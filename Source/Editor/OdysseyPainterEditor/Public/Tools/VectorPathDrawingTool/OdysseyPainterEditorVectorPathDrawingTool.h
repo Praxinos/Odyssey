@@ -14,6 +14,12 @@
 class FOdysseyPainterEditorVectorPathDrawingToolHUD;
 class FOdysseyVectorUndoPathExtend;
 
+enum class ePathDrawingMode : uint8
+{
+    Create = 0,
+    Alter = 1
+};
+
 UENUM()
 enum class eTracingType : uint8
 {
@@ -167,4 +173,5 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         FOdysseyVectorPathTracer mPathTracer;
         FOdysseyVectorVertex* mStitchedVertex;
         uint32 mPathNumber;
+        ePathDrawingMode mPathDrawingMode;
 };

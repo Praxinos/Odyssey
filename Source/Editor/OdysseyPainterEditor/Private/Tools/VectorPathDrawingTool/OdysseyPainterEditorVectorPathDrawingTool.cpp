@@ -205,6 +205,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
 
     mPathTracer.Reset();
     mStitchedVertex = nullptr;
+    mPathDrawingMode = ePathDrawingMode::Create;
 
     mTimeAtDown = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
@@ -230,6 +231,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
                     mStitchedVertex = pickedVertex;
 
                     path = mStitchedVertex->GetOwnerAsPath();
+
+                    mPathDrawingMode = ePathDrawingMode::Alter;
                 }
 
                 if( Snap )
@@ -244,7 +247,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
             }
         }
 
-        if( path == nullptr )
+        if( mPathDrawingMode == ePathDrawingMode::Create )
         {
             FOdysseyVectorObject* parentObject = GetParentObject( iScene );
 
@@ -258,7 +261,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
             path->SetOpacity( Opacity );
         }
 
-        if( mStitchedVertex == nullptr )
+        if( mPathDrawingMode == ePathDrawingMode::Create )
         {
             BLMatrix2D& pathInverseWorldMatrix = path->GetInverseWorldMatrix();
             BLPoint localPoint = pathInverseWorldMatrix.mapPoint( vertexWorldCoords.x
@@ -494,7 +497,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                 mAddedSegmentArray.push_back( newSegment );
             }
 
-            if( mStitchedVertex )
+            if( mPathDrawingMode == ePathDrawingMode::Alter )
             {
                 if( mAddedSegmentArray.size() )
                 {
@@ -503,7 +506,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                                         , mAddedSegmentArray );
                 }
             }
-            else // mStitchedVertex = nullptr
+
+            if( mPathDrawingMode == ePathDrawingMode::Create )
             {
                 // TODO: this is only for NEW path
                 if ( path->GetVertexList().size() <= 1 )
