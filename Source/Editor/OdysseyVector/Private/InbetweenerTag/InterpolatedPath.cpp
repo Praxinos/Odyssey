@@ -10,7 +10,9 @@ FInterpolatedPath::~FInterpolatedPath()
 {
 }
 
-FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath, uint32 iInbetweenCount )
+FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
+                                    , uint32 iInbetweenCount
+                                    , bool iPolyline )
     : mOriginalPath( iPath )
 {
     uint32 pointID = 0;
@@ -34,27 +36,41 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath, uint32 iInbetwe
         FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
         FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
 
-        if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+        if( iPolyline )
         {
-            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
-            FOdysseyVectorHandleSegment* handle0 = cubicSegment->GetHandle(0);
-            FOdysseyVectorHandleSegment* handle1 = cubicSegment->GetHandle(1);
+            std::vector<FOdysseyVectorPoint>& fractionPointBuffer = segment->GetFractionPointBuffer();
 
-            // Note: we add +1 for the target position
-            mInterpolatedPointBuffer.emplace_back( handle0, mInterpolatedPointBuffer.size() );
-            handle0->SetID( pointID++ );
-            // Note: we add +1 for the target position
-            mInterpolatedPointBuffer.emplace_back( handle1, mInterpolatedPointBuffer.size() );
-            handle1->SetID( pointID++ );
+            for( FOdysseyVectorPoint& point : fractionPointBuffer )
+            {
+                mInterpolatedPointBuffer.emplace_back( &point, mInterpolatedPointBuffer.size() );
+            }
 
-            mInterpolatedSegmentCubicBuffer.emplace_back( cubicSegment
-                                                        , &mInterpolatedPointBuffer[vertex0->GetID()]
-                                                        , &mInterpolatedPointBuffer[handle0->GetID()]
-                                                        , &mInterpolatedPointBuffer[handle1->GetID()]
-                                                        , &mInterpolatedPointBuffer[vertex1->GetID()] );
+            mInterpolatedPointBuffer.emplace_back( vertex1, mInterpolatedPointBuffer.size() );
+        }
+        else
+        {
+            if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+            {
+                FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+                FOdysseyVectorHandleSegment* handle0 = cubicSegment->GetHandle(0);
+                FOdysseyVectorHandleSegment* handle1 = cubicSegment->GetHandle(1);
 
+                // Note: we add +1 for the target position
+                mInterpolatedPointBuffer.emplace_back( handle0, mInterpolatedPointBuffer.size() );
+                handle0->SetID( pointID++ );
+                // Note: we add +1 for the target position
+                mInterpolatedPointBuffer.emplace_back( handle1, mInterpolatedPointBuffer.size() );
+                handle1->SetID( pointID++ );
 
-            cubicSegment->SetID( segmentID++ );
+                mInterpolatedSegmentCubicBuffer.emplace_back( cubicSegment
+                                                            , &mInterpolatedPointBuffer[vertex0->GetID()]
+                                                            , &mInterpolatedPointBuffer[handle0->GetID()]
+                                                            , &mInterpolatedPointBuffer[handle1->GetID()]
+                                                            , &mInterpolatedPointBuffer[vertex1->GetID()] );
+
+            }
+
+            segment->SetID( segmentID++ );
         }
     }
 }

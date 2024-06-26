@@ -157,6 +157,7 @@ FInbetweenerGrid::Make( uint32 iNumQuadX
                 gridPoint[2] = &mPointBuffer[vertexOffset+1+numVertexX];
                 gridPoint[3] = &mPointBuffer[vertexOffset+numVertexX];
 
+                quad->Init( this );
                 quad->Link();
             }
         }
@@ -254,12 +255,19 @@ void
 FInbetweenerGrid::AddTrajectory( FInbetweenerTrajectory* iTrajectory )
 {
     mTrajectoryList.push_back( iTrajectory );
+
+    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORIES
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
 }
 
 void
 FInbetweenerGrid::RemoveTrajectory( FInbetweenerTrajectory* iTrajectory )
 {
     mTrajectoryList.remove( iTrajectory );
+
+    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
 }
 
 void
@@ -290,11 +298,7 @@ FInbetweenerGrid::AddTrajectory( const ::ULIS::FVec2D& iLocalCoords )
                                                                        , quadU
                                                                        , quadV );
 
-        mTrajectoryList.push_back( trajectory );
-
-        mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORIES
-                                   | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
-                                   | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
+        AddTrajectory( trajectory );
 
         return trajectory;
     }

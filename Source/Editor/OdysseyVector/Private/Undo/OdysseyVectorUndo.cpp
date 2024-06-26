@@ -68,10 +68,6 @@ FSnapshotTrajectory::Restore()
 
 FSnapshotTagInbetweener::~FSnapshotTagInbetweener()
 {
-    for ( FInbetweenerTrajectory* trajectory : mTrajectoryArray )
-    {
-        delete trajectory;
-    }
 }
 
 FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* iInbetweenerTag

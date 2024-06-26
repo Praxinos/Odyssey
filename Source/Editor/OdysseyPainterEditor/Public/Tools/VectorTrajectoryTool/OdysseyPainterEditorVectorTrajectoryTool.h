@@ -11,6 +11,7 @@
 struct FInbetweenerInbetween;
 class FInbetweenerHandleTrajectory;
 class FOdysseyPainterEditorVectorTrajectoryToolHUD;
+class FInbetweenerQuad;
 
 UENUM()
 enum class eTrajectoryPickingMode : uint8
@@ -33,6 +34,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
         virtual bool IsActivable() const override;
 
         UOdysseyPainterEditorVectorTrajectoryTool();
+
+        FInbetweenerQuad* GetHoveredQuad();
+        void ResetHoveredQuad();
+        eTrajectoryPickingMode GetPickingMode();
 
         virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
@@ -66,6 +71,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
         FOdysseyPainterEditorVectorTrajectoryToolHUD* mTrajectoryHUD;
         std::list<FInbetweenerHandleTrajectory*> mPickedHandleList;
         eTrajectoryPickingMode mPickingMode;
+        FInbetweenerQuad* mHoveredQuad;
 
     public:
         UPROPERTY( EditAnywhere

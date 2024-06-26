@@ -69,6 +69,25 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickTrajectory( FOdysseyVectorGrou
       } );
 }
 
+FInbetweenerQuad*
+FOdysseyPainterEditorVectorTrajectoryToolHUD::PickSourceQuad( FInbetweenerGrid* iGrid
+                                                            , double iWorldX
+                                                            , double iWorldY
+                                                            , double iPickingRadius )
+{
+    BLPoint localPick = iGrid->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix().mapPoint( iWorldX, iWorldY );
+
+    for( FInbetweenerQuad& quad : iGrid->GetQuadBuffer() )
+    {
+        if( quad.IsLinked() && quad.HitTest( localPick.x, localPick.y ) )
+        {
+            return &quad;
+        }
+    }
+
+    return nullptr;
+}
+
 FInbetweenerTrajectory*
 FOdysseyPainterEditorVectorTrajectoryToolHUD::PickTrajectory( FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                             , double iWorldX
@@ -186,6 +205,53 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickHandle( FOdysseyVectorTagInbet
 }
 
 void
+FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHoveredQuad( BLContext* iBLContext
+                                                             , BLRgba32& iFgColor
+                                                             , BLRgba32& iBgColor
+                                                             , BLRgba32& iHcColor )
+{
+    FInbetweenerQuad* hoveredQuad = mTrajectoryTool->GetHoveredQuad();
+
+    if( hoveredQuad )
+    {
+        FOdysseyVectorTagInbetweener* iInbetweenerTag = hoveredQuad->GetGrid()->GetInbetweenerTag();
+        FInbetweenerPoint** points = hoveredQuad->GetPoints();
+        ::ULIS::FVec2D position[4] = { points[0]->GetSourcePosition()
+                                     , points[1]->GetSourcePosition()
+                                     , points[2]->GetSourcePosition()
+                                     , points[3]->GetSourcePosition() };
+        BLMatrix2D& worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
+        BLPoint pt[4] = { worldMatrix.mapPoint( position[0].x, position[0].y )
+                        , worldMatrix.mapPoint( position[1].x, position[1].y )
+                        , worldMatrix.mapPoint( position[2].x, position[2].y )
+                        , worldMatrix.mapPoint( position[3].x, position[3].y ) };
+        BLPath path;
+
+        path.moveTo( pt[0].x, pt[0].y );
+        path.lineTo( pt[1].x, pt[1].y );
+        path.lineTo( pt[2].x, pt[2].y );
+        path.lineTo( pt[3].x, pt[3].y );
+        path.close();
+
+        iBLContext->save();
+        iBLContext->resetMatrix();
+
+        iBLContext->setStrokeStyle( iBgColor );
+        iBLContext->setStrokeWidth( 2.0f );
+        iBLContext->strokePath( path );
+      
+        iBLContext->setStrokeStyle( iHcColor );
+        iBLContext->setStrokeWidth( 1.0f );
+        iBLContext->strokePath( path );
+
+        iBLContext->restore();
+
+        // prevent a crash in case the grid is rebuilt by reset the pointer to null each time.
+        mTrajectoryTool->ResetHoveredQuad();
+    }
+}
+
+void
 FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLContext
                                                             , BLRgba32& iFgColor
                                                             , BLRgba32& iBgColor
@@ -207,19 +273,43 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLCont
     iBLContext->save();
     iBLContext->resetMatrix();
 
-    DrawCircle( iBLContext, p1World.x, p1World.y, HANDLERADIUS, iFgColor, iBgColor );
-
-    iBLContext->setStrokeStyle( BLRgba32( 255, 0, 0, 255 ) );
-    iBLContext->setStrokeWidth( 1.0f );
+    DrawCircle( iBLContext, p0World.x, p0World.y, VERTEXRADIUS, iHcColor, iBgColor );
+    DrawCircle( iBLContext, p3World.x, p3World.y, VERTEXRADIUS, iHcColor, iBgColor );
 
     path.moveTo( p0World.x, p0World.y );
     path.cubicTo( p1World.x, p1World.y
                 , p2World.x, p2World.y 
                 , p3World.x, p3World.y );
 
+    iBLContext->setStrokeStyle( iBgColor );
+    iBLContext->setStrokeWidth( 2.0f );
     iBLContext->strokePath( path );
 
-    DrawCircle( iBLContext, p2World.x, p2World.y, HANDLERADIUS, iFgColor, iBgColor );
+    iBLContext->setStrokeStyle( iHcColor );
+    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->strokePath( path );
+
+    if( mTrajectoryTool->GetPickingMode() == eTrajectoryPickingMode::Alter )
+    {
+        DrawLine  ( iBLContext
+                  , p0World.x
+                  , p0World.y
+                  , p1World.x
+                  , p1World.y
+                  , iFgColor
+                  , iBgColor );
+        DrawCircle( iBLContext, p1World.x, p1World.y, VERTEXRADIUS, iFgColor, iBgColor );
+
+        DrawLine  ( iBLContext
+                  , p3World.x
+                  , p3World.y
+                  , p2World.x
+                  , p2World.y
+                  , iFgColor
+                  , iBgColor );
+        DrawCircle( iBLContext, p2World.x, p2World.y, VERTEXRADIUS, iFgColor, iBgColor );
+    }
+
 
     iBLContext->restore();
 }
@@ -245,6 +335,14 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
         FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
+        if( mTrajectoryTool->GetPickingMode() == eTrajectoryPickingMode::Add )
+        {
+            DrawHoveredQuad( iBLContext
+                           , fgColor
+                           , bgColor
+                           , hcColor );
+        }
 
         vectorEngine->Traverse
         ( iScene

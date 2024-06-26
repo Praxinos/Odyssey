@@ -26,6 +26,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::UOdysseyPainterEditorVectorTrajectory
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorTrajectoryToolHUD( this ), false )
     , PickingRadius( 10.0f )
     , mPickingMode( eTrajectoryPickingMode::Add )
+    , mHoveredQuad( nullptr )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory64");
 
@@ -138,16 +139,16 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
     mPickedHandleList.clear();
+    mHoveredQuad = nullptr;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
         if( mPickingMode == eTrajectoryPickingMode::Add )
         {
-            FOdysseyVectorObject* selectedObject = iEngine->GetSelectedObjectList().front();
-
-            if( selectedObject )
+            if( iEngine->GetSelectedObjectList().size() )
             {
+                FOdysseyVectorObject* selectedObject = iEngine->GetSelectedObjectList().front();
                 FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
 
                 if( tag )
@@ -239,13 +240,53 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
+FInbetweenerQuad*
+UOdysseyPainterEditorVectorTrajectoryTool::GetHoveredQuad()
+{
+    return mHoveredQuad;
+}
+
+void
+UOdysseyPainterEditorVectorTrajectoryTool::ResetHoveredQuad()
+{
+    mHoveredQuad = nullptr;
+}
+
+eTrajectoryPickingMode
+UOdysseyPainterEditorVectorTrajectoryTool::GetPickingMode()
+{
+    return mPickingMode;
+}
+
 uint64
 UOdysseyPainterEditorVectorTrajectoryTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                        , const FOdysseyPoint& iPointInTexture )
 {
-    // TODO: highlight grid handles ?
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    return 0;
+    mHoveredQuad = nullptr;
+
+    if( mPickingMode == eTrajectoryPickingMode::Add )
+    {
+        if( iEngine->GetSelectedObjectList().size() )
+        {
+            FOdysseyVectorObject* selectedObject = iEngine->GetSelectedObjectList().front();
+            FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+            if( tag )
+            {
+                FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+                mHoveredQuad = mTrajectoryHUD->PickSourceQuad( inbetweenerTag->GetGrid()
+                                                             , iPointInTexture.x
+                                                             , iPointInTexture.y
+                                                             , PickingRadius );
+
+            }
+        }
+    }
+
+    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
 uint64

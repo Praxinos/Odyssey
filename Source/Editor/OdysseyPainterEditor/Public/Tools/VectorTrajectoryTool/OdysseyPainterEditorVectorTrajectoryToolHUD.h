@@ -8,6 +8,7 @@
 
 class FOdysseyVectorTagInbetweener;
 class FInbetweenerTrajectory;
+class FInbetweenerGrid;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
@@ -33,6 +34,10 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
                            , double iWorldY
                            , double iPickingRadius
                            , std::list<FInbetweenerTrajectory*>& oTrajectoryList );
+        FInbetweenerQuad* PickSourceQuad( FInbetweenerGrid* iGrid
+                                        , double iWorldX
+                                        , double iworldY
+                                        , double iPickingRadius );
         FInbetweenerTrajectory* PickTrajectory( FOdysseyVectorTagInbetweener* iInbetweenerTag
                                               , double iWorldX
                                               , double iWorldY
@@ -55,6 +60,10 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
                            , BLRgba32& iHcColor
                            , FOdysseyVectorTagInbetweener* iInbetweenerTag
                            , FInbetweenerTrajectory* iTrajectory );
+        void DrawHoveredQuad( BLContext* iBLContext
+                            , BLRgba32& iFgColor
+                            , BLRgba32& iBgColor
+                            , BLRgba32& iHcColor );
 
     private:
         UOdysseyPainterEditorVectorTrajectoryTool* mTrajectoryTool;

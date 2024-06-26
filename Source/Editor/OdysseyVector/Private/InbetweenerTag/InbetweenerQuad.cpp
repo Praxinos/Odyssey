@@ -2,7 +2,7 @@
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVector.h"
 
-FInbetweenerQuad::FInbetweenerQuad( )
+FInbetweenerQuad::FInbetweenerQuad()
     : mFlags ( 0 )
     , bPinned( false )
 {
@@ -12,6 +12,18 @@ FInbetweenerPoint**
 FInbetweenerQuad::GetPoints()
 {
     return mPoint;
+}
+
+FInbetweenerGrid*
+FInbetweenerQuad::GetGrid()
+{
+    return mGrid;
+}
+
+void
+FInbetweenerQuad::Init( FInbetweenerGrid* iGrid )
+{
+    mGrid = iGrid;
 }
 
 bool
@@ -29,6 +41,17 @@ FInbetweenerQuad::Link()
     {
         mPoint[i]->AddQuad( this );
     }
+}
+
+bool
+FInbetweenerQuad::HitTest( double iLocalX, double iLocalY )
+{
+    ::ULIS::FRectD rect = ::ULIS::FRectD( mPoint[0]->GetSourcePosition().x
+                                        , mPoint[0]->GetSourcePosition().y
+                                        , mPoint[1]->GetSourcePosition().x - mPoint[0]->GetSourcePosition().x
+                                        , mPoint[3]->GetSourcePosition().y - mPoint[0]->GetSourcePosition().y );
+
+    return rect.HitTest( ::ULIS::FVec2D( iLocalX, iLocalY ) );
 }
 
 bool

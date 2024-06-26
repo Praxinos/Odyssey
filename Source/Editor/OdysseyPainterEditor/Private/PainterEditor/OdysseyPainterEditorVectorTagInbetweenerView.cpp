@@ -33,15 +33,24 @@ UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
 
         InterpolationType = selectedInbetweenerTag->GetInterpolationType();
         GridType = selectedInbetweenerTag->GetGridType();
-        DivisionX = selectedInbetweenerTag->GetGridNumQuadX();
-        DivisionY = selectedInbetweenerTag->GetGridNumQuadY();
         InbetweenCount = selectedInbetweenerTag->GetInbetweenCount();
         Color = selectedInbetweenerTag->GetColor();
+        MapPathsAsPolyline = selectedInbetweenerTag->GetMapAsPolyline();
+
+        if( GridType == eInbetweenerGridType::FFD )
+        {
+            FInbetweenerGridFFD* ffdGrid = static_cast<FInbetweenerGridFFD*>(selectedInbetweenerTag->GetGrid());
+
+            FFDDivisionX = selectedInbetweenerTag->GetGridNumQuadX();
+            FFDDivisionY = selectedInbetweenerTag->GetGridNumQuadY();
+        }
 
         if( GridType == eInbetweenerGridType::ARAP )
         {
             FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(selectedInbetweenerTag->GetGrid());
 
+            ARAPDivisionX = selectedInbetweenerTag->GetGridNumQuadX();
+            ARAPDivisionY = selectedInbetweenerTag->GetGridNumQuadY();
             Rigidity = arapGrid->GetRigidity();
         }
     }
@@ -80,11 +89,17 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
         if( iPropertyName == "InterpolationType" )
             selectedInbetweenerTag->SetInterpolationType( InterpolationType );
 
-        if( iPropertyName == "DivisionX" )
-            selectedInbetweenerTag->SetGridNumQuadX( DivisionX );
+        if( iPropertyName == "FFDDivisionX" ) 
+            selectedInbetweenerTag->SetGridNumQuadX( FFDDivisionX );
 
-        if( iPropertyName == "DivisionY" )
-            selectedInbetweenerTag->SetGridNumQuadY( DivisionY );
+        if( iPropertyName == "FFDDivisionY" )
+            selectedInbetweenerTag->SetGridNumQuadY( FFDDivisionY );
+
+        if( iPropertyName == "ARAPDivisionX" )
+            selectedInbetweenerTag->SetGridNumQuadX( ARAPDivisionX );
+
+        if( iPropertyName == "ARAPDivisionY" )
+            selectedInbetweenerTag->SetGridNumQuadY( ARAPDivisionY );
 
         if( iPropertyName == "Rigidity" )
         {
@@ -92,6 +107,9 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
 
             arapGrid->SetRigidity( Rigidity );
         }
+
+        if( iPropertyName == "MapPathsAsPolyline" )
+            selectedInbetweenerTag->SetMapAsPolyline( MapPathsAsPolyline );
 
         if( iPropertyName == "Color" )
             selectedInbetweenerTag->SetColor( Color );

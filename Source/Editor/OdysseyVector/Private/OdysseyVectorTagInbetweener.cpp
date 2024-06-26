@@ -94,7 +94,9 @@ FOdysseyVectorTagInbetweener::Map()
               {
                   FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
-                  mInterpolatedPathBuffer.emplace_back( path, mInbetweenCount );
+                  mInterpolatedPathBuffer.emplace_back( path
+                                                      , mInbetweenCount
+                                                      , bMapAsPolyline );
 
                   return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
               }
@@ -114,6 +116,20 @@ FOdysseyVectorTagInbetweener::Map()
 FOdysseyVectorTagInbetweener::~FOdysseyVectorTagInbetweener()
 {
     delete mGrid;
+}
+
+bool
+FOdysseyVectorTagInbetweener::GetMapAsPolyline()
+{
+    return bMapAsPolyline;
+}
+
+void
+FOdysseyVectorTagInbetweener::SetMapAsPolyline( bool iMapAsPolyline )
+{
+    bMapAsPolyline = iMapAsPolyline;
+
+    Invalidate( INVALIDATE_MAP );
 }
 
 BLMatrix2D&
@@ -149,6 +165,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     , mTargetScalingY    ( 1.0f )
     , mTargetRotation    ( 0.0f )
     , mColor ( 255, 0, 255, 255 )
+    , bMapAsPolyline( false )
 {
     ResetChart();
     // Note: Matrix needs chart to be allocated first.
@@ -274,7 +291,8 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         }
     }
 
-    if( mInvalidationFlags & INVALIDATE_SPACING )
+    if( ( mInvalidationFlags & INVALIDATE_SPACING )
+     || ( mInvalidationFlags & INVALIDATE_MAP     ) )
     {
         Interpolate();
     }
@@ -896,8 +914,8 @@ FOdysseyVectorTagInbetweener::GetGridNumQuadY()
 void
 FOdysseyVectorTagInbetweener::SetGridType( eInbetweenerGridType iGridType )
 {
-    uint32 numQuadX = ( mGrid ) ? mGrid->GetNumQuadX() : 4;
-    uint32 numQuadY = ( mGrid ) ? mGrid->GetNumQuadY() : 4;
+    uint32 numQuadX = 8;
+    uint32 numQuadY = 8;
 
     if( mGrid )
     {

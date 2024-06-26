@@ -20,10 +20,6 @@ static bool IntersectSegment( const ::ULIS::FVec2D& iLine0p0
 
 FOdysseyVectorSegmentCubic::~FOdysseyVectorSegmentCubic()
 {
-    if( mFractionPointBuffer )
-    {
-        free ( mFractionPointBuffer );
-    }
 }
 
 FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorObject* iOwner
@@ -35,7 +31,6 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorObject* iO
                                                       , FOdysseyVectorVertex* iPoint1
                                                       , bool iNeedWidth )
     : FOdysseyVectorSegment( iOwner, iPoint0, iPoint1 )
-    , mFractionPointBuffer ( nullptr )
     , mNeedWidth( iNeedWidth )
     , mCtrlPoint { FOdysseyVectorHandleSegment( this, iPoint0, 0.0f, 0.0f )
                  , FOdysseyVectorHandleSegment( this, iPoint1, 0.0f, 0.0f ) }
@@ -48,7 +43,6 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorObject* iO
                                                       , FOdysseyVectorVertex* iPoint1
                                                       , bool iNeedWidth )
     : FOdysseyVectorSegment( iOwner, iPoint0, iPoint1 )
-    , mFractionPointBuffer ( nullptr )
     , mNeedWidth( iNeedWidth )
     , mCtrlPoint { FOdysseyVectorHandleSegment( this, iPoint0, 0.0f, 0.0f )
                  , FOdysseyVectorHandleSegment( this, iPoint1, 0.0f, 0.0f ) }
@@ -1378,20 +1372,7 @@ FOdysseyVectorSegmentCubic::BuildVariable()
 
         if( subPointBuffer.size() )
         {
-            mFractionPointBuffer = ( FOdysseyVectorPoint * ) realloc( mFractionPointBuffer
-                                                                    , subPointBuffer.size()
-                                                                    * sizeof (FOdysseyVectorPoint) );
-
-            for( int i = 0; i < subPointBuffer.size(); i++ )
-            {
-                mFractionPointBuffer[i] = subPointBuffer[i];
-            }
-
-            // not compatible with MACOS CLang. Not sure this is very CPU-cycles saving anyways.
-            //memcpy( mFractionPointBuffer
-            //     , &subPointBuffer[0]
-            //     ,  subPointBuffer.size() * sizeof FOdysseyVectorPoint );
-
+            mFractionPointBuffer = subPointBuffer;
         }
 
         mFractionCache.reserve( subLineBuffer.size() );

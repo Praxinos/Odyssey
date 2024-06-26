@@ -12,6 +12,7 @@ class ODYSSEYVECTOR_API FInbetweenerQuad
         FInbetweenerQuad( );
 
         FInbetweenerPoint** GetPoints();
+        void Init( FInbetweenerGrid* iGrid );
         void Link();
         void Unlink();
         bool IsLinked();
@@ -21,12 +22,15 @@ class ODYSSEYVECTOR_API FInbetweenerQuad
         ::ULIS::FVec2D GetPoint( eInbetweenerPointPositionType iPositionType
                                , double iU
                                , double iV );
+        FInbetweenerGrid* GetGrid();
         ::ULIS::FVec2D GetPinPosition();
         double GetPinU();
         double GetPinV();
         bool IsPinned();
         ::ULIS::FRectD GetBBox( eInbetweenerPointPositionType iPositionType );
         double GetSourceArea();
+        bool HitTest( double iLocalX, double iLocalY );
+
         friend class FOdysseyVectorTagInbetweener;
 
     public:
@@ -34,6 +38,7 @@ class ODYSSEYVECTOR_API FInbetweenerQuad
 
     protected:
         uint32 mFlags;
+        FInbetweenerGrid* mGrid;
         FInbetweenerPoint* mPoint[4];
         ::ULIS::FVec2D mCentroid[4];
         ::ULIS::FVec2D mPinPosition;

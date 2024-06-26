@@ -155,6 +155,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         const FColor& GetColor();
         void SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         void SetColor( const FColor& iColor );
+        void SetMapAsPolyline( bool iMapAsPolyline );
+        bool GetMapAsPolyline();
 
     protected:
         void UpdateAnimationCells( uint32 iInbetweenCount );
@@ -206,4 +208,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         uint32 mInbetweenCount;
         uint64 mInvalidationFlags;
         FColor mColor;
+        bool bMapAsPolyline;
 };

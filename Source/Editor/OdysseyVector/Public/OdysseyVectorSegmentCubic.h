@@ -274,10 +274,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                                , FOdysseyVectorBezierFragment* iCurrFragment[2] );
 
     protected:
-        // here we use C-style allocation to avoir unnecessary constructor calls
-        // that a std::vector would perform. Moreover, we don't need to iterate
-        // among the items, thus we don't need to know the size of it afterwards.
-        FOdysseyVectorPoint* mFractionPointBuffer;
         FOdysseyVectorOffsetCurveCubic mOffsetCurve[2];
         ::ULIS::FVec2D mBezier[4];
         bool mNeedWidth;

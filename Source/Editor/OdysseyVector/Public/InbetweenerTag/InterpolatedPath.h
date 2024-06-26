@@ -14,7 +14,9 @@ class FInterpolatedPath
 {
     public:
         virtual ~FInterpolatedPath();
-        FInterpolatedPath( FOdysseyVectorPath* iPath, uint32 iInbetweenCount );
+        FInterpolatedPath( FOdysseyVectorPath* iPath
+                         , uint32 iInbetweenCount
+                         , bool iPolyline );
         void Draw( BLContext* iBLContext
                  , const ::ULIS::FRectD& iInvalidationArea
                  , double iAncestorsOpacity

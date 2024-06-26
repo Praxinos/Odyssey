@@ -442,6 +442,12 @@ FOdysseyVectorSegment::GetBBoxInParent()
     return mBBoxInParent;
 }
 
+std::vector<FOdysseyVectorPoint>&
+FOdysseyVectorSegment::GetFractionPointBuffer()
+{
+    return mFractionPointBuffer;
+}
+
 /*
 void
 FOdysseyVectorSegment::BuildExplorationPairs( std::vector<FExplorationPair>& iExplorationPairsArray )
