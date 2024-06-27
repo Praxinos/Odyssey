@@ -92,6 +92,9 @@ void UOdysseyPainterEditorRasterSelectionTool::OnMouseDrag(const FOdysseyPoint& 
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    if( !mToolSelectionArea )
+        return false;
+
     TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetEditor()->GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
     if (mediaRasters.Num() <= 0)
         return false;
