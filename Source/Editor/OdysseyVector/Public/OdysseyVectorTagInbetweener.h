@@ -17,7 +17,6 @@
 #include "InbetweenerTag/InbetweenerQuad.h"
 #include "InbetweenerTag/InterpolatedPoint.h"
 #include "InbetweenerTag/InterpolatedSegment.h"
-#include "InbetweenerTag/InterpolatedSegmentCubic.h"
 #include "InbetweenerTag/InterpolatedPath.h"
 
 #include "OdysseyVectorTagInbetweener.generated.h"
@@ -124,7 +123,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
 
         virtual void Update( uint32 iUpdateFlags
                            , uint64 iOwnerInvalidationFlags ) override;
-        void Commit();
+        void Commit( std::list<FOdysseyVectorTag*>& oRemovedTagList
+                   , std::list<FOdysseyVectorObject*>& oAddedObjectList );
         virtual void UpdateMatrix() override;
         void Translate( double iX, double iY );
         void Rotate( double iAngle );

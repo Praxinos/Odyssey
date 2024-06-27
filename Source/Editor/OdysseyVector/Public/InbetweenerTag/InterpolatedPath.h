@@ -6,9 +6,10 @@
 #include <ULIS>
 #include <blend2d.h>
 
+#include <InbetweenerTag/InterpolatedPoint.h>
+#include <InbetweenerTag/InterpolatedSegment.h>
+
 class FOdysseyVectorPath;
-class FInterpolatedPoint;
-class FInterpolatedSegmentCubic;
 
 class FInterpolatedPath
 {
@@ -22,16 +23,19 @@ class FInterpolatedPath
                  , double iAncestorsOpacity
                  , uint64 iDrawingFlags );
         std::vector<FInterpolatedPoint>& GetInterpolatedPointBuffer();
-        std::vector<FInterpolatedSegmentCubic>& GetInterpolatedSegmentCubicBuffer();
+        std::vector<FInterpolatedSegment>& GetInterpolatedSegmentBuffer();
         std::vector<::ULIS::FVec2D>& GetInterpolatedPointPositionBuffer();
         FOdysseyVectorPath* GetOriginalPath();
 
         friend class FOdysseyVectorTagInbetweener;
 
     protected:
+        void Alloc( bool iPolyline );
+
+    protected:
         FOdysseyVectorPath* mOriginalPath;
         std::vector<FInterpolatedPoint> mInterpolatedPointBuffer;
-        std::vector<FInterpolatedSegmentCubic> mInterpolatedSegmentCubicBuffer;
+        std::vector<FInterpolatedSegment> mInterpolatedSegmentBuffer;
         // we alloc point position in one single big array.
         std::vector<::ULIS::FVec2D> mInterpolatedPointPositionBuffer;
 };

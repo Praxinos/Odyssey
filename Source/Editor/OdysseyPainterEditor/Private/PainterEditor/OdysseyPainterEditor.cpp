@@ -42,6 +42,7 @@
 #include "Undo/OdysseyVectorUndoTagAdd.h"
 #include "Undo/OdysseyVectorUndoTagRemove.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerChartAlter.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerCommit.h"
 
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
@@ -1573,6 +1574,8 @@ FOdysseyPainterEditor::CommitInbetweenerTag( FOdysseyPainterEditor* iEditor
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::list<FOdysseyVectorObject*>& selectedObjectList = vectorEngine->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*> addedObjectList;
+    std::list<FOdysseyVectorTag*> removedTagList;
 
     for( FOdysseyVectorObject* selectedObject : selectedObjectList )
     {
@@ -1582,8 +1585,32 @@ FOdysseyPainterEditor::CommitInbetweenerTag( FOdysseyPainterEditor* iEditor
         {
             FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
 
-            inbetweenerTag->Commit();
+            inbetweenerTag->Commit( removedTagList, addedObjectList );
         }
+    }
+
+    if( removedTagList.size() )
+    {
+        // needed for undos
+        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.commit-tags", "Commit Tags"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerCommit( iScene
+                                                                                 , removedTagList
+                                                                                 , addedObjectList );
+
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+            TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
+        }
+        GEditor->EndTransaction();
+
+        // call callbacks if any (for refreshing GUI e.g)
+        vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                            | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
+                            | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
     }
 }
 

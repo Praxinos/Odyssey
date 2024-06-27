@@ -6,11 +6,15 @@ FInterpolatedSegment::~FInterpolatedSegment()
 {
 }
 
-FInterpolatedSegment::FInterpolatedSegment( FOdysseyVectorSegment* iSegment
-                                          , FInterpolatedPoint* iInterpolatedPoint0
-                                          , FInterpolatedPoint* iInterpolatedPoint1 )
+FInterpolatedSegment::FInterpolatedSegment( FOdysseyVectorSegment* iSegment )
     : mOriginalSegment( iSegment )
-    , mInterpolatedVertex{ iInterpolatedPoint0, iInterpolatedPoint1 }
+{
+}
+
+FInterpolatedSegment::FInterpolatedSegment( FOdysseyVectorSegment* iSegment
+                                          , const std::vector<FInterpolatedPoint*>& iPolylinePointArray )
+    : mOriginalSegment( iSegment )
+    , mInterpolatedPointArray( iPolylinePointArray )
 {
 }
 

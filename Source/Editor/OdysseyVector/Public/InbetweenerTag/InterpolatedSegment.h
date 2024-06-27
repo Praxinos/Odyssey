@@ -10,14 +10,14 @@ class FInterpolatedSegment
 {
     public:
         virtual ~FInterpolatedSegment();
-        FInterpolatedSegment( FOdysseyVectorSegment* iSegment
-                            , FInterpolatedPoint* iInterpolatedPoint0
-                            , FInterpolatedPoint* iInterpolatedPoint1 );
+        FInterpolatedSegment( FOdysseyVectorSegment* iSegment );
+        ::FInterpolatedSegment( FOdysseyVectorSegment* iSegment
+                              , const std::vector<FInterpolatedPoint*>& iPolylinePointArray );
         FOdysseyVectorSegment* GetOriginalSegment();
 
         friend class FOdysseyVectorTagInbetweener;
 
     protected:
         FOdysseyVectorSegment* mOriginalSegment;
-        FInterpolatedPoint* mInterpolatedVertex[2];
+        std::vector<FInterpolatedPoint*> mInterpolatedPointArray;
 };

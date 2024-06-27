@@ -355,18 +355,21 @@ FOdysseyVectorObject::ResetTransform()
 }
 
 void
-FOdysseyVectorObject::RecursiveRemoveTagByType( uint32 iTagType )
+FOdysseyVectorObject::RecursiveRemoveTagByType( uint32 iTagType
+                                              , std::list<FOdysseyVectorTag*>& oRemovedTagList )
 {
     FOdysseyVectorTag* tag = GetTagByType( iTagType );
 
     if( tag )
     {
+        oRemovedTagList.push_back( tag );
+
         RemoveTag( tag );
     }
 
     for( FOdysseyVectorObject* child : mChildrenList )
     {
-        child->RecursiveRemoveTagByType( iTagType );
+        child->RecursiveRemoveTagByType( iTagType, oRemovedTagList );
     }
 }
 

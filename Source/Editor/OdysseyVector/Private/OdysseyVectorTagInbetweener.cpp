@@ -14,7 +14,7 @@
 #include "InbetweenerTag/InbetweenerGrid.h"
 #include "InbetweenerTag/InbetweenerGridFFD.h"
 #include "InbetweenerTag/InbetweenerGridARAP.h"
-#include "InbetweenerTag/InterpolatedSegmentCubic.h"
+#include "InbetweenerTag/InterpolatedSegment.h"
 #include "InbetweenerTag/InterpolatedPoint.h"
 #include "InbetweenerTag/InterpolatedPath.h"
 
@@ -129,7 +129,7 @@ FOdysseyVectorTagInbetweener::SetMapAsPolyline( bool iMapAsPolyline )
 {
     bMapAsPolyline = iMapAsPolyline;
 
-    Invalidate( INVALIDATE_MAP );
+    Invalidate( INVALIDATE_MAP | INVALIDATE_CELLS );
 }
 
 BLMatrix2D&
@@ -676,28 +676,51 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FInterpolatedPath* iInterpolatedPath
                                         , const BLMatrix2D& iWorldMatrix
                                         , BLContext* iBLContext )
 {
-    for( FInterpolatedSegmentCubic& interpolatedCubicSegment : iInterpolatedPath->mInterpolatedSegmentCubicBuffer )
+    for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->mInterpolatedSegmentBuffer )
     {
-        FInterpolatedPoint* interpolatedPoint[4] = { interpolatedCubicSegment.mInterpolatedVertex[0]
-                                                   , interpolatedCubicSegment.mInterpolatedHandle[0]
-                                                   , interpolatedCubicSegment.mInterpolatedHandle[1]
-                                                   , interpolatedCubicSegment.mInterpolatedVertex[1] };
-        BLPoint pt[4] = { iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[0]->mIndex].x
-                                               , iPointPositionBuffer[interpolatedPoint[0]->mIndex].y )
-                        , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[1]->mIndex].x
-                                               , iPointPositionBuffer[interpolatedPoint[1]->mIndex].y )
-                        , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[2]->mIndex].x
-                                               , iPointPositionBuffer[interpolatedPoint[2]->mIndex].y )
-                        , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[3]->mIndex].x
-                                               , iPointPositionBuffer[interpolatedPoint[3]->mIndex].y ) };
-        BLPath path;
+        if( bMapAsPolyline )
+        {
+             uint32 pointCount = interpolatedSegment.mInterpolatedPointArray.size();
 
-        path.moveTo ( pt[0].x, pt[0].y );
-        path.cubicTo( pt[1].x, pt[1].y
-                    , pt[2].x, pt[2].y
-                    , pt[3].x, pt[3].y );
+            for( uint32 i = 0; i < pointCount - 1; i++ )
+            {
+                uint32 n = i + 1;
+                FInterpolatedPoint* pointi = interpolatedSegment.mInterpolatedPointArray[i];
+                FInterpolatedPoint* pointn = interpolatedSegment.mInterpolatedPointArray[n];
+                BLPoint pt[2] = { iWorldMatrix.mapPoint( iPointPositionBuffer[pointi->mIndex].x
+                                                       , iPointPositionBuffer[pointi->mIndex].y )
+                                , iWorldMatrix.mapPoint( iPointPositionBuffer[pointn->mIndex].x
+                                                       , iPointPositionBuffer[pointn->mIndex].y ) };
 
-        iBLContext->strokePath( path );
+                iBLContext->strokeLine( pt[0].x, pt[0].y, pt[1].x, pt[1].y );
+            }
+        }
+        else
+        {
+            if( interpolatedSegment.GetOriginalSegment()->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+            {
+                FInterpolatedPoint* interpolatedPoint[4] = { interpolatedSegment.mInterpolatedPointArray[0]
+                                                           , interpolatedSegment.mInterpolatedPointArray[1]
+                                                           , interpolatedSegment.mInterpolatedPointArray[2]
+                                                           , interpolatedSegment.mInterpolatedPointArray[3] };
+                BLPoint pt[4] = { iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[0]->mIndex].x
+                                                       , iPointPositionBuffer[interpolatedPoint[0]->mIndex].y )
+                                , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[1]->mIndex].x
+                                                       , iPointPositionBuffer[interpolatedPoint[1]->mIndex].y )
+                                , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[2]->mIndex].x
+                                                       , iPointPositionBuffer[interpolatedPoint[2]->mIndex].y )
+                                , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[3]->mIndex].x
+                                                       , iPointPositionBuffer[interpolatedPoint[3]->mIndex].y ) };
+                BLPath path;
+
+                path.moveTo ( pt[0].x, pt[0].y );
+                path.cubicTo( pt[1].x, pt[1].y
+                            , pt[2].x, pt[2].y
+                            , pt[3].x, pt[3].y );
+
+                iBLContext->strokePath( path );
+            }
+        }
     }
 }
 
@@ -993,10 +1016,12 @@ FOdysseyVectorTagInbetweener::SetGridNumQuadY( uint32 iNumQuadY )
 }
 
 void
-FOdysseyVectorTagInbetweener::Commit()
+FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTagList
+                                    , std::list<FOdysseyVectorObject*>& oAddedObjectList )
 {
     IOdysseyVectorAnimationCell* animationCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
     int32 animationCellIndex = animationCell->GetIndex();
+    
 
     for( uint32 inbetweenIndex = 0; inbetweenIndex < mInbetweenCount; inbetweenIndex++ )
     {
@@ -1062,6 +1087,8 @@ FOdysseyVectorTagInbetweener::Commit()
 
             FOdysseyVectorObject* copiedObject = mOwner->Copy( preProcess, postProcess );
 
+            oAddedObjectList.push_back( copiedObject );
+
             inbetweenScene->AppendChild( copiedObject );
 
             inbetweenScene->UpdateMatrix();
@@ -1069,7 +1096,8 @@ FOdysseyVectorTagInbetweener::Commit()
         }
     }
 
-    mOwner->RecursiveRemoveTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+    mOwner->RecursiveRemoveTagByType( FOdysseyVectorTagInbetweener::StaticClass()
+                                    , oRemovedTagList );
 
     UpdateAnimationCells();
 }

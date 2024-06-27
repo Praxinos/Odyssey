@@ -1,7 +1,6 @@
 #include "InbetweenerTag/InbetweenerGridARAP.h"
 #include "InbetweenerTag/InterpolatedPath.h"
 #include "InbetweenerTag/InterpolatedSegment.h"
-#include "InbetweenerTag/InterpolatedSegmentCubic.h"
 #include "InbetweenerTag/InterpolatedPoint.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorPoint.h"

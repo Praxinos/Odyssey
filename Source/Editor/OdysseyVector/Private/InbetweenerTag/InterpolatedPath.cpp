@@ -10,6 +10,32 @@ FInterpolatedPath::~FInterpolatedPath()
 {
 }
 
+void
+FInterpolatedPath::Alloc( bool iPolyline )
+{
+    uint32 pointCount = mOriginalPath->GetVertexList().size();
+
+    if( iPolyline )
+    {
+        for( FOdysseyVectorSegment* segment : mOriginalPath->GetSegmentList() )
+        {
+            pointCount += segment->GetFractionPointBuffer().size();
+        }
+    }
+    else
+    {
+        for( FOdysseyVectorSegment* segment : mOriginalPath->GetSegmentList() )
+        {
+            if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+            {
+                pointCount += 2;
+            }
+        }
+    }
+
+    mInterpolatedPointBuffer.reserve( pointCount );
+}
+
 FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
                                     , uint32 iInbetweenCount
                                     , bool iPolyline )
@@ -18,10 +44,7 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
     uint32 pointID = 0;
     uint32 segmentID = 0;
 
-                                       // alloc 1 point per vertex
-    mInterpolatedPointBuffer.reserve(  iPath->GetVertexList().size()
-                                       // alloc 2 handles per segment
-                                   + ( iPath->GetSegmentList().size() * 2 ) );
+    Alloc( iPolyline );
 
     for( FOdysseyVectorVertex* vertex : iPath->GetVertexList() )
     {
@@ -38,14 +61,25 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
 
         if( iPolyline )
         {
-            std::vector<FOdysseyVectorPoint>& fractionPointBuffer = segment->GetFractionPointBuffer();
+            std::vector<FInterpolatedPoint*> polylinePointArray;
+            std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
+            uint32 fractionCount = segment->GetFractionCount();
 
-            for( FOdysseyVectorPoint& point : fractionPointBuffer )
+            polylinePointArray.reserve( 2 + ( fractionCount - 1 ) );
+
+            polylinePointArray.push_back( &mInterpolatedPointBuffer[vertex0->GetID()] );
+
+            for( uint32 i = 0; i < fractionCount - 1; i++ )
             {
-                mInterpolatedPointBuffer.emplace_back( &point, mInterpolatedPointBuffer.size() );
+                FOdysseyVectorFraction& fraction = fractionCache[i];
+                FInterpolatedPoint& interpolatedPoint = mInterpolatedPointBuffer.emplace_back( fraction.point[1], mInterpolatedPointBuffer.size() );
+
+                polylinePointArray.push_back( &interpolatedPoint );
             }
 
-            mInterpolatedPointBuffer.emplace_back( vertex1, mInterpolatedPointBuffer.size() );
+            polylinePointArray.push_back( &mInterpolatedPointBuffer[vertex1->GetID()] );
+
+            mInterpolatedSegmentBuffer.emplace_back( segment, polylinePointArray );
         }
         else
         {
@@ -54,6 +88,7 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
                 FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
                 FOdysseyVectorHandleSegment* handle0 = cubicSegment->GetHandle(0);
                 FOdysseyVectorHandleSegment* handle1 = cubicSegment->GetHandle(1);
+                std::vector<FInterpolatedPoint*> cubicSegmentPointArray;
 
                 // Note: we add +1 for the target position
                 mInterpolatedPointBuffer.emplace_back( handle0, mInterpolatedPointBuffer.size() );
@@ -62,12 +97,13 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
                 mInterpolatedPointBuffer.emplace_back( handle1, mInterpolatedPointBuffer.size() );
                 handle1->SetID( pointID++ );
 
-                mInterpolatedSegmentCubicBuffer.emplace_back( cubicSegment
-                                                            , &mInterpolatedPointBuffer[vertex0->GetID()]
-                                                            , &mInterpolatedPointBuffer[handle0->GetID()]
-                                                            , &mInterpolatedPointBuffer[handle1->GetID()]
-                                                            , &mInterpolatedPointBuffer[vertex1->GetID()] );
+                cubicSegmentPointArray.resize( 4 );
+                cubicSegmentPointArray[0] = &mInterpolatedPointBuffer[vertex0->GetID()];
+                cubicSegmentPointArray[1] = &mInterpolatedPointBuffer[handle0->GetID()];
+                cubicSegmentPointArray[2] = &mInterpolatedPointBuffer[handle1->GetID()];
+                cubicSegmentPointArray[3] = &mInterpolatedPointBuffer[vertex1->GetID()];
 
+                mInterpolatedSegmentBuffer.emplace_back( cubicSegment, cubicSegmentPointArray );
             }
 
             segment->SetID( segmentID++ );
@@ -75,10 +111,10 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
     }
 }
 
-std::vector<FInterpolatedSegmentCubic>&
-FInterpolatedPath::GetInterpolatedSegmentCubicBuffer()
+std::vector<FInterpolatedSegment>&
+FInterpolatedPath::GetInterpolatedSegmentBuffer()
 {
-    return mInterpolatedSegmentCubicBuffer;
+    return mInterpolatedSegmentBuffer;
 }
 
 std::vector<::ULIS::FVec2D>&
