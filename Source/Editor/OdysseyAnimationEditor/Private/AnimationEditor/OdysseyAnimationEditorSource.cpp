@@ -332,10 +332,6 @@ FOdysseyAnimationEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> 
     if (!GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>())
         return;
 
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
-    if (mediaRasters.Num() <= 0)
-        return;
-
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("actions.paste", "Paste"));
 #endif
@@ -359,7 +355,12 @@ FOdysseyAnimationEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> 
     ctx.Finish();
 
     UOdysseyAnimationLayerImageRaster* layer = Cast< UOdysseyAnimationLayerImageRaster >(GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-    GetLayerStack()->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
+	
+	GetLayerStack()->Modify();
+	GetLayerStack()->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
+
+    FPropertyChangedEvent PropertyChangedEvent(UOdysseyLayerStack::StaticClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer)), EPropertyChangeType::ValueSet);
+    GetLayerStack()->PostEditChangeProperty(PropertyChangedEvent);
 
     TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
     TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, 1, copyBlock);
@@ -372,6 +373,39 @@ FOdysseyAnimationEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> 
     FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mAnimation);
     currentFrameMutator.Set(mAnimation->CurrentFrame);
     currentFrameMutator.Commit();
+
+
+	//Version to paste into current cell
+	/*UOdysseyAnimationLayerImageRaster* currentLayer = Cast<UOdysseyAnimationLayerImageRaster>(GetLayerStack()->CurrentLayer.Get());
+	if( !currentLayer )
+		return;
+
+
+	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = currentLayer->GetCellsContainer();
+	FOdysseyAnimationCell* cell = cellsContainer->GetCellAtFrame( mAnimation->CurrentFrame ).Get();
+
+	if( cell && cell->GetType() == FOdysseyAnimationCellImageRaster::StaticType() )
+	{
+		FOdysseyAnimationCellImageRaster* rasterCell = (FOdysseyAnimationCellImageRaster*)cell;
+
+		::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+
+		ctx.Blend(
+			*iBlock,
+			*rasterCell->GetRasterBlock()->GetBlock(),
+			iBlock->Rect(),
+			::ULIS::FVec2I(0, 0),
+			::ULIS::Blend_Normal,
+			::ULIS::Alpha_Normal,
+			1.f,
+			::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+			0,
+			nullptr,
+			nullptr
+		);
+
+		ctx.Finish();
+	}*/
 }
 
 void

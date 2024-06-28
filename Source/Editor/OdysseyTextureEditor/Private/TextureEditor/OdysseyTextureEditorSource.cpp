@@ -294,10 +294,6 @@ FOdysseyTextureEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> iB
     if (!GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>())
 		return;
 
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
-    if (mediaRasters.Num() <= 0)
-        return;
-
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("actions.paste", "Paste"));
 #endif
@@ -321,7 +317,12 @@ FOdysseyTextureEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> iB
     ctx.Finish();
 
 	UOdysseyTextureLayerImageRaster* layer = Cast< UOdysseyTextureLayerImageRaster >(GetLayerStack()->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
-	GetLayerStack()->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
+    
+    GetLayerStack()->Modify();
+    GetLayerStack()->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
+
+    FPropertyChangedEvent PropertyChangedEvent(UOdysseyLayerStack::StaticClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer)), EPropertyChangeType::ValueSet);
+    GetLayerStack()->PostEditChangeProperty(PropertyChangedEvent);
 
     layer->GetRasterBlock()->SetBlock(copyBlock);
 }
