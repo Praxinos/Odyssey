@@ -219,7 +219,7 @@ void UOdysseyPainterEditorRasterSelectionTool::Unload()
 
 bool UOdysseyPainterEditorRasterSelectionTool::IsSelectionValid(::ULIS::FRectI iSelectionArea)
 {
-    if (iSelectionArea.w > 8192 || iSelectionArea.h > 8192) //Unreal limitations + very slow in ULIS at these sizes
+    if (iSelectionArea.w > 8192 || iSelectionArea.h > 8192 || iSelectionArea.w <= 0 || iSelectionArea.h <= 0) //Unreal limitations + very slow in ULIS at these sizes
         return false;
 
     return true;

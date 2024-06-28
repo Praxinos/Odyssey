@@ -1786,7 +1786,8 @@ bool FOdysseyPainterEditor::CutCurrentSelectionToCopyBlock()
 
 void FOdysseyPainterEditor::PasteCopiedBlockToNewLayer()
 {
-    mSource->PasteBlockToNewLayer( mCopyBlock );
+    if( mSource )
+        mSource->PasteBlockToNewLayer( mCopyBlock );
 }
 
 static void
