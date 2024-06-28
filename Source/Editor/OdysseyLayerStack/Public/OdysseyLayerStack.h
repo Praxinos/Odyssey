@@ -290,9 +290,7 @@ public:
     TSet<UClass*> CompatibleLayers; //Contains compatible C++ layer types
 
 public:
-    //CurrentLayer is specific to the user, not to the layerstack itself
-    //So we save it in user's config, instead of the layerstack
-	UPROPERTY(config, DuplicateTransient, meta = (AllowedClasses = "OdysseyLayer"))
+	UPROPERTY(meta = (AllowedClasses = "OdysseyLayer"))
 	TSoftObjectPtr<UOdysseyLayer> CurrentLayer;
 
     UPROPERTY()
