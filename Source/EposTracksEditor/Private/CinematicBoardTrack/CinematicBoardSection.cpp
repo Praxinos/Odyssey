@@ -303,6 +303,9 @@ FCinematicBoardSection::GetSectionToolTip() const
 float
 FCinematicBoardSection::GetSectionHeight( const UE::Sequencer::FViewDensityInfo& ViewDensity ) const
 {
+    if( !IsValid( Section ) )
+        return 100.f;
+
     UMovieSceneCinematicBoardTrack* track = Section->GetTypedOuter<UMovieSceneCinematicBoardTrack>();
     check( track );
 

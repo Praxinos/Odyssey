@@ -81,6 +81,9 @@ BoardSequenceHelpers::GetInnerSequence( IMovieScenePlayer& iPlayer, const UMovie
 {
     FInnerSequenceResult result;
 
+    if( !IsValid( &iSubSection ) )
+        return result;
+
     result.mInnerSequence = iSubSection.GetSequence();
     result.mInnerMovieScene = result.mInnerSequence ? result.mInnerSequence->GetMovieScene() : nullptr;
 
