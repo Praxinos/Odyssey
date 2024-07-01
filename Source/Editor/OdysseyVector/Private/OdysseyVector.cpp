@@ -419,3 +419,173 @@ FOdysseyVector::GetBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
 
     return length;
 }
+
+//////////////////////// Curve fitting ////////////////////////////////////
+
+#ifdef testing
+/*
+ *  FitCurve :
+ *  	Fit a Bezier curve to a set of digitized points 
+ * 
+ *   Point2	*d;			//  Array of digitized points
+    int		nPts;		//  Number of digitized points
+    double	error;		//  User-defined error squared
+ */
+
+void
+FitCurve( const std::vector<::ULIS::FVec2D>& iPointBuffer
+        , double iError )
+
+{
+    if( iPointBuffer.size() >= 2 )
+    {
+        const ::ULIS::FVec2D* firstRecord = &iPointBuffer.front();
+        const ::ULIS::FVec2D* lastRecord  = &iPointBuffer.back();
+        // Unit tangent vectors at endpoints
+        ::ULIS::FVec2D leftTangent  = (firstRecord + 1 ) - (*firstRecord);
+        ::ULIS::FVec2D rightTangent = (lastRecord  - 1 ) - (*lastRecord );
+
+        if( leftTangent.DistanceSquared() && rightTangent.DistanceSquared() )
+        {
+            leftTangent.Normalize();
+            rightTangent.Normalize();
+
+            FitCubic( iPointBuffer
+                    , firstRecord
+                    , lastRecord
+                    , leftTangent
+                    , rightTangent
+                    , error );
+        }
+    }
+}
+
+/*
+ *  FitCubic :
+ *  	Fit a Bezier curve to a (sub)set of digitized points
+*   Point2	*d;			//  Array of digitized points
+    int		first, last;	// Indices of first and last pts in region
+    Vector2	tHat1, tHat2;	// Unit tangent vectors at endpoints
+    double	error;		//  User-defined error squared
+ */
+void
+FitCubic( const std::vector<::ULIS::FVec2D>& iPointBuffer
+        , const ::ULIS::FVec2D* iFirstRecord
+        , const ::ULIS::FVec2D* iLastRecord
+        , const ::ULIS::FVec2D& iLeftTangent
+        , const ::ULIS::FVec2D& iRightTangent
+        , double iError )
+
+{
+    ::ULIS::FVec2D bezierCurve[4]; /*Control points of fitted Bezier curve*/
+    double	*u;		/*  Parameter values for point  */
+    double	*uPrime;	/*  Improved parameter values */
+    double	maxError;	/*  Maximum fitting error	 */
+    ::ULIS::FVec2D splitPoint;	/*  Point to split point set at	 */
+    int		nPts;		/*  Number of points in subset  */
+    double	iterationError; /*Error below which you try iterating  */
+    int		maxIterations = 4; /*  Max times to try iterating  */
+    ::ULIS::FVec2D tHatCenter;   	/* Unit tangent vector at splitPoint */
+    int		i;		
+
+    iterationError = iError * 4.0;	/* fixed issue 23 */
+    nPts = last - first + 1;
+
+    /*
+    //  Use heuristic if region only has two points in it 
+    if (nPts == 2) {
+	    double dist = V2DistanceBetween2Points(&d[last], &d[first]) / 3.0;
+
+		bezCurve = (Point2 *)malloc(4 * sizeof(Point2));
+		bezCurve[0] = d[first];
+		bezCurve[3] = d[last];
+		V2Add(&bezCurve[0], V2Scale(&tHat1, dist), &bezCurve[1]);
+		V2Add(&bezCurve[3], V2Scale(&tHat2, dist), &bezCurve[2]);
+		DrawBezierCurve(3, bezCurve);
+		free((void *)bezCurve);
+		return;
+    }
+    */
+
+    /*  Parameterize points, and attempt to fit curve */
+    u = ChordLengthParameterize( iPointBuffer
+                               , iFirstRecord
+                               , iLastRecord );
+    bezCurve = GenerateBezier( iPointBuffer
+                             , iFirstRecord
+                             , iLastRecord
+                             , u
+                             , iLeftTangent
+                             , iRightTangent );
+
+    /*  Find max deviation of points to fitted curve */
+    maxError = ComputeMaxError( iPointBuffer
+                              , iFirstRecord
+                              , iLastRecord
+                              , bezierCurve
+                              , u
+                              , &splitPoint );
+    if ( maxError < error )
+    {
+		DrawBezierCurve( 3, bezCurve );
+
+		return;
+    }
+
+    /*  If error not too large, try some reparameterization  */
+    /*  and iteration */
+    if ( maxError < iterationError )
+    {
+		for ( i = 0; i < maxIterations; i++ )
+        {
+	    	uPrime = Reparameterize( iPointBuffer
+                                   , iFirstRecord
+                                   , iLastRecord
+                                   , u
+                                   , bezierCurve );
+
+            bezCurve = GenerateBezier( iPointBuffer
+                                     , iFirstRecord
+                                     , iLastRecord
+                                     , uPrime
+                                     , iLeftTangent
+                                     , iRightTangent );
+
+            maxError = ComputeMaxError( iPointBuffer
+                                      , iFirstRecord
+                                      , iLastRecord
+                                      , bezierCurve
+                                      , uPrime
+                                      , &splitPoint );
+	    	if ( maxError < error )
+            {
+                DrawBezierCurve( 3, bezCurve );
+
+                return;
+            }
+            free((void *)u);
+            u = uPrime;
+        }
+    }
+
+    /* Fitting failed -- split at max error point and fit recursively */
+    tHatCenter = ComputeCenterTangent( iPointBuffer
+                                     , splitPoint );
+
+    FitCubic( iPointBuffer
+            , iFirstRecord
+            , &splitPoint
+            , iLeftTangent
+            , tHatCenter
+            , iError );
+
+    V2Negate( &tHatCenter );
+
+    FitCubic( iPointBuffer
+            , &splitPoint
+            , iLastRecord
+            , tHatCenter
+            , iRightTangent
+            , error );
+}
+#endif

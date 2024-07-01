@@ -330,7 +330,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
         }
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->Update( /*FOdysseyVectorObject::UPDATE_PAINTGROUPS*/0 );
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;

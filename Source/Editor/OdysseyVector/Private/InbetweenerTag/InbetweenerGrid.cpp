@@ -182,6 +182,21 @@ FInbetweenerGrid::Update( uint32 iUpdateFlags
     {
         mTargetCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::TargetPosition );
     }
+
+    if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEBBOX      )
+     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGETBBOX      )
+     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE        )
+     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORY_LIST )
+     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_MAP             ) )
+    {
+        if( mInbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
+        {
+            if( PrecomputeARAPInterpolation() == false )
+            {
+                UE_LOG( LogTemp, Warning, TEXT("ERROR DURING PRECOMPUTE"));
+            }
+        }
+    }
 }
 
 ::ULIS::FVec2D
@@ -257,6 +272,7 @@ FInbetweenerGrid::AddTrajectory( FInbetweenerTrajectory* iTrajectory )
     mTrajectoryList.push_back( iTrajectory );
 
     mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORIES
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORY_LIST
                                | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
                                | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
 }
@@ -266,7 +282,8 @@ FInbetweenerGrid::RemoveTrajectory( FInbetweenerTrajectory* iTrajectory )
 {
     mTrajectoryList.remove( iTrajectory );
 
-    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
+    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORY_LIST
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
                                | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
 }
 
@@ -274,6 +291,10 @@ void
 FInbetweenerGrid::RemoveAllTrajectories()
 {
     mTrajectoryList.clear();
+
+    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORY_LIST
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
 }
 
 FInbetweenerTrajectory*
@@ -396,11 +417,13 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
 
     // Compute P (sparse) and store its transpose to construct the RHS of the equation later
     // TODO refactorize concatenation
-    for( FInbetweenerQuad& quad : mQuadBuffer )
+    //for( FInbetweenerQuad& quad : mQuadBuffer )
+    for( FInbetweenerQuad* quad : mQuadArray )
     {
-        if( quad.IsLinked() )
-        {
-            FInbetweenerPoint** points = quad.GetPoints();
+        //if( quad.IsLinked() )
+        //{
+
+            FInbetweenerPoint** points = quad->GetPoints();
             FInbetweenerPoint* triangleA[3] = { points[0], points[1], points[2] };
             FInbetweenerPoint* triangleB[3] = { points[2], points[3], points[0] };
 
@@ -408,14 +431,15 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
             triRow++;
             ComputePStar( triangleB, triRow, eInbetweenerPointPositionType::SourcePosition, P_triplets );
             triRow++;
-        }
+        //}
     }
 
-    for( FInbetweenerQuad& quad : mQuadBuffer )
+    //for( FInbetweenerQuad& quad : mQuadBuffer )
+    for( FInbetweenerQuad* quad : mQuadArray )
     {
-        if( quad.IsLinked() )
-        {
-            FInbetweenerPoint** points = quad.GetPoints();
+        //if( quad.IsLinked() )
+        //{
+            FInbetweenerPoint** points = quad->GetPoints();
             FInbetweenerPoint* triangleA[3] = { points[0], points[1], points[2] };
             FInbetweenerPoint* triangleB[3] = { points[2], points[3], points[0] };
 
@@ -423,7 +447,7 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
             triRow++;
             ComputePStar( triangleB, triRow, eInbetweenerPointPositionType::TargetPosition, P_triplets );
             triRow++;
-        }
+        //}
     }
 
     Eigen::SparseMatrix<double, Eigen::ColMajor> P( P_rows, mUsedPointCount );
@@ -515,21 +539,17 @@ void FInbetweenerGrid::ComputeJAM( FInbetweenerPoint* iTriangle[3]
                                  , bool iInverseOrientation
                                  , Eigen::Matrix2d& oA )
 {
-    ::ULIS::FVec2D qi, qj, qk, pi, pj, pk;
+    // target pose
+    const ::ULIS::FVec2D &qi = iTriangle[0]->GetTargetPosition()
+                       , &qj = iTriangle[1]->GetTargetPosition()
+                       , &qk = iTriangle[2]->GetTargetPosition();
+    // reference pose
+    const ::ULIS::FVec2D &pi = iTriangle[0]->GetSourcePosition()
+                       , &pj = iTriangle[1]->GetSourcePosition()
+                       , &pk = iTriangle[2]->GetSourcePosition();
     Eigen::Matrix2d P, Q;
 
-    // target pose
-    qi = iTriangle[0]->GetTargetPosition();
-    qj = iTriangle[1]->GetTargetPosition();
-    qk = iTriangle[2]->GetTargetPosition();
-
     Q << qi.x - qk.x, qi.y - qk.y, qj.x - qk.x, qj.y - qk.y;
-
-    // reference pose
-    pi = iTriangle[0]->GetSourcePosition();
-    pj = iTriangle[1]->GetSourcePosition();
-    pk = iTriangle[2]->GetSourcePosition();
-
     P << pi.x - pk.x, pi.y - pk.y, pj.x - pk.x, pj.y - pk.y;
 
     if ( iInverseOrientation )
@@ -641,26 +661,30 @@ FInbetweenerGrid::ComputeARAPInterpolation( //float alphaLinear
 //        else             copyPositions(this, TARGET_POS, INTERP_POS);
 //        return;
 //    }
-
+/*
+    auto startTotal = std::chrono::high_resolution_clock::now();
+*/
     Eigen::MatrixXd A( 2, 8 * mUsedQuadCount  );
     //double t = alpha;
     double t = iInbetween->spacing;
-
     // Compute A(t)
     int i = 0;
-    for ( FInbetweenerQuad& quad : mQuadBuffer )
+
+    //for ( FInbetweenerQuad& quad : mQuadBuffer )
+    for ( FInbetweenerQuad* quad : mQuadArray )
     {
-        if( quad.IsLinked() )
+        //if( quad->IsLinked() )
         {
-            ComputeQuadA( &quad, A, i, t, false );
+            ComputeQuadA( quad, A, i, t, false );
         }
     }
 
-    for ( FInbetweenerQuad& quad : mQuadBuffer )
+    //for ( FInbetweenerQuad& quad : mQuadBuffer )
+    for ( FInbetweenerQuad* quad : mQuadArray )
     {
-        if( quad.IsLinked() )
+        //if( quad->IsLinked() )
         {
-            ComputeQuadA( &quad, A, i, t, true );
+            ComputeQuadA( quad, A, i, t, true );
         }
     }
 
@@ -717,18 +741,14 @@ FInbetweenerGrid::ComputeARAPInterpolation( //float alphaLinear
             FInbetweenerPoint::VectorType coords = V.row( point.GetID() );
 
             point.SetInterpPosition( coords.x(), coords.y() );
-
-    /*
-            if ( useRigidTransform )
-            {
-                FInbetweenerPoint::VectorType rigidPoint = globalRigidTransform * coords;
-
-                point.SetMotionPosition( rigidPoint.x(), rigidPoint.y() );
-            }
-    */
         }
     }
 
+/*
+    auto stopTotal = std::chrono::high_resolution_clock::now();
+    auto durationTotal = std::chrono::duration_cast<std::chrono::microseconds>(stopTotal - startTotal);
+    UE_LOG(LogTemp, Warning, TEXT("ComputeARAPInterpolation Exec time %llu"), durationTotal.count() );
+*/
     //m_arapDirty = false;
     //sw.stop();
 

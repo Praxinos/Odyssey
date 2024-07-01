@@ -464,7 +464,7 @@ FOdysseyVectorPath::InvalidateSegment( FOdysseyVectorSegment* iSegment )
     {
         mInvalidatedSegmentList.push_back( iSegment );
 
-        Invalidate();
+        Invalidate( INVALIDATE_SHAPE );
     }
 }
 

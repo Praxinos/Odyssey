@@ -275,6 +275,12 @@ FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPat
     mUsedQuadCount = 0;
     mUsedPointCount = 0;
 
+    // reset point status
+    for( FInbetweenerPoint& point : mPointBuffer )
+    {
+        point.SetNeeded( false );
+    }
+
     // relink unlinked quads before discarding unused ones at the end of the function
     for( FInbetweenerQuad& quad : mQuadBuffer )
     {
@@ -319,10 +325,17 @@ FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPat
 
     DiscardEmptyQuads( mInbetweenerTag->GetInterpolatedPathBuffer() );
 
+    mQuadArray.clear();
+    mQuadArray.reserve( mQuadBuffer.size() );
+
     // TODO: do this in base class
     for( FInbetweenerQuad& quad : mQuadBuffer )
     {
-        if( quad.IsLinked() ) mUsedQuadCount++;
+        if( quad.IsLinked() )
+        {
+            mUsedQuadCount++;
+            mQuadArray.push_back( &quad );
+        }
     }
 
     for( FInbetweenerPoint& point : mPointBuffer )
@@ -399,32 +412,35 @@ FInbetweenerGridARAP::DiscardEmptyQuads( std::vector<FInterpolatedPath>& iPathBu
                 IntersectNeededQuads( tagBBox, xmin, ymin, xmax, ymax );
             }
 
-            if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+            if( mInbetweenerTag->GetMapAsPolyline() == false )
             {
-                FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
-                FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
-                FOdysseyVectorHandleSegment* handle0 = segment->GetHandle(0);
-                FOdysseyVectorHandleSegment* handle1 = segment->GetHandle(1);
-                ::ULIS::FVec2D& p0Local = vertex0->GetCoords();
-                ::ULIS::FVec2D& p1Local = handle0->GetCoords();
-                ::ULIS::FVec2D& p2Local = handle1->GetCoords();
-                ::ULIS::FVec2D& p3Local = vertex1->GetCoords();
-                BLPoint pt0 = conversionMatrix.mapPoint( p0Local.x, p0Local.y );
-                BLPoint pt1 = conversionMatrix.mapPoint( p1Local.x, p1Local.y );
-                BLPoint pt2 = conversionMatrix.mapPoint( p2Local.x, p2Local.y );
-                BLPoint pt3 = conversionMatrix.mapPoint( p3Local.x, p3Local.y );
+                if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+                {
+                    FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
+                    FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
+                    FOdysseyVectorHandleSegment* handle0 = segment->GetHandle(0);
+                    FOdysseyVectorHandleSegment* handle1 = segment->GetHandle(1);
+                    ::ULIS::FVec2D& p0Local = vertex0->GetCoords();
+                    ::ULIS::FVec2D& p1Local = handle0->GetCoords();
+                    ::ULIS::FVec2D& p2Local = handle1->GetCoords();
+                    ::ULIS::FVec2D& p3Local = vertex1->GetCoords();
+                    BLPoint pt0 = conversionMatrix.mapPoint( p0Local.x, p0Local.y );
+                    BLPoint pt1 = conversionMatrix.mapPoint( p1Local.x, p1Local.y );
+                    BLPoint pt2 = conversionMatrix.mapPoint( p2Local.x, p2Local.y );
+                    BLPoint pt3 = conversionMatrix.mapPoint( p3Local.x, p3Local.y );
 
-                IntersectNeededQuads( tagBBox
-                                    , ::ULIS::FMath::Min( pt0.x, pt1.x )
-                                    , ::ULIS::FMath::Min( pt0.y, pt1.y )
-                                    , ::ULIS::FMath::Max( pt0.x, pt1.x )
-                                    , ::ULIS::FMath::Max( pt0.y, pt1.y ) );
+                    IntersectNeededQuads( tagBBox
+                                        , ::ULIS::FMath::Min( pt0.x, pt1.x )
+                                        , ::ULIS::FMath::Min( pt0.y, pt1.y )
+                                        , ::ULIS::FMath::Max( pt0.x, pt1.x )
+                                        , ::ULIS::FMath::Max( pt0.y, pt1.y ) );
 
-                IntersectNeededQuads( tagBBox
-                                    , ::ULIS::FMath::Min( pt3.x, pt2.x )
-                                    , ::ULIS::FMath::Min( pt3.y, pt2.y )
-                                    , ::ULIS::FMath::Max( pt3.x, pt2.x )
-                                    , ::ULIS::FMath::Max( pt3.y, pt2.y ) );
+                    IntersectNeededQuads( tagBBox
+                                        , ::ULIS::FMath::Min( pt3.x, pt2.x )
+                                        , ::ULIS::FMath::Min( pt3.y, pt2.y )
+                                        , ::ULIS::FMath::Max( pt3.x, pt2.x )
+                                        , ::ULIS::FMath::Max( pt3.y, pt2.y ) );
+                }
             }
         }
     }

@@ -546,7 +546,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         BLMatrix2D mInverseWorldMatrix;
         std::list<FOdysseyVectorTag*> mTagList;
         std::list<FOdysseyVectorObject*> mChildrenList;
-        std::list<FOdysseyVectorTag*> mInvalidatedTagList;
         std::list<FOdysseyVectorObject*> mInvalidatedChildrenList;
         FOdysseyVectorObject* mOldParent;
         FOdysseyVectorObject* mParent;

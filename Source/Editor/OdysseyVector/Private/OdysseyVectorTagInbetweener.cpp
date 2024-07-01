@@ -173,6 +173,21 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
 
     mSourceBBox = iOwnerObject->GetBBox( false );
 
+    if( mSourceBBox.h > mSourceBBox.w )
+    {
+        double quadH = ( mSourceBBox.h / iNumQuadY );
+        double quadW = quadH;
+
+        mSourceBBox.w = iNumQuadX * quadW;
+    }
+    else
+    {
+        double quadW = ( mSourceBBox.w / iNumQuadX );
+        double quadH = quadW;
+
+        mSourceBBox.h = iNumQuadY * quadH;
+    }
+
     // Note: Grid building needs the bbox to be set.
     SetGridType( mGridType );
 
@@ -259,15 +274,11 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
     if( mInvalidationFlags & INVALIDATE_SOURCEBBOX )
     {
         UpdateBBox( mSourceBBox, eInbetweenerPointPositionType::SourcePosition );
-
-        mGrid->Update( iUpdateFlags, mInvalidationFlags );
     }
 
     if( mInvalidationFlags & INVALIDATE_TARGETBBOX )
     {
         UpdateBBox( mTargetBBox, eInbetweenerPointPositionType::TargetPosition );
-
-        mGrid->Update( iUpdateFlags, mInvalidationFlags );
     }
 
     if( mInvalidationFlags & INVALIDATE_MAP )
@@ -290,6 +301,8 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             trajectory->Update();
         }
     }
+
+    mGrid->Update( iUpdateFlags, mInvalidationFlags );
 
     if( ( mInvalidationFlags & INVALIDATE_SPACING )
      || ( mInvalidationFlags & INVALIDATE_MAP     ) )
@@ -445,17 +458,20 @@ FOdysseyVectorTagInbetweener::UpdateMatrix()
 void
 FOdysseyVectorTagInbetweener::InterpolateGeometry( uint32 iInbetweenIndex )
 {
-    ::ULIS::FRectD bbox = mOwner->GetBBox( false );
+    ::ULIS::FRectD bbox = mSourceBBox;
 
     if( mInterpolationType == eInbetweenerInterpolationType::Linear )
     {
         for( FInbetweenerPoint& point : mGrid->GetPointBuffer() )
         {
-            ::ULIS::FVec2D diff = ( point.mTargetPosition - point.mSourcePosition );
-            double t = mChart.inbetweenBuffer[iInbetweenIndex].spacing;
-            ::ULIS::FVec2D step = diff * t;
+            if( point.GetQuadCount() )
+            {
+                ::ULIS::FVec2D diff = ( point.mTargetPosition - point.mSourcePosition );
+                double t = mChart.inbetweenBuffer[iInbetweenIndex].spacing;
+                ::ULIS::FVec2D step = diff * t;
 
-            point.mInterpPosition = point.mSourcePosition + step;
+                point.mInterpPosition = point.mSourcePosition + step;
+            }
         }
     }
 
@@ -468,6 +484,7 @@ FOdysseyVectorTagInbetweener::InterpolateGeometry( uint32 iInbetweenIndex )
                                        // , const FInbetweenerPoint::Affine &globalRigidTransform
                                          &mChart.inbetweenBuffer[iInbetweenIndex]
                                        , false );
+
     }
 
     if( mGridType == eInbetweenerGridType::FFD )
@@ -541,17 +558,21 @@ FOdysseyVectorTagInbetweener::Interpolate()
 {
     if( mInterpolationType == eInbetweenerInterpolationType::ARAP )
     {
+/*
         if( mGrid->PrecomputeARAPInterpolation() == false )
         {
             UE_LOG( LogTemp, Warning, TEXT("ERROR DURING PRECOMPUTE"));
         }
+*/
     }
 
+    //UE_LOG( LogTemp, Warning, TEXT("Interpolate geometry"));
     for( uint32 i = 0; i <= mInbetweenCount; i++ )
     {
         InterpolateTransform( i );
         InterpolateGeometry( i );
     }
+    //UE_LOG( LogTemp, Warning, TEXT("-------------------"));
 }
 
 uint32
@@ -1114,5 +1135,6 @@ FOdysseyVectorTagInbetweener::SetInterpolationType( eInbetweenerInterpolationTyp
     mInterpolationType = iInterpolationType;
 
     Invalidate( INVALIDATE_SPACING
+              | INVALIDATE_GRIDTYPE
               | INVALIDATE_CELLS );
 }

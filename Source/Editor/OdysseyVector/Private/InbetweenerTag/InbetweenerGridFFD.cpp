@@ -120,6 +120,21 @@ FInbetweenerGridFFD::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPath
     mUsedQuadCount = 0;
     mUsedPointCount = 0;
 
+    // reset point status
+    for( FInbetweenerPoint& point : mPointBuffer )
+    {
+        point.SetNeeded( false );
+    }
+
+    // relink unlinked quads before discarding unused ones at the end of the function
+    for( FInbetweenerQuad& quad : mQuadBuffer )
+    {
+        if( quad.IsLinked() == false )
+        {
+            quad.Link();
+        }
+    }
+
     for( FInterpolatedPath& interpolatedPath : iPathBuffer )
     {
         std::vector<FInterpolatedPoint>& interpolatedPointBuffer = interpolatedPath.GetInterpolatedPointBuffer();
@@ -145,10 +160,17 @@ FInbetweenerGridFFD::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPath
         }
     }
 
+    mQuadArray.clear();
+    mQuadArray.reserve( mQuadBuffer.size() );
+
     // TODO: do this in base class
     for( FInbetweenerQuad& quad : mQuadBuffer )
     {
-        if( quad.IsLinked() ) mUsedQuadCount++;
+        if( quad.IsLinked() )
+        {
+            mUsedQuadCount++;
+            mQuadArray.push_back( &quad );
+        }
     }
 
     for( FInbetweenerPoint& point : mPointBuffer )

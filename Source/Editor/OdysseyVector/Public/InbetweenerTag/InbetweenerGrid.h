@@ -106,6 +106,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         std::list<FInbetweenerTrajectory*> mTrajectoryList;
         std::vector<FInbetweenerPoint> mPointBuffer;
         std::vector<FInbetweenerQuad> mQuadBuffer;
+        std::vector<FInbetweenerQuad*> mQuadArray;
         uint32 mNumQuadX;
         uint32 mNumQuadY;
         uint32 mUsedQuadCount;

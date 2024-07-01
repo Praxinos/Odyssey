@@ -200,7 +200,7 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
         UpdateShape( iUpdateFlags );
 
         // update tags
-        for( FOdysseyVectorTag* tag : mInvalidatedTagList )
+        for( FOdysseyVectorTag* tag : mTagList )
         {
             tag->Update( iUpdateFlags, mInvalidationFlags );
         }
@@ -696,13 +696,6 @@ void
 FOdysseyVectorObject::InvalidateTag( FOdysseyVectorTag* iTag )
 {
     Invalidate( FOdysseyVectorObject::INVALIDATE_TAG );
-
-    if( std::find( mInvalidatedTagList.begin()
-                 , mInvalidatedTagList.end()
-                 , iTag ) == mInvalidatedTagList.end() )
-    {
-        mInvalidatedTagList.push_back( iTag );
-    }
 }
 
 void
