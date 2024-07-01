@@ -283,6 +283,7 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
     TSharedPtr<::ULIS::FBlock> maskBlock = MakeShared<ULIS::FBlock>(w, h, ::ULIS::Format_BGRA8);
 
     ::ULIS::FContext& ulisCtx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
+    ::ULIS::FContext& formatCtx = IULISLoaderModule::StaticFindOrAddContext(format);
     ulisCtx.Clear(*maskBlock);
     ulisCtx.Finish();
 
@@ -390,8 +391,8 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
     ulisCtx.ConvertFormat(*maskBlock, *dstBlock, invalidRect);
     ulisCtx.Finish();
 
-    ulisCtx.Blend(*dstBlock, *mPaintEngine.PaintBlock(), dstBlock->Rect(), invalidRect.Position());
-    ulisCtx.Finish();
+    formatCtx.Blend(*dstBlock, *mPaintEngine.PaintBlock(), dstBlock->Rect(), invalidRect.Position());
+    formatCtx.Finish();
 
     mPaintEngine.PaintBlock()->Dirty();
     mPaintEngine.Update(BlendParameters);
