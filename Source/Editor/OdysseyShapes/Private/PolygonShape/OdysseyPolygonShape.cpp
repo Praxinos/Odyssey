@@ -94,9 +94,9 @@ UOdysseyPolygonShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
         int shiftY = FMath::Abs(iPointInTexture.y - mPoints[num].y);
 
         if (shiftX > shiftY)
-            mPoints.Last().y = mPoints[num].x;
+            mPoints.Last().y = mPoints[num].y;
         else
-            mPoints.Last().x = mPoints[num].y;
+            mPoints.Last().x = mPoints[num].x;
     }
     
     SetLastHUDPoint(mPoints.Last());

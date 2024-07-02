@@ -58,9 +58,9 @@ UOdysseyLineShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
         int shiftY = FMath::Abs( mEndPoint.y - mStartPoint.y);
 
         if( shiftX > shiftY )
-            mEndPoint.y = mStartPoint.x;
+            mEndPoint.y = mStartPoint.y;
         else
-            mEndPoint.x = mStartPoint.y;
+            mEndPoint.x = mStartPoint.x;
     }
 
     RefreshHUD();
