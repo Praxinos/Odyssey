@@ -4,19 +4,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyShape.h"
 #include "OdysseyPainterEditorTool.h"
-#include "OdysseyPaintEngine.h"
 #include "OdysseyPainterEditorRasterSelectionTool.generated.h"
 
-class FOdysseyHUDPolygon;
-
-UENUM()
-enum class EOdysseySelectionShape : uint8
-{
-    Rectangle,
-    Freehand,
-    Ellipse
-};
+class UOdysseyShape;
 
 UENUM()
 enum class EOdysseySelectionState : uint8
@@ -39,7 +31,13 @@ public:
 
     //Constructor
     UOdysseyPainterEditorRasterSelectionTool();
-    
+
+
+public:
+    //TOOL
+    template<class T> T* CreateShape(FName iName);
+
+public:
     virtual bool IsActivable() const override;
 
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
@@ -52,32 +50,32 @@ public:
     virtual void Load() override;
     virtual void Unload() override;
 
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetSelectionBlock();
-    ::ULIS::FRectI GetSelectionAreaBoundingRect();
-
-    void ClearSelection();
-
-protected:
-    bool IsSelectionValid(::ULIS::FRectI iSelectionArea);
-    void ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
+    virtual void Tick(float iDeltaTime) override;
 
 private:
-    void ConstrainSelectionToEllipse( const FOdysseyPoint& iPointInTexture );
-    void ConstrainSelectionToRectangle(FVector2D iPosition);
+    // Internal - Callbacks
+    void SelectedShapeChanged();
+    void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
 
+public:
+    virtual void PropertyChanged(const FName& iPropertyName) override;
 
 protected:
-    UPROPERTY(EditAnywhere, Category = "Selection Shape")
-    EOdysseySelectionShape SelectionShape;
+    UPROPERTY(EditAnywhere, Category = "Shape")
+    EOdysseyFillShape SelectedShape;
 
-    EOdysseySelectionState SelectionState;
+    UPROPERTY(VisibleInstanceOnly, Category = "Shape", Instanced, meta = (ShowInnerProperties))
+    UOdysseyShape* SelectedShapeInstance;
 
-    UPROPERTY(EditAnywhere, Category = "Selection Shape")
-    bool Uniform;
+    UPROPERTY()
+    TMap<EOdysseyFillShape, UOdysseyShape*> AvailableShapes;
 
-    TSharedPtr<FOdysseyHUDElement> mSelectionHUD;
-    TSharedPtr<FOdysseyHUDPolygon> mToolSelectionArea;
-    FOdysseyPaintEngine mPaintEngine;
+    UPROPERTY(EditAnywhere, Category = "Parameters")
+    bool Antialiasing = true;
 
-    FVector2D mDownReference;
+    UPROPERTY(EditAnywhere, Category = "Parameters")
+    bool SubPixel = true;
+
+    EOdysseySelectionState mSelectionState;
+    TSharedPtr<FOdysseyHUDElement> mShapeHUD;
 };

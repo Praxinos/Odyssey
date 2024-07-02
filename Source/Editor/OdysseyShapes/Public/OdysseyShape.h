@@ -11,27 +11,21 @@
 
 class FOdysseyHUDElement;
 
-/* UENUM()
-enum class EOdysseyDrawingPrecision : uint8
-{
-    kRaw  UMETA(DisplayName = "Raw"),
-    kAA   UMETA(DisplayName = "AntiAliased"),
-    kSP   UMETA(DisplayName = "SubPixel")
-};
-
-struct FOdysseyShapeDrawOptions
-{
-    //float size;
-    ::ULIS::FColor mColor = ::ULIS::FColor::FromRGBA8( 0, 0, 0, 255);
-    bool mFilled = false;
-    EOdysseyDrawingPrecision mPrecision = EOdysseyDrawingPrecision::kRaw;
-}; */
-
 UENUM()
 enum class EOdysseyShape : uint8
 {
     kFreehand       UMETA(DisplayName = "Freehand"),
     kLine           UMETA(DisplayName = "Line"),
+    kRectangle      UMETA(DisplayName = "Rectangle"),
+    kPolygon        UMETA(DisplayName = "Polygon"),
+    kEllipse        UMETA(DisplayName = "Ellipse"),
+    kBezier         UMETA(DisplayName = "Bezier"),
+};
+
+UENUM()
+enum class EOdysseyFillShape : uint8
+{
+    kFreehand       UMETA(DisplayName = "Freehand"),
     kRectangle      UMETA(DisplayName = "Rectangle"),
     kPolygon        UMETA(DisplayName = "Polygon"),
     kEllipse        UMETA(DisplayName = "Ellipse"),

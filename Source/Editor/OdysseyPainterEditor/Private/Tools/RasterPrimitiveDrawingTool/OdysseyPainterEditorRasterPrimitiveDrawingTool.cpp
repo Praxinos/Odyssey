@@ -12,8 +12,6 @@
 #include "EllipseShape/OdysseyEllipseShape.h"
 #include "BezierShape/OdysseyBezierShape.h"
 
-#include "UObject/OdysseyObjectEditorUtils.h"
-
 #include "OdysseyMediaRaster.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDSystem.h"
@@ -36,7 +34,7 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::UOdysseyPainterEditorRasterPrim
 {
     Icon = *FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Shapes64");
 
-    UOdysseyFreehandShape* freehandShape = CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterDrawingTool::FreehandShape");
+    UOdysseyFreehandShape* freehandShape = CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterPrimitiveDrawingTool::FreehandShape");
     freehandShape->DisplayHUD(true);
 
     AvailableShapes.Add(EOdysseyShape::kFreehand, freehandShape);
