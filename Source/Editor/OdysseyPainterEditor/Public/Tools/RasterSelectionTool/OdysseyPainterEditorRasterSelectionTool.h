@@ -70,11 +70,11 @@ protected:
     UPROPERTY()
     TMap<EOdysseyFillShape, UOdysseyShape*> AvailableShapes;
 
-    UPROPERTY(EditAnywhere, Category = "Parameters")
+    /* UPROPERTY(EditAnywhere, Category = "Parameters")
     bool Antialiasing = true;
 
     UPROPERTY(EditAnywhere, Category = "Parameters")
-    bool SubPixel = true;
+    bool SubPixel = true; */
 
     EOdysseySelectionState mSelectionState;
     TSharedPtr<FOdysseyHUDElement> mShapeHUD;
