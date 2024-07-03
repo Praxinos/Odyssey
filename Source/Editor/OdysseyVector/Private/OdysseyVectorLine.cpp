@@ -53,7 +53,7 @@ FOdysseyVectorLine::UpdateShape( uint32 iUpdateFlags )
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorLine::CopyShape()
+FOdysseyVectorLine::CopyShape( uint64 iCopyFlags )
 {
     FOdysseyVectorLine* lineCopy = new FOdysseyVectorLine( mName
                                                          , mWidth

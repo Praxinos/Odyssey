@@ -1051,7 +1051,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
         if( inbetweenAnimationCell )
         {
             // change vertices coords before copying the object
-            std::function<void(FOdysseyVectorObject*)> preProcess = [ inbetweenIndex ]( FOdysseyVectorObject* vectorObject )
+            std::function<uint64(FOdysseyVectorObject*)> preProcess = [ inbetweenIndex ]( FOdysseyVectorObject* vectorObject ) -> uint64
             {
                 FOdysseyVectorTag* tag = vectorObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
 
@@ -1083,12 +1083,16 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                     }
 
                     //tag->GetOwner()->RemoveTag( tag );
+
+                    return inbetweenerTag->GetMapAsPolyline() ? FOdysseyVectorObject::COPY_RETOPOLOGY : 0;
                 }
+
+                return 0;
             };
 
-            std::function<void(FOdysseyVectorObject*,FOdysseyVectorObject*)> postProcess = [ inbetweenIndex
-                                                                                           , preProcess ]( FOdysseyVectorObject* sourceObject
-                                                                                                         , FOdysseyVectorObject* objectCopy )
+            std::function<uint64(FOdysseyVectorObject*,FOdysseyVectorObject*)> postProcess = [ inbetweenIndex
+                                                                                             , preProcess ]( FOdysseyVectorObject* sourceObject
+                                                                                                           , FOdysseyVectorObject* objectCopy ) -> uint64
             {
                 FOdysseyVectorTag* tag = sourceObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
 
@@ -1098,15 +1102,18 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                     FInbetweenerInbetween* inbetween = &inbetweenerTag->mChart.inbetweenBuffer[inbetweenIndex];
 
                     inbetween->matrix.reset();
+
+                    // revert vertices coords after having copied the object. It's actually the same thing.
+                    preProcess( sourceObject );
                 }
 
-                // revert vertices coords after having copied the object. It's actually the same thing.
-                preProcess( sourceObject );
+                return 0;
             };
 
             FOdysseyVectorGroupPaint* inbetweenScene = inbetweenAnimationCell->GetEngine()->GetScene();
 
-            FOdysseyVectorObject* copiedObject = mOwner->Copy( preProcess, postProcess );
+            FOdysseyVectorObject* copiedObject = mOwner->Copy( preProcess
+                                                             , postProcess );
 
             oAddedObjectList.push_back( copiedObject );
 

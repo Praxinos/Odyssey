@@ -2433,7 +2433,7 @@ FOdysseyVectorGroupPaint::CopyBuckets( FOdysseyVectorGroupPaint* iDestination, b
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorGroupPaint::CopyShape()
+FOdysseyVectorGroupPaint::CopyShape( uint64 iCopyFlags )
 {
     FOdysseyVectorGroupPaint* groupPaintCopy = new FOdysseyVectorGroupPaint( "Paint Group Copy" );
 

@@ -374,13 +374,13 @@ FOdysseyVectorObject::RecursiveRemoveTagByType( uint32 iTagType
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorObject::Copy( std::function<void(FOdysseyVectorObject*)> iPreCallback
-                          , std::function<void(FOdysseyVectorObject*
-                                             , FOdysseyVectorObject*)> iPostCallback )
+FOdysseyVectorObject::Copy( std::function<uint64(FOdysseyVectorObject*)> iPreCallback
+                          , std::function<uint64(FOdysseyVectorObject*
+                                               , FOdysseyVectorObject*)> iPostCallback )
 {
-    iPreCallback( this );
+    uint64 copyFlags = iPreCallback( this );
 
-    FOdysseyVectorObject* objectCopy = CopyShape();
+    FOdysseyVectorObject* objectCopy = CopyShape( copyFlags );
 
     if( objectCopy )
     {
@@ -403,9 +403,9 @@ FOdysseyVectorObject::Copy( std::function<void(FOdysseyVectorObject*)> iPreCallb
 FOdysseyVectorObject*
 FOdysseyVectorObject::Copy()
 {
-    return Copy( []( FOdysseyVectorObject* object ){}
+    return Copy( []( FOdysseyVectorObject* object ){ return 0; }
                , []( FOdysseyVectorObject* sourceObject
-                   , FOdysseyVectorObject* objectCopy ){} );
+                   , FOdysseyVectorObject* objectCopy ){ return 0; } );
 }
 
 // TODO: export flags

@@ -23,3 +23,9 @@ FInterpolatedSegment::GetOriginalSegment()
 {
     return mOriginalSegment;
 } 
+
+std::vector<FInterpolatedPoint*>&
+FInterpolatedSegment::GetInterpolatedPointArray()
+{
+    return mInterpolatedPointArray;
+}

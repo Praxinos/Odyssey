@@ -14,6 +14,7 @@ class FInterpolatedSegment
         ::FInterpolatedSegment( FOdysseyVectorSegment* iSegment
                               , const std::vector<FInterpolatedPoint*>& iPolylinePointArray );
         FOdysseyVectorSegment* GetOriginalSegment();
+        std::vector<FInterpolatedPoint*>& GetInterpolatedPointArray();
 
         friend class FOdysseyVectorTagInbetweener;
 

@@ -23,7 +23,7 @@ FOdysseyVectorPrimitive::HasBaseClass( uint32 iBaseClassID )
 FOdysseyVectorPath*
 FOdysseyVectorPrimitive::Convert()
 {
-    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(this->FOdysseyVectorPath::CopyShape());
+    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(this->FOdysseyVectorPath::CopyShape( 0 ));
 
     this->CopySettings( path );
 

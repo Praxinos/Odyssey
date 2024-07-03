@@ -57,3 +57,9 @@ FInterpolatedPoint::SetUV( FInbetweenerQuad* iMappedQuad, double iU, double iV )
     mU = iU;
     mV = iV;
 }
+
+uint32
+FInterpolatedPoint::GetIndex()
+{
+    return mIndex;
+}

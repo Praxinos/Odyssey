@@ -118,6 +118,12 @@ namespace FOdysseyVector
         oMax.y = ::ULIS::FMath::Max( y1, y2 );
     }
 
+    void ODYSSEYVECTOR_API FitCurve( const std::vector<::ULIS::FVec2D>& iPointBuffer
+                                   , double iError
+                                   , std::function<void ( const std::vector<::ULIS::FVec2D>&
+                                                        , double
+                                                        , double )> iFunction );
+
     //bool ODYSSEYVECTOR_API IntersectRegions( const ::ULIS::FRectI& iRegion0, const ::ULIS::FRectI& iRegion1, ::ULIS::FRectI &oRegionOut );
 }
 

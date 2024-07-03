@@ -1433,6 +1433,34 @@ typedef struct FStitchingPair
     }
 } FStitchingPair;
 
+FOdysseyVectorSegment*
+FOdysseyVectorPath::GetSegmentByID( uint32 iID )
+{
+    for( FOdysseyVectorSegment* segment : mSegmentList )
+    {
+        if( segment->GetID() == iID )
+        {
+            return segment;
+        }
+    }
+
+    return nullptr;
+}
+
+FOdysseyVectorVertex*
+FOdysseyVectorPath::GetVertexByID( uint32 iID )
+{
+    for( FOdysseyVectorVertex* vertex : mVertexList )
+    {
+        if( vertex->GetID() == iID )
+        {
+            return vertex;
+        }
+    }
+
+    return nullptr;
+}
+
 //static
 void
 FOdysseyVectorPath::DeleteVertex( FOdysseyVectorPath* iPath
@@ -1992,7 +2020,7 @@ FOdysseyVectorPath::GetInvalidatedSegmentList()
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorPath::CopyShape()
+FOdysseyVectorPath::CopyShape( uint64 iCopyFlags )
 {
     FOdysseyVectorPath* cubicPathCopy = new FOdysseyVectorPath( FString("Cubic Path") );
     std::map<FOdysseyVectorVertex*, FOdysseyVectorVertex*> lookupTable;
@@ -2019,21 +2047,84 @@ FOdysseyVectorPath::CopyShape()
     {
         if( originalSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
         {
-            FOdysseyVectorSegmentCubic* originalCubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(originalSegment);
-            FOdysseyVectorVertex* vertex0 = static_cast<FOdysseyVectorVertex*>( originalCubicSegment->GetPoint(0) );
-            FOdysseyVectorVertex* vertex1 = static_cast<FOdysseyVectorVertex*>( originalCubicSegment->GetPoint(1) );
-            FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( cubicPathCopy
-                                                                                        , lookupTable[vertex0]
-                                                                                        , originalCubicSegment->GetHandle(0)->GetX()
-                                                                                        , originalCubicSegment->GetHandle(0)->GetY()
-                                                                                        , originalCubicSegment->GetHandle(1)->GetX()
-                                                                                        , originalCubicSegment->GetHandle(1)->GetY()
-                                                                                        , lookupTable[vertex1]
-                                                                                        , true );
+            if( iCopyFlags & COPY_RETOPOLOGY )
+            {
+                std::vector<FOdysseyVectorFraction>& fractionCache = originalSegment->GetFractionCache();
+                uint32 fractionCount = originalSegment->GetFractionCount();
+                std::vector<::ULIS::FVec2D> pointBuffer;
+                FOdysseyVectorVertex* vertex0 = originalSegment->GetVertex(0);
+                FOdysseyVectorVertex* vertex1 = nullptr;
 
-            cubicPathCopy->AddSegment( newCubicSegment );
+                pointBuffer.reserve( originalSegment->GetFractionPointBuffer().size() + 2 );
+                pointBuffer.push_back( originalSegment->GetVertex(0)->GetCoords() );
+
+                for( uint32 i = 0; i < fractionCount - 1; i++ )
+                {
+                    FOdysseyVectorFraction& fraction = fractionCache[i];
+
+                    pointBuffer.push_back( fraction.point[1]->GetCoords() );
+                }
+
+                pointBuffer.push_back( originalSegment->GetVertex(1)->GetCoords() );
+
+                FOdysseyVector::FitCurve( pointBuffer
+                                        , 4.0f
+                                        , [ &lookupTable
+                                          , cubicPathCopy
+                                          , originalSegment
+                                          , &vertex0
+                                          , &vertex1 ]( const std::vector<::ULIS::FVec2D>& bezierCurve
+                                                      , double firstT
+                                                      , double lastRecordT )
+                {
+                    if( lastRecordT == 1.0f )
+                    {
+                        vertex1 = originalSegment->GetVertex(1);
+                    }
+                    else
+                    {
+                        vertex1 = new FOdysseyVectorVertex( bezierCurve[3].x
+                                                          , bezierCurve[3].y
+                                                          , 1.0f );
+
+                        cubicPathCopy->AddVertex( vertex1 );
+                    }
+
+                    if( lookupTable[vertex0] ) vertex0 = lookupTable[vertex0];
+                    if( lookupTable[vertex1] ) vertex1 = lookupTable[vertex1];
+
+                    FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( cubicPathCopy
+                                                                                                , vertex0
+                                                                                                , bezierCurve[1].x
+                                                                                                , bezierCurve[1].y
+                                                                                                , bezierCurve[2].x
+                                                                                                , bezierCurve[2].y
+                                                                                                , vertex1
+                                                                                                , true );
+
+                    cubicPathCopy->AddSegment( newCubicSegment );
+
+                    vertex0 = vertex1;
+                } );
+            }
+            else
+            {
+                FOdysseyVectorSegmentCubic* originalCubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(originalSegment);
+                FOdysseyVectorVertex* vertex0 = static_cast<FOdysseyVectorVertex*>( originalCubicSegment->GetPoint(0) );
+                FOdysseyVectorVertex* vertex1 = static_cast<FOdysseyVectorVertex*>( originalCubicSegment->GetPoint(1) );
+                FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( cubicPathCopy
+                                                                                            , lookupTable[vertex0]
+                                                                                            , originalCubicSegment->GetHandle(0)->GetX()
+                                                                                            , originalCubicSegment->GetHandle(0)->GetY()
+                                                                                            , originalCubicSegment->GetHandle(1)->GetX()
+                                                                                            , originalCubicSegment->GetHandle(1)->GetY()
+                                                                                            , lookupTable[vertex1]
+                                                                                            , true );
+
+                cubicPathCopy->AddSegment( newCubicSegment );
+            }
+            //newSegment->BuildVariable();
         }
-        //newSegment->BuildVariable();
     }
 
     //cubicPathCopy->Update( 0 );

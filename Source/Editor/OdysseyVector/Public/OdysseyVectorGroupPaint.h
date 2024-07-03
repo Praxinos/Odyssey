@@ -127,7 +127,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @brief Copy the shape to a new object.
          * @return a pointer to  copy of the object
          */
-        virtual FOdysseyVectorObject* CopyShape() override;
+        virtual FOdysseyVectorObject* CopyShape( uint64 iCopyFlags ) override;
 
         /**
          * @brief Copy buckets from this PaintGroup to a destination PaintGroup.

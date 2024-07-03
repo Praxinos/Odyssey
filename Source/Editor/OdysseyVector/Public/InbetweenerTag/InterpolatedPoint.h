@@ -18,6 +18,7 @@ class FInterpolatedPoint
         void SetV( double iV );
         double GetU();
         double GetV();
+        uint32 GetIndex();
 
 
         friend class FOdysseyVectorTagInbetweener;

@@ -29,13 +29,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 HIERARCHY_CHANGE_FORBIDDEN = 1;
         static const uint32 HIERARCHY_CHANGE_ERROR     = 2;
 
-        // update mask
-        //static const uint32 FREQUENTUPDATES = ( 1 << 0 );
-        static const uint32 UPDATE_KEEPINVALIDATED = ( 1 << 1 );
-        static const uint32 UPDATE_PAINTGROUPS     = ( 1 << 2 );
-        static const uint32 UPDATE_LOADED          = ( 1 << 3 );
+        // copy flags
+        static const uint32 COPY_RETOPOLOGY          = ( 1 << 0 );
 
-        // invalidation mask
+        // update flags
+        //static const uint32 FREQUENTUPDATES = ( 1 << 0 );
+        static const uint32 UPDATE_KEEPINVALIDATED   = ( 1 << 1 );
+        static const uint32 UPDATE_PAINTGROUPS       = ( 1 << 2 );
+        static const uint32 UPDATE_LOADED            = ( 1 << 3 );
+
+        // invalidation flags
         static const uint32 INVALIDATE_MATRIX        = ( 1 << 0 );
         static const uint32 INVALIDATE_HIERARCHY     = ( 1 << 1 );
         static const uint32 INVALIDATE_SHAPE         = ( 1 << 2 );
@@ -93,9 +96,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
          */
         FOdysseyVectorObject* Copy(); 
 
-        FOdysseyVectorObject* Copy( std::function<void(FOdysseyVectorObject*)> iPreCallback
-                                  , std::function<void(FOdysseyVectorObject*
-                                                     , FOdysseyVectorObject*)> iPostCallback );
+        FOdysseyVectorObject* Copy( std::function<uint64(FOdysseyVectorObject*)> iPreCallback
+                                  , std::function<uint64(FOdysseyVectorObject*
+                                                       , FOdysseyVectorObject*)> iPostCallback );
 
         void RecursiveRemoveTagByType( uint32 iTagType
                                      , std::list<FOdysseyVectorTag*>& oRemovedTagList );
@@ -530,7 +533,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags );
-        virtual FOdysseyVectorObject* CopyShape(){ return nullptr; };
+        virtual FOdysseyVectorObject* CopyShape( uint64 iCopyFlags ){ return nullptr; };
         virtual void DrawShape ( BLContext* iBLContext
                                , const ::ULIS::FRectD& iInvalidationArea
                                , double iCombinedOpacity
