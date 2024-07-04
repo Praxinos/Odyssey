@@ -362,7 +362,20 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.
     // -> inbetweens in inbetween mode.
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
+    if( hudFlags & HUD_MODE_VERTEX )
+    {
+        FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene);
+    }
+
+    if( hudFlags & HUD_MODE_INBETWEEN )
+    {
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | HUD_TAGINBETWEENER_TARGET );
+    }
 
     iBLContext->save();
     iBLContext->resetMatrix();

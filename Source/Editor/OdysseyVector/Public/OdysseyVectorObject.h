@@ -96,9 +96,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
          */
         FOdysseyVectorObject* Copy(); 
 
-        FOdysseyVectorObject* Copy( std::function<uint64(FOdysseyVectorObject*)> iPreCallback
+        FOdysseyVectorObject* Copy( uint64 iCopyFlags
+                                  , std::function<uint64(FOdysseyVectorObject*,uint64)> iPreCallback
                                   , std::function<uint64(FOdysseyVectorObject*
-                                                       , FOdysseyVectorObject*)> iPostCallback );
+                                                       , FOdysseyVectorObject*,uint64)> iPostCallback );
 
         void RecursiveRemoveTagByType( uint32 iTagType
                                      , std::list<FOdysseyVectorTag*>& oRemovedTagList );
@@ -533,7 +534,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags );
-        virtual FOdysseyVectorObject* CopyShape( uint64 iCopyFlags ){ return nullptr; };
+        virtual FOdysseyVectorObject* CopyShape( uint64 iCopyFlags );
         virtual void DrawShape ( BLContext* iBLContext
                                , const ::ULIS::FRectD& iInvalidationArea
                                , double iCombinedOpacity

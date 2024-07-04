@@ -374,11 +374,18 @@ FOdysseyVectorObject::RecursiveRemoveTagByType( uint32 iTagType
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorObject::Copy( std::function<uint64(FOdysseyVectorObject*)> iPreCallback
-                          , std::function<uint64(FOdysseyVectorObject*
-                                               , FOdysseyVectorObject*)> iPostCallback )
+FOdysseyVectorObject::CopyShape( uint64 iCopyFlags )
 {
-    uint64 copyFlags = iPreCallback( this );
+    return new FOdysseyVectorObject( mName );
+}
+
+FOdysseyVectorObject*
+FOdysseyVectorObject::Copy( uint64 iCopyFlags
+                          , std::function<uint64(FOdysseyVectorObject*,uint64)> iPreCallback
+                          , std::function<uint64(FOdysseyVectorObject*
+                                               , FOdysseyVectorObject*,uint64)> iPostCallback )
+{
+    uint64 copyFlags = iPreCallback( this, iCopyFlags );
 
     FOdysseyVectorObject* objectCopy = CopyShape( copyFlags );
 
@@ -389,13 +396,13 @@ FOdysseyVectorObject::Copy( std::function<uint64(FOdysseyVectorObject*)> iPreCal
         // recurse
         for( FOdysseyVectorObject *child : mChildrenList )
         {
-            FOdysseyVectorObject *childCopy = child->Copy( iPreCallback, iPostCallback );
+            FOdysseyVectorObject *childCopy = child->Copy( copyFlags, iPreCallback, iPostCallback );
 
             objectCopy->AppendChild( childCopy );
         }
     }
 
-    iPostCallback( this, objectCopy );
+    iPostCallback( this, objectCopy, copyFlags );
 
     return objectCopy;
 }
@@ -403,9 +410,10 @@ FOdysseyVectorObject::Copy( std::function<uint64(FOdysseyVectorObject*)> iPreCal
 FOdysseyVectorObject*
 FOdysseyVectorObject::Copy()
 {
-    return Copy( []( FOdysseyVectorObject* object ){ return 0; }
+    return Copy( 0
+               , []( FOdysseyVectorObject* object, uint64 ){ return 0; }
                , []( FOdysseyVectorObject* sourceObject
-                   , FOdysseyVectorObject* objectCopy ){ return 0; } );
+                   , FOdysseyVectorObject* objectCopy, uint64 ){ return 0; } );
 }
 
 // TODO: export flags

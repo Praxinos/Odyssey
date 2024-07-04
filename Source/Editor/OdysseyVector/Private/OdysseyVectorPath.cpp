@@ -2083,9 +2083,12 @@ FOdysseyVectorPath::CopyShape( uint64 iCopyFlags )
                     }
                     else
                     {
+                        double radius = ( originalSegment->GetVertex(0)->GetRadius() * ( 1.0f - lastRecordT ) )
+                                      + ( originalSegment->GetVertex(1)->GetRadius() * ( lastRecordT        ) );
+
                         vertex1 = new FOdysseyVectorVertex( bezierCurve[3].x
                                                           , bezierCurve[3].y
-                                                          , 1.0f );
+                                                          , radius );
 
                         cubicPathCopy->AddVertex( vertex1 );
                     }

@@ -404,13 +404,13 @@ void
 FOdysseyPainterEditorVectorBaseToolHUD::Draw( BLContext* iBLContext
                                             , FOdysseyVectorGroupPaint* iScene )
 {
+    uint64 hudFlags = mBaseTool->GetEditor()->GetVectorHUDFlags();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    uint64 hudFlags = mBaseTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw object details only in vertex mode
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
