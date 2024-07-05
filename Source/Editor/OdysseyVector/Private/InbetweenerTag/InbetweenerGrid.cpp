@@ -200,7 +200,8 @@ FInbetweenerGrid::Update( uint32 iUpdateFlags
 }
 
 ::ULIS::FVec2D
-FInbetweenerGrid::DeformPoint( FInterpolatedPoint* iInterpolatedPoint )
+FInbetweenerGrid::DeformPoint( FInterpolatedPoint* iInterpolatedPoint
+                             , const ::ULIS::FRectD& isourceBBox )
 {
     FInbetweenerQuad* mappedQuad = iInterpolatedPoint->GetMappedQuad();
 
@@ -218,6 +219,7 @@ void
 FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
                              , uint32 iInbetweenIndex )
 {
+    ::ULIS::FRectD sourceBBox = mInbetweenerTag->GetSourceBBox( false );
 
     for( FInterpolatedPath& interpolatedPath : iInterpolatedPathBuffer )
     {
@@ -229,7 +231,8 @@ FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPath
         {
             FInterpolatedPoint* interpolatedPoint = &interpolatedPath.GetInterpolatedPointBuffer()[i];
 
-            interpolatedPointPositionBuffer[skippedOffset + i] = DeformPoint( interpolatedPoint );
+            interpolatedPointPositionBuffer[skippedOffset + i] = DeformPoint( interpolatedPoint
+                                                                            , sourceBBox );
         }
     }
 }

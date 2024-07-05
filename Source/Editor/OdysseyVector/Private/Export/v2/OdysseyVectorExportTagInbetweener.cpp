@@ -260,6 +260,20 @@ FOdysseyVectorExportV2::WriteTagInbetweenerInbetweenCount( FOdysseyVectorTagInbe
 }
 
 void
+FOdysseyVectorExportV2::WriteTagInbetweenerMapAsPolyline( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                        , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_MAPASPOLYLINE
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        uint32 mapAsPolyline = iInbetweenerTag.GetMapAsPolyline() ? 1 : 0;
+
+        Ar << mapAsPolyline;
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER
@@ -267,6 +281,7 @@ FOdysseyVectorExportV2::WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbe
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
         WriteTagInbetweenerInbetweenCount( iInbetweenerTag, Ar );
+        WriteTagInbetweenerMapAsPolyline( iInbetweenerTag, Ar );
         WriteTagInbetweenerChart( iInbetweenerTag, Ar );
         WriteTagInbetweenerTransform( iInbetweenerTag, Ar );
         WriteTagInbetweenerGrid( iInbetweenerTag, Ar );

@@ -355,6 +355,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    static BLRgba32 greyColor = BLRgba32( 128, 128, 128, 128 );
     uint32 selectedObjectCount = iScene->GetEngine()->GetSelectedObjectList().size();
     uint64 hudFlags = mTransformTool->GetEditor()->GetVectorHUDFlags();
 
@@ -369,6 +370,13 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
 
     if( hudFlags & HUD_MODE_INBETWEEN )
     {
+        DrawObjects( iBLContext
+                   , iScene
+                   , greyColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | HUD_TAGINBETWEENER_TARGET | HUD_DRAW_ALL );
+
         DrawObjects( iBLContext
                    , iScene
                    , fgColor

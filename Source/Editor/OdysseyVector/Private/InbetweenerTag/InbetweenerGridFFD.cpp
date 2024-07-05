@@ -15,11 +15,12 @@ FInbetweenerGridFFD::FInbetweenerGridFFD( FOdysseyVectorTagInbetweener* iInbetwe
 }
 
 ::ULIS::FVec2D
-FInbetweenerGridFFD::DeformPoint( FInterpolatedPoint* iInterpolatedPoint )
+FInbetweenerGridFFD::DeformPoint( FInterpolatedPoint* iInterpolatedPoint
+                                , const ::ULIS::FRectD& iSourceBBox )
 {
+/*
     double interpolatedPointU = iInterpolatedPoint->GetU();
     double interpolatedPointV = iInterpolatedPoint->GetV();
-    ::ULIS::FRectD bbox = mInbetweenerTag->GetSourceBBox( false );
     ::ULIS::FVec2D vi = ::ULIS::FVec2D( 0.0f, 0.0f );
     uint32 numVertexX = mNumQuadX + 1;
     uint32 numVertexY = mNumQuadY + 1;
@@ -28,6 +29,7 @@ FInbetweenerGridFFD::DeformPoint( FInterpolatedPoint* iInterpolatedPoint )
     {
         ::ULIS::FVec2D vj = ::ULIS::FVec2D( 0.0f, 0.0f );
         double bcv = mVBinomialCoefficientBuffer[i];
+        double calcV = bcv * pow ( ( 1.0f - interpolatedPointV ), (mNumQuadY) - i ) * pow ( interpolatedPointV, i );
 
         for ( uint32 j = 0; j < numVertexX; j++ )
         {
@@ -35,17 +37,27 @@ FInbetweenerGridFFD::DeformPoint( FInterpolatedPoint* iInterpolatedPoint )
             uint32 offset = ( i * numVertexX ) + j;
             double gridPointU = mPointBuffer[offset].GetU();
             double gridPointV = mPointBuffer[offset].GetV();
+            double calcU = bcu * pow ( ( 1.0f - interpolatedPointU ), (mNumQuadX) - j ) * pow ( interpolatedPointU, j );
 
-            vj.x += ( bcu * pow ( ( 1 - interpolatedPointU ), (mNumQuadX) - j ) * pow ( interpolatedPointU, j ) * gridPointU );
-            vj.y += ( bcu * pow ( ( 1 - interpolatedPointU ), (mNumQuadX) - j ) * pow ( interpolatedPointU, j ) * gridPointV );
+            vj.x += ( calcU * gridPointU );
+            vj.y += ( calcU * gridPointV );
         }
 
-        vi.x += ( bcv * pow ( ( 1 - interpolatedPointV ), (mNumQuadY) - i ) * pow ( interpolatedPointV, i ) * vj.x );
-        vi.y += ( bcv * pow ( ( 1 - interpolatedPointV ), (mNumQuadY) - i ) * pow ( interpolatedPointV, i ) * vj.y );
+        vi.x += ( calcV * vj.x );
+        vi.y += ( calcV * vj.y );
     }
 
-    return ::ULIS::FVec2D( ( bbox.x + ( bbox.w * vi.x ) )
-                         , ( bbox.y + ( bbox.h * vi.y ) ) );
+    return ::ULIS::FVec2D( ( iSourceBBox.x + ( iSourceBBox.w * vi.x ) )
+                         , ( iSourceBBox.y + ( iSourceBBox.h * vi.y ) ) );
+*/
+    if( iInterpolatedPoint->GetMappedQuad() )
+    {
+        return iInterpolatedPoint->GetMappedQuad()->GetPoint( eInbetweenerPointPositionType::InterpPosition
+                                                            , iInterpolatedPoint->GetU()
+                                                            , iInterpolatedPoint->GetV() );
+    }
+
+    return ::ULIS::FVec2D( 0.0f, 0.0f );
 }
 
 void
@@ -60,7 +72,7 @@ FInbetweenerGridFFD::Make( uint32 iNumQuadX
                           , iBBox
                           , iSourcePositionBuffer
                           , iTargetPositionBuffer );
-
+/*
     if( iNumQuadX && iNumQuadY )
     {
         mUBinomialCoefficientBuffer.resize( mPointBuffer.size() );
@@ -68,8 +80,9 @@ FInbetweenerGridFFD::Make( uint32 iNumQuadX
 
         ComputeBinomialCoefficients();
     }
+*/
 }
-
+/*
 static
 int Factorial ( int n )
 {
@@ -107,7 +120,93 @@ FInbetweenerGridFFD::ComputeBinomialCoefficients()
         mVBinomialCoefficientBuffer[i] = coeffV;
     }
 }
+*/
+void
+FInbetweenerGridFFD::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
+                                         , const BLMatrix2D& iSpaceInverseMatrix )
+{
+    ::ULIS::FRectD spaceBBox = mInbetweenerTag->GetSourceBBox( false );
+    BLMatrix2D conversionMatrix;
+    uint32 pointID = 0;
+    uint32 segmentID = 0;
 
+    mUsedQuadCount = 0;
+    mUsedPointCount = 0;
+
+    // reset point status
+    for( FInbetweenerPoint& point : mPointBuffer )
+    {
+        point.SetNeeded( false );
+    }
+
+    // relink unlinked quads before discarding unused ones at the end of the function
+    for( FInbetweenerQuad& quad : mQuadBuffer )
+    {
+        if( quad.IsLinked() == false )
+        {
+            quad.Link();
+        }
+    }
+
+    for( FInterpolatedPath& interpolatedPath : iPathBuffer )
+    {
+        std::vector<FInterpolatedPoint>& interpolatedPointBuffer = interpolatedPath.GetInterpolatedPointBuffer();
+
+        FOdysseyVector::MatrixMultiply( iSpaceInverseMatrix
+                                      , interpolatedPath.GetOriginalPath()->GetWorldMatrix()
+                                      , conversionMatrix );
+
+        for( FInterpolatedPoint& interpolatedPoint : interpolatedPointBuffer )
+        {
+            FOdysseyVectorPoint* originalPoint = interpolatedPoint.GetOriginalPoint();
+            BLPoint pt = conversionMatrix.mapPoint( originalPoint->GetX()
+                                                  , originalPoint->GetY() );
+
+            int quadIndex = GetQuadIndex( ::ULIS::FVec2D( pt.x, pt.y ) );
+
+            if( quadIndex >= 0 )
+            {
+                FInbetweenerQuad* matchedQuad = &mQuadBuffer[quadIndex];
+                ::ULIS::FRectD quadBBox = matchedQuad->GetBBox( eInbetweenerPointPositionType::SourcePosition );
+                double quadX = pt.x - quadBBox.x;
+                double quadY = pt.y - quadBBox.y;
+                //double u = std::clamp<double>( spaceX / iSpaceBBox.w, 0.0f, 1.0f );
+                //double v = std::clamp<double>( spaceY / iSpaceBBox.h, 0.0f, 1.0f );
+                double u = std::clamp<double>( quadX / quadBBox.w, 0.0f, 1.0f );
+                double v = std::clamp<double>( quadY / quadBBox.h, 0.0f, 1.0f );
+
+                // Note: we add +1 for the target position
+                interpolatedPoint.SetUV( matchedQuad, u, v );
+            }
+        }
+    }
+
+    //DiscardEmptyQuads( mInbetweenerTag->GetInterpolatedPathBuffer() );
+
+    mQuadArray.clear();
+    mQuadArray.reserve( mQuadBuffer.size() );
+
+    // TODO: do this in base class
+    for( FInbetweenerQuad& quad : mQuadBuffer )
+    {
+        if( quad.IsLinked() )
+        {
+            mUsedQuadCount++;
+            mQuadArray.push_back( &quad );
+        }
+    }
+
+    for( FInbetweenerPoint& point : mPointBuffer )
+    {
+        if( point.GetQuadCount() )
+        {
+            point.SetID( mUsedPointCount++ );
+        }
+    }
+    //---------------
+}
+
+/*
 void
 FInbetweenerGridFFD::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
                                          , const BLMatrix2D& iSpaceInverseMatrix )
@@ -182,3 +281,4 @@ FInbetweenerGridFFD::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPath
     }
     //---------------
 }
+*/

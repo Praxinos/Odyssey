@@ -216,7 +216,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( FOdysse
                   }
                   else
                   {
-                      selectedObjectBBox = object->GetBBox( false );
+                      selectedObjectBBox = object->GetBBox( true );
                   }
 
                   mSelectionBox.rect = mSelectionBox.inited ? mSelectionBox.rect | selectedObjectBBox

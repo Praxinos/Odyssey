@@ -172,7 +172,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     UpdateMatrix();
 
     mSourceBBox = iOwnerObject->GetBBox( false );
-
+/*
     if( mSourceBBox.h > mSourceBBox.w )
     {
         double quadH = ( mSourceBBox.h / iNumQuadY );
@@ -187,7 +187,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
 
         mSourceBBox.h = iNumQuadY * quadH;
     }
-
+*/
     // Note: Grid building needs the bbox to be set.
     SetGridType( mGridType );
 
@@ -255,8 +255,22 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
 {
     if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
      || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
+     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
+     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
+    {
+        mSourceBBox = mOwner->GetBBox( false );
+
+        mSourceBBox.x -= 0.1f;
+        mSourceBBox.y -= 0.1f;
+        mSourceBBox.w += 0.2f;
+        mSourceBBox.h += 0.2f;
+    }
+
+    if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
+     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
      || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST )
-     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY ) )
+     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY ) 
+     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
     {
         mInvalidationFlags |= INVALIDATE_MAP;
     }
@@ -273,7 +287,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
 
     if( mInvalidationFlags & INVALIDATE_SOURCEBBOX )
     {
-        UpdateBBox( mSourceBBox, eInbetweenerPointPositionType::SourcePosition );
+        //UpdateBBox( mSourceBBox, eInbetweenerPointPositionType::SourcePosition );
     }
 
     if( mInvalidationFlags & INVALIDATE_TARGETBBOX )
@@ -310,13 +324,19 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         Interpolate();
     }
 
-    if( mInvalidationFlags & INVALIDATE_CELLS )
+    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
     {
-        UpdateAnimationCells();
+        if( mInvalidationFlags & INVALIDATE_CELLS )
+        {
+            UpdateAnimationCells();
+        }
     }
 
     // reset tag's invalidation flags (do not confuse with object's invalidation flags)
-    mInvalidationFlags = 0;
+    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_KEEPINVALIDATED ) == 0 )
+    {
+        mInvalidationFlags = 0;
+    }
 }
 
 void

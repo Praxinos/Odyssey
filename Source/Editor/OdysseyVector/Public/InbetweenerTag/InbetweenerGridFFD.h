@@ -19,7 +19,8 @@ class ODYSSEYVECTOR_API FInbetweenerGridFFD : public FInbetweenerGrid
                          , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
                          , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer ) override;
         void ComputeBinomialCoefficients();
-        virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint ) override;
+        virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint
+                                          , const ::ULIS::FRectD& iSourceBBox ) override;
         void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
                                  , const BLMatrix2D& iSpaceInverseMatrix );
 

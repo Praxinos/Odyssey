@@ -33,6 +33,16 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                 }
                 break;
 
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_MAPASPOLYLINE:
+                {
+                    uint32 mapAsPolyline;
+
+                    Ar << mapAsPolyline;
+
+                    iInbetweenerTag.SetMapAsPolyline( mapAsPolyline ? true : false );
+                }
+                break;
+
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_CHART:
                 {
                     for( uint32 i = 0; i < iInbetweenerTag.GetInbetweenCount(); i++ )

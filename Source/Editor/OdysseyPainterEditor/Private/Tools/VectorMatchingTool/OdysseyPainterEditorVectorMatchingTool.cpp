@@ -135,8 +135,8 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
 
             if( inbetweenerTag )
             {
-                BLPoint localDiff = selectedObject->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
-                                                                                        , iPointInTexture.deltaPosition.Y );
+                BLPoint localDiff = inbetweenerTag->GetTargetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
+                                                                                           , iPointInTexture.deltaPosition.Y );
 
                 for( FInbetweenerPoint* gridPoint : mPickedPointArray )
                 {

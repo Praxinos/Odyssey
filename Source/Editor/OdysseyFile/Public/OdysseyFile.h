@@ -117,6 +117,7 @@ namespace FOdysseyFile
                         static const uint32 CHUNK_OBJECT_TAGS = 0x6c2511f0; // container
                             static const uint32 CHUNK_TAGINBETWEENER = 0x3da0a9c0; // container
                                 static const uint32 CHUNK_TAGINBETWEENER_INBETWEENCOUNT = 0x73d1119d; // uint32(count)
+                                static const uint32 CHUNK_TAGINBETWEENER_MAPASPOLYLINE = 0x12201950; // uint32(bool)
                                 static const uint32 CHUNK_TAGINBETWEENER_CHART = 0x953d8893; // array[float]
                                 static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM = 0xdc0fe227; // container
                                     static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM_TRANSLATION = 0xaf8ba83b; // double(X)-double(Y)

@@ -147,6 +147,8 @@ SOdysseyPainterEditorVectorEditionMode::SetVectorEditionFlags( ECheckBoxState iN
 
     mEditor->SetVectorHUDFlags( ( mEditor->GetVectorHUDFlags() & (~FOdysseyVectorHUD::HUD_MODE_ALL) ) | iViewMode );
 
+    mEditor->SanitizeCurrentTool();
+
     if( mediaVectors.Num() )
     {
         FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();

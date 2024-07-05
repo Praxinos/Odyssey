@@ -75,7 +75,8 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
 
     protected:
         ::ULIS::FVec2D GetCenterOfMass( eInbetweenerPointPositionType iPositionType );
-        virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint );
+        virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint
+                                          , const ::ULIS::FRectD& isourceBBox );
 
 
     // ARAP interpolation (do not confuse with ARAP deformation)
