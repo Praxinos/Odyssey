@@ -112,6 +112,9 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
         if( ( iPropertyName == "ForegroundColor" ) || ( iMemberPropertyName == "ForegroundColor" ) )
             selectedObject->GetForegroundBucket().SetSolidColor( ForegroundColor );
 
+        if ( ( (iPropertyName == "OdysseyPaletteEntryColor") || (iMemberPropertyName == "OdysseyPaletteEntryColor") ) && OdysseyPaletteEntryColor != nullptr )
+            selectedObject->GetForegroundBucket().SetPaletteEntry( OdysseyPaletteEntryColor );
+
         if( iPropertyName == "BackgroundColorMode" )
             selectedObject->GetBackgroundBucket().SetColorMode( static_cast<eBucketColorMode>(BackgroundColorMode) );
 

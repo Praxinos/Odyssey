@@ -4,6 +4,7 @@
 #include "OdysseyPainterEditorModule.h"
 
 #include "FOdysseyVectorBrushCustomization.h"
+#include "FOdysseyVectorObjectViewCustomization.h"
 
 #include "AssetToolsModule.h"
 #include "CoreMinimal.h"
@@ -38,6 +39,7 @@ FOdysseyPainterEditorModule::StartupModule()
     RegisterLevelEditorLayoutExtensions();
 
     FOdysseyVectorBrushCustomization::Register();
+    FOdysseyVectorObjectViewCustomization::Register();
 }
 
 void
@@ -49,6 +51,7 @@ FOdysseyPainterEditorModule::ShutdownModule()
     UnregisterLevelEditorLayoutExtensions();
 
     FOdysseyVectorBrushCustomization::Unregister();
+    FOdysseyVectorObjectViewCustomization::Unregister();
 }
 
 void

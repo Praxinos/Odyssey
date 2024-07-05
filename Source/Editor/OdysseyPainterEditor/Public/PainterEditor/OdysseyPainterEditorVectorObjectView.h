@@ -6,6 +6,8 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "OdysseyVectorObject.h"
+#include "Palette/OdysseyPalette.h"
+#include "Palette/OdysseyPaletteEntryColor.h"
 
 #include "OdysseyPainterEditorVectorObjectView.generated.h"
 
@@ -86,6 +88,20 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
                           , EditCondition = "(ForegroundColorMode == eForegroundColorMode::SolidColor)"
                           , EditConditionHides) )
         FColor ForegroundColor;
+
+        UPROPERTY(EditAnywhere
+            , Category = Appearance
+            , meta = (ToolTip = "Palette Used for Foreground Color"
+                , EditCondition = "(ForegroundColorMode == eForegroundColorMode::Palette)"
+                , EditConditionHides))
+        UOdysseyPalette* OdysseyPalette;
+
+        UPROPERTY(EditAnywhere
+            , Category = Appearance
+            , meta = (ToolTip = "Palette Entry for Foreground Color"
+                , EditCondition = "OdysseyPalette != nullptr"
+                , EditConditionHides))
+        UOdysseyPaletteEntryColor* OdysseyPaletteEntryColor;
 
         UPROPERTY( EditAnywhere
                  , Category = Appearance
