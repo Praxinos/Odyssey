@@ -52,6 +52,15 @@ public:
 
     virtual void PostLoad() override;
 
+    virtual void MoveSection( FFrameNumber iDeltaTime ) override;
+
+public:
+    TOptional<TRange<FFrameNumber>> GetTrueRangeBeforeMove() const;
+    void ResetTrueRangeBeforeMove();
+
+private:
+    TOptional<TRange<FFrameNumber>> mTrueRangeBeforeMove;
+
 public:
     TArray<FBoardSectionTake> GetTakes() const;
 
@@ -167,8 +176,6 @@ private:
 //---
 
 public:
-    bool GuessStartMoving( TRange<FFrameNumber>& iRangeBackup ); //PATCH
-
     void StartMoving();
     void Moving();
     void StopMoving();

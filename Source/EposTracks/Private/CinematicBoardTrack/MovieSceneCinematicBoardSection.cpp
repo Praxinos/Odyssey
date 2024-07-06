@@ -123,6 +123,27 @@ UMovieSceneCinematicBoardSection::PostLoad()
     Super::PostLoad();
 }
 
+void
+UMovieSceneCinematicBoardSection::MoveSection( FFrameNumber iDeltaTime ) //override
+{
+    if( iDeltaTime.Value )
+        mTrueRangeBeforeMove = GetTrueRange();
+
+    Super::MoveSection( iDeltaTime );
+}
+
+TOptional<TRange<FFrameNumber>>
+UMovieSceneCinematicBoardSection::GetTrueRangeBeforeMove() const
+{
+    return mTrueRangeBeforeMove;
+}
+
+void
+UMovieSceneCinematicBoardSection::ResetTrueRangeBeforeMove()
+{
+    mTrueRangeBeforeMove.Reset();
+}
+
 //---
 
 FBoardSectionTake::FBoardSectionTake()
@@ -299,88 +320,13 @@ UMovieSceneCinematicBoardSection::IsResizing() const
 
 //---
 
-bool
-UMovieSceneCinematicBoardSection::GuessStartMoving( TRange<FFrameNumber>& oRangeBackup )
-{
-    if( IsMoving() )
-        return false;
-
-    UMovieSceneTrack* outer_track = GetTypedOuter<UMovieSceneTrack>();
-    auto all_sections = outer_track->GetAllSections();
-
-    TArray<UMovieSceneSection*> sections_without_selected;
-    for( int i = 0; i < all_sections.Num(); i++ )
-    {
-        if( all_sections[i] == this )
-            continue;
-
-        sections_without_selected.Add( all_sections[i] );
-    }
-
-    if( !sections_without_selected.Num() )
-    {
-        StartMoving(); // Backup value is not valid, but shouldn't be a problem for this case, where there is only 1 section and it is moving
-
-        //PATCH: sometimes, GetTrueRange() doesn't start at frame 0 when the only section is moved very quickly
-        // It's certainly something above during FMoveKeysAndSections::OnDrag/OnEndDrag which don't call UMovieSceneCinematicBoardTrack::OnSectionMoved very synchronously ?
-        mSectionRangeBackup = TRange<FFrameNumber>( 0, GetTrueRange().Size<FFrameNumber>() ); // wrong, but doesn't impact after as there is no previous/next sections
-
-        oRangeBackup = mSectionRangeBackup;
-
-        return true;
-    }
-
-    TRange<FFrameNumber> gap( TRange<FFrameNumber>::Empty() );
-
-    for( int i = 0; i < sections_without_selected.Num(); i++ )
-    {
-        UMovieSceneSection* current_section = sections_without_selected[i];
-        TRangeBound<FFrameNumber> current_upper_bound = current_section->GetTrueRange().GetUpperBound();
-
-        if( !sections_without_selected.IsValidIndex( i + 1 ) )
-            continue;
-
-        UMovieSceneSection* next_section = sections_without_selected[i + 1];
-        TRangeBound<FFrameNumber> next_lower_bound = next_section->GetTrueRange().GetLowerBound();
-        if( current_upper_bound.GetValue() != next_lower_bound.GetValue() )
-        {
-            gap = TRange<FFrameNumber>( TRangeBound<FFrameNumber>::FlipInclusion( current_upper_bound ), TRangeBound<FFrameNumber>::FlipInclusion( next_lower_bound ) );
-        }
-    }
-
-    if( !gap.IsEmpty() )
-    {
-        StartMoving();
-        mSectionRangeBackup = gap;
-        oRangeBackup = mSectionRangeBackup;
-
-        return true;
-    }
-
-    TRange<FFrameNumber> first_range( 0, sections_without_selected[0]->GetInclusiveStartFrame() );
-    if( !first_range.IsEmpty() && UE::MovieScene::DiscreteSize( first_range ) >= UE::MovieScene::DiscreteSize( GetTrueRange() ) )
-    {
-        StartMoving();
-        mSectionRangeBackup = first_range;
-        oRangeBackup = mSectionRangeBackup;
-
-        return true;
-    }
-
-    TRange<FFrameNumber> last_range( sections_without_selected.Last()->GetExclusiveEndFrame(), sections_without_selected.Last()->GetExclusiveEndFrame() + UE::MovieScene::DiscreteSize( GetTrueRange() ) );
-    StartMoving();
-    mSectionRangeBackup = last_range;
-    oRangeBackup = mSectionRangeBackup;
-
-    return true;
-}
-
 void
 UMovieSceneCinematicBoardSection::StartMoving()
 {
     mMoving = 0;
 
-    mSectionRangeBackup = GetTrueRange();
+    // This is not correct as the when StartMoving() is called, the section has already moved of some frames
+    //mSectionRangeBackup = GetTrueRange();
 }
 void
 UMovieSceneCinematicBoardSection::Moving()
@@ -395,7 +341,7 @@ UMovieSceneCinematicBoardSection::StopMoving()
 {
     mMoving = -1;
 
-    mSectionRangeBackup = TRange<FFrameNumber>::Empty();
+    //mSectionRangeBackup = TRange<FFrameNumber>::Empty();
 }
 bool
 UMovieSceneCinematicBoardSection::IsMoving() const
