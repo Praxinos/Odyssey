@@ -74,6 +74,8 @@ FEposSequenceEditorStyle::InitSequencer()
     Set( "ClassThumbnail.BoardSequence", new IMAGE_BRUSH_SVG( "sequence-board", Icon64x64 ) );
     Set( "ClassIcon.ShotSequence", new IMAGE_BRUSH_SVG( "sequence-shot", Icon16x16 ) );
     Set( "ClassThumbnail.ShotSequence", new IMAGE_BRUSH_SVG( "sequence-shot", Icon64x64 ) );
+    Set( "ClassIcon.StoryNote", new IMAGE_BRUSH_SVG( "storynote", Icon16x16 ) );
+    Set( "ClassThumbnail.StoryNote", new IMAGE_BRUSH_SVG( "storynote", Icon64x64 ) );
 
     //---
 
@@ -137,9 +139,8 @@ FEposSequenceEditorStyle::InitCommands()
     Set( "EposSequenceCommands.OpenAboutWindow", new IMAGE_BRUSH_SVG( "epos-about", Icon20x20 ) );
     Set( "EposSequenceCommands.OpenAboutWindow.Small", new IMAGE_BRUSH_SVG( "epos-about", Icon20x20 ) );
 
-    //TODO: should be a 20x20 icon
-    Set( "EposSequenceCommands.StoryboardViewportResetPanZoomRotate", new IMAGE_BRUSH_SVG( "viewport-reset-transform", Icon24x24 ) );
-    Set( "EposSequenceCommands.StoryboardViewportResetPanZoomRotate.Small", new IMAGE_BRUSH_SVG( "viewport-reset-transform", Icon24x24 ) );
+    Set( "EposSequenceCommands.StoryboardViewportResetPanZoomRotate", new IMAGE_BRUSH_SVG( "viewport-reset-transform", Icon20x20 ) );
+    Set( "EposSequenceCommands.StoryboardViewportResetPanZoomRotate.Small", new IMAGE_BRUSH_SVG( "viewport-reset-transform", Icon20x20 ) );
 }
 
 void
@@ -196,8 +197,8 @@ FEposSequenceEditorStyle::InitViewport()
     //---
 
     Set( "Viewport.Settings", new IMAGE_BRUSH_SVG( "viewport-settings", Icon24x24 ) );
-    Set( "Viewport.RotationOptions", new IMAGE_BRUSH_SVG( "viewport-rotation-options", Icon24x24 ) );
-    Set( "Viewport.ZoomOptions", new IMAGE_BRUSH_SVG( "viewport-zoom-options", Icon24x24 ) );
+
+    Set( "Viewport.ResetTransform", new IMAGE_BRUSH_SVG( "viewport-reset-transform", Icon24x24 ) );
 
     //-
 
@@ -226,8 +227,6 @@ FEposSequenceEditorStyle::InitViewport()
                                         .SetFont( DEFAULT_FONT( "Italic", 10 ) )
                                         .SetColorAndOpacity( FLinearColor( FColor( 32, 32, 32 ) ) ) );
 
-    //TODO: should be a 24x24 icon
-    Set( "Viewport.ResetTransform", new IMAGE_BRUSH( "viewport-reset-transform", Icon16x16 ) );
 
     Set( "Viewport.Toolbar.SpinBox", FSpinBoxStyle( FAppStyle::Get().GetWidgetStyle<FSpinBoxStyle>("SpinBox") )
         .SetTextPadding(FMargin(0.f))
