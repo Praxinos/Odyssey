@@ -13,6 +13,26 @@
 
 class FOdysseyPainterEditor;
 
+USTRUCT()
+struct FPaletteEntrySelection
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere
+        , Category = Appearance
+        , meta = (ToolTip = "Palette Used for Foreground Color"
+            , EditCondition = "(ForegroundColorMode == eForegroundColorMode::Palette)"
+            , EditConditionHides))
+    UOdysseyPalette* OdysseyPalette;
+
+    UPROPERTY(EditAnywhere
+        , Category = Appearance
+        , meta = (ToolTip = "Palette Entry Used for Foreground Color"
+            , EditCondition = "OdysseyPalette != nullptr"
+            , EditConditionHides))
+    UOdysseyPaletteEntryColor* OdysseyPaletteEntryColor;
+};
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UObject
 {
@@ -89,19 +109,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
                           , EditConditionHides) )
         FColor ForegroundColor;
 
-        UPROPERTY(EditAnywhere
-            , Category = Appearance
-            , meta = (ToolTip = "Palette Used for Foreground Color"
-                , EditCondition = "(ForegroundColorMode == eForegroundColorMode::Palette)"
-                , EditConditionHides))
-        UOdysseyPalette* OdysseyPalette;
-
-        UPROPERTY(EditAnywhere
-            , Category = Appearance
-            , meta = (ToolTip = "Palette Entry for Foreground Color"
-                , EditCondition = "OdysseyPalette != nullptr"
-                , EditConditionHides))
-        UOdysseyPaletteEntryColor* OdysseyPaletteEntryColor;
+        UPROPERTY( EditAnywhere,
+                   Category = Appearance,
+                   meta = ( EditCondition = "(ForegroundColorMode == eForegroundColorMode::Palette)"
+                          , EditConditionHides ))
+        FPaletteEntrySelection ForegroundPaletteSelection;
 
         UPROPERTY( EditAnywhere
                  , Category = Appearance
@@ -114,4 +126,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
                           , EditCondition = "(BackgroundColorMode == eBackgroundColorMode::SolidColor)"
                           , EditConditionHides ) )
         FColor BackgroundColor;
+
+        UPROPERTY(EditAnywhere,
+            Category = Appearance,
+            meta = (EditCondition = "(BackgroundColorMode == eBackgroundColorMode::Palette)"
+                , EditConditionHides))
+        FPaletteEntrySelection BackgroundPaletteSelection;
 };

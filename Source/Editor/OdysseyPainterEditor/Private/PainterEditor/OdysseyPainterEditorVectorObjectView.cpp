@@ -42,6 +42,31 @@ UOdysseyPainterEditorVectorObjectView::ImportParam()
         ForegroundColor = focusedObject->GetForegroundBucket().GetSolidColor();
         BackgroundColor = focusedObject->GetBackgroundBucket().GetSolidColor();
 
+        if( focusedObject->GetForegroundBucket().GetPaletteEntry() )
+        {
+            ForegroundPaletteSelection.OdysseyPalette = focusedObject->GetForegroundBucket().GetPaletteEntry()->GetPalette();
+            //Careful, we can't select anything else than a color FOR NOW, so the cast is correct, but later, when we'll have material, we should change this accordingly
+            ForegroundPaletteSelection.OdysseyPaletteEntryColor = Cast<UOdysseyPaletteEntryColor>( focusedObject->GetForegroundBucket().GetPaletteEntry() );
+        }
+        else
+        {
+            ForegroundPaletteSelection.OdysseyPalette = nullptr;
+            ForegroundPaletteSelection.OdysseyPaletteEntryColor = nullptr;
+        }
+
+        if (focusedObject->GetBackgroundBucket().GetPaletteEntry())
+        {
+            BackgroundPaletteSelection.OdysseyPalette = focusedObject->GetBackgroundBucket().GetPaletteEntry()->GetPalette();
+            //Careful, we can't select anything else than a color FOR NOW, so the cast is correct, but later, when we'll have material, we should change this accordingly
+            BackgroundPaletteSelection.OdysseyPaletteEntryColor = Cast<UOdysseyPaletteEntryColor>( focusedObject->GetBackgroundBucket().GetPaletteEntry() );
+        }
+        else
+        {
+            BackgroundPaletteSelection.OdysseyPalette = nullptr;
+            BackgroundPaletteSelection.OdysseyPaletteEntryColor = nullptr;
+        }
+
+
         break; // only one
     }
 }
@@ -111,9 +136,12 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
         // and we can edit individual struct members RGBA
         if( ( iPropertyName == "ForegroundColor" ) || ( iMemberPropertyName == "ForegroundColor" ) )
             selectedObject->GetForegroundBucket().SetSolidColor( ForegroundColor );
+            
+        if ( (iPropertyName == "ForegroundPaletteSelection") || (iMemberPropertyName == "ForegroundPaletteSelection") )
+            selectedObject->GetForegroundBucket().SetPaletteEntry( ForegroundPaletteSelection.OdysseyPaletteEntryColor );
 
-        if ( ( (iPropertyName == "OdysseyPaletteEntryColor") || (iMemberPropertyName == "OdysseyPaletteEntryColor") ) && OdysseyPaletteEntryColor != nullptr )
-            selectedObject->GetForegroundBucket().SetPaletteEntry( OdysseyPaletteEntryColor );
+        if ((iPropertyName == "BackgroundPaletteSelection") || (iMemberPropertyName == "BackgroundPaletteSelection"))
+            selectedObject->GetBackgroundBucket().SetPaletteEntry( BackgroundPaletteSelection.OdysseyPaletteEntryColor);
 
         if( iPropertyName == "BackgroundColorMode" )
             selectedObject->GetBackgroundBucket().SetColorMode( static_cast<eBucketColorMode>(BackgroundColorMode) );
