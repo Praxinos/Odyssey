@@ -1707,28 +1707,45 @@ bool FOdysseyPainterEditor::CopyCurrentSelectionToCopyBlock()
     mCopyBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, rasterBlock->GetFormat());
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+    ::ULIS::FEvent clearEvent, copyEvent;
     ctx.Clear(*mCopyBlock);
+    ctx.Finish();
 
-    TArray<::ULIS::FRectI> rectangles = RasterSelection()->GetSelectionAreaAsScanlines();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = RasterSelection()->GetBlock();
 
-    for (int i = 0; i < rectangles.Num(); i++)
+    if (maskBlock)
     {
-        int decalX = FMath::Min(rectangles[i].x, 0);
-        int decalY = FMath::Min(rectangles[i].y, 0);
-
         ctx.Copy(
             *rasterBlock->GetBlock(),
             *mCopyBlock,
-            rectangles[i],
-            ::ULIS::FVec2I(-decalX - boundingBox.x + rectangles[i].x, -decalY - boundingBox.y + rectangles[i].y),
+            boundingBox,
+            ::ULIS::FVec2I(0, 0),
             ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
             0,
             nullptr,
-            nullptr
+            &copyEvent
         );
-    }
 
-    ctx.Finish();
+        ctx.FilterInto(
+            [](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
+            {
+                for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+                {
+                    iDstPixel.SetAlphaF(iDstPixel.AlphaF() * iSrcPixel.GreyF());
+                }
+            }
+                , *maskBlock
+                , * mCopyBlock
+                , boundingBox
+                , ::ULIS::FVec2I(0, 0)
+                , ::ULIS::FSchedulePolicy::MultiScanlines
+                , 1
+                , &copyEvent
+                , nullptr
+                );
+
+        ctx.Finish();
+    }
 
     return true;
 }
@@ -1756,28 +1773,45 @@ bool FOdysseyPainterEditor::CutCurrentSelectionToCopyBlock()
     mCopyBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, rasterBlock->GetFormat());
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+    ::ULIS::FEvent clearEvent, copyEvent;
     ctx.Clear(*mCopyBlock);
+    ctx.Finish();
 
-    TArray<::ULIS::FRectI> rectangles = RasterSelection()->GetSelectionAreaAsScanlines();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = RasterSelection()->GetBlock();
 
-    for (int i = 0; i < rectangles.Num(); i++)
+    if (maskBlock)
     {
-        int decalX = FMath::Min(rectangles[i].x, 0);
-        int decalY = FMath::Min(rectangles[i].y, 0);
-
         ctx.Copy(
             *rasterBlock->GetBlock(),
             *mCopyBlock,
-            rectangles[i],
-            ::ULIS::FVec2I(-decalX - boundingBox.x + rectangles[i].x, -decalY - boundingBox.y + rectangles[i].y),
+            boundingBox,
+            ::ULIS::FVec2I(0, 0),
             ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
             0,
             nullptr,
-            nullptr
+            &copyEvent
         );
-    }
 
-    ctx.Finish();
+        ctx.FilterInto(
+            [](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
+            {
+                for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+                {
+                    iDstPixel.SetAlphaF(iDstPixel.AlphaF() * iSrcPixel.GreyF());
+                }
+            }
+            , *maskBlock
+                , *mCopyBlock
+                , boundingBox
+                , ::ULIS::FVec2I(0, 0)
+                , ::ULIS::FSchedulePolicy::MultiScanlines
+                , 1
+                , &copyEvent
+                , nullptr
+                );
+
+        ctx.Finish();
+    }
 
     mSource->ClearFromCopyBlock(mCopyBlock);
 

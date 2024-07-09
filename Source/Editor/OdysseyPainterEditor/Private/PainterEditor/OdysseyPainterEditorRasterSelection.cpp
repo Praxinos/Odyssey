@@ -95,28 +95,6 @@ FOdysseyPainterEditorRasterSelection::Substract(const TArray<FVector2D>& iPolygo
 }
 
 ::ULIS::FRectI
-FOdysseyPainterEditorRasterSelection::ComputeBoundingRect(const TArray<FVector2D>& iPoints ) const
-{
-    if ( iPoints.IsEmpty() )
-        return ::ULIS::FRectI::FromXYWH(0, 0, 0, 0);
-
-    int minX = FMath::FloorToFloat(iPoints[0].X) + 0.5f;
-    int maxX = FMath::CeilToFloat(iPoints[0].X) + 0.5f;
-    int minY = FMath::FloorToFloat(iPoints[0].Y) + 0.5f;
-    int maxY = FMath::CeilToFloat(iPoints[0].Y) + 0.5f;
-
-    for ( int j = 1; j < iPoints.Num(); j++ )
-    {
-        minX = FMath::Min(minX, FMath::FloorToFloat(iPoints[j].X) + 0.5f);
-        maxX = FMath::Max(maxX, FMath::CeilToFloat(iPoints[j].X) + 0.5f);
-        minY = FMath::Min(minY, FMath::FloorToFloat(iPoints[j].Y) + 0.5f);
-        maxY = FMath::Max(maxY, FMath::CeilToFloat(iPoints[j].Y) + 0.5f);
-    }
-
-    return ::ULIS::FRectI::FromMinMax(minX, minY, maxX, maxY);
-}
-
-::ULIS::FRectI
 FOdysseyPainterEditorRasterSelection::GetMaskBoundingRect() const
 {
     return mBoundingRect;
@@ -137,12 +115,13 @@ FOdysseyPainterEditorRasterSelection::GetHUD()
 void
 FOdysseyPainterEditorRasterSelection::RefreshHUD()
 {
-    mPoints.Empty();
     mHUD->EmptyElements();
     mBoundingRect = ::ULIS::FRectI::FromXYWH(0, 0, 0, 0);
     
     if (!mBlock)
         return;
+
+    TArray<FVector2D> points;
 
     for (int y = 0; y <= mBlock->Height(); y++)
     {
@@ -156,8 +135,8 @@ FOdysseyPainterEditorRasterSelection::RefreshHUD()
 
             if (leftValue == 0.f && value != 0.f || leftValue != 0.f && value == 0.f)
             {
-                mPoints.Add(FVector2D(x, y));
-                mPoints.Add(FVector2D(x, y+1));
+                points.Add(FVector2D(x, y));
+                points.Add(FVector2D(x, y+1));
 
                 //left vertical Line
                 TSharedPtr<FOdysseyHUDLine> lineHUD = MakeShared<FOdysseyHUDLine>(FVector2D(x, y), FVector2D(x, y+1));
@@ -166,8 +145,9 @@ FOdysseyPainterEditorRasterSelection::RefreshHUD()
 
             if (topValue == 0.f && value != 0.f || topValue != 0.f && value == 0.f)
             {
-                mPoints.Add(FVector2D(x, y));
-                mPoints.Add(FVector2D(x + 1, y));
+                points.Add(FVector2D(x, y));
+                points.Add(FVector2D(x+1, y));
+
                 //top horizontal Line
                 TSharedPtr<FOdysseyHUDLine> lineHUD = MakeShared<FOdysseyHUDLine>(FVector2D(x, y), FVector2D(x+1, y));
                 mHUD->AddElement(lineHUD);
@@ -175,61 +155,27 @@ FOdysseyPainterEditorRasterSelection::RefreshHUD()
         }
     }
 
-    mBoundingRect = ComputeBoundingRect(mPoints);
+    mBoundingRect = ComputeBoundingRect(points);
 }
 
-TArray<::ULIS::FRectI> FOdysseyPainterEditorRasterSelection::GetSelectionAreaAsScanlines()
+::ULIS::FRectI
+FOdysseyPainterEditorRasterSelection::ComputeBoundingRect(const TArray<FVector2D>& iPoints) const
 {
-    TArray<::ULIS::FRectI> rectangles;
-    ::ULIS::FRectI boundingBox = GetMaskBoundingRect();
-    int maxX = boundingBox.x + boundingBox.w;
-    int maxY = boundingBox.y + boundingBox.h;
-    int minX = boundingBox.x;
-    int minY = boundingBox.y;
+    if (iPoints.IsEmpty())
+        return ::ULIS::FRectI::FromXYWH(0, 0, 0, 0);
 
-    for (int y = minY; y <= maxY; y++)
+    int minX = FMath::FloorToFloat(iPoints[0].X) + 0.5f;
+    int maxX = FMath::CeilToFloat(iPoints[0].X) + 0.5f;
+    int minY = FMath::FloorToFloat(iPoints[0].Y) + 0.5f;
+    int maxY = FMath::CeilToFloat(iPoints[0].Y) + 0.5f;
+
+    for (int j = 1; j < iPoints.Num(); j++)
     {
-        std::vector< int > nodesX;
-
-        for (int i = 0; i < mPoints.Num(); i++)
-        {
-            if( mPoints[i].Y == y )
-                nodesX.push_back(mPoints[i].X);
-        }
-
-        int i = 0;
-        int size = int(nodesX.size() - 1);
-        while (i < size)
-        {
-            if (nodesX[i] > nodesX[i + 1])
-            {
-                int temp = nodesX[i];
-                nodesX[i] = nodesX[i + 1];
-                nodesX[i + 1] = temp;
-                if (i > 0)
-                    i--;
-            }
-            else
-            {
-                i++;
-            }
-        }
-
-        for (i = 0; i < nodesX.size() - 1; i++)
-        {
-            if( nodesX[i] == nodesX[i+1] ) continue;
-            if (nodesX[i] > maxX) break;
-            if (nodesX[i + 1] > minX)
-            {
-                if (nodesX[i] < minX)
-                    nodesX[i] = minX;
-                if (nodesX[i + 1] > maxX)
-                    nodesX[i + 1] = maxX;
-
-                rectangles.Add(::ULIS::FRectI::FromXYWH(nodesX[i], y, nodesX[i + 1] - nodesX[i], 1));
-            }
-        }
+        minX = FMath::Min(minX, FMath::FloorToFloat(iPoints[j].X) + 0.5f);
+        maxX = FMath::Max(maxX, FMath::CeilToFloat(iPoints[j].X) + 0.5f);
+        minY = FMath::Min(minY, FMath::FloorToFloat(iPoints[j].Y) + 0.5f);
+        maxY = FMath::Max(maxY, FMath::CeilToFloat(iPoints[j].Y) + 0.5f);
     }
 
-    return rectangles;
+    return ::ULIS::FRectI::FromMinMax(minX, minY, maxX, maxY);
 }

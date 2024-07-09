@@ -11,6 +11,7 @@
 #include "GeomTools.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
+#include "ULISEventBuilder.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -745,28 +746,45 @@ UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection()
     mSelectionBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, rasterBlock->GetFormat());
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+    ::ULIS::FEvent clearEvent, copyEvent;
     ctx.Clear(*mSelectionBlock);
+    ctx.Finish();
+
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = mEditor->RasterSelection()->GetBlock();
     
-    TArray<::ULIS::FRectI> rectangles = mEditor->RasterSelection()->GetSelectionAreaAsScanlines();
-
-    for (int i = 0; i < rectangles.Num(); i++)
+    if (maskBlock)
     {
-        int decalX = FMath::Min(rectangles[i].x, 0);
-        int decalY = FMath::Min(rectangles[i].y, 0);
-
         ctx.Copy(
             *rasterBlock->GetBlock(),
             *mSelectionBlock,
-            rectangles[i],
-            ::ULIS::FVec2I(-decalX - boundingBox.x + rectangles[i].x, -decalY - boundingBox.y + rectangles[i].y),
+            boundingBox,
+            ::ULIS::FVec2I(0,0),
             ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
             0,
             nullptr,
-            nullptr
+            &copyEvent
         );
-    }
 
-    ctx.Finish();
+        ctx.FilterInto(
+            [](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
+            {
+                for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+                {
+                    iDstPixel.SetAlphaF(iDstPixel.AlphaF() * iSrcPixel.GreyF());
+                }
+            }
+                , *maskBlock
+                , *mSelectionBlock
+                , boundingBox
+                , ::ULIS::FVec2I(0,0)
+                , ::ULIS::FSchedulePolicy::MultiScanlines
+                , 1
+                , &copyEvent
+                , nullptr
+                );
+
+        ctx.Finish();
+    }
 }
 
 void
