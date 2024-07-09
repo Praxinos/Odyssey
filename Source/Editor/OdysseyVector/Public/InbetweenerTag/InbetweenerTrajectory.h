@@ -6,13 +6,13 @@
 #include "InbetweenerTag/InbetweenerHandleTrajectory.h"
 
 class FInbetweenerQuad;
-class FInbetweenerGrid;
+class FOdysseyVectorTagInbetweener;
 
 class ODYSSEYVECTOR_API FInbetweenerTrajectory
 {
     public:
         virtual ~FInbetweenerTrajectory();
-        FInbetweenerTrajectory( FInbetweenerGrid* iGrid
+        FInbetweenerTrajectory( FOdysseyVectorTagInbetweener* iInbetweenerTag
                               , uint32 iQuadIndex
                               , double iQuadU
                               , double iQuadV );
@@ -26,10 +26,10 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
         double GetQuadV();
         void Update();
         ::ULIS::FVec2D* GetCubicBezier();
-        FInbetweenerGrid* GetGrid();
+        FOdysseyVectorTagInbetweener* GetInbetweenerTag();
 
     private:
-        FInbetweenerGrid* mGrid;
+        FOdysseyVectorTagInbetweener* mInbetweenerTag;
         ::ULIS::FVec2D mCubicBezier[4];
         FInbetweenerHandleTrajectory mHandle[2];
         uint32 mQuadIndex;

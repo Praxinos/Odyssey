@@ -156,7 +156,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                     FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
                     BLMatrix2D& ownerInverseWorldMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
                     BLPoint pt = ownerInverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
-                    FInbetweenerTrajectory* trajectory = inbetweenerTag->GetGrid()->AddTrajectory( ::ULIS::FVec2D( pt.x, pt.y ));
+                    FInbetweenerTrajectory* trajectory = inbetweenerTag->AddTrajectory( ::ULIS::FVec2D( pt.x, pt.y ));
 
                     if( trajectory )
                     {
@@ -215,7 +215,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
 
             for( FInbetweenerTrajectory* trajectory : pickedTrajectoryList )
             {
-                trajectory->GetGrid()->RemoveTrajectory( trajectory );
+                trajectory->GetInbetweenerTag()->RemoveTrajectory( trajectory );
             }
 
             // needed for valid GUndo pointer
@@ -266,6 +266,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseHoverVector( FOdysseyVectorGro
 
     mHoveredQuad = nullptr;
 
+    mTrajectoryHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
+
     if( mPickingMode == eTrajectoryPickingMode::Add )
     {
         if( iEngine->GetSelectedObjectList().size() )
@@ -295,6 +297,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
+    mTrajectoryHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
+
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
         if( mPickingMode == eTrajectoryPickingMode::Add )
@@ -306,7 +310,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
             for( FInbetweenerHandleTrajectory* trajectoryHandle : mPickedHandleList )
             {
                 FInbetweenerTrajectory* trajectory = trajectoryHandle->GetTrajectory();
-                BLMatrix2D ownerInverseWorldMatrix = trajectory->GetGrid()->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
+                BLMatrix2D ownerInverseWorldMatrix = trajectory->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
                 uint32 endpointIndex = ( trajectoryHandle == trajectory->GetHandle(0) ) ? 0 : 3;
                 uint32 handleIndex   = ( trajectoryHandle == trajectory->GetHandle(0) ) ? 1 : 2;
                 BLPoint diff = ownerInverseWorldMatrix.mapVector( iPointInTexture.deltaPosition.X
@@ -330,7 +334,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
         }
     }
 
-    iScene->Update( /*FOdysseyVectorObject::UPDATE_PAINTGROUPS*/0 );
+    iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;

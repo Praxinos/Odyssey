@@ -474,11 +474,11 @@ FOdysseyVectorHUD::DrawInbetweens( BLContext* iBLContext
                                  , uint64 iHUDFlags )
 {
     BLMatrix2D worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
-    FColor color = iInbetweenerTag->GetOwner()->IsSelected() ? iInbetweenerTag->GetColor() 
-                                                             : FColor( fgColor.r()
-                                                                     , fgColor.g()
-                                                                     , fgColor.b()
-                                                                     , fgColor.a() );
+    FColor color = ( iHUDFlags & HUD_DRAW_ALL ) ? FColor( fgColor.r()
+                                                        , fgColor.g()
+                                                        , fgColor.b()
+                                                        , fgColor.a() )
+                                               :  iInbetweenerTag->GetColor();
 
     if( iHUDFlags & HUD_TAGINBETWEENER_INBETWEEN )
     {

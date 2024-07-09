@@ -67,49 +67,21 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
                  , Category = "Inbetweener"
                  , meta = ( ToolTip  = "Divisions X"
                           , DisplayName = "Divisions X"
-                          , EditCondition = "( GridType == eInbetweenerGridType::FFD )"
-                          , EditConditionHides
                           , ClampMin = "1"
-                          , ClampMax = "8"
+                          , ClampMax = "16"
                           , UIMin    = "1"
-                          , UIMax    = "8" ) )
-        uint32 FFDDivisionX;
+                          , UIMax    = "16" ) )
+        uint32 DivisionX;
 
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"
                  , meta = ( ToolTip  = "Divisions Y"
                           , DisplayName = "Divisions Y"
-                          , EditCondition = "( GridType == eInbetweenerGridType::FFD )"
-                          , EditConditionHides
                           , ClampMin = "1"
                           , ClampMax = "16"
                           , UIMin    = "1"
                           , UIMax    = "16" ) )
-        uint32 FFDDivisionY;
-
-        UPROPERTY( EditAnywhere
-                 , Category = "Inbetweener"
-                 , meta = ( ToolTip  = "Divisions X"
-                          , DisplayName = "Divisions X"
-                          , EditCondition = "( GridType == eInbetweenerGridType::ARAP )"
-                          , EditConditionHides
-                          , ClampMin = "1"
-                          , ClampMax = "16"
-                          , UIMin    = "1"
-                          , UIMax    = "16" ) )
-        uint32 ARAPDivisionX;
-
-        UPROPERTY( EditAnywhere
-                 , Category = "Inbetweener"
-                 , meta = ( ToolTip  = "Divisions Y"
-                          , DisplayName = "Divisions Y"
-                          , EditCondition = "( GridType == eInbetweenerGridType::ARAP )"
-                          , EditConditionHides
-                          , ClampMin = "1"
-                          , ClampMax = "16"
-                          , UIMin    = "1"
-                          , UIMax    = "16" ) )
-        uint32 ARAPDivisionY;
+        uint32 DivisionY;
 
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"
@@ -124,8 +96,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
 
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"
-                 , meta = ( ToolTip  = "Map Paths As Polyline" ) )
-        bool MapPathsAsPolyline;
+                 , meta = ( ToolTip  = "Map As Polyline" ) )
+        bool MapAsPolyline;
 
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"

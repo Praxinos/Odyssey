@@ -53,6 +53,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
                        , double iPickingRadius
                        , std::list<FInbetweenerHandleTrajectory*>& oTrajectoryHandleList );
 
+        void SetCursorPosition( double ix, double iY );
+
     private:
         void DrawTrajectory( BLContext* iBLContext
                            , BLRgba32& iFgColor
@@ -68,4 +70,5 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
     private:
         UOdysseyPainterEditorVectorTrajectoryTool* mTrajectoryTool;
         ::ULIS::FRectD mTrajectoryRect;
+        ::ULIS::FRectD mCursorPosition;
 };

@@ -9,16 +9,8 @@ class ODYSSEYVECTOR_API FInbetweenerGridFFD : public FInbetweenerGrid
 {
     public:
         virtual ~FInbetweenerGridFFD(){};
-        FInbetweenerGridFFD( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                           , uint32 iNumQuadX
-                           , uint32 iNumQuadY );
+        FInbetweenerGridFFD( FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
-        virtual void Make( uint32 iNumQuadX
-                         , uint32 iNumQuadY
-                         , const ::ULIS::FRectD& iBBox
-                         , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
-                         , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer ) override;
-        void ComputeBinomialCoefficients();
         virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint
                                           , const ::ULIS::FRectD& iSourceBBox ) override;
         void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer

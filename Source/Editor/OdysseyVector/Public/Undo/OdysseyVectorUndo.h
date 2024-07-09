@@ -84,13 +84,15 @@ namespace FSnapshotFlags
             static const uint64 INTERPOLATIONTYPE = ( 1ULL <<  7 );
             static const uint64 ARAPRIGIDITY      = ( 1ULL <<  8 );
             static const uint64 COLOR             = ( 1ULL <<  9 );
+            static const uint64 MAPASPOLYLINE     = ( 1ULL << 10 );
             static const uint64 PARAM             = ( INBETWEENCOUNT
                                                     | GRIDSIZE
                                                     | GRIDTYPE
                                                     | GRIDGEOMETRY
                                                     | INTERPOLATIONTYPE
                                                     | ARAPRIGIDITY
-                                                    | COLOR );
+                                                    | COLOR
+                                                    | MAPASPOLYLINE );
         }
     }
 
@@ -256,6 +258,7 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         uint32 mARAPRigidity;
         std::vector<FInbetweenerTrajectory*> mTrajectoryArray;
         FColor mColor;
+        bool bMapAsPolyline;
 };
 
 class ODYSSEYVECTOR_API FSnapshotObject

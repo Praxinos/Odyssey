@@ -33,27 +33,16 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
 {
     public:
         virtual ~FInbetweenerGrid();
-        FInbetweenerGrid( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                        , uint32 iNumQuadX
-                        , uint32 iNumQuadY );
+        FInbetweenerGrid( FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
-        void Make( uint32 iNumQuadX
-                 , uint32 iNumQuadY
-                 , const ::ULIS::FRectD& iBBox );
+        void Make();
 
-        virtual void Make( uint32 iNumQuadX
-                         , uint32 iNumQuadY
-                         , const ::ULIS::FRectD& iBBox
-                         , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
+        virtual void Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
                          , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer );
 
         virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
                                 , uint32 iInbetweenIndex );
 
-        FInbetweenerTrajectory* AddTrajectory( const ::ULIS::FVec2D& iLocalCoords );
-        void AddTrajectory( FInbetweenerTrajectory* iTrajectory );
-        void RemoveTrajectory( FInbetweenerTrajectory* iTrajectory );
-        void RemoveAllTrajectories();
         int GetQuadIndex( const ::ULIS::FVec2D& iLocalCoords );
 
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
@@ -61,11 +50,8 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
                            , uint64 iTagInvalidationFlags );
         virtual void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
                                          , const BLMatrix2D& iSpaceInverseMatrix  );
-        std::list<FInbetweenerTrajectory*>& GetTrajectoryList();
         std::vector<FInbetweenerQuad>& GetQuadBuffer();
         std::vector<FInbetweenerPoint>& GetPointBuffer();
-        uint32 GetNumQuadX();
-        uint32 GetNumQuadY();
         void GetGeometry( std::vector<::ULIS::FVec2D>& oGeometry
                         , eInbetweenerPointPositionType iPositionType );
         void SetGeometry( const std::vector<::ULIS::FVec2D>& iGeometry
@@ -104,12 +90,9 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
 
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        std::list<FInbetweenerTrajectory*> mTrajectoryList;
         std::vector<FInbetweenerPoint> mPointBuffer;
         std::vector<FInbetweenerQuad> mQuadBuffer;
         std::vector<FInbetweenerQuad*> mQuadArray;
-        uint32 mNumQuadX;
-        uint32 mNumQuadY;
         uint32 mUsedQuadCount;
         uint32 mUsedPointCount;
 

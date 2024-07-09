@@ -11,15 +11,7 @@ class ODYSSEYVECTOR_API FInbetweenerGridARAP : public FInbetweenerGrid
 {
     public:
         virtual ~FInbetweenerGridARAP(){};
-        FInbetweenerGridARAP( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                            , uint32 iNumQuadX
-                            , uint32 iNumQuadY );
-
-        virtual void Make(  uint32 iNumQuadX
-                          , uint32 iNumQuadY
-                          , const ::ULIS::FRectD& iBBox
-                          , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
-                          , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer ) override;
+        FInbetweenerGridARAP( FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
         double RegularizeQuads( eInbetweenerPointPositionType iPositionType );
         void RegularizeQuad( FInbetweenerQuad* iQuad

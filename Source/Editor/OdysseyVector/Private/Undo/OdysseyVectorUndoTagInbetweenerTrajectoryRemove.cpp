@@ -45,7 +45,7 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryRemove::Apply( UObject* iIgnored )
 
     for( FInbetweenerTrajectory* trajectory : mTrajectoryArray )
     {
-        trajectory->GetGrid()->RemoveTrajectory( trajectory );
+        trajectory->GetInbetweenerTag()->RemoveTrajectory( trajectory );
     }
 
     // update invalidated objects
@@ -65,7 +65,7 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryRemove::Revert( UObject* iIgnored )
 
     for( FInbetweenerTrajectory* trajectory : mTrajectoryArray )
     {
-        trajectory->GetGrid()->AddTrajectory( trajectory );
+        trajectory->GetInbetweenerTag()->AddTrajectory( trajectory );
     }
 
     // update invalidated objects

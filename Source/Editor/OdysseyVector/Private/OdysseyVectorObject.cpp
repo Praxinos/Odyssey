@@ -205,7 +205,7 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
             tag->Update( iUpdateFlags, mInvalidationFlags );
         }
 
-        if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_KEEPINVALIDATED ) == 0 )
+        if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
         {
             mInvalidationFlags = 0;
         }

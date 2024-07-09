@@ -162,7 +162,10 @@ UOdysseyPainterEditorVectorChartTool::OnMouseUpVector( FOdysseyVectorGroupPaint*
 
             if( inbetweenerTag )
             {
+                // we need to manually redraw because no object is modified
                 inbetweenerTag->UpdateAnimationCells();
+
+                //iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
             }
         }
     }

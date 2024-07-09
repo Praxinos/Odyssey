@@ -281,7 +281,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorGroupP
         }
 
         // update vector scene and GUI widgets via delegates.
-        iScene->Update( FOdysseyVectorObject::UPDATE_KEEPINVALIDATED );
+        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
     }
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW

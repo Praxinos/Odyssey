@@ -84,6 +84,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         virtual void Added() override;
         virtual void Removed() override;
 
+        std::list<FInbetweenerTrajectory*>& GetTrajectoryList();
+        FInbetweenerTrajectory* AddTrajectory( const ::ULIS::FVec2D& iLocalCoords );
+        void AddTrajectory( FInbetweenerTrajectory* iTrajectory );
+        void RemoveTrajectory( FInbetweenerTrajectory* iTrajectory );
+        void RemoveAllTrajectories();
+        void ResetGrid();
         void MakeGrid();
         void Map();
         void Interpolate();
@@ -103,9 +109,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void UpdateAnimationCells();
         void ResetChart();
         void SetInbetweenCount( uint32 iInbetweenCount );
-        void SetGridType( eInbetweenerGridType iGridType );
-        void SetGridNumQuadX( uint32 iNumQuadX );
-        void SetGridNumQuadY( uint32 iNumQuadY );
+        void SetGrid( eInbetweenerGridType iGridType
+                    , uint32 iGridNumQuadX
+                    , uint32 iGridNumQuadY );
         void SetGridNumQuad( uint32 iNumQuadX, uint32 iNumQuadY );
         void SetGridNumQuad( uint32 iNumQuadX
                            , uint32 iNumQuadY
@@ -124,7 +130,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         virtual void Update( uint32 iUpdateFlags
                            , uint64 iOwnerInvalidationFlags ) override;
         void Commit( std::list<FOdysseyVectorTag*>& oRemovedTagList
-                   , std::list<FOdysseyVectorObject*>& oAddedObjectList );
+                   , std::list<FOdysseyVectorObject*>& oAddedObjectList
+                   , std::list<FOdysseyVectorGroupPaint*>& oCommittedSceneList );
         virtual void UpdateMatrix() override;
         void Translate( double iX, double iY );
         void Rotate( double iAngle );
@@ -203,8 +210,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         BLMatrix2D mTargetInverseWorldMatrix;
         FOdysseyVectorSharedEnv* mSharedEnv;
         std::vector<FInterpolatedPath> mInterpolatedPathBuffer;
+        std::list<FInbetweenerTrajectory*> mTrajectoryList;
         FInbetweenerGrid* mGrid;
         eInbetweenerGridType mGridType;
+        uint32 mGridNumQuadX;
+        uint32 mGridNumQuadY;
         eInbetweenerInterpolationType mInterpolationType;
         ::ULIS::FRectD mSourceBBox;
         ::ULIS::FRectD mTargetBBox;

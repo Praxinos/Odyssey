@@ -1899,6 +1899,21 @@ FOdysseyVectorGroupPaint::UpdatePathList()
     }
 */
 }
+/*
+void
+FOdysseyVectorGroupPaint::AddChild( FOdysseyVectorObject* iChild
+                                  , FOdysseyVectorObject* iInsertAfter )
+{
+    FOdysseyVectorGroup::AddChild( iChild, iInsertAfter );
+
+    UpdatePathList();
+}
+
+void
+FOdysseyVectorGroupPaint::RemoveChild()
+{
+}
+*/
 
 void
 FOdysseyVectorGroupPaint::BuildGraph()

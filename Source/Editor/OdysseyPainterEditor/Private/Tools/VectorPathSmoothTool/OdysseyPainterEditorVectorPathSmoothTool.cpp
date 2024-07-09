@@ -168,7 +168,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorGrou
             }
         }
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_KEEPINVALIDATED );
+        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
     }
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW

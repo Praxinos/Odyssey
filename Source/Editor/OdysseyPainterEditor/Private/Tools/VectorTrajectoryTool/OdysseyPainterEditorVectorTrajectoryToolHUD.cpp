@@ -94,7 +94,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickTrajectory( FOdysseyVectorTagI
                                                             , double iWorldY
                                                             , double iPickingRadius )
 {
-    std::list<FInbetweenerTrajectory*>& trajectoryList = iInbetweenerTag->GetGrid()->GetTrajectoryList();
+    std::list<FInbetweenerTrajectory*>& trajectoryList = iInbetweenerTag->GetTrajectoryList();
     BLMatrix2D& ownerWorldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
 
     for( FInbetweenerTrajectory* trajectory : trajectoryList )
@@ -175,7 +175,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickHandle( FOdysseyVectorTagInbet
                                                         , double iWorldY
                                                         , double iPickingRadius )
 {
-    std::list<FInbetweenerTrajectory*>& trajectoryList = iInbetweenerTag->GetGrid()->GetTrajectoryList();
+    std::list<FInbetweenerTrajectory*>& trajectoryList = iInbetweenerTag->GetTrajectoryList();
     BLMatrix2D& ownerWorldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
 
     for( FInbetweenerTrajectory* trajectory : trajectoryList )
@@ -205,6 +205,13 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickHandle( FOdysseyVectorTagInbet
 }
 
 void
+FOdysseyPainterEditorVectorTrajectoryToolHUD::SetCursorPosition( double iX, double iY )
+{
+    mCursorPosition.x = iX;
+    mCursorPosition.y = iY;
+}
+
+void
 FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHoveredQuad( BLContext* iBLContext
                                                              , BLRgba32& iFgColor
                                                              , BLRgba32& iBgColor
@@ -214,7 +221,34 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHoveredQuad( BLContext* iBLCon
 
     if( hoveredQuad )
     {
+        ::ULIS::FRectD quadBBox = hoveredQuad->GetBBox( eInbetweenerPointPositionType::SourcePosition );
         FOdysseyVectorTagInbetweener* iInbetweenerTag = hoveredQuad->GetGrid()->GetInbetweenerTag();
+/*
+        BLPoint localCursor = iInbetweenerTag->GetOwner()->GetInverseWorldMatrix().mapPoint( mCursorPosition.x
+                                                                                     , mCursorPosition.y );
+        double u = quadBBox.w ? ( localCursor.x - quadBBox.x ) / quadBBox.w : 0.0f;
+        double v = quadBBox.h ? ( localCursor.y - quadBBox.y ) / quadBBox.h : 0.0f;
+        ::ULIS::FVec2D targetPosition = hoveredQuad->GetPoint( eInbetweenerPointPositionType::TargetPosition, u, v  );
+        BLPoint targetWorldPosition = iInbetweenerTag->GetTargetWorldMatrix().mapPoint( targetPosition.x
+                                                                                      , targetPosition.y );
+        BLPath path;
+
+        path.moveTo( mCursorPosition.x, mCursorPosition.y );
+        path.lineTo( targetWorldPosition.x, targetWorldPosition.y );
+
+        iBLContext->save();
+        iBLContext->resetMatrix();
+
+        iBLContext->setStrokeStyle( iBgColor );
+        iBLContext->setStrokeWidth( 2.0f );
+        iBLContext->strokePath( path );
+      
+        iBLContext->setStrokeStyle( iHcColor );
+        iBLContext->setStrokeWidth( 1.0f );
+        iBLContext->strokePath( path );
+
+        iBLContext->restore();
+*/
         FInbetweenerPoint** points = hoveredQuad->GetPoints();
         ::ULIS::FVec2D position[4] = { points[0]->GetSourcePosition()
                                      , points[1]->GetSourcePosition()
@@ -362,7 +396,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
                   if( tag )
                   {
                       FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-                      std::list<FInbetweenerTrajectory*>& trajectoryList = inbetweenerTag->GetGrid()->GetTrajectoryList();
+                      std::list<FInbetweenerTrajectory*>& trajectoryList = inbetweenerTag->GetTrajectoryList();
 
                       for( FInbetweenerTrajectory* trajectory : trajectoryList )
                       {

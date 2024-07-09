@@ -156,7 +156,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
                 }
 
                 // update
-                iScene->Update( 0 );
+                iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
             }
         }
     }
@@ -183,7 +183,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseUpVector( FOdysseyVectorGroupPai
 
             if( inbetweenerTag )
             {
-                inbetweenerTag->UpdateAnimationCells();
+                iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
             }
         }
     }

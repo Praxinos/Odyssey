@@ -269,7 +269,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
             }
         }
 
-        iScene->Update( /*FOdysseyVectorObject::FREQUENTUPDATES*/0 ); // update invalidated objects
+        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE ); // update invalidated objects
     }
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW

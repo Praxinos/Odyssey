@@ -43,6 +43,7 @@
 #include "Undo/OdysseyVectorUndoTagRemove.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerChartAlter.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerCommit.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerMatching.h"
 
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
@@ -1574,6 +1575,7 @@ FOdysseyPainterEditor::CommitInbetweenerTag( FOdysseyPainterEditor* iEditor
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::list<FOdysseyVectorObject*>& selectedObjectList = vectorEngine->GetSelectedObjectList();
+    std::list<FOdysseyVectorGroupPaint*> committedSceneList;
     std::list<FOdysseyVectorObject*> addedObjectList;
     std::list<FOdysseyVectorTag*> removedTagList;
 
@@ -1585,7 +1587,9 @@ FOdysseyPainterEditor::CommitInbetweenerTag( FOdysseyPainterEditor* iEditor
         {
             FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
 
-            inbetweenerTag->Commit( removedTagList, addedObjectList );
+            inbetweenerTag->Commit( removedTagList
+                                  , addedObjectList
+                                  , committedSceneList );
         }
     }
 
@@ -1597,7 +1601,8 @@ FOdysseyPainterEditor::CommitInbetweenerTag( FOdysseyPainterEditor* iEditor
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerCommit( iScene
                                                                                  , removedTagList
-                                                                                 , addedObjectList );
+                                                                                 , addedObjectList
+                                                                                 , committedSceneList );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         
@@ -1655,6 +1660,44 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
             source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
+
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+    // call callbacks if any (for refreshing GUI e.g)
+    vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                        | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+}
+
+// static
+void
+FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
+{
+    std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
+    vectorEngine->GetSelectedInbetweenerTagList( selectedInbetweenerTagList );
+
+    if( selectedInbetweenerTagList.size() )
+    {
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.reset-chart","Reset Spacing Chart"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerMatching( iScene, selectedInbetweenerTagList );
+
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+            TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
+        }
+        GEditor->EndTransaction();
+
+        for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
+        {
+            inbetweenerTag->ResetGrid();
+        }
+    }
 
     iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 

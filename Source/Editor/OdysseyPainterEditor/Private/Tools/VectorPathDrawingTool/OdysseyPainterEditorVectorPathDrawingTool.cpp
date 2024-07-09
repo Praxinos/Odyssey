@@ -404,7 +404,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
             vectorEngine->InvalidateRect();
         }
 
-        iScene->Update( 0 ); // update invalidated path after segment insertion
+        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE ); // update invalidated path after segment insertion
     }
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW

@@ -115,8 +115,84 @@ FOdysseyVectorTagInbetweener::Map()
 
 FOdysseyVectorTagInbetweener::~FOdysseyVectorTagInbetweener()
 {
+    mTrajectoryList.remove_if( []( FInbetweenerTrajectory* trajectory )
+                               {
+                                   delete trajectory;
+
+                                   return true;
+                               } );
+
     delete mGrid;
 }
+
+
+std::list<FInbetweenerTrajectory*>&
+FOdysseyVectorTagInbetweener::GetTrajectoryList()
+{
+    return mTrajectoryList;
+}
+
+void
+FOdysseyVectorTagInbetweener::AddTrajectory( FInbetweenerTrajectory* iTrajectory )
+{
+    mTrajectoryList.push_back( iTrajectory );
+
+    Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORIES
+              | FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORY_LIST
+              | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
+              | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
+}
+
+void
+FOdysseyVectorTagInbetweener::RemoveTrajectory( FInbetweenerTrajectory* iTrajectory )
+{
+    mTrajectoryList.remove( iTrajectory );
+
+    Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORY_LIST
+              | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
+              | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
+}
+
+void
+FOdysseyVectorTagInbetweener::RemoveAllTrajectories()
+{
+    mTrajectoryList.clear();
+
+    Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORY_LIST
+              | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
+              | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
+}
+
+FInbetweenerTrajectory*
+FOdysseyVectorTagInbetweener::AddTrajectory( const ::ULIS::FVec2D& iLocalCoords )
+{
+    int quadIndex = mGrid->GetQuadIndex( iLocalCoords );
+
+    if( quadIndex >= 0 )
+    {
+        FInbetweenerQuad* quad = &mGrid->GetQuadBuffer()[quadIndex];
+        FInbetweenerPoint** quadPoint = quad->GetPoints();
+        ::ULIS::FVec2D p0Coords = quadPoint[0]->GetSourcePosition();
+        ::ULIS::FVec2D p1Coords = quadPoint[1]->GetSourcePosition();
+        ::ULIS::FVec2D p2Coords = quadPoint[2]->GetSourcePosition();
+        ::ULIS::FVec2D p3Coords = quadPoint[3]->GetSourcePosition();
+        double difX = p1Coords.x - p0Coords.x;
+        double difY = p2Coords.y - p1Coords.y;
+        double quadU = difX ? ( iLocalCoords.x - p0Coords.x ) / difX : 0.0f;
+        double quadV = difY ? ( iLocalCoords.y - p0Coords.y ) / difY : 0.0f;
+        FInbetweenerTrajectory* trajectory = new FInbetweenerTrajectory( this
+                                                                       , quadIndex
+                                                                       , quadU
+                                                                       , quadV );
+
+        AddTrajectory( trajectory );
+
+        return trajectory;
+    }
+
+    return nullptr;
+}
+
 
 bool
 FOdysseyVectorTagInbetweener::GetMapAsPolyline()
@@ -172,6 +248,11 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     UpdateMatrix();
 
     mSourceBBox = iOwnerObject->GetBBox( false );
+
+    mSourceBBox.x -= 0.01f;
+    mSourceBBox.y -= 0.01f;
+    mSourceBBox.w += 0.02f;
+    mSourceBBox.h += 0.02f;
 /*
     if( mSourceBBox.h > mSourceBBox.w )
     {
@@ -189,7 +270,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     }
 */
     // Note: Grid building needs the bbox to be set.
-    SetGridType( mGridType );
+    SetGrid( mGridType, iNumQuadX, iNumQuadY );
 
     //mGrid->Make( iNumQuadX, iNumQuadY, iOwnerObject->GetBBox( false ), this );
 
@@ -254,16 +335,27 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
                                          , uint64 iOwnerInvalidationFlags )
 {
     if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
+     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
      || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
      || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
      || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
     {
-        mSourceBBox = mOwner->GetBBox( false );
+        if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
+        {
+            std::vector<::ULIS::FVec2D> sourceGeometry;
+            std::vector<::ULIS::FVec2D> targetGeometry;
 
-        mSourceBBox.x -= 0.1f;
-        mSourceBBox.y -= 0.1f;
-        mSourceBBox.w += 0.2f;
-        mSourceBBox.h += 0.2f;
+            mGrid->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
+
+            mSourceBBox = mOwner->GetBBox( false );
+
+            mSourceBBox.x -= 0.1f;
+            mSourceBBox.y -= 0.1f;
+            mSourceBBox.w += 0.2f;
+            mSourceBBox.h += 0.2f;
+
+            mGrid->Make( sourceGeometry, targetGeometry );
+        }
     }
 
     if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
@@ -310,7 +402,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
     if( ( mInvalidationFlags & INVALIDATE_TRAJECTORIES )
     ||  ( mInvalidationFlags & INVALIDATE_TARGETBBOX   ) )
     {
-        for( FInbetweenerTrajectory* trajectory : mGrid->GetTrajectoryList() )
+        for( FInbetweenerTrajectory* trajectory : mTrajectoryList )
         {
             trajectory->Update();
         }
@@ -326,14 +418,14 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
 
     if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
     {
-        if( mInvalidationFlags & INVALIDATE_CELLS )
+        //if( mInvalidationFlags & INVALIDATE_CELLS )
         {
             UpdateAnimationCells();
         }
     }
 
     // reset tag's invalidation flags (do not confuse with object's invalidation flags)
-    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_KEEPINVALIDATED ) == 0 )
+    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
     {
         mInvalidationFlags = 0;
     }
@@ -932,6 +1024,12 @@ FOdysseyVectorTagInbetweener::AllocBuffers()
 }
 
 void
+FOdysseyVectorTagInbetweener::ResetGrid()
+{
+    mGrid->Make();
+}
+
+void
 FOdysseyVectorTagInbetweener::SetInbetweenCount( uint32 iInbetweenCount )
 {
     uint32 maxInbetweenCount = ::ULIS::FMath::Max( iInbetweenCount, mInbetweenCount );
@@ -968,21 +1066,20 @@ FOdysseyVectorTagInbetweener::GetGridPointBuffer()
 uint32
 FOdysseyVectorTagInbetweener::GetGridNumQuadX()
 {
-    return mGrid->GetNumQuadX();
+    return mGridNumQuadX;
 }
 
 uint32
 FOdysseyVectorTagInbetweener::GetGridNumQuadY()
 {
-    return mGrid->GetNumQuadY();
+    return mGridNumQuadY;
 }
 
 void
-FOdysseyVectorTagInbetweener::SetGridType( eInbetweenerGridType iGridType )
+FOdysseyVectorTagInbetweener::SetGrid( eInbetweenerGridType iGridType
+                                     , uint32 iGridNumQuadX
+                                     , uint32 iGridNumQuadY )
 {
-    uint32 numQuadX = 8;
-    uint32 numQuadY = 8;
-
     if( mGrid )
     {
         delete mGrid;
@@ -990,30 +1087,38 @@ FOdysseyVectorTagInbetweener::SetGridType( eInbetweenerGridType iGridType )
         mGrid = nullptr;
     }
 
+    if( ( mGridNumQuadX != iGridNumQuadX ) && ( mGridNumQuadY != iGridNumQuadY ) )
+    {
+        RemoveAllTrajectories();
+    }
+
     mGridType = iGridType;
+    mGridNumQuadX = iGridNumQuadX ? iGridNumQuadX : 1;
+    mGridNumQuadY = iGridNumQuadY ? iGridNumQuadY : 1;
 
     switch( iGridType )
     {
         case eInbetweenerGridType::ARAP :
-            mGrid = new FInbetweenerGridARAP( this, numQuadX, numQuadY );
+            mGrid = new FInbetweenerGridARAP( this );
         break;
 
         default:
-            mGrid = new FInbetweenerGridFFD( this, numQuadX, numQuadY );
+            mGrid = new FInbetweenerGridFFD( this );
         break;
     }
 
     Invalidate( INVALIDATE_MAP
               | INVALIDATE_SPACING
               | INVALIDATE_BUFFERS
+              | INVALIDATE_GRIDTYPE
               | INVALIDATE_CELLS );
 
-    mGrid->Make( mGrid->GetNumQuadX(), mGrid->GetNumQuadY(), mSourceBBox );
+    mGrid->Make();
 }
 
 void
-FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iNumQuadX
-                                            , uint32 iNumQuadY
+FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
+                                            , uint32 iGridNumQuadY
                                             , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
                                             , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer )
 {
@@ -1021,46 +1126,41 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iNumQuadX
               | INVALIDATE_SPACING
               | INVALIDATE_CELLS );
 
-    mGrid->Make( iNumQuadX
-               , iNumQuadY
-               , mSourceBBox
-               , iSourcePositionBuffer
+    if( ( mGridNumQuadX != iGridNumQuadX ) && ( mGridNumQuadY != iGridNumQuadY ) )
+    {
+        RemoveAllTrajectories();
+    }
+
+    mGridNumQuadX = iGridNumQuadX;
+    mGridNumQuadY = iGridNumQuadY;
+
+    mGrid->Make( iSourcePositionBuffer
                , iTargetPositionBuffer );
 }
 
 void
-FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iNumQuadX, uint32 iNumQuadY )
+FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
+                                            , uint32 iGridNumQuadY )
 {
     Invalidate( INVALIDATE_MAP
               | INVALIDATE_SPACING
               | INVALIDATE_CELLS );
 
-    mGrid->Make( iNumQuadX, iNumQuadY, mSourceBBox );
-}
+    if( ( mGridNumQuadX != iGridNumQuadX ) && ( mGridNumQuadY != iGridNumQuadY ) )
+    {
+        RemoveAllTrajectories();
+    }
 
-void
-FOdysseyVectorTagInbetweener::SetGridNumQuadX( uint32 iNumQuadX )
-{
-    Invalidate( INVALIDATE_MAP
-              | INVALIDATE_SPACING
-              | INVALIDATE_CELLS );
+    mGridNumQuadX = iGridNumQuadX;
+    mGridNumQuadY = iGridNumQuadY;
 
-    mGrid->Make( iNumQuadX, mGrid->GetNumQuadY(), mSourceBBox );
-}
-
-void
-FOdysseyVectorTagInbetweener::SetGridNumQuadY( uint32 iNumQuadY )
-{
-    Invalidate( INVALIDATE_MAP
-              | INVALIDATE_SPACING
-              | INVALIDATE_CELLS );
-
-    mGrid->Make( mGrid->GetNumQuadX(), iNumQuadY, mSourceBBox );
+    mGrid->Make();
 }
 
 void
 FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTagList
-                                    , std::list<FOdysseyVectorObject*>& oAddedObjectList )
+                                    , std::list<FOdysseyVectorObject*>& oAddedObjectList
+                                    , std::list<FOdysseyVectorGroupPaint*>& oCommittedSceneList )
 {
     IOdysseyVectorAnimationCell* animationCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
     int32 animationCellIndex = animationCell->GetIndex();
@@ -1169,6 +1269,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
             FOdysseyVectorObject* copiedObject = mOwner->Copy( 0, preProcess, postProcess );
 
             oAddedObjectList.push_back( copiedObject );
+            oCommittedSceneList.push_back( inbetweenScene );
 
             inbetweenScene->AppendChild( copiedObject );
 
@@ -1230,6 +1331,5 @@ FOdysseyVectorTagInbetweener::SetInterpolationType( eInbetweenerInterpolationTyp
     mInterpolationType = iInterpolationType;
 
     Invalidate( INVALIDATE_SPACING
-              | INVALIDATE_GRIDTYPE
               | INVALIDATE_CELLS );
 }

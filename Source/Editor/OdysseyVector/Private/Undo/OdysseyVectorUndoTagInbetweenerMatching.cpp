@@ -18,9 +18,22 @@ FOdysseyVectorUndoTagInbetweenerMatching::~FOdysseyVectorUndoTagInbetweenerMatch
 FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatching( FOdysseyVectorGroupPaint* iScene
                                                                                   , FOdysseyVectorTagInbetweener* iInbetweenerTag )
     : FOdysseyVectorUndo( iScene )
-    , mInbetweenerTagSnapshot( iInbetweenerTag
-                             , FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY )
 {
+    mInbetweenerTagSnapshotBuffer.emplace_back( iInbetweenerTag
+                                              , FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY );
+}
+
+FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatching( FOdysseyVectorGroupPaint* iScene
+                                                                                  , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList )
+    : FOdysseyVectorUndo( iScene )
+{
+    mInbetweenerTagSnapshotBuffer.reserve( iInbetweenerTagList.size() );
+
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
+    {
+        mInbetweenerTagSnapshotBuffer.emplace_back( inbetweenerTag
+                                                  , FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY );
+    }
 }
 
 void
@@ -29,7 +42,10 @@ FOdysseyVectorUndoTagInbetweenerMatching::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mInbetweenerTagSnapshot.Restore();
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
+    {
+        inbetweenerTagSnapshot.Restore();
+    }
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
@@ -46,7 +62,10 @@ FOdysseyVectorUndoTagInbetweenerMatching::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mInbetweenerTagSnapshot.Restore();
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
+    {
+        inbetweenerTagSnapshot.Restore();
+    }
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );

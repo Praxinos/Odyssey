@@ -20,7 +20,7 @@ FOdysseyVectorImportV2::ReadTrajectory( FInbetweenerTrajectory& iTrajectory
             {
                 case FOdysseyFile::VectorV2::CHUNK_TRAJECTORY_COORDS:
                 {
-                    std::vector<FInbetweenerQuad>& quadBuffer =  iTrajectory.GetGrid()->GetQuadBuffer();
+                    std::vector<FInbetweenerQuad>& quadBuffer =  iTrajectory.GetInbetweenerTag()->GetGrid()->GetQuadBuffer();
                     uint32 quadID;
                     double quadU;
                     double quadV;

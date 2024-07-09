@@ -21,6 +21,19 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
         {
             switch( iChunkID )
             {
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_COLOR:
+                {
+                    uint8 r, g, b, a;
+
+                    Ar << r;
+                    Ar << g;
+                    Ar << b;
+                    Ar << a;
+
+                    iInbetweenerTag.SetColor( r, g, b, a );
+                }
+                break;
+
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_INBETWEENCOUNT:
                 {
                     uint32 inbetweenCount;
@@ -98,7 +111,9 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
 
                     Ar << gridType;
 
-                    iInbetweenerTag.SetGridType( static_cast<eInbetweenerGridType>(gridType) );
+                    iInbetweenerTag.SetGrid( static_cast<eInbetweenerGridType>(gridType)
+                                           , iInbetweenerTag.GetGridNumQuadX()
+                                           , iInbetweenerTag.GetGridNumQuadY() );
                 break;
 
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_INTERPOLATION:
@@ -203,12 +218,12 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
 
                 case FOdysseyFile::VectorV2::CHUNK_TRAJECTORY:
                 {
-                    FInbetweenerTrajectory* trajectory = new FInbetweenerTrajectory( iInbetweenerTag.GetGrid()
+                    FInbetweenerTrajectory* trajectory = new FInbetweenerTrajectory( &iInbetweenerTag
                                                                                    , 0
                                                                                    , 0.0f
                                                                                    , 0.0f );
 
-                    iInbetweenerTag.GetGrid()->AddTrajectory( trajectory );
+                    iInbetweenerTag.AddTrajectory( trajectory );
 
                     ReadTrajectory( *trajectory
                                   , Ar.Tell() + iChunkLen

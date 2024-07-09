@@ -23,10 +23,12 @@ FOdysseyVectorUndoTagInbetweenerCommit::~FOdysseyVectorUndoTagInbetweenerCommit(
 
 FOdysseyVectorUndoTagInbetweenerCommit::FOdysseyVectorUndoTagInbetweenerCommit( FOdysseyVectorGroupPaint* iScene
                                                                               , const std::list<FOdysseyVectorTag*>& iRemovedTagList 
-                                                                              , const std::list<FOdysseyVectorObject*>& iAddedObjectList )
+                                                                              , const std::list<FOdysseyVectorObject*>& iAddedObjectList
+                                                                              , const std::list<FOdysseyVectorGroupPaint*>& iCommittedSceneList )
     : FOdysseyVectorUndo( iScene )
     , mRemovedTagList( iRemovedTagList )
     , mAddedObjectList( iAddedObjectList )
+    , mCommittedSceneList( iCommittedSceneList )
 {
 }
 
@@ -44,6 +46,12 @@ FOdysseyVectorUndoTagInbetweenerCommit::Apply( UObject* iIgnored )
     for( FOdysseyVectorObject* object : mAddedObjectList )
     {
         object->GetOldParent()->AppendChild( object );
+    }
+
+    for( FOdysseyVectorGroupPaint* scene : mCommittedSceneList )
+    {
+        //will update paintgroup's mPathList e.g
+        scene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
     // update invalidated objects
@@ -69,6 +77,12 @@ FOdysseyVectorUndoTagInbetweenerCommit::Revert( UObject* iIgnored )
     for( FOdysseyVectorObject* object : mAddedObjectList )
     {
         object->GetParent()->RemoveChild( object );
+    }
+
+    for( FOdysseyVectorGroupPaint* scene : mCommittedSceneList )
+    {
+        //will update paintgroup's mPathList e.g
+        scene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
     // update invalidated objects

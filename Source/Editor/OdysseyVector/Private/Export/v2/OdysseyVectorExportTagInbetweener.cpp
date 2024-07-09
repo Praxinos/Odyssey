@@ -16,7 +16,7 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGridTrajectories( FOdysseyVectorTagIn
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        std::list<FInbetweenerTrajectory*>& trajectoryList = iInbetweenerTag.GetGrid()->GetTrajectoryList();
+        std::list<FInbetweenerTrajectory*>& trajectoryList = iInbetweenerTag.GetTrajectoryList();
 
         for( FInbetweenerTrajectory* trajectory : trajectoryList )
         {
@@ -158,7 +158,7 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGrid( FOdysseyVectorTagInbetweener& i
             WriteTagInbetweenerGridArapRigidity( *arapGrid, Ar );
         }
 
-        if( iInbetweenerTag.GetGrid()->GetTrajectoryList().size() )
+        if( iInbetweenerTag.GetTrajectoryList().size() )
         {
             WriteTagInbetweenerGridTrajectories( iInbetweenerTag, Ar );
         }
@@ -260,6 +260,27 @@ FOdysseyVectorExportV2::WriteTagInbetweenerInbetweenCount( FOdysseyVectorTagInbe
 }
 
 void
+FOdysseyVectorExportV2::WriteTagInbetweenerColor( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_COLOR
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        FColor color = iInbetweenerTag.GetColor();
+        uint8 r8 = color.R;
+        uint8 g8 = color.G;
+        uint8 b8 = color.B;
+        uint8 a8 = color.A;
+
+        Ar << r8;
+        Ar << g8;
+        Ar << b8;
+        Ar << a8;
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteTagInbetweenerMapAsPolyline( FOdysseyVectorTagInbetweener& iInbetweenerTag
                                                         , FArchive &Ar )
 {
@@ -280,6 +301,7 @@ FOdysseyVectorExportV2::WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbe
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
+        WriteTagInbetweenerColor( iInbetweenerTag, Ar );
         WriteTagInbetweenerInbetweenCount( iInbetweenerTag, Ar );
         WriteTagInbetweenerMapAsPolyline( iInbetweenerTag, Ar );
         WriteTagInbetweenerChart( iInbetweenerTag, Ar );

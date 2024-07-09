@@ -886,7 +886,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
     */
         mOldPointInTexture = ::ULIS::FVec2D( pointInTextureX, pointInTextureY );
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_KEEPINVALIDATED );
+        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
     }
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW

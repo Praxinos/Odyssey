@@ -7,11 +7,11 @@ FInbetweenerTrajectory::~FInbetweenerTrajectory()
 {
 }
 
-FInbetweenerTrajectory::FInbetweenerTrajectory( FInbetweenerGrid* iGrid
+FInbetweenerTrajectory::FInbetweenerTrajectory( FOdysseyVectorTagInbetweener* iInbetweenerTag
                                               , uint32 iQuadIndex
                                               , double iQuadU
                                               , double iQuadV )
-    : mGrid( iGrid )
+    : mInbetweenerTag( iInbetweenerTag )
     , mHandle{ (this), (this) }
 {
     Init( iQuadIndex, iQuadU, iQuadV );
@@ -30,7 +30,7 @@ FInbetweenerTrajectory::Init( uint32 iQuadIndex
 void
 FInbetweenerTrajectory::Update()
 {
-    BLMatrix2D targetLocalMatrix = mGrid->GetInbetweenerTag()->GetTargetLocalMatrix();
+    BLMatrix2D targetLocalMatrix = mInbetweenerTag->GetTargetLocalMatrix();
     double bezierLength;
     FInbetweenerQuad* quad = GetQuad();
 
@@ -55,12 +55,6 @@ FInbetweenerTrajectory::GetHandle( uint32 index )
     return &mHandle[index];
 }
 
-FInbetweenerGrid*
-FInbetweenerTrajectory::GetGrid()
-{
-    return mGrid;
-}
-
 ::ULIS::FVec2D*
 FInbetweenerTrajectory::GetCubicBezier()
 {
@@ -70,7 +64,7 @@ FInbetweenerTrajectory::GetCubicBezier()
 FInbetweenerQuad* 
 FInbetweenerTrajectory::GetQuad()
 {
-    return &mGrid->GetQuadBuffer()[mQuadIndex];
+    return &mInbetweenerTag->GetGrid()->GetQuadBuffer()[mQuadIndex];
 }
 
 uint32
@@ -89,4 +83,10 @@ double
 FInbetweenerTrajectory::GetQuadV()
 {
     return mQuadV;
+}
+
+FOdysseyVectorTagInbetweener*
+FInbetweenerTrajectory::GetInbetweenerTag()
+{
+    return mInbetweenerTag;
 }

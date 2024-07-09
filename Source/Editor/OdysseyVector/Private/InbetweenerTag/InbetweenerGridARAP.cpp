@@ -9,27 +9,11 @@
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorSegmentCubic.h"
 
-FInbetweenerGridARAP::FInbetweenerGridARAP( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                          , uint32 iNumQuadX
-                                          , uint32 iNumQuadY )
-    : FInbetweenerGrid( iInbetweenerTag, iNumQuadX, iNumQuadY )
+FInbetweenerGridARAP::FInbetweenerGridARAP( FOdysseyVectorTagInbetweener* iInbetweenerTag )
+    : FInbetweenerGrid( iInbetweenerTag )
     , k_cornersFixed( false ) // what is this ?
     , mRigidity( 10 )
 {
-}
-
-void
-FInbetweenerGridARAP::Make( uint32 iNumQuadX
-                          , uint32 iNumQuadY
-                          , const ::ULIS::FRectD& iBBox
-                          , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
-                          , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer )
-{
-    FInbetweenerGrid::Make( iNumQuadX
-                          , iNumQuadY
-                          , iBBox
-                          , iSourcePositionBuffer
-                          , iTargetPositionBuffer );
 }
 
 #define EPSILON 0.001f
@@ -359,16 +343,16 @@ FInbetweenerGridARAP::IntersectNeededQuads( const ::ULIS::FRectD& iSourceBBox
     double vmin = std::clamp<double>( ( iYMin - iSourceBBox.y ) / iSourceBBox.h, 0.0f, 0.9999f );
     double umax = std::clamp<double>( ( iXMax - iSourceBBox.x ) / iSourceBBox.w, 0.0f, 0.9999f );
     double vmax = std::clamp<double>( ( iYMax - iSourceBBox.y ) / iSourceBBox.h, 0.0f, 0.9999f );
-    uint32 uminIdx = umin * mNumQuadX;
-    uint32 vminIdx = vmin * mNumQuadY;
-    uint32 umaxIdx = umax * mNumQuadX;
-    uint32 vmaxIdx = vmax * mNumQuadY;
+    uint32 uminIdx = umin * mInbetweenerTag->GetGridNumQuadX();
+    uint32 vminIdx = vmin * mInbetweenerTag->GetGridNumQuadY();
+    uint32 umaxIdx = umax * mInbetweenerTag->GetGridNumQuadX();
+    uint32 vmaxIdx = vmax * mInbetweenerTag->GetGridNumQuadY();
 
     for( uint32 i = vminIdx; i <= vmaxIdx; i++ )
     {
         for( uint32 j = uminIdx; j <= umaxIdx; j++ )
         {
-            uint32 offset = ( i * mNumQuadX ) + j;
+            uint32 offset = ( i * mInbetweenerTag->GetGridNumQuadX() ) + j;
 
             mQuadBuffer[offset].GetPoints()[0]->SetNeeded( true );
             mQuadBuffer[offset].GetPoints()[1]->SetNeeded( true );

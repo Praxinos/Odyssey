@@ -95,15 +95,21 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
         mInbetweenCount = mInbetweenerTag->GetInbetweenCount();
     }
 
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE )
+    {
+        bMapAsPolyline = mInbetweenerTag->GetMapAsPolyline();
+    }
+
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::CHART )
     {
         mChart = mInbetweenerTag->GetChart();
     }
 
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
+    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
+     || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE ) )
     {
-        mGridSizeX = mInbetweenerTag->GetGrid()->GetNumQuadX();
-        mGridSizeY = mInbetweenerTag->GetGrid()->GetNumQuadY();
+        mGridSizeX = mInbetweenerTag->GetGridNumQuadX();
+        mGridSizeY = mInbetweenerTag->GetGridNumQuadY();
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE )
@@ -201,10 +207,20 @@ FSnapshotTagInbetweener::Restore()
         mInbetweenCount = swapCount;
     }
 
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE )
     {
-        uint32 swaGridSizeX = mInbetweenerTag->GetGrid()->GetNumQuadX();
-        uint32 swaGridSizeY = mInbetweenerTag->GetGrid()->GetNumQuadY();
+        bool swapMapAsPolyline = mInbetweenerTag->GetMapAsPolyline();
+
+        mInbetweenerTag->SetMapAsPolyline( bMapAsPolyline );
+
+        bMapAsPolyline = swapMapAsPolyline;
+    }
+
+    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
+     || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE ) )
+    {
+        uint32 swaGridSizeX = mInbetweenerTag->GetGridNumQuadX();
+        uint32 swaGridSizeY = mInbetweenerTag->GetGridNumQuadY();
 
         mInbetweenerTag->SetGridNumQuad( mGridSizeX, mGridSizeY );
 
@@ -216,7 +232,7 @@ FSnapshotTagInbetweener::Restore()
     {
         eInbetweenerGridType swapGridType = mInbetweenerTag->GetGridType();
 
-        mInbetweenerTag->SetGridType( mGridType );
+        mInbetweenerTag->SetGrid( mGridType, mGridSizeX, mGridSizeY );
 
         mGridType = swapGridType;
     }
@@ -283,7 +299,7 @@ FSnapshotTagInbetweener::Restore()
 void
 FSnapshotTagInbetweener::SaveTrajectories( std::vector<FInbetweenerTrajectory*>& oTrajectoryArray )
 {
-    std::list<FInbetweenerTrajectory*>& trajectoryList = mInbetweenerTag->GetGrid()->GetTrajectoryList();
+    std::list<FInbetweenerTrajectory*>& trajectoryList = mInbetweenerTag->GetTrajectoryList();
 
     oTrajectoryArray.clear();
     oTrajectoryArray.reserve( trajectoryList.size() );
@@ -297,11 +313,11 @@ FSnapshotTagInbetweener::SaveTrajectories( std::vector<FInbetweenerTrajectory*>&
 void
 FSnapshotTagInbetweener::RestoreTrajectories()
 {
-    mInbetweenerTag->GetGrid()->RemoveAllTrajectories();
+    mInbetweenerTag->RemoveAllTrajectories();
 
     for( FInbetweenerTrajectory* trajectory : mTrajectoryArray )
     {
-        mInbetweenerTag->GetGrid()->AddTrajectory( trajectory );
+        mInbetweenerTag->AddTrajectory( trajectory );
     }
 }
 
