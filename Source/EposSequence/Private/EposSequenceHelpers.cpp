@@ -25,6 +25,7 @@
 #include "Sections/MovieScene3DTransformSection.h"
 #include "Sections/MovieSceneBoolSection.h"
 #include "Sections/MovieSceneParameterSection.h"
+#include "Sections/MovieSceneComponentMaterialParameterSection.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
 #include "Tracks/MovieSceneMaterialTrack.h"
@@ -1063,14 +1064,20 @@ ShotSequenceHelpers::FindMaterialParameterTrackAndSections( IMovieScenePlayer& i
         {
             if( section->IsTimeWithinSection( iFrameNumber.GetValue() ) )
             {
-                result.mSections.Add( Cast<UMovieSceneParameterSection>( section ) );
+                                                                                        // If we have an old parameter section already, manage to the old style section
+                check( Cast<UMovieSceneComponentMaterialParameterSection>( section ) || Cast<UMovieSceneParameterSection>( section ) );
+                result.mSections.Add( section );
             }
         }
     }
     else
     {
         for( auto section : result.mTrack->GetAllSections() )
-            result.mSections.Add( Cast<UMovieSceneParameterSection>( section ) );
+        {
+                                                                                    // If we have an old parameter section already, manage to the old style section
+            check( Cast<UMovieSceneComponentMaterialParameterSection>( section ) || Cast<UMovieSceneParameterSection>( section ) );
+            result.mSections.Add( section );
+        }
     }
 
     return result;
@@ -1119,7 +1126,9 @@ ShotSequenceHelpers::FindOrCreateMaterialParameterTrackAndSections( IMovieSceneP
 
         section->SetRange( TRange<FFrameNumber>::All() );
 
-        result.mSections.Add( Cast<UMovieSceneParameterSection>( section ) );
+        // The track UMovieSceneComponentMaterialTrack (now 5.4) always create a UMovieSceneComponentMaterialParameterSection
+        check( Cast<UMovieSceneComponentMaterialParameterSection>( section ) );
+        result.mSections.Add( section );
     }
 
     return result;
@@ -1127,17 +1136,32 @@ ShotSequenceHelpers::FindOrCreateMaterialParameterTrackAndSections( IMovieSceneP
 
 //static
 ShotSequenceHelpers::FFindOrCreateParameterChannelResult
-ShotSequenceHelpers::FindMaterialOpacityChannel( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TWeakObjectPtr<UMovieSceneParameterSection> iSection )
+ShotSequenceHelpers::FindMaterialOpacityChannel( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TWeakObjectPtr<UMovieSceneSection> iSection )
 {
     FFindOrCreateParameterChannelResult result;
 
-    TArray<FScalarParameterNameAndCurve>& parameters = iSection->GetScalarParameterNamesAndCurves();
-    for( auto& parameter : parameters )
+    if( UMovieSceneComponentMaterialParameterSection* component_material_parameter_section = Cast<UMovieSceneComponentMaterialParameterSection>( iSection ) )
     {
-        if( parameter.ParameterName.IsEqual( TEXT( "DrawingOpacity" ) ) )
+        TArray<FScalarMaterialParameterInfoAndCurve>& parameters = component_material_parameter_section->GetScalarParameterNamesAndCurves();
+        for( auto& parameter : parameters )
         {
-            result.mChannel = &parameter.ParameterCurve;
-            return result;
+            if( parameter.ParameterInfo.Name.IsEqual( TEXT( "DrawingOpacity" ) ) )
+            {
+                result.mChannel = &parameter.ParameterCurve;
+                return result;
+            }
+        }
+    }
+    else if( UMovieSceneParameterSection* parameter_section = Cast<UMovieSceneParameterSection>( iSection ) )
+    {
+        TArray<FScalarParameterNameAndCurve>& parameters = parameter_section->GetScalarParameterNamesAndCurves();
+        for( auto& parameter : parameters )
+        {
+            if( parameter.ParameterName.IsEqual( TEXT( "DrawingOpacity" ) ) )
+            {
+                result.mChannel = &parameter.ParameterCurve;
+                return result;
+            }
         }
     }
 
@@ -1146,35 +1170,66 @@ ShotSequenceHelpers::FindMaterialOpacityChannel( IMovieScenePlayer& iPlayer, UMo
 
 //static
 ShotSequenceHelpers::FFindOrCreateParameterChannelResult
-ShotSequenceHelpers::FindOrCreateMaterialOpacityChannel( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TWeakObjectPtr<UMovieSceneParameterSection> iSection )
+ShotSequenceHelpers::FindOrCreateMaterialOpacityChannel( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TWeakObjectPtr<UMovieSceneSection> iSection )
 {
     FFindOrCreateParameterChannelResult result = FindMaterialOpacityChannel( iPlayer, iSequence, iSequenceID, iPlaneBinding, iSection );
     if( result.mChannel )
         return result;
 
-    // This will create the channel named "DrawingOpacity" (as it not exists)
-    // and add a (dummy) key to be able to recache internal stuff (ChannelProxy) of the parameter section
-    // And once the parameter channel are created, next we remove the dummy key
-    iSection->AddScalarParameterKey( TEXT( "DrawingOpacity" ), 0, 1.f );
-
-    result.mChannelCreated = true;
-
-    TArray<FScalarParameterNameAndCurve>& parameters = iSection->GetScalarParameterNamesAndCurves();
-    for( auto& parameter : parameters )
+    if( UMovieSceneComponentMaterialParameterSection* component_material_parameter_section = Cast<UMovieSceneComponentMaterialParameterSection>( iSection ) )
     {
-        if( parameter.ParameterName.IsEqual( TEXT( "DrawingOpacity" ) ) )
+        // This will create the channel named "DrawingOpacity" (as it not exists)
+        // and add a (dummy) key to be able to recache internal stuff (ChannelProxy) of the parameter section
+        // And once the parameter channel are created, next we remove the dummy key
+        component_material_parameter_section->AddScalarParameterKey( FMaterialParameterInfo( TEXT( "DrawingOpacity" ) ), 0, 1.f, FString(), FString() );
+
+        result.mChannelCreated = true;
+
+        TArray<FScalarMaterialParameterInfoAndCurve>& parameters = component_material_parameter_section->GetScalarParameterNamesAndCurves();
+        for( auto& parameter : parameters )
         {
-            TArray<FFrameNumber> key_times;
-            TArray<FKeyHandle> key_handles;
-            parameter.ParameterCurve.GetKeys( TRange<FFrameNumber>::All(), &key_times, &key_handles );
-            check( key_handles.Num() == 1 );
+            if( parameter.ParameterInfo.Name.IsEqual( TEXT( "DrawingOpacity" ) ) )
+            {
+                TArray<FFrameNumber> key_times;
+                TArray<FKeyHandle> key_handles;
+                parameter.ParameterCurve.GetKeys( TRange<FFrameNumber>::All(), &key_times, &key_handles );
+                check( key_handles.Num() == 1 );
 
-            UE::MovieScene::SetChannelDefault( &parameter.ParameterCurve, 1.f );
+                UE::MovieScene::SetChannelDefault( &parameter.ParameterCurve, 1.f );
 
-            parameter.ParameterCurve.DeleteKeys( key_handles );
+                parameter.ParameterCurve.DeleteKeys( key_handles );
 
-            result.mChannel = &parameter.ParameterCurve;
-            return result;
+                result.mChannel = &parameter.ParameterCurve;
+                return result;
+            }
+        }
+    }
+    else if( UMovieSceneParameterSection* parameter_section = Cast<UMovieSceneParameterSection>( iSection ) )
+    {
+        // This will create the channel named "DrawingOpacity" (as it not exists)
+        // and add a (dummy) key to be able to recache internal stuff (ChannelProxy) of the parameter section
+        // And once the parameter channel are created, next we remove the dummy key
+        parameter_section->AddScalarParameterKey( TEXT( "DrawingOpacity" ), 0, 1.f );
+
+        result.mChannelCreated = true;
+
+        TArray<FScalarParameterNameAndCurve>& parameters = parameter_section->GetScalarParameterNamesAndCurves();
+        for( auto& parameter : parameters )
+        {
+            if( parameter.ParameterName.IsEqual( TEXT( "DrawingOpacity" ) ) )
+            {
+                TArray<FFrameNumber> key_times;
+                TArray<FKeyHandle> key_handles;
+                parameter.ParameterCurve.GetKeys( TRange<FFrameNumber>::All(), &key_times, &key_handles );
+                check( key_handles.Num() == 1 );
+
+                UE::MovieScene::SetChannelDefault( &parameter.ParameterCurve, 1.f );
+
+                parameter.ParameterCurve.DeleteKeys( key_handles );
+
+                result.mChannel = &parameter.ParameterCurve;
+                return result;
+            }
         }
     }
 
