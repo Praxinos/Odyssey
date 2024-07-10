@@ -178,7 +178,7 @@ public:
     {
         TWeakObjectPtr<UMovieSceneComponentMaterialTrack>   mTrack;
         bool mTrackCreated { false };
-        TArray<TWeakObjectPtr<UMovieSceneParameterSection>> mSections;
+        TArray<TWeakObjectPtr<UMovieSceneSection>>          mSections;
         bool mSectionsCreated { false };
 
         FGuid mPlaneComponentBinding; // The binding of the root component of the plane
@@ -197,8 +197,8 @@ public:
         FMovieSceneFloatChannel* mChannel { nullptr };
         bool mChannelCreated { false };
     };
-    static FFindOrCreateParameterChannelResult          FindMaterialOpacityChannel( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TWeakObjectPtr<UMovieSceneParameterSection> iSection );
-    static FFindOrCreateParameterChannelResult          FindOrCreateMaterialOpacityChannel( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TWeakObjectPtr<UMovieSceneParameterSection> iSection );
+    static FFindOrCreateParameterChannelResult          FindMaterialOpacityChannel( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TWeakObjectPtr<UMovieSceneSection> iSection );
+    static FFindOrCreateParameterChannelResult          FindOrCreateMaterialOpacityChannel( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding, TWeakObjectPtr<UMovieSceneSection> iSection );
 
     static FKeyOpacity                                  GetOpacityKey( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, FGuid iPlaneBinding );
 
