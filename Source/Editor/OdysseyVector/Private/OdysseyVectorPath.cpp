@@ -2032,9 +2032,21 @@ FOdysseyVectorPath::CopyShape( uint64 iCopyFlags )
 
     for( FOdysseyVectorVertex* originalVertex : mVertexList )
     {
-        FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( originalVertex->GetX()
-                                                                  , originalVertex->GetY()
-                                                                  , originalVertex->GetRadius() );
+        ::ULIS::FVec2D originalVertexCoords = originalVertex->GetCoords();
+        double originalVertexRadius = originalVertex->GetRadius();
+        FOdysseyVectorVertex* newVertex;
+
+        if( iCopyFlags & COPY_WORLDCOORDS )
+        {
+            originalVertexCoords = FOdysseyVector::MapPoint( mWorldMatrix, originalVertexCoords );
+            originalVertexRadius = FOdysseyVector::MapVector( mWorldMatrix
+                                                            , ::ULIS::FVec2D( originalVertexRadius * 0.7071f
+                                                                            , originalVertexRadius * 0.7071f ) ).Distance();
+        }
+
+        newVertex = new FOdysseyVectorVertex( originalVertexCoords.x
+                                            , originalVertexCoords.y
+                                            , originalVertexRadius );
 
         newVertex->SetHandleAligned( originalVertex->IsHandleAligned() );
 
@@ -2056,16 +2068,24 @@ FOdysseyVectorPath::CopyShape( uint64 iCopyFlags )
                 FOdysseyVectorVertex* vertex1 = nullptr;
 
                 pointBuffer.reserve( originalSegment->GetFractionPointBuffer().size() + 2 );
-                pointBuffer.push_back( originalSegment->GetVertex(0)->GetCoords() );
+                pointBuffer.push_back( FOdysseyVector::MapPoint( mWorldMatrix
+                                                               , originalSegment->GetVertex(0)->GetCoords() ) );
 
                 for( uint32 i = 0; i < fractionCount - 1; i++ )
                 {
                     FOdysseyVectorFraction& fraction = fractionCache[i];
+                    ::ULIS::FVec2D fractionPointCoords = fraction.point[1]->GetCoords();
 
-                    pointBuffer.push_back( fraction.point[1]->GetCoords() );
+                    if( iCopyFlags & COPY_WORLDCOORDS )
+                    {
+                        fractionPointCoords = FOdysseyVector::MapPoint( mWorldMatrix, fractionPointCoords );
+                    }
+
+                    pointBuffer.push_back( fractionPointCoords );
                 }
 
-                pointBuffer.push_back( originalSegment->GetVertex(1)->GetCoords() );
+                pointBuffer.push_back( FOdysseyVector::MapPoint( mWorldMatrix
+                                                               , originalSegment->GetVertex(1)->GetCoords() ) );
 
                 FOdysseyVector::FitCurve( pointBuffer
                                         , 4.0f
@@ -2083,8 +2103,8 @@ FOdysseyVectorPath::CopyShape( uint64 iCopyFlags )
                     }
                     else
                     {
-                        double radius = ( originalSegment->GetVertex(0)->GetRadius() * ( 1.0f - lastRecordT ) )
-                                      + ( originalSegment->GetVertex(1)->GetRadius() * ( lastRecordT        ) );
+                        double radius = ( lookupTable[originalSegment->GetVertex(0)]->GetRadius() * ( 1.0f - lastRecordT ) )
+                                      + ( lookupTable[originalSegment->GetVertex(1)]->GetRadius() * ( lastRecordT        ) );
 
                         vertex1 = new FOdysseyVectorVertex( bezierCurve[3].x
                                                           , bezierCurve[3].y
@@ -2115,12 +2135,23 @@ FOdysseyVectorPath::CopyShape( uint64 iCopyFlags )
                 FOdysseyVectorSegmentCubic* originalCubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(originalSegment);
                 FOdysseyVectorVertex* vertex0 = static_cast<FOdysseyVectorVertex*>( originalCubicSegment->GetPoint(0) );
                 FOdysseyVectorVertex* vertex1 = static_cast<FOdysseyVectorVertex*>( originalCubicSegment->GetPoint(1) );
+                FOdysseyVectorHandleSegment* originalHandle0 = originalSegment->GetHandle(0);
+                FOdysseyVectorHandleSegment* originalHandle1 = originalSegment->GetHandle(1);
+                ::ULIS::FVec2D originalHandle0Coords = originalHandle0->GetCoords();
+                ::ULIS::FVec2D originalHandle1Coords = originalHandle1->GetCoords();
+
+                if( iCopyFlags & COPY_WORLDCOORDS )
+                {
+                    originalHandle0Coords = FOdysseyVector::MapPoint( mWorldMatrix, originalHandle0Coords );
+                    originalHandle1Coords = FOdysseyVector::MapPoint( mWorldMatrix, originalHandle1Coords );
+                }
+
                 FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( cubicPathCopy
                                                                                             , lookupTable[vertex0]
-                                                                                            , originalCubicSegment->GetHandle(0)->GetX()
-                                                                                            , originalCubicSegment->GetHandle(0)->GetY()
-                                                                                            , originalCubicSegment->GetHandle(1)->GetX()
-                                                                                            , originalCubicSegment->GetHandle(1)->GetY()
+                                                                                            , originalHandle0Coords.x
+                                                                                            , originalHandle0Coords.y
+                                                                                            , originalHandle1Coords.x
+                                                                                            , originalHandle1Coords.y
                                                                                             , lookupTable[vertex1]
                                                                                             , true );
 

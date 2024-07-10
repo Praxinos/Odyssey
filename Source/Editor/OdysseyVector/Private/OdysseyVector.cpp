@@ -163,6 +163,15 @@ FOdysseyVector::MapPoint( BLMatrix2D& iMatrix
     return ::ULIS::FVec2D( pt.x, pt.y );
 }
 
+::ULIS::FVec2D
+FOdysseyVector::MapVector( BLMatrix2D& iMatrix
+                         , const ::ULIS::FVec2D& iPoint )
+{
+    BLPoint pt = iMatrix.mapVector( iPoint.x, iPoint.y );
+
+    return ::ULIS::FVec2D( pt.x, pt.y );
+}
+
 double
 FOdysseyVector::Cross2D( const ::ULIS::FVec2D& iA, const ::ULIS::FVec2D &iB )
 {
@@ -880,7 +889,7 @@ FitCubic( const std::vector<::ULIS::FVec2D>& iPointBuffer
 
     /*  If error not too large, try some reparameterization  */
     /*  and iteration */
-
+/* commented out for now: reparametrization gives strange values.
     if ( maxError < iterationError )
     {
 		for ( uint32 i = 0; i < maxIterations; i++ )
@@ -916,6 +925,7 @@ FitCubic( const std::vector<::ULIS::FVec2D>& iPointBuffer
             uBuffer = uPrimeBuffer;
         }
     }
+*/
 
     /* Fitting failed -- split at max error point and fit recursively */
     tHatCenter = ComputeCenterTangent( iPointBuffer, splitPoint );
@@ -924,7 +934,7 @@ FitCubic( const std::vector<::ULIS::FVec2D>& iPointBuffer
             , iFirstRecord
             , splitPoint
             , iFirstRecordT
-            , uBuffer[(splitPoint - &iPointBuffer[0])]
+            , (double) ( splitPoint - &iPointBuffer[0] ) / iPointBuffer.size()
             , iLeftTangent
             , tHatCenter
             , iError
@@ -935,7 +945,7 @@ FitCubic( const std::vector<::ULIS::FVec2D>& iPointBuffer
     FitCubic( iPointBuffer
             , splitPoint
             , iLastRecord
-            , uBuffer[(splitPoint - &iPointBuffer[0])]
+            , (double) ( splitPoint - &iPointBuffer[0] ) / iPointBuffer.size()
             , iLastRecordT
             , tHatCenter
             , iRightTangent

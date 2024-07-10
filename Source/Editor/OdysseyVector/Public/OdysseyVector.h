@@ -62,6 +62,8 @@ namespace FOdysseyVector
 
     ::ULIS::FVec2D ODYSSEYVECTOR_API MapPoint( BLMatrix2D& iMatrix
                                              , const ::ULIS::FVec2D& iPoint );
+    ::ULIS::FVec2D ODYSSEYVECTOR_API MapVector( BLMatrix2D& iMatrix
+                                              , const ::ULIS::FVec2D& iPoint );
     bool ProjectPoint( const ::ULIS::FVec2D& iPt
                      , const ::ULIS::FVec2D& iSegmentP0
                      , const ::ULIS::FVec2D& iSegmentP1

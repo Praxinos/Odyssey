@@ -1087,7 +1087,7 @@ FOdysseyVectorTagInbetweener::SetGrid( eInbetweenerGridType iGridType
         mGrid = nullptr;
     }
 
-    if( ( mGridNumQuadX != iGridNumQuadX ) && ( mGridNumQuadY != iGridNumQuadY ) )
+    if( ( mGridNumQuadX != iGridNumQuadX ) || ( mGridNumQuadY != iGridNumQuadY ) )
     {
         RemoveAllTrajectories();
     }
@@ -1126,7 +1126,7 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
               | INVALIDATE_SPACING
               | INVALIDATE_CELLS );
 
-    if( ( mGridNumQuadX != iGridNumQuadX ) && ( mGridNumQuadY != iGridNumQuadY ) )
+    if( ( mGridNumQuadX != iGridNumQuadX ) || ( mGridNumQuadY != iGridNumQuadY ) )
     {
         RemoveAllTrajectories();
     }
@@ -1146,7 +1146,7 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
               | INVALIDATE_SPACING
               | INVALIDATE_CELLS );
 
-    if( ( mGridNumQuadX != iGridNumQuadX ) && ( mGridNumQuadY != iGridNumQuadY ) )
+    if( ( mGridNumQuadX != iGridNumQuadX ) || ( mGridNumQuadY != iGridNumQuadY ) )
     {
         RemoveAllTrajectories();
     }
@@ -1204,17 +1204,19 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                             FInterpolatedPoint* interpolatedPoint = &interpolatedPath.mInterpolatedPointBuffer[i];
                             ::ULIS::FVec2D* commitPosition = &interpolatedPath.mInterpolatedPointPositionBuffer[skippedOffset + i];
                             ::ULIS::FVec2D swapPosition = interpolatedPoint->mOriginalPoint->GetCoords();
-                            BLPoint transformedLocalPosition;
-                            BLPoint transformedWorldPosition;
+                            ::ULIS::FVec2D transformedLocalPosition;
+                            //double transformedLocalRadius;
+                            //BLPoint transformedWorldPosition;
 
-                            transformedLocalPosition = inbetween->matrix.mapPoint( commitPosition->x
-                                                                                 , commitPosition->y );
+                            transformedLocalPosition = FOdysseyVector::MapPoint( inbetween->matrix, ::ULIS::FVec2D( commitPosition->x
+                                                                                                                  , commitPosition->y ) );
 
+/*
                             transformedWorldPosition = ownerWorldMatrix.mapPoint( transformedLocalPosition.x
                                                                                 , transformedLocalPosition.y );
-
-                            interpolatedPoint->mOriginalPoint->Set( transformedWorldPosition.x
-                                                                  , transformedWorldPosition.y );
+*/
+                            interpolatedPoint->mOriginalPoint->Set( transformedLocalPosition.x
+                                                                  , transformedLocalPosition.y );
 
                             *commitPosition = swapPosition;
                         }
@@ -1266,7 +1268,9 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
 
             FOdysseyVectorGroupPaint* inbetweenScene = inbetweenAnimationCell->GetEngine()->GetScene();
 
-            FOdysseyVectorObject* copiedObject = mOwner->Copy( 0, preProcess, postProcess );
+            FOdysseyVectorObject* copiedObject = mOwner->Copy( FOdysseyVectorObject::COPY_WORLDCOORDS
+                                                             , preProcess
+                                                             , postProcess );
 
             oAddedObjectList.push_back( copiedObject );
             oCommittedSceneList.push_back( inbetweenScene );
@@ -1287,8 +1291,12 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                     {
                         BLPoint vertexLocalPosition = inverseWorldMatrix.mapPoint( vertex->GetX()
                                                                                  , vertex->GetY() );
+                        double vertexLocalRadius = FOdysseyVector::MapVector( inverseWorldMatrix
+                                                                            , ::ULIS::FVec2D( vertex->GetRadius() * 0.7071f
+                                                                                            , vertex->GetRadius() * 0.7071f ) ).Distance();
 
                         vertex->Set( vertexLocalPosition.x, vertexLocalPosition.y );
+                        vertex->SetRadius( vertexLocalRadius );
                     }
 
                     for( FOdysseyVectorSegment* segment : newPath->GetSegmentList() )
