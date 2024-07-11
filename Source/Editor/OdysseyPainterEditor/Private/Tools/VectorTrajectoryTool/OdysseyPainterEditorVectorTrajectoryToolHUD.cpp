@@ -100,12 +100,8 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickTrajectory( FOdysseyVectorTagI
     for( FInbetweenerTrajectory* trajectory : trajectoryList )
     {
         ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
-
         BLPoint p0World = ownerWorldMatrix.mapPoint( cubicBezier[0].x, cubicBezier[0].y );
-        BLPoint p1World = ownerWorldMatrix.mapPoint( cubicBezier[1].x, cubicBezier[1].y );
-        BLPoint p2World = ownerWorldMatrix.mapPoint( cubicBezier[2].x, cubicBezier[2].y );
         BLPoint p3World = ownerWorldMatrix.mapPoint( cubicBezier[3].x, cubicBezier[3].y ); 
-
 
         if( ( ::ULIS::FVec2D( p0World.x, p0World.y )
             - ::ULIS::FVec2D( iWorldX  , iWorldY   ) ).Distance() <= iPickingRadius )
@@ -151,14 +147,18 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickHandle( FOdysseyVectorGroupPai
               if( tag )
               {
                   FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-                  FInbetweenerHandleTrajectory* trajectoryHandle = PickHandle( inbetweenerTag
-                                                                             , iWorldX
-                                                                             , iWorldY
-                                                                             , iPickingRadius );
 
-                  if( trajectoryHandle )
+                  if( inbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
                   {
-                      oTrajectoryHandleList.push_back( trajectoryHandle );
+                      FInbetweenerHandleTrajectory* trajectoryHandle = PickHandle( inbetweenerTag
+                                                                                 , iWorldX
+                                                                                 , iWorldY
+                                                                                 , iPickingRadius );
+
+                      if( trajectoryHandle )
+                      {
+                          oTrajectoryHandleList.push_back( trajectoryHandle );
+                      }
                   }
               }
 
@@ -293,14 +293,10 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLCont
                                                             , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                             , FInbetweenerTrajectory* iTrajectory )
 {
-
     FInbetweenerQuad* quad = iTrajectory->GetQuad();
     ::ULIS::FVec2D* cubicBezier = iTrajectory->GetCubicBezier();
     BLMatrix2D& ownerWorldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
-
     BLPoint p0World = ownerWorldMatrix.mapPoint( cubicBezier[0].x, cubicBezier[0].y );
-    BLPoint p1World = ownerWorldMatrix.mapPoint( cubicBezier[1].x, cubicBezier[1].y );
-    BLPoint p2World = ownerWorldMatrix.mapPoint( cubicBezier[2].x, cubicBezier[2].y );
     BLPoint p3World = ownerWorldMatrix.mapPoint( cubicBezier[3].x, cubicBezier[3].y );
     BLPath path;
 
@@ -310,40 +306,59 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLCont
     DrawCircle( iBLContext, p0World.x, p0World.y, VERTEXRADIUS, iHcColor, iBgColor );
     DrawCircle( iBLContext, p3World.x, p3World.y, VERTEXRADIUS, iHcColor, iBgColor );
 
-    path.moveTo( p0World.x, p0World.y );
-    path.cubicTo( p1World.x, p1World.y
-                , p2World.x, p2World.y 
-                , p3World.x, p3World.y );
-
-    iBLContext->setStrokeStyle( iBgColor );
-    iBLContext->setStrokeWidth( 2.0f );
-    iBLContext->strokePath( path );
-
-    iBLContext->setStrokeStyle( iHcColor );
-    iBLContext->setStrokeWidth( 1.0f );
-    iBLContext->strokePath( path );
-
-    if( mTrajectoryTool->GetPickingMode() == eTrajectoryPickingMode::Alter )
+    if( iInbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::Linear )
     {
-        DrawLine  ( iBLContext
-                  , p0World.x
-                  , p0World.y
-                  , p1World.x
-                  , p1World.y
-                  , iFgColor
-                  , iBgColor );
-        DrawCircle( iBLContext, p1World.x, p1World.y, VERTEXRADIUS, iFgColor, iBgColor );
+        path.moveTo( p0World.x, p0World.y );
+        path.lineTo( p3World.x, p3World.y );
 
-        DrawLine  ( iBLContext
-                  , p3World.x
-                  , p3World.y
-                  , p2World.x
-                  , p2World.y
-                  , iFgColor
-                  , iBgColor );
-        DrawCircle( iBLContext, p2World.x, p2World.y, VERTEXRADIUS, iFgColor, iBgColor );
+        iBLContext->setStrokeStyle( iBgColor );
+        iBLContext->setStrokeWidth( 2.0f );
+        iBLContext->strokePath( path );
+
+        iBLContext->setStrokeStyle( iHcColor );
+        iBLContext->setStrokeWidth( 1.0f );
+        iBLContext->strokePath( path );
     }
 
+    if( iInbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
+    {
+        BLPoint p1World = ownerWorldMatrix.mapPoint( cubicBezier[1].x, cubicBezier[1].y );
+        BLPoint p2World = ownerWorldMatrix.mapPoint( cubicBezier[2].x, cubicBezier[2].y );
+
+        path.moveTo( p0World.x, p0World.y );
+        path.cubicTo( p1World.x, p1World.y
+                    , p2World.x, p2World.y 
+                    , p3World.x, p3World.y );
+
+        iBLContext->setStrokeStyle( iBgColor );
+        iBLContext->setStrokeWidth( 2.0f );
+        iBLContext->strokePath( path );
+
+        iBLContext->setStrokeStyle( iHcColor );
+        iBLContext->setStrokeWidth( 1.0f );
+        iBLContext->strokePath( path );
+
+        if( mTrajectoryTool->GetPickingMode() == eTrajectoryPickingMode::Alter )
+        {
+            DrawLine  ( iBLContext
+                      , p0World.x
+                      , p0World.y
+                      , p1World.x
+                      , p1World.y
+                      , iFgColor
+                      , iBgColor );
+            DrawCircle( iBLContext, p1World.x, p1World.y, VERTEXRADIUS, iFgColor, iBgColor );
+
+            DrawLine  ( iBLContext
+                      , p3World.x
+                      , p3World.y
+                      , p2World.x
+                      , p2World.y
+                      , iFgColor
+                      , iBgColor );
+            DrawCircle( iBLContext, p2World.x, p2World.y, VERTEXRADIUS, iFgColor, iBgColor );
+        }
+    }
 
     iBLContext->restore();
 }

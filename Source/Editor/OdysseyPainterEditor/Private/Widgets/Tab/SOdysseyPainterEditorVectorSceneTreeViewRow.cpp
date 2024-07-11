@@ -49,7 +49,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow
     const FSlateBrush* inbetweenerTagIcon = nullptr;
 
     //inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.InbetweenerTag16" );
-    inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Grid16" );
+    inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching16" );
 
     if ( vectorObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
     {

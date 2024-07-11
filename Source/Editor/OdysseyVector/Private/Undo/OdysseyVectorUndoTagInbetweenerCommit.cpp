@@ -50,8 +50,9 @@ FOdysseyVectorUndoTagInbetweenerCommit::Apply( UObject* iIgnored )
 
     for( FOdysseyVectorGroupPaint* scene : mCommittedSceneList )
     {
-        //will update paintgroup's mPathList e.g
+        //will update paintgroup's mPathList e.
         scene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
     }
 
     // update invalidated objects
@@ -83,6 +84,7 @@ FOdysseyVectorUndoTagInbetweenerCommit::Revert( UObject* iIgnored )
     {
         //will update paintgroup's mPathList e.g
         scene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
     }
 
     // update invalidated objects

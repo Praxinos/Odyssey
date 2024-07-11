@@ -465,7 +465,12 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.Polygon32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/polygon_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.FreeHand32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/freehand_32", mIcon32x32 ) );
     Set( "PainterEditor.ToolsTab.Chart64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/chart_tool", mIcon64x64 ) );
-    Set( "PainterEditor.ToolsTab.Trajectory64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/trajectory_tool", mIcon64x64 ) );
+// commented out: this SVG icon is poorly displayed, I don't know why. I then converted it to PNG
+//    Set( "PainterEditor.ToolsTab.Trajectory64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/trajectory_tool", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.Trajectory64", new IMAGE_BRUSH( "PainterEditor/ToolsTab/trajectory_64", mIcon64x64 ) );
+    Set( "PainterEditor.ToolsTab.Trajectory32", new IMAGE_BRUSH( "PainterEditor/ToolsTab/trajectory_32", mIcon32x32 ) );
+    Set( "PainterEditor.ToolsTab.Trajectory16", new IMAGE_BRUSH( "PainterEditor/ToolsTab/trajectory_64", mIcon16x16 ) );
+    Set( "PainterEditor.ToolsTab.Matching16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/matching_tool", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.Matching64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/matching_tool", mIcon64x64 ) );
 
     //OdysseyPainterEditorTools
