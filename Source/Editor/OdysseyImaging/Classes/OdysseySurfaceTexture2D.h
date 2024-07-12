@@ -41,5 +41,5 @@ public:
 private:
     // Private Data
     UPROPERTY()
-    UTexture2D* mTexture;
+    TStrongObjectPtr<UTexture2D> mTexture;
 };

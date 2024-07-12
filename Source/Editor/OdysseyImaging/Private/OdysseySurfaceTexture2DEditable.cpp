@@ -548,7 +548,6 @@ InvalidateSurfaceCallback( const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* i
 //----------------------------------------------------------- Construction / Destruction
 FOdysseySurfaceTexture2DEditable::~FOdysseySurfaceTexture2DEditable()
 {
-    mTexture->RemoveFromRoot();
     if(!mIsBorrowedTexture) // If not borrowed, that means transient hence we are responsible for dealloc
     {
         checkf(mTexture,TEXT("Error: texture should be a valid pointer"));
@@ -564,7 +563,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,in
     : mIsBorrowedTexture(false)
 {
     EPixelFormat pixelFormat = PixelFormatForULISFormat(iFormat);
-    mTexture = UTexture2D::CreateTransient(iWidth, iHeight, pixelFormat);
+    mTexture = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(iWidth, iHeight, pixelFormat));
     #if WITH_EDITORONLY_DATA
     mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
     #endif
@@ -572,11 +571,9 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,in
     
     //IsImageInfoValid() in ImageCore.h allows use of sRGB only on G8 and BGRA8 textures
     mTexture->SRGB = pixelFormat == EPixelFormat::PF_G8 || pixelFormat == EPixelFormat::PF_B8G8R8A8;
-    //texture->AddToRoot(); // Prevent GC
     mTexture->Filter = TextureFilter::TF_Nearest;
     mTexture->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({mTexture});
-    mTexture->AddToRoot();
+    FTextureCompilingManager::Get().FinishCompilation({mTexture.Get()});
 
     // Warning: the texture data source / bulk is allocated, then the block is allocated, then we copy the block content into bulk.
     mBlock = MakeShared<::ULIS::FBlock>(iWidth,iHeight, iFormat, nullptr, ::ULIS::FOnInvalidBlock( &InvalidateSurfaceCallback, static_cast<void*>(this) ));
@@ -596,8 +593,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* i
     ::ULIS::eFormat sourceFormat = ULISFormatForTextureSourceFormat(iTexture->Source.GetFormat());
     checkf( sourceFormat == iBlock->Format(),TEXT("iBlock format does not correspond to the expected format"));
 
-    mTexture = iTexture;
-    mTexture->AddToRoot();
+    mTexture = TStrongObjectPtr<UTexture2D>(iTexture);
 
     mBlock = iBlock;
 
@@ -608,8 +604,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* i
     : mIsBorrowedTexture(true)
 {
     checkf(iTexture,TEXT("Cannot Initialize with Null borrowed texture"));
-    mTexture = iTexture;
-    mTexture->AddToRoot();
+    mTexture = TStrongObjectPtr<UTexture2D>(iTexture);
 
     // Warning: the block is allocated, then the texture data is copied into it.
     ::ULIS::eFormat sourceFormat = ULISFormatForTextureSourceFormat(iTexture->Source.GetFormat());
@@ -621,7 +616,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(UTexture2D* i
         , ::ULIS::FOnInvalidBlock( &InvalidateSurfaceCallback, static_cast< void* >( this ) )
     );
 
-    CopyUTextureSourceDataIntoBlock( mBlock.Get(), mTexture);
+    CopyUTextureSourceDataIntoBlock( mBlock.Get(), mTexture.Get());
 }
 
 FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
@@ -632,7 +627,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(TSharedPtr<::
 
     EPixelFormat pixelFormat = PixelFormatForULISFormat(mBlock->Format());
 
-    mTexture = UTexture2D::CreateTransient(mBlock->Width(),mBlock->Height(), pixelFormat);
+    mTexture = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(mBlock->Width(),mBlock->Height(), pixelFormat));
     #if WITH_EDITORONLY_DATA
     mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
     #endif
@@ -642,8 +637,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(TSharedPtr<::
     mTexture->SRGB = pixelFormat == EPixelFormat::PF_G8 || pixelFormat == EPixelFormat::PF_B8G8R8A8;
     mTexture->Filter = TextureFilter::TF_Nearest;
     mTexture->UpdateResource();
-    FTextureCompilingManager::Get().FinishCompilation({ mTexture });
-    mTexture->AddToRoot();
+    FTextureCompilingManager::Get().FinishCompilation({ mTexture.Get() });
 
     mBlock->OnInvalid( ::ULIS::FOnInvalidBlock( &InvalidateSurfaceCallback, static_cast< void* >( this ) ) );
 
@@ -664,13 +658,13 @@ FOdysseySurfaceTexture2DEditable::Block() const
 UTexture2D*
 FOdysseySurfaceTexture2DEditable::Texture()
 {
-    return mTexture;
+    return mTexture.Get();
 }
 
 const UTexture2D*
 FOdysseySurfaceTexture2DEditable::Texture() const
 {
-    return mTexture;
+    return mTexture.Get();
 }
 
 bool

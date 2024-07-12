@@ -70,5 +70,5 @@ private:
     // Private Data
     const bool mIsBorrowedTexture;
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock;
-    UTexture2D* mTexture;
+    TStrongObjectPtr<UTexture2D> mTexture;
 };
