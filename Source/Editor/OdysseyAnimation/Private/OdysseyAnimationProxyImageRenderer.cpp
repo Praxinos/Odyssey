@@ -23,7 +23,7 @@ void
 FOdysseyAnimationProxyImageRenderer::Init()
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxyImageRenderer::Init);
-    if ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Editor || mForceRender )
+    if ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Editor || GetRenderType() == IOdysseyImageRenderer::eRenderType::RenderOutOfPegs || mForceRender )
         mAnimationRenderer->Init();
 
     if ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Render )

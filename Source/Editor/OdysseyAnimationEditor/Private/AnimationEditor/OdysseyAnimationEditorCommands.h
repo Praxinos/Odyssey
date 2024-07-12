@@ -110,4 +110,7 @@ public:
 
     /** Action to pan/Zoom the timeline */
     TSharedPtr<FUICommandInfo> PanZoomTimeline;
+
+    /** Flip System */
+    TArray<TSharedPtr<FUICommandInfo>> Flip;
 };

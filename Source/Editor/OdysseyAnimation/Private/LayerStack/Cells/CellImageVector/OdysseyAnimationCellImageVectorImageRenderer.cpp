@@ -48,6 +48,15 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
         mDrawingFlags |= layer->IsWireframe ? mDrawingFlags | ( FOdysseyVectorEngine::DRAWING_WIREFRAME)
                                             : mDrawingFlags & (~FOdysseyVectorEngine::DRAWING_WIREFRAME);
 
+        FVector2D outOfPegsPan = mCell->OutOfPegsPan();
+        float outOfPegsRotation = mCell->OutOfPegsRotation();
+        float outOfPegsZoom = mCell->OutOfPegsZoom();
+
+        mOutOfPegsTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
+            * ::ULIS::FMat3F::MakeTranslationMatrix(outOfPegsPan.X, outOfPegsPan.Y)
+            * ::ULIS::FMat3F::MakeRotationMatrix(FMath::DegreesToRadians(outOfPegsRotation))
+            * ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom, outOfPegsZoom)
+            * ::ULIS::FMat3F::MakeTranslationMatrix( animation->Width() / -2.f, animation->Height() / -2.f);
     }
 }
     
@@ -77,7 +86,11 @@ FOdysseyAnimationCellImageVectorImageRenderer::Blend(const FOdysseyImageRenderer
     if (!mBlock)
         return iWaitList;
 
-    TArray<::ULIS::FEvent> events = ConvertAndBlend(mBlock, ::ULIS::FVec2I(0), iParams, iWaitList);
+    FOdysseyImageRendererBlendParams params(iParams);
+    if (GetRenderType() == IOdysseyImageRenderer::eRenderType::RenderOutOfPegs)
+        params.mTransform = mOutOfPegsTransform;
+
+    TArray<::ULIS::FEvent> events = ConvertAndBlend(mBlock, ::ULIS::FVec2I(0), params, iWaitList);
     
     if (!mHUDBlock)
         return events;
@@ -95,7 +108,11 @@ FOdysseyAnimationCellImageVectorImageRenderer::Copy(const FOdysseyImageRendererC
     if (!mBlock)
         return iWaitList;
 
-    return ConvertAndCopy(mBlock, ::ULIS::FVec2I(0), iParams, iWaitList);
+    FOdysseyImageRendererCopyParams params(iParams);
+    if (GetRenderType() == IOdysseyImageRenderer::eRenderType::RenderOutOfPegs)
+        params.mTransform = mOutOfPegsTransform;
+
+    return ConvertAndCopy(mBlock, ::ULIS::FVec2I(0), params, iWaitList);
 }
 
 void

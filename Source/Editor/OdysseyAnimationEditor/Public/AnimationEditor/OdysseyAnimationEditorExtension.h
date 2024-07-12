@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "PainterEditor/OdysseyPainterEditorExtension.h"
 #include "OdysseyAnimationEditorTimeline.h"
+#include "OdysseyAnimationEditorFlipSystem.h"
 #include "OdysseyAnimationImageRenderingAbility.h"
 
 class FOdysseyPainterEditor;
@@ -57,7 +58,8 @@ private:
 public:
     TSharedPtr<FOdysseyAnimationEditorSource> mAnimationSource;
     TSharedPtr<FOdysseyAnimationEditorGUI> mGUI;
-    FOdysseyAnimationEditorTimeline mTimeline; //Those are just the editor specific data of the timeline    
+    FOdysseyAnimationEditorTimeline mTimeline; //Those are just the editor specific data of the timeline
+    TSharedPtr<FOdysseyAnimationEditorFlipSystem> mFlipSystem;
 
     float mPlaybackFramesPerSecond;
     TArray<FGuid> mImageRenderingComposition;

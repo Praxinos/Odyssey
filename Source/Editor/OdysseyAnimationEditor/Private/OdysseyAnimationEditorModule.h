@@ -34,6 +34,9 @@ private:
     //Level Editor Layout
     void RegisterLevelEditorLayoutExtensions();
     void UnregisterLevelEditorLayoutExtensions();
+
+	void RegisterDetailCustomizations();
+	void UnregisterDetailCustomization();
     
 private:
 	/** All created asset type actions. Cached here so that we can unregister them during shutdown. */

@@ -48,7 +48,8 @@ public:
     enum class eRenderType
     {
         Render, //renders only the expected final render result
-        Editor //renders what is expected in an editor (can render the animation lighttable for example)
+        RenderOutOfPegs,
+        Editor, //renders what is expected in an editor (can render the animation lighttable for example)
     };
 
     virtual ~IOdysseyImageRenderer() {};

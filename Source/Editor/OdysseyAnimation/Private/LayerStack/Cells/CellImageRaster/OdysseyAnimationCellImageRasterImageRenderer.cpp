@@ -6,6 +6,7 @@
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRasterImageRenderer.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "OdysseyRasterBlock.h"
+#include "OdysseyAnimation.h"
 
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"
@@ -15,6 +16,21 @@ FOdysseyAnimationCellImageRasterImageRenderer::FOdysseyAnimationCellImageRasterI
     , mCell(iCell)
     , mBlock(nullptr)
 {
+    UOdysseyAnimationLayer* layer = mCell->GetLayer();
+    UOdysseyAnimation* animation = layer->GetAnimation();
+
+    FVector2D outOfPegsPan = mCell->OutOfPegsPan();
+    float outOfPegsRotation = mCell->OutOfPegsRotation();
+    float outOfPegsZoom = mCell->OutOfPegsZoom();
+
+    if (mCell->IsOutOfPegs())
+    {
+        mOutOfPegsTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
+            * ::ULIS::FMat3F::MakeTranslationMatrix(outOfPegsPan.X, outOfPegsPan.Y)
+            * ::ULIS::FMat3F::MakeRotationMatrix(FMath::DegreesToRadians(outOfPegsRotation))
+            * ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom, outOfPegsZoom)
+            * ::ULIS::FMat3F::MakeTranslationMatrix( animation->Width() / -2.f, animation->Height() / -2.f);
+    }
 }
     
 void
@@ -50,7 +66,11 @@ FOdysseyAnimationCellImageRasterImageRenderer::Blend(const FOdysseyImageRenderer
     if (!mBlock)
         return iWaitList;
 
-    return ConvertAndBlend(mBlock, ::ULIS::FVec2I(0), iParams, iWaitList);
+    FOdysseyImageRendererBlendParams params(iParams);
+    if (GetRenderType() == IOdysseyImageRenderer::eRenderType::RenderOutOfPegs)
+        params.mTransform = mOutOfPegsTransform;
+
+    return ConvertAndBlend(mBlock, ::ULIS::FVec2I(0), params, iWaitList);
 }
 
 TArray<::ULIS::FEvent>
@@ -60,5 +80,9 @@ FOdysseyAnimationCellImageRasterImageRenderer::Copy(const FOdysseyImageRendererC
     if (!mBlock)
         return iWaitList;
 
-    return ConvertAndCopy(mBlock, ::ULIS::FVec2I(0), iParams, iWaitList);
+    FOdysseyImageRendererCopyParams params(iParams);
+    if (GetRenderType() == IOdysseyImageRenderer::eRenderType::RenderOutOfPegs)
+        params.mTransform = mOutOfPegsTransform;
+
+    return ConvertAndCopy(mBlock, ::ULIS::FVec2I(0), params, iWaitList);
 }

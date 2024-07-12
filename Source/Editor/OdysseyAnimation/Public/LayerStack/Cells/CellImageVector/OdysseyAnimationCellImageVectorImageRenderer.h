@@ -29,4 +29,5 @@ public:
     TSharedPtr<::ULIS::FBlock> mHUDBlock;
     uint64 mDrawingFlags;
     bool mRenderHUD;
+    ::ULIS::FMat3F mOutOfPegsTransform;
 };

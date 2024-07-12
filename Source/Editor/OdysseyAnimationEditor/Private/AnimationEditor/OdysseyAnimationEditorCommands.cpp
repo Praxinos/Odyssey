@@ -100,6 +100,23 @@ FOdysseyAnimationEditorCommands::RegisterCommands()
     }
 
     UI_BUNDLE_COMMAND( PanZoomTimeline, TimelineShortcuts,  "Pan / Zoom Timeline", "Hold the key to Pan (Left Mouse Button) or Zoom (Right Mouse Button) the Timeline",                                        EUserInterfaceActionType::None, FInputChord(EKeys::M));
+
+    for (int i = 0; i < 10; i++)
+    {
+        FNumberFormattingOptions options;
+        options.SetMinimumIntegralDigits(2);
+        TSharedPtr<FUICommandInfo> commandInfo = FUICommandInfoDecl(
+              this->AsShared()
+            , FName( *FString::Printf( TEXT( "Flip-%d" ), i + 1 ))
+            , FText::Format( LOCTEXT( "commands.flip.label", "Flip #{0}"), FText::AsNumber(i + 1, &options) )
+            , FText::Format( LOCTEXT( "commands.flip.tooltip", "Flips the timeline using the flip configuratio #{0}"), FText::AsNumber(i + 1, &options))
+            , TimelineShortcuts
+        )
+        .UserInterfaceType( EUserInterfaceActionType::Button )
+        .DefaultChord( FInputChord() );
+        
+        Flip.Add(commandInfo);
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -19,9 +19,11 @@
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "AnimationEditor/OdysseyAnimationEditorGUI.h"
 #include "AnimationEditor/OdysseyAnimationEditorProjectSettings.h"
+#include "AnimationEditor/OdysseyAnimationEditorUserSettings.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyAnimation.h"
 #include "AnimationEditor/OdysseyAnimationEditorSource.h"
+#include "OdysseyAnimationEditorFlipSystem.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -87,6 +89,8 @@ FOdysseyAnimationEditorModule::StartupModule()
 	RegisterSettings();
 
 	RegisterLevelEditorLayoutExtensions();
+
+	RegisterDetailCustomizations();
 }
 
 void
@@ -101,6 +105,8 @@ FOdysseyAnimationEditorModule::ShutdownModule()
 	UnregisterAssetTypeActions();
 
 	UnregisterLevelEditorLayoutExtensions();
+
+	UnregisterDetailCustomization();
 }
 
 void
@@ -141,6 +147,18 @@ FOdysseyAnimationEditorModule::UnregisterCommands()
 }
 
 void
+FOdysseyAnimationEditorModule::RegisterDetailCustomizations()
+{
+	FOdysseyAnimationEditorFlipSystem::RegisterDetailCustomization();
+}
+
+void
+FOdysseyAnimationEditorModule::UnregisterDetailCustomization()
+{
+	FOdysseyAnimationEditorFlipSystem::UnregisterDetailCustomization();
+}
+
+void
 FOdysseyAnimationEditorModule::RegisterLevelEditorLayoutExtensions()
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
@@ -166,6 +184,11 @@ FOdysseyAnimationEditorModule::RegisterSettings()
                                         , LOCTEXT( "settings.name", "2D Animation Editor" )
                                         , LOCTEXT( "settings.tooltip", "Configure the look and feel of the 2D Animation Editor." )
                                         , GetMutableDefault<UOdysseyAnimationEditorProjectSettings>() );
+
+	settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyAnimationEditorUserSettings"
+										, LOCTEXT( "settings.name", "2D Animation Editor" )
+										, LOCTEXT( "settings.tooltip", "Configure the look and feel of the 2D Animation Editor." )
+										, GetMutableDefault<UOdysseyAnimationEditorUserSettings>() );
 }
 
 void
@@ -177,6 +200,7 @@ FOdysseyAnimationEditorModule::UnregisterSettings()
         return;
         
     settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyAnimationEditor" );
+	settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyAnimationEditorUserSettings" );
 }
 
 IMPLEMENT_MODULE( FOdysseyAnimationEditorModule, OdysseyAnimationEditor );
