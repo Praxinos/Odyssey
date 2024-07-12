@@ -25,6 +25,7 @@ FOdysseyAnimationEditorExtension::FOdysseyAnimationEditorExtension(FOdysseyPaint
 	, mAnimationSource(nullptr)
 	, mGUI(nullptr)
 	, mTimeline(this)
+	, mFlipSystem(MakeShared<FOdysseyAnimationEditorFlipSystem>(this))
 	, mPlaybackFramesPerSecond(0)
 	, mLayerStackBrushEditorContext(MakeShared<FOdysseyLayerStackEditorBrushContext>(nullptr))
 	, mOutOfPegsTool(nullptr)
@@ -42,6 +43,8 @@ FOdysseyAnimationEditorExtension::Initialize()
 	
 	mOutOfPegsTool = NewObject<UOdysseyAnimationEditorOutOfPegsTool>();
 	mOutOfPegsTool->SetEditor(GetEditor());
+
+    FSlateApplication::Get().RegisterInputPreProcessor(mFlipSystem);
 }
 
 void
@@ -223,4 +226,5 @@ FOdysseyAnimationEditorExtension::BindShortcuts(FBaseToolkit* iToolkit)
 	FOdysseyPainterEditorExtension::BindShortcuts(iToolkit);
 	
     mOutOfPegsTool->BindShortcuts(iToolkit);
+	mFlipSystem->BindShortcuts(iToolkit);
 }

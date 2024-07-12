@@ -114,7 +114,7 @@ UOdysseyAnimationPlayer::SeekToTime(FTimespan iTime)
 void
 UOdysseyAnimationPlayer::SeekToFrame(int iFrameIndex)
 {
-	mCurrentTime = FTimespan::FromSeconds((Animation->CurrentFrame) / Animation->GetFramesPerSecond());
+	mCurrentTime = FTimespan::FromSeconds(iFrameIndex / Animation->GetFramesPerSecond());
 	mOnCurrentTimeChanged.Broadcast();
 }
 

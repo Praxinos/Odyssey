@@ -27,4 +27,5 @@ public:
 public:
     TSharedPtr<const FOdysseyAnimationCellImageRaster> mCell;
     TSharedPtr<::ULIS::FBlock> mBlock;
+    ::ULIS::FMat3F mOutOfPegsTransform;
 };
