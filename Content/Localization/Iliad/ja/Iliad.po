@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Iliad\n"
-"POT-Creation-Date: 2024-06-25 11:46\n"
-"PO-Revision-Date: 2024-06-25 11:46\n"
+"POT-Creation-Date: 2024-07-15 12:51\n"
+"PO-Revision-Date: 2024-07-15 12:51\n"
 "Language-Team: \n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
@@ -118,6 +118,20 @@ msgctxt "AnimationEditor,animation-details-tab.name"
 msgid "Animation Details"
 msgstr ""
 
+#. Key:	commands.flip.label
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorCommands.cpp(111)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorCommands.cpp(111)
+msgctxt "AnimationEditor,commands.flip.label"
+msgid "Flip #{0}"
+msgstr ""
+
+#. Key:	commands.flip.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorCommands.cpp(112)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorCommands.cpp(112)
+msgctxt "AnimationEditor,commands.flip.tooltip"
+msgid "Flips the timeline using the flip configuratio #{0}"
+msgstr ""
+
 #. Key:	editor-commands.name
 #. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorCommands.cpp(20)
 #: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorCommands.cpp(20)
@@ -174,6 +188,34 @@ msgctxt "AnimationEditor,commands.set-cell-mark.tooltip"
 msgid "Sets the Cell Mark #{0} on selected cells"
 msgstr ""
 
+#. Key:	flip-detail-customization.all-cell-marks
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(249)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(249)
+msgctxt "AnimationEditor,flip-detail-customization.all-cell-marks"
+msgid "All Cell Marks"
+msgstr ""
+
+#. Key:	flip-detail-customization.invalid-cell-mark
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(253)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(253)
+msgctxt "AnimationEditor,flip-detail-customization.invalid-cell-mark"
+msgid "Invalid Value"
+msgstr ""
+
+#. Key:	flip-detail-customization.limits-cell-mark.custum-row.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(80)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(80)
+msgctxt "AnimationEditor,flip-detail-customization.limits-cell-mark.custum-row.name"
+msgid "Limits Cell Mark"
+msgstr ""
+
+#. Key:	flip-detail-customization.keys-cell-mark.custum-row.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(99)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(99)
+msgctxt "AnimationEditor,flip-detail-customization.keys-cell-mark.custum-row.name"
+msgid "Keys Cell Mark"
+msgstr ""
+
 #. Key:	lighttable-tab.name
 #. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorLightTableTab.cpp(28)
 #: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorLightTableTab.cpp(28)
@@ -182,11 +224,18 @@ msgid "LightTable"
 msgstr "ライトテーブル"
 
 #. Key:	actions.clear
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(192)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(192)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(195)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(195)
 msgctxt "AnimationEditor,actions.clear"
 msgid "Clear"
 msgstr "消去する"
+
+#. Key:	actions.cut
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(265)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(265)
+msgctxt "AnimationEditor,actions.cut"
+msgid "Cut"
+msgstr ""
 
 #. Key:	timeline-tab.file-menu.animation-import-export-section.name
 #. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(186)
@@ -329,29 +378,29 @@ msgid "Animation"
 msgstr "アニメーション"
 
 #. Key:	asset-category.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(112)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(112)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(118)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(118)
 msgctxt "AnimationEditor,asset-category.name"
 msgid "ILIAD"
 msgstr "ILIAD"
 
 #. Key:	settings.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(166)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(166)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(184)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(184)
 msgctxt "AnimationEditor,settings.name"
 msgid "2D Animation Editor"
 msgstr ""
 
 #. Key:	settings.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(167)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(167)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(185)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(185)
 msgctxt "AnimationEditor,settings.tooltip"
 msgid "Configure the look and feel of the 2D Animation Editor."
 msgstr ""
 
 #. Key:	main-menu.category
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(37)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(37)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(39)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(39)
 msgctxt "AnimationEditor,main-menu.category"
 msgid "Odyssey Animation Editor"
 msgstr "Odyssey アニメーション エディタ"
@@ -1449,15 +1498,15 @@ msgid "Uncategorized Yet Shortcuts"
 msgstr "未分類のショートカット"
 
 #. Key:	settings.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(63)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(63)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(66)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(66)
 msgctxt "PainterEditor,settings.name"
 msgid "ILIAD Painter Editor"
 msgstr "Iliad ペインターのエディタ"
 
 #. Key:	settings.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(64)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(64)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(67)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(67)
 msgctxt "PainterEditor,settings.tooltip"
 msgid "Configure the look and feel of the ILIAD Editor."
 msgstr "ILIAD エディタのルックとフィールのコンフィギュレーションをする。"
@@ -1468,6 +1517,13 @@ msgstr "ILIAD エディタのルックとフィールのコンフィギュレー
 msgctxt "PainterEditor,vector-brush.brush-picker-window.title"
 msgid "Pick Vector Brush"
 msgstr "ベクターブラシを選択する"
+
+#. Key:	None
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/FOdysseyVectorObjectViewPaletteCustomization.cpp(93)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/FOdysseyVectorObjectViewPaletteCustomization.cpp(93)
+msgctxt "PainterEditor,None"
+msgid "None"
+msgstr ""
 
 #. Key:	vector-scene.transaction.ungroup
 #. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1012)
@@ -1561,29 +1617,29 @@ msgid "Delete Bucket"
 msgstr "塗りつぶしツール用のポイントを削除"
 
 #. Key:	vector-scene.transaction.propagate-bucket
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1747)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1747)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1834)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1834)
 msgctxt "PainterEditor,vector-scene.transaction.propagate-bucket"
 msgid "Propagate Bucket"
 msgstr "塗りつぶす範囲を拡張する"
 
 #. Key:	PasteTransformation
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1823)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1823)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1910)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1910)
 msgctxt "PainterEditor,PasteTransformation"
 msgid "Paste Transformation"
 msgstr "トランスフォーメーションをペーストする"
 
 #. Key:	vector-scene.transaction.paste-objects
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1890)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1890)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1977)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1977)
 msgctxt "PainterEditor,vector-scene.transaction.paste-objects"
 msgid "Paste"
 msgstr "ペーストする"
 
 #. Key:	vector-scene.transaction.stitch-vertices
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1999)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1999)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(2086)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(2086)
 msgctxt "PainterEditor,vector-scene.transaction.stitch-vertices"
 msgid "Vector Path Stitch Tool"
 msgstr "ベクターパスのステッチツール"
@@ -1652,92 +1708,92 @@ msgid "Color Wheel"
 msgstr "カラーホイール"
 
 #. Key:	about-menu.iliad-submenu.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(160)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(160)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(161)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(161)
 msgctxt "PainterEditor,about-menu.iliad-submenu.name"
 msgid "Iliad"
 msgstr "Iliad"
 
 #. Key:	about-menu.iliad-submenu.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(161)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(161)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(162)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(162)
 msgctxt "PainterEditor,about-menu.iliad-submenu.tooltip"
 msgid "Iliad Actions"
 msgstr "ILIAD アクション"
 
 #. Key:	about-menu.iliad.iliad-section.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(167)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(167)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(168)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(168)
 msgctxt "PainterEditor,about-menu.iliad.iliad-section.name"
 msgid "ILIAD"
 msgstr "ILIAD"
 
 #. Key:	about-menu.iliad.about-iliad.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(171)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(171)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(172)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(172)
 msgctxt "PainterEditor,about-menu.iliad.about-iliad.name"
 msgid "About Iliad"
 msgstr "Iliad について"
 
 #. Key:	about-menu.iliad.about-iliad.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(172)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(172)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(173)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(173)
 msgctxt "PainterEditor,about-menu.iliad.about-iliad.tooltip"
 msgid "to get more information about the plugin, the team that created it, etc."
 msgstr "プラグインやそれを作成したチームなどに関する詳細情報を取得します。"
 
 #. Key:	about-menu.iliad.about-iliad.visit-praxinos-website.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(177)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(177)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(178)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(178)
 msgctxt "PainterEditor,about-menu.iliad.about-iliad.visit-praxinos-website.name"
 msgid "About Praxinos ..."
 msgstr "Praxinos について..."
 
 #. Key:	about-menu.iliad.about-iliad.visit-praxinos-website.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(178)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(178)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(179)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(179)
 msgctxt "PainterEditor,about-menu.iliad.about-iliad.visit-praxinos-website.tooltip"
 msgid "to get more information about the company Praxinos, its projects, etc."
 msgstr "Praxinos 社やそのプロジェクトなどについてさらに詳しい情報を入手するには..."
 
 #. Key:	about-menu.iliad.about-iliad.manual-and-release-notes.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(183)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(183)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(184)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(184)
 msgctxt "PainterEditor,about-menu.iliad.about-iliad.manual-and-release-notes.name"
 msgid "Manual and Release Notes ..."
 msgstr "マニュアルとリリースノート..."
 
 #. Key:	about-menu.iliad.about-iliad.manual-and-release-notes.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(184)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(184)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(185)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(185)
 msgctxt "PainterEditor,about-menu.iliad.about-iliad.manual-and-release-notes.tooltip"
 msgid "to get a full changelog of each Iliad version."
 msgstr "各 Iliad バージョンの完全な変更ログを取得する。"
 
 #. Key:	about-menu.iliad.about-iliad.get-more-brushes.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(189)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(189)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(190)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(190)
 msgctxt "PainterEditor,about-menu.iliad.about-iliad.get-more-brushes.name"
 msgid "Get more brushes ..."
 msgstr "もっと多くのブラシを入手するためには..."
 
 #. Key:	about-menu.iliad.about-iliad.get-more-brushes.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(190)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(190)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(191)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(191)
 msgctxt "PainterEditor,about-menu.iliad.about-iliad.get-more-brushes.tooltip"
 msgid "Want more brushes ? Just follow this link !"
 msgstr "もっと多くのブラシが欲しい方は、このリンクをクリックしてください！"
 
 #. Key:	about-menu.iliad.about-iliad.talk-with-the-developpers.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(195)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(195)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(196)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(196)
 msgctxt "PainterEditor,about-menu.iliad.about-iliad.talk-with-the-developpers.name"
 msgid "Talk with the developpers ..."
 msgstr "開発者とディスカッションする..."
 
 #. Key:	about-menu.iliad.about-iliad.talk-with-the-developpers.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(196)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(196)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(197)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(197)
 msgctxt "PainterEditor,about-menu.iliad.about-iliad.talk-with-the-developpers.tooltip"
 msgid "For those who want to discuss with us about the next improvements"
 msgstr "今後の改善点について話し合いたい方"
@@ -1820,8 +1876,8 @@ msgid "Property Changed"
 msgstr "プロパティが変更されました"
 
 #. Key:	vector-object.transaction.property-changed
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorVectorObjectView.cpp(140)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorVectorObjectView.cpp(140)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorVectorObjectView.cpp(171)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorVectorObjectView.cpp(171)
 msgctxt "PainterEditor,vector-object.transaction.property-changed"
 msgid "Property Changed"
 msgstr "プロパティが変更されました"
@@ -1911,29 +1967,29 @@ msgid "Paint Bucket Tool"
 msgstr ""
 
 #. Key:	raster-primitive-drawing-tool.transaction.draw-shape
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(277)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(277)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(275)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(275)
 msgctxt "PainterEditor,raster-primitive-drawing-tool.transaction.draw-shape"
 msgid "Draw Primitive Shape"
 msgstr "プリミティブシェイプを描く"
 
 #. Key:	raster-primitive-drawing-tool.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(435)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(435)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(434)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(434)
 msgctxt "PainterEditor,raster-primitive-drawing-tool.tooltip"
 msgid "Primitive Drawing Tool"
 msgstr ""
 
 #. Key:	raster-transform-tool.transaction.transform
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(580)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(580)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(581)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(581)
 msgctxt "PainterEditor,raster-transform-tool.transaction.transform"
 msgid "Transform"
 msgstr "トランスフォーム"
 
 #. Key:	raster-transform-tool.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(670)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(670)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(671)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(671)
 msgctxt "PainterEditor,raster-transform-tool.tooltip"
 msgid "Transform Tool"
 msgstr ""
@@ -2352,8 +2408,8 @@ msgid "Vector Path Drawing Tool"
 msgstr "ベクターパス描画ツール"
 
 #. Key:	vector-path-drawing-tool.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.cpp(609)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.cpp(609)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.cpp(613)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.cpp(613)
 msgctxt "PainterEditor,vector-path-drawing-tool.tooltip"
 msgid "Drawing Tool"
 msgstr ""
