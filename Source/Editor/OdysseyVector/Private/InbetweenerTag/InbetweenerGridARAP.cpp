@@ -11,7 +11,6 @@
 
 FInbetweenerGridARAP::FInbetweenerGridARAP( FOdysseyVectorTagInbetweener* iInbetweenerTag )
     : FInbetweenerGrid( iInbetweenerTag )
-    , k_cornersFixed( false ) // what is this ?
     , mRigidity( 10 )
 {
 }
@@ -115,7 +114,7 @@ FInbetweenerGridARAP::RegularizeQuads( eInbetweenerPointPositionType iPositionTy
     {
         if( point.GetQuadCount() )
         {
-            if ( point.IsDeformable() && (!k_cornersFixed || point.GetQuadCount() > 1 ) )
+            if ( point.IsDeformable() )
             {
                 ::ULIS::FVec2D tgt( point.GetPosition( iPositionType ).x
                                   , point.GetPosition( iPositionType ).y );
@@ -248,9 +247,9 @@ FInbetweenerGridARAP::Update( uint32 iUpdateFlags
 }
 
 void
-FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
-                                          , const BLMatrix2D& iSpaceInverseMatrix )
+FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer )
 {
+    BLMatrix2D& ownerInverseWorldMatrix = mInbetweenerTag->GetOwner()->GetInverseWorldMatrix();
     ::ULIS::FRectD spaceBBox = mInbetweenerTag->GetSourceBBox( false );
     BLMatrix2D conversionMatrix;
     uint32 pointID = 0;
@@ -278,7 +277,7 @@ FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPat
     {
         std::vector<FInterpolatedPoint>& interpolatedPointBuffer = interpolatedPath.GetInterpolatedPointBuffer();
 
-        FOdysseyVector::MatrixMultiply( iSpaceInverseMatrix
+        FOdysseyVector::MatrixMultiply( ownerInverseWorldMatrix
                                       , interpolatedPath.GetOriginalPath()->GetWorldMatrix()
                                       , conversionMatrix );
 

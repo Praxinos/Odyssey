@@ -855,14 +855,16 @@ FOdysseyVectorSegmentCubic::ThickenFraction( FOdysseyVectorFraction* iFraction
 void
 FOdysseyVectorSegmentCubic::BuildVariableAdaptive( FOdysseyVectorPoint* iFromPoint
                                                  , FOdysseyVectorPoint* iToPoint
-                                                 , double  iFromT
-                                                 , double  iToT
-                                                 , double  iRadiusFrom
-                                                 , double  iRadiusTo
+                                                 , double iFromT
+                                                 , double iToT
+                                                 , double iRadiusFrom
+                                                 , double iRadiusTo
                                                  , ::ULIS::FVec2D iBezier[4]
                                                  , const ::ULIS::FVec2D& iNormalizedTangentFrom
                                                  , const ::ULIS::FVec2D& iNormalizedTangentTo
-                                                 , int32   iRecurseDepth
+                                                 , uint32 iRecurseDepth
+                                                 , uint32 iMinRecurse
+                                                 , uint32 iMaxRecurse
                                                  , std::vector<FOdysseyVectorPoint>& iSubPointBuffer
                                                  , std::vector<FSegmentSubLine>& iSubLineBuffer )
 {
@@ -895,8 +897,8 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( FOdysseyVectorPoint* iFromPoi
         ctrlVector[1] = -straightVector;
     }
 
-    if( ( iRecurseDepth < MINRECURSE  )
-     || ( ( iRecurseDepth < MAXRECURSE ) // <--- do not subdivide forever though.
+    if( ( iRecurseDepth < iMinRecurse  )
+     || ( ( iRecurseDepth < iMaxRecurse ) // <--- do not subdivide forever though.
        && ( ( ctrlVector[0].DotProduct(  straightVector ) < dotLimit )
          || ( ctrlVector[1].DotProduct( -straightVector ) < dotLimit ) ) ) )
     {
@@ -937,6 +939,8 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( FOdysseyVectorPoint* iFromPoi
                                  , iNormalizedTangentFrom
                                  , tangent
                                  , iRecurseDepth + 1
+                                 , iMinRecurse
+                                 , iMaxRecurse
                                  , iSubPointBuffer
                                  , iSubLineBuffer );
 
@@ -957,6 +961,8 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( FOdysseyVectorPoint* iFromPoi
                                  , tangent
                                  , iNormalizedTangentTo
                                  , iRecurseDepth + 1
+                                 , iMinRecurse
+                                 , iMaxRecurse
                                  , iSubPointBuffer
                                  , iSubLineBuffer );
         }
@@ -1272,9 +1278,9 @@ FOdysseyVectorSegmentCubic::BuildOffsetCurves()
 }
 
 void
-FOdysseyVectorSegmentCubic::Update()
+FOdysseyVectorSegmentCubic::Update( uint32 iUpdateFlags )
 {
-    FOdysseyVectorSegment::Update();
+    FOdysseyVectorSegment::Update( iUpdateFlags );
 
     mBezier[0] = mPoint[0]->GetCoords();
     mBezier[1] = mCtrlPoint[0].GetCoords();
@@ -1283,7 +1289,8 @@ FOdysseyVectorSegmentCubic::Update()
 
     if( mNeedWidth )
     {
-        BuildVariable();
+        BuildVariable( iUpdateFlags & FOdysseyVectorObject::UPDATE_NEEDPOLYLINE ? 4 : MINRECURSE
+                     , MAXRECURSE );
     }
 }
 
@@ -1309,7 +1316,7 @@ static bool IntersectSegment( const ::ULIS::FVec2D& iLine0p0
 }
 
 void
-FOdysseyVectorSegmentCubic::BuildVariable()
+FOdysseyVectorSegmentCubic::BuildVariable( uint32 iMinRecurse, uint32 iMaxRecurse )
 {
     std::vector<FOdysseyVectorPoint> subPointBuffer;
     std::vector<FSegmentSubLine> subLineBuffer;
@@ -1341,15 +1348,17 @@ FOdysseyVectorSegmentCubic::BuildVariable()
                                                                                            , mBezier[3]
                                                                                            , 1.0f ) };
         double startU = 0.0f;
+        double tangent0Length = tangent[0].Distance();
+        double tangent1Length = tangent[1].Distance();
 
-        if( tangent[0].DistanceSquared() )
+        if( tangent0Length )
         {
-            tangent[0].Normalize();
+            tangent[0] /= tangent0Length;
         }
 
-        if( tangent[1].DistanceSquared() )
+        if( tangent1Length )
         {
-            tangent[1].Normalize();
+            tangent[1] /= tangent1Length;
         }
 
         BuildOffsetCurves();
@@ -1366,6 +1375,8 @@ FOdysseyVectorSegmentCubic::BuildVariable()
                               , tangent[0]
                               , tangent[1]
                               , 0
+                              , iMinRecurse
+                              , iMaxRecurse
                               , subPointBuffer
                               , subLineBuffer );
 

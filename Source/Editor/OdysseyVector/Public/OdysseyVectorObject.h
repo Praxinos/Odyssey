@@ -39,6 +39,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 UPDATE_PAINTGROUPS       = ( 1 << 2 );
         static const uint32 UPDATE_LOADED            = ( 1 << 3 );
         static const uint32 UPDATE_INTERACTIVE       = ( 1 << 4 );
+        static const uint32 UPDATE_NEEDPOLYLINE      = ( 1 << 5 );
 
         // invalidation flags
         static const uint32 INVALIDATE_MATRIX        = ( 1 << 0 );

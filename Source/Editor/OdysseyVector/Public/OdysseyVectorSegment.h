@@ -135,7 +135,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
        /**
          * @brief Update cached data for this segment.
          */
-        virtual void Update();
+        virtual void Update( uint32 iUpdateFlags );
 
        /**
          * @brief Mark this segment for later update. This invalidates the path as well.

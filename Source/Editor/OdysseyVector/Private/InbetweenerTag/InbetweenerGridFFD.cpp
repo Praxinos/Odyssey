@@ -27,9 +27,9 @@ FInbetweenerGridFFD::DeformPoint( FInterpolatedPoint* iInterpolatedPoint
 }
 
 void
-FInbetweenerGridFFD::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
-                                         , const BLMatrix2D& iSpaceInverseMatrix )
+FInbetweenerGridFFD::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer )
 {
+    BLMatrix2D& ownerInverseWorldMatrix = mInbetweenerTag->GetOwner()->GetInverseWorldMatrix();
     ::ULIS::FRectD spaceBBox = mInbetweenerTag->GetSourceBBox( false );
     BLMatrix2D conversionMatrix;
     uint32 pointID = 0;
@@ -57,7 +57,7 @@ FInbetweenerGridFFD::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPath
     {
         std::vector<FInterpolatedPoint>& interpolatedPointBuffer = interpolatedPath.GetInterpolatedPointBuffer();
 
-        FOdysseyVector::MatrixMultiply( iSpaceInverseMatrix
+        FOdysseyVector::MatrixMultiply( ownerInverseWorldMatrix
                                       , interpolatedPath.GetOriginalPath()->GetWorldMatrix()
                                       , conversionMatrix );
 

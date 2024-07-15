@@ -1542,7 +1542,7 @@ FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
 
             removedTagArray.push_back( tag );
 
-            inbetweenerTag->UpdateAnimationCells();
+            inbetweenerTag->RedrawAnimationCells();
         }
     }
 

@@ -18,10 +18,6 @@ class FInterpolatedPath
         FInterpolatedPath( FOdysseyVectorPath* iPath
                          , uint32 iInbetweenCount
                          , bool iPolyline );
-        void Draw( BLContext* iBLContext
-                 , const ::ULIS::FRectD& iInvalidationArea
-                 , double iAncestorsOpacity
-                 , uint64 iDrawingFlags );
         std::vector<FInterpolatedPoint>& GetInterpolatedPointBuffer();
         std::vector<FInterpolatedSegment>& GetInterpolatedSegmentBuffer();
         std::vector<::ULIS::FVec2D>& GetInterpolatedPointPositionBuffer();

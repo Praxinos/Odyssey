@@ -83,7 +83,7 @@ FInbetweenerPoint::SetTargetPosition( double iX, double iY )
     mTargetPosition.x = iX;
     mTargetPosition.y = iY;
 
-    mGrid->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TARGETBBOX
+    mGrid->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TARGET
                                           | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
 }
 

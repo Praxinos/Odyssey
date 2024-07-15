@@ -139,7 +139,7 @@ FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
         mQuadArea = mQuadBuffer[0].GetSourceArea();
 
         mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEBBOX
-                                   | FOdysseyVectorTagInbetweener::INVALIDATE_TARGETBBOX );
+                                   | FOdysseyVectorTagInbetweener::INVALIDATE_TARGET );
     }
 }
 
@@ -153,14 +153,14 @@ FInbetweenerGrid::Update( uint32 iUpdateFlags
         mSourceCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::SourcePosition );
     }
 
-    if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGETBBOX )
+    if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGET )
      || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE   ) )
     {
         mTargetCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::TargetPosition );
     }
 
     if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEBBOX      )
-     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGETBBOX      )
+     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGET      )
      || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE        )
      || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SPACING         )
      || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TRAJECTORY_LIST )
@@ -319,14 +319,6 @@ bool
 FInbetweenerGrid::PrecomputeARAPInterpolation()
 {
     std::list<FInbetweenerTrajectory*>& trajectoryList = mInbetweenerTag->GetTrajectoryList();
-
-/*
-    if (!m_singleConnectedComponent)
-    {
-        qWarning() << "Cannot precompute a lattice with multiple connected components! ";
-        return;
-    }
-*/
     std::vector<TripletD> P_triplets;
     uint32 P_rows = 8 * mUsedQuadCount; // P_rows
     double triArea = mQuadArea * 0.5f;
@@ -429,14 +421,6 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
 
         return false;
     }
-
-    // Compute ref and target center of mass
-    //mSourceCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::SourcePosition );
-    //mTargetCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::TargetPosition );
-
-    //m_precomputeDirty = false;
-    //m_arapDirty = true;
-    //sw.stop();
 
     return true;
 }
@@ -567,24 +551,10 @@ FInbetweenerGrid::ComputeARAPInterpolation( //float alphaLinear
                                           , bool useRigidTransform )
 {
     std::list<FInbetweenerTrajectory*>& trajectoryList = mInbetweenerTag->GetTrajectoryList();
-
-//    qDebug() << "** Interpolating lattice at t=" << alpha;
-//    StopWatch sw("ARAP interpolation");
-
-    //useRigidTransform = useRigidTransform && k_useGlobalRigidTransform;
-//    m_currentPrecomputedTime = alpha;
-
-    // Lattices with multiple connected components cannot be interpolated, return reference or target configuration
-//    if (!m_singleConnectedComponent) {
-//        if (alpha < 1.0) copyPositions(this, REF_POS, INTERP_POS);
-//        else             copyPositions(this, TARGET_POS, INTERP_POS);
-//        return;
-//    }
 /*
     auto startTotal = std::chrono::high_resolution_clock::now();
 */
     Eigen::MatrixXd A( 2, 8 * mUsedQuadCount  );
-    //double t = alpha;
     double t = iInbetween->spacing;
     // Compute A(t)
     int i = 0;
@@ -623,20 +593,16 @@ FInbetweenerGrid::ComputeARAPInterpolation( //float alphaLinear
     }
 
     // User defined constraints values
-
-    //float offset;
     for ( FInbetweenerTrajectory* trajectory : trajectoryList )
     {
         ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
+        double waypointT = trajectory->GetWaypointBuffer()[iInbetween->index].GetT();
         ::ULIS::FVec2D coords = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( cubicBezier[0]
                                                                                    , cubicBezier[1]
                                                                                    , cubicBezier[2]
                                                                                    , cubicBezier[3]
-                                                                                   , t );
+                                                                                   , waypointT );
         BLPoint inbetweenCoords = iInbetween->inverseMatrix.mapPoint( coords.x, coords.y );
-
-        //offset = traj->localOffset()->get();
-        //Point::VectorType pos = traj->eval(t + (std::abs(offset) < 1e-5f ? 0.0f : offset));
 
         PTAD( idx, 0 ) = inbetweenCoords.x;
         PTAD( idx, 1 ) = inbetweenCoords.y;
@@ -668,14 +634,11 @@ FInbetweenerGrid::ComputeARAPInterpolation( //float alphaLinear
     auto durationTotal = std::chrono::duration_cast<std::chrono::microseconds>(stopTotal - startTotal);
     UE_LOG(LogTemp, Warning, TEXT("ComputeARAPInterpolation Exec time %llu"), durationTotal.count() );
 */
-    //m_arapDirty = false;
-    //sw.stop();
 
     return true;
 }
 
 void
-FInbetweenerGrid::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
-                                      , const BLMatrix2D& iSpaceInverseMatrix  )
+FInbetweenerGrid::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer )
 {
 }

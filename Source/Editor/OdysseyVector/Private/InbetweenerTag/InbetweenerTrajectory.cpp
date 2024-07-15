@@ -25,8 +25,13 @@ FInbetweenerTrajectory::Init( uint32 iQuadIndex
     mQuadIndex = iQuadIndex;
     mQuadU = iQuadU;
     mQuadV = iQuadV;
+
+    ResetSpacing();
 }
 
+/*
+* Updates the bezier between the source grid and the target grid
+*/
 void
 FInbetweenerTrajectory::Update()
 {
@@ -47,6 +52,33 @@ FInbetweenerTrajectory::Update()
 
     mCubicBezier[1] = mCubicBezier[0] + ( mHandle[0].GetDirection() * mHandle[0].GetLengthRatio() * bezierLength );
     mCubicBezier[2] = mCubicBezier[3] + ( mHandle[1].GetDirection() * mHandle[1].GetLengthRatio() * bezierLength );
+}
+
+FInbetweenerWaypoint*
+FInbetweenerTrajectory::GetWaypoint( uint32 iIndex )
+{
+    return &mWaypointBuffer[iIndex];
+}
+
+void
+FInbetweenerTrajectory::ResetSpacing()
+{
+    uint32 inbetweenCount =  mInbetweenerTag->GetInbetweenCount();
+
+    float step = 1.0f / ( inbetweenCount + 1 );
+    float t = step;
+
+    mWaypointBuffer.clear();
+    mWaypointBuffer.reserve( inbetweenCount );
+
+    for( uint32 i = 0; i < inbetweenCount; i++ )
+    {
+        FInbetweenerWaypoint& waypoint = mWaypointBuffer.emplace_back( this );
+
+        waypoint.SetT( t );
+
+        t += step;
+    }
 }
 
 FInbetweenerHandleTrajectory*
@@ -89,4 +121,10 @@ FOdysseyVectorTagInbetweener*
 FInbetweenerTrajectory::GetInbetweenerTag()
 {
     return mInbetweenerTag;
+}
+
+std::vector<FInbetweenerWaypoint>&
+FInbetweenerTrajectory::GetWaypointBuffer()
+{
+    return mWaypointBuffer;
 }

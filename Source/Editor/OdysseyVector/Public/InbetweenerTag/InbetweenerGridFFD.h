@@ -11,14 +11,17 @@ class ODYSSEYVECTOR_API FInbetweenerGridFFD : public FInbetweenerGrid
         virtual ~FInbetweenerGridFFD(){};
         FInbetweenerGridFFD( FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
+        /**
+         * @brief Map paths to the grid according to the needs of the grid
+         * @param iPathBuffer the paths to map
+         */
+        void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer );
+
+    protected:
         virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint
                                           , const ::ULIS::FRectD& iSourceBBox ) override;
-        void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
-                                 , const BLMatrix2D& iSpaceInverseMatrix );
 
         friend class FOdysseyVectorTagInbetweener;
 
     protected:
-        std::vector<double> mUBinomialCoefficientBuffer;
-        std::vector<double> mVBinomialCoefficientBuffer;
 };

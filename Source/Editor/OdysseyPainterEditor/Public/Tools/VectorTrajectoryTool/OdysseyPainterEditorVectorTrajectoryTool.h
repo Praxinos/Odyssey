@@ -12,13 +12,15 @@ struct FInbetweenerInbetween;
 class FInbetweenerHandleTrajectory;
 class FOdysseyPainterEditorVectorTrajectoryToolHUD;
 class FInbetweenerQuad;
+class FInbetweenerWaypoint;
 
 UENUM()
 enum class eTrajectoryPickingMode : uint8
 {
     Add = 0,
     Alter = 1,
-    Remove = 2
+    Shift = 2,
+    Remove = 3
 };
 
 UCLASS( HideCategories = (SelectionTool) )
@@ -70,6 +72,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
     private:
         FOdysseyPainterEditorVectorTrajectoryToolHUD* mTrajectoryHUD;
         std::list<FInbetweenerHandleTrajectory*> mPickedHandleList;
+        FInbetweenerWaypoint* mPickedWaypoint;
         eTrajectoryPickingMode mPickingMode;
         FInbetweenerQuad* mHoveredQuad;
 

@@ -100,7 +100,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
        /**
          * @brief Update cached data for this segment.
          */
-        virtual void Update() override;
+        virtual void Update( uint32 iUpdateFlags ) override;
 
         virtual ::ULIS::FVec2D GetHandleVector( uint32 iHandleID, bool iNormalize ) override;
         virtual ::ULIS::FVec2D GetHandleVector( FOdysseyVectorVertex* iVertex, bool iNormalize ) override;
@@ -152,7 +152,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
        /**
          * @brief Builds the variable thickness segment (stores values into polygon cache).
          */
-        void BuildVariable();
+        void BuildVariable( uint32 iMinRecurse, uint32 iMaxRecurse );
 
         ::ULIS::FVec2D GetVectorAtEnd( bool iNormalize );
         ::ULIS::FVec2D GetVectorAtStart( bool iNormalize );
@@ -247,7 +247,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                   , ::ULIS::FVec2D iBezier[4]
                                   , const ::ULIS::FVec2D& iNormalizedTangentFrom
                                   , const ::ULIS::FVec2D& iNormalizedTangentTo
-                                  , int32   iRecurseDepth
+                                  , uint32 iRecurseDepth
+                                  , uint32 iMinRecurse
+                                  , uint32 iMaxRecurse
                                   , std::vector<FOdysseyVectorPoint>& iSubPointBuffer
                                   , std::vector<FSegmentSubLine>& iSubLineBuffer );
         void PrepareOffsetBeziers( double iSegmentStartRadius

@@ -1249,7 +1249,7 @@ FOdysseyVectorGroupPaint::CreateVertexGapSegment( FOdysseyVectorVertex* iVertex 
         {
             FOdysseyVectorSegmentCubicGap& newGapSegment = mGapSegmentBuffer.emplace_back( this, nearestVertex, iVertex );
             //iGapSegmentBuffer[gapCount].Link(); // not necessary. saves us some cpu cycles
-            newGapSegment.Update();
+            newGapSegment.Update( 0 );
 
             FOdysseyVectorSection& newGapSection = mGapSectionBuffer.emplace_back( this, &newGapSegment, nearestVertex, iVertex, 0.0f, 1.0f, mShortSectionArray );
             //newGapSection.Link();

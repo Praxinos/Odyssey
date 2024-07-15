@@ -316,13 +316,15 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
                  , mInvalidatedSegmentList.begin()
                  , mInvalidatedSegmentList.end()
                  , [ this ]( FOdysseyVectorSegment *segment )*/
+
     for ( FOdysseyVectorSegment* segment : mInvalidatedSegmentList )
     {
-        segment->Update();
-    } 
-    /*);*/
+        segment->Update( iUpdateFlags );
+    }
 
     mInvalidatedSegmentList.clear();
+
+    /*);*/
 
     if( mInvalidationFlags & INVALIDATE_TOPOLOGY )
     {

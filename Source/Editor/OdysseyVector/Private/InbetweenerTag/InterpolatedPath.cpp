@@ -61,6 +61,9 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
 
         if( iPolyline )
         {
+            // when the segment is considered as a polyline, we map the intermediate points 
+            // the bezier is made of internally. They are of type FOdysseyVectorPoint.
+            // We also map the end vertices which also derive from type FOdysseyVectorPoint
             std::vector<FInterpolatedPoint*> polylinePointArray;
             std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
             uint32 fractionCount = segment->GetFractionCount();
@@ -83,6 +86,8 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
         }
         else
         {
+            // when the segment is NOT considered as a polyline, we map the end vertices 
+            // (which derive from type FOdysseyVectorPoint).
             if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
             {
                 FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);

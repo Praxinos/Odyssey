@@ -35,25 +35,79 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         virtual ~FInbetweenerGrid();
         FInbetweenerGrid( FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
+        /**
+         * @brief Build the grid.
+         */
         void Make();
 
+        /**
+         * @brief Build the grid.
+         * @param iSourcePositionBuffer source position of the points in the grid. Can be empty.
+         * @param iTargetPositionBuffer target position of the points in the grid. Can be empty.
+         */
         virtual void Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
                          , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer );
 
+        /**
+         * @brief Deform the paths passed as parameter.
+         * @param iInterpolatedPathBuffer deform the paths according to the shape of the grid
+         * @param iInbetweenIndex Inbetween index
+         */
         virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
                                 , uint32 iInbetweenIndex );
 
+        /**
+         * @brief Get the quad the coords passed as parameter fit within.
+         * @param iLocalCoords coords for testing hits.
+         * @return the quad index that hits the coords passed as parameter. -1 if none.
+         */
         int GetQuadIndex( const ::ULIS::FVec2D& iLocalCoords );
 
+        /**
+         * @brief Get the inbetweener tag that owns the grid
+         * @return the inbetweener tag that owns the grid
+         */
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
-        virtual void Update( uint32 iUpdateFlags
+
+        /**
+         * @brief Update the grid when the owner object is updated.
+         * @param iUpdateFlags update flags receieved by the owner object
+         * @param iTagInvalidationFlags inbetweener tag invalidation flags
+         */
+        virtual void Update( uint32 iOwnerObjectUpdateFlags
                            , uint64 iTagInvalidationFlags );
-        virtual void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
-                                         , const BLMatrix2D& iSpaceInverseMatrix  );
+
+        /**
+         * @brief Map paths to the grid according to the needs of the grid
+         * @param iPathBuffer the paths to map
+         */
+        virtual void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer );
+
+        /**
+         * @brief Get the quad buffer
+         * @return a reference to the quad buffer
+         */
         std::vector<FInbetweenerQuad>& GetQuadBuffer();
+
+        /**
+         * @brief Get the point buffer
+         * @return a reference to the point buffer
+         */
         std::vector<FInbetweenerPoint>& GetPointBuffer();
+
+        /**
+         * @brief Get the grid's geometry
+         * @param oGeometry returned positions
+         * @param iPositionType position type (source, target, interp, deform)
+         */
         void GetGeometry( std::vector<::ULIS::FVec2D>& oGeometry
                         , eInbetweenerPointPositionType iPositionType );
+
+        /**
+         * @brief Set the grid's geometry
+         * @param oGeometry positions to set
+         * @param iPositionType position type (source, target, interp, deform)
+         */
         void SetGeometry( const std::vector<::ULIS::FVec2D>& iGeometry
                         , eInbetweenerPointPositionType iPositionType );
 
@@ -69,10 +123,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
     // applies to all types of grid.
     protected:
         bool PrecomputeARAPInterpolation();
-        bool ComputeARAPInterpolation( //float alphaLinear
-                                     //, float alpha
-                                     // , const FInbetweenerPoint::Affine &globalRigidTransform
-                                       const FInbetweenerInbetween* iInbetween
+        bool ComputeARAPInterpolation( const FInbetweenerInbetween* iInbetween
                                      , bool useRigidTransform );
         void ComputePStar( FInbetweenerPoint* iTriangle[3]
                          , int triRow

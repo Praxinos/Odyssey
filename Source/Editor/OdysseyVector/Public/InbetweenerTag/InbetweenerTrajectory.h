@@ -4,6 +4,7 @@
 #include <ULIS>
 
 #include "InbetweenerTag/InbetweenerHandleTrajectory.h"
+#include "InbetweenerTag/InbetweenerWaypoint.h"
 
 class FInbetweenerQuad;
 class FOdysseyVectorTagInbetweener;
@@ -27,8 +28,12 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
         void Update();
         ::ULIS::FVec2D* GetCubicBezier();
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
+        std::vector<FInbetweenerWaypoint>& GetWaypointBuffer();
+        void ResetSpacing();
+        FInbetweenerWaypoint* GetWaypoint( uint32 iIndex );
 
     private:
+        std::vector<FInbetweenerWaypoint> mWaypointBuffer;
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
         ::ULIS::FVec2D mCubicBezier[4];
         FInbetweenerHandleTrajectory mHandle[2];

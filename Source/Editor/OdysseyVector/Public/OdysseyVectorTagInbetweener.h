@@ -49,6 +49,7 @@ struct FInbetweenerInbetween
     float spacing;
     BLMatrix2D matrix;
     BLMatrix2D inverseMatrix;
+    uint32 index;
 };
 
 struct FInbetweenerChart
@@ -71,42 +72,104 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                                     , uint32 iNumCellX
                                     , uint32 iNumCellY
                                     , uint32 iInbetweenCount );
+
+        /**
+         * @brief Draw the tag to the Blend2D context passed as parameter
+         * @param iBLContext The Blend2D context to draw to
+         * @param iInvalidationArea
+         * @param iAncestorsOpacity The cumulated opacity from parent objects
+         * @param iDrawingFlags drawing flags
+         */
         virtual void Draw( BLContext* iBLContext
                          , const ::ULIS::FRectD& iInvalidationArea
                          , double iAncestorsOpacity
                          , uint64 iDrawingFlags ) override;
-        // when drawn as a shared tag
+
+        /**
+         * @brief Draw the object to the Blend2D context passed as parameter
+         *        Note: This is called when the tag is dran as a shared tag. The current scene
+         *        may therefore NOT be the top level object
+         * FOdysseyVectorGroupPaint* iCurrentScene current scene in which to draw the tag
+         * @param iBLContext The Blend2D context to draw to
+         * @param iInvalidationArea
+         * @param iAncestorsOpacity The cumulated opacity from parent objects
+         * @param iDrawingFlags drawing flags
+         */
         virtual void Draw( FOdysseyVectorGroupPaint* iCurrentScene
                          , BLContext* iBLContext
                          , const ::ULIS::FRectD& iInvalidationArea
                          , double iAncestorsOpacity
                          , uint64 iDrawingFlags ) override;
+
+        /**
+         * @brief Callback called when the tag is removed from the object's list of tags
+         * @return a reference to the list of trajectories
+         */
+        std::list<FInbetweenerTrajectory*>& GetTrajectoryList();
+
+        /**
+         * @brief Add a trajectory
+         * @param iLocalCoords X and Y coords at which to create the trajectory
+         * @return the newly created trajectory or nullptr if coords are outside the grid.
+         */
+        FInbetweenerTrajectory* AddTrajectory( const ::ULIS::FVec2D& iLocalCoords );
+
+        /**
+         * @brief Add a trajectory
+         * @param iTrajectory a pointer to the added trajectory.
+         */
+        void AddTrajectory( FInbetweenerTrajectory* iTrajectory );
+
+        /**
+         * @brief Remove all trajectories
+         */
+        void RemoveAllTrajectories();
+
+        /**
+         * @brief Remove a trajectory
+         * @param iTrajectory a pointer to the trajectory that must be removed.
+         */
+        void RemoveTrajectory( FInbetweenerTrajectory* iTrajectory );
+
+        /**
+         * @brief Reset the target grid
+         */
+        void ResetGrid();
+
+        /**
+         * @brief Callback called when the tag is added to the object's list of tags
+         */
         virtual void Added() override;
+
+        /**
+         * @brief Callback called when the tag is removed from the object's list of tags
+         */
         virtual void Removed() override;
 
-        std::list<FInbetweenerTrajectory*>& GetTrajectoryList();
-        FInbetweenerTrajectory* AddTrajectory( const ::ULIS::FVec2D& iLocalCoords );
-        void AddTrajectory( FInbetweenerTrajectory* iTrajectory );
-        void RemoveTrajectory( FInbetweenerTrajectory* iTrajectory );
-        void RemoveAllTrajectories();
-        void ResetGrid();
-        void MakeGrid();
-        void Map();
-        void Interpolate();
-        void DrawMotionGrid( uint32 iInbetweenIndex
-                           , BLContext* iBLContext
-                           , const ::ULIS::FRectD& iInvalidationArea
-                           , double iAncestorsOpacity
-                           , uint64 iDrawingFlags );
-        void DrawPathsInbetween( uint32 iInbetweenIndex
-                               , BLContext* iBLContext );
-        void DrawPathsTarget( BLContext* iBLContext );
+        /**
+         * @brief Get the number of inbetween
+         * @return the number of inbetween
+         */
         uint32 GetInbetweenCount();
+
+        /**
+         * @brief Get the spacing chart
+         * @return a reference to the spacing chart
+         */
         FInbetweenerChart& GetChart();
+
+        /**
+         * @brief Get the spacing chart
+         * @param iInbetween
+         * @param iNewSpacing
+         * @param iRelative move all inbetweens relative to the one passed as parameter
+         */
         void MoveInbetween( FInbetweenerInbetween* iInbetween
                           , float iNewSpacing
                           , bool iRelative );
-        void UpdateAnimationCells();
+
+        void RedrawAnimationCells();
+        void RedrawAnimationCells( uint32 iInbetweenCount );
         void ResetChart();
         void SetInbetweenCount( uint32 iInbetweenCount );
         void SetGrid( eInbetweenerGridType iGridType
@@ -164,9 +227,29 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void SetColor( const FColor& iColor );
         void SetMapAsPolyline( bool iMapAsPolyline );
         bool GetMapAsPolyline();
+        void DrawPathsInbetween( uint32 iInbetweenIndex
+                               , BLContext* iBLContext );
+        void DrawPathsTarget( BLContext* iBLContext );
+        void DeformPathsAtInbetween( uint32 iInbetweenIndex );
+        void DeformPathsAtTarget();
 
     protected:
-        void UpdateAnimationCells( uint32 iInbetweenCount );
+        /**
+         * @brief Map paths to the grid
+         */
+        void Map();
+
+        /**
+         * @brief Compute interpolations for all the mapped paths
+         */
+        void Interpolate();
+
+        void DrawMotionGrid( uint32 iInbetweenIndex
+                           , BLContext* iBLContext
+                           , const ::ULIS::FRectD& iInvalidationArea
+                           , double iAncestorsOpacity
+                           , uint64 iDrawingFlags );
+
         void UpdateBBox( ::ULIS::FRectD& iBBox
                        , eInbetweenerPointPositionType iPositionType );
         void InterpolateGeometry( uint32 iInbetweenIndex );
@@ -186,7 +269,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         static const uint64 INVALIDATE_GRIDTYPE        = ( 1LL << 3 );
         static const uint64 INVALIDATE_CELLS           = ( 1LL << 4 );
         static const uint64 INVALIDATE_SOURCEBBOX      = ( 1LL << 5 );
-        static const uint64 INVALIDATE_TARGETBBOX      = ( 1LL << 6 );
+        static const uint64 INVALIDATE_TARGET          = ( 1LL << 6 );
         static const uint64 INVALIDATE_TRAJECTORIES    = ( 1LL << 7 );
         static const uint64 INVALIDATE_TRAJECTORY_LIST = ( 1LL << 8 );
         static const uint64 INVALIDATE_ALL             = ( INVALIDATE_MAP
@@ -195,7 +278,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                                                          | INVALIDATE_GRIDTYPE
                                                          | INVALIDATE_CELLS
                                                          | INVALIDATE_SOURCEBBOX
-                                                         | INVALIDATE_TARGETBBOX
+                                                         | INVALIDATE_TARGET
                                                          | INVALIDATE_TRAJECTORIES
                                                          | INVALIDATE_TRAJECTORY_LIST );
 

@@ -13,26 +13,47 @@ class ODYSSEYVECTOR_API FInbetweenerGridARAP : public FInbetweenerGrid
         virtual ~FInbetweenerGridARAP(){};
         FInbetweenerGridARAP( FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
-        double RegularizeQuads( eInbetweenerPointPositionType iPositionType );
-        void RegularizeQuad( FInbetweenerQuad* iQuad
-                           , eInbetweenerPointPositionType iPositionType );
+        void Regularize();
+
+        /**
+         * @brief Update the grid when the owner object is updated.
+         * @param iUpdateFlags update flags receieved by the owner object
+         * @param iTagInvalidationFlags inbetweener tag invalidation flags
+         */
+        virtual void Update( uint32 iUpdateFlags
+                           , uint64 iTagInvalidationFlags ) override;
+
+        /**
+         * @brief Get the rigidity for ARAP deformation
+         * @return the rigidity
+         */
+        uint32 GetRigidity();
+
+        /**
+         * @brief Set the rigidity for ARAP deformation
+         * @param iRigidity
+         */
+        void SetRigidity( uint32 iRigidity );
+
+        /**
+         * @brief Map paths to the grid according to the needs of the grid
+         * @param iPathBuffer the paths to map
+         */
+        virtual void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer ) override;
+
+        friend class FOdysseyVectorTagInbetweener;
+
+    // ARAP deformation (do not confuse with ARAP interpolation)
+    protected:
+        void DiscardEmptyQuads( std::vector<FInterpolatedPath>& iPathBuffer );
         uint32 Regularize( eInbetweenerPointPositionType iSourcePositionType
                          , eInbetweenerPointPositionType iDestPositionType
                          , int maxIterations
                          , bool allGrid
                          , bool convergenceStop );
-        void Regularize();
-        virtual void Update( uint32 iUpdateFlags
-                           , uint64 iTagInvalidationFlags ) override;
-        uint32 GetRigidity();
-        void SetRigidity( uint32 iRigidity );
-        virtual void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer
-                                         , const BLMatrix2D& iSpaceInverseMatrix ) override;
-        void DiscardEmptyQuads( std::vector<FInterpolatedPath>& iPathBuffer );
-
-        friend class FOdysseyVectorTagInbetweener;
-
-    protected:
+        double RegularizeQuads( eInbetweenerPointPositionType iPositionType );
+        void RegularizeQuad( FInbetweenerQuad* iQuad
+                           , eInbetweenerPointPositionType iPositionType );
         void IntersectNeededQuads( const ::ULIS::FRectD& iSourceBBox
                                  , double iXMin
                                  , double iYMin
@@ -40,6 +61,5 @@ class ODYSSEYVECTOR_API FInbetweenerGridARAP : public FInbetweenerGrid
                                  , double iYMax );
 
     protected:
-        bool k_cornersFixed;
         uint32 mRigidity;
 };
