@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Epos\n"
-"POT-Creation-Date: 2024-06-05 14:59\n"
-"PO-Revision-Date: 2024-06-05 14:59\n"
+"POT-Creation-Date: 2024-07-15 12:51\n"
+"PO-Revision-Date: 2024-07-15 12:51\n"
 "Language-Team: \n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
@@ -146,6 +146,13 @@ msgctxt "NamingConventionSettingsCustomization,board-pattern-tooltip"
 msgid "Some examples:\n\n- board_{0} ->\n    board_10\n    board_20\n    board_30\n    ...\n- {2}_board_{0}_{10} ->\n    MS_board_0010_xy\n    MS_board_0020_xy\n    MS_board_0030_xy\n    ...\n\n(Click on a keyword to Copy it)"
 msgstr "Some examples:\n\n- board_{0} ->\n    board_10\n    board_20\n    board_30\n    ...\n- {2}_board_{0}_{10} ->\n    MS_board_0010_xy\n    MS_board_0020_xy\n    MS_board_0030_xy\n    ...\n\n(Click on a keyword to Copy it)"
 
+#. Key:	Pattern
+#. SourceLocation:	Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(80)
+#: Plugins/Epos/Source/EposNamingConvention/Private/Settings/NamingConventionSettingsCustomization.cpp(80)
+msgctxt "NamingConventionSettingsCustomization,Pattern"
+msgid "Pattern"
+msgstr "Pattern"
+
 #. Key:	wrong-pattern
 #. SourceLocation:	Plugins/Epos/Source/EposPattern/Private/SPatternTextBox.cpp(164)
 #: Plugins/Epos/Source/EposPattern/Private/SPatternTextBox.cpp(164)
@@ -175,78 +182,78 @@ msgid "EPOS"
 msgstr "EPOS"
 
 #. Key:	multiple-planes
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(209)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(209)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(218)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(218)
 msgctxt "BoardSequenceCustomization,multiple-planes"
 msgid "There are multiple planes. Select one of them."
 msgstr "There are multiple planes. Select one of them."
 
 #. Key:	Settings
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(474)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(474)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(483)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(483)
 msgctxt "BoardSequenceCustomization,Settings"
 msgid "Settings"
 msgstr "Settings"
 
 #. Key:	SettingsToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(475)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(475)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(484)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(484)
 msgctxt "BoardSequenceCustomization,SettingsToolTip"
 msgid "Set settings"
 msgstr "Set settings"
 
 #. Key:	Help
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(483)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(483)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(492)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(492)
 msgctxt "BoardSequenceCustomization,Help"
 msgid "Help"
 msgstr "Help"
 
 #. Key:	HelpToolTip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(484)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(484)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(493)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(493)
 msgctxt "BoardSequenceCustomization,HelpToolTip"
 msgid "Help"
 msgstr "Help"
 
 #. Key:	infobar-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(492)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(492)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(501)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(501)
 msgctxt "BoardSequenceCustomization,infobar-tooltip"
 msgid "Double-click on the infobar to open its pattern settings"
 msgstr "Double-click on the infobar to open its pattern settings"
 
 #. Key:	ImportExportMenuSectionName
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(567)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(567)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(576)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(576)
 msgctxt "BoardSequenceCustomization,ImportExportMenuSectionName"
 msgid "Import/Export"
 msgstr "Import/Export"
 
 #. Key:	ImportFBX
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(570)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(570)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(579)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(579)
 msgctxt "BoardSequenceCustomization,ImportFBX"
 msgid "Import..."
 msgstr "Import..."
 
 #. Key:	ImportFBXTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(571)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(571)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(580)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(580)
 msgctxt "BoardSequenceCustomization,ImportFBXTooltip"
 msgid "Import FBX animation to this object"
 msgstr "Import FBX animation to this object"
 
 #. Key:	ExportFBX
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(581)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(581)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(590)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(590)
 msgctxt "BoardSequenceCustomization,ExportFBX"
 msgid "Export..."
 msgstr "Export..."
 
 #. Key:	ExportFBXTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(582)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(582)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(591)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/Board/BoardSequenceCustomization.cpp(591)
 msgctxt "BoardSequenceCustomization,ExportFBXTooltip"
 msgid "Export FBX animation from this object"
 msgstr "Export FBX animation from this object"
@@ -1497,13 +1504,6 @@ msgctxt "NamingConventionSettingsCustomization,infobar-pattern-tooltip"
 msgid "Each keywords will be replaced by its corresponding value.\nThe separator will be used to join each line of the pattern field.\n\n(Click on a keyword to Copy it)"
 msgstr "Each keywords will be replaced by its corresponding value.\nThe separator will be used to join each line of the pattern field.\n\n(Click on a keyword to Copy it)"
 
-#. Key:	Pattern
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Settings/EposSequenceEditorSettingsCustomization.cpp(77)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/Settings/EposSequenceEditorSettingsCustomization.cpp(77)
-msgctxt "NamingConventionSettingsCustomization,Pattern"
-msgid "Pattern"
-msgstr "Pattern"
-
 #. Key:	AssetTypeActions_ShotSequence
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/Shot/AssetDefinition_ShotSequence.cpp(18)
 #: Plugins/Epos/Source/EposSequenceEditor/Private/Shot/AssetDefinition_ShotSequence.cpp(18)
@@ -1819,107 +1819,44 @@ msgctxt "EposSequenceEditorNotes,notes-in-viewport.no-notes"
 msgid "No Notes"
 msgstr "No Notes"
 
-#. Key:	viewport-toolbar-options.viewport-zoom.label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1012)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1012)
-msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.viewport-zoom.label"
-msgid "Zoom"
-msgstr "Zoom"
-
-#. Key:	viewport-toolbar-options.zoom-options.label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1016)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1016)
-msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.zoom-options.label"
-msgid "Zoom Options"
-msgstr "Zoom Options"
-
-#. Key:	viewport-toolbar-options.zoom-options.tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1017)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1017)
-msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.zoom-options.tooltip"
-msgid "Zoom the viewport"
-msgstr "Zoom the viewport"
-
-#. Key:	viewport-toolbar-options.reset-viewport-transform.label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1040)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1040)
-msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.reset-viewport-transform.label"
-msgid "Reset Pan/Zoom/Rotation"
-msgstr "Reset Pan/Zoom/Rotation"
-
-#. Key:	viewport-toolbar-options.reset-viewport-transform.tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1041)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1041)
-msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.reset-viewport-transform.tooltip"
-msgid "Resets the Pan, Zoom and Rotation values of the viewport"
-msgstr "Resets the Pan, Zoom and Rotation values of the viewport"
-
-#. Key:	note-settings.display-in-viewport-label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1066)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1066)
-msgctxt "SStoryboardLevelViewport,note-settings.display-in-viewport-label"
-msgid "Display notes in viewport"
-msgstr "Display notes in viewport"
-
-#. Key:	note-settings.display-in-viewport-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1067)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1067)
-msgctxt "SStoryboardLevelViewport,note-settings.display-in-viewport-tooltip"
-msgid "Display the notes at the current frame under the 3D scene."
-msgstr "Display the notes at the current frame under the 3D scene."
-
-#. Key:	note-settings.display-as-overlay-label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1087)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1087)
-msgctxt "SStoryboardLevelViewport,note-settings.display-as-overlay-label"
-msgid "Display notes as overlay"
-msgstr "Display notes as overlay"
-
-#. Key:	note-settings.display-as-overlay-tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1088)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1088)
-msgctxt "SStoryboardLevelViewport,note-settings.display-as-overlay-tooltip"
-msgid "Display the notes at the current frame on the 3D scene."
-msgstr "Display the notes at the current frame on the 3D scene."
-
 #. Key:	storyboard-viewport-add-rotation-section
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1325)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1325)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1218)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1218)
 msgctxt "SStoryboardLevelViewport,storyboard-viewport-add-rotation-section"
 msgid "Add Viewport Rotation"
 msgstr "Add Viewport Rotation"
 
 #. Key:	storyboard-viewport-set-rotation-section
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1330)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1330)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1223)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1223)
 msgctxt "SStoryboardLevelViewport,storyboard-viewport-set-rotation-section"
 msgid "Set Viewport Rotation"
 msgstr "Set Viewport Rotation"
 
 #. Key:	storyboard-viewport-add-zoom-section
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1428)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1428)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1321)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1321)
 msgctxt "SStoryboardLevelViewport,storyboard-viewport-add-zoom-section"
 msgid "Add Viewport Zoom"
 msgstr "Add Viewport Zoom"
 
 #. Key:	storyboard-viewport-set-zoom-section
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1433)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1433)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1326)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1326)
 msgctxt "SStoryboardLevelViewport,storyboard-viewport-set-zoom-section"
 msgid "Set Viewport Zoom"
 msgstr "Set Viewport Zoom"
 
 #. Key:	storyboard-viewport-fit-to-screen
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1441)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1441)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1334)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1334)
 msgctxt "SStoryboardLevelViewport,storyboard-viewport-fit-to-screen"
 msgid "Fit To Screen"
 msgstr "Fit To Screen"
 
 #. Key:	TimeFormat
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1900)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1900)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1793)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(1793)
 msgctxt "SStoryboardLevelViewport,TimeFormat"
 msgid "{0}"
 msgstr "{0}"
@@ -2015,68 +1952,47 @@ msgctxt "SStoryboardLevelViewport,NoSequencerMessage"
 msgid "No active Board/Shot Sequence Editor detected. Please edit a Board/Shot Sequence to enable full controls."
 msgstr "No active Board/Shot Sequence Editor detected. Please edit a Board/Shot Sequence to enable full controls."
 
-#. Key:	viewport-toolbar-options.film-overlay.label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(855)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(855)
-msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.film-overlay.label"
-msgid "Film Overlays"
-msgstr "Film Overlays"
-
-#. Key:	viewport-toolbar-options.film-overlay.tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(856)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(856)
-msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.film-overlay.tooltip"
-msgid "Change the appearance of the film overlays."
-msgstr "Change the appearance of the film overlays."
-
-#. Key:	viewport-toolbar-options.viewport-settings.label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(874)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(874)
-msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.viewport-settings.label"
-msgid "Viewport Settings"
-msgstr "Viewport Settings"
-
-#. Key:	viewport-toolbar-options.viewport-settings.tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(875)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(875)
-msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.viewport-settings.tooltip"
-msgid "Change the settings of the Storyboard viewport"
-msgstr "Change the settings of the Storyboard viewport"
-
 #. Key:	ViewportRotationTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(890)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(890)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(870)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(870)
 msgctxt "SStoryboardLevelViewport,ViewportRotationTooltip"
 msgid "Change the viewport rotation."
 msgstr "Change the viewport rotation."
 
-#. Key:	viewport-toolbar-options.viewport-rotation.label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(942)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(942)
-msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.viewport-rotation.label"
-msgid "Rotation"
-msgstr "Rotation"
-
-#. Key:	viewport-toolbar-options.rotation-options.label
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(946)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(946)
-msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.rotation-options.label"
-msgid "Rotation Options"
-msgstr "Rotation Options"
-
-#. Key:	viewport-toolbar-options.rotation-options.tooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(947)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(947)
-msgctxt "SStoryboardLevelViewport,viewport-toolbar-options.rotation-options.tooltip"
-msgid "Rotate the viewport"
-msgstr "Rotate the viewport"
-
 #. Key:	ViewportZoomTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(962)
-#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(962)
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(904)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(904)
 msgctxt "SStoryboardLevelViewport,ViewportZoomTooltip"
 msgid "Change the viewport zoom."
 msgstr "Change the viewport zoom."
+
+#. Key:	note-settings.display-in-viewport-label
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(959)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(959)
+msgctxt "SStoryboardLevelViewport,note-settings.display-in-viewport-label"
+msgid "Display notes in viewport"
+msgstr "Display notes in viewport"
+
+#. Key:	note-settings.display-in-viewport-tooltip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(960)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(960)
+msgctxt "SStoryboardLevelViewport,note-settings.display-in-viewport-tooltip"
+msgid "Display the notes at the current frame under the 3D scene."
+msgstr "Display the notes at the current frame under the 3D scene."
+
+#. Key:	note-settings.display-as-overlay-label
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(980)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(980)
+msgctxt "SStoryboardLevelViewport,note-settings.display-as-overlay-label"
+msgid "Display notes as overlay"
+msgstr "Display notes as overlay"
+
+#. Key:	note-settings.display-as-overlay-tooltip
+#. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(981)
+#: Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardLevelViewport.cpp(981)
+msgctxt "SStoryboardLevelViewport,note-settings.display-as-overlay-tooltip"
+msgid "Display the notes at the current frame on the 3D scene."
+msgstr "Display the notes at the current frame on the 3D scene."
 
 #. Key:	storyboard-viewport-settings.display-sequence-infos-label
 #. SourceLocation:	Plugins/Epos/Source/EposSequenceEditor/Private/StoryboardViewport/SStoryboardViewportSettings.cpp(107)
@@ -2555,15 +2471,15 @@ msgid "https://github.com/Praxinos/Epos"
 msgstr "https://github.com/Praxinos/Epos"
 
 #. Key:	TakeNumberTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(1016)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(1016)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(1019)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(1019)
 msgctxt "FCinematicBoardSection,TakeNumberTooltip"
 msgid "Switch to {0}"
 msgstr "Switch to {0}"
 
 #. Key:	SetBoardName
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(1046)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(1046)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(1049)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(1049)
 msgctxt "FCinematicBoardSection,SetBoardName"
 msgid "Set Board Name"
 msgstr "Set Board Name"
@@ -2632,99 +2548,99 @@ msgid "TakeIndex: {0}"
 msgstr "TakeIndex: {0}"
 
 #. Key:	BoardMenuText
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(804)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(804)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(807)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(807)
 msgctxt "FCinematicBoardSection,BoardMenuText"
 msgid "Section"
 msgstr "Section"
 
 #. Key:	SectionBackgroundColorTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(851)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(851)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(854)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(854)
 msgctxt "FCinematicBoardSection,SectionBackgroundColorTooltip"
 msgid "Change the background color of this section\n(set to 0 to use the default (settings) one)"
 msgstr "Change the background color of this section\n(set to 0 to use the default (settings) one)"
 
 #. Key:	SectionBackgroundColor
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(860)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(860)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(863)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(863)
 msgctxt "FCinematicBoardSection,SectionBackgroundColor"
 msgid "Background Color"
 msgstr "Background Color"
 
 #. Key:	RenameBoard
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(899)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(899)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(902)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(902)
 msgctxt "FCinematicBoardSection,RenameBoard"
 msgid "Rename Board"
 msgstr "Rename Board"
 
 #. Key:	RenameBoardTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(900)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(900)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(903)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(903)
 msgctxt "FCinematicBoardSection,RenameBoardTooltip"
 msgid "Rename {0}"
 msgstr "Rename {0}"
 
 #. Key:	BulkEditNamingElements
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(950)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(950)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(953)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(953)
 msgctxt "FCinematicBoardSection,BulkEditNamingElements"
 msgid "Edit Naming Elements"
 msgstr "Edit Naming Elements"
 
 #. Key:	BulkEditNamingElementsTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(951)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(951)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(954)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(954)
 msgctxt "FCinematicBoardSection,BulkEditNamingElementsTooltip"
 msgid "Edit naming elements of the selected sections"
 msgstr "Edit naming elements of the selected sections"
 
 #. Key:	AdvancedSectionOptions
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(961)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(961)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(964)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(964)
 msgctxt "FCinematicBoardSection,AdvancedSectionOptions"
 msgid "Advanced"
 msgstr "Advanced"
 
 #. Key:	TakeMenuText
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(972)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(972)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(975)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(975)
 msgctxt "FCinematicBoardSection,TakeMenuText"
 msgid "Take"
 msgstr "Take"
 
 #. Key:	TakesMenu
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(975)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(975)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(978)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(978)
 msgctxt "FCinematicBoardSection,TakesMenu"
 msgid "Takes"
 msgstr "Takes"
 
 #. Key:	TakesMenuTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(976)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(976)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(979)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(979)
 msgctxt "FCinematicBoardSection,TakesMenuTooltip"
 msgid "Shot takes"
 msgstr "Shot takes"
 
 #. Key:	NewTakeTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(985)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(985)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(988)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(988)
 msgctxt "FCinematicBoardSection,NewTakeTooltip"
 msgid "Create a new take for {0}"
 msgstr "Create a new take for {0}"
 
 #. Key:	NewTakeWithWarningTooltip
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(987)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(987)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(990)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(990)
 msgctxt "FCinematicBoardSection,NewTakeWithWarningTooltip"
 msgid "Create a new take for {0}\n\nDrawing(s) must not be in edition mode"
 msgstr "Create a new take for {0}\n\nDrawing(s) must not be in edition mode"
 
 #. Key:	NewTake
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(990)
-#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(990)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(993)
+#: Plugins/Epos/Source/EposTracksEditor/Private/CinematicBoardTrack/CinematicBoardSection.cpp(993)
 msgctxt "FCinematicBoardSection,NewTake"
 msgid "New Take"
 msgstr "New Take"
@@ -4067,8 +3983,8 @@ msgid "Clone Section"
 msgstr "Clone Section"
 
 #. Key:	transaction.stop-piloting-storycamera
-#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Camera.cpp(1157)
-#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Camera.cpp(1157)
+#. SourceLocation:	Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Camera.cpp(1161)
+#: Plugins/Epos/Source/EposTracksEditor/Private/Tools/EposSequenceTools_Camera.cpp(1161)
 msgctxt "EposSequenceTools_Camera,transaction.stop-piloting-storycamera"
 msgid "Stop Piloting Storyboard Camera"
 msgstr "Stop Piloting Storyboard Camera"
