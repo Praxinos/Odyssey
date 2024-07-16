@@ -11,6 +11,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "undo/OdysseyVectorUndoTagInbetweenerTrajectoryAlter.h"
+#include "undo/OdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint.h"
 #include "undo/OdysseyVectorUndoTagInbetweenerTrajectoryAdd.h"
 #include "undo/OdysseyVectorUndoTagInbetweenerTrajectoryRemove.h"
 
@@ -220,6 +221,20 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                                                                   , iPointInTexture.x
                                                                   , iPointInTexture.y
                                                                   , PickingRadius );
+
+                    // needed for valid GUndo pointer
+                    GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.shift","Vector Trajectory Tool"));
+                    if( GUndo )
+                    {
+                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint( iScene, mPickedWaypoint->GetTrajectory() );
+
+                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+                        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                        if (source)
+                            source->RecordCurrentFrameUndo();
+                    }
+                    GEditor->EndTransaction();
                 }
             }
         }
@@ -331,32 +346,17 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
             {
                 FInbetweenerTrajectory* trajectory = mPickedWaypoint->GetTrajectory();
                 FOdysseyVectorTagInbetweener* inbetweenerTag = trajectory->GetInbetweenerTag();
-                std::vector<FInbetweenerWaypoint>& waypointBuffer = trajectory->GetWaypointBuffer();
-                uint32 waypointCount = waypointBuffer.size();
-                uint32 waypointIndex = mPickedWaypoint - &waypointBuffer[0];
+
                 ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
-                double prevT = ( waypointIndex > 0                     ) ? trajectory->GetWaypoint( waypointIndex - 1 )->GetT() : 0.0f;
-                double nextT = ( waypointIndex < ( waypointCount - 1 ) ) ? trajectory->GetWaypoint( waypointIndex + 1 )->GetT() : 1.0f;
 
-                ::ULIS::FVec2D prevAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( cubicBezier[0]
-                                                                                           , cubicBezier[1]
-                                                                                           , cubicBezier[2]
-                                                                                           , cubicBezier[3]
-                                                                                           , prevT );
-                ::ULIS::FVec2D worldPrevAt = FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), prevAt );
-                ::ULIS::FVec2D worldPrevVec = worldPrevAt - ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
-                ::ULIS::FVec2D nextAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( cubicBezier[0]
-                                                                                           , cubicBezier[1]
-                                                                                           , cubicBezier[2]
-                                                                                           , cubicBezier[3]
-                                                                                           , nextT );
-                ::ULIS::FVec2D worldNextAt = FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), nextAt );
-                ::ULIS::FVec2D worldNextVec = worldNextAt - ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
-                double totalDistance = worldPrevVec.Distance() + worldNextVec.Distance();
-                double newT = ( prevT * ( 1.0f - ( worldPrevVec.Distance() / totalDistance ) ) )
-                            + ( nextT * ( 1.0f - ( worldNextVec.Distance() / totalDistance ) ) );
+                double newT = FOdysseyVector::BezierHitTest( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y )
+                                                           , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[0] )
+                                                           , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[1] )
+                                                           , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[2] )
+                                                           , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[3] )
+                                                           , 16 );
 
-                if( ( newT > prevT ) && ( newT < nextT ) )
+                //if( ( newT > prevT ) && ( newT < nextT ) )
                 {
                     mPickedWaypoint->SetT( newT );
                 }

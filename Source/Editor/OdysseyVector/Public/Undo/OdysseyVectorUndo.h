@@ -71,6 +71,12 @@ namespace FSnapshotFlags
         //static const uint32 SNAPSHOT_ALL = 0xFFFFFFFFFFFFFFFFULL;
     }
 
+    namespace Trajectory
+    {
+        static const uint64 BEZIER    = ( 1ULL <<  0 );
+        static const uint64 WAYPOINTS = ( 1ULL <<  1 );
+    }
+
     namespace Tag
     {
         namespace Inbetweener
@@ -147,14 +153,19 @@ class ODYSSEYVECTOR_API FSnapshotTrajectory
 {
     public:
         virtual ~FSnapshotTrajectory();
-        FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory );
+        FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory, uint64 iSnapshotFlags );
         FInbetweenerTrajectory* GetTrajectory();
         virtual void Restore();
 
+        static void WaypointSpacingToArray( FInbetweenerTrajectory* iTrajectory
+                                          , std::vector<float>& oSpacingBuffer );
+
     protected:
+        uint64 mSnapshotFlags;
         FInbetweenerTrajectory* mTrajectory;
         ::ULIS::FVec2D mHandleDirection[2];
         double mHandleLengthRatio[2];
+        std::vector<float> mWaypointSpacingBuffer;
 };
 
 class ODYSSEYVECTOR_API FSnapshotPoint

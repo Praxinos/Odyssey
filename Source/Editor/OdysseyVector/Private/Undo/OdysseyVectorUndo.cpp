@@ -33,13 +33,38 @@ FSnapshotTrajectory::~FSnapshotTrajectory()
 {
 }
 
-FSnapshotTrajectory::FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory )
-    : mTrajectory ( iTrajectory )
-    , mHandleDirection { iTrajectory->GetHandle(0)->GetDirection()
-                       , iTrajectory->GetHandle(1)->GetDirection() }
-    , mHandleLengthRatio { iTrajectory->GetHandle(0)->GetLengthRatio()
-                         , iTrajectory->GetHandle(1)->GetLengthRatio() }
+FSnapshotTrajectory::FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory, uint64 iSnapshotFlags )
+    : mSnapshotFlags( iSnapshotFlags )
+    , mTrajectory ( iTrajectory )
 {
+    if( mSnapshotFlags & FSnapshotFlags::Trajectory::BEZIER )
+    {
+        mHandleDirection[0] = iTrajectory->GetHandle(0)->GetDirection();
+        mHandleDirection[1] = iTrajectory->GetHandle(1)->GetDirection();
+
+        mHandleLengthRatio[0] = iTrajectory->GetHandle(0)->GetLengthRatio();
+        mHandleLengthRatio[1] = iTrajectory->GetHandle(1)->GetLengthRatio();
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Trajectory::WAYPOINTS )
+    {
+        WaypointSpacingToArray( iTrajectory, mWaypointSpacingBuffer );
+    }
+}
+
+// static
+void
+FSnapshotTrajectory::WaypointSpacingToArray( FInbetweenerTrajectory* iTrajectory
+                                           , std::vector<float>& oSpacingBuffer )
+{
+    std::vector<FInbetweenerWaypoint>& waypointBuffer = iTrajectory->GetWaypointBuffer();
+
+    oSpacingBuffer.reserve( waypointBuffer.size() );
+
+    for( FInbetweenerWaypoint& waypoint : waypointBuffer )
+    {
+        oSpacingBuffer.emplace_back( waypoint.GetT() );
+    }
 }
 
 FInbetweenerTrajectory*
@@ -51,19 +76,40 @@ FSnapshotTrajectory::GetTrajectory()
 void
 FSnapshotTrajectory::Restore()
 {
-    ::ULIS::FVec2D swapHandleDirection[2] = { mTrajectory->GetHandle(0)->GetDirection()
-                                            , mTrajectory->GetHandle(1)->GetDirection() };
-    double swapHandleLengthRatio[2] =  { mTrajectory->GetHandle(0)->GetLengthRatio()
-                                       , mTrajectory->GetHandle(1)->GetLengthRatio() };
 
-    mTrajectory->GetHandle(0)->Set( mHandleDirection[0], mHandleLengthRatio[0] );
-    mTrajectory->GetHandle(1)->Set( mHandleDirection[1], mHandleLengthRatio[1] );
+    if( mSnapshotFlags & FSnapshotFlags::Trajectory::BEZIER )
+    {
+        ::ULIS::FVec2D swapHandleDirection[2] = { mTrajectory->GetHandle(0)->GetDirection()
+                                                , mTrajectory->GetHandle(1)->GetDirection() };
+        double swapHandleLengthRatio[2] =  { mTrajectory->GetHandle(0)->GetLengthRatio()
+                                           , mTrajectory->GetHandle(1)->GetLengthRatio() };
 
-    mHandleDirection[0] = swapHandleDirection[0];
-    mHandleDirection[1] = swapHandleDirection[1];
+        mTrajectory->GetHandle(0)->Set( mHandleDirection[0], mHandleLengthRatio[0] );
+        mTrajectory->GetHandle(1)->Set( mHandleDirection[1], mHandleLengthRatio[1] );
 
-    mHandleLengthRatio[0] = swapHandleLengthRatio[0];
-    mHandleLengthRatio[1] = swapHandleLengthRatio[1];
+        mHandleDirection[0] = swapHandleDirection[0];
+        mHandleDirection[1] = swapHandleDirection[1];
+
+        mHandleLengthRatio[0] = swapHandleLengthRatio[0];
+        mHandleLengthRatio[1] = swapHandleLengthRatio[1];
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Trajectory::WAYPOINTS )
+    {
+        std::vector<FInbetweenerWaypoint>& waypointBuffer = mTrajectory->GetWaypointBuffer();
+        std::vector<float> swapWaypointSpacingBuffer;
+
+        WaypointSpacingToArray( mTrajectory, swapWaypointSpacingBuffer );
+
+        //waypointBuffer.resize( mWaypointSpacingBuffer.size() );
+
+        for( int i = 0; i < mWaypointSpacingBuffer.size(); i++ )
+        {
+            waypointBuffer[i].SetT( mWaypointSpacingBuffer[i] );
+
+            mWaypointSpacingBuffer[i] = swapWaypointSpacingBuffer[i];
+        }
+    }
 }
 
 FSnapshotTagInbetweener::~FSnapshotTagInbetweener()
@@ -100,7 +146,8 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
         bMapAsPolyline = mInbetweenerTag->GetMapAsPolyline();
     }
 
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::CHART )
+    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT )
+     || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::CHART ) )
     {
         mChart = mInbetweenerTag->GetChart();
     }

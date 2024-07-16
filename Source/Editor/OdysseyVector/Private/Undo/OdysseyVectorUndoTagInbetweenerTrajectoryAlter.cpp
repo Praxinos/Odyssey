@@ -19,7 +19,7 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::FOdysseyVectorUndoTagInbetweene
                                                                                                 , FInbetweenerTrajectory* iTrajectory )
     : FOdysseyVectorUndo( iScene )
 {
-    mTrajectorySnapshotBuffer.emplace_back( iTrajectory );
+    mTrajectorySnapshotBuffer.emplace_back( iTrajectory, FSnapshotFlags::Trajectory::BEZIER );
 }
 
 FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::FOdysseyVectorUndoTagInbetweenerTrajectoryAlter( FOdysseyVectorGroupPaint* iScene
@@ -28,7 +28,7 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::FOdysseyVectorUndoTagInbetweene
 {
     for( FInbetweenerTrajectory* trajectory : iTrajectoryList )
     {
-        mTrajectorySnapshotBuffer.emplace_back( trajectory );
+        mTrajectorySnapshotBuffer.emplace_back( trajectory, FSnapshotFlags::Trajectory::BEZIER );
     }
 }
 
@@ -50,7 +50,7 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::FOdysseyVectorUndoTagInbetweene
                               return false;
                           } ) == mTrajectorySnapshotBuffer.end() )
         {
-            mTrajectorySnapshotBuffer.emplace_back( trajectoryHandle->GetTrajectory() );
+            mTrajectorySnapshotBuffer.emplace_back( trajectoryHandle->GetTrajectory(), FSnapshotFlags::Trajectory::BEZIER );
         }
     }
 }
