@@ -75,7 +75,7 @@ struct FOdysseyAnimationFlipConfiguration
     int RightLimit = 0;
 
     UPROPERTY(  EditAnywhere, Category="Flip Configuration" )
-    EOdysseyAnimationFlipKeys Keys = EOdysseyAnimationFlipKeys::AllFrames;
+    EOdysseyAnimationFlipKeys Keys = EOdysseyAnimationFlipKeys::Cells;
 
     UPROPERTY(  EditAnywhere, Category="Flip Configuration" 
                 , meta = (EditCondition = "Limits == EOdysseyAnimationFlipKeys::CellMarks"
