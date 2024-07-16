@@ -146,6 +146,12 @@ FOdysseyAnimationEditorExtension::PlaybackFramesPerSecond() const
 	return mPlaybackFramesPerSecond;
 }
 
+TSharedPtr<FOdysseyAnimationEditorFlipSystem>
+FOdysseyAnimationEditorExtension::FlipSystem() const
+{
+	return mFlipSystem;
+}
+
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------- Events
 
@@ -226,5 +232,4 @@ FOdysseyAnimationEditorExtension::BindShortcuts(FBaseToolkit* iToolkit)
 	FOdysseyPainterEditorExtension::BindShortcuts(iToolkit);
 	
     mOutOfPegsTool->BindShortcuts(iToolkit);
-	mFlipSystem->BindShortcuts(iToolkit);
 }

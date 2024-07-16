@@ -43,6 +43,7 @@ public:
     UOdysseyAnimationPlayer*            Player() const;
     FOdysseyAnimationEditorTimeline*    Timeline();
     float                               PlaybackFramesPerSecond() const;
+	TSharedPtr<FOdysseyAnimationEditorFlipSystem> FlipSystem() const;
 
     UOdysseyAnimationEditorOutOfPegsTool* GetOutOfPegsTool() const;
 

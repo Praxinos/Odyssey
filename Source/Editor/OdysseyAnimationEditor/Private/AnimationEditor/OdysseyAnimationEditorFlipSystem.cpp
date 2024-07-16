@@ -400,11 +400,6 @@ FOdysseyAnimationEditorFlipSystem::FOdysseyAnimationEditorFlipSystem(FOdysseyAni
 }
 
 void
-FOdysseyAnimationEditorFlipSystem::BindShortcuts(FBaseToolkit* iToolkit)
-{
-}
-
-void
 FOdysseyAnimationEditorFlipSystem::StartFlipping(const FOdysseyAnimationFlipConfiguration& iFlipConfiguration)
 {
     mAnimation = mExtension->Animation();
@@ -468,7 +463,7 @@ FOdysseyAnimationEditorFlipSystem::FlipTo(int iDelta)
 bool
 FOdysseyAnimationEditorFlipSystem::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {
-    if (!InKeyEvent.GetKey().IsModifierKey())
+    /* if (!InKeyEvent.GetKey().IsModifierKey())
         mLastKey = InKeyEvent.GetKey();
 
     if (mLastKey != FKey())
@@ -495,7 +490,7 @@ FOdysseyAnimationEditorFlipSystem::HandleKeyDownEvent(FSlateApplication& SlateAp
         }
     }
 
-    EndFlipping();
+    Endlipping(); */
 
     return false; //false means Unreal will continue as if we did nothing
 }
@@ -542,7 +537,25 @@ FOdysseyAnimationEditorFlipSystem::HandleMouseMoveEvent(FSlateApplication& Slate
     {
         FVector2D mousePosition = MouseEvent.GetScreenSpacePosition();
         FVector2D mouseDelta = mousePosition - mMousePositionReference;
-        float directiondelta = mFlipConfiguration.Direction == EOdysseyAnimationFlipDirection::Horizontal ? mouseDelta.X : mouseDelta.Y;
+        float directiondelta = mouseDelta.X;
+		switch (mFlipConfiguration.Direction)
+		{
+			case EOdysseyAnimationFlipDirection::Horizontal:
+				directiondelta = mouseDelta.X;
+			break;
+
+			case EOdysseyAnimationFlipDirection::HorizontalInverted:
+				directiondelta = -mouseDelta.X;
+			break;
+
+			case EOdysseyAnimationFlipDirection::Vertical:
+				directiondelta = mouseDelta.Y;
+			break;
+
+			case EOdysseyAnimationFlipDirection::VerticalInverted:
+				directiondelta = -mouseDelta.Y;
+			break;
+		}
 
         const float minStep = 1;
         const float maxStep = 100;

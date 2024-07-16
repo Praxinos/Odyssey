@@ -34,6 +34,8 @@ public:
     void Action_InactivateLooping();
     void Action_ToggleLooping();
 
+	void Action_Flip(int iConfigurationIndex);
+
 public:
     //Shortcuts
     virtual void MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList) override;

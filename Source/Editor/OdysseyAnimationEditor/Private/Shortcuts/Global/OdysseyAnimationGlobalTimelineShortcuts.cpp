@@ -9,6 +9,7 @@
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyAnimationPlayer.h"
+#include "OdysseyAnimationEditorUserSettings.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -103,6 +104,14 @@ FOdysseyAnimationGlobalTimelineShortcuts::MapActionsToCommandList(TSharedRef<FUI
         FOdysseyAnimationEditorCommands::Get().ToggleLooping,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_ToggleLooping)
     );
+
+	for (int i = 0; i < FOdysseyAnimationEditorCommands::Get().Flip.Num(); i++)
+    {
+		iCommandList->MapAction(
+			FOdysseyAnimationEditorCommands::Get().Flip[i],
+			FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_Flip, i )
+		);
+	}
 }
 
 void
@@ -385,5 +394,19 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_ToggleLooping()
         return;
     FOdysseyObjectEditorUtils::SetPropertyValue(player, "IsLooping", !player->IsLooping);
 }
+
+void
+FOdysseyAnimationGlobalTimelineShortcuts::Action_Flip(int iConfigurationIndex)
+{
+	TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
+    if (!extension)
+        return;
+
+	const UOdysseyAnimationEditorUserSettings* settings = UOdysseyAnimationEditorUserSettings::Get();
+	extension->FlipSystem()->StartFlipping(settings->FlipConfigurations[iConfigurationIndex]);
+}
+
+
+
 
 #undef LOCTEXT_NAMESPACE
