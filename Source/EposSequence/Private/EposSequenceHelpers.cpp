@@ -1142,7 +1142,7 @@ ShotSequenceHelpers::FindMaterialOpacityChannel( IMovieScenePlayer& iPlayer, UMo
 
     if( UMovieSceneComponentMaterialParameterSection* component_material_parameter_section = Cast<UMovieSceneComponentMaterialParameterSection>( iSection ) )
     {
-        TArray<FScalarMaterialParameterInfoAndCurve>& parameters = component_material_parameter_section->GetScalarParameterNamesAndCurves();
+        TArray<FScalarMaterialParameterInfoAndCurve>& parameters = component_material_parameter_section->ScalarParameterInfosAndCurves;
         for( auto& parameter : parameters )
         {
             if( parameter.ParameterInfo.Name.IsEqual( TEXT( "DrawingOpacity" ) ) )
@@ -1185,7 +1185,7 @@ ShotSequenceHelpers::FindOrCreateMaterialOpacityChannel( IMovieScenePlayer& iPla
 
         result.mChannelCreated = true;
 
-        TArray<FScalarMaterialParameterInfoAndCurve>& parameters = component_material_parameter_section->GetScalarParameterNamesAndCurves();
+        TArray<FScalarMaterialParameterInfoAndCurve>& parameters = component_material_parameter_section->ScalarParameterInfosAndCurves;
         for( auto& parameter : parameters )
         {
             if( parameter.ParameterInfo.Name.IsEqual( TEXT( "DrawingOpacity" ) ) )
