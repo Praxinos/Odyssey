@@ -135,7 +135,8 @@ namespace FOdysseyFile
                                         static const uint32 CHUNK_TRAJECTORY = 0xac49261e; // container
                                             static const uint32 CHUNK_TRAJECTORY_COORDS = 0x65ec54bd; // uint32(quadIndex)-double(u)-double(v)
                                             static const uint32 CHUNK_TRAJECTORY_GEOMETRY = 0xf7413cb0; // double(handle0dirX)-double(handle0dirY)-double(handle0LengthRatio)-double(handle1dirX)-double(handle1dirY)-double(handle1LengthRatio)
-
+                                            static const uint32 CHUNK_TRAJECTORY_WAYPOINTS = 0xf60935b9; // container
+                                                static const uint32 CHUNK_TRAJECTORY_WAYPOINTS_RATIO = 0x1949a3f0; // array[float]
 
                     static const uint32 CHUNK_PATH = 0x138d0bec; // container
                         // ... inherited chunks.

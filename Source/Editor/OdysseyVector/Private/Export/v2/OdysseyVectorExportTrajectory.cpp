@@ -54,6 +54,38 @@ FOdysseyVectorExportV2::WriteTrajectoryCoords( FInbetweenerTrajectory& iTrajecto
 }
 
 void
+FOdysseyVectorExportV2::WriteTrajectoryWaypointsRatio( FInbetweenerTrajectory& iTrajectory
+                                                     , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TRAJECTORY_WAYPOINTS_RATIO
+                            , Ar
+                            , [&iTrajectory](FArchive &Ar) -> void
+    {
+        uint32 inbetweenCount = iTrajectory.GetInbetweenerTag()->GetInbetweenCount();
+        std::vector<FInbetweenerWaypoint>& waypointBuffer = iTrajectory.GetWaypointBuffer();
+
+        for( uint32 i = 0; i < inbetweenCount; i++ )
+        {
+            float ratio = waypointBuffer[i].GetRatio();
+
+            Ar << ratio;
+        }
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteTrajectoryWaypoints( FInbetweenerTrajectory& iTrajectory
+                                                , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TRAJECTORY_WAYPOINTS
+                            , Ar
+                            , [&iTrajectory](FArchive &Ar) -> void
+    {
+        WriteTrajectoryWaypointsRatio( iTrajectory, Ar );
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteTrajectory( FInbetweenerTrajectory& iTrajectory
                                        , FArchive &Ar )
 {
@@ -63,5 +95,6 @@ FOdysseyVectorExportV2::WriteTrajectory( FInbetweenerTrajectory& iTrajectory
     {
         WriteTrajectoryCoords( iTrajectory, Ar );
         WriteTrajectoryGeometry( iTrajectory, Ar );
+        WriteTrajectoryWaypoints( iTrajectory, Ar );
     } );
 }

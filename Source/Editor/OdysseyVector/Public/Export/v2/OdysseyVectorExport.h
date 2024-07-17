@@ -132,4 +132,8 @@ namespace FOdysseyVectorExportV2
                               , FArchive &Ar );
     void WriteTrajectoryGeometry( FInbetweenerTrajectory& iTrajectory
                                 , FArchive &Ar );
+    void WriteTrajectoryWaypoints( FInbetweenerTrajectory& iTrajectory
+                                 , FArchive &Ar );
+    void WriteTrajectoryWaypointsRatio( FInbetweenerTrajectory& iTrajectory
+                                      , FArchive &Ar );
 }

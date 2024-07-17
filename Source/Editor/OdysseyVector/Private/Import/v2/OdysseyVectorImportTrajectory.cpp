@@ -18,6 +18,26 @@ FOdysseyVectorImportV2::ReadTrajectory( FInbetweenerTrajectory& iTrajectory
         {
             switch( iChunkID )
             {
+                case FOdysseyFile::VectorV2::CHUNK_TRAJECTORY_WAYPOINTS:
+                // container
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_TRAJECTORY_WAYPOINTS_RATIO:
+                {
+                    uint32 inbetweenCount = iTrajectory.GetInbetweenerTag()->GetInbetweenCount();
+                    std::vector<FInbetweenerWaypoint>& waypointBuffer = iTrajectory.GetWaypointBuffer();
+
+                    for( uint32 i = 0; i < inbetweenCount; i++ )
+                    {
+                        float ratio;
+
+                        Ar << ratio;
+
+                        waypointBuffer[i].SetRatio( ratio );
+                    }
+                }
+                break;
+
                 case FOdysseyFile::VectorV2::CHUNK_TRAJECTORY_COORDS:
                 {
                     std::vector<FInbetweenerQuad>& quadBuffer =  iTrajectory.GetInbetweenerTag()->GetGrid()->GetQuadBuffer();

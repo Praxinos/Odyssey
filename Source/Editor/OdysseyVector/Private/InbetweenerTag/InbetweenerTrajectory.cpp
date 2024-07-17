@@ -65,19 +65,12 @@ FInbetweenerTrajectory::ResetSpacing()
 {
     uint32 inbetweenCount =  mInbetweenerTag->GetInbetweenCount();
 
-    float step = 1.0f / ( inbetweenCount + 1 );
-    float t = step;
-
     mWaypointBuffer.clear();
     mWaypointBuffer.reserve( inbetweenCount );
 
     for( uint32 i = 0; i < inbetweenCount; i++ )
     {
         FInbetweenerWaypoint& waypoint = mWaypointBuffer.emplace_back( this );
-
-        waypoint.SetT( t );
-
-        t += step;
     }
 }
 

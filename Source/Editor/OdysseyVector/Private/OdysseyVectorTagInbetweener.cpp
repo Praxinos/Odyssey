@@ -517,10 +517,9 @@ FOdysseyVectorTagInbetweener::ResetChart()
     float spacing = step;
 
     mChart.inbetweenBuffer.clear();
-    // Note: +1 for target position
-    mChart.inbetweenBuffer.resize( mInbetweenCount + 1 );
+    mChart.inbetweenBuffer.resize( mInbetweenCount );
 
-    for( uint32 i = 0; i <= mInbetweenCount; i++ )
+    for( uint32 i = 0; i < mInbetweenCount; i++ )
     {
         mChart.inbetweenBuffer[i].spacing = spacing;
         mChart.inbetweenBuffer[i].index = i;
@@ -965,40 +964,21 @@ FOdysseyVectorTagInbetweener::MoveInbetween( FInbetweenerInbetween* iInbetween
     if( ( iNewSpacing > 0.0f ) && ( iNewSpacing < 1.0f ) )
     {
         IOdysseyVectorAnimationCell* animationCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
-        int32 inbetweenIndex = iInbetween - &mChart.inbetweenBuffer[0];
-        int32 prevIndex  = inbetweenIndex - 1;
-        uint32 nextIndex = inbetweenIndex + 1;
-        float prevSpacing = prevIndex > -1 ? mChart.inbetweenBuffer[prevIndex].spacing
-                                           : 0.0f;
-        float nextSpacing = nextIndex < mInbetweenCount ? mChart.inbetweenBuffer[nextIndex].spacing
-                                                        : 1.0f;
+        int32 prevIndex  = iInbetween->index - 1;
+        uint32 nextIndex = iInbetween->index + 1;
+        float prevSpacing = prevIndex > -1 ? mChart.inbetweenBuffer[prevIndex].spacing : 0.0f;
+        float nextSpacing = nextIndex < mInbetweenCount ? mChart.inbetweenBuffer[nextIndex].spacing : 1.0f;
 
         if( iRelative == false )
         {
             if( ( iNewSpacing > prevSpacing )
              && ( iNewSpacing < nextSpacing ) )
             {
-                double oldSpacing = iInbetween->spacing;
-
                 iInbetween->spacing = iNewSpacing;
 
                 // recompute single inbetweens
-                InterpolateTransform( inbetweenIndex );
-                DeformPathsAtInbetween( inbetweenIndex );
-
-                for( FInbetweenerTrajectory* trajectory : mTrajectoryList )
-                {
-                    std::vector<FInbetweenerWaypoint>& waypointBuffer = trajectory->GetWaypointBuffer();
-                    FInbetweenerWaypoint* waypoint = &waypointBuffer[inbetweenIndex];
-                    uint32 waypointCount = waypointBuffer.size();
-                    uint32 waypointIndex = waypoint - &waypointBuffer[0];
-                    double prevT = ( waypointIndex > 0                     ) ? trajectory->GetWaypoint( waypointIndex - 1 )->GetT() : 0.0f;
-                    double nextT = ( waypointIndex < ( waypointCount - 1 ) ) ? trajectory->GetWaypoint( waypointIndex + 1 )->GetT() : 1.0f;
-
-                    double ratio = ( iNewSpacing - oldSpacing ) / ( nextSpacing - prevSpacing );
-
-                    waypoint->SetT( waypoint->GetT() + ( ( nextT - prevT ) * ratio ) );
-                }
+                InterpolateTransform( iInbetween->index );
+                DeformPathsAtInbetween( iInbetween->index );
             }
         }
         else
@@ -1007,6 +987,8 @@ FOdysseyVectorTagInbetweener::MoveInbetween( FInbetweenerInbetween* iInbetween
             {
                 if( &otherInbetween != iInbetween )
                 {
+                    double otherInbetweenOldSpacing = otherInbetween.spacing;
+
                     if( otherInbetween.spacing < iInbetween->spacing )
                     {
                         float length = iInbetween->spacing;
@@ -1031,8 +1013,6 @@ FOdysseyVectorTagInbetweener::MoveInbetween( FInbetweenerInbetween* iInbetween
             // recompute all inbetweens
             Interpolate();
         }
-
-
     }
 }
 

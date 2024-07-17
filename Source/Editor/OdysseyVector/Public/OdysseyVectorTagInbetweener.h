@@ -260,6 +260,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                        , ::ULIS::FVec2D* iPointPositionBuffer
                        , const BLMatrix2D& iWorldMatrix
                        , BLContext* iBLContext );
+        void MoveWaypointsWithInbetween( uint32 iInbetweenIndex
+                                       , double iInbetweenOldSpacing
+                                       , double iInbetweenNewSpacing );
 
 
     public:

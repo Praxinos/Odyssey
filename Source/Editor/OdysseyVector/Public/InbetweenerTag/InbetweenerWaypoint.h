@@ -14,8 +14,10 @@ class ODYSSEYVECTOR_API FInbetweenerWaypoint
         void SetT( float iT );
         float GetT();
         FInbetweenerTrajectory* GetTrajectory();
+        void SetRatio( float iRatio );
+        float GetRatio();
 
     protected:
         FInbetweenerTrajectory* mTrajectory;
-        float mT;
+        float mRatio;
 };
