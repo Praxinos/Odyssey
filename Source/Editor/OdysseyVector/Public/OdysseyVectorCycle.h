@@ -2,6 +2,7 @@
 
 #include <blend2d.h>
 #include <Core/Core.h>
+#include <list>
 #include <Image/Block.h>
 
 class FOdysseyVectorObject;

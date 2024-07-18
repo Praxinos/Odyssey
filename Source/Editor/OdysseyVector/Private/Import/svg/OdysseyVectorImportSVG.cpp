@@ -112,17 +112,18 @@ static TCHAR* ReadXY( const TCHAR* iCommandArgs
                     , ::ULIS::FVec2D& coords
                     , ::ULIS::FVec2D* referenceCoords )
 {
-    TCHAR* currentArg = (TCHAR*) iCommandArgs;
+    wchar_t* currentArg = (wchar_t*) iCommandArgs;
+    TCHAR* currentArgChar = (TCHAR*) iCommandArgs;
 
     // wcstod is for wide chars. It should be portable on both windows and linux but I am unsure
     // about the result compared to the windows-only _tcstod function.
-    coords.x = wcstod( currentArg, &currentArg );
+    coords.x = std::wcstod( currentArg, &currentArg );
 
-    currentArg = SkipCommaWhitespace( currentArg );
+    currentArgChar = SkipCommaWhitespace( currentArgChar );
 
     // wcstod is for wide chars. It should be portable on both windows and linux but I am unsure
     // about the result compared to the windows-only _tcstod function.
-    coords.y = wcstod( currentArg, &currentArg );
+    coords.y = std::wcstod( currentArg, &currentArg );
 
     if( referenceCoords )
     {
@@ -132,7 +133,7 @@ static TCHAR* ReadXY( const TCHAR* iCommandArgs
         //*referenceCoords = coords;
     }
 
-    return currentArg;
+    return currentArgChar;
 }
 
 bool

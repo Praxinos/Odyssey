@@ -3,6 +3,7 @@
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
+#include <list>
 #include "OdysseyVectorPoint.h"
 //#include "OdysseyVectorCycle.h"
 
