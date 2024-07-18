@@ -17,6 +17,11 @@
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 
+#include "Widgets/Layout/SWidgetSwitcher.h"
+#include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeader.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
+
 /////////////////////////////////////////////////////
 // FOdysseyAnimationEditorGUI
 //--------------------------------------------------------------------------------------
@@ -189,6 +194,26 @@ FOdysseyAnimationEditorGUI::ParseVectorSignal( FOdysseyVectorGroupPaint* iScene
         TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
 
         vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( iScene );
+    }
+
+    if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED ) )
+    {
+        TSharedPtr<FOdysseyAnimationEditorTimelineTab> timelineTab = mExtension->GetEditor()->FindTab<FOdysseyAnimationEditorTimelineTab>();
+        TSharedPtr<SWidgetSwitcher> widgetSwitcher = StaticCastSharedPtr<SWidgetSwitcher>(timelineTab.Get()->Widget());
+        TSharedPtr<SOdysseyAnimationLayerStack> layerStack = StaticCastSharedPtr<SOdysseyAnimationLayerStack>(widgetSwitcher.Get()->GetWidget(0));
+        TSharedPtr<SOdysseyLayerStackTreeView> treeView = layerStack.Get()->GetTreeView();
+        TArray<UOdysseyLayer*> selectedItemArray;
+
+        treeView.Get()->GetSelectedItems( selectedItemArray );
+
+        for( UOdysseyLayer* layer : selectedItemArray )
+        {
+            treeView.Get()->GenerateNewWidget( layer );
+
+            TSharedPtr< ITableRow > treeView.Get()->WidgetFromItem ( layer );
+)
+
+        }
     }
 }
 

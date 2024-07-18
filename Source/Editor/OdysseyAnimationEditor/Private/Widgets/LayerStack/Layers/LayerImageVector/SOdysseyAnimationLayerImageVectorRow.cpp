@@ -14,6 +14,7 @@
 #include "Math/UnitConversion.h"
 #include "SEnumCombo.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeader.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -164,6 +165,13 @@ SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
             SNew(SOdysseyAnimationTimelineLightTableHeader)
             .LightTable(mAnimationLayerImageVector->GetLightTable())
 		    .Visibility(this, &SOdysseyAnimationLayerImageVectorRow::GetLightTableVisibility)
+        ]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(SOdysseyAnimationTimelineInbetweeningHeader, mAnimationLayerImageVector->GetSharedEnv() )
+            //.LightTable(mAnimationLayerImageVector->GetLightTable())
+		    //.Visibility(this, &SOdysseyAnimationLayerImageVectorRow::GetLightTableVisibility)
         ];
 }
 
