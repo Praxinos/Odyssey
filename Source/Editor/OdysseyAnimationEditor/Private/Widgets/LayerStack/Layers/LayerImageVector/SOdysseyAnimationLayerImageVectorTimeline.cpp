@@ -4,6 +4,7 @@
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimeline.h"
 #include "Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
 #include "Widgets/LayerStack/Cells/CellImageVector/SOdysseyAnimationCellImageVector.h"
+#include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
 #include "OdysseyAnimation.h"
@@ -27,6 +28,15 @@ SOdysseyAnimationLayerImageVectorTimeline::Construct(
     SOdysseyAnimationLayerImageTimeline::FArguments args;
     args.IsCollapsed(InArgs._IsCollapsed);
     SOdysseyAnimationLayerImageTimeline::Construct(args, iExtension, iAnimationLayerImageVector);
+
+    TSharedRef<SVerticalBox> verticalBox = StaticCastSharedRef<SVerticalBox>(GetChildren()->GetChildAt( 0 ));
+
+    verticalBox.Get().AddSlot()
+    [
+        SNew(SOdysseyAnimationLayerImageVectorTimelineInbetweening
+           , iAnimationLayerImageVector->GetSharedEnv()
+           , iExtension)
+    ];
 }
 
 TSharedRef<FOdysseyAnimationCell>

@@ -7,6 +7,7 @@
 #include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerRow.h"
 
 class FOdysseyAnimationEditorExtension;
+class SOdysseyAnimationTimelineInbetweeningHeader;
 
 /**
  * Implements a layer row widget
@@ -30,6 +31,8 @@ public:
         class UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector
     );
 
+    TSharedPtr<SOdysseyAnimationTimelineInbetweeningHeader> GetInbetweeningHeader();
+
 private:
     virtual TSharedRef<SWidget> GenerateHeaderWidget() override;
     virtual TSharedRef<SWidget> GenerateOptionsWidget() override;
@@ -51,6 +54,7 @@ private:
     void OnOpacityEndSliderMovement(int iValue);
 
 private:
+    TSharedPtr<SOdysseyAnimationTimelineInbetweeningHeader> mInbetweeningHeader;
     class UOdysseyAnimationLayerImageVector* mAnimationLayerImageVector;
     FText mSetOpacityTransactionName;
 };

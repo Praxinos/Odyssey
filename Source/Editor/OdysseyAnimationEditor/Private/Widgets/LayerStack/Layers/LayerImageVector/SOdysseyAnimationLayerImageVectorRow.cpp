@@ -122,6 +122,8 @@ SOdysseyAnimationLayerImageVectorRow::GenerateHeaderWidget()
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
 {
+    mInbetweeningHeader = SNew(SOdysseyAnimationTimelineInbetweeningHeader, mAnimationLayerImageVector->GetSharedEnv() );
+
 	return SNew(SVerticalBox)
         + SVerticalBox::Slot()
         .Padding(FMargin(0, 2.f, 0, 0))
@@ -169,10 +171,16 @@ SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            SNew(SOdysseyAnimationTimelineInbetweeningHeader, mAnimationLayerImageVector->GetSharedEnv() )
+            mInbetweeningHeader.ToSharedRef()
             //.LightTable(mAnimationLayerImageVector->GetLightTable())
 		    //.Visibility(this, &SOdysseyAnimationLayerImageVectorRow::GetLightTableVisibility)
         ];
+}
+
+TSharedPtr<SOdysseyAnimationTimelineInbetweeningHeader>
+SOdysseyAnimationLayerImageVectorRow::GetInbetweeningHeader()
+{
+    return mInbetweeningHeader;
 }
 
 TSharedRef<SWidget>

@@ -21,6 +21,7 @@
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeader.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
+#include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyAnimationEditorGUI
@@ -196,7 +197,8 @@ FOdysseyAnimationEditorGUI::ParseVectorSignal( FOdysseyVectorGroupPaint* iScene
         vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( iScene );
     }
 
-    if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED ) )
+    if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
+     || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED ) )
     {
         TSharedPtr<FOdysseyAnimationEditorTimelineTab> timelineTab = mExtension->GetEditor()->FindTab<FOdysseyAnimationEditorTimelineTab>();
         TSharedPtr<SWidgetSwitcher> widgetSwitcher = StaticCastSharedPtr<SWidgetSwitcher>(timelineTab.Get()->Widget());
@@ -204,15 +206,24 @@ FOdysseyAnimationEditorGUI::ParseVectorSignal( FOdysseyVectorGroupPaint* iScene
         TSharedPtr<SOdysseyLayerStackTreeView> treeView = layerStack.Get()->GetTreeView();
         TArray<UOdysseyLayer*> selectedItemArray;
 
-        treeView.Get()->GetSelectedItems( selectedItemArray );
+        selectedItemArray = treeView.Get()->GetItems();
 
         for( UOdysseyLayer* layer : selectedItemArray )
         {
-            treeView.Get()->GenerateNewWidget( layer );
+            //treeView.Get()->GenerateNewWidget( layer );
+            TSharedPtr<ITableRow> tableRow = treeView.Get()->WidgetFromItem ( layer );
 
-            TSharedPtr< ITableRow > treeView.Get()->WidgetFromItem ( layer );
-)
+            if( tableRow.IsValid() )
+            {
+                TSharedRef<SWidget> rowWidget = tableRow.Get()->AsWidget();
 
+                if( rowWidget.Get().GetType() == "SOdysseyAnimationLayerImageVectorRow" )
+                {
+                    TSharedRef<SOdysseyAnimationLayerImageVectorRow> vectorRowWidget = StaticCastSharedRef<SOdysseyAnimationLayerImageVectorRow>(rowWidget);
+
+                    vectorRowWidget.Get().GetInbetweeningHeader().Get()->Update();
+                }
+            }
         }
     }
 }

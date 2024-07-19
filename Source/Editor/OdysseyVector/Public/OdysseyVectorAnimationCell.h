@@ -16,4 +16,5 @@ class IOdysseyVectorAnimationCell
         virtual FOdysseyVectorEngine* GetEngine() = 0;
         virtual int32 GetIndex() = 0;
         virtual uint32 GetLength() = 0;
+        virtual uint32 GetFrame() = 0;
 };

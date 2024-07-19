@@ -75,7 +75,8 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
         {
             selectedObject->SetName( Name );
 
-            signalFlags |= FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY;
+            signalFlags |= ( FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
+                           | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
         }
 
         // Category "Transform"

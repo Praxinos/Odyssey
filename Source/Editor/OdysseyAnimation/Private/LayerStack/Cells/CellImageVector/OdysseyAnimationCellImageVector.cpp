@@ -294,5 +294,12 @@ FOdysseyAnimationCellImageVector::GetIndex()
 uint32
 FOdysseyAnimationCellImageVector::GetLength()
 {
-    return GetLength();
+    return FOdysseyAnimationCell::GetLength();
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetFrame
+uint32
+FOdysseyAnimationCellImageVector::GetFrame()
+{
+    return GetLayer()->GetCellsContainer()->GetCellFrame(SharedThis(this));
 }

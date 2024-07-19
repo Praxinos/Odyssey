@@ -65,6 +65,7 @@ public:
     virtual FOdysseyVectorEngine* GetEngine() override;
     virtual int32 GetIndex() override;
     virtual uint32 GetLength() override;
+    virtual uint32 GetFrame() override;
 
 private:
     void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);

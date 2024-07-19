@@ -130,9 +130,14 @@ void
 SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged( const FText& InText
                                                           , ETextCommit::Type CommitInfo )
 {
+    FOdysseyVectorObject* itemObject = mItem.Get()->GetVectorObject();
+    FOdysseyVectorGroupPaint* itemScene = itemObject->GetScene();
+
     mItem.Get()->GetVectorObject()->SetName( InText.ToString() );
 
     mTextBlockWidget.Get()->SetText( FText::FromString( mItem.Get()->GetVectorObject()->GetName() ) );
+
+    itemScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
 }
 
 FReply

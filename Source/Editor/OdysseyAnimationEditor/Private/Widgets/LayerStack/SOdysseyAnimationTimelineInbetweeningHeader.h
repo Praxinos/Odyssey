@@ -26,10 +26,9 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeader
 	    void Construct( const FArguments& InArgs
                       , FOdysseyVectorSharedEnv* iVectorSharedEnv );
 
-    protected:
         void Update();
 
-
+    protected:
         TSharedRef<ITableRow> OnGenerateRow( TSharedPtr<FInbetweeningListViewItem> iItem
                                            , const TSharedRef<STableViewBase>& iOwnerTable );
 
