@@ -8,6 +8,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Misc/FrameNumber.h"
 #include "Misc/Guid.h"
+#include "Misc/QualifiedFrameTime.h"
 #include "MovieSceneSequenceID.h"
 
 #include "EposSequenceHelpers.generated.h"
