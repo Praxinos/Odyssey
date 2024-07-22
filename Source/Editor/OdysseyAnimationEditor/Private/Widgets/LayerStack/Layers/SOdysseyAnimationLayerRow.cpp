@@ -31,11 +31,19 @@ SOdysseyAnimationLayerRow::GetExtension()
     return mExtension;
 }
 
+TSharedPtr<SWidget>
+SOdysseyAnimationLayerRow::GetTimelineWidget()
+{
+    return mTimelineWidget;
+}
+
 TSharedRef<SWidget>
 SOdysseyAnimationLayerRow::GenerateWidgetForColumn( const FName& InColumnName )
 {
     if (InColumnName == "Timeline")
     {
+        mTimelineWidget = GenerateTimelineWidget();
+
         return 
             SNew(SBorder)
             .Padding(FMargin(4.f, 0.f, 0.f, 0.f)) //Patch
@@ -43,7 +51,7 @@ SOdysseyAnimationLayerRow::GenerateWidgetForColumn( const FName& InColumnName )
                 SNew(SOdysseyAnimationTimelineControl, mExtension)
                 .Clipping(EWidgetClipping::ClipToBoundsAlways)
                 [
-                    GenerateTimelineWidget()
+                    mTimelineWidget.ToSharedRef()
                 ]
             ];
     }

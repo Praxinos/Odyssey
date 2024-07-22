@@ -35,9 +35,12 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
                              , int32 LayerId
                              , const FWidgetStyle& InWidgetStyle
                              , bool bParentEnabled ) const override;
+        FText GetInbetweenerTagInbetweenCount() const;
 
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
+        FVector2D mBoxPos;
+        FVector2D mBoxSize;
         //Box containing the cells widgets
         //TSharedPtr<SHorizontalBox> mCellsBox;
 };

@@ -249,6 +249,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     , mTargetRotation    ( 0.0f )
     , mColor ( 255, 0, 255, 255 )
     , bMapAsPolyline( false )
+    , bShared ( false )
 {
     ResetChart();
     // Note: Matrix needs chart to be allocated first.
@@ -330,122 +331,156 @@ FOdysseyVectorTagInbetweener::Scale( double iX, double iY )
 
 void FOdysseyVectorTagInbetweener::Added()
 {
-    mSharedEnv->AddTag( this );
+    Share();
 }
 
 void FOdysseyVectorTagInbetweener::Removed()
 {
+    Unshare();
+}
+
+void
+FOdysseyVectorTagInbetweener::Share()
+{
+    mSharedEnv->AddTag( this );
+
+    bShared = true;
+}
+
+void
+FOdysseyVectorTagInbetweener::Unshare()
+{
     mSharedEnv->RemoveTag( this );
+
+    bShared = false;
 }
 
 void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
                                          , uint64 iOwnerInvalidationFlags )
 {
-    if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
-     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
-     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
-     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
-     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
+    if( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY )
     {
+        if( mOwner->GetScene() == nullptr )
+        {
+            Unshare();
+        }
+        else
+        {
+            if( mSharedEnv->HasTag( this ) == false )
+            {
+                Share();
+            }
+        }
+    }
+
+    if( bShared == true )
+    {
+        if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
+        {
+            if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
+            {
+                std::vector<::ULIS::FVec2D> sourceGeometry;
+                std::vector<::ULIS::FVec2D> targetGeometry;
+
+                mGrid->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
+
+                mSourceBBox = mOwner->GetBBox( false );
+
+                mSourceBBox.x -= 0.1f;
+                mSourceBBox.y -= 0.1f;
+                mSourceBBox.w += 0.2f;
+                mSourceBBox.h += 0.2f;
+
+                mGrid->Make( sourceGeometry, targetGeometry );
+            }
+        }
+
+        if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST )
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY ) 
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
+        {
+            mInvalidationFlags |= INVALIDATE_MAP;
+        }
+
+        if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE    )
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TAG_LIST )
+         //|| ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_MATRIX   )
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    )
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST ) )
+         //|| ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_MATRIX   ) )
+        {
+            mInvalidationFlags |= ( INVALIDATE_SPACING );
+        }
+
+        if( mInvalidationFlags & INVALIDATE_TARGET )
+        {
+            UpdateBBox( mTargetBBox, eInbetweenerPointPositionType::TargetPosition );
+        }
+
+        if( mInvalidationFlags & INVALIDATE_SOURCEBBOX )
+        {
+            //UpdateBBox( mSourceBBox, eInbetweenerPointPositionType::SourcePosition );
+        }
+
+        if( mInvalidationFlags & INVALIDATE_MAP )
+        {
+            Map();
+
+            mInvalidationFlags |= INVALIDATE_BUFFERS;
+        }
+
+        if( mInvalidationFlags & INVALIDATE_BUFFERS )
+        {
+            AllocBuffers();
+        }
+
+        if( mInvalidationFlags & INVALIDATE_TARGET )
+        {
+            DeformPathsAtTarget( );
+
+            if( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE )
+            {
+                mInvalidationFlags &= (~INVALIDATE_SPACING);
+            }
+        }
+
+        if( ( mInvalidationFlags & INVALIDATE_TRAJECTORIES )
+        ||  ( mInvalidationFlags & INVALIDATE_TARGET   ) )
+        {
+            for( FInbetweenerTrajectory* trajectory : mTrajectoryList )
+            {
+                trajectory->Update();
+            }
+        }
+
+        mGrid->Update( iUpdateFlags, mInvalidationFlags );
+
+        if( ( mInvalidationFlags & INVALIDATE_SPACING )
+         || ( mInvalidationFlags & INVALIDATE_MAP     ) )
+        {
+            Interpolate();
+        }
+
         if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
         {
-            std::vector<::ULIS::FVec2D> sourceGeometry;
-            std::vector<::ULIS::FVec2D> targetGeometry;
-
-            mGrid->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
-
-            mSourceBBox = mOwner->GetBBox( false );
-
-            mSourceBBox.x -= 0.1f;
-            mSourceBBox.y -= 0.1f;
-            mSourceBBox.w += 0.2f;
-            mSourceBBox.h += 0.2f;
-
-            mGrid->Make( sourceGeometry, targetGeometry );
+            //if( mInvalidationFlags & INVALIDATE_CELLS )
+            {
+                RedrawAnimationCells();
+            }
         }
-    }
 
-    if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
-     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
-     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
-     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST )
-     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY ) 
-     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
-    {
-        mInvalidationFlags |= INVALIDATE_MAP;
-    }
-
-    if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE    )
-     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TAG_LIST )
-     //|| ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_MATRIX   )
-     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    )
-     || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST ) )
-     //|| ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_MATRIX   ) )
-    {
-        mInvalidationFlags |= ( INVALIDATE_SPACING );
-    }
-
-    if( mInvalidationFlags & INVALIDATE_TARGET )
-    {
-        UpdateBBox( mTargetBBox, eInbetweenerPointPositionType::TargetPosition );
-    }
-
-    if( mInvalidationFlags & INVALIDATE_SOURCEBBOX )
-    {
-        //UpdateBBox( mSourceBBox, eInbetweenerPointPositionType::SourcePosition );
-    }
-
-    if( mInvalidationFlags & INVALIDATE_MAP )
-    {
-        Map();
-
-        mInvalidationFlags |= INVALIDATE_BUFFERS;
-    }
-
-    if( mInvalidationFlags & INVALIDATE_BUFFERS )
-    {
-        AllocBuffers();
-    }
-
-    if( mInvalidationFlags & INVALIDATE_TARGET )
-    {
-        DeformPathsAtTarget( );
-
-        if( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE )
+        // reset tag's invalidation flags (do not confuse with object's invalidation flags)
+        if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
         {
-            mInvalidationFlags &= (~INVALIDATE_SPACING);
+            mInvalidationFlags = 0;
         }
-    }
-
-    if( ( mInvalidationFlags & INVALIDATE_TRAJECTORIES )
-    ||  ( mInvalidationFlags & INVALIDATE_TARGET   ) )
-    {
-        for( FInbetweenerTrajectory* trajectory : mTrajectoryList )
-        {
-            trajectory->Update();
-        }
-    }
-
-    mGrid->Update( iUpdateFlags, mInvalidationFlags );
-
-    if( ( mInvalidationFlags & INVALIDATE_SPACING )
-     || ( mInvalidationFlags & INVALIDATE_MAP     ) )
-    {
-        Interpolate();
-    }
-
-    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
-    {
-        //if( mInvalidationFlags & INVALIDATE_CELLS )
-        {
-            RedrawAnimationCells();
-        }
-    }
-
-    // reset tag's invalidation flags (do not confuse with object's invalidation flags)
-    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
-    {
-        mInvalidationFlags = 0;
     }
 }
 

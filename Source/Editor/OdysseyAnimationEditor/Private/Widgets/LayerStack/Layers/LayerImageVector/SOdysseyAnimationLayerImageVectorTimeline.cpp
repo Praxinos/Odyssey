@@ -31,12 +31,20 @@ SOdysseyAnimationLayerImageVectorTimeline::Construct(
 
     TSharedRef<SVerticalBox> verticalBox = StaticCastSharedRef<SVerticalBox>(GetChildren()->GetChildAt( 0 ));
 
+    mInbetweeningListView = SNew( SOdysseyAnimationLayerImageVectorTimelineInbetweening
+                                , iAnimationLayerImageVector->GetSharedEnv()
+                                , iExtension );
     verticalBox.Get().AddSlot()
+    .AutoHeight()
     [
-        SNew(SOdysseyAnimationLayerImageVectorTimelineInbetweening
-           , iAnimationLayerImageVector->GetSharedEnv()
-           , iExtension)
+        mInbetweeningListView.ToSharedRef()
     ];
+}
+
+TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>
+SOdysseyAnimationLayerImageVectorTimeline::GetInbetweeningListView()
+{
+    return mInbetweeningListView;
 }
 
 TSharedRef<FOdysseyAnimationCell>

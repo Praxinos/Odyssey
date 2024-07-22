@@ -50,7 +50,7 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::Construct( const typename STable
 
     mInbetweenerTag = iTem.Get()->GetInbetweenerTag();
 
-    mTextBlockWidget = SNew(SInlineEditableTextBlock)
+    mTextBlockWidget = SNew(STextBlock)
                        .Text( FText::FromString( mInbetweenerTag->GetOwner()->GetName() ) );
 
     tagBox = SNew(SHorizontalBox);

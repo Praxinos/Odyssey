@@ -40,5 +40,5 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeaderRow
 
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        TSharedPtr<SInlineEditableTextBlock> mTextBlockWidget;
+        TSharedPtr<STextBlock> mTextBlockWidget;
 };

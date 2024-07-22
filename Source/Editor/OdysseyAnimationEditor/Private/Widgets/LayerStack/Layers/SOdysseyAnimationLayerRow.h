@@ -30,6 +30,7 @@ public:
 
 public:
     FOdysseyAnimationEditorExtension* GetExtension();
+    TSharedPtr<SWidget> GetTimelineWidget();
 
 public:
     virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
@@ -39,4 +40,5 @@ protected:
 
 private:
     FOdysseyAnimationEditorExtension* mExtension;
+    TSharedPtr<SWidget> mTimelineWidget;
 };

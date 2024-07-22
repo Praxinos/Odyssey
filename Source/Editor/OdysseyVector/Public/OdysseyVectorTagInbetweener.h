@@ -263,7 +263,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void MoveWaypointsWithInbetween( uint32 iInbetweenIndex
                                        , double iInbetweenOldSpacing
                                        , double iInbetweenNewSpacing );
-
+        void Share();
+        void Unshare();
 
     public:
         static const uint64 INVALIDATE_MAP             = ( 1LL << 0 );
@@ -309,4 +310,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         uint64 mInvalidationFlags;
         FColor mColor;
         bool bMapAsPolyline;
+        bool bShared;
 };

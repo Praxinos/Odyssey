@@ -22,6 +22,8 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeader.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.h"
+#include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimeline.h"
+#include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyAnimationEditorGUI
@@ -220,8 +222,12 @@ FOdysseyAnimationEditorGUI::ParseVectorSignal( FOdysseyVectorGroupPaint* iScene
                 if( rowWidget.Get().GetType() == "SOdysseyAnimationLayerImageVectorRow" )
                 {
                     TSharedRef<SOdysseyAnimationLayerImageVectorRow> vectorRowWidget = StaticCastSharedRef<SOdysseyAnimationLayerImageVectorRow>(rowWidget);
+                    TSharedPtr<SOdysseyAnimationLayerImageVectorTimeline> vectorTimelineWidget = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimeline>(vectorRowWidget.Get().GetTimelineWidget());
 
+                    // Update the left part of the timeline
                     vectorRowWidget.Get().GetInbetweeningHeader().Get()->Update();
+
+                    vectorTimelineWidget.Get()->GetInbetweeningListView().Get()->Update();
                 }
             }
         }

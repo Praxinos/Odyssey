@@ -917,6 +917,8 @@ FOdysseyVectorObject::GetOldParent()
 uint32
 FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 {
+    uint32 ret = HIERARCHY_CHANGE_ERROR;
+
     if( iChild->mParent == this )
     {
         mChildrenList.remove( iChild );
@@ -927,10 +929,14 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
         iChild->mOldParent = this;
         iChild->mParent = nullptr;
 
-        return HIERARCHY_CHANGE_SUCCESS; // removal succeeded
+        // update removed object immediately so that it can unregister itself e.g
+        iChild->Invalidate( INVALIDATE_HIERARCHY );
+        iChild->Update( 0 );
+
+        ret = HIERARCHY_CHANGE_SUCCESS; // removal succeeded
     }
 
-    return HIERARCHY_CHANGE_ERROR;
+    return ret;
 }
 
 uint32

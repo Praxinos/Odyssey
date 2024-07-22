@@ -19,8 +19,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorSharedEnv
         void RemoveTag( FOdysseyVectorTag* iVectorTag );
         void AddObject( FOdysseyVectorObject* iVectorObject );
         void RemoveObject( FOdysseyVectorObject* iVectorObject );
+        bool HasTag( FOdysseyVectorTag* iTag );
 
         std::list<FOdysseyVectorTag*>& GetTagList();
+
 
     private:
         std::list<FOdysseyVectorObject*> mObjectList;

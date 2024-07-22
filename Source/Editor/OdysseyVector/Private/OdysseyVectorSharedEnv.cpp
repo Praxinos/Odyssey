@@ -37,3 +37,9 @@ FOdysseyVectorSharedEnv::GetTagList()
 {
     return mTagList;
 }
+
+bool
+FOdysseyVectorSharedEnv::HasTag( FOdysseyVectorTag* iTag )
+{
+    return ( std::find( mTagList.begin(), mTagList.end(), iTag ) == mTagList.end() ) ? false : true;
+}

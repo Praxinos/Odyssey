@@ -39,33 +39,23 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::Construct( const typen
 
     //SetContent( mCellsBox.ToSharedRef() );
 
+    ChildSlot
+    [
+        SNew( STextBlock)
+        .Text( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::GetInbetweenerTagInbetweenCount )
+    ];
+
     Update();
+}
+
+FText
+SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::GetInbetweenerTagInbetweenCount() const
+{
+    return FText::FromString( FString::FromInt( (int32)mInbetweenerTag->GetInbetweenCount() ) );
 }
 
 void
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::Update()
-{
-    // retrieve parent widget
-    const TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> listView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
-    // retrieve timing data
-    int32 tagCellIndex = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetIndex();
-    uint32 fromFrame = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetFrame();
-    uint32 toFrame   = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetCellByIndex( fromFrame + mInbetweenerTag->GetInbetweenCount() + 1 )->GetFrame();
-    // compute geometry
-    FOdysseyAnimationEditorExtension* animationEditorExtension = listView.Get()->GetAnimationEditorExtension();
-    float tagCellX = fromFrame * animationEditorExtension->Timeline()->GetFrameWidth();
-    float tagCellW = toFrame * animationEditorExtension->Timeline()->GetFrameWidth();
-}
-
-
-int32
-SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintArgs& Args
-                                                                 , const FGeometry& AllottedGeometry
-                                                                 , const FSlateRect& MyCullingRect
-                                                                 , FSlateWindowElementList& OutDrawElements
-                                                                 , int32 LayerId
-                                                                 , const FWidgetStyle& InWidgetStyle
-                                                                 , bool bParentEnabled ) const
 {
     // retrieve parent widget
     const TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> listView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
@@ -76,10 +66,26 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
     uint32 toFrame   = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetCellByIndex( tagCellIndex + tagCellCount )->GetFrame();
     // compute geometry
     FOdysseyAnimationEditorExtension* animationEditorExtension = listView.Get()->GetAnimationEditorExtension();
-    float tagCellX = fromFrame * animationEditorExtension->Timeline()->GetFrameWidth();
-    float tagCellW = toFrame * animationEditorExtension->Timeline()->GetFrameWidth();
-    //FVector2D widgetSize = MyCullingRect.GetSize();
-    static FSlateBrush whiteBackgroundBrush;
+    const FGeometry& geometry = GetPaintSpaceGeometry();
+
+    mBoxPos.X  = fromFrame * animationEditorExtension->Timeline()->GetFrameWidth();
+    mBoxPos.Y  = 0.0f;
+    mBoxSize.X = toFrame * animationEditorExtension->Timeline()->GetFrameWidth();
+    //mBoxSize.Y = GetPaintSpaceGeometry().GetAbsoluteSize().Y;
+    mBoxSize.Y = ChildSlot.GetWidget().Get().GetPaintSpaceGeometry().GetAbsoluteSize().Y;
+}
+
+int32
+SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintArgs& Args
+                                                                 , const FGeometry& AllottedGeometry
+                                                                 , const FSlateRect& MyCullingRect
+                                                                 , FSlateWindowElementList& OutDrawElements
+                                                                 , int32 LayerId
+                                                                 , const FWidgetStyle& InWidgetStyle
+                                                                 , bool bParentEnabled ) const
+{
+    const FColor& inbetweenerTagColor = mInbetweenerTag->GetColor();
+    static FSlateBrush defaultBrush;
 
 	// Draw a current frame
 	LayerId = SCompoundWidget::OnPaint( Args
@@ -90,17 +96,37 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                                       , InWidgetStyle
                                       , bParentEnabled );
 	++LayerId;
+    FLinearColor strokeColor = FLinearColor( 0.5f
+                                           , 0.5f
+                                           , 0.5f
+                                           , 0.5f );
+    FLinearColor fillColor = FLinearColor( inbetweenerTagColor.R
+                                         , inbetweenerTagColor.G
+                                         , inbetweenerTagColor.B
+                                         , 0.25f );
+    TArray< FVector2D > lines;
 
-    FLinearColor color = FLinearColor( 1.0f, 1.0f, 1.0f, 1.0f );
+    lines.Reserve( 5 );
+    lines.Push( FVector2D( mBoxPos.X             , mBoxPos.Y              ) );
+    lines.Push( FVector2D( mBoxPos.X + mBoxSize.X, mBoxPos.Y              ) );
+    lines.Push( FVector2D( mBoxPos.X + mBoxSize.X, mBoxPos.Y + mBoxSize.Y ) );
+    lines.Push( FVector2D( 0.0f                  , mBoxPos.Y + mBoxSize.Y ) );
 
 	FSlateDrawElement::MakeBox( OutDrawElements
 		                      , LayerId
-		                      , AllottedGeometry.ToPaintGeometry( FVector2D( tagCellX, 0.0f )
-		                                                        , FVector2D( tagCellW, 10/*AllottedGeometry.Size.Y*/ ) )
-		                      , &whiteBackgroundBrush
+		                      , AllottedGeometry.ToPaintGeometry( mBoxPos, mBoxSize )
+		                      , &defaultBrush
 		                      , ESlateDrawEffect::None
-		                      , color
-	);
+		                      , fillColor );
+
+	FSlateDrawElement::MakeLines( OutDrawElements
+		                        , LayerId
+                                , AllottedGeometry.ToPaintGeometry()
+		                        , lines
+		                        , ESlateDrawEffect::None
+		                        , strokeColor
+		                        , true
+		                        , 2.0f );
 
     return LayerId;
 }
