@@ -6,10 +6,13 @@
 
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 #include "OdysseyStyleSet.h"
-#include "OdysseyVector.h"
-#include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+// from module OdysseyVector
+#include "OdysseyVector.h"
+#include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -67,6 +70,29 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::Construct( const typename STable
                 [
                     mTextBlockWidget.ToSharedRef()
                 ] );
+}
+
+FReply
+SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonDown( const FGeometry & MyGeometry
+                                                                 , const FPointerEvent & MouseEvent )
+{
+    FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetEngine()->GetSharedEnv();
+    std::list<FOdysseyVectorTag*>& tagList = sharedEnv->GetTagList();
+
+    for( FOdysseyVectorTag* tag : tagList )
+    {
+        tag->SetSelected( false );
+    }
+
+    mInbetweenerTag->SetSelected( true );
+
+    return FReply::Handled();
+}
+
+FVector2D
+SOdysseyAnimationTimelineInbetweeningHeaderRow::ComputeDesiredSize ( float LayoutScaleMultiplier ) const
+{
+    return FVector2D( 20.0f * LayoutScaleMultiplier, 20.0f * LayoutScaleMultiplier );
 }
 
 #undef LOCTEXT_NAMESPACE

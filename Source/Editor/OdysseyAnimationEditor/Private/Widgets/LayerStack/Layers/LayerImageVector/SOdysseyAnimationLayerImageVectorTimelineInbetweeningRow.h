@@ -25,9 +25,9 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
         void Construct( const typename STableRow<TSharedPtr<FInbetweeningListViewItem>>::FArguments& InArgs
                       , const TSharedRef< STableViewBase >& InOwnerTableView
                       , const TSharedPtr<FInbetweeningListViewItem> iTem );
+        virtual FReply OnMouseButtonDown( const FGeometry & MyGeometry, const FPointerEvent & MouseEvent ) override;
 
     protected:
-        void Update();
         virtual int32 OnPaint( const FPaintArgs& Args
                              , const FGeometry& AllottedGeometry
                              , const FSlateRect& MyCullingRect
@@ -36,6 +36,10 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
                              , const FWidgetStyle& InWidgetStyle
                              , bool bParentEnabled ) const override;
         FText GetInbetweenerTagInbetweenCount() const;
+
+        virtual FVector2D ComputeDesiredSize ( float LayoutScaleMultiplier ) const override;
+        virtual void CacheDesiredSize ( float LayoutScaleMultiplier ) override;
+
 
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;

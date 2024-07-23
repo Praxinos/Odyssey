@@ -38,14 +38,31 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::Construct( const typen
     //mCellsBox = SNew(SHorizontalBox);
 
     //SetContent( mCellsBox.ToSharedRef() );
-
+/*
     ChildSlot
     [
         SNew( STextBlock)
         .Text( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::GetInbetweenerTagInbetweenCount )
     ];
+*/
+}
 
-    Update();
+
+FReply
+SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( const FGeometry & MyGeometry
+                                                                           , const FPointerEvent & MouseEvent )
+{
+    FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetEngine()->GetSharedEnv();
+    std::list<FOdysseyVectorTag*>& tagList = sharedEnv->GetTagList();
+    
+    for( FOdysseyVectorTag* tag : tagList )
+    {
+        tag->SetSelected( false );
+    }
+
+    mInbetweenerTag->SetSelected( true );
+
+    return FReply::Handled();
 }
 
 FText
@@ -55,7 +72,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::GetInbetweenerTagInbet
 }
 
 void
-SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::Update()
+SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( float LayoutScaleMultiplier )
 {
     // retrieve parent widget
     const TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> listView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
@@ -66,13 +83,23 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::Update()
     uint32 toFrame   = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetCellByIndex( tagCellIndex + tagCellCount )->GetFrame();
     // compute geometry
     FOdysseyAnimationEditorExtension* animationEditorExtension = listView.Get()->GetAnimationEditorExtension();
-    const FGeometry& geometry = GetPaintSpaceGeometry();
+
+    STableRow<TSharedPtr<FInbetweeningListViewItem>>::CacheDesiredSize( LayoutScaleMultiplier );
 
     mBoxPos.X  = fromFrame * animationEditorExtension->Timeline()->GetFrameWidth();
     mBoxPos.Y  = 0.0f;
     mBoxSize.X = toFrame * animationEditorExtension->Timeline()->GetFrameWidth();
-    //mBoxSize.Y = GetPaintSpaceGeometry().GetAbsoluteSize().Y;
-    mBoxSize.Y = ChildSlot.GetWidget().Get().GetPaintSpaceGeometry().GetAbsoluteSize().Y;
+    mBoxSize.Y = 20.0f;
+
+    mBoxSize.X *= LayoutScaleMultiplier;
+    mBoxSize.Y *= LayoutScaleMultiplier;
+}
+
+FVector2D
+SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::ComputeDesiredSize ( float LayoutScaleMultiplier ) const
+{
+    // Note: dimensions are already scaled in CacheDesiredSize()
+    return FVector2D( mBoxSize.X, mBoxSize.Y );
 }
 
 int32
@@ -87,14 +114,13 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
     const FColor& inbetweenerTagColor = mInbetweenerTag->GetColor();
     static FSlateBrush defaultBrush;
 
-	// Draw a current frame
-	LayerId = SCompoundWidget::OnPaint( Args
-                                      , AllottedGeometry
-                                      , MyCullingRect
-                                      , OutDrawElements
-                                      , LayerId
-                                      , InWidgetStyle
-                                      , bParentEnabled );
+	LayerId = STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnPaint( Args
+                                                                       , AllottedGeometry
+                                                                       , MyCullingRect
+                                                                       , OutDrawElements
+                                                                       , LayerId
+                                                                       , InWidgetStyle
+                                                                       , bParentEnabled );
 	++LayerId;
     FLinearColor strokeColor = FLinearColor( 0.5f
                                            , 0.5f

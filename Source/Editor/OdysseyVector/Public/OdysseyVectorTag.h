@@ -14,6 +14,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTag
     private:
         static const uint32 mStaticClass = 0xcd382614; // value is crc32 FOdysseyVectorTag
 
+        static const uint32 SELECTED = ( 1UL << 0 );
+
     public:
         static uint32 StaticClass() { return mStaticClass; };
         virtual uint32 GetClass() { return mStaticClass; };
@@ -35,9 +37,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorTag
         virtual void Added() = 0;
         virtual void Removed() = 0;
         virtual void UpdateMatrix() = 0;
+        void SetSelected( bool iSelected );
+        bool IsSelected();
 
         FOdysseyVectorObject* GetOwner();
 
     protected:
         FOdysseyVectorObject* mOwner;
+        uint32 mFlags;
 };

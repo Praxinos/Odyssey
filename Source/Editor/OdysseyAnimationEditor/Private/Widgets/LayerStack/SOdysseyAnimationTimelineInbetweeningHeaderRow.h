@@ -38,6 +38,11 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeaderRow
                       , const TSharedRef< STableViewBase >& InOwnerTableView
                       , const TSharedPtr<FInbetweeningListViewItem> iInbetweenerTag );
 
+        virtual FReply OnMouseButtonDown( const FGeometry & MyGeometry, const FPointerEvent & MouseEvent ) override;
+
+    protected:
+        virtual FVector2D ComputeDesiredSize ( float LayoutScaleMultiplier ) const override;
+
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
         TSharedPtr<STextBlock> mTextBlockWidget;
