@@ -795,4 +795,10 @@ SOdysseyAnimationLayerImageTimeline::IsCellMarkChecked(int iMarkId) const
     return true;
 }
 
+UOdysseyAnimationLayer*
+SOdysseyAnimationLayerImageTimeline::GetLayer()
+{
+    return mLayer;
+}
+
 #undef LOCTEXT_NAMESPACE

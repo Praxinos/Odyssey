@@ -37,8 +37,11 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeaderRow
         void Construct( const typename STableRow<TSharedPtr<FInbetweeningListViewItem>>::FArguments& InArgs
                       , const TSharedRef< STableViewBase >& InOwnerTableView
                       , const TSharedPtr<FInbetweeningListViewItem> iInbetweenerTag );
+        // from STableRow::IsSelected
+        virtual bool IsItemSelected() const override;
 
         virtual FReply OnMouseButtonDown( const FGeometry & MyGeometry, const FPointerEvent & MouseEvent ) override;
+
 
     protected:
         virtual FVector2D ComputeDesiredSize ( float LayoutScaleMultiplier ) const override;

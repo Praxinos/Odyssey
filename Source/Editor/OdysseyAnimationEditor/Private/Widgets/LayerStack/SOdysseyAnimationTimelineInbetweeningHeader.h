@@ -31,6 +31,8 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeader
     protected:
         TSharedRef<ITableRow> OnGenerateRow( TSharedPtr<FInbetweeningListViewItem> iItem
                                            , const TSharedRef<STableViewBase>& iOwnerTable );
+    private :
+        virtual bool Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const override;
 
     protected:
         TArray<TSharedPtr<FInbetweeningListViewItem>> mItemsSource;

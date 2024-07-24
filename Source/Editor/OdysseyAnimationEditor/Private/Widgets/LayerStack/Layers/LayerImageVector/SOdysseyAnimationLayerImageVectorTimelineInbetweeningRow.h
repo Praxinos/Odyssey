@@ -26,6 +26,12 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
                       , const TSharedRef< STableViewBase >& InOwnerTableView
                       , const TSharedPtr<FInbetweeningListViewItem> iTem );
         virtual FReply OnMouseButtonDown( const FGeometry & MyGeometry, const FPointerEvent & MouseEvent ) override;
+        virtual FReply OnMouseMove ( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
+        virtual FReply OnMouseButtonUp( const FGeometry & MyGeometry, const FPointerEvent & MouseEvent ) override;
+        virtual FCursorReply OnCursorQuery ( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
+        // from STableRow::IsSelected
+        virtual bool IsItemSelected() const override;
+
 
     protected:
         virtual int32 OnPaint( const FPaintArgs& Args
@@ -43,8 +49,15 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
 
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
+        FVector2D mSourcePos;
+        FVector2D mSourceSize;
+        TArray<FVector2D> mInterpPosBuffer;
+        TArray<FVector2D> mInterpSizeBuffer;
+        FVector2D mTargetPos;
+        FVector2D mTargetSize;
         FVector2D mBoxPos;
         FVector2D mBoxSize;
+        bool bHandleClicked;
         //Box containing the cells widgets
         //TSharedPtr<SHorizontalBox> mCellsBox;
 };

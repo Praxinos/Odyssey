@@ -8,8 +8,8 @@
 //#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 
 class FInbetweeningListViewItem;
-class FOdysseyVectorSharedEnv;
 class FOdysseyAnimationEditorExtension;
+class UOdysseyAnimationLayerImageVector;
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationLayerImageVectorTimelineInbetweening
@@ -25,18 +25,22 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
         SLATE_END_ARGS()
 
 	    void Construct( const FArguments& InArgs
-                      , FOdysseyVectorSharedEnv* iVectorSharedEnv
+                      , UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector
                       , FOdysseyAnimationEditorExtension* iAnimationEditorExtension );
 
         void Update();
         FOdysseyAnimationEditorExtension* GetAnimationEditorExtension();
+        UOdysseyAnimationLayerImageVector* GetAnimationLayerImageVector();
 
     protected:
         TSharedRef<ITableRow> OnGenerateRow( TSharedPtr<FInbetweeningListViewItem> iItem
                                            , const TSharedRef<STableViewBase>& iOwnerTable );
 
+    private :
+        virtual bool Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const override;
+
     protected:
+        UOdysseyAnimationLayerImageVector* mAnimationLayerImageVector;
 	    FOdysseyAnimationEditorExtension* mAnimationEditorExtension;
         TArray<TSharedPtr<FInbetweeningListViewItem>> mItemsSource;
-        FOdysseyVectorSharedEnv* mVectorSharedEnv;
 };

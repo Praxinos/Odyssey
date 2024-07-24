@@ -4,8 +4,12 @@
 // From module OdysseyAnimationEditor
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow.h"
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
+#include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimeline.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 // From module OdysseyStyle
 #include "OdysseyStyleSet.h"
 // From module OdysseyVector
@@ -23,6 +27,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::~SOdysseyAnimationLaye
 }
 
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow()
+    : bHandleClicked( false )
 {
 }
 
@@ -62,6 +67,56 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
 
     mInbetweenerTag->SetSelected( true );
 
+    bHandleClicked = true;
+
+    return FReply::Handled();
+}
+
+
+FReply
+SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FGeometry& MyGeometry
+                                                                      , const FPointerEvent& MouseEvent )
+{
+    if( MouseEvent.IsMouseButtonDown( EKeys::LeftMouseButton ) )
+    {
+        if( bHandleClicked )
+        {
+            const TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> listView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
+            FOdysseyAnimationEditorExtension* animationEditorExtension = listView.Get()->GetAnimationEditorExtension();
+            const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() );
+            uint32 frameIndex = animationEditorExtension->Timeline()->GetFrameIndexAtMousePosition( cursorPos.X );
+            TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = listView.Get()->GetAnimationLayerImageVector()->GetCellsContainer();
+            int32 tagCellIndex = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetIndex();
+
+            if (!cellsContainer)
+                return FReply::Unhandled();
+
+            TSharedPtr<FOdysseyAnimationCellImageVector> cell = StaticCastSharedPtr<FOdysseyAnimationCellImageVector>(cellsContainer->GetCellAtFrame(frameIndex));
+
+            if( cell.IsValid() )
+            {
+                uint32 inbetweenCount = cell.Get()->GetIndex();
+
+                if( cell.Get()->GetIndex() > tagCellIndex )
+                {
+                    mInbetweenerTag->SetInbetweenCount( cell.Get()->GetIndex() - tagCellIndex - 1 );
+                }
+            }
+        }
+    }
+
+    return FReply::Handled();
+}
+
+FReply
+SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const FGeometry & MyGeometry
+                                                                         , const FPointerEvent & MouseEvent )
+{
+    bHandleClicked = false;
+
+    mInbetweenerTag->GetOwner()->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+
     return FReply::Handled();
 }
 
@@ -79,20 +134,50 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
     // retrieve timing data
     int32 tagCellIndex = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetIndex();
     int32 tagCellCount = mInbetweenerTag->GetInbetweenCount();
-    uint32 fromFrame = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetFrame();
-    uint32 toFrame   = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetCellByIndex( tagCellIndex + tagCellCount )->GetFrame();
+    IOdysseyVectorAnimationCell* sourceCell = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell();
+    IOdysseyVectorAnimationCell* targetCell = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetCellByIndex( tagCellIndex + tagCellCount + 1 );
+    uint32 sourceFrame = sourceCell->GetFrame();
+    uint32 targetFrame = targetCell->GetFrame();
     // compute geometry
     FOdysseyAnimationEditorExtension* animationEditorExtension = listView.Get()->GetAnimationEditorExtension();
+    float frameWidth = animationEditorExtension->Timeline()->GetFrameWidth();
 
+    // call from base class
     STableRow<TSharedPtr<FInbetweeningListViewItem>>::CacheDesiredSize( LayoutScaleMultiplier );
 
-    mBoxPos.X  = fromFrame * animationEditorExtension->Timeline()->GetFrameWidth();
+    // total size of the widget
+    mBoxPos.X  = sourceFrame * frameWidth * LayoutScaleMultiplier;
     mBoxPos.Y  = 0.0f;
-    mBoxSize.X = toFrame * animationEditorExtension->Timeline()->GetFrameWidth();
-    mBoxSize.Y = 20.0f;
+    mBoxSize.X = ( targetFrame + targetCell->GetLength() ) * frameWidth * LayoutScaleMultiplier;
+    mBoxSize.Y = 20.0f * LayoutScaleMultiplier;
 
-    mBoxSize.X *= LayoutScaleMultiplier;
-    mBoxSize.Y *= LayoutScaleMultiplier;
+    // source cell has its own rectangle
+    mSourcePos.X  = mBoxPos.X;
+    mSourcePos.Y  = mBoxPos.Y;
+    mSourceSize.X = sourceCell->GetLength() * frameWidth * LayoutScaleMultiplier;
+    mSourceSize.Y = mBoxSize.Y;
+
+    mInterpPosBuffer.Reset();
+    mInterpPosBuffer.Reserve( mInbetweenerTag->GetInbetweenCount() );
+
+    mInterpSizeBuffer.Reset();
+    mInterpSizeBuffer.Reserve( mInbetweenerTag->GetInbetweenCount() );
+
+    // inbetween cells have their own rectangle
+    for( uint32 i = 0; i <  mInbetweenerTag->GetInbetweenCount(); i++ )
+    {
+        IOdysseyVectorAnimationCell* interpCell = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetCellByIndex( tagCellIndex + i + 1 );
+        uint32 interpFrame = interpCell->GetFrame();
+
+        mInterpPosBuffer.Emplace( interpFrame * frameWidth * LayoutScaleMultiplier, 0.0f );
+        mInterpSizeBuffer.Emplace( interpCell->GetLength() * frameWidth * LayoutScaleMultiplier, mBoxSize.Y );
+    }
+
+    // target cell has its own rectangle
+    mTargetPos.X  = targetFrame * frameWidth * LayoutScaleMultiplier;
+    mTargetPos.Y  = 0.0f;
+    mTargetSize.X = targetCell->GetLength() * frameWidth * LayoutScaleMultiplier;
+    mTargetSize.Y = mBoxSize.Y;
 }
 
 FVector2D
@@ -100,6 +185,29 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::ComputeDesiredSize ( f
 {
     // Note: dimensions are already scaled in CacheDesiredSize()
     return FVector2D( mBoxSize.X, mBoxSize.Y );
+}
+
+bool  	
+SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::IsItemSelected() const
+{
+    return mInbetweenerTag->IsSelected();
+}
+
+FCursorReply
+SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnCursorQuery ( const FGeometry& MyGeometry
+                                                                        , const FPointerEvent& CursorEvent ) const
+{
+    const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( CursorEvent.GetScreenSpacePosition() );
+
+    if( ( cursorPos.X > mTargetPos.X )
+     && ( cursorPos.Y > mTargetPos.Y )
+     && ( cursorPos.X < ( mTargetPos.X + mTargetSize.X ) )
+     && ( cursorPos.Y < ( mTargetPos.Y + mTargetSize.Y ) ) )
+    {
+        return  FCursorReply::Cursor( EMouseCursor::ResizeLeftRight );
+    }
+
+    return FCursorReply::Unhandled();
 }
 
 int32
@@ -122,28 +230,44 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                                                                        , InWidgetStyle
                                                                        , bParentEnabled );
 	++LayerId;
-    FLinearColor strokeColor = FLinearColor( 0.5f
-                                           , 0.5f
-                                           , 0.5f
-                                           , 0.5f );
-    FLinearColor fillColor = FLinearColor( inbetweenerTagColor.R
-                                         , inbetweenerTagColor.G
-                                         , inbetweenerTagColor.B
-                                         , 0.25f );
+    FLinearColor strokeColor = FLinearColor( 0.5f, 0.5f, 0.5f, 0.5f  );
+    FLinearColor sourceColor = FLinearColor( 0.5f, 0.5f, 0.5f, 0.25f );
+    FLinearColor interpColor = FLinearColor( inbetweenerTagColor.R
+                                           , inbetweenerTagColor.G
+                                           , inbetweenerTagColor.B
+                                           , 0.25f );
+    FLinearColor targetColor = FLinearColor( 0.0f, 0.5f, 0.0f, 0.25f );
     TArray< FVector2D > lines;
+
+	FSlateDrawElement::MakeBox( OutDrawElements
+		                      , LayerId
+		                      , AllottedGeometry.ToPaintGeometry( mSourcePos, mSourceSize )
+		                      , &defaultBrush
+		                      , ESlateDrawEffect::None
+		                      , sourceColor );
+
+    for( uint32 i = 0; i <  mInbetweenerTag->GetInbetweenCount(); i++ )
+    {
+	    FSlateDrawElement::MakeBox( OutDrawElements
+		                          , LayerId
+		                          , AllottedGeometry.ToPaintGeometry( mInterpPosBuffer[i], mInterpSizeBuffer[i] )
+		                          , &defaultBrush
+		                          , ESlateDrawEffect::None
+		                          , interpColor );
+    }
+
+	FSlateDrawElement::MakeBox( OutDrawElements
+		                      , LayerId
+		                      , AllottedGeometry.ToPaintGeometry( mTargetPos, mTargetSize )
+		                      , &defaultBrush
+		                      , ESlateDrawEffect::None
+		                      , targetColor );
 
     lines.Reserve( 5 );
     lines.Push( FVector2D( mBoxPos.X             , mBoxPos.Y              ) );
     lines.Push( FVector2D( mBoxPos.X + mBoxSize.X, mBoxPos.Y              ) );
     lines.Push( FVector2D( mBoxPos.X + mBoxSize.X, mBoxPos.Y + mBoxSize.Y ) );
     lines.Push( FVector2D( 0.0f                  , mBoxPos.Y + mBoxSize.Y ) );
-
-	FSlateDrawElement::MakeBox( OutDrawElements
-		                      , LayerId
-		                      , AllottedGeometry.ToPaintGeometry( mBoxPos, mBoxSize )
-		                      , &defaultBrush
-		                      , ESlateDrawEffect::None
-		                      , fillColor );
 
 	FSlateDrawElement::MakeLines( OutDrawElements
 		                        , LayerId

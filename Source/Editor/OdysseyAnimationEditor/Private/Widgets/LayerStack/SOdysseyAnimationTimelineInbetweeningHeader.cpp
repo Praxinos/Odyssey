@@ -63,6 +63,12 @@ SOdysseyAnimationTimelineInbetweeningHeader::Update()
     RequestListRefresh();
 }
 
+bool
+SOdysseyAnimationTimelineInbetweeningHeader::Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const
+{
+    return iItem.Get()->GetInbetweenerTag()->IsSelected();
+}
+
 /*
 void
 SOdysseyAnimationTimelineInbetweeningHeader::OnGetChildren( TSharedPtr<FInbetweeningListViewItem> iParent

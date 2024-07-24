@@ -49,6 +49,9 @@ public:
     virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
     virtual FReply OnKeyUp( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
 
+public:
+    UOdysseyAnimationLayer* GetLayer();
+
 protected:
     virtual TSharedRef<FOdysseyAnimationCell> OnCreateCell() = 0;
     virtual TSharedRef<SWidget> OnGenerateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell) = 0;

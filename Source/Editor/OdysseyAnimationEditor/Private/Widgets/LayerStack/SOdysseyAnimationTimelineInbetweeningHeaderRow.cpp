@@ -89,6 +89,12 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonDown( const FGeomet
     return FReply::Handled();
 }
 
+bool
+SOdysseyAnimationTimelineInbetweeningHeaderRow::IsItemSelected() const
+{
+    return mInbetweenerTag->IsSelected();
+}
+
 FVector2D
 SOdysseyAnimationTimelineInbetweeningHeaderRow::ComputeDesiredSize ( float LayoutScaleMultiplier ) const
 {

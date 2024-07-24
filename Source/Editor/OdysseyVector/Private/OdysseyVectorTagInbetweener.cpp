@@ -463,7 +463,8 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         mGrid->Update( iUpdateFlags, mInvalidationFlags );
 
         if( ( mInvalidationFlags & INVALIDATE_SPACING )
-         || ( mInvalidationFlags & INVALIDATE_MAP     ) )
+         || ( mInvalidationFlags & INVALIDATE_MAP     )
+         || ( mInvalidationFlags & INVALIDATE_TARGET  ) )
         {
             Interpolate();
         }
