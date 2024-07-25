@@ -42,9 +42,11 @@ UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
 
         if( GridType == eInbetweenerGridType::ARAP )
         {
+/*------------
             FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(selectedInbetweenerTag->GetGrid());
 
             Rigidity = arapGrid->GetRigidity();
+*/
         }
     }
 }
@@ -90,9 +92,11 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
 
         if( iPropertyName == "Rigidity" )
         {
+/*----------
             FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(selectedInbetweenerTag->GetGrid());
 
             arapGrid->SetRigidity( Rigidity );
+*/
         }
 
         if( iPropertyName == "MapAsPolyline" )

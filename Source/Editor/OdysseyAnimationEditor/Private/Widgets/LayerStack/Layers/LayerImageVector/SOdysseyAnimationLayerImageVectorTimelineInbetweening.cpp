@@ -16,6 +16,10 @@
 #include "OdysseyStyleSet.h"
 // From module OdysseyVector
 #include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorAnimationCell.h"
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTag.h"
 #include "OdysseyVectorTagInbetweener.h"
 
@@ -43,7 +47,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Construct( const FArgumen
         //.OnGetChildren( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnGetChildren )
         //.OnSelectionChanged( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged )
         //.OnItemScrolledIntoView(this, &SOdysseyLayerStackTreeView::OnItemScrolledIntoView)
-        //.OnContextMenuOpening( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnContextMenuOpening )
+        .OnContextMenuOpening( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnContextMenuOpening )
         //.SelectionMode( ESelectionMode::Multi )
         //.HeaderRow(headerRow)
     );
@@ -94,6 +98,38 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnGenerateRow( TSharedPtr
                                                                     , const TSharedRef<STableViewBase>& iOwnerTable )
 {
    return SNew( SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow, iOwnerTable, iItem );
+}
+
+TSharedPtr<SWidget>
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnContextMenuOpening()
+{
+    FMenuBuilder menu( true, nullptr );
+
+    menu.AddMenuEntry( LOCTEXT("vector-tool.inbetweening-context-menu.add-breakdown.name", "Add Breakdown")
+                     , LOCTEXT("vector-tool.inbetweening-context-menu.add-breakdown.tooltip", "Add Breakdown")
+                     , FSlateIcon()
+                     , FUIAction(FExecuteAction::CreateSP( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown )));
+
+    return menu.MakeWidget();
+}
+
+void
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
+{
+    FVector2D cursorPos = GetPaintSpaceGeometry().AbsoluteToLocal( FSlateApplication::Get().GetCursorPos() );
+    int frameIndex = mAnimationEditorExtension->Timeline()->GetFrameIndexAtMousePosition( cursorPos.X );
+
+    //const TArray<TSharedPtr<FInbetweeningListViewItem>> selectedItems = GetItems();
+
+    for( TSharedPtr<FInbetweeningListViewItem> item : GetItems() )
+    {
+        FOdysseyVectorTagInbetweener* inbetweenerTag = item.Get()->GetInbetweenerTag();
+        uint32 cellFrame = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetFrame();
+
+        inbetweenerTag->AddBreakdown( frameIndex - cellFrame );
+    }
+
+    Update();
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -16,12 +16,14 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGridTrajectories( FOdysseyVectorTagIn
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
+/*----------------
         std::list<FInbetweenerTrajectory*>& trajectoryList = iInbetweenerTag.GetTrajectoryList();
 
         for( FInbetweenerTrajectory* trajectory : trajectoryList )
         {
             WriteTrajectory( *trajectory, Ar );
         }
+*/
     } );
 }
 
@@ -33,6 +35,7 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGridGeometryMk2( FOdysseyVectorTagInb
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
+/*-------------
         std::vector<FInbetweenerPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
         uint32 numQuadX = iInbetweenerTag.GetGridNumQuadX();
         uint32 numQuadY = iInbetweenerTag.GetGridNumQuadY();
@@ -52,6 +55,7 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGridGeometryMk2( FOdysseyVectorTagInb
             Ar << targetX;
             Ar << targetY;
         }
+*/
     } );
 }
 
@@ -63,6 +67,7 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGridGeometry( FOdysseyVectorTagInbetw
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
+/*-------------
         std::vector<FInbetweenerPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
 
         for( FInbetweenerPoint& point : gridPointbuffer )
@@ -77,6 +82,7 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGridGeometry( FOdysseyVectorTagInbetw
             Ar << targetX;
             Ar << targetY;
         }
+*/
     } );
 }
 
@@ -153,15 +159,16 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGrid( FOdysseyVectorTagInbetweener& i
 
         if( iInbetweenerTag.GetGridType() == eInbetweenerGridType::ARAP )
         {
-            FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(iInbetweenerTag.GetGrid());
+            FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(iInbetweenerTag.GetBreakdownList().front()->GetGrid());
 
             WriteTagInbetweenerGridArapRigidity( *arapGrid, Ar );
         }
-
+/*-----------
         if( iInbetweenerTag.GetTrajectoryList().size() )
         {
             WriteTagInbetweenerGridTrajectories( iInbetweenerTag, Ar );
         }
+*/
     } );
 }
 

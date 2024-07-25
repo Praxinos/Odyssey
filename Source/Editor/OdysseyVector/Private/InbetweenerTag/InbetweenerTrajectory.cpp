@@ -1,5 +1,7 @@
 #include "InbetweenerTag/InbetweenerTrajectory.h"
 #include "InbetweenerTag/InbetweenerGrid.h"
+#include "InbetweenerTag/InbetweenerRoute.h"
+#include "InbetweenerTag/InbetweenerBreakdown.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVector.h"
 
@@ -7,46 +9,41 @@ FInbetweenerTrajectory::~FInbetweenerTrajectory()
 {
 }
 
-FInbetweenerTrajectory::FInbetweenerTrajectory( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                              , uint32 iQuadIndex
-                                              , double iQuadU
-                                              , double iQuadV )
-    : mInbetweenerTag( iInbetweenerTag )
-    , mHandle{ (this), (this) }
+FInbetweenerTrajectory::FInbetweenerTrajectory( FInbetweenerRoute* iRoute
+                                              , FInbetweenerBreakdown* iBreakdown )
+    : mRoute( iRoute )
+    , mBreakdown ( iBreakdown )
+    , mHandle { ( this ), ( this ) }
 {
-    Init( iQuadIndex, iQuadU, iQuadV );
+    Init( iBreakdown->GetTargetInbetweenIndex() - iBreakdown->GetSourceInbetweenIndex() - 1 );
 }
 
 void
-FInbetweenerTrajectory::Init( uint32 iQuadIndex
-                            , double iQuadU
-                            , double iQuadV )
+FInbetweenerTrajectory::Init( uint32 iInbetweenCount )
 {
-    mQuadIndex = iQuadIndex;
-    mQuadU = iQuadU;
-    mQuadV = iQuadV;
-
-    ResetSpacing();
+    ResetSpacing( iInbetweenCount );
 }
 
 /*
 * Updates the bezier between the source grid and the target grid
 */
 void
-FInbetweenerTrajectory::Update()
+FInbetweenerTrajectory::Update() 
 {
-    BLMatrix2D targetLocalMatrix = mInbetweenerTag->GetTargetLocalMatrix();
+    const BLMatrix2D& iTargetLocalMatrix = mBreakdown->GetTargetLocalMatrix();
     double bezierLength;
     FInbetweenerQuad* quad = GetQuad();
+    double quadU = mRoute->GetQuadU();
+    double quadV = mRoute->GetQuadV();
 
     mCubicBezier[0] = quad->GetPoint( eInbetweenerPointPositionType::SourcePosition
-                                    , mQuadU
-                                    , mQuadV );
+                                    , quadU
+                                    , quadV );
 
-    mCubicBezier[3] = FOdysseyVector::MapPoint( targetLocalMatrix
+    mCubicBezier[3] = FOdysseyVector::MapPoint( iTargetLocalMatrix
                                               , quad->GetPoint( eInbetweenerPointPositionType::TargetPosition
-                                                              , mQuadU
-                                                              , mQuadV ) );
+                                                              , quadU
+                                                              , quadV ) );
 
     bezierLength = ( mCubicBezier[3] - mCubicBezier[0] ).Distance();
 
@@ -61,14 +58,12 @@ FInbetweenerTrajectory::GetWaypoint( uint32 iIndex )
 }
 
 void
-FInbetweenerTrajectory::ResetSpacing()
+FInbetweenerTrajectory::ResetSpacing( uint32 iInbetweenCount )
 {
-    uint32 inbetweenCount =  mInbetweenerTag->GetInbetweenCount();
-
     mWaypointBuffer.clear();
-    mWaypointBuffer.reserve( inbetweenCount );
+    mWaypointBuffer.reserve( iInbetweenCount );
 
-    for( uint32 i = 0; i < inbetweenCount; i++ )
+    for( uint32 i = 0; i < iInbetweenCount; i++ )
     {
         FInbetweenerWaypoint& waypoint = mWaypointBuffer.emplace_back( this );
     }
@@ -89,35 +84,17 @@ FInbetweenerTrajectory::GetCubicBezier()
 FInbetweenerQuad* 
 FInbetweenerTrajectory::GetQuad()
 {
-    return &mInbetweenerTag->GetGrid()->GetQuadBuffer()[mQuadIndex];
-}
-
-uint32
-FInbetweenerTrajectory::GetQuadIndex()
-{
-    return mQuadIndex;
-}
-
-double
-FInbetweenerTrajectory::GetQuadU()
-{
-    return mQuadU;
-}
-
-double
-FInbetweenerTrajectory::GetQuadV()
-{
-    return mQuadV;
-}
-
-FOdysseyVectorTagInbetweener*
-FInbetweenerTrajectory::GetInbetweenerTag()
-{
-    return mInbetweenerTag;
+    return &mBreakdown->GetGrid()->GetQuadBuffer()[mRoute->GetQuadIndex()];
 }
 
 std::vector<FInbetweenerWaypoint>&
 FInbetweenerTrajectory::GetWaypointBuffer()
 {
     return mWaypointBuffer;
+}
+
+FInbetweenerRoute*
+FInbetweenerTrajectory::GetRoute()
+{
+    return mRoute;
 }

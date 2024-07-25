@@ -155,7 +155,7 @@ FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
 */
 
 ::ULIS::FVec2D
-FOdysseyVector::MapPoint( BLMatrix2D& iMatrix
+FOdysseyVector::MapPoint( const BLMatrix2D& iMatrix
                         , const ::ULIS::FVec2D& iPoint )
 {
     BLPoint pt = iMatrix.mapPoint( iPoint.x, iPoint.y );

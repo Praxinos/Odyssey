@@ -11,7 +11,7 @@ class ODYSSEYVECTOR_API FInbetweenerGridARAP : public FInbetweenerGrid
 {
     public:
         virtual ~FInbetweenerGridARAP(){};
-        FInbetweenerGridARAP( FOdysseyVectorTagInbetweener* iInbetweenerTag );
+        FInbetweenerGridARAP( FInbetweenerBreakdown* iBreakdown );
 
         void Regularize();
 

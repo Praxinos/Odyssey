@@ -166,9 +166,11 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::ARAPRIGIDITY )
     {
+/*--------
         FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(mInbetweenerTag->GetGrid());
 
         mARAPRigidity = arapGrid->GetRigidity();
+*/
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INTERPOLATIONTYPE )
@@ -185,8 +187,10 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
     ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE     )
     ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY ) )
     {
+/*-----------
         mInbetweenerTag->GetGrid()->GetGeometry( mGridGeometry
                                                , eInbetweenerPointPositionType::TargetPosition );
+*/
     }
 }
 
@@ -209,8 +213,10 @@ FSnapshotTagInbetweener::Restore()
     ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE     )
     ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY ) )
     {
+/*---------------
         mInbetweenerTag->GetGrid()->GetGeometry( swapGridGeometry
                                                , eInbetweenerPointPositionType::TargetPosition );
+*/
     }
 
     // pre-step. Backup Chart before being changed by SetInbetweenCount
@@ -295,12 +301,14 @@ FSnapshotTagInbetweener::Restore()
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::ARAPRIGIDITY )
     {
+/*---------------
         FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(mInbetweenerTag->GetGrid());
         uint32 swapARAPRigidity = arapGrid->GetRigidity();
 
         arapGrid->SetRigidity( mARAPRigidity );
 
         mARAPRigidity = swapARAPRigidity;
+*/
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::COLOR )
@@ -325,10 +333,12 @@ FSnapshotTagInbetweener::Restore()
     ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE     )
     ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY ) )
     {
+/*--------
         mInbetweenerTag->GetGrid()->SetGeometry( mGridGeometry
                                                , eInbetweenerPointPositionType::TargetPosition );
 
         mGridGeometry = swapGridGeometry;
+*/
     }
 
     // restore chart after params have been set
@@ -346,6 +356,7 @@ FSnapshotTagInbetweener::Restore()
 void
 FSnapshotTagInbetweener::SaveTrajectories( std::vector<FInbetweenerTrajectory*>& oTrajectoryArray )
 {
+/*------------
     std::list<FInbetweenerTrajectory*>& trajectoryList = mInbetweenerTag->GetTrajectoryList();
 
     oTrajectoryArray.clear();
@@ -355,17 +366,20 @@ FSnapshotTagInbetweener::SaveTrajectories( std::vector<FInbetweenerTrajectory*>&
     {
         oTrajectoryArray.push_back( trajectory );
     }
+*/
 }
 
 void
 FSnapshotTagInbetweener::RestoreTrajectories()
 {
+/*-----------
     mInbetweenerTag->RemoveAllTrajectories();
 
     for( FInbetweenerTrajectory* trajectory : mTrajectoryArray )
     {
         mInbetweenerTag->AddTrajectory( trajectory );
     }
+*/
 }
 
 FSnapshotObject::~FSnapshotObject()

@@ -10,6 +10,7 @@
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "InbetweenerTag/InbetweenerRoute.h"
 #include "undo/OdysseyVectorUndoTagInbetweenerTrajectoryAlter.h"
 #include "undo/OdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint.h"
 #include "undo/OdysseyVectorUndoTagInbetweenerTrajectoryAdd.h"
@@ -158,10 +159,11 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                     FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
                     BLMatrix2D& ownerInverseWorldMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
                     BLPoint pt = ownerInverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
-                    FInbetweenerTrajectory* trajectory = inbetweenerTag->AddTrajectory( ::ULIS::FVec2D( pt.x, pt.y ));
+                    FInbetweenerRoute* route = inbetweenerTag->AddRoute( ::ULIS::FVec2D( pt.x, pt.y ));
 
-                    if( trajectory )
+                    if( route )
                     {
+/*--------------
                         // needed for valid GUndo pointer
                         GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.add","Vector Trajectory Tool"));
                         if( GUndo )
@@ -175,6 +177,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                                 source->RecordCurrentFrameUndo();
                         }
                         GEditor->EndTransaction();
+*/
                     }
                 }
             }
@@ -244,29 +247,31 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
 
         if( mPickingMode == eTrajectoryPickingMode::Remove )
         {
-            std::list<FInbetweenerTrajectory*> pickedTrajectoryList;
-            mTrajectoryHUD->PickTrajectory( iScene
-                                          , iPointInTexture.x
-                                          , iPointInTexture.y
-                                          , PickingRadius
-                                          , pickedTrajectoryList );
+            std::list<FInbetweenerRoute*> pickedRouteList;
+            mTrajectoryHUD->PickRoute( iScene
+                                     , iPointInTexture.x
+                                     , iPointInTexture.y
+                                     , PickingRadius
+                                     , pickedRouteList );
 
-            for( FInbetweenerTrajectory* trajectory : pickedTrajectoryList )
+            for( FInbetweenerRoute* route : pickedRouteList )
             {
-                trajectory->GetInbetweenerTag()->RemoveTrajectory( trajectory );
+                route->GetInbetweenerTag()->RemoveRoute( route );
             }
 
             // needed for valid GUndo pointer
             GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.remove","Vector Trajectory Tool"));
             if( GUndo )
             {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerTrajectoryRemove( iScene, pickedTrajectoryList );
+/*----------
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerTrajectoryRemove( iScene, pickedRouteList );
 
                 GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
                 TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                 if (source)
                     source->RecordCurrentFrameUndo();
+*/
             }
             GEditor->EndTransaction();
         }
@@ -317,7 +322,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseHoverVector( FOdysseyVectorGro
             {
                 FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
 
-                mHoveredQuad = mTrajectoryHUD->PickSourceQuad( inbetweenerTag->GetGrid()
+                mHoveredQuad = mTrajectoryHUD->PickSourceQuad( inbetweenerTag->GetBreakdownList().front()->GetGrid()
                                                              , iPointInTexture.x
                                                              , iPointInTexture.y
                                                              , PickingRadius );
@@ -347,6 +352,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
         {
             if( mPickedWaypoint )
             {
+/*--------------
                 FInbetweenerTrajectory* trajectory = mPickedWaypoint->GetTrajectory();
                 FOdysseyVectorTagInbetweener* inbetweenerTag = trajectory->GetInbetweenerTag();
 
@@ -363,11 +369,13 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
                 {
                     mPickedWaypoint->SetT( newT );
                 }
+*/
             }
         }
 
         if( mPickingMode == eTrajectoryPickingMode::Alter )
         {
+/*---------------
             for( FInbetweenerHandleTrajectory* trajectoryHandle : mPickedHandleList )
             {
                 FInbetweenerTrajectory* trajectory = trajectoryHandle->GetTrajectory();
@@ -392,6 +400,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
                     trajectoryHandle->Set( direction, lengthRatio );
                 }
             }
+*/
         }
     }
 

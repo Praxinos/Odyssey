@@ -6,6 +6,7 @@
 #include "OdysseyVectorTagInbetweener.h"
 #include "InbetweenerTag/InbetweenerPoint.h"
 #include "InbetweenerTag/InbetweenerQuad.h"
+#include "InbetweenerTag/InbetweenerBreakdown.h"
 
 FOdysseyPainterEditorVectorMatchingToolHUD::~FOdysseyPainterEditorVectorMatchingToolHUD()
 {
@@ -39,25 +40,28 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawGrid( BLContext* iBLContext
     iBLContext->setStrokeStyle( iHcColor );
     iBLContext->setStrokeWidth( 1.0f );
 
-    for( FInbetweenerQuad& quad : iInbetweenerTag->GetGridQuadBuffer() )
+    for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
     {
-        if( quad.IsLinked() )
+        for( FInbetweenerQuad& quad : breakdown->GetGrid()->GetQuadBuffer() )
         {
-            FInbetweenerPoint** gridPoint = quad.GetPoints();
+            if( quad.IsLinked() )
+            {
+                FInbetweenerPoint** gridPoint = quad.GetPoints();
 
-            BLPoint pt[4] = { worldMatrix.mapPoint( gridPoint[0]->GetTargetPosition().x
-                                                  , gridPoint[0]->GetTargetPosition().y )
-                            , worldMatrix.mapPoint( gridPoint[1]->GetTargetPosition().x
-                                                  , gridPoint[1]->GetTargetPosition().y )
-                            , worldMatrix.mapPoint( gridPoint[2]->GetTargetPosition().x
-                                                  , gridPoint[2]->GetTargetPosition().y )
-                            , worldMatrix.mapPoint( gridPoint[3]->GetTargetPosition().x
-                                                  , gridPoint[3]->GetTargetPosition().y ) };
+                BLPoint pt[4] = { worldMatrix.mapPoint( gridPoint[0]->GetTargetPosition().x
+                                                      , gridPoint[0]->GetTargetPosition().y )
+                                , worldMatrix.mapPoint( gridPoint[1]->GetTargetPosition().x
+                                                      , gridPoint[1]->GetTargetPosition().y )
+                                , worldMatrix.mapPoint( gridPoint[2]->GetTargetPosition().x
+                                                      , gridPoint[2]->GetTargetPosition().y )
+                                , worldMatrix.mapPoint( gridPoint[3]->GetTargetPosition().x
+                                                      , gridPoint[3]->GetTargetPosition().y ) };
 
-            iBLContext->strokeLine( pt[0], pt[1] );
-            iBLContext->strokeLine( pt[1], pt[2] );
-            iBLContext->strokeLine( pt[2], pt[3] );
-            iBLContext->strokeLine( pt[3], pt[0] );
+                iBLContext->strokeLine( pt[0], pt[1] );
+                iBLContext->strokeLine( pt[1], pt[2] );
+                iBLContext->strokeLine( pt[2], pt[3] );
+                iBLContext->strokeLine( pt[3], pt[0] );
+            }
         }
     }
 
@@ -148,17 +152,20 @@ FOdysseyPainterEditorVectorMatchingToolHUD::PickTargetPoints( FOdysseyVectorTagI
 {
     BLMatrix2D worldMatrix = iInbetweenerTag->GetTargetWorldMatrix();
 
-    for( FInbetweenerPoint& point : iInbetweenerTag->GetGridPointBuffer() )
+    for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
     {
-        BLPoint pt = worldMatrix.mapPoint( point.GetTargetPosition().x
-                                         , point.GetTargetPosition().y );
-        ::ULIS::FVec2D vec = ::ULIS::FVec2D( pt.x - iWorldX, pt.y - iWorldY );
-        double distance = vec.Distance();
-
-        if( distance <= iRadius )
+        for( FInbetweenerPoint& point : breakdown->GetGrid()->GetPointBuffer() )
         {
-            oPointArray.push_back( &point );
-            oWorldDistanceArray.push_back( distance );
+            BLPoint pt = worldMatrix.mapPoint( point.GetTargetPosition().x
+                                             , point.GetTargetPosition().y );
+            ::ULIS::FVec2D vec = ::ULIS::FVec2D( pt.x - iWorldX, pt.y - iWorldY );
+            double distance = vec.Distance();
+
+            if( distance <= iRadius )
+            {
+                oPointArray.push_back( &point );
+                oWorldDistanceArray.push_back( distance );
+            }
         }
     }
 }

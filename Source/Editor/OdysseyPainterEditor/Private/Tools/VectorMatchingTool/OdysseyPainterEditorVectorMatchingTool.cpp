@@ -150,9 +150,11 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
 
                 if( inbetweenerTag->GetGridType() == eInbetweenerGridType::ARAP )
                 {
+/*----------
                     FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(inbetweenerTag->GetGrid());
 
                     arapGrid->Regularize();
+*/
                 }
 
                 // update

@@ -26,6 +26,7 @@ class FOdysseyVectorTagInbetweener;
 class FInterpolatedPoint;
 class FInterpolatedPath;
 struct FInbetweenerInbetween;
+class FInbetweenerBreakdown;
 
 typedef Eigen::Triplet<double> TripletD;
 
@@ -33,7 +34,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
 {
     public:
         virtual ~FInbetweenerGrid();
-        FInbetweenerGrid( FOdysseyVectorTagInbetweener* iInbetweenerTag );
+        FInbetweenerGrid( FInbetweenerBreakdown* iBreakdown );
 
         /**
          * @brief Build the grid.
@@ -63,11 +64,6 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
          */
         int GetQuadIndex( const ::ULIS::FVec2D& iLocalCoords );
 
-        /**
-         * @brief Get the inbetweener tag that owns the grid
-         * @return the inbetweener tag that owns the grid
-         */
-        FOdysseyVectorTagInbetweener* GetInbetweenerTag();
 
         /**
          * @brief Update the grid when the owner object is updated.
@@ -111,12 +107,13 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         void SetGeometry( const std::vector<::ULIS::FVec2D>& iGeometry
                         , eInbetweenerPointPositionType iPositionType );
 
+        FInbetweenerBreakdown* GetBreakdown();
+
         friend class FOdysseyVectorTagInbetweener;
 
     protected:
         ::ULIS::FVec2D GetCenterOfMass( eInbetweenerPointPositionType iPositionType );
-        virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint
-                                          , const ::ULIS::FRectD& isourceBBox );
+        virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint );
 
 
     // ARAP interpolation (do not confuse with ARAP deformation)
@@ -140,7 +137,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         double PolarDecomp( Eigen::Matrix2d &A, Eigen::Matrix2d &S );
 
     protected:
-        FOdysseyVectorTagInbetweener* mInbetweenerTag;
+        FInbetweenerBreakdown* mBreakdown;
         std::vector<FInbetweenerPoint> mPointBuffer;
         std::vector<FInbetweenerQuad> mQuadBuffer;
         std::vector<FInbetweenerQuad*> mQuadArray;

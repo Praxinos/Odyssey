@@ -29,9 +29,9 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAdd::Apply( UObject* iIgnored )
 {
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
-
+/*------
     mInbetweenerTag->AddTrajectory( mTrajectory );
-
+*/
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
@@ -46,9 +46,9 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAdd::Revert( UObject* iIgnored )
 {
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
-
+/*--------
     mInbetweenerTag->RemoveTrajectory( mTrajectory );
-
+*/
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 

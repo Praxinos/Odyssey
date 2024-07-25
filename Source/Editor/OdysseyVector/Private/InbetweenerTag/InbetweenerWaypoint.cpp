@@ -1,5 +1,6 @@
 #include "InbetweenerTag/InbetweenerWaypoint.h"
 #include "InbetweenerTag/InbetweenerTrajectory.h"
+#include "InbetweenerTag/InbetweenerRoute.h"
 #include "OdysseyVectorTagInbetweener.h"
 
 FInbetweenerWaypoint::FInbetweenerWaypoint( FInbetweenerTrajectory* iTrajectory )
@@ -30,7 +31,7 @@ void
 FInbetweenerWaypoint::SetT( float iT )
 {
     uint32 waypointIndex = this - &mTrajectory->GetWaypointBuffer()[0];
-    double inbetweenT = mTrajectory->GetInbetweenerTag()->GetChart().inbetweenBuffer[waypointIndex].spacing;
+    double inbetweenT = mTrajectory->GetRoute()->GetInbetweenerTag()->GetChart().inbetweenBuffer[waypointIndex].spacing;
 
     // waypoint is precisely on inbetween
     mRatio = 0.0f;
@@ -47,14 +48,14 @@ FInbetweenerWaypoint::SetT( float iT )
         mRatio = -( inbetweenT - iT ) / (        inbetweenT );
     }
 
-    mTrajectory->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
+    mTrajectory->GetRoute()->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
 }
 
 float
 FInbetweenerWaypoint::GetT()
 {
     uint32 waypointIndex = this - &mTrajectory->GetWaypointBuffer()[0];
-    double inbetweenT = mTrajectory->GetInbetweenerTag()->GetChart().inbetweenBuffer[waypointIndex].spacing;
+    double inbetweenT = mTrajectory->GetRoute()->GetInbetweenerTag()->GetChart().inbetweenBuffer[waypointIndex].spacing;
 
     if( mRatio > 0.0f )
     {

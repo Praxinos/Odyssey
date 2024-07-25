@@ -66,7 +66,7 @@ namespace FOdysseyVector
     double ODYSSEYVECTOR_API GetBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
                                                        , uint32 iDivisions );
 
-    ::ULIS::FVec2D ODYSSEYVECTOR_API MapPoint( BLMatrix2D& iMatrix
+    ::ULIS::FVec2D ODYSSEYVECTOR_API MapPoint( const BLMatrix2D& iMatrix
                                              , const ::ULIS::FVec2D& iPoint );
     ::ULIS::FVec2D ODYSSEYVECTOR_API MapVector( BLMatrix2D& iMatrix
                                               , const ::ULIS::FVec2D& iPoint );

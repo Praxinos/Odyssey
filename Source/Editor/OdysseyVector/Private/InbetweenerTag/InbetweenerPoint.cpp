@@ -1,4 +1,5 @@
 #include "InbetweenerTag/InbetweenerPoint.h"
+#include "InbetweenerTag/InbetweenerBreakdown.h"
 #include "OdysseyVectorTagInbetweener.h"
 
 FInbetweenerPoint::FInbetweenerPoint()
@@ -74,7 +75,7 @@ FInbetweenerPoint::SetSourcePosition( double iX, double iY )
     mSourcePosition.x = iX;
     mSourcePosition.y = iY;
 
-    mGrid->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEBBOX );
+    mGrid->GetBreakdown()->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEBBOX );
 }
 
 void
@@ -83,8 +84,8 @@ FInbetweenerPoint::SetTargetPosition( double iX, double iY )
     mTargetPosition.x = iX;
     mTargetPosition.y = iY;
 
-    mGrid->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TARGET
-                                          | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
+    mGrid->GetBreakdown()->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TARGET
+                                                          | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
 }
 
 void

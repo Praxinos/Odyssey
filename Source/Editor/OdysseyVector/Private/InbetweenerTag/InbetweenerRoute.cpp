@@ -1,0 +1,111 @@
+#include "InbetweenerTag/InbetweenerRoute.h"
+#include "InbetweenerTag/InbetweenerGrid.h"
+#include "InbetweenerTag/InbetweenerBreakdown.h"
+#include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVector.h"
+
+FInbetweenerRoute::~FInbetweenerRoute()
+{
+}
+
+FInbetweenerRoute::FInbetweenerRoute( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                    , uint32 iQuadIndex
+                                    , double iQuadU
+                                    , double iQuadV )
+    : mInbetweenerTag( iInbetweenerTag )
+{
+    Init( iQuadIndex, iQuadU, iQuadV );
+}
+
+void
+FInbetweenerRoute::Init( uint32 iQuadIndex
+                       , double iQuadU
+                       , double iQuadV )
+{
+    mQuadIndex = iQuadIndex;
+    mQuadU = iQuadU;
+    mQuadV = iQuadV;
+
+    //ResetSpacing();
+
+    // create as many trajectories as breakdowns
+    for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
+    {
+        mTrajectoryBuffer.emplace_back( this, breakdown );
+    }
+}
+
+std::vector<FInbetweenerTrajectory>&
+FInbetweenerRoute::GetTrajectoryBuffer()
+{
+    return mTrajectoryBuffer;
+}
+
+void
+FInbetweenerRoute::Update( uint32 iUpdateFlags
+                         , uint64 iOwnerInvalidationFlags
+                         , uint64 iTagInvalidationFlags )
+{
+    if( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_BREAKDOWN_LIST ) 
+    {
+        uint32 breakdownCount = mInbetweenerTag->GetBreakdownList().size();
+
+        mTrajectoryBuffer.clear();
+        mTrajectoryBuffer.reserve( breakdownCount );
+
+        for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
+        {
+            mTrajectoryBuffer.emplace_back( this, breakdown );
+        }
+    }
+
+    if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_ROUTES )
+     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGET ) )
+    {
+        for( FInbetweenerTrajectory& trajectory : mTrajectoryBuffer )
+        {
+            // update the bezier
+            trajectory.Update();
+        }
+    }
+}
+
+void
+FInbetweenerRoute::ResetSpacing()
+{
+    uint32 i = 0;
+
+    for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
+    {
+        uint32 inbetweenCount = breakdown->GetTargetInbetweenIndex() - breakdown->GetSourceInbetweenIndex() - 1;
+
+        // update the bezier
+        mTrajectoryBuffer[i].ResetSpacing( inbetweenCount );
+
+        i++;
+    }
+}
+
+uint32
+FInbetweenerRoute::GetQuadIndex()
+{
+    return mQuadIndex;
+}
+
+double
+FInbetweenerRoute::GetQuadU()
+{
+    return mQuadU;
+}
+
+double
+FInbetweenerRoute::GetQuadV()
+{
+    return mQuadV;
+}
+
+FOdysseyVectorTagInbetweener*
+FInbetweenerRoute::GetInbetweenerTag()
+{
+    return mInbetweenerTag;
+}

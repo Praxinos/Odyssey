@@ -1,4 +1,5 @@
 #include "InbetweenerTag/InbetweenerGridFFD.h"
+#include "InbetweenerTag/InbetweenerBreakdown.h"
 #include "InbetweenerTag/InterpolatedPath.h"
 #include "InbetweenerTag/InterpolatedSegment.h"
 #include "InbetweenerTag/InterpolatedPoint.h"
@@ -7,30 +8,16 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVector.h"
 
-FInbetweenerGridFFD::FInbetweenerGridFFD( FOdysseyVectorTagInbetweener* iInbetweenerTag )
-    : FInbetweenerGrid( iInbetweenerTag )
+FInbetweenerGridFFD::FInbetweenerGridFFD( FInbetweenerBreakdown* iBreakdown )
+    : FInbetweenerGrid( iBreakdown )
 {
-}
-
-::ULIS::FVec2D
-FInbetweenerGridFFD::DeformPoint( FInterpolatedPoint* iInterpolatedPoint
-                                , const ::ULIS::FRectD& iSourceBBox )
-{
-    if( iInterpolatedPoint->GetMappedQuad() )
-    {
-        return iInterpolatedPoint->GetMappedQuad()->GetPoint( eInbetweenerPointPositionType::InterpPosition
-                                                            , iInterpolatedPoint->GetU()
-                                                            , iInterpolatedPoint->GetV() );
-    }
-
-    return ::ULIS::FVec2D( 0.0f, 0.0f );
 }
 
 void
 FInbetweenerGridFFD::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer )
 {
-    BLMatrix2D& ownerInverseWorldMatrix = mInbetweenerTag->GetOwner()->GetInverseWorldMatrix();
-    ::ULIS::FRectD spaceBBox = mInbetweenerTag->GetSourceBBox( false );
+    BLMatrix2D& ownerInverseWorldMatrix = mBreakdown->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
+    ::ULIS::FRectD spaceBBox = mBreakdown->GetInbetweenerTag()->GetSourceBBox( false );
     BLMatrix2D conversionMatrix;
     uint32 pointID = 0;
     uint32 segmentID = 0;

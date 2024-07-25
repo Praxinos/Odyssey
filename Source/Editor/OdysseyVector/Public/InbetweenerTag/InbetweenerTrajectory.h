@@ -3,41 +3,35 @@
 #include "CoreMinimal.h"
 #include <ULIS>
 
+#include <blend2d.h>
 #include "InbetweenerTag/InbetweenerHandleTrajectory.h"
 #include "InbetweenerTag/InbetweenerWaypoint.h"
 
 class FInbetweenerQuad;
+class FInbetweenerRoute;
+class FInbetweenerBreakdown;
 class FOdysseyVectorTagInbetweener;
 
 class ODYSSEYVECTOR_API FInbetweenerTrajectory
 {
     public:
         virtual ~FInbetweenerTrajectory();
-        FInbetweenerTrajectory( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                              , uint32 iQuadIndex
-                              , double iQuadU
-                              , double iQuadV );
-        void Init( uint32 iQuadIndex
-                 , double iQuadU
-                 , double iQuadV );
+        FInbetweenerTrajectory( FInbetweenerRoute* iRoute
+                              , FInbetweenerBreakdown* iBreakdown );
+        void Init( uint32 iInbetweenCount );
         FInbetweenerHandleTrajectory* GetHandle( uint32 index );
         FInbetweenerQuad* GetQuad();
-        uint32 GetQuadIndex();
-        double GetQuadU();
-        double GetQuadV();
         void Update();
         ::ULIS::FVec2D* GetCubicBezier();
-        FOdysseyVectorTagInbetweener* GetInbetweenerTag();
         std::vector<FInbetweenerWaypoint>& GetWaypointBuffer();
-        void ResetSpacing();
+        void ResetSpacing( uint32 iInbetweenCount );
         FInbetweenerWaypoint* GetWaypoint( uint32 iIndex );
+        FInbetweenerRoute* GetRoute();
 
     private:
         std::vector<FInbetweenerWaypoint> mWaypointBuffer;
-        FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        ::ULIS::FVec2D mCubicBezier[4];
+        FInbetweenerRoute* mRoute;
         FInbetweenerHandleTrajectory mHandle[2];
-        uint32 mQuadIndex;
-        double mQuadU;
-        double mQuadV;
+        ::ULIS::FVec2D mCubicBezier[4];
+        FInbetweenerBreakdown* mBreakdown;
 };

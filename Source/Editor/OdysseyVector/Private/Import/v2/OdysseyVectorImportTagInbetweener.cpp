@@ -138,6 +138,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                 break;
 
                 // deprecated chunk
+/*------------------
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_GEOMETRY:
                 {
                     std::vector<FInbetweenerPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
@@ -159,7 +160,8 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     }
                 }
                 break;
-
+*/
+/*--------------------
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_GEOMETRY_MK2:
                 {
                     std::vector<FInbetweenerPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
@@ -212,10 +214,11 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     arapGrid->SetRigidity( rigidity );
                 }
                 break;
-
+*/
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_TRAJECTORIES: // container
                 break;
 
+/*-------------
                 case FOdysseyFile::VectorV2::CHUNK_TRAJECTORY:
                 {
                     FInbetweenerTrajectory* trajectory = new FInbetweenerTrajectory( &iInbetweenerTag
@@ -230,6 +233,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                                   , Ar );
                 }
                 break;
+*/
 
                 default:
                 // Mandatory

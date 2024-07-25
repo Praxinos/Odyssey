@@ -42,6 +42,7 @@ FOdysseyVectorExportV2::WriteTrajectoryCoords( FInbetweenerTrajectory& iTrajecto
                             , Ar
                             , [&iTrajectory](FArchive &Ar) -> void
     {
+/*--------------
         std::vector<FInbetweenerQuad>& quadBuffer = iTrajectory.GetInbetweenerTag()->GetGrid()->GetQuadBuffer();
         uint32 quadIndex = iTrajectory.GetQuadIndex();
         double quadU = iTrajectory.GetQuadU();
@@ -50,6 +51,7 @@ FOdysseyVectorExportV2::WriteTrajectoryCoords( FInbetweenerTrajectory& iTrajecto
         Ar << quadIndex;
         Ar << quadU;
         Ar << quadV;
+*/
     } );
 }
 
@@ -61,6 +63,7 @@ FOdysseyVectorExportV2::WriteTrajectoryWaypointsRatio( FInbetweenerTrajectory& i
                             , Ar
                             , [&iTrajectory](FArchive &Ar) -> void
     {
+/*-----------
         uint32 inbetweenCount = iTrajectory.GetInbetweenerTag()->GetInbetweenCount();
         std::vector<FInbetweenerWaypoint>& waypointBuffer = iTrajectory.GetWaypointBuffer();
 
@@ -70,6 +73,7 @@ FOdysseyVectorExportV2::WriteTrajectoryWaypointsRatio( FInbetweenerTrajectory& i
 
             Ar << ratio;
         }
+*/
     } );
 }
 

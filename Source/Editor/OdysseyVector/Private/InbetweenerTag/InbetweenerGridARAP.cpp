@@ -1,4 +1,5 @@
 #include "InbetweenerTag/InbetweenerGridARAP.h"
+#include "InbetweenerTag/InbetweenerBreakdown.h"
 #include "InbetweenerTag/InterpolatedPath.h"
 #include "InbetweenerTag/InterpolatedSegment.h"
 #include "InbetweenerTag/InterpolatedPoint.h"
@@ -9,8 +10,8 @@
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorSegmentCubic.h"
 
-FInbetweenerGridARAP::FInbetweenerGridARAP( FOdysseyVectorTagInbetweener* iInbetweenerTag )
-    : FInbetweenerGrid( iInbetweenerTag )
+FInbetweenerGridARAP::FInbetweenerGridARAP( FInbetweenerBreakdown* iBreakdown )
+    : FInbetweenerGrid( iBreakdown )
     , mRigidity( 10 )
 {
 }
@@ -249,8 +250,8 @@ FInbetweenerGridARAP::Update( uint32 iUpdateFlags
 void
 FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer )
 {
-    BLMatrix2D& ownerInverseWorldMatrix = mInbetweenerTag->GetOwner()->GetInverseWorldMatrix();
-    ::ULIS::FRectD spaceBBox = mInbetweenerTag->GetSourceBBox( false );
+    BLMatrix2D& ownerInverseWorldMatrix = mBreakdown->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
+    ::ULIS::FRectD spaceBBox = mBreakdown->GetInbetweenerTag()->GetSourceBBox( false );
     BLMatrix2D conversionMatrix;
     uint32 pointID = 0;
     uint32 segmentID = 0;
@@ -306,7 +307,7 @@ FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPat
         }
     }
 
-    DiscardEmptyQuads( mInbetweenerTag->GetInterpolatedPathBuffer() );
+    DiscardEmptyQuads( mBreakdown->GetInbetweenerTag()->GetInterpolatedPathBuffer() );
 
     mQuadArray.clear();
     mQuadArray.reserve( mQuadBuffer.size() );
@@ -342,16 +343,16 @@ FInbetweenerGridARAP::IntersectNeededQuads( const ::ULIS::FRectD& iSourceBBox
     double vmin = std::clamp<double>( ( iYMin - iSourceBBox.y ) / iSourceBBox.h, 0.0f, 0.9999f );
     double umax = std::clamp<double>( ( iXMax - iSourceBBox.x ) / iSourceBBox.w, 0.0f, 0.9999f );
     double vmax = std::clamp<double>( ( iYMax - iSourceBBox.y ) / iSourceBBox.h, 0.0f, 0.9999f );
-    uint32 uminIdx = umin * mInbetweenerTag->GetGridNumQuadX();
-    uint32 vminIdx = vmin * mInbetweenerTag->GetGridNumQuadY();
-    uint32 umaxIdx = umax * mInbetweenerTag->GetGridNumQuadX();
-    uint32 vmaxIdx = vmax * mInbetweenerTag->GetGridNumQuadY();
+    uint32 uminIdx = umin * mBreakdown->GetInbetweenerTag()->GetGridNumQuadX();
+    uint32 vminIdx = vmin * mBreakdown->GetInbetweenerTag()->GetGridNumQuadY();
+    uint32 umaxIdx = umax * mBreakdown->GetInbetweenerTag()->GetGridNumQuadX();
+    uint32 vmaxIdx = vmax * mBreakdown->GetInbetweenerTag()->GetGridNumQuadY();
 
     for( uint32 i = vminIdx; i <= vmaxIdx; i++ )
     {
         for( uint32 j = uminIdx; j <= umaxIdx; j++ )
         {
-            uint32 offset = ( i * mInbetweenerTag->GetGridNumQuadX() ) + j;
+            uint32 offset = ( i * mBreakdown->GetInbetweenerTag()->GetGridNumQuadX() ) + j;
 
             mQuadBuffer[offset].GetPoints()[0]->SetNeeded( true );
             mQuadBuffer[offset].GetPoints()[1]->SetNeeded( true );
@@ -364,12 +365,12 @@ FInbetweenerGridARAP::IntersectNeededQuads( const ::ULIS::FRectD& iSourceBBox
 void
 FInbetweenerGridARAP::DiscardEmptyQuads( std::vector<FInterpolatedPath>& iPathBuffer )
 {
-    ::ULIS::FRectD tagBBox = mInbetweenerTag->GetSourceBBox( false );
+    ::ULIS::FRectD tagBBox = mBreakdown->GetInbetweenerTag()->GetSourceBBox( false );
 
     for( FInterpolatedPath& interpolatedPath : iPathBuffer )
     {
         FOdysseyVectorPath* path = interpolatedPath.GetOriginalPath();
-        BLMatrix2D& tagOwnerInverseWorldMatrix = mInbetweenerTag->GetOwner()->GetInverseWorldMatrix();
+        BLMatrix2D& tagOwnerInverseWorldMatrix = mBreakdown->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
         BLMatrix2D& pathWorldMatrix = path->GetWorldMatrix();
         BLMatrix2D conversionMatrix = pathWorldMatrix;
 
@@ -395,7 +396,7 @@ FInbetweenerGridARAP::DiscardEmptyQuads( std::vector<FInterpolatedPath>& iPathBu
                 IntersectNeededQuads( tagBBox, xmin, ymin, xmax, ymax );
             }
 
-            if( mInbetweenerTag->GetMapAsPolyline() == false )
+            if( mBreakdown->GetInbetweenerTag()->GetMapAsPolyline() == false )
             {
                 if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
                 {

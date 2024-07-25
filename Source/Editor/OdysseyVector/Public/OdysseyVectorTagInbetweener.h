@@ -15,6 +15,7 @@
 #include "InbetweenerTag/InbetweenerGridARAP.h"
 #include "InbetweenerTag/InbetweenerPoint.h"
 #include "InbetweenerTag/InbetweenerQuad.h"
+#include "InbetweenerTag/InbetweenerBreakdown.h"
 #include "InbetweenerTag/InterpolatedPoint.h"
 #include "InbetweenerTag/InterpolatedSegment.h"
 #include "InbetweenerTag/InterpolatedPath.h"
@@ -47,6 +48,8 @@ enum class eInbetweenerInterpolationType : uint8
 struct FInbetweenerInbetween
 {
     float spacing;
+    float breakdownSpacing; // spacing relative to the current breakdown
+    FInbetweenerBreakdown* breakdown;
     BLMatrix2D matrix;
     BLMatrix2D inverseMatrix;
     uint32 index;
@@ -102,34 +105,28 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                          , uint64 iDrawingFlags ) override;
 
         /**
-         * @brief Callback called when the tag is removed from the object's list of tags
-         * @return a reference to the list of trajectories
-         */
-        std::list<FInbetweenerTrajectory*>& GetTrajectoryList();
-
-        /**
          * @brief Add a trajectory
          * @param iLocalCoords X and Y coords at which to create the trajectory
          * @return the newly created trajectory or nullptr if coords are outside the grid.
          */
-        FInbetweenerTrajectory* AddTrajectory( const ::ULIS::FVec2D& iLocalCoords );
+        //FInbetweenerTrajectory* AddTrajectory( const ::ULIS::FVec2D& iLocalCoords );
 
         /**
          * @brief Add a trajectory
          * @param iTrajectory a pointer to the added trajectory.
          */
-        void AddTrajectory( FInbetweenerTrajectory* iTrajectory );
+        //void AddTrajectory( FInbetweenerTrajectory* iTrajectory );
 
         /**
          * @brief Remove all trajectories
          */
-        void RemoveAllTrajectories();
+        //void RemoveAllTrajectories();
 
         /**
          * @brief Remove a trajectory
          * @param iTrajectory a pointer to the trajectory that must be removed.
          */
-        void RemoveTrajectory( FInbetweenerTrajectory* iTrajectory );
+        //void RemoveTrajectory( FInbetweenerTrajectory* iTrajectory );
 
         /**
          * @brief Reset the target grid
@@ -187,8 +184,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         eInbetweenerGridType GetGridType();
         uint32 GetGridNumQuadX();
         uint32 GetGridNumQuadY();
-        std::vector<FInbetweenerPoint>& GetGridPointBuffer();
-        std::vector<FInbetweenerQuad>& GetGridQuadBuffer();
+        void AddRoute( FInbetweenerRoute* iRoute );
+        FInbetweenerRoute* AddRoute( const ::ULIS::FVec2D& iLocalCoords );
+        std::list<FInbetweenerRoute*>& GetRouteList();
+        void RemoveRoute( FInbetweenerRoute* iRoute );
+        void RemoveAllRoutes();
 
         virtual void Update( uint32 iUpdateFlags
                            , uint64 iOwnerInvalidationFlags ) override;
@@ -210,7 +210,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         BLMatrix2D& GetTargetWorldMatrix();
         BLMatrix2D& GetTargetInverseWorldMatrix();
         void Invalidate( uint64 iInvalidationFlags );
-        FInbetweenerGrid* GetGrid();
         std::vector<FInterpolatedPath>& GetInterpolatedPathBuffer();
         void GetTargetTransform( double& oTranslationX
                                , double& oTranslationY
@@ -232,6 +231,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void DrawPathsTarget( BLContext* iBLContext );
         void DeformPathsAtInbetween( uint32 iInbetweenIndex );
         void DeformPathsAtTarget();
+        std::list<FInbetweenerBreakdown*>& GetBreakdownList();
+        FInbetweenerBreakdown* AddBreakdown( int32 iInbetweenIndex );
+        void DispatchInbetweensToBreakdowns();
 
     protected:
         /**
@@ -267,24 +269,26 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void Unshare();
 
     public:
-        static const uint64 INVALIDATE_MAP             = ( 1LL << 0 );
-        static const uint64 INVALIDATE_BUFFERS         = ( 1LL << 1 );
-        static const uint64 INVALIDATE_SPACING         = ( 1LL << 2 );
-        static const uint64 INVALIDATE_GRIDTYPE        = ( 1LL << 3 );
-        static const uint64 INVALIDATE_CELLS           = ( 1LL << 4 );
-        static const uint64 INVALIDATE_SOURCEBBOX      = ( 1LL << 5 );
-        static const uint64 INVALIDATE_TARGET          = ( 1LL << 6 );
-        static const uint64 INVALIDATE_TRAJECTORIES    = ( 1LL << 7 );
-        static const uint64 INVALIDATE_TRAJECTORY_LIST = ( 1LL << 8 );
-        static const uint64 INVALIDATE_ALL             = ( INVALIDATE_MAP
-                                                         | INVALIDATE_BUFFERS
-                                                         | INVALIDATE_SPACING
-                                                         | INVALIDATE_GRIDTYPE
-                                                         | INVALIDATE_CELLS
-                                                         | INVALIDATE_SOURCEBBOX
-                                                         | INVALIDATE_TARGET
-                                                         | INVALIDATE_TRAJECTORIES
-                                                         | INVALIDATE_TRAJECTORY_LIST );
+        static const uint64 INVALIDATE_MAP            = ( 1LL << 0 );
+        static const uint64 INVALIDATE_BUFFERS        = ( 1LL << 1 );
+        static const uint64 INVALIDATE_SPACING        = ( 1LL << 2 );
+        static const uint64 INVALIDATE_GRIDTYPE       = ( 1LL << 3 );
+        static const uint64 INVALIDATE_CELLS          = ( 1LL << 4 );
+        static const uint64 INVALIDATE_SOURCEBBOX     = ( 1LL << 5 );
+        static const uint64 INVALIDATE_TARGET         = ( 1LL << 6 );
+        static const uint64 INVALIDATE_ROUTES         = ( 1LL << 7 );
+        static const uint64 INVALIDATE_ROUTE_LIST     = ( 1LL << 8 );
+        static const uint64 INVALIDATE_BREAKDOWN_LIST = ( 1LL << 9 );
+        static const uint64 INVALIDATE_ALL            = ( INVALIDATE_MAP
+                                                        | INVALIDATE_BUFFERS
+                                                        | INVALIDATE_SPACING
+                                                        | INVALIDATE_GRIDTYPE
+                                                        | INVALIDATE_CELLS
+                                                        | INVALIDATE_SOURCEBBOX
+                                                        | INVALIDATE_TARGET
+                                                        | INVALIDATE_ROUTES
+                                                        | INVALIDATE_ROUTE_LIST
+                                                        | INVALIDATE_BREAKDOWN_LIST );
 
     protected:
         double mTargetTranslationX;
@@ -297,8 +301,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         BLMatrix2D mTargetInverseWorldMatrix;
         FOdysseyVectorSharedEnv* mSharedEnv;
         std::vector<FInterpolatedPath> mInterpolatedPathBuffer;
-        std::list<FInbetweenerTrajectory*> mTrajectoryList;
-        FInbetweenerGrid* mGrid;
+        std::list<FInbetweenerRoute*> mRouteList;
+        std::list<FInbetweenerBreakdown*> mBreakdownList;
         eInbetweenerGridType mGridType;
         uint32 mGridNumQuadX;
         uint32 mGridNumQuadY;

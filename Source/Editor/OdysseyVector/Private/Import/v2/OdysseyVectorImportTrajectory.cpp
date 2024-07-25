@@ -22,6 +22,7 @@ FOdysseyVectorImportV2::ReadTrajectory( FInbetweenerTrajectory& iTrajectory
                 // container
                 break;
 
+/*----------------
                 case FOdysseyFile::VectorV2::CHUNK_TRAJECTORY_WAYPOINTS_RATIO:
                 {
                     uint32 inbetweenCount = iTrajectory.GetInbetweenerTag()->GetInbetweenCount();
@@ -37,7 +38,8 @@ FOdysseyVectorImportV2::ReadTrajectory( FInbetweenerTrajectory& iTrajectory
                     }
                 }
                 break;
-
+*/
+/*------------------
                 case FOdysseyFile::VectorV2::CHUNK_TRAJECTORY_COORDS:
                 {
                     std::vector<FInbetweenerQuad>& quadBuffer =  iTrajectory.GetInbetweenerTag()->GetGrid()->GetQuadBuffer();
@@ -52,7 +54,7 @@ FOdysseyVectorImportV2::ReadTrajectory( FInbetweenerTrajectory& iTrajectory
                     iTrajectory.Init( quadID, quadU, quadV );
                 }
                 break;
-
+*/
                 case FOdysseyFile::VectorV2::CHUNK_TRAJECTORY_GEOMETRY:
                 {
                     double handle0DirX;

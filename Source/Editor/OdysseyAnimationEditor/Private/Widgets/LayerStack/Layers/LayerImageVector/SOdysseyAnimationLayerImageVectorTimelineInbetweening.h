@@ -35,6 +35,8 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
     protected:
         TSharedRef<ITableRow> OnGenerateRow( TSharedPtr<FInbetweeningListViewItem> iItem
                                            , const TSharedRef<STableViewBase>& iOwnerTable );
+        TSharedPtr<SWidget> OnContextMenuOpening();
+        void AddBreakdown();
 
     private :
         virtual bool Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const override;

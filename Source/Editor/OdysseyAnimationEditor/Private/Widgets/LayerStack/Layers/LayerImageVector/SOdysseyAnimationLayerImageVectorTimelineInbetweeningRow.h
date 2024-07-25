@@ -46,7 +46,6 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
         virtual FVector2D ComputeDesiredSize ( float LayoutScaleMultiplier ) const override;
         virtual void CacheDesiredSize ( float LayoutScaleMultiplier ) override;
 
-
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
         FVector2D mSourcePos;

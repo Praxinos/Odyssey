@@ -57,19 +57,24 @@ FReply
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( const FGeometry & MyGeometry
                                                                            , const FPointerEvent & MouseEvent )
 {
-    FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetEngine()->GetSharedEnv();
-    std::list<FOdysseyVectorTag*>& tagList = sharedEnv->GetTagList();
-    
-    for( FOdysseyVectorTag* tag : tagList )
+    if( MouseEvent.IsMouseButtonDown( EKeys::LeftMouseButton ) )
     {
-        tag->SetSelected( false );
+        FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetEngine()->GetSharedEnv();
+        std::list<FOdysseyVectorTag*>& tagList = sharedEnv->GetTagList();
+
+        for( FOdysseyVectorTag* tag : tagList )
+        {
+            tag->SetSelected( false );
+        }
+
+        mInbetweenerTag->SetSelected( true );
+
+        bHandleClicked = true;
+
+        return FReply::Handled();
     }
 
-    mInbetweenerTag->SetSelected( true );
-
-    bHandleClicked = true;
-
-    return FReply::Handled();
+    return FReply::Unhandled();
 }
 
 
@@ -114,10 +119,15 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
 {
     bHandleClicked = false;
 
-    mInbetweenerTag->GetOwner()->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+	if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    {
+        mInbetweenerTag->GetOwner()->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
 
-    return FReply::Handled();
+        return FReply::Handled();
+    }
+
+    return FReply::Unhandled();
 }
 
 FText
