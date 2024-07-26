@@ -234,6 +234,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         std::list<FInbetweenerBreakdown*>& GetBreakdownList();
         FInbetweenerBreakdown* AddBreakdown( int32 iInbetweenIndex );
         void DispatchInbetweensToBreakdowns();
+        void SetUsedQuadCount( uint32 );
+        void SetUsedPointCount( uint32 );
+        uint32 GetUsedQuadCount();
+        uint32 GetUsedPointCount();
+        void DrawPathAt( FInterpolatedPath* iInterpolatedPath
+                       , ::ULIS::FVec2D* iPointPositionBuffer
+                       , const BLMatrix2D& iWorldMatrix
+                       , BLContext* iBLContext );
 
     protected:
         /**
@@ -258,10 +266,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void InterpolateTransform( uint32 iInbetweenIndex );
         void Reset( bool iResetGridShape );
         void AllocBuffers();
-        void DrawPathAt( FInterpolatedPath* iInterpolatedPath
-                       , ::ULIS::FVec2D* iPointPositionBuffer
-                       , const BLMatrix2D& iWorldMatrix
-                       , BLContext* iBLContext );
+
         void MoveWaypointsWithInbetween( uint32 iInbetweenIndex
                                        , double iInbetweenOldSpacing
                                        , double iInbetweenNewSpacing );
@@ -315,4 +320,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         FColor mColor;
         bool bMapAsPolyline;
         bool bShared;
+        FInbetweenerBreakdown* mMasterBreakdown;
+        uint32 mUsedQuadCount;
+        uint32 mUsedPointCount;
 };

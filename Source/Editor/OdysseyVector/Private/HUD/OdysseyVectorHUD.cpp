@@ -484,17 +484,22 @@ FOdysseyVectorHUD::DrawInbetweens( BLContext* iBLContext
     {
         iBLContext->setStrokeWidth( 2.0f );
 
-        // note: mInbetweenCount+1 holds the target position
-        for( uint32 i = 0; i < iInbetweenerTag->GetInbetweenCount(); i++ )
+        for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
         {
-            FInbetweenerInbetween& inbetween = iInbetweenerTag->GetChart().inbetweenBuffer[i];
+            int32 sourceInbetweenIndex = breakdown->GetSourceInbetweenIndex();
+            int32 targetInbetweenIndex = breakdown->GetTargetInbetweenIndex();
 
-            iBLContext->setStrokeStyle( BLRgba32( color.R
-                                                , color.G
-                                                , color.B
-                                                , 127 + ( color.A * 0.5f * inbetween.spacing ) ) );
+            for( int32 i = sourceInbetweenIndex + 1; i < targetInbetweenIndex; i++ )
+            {
+                FInbetweenerInbetween& inbetween = iInbetweenerTag->GetChart().inbetweenBuffer[i];
 
-            iInbetweenerTag->DrawPathsInbetween( i, iBLContext );
+                iBLContext->setStrokeStyle( BLRgba32( color.R
+                                                    , color.G
+                                                    , color.B
+                                                    , 127 + ( color.A * 0.5f * inbetween.spacing ) ) );
+
+                iInbetweenerTag->DrawPathsInbetween( i, iBLContext );
+            }
         }
     }
 
@@ -502,12 +507,15 @@ FOdysseyVectorHUD::DrawInbetweens( BLContext* iBLContext
     {
         iBLContext->setStrokeWidth( 3.0f );
 
-        iBLContext->setStrokeStyle( BLRgba32( color.R
-                                            , color.G
-                                            , color.B
-                                            , color.A ) );
+        iBLContext->setStrokeStyle( BLRgba32( 255
+                                            , 127
+                                            , 127
+                                            , 255 ) );
 
-        iInbetweenerTag->DrawPathsTarget( iBLContext );
+        for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
+        {
+            breakdown->DrawPathsAtTarget( iBLContext );
+        }
     }
 }
 

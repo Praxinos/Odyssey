@@ -22,11 +22,15 @@ FInbetweenerRoute::Init( uint32 iQuadIndex
                        , double iQuadU
                        , double iQuadV )
 {
+    uint32 breakdownCount = mInbetweenerTag->GetBreakdownList().size();
+
     mQuadIndex = iQuadIndex;
     mQuadU = iQuadU;
     mQuadV = iQuadV;
 
     //ResetSpacing();
+
+    mTrajectoryBuffer.reserve( breakdownCount );
 
     // create as many trajectories as breakdowns
     for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )

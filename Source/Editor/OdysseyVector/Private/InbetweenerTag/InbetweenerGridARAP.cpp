@@ -256,8 +256,8 @@ FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPat
     uint32 pointID = 0;
     uint32 segmentID = 0;
 
-    mUsedQuadCount = 0;
-    mUsedPointCount = 0;
+    uint32 usedQuadCount = 0;
+    uint32 usedPointCount = 0;
 
     // reset point status
     for( FInbetweenerPoint& point : mPointBuffer )
@@ -302,13 +302,33 @@ FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPat
                 double v = std::clamp<double>( quadY / quadBBox.h, 0.0f, 1.0f );
 
                 // Note: we add +1 for the target position
-                interpolatedPoint.SetUV( matchedQuad, u, v );
+                interpolatedPoint.SetUV( quadIndex, u, v );
             }
         }
     }
 
     DiscardEmptyQuads( mBreakdown->GetInbetweenerTag()->GetInterpolatedPathBuffer() );
 
+    for( FInbetweenerQuad& quad : mQuadBuffer )
+    {
+        if( quad.IsLinked() )
+        {
+            usedQuadCount++;
+        }
+    }
+
+    for( FInbetweenerPoint& point : mPointBuffer )
+    {
+        if( point.GetQuadCount() )
+        {
+            point.SetID( usedPointCount++ );
+        }
+    }
+
+    mBreakdown->GetInbetweenerTag()->SetUsedQuadCount( usedQuadCount );
+    mBreakdown->GetInbetweenerTag()->SetUsedPointCount( usedPointCount );
+
+/*
     mQuadArray.clear();
     mQuadArray.reserve( mQuadBuffer.size() );
 
@@ -330,6 +350,7 @@ FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPat
         }
     }
     //---------------
+*/
 }
 
 void

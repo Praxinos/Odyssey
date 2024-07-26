@@ -9,7 +9,7 @@ FInterpolatedPoint::~FInterpolatedPoint()
 FInterpolatedPoint::FInterpolatedPoint( FOdysseyVectorPoint* iPoint, uint32 iIndex  )
     : mOriginalPoint( iPoint )
     , mIndex ( iIndex )
-    , mMappedQuad ( nullptr )
+    , mMappedQuadIndex ( 0 )
     , mU ( 0.0f )
     , mV ( 0.0f )
 {
@@ -39,9 +39,9 @@ FInterpolatedPoint::GetV()
     return mV;
 }
 
-FInbetweenerQuad* FInterpolatedPoint::GetMappedQuad()
+uint32 FInterpolatedPoint::GetMappedQuadIndex()
 {
-    return mMappedQuad;
+    return mMappedQuadIndex;
 }
 
 FOdysseyVectorPoint*
@@ -51,9 +51,9 @@ FInterpolatedPoint::GetOriginalPoint()
 }
 
 void
-FInterpolatedPoint::SetUV( FInbetweenerQuad* iMappedQuad, double iU, double iV )
+FInterpolatedPoint::SetUV( uint32 iMappedQuadIndex, double iU, double iV )
 {
-    mMappedQuad = iMappedQuad;
+    mMappedQuadIndex = iMappedQuadIndex;
     mU = iU;
     mV = iV;
 }

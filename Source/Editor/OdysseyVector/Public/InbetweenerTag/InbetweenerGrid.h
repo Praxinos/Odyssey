@@ -55,7 +55,8 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
          * @param iInbetweenIndex Inbetween index
          */
         virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
-                                , uint32 iInbetweenIndex );
+                                , uint32 iInbetweenIndex
+                                , eInbetweenerPointPositionType iPositionType );
 
         /**
          * @brief Get the quad the coords passed as parameter fit within.
@@ -113,7 +114,8 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
 
     protected:
         ::ULIS::FVec2D GetCenterOfMass( eInbetweenerPointPositionType iPositionType );
-        virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint );
+        virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint
+                                          , eInbetweenerPointPositionType iPositionType );
 
 
     // ARAP interpolation (do not confuse with ARAP deformation)
@@ -140,9 +142,9 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         FInbetweenerBreakdown* mBreakdown;
         std::vector<FInbetweenerPoint> mPointBuffer;
         std::vector<FInbetweenerQuad> mQuadBuffer;
-        std::vector<FInbetweenerQuad*> mQuadArray;
-        uint32 mUsedQuadCount;
-        uint32 mUsedPointCount;
+        //std::vector<FInbetweenerQuad*> mQuadArray;
+        //uint32 mUsedQuadCount;
+        //uint32 mUsedPointCount;
 
     // ARAP interpolation (do not confuse with ARAP deformation)
     protected:

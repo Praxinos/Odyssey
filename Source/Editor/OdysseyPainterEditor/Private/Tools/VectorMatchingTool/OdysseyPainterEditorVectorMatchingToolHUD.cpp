@@ -32,8 +32,6 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawGrid( BLContext* iBLContext
                                                     , const BLRgba32& iBgColor
                                                     , const BLRgba32& iHcColor )
 {
-    BLMatrix2D worldMatrix = iInbetweenerTag->GetTargetWorldMatrix();
-
     iBLContext->save();
     iBLContext->resetMatrix();
 
@@ -42,6 +40,11 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawGrid( BLContext* iBLContext
 
     for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
     {
+        BLMatrix2D worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
+        BLMatrix2D& localMatrix = breakdown->GetTargetLocalMatrix();
+
+        worldMatrix.transform( localMatrix );
+
         for( FInbetweenerQuad& quad : breakdown->GetGrid()->GetQuadBuffer() )
         {
             if( quad.IsLinked() )
@@ -150,10 +153,13 @@ FOdysseyPainterEditorVectorMatchingToolHUD::PickTargetPoints( FOdysseyVectorTagI
                                                             , std::vector<FInbetweenerPoint*>& oPointArray
                                                             , std::vector<double>& oWorldDistanceArray )
 {
-    BLMatrix2D worldMatrix = iInbetweenerTag->GetTargetWorldMatrix();
-
     for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
     {
+        BLMatrix2D worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
+        BLMatrix2D& localMatrix = breakdown->GetTargetLocalMatrix();
+
+        worldMatrix.transform( localMatrix );
+
         for( FInbetweenerPoint& point : breakdown->GetGrid()->GetPointBuffer() )
         {
             BLPoint pt = worldMatrix.mapPoint( point.GetTargetPosition().x

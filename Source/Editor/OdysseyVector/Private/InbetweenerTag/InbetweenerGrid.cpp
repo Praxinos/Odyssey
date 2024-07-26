@@ -16,8 +16,6 @@ FInbetweenerGrid::~FInbetweenerGrid()
 
 FInbetweenerGrid::FInbetweenerGrid( FInbetweenerBreakdown* iBreakdown )
     : mBreakdown( iBreakdown )
-    , mUsedQuadCount( 0 )
-    , mUsedPointCount( 0 )
 {
 }
 
@@ -180,13 +178,13 @@ FInbetweenerGrid::Update( uint32 iUpdateFlags
 }
 
 ::ULIS::FVec2D
-FInbetweenerGrid::DeformPoint( FInterpolatedPoint* iInterpolatedPoint )
+FInbetweenerGrid::DeformPoint( FInterpolatedPoint* iInterpolatedPoint, eInbetweenerPointPositionType iPositionType )
 {
-    FInbetweenerQuad* mappedQuad = iInterpolatedPoint->GetMappedQuad();
+    FInbetweenerQuad* mappedQuad = &mQuadBuffer[iInterpolatedPoint->GetMappedQuadIndex()];
 
     if( mappedQuad )
     {
-        return mappedQuad->GetPoint( eInbetweenerPointPositionType::InterpPosition
+        return mappedQuad->GetPoint( iPositionType
                                    , iInterpolatedPoint->GetU()
                                    , iInterpolatedPoint->GetV() );
     }
@@ -196,7 +194,8 @@ FInbetweenerGrid::DeformPoint( FInterpolatedPoint* iInterpolatedPoint )
 
 void
 FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
-                             , uint32 iInbetweenIndex )
+                             , uint32 iInbetweenIndex
+                             , eInbetweenerPointPositionType iPositionType )
 {
     ::ULIS::FRectD sourceBBox = mBreakdown->GetInbetweenerTag()->GetSourceBBox( false );
 
@@ -210,7 +209,7 @@ FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPath
         {
             FInterpolatedPoint* interpolatedPoint = &interpolatedPath.GetInterpolatedPointBuffer()[i];
 
-            interpolatedPointPositionBuffer[skippedOffset + i] = DeformPoint( interpolatedPoint );
+            interpolatedPointPositionBuffer[skippedOffset + i] = DeformPoint( interpolatedPoint, iPositionType );
         }
     }
 }
@@ -320,20 +319,22 @@ bool
 FInbetweenerGrid::PrecomputeARAPInterpolation()
 {
     std::list<FInbetweenerRoute*>& routeList = mBreakdown->GetInbetweenerTag()->GetRouteList();
-    std::vector<TripletD> P_triplets;
-    uint32 P_rows = 8 * mUsedQuadCount; // P_rows
+    uint32 usedQuadCount = mBreakdown->GetInbetweenerTag()->GetUsedQuadCount();
+    uint32 usedPointCount = mBreakdown->GetInbetweenerTag()->GetUsedPointCount();
+    uint32 P_rows = 8 * usedQuadCount; // P_rows
     double triArea = mQuadArea * 0.5f;
+    std::vector<TripletD> P_triplets;
     int triRow = 0;
 
     // Compute P (sparse) and store its transpose to construct the RHS of the equation later
     // TODO refactorize concatenation
-    //for( FInbetweenerQuad& quad : mQuadBuffer )
-    for( FInbetweenerQuad* quad : mQuadArray )
+    for( FInbetweenerQuad& quad : mQuadBuffer )
+    //for( FInbetweenerQuad* quad : mQuadArray )
     {
-        //if( quad.IsLinked() )
-        //{
+        if( quad.IsLinked() )
+        {
 
-            FInbetweenerPoint** points = quad->GetPoints();
+            FInbetweenerPoint** points = quad.GetPoints();
             FInbetweenerPoint* triangleA[3] = { points[0], points[1], points[2] };
             FInbetweenerPoint* triangleB[3] = { points[2], points[3], points[0] };
 
@@ -341,15 +342,15 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
             triRow++;
             ComputePStar( triangleB, triRow, eInbetweenerPointPositionType::SourcePosition, P_triplets );
             triRow++;
-        //}
+        }
     }
 
-    //for( FInbetweenerQuad& quad : mQuadBuffer )
-    for( FInbetweenerQuad* quad : mQuadArray )
+    for( FInbetweenerQuad& quad : mQuadBuffer )
+    //for( FInbetweenerQuad* quad : mQuadArray )
     {
-        //if( quad.IsLinked() )
-        //{
-            FInbetweenerPoint** points = quad->GetPoints();
+        if( quad.IsLinked() )
+        {
+            FInbetweenerPoint** points = quad.GetPoints();
             FInbetweenerPoint* triangleA[3] = { points[0], points[1], points[2] };
             FInbetweenerPoint* triangleB[3] = { points[2], points[3], points[0] };
 
@@ -357,10 +358,10 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
             triRow++;
             ComputePStar( triangleB, triRow, eInbetweenerPointPositionType::TargetPosition, P_triplets );
             triRow++;
-        //}
+        }
     }
 
-    Eigen::SparseMatrix<double, Eigen::ColMajor> P( P_rows, mUsedPointCount );
+    Eigen::SparseMatrix<double, Eigen::ColMajor> P( P_rows, usedPointCount );
     P.setFromTriplets( P_triplets.begin(), P_triplets.end() );
     mPt = P.transpose();
 
@@ -374,21 +375,21 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
 
     // Assembling LHS (with constraint)
     uint32 constraintCount = routeList.size() > 0 ? routeList.size() : 1;
-    uint32 idx = mUsedPointCount;
+    uint32 idx = usedPointCount;
     Eigen::SparseMatrix<double, Eigen::ColMajor> PTP = mPt * mW.asDiagonal() * P;
     // Left Hand Side is a square matrix
-    Eigen::SparseMatrix<double, Eigen::ColMajor> LHS( mUsedPointCount + constraintCount
-                                                    , mUsedPointCount + constraintCount );
+    Eigen::SparseMatrix<double, Eigen::ColMajor> LHS( usedPointCount + constraintCount
+                                                    , usedPointCount + constraintCount );
 
     // main constraint (linear interp of center of mass)
     // TODO: is there a more efficient way to do this than using the intermediate var PTP?
-    LHS.innerVectors( 0, mUsedPointCount ) = PTP.innerVectors( 0, mUsedPointCount );
+    LHS.innerVectors( 0, usedPointCount ) = PTP.innerVectors( 0, usedPointCount );
 
     if ( routeList.size() == 0 )
     {
-        float constraintMean = mUsedPointCount ? 1.0f / mUsedPointCount : 0.0f;
+        float constraintMean = usedPointCount ? 1.0f / usedPointCount : 0.0f;
 
-        for ( uint32 i = 0; i < mUsedPointCount; ++i )
+        for ( uint32 i = 0; i < usedPointCount; ++i )
         {
             LHS.insert( idx, i ) = constraintMean;
             LHS.insert( i, idx ) = constraintMean;
@@ -549,38 +550,40 @@ FInbetweenerGrid::ComputeARAPInterpolation( const FInbetweenerInbetween* iInbetw
                                           , bool useRigidTransform )
 {
     std::list<FInbetweenerRoute*>& routeList = mBreakdown->GetInbetweenerTag()->GetRouteList();
+    uint32 usedQuadCount = mBreakdown->GetInbetweenerTag()->GetUsedQuadCount();
+    uint32 usedPointCount = mBreakdown->GetInbetweenerTag()->GetUsedPointCount();
 /*
     auto startTotal = std::chrono::high_resolution_clock::now();
 */
-    Eigen::MatrixXd A( 2, 8 * mUsedQuadCount  );
+    Eigen::MatrixXd A( 2, 8 * usedQuadCount  );
     double t = iInbetween->breakdownSpacing;
     // Compute A(t)
     int i = 0;
 
-    //for ( FInbetweenerQuad& quad : mQuadBuffer )
-    for ( FInbetweenerQuad* quad : mQuadArray )
+    for ( FInbetweenerQuad& quad : mQuadBuffer )
+    //for ( FInbetweenerQuad* quad : mQuadArray )
     {
-        //if( quad->IsLinked() )
+        if( quad.IsLinked() )
         {
-            ComputeQuadA( quad, A, i, t, false );
+            ComputeQuadA( &quad, A, i, t, false );
         }
     }
 
-    //for ( FInbetweenerQuad& quad : mQuadBuffer )
-    for ( FInbetweenerQuad* quad : mQuadArray )
+    for ( FInbetweenerQuad& quad : mQuadBuffer )
+    //for ( FInbetweenerQuad* quad : mQuadArray )
     {
-        //if( quad->IsLinked() )
+        if( quad.IsLinked() )
         {
-            ComputeQuadA( quad, A, i, t, true );
+            ComputeQuadA( &quad, A, i, t, true );
         }
     }
 
     // Assembling final RHS matrix and concatenating constraints values
     unsigned int constraintCount = routeList.size() > 0 ? routeList.size() : 1;
-    unsigned int idx = mUsedPointCount;
-    Eigen::MatrixXd PTAD( mUsedPointCount + constraintCount, 2 );
+    unsigned int idx = usedPointCount;
+    Eigen::MatrixXd PTAD( usedPointCount + constraintCount, 2 );
 
-    PTAD.block( 0, 0, mUsedPointCount, 2 ) = mPt * mW.asDiagonal() * A.transpose();
+    PTAD.block( 0, 0, usedPointCount, 2 ) = mPt * mW.asDiagonal() * A.transpose();
 
     // Main constraint (linear interp of center of mass)
     if ( routeList.size() == 0 )

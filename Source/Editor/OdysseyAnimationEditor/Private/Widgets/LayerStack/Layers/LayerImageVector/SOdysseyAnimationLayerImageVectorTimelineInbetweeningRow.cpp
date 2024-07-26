@@ -229,6 +229,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                                                                  , const FWidgetStyle& InWidgetStyle
                                                                  , bool bParentEnabled ) const
 {
+    uint32 inbetweenCount = mInbetweenerTag->GetInbetweenCount();
     const FColor& inbetweenerTagColor = mInbetweenerTag->GetColor();
     static FSlateBrush defaultBrush;
 
@@ -246,6 +247,10 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                                            , inbetweenerTagColor.G
                                            , inbetweenerTagColor.B
                                            , 0.25f );
+    FLinearColor bkdownColor = FLinearColor( 1.0f
+                                           , 0.5f
+                                           , 0.0f
+                                           , 0.25f );
     FLinearColor targetColor = FLinearColor( 0.0f, 0.5f, 0.0f, 0.25f );
     TArray< FVector2D > lines;
 
@@ -256,14 +261,31 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 		                      , ESlateDrawEffect::None
 		                      , sourceColor );
 
-    for( uint32 i = 0; i <  mInbetweenerTag->GetInbetweenCount(); i++ )
+    for( uint32 i = 0; i <  inbetweenCount; i++ )
     {
 	    FSlateDrawElement::MakeBox( OutDrawElements
-		                          , LayerId
-		                          , AllottedGeometry.ToPaintGeometry( mInterpPosBuffer[i], mInterpSizeBuffer[i] )
-		                          , &defaultBrush
-		                          , ESlateDrawEffect::None
-		                          , interpColor );
+		                            , LayerId
+		                            , AllottedGeometry.ToPaintGeometry( mInterpPosBuffer[i]
+                                                                      , mInterpSizeBuffer[i] )
+		                            , &defaultBrush
+		                            , ESlateDrawEffect::None
+		                            , interpColor );
+    }
+
+    for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
+    {
+        
+
+        if( breakdown->GetTargetInbetweenIndex() != inbetweenCount )
+        {
+	        FSlateDrawElement::MakeBox( OutDrawElements
+		                                , LayerId
+		                                , AllottedGeometry.ToPaintGeometry( mInterpPosBuffer[breakdown->GetTargetInbetweenIndex()]
+                                                                          , mInterpSizeBuffer[breakdown->GetTargetInbetweenIndex()] )
+		                                , &defaultBrush
+		                                , ESlateDrawEffect::None
+		                                , bkdownColor );
+        }
     }
 
 	FSlateDrawElement::MakeBox( OutDrawElements
@@ -271,7 +293,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 		                      , AllottedGeometry.ToPaintGeometry( mTargetPos, mTargetSize )
 		                      , &defaultBrush
 		                      , ESlateDrawEffect::None
-		                      , targetColor );
+		                      , bkdownColor );
 
     lines.Reserve( 5 );
     lines.Push( FVector2D( mBoxPos.X             , mBoxPos.Y              ) );

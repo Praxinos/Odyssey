@@ -29,6 +29,15 @@ FInbetweenerQuad::Init( FInbetweenerGrid* iGrid )
 bool
 FInbetweenerQuad::IsLinked()
 {
+    FInbetweenerBreakdown* masterBreakdown = mGrid->GetBreakdown()->GetMasterBreakdown();
+
+    if( masterBreakdown )
+    {
+        uint32 quadIndex = this - &mGrid->GetQuadBuffer()[0];
+
+        return masterBreakdown->GetGrid()->GetQuadBuffer()[quadIndex].IsLinked();
+    }
+
     return ( mFlags & LINKED ) ? true : false; 
 }
 

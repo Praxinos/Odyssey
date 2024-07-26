@@ -2,6 +2,7 @@
 #include "InbetweenerTag/InbetweenerGrid.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVector.h"
+#include "OdysseyVectorObject.h"
 
 FInbetweenerBreakdown::~FInbetweenerBreakdown()
 {
@@ -9,6 +10,7 @@ FInbetweenerBreakdown::~FInbetweenerBreakdown()
 }
 
 FInbetweenerBreakdown::FInbetweenerBreakdown( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                            , FInbetweenerBreakdown* iMasterBreakdown
                                             , int32 iSourceInbetweenIndex
                                             , int32 iTargetInbetweenIndex )
     : mInbetweenerTag( iInbetweenerTag )
@@ -16,8 +18,41 @@ FInbetweenerBreakdown::FInbetweenerBreakdown( FOdysseyVectorTagInbetweener* iInb
     , mTargetInbetweenIndex( iTargetInbetweenIndex )
     , mIndex( 0 )
     , mGrid( nullptr )
+    , mMasterBreakdown( iMasterBreakdown )
+    , mPrevBreakdown( nullptr )
+    , mNextBreakdown( nullptr )
 {
     SetGrid( iInbetweenerTag->GetGridType() );
+}
+
+FInbetweenerBreakdown*
+FInbetweenerBreakdown::GetMasterBreakdown()
+{
+    return mMasterBreakdown;
+}
+
+void
+FInbetweenerBreakdown::SetPrevBreakdown( FInbetweenerBreakdown* iPrevBreakdown )
+{
+    mPrevBreakdown = iPrevBreakdown;
+}
+
+void
+FInbetweenerBreakdown::SetNextBreakdown( FInbetweenerBreakdown* iNextBreakdown )
+{
+    mNextBreakdown = iNextBreakdown;
+}
+
+FInbetweenerBreakdown*
+FInbetweenerBreakdown::GetPrevBreakdown()
+{
+    return mPrevBreakdown;
+}
+
+FInbetweenerBreakdown*
+FInbetweenerBreakdown::GetNextBreakdown()
+{
+    return mNextBreakdown;
 }
 
 FOdysseyVectorTagInbetweener*
@@ -38,12 +73,47 @@ FInbetweenerBreakdown::GetIndex()
     return mIndex;
 }
 
+void
+FInbetweenerBreakdown::DrawPathsAtTarget( BLContext* iBLContext )
+{
+    BLMatrix2D worldMatrix = mInbetweenerTag->GetOwner()->GetWorldMatrix();
+
+    iBLContext->save();
+    iBLContext->resetMatrix();
+
+    worldMatrix.transform( GetTargetLocalMatrix() );
+
+    for( FInterpolatedPath& interpolatedPath : mInbetweenerTag->GetInterpolatedPathBuffer() )
+    {
+        uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
+        ::ULIS::FVec2D* pointPositionBuffer = &interpolatedPath.GetInterpolatedPointPositionBuffer()[pointCount * mTargetInbetweenIndex];
+
+        mInbetweenerTag->DrawPathAt( &interpolatedPath
+                                   , pointPositionBuffer
+                                   , worldMatrix
+                                   , iBLContext );
+    }
+
+    iBLContext->restore();
+}
+
+BLMatrix2D&
+FInbetweenerBreakdown::GetSourceLocalMatrix()
+{
+    static BLMatrix2D identityMatrix = BLMatrix2D::makeIdentity();
+
+    if( mSourceInbetweenIndex == -1 )
+    {
+        return identityMatrix;
+    }
+
+    return mInbetweenerTag->GetChart().inbetweenBuffer[mSourceInbetweenIndex].matrix;
+}
+
 BLMatrix2D&
 FInbetweenerBreakdown::GetTargetLocalMatrix()
 {
-    uint32 inbetweenCount = mTargetInbetweenIndex - mSourceInbetweenIndex - 1;
-
-    if( mInbetweenerTag->GetInbetweenCount() == inbetweenCount )
+    if( mTargetInbetweenIndex == mInbetweenerTag->GetInbetweenCount() )
     {
         return mInbetweenerTag->GetTargetLocalMatrix();
     }

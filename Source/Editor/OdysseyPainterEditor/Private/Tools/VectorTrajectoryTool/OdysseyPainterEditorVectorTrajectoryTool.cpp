@@ -375,11 +375,10 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
 
         if( mPickingMode == eTrajectoryPickingMode::Alter )
         {
-/*---------------
             for( FInbetweenerHandleTrajectory* trajectoryHandle : mPickedHandleList )
             {
                 FInbetweenerTrajectory* trajectory = trajectoryHandle->GetTrajectory();
-                BLMatrix2D ownerInverseWorldMatrix = trajectory->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
+                BLMatrix2D ownerInverseWorldMatrix = trajectory->GetRoute()->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
                 uint32 endpointIndex = ( trajectoryHandle == trajectory->GetHandle(0) ) ? 0 : 3;
                 uint32 handleIndex   = ( trajectoryHandle == trajectory->GetHandle(0) ) ? 1 : 2;
                 BLPoint diff = ownerInverseWorldMatrix.mapVector( iPointInTexture.deltaPosition.X
@@ -400,7 +399,6 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
                     trajectoryHandle->Set( direction, lengthRatio );
                 }
             }
-*/
         }
     }
 

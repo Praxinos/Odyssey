@@ -12,8 +12,8 @@ class FInterpolatedPoint
         virtual ~FInterpolatedPoint();
         FInterpolatedPoint( FOdysseyVectorPoint* iPoint, uint32 iIndex );
         FOdysseyVectorPoint* GetOriginalPoint();
-        void SetUV( FInbetweenerQuad* iMappedQuad, double iU, double iV );
-        FInbetweenerQuad* GetMappedQuad();
+        void SetUV( uint32 iMappedQuadIndex, double iU, double iV );
+        uint32 GetMappedQuadIndex();
         void SetU( double iU );
         void SetV( double iV );
         double GetU();
@@ -24,7 +24,7 @@ class FInterpolatedPoint
         friend class FOdysseyVectorTagInbetweener;
 
     protected:
-        FInbetweenerQuad* mMappedQuad;
+        uint32 mMappedQuadIndex;
         FOdysseyVectorPoint* mOriginalPoint;
         uint32 mIndex;
         double mU;

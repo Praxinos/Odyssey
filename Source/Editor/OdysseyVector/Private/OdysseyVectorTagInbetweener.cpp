@@ -293,7 +293,8 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     SetGrid( mGridType, iNumQuadX, iNumQuadY );
 
     // the default breakdown
-    mBreakdownList.emplace_back( new FInbetweenerBreakdown( this, -1, iInbetweenCount ) );
+    mMasterBreakdown = new FInbetweenerBreakdown( this, nullptr, -1, iInbetweenCount );
+    mBreakdownList.emplace_back( mMasterBreakdown );
 
     //mGrid->Make( iNumQuadX, iNumQuadY, iOwnerObject->GetBBox( false ), this );
 
@@ -377,6 +378,8 @@ FOdysseyVectorTagInbetweener::AddBreakdown( int32 iInbetweenIndex )
     int32 targetInbetweenIndex = mInbetweenCount;
     uint32 breakdownIndex = 0;
     std::vector<::ULIS::FVec2D> curBreakdownSourceGeometry;
+    FInbetweenerBreakdown* prevBreakdown = nullptr;
+    FInbetweenerBreakdown* nextBreakdown = nullptr;
 
     std::list<FInbetweenerBreakdown*>::iterator
         curBreakdownIterator = std::find_if( mBreakdownList.begin()
@@ -406,19 +409,27 @@ FOdysseyVectorTagInbetweener::AddBreakdown( int32 iInbetweenIndex )
     }
 
     FInbetweenerBreakdown* newBreakdown = new FInbetweenerBreakdown( this
+                                                                   , mMasterBreakdown
                                                                    , sourceInbetweenIndex
                                                                    , targetInbetweenIndex );
 
-    newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
-    newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::TargetPosition );
-
     mBreakdownList.insert( curBreakdownIterator, newBreakdown );
 
-    // we need that index to extract the correct trajectories from the routes.
-    for( FInbetweenerBreakdown* breakdown : mBreakdownList )
+    for( std::list<FInbetweenerBreakdown*>::iterator it = mBreakdownList.begin(); it !=  mBreakdownList.end(); ++it )
     {
+        FInbetweenerBreakdown* breakdown = *it;
+        std::list<FInbetweenerBreakdown*>::iterator prevIt = std::prev( it );
+        std::list<FInbetweenerBreakdown*>::iterator nextIt = std::next( it );
+
         breakdown->SetIndex( breakdownIndex++ );
+
+        breakdown->SetPrevBreakdown( (     it != mBreakdownList.begin() ) ? *prevIt : nullptr );
+        breakdown->SetNextBreakdown( ( nextIt != mBreakdownList.end()   ) ? *nextIt : nullptr );
     }
+
+    // must be done after the intertweaning of the breakdowns
+    newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+    newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::TargetPosition );
 
     //DispatchInbetweensToBreakdowns();
 
@@ -429,6 +440,30 @@ std::list<FInbetweenerBreakdown*>&
 FOdysseyVectorTagInbetweener::GetBreakdownList()
 {
     return mBreakdownList;
+}
+
+void
+FOdysseyVectorTagInbetweener::SetUsedQuadCount( uint32 iUsedQuadCount )
+{
+    mUsedQuadCount = iUsedQuadCount;
+}
+
+void
+FOdysseyVectorTagInbetweener::SetUsedPointCount( uint32 iUsedPointCount  )
+{
+    mUsedPointCount = iUsedPointCount;
+}
+
+uint32
+FOdysseyVectorTagInbetweener::GetUsedQuadCount()
+{
+    return mUsedQuadCount;
+}
+
+uint32
+FOdysseyVectorTagInbetweener::GetUsedPointCount()
+{
+    return mUsedPointCount;
 }
 
 void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
@@ -712,16 +747,13 @@ FOdysseyVectorTagInbetweener::UpdateMatrix()
 void
 FOdysseyVectorTagInbetweener::DeformPathsAtTarget()
 {
-    for( FInbetweenerPoint& point : mBreakdownList.back()->GetGrid()->GetPointBuffer() )
+    for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
-        if( point.GetQuadCount() )
-        {
-            point.mInterpPosition = point.mTargetPosition;
-        }
+        // deform the path according to grid geometry
+        breakdown->GetGrid()->DeformPaths( mInterpolatedPathBuffer
+                                         , breakdown->GetTargetInbetweenIndex()
+                                         , eInbetweenerPointPositionType::TargetPosition );
     }
-
-    // deform the path according to grid geometry
-    mBreakdownList.back()->GetGrid()->DeformPaths( mInterpolatedPathBuffer, mInbetweenCount );
 }
 
 void
@@ -732,7 +764,7 @@ FOdysseyVectorTagInbetweener::DispatchInbetweensToBreakdowns()
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
         int32 targetInbetweenIndex = breakdown->GetTargetInbetweenIndex();
-        double breakdownLastSpacing = ( mBreakdownList.size() == 1 ) ? 1.0f : mChart.inbetweenBuffer[targetInbetweenIndex].spacing;
+        double breakdownLastSpacing = ( targetInbetweenIndex == mInbetweenCount ) ? 1.0f : mChart.inbetweenBuffer[targetInbetweenIndex].spacing;
 
         for( int32 i = 0; i < (int32)mInbetweenCount; i++ )
         {
@@ -788,7 +820,9 @@ FOdysseyVectorTagInbetweener::DeformPathsAtInbetween( uint32 iInbetweenIndex )
     }
 */
     // deform the path according to grid geometry
-    inbetween->breakdown->GetGrid()->DeformPaths( mInterpolatedPathBuffer, iInbetweenIndex );
+    inbetween->breakdown->GetGrid()->DeformPaths( mInterpolatedPathBuffer
+                                                , iInbetweenIndex
+                                                , eInbetweenerPointPositionType::InterpPosition );
 }
 
 void
@@ -1087,30 +1121,6 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( uint32 iInbetweenIndex
 }
 
 void
-FOdysseyVectorTagInbetweener::DrawPathsTarget( BLContext* iBLContext )
-{
-    BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
-
-    iBLContext->save();
-    iBLContext->resetMatrix();
-
-    worldMatrix.transform( mTargetLocalMatrix );
-
-    for( FInterpolatedPath& interpolatedPath : mInterpolatedPathBuffer )
-    {
-        uint32 pointCount = interpolatedPath.mInterpolatedPointBuffer.size();
-        ::ULIS::FVec2D* pointPositionBuffer = &interpolatedPath.mInterpolatedPointPositionBuffer[pointCount * mInbetweenCount];
-
-        DrawPathAt( &interpolatedPath
-                  , pointPositionBuffer
-                  , worldMatrix
-                  , iBLContext );
-    }
-
-    iBLContext->restore();
-}
-
-void
 FOdysseyVectorTagInbetweener::MoveInbetween( FInbetweenerInbetween* iInbetween
                                            , float iNewSpacing
                                            , bool iRelative )
@@ -1131,8 +1141,11 @@ FOdysseyVectorTagInbetweener::MoveInbetween( FInbetweenerInbetween* iInbetween
                 iInbetween->spacing = iNewSpacing;
 
                 // recompute single inbetweens
+/*
                 InterpolateTransform( iInbetween->index );
                 DeformPathsAtInbetween( iInbetween->index );
+*/
+                Interpolate();
             }
         }
         else

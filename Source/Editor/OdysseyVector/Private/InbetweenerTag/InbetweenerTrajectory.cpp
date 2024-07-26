@@ -30,17 +30,19 @@ FInbetweenerTrajectory::Init( uint32 iInbetweenCount )
 void
 FInbetweenerTrajectory::Update() 
 {
-    const BLMatrix2D& iTargetLocalMatrix = mBreakdown->GetTargetLocalMatrix();
+    const BLMatrix2D& sourceLocalMatrix = mBreakdown->GetSourceLocalMatrix();
+    const BLMatrix2D& targetLocalMatrix = mBreakdown->GetTargetLocalMatrix();
     double bezierLength;
     FInbetweenerQuad* quad = GetQuad();
     double quadU = mRoute->GetQuadU();
     double quadV = mRoute->GetQuadV();
 
-    mCubicBezier[0] = quad->GetPoint( eInbetweenerPointPositionType::SourcePosition
-                                    , quadU
-                                    , quadV );
+    mCubicBezier[0] = FOdysseyVector::MapPoint( sourceLocalMatrix
+                                              , quad->GetPoint( eInbetweenerPointPositionType::SourcePosition
+                                                              , quadU
+                                                              , quadV ) );
 
-    mCubicBezier[3] = FOdysseyVector::MapPoint( iTargetLocalMatrix
+    mCubicBezier[3] = FOdysseyVector::MapPoint( targetLocalMatrix
                                               , quad->GetPoint( eInbetweenerPointPositionType::TargetPosition
                                                               , quadU
                                                               , quadV ) );

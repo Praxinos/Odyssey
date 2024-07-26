@@ -28,6 +28,15 @@ FInbetweenerPoint::Init( FInbetweenerGrid* iGrid )
 uint32
 FInbetweenerPoint::GetQuadCount()
 {
+    FInbetweenerBreakdown* masterBreakdown = mGrid->GetBreakdown()->GetMasterBreakdown();
+
+    if( masterBreakdown )
+    {
+        uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
+
+        return masterBreakdown->GetGrid()->GetPointBuffer()[pointIndex].GetQuadCount();
+    }
+
     return mQuadList.size();
 }
 
@@ -72,20 +81,44 @@ FInbetweenerPoint::IsNeeded()
 void
 FInbetweenerPoint::SetSourcePosition( double iX, double iY )
 {
+    FInbetweenerBreakdown* prevBreakdown = mGrid->GetBreakdown()->GetPrevBreakdown();
+    uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEBBOX;
+    uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
+
     mSourcePosition.x = iX;
     mSourcePosition.y = iY;
 
-    mGrid->GetBreakdown()->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEBBOX );
+    if( prevBreakdown )
+    {
+        prevBreakdown->GetGrid()->GetPointBuffer()[pointIndex].mTargetPosition.x = mSourcePosition.x;
+        prevBreakdown->GetGrid()->GetPointBuffer()[pointIndex].mTargetPosition.y = mSourcePosition.y;
+
+        invalidationFlags |= FOdysseyVectorTagInbetweener::INVALIDATE_TARGET;
+    }
+
+    mGrid->GetBreakdown()->GetInbetweenerTag()->Invalidate( invalidationFlags );
 }
 
 void
 FInbetweenerPoint::SetTargetPosition( double iX, double iY )
 {
+    FInbetweenerBreakdown* nextBreakdown = mGrid->GetBreakdown()->GetNextBreakdown();
+    uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_TARGET
+                             | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING;
+    uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
+
     mTargetPosition.x = iX;
     mTargetPosition.y = iY;
 
-    mGrid->GetBreakdown()->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_TARGET
-                                                          | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
+    if( nextBreakdown )
+    {
+        nextBreakdown->GetGrid()->GetPointBuffer()[pointIndex].mSourcePosition.x = mTargetPosition.x;
+        nextBreakdown->GetGrid()->GetPointBuffer()[pointIndex].mSourcePosition.y = mTargetPosition.y;
+
+        invalidationFlags |= FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEBBOX;
+    }
+
+    mGrid->GetBreakdown()->GetInbetweenerTag()->Invalidate( invalidationFlags );
 }
 
 void
@@ -141,6 +174,15 @@ FInbetweenerPoint::SetID( uint32 iID )
 uint32
 FInbetweenerPoint::GetID()
 {
+    FInbetweenerBreakdown* masterBreakdown = mGrid->GetBreakdown()->GetMasterBreakdown();
+
+    if( masterBreakdown )
+    {
+        uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
+
+        return masterBreakdown->GetGrid()->GetPointBuffer()[pointIndex].GetID();
+    }
+
     return mID;
 }
 

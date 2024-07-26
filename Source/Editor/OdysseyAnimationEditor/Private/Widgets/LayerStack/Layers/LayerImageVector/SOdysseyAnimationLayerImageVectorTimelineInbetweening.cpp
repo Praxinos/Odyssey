@@ -126,7 +126,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
         FOdysseyVectorTagInbetweener* inbetweenerTag = item.Get()->GetInbetweenerTag();
         uint32 cellFrame = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetFrame();
 
-        inbetweenerTag->AddBreakdown( frameIndex - cellFrame );
+        // Note: -1 because we add breakdown at inbetween index
+        inbetweenerTag->AddBreakdown( frameIndex - cellFrame - 1 );
     }
 
     Update();
