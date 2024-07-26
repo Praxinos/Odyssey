@@ -47,9 +47,9 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSceneTreeViewTab :
         TSharedPtr<SOdysseyPainterEditorVectorSceneTreeView> mVectorSceneTreeView;
         TSharedPtr<IDetailsView> mDetailsView;
 
-        UOdysseyPainterEditorVectorObjectView* mObjectView;
-        UOdysseyPainterEditorVectorPathView* mPathView;
-        UOdysseyPainterEditorVectorGroupPaintView* mGroupPaintView;
+        TObjectPtr<UOdysseyPainterEditorVectorObjectView> mObjectView;
+        TObjectPtr<UOdysseyPainterEditorVectorPathView> mPathView;
+        TObjectPtr<UOdysseyPainterEditorVectorGroupPaintView> mGroupPaintView;
 
         FOdysseyVectorGroupPaint* mScene = nullptr;
 };

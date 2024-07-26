@@ -62,7 +62,7 @@ public:
     void  SelectableMaterials( TArray<UMaterialInterface*>& ioSelectedMaterials ) const;
     const TArray<FPaintableTexture>& SelectableTextures() const;
 
-    const TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>>& ComponentToAdapterMap() const;
+    const TMap<TObjectPtr<UMeshComponent>, TSharedPtr<IMeshPaintGeometryAdapter>>& ComponentToAdapterMap() const;
 
     EOdysseyViewportDrawingPaintingAdapterMethod PaintingAdapterMethod() const;
     
@@ -165,7 +165,7 @@ private:
     TArray<FPaintableTexture> mSelectableTextures;
 
 	/** Map of geometry adapters for each selectable mesh component, so that we don't recreate a GeometryAdapter each time we select a mesh to paint */
-	TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>> mComponentToAdapterMap;
+	TMap<TObjectPtr<UMeshComponent>, TSharedPtr<IMeshPaintGeometryAdapter>> mComponentToAdapterMap;
 
     /** The corresponding render target for the Texture of the editor above */
     UTextureRenderTarget2D* mPaintingTexture2DRenderTarget;

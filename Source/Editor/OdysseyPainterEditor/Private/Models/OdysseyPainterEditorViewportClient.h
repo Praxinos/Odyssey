@@ -158,7 +158,7 @@ private:
     FOdysseyPainterEditor*		            mOdysseyPainterEditor;
     TWeakPtr<SOdysseyViewport>              mOdysseyPainterEditorViewportPtr;
     FOdysseyMeshSelector*                   mMeshSelector;
-    UTexture2D*                             mCheckerboardTexture;
+    TObjectPtr<UTexture2D>                  mCheckerboardTexture;
     EMouseCursor::Type                      mCurrentMouseCursor;
     float                                   mRotationReference; // The reference from which we determine the new rotation
     FVector2D                               mPanReference; //Where did we begin the pan ?

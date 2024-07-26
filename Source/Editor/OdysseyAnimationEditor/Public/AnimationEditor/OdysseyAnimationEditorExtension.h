@@ -66,5 +66,5 @@ public:
     TArray<FGuid> mImageRenderingComposition;
     TSharedPtr<FOdysseyLayerStackEditorBrushContext> mLayerStackBrushEditorContext;
 
-    UOdysseyAnimationEditorOutOfPegsTool* mOutOfPegsTool;
+    TObjectPtr<UOdysseyAnimationEditorOutOfPegsTool> mOutOfPegsTool;
 };

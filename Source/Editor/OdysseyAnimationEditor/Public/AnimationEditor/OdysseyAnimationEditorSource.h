@@ -55,6 +55,6 @@ private:
 
 public:
     UOdysseyAnimation* mAnimation;
-    UOdysseyAnimationTexture* mTexture;
-    UOdysseyAnimationPlayer* mPlayer;
+    TObjectPtr<UOdysseyAnimationTexture> mTexture;
+    TObjectPtr<UOdysseyAnimationPlayer> mPlayer;
 };

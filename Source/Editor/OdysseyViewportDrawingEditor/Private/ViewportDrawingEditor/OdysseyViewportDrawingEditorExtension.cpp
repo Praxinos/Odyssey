@@ -231,7 +231,7 @@ FOdysseyViewportDrawingEditorExtension::SelectableTextures() const
     return mSelectableTextures;
 }
 
-const TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>>&
+const TMap<TObjectPtr<UMeshComponent>, TSharedPtr<IMeshPaintGeometryAdapter>>&
 FOdysseyViewportDrawingEditorExtension::ComponentToAdapterMap() const
 {
 	return mComponentToAdapterMap;
@@ -980,8 +980,8 @@ FOdysseyViewportDrawingEditorExtension::AddReferencedObjects(FReferenceCollector
 
 	FMeshPaintAdapterFactory::AddReferencedObjectsGlobals(iCollector);
 
-    TMap<UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>> map = ComponentToAdapterMap();
-	for (TMap< UMeshComponent*, TSharedPtr<IMeshPaintGeometryAdapter>>::TIterator It(map); It; ++It)
+    TMap<TObjectPtr<UMeshComponent>, TSharedPtr<IMeshPaintGeometryAdapter>> map = ComponentToAdapterMap();
+	for (TMap< TObjectPtr<UMeshComponent>, TSharedPtr<IMeshPaintGeometryAdapter>>::TIterator It(map); It; ++It)
 	{
         //Prevent GC on the components we save painting settings for
 		iCollector.AddReferencedObject(It.Key());
