@@ -11,6 +11,7 @@
 
 class FOdysseyVectorTagInbetweener;
 class FInbetweeningListViewItem;
+class FInbetweenerBreakdown;
 
 /**
  * Implements the List View Widget
@@ -52,11 +53,12 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
         FVector2D mSourceSize;
         TArray<FVector2D> mInterpPosBuffer;
         TArray<FVector2D> mInterpSizeBuffer;
-        FVector2D mTargetPos;
-        FVector2D mTargetSize;
+        // there are as many target poses as breakdowns
+        TArray<FVector2D> mTargetPosBuffer;
+        TArray<FVector2D> mTargetSizeBuffer;
         FVector2D mBoxPos;
         FVector2D mBoxSize;
-        bool bHandleClicked;
+        FInbetweenerBreakdown* mPickedBreakdown;
         //Box containing the cells widgets
         //TSharedPtr<SHorizontalBox> mCellsBox;
 };

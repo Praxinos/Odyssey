@@ -374,8 +374,6 @@ FOdysseyVectorTagInbetweener::Unshare()
 FInbetweenerBreakdown*
 FOdysseyVectorTagInbetweener::AddBreakdown( int32 iInbetweenIndex )
 {
-    int32 sourceInbetweenIndex = -1;
-    int32 targetInbetweenIndex = mInbetweenCount;
     uint32 breakdownIndex = 0;
     std::vector<::ULIS::FVec2D> curBreakdownSourceGeometry;
     FInbetweenerBreakdown* prevBreakdown = nullptr;
@@ -394,52 +392,55 @@ FOdysseyVectorTagInbetweener::AddBreakdown( int32 iInbetweenIndex )
 
                                                  return false;
                                              } );
-    //if( curBreakdownIterator != mBreakdownList.end() )
+    if( curBreakdownIterator != mBreakdownList.end() )
     {
         FInbetweenerBreakdown* curBreakdown = *curBreakdownIterator;
-
-        //newBreakdown.SetOffset( curBreakdown.GetFromOffset() );
-        //newBreakdown.SetLength( toOffset );
+        int32 sourceInbetweenIndex = curBreakdown->GetSourceInbetweenIndex();
+        int32 targetInbetweenIndex = iInbetweenIndex;
+        FInbetweenerBreakdown* newBreakdown = new FInbetweenerBreakdown( this
+                                                                       , mMasterBreakdown
+                                                                       , sourceInbetweenIndex
+                                                                       , targetInbetweenIndex );
 
         curBreakdown->SetSourceInbetweenIndex( iInbetweenIndex );
 
         curBreakdown->GetGrid()->GetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
 
-        targetInbetweenIndex = iInbetweenIndex;
+        mBreakdownList.insert( curBreakdownIterator, newBreakdown );
+
+        for( std::list<FInbetweenerBreakdown*>::iterator it = mBreakdownList.begin(); it !=  mBreakdownList.end(); ++it )
+        {
+            FInbetweenerBreakdown* breakdown = *it;
+            std::list<FInbetweenerBreakdown*>::iterator prevIt = std::prev( it );
+            std::list<FInbetweenerBreakdown*>::iterator nextIt = std::next( it );
+
+            breakdown->SetIndex( breakdownIndex++ );
+
+            breakdown->SetPrevBreakdown( (     it != mBreakdownList.begin() ) ? *prevIt : nullptr );
+            breakdown->SetNextBreakdown( ( nextIt != mBreakdownList.end()   ) ? *nextIt : nullptr );
+        }
+
+        // must be done after the intertweaning of the breakdowns
+        newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+        newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::TargetPosition );
+
+        return newBreakdown;
     }
-
-    FInbetweenerBreakdown* newBreakdown = new FInbetweenerBreakdown( this
-                                                                   , mMasterBreakdown
-                                                                   , sourceInbetweenIndex
-                                                                   , targetInbetweenIndex );
-
-    mBreakdownList.insert( curBreakdownIterator, newBreakdown );
-
-    for( std::list<FInbetweenerBreakdown*>::iterator it = mBreakdownList.begin(); it !=  mBreakdownList.end(); ++it )
-    {
-        FInbetweenerBreakdown* breakdown = *it;
-        std::list<FInbetweenerBreakdown*>::iterator prevIt = std::prev( it );
-        std::list<FInbetweenerBreakdown*>::iterator nextIt = std::next( it );
-
-        breakdown->SetIndex( breakdownIndex++ );
-
-        breakdown->SetPrevBreakdown( (     it != mBreakdownList.begin() ) ? *prevIt : nullptr );
-        breakdown->SetNextBreakdown( ( nextIt != mBreakdownList.end()   ) ? *nextIt : nullptr );
-    }
-
-    // must be done after the intertweaning of the breakdowns
-    newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
-    newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::TargetPosition );
 
     //DispatchInbetweensToBreakdowns();
-
-    return newBreakdown;
+    return nullptr;
 }
 
 std::list<FInbetweenerBreakdown*>&
 FOdysseyVectorTagInbetweener::GetBreakdownList()
 {
     return mBreakdownList;
+}
+
+uint32
+FOdysseyVectorTagInbetweener::GetBreakdownCount()
+{
+    return mBreakdownList.size();
 }
 
 void
@@ -895,11 +896,11 @@ FOdysseyVectorTagInbetweener::Interpolate()
 
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
-        uint32 fromIndex = breakdown->GetSourceInbetweenIndex() + 1;
-        uint32 toIndex = breakdown->GetTargetInbetweenIndex() - 1;
+        int32 fromIndex = breakdown->GetSourceInbetweenIndex() + 1;
+        int32 toIndex = breakdown->GetTargetInbetweenIndex() - 1;
         FInbetweenerInbetween* lastInbetween = &mChart.inbetweenBuffer[toIndex];
 
-        for( uint32 i = fromIndex; i <= toIndex; i++ )
+        for( int32 i = fromIndex; i <= toIndex; i++ )
         {
             InterpolateTransform( i );
             DeformPathsAtInbetween( i );

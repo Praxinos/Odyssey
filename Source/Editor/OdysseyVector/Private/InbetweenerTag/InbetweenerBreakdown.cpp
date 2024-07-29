@@ -125,12 +125,34 @@ void
 FInbetweenerBreakdown::SetSourceInbetweenIndex( int32 iSourceInbetweenIndex )
 {
     mSourceInbetweenIndex = iSourceInbetweenIndex;
+
+    if( mPrevBreakdown )
+    {
+        mPrevBreakdown->mTargetInbetweenIndex = iSourceInbetweenIndex;
+    }
+
+    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING 
+                               // force deformation of interpolated paths at target
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_TARGET  );
 }
 
 void
 FInbetweenerBreakdown::SetTargetInbetweenIndex( int32 iTargetInbetweenIndex )
 {
     mTargetInbetweenIndex = iTargetInbetweenIndex;
+
+    if( mNextBreakdown )
+    {
+        mNextBreakdown->mSourceInbetweenIndex = iTargetInbetweenIndex;
+    }
+    else
+    {
+        mInbetweenerTag->SetInbetweenCount( iTargetInbetweenIndex );
+    }
+
+    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING 
+                               // force deformation of interpolated paths at target
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_TARGET );
 }
 
 int32

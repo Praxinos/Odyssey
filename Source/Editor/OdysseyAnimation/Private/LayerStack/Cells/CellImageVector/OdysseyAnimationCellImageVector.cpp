@@ -276,6 +276,15 @@ FOdysseyAnimationCellImageVector::GetCellByIndex( uint32 iIndex )
     return nullptr;
 }
 
+// Implements Interface IOdysseyVectorAnimationCell::GetLastCell
+IOdysseyVectorAnimationCell*
+FOdysseyAnimationCellImageVector::GetLastCell()
+{
+    FOdysseyAnimationCell* lastCell = GetLayer()->GetCellsContainer()->GetCells().Last().Get();
+
+    return static_cast<FOdysseyAnimationCellImageVector*>(lastCell);
+}
+
 // Implements Interface IOdysseyVectorAnimationCell::GetEngine
 FOdysseyVectorEngine* 
 FOdysseyAnimationCellImageVector::GetEngine()

@@ -62,6 +62,7 @@ public:
 public:
     // Implements Interface IOdysseyVectorAnimationCell
     virtual IOdysseyVectorAnimationCell* GetCellByIndex( uint32 iIndex ) override;
+    virtual IOdysseyVectorAnimationCell* GetLastCell() override;
     virtual FOdysseyVectorEngine* GetEngine() override;
     virtual int32 GetIndex() override;
     virtual uint32 GetLength() override;
