@@ -127,7 +127,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
         uint32 cellFrame = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetFrame();
 
         // Note: -1 because we add breakdown at inbetween index
-        inbetweenerTag->AddBreakdown( frameIndex - cellFrame - 1 );
+        inbetweenerTag->AddBreakdown( frameIndex - cellFrame, true );
     }
 
     Update();

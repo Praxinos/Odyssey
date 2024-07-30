@@ -260,7 +260,7 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         double mRotation;
         double mScalingX;
         double mScalingY;
-        uint32 mInbetweenCount;
+        uint32 mDrawingCount;
         eInbetweenerGridType mGridType;
         eInbetweenerInterpolationType mInterpolationType;
         uint32 mGridSizeX;

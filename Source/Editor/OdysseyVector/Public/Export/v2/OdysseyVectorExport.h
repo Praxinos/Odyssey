@@ -20,6 +20,7 @@ class  FOdysseyVectorGroupPaint;
 class  FOdysseyVectorTagInbetweener;
 class  FInbetweenerTrajectory;
 class  FInbetweenerGridARAP;
+class  FInbetweenerBreakdown;
 
 namespace FOdysseyVectorExportV2
 {
@@ -108,23 +109,20 @@ namespace FOdysseyVectorExportV2
     void WriteTagInbetweenerMapAsPolyline( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerChart( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerGrid( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
-    void WriteTagInbetweenerGridType( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
-    void WriteTagInbetweenerGridInterpolation( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
-    void WriteTagInbetweenerGridSize( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerDeformation( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerInterpolation( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerDimension( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerGridGeometry( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerGridGeometryMk2( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
-    void WriteTagInbetweenerTransformTranslation( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                                , FArchive &Ar );
-    void WriteTagInbetweenerTransformRotation( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                             , FArchive &Ar );
-    void WriteTagInbetweenerTransformScaling( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                            , FArchive &Ar );
-    void WriteTagInbetweenerTransform( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                     , FArchive &Ar );
-    void WriteTagInbetweenerGridArapRigidity( FInbetweenerGridARAP& iArapGrid
-                                            , FArchive &Ar );
-    void WriteTagInbetweenerGridTrajectories( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                            , FArchive &Ar );
+    void WriteTagInbetweenerTransformTranslation( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerTransformRotation( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerTransformScaling( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerTransform( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerArapRigidity( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerGridTrajectories( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerBreakdowns( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerBreakdownsLayout( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerBreakdownsGeometry( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
 
     void ODYSSEYVECTOR_API WriteTrajectory( FInbetweenerTrajectory& iTrajectory
                                           , FArchive &Ar );
@@ -136,4 +134,5 @@ namespace FOdysseyVectorExportV2
                                  , FArchive &Ar );
     void WriteTrajectoryWaypointsRatio( FInbetweenerTrajectory& iTrajectory
                                       , FArchive &Ar );
+
 }

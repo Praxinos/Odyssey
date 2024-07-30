@@ -11,11 +11,11 @@ FInbetweenerBreakdown::~FInbetweenerBreakdown()
 
 FInbetweenerBreakdown::FInbetweenerBreakdown( FOdysseyVectorTagInbetweener* iInbetweenerTag
                                             , FInbetweenerBreakdown* iMasterBreakdown
-                                            , int32 iSourceInbetweenIndex
-                                            , int32 iTargetInbetweenIndex )
+                                            , uint32 iSourceDrawingIndex
+                                            , uint32 iTargetDrawingIndex )
     : mInbetweenerTag( iInbetweenerTag )
-    , mSourceInbetweenIndex( iSourceInbetweenIndex )
-    , mTargetInbetweenIndex( iTargetInbetweenIndex )
+    , mSourceDrawingIndex( iSourceDrawingIndex )
+    , mTargetDrawingIndex( iTargetDrawingIndex )
     , mIndex( 0 )
     , mGrid( nullptr )
     , mMasterBreakdown( iMasterBreakdown )
@@ -86,7 +86,7 @@ FInbetweenerBreakdown::DrawPathsAtTarget( BLContext* iBLContext )
     for( FInterpolatedPath& interpolatedPath : mInbetweenerTag->GetInterpolatedPathBuffer() )
     {
         uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
-        ::ULIS::FVec2D* pointPositionBuffer = &interpolatedPath.GetInterpolatedPointPositionBuffer()[pointCount * mTargetInbetweenIndex];
+        ::ULIS::FVec2D* pointPositionBuffer = &interpolatedPath.GetInterpolatedPointPositionBuffer()[pointCount * mTargetDrawingIndex];
 
         mInbetweenerTag->DrawPathAt( &interpolatedPath
                                    , pointPositionBuffer
@@ -102,69 +102,67 @@ FInbetweenerBreakdown::GetSourceLocalMatrix()
 {
     static BLMatrix2D identityMatrix = BLMatrix2D::makeIdentity();
 
-    if( mSourceInbetweenIndex == -1 )
+    if( mSourceDrawingIndex == 0 )
     {
         return identityMatrix;
     }
 
-    return mInbetweenerTag->GetChart().inbetweenBuffer[mSourceInbetweenIndex].matrix;
+    return mInbetweenerTag->GetChart().drawingBuffer[mSourceDrawingIndex].matrix;
 }
 
 BLMatrix2D&
 FInbetweenerBreakdown::GetTargetLocalMatrix()
 {
-    if( mTargetInbetweenIndex == mInbetweenerTag->GetInbetweenCount() )
+    if( mTargetDrawingIndex == mInbetweenerTag->GetDrawingCount() )
     {
         return mInbetweenerTag->GetTargetLocalMatrix();
     }
 
-    return mInbetweenerTag->GetChart().inbetweenBuffer[mTargetInbetweenIndex].matrix;
+    return mInbetweenerTag->GetChart().drawingBuffer[mTargetDrawingIndex].matrix;
 }
 
 void
-FInbetweenerBreakdown::SetSourceInbetweenIndex( int32 iSourceInbetweenIndex )
+FInbetweenerBreakdown::SetSourceDrawingIndex( uint32 iSourceDrawingIndex )
 {
-    mSourceInbetweenIndex = iSourceInbetweenIndex;
+    mSourceDrawingIndex = iSourceDrawingIndex;
 
     if( mPrevBreakdown )
     {
-        mPrevBreakdown->mTargetInbetweenIndex = iSourceInbetweenIndex;
+        mPrevBreakdown->mTargetDrawingIndex = iSourceDrawingIndex;
     }
 
     mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING 
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_BREAKDOWN_LIST
                                // force deformation of interpolated paths at target
                                | FOdysseyVectorTagInbetweener::INVALIDATE_TARGET  );
 }
 
 void
-FInbetweenerBreakdown::SetTargetInbetweenIndex( int32 iTargetInbetweenIndex )
+FInbetweenerBreakdown::SetTargetDrawingIndex( uint32 iTargetDrawingIndex )
 {
-    mTargetInbetweenIndex = iTargetInbetweenIndex;
+    mTargetDrawingIndex = iTargetDrawingIndex;
 
     if( mNextBreakdown )
     {
-        mNextBreakdown->mSourceInbetweenIndex = iTargetInbetweenIndex;
-    }
-    else
-    {
-        mInbetweenerTag->SetInbetweenCount( iTargetInbetweenIndex );
+        mNextBreakdown->mSourceDrawingIndex = iTargetDrawingIndex;
     }
 
     mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING 
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_BREAKDOWN_LIST
                                // force deformation of interpolated paths at target
                                | FOdysseyVectorTagInbetweener::INVALIDATE_TARGET );
 }
 
-int32
-FInbetweenerBreakdown::GetSourceInbetweenIndex()
+uint32
+FInbetweenerBreakdown::GetSourceDrawingIndex()
 {
-    return mSourceInbetweenIndex;
+    return mSourceDrawingIndex;
 }
 
-int32
-FInbetweenerBreakdown::GetTargetInbetweenIndex()
+uint32
+FInbetweenerBreakdown::GetTargetDrawingIndex()
 {
-    return mTargetInbetweenIndex;
+    return mTargetDrawingIndex;
 }
 
 void

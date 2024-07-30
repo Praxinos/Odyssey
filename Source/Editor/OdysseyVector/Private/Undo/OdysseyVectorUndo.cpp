@@ -138,7 +138,7 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT )
     {
-        mInbetweenCount = mInbetweenerTag->GetInbetweenCount();
+        mDrawingCount = mInbetweenerTag->GetDrawingCount();
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE )
@@ -253,11 +253,11 @@ FSnapshotTagInbetweener::Restore()
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT )
     {
-        uint32 swapCount = mInbetweenerTag->GetInbetweenCount();
+        uint32 swapCount = mInbetweenerTag->GetDrawingCount();
 
-        mInbetweenerTag->SetInbetweenCount( mInbetweenCount );
+        mInbetweenerTag->SetDrawingCount( mDrawingCount );
 
-        mInbetweenCount = swapCount;
+        mDrawingCount = swapCount;
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE )

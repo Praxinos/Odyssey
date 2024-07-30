@@ -12,7 +12,6 @@
 
 FInbetweenerGridARAP::FInbetweenerGridARAP( FInbetweenerBreakdown* iBreakdown )
     : FInbetweenerGrid( iBreakdown )
-    , mRigidity( 10 )
 {
 }
 
@@ -221,24 +220,10 @@ FInbetweenerGridARAP::Regularize()
 {
     Regularize( eInbetweenerPointPositionType::SourcePosition
               , eInbetweenerPointPositionType::TargetPosition
-              , mRigidity
+              , mBreakdown->GetInbetweenerTag()->GetARAPRigidity()
               , true
               , true );
 }
-
-uint32
-FInbetweenerGridARAP::GetRigidity()
-{
-    return mRigidity;
-}
-
-void
-FInbetweenerGridARAP::SetRigidity( uint32 iRigidity )
-{
-    mRigidity = iRigidity;
-}
-
-
 
 void
 FInbetweenerGridARAP::Update( uint32 iUpdateFlags

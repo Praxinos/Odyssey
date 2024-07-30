@@ -3,6 +3,7 @@
 // from module OdysseyFile
 #include "OdysseyFile.h"
 #include "InbetweenerTag/InbetweenerPoint.h"
+#include "InbetweenerTag/InbetweenerBreakdown.h"
 #include "InbetweenerTag/InbetweenerTrajectory.h"
 #include "InbetweenerTag/InbetweenerHandleTrajectory.h"
 #include "InbetweenerTag/InbetweenerGrid.h"
@@ -87,51 +88,90 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGridGeometry( FOdysseyVectorTagInbetw
 }
 
 void
-FOdysseyVectorExportV2::WriteTagInbetweenerGridInterpolation( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar )
+FOdysseyVectorExportV2::WriteTagInbetweenerArapRigidity( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                       , FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_INTERPOLATION
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_ARAPRIGIDITY
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        uint32 interpolationType = static_cast<uint32>(iInbetweenerTag.GetInterpolationType());
+        uint32 arapRigidty = static_cast<uint32>(iInbetweenerTag.GetARAPRigidity());
 
-        Ar << interpolationType;
+        Ar << arapRigidty;
     } );
 }
 
 void
-FOdysseyVectorExportV2::WriteTagInbetweenerGridArapRigidity( FInbetweenerGridARAP& iArapGrid
-                                                           , FArchive &Ar )
+FOdysseyVectorExportV2::WriteTagInbetweenerBreakdownsLayout( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                             , FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_ARAP_RIGIDITY
-                            , Ar
-                            , [&iArapGrid](FArchive &Ar) -> void
-    {
-        uint32 rigidty = static_cast<uint32>(iArapGrid.GetRigidity());
-
-        Ar << rigidty;
-    } );
-}
-
-void
-FOdysseyVectorExportV2::WriteTagInbetweenerGridType( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                                   , FArchive &Ar )
-{
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_TYPE
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_BREAKDOWNS_LAYOUT
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        uint32 gridType = static_cast<uint32>(iInbetweenerTag.GetGridType());
+        uint32 breakdownCount = iInbetweenerTag.GetBreakdownCount();
 
-        Ar << gridType;
+        Ar << breakdownCount;
+
+        for( FInbetweenerBreakdown* breakdown : iInbetweenerTag.GetBreakdownList() )
+        {
+            uint32 master = breakdown->GetMasterBreakdown() ? 0 : 1;
+            uint32 sourceDrawingIndex = breakdown->GetSourceDrawingIndex();
+            uint32 targetDrawingIndex = breakdown->GetTargetDrawingIndex();
+
+            Ar << master;
+            Ar << sourceDrawingIndex;
+            Ar << targetDrawingIndex;
+        }
     } );
 }
 
 void
-FOdysseyVectorExportV2::WriteTagInbetweenerGridSize( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                                   , FArchive &Ar )
+FOdysseyVectorExportV2::WriteTagInbetweenerBreakdownsGeometry( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                             , FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_SIZE
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_BREAKDOWNS_GRIDGEOMETRY
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        for( FInbetweenerBreakdown* breakdown : iInbetweenerTag.GetBreakdownList() )
+        {
+            std::vector<FInbetweenerPoint>& gridPointbuffer = breakdown->GetGrid()->GetPointBuffer();
+
+            for( FInbetweenerPoint& point : gridPointbuffer )
+            {
+                double sourceX = point.GetSourcePosition().x;
+                double sourceY = point.GetSourcePosition().y;
+                double targetX = point.GetTargetPosition().x;
+                double targetY = point.GetTargetPosition().y;
+
+                Ar << sourceX;
+                Ar << sourceY;
+                Ar << targetX;
+                Ar << targetY;
+            }
+        }
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteTagInbetweenerBreakdowns( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                     , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_BREAKDOWNS
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        WriteTagInbetweenerBreakdownsLayout( iInbetweenerTag, Ar );
+        WriteTagInbetweenerBreakdownsGeometry( iInbetweenerTag, Ar );
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteTagInbetweenerDimension( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                    , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_DIMENSION
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
@@ -143,6 +183,34 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGridSize( FOdysseyVectorTagInbetweene
     } );
 }
 
+void
+FOdysseyVectorExportV2::WriteTagInbetweenerInterpolation( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_INTERPOLATION
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        uint32 interpolationType = static_cast<uint32>(iInbetweenerTag.GetInterpolationType());
+
+        Ar << interpolationType;
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteTagInbetweenerDeformation( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                      , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_DEFORMATION
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        uint32 gridType = static_cast<uint32>(iInbetweenerTag.GetGridType());
+
+        Ar << gridType;
+    } );
+}
+
+/*
 void
 FOdysseyVectorExportV2::WriteTagInbetweenerGrid( FOdysseyVectorTagInbetweener& iInbetweenerTag
                                                , FArchive &Ar )
@@ -163,14 +231,14 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGrid( FOdysseyVectorTagInbetweener& i
 
             WriteTagInbetweenerGridArapRigidity( *arapGrid, Ar );
         }
-/*-----------
+
         if( iInbetweenerTag.GetTrajectoryList().size() )
         {
             WriteTagInbetweenerGridTrajectories( iInbetweenerTag, Ar );
         }
-*/
     } );
 }
+*/
 
 void
 FOdysseyVectorExportV2::WriteTagInbetweenerTransformScaling( FOdysseyVectorTagInbetweener& iInbetweenerTag
@@ -240,12 +308,10 @@ FOdysseyVectorExportV2::WriteTagInbetweenerChart( FOdysseyVectorTagInbetweener& 
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        // note; do not use inbetweenBuffer.size(), because it has 1 more inbetween
-        // than officially stated ( for the final frame)
-        for( uint32 i = 0; i < iInbetweenerTag.GetInbetweenCount(); i++ )
+        for( uint32 i = 0; i < iInbetweenerTag.GetDrawingCount(); i++ )
         {
-            FInbetweenerInbetween& inbetween = iInbetweenerTag.GetChart().inbetweenBuffer[i];
-            float spacing = inbetween.spacing;
+            FInbetweenerDrawing& drawing = iInbetweenerTag.GetChart().drawingBuffer[i];
+            float spacing = drawing.spacing;
 
             Ar << spacing;
         }
@@ -260,7 +326,7 @@ FOdysseyVectorExportV2::WriteTagInbetweenerInbetweenCount( FOdysseyVectorTagInbe
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        uint32 inbetweenCount = iInbetweenerTag.GetInbetweenCount();
+        uint32 inbetweenCount = iInbetweenerTag.GetDrawingCount();
 
         Ar << inbetweenCount;
     } );
@@ -313,6 +379,11 @@ FOdysseyVectorExportV2::WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbe
         WriteTagInbetweenerMapAsPolyline( iInbetweenerTag, Ar );
         WriteTagInbetweenerChart( iInbetweenerTag, Ar );
         WriteTagInbetweenerTransform( iInbetweenerTag, Ar );
-        WriteTagInbetweenerGrid( iInbetweenerTag, Ar );
+        WriteTagInbetweenerDeformation( iInbetweenerTag, Ar );
+        WriteTagInbetweenerInterpolation( iInbetweenerTag, Ar );
+        WriteTagInbetweenerDimension( iInbetweenerTag, Ar );
+        WriteTagInbetweenerArapRigidity( iInbetweenerTag, Ar );
+        WriteTagInbetweenerBreakdowns( iInbetweenerTag, Ar );
+        //WriteTagInbetweenerGrid( iInbetweenerTag, Ar );
     } );
 }

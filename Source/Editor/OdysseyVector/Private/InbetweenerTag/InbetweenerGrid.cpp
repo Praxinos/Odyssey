@@ -15,8 +15,10 @@ FInbetweenerGrid::~FInbetweenerGrid()
 }
 
 FInbetweenerGrid::FInbetweenerGrid( FInbetweenerBreakdown* iBreakdown )
-    : mBreakdown( iBreakdown )
+    : mFlags( 0 )
+    , mBreakdown( iBreakdown )
 {
+    //Make();
 }
 
 FInbetweenerBreakdown*
@@ -546,7 +548,7 @@ FInbetweenerGrid::ComputeQuadA( FInbetweenerQuad* iQuad
  * @param useRigidTransform If true the global rigid transformation is applied.
  */
 bool
-FInbetweenerGrid::ComputeARAPInterpolation( const FInbetweenerInbetween* iInbetween
+FInbetweenerGrid::ComputeARAPInterpolation( const FInbetweenerDrawing* iDrawing
                                           , bool useRigidTransform )
 {
     std::list<FInbetweenerRoute*>& routeList = mBreakdown->GetInbetweenerTag()->GetRouteList();
@@ -556,7 +558,7 @@ FInbetweenerGrid::ComputeARAPInterpolation( const FInbetweenerInbetween* iInbetw
     auto startTotal = std::chrono::high_resolution_clock::now();
 */
     Eigen::MatrixXd A( 2, 8 * usedQuadCount  );
-    double t = iInbetween->breakdownSpacing;
+    double t = iDrawing->breakdownSpacing;
     // Compute A(t)
     int i = 0;
 
@@ -598,14 +600,14 @@ FInbetweenerGrid::ComputeARAPInterpolation( const FInbetweenerInbetween* iInbetw
     {
         FInbetweenerTrajectory* trajectory = &route->GetTrajectoryBuffer()[mBreakdown->GetIndex()];
         ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
-        uint32 waypointIndex = iInbetween->index - mBreakdown->GetSourceInbetweenIndex() - 1;
+        uint32 waypointIndex = iDrawing->index - mBreakdown->GetSourceDrawingIndex();
         double waypointT = trajectory->GetWaypointBuffer()[waypointIndex].GetT();
         ::ULIS::FVec2D coords = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( cubicBezier[0]
                                                                                    , cubicBezier[1]
                                                                                    , cubicBezier[2]
                                                                                    , cubicBezier[3]
                                                                                    , waypointT );
-        BLPoint inbetweenCoords = iInbetween->inverseMatrix.mapPoint( coords.x, coords.y );
+        BLPoint inbetweenCoords = iDrawing->inverseMatrix.mapPoint( coords.x, coords.y );
 
         PTAD( idx, 0 ) = inbetweenCoords.x;
         PTAD( idx, 1 ) = inbetweenCoords.y;

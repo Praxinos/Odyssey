@@ -25,7 +25,7 @@
 class FOdysseyVectorTagInbetweener;
 class FInterpolatedPoint;
 class FInterpolatedPath;
-struct FInbetweenerInbetween;
+struct FInbetweenerDrawing;
 class FInbetweenerBreakdown;
 
 typedef Eigen::Triplet<double> TripletD;
@@ -122,7 +122,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
     // applies to all types of grid.
     protected:
         bool PrecomputeARAPInterpolation();
-        bool ComputeARAPInterpolation( const FInbetweenerInbetween* iInbetween
+        bool ComputeARAPInterpolation( const FInbetweenerDrawing* iInbetween
                                      , bool useRigidTransform );
         void ComputePStar( FInbetweenerPoint* iTriangle[3]
                          , int triRow
@@ -138,6 +138,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
                          , bool iInverseOrientation );
         double PolarDecomp( Eigen::Matrix2d &A, Eigen::Matrix2d &S );
 
+
     protected:
         FInbetweenerBreakdown* mBreakdown;
         std::vector<FInbetweenerPoint> mPointBuffer;
@@ -148,6 +149,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
 
     // ARAP interpolation (do not confuse with ARAP deformation)
     protected:
+        uint32 mFlags;
         // center of mass of the lattice in its reference and target positions
         ::ULIS::FVec2D mSourceCenterOfMass;
         ::ULIS::FVec2D mTargetCenterOfMass;

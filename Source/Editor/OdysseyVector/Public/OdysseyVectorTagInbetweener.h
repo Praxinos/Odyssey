@@ -45,7 +45,7 @@ enum class eInbetweenerInterpolationType : uint8
 
 //////////////// Grid data structures //////////////////
 
-struct FInbetweenerInbetween
+struct FInbetweenerDrawing
 {
     float spacing;
     float breakdownSpacing; // spacing relative to the current breakdown
@@ -57,7 +57,7 @@ struct FInbetweenerInbetween
 
 struct FInbetweenerChart
 {
-    std::vector<FInbetweenerInbetween> inbetweenBuffer;
+    std::vector<FInbetweenerDrawing> drawingBuffer;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
@@ -74,7 +74,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                                     , FOdysseyVectorObject* iOwnerObject
                                     , uint32 iNumCellX
                                     , uint32 iNumCellY
-                                    , uint32 iInbetweenCount );
+                                    , uint32 iDrawingCount );
 
         /**
          * @brief Draw the tag to the Blend2D context passed as parameter
@@ -147,7 +147,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
          * @brief Get the number of inbetween
          * @return the number of inbetween
          */
-        uint32 GetInbetweenCount();
+        uint32 GetDrawingCount();
 
         /**
          * @brief Get the spacing chart
@@ -161,14 +161,26 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
          * @param iNewSpacing
          * @param iRelative move all inbetweens relative to the one passed as parameter
          */
-        void MoveInbetween( FInbetweenerInbetween* iInbetween
+        void MoveInbetween( FInbetweenerDrawing* iInbetween
                           , float iNewSpacing
                           , bool iRelative );
+
+        /**
+         * @brief Get the rigidity for ARAP deformation
+         * @return the rigidity
+         */
+        uint32 GetARAPRigidity();
+
+        /**
+         * @brief Set the rigidity for ARAP deformation
+         * @param iRigidity
+         */
+        void SetARAPRigidity( uint32 iRigidity );
 
         void RedrawAnimationCells();
         void RedrawAnimationCells( uint32 iInbetweenCount );
         void ResetChart();
-        void SetInbetweenCount( uint32 iInbetweenCount );
+        void SetDrawingCount( uint32 iInbetweenCount );
         void SetGrid( eInbetweenerGridType iGridType
                     , uint32 iGridNumQuadX
                     , uint32 iGridNumQuadY );
@@ -226,13 +238,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void SetColor( const FColor& iColor );
         void SetMapAsPolyline( bool iMapAsPolyline );
         bool GetMapAsPolyline();
-        void DrawPathsInbetween( uint32 iInbetweenIndex
+        void DrawPathsInbetween( uint32 iDrawingIndex
                                , BLContext* iBLContext );
         void DrawPathsTarget( BLContext* iBLContext );
-        void DeformPathsAtInbetween( uint32 iInbetweenIndex );
+        void DeformPathsAtInbetween( uint32 iDrawingIndex );
         void DeformPathsAtTarget();
         std::list<FInbetweenerBreakdown*>& GetBreakdownList();
-        FInbetweenerBreakdown* AddBreakdown( int32 iInbetweenIndex );
+        FInbetweenerBreakdown* AddBreakdown( uint32 iDrawingIndex, bool iCopyGeometry );
+        FInbetweenerBreakdown* AddBreakdown( FInbetweenerBreakdown* iNewBreakdown, uint32 iDrawingIndex, bool iCopyGeometry );
         void DispatchInbetweensToBreakdowns();
         void SetUsedQuadCount( uint32 );
         void SetUsedPointCount( uint32 );
@@ -243,6 +256,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                        , const BLMatrix2D& iWorldMatrix
                        , BLContext* iBLContext );
         uint32 GetBreakdownCount();
+        FInbetweenerBreakdown* GetMasterBreakdown();
 
     protected:
         /**
@@ -255,7 +269,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
          */
         void Interpolate();
 
-        void DrawMotionGrid( uint32 iInbetweenIndex
+        void DrawMotionGrid( uint32 iDrawingIndex
                            , BLContext* iBLContext
                            , const ::ULIS::FRectD& iInvalidationArea
                            , double iAncestorsOpacity
@@ -263,12 +277,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
 
         void UpdateBBox( ::ULIS::FRectD& iBBox
                        , eInbetweenerPointPositionType iPositionType );
-        void InterpolateGeometry( uint32 iInbetweenIndex );
-        void InterpolateTransform( uint32 iInbetweenIndex );
+        void InterpolateGeometry( uint32 iDrawingIndex );
+        void InterpolateTransform( uint32 iDrawingIndex );
         void Reset( bool iResetGridShape );
         void AllocBuffers();
 
-        void MoveWaypointsWithInbetween( uint32 iInbetweenIndex
+        void MoveWaypointsWithInbetween( uint32 iDrawingIndex
                                        , double iInbetweenOldSpacing
                                        , double iInbetweenNewSpacing );
         void Share();
@@ -316,7 +330,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         ::ULIS::FRectD mSourceBBox;
         ::ULIS::FRectD mTargetBBox;
         FInbetweenerChart mChart;
-        uint32 mInbetweenCount;
         uint64 mInvalidationFlags;
         FColor mColor;
         bool bMapAsPolyline;
@@ -324,4 +337,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         FInbetweenerBreakdown* mMasterBreakdown;
         uint32 mUsedQuadCount;
         uint32 mUsedPointCount;
+        uint32 mARAPRigidity;
 };

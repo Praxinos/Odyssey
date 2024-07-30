@@ -81,10 +81,10 @@ FInbetweenerRoute::ResetSpacing()
 
     for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
     {
-        uint32 inbetweenCount = breakdown->GetTargetInbetweenIndex() - breakdown->GetSourceInbetweenIndex() - 1;
+        uint32 drawingCount = breakdown->GetTargetDrawingIndex() - breakdown->GetSourceDrawingIndex() + 1;
 
         // update the bezier
-        mTrajectoryBuffer[i].ResetSpacing( inbetweenCount );
+        mTrajectoryBuffer[i].ResetSpacing( drawingCount );
 
         i++;
     }

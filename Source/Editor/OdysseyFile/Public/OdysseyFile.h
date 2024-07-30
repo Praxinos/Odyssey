@@ -124,19 +124,32 @@ namespace FOdysseyFile
                                     static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM_TRANSLATION = 0xaf8ba83b; // double(X)-double(Y)
                                     static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM_ROTATION = 0xb941a26b; // double(A)
                                     static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM_SCALING = 0xf6a73728; // double(X)-double(Y)
-                                static const uint32 CHUNK_TAGINBETWEENER_GRID = 0x6b443e74; // container0
-                                    static const uint32 CHUNK_TAGINBETWEENER_GRID_TYPE = 0x31327385; // uint32(type)
-                                    static const uint32 CHUNK_TAGINBETWEENER_GRID_INTERPOLATION = 0x58d52354; // uint32(type)
-                                    static const uint32 CHUNK_TAGINBETWEENER_GRID_SIZE = 0xb3e7577b; // uint32(x)-uint32(y)
-                                    static const uint32 CHUNK_TAGINBETWEENER_GRID_GEOMETRY = 0x88fd3275; // array[double(sourcex)-double(sourcey)-double(targetx)-double(targety)]
-                                    static const uint32 CHUNK_TAGINBETWEENER_GRID_GEOMETRY_MK2 = 0xed2c6bcf; // uint32(x)-uint32(y)-array[double(sourcex)-double(sourcey)-double(targetx)-double(targety)]
-                                    static const uint32 CHUNK_TAGINBETWEENER_GRID_ARAP_RIGIDITY = 0x480cdc13; // uint32(type)
-                                    static const uint32 CHUNK_TAGINBETWEENER_GRID_TRAJECTORIES = 0x7a7fe7ce; // container
-                                        static const uint32 CHUNK_TRAJECTORY = 0xac49261e; // container
-                                            static const uint32 CHUNK_TRAJECTORY_COORDS = 0x65ec54bd; // uint32(quadIndex)-double(u)-double(v)
-                                            static const uint32 CHUNK_TRAJECTORY_GEOMETRY = 0xf7413cb0; // double(handle0dirX)-double(handle0dirY)-double(handle0LengthRatio)-double(handle1dirX)-double(handle1dirY)-double(handle1LengthRatio)
-                                            static const uint32 CHUNK_TRAJECTORY_WAYPOINTS = 0xf60935b9; // container
-                                                static const uint32 CHUNK_TRAJECTORY_WAYPOINTS_RATIO = 0x1949a3f0; // array[float]
+
+             /* Deprecated */   static const uint32 CHUNK_TAGINBETWEENER_GRID = 0x6b443e74; // container0
+             /* Deprecated */       static const uint32 CHUNK_TAGINBETWEENER_GRID_TYPE = 0x31327385; // uint32(type)
+             /* Deprecated */       static const uint32 CHUNK_TAGINBETWEENER_GRID_INTERPOLATION = 0x58d52354; // uint32(type)
+             /* Deprecated */       static const uint32 CHUNK_TAGINBETWEENER_GRID_SIZE = 0xb3e7577b; // uint32(x)-uint32(y)
+             /* Deprecated */       static const uint32 CHUNK_TAGINBETWEENER_GRID_GEOMETRY = 0x88fd3275; // array[double(sourcex)-double(sourcey)-double(targetx)-double(targety)]
+             /* Deprecated */       static const uint32 CHUNK_TAGINBETWEENER_GRID_GEOMETRY_MK2 = 0xed2c6bcf; // uint32(x)-uint32(y)-array[double(sourcex)-double(sourcey)-double(targetx)-double(targety)]
+             /* Deprecated */       static const uint32 CHUNK_TAGINBETWEENER_GRID_ARAP_RIGIDITY = 0x480cdc13; // uint32
+             /* Deprecated */       static const uint32 CHUNK_TAGINBETWEENER_GRID_TRAJECTORIES = 0x7a7fe7ce; // container
+             /* Deprecated */           static const uint32 CHUNK_TRAJECTORY = 0xac49261e; // container
+             /* Deprecated */               static const uint32 CHUNK_TRAJECTORY_COORDS = 0x65ec54bd; // uint32(quadIndex)-double(u)-double(v)
+             /* Deprecated */               static const uint32 CHUNK_TRAJECTORY_GEOMETRY = 0xf7413cb0; // double(handle0dirX)-double(handle0dirY)-double(handle0LengthRatio)-double(handle1dirX)-double(handle1dirY)-double(handle1LengthRatio)
+             /* Deprecated */               static const uint32 CHUNK_TRAJECTORY_WAYPOINTS = 0xf60935b9; // container
+             /* Deprecated */                   static const uint32 CHUNK_TRAJECTORY_WAYPOINTS_RATIO = 0x1949a3f0; // array[float]
+
+                                static const uint32 CHUNK_TAGINBETWEENER_DEFORMATION = 0x6501ffec; // uint32(type)
+                                static const uint32 CHUNK_TAGINBETWEENER_INTERPOLATION = 0x45b060f6; // uint32(type)
+                                static const uint32 CHUNK_TAGINBETWEENER_DIMENSION  = 0x8421afc9; // uint32(nbquadx)-uint32(nbquady)
+                                static const uint32 CHUNK_TAGINBETWEENER_ARAPRIGIDITY = 0x1b0b5379; // uint32
+                                static const uint32 CHUNK_TAGINBETWEENER_BREAKDOWNS = 0xe9893b5d; // container
+                                    static const uint32 CHUNK_TAGINBETWEENER_BREAKDOWNS_LAYOUT =  0x1f69cf20; // uint32(count) array[uint32(bool)-uint32(sourceDrawingIndex)-uint32(targetDrawingIndex)]
+                                    static const uint32 CHUNK_TAGINBETWEENER_BREAKDOWNS_GRIDGEOMETRY = 0x7e734517; // array[double(sourcex)-double(sourcey)-double(targetx)-double(targety)]
+
+                                static const uint32 CHUNK_TAGINBETWEENER_ROUTES = 0xbb7682f1; // container
+                                    static const uint32 CHUNK_ROUTE = 0x25f4d3c5; // container
+                                        static const uint32 CHUNK_ROUTE_TRAJECTORIES = 0x876094e2; // container
 
                     static const uint32 CHUNK_PATH = 0x138d0bec; // container
                         // ... inherited chunks.

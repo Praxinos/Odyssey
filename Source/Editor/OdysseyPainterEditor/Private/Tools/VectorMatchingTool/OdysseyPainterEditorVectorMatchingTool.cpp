@@ -65,7 +65,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
     mPickedPointArray.clear();
-    mWorldDistanceArray.clear();
+    mPickedGridArray.clear();
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -97,7 +97,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
                                               , iPointInTexture.y
                                               , PickingRadius
                                               , mPickedPointArray
-                                              , mWorldDistanceArray );
+                                              , mPickedGridArray );
             }
         }
     }
@@ -148,13 +148,14 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
                     gridPoint->SetTargetPosition( targetPosition.x, targetPosition.y );
                 }
 
-                if( inbetweenerTag->GetGridType() == eInbetweenerGridType::ARAP )
+                for( FInbetweenerGrid* grid : mPickedGridArray )
                 {
-/*----------
-                    FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(inbetweenerTag->GetGrid());
+                    if( inbetweenerTag->GetGridType() == eInbetweenerGridType::ARAP )
+                    {
+                        FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(grid);
 
-                    arapGrid->Regularize();
-*/
+                        arapGrid->Regularize();
+                    }
                 }
 
                 // update

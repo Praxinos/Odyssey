@@ -18,13 +18,13 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
         virtual ~FInbetweenerTrajectory();
         FInbetweenerTrajectory( FInbetweenerRoute* iRoute
                               , FInbetweenerBreakdown* iBreakdown );
-        void Init( uint32 iInbetweenCount );
+        void Init( uint32 iDrawingCount );
         FInbetweenerHandleTrajectory* GetHandle( uint32 index );
         FInbetweenerQuad* GetQuad();
         void Update();
         ::ULIS::FVec2D* GetCubicBezier();
         std::vector<FInbetweenerWaypoint>& GetWaypointBuffer();
-        void ResetSpacing( uint32 iInbetweenCount );
+        void ResetSpacing( uint32 iDrawingCount );
         FInbetweenerWaypoint* GetWaypoint( uint32 iIndex );
         FInbetweenerRoute* GetRoute();
 

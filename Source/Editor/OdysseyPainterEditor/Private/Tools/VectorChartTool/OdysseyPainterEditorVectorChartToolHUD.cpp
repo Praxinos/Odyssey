@@ -39,9 +39,10 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
     iBLContext->strokeLine( mChartRect.x               , cursorY
                           , mChartRect.x + mChartRect.w, cursorY );
 
-    for( FInbetweenerInbetween& inbetween : chart.inbetweenBuffer )
+    for( uint32 i = 1; i < ( iInbetweenerTag->GetDrawingCount() - 1 ); i++ )
     {
-        float cursorX = mChartRect.x + ( inbetween.spacing * mChartRect.w );
+        FInbetweenerDrawing& drawing = chart.drawingBuffer[i];
+        float cursorX = mChartRect.x + ( drawing.spacing * mChartRect.w );
 
         iBLContext->strokeLine( cursorX, cursorY - cursorRadius
                               , cursorX, cursorY + cursorRadius );
@@ -97,11 +98,11 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
     iBLContext->resetMatrix();
 }
 
-FInbetweenerInbetween*
+FInbetweenerDrawing*
 FOdysseyPainterEditorVectorChartToolHUD::PickInbetween( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                         , double iWorldX
-                                                         , double iWorldY
-                                                         , double iRadius )
+                                                      , double iWorldX
+                                                      , double iWorldY
+                                                      , double iRadius )
 {
     FInbetweenerChart& chart = iInbetweenerTag->GetChart();
     double cursorRadius = mChartRect.h *.5f;
@@ -109,14 +110,15 @@ FOdysseyPainterEditorVectorChartToolHUD::PickInbetween( FOdysseyVectorTagInbetwe
 
     if( mChartRect.HitTest( ::ULIS::FVec2D( iWorldX, iWorldY ) ) )
     {
-        for( FInbetweenerInbetween& inbetween : chart.inbetweenBuffer )
+        for( uint32 i = 1; i < ( iInbetweenerTag->GetDrawingCount() - 1 ); i++ )
         {
-            float cursorX = mChartRect.x + ( inbetween.spacing * mChartRect.w );
+            FInbetweenerDrawing& drawing = chart.drawingBuffer[i];
+            float cursorX = mChartRect.x + ( drawing.spacing * mChartRect.w );
 
             if( ( iWorldX >= ( cursorX - iRadius ) )
              && ( iWorldX <= ( cursorX + iRadius ) ) )
             {
-                return &inbetween;
+                return &drawing;
             }
         }
     }
@@ -126,12 +128,12 @@ FOdysseyPainterEditorVectorChartToolHUD::PickInbetween( FOdysseyVectorTagInbetwe
 
 void
 FOdysseyPainterEditorVectorChartToolHUD::MoveInbetween( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                         , FInbetweenerInbetween* iInbetween
-                                                         , double iWorldX
-                                                         , double iWorldY
-                                                         , bool iRelative )
+                                                      , FInbetweenerDrawing* iDrawing
+                                                      , double iWorldX
+                                                      , double iWorldY
+                                                      , bool iRelative )
 {
     double newSpacing = ( iWorldX - mChartRect.x ) / mChartRect.w;
 
-    iInbetweenerTag->MoveInbetween( iInbetween, newSpacing, iRelative );
+    iInbetweenerTag->MoveInbetween( iDrawing, newSpacing, iRelative );
 }

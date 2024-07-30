@@ -486,17 +486,17 @@ FOdysseyVectorHUD::DrawInbetweens( BLContext* iBLContext
 
         for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
         {
-            int32 sourceInbetweenIndex = breakdown->GetSourceInbetweenIndex();
-            int32 targetInbetweenIndex = breakdown->GetTargetInbetweenIndex();
+            int32 sourceInbetweenIndex = breakdown->GetSourceDrawingIndex();
+            int32 targetInbetweenIndex = breakdown->GetTargetDrawingIndex();
 
             for( int32 i = sourceInbetweenIndex + 1; i < targetInbetweenIndex; i++ )
             {
-                FInbetweenerInbetween& inbetween = iInbetweenerTag->GetChart().inbetweenBuffer[i];
+                FInbetweenerDrawing& drawing = iInbetweenerTag->GetChart().drawingBuffer[i];
 
                 iBLContext->setStrokeStyle( BLRgba32( color.R
                                                     , color.G
                                                     , color.B
-                                                    , 127 + ( color.A * 0.5f * inbetween.spacing ) ) );
+                                                    , 127 + ( color.A * 0.5f * drawing.spacing ) ) );
 
                 iInbetweenerTag->DrawPathsInbetween( i, iBLContext );
             }

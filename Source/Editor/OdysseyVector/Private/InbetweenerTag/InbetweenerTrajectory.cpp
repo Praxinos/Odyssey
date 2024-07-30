@@ -15,13 +15,13 @@ FInbetweenerTrajectory::FInbetweenerTrajectory( FInbetweenerRoute* iRoute
     , mBreakdown ( iBreakdown )
     , mHandle { ( this ), ( this ) }
 {
-    Init( iBreakdown->GetTargetInbetweenIndex() - iBreakdown->GetSourceInbetweenIndex() - 1 );
+    Init( iBreakdown->GetTargetDrawingIndex() - iBreakdown->GetSourceDrawingIndex() );
 }
 
 void
-FInbetweenerTrajectory::Init( uint32 iInbetweenCount )
+FInbetweenerTrajectory::Init( uint32 iDrawingCount )
 {
-    ResetSpacing( iInbetweenCount );
+    ResetSpacing( iDrawingCount );
 }
 
 /*
@@ -60,12 +60,12 @@ FInbetweenerTrajectory::GetWaypoint( uint32 iIndex )
 }
 
 void
-FInbetweenerTrajectory::ResetSpacing( uint32 iInbetweenCount )
+FInbetweenerTrajectory::ResetSpacing( uint32 iDrawingCount )
 {
     mWaypointBuffer.clear();
-    mWaypointBuffer.reserve( iInbetweenCount );
+    mWaypointBuffer.reserve( iDrawingCount );
 
-    for( uint32 i = 0; i < iInbetweenCount; i++ )
+    for( uint32 i = 0; i < iDrawingCount; i++ )
     {
         FInbetweenerWaypoint& waypoint = mWaypointBuffer.emplace_back( this );
     }

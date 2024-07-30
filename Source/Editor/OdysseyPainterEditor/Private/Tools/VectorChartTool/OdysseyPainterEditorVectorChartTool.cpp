@@ -114,7 +114,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseHoverVector( FOdysseyVectorGroupPai
 
 uint64
 UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                          , const FOdysseyPoint& iPointInTexture )
+                                                       , const FOdysseyPoint& iPointInTexture )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
@@ -135,6 +135,9 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                                                , iPointInTexture.x
                                                , iPointInTexture.y
                                                , FSlateApplication::Get().GetModifierKeys().IsControlDown() );
+
+                    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS
+                                  | FOdysseyVectorObject::UPDATE_INTERACTIVE );
                 }
             }
         }
@@ -165,7 +168,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseUpVector( FOdysseyVectorGroupPaint*
                 // we need to manually redraw because no object is modified
                 inbetweenerTag->RedrawAnimationCells();
 
-                //iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+                iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
             }
         }
     }

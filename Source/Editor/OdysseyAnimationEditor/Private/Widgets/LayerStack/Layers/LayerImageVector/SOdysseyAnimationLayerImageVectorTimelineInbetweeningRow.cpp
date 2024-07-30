@@ -118,18 +118,18 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
             if( cell.IsValid() )
             {
                 //uint32 inbetweenCount = cell.Get()->GetIndex();
-                int32 cellIndex = cell.Get()->GetIndex();
-                int32 inbetweenCellIndex = cellIndex - tagCellIndex - 1;
-                int32 inbetweenMaxCellIndex = maxCellIndex - tagCellIndex;
+                uint32 cellIndex = cell.Get()->GetIndex();
+                uint32 inbetweenCellIndex = cellIndex - tagCellIndex;
+                uint32 inbetweenMaxCellIndex = maxCellIndex - tagCellIndex;
                 FInbetweenerBreakdown* prevBreakdown = mPickedBreakdown->GetPrevBreakdown();
                 FInbetweenerBreakdown* nextBreakdown = mPickedBreakdown->GetNextBreakdown();
-                uint32 inbetweenCount = mInbetweenerTag->GetInbetweenCount();
-                int32 prevInbetweenIndex = prevBreakdown ? prevBreakdown->GetTargetInbetweenIndex() : -1;
-                int32 nextInbetweenIndex = nextBreakdown ? nextBreakdown->GetTargetInbetweenIndex() : inbetweenMaxCellIndex;
+                uint32 drawingCount = mInbetweenerTag->GetDrawingCount();
+                uint32 prevInbetweenIndex = prevBreakdown ? prevBreakdown->GetTargetDrawingIndex() : 0;
+                uint32 nextInbetweenIndex = nextBreakdown ? nextBreakdown->GetTargetDrawingIndex() : inbetweenMaxCellIndex + 1;
 
                 if( ( inbetweenCellIndex > prevInbetweenIndex ) && ( inbetweenCellIndex < nextInbetweenIndex ) )
                 {
-                    mPickedBreakdown->SetTargetInbetweenIndex( inbetweenCellIndex );
+                    mPickedBreakdown->SetTargetDrawingIndex( inbetweenCellIndex );
 
                     //MarkPrepassAsDirty();
                 }
@@ -161,7 +161,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
 FText
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::GetInbetweenerTagInbetweenCount() const
 {
-    return FText::FromString( FString::FromInt( (int32)mInbetweenerTag->GetInbetweenCount() ) );
+    return FText::FromString( FString::FromInt( (int32)mInbetweenerTag->GetDrawingCount() ) );
 }
 
 void
@@ -176,6 +176,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
     // compute geometry
     FOdysseyAnimationEditorExtension* animationEditorExtension = listView.Get()->GetAnimationEditorExtension();
     float frameWidth = animationEditorExtension->Timeline()->GetFrameWidth();
+    uint32 inbetweenCount = ( mInbetweenerTag->GetDrawingCount() - 2 );
 
     // call from base class
     STableRow<TSharedPtr<FInbetweeningListViewItem>>::CacheDesiredSize( LayoutScaleMultiplier );
@@ -192,13 +193,13 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
     mSourceSize.Y = mBoxSize.Y;
 
     mInterpPosBuffer.Reset();
-    mInterpPosBuffer.Reserve( mInbetweenerTag->GetInbetweenCount() );
+    mInterpPosBuffer.Reserve( inbetweenCount );
 
     mInterpSizeBuffer.Reset();
-    mInterpSizeBuffer.Reserve( mInbetweenerTag->GetInbetweenCount() );
+    mInterpSizeBuffer.Reserve( inbetweenCount );
 
     // inbetween cells have their own rectangle
-    for( uint32 i = 0; i <  mInbetweenerTag->GetInbetweenCount(); i++ )
+    for( uint32 i = 0; i < inbetweenCount; i++ )
     {
         IOdysseyVectorAnimationCell* interpCell = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetCellByIndex( tagCellIndex + i + 1 );
         uint32 interpFrame = interpCell->GetFrame();
@@ -215,7 +216,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
 
     for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
     {
-        IOdysseyVectorAnimationCell* targetCell = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetCellByIndex( tagCellIndex + breakdown->GetTargetInbetweenIndex() + 1 );
+        IOdysseyVectorAnimationCell* targetCell = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetCellByIndex( tagCellIndex + breakdown->GetTargetDrawingIndex() );
         uint32 targetFrame = targetCell->GetFrame();
 
         mTargetPosBuffer.Emplace( targetFrame * frameWidth * LayoutScaleMultiplier, 0.0f );
@@ -267,7 +268,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                                                                  , const FWidgetStyle& InWidgetStyle
                                                                  , bool bParentEnabled ) const
 {
-    uint32 inbetweenCount = mInbetweenerTag->GetInbetweenCount();
+    uint32 inbetweenCount = ( mInbetweenerTag->GetDrawingCount() - 2 );
     uint32 breakdownCount = mInbetweenerTag->GetBreakdownCount();
     const FColor& inbetweenerTagColor = mInbetweenerTag->GetColor();
     static FSlateBrush defaultBrush;

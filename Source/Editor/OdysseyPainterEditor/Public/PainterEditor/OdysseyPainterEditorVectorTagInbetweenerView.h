@@ -46,12 +46,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
     public:
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"
-                 , meta = ( ToolTip  = "Inbetween Count"
-                          , ClampMin = "0"
+                 , meta = ( ToolTip  = "Drawing Count"
+                          , ClampMin = "2"
                           , ClampMax = "16"
-                          , UIMin    = "0"
+                          , UIMin    = "2"
                           , UIMax    = "16" ) )
-        uint32 InbetweenCount;
+        uint32 DrawingCount;
 
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"

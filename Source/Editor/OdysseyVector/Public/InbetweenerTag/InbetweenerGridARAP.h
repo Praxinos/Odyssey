@@ -24,24 +24,15 @@ class ODYSSEYVECTOR_API FInbetweenerGridARAP : public FInbetweenerGrid
                            , uint64 iTagInvalidationFlags ) override;
 
         /**
-         * @brief Get the rigidity for ARAP deformation
-         * @return the rigidity
-         */
-        uint32 GetRigidity();
-
-        /**
-         * @brief Set the rigidity for ARAP deformation
-         * @param iRigidity
-         */
-        void SetRigidity( uint32 iRigidity );
-
-        /**
          * @brief Map paths to the grid according to the needs of the grid
          * @param iPathBuffer the paths to map
          */
         virtual void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer ) override;
 
         friend class FOdysseyVectorTagInbetweener;
+
+    public:
+
 
     // ARAP deformation (do not confuse with ARAP interpolation)
     protected:
@@ -61,5 +52,5 @@ class ODYSSEYVECTOR_API FInbetweenerGridARAP : public FInbetweenerGrid
                                  , double iYMax );
 
     protected:
-        uint32 mRigidity;
+
 };
