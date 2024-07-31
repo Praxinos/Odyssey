@@ -1,4 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// IDDN.FR.000.000000.000.S.X.0000.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2024
 
 #pragma once
 
@@ -26,29 +27,29 @@ using namespace UE::MovieScene;
 /** Pre-animated view target info */
 struct FPreAnimatedCameraCutState
 {
-	FObjectKey LastWorld;
-	FObjectKey LastLocalPlayer;
-	FObjectKey LastViewTarget;
-	TOptional<EAspectRatioAxisConstraint> LastAspectRatioAxisConstraint;
+    FObjectKey LastWorld;
+    FObjectKey LastLocalPlayer;
+    FObjectKey LastViewTarget;
+    TOptional<EAspectRatioAxisConstraint> LastAspectRatioAxisConstraint;
 };
 
 /** Pre-animated traits for in-game camera cuts */
 struct FPreAnimatedCameraCutTraits : FPreAnimatedStateTraits
 {
-	// Key type is an integer, to be maybe later used as the splitscreen index.
-	using KeyType = uint8;
-	using StorageType = FPreAnimatedCameraCutState;
+    // Key type is an integer, to be maybe later used as the splitscreen index.
+    using KeyType = uint8;
+    using StorageType = FPreAnimatedCameraCutState;
 
-	static bool ShouldHandleWorldCameraCuts(UWorld* World);
-	static StorageType CachePreAnimatedValue(IMovieScenePlayer* Player, uint8 InKey);
+    static bool ShouldHandleWorldCameraCuts(UWorld* World);
+    static StorageType CachePreAnimatedValue(IMovieScenePlayer* Player, uint8 InKey);
 
-	void RestorePreAnimatedValue(uint8 InKey, const StorageType& CachedValue, const FRestoreStateParams& Params);
+    void RestorePreAnimatedValue(uint8 InKey, const StorageType& CachedValue, const FRestoreStateParams& Params);
 };
 
 /** Pre-aniamted state storage for in-game camera cuts */
 struct FPreAnimatedCameraCutStorage : TPreAnimatedStateStorage<FPreAnimatedCameraCutTraits>
 {
-	static TAutoRegisterPreAnimatedStorageID<FPreAnimatedCameraCutStorage> StorageID;
+    static TAutoRegisterPreAnimatedStorageID<FPreAnimatedCameraCutStorage> StorageID;
 };
 
 /**
@@ -56,23 +57,23 @@ struct FPreAnimatedCameraCutStorage : TPreAnimatedStateStorage<FPreAnimatedCamer
  */
 struct FCameraCutGameHandler
 {
-	FCameraCutGameHandler(
-			UMovieSceneEntitySystemLinker* InLinker,
-			const FSequenceInstance& InSequenceInstance);
+    FCameraCutGameHandler(
+            UMovieSceneEntitySystemLinker* InLinker,
+            const FSequenceInstance& InSequenceInstance);
 
-	/** Sets the given camera cut in all qualifying game worlds. */
-	void SetCameraCut(
-			UObject* CameraObject, 
-			const FMovieSceneCameraCutParams& CameraCutParams);
+    /** Sets the given camera cut in all qualifying game worlds. */
+    void SetCameraCut(
+            UObject* CameraObject,
+            const FMovieSceneCameraCutParams& CameraCutParams);
 
-	/** Cache any pre-animated values required for handling camera cuts in game. */
-	static void CachePreAnimatedValue(
-			UMovieSceneEntitySystemLinker* Linker,
-			const FSequenceInstance& SequenceInstance);
+    /** Cache any pre-animated values required for handling camera cuts in game. */
+    static void CachePreAnimatedValue(
+            UMovieSceneEntitySystemLinker* Linker,
+            const FSequenceInstance& SequenceInstance);
 
 private:
-	UMovieSceneEntitySystemLinker* Linker;
-	const FSequenceInstance& SequenceInstance;
+    UMovieSceneEntitySystemLinker* Linker;
+    const FSequenceInstance& SequenceInstance;
 };
 
 }  // namespace UE::MovieScene

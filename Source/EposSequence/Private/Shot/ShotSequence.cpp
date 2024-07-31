@@ -82,7 +82,7 @@ void UShotSequence::PostLoad()
     }
 
     CameraBindingIdToReferences_DEPRECATED.Empty();
-    
+
     for( TPair< FGuid, FLevelSequenceBindingReference > pair : PlanesBindingIdToReferences_DEPRECATED )
     {
         FLevelSequenceBindingReference legacy_ref = pair.Value;
@@ -105,7 +105,7 @@ void UShotSequence::PostLoad()
     }
 
     PlanesBindingIdToReferences_DEPRECATED.Empty();
-    
+
     for( TPair< FGuid, FLevelSequenceBindingReference > pair : ActorsBindingIdToReferences_DEPRECATED )
     {
         FLevelSequenceBindingReference legacy_ref = pair.Value;

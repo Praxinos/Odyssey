@@ -179,7 +179,7 @@ void UEposSequenceEditorSubsystem::Initialize(FSubsystemCollectionBase& Collecti
     //    {
     //        return;
     //    }
-    //    
+    //
     //    FFormatNamedArguments Args;
     //    MenuBuilder.AddSubMenu(
     //        FText::Format(LOCTEXT("BindingProperties", "Binding Properties"), Args),
@@ -1840,8 +1840,8 @@ void UEposSequenceEditorSubsystem::FixActorReferences()
 //    {
 //        TSharedRef<FStructOnScope> LocatorsStruct = MakeShareable(new FStructOnScope(FMovieSceneUniversalLocatorList::StaticStruct()));
 //        FMovieSceneUniversalLocatorList* Locators = (FMovieSceneUniversalLocatorList*)LocatorsStruct->GetStructMemory();
-//        Algo::Transform(BindingReferences->GetReferences(ObjectBindings[0]), Locators->Bindings, [](const FMovieSceneBindingReference& Reference) 
-//            { 
+//        Algo::Transform(BindingReferences->GetReferences(ObjectBindings[0]), Locators->Bindings, [](const FMovieSceneBindingReference& Reference)
+//            {
 //                return FMovieSceneUniversalLocatorInfo{ Reference.Locator, Reference.ResolveFlags };
 //            });
 //
