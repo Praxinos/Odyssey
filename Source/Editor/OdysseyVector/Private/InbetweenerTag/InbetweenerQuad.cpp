@@ -29,13 +29,13 @@ FInbetweenerQuad::Init( FInbetweenerGrid* iGrid )
 bool
 FInbetweenerQuad::IsLinked()
 {
-    FInbetweenerBreakdown* masterBreakdown = mGrid->GetBreakdown()->GetMasterBreakdown();
+    FInbetweenerBreakdown* firstBreakdown = mGrid->GetBreakdown()->GetInbetweenerTag()->GetBreakdownList().front();
 
-    if( masterBreakdown )
+    if( firstBreakdown != mGrid->GetBreakdown() )
     {
         uint32 quadIndex = this - &mGrid->GetQuadBuffer()[0];
 
-        return masterBreakdown->GetGrid()->GetQuadBuffer()[quadIndex].IsLinked();
+        return firstBreakdown->GetGrid()->GetQuadBuffer()[quadIndex].IsLinked();
     }
 
     return ( mFlags & LINKED ) ? true : false; 

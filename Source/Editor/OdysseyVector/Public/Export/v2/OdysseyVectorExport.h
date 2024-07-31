@@ -21,6 +21,7 @@ class  FOdysseyVectorTagInbetweener;
 class  FInbetweenerTrajectory;
 class  FInbetweenerGridARAP;
 class  FInbetweenerBreakdown;
+class  FInbetweenerRoute;
 
 namespace FOdysseyVectorExportV2
 {
@@ -123,7 +124,13 @@ namespace FOdysseyVectorExportV2
     void WriteTagInbetweenerBreakdowns( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerBreakdownsLayout( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerBreakdownsGeometry( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerRoutes( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
 
+    void ODYSSEYVECTOR_API WriteRoute( FInbetweenerRoute& iRoute, FArchive &Ar );
+    void WriteRouteCoords( FInbetweenerRoute& iRoute, FArchive &Ar );
+    void WriteRouteTrajectories( FInbetweenerRoute& iRoute, FArchive &Ar );
+
+/*
     void ODYSSEYVECTOR_API WriteTrajectory( FInbetweenerTrajectory& iTrajectory
                                           , FArchive &Ar );
     void WriteTrajectoryCoords( FInbetweenerTrajectory& iTrajectory
@@ -134,5 +141,5 @@ namespace FOdysseyVectorExportV2
                                  , FArchive &Ar );
     void WriteTrajectoryWaypointsRatio( FInbetweenerTrajectory& iTrajectory
                                       , FArchive &Ar );
-
+*/
 }

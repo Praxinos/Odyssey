@@ -120,7 +120,7 @@ FOdysseyVectorTagInbetweener::Map()
       } );
 
     /* Map on master grid */
-    mMasterBreakdown->GetGrid()->MapInterpolatedPaths( mInterpolatedPathBuffer );
+    mBreakdownList.front()->GetGrid()->MapInterpolatedPaths( mInterpolatedPathBuffer );
     //mGrid->MapInterpolatedPaths( mInterpolatedPathBuffer );
 }
 
@@ -366,72 +366,128 @@ FOdysseyVectorTagInbetweener::AddBreakdown( uint32 iDrawingIndex, bool iCopyGeom
     return AddBreakdown( nullptr, iDrawingIndex, iCopyGeometry );
 }
 
+void
+FOdysseyVectorTagInbetweener::ChainBreakdowns()
+{
+    uint32 breakdownIndex = 0;
+
+    for( std::list<FInbetweenerBreakdown*>::iterator it = mBreakdownList.begin(); it !=  mBreakdownList.end(); ++it )
+    {
+        FInbetweenerBreakdown* breakdown = *it;
+        std::list<FInbetweenerBreakdown*>::iterator prevIt = std::prev( it );
+        std::list<FInbetweenerBreakdown*>::iterator nextIt = std::next( it );
+
+        breakdown->SetIndex( breakdownIndex++ );
+
+        breakdown->SetPrevBreakdown( (     it != mBreakdownList.begin() ) ? *prevIt : nullptr );
+        breakdown->SetNextBreakdown( ( nextIt != mBreakdownList.end()   ) ? *nextIt : nullptr );
+    }
+
+    // Reset grid at source position for first the breakdown (must always be squared)
+    std::vector<::ULIS::FVec2D> sourceGeometry;
+    std::vector<::ULIS::FVec2D> targetGeometry;
+
+    // save positions for restoring when calling Make()
+    mBreakdownList.front()->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
+    mBreakdownList.front()->GetGrid()->Make( sourceGeometry, targetGeometry );
+}
+
 FInbetweenerBreakdown*
 FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
                                           , uint32 iDrawingIndex
                                           , bool iCopyGeometry )
 {
-    uint32 breakdownIndex = 0;
     std::vector<::ULIS::FVec2D> curBreakdownSourceGeometry;
+    std::list<FInbetweenerBreakdown*>::iterator curBreakdownIterator = GetBreakdownItem( iDrawingIndex );
 
+    if( curBreakdownIterator!= mBreakdownList.end() )
+    {
+        FInbetweenerBreakdown* curBreakdown = *curBreakdownIterator;
+
+        if ( ( iDrawingIndex > curBreakdown->GetSourceDrawingIndex() )
+          && ( iDrawingIndex < curBreakdown->GetTargetDrawingIndex() ) )
+        {
+            int32 sourceDrawingIndex = curBreakdown->GetSourceDrawingIndex();
+            int32 targetDrawingIndex = iDrawingIndex;
+            FInbetweenerBreakdown* newBreakdown = iNewBreakdown ? iNewBreakdown 
+                                                                : new FInbetweenerBreakdown( this
+                                                                                           , mMasterBreakdown
+                                                                                           , sourceDrawingIndex
+                                                                                           , targetDrawingIndex );
+
+            if( iCopyGeometry )
+            {
+                curBreakdown->GetGrid()->GetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+            }
+
+            mBreakdownList.insert( curBreakdownIterator, newBreakdown );
+
+            ChainBreakdowns();
+
+            // this also alters the previous breakdown target index, so it must be done after the chaining has been updated
+            curBreakdown->SetSourceDrawingIndex( iDrawingIndex );
+
+            // must be done after the intertweaning of the breakdowns
+            if( iCopyGeometry )
+            {
+                newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+                newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::TargetPosition );
+            }
+
+            Invalidate( INVALIDATE_BREAKDOWN_LIST );
+
+            return newBreakdown;
+        }
+    }
+
+    //DispatchInbetweensToBreakdowns();
+    return nullptr;
+}
+
+FInbetweenerBreakdown*
+FOdysseyVectorTagInbetweener::GetBreakdown( uint32 iDrawingIndex )
+{
+    std::list<FInbetweenerBreakdown*>::iterator curBreakdownIterator = GetBreakdownItem( iDrawingIndex );
+
+    return ( curBreakdownIterator != mBreakdownList.end() ) ? *curBreakdownIterator : nullptr;
+}
+
+std::list<FInbetweenerBreakdown*>::iterator
+FOdysseyVectorTagInbetweener::GetBreakdownItem( uint32 iDrawingIndex )
+{
     std::list<FInbetweenerBreakdown*>::iterator
         curBreakdownIterator = std::find_if( mBreakdownList.begin()
                                            , mBreakdownList.end()
                                            , [&iDrawingIndex]( FInbetweenerBreakdown* breakdown ) -> bool
                                              {
-                                                 if( ( iDrawingIndex > breakdown->GetSourceDrawingIndex() )
-                                                  && ( iDrawingIndex < breakdown->GetTargetDrawingIndex() ) )
+                                                 if( ( iDrawingIndex >= breakdown->GetSourceDrawingIndex() )
+                                                  && ( iDrawingIndex <= breakdown->GetTargetDrawingIndex() ) )
                                                  {
                                                      return true;
                                                  }
 
                                                  return false;
                                              } );
-    if( curBreakdownIterator != mBreakdownList.end() )
+
+    return curBreakdownIterator;
+}
+
+void
+FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown, bool iFreeMemNow )
+{
+    mBreakdownList.remove_if( [iBreakdown]( FInbetweenerBreakdown* listedBreakdown )
+                              {
+                                  return ( iBreakdown == listedBreakdown ) ? true : false;
+                              } );
+
+    if( iBreakdown->GetNextBreakdown() )
     {
-        FInbetweenerBreakdown* curBreakdown = *curBreakdownIterator;
-        int32 sourceDrawingIndex = curBreakdown->GetSourceDrawingIndex();
-        int32 targetDrawingIndex = iDrawingIndex;
-        FInbetweenerBreakdown* newBreakdown = iNewBreakdown ? iNewBreakdown 
-                                                            : new FInbetweenerBreakdown( this
-                                                                                       , mMasterBreakdown
-                                                                                       , sourceDrawingIndex
-                                                                                       , targetDrawingIndex );
-
-        if( iCopyGeometry )
-        {
-            curBreakdown->GetGrid()->GetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
-        }
-
-        mBreakdownList.insert( curBreakdownIterator, newBreakdown );
-
-        for( std::list<FInbetweenerBreakdown*>::iterator it = mBreakdownList.begin(); it !=  mBreakdownList.end(); ++it )
-        {
-            FInbetweenerBreakdown* breakdown = *it;
-            std::list<FInbetweenerBreakdown*>::iterator prevIt = std::prev( it );
-            std::list<FInbetweenerBreakdown*>::iterator nextIt = std::next( it );
-
-            breakdown->SetIndex( breakdownIndex++ );
-
-            breakdown->SetPrevBreakdown( (     it != mBreakdownList.begin() ) ? *prevIt : nullptr );
-            breakdown->SetNextBreakdown( ( nextIt != mBreakdownList.end()   ) ? *nextIt : nullptr );
-        }
-
-        // this also alters the previous breakdown target index, so it must be done after the chaining has been updated
-        curBreakdown->SetSourceDrawingIndex( iDrawingIndex );
-
-        // must be done after the intertweaning of the breakdowns
-        if( iCopyGeometry )
-        {
-            newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
-            newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::TargetPosition );
-        }
-
-        return newBreakdown;
+        iBreakdown->GetNextBreakdown()->SetSourceDrawingIndex( iBreakdown->GetSourceDrawingIndex() );
     }
 
-    //DispatchInbetweensToBreakdowns();
-    return nullptr;
+    ChainBreakdowns();
+
+    Invalidate( INVALIDATE_BREAKDOWN_LIST );
 }
 
 std::list<FInbetweenerBreakdown*>&
@@ -548,7 +604,8 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             //UpdateBBox( mSourceBBox, eInbetweenerPointPositionType::SourcePosition );
         }
 
-        if( mInvalidationFlags & INVALIDATE_MAP )
+        if( ( mInvalidationFlags & INVALIDATE_MAP            )
+         || ( mInvalidationFlags & INVALIDATE_BREAKDOWN_LIST ) )
         {
             Map();
 

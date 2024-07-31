@@ -36,6 +36,7 @@ private:
     virtual TSharedRef<FOdysseyAnimationCell> OnCreateCell() override;
     virtual TSharedRef<SWidget> OnGenerateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell) override;
     virtual FReply OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+    EVisibility IsVisible() const;
 
 private:
     TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> mInbetweeningListView;

@@ -31,12 +31,14 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
         void Update();
         FOdysseyAnimationEditorExtension* GetAnimationEditorExtension();
         UOdysseyAnimationLayerImageVector* GetAnimationLayerImageVector();
+        void SetCursorPos( FVector2D iCursorPos );
 
     protected:
         TSharedRef<ITableRow> OnGenerateRow( TSharedPtr<FInbetweeningListViewItem> iItem
                                            , const TSharedRef<STableViewBase>& iOwnerTable );
         TSharedPtr<SWidget> OnContextMenuOpening();
         void AddBreakdown();
+        void RemoveBreakdown();
 
     private :
         virtual bool Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const override;
@@ -45,4 +47,5 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
         UOdysseyAnimationLayerImageVector* mAnimationLayerImageVector;
 	    FOdysseyAnimationEditorExtension* mAnimationEditorExtension;
         TArray<TSharedPtr<FInbetweeningListViewItem>> mItemsSource;
+        FVector2D mCursorPos;
 };

@@ -88,6 +88,21 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGridGeometry( FOdysseyVectorTagInbetw
 }
 
 void
+FOdysseyVectorExportV2::WriteTagInbetweenerRoutes( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                 , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_ROUTES
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        for( FInbetweenerRoute* route : iInbetweenerTag.GetRouteList() )
+        {
+            WriteRoute( *route, Ar );
+        }
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteTagInbetweenerArapRigidity( FOdysseyVectorTagInbetweener& iInbetweenerTag
                                                        , FArchive &Ar )
 {
@@ -384,6 +399,6 @@ FOdysseyVectorExportV2::WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbe
         WriteTagInbetweenerDimension( iInbetweenerTag, Ar );
         WriteTagInbetweenerArapRigidity( iInbetweenerTag, Ar );
         WriteTagInbetweenerBreakdowns( iInbetweenerTag, Ar );
-        //WriteTagInbetweenerGrid( iInbetweenerTag, Ar );
+        WriteTagInbetweenerRoutes( iInbetweenerTag, Ar );
     } );
 }

@@ -29,7 +29,7 @@ FInbetweenerRoute::Init( uint32 iQuadIndex
     mQuadV = iQuadV;
 
     //ResetSpacing();
-
+    mTrajectoryBuffer.clear();
     mTrajectoryBuffer.reserve( breakdownCount );
 
     // create as many trajectories as breakdowns
@@ -53,6 +53,8 @@ FInbetweenerRoute::Update( uint32 iUpdateFlags
     if( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_BREAKDOWN_LIST ) 
     {
         uint32 breakdownCount = mInbetweenerTag->GetBreakdownList().size();
+        std::vector<FInbetweenerTrajectory> saveTrajectoryBuffer = mTrajectoryBuffer;
+        uint32 i = 0;
 
         mTrajectoryBuffer.clear();
         mTrajectoryBuffer.reserve( breakdownCount );
@@ -60,6 +62,14 @@ FInbetweenerRoute::Update( uint32 iUpdateFlags
         for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
         {
             mTrajectoryBuffer.emplace_back( this, breakdown );
+
+            if( i < saveTrajectoryBuffer.size() )
+            {
+                // restore values for trajectories that are kept
+                mTrajectoryBuffer[i].Import( saveTrajectoryBuffer[i] );
+            }
+
+            i++;
         }
     }
 

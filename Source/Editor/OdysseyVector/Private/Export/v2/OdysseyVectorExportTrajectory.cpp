@@ -8,6 +8,7 @@
 #include "InbetweenerTag/InbetweenerGrid.h"
 #include "OdysseyVectorTagInbetweener.h"
 
+#ifdef unused
 void
 FOdysseyVectorExportV2::WriteTrajectoryGeometry( FInbetweenerTrajectory& iTrajectory
                                                , FArchive &Ar )
@@ -102,3 +103,4 @@ FOdysseyVectorExportV2::WriteTrajectory( FInbetweenerTrajectory& iTrajectory
         WriteTrajectoryWaypoints( iTrajectory, Ar );
     } );
 }
+#endif

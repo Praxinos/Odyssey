@@ -5,6 +5,7 @@
 
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "InbetweenerTag/InbetweenerRoute.h"
 #include "OdysseyVectorTagInbetweener.h"
 
 void
@@ -225,6 +226,24 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                         breakdown->GetGrid()->SetGeometry( sourcePosition, eInbetweenerPointPositionType::SourcePosition );
                         breakdown->GetGrid()->SetGeometry( targetPosition, eInbetweenerPointPositionType::TargetPosition );
                     }
+                }
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_ROUTES:
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_ROUTE:
+                {
+                    FInbetweenerRoute* route = new FInbetweenerRoute( &iInbetweenerTag
+                                                                     , 0
+                                                                     , 0.0f
+                                                                     , 0.0f );
+
+                    iInbetweenerTag.AddRoute( route );
+
+                    ReadRoute( *route
+                             , Ar.Tell() + iChunkLen
+                             , Ar );
                 }
                 break;
 

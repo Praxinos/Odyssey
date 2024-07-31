@@ -7,7 +7,10 @@
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "OdysseyPainterEditor.h"
 #include "OdysseyAnimation.h"
+#include "HUD/OdysseyVectorHUD.h"
 
 SOdysseyAnimationLayerImageVectorTimeline::~SOdysseyAnimationLayerImageVectorTimeline()
 {
@@ -33,12 +36,21 @@ SOdysseyAnimationLayerImageVectorTimeline::Construct(
 
     mInbetweeningListView = SNew( SOdysseyAnimationLayerImageVectorTimelineInbetweening
                                 , iAnimationLayerImageVector
-                                , iExtension );
+                                , iExtension )
+                            .Visibility( this, &SOdysseyAnimationLayerImageVectorTimeline::IsVisible );
+
     verticalBox.Get().AddSlot()
     .AutoHeight()
     [
         mInbetweeningListView.ToSharedRef()
     ];
+}
+
+EVisibility
+SOdysseyAnimationLayerImageVectorTimeline::IsVisible() const
+{
+    return ( mExtension->GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) ? EVisibility::Visible 
+                                                                                                    : EVisibility::Collapsed;
 }
 
 TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>

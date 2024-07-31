@@ -38,7 +38,7 @@ public:
 protected:
     virtual TSharedRef<SWidget> GenerateTimelineWidget();
 
-private:
+protected:
     FOdysseyAnimationEditorExtension* mExtension;
     TSharedPtr<SWidget> mTimelineWidget;
 };

@@ -93,6 +93,12 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetAnimationLayerImageVec
     return mAnimationLayerImageVector;
 }
 
+void
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::SetCursorPos( FVector2D iCursorPos )
+{
+    mCursorPos = iCursorPos;
+}
+
 TSharedRef<ITableRow>
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnGenerateRow( TSharedPtr<FInbetweeningListViewItem> iItem
                                                                     , const TSharedRef<STableViewBase>& iOwnerTable )
@@ -110,14 +116,19 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnContextMenuOpening()
                      , FSlateIcon()
                      , FUIAction(FExecuteAction::CreateSP( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown )));
 
+    menu.AddMenuEntry( LOCTEXT("vector-tool.inbetweening-context-menu.remove-breakdown.name", "Remove Breakdown")
+                     , LOCTEXT("vector-tool.inbetweening-context-menu.remove-breakdown.tooltip", "Remove Breakdown")
+                     , FSlateIcon()
+                     , FUIAction(FExecuteAction::CreateSP( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown )));
+
     return menu.MakeWidget();
 }
 
 void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
 {
-    FVector2D cursorPos = GetPaintSpaceGeometry().AbsoluteToLocal( FSlateApplication::Get().GetCursorPos() );
-    int frameIndex = mAnimationEditorExtension->Timeline()->GetFrameIndexAtMousePosition( cursorPos.X );
+    int frameIndex = mAnimationEditorExtension->Timeline()->GetFrameIndexAtMousePosition( mCursorPos.X );
+    std::list<FOdysseyVectorEngine*> engineList;
 
     //const TArray<TSharedPtr<FInbetweeningListViewItem>> selectedItems = GetItems();
 
@@ -125,12 +136,86 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
     {
         FOdysseyVectorTagInbetweener* inbetweenerTag = item.Get()->GetInbetweenerTag();
         uint32 cellFrame = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetFrame();
+        FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
 
         // Note: -1 because we add breakdown at inbetween index
-        inbetweenerTag->AddBreakdown( frameIndex - cellFrame, true );
+        if( inbetweenerTag->AddBreakdown( frameIndex - cellFrame, true ) )
+        {
+            // find which engine/scene to update/redraw
+            if( std::find_if( engineList.begin()
+                            , engineList.end()
+                            , [inbetweenerTagEngine]( FOdysseyVectorEngine* engine ) -> bool
+                              {
+                                  return ( inbetweenerTagEngine == engine ) ? true : false;
+                              } ) == engineList.end() )
+            {
+                engineList.push_back( inbetweenerTagEngine );
+            }
+
+            // force recompute internal geometry of the attached widget
+            WidgetFromItem ( item ).Get()->AsWidget()->MarkPrepassAsDirty();
+        }
     }
 
-    Update();
+    for( FOdysseyVectorEngine* engine : engineList )
+    {
+        engine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        engine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    }
+
+    //mAnimationLayerImageVector.Get
+
+    //Update();
+}
+
+void
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
+{
+    int frameIndex = mAnimationEditorExtension->Timeline()->GetFrameIndexAtMousePosition( mCursorPos.X );
+    std::list<FOdysseyVectorEngine*> engineList;
+
+    //const TArray<TSharedPtr<FInbetweeningListViewItem>> selectedItems = GetItems();
+
+    for( TSharedPtr<FInbetweeningListViewItem> item : GetItems() )
+    {
+        FOdysseyVectorTagInbetweener* inbetweenerTag = item.Get()->GetInbetweenerTag();
+        uint32 cellFrame = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetFrame();
+        FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
+        FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdown( frameIndex - cellFrame );
+
+        if( breakdown )
+        {
+            // we delete the breakdown only if it is not the master breakdown ( the default one)
+            if( breakdown->GetMasterBreakdown() )
+            {
+                inbetweenerTag->RemoveBreakdown( breakdown, false );
+
+                // find which engine/scene to update/redraw
+                if( std::find_if( engineList.begin()
+                                , engineList.end()
+                                , [inbetweenerTagEngine]( FOdysseyVectorEngine* engine ) -> bool
+                                  {
+                                      return ( inbetweenerTagEngine == engine ) ? true : false;
+                                  } ) == engineList.end() )
+                {
+                    engineList.push_back( inbetweenerTagEngine );
+                }
+
+                // force recompute internal geometry of the attached widget
+                WidgetFromItem ( item ).Get()->AsWidget()->MarkPrepassAsDirty();
+            }
+        }
+    }
+
+    for( FOdysseyVectorEngine* engine : engineList )
+    {
+        engine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        engine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    }
+
+    //mAnimationLayerImageVector.Get
+
+    //Update();
 }
 
 #undef LOCTEXT_NAMESPACE

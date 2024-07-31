@@ -56,6 +56,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorImportV2
     void ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbetweenerTag
                            , uint64 iChunkEnd
                            , FArchive &Ar );
+
+    void ReadRoute( FInbetweenerRoute& iRoute
+                  , uint64 iChunkEnd
+                  , FArchive &Ar );
+
     void ReadTrajectory( FInbetweenerTrajectory& iTrajectory
                        , uint64 iChunkEnd
                        , FArchive &Ar );

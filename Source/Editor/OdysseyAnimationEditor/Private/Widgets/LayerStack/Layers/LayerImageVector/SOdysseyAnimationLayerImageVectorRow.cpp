@@ -15,6 +15,9 @@
 #include "SEnumCombo.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeader.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "OdysseyPainterEditor.h"
+#include "HUD/OdysseyVectorHUD.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -122,7 +125,9 @@ SOdysseyAnimationLayerImageVectorRow::GenerateHeaderWidget()
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
 {
-    mInbetweeningHeader = SNew(SOdysseyAnimationTimelineInbetweeningHeader, mAnimationLayerImageVector->GetSharedEnv() );
+    mInbetweeningHeader = SNew( SOdysseyAnimationTimelineInbetweeningHeader
+                              , mAnimationLayerImageVector->GetSharedEnv() )
+                         .Visibility( this, &SOdysseyAnimationLayerImageVectorRow::IsVisible );
 
 	return SNew(SVerticalBox)
         + SVerticalBox::Slot()
@@ -175,6 +180,13 @@ SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
             //.LightTable(mAnimationLayerImageVector->GetLightTable())
 		    //.Visibility(this, &SOdysseyAnimationLayerImageVectorRow::GetLightTableVisibility)
         ];
+}
+
+EVisibility
+SOdysseyAnimationLayerImageVectorRow::IsVisible() const
+{
+    return ( mExtension->GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) ? EVisibility::Visible 
+                                                                                                    : EVisibility::Collapsed;
 }
 
 TSharedPtr<SOdysseyAnimationTimelineInbetweeningHeader>

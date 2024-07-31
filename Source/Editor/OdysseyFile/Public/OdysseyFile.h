@@ -149,7 +149,9 @@ namespace FOdysseyFile
 
                                 static const uint32 CHUNK_TAGINBETWEENER_ROUTES = 0xbb7682f1; // container
                                     static const uint32 CHUNK_ROUTE = 0x25f4d3c5; // container
-                                        static const uint32 CHUNK_ROUTE_TRAJECTORIES = 0x876094e2; // container
+                                        static const uint32 CHUNK_ROUTE_COORDS = 0xf171bebc; // uint32(quadIndex)-double(u)-double(v)
+                                        static const uint32 CHUNK_ROUTE_TRAJECTORIES = 0x876094e2;
+                                        static const uint32 CHUNK_ROUTE_WAYPOINTS_RATIO = 0x14cacdb3;
 
                     static const uint32 CHUNK_PATH = 0x138d0bec; // container
                         // ... inherited chunks.

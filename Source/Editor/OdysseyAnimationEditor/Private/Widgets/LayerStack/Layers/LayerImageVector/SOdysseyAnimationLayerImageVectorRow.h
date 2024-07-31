@@ -45,6 +45,7 @@ private:
     EVisibility GetLightTableVisibility() const;
     EVisibility GetCollapsedOpacityVisibility() const;
     ECheckBoxState GetIsWireframeIsChecked() const;
+    EVisibility IsVisible() const;
 
 private:
     void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);

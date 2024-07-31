@@ -57,11 +57,20 @@ FReply
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( const FGeometry & MyGeometry
                                                                            , const FPointerEvent & MouseEvent )
 {
+    TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
+    const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() );
+    // for AddBreakdown / RemoveBreakdown functions in the context menu
+    treeView.Get()->SetCursorPos( cursorPos );
+
     mPickedBreakdown = nullptr;
+
+    //STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonDown( MyGeometry, MouseEvent );
+
+    // and highlight the clicked done (this one)
+    mInbetweenerTag->SetSelected( true );
 
     if( MouseEvent.IsMouseButtonDown( EKeys::LeftMouseButton ) )
     {
-        const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() );
         FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetEngine()->GetSharedEnv();
         std::list<FOdysseyVectorTag*>& tagList = sharedEnv->GetTagList();
 
@@ -70,8 +79,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
         {
             tag->SetSelected( false );
         }
-        // and highlight the clicked done (this one)
-        mInbetweenerTag->SetSelected( true );
+
 
         for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
         {
@@ -97,6 +105,8 @@ FReply
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FGeometry& MyGeometry
                                                                       , const FPointerEvent& MouseEvent )
 {
+    //STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseMove( MyGeometry, MouseEvent );
+
     if( MouseEvent.IsMouseButtonDown( EKeys::LeftMouseButton ) )
     {
         if( mPickedBreakdown )
@@ -144,6 +154,8 @@ FReply
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const FGeometry & MyGeometry
                                                                          , const FPointerEvent & MouseEvent )
 {
+    //STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonUp( MyGeometry, MouseEvent );
+
     mPickedBreakdown = nullptr;
 
 	if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
@@ -245,7 +257,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnCursorQuery ( const 
 {
     const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( CursorEvent.GetScreenSpacePosition() );
 
-    for( uint32 i = 0; i < mInbetweenerTag->GetBreakdownCount(); i++ )
+    for( int i = 0; ( i < (int)mInbetweenerTag->GetBreakdownCount() )
+                    // desired size may not be updated yet, check we are within limits
+                 && ( i < (int)mTargetPosBuffer.Num() ); i++ )
     {
         if( ( cursorPos.X >   mTargetPosBuffer[i].X )
          && ( cursorPos.Y >   mTargetPosBuffer[i].Y )

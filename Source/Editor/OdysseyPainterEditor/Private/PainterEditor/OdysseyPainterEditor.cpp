@@ -1067,6 +1067,7 @@ FOdysseyPainterEditor::GroupAndAddInbetweenerTag( FOdysseyPainterEditor* iEditor
 
     // call callbacks if any (for refreshing GUI e.g)
     vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                        | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
                         | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 }
 
@@ -1565,6 +1566,7 @@ FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
 
     // call callbacks if any (for refreshing GUI e.g)
     vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                        | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
                         | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
 }
 
@@ -1665,7 +1667,8 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
 
     // call callbacks if any (for refreshing GUI e.g)
     vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                        | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+                        | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
+                        | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
 }
 
 // static

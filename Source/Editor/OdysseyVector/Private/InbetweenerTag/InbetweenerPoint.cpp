@@ -28,13 +28,13 @@ FInbetweenerPoint::Init( FInbetweenerGrid* iGrid )
 uint32
 FInbetweenerPoint::GetQuadCount()
 {
-    FInbetweenerBreakdown* masterBreakdown = mGrid->GetBreakdown()->GetMasterBreakdown();
+    FInbetweenerBreakdown* firstBreakdown = mGrid->GetBreakdown()->GetInbetweenerTag()->GetBreakdownList().front();
 
-    if( masterBreakdown )
+    if( firstBreakdown != mGrid->GetBreakdown() )
     {
         uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
 
-        return masterBreakdown->GetGrid()->GetPointBuffer()[pointIndex].GetQuadCount();
+        return firstBreakdown->GetGrid()->GetPointBuffer()[pointIndex].GetQuadCount();
     }
 
     return mQuadList.size();
@@ -174,13 +174,13 @@ FInbetweenerPoint::SetID( uint32 iID )
 uint32
 FInbetweenerPoint::GetID()
 {
-    FInbetweenerBreakdown* masterBreakdown = mGrid->GetBreakdown()->GetMasterBreakdown();
+    FInbetweenerBreakdown* firstBreakdown = mGrid->GetBreakdown()->GetInbetweenerTag()->GetBreakdownList().front();
 
-    if( masterBreakdown )
+    if( firstBreakdown != mGrid->GetBreakdown() )
     {
         uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
 
-        return masterBreakdown->GetGrid()->GetPointBuffer()[pointIndex].GetID();
+        return firstBreakdown->GetGrid()->GetPointBuffer()[pointIndex].GetID();
     }
 
     return mID;

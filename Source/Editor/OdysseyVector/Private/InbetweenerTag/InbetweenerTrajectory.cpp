@@ -24,6 +24,13 @@ FInbetweenerTrajectory::Init( uint32 iDrawingCount )
     ResetSpacing( iDrawingCount );
 }
 
+void
+FInbetweenerTrajectory::Import( FInbetweenerTrajectory& iImportFrom )
+{
+    mHandle[0].Set( iImportFrom.GetHandle(0)->GetDirection(), iImportFrom.GetHandle(0)->GetLengthRatio() );
+    mHandle[1].Set( iImportFrom.GetHandle(1)->GetDirection(), iImportFrom.GetHandle(1)->GetLengthRatio() );
+}
+
 /*
 * Updates the bezier between the source grid and the target grid
 */
