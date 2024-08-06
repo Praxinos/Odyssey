@@ -32,6 +32,26 @@ FOdysseyViewportDrawingEditorScreenBasedAdapter::FOdysseyViewportDrawingEditorSc
 {
 }
 
+void FOdysseyViewportDrawingEditorScreenBasedAdapter::Initialize()
+{
+    IOdysseyViewportDrawingEditorAdapter::Initialize();
+    mState = eState::kIdleReady;
+}
+
+void FOdysseyViewportDrawingEditorScreenBasedAdapter::Finalize()
+{
+    IOdysseyViewportDrawingEditorAdapter::Finalize();
+}
+
+void FOdysseyViewportDrawingEditorScreenBasedAdapter::SetTool(UOdysseyPainterEditorTool* iTool)
+{
+    IOdysseyViewportDrawingEditorAdapter::SetTool(iTool);
+
+    UOdysseyPainterEditorRasterDrawingTool* drawingTool = GetDrawingTool();
+    if (drawingTool)
+        drawingTool->SetBaseSize(mExtension->GetMeshComponentMaxSize() * GetStampQuality());
+}
+
 void
 FOdysseyViewportDrawingEditorScreenBasedAdapter::SetTexture(UTexture* iTexture)
 {
@@ -139,7 +159,7 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::RenderInteractorWidget(con
         if (iPDI != NULL)
         {
             int numCircleSides = 128;
-            DrawCircle(iPDI, mousePosInWorld, xScreenAxis, yScreenAxis, brushCueColor, drawingTool->GetBrushInstance()->GetSizeModifier() / GetStampQuality(), numCircleSides, SDPG_World, 0.01f);
+            DrawCircle(iPDI, mousePosInWorld, xScreenAxis, yScreenAxis, brushCueColor, drawingTool->GetBrushInstance()->GetSizeModifier() / 2, numCircleSides, SDPG_World, 0.01f);
         }
     }
 
@@ -632,7 +652,7 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::Tick(float iDelta)
         return;
 
     UOdysseyPainterEditorRasterDrawingTool* drawingTool = GetDrawingTool();
-    if (!drawingTool)
+    if (!drawingTool || !drawingTool->IsValidLowLevel())
         return;
 
     drawingTool->SetBaseSize((FMath::Max(mLastKnownViewport->GetSizeXY().X, mLastKnownViewport->GetSizeXY().Y) / 2) * GetStampQuality());

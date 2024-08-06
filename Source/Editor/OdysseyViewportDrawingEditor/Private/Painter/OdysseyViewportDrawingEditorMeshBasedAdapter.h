@@ -9,6 +9,7 @@
 #include "OdysseySeamsPaintRendering.h"
 #include "MeshPaintTypes.h"
 #include "TexturePaintHelpers.h"
+#include "../Classes/OdysseySurfaceTexture2DEditable.h"
 
 /* -------------------------------------------------------------------  */
 
@@ -96,6 +97,7 @@ protected:
 
 private:
     UTexture2D* mStrokeBufferTexture2D;
+    FOdysseySurfaceTexture2DEditable* mStrokeBufferSurfaceTexture2DEditable;
 
     TArray<TArray<FLinearColor>> mColorData;
     //TArray<FColor*> mColorDataPtr;

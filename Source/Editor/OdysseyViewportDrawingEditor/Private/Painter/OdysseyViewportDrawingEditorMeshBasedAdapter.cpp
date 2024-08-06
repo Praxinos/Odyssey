@@ -95,6 +95,15 @@ FOdysseyViewportDrawingEditorMeshBasedAdapter::InitializeRenderTarget()
     mSeamRenderTarget2D->UpdateResourceImmediate();
     mSeamRenderTarget2D->AddToRoot();
 
+    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(textureWidth, textureHeight, ::ULIS::eFormat::Format_BGRA8);
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::eFormat::Format_BGRA8);
+    ctx.Clear(*block.Get());
+    ctx.Finish();
+
+    mStrokeBufferSurfaceTexture2DEditable = new FOdysseySurfaceTexture2DEditable( textureWidth, textureHeight, ::ULIS::eFormat::Format_BGRA8 );
+    //mStrokeBufferTexture2D = NewRGBAFTextureFromBlockData(block.Get());
+
     FOdysseyViewportDrawingEditorUtils::GenerateSeamMask(mExtension->Component(), mExtension->GetUVIndexUsedByCurrentTexture(), mSeamRenderTarget2D, texture, mPaintingTexture2DRenderTarget);
 }
 
@@ -119,6 +128,8 @@ FOdysseyViewportDrawingEditorMeshBasedAdapter::FinalizeRenderTarget()
         mSeamRenderTarget2D->ConditionalBeginDestroy();
         mSeamRenderTarget2D = nullptr;
     }
+
+    mStrokeBufferTexture2D = nullptr;
 }
 
 void FOdysseyViewportDrawingEditorMeshBasedAdapter::StartPainting()
@@ -227,7 +238,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorMeshBasedAdapter::GetMinimal
     TArray<::ULIS::FRectI> rects;
 
     //Get Biggest rectangle
-    /*int minX = 100000000;
+    int minX = 100000000;
     int minY = 100000000;
     int maxX = 0;
     int maxY = 0;
@@ -240,10 +251,10 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorMeshBasedAdapter::GetMinimal
         maxY = ::ULIS::FMath::Max4(double(maxY), iTriangles[i].TrianglePoints[0].Y, iTriangles[i].TrianglePoints[1].Y, iTriangles[i].TrianglePoints[2].Y);
     }
     rects.Add( ::ULIS::FRectI::FromMinMax(minX, minY, maxX, maxY) );
-    return rects;*/
+    return rects;
 
     //First step, we get all bounding rectangles from the triangles
-    for (int i = 0; i < iTriangles.Num(); i++)
+    /*for (int i = 0; i < iTriangles.Num(); i++)
     {
         rects.Add(::ULIS::FRectI::FromMinMax( FMath::Max( FMath::Min3(iTriangles[i].TrianglePoints[0].X, iTriangles[i].TrianglePoints[1].X, iTriangles[i].TrianglePoints[2].X) - 1, 0 ),
                                               FMath::Max( FMath::Min3(iTriangles[i].TrianglePoints[0].Y, iTriangles[i].TrianglePoints[1].Y, iTriangles[i].TrianglePoints[2].Y) - 1, 0 ),
@@ -294,16 +305,15 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorMeshBasedAdapter::GetMinimal
     }
 
     
-    return finalRects;
+    return finalRects;*/
 }
 
 float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
 {
-    if (!mTexture)
-        return 0.f;
-
-    if (mExtension->Component())
-        return ((FMath::Max( mTexture->GetSurfaceWidth(), mTexture->GetSurfaceHeight() ) / mExtension->GetMeshComponentMaxSize()) + 1.f);
+    if (mTexture && mExtension->Component())
+    {
+        return ((FMath::Max(mTexture->GetSurfaceWidth(), mTexture->GetSurfaceHeight()) / mExtension->GetMeshComponentMaxSize()) + 1.f);
+    }
 
     return 1.f;
 }
@@ -363,14 +373,56 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
         iStampParams.mPosition.x = coord.X * mTexture->GetSurfaceWidth() - iStampParams.mBlock->Width() / 2.f;
         iStampParams.mPosition.y = coord.Y * mTexture->GetSurfaceHeight() - iStampParams.mBlock->Height() / 2.f;
 
-        mStrokeBufferTexture2D = NewRGBAFTextureFromBlockData(iStampParams.mBlock);
+        ::ULIS::FEvent eventBlendd;
+        ::ULIS::eFormat target_formatt = ::ULIS::eFormat::Format_RGBAF;
+        ::ULIS::FContext& ctxx = IULISLoaderModule::StaticFindOrAddContext(target_formatt);
+
+        //To check
+        if (iStampParams.mAntiAliasing)
+        {
+            ctxx.BlendAA(
+                *iStampParams.mBlock
+                , *mStrokeBufferSurfaceTexture2DEditable->Block()
+                , iStampParams.mRects[0]
+                , ::ULIS::FVec2F(0,0)
+                , ::ULIS::eBlendMode(iStampParams.mBlendingMode)
+                , ::ULIS::eAlphaMode(iStampParams.mAlphaMode)
+                , FMath::Clamp(iStampParams.mFlow, 0.f, 1.f)
+                , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
+                , 0
+                , nullptr
+                , &eventBlendd
+            );
+        }
+        else
+        {
+            ctxx.Blend(
+                *iStampParams.mBlock
+                , *mStrokeBufferSurfaceTexture2DEditable->Block()
+                , iStampParams.mRects[0]
+                , ::ULIS::FVec2F(0, 0)
+                , ::ULIS::eBlendMode(iStampParams.mBlendingMode)
+                , ::ULIS::eAlphaMode(iStampParams.mAlphaMode)
+                , FMath::Clamp(iStampParams.mFlow, 0.f, 1.f)
+                , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
+                , 0
+                , nullptr
+                , &eventBlendd
+            );
+        }
+
+        ::ULIS::FRectI rect = mStrokeBufferSurfaceTexture2DEditable->Block()->Rect();
+        //InvalidateTextureFromData( iStampParams.mBlock, mStrokeBufferSurfaceTexture2DEditable->Texture(), iStampParams.mRects.GetData(), iStampParams.mRects.Num() );
+        InvalidateTextureFromData( iStampParams.mBlock, mStrokeBufferSurfaceTexture2DEditable->Texture(), &rect, 1 );
+
+        //mStrokeBufferTexture2D = NewRGBAFTextureFromBlockData(iStampParams.mBlock);
     }
 
     TRefCountPtr< FOdysseyMeshPaintBatchedElementParameters > meshPaintBatchedElementParameters(new FOdysseyMeshPaintBatchedElementParameters());
     {
-        meshPaintBatchedElementParameters->ShaderParams.Stroke2D = mStrokeBufferTexture2D;
+        meshPaintBatchedElementParameters->ShaderParams.Stroke2D = mStrokeBufferSurfaceTexture2DEditable->Texture();
         meshPaintBatchedElementParameters->ShaderParams.WorldToBrushMatrix = worldToBrushMatrix;
-        meshPaintBatchedElementParameters->ShaderParams.TextureHitPoint = FVector2D( iStampParams.mPosition.x, iStampParams.mPosition.y );
+        meshPaintBatchedElementParameters->ShaderParams.TextureHitPoint = FVector2D( iStampParams.mBlock->Width(), iStampParams.mBlock->Height() );
         meshPaintBatchedElementParameters->ShaderParams.StampQuality = GetStampQuality();
     }
 
@@ -563,12 +615,12 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
     mPixelFence.Wait();
 
     //Resets the color of all pixels in mStrokeBufferRenderTarget2D for next stamp. Is there a better way to do it ?
-    mStrokeBufferRenderTarget2D->UpdateResource();
+    //mStrokeBufferRenderTarget2D->UpdateResource();
 
     TArray<::ULIS::FEvent> eventBlend;
     ::ULIS::eFormat target_format = ::ULIS::eFormat::Format_RGBAF;
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(target_format);
-
+    
     for (int i = 0; i < rects.Num(); i++)
     {
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToStamp = MakeShared<::ULIS::FBlock>(static_cast<uint8*>(static_cast<void*>(mColorData[i].GetData())), rects[i].w, rects[i].h, ::ULIS::eFormat::Format_RGBAF);
