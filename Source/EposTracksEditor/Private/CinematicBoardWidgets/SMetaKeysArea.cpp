@@ -156,19 +156,22 @@ SMetaKeysArea::OnMouseButtonDown( const FGeometry& MyGeometry, const FPointerEve
             TSharedPtr<FMetaChannel> keys = CreateKeysUnderMouse( MouseEvent );
             if( keys.IsValid() && keys->NumMetaKeys() )
             {
-                mState = EState::kDragging;
+                mState = EState::kPressing;
 
                 check( !mDraggedKeys.IsValid() );
                 mDraggedKeys = keys; // Must be done before BeginTransaction
-
-                BeginTransaction( LOCTEXT( "MoveMetaKeyTransaction", "Move Meta Keys" ) );
 
                 return FReply::Handled().CaptureMouse( SharedThis( this ) );
             }
         }
     }
+    else if( mState == EState::kPressing )
+    {
+        checkNoEntry();
+    }
     else if( mState == EState::kDragging )
     {
+        checkNoEntry();
     }
     else
     {
@@ -195,6 +198,36 @@ SMetaKeysArea::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent
             mState = EState::kIdle;
 
             EndTransaction();
+
+            mDraggedKeys = nullptr;
+
+            return FReply::Handled().ReleaseMouseCapture();
+        }
+    }
+    else if( mState == EState::kPressing )
+    {
+        if( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+        {
+            check( HasMouseCapture() );
+            check( mDraggedKeys.IsValid() && mDraggedKeys->NumMetaKeys() );
+
+            //-
+
+            FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
+            const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
+            ISequencer* sequencer = board_section->GetSequencer().Get();
+            const FMovieSceneSequenceTransform OuterToInnerTransform = subsection_object->OuterToInnerTransform();
+
+            TArray<FFrameNumber> keys;
+            mDraggedKeys->GetMetaKeys().GenerateKeyArray( keys ); // Or get the inner time of the first subkey ?
+            FFrameTime local_time = keys[0] * OuterToInnerTransform.InverseNoLooping();
+
+            // Update the current frame in the sequencer
+            sequencer->SetLocalTime( local_time, ESnapTimeMode::STM_Interval );
+
+            //-
+
+            mState = EState::kIdle;
 
             mDraggedKeys = nullptr;
 
@@ -232,10 +265,16 @@ SMetaKeysArea::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent
 FReply
 SMetaKeysArea::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) //override
 {
-    if( mState == EState::kDragging )
+    if( mState == EState::kDragging || mState == EState::kPressing )
     {
         check( HasMouseCapture() );
         check( mDraggedKeys.IsValid() && mDraggedKeys->NumMetaKeys() );
+
+        if( mState == EState::kPressing )
+        {
+            BeginTransaction( LOCTEXT( "MoveMetaKeyTransaction", "Move Meta Keys" ) );
+            mState = EState::kDragging;
+        }
 
         //-
 
@@ -287,13 +326,7 @@ SMetaKeysArea::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& Mo
         }
 
         // Update the current frame in the sequencer
-        if( sequencer->GetSequencerSettings()->GetIsSnapEnabled() )
-        {
-            FFrameRate LocalResolution = sequencer->GetFocusedTickResolution();
-            FFrameRate LocalDisplayRate = sequencer->GetFocusedDisplayRate();
-            local_time = FFrameRate::TransformTime( FFrameRate::TransformTime( local_time, LocalResolution, LocalDisplayRate ).FloorToFrame(), LocalDisplayRate, LocalResolution );
-        }
-        sequencer->SetLocalTime( local_time );
+        sequencer->SetLocalTime( local_time, ESnapTimeMode::STM_Interval );
 
         return FReply::Handled();
     }

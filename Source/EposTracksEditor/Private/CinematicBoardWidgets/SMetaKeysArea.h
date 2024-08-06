@@ -74,6 +74,7 @@ private:
     enum class EState
     {
         kIdle,
+        kPressing,
         kDragging,
     };
     EState mState { EState::kIdle };
