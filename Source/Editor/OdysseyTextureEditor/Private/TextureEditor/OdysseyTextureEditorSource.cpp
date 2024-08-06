@@ -11,6 +11,8 @@
 #include "Undo/OdysseyVectorUndoEngineClear.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyMediaVector.h"
+#include "OdysseyPixelFormat.h"
+#include "TextureCompiler.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
@@ -296,21 +298,25 @@ FOdysseyTextureEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> iB
     FScopedTransaction ScopedTransaction(LOCTEXT("actions.paste", "Paste"));
 #endif
 
-    TSharedPtr<::ULIS::FBlock> copyBlock = MakeShared<::ULIS::FBlock>(iBlock->Rect().w, iBlock->Rect().h, iBlock->Format());
+    int width = GetLayerStack()->GetTexture()->GetSizeX();
+    int height = GetLayerStack()->GetTexture()->GetSizeY();
+    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat( GetLayerStack()->GetTexture()->Source.GetFormat() );
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+    TSharedPtr<::ULIS::FBlock> copyBlock = MakeShared<::ULIS::FBlock>(width, height, format);
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
     ctx.Clear(*copyBlock);
+    ctx.Finish();
 
-    ctx.Copy(
+    ctx.ConvertFormat(
         *iBlock,
         *copyBlock,
         iBlock->Rect(),
-        ::ULIS::FVec2I(0,0),
+        ::ULIS::FVec2I(0, 0),
         ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
         0,
         nullptr,
-        nullptr
-    );
+        nullptr);
 
     ctx.Finish();
 

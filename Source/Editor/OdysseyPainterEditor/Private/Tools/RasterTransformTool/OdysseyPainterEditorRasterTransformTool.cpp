@@ -742,6 +742,7 @@ UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection()
     ::ULIS::FRectI boundingBox = rasterSelection->GetMaskBoundingRect();
 
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = rasterBlock->GetBlock();
 
     mSelectionBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, rasterBlock->GetFormat());
 
@@ -755,7 +756,7 @@ UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection()
     if (maskBlock)
     {
         ctx.Copy(
-            *rasterBlock->GetBlock(),
+            *block,
             *mSelectionBlock,
             boundingBox,
             ::ULIS::FVec2I(0,0),

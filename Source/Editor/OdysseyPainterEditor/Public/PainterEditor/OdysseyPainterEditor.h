@@ -230,7 +230,8 @@ protected:
     FText                                    mName;
     FName                                    mLayoutName;
     TSharedPtr<FTabManager::FLayout>         mLayout;
-    TSharedPtr<::ULIS::FBlock>               mCopyBlock; // Pixel block in clipboard (ctrl + c, ctrl + v)
+    static TSharedPtr<::ULIS::FBlock>        mCopyBlock; // Pixel block in clipboard (ctrl + c, ctrl + v)
+    FRenderCommandFence mPixelFence;
 
     //Tools
     TSharedPtr<FOdysseyPainterEditorSource>  mSource;

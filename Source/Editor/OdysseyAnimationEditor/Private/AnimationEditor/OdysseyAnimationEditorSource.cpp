@@ -338,6 +338,7 @@ FOdysseyAnimationEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> 
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
     ctx.Clear(*copyBlock);
+	ctx.Finish();
 
     ctx.Copy(
         *iBlock,

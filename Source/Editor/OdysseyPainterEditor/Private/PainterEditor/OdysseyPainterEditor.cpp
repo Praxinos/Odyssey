@@ -69,6 +69,8 @@
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 
+TSharedPtr<::ULIS::FBlock> FOdysseyPainterEditor::mCopyBlock;
+
 FOdysseyPainterEditor::~FOdysseyPainterEditor()
 {
     
@@ -77,7 +79,6 @@ FOdysseyPainterEditor::~FOdysseyPainterEditor()
 FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iName, UObject* iEditedObject, const FName& iLayoutName)
     : FOdysseyEditor(iId, iName, iEditedObject)
     , mLayoutName(iLayoutName)
-    , mCopyBlock(nullptr)
     , mSource(nullptr)
     , mMeshSelector(MakeShared<FOdysseyMeshSelector>())
     , mCurrentMainTool(nullptr)
@@ -1692,7 +1693,7 @@ bool FOdysseyPainterEditor::CopyCurrentSelectionToCopyBlock()
     if( !GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>() )
         return false;
 
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetCurrentMediaProvider().GetMedias<FOdysseyMediaRaster>();
     if (mediaRasters.Num() <= 0)
         return false;
 
@@ -1702,6 +1703,8 @@ bool FOdysseyPainterEditor::CopyCurrentSelectionToCopyBlock()
     }
 
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = rasterBlock->GetBlock();
+
     ::ULIS::FRectI boundingBox = rasterBlock->GetRect();
 
     mCopyBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, rasterBlock->GetFormat());
@@ -1716,7 +1719,7 @@ bool FOdysseyPainterEditor::CopyCurrentSelectionToCopyBlock()
     if (maskBlock)
     {
         ctx.Copy(
-            *rasterBlock->GetBlock(),
+            *block,
             *mCopyBlock,
             boundingBox,
             ::ULIS::FVec2I(0, 0),
@@ -1725,7 +1728,7 @@ bool FOdysseyPainterEditor::CopyCurrentSelectionToCopyBlock()
             nullptr,
             &copyEvent
         );
-
+        
         ctx.FilterInto(
             [](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
             {
@@ -1735,10 +1738,10 @@ bool FOdysseyPainterEditor::CopyCurrentSelectionToCopyBlock()
                 }
             }
                 , *maskBlock
-                , * mCopyBlock
+                , *mCopyBlock
                 , boundingBox
                 , ::ULIS::FVec2I(0, 0)
-                , ::ULIS::FSchedulePolicy::MultiScanlines
+                , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
                 , 1
                 , &copyEvent
                 , nullptr
@@ -1768,6 +1771,8 @@ bool FOdysseyPainterEditor::CutCurrentSelectionToCopyBlock()
     }
 
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = rasterBlock->GetBlock();
+
     ::ULIS::FRectI boundingBox = rasterBlock->GetRect();
 
     mCopyBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, rasterBlock->GetFormat());
@@ -1782,7 +1787,7 @@ bool FOdysseyPainterEditor::CutCurrentSelectionToCopyBlock()
     if (maskBlock)
     {
         ctx.Copy(
-            *rasterBlock->GetBlock(),
+            *block,
             *mCopyBlock,
             boundingBox,
             ::ULIS::FVec2I(0, 0),
@@ -1804,7 +1809,7 @@ bool FOdysseyPainterEditor::CutCurrentSelectionToCopyBlock()
                 , *mCopyBlock
                 , boundingBox
                 , ::ULIS::FVec2I(0, 0)
-                , ::ULIS::FSchedulePolicy::MultiScanlines
+                , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
                 , 1
                 , &copyEvent
                 , nullptr
