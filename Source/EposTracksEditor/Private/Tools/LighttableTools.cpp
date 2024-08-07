@@ -5,10 +5,13 @@
 
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
+#include "Compilation/MovieSceneCompiledDataManager.h"
 #include "EditorSupportDelegates.h"
+#include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "MaterialEditingLibrary.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieSceneSequence.h"
+#include "MovieSceneSequenceVisitor.h"
 #include "ISequencer.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
 #include "Sections/MovieSceneSubSection.h"
@@ -76,6 +79,43 @@ int8
 LighttableTools::GetState( ISequencer* iSequencer, FGuid iPlaneBinding )
 {
     return GetState( *iSequencer, iSequencer->GetFocusedMovieSceneSequence(), iSequencer->GetFocusedTemplateID(), iPlaneBinding );
+}
+
+//---
+
+//static
+void
+LighttableTools::Deactivate( ISequencer* iSequencer )
+{
+    if( !iSequencer )
+        return;
+
+    struct FBindingVisitor
+        : UE::MovieScene::ISequenceVisitor
+    {
+        virtual void VisitObjectBinding( const FMovieSceneBinding& iBinding, const UE::MovieScene::FSubSequenceSpace& iLocalSpace ) override
+        {
+            const FMovieSceneSequenceHierarchy* Hierarchy = mSequencer->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( mSequencer->GetEvaluationTemplate().GetCompiledDataID() );
+            UMovieSceneSequence* subsequence = Hierarchy->FindSubSequence( iLocalSpace.SequenceID );
+
+            LighttableTools::Deactivate( *mSequencer, subsequence, iLocalSpace.SequenceID, iBinding.GetObjectGuid() );
+        }
+
+        ISequencer* mSequencer;
+    };
+
+    //---
+
+    UE::MovieScene::FSequenceVisitParams params;
+    params.bVisitRootTracks = true;
+    params.bVisitSubSequences = true;
+    params.bVisitObjectBindings = true;
+
+    FBindingVisitor visitor;
+    visitor.mSequencer = iSequencer;
+
+    // Visit all notes
+    VisitSequence( iSequencer->GetRootMovieSceneSequence(), params, visitor );
 }
 
 //---

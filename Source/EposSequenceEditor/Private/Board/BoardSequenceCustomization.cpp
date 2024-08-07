@@ -33,6 +33,7 @@
 #include "Styles/EposSequenceEditorStyle.h"
 #include "ToolkitHelpers.h"
 #include "Tools/EposSequenceTools.h"
+#include "Tools/LighttableTools.h"
 #include "Widgets/SInfoBar.h"
 
 #define LOCTEXT_NAMESPACE "BoardSequenceCustomization"
@@ -259,6 +260,11 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
         FEposSequenceEditorCommands::Get().GotoNextDrawing,
         FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::GotoNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
         FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::HasNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+    );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().DeactivateAllLighttables,
+        FExecuteAction::CreateLambda( [this](){ LighttableTools::Deactivate( mSequencer ); } )
     );
 }
 

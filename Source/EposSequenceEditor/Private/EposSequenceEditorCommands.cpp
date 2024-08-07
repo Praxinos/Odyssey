@@ -88,6 +88,8 @@ FEposSequenceEditorCommands::RegisterCommands()
     UI_COMMAND( StepToPreviousShot,                 "Step to Previous Shot", "Step to previous shot", EUserInterfaceActionType::Button, FInputChord( EKeys::Y ) );
     UI_COMMAND( StepToNextShot,                     "Step to Next Shot", "Step to next shot", EUserInterfaceActionType::Button, FInputChord( EKeys::U ) );
 
+    UI_COMMAND( DeactivateAllLighttables,           "Deactivate All Lighttables", "Deactivate all lighttables recursively from the root sequence", EUserInterfaceActionType::Button, FInputChord() );
+
     //---
 
     UI_COMMAND( CreateCameraAtCurrentTime,          "Create Camera", "Create a new camera and set it as the current camera cut", EUserInterfaceActionType::Button, FInputChord() );

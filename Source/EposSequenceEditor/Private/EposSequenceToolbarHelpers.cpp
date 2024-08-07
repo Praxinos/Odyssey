@@ -248,6 +248,8 @@ EposSequenceToolbarHelpers::MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISe
                                 .OnColorCommitted_Lambda( OnNextColorCommited ),
                             LOCTEXT( "settings.lighttable.next-drawing-color-label", "Next Drawing Color" ) );
 
+    iMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().DeactivateAllLighttables );
+
     iMenuBuilder.EndSection();
 
     //---
