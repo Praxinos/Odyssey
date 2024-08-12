@@ -5,8 +5,12 @@
 
 #include "EditorSubsystem.h"
 
-#include "SequenceTimeUnit.h"
+#include "MovieSceneTimeUnit.h"
 #include "Containers/SortedMap.h"
+#include "UObject/StructOnScope.h"
+#include "UniversalObjectLocator.h"
+#include "UniversalObjectLocatorResolveParams.h"
+#include "Misc/NotifyHook.h"
 #include "EposSequenceEditorSubsystem.generated.h"
 
 class FUICommandList;
@@ -27,8 +31,11 @@ class FMenuBuilder;
 class UMovieSceneCompiledDataManager;
 class UMovieSceneFolder;
 class UMovieSceneSection;
-class USequencerScriptingLayer;
-//
+class UMovieSceneSequence;
+class USequencerModuleScriptingLayer;
+class IStructureDetailsView;
+class USequencerCurveEditorObject;
+
 //USTRUCT(BlueprintType)
 //struct FMovieSceneScriptingParams
 //{
@@ -44,7 +51,7 @@ class USequencerScriptingLayer;
 * UEposSequenceEditorSubsystem
 * Subsystem for epos sequence editor related utilities to scripts
 */
-UCLASS(Blueprintable)
+UCLASS()
 class EPOSSEQUENCEEDITOR_API UEposSequenceEditorSubsystem
     : public UEditorSubsystem
 {
@@ -60,6 +67,10 @@ public:
     ///** Retrieve the outliner */
     //UFUNCTION(BlueprintPure, Category = "Level Sequence Editor")
     //USequencerScriptingLayer* GetScriptingLayer();
+
+    ///** Retrieve the curve editor */
+    //UFUNCTION( BlueprintPure, Category = "Level Sequence Editor" )
+    //USequencerCurveEditorObject* GetCurveEditor();
 
     ///** Add existing actors to Sequencer. Tracks will be automatically added based on default track settings. */
     //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
@@ -77,73 +88,73 @@ public:
     //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
     //FMovieSceneBindingProxy ConvertToPossessable(const FMovieSceneBindingProxy& ObjectBinding);
 
-    ///**
-    // * Copy folders
-    // * The copied folders will be saved to the clipboard as well as assigned to the ExportedText string.
-    // * The ExportedTest string can be used in conjunction with PasteFolders if, for example, pasting copy/pasting multiple
-    // * folders without relying on a single clipboard.
-    // */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //void CopyFolders(const TArray<UMovieSceneFolder*>& Folders, FString& ExportedText);
+    /**
+     * Copy folders
+     * The copied folders will be saved to the clipboard as well as assigned to the ExportedText string.
+     * The ExportedTest string can be used in conjunction with PasteFolders if, for example, pasting copy/pasting multiple
+     * folders without relying on a single clipboard.
+     */
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    void CopyFolders(const TArray<UMovieSceneFolder*>& Folders, FString& ExportedText);
 
-    ///**
-    // * Paste folders
-    // * Paste folders from the given TextToImport string (used in conjunction with CopyFolders).
-    // * If TextToImport is empty, the contents of the clipboard will be used.
-    // */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //bool PasteFolders(const FString& TextToImport, FMovieScenePasteFoldersParams PasteFoldersParams, TArray<UMovieSceneFolder*>& OutFolders);
+    /**
+     * Paste folders
+     * Paste folders from the given TextToImport string (used in conjunction with CopyFolders).
+     * If TextToImport is empty, the contents of the clipboard will be used.
+     */
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    bool PasteFolders(const FString& TextToImport, FMovieScenePasteFoldersParams PasteFoldersParams, TArray<UMovieSceneFolder*>& OutFolders);
 
-    ///**
-    // * Copy sections
-    // * The copied sections will be saved to the clipboard as well as assigned to the ExportedText string.
-    // * The ExportedTest string can be used in conjunction with PasteSections if, for example, pasting copy/pasting multiple
-    // * sections without relying on a single clipboard.
-    // */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //void CopySections(const TArray<UMovieSceneSection*>& Sections, FString& ExportedText);
+    /**
+     * Copy sections
+     * The copied sections will be saved to the clipboard as well as assigned to the ExportedText string.
+     * The ExportedTest string can be used in conjunction with PasteSections if, for example, pasting copy/pasting multiple
+     * sections without relying on a single clipboard.
+     */
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    void CopySections(const TArray<UMovieSceneSection*>& Sections, FString& ExportedText);
 
-    ///**
-    // * Paste sections
-    // * Paste sections from the given TextToImport string (used in conjunction with CopySections).
-    // * If TextToImport is empty, the contents of the clipboard will be used.
-    // */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //bool PasteSections(const FString& TextToImport, FMovieScenePasteSectionsParams PasteSectionsParams, TArray<UMovieSceneSection*>& OutSections);
+    /**
+     * Paste sections
+     * Paste sections from the given TextToImport string (used in conjunction with CopySections).
+     * If TextToImport is empty, the contents of the clipboard will be used.
+     */
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    bool PasteSections(const FString& TextToImport, FMovieScenePasteSectionsParams PasteSectionsParams, TArray<UMovieSceneSection*>& OutSections);
 
-    ///**
-    // * Copy tracks
-    // * The copied tracks will be saved to the clipboard as well as assigned to the ExportedText string.
-    // * The ExportedTest string can be used in conjunction with PasteTracks if, for example, pasting copy/pasting multiple
-    // * tracks without relying on a single clipboard.
-    // */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //void CopyTracks(const TArray<UMovieSceneTrack*>& Tracks, FString& ExportedText);
+    /**
+     * Copy tracks
+     * The copied tracks will be saved to the clipboard as well as assigned to the ExportedText string.
+     * The ExportedTest string can be used in conjunction with PasteTracks if, for example, pasting copy/pasting multiple
+     * tracks without relying on a single clipboard.
+     */
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    void CopyTracks(const TArray<UMovieSceneTrack*>& Tracks, FString& ExportedText);
 
-    ///**
-    // * Paste tracks
-    // * Paste tracks from the given TextToImport string (used in conjunction with CopyTracks).
-    // * If TextToImport is empty, the contents of the clipboard will be used.
-    // */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //bool PasteTracks(const FString& TextToImport, FMovieScenePasteTracksParams PasteTracksParams, TArray<UMovieSceneTrack*>& OutTracks);
+    /**
+     * Paste tracks
+     * Paste tracks from the given TextToImport string (used in conjunction with CopyTracks).
+     * If TextToImport is empty, the contents of the clipboard will be used.
+     */
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    bool PasteTracks(const FString& TextToImport, FMovieScenePasteTracksParams PasteTracksParams, TArray<UMovieSceneTrack*>& OutTracks);
 
-    ///**
-    // * Copy bindings
-    // * The copied bindings will be saved to the clipboard as well as assigned to the ExportedText string.
-    // * The ExportedTest string can be used in conjunction with PasteBindings if, for example, pasting copy/pasting multiple
-    // * bindings without relying on a single clipboard.
-    // */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //void CopyBindings(const TArray<FMovieSceneBindingProxy>& Bindings, FString& ExportedText);
+    /**
+     * Copy bindings
+     * The copied bindings will be saved to the clipboard as well as assigned to the ExportedText string.
+     * The ExportedTest string can be used in conjunction with PasteBindings if, for example, pasting copy/pasting multiple
+     * bindings without relying on a single clipboard.
+     */
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    void CopyBindings(const TArray<FMovieSceneBindingProxy>& Bindings, FString& ExportedText);
 
-    ///**
-    // * Paste bindings
-    // * Paste bindings from the given TextToImport string (used in conjunction with CopyBindings).
-    // * If TextToImport is empty, the contents of the clipboard will be used.
-    // */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //bool PasteBindings(const FString& TextToImport, FMovieScenePasteBindingsParams PasteBindingsParams, TArray<FMovieSceneBindingProxy>& OutObjectBindings);
+    /**
+     * Paste bindings
+     * Paste bindings from the given TextToImport string (used in conjunction with CopyBindings).
+     * If TextToImport is empty, the contents of the clipboard will be used.
+     */
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
+    bool PasteBindings(const FString& TextToImport, FMovieScenePasteBindingsParams PasteBindingsParams, TArray<FMovieSceneBindingProxy>& OutObjectBindings);
 
     ///** Snap sections to timeline using source timecode */
     //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
@@ -162,7 +173,7 @@ public:
     //bool BakeTransformWithSettings(const TArray<FMovieSceneBindingProxy>& ObjectBindings, const FBakingAnimationKeySettings& InSettings, const FMovieSceneScriptingParams& Params = FMovieSceneScriptingParams());
 
     /** Attempts to automatically fix up broken actor references in the current scene */
-    UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
+    UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
     void FixActorReferences();
 
     ///** Assigns the given actors to the binding */
@@ -201,6 +212,20 @@ public:
 //    void CalculateFramesPerGuid(TSharedPtr<ISequencer>& Sequencer, const FBakingAnimationKeySettings& InSettings, TMap<FGuid, FBakeData>& OutBakeDataMa,
 //        TSortedMap<FFrameNumber, FFrameNumber>&  OutFrameMap);
 
+    //// Used by binding properties menu
+    //struct FBindingPropertiesNotifyHook: FNotifyHook
+    //{
+    //    UMovieSceneSequence* ObjectToModify = nullptr;
+    //    FBindingPropertiesNotifyHook() {}
+
+    //    FBindingPropertiesNotifyHook( UMovieSceneSequence* InObjectToModify ): ObjectToModify( InObjectToModify ) {}
+
+    //    virtual void NotifyPreChange( FProperty* PropertyAboutToChange ) override;
+    //    virtual void NotifyPostChange( const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged ) override;
+    //};
+
+    //FBindingPropertiesNotifyHook NotifyHook;
+
 private:
 
     TSharedPtr<ISequencer> GetActiveSequencer();
@@ -216,6 +241,8 @@ private:
     //void RebindComponentInternal(const FName& ComponentName);
 
     //void AddAssignActorMenu(FMenuBuilder& MenuBuilder);
+    //void AddBindingPropertiesMenu( FMenuBuilder& MenuBuilder );
+    //void OnFinishedChangingLocators( const FPropertyChangedEvent& PropertyChangedEvent, TSharedRef<IStructureDetailsView> StructDetailsView, TSharedRef<FStructOnScope> LocatorsStruct, FGuid ObjectBindingID );
 
     //void GetRebindComponentNames(TArray<FName>& OutComponentNames);
     //void RebindComponentMenu(FMenuBuilder& MenuBuilder);
@@ -225,12 +252,19 @@ private:
     /* List of sequencers that have been created */
     TArray<TWeakPtr<ISequencer>> Sequencers;
 
+    ///* Map of curve editors with their sequencers*/
+    //TMap<TWeakPtr<ISequencer>, TObjectPtr<USequencerCurveEditorObject>> CurveEditorObjects;
+    ///* property array of the curve editors*/
+    //UPROPERTY()
+    //TArray<TObjectPtr<USequencerCurveEditorObject>> CurveEditorArray;
+
     TSharedPtr<FUICommandList> CommandList;
 
     //TSharedPtr<FExtender> TransformMenuExtender;
     TSharedPtr<FExtender> FixActorReferencesMenuExtender;
 
     //TSharedPtr<FExtender> AssignActorMenuExtender;
+    //TSharedPtr<FExtender> BindingPropertiesMenuExtender;
     //TSharedPtr<FExtender> RebindComponentMenuExtender;
 };
 

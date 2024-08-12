@@ -38,11 +38,11 @@
 #include "EngineUtils.h"
 //#include "Framework/Application/SlateApplication.h"
 //#include "Framework/MultiBox/MultiBoxBuilder.h"
-//#include "HAL/PlatformApplicationMisc.h"
+#include "HAL/PlatformApplicationMisc.h"
 //#include "Modules/ModuleManager.h"
 //#include "SceneOutlinerModule.h"
 //#include "ScopedTransaction.h"
-//#include "Widgets/Notifications/SNotificationList.h"
+#include "Widgets/Notifications/SNotificationList.h"
 //#include "Framework/MultiBox/MultiBoxBuilder.h"
 //#include "BakingAnimationKeySettings.h"
 //#include "IStructureDetailsView.h"
@@ -143,7 +143,7 @@ void UEposSequenceEditorSubsystem::Initialize(FSubsystemCollectionBase& Collecti
 
     FixActorReferencesMenuExtender = MakeShareable(new FExtender);
     FixActorReferencesMenuExtender->AddMenuExtension("Bindings", EExtensionHook::First, CommandList, FMenuExtensionDelegate::CreateLambda([this](FMenuBuilder& MenuBuilder) {
-        // Only add menu entries where the focused sequence is a UEposSequence
+        // Only add menu entries where the focused sequence is a UEposMovieSceneSequence
         if (!GetActiveSequencer())
         {
             return;
@@ -174,7 +174,7 @@ void UEposSequenceEditorSubsystem::Initialize(FSubsystemCollectionBase& Collecti
     //// For now we have the binding properties being a separate menu. When the UX is worked out we will likely merge the AssignActor menu away.
     //BindingPropertiesMenuExtender = MakeShareable(new FExtender);
     //BindingPropertiesMenuExtender->AddMenuExtension("Possessable", EExtensionHook::First, CommandList, FMenuExtensionDelegate::CreateLambda([this](FMenuBuilder& MenuBuilder) {
-    //    // Only add menu entries where the focused sequence is a ULevelSequence
+    //    // Only add menu entries where the focused sequence is a UEposMovieSceneSequence
     //    if (!GetActiveSequencer())
     //    {
     //        return;
@@ -382,131 +382,131 @@ TSharedPtr<ISequencer> UEposSequenceEditorSubsystem::GetActiveSequencer()
 //
 //    return PossessableProxy;
 //}
-//
-//void UEposSequenceEditorSubsystem::CopyFolders(const TArray<UMovieSceneFolder*>& Folders, FString& ExportedText)
-//{
-//    FSequencerUtilities::CopyFolders(Folders, ExportedText);
-//
-//    FPlatformApplicationMisc::ClipboardCopy(*ExportedText);
-//}
-//
-//bool UEposSequenceEditorSubsystem::PasteFolders(const FString& InTextToImport, FMovieScenePasteFoldersParams PasteFoldersParams, TArray<UMovieSceneFolder*>& OutFolders)
-//{
-//    FString TextToImport = InTextToImport;
-//    if (TextToImport.IsEmpty())
-//    {
-//        FPlatformApplicationMisc::ClipboardPaste(TextToImport);
-//    }
-//
-//    TArray<FNotificationInfo> PasteErrors;
-//    if (!FSequencerUtilities::PasteFolders(TextToImport, PasteFoldersParams, OutFolders, PasteErrors))
-//    {
-//        for (FNotificationInfo PasteError : PasteErrors)
-//        {
-//            UE_LOG(LogEposSequenceEditor, Error, TEXT("%s"), *PasteError.Text.Get().ToString());
-//        }
-//        return false;
-//    }
-//
-//    return true;
-//}
-//
-//void UEposSequenceEditorSubsystem::CopySections(const TArray<UMovieSceneSection*>& Sections, FString& ExportedText)
-//{
-//    FSequencerUtilities::CopySections(Sections, ExportedText);
-//
-//    FPlatformApplicationMisc::ClipboardCopy(*ExportedText);
-//}
-//
-//bool UEposSequenceEditorSubsystem::PasteSections(const FString& InTextToImport, FMovieScenePasteSectionsParams PasteSectionsParams, TArray<UMovieSceneSection*>& OutSections)
-//{
-//    FString TextToImport = InTextToImport;
-//    if (TextToImport.IsEmpty())
-//    {
-//        FPlatformApplicationMisc::ClipboardPaste(TextToImport);
-//    }
-//
-//    TArray<FNotificationInfo> PasteErrors;
-//    if (!FSequencerUtilities::PasteSections(TextToImport, PasteSectionsParams, OutSections, PasteErrors))
-//    {
-//        for (FNotificationInfo PasteError : PasteErrors)
-//        {
-//            UE_LOG(LogEposSequenceEditor, Error, TEXT("%s"), *PasteError.Text.Get().ToString());
-//        }
-//        return false;
-//    }
-//
-//    return true;
-//}
-//
-//void UEposSequenceEditorSubsystem::CopyTracks(const TArray<UMovieSceneTrack*>& Tracks, FString& ExportedText)
-//{
-//    TArray<UMovieSceneFolder*> Folders;
-//    FSequencerUtilities::CopyTracks(Tracks, Folders, ExportedText);
-//    FPlatformApplicationMisc::ClipboardCopy(*ExportedText);
-//}
-//
-//bool UEposSequenceEditorSubsystem::PasteTracks(const FString& InTextToImport, FMovieScenePasteTracksParams PasteTracksParams, TArray<UMovieSceneTrack*>& OutTracks)
-//{
-//    FString TextToImport = InTextToImport;
-//    if (TextToImport.IsEmpty())
-//    {
-//        FPlatformApplicationMisc::ClipboardPaste(TextToImport);
-//    }
-//
-//    TArray<FNotificationInfo> PasteErrors;
-//    if (!FSequencerUtilities::PasteTracks(TextToImport, PasteTracksParams, OutTracks, PasteErrors))
-//    {
-//        for (FNotificationInfo PasteError : PasteErrors)
-//        {
-//            UE_LOG(LogEposSequenceEditor, Error, TEXT("%s"), *PasteError.Text.Get().ToString());
-//        }
-//        return false;
-//    }
-//
-//    return true;
-//}
-//
-//void UEposSequenceEditorSubsystem::CopyBindings(const TArray<FMovieSceneBindingProxy>& Bindings, FString& ExportedText)
-//{
-//    TSharedPtr<ISequencer> Sequencer = GetActiveSequencer();
-//    if (Sequencer == nullptr)
-//    {
-//        return;
-//    }
-//
-//    TArray<UMovieSceneFolder*> Folders;
-//    FSequencerUtilities::CopyBindings(Sequencer.ToSharedRef(), Bindings, Folders, ExportedText);
-//    FPlatformApplicationMisc::ClipboardCopy(*ExportedText);
-//}
-//
-//bool UEposSequenceEditorSubsystem::PasteBindings(const FString& InTextToImport, FMovieScenePasteBindingsParams PasteBindingsParams, TArray<FMovieSceneBindingProxy>& OutObjectBindings)
-//{
-//    TSharedPtr<ISequencer> Sequencer = GetActiveSequencer();
-//    if (Sequencer == nullptr)
-//    {
-//        return false;
-//    }
-//
-//    FString TextToImport = InTextToImport;
-//    if (TextToImport.IsEmpty())
-//    {
-//        FPlatformApplicationMisc::ClipboardPaste(TextToImport);
-//    }
-//
-//    TArray<FNotificationInfo> PasteErrors;
-//    if (!FSequencerUtilities::PasteBindings(TextToImport, Sequencer.ToSharedRef(), PasteBindingsParams, OutObjectBindings, PasteErrors))
-//    {
-//        for (FNotificationInfo PasteError : PasteErrors)
-//        {
-//            UE_LOG(LogEposSequenceEditor, Error, TEXT("%s"), *PasteError.Text.Get().ToString());
-//        }
-//        return false;
-//    }
-//
-//    return true;
-//}
-//
+
+void UEposSequenceEditorSubsystem::CopyFolders(const TArray<UMovieSceneFolder*>& Folders, FString& ExportedText)
+{
+    FSequencerUtilities::CopyFolders(Folders, ExportedText);
+
+    FPlatformApplicationMisc::ClipboardCopy(*ExportedText);
+}
+
+bool UEposSequenceEditorSubsystem::PasteFolders(const FString& InTextToImport, FMovieScenePasteFoldersParams PasteFoldersParams, TArray<UMovieSceneFolder*>& OutFolders)
+{
+    FString TextToImport = InTextToImport;
+    if (TextToImport.IsEmpty())
+    {
+        FPlatformApplicationMisc::ClipboardPaste(TextToImport);
+    }
+
+    TArray<FNotificationInfo> PasteErrors;
+    if (!FSequencerUtilities::PasteFolders(TextToImport, PasteFoldersParams, OutFolders, PasteErrors))
+    {
+        for (FNotificationInfo PasteError : PasteErrors)
+        {
+            UE_LOG(LogEposSequenceEditor, Error, TEXT("%s"), *PasteError.Text.Get().ToString());
+        }
+        return false;
+    }
+
+    return true;
+}
+
+void UEposSequenceEditorSubsystem::CopySections(const TArray<UMovieSceneSection*>& Sections, FString& ExportedText)
+{
+    FSequencerUtilities::CopySections(Sections, ExportedText);
+
+    FPlatformApplicationMisc::ClipboardCopy(*ExportedText);
+}
+
+bool UEposSequenceEditorSubsystem::PasteSections(const FString& InTextToImport, FMovieScenePasteSectionsParams PasteSectionsParams, TArray<UMovieSceneSection*>& OutSections)
+{
+    FString TextToImport = InTextToImport;
+    if (TextToImport.IsEmpty())
+    {
+        FPlatformApplicationMisc::ClipboardPaste(TextToImport);
+    }
+
+    TArray<FNotificationInfo> PasteErrors;
+    if (!FSequencerUtilities::PasteSections(TextToImport, PasteSectionsParams, OutSections, PasteErrors))
+    {
+        for (FNotificationInfo PasteError : PasteErrors)
+        {
+            UE_LOG(LogEposSequenceEditor, Error, TEXT("%s"), *PasteError.Text.Get().ToString());
+        }
+        return false;
+    }
+
+    return true;
+}
+
+void UEposSequenceEditorSubsystem::CopyTracks(const TArray<UMovieSceneTrack*>& Tracks, FString& ExportedText)
+{
+    TArray<UMovieSceneFolder*> Folders;
+    FSequencerUtilities::CopyTracks(Tracks, Folders, ExportedText);
+    FPlatformApplicationMisc::ClipboardCopy(*ExportedText);
+}
+
+bool UEposSequenceEditorSubsystem::PasteTracks(const FString& InTextToImport, FMovieScenePasteTracksParams PasteTracksParams, TArray<UMovieSceneTrack*>& OutTracks)
+{
+    FString TextToImport = InTextToImport;
+    if (TextToImport.IsEmpty())
+    {
+        FPlatformApplicationMisc::ClipboardPaste(TextToImport);
+    }
+
+    TArray<FNotificationInfo> PasteErrors;
+    if (!FSequencerUtilities::PasteTracks(TextToImport, PasteTracksParams, OutTracks, PasteErrors))
+    {
+        for (FNotificationInfo PasteError : PasteErrors)
+        {
+            UE_LOG(LogEposSequenceEditor, Error, TEXT("%s"), *PasteError.Text.Get().ToString());
+        }
+        return false;
+    }
+
+    return true;
+}
+
+void UEposSequenceEditorSubsystem::CopyBindings(const TArray<FMovieSceneBindingProxy>& Bindings, FString& ExportedText)
+{
+    TSharedPtr<ISequencer> Sequencer = GetActiveSequencer();
+    if (Sequencer == nullptr)
+    {
+        return;
+    }
+
+    TArray<UMovieSceneFolder*> Folders;
+    FSequencerUtilities::CopyBindings(Sequencer.ToSharedRef(), Bindings, Folders, ExportedText);
+    FPlatformApplicationMisc::ClipboardCopy(*ExportedText);
+}
+
+bool UEposSequenceEditorSubsystem::PasteBindings(const FString& InTextToImport, FMovieScenePasteBindingsParams PasteBindingsParams, TArray<FMovieSceneBindingProxy>& OutObjectBindings)
+{
+    TSharedPtr<ISequencer> Sequencer = GetActiveSequencer();
+    if (Sequencer == nullptr)
+    {
+        return false;
+    }
+
+    FString TextToImport = InTextToImport;
+    if (TextToImport.IsEmpty())
+    {
+        FPlatformApplicationMisc::ClipboardPaste(TextToImport);
+    }
+
+    TArray<FNotificationInfo> PasteErrors;
+    if (!FSequencerUtilities::PasteBindings(TextToImport, Sequencer.ToSharedRef(), PasteBindingsParams, OutObjectBindings, PasteErrors))
+    {
+        for (FNotificationInfo PasteError : PasteErrors)
+        {
+            UE_LOG(LogEposSequenceEditor, Error, TEXT("%s"), *PasteError.Text.Get().ToString());
+        }
+        return false;
+    }
+
+    return true;
+}
+
 //void UEposSequenceEditorSubsystem::SnapSectionsToTimelineUsingSourceTimecodeInternal()
 //{
 //    const TSharedPtr<ISequencer> Sequencer = GetActiveSequencer();
@@ -1431,7 +1431,6 @@ void UEposSequenceEditorSubsystem::FixActorReferences()
     }
 
     UWorld* PlaybackContext = Sequencer->GetPlaybackContext()->GetWorld();
-
     if (!PlaybackContext)
     {
         return;
@@ -1816,7 +1815,7 @@ void UEposSequenceEditorSubsystem::FixActorReferences()
 //    MenuBuilder.AddWidget(MiniSceneOutliner, FText::GetEmpty(), true);
 //}
 //
-//void ULevelSequenceEditorSubsystem::AddBindingPropertiesMenu(FMenuBuilder& MenuBuilder)
+//void UEposSequenceEditorSubsystem::AddBindingPropertiesMenu(FMenuBuilder& MenuBuilder)
 //{
 //    TSharedPtr<ISequencer> Sequencer = GetActiveSequencer();
 //    if (Sequencer == nullptr)
@@ -1877,7 +1876,7 @@ void UEposSequenceEditorSubsystem::FixActorReferences()
 //            .CreateStructureDetailView(DetailsViewArgs, StructureViewArgs, nullptr);
 //
 //        StructureDetailsView->SetStructureData(LocatorsStruct);
-//        StructureDetailsView->GetOnFinishedChangingPropertiesDelegate().AddUObject(this, &ULevelSequenceEditorSubsystem::OnFinishedChangingLocators, StructureDetailsView,  LocatorsStruct, ObjectBindings[0]);
+//        StructureDetailsView->GetOnFinishedChangingPropertiesDelegate().AddUObject(this, &UEposSequenceEditorSubsystem::OnFinishedChangingLocators, StructureDetailsView,  LocatorsStruct, ObjectBindings[0]);
 //
 //        MenuBuilder.AddWidget(StructureDetailsView->GetWidget().ToSharedRef(), FText::GetEmpty(), true);
 //    }
@@ -1885,7 +1884,7 @@ void UEposSequenceEditorSubsystem::FixActorReferences()
 //
 //
 //
-//void ULevelSequenceEditorSubsystem::FBindingPropertiesNotifyHook::NotifyPreChange(FProperty* PropertyAboutToChange)
+//void UEposSequenceEditorSubsystem::FBindingPropertiesNotifyHook::NotifyPreChange(FProperty* PropertyAboutToChange)
 //{
 //    if (PropertyAboutToChange != nullptr)
 //    {
@@ -1895,13 +1894,13 @@ void UEposSequenceEditorSubsystem::FixActorReferences()
 //    }
 //}
 //
-//void ULevelSequenceEditorSubsystem::FBindingPropertiesNotifyHook::NotifyPostChange(const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged)
+//void UEposSequenceEditorSubsystem::FBindingPropertiesNotifyHook::NotifyPostChange(const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged)
 //{
 //    GEditor->EndTransaction();
 //}
 //
 //
-//void ULevelSequenceEditorSubsystem::OnFinishedChangingLocators(const FPropertyChangedEvent& PropertyChangedEvent, TSharedRef<IStructureDetailsView> StructDetailsView, TSharedRef<FStructOnScope> LocatorsStruct, FGuid ObjectBindingID)
+//void UEposSequenceEditorSubsystem::OnFinishedChangingLocators(const FPropertyChangedEvent& PropertyChangedEvent, TSharedRef<IStructureDetailsView> StructDetailsView, TSharedRef<FStructOnScope> LocatorsStruct, FGuid ObjectBindingID)
 //{
 //    const FScopedTransaction Transaction(LOCTEXT("ChangeBindingProperties", "Change Binding Properties"));
 //
