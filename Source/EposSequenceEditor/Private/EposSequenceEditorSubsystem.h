@@ -129,7 +129,7 @@ public:
      * tracks without relying on a single clipboard.
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
-    void CopyTracks(const TArray<UMovieSceneTrack*>& Tracks, FString& ExportedText);
+    void CopyTracks(const TArray<UMovieSceneTrack*>& Tracks, const TArray<UMovieSceneFolder*>& Folders, FString& ExportedText);
 
     /**
      * Paste tracks
@@ -146,7 +146,7 @@ public:
      * bindings without relying on a single clipboard.
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
-    void CopyBindings(const TArray<FMovieSceneBindingProxy>& Bindings, FString& ExportedText);
+    void CopyBindings(const TArray<FMovieSceneBindingProxy>& Bindings, const TArray<UMovieSceneFolder*>& Folders, FString& ExportedText);
 
     /**
      * Paste bindings

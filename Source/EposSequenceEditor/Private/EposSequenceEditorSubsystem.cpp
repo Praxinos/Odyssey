@@ -439,9 +439,9 @@ bool UEposSequenceEditorSubsystem::PasteSections(const FString& InTextToImport, 
     return true;
 }
 
-void UEposSequenceEditorSubsystem::CopyTracks(const TArray<UMovieSceneTrack*>& Tracks, FString& ExportedText)
+void UEposSequenceEditorSubsystem::CopyTracks(const TArray<UMovieSceneTrack*>& Tracks, const TArray<UMovieSceneFolder*>& Folders, FString& ExportedText)
 {
-    TArray<UMovieSceneFolder*> Folders;
+    //TArray<UMovieSceneFolder*> Folders;
     FSequencerUtilities::CopyTracks(Tracks, Folders, ExportedText);
     FPlatformApplicationMisc::ClipboardCopy(*ExportedText);
 }
@@ -467,7 +467,7 @@ bool UEposSequenceEditorSubsystem::PasteTracks(const FString& InTextToImport, FM
     return true;
 }
 
-void UEposSequenceEditorSubsystem::CopyBindings(const TArray<FMovieSceneBindingProxy>& Bindings, FString& ExportedText)
+void UEposSequenceEditorSubsystem::CopyBindings(const TArray<FMovieSceneBindingProxy>& Bindings, const TArray<UMovieSceneFolder*>& Folders, FString& ExportedText)
 {
     TSharedPtr<ISequencer> Sequencer = GetActiveSequencer();
     if (Sequencer == nullptr)
@@ -475,7 +475,7 @@ void UEposSequenceEditorSubsystem::CopyBindings(const TArray<FMovieSceneBindingP
         return;
     }
 
-    TArray<UMovieSceneFolder*> Folders;
+    //TArray<UMovieSceneFolder*> Folders;
     FSequencerUtilities::CopyBindings(Sequencer.ToSharedRef(), Bindings, Folders, ExportedText);
     FPlatformApplicationMisc::ClipboardCopy(*ExportedText);
 }
