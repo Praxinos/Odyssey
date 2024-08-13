@@ -5,12 +5,12 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyShape.h"
-#include "Tools/OdysseyPainterEditorTool.h"
+#include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
 #include "OdysseyPaintEngine.h"
 #include "OdysseyPainterEditorRasterPrimitiveDrawingTool.generated.h"
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterPrimitiveDrawingTool : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterPrimitiveDrawingTool : public UOdysseyPainterEditorRasterBaseTool
 {
 public:
     GENERATED_BODY()

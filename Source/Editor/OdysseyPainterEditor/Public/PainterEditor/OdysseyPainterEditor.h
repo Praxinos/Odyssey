@@ -194,6 +194,7 @@ public:
                                  , bool   iAbsolute );
 
     // Utility functions
+    bool HasCopyBlock(); //Did we copied a selection inside a block ? (Ctrl + C)
     bool CopyCurrentSelectionToCopyBlock();
     bool CutCurrentSelectionToCopyBlock();
     void PasteCopiedBlockToNewLayer();

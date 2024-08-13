@@ -69,7 +69,7 @@
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
 
-TSharedPtr<::ULIS::FBlock> FOdysseyPainterEditor::mCopyBlock;
+TSharedPtr<::ULIS::FBlock> FOdysseyPainterEditor::mCopyBlock = nullptr;
 
 FOdysseyPainterEditor::~FOdysseyPainterEditor()
 {
@@ -1685,6 +1685,11 @@ FOdysseyPainterEditor::AlterContourWidth( FOdysseyVectorGroupPaint* iScene
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 }
 
+bool FOdysseyPainterEditor::HasCopyBlock()
+{
+    return mCopyBlock != nullptr;
+}
+
 bool FOdysseyPainterEditor::CopyCurrentSelectionToCopyBlock()
 {
     if (GetCurrentMediaProvider().IsLocked())
@@ -1741,7 +1746,7 @@ bool FOdysseyPainterEditor::CopyCurrentSelectionToCopyBlock()
                 , *mCopyBlock
                 , boundingBox
                 , ::ULIS::FVec2I(0, 0)
-                , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
+                , ::ULIS::FSchedulePolicy::MultiScanlines
                 , 1
                 , &copyEvent
                 , nullptr
@@ -1809,7 +1814,7 @@ bool FOdysseyPainterEditor::CutCurrentSelectionToCopyBlock()
                 , *mCopyBlock
                 , boundingBox
                 , ::ULIS::FVec2I(0, 0)
-                , ::ULIS::FSchedulePolicy::AsyncCacheEfficient
+                , ::ULIS::FSchedulePolicy::MultiScanlines
                 , 1
                 , &copyEvent
                 , nullptr

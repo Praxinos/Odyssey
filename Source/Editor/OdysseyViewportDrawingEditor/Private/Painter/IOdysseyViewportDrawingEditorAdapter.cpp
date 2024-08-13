@@ -194,6 +194,20 @@ IOdysseyViewportDrawingEditorAdapter::ViewportCoordinatesToTextureCoordinates(FV
 
     TSharedPtr<IMeshPaintGeometryAdapter> meshAdapter = *meshAdapterPtr;
 
+    FCollisionQueryParams CollisionParams;
+    CollisionParams.bTraceComplex = true;
+    CollisionParams.bReturnFaceIndex = true;
+    CollisionParams.bReturnPhysicalMaterial = true;
+
+    USkeletalMeshComponent* SkeletalMeshComponent = Cast< USkeletalMeshComponent >(mExtension->Component());
+    if (SkeletalMeshComponent)
+    {
+        SkeletalMeshComponent->SetCollisionObjectType(ECC_PhysicsBody);
+        SkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+        SkeletalMeshComponent->bEnablePerPolyCollision = true;
+        SkeletalMeshComponent->RecreatePhysicsState();
+    }
+
     // Compute a world space ray from the screen space mouse coordinates
     /* FSceneViewFamilyContext viewFamily(FSceneViewFamily::ConstructionValues(
         iViewportClient->Viewport,
@@ -211,7 +225,9 @@ IOdysseyViewportDrawingEditorAdapter::ViewportCoordinatesToTextureCoordinates(FV
     FHitResult traceHitResult(1.0f);
     const FVector rayEnd(rayOrigin + rayDirection * HALF_WORLD_MAX);
 
-    meshAdapter->LineTraceComponent(traceHitResult, rayOrigin, rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
+    meshAdapter->LineTraceComponent(traceHitResult, rayOrigin, rayEnd, CollisionParams);
+    
+    UE_LOG(LogTemp, Display, TEXT("%d"), traceHitResult.FaceIndex) // is 0 for Skeletal Mesh
 
     // Convert trace to UV position
     FVector2D coord;

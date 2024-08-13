@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyPainterEditorTool.h"
+#include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
 #include "OdysseyPaintEngine.h"
 #include "RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
 #include "OdysseyPainterEditorRasterTransformTool.generated.h"
@@ -22,7 +22,7 @@ enum class EOdysseyTransformCapture
 };
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterTransformTool : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterTransformTool : public UOdysseyPainterEditorRasterBaseTool
 {
 public:
     GENERATED_BODY()

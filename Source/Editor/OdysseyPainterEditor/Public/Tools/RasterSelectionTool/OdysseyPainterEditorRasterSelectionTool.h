@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyShape.h"
-#include "OdysseyPainterEditorTool.h"
+#include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
 #include "OdysseyPainterEditorRasterSelectionTool.generated.h"
 
 class UOdysseyShape;
@@ -20,7 +20,7 @@ enum class EOdysseySelectionState : uint8
 
 //This is already a tool to prepare for the moment we'll separate transform and selection. When we'll have a "mask" feature in Odyssey
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterSelectionTool : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterSelectionTool : public UOdysseyPainterEditorRasterBaseTool
 {
 public:
     GENERATED_BODY()

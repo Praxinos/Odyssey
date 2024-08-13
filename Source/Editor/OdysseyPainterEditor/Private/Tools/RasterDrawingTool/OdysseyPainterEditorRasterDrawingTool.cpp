@@ -146,6 +146,9 @@ UOdysseyPainterEditorRasterDrawingTool::IsActivable() const
 bool
 UOdysseyPainterEditorRasterDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    if (UOdysseyPainterEditorRasterBaseTool::OnMouseDown(iPointInTexture, iKey))
+        return true;
+
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
     if (mediaProvider.IsLocked())
         return false;
@@ -168,7 +171,10 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseDown(const FOdysseyPoint& iPointI
 
 bool
 UOdysseyPainterEditorRasterDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{
+{    
+    if (UOdysseyPainterEditorRasterBaseTool::OnMouseUp(iPointInTexture, iKey))
+        return true;
+
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
     if (mediaProvider.IsLocked())
         return false;

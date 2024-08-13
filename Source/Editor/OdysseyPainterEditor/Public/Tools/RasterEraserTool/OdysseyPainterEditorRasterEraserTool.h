@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/OdysseyPainterEditorTool.h"
+#include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
 #include "OdysseyShape.h"
 #include "OdysseyPaintEngine.h"
 #include "FreehandShape/Interpolation/OdysseyInterpolationTypes.h"
@@ -15,7 +15,7 @@ class IOdysseyInterpolation;
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterEraserTool :
-    public UOdysseyPainterEditorTool
+    public UOdysseyPainterEditorRasterBaseTool
 {
     GENERATED_BODY()
 

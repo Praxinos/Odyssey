@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Tools/OdysseyPainterEditorTool.h"
+#include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
 #include "OdysseyPaintEngine.h"
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketToolSourceProvider.h"
 
@@ -23,7 +23,7 @@ enum class EOdysseyRasterPaintBucketToolColorToleranceSource : uint8
 };
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterPaintBucketTool : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterPaintBucketTool : public UOdysseyPainterEditorRasterBaseTool
 {
     GENERATED_BODY()
 

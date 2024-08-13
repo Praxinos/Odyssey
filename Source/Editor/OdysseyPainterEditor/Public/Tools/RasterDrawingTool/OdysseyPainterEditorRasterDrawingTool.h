@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "UObject/UObjectGlobals.h"
 #include "InputCoreTypes.h"
-#include "Tools/OdysseyPainterEditorTool.h"
+#include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
 #include "OdysseyBrushBlueprint.h"
 #include "OdysseyBrushOptions.h"
 #include "OdysseyBlendParameters.h"
@@ -24,7 +24,7 @@ class FOdysseyStrokeEngineBrushOptions;
 class IOdysseyInterpolation;
 
 UCLASS()
-class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterDrawingTool : public UOdysseyPainterEditorTool
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterDrawingTool : public UOdysseyPainterEditorRasterBaseTool
 {
     GENERATED_BODY()
 

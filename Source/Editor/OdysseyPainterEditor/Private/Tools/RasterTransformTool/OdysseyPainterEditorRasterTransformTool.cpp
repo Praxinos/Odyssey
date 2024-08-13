@@ -56,6 +56,9 @@ UOdysseyPainterEditorRasterTransformTool::IsActivable() const
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    if (UOdysseyPainterEditorRasterBaseTool::OnMouseDown(iPointInTexture, iKey))
+        return true;
+
     if( !mTransformArea )
         return false;
 
@@ -134,6 +137,9 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+    if (UOdysseyPainterEditorRasterBaseTool::OnMouseUp(iPointInTexture, iKey))
+        return true;
+
     if (!mTransformArea)
         return false;
 
