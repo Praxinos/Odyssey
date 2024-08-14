@@ -86,11 +86,11 @@ public:
 
 protected:
     //Property changes
-	virtual void LightTableChanged();
+	virtual void LightTableChanged(bool iIsInteractive);
     virtual void PreBehaviourChanged();
     virtual void PostBehaviourChanged();
-	virtual void CellsChanged();
-	virtual void CellsOffsetChanged();
+	virtual void CellsChanged(bool iIsInteractive);
+	virtual void CellsOffsetChanged(bool iIsInteractive);
     virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
 
 protected:

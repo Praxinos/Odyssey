@@ -69,30 +69,30 @@ UOdysseyAnimationLayer::OnLightTableChanged()
 }
 
 void
-UOdysseyAnimationLayer::LightTableChanged()
+UOdysseyAnimationLayer::LightTableChanged(bool iIsInteractive)
 {   
-    ImageRenderingCompositionChanged(); //Composition could change if lighttable or a key is activated/inactivated
-	ImageRenderingChanged(); //ImageRendering changes without a composition change when any other param is changed
+    ImageRenderingCompositionChanged(iIsInteractive); //Composition could change if lighttable or a key is activated/inactivated
+	ImageRenderingChanged(iIsInteractive); //ImageRendering changes without a composition change when any other param is changed
     OnLightTableChanged().Broadcast();
 }
 
 void
-UOdysseyAnimationLayer::CellsChanged()
+UOdysseyAnimationLayer::CellsChanged(bool iIsInteractive)
 {
 	UpdateCellsIndexInLayer();
 	InvalidateCellsFrameRanges();
 
 	mOnCellsChanged.Broadcast();
 
-    ImageRenderingCompositionChanged();
+    ImageRenderingCompositionChanged(iIsInteractive);
     UOdysseyLayer::OnMediaChanged().Broadcast();
 }
 
 void
-UOdysseyAnimationLayer::CellsOffsetChanged()
+UOdysseyAnimationLayer::CellsOffsetChanged(bool iIsInteractive)
 {
 	InvalidateCellsFrameRanges();
-    ImageRenderingCompositionChanged();
+    ImageRenderingCompositionChanged(iIsInteractive);
 	UOdysseyLayer::OnMediaChanged().Broadcast();
 }
 
@@ -118,11 +118,11 @@ UOdysseyAnimationLayer::PropertyChanged(const FName& iPropertyName, const FName&
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, PostBehaviour))
         PostBehaviourChanged();
     if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable))
-        LightTableChanged();
+        LightTableChanged(iIsInteractive);
 	if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Cells))
-        CellsChanged();
+        CellsChanged(iIsInteractive);
 	if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset))
-        CellsOffsetChanged();
+        CellsOffsetChanged(iIsInteractive);
 }
 
 int

@@ -195,6 +195,9 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextCell()
     if (!currentLayer)
         return;
 
+	if (currentLayer->GetCells().IsEmpty())
+		return;
+
     int currentFrame = animation->CurrentFrame;
     FInt32Range frameRange = currentLayer->GetFrameRange();
     if (currentFrame > frameRange.GetUpperBoundValue())
@@ -236,6 +239,9 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToPreviousCell()
     UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
     if (!currentLayer)
         return;
+
+	if (currentLayer->GetCells().IsEmpty())
+		return;
 
     int currentFrame = animation->CurrentFrame;
     FInt32Range frameRange = currentLayer->GetFrameRange();

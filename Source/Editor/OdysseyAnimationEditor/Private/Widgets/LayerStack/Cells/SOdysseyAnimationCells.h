@@ -137,8 +137,7 @@ private:
         double mMousePosition;
 
 		int mInitialOffset;
-		TArray<UOdysseyAnimationCell*> mAffectedCells;
-		TArray<int> mAffectedCellsInitialLength;
+		TMap<UOdysseyAnimationCell*, int> mAffectedCells;
     } mTimingHandleDragData;
 
     struct
@@ -150,7 +149,6 @@ private:
         bool mIsRightHandle;
 
 		int mInitialOffset;
-		TArray<UOdysseyAnimationCell*> mAffectedCells;
-		TArray<int> mAffectedCellsInitialLength;
+		TMap<UOdysseyAnimationCell*, int> mAffectedCells;
     } mAddCellsHandleDragData;
 };

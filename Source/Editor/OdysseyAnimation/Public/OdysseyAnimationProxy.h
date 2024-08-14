@@ -56,7 +56,7 @@ private:
 
     TArray<TSharedPtr<FBlockData>> mBlockData;
     TMap<int, TSharedPtr<FBlockData>> mFramesToBlockData;
-    TQueue<TSharedPtr<FBlockData>> mPendingBlockData;
+    TQueue<TSharedPtr<FBlockData>, EQueueMode::Mpsc> mPendingBlockData;
     FInt32Range mAnimationRange;
 };
 
