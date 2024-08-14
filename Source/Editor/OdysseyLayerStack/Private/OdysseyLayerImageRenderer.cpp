@@ -94,6 +94,8 @@ bool
 FOdysseyLayerImageRenderer::IsGameThreadOnly()
 {
     for (const FChildData& childData : mChildrenData)
+	{
+		if (childData.mRenderer->IsGameThreadOnly())
             return true;
     }
     return false;
