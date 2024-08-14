@@ -31,6 +31,7 @@ FOdysseyAnimationCellsContainerImport::Read( UOdysseyAnimationLayer* iAnimationL
             Ar.Seek( start );
             return false;
     }
+	iAnimationLayer->UpdateCellsIndexInLayer();
     return true;
 }
 

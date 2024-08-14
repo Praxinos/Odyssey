@@ -47,7 +47,9 @@ FOdysseyAnimationCellImageStaggerImport::Read( UOdysseyAnimationCellImageStagger
             {
                 case FOdysseyFile::Animation::CHUNK_CELLIMAGESTAGGER_BEHAVIOUR :
                 {
-                    Ar << iAnimationCellImageStagger->Behaviour;
+					uint32 behaviour;
+                    Ar << behaviour;
+					iAnimationCellImageStagger->Behaviour = (EOdysseyAnimationCellImageStaggerBehaviour)behaviour;
                 }
                 break;
 

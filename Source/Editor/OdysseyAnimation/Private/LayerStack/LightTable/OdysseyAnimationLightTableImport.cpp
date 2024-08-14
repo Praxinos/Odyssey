@@ -47,7 +47,9 @@ FOdysseyAnimationLightTableImport::Read( FOdysseyAnimationLightTable* iAnimation
             {
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_DISPLAY_POSITION:
                 {
-                    Ar << iAnimationLightTable->DisplayPosition;
+					uint32 displayPosition;
+                    Ar << displayPosition;
+					iAnimationLightTable->DisplayPosition = (EOdysseyLightTableDisplayPosition)displayPosition;
                 }
                 break;
 
