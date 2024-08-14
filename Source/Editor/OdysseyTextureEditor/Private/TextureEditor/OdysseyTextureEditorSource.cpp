@@ -282,6 +282,90 @@ FOdysseyTextureEditorSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock> iCopy
     }
 }
 
+void FOdysseyTextureEditorSource::PasteBlockToCurrentLayer(TSharedPtr<::ULIS::FBlock> iBlock)
+{
+    if (!iBlock)
+        return;
+
+    UOdysseyLayerStack* layerStack = GetLayerStack();
+    if (!layerStack)
+        return;
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("actions.paste", "Paste"));
+#endif
+
+    UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+    if (!currentLayer)
+        return;
+
+    FOdysseyMediaProvider mediaProvider = currentLayer->GetMediaProvider(0);
+    if (mediaProvider.IsLocked())
+        return;
+
+
+    if (mediaProvider.HasMedia<FOdysseyMediaRaster>())
+    {
+        int width = GetLayerStack()->GetTexture()->GetSizeX();
+        int height = GetLayerStack()->GetTexture()->GetSizeY();
+        ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(GetLayerStack()->GetTexture()->Source.GetFormat());
+
+        TSharedPtr<::ULIS::FBlock> copyBlock = MakeShared<::ULIS::FBlock>(width, height, format);
+
+        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+        ctx.Clear(*copyBlock);
+        ctx.Finish();
+
+        ctx.ConvertFormat(
+            *iBlock,
+            *copyBlock,
+            iBlock->Rect(),
+            ::ULIS::FVec2I(0, 0),
+            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+            0,
+            nullptr,
+            nullptr);
+
+        ctx.Finish();
+
+        TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
+        for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
+        {
+            TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
+            if (!rasterBlock)
+                continue;
+
+            FOdysseyRasterBlockMutator mutator(rasterBlock);
+            mutator.EditTilesFromRects(
+                { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
+                FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                    {
+                        ::ULIS::FEvent eventPaste;
+
+                        ctx.Blend(
+                            *copyBlock,
+                            *iBlock,
+                            copyBlock->Rect(),
+                            ::ULIS::FVec2I(0, 0),
+                            ::ULIS::Blend_Normal,
+                            ::ULIS::Alpha_Normal,
+                            1.f,
+                            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+                            0,
+                            nullptr,
+                            &eventPaste);
+
+                        return { eventPaste };
+
+                    }
+                )
+            );
+            mutator.Commit();
+        }
+    }
+}
+
 void 
 FOdysseyTextureEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> iBlock )
 {

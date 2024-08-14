@@ -35,6 +35,7 @@ public:
 
     virtual void Clear() override;
     virtual void ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock> iCopyBlock) override;
+    virtual void PasteBlockToCurrentLayer(TSharedPtr<::ULIS::FBlock> iBlock) override;
     virtual void PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> iBlock ) override;
 
     virtual void RecordCurrentFrameUndo() const override;

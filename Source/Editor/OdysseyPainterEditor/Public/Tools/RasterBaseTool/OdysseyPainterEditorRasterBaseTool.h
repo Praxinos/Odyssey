@@ -41,9 +41,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterBaseTool : public UOdy
         TSharedPtr<SWidget> CreateContextMenu();
 
     protected:
+        void SelectAll();
         void CopySelection();
         void CutSelection();
         void PasteSelection();
+        void PasteSelectionInNewLayer();
         void ClearSelection();
 
 protected:

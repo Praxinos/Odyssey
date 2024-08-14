@@ -41,6 +41,7 @@ public:
     // Utility functions
     virtual void Clear() = 0;
     virtual void ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock> iBlock) = 0; //Clears the current layer of all the pixels contained in iBlock: basically a blend with alpha = sub
+    virtual void PasteBlockToCurrentLayer(TSharedPtr<::ULIS::FBlock> iBlock) = 0;
     virtual void PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> iCopyBlock ) = 0;
 
     FOnAddEditedObject& OnAddEditedObjectDelegate();

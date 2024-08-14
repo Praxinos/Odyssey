@@ -197,6 +197,7 @@ public:
     bool HasCopyBlock(); //Did we copied a selection inside a block ? (Ctrl + C)
     bool CopyCurrentSelectionToCopyBlock();
     bool CutCurrentSelectionToCopyBlock();
+    void PasteCopiedBlock(); //In current layer
     void PasteCopiedBlockToNewLayer();
 
     // Populates the Edit Menu everytime it is displayed

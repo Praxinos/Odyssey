@@ -47,6 +47,9 @@ public:
     /** Action for clearing the current layer */
     TSharedPtr<FUICommandInfo> ClearCurrentLayer;
 
+    /** Action for selecting the whole layer in a selection */
+    TSharedPtr<FUICommandInfo> SelectAll;
+
     /** Action for clearing the current selection block, if it exists */
     TSharedPtr<FUICommandInfo> ClearCurrentSelection;
 
@@ -58,6 +61,9 @@ public:
 
     /** Action for pasting the current selection */
     TSharedPtr<FUICommandInfo> PasteCurrentSelection;
+
+    /** Action for pasting the current selection in a new layer */
+    TSharedPtr<FUICommandInfo> PasteCurrentSelectionInNewLayer;
 
     //Viewport Actions
 

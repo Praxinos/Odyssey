@@ -55,10 +55,12 @@ protected:
     void SwitchTabletAPI();
 
     void ClearCurrentLayer();
+    void SelectAll();
     void ClearCurrentSelection();
     void CopyCurrentSelection();
     void CutCurrentSelection();
     void PasteCurrentSelection();
+    void PasteCurrentSelectionInNewLayer();
 
     void ToggleEraserButton();
 

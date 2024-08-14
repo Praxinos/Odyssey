@@ -1828,6 +1828,12 @@ bool FOdysseyPainterEditor::CutCurrentSelectionToCopyBlock()
     return true;
 }
 
+void FOdysseyPainterEditor::PasteCopiedBlock()
+{
+    if (mSource)
+        mSource->PasteBlockToCurrentLayer( mCopyBlock );
+}
+
 void FOdysseyPainterEditor::PasteCopiedBlockToNewLayer()
 {
     if( mSource )

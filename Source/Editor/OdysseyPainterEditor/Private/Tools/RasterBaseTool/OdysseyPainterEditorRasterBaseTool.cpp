@@ -153,7 +153,10 @@ void UOdysseyPainterEditorRasterBaseTool::ExtendContextMenu(FMenuBuilder& menu)
             LOCTEXT("raster-tool.object-context-menu.select-all.name", "Select All")
             , LOCTEXT("raster-tool.object-context-menu.select-all.tooltip", "Select All")
             , FSlateIcon()
-            , FUIAction());
+            , FUIAction(
+                FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::SelectAll)
+              , FCanExecuteAction::CreateLambda([this]() { return mEditor != nullptr; }))
+        );
 
         menu.AddMenuEntry(
             LOCTEXT("raster-tool.object-context-menu.copy-selection.name", "Copy Selection")
@@ -192,10 +195,13 @@ void UOdysseyPainterEditorRasterBaseTool::ExtendContextMenu(FMenuBuilder& menu)
         );
 
         menu.AddMenuEntry(
-            LOCTEXT("raster-tool.object-context-menu.paste-selection-in-current-layer.name", "Paste Selection In Current Layer")
-            , LOCTEXT("raster-tool.object-context-menu.paste-selection-in-current-layer.tooltip", "Paste Selection In Current Layer")
+            LOCTEXT("raster-tool.object-context-menu.paste-selection-in-new-layer.name", "Paste Selection In New Layer")
+            , LOCTEXT("raster-tool.object-context-menu.paste-selection-in-new-layer.tooltip", "Paste Selection In New Layer")
             , FSlateIcon()
-            , FUIAction());
+            , FUIAction(
+                FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::PasteSelectionInNewLayer)
+                , FCanExecuteAction::CreateLambda([this]() { return (mEditor && mEditor->HasCopyBlock()); }))
+        );
 
         menu.AddMenuEntry(
             LOCTEXT("raster-tool.object-context-menu.invert-selection.name", "Invert Selection")
@@ -211,6 +217,19 @@ void UOdysseyPainterEditorRasterBaseTool::BindShortcuts(FBaseToolkit* iToolkit)
 
 }
 
+void UOdysseyPainterEditorRasterBaseTool::SelectAll()
+{
+    if (mEditor)
+    {
+        TArray<FVector2D> polyPoints;
+        polyPoints.Add(FVector2D(0, 0));
+        polyPoints.Add(FVector2D(mEditor->RasterSelection()->GetBlock()->Width(), 0));
+        polyPoints.Add(FVector2D(mEditor->RasterSelection()->GetBlock()->Width(), mEditor->RasterSelection()->GetBlock()->Height()));
+        polyPoints.Add(FVector2D(0, mEditor->RasterSelection()->GetBlock()->Height()));
+
+        mEditor->RasterSelection()->Add(polyPoints);
+    }
+}
 
 void UOdysseyPainterEditorRasterBaseTool::CopySelection()
 {
@@ -225,6 +244,12 @@ void UOdysseyPainterEditorRasterBaseTool::CutSelection()
 }
 
 void UOdysseyPainterEditorRasterBaseTool::PasteSelection()
+{
+    if (mEditor)
+        mEditor->PasteCopiedBlock();
+}
+
+void UOdysseyPainterEditorRasterBaseTool::PasteSelectionInNewLayer()
 {
     if (mEditor)
         mEditor->PasteCopiedBlockToNewLayer();
