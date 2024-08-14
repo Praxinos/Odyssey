@@ -450,7 +450,7 @@ SOdysseyAnimationCells::GetCellBreakIndicatorOffset(UOdysseyAnimationCell* iCell
 	if (!cell)
 		return 0.f;
 
-	return frame - cell->GetFrameRange().GetLowerBoundValue();
+	return (int)frame - cell->GetFrameRange().GetLowerBoundValue();
 }
 
 EVisibility
@@ -546,7 +546,7 @@ SOdysseyAnimationCells::OnLengthHandleDragged(const FGeometry& iGeometry, const 
         mouseOffsetInt = (int)(mouseOffset / mExtension->Timeline()->GetFrameWidth() - 0.5f);
 
     UOdysseyAnimationCell* cell = mAnimationLayer->GetCells()[mLengthHandleDragData.mCellIndex];
-    int length = mLengthHandleDragData.mInitialLength + mouseOffsetInt;
+    int length = FMath::Max(0, mLengthHandleDragData.mInitialLength + mouseOffsetInt);
 	FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), length, EPropertyChangeType::Interactive);
 }
 
@@ -584,14 +584,20 @@ SOdysseyAnimationCells::OnTimingHandleDragStarted(const FGeometry& iGeometry, co
 void
 SOdysseyAnimationCells::OnTimingHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCells::OnTimingHandleDragged);
+	
 	for (int i = 0; i < mTimingHandleDragData.mAffectedCells.Num(); i++)
 	{
+		TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCells::OnTimingHandleDragged::InitAffectedCell);
 		UOdysseyAnimationCell* cell = mTimingHandleDragData.mAffectedCells[i];
 		int initialLength = mTimingHandleDragData.mAffectedCellsInitialLength[i];
 		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), initialLength, EPropertyChangeType::Interactive );
 	}
 
-	FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), mTimingHandleDragData.mInitialOffset, EPropertyChangeType::Interactive );
+	{
+		TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCells::OnTimingHandleDragged::InitCellsOffset);
+		FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), mTimingHandleDragData.mInitialOffset, EPropertyChangeType::Interactive );
+	}
 
 	mTimingHandleDragData.mAffectedCells.Empty();
 	mTimingHandleDragData.mAffectedCellsInitialLength.Empty();
@@ -652,6 +658,7 @@ SOdysseyAnimationCells::OnTimingHandleDragged(const FGeometry& iGeometry, const 
         // When dragging to the left, the current cell length is always edited
         // It cannot be removed
         {
+			TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCells::OnTimingHandleDragged::SetCurrentCellLength);
 			mTimingHandleDragData.mAffectedCells.Add(cell);
 			mTimingHandleDragData.mAffectedCellsInitialLength.Add(cell->Length);
 
@@ -662,6 +669,7 @@ SOdysseyAnimationCells::OnTimingHandleDragged(const FGeometry& iGeometry, const 
         //for each cell adjust its length or hide it 
         for ( int i = mTimingHandleDragData.mCellIndex - 1; i >= 0 && mouseOffsetInt < 0; i-- )
         {
+			TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCells::OnTimingHandleDragged::SetCellLength);
             UOdysseyAnimationCell* cellToAdjust = mAnimationLayer->GetCells()[i];
 			
 			mTimingHandleDragData.mAffectedCells.Add(cellToAdjust);
@@ -679,6 +687,7 @@ SOdysseyAnimationCells::OnTimingHandleDragged(const FGeometry& iGeometry, const 
         //if we dragged further than the first cell adjust layer's offset 
         if ( mouseOffsetInt < 0 )
         {
+			TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationCells::OnTimingHandleDragged::SetCellsOffset);
 			FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), mAnimationLayer->CellsOffset + mouseOffsetInt, EPropertyChangeType::Interactive );
         }
     }
@@ -798,8 +807,8 @@ SOdysseyAnimationCells::OnAddCellsHandleDragged(const FGeometry& iGeometry, cons
             {
                 UOdysseyAnimationCell* cellToAdjust = mAnimationLayer->GetCells()[i];
 				
-				mTimingHandleDragData.mAffectedCells.Add(cellToAdjust);
-				mTimingHandleDragData.mAffectedCellsInitialLength.Add(cellToAdjust->Length);
+				mAddCellsHandleDragData.mAffectedCells.Add(cellToAdjust);
+				mAddCellsHandleDragData.mAffectedCellsInitialLength.Add(cellToAdjust->Length);
 
                 int lengthToRemove = FMath::Min(cellToAdjust->Length, -mouseOffsetInt);
                 int length = cellToAdjust->Length - lengthToRemove;
@@ -825,8 +834,8 @@ SOdysseyAnimationCells::OnAddCellsHandleDragged(const FGeometry& iGeometry, cons
             {
                 UOdysseyAnimationCell* cellToAdjust = mAnimationLayer->GetCells()[i];
 				
-				mTimingHandleDragData.mAffectedCells.Add(cellToAdjust);
-				mTimingHandleDragData.mAffectedCellsInitialLength.Add(cellToAdjust->Length);
+				mAddCellsHandleDragData.mAffectedCells.Add(cellToAdjust);
+				mAddCellsHandleDragData.mAffectedCellsInitialLength.Add(cellToAdjust->Length);
 
                 int lengthToRemove = FMath::Min(cellToAdjust->Length, mouseOffsetInt);
                 int length = cellToAdjust->Length - lengthToRemove;

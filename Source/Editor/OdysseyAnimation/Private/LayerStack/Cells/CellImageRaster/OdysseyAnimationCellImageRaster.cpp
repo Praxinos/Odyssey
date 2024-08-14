@@ -18,23 +18,14 @@ UOdysseyAnimationCellImageRaster::GetRasterBlock() const
 {
 	if (!mRasterBlock)
 	{
-		mRasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyAnimationCellImageRaster*>(this));
-
-		::ULIS::eFormat format = GetAnimation()->Format();
 		int width = GetAnimation()->Width();
 		int height = GetAnimation()->Height();
+		::ULIS::eFormat format = GetAnimation()->Format();
 
-		TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(width, height, format);
-
-		::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-		ctx.Clear(*block.Get());
-		ctx.Finish();
-
-		mRasterBlock->SetBlock(block);
+		mRasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyAnimationCellImageRaster*>(this), width, height, format);
 	
 		mRasterBlock->OnBlockChanged().AddUObject(const_cast<UOdysseyAnimationCellImageRaster*>(this), &UOdysseyAnimationCellImageRaster::OnBlockChanged);
 		mRasterBlock->OnBlockCommited().AddUObject(const_cast<UOdysseyAnimationCellImageRaster*>(this), &UOdysseyAnimationCellImageRaster::OnBlockCommited);
-		mRasterBlock->OnBlockPtrChanged().AddUObject(const_cast<UOdysseyAnimationCellImageRaster*>(this), &UOdysseyAnimationCellImageRaster::OnBlockPtrChanged);
 		mRasterBlock->PostProcess().BindUObject(const_cast<UOdysseyAnimationCellImageRaster*>(this), &UOdysseyAnimationCellImageRaster::RasterBlockPostProcess);
 	}
     return mRasterBlock;
@@ -52,11 +43,11 @@ UOdysseyAnimationCellImageRaster::PostDuplicate(EDuplicateMode::Type iDuplicateM
 		::ULIS::eFormat format = GetAnimation()->Format();
 		int width = GetAnimation()->Width();
 		int height = GetAnimation()->Height();
-		mRasterBlock->PostDuplicate(width, height, format);
+		mRasterBlock->PostDuplicate();
+		mRasterBlock->ConvertTo(width, height, format);
 	
 		mRasterBlock->OnBlockChanged().AddUObject(this, &UOdysseyAnimationCellImageRaster::OnBlockChanged);
 		mRasterBlock->OnBlockCommited().AddUObject(this, &UOdysseyAnimationCellImageRaster::OnBlockCommited);
-		mRasterBlock->OnBlockPtrChanged().AddUObject(this, &UOdysseyAnimationCellImageRaster::OnBlockPtrChanged);
 		mRasterBlock->PostProcess().BindUObject(this, &UOdysseyAnimationCellImageRaster::RasterBlockPostProcess);
 	}
 }

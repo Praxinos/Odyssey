@@ -281,6 +281,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
 void
 UOdysseyAnimationPlayer::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::OnImageRenderingChanged);
 	if ( !Animation )
 		return;
 

@@ -27,17 +27,18 @@ FOdysseyRasterBlock::~FOdysseyRasterBlock()
 }
 
 FOdysseyRasterBlock::FOdysseyRasterBlock()
-    //: mCache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION)
     : mOwner(nullptr)
-    , Id(FGuid::NewGuid())
+    , mId(FGuid::NewGuid())
     , mBlockData(nullptr)
 {
 }
 
-FOdysseyRasterBlock::FOdysseyRasterBlock(UObject* iOwner)
-    //: mCache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION)
+FOdysseyRasterBlock::FOdysseyRasterBlock(UObject* iOwner, int iWidth, int iHeight, ::ULIS::eFormat iFormat)
     : mOwner(iOwner)
-    , Id(FGuid::NewGuid())
+	, mWidth(iWidth)
+	, mHeight(iHeight)
+	, mFormat(iFormat)
+    , mId(FGuid::NewGuid())
     , mBlockData(nullptr)
 {
 }
@@ -49,26 +50,23 @@ FOdysseyRasterBlock::GetOwner() const
 }
 
 void
-FOdysseyRasterBlock::PostDuplicate(int iWidth, int iHeight, ::ULIS::eFormat iFormat)
+FOdysseyRasterBlock::PostDuplicate()
 {
-    if ( iWidth == GetWidth() && iHeight == GetHeight() && iFormat == GetFormat() )
-    {
-        //GetBlock using old Id (having it in memory is needed when changing the Id)
-        TSharedPtr<::ULIS::FBlock> originalBlock = GetBlock();
-
-        //Set new Id
-        Id = FGuid::NewGuid();
-
-        return; //will save the block using the new Id
-    }
-
-    //GetBlock using old Id
+	//Load the block in memory
+	//Then change the Id
+	//Once the SharedPtr is released the block will be automatically saved in cache with the new Id
     TSharedPtr<::ULIS::FBlock> originalBlock = GetBlock();
+	mId = FGuid::NewGuid();
+}
 
-    //Set new Id
-    Id = FGuid::NewGuid();
+void
+FOdysseyRasterBlock::ConvertTo(int iWidth, int iHeight, ::ULIS::eFormat iFormat)
+{
+    if ( iWidth == mWidth && iHeight == mHeight && iFormat == mFormat )
+        return; //will save the block using the new Id
 
     //Duplicate block
+	TSharedPtr<::ULIS::FBlock> originalBlock = GetBlock();
     TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(iWidth, iHeight, iFormat);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iFormat);
     ctx.ConvertFormat(
@@ -80,45 +78,68 @@ FOdysseyRasterBlock::PostDuplicate(int iWidth, int iHeight, ::ULIS::eFormat iFor
     );
     ctx.Finish();
 
-    //Set and save block using new Id
-    SetBlock(block);
-    originalBlock = nullptr;
-    block = nullptr;
+    FScopeLock Lock(&mMutex);
+    
+	//we have the responsability to delete the block data
+	if ( mBlockData->mBuffer.IsOwned() )
+	{
+		//Data is owned by the sharedBuffer
+		originalBlock->OnCleanup(::ULIS::FOnCleanupData());
+	}
+	else
+	{
+		//Data is not owned by the sharedBuffer, destroy it ourself
+		originalBlock->OnCleanup(::ULIS::FOnCleanupData(&::ULIS::OnCleanup_FreeMemory));
+	}
+
+    mBlock = block;
+	mWidth = iWidth;
+	mHeight = iHeight;
+	mFormat = iFormat;
+
+	delete mBlockData;
+	mBlockData = new FBlockData();
+	mBlockData->mBuffer = FUniqueBuffer::MakeView(block->Bits(), block->BytesTotal());
+	mBlockData->mIsCacheInvalid = true;
+	mBlockData->mId = mId;
+        
+    block->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, mBlockData));
 }
 
 const FGuid&
 FOdysseyRasterBlock::GetId() const
 {
-    return Id;
+    return mId;
 }
 
 int
 FOdysseyRasterBlock::GetWidth() const
 {
-    return Width;
+    return mWidth;
 }
 
 int
 FOdysseyRasterBlock::GetHeight() const
 {
-    return Height;
+    return mHeight;
 }
 
 ::ULIS::FRectI
 FOdysseyRasterBlock::GetRect() const
 {
-    return ::ULIS::FRectI::FromXYWH(0, 0, Width, Height);
+    return ::ULIS::FRectI::FromXYWH(0, 0, mWidth, mHeight);
 }
 
 ::ULIS::eFormat
 FOdysseyRasterBlock::GetFormat() const
 {
-    return (::ULIS::eFormat)Format;
+    return mFormat;
 }
 
 void
 FOdysseyRasterBlock::CleanupBlock(uint8* iData, void* iInfo)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyRasterBlock::CleanupBlock);
     FBlockData* blockData = static_cast<FBlockData*>(iInfo);
 
     if ( blockData->mIsCacheInvalid )
@@ -142,62 +163,12 @@ FOdysseyRasterBlock::CleanupBlock(uint8* iData, void* iInfo)
     delete blockData;
 }
 
-void
-FOdysseyRasterBlock::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
-{
-    FScopeLock Lock(&mMutex);
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> currentBlock;
-    currentBlock = mBlock.Pin();
-    if (iBlock == currentBlock)
-        return;
-    
-    if (currentBlock)
-    {
-        //we have the responsability to delete the block data
-        if ( mBlockData->mBuffer.IsOwned() )
-        {
-            //Data is owned by the sharedBuffer
-            currentBlock->OnCleanup(::ULIS::FOnCleanupData());
-        }
-        else
-        {
-            //Data is not owned by the sharedBuffer, destroy it ourself
-            currentBlock->OnCleanup(::ULIS::FOnCleanupData(&::ULIS::OnCleanup_FreeMemory));
-        }
-
-        //Cleanup everything else
-        mBlock = nullptr;
-        Width = -1;
-        Height = -1;
-        delete mBlockData;
-        mBlockData = nullptr;
-    }
-
-    if (iBlock)
-    {
-        mBlock = iBlock;
-        Width = iBlock->Width();
-        Height = iBlock->Height();
-        Format = iBlock->Format();
-
-        mBlockData = new FBlockData();
-        mBlockData->mBuffer = FUniqueBuffer::MakeView(iBlock->Bits(), iBlock->BytesTotal());
-        mBlockData->mIsCacheInvalid = true;
-        mBlockData->mId = Id;
-        
-        iBlock->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, mBlockData));
-    }
-    
-    mOnBlockPtrChanged.Broadcast();
-}
-
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 FOdysseyRasterBlock::GetBlock()
 {
 	FScopeLock Lock(&mMutex);
 
-    if ( Width <= 0 || Height <= 0 )
+    if ( mWidth <= 0 || mHeight <= 0 )
         return nullptr;
     
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block;
@@ -206,23 +177,31 @@ FOdysseyRasterBlock::GetBlock()
         return block;
 
     mBlockData = new FBlockData();
-    mBlockData->mId = Id;
+    mBlockData->mId = mId;
     mBlockData->mIsCacheInvalid = false;
 
     //FUniqueBuffer buffer;
     FOdysseyDiskCache cache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION);
-    if ( !cache.Load(Id.ToString(), mBlockData->mBuffer) )
+    if ( !cache.Load(mId.ToString(), mBlockData->mBuffer) )
     {
         mBlockData->mIsCacheInvalid = true;
         if (!LoadBlockFromBulkData(mBlockData->mBuffer))
         {
-            delete mBlockData;
-            mBlockData = nullptr;
-            return nullptr;
+			block = MakeShared<::ULIS::FBlock>(mWidth, mHeight, mFormat);
+			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mFormat);
+			ctx.Clear(*block);
+			ctx.Finish();
+
+			mBlockData->mBuffer = FUniqueBuffer::MakeView(block->Bits(), block->BytesTotal());
+
+			block->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, mBlockData));
+			mBlock = block;
+
+            return block;
         }
     }
 
-    block = MakeShared<::ULIS::FBlock>((uint8*)mBlockData->mBuffer.GetData(), Width, Height, (::ULIS::eFormat)Format);
+    block = MakeShared<::ULIS::FBlock>((uint8*)mBlockData->mBuffer.GetData(), mWidth, mHeight, mFormat);
     block->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyRasterBlock::CleanupBlock, mBlockData));
     mBlock = block;
 
@@ -258,15 +237,11 @@ FOdysseyRasterBlock::PostProcess()
     return mPostProcess;
 }
 
-FSimpleMulticastDelegate&
-FOdysseyRasterBlock::OnBlockPtrChanged()
-{
-    return mOnBlockPtrChanged;
-}
-
 bool
 FOdysseyRasterBlock::LoadBlockFromBulkData(FUniqueBuffer& oBuffer)
 {
+	if (!mBulkData.HasPayloadData())
+		return false;
     FSharedBuffer buffer = mBulkData.GetPayload().Get();
     oBuffer = FUniqueBuffer::Alloc(buffer.GetSize());
     oBuffer.GetView().CopyFrom(buffer);
@@ -298,15 +273,18 @@ FOdysseyRasterBlock::Serialize(FArchive& Ar)
         {
             //Old Style No Chunk Loading
 
-            Ar << Id; //unique ID identifying the block
-            Ar << Width;
-            Ar << Height;
-            Ar << Format;
+            Ar << mId; //unique ID identifying the block
+            Ar << mWidth;
+            Ar << mHeight;
+
+			int format;
+            Ar << format;
+			mFormat = (::ULIS::eFormat)format;
 
             mBulkData.Serialize(Ar, mOwner);
         }
 
         FOdysseyDiskCache cache(FOdysseyRasterBlock_CACHE_NAME, FOdysseyRasterBlock_CACHE_VERSION);
-        cache.Remove(Id.ToString());
+        cache.Remove(mId.ToString());
     }
 }

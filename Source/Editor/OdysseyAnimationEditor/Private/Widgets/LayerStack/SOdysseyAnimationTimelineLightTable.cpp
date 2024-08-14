@@ -247,6 +247,7 @@ SOdysseyAnimationTimelineLightTable::OnCurrentFrameChanged(UOdysseyAnimation* iA
 void
 SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged);
 	if (iEvent.IsInteractive())
 		return;
 
@@ -267,6 +268,7 @@ SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged(const FOdysseyImage
 void
 SOdysseyAnimationTimelineLightTable::Update()
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationTimelineLightTable::Update);
 	UOdysseyAnimation* animation = mLayer->GetAnimation();
 	if (!animation)
 		return;

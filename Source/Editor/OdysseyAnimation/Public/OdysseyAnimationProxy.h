@@ -63,6 +63,7 @@ private:
 class FBlockData
 {
 public:
+	~FBlockData();
     FBlockData(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iComposition);
 
 public:

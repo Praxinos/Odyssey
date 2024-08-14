@@ -164,6 +164,7 @@ FOdysseyAnimationEditorExtension::OnLayerMediaChanged()
 void
 FOdysseyAnimationEditorExtension::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationEditorExtension::OnImageRenderingChanged);
 	if (iEvent.IsInteractive() || iEvent.GetType() != FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
 		return;
 

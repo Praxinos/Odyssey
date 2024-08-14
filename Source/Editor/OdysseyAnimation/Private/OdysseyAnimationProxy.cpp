@@ -31,6 +31,7 @@ FOdysseyAnimationProxy::FOdysseyAnimationProxy(UOdysseyAnimation* iAnimation)
 TSharedPtr<FBlockData>
 FOdysseyAnimationProxy::GetBlockDataForComposition(const TArray<FGuid>& iComposition)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxy::GetBlockDataForComposition);
     for (TSharedPtr<FBlockData> blockData : mBlockData)
     {
         if (blockData->GetComposition() == iComposition)
@@ -199,13 +200,14 @@ FOdysseyAnimationProxy::OnImageRenderingPreChanged(const FOdysseyImageRenderingC
 void
 FOdysseyAnimationProxy::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxy::OnImageRenderingChanged);
     if (iEvent.IsInteractive())
         return;
 
     const FGuid& id = iEvent.GetId();
     if(iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
     {
-        FInt32Range range = mAnimation->GetFrameRange();
+        FInt32Range range = mAnimation->GetFrameRange();	
 
         TArray<FInt32Range> rangesToRemove;
         if ( !mAnimationRange.GetUpperBound().IsOpen() && !mAnimationRange.GetLowerBound().IsOpen() )
@@ -302,12 +304,12 @@ FOdysseyAnimationProxy::OnImageRenderingChanged(const FOdysseyImageRenderingChan
         }
 
         //Remove unused blockData
-        mBlockData.RemoveAll(
-            [](TSharedPtr<FBlockData> iBlockData)
-            {
-                return iBlockData->GetFrameIndexes().IsEmpty();
-            }
-        );
+		mBlockData.RemoveAll(
+			[](TSharedPtr<FBlockData> iBlockData)
+			{
+				return iBlockData->GetFrameIndexes().IsEmpty();
+			}
+		);
     }
 
     for (TSharedPtr<FBlockData> blockData : mBlockData)
@@ -323,6 +325,19 @@ FOdysseyAnimationProxy::OnImageRenderingChanged(const FOdysseyImageRenderingChan
 
 //=================================================================
 
+FBlockData::~FBlockData()
+{
+	//PATCH: To avoid a crash when renderer is destroyed
+	// Because some renderers contain TStrongObjectPtr members
+	// And TStrongObjectPtr must be created AND destroyed on the GameThread
+	// Otherwise it crashes
+	AsyncTask(ENamedThreads::GameThread, [r = mRenderer]() {
+		// code to execute on game thread here
+		TSharedPtr<IOdysseyImageRenderer> r1 = r;
+		r1.Reset();
+	});
+}
+
 FBlockData::FBlockData(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iComposition)
     : mAnimation(iAnimation)
     , mComposition(iComposition)
@@ -330,8 +345,7 @@ FBlockData::FBlockData(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iComp
     , mFrameIndexes()
     , mIsInvalid(false)
 {
-    mRasterBlock = MakeShared<FOdysseyRasterBlock>(mAnimation);
-    mRasterBlock->SetBlock(MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format()));
+    mRasterBlock = MakeShared<FOdysseyRasterBlock>(mAnimation, mAnimation->Width(), mAnimation->Height(), mAnimation->Format());
 }
 
 TSharedPtr<::ULIS::FBlock>
@@ -355,6 +369,7 @@ FBlockData::GetRasterBlock() const
 void
 FBlockData::PreChange(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FBlockData::PreChange);
     //here we say that the iId part of the rendering will be modified
     //
     FScopeLock Lock(&mEditMutex);
@@ -369,6 +384,7 @@ FBlockData::PreChange(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
 bool
 FBlockData::PostChange(const FGuid& iId)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FBlockData::PostChange);
     //here we say that the iId part of the rendering has been modified
     //optionnally specific rectangles to invalidate can be given
     //otherwise the full size of the rendering will be invalidated
@@ -418,13 +434,11 @@ FBlockData::Render(TSharedPtr<IOdysseyImageRenderer> iRenderer, TSharedPtr<FOdys
     FOdysseyRasterBlockMutator rasterBlockMutator(iRasterBlock, false);
     rasterBlockMutator.EditTilesFromRects(
         iInvalidRects,
-        FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap)
-            {
-                FOdysseyImageRendererCopyParams params(iBlock, iTileMap.InvalidRects());
-                return iRenderer->Copy(params,  {});
-            }
-        )
+		[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap)
+		{
+			FOdysseyImageRendererCopyParams params(iBlock, iTileMap.InvalidRects());
+			return iRenderer->Copy(params,  {});
+		}
     );
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iRasterBlock->GetFormat());
     ctx.Finish();

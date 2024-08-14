@@ -14,9 +14,6 @@ class FOdysseyRasterBlock;
 class ODYSSEYIMAGING_API FOdysseyRasterBlockMutator
 {
 public:
-    DECLARE_DELEGATE_RetVal_TwoParams(TArray<::ULIS::FEvent>, FEditDelegate, TSharedPtr<::ULIS::FBlock>, const FULISInvalidTileMap&)
-
-public:
     ~FOdysseyRasterBlockMutator();
     FOdysseyRasterBlockMutator(bool iStoreUndo = true);
     FOdysseyRasterBlockMutator(TSharedPtr<FOdysseyRasterBlock> iRasterBlock, bool iStoreUndo = true);
@@ -29,7 +26,7 @@ public:
     const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& GetOriginalTileBlocks() const;
 
     void ResetTilesFromRects(const TArray<::ULIS::FRectI>& iRects);
-    void EditTilesFromRects(const TArray<::ULIS::FRectI>& iRects, const FEditDelegate& iDelegate);
+    void EditTilesFromRects(const TArray<::ULIS::FRectI>& iRects, TFunction<TArray<::ULIS::FEvent>(TSharedPtr<::ULIS::FBlock>, const FULISInvalidTileMap&)> iDelegate);
 
 	void Copy(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects);
 

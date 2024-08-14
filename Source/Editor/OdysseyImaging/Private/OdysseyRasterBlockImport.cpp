@@ -53,20 +53,22 @@ FOdysseyRasterBlockImport::Read( FOdysseyRasterBlock* iRasterBlock
 
                 case FOdysseyFile::RasterBlock::CHUNK_RASTERBLOCK_ID :
                 {
-                    Ar << iRasterBlock->Id; //unique ID identifying the block
+                    Ar << iRasterBlock->mId; //unique ID identifying the block
                 }
                 break;
                 
                 case FOdysseyFile::RasterBlock::CHUNK_RASTERBLOCK_RESOLUTION :
                 {
-                    Ar << iRasterBlock->Width;
-                    Ar << iRasterBlock->Height;
+                    Ar << iRasterBlock->mWidth;
+                    Ar << iRasterBlock->mHeight;
                 }
                 break;
 
                 case FOdysseyFile::RasterBlock::CHUNK_RASTERBLOCK_FORMAT :
                 {
-                    Ar << iRasterBlock->Format;
+					int format = iRasterBlock->mFormat;
+                    Ar << format;
+					iRasterBlock->mFormat = (::ULIS::eFormat)format;
                 }
                 break;
 

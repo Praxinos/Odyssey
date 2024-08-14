@@ -227,28 +227,26 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 
         blockMutator.EditTilesFromRects(
             { rect },
-            FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-                {
-                    TArray<::ULIS::FEvent> lastEvent;
-                    for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
-                    {
-                        UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(iLayers[layerIndex]);
-                        if ( !layer )
-                            continue;
+			[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+			{
+				TArray<::ULIS::FEvent> lastEvent;
+				for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
+				{
+					UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(iLayers[layerIndex]);
+					if ( !layer )
+						continue;
 
-                        TSharedPtr<IOdysseyImageRenderer> renderer = layer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, frame);
-                        renderer->Init();
+					TSharedPtr<IOdysseyImageRenderer> renderer = layer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, frame);
+					renderer->Init();
 
-                        FOdysseyImageRendererBlendParams params(iBlock, { rect });
-                        params.mBlendMode = (::ULIS::eBlendMode)layer->BlendMode;
-                        params.mOpacity = layer->Opacity;
-                        lastEvent = renderer->Blend(params, lastEvent);
-                    }
+					FOdysseyImageRendererBlendParams params(iBlock, { rect });
+					params.mBlendMode = (::ULIS::eBlendMode)layer->BlendMode;
+					params.mOpacity = layer->Opacity;
+					lastEvent = renderer->Blend(params, lastEvent);
+				}
 
-                    return lastEvent;
-                }
-            )
+				return lastEvent;
+			}
         );
     }
 

@@ -304,45 +304,43 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
     mRasterMutator.SetRasterBlock(rasterBlock);
     mRasterMutator.EditTilesFromRects(
         { boundingBox },
-        FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-            [&, referenceBlock = mSelectionBlock](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-            {
-                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-                ::ULIS::FEvent blendEvent;
+		[&, referenceBlock = mSelectionBlock](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+		{
+			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+			::ULIS::FEvent blendEvent;
 
-                ctx.Blend(
-                    *referenceBlock,
-                    *iBlock,
-                    referenceBlock->Rect(),
-                    ::ULIS::FVec2I(boundingBox.x, boundingBox.y),
-                    ::ULIS::Blend_Normal,
-                    ::ULIS::Alpha_Sub,
-                    1.f,
-                    ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                    0,
-                    nullptr,
-                    nullptr
-                );
+			ctx.Blend(
+				*referenceBlock,
+				*iBlock,
+				referenceBlock->Rect(),
+				::ULIS::FVec2I(boundingBox.x, boundingBox.y),
+				::ULIS::Blend_Normal,
+				::ULIS::Alpha_Sub,
+				1.f,
+				::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+				0,
+				nullptr,
+				nullptr
+			);
 
-                ctx.Finish();
+			ctx.Finish();
 
-                ctx.Blend(
-                    *referenceBlock,
-                    *paintBlock,
-                    referenceBlock->Rect(),
-                    ::ULIS::FVec2I(boundingBox.x, boundingBox.y),
-                    ::ULIS::Blend_Normal,
-                    ::ULIS::Alpha_Normal,
-                    1.f,
-                    ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                    0,
-                    nullptr,
-                    &blendEvent
-                );
+			ctx.Blend(
+				*referenceBlock,
+				*paintBlock,
+				referenceBlock->Rect(),
+				::ULIS::FVec2I(boundingBox.x, boundingBox.y),
+				::ULIS::Blend_Normal,
+				::ULIS::Alpha_Normal,
+				1.f,
+				::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+				0,
+				nullptr,
+				&blendEvent
+			);
 
-                return { blendEvent };
-            }
-        )
+			return { blendEvent };
+		}
     );
 
     paintBlock->Dirty();

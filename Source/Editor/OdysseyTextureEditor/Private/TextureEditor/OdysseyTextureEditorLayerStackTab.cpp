@@ -298,14 +298,12 @@ FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
         FOdysseyRasterBlockMutator rasterBlockMutator(layerImageRaster->GetRasterBlock(), false);
         rasterBlockMutator.EditTilesFromRects(
             { textureBlock->Rect() },
-            FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
-                {
-                    ctx.Copy(*textureBlock, *iBlock);
-                    ctx.Finish();
-                    return {};
-                }
-            )
+			[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
+			{
+				ctx.Copy(*textureBlock, *iBlock);
+				ctx.Finish();
+				return {};
+			}
         );
         rasterBlockMutator.Commit();
         

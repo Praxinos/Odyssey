@@ -75,8 +75,15 @@ void
 FOdysseyImageRenderingAbility::ImageRenderingCompositionChanged(bool iIsInteractive)
 {
     FOdysseyImageRenderingChangedEvent eventChanged(FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange, iIsInteractive, GetImageRenderingId(), {});
-    OnImageRenderingPreChangedDelegate().Broadcast(eventChanged);
-    OnImageRenderingChangedDelegate().Broadcast(eventChanged);
+	{
+		TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyImageRenderingAbility::ImageRenderingCompositionChanged::PreChange);
+    	OnImageRenderingPreChangedDelegate().Broadcast(eventChanged);
+	}
+
+	{
+		TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyImageRenderingAbility::ImageRenderingCompositionChanged::Change);
+    	OnImageRenderingChangedDelegate().Broadcast(eventChanged);
+	}
 }
 
 TArray<::ULIS::FRectI>

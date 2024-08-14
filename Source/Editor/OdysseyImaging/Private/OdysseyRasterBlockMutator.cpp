@@ -92,7 +92,7 @@ FOdysseyRasterBlockMutator::ResetTilesFromRects(const TArray<::ULIS::FRectI>& iR
 }
 
 void
-FOdysseyRasterBlockMutator::EditTilesFromRects(const TArray<::ULIS::FRectI>& iRects, const FEditDelegate& iDelegate)
+FOdysseyRasterBlockMutator::EditTilesFromRects(const TArray<::ULIS::FRectI>& iRects, TFunction<TArray<::ULIS::FEvent>(TSharedPtr<::ULIS::FBlock>, const FULISInvalidTileMap&)> iDelegate)
 {
     if (!mRasterBlock)
         return;
@@ -117,9 +117,9 @@ FOdysseyRasterBlockMutator::EditTilesFromRects(const TArray<::ULIS::FRectI>& iRe
     }
     ctx.Finish();
 
-    if (iDelegate.IsBound())
+    if (iDelegate)
     {
-        TArray<::ULIS::FEvent> delegateEvents = iDelegate.Execute(mBlock, invalidTileMap);
+        TArray<::ULIS::FEvent> delegateEvents = iDelegate(mBlock, invalidTileMap);
         if (mRasterBlock->PostProcess().IsBound())
             mRasterBlock->PostProcess().Execute(mOriginalTileBlocks, invalidTileMap, delegateEvents);
     }
@@ -181,7 +181,15 @@ FOdysseyRasterBlockMutator::Abort()
 }
 
 void
-Copy(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects)
+FOdysseyRasterBlockMutator::Copy(TSharedPtr<::ULIS::FBlock> iBlockToCopy, const TArray<::ULIS::FRectI>& iRects)
 {
-
+	EditTilesFromRects(iRects,
+		[this, iBlockToCopy](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+		{
+			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+			ctx.ConvertFormat(*iBlockToCopy, *mBlock);
+			ctx.Finish();
+			return {};
+		}
+	);
 }

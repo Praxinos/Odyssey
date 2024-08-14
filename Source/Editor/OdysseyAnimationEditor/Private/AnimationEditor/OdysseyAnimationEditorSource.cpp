@@ -215,15 +215,13 @@ FOdysseyAnimationEditorSource::Clear()
 			FOdysseyRasterBlockMutator mutator(rasterBlock);
 			mutator.EditTilesFromRects(
 				{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-				FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-					[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-					{
-						::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-						::ULIS::FEvent eventClear;
-						ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
-						return { eventClear };
-					}
-				)
+				[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+				{
+					::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+					::ULIS::FEvent eventClear;
+					ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+					return { eventClear };
+				}
 			);
 			mutator.Commit();
 			
@@ -285,29 +283,27 @@ void FOdysseyAnimationEditorSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock
             FOdysseyRasterBlockMutator mutator(rasterBlock);
             mutator.EditTilesFromRects(
                 { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-                    {
-                        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-                        ::ULIS::FEvent eventCut;
+				[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+				{
+					::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+					::ULIS::FEvent eventCut;
 
-                        ctx.Blend(
-                            *iCopyBlock,
-                            *iBlock,
-                            iCopyBlock->Rect(),
-                            ::ULIS::FVec2I(0, 0),
-                            ::ULIS::Blend_Normal,
-                            ::ULIS::Alpha_Sub,
-                            1.f,
-                            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-                            0,
-                            nullptr,
-                            &eventCut
-                        );                        
-						
-						return { eventCut };
-                    }
-                )
+					ctx.Blend(
+						*iCopyBlock,
+						*iBlock,
+						iCopyBlock->Rect(),
+						::ULIS::FVec2I(0, 0),
+						::ULIS::Blend_Normal,
+						::ULIS::Alpha_Sub,
+						1.f,
+						::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+						0,
+						nullptr,
+						&eventCut
+					);                        
+					
+					return { eventCut };
+				}
             );
             mutator.Commit();
 
@@ -349,21 +345,19 @@ FOdysseyAnimationEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> 
 	FOdysseyRasterBlockMutator blockMutator(cell->GetRasterBlock(), false);
 	blockMutator.EditTilesFromRects(
 		{ cell->GetRasterBlock()->GetRect() },
-		FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-			[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-			{
-				::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(cell->GetRasterBlock()->GetFormat());
-				::ULIS::FEvent eventClear;
-				ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
-				ctx.Finish();
-				ctx.Copy(
-					*iBlock,
-					*cell->GetRasterBlock()->GetBlock()
-				);
-				ctx.Finish();
-				return {};
-			}
-		)
+		[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+		{
+			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(cell->GetRasterBlock()->GetFormat());
+			::ULIS::FEvent eventClear;
+			ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+			ctx.Finish();
+			ctx.Copy(
+				*iBlock,
+				*cell->GetRasterBlock()->GetBlock()
+			);
+			ctx.Finish();
+			return {};
+		}
 	);
 	blockMutator.Commit();
 

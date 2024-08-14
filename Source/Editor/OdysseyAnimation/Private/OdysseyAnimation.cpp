@@ -76,17 +76,16 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 		FLinearColor backgorundColor = iConfiguration.GetBackgroundColor();
 
 		FOdysseyRasterBlockMutator rasterBlockMutator(backgroundRasterBlock);
-		rasterBlockMutator.EditTilesFromRects({backgroundRasterBlock->GetRect()},
-			FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-				[backgorundColor](TSharedPtr<::ULIS::FBlock> ioBlock, const FULISInvalidTileMap& iInvalidTileMap) -> TArray<::ULIS::FEvent>
-				{
-					::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ioBlock->Format());
-					::ULIS::FColor color( ::ULIS::FColor::FromRGBAF( backgorundColor.R, backgorundColor.G, backgorundColor.B, backgorundColor.A ) );
-					ctx.Fill(*ioBlock, color);
-					ctx.Finish();
-					return {};
-				}
-			)
+		rasterBlockMutator.EditTilesFromRects(
+			{ backgroundRasterBlock->GetRect() },
+			[backgorundColor](TSharedPtr<::ULIS::FBlock> ioBlock, const FULISInvalidTileMap& iInvalidTileMap) -> TArray<::ULIS::FEvent>
+			{
+				::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ioBlock->Format());
+				::ULIS::FColor color( ::ULIS::FColor::FromRGBAF( backgorundColor.R, backgorundColor.G, backgorundColor.B, backgorundColor.A ) );
+				ctx.Fill(*ioBlock, color);
+				ctx.Finish();
+				return {};
+			}
 		);
 	}
 }
@@ -119,6 +118,7 @@ UOdysseyAnimation::GetDuration() const
 FInt32Range
 UOdysseyAnimation::GetFrameRange() const
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetFrameRange);
 	//TODO: deduce frame count from :
 	// - startPoint / endPoint
 
@@ -218,6 +218,7 @@ UOdysseyAnimation::PostInitProperties()
 void
 UOdysseyAnimation::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::OnImageRenderingChanged);
 	if (iEvent.IsInteractive())
 		return;
 
