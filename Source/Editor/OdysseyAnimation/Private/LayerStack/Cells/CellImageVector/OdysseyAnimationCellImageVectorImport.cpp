@@ -55,6 +55,12 @@ FOdysseyAnimationCellImageVectorImport::Read( UOdysseyAnimationCellImageVector* 
                     Ar << height;
 
                     //DEPRECATED: No need to use those values, but we still need to read them
+					if( iAnimationCellImageVector->GetEngine() == nullptr )
+                    {
+						iAnimationCellImageVector->mEngine = new FOdysseyVectorEngine( new FOdysseyVectorGroupPaint( "Scene" )
+                                       , (double)width
+                                       , (double)height );
+                    }
                 }
                 break;
 

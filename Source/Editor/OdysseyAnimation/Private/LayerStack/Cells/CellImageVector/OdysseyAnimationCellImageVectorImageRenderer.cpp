@@ -27,12 +27,15 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
     if (layer)
     {
         UOdysseyAnimation* animation = layer->GetAnimation();
-        UOdysseyLayerStack* layerStack = layer->GetLayerStack();
-        if (animation && layerStack)
+        if (animation)
         {
             UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
-            int frame = animation->CurrentFrame - cell->GetFrameRange().GetLowerBoundValue();
-            mRenderHUD = cell == mCell.Get() && frame == iFrame && layerStack->CurrentLayer.Get() == layer;
+			if (cell)
+			{
+        		UOdysseyLayerStack* layerStack = layer->GetLayerStack();
+            	int frame = animation->CurrentFrame - cell->GetFrameRange().GetLowerBoundValue();
+            	mRenderHUD = cell == mCell.Get() && frame == iFrame && layerStack->CurrentLayer.Get() == layer;
+			}
         }
 
         // this is per-layer

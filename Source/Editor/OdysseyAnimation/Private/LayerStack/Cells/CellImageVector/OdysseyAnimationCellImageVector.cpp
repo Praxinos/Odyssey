@@ -29,20 +29,23 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
 	if (GetFlags() & RF_ClassDefaultObject)
 		return;
 
-	UOdysseyAnimation* animation = GetAnimation();
-    mEngine = new FOdysseyVectorEngine( new FOdysseyVectorGroupPaint( "Scene" )
-                                       , (double)animation->Width()
-                                       , (double)animation->Height() );
-
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     UOdysseyAnimationLayerImageVector::OnIsColoredChanged().AddUObject( this, &UOdysseyAnimationCellImageVector::OnIsColoredChanged );
     UOdysseyAnimationLayerImageVector::OnIsWireframeChanged().AddUObject( this, &UOdysseyAnimationCellImageVector::OnIsWireframeChanged );
 
 	mVectorBlockId = FGuid::NewGuid();
-
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
-    mVectorBlock->Init(mVectorBlockId, mEngine, animation->Width(), animation->Height(), animation->Format());
     mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated);	
+
+	UOdysseyAnimation* animation = GetAnimation();
+	if (animation->Width() < 0 || animation->Height() < 0)
+		return;
+
+	mEngine = new FOdysseyVectorEngine( new FOdysseyVectorGroupPaint( "Scene" )
+									, (double)animation->Width()
+									, (double)animation->Height() );
+    
+    mVectorBlock->Init(mVectorBlockId, mEngine, animation->Width(), animation->Height(), animation->Format());
 }
 
 FOdysseyVectorEngine*
@@ -72,7 +75,10 @@ UOdysseyAnimationCellImageVector::SetVectorBlockId( FGuid iVectorBlockId )
 void
 UOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 {
-    Super::OldSerialize(Ar);
+    Super::Serialize(Ar);
+	
+	if (GetFlags() & RF_ClassDefaultObject)
+		return;
 
     if( Ar.IsSaving() )
     {
@@ -92,7 +98,7 @@ UOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 void
 UOdysseyAnimationCellImageVector::OldSerialize(FArchive& Ar)
 {
-    UOdysseyAnimationCell::OldSerialize(Ar);
+    Super::OldSerialize(Ar);
 
     if( Ar.IsSaving() )
     {
@@ -113,6 +119,12 @@ void
 UOdysseyAnimationCellImageVector::PostLoad()
 {
 	Super::PostLoad();
+	
+	if (GetFlags() & RF_ClassDefaultObject)
+		return;
+
+	UOdysseyAnimation* animation = GetAnimation();
+    mVectorBlock->Init(mVectorBlockId, mEngine, animation->Width(), animation->Height(), animation->Format());
     mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY );
 }
 

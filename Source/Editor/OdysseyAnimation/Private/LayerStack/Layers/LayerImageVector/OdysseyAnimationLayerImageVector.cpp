@@ -45,12 +45,39 @@ UOdysseyAnimationLayerImageVector::PostInitProperties()
     SupportedCellTypes.Add(UOdysseyAnimationCellImageStagger::StaticClass());
 }
 
+struct FOdysseyAnimationLayerImageVectorObjectVersion
+{
+	enum Type
+	{
+		// Before any version changes were made
+		BeforeCustomVersionWasAdded,
+
+		// Reworked how anim blueprint root nodes are recovered
+		RefactorCellsToUObject,
+
+		// -----<new versions can be added above this line>-------------------------------------------------
+		VersionPlusOne,
+		LatestVersion = VersionPlusOne - 1
+	};
+
+	// The GUID for this custom version number
+	const static FGuid GUID;
+
+private:
+	FOdysseyAnimationLayerImageVectorObjectVersion() {}
+};
+
+const FGuid FOdysseyAnimationLayerImageVectorObjectVersion::GUID(0x8799329A, 0x214C4880, 0xB9229B09, 0x30C8D2BB);
+FDevVersionRegistration GRegisterOdysseyAnimationLayerImageVectorObjectVersion(FOdysseyAnimationLayerImageVectorObjectVersion::GUID, FOdysseyAnimationLayerImageVectorObjectVersion::LatestVersion, TEXT("OdysseyAnimationLayerImageVector"));
+
 void
 UOdysseyAnimationLayerImageVector::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
 
-    if( Ar.IsLoading() )
+	Ar.UsingCustomVersion(FOdysseyAnimationLayerImageVectorObjectVersion::GUID);
+
+    if( Ar.IsLoading() && Ar.CustomVer(FOdysseyAnimationLayerImageVectorObjectVersion::GUID) < FOdysseyAnimationLayerImageVectorObjectVersion::RefactorCellsToUObject)
     {
         if (!FOdysseyAnimationLayerImageVectorImport::Read( this, Ar ))
         {

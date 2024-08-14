@@ -4,6 +4,22 @@
 #include "OdysseyFile.h"
 
 void
+FOdysseyAnimationCellImageVectorExport::WriteResolution( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
+                                                       , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR_RESOLUTION
+                            , Ar
+                            , [iAnimationCellImageVector](FArchive &Ar) -> void
+    {
+        uint32 width = iAnimationCellImageVector->GetEngine()->GetPreferredWidth();
+        uint32 height = iAnimationCellImageVector->GetEngine()->GetPreferredHeight();
+
+        Ar << width;
+        Ar << height;
+    } );
+}
+
+void
 FOdysseyAnimationCellImageVectorExport::WriteVectorBlockID( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                                           , FArchive &Ar )
 {
@@ -39,6 +55,7 @@ FOdysseyAnimationCellImageVectorExport::Write( UOdysseyAnimationCellImageVector*
     {
         FOdysseyVectorEngine* vectorEngine = iAnimationCellImageVector->GetEngine();
 
+        WriteResolution( iAnimationCellImageVector, Ar );
         WriteVectorBlock( iAnimationCellImageVector, Ar );
         // engine might be NULL because this function is sometimes called even before loading anything
         // so we have to check the validity of the pointer
