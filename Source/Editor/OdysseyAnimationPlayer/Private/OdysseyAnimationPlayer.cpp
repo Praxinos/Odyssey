@@ -423,19 +423,19 @@ UOdysseyAnimationPlayer::IsLoopingChanged()
 void
 UOdysseyAnimationPlayer::PropertyChanged(const FName& iPropertyName)
 {
-    if ( iPropertyName == "Animation" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Animation) )
 		AnimationChanged();
 
-	if ( iPropertyName == "Texture" )
+	if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Texture) )
 		TextureChanged();
 
-	if ( iPropertyName == "Status" )
+	if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Status) )
 		StatusChanged();
 
-	if ( iPropertyName == "FrameRate" )
+	if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, FrameRate) )
 		FrameRateChanged();
 
-	if ( iPropertyName == "IsLooping" )
+	if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping) )
 		IsLoopingChanged();
 }
 

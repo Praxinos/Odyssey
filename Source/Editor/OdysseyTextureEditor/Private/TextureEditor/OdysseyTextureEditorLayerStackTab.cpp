@@ -472,7 +472,7 @@ FOdysseyTextureEditorLayerStackTab::CreateNewLayer()
             return;
     }
             
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(layer));
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), TSoftObjectPtr<UOdysseyLayer>(layer));
 }
 
 void
@@ -495,7 +495,7 @@ FOdysseyTextureEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("layerstack-tab.transaction.shortcut.set-layer-opacity", "Change Layer Opacity"));
 #endif
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack->CurrentLayer.Get(), "Opacity", FMath::Clamp(iOpacity, 0.f, 1.f));
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack->CurrentLayer.Get(), GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), FMath::Clamp(iOpacity, 0.f, 1.f));
 }
 
 #undef LOCTEXT_NAMESPACE

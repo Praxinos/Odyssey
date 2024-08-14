@@ -62,6 +62,6 @@ FOdysseyLayerStackClipboardData::Paste(UOdysseyLayerStack* iLayerStack) const
     else
 		pastedLayers = iLayerStack->CopyLayers(mLayers, parent, index);
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(iLayerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(pastedLayers[0]));
+    FOdysseyObjectEditorUtils::SetPropertyValue(iLayerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), TSoftObjectPtr<UOdysseyLayer>(pastedLayers[0]));
     return pastedLayers;
 }

@@ -157,7 +157,7 @@ TArray<UOdysseyPaletteEntry*> UOdysseyPalette::DuplicateEntries(TArray<UOdysseyP
     }
 
     if (entriesDuplicates.Num() != 0)
-        FOdysseyObjectEditorUtils::SetPropertyValue(this, "CurrentEntry", TSoftObjectPtr<UOdysseyPaletteEntry>(entriesDuplicates[0]));
+        FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPalette, CurrentEntry), TSoftObjectPtr<UOdysseyPaletteEntry>(entriesDuplicates[0]));
 
     return entriesDuplicates;
 }
@@ -453,7 +453,7 @@ void UOdysseyPalette::CurrentEntryChanged()
 
 void UOdysseyPalette::PropertyChanged(const FName& iPropertyName)
 {
-    if (iPropertyName == "CurrentEntry")
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPalette, CurrentEntry))
         CurrentEntryChanged();
 }
 

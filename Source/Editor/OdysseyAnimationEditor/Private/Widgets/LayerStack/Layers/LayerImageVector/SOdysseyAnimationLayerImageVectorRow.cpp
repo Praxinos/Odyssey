@@ -178,20 +178,22 @@ void
 SOdysseyAnimationLayerImageVectorRow::OnIsWireframeCheckStateChanged( ECheckBoxState iState )
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-wireframe", "Change Layer Wireframe status"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "IsWireframe", iState == ECheckBoxState::Checked);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsWireframe), iState == ECheckBoxState::Checked);
 }
 
 void
 SOdysseyAnimationLayerImageVectorRow::OnIsColoredCheckStateChanged( ECheckBoxState iState )
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-coloring", "Change Layer Coloring"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "IsColored", iState == ECheckBoxState::Checked);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsColored), iState == ECheckBoxState::Checked);
 }
 
 void
 SOdysseyAnimationLayerImageVectorRow::OnLightTableCheckStateChanged(ECheckBoxState iState)
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "bIsLightTableActivated", iState == ECheckBoxState::Checked);
+	FOdysseyAnimationLightTable lighttable = mAnimationLayerImageVector->Lighttable;
+	lighttable.bIsActivated = iState == ECheckBoxState::Checked;
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
     GetTreeView()->RequestTreeRefresh(); //needed to display layers previously hidden
 }
 
@@ -203,7 +205,7 @@ SOdysseyAnimationLayerImageVectorRow::OnOpacityValueCommitted(int iValue, ETextC
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::ValueSet);
 }
 
 void
@@ -212,7 +214,7 @@ SOdysseyAnimationLayerImageVectorRow::OnOpacityValueChanged(int iValue)
     if ( mAnimationLayerImageVector->GetIsLockedRecursively() )
         return;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "Opacity", iValue / 100.f, EPropertyChangeType::Interactive);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::Interactive);
 }
 
 void
@@ -254,7 +256,7 @@ SOdysseyAnimationLayerImageVectorRow::OnBlendModeComboBoxChanged(int32 iValue, E
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-blend-mode", "Change Layer BlendMode"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "BlendMode", EOdysseyBlendingMode(iValue));
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode), EOdysseyBlendingMode(iValue));
 }
 
 EVisibility

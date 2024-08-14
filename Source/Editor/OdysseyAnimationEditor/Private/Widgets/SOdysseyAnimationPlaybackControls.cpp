@@ -252,28 +252,28 @@ SOdysseyAnimationPlaybackControls::OnStopClicked()
 FReply
 SOdysseyAnimationPlaybackControls::OnBeginningClicked()
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", 0);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), 0);
     return FReply::Handled();
 }
 
 FReply
 SOdysseyAnimationPlaybackControls::OnEndClicked()
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", mExtension->Animation()->GetFrameRange().GetUpperBoundValue());
+	FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), mExtension->Animation()->GetFrameRange().GetUpperBoundValue());
     return FReply::Handled();
 }
 
 FReply
 SOdysseyAnimationPlaybackControls::OnPreviousClicked()
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", mExtension->Animation()->CurrentFrame - 1);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), mExtension->Animation()->CurrentFrame - 1);
 	return FReply::Handled();
 }
 
 FReply
 SOdysseyAnimationPlaybackControls::OnNextClicked()
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", mExtension->Animation()->CurrentFrame + 1);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), mExtension->Animation()->CurrentFrame + 1);
 	return FReply::Handled();
 }
 
@@ -296,6 +296,6 @@ SOdysseyAnimationPlaybackControls::OnNextKeyClicked()
 FReply
 SOdysseyAnimationPlaybackControls::OnLoopClicked()
 {	
-    FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Player(), "IsLooping", !mExtension->Player()->IsLooping);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Player(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping), !mExtension->Player()->IsLooping);
     return FReply::Handled();
 }

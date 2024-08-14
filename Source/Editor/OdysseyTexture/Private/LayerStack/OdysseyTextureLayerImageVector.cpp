@@ -195,9 +195,9 @@ void
 UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
 {
     Super::PropertyChanged(iPropertyName, iMemberPropertyName, iIsInteractive);
-    if(iPropertyName == "IsWireframe")
+    if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsWireframe))
         IsWireframeChanged();
-    if(iPropertyName == "IsColored")
+    if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsColored))
         IsColoredChanged();
 }
 

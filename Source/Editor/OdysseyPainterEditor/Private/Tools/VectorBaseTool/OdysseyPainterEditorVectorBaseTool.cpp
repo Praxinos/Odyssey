@@ -661,10 +661,10 @@ UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( FOdysseyVectorGroupP
                                                           , const FName& iPropertyName )
 {
     // RestrictToSelection was changed, return redraw flag
-    if( iPropertyName == "RestrictToSelectedObjects" )
+    /* if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBaseTool, RestrictToSelectedObjects) )
     {
         iScene->GetEngine()->ResetHUD();
-    }
+    } */
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }

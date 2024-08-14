@@ -269,7 +269,7 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Tick(float iDeltaTime)
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::SelectedShapeChanged()
 {
     SelectedShapeInstance->Abort();
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "SelectedShapeInstance", AvailableShapes[SelectedShape]);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPrimitiveDrawingTool, SelectedShapeInstance), AvailableShapes[SelectedShape]);
     mOnShapeChanged.Broadcast();
 }
 
@@ -415,7 +415,7 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::PropertyChanged(const FName& iPropertyName)
 {
-    if (iPropertyName == "SelectedShape")
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPrimitiveDrawingTool, SelectedShape))
         SelectedShapeChanged();
 }
 

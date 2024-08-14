@@ -179,7 +179,7 @@ void
 SOdysseyLayerRow::OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState)
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-is-activated", "Change Layer Active"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "IsActivated", iState == ECheckBoxState::Checked);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsActivated), iState == ECheckBoxState::Checked);
 }
 
 ECheckBoxState
@@ -192,7 +192,7 @@ void
 SOdysseyLayerRow::OnIsLockedCheckBoxStateChanged(ECheckBoxState iState)
 {
 	FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-is-locked", "Change Layer Lock"));
-	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "IsLocked", iState == ECheckBoxState::Checked);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsLocked), iState == ECheckBoxState::Checked);
 }
 
 ECheckBoxState
@@ -217,7 +217,7 @@ void
 SOdysseyLayerRow::OnLayerNameCommited(const FText& iText, ETextCommit::Type iType)
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-name", "Change Layer Name"));
-	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "Name", iText);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Name), iText);
 }
 
 FSlateFontInfo
@@ -482,7 +482,7 @@ SOdysseyLayerRow::OnRowDragDetected(const FGeometry& iGeometry, const FPointerEv
 void
 SOdysseyLayerRow::OnDisplayOptionsCheckBoxStateChanged(ECheckBoxState iState)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "DisplayOptions", iState == ECheckBoxState::Checked);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayOptions), iState == ECheckBoxState::Checked);
 }
 
 ECheckBoxState

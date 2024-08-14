@@ -62,7 +62,7 @@ FOdysseyAnimationEditorSource::Activate()
 {
 	AddEditedObject(mAnimation);
 
-	FOdysseyObjectEditorUtils::SetPropertyValue(mPlayer, "Animation", mAnimation);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mPlayer, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationPlayer, Animation), mAnimation);
 	mTexture->SetPlayer(mPlayer);
 	mTexture->UpdateResource();
 
@@ -84,7 +84,7 @@ FOdysseyAnimationEditorSource::Inactivate()
 	mPlayer->OnPlay().RemoveAll(this);
 	mPlayer->OnStop().RemoveAll(this);
 	mPlayer->Stop();
-	FOdysseyObjectEditorUtils::SetPropertyValue(mPlayer, "Animation", nullptr);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mPlayer, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationPlayer, Animation), nullptr);
 
 	mAnimation->OnCurrentFrameChanged().RemoveAll(this);
 

@@ -155,7 +155,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextFrame()
         return;
 
     int currentFrame = animation->CurrentFrame + 1;
-    FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", currentFrame);
+    FOdysseyObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), currentFrame);
 }
 
 void
@@ -173,7 +173,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToPreviousFrame()
     if (currentFrame < 0)
         return;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", currentFrame);
+    FOdysseyObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), currentFrame);
 }
 
 void
@@ -215,7 +215,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextCell()
     }
 
 	UOdysseyAnimationCell* nextCell = currentLayer->GetCells()[cellIndex];
-    FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", nextCell->GetFrameRange().GetLowerBoundValue());
+    FOdysseyObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), nextCell->GetFrameRange().GetLowerBoundValue());
 }
 
 void
@@ -257,7 +257,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToPreviousCell()
     }
 
     UOdysseyAnimationCell* prevCell = currentLayer->GetCells()[cellIndex];
-    FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", prevCell->GetFrameRange().GetLowerBoundValue());
+    FOdysseyObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), prevCell->GetFrameRange().GetLowerBoundValue());
 }
 
 void
@@ -272,7 +272,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToAnimationFirstFrame()
         return;
 
     FInt32Range frameRange = animation->GetFrameRange();
-    FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", frameRange.GetLowerBoundValue());
+    FOdysseyObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frameRange.GetLowerBoundValue());
 }
 
 void
@@ -287,7 +287,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToAnimationLastFrame()
         return;
 
     FInt32Range frameRange = animation->GetFrameRange();
-    FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", frameRange.GetUpperBoundValue());
+    FOdysseyObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frameRange.GetUpperBoundValue());
 }
 
 void
@@ -357,7 +357,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_ActivateLooping()
     UOdysseyAnimationPlayer* player = extension->Player();
     if (!player)
         return;
-    FOdysseyObjectEditorUtils::SetPropertyValue(player, "IsLooping", true);
+    FOdysseyObjectEditorUtils::SetPropertyValue(player, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping), true);
 }
 
 void
@@ -370,7 +370,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_InactivateLooping()
     UOdysseyAnimationPlayer* player = extension->Player();
     if (!player)
         return;
-    FOdysseyObjectEditorUtils::SetPropertyValue(player, "IsLooping", false);
+    FOdysseyObjectEditorUtils::SetPropertyValue(player, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping), false);
 }
 
 void
@@ -383,7 +383,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_ToggleLooping()
     UOdysseyAnimationPlayer* player = extension->Player();
     if (!player)
         return;
-    FOdysseyObjectEditorUtils::SetPropertyValue(player, "IsLooping", !player->IsLooping);
+    FOdysseyObjectEditorUtils::SetPropertyValue(player, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping), !player->IsLooping);
 }
 
 void

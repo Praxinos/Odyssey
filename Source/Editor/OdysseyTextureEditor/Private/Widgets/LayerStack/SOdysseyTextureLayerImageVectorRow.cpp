@@ -143,14 +143,14 @@ void
 SOdysseyTextureLayerImageVectorRow::OnIsWireframeCheckStateChanged( ECheckBoxState iState )
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-wireframe", "Change Layer Wireframe status"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "IsWireframe", iState == ECheckBoxState::Checked);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsWireframe), iState == ECheckBoxState::Checked);
 }
 
 void
 SOdysseyTextureLayerImageVectorRow::OnIsColoredCheckStateChanged( ECheckBoxState iState )
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-coloring", "Change Layer Coloring"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "IsColored", iState == ECheckBoxState::Checked);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsColored), iState == ECheckBoxState::Checked);
 }
 
 void
@@ -161,7 +161,7 @@ SOdysseyTextureLayerImageVectorRow::OnOpacityValueCommitted(int iValue, ETextCom
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::ValueSet);
 }
 
 void
@@ -170,7 +170,7 @@ SOdysseyTextureLayerImageVectorRow::OnOpacityValueChanged(int iValue)
     if ( mTextureLayerImageVector->GetIsLockedRecursively() )
         return;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "Opacity", iValue / 100.f, EPropertyChangeType::Interactive);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::Interactive);
 }
 
 void
@@ -206,7 +206,7 @@ SOdysseyTextureLayerImageVectorRow::OnBlendModeComboBoxChanged(int32 iValue, ESe
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-blend-mode", "Change Layer BlendMode"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "BlendMode", EOdysseyBlendingMode(iValue));
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode), EOdysseyBlendingMode(iValue));
 }
 
 EVisibility

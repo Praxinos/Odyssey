@@ -122,7 +122,7 @@ SOdysseyPaletteAddEntryButton::AddEntryFromClass(FAssetData iAssetData)
     }
 
     mOnAdded.ExecuteIfBound(currentEntry);
-    FOdysseyObjectEditorUtils::SetPropertyValue(palette, "CurrentEntry", TSoftObjectPtr<UOdysseyPaletteEntry>(currentEntry));
+    FOdysseyObjectEditorUtils::SetPropertyValue(palette, GET_MEMBER_NAME_CHECKED(UOdysseyPalette, CurrentEntry), TSoftObjectPtr<UOdysseyPaletteEntry>(currentEntry));
 }
 
 #undef LOCTEXT_NAMESPACE

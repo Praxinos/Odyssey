@@ -15,13 +15,13 @@ FOdysseySetCurrentFrameMutation::FOdysseySetCurrentFrameMutation(UOdysseyAnimati
 void
 FOdysseySetCurrentFrameMutation::Apply()
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, "CurrentFrame", mFrame);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED( UOdysseyAnimation, CurrentFrame), mFrame);
 }
 
 void
 FOdysseySetCurrentFrameMutation::Revert()
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, "CurrentFrame", mFrame);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED( UOdysseyAnimation, CurrentFrame), mFrame);
 }
 
 FOdysseyAnimationCurrentFrameMutator::FOdysseyAnimationCurrentFrameMutator(UOdysseyAnimation* iAnimation)

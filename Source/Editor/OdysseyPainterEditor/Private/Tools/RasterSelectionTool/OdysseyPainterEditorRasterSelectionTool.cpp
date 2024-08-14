@@ -169,7 +169,7 @@ void UOdysseyPainterEditorRasterSelectionTool::Tick(float iDeltaTime)
 void UOdysseyPainterEditorRasterSelectionTool::SelectedShapeChanged()
 {
     SelectedShapeInstance->Abort();
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "SelectedShapeInstance", AvailableShapes[SelectedShape]);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterSelectionTool, SelectedShapeInstance), AvailableShapes[SelectedShape]);
 }
 
 void
@@ -194,6 +194,6 @@ UOdysseyPainterEditorRasterSelectionTool::OnShapeCommit(const TArray<FOdysseyPoi
 
 void UOdysseyPainterEditorRasterSelectionTool::PropertyChanged(const FName& iPropertyName)
 {
-    if (iPropertyName == "SelectedShape")
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterSelectionTool, SelectedShape))
         SelectedShapeChanged();
 }

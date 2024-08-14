@@ -119,7 +119,7 @@ SOdysseyPainterEditorRasterDrawingToolTopTab::OnEraserButtonClicked()
 {
     FOdysseyBlendParameters blendParameters = mTool->GetBlendParameters();
     blendParameters.bEraserMode = !blendParameters.bEraserMode;
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTool, "BlendParameters", blendParameters);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTool, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), blendParameters);
     return FReply::Handled();
 }
 

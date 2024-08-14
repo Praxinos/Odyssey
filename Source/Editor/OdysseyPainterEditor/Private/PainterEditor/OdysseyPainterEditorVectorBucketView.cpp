@@ -51,34 +51,34 @@ UOdysseyPainterEditorVectorBucketView::PropertyChanged( const FName& iPropertyNa
 {
     if( mBucket )
     {
-        if( iPropertyName == "ColorMode" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, ColorMode) )
             mBucket->SetColorMode( ColorMode );
 
-        if( iPropertyName == "SpreadingPolicy" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, SpreadingPolicy) )
             mBucket->SetSpreadingPolicy( SpreadingPolicy );
 
         // note: iMemberPropertyName because FColor is a struct 
         // and we can edit individual struct members RGBA
-        if( ( iPropertyName == "SolidColor" ) || ( iMemberPropertyName == "SolidColor" ) )
+        if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, SolidColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, SolidColor) ) )
             mBucket->SetSolidColor( SolidColor );
 
-        if( iPropertyName == "Rotation" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, Rotation) )
             mBucket->SetRotation( Rotation );
 
-        if( iPropertyName == "Propagated" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, Propagated) )
             mBucket->SetPropagated( Propagated );
 
         // note: iMemberPropertyName because FColor is a struct 
         // and we can edit individual struct members RGBA
-        if( ( iPropertyName == "GradientColor0" ) || ( iMemberPropertyName == "GradientColor0" ) )
+        if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, GradientColor0) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, GradientColor0) ) )
             mBucket->SetGradientColor0( GradientColor0 );
 
         // note: iMemberPropertyName because FColor is a struct 
         // and we can edit individual struct members RGBA
-        if( ( iPropertyName == "GradientColor1" ) || ( iMemberPropertyName == "GradientColor1" ) )
+        if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, GradientColor1) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, GradientColor1) ) )
             mBucket->SetGradientColor1( GradientColor1 );
 
-        if( iPropertyName == "RadialRadius" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, RadialRadius) )
             mBucket->SetRadialRadius( RadialRadius );
 
         mBucket->Invalidate();

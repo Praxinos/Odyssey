@@ -161,7 +161,7 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonUp(const FGeometry& MyGeometry, co
 	{
 		const float minScrub = 0.0f;
 		float frame = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / mExtension->Timeline()->GetFrameWidth() + mExtension->Timeline()->GetOffset();
-		FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", FMath::Max(0, (int)frame));
+		FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), FMath::Max(0, (int)frame));
 		mExtension->Player()->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
 		mIsScrubbing = false;
 		return FReply::Handled().ReleaseMouseCapture();

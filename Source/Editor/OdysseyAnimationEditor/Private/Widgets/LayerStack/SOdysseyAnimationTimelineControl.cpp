@@ -159,12 +159,12 @@ SOdysseyAnimationTimelineControl::OnNavigation(const FGeometry& MyGeometry, cons
     if (InNavigationEvent.GetNavigationType() == EUINavigation::Left)
     {
         int frame = FMath::Max(0, mExtension->Animation()->CurrentFrame - 1);
-        FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", frame);
+        FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
     }
     else if (InNavigationEvent.GetNavigationType() == EUINavigation::Right)
     {
         int frame = mExtension->Animation()->CurrentFrame + 1;
-        FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), "CurrentFrame", frame);
+        FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
     }
 	return FNavigationReply::Stop();
 }

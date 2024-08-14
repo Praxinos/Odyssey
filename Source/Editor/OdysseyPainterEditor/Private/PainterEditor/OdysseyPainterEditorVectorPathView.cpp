@@ -44,13 +44,13 @@ UOdysseyPainterEditorVectorPathView::PropertyChanged( const FName& iPropertyName
         {
             FOdysseyVectorPath* selectedPath = static_cast<FOdysseyVectorPath*>(selectedObject);
 
-            if( iPropertyName == "JointType" )
+            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, JointType) )
                 selectedPath->SetJointType( JointType, true );
 
-            if( iPropertyName == "Brush" )
+            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, Brush) )
                 selectedPath->SetBrush( Brush );
 
-            if( iPropertyName == "MiterLimit" )
+            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathView, MiterLimit) )
                 selectedPath->SetMiterLimit( MiterLimit, true );
         }
     }

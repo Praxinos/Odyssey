@@ -170,7 +170,7 @@ UOdysseyLayerStack::DuplicateLayers(TArray<UOdysseyLayer*> Layers)
     }
 
     if (layersDuplicates.Num() != 0)
-        FOdysseyObjectEditorUtils::SetPropertyValue(this, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(layersDuplicates[0]));
+        FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), TSoftObjectPtr<UOdysseyLayer>(layersDuplicates[0]));
 
     return layersDuplicates;
 }
@@ -759,7 +759,7 @@ UOdysseyLayerStack::CurrentLayerChanged()
 void
 UOdysseyLayerStack::PropertyChanged(const FName& iPropertyName)
 {
-    if ( iPropertyName == "CurrentLayer" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer) )
         CurrentLayerChanged();
 }
 

@@ -247,9 +247,9 @@ UOdysseyAnimation::PostLoad()
 void
 UOdysseyAnimation::PropertyChanged(const FName& iPropertyName)
 {
-	if ( iPropertyName == "CurrentFrame" )
+	if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame) )
         CurrentFrameChanged();
-    if ( iPropertyName == "FramesPerSecond" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, FramesPerSecond) )
         FramesPerSecondChanged();
 }
 

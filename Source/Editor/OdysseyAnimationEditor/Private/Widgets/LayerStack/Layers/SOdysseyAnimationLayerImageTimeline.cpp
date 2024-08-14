@@ -594,7 +594,7 @@ SOdysseyAnimationLayerImageTimeline::SetPostBehaviour(EOdysseyAnimationLayerImag
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-post-behaviour", "Set Post Behaviour"));
 #endif
-    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "PostBehaviour", iBehaviour);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, PostBehaviour), iBehaviour);
 }
 
 bool
@@ -615,7 +615,7 @@ SOdysseyAnimationLayerImageTimeline::SetPreBehaviour(EOdysseyAnimationLayerImage
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-pre-behaviour", "Set Pre Behaviour"));
 #endif
-    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "PreBehaviour", iBehaviour);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, PreBehaviour), iBehaviour);
 }
 
 bool

@@ -215,10 +215,10 @@ UOdysseyPainterEditorVectorPathStitchTool::PropertyChangedVector( FOdysseyVector
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    if( iPropertyName == "RestrictToSelection" )
+    /* if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathStitchTool, RestrictToSelection) )
     {
         iEngine->ResetHUD(); // rebuild the quad tree
-    }
+    } */
 
     return UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName )
          | FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;

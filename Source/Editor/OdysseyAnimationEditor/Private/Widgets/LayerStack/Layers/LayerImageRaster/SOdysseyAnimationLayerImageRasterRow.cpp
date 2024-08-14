@@ -167,14 +167,16 @@ SOdysseyAnimationLayerImageRasterRow::GenerateTimelineWidget()
 void
 SOdysseyAnimationLayerImageRasterRow::OnLightTableCheckStateChanged(ECheckBoxState iState)
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "bIsLightTableActivated", iState == ECheckBoxState::Checked);
+	FOdysseyAnimationLightTable lighttable = mAnimationLayerImageRaster->Lighttable;
+	lighttable.bIsActivated = iState == ECheckBoxState::Checked;
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
     GetTreeView()->RequestTreeRefresh(); //needed to display layers previously hidden
 }
 
 void
 SOdysseyAnimationLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState)
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "IsAlphaLocked", iState == ECheckBoxState::Checked);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageRaster,  IsAlphaLocked), iState == ECheckBoxState::Checked);
 }
 
 void
@@ -185,7 +187,7 @@ SOdysseyAnimationLayerImageRasterRow::OnOpacityValueCommitted(int iValue, ETextC
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::ValueSet);
 }
 
 void
@@ -194,7 +196,7 @@ SOdysseyAnimationLayerImageRasterRow::OnOpacityValueChanged(int iValue)
     if ( mAnimationLayerImageRaster->GetIsLockedRecursively() )
         return;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "Opacity", iValue / 100.f, EPropertyChangeType::Interactive);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::Interactive);
 }
 
 void
@@ -230,7 +232,7 @@ SOdysseyAnimationLayerImageRasterRow::OnBlendModeComboBoxChanged(int32 iValue, E
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-raster.transaction.set-blend-mode", "Change Layer BlendMode"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "BlendMode", EOdysseyBlendingMode(iValue));
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode), EOdysseyBlendingMode(iValue));
 }
 
 EVisibility

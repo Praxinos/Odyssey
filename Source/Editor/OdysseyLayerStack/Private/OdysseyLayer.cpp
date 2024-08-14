@@ -235,23 +235,23 @@ UOdysseyLayer::PropertyChanged(const FName& iPropertyName, const FName& iMemberP
 	if (iIsInteractive)
 		return;
 
-    if ( iPropertyName == "Name" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Name) )
         NameChanged();
-    if ( iPropertyName == "IsActivated" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsActivated) )
         IsActivatedChanged();
-    if ( iPropertyName == "IsLocked" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsLocked) )
         IsLockedChanged();
-    if ( iPropertyName == "DisplayChildren" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren) )
         DisplayChildrenChanged();
-    if ( iPropertyName == "DisplayOptions" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayOptions) )
         DisplayOptionsChanged();
-    if ( iPropertyName == "Parent" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Parent) )
         ParentChanged();
-    if ( iPropertyName == "Children" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Children) )
         ChildrenChanged();
-    if (iPropertyName == "BlendMode")
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode) )
         BlendModeChanged();
-    if (iPropertyName == "Opacity")
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity) )
         OpacityChanged();
 }
 

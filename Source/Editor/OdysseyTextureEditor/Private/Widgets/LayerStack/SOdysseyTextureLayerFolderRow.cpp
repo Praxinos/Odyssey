@@ -112,7 +112,7 @@ SOdysseyTextureLayerFolderRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectI
         return;
 
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-folder.transaction.set-blend-mode", "Change Layer BlendMode"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerFolder, "BlendMode", EOdysseyBlendingMode(iValue), EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerFolder, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode), EOdysseyBlendingMode(iValue), EPropertyChangeType::ValueSet);
 }
 
 void
@@ -123,7 +123,7 @@ SOdysseyTextureLayerFolderRow::OnOpacityValueCommitted(int iValue, ETextCommit::
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerFolder, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerFolder, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::ValueSet);
 }
 
 void
@@ -132,7 +132,7 @@ SOdysseyTextureLayerFolderRow::OnOpacityValueChanged(int iValue)
     if ( mTextureLayerFolder->GetIsLockedRecursively() )
         return;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerFolder, "Opacity", iValue / 100.f, EPropertyChangeType::Interactive);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerFolder, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::Interactive);
 }
 
 void

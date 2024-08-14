@@ -435,7 +435,7 @@ FOdysseyAnimationEditorFlipSystem::EndFlipping()
     {
         mExtension->Player()->SetRenderType(mInitialRenderType);
         int frame = mAnimation->GetFrameIndexAtTime(mExtension->Player()->GetCurrentTime());
-        FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, "CurrentFrame", frame);
+        FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED( UOdysseyAnimation, CurrentFrame), frame);
     }
 }
 

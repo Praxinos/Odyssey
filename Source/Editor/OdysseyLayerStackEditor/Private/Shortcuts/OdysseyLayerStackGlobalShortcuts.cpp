@@ -73,7 +73,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToNextLayer()
         );
     }
     
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(layer));
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), TSoftObjectPtr<UOdysseyLayer>(layer));
 }
 
 void
@@ -112,7 +112,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToPreviousLayer()
         );
     }
     
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(layer));
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), TSoftObjectPtr<UOdysseyLayer>(layer));
 }
 
 void
@@ -129,7 +129,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_OpenFolderLayer()
     if (currentLayer->GetChildren().Num() <= 0)
         return;
     
-    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, "DisplayChildren", true);
+    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren), true);
 }
 
 void
@@ -146,7 +146,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_CloseFolderLayer()
     if (currentLayer->GetChildren().Num() <= 0)
         return;
     
-    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, "DisplayChildren", false);
+    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren), false);
 }
 
 #undef LOCTEXT_NAMESPACE

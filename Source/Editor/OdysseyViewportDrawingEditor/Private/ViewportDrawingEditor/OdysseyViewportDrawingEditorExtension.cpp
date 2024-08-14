@@ -970,7 +970,7 @@ FOdysseyViewportDrawingEditorExtension::SyncAnimationCurrentFrameWithMediaPlayer
 	int frame = seconds * animation->GetFramesPerSecond() + animationMediaControls->GetFrameRange().GetLowerBoundValue();
 
 	if (frame != animation->CurrentFrame)
-		FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", frame);
+		FOdysseyObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
 }
 
 void

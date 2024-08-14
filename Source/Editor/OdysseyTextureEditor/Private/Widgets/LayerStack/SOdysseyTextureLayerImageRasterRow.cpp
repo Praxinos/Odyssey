@@ -129,7 +129,7 @@ SOdysseyTextureLayerImageRasterRow::GenerateOptionsWidget()
 void
 SOdysseyTextureLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState)
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageRaster, "IsAlphaLocked", iState == ECheckBoxState::Checked);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageRaster, IsAlphaLocked), iState == ECheckBoxState::Checked);
 }
 
 void
@@ -140,7 +140,7 @@ SOdysseyTextureLayerImageRasterRow::OnOpacityValueCommitted(int iValue, ETextCom
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageRaster, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::ValueSet);
 }
 
 void
@@ -149,7 +149,7 @@ SOdysseyTextureLayerImageRasterRow::OnOpacityValueChanged(int iValue)
     if ( mTextureLayerImageRaster->GetIsLockedRecursively() )
         return;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageRaster, "Opacity", iValue / 100.f, EPropertyChangeType::Interactive);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::Interactive);
 }
 
 void
@@ -179,7 +179,7 @@ SOdysseyTextureLayerImageRasterRow::OnBlendModeComboBoxChanged(int32 iValue, ESe
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-raster.transaction.set-blend-mode", "Change Layer BlendMode"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageRaster, "BlendMode", EOdysseyBlendingMode(iValue));
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode), EOdysseyBlendingMode(iValue));
 }
 
 EVisibility

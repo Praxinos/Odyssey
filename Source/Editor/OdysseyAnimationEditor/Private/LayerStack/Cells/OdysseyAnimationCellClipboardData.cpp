@@ -47,7 +47,7 @@ FOdysseyAnimationCellClipboardData::Paste(UOdysseyAnimationLayer* iLayer, int iF
 	{
 		cellIndex = 0;
 	}
-	else if (iFrame < layerRange.GetUpperBoundValue())
+	else if (iFrame > layerRange.GetUpperBoundValue())
 	{
 		cellIndex = iLayer->GetCells().Num();
 	}

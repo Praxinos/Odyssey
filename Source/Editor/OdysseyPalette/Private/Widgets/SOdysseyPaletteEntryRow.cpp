@@ -135,7 +135,7 @@ void
 SOdysseyPaletteEntryRow::OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState)
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("entry-row.set-is-activated", "Change Entry Active"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mEntry, "IsActivated", iState == ECheckBoxState::Checked);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mEntry, GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntry, IsActivated), iState == ECheckBoxState::Checked);
 }
 
 ECheckBoxState
@@ -160,7 +160,7 @@ void
 SOdysseyPaletteEntryRow::OnEntryNameCommited(const FText& iText, ETextCommit::Type iType)
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("entry-row.set-name", "Change Entry Name"));
-	FOdysseyObjectEditorUtils::SetPropertyValue(mEntry, "EntryName", iText);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mEntry, GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntry, EntryName), iText);
 }
 
 void

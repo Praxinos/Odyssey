@@ -364,7 +364,7 @@ void
 UOdysseyPainterEditorRasterEraserTool::SelectedShapeChanged()
 {
     SelectedShapeInstance->Abort();
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "SelectedShapeInstance", AvailableShapes[SelectedShape]);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, SelectedShapeInstance), AvailableShapes[SelectedShape]);
     mOnShapeChanged.Broadcast();
 }
 
@@ -385,13 +385,13 @@ UOdysseyPainterEditorRasterEraserTool::OpacityChanged()
 void
 UOdysseyPainterEditorRasterEraserTool::PropertyChanged(const FName& iPropertyName)
 {
-    if (iPropertyName == "SelectedShape")
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, SelectedShape))
         SelectedShapeChanged();
 
-    if (iPropertyName == "Size")
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Size))
         SizeChanged();
 
-    if (iPropertyName == "Opacity")
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Opacity))
         OpacityChanged();
 }
 
