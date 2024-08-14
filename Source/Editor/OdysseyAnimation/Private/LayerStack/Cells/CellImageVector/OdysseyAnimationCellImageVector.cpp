@@ -48,6 +48,15 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
     mVectorBlock->Init(mVectorBlockId, mEngine, animation->Width(), animation->Height(), animation->Format());
 }
 
+void
+UOdysseyAnimationCellImageVector::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
+{
+	Super::PostDuplicate(iDuplicateMode);
+	UOdysseyAnimation* animation = GetAnimation();
+	mVectorBlockId = FGuid::NewGuid();
+	mVectorBlock->Init(mVectorBlockId, mEngine, animation->Width(), animation->Height(), animation->Format());
+}
+
 FOdysseyVectorEngine*
 UOdysseyAnimationCellImageVector::GetEngine() const
 {

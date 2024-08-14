@@ -187,6 +187,9 @@ FOdysseyAnimationProxy::OnImageRenderingPreChanged(const FOdysseyImageRenderingC
     //Some systems could react to OnImageRenderingChanged to ask the proxy for the block
     //But if you don't use OnImageRenderingPreChanged the proxy block could be in a valid state instead of an invalid state
 
+	if(iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
+		return;
+
     const FGuid& id = iEvent.GetId();
     bool isValueChange = iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kValueChange;
     TArray<::ULIS::FRectI> defaultRects = { ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height())};
@@ -215,6 +218,7 @@ FOdysseyAnimationProxy::OnImageRenderingChanged(const FOdysseyImageRenderingChan
 
         TMap<TSharedPtr<FBlockData>, TArray<int>> frameIndexesToRemove;
         TMap<TSharedPtr<FBlockData>, TArray<int>> frameIndexesToAdd;
+		TArray<TSharedPtr<FBlockData>> createdBlockData;
 
         //Remove unused indexes
         for ( const FInt32Range& rangeToRemove : rangesToRemove )
@@ -266,8 +270,8 @@ FOdysseyAnimationProxy::OnImageRenderingChanged(const FOdysseyImageRenderingChan
                 if ( !blockData )
                 {
                     blockData = MakeShared<FBlockData>(mAnimation, composition);
-                    blockData->PreChange(id, {::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height())});
                     mBlockData.Add(blockData);
+					createdBlockData.Add(blockData);
                 }
 
                 if ( !frameIndexesToAdd.Contains(blockData) )
@@ -310,6 +314,16 @@ FOdysseyAnimationProxy::OnImageRenderingChanged(const FOdysseyImageRenderingChan
 				return iBlockData->GetFrameIndexes().IsEmpty();
 			}
 		);
+
+		for (TSharedPtr<FBlockData> blockData : createdBlockData)
+		{
+			blockData->PreChange(FGuid(), {::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height())}); 
+			bool shouldEnqueue = blockData->PostChange(FGuid());
+			if (shouldEnqueue)
+				mPendingBlockData.Enqueue(blockData); //mPendingBlockData is ThreadSafe */
+		}
+
+		return;
     }
 
     for (TSharedPtr<FBlockData> blockData : mBlockData)

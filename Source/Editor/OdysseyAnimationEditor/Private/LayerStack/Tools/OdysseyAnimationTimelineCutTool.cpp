@@ -38,7 +38,7 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
         return FReply::Unhandled();
 
 #ifdef WITH_EDITOR
-        FScopedTransaction ScopedTransaction(LOCTEXT("timeline.move-tool.transaction.set-offset", "Change Layer Offset"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline.cut-tool.transaction.break-cell", "Break Cell"));
 #endif
 	cell->Break(frame - cell->GetFrameRange().GetLowerBoundValue());
     return FReply::Unhandled();
