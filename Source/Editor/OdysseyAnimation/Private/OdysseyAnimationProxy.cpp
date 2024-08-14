@@ -494,6 +494,17 @@ FBlockData::Render()
         Render(renderer, rasterBlock, invalidRects);
 
         renderer->Unlock();
+
+		//PATCH: To avoid a crash when renderer is destroyed
+		// Because some renderers contain TStrongObjectPtr members
+		// And TStrongObjectPtr must be created AND destroyed on the GameThread
+		// Otherwise it crashes
+		AsyncTask(ENamedThreads::GameThread, [r = renderer]() {
+			// code to execute on game thread here
+			TSharedPtr<IOdysseyImageRenderer> r1 = r;
+			r1.Reset();
+		});
+
         mEditMutex.Lock();
     }
     mEditMutex.Unlock();

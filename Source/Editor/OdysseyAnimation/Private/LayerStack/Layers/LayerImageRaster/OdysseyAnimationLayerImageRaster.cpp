@@ -36,12 +36,39 @@ UOdysseyAnimationLayerImageRaster::PostInitProperties()
     SupportedCellTypes.Add(UOdysseyAnimationCellImageStagger::StaticClass());
 }
 
+struct FOdysseyAnimationLayerImageRasterObjectVersion
+{
+	enum Type
+	{
+		// Before any version changes were made
+		BeforeCustomVersionWasAdded,
+
+		// Reworked how anim blueprint root nodes are recovered
+		RefactorCellsToUObject,
+
+		// -----<new versions can be added above this line>-------------------------------------------------
+		VersionPlusOne,
+		LatestVersion = VersionPlusOne - 1
+	};
+
+	// The GUID for this custom version number
+	const static FGuid GUID;
+
+private:
+	FOdysseyAnimationLayerImageRasterObjectVersion() {}
+};
+
+const FGuid FOdysseyAnimationLayerImageRasterObjectVersion::GUID(0x4D889B46, 0x1B9849F6, 0xBA63C098, 0x5741EEF9);
+FDevVersionRegistration GRegisterOdysseyAnimationLayerImageRasterObjectVersion(FOdysseyAnimationLayerImageRasterObjectVersion::GUID, FOdysseyAnimationLayerImageRasterObjectVersion::LatestVersion, TEXT("OdysseyAnimationLayerImageRaster"));
+
 void
 UOdysseyAnimationLayerImageRaster::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
 
-    if( Ar.IsLoading() )
+	Ar.UsingCustomVersion(FOdysseyAnimationLayerImageRasterObjectVersion::GUID);
+	
+    if( Ar.IsLoading() && Ar.CustomVer(FOdysseyAnimationLayerImageRasterObjectVersion::GUID) < FOdysseyAnimationLayerImageRasterObjectVersion::RefactorCellsToUObject)
     {
         if (!FOdysseyAnimationLayerImageRasterImport::Read( this, Ar ))
         {
