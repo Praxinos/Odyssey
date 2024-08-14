@@ -27,17 +27,17 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
 				UOdysseyAnimationCell* keyCell = iLayer->GetCells()[keyCellIndex];
 				FVector2D outOfPegsPan = keyCell->OutOfPegs.Pan;
 				float outOfPegsRotation = keyCell->OutOfPegs.Rotation;
-				float outOfPegsZoom = keyCell->OutOfPegs.Zoom / 100.f;
+				float outOfPegsZoom = keyCell->OutOfPegs.Zoom;
 
 				::ULIS::FMat3F oopTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
 				* ::ULIS::FMat3F::MakeTranslationMatrix(outOfPegsPan.X, outOfPegsPan.Y)
 				* ::ULIS::FMat3F::MakeRotationMatrix(FMath::DegreesToRadians(outOfPegsRotation))
-				* ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom, outOfPegsZoom)
+				* ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom / 100.f, outOfPegsZoom / 100.f)
 				* ::ULIS::FMat3F::MakeTranslationMatrix( animation->Width() / -2.f, animation->Height() / -2.f);
 
 				FFrameData data;
-				data.mOpacity = iLayer->Lighttable.PreviousKeys[i].Opacity;
-				data.mRenderer = cell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0, iFilter);
+				data.mOpacity = iLayer->Lighttable.PreviousKeys[i].Opacity / 100.f;
+				data.mRenderer = keyCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0, iFilter);
 				data.mColor = ::ULIS::FColor::FromRGBAF(
 					iLayer->Lighttable.PreviousKeysColor.R,
 					iLayer->Lighttable.PreviousKeysColor.G,
@@ -58,17 +58,17 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
 				UOdysseyAnimationCell* keyCell = iLayer->GetCells()[keyCellIndex];
 				FVector2D outOfPegsPan = keyCell->OutOfPegs.Pan;
 				float outOfPegsRotation = keyCell->OutOfPegs.Rotation;
-				float outOfPegsZoom = keyCell->OutOfPegs.Zoom / 100.f;
+				float outOfPegsZoom = keyCell->OutOfPegs.Zoom;
 
 				::ULIS::FMat3F oopTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
 				* ::ULIS::FMat3F::MakeTranslationMatrix(outOfPegsPan.X, outOfPegsPan.Y)
 				* ::ULIS::FMat3F::MakeRotationMatrix(FMath::DegreesToRadians(outOfPegsRotation))
-				* ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom, outOfPegsZoom)
+				* ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom / 100.f, outOfPegsZoom / 100.f)
 				* ::ULIS::FMat3F::MakeTranslationMatrix( animation->Width() / -2.f, animation->Height() / -2.f);
 
 				FFrameData data;
-				data.mOpacity = iLayer->Lighttable.NextKeys[i].Opacity;
-				data.mRenderer = cell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0, iFilter);
+				data.mOpacity = iLayer->Lighttable.NextKeys[i].Opacity / 100.f;
+				data.mRenderer = keyCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0, iFilter);
 				data.mColor = ::ULIS::FColor::FromRGBAF(
 					iLayer->Lighttable.NextKeysColor.R,
 					iLayer->Lighttable.NextKeysColor.G,

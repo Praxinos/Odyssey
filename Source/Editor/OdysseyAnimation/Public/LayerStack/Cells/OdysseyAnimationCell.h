@@ -21,7 +21,7 @@ struct FOdysseyAnimationCellOutOfPegs
     float Rotation = 0.f;
 
 	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
-    float Zoom = 1.f;
+    float Zoom = 100.f; //TODO:
 };
 
 UCLASS(BlueprintType)

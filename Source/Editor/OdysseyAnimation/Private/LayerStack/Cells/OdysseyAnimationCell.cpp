@@ -57,7 +57,7 @@ UOdysseyAnimationCell::GetFrameRange() const
 bool
 UOdysseyAnimationCell::IsOutOfPegs() const
 {
-    return OutOfPegs.Pan != FVector2D(0, 0) || OutOfPegs.Rotation != 0.f || OutOfPegs.Zoom != 1.f;
+    return OutOfPegs.Pan != FVector2D(0, 0) || OutOfPegs.Rotation != 0.f || OutOfPegs.Zoom != 100.f;
 }
 
 ::ULIS::FMat3F
@@ -70,7 +70,7 @@ UOdysseyAnimationCell::OutOfPegsTransform() const
     return ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
             * ::ULIS::FMat3F::MakeTranslationMatrix(OutOfPegs.Pan.X, OutOfPegs.Pan.Y)
             * ::ULIS::FMat3F::MakeRotationMatrix(FMath::DegreesToRadians(OutOfPegs.Rotation))
-            * ::ULIS::FMat3F::MakeScaleMatrix(OutOfPegs.Zoom, OutOfPegs.Zoom)
+            * ::ULIS::FMat3F::MakeScaleMatrix(OutOfPegs.Zoom / 100.f, OutOfPegs.Zoom / 100.f)
             * ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / -2.f, animation->Height() / -2.f);
 }
 
@@ -113,10 +113,6 @@ void
 UOdysseyAnimationCell::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
-    
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
-        return;
-
     PropertyChanged(PropertyChangedEvent.GetPropertyName(), PropertyChangedEvent.GetMemberPropertyName(), PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive);
 }
 

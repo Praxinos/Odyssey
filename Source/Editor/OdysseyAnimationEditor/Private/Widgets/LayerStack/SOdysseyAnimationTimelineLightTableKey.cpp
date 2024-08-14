@@ -58,7 +58,7 @@ const FSlateBrush*
 SOdysseyAnimationTimelineLightTableKey::GetOutOfPegsButtonImage() const
 {
 	UOdysseyAnimationCell* cell = mCell.Get();
-	if (cell)
+	if (!cell)
 		return nullptr;
 
 	if (cell->IsOutOfPegs())
@@ -77,7 +77,7 @@ SOdysseyAnimationTimelineLightTableKey::OnOutOfPegsCheckStateChanged(ECheckBoxSt
 	if (iValue == ECheckBoxState::Checked)
 	{
 		UOdysseyAnimationCell* cell = mCell.Get();
-		if (cell)
+		if (!cell)
 			return;
 
 		mExtension->GetOutOfPegsTool()->SetCell(cell);
@@ -101,7 +101,7 @@ SOdysseyAnimationTimelineLightTableKey::IsOutOfPegsChecked() const
 		return ECheckBoxState::Unchecked;
 
 	UOdysseyAnimationCell* cell = mCell.Get();
-	if (cell)
+	if (!cell)
 		return ECheckBoxState::Unchecked;
 
 	bool isToolActive = tool->IsA(UOdysseyAnimationEditorOutOfPegsTool::StaticClass());
@@ -193,7 +193,7 @@ SOdysseyAnimationTimelineLightTableKeySlider::OnMouseMove(const FGeometry& iGeom
 		float sensitivity = 200.f; 
 
 		FOdysseyAnimationLightTableKey key = mKey.Get();
-		key.Opacity = mOldOpacity + 100.f * delta / sensitivity;
+		key.Opacity = FMath::Clamp(mOldOpacity + 100.f * delta / sensitivity, 0.f, 100.f);
 		mOnChanged.ExecuteIfBound(key);
 		
 		// This has prevent throttling on so that viewports continue to run whilst dragging the slider

@@ -216,10 +216,10 @@ UOdysseyLayer::ChildrenChanged()
 }
 
 void
-UOdysseyLayer::OpacityChanged()
+UOdysseyLayer::OpacityChanged(bool iIsInteractive)
 {
     OnOpacityChanged().Broadcast(this);
-    ImageRenderingChanged();
+    ImageRenderingChanged(iIsInteractive);
 }
 
 void
@@ -232,9 +232,6 @@ UOdysseyLayer::BlendModeChanged()
 void
 UOdysseyLayer::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
 {
-	if (iIsInteractive)
-		return;
-
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Name) )
         NameChanged();
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsActivated) )
@@ -252,7 +249,7 @@ UOdysseyLayer::PropertyChanged(const FName& iPropertyName, const FName& iMemberP
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode) )
         BlendModeChanged();
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity) )
-        OpacityChanged();
+        OpacityChanged(iIsInteractive);
 }
 
 void

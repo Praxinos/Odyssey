@@ -71,7 +71,8 @@ UOdysseyAnimationLayer::OnLightTableChanged()
 void
 UOdysseyAnimationLayer::LightTableChanged()
 {   
-    ImageRenderingCompositionChanged();
+    ImageRenderingCompositionChanged(); //Composition could change if lighttable or a key is activated/inactivated
+	ImageRenderingChanged(); //ImageRendering changes without a composition change when any other param is changed
     OnLightTableChanged().Broadcast();
 }
 

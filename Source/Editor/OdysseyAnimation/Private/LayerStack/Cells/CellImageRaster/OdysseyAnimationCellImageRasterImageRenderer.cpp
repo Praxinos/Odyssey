@@ -25,7 +25,7 @@ FOdysseyAnimationCellImageRasterImageRenderer::FOdysseyAnimationCellImageRasterI
         mOutOfPegsTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
             * ::ULIS::FMat3F::MakeTranslationMatrix(outOfPegsPan.X, outOfPegsPan.Y)
             * ::ULIS::FMat3F::MakeRotationMatrix(FMath::DegreesToRadians(outOfPegsRotation))
-            * ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom, outOfPegsZoom)
+            * ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom / 100.f, outOfPegsZoom / 100.f)
             * ::ULIS::FMat3F::MakeTranslationMatrix( animation->Width() / -2.f, animation->Height() / -2.f);
     }
 }

@@ -205,7 +205,7 @@ protected:
     virtual void DisplayOptionsChanged();
     virtual void ParentChanged();
     virtual void ChildrenChanged();
-    virtual void OpacityChanged();
+    virtual void OpacityChanged(bool iIsInteractive);
     virtual void BlendModeChanged();
 
     virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive);
