@@ -663,6 +663,8 @@ FOdysseyAnimationEditorFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
 
                 lastFrameComposition = frameComposition;
                 int frame = oFrame;
+
+				//detect if we cross the start frame or not before the next cell
                 while(frame < mStartFrame)
                 {
                     if (frame == mStartFrame)
@@ -703,15 +705,13 @@ FOdysseyAnimationEditorFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
                 }
                 while(oFrame != initialFrame && frameComposition == lastFrameComposition);
 
-                //Navigate to the start of the cell
+				//Detect if we cross the start frame or not before the next cell
+                //And navigate to the start of the cell
                 lastFrameComposition = frameComposition;
-                while(oFrame > mStartFrame)
+                while(oFrame > leftLimit)
                 {
                     if (oFrame == mStartFrame)
-                    {
-                        oFrame = mStartFrame;
                         break;
-                    }
 
                     frameComposition = layer->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor, oFrame - 1);
                     if (frameComposition != lastFrameComposition)
