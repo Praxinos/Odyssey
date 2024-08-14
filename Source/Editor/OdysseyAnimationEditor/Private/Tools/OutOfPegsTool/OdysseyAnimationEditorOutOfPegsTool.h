@@ -8,11 +8,11 @@
 #include "OdysseyAnimationEditorOutOfPegsTool.generated.h"
 
 class FOdysseyPaintEngine;
-class FOdysseyAnimationCell;
 class UOdysseyAnimationLayer;
 class FOdysseyHUDPolygon;
 class FOdysseyHUDHandle;
 class FOdysseyHUDLine;
+class UOdysseyAnimationCell;
 
 UCLASS()
 class UOdysseyAnimationEditorOutOfPegsTool :
@@ -43,12 +43,12 @@ public:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& iEvent) override;
 
 public:
-    TSharedPtr<FOdysseyAnimationCell> GetCell() const;
-    void SetCell(TSharedPtr<FOdysseyAnimationCell> iCell);
+    UOdysseyAnimationCell* GetCell() const;
+    void SetCell(UOdysseyAnimationCell* iCell);
 
 private:
     void OnCellOutOfPegsChanged(bool iIsInteractive);
-    void OnLightTableIsActivatedChanged();
+    void OnLightTableChanged();
     void RebuildHUD();
     void RefreshHUD();
     FVector2D GetCenter() const;
@@ -83,7 +83,7 @@ public:
 
 private:
     UOdysseyAnimationLayer* mLayer;
-    TSharedPtr<FOdysseyAnimationCell> mCell;
+    UOdysseyAnimationCell* mCell;
     TSharedPtr<FOdysseyHUDPolygon> mTransformHUD = nullptr;
     TSharedPtr<FOdysseyHUDHandle> mTransformTopLeftHandleHUD = nullptr;
     TSharedPtr<FOdysseyHUDHandle> mTransformTopRightHandleHUD = nullptr;

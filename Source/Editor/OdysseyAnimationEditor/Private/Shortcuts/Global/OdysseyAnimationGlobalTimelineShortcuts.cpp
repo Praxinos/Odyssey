@@ -6,7 +6,6 @@
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyAnimation.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimationEditorUserSettings.h"
@@ -196,12 +195,8 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextCell()
     if (!currentLayer)
         return;
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = currentLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return;
-
     int currentFrame = animation->CurrentFrame;
-    FInt32Range frameRange = cellsContainer->GetFrameRange();
+    FInt32Range frameRange = currentLayer->GetFrameRange();
     if (currentFrame > frameRange.GetUpperBoundValue())
         return;
 
@@ -212,15 +207,15 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextCell()
     }
     else
     {
-        cellIndex = cellsContainer->GetCellIndexAtFrame(currentFrame);
-        if (cellIndex == INDEX_NONE || cellIndex == cellsContainer->GetCells().Num() - 1)
+        UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(currentFrame);
+        if (!cell || cell == currentLayer->GetCells().Last())
             return;
         
-        cellIndex++;
+        cellIndex = cell->IndexInLayer + 1;
     }
 
-    int nextCellFrame = cellsContainer->GetCellFrame(cellsContainer->GetCells()[cellIndex]);
-    FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", nextCellFrame);
+	UOdysseyAnimationCell* nextCell = currentLayer->GetCells()[cellIndex];
+    FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", nextCell->GetFrameRange().GetLowerBoundValue());
 }
 
 void
@@ -242,31 +237,27 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToPreviousCell()
     if (!currentLayer)
         return;
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = currentLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return;
-
     int currentFrame = animation->CurrentFrame;
-    FInt32Range frameRange = cellsContainer->GetFrameRange();
+    FInt32Range frameRange = currentLayer->GetFrameRange();
     if (currentFrame < frameRange.GetLowerBoundValue())
         return;
 
     int cellIndex = INDEX_NONE;
     if (currentFrame > frameRange.GetUpperBoundValue())
     {
-        cellIndex = cellsContainer->GetCells().Num() - 1;
+        cellIndex = currentLayer->GetCells().Num() - 1;
     }
     else
     {
-        cellIndex = cellsContainer->GetCellIndexAtFrame(currentFrame);
-        if (cellIndex == INDEX_NONE || cellIndex == 0)
+        UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(currentFrame);
+        if (!cell || cell == currentLayer->GetCells()[0])
             return;
         
-        cellIndex--;
+        cellIndex = cell->IndexInLayer - 1;
     }
 
-    int previousCellFrame = cellsContainer->GetCellFrame(cellsContainer->GetCells()[cellIndex]);
-    FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", previousCellFrame);
+    UOdysseyAnimationCell* prevCell = currentLayer->GetCells()[cellIndex];
+    FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", prevCell->GetFrameRange().GetLowerBoundValue());
 }
 
 void

@@ -18,7 +18,7 @@ UOdysseyAnimationCellImageRaster::GetRasterBlock() const
 {
 	if (!mRasterBlock)
 	{
-		mRasterBlock = MakeShared<FOdysseyRasterBlock>(this);
+		mRasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyAnimationCellImageRaster*>(this));
 
 		::ULIS::eFormat format = GetAnimation()->Format();
 		int width = GetAnimation()->Width();
@@ -32,10 +32,10 @@ UOdysseyAnimationCellImageRaster::GetRasterBlock() const
 
 		mRasterBlock->SetBlock(block);
 	
-		mRasterBlock->OnBlockChanged().AddUObject(this, &UOdysseyAnimationCellImageRaster::OnBlockChanged);
-		mRasterBlock->OnBlockCommited().AddUObject(this, &UOdysseyAnimationCellImageRaster::OnBlockCommited);
-		mRasterBlock->OnBlockPtrChanged().AddUObject(this, &UOdysseyAnimationCellImageRaster::OnBlockPtrChanged);
-		mRasterBlock->PostProcess().BindUObject(this, &UOdysseyAnimationCellImageRaster::RasterBlockPostProcess);
+		mRasterBlock->OnBlockChanged().AddUObject(const_cast<UOdysseyAnimationCellImageRaster*>(this), &UOdysseyAnimationCellImageRaster::OnBlockChanged);
+		mRasterBlock->OnBlockCommited().AddUObject(const_cast<UOdysseyAnimationCellImageRaster*>(this), &UOdysseyAnimationCellImageRaster::OnBlockCommited);
+		mRasterBlock->OnBlockPtrChanged().AddUObject(const_cast<UOdysseyAnimationCellImageRaster*>(this), &UOdysseyAnimationCellImageRaster::OnBlockPtrChanged);
+		mRasterBlock->PostProcess().BindUObject(const_cast<UOdysseyAnimationCellImageRaster*>(this), &UOdysseyAnimationCellImageRaster::RasterBlockPostProcess);
 	}
     return mRasterBlock;
 }

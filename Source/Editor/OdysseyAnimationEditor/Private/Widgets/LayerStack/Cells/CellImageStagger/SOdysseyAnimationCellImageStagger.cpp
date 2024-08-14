@@ -2,18 +2,16 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
-#include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStaggerMutator.h"
 #include "Widgets/Input/SSpinBox.h"
 #include "OdysseyStyleSet.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
 void
-SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, TSharedPtr<FOdysseyAnimationCellImageStagger> iCell, FOdysseyAnimationEditorExtension* iExtension)
+SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyAnimationCellImageStagger* iCell, FOdysseyAnimationEditorExtension* iExtension)
 {
     mExtension = iExtension;
     mCell = iCell;
@@ -144,13 +142,13 @@ SOdysseyAnimationCellImageStagger::OnPaint(const FPaintArgs& Args, const FGeomet
 const FSlateBrush*
 SOdysseyAnimationCellImageStagger::GetBehaviourBrush() const
 {
-    switch(mCell->GetBehaviour())
+    switch(mCell->Behaviour)
     {
-        case FOdysseyAnimationCellImageStagger::eBehaviour::Loop:
+        case EOdysseyAnimationCellImageStaggerBehaviour::Loop:
             return FOdysseyStyle::GetBrush("Animation.CellImageStagger.Behaviour.Loop");
         break;
 
-        case FOdysseyAnimationCellImageStagger::eBehaviour::PingPong:
+        case EOdysseyAnimationCellImageStaggerBehaviour::PingPong:
             return FOdysseyStyle::GetBrush("Animation.CellImageStagger.Behaviour.PingPong");
         break;
     }
@@ -162,14 +160,13 @@ SOdysseyAnimationCellImageStagger::GetReach() const
 {
     if (mIsEditingReach)
         return mReachData.mReach;
-    return mCell->GetReach();
+    return mCell->Reach;
 }
 
 void
 SOdysseyAnimationCellImageStagger::OnReachValueChanged(int iReach)
 {
     mReachData.mReach = FMath::Max(0, iReach);
-    //return mCell->GetReach()
 }
 
 void
@@ -178,30 +175,24 @@ SOdysseyAnimationCellImageStagger::OnReachValueCommited(int iReach, ETextCommit:
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-stagger.set-reach", "Set Stagger Cell Reach"));
 #endif
-    UOdysseyAnimationLayer* layer = mCell->GetLayer();
-    UOdysseyAnimation* animation = layer->GetAnimation();
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
+	FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Reach), FMath::Max(0, iReach));
 
-    FOdysseyAnimationCellImageStaggerMutator mutator(layer, mCell);
-    mutator.SetReach(FMath::Max(0, iReach));
-
-    int frame = cellsContainer->GetCellFrame(mCell);
-    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
-    currentFrameMutator.Set(frame);
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mCell->GetAnimation());
+    currentFrameMutator.Set(mCell->GetFrameRange().GetLowerBoundValue());
     currentFrameMutator.Commit();
 }
 
 void
 SOdysseyAnimationCellImageStagger::OnReachBeginSliderMovement()
 {
-    mReachData.mReach = mCell->GetReach();
+    mReachData.mReach = mCell->Reach;
     mIsEditingReach = true;
 }
 
 void
 SOdysseyAnimationCellImageStagger::OnReachEndSliderMovement(int iReach)
 {
-    mReachData.mReach = mCell->GetReach();
+    mReachData.mReach = mCell->Reach;
     mIsEditingReach = false;
 
     //Clear the keyboard focus here because the spinbox keeps it after dragging the value
@@ -234,9 +225,9 @@ SOdysseyAnimationCellImageStagger::BuildContextMenu(FMenuBuilder& iMenuBuilder)
             TAttribute<FText>(),
             FSlateIcon("OdysseyStyle", "Animation.CellImageStagger.Behaviour.Loop"),
             FUIAction(
-                FExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::SetBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::Loop),
-                FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::CanSetBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::Loop),
-                FIsActionChecked::CreateRaw(this, &SOdysseyAnimationCellImageStagger::IsBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::Loop)
+                FExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::SetBehaviour, EOdysseyAnimationCellImageStaggerBehaviour::Loop),
+                FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::CanSetBehaviour, EOdysseyAnimationCellImageStaggerBehaviour::Loop),
+                FIsActionChecked::CreateRaw(this, &SOdysseyAnimationCellImageStagger::IsBehaviour, EOdysseyAnimationCellImageStaggerBehaviour::Loop)
             ),
             NAME_None,
             EUserInterfaceActionType::RadioButton
@@ -246,9 +237,9 @@ SOdysseyAnimationCellImageStagger::BuildContextMenu(FMenuBuilder& iMenuBuilder)
             TAttribute<FText>(),
             FSlateIcon("OdysseyStyle", "Animation.CellImageStagger.Behaviour.PingPong"),
             FUIAction(
-                FExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::SetBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::PingPong),
-                FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::CanSetBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::PingPong),
-                FIsActionChecked::CreateRaw(this, &SOdysseyAnimationCellImageStagger::IsBehaviour, FOdysseyAnimationCellImageStagger::eBehaviour::PingPong)
+                FExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::SetBehaviour, EOdysseyAnimationCellImageStaggerBehaviour::PingPong),
+                FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationCellImageStagger::CanSetBehaviour, EOdysseyAnimationCellImageStaggerBehaviour::PingPong),
+                FIsActionChecked::CreateRaw(this, &SOdysseyAnimationCellImageStagger::IsBehaviour, EOdysseyAnimationCellImageStaggerBehaviour::PingPong)
             ),
             NAME_None,
             EUserInterfaceActionType::RadioButton
@@ -259,42 +250,36 @@ SOdysseyAnimationCellImageStagger::BuildContextMenu(FMenuBuilder& iMenuBuilder)
 }
 
 void
-SOdysseyAnimationCellImageStagger::SetBehaviour(FOdysseyAnimationCellImageStagger::eBehaviour iBehaviour)
+SOdysseyAnimationCellImageStagger::SetBehaviour(EOdysseyAnimationCellImageStaggerBehaviour iBehaviour)
 {
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-stagger.transaction.set-behaviour", "Set Stagger Cell Behaviour"));
 #endif
-    UOdysseyAnimationLayer* layer = mCell->GetLayer();
-    UOdysseyAnimation* animation = layer->GetAnimation();
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
+	FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Behaviour), iBehaviour);
 
-    FOdysseyAnimationCellImageStaggerMutator mutator(layer, mCell);
-    mutator.SetBehaviour(iBehaviour);
-
-    int frame = cellsContainer->GetCellFrame(mCell);
-    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
-    currentFrameMutator.Set(frame);
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mCell->GetAnimation());
+    currentFrameMutator.Set(mCell->GetFrameRange().GetLowerBoundValue());
     currentFrameMutator.Commit();
 }
 
 bool
-SOdysseyAnimationCellImageStagger::CanSetBehaviour(FOdysseyAnimationCellImageStagger::eBehaviour iBehaviour) const
+SOdysseyAnimationCellImageStagger::CanSetBehaviour(EOdysseyAnimationCellImageStaggerBehaviour iBehaviour) const
 {
     //TODO: check if layer is locked
     return true;
 }
 
 bool
-SOdysseyAnimationCellImageStagger::IsBehaviour(FOdysseyAnimationCellImageStagger::eBehaviour iBehaviour) const
+SOdysseyAnimationCellImageStagger::IsBehaviour(EOdysseyAnimationCellImageStaggerBehaviour iBehaviour) const
 {
-    return mCell->GetBehaviour() == iBehaviour;
+    return mCell->Behaviour == iBehaviour;
 }
 
 int
 SOdysseyAnimationCellImageStagger::GetClampedReach() const
 {
-    int cellStartFrame = mCell->GetLayer()->GetCellsContainer()->GetCellFrame(mCell);
-    int layerStartFrame = mCell->GetLayer()->GetCellsContainer()->GetOffset();
+    int cellStartFrame = mCell->GetFrameRange().GetLowerBoundValue();
+    int layerStartFrame = mCell->GetLayer()->GetFrameRange().GetLowerBoundValue();
     int maxReach = cellStartFrame - layerStartFrame;
     int reach = GetReach() <= 0 ? maxReach : FMath::Min(GetReach(), maxReach);
 
@@ -304,13 +289,13 @@ SOdysseyAnimationCellImageStagger::GetClampedReach() const
 int
 SOdysseyAnimationCellImageStagger::GetStaggerLength() const
 {
-    switch(mCell->GetBehaviour())
+    switch(mCell->Behaviour)
     {
-        case FOdysseyAnimationCellImageStagger::eBehaviour::Loop:
+        case EOdysseyAnimationCellImageStaggerBehaviour::Loop:
             return GetClampedReach();
         break;
 
-        case FOdysseyAnimationCellImageStagger::eBehaviour::PingPong:
+        case EOdysseyAnimationCellImageStaggerBehaviour::PingPong:
             return GetClampedReach() - 1;
         break;
     }

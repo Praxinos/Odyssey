@@ -179,3 +179,9 @@ FOdysseyRasterBlockMutator::Abort()
     mOriginalTileBlocks.Empty();
     mRasterBlock->OnBlockChanged().Broadcast(rects); //always send at least one interactive event
 }
+
+void
+Copy(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects)
+{
+
+}

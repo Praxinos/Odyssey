@@ -42,7 +42,6 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
 
     public:
         //UOdysseyLayer overrides
-        virtual void OnCreated_Implementation() override;
         virtual void PostInitProperties() override;
         virtual void PostLoad() override;
         virtual void PostDuplicate(bool bDuplicateForPIE) override;
@@ -53,7 +52,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
         void IsWireframeChanged();
         void IsColoredChanged();
         void Serialize(FArchive& Ar);
-        virtual void PropertyChanged(const FName& iPropertyName) override;
+        virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
 
         virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 

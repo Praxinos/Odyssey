@@ -78,6 +78,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category="LayerStack")
 	void RemoveCellAtIndex(int Index);
 
+    UFUNCTION(BlueprintCallable, Category="LayerStack")
+    UOdysseyAnimationCell* CopyCell(UOdysseyAnimationCell* Cell, int Index = -1);
+
+    UFUNCTION(BlueprintCallable, Category="LayerStack")
+    TArray<UOdysseyAnimationCell*> CopyCells(TArray<UOdysseyAnimationCell*> Layers, int Index = -1);
+
 protected:
     //Property changes
 	virtual void LightTableChanged();
@@ -96,7 +102,7 @@ public:
     FSimpleMulticastDelegate& OnCellsChanged();
 
 private:
-	TArray<FInt32Range> mCellsFrameRanges;
+	mutable TArray<FInt32Range> mCellsFrameRanges;
 
 protected:
 	friend class FOdysseyAnimationCellsContainerImport;
@@ -110,6 +116,9 @@ protected:
 	TArray<TObjectPtr<UOdysseyAnimationCell>> Cells;
 
 public:
+	UPROPERTY(BlueprintReadOnly, Category="Odyssey|LayerStack")
+	TObjectPtr<UClass> DefaultCellClass = nullptr;
+
 	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LayerStack")
 	int CellsOffset = 0;
 

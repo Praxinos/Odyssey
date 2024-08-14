@@ -4,6 +4,7 @@
 #include "OdysseyLayerStack.h"
 
 #include "OdysseyLayer.h"
+#include "OdysseyLayerStackImageRenderer.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Misc/ScopedSlowTask.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -38,39 +39,11 @@ UOdysseyLayerStack::OnCurrentLayerChanged()
     return onCurrentLayerChanged;
 }
 
-//--- Layer Class Support
-
-/*
-TArray<UClass*>
-UOdysseyLayerStack::FindSupportedCustomLayerClasses() const
-{
-    TArray<UClass*> supportedClasses;
-    TArray<FAssetData> layersAssetData = UOdysseyCustomLayer::FindAllCustomLayerClassesAssetData();
-    for (const FAssetData& assetData : layersAssetData)
-	{
-        UClass* layerClass = UOdysseyCustomLayer::LoadClassFromAssetData(assetData);
-        if (!layerClass)
-            continue;
-
-        if (!SupportsLayerClass(layerClass))
-            continue;
-        
-        supportedClasses.Add(layerClass);
-    }
-
-    return supportedClasses;
-}
-*/
-
 bool
 UOdysseyLayerStack::SupportsLayerClass(UClass* iClass) const
 {
     if (CompatibleLayers.Contains(iClass))
         return true;
-
-    /* UOdysseyCustomLayer* layerCDO = UOdysseyCustomLayer::StaticClass()->GetDefaultObject<UOdysseyCustomLayer>();
-    if (layerCDO && layerCDO->CompatibleLayerStacks.Contains(GetClass()))
-        return true; */
 
     return false;
 }
@@ -678,9 +651,6 @@ UOdysseyLayerStack::CreateLayer(UClass* iLayerType)
     FString name = layer->DefaultName.ToString() + TEXT(" ") + FString::FromInt(GetLayers().Num() + 1);
     layer->Name = FText::FromString(name);
 
-    //Initialize the layer
-    layer->OnCreated();
-
     return layer;
 }
 
@@ -815,4 +785,27 @@ UOdysseyLayerStack::PostTransacted(const FTransactionObjectEvent& iTransactionEv
     {
         PropertyChanged(propertyName);
     }
+}
+
+
+TSharedPtr<IOdysseyImageRenderer>
+UOdysseyLayerStack::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+{
+    if (iFilter.IsBound() && !iFilter.Execute(this))
+        return nullptr;
+    
+    return MakeShared<FOdysseyLayerStackImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
+}
+
+TArray<FGuid>
+UOdysseyLayerStack::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
+{
+    TArray<FGuid> idComposition = { GetImageRenderingId() };
+
+    UOdysseyLayer* layerRoot = Cast<UOdysseyLayer>(LayerRoot);
+    if ( !layerRoot )
+        return idComposition;
+    
+    idComposition.Append(layerRoot->GetImageRenderingComposition(iRenderType, iFrameIndex));
+    return idComposition;
 }

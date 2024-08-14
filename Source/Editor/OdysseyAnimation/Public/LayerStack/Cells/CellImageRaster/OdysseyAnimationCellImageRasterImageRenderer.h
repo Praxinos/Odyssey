@@ -6,13 +6,11 @@
 #include "OdysseyImageRenderer.h"
 #include <ULIS>
 
-class FOdysseyAnimationCellImageRaster;
-
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRasterImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationCellImageRasterImageRenderer(UOdysseyAnimationCellImageRaster* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
+    FOdysseyAnimationCellImageRasterImageRenderer(const UOdysseyAnimationCellImageRaster* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
 
 public:
     virtual void Init() override;
@@ -25,7 +23,7 @@ public:
     virtual TArray<::ULIS::FEvent> Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList) override;
 
 public:
-    TStrongObjectPtr<UOdysseyAnimationCellImageRaster> mCell;
+    TStrongObjectPtr<const UOdysseyAnimationCellImageRaster> mCell;
     TSharedPtr<::ULIS::FBlock> mBlock;
     ::ULIS::FMat3F mOutOfPegsTransform;
 };

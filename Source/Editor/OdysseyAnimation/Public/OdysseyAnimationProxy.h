@@ -94,6 +94,7 @@ private:
     FULISInvalidTileMap mInvalidTileMap;
     TSet<int> mFrameIndexes;
     TSharedPtr<IOdysseyImageRenderer> mRenderer;
+	bool mIsReadyToRender = false;
     bool mIsInvalid;
     
     FCriticalSection mEditMutex;

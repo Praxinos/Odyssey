@@ -353,7 +353,7 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
         if ( !textureLayer )
             continue;
 
-        TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
+        TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
         renderer->Init();
 
         FOdysseyImageRendererCopyParams params(block, { block->Rect() });
@@ -425,7 +425,7 @@ FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
     outTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
     outTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
 
-    TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
+    TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
     renderer->Init();
 
     FOdysseyImageRendererCopyParams params(block, { block->Rect() });

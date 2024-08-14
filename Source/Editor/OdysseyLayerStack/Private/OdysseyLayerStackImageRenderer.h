@@ -4,15 +4,16 @@
 #pragma once
 
 #include "OdysseyImageRenderer.h"
+
 #include <ULIS>
 
-class UOdysseyTextureLayerStack;
+class UOdysseyLayerStack;
 
-class FOdysseyTextureLayerStackImageRenderer
+class FOdysseyLayerStackImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyTextureLayerStackImageRenderer(const UOdysseyTextureLayerStack* iLayerStack, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects, FImageRendererFilter iFilter);
+    FOdysseyLayerStackImageRenderer(const UOdysseyLayerStack* iLayerStack, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects, FImageRendererFilter iFilter);
 
 public:    
     virtual void Init() override;

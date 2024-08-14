@@ -30,6 +30,7 @@ UOdysseyAnimationLayerImageRaster::PostInitProperties()
 	
 	LayerTypeName = LOCTEXT("layer-image-raster.type", "Raster Image Layer");
     Icon = FSlateIcon("OdysseyStyle", "OdysseyLayerStack.LayerBitmap16");
+	DefaultCellClass = UOdysseyAnimationCellImageRaster::StaticClass();
 
     SupportedCellTypes.Add(UOdysseyAnimationCellImageRaster::StaticClass());
     SupportedCellTypes.Add(UOdysseyAnimationCellImageStagger::StaticClass());

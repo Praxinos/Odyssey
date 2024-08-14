@@ -18,9 +18,9 @@ public:
 
 public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTableHeader)
-		: _LightTable(nullptr)
+		: _Layer(nullptr)
 		{}
-		SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationLightTable>, LightTable)
+		SLATE_ARGUMENT(UOdysseyAnimationLayer*, Layer)
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
@@ -44,7 +44,7 @@ private:
     bool IsDisplayPositionSet(EOdysseyLightTableDisplayPosition iPosition) const;
 
 private:
-	TWeakPtr<FOdysseyAnimationLightTable> mLightTable;
+	UOdysseyAnimationLayer* mLayer;
     TSharedPtr<SColorBlock> mLightTablePreviousKeysColorBlockWidget;
     TSharedPtr<SColorBlock> mLightTableNextKeysColorBlockWidget;
 };

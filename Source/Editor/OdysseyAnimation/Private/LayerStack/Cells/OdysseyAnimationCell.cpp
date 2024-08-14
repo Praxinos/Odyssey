@@ -6,6 +6,7 @@
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "OdysseyAnimation.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 UOdysseyAnimationLayer*
 UOdysseyAnimationCell::GetLayer() const
@@ -132,4 +133,17 @@ UOdysseyAnimationCell::PostTransacted(const FTransactionObjectEvent& iTransactio
     {
         PropertyChanged(propertyName, propertyName, false);
     }
+}
+
+UOdysseyAnimationCell*
+UOdysseyAnimationCell::Break(int Frame)
+{
+	if (Frame <= 0 || Frame >= Length)
+		return nullptr;
+
+	UOdysseyAnimationCell* copiedCell = GetLayer()->CopyCell(this, IndexInLayer + 1);
+	FOdysseyObjectEditorUtils::SetPropertyValue(copiedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), Length - Frame);
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), Frame);
+	
+	return copiedCell;
 }

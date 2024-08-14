@@ -3,9 +3,7 @@
 
 #include "LayerStack/Tools/OdysseyAnimationTimelineMoveTool.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "OdysseyAnimationEditorTimeline.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -15,7 +13,6 @@ FOdysseyAnimationTimelineMoveTool::~FOdysseyAnimationTimelineMoveTool()
 
 FOdysseyAnimationTimelineMoveTool::FOdysseyAnimationTimelineMoveTool(FOdysseyAnimationEditorTimeline* iTimelineParams)
     : mTimelineParams(iTimelineParams)
-    , mCellsMutator(nullptr)
 {   
 }
 
@@ -28,14 +25,12 @@ FOdysseyAnimationTimelineMoveTool::OnMouseButtonDown(const FMouseEventParams& iP
 	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
 		return FReply::Unhandled();
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = iParams.mLayer->GetCellsContainer();
-
 	if (iParams.mMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
     {
         mOffsettingLayer = true;
         mLayerOffsetData.mIsDragDetected = false;
         mLayerOffsetData.mMousePosition = iParams.mMouseEvent.GetScreenSpacePosition().X;
-        mLayerOffsetData.mInitialOffset = cellsContainer->GetOffset();
+        mLayerOffsetData.mInitialOffset = iParams.mLayer->CellsOffset;
 
         return FReply::Handled().DetectDrag(iParams.mWidget.ToSharedRef(), EKeys::LeftMouseButton);
     }
@@ -54,7 +49,10 @@ FOdysseyAnimationTimelineMoveTool::OnDragDetected(const FMouseEventParams& iPara
     if (mOffsettingLayer)
   	{
         mLayerOffsetData.mIsDragDetected = true;
-        mCellsMutator = MakeShared<FOdysseyAnimationCellsMutator>(iParams.mLayer, iParams.mLayer->GetCellsContainer().ToSharedRef());
+	#ifdef WITH_EDITOR
+		GEditor->BeginTransaction(LOCTEXT("timeline.move-tool.transaction.set-offset", "Change Layer Offset"));
+	#endif
+		
         return FReply::Handled().CaptureMouse(iParams.mWidget.ToSharedRef()).PreventThrottling();
   	}
   	return FReply::Unhandled();
@@ -68,15 +66,14 @@ FOdysseyAnimationTimelineMoveTool::OnMouseMove(const FMouseEventParams& iParams)
 
 	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
 		return FReply::Unhandled();
-		
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = iParams.mLayer->GetCellsContainer();
 
     if ( mOffsettingLayer && mLayerOffsetData.mIsDragDetected)
     {
         const int minOffset = 0;
         float mouseOffset = iParams.mMouseEvent.GetScreenSpacePosition().X - mLayerOffsetData.mMousePosition;
         int offset = (int)(mLayerOffsetData.mInitialOffset + (mouseOffset / mTimelineParams->GetFrameWidth()));
-        mCellsMutator->SetOffset(FMath::Max(minOffset, offset));
+
+		FOdysseyObjectEditorUtils::SetPropertyValue(iParams.mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), FMath::Max(minOffset, offset), EPropertyChangeType::Interactive);
 
         return FReply::Handled();
     }
@@ -94,20 +91,16 @@ FOdysseyAnimationTimelineMoveTool::OnMouseButtonUp(const FMouseEventParams& iPar
 	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
 		return FReply::Unhandled();
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = iParams.mLayer->GetCellsContainer();
-
     //validateMove
 	if ( mOffsettingLayer && mLayerOffsetData.mIsDragDetected)
     {
-        mLayerOffsetData.mIsDragDetected = false;
+		mLayerOffsetData.mIsDragDetected = false;
+		mOffsettingLayer = false;
 
-#ifdef WITH_EDITOR
-        FScopedTransaction ScopedTransaction(LOCTEXT("timeline.move-tool.transaction.set-offset", "Change Layer Offset"));
-#endif
-        mCellsMutator->Commit();
-        mOffsettingLayer = false;
-        mCellsMutator = nullptr;
-
+		FOdysseyObjectEditorUtils::SetPropertyValue(iParams.mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), iParams.mLayer->CellsOffset, EPropertyChangeType::ValueSet);
+		#ifdef WITH_EDITOR
+			GEditor->EndTransaction();
+		#endif
         return FReply::Handled().ReleaseMouseCapture();
     }
     return FReply::Unhandled();

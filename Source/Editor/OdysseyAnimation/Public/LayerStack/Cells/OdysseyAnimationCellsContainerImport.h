@@ -2,8 +2,6 @@
 
 #include <Core/Core.h>
 
-class FOdysseyAnimationCellsContainer;
-
 class FOdysseyAnimationCellsContainerImport
 {
 public:

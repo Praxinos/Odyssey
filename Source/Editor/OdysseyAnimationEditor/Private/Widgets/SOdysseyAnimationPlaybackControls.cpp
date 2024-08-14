@@ -6,7 +6,6 @@
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimation.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 void
@@ -188,27 +187,19 @@ SOdysseyAnimationPlaybackControls::OnPlayClicked()
 	if (!layer)
 		return FReply::Unhandled();
 
-	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
-	if (!cellsContainer)
-		return FReply::Unhandled();
-
-	TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
-	TMap<TSharedPtr<FOdysseyAnimationCell>, FInt32Range> cellFrameRanges = cellsContainer->GetCellsFrameRanges();
-	cellFrameRanges = cellFrameRanges.FilterByPredicate(
-		[&selectedCells](const TPair<TSharedPtr<FOdysseyAnimationCell>, FInt32Range>& iPair)
-		{
-			return selectedCells.Contains(iPair.Key);
-		}
-	);
-	
-	if (cellFrameRanges.IsEmpty())
+	TArray<UOdysseyAnimationCell*> selectedCells = mExtension->Timeline()->GetSelectedCells();
+	if (selectedCells.IsEmpty())
 	{
 		mExtension->Player()->SetFrameRange(TOptional<FInt32Range>());
 	}
 	else
 	{
 		TArray<FInt32Range> ranges;
-		cellFrameRanges.GenerateValueArray(ranges);
+		for (UOdysseyAnimationCell* cell : selectedCells)
+		{
+			ranges.Add(cell->GetFrameRange());
+		}
+	
 		FInt32Range range = FInt32Range::Hull(ranges);
 		mExtension->Player()->SetFrameRange(range);
 	}
@@ -231,32 +222,24 @@ SOdysseyAnimationPlaybackControls::OnPlayBackwardClicked()
 	if (!layer)
 		return FReply::Unhandled();
 
-	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
-	if (!cellsContainer)
-		return FReply::Unhandled();
-
-	TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
-	TMap<TSharedPtr<FOdysseyAnimationCell>, FInt32Range> cellFrameRanges = cellsContainer->GetCellsFrameRanges();
-	cellFrameRanges = cellFrameRanges.FilterByPredicate(
-		[&selectedCells](const TPair<TSharedPtr<FOdysseyAnimationCell>, FInt32Range>& iPair)
-		{
-			return selectedCells.Contains(iPair.Key);
-		}
-	);
-
-	if (cellFrameRanges.IsEmpty())
+	TArray<UOdysseyAnimationCell*> selectedCells = mExtension->Timeline()->GetSelectedCells();
+	if (selectedCells.IsEmpty())
 	{
 		mExtension->Player()->SetFrameRange(TOptional<FInt32Range>());
 	}
 	else
 	{
 		TArray<FInt32Range> ranges;
-		cellFrameRanges.GenerateValueArray(ranges);
+		for (UOdysseyAnimationCell* cell : selectedCells)
+		{
+			ranges.Add(cell->GetFrameRange());
+		}
+	
 		FInt32Range range = FInt32Range::Hull(ranges);
 		mExtension->Player()->SetFrameRange(range);
 	}
 	mExtension->Player()->Play(true);
-    return FReply::Handled();
+	return FReply::Handled();
 }
 
 FReply

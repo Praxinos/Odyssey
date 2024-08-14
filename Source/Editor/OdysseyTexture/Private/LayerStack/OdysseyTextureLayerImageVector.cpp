@@ -71,8 +71,13 @@ UOdysseyTextureLayerImageVector::GetMediaProvider(uint32 iFrameIndex) const
 }
 
 void
-UOdysseyTextureLayerImageVector::OnCreated_Implementation()
+UOdysseyTextureLayerImageVector::PostInitProperties()
 {
+    Super::PostInitProperties();
+	
+	if (GetFlags() & RF_ClassDefaultObject)
+		return;
+
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
     if(!layerStack)
         return;
@@ -85,19 +90,10 @@ UOdysseyTextureLayerImageVector::OnCreated_Implementation()
     //let's ensure the format has alpha, so add alpha channel of needed
     format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
 
-    
-
+    mVectorBlockId = FGuid::NewGuid();
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
     mVectorBlock->Init(mVectorBlockId, mEngine, Width, Height, format);
     mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
-}
-
-void
-UOdysseyTextureLayerImageVector::PostInitProperties()
-{
-    Super::PostInitProperties();
-
-    mVectorBlockId = FGuid::NewGuid();
 }
 
 void
@@ -196,9 +192,9 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 }
 
 void
-UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName)
+UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
 {
-    Super::PropertyChanged(iPropertyName);
+    Super::PropertyChanged(iPropertyName, iMemberPropertyName, iIsInteractive);
     if(iPropertyName == "IsWireframe")
         IsWireframeChanged();
     if(iPropertyName == "IsColored")

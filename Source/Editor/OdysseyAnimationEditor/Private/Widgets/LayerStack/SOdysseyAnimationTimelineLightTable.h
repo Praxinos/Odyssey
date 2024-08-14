@@ -14,11 +14,12 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTable
 	: public SCompoundWidget
 {
 public:
+	static inline const float mDesiredHeight = 60.f;
+
+public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTable)
 	{}
 	SLATE_END_ARGS()
-
-	SOdysseyAnimationTimelineLightTable();
 
 	void Construct(
 		const FArguments& InArgs,
@@ -26,20 +27,12 @@ public:
 		FOdysseyAnimationEditorExtension* iExtension);
 
 private:
-	TSharedRef<SWidget> CreateKeyWidget(int iCellOffset);
 	void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
 	void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
 	void Update();
-	float GetLightTableKeyRemainingLength(int iCellOffset) const;
-	EVisibility GetLightTableKeyVisibility(int iCellOffset) const;
-	bool GetLightTableKeyIsActivated(int iCellOffset) const;
-	float GetCurrentCellLength() const;
-	const FSlateBrush* GetOutOfPegsButtonImage(int iCellOffset) const;
-	void OnOutOfPegsCheckStateChanged(ECheckBoxState InValue, int iCellOffset);
-    ECheckBoxState IsOutOfPegsChecked(int iCellOffset) const;
 
 private:
-	UOdysseyAnimationLayer* mLayer;
-	FOdysseyAnimationEditorExtension* mExtension;
-	int mCurrentCellIndex;
+	UOdysseyAnimationLayer* mLayer = nullptr;
+	FOdysseyAnimationEditorExtension* mExtension = nullptr;
+	UOdysseyAnimationCell* mCurrentCell = nullptr;
 };

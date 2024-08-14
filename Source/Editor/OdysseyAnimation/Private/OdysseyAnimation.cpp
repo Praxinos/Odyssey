@@ -9,7 +9,6 @@
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 #include "OdysseyRasterBlockMutator.h"
 
 #include "Misc/TransactionObjectEvent.h"
@@ -48,11 +47,7 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 		{
 			UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(mLayerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
 			mLayerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
-
-			TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, 1, mWidth, mHeight, Format());
-			FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
-			mutator.Add({ cell });
-			mutator.Commit();
+			layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
 		}
 		break;
 
@@ -60,11 +55,7 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 		{
 			UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(mLayerStack->AddLayer(UOdysseyAnimationLayerImageVector::StaticClass()));
 			mLayerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
-
-			TSharedPtr<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(layer, 1, mWidth, mHeight);
-			FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
-			mutator.Add({ cell });
-			mutator.Commit();
+			layer->AddCell(UOdysseyAnimationCellImageVector::StaticClass());
 		}
 		break;
 
@@ -79,7 +70,7 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 		backgroundLayer->PostBehaviour = EOdysseyAnimationLayerImagePostBehaviour::Hold;
 		backgroundLayer->Name = LOCTEXT("animation.default-background-layer.name", "Background");
 
-		TSharedPtr<FOdysseyAnimationCellImageRaster> backgroundCell = FOdysseyAnimationCellImageRaster::Create(backgroundLayer, 1, mWidth, mHeight, Format());
+		UOdysseyAnimationCellImageRaster* backgroundCell = Cast<UOdysseyAnimationCellImageRaster>(backgroundLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
 		TSharedPtr<FOdysseyRasterBlock> backgroundRasterBlock = backgroundCell->GetRasterBlock();
 
 		FLinearColor backgorundColor = iConfiguration.GetBackgroundColor();
@@ -97,10 +88,6 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 				}
 			)
 		);
-
-		FOdysseyAnimationCellsMutator cellsMutator(backgroundLayer, backgroundLayer->GetCellsContainer());
-		cellsMutator.Add({ backgroundCell });
-		cellsMutator.Commit();
 	}
 }
 

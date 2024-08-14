@@ -39,6 +39,7 @@ UOdysseyAnimationLayerImageVector::PostInitProperties()
 
 	LayerTypeName = LOCTEXT("layer-image-vector.type", "Vector Image Layer");
     Icon = FSlateIcon("OdysseyStyle", "OdysseyLayerStack.LayerVector16");
+	DefaultCellClass = UOdysseyAnimationCellImageVector::StaticClass();
 
     SupportedCellTypes.Add(UOdysseyAnimationCellImageVector::StaticClass());
     SupportedCellTypes.Add(UOdysseyAnimationCellImageStagger::StaticClass());
@@ -207,7 +208,7 @@ UOdysseyAnimationLayerImageVector::CreateMediaVector(int iFrameIndex)
 {
     //Create the cell if needed
     AutoCreateCell(iFrameIndex);
-	GetCellMediaVector(iFrameIndex);
+	return GetCellMediaVector(iFrameIndex);
 }
 
 void

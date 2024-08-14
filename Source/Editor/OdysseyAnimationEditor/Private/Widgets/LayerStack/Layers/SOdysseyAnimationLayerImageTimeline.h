@@ -7,7 +7,6 @@
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 class FOdysseyAnimationEditorExtension;
-class FOdysseyAnimationCell;
 class UOdysseyAnimationLayer;
 class FOdysseyAnimationTimelineCellsShortcuts;
 
@@ -50,8 +49,7 @@ public:
     virtual FReply OnKeyUp( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
 
 protected:
-    virtual TSharedRef<FOdysseyAnimationCell> OnCreateCell() = 0;
-    virtual TSharedRef<SWidget> OnGenerateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell) = 0;
+    virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyAnimationCell* iCell) = 0;
 
 protected:
     //TArray<TSharedPtr<FOdysseyAnimationCell>> GetSelectedCells() const;

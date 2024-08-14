@@ -162,7 +162,7 @@ SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
         .AutoHeight()
         [
             SNew(SOdysseyAnimationTimelineLightTableHeader)
-            .LightTable(mAnimationLayerImageVector->GetLightTable())
+            .Layer(mAnimationLayerImageVector)
 		    .Visibility(this, &SOdysseyAnimationLayerImageVectorRow::GetLightTableVisibility)
         ];
 }
@@ -243,7 +243,7 @@ SOdysseyAnimationLayerImageVectorRow::GetIsColoredIsChecked() const
 ECheckBoxState
 SOdysseyAnimationLayerImageVectorRow::GetLightTableIsChecked() const
 {
-	return mAnimationLayerImageVector->bIsLightTableActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+	return mAnimationLayerImageVector->Lighttable.bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 void
@@ -260,7 +260,7 @@ SOdysseyAnimationLayerImageVectorRow::OnBlendModeComboBoxChanged(int32 iValue, E
 EVisibility
 SOdysseyAnimationLayerImageVectorRow::GetLightTableVisibility() const
 {
-    return mAnimationLayerImageVector->bIsLightTableActivated ? EVisibility::Visible : EVisibility::Collapsed;
+    return mAnimationLayerImageVector->Lighttable.bIsActivated ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 EVisibility

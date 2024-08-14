@@ -26,7 +26,6 @@ public:
 
 public:
     //UOdysseyLayer overrides
-    virtual void OnCreated_Implementation() override;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
 public:

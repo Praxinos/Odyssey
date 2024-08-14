@@ -5,6 +5,7 @@
 
 #include "OdysseyLayerStack.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyLayerImageRenderer.h"
 #include "Misc/TransactionObjectEvent.h"
 
 UOdysseyLayer::FOnNameChanged&
@@ -194,14 +195,24 @@ UOdysseyLayer::DisplayOptionsChanged()
 void
 UOdysseyLayer::ParentChanged()
 {
+    UOdysseyLayerStack* layerStack = GetLayerStack();
+    if ( !layerStack )
+        return;
+
     OnParentChanged().Broadcast(this);
+    layerStack->HierarchyChanged();
 }
 
 void
 UOdysseyLayer::ChildrenChanged()
 {
+    UOdysseyLayerStack* layerStack = GetLayerStack();
+    if ( !layerStack )
+        return;
+
 	ImageRenderingCompositionChanged();
     OnChildrenChanged().Broadcast(this);
+    layerStack->HierarchyChanged();
 }
 
 void

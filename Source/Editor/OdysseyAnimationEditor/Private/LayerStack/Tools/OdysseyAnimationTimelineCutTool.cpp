@@ -4,8 +4,6 @@
 #include "LayerStack/Tools/OdysseyAnimationTimelineCutTool.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyAnimationEditorTimeline.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -35,17 +33,14 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
     float frameWidth = mTimelineParams->GetFrameWidth();
     float frame = (int)(posX / frameWidth + timelineOffset + 0.5f);
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = iParams.mLayer->GetCellsContainer();
-    int cellFrame = cellsContainer->GetCellFrameAtFrame(frame);
-    if (cellFrame == INDEX_NONE || cellFrame == 0)
+    UOdysseyAnimationCell* cell = iParams.mLayer->GetCellAtFrame(frame);
+    if (!cell || cell->GetFrameRange().GetLowerBoundValue() == frame)
         return FReply::Unhandled();
 
 #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("timeline.move-tool.transaction.set-offset", "Change Layer Offset"));
 #endif
-    TSharedRef<FOdysseyAnimationCellsMutator> cellsMutator = MakeShared<FOdysseyAnimationCellsMutator>(iParams.mLayer, iParams.mLayer->GetCellsContainer().ToSharedRef());
-    cellsMutator->BreakCellAtFrame(frame);
-
+	cell->Break(frame - cell->GetFrameRange().GetLowerBoundValue());
     return FReply::Unhandled();
 }
 

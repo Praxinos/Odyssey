@@ -6,10 +6,8 @@
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -66,16 +64,19 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakCell()
 
     if (currentLayer->GetIsLockedRecursively())
         return;
+		
+	UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(animation->CurrentFrame);
+	if (!cell)
+		return;
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = currentLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return;
+	int frame = animation->CurrentFrame - cell->GetFrameRange().GetLowerBoundValue();
+	if (frame == 0)
+		return;
         
 #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.break-cell", "Break Cell"));
 #endif
-    TSharedRef<FOdysseyAnimationCellsMutator> cellsMutator = MakeShared<FOdysseyAnimationCellsMutator>(currentLayer, cellsContainer.ToSharedRef());
-    cellsMutator->BreakCellAtFrame(animation->CurrentFrame);
+	cell->Break(frame);
 
     FOdysseyAnimationCurrentFrameMutator mutator(animation);
     mutator.Set(animation->CurrentFrame);
@@ -104,14 +105,10 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark()
     if (currentLayer->GetIsLockedRecursively())
         return;
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = currentLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return;
-
-    TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = extension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = extension->Timeline()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
-        TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame(animation->CurrentFrame);
+        UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(animation->CurrentFrame);
         if (!cell)
             return;
 
@@ -121,18 +118,13 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark()
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.remove-cell-mark", "Remove Cell Mark"));
 #endif
-    FOdysseyAnimationCellsMutator cellsMutator(currentLayer, cellsContainer.ToSharedRef());
-
-    for (TSharedPtr<FOdysseyAnimationCell> cell : selectedCells)
+    for (UOdysseyAnimationCell* cell : selectedCells)
     {
-        cellsMutator.SetMarkId(cell, INDEX_NONE);
+		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
     }
-    cellsMutator.Commit();
-
-    int frame = cellsContainer->GetCellFrame(selectedCells[0]);
 
     FOdysseyAnimationCurrentFrameMutator mutator(animation);
-    mutator.Set(frame);
+    mutator.Set(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
     mutator.Commit();
 }
 
@@ -157,15 +149,11 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark(int iMarkId)
 
     if (currentLayer->GetIsLockedRecursively())
         return;
-
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = currentLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return;
         
-    TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = extension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = extension->Timeline()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
-        TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame(animation->CurrentFrame);
+        UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(animation->CurrentFrame);
         if (!cell)
             return;
             
@@ -175,18 +163,13 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark(int iMarkId)
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.remove-cell-mark", "Remove Cell Mark"));
 #endif
-    FOdysseyAnimationCellsMutator cellsMutator(currentLayer, cellsContainer.ToSharedRef());
-
-    for (TSharedPtr<FOdysseyAnimationCell> cell : selectedCells)
+    for (UOdysseyAnimationCell* cell : selectedCells)
     {
-        cellsMutator.SetMarkId(cell, iMarkId);
+		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), iMarkId);
     }
-    cellsMutator.Commit();
-
-    int frame = cellsContainer->GetCellFrame(selectedCells[0]);
 
     FOdysseyAnimationCurrentFrameMutator mutator(animation);
-    mutator.Set(frame);
+    mutator.Set(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
     mutator.Commit();
 }
 
@@ -218,14 +201,10 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveCellMark()
     if (layer->GetIsLockedRecursively())
         return false;
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
-    if (!cellsContainer)
-        return false;
-
-    TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = extension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = extension->Timeline()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
-        TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame(animation->CurrentFrame);
+        UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
         if (!cell)
             return false;
     }
@@ -255,14 +234,10 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_SetCellMark(int iMarkId)
     if (layer->GetIsLockedRecursively())
         return false;
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
-    if (!cellsContainer)
-        return false;
-
-    TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = extension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = extension->Timeline()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
-        TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame(animation->CurrentFrame);
+        UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
         if (!cell)
             return false;
     }

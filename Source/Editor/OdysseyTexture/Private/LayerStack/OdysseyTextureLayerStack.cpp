@@ -9,7 +9,6 @@
 #include "UObject/ObjectSaveContext.h"
 #include "OdysseyTextureLayerImageRaster.h"
 #include "OdysseyRectUtils.h"
-#include "LayerStack/OdysseyTextureLayerStackImageRenderer.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "LayerStack/OdysseyTextureLayer.h"
 #include "OdysseyTextureLayerImageVector.h"
@@ -111,27 +110,6 @@ UOdysseyTextureLayerStack::GetTexture() const
     return nullptr;    
 }
 
-TSharedPtr<IOdysseyImageRenderer>
-UOdysseyTextureLayerStack::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
-{
-    if (iFilter.IsBound() && !iFilter.Execute(this))
-        return nullptr;
-    
-    return MakeShared<FOdysseyTextureLayerStackImageRenderer>(this, iRenderType, GetImageRenderingRects(), iFilter);
-}
-
-TArray<FGuid>
-UOdysseyTextureLayerStack::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
-{
-    TArray<FGuid> idComposition = { GetImageRenderingId() };
-    UOdysseyTextureLayer* layerRoot = Cast<UOdysseyTextureLayer>(LayerRoot);
-        if ( !layerRoot )
-            return idComposition;
-    
-        idComposition.Append(layerRoot->GetImageRenderingComposition(iRenderType));
-        return idComposition;
-}
-
 TArray<::ULIS::FRectI>
 UOdysseyTextureLayerStack::GetImageRenderingRects() const
 {
@@ -146,7 +124,7 @@ void
 UOdysseyTextureLayerStack::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
     const FGuid& eventId =  iEvent.GetId();
-    TArray<FGuid> composition = GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor);
+    TArray<FGuid> composition = GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor, 0);
     if (!composition.Contains(eventId))
         return;
 
@@ -257,7 +235,7 @@ UOdysseyTextureLayerStack::FastUpdateTexture(const TArray<::ULIS::FRectI>& iRect
 
     FTextureCompilingManager::Get().FinishCompilation({ texture });
 
-    mRenderer = BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render); //TODO: should depend on a variable or something ?
+    mRenderer = BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0); //TODO: should depend on a variable or something ?
     mRenderer->Init();
 
     FOdysseyImageRendererCopyParams params(mTextureFastUpdateSurface->Block(), iRects);
@@ -361,7 +339,7 @@ UOdysseyTextureLayerStack::UpdateTexture(bool iForceRefresh)
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShareable(NewBlockFromUTextureData(texture, format));
 
         TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
-        TSharedPtr<IOdysseyImageRenderer> renderer = BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render); //TODO: should depend on a variable or something ?
+        TSharedPtr<IOdysseyImageRenderer> renderer = BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0); //TODO: should depend on a variable or something ?
         renderer->Init();
 
         FOdysseyImageRendererCopyParams params(block, invalidRects);

@@ -19,7 +19,7 @@ public:
     SLATE_END_ARGS()
 
 public:
-    void Construct(const FArguments& iArgs, TSharedPtr<FOdysseyAnimationCellImageStagger> iCell, FOdysseyAnimationEditorExtension* iExtension);
+    void Construct(const FArguments& iArgs, UOdysseyAnimationCellImageStagger* iCell, FOdysseyAnimationEditorExtension* iExtension);
     virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const;
 
 private:
@@ -40,13 +40,13 @@ private:
     void MapActions(TSharedPtr<FUICommandList> iCommandList);
     void BuildContextMenu(FMenuBuilder& iMenuBuilder);
 
-    void SetBehaviour(FOdysseyAnimationCellImageStagger::eBehaviour iBehaviour);
-    bool CanSetBehaviour(FOdysseyAnimationCellImageStagger::eBehaviour iBehaviour) const;
-    bool IsBehaviour(FOdysseyAnimationCellImageStagger::eBehaviour iBehaviour) const;
+    void SetBehaviour(EOdysseyAnimationCellImageStaggerBehaviour iBehaviour);
+    bool CanSetBehaviour(EOdysseyAnimationCellImageStaggerBehaviour iBehaviour) const;
+    bool IsBehaviour(EOdysseyAnimationCellImageStaggerBehaviour iBehaviour) const;
 
 private:
     FOdysseyAnimationEditorExtension* mExtension;
-    TSharedPtr<FOdysseyAnimationCellImageStagger> mCell;
+    UOdysseyAnimationCellImageStagger* mCell;
     TAttribute<bool> mShowContent;
 
     bool mIsEditingReach;

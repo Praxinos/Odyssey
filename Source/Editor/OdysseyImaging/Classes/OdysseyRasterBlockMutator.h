@@ -31,6 +31,8 @@ public:
     void ResetTilesFromRects(const TArray<::ULIS::FRectI>& iRects);
     void EditTilesFromRects(const TArray<::ULIS::FRectI>& iRects, const FEditDelegate& iDelegate);
 
+	void Copy(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects);
+
     void Commit();
     void Abort();
 

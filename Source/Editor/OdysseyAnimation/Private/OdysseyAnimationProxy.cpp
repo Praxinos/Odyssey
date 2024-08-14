@@ -360,6 +360,7 @@ FBlockData::PreChange(const FGuid& iId, const TArray<::ULIS::FRectI>& iRects)
     FScopeLock Lock(&mEditMutex);
 
     mRenderer = nullptr;
+	mIsReadyToRender = false;
     mIsInvalid = true;
     mInvalidTileMap.Invalidate(iRects);
     mInvalidIds.AddUnique(iId); //ensures that if we get multiple chained events to OnImageRenderingChanged, we only really invalidate once the last one has been processed
@@ -378,6 +379,7 @@ FBlockData::PostChange(const FGuid& iId)
     {
         TArray<::ULIS::FRectI> rects = { ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height()) };
         mRenderer = MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, mFrameIndexes.Array()[0], IOdysseyImageRenderer::eRenderType::Render, rects );
+		mIsReadyToRender = true;
         return true;
     }
         
@@ -408,12 +410,6 @@ bool
 FBlockData::IsInvalid() const
 {
     return mIsInvalid;
-}
-
-bool
-FBlockData::IsReadyToRender() const
-{
-    return !!mRenderer;
 }
 
 void
@@ -447,7 +443,7 @@ FBlockData::Render()
         return true;
     }
 
-    if (IsInvalid() && !IsReadyToRender()) //the block contained by the blockdata is indeed invalid, but the block data is not yet in a state where it can be rendered
+    if (IsInvalid() && !mIsReadyToRender) //the block contained by the blockdata is indeed invalid, but the block data is not yet in a state where it can be rendered
     {
         if (!IsInGameThread())
         {
@@ -461,6 +457,7 @@ FBlockData::Render()
         //this is safe only because we are on the gamethread
         TArray<::ULIS::FRectI> rects = { ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height()) };
         mRenderer = MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, mFrameIndexes.Array()[0], IOdysseyImageRenderer::eRenderType::Render, rects );
+		mIsReadyToRender = true;
     }
 
     if (!IsInvalid()) //the block has already been rendered and is valid
@@ -469,7 +466,7 @@ FBlockData::Render()
         return true;
     }
 
-    while(mRenderer)
+    while(mIsReadyToRender)
     {
         //Lock any data that could change while accessing
         mRenderer->Lock();
@@ -489,7 +486,7 @@ FBlockData::Render()
         TSharedPtr<FOdysseyRasterBlock> rasterBlock = mRasterBlock;
 
         //Clear the invalid rects, before rendering so we can detect if new invalid rects are present when we are done
-        mRenderer = nullptr;
+		mIsReadyToRender = false;
         mIsInvalid = false;
         mInvalidTileMap.Clear();
         mEditMutex.Unlock();

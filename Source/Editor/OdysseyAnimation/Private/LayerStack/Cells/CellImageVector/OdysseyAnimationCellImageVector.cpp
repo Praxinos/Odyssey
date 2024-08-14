@@ -25,6 +25,9 @@ void
 UOdysseyAnimationCellImageVector::PostInitProperties()
 {
 	Super::PostInitProperties();
+	
+	if (GetFlags() & RF_ClassDefaultObject)
+		return;
 
 	UOdysseyAnimation* animation = GetAnimation();
     mEngine = new FOdysseyVectorEngine( new FOdysseyVectorGroupPaint( "Scene" )

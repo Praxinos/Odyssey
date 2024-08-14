@@ -2,7 +2,6 @@
 
 #include <Core/Core.h>
 
-class FOdysseyAnimationLightTable;
 struct FOdysseyAnimationLightTableKey;
 
 class FOdysseyAnimationLightTableKeyImport

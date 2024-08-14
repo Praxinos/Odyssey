@@ -31,31 +31,6 @@ UOdysseyTextureLayerImageRaster::UOdysseyTextureLayerImageRaster()
     Icon = FSlateIcon("OdysseyStyle", "OdysseyLayerStack.LayerBitmap16");
 }
 
-void
-UOdysseyTextureLayerImageRaster::OnCreated_Implementation()
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    if(!layerStack)
-        return;
-
-    UTexture2D* texture = layerStack->GetTexture();
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-    //let's ensure the format has alpha, so add alpha channel of needed
-    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>( texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
-
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-    ctx.Clear(*block.Get());
-    ctx.Finish();
-
-    //Caches the tiles on disk, we do this
-    RasterBlock->SetBlock(block);
-    RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
-    RasterBlock->OnBlockCommited().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockCommited);
-    RasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockPtrChanged);
-}
-
 TSharedPtr<FOdysseyRasterBlock>
 UOdysseyTextureLayerImageRaster::GetRasterBlock() const
 {
@@ -97,7 +72,7 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
                     if ( !textureLayer )
                         continue;
 
-                    TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
+                    TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
 		            renderer->Init();
 
                     FOdysseyImageRendererBlendParams params(iBlock, {iBlock->Rect()});
@@ -117,6 +92,27 @@ void
 UOdysseyTextureLayerImageRaster::PostInitProperties()
 {
     Super::PostInitProperties();
+
+	if (GetFlags() & RF_ClassDefaultObject)
+		return;
+
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+    UTexture2D* texture = layerStack->GetTexture();
+    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+    //let's ensure the format has alpha, so add alpha channel of needed
+    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
+
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>( texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
+
+	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
+    ctx.Clear(*block.Get());
+    ctx.Finish();
+
+    //Caches the tiles on disk, we do this
+    RasterBlock->SetBlock(block);
+    RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
+    RasterBlock->OnBlockCommited().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockCommited);
+    RasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockPtrChanged);
 
     RasterBlock->PostProcess().BindUObject(this, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);
 }

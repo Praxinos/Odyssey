@@ -51,7 +51,9 @@ FOdysseyAnimationLightTableKeyImport::Read( FOdysseyAnimationLightTableKey* iKey
 
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_KEY_OPACITY:
                 {
-                    Ar << iKey->Opacity;
+					float opacity = 0.f;
+                    Ar << opacity;
+					iKey->Opacity = opacity * 100.f;
                 }
                 break;
 

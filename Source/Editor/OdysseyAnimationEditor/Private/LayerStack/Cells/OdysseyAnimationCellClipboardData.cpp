@@ -3,9 +3,7 @@
 
 #include "LayerStack/Cells/OdysseyAnimationCellClipboardData.h"
 
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 FOdysseyAnimationCellClipboardData::FOdysseyAnimationCellClipboardData()
@@ -14,7 +12,7 @@ FOdysseyAnimationCellClipboardData::FOdysseyAnimationCellClipboardData()
 
 }
 
-FOdysseyAnimationCellClipboardData::FOdysseyAnimationCellClipboardData(const TArray<TSharedPtr<FOdysseyAnimationCell>>& iCells)
+FOdysseyAnimationCellClipboardData::FOdysseyAnimationCellClipboardData(const TArray<UOdysseyAnimationCell*>& iCells)
     : IOdysseyClipboardData(StaticId())
 {
     Copy(iCells);
@@ -28,12 +26,12 @@ FOdysseyAnimationCellClipboardData::StaticId()
 }
 
 void
-FOdysseyAnimationCellClipboardData::Copy(const TArray<TSharedPtr<FOdysseyAnimationCell>>& iCells)
+FOdysseyAnimationCellClipboardData::Copy(const TArray<UOdysseyAnimationCell*>& iCells)
 {
     mCellCopies.Empty();
-    for (TSharedPtr<FOdysseyAnimationCell> cell : iCells)
+    for (UOdysseyAnimationCell* cell : iCells)
     {
-        mCellCopies.Add({cell, cell->GetLength()});
+        mCellCopies.Add({cell, cell->Length});
     }
 }
 
@@ -42,15 +40,31 @@ FOdysseyAnimationCellClipboardData::Paste(UOdysseyAnimationLayer* iLayer, int iF
 {
     checkf(CanPaste(iLayer), TEXT("Can't Paste"));
 
-    FOdysseyAnimationCellsMutator mutator(iLayer, iLayer->GetCellsContainer());
+	int cellIndex = INDEX_NONE;
 
-    TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
-    for (const FCellCopy& cellCopy : mCellCopies)
+	FInt32Range layerRange = iLayer->GetFrameRange();
+	if (iFrame < layerRange.GetLowerBoundValue())
+	{
+		cellIndex = 0;
+	}
+	else if (iFrame < layerRange.GetUpperBoundValue())
+	{
+		cellIndex = iLayer->GetCells().Num();
+	}
+	else
+	{
+		UOdysseyAnimationCell* cell = iLayer->GetCellAtFrame(iFrame);
+		cellIndex = cell->IndexInLayer;
+		int cellFrame = iFrame - cell->GetFrameRange().GetLowerBoundValue();
+		cell->Break(cellFrame);
+	}
+
+    for (int i = 0; i < mCellCopies.Num(); i++)
     {
-        TSharedPtr<FOdysseyAnimationCell> cell = cellCopy.mCell->Clone(iLayer, cellCopy.mLength);
-        cells.Add(cell);
+		const FCellCopy& cellCopy = mCellCopies[i];
+		UOdysseyAnimationCell* cell = iLayer->CopyCell(cellCopy.mCell, cellIndex + i);
+		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), cellCopy.mLength);
     }
-    mutator.AddAtFrame(cells, iFrame);
 }
 
 bool
@@ -58,14 +72,10 @@ FOdysseyAnimationCellClipboardData::CanPaste(UOdysseyAnimationLayer* iLayer) con
 {
     if (iLayer->GetIsLockedRecursively())
         return false;
-    //TODO: check if iLayer cells types are compatible with the copied cells
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellContainer = iLayer->GetCellsContainer();
-    if (!cellContainer)
-        return false;
         
     for (const FCellCopy& cellCopy : mCellCopies)
     {
-        if (!cellContainer->SupportsType(cellCopy.mCell->GetType()))
+        if (!iLayer->GetSupportedCellTypes().Contains(cellCopy.mCell->GetClass()))
             return false;
     }
 
@@ -76,4 +86,25 @@ int
 FOdysseyAnimationCellClipboardData::GetCellCount() const
 {
     return mCellCopies.Num();
+}
+
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------- FGCObject implementation
+
+void
+FOdysseyAnimationCellClipboardData::AddReferencedObjects(FReferenceCollector& Collector)
+{
+    Collector.AddReferencedObject(mLayer);
+
+	for (FCellCopy& cellCopy : mCellCopies)
+	{
+		Collector.AddReferencedObject(cellCopy.mCell);
+	}
+}
+
+FString
+FOdysseyAnimationCellClipboardData::GetReferencerName() const
+{
+    return "FOdysseyAnimationCellClipboardData";
 }

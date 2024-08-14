@@ -1,7 +1,6 @@
 #include "LayerStack/LightTable/OdysseyAnimationLightTableImport.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTableKeyImport.h"
-#include "LayerStack/LightTable/OdysseyAnimationLightTableKeyExport.h"
 #include "OdysseyFile.h"
 
 bool
@@ -61,8 +60,12 @@ FOdysseyAnimationLightTableImport::Read( FOdysseyAnimationLightTable* iAnimation
 
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_CONTRAST:
                 {
-                    Ar << iAnimationLightTable->PreviousKeysContrast;
-                    Ar << iAnimationLightTable->NextKeysContrast;
+					float prev = 0.f;
+					float next = 0.f;
+                    Ar << prev;
+                    Ar << next;
+					iAnimationLightTable->PreviousKeysContrast = prev * 100.f;
+                    iAnimationLightTable->NextKeysContrast = next * 100.f;
                 }
                 break;
 
@@ -70,12 +73,12 @@ FOdysseyAnimationLightTableImport::Read( FOdysseyAnimationLightTable* iAnimation
                 {
                     for ( int i = 0; i < 10; i++ )
                     {
-                        FOdysseyAnimationLightTableKeyExport::Write( &iAnimationLightTable->PreviousKeys[i], Ar );
+                        FOdysseyAnimationLightTableKeyImport::Read( &iAnimationLightTable->PreviousKeys[i], Ar );
                     }
 
 					for ( int i = 0; i < 10; i++ )
                     {
-                        FOdysseyAnimationLightTableKeyExport::Write( &iAnimationLightTable->NextKeys[i], Ar );
+                        FOdysseyAnimationLightTableKeyImport::Read( &iAnimationLightTable->NextKeys[i], Ar );
                     }
                 }
                 break;

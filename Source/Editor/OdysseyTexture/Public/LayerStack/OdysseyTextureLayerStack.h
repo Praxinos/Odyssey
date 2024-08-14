@@ -26,7 +26,6 @@ enum class EOdysseyTextureLayerStackTextureUpdateMode
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerStack
     : public UOdysseyLayerStack
-    , public FOdysseyImageRenderingAbility
     , public FTickableGameObject
 {
     GENERATED_BODY()
@@ -92,8 +91,6 @@ public:
 
 public:
     //FOdysseyImageRenderingAbility overrides
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0) const override;
     virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
 
 private:

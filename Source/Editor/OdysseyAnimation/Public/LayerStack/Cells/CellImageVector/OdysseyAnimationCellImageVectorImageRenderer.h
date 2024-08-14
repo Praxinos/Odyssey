@@ -7,13 +7,11 @@
 
 #include <ULIS>
 
-class FOdysseyAnimationCellImageVector;
-
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageVectorImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationCellImageVectorImageRenderer(UOdysseyAnimationCellImageVector* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
+    FOdysseyAnimationCellImageVectorImageRenderer(const UOdysseyAnimationCellImageVector* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
 
 public:
     virtual void Init() override;
@@ -24,7 +22,7 @@ public:
     virtual TArray<::ULIS::FEvent> Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList) override;
 
 public:
-    TStrongObjectPtr<UOdysseyAnimationCellImageVector> mCell;
+    TStrongObjectPtr<const UOdysseyAnimationCellImageVector> mCell;
     TSharedPtr<::ULIS::FBlock> mBlock;
     TSharedPtr<::ULIS::FBlock> mHUDBlock;
     uint64 mDrawingFlags;

@@ -245,8 +245,6 @@ FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
     if ( !layerStack )
         return;
 
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Import Textures Sequence"));
-
     FOpenAssetDialogConfig openAssetDialogConfig;
     openAssetDialogConfig.DialogTitleOverride = LOCTEXT( "timeline-tab.import-texture-dialog.title", "Import Textures Sequence" );
     openAssetDialogConfig.DefaultPath = FPaths::GetPath(mExtension->Animation()->GetPathName() );
@@ -262,54 +260,41 @@ FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
     if ( assetsData.Num() <= 0 )
         return;
 
+    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Import Textures Sequence"));
+    layerStack->Modify();
+
     UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass());
     UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
-    if ( !layerImageRaster )
-        return;
     
-    layerStack->Modify();
+	layerImageRaster->Modify();
     
     FScopedSlowTask progressBar(assetsData.Num(), LOCTEXT("timeline-tab.import-texture-dialog.progress-bar.title", "Importing Texture Sequence"));
     progressBar.MakeDialog();
 
-    TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
     for( int i = 0; i < assetsData.Num(); i++ )
     {
         progressBar.EnterProgressFrame();
         UTexture2D* openedTexture = static_cast<UTexture2D*>(assetsData[i].GetAsset());
-        TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(openedTexture, animation->Format()));
-        if (textureBlock->Width() == animation->Width() && textureBlock->Height() == animation->Height() && textureBlock->Format() == animation->Format())
-        {
-            TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layerImageRaster, 1, textureBlock);
-            cells.Add(cell);
-        }
-        else
-        {
-            TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layerImageRaster, 1, animation->Width(), animation->Height(), animation->Format());
-            TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
-            FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
-            ::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
-            rasterBlockMutator.EditTilesFromRects(
-                { invalidRect },
-                FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-                    {
-                        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
-                        ::ULIS::FEvent eventConvertFormat = FULISEventBuilder().RetainBlock(iBlock).RetainBlock(textureBlock).Build();
-                        ctx.ConvertFormat(*textureBlock, *iBlock, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventConvertFormat);
-                        return { eventConvertFormat };
-                    }
-                )
-            );
-            rasterBlockMutator.Commit();
-            
-            cells.Add(cell);
-        }
+        TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(openedTexture, animation->Format()));    
+	
+		UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(layerImageRaster->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
+		TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
+		FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
+		::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
+		rasterBlockMutator.EditTilesFromRects(
+			{ invalidRect },
+			FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+				[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+				{
+					::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+					::ULIS::FEvent eventConvertFormat = FULISEventBuilder().RetainBlock(iBlock).RetainBlock(textureBlock).Build();
+					ctx.ConvertFormat(*textureBlock, *iBlock, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventConvertFormat);
+					return { eventConvertFormat };
+				}
+			)
+		);
+		rasterBlockMutator.Commit();
     }
-    
-    FOdysseyAnimationCellsMutator mutator(layerImageRaster, layerImageRaster->GetCellsContainer());
-    mutator.Add(cells);
-    mutator.Commit(); 
     
     FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
     currentFrameMutator.Set(0);
@@ -414,17 +399,30 @@ FOdysseyAnimationEditorTimelineTab::ImportImageSequence()
     #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("timeline-tab.transaction.import-image-sequence", "Import Image Sequence"));
     #endif
+	layerStack->Modify();
     UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-    TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
+	layer->Modify();
     for (TSharedPtr<::ULIS::FBlock> block : blocks)
     {
-        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, 1, block);
-        cells.Add(cell);
+		UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
+		
+		TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
+		FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
+		::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
+		rasterBlockMutator.EditTilesFromRects(
+			{ invalidRect },
+			FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+				[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+				{
+					::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+					::ULIS::FEvent eventConvertFormat = FULISEventBuilder().RetainBlock(iBlock).RetainBlock(block).Build();
+					ctx.ConvertFormat(*block, *iBlock, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventConvertFormat);
+					return { eventConvertFormat };
+				}
+			)
+		);
+		rasterBlockMutator.Commit();
     }
-    
-    FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
-    mutator.Add(cells);
-    mutator.Commit();
 
     FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
     currentFrameMutator.Set(0);
@@ -592,6 +590,7 @@ FOdysseyAnimationEditorTimelineTab::CreateNewLayer()
     #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("timeline-tab.transaction.shortcut.create-new-layer", "Add Layer"));
     #endif
+		layerStack->Modify();
         UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
         if (currentLayer)
         {
@@ -615,11 +614,8 @@ FOdysseyAnimationEditorTimelineTab::CreateNewLayer()
         if (!animLayer)
             return;
 
-        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(animLayer, 1, animation->Width(), animation->Height(), animation->Format());
-        FOdysseyAnimationCellsMutator mutator(animLayer, animLayer->GetCellsContainer());
-        mutator.Add({ cell });
-        mutator.SetOffset(animation->CurrentFrame);
-        mutator.Commit();
+		animLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
+		FOdysseyObjectEditorUtils::SetPropertyValue(animLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), animation->CurrentFrame);
     
         FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
         currentFrameMutator.Set(animation->CurrentFrame);

@@ -274,9 +274,9 @@ FOdysseyAnimationEditorTimeline::SetSelectedCells(const TArray<UOdysseyAnimation
     
     TArray<UOdysseyAnimationCell*> cells = mLayer->GetCells();
     mSelectedCells.Sort(
-        [cells](UOdysseyAnimationCell* iCellA, UOdysseyAnimationCell* iCellB)
+        [cells](const UOdysseyAnimationCell& iCellA, const UOdysseyAnimationCell& iCellB)
         {
-            return iCellA->IndexInLayer < iCellB->IndexInLayer;
+            return iCellA.IndexInLayer < iCellB.IndexInLayer;
         }
     );
 }

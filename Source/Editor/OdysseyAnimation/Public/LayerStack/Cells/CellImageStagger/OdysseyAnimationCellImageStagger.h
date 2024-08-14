@@ -38,6 +38,9 @@ public:
     int GetStaggerFrame(int Frame) const;
 
 public:
+	virtual UOdysseyAnimationCell* Break(int Frame) override;
+
+public:
 	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
     EOdysseyAnimationCellImageStaggerBehaviour Behaviour = EOdysseyAnimationCellImageStaggerBehaviour::Loop;
 

@@ -5,6 +5,7 @@
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStaggerImport.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStaggerImageRenderer.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 void
 UOdysseyAnimationCellImageStagger::OldSerialize(FArchive& Ar)
@@ -110,4 +111,29 @@ TArray<::ULIS::FRectI>
 UOdysseyAnimationCellImageStagger::GetImageRenderingRects() const
 {
     return GetLayer()->GetImageRenderingRects();
+}
+
+UOdysseyAnimationCell*
+UOdysseyAnimationCellImageStagger::Break(int Frame)
+{
+	if (Frame <= 0 || Frame >= Length)
+		return nullptr;
+
+	UOdysseyAnimationCell* cell = this;
+	do
+	{
+		UOdysseyAnimationCellImageStagger* cellStagger = Cast<UOdysseyAnimationCellImageStagger>(cell);
+		int staggerFrame = cellStagger->GetStaggerFrame(Frame);
+		cell = cellStagger->GetReferenceCellAtFrame(Frame);
+	}
+	while(cell && cell->IsA<UOdysseyAnimationCellImageStagger>());
+
+	if (!cell)
+		return nullptr;
+
+	UOdysseyAnimationCell* copiedCell = GetLayer()->CopyCell(cell, IndexInLayer + 1);
+	FOdysseyObjectEditorUtils::SetPropertyValue(copiedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), Length - Frame);
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), Frame);
+
+	return copiedCell;
 }

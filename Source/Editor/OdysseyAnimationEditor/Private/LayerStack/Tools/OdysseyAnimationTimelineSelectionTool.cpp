@@ -5,7 +5,6 @@
 #include "OdysseyAnimationEditorTimeline.h"
 #include "DragDropOperations/OdysseyAnimationCellsDragDropOperation.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 
 FOdysseyAnimationTimelineSelectionTool::~FOdysseyAnimationTimelineSelectionTool()
@@ -289,11 +288,7 @@ FOdysseyAnimationTimelineSelectionTool::OnNonContiguousSelectionMouseButtonDown(
 		
 	if (mShouldDeselect)
 	{
-		TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = iParams.mLayer->GetCellsContainer();
-		if (!cellsContainer)
-			return FReply::Unhandled();
-
-		TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame(frame);
+		UOdysseyAnimationCell* cell = iParams.mLayer->GetCellAtFrame(frame);
 		if (!cell)
 			return FReply::Unhandled();
 
@@ -366,58 +361,41 @@ FOdysseyAnimationTimelineSelectionTool::GetFrameUnderCursor(const FMouseEventPar
 bool
 FOdysseyAnimationTimelineSelectionTool::SelectFromCursorToFrame(UOdysseyAnimationLayer* iLayer, int iFrame, bool iDeselect)
 {
-	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = iLayer->GetCellsContainer();
-	if (!cellsContainer)
-		return false;
-
 	if (!mCellCursor)
 		return false;
 
-	/*{
-		TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame(iFrame);
-		if (!cell)
-			return false;
+	FInt32Range cursorCellFrameRange = mCellCursor->GetFrameRange();
 
-		mTimelineParams->SelectCell(cell, true);
-		return true;
-	}*/
-
-	TMap<TSharedPtr<FOdysseyAnimationCell>, FInt32Range> cellsFrameRanges = cellsContainer->GetCellsFrameRanges();
-	if (!cellsFrameRanges.Contains(mCellCursor))
-		return false;
-
-	FInt32Range cursorCellFrameRange = cellsFrameRanges[mCellCursor];
-
-	TArray<TSharedPtr<FOdysseyAnimationCell>> affectedCells = {};
+	TArray<UOdysseyAnimationCell*> affectedCells = {};
 	affectedCells.AddUnique(mCellCursor);
 
 	int currentFrame = cursorCellFrameRange.GetLowerBoundValue() - 1;
 	while(currentFrame >= iFrame)
 	{
-		TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame(currentFrame);
+		UOdysseyAnimationCell* cell = iLayer->GetCellAtFrame(currentFrame);
 		if (!cell)
 			break;
 
 		affectedCells.AddUnique(cell);
-		currentFrame -= cell->GetLength();
+		currentFrame -= cell->Length;
 	}
 
 	currentFrame = cursorCellFrameRange.GetUpperBoundValue() + 1;
 	while(currentFrame <= iFrame)
 	{
-		TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame(currentFrame);
+		UOdysseyAnimationCell* cell = iLayer->GetCellAtFrame(currentFrame);
 		if (!cell)
 			break;
 
 		affectedCells.AddUnique(cell);
-		currentFrame += cell->GetLength();
+		currentFrame += cell->Length;
 	}
 	
-	TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = { mInitialSelection };
+	TArray<UOdysseyAnimationCell*> selectedCells = { mInitialSelection };
 	if (iDeselect)
 	{
 		selectedCells.RemoveAll(
-			[&affectedCells](TSharedPtr<FOdysseyAnimationCell> iCell)
+			[&affectedCells](UOdysseyAnimationCell* iCell)
 			{
 				return affectedCells.Contains(iCell);
 			}
@@ -425,7 +403,7 @@ FOdysseyAnimationTimelineSelectionTool::SelectFromCursorToFrame(UOdysseyAnimatio
 	}
 	else
 	{
-		for ( TSharedPtr<FOdysseyAnimationCell> affectedCell : affectedCells)
+		for ( UOdysseyAnimationCell* affectedCell : affectedCells)
 		{
 			selectedCells.AddUnique(affectedCell);
 		}
@@ -437,11 +415,7 @@ FOdysseyAnimationTimelineSelectionTool::SelectFromCursorToFrame(UOdysseyAnimatio
 bool
 FOdysseyAnimationTimelineSelectionTool::SetCellSelectionCursorAtFrame(UOdysseyAnimationLayer* iLayer, int iFrame)
 {
-	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = iLayer->GetCellsContainer();
-	if (!cellsContainer)
-		return false;
-
-	TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame(iFrame);
+	UOdysseyAnimationCell* cell = iLayer->GetCellAtFrame(iFrame);
 	if (!cell)
 		return false;
 
@@ -452,11 +426,7 @@ FOdysseyAnimationTimelineSelectionTool::SetCellSelectionCursorAtFrame(UOdysseyAn
 bool
 FOdysseyAnimationTimelineSelectionTool::IsFrameSelected(UOdysseyAnimationLayer* iLayer, int iFrame) const
 {
-	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = iLayer->GetCellsContainer();
-	if (!cellsContainer)
-		return false;
-
-	TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame(iFrame);
+	UOdysseyAnimationCell* cell = iLayer->GetCellAtFrame(iFrame);
 	if (!cell)
 		return false;
 

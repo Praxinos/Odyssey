@@ -5,11 +5,13 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyPerformanceMode.h"
+#include "OdysseyImageRenderingAbility.h"
 #include "OdysseyLayerStack.generated.h"
 
 UCLASS(Abstract, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYLAYERSTACK_API UOdysseyLayerStack
     : public UObject
+	, public FOdysseyImageRenderingAbility
 {
     GENERATED_BODY()
 
@@ -18,6 +20,9 @@ public:
     /* Called when the current layer changed */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentLayerChanged, UOdysseyLayerStack*)
 
+    /* Called when the Layer hierarchy changed at some point */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnHierarchyChanged, UOdysseyLayerStack*);
+
 public:
     //Delegates
 
@@ -25,6 +30,11 @@ public:
      * @brief Returns the CurrentLayerChanged delegate
      */
     static FOnCurrentLayerChanged& OnCurrentLayerChanged();
+
+    /**
+     * @brief Returns the HierarchyChanged delegate
+     */
+    static FOnHierarchyChanged& OnHierarchyChanged();
 
 public:
     //Layer Class Support
@@ -236,7 +246,11 @@ public:
 protected:
     //Property changed methods
     void CurrentLayerChanged();
-    virtual void PropertyChanged(const FName& iPropertyName);
+    virtual void PropertyChanged(const FName& iPropertyName);public:
+    
+public:
+	//Called by layers when there Parent or Children changed
+    void HierarchyChanged();
 
 public:
     // UObject overrides
@@ -258,6 +272,11 @@ public:
 
     virtual void PostInitProperties() override;
 
+public:
+	//FOdysseyImageRenderingAbility overrides
+	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
+	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
+
 protected:
     //Internal
     UOdysseyLayer* CreateLayer(UClass* iLayerType);
@@ -269,8 +288,6 @@ protected:
     UOdysseyLayer* CopyLayerInternal(UOdysseyLayer* iLayer, UOdysseyLayer* iParent, int iIndexInParent);
     
     void GetLayersUniqueParents(TArray<UOdysseyLayer*> iLayers, TArray<UOdysseyLayer*>& oParents);
-
-    //void GetLayersToRemoveRecursively(TArray<UOdysseyLayer*> iLayers, TArray<UOdysseyLayer*>& ioRemovedLayers);
 
 public:
     //Default properties

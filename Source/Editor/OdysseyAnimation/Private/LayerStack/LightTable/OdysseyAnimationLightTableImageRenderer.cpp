@@ -8,26 +8,26 @@
 #include "ULISLoaderModule.h"
 #include "ULISEventBuilder.h"
 
-FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRenderer(UOdysseyAnimationLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
+FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRenderer(const UOdysseyAnimationLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
 {
     UOdysseyAnimation* animation = iLayer->GetAnimation();
 
-    int currentCellIndex = iLayer->GetCellIndexAtFrame(iFrame);
-    if (currentCellIndex == INDEX_NONE)
+    UOdysseyAnimationCell* cell = iLayer->GetCellAtFrame(iFrame);
+    if (!cell)
         return;
 
     for (int i = 9; i >= 0; i--)
     {
-		if (iLayer->Lighttable.PreviousKeys[i].IsActivated)
+		if (iLayer->Lighttable.PreviousKeys[i].bIsActivated)
 		{
-			int keyCellIndex = cellIndex - i - 1;
-			if (keyCellIndex >= 0 && keyCellIndex < Cells.Num())
+			int keyCellIndex = cell->IndexInLayer - i - 1;
+			if (keyCellIndex >= 0 && keyCellIndex < iLayer->GetCells().Num())
 			{
-				UOdysseyAnimationCell* cell = GetCells()[keyCellIndex];
-				FVector2D outOfPegsPan = cell->OutOfPegsPan();
-				float outOfPegsRotation = cell->OutOfPegsRotation();
-				float outOfPegsZoom = cell->OutOfPegsZoom();
+				UOdysseyAnimationCell* keyCell = iLayer->GetCells()[keyCellIndex];
+				FVector2D outOfPegsPan = keyCell->OutOfPegs.Pan;
+				float outOfPegsRotation = keyCell->OutOfPegs.Rotation;
+				float outOfPegsZoom = keyCell->OutOfPegs.Zoom / 100.f;
 
 				::ULIS::FMat3F oopTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
 				* ::ULIS::FMat3F::MakeTranslationMatrix(outOfPegsPan.X, outOfPegsPan.Y)
@@ -38,22 +38,27 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
 				FFrameData data;
 				data.mOpacity = iLayer->Lighttable.PreviousKeys[i].Opacity;
 				data.mRenderer = cell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0, iFilter);
-				data.mColor = iLayer->Lighttable.PreviousKeysColor;
-				data.mContrast = iLayer->Lighttable.PreviousKeysContrast;
+				data.mColor = ::ULIS::FColor::FromRGBAF(
+					iLayer->Lighttable.PreviousKeysColor.R,
+					iLayer->Lighttable.PreviousKeysColor.G,
+					iLayer->Lighttable.PreviousKeysColor.B,
+					iLayer->Lighttable.PreviousKeysColor.A
+				);
+				data.mContrast = iLayer->Lighttable.PreviousKeysContrast / 100.f;
 				data.mOutOfPegsTransform = oopTransform;
 				mFramesData.Add(data);
 			}
 		}
 
-		if (iLayer->Lighttable.NextKeys[i].IsActivated)
+		if (iLayer->Lighttable.NextKeys[i].bIsActivated)
 		{
-			int keyCellIndex = cellIndex + i + 1;
-			if (keyCellIndex >= 0 && keyCellIndex < Cells.Num())
+			int keyCellIndex = cell->IndexInLayer + i + 1;
+			if (keyCellIndex >= 0 && keyCellIndex < iLayer->GetCells().Num())
 			{
-				UOdysseyAnimationCell* cell = GetCells()[keyCellIndex];
-				FVector2D outOfPegsPan = cell->OutOfPegsPan();
-				float outOfPegsRotation = cell->OutOfPegsRotation();
-				float outOfPegsZoom = cell->OutOfPegsZoom();
+				UOdysseyAnimationCell* keyCell = iLayer->GetCells()[keyCellIndex];
+				FVector2D outOfPegsPan = keyCell->OutOfPegs.Pan;
+				float outOfPegsRotation = keyCell->OutOfPegs.Rotation;
+				float outOfPegsZoom = keyCell->OutOfPegs.Zoom / 100.f;
 
 				::ULIS::FMat3F oopTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
 				* ::ULIS::FMat3F::MakeTranslationMatrix(outOfPegsPan.X, outOfPegsPan.Y)
@@ -64,8 +69,13 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
 				FFrameData data;
 				data.mOpacity = iLayer->Lighttable.NextKeys[i].Opacity;
 				data.mRenderer = cell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0, iFilter);
-				data.mColor = iLayer->Lighttable.NextKeysColor;
-				data.mContrast = iLayer->Lighttable.NextKeysContrast;
+				data.mColor = ::ULIS::FColor::FromRGBAF(
+					iLayer->Lighttable.NextKeysColor.R,
+					iLayer->Lighttable.NextKeysColor.G,
+					iLayer->Lighttable.NextKeysColor.B,
+					iLayer->Lighttable.NextKeysColor.A
+				);
+				data.mContrast = iLayer->Lighttable.NextKeysContrast / 100.f;
 				data.mOutOfPegsTransform = oopTransform;
 				mFramesData.Add(data);
 			}

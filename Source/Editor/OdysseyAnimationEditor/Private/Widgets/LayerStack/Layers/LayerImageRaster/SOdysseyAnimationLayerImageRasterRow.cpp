@@ -152,7 +152,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
         .AutoHeight()
         [
             SNew(SOdysseyAnimationTimelineLightTableHeader)
-            .LightTable(mAnimationLayerImageRaster->GetLightTable())
+            .Layer(mAnimationLayerImageRaster)
 		    .Visibility(this, &SOdysseyAnimationLayerImageRasterRow::GetLightTableVisibility)
         ];
 }
@@ -213,7 +213,7 @@ SOdysseyAnimationLayerImageRasterRow::OnOpacityEndSliderMovement(int iValue)
 ECheckBoxState
 SOdysseyAnimationLayerImageRasterRow::GetLightTableIsChecked() const
 {
-	return mAnimationLayerImageRaster->bIsLightTableActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+	return mAnimationLayerImageRaster->Lighttable.bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 ECheckBoxState
@@ -242,7 +242,7 @@ SOdysseyAnimationLayerImageRasterRow::GetCollapsedOpacityVisibility() const
 EVisibility
 SOdysseyAnimationLayerImageRasterRow::GetLightTableVisibility() const
 {
-    return mAnimationLayerImageRaster->bIsLightTableActivated ? EVisibility::Visible : EVisibility::Collapsed;
+    return mAnimationLayerImageRaster->Lighttable.bIsActivated ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 #undef LOCTEXT_NAMESPACE

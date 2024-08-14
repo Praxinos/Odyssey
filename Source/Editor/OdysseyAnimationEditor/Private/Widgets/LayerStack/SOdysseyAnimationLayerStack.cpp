@@ -19,7 +19,6 @@
 #include "Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.h"
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.h"
 #include "OdysseyAnimation.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -252,19 +251,13 @@ SOdysseyAnimationLayerStack::OnLayerAdded(UOdysseyLayer* iLayer)
 {
     if (iLayer->GetClass() == UOdysseyAnimationLayerImageRaster::StaticClass())
     {
-        UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(iLayer);
-        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, 1, mExtension->Animation()->Width(), mExtension->Animation()->Height(), mExtension->Animation()->Format());
-        FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
-        mutator.Add({ cell });
-        mutator.Commit();
+		UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(iLayer);
+		layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
     }
     else if (iLayer->GetClass() == UOdysseyAnimationLayerImageVector::StaticClass())
     {
-        UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(iLayer);
-        TSharedPtr<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(layer, 1, mExtension->Animation()->Width(), mExtension->Animation()->Height());
-        FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
-        mutator.Add({ cell });
-        mutator.Commit();
+		UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(iLayer);
+        layer->AddCell(UOdysseyAnimationCellImageVector::StaticClass());
     }
 }
 

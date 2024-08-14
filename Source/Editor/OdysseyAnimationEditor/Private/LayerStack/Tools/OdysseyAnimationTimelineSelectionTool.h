@@ -6,7 +6,6 @@
 #include "LayerStack/Tools/OdysseyAnimationTimelineTool.h"
 
 class FOdysseyAnimationEditorTimeline;
-class FOdysseyAnimationCell;
 
 class FOdysseyAnimationTimelineSelectionTool
     : public FOdysseyAnimationTimelineTool
@@ -59,6 +58,6 @@ private:
     bool mIsDragnDrop = false;
     ESelectionMode mSelectionMode = ESelectionMode::Default;
     bool mShouldDeselect = false;
-    TArray<TSharedPtr<FOdysseyAnimationCell>> mInitialSelection;
-    TSharedPtr<FOdysseyAnimationCell> mCellCursor; //Most of the time same as mTimelineParams->GetCellSelectionCursor() but can be different in some cases
+    TArray<UOdysseyAnimationCell*> mInitialSelection;
+    UOdysseyAnimationCell* mCellCursor; //Most of the time same as mTimelineParams->GetCellSelectionCursor() but can be different in some cases
 };

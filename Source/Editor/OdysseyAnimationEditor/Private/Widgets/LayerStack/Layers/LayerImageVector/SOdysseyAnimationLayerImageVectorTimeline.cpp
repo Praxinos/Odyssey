@@ -29,20 +29,13 @@ SOdysseyAnimationLayerImageVectorTimeline::Construct(
     SOdysseyAnimationLayerImageTimeline::Construct(args, iExtension, iAnimationLayerImageVector);
 }
 
-TSharedRef<FOdysseyAnimationCell>
-SOdysseyAnimationLayerImageVectorTimeline::OnCreateCell()
-{
-    UOdysseyAnimation* animation = mLayer->GetAnimation();
-    return FOdysseyAnimationCellImageVector::Create(Cast<UOdysseyAnimationLayerImageVector>(mLayer), 1, animation->Width(), animation->Height());
-}
-
 TSharedRef<SWidget>
-SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell)
+SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(UOdysseyAnimationCell* iCell)
 {
-    if (!iCell || iCell->GetType() == FOdysseyAnimationCellImageVector::StaticType())
+    if (!iCell || iCell->IsA<UOdysseyAnimationCellImageVector>())
         return SNew(SOdysseyAnimationCellImageVector);
-    else if (iCell->GetType() == FOdysseyAnimationCellImageStagger::StaticType())
-        return SNew(SOdysseyAnimationCellImageStagger, StaticCastSharedPtr<FOdysseyAnimationCellImageStagger>(iCell), mExtension)
+    else if (iCell->IsA<UOdysseyAnimationCellImageStagger>())
+        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell), mExtension)
             .ShowContent(this, &SOdysseyAnimationLayerImageVectorTimeline::GetShowStaggerCellContent);
 
     return SNullWidget::NullWidget;
