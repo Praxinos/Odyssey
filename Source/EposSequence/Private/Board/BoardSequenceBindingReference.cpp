@@ -1,4 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// IDDN.FR.000.000000.000.S.X.0000.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2024
 
 #include "Board/BoardSequenceBindingReference.h"
 

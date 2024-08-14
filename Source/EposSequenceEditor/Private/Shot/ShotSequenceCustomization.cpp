@@ -235,6 +235,11 @@ FShotSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandLi
         FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::GotoNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
         FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::HasNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
     );
+
+    ioCommandList->MapAction(
+        FEposSequenceEditorCommands::Get().DeactivateAllLighttables,
+        FExecuteAction::CreateLambda( [this](){ LighttableTools::Deactivate( mSequencer ); } )
+    );
 }
 
 //---

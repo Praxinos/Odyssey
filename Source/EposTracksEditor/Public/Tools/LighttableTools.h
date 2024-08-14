@@ -23,6 +23,8 @@ public:
     static void Activate( ISequencer* iSequencer, FGuid iPlaneBinding );
     static void Deactivate( ISequencer* iSequencer, FGuid iPlaneBinding );
     static int8 GetState( ISequencer* iSequencer, FGuid iPlaneBinding );
+    // All
+    static void Deactivate( ISequencer* iSequencer );
 
 public:
     static void Activate( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iPlaneBinding );

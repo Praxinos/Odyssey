@@ -180,7 +180,7 @@ void UMovieSceneSingleCameraCutSection::ComputeInitialCameraCutTransform()
                 }
             }
         }
-    }   
+    }
 
     // Does the bound camera have a transform track?
     if (CameraTransformTrack == nullptr)

@@ -43,6 +43,8 @@ public:
     TSharedPtr<FUICommandInfo> StepToPreviousShot;
     TSharedPtr<FUICommandInfo> StepToNextShot;
 
+    TSharedPtr<FUICommandInfo> DeactivateAllLighttables;
+
     //---
 
     TSharedPtr<FUICommandInfo> CreateCameraAtCurrentTime;

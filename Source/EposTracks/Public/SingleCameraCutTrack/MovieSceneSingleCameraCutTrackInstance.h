@@ -1,4 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// IDDN.FR.000.000000.000.S.X.0000.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2024
 
 #pragma once
 
@@ -15,33 +16,33 @@ class UMovieSceneSingleCameraCutSection;
 namespace UE::EposMovieScene
 {
     class FCameraCutViewportPreviewer;
-	struct FCameraCutAnimator; 
+    struct FCameraCutAnimator;
 }
 namespace UE::MovieScene
-{ 
-	struct FCameraCutPlaybackCapability;
-	struct FOnCameraCutUpdatedParams;
-	struct FSequenceInstance;
+{
+    struct FCameraCutPlaybackCapability;
+    struct FOnCameraCutUpdatedParams;
+    struct FSequenceInstance;
 }
 
 namespace UE::EposMovieScene
 {
     using namespace UE::MovieScene;
 
-	// Backwards compatibilty wrapper for camera cut playback capability.
-	struct FCameraCutPlaybackCapabilityCompatibilityWrapper
-	{
-		FCameraCutPlaybackCapabilityCompatibilityWrapper(const FSequenceInstance& SequenceInstance);
+    // Backwards compatibilty wrapper for camera cut playback capability.
+    struct FCameraCutPlaybackCapabilityCompatibilityWrapper
+    {
+        FCameraCutPlaybackCapabilityCompatibilityWrapper(const FSequenceInstance& SequenceInstance);
 
-		bool ShouldUpdateCameraCut();
-		void OnCameraCutUpdated(const FOnCameraCutUpdatedParams& Params);
+        bool ShouldUpdateCameraCut();
+        void OnCameraCutUpdated(const FOnCameraCutUpdatedParams& Params);
 #if WITH_EDITOR
-		bool ShouldRestoreEditorViewports();
+        bool ShouldRestoreEditorViewports();
 #endif
 
         FCameraCutPlaybackCapability* CameraCutCapability;
         IMovieScenePlayer* Player;
-	};
+    };
 }
 
 /**
@@ -50,55 +51,54 @@ namespace UE::EposMovieScene
 UCLASS()
 class EPOSTRACKS_API UMovieSceneSingleCameraCutTrackInstance : public UMovieSceneTrackInstance
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
 #if WITH_EDITOR
-	/**
-	 * Toggle camera cut lock on cinematic editor viewports while also correctly managing
-	 * remember/restoring/discarding pre-animated viewport positions based on sequencer
-	 * settings.
-	 */
-	static void ToggleCameraCutLock(UMovieSceneEntitySystemLinker* Linker, bool bEnableCameraCuts, bool bRestoreViewports);
+    /**
+     * Toggle camera cut lock on cinematic editor viewports while also correctly managing
+     * remember/restoring/discarding pre-animated viewport positions based on sequencer
+     * settings.
+     */
+    static void ToggleCameraCutLock(UMovieSceneEntitySystemLinker* Linker, bool bEnableCameraCuts, bool bRestoreViewports);
 #endif
 
 private:
-	virtual void OnInitialize() override;
-	virtual void OnAnimate() override;
-	virtual void OnEndUpdateInputs() override;
-	virtual void OnDestroyed() override;
+    virtual void OnInitialize() override;
+    virtual void OnAnimate() override;
+    virtual void OnEndUpdateInputs() override;
+    virtual void OnDestroyed() override;
 
 private:
-	/**
-	 * Stores information about the last set camera in order to differentiate
-	 * between new and pre-existing cuts.
-	 */
-	struct FCameraCutCache
-	{
-		TWeakObjectPtr<> LastLockedCamera;
-		FMovieSceneTrackInstanceInput LastInput;
-	};
+    /**
+     * Stores information about the last set camera in order to differentiate
+     * between new and pre-existing cuts.
+     */
+    struct FCameraCutCache
+    {
+        TWeakObjectPtr<> LastLockedCamera;
+        FMovieSceneTrackInstanceInput LastInput;
+    };
 
-	/**
-	 * Track instance input qualified with the global start time of its corresponding
-	 * section, used for sorting inputs and prioritizing more "recent" camera cuts
-	 * over "older" ones.
-	 */
-	struct FCameraCutInputInfo
-	{
-		FMovieSceneTrackInstanceInput Input;
-		float GlobalStartTime = 0.f;
-	};
+    /**
+     * Track instance input qualified with the global start time of its corresponding
+     * section, used for sorting inputs and prioritizing more "recent" camera cuts
+     * over "older" ones.
+     */
+    struct FCameraCutInputInfo
+    {
+        FMovieSceneTrackInstanceInput Input;
+        float GlobalStartTime = 0.f;
+    };
 
-	FCameraCutCache CameraCutCache;
-	TArray<FCameraCutInputInfo> SortedInputInfos;
+    FCameraCutCache CameraCutCache;
+    TArray<FCameraCutInputInfo> SortedInputInfos;
 
 #if WITH_EDITOR
-	TUniquePtr<UE::EposMovieScene::FCameraCutViewportPreviewer> ViewportPreviewer;
+    TUniquePtr<UE::EposMovieScene::FCameraCutViewportPreviewer> ViewportPreviewer;
 #endif
 
 private:
 
-	friend struct UE::EposMovieScene::FCameraCutAnimator;
+    friend struct UE::EposMovieScene::FCameraCutAnimator;
 };
-

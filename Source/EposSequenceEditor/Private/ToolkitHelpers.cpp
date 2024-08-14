@@ -120,29 +120,29 @@ ToolkitHelpers::CreateTrack( ISequencer* iSequencer, AActor* iActor, const FGuid
 
             TArrayView<FMovieSceneDoubleChannel*> DoubleChannels = TransformSection->GetChannelProxy().GetChannels<FMovieSceneDoubleChannel>();
 
-            AddKeyToChannel( DoubleChannels[0], 0, Location.X, iSequencer->GetKeyInterpolation() );
-            AddKeyToChannel( DoubleChannels[1], 0, Location.Y, iSequencer->GetKeyInterpolation() );
-            AddKeyToChannel( DoubleChannels[2], 0, Location.Z, iSequencer->GetKeyInterpolation() );
+            //AddKeyToChannel( DoubleChannels[0], 0, Location.X, iSequencer->GetKeyInterpolation() );
+            //AddKeyToChannel( DoubleChannels[1], 0, Location.Y, iSequencer->GetKeyInterpolation() );
+            //AddKeyToChannel( DoubleChannels[2], 0, Location.Z, iSequencer->GetKeyInterpolation() );
 
-            AddKeyToChannel( DoubleChannels[3], 0, Rotation.Euler().X, iSequencer->GetKeyInterpolation() );
-            AddKeyToChannel( DoubleChannels[4], 0, Rotation.Euler().Y, iSequencer->GetKeyInterpolation() );
-            AddKeyToChannel( DoubleChannels[5], 0, Rotation.Euler().Z, iSequencer->GetKeyInterpolation() );
+            //AddKeyToChannel( DoubleChannels[3], 0, Rotation.Euler().X, iSequencer->GetKeyInterpolation() );
+            //AddKeyToChannel( DoubleChannels[4], 0, Rotation.Euler().Y, iSequencer->GetKeyInterpolation() );
+            //AddKeyToChannel( DoubleChannels[5], 0, Rotation.Euler().Z, iSequencer->GetKeyInterpolation() );
 
-            AddKeyToChannel( DoubleChannels[6], 0, Scale.X, iSequencer->GetKeyInterpolation() );
-            AddKeyToChannel( DoubleChannels[7], 0, Scale.Y, iSequencer->GetKeyInterpolation() );
-            AddKeyToChannel( DoubleChannels[8], 0, Scale.Z, iSequencer->GetKeyInterpolation() );
+            //AddKeyToChannel( DoubleChannels[6], 0, Scale.X, iSequencer->GetKeyInterpolation() );
+            //AddKeyToChannel( DoubleChannels[7], 0, Scale.Y, iSequencer->GetKeyInterpolation() );
+            //AddKeyToChannel( DoubleChannels[8], 0, Scale.Z, iSequencer->GetKeyInterpolation() );
 
-            //DoubleChannels[0]->SetDefault( Location.X );
-            //DoubleChannels[1]->SetDefault( Location.Y );
-            //DoubleChannels[2]->SetDefault( Location.Z );
+            DoubleChannels[0]->SetDefault( Location.X );
+            DoubleChannels[1]->SetDefault( Location.Y );
+            DoubleChannels[2]->SetDefault( Location.Z );
 
-            //DoubleChannels[3]->SetDefault( Rotation.Euler().X );
-            //DoubleChannels[4]->SetDefault( Rotation.Euler().Y );
-            //DoubleChannels[5]->SetDefault( Rotation.Euler().Z );
+            DoubleChannels[3]->SetDefault( Rotation.Euler().X );
+            DoubleChannels[4]->SetDefault( Rotation.Euler().Y );
+            DoubleChannels[5]->SetDefault( Rotation.Euler().Z );
 
-            //DoubleChannels[6]->SetDefault( Scale.X );
-            //DoubleChannels[7]->SetDefault( Scale.Y );
-            //DoubleChannels[8]->SetDefault( Scale.Z );
+            DoubleChannels[6]->SetDefault( Scale.X );
+            DoubleChannels[7]->SetDefault( Scale.Y );
+            DoubleChannels[8]->SetDefault( Scale.Z );
         }
 
         if( NewTrack->IsA<UMovieScenePrimitiveMaterialTrack>() && iSequencer->GetAutoSetTrackDefaults() )
