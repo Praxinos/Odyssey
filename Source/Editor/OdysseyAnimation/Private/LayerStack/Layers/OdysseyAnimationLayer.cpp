@@ -4,11 +4,15 @@
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 #include "LayerStack/OdysseyAnimationLayerStack.h"
-#include "OdysseyAnimationLayerImageRenderer.h"
 #include "ULISLoaderModule.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 
 //===========================
+
+FSimpleMulticastDelegate&
+UOdysseyAnimationLayer::OnCellsChanged()
+{
+	return mOnCellsChanged;	
+}
 
 void
 UOdysseyAnimationLayer::PostInitProperties()
@@ -21,7 +25,7 @@ UOdysseyAnimationLayer::PostInitProperties()
 }
 
 void
-UOdysseyAnimationLayer::InvalidateCellFrameRanges()
+UOdysseyAnimationLayer::InvalidateCellsFrameRanges()
 {
 	mCellsFrameRanges.Empty();
 }
@@ -71,6 +75,9 @@ UOdysseyAnimationLayer::CellsChanged()
 {
 	UpdateCellsIndexInLayer();
 	InvalidateCellFrameRanges();
+
+	mOnCellsChanged.Broadcast();
+
     ImageRenderingCompositionChanged();
     UOdysseyLayer::OnMediaChanged().Broadcast();
 }
@@ -210,11 +217,11 @@ UOdysseyAnimationLayer::GetCells() const
 	return Cells;
 }
 
-int
-UOdysseyAnimationLayer::GetCellIndexAtFrame(int Frame) const
+UOdysseyAnimationCell*
+UOdysseyAnimationLayer::GetCellAtFrame(int Frame) const
 {
 	if( Frame < CellsOffset )
-        return INDEX_NONE;
+        return nullptr;
 
     int frameIndex = CellsOffset;
     for (int i = 0; i < Cells.Num(); i++)
@@ -222,18 +229,18 @@ UOdysseyAnimationLayer::GetCellIndexAtFrame(int Frame) const
         UOdysseyAnimationCell* cell = Cells[i];
 
         if ( frameIndex + cell->Length - 1 >= Frame)
-            return i;
+            return cell;
 
         frameIndex += cell->Length;
     }
 
-    return INDEX_NONE;
+    return nullptr;
 }
 
 bool
 UOdysseyAnimationLayer::HasCellAtFrame(int Frame) const
 {
-	return GetCellIndexAtFrame(Frame) != INDEX_NONE;
+	return !!GetCellAtFrame(Frame);
 }
 
 TArray<FInt32Range>
@@ -254,8 +261,18 @@ UOdysseyAnimationLayer::GetCellsFrameRanges() const
     return mCellsFrameRanges;
 }
 
+UOdysseyAnimationCell*
+UOdysseyAnimationLayer::AddCells(TSubclassOf<UOdysseyAnimationCell*> CellType, int Index)
+{
+	TArray<UOdysseyAnimationCell*> cells = AddCells(CellType, Index);
+	if (cells.IsEmpty())
+		return nullptr;
+
+	return cells[0];
+}
+
 TArray<UOdysseyAnimationCell*>
-UOdysseyAnimationLayer::AddCells(TSubclassOf<UOdysseyAnimationCell*> CellType, int Index = -1, int Count = 0)
+UOdysseyAnimationLayer::AddCells(TSubclassOf<UOdysseyAnimationCell*> CellType, int Index, int Count)
 {
 	UClass* cellType = CellType.Get();
 
@@ -271,11 +288,10 @@ UOdysseyAnimationLayer::AddCells(TSubclassOf<UOdysseyAnimationCell*> CellType, i
 	for (int i = 0; i < Count; i++)
 	{
 		//Create the Layer
-		UOdysseyLayer* cell = NewObject<UOdysseyLayer>(this, cellType, NAME_None, RF_Public | RF_Transactional);
+		UOdysseyAnimationCell* cell = NewObject<UOdysseyAnimationCell>(this, cellType, NAME_None, RF_Public | RF_Transactional);
 		if (!cell )
 			return cells;
 
-		cell->Init(this);
 		cells.Add(cell);
 	}
 

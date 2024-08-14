@@ -48,29 +48,34 @@ FOdysseyAnimationLightTableImport::Read( FOdysseyAnimationLightTable* iAnimation
             {
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_DISPLAY_POSITION:
                 {
-                    Ar << iAnimationLightTable->mDisplayPosition;
+                    Ar << iAnimationLightTable->DisplayPosition;
                 }
                 break;
 
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_COLORS:
                 {
-                    Ar << iAnimationLightTable->mPreviousKeysColor;
-                    Ar << iAnimationLightTable->mNextKeysColor;
+                    Ar << iAnimationLightTable->PreviousKeysColor;
+                    Ar << iAnimationLightTable->NextKeysColor;
                 }
                 break;
 
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_CONTRAST:
                 {
-                    Ar << iAnimationLightTable->mPreviousKeysContrast;
-                    Ar << iAnimationLightTable->mNextKeysContrast;
+                    Ar << iAnimationLightTable->PreviousKeysContrast;
+                    Ar << iAnimationLightTable->NextKeysContrast;
                 }
                 break;
 
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_KEYS:
                 {
-                    for ( FOdysseyAnimationLightTableKey& key : iAnimationLightTable->mKeys )
+                    for ( int i = 0; i < 10; i++ )
                     {
-                        FOdysseyAnimationLightTableKeyExport::Write( &key, Ar );
+                        FOdysseyAnimationLightTableKeyExport::Write( &iAnimationLightTable->PreviousKeys[i], Ar );
+                    }
+
+					for ( int i = 0; i < 10; i++ )
+                    {
+                        FOdysseyAnimationLightTableKeyExport::Write( &iAnimationLightTable->NextKeys[i], Ar );
                     }
                 }
                 break;

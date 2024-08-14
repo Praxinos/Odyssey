@@ -67,18 +67,18 @@ UOdysseyAnimationCellImageVector::SetVectorBlockId( FGuid iVectorBlockId )
 }
 
 void
-UOdysseyAnimationCellImageVector::OldSerialize(FArchive& Ar)
+UOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 {
     Super::OldSerialize(Ar);
 
     if( Ar.IsSaving() )
     {
-        UOdysseyAnimationCellImageVectorExport::Write( this, Ar );
+        FOdysseyAnimationCellImageVectorExport::Write( this, Ar );
     }
 
     if( Ar.IsLoading() )
     {
-        if (!UOdysseyAnimationCellImageVectorImport::Read( this, Ar ))
+        if (!FOdysseyAnimationCellImageVectorImport::Read( this, Ar ))
         {
             //Old Style No Chunk Loading
             checkf(false, TEXT("Failed to read chunks"));
@@ -89,16 +89,16 @@ UOdysseyAnimationCellImageVector::OldSerialize(FArchive& Ar)
 void
 UOdysseyAnimationCellImageVector::OldSerialize(FArchive& Ar)
 {
-    FOdysseyAnimationCell::Serialize(Ar);
+    UOdysseyAnimationCell::OldSerialize(Ar);
 
     if( Ar.IsSaving() )
     {
-        UOdysseyAnimationCellImageVectorExport::Write( this, Ar );
+        FOdysseyAnimationCellImageVectorExport::Write( this, Ar );
     }
 
     if( Ar.IsLoading() )
     {
-        if (!UOdysseyAnimationCellImageVectorImport::Read( this, Ar ))
+        if (!FOdysseyAnimationCellImageVectorImport::Read( this, Ar ))
         {
             //Old Style No Chunk Loading
             checkf(false, TEXT("Failed to read chunks"));
@@ -144,7 +144,7 @@ UOdysseyAnimationCellImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRen
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
     
-    return MakeShared<UOdysseyAnimationCellImageVectorImageRenderer>(SharedThis(this), iFrame, iRenderType, GetImageRenderingRects(), iFilter);
+    return MakeShared<FOdysseyAnimationCellImageVectorImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
 TArray<FGuid>
@@ -158,7 +158,7 @@ UOdysseyAnimationCellImageVector::GetImageRenderingRects() const
 {
 	UOdysseyAnimation* animation = GetAnimation();
 	if (!animation)
-		return {}
+		return {};
 
     return { ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height()) };
 }

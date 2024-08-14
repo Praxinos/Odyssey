@@ -2,53 +2,50 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "LayerStack/Cells/OdysseyAnimationCellImport.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "Misc/TransactionObjectEvent.h"
 #include "OdysseyAnimation.h"
 
 UOdysseyAnimationLayer*
-FOdysseyAnimationCell::GetLayer() const
+UOdysseyAnimationCell::GetLayer() const
 {
     return Cast<UOdysseyAnimationLayer>(GetOuter());
 }
 
 UOdysseyAnimation*
-FOdysseyAnimationCell::GetAnimation() const
+UOdysseyAnimationCell::GetAnimation() const
 {
     return GetLayer() ? GetLayer()->GetAnimation() : nullptr;
 }
 
 void
-FOdysseyAnimationCell::OldSerialize(FArchive& Ar)
+UOdysseyAnimationCell::OldSerialize(FArchive& Ar)
 {
-    if( Ar.IsSaving() )
-    {
-        FOdysseyAnimationCellExport::Write( this, Ar );
-    }
-
-    if( Ar.IsLoading() )
-    {
-        if (!FOdysseyAnimationCellImport::Read( this, Ar ))
-        {
-            //Old Style No Chunk Loading
-            Ar << Length;
-        }
-    }
+    if( !Ar.IsLoading() )
+		return;
+	
+	if (!FOdysseyAnimationCellImport::Read( this, Ar ))
+	{
+		//Old Style No Chunk Loading
+		Ar << Length;
+	}
 }
 
 UOdysseyAnimationLayerStack*
-FOdysseyAnimationCell::GetLayerStack() const
+UOdysseyAnimationCell::GetLayerStack() const
 {
     return GetLayer() ? Cast<UOdysseyAnimationLayerStack>(GetLayer()->GetLayerStack()) : nullptr;
 }
 
 FOdysseyMediaProvider
-FOdysseyAnimationCell::GetMediaProvider(uint32 iFrameIndex) const
+UOdysseyAnimationCell::GetMediaProvider(uint32 iFrameIndex) const
 {
     return FOdysseyMediaProvider();
 }
 
 FInt32Range
-FOdysseyAnimationCell::GetFrameRange() const
+UOdysseyAnimationCell::GetFrameRange() const
 {
 	if (!GetLayer())
 		return FInt32Range::Empty();
@@ -57,13 +54,13 @@ FOdysseyAnimationCell::GetFrameRange() const
 }
 
 bool
-FOdysseyAnimationCell::IsOutOfPegs() const
+UOdysseyAnimationCell::IsOutOfPegs() const
 {
     return OutOfPegs.Pan != FVector2D(0, 0) || OutOfPegs.Rotation != 0.f || OutOfPegs.Zoom != 1.f;
 }
 
 ::ULIS::FMat3F
-FOdysseyAnimationCell::OutOfPegsTransform() const
+UOdysseyAnimationCell::OutOfPegsTransform() const
 {
     UOdysseyAnimation* animation = GetAnimation();
     if (!animation)
@@ -76,54 +73,54 @@ FOdysseyAnimationCell::OutOfPegsTransform() const
             * ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / -2.f, animation->Height() / -2.f);
 }
 
-FOdysseyAnimationCell::FOnOutOfPegsChanged&
-FOdysseyAnimationCell::OnOutOfPegsChanged()
+UOdysseyAnimationCell::FOnOutOfPegsChanged&
+UOdysseyAnimationCell::OnOutOfPegsChanged()
 {
     return mOnOutOfPegsChanged;
 }
 
 void
-FOdysseyAnimationCell::OutOfPegsChanged(bool iIsInteractive)
+UOdysseyAnimationCell::OutOfPegsChanged(bool iIsInteractive)
 {
 	mOnOutOfPegsChanged.Broadcast(iIsInteractive);
     ImageRenderingChanged(iIsInteractive);
 }
 
 void
-FOdysseyAnimationCell::LengthChanged(bool iIsInteractive)
+UOdysseyAnimationCell::LengthChanged(bool iIsInteractive)
 {
 	if (GetLayer())
-		GetLayer()->InvalidateCellFrameRanges();
+		GetLayer()->InvalidateCellsFrameRanges();
     ImageRenderingCompositionChanged(iIsInteractive);
 }
 
 void
-FOdysseyAnimationCell::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
+UOdysseyAnimationCell::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
 {
-	if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(OutOfPegs))
+	if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs))
 	{
 		OutOfPegsChanged(iIsInteractive);
 	}
 
-	if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(Length))
+	if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length))
 	{
 		LengthChanged(iIsInteractive);
 	}
 }
 
 void
-FOdysseyAnimationCell::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
+UOdysseyAnimationCell::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
     
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
 
-    PropertyChanged(PropertyChangedEvent.GetPropertyName(), PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive);
+    PropertyChanged(PropertyChangedEvent.GetPropertyName(), PropertyChangedEvent.GetMemberPropertyName(), PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive);
 }
 
 void
-FOdysseyAnimationCell::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
+UOdysseyAnimationCell::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 {
 	Super::PostTransacted(iTransactionEvent);
 
@@ -133,6 +130,6 @@ FOdysseyAnimationCell::PostTransacted(const FTransactionObjectEvent& iTransactio
     const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
     for ( const FName& propertyName : changedPropertyNames )
     {
-        PropertyChanged(propertyName, false);
+        PropertyChanged(propertyName, propertyName, false);
     }
 }

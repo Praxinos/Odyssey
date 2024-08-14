@@ -7,7 +7,6 @@
 #include "Widgets/Input/SButton.h"
 
 class FOdysseyAnimationEditorExtension;
-class FOdysseyAnimationLightTable;
 class UOdysseyLayerStack;
 class UOdysseyAnimationLayerStack;
 

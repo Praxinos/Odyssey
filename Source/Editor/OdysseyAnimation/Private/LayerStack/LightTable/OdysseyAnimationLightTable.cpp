@@ -6,11 +6,11 @@
 FOdysseyAnimationLightTableKey
 UOdysseyAnimationLighttableFunctionLibrary::GetPreviousKey(FOdysseyAnimationLightTable Lighttable, int Index)
 {
-	return Lighttable.PreviousKeys;
+	return Lighttable.PreviousKeys[Index];
 }
 
 FOdysseyAnimationLightTableKey
 UOdysseyAnimationLighttableFunctionLibrary::GetNextKey(FOdysseyAnimationLightTable Lighttable, int Index)
 {
-	return Lighttable.NextKeys;
+	return Lighttable.NextKeys[Index];
 }

@@ -1,7 +1,6 @@
 #include "OdysseyAnimationEditorTimeline.h"
 
 #include "OdysseyLayerStack.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Tools/OdysseyAnimationTimelineTool.h"
 #include "LayerStack/Tools/OdysseyAnimationTimelineSelectionTool.h"
 #include "LayerStack/Tools/OdysseyAnimationTimelineMoveTool.h"
@@ -27,7 +26,6 @@ FOdysseyAnimationEditorTimeline::FOdysseyAnimationEditorTimeline(FOdysseyAnimati
     : mExtension(iExtension)
     , mZoom(1.f)
     , mOffset(0.f)
-    , mCellsContainer(nullptr)
     , mSelectedTool(EOdysseyTimelineTool::None)
     , mSelectionTool()
     , mMoveTool()
@@ -81,16 +79,15 @@ FOdysseyAnimationEditorTimeline::OnCellsChanged()
 void
 FOdysseyAnimationEditorTimeline::CleanSelectedCells()
 {
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mCellsContainer.Pin();
-    if (!cellsContainer)
-    {
-        mSelectedCells.Empty();
+    if (!mLayer)
+	{
+		mSelectedCells.Empty();
         return;
-    }
+	}
 
-    TArray<TSharedPtr<FOdysseyAnimationCell>> cells = cellsContainer->GetCells();
+    TArray<UOdysseyAnimationCell*> cells = mLayer->GetCells();
     mSelectedCells = mSelectedCells.FilterByPredicate(
-        [cells](TSharedPtr<FOdysseyAnimationCell> iCell)
+        [cells](UOdysseyAnimationCell* iCell)
         {
             return cells.Contains(iCell);
         }
@@ -100,14 +97,13 @@ FOdysseyAnimationEditorTimeline::CleanSelectedCells()
 void
 FOdysseyAnimationEditorTimeline::CleanCellSelectionCursor()
 {
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mCellsContainer.Pin();
-    if (!cellsContainer)
-    {
-        mCellSelectionCursor = nullptr;
+    if (!mLayer)
+	{
+		mCellSelectionCursor = nullptr;
         return;
-    }
+	}
 
-    TArray<TSharedPtr<FOdysseyAnimationCell>> cells = GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> cells = GetSelectedCells();
     if (cells.IsEmpty())
     {
         mCellSelectionCursor = nullptr;
@@ -145,23 +141,18 @@ FOdysseyAnimationEditorTimeline::BindOnCellsChanged()
     if (!currentLayer)
         return;
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = currentLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return;
-
-    
-    cellsContainer->OnCellsChanged().AddRaw(this, &FOdysseyAnimationEditorTimeline::OnCellsChanged);
-    mCellsContainer = cellsContainer;
+	mLayer = currentLayer;
+    currentLayer->OnCellsChanged().AddRaw(this, &FOdysseyAnimationEditorTimeline::OnCellsChanged);
 }
 
 void 
 FOdysseyAnimationEditorTimeline::UnbindOnCellsChanged()
 {
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mCellsContainer.Pin();
-    if (!cellsContainer)
+    if (!mLayer)
         return;
 
-    cellsContainer->OnCellsChanged().RemoveAll(this);
+    mLayer->OnCellsChanged().RemoveAll(this);
+	mLayer = nullptr;
 }
 
 
@@ -248,17 +239,16 @@ FOdysseyAnimationEditorTimeline::SetOffset(float iOffset)
 }
 
 void
-FOdysseyAnimationEditorTimeline::SelectCell(TSharedPtr<FOdysseyAnimationCell> iCell, bool iSetAsCursor)
+FOdysseyAnimationEditorTimeline::SelectCell(UOdysseyAnimationCell* iCell, bool iSetAsCursor)
 {
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mCellsContainer.Pin();
-    if (!cellsContainer)
+    if (!mLayer)
     {
         mCellSelectionCursor = nullptr;
         mSelectedCells.Empty();
         return;
     }
 
-    if (!cellsContainer->GetCells().Contains(iCell))
+    if (!mLayer->GetCells().Contains(iCell))
         return;
 
     if (iSetAsCursor)
@@ -272,10 +262,9 @@ FOdysseyAnimationEditorTimeline::SelectCell(TSharedPtr<FOdysseyAnimationCell> iC
 }
 
 void
-FOdysseyAnimationEditorTimeline::SetSelectedCells(const TArray<TSharedPtr<FOdysseyAnimationCell>>& iSelectedCells)
+FOdysseyAnimationEditorTimeline::SetSelectedCells(const TArray<UOdysseyAnimationCell*>& iSelectedCells)
 {
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mCellsContainer.Pin();
-    if (!cellsContainer)
+    if (!mLayer)
     {
         mSelectedCells.Empty();
         return;
@@ -283,11 +272,11 @@ FOdysseyAnimationEditorTimeline::SetSelectedCells(const TArray<TSharedPtr<FOdyss
 
     mSelectedCells = iSelectedCells;
     
-    TArray<TSharedPtr<FOdysseyAnimationCell>> cells = cellsContainer->GetCells();
+    TArray<UOdysseyAnimationCell*> cells = mLayer->GetCells();
     mSelectedCells.Sort(
-        [cells](TSharedPtr<FOdysseyAnimationCell> iCellA, TSharedPtr<FOdysseyAnimationCell> iCellB)
+        [cells](UOdysseyAnimationCell* iCellA, UOdysseyAnimationCell* iCellB)
         {
-            return cells.Find(iCellA) < cells.Find(iCellB);
+            return iCellA->IndexInLayer < iCellB->IndexInLayer;
         }
     );
 }
@@ -327,13 +316,13 @@ FOdysseyAnimationEditorTimeline::GetFrameIndexAtMousePosition(float iX) const
     return frame;
 }
 
-const TArray<TSharedPtr<FOdysseyAnimationCell>>&
+const TArray<UOdysseyAnimationCell*>&
 FOdysseyAnimationEditorTimeline::GetSelectedCells() const
 {
     return mSelectedCells;
 }
 
-TSharedPtr<FOdysseyAnimationCell>
+UOdysseyAnimationCell*
 FOdysseyAnimationEditorTimeline::GetCellSelectionCursor() const
 {
     FOdysseyAnimationEditorTimeline* self = const_cast<FOdysseyAnimationEditorTimeline*>(this);

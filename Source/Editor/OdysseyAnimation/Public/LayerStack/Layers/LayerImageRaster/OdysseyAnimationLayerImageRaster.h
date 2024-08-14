@@ -15,6 +15,7 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageRaster
 public:
     // UObject overrides
 	virtual void PostInitProperties() override;
+	virtual void Serialize(FArchive& Ar) override;
 
 public:
     //UOdysseyLayer overrides

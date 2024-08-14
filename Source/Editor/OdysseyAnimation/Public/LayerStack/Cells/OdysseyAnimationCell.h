@@ -62,6 +62,7 @@ public:
     // UObject overrides
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
+	virtual void OldSerialize(FArchive& Ar); //DEPRECATED: Keep that for compatibility with early versions of Odyssey
 
 protected:
 	//Properties modifications
@@ -70,7 +71,7 @@ protected:
 
     virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive);
 
-protected:
+public:
 	UPROPERTY(BlueprintReadOnly, Category="Odyssey|Cell")
     int IndexInLayer = -1;
 

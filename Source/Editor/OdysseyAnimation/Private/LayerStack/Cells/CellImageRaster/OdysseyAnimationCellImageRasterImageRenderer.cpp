@@ -16,9 +16,9 @@ FOdysseyAnimationCellImageRasterImageRenderer::FOdysseyAnimationCellImageRasterI
 {
     UOdysseyAnimation* animation = mCell->GetAnimation();
 
-    FVector2D outOfPegsPan = mCell->OutOfPegsPan();
-    float outOfPegsRotation = mCell->OutOfPegsRotation();
-    float outOfPegsZoom = mCell->OutOfPegsZoom();
+    FVector2D outOfPegsPan = mCell->OutOfPegs.Pan;
+    float outOfPegsRotation = mCell->OutOfPegs.Rotation;
+    float outOfPegsZoom = mCell->OutOfPegs.Zoom;
 
     if (mCell->IsOutOfPegs())
     {

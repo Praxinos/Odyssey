@@ -55,7 +55,7 @@ namespace
             ::ULIS::FEvent eventClear;
             ctx.Clear(*dst, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
 
-            TSharedPtr<IOdysseyImageRenderer> imageRenderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
+            TSharedPtr<IOdysseyImageRenderer> imageRenderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
             imageRenderer->Init();
 
             ::ULIS::FRectI dstRect = ::ULIS::FRectI::FromXYWH(dst_pos.x, dst_pos.y, given_rect.w - dst_pos.x, given_rect.h - dst_pos.y);

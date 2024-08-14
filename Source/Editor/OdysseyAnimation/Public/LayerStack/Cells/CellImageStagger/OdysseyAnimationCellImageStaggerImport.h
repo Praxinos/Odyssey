@@ -2,7 +2,7 @@
 
 #include <Core/Core.h>
 
-class FOdysseyAnimationCellImageStagger;
+class UOdysseyAnimationCellImageStagger;
 
 class FOdysseyAnimationCellImageStaggerImport
 {
@@ -13,7 +13,7 @@ public:
      * @param iAnimationCellImageStagger 
      * @param Ar 
      */
-    static bool ODYSSEYANIMATION_API Read( FOdysseyAnimationCellImageStagger* iAnimationCellImageStagger
+    static bool ODYSSEYANIMATION_API Read( UOdysseyAnimationCellImageStagger* iAnimationCellImageStagger
                                   , FArchive &Ar );
 
 private:
@@ -21,7 +21,7 @@ private:
      * Private import functions
      */
 
-    static void Read( FOdysseyAnimationCellImageStagger* iAnimationCellImageStagger
+    static void Read( UOdysseyAnimationCellImageStagger* iAnimationCellImageStagger
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };

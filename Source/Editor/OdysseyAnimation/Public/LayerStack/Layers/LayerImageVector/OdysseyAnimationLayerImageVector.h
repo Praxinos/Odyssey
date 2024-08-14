@@ -21,8 +21,21 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageVector
     GENERATED_BODY()
 
 public:
+    /**
+     * @brief Delegate called when something changed the result of RenderImage()
+     * 
+     */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsColoredChanged, UOdysseyAnimationLayerImageVector*)
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsWireframeChanged, UOdysseyAnimationLayerImageVector*)
+
+public:
+    static FOnIsColoredChanged& OnIsColoredChanged();
+    static FOnIsWireframeChanged& OnIsWireframeChanged();
+
+public:
     // UObject overrides
 	virtual void PostInitProperties() override;
+	virtual void Serialize(FArchive& Ar) override;
 
 public:
     //UOdysseyLayer overrides

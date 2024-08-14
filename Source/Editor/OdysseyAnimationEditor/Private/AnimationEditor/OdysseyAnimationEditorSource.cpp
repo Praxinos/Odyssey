@@ -5,9 +5,9 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationTexture.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyMediaVector.h"
@@ -333,78 +333,43 @@ FOdysseyAnimationEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("actions.paste", "Paste"));
 #endif
-
-    TSharedPtr<::ULIS::FBlock> copyBlock = MakeShared<::ULIS::FBlock>(iBlock->Rect().w, iBlock->Rect().h, iBlock->Format());
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
-    ctx.Clear(*copyBlock);
-	ctx.Finish();
-
-    ctx.Copy(
-        *iBlock,
-        *copyBlock,
-		iBlock->Rect(),
-        ::ULIS::FVec2I(0, 0),
-        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-        0,
-        nullptr,
-        nullptr
-    );
-
-    ctx.Finish();
+	GetLayerStack()->Modify();
 
     UOdysseyAnimationLayerImageRaster* layer = Cast< UOdysseyAnimationLayerImageRaster >(GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
+	layer->Modify();
 	
-	GetLayerStack()->Modify();
 	GetLayerStack()->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
 
     FPropertyChangedEvent PropertyChangedEvent(UOdysseyLayerStack::StaticClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer)), EPropertyChangeType::ValueSet);
     GetLayerStack()->PostEditChangeProperty(PropertyChangedEvent);
 
-    TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
-    TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, 1, copyBlock);
-    cells.Add(cell);
+	UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass(), mAnimation->CurrentFrame));
+	cell->Modify();
 
-    FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
-    mutator.AddAtFrame(cells, mAnimation->CurrentFrame);
-    mutator.Commit();
+	FOdysseyRasterBlockMutator blockMutator(cell->GetRasterBlock(), false);
+	blockMutator.EditTilesFromRects(
+		{ cell->GetRasterBlock()->GetRect() },
+		FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
+			[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+			{
+				::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(cell->GetRasterBlock()->GetFormat());
+				::ULIS::FEvent eventClear;
+				ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+				ctx.Finish();
+				ctx.Copy(
+					*iBlock,
+					*cell->GetRasterBlock()->GetBlock()
+				);
+				ctx.Finish();
+				return {};
+			}
+		)
+	);
+	blockMutator.Commit();
 
     FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mAnimation);
     currentFrameMutator.Set(mAnimation->CurrentFrame);
     currentFrameMutator.Commit();
-
-
-	//Version to paste into current cell
-	/*UOdysseyAnimationLayerImageRaster* currentLayer = Cast<UOdysseyAnimationLayerImageRaster>(GetLayerStack()->CurrentLayer.Get());
-	if( !currentLayer )
-		return;
-
-
-	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = currentLayer->GetCellsContainer();
-	FOdysseyAnimationCell* cell = cellsContainer->GetCellAtFrame( mAnimation->CurrentFrame ).Get();
-
-	if( cell && cell->GetType() == FOdysseyAnimationCellImageRaster::StaticType() )
-	{
-		FOdysseyAnimationCellImageRaster* rasterCell = (FOdysseyAnimationCellImageRaster*)cell;
-
-		::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
-
-		ctx.Blend(
-			*iBlock,
-			*rasterCell->GetRasterBlock()->GetBlock(),
-			iBlock->Rect(),
-			::ULIS::FVec2I(0, 0),
-			::ULIS::Blend_Normal,
-			::ULIS::Alpha_Normal,
-			1.f,
-			::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-			0,
-			nullptr,
-			nullptr
-		);
-
-		ctx.Finish();
-	}*/
 }
 
 void

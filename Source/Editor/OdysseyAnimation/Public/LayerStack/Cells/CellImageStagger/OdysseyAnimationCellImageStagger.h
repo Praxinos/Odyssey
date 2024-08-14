@@ -28,9 +28,11 @@ public:
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
     bool IsImageRenderingGameThreadOnly() const;
 
+	virtual void OldSerialize(FArchive& Ar) override; //DEPRECATED: Keep that for compatibility with early versions of Odyssey
+
 public:
 	UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
-    UOdysseyAnimationCell* GetReferenceCellAtFrame(int Frame, int& ReferenceCellFrame) const;
+    UOdysseyAnimationCell* GetReferenceCellAtFrame(int Frame) const;
 
 	UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     int GetStaggerFrame(int Frame) const;

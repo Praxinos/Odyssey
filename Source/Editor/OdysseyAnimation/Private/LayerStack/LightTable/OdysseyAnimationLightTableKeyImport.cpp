@@ -45,13 +45,13 @@ FOdysseyAnimationLightTableKeyImport::Read( FOdysseyAnimationLightTableKey* iKey
             {
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_KEY_ISACTIVATED:
                 {
-                    Ar << iKey->mIsActivated;
+                    Ar << iKey->bIsActivated;
                 }
                 break;
 
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_KEY_OPACITY:
                 {
-                    Ar << iKey->mOpacity;
+                    Ar << iKey->Opacity;
                 }
                 break;
 

@@ -25,6 +25,7 @@ public:
 public:
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
 	virtual void Serialize(FArchive& Ar) override;
+	virtual void OldSerialize(FArchive& Ar) override; //DEPRECATED: Keep that for compatibility with early versions of Odyssey
 
 public:
 	//FOdysseyImageRenderingAbility overrides

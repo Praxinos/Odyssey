@@ -182,8 +182,6 @@ UOdysseyAnimationCellImageRaster::Serialize(FArchive& Ar)
     {
         if (!FOdysseyAnimationCellImageRasterImport::Read( this, Ar ))
         {
-            //Old Style No Chunk Loading
-            Ar << *mRasterBlock;
         }
     }
 }

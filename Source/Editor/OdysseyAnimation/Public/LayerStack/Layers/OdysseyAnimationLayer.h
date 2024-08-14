@@ -32,7 +32,8 @@ public:
 public:
 	//Invalidate the frame ranges of all cells
 	//Used for performance optimisation to avoid iterating over all cells each time we need a cell's frame range
-	void InvalidateCellFrameRanges();
+	void InvalidateCellsFrameRanges();
+	const TArray<FInt32Range>& GetCellsFrameRanges() const;
 
 public:
     //Getters
@@ -57,13 +58,10 @@ public:
 	const TArray<UOdysseyAnimationCell*>& GetCells() const;
 
 	UFUNCTION(BlueprintCallable, Category="LayerStack")
-	int GetCellIndexAtFrame(int Frame) const;
+	UOdysseyAnimationCell* GetCellAtFrame(int Frame) const;
 	
 	UFUNCTION(BlueprintCallable, Category="LayerStack")
 	bool HasCellAtFrame(int Frame) const;
-
-	UFUNCTION(BlueprintCallable, Category="LayerStack")
-	const TArray<FInt32Range>& GetCellsFrameRanges() const;
 
 	UFUNCTION(BlueprintCallable, Category="LayerStack")
 	UOdysseyAnimationCell* AddCell(TSubclassOf<UOdysseyAnimationCell> CellType, int Index = -1 );
@@ -78,7 +76,7 @@ public:
 	void RemoveCells(const TArray<UOdysseyAnimationCell*>& Cells); //Prevent Empty Layer ?
 
 	UFUNCTION(BlueprintCallable, Category="LayerStack")
-	void RemoveCellAtIndex(int Index); //Prevent Empty Layer ?
+	void RemoveCellAtIndex(int Index);
 
 protected:
     //Property changes
@@ -94,12 +92,17 @@ protected:
 	void UpdateCellsIndexInLayer();
 
 public:
-    virtual FSimpleMulticastDelegate& OnLightTableChanged();
+    FSimpleMulticastDelegate& OnLightTableChanged();
+    FSimpleMulticastDelegate& OnCellsChanged();
 
 private:
 	TArray<FInt32Range> mCellsFrameRanges;
 
-private:
+protected:
+	friend class FOdysseyAnimationCellsContainerImport;
+	friend class FOdysseyAnimationLayerImageRasterImport;
+	friend class FOdysseyAnimationLayerImageVectorImport;
+
 	UPROPERTY()
 	TArray<TObjectPtr<UClass>> SupportedCellTypes;
 
@@ -120,4 +123,5 @@ public:
 	FOdysseyAnimationLightTable Lighttable;
 
     FSimpleMulticastDelegate mOnLightTableChanged;
+	FSimpleMulticastDelegate mOnCellsChanged;
 };

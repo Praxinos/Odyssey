@@ -2,7 +2,6 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorImageRenderer.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorBlock.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
@@ -32,9 +31,8 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
         if (animation && layerStack)
         {
             UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
-            int frame = layer->GetCellFrameAtFrame(animation->CurrentFrame);
-
-            mRenderHUD = cell == mCell && frame == iFrame && layerStack->CurrentLayer.Get() == layer;
+            int frame = animation->CurrentFrame - cell->GetFrameRange().GetLowerBoundValue();
+            mRenderHUD = cell == mCell.Get() && frame == iFrame && layerStack->CurrentLayer.Get() == layer;
         }
 
         // this is per-layer
@@ -46,9 +44,9 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
         mDrawingFlags |= layer->IsWireframe ? mDrawingFlags | ( FOdysseyVectorEngine::DRAWING_WIREFRAME)
                                             : mDrawingFlags & (~FOdysseyVectorEngine::DRAWING_WIREFRAME);
 
-        FVector2D outOfPegsPan = mCell->OutOfPegsPan();
-        float outOfPegsRotation = mCell->OutOfPegsRotation();
-        float outOfPegsZoom = mCell->OutOfPegsZoom();
+        FVector2D outOfPegsPan = mCell->OutOfPegs.Pan;
+        float outOfPegsRotation = mCell->OutOfPegs.Rotation;
+        float outOfPegsZoom = mCell->OutOfPegs.Zoom;
 
         mOutOfPegsTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
             * ::ULIS::FMat3F::MakeTranslationMatrix(outOfPegsPan.X, outOfPegsPan.Y)

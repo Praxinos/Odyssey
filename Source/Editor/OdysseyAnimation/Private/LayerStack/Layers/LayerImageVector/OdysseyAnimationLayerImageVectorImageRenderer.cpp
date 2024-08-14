@@ -4,7 +4,6 @@
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVectorImageRenderer.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTableImageRenderer.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 
 FOdysseyAnimationLayerImageVectorImageRenderer::FOdysseyAnimationLayerImageVectorImageRenderer(const UOdysseyAnimationLayerImageVector* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
@@ -12,7 +11,7 @@ FOdysseyAnimationLayerImageVectorImageRenderer::FOdysseyAnimationLayerImageVecto
     , mCellRenderer(nullptr)
     , mBlendMode(::ULIS::eBlendMode(iLayer->BlendMode))
     , mOpacity(iLayer->Opacity) 
-    , mLightTableDisplayPosition(iLayer->LightTable->DisplayPosition)
+    , mLightTableDisplayPosition(iLayer->Lighttable.DisplayPosition)
 { 
     int frame = iFrame;
     FInt32Range frameRange = iLayer->GetFrameRange();
@@ -25,16 +24,14 @@ FOdysseyAnimationLayerImageVectorImageRenderer::FOdysseyAnimationLayerImageVecto
         frame = iLayer->GetPostBehaviourFrame(iLayer->PostBehaviour, iFrame);
     }
 
- 	int cellIndex = iLayer->GetCellIndexAtFrame(frame);
-	if (cellIndex != INDEX_NONE)
+ 	UOdysseyAnimationCell* cell = iLayer->GetCellAtFrame(frame);
+	if (cell)
 	{
-		UOdysseyAnimationCell* cell = iLayer->Cells[cellIndex];
-		int cellFrame = iLayer->GetCellFrameAtFrame(frame);
-		if (cellFrame != INDEX_NONE)
-			mCellRenderer = cell->BuildImageRenderer(iRenderType, cellFrame, iFilter);
+		int cellFrame = frame - cell->GetFrameRange().GetLowerBoundValue();
+		mCellRenderer = cell->BuildImageRenderer(iRenderType, cellFrame, iFilter);
 	}
 
-    if ( iRenderType == IOdysseyImageRenderer::eRenderType::Editor && iLayer->bIsLightTableActivated )
+    if ( iRenderType == IOdysseyImageRenderer::eRenderType::Editor && iLayer->Lighttable.bIsActivated )
         mLightTableRenderer = MakeShared<FOdysseyAnimationLightTableImageRenderer>(iLayer, iFrame, iRenderType, iDefaultRects, iFilter);
 }
     

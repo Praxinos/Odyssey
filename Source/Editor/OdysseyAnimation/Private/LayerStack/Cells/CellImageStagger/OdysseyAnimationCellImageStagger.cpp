@@ -2,22 +2,14 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
-#include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStaggerExport.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStaggerImport.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStaggerImageRenderer.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 void
-FOdysseyAnimationCellImageStagger::OldSerialize(FArchive& Ar)
+UOdysseyAnimationCellImageStagger::OldSerialize(FArchive& Ar)
 {
     Super::OldSerialize(Ar);
-
-    if( Ar.IsSaving() )
-    {
-        FOdysseyAnimationCellImageStaggerExport::Write( this, Ar );
-    }
-
     if( Ar.IsLoading() )
     {
         if (!FOdysseyAnimationCellImageStaggerImport::Read( this, Ar ))
@@ -28,16 +20,16 @@ FOdysseyAnimationCellImageStagger::OldSerialize(FArchive& Ar)
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-FOdysseyAnimationCellImageStagger::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+UOdysseyAnimationCellImageStagger::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
     
-    return MakeShared<FOdysseyAnimationCellImageStaggerImageRenderer>(SharedThis(this), iFrame, iRenderType, GetImageRenderingRects(), iFilter);
+    return MakeShared<FOdysseyAnimationCellImageStaggerImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
 int
-FOdysseyAnimationCellImageStagger::GetStaggerFrame(int iFrameIndex) const
+UOdysseyAnimationCellImageStagger::GetStaggerFrame(int iFrameIndex) const
 {
 	FInt32Range frameRange = GetFrameRange();
     if (frameRange.IsEmpty())
@@ -45,21 +37,21 @@ FOdysseyAnimationCellImageStagger::GetStaggerFrame(int iFrameIndex) const
 
     int cellStartFrame = frameRange.GetLowerBoundValue();
     int frame = INDEX_NONE;
-    switch(mBehaviour)
+    switch(Behaviour)
     {
-        case eBehaviour::Loop:
+        case EOdysseyAnimationCellImageStaggerBehaviour::Loop:
         {
             int layerStartFrame = frameRange.GetLowerBoundValue();
-            int startFrame = mReach <= 0 ? layerStartFrame : FMath::Max(layerStartFrame, int(cellStartFrame - mReach));
+            int startFrame = Reach <= 0 ? layerStartFrame : FMath::Max(layerStartFrame, int(cellStartFrame - Reach));
             int offset = iFrameIndex % (cellStartFrame - startFrame);
             frame = startFrame + offset;
         }
         break;
 
-        case eBehaviour::PingPong:
+        case EOdysseyAnimationCellImageStaggerBehaviour::PingPong:
         {
             int layerStartFrame = frameRange.GetLowerBoundValue();
-            int startFrame = mReach <= 0 ? layerStartFrame : FMath::Max(layerStartFrame, int(cellStartFrame - mReach));
+            int startFrame = Reach <= 0 ? layerStartFrame : FMath::Max(layerStartFrame, int(cellStartFrame - Reach));
 
             //If there is only one frame before the stagger cell,
             //we return that one frame because PingPong needs at least 2 frames to work properly
@@ -85,55 +77,37 @@ FOdysseyAnimationCellImageStagger::GetStaggerFrame(int iFrameIndex) const
     return frame;
 }
 
-int
-FOdysseyAnimationCellImageStagger::GetReach() const
-{
-    return mReach;
-}
-
-FOdysseyAnimationCellImageStagger::eBehaviour
-FOdysseyAnimationCellImageStagger::GetBehaviour() const
-{
-    return mBehaviour;
-}
-
-TSharedPtr<FOdysseyAnimationCell>
-FOdysseyAnimationCellImageStagger::GetReferenceCellAtFrame(int iFrameIndex, int* oCellFrameIndex) const
+UOdysseyAnimationCell*
+UOdysseyAnimationCellImageStagger::GetReferenceCellAtFrame(int Frame) const
 {
 	if (!GetLayer())
 		return nullptr;
 
-    int frame = GetStaggerFrame(iFrameIndex);
-    if (frame == INDEX_NONE)
+    int staggerFrame = GetStaggerFrame(Frame);
+    if (staggerFrame == INDEX_NONE)
         return nullptr;
 
-    TSharedPtr<FOdysseyAnimationCell> cell = GetLayer()->GetCellAtFrame(frame);
-    if (!cell)
-        return nullptr;
-
-    if (oCellFrameIndex)
-        *oCellFrameIndex = GetLayer()->GetCellFrameAtFrame(frame);
-
-    return cell;
+	return GetLayer()->GetCellAtFrame(staggerFrame);
 }
 
 TArray<FGuid>
-FOdysseyAnimationCellImageStagger::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
+UOdysseyAnimationCellImageStagger::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
 {
     TArray<FGuid> idComposition = { GetImageRenderingId() };
     
-    int cellFrameIndex = INDEX_NONE;
-    TSharedPtr<FOdysseyAnimationCell> cell = GetReferenceCellAtFrame(iFrameIndex, &cellFrameIndex);
+    UOdysseyAnimationCell* cell = GetReferenceCellAtFrame(iFrameIndex);
     if (!cell)
         return idComposition;
 
-    idComposition.Append(cell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, cellFrameIndex));
+    int cellFrame = iFrameIndex - cell->GetFrameRange().GetLowerBoundValue();
+
+    idComposition.Append(cell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, cellFrame));
     
     return idComposition;
 }
 
 TArray<::ULIS::FRectI>
-FOdysseyAnimationCellImageStagger::GetImageRenderingRects() const
+UOdysseyAnimationCellImageStagger::GetImageRenderingRects() const
 {
     return GetLayer()->GetImageRenderingRects();
 }

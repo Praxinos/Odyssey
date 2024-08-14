@@ -6,12 +6,12 @@
 
 class FOdysseyAnimationEditorExtension;
 class UOdysseyLayerStack;
-class FOdysseyAnimationCellsContainer;
+class UOdysseyAnimationLayer;
 class FOdysseyAnimationTimelineTool;
 class FOdysseyAnimationTimelineSelectionTool;
 class FOdysseyAnimationTimelineMoveTool;
 class FOdysseyAnimationTimelineCutTool;
-class FOdysseyAnimationCell;
+class UOdysseyAnimationCell;
 
 enum class EOdysseyTimelineTool
 {
@@ -42,8 +42,8 @@ public:
 	void SetZoom(float iZoom);
 	void SetOffset(float iOffset);
     //void SetSelectedFrames(const FInt32Range& iSelectedFrames);
-    void SelectCell(TSharedPtr<FOdysseyAnimationCell> iCell, bool iSetAsCursor = false);
-    void SetSelectedCells(const TArray<TSharedPtr<FOdysseyAnimationCell>>& iCells);
+    void SelectCell(UOdysseyAnimationCell* iCell, bool iSetAsCursor = false);
+    void SetSelectedCells(const TArray<UOdysseyAnimationCell*>& iCells);
 
 	static float GetBaseFrameSize();
 	float GetFrameWidth() const;
@@ -51,8 +51,8 @@ public:
 	float GetOffset() const;
     //FInt32Range GetSelectedFrames() const;
     //FInt32Range GetSelectableFrames() const;
-    const TArray<TSharedPtr<FOdysseyAnimationCell>>& GetSelectedCells() const;
-    TSharedPtr<FOdysseyAnimationCell> GetCellSelectionCursor() const;
+    const TArray<UOdysseyAnimationCell*>& GetSelectedCells() const;
+    UOdysseyAnimationCell* GetCellSelectionCursor() const;
     void CleanSelectedCells();
     void CleanCellSelectionCursor();
 
@@ -77,13 +77,13 @@ private:
     float mZoom;
 	float mOffset;
     //FInt32Range mSelectedFrames;
-    TArray<TSharedPtr<FOdysseyAnimationCell>> mSelectedCells;
-    TSharedPtr<FOdysseyAnimationCell> mCellSelectionCursor;
+    TArray<UOdysseyAnimationCell*> mSelectedCells;
+    UOdysseyAnimationCell* mCellSelectionCursor;
 
     FSimpleMulticastDelegate mOnZoomChanged;
     FSimpleMulticastDelegate mOnOffsetChanged;
 
-    TWeakPtr<FOdysseyAnimationCellsContainer> mCellsContainer; 
+	UOdysseyAnimationLayer* mLayer;
 
     EOdysseyTimelineTool mSelectedTool;
     TSharedPtr<FOdysseyAnimationTimelineSelectionTool> mSelectionTool;

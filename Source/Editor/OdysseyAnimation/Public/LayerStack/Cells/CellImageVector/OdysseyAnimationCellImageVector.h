@@ -28,6 +28,8 @@ public:
 public:
 	virtual void PostInitProperties() override;
     virtual void PostLoad() override;
+	virtual void Serialize(FArchive& Ar) override;
+	virtual void OldSerialize(FArchive& Ar) override; //DEPRECATED: Keep that for compatibility with early versions of Odyssey
         
     FOdysseyVectorEngine* GetEngine() const;
     TSharedPtr<FOdysseyVectorBlock> GetVectorBlock() const;

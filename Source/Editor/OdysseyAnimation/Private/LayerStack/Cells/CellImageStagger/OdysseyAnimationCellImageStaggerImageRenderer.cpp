@@ -11,10 +11,12 @@ FOdysseyAnimationCellImageStaggerImageRenderer::FOdysseyAnimationCellImageStagge
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mCellRenderer(nullptr)
 {
-    int cellFrame = INDEX_NONE;
-    TSharedPtr<FOdysseyAnimationCell> cell = iCell->GetReferenceCellAtFrame(iFrame, &cellFrame);
+    UOdysseyAnimationCell* cell = iCell->GetReferenceCellAtFrame(iFrame);
     if (cell)
+	{
+    	int cellFrame = iFrame - cell->GetFrameRange().GetLowerBoundValue();
         mCellRenderer = cell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFrame, iFilter);
+	}
 }
     
 void

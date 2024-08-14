@@ -4,7 +4,7 @@
 #include "OdysseyFile.h"
 
 bool
-FOdysseyAnimationCellImageVectorImport::Read( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
+FOdysseyAnimationCellImageVectorImport::Read( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                             , FArchive &Ar )
 {
     uint64 start = Ar.Tell();
@@ -36,7 +36,7 @@ FOdysseyAnimationCellImageVectorImport::Read( FOdysseyAnimationCellImageVector* 
 }
 
 void
-FOdysseyAnimationCellImageVectorImport::Read( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
+FOdysseyAnimationCellImageVectorImport::Read( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                             , FArchive &Ar
                                             , uint64 iChunkEnd )
 {
@@ -54,13 +54,7 @@ FOdysseyAnimationCellImageVectorImport::Read( FOdysseyAnimationCellImageVector* 
                     Ar << width;
                     Ar << height;
 
-                    iAnimationCellImageVector->SetWidth( width );
-                    iAnimationCellImageVector->SetHeight( height );
-
-                    if( iAnimationCellImageVector->GetEngine() == nullptr )
-                    {
-                        iAnimationCellImageVector->Init( width, height );
-                    }
+                    //DEPRECATED: No need to use those values, but we still need to read them
                 }
                 break;
 
