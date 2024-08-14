@@ -35,6 +35,7 @@ public:
      * 
      * @return FInt32Range 
      */
+	UFUNCTION(BlueprintCallable, Category="LayerStack")
     FInt32Range GetFrameRange() const;
 
 public:

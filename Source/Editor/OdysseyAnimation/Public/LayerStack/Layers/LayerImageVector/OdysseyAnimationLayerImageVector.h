@@ -108,14 +108,11 @@ private:
     friend class FOdysseyAnimationLayerImageVectorImport;
 
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation | LayerStack")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Animation | LayerStack")
     bool IsWireframe = false;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation | LayerStack")
-    bool IsColored = true;
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Animation | LayerStack")
-    bool IsAlphaLocked = false;
+    bool IsColored = true;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
 	EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
@@ -125,9 +122,6 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
     bool bIsLightTableActivated = false;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
-    bool bAutoAddCells = true;
 
 private:
     TSharedRef<FOdysseyAnimationCellsContainer> mCellsContainer;

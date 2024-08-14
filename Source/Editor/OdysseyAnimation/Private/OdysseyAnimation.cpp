@@ -104,13 +104,13 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 	}
 }
 
-uint32
+int
 UOdysseyAnimation::Width() const
 {
 	return mWidth;
 }
 
-uint32
+int
 UOdysseyAnimation::Height() const
 {
 	return mHeight;
@@ -142,7 +142,7 @@ UOdysseyAnimation::GetFrameRange() const
 	return FInt32Range::Inclusive(0, layerStackFrameRange.GetUpperBoundValue()); //Animation starts always at 0 if there is no startPoint
 }
 
-uint32
+int
 UOdysseyAnimation::GetFrameCount() const
 {
 	FInt32Range frameRange = mLayerStack->GetFrameRange();

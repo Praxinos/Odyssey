@@ -118,9 +118,6 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
     bool bIsLightTableActivated = false;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
-    bool bAutoAddCells = true;
-
 private:
     TSharedRef<FOdysseyAnimationCellsContainer> mCellsContainer;
     TSharedPtr<FOdysseyAnimationLightTable> mLightTable;

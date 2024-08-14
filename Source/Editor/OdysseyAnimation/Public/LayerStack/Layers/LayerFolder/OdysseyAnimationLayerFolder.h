@@ -67,9 +67,9 @@ private:
     virtual void PropertyChanged(const FName& iPropertyName) override;
 
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Odyssey | LayerStack")
 	EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Odyssey | LayerStack")
     float Opacity = 1.0f;
 };

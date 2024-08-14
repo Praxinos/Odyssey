@@ -526,9 +526,6 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
     FInt32Range range = mCellsContainer->GetFrameRange();
     if ( iFrameIndex < range.GetLowerBoundValue())
     {
-        if (!bAutoAddCells) //If out of range is not allowed, return
-            return;
-
         int length = range.GetLowerBoundValue() - iFrameIndex;
 
         //Add a frame at current frame and extend it 
@@ -547,9 +544,6 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
 
     if ( iFrameIndex > range.GetUpperBoundValue())
     {
-        if (!bAutoAddCells) //If out of range is not allowed, return
-            return;
-
         //Add a frame at current frame and extend previous frame to it 
         TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(this, 1, animation->Width(), animation->Height(), animation->Format());
         

@@ -34,11 +34,18 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayer
 
 public:
     //Getters
+	UFUNCTION(BlueprintPure, Category="LayerStack")
     UOdysseyAnimation* GetAnimation() const;
+
+	UFUNCTION(BlueprintCallable, Category="LayerStack")
     virtual FInt32Range GetFrameRange() const;
+
     virtual TSharedPtr<FOdysseyAnimationCellsContainer> GetCellsContainer() const { return nullptr; }
 
+	UFUNCTION(BlueprintCallable, Category="LayerStack")
     int GetPreBehaviourFrame(EOdysseyAnimationLayerImagePostBehaviour iBehaviour, int iFrame) const;
+
+	UFUNCTION(BlueprintCallable, Category="LayerStack")
     int GetPostBehaviourFrame(EOdysseyAnimationLayerImagePostBehaviour iBehaviour, int iFrame) const;
     
 protected:
@@ -63,10 +70,10 @@ public:
     virtual void PostLoad() override;
 
 public:
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|LayerStack")
     EOdysseyAnimationLayerImagePostBehaviour PreBehaviour = EOdysseyAnimationLayerImagePostBehaviour::None;
 
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|LayerStack")
     EOdysseyAnimationLayerImagePostBehaviour PostBehaviour = EOdysseyAnimationLayerImagePostBehaviour::None;
 
     FSimpleMulticastDelegate mOnLightTableIsActivatedChanged;

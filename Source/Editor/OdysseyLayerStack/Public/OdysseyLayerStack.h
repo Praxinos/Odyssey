@@ -289,8 +289,7 @@ public:
     UPROPERTY(Transient)
     TSet<UClass*> CompatibleLayers; //Contains compatible C++ layer types
 
-public:
-	UPROPERTY(meta = (AllowedClasses = "OdysseyLayer"))
+	UPROPERTY(BlueprintReadWrite, Category="LayerStack", meta = (AllowedClasses = "OdysseyLayer"))
 	TSoftObjectPtr<UOdysseyLayer> CurrentLayer;
 
     UPROPERTY()
