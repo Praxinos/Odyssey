@@ -80,26 +80,10 @@ UOdysseyAnimationLayerImageVector::GetLightTable() const
     return mLightTable;
 }
 
-bool
-UOdysseyAnimationLayerImageVector::GetIsLightTableActivated() const
-{
-    return bIsLightTableActivated;
-}
-
 TSharedPtr<FOdysseyAnimationCellsContainer>
 UOdysseyAnimationLayerImageVector::GetCellsContainer() const
 {
     return mCellsContainer;
-}
-
-void
-UOdysseyAnimationLayerImageVector::IsLightTableActivatedChanged()
-{   
-    UOdysseyAnimation* animation = GetAnimation();
-    if ( !animation )
-        return;
-
-    ImageRenderingChanged();
 }
 
 void
@@ -155,8 +139,6 @@ UOdysseyAnimationLayerImageVector::PropertyChanged(const FName& iPropertyName)
         BlendModeChanged();
     if (iPropertyName == "Opacity")
         OpacityChanged();
-    if (iPropertyName == "bIsLightTableActivated")
-        IsLightTableActivatedChanged();
 }
 
 TSharedPtr<FOdysseyAnimationCell>

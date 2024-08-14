@@ -50,6 +50,7 @@ public:
     
 protected:
     //Property changes
+	virtual void IsLightTableActivatedChanged();
     virtual void ChildrenChanged() override;
     virtual void IsActivatedChanged() override;
     virtual void PreBehaviourChanged();
@@ -62,7 +63,6 @@ public:
 	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
     virtual TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const;
-    virtual bool GetIsLightTableActivated() const;
     virtual FSimpleMulticastDelegate& OnLightTableIsActivatedChanged();
 
 public:
@@ -75,6 +75,9 @@ public:
 
     UPROPERTY(BlueprintReadWrite, Category="Odyssey|LayerStack")
     EOdysseyAnimationLayerImagePostBehaviour PostBehaviour = EOdysseyAnimationLayerImagePostBehaviour::None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Odyssey | LayerStack")
+    bool bIsLightTableActivated = false;
 
     FSimpleMulticastDelegate mOnLightTableIsActivatedChanged;
 };

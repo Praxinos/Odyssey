@@ -651,7 +651,7 @@ SOdysseyAnimationLayerImageTimeline::MapActions(TSharedPtr<FUICommandList> iComm
 EVisibility
 SOdysseyAnimationLayerImageTimeline::GetLightTableVisibility() const
 {
-    return mLayer->GetIsLightTableActivated() && mDisplayOptions.Get() ? EVisibility::Visible : EVisibility::Collapsed;
+    return mLayer->bIsLightTableActivated && mDisplayOptions.Get() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 bool

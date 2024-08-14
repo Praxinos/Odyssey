@@ -164,7 +164,7 @@ UOdysseyAnimationEditorOutOfPegsTool::OnCellOutOfPegsChanged(bool iIsInteractive
 void
 UOdysseyAnimationEditorOutOfPegsTool::OnLightTableIsActivatedChanged()
 {
-    if (!mLayer->GetIsLightTableActivated())
+    if (!mLayer->bIsLightTableActivated)
     {
         GetEditor()->InactivateTemporaryTool();
     }

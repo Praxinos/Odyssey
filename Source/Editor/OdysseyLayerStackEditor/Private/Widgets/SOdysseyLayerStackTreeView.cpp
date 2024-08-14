@@ -518,7 +518,7 @@ SOdysseyLayerStackTreeView::OnLayerDisplayOptionsChanged(UOdysseyLayer* iLayerNo
 void
 SOdysseyLayerStackTreeView::OnExpansionChanged( UOdysseyLayer* iLayerNode, bool iIsExpanded )
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(iLayerNode, "IsExpanded", iIsExpanded);
+    FOdysseyObjectEditorUtils::SetPropertyValue(iLayerNode, "DisplayChildren", iIsExpanded);
 }
 
 void

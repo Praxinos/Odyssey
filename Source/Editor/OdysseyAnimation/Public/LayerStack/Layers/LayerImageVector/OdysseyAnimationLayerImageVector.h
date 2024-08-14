@@ -74,7 +74,6 @@ public:
 
 public:
     virtual TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const override;
-    virtual bool GetIsLightTableActivated() const override;
     virtual TSharedPtr<FOdysseyAnimationCellsContainer> GetCellsContainer() const override;
 
 public:
@@ -87,7 +86,6 @@ public:
 protected:
     void IsColoredChanged();
     void IsWireframeChanged();
-    void IsLightTableActivatedChanged();
     void OpacityChanged();
     void BlendModeChanged();
     virtual void PropertyChanged(const FName& iPropertyName) override;
@@ -119,9 +117,6 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
     float Opacity = 1.0f;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
-    bool bIsLightTableActivated = false;
 
 private:
     TSharedRef<FOdysseyAnimationCellsContainer> mCellsContainer;

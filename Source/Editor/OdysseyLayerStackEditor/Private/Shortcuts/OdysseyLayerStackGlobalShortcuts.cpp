@@ -129,7 +129,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_OpenFolderLayer()
     if (currentLayer->GetChildren().Num() <= 0)
         return;
     
-    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, "IsExpanded", true);
+    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, "DisplayChildren", true);
 }
 
 void
@@ -146,7 +146,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_CloseFolderLayer()
     if (currentLayer->GetChildren().Num() <= 0)
         return;
     
-    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, "IsExpanded", false);
+    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, "DisplayChildren", false);
 }
 
 #undef LOCTEXT_NAMESPACE

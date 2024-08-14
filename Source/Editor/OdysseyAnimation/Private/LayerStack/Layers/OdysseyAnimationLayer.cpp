@@ -43,16 +43,22 @@ UOdysseyAnimationLayer::GetLightTable() const
     return nullptr;
 }
 
-bool
-UOdysseyAnimationLayer::GetIsLightTableActivated() const
-{
-    return false;
-}
-
 FSimpleMulticastDelegate&
 UOdysseyAnimationLayer::OnLightTableIsActivatedChanged()
 {
     return mOnLightTableIsActivatedChanged;
+}
+
+void
+UOdysseyAnimationLayer::IsLightTableActivatedChanged()
+{   
+    UOdysseyAnimation* animation = GetAnimation();
+    if ( !animation )
+        return;
+
+    ImageRenderingChanged();
+    
+    OnLightTableIsActivatedChanged().Broadcast();
 }
 
 void
@@ -96,6 +102,8 @@ UOdysseyAnimationLayer::PropertyChanged(const FName& iPropertyName)
         PreBehaviourChanged();
     if (iPropertyName == "PostBehaviour")
         PostBehaviourChanged();
+    if (iPropertyName == "bIsLightTableActivated")
+        IsLightTableActivatedChanged();
 }
 
 TSharedPtr<IOdysseyImageRenderer>
