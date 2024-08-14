@@ -115,6 +115,7 @@ UOdysseyAnimationLayerImageVector::Serialize(FArchive& Ar)
 						cell->OldSerialize(Ar);
 					}
 				}
+				UpdateCellsIndexInLayer();
 			}
         }
     }
