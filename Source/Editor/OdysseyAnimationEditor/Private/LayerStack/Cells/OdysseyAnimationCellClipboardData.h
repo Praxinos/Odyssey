@@ -35,7 +35,6 @@ private:
     void Copy(const TArray<UOdysseyAnimationCell*>& iCells);
 
 private:
-    UOdysseyAnimationLayer* mLayer;
     struct FCellCopy
     {
         UOdysseyAnimationCell* mCell;

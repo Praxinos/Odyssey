@@ -62,7 +62,7 @@ FOdysseyAnimationCellClipboardData::Paste(UOdysseyAnimationLayer* iLayer, int iF
     for (int i = 0; i < mCellCopies.Num(); i++)
     {
 		const FCellCopy& cellCopy = mCellCopies[i];
-		UOdysseyAnimationCell* cell = iLayer->CopyCell(cellCopy.mCell, cellIndex + i);
+		UOdysseyAnimationCell* cell = iLayer->CopyCell(cellCopy.mCell, cellIndex + i + 1);
 		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), cellCopy.mLength);
     }
 }
@@ -95,8 +95,6 @@ FOdysseyAnimationCellClipboardData::GetCellCount() const
 void
 FOdysseyAnimationCellClipboardData::AddReferencedObjects(FReferenceCollector& Collector)
 {
-    Collector.AddReferencedObject(mLayer);
-
 	for (FCellCopy& cellCopy : mCellCopies)
 	{
 		Collector.AddReferencedObject(cellCopy.mCell);

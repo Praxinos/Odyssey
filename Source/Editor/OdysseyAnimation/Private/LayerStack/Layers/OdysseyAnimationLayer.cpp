@@ -387,7 +387,7 @@ UOdysseyAnimationLayer::UpdateCellsIndexInLayer()
 {
 	for (int i = 0; i < Cells.Num(); i++)
 	{
-		Cells[i]->IndexInLayer = i;
+		FOdysseyObjectEditorUtils::SetPropertyValue(Cells[i], GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, IndexInLayer), i);
 	}
 }
 
