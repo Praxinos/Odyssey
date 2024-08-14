@@ -84,7 +84,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell") //TODO: GetOptions ? Is that possible ?
     int Mark = -1;
 
-	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell", NonTransactional)
     FOdysseyAnimationCellOutOfPegs OutOfPegs;
 
 private:

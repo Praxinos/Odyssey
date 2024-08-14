@@ -128,7 +128,7 @@ public:
     UPROPERTY(BlueprintReadWrite, Category="Odyssey|LayerStack")
     EOdysseyAnimationLayerImagePostBehaviour PostBehaviour = EOdysseyAnimationLayerImagePostBehaviour::None;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Odyssey | LayerStack")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Odyssey | LayerStack", NonTransactional)
 	FOdysseyAnimationLightTable Lighttable;
 
     FSimpleMulticastDelegate mOnLightTableChanged;
