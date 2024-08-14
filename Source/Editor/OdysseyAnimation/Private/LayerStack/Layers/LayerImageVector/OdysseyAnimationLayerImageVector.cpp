@@ -186,8 +186,8 @@ UOdysseyAnimationLayerImageVector::GetMediaProvider(uint32 iFrameIndex) const
 {
 	FOdysseyMediaProvider provider;
 
-    bool isActive = GetIsActivatedRecursively();
-    bool isLocked = GetIsLockedRecursively();
+    bool isActive = IsActivatedRecursively();
+    bool isLocked = IsLockedRecursively();
     provider.IsLocked(!isActive || isLocked);
 
 	TSharedPtr<IOdysseyMedia> cellMediaVector = GetCellMediaVector(iFrameIndex);
@@ -338,7 +338,7 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
 					int srcCellFrame = staggerFrame - srcCell->GetFrameRange().GetLowerBoundValue();
 					
 					staggerFrame = cellStagger->GetStaggerFrame(srcCellFrame);
-					srcCell = cellStagger->GetReferenceCellAtFrame(srcCellFrame);
+					srcCell = vectorLayer->GetCellAtFrame(staggerFrame);
 				}
 			}
 

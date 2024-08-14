@@ -56,7 +56,7 @@ SOdysseyAnimationLayerImageTimeline::Construct(
         .Padding(cellsPadding)
         [
             SNew(SOdysseyAnimationCells, mExtension, mLayer)
-            .IsEnabled_Lambda([this](){ return !mLayer->GetIsLockedRecursively();})
+            .IsEnabled_Lambda([this](){ return !mLayer->IsLockedRecursively();})
             .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
             .ShowHandles(this, &SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles)
         ]
@@ -606,7 +606,7 @@ SOdysseyAnimationLayerImageTimeline::IsPostBehaviour(EOdysseyAnimationLayerImage
 bool
 SOdysseyAnimationLayerImageTimeline::CanSetPostBehaviour() const
 {
-    return !mLayer->GetIsLockedRecursively();
+    return !mLayer->IsLockedRecursively();
 }
 
 void
@@ -627,7 +627,7 @@ SOdysseyAnimationLayerImageTimeline::IsPreBehaviour(EOdysseyAnimationLayerImageP
 bool
 SOdysseyAnimationLayerImageTimeline::CanSetPreBehaviour() const
 {
-    return !mLayer->GetIsLockedRecursively();
+    return !mLayer->IsLockedRecursively();
 }
 
 void
@@ -672,7 +672,7 @@ SOdysseyAnimationLayerImageTimeline::OnContextMenuPlusButtonClicked()
 void
 SOdysseyAnimationLayerImageTimeline::RemoveCellMark()
 {
-    if (mLayer->GetIsLockedRecursively())
+    if (mLayer->IsLockedRecursively())
         return;
 
     TArray<UOdysseyAnimationCell*> selectedCells = mExtension->Timeline()->GetSelectedCells();
@@ -695,7 +695,7 @@ SOdysseyAnimationLayerImageTimeline::RemoveCellMark()
 bool
 SOdysseyAnimationLayerImageTimeline::CanRemoveCellMark() const
 {
-    if (mLayer->GetIsLockedRecursively())
+    if (mLayer->IsLockedRecursively())
         return false;
 
     TArray<UOdysseyAnimationCell*> selectedCells = mExtension->Timeline()->GetSelectedCells();
@@ -708,7 +708,7 @@ SOdysseyAnimationLayerImageTimeline::CanRemoveCellMark() const
 void
 SOdysseyAnimationLayerImageTimeline::SetCellMark( int iMarkId )
 {
-    if (mLayer->GetIsLockedRecursively())
+    if (mLayer->IsLockedRecursively())
         return;
 
     TArray<UOdysseyAnimationCell*> selectedCells = mExtension->Timeline()->GetSelectedCells();
@@ -731,7 +731,7 @@ SOdysseyAnimationLayerImageTimeline::SetCellMark( int iMarkId )
 bool
 SOdysseyAnimationLayerImageTimeline::CanSetCellMark() const
 {
-    if (mLayer->GetIsLockedRecursively())
+    if (mLayer->IsLockedRecursively())
         return false;
 
     TArray<UOdysseyAnimationCell*> selectedCells = mExtension->Timeline()->GetSelectedCells();
@@ -744,7 +744,7 @@ SOdysseyAnimationLayerImageTimeline::CanSetCellMark() const
 bool
 SOdysseyAnimationLayerImageTimeline::IsCellMarkChecked(int iMarkId) const
 {
-    if (mLayer->GetIsLockedRecursively())
+    if (mLayer->IsLockedRecursively())
         return false;
 
     TArray<UOdysseyAnimationCell*> selectedCells = mExtension->Timeline()->GetSelectedCells();

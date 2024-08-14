@@ -78,7 +78,7 @@ SOdysseyTextureLayerFolderRow::GenerateOptionsWidget()
         .Padding(FMargin(0, 0, 1.f, 0))
         [
             SNew(SNumericEntryBox<int>)
-            .IsEnabled_Lambda([this](){ return !mTextureLayerFolder->GetIsLockedRecursively();})
+            .IsEnabled_Lambda([this](){ return !mTextureLayerFolder->IsLockedRecursively();})
             .Value_Lambda([this]() { return (int)(mTextureLayerFolder->Opacity * 100.f + 0.5f);})
             .AllowSpin(true)
             .ShiftMouseMovePixelPerDelta(10)
@@ -98,7 +98,7 @@ SOdysseyTextureLayerFolderRow::GenerateOptionsWidget()
         .VAlign(VAlign_Center)
         [
             SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-            .IsEnabled_Lambda([this](){ return !mTextureLayerFolder->GetIsLockedRecursively();})
+            .IsEnabled_Lambda([this](){ return !mTextureLayerFolder->IsLockedRecursively();})
             .CurrentValue_Lambda([this](){ return (int32)mTextureLayerFolder->BlendMode;})
             .ContentPadding(FMargin(0))
             .OnEnumSelectionChanged(this, &SOdysseyTextureLayerFolderRow::OnBlendModeComboBoxChanged)
@@ -108,7 +108,7 @@ SOdysseyTextureLayerFolderRow::GenerateOptionsWidget()
 void
 SOdysseyTextureLayerFolderRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
-    if ( mTextureLayerFolder->GetIsLockedRecursively() )
+    if ( mTextureLayerFolder->IsLockedRecursively() )
         return;
 
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-folder.transaction.set-blend-mode", "Change Layer BlendMode"));
@@ -118,7 +118,7 @@ SOdysseyTextureLayerFolderRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectI
 void
 SOdysseyTextureLayerFolderRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
-    if ( mTextureLayerFolder->GetIsLockedRecursively() )
+    if ( mTextureLayerFolder->IsLockedRecursively() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard
@@ -129,7 +129,7 @@ SOdysseyTextureLayerFolderRow::OnOpacityValueCommitted(int iValue, ETextCommit::
 void
 SOdysseyTextureLayerFolderRow::OnOpacityValueChanged(int iValue)
 {
-    if ( mTextureLayerFolder->GetIsLockedRecursively() )
+    if ( mTextureLayerFolder->IsLockedRecursively() )
         return;
 
     FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerFolder, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::Interactive);

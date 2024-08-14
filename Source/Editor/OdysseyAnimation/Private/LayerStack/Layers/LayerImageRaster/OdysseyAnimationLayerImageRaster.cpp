@@ -279,8 +279,8 @@ UOdysseyAnimationLayerImageRaster::GetMediaProvider(uint32 iFrameIndex) const
 {
 	FOdysseyMediaProvider provider;
 
-    bool isActive = GetIsActivatedRecursively();
-    bool isLocked = GetIsLockedRecursively();
+    bool isActive = IsActivatedRecursively();
+    bool isLocked = IsLockedRecursively();
     provider.IsLocked(!isActive || isLocked);
 
 	TSharedPtr<IOdysseyMedia> cellMediaRaster = GetCellMediaRaster(iFrameIndex);

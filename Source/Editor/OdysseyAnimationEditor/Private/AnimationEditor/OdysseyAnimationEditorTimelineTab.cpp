@@ -631,7 +631,7 @@ FOdysseyAnimationEditorTimelineTab::ChangeLayerOpacity( float iOpacity )
     if ( !layerStack->CurrentLayer )
         return;
 
-    if ( layerStack->CurrentLayer->GetIsLockedRecursively() )
+    if ( layerStack->CurrentLayer->IsLockedRecursively() )
         return;
 
 #ifdef WITH_EDITOR

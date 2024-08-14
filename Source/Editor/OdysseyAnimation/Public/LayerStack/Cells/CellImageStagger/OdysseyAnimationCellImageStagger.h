@@ -32,13 +32,16 @@ public:
 
 public:
 	UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
-    UOdysseyAnimationCell* GetReferenceCellAtFrame(int Frame) const;
-
-	UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
     int GetStaggerFrame(int Frame) const;
 
 public:
 	virtual UOdysseyAnimationCell* Break(int Frame) override;
+
+protected:	
+	void BehaviourChanged();
+	void ReachChanged(bool iIsInteractive);
+
+	virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
 
 public:
 	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")

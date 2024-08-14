@@ -48,6 +48,7 @@ private:
     FOdysseyAnimationEditorExtension* mExtension;
     UOdysseyAnimationCellImageStagger* mCell;
     TAttribute<bool> mShowContent;
+    FText mSetReachTransactionName;
 
     bool mIsEditingReach;
     struct FReachData

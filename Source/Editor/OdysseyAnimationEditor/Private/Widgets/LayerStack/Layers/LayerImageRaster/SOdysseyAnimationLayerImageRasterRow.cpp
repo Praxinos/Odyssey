@@ -121,7 +121,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
             .Padding(FMargin(0, 0, 1.f, 0))
             [
                 SNew(SNumericEntryBox<int>)
-                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageRaster->GetIsLockedRecursively();})
+                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageRaster->IsLockedRecursively();})
                 .Value_Lambda([this]() { return (int)(mAnimationLayerImageRaster->Opacity * 100.f + 0.5f);})
                 .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
                 .AllowSpin(true)
@@ -142,7 +142,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
             .VAlign(VAlign_Center)
             [
                 SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageRaster->GetIsLockedRecursively();})
+                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageRaster->IsLockedRecursively();})
                 .CurrentValue_Lambda([this](){ return (int32)mAnimationLayerImageRaster->BlendMode;})
                 .ContentPadding(FMargin(0))
                 .OnEnumSelectionChanged(this, &SOdysseyAnimationLayerImageRasterRow::OnBlendModeComboBoxChanged)
@@ -182,7 +182,7 @@ SOdysseyAnimationLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged(ECheckBox
 void
 SOdysseyAnimationLayerImageRasterRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
-    if ( mAnimationLayerImageRaster->GetIsLockedRecursively() )
+    if ( mAnimationLayerImageRaster->IsLockedRecursively() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard
@@ -193,7 +193,7 @@ SOdysseyAnimationLayerImageRasterRow::OnOpacityValueCommitted(int iValue, ETextC
 void
 SOdysseyAnimationLayerImageRasterRow::OnOpacityValueChanged(int iValue)
 {
-    if ( mAnimationLayerImageRaster->GetIsLockedRecursively() )
+    if ( mAnimationLayerImageRaster->IsLockedRecursively() )
         return;
 
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::Interactive);
@@ -227,7 +227,7 @@ SOdysseyAnimationLayerImageRasterRow::GetIsAlphaLockedIsChecked() const
 void
 SOdysseyAnimationLayerImageRasterRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
-    if ( mAnimationLayerImageRaster->GetIsLockedRecursively() )
+    if ( mAnimationLayerImageRaster->IsLockedRecursively() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard

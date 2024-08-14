@@ -13,6 +13,7 @@
 void
 SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyAnimationCellImageStagger* iCell, FOdysseyAnimationEditorExtension* iExtension)
 {
+	mSetReachTransactionName = (LOCTEXT("cell-image-stagger.set-reach", "Set Stagger Cell Reach"));
     mExtension = iExtension;
     mCell = iCell;
     mShowContent = iArgs._ShowContent;
@@ -158,24 +159,22 @@ SOdysseyAnimationCellImageStagger::GetBehaviourBrush() const
 int
 SOdysseyAnimationCellImageStagger::GetReach() const
 {
-    if (mIsEditingReach)
-        return mReachData.mReach;
     return mCell->Reach;
 }
 
 void
 SOdysseyAnimationCellImageStagger::OnReachValueChanged(int iReach)
 {
-    mReachData.mReach = FMath::Max(0, iReach);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Reach), FMath::Max(0, iReach), EPropertyChangeType::Interactive);
 }
 
 void
 SOdysseyAnimationCellImageStagger::OnReachValueCommited(int iReach, ETextCommit::Type iType)
-{    
+{
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-stagger.set-reach", "Set Stagger Cell Reach"));
+    FScopedTransaction ScopedTransaction(mSetReachTransactionName);
 #endif
-	FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Reach), FMath::Max(0, iReach));
+	FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Reach), FMath::Max(0, iReach), EPropertyChangeType::ValueSet);
 
     FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mCell->GetAnimation());
     currentFrameMutator.Set(mCell->GetFrameRange().GetLowerBoundValue());
@@ -185,16 +184,17 @@ SOdysseyAnimationCellImageStagger::OnReachValueCommited(int iReach, ETextCommit:
 void
 SOdysseyAnimationCellImageStagger::OnReachBeginSliderMovement()
 {
-    mReachData.mReach = mCell->Reach;
-    mIsEditingReach = true;
+#ifdef WITH_EDITOR
+    GEditor->BeginTransaction(mSetReachTransactionName);
+#endif
 }
 
 void
 SOdysseyAnimationCellImageStagger::OnReachEndSliderMovement(int iReach)
 {
-    mReachData.mReach = mCell->Reach;
-    mIsEditingReach = false;
-
+#ifdef WITH_EDITOR
+    GEditor->EndTransaction();
+#endif
     //Clear the keyboard focus here because the spinbox keeps it after dragging the value
     //which leads to the reach preview to be displayed after edition
     FSlateApplication::Get().SetKeyboardFocus(AsShared(), EFocusCause::SetDirectly);
@@ -265,8 +265,7 @@ SOdysseyAnimationCellImageStagger::SetBehaviour(EOdysseyAnimationCellImageStagge
 bool
 SOdysseyAnimationCellImageStagger::CanSetBehaviour(EOdysseyAnimationCellImageStaggerBehaviour iBehaviour) const
 {
-    //TODO: check if layer is locked
-    return true;
+    return !mCell->GetLayer()->IsLockedRecursively();
 }
 
 bool

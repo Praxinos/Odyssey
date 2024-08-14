@@ -462,7 +462,7 @@ SOdysseyAnimationCells::GetCellBreakIndicatorOffset(UOdysseyAnimationCell* iCell
 EVisibility
 SOdysseyAnimationCells::GetCellBreakIndicatorVisibility(UOdysseyAnimationCell* iCell) const
 {
-    if (mAnimationLayer->GetIsLockedRecursively())
+    if (mAnimationLayer->IsLockedRecursively())
         return EVisibility::Hidden;
         
     if (mExtension->Timeline()->GetCurrentTool() != EOdysseyTimelineTool::Cut)
@@ -489,7 +489,7 @@ SOdysseyAnimationCells::GetCellBreakIndicatorVisibility(UOdysseyAnimationCell* i
 EVisibility
 SOdysseyAnimationCells::GetTimingHandleVisibility(UOdysseyAnimationCell* iCell) const
 {
-    if (mAnimationLayer->GetIsLockedRecursively())
+    if (mAnimationLayer->IsLockedRecursively())
         return EVisibility::Hidden;
 
     if (mExtension->Timeline()->GetCurrentTool() != EOdysseyTimelineTool::Selection)
@@ -504,7 +504,7 @@ SOdysseyAnimationCells::GetTimingHandleVisibility(UOdysseyAnimationCell* iCell) 
 EVisibility
 SOdysseyAnimationCells::GetLengthHandleVisibility(UOdysseyAnimationCell* iCell) const
 {
-    if (mAnimationLayer->GetIsLockedRecursively())
+    if (mAnimationLayer->IsLockedRecursively())
         return EVisibility::Hidden;
         
     if (mExtension->Timeline()->GetCurrentTool() != EOdysseyTimelineTool::Selection)
@@ -720,7 +720,7 @@ SOdysseyAnimationCells::OnTimingHandleDragStopped(const FGeometry& iGeometry, co
 EVisibility
 SOdysseyAnimationCells::GetAddCellsHandleRightVisibility() const
 {
-    if (mAnimationLayer->GetIsLockedRecursively())
+    if (mAnimationLayer->IsLockedRecursively())
         return EVisibility::Hidden;
 
     return mShowHandles.Get() ? EVisibility::Visible : EVisibility::Hidden;
@@ -729,7 +729,7 @@ SOdysseyAnimationCells::GetAddCellsHandleRightVisibility() const
 EVisibility
 SOdysseyAnimationCells::GetAddCellsHandleLeftVisibility() const
 {
-    if (mAnimationLayer->GetIsLockedRecursively())
+    if (mAnimationLayer->IsLockedRecursively())
         return EVisibility::Hidden;
         
     return mShowHandles.Get() && GetOffset() > 0 ? EVisibility::Visible : EVisibility::Hidden;

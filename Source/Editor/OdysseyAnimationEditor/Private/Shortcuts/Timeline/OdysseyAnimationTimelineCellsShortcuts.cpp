@@ -103,7 +103,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Cut()
     if (!layer)
         return;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
     {
         Action_Copy();
         return;
@@ -130,7 +130,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Paste()
     if (!layer)
         return;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return;
 
     FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
@@ -170,7 +170,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
     if (!layer)
         return;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return;
 
     const TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
@@ -199,7 +199,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
     if (!layer)
         return;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return;
 
     UOdysseyAnimation* animation = layer->GetAnimation();
@@ -219,7 +219,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
     selectedCells = selectedCells.FilterByPredicate(
         [](UOdysseyAnimationCell* iCell)
         {
-            return iCell->IsA<UOdysseyAnimationCellImageStagger>();
+            return !iCell->IsA<UOdysseyAnimationCellImageStagger>();
         }
     );
 
@@ -235,8 +235,8 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
 
     for (UOdysseyAnimationCell* cell : selectedCells)
     {
-		layer->AddCell(UOdysseyAnimationCellImageStagger::StaticClass(), cell->IndexInLayer);
-		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), cell->Length);
+		UOdysseyAnimationCell* staggerCell = layer->AddCell(UOdysseyAnimationCellImageStagger::StaticClass(), cell->IndexInLayer);
+		FOdysseyObjectEditorUtils::SetPropertyValue(staggerCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), cell->Length);
 		layer->RemoveCell(cell);
     }
 }
@@ -248,7 +248,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellLength()
     if (!layer)
         return;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return;
 
     UOdysseyAnimation* animation = layer->GetAnimation();
@@ -285,7 +285,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellLength()
     if (!layer)
         return;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return;
 
     UOdysseyAnimation* animation = layer->GetAnimation();
@@ -322,7 +322,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellLength()
     if (!layer)
         return;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return;
 
     UOdysseyAnimation* animation = layer->GetAnimation();
@@ -408,7 +408,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Cut()
     if (!layer)
         return false;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return false;
 
     const TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
@@ -425,7 +425,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Paste()
     if (!layer)
         return false;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return false;
 
     FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
@@ -458,7 +458,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Delete()
     if (!layer)
         return false;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return false;
 
     const TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
@@ -476,7 +476,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell()
     if (!layer)
         return false;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return false;
 
     UOdysseyAnimation* animation = layer->GetAnimation();
@@ -495,7 +495,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell()
     selectedCells = selectedCells.FilterByPredicate(
         [](UOdysseyAnimationCell* iCell)
         {
-            return iCell->IsA<UOdysseyAnimationCellImageStagger>();
+            return !iCell->IsA<UOdysseyAnimationCellImageStagger>();
         }
     );
 
@@ -512,7 +512,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_IncreaseCellLength()
     if (!layer)
         return false;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return false;
 
     UOdysseyAnimation* animation = layer->GetAnimation();
@@ -537,7 +537,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_DecreaseCellLength()
     if (!layer)
         return false;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return false;
 
     UOdysseyAnimation* animation = layer->GetAnimation();
@@ -562,7 +562,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_SetCellLength()
     if (!layer)
         return false;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return false;
 
     UOdysseyAnimation* animation = layer->GetAnimation();

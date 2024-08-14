@@ -19,7 +19,7 @@ FOdysseyAnimationTimelineMoveTool::FOdysseyAnimationTimelineMoveTool(FOdysseyAni
 FReply
 FOdysseyAnimationTimelineMoveTool::OnMouseButtonDown(const FMouseEventParams& iParams)
 {
-    if (iParams.mLayer->GetIsLockedRecursively())
+    if (iParams.mLayer->IsLockedRecursively())
         return FReply::Unhandled();
 
 	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
@@ -40,7 +40,7 @@ FOdysseyAnimationTimelineMoveTool::OnMouseButtonDown(const FMouseEventParams& iP
 FReply
 FOdysseyAnimationTimelineMoveTool::OnDragDetected(const FMouseEventParams& iParams)
 {
-    if (iParams.mLayer->GetIsLockedRecursively())
+    if (iParams.mLayer->IsLockedRecursively())
         return FReply::Unhandled();
 
 	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
@@ -61,7 +61,7 @@ FOdysseyAnimationTimelineMoveTool::OnDragDetected(const FMouseEventParams& iPara
 FReply
 FOdysseyAnimationTimelineMoveTool::OnMouseMove(const FMouseEventParams& iParams)
 {
-    if (iParams.mLayer->GetIsLockedRecursively())
+    if (iParams.mLayer->IsLockedRecursively())
         return FReply::Unhandled();
 
 	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
@@ -85,7 +85,7 @@ FOdysseyAnimationTimelineMoveTool::OnMouseMove(const FMouseEventParams& iParams)
 FReply
 FOdysseyAnimationTimelineMoveTool::OnMouseButtonUp(const FMouseEventParams& iParams)
 {
-    if (iParams.mLayer->GetIsLockedRecursively())
+    if (iParams.mLayer->IsLockedRecursively())
         return FReply::Unhandled();
 
 	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)

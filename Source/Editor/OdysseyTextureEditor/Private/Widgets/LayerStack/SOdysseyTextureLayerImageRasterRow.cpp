@@ -98,7 +98,7 @@ SOdysseyTextureLayerImageRasterRow::GenerateOptionsWidget()
             .Padding(FMargin(0, 0, 1.f, 0))
             [
                 SNew(SNumericEntryBox<int>)
-                .IsEnabled_Lambda([this](){ return !mTextureLayerImageRaster->GetIsLockedRecursively();})
+                .IsEnabled_Lambda([this](){ return !mTextureLayerImageRaster->IsLockedRecursively();})
                 .Value_Lambda([this]() { return (int)(mTextureLayerImageRaster->Opacity * 100.f + 0.5f);})
                 .AllowSpin(true)
                 .ShiftMouseMovePixelPerDelta(10)
@@ -118,7 +118,7 @@ SOdysseyTextureLayerImageRasterRow::GenerateOptionsWidget()
             .VAlign(VAlign_Center)
             [
                 SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-                .IsEnabled_Lambda([this](){ return !mTextureLayerImageRaster->GetIsLockedRecursively();})
+                .IsEnabled_Lambda([this](){ return !mTextureLayerImageRaster->IsLockedRecursively();})
                 .CurrentValue_Lambda([this](){ return (int32)mTextureLayerImageRaster->BlendMode;})
                 .ContentPadding(FMargin(0))
                 .OnEnumSelectionChanged(this, &SOdysseyTextureLayerImageRasterRow::OnBlendModeComboBoxChanged)
@@ -135,7 +135,7 @@ SOdysseyTextureLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged(ECheckBoxSt
 void
 SOdysseyTextureLayerImageRasterRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
-    if ( mTextureLayerImageRaster->GetIsLockedRecursively() )
+    if ( mTextureLayerImageRaster->IsLockedRecursively() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard
@@ -146,7 +146,7 @@ SOdysseyTextureLayerImageRasterRow::OnOpacityValueCommitted(int iValue, ETextCom
 void
 SOdysseyTextureLayerImageRasterRow::OnOpacityValueChanged(int iValue)
 {
-    if ( mTextureLayerImageRaster->GetIsLockedRecursively() )
+    if ( mTextureLayerImageRaster->IsLockedRecursively() )
         return;
 
     FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::Interactive);
@@ -174,7 +174,7 @@ SOdysseyTextureLayerImageRasterRow::GetIsAlphaLockedIsChecked() const
 void
 SOdysseyTextureLayerImageRasterRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
-    if ( mTextureLayerImageRaster->GetIsLockedRecursively() )
+    if ( mTextureLayerImageRaster->IsLockedRecursively() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard

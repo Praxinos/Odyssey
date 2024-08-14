@@ -485,7 +485,7 @@ FOdysseyTextureEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
     if ( !layerStack->CurrentLayer )
         return;
         
-    if ( layerStack->CurrentLayer->GetIsLockedRecursively() )
+    if ( layerStack->CurrentLayer->IsLockedRecursively() )
         return;
 
     if ( !FOdysseyObjectEditorUtils::HasProperty(layerStack->CurrentLayer.Get(), "Opacity") )

@@ -45,7 +45,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_ConvertToRasterCell()
     if (!layer || !layer->IsA(UOdysseyAnimationLayerImageRaster::StaticClass()))
         return;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return;
 
     UOdysseyAnimation* animation = layer->GetAnimation();
@@ -183,7 +183,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     if (!layer || !layer->IsA(UOdysseyAnimationLayerImageRaster::StaticClass()))
         return;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return;
 
     UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
@@ -350,7 +350,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::CanAction_ConvertToRasterCell
     if (!layer || !layer->IsA(UOdysseyAnimationLayerImageRaster::StaticClass()))
         return false;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return false;
 
     UOdysseyAnimation* animation = layer->GetAnimation();
@@ -387,7 +387,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::CanAction_CrossFade()
     if (!layer || !layer->IsA(UOdysseyAnimationLayerImageRaster::StaticClass()))
         return false;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return false;
 
     UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(mLayerStack->CurrentLayer.Get());

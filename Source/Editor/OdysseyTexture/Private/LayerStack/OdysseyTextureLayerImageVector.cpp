@@ -59,8 +59,8 @@ UOdysseyTextureLayerImageVector::GetEngine()
 FOdysseyMediaProvider
 UOdysseyTextureLayerImageVector::GetMediaProvider(uint32 iFrameIndex) const
 {
-    bool isActive = GetIsActivatedRecursively();
-    bool isLocked = GetIsLockedRecursively();
+    bool isActive = IsActivatedRecursively();
+    bool isLocked = IsLockedRecursively();
 
     FOdysseyMediaProvider mediaProvider;
     mediaProvider.IsLocked(!isActive || isLocked);

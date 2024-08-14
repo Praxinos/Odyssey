@@ -185,10 +185,10 @@ public:
     UOdysseyLayerStack* GetLayerStack() const;
 
     UFUNCTION(BlueprintPure, Category="LayerStack")
-    bool GetIsActivatedRecursively() const;
+    bool IsActivatedRecursively() const;
 
     UFUNCTION(BlueprintPure, Category="LayerStack")
-    bool GetIsLockedRecursively() const;
+    bool IsLockedRecursively() const;
 
 public:
 	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;

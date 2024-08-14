@@ -133,12 +133,6 @@ UOdysseyAnimationCellImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& 
     ImageRenderingChanged(iRects);
 }
 
-void
-UOdysseyAnimationCellImageRaster::OnBlockPtrChanged()
-{
-    ImageRenderingChanged();
-}
-
 FOdysseyMediaProvider
 UOdysseyAnimationCellImageRaster::GetMediaProvider(uint32 iFrameIndex) const
 {

@@ -11,7 +11,9 @@ FOdysseyAnimationCellImageStaggerImageRenderer::FOdysseyAnimationCellImageStagge
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mCellRenderer(nullptr)
 {
-    UOdysseyAnimationCell* cell = iCell->GetReferenceCellAtFrame(iFrame);
+	int staggerFrame = iCell->GetStaggerFrame(iFrame);
+	UOdysseyAnimationCell* cell =  iCell->GetLayer()->GetCellAtFrame(staggerFrame);
+    
     if (cell)
 	{
     	int cellFrame = iFrame - cell->GetFrameRange().GetLowerBoundValue();

@@ -62,7 +62,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakCell()
     if (!currentLayer)
         return;
 
-    if (currentLayer->GetIsLockedRecursively())
+    if (currentLayer->IsLockedRecursively())
         return;
 		
 	UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(animation->CurrentFrame);
@@ -102,7 +102,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark()
     if (!currentLayer)
         return;
 
-    if (currentLayer->GetIsLockedRecursively())
+    if (currentLayer->IsLockedRecursively())
         return;
 
     TArray<UOdysseyAnimationCell*> selectedCells = extension->Timeline()->GetSelectedCells();
@@ -147,7 +147,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark(int iMarkId)
     if (!currentLayer)
         return;
 
-    if (currentLayer->GetIsLockedRecursively())
+    if (currentLayer->IsLockedRecursively())
         return;
         
     TArray<UOdysseyAnimationCell*> selectedCells = extension->Timeline()->GetSelectedCells();
@@ -198,7 +198,7 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveCellMark()
     if (!layer)
         return false;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return false;
 
     TArray<UOdysseyAnimationCell*> selectedCells = extension->Timeline()->GetSelectedCells();
@@ -231,7 +231,7 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_SetCellMark(int iMarkId)
     if (!layer)
         return false;
 
-    if (layer->GetIsLockedRecursively())
+    if (layer->IsLockedRecursively())
         return false;
 
     TArray<UOdysseyAnimationCell*> selectedCells = extension->Timeline()->GetSelectedCells();

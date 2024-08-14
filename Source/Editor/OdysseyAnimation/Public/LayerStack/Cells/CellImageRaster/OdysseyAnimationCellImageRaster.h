@@ -41,7 +41,6 @@ private:
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
     void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects);
     void OnBlockCommited(const TArray<::ULIS::FRectI>& iRects);
-    void OnBlockPtrChanged();
 
 private:
     //Import/Export

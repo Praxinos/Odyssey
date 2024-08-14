@@ -281,7 +281,7 @@ UOdysseyLayer::GetMediaProvider(uint32 iFrameIndex) const
 }
 
 bool
-UOdysseyLayer::GetIsActivatedRecursively() const
+UOdysseyLayer::IsActivatedRecursively() const
 {
     const UOdysseyLayer* layer = this;
     while(layer)
@@ -295,7 +295,7 @@ UOdysseyLayer::GetIsActivatedRecursively() const
 }
 
 bool
-UOdysseyLayer::GetIsLockedRecursively() const
+UOdysseyLayer::IsLockedRecursively() const
 {
     const UOdysseyLayer* layer = this;
     while(layer)
