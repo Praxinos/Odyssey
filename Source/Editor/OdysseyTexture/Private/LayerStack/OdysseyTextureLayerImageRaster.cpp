@@ -20,20 +20,6 @@
 
 #define LOCTEXT_NAMESPACE "Texture"
 
-UOdysseyTextureLayerImageRaster::FOnBlendModeChanged&
-UOdysseyTextureLayerImageRaster::OnBlendModeChanged()
-{
-    static FOnBlendModeChanged onBlendModeChanged;
-    return onBlendModeChanged;
-}
-
-UOdysseyTextureLayerImageRaster::FOnOpacityChanged&
-UOdysseyTextureLayerImageRaster::OnOpacityChanged()
-{
-    static FOnOpacityChanged onOpacityChanged;
-    return onOpacityChanged;
-}
-
 UOdysseyTextureLayerImageRaster::~UOdysseyTextureLayerImageRaster()
 {
 }
@@ -115,8 +101,8 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 		            renderer->Init();
 
                     FOdysseyImageRendererBlendParams params(iBlock, {iBlock->Rect()});
-                    params.mBlendMode = textureLayer->GetImageRenderingBlendMode();
-                    params.mOpacity = textureLayer->GetImageRenderingOpacity();
+                    params.mBlendMode = (::ULIS::eBlendMode)textureLayer->BlendMode;
+                    params.mOpacity = textureLayer->Opacity;
 
                     lastEvent = renderer->Blend(params, lastEvent);
                 }
@@ -125,33 +111,6 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
         )
     );
     mutator.Commit();
-}
-
-void
-UOdysseyTextureLayerImageRaster::OpacityChanged()
-{
-    OnOpacityChanged().Broadcast(this);
-
-    ImageRenderingChanged();
-}
-
-void
-UOdysseyTextureLayerImageRaster::BlendModeChanged()
-{
-    OnBlendModeChanged().Broadcast(this);
-    
-    ImageRenderingChanged();
-}
-
-void
-UOdysseyTextureLayerImageRaster::PropertyChanged(const FName& iPropertyName)
-{
-    Super::PropertyChanged(iPropertyName);
-
-    if (iPropertyName == "BlendMode")
-        BlendModeChanged();
-    if (iPropertyName == "Opacity")
-        OpacityChanged();
 }
 
 void
@@ -288,7 +247,7 @@ UOdysseyTextureLayerImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TS
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyTextureLayerImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter) const
+UOdysseyTextureLayerImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
@@ -297,21 +256,9 @@ UOdysseyTextureLayerImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRend
 }
 
 TArray<FGuid>
-UOdysseyTextureLayerImageRaster::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const
+UOdysseyTextureLayerImageRaster::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
 {
     return { GetImageRenderingId() };
-}
-
-::ULIS::eBlendMode
-UOdysseyTextureLayerImageRaster::GetImageRenderingBlendMode() const
-{
-    return (::ULIS::eBlendMode)BlendMode;
-}
-
-float
-UOdysseyTextureLayerImageRaster::GetImageRenderingOpacity() const
-{
-    return Opacity;
 }
 
 #undef LOCTEXT_NAMESPACE

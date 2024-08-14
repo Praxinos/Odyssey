@@ -4,7 +4,6 @@
 #pragma once
 
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "OdysseyAnimationImageRenderingAbility.h"
 #include "ULISInvalidTileMap.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 

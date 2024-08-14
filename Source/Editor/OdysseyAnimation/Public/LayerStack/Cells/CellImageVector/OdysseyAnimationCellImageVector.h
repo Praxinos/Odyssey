@@ -4,7 +4,6 @@
 #pragma once
 
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "OdysseyAnimationImageRenderingAbility.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 
 class FOdysseyVectorBlock;

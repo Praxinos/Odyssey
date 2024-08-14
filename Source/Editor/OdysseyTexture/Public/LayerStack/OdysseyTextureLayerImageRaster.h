@@ -19,23 +19,6 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageRaster
     : public UOdysseyTextureLayer
 {
     GENERATED_BODY()
-    
-public:
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     * 
-     */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnBlendModeChanged, UOdysseyTextureLayerImageRaster*)
-
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     * 
-     */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnOpacityChanged, UOdysseyTextureLayerImageRaster*)
-
-public:
-    static FOnBlendModeChanged& OnBlendModeChanged();
-    static FOnOpacityChanged& OnOpacityChanged();
 
 public:
     ~UOdysseyTextureLayerImageRaster();
@@ -65,10 +48,6 @@ protected:
     void OnBlockCommited(const TArray<::ULIS::FRectI>& iRects);
     void OnBlockPtrChanged();
 
-    void OpacityChanged();
-    void BlendModeChanged();
-    virtual void PropertyChanged(const FName& iPropertyName) override;
-
 public:
     // UObject overrides
     virtual void PostInitProperties() override;
@@ -87,10 +66,8 @@ public:
 
 public:
 	//FOdysseyImageRenderingAbility overrides
-	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const override;
-    virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
-    virtual float GetImageRenderingOpacity() const override;
+	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
+	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0) const override;
 
 private:
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
@@ -106,10 +83,4 @@ private:
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Texture | LayerStack")
     bool IsAlphaLocked = false;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Texture | LayerStack")
-	EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Texture | LayerStack")
-    float Opacity = 1.0f;
 };

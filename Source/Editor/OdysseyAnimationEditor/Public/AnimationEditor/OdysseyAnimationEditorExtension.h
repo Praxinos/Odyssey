@@ -7,7 +7,7 @@
 #include "PainterEditor/OdysseyPainterEditorExtension.h"
 #include "OdysseyAnimationEditorTimeline.h"
 #include "OdysseyAnimationEditorFlipSystem.h"
-#include "OdysseyAnimationImageRenderingAbility.h"
+#include "OdysseyImageRenderingAbility.h"
 
 class FOdysseyPainterEditor;
 class UOdysseyAnimation;

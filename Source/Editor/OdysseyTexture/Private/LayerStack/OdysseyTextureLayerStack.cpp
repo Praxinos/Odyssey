@@ -112,7 +112,7 @@ UOdysseyTextureLayerStack::GetTexture() const
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyTextureLayerStack::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter) const
+UOdysseyTextureLayerStack::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
@@ -121,7 +121,7 @@ UOdysseyTextureLayerStack::BuildImageRenderer(IOdysseyImageRenderer::eRenderType
 }
 
 TArray<FGuid>
-UOdysseyTextureLayerStack::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const
+UOdysseyTextureLayerStack::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
 {
     TArray<FGuid> idComposition = { GetImageRenderingId() };
     UOdysseyTextureLayer* layerRoot = Cast<UOdysseyTextureLayer>(LayerRoot);

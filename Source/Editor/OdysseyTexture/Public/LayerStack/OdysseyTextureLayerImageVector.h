@@ -4,10 +4,6 @@
 #pragma once
 
 #include "LayerStack/OdysseyTextureLayer.h"
-#include "Image/OdysseyBlendingMode.h"
-#include "Misc/TransactionObjectEvent.h"
-#include "Misc/ITransaction.h"
-#include "Misc/ITransactionObjectAnnotation.h"
 
 #include <ULIS>
 
@@ -22,24 +18,6 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
     : public UOdysseyTextureLayer
 {
     GENERATED_BODY()
-
-    public:
-        /**
-         * @brief Delegate called when something changed the result of RenderImage()
-         * 
-         */
-        DECLARE_MULTICAST_DELEGATE_OneParam(FOnBlendModeChanged, UOdysseyTextureLayerImageVector*)
-
-        /**
-         * @brief Delegate called when something changed the result of RenderImage()
-         * 
-         */
-        DECLARE_MULTICAST_DELEGATE_OneParam(FOnOpacityChanged, UOdysseyTextureLayerImageVector*)
-
-    public:
-        static FOnBlendModeChanged& OnBlendModeChanged();
-        static FOnOpacityChanged& OnOpacityChanged();
-
 
     private:
         // handle to a callback to refresh the layer when a property of an object's details view is changed
@@ -72,8 +50,6 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
 
         FOdysseyVectorEngine* GetEngine();
  
-        void OpacityChanged();
-        void BlendModeChanged();
         void IsWireframeChanged();
         void IsColoredChanged();
         void Serialize(FArchive& Ar);
@@ -83,11 +59,9 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
 
     public:
         //FOdysseyImageRenderingAbility overrides
-        virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-        virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const override;
-        virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
-        virtual float GetImageRenderingOpacity() const override;
-
+        virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
+        virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0) const override;
+        
     private:
         void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
 
@@ -102,10 +76,4 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
 
         UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Texture | LayerStack")
         bool IsColored = true;
-
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Texture | LayerStack")
-	    EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
-
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Texture | LayerStack")
-        float Opacity = 1.0f;
 };

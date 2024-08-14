@@ -23,20 +23,6 @@
 
 #define LOCTEXT_NAMESPACE "Animation"
 
-UOdysseyAnimationLayerImageRaster::FOnBlendModeChanged&
-UOdysseyAnimationLayerImageRaster::OnBlendModeChanged()
-{
-    static FOnBlendModeChanged onBlendModeChanged;
-    return onBlendModeChanged;
-}
-
-UOdysseyAnimationLayerImageRaster::FOnOpacityChanged&
-UOdysseyAnimationLayerImageRaster::OnOpacityChanged()
-{
-    static FOnOpacityChanged onOpacityChanged;
-    return onOpacityChanged;
-}
-
 UOdysseyAnimationLayerImageRaster::~UOdysseyAnimationLayerImageRaster()
 {
 }
@@ -159,8 +145,8 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
                         renderer->Init();
 
                         FOdysseyImageRendererBlendParams params(iBlock, { rect });
-                        params.mBlendMode = layer->GetImageRenderingBlendMode();
-                        params.mOpacity = layer->GetImageRenderingOpacity();
+                        params.mBlendMode = (::ULIS::eBlendMode)layer->BlendMode;
+                        params.mOpacity = layer->Opacity;
                         lastEvent = renderer->Blend(params, lastEvent);
                     }
 
@@ -182,38 +168,11 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 }
 
 void
-UOdysseyAnimationLayerImageRaster::OpacityChanged()
-{
-    OnOpacityChanged().Broadcast(this);
-
-    ImageRenderingChanged();
-}
-
-void
-UOdysseyAnimationLayerImageRaster::BlendModeChanged()
-{
-    OnBlendModeChanged().Broadcast(this);
-    
-    ImageRenderingChanged();
-}
-
-void
 UOdysseyAnimationLayerImageRaster::OnCellsChanged()
 {
     //OnCellsChanged().Broadcast(this);
     ImageRenderingCompositionChanged();
     UOdysseyLayer::OnMediaChanged().Broadcast();
-}
-
-void
-UOdysseyAnimationLayerImageRaster::PropertyChanged(const FName& iPropertyName)
-{
-    Super::PropertyChanged(iPropertyName);
-
-    if (iPropertyName == "BlendMode")
-        BlendModeChanged();
-    if (iPropertyName == "Opacity")
-        OpacityChanged();
 }
 
 TSharedPtr<FOdysseyAnimationCell>
@@ -315,18 +274,6 @@ UOdysseyAnimationLayerImageRaster::GetImageRenderingComposition(IOdysseyImageRen
     }
 
     return idComposition;
-}
-
-::ULIS::eBlendMode
-UOdysseyAnimationLayerImageRaster::GetImageRenderingBlendMode() const
-{
-    return (::ULIS::eBlendMode)BlendMode;
-}
-
-float
-UOdysseyAnimationLayerImageRaster::GetImageRenderingOpacity() const
-{
-    return Opacity;
 }
 
 TSharedPtr<IOdysseyMedia>

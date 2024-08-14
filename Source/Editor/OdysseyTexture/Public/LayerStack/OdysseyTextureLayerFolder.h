@@ -4,8 +4,6 @@
 #pragma once
 
 #include "LayerStack/OdysseyTextureLayer.h"
-#include "Image/OdysseyBlendingMode.h"
-
 #include "OdysseyTextureLayerFolder.generated.h"
 
 UCLASS(BlueprintType)
@@ -13,23 +11,6 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerFolder
     : public UOdysseyTextureLayer
 {
     GENERATED_BODY()
-
-public:
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     * 
-     */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnBlendModeChanged, UOdysseyTextureLayerFolder*)
-
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     * 
-     */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnOpacityChanged, UOdysseyTextureLayerFolder*)
-
-public:
-    static FOnBlendModeChanged& OnBlendModeChanged();
-    static FOnOpacityChanged& OnOpacityChanged();
 
 public:
     UOdysseyTextureLayerFolder();
@@ -52,22 +33,4 @@ public:
      * @return TSet<UClass*> 
      */
     virtual TSet<UClass*> GetMergeLayerTypesFromTypes(TSet<UClass*> iLayerTypes) const override;
-
-    virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
-
-    virtual float GetImageRenderingOpacity() const override;
-
-private:
-    //Property changed methods
-    void OpacityChanged();
-    void BlendModeChanged();
-
-    virtual void PropertyChanged(const FName& iPropertyName) override;
-
-public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Texture | LayerStack")
-	EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Texture | LayerStack")
-    float Opacity = 1.0f;
 };

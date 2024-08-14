@@ -6,6 +6,8 @@
 #include "CoreMinimal.h"
 #include "OdysseyPerformanceMode.h"
 #include "OdysseyMediaProvider.h"
+#include "Image/OdysseyBlendingMode.h"
+#include "OdysseyImageRenderingAbility.h"
 #include "OdysseyLayer.generated.h"
 
 class UOdysseyLayerStack;
@@ -20,6 +22,7 @@ enum  class  EGetLayerChildrenMethod : uint8
 UCLASS(Abstract, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYLAYERSTACK_API UOdysseyLayer
 	: public UObject
+	, public FOdysseyImageRenderingAbility
 {
     GENERATED_BODY()
 
@@ -64,6 +67,18 @@ public:
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnChildrenChanged, UOdysseyLayer*);
 
+    /**
+     * @brief Delegate called when something changed the result of RenderImage()
+     * 
+     */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnBlendModeChanged, UOdysseyLayer*)
+
+    /**
+     * @brief Delegate called when something changed the result of RenderImage()
+     * 
+     */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnOpacityChanged, UOdysseyLayer*)
+
 
 public:
     static FOnNameChanged& OnNameChanged();
@@ -74,6 +89,8 @@ public:
     static FOnParentChanged& OnParentChanged();
     static FOnChildrenChanged& OnChildrenChanged();
     static FSimpleMulticastDelegate& OnMediaChanged();
+    static FOnBlendModeChanged& OnBlendModeChanged();
+    static FOnOpacityChanged& OnOpacityChanged();
     
 public:
     // Events
@@ -195,6 +212,8 @@ protected:
     virtual void DisplayOptionsChanged();
     virtual void ParentChanged();
     virtual void ChildrenChanged();
+    virtual void OpacityChanged();
+    virtual void BlendModeChanged();
 
     virtual void PropertyChanged(const FName& iPropertyName);
 
@@ -224,8 +243,11 @@ public:
     UPROPERTY(EditDefaultsOnly, Category="Layer")
 	bool CanHaveChildren = false;
 
-protected:
-    //Instance properties (protected)
+    UPROPERTY()
+    UOdysseyLayer* Parent;
+
+    UPROPERTY()
+    TArray<UOdysseyLayer*> Children;
 
 public:
     //Instance properties
@@ -244,9 +266,9 @@ public:
     UPROPERTY(BlueprintReadWrite, Category="LayerStack|Layer")
     bool DisplayOptions = true;
 
-    UPROPERTY()
-    UOdysseyLayer* Parent;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Odyssey | LayerStack")
+	EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
 
-    UPROPERTY()
-    TArray<UOdysseyLayer*> Children;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Odyssey | LayerStack")
+    float Opacity = 1.0f;
 };

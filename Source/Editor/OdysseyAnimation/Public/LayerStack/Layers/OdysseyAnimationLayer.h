@@ -7,7 +7,6 @@
 
 #include "UObject/OdysseyObjectPropertyTracker.h"
 #include "Misc/OdysseyHandle.h"
-#include "OdysseyAnimationImageRenderingAbility.h"
 #include <ULIS>
 
 #include "OdysseyAnimationLayer.generated.h"
@@ -28,7 +27,6 @@ enum class EOdysseyAnimationLayerImagePostBehaviour : uint8
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayer
     : public UOdysseyLayer
-    , public FOdysseyAnimationImageRenderingAbility
 {
     GENERATED_BODY()
 

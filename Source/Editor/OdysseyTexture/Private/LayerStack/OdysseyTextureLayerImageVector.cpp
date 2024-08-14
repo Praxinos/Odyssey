@@ -23,20 +23,6 @@
 
 #define LOCTEXT_NAMESPACE "Texture"
 
-UOdysseyTextureLayerImageVector::FOnBlendModeChanged&
-UOdysseyTextureLayerImageVector::OnBlendModeChanged()
-{
-    static FOnBlendModeChanged onBlendModeChanged;
-    return onBlendModeChanged;
-}
-
-UOdysseyTextureLayerImageVector::FOnOpacityChanged&
-UOdysseyTextureLayerImageVector::OnOpacityChanged()
-{
-    static FOnOpacityChanged onOpacityChanged;
-    return onOpacityChanged;
-}
-
 UOdysseyTextureLayerImageVector::~UOdysseyTextureLayerImageVector()
 {
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
@@ -217,10 +203,6 @@ UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName)
         IsWireframeChanged();
     if(iPropertyName == "IsColored")
         IsColoredChanged();
-    if (iPropertyName == "BlendMode")
-        BlendModeChanged();
-    if (iPropertyName == "Opacity")
-        OpacityChanged();
 }
 
 void
@@ -243,24 +225,8 @@ UOdysseyTextureLayerImageVector::IsColoredChanged()
     ImageRenderingChanged();
 }
 
-void
-UOdysseyTextureLayerImageVector::OpacityChanged()
-{
-    OnOpacityChanged().Broadcast(this);
-    
-    ImageRenderingChanged();
-}
-
-void
-UOdysseyTextureLayerImageVector::BlendModeChanged()
-{
-    OnBlendModeChanged().Broadcast(this);
-    
-    ImageRenderingChanged();
-}
-
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyTextureLayerImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter) const
+UOdysseyTextureLayerImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
@@ -269,21 +235,9 @@ UOdysseyTextureLayerImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRend
 }
 
 TArray<FGuid>
-UOdysseyTextureLayerImageVector::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const
+UOdysseyTextureLayerImageVector::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
 {
     return { GetImageRenderingId() };
-}
-
-::ULIS::eBlendMode
-UOdysseyTextureLayerImageVector::GetImageRenderingBlendMode() const
-{
-    return (::ULIS::eBlendMode)BlendMode;
-}
-
-float
-UOdysseyTextureLayerImageVector::GetImageRenderingOpacity() const
-{
-    return Opacity;
 }
 
 void

@@ -15,6 +15,4 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayerRoot
 
 public:
     UOdysseyAnimationLayerRoot();
-
-    virtual TSharedPtr<FOdysseyAnimationCellsContainer> GetCellsContainer() const override { return nullptr; }
 };

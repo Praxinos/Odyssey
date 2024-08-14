@@ -94,7 +94,7 @@ FOdysseyTextureEditorRasterPaintBucketToolSourceProvider::GetForegroundLayersBlo
 		}
 	);
 
-	TSharedPtr<IOdysseyImageRenderer> renderer = layerStack->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, filter);
+	TSharedPtr<IOdysseyImageRenderer> renderer = layerStack->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0, filter);
 	if (!renderer)
 		return nullptr;
 
@@ -131,7 +131,7 @@ FOdysseyTextureEditorRasterPaintBucketToolSourceProvider::GetBackgroundLayersBlo
 		}
 	);
 
-	TSharedPtr<IOdysseyImageRenderer> renderer = layerStack->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, filter);
+	TSharedPtr<IOdysseyImageRenderer> renderer = layerStack->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0, filter);
 	if (!renderer)
 		return nullptr;
 

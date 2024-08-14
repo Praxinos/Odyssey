@@ -10,7 +10,7 @@
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "BaseMediaSource.h"
 #include "OdysseyAnimationProxy.h"
-#include "OdysseyAnimationImageRenderingAbility.h"
+#include "OdysseyImageRenderingAbility.h"
 #include <ULIS>
 
 #include "OdysseyAnimation.generated.h"
@@ -18,7 +18,7 @@
 UCLASS(config=EditorPerProjectUserSettings, PerObjectConfig, HideCategories=(Platforms))
 class ODYSSEYANIMATION_API UOdysseyAnimation
 	: public UBaseMediaSource
-    , public FOdysseyAnimationImageRenderingAbility
+    , public FOdysseyImageRenderingAbility
 	//, public FTickableEditorObject //Allows us to react to Tick events
 {
 	GENERATED_BODY()

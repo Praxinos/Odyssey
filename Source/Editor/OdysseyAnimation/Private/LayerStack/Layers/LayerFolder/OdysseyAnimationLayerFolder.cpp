@@ -2,28 +2,10 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.h"
-#include "LayerStack/OdysseyAnimationLayerStack.h"
-#include "OdysseyPixelFormat.h"
+#include "OdysseyLayerStack.h"
 #include "EditorStyleSet.h"
-#include "ULISEventBuilder.h"
-#include "ULISLoaderModule.h"
-#include "ULISUtils.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
-
-UOdysseyAnimationLayerFolder::FOnBlendModeChanged&
-UOdysseyAnimationLayerFolder::OnBlendModeChanged()
-{
-    static FOnBlendModeChanged onBlendModeChanged;
-    return onBlendModeChanged;
-}
-
-UOdysseyAnimationLayerFolder::FOnOpacityChanged&
-UOdysseyAnimationLayerFolder::OnOpacityChanged()
-{
-    static FOnOpacityChanged onOpacityChanged;
-    return onOpacityChanged;
-}
 
 UOdysseyAnimationLayerFolder::UOdysseyAnimationLayerFolder()
 {
@@ -61,45 +43,6 @@ UOdysseyAnimationLayerFolder::GetMergeLayerTypesFromTypes(TSet<UClass*> iLayerTy
     }
 
     return types;
-}
-
-void
-UOdysseyAnimationLayerFolder::OpacityChanged()
-{
-    OnOpacityChanged().Broadcast(this);
-
-    ImageRenderingChanged();
-}
-
-void
-UOdysseyAnimationLayerFolder::BlendModeChanged()
-{
-    OnBlendModeChanged().Broadcast(this);
-
-    ImageRenderingChanged();
-}
-
-void
-UOdysseyAnimationLayerFolder::PropertyChanged(const FName& iPropertyName)
-{
-    Super::PropertyChanged(iPropertyName);
-
-    if (iPropertyName == "BlendMode")
-        BlendModeChanged();
-    if (iPropertyName == "Opacity")
-        OpacityChanged();
-}
-
-::ULIS::eBlendMode
-UOdysseyAnimationLayerFolder::GetImageRenderingBlendMode() const
-{
-    return (::ULIS::eBlendMode)BlendMode;
-}
-
-float
-UOdysseyAnimationLayerFolder::GetImageRenderingOpacity() const
-{
-    return Opacity;
 }
 
 #undef LOCTEXT_NAMESPACE

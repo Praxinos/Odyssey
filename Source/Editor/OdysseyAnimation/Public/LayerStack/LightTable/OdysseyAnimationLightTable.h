@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyAnimationImageRenderingAbility.h"
+#include "OdysseyImageRenderingAbility.h"
 
 #include "OdysseyAnimationLightTable.generated.h"
 
@@ -28,7 +28,7 @@ class UOdysseyAnimationLayer;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationLightTable
     : public TSharedFromThis<FOdysseyAnimationLightTable>
-    , public FOdysseyAnimationImageRenderingAbility
+    , public FOdysseyImageRenderingAbility
 {
 public:
     virtual ~FOdysseyAnimationLightTable();

@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include "OdysseyAnimationImageRenderingAbility.h"
+#include "OdysseyImageRenderingAbility.h"
 #include "OdysseyMediaProvider.h"
 
 class UOdysseyAnimationLayer;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCell
     : public TSharedFromThis<FOdysseyAnimationCell>
-    , public FOdysseyAnimationImageRenderingAbility
+    , public FOdysseyImageRenderingAbility
 {
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnOutOfPegsChanged, bool /*iIsInteractive*/)
 

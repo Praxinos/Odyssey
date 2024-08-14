@@ -20,8 +20,8 @@ FOdysseyAnimationLayerImageRenderer::FOdysseyAnimationLayerImageRenderer(const U
 
         FChildData data;
         data.mRenderer = child->BuildImageRenderer(iRenderType, iFrame, iFilter);
-        data.mBlendMode = child->GetImageRenderingBlendMode();
-        data.mOpacity = child->GetImageRenderingOpacity();
+        data.mBlendMode = (::ULIS::eBlendMode)child->BlendMode;
+        data.mOpacity = child->Opacity;
 
         if (!data.mRenderer)
             continue;

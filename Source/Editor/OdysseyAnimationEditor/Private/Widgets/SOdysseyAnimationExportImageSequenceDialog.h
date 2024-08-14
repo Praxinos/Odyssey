@@ -9,7 +9,7 @@
 #include "SOdysseyAnimationExportImageSequenceDialog.generated.h"
 
 class UOdysseyAnimation;
-class FOdysseyAnimationImageRenderingAbility;
+class FOdysseyImageRenderingAbility;
 
 UENUM()
 enum class EOdysseyAnimationExportImageSequenceFormat : uint8
@@ -63,7 +63,7 @@ private:
 
 	struct FSource
 	{
-		FOdysseyAnimationImageRenderingAbility* mImageRenderingAbility;
+		FOdysseyImageRenderingAbility* mImageRenderingAbility;
 		FString mFilename;
 		FInt32Range mRange;
 	};

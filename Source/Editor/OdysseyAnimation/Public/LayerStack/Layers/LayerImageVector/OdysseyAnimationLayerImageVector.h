@@ -25,25 +25,11 @@ public:
      * @brief Delegate called when something changed the result of RenderImage()
      * 
      */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnBlendModeChanged, UOdysseyAnimationLayerImageVector*)
-
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     * 
-     */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnOpacityChanged, UOdysseyAnimationLayerImageVector*)
-
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     * 
-     */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsColoredChanged, UOdysseyAnimationLayerImageVector*)
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsWireframeChanged, UOdysseyAnimationLayerImageVector*)
 
 
 public:
-    static FOnBlendModeChanged& OnBlendModeChanged();
-    static FOnOpacityChanged& OnOpacityChanged();
     static FOnIsColoredChanged& OnIsColoredChanged();
     static FOnIsColoredChanged& OnIsWireframeChanged();
 
@@ -80,14 +66,10 @@ public:
 	//FOdysseyImageRenderingAbility overrides
 	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
 	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
-    virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
-    virtual float GetImageRenderingOpacity() const override;
 
 protected:
     void IsColoredChanged();
     void IsWireframeChanged();
-    void OpacityChanged();
-    void BlendModeChanged();
     virtual void PropertyChanged(const FName& iPropertyName) override;
     
 private:
@@ -111,12 +93,6 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Animation | LayerStack")
     bool IsColored = true;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
-	EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
-    float Opacity = 1.0f;
 
 private:
     TSharedRef<FOdysseyAnimationCellsContainer> mCellsContainer;

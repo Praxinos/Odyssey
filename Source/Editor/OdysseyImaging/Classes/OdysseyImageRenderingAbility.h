@@ -43,22 +43,29 @@ public:
     //Called when some data of this object, related with image rendering changed interactively
     static FOnChanged& OnImageRenderingChangedDelegate();
 
-    //Called before OnChanged() is called, so that some part of ILIAD can react prior to other parts (ex: animation Proxy invalidation)
-    //FOnChanged& OnImageRenderingPreChanged();
-
-    //Called when some data of this object, related with image rendering changed interactively
-    //FOnChanged& OnImageRenderingChanged();
-
 public:
     FOdysseyImageRenderingAbility();
 
 public:
     void ImageRenderingChanged(bool iIsInteractive = false); //Changes the whole rect
     void ImageRenderingChanged(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive = false);
-    /*void ImageRenderingCommited(); //Changes the whole rect
-    void ImageRenderingCommited(const TArray<::ULIS::FRectI>& iRects); */
     void ImageRenderingCompositionChanged(bool iIsInteractive = false);
-    //void ImageRenderingCompositionCommited();
+
+public:
+    /**
+     * @brief Creates a renderer able to render an image at the specified frame
+     * This renderer is made to always render the same rendering composition
+     * For example : if you delete a layer, you should create a new renderer
+     * but if you are just drawing on the layer, you can reuse the renderer
+     */
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0, FImageRendererFilter iFilter = FImageRendererFilter()) const;
+
+    /**
+     * @brief Returns the full Render Image Id, eventually composed of underlying ids
+     *
+     * @return const FGuid&
+     */
+    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex = 0) const;
 
 public:
     /**

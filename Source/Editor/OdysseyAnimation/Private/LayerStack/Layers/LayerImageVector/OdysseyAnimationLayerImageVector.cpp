@@ -21,20 +21,6 @@
 
 #define LOCTEXT_NAMESPACE "Animation"
 
-UOdysseyAnimationLayerImageVector::FOnBlendModeChanged&
-UOdysseyAnimationLayerImageVector::OnBlendModeChanged()
-{
-    static FOnBlendModeChanged onBlendModeChanged;
-    return onBlendModeChanged;
-}
-
-UOdysseyAnimationLayerImageVector::FOnOpacityChanged&
-UOdysseyAnimationLayerImageVector::OnOpacityChanged()
-{
-    static FOnOpacityChanged onOpacityChanged;
-    return onOpacityChanged;
-}
-
 UOdysseyAnimationLayerImageVector::FOnIsColoredChanged&
 UOdysseyAnimationLayerImageVector::OnIsColoredChanged()
 {
@@ -103,22 +89,6 @@ UOdysseyAnimationLayerImageVector::IsWireframeChanged()
 }
 
 void
-UOdysseyAnimationLayerImageVector::OpacityChanged()
-{
-    OnOpacityChanged().Broadcast(this);
-
-    ImageRenderingChanged();
-}
-
-void
-UOdysseyAnimationLayerImageVector::BlendModeChanged()
-{
-    OnBlendModeChanged().Broadcast(this);
-    
-    ImageRenderingChanged();
-}
-
-void
 UOdysseyAnimationLayerImageVector::OnCellsChanged()
 {
     //OnCellsChanged().Broadcast(this);
@@ -135,10 +105,6 @@ UOdysseyAnimationLayerImageVector::PropertyChanged(const FName& iPropertyName)
         IsColoredChanged();
     if(iPropertyName == "IsWireframe")
         IsWireframeChanged();
-    if (iPropertyName == "BlendMode")
-        BlendModeChanged();
-    if (iPropertyName == "Opacity")
-        OpacityChanged();
 }
 
 TSharedPtr<FOdysseyAnimationCell>
@@ -251,18 +217,6 @@ UOdysseyAnimationLayerImageVector::GetImageRenderingComposition(IOdysseyImageRen
     }
 
     return idComposition;
-}
-
-::ULIS::eBlendMode
-UOdysseyAnimationLayerImageVector::GetImageRenderingBlendMode() const
-{
-    return (::ULIS::eBlendMode)BlendMode;
-}
-
-float
-UOdysseyAnimationLayerImageVector::GetImageRenderingOpacity() const
-{
-    return Opacity;
 }
 
 TSharedPtr<IOdysseyMedia>

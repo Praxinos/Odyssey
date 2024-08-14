@@ -20,9 +20,9 @@ FOdysseyTextureLayerImageRenderer::FOdysseyTextureLayerImageRenderer(const UOdys
             continue;
 
         FChildData data;
-        data.mRenderer = child->BuildImageRenderer(iRenderType, iFilter);
-        data.mBlendMode = child->GetImageRenderingBlendMode();
-        data.mOpacity = child->GetImageRenderingOpacity();
+        data.mRenderer = child->BuildImageRenderer(iRenderType, 0, iFilter);
+        data.mBlendMode = (::ULIS::eBlendMode)child->BlendMode;
+        data.mOpacity = child->Opacity;
 
         if (!data.mRenderer)
             continue;

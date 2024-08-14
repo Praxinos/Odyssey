@@ -91,3 +91,17 @@ FOdysseyImageRenderingAbility::GetImageRenderingId() const
 {
     return mImageRenderingId;
 }
+
+TSharedPtr<IOdysseyImageRenderer>
+FOdysseyImageRenderingAbility::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+{
+    check(false); //If you need it, override it in your class
+    return nullptr;
+}
+
+TArray<FGuid>
+FOdysseyImageRenderingAbility::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+{
+    check(false); //If you need it, override it in your class
+    return {};
+}

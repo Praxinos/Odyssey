@@ -124,7 +124,7 @@ protected:
     void OnLayerDisplayChildrenChanged(UOdysseyLayer* iLayer);
 
     /**
-     * @brief The layer's IsCollapsed property changes
+     * @brief The layer's DisplayOptions property changes
      * 
      * @param iLayer 
      */

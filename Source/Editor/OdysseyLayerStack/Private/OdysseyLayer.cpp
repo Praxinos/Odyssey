@@ -63,6 +63,20 @@ UOdysseyLayer::OnMediaChanged()
     return onMediaChanged;
 }
 
+UOdysseyLayer::FOnBlendModeChanged&
+UOdysseyLayer::OnBlendModeChanged()
+{
+    static FOnBlendModeChanged onBlendModeChanged;
+    return onBlendModeChanged;
+}
+
+UOdysseyLayer::FOnOpacityChanged&
+UOdysseyLayer::OnOpacityChanged()
+{
+    static FOnOpacityChanged onOpacityChanged;
+    return onOpacityChanged;
+}
+
 UOdysseyLayer*
 UOdysseyLayer::GetParent() const
 {
@@ -205,6 +219,22 @@ UOdysseyLayer::ChildrenChanged()
 }
 
 void
+UOdysseyLayer::OpacityChanged()
+{
+    OnOpacityChanged().Broadcast(this);
+
+    ImageRenderingChanged();
+}
+
+void
+UOdysseyLayer::BlendModeChanged()
+{
+    OnBlendModeChanged().Broadcast(this);
+
+    ImageRenderingChanged();
+}
+
+void
 UOdysseyLayer::PropertyChanged(const FName& iPropertyName)
 {
     if ( iPropertyName == "Name" )
@@ -221,6 +251,10 @@ UOdysseyLayer::PropertyChanged(const FName& iPropertyName)
         ParentChanged();
     if ( iPropertyName == "Children" )
         ChildrenChanged();
+    if (iPropertyName == "BlendMode")
+        BlendModeChanged();
+    if (iPropertyName == "Opacity")
+        OpacityChanged();
 }
 
 void

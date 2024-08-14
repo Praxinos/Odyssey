@@ -10,7 +10,7 @@ FOdysseyTextureLayerStackImageRenderer::FOdysseyTextureLayerStackImageRenderer(c
     , mLayerRootRenderer(nullptr)
 {
     UOdysseyTextureLayer* layerRoot = Cast<UOdysseyTextureLayer>(iLayerStack->LayerRoot);
-    mLayerRootRenderer = layerRoot->BuildImageRenderer(iRenderType, iFilter);
+    mLayerRootRenderer = layerRoot->BuildImageRenderer(iRenderType, 0, iFilter);
 }
 
 void
