@@ -9,13 +9,12 @@
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"
 
-FOdysseyAnimationCellImageRasterImageRenderer::FOdysseyAnimationCellImageRasterImageRenderer(TSharedRef<const FOdysseyAnimationCellImageRaster> iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
+FOdysseyAnimationCellImageRasterImageRenderer::FOdysseyAnimationCellImageRasterImageRenderer(UOdysseyAnimationCellImageRaster* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mCell(iCell)
     , mBlock(nullptr)
 {
-    UOdysseyAnimationLayer* layer = mCell->GetLayer();
-    UOdysseyAnimation* animation = layer->GetAnimation();
+    UOdysseyAnimation* animation = mCell->GetAnimation();
 
     FVector2D outOfPegsPan = mCell->OutOfPegsPan();
     float outOfPegsRotation = mCell->OutOfPegsRotation();

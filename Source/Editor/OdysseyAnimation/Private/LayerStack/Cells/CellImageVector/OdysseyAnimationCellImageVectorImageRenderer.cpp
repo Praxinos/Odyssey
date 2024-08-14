@@ -15,7 +15,7 @@
 
 static FCriticalSection mEngineMutex;
 
-FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorImageRenderer(TSharedRef<const FOdysseyAnimationCellImageVector> iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
+FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorImageRenderer(UOdysseyAnimationCellImageVector* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mCell(iCell)
     , mBlock(nullptr)
@@ -31,8 +31,8 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
         UOdysseyLayerStack* layerStack = layer->GetLayerStack();
         if (animation && layerStack)
         {
-            TSharedPtr<FOdysseyAnimationCell> cell = layer->GetCellsContainer()->GetCellAtFrame(animation->CurrentFrame);
-            int frame = layer->GetCellsContainer()->GetCellFrameAtFrame(animation->CurrentFrame);
+            UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
+            int frame = layer->GetCellFrameAtFrame(animation->CurrentFrame);
 
             mRenderHUD = cell == mCell && frame == iFrame && layerStack->CurrentLayer.Get() == layer;
         }
@@ -62,7 +62,6 @@ void
 FOdysseyAnimationCellImageVectorImageRenderer::Init()
 {
     TSharedPtr<FOdysseyVectorBlock> vectorBlock = mCell->GetVectorBlock();
-
 
     if (vectorBlock)
     {

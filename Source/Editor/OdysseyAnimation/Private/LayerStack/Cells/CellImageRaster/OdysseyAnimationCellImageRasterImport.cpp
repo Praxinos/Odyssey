@@ -4,7 +4,7 @@
 #include "OdysseyRasterBlock.h"
 
 bool
-FOdysseyAnimationCellImageRasterImport::Read( FOdysseyAnimationCellImageRaster* iAnimationCellImageRaster
+FOdysseyAnimationCellImageRasterImport::Read( UOdysseyAnimationCellImageRaster* iAnimationCellImageRaster
                                             , FArchive &Ar )
 {
     uint64 start = Ar.Tell();
@@ -36,7 +36,7 @@ FOdysseyAnimationCellImageRasterImport::Read( FOdysseyAnimationCellImageRaster* 
 }
 
 void
-FOdysseyAnimationCellImageRasterImport::Read( FOdysseyAnimationCellImageRaster* iAnimationCellImageRaster
+FOdysseyAnimationCellImageRasterImport::Read( UOdysseyAnimationCellImageRaster* iAnimationCellImageRaster
                                             , FArchive &Ar
                                             , uint64 iChunkEnd )
 {

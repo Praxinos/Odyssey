@@ -8,58 +8,10 @@
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
-#include "Misc/OdysseyDuplicate.h"
-
-TSharedRef<FOdysseyAnimationCellImageStagger>
-FOdysseyAnimationCellImageStagger::Create(UOdysseyAnimationLayer* iLayer, int iLength)
-{
-    TSharedRef<FOdysseyAnimationCellImageStagger> cell = MakeShared<FOdysseyAnimationCellImageStagger>(iLayer, iLength);
-    cell->Init();
-    return cell;
-}
-
-const FName&
-FOdysseyAnimationCellImageStagger::StaticType()
-{
-    static FName type = TEXT("FOdysseyAnimationCellImageStagger");
-    return type;
-}
-
-FOdysseyAnimationCellImageStagger::~FOdysseyAnimationCellImageStagger()
-{
-}
-
-FOdysseyAnimationCellImageStagger::FOdysseyAnimationCellImageStagger(UOdysseyAnimationLayer* iLayer, int iLength)
-    : FOdysseyAnimationCell(iLength, iLayer)
-    , mBehaviour(eBehaviour::Loop)
-    , mReach(0) // <= 0 is Infinite reach
-{
-}
-
 void
-FOdysseyAnimationCellImageStagger::Init()
+FOdysseyAnimationCellImageStagger::OldSerialize(FArchive& Ar)
 {
-}
-
-TSharedPtr<FOdysseyAnimationCell>
-FOdysseyAnimationCellImageStagger::Clone(UOdysseyAnimationLayer* iLayer, int iLength) const
-{
-    TSharedPtr<FOdysseyAnimationCellImageStagger> cloneCell = MakeShared<FOdysseyAnimationCellImageStagger>(iLayer, 1);
-    ::Odyssey::Duplicate(const_cast<FOdysseyAnimationCellImageStagger*>(this), cloneCell.Get());
-    cloneCell->mLength = iLength;
-    return cloneCell;
-}
-
-const FName&
-FOdysseyAnimationCellImageStagger::GetType() const
-{
-    return StaticType();
-}
-
-void
-FOdysseyAnimationCellImageStagger::Serialize(FArchive& Ar)
-{
-    FOdysseyAnimationCell::Serialize(Ar);
+    Super::OldSerialize(Ar);
 
     if( Ar.IsSaving() )
     {
@@ -87,16 +39,11 @@ FOdysseyAnimationCellImageStagger::BuildImageRenderer(IOdysseyImageRenderer::eRe
 int
 FOdysseyAnimationCellImageStagger::GetStaggerFrame(int iFrameIndex) const
 {
-    int cellStartFrame = GetLayer()->GetCellsContainer()->GetCellFrame(SharedThis(this));
-    if (cellStartFrame == INDEX_NONE)
+	FInt32Range frameRange = GetFrameRange();
+    if (frameRange.IsEmpty())
         return INDEX_NONE;
 
-    int cellIndex = GetLayer()->GetCellsContainer()->GetCellIndex(SharedThis(this));
-    if (cellIndex == INDEX_NONE || cellIndex == 0)
-        return INDEX_NONE;
-
-    FInt32Range frameRange = GetLayer()->GetFrameRange();
-
+    int cellStartFrame = frameRange.GetLowerBoundValue();
     int frame = INDEX_NONE;
     switch(mBehaviour)
     {
@@ -132,7 +79,7 @@ FOdysseyAnimationCellImageStagger::GetStaggerFrame(int iFrameIndex) const
             break;;
     }
     
-    if (!GetLayer()->GetCellsContainer()->HasCellAtFrame(frame))
+    if (!GetLayer()->HasCellAtFrame(frame))
         return INDEX_NONE;
 
     return frame;
@@ -153,20 +100,19 @@ FOdysseyAnimationCellImageStagger::GetBehaviour() const
 TSharedPtr<FOdysseyAnimationCell>
 FOdysseyAnimationCellImageStagger::GetReferenceCellAtFrame(int iFrameIndex, int* oCellFrameIndex) const
 {
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = GetLayer()->GetCellsContainer();
-    if (!cellsContainer)
-        return nullptr;
+	if (!GetLayer())
+		return nullptr;
 
     int frame = GetStaggerFrame(iFrameIndex);
     if (frame == INDEX_NONE)
         return nullptr;
 
-    TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame(frame);
+    TSharedPtr<FOdysseyAnimationCell> cell = GetLayer()->GetCellAtFrame(frame);
     if (!cell)
         return nullptr;
 
     if (oCellFrameIndex)
-        *oCellFrameIndex = cellsContainer->GetCellFrameAtFrame(frame);
+        *oCellFrameIndex = GetLayer()->GetCellFrameAtFrame(frame);
 
     return cell;
 }
@@ -190,15 +136,4 @@ TArray<::ULIS::FRectI>
 FOdysseyAnimationCellImageStagger::GetImageRenderingRects() const
 {
     return GetLayer()->GetImageRenderingRects();
-}
-
-TSharedPtr<FOdysseyAnimationCell>
-FOdysseyAnimationCellImageStagger::CreateCellFromFrame(uint32 iFrameIndex) const
-{
-    int cellFrameIndex = INDEX_NONE;
-    TSharedPtr<FOdysseyAnimationCell> cell = GetReferenceCellAtFrame(iFrameIndex, &cellFrameIndex);
-    if (!cell)
-        return nullptr;
-
-    return cell->CreateCellFromFrame(cellFrameIndex);
 }

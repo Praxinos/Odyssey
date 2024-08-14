@@ -13,7 +13,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellImageStaggerImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationCellImageStaggerImageRenderer(TSharedRef<const FOdysseyAnimationCellImageStagger> iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
+    FOdysseyAnimationCellImageStaggerImageRenderer(UOdysseyAnimationCellImageStagger* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
 
 public:
     virtual void Init() override;

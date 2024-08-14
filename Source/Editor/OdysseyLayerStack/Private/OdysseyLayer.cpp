@@ -156,11 +156,6 @@ UOdysseyLayer::GetLayerStack() const
 }
 
 void
-UOdysseyLayer::OnCreated_Implementation()
-{
-}
-
-void
 UOdysseyLayer::Merge(const TArray<UOdysseyLayer*>& Layers)
 {
 }
@@ -174,6 +169,7 @@ UOdysseyLayer::NameChanged()
 void
 UOdysseyLayer::IsActivatedChanged()
 {
+	ImageRenderingCompositionChanged();
     OnIsActivatedChanged().Broadcast(this);
 }
 
@@ -198,31 +194,20 @@ UOdysseyLayer::DisplayOptionsChanged()
 void
 UOdysseyLayer::ParentChanged()
 {
-    UOdysseyLayerStack* layerStack = GetLayerStack();
-    if ( !layerStack )
-        return;
-
     OnParentChanged().Broadcast(this);
-    layerStack->HierarchyChanged();
 }
 
 void
 UOdysseyLayer::ChildrenChanged()
 {
+	ImageRenderingCompositionChanged();
     OnChildrenChanged().Broadcast(this);
-
-    UOdysseyLayerStack* layerStack = GetLayerStack();
-    if ( !layerStack )
-        return;
-
-    layerStack->HierarchyChanged();
 }
 
 void
 UOdysseyLayer::OpacityChanged()
 {
     OnOpacityChanged().Broadcast(this);
-
     ImageRenderingChanged();
 }
 
@@ -230,13 +215,15 @@ void
 UOdysseyLayer::BlendModeChanged()
 {
     OnBlendModeChanged().Broadcast(this);
-
     ImageRenderingChanged();
 }
 
 void
-UOdysseyLayer::PropertyChanged(const FName& iPropertyName)
+UOdysseyLayer::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
 {
+	if (iIsInteractive)
+		return;
+
     if ( iPropertyName == "Name" )
         NameChanged();
     if ( iPropertyName == "IsActivated" )
@@ -261,11 +248,7 @@ void
 UOdysseyLayer::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
-    
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
-        return;
-
-    PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    PropertyChanged(PropertyChangedEvent.GetPropertyName(), PropertyChangedEvent.GetMemberPropertyName(), PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive );
 }
 
 void
@@ -279,7 +262,7 @@ UOdysseyLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
     const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
     for ( const FName& propertyName : changedPropertyNames )
     {
-        PropertyChanged(propertyName);
+        PropertyChanged(propertyName, propertyName, false);
     }
 }
 
@@ -315,4 +298,42 @@ UOdysseyLayer::GetIsLockedRecursively() const
     }
 
     return false;
+}
+
+TArray<FGuid>
+UOdysseyLayer::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
+{
+    TArray<FGuid> idComposition = { GetImageRenderingId() };
+
+    const TArray<UOdysseyLayer*>& children = GetChildren();
+    for (UOdysseyLayer* child : children)
+    {
+        if (!child->IsActivated)
+            continue;
+
+        idComposition.Append(child->GetImageRenderingComposition(iRenderType, iFrame));
+    }
+
+    return idComposition;
+}
+
+TArray<::ULIS::FRectI>
+UOdysseyLayer::GetImageRenderingRects() const
+{
+    UOdysseyLayerStack* layerStack = GetLayerStack();
+    if(!layerStack)
+        return {};
+
+    return layerStack->GetImageRenderingRects();
+}
+
+
+
+TSharedPtr<IOdysseyImageRenderer>
+UOdysseyLayer::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+{
+    if (iFilter.IsBound() && !iFilter.Execute(this))
+        return nullptr;
+    
+    return MakeShared<FOdysseyLayerImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }

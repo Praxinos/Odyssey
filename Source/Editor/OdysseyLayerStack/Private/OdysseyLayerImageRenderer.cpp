@@ -1,17 +1,16 @@
 // IDDN FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
-
-#include "OdysseyAnimationLayerImageRenderer.h"
+#include "OdysseyLayerImageRenderer.h"
 #include "OdysseyRectUtils.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "LayerStack/Layers/OdysseyLayer.h"
 
-FOdysseyAnimationLayerImageRenderer::FOdysseyAnimationLayerImageRenderer(const UOdysseyAnimationLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
+FOdysseyLayerImageRenderer::FOdysseyLayerImageRenderer(const UOdysseyLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
 {    
     const TArray<UOdysseyLayer*>& children = iLayer->GetChildren();
     for (int i = children.Num() - 1; i >= 0 ; i--)
     {
-        UOdysseyAnimationLayer* child = Cast<UOdysseyAnimationLayer>(children[i]);
+        UOdysseyLayer* child = children[i];
         if (!child)
             continue;
 
@@ -31,7 +30,7 @@ FOdysseyAnimationLayerImageRenderer::FOdysseyAnimationLayerImageRenderer(const U
 }
 
 void
-FOdysseyAnimationLayerImageRenderer::Init()
+FOdysseyLayerImageRenderer::Init()
 {
     for (const FChildData& childData : mChildrenData)
     {
@@ -40,7 +39,7 @@ FOdysseyAnimationLayerImageRenderer::Init()
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationLayerImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyLayerImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
     TArray<::ULIS::FEvent> events;
     for (const ::ULIS::FRectI& rect : iParams.mRects)
@@ -76,9 +75,9 @@ FOdysseyAnimationLayerImageRenderer::Blend(const FOdysseyImageRendererBlendParam
 }
 
 TArray<::ULIS::FEvent>
-FOdysseyAnimationLayerImageRenderer::Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
+FOdysseyLayerImageRenderer::Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
-    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationLayerImageRenderer::Copy);
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyLayerImageRenderer::Copy);
     TArray<::ULIS::FEvent> clearEvents = Clear(iParams.mBlock, iParams.mRects, iWaitList);
     TArray<::ULIS::FEvent> lastEvent = clearEvents;
     for (const FChildData& childData : mChildrenData)
@@ -92,11 +91,9 @@ FOdysseyAnimationLayerImageRenderer::Copy(const FOdysseyImageRendererCopyParams&
 }
 
 bool
-FOdysseyAnimationLayerImageRenderer::IsGameThreadOnly()
+FOdysseyLayerImageRenderer::IsGameThreadOnly()
 {
     for (const FChildData& childData : mChildrenData)
-    {
-        if (childData.mRenderer->IsGameThreadOnly())
             return true;
     }
     return false;

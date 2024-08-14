@@ -91,17 +91,6 @@ public:
     static FSimpleMulticastDelegate& OnMediaChanged();
     static FOnBlendModeChanged& OnBlendModeChanged();
     static FOnOpacityChanged& OnOpacityChanged();
-    
-public:
-    // Events
-
-    /**
-	 * @brief Called when the node has been created by the given LayerStack
-	 *
-	 */
-    UFUNCTION(BlueprintNativeEvent, Category = "LayerStack")
-    void OnCreated();
-    virtual void OnCreated_Implementation();
 
 public:
     // API
@@ -201,6 +190,10 @@ public:
     UFUNCTION(BlueprintPure, Category="LayerStack")
     bool GetIsLockedRecursively() const;
 
+public:
+	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
+	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
+	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const override;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
 
 protected:
@@ -215,7 +208,7 @@ protected:
     virtual void OpacityChanged();
     virtual void BlendModeChanged();
 
-    virtual void PropertyChanged(const FName& iPropertyName);
+    virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive);
 
 public:
     // UObject overrides

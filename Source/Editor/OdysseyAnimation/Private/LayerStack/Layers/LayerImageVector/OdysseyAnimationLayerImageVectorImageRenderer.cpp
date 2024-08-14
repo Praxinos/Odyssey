@@ -12,7 +12,7 @@ FOdysseyAnimationLayerImageVectorImageRenderer::FOdysseyAnimationLayerImageVecto
     , mCellRenderer(nullptr)
     , mBlendMode(::ULIS::eBlendMode(iLayer->BlendMode))
     , mOpacity(iLayer->Opacity) 
-    , mLightTableDisplayPosition(iLayer->GetLightTable()->GetDisplayPosition())
+    , mLightTableDisplayPosition(iLayer->LightTable->DisplayPosition)
 { 
     int frame = iFrame;
     FInt32Range frameRange = iLayer->GetFrameRange();
@@ -25,13 +25,17 @@ FOdysseyAnimationLayerImageVectorImageRenderer::FOdysseyAnimationLayerImageVecto
         frame = iLayer->GetPostBehaviourFrame(iLayer->PostBehaviour, iFrame);
     }
 
-    TSharedPtr<FOdysseyAnimationCell> cell = iLayer->GetCellsContainer()->GetCellAtFrame(frame);
-    int cellFrameIndex = iLayer->GetCellsContainer()->GetCellFrameAtFrame(frame);
-    if (cell && cellFrameIndex != INDEX_NONE)
-        mCellRenderer = cell->BuildImageRenderer(iRenderType, cellFrameIndex, iFilter);
+ 	int cellIndex = iLayer->GetCellIndexAtFrame(frame);
+	if (cellIndex != INDEX_NONE)
+	{
+		UOdysseyAnimationCell* cell = iLayer->Cells[cellIndex];
+		int cellFrame = iLayer->GetCellFrameAtFrame(frame);
+		if (cellFrame != INDEX_NONE)
+			mCellRenderer = cell->BuildImageRenderer(iRenderType, cellFrame, iFilter);
+	}
 
     if ( iRenderType == IOdysseyImageRenderer::eRenderType::Editor && iLayer->bIsLightTableActivated )
-        mLightTableRenderer = MakeShared<FOdysseyAnimationLightTableImageRenderer>(iLayer->GetLightTable().ToSharedRef(), iFrame, iRenderType, iDefaultRects, iFilter);
+        mLightTableRenderer = MakeShared<FOdysseyAnimationLightTableImageRenderer>(iLayer, iFrame, iRenderType, iDefaultRects, iFilter);
 }
     
 void

@@ -18,17 +18,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayer
 {
     GENERATED_BODY()
 
-protected:
-    virtual void IsActivatedChanged() override;
-    virtual void ChildrenChanged() override;
-
 public:
 	UFUNCTION(BlueprintPure, Category="Odyssey | LayerStack")
 	UTexture2D* GetTexture() const;
-
-public:
-	//FOdysseyImageRenderingAbility overrides
-	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0) const override;
-	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
 };

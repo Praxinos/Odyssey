@@ -4,41 +4,34 @@
 #pragma once
 
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+
+#include "OdysseyAnimationCellImageVector.generated.h"
 
 class FOdysseyVectorBlock;
 class FOdysseyMediaVector;
 class FOdysseyVectorEngine;
 class FOdysseyVectorGroupPaint;
+class UOdysseyAnimationLayerImageVector;
 
-class ODYSSEYANIMATION_API FOdysseyAnimationCellImageVector
-    : public FOdysseyAnimationCell
-{    
+UCLASS(BlueprintType)
+class ODYSSEYANIMATION_API UOdysseyAnimationCellImageVector
+    : public UOdysseyAnimationCell
+{
+	GENERATED_BODY()
+
 public:
-    static TSharedRef<FOdysseyAnimationCellImageVector> Create(UOdysseyAnimationLayerImageVector* iLayer, int iLength, int iWidth, int iHeight);
-    static const FName& StaticType();
+	virtual ~UOdysseyAnimationCellImageVector();
 
 public:
-    virtual ~FOdysseyAnimationCellImageVector();
-    FOdysseyAnimationCellImageVector(UOdysseyAnimationLayerImageVector* iLayer, int iLength);
-
-    void Init(int iWidth, int iHeight);
-    virtual TSharedPtr<FOdysseyAnimationCell> Clone(UOdysseyAnimationLayer* iLayer, int iLength) const override;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
-    virtual TSharedPtr<FOdysseyAnimationCell> CreateCellFromFrame(uint32 iFrameIndex) const override;
 
 public:
-    virtual const FName& GetType() const override;
-    virtual void Serialize(FArchive& Ar) override;
+	virtual void PostInitProperties() override;
     virtual void PostLoad() override;
         
     FOdysseyVectorEngine* GetEngine() const;
     TSharedPtr<FOdysseyVectorBlock> GetVectorBlock() const;
-    uint32 GetWidth();
-    uint32 GetHeight();
     FGuid GetVectorBlockId();
-    void SetWidth( uint32 iWidth );
-    void SetHeight( uint32 iHeight );
     void SetVectorBlockId( FGuid iVectorBlockID );
 
 public:
@@ -47,7 +40,6 @@ public:
     void OnIsColoredChanged(UOdysseyAnimationLayerImageVector* iLayer);
     void OnIsWireframeChanged(UOdysseyAnimationLayerImageVector* iLayer);
 
-
 public:
 	//FOdysseyImageRenderingAbility overrides
 	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
@@ -55,7 +47,6 @@ public:
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
     FCriticalSection* GetImageRenderingMutex() const;
     bool IsImageRenderingGameThreadOnly() const;
-    virtual UOdysseyAnimationLayerImageVector* GetLayer() const override;
 
 private:
     void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
@@ -66,11 +57,9 @@ private:
     friend class FOdysseyAnimationCellImageVectorImport;
 
 private:
-    FOdysseyVectorEngine* mEngine;
+    FOdysseyVectorEngine* mEngine = nullptr;
     FGuid mVectorBlockId;
     TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
-    uint32 mWidth;
-    uint32 mHeight;
     mutable FCriticalSection mImageRenderingMutex;
     mutable TWeakPtr<FOdysseyMediaVector> mMediaVector;
 };

@@ -18,9 +18,6 @@ public:
     /* Called when the current layer changed */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentLayerChanged, UOdysseyLayerStack*)
 
-    /* Called when the layer hierarchy changed at some point */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnHierarchyChanged, UOdysseyLayerStack*);
-
 public:
     //Delegates
 
@@ -28,11 +25,6 @@ public:
      * @brief Returns the CurrentLayerChanged delegate
      */
     static FOnCurrentLayerChanged& OnCurrentLayerChanged();
-
-    /**
-     * @brief Returns the HierarchyChanged delegate
-     */
-    static FOnHierarchyChanged& OnHierarchyChanged();
 
 public:
     //Layer Class Support
@@ -240,10 +232,6 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "LayerStack")
 	void MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* ParentLayer = nullptr, int IndexInParent = 0);
-
-public:
-    //Called by layers when there Parent or Children changed
-    virtual void HierarchyChanged();
 
 protected:
     //Property changed methods

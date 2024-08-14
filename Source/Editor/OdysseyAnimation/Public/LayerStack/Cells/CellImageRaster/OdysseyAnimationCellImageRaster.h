@@ -5,36 +5,26 @@
 
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "ULISInvalidTileMap.h"
-#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+
+#include "OdysseyAnimationCellImageRaster.generated.h"
 
 class UOdysseyAnimationLayerImageRaster;
 class FOdysseyRasterBlock;
 class FOdysseyMediaRaster;
 
-class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRaster
-    : public FOdysseyAnimationCell
-{    
-public:
-    static TSharedRef<FOdysseyAnimationCellImageRaster> Create(UOdysseyAnimationLayerImageRaster* iLayer, int iLength, int iWidth, int iHeight, ::ULIS::eFormat iFormat);
-    static TSharedRef<FOdysseyAnimationCellImageRaster> Create(UOdysseyAnimationLayerImageRaster* iLayer, int iLength, TSharedPtr<::ULIS::FBlock> iBlock);
-    static const FName& StaticType();
+UCLASS(BlueprintType)
+class ODYSSEYANIMATION_API UOdysseyAnimationCellImageRaster
+    : public UOdysseyAnimationCell
+{
+	GENERATED_BODY()
 
 public:
-    virtual ~FOdysseyAnimationCellImageRaster();
-    FOdysseyAnimationCellImageRaster(UOdysseyAnimationLayerImageRaster* iLayer, int iLength);
-
-    void Init(int iWidth, int iHeight, ::ULIS::eFormat iFormat);
-    void Init(TSharedPtr<::ULIS::FBlock> iBlock);
-    TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
+	TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
-    virtual TSharedPtr<FOdysseyAnimationCell> CreateCellFromFrame(uint32 iFrameIndex) const override;
-    virtual UOdysseyAnimationLayerImageRaster* GetLayer() const override;
 
 public:
-    virtual TSharedPtr<FOdysseyAnimationCell> Clone(UOdysseyAnimationLayer* iLayer, int iLength) const override;
-    virtual const FName& GetType() const override;
-    virtual void Serialize(FArchive& Ar);
-    virtual void PostDuplicate() override;
+    virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
+	virtual void Serialize(FArchive& Ar) override;
 
 public:
 	//FOdysseyImageRenderingAbility overrides
@@ -45,6 +35,8 @@ public:
     bool IsImageRenderingGameThreadOnly() const;
 
 private:
+    void InitFromFormat(int iWidth, int iHeight, ::ULIS::eFormat iFormat);
+    void InitFromBlock(TSharedPtr<::ULIS::FBlock> iBlock);
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
     void OnBlockChanged(const TArray<::ULIS::FRectI>& iRects);
     void OnBlockCommited(const TArray<::ULIS::FRectI>& iRects);
@@ -56,8 +48,7 @@ private:
     friend class FOdysseyAnimationCellImageRasterImport;
 
 private:
-    UOdysseyAnimationLayerImageRaster* mLayer;
-    TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
+    mutable TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
     mutable FCriticalSection mImageRenderingMutex;
     mutable TWeakPtr<FOdysseyMediaRaster> mMediaRaster;
 };

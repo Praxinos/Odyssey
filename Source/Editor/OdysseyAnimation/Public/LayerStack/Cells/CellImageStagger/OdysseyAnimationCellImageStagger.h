@@ -5,30 +5,21 @@
 
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 
-class ODYSSEYANIMATION_API FOdysseyAnimationCellImageStagger
-    : public FOdysseyAnimationCell
-{    
-public:
-    enum class eBehaviour
-    {
-        Loop = 1, //needs to be 1 for compatibility reasons when Hold was an option
-        PingPong
-    };
+#include "OdysseyAnimationCellImageStagger.generated.h"
 
-public:
-    static TSharedRef<FOdysseyAnimationCellImageStagger> Create(UOdysseyAnimationLayer* iLayer, int iLength);
-    static const FName& StaticType();
+UENUM(BlueprintType)
+enum class EOdysseyAnimationCellImageStaggerBehaviour : uint8
+{
+	Invalid = 0 UMETA(Hidden), //exists for compatibility reasons when Hold was an option
+	Loop = 1, //needs to be 1 for compatibility reasons when Hold was an option
+	PingPong
+};
 
-public:
-    virtual ~FOdysseyAnimationCellImageStagger();
-    FOdysseyAnimationCellImageStagger(UOdysseyAnimationLayer* iLayer, int iLength);
-    void Init();
-
-public:
-    virtual TSharedPtr<FOdysseyAnimationCell> Clone(UOdysseyAnimationLayer* iLayer, int iLength) const override;
-    virtual const FName& GetType() const override;
-    virtual void Serialize(FArchive& Ar);
-    virtual TSharedPtr<FOdysseyAnimationCell> CreateCellFromFrame(uint32 iFrameIndex) const override;
+UCLASS(BlueprintType)
+class ODYSSEYANIMATION_API UOdysseyAnimationCellImageStagger
+    : public UOdysseyAnimationCell
+{
+	GENERATED_BODY()
 
 public:
 	//FOdysseyImageRenderingAbility overrides
@@ -38,20 +29,16 @@ public:
     bool IsImageRenderingGameThreadOnly() const;
 
 public:
-    TSharedPtr<FOdysseyAnimationCell> GetReferenceCellAtFrame(int iFrameIndex, int* oCellFrameIndex) const;
-    int GetStaggerFrame(int iFrameIndex) const;
-    int GetReach() const;
-    eBehaviour GetBehaviour() const;
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
+    UOdysseyAnimationCell* GetReferenceCellAtFrame(int Frame, int& ReferenceCellFrame) const;
 
-private:
-    //Import/Export
-    friend class FOdysseyAnimationCellImageStaggerExport;
-    friend class FOdysseyAnimationCellImageStaggerImport;
-    friend class FOdysseyAnimationCellImageStaggerMutator;
-    friend class FOdysseySetBehaviourMutation;
-    friend class FOdysseySetReachMutation;
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
+    int GetStaggerFrame(int Frame) const;
 
-private:
-    eBehaviour mBehaviour;
-    uint32 mReach;
+public:
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
+    EOdysseyAnimationCellImageStaggerBehaviour Behaviour = EOdysseyAnimationCellImageStaggerBehaviour::Loop;
+
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
+    int Reach = 0;
 };

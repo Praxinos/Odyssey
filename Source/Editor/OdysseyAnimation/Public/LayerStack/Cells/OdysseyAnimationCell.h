@@ -5,65 +5,84 @@
 
 #include "OdysseyImageRenderingAbility.h"
 #include "OdysseyMediaProvider.h"
+#include "OdysseyAnimationCell.generated.h"
 
 class UOdysseyAnimationLayer;
 
-class ODYSSEYANIMATION_API FOdysseyAnimationCell
-    : public TSharedFromThis<FOdysseyAnimationCell>
+USTRUCT(BlueprintType)
+struct FOdysseyAnimationCellOutOfPegs
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
+	FVector2D Pan = FVector2D(0, 0);
+
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
+    float Rotation = 0.f;
+
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
+    float Zoom = 1.f;
+};
+
+UCLASS(BlueprintType)
+class ODYSSEYANIMATION_API UOdysseyAnimationCell
+	: public UObject
     , public FOdysseyImageRenderingAbility
 {
+	GENERATED_BODY()
+
+public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnOutOfPegsChanged, bool /*iIsInteractive*/)
 
 public:
-    virtual ~FOdysseyAnimationCell();
-    FOdysseyAnimationCell(int iLength, UOdysseyAnimationLayer* iLayer);
+	UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
+	UOdysseyAnimationLayer* GetLayer() const;
 
+	UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
+	UOdysseyAnimation* GetAnimation() const;
+
+	UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
+	UOdysseyAnimationLayerStack* GetLayerStack() const;
+
+	UFUNCTION(BlueprintPure, Category="Odyssey|Cell")
+	bool IsOutOfPegs() const;
+
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
+	FInt32Range GetFrameRange() const;
+    
 public:
-    //void SetLength(int iLength);
-    int GetLength() const;
-    int GetMarkId() const;
-    virtual UOdysseyAnimationLayer* GetLayer() const;
-    virtual TSharedPtr<FOdysseyAnimationCell> Clone(UOdysseyAnimationLayer* iLayer, int iLength) const = 0;
-    virtual const FName& GetType() const = 0;
-    virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
-    virtual TSharedPtr<FOdysseyAnimationCell> CreateCellFromFrame(uint32 iFrameIndex) const;
-
-    FOnOutOfPegsChanged& OnOutOfPegsChanged();
-
+	virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
 
 public:
     //OutOfPegs
-    bool IsOutOfPegs() const;
-    FVector2D OutOfPegsPan() const;
-    float OutOfPegsRotation() const;
-    float OutOfPegsZoom() const;
     ::ULIS::FMat3F OutOfPegsTransform() const;
-
-    void SetOutOfPegsPan(const FVector2D& iPan, bool iIsInteractive);
-    void SetOutOfPegsRotation(float iRotation, bool iIsInteractive);
-    void SetOutOfPegsZoom(float iZoom, bool iIsInteractive);
+	FOnOutOfPegsChanged& OnOutOfPegsChanged();
 
 public:
-    virtual void PostDuplicate();
-    virtual void PostLoad();
-    virtual void Serialize(FArchive& Ar);
-
-private:
-    //Import/Export
-    friend class FOdysseyAnimationCellExport;
-    friend class FOdysseyAnimationCellImport;
-    friend class FOdysseySetCellLengthMutation;
-    friend class FOdysseySetCellMarkIdMutation;
+    // UObject overrides
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
+    virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 
 protected:
-    UOdysseyAnimationLayer* mLayer;
-    uint32 mLength;
-    int mMarkId;
+	//Properties modifications
+	void OutOfPegsChanged(bool iIsInteractive);
+	void LengthChanged(bool iIsInteractive);
 
-    bool mIsOutOfPegs = false;
-    FVector2D mOutOfPegsPan = FVector2D(0, 0);
-    float mOutOfPegsRotation = 0.f;
-    float mOutOfPegsZoom = 1.f;
+    virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive);
 
+protected:
+	UPROPERTY(BlueprintReadOnly, Category="Odyssey|Cell")
+    int IndexInLayer = -1;
+
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")//TODO: meta (minvalue 1)
+    int Length = 1;
+
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell") //TODO: GetOptions ? Is that possible ?
+    int Mark = -1;
+
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
+    FOdysseyAnimationCellOutOfPegs OutOfPegs;
+
+private:
     FOnOutOfPegsChanged mOnOutOfPegsChanged;
 };

@@ -12,9 +12,9 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRasterImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationCellImageRasterImageRenderer(TSharedRef<const FOdysseyAnimationCellImageRaster> iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
+    FOdysseyAnimationCellImageRasterImageRenderer(UOdysseyAnimationCellImageRaster* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
 
-
+public:
     virtual void Init() override;
     virtual void Lock() override;
     virtual void Unlock() override;
@@ -25,7 +25,7 @@ public:
     virtual TArray<::ULIS::FEvent> Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList) override;
 
 public:
-    TSharedPtr<const FOdysseyAnimationCellImageRaster> mCell;
+    TStrongObjectPtr<UOdysseyAnimationCellImageRaster> mCell;
     TSharedPtr<::ULIS::FBlock> mBlock;
     ::ULIS::FMat3F mOutOfPegsTransform;
 };

@@ -21,46 +21,13 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageVector
     GENERATED_BODY()
 
 public:
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     * 
-     */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsColoredChanged, UOdysseyAnimationLayerImageVector*)
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsWireframeChanged, UOdysseyAnimationLayerImageVector*)
-
-
-public:
-    static FOnIsColoredChanged& OnIsColoredChanged();
-    static FOnIsColoredChanged& OnIsWireframeChanged();
-
-public:
-    ~UOdysseyAnimationLayerImageVector();
-    UOdysseyAnimationLayerImageVector();
-
-public:
     // UObject overrides
 	virtual void PostInitProperties() override;
 
-    /**
-     * @brief Serialize this object
-     *
-     * @param Ar
-     */
-    virtual void Serialize(FArchive& Ar) override;
-
 public:
     //UOdysseyLayer overrides
-    virtual void OnCreated_Implementation() override;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
-
-public:
-    //UOdysseyAnimationLayer overrides
-    virtual FInt32Range GetFrameRange() const override;
-
-public:
-    virtual TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const override;
-    virtual TSharedPtr<FOdysseyAnimationCellsContainer> GetCellsContainer() const override;
 
 public:
 	//FOdysseyImageRenderingAbility overrides
@@ -70,22 +37,12 @@ public:
 protected:
     void IsColoredChanged();
     void IsWireframeChanged();
-    virtual void PropertyChanged(const FName& iPropertyName) override;
-    
-private:
-    void OnCellsChanged();
-    TSharedPtr<FOdysseyAnimationCell> CreateCell( const FName& iCellType, bool iForSerialization);
+    virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
 
 private:
     TSharedPtr<IOdysseyMedia> CreateMediaVector(int iFrameIndex);
     TSharedPtr<IOdysseyMedia> GetCellMediaVector(uint32 iFrameIndex) const;
     void AutoCreateCell(int iFrameIndex);
-    void CreateCell( const FName& iCellType);
-
-private:
-    //Import/Export
-    friend class FOdysseyAnimationLayerImageVectorExport;
-    friend class FOdysseyAnimationLayerImageVectorImport;
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Animation | LayerStack")
@@ -93,8 +50,4 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Animation | LayerStack")
     bool IsColored = true;
-
-private:
-    TSharedRef<FOdysseyAnimationCellsContainer> mCellsContainer;
-    TSharedPtr<FOdysseyAnimationLightTable> mLightTable;
 };

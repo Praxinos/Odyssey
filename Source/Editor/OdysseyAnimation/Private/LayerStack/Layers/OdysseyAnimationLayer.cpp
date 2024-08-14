@@ -10,6 +10,22 @@
 
 //===========================
 
+void
+UOdysseyAnimationLayer::PostInitProperties()
+{
+	Super::PostInitProperties();
+
+	//Activate first previous and first next keys in the lighttable by default
+	Lighttable.PreviousKeys[0].IsActivated = true;
+	Lighttable.NextKeys[0].IsActivated = true;
+}
+
+void
+UOdysseyAnimationLayer::InvalidateCellFrameRanges()
+{
+	mCellsFrameRanges.Empty();
+}
+
 UOdysseyAnimation*
 UOdysseyAnimationLayer::GetAnimation() const
 {
@@ -37,48 +53,34 @@ UOdysseyAnimationLayer::GetFrameRange() const
     return FInt32Range::Hull(ranges);
 }
 
-TSharedPtr<FOdysseyAnimationLightTable>
-UOdysseyAnimationLayer::GetLightTable() const
-{
-    return nullptr;
-}
-
 FSimpleMulticastDelegate&
-UOdysseyAnimationLayer::OnLightTableIsActivatedChanged()
+UOdysseyAnimationLayer::OnLightTableChanged()
 {
-    return mOnLightTableIsActivatedChanged;
+    return mOnLightTableChanged;
 }
 
 void
-UOdysseyAnimationLayer::IsLightTableActivatedChanged()
+UOdysseyAnimationLayer::LightTableChanged()
 {   
-    UOdysseyAnimation* animation = GetAnimation();
-    if ( !animation )
-        return;
-
-    ImageRenderingChanged();
-    
-    OnLightTableIsActivatedChanged().Broadcast();
-}
-
-void
-UOdysseyAnimationLayer::ChildrenChanged()
-{
-    Super::ChildrenChanged();
-
     ImageRenderingCompositionChanged();
+    OnLightTableChanged().Broadcast();
 }
 
 void
-UOdysseyAnimationLayer::IsActivatedChanged()
+UOdysseyAnimationLayer::CellsChanged()
 {
-    Super::IsActivatedChanged();
+	UpdateCellsIndexInLayer();
+	InvalidateCellFrameRanges();
+    ImageRenderingCompositionChanged();
+    UOdysseyLayer::OnMediaChanged().Broadcast();
+}
 
-    UOdysseyAnimationLayer* parentLayer = Cast<UOdysseyAnimationLayer>(GetParent());
-    if (!parentLayer)
-        return;
-
-    parentLayer->ImageRenderingCompositionChanged();
+void
+UOdysseyAnimationLayer::CellsOffsetChanged()
+{
+	InvalidateCellFrameRanges();
+    ImageRenderingCompositionChanged();
+	UOdysseyLayer::OnMediaChanged().Broadcast();
 }
 
 void
@@ -94,56 +96,20 @@ UOdysseyAnimationLayer::PostBehaviourChanged()
 }
 
 void
-UOdysseyAnimationLayer::PropertyChanged(const FName& iPropertyName)
+UOdysseyAnimationLayer::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
 {
-    Super::PropertyChanged(iPropertyName);
+    Super::PropertyChanged(iPropertyName, iMemberPropertyName, iIsInteractive);
 
-    if (iPropertyName == "PreBehaviour")
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, PreBehaviour))
         PreBehaviourChanged();
-    if (iPropertyName == "PostBehaviour")
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, PostBehaviour))
         PostBehaviourChanged();
-    if (iPropertyName == "bIsLightTableActivated")
-        IsLightTableActivatedChanged();
-}
-
-TSharedPtr<IOdysseyImageRenderer>
-UOdysseyAnimationLayer::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
-{
-    if (iFilter.IsBound() && !iFilter.Execute(this))
-        return nullptr;
-    
-    return MakeShared<FOdysseyAnimationLayerImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
-}
-
-TArray<FGuid>
-UOdysseyAnimationLayer::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
-{
-    TArray<FGuid> idComposition = { GetImageRenderingId() };
-
-    const TArray<UOdysseyLayer*>& children = GetChildren();
-    for (UOdysseyLayer* child : children)
-    {
-        if (!child->IsActivated)
-            continue;
-
-        UOdysseyAnimationLayer* animationChild = Cast<UOdysseyAnimationLayer>(child);
-        if (!animationChild)
-            continue;
-
-        idComposition.Append(animationChild->GetImageRenderingComposition(iRenderType, iFrame));
-    }
-
-    return idComposition;
-}
-
-TArray<::ULIS::FRectI>
-UOdysseyAnimationLayer::GetImageRenderingRects() const
-{
-    UOdysseyAnimationLayerStack* layerStack = Cast<UOdysseyAnimationLayerStack>(GetLayerStack());
-    if(!layerStack)
-        return {};
-
-    return layerStack->GetImageRenderingRects();
+    if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, LightTable))
+        LightTableChanged();
+	if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Cells))
+        CellsChanged();
+	if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset))
+        CellsOffsetChanged();
 }
 
 int
@@ -232,12 +198,169 @@ UOdysseyAnimationLayer::GetPostBehaviourFrame(EOdysseyAnimationLayerImagePostBeh
     return frame;
 }
 
-void
-UOdysseyAnimationLayer::PostLoad()
+const TArray<TObjectPtr<UClass>>&
+UOdysseyAnimationLayer::GetSupportedCellTypes() const
 {
-    Super::PostLoad();
+	return SupportedCellTypes;
+}
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = GetCellsContainer();
-    if (cellsContainer)
-        cellsContainer->PostLoad();
+const TArray<TObjectPtr<UOdysseyAnimationCell>>&
+UOdysseyAnimationLayer::GetCells() const
+{
+	return Cells;
+}
+
+int
+UOdysseyAnimationLayer::GetCellIndexAtFrame(int Frame) const
+{
+	if( Frame < CellsOffset )
+        return INDEX_NONE;
+
+    int frameIndex = CellsOffset;
+    for (int i = 0; i < Cells.Num(); i++)
+    {
+        UOdysseyAnimationCell* cell = Cells[i];
+
+        if ( frameIndex + cell->Length - 1 >= Frame)
+            return i;
+
+        frameIndex += cell->Length;
+    }
+
+    return INDEX_NONE;
+}
+
+bool
+UOdysseyAnimationLayer::HasCellAtFrame(int Frame) const
+{
+	return GetCellIndexAtFrame(Frame) != INDEX_NONE;
+}
+
+TArray<FInt32Range>
+UOdysseyAnimationLayer::GetCellsFrameRanges() const
+{
+	if (mCellsFrameRanges.Num() != Cells.Num())
+	{
+		mCellsFrameRanges.Empty();
+		uint32 startFrame = CellsOffset;
+		for (TObjectPtr<UOdysseyAnimationCell> cell : Cells)
+		{
+			FInt32Range frameRange = FInt32Range::Inclusive(startFrame, startFrame + cell->Length - 1);
+			mCellsFrameRanges.Add(frameRange);
+			startFrame += cell->Length;
+		}
+	}
+	
+    return mCellsFrameRanges;
+}
+
+TArray<UOdysseyAnimationCell*>
+UOdysseyAnimationLayer::AddCells(TSubclassOf<UOdysseyAnimationCell*> CellType, int Index = -1, int Count = 0)
+{
+	UClass* cellType = CellType.Get();
+
+    //No cellType
+	if ( !cellType )
+		return {};
+
+    //cellType Not supported
+    if (!SupportedCellTypes.Contains(cellType))
+        return {};
+
+	TArray<UOdysseyAnimationCell*> cells;
+	for (int i = 0; i < Count; i++)
+	{
+		//Create the Layer
+		UOdysseyLayer* cell = NewObject<UOdysseyLayer>(this, cellType, NAME_None, RF_Public | RF_Transactional);
+		if (!cell )
+			return cells;
+
+		cell->Init(this);
+		cells.Add(cell);
+	}
+
+	FOdysseyObjectEditorUtils::PreChangePropertyValue(this, GET_MEMBER_NAME_CHECKED(Cells));
+	Cells.Insert(cells, mIndex);
+	FOdysseyObjectEditorUtils::PostChangePropertyValue(this, GET_MEMBER_NAME_CHECKED(Cells), EPropertyChangeType::ArrayAdd);
+}
+
+void
+UOdysseyAnimationLayer::RemoveCell(UOdysseyAnimationCell* Cell)
+{
+	RemoveCells({Cell});
+	checkf(cell->Parent == this, TEXT("Layer does not contain the cell to remove"));
+}
+
+void
+UOdysseyAnimationLayer::RemoveCells(TArray<UOdysseyAnimationCell*> Cells)
+{
+	TArray<UOdysseyAnimationCell*> cells;
+	for (UOdysseyAnimationCell* cell : Cells)
+	{
+		if (!ensureMsgf(cell->Parent == this, TEXT("Layer does not contain the cell to remove")))
+			continue;
+
+		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, IndexInLayer), INDEX_NONE);
+		cells.Add(cell);
+	}
+
+	FOdysseyObjectEditorUtils::PreChangePropertyValue(this, GET_MEMBER_NAME_CHECKED(Cells));
+	Cells.RemoveAll(cells);
+	FOdysseyObjectEditorUtils::PostChangePropertyValue(this, GET_MEMBER_NAME_CHECKED(Cells), EPropertyChangeType::ArrayRemove);
+}
+
+void
+UOdysseyAnimationLayer::RemoveCellAtIndex(int Index)
+{
+	if (Index < 0 || Index >= Cells.Num())
+		return;
+
+	FOdysseyObjectEditorUtils::SetPropertyValue(Cells[Index], GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, IndexInLayer), INDEX_NONE);
+
+	FOdysseyObjectEditorUtils::PreChangePropertyValue(this, GET_MEMBER_NAME_CHECKED(Cells));
+	Cells.RemoveAt(Index);
+	FOdysseyObjectEditorUtils::PostChangePropertyValue(this, GET_MEMBER_NAME_CHECKED(Cells), EPropertyChangeType::ArrayRemove);
+}
+
+TArray<FGuid>
+UOdysseyAnimationLayer::GetLighttableImageRenderingComposition(int iFrameIndex) const
+{
+	int cellIndex = cellsContainer->GetCellIndexAtFrame(iFrameIndex);
+	if (cellIndex == INDEX_NONE)
+		continue;
+
+    TArray<FGuid> idComposition = {};
+    for (int i = 9; i >= 0; i--)
+    {
+        if (Lighttable.PreviousKeys[i].IsActivated)
+		{
+			int keyCellIndex = cellIndex - i - 1;
+			if (keyCellIndex >= 0 && keyCellIndex < Cells.Num())
+			{
+				UOdysseyAnimationCell* cell = GetCells()[keyCellIndex];
+				idComposition.Append(cell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, 0));
+			}
+		}
+
+		if (Lighttable.NextKeys[i].IsActivated)
+		{
+			int keyCellIndex = cellIndex + i + 1;
+			if (keyCellIndex >= 0 && keyCellIndex < Cells.Num())
+			{
+				UOdysseyAnimationCell* cell = GetCells()[keyCellIndex];
+				idComposition.Append(cell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, 0));
+			}
+		}
+    }
+
+    return idComposition;
+}
+
+void
+UOdysseyAnimationLayer::UpdateCellsIndexInLayer()
+{
+	for (int i = 0, i < Cells.Num(); i++)
+	{
+		Cells[i].IndexInLayer = i;
+	}
 }

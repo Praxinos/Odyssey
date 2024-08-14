@@ -4,15 +4,7 @@
 #pragma once
 
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "Image/OdysseyBlendingMode.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
-
-#include <ULIS>
-
 #include "OdysseyAnimationLayerImageRaster.generated.h"
-
-class FOdysseyAnimationLightTable;
 
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageRaster
@@ -21,33 +13,12 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageRaster
     GENERATED_BODY()
 
 public:
-    ~UOdysseyAnimationLayerImageRaster();
-    UOdysseyAnimationLayerImageRaster();
-
-public:
     // UObject overrides
 	virtual void PostInitProperties() override;
-    virtual void PostDuplicate(bool bDuplicateForPIE) override;
-
-    /**
-     * @brief Serialize this object
-     *
-     * @param Ar
-     */
-    virtual void Serialize(FArchive& Ar) override;
 
 public:
     //UOdysseyLayer overrides
-    virtual void OnCreated_Implementation() override;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
-
-public:
-    //UOdysseyAnimationLayer overrides
-    virtual FInt32Range GetFrameRange() const override;
-
-public:
-    virtual TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const override;
-    virtual TSharedPtr<FOdysseyAnimationCellsContainer> GetCellsContainer() const override;
 
 public:
     // UOdysseyLayer Overrides
@@ -63,10 +34,6 @@ public:
 	//FOdysseyImageRenderingAbility overrides
 	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
 	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
-    
-private:
-    void OnCellsChanged();
-    TSharedPtr<FOdysseyAnimationCell> CreateCell( const FName& iCellType, bool iForSerialization);
 
 private:
     TSharedPtr<IOdysseyMedia> CreateMediaRaster(int iFrameIndex);
@@ -74,16 +41,7 @@ private:
     void AutoCreateCell(int iFrameIndex);
     void CreateCell( const FName& iCellType);
 
-private:
-    //Import/Export
-    friend class FOdysseyAnimationLayerImageRasterExport;
-    friend class FOdysseyAnimationLayerImageRasterImport;
-
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Animation | LayerStack")
     bool IsAlphaLocked = false;
-
-private:
-    TSharedRef<FOdysseyAnimationCellsContainer> mCellsContainer;
-    TSharedPtr<FOdysseyAnimationLightTable> mLightTable;
 };

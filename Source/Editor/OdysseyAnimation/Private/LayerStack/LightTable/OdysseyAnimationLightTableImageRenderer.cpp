@@ -4,91 +4,72 @@
 #include "LayerStack/LightTable/OdysseyAnimationLightTableImageRenderer.h"
 #include "OdysseyAnimation.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "ULISLoaderModule.h"
 #include "ULISEventBuilder.h"
 
-FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRenderer(TSharedRef<const FOdysseyAnimationLightTable> iLightTable, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
+FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRenderer(UOdysseyAnimationLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
 {
-    UOdysseyAnimationLayer* layer = iLightTable->GetLayer();
+    UOdysseyAnimation* animation = iLayer->GetAnimation();
 
-    UOdysseyAnimation* animation = layer->GetAnimation();
-
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = iLightTable->GetLayer()->GetCellsContainer();
-    int currentCellIndex = cellsContainer->GetCellIndexAtFrame(iFrame);
+    int currentCellIndex = iLayer->GetCellIndexAtFrame(iFrame);
     if (currentCellIndex == INDEX_NONE)
         return;
 
-    const TArray<TSharedPtr<FOdysseyAnimationCell>>& cells = cellsContainer->GetCells();
-    if (currentCellIndex == INDEX_NONE)
-        return;
-
-    for (int i = -1; i >= -iLightTable->GetRange(); i--)
+    for (int i = 9; i >= 0; i--)
     {
-        int cellIndex = currentCellIndex + i;
-        if (cellIndex < 0 || cellIndex >= cells.Num())
-            continue;
+		if (iLayer->Lighttable.PreviousKeys[i].IsActivated)
+		{
+			int keyCellIndex = cellIndex - i - 1;
+			if (keyCellIndex >= 0 && keyCellIndex < Cells.Num())
+			{
+				UOdysseyAnimationCell* cell = GetCells()[keyCellIndex];
+				FVector2D outOfPegsPan = cell->OutOfPegsPan();
+				float outOfPegsRotation = cell->OutOfPegsRotation();
+				float outOfPegsZoom = cell->OutOfPegsZoom();
 
-        TSharedPtr<FOdysseyAnimationCell> cell = cells[cellIndex];
+				::ULIS::FMat3F oopTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
+				* ::ULIS::FMat3F::MakeTranslationMatrix(outOfPegsPan.X, outOfPegsPan.Y)
+				* ::ULIS::FMat3F::MakeRotationMatrix(FMath::DegreesToRadians(outOfPegsRotation))
+				* ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom, outOfPegsZoom)
+				* ::ULIS::FMat3F::MakeTranslationMatrix( animation->Width() / -2.f, animation->Height() / -2.f);
 
-        if (!iLightTable->GetKeyIsActivated(i))
-            continue;
+				FFrameData data;
+				data.mOpacity = iLayer->Lighttable.PreviousKeys[i].Opacity;
+				data.mRenderer = cell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0, iFilter);
+				data.mColor = iLayer->Lighttable.PreviousKeysColor;
+				data.mContrast = iLayer->Lighttable.PreviousKeysContrast;
+				data.mOutOfPegsTransform = oopTransform;
+				mFramesData.Add(data);
+			}
+		}
 
-        int cellFirstFrame = cellsContainer->GetCellFrame(cell);
+		if (iLayer->Lighttable.NextKeys[i].IsActivated)
+		{
+			int keyCellIndex = cellIndex + i + 1;
+			if (keyCellIndex >= 0 && keyCellIndex < Cells.Num())
+			{
+				UOdysseyAnimationCell* cell = GetCells()[keyCellIndex];
+				FVector2D outOfPegsPan = cell->OutOfPegsPan();
+				float outOfPegsRotation = cell->OutOfPegsRotation();
+				float outOfPegsZoom = cell->OutOfPegsZoom();
 
-        FVector2D outOfPegsPan = cell->OutOfPegsPan();
-        float outOfPegsRotation = cell->OutOfPegsRotation();
-        float outOfPegsZoom = cell->OutOfPegsZoom();
+				::ULIS::FMat3F oopTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
+				* ::ULIS::FMat3F::MakeTranslationMatrix(outOfPegsPan.X, outOfPegsPan.Y)
+				* ::ULIS::FMat3F::MakeRotationMatrix(FMath::DegreesToRadians(outOfPegsRotation))
+				* ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom, outOfPegsZoom)
+				* ::ULIS::FMat3F::MakeTranslationMatrix( animation->Width() / -2.f, animation->Height() / -2.f);
 
-        ::ULIS::FMat3F oopTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
-            * ::ULIS::FMat3F::MakeTranslationMatrix(outOfPegsPan.X, outOfPegsPan.Y)
-            * ::ULIS::FMat3F::MakeRotationMatrix(FMath::DegreesToRadians(outOfPegsRotation))
-            * ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom, outOfPegsZoom)
-            * ::ULIS::FMat3F::MakeTranslationMatrix( animation->Width() / -2.f, animation->Height() / -2.f);
-
-        FFrameData data;
-        data.mOpacity = iLightTable->GetKeyOpacity(i);
-        data.mRenderer = iLightTable->GetLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFirstFrame, iFilter);
-        data.mColor = iLightTable->GetKeyColor(i);
-        data.mContrast = iLightTable->GetPreviousKeysContrast();
-        data.mOutOfPegsTransform = oopTransform;
-        mFramesData.Add(data);
-    }
-
-    for (int i = 1; i <= iLightTable->GetRange(); i++)
-    {
-        int cellIndex = currentCellIndex + i;
-        if (cellIndex < 0 || cellIndex >= cells.Num())
-            continue;
-
-        TSharedPtr<FOdysseyAnimationCell> cell = cells[cellIndex];
-
-        if (!iLightTable->GetKeyIsActivated(i))
-            continue;
-
-        int cellFirstFrame = cellsContainer->GetCellFrame(cell);
-
-        FVector2D outOfPegsPan = cell->OutOfPegsPan();
-        float outOfPegsRotation = cell->OutOfPegsRotation();
-        float outOfPegsZoom = cell->OutOfPegsZoom();
-
-        
-
-        ::ULIS::FMat3F oopTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
-            * ::ULIS::FMat3F::MakeTranslationMatrix(outOfPegsPan.X, outOfPegsPan.Y)
-            * ::ULIS::FMat3F::MakeRotationMatrix(FMath::DegreesToRadians(outOfPegsRotation))
-            * ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom, outOfPegsZoom)
-            * ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / -2.f, animation->Height() / -2.f);
-
-        FFrameData data;
-        data.mOpacity = iLightTable->GetKeyOpacity(i);
-        data.mRenderer = iLightTable->GetLayer()->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFirstFrame, iFilter);
-        data.mColor = iLightTable->GetKeyColor(i);
-        data.mContrast = iLightTable->GetNextKeysContrast();
-        data.mOutOfPegsTransform = oopTransform;
-        mFramesData.Add(data);
+				FFrameData data;
+				data.mOpacity = iLayer->Lighttable.NextKeys[i].Opacity;
+				data.mRenderer = cell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0, iFilter);
+				data.mColor = iLayer->Lighttable.NextKeysColor;
+				data.mContrast = iLayer->Lighttable.NextKeysContrast;
+				data.mOutOfPegsTransform = oopTransform;
+				mFramesData.Add(data);
+			}
+		}
     }
 }
     
