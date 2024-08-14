@@ -17,7 +17,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageRasterTimeline
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageRasterTimeline)
         {}
-        SLATE_ATTRIBUTE(bool, IsCollapsed)
+        SLATE_ATTRIBUTE(bool, DisplayOptions)
     SLATE_END_ARGS()
 
 public:

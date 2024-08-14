@@ -16,5 +16,5 @@ public:
     static TArray<UOdysseyLayer*> FilterTopmostLayers(TArray<UOdysseyLayer*> Layers);
 
     UFUNCTION(BlueprintCallable, Category="LayerStack")
-    static TArray<UOdysseyLayer*> SortLayers(TArray<UOdysseyLayer*> iLayers, bool iReverse);
+    static TArray<UOdysseyLayer*> SortLayers(TArray<UOdysseyLayer*> Layers, bool Reverse);
 };

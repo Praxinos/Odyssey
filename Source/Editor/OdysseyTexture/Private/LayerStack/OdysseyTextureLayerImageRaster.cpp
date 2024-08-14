@@ -12,7 +12,6 @@
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyRasterBlockUndo.h"
 #include "OdysseyTextureLayerImageRaster.h"
-#include "OdysseyLayerFunctionLibrary.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "LayerStack/OdysseyTextureLayerImageRasterImageRenderer.h"
 #include "OdysseyTextureLayerImageRasterImport.h"
@@ -222,8 +221,8 @@ UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
 FOdysseyMediaProvider
 UOdysseyTextureLayerImageRaster::GetMediaProvider(uint32 iFrameIndex) const
 {
-    bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(this);
-    bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(this);
+    bool isActive = GetIsActivatedRecursively();
+    bool isLocked = GetIsLockedRecursively();
 
     FOdysseyMediaProvider mediaProvider;
     mediaProvider.IsLocked(!isActive || isLocked);

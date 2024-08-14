@@ -113,7 +113,7 @@ SOdysseyLayerStackAddLayerButton::AddLayerFromClass(FAssetData iAssetData)
     UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
     if (currentLayer)
     {
-        if (currentLayer->CanHaveChildren && currentLayer->IsExpanded)
+        if (currentLayer->CanHaveChildren && currentLayer->DisplayChildren)
         {
 			currentLayer = layerStack->AddLayer(layerClass, currentLayer);
         }

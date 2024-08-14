@@ -42,12 +42,12 @@ SOdysseyAnimationLayerImageTimeline::Construct(
 
     mExtension = iExtension;
     mLayer = iLayer;
-    mIsCollapsed = iArgs._IsCollapsed;
+    mDisplayOptions = iArgs._DisplayOptions;
 
     TAttribute<FMargin> cellsPadding = TAttribute<FMargin>::CreateLambda(
         [this]()
         {
-            return /*IsCollapsed() ? FMargin(0.f, 5.f, 0.f, 5.f) :*/ FMargin(0);
+            return /*!DisplayOptions() ? FMargin(0.f, 5.f, 0.f, 5.f) :*/ FMargin(0);
         }
     );
     
@@ -58,7 +58,7 @@ SOdysseyAnimationLayerImageTimeline::Construct(
         .Padding(cellsPadding)
         [
             SNew(SOdysseyAnimationCells, mExtension, mLayer, mLayer->GetCellsContainer())
-            .IsEnabled_Lambda([this](){ return !mLayer->GetIsLocked();})
+            .IsEnabled_Lambda([this](){ return !mLayer->GetIsLockedRecursively();})
             .OnCreateCell(this, &SOdysseyAnimationLayerImageTimeline::OnCreateCell)
             .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
             .ShowHandles(this, &SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles)
@@ -617,7 +617,7 @@ SOdysseyAnimationLayerImageTimeline::IsPostBehaviour(EOdysseyAnimationLayerImage
 bool
 SOdysseyAnimationLayerImageTimeline::CanSetPostBehaviour() const
 {
-    return !mLayer->GetIsLocked();
+    return !mLayer->GetIsLockedRecursively();
 }
 
 void
@@ -638,7 +638,7 @@ SOdysseyAnimationLayerImageTimeline::IsPreBehaviour(EOdysseyAnimationLayerImageP
 bool
 SOdysseyAnimationLayerImageTimeline::CanSetPreBehaviour() const
 {
-    return !mLayer->GetIsLocked();
+    return !mLayer->GetIsLockedRecursively();
 }
 
 void
@@ -651,19 +651,19 @@ SOdysseyAnimationLayerImageTimeline::MapActions(TSharedPtr<FUICommandList> iComm
 EVisibility
 SOdysseyAnimationLayerImageTimeline::GetLightTableVisibility() const
 {
-    return mLayer->GetIsLightTableActivated() && !mIsCollapsed.Get() ? EVisibility::Visible : EVisibility::Collapsed;
+    return mLayer->GetIsLightTableActivated() && mDisplayOptions.Get() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 bool
-SOdysseyAnimationLayerImageTimeline::IsCollapsed() const
+SOdysseyAnimationLayerImageTimeline::DisplayOptions() const
 {
-    return mIsCollapsed.Get();
+    return mDisplayOptions.Get();
 }
 
 bool
 SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles() const
 {
-    return !mIsCollapsed.Get();
+    return mDisplayOptions.Get();
 }
 
 FReply
@@ -683,7 +683,7 @@ SOdysseyAnimationLayerImageTimeline::OnContextMenuPlusButtonClicked()
 void
 SOdysseyAnimationLayerImageTimeline::RemoveCellMark()
 {
-    if (mLayer->GetIsLocked())
+    if (mLayer->GetIsLockedRecursively())
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
@@ -715,7 +715,7 @@ SOdysseyAnimationLayerImageTimeline::RemoveCellMark()
 bool
 SOdysseyAnimationLayerImageTimeline::CanRemoveCellMark() const
 {
-    if (mLayer->GetIsLocked())
+    if (mLayer->GetIsLockedRecursively())
         return false;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
@@ -732,7 +732,7 @@ SOdysseyAnimationLayerImageTimeline::CanRemoveCellMark() const
 void
 SOdysseyAnimationLayerImageTimeline::SetCellMark( int iMarkId )
 {
-    if (mLayer->GetIsLocked())
+    if (mLayer->GetIsLockedRecursively())
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
@@ -764,7 +764,7 @@ SOdysseyAnimationLayerImageTimeline::SetCellMark( int iMarkId )
 bool
 SOdysseyAnimationLayerImageTimeline::CanSetCellMark() const
 {
-    if (mLayer->GetIsLocked())
+    if (mLayer->GetIsLockedRecursively())
         return false;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
@@ -781,7 +781,7 @@ SOdysseyAnimationLayerImageTimeline::CanSetCellMark() const
 bool
 SOdysseyAnimationLayerImageTimeline::IsCellMarkChecked(int iMarkId) const
 {
-    if (mLayer->GetIsLocked())
+    if (mLayer->GetIsLockedRecursively())
         return false;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();

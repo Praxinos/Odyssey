@@ -49,7 +49,6 @@ public:
 
 public:
 	//Getters
-	UFUNCTION(BlueprintPure, Category="Odyssey|2D Animation")
 	UOdysseyAnimationLayerStack* GetLayerStack() const;
 	TSharedPtr<FOdysseyAnimationProxy> GetProxy() const;
 
@@ -59,21 +58,21 @@ public:
 	::ULIS::eFormat Format() const;
 
 	//Duration and speed
-	UFUNCTION(BlueprintCallable, Category="Odyssey|2D Animation")
+	UFUNCTION(BlueprintPure, Category="Odyssey|2D Animation")
 	FTimespan GetDuration() const;
 
-	UFUNCTION(BlueprintCallable, Category="Odyssey|2D Animation")
+	UFUNCTION(BlueprintPure, Category="Odyssey|2D Animation")
 	FInt32Range GetFrameRange() const;
 
-	UFUNCTION(BlueprintCallable, Category="Odyssey|2D Animation")
+	UFUNCTION(BlueprintPure, Category="Odyssey|2D Animation")
 	int GetFrameCount() const;
 
 	double GetFramesPerSecond() const;
 
 	//Time
 	//Index to the frame at a given time
-	UFUNCTION(BlueprintCallable, Category="Odyssey|2D Animation")
-	int GetFrameIndexAtTime(FTimespan iTime) const;
+	UFUNCTION(BlueprintPure, Category="Odyssey|2D Animation")
+	int GetFrameIndexAtTime(FTimespan Time) const;
 
 	//Time range of the frame at iFrameIndex
 	TRange<FTimespan> GetFrameTimeRange(int iFrameIndex) const;
@@ -121,10 +120,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(DisplayName="Height"), Category = "Animation")
 	int mHeight = -1;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Animation")
+	UPROPERTY(BlueprintReadOnly, meta=(DisplayName="Format"), Category = "Animation")
 	int mFormat = ::ULIS::Format_RGBA8;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Animation", meta=(LoadBehavior = "LazyOnDemand"))
+	UPROPERTY(BlueprintReadOnly, Category = "Animation", meta=(DisplayName="Layer Stack", LoadBehavior = "LazyOnDemand"))
 	TObjectPtr<UOdysseyAnimationLayerStack> mLayerStack;
 
 	TSharedPtr<FOdysseyAnimationProxy> mProxy;

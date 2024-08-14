@@ -144,7 +144,7 @@ public:
      * @return TSet<UClass*> 
      */
     UFUNCTION(BlueprintCallable, Category="LayerStack")
-    TSet<UClass*> FindLayersMergeTypes(TArray<UOdysseyLayer*> iLayers);
+    TSet<UClass*> FindLayersMergeTypes(TArray<UOdysseyLayer*> Layers);
 
     /**
      * @brief Return wether the given layers can be merged together
@@ -154,14 +154,14 @@ public:
      * @return false 
      */
     UFUNCTION(BlueprintCallable, Category="LayerStack")
-    bool CanMergeLayers(TArray<UOdysseyLayer*> iLayers);
+    bool CanMergeLayers(TArray<UOdysseyLayer*> Layers);
 
     /**
      * @brief Merges the given layers together
      * 
      */
     UFUNCTION(BlueprintCallable, Category="LayerStack")
-    UOdysseyLayer* MergeLayers(TArray<UOdysseyLayer*> iLayers);
+    UOdysseyLayer* MergeLayers(TArray<UOdysseyLayer*> Layers);
 
     /**
      * @brief Return wether the given layer can be flattened
@@ -171,7 +171,7 @@ public:
      * @return false 
      */
     UFUNCTION(BlueprintCallable, Category="LayerStack")
-    bool CanFlattenLayer(UOdysseyLayer* iLayer);
+    bool CanFlattenLayer(UOdysseyLayer* Layer);
 
     /**
      * @brief Flattens the given layer
@@ -180,7 +180,7 @@ public:
      * @return TArray<UOdysseyLayer*> 
      */
     UFUNCTION(BlueprintCallable, Category="LayerStack")
-    TArray<UOdysseyLayer*> FlattenLayer(UOdysseyLayer* iLayer);
+    TArray<UOdysseyLayer*> FlattenLayer(UOdysseyLayer* Layer);
 
     /**
      * @brief Return wether the given layers can be flattened
@@ -190,7 +190,7 @@ public:
      * @return false 
      */
     UFUNCTION(BlueprintCallable, Category="LayerStack")
-    bool CanFlattenLayers(TArray<UOdysseyLayer*> iLayers);
+    bool CanFlattenLayers(TArray<UOdysseyLayer*> Layers);
 
     /**
      * @brief Flattens the given layers
@@ -199,7 +199,7 @@ public:
      * @return TArray<UOdysseyLayer*> 
      */
     UFUNCTION(BlueprintCallable, Category="LayerStack")
-    TArray<UOdysseyLayer*> FlattenLayers(TArray<UOdysseyLayer*> iLayers);
+    TArray<UOdysseyLayer*> FlattenLayers(TArray<UOdysseyLayer*> Layers);
     
     /**
      * @brief Returns wether the given layer can be moved in the given ParentLayer

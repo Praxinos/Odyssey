@@ -30,7 +30,7 @@ SOdysseyAnimationLayerImageRasterTimeline::Construct(
 {
     ensure(iAnimationLayerImageRaster);
     SOdysseyAnimationLayerImageTimeline::FArguments args;
-    args.IsCollapsed(InArgs._IsCollapsed);
+    args.DisplayOptions(InArgs._DisplayOptions);
     SOdysseyAnimationLayerImageTimeline::Construct(args, iExtension, iAnimationLayerImageRaster);
 }
 
@@ -73,10 +73,10 @@ SOdysseyAnimationLayerImageRasterTimeline::OnPreviewMouseButtonDown(const FGeome
 bool
 SOdysseyAnimationLayerImageRasterTimeline::GetShowStaggerCellContent() const
 {
-    if (mLayer->GetIsLocked())
+    if (mLayer->GetIsLockedRecursively())
         return false;
 
-    return !IsCollapsed();
+    return DisplayOptions();
 }
 
 TSharedPtr<FExtender>

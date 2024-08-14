@@ -16,7 +16,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimeline
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageVectorTimeline)
         {}
-        SLATE_ATTRIBUTE(bool, IsCollapsed)
+        SLATE_ATTRIBUTE(bool, DisplayOptions)
     SLATE_END_ARGS()
 
 public:

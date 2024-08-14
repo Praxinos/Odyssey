@@ -25,7 +25,7 @@ SOdysseyAnimationLayerImageVectorTimeline::Construct(
 {
     ensure(iAnimationLayerImageVector);
     SOdysseyAnimationLayerImageTimeline::FArguments args;
-    args.IsCollapsed(InArgs._IsCollapsed);
+    args.DisplayOptions(InArgs._DisplayOptions);
     SOdysseyAnimationLayerImageTimeline::Construct(args, iExtension, iAnimationLayerImageVector);
 }
 
@@ -66,8 +66,8 @@ SOdysseyAnimationLayerImageVectorTimeline::OnPreviewMouseButtonDown(const FGeome
 bool
 SOdysseyAnimationLayerImageVectorTimeline::GetShowStaggerCellContent() const
 {
-    if (mLayer->GetIsLocked())
+    if (mLayer->GetIsLockedRecursively())
         return false;
         
-    return !IsCollapsed();
+    return DisplayOptions();
 }

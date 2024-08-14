@@ -13,7 +13,6 @@
 #include "LayerStack/OdysseyTextureLayerImageVectorImageRenderer.h"
 #include "OdysseyTextureLayerImageVectorImport.h"
 #include "OdysseyTextureLayerImageVectorExport.h"
-#include "OdysseyLayerFunctionLibrary.h"
 // from module OdysseyVector
 #include "Import/v1/OdysseyVectorImport.h"
 #include "Import/v2/OdysseyVectorImport.h"
@@ -74,8 +73,8 @@ UOdysseyTextureLayerImageVector::GetEngine()
 FOdysseyMediaProvider
 UOdysseyTextureLayerImageVector::GetMediaProvider(uint32 iFrameIndex) const
 {
-    bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(this);
-    bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(this);
+    bool isActive = GetIsActivatedRecursively();
+    bool isLocked = GetIsLockedRecursively();
 
     FOdysseyMediaProvider mediaProvider;
     mediaProvider.IsLocked(!isActive || isLocked);

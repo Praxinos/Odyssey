@@ -28,18 +28,18 @@ UOdysseyLayer::OnIsLockedChanged()
     return onIsLockedChanged;
 }
 
-UOdysseyLayer::FOnIsExpandedChanged&
-UOdysseyLayer::OnIsExpandedChanged()
+UOdysseyLayer::FOnDisplayChildrenChanged&
+UOdysseyLayer::OnDisplayChildrenChanged()
 {
-    static FOnIsExpandedChanged onIsExpandedChanged;
-    return onIsExpandedChanged;
+    static FOnDisplayChildrenChanged onDisplayChildrenChanged;
+    return onDisplayChildrenChanged;
 }
 
-UOdysseyLayer::FOnIsCollapsedChanged&
-UOdysseyLayer::OnIsCollapsedChanged()
+UOdysseyLayer::FOnDisplayOptionsChanged&
+UOdysseyLayer::OnDisplayOptionsChanged()
 {
-    static FOnIsCollapsedChanged onIsCollapsedChanged;
-    return onIsCollapsedChanged;
+    static FOnDisplayOptionsChanged onDisplayOptionsChanged;
+    return onDisplayOptionsChanged;
 }
 
 UOdysseyLayer::FOnParentChanged&
@@ -170,15 +170,15 @@ UOdysseyLayer::IsLockedChanged()
 }
 
 void
-UOdysseyLayer::IsExpandedChanged()
+UOdysseyLayer::DisplayChildrenChanged()
 {
-    OnIsExpandedChanged().Broadcast(this);
+    OnDisplayChildrenChanged().Broadcast(this);
 }
 
 void
-UOdysseyLayer::IsCollapsedChanged()
+UOdysseyLayer::DisplayOptionsChanged()
 {
-    OnIsCollapsedChanged().Broadcast(this);
+    OnDisplayOptionsChanged().Broadcast(this);
 }
 
 void
@@ -213,10 +213,10 @@ UOdysseyLayer::PropertyChanged(const FName& iPropertyName)
         IsActivatedChanged();
     if ( iPropertyName == "IsLocked" )
         IsLockedChanged();
-    if ( iPropertyName == "IsExpanded" )
-        IsExpandedChanged();
-    if ( iPropertyName == "IsCollapsed" )
-        IsCollapsedChanged();
+    if ( iPropertyName == "DisplayChildren" )
+        DisplayChildrenChanged();
+    if ( iPropertyName == "DisplayOptions" )
+        DisplayOptionsChanged();
     if ( iPropertyName == "Parent" )
         ParentChanged();
     if ( iPropertyName == "Children" )
@@ -256,11 +256,22 @@ UOdysseyLayer::GetMediaProvider(uint32 iFrameIndex) const
 }
 
 bool
-UOdysseyLayer::GetIsLocked(bool iIgnoreParentState) const
+UOdysseyLayer::GetIsActivatedRecursively() const
 {
-    if (iIgnoreParentState)
-        return IsLocked;
+    const UOdysseyLayer* layer = this;
+    while(layer)
+    {
+        if (!layer->IsActivated)
+            return false;
+        layer = layer->Parent;
+    }
 
+    return true;
+}
+
+bool
+UOdysseyLayer::GetIsLockedRecursively() const
+{
     const UOdysseyLayer* layer = this;
     while(layer)
     {
@@ -270,10 +281,4 @@ UOdysseyLayer::GetIsLocked(bool iIgnoreParentState) const
     }
 
     return false;
-}
-
-void
-UOdysseyLayer::SetIsLocked(bool Value)
-{
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "IsLocked", Value);
 }

@@ -65,3 +65,13 @@ UOdysseyTextureLayer::GetImageRenderingRects() const
 
     return layerStack->GetImageRenderingRects();
 }
+
+UTexture2D*
+UOdysseyTextureLayer::GetTexture() const
+{
+	UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+    if(!layerStack)
+        return nullptr;
+
+	return layerStack->GetTexture();
+}

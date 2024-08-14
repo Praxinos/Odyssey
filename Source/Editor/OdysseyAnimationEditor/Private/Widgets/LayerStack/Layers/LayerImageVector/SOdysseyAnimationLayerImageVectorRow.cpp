@@ -131,7 +131,7 @@ SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
             .Padding(FMargin(0, 0, 1.f, 0))
             [
                 SNew(SNumericEntryBox<int>)
-                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageVector->GetIsLocked();})
+                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageVector->GetIsLockedRecursively();})
                 .Value_Lambda([this]() { return (int)(mAnimationLayerImageVector->Opacity * 100.f + 0.5f);})
                 .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
                 .AllowSpin(true)
@@ -152,7 +152,7 @@ SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
             .VAlign(VAlign_Center)
             [
                 SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageVector->GetIsLocked();})
+                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageVector->GetIsLockedRecursively();})
                 .CurrentValue_Lambda([this](){ return (int32)mAnimationLayerImageVector->BlendMode;})
                 .ContentPadding(FMargin(0))
                 .OnEnumSelectionChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnBlendModeComboBoxChanged)
@@ -171,7 +171,7 @@ TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorRow::GenerateTimelineWidget()
 {
     return SNew(SOdysseyAnimationLayerImageVectorTimeline, GetExtension(), mAnimationLayerImageVector)
-        .IsCollapsed(this, &SOdysseyAnimationLayerImageVectorRow::IsCollapsed);
+        .DisplayOptions(this, &SOdysseyAnimationLayerImageVectorRow::DisplayOptions);
 }
 
 void
@@ -198,7 +198,7 @@ SOdysseyAnimationLayerImageVectorRow::OnLightTableCheckStateChanged(ECheckBoxSta
 void
 SOdysseyAnimationLayerImageVectorRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
-    if ( mAnimationLayerImageVector->GetIsLocked() )
+    if ( mAnimationLayerImageVector->GetIsLockedRecursively() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard
@@ -209,7 +209,7 @@ SOdysseyAnimationLayerImageVectorRow::OnOpacityValueCommitted(int iValue, ETextC
 void
 SOdysseyAnimationLayerImageVectorRow::OnOpacityValueChanged(int iValue)
 {
-    if ( mAnimationLayerImageVector->GetIsLocked() )
+    if ( mAnimationLayerImageVector->GetIsLockedRecursively() )
         return;
 
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "Opacity", iValue / 100.f, EPropertyChangeType::Interactive);
@@ -249,7 +249,7 @@ SOdysseyAnimationLayerImageVectorRow::GetLightTableIsChecked() const
 void
 SOdysseyAnimationLayerImageVectorRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
-    if ( mAnimationLayerImageVector->GetIsLocked() )
+    if ( mAnimationLayerImageVector->GetIsLockedRecursively() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard
@@ -266,7 +266,7 @@ SOdysseyAnimationLayerImageVectorRow::GetLightTableVisibility() const
 EVisibility
 SOdysseyAnimationLayerImageVectorRow::GetCollapsedOpacityVisibility() const
 {
-    return IsCollapsed() ? EVisibility::Visible : EVisibility::Collapsed;
+    return DisplayOptions() ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 #undef LOCTEXT_NAMESPACE

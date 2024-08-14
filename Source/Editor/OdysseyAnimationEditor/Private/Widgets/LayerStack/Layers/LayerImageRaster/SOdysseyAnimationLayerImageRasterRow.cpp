@@ -121,7 +121,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
             .Padding(FMargin(0, 0, 1.f, 0))
             [
                 SNew(SNumericEntryBox<int>)
-                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageRaster->GetIsLocked();})
+                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageRaster->GetIsLockedRecursively();})
                 .Value_Lambda([this]() { return (int)(mAnimationLayerImageRaster->Opacity * 100.f + 0.5f);})
                 .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
                 .AllowSpin(true)
@@ -142,7 +142,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
             .VAlign(VAlign_Center)
             [
                 SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageRaster->GetIsLocked();})
+                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageRaster->GetIsLockedRecursively();})
                 .CurrentValue_Lambda([this](){ return (int32)mAnimationLayerImageRaster->BlendMode;})
                 .ContentPadding(FMargin(0))
                 .OnEnumSelectionChanged(this, &SOdysseyAnimationLayerImageRasterRow::OnBlendModeComboBoxChanged)
@@ -161,7 +161,7 @@ TSharedRef<SWidget>
 SOdysseyAnimationLayerImageRasterRow::GenerateTimelineWidget()
 {
     return SNew(SOdysseyAnimationLayerImageRasterTimeline, GetExtension(), mAnimationLayerImageRaster)
-        .IsCollapsed(this, &SOdysseyAnimationLayerImageRasterRow::IsCollapsed);
+        .DisplayOptions(this, &SOdysseyAnimationLayerImageRasterRow::DisplayOptions);
 }
 
 void
@@ -180,7 +180,7 @@ SOdysseyAnimationLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged(ECheckBox
 void
 SOdysseyAnimationLayerImageRasterRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
-    if ( mAnimationLayerImageRaster->GetIsLocked() )
+    if ( mAnimationLayerImageRaster->GetIsLockedRecursively() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard
@@ -191,7 +191,7 @@ SOdysseyAnimationLayerImageRasterRow::OnOpacityValueCommitted(int iValue, ETextC
 void
 SOdysseyAnimationLayerImageRasterRow::OnOpacityValueChanged(int iValue)
 {
-    if ( mAnimationLayerImageRaster->GetIsLocked() )
+    if ( mAnimationLayerImageRaster->GetIsLockedRecursively() )
         return;
 
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "Opacity", iValue / 100.f, EPropertyChangeType::Interactive);
@@ -225,7 +225,7 @@ SOdysseyAnimationLayerImageRasterRow::GetIsAlphaLockedIsChecked() const
 void
 SOdysseyAnimationLayerImageRasterRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
-    if ( mAnimationLayerImageRaster->GetIsLocked() )
+    if ( mAnimationLayerImageRaster->GetIsLockedRecursively() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard
@@ -236,7 +236,7 @@ SOdysseyAnimationLayerImageRasterRow::OnBlendModeComboBoxChanged(int32 iValue, E
 EVisibility
 SOdysseyAnimationLayerImageRasterRow::GetCollapsedOpacityVisibility() const
 {
-    return IsCollapsed() ? EVisibility::Visible : EVisibility::Collapsed;
+    return DisplayOptions() ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 EVisibility

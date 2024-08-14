@@ -64,7 +64,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakCell()
     if (!currentLayer)
         return;
 
-    if (currentLayer->GetIsLocked())
+    if (currentLayer->GetIsLockedRecursively())
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = currentLayer->GetCellsContainer();
@@ -101,7 +101,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark()
     if (!currentLayer)
         return;
 
-    if (currentLayer->GetIsLocked())
+    if (currentLayer->GetIsLockedRecursively())
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = currentLayer->GetCellsContainer();
@@ -155,7 +155,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark(int iMarkId)
     if (!currentLayer)
         return;
 
-    if (currentLayer->GetIsLocked())
+    if (currentLayer->GetIsLockedRecursively())
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = currentLayer->GetCellsContainer();
@@ -215,7 +215,7 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveCellMark()
     if (!layer)
         return false;
 
-    if (layer->GetIsLocked())
+    if (layer->GetIsLockedRecursively())
         return false;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -252,7 +252,7 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_SetCellMark(int iMarkId)
     if (!layer)
         return false;
 
-    if (layer->GetIsLocked())
+    if (layer->GetIsLockedRecursively())
         return false;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();

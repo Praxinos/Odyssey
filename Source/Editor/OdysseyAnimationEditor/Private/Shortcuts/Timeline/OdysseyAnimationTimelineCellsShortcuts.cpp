@@ -105,7 +105,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Cut()
     if (!layer)
         return;
 
-    if (layer->GetIsLocked())
+    if (layer->GetIsLockedRecursively())
     {
         Action_Copy();
         return;
@@ -132,7 +132,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Paste()
     if (!layer)
         return;
 
-    if (layer->GetIsLocked())
+    if (layer->GetIsLockedRecursively())
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -180,7 +180,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
     if (!layer)
         return;
 
-    if (layer->GetIsLocked())
+    if (layer->GetIsLockedRecursively())
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -216,7 +216,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
     if (!layer)
         return;
 
-    if (layer->GetIsLocked())
+    if (layer->GetIsLockedRecursively())
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -278,7 +278,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellLength()
     if (!layer)
         return;
 
-    if (layer->GetIsLocked())
+    if (layer->GetIsLockedRecursively())
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -323,7 +323,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellLength()
     if (!layer)
         return;
 
-    if (layer->GetIsLocked())
+    if (layer->GetIsLockedRecursively())
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -368,7 +368,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellLength()
     if (!layer)
         return;
 
-    if (layer->GetIsLocked())
+    if (layer->GetIsLockedRecursively())
         return;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -466,7 +466,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Cut()
     if (!layer)
         return false;
 
-    if (layer->GetIsLocked())
+    if (layer->GetIsLockedRecursively())
         return false;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -487,7 +487,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Paste()
     if (!layer)
         return false;
 
-    if (layer->GetIsLocked())
+    if (layer->GetIsLockedRecursively())
         return false;
 
     FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
@@ -520,7 +520,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Delete()
     if (!layer)
         return false;
 
-    if (layer->GetIsLocked())
+    if (layer->GetIsLockedRecursively())
         return false;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -542,7 +542,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell()
     if (!layer)
         return false;
 
-    if (layer->GetIsLocked())
+    if (layer->GetIsLockedRecursively())
         return false;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -582,7 +582,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_IncreaseCellLength()
     if (!layer)
         return false;
 
-    if (layer->GetIsLocked())
+    if (layer->GetIsLockedRecursively())
         return false;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -611,7 +611,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_DecreaseCellLength()
     if (!layer)
         return false;
 
-    if (layer->GetIsLocked())
+    if (layer->GetIsLockedRecursively())
         return false;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();
@@ -640,7 +640,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_SetCellLength()
     if (!layer)
         return false;
 
-    if (layer->GetIsLocked())
+    if (layer->GetIsLockedRecursively())
         return false;
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = layer->GetCellsContainer();

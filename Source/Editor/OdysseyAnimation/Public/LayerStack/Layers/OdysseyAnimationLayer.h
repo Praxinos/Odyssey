@@ -43,10 +43,10 @@ public:
     virtual TSharedPtr<FOdysseyAnimationCellsContainer> GetCellsContainer() const { return nullptr; }
 
 	UFUNCTION(BlueprintCallable, Category="LayerStack")
-    int GetPreBehaviourFrame(EOdysseyAnimationLayerImagePostBehaviour iBehaviour, int iFrame) const;
+    int GetPreBehaviourFrame(EOdysseyAnimationLayerImagePostBehaviour Behaviour, int Frame) const;
 
 	UFUNCTION(BlueprintCallable, Category="LayerStack")
-    int GetPostBehaviourFrame(EOdysseyAnimationLayerImagePostBehaviour iBehaviour, int iFrame) const;
+    int GetPostBehaviourFrame(EOdysseyAnimationLayerImagePostBehaviour Behaviour, int Frame) const;
     
 protected:
     //Property changes

@@ -25,6 +25,10 @@ protected:
     virtual void ChildrenChanged() override;
 
 public:
+	UFUNCTION(BlueprintPure, Category="Odyssey | LayerStack")
+	UTexture2D* GetTexture() const;
+
+public:
 	//FOdysseyImageRenderingAbility overrides
 	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
 	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const override;

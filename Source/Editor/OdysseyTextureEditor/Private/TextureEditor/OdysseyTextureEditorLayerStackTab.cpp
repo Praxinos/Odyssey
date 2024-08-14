@@ -454,7 +454,7 @@ FOdysseyTextureEditorLayerStackTab::CreateNewLayer()
         UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
         if (currentLayer)
         {
-            if (currentLayer->CanHaveChildren && currentLayer->IsExpanded)
+            if (currentLayer->CanHaveChildren && currentLayer->DisplayChildren)
             {
                 layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), currentLayer);
             }
@@ -487,7 +487,7 @@ FOdysseyTextureEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
     if ( !layerStack->CurrentLayer )
         return;
         
-    if ( layerStack->CurrentLayer->GetIsLocked() )
+    if ( layerStack->CurrentLayer->GetIsLockedRecursively() )
         return;
 
     if ( !FOdysseyObjectEditorUtils::HasProperty(layerStack->CurrentLayer.Get(), "Opacity") )

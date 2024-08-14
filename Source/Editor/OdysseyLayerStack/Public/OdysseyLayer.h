@@ -44,15 +44,15 @@ public:
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsLockedChanged, UOdysseyLayer*)
 
-    /* IsExpandedChanged
+    /* DisplayChildrenChanged
      * - concerned Child 
      */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsExpandedChanged, UOdysseyLayer*);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayChildrenChanged, UOdysseyLayer*);
 
-    /* IsCollapsedChanged
+    /* DisplayOptionsChanged
      * - concerned Child 
      */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsCollapsedChanged, UOdysseyLayer*);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayOptionsChanged, UOdysseyLayer*);
 
     /* ParentChanged
      * - concerned Child
@@ -69,8 +69,8 @@ public:
     static FOnNameChanged& OnNameChanged();
     static FOnIsActivatedChanged& OnIsActivatedChanged();
     static FOnIsLockedChanged& OnIsLockedChanged();
-    static FOnIsExpandedChanged& OnIsExpandedChanged();
-    static FOnIsCollapsedChanged& OnIsCollapsedChanged();
+    static FOnDisplayChildrenChanged& OnDisplayChildrenChanged();
+    static FOnDisplayOptionsChanged& OnDisplayOptionsChanged();
     static FOnParentChanged& OnParentChanged();
     static FOnChildrenChanged& OnChildrenChanged();
     static FSimpleMulticastDelegate& OnMediaChanged();
@@ -160,7 +160,7 @@ public:
      * @return TSet<UClass*> 
      */
     UFUNCTION(BlueprintPure, Category = "LayerStack" )
-    virtual TSet<UClass*> GetMergeLayerTypesFromTypes(TSet<UClass*> iLayerTypes) const;
+    virtual TSet<UClass*> GetMergeLayerTypesFromTypes(TSet<UClass*> LayerTypes) const;
 
     /**
      * @brief Merges the given layers into this layer
@@ -168,9 +168,6 @@ public:
      */
     UFUNCTION(BlueprintCallable, Category = "LayerStack")
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers);
-    
-    UFUNCTION(BlueprintCallable, Category="LayerStack")
-    void SetIsLocked(bool Value);
 
 public:
     // Getters
@@ -182,7 +179,10 @@ public:
     UOdysseyLayerStack* GetLayerStack() const;
 
     UFUNCTION(BlueprintPure, Category="LayerStack")
-    bool GetIsLocked(bool IgnoreParentState = false) const;
+    bool GetIsActivatedRecursively() const;
+
+    UFUNCTION(BlueprintPure, Category="LayerStack")
+    bool GetIsLockedRecursively() const;
 
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
 
@@ -191,8 +191,8 @@ protected:
     virtual void NameChanged();
     virtual void IsActivatedChanged();
     virtual void IsLockedChanged();
-    virtual void IsExpandedChanged();
-    virtual void IsCollapsedChanged();
+    virtual void DisplayChildrenChanged();
+    virtual void DisplayOptionsChanged();
     virtual void ParentChanged();
     virtual void ChildrenChanged();
 
@@ -226,8 +226,6 @@ public:
 
 protected:
     //Instance properties (protected)
-    UPROPERTY(EditInstanceOnly, Category="LayerStack|Layer")
-    bool IsLocked = false;
 
 public:
     //Instance properties
@@ -237,11 +235,14 @@ public:
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="LayerStack|Layer")
     bool IsActivated = true;
 
-    UPROPERTY(config, BlueprintReadWrite, Category="LayerStack|Layer", NonTransactional)
-    bool IsExpanded = true; //Displays children or not
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="LayerStack|Layer")
+    bool IsLocked = false;
 
-    UPROPERTY(config, BlueprintReadWrite, Category="LayerStack|Layer", NonTransactional)
-    bool IsCollapsed = false; //Is it in "small" mode (hiding some options)
+    UPROPERTY(BlueprintReadWrite, Category="LayerStack|Layer")
+    bool DisplayChildren = true;
+
+    UPROPERTY(BlueprintReadWrite, Category="LayerStack|Layer")
+    bool DisplayOptions = true;
 
     UPROPERTY()
     UOdysseyLayer* Parent;

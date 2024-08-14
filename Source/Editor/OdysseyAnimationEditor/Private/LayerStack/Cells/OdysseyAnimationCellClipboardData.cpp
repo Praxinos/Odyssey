@@ -56,7 +56,7 @@ FOdysseyAnimationCellClipboardData::Paste(UOdysseyAnimationLayer* iLayer, int iF
 bool
 FOdysseyAnimationCellClipboardData::CanPaste(UOdysseyAnimationLayer* iLayer) const
 {
-    if (iLayer->GetIsLocked())
+    if (iLayer->GetIsLockedRecursively())
         return false;
     //TODO: check if iLayer cells types are compatible with the copied cells
     TSharedPtr<FOdysseyAnimationCellsContainer> cellContainer = iLayer->GetCellsContainer();

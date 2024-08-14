@@ -57,7 +57,7 @@ FOdysseyLayerStackClipboardData::Paste(UOdysseyLayerStack* iLayerStack) const
     UOdysseyLayer* parent = currentLayer->GetParent();
     int index = currentLayer->GetIndexInParent();
 
-    if (currentLayer->CanHaveChildren && currentLayer->IsExpanded)
+    if (currentLayer->CanHaveChildren && currentLayer->DisplayChildren)
         pastedLayers = iLayerStack->CopyLayers(mLayers, currentLayer);
     else
 		pastedLayers = iLayerStack->CopyLayers(mLayers, parent, index);

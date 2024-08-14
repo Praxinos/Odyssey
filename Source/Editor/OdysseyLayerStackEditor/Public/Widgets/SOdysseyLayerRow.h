@@ -43,7 +43,7 @@ protected:
 	virtual TSharedRef<SWidget> GenerateHeaderWidget();
     virtual TSharedRef<SWidget> GenerateOptionsWidget();
     TSharedRef<SWidget> GenerateExpandableHeaderWidget();
-	TSharedRef<SWidget> GenerateIsCollapsedWidget();
+	TSharedRef<SWidget> GenerateDisplayOptionsWidget();
     TSharedRef<SWidget> GenerateIsActivatedWidget();
     TSharedRef<SWidget> GenerateIsLockedWidget();
     
@@ -55,7 +55,7 @@ protected:
 	void OnLayerNameCommited(const FText& iText, ETextCommit::Type iType);
     FText GetLayerName() const;
     FSlateFontInfo GetLayerNameFont() const;
-    bool IsCollapsed() const;
+    bool DisplayOptions() const;
     
     EVisibility OptionsWidgetVisibility() const;
 
@@ -95,8 +95,8 @@ protected:
 
 
 private:
-    void OnIsCollapsedCheckBoxStateChanged(ECheckBoxState iState);
-    ECheckBoxState GetIsCollapsedCheckBoxState() const;
+    void OnDisplayOptionsCheckBoxStateChanged(ECheckBoxState iState);
+    ECheckBoxState GetDisplayOptionsCheckBoxState() const;
     EItemDropZone ComputeItemDropZoneForLeaf(FVector2D iLocalPointerPos, FVector2D iLocalSize, bool iCanHaveChildren, bool iIsExpanded);
 
 private:

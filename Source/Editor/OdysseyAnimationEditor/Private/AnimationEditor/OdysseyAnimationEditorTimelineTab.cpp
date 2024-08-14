@@ -596,7 +596,7 @@ FOdysseyAnimationEditorTimelineTab::CreateNewLayer()
         UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
         if (currentLayer)
         {
-            if (currentLayer->CanHaveChildren && currentLayer->IsExpanded)
+            if (currentLayer->CanHaveChildren && currentLayer->DisplayChildren)
             {
                 layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), currentLayer);
             }
@@ -640,7 +640,7 @@ FOdysseyAnimationEditorTimelineTab::ChangeLayerOpacity( float iOpacity )
     if ( !layerStack->CurrentLayer )
         return;
 
-    if ( layerStack->CurrentLayer->GetIsLocked() )
+    if ( layerStack->CurrentLayer->GetIsLockedRecursively() )
         return;
 
     if ( !FOdysseyObjectEditorUtils::HasProperty(layerStack->CurrentLayer.Get(), "Opacity") )

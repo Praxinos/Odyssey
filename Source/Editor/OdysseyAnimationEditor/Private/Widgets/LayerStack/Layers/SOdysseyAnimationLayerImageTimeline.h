@@ -23,9 +23,9 @@ public:
     SOdysseyAnimationLayerImageTimeline();
 
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageTimeline)
-        : _IsCollapsed(false)
+        : _DisplayOptions(false)
         {}
-        SLATE_ATTRIBUTE(bool, IsCollapsed)
+        SLATE_ATTRIBUTE(bool, DisplayOptions)
     SLATE_END_ARGS()
 
 protected:
@@ -61,7 +61,7 @@ protected:
 
     FOptionalSize GetCellsHeight() const;
     FOptionalSize GetLightTableHeight() const;
-    bool IsCollapsed() const;
+    bool DisplayOptions() const;
 
     bool GetShowCellsHandles() const;
 
@@ -109,7 +109,7 @@ protected:
     bool mIsDraggingOver;
     eDragState mDragState;
     int mDragPosition;
-    TAttribute<bool> mIsCollapsed;
+    TAttribute<bool> mDisplayOptions;
 
     TSharedPtr<FOdysseyAnimationTimelineCellsShortcuts> mAnimationTimelineCellsShortcuts;
 };

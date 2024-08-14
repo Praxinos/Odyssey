@@ -68,7 +68,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToNextLayer()
         isHidden = parents.ContainsByPredicate(
             [](UOdysseyLayer* iLayer)
             {
-                return !iLayer->IsExpanded;
+                return !iLayer->DisplayChildren;
             }
         );
     }
@@ -107,7 +107,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToPreviousLayer()
         isHidden = parents.ContainsByPredicate(
             [](UOdysseyLayer* iLayer)
             {
-                return !iLayer->IsExpanded;
+                return !iLayer->DisplayChildren;
             }
         );
     }
