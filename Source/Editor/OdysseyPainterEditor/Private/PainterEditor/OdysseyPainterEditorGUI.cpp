@@ -132,6 +132,8 @@ FOdysseyPainterEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
     MAP_ACTION(painterEditorCommands.CopyCurrentSelection, CopyCurrentSelection)
     MAP_ACTION(painterEditorCommands.CutCurrentSelection, CutCurrentSelection)
     MAP_ACTION(painterEditorCommands.PasteCurrentSelection, PasteCurrentSelection)
+    MAP_ACTION(painterEditorCommands.PasteCurrentSelectionInNewLayer, PasteCurrentSelectionInNewLayer)
+    MAP_ACTION(painterEditorCommands.InvertSelection, InvertSelection)
 
     MAP_ACTION(painterEditorCommands.ToggleEraserButton, ToggleEraserButton)
 
@@ -461,6 +463,11 @@ void FOdysseyPainterEditorGUI::PasteCurrentSelection()
 void FOdysseyPainterEditorGUI::PasteCurrentSelectionInNewLayer()
 {
     mEditor->PasteCopiedBlockToNewLayer();
+}
+
+void FOdysseyPainterEditorGUI::InvertSelection()
+{
+    mEditor->RasterSelection()->Invert();
 }
 
 #undef LOCTEXT_NAMESPACE

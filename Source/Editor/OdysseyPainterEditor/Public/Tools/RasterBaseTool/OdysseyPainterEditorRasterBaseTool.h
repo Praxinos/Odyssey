@@ -47,6 +47,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterBaseTool : public UOdy
         void PasteSelection();
         void PasteSelectionInNewLayer();
         void ClearSelection();
+        void InvertSelection();
 
 protected:
         bool mHasContextMenu;

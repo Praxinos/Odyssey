@@ -61,6 +61,7 @@ protected:
     void CutCurrentSelection();
     void PasteCurrentSelection();
     void PasteCurrentSelectionInNewLayer();
+    void InvertSelection();
 
     void ToggleEraserButton();
 

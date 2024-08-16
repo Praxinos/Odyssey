@@ -159,6 +159,15 @@ void UOdysseyPainterEditorRasterBaseTool::ExtendContextMenu(FMenuBuilder& menu)
         );
 
         menu.AddMenuEntry(
+            LOCTEXT("raster-tool.object-context-menu.clear-selection.name", "Clear Selection")
+            , LOCTEXT("raster-tool.object-context-menu.clear-selection.tooltip", "Clear Selection")
+            , FSlateIcon()
+            , FUIAction(
+                FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::ClearSelection)
+                , FCanExecuteAction::CreateLambda([this]() { return (mEditor && !mEditor->RasterSelection()->IsEmpty()); }))
+        );
+
+        menu.AddMenuEntry(
             LOCTEXT("raster-tool.object-context-menu.copy-selection.name", "Copy Selection")
             , LOCTEXT("raster-tool.object-context-menu.copy-selection.tooltip", "Copy Selection")
             , FSlateIcon()
@@ -185,14 +194,6 @@ void UOdysseyPainterEditorRasterBaseTool::ExtendContextMenu(FMenuBuilder& menu)
               , FCanExecuteAction::CreateLambda([this]() { return (mEditor && mEditor->HasCopyBlock()); }))
         );
 
-        menu.AddMenuEntry(
-            LOCTEXT("raster-tool.object-context-menu.clear-selection.name", "Clear Selection")
-            , LOCTEXT("raster-tool.object-context-menu.clear-selection.tooltip", "Clear Selection")
-            , FSlateIcon()
-            , FUIAction(
-                FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::ClearSelection)
-                , FCanExecuteAction::CreateLambda([this]() { return (mEditor && !mEditor->RasterSelection()->IsEmpty()); }))
-        );
 
         menu.AddMenuEntry(
             LOCTEXT("raster-tool.object-context-menu.paste-selection-in-new-layer.name", "Paste Selection In New Layer")
@@ -207,7 +208,10 @@ void UOdysseyPainterEditorRasterBaseTool::ExtendContextMenu(FMenuBuilder& menu)
             LOCTEXT("raster-tool.object-context-menu.invert-selection.name", "Invert Selection")
             , LOCTEXT("raster-tool.object-context-menu.invert-selection.tooltip", "Invert Selection")
             , FSlateIcon()
-            , FUIAction());
+            , FUIAction(
+                FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::InvertSelection)
+                , FCanExecuteAction::CreateLambda([this]() { return (mEditor && !mEditor->RasterSelection()->IsEmpty()); }))
+        );
     }
 }
 
@@ -259,6 +263,12 @@ void UOdysseyPainterEditorRasterBaseTool::ClearSelection()
 {
     if (mEditor)
         mEditor->RasterSelection()->Clear();
+}
+
+void UOdysseyPainterEditorRasterBaseTool::InvertSelection()
+{
+    if (mEditor)
+        mEditor->RasterSelection()->Invert();
 }
 
 

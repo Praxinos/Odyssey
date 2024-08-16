@@ -20,6 +20,7 @@ public:
     void Init(int iWidth, int iHeight);
     void Add( const TArray<FVector2D>& iPolygon );
     void Substract( const TArray<FVector2D>& iPolygon );
+    void Invert();
     void Clear();
     void Reset();
 

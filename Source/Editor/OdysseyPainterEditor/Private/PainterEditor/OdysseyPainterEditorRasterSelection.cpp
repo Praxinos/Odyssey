@@ -94,6 +94,32 @@ FOdysseyPainterEditorRasterSelection::Substract(const TArray<FVector2D>& iPolygo
     mOnChanged.Broadcast();
 }
 
+void FOdysseyPainterEditorRasterSelection::Invert()
+{
+    if( !mBlock )
+        return;
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_GF);
+    ctx.FilterInto(
+        [this](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
+        {
+            for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+            {
+                if (iSrcPixel.GreyF() == 0.f)
+                    iDstPixel.SetGreyF(1.f);
+                else
+                    iDstPixel.SetGreyF(0.f);
+            }
+        }
+        , *mBlock
+        , *mBlock
+            );
+
+    ctx.Finish();
+
+    RefreshHUD();
+}
+
 ::ULIS::FRectI
 FOdysseyPainterEditorRasterSelection::GetMaskBoundingRect() const
 {

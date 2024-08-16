@@ -65,6 +65,9 @@ public:
     /** Action for pasting the current selection in a new layer */
     TSharedPtr<FUICommandInfo> PasteCurrentSelectionInNewLayer;
 
+    /** Action for inverting the current raster selection */
+    TSharedPtr<FUICommandInfo> InvertSelection;
+
     //Viewport Actions
 
     /** Action to pan/Zoom the viewport */
