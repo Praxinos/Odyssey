@@ -70,9 +70,9 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
         friend class FOdysseyTextureLayerImageVectorImport;
 
     public:
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Texture | LayerStack")
+        UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
         bool IsWireframe = false;
 
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Texture | LayerStack")
+        UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
         bool IsColored = true;
 };

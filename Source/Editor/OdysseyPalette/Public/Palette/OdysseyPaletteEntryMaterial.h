@@ -19,6 +19,6 @@ public:
     UOdysseyPaletteEntryMaterial();
 
 public:
-    UPROPERTY(EditAnywhere, Category = Palette)
+    UPROPERTY(EditAnywhere, Category=Palette)
     TArray<UMaterial*> EntryMaterial;
 };

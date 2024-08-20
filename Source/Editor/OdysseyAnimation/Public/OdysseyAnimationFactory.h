@@ -10,7 +10,7 @@
 #include "OdysseyAnimationFactory.generated.h"
 
 UCLASS()
-class UOdysseyAnimationFactory 
+class ODYSSEYANIMATION_API UOdysseyAnimationFactory 
     : public UFactory
 {
     GENERATED_UCLASS_BODY()

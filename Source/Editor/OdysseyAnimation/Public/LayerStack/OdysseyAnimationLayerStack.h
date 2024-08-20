@@ -22,7 +22,7 @@ public:
     UOdysseyAnimationLayerStack();
 
 public:
-    UFUNCTION(BlueprintPure, Category="LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
     UOdysseyAnimation* GetAnimation() const;
 
 public:
@@ -32,7 +32,7 @@ public:
      * 
      * @return FInt32Range 
      */
-	UFUNCTION(BlueprintCallable, Category="LayerStack")
+	UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     FInt32Range GetFrameRange() const;
 
 public:

@@ -37,51 +37,51 @@ public:
 
 public:
     //Getters
-	UFUNCTION(BlueprintPure, Category="LayerStack")
+	UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     UOdysseyAnimation* GetAnimation() const;
 
-	UFUNCTION(BlueprintCallable, Category="LayerStack")
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     virtual FInt32Range GetFrameRange() const;
 
-	UFUNCTION(BlueprintCallable, Category="LayerStack")
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     int GetPreBehaviourFrame(EOdysseyAnimationLayerImagePostBehaviour Behaviour, int Frame) const;
 
-	UFUNCTION(BlueprintCallable, Category="LayerStack")
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     int GetPostBehaviourFrame(EOdysseyAnimationLayerImagePostBehaviour Behaviour, int Frame) const;
 
 public:
 	//Cells
-	UFUNCTION(BlueprintCallable, Category="LayerStack")
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
 	const TArray<UClass*>& GetSupportedCellTypes() const;
 
-	UFUNCTION(BlueprintCallable, Category="LayerStack")
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
 	const TArray<UOdysseyAnimationCell*>& GetCells() const;
 
-	UFUNCTION(BlueprintCallable, Category="LayerStack")
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
 	UOdysseyAnimationCell* GetCellAtFrame(int Frame) const;
 	
-	UFUNCTION(BlueprintCallable, Category="LayerStack")
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
 	bool HasCellAtFrame(int Frame) const;
 
-	UFUNCTION(BlueprintCallable, Category="LayerStack")
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
 	UOdysseyAnimationCell* AddCell(TSubclassOf<UOdysseyAnimationCell> CellType, int Index = -1 );
 
-	UFUNCTION(BlueprintCallable, Category="LayerStack")
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
 	TArray<UOdysseyAnimationCell*> AddCells(TSubclassOf<UOdysseyAnimationCell> CellType, int Index = -1, int Count = 1 );
 
-	UFUNCTION(BlueprintCallable, Category="LayerStack")
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
 	void RemoveCell(UOdysseyAnimationCell* Cell); //Prevent Empty Layer ?
 
-	UFUNCTION(BlueprintCallable, Category="LayerStack")
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
 	void RemoveCells(const TArray<UOdysseyAnimationCell*>& Cells); //Prevent Empty Layer ?
 
-	UFUNCTION(BlueprintCallable, Category="LayerStack")
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
 	void RemoveCellAtIndex(int Index);
 
-    UFUNCTION(BlueprintCallable, Category="LayerStack")
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     UOdysseyAnimationCell* CopyCell(UOdysseyAnimationCell* Cell, int Index = -1);
 
-    UFUNCTION(BlueprintCallable, Category="LayerStack")
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     TArray<UOdysseyAnimationCell*> CopyCells(TArray<UOdysseyAnimationCell*> Layers, int Index = -1);
 
 protected:
@@ -116,19 +116,19 @@ protected:
 	TArray<TObjectPtr<UOdysseyAnimationCell>> Cells;
 
 public:
-	UPROPERTY(BlueprintReadOnly, Category="Odyssey|LayerStack")
+	UPROPERTY(BlueprintReadOnly, Category="Odyssey|Layer")
 	TObjectPtr<UClass> DefaultCellClass = nullptr;
 
-	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LayerStack")
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer")
 	int CellsOffset = 0;
 
-    UPROPERTY(BlueprintReadWrite, Category="Odyssey|LayerStack")
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer")
     EOdysseyAnimationLayerImagePostBehaviour PreBehaviour = EOdysseyAnimationLayerImagePostBehaviour::None;
 
-    UPROPERTY(BlueprintReadWrite, Category="Odyssey|LayerStack")
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer")
     EOdysseyAnimationLayerImagePostBehaviour PostBehaviour = EOdysseyAnimationLayerImagePostBehaviour::None;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Odyssey | LayerStack", NonTransactional)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", NonTransactional)
 	FOdysseyAnimationLightTable Lighttable;
 
     FSimpleMulticastDelegate mOnLightTableChanged;

@@ -43,6 +43,6 @@ private:
     void CreateCell( const FName& iCellType);
 
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Animation | LayerStack")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
     bool IsAlphaLocked = false;
 };

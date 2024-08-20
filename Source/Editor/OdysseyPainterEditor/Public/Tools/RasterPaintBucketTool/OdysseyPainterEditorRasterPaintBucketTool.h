@@ -83,17 +83,17 @@ private:
     void OnRasterSelectionChanged();
 
 public:
-    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool)
+    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool)
     EOdysseyRasterPaintBucketToolSource Source = EOdysseyRasterPaintBucketToolSource::CurrentLayer;
-    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool)
+    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool)
     EOdysseyRasterPaintBucketToolColorToleranceSource ColorToleranceSource;
-    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool, meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple="1", Units="Percent") )
+    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool, meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple="1", Units="Percent") )
     float ColorTolerance; //0 - 100%
-    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool, meta=(LinearDeltaSensitivity=1) )
+    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool, meta=(LinearDeltaSensitivity=1) )
     float Expansion; //pixels positive and negative
-    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool, meta=(ClampMin=0, UIMin=0, LinearDeltaSensitivity=1) )
+    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool, meta=(ClampMin=0, UIMin=0, LinearDeltaSensitivity=1) )
     float GapTolerance; //pixels positive only
-    UPROPERTY( EditAnywhere, Category = RasterPaintBucketTool)
+    UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool)
     TArray<FLinearColor> IncludeColors;
     
     UPROPERTY(EditInstanceOnly, Category="Blending", meta=(ShowOnlyInnerProperties))

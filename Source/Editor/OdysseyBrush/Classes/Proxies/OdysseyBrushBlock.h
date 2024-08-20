@@ -62,22 +62,22 @@ struct FOdysseyFontCharacter
 {
     GENERATED_BODY()
 
-    UPROPERTY( BlueprintReadWrite, Category = "Odyssey|Block")
+    UPROPERTY( BlueprintReadWrite, Category="Odyssey|Block")
     int32 StartU;
 
-    UPROPERTY( BlueprintReadWrite, Category = "Odyssey|Block")
+    UPROPERTY( BlueprintReadWrite, Category="Odyssey|Block")
     int32 StartV;
 
-    UPROPERTY( BlueprintReadWrite, Category = "Odyssey|Block")
+    UPROPERTY( BlueprintReadWrite, Category="Odyssey|Block")
     int32 USize;
 
-    UPROPERTY( BlueprintReadWrite, Category = "Odyssey|Block")
+    UPROPERTY( BlueprintReadWrite, Category="Odyssey|Block")
     int32 VSize;
 
-    UPROPERTY( BlueprintReadWrite, Category = "Odyssey|Block")
+    UPROPERTY( BlueprintReadWrite, Category="Odyssey|Block")
     uint8 TextureIndex;
 
-    UPROPERTY( BlueprintReadWrite, Category = "Odyssey|Block")
+    UPROPERTY( BlueprintReadWrite, Category="Odyssey|Block")
     int32 VerticalOffset;
 
     FOdysseyFontCharacter()
@@ -120,7 +120,7 @@ public:
 
     //Blends a color on the whole given Sample. Requires an Odyssey Brush Color input.
 	UFUNCTION(BlueprintPure
-		, Category = "Odyssey|Block"
+		, Category="Odyssey|Block"
 		, meta = (DisplayName = "Blend Block With Color"))
 	static FOdysseyBlockProxy BlendColor( FOdysseyBrushColor Color
 			, FOdysseyBlockProxy Back
@@ -190,7 +190,7 @@ public:
 	//Abscissa represents the actual component value.
 	//Ordinate represents the adjusted component value.
 	UFUNCTION(BlueprintPure
-			, Category = "Odyssey|Block"
+			, Category="Odyssey|Block"
 			, meta = (DisplayName = "Adjust Block RGBA"))
 	static FOdysseyBlockProxy AdjustRGBA(FOdysseyBlockProxy Block
 		, UCurveFloat* CurveR
@@ -204,7 +204,7 @@ public:
 	//Abscissa represents the actual component value.
 	//Ordinate represents the adjusted component value.
 	UFUNCTION(BlueprintPure
-		, Category = "Odyssey|Block"
+		, Category="Odyssey|Block"
 		, meta = (DisplayName = "Adjust Block GreyA"))
 		static FOdysseyBlockProxy AdjustGreyA(FOdysseyBlockProxy Block
 			, UCurveFloat* CurveGrey
@@ -216,7 +216,7 @@ public:
 	//Abscissa represents the actual component value.
 	//Ordinate represents the adjusted component value.
 	UFUNCTION(BlueprintPure
-		, Category = "Odyssey|Block"
+		, Category="Odyssey|Block"
 		, meta = (DisplayName = "Adjust Block HSVA"))
 		static FOdysseyBlockProxy AdjustHSVA(FOdysseyBlockProxy Block
 			, UCurveFloat* CurveH
@@ -229,7 +229,7 @@ public:
 	//Abscissa represents the actual component value.
 	//Ordinate represents the adjusted component value.
 	UFUNCTION(BlueprintPure
-		, Category = "Odyssey|Block"
+		, Category="Odyssey|Block"
 		, meta = (DisplayName = "Adjust Block HSLA"))
 		static FOdysseyBlockProxy AdjustHSLA(FOdysseyBlockProxy Block
 			, UCurveFloat* CurveH
@@ -242,7 +242,7 @@ public:
 	//Abscissa represents the actual component value.
 	//Ordinate represents the adjusted component value.
 	UFUNCTION(BlueprintPure
-		, Category = "Odyssey|Block"
+		, Category="Odyssey|Block"
 		, meta = (DisplayName = "Adjust Block CMYKA"))
 		static FOdysseyBlockProxy AdjustCMYKA(FOdysseyBlockProxy Block
 			, UCurveFloat* CurveC
@@ -256,7 +256,7 @@ public:
 	//Abscissa represents the actual component value.
 	//Ordinate represents the adjusted component value.
 	UFUNCTION(BlueprintPure
-		, Category = "Odyssey|Block"
+		, Category="Odyssey|Block"
 		, meta = (DisplayName = "Adjust Block LabA"))
 		static FOdysseyBlockProxy AdjustLabA(FOdysseyBlockProxy Block
 			, UCurveFloat* CurveL
@@ -292,7 +292,7 @@ public:
     //Requires a Font and a String to return Arrays of width/height of each character.
     //This node compute the box of each character corresponding to the font.
     UFUNCTION( BlueprintPure
-             , Category = "Odyssey|Block" )
+             , Category="Odyssey|Block" )
     static void GetCharactersSize( const UFont* Font, const FString& String, TArray<float>& Width, TArray<float>& Height );
 
     //---

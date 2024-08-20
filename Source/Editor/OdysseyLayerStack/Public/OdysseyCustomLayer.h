@@ -29,7 +29,7 @@ public:
 public:
     //Default properties
     UPROPERTY(EditDefaultsOnly, Category="Layer")
-    FText Category = FText::FromString(TEXT(""));
+    FText Category=FText::FromString(TEXT(""));
 
     UPROPERTY(EditDefaultsOnly, Category="Layer")
     int DisplayOrder = 0;

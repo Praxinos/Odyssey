@@ -46,13 +46,13 @@ public:
     /**
      * @brief Adds an entry of EntryType to the Palette as child of ParentEntry at IndexInParent
      */
-    UFUNCTION(BlueprintCallable, Category = "Palette", meta = (DeterminesOutputType = "EntryType"))
+    UFUNCTION(BlueprintCallable, Category="Palette", meta = (DeterminesOutputType = "EntryType"))
     UOdysseyPaletteEntry* AddEntry(TSubclassOf<UOdysseyPaletteEntry> iEntryType, UOdysseyPaletteEntry* iParentEntry = nullptr, int iIndexInParent = 0);
 
     /**
      * @brief Removes Entry from the Palette
      */
-    UFUNCTION(BlueprintCallable, Category = "Palette")
+    UFUNCTION(BlueprintCallable, Category="Palette")
     void RemoveEntry(UOdysseyPaletteEntry* iEntry);
 
     /**
@@ -60,7 +60,7 @@ public:
      *
      * @param Entries has to be Entries from this Palette
      */
-    UFUNCTION(BlueprintCallable, Category = "Palette")
+    UFUNCTION(BlueprintCallable, Category="Palette")
     void RemoveEntries(TArray<UOdysseyPaletteEntry*> iEntries);
 
     /**
@@ -69,7 +69,7 @@ public:
      * @param Entry
      * @return bool
      */
-    UFUNCTION(BlueprintPure, Category = "Palette")
+    UFUNCTION(BlueprintPure, Category="Palette")
     bool ContainsEntry(const UOdysseyPaletteEntry* iEntry) const;
 
     /**
@@ -77,7 +77,7 @@ public:
      *
      * @return TArray<UOdysseyPaletteEntry*>
      */
-    UFUNCTION(BlueprintPure, Category = "Palette")
+    UFUNCTION(BlueprintPure, Category="Palette")
     const TArray<UOdysseyPaletteEntry*>& GetRootEntries() const;
 
     /**
@@ -85,7 +85,7 @@ public:
      *
      * @return TArray<UOdysseyPaletteEntry*>
      */
-    UFUNCTION(BlueprintPure, Category = "Palette")
+    UFUNCTION(BlueprintPure, Category="Palette")
     TArray<UOdysseyPaletteEntry*> GetEntries() const;
 
     /**
@@ -94,7 +94,7 @@ public:
      * @param Entry has to be a Entry from this Palette
      * @return UOdysseyPaletteEntry*
      */
-    UFUNCTION(BlueprintCallable, Category = "Palette", meta = (DeterminesOutputType = "Entry"))
+    UFUNCTION(BlueprintCallable, Category="Palette", meta = (DeterminesOutputType = "Entry"))
     UOdysseyPaletteEntry* DuplicateEntry(UOdysseyPaletteEntry* iEntry);
 
     /**
@@ -103,7 +103,7 @@ public:
      * @param Entries
      * @return UOdysseyPaletteEntry*
      */
-    UFUNCTION(BlueprintCallable, Category = "Palette", meta = (DeterminesOutputType = "Entry"))
+    UFUNCTION(BlueprintCallable, Category="Palette", meta = (DeterminesOutputType = "Entry"))
     TArray<UOdysseyPaletteEntry*> DuplicateEntries(TArray<UOdysseyPaletteEntry*> iEntries);
 
     /**
@@ -114,7 +114,7 @@ public:
      * @param IndexInParent
      * @return UOdysseyPaletteEntry*
      */
-    UFUNCTION(BlueprintCallable, Category = "Palette", meta = (DeterminesOutputType = "Entry"))
+    UFUNCTION(BlueprintCallable, Category="Palette", meta = (DeterminesOutputType = "Entry"))
     UOdysseyPaletteEntry* CopyEntry(UOdysseyPaletteEntry* iEntry, UOdysseyPaletteEntry* iParentEntry = nullptr, int iIndexInParent = 0);
 
     /**
@@ -125,7 +125,7 @@ public:
      * @param IndexInParent
      * @return UOdysseyPaletteEntry*
      */
-    UFUNCTION(BlueprintCallable, Category = "Palette", meta = (DeterminesOutputType = "Entry"))
+    UFUNCTION(BlueprintCallable, Category="Palette", meta = (DeterminesOutputType = "Entry"))
     TArray<UOdysseyPaletteEntry*> CopyEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdysseyPaletteEntry* iParentEntry = nullptr, int iIndexInParent = 0);
 
     /**
@@ -145,7 +145,7 @@ public:
 	 * @param ParentEntry has to be a Entry from this Palette or nullptr
 	 * @param IndexInParent
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Palette")
+	UFUNCTION(BlueprintCallable, Category="Palette")
 	bool CanMoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdysseyPaletteEntry* iParentEntry) const;
 
     /**
@@ -165,7 +165,7 @@ public:
 	 * @param ParentEntry has to be a Entry from this Palette or nullptr
 	 * @param IndexInParent
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Palette")
+	UFUNCTION(BlueprintCallable, Category="Palette")
 	void MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdysseyPaletteEntry* iParentEntry = nullptr, int iIndexInParent = 0);
 
     void AddSet();

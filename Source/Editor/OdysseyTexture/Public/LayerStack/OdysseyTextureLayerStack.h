@@ -40,7 +40,7 @@ public:
     virtual void PostLoad() override;
 
 public:
-    UFUNCTION(BlueprintPure, Category="LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
     UTexture2D* GetTexture() const;
 
 public:

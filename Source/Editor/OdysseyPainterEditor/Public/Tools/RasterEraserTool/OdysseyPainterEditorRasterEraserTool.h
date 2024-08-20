@@ -116,7 +116,7 @@ protected:
     UPROPERTY( EditAnywhere, Category="Interpolation")
     bool    AdaptativeStep = false;
 
-    UPROPERTY( EditAnywhere, Category = "Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1", DisplayPriority = "0"))
+    UPROPERTY( EditAnywhere, Category="Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1", DisplayPriority = "0"))
     float   Step = 1.0;
 
 protected:

@@ -101,7 +101,7 @@ public:
      * @param Layer
      * @return int
      */
-    UFUNCTION(BlueprintPure, Category = "LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     UOdysseyLayer* GetParent() const;
 
     /**
@@ -110,7 +110,7 @@ public:
      * @param Layer
      * @return int
      */
-    UFUNCTION(BlueprintPure, Category = "LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     TArray<UOdysseyLayer*> GetParents() const;
 
     /**
@@ -119,7 +119,7 @@ public:
      * @param Layer
      * @return int
      */
-    UFUNCTION(BlueprintPure, Category = "LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     const TArray<UOdysseyLayer*>& GetChildren() const;
 
     /**
@@ -128,7 +128,7 @@ public:
      * @param Layer
      * @return int
      */
-    UFUNCTION(BlueprintPure, Category = "LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     TArray<UOdysseyLayer*> GetChildrenRecursively(EGetLayerChildrenMethod Method = EGetLayerChildrenMethod::DepthFirst) const;
 
     /**
@@ -137,7 +137,7 @@ public:
      * @param Layer
      * @return int
      */
-    UFUNCTION(BlueprintPure, Category = "LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     int GetIndexInParent() const;
 
     /**
@@ -147,7 +147,7 @@ public:
      * @param ParentLayer
      * @return bool
      */
-    UFUNCTION(BlueprintPure, Category = "LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool IsChildOf(UOdysseyLayer* Layer) const;
 
     /**
@@ -156,7 +156,7 @@ public:
      * 
      * @return TSet<UClass*> 
      */
-    UFUNCTION(BlueprintPure, Category = "LayerStack" )
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer" )
     virtual TSet<UClass*> GetMergeDefaultLayerTypes() const;
 
     /**
@@ -165,14 +165,14 @@ public:
      * 
      * @return TSet<UClass*> 
      */
-    UFUNCTION(BlueprintPure, Category = "LayerStack" )
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer" )
     virtual TSet<UClass*> GetMergeLayerTypesFromTypes(TSet<UClass*> LayerTypes) const;
 
     /**
      * @brief Merges the given layers into this layer
      * Only works with Layer class being a child of classes returned by GetMergeLayerTypes()
      */
-    UFUNCTION(BlueprintCallable, Category = "LayerStack")
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers);
 
 public:
@@ -181,13 +181,13 @@ public:
 	 * @brief Returns the topmost parent of this node
 	 *
 	 */
-    UFUNCTION(BlueprintPure, Category="LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     UOdysseyLayerStack* GetLayerStack() const;
 
-    UFUNCTION(BlueprintPure, Category="LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool IsActivatedRecursively() const;
 
-    UFUNCTION(BlueprintPure, Category="LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool IsLockedRecursively() const;
 
 public:
@@ -217,23 +217,23 @@ public:
 
 public:
     //Default properties
-    UPROPERTY(EditDefaultsOnly, Category="Layer")
+    UPROPERTY(EditDefaultsOnly, Category="Odyssey|Layer")
     FText LayerTypeName = FText::FromString(TEXT("Unnamed Layer Type"));
 
-    UPROPERTY(EditDefaultsOnly, Category="Layer")
+    UPROPERTY(EditDefaultsOnly, Category="Odyssey|Layer")
     FText DefaultName = FText::FromString(TEXT("Layer"));
 
-    UPROPERTY(EditDefaultsOnly, Category="Layer")
+    UPROPERTY(EditDefaultsOnly, Category="Odyssey|Layer")
 	FText Description = FText::FromString(TEXT(""));
 
-    //UPROPERTY(EditDefaultsOnly, Category="Layer")
+    //UPROPERTY(EditDefaultsOnly, Category="Odyssey|Layer")
     FSlateIcon Icon;
 
-    //UPROPERTY(EditDefaultsOnly, Category="Layer")
+    //UPROPERTY(EditDefaultsOnly, Category="Odyssey|Layer")
     FSlateIcon IconExpanded;
     
     //Defaults Properties
-    UPROPERTY(EditDefaultsOnly, Category="Layer")
+    UPROPERTY(EditDefaultsOnly, Category="Odyssey|Layer")
 	bool CanHaveChildren = false;
 
     UPROPERTY()
@@ -244,24 +244,24 @@ public:
 
 public:
     //Instance properties
-    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="LayerStack|Layer")
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Odyssey|Layer")
     FText Name;
 
-    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="LayerStack|Layer")
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Odyssey|Layer")
     bool IsActivated = true;
 
-    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="LayerStack|Layer")
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Odyssey|Layer")
     bool IsLocked = false;
 
-    UPROPERTY(BlueprintReadWrite, Category="LayerStack|Layer")
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer")
     bool DisplayChildren = true;
 
-    UPROPERTY(BlueprintReadWrite, Category="LayerStack|Layer")
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer")
     bool DisplayOptions = true;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Odyssey | LayerStack")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer")
 	EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Odyssey | LayerStack")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer")
     float Opacity = 1.0f;
 };

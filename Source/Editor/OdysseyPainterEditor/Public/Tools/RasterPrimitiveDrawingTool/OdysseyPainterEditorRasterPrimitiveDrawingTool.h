@@ -76,27 +76,27 @@ protected:
     TSharedPtr<FOdysseyHUDElement> mShapeHUD;
 
 public:
-    UPROPERTY(EditAnywhere, Category = "Shape")
+    UPROPERTY(EditAnywhere, Category="Shape")
     EOdysseyShape SelectedShape;
 
-    UPROPERTY(VisibleInstanceOnly, Category = "Shape", Instanced, meta = (ShowInnerProperties))
+    UPROPERTY(VisibleInstanceOnly, Category="Shape", Instanced, meta = (ShowInnerProperties))
     class UOdysseyShape* SelectedShapeInstance;
 
     UPROPERTY()
     TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
 
-    UPROPERTY(EditAnywhere, Category = "Parameters", meta=(UIMin=0, ClampMin=0, LinearDeltaSensitivity=1))
+    UPROPERTY(EditAnywhere, Category="Parameters", meta=(UIMin=0, ClampMin=0, LinearDeltaSensitivity=1))
     float StrokeWidth = 1.0f;
 
-    UPROPERTY(EditAnywhere, Category = "Parameters")
+    UPROPERTY(EditAnywhere, Category="Parameters")
     bool Antialiasing = true;
 
-    UPROPERTY(EditAnywhere, Category = "Parameters")
+    UPROPERTY(EditAnywhere, Category="Parameters")
     bool SubPixel = true;
 
-    UPROPERTY(EditAnywhere, Category = "Parameters")
+    UPROPERTY(EditAnywhere, Category="Parameters")
     bool Filled = true;
 
-    UPROPERTY(EditInstanceOnly, Category = "Blending", meta = (ShowOnlyInnerProperties))
+    UPROPERTY(EditInstanceOnly, Category="Blending", meta = (ShowOnlyInnerProperties))
     FOdysseyBlendParameters BlendParameters;
 };

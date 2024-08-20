@@ -12,9 +12,9 @@ class ODYSSEYLAYERSTACK_API UOdysseyLayerStackFunctionLibrary : public UBlueprin
     GENERATED_BODY()
 
 public:
-    UFUNCTION(BlueprintCallable, Category="LayerStack")
+    UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     static TArray<UOdysseyLayer*> FilterTopmostLayers(TArray<UOdysseyLayer*> Layers);
 
-    UFUNCTION(BlueprintCallable, Category="LayerStack")
+    UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     static TArray<UOdysseyLayer*> SortLayers(TArray<UOdysseyLayer*> Layers, bool Reverse);
 };

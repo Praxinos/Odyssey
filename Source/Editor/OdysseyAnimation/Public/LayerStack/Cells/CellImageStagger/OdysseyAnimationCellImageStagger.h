@@ -10,8 +10,7 @@
 UENUM(BlueprintType)
 enum class EOdysseyAnimationCellImageStaggerBehaviour : uint8
 {
-	Invalid = 0 UMETA(Hidden), //exists for compatibility reasons when Hold was an option
-	Loop = 1, //needs to be 1 for compatibility reasons when Hold was an option
+	Loop,
 	PingPong
 };
 

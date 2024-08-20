@@ -163,14 +163,14 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
 
     public:
         UPROPERTY( EditAnywhere
-                 , Category = PathEditTool
+                 , Category=PathEditTool
                  , meta = ( ToolTip = "Picking Radius"
                           , ClampMin = "0.0"
                           , UIMin = "0.0" ) )
         double PickingRadius;
 
         UPROPERTY( EditAnywhere
-                 , Category = PathEditTool
+                 , Category=PathEditTool
                  , meta = ( ToolTip = "Widen All Along" ) )
         bool WidenAllAlong;
 };

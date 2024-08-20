@@ -19,6 +19,6 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayer
     GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintPure, Category="Odyssey | LayerStack")
+	UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
 	UTexture2D* GetTexture() const;
 };

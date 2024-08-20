@@ -59,7 +59,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdy
 
     public:
         UPROPERTY( EditAnywhere
-                 , Category = GridTool
+                 , Category=GridTool
                  , meta = ( ToolTip  = "Divisions X"
                           , ClampMin = "1"
                           , ClampMax = "32"
@@ -68,7 +68,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdy
         uint32 DivisionsX;
 
         UPROPERTY( EditAnywhere
-                 , Category = GridTool
+                 , Category=GridTool
                  , meta = ( ToolTip  = "Divisions Y"
                           , ClampMin = "1"
                           , ClampMax = "32"
@@ -77,14 +77,14 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdy
         uint32 DivisionsY;
 
         UPROPERTY( EditAnywhere
-                 , Category = GridTool
+                 , Category=GridTool
                  , meta = ( ToolTip  = "Picking Radius"
                           , ClampMin = "0.0"
                           , UIMin    = "0.0" ) )
         double PickingRadius;
 
         UPROPERTY( EditAnywhere
-                 , Category = GridTool
+                 , Category=GridTool
                  , meta = ( ToolTip  = "World" ) )
         bool World;
 };

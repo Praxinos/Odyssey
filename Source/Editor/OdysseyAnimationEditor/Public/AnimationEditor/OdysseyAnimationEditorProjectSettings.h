@@ -57,9 +57,9 @@ public:
 
 public:
     /** The type of background to draw in the texture editor view port. */
-    UPROPERTY(config, EditAnywhere, EditFixedSize, Category = "Animation Cell Marks Settings", meta=(ForceInlineRow, EditFixedOrder))
+    UPROPERTY(config, EditAnywhere, EditFixedSize, Category="Animation Cell Marks Settings", meta=(ForceInlineRow, EditFixedOrder))
     TArray<FAnimationCellMarkSettings> AnimationCellsMarks;
 
-    UPROPERTY(config, EditAnywhere, Category = "Animation Cell Marks Settings", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple="1", Units="Percent") )
+    UPROPERTY(config, EditAnywhere, Category="Animation Cell Marks Settings", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", Delta = "1", Multiple="1", Units="Percent") )
     float AnimationCellsMarksFillOpacity = 75.f;
 };

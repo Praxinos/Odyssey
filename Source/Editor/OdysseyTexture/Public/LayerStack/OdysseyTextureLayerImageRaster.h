@@ -80,6 +80,6 @@ private:
     TSharedPtr<FOdysseyRasterBlock> RasterBlock;
 
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Texture | LayerStack")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
     bool IsAlphaLocked = false;
 };

@@ -27,6 +27,6 @@ public:
     virtual void RemoveSet(int iIndex = -1) override;
 
 public:
-    UPROPERTY(EditAnywhere, Category = Palette)
+    UPROPERTY(EditAnywhere, Category=Palette)
     TArray<FColor> EntryColors;
 };

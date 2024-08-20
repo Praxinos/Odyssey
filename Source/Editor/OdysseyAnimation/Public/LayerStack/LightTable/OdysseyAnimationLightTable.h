@@ -63,11 +63,15 @@ class UOdysseyAnimationLighttableFunctionLibrary : public UBlueprintFunctionLibr
     GENERATED_BODY()
 
 public:
-    // Odyssey Brush Blueprint Callable Methods
 	UFUNCTION(BlueprintPure, Category="Odyssey|LightTable")
-	static FOdysseyAnimationLightTableKey GetPreviousKey(FOdysseyAnimationLightTable Lighttable, int KeyIndex = 0);
+	static FOdysseyAnimationLightTableKey GetPreviousKey(FOdysseyAnimationLightTable Lighttable, int Index = 0);
 
-	// Odyssey Brush Blueprint Callable Methods
 	UFUNCTION(BlueprintPure, Category="Odyssey|LightTable")
-	static FOdysseyAnimationLightTableKey GetNextKey(FOdysseyAnimationLightTable Lighttable, int KeyIndex = 0);
+	static FOdysseyAnimationLightTableKey GetNextKey(FOdysseyAnimationLightTable Lighttable, int Index = 0);
+
+	UFUNCTION(BlueprintPure, Category="Odyssey|LightTable")
+	static FOdysseyAnimationLightTable SetPreviousKey(FOdysseyAnimationLightTable Lighttable, FOdysseyAnimationLightTableKey Key, int Index = 0);
+
+	UFUNCTION(BlueprintPure, Category="Odyssey|LightTable")
+	static FOdysseyAnimationLightTable SetNextKey(FOdysseyAnimationLightTable Lighttable, FOdysseyAnimationLightTableKey Key, int Index = 0);
 };

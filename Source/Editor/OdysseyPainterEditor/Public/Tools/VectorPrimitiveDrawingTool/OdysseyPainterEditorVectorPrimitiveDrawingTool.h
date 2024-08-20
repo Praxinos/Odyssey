@@ -70,32 +70,32 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
 
     public:
         UPROPERTY( EditAnywhere
-                 , Category = PrimitiveDrawingTool
+                 , Category=PrimitiveDrawingTool
                  , meta = ( ToolTip = "Primitive Type" ) )
         EOdysseyVectorPrimitiveType PrimitiveType;
 
         UPROPERTY( EditAnywhere
-                 , Category = PrimitiveDrawingTool
+                 , Category=PrimitiveDrawingTool
                  , meta = ( ToolTip = "Color Mode" ) )
         eForegroundColorMode ColorMode;
 
-        //UPROPERTY( EditAnywhere, Category = PrimitiveDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
+        //UPROPERTY( EditAnywhere, Category=PrimitiveDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
         double Opacity;
 
         UPROPERTY( EditAnywhere
-                 , Category = PrimitiveDrawingTool
+                 , Category=PrimitiveDrawingTool
                  , meta = ( ToolTip = "Brush" ) )
         FOdysseyVectorBrush Brush;
 
         UPROPERTY( EditAnywhere
-                 , Category = PrimitiveDrawingTool
+                 , Category=PrimitiveDrawingTool
                  , meta = ( ToolTip  = "Stroke Width"
                           , ClampMin = "0.0"
                           , UIMin    = "0.0" ) )
         double StrokeWidth;
 
         UPROPERTY( EditAnywhere
-                 , Category = PrimitiveDrawingTool
+                 , Category=PrimitiveDrawingTool
                  , meta = ( ToolTip  = "Uniform" ) )
         bool Uniform;
         bool UniformAtKeyDown;

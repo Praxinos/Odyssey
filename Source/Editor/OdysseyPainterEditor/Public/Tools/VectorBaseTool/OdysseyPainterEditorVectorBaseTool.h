@@ -148,6 +148,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         eMouseEventName mPreviousMouseEvent; // filter faulty stylus events
 
     public:
-        //UPROPERTY( EditAnywhere, Category = Behavior )
+        //UPROPERTY( EditAnywhere, Category=Behavior )
         //bool RestrictToSelectedObjects;
 };

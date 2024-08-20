@@ -26,26 +26,26 @@ struct ODYSSEYVECTOR_API FOdysseyVectorBrush
 {
     GENERATED_BODY()
 
-    //UPROPERTY( EditAnywhere, Category = "Default" )
+    //UPROPERTY( EditAnywhere, Category="Default" )
     //UTexture2D* Texture;
 
     UPROPERTY( EditAnywhere
-             , Category = "Default"
+             , Category="Default"
              , meta = ( ToolTip = "Color From Brush" ) )
     bool ColorFromBrush;
 
     UPROPERTY( EditAnywhere
-             , Category = "Default"
+             , Category="Default"
              , meta = ( ToolTip = "Bilinear Filtering" ) )
     bool BilinearFiltering;
 
     UPROPERTY( EditAnywhere
-             , Category = "Default"
+             , Category="Default"
              , meta = ( ToolTip = "Extension Mode" ) )
     eBrushExtensionMode ExtensionMode;
 
     UPROPERTY( EditAnywhere
-             , Category = "Default"
+             , Category="Default"
              , meta = ( ToolTip = "Revert" ) )
     bool Revert;
 

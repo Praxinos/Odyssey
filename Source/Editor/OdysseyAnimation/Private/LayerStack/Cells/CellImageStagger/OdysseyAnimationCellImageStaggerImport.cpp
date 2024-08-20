@@ -49,6 +49,8 @@ FOdysseyAnimationCellImageStaggerImport::Read( UOdysseyAnimationCellImageStagger
                 {
 					uint32 behaviour;
                     Ar << behaviour;
+
+					behaviour = FMath::Max(uint32(0), behaviour - 1); //first value was "Invalid" which does not exist anymore
 					iAnimationCellImageStagger->Behaviour = (EOdysseyAnimationCellImageStaggerBehaviour)behaviour;
                 }
                 break;

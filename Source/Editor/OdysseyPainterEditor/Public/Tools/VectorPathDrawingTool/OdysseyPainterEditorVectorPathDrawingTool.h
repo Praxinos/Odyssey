@@ -96,15 +96,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 
     public:
         UPROPERTY( EditAnywhere
-                 , Category = PathDrawingTool
+                 , Category=PathDrawingTool
                  , meta = ( ToolTip = "Color Mode" ) )
         eForegroundColorMode ColorMode;
 
-        //UPROPERTY( EditAnywhere, Category = PathDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
+        //UPROPERTY( EditAnywhere, Category=PathDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
         double Opacity;
 
         UPROPERTY( EditAnywhere
-                 , Category = PathDrawingTool
+                 , Category=PathDrawingTool
                  , meta = ( ToolTip = "Brush" ) )
         FOdysseyVectorBrush Brush;
 
@@ -112,12 +112,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         eTracingType TracingType;
 
         UPROPERTY( EditAnywhere
-                 , Category = PathDrawingTool
+                 , Category=PathDrawingTool
                  , meta = ( ToolTip = "Tracing Fidelity" ) )
         eTracingFidelity TracingFidelity;
 
         UPROPERTY( EditAnywhere
-                 , Category = PathDrawingTool
+                 , Category=PathDrawingTool
                  , meta = ( ToolTip = "Radius"
                           , ClampMin = "0.0"
                           , UIMin = "0.0" ) )
@@ -126,36 +126,36 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         double mRealSize;
 
         UPROPERTY( EditAnywhere
-                 , Category = PathDrawingTool
+                 , Category=PathDrawingTool
                  , meta = ( ToolTip = "Pressure Sensitive" ) )
         bool PressureSensitive;
 
-        //UPROPERTY( EditAnywhere, Category = PathDrawingTool )
+        //UPROPERTY( EditAnywhere, Category=PathDrawingTool )
         //bool Absolute;
 
         UPROPERTY( EditAnywhere
-                 , Category = PathDrawingTool
+                 , Category=PathDrawingTool
                  , meta = ( ToolTip = "Update PaintGroups" ) )
         bool UpdatePaintGroups;
 
         UPROPERTY( EditAnywhere
-                 , Category = PathDrawingTool
+                 , Category=PathDrawingTool
                  , meta = ( ToolTip = "Stitch" ) )
         bool Stitch;
         bool StitchAtKeyDown;
 
         UPROPERTY( EditAnywhere
-                 , Category = PathDrawingTool
+                 , Category=PathDrawingTool
                  , meta = ( ToolTip = "Snap" ) )
         bool Snap;
 
         UPROPERTY( EditAnywhere
-                 , Category = PathDrawingTool
+                 , Category=PathDrawingTool
                  , meta = ( ToolTip = "Average Stitched Radius" ) )
         bool AverageStitchedRadius;
 
         UPROPERTY( EditAnywhere
-                 , Category = PathDrawingTool
+                 , Category=PathDrawingTool
                  , meta = ( ToolTip = "Snap/Stitching Radius"
                           , ClampMin = "0.0"
                           , UIMin = "0.0" ) )

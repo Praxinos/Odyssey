@@ -209,7 +209,7 @@ public:
     UPROPERTY(VisibleInstanceOnly, Category="Shape", Instanced, meta=(ShowInnerProperties))
     class UOdysseyShape* SelectedShapeInstance;
 
-    UPROPERTY(EditAnywhere, Category = "Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1"))
+    UPROPERTY(EditAnywhere, Category="Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1"))
     float   Step = 1.0;
 
     UPROPERTY( EditAnywhere, Category="Interpolation")

@@ -39,7 +39,7 @@ public:
     FBrushDefaults();
 
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Brush, meta = (AllowPrivateAccess = "true", DisplayThumbnail = "true", DisplayName = "Default Brush", AllowedClasses="OdysseyBrush"))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Brush, meta = (AllowPrivateAccess = "true", DisplayThumbnail = "true", DisplayName = "Default Brush", AllowedClasses="OdysseyBrush"))
     TSoftObjectPtr<UOdysseyBrush> DefaultBrush;
 };
 
