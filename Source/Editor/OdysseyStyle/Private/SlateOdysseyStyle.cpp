@@ -335,6 +335,12 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.Viewport20", new IMAGE_BRUSH( "PainterEditor/viewport_20", mIcon20x20 ) );
     Set( "PainterEditor.Viewport16", new IMAGE_BRUSH( "PainterEditor/viewport_16", mIcon16x16 ) );
 
+    Set("PainterEditor.FlipVertical32", new IMAGE_BRUSH_SVG("PainterEditor/flip_vertical", mIcon32x32));
+    Set("PainterEditor.FlipHorizontal32", new IMAGE_BRUSH_SVG("PainterEditor/flip_horizontal", mIcon32x32));
+
+    Set("PainterEditor.FlipVerticalFilled32", new IMAGE_BRUSH_SVG("PainterEditor/flip_vertical_filled", mIcon32x32));
+    Set("PainterEditor.FlipHorizontalFilled32", new IMAGE_BRUSH_SVG("PainterEditor/flip_horizontal_filled", mIcon32x32));
+
     Set( "PainterEditor.Draw64", new IMAGE_BRUSH( "PainterEditor/draw_64", mIcon64x64 ) );
     Set( "PainterEditor.Draw16", new IMAGE_BRUSH( "PainterEditor/draw_16", mIcon16x16 ) );
 

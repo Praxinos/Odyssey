@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
+#include "Widgets/SOdysseyPainterEditorRasterTransformToolTopTab.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyHUDSystem.h"
@@ -54,11 +55,13 @@ UOdysseyPainterEditorRasterTransformTool::IsActivable() const
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
 }
 
+TSharedRef<SWidget> UOdysseyPainterEditorRasterTransformTool::CreateTopTabWidget()
+{
+    return SNew(SOdysseyPainterEditorRasterTransformToolTopTab, this);
+}
+
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if (UOdysseyPainterEditorRasterBaseTool::OnMouseDown(iPointInTexture, iKey))
-        return true;
-
     if( !mTransformArea )
         return false;
 
@@ -675,6 +678,112 @@ FText
 UOdysseyPainterEditorRasterTransformTool::GetTooltip() const
 {
     return LOCTEXT("raster-transform-tool.tooltip", "Transform Tool");
+}
+
+bool UOdysseyPainterEditorRasterTransformTool::FlipHorizontal()
+{
+    if( !mSelectionBlock )
+        return false;
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( mSelectionBlock->Format() );
+
+    TArray<FVector2D> referencePoints;
+    referencePoints.Add(FVector2D(0, 0));
+    referencePoints.Add(FVector2D(mSelectionBlock->Width(), 0));
+    referencePoints.Add(FVector2D(mSelectionBlock->Width(), mSelectionBlock->Height()));
+    referencePoints.Add(FVector2D(0, mSelectionBlock->Height()));
+
+    FOdysseyMatrix transformation = UOdysseyTransformProxyLibrary::MakePerspectiveMatrix(
+        referencePoints[0],
+        referencePoints[1],
+        referencePoints[2],
+        referencePoints[3],
+        referencePoints[1],
+        referencePoints[0],
+        referencePoints[3],
+        referencePoints[2]
+    );
+
+    ::ULIS::FBlock copyBlock = ::ULIS::FBlock(mSelectionBlock->Width(), mSelectionBlock->Height(), mSelectionBlock->Format() );
+
+    ctx.Copy(
+        *mSelectionBlock,
+        copyBlock,
+        ::ULIS::FRectI::Auto,
+        ::ULIS::FVec2I(0, 0),
+        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+        0,
+        nullptr,
+        nullptr
+    );
+
+    ctx.Finish();
+
+    ctx.TransformPerspective(
+        copyBlock
+        , *mSelectionBlock
+        , ::ULIS::FRectI::Auto
+        , transformation.m
+    );
+
+    ctx.Finish();
+
+    CreateTransformBlockFromSelectionBlock();
+
+    return true;
+}
+
+bool UOdysseyPainterEditorRasterTransformTool::FlipVertical()
+{
+    if (!mSelectionBlock)
+        return false;
+
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mSelectionBlock->Format());
+
+    TArray<FVector2D> referencePoints;
+    referencePoints.Add(FVector2D(0, 0));
+    referencePoints.Add(FVector2D(mSelectionBlock->Width(), 0));
+    referencePoints.Add(FVector2D(mSelectionBlock->Width(), mSelectionBlock->Height()));
+    referencePoints.Add(FVector2D(0, mSelectionBlock->Height()));
+
+    FOdysseyMatrix transformation = UOdysseyTransformProxyLibrary::MakePerspectiveMatrix(
+        referencePoints[0],
+        referencePoints[1],
+        referencePoints[2],
+        referencePoints[3],
+        referencePoints[3],
+        referencePoints[2],
+        referencePoints[1],
+        referencePoints[0]
+    );
+
+    ::ULIS::FBlock copyBlock = ::ULIS::FBlock(mSelectionBlock->Width(), mSelectionBlock->Height(), mSelectionBlock->Format());
+
+    ctx.Copy(
+        *mSelectionBlock,
+        copyBlock,
+        ::ULIS::FRectI::Auto,
+        ::ULIS::FVec2I(0, 0),
+        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+        0,
+        nullptr,
+        nullptr
+    );
+
+    ctx.Finish();
+
+    ctx.TransformPerspective(
+        copyBlock
+        , *mSelectionBlock
+        , ::ULIS::FRectI::Auto
+        , transformation.m
+    );
+
+    ctx.Finish();
+
+    CreateTransformBlockFromSelectionBlock();
+
+    return true;
 }
 
 void

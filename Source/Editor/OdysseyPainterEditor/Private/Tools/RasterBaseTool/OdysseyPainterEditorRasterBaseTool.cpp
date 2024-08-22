@@ -44,7 +44,31 @@ TSharedRef<SWidget> UOdysseyPainterEditorRasterBaseTool::CreateTopTabWidget()
 
 TSharedPtr<SWidget> UOdysseyPainterEditorRasterBaseTool::CreatePropertyWidget(TSharedPtr<class IPropertyHandle> iPropertyHandle, const TSharedPtr<ISinglePropertyView> iView)
 {
-    return SNullWidget::NullWidget;
+    if (!iPropertyHandle)
+        return nullptr;
+
+    TSharedRef<SWidget> nameWidget = iPropertyHandle->CreatePropertyNameWidget();
+    TSharedRef<SWidget> valueWidget = iPropertyHandle->CreatePropertyValueWidget(false);
+
+    iView->SetVisibility(EVisibility::Collapsed);
+
+    return SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+            //PATCH:
+            iView.ToSharedRef()
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .Padding(0.f, 0.f, 3.f, 0.f)
+        [
+            nameWidget
+        ]
+        + SHorizontalBox::Slot()
+        [
+            valueWidget
+        ];
 }
 
 bool
