@@ -38,14 +38,14 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
     mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated);	
 
 	UOdysseyAnimation* animation = GetAnimation();
-	if (animation->Width() < 0 || animation->Height() < 0)
+	if (animation->GetWidth() < 0 || animation->GetHeight() < 0)
 		return;
 
 	mEngine = new FOdysseyVectorEngine( new FOdysseyVectorGroupPaint( "Scene" )
-									, (double)animation->Width()
-									, (double)animation->Height() );
+									, (double)animation->GetWidth()
+									, (double)animation->GetHeight() );
     
-    mVectorBlock->Init(mVectorBlockId, mEngine, animation->Width(), animation->Height(), animation->Format());
+    mVectorBlock->Init(mVectorBlockId, mEngine, animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
 }
 
 void
@@ -54,7 +54,7 @@ UOdysseyAnimationCellImageVector::PostDuplicate(EDuplicateMode::Type iDuplicateM
 	Super::PostDuplicate(iDuplicateMode);
 	UOdysseyAnimation* animation = GetAnimation();
 	mVectorBlockId = FGuid::NewGuid();
-	mVectorBlock->Init(mVectorBlockId, mEngine, animation->Width(), animation->Height(), animation->Format());
+	mVectorBlock->Init(mVectorBlockId, mEngine, animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
 }
 
 FOdysseyVectorEngine*
@@ -133,7 +133,7 @@ UOdysseyAnimationCellImageVector::PostLoad()
 		return;
 
 	UOdysseyAnimation* animation = GetAnimation();
-    mVectorBlock->Init(mVectorBlockId, mEngine, animation->Width(), animation->Height(), animation->Format());
+    mVectorBlock->Init(mVectorBlockId, mEngine, animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
     mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY );
 }
 
@@ -184,7 +184,7 @@ UOdysseyAnimationCellImageVector::GetImageRenderingRects() const
 	if (!animation)
 		return {};
 
-    return { ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height()) };
+    return { ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight()) };
 }
 
 FOdysseyMediaProvider

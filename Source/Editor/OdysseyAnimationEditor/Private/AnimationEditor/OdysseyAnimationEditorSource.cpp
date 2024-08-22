@@ -48,13 +48,13 @@ FOdysseyAnimationEditorSource::Id() const
 int
 FOdysseyAnimationEditorSource::Width() const
 {
-	return mAnimation->Width();
+	return mAnimation->GetWidth();
 }
 
 int
 FOdysseyAnimationEditorSource::Height() const
 {
-	return mAnimation->Height();
+	return mAnimation->GetHeight();
 }
 
 void

@@ -37,6 +37,7 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 	mWidth = iConfiguration.Width;
 	mHeight = iConfiguration.Height;
 	mFormat = iConfiguration.ULISFormat();
+	Format = iConfiguration.Format;
 	FramesPerSecond = iConfiguration.FramesPerSecond;
 
 	mLayerStack = NewObject<UOdysseyAnimationLayerStack>(this, "LayerStack", RF_Public | RF_Transactional);
@@ -91,21 +92,27 @@ void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguratio
 }
 
 int
-UOdysseyAnimation::Width() const
+UOdysseyAnimation::GetWidth() const
 {
 	return mWidth;
 }
 
 int
-UOdysseyAnimation::Height() const
+UOdysseyAnimation::GetHeight() const
 {
 	return mHeight;
 }
 
 ::ULIS::eFormat
-UOdysseyAnimation::Format() const
+UOdysseyAnimation::GetFormat() const
 {
-	return ::ULIS::eFormat(mFormat);
+	switch(Format)
+	{
+		case EOdysseyAnimationFormat::kBGRA8: return ::ULIS::Format_BGRA8;
+		case EOdysseyAnimationFormat::kRGBAF: return ::ULIS::Format_RGBAF;
+	}
+	checkf(false, TEXT("Format not found"));
+	return ::ULIS::Format_BGRA8;
 }
 
 FTimespan
@@ -241,6 +248,16 @@ void
 UOdysseyAnimation::PostLoad()
 {
 	Super::PostLoad();
+
+	if (mFormat == ::ULIS::Format_BGRA8)
+	{
+		Format = EOdysseyAnimationFormat::kBGRA8;
+	}
+	if (mFormat == ::ULIS::Format_RGBAF)
+	{
+		Format = EOdysseyAnimationFormat::kRGBAF;
+	}
+
 	mProxy->PostLoad();
 }
 
@@ -306,7 +323,7 @@ UOdysseyAnimation::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderTy
 TArray<::ULIS::FRectI>
 UOdysseyAnimation::GetImageRenderingRects() const
 {
-    return { ::ULIS::FRectI::FromXYWH(0, 0, Width(), Height()) };
+    return { ::ULIS::FRectI::FromXYWH(0, 0, GetWidth(), GetHeight()) };
 }
 
 #undef LOCTEXT_NAMESPACE

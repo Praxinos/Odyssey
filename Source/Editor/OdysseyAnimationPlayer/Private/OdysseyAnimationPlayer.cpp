@@ -228,14 +228,14 @@ UOdysseyAnimationPlayer::UpdateTexture()
 		renderer->Init();
 		mRenderer = renderer; //Init Renderer before assigning mRenderer to avoid caching (raster / vector blocks) when unneeded
 
-		::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height());
-		TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(Animation->Width(), Animation->Height(), Animation->Format());
+		::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight());
+		TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(Animation->GetWidth(), Animation->GetHeight(), Animation->GetFormat());
 
 		{
 			FOdysseyImageRendererCopyParams params(block, { block->Rect() });
 			mRenderer->Copy(params, {});
 
-			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->Format());
+			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->GetFormat());
 			ctx.Finish();
 		}
 
@@ -258,13 +258,13 @@ UOdysseyAnimationPlayer::UpdateTexture()
 			TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::UpdateTexture::Copy);
 			for ( const ::ULIS::FRectI& rect : invalidRects )
 			{
-				TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, Animation->Format());
+				TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, Animation->GetFormat());
 				FOdysseyImageRendererCopyParams params(block, { block->Rect() }, rect.Position());
 				mRenderer->Copy(params, {});
 				blocks.Add(block);
 			}
 			
-			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->Format());
+			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->GetFormat());
 			ctx.Finish();
 		}
 
@@ -307,7 +307,7 @@ UOdysseyAnimationPlayer::OnImageRenderingChanged(const FOdysseyImageRenderingCha
 		if ( imageRenderingComposition == mImageRenderingComposition )
 			return;
 
-		mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height()));
+		mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight()));
 	}
 }
 
@@ -385,9 +385,9 @@ UOdysseyAnimationPlayer::AnimationChanged()
 		return;
 	}
 
-	Texture = UTexture2D::CreateTransient(Animation->Width(), Animation->Height(), PF_B8G8R8A8);
+	Texture = UTexture2D::CreateTransient(Animation->GetWidth(), Animation->GetHeight(), PF_B8G8R8A8);
 	Texture->UpdateResource();
-	mInvalidTileMap = FULISInvalidTileMap(64, Animation->Width(), Animation->Height());
+	mInvalidTileMap = FULISInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
 
 	UOdysseyAnimation::OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
 

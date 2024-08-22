@@ -31,5 +31,14 @@ UOdysseyAnimationEditorFunctionLibrary::CreateAnimationAsset(FString AssetName, 
 			UOdysseyAnimationFactory::StaticClass()->GetDefaultObject<UFactory>()
 		)
 	);
+
+	FOdysseyAnimationConfiguration conf;
+	conf.Width = Width;
+	conf.Height = Height;
+	conf.Format = Format;
+	conf.FramesPerSecond = FramesPerSecond;
+
+	animation->Init(conf);
+
 	return animation;
 }

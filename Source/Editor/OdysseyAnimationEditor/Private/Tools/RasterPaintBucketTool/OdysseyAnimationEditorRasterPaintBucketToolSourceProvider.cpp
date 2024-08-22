@@ -55,7 +55,7 @@ FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider::GetCurrentLayerBlock
 	if (!layerStack)
 		return nullptr;
 
-	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
+	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
 	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
 	TSharedPtr<IOdysseyImageRenderer> renderer = currentLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
 	renderer->Init();
@@ -63,7 +63,7 @@ FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider::GetCurrentLayerBlock
 	FOdysseyImageRendererCopyParams params(block, { block->Rect() });
 	renderer->Copy(params, {});
 
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
+	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->GetFormat());
 	ctx.Finish();
 
 	return block;
@@ -80,7 +80,7 @@ FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider::GetForegroundLayersB
 	if (!layerStack)
 		return nullptr;
 
-	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
+	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
 	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
 	TArray<FOdysseyImageRenderingAbility*> layersToExclude = GetForegroundLayersToExclude(currentLayer);
 	FImageRendererFilter filter = FImageRendererFilter::CreateLambda(
@@ -99,7 +99,7 @@ FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider::GetForegroundLayersB
 	FOdysseyImageRendererCopyParams params(block, { block->Rect() });
 	renderer->Copy(params, {});
 
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
+	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->GetFormat());
 	ctx.Finish();
 
 	return block;
@@ -116,7 +116,7 @@ FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider::GetBackgroundLayersB
 	if (!layerStack)
 		return nullptr;
 
-	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
+	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
 	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
 	TArray<FOdysseyImageRenderingAbility*> layersToExclude = GetBackgroundLayersToExclude(currentLayer);
 	FImageRendererFilter filter = FImageRendererFilter::CreateLambda(
@@ -134,7 +134,7 @@ FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider::GetBackgroundLayersB
 	FOdysseyImageRendererCopyParams params(block, { block->Rect() });
 	renderer->Copy(params, {});
 
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
+	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->GetFormat());
 	ctx.Finish();
 
 	return block;
@@ -147,13 +147,13 @@ FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider::GetAllLayersBlock() 
 	if (!animation)
 		return nullptr;
 
-	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
+	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
 	TSharedPtr<IOdysseyImageRenderer> renderer = animation->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
 	renderer->Init();
 	FOdysseyImageRendererCopyParams params(block, { block->Rect() });
 	renderer->Copy(params, {});
 
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
+	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->GetFormat());
 	ctx.Finish();
 
 	return block;

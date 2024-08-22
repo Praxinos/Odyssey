@@ -248,8 +248,8 @@ UOdysseyAnimationEditorOutOfPegsTool::GetCenter() const
     if (!animation)
         return FVector2D();
 
-    float width = animation->Width();
-    float height = animation->Height();
+    float width = animation->GetWidth();
+    float height = animation->GetHeight();
 
     ::ULIS::FMat3F oopTransform = mCell->OutOfPegsTransform();
     ::ULIS::FVec2F center = oopTransform * ::ULIS::FVec3F(width / 2.f, height / 2.f, 1.f);
@@ -267,8 +267,8 @@ UOdysseyAnimationEditorOutOfPegsTool::RefreshHUD()
     if (!animation)
         return;
 
-    float width = animation->Width();
-    float height = animation->Height();
+    float width = animation->GetWidth();
+    float height = animation->GetHeight();
 
     ::ULIS::FMat3F oopTransform = mCell->OutOfPegsTransform();
 

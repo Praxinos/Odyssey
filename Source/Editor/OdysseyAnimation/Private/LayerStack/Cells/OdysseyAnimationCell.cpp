@@ -67,11 +67,11 @@ UOdysseyAnimationCell::OutOfPegsTransform() const
     if (!animation)
         return ::ULIS::FMat3F();
 
-    return ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
+    return ::ULIS::FMat3F::MakeTranslationMatrix(animation->GetWidth() / 2.f, animation->GetHeight() / 2.f)
             * ::ULIS::FMat3F::MakeTranslationMatrix(OutOfPegs.Pan.X, OutOfPegs.Pan.Y)
             * ::ULIS::FMat3F::MakeRotationMatrix(FMath::DegreesToRadians(OutOfPegs.Rotation))
             * ::ULIS::FMat3F::MakeScaleMatrix(OutOfPegs.Zoom / 100.f, OutOfPegs.Zoom / 100.f)
-            * ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / -2.f, animation->Height() / -2.f);
+            * ::ULIS::FMat3F::MakeTranslationMatrix(animation->GetWidth() / -2.f, animation->GetHeight() / -2.f);
 }
 
 UOdysseyAnimationCell::FOnOutOfPegsChanged&

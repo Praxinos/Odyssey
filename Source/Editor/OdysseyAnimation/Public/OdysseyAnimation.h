@@ -53,9 +53,9 @@ public:
 	TSharedPtr<FOdysseyAnimationProxy> GetProxy() const;
 
 	//Size and Format
-	int Width() const;
-	int Height() const;
-	::ULIS::eFormat Format() const;
+	int GetWidth() const;
+	int GetHeight() const;
+	::ULIS::eFormat GetFormat() const;
 
 	//Duration and speed
 	UFUNCTION(BlueprintPure, Category="Odyssey|Animation")
@@ -120,8 +120,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(DisplayName="Height"), Category="Odyssey|Animation")
 	int mHeight = -1;
 
-	UPROPERTY(BlueprintReadOnly, meta=(DisplayName="Format"), Category="Odyssey|Animation")
-	int mFormat = ::ULIS::Format_RGBA8;
+	UPROPERTY()
+	int mFormat = ::ULIS::Format_BGRA8; //Deprecated: only present for compatibility, use Format instead
+
+	UPROPERTY(BlueprintReadOnly, Category="Odyssey|Animation")
+	EOdysseyAnimationFormat Format = EOdysseyAnimationFormat::kBGRA8;
 
 	UPROPERTY(BlueprintReadOnly, Category="Odyssey|Animation", meta=(DisplayName="Layer Stack", LoadBehavior = "LazyOnDemand"))
 	TObjectPtr<UOdysseyAnimationLayerStack> mLayerStack;

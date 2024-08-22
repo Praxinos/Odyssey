@@ -18,9 +18,9 @@ UOdysseyAnimationCellImageRaster::GetRasterBlock() const
 {
 	if (!mRasterBlock)
 	{
-		int width = GetAnimation()->Width();
-		int height = GetAnimation()->Height();
-		::ULIS::eFormat format = GetAnimation()->Format();
+		int width = GetAnimation()->GetWidth();
+		int height = GetAnimation()->GetHeight();
+		::ULIS::eFormat format = GetAnimation()->GetFormat();
 
 		mRasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyAnimationCellImageRaster*>(this), width, height, format);
 	
@@ -40,9 +40,9 @@ UOdysseyAnimationCellImageRaster::PostDuplicate(EDuplicateMode::Type iDuplicateM
     //Ensure the block uses those parameters
 	if (mRasterBlock)
 	{
-		::ULIS::eFormat format = GetAnimation()->Format();
-		int width = GetAnimation()->Width();
-		int height = GetAnimation()->Height();
+		::ULIS::eFormat format = GetAnimation()->GetFormat();
+		int width = GetAnimation()->GetWidth();
+		int height = GetAnimation()->GetHeight();
 		mRasterBlock->PostDuplicate();
 		mRasterBlock->ConvertTo(width, height, format);
 	

@@ -120,7 +120,7 @@ FOdysseyAnimationProxy::PostLoad()
         //Call PreChange with default Guid and PostChange with default Guid
         //to invalidate the blockdata and create its renderer
         //so that it is ready to be enqueued
-        blockData->PreChange(FGuid(), {::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height())}); 
+        blockData->PreChange(FGuid(), {::ULIS::FRectI::FromXYWH(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight())}); 
         blockData->PostChange(FGuid());
         mPendingBlockData.Enqueue(blockData); //mPendingBlockData is ThreadSafe
     }
@@ -192,7 +192,7 @@ FOdysseyAnimationProxy::OnImageRenderingPreChanged(const FOdysseyImageRenderingC
 
     const FGuid& id = iEvent.GetId();
     bool isValueChange = iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kValueChange;
-    TArray<::ULIS::FRectI> defaultRects = { ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height())};
+    TArray<::ULIS::FRectI> defaultRects = { ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight())};
     for (TSharedPtr<FBlockData> blockData : mBlockData)
     {
         if (blockData->GetComposition().Contains(id))
@@ -317,7 +317,7 @@ FOdysseyAnimationProxy::OnImageRenderingChanged(const FOdysseyImageRenderingChan
 
 		for (TSharedPtr<FBlockData> blockData : createdBlockData)
 		{
-			blockData->PreChange(FGuid(), {::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height())}); 
+			blockData->PreChange(FGuid(), {::ULIS::FRectI::FromXYWH(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight())}); 
 			bool shouldEnqueue = blockData->PostChange(FGuid());
 			if (shouldEnqueue)
 				mPendingBlockData.Enqueue(blockData); //mPendingBlockData is ThreadSafe */
@@ -355,11 +355,11 @@ FBlockData::~FBlockData()
 FBlockData::FBlockData(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iComposition)
     : mAnimation(iAnimation)
     , mComposition(iComposition)
-    , mInvalidTileMap(64, iAnimation->Width(), iAnimation->Height())
+    , mInvalidTileMap(64, iAnimation->GetWidth(), iAnimation->GetHeight())
     , mFrameIndexes()
     , mIsInvalid(false)
 {
-    mRasterBlock = MakeShared<FOdysseyRasterBlock>(mAnimation, mAnimation->Width(), mAnimation->Height(), mAnimation->Format());
+    mRasterBlock = MakeShared<FOdysseyRasterBlock>(mAnimation, mAnimation->GetWidth(), mAnimation->GetHeight(), mAnimation->GetFormat());
 }
 
 TSharedPtr<::ULIS::FBlock>
@@ -407,7 +407,7 @@ FBlockData::PostChange(const FGuid& iId)
 
     if (mInvalidIds.IsEmpty() && !mInvalidTileMap.InvalidTiles().IsEmpty())
     {
-        TArray<::ULIS::FRectI> rects = { ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height()) };
+        TArray<::ULIS::FRectI> rects = { ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight()) };
         mRenderer = MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, mFrameIndexes.Array()[0], IOdysseyImageRenderer::eRenderType::Render, rects );
 		mIsReadyToRender = true;
         return true;
@@ -483,7 +483,7 @@ FBlockData::Render()
         //if we are in the game thread
         //we force rendering even if we are still editing the blockdata
         //this is safe only because we are on the gamethread
-        TArray<::ULIS::FRectI> rects = { ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height()) };
+        TArray<::ULIS::FRectI> rects = { ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight()) };
         mRenderer = MakeShared<FOdysseyAnimationImageRenderer>(mAnimation, mFrameIndexes.Array()[0], IOdysseyImageRenderer::eRenderType::Render, rects );
 		mIsReadyToRender = true;
     }

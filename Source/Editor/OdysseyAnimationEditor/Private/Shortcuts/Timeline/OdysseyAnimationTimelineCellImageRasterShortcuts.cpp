@@ -73,7 +73,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_ConvertToRasterCell()
 
     if (filteredCells.IsEmpty())
         return;
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->GetFormat());
 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-raster.transaction.convert-to-raster-cell", "Convert To Raster Cell"));
@@ -94,7 +94,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_ConvertToRasterCell()
         progressBar.EnterProgressFrame();
 
         TArray<FGuid> lastComposition = filteredCell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, 0);
-        TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
+        TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
         ctx.Clear(*block);
         ctx.Finish();
 
@@ -122,7 +122,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_ConvertToRasterCell()
             resultingCells.Last().mLength = i - (filteredCell->Length - resultingCells.Last().mLength);
             lastComposition = composition;
             
-            block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
+            block = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
             ctx.Clear(*block);
             ctx.Finish();
 
@@ -221,13 +221,13 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     TArray<UOdysseyAnimationCell*> cellsToSelect = selectedCells;
 
     //Cross Fade all selected cells
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->GetFormat());
 
     FScopedSlowTask selectedCellsProgress(selectedCells.Num());
     for (UOdysseyAnimationCell* selectedCell : selectedCells)
     {
         selectedCellsProgress.EnterProgressFrame();
-        TSharedPtr<::ULIS::FBlock> startBlock = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
+        TSharedPtr<::ULIS::FBlock> startBlock = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
         ctx.Clear(*startBlock);
         ctx.Finish();
         TSharedPtr<IOdysseyImageRenderer> renderer = selectedCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
@@ -247,7 +247,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
         if (nextCellIndex < layer->GetCells().Num())
         {
             UOdysseyAnimationCell* nextCell = layer->GetCells()[nextCellIndex];
-            TSharedPtr<::ULIS::FBlock> endBlock = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
+            TSharedPtr<::ULIS::FBlock> endBlock = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
             ctx.Clear(*endBlock);
             ctx.Finish();
             renderer = nextCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);

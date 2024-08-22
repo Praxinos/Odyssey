@@ -289,8 +289,8 @@ SOdysseyAnimationExportImageSequenceDialog::ExportSource(const FSource& iSource,
 
     FScopedSlowTask progressBar(endFrame - startFrame + 1);
 
-    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format());
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( mAnimation->Format() );
+    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->GetWidth(), mAnimation->GetHeight(), mAnimation->GetFormat());
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( mAnimation->GetFormat() );
     TArray<FGuid> lastRenderingComposition;
 
     for (int i = startFrame; i <= endFrame; i++)
