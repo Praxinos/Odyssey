@@ -140,8 +140,6 @@ private:
     void        OnViewportPropertyWillChange();
     void        OnViewportPropertyChanged();
 
-    FTransform2D GetTransform() const;
-
 private:
     //New API to manage events
     void MouseDown(const FOdysseyPoint& iPoint);

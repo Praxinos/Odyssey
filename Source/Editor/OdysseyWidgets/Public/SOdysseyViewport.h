@@ -42,9 +42,6 @@ public:
     /* Get the viewport widget */
     TSharedPtr<SViewport>               GetViewportWidget()        const;
 
-    /* Returns the tranformation matrix */
-    const FTransform2D& GetTransform() const;
-
     /* Get the current Zoom value */
     double          GetZoom() const;
 
@@ -56,6 +53,9 @@ public:
 
     /* Get the Pan value*/
     FVector2D       GetPan() const;
+
+    /* Get the flip state */
+    FVector2D       GetFlip() const;
 
     /* Returns the center point of the viewport widget */
     FVector2D       GetViewportCenter() const;
@@ -92,10 +92,10 @@ public:
     void            ComputeTextureDisplayDimensions(uint32& Width, uint32& Height) const;
 
     /* Retrieve the transform of the displayed texture in the viewport */
-    FTransform2D GetTransformToDisplayedTexture();
+    FTransform2D    GetTransformToDisplayedTexture();
 
     /* Retrieve the transform of the source texture in the viewport */
-    FTransform2D GetTransformToSourceTexture();
+    FTransform2D    GetTransformToSourceTexture();
 
     /* Converts the given point from WorldCoodinates to LocalCoordinates (texture Coordinates, (0,0) being the center of the texture)*/
     FVector2D       ToLocal(const FVector2D& iPoint) const;
@@ -114,6 +114,12 @@ public:
     
     /* Rotate the canvas to the Right, the Pivot point for the Rotation being in the middle of the viewport */
     void            RotateRight();
+
+    /* Flip the canvas Horizontally */
+    void            FlipHorizontal();
+
+    /* Flip the canvas Vertically */
+    void            FlipVertical();
 
 private:
     // Private API
@@ -148,6 +154,9 @@ private:
 
     /* Update the scrollbars according to the texture transform */
     void                        UpdateScrollBars();
+
+    /* Returns the tranformation matrix with the eventual flip */
+    const FMatrix2x2            GetFlipMatrix() const;
 
 private:
     // SWidget overrides
@@ -200,8 +209,10 @@ private:
     TSharedPtr<SViewport>               mViewportWidget;
     TSharedPtr<SScrollBar>              mVerticalScrollBar;
     TSharedPtr<SScrollBar>              mHorizontalScrollBar;
-    TSharedPtr<SSpinBox<float>>   mZoomSpinBox;
+    TSharedPtr<SSpinBox<float>>         mZoomSpinBox;
     FTransform2D                        mTransform;
     bool                                mIsFitToViewport;
 
+    //0,0 if no flip, 1,0 if flip X, 0,1 if flip Y, 1,1 if both axis are flipped
+    FVector2D                           mFlipStateUV;
 };

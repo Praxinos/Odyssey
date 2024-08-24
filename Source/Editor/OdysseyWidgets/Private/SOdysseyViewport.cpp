@@ -47,6 +47,8 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
 
     mTransform = FTransform2D(1.0f, FVector2D(0.0f, 0.0f));
 
+    mFlipStateUV = FVector2D(0.f, 0.f);
+
     // create zoom menu
     FMenuBuilder ZoomMenuBuilder(true, NULL);
     {
@@ -215,6 +217,30 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
                             SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.RotateRight16"))
                         ]
                     ]
+                + SHorizontalBox::Slot()
+                    .AutoWidth()
+                    .Padding(4.0f, 0.0f)
+                    .VAlign(VAlign_Center)
+                    [
+                        SNew(SButton)
+                            .ButtonStyle(FCoreStyle::Get(), "NoBorder")
+                            .OnPressed(this, &SOdysseyViewport::FlipHorizontal)
+                            [
+                                SNew(SImage).Image(FOdysseyStyle::GetBrush("PainterEditor.FlipHorizontal16"))
+                            ]
+                    ]
+                + SHorizontalBox::Slot()
+                    .AutoWidth()
+                    .Padding(4.0f, 0.0f)
+                    .VAlign(VAlign_Center)
+                    [
+                        SNew(SButton)
+                            .ButtonStyle(FCoreStyle::Get(), "NoBorder")
+                            .OnPressed(this, &SOdysseyViewport::FlipVertical)
+                            [
+                                SNew(SImage).Image(FOdysseyStyle::GetBrush("PainterEditor.FlipVertical16"))
+                            ]
+                    ]
             ]
             + SHorizontalBox::Slot()
             .HAlign(HAlign_Right)
@@ -341,6 +367,17 @@ SOdysseyViewport::UpdateScrollBars()
 
     mHorizontalScrollBar->SetState((1.0 - pos.X) * ScrollbarSpaceRatio, ScrollbarThumbRatio);
     mVerticalScrollBar->SetState((1.0 - pos.Y) * ScrollbarSpaceRatio, ScrollbarThumbRatio);
+}
+
+const FMatrix2x2 SOdysseyViewport::GetFlipMatrix() const
+{
+    int flipX = mFlipStateUV.X == 0 ? 1 : -1;
+    int flipY = mFlipStateUV.Y == 0 ? 1 : -1;
+
+    const FMatrix2x2 flipState = FMatrix2x2(flipX, 0.f,
+                                            0.f, flipY);
+
+    return flipState;
 }
 
 
@@ -558,11 +595,6 @@ SOdysseyViewport::ZoomExponential(float iBaseZoom, float iSliderOffsetToAdd, con
     SetZoom( newZoom, iZoomPosition);
 }
 
-const FTransform2D& SOdysseyViewport::GetTransform() const
-{
-    return mTransform;
-}
-
 bool
 SOdysseyViewport::GetFitToViewport() const
 {
@@ -665,6 +697,11 @@ FVector2D SOdysseyViewport::GetPan() const
     return FVector2D(mTransform.GetTranslation().X, mTransform.GetTranslation().Y);
 }
 
+FVector2D SOdysseyViewport::GetFlip() const
+{
+    return mFlipStateUV;
+}
+
 FVector2D SOdysseyViewport::GetViewportCenter() const
 {
     return FVector2D(mViewport->GetSizeXY().X / 2.0f, mViewport->GetSizeXY().Y / 2.0f);
@@ -703,6 +740,24 @@ void SOdysseyViewport::RotateRight()
     SetRotation(GetRotation() - FMath::DegreesToRadians(RotationStep));
 }
 
+void SOdysseyViewport::FlipHorizontal()
+{
+    /*FMatrix2x2 invertY = FMatrix2x2( -1.f, 0.f,
+                                     0.f, 1.f );
+    mTransform = mTransform.Concatenate( FTransform2D(invertY) );*/
+
+    mFlipStateUV.X = int(mFlipStateUV.X + 1) % 2;
+}
+
+void SOdysseyViewport::FlipVertical()
+{
+    /*FMatrix2x2 invertY = FMatrix2x2( 1.f, 0.f,
+                                     0.f, -1.f );
+    mTransform = mTransform.Concatenate( FTransform2D(invertY) );*/
+
+    mFlipStateUV.Y = int(mFlipStateUV.Y + 1) % 2;
+}
+
 void SOdysseyViewport::ComputeTextureDisplayDimensions( uint32& Width, uint32& Height ) const
 {
     Width = 0;
@@ -734,8 +789,7 @@ SOdysseyViewport::GetTransformToDisplayedTexture()
     transform = transform.Concatenate(FTransform2D(translation));
     //FTransform2D transform = transform.Concatenate(translation);
     
-    return transform;
-    //return mTransform;
+    return mTransform;
 }
 
 FTransform2D

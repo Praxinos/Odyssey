@@ -60,6 +60,8 @@ protected:
     virtual void OnResetViewportRotation();
     virtual void OnRotateViewportLeft();
     virtual void OnRotateViewportRight();
+    virtual void OnFlipViewportHorizontally();
+    virtual void OnFlipViewportVertically();
     virtual void OnSetZoom(double iZoomValue);
     virtual void OnSetZoomFitScreen();
     virtual void OnZoomInExponential();

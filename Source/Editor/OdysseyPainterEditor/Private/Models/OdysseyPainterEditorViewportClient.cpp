@@ -142,7 +142,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 
     // Draw background Checker
     {
-        FCanvasTileItem tileItem(pan, mCheckerboardTexture->GetResource(), FVector2D( width, height ), FVector2D( 0.f, 0.f ), FVector2D( width / mCheckerboardTexture->GetSizeX(), height / mCheckerboardTexture->GetSizeY() ), FLinearColor::White );
+        FCanvasTileItem tileItem(pan, mCheckerboardTexture->GetResource(), FVector2D(width, height), FVector2D(0, 0), FVector2D( width / mCheckerboardTexture->GetSizeX(), height / mCheckerboardTexture->GetSizeY() ), FLinearColor::White );
         tileItem.BlendMode = SE_BLEND_Opaque;
         tileItem.PivotPoint = pivotPoint;
         tileItem.Rotation.Add( 0, rotation, 0 );
@@ -164,6 +164,9 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         }
         // END PATCH:
 
+        FVector2D topLeft = mOdysseyPainterEditorViewportPtr.Pin()->GetFlip();
+        FVector2D bottomRight = FVector2D(1, 1) - topLeft;
+
         FCanvasTileItem tileItem(pan, textureToDisplay, FVector2D(width, height), FLinearColor::White);
         tileItem.BatchedElementParameters = batchedElementParameters;
         uint32 result = (uint32)SE_BLEND_RGBA_MASK_START;
@@ -174,6 +177,8 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         tileItem.BlendMode = (ESimpleElementBlendMode)result;
         tileItem.PivotPoint = pivotPoint;
         tileItem.Rotation.Add( 0, rotation, 0 );
+        tileItem.UV0 = topLeft;
+        tileItem.UV1 = bottomRight;
         
         if (texture->IsCurrentlyVirtualTextured() && texture->Source.GetNumBlocks() > 1)
         {
@@ -1121,20 +1126,50 @@ FOdysseyPainterEditorViewportClient::GetZoom() const
 FVector2D
 FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMouseInViewport ) const
 {
-    return mOdysseyPainterEditorViewportPtr.Pin()->GetTransformToDisplayedTexture().Inverse().TransformPoint(iMouseInViewport);
+    FVector2D pointInTexture = mOdysseyPainterEditorViewportPtr.Pin()->GetTransformToDisplayedTexture().Inverse().TransformPoint(iMouseInViewport);
+
+    UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
+    if (!texture)
+        return pointInTexture;
+
+    if (mOdysseyPainterEditorViewportPtr.Pin()->GetFlip().X == 1)
+    {
+        pointInTexture.X = texture->GetSurfaceWidth() - pointInTexture.X;
+    }
+
+    if (mOdysseyPainterEditorViewportPtr.Pin()->GetFlip().Y == 1)
+    {
+        pointInTexture.Y = texture->GetSurfaceHeight() - pointInTexture.Y;
+    }
+
+    return pointInTexture;
 }
 
 FOdysseyPoint
 FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FOdysseyPoint& iPointInViewport ) const
 {
-    FVector2D position_in_viewport(iPointInViewport.x, iPointInViewport.y);
-    FVector2D position_in_texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTransformToSourceTexture().Inverse().TransformPoint(position_in_viewport);
-    
-    FOdysseyPoint point_in_texture(iPointInViewport);
-    point_in_texture.x = position_in_texture.X;
-    point_in_texture.y = position_in_texture.Y;
+    FVector2D positionInViewport(iPointInViewport.x, iPointInViewport.y);
+    FVector2D positionInTexture = mOdysseyPainterEditorViewportPtr.Pin()->GetTransformToSourceTexture().Inverse().TransformPoint(positionInViewport);
+    FOdysseyPoint pointInTexture(iPointInViewport);
 
-    return point_in_texture;
+    UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
+    if (!texture)
+        return pointInTexture;
+
+    if( mOdysseyPainterEditorViewportPtr.Pin()->GetFlip().X == 1)
+    {
+        positionInTexture.X = texture->GetSurfaceWidth() - positionInTexture.X;
+    }
+
+    if (mOdysseyPainterEditorViewportPtr.Pin()->GetFlip().Y == 1)
+    {
+        positionInTexture.Y = texture->GetSurfaceHeight() - positionInTexture.Y;
+    }
+
+    pointInTexture.x = positionInTexture.X;
+    pointInTexture.y = positionInTexture.Y;
+
+    return pointInTexture;
 }
 
 void 
@@ -1212,7 +1247,10 @@ FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iView
 
                 FVector pIntersect;
                 FVector2D p1 = transform.TransformPoint(UVs[corner1] * textureSurfaceSize);
+                p1 = p1 - (2 * p1 * mOdysseyPainterEditorViewportPtr.Pin()->GetFlip());
+
                 FVector2D p2 = transform.TransformPoint(UVs[corner2] * textureSurfaceSize);
+                p2 = p2 - (2 * p2 * mOdysseyPainterEditorViewportPtr.Pin()->GetFlip());
 
                 #define V(p) FVector(p, 0.f)
                 bool intersect = FMath::SegmentIntersection2D(V(p1), V(p2), vp1, vp2, pIntersect) ||

@@ -86,6 +86,8 @@ FOdysseyPainterEditorViewportTab::BindShortcuts(FBaseToolkit* iToolkit)
 	MAP_ACTION(painterEditorCommands.ResetViewportRotation, OnResetViewportRotation )
 	MAP_ACTION(painterEditorCommands.RotateViewportLeft, OnRotateViewportLeft )
 	MAP_ACTION(painterEditorCommands.RotateViewportRight, OnRotateViewportRight )
+    MAP_ACTION(painterEditorCommands.FlipViewportHorizontally, OnFlipViewportHorizontally)
+    MAP_ACTION(painterEditorCommands.FlipViewportVertically, OnFlipViewportVertically)
 	MAP_ACTION(painterEditorCommands.SetZoom10Percent, OnSetZoom, 0.1 )
 	MAP_ACTION(painterEditorCommands.SetZoom20Percent, OnSetZoom, 0.2 )
 	MAP_ACTION(painterEditorCommands.SetZoom30Percent, OnSetZoom, 0.3 )
@@ -259,6 +261,16 @@ void
 FOdysseyPainterEditorViewportTab::OnRotateViewportRight()
 {
     mViewport->RotateRight();
+}
+
+void FOdysseyPainterEditorViewportTab::OnFlipViewportHorizontally()
+{
+    mViewport->FlipHorizontal();
+}
+
+void FOdysseyPainterEditorViewportTab::OnFlipViewportVertically()
+{
+    mViewport->FlipVertical();
 }
 
 void

@@ -91,6 +91,12 @@ public:
     /** Action to rotate the viewport right */
     TSharedPtr<FUICommandInfo> RotateViewportRight; 
 
+    /** Action to flip the viewport horizontally */
+    TSharedPtr<FUICommandInfo> FlipViewportHorizontally;
+
+    /** Action to flip the viewport vertically */
+    TSharedPtr<FUICommandInfo> FlipViewportVertically;
+
     /** Action to set zoom pourcentage at 10% */
     TSharedPtr<FUICommandInfo> SetZoom10Percent; 
 
