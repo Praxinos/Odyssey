@@ -1,37 +1,38 @@
-#include "Undo/OdysseyVectorUndoTagInbetweenerTrajectoryAdd.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownRemove.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTag.h"
 
-FOdysseyVectorUndoTagInbetweenerTrajectoryAdd::~FOdysseyVectorUndoTagInbetweenerTrajectoryAdd()
+FOdysseyVectorUndoTagInbetweenerBreakdownRemove::~FOdysseyVectorUndoTagInbetweenerBreakdownRemove()
 {
     if( mApplied )
     {
-        // nothing to do
+        delete mBreakdown;
     }
     else
     {
-        delete mTrajectory;
+        // nothing to do
     }
 }
 
-FOdysseyVectorUndoTagInbetweenerTrajectoryAdd::FOdysseyVectorUndoTagInbetweenerTrajectoryAdd( FOdysseyVectorGroupPaint* iScene
-                                                                                            , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                                                            , FInbetweenerTrajectory* iTrajectory )
+FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorGroupPaint* iScene
+                                                                                                , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                                                                , FInbetweenerBreakdown* iBreakdown )
     : FOdysseyVectorUndo( iScene )
     , mInbetweenerTag( iInbetweenerTag )
-    , mTrajectory( iTrajectory )
+    , mBreakdown( iBreakdown )
+    , mDrawingIndex( iBreakdown->GetTargetDrawingIndex() )
 {
 }
 
 void
-FOdysseyVectorUndoTagInbetweenerTrajectoryAdd::Apply( UObject* iIgnored )
+FOdysseyVectorUndoTagInbetweenerBreakdownRemove::Apply( UObject* iIgnored )
 {
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
-/*------
-    mInbetweenerTag->AddTrajectory( mTrajectory );
-*/
+
+    mInbetweenerTag->RemoveBreakdown( mBreakdown, false );
+
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
@@ -42,13 +43,13 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAdd::Apply( UObject* iIgnored )
 }
 
 void
-FOdysseyVectorUndoTagInbetweenerTrajectoryAdd::Revert( UObject* iIgnored )
+FOdysseyVectorUndoTagInbetweenerBreakdownRemove::Revert( UObject* iIgnored )
 {
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
-/*--------
-    mInbetweenerTag->RemoveTrajectory( mTrajectory );
-*/
+
+    mInbetweenerTag->AddBreakdown( mBreakdown, mDrawingIndex, false );
+
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
@@ -60,7 +61,7 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAdd::Revert( UObject* iIgnored )
 
 /** Describes this change (for debugging) */
 FString
-FOdysseyVectorUndoTagInbetweenerTrajectoryAdd::ToString() const
+FOdysseyVectorUndoTagInbetweenerBreakdownRemove::ToString() const
 {
-    return FString("FOdysseyVectorUndoTagInbetweenerTrajectoryAdd");
+    return FString("FOdysseyVectorUndoTagInbetweenerBreakdownRemove");
 }

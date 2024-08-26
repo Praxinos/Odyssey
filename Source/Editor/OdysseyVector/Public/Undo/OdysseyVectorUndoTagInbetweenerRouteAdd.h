@@ -11,12 +11,13 @@
 
 class FOdysseyVectorGroupPaint;
 
-class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerTrajectoryAlter : public FOdysseyVectorUndo
+class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerRouteAdd : public FOdysseyVectorUndo
 {
     public:
-        ~FOdysseyVectorUndoTagInbetweenerTrajectoryAlter();
-        FOdysseyVectorUndoTagInbetweenerTrajectoryAlter( FOdysseyVectorGroupPaint* iScene
-                                                       , FInbetweenerTrajectory* iTrajectory );
+        ~FOdysseyVectorUndoTagInbetweenerRouteAdd();
+        FOdysseyVectorUndoTagInbetweenerRouteAdd( FOdysseyVectorGroupPaint* iScene
+                                                , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                , FInbetweenerRoute* iRoute );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -28,5 +29,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerTrajectoryAlter : public
         virtual FString ToString() const override;
 
     private:
-        FSnapshotRoute mRouteSnapshot;
+        FOdysseyVectorTagInbetweener* mInbetweenerTag;
+        FInbetweenerRoute* mRoute;
 };

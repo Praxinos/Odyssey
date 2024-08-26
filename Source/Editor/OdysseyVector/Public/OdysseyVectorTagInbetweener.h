@@ -15,6 +15,7 @@
 #include "InbetweenerTag/InbetweenerGridARAP.h"
 #include "InbetweenerTag/InbetweenerPoint.h"
 #include "InbetweenerTag/InbetweenerQuad.h"
+#include "InbetweenerTag/InbetweenerRoute.h"
 #include "InbetweenerTag/InbetweenerBreakdown.h"
 #include "InbetweenerTag/InterpolatedPoint.h"
 #include "InbetweenerTag/InterpolatedSegment.h"
@@ -338,7 +339,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         FColor mColor;
         bool bMapAsPolyline;
         bool bShared;
-        FInbetweenerBreakdown* mMasterBreakdown;
+        FInbetweenerBreakdown mMasterBreakdown;
         uint32 mUsedQuadCount;
         uint32 mUsedPointCount;
         uint32 mARAPRigidity;

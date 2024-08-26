@@ -30,21 +30,18 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
                           , double iWorldX
                           , double iWorldY
                           , bool iRelative );
-        void PickRoute( FOdysseyVectorGroupPaint* iScene
-                      , double iWorldX
-                      , double iWorldY
-                      , double iPickingRadius
-                      , std::list<FInbetweenerRoute*>& oRouteList );
+
+        FInbetweenerRoute* PickRoute( FOdysseyVectorGroupPaint* iScene
+                                    , double iWorldX
+                                    , double iWorldY
+                                    , double iPickingRadius  );
+
         FInbetweenerQuad* PickSourceQuad( FInbetweenerGrid* iGrid
                                         , double iWorldX
                                         , double iworldY
                                         , double iPickingRadius );
-        FInbetweenerRoute* PickRoute( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                    , double iWorldX
-                                    , double iWorldY
-                                    , double iPickingRadius );
 
-        FInbetweenerHandleTrajectory* PickHandle( FOdysseyVectorTagInbetweener* iInbetweenerTag
+        FInbetweenerHandleTrajectory* PickHandle( FOdysseyVectorGroupPaint* iScene
                                                 , double iWorldX
                                                 , double iWorldY
                                                 , double iPickingRadius );
@@ -53,12 +50,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
                                           , double iWorldX
                                           , double iWorldY
                                           , double iPickingRadius );
-
-        void PickHandle( FOdysseyVectorGroupPaint* iScene
-                       , double iWorldX
-                       , double iWorldY
-                       , double iPickingRadius
-                       , std::list<FInbetweenerHandleTrajectory*>& oTrajectoryHandleList );
 
         void SetCursorPosition( double ix, double iY );
 

@@ -71,7 +71,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
 
     private:
         FOdysseyPainterEditorVectorTrajectoryToolHUD* mTrajectoryHUD;
-        std::list<FInbetweenerHandleTrajectory*> mPickedHandleList;
+        FInbetweenerHandleTrajectory* mPickedHandle;
         FInbetweenerWaypoint* mPickedWaypoint;
         eTrajectoryPickingMode mPickingMode;
         FInbetweenerQuad* mHoveredQuad;

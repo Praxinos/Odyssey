@@ -136,7 +136,10 @@ FOdysseyVectorTagInbetweener::~FOdysseyVectorTagInbetweener()
     //delete mGrid;
     mBreakdownList.remove_if( []( FInbetweenerBreakdown* breakdown )
                               {
-                                  delete breakdown;
+                                  if( breakdown->GetMasterBreakdown() != nullptr )
+                                  {
+                                      delete breakdown;
+                                  }
 
                                   return true;
                               } );
@@ -261,6 +264,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     , bMapAsPolyline( false )
     , bShared ( false )
     , mARAPRigidity ( 10 )
+    , mMasterBreakdown( this, nullptr, 0, std::max( 2, (int) iDrawingCount - 1 ) )
 {
     mSourceBBox = iOwnerObject->GetBBox( false );
 
@@ -270,8 +274,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     mSourceBBox.h += 0.02f;
 
     // the default breakdown
-    mMasterBreakdown = new FInbetweenerBreakdown( this, nullptr, 0, std::max( 2, (int) iDrawingCount - 1 ) );
-    mBreakdownList.emplace_back( mMasterBreakdown );
+    mBreakdownList.emplace_back( &mMasterBreakdown );
 
     // Note: Grid building needs the bbox to be set.
     //SetGrid( mGridType, iNumQuadX, iNumQuadY );
@@ -411,7 +414,7 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
             int32 targetDrawingIndex = iDrawingIndex;
             FInbetweenerBreakdown* newBreakdown = iNewBreakdown ? iNewBreakdown 
                                                                 : new FInbetweenerBreakdown( this
-                                                                                           , mMasterBreakdown
+                                                                                           , &mMasterBreakdown
                                                                                            , sourceDrawingIndex
                                                                                            , targetDrawingIndex );
 
@@ -1332,7 +1335,7 @@ FOdysseyVectorTagInbetweener::GetGridNumQuadY()
 FInbetweenerBreakdown*
 FOdysseyVectorTagInbetweener::GetMasterBreakdown()
 {
-    return mMasterBreakdown;
+    return &mMasterBreakdown;
 }
 
 void

@@ -10,6 +10,17 @@
 #include "InbetweenerTag/InbetweenerQuad.h"
 #include "InbetweenerTag/InbetweenerPoint.h"
 
+static FInbetweenerHandleTrajectory*
+PickHandleFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                 , double iWorldX
+                 , double iWorldY
+                 , double iPickingRadius );
+static FInbetweenerRoute*
+PickRouteFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                , double iWorldX
+                , double iWorldY
+                , double iPickingRadius );
+
 FOdysseyPainterEditorVectorTrajectoryToolHUD::~FOdysseyPainterEditorVectorTrajectoryToolHUD()
 {
 }
@@ -26,26 +37,26 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Reset( FOdysseyVectorGroupPaint* i
 
 }
 
-void
+FInbetweenerRoute*
 FOdysseyPainterEditorVectorTrajectoryToolHUD::PickRoute( FOdysseyVectorGroupPaint* iScene
                                                        , double iWorldX
                                                        , double iWorldY
-                                                       , double iPickingRadius
-                                                       , std::list<FInbetweenerRoute*>& oRouteList )
+                                                       , double iPickingRadius )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    FInbetweenerRoute* retRoute = nullptr;
 
     vectorEngine->Traverse
     ( iScene
     , 0
     , [ vectorEngine
       , iScene
+      , &retRoute
       , this
       , iWorldX
       , iWorldY
-      , iPickingRadius
-      , &oRouteList ]( FOdysseyVectorObject* object
-                     , uint64 travesalFlags ) -> uint64
+      , iPickingRadius ]( FOdysseyVectorObject* object
+                        , uint64 travesalFlags ) -> uint64
       {
           if( vectorEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
           {
@@ -54,14 +65,16 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickRoute( FOdysseyVectorGroupPain
               if( tag )
               {
                   FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-                  FInbetweenerRoute* route = PickRoute( inbetweenerTag
-                                                      , iWorldX
-                                                      , iWorldY
-                                                      , iPickingRadius );
+                  FInbetweenerRoute* route = PickRouteFromTag( inbetweenerTag
+                                                             , iWorldX
+                                                             , iWorldY
+                                                             , iPickingRadius );
 
                   if( route )
                   {
-                      oRouteList.push_back( route );
+                      retRoute = route;
+
+                      return FOdysseyVectorEngine::TRAVERSE_STOP;
                   }
               }
 
@@ -70,6 +83,8 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickRoute( FOdysseyVectorGroupPain
 
           return 0;
       } );
+
+    return retRoute;
 }
 
 FInbetweenerQuad*
@@ -91,11 +106,11 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickSourceQuad( FInbetweenerGrid* 
     return nullptr;
 }
 
-FInbetweenerRoute*
-FOdysseyPainterEditorVectorTrajectoryToolHUD::PickRoute( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                       , double iWorldX
-                                                       , double iWorldY
-                                                       , double iPickingRadius )
+static FInbetweenerRoute*
+PickRouteFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                , double iWorldX
+                , double iWorldY
+                , double iPickingRadius )
 {
     std::list<FInbetweenerRoute*>& routeList = iInbetweenerTag->GetRouteList();
     BLMatrix2D& ownerWorldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
@@ -105,7 +120,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickRoute( FOdysseyVectorTagInbetw
         FInbetweenerQuad* quad = &iInbetweenerTag->GetBreakdownList().front()->GetGrid()->GetQuadBuffer()[route->GetQuadIndex()];
         ::ULIS::FVec2D routeLocalPosition = quad->GetPoint( eInbetweenerPointPositionType::SourcePosition
                                                           , route->GetQuadU()
-                                                          , route->GetQuadU() );
+                                                          , route->GetQuadV() );
         ::ULIS::FVec2D routeWorldPosition = FOdysseyVector::MapPoint( ownerWorldMatrix, routeLocalPosition );
 
         if( ( ::ULIS::FVec2D( routeWorldPosition.x, routeWorldPosition.y )
@@ -118,14 +133,14 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickRoute( FOdysseyVectorTagInbetw
     return nullptr;
 }
 
-void
+FInbetweenerHandleTrajectory*
 FOdysseyPainterEditorVectorTrajectoryToolHUD::PickHandle( FOdysseyVectorGroupPaint* iScene
                                                         , double iWorldX
                                                         , double iWorldY
-                                                        , double iPickingRadius
-                                                        , std::list<FInbetweenerHandleTrajectory*>& oTrajectoryHandleList )
+                                                        , double iPickingRadius )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    FInbetweenerHandleTrajectory* retHandle = nullptr;
 
     vectorEngine->Traverse
     ( iScene
@@ -133,11 +148,11 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickHandle( FOdysseyVectorGroupPai
     , [ vectorEngine
       , iScene
       , this
+      , &retHandle
       , iWorldX
       , iWorldY
-      , iPickingRadius
-      , &oTrajectoryHandleList ]( FOdysseyVectorObject* object
-                                , uint64 travesalFlags ) -> uint64
+      , iPickingRadius ]( FOdysseyVectorObject* object
+                        , uint64 travesalFlags ) -> uint64
       {
           if( vectorEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
           {
@@ -149,14 +164,16 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickHandle( FOdysseyVectorGroupPai
 
                   if( inbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
                   {
-                      FInbetweenerHandleTrajectory* trajectoryHandle = PickHandle( inbetweenerTag
-                                                                                 , iWorldX
-                                                                                 , iWorldY
-                                                                                 , iPickingRadius );
+                      FInbetweenerHandleTrajectory* trajectoryHandle = PickHandleFromTag( inbetweenerTag
+                                                                                        , iWorldX
+                                                                                        , iWorldY
+                                                                                        , iPickingRadius );
 
                       if( trajectoryHandle )
                       {
-                          oTrajectoryHandleList.push_back( trajectoryHandle );
+                          retHandle = trajectoryHandle;
+
+                          return FOdysseyVectorEngine::TRAVERSE_STOP;
                       }
                   }
               }
@@ -166,6 +183,8 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickHandle( FOdysseyVectorGroupPai
 
           return 0;
       } );
+
+    return retHandle;
 }
 
 FInbetweenerWaypoint*
@@ -206,11 +225,11 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickWaypoint( FOdysseyVectorTagInb
     return nullptr;
 }
 
-FInbetweenerHandleTrajectory*
-FOdysseyPainterEditorVectorTrajectoryToolHUD::PickHandle( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                        , double iWorldX
-                                                        , double iWorldY
-                                                        , double iPickingRadius )
+static FInbetweenerHandleTrajectory*
+PickHandleFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                 , double iWorldX
+                 , double iWorldY
+                 , double iPickingRadius )
 {
     BLMatrix2D& ownerWorldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
 

@@ -154,15 +154,13 @@ class ODYSSEYVECTOR_API FSnapshotTrajectory
     public:
         virtual ~FSnapshotTrajectory();
         FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory, uint64 iSnapshotFlags );
-        FInbetweenerTrajectory* GetTrajectory();
-        virtual void Restore();
+        virtual void Restore( FInbetweenerTrajectory* iTrajectory );
 
         static void WaypointSpacingToArray( FInbetweenerTrajectory* iTrajectory
                                           , std::vector<float>& oSpacingBuffer );
 
     protected:
         uint64 mSnapshotFlags;
-        FInbetweenerTrajectory* mTrajectory;
         ::ULIS::FVec2D mHandleDirection[2];
         double mHandleLengthRatio[2];
         std::vector<float> mWaypointSpacingBuffer;
@@ -238,6 +236,35 @@ class ODYSSEYVECTOR_API FSnapshotSegmentCubic
         ULIS::FVec2D mHandleCoords[2];
 };
 
+class ODYSSEYVECTOR_API FSnapshotRoute
+{
+    public:
+        virtual ~FSnapshotRoute();
+        FSnapshotRoute( FInbetweenerRoute* iRoute
+                      , uint64 iSnapshotflags
+                      , uint64 iTrajectorySnapshotflags );
+
+        virtual bool Restore();
+
+    protected:
+        FInbetweenerRoute* mRoute;
+        std::vector<FSnapshotTrajectory> mTrajectorySnapshotBuffer;
+        uint64 mSnapshotFlags;
+};
+
+class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
+{
+    public:
+        virtual ~FSnapshotInbetweenerBreakdown();
+        FSnapshotInbetweenerBreakdown( FInbetweenerBreakdown* iBreakdown );
+
+        virtual bool Restore();
+
+    protected:
+        FInbetweenerBreakdown* mBreakdown;
+        std::vector<::ULIS::FVec2D> mGridGeometry;
+};
+
 class ODYSSEYVECTOR_API FSnapshotTagInbetweener
 {
     public:
@@ -265,9 +292,9 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         eInbetweenerInterpolationType mInterpolationType;
         uint32 mGridSizeX;
         uint32 mGridSizeY;
-        std::vector<::ULIS::FVec2D> mGridGeometry;
         uint32 mARAPRigidity;
         std::vector<FInbetweenerTrajectory*> mTrajectoryArray;
+        std::vector<FSnapshotInbetweenerBreakdown> mInbetweenerBreakdownSnaphotBuffer;
         FColor mColor;
         bool bMapAsPolyline;
 };

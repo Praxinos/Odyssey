@@ -35,7 +35,6 @@ FSnapshotTrajectory::~FSnapshotTrajectory()
 
 FSnapshotTrajectory::FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory, uint64 iSnapshotFlags )
     : mSnapshotFlags( iSnapshotFlags )
-    , mTrajectory ( iTrajectory )
 {
     if( mSnapshotFlags & FSnapshotFlags::Trajectory::BEZIER )
     {
@@ -67,25 +66,18 @@ FSnapshotTrajectory::WaypointSpacingToArray( FInbetweenerTrajectory* iTrajectory
     }
 }
 
-FInbetweenerTrajectory*
-FSnapshotTrajectory::GetTrajectory()
-{
-    return mTrajectory;
-}
-
 void
-FSnapshotTrajectory::Restore()
+FSnapshotTrajectory::Restore( FInbetweenerTrajectory* iTrajectory )
 {
-
     if( mSnapshotFlags & FSnapshotFlags::Trajectory::BEZIER )
     {
-        ::ULIS::FVec2D swapHandleDirection[2] = { mTrajectory->GetHandle(0)->GetDirection()
-                                                , mTrajectory->GetHandle(1)->GetDirection() };
-        double swapHandleLengthRatio[2] =  { mTrajectory->GetHandle(0)->GetLengthRatio()
-                                           , mTrajectory->GetHandle(1)->GetLengthRatio() };
+        ::ULIS::FVec2D swapHandleDirection[2] = { iTrajectory->GetHandle(0)->GetDirection()
+                                                , iTrajectory->GetHandle(1)->GetDirection() };
+        double swapHandleLengthRatio[2] =  { iTrajectory->GetHandle(0)->GetLengthRatio()
+                                           , iTrajectory->GetHandle(1)->GetLengthRatio() };
 
-        mTrajectory->GetHandle(0)->Set( mHandleDirection[0], mHandleLengthRatio[0] );
-        mTrajectory->GetHandle(1)->Set( mHandleDirection[1], mHandleLengthRatio[1] );
+        iTrajectory->GetHandle(0)->Set( mHandleDirection[0], mHandleLengthRatio[0] );
+        iTrajectory->GetHandle(1)->Set( mHandleDirection[1], mHandleLengthRatio[1] );
 
         mHandleDirection[0] = swapHandleDirection[0];
         mHandleDirection[1] = swapHandleDirection[1];
@@ -96,10 +88,10 @@ FSnapshotTrajectory::Restore()
 
     if( mSnapshotFlags & FSnapshotFlags::Trajectory::WAYPOINTS )
     {
-        std::vector<FInbetweenerWaypoint>& waypointBuffer = mTrajectory->GetWaypointBuffer();
+        std::vector<FInbetweenerWaypoint>& waypointBuffer = iTrajectory->GetWaypointBuffer();
         std::vector<float> swapWaypointSpacingBuffer;
 
-        WaypointSpacingToArray( mTrajectory, swapWaypointSpacingBuffer );
+        WaypointSpacingToArray( iTrajectory, swapWaypointSpacingBuffer );
 
         //waypointBuffer.resize( mWaypointSpacingBuffer.size() );
 
@@ -110,6 +102,60 @@ FSnapshotTrajectory::Restore()
             mWaypointSpacingBuffer[i] = swapWaypointSpacingBuffer[i];
         }
     }
+}
+
+FSnapshotRoute::~FSnapshotRoute()
+{
+}
+
+FSnapshotRoute::FSnapshotRoute( FInbetweenerRoute* iRoute
+                              , uint64 iSnapshotflags
+                              , uint64 iTrajectorySnapshotflags )
+    : mRoute( iRoute )
+    , mSnapshotFlags( iSnapshotflags ) // unused
+{
+    mTrajectorySnapshotBuffer.reserve( iRoute->GetInbetweenerTag()->GetBreakdownCount() );
+
+    for( FInbetweenerTrajectory& trajectory : iRoute->GetTrajectoryBuffer() )
+    {
+        mTrajectorySnapshotBuffer.emplace_back( &trajectory, iTrajectorySnapshotflags );
+    }
+}
+
+bool
+FSnapshotRoute::Restore()
+{
+    for( uint32 i = 0; i <  mRoute->GetInbetweenerTag()->GetBreakdownCount(); i++ )
+    {
+        FInbetweenerTrajectory* trajectory = &mRoute->GetTrajectoryBuffer()[i];
+        FSnapshotTrajectory* trajectorySnapshot = &mTrajectorySnapshotBuffer[i];
+
+        trajectorySnapshot->Restore( trajectory );
+    }
+
+    return true;
+}
+
+FSnapshotInbetweenerBreakdown::~FSnapshotInbetweenerBreakdown()
+{
+}
+
+FSnapshotInbetweenerBreakdown::FSnapshotInbetweenerBreakdown( FInbetweenerBreakdown* iBreakdown )
+    : mBreakdown( iBreakdown )
+{
+    mBreakdown->GetGrid()->GetGeometry( mGridGeometry, eInbetweenerPointPositionType::TargetPosition );
+}
+
+bool FSnapshotInbetweenerBreakdown::Restore()
+{
+    std::vector<::ULIS::FVec2D> swapGridGeometry;
+
+    mBreakdown->GetGrid()->GetGeometry( swapGridGeometry, eInbetweenerPointPositionType::TargetPosition );
+    mBreakdown->GetGrid()->SetGeometry( mGridGeometry   , eInbetweenerPointPositionType::TargetPosition );
+
+    mGridGeometry = swapGridGeometry;
+
+    return true; // restore succeeded
 }
 
 FSnapshotTagInbetweener::~FSnapshotTagInbetweener()
@@ -187,10 +233,12 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
     ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE     )
     ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY ) )
     {
-/*-----------
-        mInbetweenerTag->GetGrid()->GetGeometry( mGridGeometry
-                                               , eInbetweenerPointPositionType::TargetPosition );
-*/
+        mInbetweenerBreakdownSnaphotBuffer.reserve( mInbetweenerTag->GetBreakdownCount() );
+
+        for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
+        {
+            mInbetweenerBreakdownSnaphotBuffer.emplace_back( breakdown );
+        }
     }
 }
 
@@ -198,7 +246,6 @@ bool
 FSnapshotTagInbetweener::Restore()
 {
     std::vector<FInbetweenerTrajectory*> swapTrajectoryArray;
-    std::vector<::ULIS::FVec2D> swapGridGeometry;
     FInbetweenerChart swapChart;
 
     // pre-step. Backup grid geometry before being changed
@@ -206,17 +253,6 @@ FSnapshotTagInbetweener::Restore()
     ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE ) )
     {
         SaveTrajectories( swapTrajectoryArray );
-    }
-
-    // pre-step. Backup grid geometry before being changed
-    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE     )
-    ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE     )
-    ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY ) )
-    {
-/*---------------
-        mInbetweenerTag->GetGrid()->GetGeometry( swapGridGeometry
-                                               , eInbetweenerPointPositionType::TargetPosition );
-*/
     }
 
     // pre-step. Backup Chart before being changed by SetInbetweenCount
@@ -333,12 +369,10 @@ FSnapshotTagInbetweener::Restore()
     ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE     )
     ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY ) )
     {
-/*--------
-        mInbetweenerTag->GetGrid()->SetGeometry( mGridGeometry
-                                               , eInbetweenerPointPositionType::TargetPosition );
-
-        mGridGeometry = swapGridGeometry;
-*/
+        for( FSnapshotInbetweenerBreakdown& inbetweenerBreakdownSnapshot : mInbetweenerBreakdownSnaphotBuffer )
+        {
+            inbetweenerBreakdownSnapshot.Restore();
+        }
     }
 
     // restore chart after params have been set

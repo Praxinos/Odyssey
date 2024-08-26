@@ -7,6 +7,9 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+// From module OdysseyPainterEditor
+#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "PainterEditor/OdysseyPainterEditor.h"
 // From U.E
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
@@ -22,7 +25,8 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTag.h"
 #include "OdysseyVectorTagInbetweener.h"
-
+#include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAdd.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownRemove.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -137,10 +141,28 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
         FOdysseyVectorTagInbetweener* inbetweenerTag = item.Get()->GetInbetweenerTag();
         uint32 cellFrame = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetFrame();
         FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
+        FInbetweenerBreakdown* breakdown = inbetweenerTag->AddBreakdown( frameIndex - cellFrame, true );
+        FOdysseyVectorGroupPaint* scene = inbetweenerTag->GetOwner()->GetScene();
 
-        // Note: -1 because we add breakdown at inbetween index
-        if( inbetweenerTag->AddBreakdown( frameIndex - cellFrame, true ) )
+        if( breakdown )
         {
+            //---------- needed for undos-----------//
+            GEditor->BeginTransaction(LOCTEXT("vector-timeline.transaction.add-breakdown", "Add Breakdown"));
+            if( GUndo )
+            {
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAdd( scene
+                                                                                           , inbetweenerTag
+                                                                                           , breakdown );
+
+                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+                TSharedPtr<FOdysseyPainterEditorSource> source = mAnimationEditorExtension->GetEditor()->GetSource();
+                if (source)
+                    source->RecordCurrentFrameUndo();
+            }
+            GEditor->EndTransaction();
+            //--------------------------------------//
+
             // find which engine/scene to update/redraw
             if( std::find_if( engineList.begin()
                             , engineList.end()
@@ -182,28 +204,43 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
         uint32 cellFrame = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetFrame();
         FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
         FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdown( frameIndex - cellFrame );
+        FOdysseyVectorGroupPaint* scene = inbetweenerTag->GetOwner()->GetScene();
 
-        if( breakdown )
+        // we delete the breakdown only if it is not the master breakdown ( the default one)
+        if( breakdown && breakdown->GetMasterBreakdown() )
         {
-            // we delete the breakdown only if it is not the master breakdown ( the default one)
-            if( breakdown->GetMasterBreakdown() )
+            //---------- needed for undos-----------//
+            GEditor->BeginTransaction(LOCTEXT("vector-timeline.transaction.remove-breakdown", "Remove Breakdown"));
+            if( GUndo )
             {
-                inbetweenerTag->RemoveBreakdown( breakdown, false );
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownRemove( scene
+                                                                                              , inbetweenerTag
+                                                                                              , breakdown );
 
-                // find which engine/scene to update/redraw
-                if( std::find_if( engineList.begin()
-                                , engineList.end()
-                                , [inbetweenerTagEngine]( FOdysseyVectorEngine* engine ) -> bool
-                                  {
-                                      return ( inbetweenerTagEngine == engine ) ? true : false;
-                                  } ) == engineList.end() )
-                {
-                    engineList.push_back( inbetweenerTagEngine );
-                }
-
-                // force recompute internal geometry of the attached widget
-                WidgetFromItem ( item ).Get()->AsWidget()->MarkPrepassAsDirty();
+                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+                TSharedPtr<FOdysseyPainterEditorSource> source = mAnimationEditorExtension->GetEditor()->GetSource();
+                if (source)
+                    source->RecordCurrentFrameUndo();
             }
+            GEditor->EndTransaction();
+            //--------------------------------------//
+
+            inbetweenerTag->RemoveBreakdown( breakdown, false );
+
+            // find which engine/scene to update/redraw
+            if( std::find_if( engineList.begin()
+                            , engineList.end()
+                            , [inbetweenerTagEngine]( FOdysseyVectorEngine* engine ) -> bool
+                                {
+                                    return ( inbetweenerTagEngine == engine ) ? true : false;
+                                } ) == engineList.end() )
+            {
+                engineList.push_back( inbetweenerTagEngine );
+            }
+
+            // force recompute internal geometry of the attached widget
+            WidgetFromItem ( item ).Get()->AsWidget()->MarkPrepassAsDirty();
         }
     }
 
