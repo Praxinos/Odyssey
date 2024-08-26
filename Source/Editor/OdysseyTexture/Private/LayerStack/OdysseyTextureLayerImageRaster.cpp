@@ -156,6 +156,9 @@ void
 UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
+
+	if (GetFlags() & RF_ClassDefaultObject)
+		return;
     
     if( Ar.IsSaving() )
     {
