@@ -44,5 +44,9 @@ private:
     TSharedPtr<FOdysseyHUDHandle> mHandleEndHUD;
 
     bool mIsDrawing = false;
-    bool mSnapAngles = false;
+    bool mInvertSnapAngles = false;
+
+public:
+	UPROPERTY(EditAnywhere, Category="Shape")
+	bool SnapAngles = false;
 };

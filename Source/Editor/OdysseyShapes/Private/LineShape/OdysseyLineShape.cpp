@@ -42,7 +42,8 @@ UOdysseyLineShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
     //Line Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
     mEndPoint = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
 
-    if( mSnapAngles )
+	bool snapAngles = SnapAngles ^ mInvertSnapAngles;
+    if( snapAngles )
     {
         //TODO: Angles
         /* float shiftX = mEndPoint.x - mStartPoint.x;
@@ -93,7 +94,7 @@ UOdysseyLineShape::OnKeyDown(const FKey& iKey)
 
     if( iKey == EKeys::LeftShift || iKey == EKeys::RightShift )
 	{
-		mSnapAngles = true;
+		mInvertSnapAngles = true;
 		return true;
 	}
 
@@ -105,7 +106,7 @@ UOdysseyLineShape::OnKeyUp(const FKey& iKey)
 {
     if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
     {
-        mSnapAngles = false;
+        mInvertSnapAngles = false;
 		return true;
     }
 

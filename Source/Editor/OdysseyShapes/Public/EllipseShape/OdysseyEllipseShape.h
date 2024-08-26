@@ -42,6 +42,10 @@ private:
 
     TSharedPtr<FOdysseyHUDEllipse> mEllipseHUD;
 
-    bool mUniform = false;
+    bool mInvertUniform = false;
     bool mIsDrawing = false;
+
+public:
+	UPROPERTY(EditAnywhere, Category="Shape")
+	bool Uniform = false;
 };

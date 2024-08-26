@@ -41,7 +41,8 @@ UOdysseyRectangleShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 
     //Rectangle Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
     mBottomRightPoint = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
-    if (mUniform)
+	bool uniform = Uniform ^ mInvertUniform;
+    if (uniform)
     {
         int shiftX = mBottomRightPoint.x - mTopLeftPoint.x;
         int shiftY = mBottomRightPoint.y - mTopLeftPoint.y;
@@ -100,7 +101,7 @@ UOdysseyRectangleShape::OnKeyDown(const FKey& iKey)
 
     if( iKey == EKeys::LeftShift || iKey == EKeys::RightShift )
 	{
-		mUniform = true;
+		mInvertUniform = true;
 		return true;
 	}
 
@@ -112,7 +113,7 @@ UOdysseyRectangleShape::OnKeyUp(const FKey& iKey)
 {
     if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
     {
-        mUniform = false;
+        mInvertUniform = false;
 		return true;
     }
 

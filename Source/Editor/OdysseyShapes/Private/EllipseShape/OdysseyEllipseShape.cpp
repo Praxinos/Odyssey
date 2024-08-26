@@ -42,7 +42,9 @@ UOdysseyEllipseShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
     //Ellipse Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
     FOdysseyPoint point(iPointInTexture.x, iPointInTexture.y);
     mBorderPoint = point;
-    if (mUniform)
+
+	bool uniform = Uniform ^ mInvertUniform;
+    if (uniform)
     {
         int shiftX = FMath::Abs(mBorderPoint.x - mCenterPoint.x);
         int shiftY = FMath::Abs(mBorderPoint.y - mCenterPoint.y);
@@ -83,7 +85,7 @@ UOdysseyEllipseShape::OnKeyDown(const FKey& iKey)
 
     if( iKey == EKeys::LeftShift || iKey == EKeys::RightShift )
 	{
-		mUniform = true;
+		mInvertUniform = true;
 		return true;
 	}
 
@@ -95,7 +97,7 @@ UOdysseyEllipseShape::OnKeyUp(const FKey& iKey)
 {
     if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
     {
-        mUniform = false;
+        mInvertUniform = false;
 		return true;
     }
 

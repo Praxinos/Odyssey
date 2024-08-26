@@ -44,5 +44,9 @@ private:
     TSharedPtr<FOdysseyHUDHandle> mHandleBottomRightHUD;
 
     bool mIsDrawing = false;
-    bool mUniform = false;
+    bool mInvertUniform = false;
+
+public:
+	UPROPERTY(EditAnywhere, Category="Shape")
+	bool Uniform = false;
 };

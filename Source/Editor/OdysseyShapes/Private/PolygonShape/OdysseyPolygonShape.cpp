@@ -44,7 +44,9 @@ UOdysseyPolygonShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
     {
         //Polygon Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
         mPoints.Last() = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
-        if (mSnapAngles)
+		
+		bool snapAngles = SnapAngles ^ mInvertSnapAngles;
+        if (snapAngles)
         {
             int num = mPoints.Num() - 2; 
             int shiftX = FMath::Abs(iPointInTexture.x - mPoints[num].x);
@@ -87,7 +89,9 @@ UOdysseyPolygonShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 
     //Polygon Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
     mPoints.Last() = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
-    if (mSnapAngles && mPoints.Num() > 1)
+	
+	bool snapAngles = SnapAngles ^ mInvertSnapAngles;
+    if (snapAngles && mPoints.Num() > 1)
     {
         int num = mPoints.Num() - 2; 
         int shiftX = FMath::Abs(iPointInTexture.x - mPoints[num].x);
@@ -123,7 +127,7 @@ UOdysseyPolygonShape::OnKeyDown(const FKey& iKey)
 
     if( iKey == EKeys::LeftShift || iKey == EKeys::RightShift )
 	{
-		mSnapAngles = true;
+		mInvertSnapAngles = true;
 		return true;
 	}
 
@@ -135,7 +139,7 @@ UOdysseyPolygonShape::OnKeyUp(const FKey& iKey)
 {
     if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
     {
-        mSnapAngles = false;
+        mInvertSnapAngles = false;
 		return true;
     }
 
