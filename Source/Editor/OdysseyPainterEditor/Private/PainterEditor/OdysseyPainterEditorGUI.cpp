@@ -13,7 +13,6 @@
 #include "OdysseyPainterEditorColorPaletteTab.h"
 #include "OdysseyPainterEditorColorSlidersTab.h"
 #include "OdysseyPainterEditorColorWheelTab.h"
-#include "OdysseyPainterEditorHUDTab.h"
 #include "OdysseyPainterEditorMeshSelectorTab.h"
 #include "OdysseyPainterEditorTopTab.h"
 #include "OdysseyPainterEditorToolsTab.h"
@@ -77,7 +76,6 @@ FOdysseyPainterEditorGUI::CreateTabs()
     TSharedRef<FOdysseyPainterEditorMeshSelectorTab> meshSelectorTab = MakeShared<FOdysseyPainterEditorMeshSelectorTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorPaletteTab> paletteTab = MakeShared<FOdysseyPainterEditorPaletteTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorViewportTab> viewportTab = MakeShared<FOdysseyPainterEditorViewportTab>(mEditor);
-    TSharedRef<FOdysseyPainterEditorHUDTab> HUDTab = MakeShared<FOdysseyPainterEditorHUDTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorBrushSelectorTab> brushSelectorTab = MakeShared<FOdysseyPainterEditorBrushSelectorTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorColorWheelTab> colorWheelTab = MakeShared<FOdysseyPainterEditorColorWheelTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorColorSlidersTab> colorSlidersTab = MakeShared<FOdysseyPainterEditorColorSlidersTab>(mEditor);
@@ -103,7 +101,6 @@ FOdysseyPainterEditorGUI::CreateTabs()
     mEditor->AddTab(meshSelectorTab);
     mEditor->AddTab(paletteTab);
     mEditor->AddTab(viewportTab);
-    mEditor->AddTab(HUDTab);
     mEditor->AddTab(colorWheelTab);
     mEditor->AddTab(colorSlidersTab);
     mEditor->AddTab(topTab);

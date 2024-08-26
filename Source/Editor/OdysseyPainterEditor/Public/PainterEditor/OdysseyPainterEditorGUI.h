@@ -69,18 +69,5 @@ private:
     FOdysseyPainterEditor*                          mEditor;
 	TSharedPtr<FTabManager::FLayout>                mLayout;
     TSharedPtr<SWidget>                             mWidget;
-
-protected:
-    /*
-    TSharedPtr<FOdysseyPainterEditorHUDTab>                     mHUDTab;
-    TSharedPtr<FOdysseyPainterEditorViewportTab>                mViewportTab;
-    TSharedPtr<FOdysseyPainterEditorBrushSelectorTab>           mBrushSelectorTab;
-    TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>            mMeshSelectorTab;
-    TSharedPtr<FOdysseyPainterEditorPaletteTab>                 mColorPaletteTab;
-    TSharedPtr<FOdysseyPainterEditorColorWheelTab>              mColorWheelTab;
-    TSharedPtr<FOdysseyPainterEditorColorSlidersTab>            mColorSlidersTab;
-    TSharedPtr<FOdysseyPainterEditorTopTab>                     mTopTab;
-    TSharedPtr<FOdysseyPainterEditorToolsTab>                   mToolsTab;
-    TSharedPtr<FOdysseyPainterEditorToolOptionsTab>             mToolOptionsTab; */
 };
 
