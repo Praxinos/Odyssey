@@ -413,3 +413,19 @@ UOdysseyAnimationEditorOutOfPegsTool::OnRotationHandleDragEnd()
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Rotation), mCell->OutOfPegs.Rotation, EPropertyChangeType::ValueSet);
 }
+
+void
+UOdysseyAnimationEditorOutOfPegsTool::Reset()
+{
+    FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), FOdysseyAnimationCellOutOfPegs());
+}
+
+void
+UOdysseyAnimationEditorOutOfPegsTool::ResetAll()
+{
+	const TArray<UOdysseyAnimationCell*> cells = mCell->GetLayer()->GetCells();
+	for (UOdysseyAnimationCell* cell : cells)
+	{
+		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), FOdysseyAnimationCellOutOfPegs());
+	}
+}
