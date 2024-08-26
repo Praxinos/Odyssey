@@ -33,6 +33,12 @@ FOdysseyRasterBlock::FOdysseyRasterBlock()
 {
 }
 
+FOdysseyRasterBlock::FOdysseyRasterBlock(UObject* iOwner)
+    : mOwner(iOwner)
+    , mBlockData(nullptr)
+{
+}
+
 FOdysseyRasterBlock::FOdysseyRasterBlock(UObject* iOwner, int iWidth, int iHeight, ::ULIS::eFormat iFormat)
     : mOwner(iOwner)
 	, mWidth(iWidth)

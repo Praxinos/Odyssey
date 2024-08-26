@@ -51,7 +51,6 @@ public:
     // UObject overrides
     virtual void PostInitProperties() override;
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
-    virtual void PostLoad() override;
 
 public:
     //UObject overrides

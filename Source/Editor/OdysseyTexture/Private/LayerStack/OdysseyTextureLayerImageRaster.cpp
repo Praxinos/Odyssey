@@ -88,29 +88,24 @@ UOdysseyTextureLayerImageRaster::PostInitProperties()
 		return;
 
     UTexture2D* texture = GetTexture();
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-    //let's ensure the format has alpha, so add alpha channel of needed
-    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
-
-    //Caches the tiles on disk
-	RasterBlock = MakeShared<FOdysseyRasterBlock>(this, texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
-    RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
-    RasterBlock->OnBlockCommited().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockCommited);
-    RasterBlock->PostProcess().BindUObject(this, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);
-}
-
-void
-UOdysseyTextureLayerImageRaster::PostLoad()
-{
-    Super::PostLoad();
-    if ( RasterBlock )
+    if (texture->Source.GetFormat() != TSF_Invalid)
     {
-        RasterBlock->OnBlockChanged().RemoveAll(this);
-        RasterBlock->OnBlockCommited().RemoveAll(this);
-        RasterBlock->PostProcess().Unbind();
+        ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+        //let's ensure the format has alpha, so add alpha channel of needed
+        format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
+
+        //Caches the tiles on disk
+        RasterBlock = MakeShared<FOdysseyRasterBlock>(this, texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
         RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
         RasterBlock->OnBlockCommited().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockCommited);
-        RasterBlock->PostProcess().BindUObject(this, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);   
+        RasterBlock->PostProcess().BindUObject(this, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);
+    }
+    else
+    {
+        RasterBlock = MakeShared<FOdysseyRasterBlock>(this);
+        RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
+        RasterBlock->OnBlockCommited().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockCommited);
+        RasterBlock->PostProcess().BindUObject(this, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);
     }
 }
 

@@ -60,6 +60,7 @@ public:
     // Construction / Destruction
     ~FOdysseyRasterBlock();
     FOdysseyRasterBlock();
+	FOdysseyRasterBlock(UObject* iOwner);
     FOdysseyRasterBlock(UObject* iOwner, int iWidth, int iHeight, ::ULIS::eFormat  iFormat);
 
 public:
