@@ -9,6 +9,7 @@
 #include "Editor/UnrealEdEngine.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyViewportDrawingEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
@@ -99,7 +100,7 @@ SOdysseyViewportDrawingEditorMasterTab::Construct(const FArguments& InArgs, FOdy
             .AutoHeight()
             [
                 SNew(SObjectPropertyEntryBox)
-                    .AllowedClass(UTexture2D::StaticClass())
+                    .AllowedClass(UTexture::StaticClass())
                     .ObjectPath(this, &SOdysseyViewportDrawingEditorMasterTab::PaintTexturePath)
                     .OnObjectChanged(FOnSetObject::CreateRaw(this, &SOdysseyViewportDrawingEditorMasterTab::OnTextureChanged))
                     .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(this, &SOdysseyViewportDrawingEditorMasterTab::ShouldFilterTextureAsset))
@@ -306,7 +307,7 @@ SOdysseyViewportDrawingEditorMasterTab::ShouldFilterMaterialAsset(const FAssetDa
 bool
 SOdysseyViewportDrawingEditorMasterTab::ShouldFilterTextureAsset(const FAssetData& iAssetData) const
 {
-    return !(mExtension->SelectableTextures().ContainsByPredicate([=](const FPaintableTexture& iTexture) { return (iAssetData.FastGetAsset() != nullptr && iTexture.Texture->GetFullName() == iAssetData.FastGetAsset()->GetFullName() ); }));
+    return !(mExtension->SelectableTextures().ContainsByPredicate([=, this](const FPaintableTexture& iTexture) { return (iAssetData.FastGetAsset() != nullptr && iTexture.Texture->GetFullName() == iAssetData.FastGetAsset()->GetFullName() && FOdysseyViewportDrawingEditorUtils::OdysseyDoesMaterialUseTexture( mExtension->Material(), iTexture.Texture ) ); }));
 }
 
 //--------------------------------------------------------------------------------------
@@ -360,7 +361,7 @@ SOdysseyViewportDrawingEditorMasterTab::OnMaterialChanged(const FAssetData& iAss
 void
 SOdysseyViewportDrawingEditorMasterTab::OnTextureChanged(const FAssetData& iAssetData)
 {
-    UTexture2D* texture = Cast<UTexture2D>(iAssetData.GetAsset());
+    UTexture* texture = Cast<UTexture>(iAssetData.GetAsset());
 
     if ( texture )
     {

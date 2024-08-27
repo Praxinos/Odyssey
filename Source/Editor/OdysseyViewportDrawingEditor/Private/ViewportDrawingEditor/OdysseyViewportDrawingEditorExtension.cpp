@@ -348,12 +348,13 @@ FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture, bool iWar
 
 	if (iTexture)
 	{
-
 		bool canSetTexture = true;
+		bool isMediaTexture = false;
 
 		UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
 		if (iTexture->IsA(UMediaTexture::StaticClass()))
 		{
+			isMediaTexture = true;
 			canSetTexture = false;
 			UMediaTexture* texture = Cast<UMediaTexture>(iTexture);
 			UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
@@ -391,8 +392,11 @@ FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture, bool iWar
 
 		if (!canSetTexture)
 		{
-			if (iWarnUserIfFailed)
-				FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("painter-editor-extension.texture-already-opened-dialog.title", "Selected Texture Already Opened"), LOCTEXT("painter-editor-extension.texture-already-opened-dialog.message", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."));
+			if (iWarnUserIfFailed && !isMediaTexture)
+				FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("painter-editor-extension.texture-already-opened-dialog.message", "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."), LOCTEXT("painter-editor-extension.texture-already-opened-dialog.title", "Selected Texture Already Opened"));
+            else if (iWarnUserIfFailed && isMediaTexture)
+                FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("painter-editor-extension.media-texture-fail-dialog.message", "A media texture doesn't have a media source and therefore can't be edited. Please setup all your media textures correctly by assigning them a media source."), LOCTEXT("painter-editor-extension.media-texture-fail-dialog.title", "Media source missing") );
+
 			return false;
 		}
 	}
@@ -723,6 +727,9 @@ FOdysseyViewportDrawingEditorExtension::SelectDefaultTexture()
 	{
 		if (paintableTexture.Texture == Texture()) //if the texture is already selected we assume we have nothing to do
 			break;
+
+		if( !FOdysseyViewportDrawingEditorUtils::OdysseyDoesMaterialUseTexture( mMaterial, paintableTexture.Texture ) )
+			continue;
 
 		bool succeeded = SetTexture(paintableTexture.Texture, displayWarning);
 		if (succeeded)
