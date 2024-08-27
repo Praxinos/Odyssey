@@ -28,6 +28,7 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
         FInbetweenerWaypoint* GetWaypoint( uint32 iIndex );
         FInbetweenerRoute* GetRoute();
         void Import( FInbetweenerTrajectory& iImportFrom );
+        FInbetweenerBreakdown* GetBreakdown();
 
     private:
         std::vector<FInbetweenerWaypoint> mWaypointBuffer;

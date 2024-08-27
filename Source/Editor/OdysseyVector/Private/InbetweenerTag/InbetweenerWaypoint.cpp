@@ -30,22 +30,29 @@ FInbetweenerWaypoint::GetRatio()
 void
 FInbetweenerWaypoint::SetT( float iT )
 {
-    uint32 waypointIndex = this - &mTrajectory->GetWaypointBuffer()[0];
-    double drawingT = mTrajectory->GetRoute()->GetInbetweenerTag()->GetChart().drawingBuffer[waypointIndex].spacing;
+    FOdysseyVectorTagInbetweener* inbetweenerTag = mTrajectory->GetRoute()->GetInbetweenerTag();
+    uint32 sourceDrawingIndex = mTrajectory->GetBreakdown()->GetSourceDrawingIndex();
+    uint32 targetDrawingIndex = mTrajectory->GetBreakdown()->GetTargetDrawingIndex();
+    uint32 waypointIndex = ( this - &mTrajectory->GetWaypointBuffer()[0] );
+    uint32 waypointDrawingIndex = waypointIndex + sourceDrawingIndex + 1;
+    double sourceDrawingT   = inbetweenerTag->GetChart().drawingBuffer[sourceDrawingIndex  ].spacing;
+    double targetDrawingT   = inbetweenerTag->GetChart().drawingBuffer[targetDrawingIndex  ].spacing;
+    double waypointDrawingT = inbetweenerTag->GetChart().drawingBuffer[waypointDrawingIndex].spacing;
+    double relativeT = ( waypointDrawingT - sourceDrawingT ) / ( targetDrawingT - sourceDrawingT );
 
     // waypoint is precisely on inbetween
     mRatio = 0.0f;
 
     // positive waypoint is after on inbetween
-    if( iT > drawingT )
+    if( iT > relativeT )
     {
-        mRatio =  ( iT - drawingT ) / ( 1.0f - drawingT );
+        mRatio =  ( iT - relativeT ) / ( 1.0f - relativeT );
     }
 
     // negative waypoint is before on inbetween
-    if ( iT < drawingT )
+    if ( iT < relativeT )
     {
-        mRatio = -( drawingT - iT ) / (        drawingT );
+        mRatio = -( relativeT - iT ) / (        relativeT );
     }
 
     mTrajectory->GetRoute()->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
@@ -54,18 +61,25 @@ FInbetweenerWaypoint::SetT( float iT )
 float
 FInbetweenerWaypoint::GetT()
 {
-    uint32 waypointIndex = this - &mTrajectory->GetWaypointBuffer()[0];
-    double drawingT = mTrajectory->GetRoute()->GetInbetweenerTag()->GetChart().drawingBuffer[waypointIndex].spacing;
+    FOdysseyVectorTagInbetweener* inbetweenerTag = mTrajectory->GetRoute()->GetInbetweenerTag();
+    uint32 sourceDrawingIndex = mTrajectory->GetBreakdown()->GetSourceDrawingIndex();
+    uint32 targetDrawingIndex = mTrajectory->GetBreakdown()->GetTargetDrawingIndex();
+    uint32 waypointIndex = ( this - &mTrajectory->GetWaypointBuffer()[0] );
+    uint32 waypointDrawingIndex = waypointIndex + sourceDrawingIndex + 1;
+    double sourceDrawingT   = inbetweenerTag->GetChart().drawingBuffer[sourceDrawingIndex  ].spacing;
+    double targetDrawingT   = inbetweenerTag->GetChart().drawingBuffer[targetDrawingIndex  ].spacing;
+    double waypointDrawingT = inbetweenerTag->GetChart().drawingBuffer[waypointDrawingIndex].spacing;
+    double relativeT = ( waypointDrawingT - sourceDrawingT ) / ( targetDrawingT - sourceDrawingT );
 
     if( mRatio > 0.0f )
     {
-        return drawingT + ( mRatio * ( 1.0f - drawingT ) );
+        return relativeT + ( mRatio * ( 1.0f - relativeT ) );
     }
 
     if( mRatio < 0.0f )
     {
-        return drawingT + ( mRatio * (        drawingT ) );
+        return relativeT + ( mRatio * (        relativeT ) );
     }
 
-    return drawingT;
+    return relativeT;
 }

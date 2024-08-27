@@ -620,6 +620,9 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             AllocBuffers();
         }
 
+// TODO: needs to be placed somewhere else
+    DispatchInbetweensToBreakdowns();
+
         if( mInvalidationFlags & INVALIDATE_TARGET )
         {
             DeformPathsAtTarget( );
@@ -831,14 +834,16 @@ FOdysseyVectorTagInbetweener::DispatchInbetweensToBreakdowns()
 
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
-        int32 targetDrawingIndex = breakdown->GetTargetDrawingIndex();
-        double breakdownLastSpacing = mChart.drawingBuffer[targetDrawingIndex].spacing;
+        uint32 sourceDrawingIndex = breakdown->GetSourceDrawingIndex();
+        uint32 targetDrawingIndex = breakdown->GetTargetDrawingIndex();
+        double breakdownLastSpacing = ( breakdown->GetMasterBreakdown() == nullptr ) ? 1.0f
+                                                                                     : mChart.drawingBuffer[targetDrawingIndex].spacing;
 
         for( uint32 i = 0; i < GetDrawingCount(); i++ )
         {
             FInbetweenerDrawing* inbetween = &mChart.drawingBuffer[i];
 
-            if( ( i >= breakdown->GetSourceDrawingIndex() ) && ( i < breakdown->GetTargetDrawingIndex() ) )
+            if( ( i >= sourceDrawingIndex ) && ( i < targetDrawingIndex ) )
             {
                 double spacing = inbetween->spacing;
 
@@ -970,8 +975,6 @@ FOdysseyVectorTagInbetweener::InterpolateTransform( uint32 iDrawingIndex )
 void
 FOdysseyVectorTagInbetweener::Interpolate()
 {
-    DispatchInbetweensToBreakdowns();
-
     if( mInterpolationType == eInbetweenerInterpolationType::ARAP )
     {
 /*
@@ -982,10 +985,20 @@ FOdysseyVectorTagInbetweener::Interpolate()
 */
     }
 
-    for( uint32 i = 1; i < ( GetDrawingCount() - 1 ); i++ )
+    for( uint32 i = 1; i < ( GetDrawingCount() - 2 ); i++ )
     {
         InterpolateTransform( i );
-        DeformPathsAtInbetween( i );
+    }
+
+    for( FInbetweenerBreakdown* breakdown : mBreakdownList )
+    {
+        uint32 sourceDrawingIndex = breakdown->GetSourceDrawingIndex();
+        uint32 targetDrawingIndex = breakdown->GetTargetDrawingIndex();
+
+        for( uint32 i = ( sourceDrawingIndex + 1 ); i < targetDrawingIndex; i++ )
+        {
+            DeformPathsAtInbetween( i );
+        }
     }
 
     //UE_LOG( LogTemp, Warning, TEXT("Interpolate geometry"));

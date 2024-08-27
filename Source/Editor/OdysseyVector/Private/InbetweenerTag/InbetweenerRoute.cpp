@@ -71,6 +71,8 @@ FInbetweenerRoute::Update( uint32 iUpdateFlags
 
             i++;
         }
+
+        ResetSpacing();
     }
 
     if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_ROUTES )

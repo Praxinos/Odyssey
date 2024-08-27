@@ -97,9 +97,11 @@ FSnapshotTrajectory::Restore( FInbetweenerTrajectory* iTrajectory )
 
         for( int i = 0; i < mWaypointSpacingBuffer.size(); i++ )
         {
+/*-----------------
             waypointBuffer[i].SetT( mWaypointSpacingBuffer[i] );
 
             mWaypointSpacingBuffer[i] = swapWaypointSpacingBuffer[i];
+------------------*/
         }
     }
 }

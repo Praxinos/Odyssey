@@ -10,84 +10,6 @@
 #include "OdysseyVectorTagInbetweener.h"
 
 void
-FOdysseyVectorExportV2::WriteTagInbetweenerGridTrajectories( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                                           , FArchive &Ar )
-{
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_TRAJECTORIES
-                            , Ar
-                            , [&iInbetweenerTag](FArchive &Ar) -> void
-    {
-/*----------------
-        std::list<FInbetweenerTrajectory*>& trajectoryList = iInbetweenerTag.GetTrajectoryList();
-
-        for( FInbetweenerTrajectory* trajectory : trajectoryList )
-        {
-            WriteTrajectory( *trajectory, Ar );
-        }
-*/
-    } );
-}
-
-void
-FOdysseyVectorExportV2::WriteTagInbetweenerGridGeometryMk2( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                                          , FArchive &Ar )
-{
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_GEOMETRY_MK2
-                            , Ar
-                            , [&iInbetweenerTag](FArchive &Ar) -> void
-    {
-/*-------------
-        std::vector<FInbetweenerPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
-        uint32 numQuadX = iInbetweenerTag.GetGridNumQuadX();
-        uint32 numQuadY = iInbetweenerTag.GetGridNumQuadY();
-
-        Ar << numQuadX;
-        Ar << numQuadY;
-
-        for( FInbetweenerPoint& point : gridPointbuffer )
-        {
-            double sourceX = point.GetSourcePosition().x;
-            double sourceY = point.GetSourcePosition().y;
-            double targetX = point.GetTargetPosition().x;
-            double targetY = point.GetTargetPosition().y;
-
-            Ar << sourceX;
-            Ar << sourceY;
-            Ar << targetX;
-            Ar << targetY;
-        }
-*/
-    } );
-}
-
-void
-FOdysseyVectorExportV2::WriteTagInbetweenerGridGeometry( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                                       , FArchive &Ar )
-{
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_GEOMETRY
-                            , Ar
-                            , [&iInbetweenerTag](FArchive &Ar) -> void
-    {
-/*-------------
-        std::vector<FInbetweenerPoint>& gridPointbuffer = iInbetweenerTag.GetGridPointBuffer();
-
-        for( FInbetweenerPoint& point : gridPointbuffer )
-        {
-            double sourceX = point.GetSourcePosition().x;
-            double sourceY = point.GetSourcePosition().y;
-            double targetX = point.GetTargetPosition().x;
-            double targetY = point.GetTargetPosition().y;
-
-            Ar << sourceX;
-            Ar << sourceY;
-            Ar << targetX;
-            Ar << targetY;
-        }
-*/
-    } );
-}
-
-void
 FOdysseyVectorExportV2::WriteTagInbetweenerRoutes( FOdysseyVectorTagInbetweener& iInbetweenerTag
                                                  , FArchive &Ar )
 {
@@ -224,36 +146,6 @@ FOdysseyVectorExportV2::WriteTagInbetweenerDeformation( FOdysseyVectorTagInbetwe
         Ar << gridType;
     } );
 }
-
-/*
-void
-FOdysseyVectorExportV2::WriteTagInbetweenerGrid( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                               , FArchive &Ar )
-{
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID
-                            , Ar
-                            , [&iInbetweenerTag](FArchive &Ar) -> void
-    {
-        WriteTagInbetweenerGridType( iInbetweenerTag, Ar );
-        WriteTagInbetweenerGridInterpolation( iInbetweenerTag, Ar );
-        //WriteTagInbetweenerGridSize( iInbetweenerTag, Ar );
-        //WriteTagInbetweenerGridGeometry( iInbetweenerTag, Ar );
-        WriteTagInbetweenerGridGeometryMk2( iInbetweenerTag, Ar );
-
-        if( iInbetweenerTag.GetGridType() == eInbetweenerGridType::ARAP )
-        {
-            FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(iInbetweenerTag.GetBreakdownList().front()->GetGrid());
-
-            WriteTagInbetweenerGridArapRigidity( *arapGrid, Ar );
-        }
-
-        if( iInbetweenerTag.GetTrajectoryList().size() )
-        {
-            WriteTagInbetweenerGridTrajectories( iInbetweenerTag, Ar );
-        }
-    } );
-}
-*/
 
 void
 FOdysseyVectorExportV2::WriteTagInbetweenerTransformScaling( FOdysseyVectorTagInbetweener& iInbetweenerTag

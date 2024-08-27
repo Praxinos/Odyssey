@@ -600,7 +600,7 @@ FInbetweenerGrid::ComputeARAPInterpolation( const FInbetweenerDrawing* iDrawing
     {
         FInbetweenerTrajectory* trajectory = &route->GetTrajectoryBuffer()[mBreakdown->GetIndex()];
         ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
-        uint32 waypointIndex = iDrawing->index - mBreakdown->GetSourceDrawingIndex();
+        uint32 waypointIndex = iDrawing->index - mBreakdown->GetSourceDrawingIndex() - 1;
         double waypointT = trajectory->GetWaypointBuffer()[waypointIndex].GetT();
         ::ULIS::FVec2D coords = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( cubicBezier[0]
                                                                                    , cubicBezier[1]

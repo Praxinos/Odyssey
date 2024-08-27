@@ -351,9 +351,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
         {
             if( mPickedWaypoint )
             {
-/*--------------
                 FInbetweenerTrajectory* trajectory = mPickedWaypoint->GetTrajectory();
-                FOdysseyVectorTagInbetweener* inbetweenerTag = trajectory->GetInbetweenerTag();
+                FOdysseyVectorTagInbetweener* inbetweenerTag = trajectory->GetRoute()->GetInbetweenerTag();
 
                 ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
 
@@ -368,7 +367,6 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
                 {
                     mPickedWaypoint->SetT( newT );
                 }
-*/
             }
         }
 
