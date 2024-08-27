@@ -525,15 +525,17 @@ SOdysseyViewport::IsZoomMenuFitChecked() const
 void
 SOdysseyViewport::HandleRotationChanged( int newRotation )
 {
-    SetRotation( -FMath::DegreesToRadians(newRotation) );
+    SetRotation( FMath::DegreesToRadians(newRotation) );
 }
 
 int
 SOdysseyViewport::GetGuiRotationValue() const
 {
-    float angle = -FMath::RadiansToDegrees(GetRotation());
+    float angle = FMath::RadiansToDegrees(GetRotation());
     if (angle < 0)
         angle += 360.0;
+
+    FMath::Fmod( angle, 360.0 );
     return FMath::RoundHalfFromZero(angle);
 }
 
@@ -732,12 +734,12 @@ void SOdysseyViewport::ResetPan()
 
 void SOdysseyViewport::RotateLeft()
 {
-    SetRotation(GetRotation() + FMath::DegreesToRadians(RotationStep));
+    SetRotation(GetRotation() - FMath::DegreesToRadians(RotationStep));
 }
 
 void SOdysseyViewport::RotateRight()
 {
-    SetRotation(GetRotation() - FMath::DegreesToRadians(RotationStep));
+    SetRotation(GetRotation() + FMath::DegreesToRadians(RotationStep));
 }
 
 void SOdysseyViewport::FlipHorizontal()
