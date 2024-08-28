@@ -10,6 +10,9 @@
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+// From module OdysseyPainterEditor
+#include "OdysseyPainterEditor.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 // From module OdysseyStyle
 #include "OdysseyStyleSet.h"
 // From module OdysseyVector
@@ -19,6 +22,7 @@
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorAnimationCell.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAlter.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -58,7 +62,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
                                                                            , const FPointerEvent & MouseEvent )
 {
     TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
+    // compute geometry
+    FOdysseyAnimationEditorExtension* animationEditorExtension = treeView.Get()->GetAnimationEditorExtension();
     const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() );
+    FOdysseyVectorGroupPaint* scene = mInbetweenerTag->GetOwner()->GetScene();
+
     // for AddBreakdown / RemoveBreakdown functions in the context menu
     treeView.Get()->SetCursorPos( cursorPos );
 
@@ -80,7 +88,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
             tag->SetSelected( false );
         }
 
-
         for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
         {
             uint32 bi = breakdown->GetIndex();
@@ -91,6 +98,21 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
              && ( cursorPos.Y < ( mTargetPosBuffer[bi].Y + mTargetSizeBuffer[bi].Y ) ) )
             {
                 mPickedBreakdown = breakdown;
+
+                // needed for valid GUndo pointer
+                GEditor->BeginTransaction(LOCTEXT("vector-timeline-row.transaction.alter","Vector Timeline Alter"));
+                if( GUndo )
+                {
+                    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( scene
+                                                                                                 , mInbetweenerTag );
+
+                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+                    TSharedPtr<FOdysseyPainterEditorSource> source = animationEditorExtension->GetEditor()->GetSource();
+                    if (source)
+                        source->RecordCurrentFrameUndo();
+                }
+                GEditor->EndTransaction();
             }
         }
 

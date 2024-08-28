@@ -4,7 +4,7 @@
 #include <ULIS>
 
 #include "InbetweenerTag/InbetweenerTrajectory.h"
-#include "InbetweenerTag/InbetweenerWaypoint.h"
+#include "InbetweenerTag/InbetweenerStep.h"
 
 class FOdysseyVectorTagInbetweener;
 
@@ -30,6 +30,7 @@ class ODYSSEYVECTOR_API FInbetweenerRoute
         std::vector<FInbetweenerTrajectory>& GetTrajectoryBuffer();
 
     private:
+        std::vector<FInbetweenerStep> mStepBuffer;
         std::vector<FInbetweenerTrajectory> mTrajectoryBuffer;
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
         uint32 mQuadIndex;

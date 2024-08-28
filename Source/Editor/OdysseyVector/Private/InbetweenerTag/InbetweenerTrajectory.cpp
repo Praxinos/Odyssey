@@ -10,9 +10,12 @@ FInbetweenerTrajectory::~FInbetweenerTrajectory()
 }
 
 FInbetweenerTrajectory::FInbetweenerTrajectory( FInbetweenerRoute* iRoute
+                                              , FInbetweenerStep* iStep0
+                                              , FInbetweenerStep* iStep1
                                               , FInbetweenerBreakdown* iBreakdown )
     : mRoute( iRoute )
     , mBreakdown ( iBreakdown )
+    , mStep { iStep0, iStep1 }
     , mHandle { ( this ), ( this ) }
 {
     uint32 drawingCount = iBreakdown->GetTargetDrawingIndex() - iBreakdown->GetSourceDrawingIndex() + 1;
@@ -23,7 +26,38 @@ FInbetweenerTrajectory::FInbetweenerTrajectory( FInbetweenerRoute* iRoute
 void
 FInbetweenerTrajectory::Init( uint32 iDrawingCount )
 {
+    mStep[0]->AddTrajectory( this );
+    mStep[1]->AddTrajectory( this );
+
     ResetSpacing( iDrawingCount );
+}
+
+FInbetweenerTrajectory*
+FInbetweenerTrajectory::GetNext()
+{
+    int32 index = this - &mRoute->GetTrajectoryBuffer()[0];
+    int32 nextIndex = index + 1;
+
+    if ( ( nextIndex >= 0  ) && ( nextIndex < mRoute->GetTrajectoryBuffer().size() ) )
+    {
+        return &mRoute->GetTrajectoryBuffer()[nextIndex];
+    }
+
+    return nullptr;
+}
+
+FInbetweenerTrajectory*
+FInbetweenerTrajectory::GetPrev()
+{
+    int32 index = this - &mRoute->GetTrajectoryBuffer()[0];
+    int32 prevIndex = index - 1;
+
+    if ( ( prevIndex >= 0  ) && ( prevIndex < mRoute->GetTrajectoryBuffer().size() ) )
+    {
+        return &mRoute->GetTrajectoryBuffer()[prevIndex];
+    }
+
+    return nullptr;
 }
 
 void
@@ -66,6 +100,12 @@ FInbetweenerWaypoint*
 FInbetweenerTrajectory::GetWaypoint( uint32 iIndex )
 {
     return &mWaypointBuffer[iIndex];
+}
+
+FInbetweenerStep*
+FInbetweenerTrajectory::GetStep( uint32 iIndex )
+{
+    return mStep[iIndex];
 }
 
 FInbetweenerBreakdown*

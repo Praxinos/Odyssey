@@ -140,6 +140,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
+    mPickedStep = nullptr;
     mPickedHandle = nullptr;
     mHoveredQuad = nullptr;
     mPickedWaypoint = nullptr;
@@ -206,6 +207,14 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                         source->RecordCurrentFrameUndo();
                 }
                 GEditor->EndTransaction();
+            }
+            else
+            {
+                // pick a step (a trajectory's endpoint) to align or disalign handles
+                mPickedStep = mTrajectoryHUD->PickStep( iScene
+                                                      , iPointInTexture.x
+                                                      , iPointInTexture.y
+                                                      , PickingRadius );
             }
         }
 
@@ -423,7 +432,10 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseUpVector( FOdysseyVectorGroupP
 
             if( inbetweenerTag )
             {
-
+                if( mPickedStep )
+                {
+                    mPickedStep->SetAligned( mPickedStep->IsAligned() ? false : true );
+                }
             }
         }
     }

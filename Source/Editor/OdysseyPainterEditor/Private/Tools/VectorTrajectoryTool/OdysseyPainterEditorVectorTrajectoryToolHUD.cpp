@@ -20,6 +20,11 @@ PickRouteFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
                 , double iWorldX
                 , double iWorldY
                 , double iPickingRadius );
+static FInbetweenerStep*
+PickStepFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
+               , double iWorldX
+               , double iWorldY
+               , double iPickingRadius );
 
 FOdysseyPainterEditorVectorTrajectoryToolHUD::~FOdysseyPainterEditorVectorTrajectoryToolHUD()
 {
@@ -187,6 +192,128 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickHandle( FOdysseyVectorGroupPai
     return retHandle;
 }
 
+static FInbetweenerHandleTrajectory*
+PickHandleFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                 , double iWorldX
+                 , double iWorldY
+                 , double iPickingRadius )
+{
+    BLMatrix2D& ownerWorldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
+
+    for( FInbetweenerRoute* route : iInbetweenerTag->GetRouteList() )
+    {
+        for( FInbetweenerTrajectory& trajectory : route->GetTrajectoryBuffer() )
+        {
+            ::ULIS::FVec2D* cubicBezier = trajectory.GetCubicBezier();
+            BLPoint p1World = ownerWorldMatrix.mapPoint( cubicBezier[1].x, cubicBezier[1].y );
+            BLPoint p2World = ownerWorldMatrix.mapPoint( cubicBezier[2].x, cubicBezier[2].y );
+
+
+            if( ( ::ULIS::FVec2D( p1World.x, p1World.y )
+                - ::ULIS::FVec2D( iWorldX  , iWorldY   ) ).Distance() <= iPickingRadius )
+            {
+                return trajectory.GetHandle(0);
+            }
+
+            if( ( ::ULIS::FVec2D( p2World.x, p2World.y )
+                - ::ULIS::FVec2D( iWorldX  , iWorldY   ) ).Distance() <= iPickingRadius )
+            {
+                return trajectory.GetHandle(1);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+FInbetweenerStep*
+FOdysseyPainterEditorVectorTrajectoryToolHUD::PickStep( FOdysseyVectorGroupPaint* iScene
+                                                      , double iWorldX
+                                                      , double iWorldY
+                                                      , double iPickingRadius )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    FInbetweenerStep* retStep = nullptr;
+
+    vectorEngine->Traverse
+    ( iScene
+    , 0
+    , [ vectorEngine
+      , iScene
+      , this
+      , &retStep
+      , iWorldX
+      , iWorldY
+      , iPickingRadius ]( FOdysseyVectorObject* object
+                        , uint64 travesalFlags ) -> uint64
+      {
+          if( vectorEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
+          {
+              FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+              if( tag )
+              {
+                  FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+                  if( inbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
+                  {
+                      FInbetweenerStep* step = PickStepFromTag( inbetweenerTag
+                                                              , iWorldX
+                                                              , iWorldY
+                                                              , iPickingRadius );
+
+                      if( step )
+                      {
+                          retStep = step;
+
+                          return FOdysseyVectorEngine::TRAVERSE_STOP;
+                      }
+                  }
+              }
+
+              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
+
+    return retStep;
+}
+
+static FInbetweenerStep*
+PickStepFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
+               , double iWorldX
+               , double iWorldY
+               , double iPickingRadius )
+{
+    BLMatrix2D& ownerWorldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
+
+    for( FInbetweenerRoute* route : iInbetweenerTag->GetRouteList() )
+    {
+        for( FInbetweenerTrajectory& trajectory : route->GetTrajectoryBuffer() )
+        {
+            ::ULIS::FVec2D* cubicBezier = trajectory.GetCubicBezier();
+            BLPoint p0World = ownerWorldMatrix.mapPoint( cubicBezier[0].x, cubicBezier[0].y );
+            BLPoint p3World = ownerWorldMatrix.mapPoint( cubicBezier[3].x, cubicBezier[3].y ); 
+
+
+            if( ( ::ULIS::FVec2D( p0World.x, p0World.y )
+                - ::ULIS::FVec2D( iWorldX  , iWorldY   ) ).Distance() <= iPickingRadius )
+            {
+                return trajectory.GetStep(0);
+            }
+
+            if( ( ::ULIS::FVec2D( p3World.x, p3World.y )
+                - ::ULIS::FVec2D( iWorldX  , iWorldY   ) ).Distance() <= iPickingRadius )
+            {
+                return trajectory.GetStep(1);
+            }
+        }
+    }
+
+    return nullptr;
+}
+
 FInbetweenerWaypoint*
 FOdysseyPainterEditorVectorTrajectoryToolHUD::PickWaypoint( FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                           , double iWorldX
@@ -218,43 +345,6 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickWaypoint( FOdysseyVectorTagInb
                         return &waypoint;
                     }
                 }
-            }
-        }
-    }
-
-    return nullptr;
-}
-
-static FInbetweenerHandleTrajectory*
-PickHandleFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                 , double iWorldX
-                 , double iWorldY
-                 , double iPickingRadius )
-{
-    BLMatrix2D& ownerWorldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
-
-    for( FInbetweenerRoute* route : iInbetweenerTag->GetRouteList() )
-    {
-        for( FInbetweenerTrajectory& trajectory : route->GetTrajectoryBuffer() )
-        {
-            ::ULIS::FVec2D* cubicBezier = trajectory.GetCubicBezier();
-
-            BLPoint p0World = ownerWorldMatrix.mapPoint( cubicBezier[0].x, cubicBezier[0].y );
-            BLPoint p1World = ownerWorldMatrix.mapPoint( cubicBezier[1].x, cubicBezier[1].y );
-            BLPoint p2World = ownerWorldMatrix.mapPoint( cubicBezier[2].x, cubicBezier[2].y );
-            BLPoint p3World = ownerWorldMatrix.mapPoint( cubicBezier[3].x, cubicBezier[3].y ); 
-
-
-            if( ( ::ULIS::FVec2D( p1World.x, p1World.y )
-                - ::ULIS::FVec2D( iWorldX  , iWorldY   ) ).Distance() <= iPickingRadius )
-            {
-                return trajectory.GetHandle(0);
-            }
-
-            if( ( ::ULIS::FVec2D( p2World.x, p2World.y )
-                - ::ULIS::FVec2D( iWorldX  , iWorldY   ) ).Distance() <= iPickingRadius )
-            {
-                return trajectory.GetHandle(1);
             }
         }
     }
@@ -356,6 +446,9 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLCont
     BLMatrix2D& ownerWorldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
     BLPoint p0World = ownerWorldMatrix.mapPoint( cubicBezier[0].x, cubicBezier[0].y );
     BLPoint p3World = ownerWorldMatrix.mapPoint( cubicBezier[3].x, cubicBezier[3].y );
+    static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
+    static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
+    static BLRgba32 greenColor = BLRgba32( 0x00, 0xFF, 0x00, 0xFF );
     BLPath path;
 
     iBLContext->save();
@@ -403,8 +496,8 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLCont
                       , p0World.y
                       , p1World.x
                       , p1World.y
-                      , iFgColor
-                      , iBgColor );
+                      , iTrajectory->GetStep(0)->IsAligned() ? greenColor : whiteColor
+                      , blackColor );
             DrawCircle( iBLContext, p1World.x, p1World.y, VERTEXRADIUS, iFgColor, iBgColor );
 
             DrawLine  ( iBLContext
@@ -412,21 +505,24 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLCont
                       , p3World.y
                       , p2World.x
                       , p2World.y
-                      , iFgColor
-                      , iBgColor );
+                      , iTrajectory->GetStep(1)->IsAligned() ? greenColor : whiteColor
+                      , blackColor );
             DrawCircle( iBLContext, p2World.x, p2World.y, VERTEXRADIUS, iFgColor, iBgColor );
         }
 
-        for( FInbetweenerWaypoint& waypoint : iTrajectory->GetWaypointBuffer() )
+        if( mTrajectoryTool->GetPickingMode() == eTrajectoryPickingMode::Shift )
         {
-            ::ULIS::FVec2D waypointAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( cubicBezier[0]
-                                                                                           , cubicBezier[1]
-                                                                                           , cubicBezier[2]
-                                                                                           , cubicBezier[3]
-                                                                                           , waypoint.GetT() );
-            BLPoint waypointWorld = ownerWorldMatrix.mapPoint( waypointAt.x, waypointAt.y );
+            for( FInbetweenerWaypoint& waypoint : iTrajectory->GetWaypointBuffer() )
+            {
+                ::ULIS::FVec2D waypointAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( cubicBezier[0]
+                                                                                               , cubicBezier[1]
+                                                                                               , cubicBezier[2]
+                                                                                               , cubicBezier[3]
+                                                                                               , waypoint.GetT() );
+                BLPoint waypointWorld = ownerWorldMatrix.mapPoint( waypointAt.x, waypointAt.y );
 
-            DrawCircle( iBLContext, waypointWorld.x, waypointWorld.y, WAYPOINTRADIUS, iFgColor, iBgColor );
+                DrawCircle( iBLContext, waypointWorld.x, waypointWorld.y, WAYPOINTRADIUS, iFgColor, iBgColor );
+            }
         }
     }
 

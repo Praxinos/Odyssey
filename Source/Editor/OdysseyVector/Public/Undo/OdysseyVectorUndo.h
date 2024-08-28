@@ -77,6 +77,12 @@ namespace FSnapshotFlags
         static const uint64 WAYPOINTS = ( 1ULL <<  1 );
     }
 
+    namespace Breakdown
+    {
+        static const uint64 RANGE        = ( 1ULL <<  0 );
+        static const uint64 GRIDGEOMETRY = ( 1ULL <<  1 );
+    }
+
     namespace Tag
     {
         namespace Inbetweener
@@ -256,12 +262,16 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
 {
     public:
         virtual ~FSnapshotInbetweenerBreakdown();
-        FSnapshotInbetweenerBreakdown( FInbetweenerBreakdown* iBreakdown );
+        FSnapshotInbetweenerBreakdown( FInbetweenerBreakdown* iBreakdown
+                                     , uint64 iSnapshotFlags );
 
         virtual bool Restore();
 
     protected:
+        uint64 mSnapshotFlags;
         FInbetweenerBreakdown* mBreakdown;
+        uint32 mSourceDrawingIndex;
+        uint32 mTargetDrawingIndex;
         std::vector<::ULIS::FVec2D> mGridGeometry;
 };
 

@@ -13,6 +13,7 @@ class FInbetweenerHandleTrajectory;
 class FOdysseyPainterEditorVectorTrajectoryToolHUD;
 class FInbetweenerQuad;
 class FInbetweenerWaypoint;
+class FInbetweenerStep;
 
 UENUM()
 enum class eTrajectoryPickingMode : uint8
@@ -72,6 +73,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
     private:
         FOdysseyPainterEditorVectorTrajectoryToolHUD* mTrajectoryHUD;
         FInbetweenerHandleTrajectory* mPickedHandle;
+        FInbetweenerStep* mPickedStep;
         FInbetweenerWaypoint* mPickedWaypoint;
         eTrajectoryPickingMode mPickingMode;
         FInbetweenerQuad* mHoveredQuad;

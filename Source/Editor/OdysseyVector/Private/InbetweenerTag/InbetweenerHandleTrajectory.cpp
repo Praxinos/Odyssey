@@ -18,6 +18,32 @@ FInbetweenerHandleTrajectory::Set( const ::ULIS::FVec2D& iDirection
     mDirection = iDirection;
     mLengthRatio = iLengthRatio;
 
+    if( this == mTrajectory->GetHandle(0) )
+    {
+        if( mTrajectory->GetStep(0)->IsAligned() )
+        {
+            FInbetweenerTrajectory* prevTrajectory = mTrajectory->GetPrev();
+
+            if( prevTrajectory )
+            {
+                prevTrajectory->GetHandle(1)->mDirection = - mDirection;
+            }
+        }
+    }
+
+    if( this == mTrajectory->GetHandle(1) )
+    {
+        if( mTrajectory->GetStep(1)->IsAligned() )
+        {
+            FInbetweenerTrajectory* nextTrajectory = mTrajectory->GetNext();
+
+            if( nextTrajectory )
+            {
+                nextTrajectory->GetHandle(0)->mDirection = - mDirection;
+            }
+        }
+    }
+
     mTrajectory->GetRoute()->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_ROUTES
                                                             | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
                                                             | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
