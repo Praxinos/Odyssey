@@ -68,6 +68,7 @@ namespace UnrealBuildTool.Rules
 					"OdysseyVector",
 					"Paper2D",
 					"Paper2DEditor",
+					"RenderCore",
                 	"Slate",
 					"SlateCore",
 					"ToolWidgets",

@@ -5,16 +5,29 @@
 
 #include "CoreMinimal.h"
 
+class UOdysseyAnimationCellImageVector;
+
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationCellImageVector
     : public SCompoundWidget
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationCellImageVector)
+        : _ShowContent(true)
         {}
+        SLATE_ATTRIBUTE(bool, ShowContent)
     SLATE_END_ARGS()
 
 public:
-    void Construct(const FArguments& iArgs);
+    void Construct(const FArguments& iArgs, UOdysseyAnimationCellImageVector* iCell);
 
 private:
+	void OnThumbnailDirtied();
+	void OnThumbnailChanged();
+
+	EVisibility GetContentVisibility() const;
+	
+private:
+    UOdysseyAnimationCellImageVector* mCell = nullptr;
+	TSharedPtr<FAssetThumbnail> mAssetThumbnail;
+    TAttribute<bool> mShowContent;
 };

@@ -38,12 +38,22 @@ TSharedRef<SWidget>
 SOdysseyAnimationLayerImageRasterTimeline::OnGenerateCellWidget(UOdysseyAnimationCell* iCell)
 {
     if (!iCell)
-        return SNew(SOdysseyAnimationCellImageRaster); //DefaultCell, this can be called when creating cells, because the celle does not really exist yet
+	{
+        return SNew(SOdysseyAnimationCellImageRaster, Cast<UOdysseyAnimationCellImageRaster>(iCell))
+			.Clipping(EWidgetClipping::ClipToBoundsAlways)
+			.ShowContent(this, &SOdysseyAnimationLayerImageRasterTimeline::GetShowCellContent); //DefaultCell, this can be called when creating cells, because the celle does not really exist yet
+	}
     if (iCell->IsA<UOdysseyAnimationCellImageRaster>())
-        return SNew(SOdysseyAnimationCellImageRaster);
+	{
+        return SNew(SOdysseyAnimationCellImageRaster, Cast<UOdysseyAnimationCellImageRaster>(iCell))
+			.Clipping(EWidgetClipping::ClipToBoundsAlways)
+			.ShowContent(this, &SOdysseyAnimationLayerImageRasterTimeline::GetShowCellContent);
+	}
     else if (iCell->IsA<UOdysseyAnimationCellImageStagger>())
+	{
         return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell), mExtension)
-            .ShowContent(this, &SOdysseyAnimationLayerImageRasterTimeline::GetShowStaggerCellContent);
+            .ShowContent(this, &SOdysseyAnimationLayerImageRasterTimeline::GetShowCellContent);
+	}
 
     return SNullWidget::NullWidget;
 }
@@ -64,7 +74,7 @@ SOdysseyAnimationLayerImageRasterTimeline::OnPreviewMouseButtonDown(const FGeome
 }
 
 bool
-SOdysseyAnimationLayerImageRasterTimeline::GetShowStaggerCellContent() const
+SOdysseyAnimationLayerImageRasterTimeline::GetShowCellContent() const
 {
     if (mLayer->IsLockedRecursively())
         return false;

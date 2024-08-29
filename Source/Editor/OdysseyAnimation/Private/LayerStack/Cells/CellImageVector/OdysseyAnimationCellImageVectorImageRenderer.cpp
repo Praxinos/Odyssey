@@ -34,7 +34,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
 			{
         		UOdysseyLayerStack* layerStack = layer->GetLayerStack();
             	int frame = animation->CurrentFrame - cell->GetFrameRange().GetLowerBoundValue();
-            	mRenderHUD = cell == mCell.Get() && frame == iFrame && layerStack->CurrentLayer.Get() == layer;
+            	mRenderHUD = cell == mCell && frame == iFrame && layerStack->CurrentLayer.Get() == layer;
 			}
         }
 
@@ -129,4 +129,19 @@ bool
 FOdysseyAnimationCellImageVectorImageRenderer::IsGameThreadOnly()
 {
     return mCell->IsImageRenderingGameThreadOnly();
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------- FGCObject implementation
+
+void
+FOdysseyAnimationCellImageVectorImageRenderer::AddReferencedObjects(FReferenceCollector& Collector)
+{
+	Collector.AddReferencedObject(mCell);
+}
+
+FString
+FOdysseyAnimationCellImageVectorImageRenderer::GetReferencerName() const
+{
+    return "FOdysseyAnimationCellImageVectorImageRenderer";
 }

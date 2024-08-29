@@ -80,6 +80,18 @@ UOdysseyAnimationCell::OnOutOfPegsChanged()
     return mOnOutOfPegsChanged;
 }
 
+FSimpleMulticastDelegate&
+UOdysseyAnimationCell::OnThumbnailChanged()
+{
+	return mOnThumbnailChanged;
+}
+
+FSimpleMulticastDelegate&
+UOdysseyAnimationCell::OnThumbnailDirtied()
+{
+	return mOnThumbnailDirtied;
+}
+
 void
 UOdysseyAnimationCell::OutOfPegsChanged(bool iIsInteractive)
 {
@@ -142,4 +154,26 @@ UOdysseyAnimationCell::Break(int Frame)
 	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), Frame);
 	
 	return copiedCell;
+}
+
+void
+UOdysseyAnimationCell::DirtyThumbnail()
+{
+	if (ThumbnailIsDirty)
+		return;
+
+	ThumbnailIsDirty = true;
+	mOnThumbnailDirtied.Broadcast();
+}
+
+void
+UOdysseyAnimationCell::UndirtyThumbnail()
+{
+	ThumbnailIsDirty = false;
+}
+
+bool
+UOdysseyAnimationCell::IsThumbnailDirty() const
+{
+	return ThumbnailIsDirty;
 }

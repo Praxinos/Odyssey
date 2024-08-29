@@ -8,6 +8,7 @@
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRasterImageRenderer
     : public IOdysseyImageRenderer
+	, public FGCObject
 {
 public:
     FOdysseyAnimationCellImageRasterImageRenderer(const UOdysseyAnimationCellImageRaster* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
@@ -23,7 +24,12 @@ public:
     virtual TArray<::ULIS::FEvent> Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList) override;
 
 public:
-    TStrongObjectPtr<const UOdysseyAnimationCellImageRaster> mCell;
+	// FGCObject implementation
+    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+    virtual FString GetReferencerName() const override;
+
+public:
+    const UOdysseyAnimationCellImageRaster* mCell;
     TSharedPtr<::ULIS::FBlock> mBlock;
     ::ULIS::FMat3F mOutOfPegsTransform;
 };

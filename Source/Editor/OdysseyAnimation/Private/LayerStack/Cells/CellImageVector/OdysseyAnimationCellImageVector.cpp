@@ -210,4 +210,7 @@ void
 UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated( const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
     ImageRenderingChanged( iRects, iIsInteractive);
+
+	if (!iIsInteractive)
+		DirtyThumbnail();
 }

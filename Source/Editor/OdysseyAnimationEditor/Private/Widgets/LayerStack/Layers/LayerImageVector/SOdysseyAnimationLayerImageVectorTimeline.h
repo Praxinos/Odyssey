@@ -34,5 +34,5 @@ private:
     virtual FReply OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 
 private:
-    bool GetShowStaggerCellContent() const;
+    bool GetShowCellContent() const;
 };

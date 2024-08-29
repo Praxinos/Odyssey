@@ -78,7 +78,17 @@ SOdysseyAnimationCells::Construct(
             + SHorizontalBox::Slot()
             .AutoWidth()
             [
+                SAssignNew(mTempPreCellsBox, SHorizontalBox)
+            ]
+			+ SHorizontalBox::Slot()
+            .AutoWidth()
+            [
                 SAssignNew(mCellsBox, SHorizontalBox)
+            ]
+			+ SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                SAssignNew(mTempPostCellsBox, SHorizontalBox)
             ]
             + SHorizontalBox::Slot()
             .AutoWidth()
@@ -109,7 +119,7 @@ SOdysseyAnimationCells::GetCellLength(UOdysseyAnimationCell* iCell) const
 }
 
 void
-SOdysseyAnimationCells::AddTempCellSection()
+SOdysseyAnimationCells::AddTempCellSection(bool iPost)
 {
     TSharedRef<SWidget> widget = SNew(SOdysseyAnimationTimelineSection, mExtension)
     .WidthInFrames(1)
@@ -121,11 +131,22 @@ SOdysseyAnimationCells::AddTempCellSection()
     ];
 
     //Cells widgets
-    mCellsBox->AddSlot()
-    .AutoWidth()
-    [
-        widget
-    ];
+	if (iPost)
+	{
+		mTempPostCellsBox->AddSlot()
+		.AutoWidth()
+		[
+			widget
+		];
+	}
+	else
+	{
+		mTempPreCellsBox->AddSlot()
+		.AutoWidth()
+		[
+			widget
+		];
+	}
 }
 
 void
@@ -184,19 +205,26 @@ SOdysseyAnimationCells::RefreshCells()
 {   
     mCellsBox->ClearChildren();
 
-    for ( uint32 i = 0; i < mNumTempCellsToPrepend; i++ )
-    {
-        AddTempCellSection();
-    }
-
     for ( int i = 0; i < mAnimationLayer->GetCells().Num(); i++ )
     {
         AddCellSection(i);
     }
+}
+
+void
+SOdysseyAnimationCells::RefreshTempCells()
+{
+    mTempPreCellsBox->ClearChildren();
+	mTempPostCellsBox->ClearChildren();
+
+    for ( uint32 i = 0; i < mNumTempCellsToPrepend; i++ )
+    {
+        AddTempCellSection(false);
+    }
 
     for ( uint32 i = 0; i < mNumTempCellsToAppend; i++ )
     {
-        AddTempCellSection();
+        AddTempCellSection(true);
     }
 }
 
@@ -317,15 +345,10 @@ SOdysseyAnimationCells::CreateCellWidget(int iCellIndex)
         .BorderBackgroundColor(FLinearColor(1.f, 1.f, 1.f))
         .Visibility(this, &SOdysseyAnimationCells::GetCellVisibility, cell)
         [
-            /* SNew(SOdysseyAnimationTimelineCellSelection, mExtension)
-            .Cell(cell)
-            .OnDragged(this, &SOdysseyAnimationCells::OnCellSelectionDragged)
-            [ */
-                SNew(SOdysseyAnimationCell, mExtension, mAnimationLayer, cell)
-                [
-                    cellWidget.ToSharedRef()
-                ]
-            //]
+			SNew(SOdysseyAnimationCell, mExtension, mAnimationLayer, cell)
+			[
+				cellWidget.ToSharedRef()
+			]
         ]
     ];
 }
@@ -339,7 +362,7 @@ SOdysseyAnimationCells::SupportsKeyboardFocus() const
 void
 SOdysseyAnimationCells::OnCellsChanged()
 {
-    RefreshCells();
+	mNeedsCellsRefresh = true;
 }
 
 FReply
@@ -596,7 +619,7 @@ SOdysseyAnimationCells::OnTimingHandleDragged(const FGeometry& iGeometry, const 
 	{
 		UOdysseyAnimationCell* affectedCell = element.Key;
 		int length = element.Value;
-		FOdysseyObjectEditorUtils::SetPropertyValue(affectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), length, EPropertyChangeType::Interactive );
+		affectedCell->Length = length; //don't use SetPropertyValue to avoid refreshing rendering while dragging (slow)
 	}
 
 	FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), mTimingHandleDragData.mInitialOffset, EPropertyChangeType::Interactive );
@@ -696,16 +719,25 @@ SOdysseyAnimationCells::OnTimingHandleDragged(const FGeometry& iGeometry, const 
 void
 SOdysseyAnimationCells::OnTimingHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
+	TArray<UOdysseyAnimationCell*> cellsToRemove;
 	for (auto element : mTimingHandleDragData.mAffectedCells)
 	{
 		UOdysseyAnimationCell* affectedCell = element.Key;
 		int length = element.Value;
-		FOdysseyObjectEditorUtils::SetPropertyValue(affectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), affectedCell->Length, EPropertyChangeType::ValueSet );
 		if (affectedCell->Length <= 0)
 		{
-			mAnimationLayer->RemoveCell(affectedCell);
+			affectedCell->Length = length;
+			cellsToRemove.Add(affectedCell);
+		}
+		else
+		{
+			int newLength = affectedCell->Length;
+			affectedCell->Length = length; //Needed here to have accurate Undos
+			FOdysseyObjectEditorUtils::SetPropertyValue(affectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), newLength, EPropertyChangeType::ValueSet );
 		}
 	}
+
+	mAnimationLayer->RemoveCells(cellsToRemove);
 
 	FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), mAnimationLayer->CellsOffset, EPropertyChangeType::ValueSet );
 
@@ -769,7 +801,7 @@ SOdysseyAnimationCells::OnAddCellsHandleDragged(const FGeometry& iGeometry, cons
 	{
 		UOdysseyAnimationCell* affectedCell = element.Key;
 		int length = element.Value;
-		FOdysseyObjectEditorUtils::SetPropertyValue(affectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), length, EPropertyChangeType::Interactive );
+		affectedCell->Length = length; //don't use SetPropertyValue to avoid refreshing rendering while dragging (slow)
 	}
 
 	FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), mAddCellsHandleDragData.mInitialOffset, EPropertyChangeType::Interactive );
@@ -843,22 +875,31 @@ SOdysseyAnimationCells::OnAddCellsHandleDragged(const FGeometry& iGeometry, cons
         }
     }
 
-    RefreshCells();
+    RefreshTempCells();
 }
 
 void
 SOdysseyAnimationCells::OnAddCellsHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
+	TArray<UOdysseyAnimationCell*> cellsToRemove;
 	for (auto element : mAddCellsHandleDragData.mAffectedCells)
 	{
 		UOdysseyAnimationCell* affectedCell = element.Key;
 		int length = element.Value;
-		FOdysseyObjectEditorUtils::SetPropertyValue(affectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), affectedCell->Length, EPropertyChangeType::ValueSet );
 		if (affectedCell->Length <= 0)
 		{
-			mAnimationLayer->RemoveCell(affectedCell);
+			affectedCell->Length = length;
+			cellsToRemove.Add(affectedCell);
+		}
+		else
+		{
+			int newLength = affectedCell->Length;
+			affectedCell->Length = length; //Needed here to have accurate Undos
+			FOdysseyObjectEditorUtils::SetPropertyValue(affectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), newLength, EPropertyChangeType::ValueSet );
 		}
 	}
+
+	mAnimationLayer->RemoveCells(cellsToRemove);
 
 	FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), mAnimationLayer->CellsOffset, EPropertyChangeType::ValueSet );
 
@@ -878,7 +919,17 @@ SOdysseyAnimationCells::OnAddCellsHandleDragStopped(const FGeometry& iGeometry, 
 	GEditor->EndTransaction();
 #endif
 
-    RefreshCells();
+    RefreshTempCells();
+}
+
+void
+SOdysseyAnimationCells::Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime )
+{
+	if (mNeedsCellsRefresh)
+	{
+		mNeedsCellsRefresh = false;
+		RefreshCells();
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

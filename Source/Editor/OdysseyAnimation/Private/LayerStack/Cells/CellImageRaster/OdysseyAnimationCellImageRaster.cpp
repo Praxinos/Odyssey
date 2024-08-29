@@ -130,6 +130,7 @@ UOdysseyAnimationCellImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& i
 void
 UOdysseyAnimationCellImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
 {
+	DirtyThumbnail();
     ImageRenderingChanged(iRects);
 }
 

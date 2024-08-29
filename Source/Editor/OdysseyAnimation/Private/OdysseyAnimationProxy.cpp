@@ -341,15 +341,6 @@ FOdysseyAnimationProxy::OnImageRenderingChanged(const FOdysseyImageRenderingChan
 
 FBlockData::~FBlockData()
 {
-	//PATCH: To avoid a crash when renderer is destroyed
-	// Because some renderers contain TStrongObjectPtr members
-	// And TStrongObjectPtr must be created AND destroyed on the GameThread
-	// Otherwise it crashes
-	AsyncTask(ENamedThreads::GameThread, [r = mRenderer]() {
-		// code to execute on game thread here
-		TSharedPtr<IOdysseyImageRenderer> r1 = r;
-		r1.Reset();
-	});
 }
 
 FBlockData::FBlockData(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iComposition)
@@ -510,6 +501,7 @@ FBlockData::Render()
 
         //Get all variables we need to render, to ensure the values we use are not modified during the process
         TSharedPtr<IOdysseyImageRenderer> renderer = mRenderer; //renderer should be created in main thread to avoid crashes
+		mRenderer = nullptr;
         TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
         TSharedPtr<FOdysseyRasterBlock> rasterBlock = mRasterBlock;
 
@@ -522,16 +514,6 @@ FBlockData::Render()
         Render(renderer, rasterBlock, invalidRects);
 
         renderer->Unlock();
-
-		//PATCH: To avoid a crash when renderer is destroyed
-		// Because some renderers contain TStrongObjectPtr members
-		// And TStrongObjectPtr must be created AND destroyed on the GameThread
-		// Otherwise it crashes
-		AsyncTask(ENamedThreads::GameThread, [r = renderer]() {
-			// code to execute on game thread here
-			TSharedPtr<IOdysseyImageRenderer> r1 = r;
-			r1.Reset();
-		});
 
         mEditMutex.Lock();
     }

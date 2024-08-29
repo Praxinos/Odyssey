@@ -41,6 +41,7 @@ public:
     virtual FReply OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
     virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent) override;
     virtual FReply OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
+	virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
 
 private:
     const TArray<UOdysseyAnimationCell*>& GetCells() const;
@@ -53,8 +54,9 @@ private:
     TSharedRef<SWidget> CreateCellBreakIndicatorWidget(int iCellIndex);
 
     void RefreshCells();
+	void RefreshTempCells();
     void AddCellSection(int iCellIndex);
-    void AddTempCellSection();
+    void AddTempCellSection(bool iPost);
 
     void SelectAllFrames();
     void DeleteSelectedFrames();
@@ -106,7 +108,10 @@ private:
     TArray<UOdysseyAnimationCell*> mTimingHandleCells; //cells that can display their timing handle
 
     //Box containing the cells widgets
+	bool mNeedsCellsRefresh = false;
     TSharedPtr<SHorizontalBox> mCellsBox;
+	TSharedPtr<SHorizontalBox> mTempPreCellsBox;
+	TSharedPtr<SHorizontalBox> mTempPostCellsBox;
 
     //Handles brushes
     const FSlateBrush* mTimingHandleBrush;

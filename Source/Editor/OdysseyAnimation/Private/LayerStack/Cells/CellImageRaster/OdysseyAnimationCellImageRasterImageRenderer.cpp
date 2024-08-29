@@ -83,3 +83,18 @@ FOdysseyAnimationCellImageRasterImageRenderer::Copy(const FOdysseyImageRendererC
 
     return ConvertAndCopy(mBlock, ::ULIS::FVec2I(0), params, iWaitList);
 }
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------- FGCObject implementation
+
+void
+FOdysseyAnimationCellImageRasterImageRenderer::AddReferencedObjects(FReferenceCollector& Collector)
+{
+	Collector.AddReferencedObject(mCell);
+}
+
+FString
+FOdysseyAnimationCellImageRasterImageRenderer::GetReferencerName() const
+{
+    return "FOdysseyAnimationCellImageRasterImageRenderer";
+}

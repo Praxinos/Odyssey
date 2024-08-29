@@ -91,6 +91,8 @@ FOdysseyAnimationEditorModule::StartupModule()
 	RegisterLevelEditorLayoutExtensions();
 
 	RegisterDetailCustomizations();
+
+	RegisterThumbnailRenderers();
 }
 
 void
@@ -107,6 +109,8 @@ FOdysseyAnimationEditorModule::ShutdownModule()
 	UnregisterLevelEditorLayoutExtensions();
 
 	UnregisterDetailCustomization();
+
+	UnregisterThumbnailRenderers();
 }
 
 void
@@ -201,6 +205,18 @@ FOdysseyAnimationEditorModule::UnregisterSettings()
         
     settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyAnimationEditor" );
 	settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyAnimationEditorUserSettings" );
+}
+
+void
+FOdysseyAnimationEditorModule::RegisterThumbnailRenderers()
+{
+	UThumbnailManager::Get().RegisterCustomRenderer(UOdysseyAnimationCell::StaticClass(), UOdysseyAnimationCellThumbnailRenderer::StaticClass());
+}
+
+void
+FOdysseyAnimationEditorModule::UnregisterThumbnailRenderers()
+{
+	//UThumbnailManager::Get().UnregisterCustomRenderer(UOdysseyAnimationCellImageRaster::StaticClass());
 }
 
 IMPLEMENT_MODULE( FOdysseyAnimationEditorModule, OdysseyAnimationEditor );

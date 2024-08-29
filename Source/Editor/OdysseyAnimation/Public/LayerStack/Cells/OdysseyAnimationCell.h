@@ -67,6 +67,15 @@ public:
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 	virtual void OldSerialize(FArchive& Ar); //DEPRECATED: Keep that for compatibility with early versions of Odyssey
 
+public:
+	FSimpleMulticastDelegate& OnThumbnailChanged();
+	FSimpleMulticastDelegate& OnThumbnailDirtied();
+
+protected:
+	void DirtyThumbnail();
+	void UndirtyThumbnail();
+	bool IsThumbnailDirty() const;
+
 protected:
 	//Properties modifications
 	void OutOfPegsChanged(bool iIsInteractive);
@@ -88,5 +97,15 @@ public:
     FOdysseyAnimationCellOutOfPegs OutOfPegs;
 
 private:
+	friend class UOdysseyAnimationCellThumbnailRenderer;
+	friend class FOdysseyAnimationCellThumbnailProxy;
+	TSharedPtr<FOdysseyRasterBlock> mThumbnail;  //TODO: save/load mThumbnail AND mThumbnailIsDirty with the cell
+
+	UPROPERTY(NonTransactional)
+    bool ThumbnailIsDirty = false;
+
+private:
     FOnOutOfPegsChanged mOnOutOfPegsChanged;
+	FSimpleMulticastDelegate mOnThumbnailChanged;
+	FSimpleMulticastDelegate mOnThumbnailDirtied;
 };
