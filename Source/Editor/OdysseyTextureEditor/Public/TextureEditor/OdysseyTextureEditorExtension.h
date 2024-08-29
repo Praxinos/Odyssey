@@ -11,6 +11,7 @@ class FOdysseyTextureEditorGUI;
 class FOdysseyTextureEditorSource;
 class FOdysseyLayerStackEditorBrushContext;
 class UOdysseyLayerStack;
+class UOdysseyTextureLayerStack;
 
 class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorExtension
     : public FOdysseyPainterEditorExtension
@@ -30,6 +31,7 @@ public:
 public:
     UTexture2D* Texture() const;
     TSharedPtr<FOdysseyTextureEditorSource> GetTextureSource() const;
+	UOdysseyTextureLayerStack* GetLayerStack() const;
 
 private:
     void OnSourceChanged();

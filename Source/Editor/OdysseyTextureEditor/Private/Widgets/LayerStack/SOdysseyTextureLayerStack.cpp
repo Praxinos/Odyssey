@@ -9,6 +9,7 @@
 #include "Widgets/LayerStack/SOdysseyTextureLayerFolderRow.h"
 #include "Widgets/LayerStack/SOdysseyTextureLayerImageRasterRow.h"
 #include "Widgets/LayerStack/SOdysseyTextureLayerImageVectorRow.h"
+#include "Widgets/LayerStack/SOdysseyTextureLayerStackTreeView.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
@@ -36,8 +37,9 @@ SOdysseyTextureLayerStack::SOdysseyTextureLayerStack()
 
 //CONSTRUCTION/DESTRUCTION-----------------------------------------------
 void
-SOdysseyTextureLayerStack::Construct(const FArguments& InArgs)
+SOdysseyTextureLayerStack::Construct(const FArguments& InArgs, FOdysseyTextureEditorExtension* iTextureExtension)
 {
+	mExtension = iTextureExtension;
     mLayerStack.Assign(*this, InArgs._LayerStack);
 
     RebuildWidgets();
@@ -63,7 +65,7 @@ SOdysseyTextureLayerStack::RebuildWidgets()
             + SVerticalBox::Slot()
             .FillHeight(1.0)
             [
-                SAssignNew(mTreeView, SOdysseyLayerStackTreeView)
+                SAssignNew(mTreeView, SOdysseyTextureLayerStackTreeView, mExtension)
                 .LayerStack(layerstack)
                 .OnGenerateRow(this, &SOdysseyTextureLayerStack::OnGenerateRow)
             ];

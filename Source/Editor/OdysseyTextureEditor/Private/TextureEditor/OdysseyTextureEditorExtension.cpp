@@ -101,6 +101,15 @@ FOdysseyTextureEditorExtension::GetTextureSource() const
 	return mTextureSource;
 }
 
+UOdysseyTextureLayerStack*
+FOdysseyTextureEditorExtension::GetLayerStack() const
+{
+	if (!mTextureSource)
+		return nullptr;
+
+	return mTextureSource->GetLayerStack();
+}
+
 void
 FOdysseyTextureEditorExtension::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 {

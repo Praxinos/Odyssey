@@ -59,7 +59,7 @@ FOdysseyTextureEditorLayerStackTab::GetId() const
 TSharedPtr<SWidget>
 FOdysseyTextureEditorLayerStackTab::CreateWidget()
 {
-    return SNew(SOdysseyTextureLayerStack)
+    return SNew(SOdysseyTextureLayerStack, mExtension)
             .LayerStack(this, &FOdysseyTextureEditorLayerStackTab::LayerStack);
 }
 
