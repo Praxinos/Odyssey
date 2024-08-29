@@ -44,6 +44,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
         std::vector<FOdysseyVectorTagInbetweener*> mSelectedInbetweenerTagArray;
 
     public:
+/*
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"
                  , meta = ( ToolTip  = "Drawing Count"
@@ -52,7 +53,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
                           , UIMin    = "2"
                           , UIMax    = "16" ) )
         uint32 DrawingCount;
-
+*/
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"
                  , meta = ( ToolTip  = "Interpolation Type" ) )

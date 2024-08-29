@@ -20,7 +20,8 @@ FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatchi
     : FOdysseyVectorUndo( iScene )
 {
     mInbetweenerTagSnapshotBuffer.emplace_back( iInbetweenerTag
-                                              , FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY );
+                                              , FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY
+                                              , 0 );
 }
 
 FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatching( FOdysseyVectorGroupPaint* iScene
@@ -32,7 +33,8 @@ FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatchi
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
     {
         mInbetweenerTagSnapshotBuffer.emplace_back( inbetweenerTag
-                                                  , FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY );
+                                                  , FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY
+                                                  , 0 );
     }
 }
 

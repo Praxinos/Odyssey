@@ -26,8 +26,10 @@ class ODYSSEYVECTOR_API FInbetweenerRoute
                    , uint64 iOwnerInvalidationFlags
                    , uint64 iTagInvalidationFlags );
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
-        void ResetSpacing();
+        void ResizeWaypoints();
         std::vector<FInbetweenerTrajectory>& GetTrajectoryBuffer();
+        std::vector<FInbetweenerStep>& GetStepBuffer();
+        void Resize();
 
     private:
         std::vector<FInbetweenerStep> mStepBuffer;

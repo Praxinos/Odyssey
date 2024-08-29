@@ -29,7 +29,7 @@ FInbetweenerTrajectory::Init( uint32 iDrawingCount )
     mStep[0]->AddTrajectory( this );
     mStep[1]->AddTrajectory( this );
 
-    ResetSpacing( iDrawingCount );
+    Resize( iDrawingCount );
 }
 
 FInbetweenerTrajectory*
@@ -115,7 +115,7 @@ FInbetweenerTrajectory::GetBreakdown()
 }
 
 void
-FInbetweenerTrajectory::ResetSpacing( uint32 iDrawingCount )
+FInbetweenerTrajectory::Resize( uint32 iDrawingCount )
 {
     uint32 inbetweenCount = ( iDrawingCount - 2 );
 

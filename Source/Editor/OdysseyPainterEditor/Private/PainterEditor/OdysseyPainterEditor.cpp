@@ -1061,7 +1061,6 @@ FOdysseyPainterEditor::GroupAndAddInbetweenerTag( FOdysseyPainterEditor* iEditor
         group->AddTag( new FOdysseyVectorTagInbetweener( vectorEngine->GetSharedEnv()
                                                        , group
                                                        , 4
-                                                       , 4
                                                        , 4 ) );
     }
 
@@ -1639,8 +1638,7 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
             FOdysseyVectorTagInbetweener* inbetweenerTag = new FOdysseyVectorTagInbetweener( vectorEngine->GetSharedEnv()
                                                                                            , selectedObject
                                                                                            , 4
-                                                                                           , 4
-                                                                                           , 6 );
+                                                                                           , 4 );
 
             selectedObject->AddTag( inbetweenerTag );
 
@@ -2033,14 +2031,15 @@ FOdysseyPainterEditor::PasteSpacingChart( FOdysseyPainterEditor* iEditor
 
             for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
             {
-                inbetweenerTag->SetDrawingCount( drawingCount );
-
-                for( uint32 i = 0; i < drawingCount; i++ )
+                if( inbetweenerTag->GetDrawingCount() == drawingCount )
                 {
-                    inbetweenerTag->GetChart().drawingBuffer[i].spacing = copiedChart->drawingBuffer[i].spacing;
-                }
+                    for( uint32 i = 0; i < drawingCount; i++ )
+                    {
+                        inbetweenerTag->GetChart().drawingBuffer[i].spacing = copiedChart->drawingBuffer[i].spacing;
+                    }
 
-                inbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
+                    inbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
+                }
             }
         }
     }

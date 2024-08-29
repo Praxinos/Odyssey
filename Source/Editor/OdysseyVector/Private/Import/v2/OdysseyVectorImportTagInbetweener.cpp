@@ -35,13 +35,13 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                 }
                 break;
 
-                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_INBETWEENCOUNT:
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_DRAWINGCOUNT:
                 {
-                    uint32 inbetweenCount;
+                    uint32 drawingCount;
 
-                    Ar << inbetweenCount;
+                    Ar << drawingCount;
 
-                    iInbetweenerTag.SetDrawingCount( inbetweenCount );
+                    iInbetweenerTag.GetMasterBreakdown()->SetTargetDrawingIndex( drawingCount - 1 );
                 }
                 break;
 
@@ -54,7 +54,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     iInbetweenerTag.SetMapAsPolyline( mapAsPolyline ? true : false );
                 }
                 break;
-
+/*
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_CHART:
                 {
                     for( uint32 i = 0; i < iInbetweenerTag.GetDrawingCount(); i++ )
@@ -67,7 +67,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     }
                 }
                 break;
-
+*/
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM:  // container
                 break;
 
@@ -168,10 +168,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                         Ar << targetDrawingIndex;
 
                         breakdown = ( master ) ? masterBreakdown
-                                               : new FInbetweenerBreakdown( &iInbetweenerTag
-                                                                          , masterBreakdown
-                                                                          , sourceDrawingIndex
-                                                                          , targetDrawingIndex );
+                                               : new FInbetweenerBreakdown( &iInbetweenerTag );
 
                         if( master == 0 ) 
                         {
@@ -183,6 +180,8 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                             breakdown->SetTargetDrawingIndex( targetDrawingIndex );
                         }
                     }
+
+                    iInbetweenerTag.ResetChart();
                 }
                 break;
 

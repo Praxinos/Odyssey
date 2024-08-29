@@ -236,8 +236,7 @@ FOdysseyVectorTagInbetweener::GetTargetLocalMatrix()
 FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorSharedEnv* iSharedEnv
                                                           , FOdysseyVectorObject* iOwnerObject
                                                           , uint32 iNumQuadX
-                                                          , uint32 iNumQuadY
-                                                          , uint32 iDrawingCount )
+                                                          , uint32 iNumQuadY )
     : FOdysseyVectorTag( iOwnerObject )
     // note: mSharedEnv is remebered as a member variable because GetEngine() calls
     // GetClass() and the latter is a virtual function. virtual function don't work
@@ -264,7 +263,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     , bMapAsPolyline( false )
     , bShared ( false )
     , mARAPRigidity ( 10 )
-    , mMasterBreakdown( this, nullptr, 0, std::max( 2, (int) iDrawingCount - 1 ) )
+    , mMasterBreakdown( this )
 {
     mSourceBBox = iOwnerObject->GetBBox( false );
 
@@ -273,7 +272,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     mSourceBBox.w += 0.02f;
     mSourceBBox.h += 0.02f;
 
-    // the default breakdown
+    // the default breakdown (has range 0 <-> 1 )
     mBreakdownList.emplace_back( &mMasterBreakdown );
 
     // Note: Grid building needs the bbox to be set.
@@ -413,10 +412,10 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
             int32 sourceDrawingIndex = curBreakdown->GetSourceDrawingIndex();
             int32 targetDrawingIndex = iDrawingIndex;
             FInbetweenerBreakdown* newBreakdown = iNewBreakdown ? iNewBreakdown 
-                                                                : new FInbetweenerBreakdown( this
-                                                                                           , &mMasterBreakdown
-                                                                                           , sourceDrawingIndex
-                                                                                           , targetDrawingIndex );
+                                                                : new FInbetweenerBreakdown( this );
+
+            newBreakdown->SetSourceDrawingIndex( sourceDrawingIndex );
+            newBreakdown->SetTargetDrawingIndex( targetDrawingIndex );
 
             if( iCopyGeometry )
             {
@@ -426,6 +425,8 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
             mBreakdownList.insert( curBreakdownIterator, newBreakdown );
 
             ChainBreakdowns();
+
+            /*ResizeRoutes();*/
 
             // this also alters the previous breakdown target index, so it must be done after the chaining has been updated
             curBreakdown->SetSourceDrawingIndex( iDrawingIndex );
@@ -490,7 +491,18 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
 
     ChainBreakdowns();
 
+    /*ResizeRoutes();*/
+
     Invalidate( INVALIDATE_BREAKDOWN_LIST );
+}
+
+void
+FOdysseyVectorTagInbetweener::ResizeRoutes()
+{
+    for( FInbetweenerRoute* route : mRouteList )
+    {
+        route->Resize();
+    }
 }
 
 std::list<FInbetweenerBreakdown*>&
@@ -602,11 +614,6 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             UpdateBBox( mTargetBBox, eInbetweenerPointPositionType::TargetPosition );
         }
 
-        if( mInvalidationFlags & INVALIDATE_SOURCEBBOX )
-        {
-            //UpdateBBox( mSourceBBox, eInbetweenerPointPositionType::SourcePosition );
-        }
-
         if( ( mInvalidationFlags & INVALIDATE_MAP            )
          || ( mInvalidationFlags & INVALIDATE_BREAKDOWN_LIST ) )
         {
@@ -631,6 +638,12 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             {
                 mInvalidationFlags &= (~INVALIDATE_SPACING);
             }
+        }
+
+        if( ( mInvalidationFlags & INVALIDATE_TARGET         )
+          ||( mInvalidationFlags & INVALIDATE_BREAKDOWN_LIST ) )
+        {
+            ResizeRoutes();
         }
 
         //if( ( mInvalidationFlags & INVALIDATE_ROUTES )
@@ -748,12 +761,12 @@ FOdysseyVectorTagInbetweener::ResetChart()
 
         spacing += step;
     }
-
+/*
     for( FInbetweenerRoute* route : mRouteList )
     {
-        route->ResetSpacing();
+        route->ResetWaypoints();
     }
-
+*/
     Invalidate( INVALIDATE_SPACING | INVALIDATE_CELLS );
 }
 
@@ -761,6 +774,13 @@ FInbetweenerChart&
 FOdysseyVectorTagInbetweener::GetChart()
 {
     return mChart;
+}
+void
+FOdysseyVectorTagInbetweener::SetChart( const FInbetweenerChart& iChart )
+{
+    mChart = iChart;
+
+    Invalidate( INVALIDATE_SPACING | INVALIDATE_CELLS );
 }
 
 void
@@ -903,7 +923,7 @@ FOdysseyVectorTagInbetweener::GetDrawingCount()
 {
     return mBreakdownList.back()->GetTargetDrawingIndex() + 1;
 }
-
+/*
 void
 FOdysseyVectorTagInbetweener::SetDrawingCount( uint32 iDrawingCount )
 {
@@ -919,7 +939,7 @@ FOdysseyVectorTagInbetweener::SetDrawingCount( uint32 iDrawingCount )
 
     RedrawAnimationCells( minDrawingCount );
 }
-
+*/
 void
 FOdysseyVectorTagInbetweener::RedrawAnimationCells()
 {

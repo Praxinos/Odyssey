@@ -243,7 +243,6 @@ FOdysseyVectorImportV2::ParseObjectChunks( FOdysseyVectorObject& iObject
             FOdysseyVectorTagInbetweener* inbetweenerTag = new FOdysseyVectorTagInbetweener( vectorEngine->GetSharedEnv()
                                                                                            , &iObject
                                                                                            , 0
-                                                                                           , 0
                                                                                            , 0 );
 
             iObject.AddTag( inbetweenerTag );

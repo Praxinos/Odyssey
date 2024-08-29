@@ -74,8 +74,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         FOdysseyVectorTagInbetweener( FOdysseyVectorSharedEnv* iSharedEnv
                                     , FOdysseyVectorObject* iOwnerObject
                                     , uint32 iNumCellX
-                                    , uint32 iNumCellY
-                                    , uint32 iDrawingCount );
+                                    , uint32 iNumCellY );
 
         /**
          * @brief Draw the tag to the Blend2D context passed as parameter
@@ -181,7 +180,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void RedrawAnimationCells();
         void RedrawAnimationCells( uint32 iInbetweenCount );
         void ResetChart();
-        void SetDrawingCount( uint32 iInbetweenCount );
+        //void SetDrawingCount( uint32 iInbetweenCount );
         void SetGrid( eInbetweenerGridType iGridType
                     , uint32 iGridNumQuadX
                     , uint32 iGridNumQuadY );
@@ -261,6 +260,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void RemoveBreakdown( FInbetweenerBreakdown* iBreakdown, bool iFreeMemNow );
         FInbetweenerBreakdown* GetBreakdown( uint32 iDrawingIndex );
         std::list<FInbetweenerBreakdown*>::iterator GetBreakdownItem( uint32 iDrawingIndex );
+        void ResizeRoutes();
+        void SetChart( const FInbetweenerChart& iChart );
 
     protected:
         /**

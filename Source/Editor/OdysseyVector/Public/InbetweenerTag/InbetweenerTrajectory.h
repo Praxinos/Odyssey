@@ -27,7 +27,7 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
         void Update();
         ::ULIS::FVec2D* GetCubicBezier();
         std::vector<FInbetweenerWaypoint>& GetWaypointBuffer();
-        void ResetSpacing( uint32 iDrawingCount );
+        void Resize( uint32 iDrawingCount );
         FInbetweenerWaypoint* GetWaypoint( uint32 iIndex );
         FInbetweenerStep* GetStep( uint32 iIndex );
         FInbetweenerRoute* GetRoute();

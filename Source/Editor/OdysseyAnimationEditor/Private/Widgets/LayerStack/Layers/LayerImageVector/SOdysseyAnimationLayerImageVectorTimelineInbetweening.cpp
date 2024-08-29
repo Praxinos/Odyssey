@@ -7,6 +7,7 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 // From module OdysseyPainterEditor
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "PainterEditor/OdysseyPainterEditor.h"
@@ -132,6 +133,7 @@ void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
 {
     int frameIndex = mAnimationEditorExtension->Timeline()->GetFrameIndexAtMousePosition( mCursorPos.X );
+    int cellIndex = mAnimationLayerImageVector->GetCellsContainer()->GetCellIndexAtFrame( frameIndex );
     std::list<FOdysseyVectorEngine*> engineList;
 
     //const TArray<TSharedPtr<FInbetweeningListViewItem>> selectedItems = GetItems();
@@ -139,20 +141,28 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
     for( TSharedPtr<FInbetweeningListViewItem> item : GetItems() )
     {
         FOdysseyVectorTagInbetweener* inbetweenerTag = item.Get()->GetInbetweenerTag();
-        uint32 cellFrame = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetFrame();
+        uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetIndex();
         FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
-        FInbetweenerBreakdown* breakdown = inbetweenerTag->AddBreakdown( frameIndex - cellFrame, true );
+        uint32 drawingIndex = cellIndex - tagCellIndex;
+        FInbetweenerBreakdown* curBreakdown = inbetweenerTag->GetBreakdown( drawingIndex );
+
         FOdysseyVectorGroupPaint* scene = inbetweenerTag->GetOwner()->GetScene();
 
-        if( breakdown )
+        if(  ( curBreakdown )
+          // check new breakdown isn't on an existing breakdown limits
+          && ( curBreakdown->GetSourceDrawingIndex() < drawingIndex )
+          && ( curBreakdown->GetTargetDrawingIndex() > drawingIndex ) )
         {
+            FInbetweenerBreakdown* newbreakdown = new FInbetweenerBreakdown( inbetweenerTag );
+
             //---------- needed for undos-----------//
             GEditor->BeginTransaction(LOCTEXT("vector-timeline.transaction.add-breakdown", "Add Breakdown"));
             if( GUndo )
             {
                 FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAdd( scene
                                                                                            , inbetweenerTag
-                                                                                           , breakdown );
+                                                                                           , newbreakdown
+                                                                                           , drawingIndex );
 
                 GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         
@@ -162,6 +172,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
             }
             GEditor->EndTransaction();
             //--------------------------------------//
+
+            inbetweenerTag->AddBreakdown( newbreakdown, drawingIndex, true );
 
             // find which engine/scene to update/redraw
             if( std::find_if( engineList.begin()
@@ -194,6 +206,7 @@ void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
 {
     int frameIndex = mAnimationEditorExtension->Timeline()->GetFrameIndexAtMousePosition( mCursorPos.X );
+    int cellIndex = mAnimationLayerImageVector->GetCellsContainer()->GetCellIndexAtFrame( frameIndex );
     std::list<FOdysseyVectorEngine*> engineList;
 
     //const TArray<TSharedPtr<FInbetweeningListViewItem>> selectedItems = GetItems();
@@ -201,9 +214,10 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
     for( TSharedPtr<FInbetweeningListViewItem> item : GetItems() )
     {
         FOdysseyVectorTagInbetweener* inbetweenerTag = item.Get()->GetInbetweenerTag();
-        uint32 cellFrame = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetFrame();
+        uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetIndex();
         FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
-        FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdown( frameIndex - cellFrame );
+        uint32 drawingIndex = cellIndex - tagCellIndex;
+        FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdown( drawingIndex );
         FOdysseyVectorGroupPaint* scene = inbetweenerTag->GetOwner()->GetScene();
 
         // we delete the breakdown only if it is not the master breakdown ( the default one)

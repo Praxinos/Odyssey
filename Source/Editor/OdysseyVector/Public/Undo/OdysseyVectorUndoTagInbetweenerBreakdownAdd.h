@@ -17,7 +17,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerBreakdownAdd : public FO
         ~FOdysseyVectorUndoTagInbetweenerBreakdownAdd();
         FOdysseyVectorUndoTagInbetweenerBreakdownAdd( FOdysseyVectorGroupPaint* iScene
                                                     , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                    , FInbetweenerBreakdown* iBreakdown );
+                                                    , FInbetweenerBreakdown* iBreakdown
+                                                    , uint32 iDrawingIndex );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -31,5 +32,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerBreakdownAdd : public FO
     private:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
         FInbetweenerBreakdown* mBreakdown;
+        std::vector<FSnapshotRoute> mRouteSnapshotBuffer;
         uint32 mDrawingIndex;
 };

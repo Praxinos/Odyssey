@@ -20,11 +20,27 @@ FOdysseyVectorUndoTagInbetweenerParam::FOdysseyVectorUndoTagInbetweenerParam( FO
                                                                             , uint64 iSnapshotFlags )
     : FOdysseyVectorUndo( iScene )
 {
+    uint64 breakdownSnapshotFlags = 0;
+
+    if( iSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::DRAWINGCOUNT )
+    {
+        breakdownSnapshotFlags |= FSnapshotFlags::Breakdown::RANGE;
+    }
+
+    if( ( iSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY )
+     || ( iSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE     )
+     || ( iSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE     ) )
+    {
+        breakdownSnapshotFlags |= FSnapshotFlags::Breakdown::GRIDGEOMETRY;
+    }
+
     mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
 
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagArray )
     {
-        mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag, iSnapshotFlags );
+        mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
+                                                 , iSnapshotFlags
+                                                 , breakdownSnapshotFlags );
     }
 }
 

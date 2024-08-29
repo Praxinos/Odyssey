@@ -9,16 +9,12 @@ FInbetweenerBreakdown::~FInbetweenerBreakdown()
     delete mGrid;
 }
 
-FInbetweenerBreakdown::FInbetweenerBreakdown( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                            , FInbetweenerBreakdown* iMasterBreakdown
-                                            , uint32 iSourceDrawingIndex
-                                            , uint32 iTargetDrawingIndex )
+FInbetweenerBreakdown::FInbetweenerBreakdown( FOdysseyVectorTagInbetweener* iInbetweenerTag )
     : mInbetweenerTag( iInbetweenerTag )
-    , mSourceDrawingIndex( iSourceDrawingIndex )
-    , mTargetDrawingIndex( iTargetDrawingIndex )
+    , mSourceDrawingIndex( 0 )
+    , mTargetDrawingIndex( 1 )
     , mIndex( 0 )
     , mGrid( nullptr )
-    , mMasterBreakdown( iMasterBreakdown )
     , mPrevBreakdown( nullptr )
     , mNextBreakdown( nullptr )
 {
@@ -28,7 +24,7 @@ FInbetweenerBreakdown::FInbetweenerBreakdown( FOdysseyVectorTagInbetweener* iInb
 FInbetweenerBreakdown*
 FInbetweenerBreakdown::GetMasterBreakdown()
 {
-    return mMasterBreakdown;
+    return mInbetweenerTag->GetMasterBreakdown();
 }
 
 void

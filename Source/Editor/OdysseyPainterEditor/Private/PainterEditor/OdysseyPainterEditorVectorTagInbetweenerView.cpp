@@ -33,7 +33,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
 
         InterpolationType = selectedInbetweenerTag->GetInterpolationType();
         GridType = selectedInbetweenerTag->GetGridType();
-        DrawingCount = selectedInbetweenerTag->GetDrawingCount();
+        //DrawingCount = selectedInbetweenerTag->GetDrawingCount();
         Color = selectedInbetweenerTag->GetColor();
         MapAsPolyline = selectedInbetweenerTag->GetMapAsPolyline();
 
@@ -71,9 +71,9 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
     for( FOdysseyVectorTagInbetweener* selectedInbetweenerTag : mSelectedInbetweenerTagArray )
     {
         //////////
-        if( iPropertyName == "InbetweenCount" )
+/*        if( iPropertyName == "InbetweenCount" )
             selectedInbetweenerTag->SetDrawingCount( DrawingCount );
-
+*/
         if( iPropertyName == "InterpolationType" )
             selectedInbetweenerTag->SetInterpolationType( InterpolationType );
 
@@ -112,10 +112,10 @@ UOdysseyPainterEditorVectorTagInbetweenerView::GetSnapshotFlags( const FName& iP
                                                                , const FName& iCategory )
 { 
     uint64 snapshotFlags = 0;
-
+/*
     if( iPropertyName == "InbetweenCount" )
         snapshotFlags |= FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT;
-
+*/
     if( iPropertyName == "InterpolationType" )
         snapshotFlags |= FSnapshotFlags::Tag::Inbetweener::INTERPOLATIONTYPE;
 

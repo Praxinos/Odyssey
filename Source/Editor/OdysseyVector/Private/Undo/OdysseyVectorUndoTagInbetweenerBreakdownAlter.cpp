@@ -18,7 +18,9 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::~FOdysseyVectorUndoTagInbetweene
 FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorGroupPaint* iScene
                                                                                              , FOdysseyVectorTagInbetweener* iInbetweenerTag )
     : FOdysseyVectorUndo( iScene )
-    , mInbetweenerTagSnapshot( iInbetweenerTag, FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT )
+    , mInbetweenerTagSnapshot( iInbetweenerTag
+                             , FSnapshotFlags::Tag::Inbetweener::DRAWINGCOUNT
+                             , FSnapshotFlags::Breakdown::RANGE )
 {
 }
 

@@ -226,10 +226,10 @@ FOdysseyVectorExportV2::WriteTagInbetweenerChart( FOdysseyVectorTagInbetweener& 
 }
 
 void
-FOdysseyVectorExportV2::WriteTagInbetweenerInbetweenCount( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                                         , FArchive &Ar )
+FOdysseyVectorExportV2::WriteTagInbetweenerDrawingCount( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                       , FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_INBETWEENCOUNT
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_DRAWINGCOUNT
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
@@ -282,9 +282,8 @@ FOdysseyVectorExportV2::WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbe
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
         WriteTagInbetweenerColor( iInbetweenerTag, Ar );
-        WriteTagInbetweenerInbetweenCount( iInbetweenerTag, Ar );
+        WriteTagInbetweenerDrawingCount( iInbetweenerTag, Ar );
         WriteTagInbetweenerMapAsPolyline( iInbetweenerTag, Ar );
-        WriteTagInbetweenerChart( iInbetweenerTag, Ar );
         WriteTagInbetweenerTransform( iInbetweenerTag, Ar );
         WriteTagInbetweenerDeformation( iInbetweenerTag, Ar );
         WriteTagInbetweenerInterpolation( iInbetweenerTag, Ar );
@@ -292,5 +291,6 @@ FOdysseyVectorExportV2::WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbe
         WriteTagInbetweenerArapRigidity( iInbetweenerTag, Ar );
         WriteTagInbetweenerBreakdowns( iInbetweenerTag, Ar );
         WriteTagInbetweenerRoutes( iInbetweenerTag, Ar );
+        WriteTagInbetweenerChart( iInbetweenerTag, Ar );
     } );
 }

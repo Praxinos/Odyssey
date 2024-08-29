@@ -23,6 +23,11 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweene
     , mBreakdown( iBreakdown )
     , mDrawingIndex( iBreakdown->GetTargetDrawingIndex() )
 {
+    // Adding or Removing a breakdown will affect routes. Backup them.
+    for( FInbetweenerRoute* route : mInbetweenerTag->GetRouteList() )
+    {
+        mRouteSnapshotBuffer.emplace_back( route, FSnapshotFlags::ALL, FSnapshotFlags::ALL );
+    }
 }
 
 void
@@ -32,6 +37,12 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::Apply( UObject* iIgnored )
     FOdysseyVectorUndo::Apply( iIgnored );
 
     mInbetweenerTag->RemoveBreakdown( mBreakdown, false );
+
+    // Adding or Removing a breakdown will affect routes. Restore them.
+    for( FSnapshotRoute& routeSnapshot : mRouteSnapshotBuffer )
+    {
+        routeSnapshot.Restore();
+    }
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
@@ -49,6 +60,12 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::Revert( UObject* iIgnored )
     FOdysseyVectorUndo::Revert( iIgnored );
 
     mInbetweenerTag->AddBreakdown( mBreakdown, mDrawingIndex, false );
+
+    // Adding or Removing a breakdown will affect routes. Restore them.
+    for( FSnapshotRoute& routeSnapshot : mRouteSnapshotBuffer )
+    {
+        routeSnapshot.Restore();
+    }
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );

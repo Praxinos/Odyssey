@@ -1,8 +1,9 @@
 #include "InbetweenerTag/InbetweenerStep.h"
 #include "InbetweenerTag/InbetweenerTrajectory.h"
 
-FInbetweenerStep::FInbetweenerStep()
+FInbetweenerStep::FInbetweenerStep( FInbetweenerRoute* iRoute )
     : mFlags ( ALIGNED )
+    , mRoute( iRoute )
 {
     mTrajectoryArray.reserve( 2 );
 }
@@ -44,6 +45,12 @@ bool
 FInbetweenerStep::IsAligned()
 {
     return ( mFlags & ALIGNED ) ? true : false;
+}
+
+FInbetweenerRoute*
+FInbetweenerStep::GetRoute()
+{
+    return mRoute;
 }
 
 void

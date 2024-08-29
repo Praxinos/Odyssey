@@ -27,12 +27,12 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::Apply( UObject* iIgnore
 {
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
-/*--------------
+
     for( FSnapshotTrajectory& trajectorySnapshot : mTrajectorySnapshotBuffer )
     {
-        trajectorySnapshot.Restore( );
+        trajectorySnapshot.Restore();
     }
-------------*/
+
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
@@ -47,12 +47,12 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::Revert( UObject* iIgnor
 {
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
-/*--------------
+
     for( FSnapshotTrajectory& trajectorySnapshot : mTrajectorySnapshotBuffer )
     {
         trajectorySnapshot.Restore();
     }
-------------*/
+
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 

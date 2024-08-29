@@ -35,7 +35,10 @@ FSnapshotTrajectory::~FSnapshotTrajectory()
 
 FSnapshotTrajectory::FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory, uint64 iSnapshotFlags )
     : mSnapshotFlags( iSnapshotFlags )
+    , mRoute( iTrajectory->GetRoute() )
+    , mIndex( iTrajectory - &iTrajectory->GetRoute()->GetTrajectoryBuffer()[0] )
 {
+
     if( mSnapshotFlags & FSnapshotFlags::Trajectory::BEZIER )
     {
         mHandleDirection[0] = iTrajectory->GetHandle(0)->GetDirection();
@@ -67,17 +70,19 @@ FSnapshotTrajectory::WaypointSpacingToArray( FInbetweenerTrajectory* iTrajectory
 }
 
 void
-FSnapshotTrajectory::Restore( FInbetweenerTrajectory* iTrajectory )
+FSnapshotTrajectory::Restore()
 {
+    FInbetweenerTrajectory* trajectory = &mRoute->GetTrajectoryBuffer()[mIndex];
+
     if( mSnapshotFlags & FSnapshotFlags::Trajectory::BEZIER )
     {
-        ::ULIS::FVec2D swapHandleDirection[2] = { iTrajectory->GetHandle(0)->GetDirection()
-                                                , iTrajectory->GetHandle(1)->GetDirection() };
-        double swapHandleLengthRatio[2] =  { iTrajectory->GetHandle(0)->GetLengthRatio()
-                                           , iTrajectory->GetHandle(1)->GetLengthRatio() };
+        ::ULIS::FVec2D swapHandleDirection[2] = { trajectory->GetHandle(0)->GetDirection()
+                                                , trajectory->GetHandle(1)->GetDirection() };
+        double swapHandleLengthRatio[2] =  { trajectory->GetHandle(0)->GetLengthRatio()
+                                           , trajectory->GetHandle(1)->GetLengthRatio() };
 
-        iTrajectory->GetHandle(0)->Set( mHandleDirection[0], mHandleLengthRatio[0] );
-        iTrajectory->GetHandle(1)->Set( mHandleDirection[1], mHandleLengthRatio[1] );
+        trajectory->GetHandle(0)->Set( mHandleDirection[0], mHandleLengthRatio[0] );
+        trajectory->GetHandle(1)->Set( mHandleDirection[1], mHandleLengthRatio[1] );
 
         mHandleDirection[0] = swapHandleDirection[0];
         mHandleDirection[1] = swapHandleDirection[1];
@@ -88,23 +93,47 @@ FSnapshotTrajectory::Restore( FInbetweenerTrajectory* iTrajectory )
 
     if( mSnapshotFlags & FSnapshotFlags::Trajectory::WAYPOINTS )
     {
-        std::vector<FInbetweenerWaypoint>& waypointBuffer = iTrajectory->GetWaypointBuffer();
+        std::vector<FInbetweenerWaypoint>& waypointBuffer = trajectory->GetWaypointBuffer();
         std::vector<float> swapWaypointSpacingBuffer;
 
-        WaypointSpacingToArray( iTrajectory, swapWaypointSpacingBuffer );
+        WaypointSpacingToArray( trajectory, swapWaypointSpacingBuffer );
 
         waypointBuffer.clear();
         waypointBuffer.reserve( mWaypointSpacingBuffer.size() );
 
         for( int i = 0; i < mWaypointSpacingBuffer.size(); i++ )
         {
-            FInbetweenerWaypoint& waypoint = waypointBuffer.emplace_back( iTrajectory );
+            FInbetweenerWaypoint& waypoint = waypointBuffer.emplace_back( trajectory );
 
             waypoint.SetT( mWaypointSpacingBuffer[i] );
-
-            mWaypointSpacingBuffer[i] = swapWaypointSpacingBuffer[i];
         }
+
+        mWaypointSpacingBuffer = swapWaypointSpacingBuffer;
     }
+}
+
+FSnapshotStep::~FSnapshotStep()
+{
+}
+
+FSnapshotStep::FSnapshotStep( FInbetweenerStep* iStep )
+    : mRoute( iStep->GetRoute() )
+    , mIndex( iStep - &iStep->GetRoute()->GetStepBuffer()[0] )
+    , bIsAligned( iStep->IsAligned() )
+{
+}
+
+bool
+FSnapshotStep::Restore()
+{
+    FInbetweenerStep* step = &mRoute->GetStepBuffer()[mIndex];
+    bool swapAligned = step->IsAligned();
+
+    step->SetAligned( bIsAligned );
+
+    bIsAligned = swapAligned;
+
+    return true;
 }
 
 FSnapshotRoute::~FSnapshotRoute()
@@ -117,23 +146,48 @@ FSnapshotRoute::FSnapshotRoute( FInbetweenerRoute* iRoute
     : mRoute( iRoute )
     , mSnapshotFlags( iSnapshotflags ) // unused
 {
-    mTrajectorySnapshotBuffer.reserve( iRoute->GetInbetweenerTag()->GetBreakdownCount() );
-
-    for( FInbetweenerTrajectory& trajectory : iRoute->GetTrajectoryBuffer() )
+    if( mSnapshotFlags & FSnapshotFlags::Route::TRAJECTORIES )
     {
-        mTrajectorySnapshotBuffer.emplace_back( &trajectory, iTrajectorySnapshotflags );
+        mTrajectorySnapshotBuffer.reserve( iRoute->GetInbetweenerTag()->GetBreakdownCount() );
+
+        for( FInbetweenerTrajectory& trajectory : iRoute->GetTrajectoryBuffer() )
+        {
+            mTrajectorySnapshotBuffer.emplace_back( &trajectory, iTrajectorySnapshotflags );
+        }
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Route::STEPS )
+    {
+        mStepSnapshotBuffer.reserve( iRoute->GetInbetweenerTag()->GetBreakdownCount() );
+
+        for( FInbetweenerStep& step : iRoute->GetStepBuffer() )
+        {
+            mStepSnapshotBuffer.emplace_back( &step );
+        }
     }
 }
 
 bool
 FSnapshotRoute::Restore()
 {
-    for( uint32 i = 0; i <  mRoute->GetInbetweenerTag()->GetBreakdownCount(); i++ )
+    if( mSnapshotFlags & FSnapshotFlags::Route::TRAJECTORIES )
     {
-        FInbetweenerTrajectory* trajectory = &mRoute->GetTrajectoryBuffer()[i];
-        FSnapshotTrajectory* trajectorySnapshot = &mTrajectorySnapshotBuffer[i];
+        // TODO: swap ?
 
-        trajectorySnapshot->Restore( trajectory );
+        for( FSnapshotTrajectory& trajectorySnapshot : mTrajectorySnapshotBuffer )
+        {
+            trajectorySnapshot.Restore();
+        }
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Route::STEPS )
+    {
+        // TODO: swap ?
+
+        for( FSnapshotStep& stepSnapshot : mStepSnapshotBuffer )
+        {
+            stepSnapshot.Restore();
+        }
     }
 
     return true;
@@ -191,10 +245,27 @@ FSnapshotTagInbetweener::~FSnapshotTagInbetweener()
 {
 }
 
+static void
+BuildBreakdownSnapshotBuffer( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                            , std::vector<FSnapshotInbetweenerBreakdown>& oBreakdownSnapshotBuffer
+                            , uint64 iBreakdownSnapshotFlags )
+{
+    // Adding or Removing a breakdown will affect routes. Backup them.
+    oBreakdownSnapshotBuffer.clear();
+    oBreakdownSnapshotBuffer.reserve( iInbetweenerTag->GetBreakdownCount() );
+
+    for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
+    {
+        oBreakdownSnapshotBuffer.emplace_back( breakdown, iBreakdownSnapshotFlags );
+    }
+}
+
 FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                , uint64 iSnapshotFlags )
+                                                , uint64 iSnapshotFlags
+                                                , uint64 iBreakdownSnapshotFlags )
     : mSnapshotFlags( iSnapshotFlags )
     , mInbetweenerTag( iInbetweenerTag )
+    , mBreakdownSnapshotFlags( iBreakdownSnapshotFlags )
 {
     uint32 breakdownSnapshotFlags = 0;
 
@@ -213,7 +284,7 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
                                            , mScalingY );
     }
 
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT )
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::DRAWINGCOUNT )
     {
         mDrawingCount = mInbetweenerTag->GetDrawingCount();
     }
@@ -223,7 +294,7 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
         bMapAsPolyline = mInbetweenerTag->GetMapAsPolyline();
     }
 
-    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT )
+    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::DRAWINGCOUNT )
      || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::CHART ) )
     {
         mChart = mInbetweenerTag->GetChart();
@@ -260,28 +331,12 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
         mColor = mInbetweenerTag->GetColor();
     }
 
-    /* ------------------ Backup Breakdown ------------------------- */
-
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT )
+    /* ------------------ Backup Breakdowns ------------------------- */
+    if( mBreakdownSnapshotFlags )
     {
-        breakdownSnapshotFlags |= FSnapshotFlags::Breakdown::RANGE;
-    }
-
-    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE     )
-    ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE     )
-    ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY ) )
-    {
-        breakdownSnapshotFlags |= FSnapshotFlags::Breakdown::GRIDGEOMETRY;
-    }
-
-    if( breakdownSnapshotFlags )
-    {
-        mInbetweenerBreakdownSnaphotBuffer.reserve( mInbetweenerTag->GetBreakdownCount() );
-
-        for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
-        {
-            mInbetweenerBreakdownSnaphotBuffer.emplace_back( breakdown, breakdownSnapshotFlags );
-        }
+        BuildBreakdownSnapshotBuffer( mInbetweenerTag
+                                    , mInbetweenerBreakdownSnaphotBuffer
+                                    , mBreakdownSnapshotFlags );
     }
     /* ------------------------------------------------------------- */
   
@@ -301,7 +356,7 @@ FSnapshotTagInbetweener::Restore()
     }
 
     // pre-step. Backup Chart before being changed by SetInbetweenCount
-    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT )
+    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::DRAWINGCOUNT )
     ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::CHART          ) )
     {
         swapChart = mInbetweenerTag->GetChart();
@@ -331,8 +386,8 @@ FSnapshotTagInbetweener::Restore()
         mScalingX     = swapScalingX;
         mScalingY     = swapScalingY;
     }
-
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT )
+/*
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::DRAWINGCOUNT )
     {
         uint32 swapCount = mInbetweenerTag->GetDrawingCount();
 
@@ -340,7 +395,7 @@ FSnapshotTagInbetweener::Restore()
 
         mDrawingCount = swapCount;
     }
-
+*/
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE )
     {
         bool swapMapAsPolyline = mInbetweenerTag->GetMapAsPolyline();
@@ -401,6 +456,22 @@ FSnapshotTagInbetweener::Restore()
         mColor = swapColor;
     }
 
+    // restore breakdowns range & grid geometry
+    if( mBreakdownSnapshotFlags )
+    {
+        std::vector<FSnapshotInbetweenerBreakdown> swapBreakdownSnapshotBuffer;
+
+        BuildBreakdownSnapshotBuffer( mInbetweenerTag, swapBreakdownSnapshotBuffer, mBreakdownSnapshotFlags );
+
+        for( FSnapshotInbetweenerBreakdown& inbetweenerBreakdownSnapshot : mInbetweenerBreakdownSnaphotBuffer )
+        {
+            inbetweenerBreakdownSnapshot.Restore();
+        }
+
+        mInbetweenerBreakdownSnaphotBuffer = swapBreakdownSnapshotBuffer;
+    }
+
+    // restor trajectories AFTER breakdowns
     if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
      || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE ) )
     {
@@ -409,23 +480,11 @@ FSnapshotTagInbetweener::Restore()
         mTrajectoryArray = swapTrajectoryArray;
     }
 
-    // restore breakdowns range & grid geometry
-    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT )
-     || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE       )
-     || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE       )
-     || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY   ) )
-    {
-        for( FSnapshotInbetweenerBreakdown& inbetweenerBreakdownSnapshot : mInbetweenerBreakdownSnaphotBuffer )
-        {
-            inbetweenerBreakdownSnapshot.Restore();
-        }
-    }
-
     // restore chart after params have been set
-    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT )
+    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::DRAWINGCOUNT )
     ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::CHART          ) )
     {
-        mInbetweenerTag->GetChart() = mChart;
+        mInbetweenerTag->SetChart( mChart );
 
         mChart = swapChart;
     }

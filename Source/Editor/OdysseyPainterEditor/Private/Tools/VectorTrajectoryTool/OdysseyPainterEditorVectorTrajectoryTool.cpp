@@ -15,6 +15,7 @@
 #include "undo/OdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint.h"
 #include "undo/OdysseyVectorUndoTagInbetweenerRouteAdd.h"
 #include "undo/OdysseyVectorUndoTagInbetweenerRouteRemove.h"
+#include "undo/OdysseyVectorUndoTagInbetweenerStepAlign.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -434,6 +435,24 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseUpVector( FOdysseyVectorGroupP
             {
                 if( mPickedStep )
                 {
+                    FInbetweenerRoute* route = mPickedStep->GetRoute();
+
+                    // needed for valid GUndo pointer
+                    GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.align","Vector Trajectory Tool"));
+                    if( GUndo )
+                    {
+                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerStepAlign( iScene
+                                                                                                , route->GetInbetweenerTag()
+                                                                                                , route );
+
+                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+                        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                        if (source)
+                            source->RecordCurrentFrameUndo();
+                    }
+                    GEditor->EndTransaction();
+
                     mPickedStep->SetAligned( mPickedStep->IsAligned() ? false : true );
                 }
             }

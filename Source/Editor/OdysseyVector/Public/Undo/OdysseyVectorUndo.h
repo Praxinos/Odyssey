@@ -77,6 +77,12 @@ namespace FSnapshotFlags
         static const uint64 WAYPOINTS = ( 1ULL <<  1 );
     }
 
+    namespace Route
+    {
+        static const uint64 TRAJECTORIES = ( 1ULL <<  0 );
+        static const uint64 STEPS        = ( 1ULL <<  1 );
+    }
+
     namespace Breakdown
     {
         static const uint64 RANGE        = ( 1ULL <<  0 );
@@ -89,7 +95,7 @@ namespace FSnapshotFlags
         {
             static const uint64 TRANSFORMATIONS   = ( 1ULL <<  0 );
             static const uint64 CHART             = ( 1ULL <<  1 );
-            static const uint64 INBETWEENCOUNT    = ( 1ULL <<  3 );
+            static const uint64 DRAWINGCOUNT      = ( 1ULL <<  3 );
             static const uint64 GRIDSIZE          = ( 1ULL <<  4 );
             static const uint64 GRIDTYPE          = ( 1ULL <<  5 );
             static const uint64 GRIDGEOMETRY      = ( 1ULL <<  6 );
@@ -97,7 +103,7 @@ namespace FSnapshotFlags
             static const uint64 ARAPRIGIDITY      = ( 1ULL <<  8 );
             static const uint64 COLOR             = ( 1ULL <<  9 );
             static const uint64 MAPASPOLYLINE     = ( 1ULL << 10 );
-            static const uint64 PARAM             = ( INBETWEENCOUNT
+            static const uint64 PARAM             = ( DRAWINGCOUNT
                                                     | GRIDSIZE
                                                     | GRIDTYPE
                                                     | GRIDGEOMETRY
@@ -160,7 +166,7 @@ class ODYSSEYVECTOR_API FSnapshotTrajectory
     public:
         virtual ~FSnapshotTrajectory();
         FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory, uint64 iSnapshotFlags );
-        virtual void Restore( FInbetweenerTrajectory* iTrajectory );
+        virtual void Restore();
 
         static void WaypointSpacingToArray( FInbetweenerTrajectory* iTrajectory
                                           , std::vector<float>& oSpacingBuffer );
@@ -170,6 +176,8 @@ class ODYSSEYVECTOR_API FSnapshotTrajectory
         ::ULIS::FVec2D mHandleDirection[2];
         double mHandleLengthRatio[2];
         std::vector<float> mWaypointSpacingBuffer;
+        FInbetweenerRoute* mRoute;
+        uint32 mIndex;
 };
 
 class ODYSSEYVECTOR_API FSnapshotPoint
@@ -242,6 +250,20 @@ class ODYSSEYVECTOR_API FSnapshotSegmentCubic
         ULIS::FVec2D mHandleCoords[2];
 };
 
+class ODYSSEYVECTOR_API FSnapshotStep
+{
+    public:
+        virtual ~FSnapshotStep();
+        FSnapshotStep( FInbetweenerStep* iStep );
+
+        virtual bool Restore();
+
+    protected:
+        FInbetweenerRoute* mRoute;
+        uint32 mIndex;
+        bool bIsAligned;
+};
+
 class ODYSSEYVECTOR_API FSnapshotRoute
 {
     public:
@@ -255,7 +277,9 @@ class ODYSSEYVECTOR_API FSnapshotRoute
     protected:
         FInbetweenerRoute* mRoute;
         std::vector<FSnapshotTrajectory> mTrajectorySnapshotBuffer;
+        std::vector<FSnapshotStep> mStepSnapshotBuffer;
         uint64 mSnapshotFlags;
+        uint64 mTrajectorySnapshotFlags;
 };
 
 class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
@@ -280,7 +304,8 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
     public:
         virtual ~FSnapshotTagInbetweener();
         FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* iObject
-                               , uint64 iSnapshotFlags );
+                               , uint64 iSnapshotFlags
+                               , uint64 iBreakdownSnapshotFlags );
 
         virtual bool Restore();
 
@@ -290,6 +315,7 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
 
     protected:
         uint64 mSnapshotFlags;
+        uint64 mBreakdownSnapshotFlags;
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
         FInbetweenerChart  mChart;
         double mTranslationX;

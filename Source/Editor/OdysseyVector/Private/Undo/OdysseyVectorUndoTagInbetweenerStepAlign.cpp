@@ -1,9 +1,9 @@
-#include "Undo/OdysseyVectorUndoTagInbetweenerTrajectoryAlter.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerStepAlign.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTag.h"
 
-FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::~FOdysseyVectorUndoTagInbetweenerTrajectoryAlter()
+FOdysseyVectorUndoTagInbetweenerStepAlign::~FOdysseyVectorUndoTagInbetweenerStepAlign()
 {
     if( mApplied )
     {
@@ -11,24 +11,28 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::~FOdysseyVectorUndoTagInbetween
     }
     else
     {
-        // nothing to do
+
     }
 }
 
-FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::FOdysseyVectorUndoTagInbetweenerTrajectoryAlter( FOdysseyVectorGroupPaint* iScene
-                                                                                                , FInbetweenerTrajectory* iTrajectory )
+FOdysseyVectorUndoTagInbetweenerStepAlign::FOdysseyVectorUndoTagInbetweenerStepAlign( FOdysseyVectorGroupPaint* iScene
+                                                                                    , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                                                    , FInbetweenerRoute* iRoute )
     : FOdysseyVectorUndo( iScene )
-    , mTrajectorySnapshot( iTrajectory, FSnapshotFlags::Trajectory::BEZIER )
+    , mInbetweenerTag( iInbetweenerTag )
+    , mRouteSnapshot( iRoute
+                    , FSnapshotFlags::Route::TRAJECTORIES | FSnapshotFlags::Route::STEPS
+                    , FSnapshotFlags::Trajectory::BEZIER )
 {
 }
 
 void
-FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::Apply( UObject* iIgnored )
+FOdysseyVectorUndoTagInbetweenerStepAlign::Apply( UObject* iIgnored )
 {
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mTrajectorySnapshot.Restore();
+    mRouteSnapshot.Restore();
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
@@ -40,12 +44,12 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::Apply( UObject* iIgnored )
 }
 
 void
-FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::Revert( UObject* iIgnored )
+FOdysseyVectorUndoTagInbetweenerStepAlign::Revert( UObject* iIgnored )
 {
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mTrajectorySnapshot.Restore();
+    mRouteSnapshot.Restore();
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
@@ -58,7 +62,7 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::Revert( UObject* iIgnored )
 
 /** Describes this change (for debugging) */
 FString
-FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::ToString() const
+FOdysseyVectorUndoTagInbetweenerStepAlign::ToString() const
 {
-    return FString("FOdysseyVectorUndoTagInbetweenerTrajectoryAlter");
+    return FString("FOdysseyVectorUndoTagInbetweenerStepAlign");
 }

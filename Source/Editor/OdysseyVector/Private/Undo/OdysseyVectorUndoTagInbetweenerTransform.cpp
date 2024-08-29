@@ -24,7 +24,8 @@ FOdysseyVectorUndoTagInbetweenerTransform::FOdysseyVectorUndoTagInbetweenerTrans
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
     {
         mInbetweenerTagArray.emplace_back( inbetweenerTag
-                                         , FSnapshotFlags::Tag::Inbetweener::TRANSFORMATIONS );
+                                         , FSnapshotFlags::Tag::Inbetweener::TRANSFORMATIONS
+                                         , 0 );
     }
 }
 

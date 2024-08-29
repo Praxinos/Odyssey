@@ -19,8 +19,9 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChar
                                                                                       , FOdysseyVectorTagInbetweener* iInbetweenerTag )
     : FOdysseyVectorUndo( iScene )
 {
-    mInbetweenerTagSnapshotBuffer.emplace_back( iInbetweenerTag, FSnapshotFlags::Tag::Inbetweener::CHART
-                                                               | FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT );
+    mInbetweenerTagSnapshotBuffer.emplace_back( iInbetweenerTag
+                                              , FSnapshotFlags::Tag::Inbetweener::CHART
+                                              , 0 );
 }
 
 FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChartAlter( FOdysseyVectorGroupPaint* iScene
@@ -31,8 +32,9 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChar
 
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
     {
-        mInbetweenerTagSnapshotBuffer.emplace_back( inbetweenerTag, FSnapshotFlags::Tag::Inbetweener::CHART
-                                                                  | FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT );
+        mInbetweenerTagSnapshotBuffer.emplace_back( inbetweenerTag
+                                                  , FSnapshotFlags::Tag::Inbetweener::CHART
+                                                  , 0 );
     }
 }
 

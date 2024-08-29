@@ -14,10 +14,7 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
 {
     public:
         virtual ~FInbetweenerBreakdown();
-        FInbetweenerBreakdown( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                             , FInbetweenerBreakdown* iMasterBreakdown
-                             , uint32 iSourceDrawingIndex
-                             , uint32 iTargetDrawingIndex );
+        FInbetweenerBreakdown( FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
         void SetSourceDrawingIndex( uint32 iSourceDrawingIndex );
         void SetTargetDrawingIndex( uint32 iTargetDrawingIndex );
@@ -40,7 +37,6 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         FInbetweenerBreakdown* GetNextBreakdown( );
 
     private:
-        FInbetweenerBreakdown* mMasterBreakdown;
         FInbetweenerBreakdown* mPrevBreakdown;
         FInbetweenerBreakdown* mNextBreakdown;
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
