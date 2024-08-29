@@ -170,7 +170,8 @@ UOdysseyLayer::NameChanged()
 void
 UOdysseyLayer::IsActivatedChanged()
 {
-	ImageRenderingCompositionChanged();
+	if (Parent)
+		Parent->ImageRenderingCompositionChanged();
     OnIsActivatedChanged().Broadcast(this);
 }
 
