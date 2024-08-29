@@ -290,7 +290,14 @@ UOdysseyAnimationLayer::AddCells(TSubclassOf<UOdysseyAnimationCell> CellType, in
     if (!SupportedCellTypes.Contains(cellType))
         return {};
 
-	Index = FMath::Clamp(Index, 0, Cells.Num());
+	if (Index < 0 )
+	{
+		Index = Cells.Num();
+	}
+	else
+	{
+		Index = FMath::Clamp(Index, 0, Cells.Num());
+	}
 
 	TArray<UOdysseyAnimationCell*> cells;
 	for (int i = 0; i < Count; i++)
@@ -398,7 +405,15 @@ UOdysseyAnimationLayer::CopyCell(UOdysseyAnimationCell* Cell, int Index)
     if(!Cell)
         return nullptr;
 
-	Index = FMath::Clamp(Index, 0, Cells.Num());
+
+	if (Index < 0 )
+	{
+		Index = Cells.Num();
+	}
+	else
+	{
+		Index = FMath::Clamp(Index, 0, Cells.Num());
+	}
 
     //Duplicate the cell
 	FObjectDuplicationParameters params(Cell, this);
@@ -416,7 +431,14 @@ UOdysseyAnimationLayer::CopyCells(TArray<UOdysseyAnimationCell*> iCells, int Ind
 {
 	TArray<UOdysseyAnimationCell*> cellCopies;
 
-	Index = FMath::Clamp(Index, 0, Cells.Num());
+	if (Index < 0 )
+	{
+		Index = Cells.Num();
+	}
+	else
+	{
+		Index = FMath::Clamp(Index, 0, Cells.Num());
+	}
 
     //Sanitize Layers array
     iCells.RemoveAll(
