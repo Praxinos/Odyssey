@@ -140,9 +140,6 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if (UOdysseyPainterEditorRasterBaseTool::OnMouseUp(iPointInTexture, iKey))
-        return true;
-
     if (!mTransformArea)
         return false;
 
@@ -201,7 +198,7 @@ void UOdysseyPainterEditorRasterTransformTool::Load()
     mHUD->AddElement(rasterSelection->GetHUD());
     mHUD->AddElement(mTransformHUD);
 
-    UpdateRasterSelection();
+    UpdateRasterSelection( true ); //Create new selection if empty
     
     CreateTransformAreaFromSelection();
     UOdysseyPainterEditorTool::Load();
@@ -836,7 +833,7 @@ UOdysseyPainterEditorRasterTransformTool::OnPivotHandleDragged()
 }
 
 void
-UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection()
+UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection( bool iCreateNewIfEmpty )
 {
     FOdysseyMediaProvider mediaProvider = mEditor->GetCurrentMediaProvider();
     if (mediaProvider.IsLocked())
@@ -849,9 +846,22 @@ UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection()
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     if (rasterSelection->IsEmpty())
     {
-        mSelectionBlock = nullptr;
-        mTransformSelectionBlock = nullptr;
-        return;
+        if( !iCreateNewIfEmpty )
+        {
+            mSelectionBlock = nullptr;
+            mTransformSelectionBlock = nullptr;
+            return;
+        }
+        else //If we have no selection, by default, transform tool with select whole block
+        {
+            TArray<FVector2D> polyPoints;
+            polyPoints.Add(FVector2D(0, 0));
+            polyPoints.Add(FVector2D(mEditor->RasterSelection()->GetBlock()->Width(), 0));
+            polyPoints.Add(FVector2D(mEditor->RasterSelection()->GetBlock()->Width(), mEditor->RasterSelection()->GetBlock()->Height()));
+            polyPoints.Add(FVector2D(0, mEditor->RasterSelection()->GetBlock()->Height()));
+
+            mEditor->RasterSelection()->Add(polyPoints);
+        }
     }
 
     ::ULIS::FRectI boundingBox = rasterSelection->GetMaskBoundingRect();

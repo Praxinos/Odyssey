@@ -164,135 +164,13 @@ UOdysseyPainterEditorRasterBaseTool::PostEditChangeProperty( FPropertyChangedEve
 
 void UOdysseyPainterEditorRasterBaseTool::ExtendContextMenu(FMenuBuilder& menu)
 {
-    //FMenuBuilder menu( true, nullptr );
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return;
 
-    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
-
-    if (hasRaster)
-    {
-        menu.AddMenuEntry(
-            LOCTEXT("raster-tool.object-context-menu.select-all.name", "Select All")
-            , LOCTEXT("raster-tool.object-context-menu.select-all.tooltip", "Select All")
-            , FSlateIcon()
-            , FUIAction(
-                FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::SelectAll)
-              , FCanExecuteAction::CreateLambda([this]() { return mEditor != nullptr; }))
-        );
-
-        menu.AddMenuEntry(
-            LOCTEXT("raster-tool.object-context-menu.clear-selection.name", "Clear Selection")
-            , LOCTEXT("raster-tool.object-context-menu.clear-selection.tooltip", "Clear Selection")
-            , FSlateIcon()
-            , FUIAction(
-                FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::ClearSelection)
-                , FCanExecuteAction::CreateLambda([this]() { return (mEditor && !mEditor->RasterSelection()->IsEmpty()); }))
-        );
-
-        menu.AddMenuEntry(
-            LOCTEXT("raster-tool.object-context-menu.copy-selection.name", "Copy Selection")
-            , LOCTEXT("raster-tool.object-context-menu.copy-selection.tooltip", "Copy Selection")
-            , FSlateIcon()
-            , FUIAction( 
-                FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorRasterBaseTool::CopySelection )
-              , FCanExecuteAction::CreateLambda([this]() { return (mEditor && !mEditor->RasterSelection()->IsEmpty()); }))
-            );
-
-        menu.AddMenuEntry(
-            LOCTEXT("raster-tool.object-context-menu.cut-selection.name", "Cut Selection")
-            , LOCTEXT("raster-tool.object-context-menu.cut-selection.tooltip", "Cut Selection")
-            , FSlateIcon()
-            , FUIAction(
-                FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::CutSelection)
-              , FCanExecuteAction::CreateLambda([this]() { return (mEditor && !mEditor->RasterSelection()->IsEmpty()); }))
-        );
-
-        menu.AddMenuEntry(
-            LOCTEXT("raster-tool.object-context-menu.paste-selection.name", "Paste Selection")
-            , LOCTEXT("raster-tool.object-context-menu.paste-selection.tooltip", "Paste Selection")
-            , FSlateIcon()
-            , FUIAction(
-                FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::PasteSelection)
-              , FCanExecuteAction::CreateLambda([this]() { return (mEditor && mEditor->HasCopyBlock()); }))
-        );
-
-
-        menu.AddMenuEntry(
-            LOCTEXT("raster-tool.object-context-menu.paste-selection-in-new-layer.name", "Paste Selection In New Layer")
-            , LOCTEXT("raster-tool.object-context-menu.paste-selection-in-new-layer.tooltip", "Paste Selection In New Layer")
-            , FSlateIcon()
-            , FUIAction(
-                FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::PasteSelectionInNewLayer)
-                , FCanExecuteAction::CreateLambda([this]() { return (mEditor && mEditor->HasCopyBlock()); }))
-        );
-
-        menu.AddMenuEntry(
-            LOCTEXT("raster-tool.object-context-menu.invert-selection.name", "Invert Selection")
-            , LOCTEXT("raster-tool.object-context-menu.invert-selection.tooltip", "Invert Selection")
-            , FSlateIcon()
-            , FUIAction(
-                FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::InvertSelection)
-                , FCanExecuteAction::CreateLambda([this]() { return (mEditor && !mEditor->RasterSelection()->IsEmpty()); }))
-        );
-    }
 }
 
 
 void UOdysseyPainterEditorRasterBaseTool::BindShortcuts(FBaseToolkit* iToolkit)
 {
 
-}
-
-void UOdysseyPainterEditorRasterBaseTool::SelectAll()
-{
-    if (mEditor)
-    {
-        TArray<FVector2D> polyPoints;
-        polyPoints.Add(FVector2D(0, 0));
-        polyPoints.Add(FVector2D(mEditor->RasterSelection()->GetBlock()->Width(), 0));
-        polyPoints.Add(FVector2D(mEditor->RasterSelection()->GetBlock()->Width(), mEditor->RasterSelection()->GetBlock()->Height()));
-        polyPoints.Add(FVector2D(0, mEditor->RasterSelection()->GetBlock()->Height()));
-
-        mEditor->RasterSelection()->Add(polyPoints);
-    }
-}
-
-void UOdysseyPainterEditorRasterBaseTool::CopySelection()
-{
-    if( mEditor )
-        mEditor->CopyCurrentSelectionToCopyBlock();
-}
-
-void UOdysseyPainterEditorRasterBaseTool::CutSelection()
-{
-    if (mEditor)
-        mEditor->CutCurrentSelectionToCopyBlock();
-}
-
-void UOdysseyPainterEditorRasterBaseTool::PasteSelection()
-{
-    if (mEditor)
-        mEditor->PasteCopiedBlock();
-}
-
-void UOdysseyPainterEditorRasterBaseTool::PasteSelectionInNewLayer()
-{
-    if (mEditor)
-        mEditor->PasteCopiedBlockToNewLayer();
-}
-
-void UOdysseyPainterEditorRasterBaseTool::ClearSelection()
-{
-    if (mEditor)
-        mEditor->RasterSelection()->Clear();
-}
-
-void UOdysseyPainterEditorRasterBaseTool::InvertSelection()
-{
-    if (mEditor)
-        mEditor->RasterSelection()->Invert();
 }
 
 

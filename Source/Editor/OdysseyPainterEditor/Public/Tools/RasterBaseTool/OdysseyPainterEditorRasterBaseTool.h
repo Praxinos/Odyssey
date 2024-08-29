@@ -7,6 +7,8 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyPainterEditorRasterBaseTool.generated.h"
 
+//Base tool to create options that are common to all raster tools
+
 UCLASS(Abstract)
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterBaseTool : public UOdysseyPainterEditorTool
 {
@@ -39,15 +41,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterBaseTool : public UOdy
     protected:
         void PopupContextMenu();
         TSharedPtr<SWidget> CreateContextMenu();
-
-    protected:
-        void SelectAll();
-        void CopySelection();
-        void CutSelection();
-        void PasteSelection();
-        void PasteSelectionInNewLayer();
-        void ClearSelection();
-        void InvertSelection();
 
 protected:
         bool mHasContextMenu;

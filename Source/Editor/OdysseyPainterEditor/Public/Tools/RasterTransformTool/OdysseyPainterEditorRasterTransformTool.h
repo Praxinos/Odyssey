@@ -85,7 +85,7 @@ private:
     
     void OnRasterSelectionChanged();
 
-    void UpdateRasterSelection();
+    void UpdateRasterSelection( bool iCreateNewIfEmpty = false );
     void ResetRasterSelection();
 
 public:
