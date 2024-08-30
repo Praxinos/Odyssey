@@ -31,7 +31,10 @@ public:
 
 public:
 	UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
-    int GetStaggerFrame(int Frame) const;
+    int GetReferenceFrameAtFrame(int Frame) const;
+
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
+	UOdysseyAnimationCell* GetReferenceCellAtFrame(int Frame, bool Recursive = true) const;
 
 public:
 	virtual UOdysseyAnimationCell* Break(int Frame) override;

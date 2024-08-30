@@ -56,13 +56,17 @@ FOdysseyAnimationCellClipboardData::Paste(UOdysseyAnimationLayer* iLayer, int iF
 		UOdysseyAnimationCell* cell = iLayer->GetCellAtFrame(iFrame);
 		cellIndex = cell->IndexInLayer;
 		int cellFrame = iFrame - cell->GetFrameRange().GetLowerBoundValue();
-		cell->Break(cellFrame);
+		if (cellFrame != 0)
+		{
+			cell->Break(cellFrame);
+			cellIndex++;
+		}
 	}
 
     for (int i = 0; i < mCellCopies.Num(); i++)
     {
 		const FCellCopy& cellCopy = mCellCopies[i];
-		UOdysseyAnimationCell* cell = iLayer->CopyCell(cellCopy.mCell, cellIndex + i + 1);
+		UOdysseyAnimationCell* cell = iLayer->CopyCell(cellCopy.mCell, cellIndex + i);
 		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), cellCopy.mLength);
     }
 }

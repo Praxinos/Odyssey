@@ -365,7 +365,7 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
 					UOdysseyAnimationCellImageStagger* cellStagger = Cast<UOdysseyAnimationCellImageStagger>(srcCell);
 					int srcCellFrame = staggerFrame - srcCell->GetFrameRange().GetLowerBoundValue();
 					
-					staggerFrame = cellStagger->GetStaggerFrame(srcCellFrame);
+					staggerFrame = cellStagger->GetReferenceFrameAtFrame(srcCellFrame);
 					srcCell = vectorLayer->GetCellAtFrame(staggerFrame);
 				}
 			}

@@ -8,6 +8,7 @@
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -76,7 +77,13 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakCell()
 #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.break-cell", "Break Cell"));
 #endif
-	cell->Break(frame);
+	UOdysseyAnimationCell* newCell = cell->Break(frame);
+	if (!newCell)
+		return;
+
+	//Remove mark from the new cell, because we consider the new cell will be modified by the user and will not represent the original cell anymore
+	//This is an arbitrary choice, you are free to change this behaviour whenever you want without any side effect
+	FOdysseyObjectEditorUtils::SetPropertyValue(newCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
 
     FOdysseyAnimationCurrentFrameMutator mutator(animation);
     mutator.Set(animation->CurrentFrame);

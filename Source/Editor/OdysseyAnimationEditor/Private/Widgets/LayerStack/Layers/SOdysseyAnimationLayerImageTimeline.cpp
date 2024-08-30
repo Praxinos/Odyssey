@@ -381,6 +381,7 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder
 
     iMenuBuilder.BeginSection("Cells", LOCTEXT("timeline-cells.context-menu.cells-section.name", "Cells"));
         iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().ConvertToStaggerCell, TEXT("ConvertToStagger"));
+		iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().ConvertToReferenceCells);
         iMenuBuilder.AddMenuEntry(
             FOdysseyAnimationEditorCommands::Get().SetCellLength,
             NAME_None,
@@ -631,6 +632,9 @@ SOdysseyAnimationLayerImageTimeline::MapActions(TSharedPtr<FUICommandList> iComm
 {
     mAnimationTimelineCellsShortcuts = MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(mLayer->GetLayerStack(), mExtension);
     mAnimationTimelineCellsShortcuts->MapActionsToCommandList(iCommandList.ToSharedRef());
+
+	mAnimationTimelineCellImageStaggerShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(mLayer->GetLayerStack(), mExtension);
+	mAnimationTimelineCellImageStaggerShortcuts->MapActionsToCommandList(iCommandList.ToSharedRef());
 }
 
 EVisibility

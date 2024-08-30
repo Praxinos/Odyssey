@@ -13,6 +13,7 @@
 #include "OdysseyAnimation.h"
 #include "ULISLoaderModule.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "Shortcuts/Timeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -30,150 +31,6 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::MapActionsToCommandList(TShar
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade),
         FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellImageRasterShortcuts::CanAction_CrossFade)
     );
-
-    iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().ConvertToRasterCell,
-        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_ConvertToRasterCell),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellImageRasterShortcuts::CanAction_ConvertToRasterCell)
-    );
-}
-
-void
-FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_ConvertToRasterCell()
-{
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
-    if (!layer || !layer->IsA(UOdysseyAnimationLayerImageRaster::StaticClass()))
-        return;
-
-    if (layer->IsLockedRecursively())
-        return;
-
-    UOdysseyAnimation* animation = layer->GetAnimation();
-    if (!animation)
-        return;
-
-    UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
-
-    TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
-    if (selectedCells.IsEmpty())
-    {
-        UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
-        if (!cell)
-            return;
-            
-        selectedCells.Add(cell);
-    }
-        
-    TArray<UOdysseyAnimationCell*> filteredCells = selectedCells.FilterByPredicate(
-        [](UOdysseyAnimationCell* iCell)
-        {
-            return iCell->IsA<UOdysseyAnimationCellImageStagger>();
-        }
-    );
-
-    if (filteredCells.IsEmpty())
-        return;
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->GetFormat());
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-raster.transaction.convert-to-raster-cell", "Convert To Raster Cell"));
-#endif
-
-    FScopedSlowTask progressBar(filteredCells.Num(), LOCTEXT("cell-image-raster.convert-to-raster-cell.progress-bar.title", "Converting To Raster Cell"));
-    progressBar.MakeDialog();
-
-    struct FResultingCell
-    {
-        TSharedPtr<::ULIS::FBlock> mBlock;
-        int mLength;
-    };
-    
-    TMap<UOdysseyAnimationCell*, TArray<FResultingCell>> resultingCellsByCell;
-    for (UOdysseyAnimationCell* filteredCell : filteredCells)
-    {
-        progressBar.EnterProgressFrame();
-
-        TArray<FGuid> lastComposition = filteredCell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, 0);
-        TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
-        ctx.Clear(*block);
-        ctx.Finish();
-
-        TSharedPtr<IOdysseyImageRenderer> renderer = filteredCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
-        renderer->Init();
-        FOdysseyImageRendererCopyParams params(block, { block->Rect() });
-        renderer->Copy(params, {});
-        ctx.Finish();
-
-        FResultingCell resultingCell;
-        resultingCell.mBlock = block;
-        resultingCell.mLength = filteredCell->Length;
-
-        TArray<FResultingCell> resultingCells;
-        resultingCells.Add(resultingCell);
-
-        FScopedSlowTask loopProgress(filteredCell->Length - 1);
-        for (int i = 1; i < filteredCell->Length; i++)
-        {
-            loopProgress.EnterProgressFrame();
-            TArray<FGuid> composition = filteredCell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, i);
-            if (composition == lastComposition)
-                continue;
-
-            resultingCells.Last().mLength = i - (filteredCell->Length - resultingCells.Last().mLength);
-            lastComposition = composition;
-            
-            block = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
-            ctx.Clear(*block);
-            ctx.Finish();
-
-            renderer = filteredCell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, i);
-            renderer->Init();
-
-            params = FOdysseyImageRendererCopyParams(block, { block->Rect() });
-            renderer->Copy(params, {});
-            ctx.Finish();
-
-            resultingCell.mBlock = block;
-            resultingCell.mLength = filteredCell->Length - i;
-
-            resultingCells.Add(resultingCell);
-        }
-
-        resultingCellsByCell.Add(filteredCell, resultingCells);
-    }
-
-    for (auto element : resultingCellsByCell)
-    {
-        UOdysseyAnimationCell* originalCell = element.Key;
-        TArray<FResultingCell> resultingCells = element.Value;
-
-        
-		TArray<UOdysseyAnimationCell*> rasterCells = layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), originalCell->IndexInLayer + 1, resultingCells.Num());
-		layer->RemoveCell(originalCell);
-        for (int i = 0; i < resultingCells.Num(); i++)
-        {
-			const FResultingCell& resultingCell = resultingCells[i];
-			UOdysseyAnimationCellImageRaster* rasterCell = Cast<UOdysseyAnimationCellImageRaster>(rasterCells[i]);
-			FOdysseyObjectEditorUtils::SetPropertyValue(rasterCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), resultingCell.mLength);
-
-			FOdysseyRasterBlockMutator mutator(rasterCell->GetRasterBlock(), false);
-			mutator.EditTilesFromRects(
-				{ rasterCell->GetRasterBlock()->GetRect() },
-				[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-				{
-					ctx.Copy(*resultingCell.mBlock, *iBlock);
-					ctx.Finish();
-					return {};
-				}
-			);
-			mutator.Commit();
-        }
-
-        selectedCells.Remove(originalCell);
-        selectedCells.Append(rasterCells);
-    }
-
-    mAnimationExtension->Timeline()->SetSelectedCells(selectedCells);
 }
 
 void
@@ -212,7 +69,8 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     progressBar.EnterProgressFrame();
 
     //Convert Selected Stagger Cells to ImageRaster Cells
-    Action_ConvertToRasterCell();
+	FOdysseyAnimationTimelineCellImageStaggerShortcuts staggerShortcuts(mLayerStack, mAnimationExtension);
+    staggerShortcuts.Action_ConvertToReferenceCells();
 
     progressBar.EnterProgressFrame();
 
@@ -305,7 +163,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
         }
         else
         {
-            TArray<UOdysseyAnimationCell*> rasterCells = layer->AddCells(UOdysseyAnimationCellImageStagger::StaticClass(), selectedCell->IndexInLayer + 1, crossFadelength - 1);
+            TArray<UOdysseyAnimationCell*> rasterCells = layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), selectedCell->IndexInLayer + 1, crossFadelength - 1);
 
             FScopedSlowTask framesProgress(crossFadelength);
             for (int j = 1; j < crossFadelength; j++)
@@ -341,43 +199,6 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
         }
     }
     mAnimationExtension->Timeline()->SetSelectedCells(cellsToSelect);
-}
-
-bool
-FOdysseyAnimationTimelineCellImageRasterShortcuts::CanAction_ConvertToRasterCell()
-{
-    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
-    if (!layer || !layer->IsA(UOdysseyAnimationLayerImageRaster::StaticClass()))
-        return false;
-
-    if (layer->IsLockedRecursively())
-        return false;
-
-    UOdysseyAnimation* animation = layer->GetAnimation();
-    if (!animation)
-        return false;
-
-    UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
-
-    TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
-    if (selectedCells.IsEmpty())
-    {
-        UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
-        if (!cell)
-            return false;
-    }
-        
-    TArray<UOdysseyAnimationCell*> filteredCells = selectedCells.FilterByPredicate(
-        [](UOdysseyAnimationCell* iCell)
-        {
-            return iCell->IsA<UOdysseyAnimationCellImageStagger>();
-        }
-    );
-
-    if (filteredCells.IsEmpty())
-        return false;
-
-    return true;
 }
 
 bool

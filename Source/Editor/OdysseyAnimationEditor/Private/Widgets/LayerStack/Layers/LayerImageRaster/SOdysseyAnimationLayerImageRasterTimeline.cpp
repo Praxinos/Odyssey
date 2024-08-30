@@ -92,19 +92,6 @@ SOdysseyAnimationLayerImageRasterTimeline::ExtendContextMenu()
     TSharedRef<FExtender> extender = MakeShared<FExtender>();
     extender->AddMenuExtension
     (
-        TEXT("ConvertToStagger"),
-        EExtensionHook::After,
-        commandList,
-        FMenuExtensionDelegate::CreateLambda(
-            [](FMenuBuilder& iMenuBuilder)
-            {
-                iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().ConvertToRasterCell);
-            }
-        )
-    );
-
-    extender->AddMenuExtension
-    (
         TEXT("Cells"),
         EExtensionHook::After,
         commandList,

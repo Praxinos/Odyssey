@@ -29,8 +29,31 @@ UOdysseyAnimationCellImageStagger::BuildImageRenderer(IOdysseyImageRenderer::eRe
     return MakeShared<FOdysseyAnimationCellImageStaggerImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
+UOdysseyAnimationCell*
+UOdysseyAnimationCellImageStagger::GetReferenceCellAtFrame(int Frame, bool Recursive) const
+{
+	int staggerFrame = GetReferenceFrameAtFrame(Frame);
+	UOdysseyAnimationCell* referenceCell = GetLayer()->GetCellAtFrame(staggerFrame);
+	if (!referenceCell)
+		return nullptr;
+
+	int frame = staggerFrame - referenceCell->GetFrameRange().GetLowerBoundValue();
+
+	while(referenceCell->IsA<UOdysseyAnimationCellImageStagger>())
+	{
+		UOdysseyAnimationCellImageStagger* referenceStaggerCell = Cast<UOdysseyAnimationCellImageStagger>(referenceCell);
+		staggerFrame = referenceStaggerCell->GetReferenceFrameAtFrame(frame);
+		referenceCell = GetLayer()->GetCellAtFrame(staggerFrame);
+		if (!referenceCell)
+			return nullptr;
+
+		frame = staggerFrame - referenceCell->GetFrameRange().GetLowerBoundValue();
+	}
+	return referenceCell;
+}
+
 int
-UOdysseyAnimationCellImageStagger::GetStaggerFrame(int iFrameIndex) const
+UOdysseyAnimationCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) const
 {
 	FInt32Range frameRange = GetFrameRange();
     if (frameRange.IsEmpty())
@@ -89,7 +112,7 @@ UOdysseyAnimationCellImageStagger::GetImageRenderingComposition(IOdysseyImageRen
 {
     TArray<FGuid> idComposition = { GetImageRenderingId() };
     
-	int staggerFrame = GetStaggerFrame(iFrameIndex);
+	int staggerFrame = GetReferenceFrameAtFrame(iFrameIndex);
 	if (staggerFrame == INDEX_NONE)
         return idComposition;
 
@@ -115,18 +138,7 @@ UOdysseyAnimationCellImageStagger::Break(int Frame)
 	if (Frame <= 0 || Frame >= Length)
 		return nullptr;
 
-	UOdysseyAnimationCell* cell = this;
-	do
-	{
-		UOdysseyAnimationCellImageStagger* cellStagger = Cast<UOdysseyAnimationCellImageStagger>(cell);
-		int staggerFrame = cellStagger->GetStaggerFrame(Frame);
-		if (staggerFrame == INDEX_NONE)
-			return nullptr;
-
-		cell =  GetLayer()->GetCellAtFrame(staggerFrame);
-	}
-	while(cell && cell->IsA<UOdysseyAnimationCellImageStagger>());
-
+	UOdysseyAnimationCell* cell = GetReferenceCellAtFrame(Frame);
 	if (!cell)
 		return nullptr;
 

@@ -8,10 +8,10 @@
 class UOdysseyLayerStack;
 class FOdysseyAnimationEditorExtension;
 
-class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineCellImageRasterShortcuts
+class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineCellImageStaggerShortcuts
 {
 public:
-    FOdysseyAnimationTimelineCellImageRasterShortcuts(UOdysseyLayerStack* iLayerStack, FOdysseyAnimationEditorExtension* iAnimationExtension);
+    FOdysseyAnimationTimelineCellImageStaggerShortcuts(UOdysseyLayerStack* iLayerStack, FOdysseyAnimationEditorExtension* iAnimationExtension);
 
 public:
     //Shortcuts
@@ -19,8 +19,8 @@ public:
 
 public:
     //Common Shortcuts
-    void Action_CrossFade();
-    bool CanAction_CrossFade();
+    void Action_ConvertToReferenceCells();
+    bool CanAction_ConvertToReferenceCells();
 
 private:
     UOdysseyLayerStack* mLayerStack;

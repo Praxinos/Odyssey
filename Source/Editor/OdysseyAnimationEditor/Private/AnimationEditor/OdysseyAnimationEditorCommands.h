@@ -74,7 +74,7 @@ public:
     TSharedPtr<FUICommandInfo> ChangeLayerOpacity100;
 
     TSharedPtr<FUICommandInfo> ConvertToStaggerCell;
-    TSharedPtr<FUICommandInfo> ConvertToRasterCell;
+    TSharedPtr<FUICommandInfo> ConvertToReferenceCells;
     
 	// Cross Fade the selected cells
 	TSharedPtr<FUICommandInfo> CrossFade;
