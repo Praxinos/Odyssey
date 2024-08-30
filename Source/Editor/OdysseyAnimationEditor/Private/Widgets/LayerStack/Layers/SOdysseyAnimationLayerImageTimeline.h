@@ -70,17 +70,6 @@ protected:
     virtual void MapActions(TSharedPtr<FUICommandList> iCommandList, int iFrame);
 
 private:
-    void BuildPostBehaviourSubMenu(FMenuBuilder& iMenuBuilder);
-    void BuildPreBehaviourSubMenu(FMenuBuilder& iMenuBuilder);
-
-    void SetPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour);
-    bool IsPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
-    bool CanSetPostBehaviour() const;
-
-    void SetPreBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour);
-    bool IsPreBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
-    bool CanSetPreBehaviour() const;
-
     void RemoveCellMark();
     bool CanRemoveCellMark() const;
     void SetCellMark( int iMarkId );
