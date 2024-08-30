@@ -462,7 +462,7 @@ FOdysseyAnimationEditorFlipSystem::FlipTo(int iDelta)
 bool
 FOdysseyAnimationEditorFlipSystem::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {
-    /* if (!InKeyEvent.GetKey().IsModifierKey())
+    if (!InKeyEvent.GetKey().IsModifierKey())
         mLastKey = InKeyEvent.GetKey();
 
     if (mLastKey != FKey())
@@ -489,7 +489,7 @@ FOdysseyAnimationEditorFlipSystem::HandleKeyDownEvent(FSlateApplication& SlateAp
         }
     }
 
-    Endlipping(); */
+    EndFlipping();
 
     return false; //false means Unreal will continue as if we did nothing
 }
