@@ -23,7 +23,7 @@ SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyAn
     ChildSlot
     .VAlign(VAlign_Center)
     .HAlign(HAlign_Left)
-    .Padding(FMargin(3, 0, 0, 0))
+    .Padding(FMargin(2, 0, 0, 0))
     [
         SNew(SHorizontalBox)
         .Visibility(this, &SOdysseyAnimationCellImageStagger::GetContentVisibility)
@@ -32,10 +32,9 @@ SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyAn
         .AutoWidth()
         [
             SNew(SComboButton)
-            //.IsFocusable(true)
+            .ButtonStyle(&FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "SimpleButton" ))
             .HasDownArrow(false)
             .OnGetMenuContent(this, &SOdysseyAnimationCellImageStagger::GetBehaviourMenuContent)
-            .ContentPadding(FMargin(0, 2, 0, 2))
             .ButtonContent()
             [
                 SNew(SImage)
@@ -45,9 +44,9 @@ SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyAn
         ]
         + SHorizontalBox::Slot()
         .AutoWidth()
-        .Padding(FMargin(5, 0, 0, 0))
         [
             SAssignNew( mReachSpinBox, SSpinBox<int> )
+			.Style(&FOdysseyStyle::GetWidgetStyle< FSpinBoxStyle >( "Animation.CellImageStagger.Reach.SpinBoxStyle" ))
             .Value(this, &SOdysseyAnimationCellImageStagger::GetReach )
             .OnValueChanged( this, &SOdysseyAnimationCellImageStagger::OnReachValueChanged )
             .OnValueCommitted( this, &SOdysseyAnimationCellImageStagger::OnReachValueCommited )
@@ -73,7 +72,6 @@ SOdysseyAnimationCellImageStagger::OnPaint(const FPaintArgs& Args, const FGeomet
     const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
 	const float height = AllottedGeometry.GetLocalSize().Y;  
 	const float width = AllottedGeometry.GetLocalSize().X;
-	float offset = mExtension->Timeline()->GetOffset();
 	const float frameSize = mExtension->Timeline()->GetFrameWidth();
 
     int reach = GetClampedReach();

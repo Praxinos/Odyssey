@@ -56,7 +56,8 @@ public:
     void CleanSelectedCells();
     void CleanCellSelectionCursor();
 
-    int GetFrameIndexAtMousePosition(float iX) const;
+    float MousePositionToFrame(float iPos) const;
+	float FrameToMousePosition(float iFrame) const;
 
 public:
     //Events

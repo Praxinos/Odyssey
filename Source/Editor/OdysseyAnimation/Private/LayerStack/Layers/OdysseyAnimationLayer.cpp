@@ -155,6 +155,12 @@ UOdysseyAnimationLayer::GetPreBehaviourFrame(EOdysseyAnimationLayerImagePostBeha
             int offsetFromStart = frameRange.GetLowerBoundValue() - iFrame;
             int layerLength = frameRange.GetUpperBoundValue() - frameRange.GetLowerBoundValue() + 1;
 
+			if (layerLength <= 1)
+			{
+				frame = frameRange.GetLowerBoundValue();
+				break;
+			}
+
             int offset = ((offsetFromStart - 1) % (layerLength - 1)) + 1;
             int forwardFrame = frameRange.GetLowerBoundValue() + offset;
             int backwardFrame = frameRange.GetUpperBoundValue() - offset;
@@ -197,6 +203,12 @@ UOdysseyAnimationLayer::GetPostBehaviourFrame(EOdysseyAnimationLayerImagePostBeh
         {
             int offsetFromEnd = iFrame - frameRange.GetUpperBoundValue();
             int layerLength = frameRange.GetUpperBoundValue() - frameRange.GetLowerBoundValue() + 1;
+
+			if (layerLength <= 1)
+			{
+				frame = frameRange.GetLowerBoundValue();
+				break;
+			}
 
             int offset = ((offsetFromEnd - 1) % (layerLength - 1)) + 1;
             int forwardFrame = frameRange.GetLowerBoundValue() + offset;

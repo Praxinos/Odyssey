@@ -350,10 +350,8 @@ FOdysseyAnimationTimelineSelectionTool::OnNonContiguousSelectionMouseButtonUp(co
 int
 FOdysseyAnimationTimelineSelectionTool::GetFrameUnderCursor(const FMouseEventParams& iParams)
 {
-	float timelineOffset = mTimelineParams->GetOffset();
 	float posX = iParams.mGeometry.AbsoluteToLocal(iParams.mMouseEvent.GetScreenSpacePosition()).X;
-	float frameWidth = mTimelineParams->GetFrameWidth();
-	float frame = (int)(posX / frameWidth + timelineOffset);
+	int frame = (int)mTimelineParams->MousePositionToFrame(posX);
 
 	return frame;
 }

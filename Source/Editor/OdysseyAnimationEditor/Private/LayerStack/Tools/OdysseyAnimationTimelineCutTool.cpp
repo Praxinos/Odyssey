@@ -28,10 +28,8 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
 	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
 		return FReply::Unhandled();
 
-    float timelineOffset = mTimelineParams->GetOffset();
     float posX = iParams.mGeometry.AbsoluteToLocal(iParams.mMouseEvent.GetScreenSpacePosition()).X;
-    float frameWidth = mTimelineParams->GetFrameWidth();
-    float frame = (int)(posX / frameWidth + timelineOffset + 0.5f);
+    int frame = (int)(mTimelineParams->MousePositionToFrame(posX) + 0.5f);
 
     UOdysseyAnimationCell* cell = iParams.mLayer->GetCellAtFrame(frame);
     if (!cell || cell->GetFrameRange().GetLowerBoundValue() == frame)

@@ -94,6 +94,18 @@ private:
     EVisibility GetCellBreakIndicatorVisibility(UOdysseyAnimationCell* iCell) const;
     float GetCellBreakIndicatorOffset(UOdysseyAnimationCell* iCell) const;
 
+	const FSlateBrush* GetPreBehaviourBrush() const;
+	TSharedRef<SWidget> GetPreBehaviourMenuContent();
+    void SetPreBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour);
+    bool CanSetPreBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
+    bool IsPreBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
+
+	const FSlateBrush* GetPostBehaviourBrush() const;
+	TSharedRef<SWidget> GetPostBehaviourMenuContent();
+    void SetPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour);
+    bool CanSetPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
+    bool IsPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
+
 private:
     FOdysseyAnimationEditorExtension* mExtension;
     class UOdysseyAnimationLayer* mAnimationLayer;

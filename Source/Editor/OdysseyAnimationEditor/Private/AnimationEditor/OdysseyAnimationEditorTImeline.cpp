@@ -306,14 +306,20 @@ FOdysseyAnimationEditorTimeline::GetOffset() const
     return mOffset;
 }
 
-int
-FOdysseyAnimationEditorTimeline::GetFrameIndexAtMousePosition(float iX) const
+float
+FOdysseyAnimationEditorTimeline::MousePositionToFrame(float iX) const
 {
-    int frame = (int)(iX / GetFrameWidth() + mOffset);
-    if (frame < 0 )
-        return INDEX_NONE;
+	float padding = FOdysseyStyle::GetFloat(TEXT("Animation.Timeline.Padding"));
+    float frame = (iX - padding) / GetFrameWidth() + mOffset;
+	return frame;
+}
 
-    return frame;
+float
+FOdysseyAnimationEditorTimeline::FrameToMousePosition(float iFrame) const
+{
+	float padding = FOdysseyStyle::GetFloat(TEXT("Animation.Timeline.Padding"));
+	float pos = (iFrame - mOffset) * GetFrameWidth() + padding;
+	return pos;
 }
 
 const TArray<UOdysseyAnimationCell*>&

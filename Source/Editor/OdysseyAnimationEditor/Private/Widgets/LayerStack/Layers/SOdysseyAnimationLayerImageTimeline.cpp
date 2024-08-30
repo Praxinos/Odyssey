@@ -116,8 +116,8 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry,
 {
 	if (iEvent.GetEffectingButton() == EKeys::RightMouseButton)
     {
-        int frame = mExtension->Timeline()->GetFrameIndexAtMousePosition(iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X);
-        if (frame == INDEX_NONE)
+        int frame = (int)mExtension->Timeline()->MousePositionToFrame(iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X);
+        if (frame < 0)
             return FReply::Unhandled();
 
         //On Right click, select cell if none are selected yet
@@ -175,14 +175,12 @@ SOdysseyAnimationLayerImageTimeline::OnPaint(const FPaintArgs& Args, const FGeom
 
 	const float height = AllottedGeometry.GetLocalSize().Y;
 	const float width = AllottedGeometry.GetLocalSize().X;
-	float offset = mExtension->Timeline()->GetOffset();
-	const float frameSize = mExtension->Timeline()->GetFrameWidth();
 
 	if(mIsDraggingOver && mDragState != kDrag_None)
 	{
         //Dragging Zone
         FLinearColor lineColor(0.2f, 0.2f, 1.f);
-		float dragPos = (mDragPosition - offset) * frameSize;
+		float dragPos = mExtension->Timeline()->FrameToMousePosition(mDragPosition);
 
         //Dragging Bar
 		FSlateDrawElement::MakeBox(
@@ -259,10 +257,8 @@ SOdysseyAnimationLayerImageTimeline::OnDragOver(const FGeometry& iGeometry, cons
     if (!operation->GetData().CanPaste(mLayer))
         return FReply::Unhandled();
 
-    float timelineOffset = mExtension->Timeline()->GetOffset();
     float posX = iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X;
-    float frameWidth = mExtension->Timeline()->GetFrameWidth();
-    float frame = (posX / frameWidth + timelineOffset);
+    float frame = mExtension->Timeline()->MousePositionToFrame(posX);
 
     UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame((int)frame);
     if (!cell)
