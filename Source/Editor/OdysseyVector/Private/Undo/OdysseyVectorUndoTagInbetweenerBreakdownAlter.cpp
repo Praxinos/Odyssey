@@ -16,11 +16,13 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::~FOdysseyVectorUndoTagInbetweene
 }
 
 FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorGroupPaint* iScene
-                                                                                             , FOdysseyVectorTagInbetweener* iInbetweenerTag )
+                                                                                              , FOdysseyVectorTagInbetweener* iInbetweenerTag )
     : FOdysseyVectorUndo( iScene )
     , mInbetweenerTagSnapshot( iInbetweenerTag
-                             , FSnapshotFlags::Tag::Inbetweener::DRAWINGCOUNT
-                             , FSnapshotFlags::Breakdown::RANGE )
+                             , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
+                             , FSnapshotFlags::Breakdown::GRIDGEOMETRY
+                             , FSnapshotFlags::Route::TRAJECTORIES
+                             | FSnapshotFlags::Route::STEPS )
 {
 }
 
@@ -30,6 +32,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
+    mInbetweenerTagSnapshot.Preswap();
     mInbetweenerTagSnapshot.Restore();
 
     // update invalidated objects
@@ -47,6 +50,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
+    mInbetweenerTagSnapshot.Preswap();
     mInbetweenerTagSnapshot.Restore();
 
     // update invalidated objects

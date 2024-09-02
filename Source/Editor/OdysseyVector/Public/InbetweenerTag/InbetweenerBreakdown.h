@@ -35,6 +35,7 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
 
         FInbetweenerBreakdown* GetPrevBreakdown( );
         FInbetweenerBreakdown* GetNextBreakdown( );
+        void SetInbetweenerTag( FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
     private:
         FInbetweenerBreakdown* mPrevBreakdown;

@@ -11,6 +11,7 @@
 #include "OdysseyPainterEditorVectorTagInbetweenerView.generated.h"
 
 class FOdysseyPainterEditor;
+class FOdysseyVectorUndo;
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : public UObject
@@ -35,6 +36,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
                                       , const FName& iCategory );
         virtual void ImportParam();
         virtual void PropertyChanged( const FName& iPropertyName
+                                    , const FName& iMemberPropertyName
+                                    , const FName& iCategory );
+        FOdysseyVectorUndo* MakeUndo( const FName& iPropertyName
                                     , const FName& iMemberPropertyName
                                     , const FName& iCategory );
 

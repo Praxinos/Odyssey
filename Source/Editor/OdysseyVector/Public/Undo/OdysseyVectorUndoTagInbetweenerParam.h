@@ -15,9 +15,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerParam : public FOdysseyV
 {
     public:
         ~FOdysseyVectorUndoTagInbetweenerParam();
-        FOdysseyVectorUndoTagInbetweenerParam( FOdysseyVectorGroupPaint* iScene
-                                             , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
-                                             , uint64 iSnapshotFlags );
+        FOdysseyVectorUndoTagInbetweenerParam( FOdysseyVectorGroupPaint* iScene );
+
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
 
@@ -27,6 +26,51 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerParam : public FOdysseyV
         /** Describes this change (for debugging) */
         virtual FString ToString() const override;
 
-    private:
+    protected:
         std::vector<FSnapshotTagInbetweener> mInbetweenerTagSnapshotArray;
+};
+
+class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerGridSize : public FOdysseyVectorUndoTagInbetweenerParam
+{
+    public:
+        ~FOdysseyVectorUndoTagInbetweenerGridSize();
+        FOdysseyVectorUndoTagInbetweenerGridSize( FOdysseyVectorGroupPaint* iScene
+                                                , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray );
+
+};
+
+class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerGridType : public FOdysseyVectorUndoTagInbetweenerParam
+{
+    public:
+        ~FOdysseyVectorUndoTagInbetweenerGridType();
+        FOdysseyVectorUndoTagInbetweenerGridType( FOdysseyVectorGroupPaint* iScene
+                                                , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray );
+
+};
+
+class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerInterpolationType : public FOdysseyVectorUndoTagInbetweenerParam
+{
+    public:
+        ~FOdysseyVectorUndoTagInbetweenerInterpolationType();
+        FOdysseyVectorUndoTagInbetweenerInterpolationType( FOdysseyVectorGroupPaint* iScene
+                                                         , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray );
+
+};
+
+class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerColor : public FOdysseyVectorUndoTagInbetweenerParam
+{
+    public:
+        ~FOdysseyVectorUndoTagInbetweenerColor();
+        FOdysseyVectorUndoTagInbetweenerColor( FOdysseyVectorGroupPaint* iScene
+                                             , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray );
+
+};
+
+class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerMapAsPolyline : public FOdysseyVectorUndoTagInbetweenerParam
+{
+    public:
+        ~FOdysseyVectorUndoTagInbetweenerMapAsPolyline();
+        FOdysseyVectorUndoTagInbetweenerMapAsPolyline( FOdysseyVectorGroupPaint* iScene
+                                                     , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray );
+
 };

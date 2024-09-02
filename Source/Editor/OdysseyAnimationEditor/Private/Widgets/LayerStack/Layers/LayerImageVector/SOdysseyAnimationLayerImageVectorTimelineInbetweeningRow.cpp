@@ -66,28 +66,32 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     FOdysseyAnimationEditorExtension* animationEditorExtension = treeView.Get()->GetAnimationEditorExtension();
     const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() );
     FOdysseyVectorGroupPaint* scene = mInbetweenerTag->GetOwner()->GetScene();
+    FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetEngine()->GetSharedEnv();
+    std::list<FOdysseyVectorTag*>& tagList = sharedEnv->GetTagList();
 
     // for AddBreakdown / RemoveBreakdown functions in the context menu
     treeView.Get()->SetCursorPos( cursorPos );
 
     mPickedBreakdown = nullptr;
 
-    //STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonDown( MyGeometry, MouseEvent );
+    for( FOdysseyVectorTag* tag : tagList )
+    {
+        tag->SetSelected( false );
+    }
 
-    // and highlight the clicked done (this one)
+    // This is used by the list view to determine which row is selected.
     mInbetweenerTag->SetSelected( true );
+
+/*
+    SetItemSelection ( const ItemType& InItem,
+bool bSelected,
+ESelectInfo::Type SelectInfo
+)
+*/
+    //STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonDown( MyGeometry, MouseEvent );
 
     if( MouseEvent.IsMouseButtonDown( EKeys::LeftMouseButton ) )
     {
-        FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetEngine()->GetSharedEnv();
-        std::list<FOdysseyVectorTag*>& tagList = sharedEnv->GetTagList();
-
-        // determines which line of the list view is highlighted. We first unhighlight all of them
-        for( FOdysseyVectorTag* tag : tagList )
-        {
-            tag->SetSelected( false );
-        }
-
         for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
         {
             uint32 bi = breakdown->GetIndex();
@@ -183,9 +187,10 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
 	if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
     {
         mInbetweenerTag->GetOwner()->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+/*
         mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                                                                     | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
-
+*/
         return FReply::Handled();
     }
 

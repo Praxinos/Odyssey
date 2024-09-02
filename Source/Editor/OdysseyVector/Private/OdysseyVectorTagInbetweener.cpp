@@ -390,8 +390,43 @@ FOdysseyVectorTagInbetweener::ChainBreakdowns()
     std::vector<::ULIS::FVec2D> targetGeometry;
 
     // save positions for restoring when calling Make()
+/*
     mBreakdownList.front()->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
     mBreakdownList.front()->GetGrid()->Make( sourceGeometry, targetGeometry );
+*/
+}
+
+// Removes all breakdowns but the default one
+void
+FOdysseyVectorTagInbetweener::ResetLayout( bool iFreeMemNow )
+{
+    std::vector<::ULIS::FVec2D> sourceGeometry;
+    std::vector<::ULIS::FVec2D> targetGeometry;
+
+    mBreakdownList.front()->GetGrid()->GetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+    mBreakdownList.back() ->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
+
+    mBreakdownList.remove_if( [ this
+                              , iFreeMemNow ]( FInbetweenerBreakdown* breakdown )
+                              {
+                                  if( iFreeMemNow && ( breakdown != breakdown->GetMasterBreakdown() ) )
+                                  {
+                                      delete breakdown;
+                                  }
+
+                                  return true;
+                              } );
+
+    mMasterBreakdown.SetSourceDrawingIndex( 0 );
+
+    mBreakdownList.push_back( &mMasterBreakdown );
+
+    ChainBreakdowns();
+
+    mMasterBreakdown.GetGrid()->SetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+    mMasterBreakdown.GetGrid()->SetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
+
+    Invalidate( INVALIDATE_BREAKDOWN_LIST );
 }
 
 FInbetweenerBreakdown*
@@ -413,6 +448,10 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
             int32 targetDrawingIndex = iDrawingIndex;
             FInbetweenerBreakdown* newBreakdown = iNewBreakdown ? iNewBreakdown 
                                                                 : new FInbetweenerBreakdown( this );
+
+            // This is for an already existing breakdown if it had been removed before
+            // (then its pointer to the tag would be null)
+            newBreakdown->SetInbetweenerTag( this );
 
             newBreakdown->SetSourceDrawingIndex( sourceDrawingIndex );
             newBreakdown->SetTargetDrawingIndex( targetDrawingIndex );
@@ -487,6 +526,15 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
     if( iBreakdown->GetNextBreakdown() )
     {
         iBreakdown->GetNextBreakdown()->SetSourceDrawingIndex( iBreakdown->GetSourceDrawingIndex() );
+    }
+
+    iBreakdown->SetInbetweenerTag( nullptr );
+
+    if( iBreakdown == &mMasterBreakdown )
+    {
+        mMasterBreakdown.SetInbetweenerTag( this );
+
+        mBreakdownList.push_back( &mMasterBreakdown );
     }
 
     ChainBreakdowns();

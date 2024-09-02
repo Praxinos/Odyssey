@@ -21,6 +21,7 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChar
 {
     mInbetweenerTagSnapshotBuffer.emplace_back( iInbetweenerTag
                                               , FSnapshotFlags::Tag::Inbetweener::CHART
+                                              , 0
                                               , 0 );
 }
 
@@ -34,6 +35,7 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChar
     {
         mInbetweenerTagSnapshotBuffer.emplace_back( inbetweenerTag
                                                   , FSnapshotFlags::Tag::Inbetweener::CHART
+                                                  , 0
                                                   , 0 );
     }
 }
@@ -46,6 +48,7 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::Apply( UObject* iIgnored )
 
     for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
     {
+        inbetweenerTagSnapshot.Preswap();
         inbetweenerTagSnapshot.Restore();
     }
 
@@ -66,6 +69,7 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::Revert( UObject* iIgnored )
 
     for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
     {
+        inbetweenerTagSnapshot.Preswap();
         inbetweenerTagSnapshot.Restore();
     }
 

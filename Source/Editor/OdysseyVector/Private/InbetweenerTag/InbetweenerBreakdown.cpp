@@ -28,6 +28,12 @@ FInbetweenerBreakdown::GetMasterBreakdown()
 }
 
 void
+FInbetweenerBreakdown::SetInbetweenerTag( FOdysseyVectorTagInbetweener* iInbetweenerTag )
+{
+    mInbetweenerTag = iInbetweenerTag;
+}
+
+void
 FInbetweenerBreakdown::SetPrevBreakdown( FInbetweenerBreakdown* iPrevBreakdown )
 {
     mPrevBreakdown = iPrevBreakdown;
@@ -142,6 +148,11 @@ FInbetweenerBreakdown::SetTargetDrawingIndex( uint32 iTargetDrawingIndex )
     {
         mNextBreakdown->mSourceDrawingIndex = iTargetDrawingIndex;
     }
+
+    mInbetweenerTag->ResetChart();
+    // TODO: put this somewhere else. I put it here so it can geenrate matrices based on
+    // the t value fromthe chart, but I don't think it is the best place. 
+    mInbetweenerTag->UpdateMatrix();
 
     mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING 
                                | FOdysseyVectorTagInbetweener::INVALIDATE_BREAKDOWN_LIST

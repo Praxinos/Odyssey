@@ -3,67 +3,70 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTag.h"
 
-static void
-BuildRouteSnapshotBuffer( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                        , std::vector<FSnapshotRoute>& oRouteSnapshotBuffer )
-{
-    // Adding or Removing a breakdown will affect routes. Backup them.
-    oRouteSnapshotBuffer.clear();
-    oRouteSnapshotBuffer.reserve( iInbetweenerTag->GetRouteList().size() );
-
-    for( FInbetweenerRoute* route : iInbetweenerTag->GetRouteList() )
-    {
-        oRouteSnapshotBuffer.emplace_back( route, FSnapshotFlags::ALL, FSnapshotFlags::ALL );
-    }
-}
-
 FOdysseyVectorUndoTagInbetweenerBreakdownAdd::~FOdysseyVectorUndoTagInbetweenerBreakdownAdd()
 {
     if( mApplied )
     {
-        // nothing to do
+
     }
     else
     {
-        delete mBreakdown;
+        // nothing to do
     }
 }
 
 FOdysseyVectorUndoTagInbetweenerBreakdownAdd::FOdysseyVectorUndoTagInbetweenerBreakdownAdd( FOdysseyVectorGroupPaint* iScene
-                                                                                          , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                                                          , FInbetweenerBreakdown* iBreakdown
-                                                                                          , uint32 iDrawingIndex )
-    : FOdysseyVectorUndo( iScene )
-    , mInbetweenerTag( iInbetweenerTag )
-    , mBreakdown( iBreakdown )
-    , mDrawingIndex( iDrawingIndex )
+                                                                                                , FOdysseyVectorTagInbetweener* iInbetweenerTag )
+    : FOdysseyVectorUndoTagInbetweenerBreakdownAdd( iScene
+                                                   , { iInbetweenerTag }
+                                                   , { iInbetweenerTag->GetOwner()->GetEngine() } )
 {
-    // Adding or Removing a breakdown will affect routes. Backup them.
-    BuildRouteSnapshotBuffer( mInbetweenerTag, mRouteSnapshotBuffer );
+
+}
+
+FOdysseyVectorUndoTagInbetweenerBreakdownAdd::FOdysseyVectorUndoTagInbetweenerBreakdownAdd( FOdysseyVectorGroupPaint* iScene
+                                                                                          , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                                                          , const std::list<FOdysseyVectorEngine*>& iEngineList )
+    : FOdysseyVectorUndo( iScene )
+{
+    mInbetweenerTagSnapshotBuffer.reserve( iInbetweenerTagList.size() );
+
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
+    {
+        FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
+
+        mInbetweenerTagSnapshotBuffer.emplace_back( inbetweenerTag
+                                                  , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
+                                                  , 0
+                                                  , FSnapshotFlags::Route::TRAJECTORIES
+                                                  | FSnapshotFlags::Route::STEPS );
+    }
+
+    mEngineArray.reserve( iEngineList.size() );
+
+    for( FOdysseyVectorEngine* tagEngine : iEngineList )
+    {
+        mEngineArray.push_back( tagEngine );
+    }
 }
 
 void
 FOdysseyVectorUndoTagInbetweenerBreakdownAdd::Apply( UObject* iIgnored )
 {
-    std::vector<FSnapshotRoute> swapRouteSnapshotBuffer;
-
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
-    // save current routes for swapping
-    BuildRouteSnapshotBuffer( mInbetweenerTag, swapRouteSnapshotBuffer );
 
-    mInbetweenerTag->AddBreakdown( mBreakdown, mDrawingIndex, false );
-
-    // Adding or Removing a breakdown will affect routes. Restore them.
-    for( FSnapshotRoute& routeSnapshot : mRouteSnapshotBuffer )
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
     {
-        routeSnapshot.Restore();
+        inbetweenerTagSnapshot.Preswap();
+        inbetweenerTagSnapshot.Restore();
     }
-    // swap
-    mRouteSnapshotBuffer = swapRouteSnapshotBuffer;
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    for( FOdysseyVectorEngine* tagEngine : mEngineArray )
+    {
+        // update invalidated objects
+        tagEngine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    }
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -74,25 +77,21 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::Apply( UObject* iIgnored )
 void
 FOdysseyVectorUndoTagInbetweenerBreakdownAdd::Revert( UObject* iIgnored )
 {
-    std::vector<FSnapshotRoute> swapRouteSnapshotBuffer;
-
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
-    // save current routes for swapping
-    BuildRouteSnapshotBuffer( mInbetweenerTag, swapRouteSnapshotBuffer );
 
-    mInbetweenerTag->RemoveBreakdown( mBreakdown, false );
-
-    // Adding or Removing a breakdown will affect routes. Restore them.
-    for( FSnapshotRoute& routeSnapshot : mRouteSnapshotBuffer )
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
     {
-        routeSnapshot.Restore();
+        inbetweenerTagSnapshot.Preswap();
+        inbetweenerTagSnapshot.Restore();
     }
-    // swap
-    mRouteSnapshotBuffer = swapRouteSnapshotBuffer;
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    for( FOdysseyVectorEngine* tagEngine : mEngineArray )
+    {
+        // update invalidated objects
+        tagEngine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    }
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)

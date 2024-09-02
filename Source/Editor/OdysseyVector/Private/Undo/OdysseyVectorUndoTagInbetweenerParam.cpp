@@ -15,32 +15,108 @@ FOdysseyVectorUndoTagInbetweenerParam::~FOdysseyVectorUndoTagInbetweenerParam()
     }
 }
 
-FOdysseyVectorUndoTagInbetweenerParam::FOdysseyVectorUndoTagInbetweenerParam( FOdysseyVectorGroupPaint* iScene
-                                                                            , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
-                                                                            , uint64 iSnapshotFlags )
+FOdysseyVectorUndoTagInbetweenerParam::FOdysseyVectorUndoTagInbetweenerParam( FOdysseyVectorGroupPaint* iScene )
     : FOdysseyVectorUndo( iScene )
 {
-    uint64 breakdownSnapshotFlags = 0;
+}
 
-    if( iSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::DRAWINGCOUNT )
-    {
-        breakdownSnapshotFlags |= FSnapshotFlags::Breakdown::RANGE;
-    }
+FOdysseyVectorUndoTagInbetweenerGridSize::~FOdysseyVectorUndoTagInbetweenerGridSize()
+{
+}
 
-    if( ( iSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDGEOMETRY )
-     || ( iSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE     )
-     || ( iSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE     ) )
-    {
-        breakdownSnapshotFlags |= FSnapshotFlags::Breakdown::GRIDGEOMETRY;
-    }
-
+FOdysseyVectorUndoTagInbetweenerGridSize::FOdysseyVectorUndoTagInbetweenerGridSize( FOdysseyVectorGroupPaint* iScene
+                                                                                  , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray )
+    : FOdysseyVectorUndoTagInbetweenerParam( iScene )
+{
     mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
 
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagArray )
     {
         mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
-                                                 , iSnapshotFlags
-                                                 , breakdownSnapshotFlags );
+                                                 , ( FSnapshotFlags::Tag::Inbetweener::GRIDSIZE
+                                                   | FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
+                                                   | FSnapshotFlags::Tag::Inbetweener::ROUTES )
+                                                 , FSnapshotFlags::ALL
+                                                 , FSnapshotFlags::ALL );
+    }
+}
+
+FOdysseyVectorUndoTagInbetweenerGridType::~FOdysseyVectorUndoTagInbetweenerGridType()
+{
+}
+
+FOdysseyVectorUndoTagInbetweenerGridType::FOdysseyVectorUndoTagInbetweenerGridType( FOdysseyVectorGroupPaint* iScene
+                                                                                  , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray )
+    : FOdysseyVectorUndoTagInbetweenerParam( iScene )
+{
+    mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
+
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagArray )
+    {
+        mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
+                                                 , ( FSnapshotFlags::Tag::Inbetweener::GRIDTYPE
+                                                   | FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
+                                                   | FSnapshotFlags::Tag::Inbetweener::ROUTES )
+                                                 , FSnapshotFlags::ALL
+                                                 , FSnapshotFlags::ALL );
+    }
+}
+
+FOdysseyVectorUndoTagInbetweenerInterpolationType::~FOdysseyVectorUndoTagInbetweenerInterpolationType()
+{
+}
+
+FOdysseyVectorUndoTagInbetweenerInterpolationType::FOdysseyVectorUndoTagInbetweenerInterpolationType( FOdysseyVectorGroupPaint* iScene
+                                                                                                    , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray )
+    : FOdysseyVectorUndoTagInbetweenerParam( iScene )
+{
+    mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
+
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagArray )
+    {
+        mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
+                                                 , ( FSnapshotFlags::Tag::Inbetweener::INTERPOLATIONTYPE
+                                                   | FSnapshotFlags::Tag::Inbetweener::ROUTES )
+                                                 , 0 
+                                                 , FSnapshotFlags::ALL );
+    }
+}
+
+FOdysseyVectorUndoTagInbetweenerColor::~FOdysseyVectorUndoTagInbetweenerColor()
+{
+}
+
+FOdysseyVectorUndoTagInbetweenerColor::FOdysseyVectorUndoTagInbetweenerColor( FOdysseyVectorGroupPaint* iScene
+                                                                            , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray )
+    : FOdysseyVectorUndoTagInbetweenerParam( iScene )
+{
+    mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
+
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagArray )
+    {
+        mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
+                                                 , FSnapshotFlags::Tag::Inbetweener::COLOR
+                                                 , 0 
+                                                 , 0 );
+    }
+}
+
+FOdysseyVectorUndoTagInbetweenerMapAsPolyline::~FOdysseyVectorUndoTagInbetweenerMapAsPolyline()
+{
+}
+
+FOdysseyVectorUndoTagInbetweenerMapAsPolyline::FOdysseyVectorUndoTagInbetweenerMapAsPolyline( FOdysseyVectorGroupPaint* iScene
+                                                                                            , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray )
+    : FOdysseyVectorUndoTagInbetweenerParam( iScene )
+{
+    mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
+
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagArray )
+    {
+        mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
+                                                 , FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE
+                                                 , 0 
+                                                 , 0 );
     }
 }
 
@@ -50,9 +126,10 @@ FOdysseyVectorUndoTagInbetweenerParam::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    for( FSnapshotTagInbetweener& snapshotInbetweenerTag : mInbetweenerTagSnapshotArray )
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotArray )
     {
-        snapshotInbetweenerTag.Restore();
+        inbetweenerTagSnapshot.Preswap();
+        inbetweenerTagSnapshot.Restore();
     }
 
     // update invalidated objects
@@ -70,9 +147,10 @@ FOdysseyVectorUndoTagInbetweenerParam::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    for( FSnapshotTagInbetweener& snapshotInbetweenerTag : mInbetweenerTagSnapshotArray )
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotArray )
     {
-        snapshotInbetweenerTag.Restore();
+        inbetweenerTagSnapshot.Preswap();
+        inbetweenerTagSnapshot.Restore();
     }
 
     // update invalidated objects

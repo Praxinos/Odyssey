@@ -32,6 +32,7 @@ FOdysseyVectorUndoTagInbetweenerStepAlign::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
+    mRouteSnapshot.Preswap();
     mRouteSnapshot.Restore();
 
     // update invalidated objects
@@ -49,6 +50,7 @@ FOdysseyVectorUndoTagInbetweenerStepAlign::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
+    mRouteSnapshot.Preswap();
     mRouteSnapshot.Restore();
 
     // update invalidated objects

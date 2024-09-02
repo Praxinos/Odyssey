@@ -30,6 +30,7 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::Apply( UObject* iIgnore
 
     for( FSnapshotTrajectory& trajectorySnapshot : mTrajectorySnapshotBuffer )
     {
+        trajectorySnapshot.Preswap();
         trajectorySnapshot.Restore();
     }
 
@@ -50,6 +51,7 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::Revert( UObject* iIgnor
 
     for( FSnapshotTrajectory& trajectorySnapshot : mTrajectorySnapshotBuffer )
     {
+        trajectorySnapshot.Preswap();
         trajectorySnapshot.Restore();
     }
 

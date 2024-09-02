@@ -10,14 +10,17 @@
 #include "OdysseyVectorTagInbetweener.h"
 
 class FOdysseyVectorGroupPaint;
+class FOdysseyVectorEngine;
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerBreakdownRemove : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoTagInbetweenerBreakdownRemove();
         FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorGroupPaint* iScene
-                                                       , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                       , FInbetweenerBreakdown* iBreakdown );
+                                                       , FOdysseyVectorTagInbetweener* iInbetweenerTag );
+        FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorGroupPaint* iScene
+                                                       , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                       , const std::list<FOdysseyVectorEngine*>& iEngineList );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -29,8 +32,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerBreakdownRemove : public
         virtual FString ToString() const override;
 
     private:
-        FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        FInbetweenerBreakdown* mBreakdown;
-        std::vector<FSnapshotRoute> mRouteSnapshotBuffer;
-        uint32 mDrawingIndex;
+        std::vector<FSnapshotTagInbetweener> mInbetweenerTagSnapshotBuffer;
+        std::vector<FOdysseyVectorEngine*> mEngineArray;
 };

@@ -7,7 +7,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::~FOdysseyVectorUndoTagInbetween
 {
     if( mApplied )
     {
-        delete mBreakdown;
+
     }
     else
     {
@@ -16,17 +16,37 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::~FOdysseyVectorUndoTagInbetween
 }
 
 FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorGroupPaint* iScene
-                                                                                                , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                                                                , FInbetweenerBreakdown* iBreakdown )
-    : FOdysseyVectorUndo( iScene )
-    , mInbetweenerTag( iInbetweenerTag )
-    , mBreakdown( iBreakdown )
-    , mDrawingIndex( iBreakdown->GetTargetDrawingIndex() )
+                                                                                                , FOdysseyVectorTagInbetweener* iInbetweenerTag )
+    : FOdysseyVectorUndoTagInbetweenerBreakdownRemove( iScene
+                                                   , { iInbetweenerTag }
+                                                   , { iInbetweenerTag->GetOwner()->GetEngine() } )
 {
-    // Adding or Removing a breakdown will affect routes. Backup them.
-    for( FInbetweenerRoute* route : mInbetweenerTag->GetRouteList() )
+
+}
+
+FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorGroupPaint* iScene
+                                                                                                , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                                                                , const std::list<FOdysseyVectorEngine*>& iEngineList )
+    : FOdysseyVectorUndo( iScene )
+{
+    mInbetweenerTagSnapshotBuffer.reserve( iInbetweenerTagList.size() );
+
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
     {
-        mRouteSnapshotBuffer.emplace_back( route, FSnapshotFlags::ALL, FSnapshotFlags::ALL );
+        FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
+
+        mInbetweenerTagSnapshotBuffer.emplace_back( inbetweenerTag
+                                                  , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
+                                                  , 0
+                                                  , FSnapshotFlags::Route::TRAJECTORIES
+                                                  | FSnapshotFlags::Route::STEPS );
+    }
+
+    mEngineArray.reserve( iEngineList.size() );
+
+    for( FOdysseyVectorEngine* tagEngine : iEngineList )
+    {
+        mEngineArray.push_back( tagEngine );
     }
 }
 
@@ -36,16 +56,17 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mInbetweenerTag->RemoveBreakdown( mBreakdown, false );
-
-    // Adding or Removing a breakdown will affect routes. Restore them.
-    for( FSnapshotRoute& routeSnapshot : mRouteSnapshotBuffer )
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
     {
-        routeSnapshot.Restore();
+        inbetweenerTagSnapshot.Preswap();
+        inbetweenerTagSnapshot.Restore();
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    for( FOdysseyVectorEngine* tagEngine : mEngineArray )
+    {
+        // update invalidated objects
+        tagEngine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    }
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -59,16 +80,18 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mInbetweenerTag->AddBreakdown( mBreakdown, mDrawingIndex, false );
-
-    // Adding or Removing a breakdown will affect routes. Restore them.
-    for( FSnapshotRoute& routeSnapshot : mRouteSnapshotBuffer )
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
     {
-        routeSnapshot.Restore();
+        inbetweenerTagSnapshot.Preswap();
+        inbetweenerTagSnapshot.Restore();
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    for( FOdysseyVectorEngine* tagEngine : mEngineArray )
+    {
+        // update invalidated objects
+        tagEngine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    }
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)

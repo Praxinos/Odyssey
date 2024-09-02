@@ -10,6 +10,8 @@
 class FInbetweeningListViewItem;
 class FOdysseyAnimationEditorExtension;
 class UOdysseyAnimationLayerImageVector;
+class FOdysseyVectorTagInbetweener;
+class FOdysseyVectorEngine;
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationLayerImageVectorTimelineInbetweening
@@ -39,6 +41,8 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
         TSharedPtr<SWidget> OnContextMenuOpening();
         void AddBreakdown();
         void RemoveBreakdown();
+        void GetSelectedInbetweenerTags( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList
+                                       , std::list<FOdysseyVectorEngine*>& oEngineList );
 
     private :
         virtual bool Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const override;

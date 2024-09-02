@@ -258,6 +258,7 @@ void
 FInbetweenerGrid::GetGeometry( std::vector<::ULIS::FVec2D>& oGeometry
                              , eInbetweenerPointPositionType iPositionType )
 {
+    oGeometry.clear( );
     oGeometry.reserve( mPointBuffer.size() );
 
     for( FInbetweenerPoint& point : mPointBuffer )

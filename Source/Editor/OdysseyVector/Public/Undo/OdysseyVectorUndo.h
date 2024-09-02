@@ -85,8 +85,7 @@ namespace FSnapshotFlags
 
     namespace Breakdown
     {
-        static const uint64 RANGE        = ( 1ULL <<  0 );
-        static const uint64 GRIDGEOMETRY = ( 1ULL <<  1 );
+        static const uint64 GRIDGEOMETRY = ( 1ULL <<  0 );
     }
 
     namespace Tag
@@ -95,18 +94,16 @@ namespace FSnapshotFlags
         {
             static const uint64 TRANSFORMATIONS   = ( 1ULL <<  0 );
             static const uint64 CHART             = ( 1ULL <<  1 );
-            static const uint64 DRAWINGCOUNT      = ( 1ULL <<  3 );
-            static const uint64 GRIDSIZE          = ( 1ULL <<  4 );
-            static const uint64 GRIDTYPE          = ( 1ULL <<  5 );
-            static const uint64 GRIDGEOMETRY      = ( 1ULL <<  6 );
-            static const uint64 INTERPOLATIONTYPE = ( 1ULL <<  7 );
-            static const uint64 ARAPRIGIDITY      = ( 1ULL <<  8 );
-            static const uint64 COLOR             = ( 1ULL <<  9 );
-            static const uint64 MAPASPOLYLINE     = ( 1ULL << 10 );
-            static const uint64 PARAM             = ( DRAWINGCOUNT
-                                                    | GRIDSIZE
+            static const uint64 GRIDSIZE          = ( 1ULL <<  2 );
+            static const uint64 GRIDTYPE          = ( 1ULL <<  3 );
+            static const uint64 BREAKDOWNS        = ( 1ULL <<  4 );
+            static const uint64 ROUTES            = ( 1ULL <<  5 );
+            static const uint64 INTERPOLATIONTYPE = ( 1ULL <<  6 );
+            static const uint64 ARAPRIGIDITY      = ( 1ULL <<  7 );
+            static const uint64 COLOR             = ( 1ULL <<  8 );
+            static const uint64 MAPASPOLYLINE     = ( 1ULL <<  9 );
+            static const uint64 PARAM             = ( GRIDSIZE
                                                     | GRIDTYPE
-                                                    | GRIDGEOMETRY
                                                     | INTERPOLATIONTYPE
                                                     | ARAPRIGIDITY
                                                     | COLOR
@@ -166,6 +163,8 @@ class ODYSSEYVECTOR_API FSnapshotTrajectory
     public:
         virtual ~FSnapshotTrajectory();
         FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory, uint64 iSnapshotFlags );
+
+        void Preswap();
         virtual void Restore();
 
         static void WaypointSpacingToArray( FInbetweenerTrajectory* iTrajectory
@@ -173,11 +172,16 @@ class ODYSSEYVECTOR_API FSnapshotTrajectory
 
     protected:
         uint64 mSnapshotFlags;
+        FInbetweenerRoute* mRoute;
+        uint32 mIndex;
+        // Swappable values
         ::ULIS::FVec2D mHandleDirection[2];
         double mHandleLengthRatio[2];
         std::vector<float> mWaypointSpacingBuffer;
-        FInbetweenerRoute* mRoute;
-        uint32 mIndex;
+        // Preswap
+        ::ULIS::FVec2D mPreswapHandleDirection[2];
+        double mPreswapHandleLengthRatio[2];
+        std::vector<float> mPreswapWaypointSpacingBuffer;
 };
 
 class ODYSSEYVECTOR_API FSnapshotPoint
@@ -272,14 +276,54 @@ class ODYSSEYVECTOR_API FSnapshotRoute
                       , uint64 iSnapshotflags
                       , uint64 iTrajectorySnapshotflags );
 
+        void Preswap();
         virtual bool Restore();
 
     protected:
         FInbetweenerRoute* mRoute;
-        std::vector<FSnapshotTrajectory> mTrajectorySnapshotBuffer;
-        std::vector<FSnapshotStep> mStepSnapshotBuffer;
         uint64 mSnapshotFlags;
         uint64 mTrajectorySnapshotFlags;
+        std::vector<FSnapshotTrajectory> mTrajectorySnapshotBuffer;
+        std::vector<FSnapshotStep> mStepSnapshotBuffer;
+        // preswap
+        std::vector<FSnapshotTrajectory> mPreswapTrajectorySnapshotBuffer;
+        std::vector<FSnapshotStep> mPreswapStepSnapshotBuffer;
+};
+
+class ODYSSEYVECTOR_API FSnapshotLayout
+{
+    public:
+        ~FSnapshotLayout();
+        FSnapshotLayout();
+        FSnapshotLayout( FOdysseyVectorTagInbetweener* iInbetweenerTag );
+
+        void Preswap();
+        bool Restore();
+
+    protected:
+        FOdysseyVectorTagInbetweener* mInbetweenerTag;
+        std::vector<FInbetweenerBreakdown*> mBreakdownArray;
+        std::vector<uint32> mTargetBuffer;
+        // Preswap
+        std::vector<FInbetweenerBreakdown*> mPreswapBreakdownArray;
+        std::vector<uint32> mPreswapTargetBuffer;
+};
+
+class ODYSSEYVECTOR_API FSnapshotDynamics
+{
+    public:
+        ~FSnapshotDynamics();
+        FSnapshotDynamics();
+        FSnapshotDynamics( FOdysseyVectorTagInbetweener* iInbetweenerTag );
+
+        void Preswap();
+        bool Restore();
+
+    protected:
+        FOdysseyVectorTagInbetweener* mInbetweenerTag;
+        std::vector<FInbetweenerRoute*> mRouteArray;
+        // Preswap
+        std::vector<FInbetweenerRoute*> mPreswapRouteArray;
 };
 
 class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
@@ -290,13 +334,15 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
                                      , uint64 iSnapshotFlags );
 
         virtual bool Restore();
+        void Preswap();
 
     protected:
         uint64 mSnapshotFlags;
         FInbetweenerBreakdown* mBreakdown;
-        uint32 mSourceDrawingIndex;
-        uint32 mTargetDrawingIndex;
+        // Saved-state
         std::vector<::ULIS::FVec2D> mGridGeometry;
+        // Pre-swap
+        std::vector<::ULIS::FVec2D> mPreswapGridGeometry;
 };
 
 class ODYSSEYVECTOR_API FSnapshotTagInbetweener
@@ -305,9 +351,11 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         virtual ~FSnapshotTagInbetweener();
         FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* iObject
                                , uint64 iSnapshotFlags
-                               , uint64 iBreakdownSnapshotFlags );
+                               , uint64 iBreakdownSnapshotFlags
+                               , uint64 iRouteSnapshotFlags );
 
         virtual bool Restore();
+        void Preswap();
 
     protected:
         void SaveTrajectories( std::vector<FInbetweenerTrajectory*>& oTrajectoryArray );
@@ -316,7 +364,11 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
     protected:
         uint64 mSnapshotFlags;
         uint64 mBreakdownSnapshotFlags;
+        uint64 mRouteSnapshotFlags;
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
+        FSnapshotLayout mLayout;
+        FSnapshotDynamics mDynamics;
+        // Swappable values
         FInbetweenerChart  mChart;
         double mTranslationX;
         double mTranslationY;
@@ -330,9 +382,28 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         uint32 mGridSizeY;
         uint32 mARAPRigidity;
         std::vector<FInbetweenerTrajectory*> mTrajectoryArray;
-        std::vector<FSnapshotInbetweenerBreakdown> mInbetweenerBreakdownSnaphotBuffer;
+        std::vector<FSnapshotInbetweenerBreakdown> mInbetweenerBreakdownSnapshotBuffer;
+        std::vector<FSnapshotRoute> mRouteSnapshotBuffer;
         FColor mColor;
         bool bMapAsPolyline;
+        // Preswap
+        FInbetweenerChart mPreswapChart;
+        double mPreswapTranslationX;
+        double mPreswapTranslationY;
+        double mPreswapRotation;
+        double mPreswapScalingX;
+        double mPreswapScalingY;
+        uint32 mPreswapDrawingCount;
+        eInbetweenerGridType mPreswapGridType;
+        eInbetweenerInterpolationType mPreswapInterpolationType;
+        uint32 mPreswapGridSizeX;
+        uint32 mPreswapGridSizeY;
+        uint32 mPreswapARAPRigidity;
+        std::vector<FInbetweenerTrajectory*> mPreswapTrajectoryArray;
+        std::vector<FSnapshotInbetweenerBreakdown> mPreswapInbetweenerBreakdownSnapshotBuffer;
+        std::vector<FSnapshotRoute> mPreswapRouteSnapshotBuffer;
+        FColor mPreswapColor;
+        bool bPreswapMapAsPolyline;
 };
 
 class ODYSSEYVECTOR_API FSnapshotObject

@@ -262,6 +262,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         std::list<FInbetweenerBreakdown*>::iterator GetBreakdownItem( uint32 iDrawingIndex );
         void ResizeRoutes();
         void SetChart( const FInbetweenerChart& iChart );
+        void ResetLayout( bool iFreeMemNow );
 
     protected:
         /**
@@ -293,6 +294,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void Share();
         void Unshare();
         void ChainBreakdowns();
+
 
     public:
         static const uint64 INVALIDATE_MAP            = ( 1LL << 0 );

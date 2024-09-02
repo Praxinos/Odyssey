@@ -28,6 +28,7 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
+    mTrajectorySnapshot.Preswap();
     mTrajectorySnapshot.Restore();
 
     // update invalidated objects
@@ -45,6 +46,7 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
+    mTrajectorySnapshot.Preswap();
     mTrajectorySnapshot.Restore();
 
     // update invalidated objects

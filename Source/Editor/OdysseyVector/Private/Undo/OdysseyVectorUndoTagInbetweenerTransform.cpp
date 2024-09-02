@@ -25,6 +25,7 @@ FOdysseyVectorUndoTagInbetweenerTransform::FOdysseyVectorUndoTagInbetweenerTrans
     {
         mInbetweenerTagArray.emplace_back( inbetweenerTag
                                          , FSnapshotFlags::Tag::Inbetweener::TRANSFORMATIONS
+                                         , 0 
                                          , 0 );
     }
 }
@@ -35,9 +36,10 @@ FOdysseyVectorUndoTagInbetweenerTransform::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    for( FSnapshotTagInbetweener& snapshotInbetweenerTag : mInbetweenerTagArray )
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagArray )
     {
-        snapshotInbetweenerTag.Restore();
+        inbetweenerTagSnapshot.Preswap();
+        inbetweenerTagSnapshot.Restore();
     }
 
     // update invalidated objects
@@ -55,9 +57,10 @@ FOdysseyVectorUndoTagInbetweenerTransform::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    for( FSnapshotTagInbetweener& snapshotInbetweenerTag : mInbetweenerTagArray )
+    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagArray )
     {
-        snapshotInbetweenerTag.Restore();
+        inbetweenerTagSnapshot.Preswap();
+        inbetweenerTagSnapshot.Restore();
     }
 
     // update invalidated objects
