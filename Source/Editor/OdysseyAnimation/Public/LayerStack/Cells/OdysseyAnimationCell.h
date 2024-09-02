@@ -79,7 +79,7 @@ protected:
 protected:
 	//Properties modifications
 	void OutOfPegsChanged(bool iIsInteractive);
-	void LengthChanged(bool iIsInteractive);
+	void ExposureChanged(bool iIsInteractive);
 
     virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive);
 
@@ -88,7 +88,7 @@ public:
     int IndexInLayer = -1;
 
 	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")//TODO: meta (minvalue 1)
-    int Length = 1;
+    int Exposure = 1;
 
 	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell") //TODO: GetOptions ? Is that possible ?
     int Mark = -1;

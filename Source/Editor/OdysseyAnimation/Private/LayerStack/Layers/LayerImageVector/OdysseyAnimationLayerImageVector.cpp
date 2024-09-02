@@ -257,8 +257,8 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
 		Modify();
         //Add a frame at current frame and extend it
 		UOdysseyAnimationCell* cell = AddCell(UOdysseyAnimationCellImageVector::StaticClass(), 0);
-		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), range.GetLowerBoundValue() - iFrameIndex);
-		FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), CellsOffset - cell->Length);
+		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), range.GetLowerBoundValue() - iFrameIndex);
+		FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), CellsOffset - cell->Exposure);
         
         FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
         currentFrameMutator.Set(animation->CurrentFrame);
@@ -269,8 +269,8 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
     if ( iFrameIndex > range.GetUpperBoundValue())
     {
 		Modify();
-        int cellLength = Cells.Last()->Length + iFrameIndex - range.GetUpperBoundValue() - 1;
-		FOdysseyObjectEditorUtils::SetPropertyValue(Cells.Last(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), cellLength);
+        int cellExposure = Cells.Last()->Exposure + iFrameIndex - range.GetUpperBoundValue() - 1;
+		FOdysseyObjectEditorUtils::SetPropertyValue(Cells.Last(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cellExposure);
 		UOdysseyAnimationCell* cell = AddCell(UOdysseyAnimationCellImageVector::StaticClass());
 
         FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
@@ -342,7 +342,7 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
     {
 		const FInt32Range& cellRange = cellRanges[i];
 		UOdysseyAnimationCellImageVector* cell = Cast<UOdysseyAnimationCellImageVector>(cells[i]);
-		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), cellRange.GetUpperBoundValue() - cellRange.GetLowerBoundValue() + 1);
+		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cellRange.GetUpperBoundValue() - cellRange.GetLowerBoundValue() + 1);
         
 		int frame = cellRange.GetLowerBoundValue();
         FOdysseyVectorGroupPaint* destinationScene = cell->GetEngine()->GetScene();

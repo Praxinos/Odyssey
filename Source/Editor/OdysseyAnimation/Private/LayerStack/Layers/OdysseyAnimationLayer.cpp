@@ -246,10 +246,10 @@ UOdysseyAnimationLayer::GetCellAtFrame(int Frame) const
     {
         UOdysseyAnimationCell* cell = Cells[i];
 
-        if ( frameIndex + cell->Length - 1 >= Frame)
+        if ( frameIndex + cell->Exposure - 1 >= Frame)
             return cell;
 
-        frameIndex += cell->Length;
+        frameIndex += cell->Exposure;
     }
 
     return nullptr;
@@ -270,9 +270,9 @@ UOdysseyAnimationLayer::GetCellsFrameRanges() const
 		uint32 startFrame = CellsOffset;
 		for (TObjectPtr<UOdysseyAnimationCell> cell : Cells)
 		{
-			FInt32Range frameRange = FInt32Range::Inclusive(startFrame, startFrame + cell->Length - 1);
+			FInt32Range frameRange = FInt32Range::Inclusive(startFrame, startFrame + cell->Exposure - 1);
 			mCellsFrameRanges.Add(frameRange);
-			startFrame += cell->Length;
+			startFrame += cell->Exposure;
 		}
 	}
 	

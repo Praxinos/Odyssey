@@ -38,7 +38,7 @@ private:
     struct FCellCopy
     {
         UOdysseyAnimationCell* mCell;
-        int mLength;
+        int mExposure;
     };
     TArray<FCellCopy> mCellCopies;
 };

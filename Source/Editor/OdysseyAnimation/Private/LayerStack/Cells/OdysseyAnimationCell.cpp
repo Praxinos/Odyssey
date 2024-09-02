@@ -29,7 +29,7 @@ UOdysseyAnimationCell::OldSerialize(FArchive& Ar)
 	if (!FOdysseyAnimationCellImport::Read( this, Ar ))
 	{
 		//Old Style No Chunk Loading
-		Ar << Length;
+		Ar << Exposure;
 	}
 }
 
@@ -100,7 +100,7 @@ UOdysseyAnimationCell::OutOfPegsChanged(bool iIsInteractive)
 }
 
 void
-UOdysseyAnimationCell::LengthChanged(bool iIsInteractive)
+UOdysseyAnimationCell::ExposureChanged(bool iIsInteractive)
 {
 	if (GetLayer())
 		GetLayer()->InvalidateCellsFrameRanges();
@@ -115,9 +115,9 @@ UOdysseyAnimationCell::PropertyChanged(const FName& iPropertyName, const FName& 
 		OutOfPegsChanged(iIsInteractive);
 	}
 
-	if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length))
+	if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure))
 	{
-		LengthChanged(iIsInteractive);
+		ExposureChanged(iIsInteractive);
 	}
 }
 
@@ -146,12 +146,12 @@ UOdysseyAnimationCell::PostTransacted(const FTransactionObjectEvent& iTransactio
 UOdysseyAnimationCell*
 UOdysseyAnimationCell::Break(int Frame)
 {
-	if (Frame <= 0 || Frame >= Length)
+	if (Frame <= 0 || Frame >= Exposure)
 		return nullptr;
 
 	UOdysseyAnimationCell* copiedCell = GetLayer()->CopyCell(this, IndexInLayer + 1);
-	FOdysseyObjectEditorUtils::SetPropertyValue(copiedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), Length - Frame);
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), Frame);
+	FOdysseyObjectEditorUtils::SetPropertyValue(copiedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Exposure - Frame);
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Frame);
 	
 	return copiedCell;
 }

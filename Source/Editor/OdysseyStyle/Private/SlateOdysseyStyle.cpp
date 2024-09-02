@@ -739,7 +739,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.AddCellsHandleRight", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleRight_16", mIcon16x16));
     Set("Animation.AddCellsHandleLeft", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleLeft_16", mIcon16x16));
     Set("Animation.CellTimingHandle", new IMAGE_BRUSH("OdysseyAnimation/CellTimingHandle_16", mIcon16x16));
-    Set("Animation.CellLengthHandle", new IMAGE_BRUSH("OdysseyAnimation/CellLengthHandle_16", mIcon16x16));
+    Set("Animation.CellExposureHandle", new IMAGE_BRUSH("OdysseyAnimation/CellExposureHandle_16", mIcon16x16));
     Set("Animation.CellBreakIndicator", new IMAGE_BRUSH("OdysseyAnimation/CellBreakIndicator", FVector2D(1, 2), FLinearColor::White, ESlateBrushTileType::Vertical));
 
     Set("Animation.Layer.PreBehaviourColor", FLinearColor(1.f, 1.f, 1.f, 1.f));

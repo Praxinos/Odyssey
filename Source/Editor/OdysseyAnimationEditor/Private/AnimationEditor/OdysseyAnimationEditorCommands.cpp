@@ -76,9 +76,9 @@ FOdysseyAnimationEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( HoldActivateTimelineCutTool, TimelineShortcuts, "Activate Timeline Cut Tool (Hold)", "Hold the key to activate the timeline Cut Tool temporarily", EUserInterfaceActionType::Button, FInputChord());
 
     UI_BUNDLE_COMMAND( BreakCell, TimelineShortcuts, "Break Cell", "Breaks Cell at Current Frame in Current Layer", EUserInterfaceActionType::Button, FInputChord());
-    UI_BUNDLE_COMMAND( IncreaseCellLength, TimelineShortcuts, "Increase Cell Length", "Increase Current or Selected Cells Length by 1 frame", EUserInterfaceActionType::Button, FInputChord(EKeys::Add));
-    UI_BUNDLE_COMMAND( DecreaseCellLength, TimelineShortcuts, "Decrease Cell Length", "Decrease Current or Selected Cells Length by 1 frame", EUserInterfaceActionType::Button, FInputChord(EKeys::Subtract));
-    UI_BUNDLE_COMMAND( SetCellLength, TimelineShortcuts, "Set Cell Length", "Set Current or Selected Cells Length", EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( IncreaseCellExposure, TimelineShortcuts, "Increase Cell Exposure", "Increase Current or Selected Cells Exposure by 1 frame", EUserInterfaceActionType::Button, FInputChord(EKeys::Add));
+    UI_BUNDLE_COMMAND( DecreaseCellExposure, TimelineShortcuts, "Decrease Cell Exposure", "Decrease Current or Selected Cells Exposure by 1 frame", EUserInterfaceActionType::Button, FInputChord(EKeys::Subtract));
+    UI_BUNDLE_COMMAND( SetCellExposure, TimelineShortcuts, "Set Cell Exposure", "Set Current or Selected Cells Exposure", EUserInterfaceActionType::Button, FInputChord());
 
     UI_BUNDLE_COMMAND( RemoveCellMark, TimelineShortcuts, "Remove Cell Mark", "Removes any cell mark applied on the selected cells", EUserInterfaceActionType::Button, FInputChord());
 

@@ -74,7 +74,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
     struct FResultingCell
     {
 		UOdysseyAnimationCell* mReferenceCell;
-        int mLength;
+        int mExposure;
     };
     
     TMap<UOdysseyAnimationCell*, TArray<FResultingCell>> resultingCellsByCell;
@@ -90,13 +90,13 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
 
         FResultingCell resultingCell;
         resultingCell.mReferenceCell = referenceCell;
-        resultingCell.mLength = staggerCell->Length;
+        resultingCell.mExposure = staggerCell->Exposure;
 
         TArray<FResultingCell> resultingCells;
         resultingCells.Add(resultingCell);
 
-        FScopedSlowTask loopProgress(staggerCell->Length - 1);
-        for (int i = 1; i < staggerCell->Length; i++)
+        FScopedSlowTask loopProgress(staggerCell->Exposure - 1);
+        for (int i = 1; i < staggerCell->Exposure; i++)
         {
             loopProgress.EnterProgressFrame();
 
@@ -104,10 +104,10 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
 			if (!referenceCell || referenceCell == resultingCells.Last().mReferenceCell)
 				continue;
 
-            resultingCells.Last().mLength = i - (staggerCell->Length - resultingCells.Last().mLength);
+            resultingCells.Last().mExposure = i - (staggerCell->Exposure - resultingCells.Last().mExposure);
 
             resultingCell.mReferenceCell = referenceCell;
-            resultingCell.mLength = staggerCell->Length - i;
+            resultingCell.mExposure = staggerCell->Exposure - i;
 
             resultingCells.Add(resultingCell);
         }
@@ -134,7 +134,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
 
 		for (int i = 0; i < resultingCells.Num(); i++)
         {
-			FOdysseyObjectEditorUtils::SetPropertyValue(newCells[i], GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), resultingCells[i].mLength);
+			FOdysseyObjectEditorUtils::SetPropertyValue(newCells[i], GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), resultingCells[i].mExposure);
 		}
 
         selectedCells.Remove(originalCell);

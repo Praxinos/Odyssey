@@ -64,7 +64,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 					if (cellIndex < 0 || cellIndex >= cells.Num())
 						return 0;
 
-					return cells[cellIndex]->Length;
+					return cells[cellIndex]->Exposure;
 				}
 			)
 			[
@@ -138,7 +138,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 				if (!mCurrentCell)
 					return 0;
 
-				return mCurrentCell->Length;
+				return mCurrentCell->Exposure;
 			}
 		)
 		[
@@ -165,7 +165,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 					if (cellIndex < 0 || cellIndex >= cells.Num())
 						return 0;
 
-					return cells[cellIndex]->Length;
+					return cells[cellIndex]->Exposure;
 				}
 			)
 			[

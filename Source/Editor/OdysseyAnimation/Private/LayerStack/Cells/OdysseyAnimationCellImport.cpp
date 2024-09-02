@@ -47,7 +47,7 @@ FOdysseyAnimationCellImport::Read( UOdysseyAnimationCell* iAnimationCell
             {
                 case FOdysseyFile::Animation::CHUNK_CELL_LENGTH :
                 {
-                    Ar << iAnimationCell->Length;
+                    Ar << iAnimationCell->Exposure;
                 }
                 break;
 

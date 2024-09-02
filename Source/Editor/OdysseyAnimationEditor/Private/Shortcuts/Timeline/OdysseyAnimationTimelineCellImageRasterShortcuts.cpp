@@ -52,7 +52,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     bool hasCellsToCrossFade = selectedCells.ContainsByPredicate(
         [](UOdysseyAnimationCell* iCell)
         {
-            return iCell->Length > 1;
+            return iCell->Exposure > 1;
         }
     );
     if (!hasCellsToCrossFade)
@@ -97,10 +97,10 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 
         int cellIndex = selectedCell->IndexInLayer;
         int nextCellIndex = cellIndex + 1;
-        int crossFadelength = selectedCell->Length;
+        int crossFadelength = selectedCell->Exposure;
 
-        //Reduce the original cell to 1 frame length
-		FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), 1);
+        //Reduce the original cell to 1 frame Exposure
+		FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), 1);
 
         if (nextCellIndex < layer->GetCells().Num())
         {
@@ -220,7 +220,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::CanAction_CrossFade()
     bool hasCellsToCrossFade = selectedCells.ContainsByPredicate(
         [](UOdysseyAnimationCell* iCell)
         {
-            return iCell->Length > 1;
+            return iCell->Exposure > 1;
         }
     );
     if (!hasCellsToCrossFade)

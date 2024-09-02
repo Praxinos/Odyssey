@@ -48,7 +48,7 @@ private:
 
     TSharedRef<SWidget> CreateCellWidget(int iCellIndex);
     TSharedRef<SWidget> CreateTimingHandleWidget(int iCellIndex);
-    TSharedRef<SWidget> CreateLengthHandleWidget(int iCellIndex);
+    TSharedRef<SWidget> CreateExposureHandleWidget(int iCellIndex);
     TSharedRef<SWidget> CreateAddCellsHandleRightWidget();
     TSharedRef<SWidget> CreateAddCellsHandleLeftWidget();
     TSharedRef<SWidget> CreateCellBreakIndicatorWidget(int iCellIndex);
@@ -73,12 +73,12 @@ private:
 
     EVisibility GetCellVisibility(UOdysseyAnimationCell* iCell) const;
     float GetCellHeight() const;
-    float GetCellLength(UOdysseyAnimationCell* iCell) const;
+    float GetCellExposure(UOdysseyAnimationCell* iCell) const;
 
-    EVisibility GetLengthHandleVisibility(UOdysseyAnimationCell* iCell) const;
-    void OnLengthHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent, int iCellIndex);
-    void OnLengthHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
-    void OnLengthHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
+    EVisibility GetExposureHandleVisibility(UOdysseyAnimationCell* iCell) const;
+    void OnExposureHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent, int iCellIndex);
+    void OnExposureHandleDragged(const FGeometry& iGeometry, const FPointerEvent& iEvent);
+    void OnExposureHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
 
     EVisibility GetTimingHandleVisibility(UOdysseyAnimationCell* iCell) const;
     void OnTimingHandleDragStarted(const FGeometry& iGeometry, const FPointerEvent& iEvent, int iCellIndex);
@@ -116,7 +116,7 @@ private:
     //Handles visibility management
     TAttribute<bool> mShowHandles;
     bool mLockHandlesVisibility;
-    UOdysseyAnimationCell* mHoveredCell; //cell that can display its length handle
+    UOdysseyAnimationCell* mHoveredCell; //cell that can display its exposure handle
     TArray<UOdysseyAnimationCell*> mTimingHandleCells; //cells that can display their timing handle
 
     //Box containing the cells widgets
@@ -127,7 +127,7 @@ private:
 
     //Handles brushes
     const FSlateBrush* mTimingHandleBrush;
-    const FSlateBrush* mLengthHandleBrush;
+    const FSlateBrush* mExposureHandleBrush;
     const FSlateBrush* mAddCellsHandleRightBrush;
     const FSlateBrush* mAddCellsHandleLeftBrush;
     const FSlateBrush* mCellBreakIndicatorBrush;
@@ -142,8 +142,8 @@ private:
     {
         int mCellIndex;
         double mMousePosition;
-        int mInitialLength;
-    } mLengthHandleDragData;
+        int mInitialExposure;
+    } mExposureHandleDragData;
 
     struct
     {

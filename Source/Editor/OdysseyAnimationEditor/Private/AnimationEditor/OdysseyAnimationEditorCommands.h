@@ -104,9 +104,9 @@ public:
     TSharedPtr<FUICommandInfo> InactivateLooping;
     TSharedPtr<FUICommandInfo> ToggleLooping;
 
-    TSharedPtr<FUICommandInfo> IncreaseCellLength;
-    TSharedPtr<FUICommandInfo> DecreaseCellLength;
-    TSharedPtr<FUICommandInfo> SetCellLength;
+    TSharedPtr<FUICommandInfo> IncreaseCellExposure;
+    TSharedPtr<FUICommandInfo> DecreaseCellExposure;
+    TSharedPtr<FUICommandInfo> SetCellExposure;
 
     /** Action to pan/Zoom the timeline */
     TSharedPtr<FUICommandInfo> PanZoomTimeline;

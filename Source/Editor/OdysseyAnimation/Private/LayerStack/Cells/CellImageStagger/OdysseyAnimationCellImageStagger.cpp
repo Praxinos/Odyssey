@@ -135,7 +135,7 @@ UOdysseyAnimationCellImageStagger::GetImageRenderingRects() const
 UOdysseyAnimationCell*
 UOdysseyAnimationCellImageStagger::Break(int Frame)
 {
-	if (Frame <= 0 || Frame >= Length)
+	if (Frame <= 0 || Frame >= Exposure)
 		return nullptr;
 
 	UOdysseyAnimationCell* cell = GetReferenceCellAtFrame(Frame);
@@ -143,8 +143,8 @@ UOdysseyAnimationCellImageStagger::Break(int Frame)
 		return nullptr;
 
 	UOdysseyAnimationCell* copiedCell = GetLayer()->CopyCell(cell, IndexInLayer + 1);
-	FOdysseyObjectEditorUtils::SetPropertyValue(copiedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), Length - Frame);
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), Frame);
+	FOdysseyObjectEditorUtils::SetPropertyValue(copiedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Exposure - Frame);
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Frame);
 
 	return copiedCell;
 }

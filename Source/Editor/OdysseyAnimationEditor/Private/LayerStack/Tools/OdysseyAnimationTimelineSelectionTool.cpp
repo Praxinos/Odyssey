@@ -375,7 +375,7 @@ FOdysseyAnimationTimelineSelectionTool::SelectFromCursorToFrame(UOdysseyAnimatio
 			break;
 
 		affectedCells.AddUnique(cell);
-		currentFrame -= cell->Length;
+		currentFrame -= cell->Exposure;
 	}
 
 	currentFrame = cursorCellFrameRange.GetUpperBoundValue() + 1;
@@ -386,7 +386,7 @@ FOdysseyAnimationTimelineSelectionTool::SelectFromCursorToFrame(UOdysseyAnimatio
 			break;
 
 		affectedCells.AddUnique(cell);
-		currentFrame += cell->Length;
+		currentFrame += cell->Exposure;
 	}
 	
 	TArray<UOdysseyAnimationCell*> selectedCells = { mInitialSelection };

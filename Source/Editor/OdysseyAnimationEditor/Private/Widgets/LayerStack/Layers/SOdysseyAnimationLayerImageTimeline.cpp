@@ -265,14 +265,14 @@ SOdysseyAnimationLayerImageTimeline::OnDragOver(const FGeometry& iGeometry, cons
         return FReply::Unhandled();
 
     int cellStartFrame = cell->GetFrameRange().GetLowerBoundValue();
-    float position = (frame - cellStartFrame) / cell->Length;
+    float position = (frame - cellStartFrame) / cell->Exposure;
     if (position < 0.5f)
     {
         mDragPosition = cellStartFrame;
     }
     else
     {
-        mDragPosition = cellStartFrame + cell->Length;
+        mDragPosition = cellStartFrame + cell->Exposure;
     }
 
     /*
@@ -383,9 +383,9 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder
         iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().ConvertToStaggerCell, TEXT("ConvertToStagger"));
 		iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().ConvertToReferenceCells);
         iMenuBuilder.AddMenuEntry(
-            FOdysseyAnimationEditorCommands::Get().SetCellLength,
+            FOdysseyAnimationEditorCommands::Get().SetCellExposure,
             NAME_None,
-            LOCTEXT("timeline-cells.context-menu.set-selected-cells-length.name", "Set Length")
+            LOCTEXT("timeline-cells.context-menu.set-selected-cells-exposure.name", "Set Exposure")
         );
         iMenuBuilder.AddSubMenu(
             LOCTEXT("timeline-cells.context-menu.cell-mark.name", "Mark"),
@@ -497,14 +497,14 @@ SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles() const
 FReply
 SOdysseyAnimationLayerImageTimeline::OnContextMenuMinusButtonClicked()
 {
-    mAnimationTimelineCellsShortcuts->Action_DecreaseCellLength();
+    mAnimationTimelineCellsShortcuts->Action_DecreaseCellExposure();
     return FReply::Handled();
 }
 
 FReply
 SOdysseyAnimationLayerImageTimeline::OnContextMenuPlusButtonClicked()
 {
-    mAnimationTimelineCellsShortcuts->Action_IncreaseCellLength();
+    mAnimationTimelineCellsShortcuts->Action_IncreaseCellExposure();
     return FReply::Handled();
 }
 

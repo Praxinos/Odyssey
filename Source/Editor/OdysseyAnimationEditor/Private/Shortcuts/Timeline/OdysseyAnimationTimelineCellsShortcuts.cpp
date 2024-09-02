@@ -66,21 +66,21 @@ FOdysseyAnimationTimelineCellsShortcuts::MapActionsToCommandList(TSharedRef<FUIC
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().IncreaseCellLength,
-        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellLength),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_IncreaseCellLength)
+        FOdysseyAnimationEditorCommands::Get().IncreaseCellExposure,
+        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellExposure),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_IncreaseCellExposure)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().DecreaseCellLength,
-        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellLength),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_DecreaseCellLength)
+        FOdysseyAnimationEditorCommands::Get().DecreaseCellExposure,
+        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellExposure),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_DecreaseCellExposure)
     );
 
     iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().SetCellLength,
-        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellLength),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_SetCellLength)
+        FOdysseyAnimationEditorCommands::Get().SetCellExposure,
+        FExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyAnimationTimelineCellsShortcuts::CanAction_SetCellExposure)
     );
 }
 
@@ -236,13 +236,13 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
     for (UOdysseyAnimationCell* cell : selectedCells)
     {
 		UOdysseyAnimationCell* staggerCell = layer->AddCell(UOdysseyAnimationCellImageStagger::StaticClass(), cell->IndexInLayer);
-		FOdysseyObjectEditorUtils::SetPropertyValue(staggerCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), cell->Length);
+		FOdysseyObjectEditorUtils::SetPropertyValue(staggerCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cell->Exposure);
 		layer->RemoveCell(cell);
     }
 }
 
 void
-FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellLength()
+FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellExposure()
 {
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
@@ -266,7 +266,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellLength()
     }
         
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.increase-selected-cells-length", "Increase Selected Cells Length"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.increase-selected-cells-exposure", "Increase Selected Cells Exposure"));
 #endif
     FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
     currentFrameMutator.Set(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
@@ -274,12 +274,12 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellLength()
 
     for (UOdysseyAnimationCell* selectedCell : selectedCells)
     {
-		FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), selectedCell->Length + 1);
+		FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), selectedCell->Exposure + 1);
     }
 }
 
 void
-FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellLength()
+FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellExposure()
 {
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
@@ -303,7 +303,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellLength()
     }
         
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.decrease-selected-cells-length", "Decrease Selected Cells Length"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.decrease-selected-cells-exposure", "Decrease Selected Cells Exposure"));
 #endif
     FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
     currentFrameMutator.Set(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
@@ -311,12 +311,12 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellLength()
 
     for (UOdysseyAnimationCell* selectedCell : selectedCells)
     {
-		FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), FMath::Max(1, selectedCell->Length - 1));
+		FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), FMath::Max(1, selectedCell->Exposure - 1));
     }
 }
 
 void
-FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellLength()
+FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure()
 {
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
@@ -341,7 +341,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellLength()
 
     int value = 1;
     SGenericDialogWidget::OpenDialog(
-        LOCTEXT("timeline-cells.dialog.set-selected-cells-length.title", "Set Selected Cells Length"),
+        LOCTEXT("timeline-cells.dialog.set-selected-cells-exposure.title", "Set Selected Cells Exposure"),
         
         SNew(SNumericEntryBox<int>)
         .Value_Lambda([&value]() { return value; })
@@ -358,7 +358,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellLength()
         .Label()
         [
             SNew(STextBlock)
-            .Text(LOCTEXT("timeline-cells.dialog.set-selected-cells-length.label", "Length"))
+            .Text(LOCTEXT("timeline-cells.dialog.set-selected-cells-exposure.label", "Exposure"))
         ],
 
         SGenericDialogWidget::FArguments()
@@ -369,7 +369,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellLength()
                 UOdysseyAnimation* animation = layer->GetAnimation();
 
                 #ifdef WITH_EDITOR
-                FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-selected-cells-length", "Set Selected Cells Length"));
+                FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-selected-cells-exposure", "Set Selected Cells Exposure"));
                 #endif
 
                 FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
@@ -378,7 +378,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellLength()
 
                 for (UOdysseyAnimationCell* selectedCell : selectedCells)
                 {
-					FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Length), FMath::Max(1, value));
+					FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), FMath::Max(1, value));
                 }
             }
         ),
@@ -506,7 +506,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell()
 }
 
 bool
-FOdysseyAnimationTimelineCellsShortcuts::CanAction_IncreaseCellLength()
+FOdysseyAnimationTimelineCellsShortcuts::CanAction_IncreaseCellExposure()
 {
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
@@ -531,7 +531,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_IncreaseCellLength()
 }
 
 bool
-FOdysseyAnimationTimelineCellsShortcuts::CanAction_DecreaseCellLength()
+FOdysseyAnimationTimelineCellsShortcuts::CanAction_DecreaseCellExposure()
 {
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
@@ -556,7 +556,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_DecreaseCellLength()
 }
 
 bool
-FOdysseyAnimationTimelineCellsShortcuts::CanAction_SetCellLength()
+FOdysseyAnimationTimelineCellsShortcuts::CanAction_SetCellExposure()
 {
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
