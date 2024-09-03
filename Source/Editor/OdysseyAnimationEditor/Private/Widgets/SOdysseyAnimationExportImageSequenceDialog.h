@@ -71,7 +71,7 @@ private:
 	FInt32Range GetSourceRange(const FSource& iSource);
 
 	void Export();
-	void ExportSource(const FSource& iSource, const FString& iFilename);
+	void ExportSource(const FSource& iSource, const FString& iFilename, int iNumZero);
 
 private:
     UOdysseyAnimation* mAnimation;

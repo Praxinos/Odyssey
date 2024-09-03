@@ -29,12 +29,14 @@ FOdysseyRasterBlock::~FOdysseyRasterBlock()
 FOdysseyRasterBlock::FOdysseyRasterBlock()
     : mOwner(nullptr)
     , mId(FGuid::NewGuid())
+	, mConstructionDestructionMutex(MakeShared<FCriticalSection>())
     , mBlockData(nullptr)
 {
 }
 
 FOdysseyRasterBlock::FOdysseyRasterBlock(UObject* iOwner)
     : mOwner(iOwner)
+	, mConstructionDestructionMutex(MakeShared<FCriticalSection>())
     , mBlockData(nullptr)
 {
 }
@@ -45,6 +47,7 @@ FOdysseyRasterBlock::FOdysseyRasterBlock(UObject* iOwner, int iWidth, int iHeigh
 	, mHeight(iHeight)
 	, mFormat(iFormat)
     , mId(FGuid::NewGuid())
+	, mConstructionDestructionMutex(MakeShared<FCriticalSection>())
     , mBlockData(nullptr)
 {
 }
@@ -105,6 +108,7 @@ FOdysseyRasterBlock::ConvertTo(int iWidth, int iHeight, ::ULIS::eFormat iFormat)
 
 	delete mBlockData;
 	mBlockData = new FBlockData();
+	mBlockData->mConstructionDestructionMutex = mConstructionDestructionMutex;
 	mBlockData->mBuffer = FUniqueBuffer::MakeView(block->Bits(), block->BytesTotal());
 	mBlockData->mIsCacheInvalid = true;
 	mBlockData->mId = mId;
@@ -166,6 +170,8 @@ FOdysseyRasterBlock::CleanupBlock(uint8* iData, void* iInfo)
         ::ULIS::OnCleanup_FreeMemory(iData, iInfo); 
     }
 
+	blockData->mConstructionDestructionMutex->Unlock();
+
     delete blockData;
 }
 
@@ -182,7 +188,10 @@ FOdysseyRasterBlock::GetBlock()
     if ( block )
         return block;
 
+	mConstructionDestructionMutex->Lock();
+
     mBlockData = new FBlockData();
+	mBlockData->mConstructionDestructionMutex = mConstructionDestructionMutex;
     mBlockData->mId = mId;
     mBlockData->mIsCacheInvalid = false;
 

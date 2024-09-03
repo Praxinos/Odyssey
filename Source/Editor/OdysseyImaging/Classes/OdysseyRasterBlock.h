@@ -191,12 +191,14 @@ private:
     //
 
     FCriticalSection mMutex;
+	TSharedPtr<FCriticalSection> mConstructionDestructionMutex;
 
     struct FBlockData
     {
         bool mIsCacheInvalid;
         FUniqueBuffer mBuffer;
         FGuid mId;
+		TSharedPtr<FCriticalSection> mConstructionDestructionMutex;
     };
 
     FBlockData* mBlockData;

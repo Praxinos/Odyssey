@@ -105,6 +105,8 @@ CopyBlockDataIntoUTexture( const ::ULIS::FBlock* iBlock, UTexture2D* iTexture )
 ::ULIS::FBlock*
 NewBlockFromUTextureData(UTexture2D* iTexture, ::ULIS::eFormat iFormat)
 {
+    FTextureCompilingManager::Get().FinishCompilation({ iTexture });
+
     ::ULIS::FBlock* block = new ::ULIS::FBlock( iTexture->Source.GetSizeX(),iTexture->Source.GetSizeY(), iFormat );
     FillOdysseyBlockFromUTextureData( block, iTexture, iFormat );
     return block;
@@ -113,6 +115,8 @@ NewBlockFromUTextureData(UTexture2D* iTexture, ::ULIS::eFormat iFormat)
 void
 FillOdysseyBlockFromUTextureData( ::ULIS::FBlock* ioBlock, UTexture2D* iTexture, ::ULIS::eFormat iFormat )
 {
+	FTextureCompilingManager::Get().FinishCompilation({ iTexture });
+	
     if (!ioBlock)
         return;
 

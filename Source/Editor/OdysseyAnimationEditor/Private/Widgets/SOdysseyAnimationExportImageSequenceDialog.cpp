@@ -265,15 +265,25 @@ SOdysseyAnimationExportImageSequenceDialog::Export()
     FScopedSlowTask progressBar(sources.Num(), LOCTEXT("timeline-tab.export-image-sequence.progress-bar.title", "Exporting Image Sequence"));
     progressBar.MakeDialog();
 
+	
+
+	TArray<FInt32Range> ranges;
+	for (const FSource& source : sources)
+	{
+		ranges.Add(GetSourceRange(source));
+	}
+	FInt32Range fullRange = FInt32Range::Hull(ranges);
+	FString endFrameStr = FString::FromInt(fullRange.GetUpperBoundValue());
+
     for (const FSource& source : sources)
     {
         progressBar.EnterProgressFrame();
-        ExportSource(source, filenames[0]);
+        ExportSource(source, filenames[0], endFrameStr.Len());
     }
 }
 
 void
-SOdysseyAnimationExportImageSequenceDialog::ExportSource(const FSource& iSource, const FString& iFilename)
+SOdysseyAnimationExportImageSequenceDialog::ExportSource(const FSource& iSource, const FString& iFilename, int iNumZero)
 {
     FString path( FPaths::ConvertRelativePathToFull( iFilename ) );
     FString folder = FPaths::GetPath(path);
@@ -313,7 +323,14 @@ SOdysseyAnimationExportImageSequenceDialog::ExportSource(const FSource& iSource,
         ctx.Finish();
 
         //Path
-        FString imagePath = folder / filename + FString::Printf(TEXT("_%d."), i) + extension;
+		
+		FString frameStr = FString::FromInt(i);
+        FString imagePath = folder / filename + TEXT("_");
+	 	for (int j = 0; j < iNumZero - frameStr.Len(); j++)
+		{
+			imagePath += TEXT("0");
+		}
+		imagePath += FString::Printf(TEXT("%d."), i) + extension;
         std::string str = std::string( TCHAR_TO_UTF8( *imagePath ) );
 
         bool canSaveDirectly = false;
