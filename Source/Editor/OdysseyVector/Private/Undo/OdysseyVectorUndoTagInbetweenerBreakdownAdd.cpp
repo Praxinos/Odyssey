@@ -68,10 +68,11 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::Apply( UObject* iIgnored )
         tagEngine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
-    mScene->GetEngine()->ResetHUD();
+    //mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    FOdysseyVectorEngine::OnSignalDelegate().Broadcast( nullptr
+                                                     , ( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                                                       | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED ) );
 }
 
 void
@@ -93,10 +94,11 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::Revert( UObject* iIgnored )
         tagEngine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
-    mScene->GetEngine()->ResetHUD();
+   // mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    FOdysseyVectorEngine::OnSignalDelegate().Broadcast( nullptr
+                                                     , ( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                                                       | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED ) );
 }
 
 /** Describes this change (for debugging) */

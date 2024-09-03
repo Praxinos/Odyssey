@@ -155,8 +155,8 @@ FOdysseyVectorExportV2::WriteTagInbetweenerTransformScaling( FOdysseyVectorTagIn
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        double scalingX = iInbetweenerTag.GetTargetScalingX();
-        double scalingY = iInbetweenerTag.GetTargetScalingY();
+        double scalingX = iInbetweenerTag.GetMasterBreakdown()->GetTargetScalingX();
+        double scalingY = iInbetweenerTag.GetMasterBreakdown()->GetTargetScalingY();
 
         Ar << scalingX;
         Ar << scalingY;
@@ -171,7 +171,7 @@ FOdysseyVectorExportV2::WriteTagInbetweenerTransformRotation( FOdysseyVectorTagI
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        double rotation = iInbetweenerTag.GetTargetRotation();
+        double rotation = iInbetweenerTag.GetMasterBreakdown()->GetTargetRotation();
 
         Ar << rotation;
     } );
@@ -185,8 +185,8 @@ FOdysseyVectorExportV2::WriteTagInbetweenerTransformTranslation( FOdysseyVectorT
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        double translationX = iInbetweenerTag.GetTargetTranslationX();
-        double translationY = iInbetweenerTag.GetTargetTranslationY();
+        double translationX = iInbetweenerTag.GetMasterBreakdown()->GetTargetTranslationX();
+        double translationY = iInbetweenerTag.GetMasterBreakdown()->GetTargetTranslationY();
 
         Ar << translationX;
         Ar << translationY;

@@ -36,8 +36,40 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         FInbetweenerBreakdown* GetPrevBreakdown( );
         FInbetweenerBreakdown* GetNextBreakdown( );
         void SetInbetweenerTag( FOdysseyVectorTagInbetweener* iInbetweenerTag );
+        void Translate( double iX, double iY );
+        void Rotate( double iAngle );
+        void Scale( double iX, double iY );
+        void GetTargetTransform( double& oTranslationX
+                               , double& oTranslationY
+                               , double& oRotation
+                               , double& oScalingX
+                               , double& oScalingY );
+        void SetTargetTransform( double iTranslationX
+                               , double iTranslationY
+                               , double iRotation
+                               , double iScalingX
+                               , double iScalingY );
+        void UpdateMatrix();
+        ::ULIS::FRectD GetTargetBBox( bool iWorld );
+        ::ULIS::FRectD GetSourceBBox( bool iWorld );
+        void InterpolateTransform();
+        double GetTargetTranslationX();
+        double GetTargetTranslationY();
+        double GetTargetRotation();
+        double GetTargetScalingX();
+        double GetTargetScalingY();
 
     private:
+        double mTargetTranslationX;
+        double mTargetTranslationY;
+        double mTargetRotation;
+        double mTargetScalingX;
+        double mTargetScalingY;
+        BLMatrix2D mTargetLocalMatrix;
+/*
+        BLMatrix2D mTargetWorldMatrix;
+        BLMatrix2D mTargetInverseWorldMatrix;
+*/
         FInbetweenerBreakdown* mPrevBreakdown;
         FInbetweenerBreakdown* mNextBreakdown;
         FOdysseyVectorTagInbetweener* mInbetweenerTag;

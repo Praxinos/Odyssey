@@ -10,6 +10,7 @@
 
 class  FGridNode;
 class  FOdysseyPainterEditorVectorMatchingToolHUD;
+class FOdysseyVectorTagInbetweener;
 struct FInbetweenerInbetween;
 class  FInbetweenerPoint;
 class  FInbetweenerGrid;
@@ -56,7 +57,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public 
         FOdysseyPainterEditorVectorMatchingToolHUD* mMatchingHUD;
         std::vector<FInbetweenerPoint*> mPickedPointArray;
         std::vector<FInbetweenerGrid*> mPickedGridArray;
-        FInbetweenerInbetween* mPickedInbetween;
+        FOdysseyVectorTagInbetweener* mPickedInbetweenerTag;
 
     public:
         UPROPERTY( EditAnywhere

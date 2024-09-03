@@ -236,7 +236,7 @@ void
 FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer )
 {
     BLMatrix2D& ownerInverseWorldMatrix = mBreakdown->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
-    ::ULIS::FRectD spaceBBox = mBreakdown->GetInbetweenerTag()->GetSourceBBox( false );
+    ::ULIS::FRectD spaceBBox = mSourceBBox;
     BLMatrix2D conversionMatrix;
     uint32 pointID = 0;
     uint32 segmentID = 0;
@@ -371,7 +371,7 @@ FInbetweenerGridARAP::IntersectNeededQuads( const ::ULIS::FRectD& iSourceBBox
 void
 FInbetweenerGridARAP::DiscardEmptyQuads( std::vector<FInterpolatedPath>& iPathBuffer )
 {
-    ::ULIS::FRectD tagBBox = mBreakdown->GetInbetweenerTag()->GetSourceBBox( false );
+    ::ULIS::FRectD tagBBox = mSourceBBox;
 
     for( FInterpolatedPath& interpolatedPath : iPathBuffer )
     {

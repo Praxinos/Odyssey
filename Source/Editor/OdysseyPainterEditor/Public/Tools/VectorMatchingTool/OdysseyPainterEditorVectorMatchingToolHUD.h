@@ -10,6 +10,7 @@ class FOdysseyVectorTagInbetweener;
 struct FInbetweenerInbetween;
 class FInbetweenerPoint;
 class FInbetweenerGrid;
+class FInbetweenerBreakdown;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorMatchingToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
@@ -21,7 +22,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorMatchingToolHUD : publ
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) override;
         virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
-        void PickTargetPoints( FOdysseyVectorTagInbetweener* iInbetweenerTag
+        void PickTargetPoints( FInbetweenerBreakdown* iBreakdown
                              , double iWorldX
                              , double iWorldY
                              , double iRadius
@@ -31,11 +32,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorMatchingToolHUD : publ
 
     private:
         void DrawPaths( BLContext* iBLContext, FOdysseyVectorTagInbetweener* iInbetweenerTag );
-        void DrawGrid( BLContext* iBLContext
-           , FOdysseyVectorTagInbetweener* iInbetweenerTag
-           , const BLRgba32& iFgColor
-           , const BLRgba32& iBgColor
-           , const BLRgba32& iHcColor );
+        void DrawTargetGrid( BLContext* iBLContext
+                           , FInbetweenerBreakdown* iBreakdown
+                           , const BLRgba32& iFgColor
+                           , const BLRgba32& iBgColor
+                           , const BLRgba32& iHcColor );
 
     private:
         UOdysseyPainterEditorVectorMatchingTool* mMatchingTool;

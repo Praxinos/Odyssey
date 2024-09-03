@@ -169,8 +169,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetSelectedInbetweenerTag
 void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
 {
-    int frameIndex = mAnimationEditorExtension->Timeline()->GetFrameIndexAtMousePosition( mCursorPos.X );
-    int cellIndex = mAnimationLayerImageVector->GetCellsContainer()->GetCellIndexAtFrame( frameIndex );
+    int breakdownFrameIndex = mAnimationEditorExtension->Timeline()->GetFrameIndexAtMousePosition( mCursorPos.X );
+    int breakdownCellIndex = mAnimationLayerImageVector->GetCellsContainer()->GetCellIndexAtFrame( breakdownFrameIndex );
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     std::list<FOdysseyVectorEngine*> engineList;
 
@@ -180,7 +180,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
     GEditor->BeginTransaction(LOCTEXT("vector-timeline.transaction.add-breakdown", "Add Breakdown"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAdd( scene
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAdd( nullptr
                                                                                    , selectedInbetweenerTagList
                                                                                    , engineList );
 
@@ -196,7 +196,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
     {
         uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetIndex();
-        uint32 drawingIndex = cellIndex - tagCellIndex;
+        uint32 drawingIndex = breakdownCellIndex - tagCellIndex;
         FInbetweenerBreakdown* curBreakdown = inbetweenerTag->GetBreakdown( drawingIndex );
 
         FOdysseyVectorGroupPaint* scene = inbetweenerTag->GetOwner()->GetScene();
@@ -232,8 +232,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
 void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
 {
-    int frameIndex = mAnimationEditorExtension->Timeline()->GetFrameIndexAtMousePosition( mCursorPos.X );
-    int cellIndex = mAnimationLayerImageVector->GetCellsContainer()->GetCellIndexAtFrame( frameIndex );
+    int breakdownFrameIndex = mAnimationEditorExtension->Timeline()->GetFrameIndexAtMousePosition( mCursorPos.X );
+    int breakdownCellIndex = mAnimationLayerImageVector->GetCellsContainer()->GetCellIndexAtFrame( breakdownFrameIndex );
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     std::list<FOdysseyVectorEngine*> engineList;
 
@@ -243,8 +243,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
     GEditor->BeginTransaction(LOCTEXT("vector-timeline.transaction.remove-breakdown", "Remove Breakdown"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownRemove( scene
-                                                                                      , selectedInbetweenerTagList );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownRemove( nullptr
+                                                                                      , selectedInbetweenerTagList
+                                                                                      , engineList);
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         
@@ -259,7 +260,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
     {
         uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetIndex();
         FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
-        uint32 drawingIndex = cellIndex - tagCellIndex;
+        uint32 drawingIndex = breakdownCellIndex - tagCellIndex;
         FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdown( drawingIndex );
         FOdysseyVectorGroupPaint* scene = inbetweenerTag->GetOwner()->GetScene();
 

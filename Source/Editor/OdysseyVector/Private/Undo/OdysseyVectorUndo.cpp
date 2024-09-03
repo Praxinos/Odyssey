@@ -413,11 +413,11 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
     /*-----------------------  Backup Transformations ---------------------- */
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::TRANSFORMATIONS )
     {
-        mInbetweenerTag->GetTargetTransform( mTranslationX
-                                           , mTranslationY
-                                           , mRotation
-                                           , mScalingX
-                                           , mScalingY );
+        mInbetweenerTag->GetMasterBreakdown()->GetTargetTransform( mTranslationX
+                                                                 , mTranslationY
+                                                                 , mRotation
+                                                                 , mScalingX
+                                                                 , mScalingY );
     }
 
     /*-------------------------  Backup Mapping Type ----------------------- */
@@ -503,11 +503,11 @@ FSnapshotTagInbetweener::Preswap()
 {
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::TRANSFORMATIONS )
     {
-        mInbetweenerTag->GetTargetTransform( mPreswapTranslationX
-                                           , mPreswapTranslationY
-                                           , mPreswapRotation
-                                           , mPreswapScalingX
-                                           , mPreswapScalingY );
+        mInbetweenerTag->GetMasterBreakdown()->GetTargetTransform( mPreswapTranslationX
+                                                                 , mPreswapTranslationY
+                                                                 , mPreswapRotation
+                                                                 , mPreswapScalingX
+                                                                 , mPreswapScalingY );
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE )
@@ -576,13 +576,13 @@ FSnapshotTagInbetweener::Restore()
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::TRANSFORMATIONS )
     {
 
-        mInbetweenerTag->SetTargetTransform( mTranslationX
-                                           , mTranslationY
-                                           , mRotation
-                                           , mScalingX
-                                           , mScalingY );
+        mInbetweenerTag->GetMasterBreakdown()->SetTargetTransform( mTranslationX
+                                                                 , mTranslationY
+                                                                 , mRotation
+                                                                 , mScalingX
+                                                                 , mScalingY );
 
-        mInbetweenerTag->UpdateMatrix();
+        mInbetweenerTag->GetMasterBreakdown()->UpdateMatrix();
 
         mTranslationX = mPreswapTranslationX;
         mTranslationY = mPreswapTranslationY;

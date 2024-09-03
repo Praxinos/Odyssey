@@ -109,11 +109,13 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
                         , eInbetweenerPointPositionType iPositionType );
 
         FInbetweenerBreakdown* GetBreakdown();
+        const ::ULIS::FRectD& GetTargetBBox();
+        const ::ULIS::FRectD& GetSourceBBox();
 
         friend class FOdysseyVectorTagInbetweener;
 
     protected:
-        ::ULIS::FVec2D GetCenterOfMass( eInbetweenerPointPositionType iPositionType );
+        ::ULIS::FVec2D GetCenterOfMass( eInbetweenerPointPositionType iPositionType, ::ULIS::FRectD& oBBox );
         virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint
                                           , eInbetweenerPointPositionType iPositionType );
 
@@ -158,4 +160,6 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         Eigen::SparseLU<Eigen::SparseMatrix<double, Eigen::ColMajor>, Eigen::COLAMDOrdering<int>> mLU;
         Eigen::VectorXd mW;
         double mQuadArea;
+        ::ULIS::FRectD mSourceBBox;
+        ::ULIS::FRectD mTargetBBox;
 };

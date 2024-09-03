@@ -422,6 +422,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         pivot.y = selectionBox.rect.y + spacePivot.y;
     }
 
+#ifdef unused
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
         BLPoint spacePivot = BLPoint( pivot.x - selectionBox.rect.x
@@ -477,6 +478,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         pivot.x = selectionBox.rect.x + spacePivot.x;
         pivot.y = selectionBox.rect.y + spacePivot.y;
     }
+#endif
 }
 
 double
@@ -613,7 +615,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
               return 0;
           } );
     }
-
+#ifdef unused
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
         BLPoint spacePivot = BLPoint( pivot.x - selectionBox.rect.x
@@ -660,6 +662,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
             inbetweenerTag->UpdateMatrix();
         }
     }
+#endif
 
     // Update the matrix for all objects
     //iScene->UpdateMatrix();
@@ -855,7 +858,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
                   return 0;
               } );
         }
-
+#ifdef unused
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
         {
             BLPoint spacePivot = BLPoint( pivot.x - selectionBox.rect.x
@@ -903,6 +906,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
                 inbetweenerTag->UpdateMatrix();
             }
         }
+#endif
     }
 
     // Update the matrix for all objects

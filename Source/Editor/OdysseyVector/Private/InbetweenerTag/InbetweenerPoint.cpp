@@ -82,7 +82,7 @@ void
 FInbetweenerPoint::SetSourcePosition( double iX, double iY )
 {
     FInbetweenerBreakdown* prevBreakdown = mGrid->GetBreakdown()->GetPrevBreakdown();
-    uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEBBOX;
+    uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_SOURCE;
     uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
 
     mSourcePosition.x = iX;
@@ -115,7 +115,7 @@ FInbetweenerPoint::SetTargetPosition( double iX, double iY )
         nextBreakdown->GetGrid()->GetPointBuffer()[pointIndex].mSourcePosition.x = mTargetPosition.x;
         nextBreakdown->GetGrid()->GetPointBuffer()[pointIndex].mSourcePosition.y = mTargetPosition.y;
 
-        invalidationFlags |= FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEBBOX;
+        invalidationFlags |= FOdysseyVectorTagInbetweener::INVALIDATE_SOURCE;
     }
 
     mGrid->GetBreakdown()->GetInbetweenerTag()->Invalidate( invalidationFlags );

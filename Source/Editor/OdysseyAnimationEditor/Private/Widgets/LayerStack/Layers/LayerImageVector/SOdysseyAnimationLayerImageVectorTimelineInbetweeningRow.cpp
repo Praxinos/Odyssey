@@ -187,10 +187,10 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
 	if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
     {
         mInbetweenerTag->GetOwner()->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-/*
+
         mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                                                                     | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
-*/
+
         return FReply::Handled();
     }
 

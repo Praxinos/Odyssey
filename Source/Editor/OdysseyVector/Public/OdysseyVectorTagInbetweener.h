@@ -51,7 +51,7 @@ struct FInbetweenerDrawing
     float spacing;
     float breakdownSpacing; // spacing relative to the current breakdown
     FInbetweenerBreakdown* breakdown;
-    BLMatrix2D matrix;
+    BLMatrix2D localMatrix;
     BLMatrix2D inverseMatrix;
     uint32 index;
 };
@@ -207,32 +207,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void Commit( std::list<FOdysseyVectorTag*>& oRemovedTagList
                    , std::list<FOdysseyVectorObject*>& oAddedObjectList
                    , std::list<FOdysseyVectorGroupPaint*>& oCommittedSceneList );
-        virtual void UpdateMatrix() override;
-        void Translate( double iX, double iY );
-        void Rotate( double iAngle );
-        void Scale( double iX, double iY );
-        double GetTargetTranslationX();
-        double GetTargetTranslationY();
-        double GetTargetRotation();
-        double GetTargetScalingX();
-        double GetTargetScalingY();
-        ::ULIS::FRectD GetSourceBBox( bool iWorld );
-        ::ULIS::FRectD GetTargetBBox( bool iWorld );
-        BLMatrix2D& GetTargetLocalMatrix();
-        BLMatrix2D& GetTargetWorldMatrix();
-        BLMatrix2D& GetTargetInverseWorldMatrix();
         void Invalidate( uint64 iInvalidationFlags );
         std::vector<FInterpolatedPath>& GetInterpolatedPathBuffer();
-        void GetTargetTransform( double& oTranslationX
-                               , double& oTranslationY
-                               , double& oRotation
-                               , double& oScalingX
-                               , double& oScalingY );
-        void SetTargetTransform( double iTranslationX
-                               , double iTranslationY
-                               , double iRotation
-                               , double iScalingX
-                               , double iScalingY );
+
         const FColor& GetColor();
         void SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         void SetColor( const FColor& iColor );
@@ -263,6 +240,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void ResizeRoutes();
         void SetChart( const FInbetweenerChart& iChart );
         void ResetLayout( bool iFreeMemNow );
+        FInbetweenerDrawing* GetDrawing( uint32 iIndex );
+        virtual void UpdateMatrix() override;
 
     protected:
         /**
@@ -302,7 +281,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         static const uint64 INVALIDATE_SPACING        = ( 1LL << 2 );
         static const uint64 INVALIDATE_GRIDTYPE       = ( 1LL << 3 );
         static const uint64 INVALIDATE_CELLS          = ( 1LL << 4 );
-        static const uint64 INVALIDATE_SOURCEBBOX     = ( 1LL << 5 );
+        static const uint64 INVALIDATE_SOURCE         = ( 1LL << 5 );
         static const uint64 INVALIDATE_TARGET         = ( 1LL << 6 );
         static const uint64 INVALIDATE_ROUTES         = ( 1LL << 7 );
         static const uint64 INVALIDATE_ROUTE_LIST     = ( 1LL << 8 );
@@ -312,21 +291,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                                                         | INVALIDATE_SPACING
                                                         | INVALIDATE_GRIDTYPE
                                                         | INVALIDATE_CELLS
-                                                        | INVALIDATE_SOURCEBBOX
+                                                        | INVALIDATE_SOURCE
                                                         | INVALIDATE_TARGET
                                                         | INVALIDATE_ROUTES
                                                         | INVALIDATE_ROUTE_LIST
                                                         | INVALIDATE_BREAKDOWN_LIST );
 
     protected:
-        double mTargetTranslationX;
-        double mTargetTranslationY;
-        double mTargetRotation;
-        double mTargetScalingX;
-        double mTargetScalingY;
-        BLMatrix2D mTargetLocalMatrix;
-        BLMatrix2D mTargetWorldMatrix;
-        BLMatrix2D mTargetInverseWorldMatrix;
         FOdysseyVectorSharedEnv* mSharedEnv;
         std::vector<FInterpolatedPath> mInterpolatedPathBuffer;
         std::list<FInbetweenerRoute*> mRouteList;
@@ -335,8 +306,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         uint32 mGridNumQuadX;
         uint32 mGridNumQuadY;
         eInbetweenerInterpolationType mInterpolationType;
-        ::ULIS::FRectD mSourceBBox;
-        ::ULIS::FRectD mTargetBBox;
         FInbetweenerChart mChart;
         uint64 mInvalidationFlags;
         FColor mColor;

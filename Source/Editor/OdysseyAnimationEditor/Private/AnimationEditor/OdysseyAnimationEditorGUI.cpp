@@ -14,6 +14,8 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyAnimation.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
+#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 
@@ -237,19 +239,22 @@ FOdysseyAnimationEditorGUI::ParseVectorSignal( FOdysseyVectorGroupPaint* iScene
 void
 FOdysseyAnimationEditorGUI::OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags )
 {
+    UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+
     // layerStack might be NULL when closing the program
-    if( mExtension->GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>() )
+    if( layerStack )
     {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mExtension->GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+        UOdysseyAnimationLayerImageVector* currentVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(layerStack->CurrentLayer.Get());
+        int frame = mExtension->Animation()->CurrentFrame;
+        FOdysseyAnimationCellImageVector* cell = static_cast<FOdysseyAnimationCellImageVector*>(currentVectorLayer->GetCellsContainer()->GetCellAtFrame(frame).Get());
 
-        if( mediaVectors.Num() )
+        if( cell )
         {
-            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+            FOdysseyVectorEngine* vectorEngine = cell->GetEngine();
+            // Note: iScene is ignored. We update the widget according to the current scene.
+            FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
 
-            if( iScene == vectorScene )
-            {
-                ParseVectorSignal( vectorScene, iSignalFlags );
-            }
+            ParseVectorSignal( vectorScene, iSignalFlags );
         }
     }
 }

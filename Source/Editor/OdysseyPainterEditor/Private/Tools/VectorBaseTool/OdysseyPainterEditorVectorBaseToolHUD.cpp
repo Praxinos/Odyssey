@@ -169,23 +169,26 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( FOdysse
     {
         FOdysseyVectorObject* selectedObject = selectedObjectList.size() ? selectedObjectList.front() : iScene;
         FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
-
+/*
         if( tag )
         {
             FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
 
             mSelectionBox.inited = true;
-            mSelectionBox.rect = inbetweenerTag->GetTargetBBox( false );
-            mSelectionBox.worldMatrix = inbetweenerTag->GetTargetWorldMatrix();
-            mSelectionBox.inverseWorldMatrix = inbetweenerTag->GetTargetInverseWorldMatrix();
+            mSelectionBox.rect = inbetweenerTag->GetBreakdownList().front()->GetSourceBBox( false );
+            mSelectionBox.worldMatrix = inbetweenerTag->GetOwner()->GetWorldMatrix();
+            mSelectionBox.inverseWorldMatrix = inbetweenerTag->GetOwner()->GetWorldMatrix();
         }
         else
         {
+*/
             mSelectionBox.inited = true;
             mSelectionBox.rect = selectedObject->GetBBox( false );
             mSelectionBox.worldMatrix = selectedObject->GetWorldMatrix();
             mSelectionBox.inverseWorldMatrix = selectedObject->GetInverseWorldMatrix();
+/*
         }
+*/
     }
     else 
     {
@@ -207,7 +210,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( FOdysse
               {
                   FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
                   ::ULIS::FRectD selectedObjectBBox;
-
+/*
                   if( tag )
                   {
                       FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
@@ -216,9 +219,11 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( FOdysse
                   }
                   else
                   {
+*/
                       selectedObjectBBox = object->GetBBox( true );
+/*
                   }
-
+*/
                   mSelectionBox.rect = mSelectionBox.inited ? mSelectionBox.rect | selectedObjectBBox
                                                             : selectedObjectBBox;
 

@@ -4,6 +4,10 @@
 #include "OdysseyVector.h"
 #include "OdysseyVectorObject.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846L
+#endif
+
 FInbetweenerBreakdown::~FInbetweenerBreakdown()
 {
     delete mGrid;
@@ -17,8 +21,133 @@ FInbetweenerBreakdown::FInbetweenerBreakdown( FOdysseyVectorTagInbetweener* iInb
     , mGrid( nullptr )
     , mPrevBreakdown( nullptr )
     , mNextBreakdown( nullptr )
+    , mTargetTranslationX( 0.0f )
+    , mTargetTranslationY( 0.0f )
+    , mTargetScalingX    ( 1.0f )
+    , mTargetScalingY    ( 1.0f )
+    , mTargetRotation    ( 0.0f )
 {
     SetGrid( iInbetweenerTag->GetGridType() );
+}
+
+::ULIS::FRectD
+FInbetweenerBreakdown::GetSourceBBox( bool iWorld )
+{
+    FInbetweenerDrawing* drawing = &mInbetweenerTag->GetChart().drawingBuffer[mTargetDrawingIndex];
+    ::ULIS::FRectD bbox = mGrid->GetSourceBBox();
+
+    if ( iWorld == true )
+    {
+        BLMatrix2D worldMatrix = mInbetweenerTag->GetOwner()->GetWorldMatrix();
+
+        worldMatrix.transform( drawing->localMatrix );
+
+        {
+            BLPoint p0 = worldMatrix.mapPoint( bbox.x         , bbox.y          );
+            BLPoint p1 = worldMatrix.mapPoint( bbox.x + bbox.w, bbox.y          );
+            BLPoint p2 = worldMatrix.mapPoint( bbox.x + bbox.w, bbox.y + bbox.h );
+            BLPoint p3 = worldMatrix.mapPoint( bbox.x         , bbox.y + bbox.h );
+            ::ULIS::FRectD worldBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
+                                                                 , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                                                 , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                                                 , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
+
+            return worldBBox;
+        }
+    }
+
+    return bbox;
+}
+
+::ULIS::FRectD
+FInbetweenerBreakdown::GetTargetBBox( bool iWorld )
+{
+    FInbetweenerDrawing* drawing = &mInbetweenerTag->GetChart().drawingBuffer[mTargetDrawingIndex];
+    ::ULIS::FRectD bbox = mGrid->GetTargetBBox();
+
+    if ( iWorld == true )
+    {
+        BLMatrix2D worldMatrix = mInbetweenerTag->GetOwner()->GetWorldMatrix();
+
+        worldMatrix.transform( drawing->localMatrix );
+
+        {
+
+            BLPoint p0 = worldMatrix.mapPoint( bbox.x         , bbox.y          );
+            BLPoint p1 = worldMatrix.mapPoint( bbox.x + bbox.w, bbox.y          );
+            BLPoint p2 = worldMatrix.mapPoint( bbox.x + bbox.w, bbox.y + bbox.h );
+            BLPoint p3 = worldMatrix.mapPoint( bbox.x         , bbox.y + bbox.h );
+            ::ULIS::FRectD worldBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
+                                                                 , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                                                 , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                                                 , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
+
+            return worldBBox;
+        }
+    }
+
+    return bbox;
+}
+
+double
+FInbetweenerBreakdown::GetTargetTranslationX()
+{
+    return mTargetTranslationX;
+}
+
+double
+FInbetweenerBreakdown::GetTargetTranslationY()
+{
+    return mTargetTranslationY;
+}
+
+double
+FInbetweenerBreakdown::GetTargetRotation()
+{
+    return mTargetRotation;
+}
+
+double
+FInbetweenerBreakdown::GetTargetScalingX()
+{
+    return mTargetScalingX;
+}
+
+double
+FInbetweenerBreakdown::GetTargetScalingY()
+{
+    return mTargetScalingY;
+}
+
+void
+FInbetweenerBreakdown::InterpolateTransform()
+{
+    FInbetweenerBreakdown* prevBreakdown = GetPrevBreakdown();
+    double sourceTranslationX = prevBreakdown ? prevBreakdown->GetTargetTranslationX() : 0.0f
+         , sourceTranslationY = prevBreakdown ? prevBreakdown->GetTargetTranslationY() : 0.0f
+         , sourceRotation     = prevBreakdown ? prevBreakdown->GetTargetRotation()    : 0.0f
+         , sourceScalingX     = prevBreakdown ? prevBreakdown->GetTargetScalingX()     : 1.0f
+         , sourceScalingY     = prevBreakdown ? prevBreakdown->GetTargetScalingY()     : 1.0f;
+
+    for( uint32 i = ( mSourceDrawingIndex + 1 ); i < mTargetDrawingIndex; i++ ) 
+    {
+        FInbetweenerDrawing* drawing = &mInbetweenerTag->GetChart().drawingBuffer[i];
+        double translationX, translationY, rotation, scalingX, scalingY;
+        double t = drawing->breakdownSpacing;
+
+        translationX = sourceTranslationX + ( ( mTargetTranslationX - sourceTranslationX ) * t );
+        translationY = sourceTranslationY + ( ( mTargetTranslationY - sourceTranslationY ) * t );
+        rotation = sourceRotation + ( ( mTargetRotation - sourceRotation ) * t );
+        scalingX = sourceScalingX + ( ( mTargetScalingX - sourceScalingX ) * t );
+        scalingY = sourceScalingY + ( ( mTargetScalingY - sourceScalingY ) * t );
+
+        drawing->localMatrix.reset();
+        drawing->localMatrix.translate( translationX, translationY );
+        drawing->localMatrix.rotate( rotation * M_PI / 180.0f ); // convert to radians
+        drawing->localMatrix.scale( scalingX, scalingY );
+
+        BLMatrix2D::invert( drawing->inverseMatrix, drawing->localMatrix );
+    }
 }
 
 FInbetweenerBreakdown*
@@ -99,6 +228,83 @@ FInbetweenerBreakdown::DrawPathsAtTarget( BLContext* iBLContext )
     iBLContext->restore();
 }
 
+void
+FInbetweenerBreakdown::GetTargetTransform( double& oTranslationX
+                                         , double& oTranslationY
+                                         , double& oRotation
+                                         , double& oScalingX
+                                         , double& oScalingY )
+{
+    oTranslationX = mTargetTranslationX;
+    oTranslationY = mTargetTranslationY;
+    oRotation = mTargetRotation;
+    oScalingX = mTargetScalingX;
+    oScalingY = mTargetScalingY;
+}
+
+void
+FInbetweenerBreakdown::SetTargetTransform( double iTranslationX
+                                         , double iTranslationY
+                                         , double iRotation
+                                         , double iScalingX
+                                         , double iScalingY )
+{
+    mTargetTranslationX = iTranslationX;
+    mTargetTranslationY = iTranslationY;
+    mTargetRotation = iRotation;
+    mTargetScalingX = iScalingX;
+    mTargetScalingY = iScalingY;
+
+    //UpdateMatrix( );
+}
+
+void
+FInbetweenerBreakdown::UpdateMatrix()
+{
+    FInbetweenerDrawing* drawing = &mInbetweenerTag->GetChart().drawingBuffer[mTargetDrawingIndex];
+
+    drawing->localMatrix.reset();
+    drawing->localMatrix.translate( mTargetTranslationX, mTargetTranslationY );
+    drawing->localMatrix.rotate( mTargetRotation * M_PI / 180.0f );
+    drawing->localMatrix.scale( mTargetScalingX, mTargetScalingY );
+
+/*
+    mTargetWorldMatrix = mOwner->GetWorldMatrix();
+    mTargetWorldMatrix.transform( mTargetLocalMatrix );
+
+    BLMatrix2D::invert( mTargetInverseWorldMatrix, mTargetWorldMatrix );
+
+    // first drawing does not need interpolation. It is actually the source position
+    for( uint32 drawingIndex = 1; drawingIndex < GetDrawingCount(); drawingIndex++ )
+    {
+        InterpolateTransform( drawingIndex );
+    }
+*/
+    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_ROUTES
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
+}
+
+void
+FInbetweenerBreakdown::Translate( double iX, double iY )
+{
+    mTargetTranslationX = iX;
+    mTargetTranslationY = iY;
+}
+
+void
+FInbetweenerBreakdown::Rotate( double iAngle )
+{
+    mTargetRotation = iAngle;
+}
+
+void
+FInbetweenerBreakdown::Scale( double iX, double iY )
+{
+    mTargetScalingX = iX;
+    mTargetScalingY = iY;
+}
+
 BLMatrix2D&
 FInbetweenerBreakdown::GetSourceLocalMatrix()
 {
@@ -109,18 +315,13 @@ FInbetweenerBreakdown::GetSourceLocalMatrix()
         return identityMatrix;
     }
 
-    return mInbetweenerTag->GetChart().drawingBuffer[mSourceDrawingIndex].matrix;
+    return mInbetweenerTag->GetChart().drawingBuffer[mSourceDrawingIndex].localMatrix;
 }
 
 BLMatrix2D&
 FInbetweenerBreakdown::GetTargetLocalMatrix()
 {
-    if( mTargetDrawingIndex == mInbetweenerTag->GetDrawingCount() )
-    {
-        return mInbetweenerTag->GetTargetLocalMatrix();
-    }
-
-    return mInbetweenerTag->GetChart().drawingBuffer[mTargetDrawingIndex].matrix;
+    return mInbetweenerTag->GetChart().drawingBuffer[mTargetDrawingIndex].localMatrix;
 }
 
 void

@@ -78,7 +78,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     Ar << translationX;
                     Ar << translationY;
 
-                    iInbetweenerTag.Translate( translationX, translationY );
+                    iInbetweenerTag.GetMasterBreakdown()->Translate( translationX, translationY );
                     //iInbetweenerTag.UpdateMatrix();
                 break;
 
@@ -87,7 +87,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
 
                     Ar << rotation;
 
-                    iInbetweenerTag.Rotate( rotation );
+                    iInbetweenerTag.GetMasterBreakdown()->Rotate( rotation );
                     //iInbetweenerTag.UpdateMatrix();
                 break;
 
@@ -98,7 +98,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     Ar << scalingX;
                     Ar << scalingY;
 
-                    iInbetweenerTag.Scale( scalingX, scalingY );
+                    iInbetweenerTag.GetMasterBreakdown()->Scale( scalingX, scalingY );
                     //iInbetweenerTag.UpdateMatrix();
                 break;
 

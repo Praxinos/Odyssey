@@ -1,4 +1,5 @@
 #include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorTag.h"
 
 FOdysseyVectorSharedEnv::~FOdysseyVectorSharedEnv()
 {
@@ -36,6 +37,23 @@ std::list<FOdysseyVectorTag*>&
 FOdysseyVectorSharedEnv::GetTagList()
 {
     return mTagList;
+}
+
+FOdysseyVectorTag*
+FOdysseyVectorSharedEnv::GetSelectedTagByClassType( uint32 iClassType )
+{
+    for( FOdysseyVectorTag* tag : mTagList )
+    {
+        if( tag->GetClass() == iClassType )
+        {
+            if( tag->IsSelected() )
+            {
+                return tag;
+            }
+        }
+    }
+
+    return nullptr;
 }
 
 bool

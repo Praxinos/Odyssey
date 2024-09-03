@@ -3,7 +3,9 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorAnimationCell.h"
 #include "InbetweenerTag/InbetweenerPoint.h"
 #include "InbetweenerTag/InbetweenerQuad.h"
 #include "InbetweenerTag/InbetweenerBreakdown.h"
@@ -26,11 +28,11 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Reset( FOdysseyVectorGroupPaint* iSc
 }
 
 void
-FOdysseyPainterEditorVectorMatchingToolHUD::DrawGrid( BLContext* iBLContext
-                                                    , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                    , const BLRgba32& iFgColor
-                                                    , const BLRgba32& iBgColor
-                                                    , const BLRgba32& iHcColor )
+FOdysseyPainterEditorVectorMatchingToolHUD::DrawTargetGrid( BLContext* iBLContext
+                                                          , FInbetweenerBreakdown* iBreakdown
+                                                          , const BLRgba32& iFgColor
+                                                          , const BLRgba32& iBgColor
+                                                          , const BLRgba32& iHcColor )
 {
     iBLContext->save();
     iBLContext->resetMatrix();
@@ -38,33 +40,30 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawGrid( BLContext* iBLContext
     iBLContext->setStrokeStyle( iHcColor );
     iBLContext->setStrokeWidth( 1.0f );
 
-    for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
+    BLMatrix2D worldMatrix = iBreakdown->GetInbetweenerTag()->GetOwner()->GetWorldMatrix();
+    BLMatrix2D& localMatrix = iBreakdown->GetTargetLocalMatrix();
+
+    worldMatrix.transform( localMatrix );
+
+    for( FInbetweenerQuad& quad : iBreakdown->GetGrid()->GetQuadBuffer() )
     {
-        BLMatrix2D worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
-        BLMatrix2D& localMatrix = breakdown->GetTargetLocalMatrix();
-
-        worldMatrix.transform( localMatrix );
-
-        for( FInbetweenerQuad& quad : breakdown->GetGrid()->GetQuadBuffer() )
+        if( quad.IsLinked() )
         {
-            if( quad.IsLinked() )
-            {
-                FInbetweenerPoint** gridPoint = quad.GetPoints();
+            FInbetweenerPoint** gridPoint = quad.GetPoints();
 
-                BLPoint pt[4] = { worldMatrix.mapPoint( gridPoint[0]->GetTargetPosition().x
-                                                      , gridPoint[0]->GetTargetPosition().y )
-                                , worldMatrix.mapPoint( gridPoint[1]->GetTargetPosition().x
-                                                      , gridPoint[1]->GetTargetPosition().y )
-                                , worldMatrix.mapPoint( gridPoint[2]->GetTargetPosition().x
-                                                      , gridPoint[2]->GetTargetPosition().y )
-                                , worldMatrix.mapPoint( gridPoint[3]->GetTargetPosition().x
-                                                      , gridPoint[3]->GetTargetPosition().y ) };
+            BLPoint pt[4] = { worldMatrix.mapPoint( gridPoint[0]->GetTargetPosition().x
+                                                  , gridPoint[0]->GetTargetPosition().y )
+                            , worldMatrix.mapPoint( gridPoint[1]->GetTargetPosition().x
+                                                  , gridPoint[1]->GetTargetPosition().y )
+                            , worldMatrix.mapPoint( gridPoint[2]->GetTargetPosition().x
+                                                  , gridPoint[2]->GetTargetPosition().y )
+                            , worldMatrix.mapPoint( gridPoint[3]->GetTargetPosition().x
+                                                  , gridPoint[3]->GetTargetPosition().y ) };
 
-                iBLContext->strokeLine( pt[0], pt[1] );
-                iBLContext->strokeLine( pt[1], pt[2] );
-                iBLContext->strokeLine( pt[2], pt[3] );
-                iBLContext->strokeLine( pt[3], pt[0] );
-            }
+            iBLContext->strokeLine( pt[0], pt[1] );
+            iBLContext->strokeLine( pt[1], pt[2] );
+            iBLContext->strokeLine( pt[2], pt[3] );
+            iBLContext->strokeLine( pt[3], pt[0] );
         }
     }
 
@@ -83,6 +82,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     static BLRgba32 greyColor = BLRgba32( 128, 128, 128, 128 );
     uint64 hudFlags = mMatchingTool->GetEditor()->GetVectorHUDFlags();
+    FOdysseyVectorEngine *engine = iScene->GetEngine();
 
     // Draw default
     // -> nothing in object mode.
@@ -92,35 +92,42 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
-        FOdysseyVectorObject* selectedObject = iScene->GetEngine()->GetLastSelectedObject();
+        // Caution: even though here we pick a tag that is displayed in the scene,
+        // it does not mean it belongs to an object that belongs to the scene.
+        FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(engine->GetSharedEnv()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass() ));
 
-        DrawObjects( iBLContext
-                   , iScene
-                   , greyColor
-                   , bgColor
-                   , hcColor
-                   , hudFlags | HUD_TAGINBETWEENER_TARGET | HUD_DRAW_ALL );
-
-        DrawObjects( iBLContext
-                   , iScene
-                   , fgColor
-                   , bgColor
-                   , hcColor
-                   , hudFlags | HUD_TAGINBETWEENER_TARGET );
-
-        if( selectedObject )
+        if( inbetweenerTag )
         {
-            FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+            FOdysseyVectorGroupPaint* inbetweenerTagScene = inbetweenerTag->GetOwner()->GetScene();
+            uint32 frameIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex()
+                              - inbetweenerTagScene->GetEngine()->GetAnimationCell()->GetIndex();
 
-            if( tag )
+            for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
             {
-                FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>( tag );
+                if( breakdown->GetTargetDrawingIndex() == frameIndex )
+                {
+                    DrawObjects( iBLContext
+                               // we draw the tag owner's scene over the current scene.
+                               , inbetweenerTag->GetOwner()->GetScene()
+                               , greyColor
+                               , bgColor
+                               , hcColor
+                               , hudFlags | HUD_TAGINBETWEENER_TARGET | HUD_DRAW_ALL );
 
-                DrawGrid ( iBLContext
-                         , inbetweenerTag
-                         , fgColor
-                         , bgColor
-                         , hcColor );
+                    DrawObjects( iBLContext
+                               // we draw the tag owner's scene over the current scene.
+                               , inbetweenerTag->GetOwner()->GetScene()
+                               , fgColor
+                               , bgColor
+                               , hcColor
+                               , hudFlags | HUD_TAGINBETWEENER_TARGET );
+
+                    DrawTargetGrid ( iBLContext
+                                   , breakdown
+                                   , fgColor
+                                   , bgColor
+                                   , hcColor );
+                }
             }
         }
     }
@@ -146,39 +153,36 @@ FOdysseyPainterEditorVectorMatchingToolHUD::SetCursorPosition( double iX, double
 }
 
 void
-FOdysseyPainterEditorVectorMatchingToolHUD::PickTargetPoints( FOdysseyVectorTagInbetweener* iInbetweenerTag
+FOdysseyPainterEditorVectorMatchingToolHUD::PickTargetPoints( FInbetweenerBreakdown* iBreakdown
                                                             , double iWorldX
                                                             , double iWorldY
                                                             , double iRadius
                                                             , std::vector<FInbetweenerPoint*>& oPointArray
                                                             , std::vector<FInbetweenerGrid*>& oGridArray )
 {
-    for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
+    BLMatrix2D worldMatrix = iBreakdown->GetInbetweenerTag()->GetOwner()->GetWorldMatrix();
+    BLMatrix2D& localMatrix = iBreakdown->GetTargetLocalMatrix();
+    bool anyPointPicked = false;
+
+    worldMatrix.transform( localMatrix );
+
+    for( FInbetweenerPoint& point : iBreakdown->GetGrid()->GetPointBuffer() )
     {
-        BLMatrix2D worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
-        BLMatrix2D& localMatrix = breakdown->GetTargetLocalMatrix();
-        bool anyPointPicked = false;
+        BLPoint pt = worldMatrix.mapPoint( point.GetTargetPosition().x
+                                            , point.GetTargetPosition().y );
+        ::ULIS::FVec2D vec = ::ULIS::FVec2D( pt.x - iWorldX, pt.y - iWorldY );
+        double distance = vec.Distance();
 
-        worldMatrix.transform( localMatrix );
-
-        for( FInbetweenerPoint& point : breakdown->GetGrid()->GetPointBuffer() )
+        if( distance <= iRadius )
         {
-            BLPoint pt = worldMatrix.mapPoint( point.GetTargetPosition().x
-                                             , point.GetTargetPosition().y );
-            ::ULIS::FVec2D vec = ::ULIS::FVec2D( pt.x - iWorldX, pt.y - iWorldY );
-            double distance = vec.Distance();
+            oPointArray.push_back( &point );
 
-            if( distance <= iRadius )
-            {
-                oPointArray.push_back( &point );
-
-                anyPointPicked = true;
-            }
+            anyPointPicked = true;
         }
+    }
 
-        if( anyPointPicked )
-        {
-            oGridArray.push_back( breakdown->GetGrid() );
-        }
+    if( anyPointPicked )
+    {
+        oGridArray.push_back( iBreakdown->GetGrid() );
     }
 }

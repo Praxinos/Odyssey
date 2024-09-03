@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include <list>
 
 //#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 

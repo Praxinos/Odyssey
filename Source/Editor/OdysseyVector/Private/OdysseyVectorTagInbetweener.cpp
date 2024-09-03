@@ -119,9 +119,8 @@ FOdysseyVectorTagInbetweener::Map()
           return 0;
       } );
 
-    /* Map on master grid */
+    /* Map on first grid */
     mBreakdownList.front()->GetGrid()->MapInterpolatedPaths( mInterpolatedPathBuffer );
-    //mGrid->MapInterpolatedPaths( mInterpolatedPathBuffer );
 }
 
 FOdysseyVectorTagInbetweener::~FOdysseyVectorTagInbetweener()
@@ -149,6 +148,12 @@ std::list<FInbetweenerRoute*>&
 FOdysseyVectorTagInbetweener::GetRouteList()
 {
     return mRouteList;
+}
+
+FInbetweenerDrawing*
+FOdysseyVectorTagInbetweener::GetDrawing( uint32 iIndex )
+{
+    return &mChart.drawingBuffer[iIndex];
 }
 
 void
@@ -227,12 +232,6 @@ FOdysseyVectorTagInbetweener::SetMapAsPolyline( bool iMapAsPolyline )
     Invalidate( INVALIDATE_MAP | INVALIDATE_CELLS | INVALIDATE_TARGET );
 }
 
-BLMatrix2D&
-FOdysseyVectorTagInbetweener::GetTargetLocalMatrix()
-{
-    return mTargetLocalMatrix;
-}
-
 FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorSharedEnv* iSharedEnv
                                                           , FOdysseyVectorObject* iOwnerObject
                                                           , uint32 iNumQuadX
@@ -249,29 +248,17 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     , mInterpolationType( eInbetweenerInterpolationType::ARAP )
     , mInvalidationFlags( INVALIDATE_MAP
                         | INVALIDATE_BUFFERS
-                        | INVALIDATE_SOURCEBBOX
+                        | INVALIDATE_SOURCE
                         | INVALIDATE_TARGET
                         | INVALIDATE_ROUTES
                         | INVALIDATE_SPACING
                         | INVALIDATE_CELLS )
-    , mTargetTranslationX( 0.0f )
-    , mTargetTranslationY( 0.0f )
-    , mTargetScalingX    ( 1.0f )
-    , mTargetScalingY    ( 1.0f )
-    , mTargetRotation    ( 0.0f )
     , mColor ( 255, 0, 255, 255 )
     , bMapAsPolyline( false )
     , bShared ( false )
     , mARAPRigidity ( 10 )
     , mMasterBreakdown( this )
 {
-    mSourceBBox = iOwnerObject->GetBBox( false );
-
-    mSourceBBox.x -= 0.01f;
-    mSourceBBox.y -= 0.01f;
-    mSourceBBox.w += 0.02f;
-    mSourceBBox.h += 0.02f;
-
     // the default breakdown (has range 0 <-> 1 )
     mBreakdownList.emplace_back( &mMasterBreakdown );
 
@@ -314,26 +301,6 @@ void
 FOdysseyVectorTagInbetweener::SetColor( const FColor& iColor )
 {
     mColor = iColor;
-}
-
-void
-FOdysseyVectorTagInbetweener::Translate( double iX, double iY )
-{
-    mTargetTranslationX = iX;
-    mTargetTranslationY = iY;
-}
-
-void
-FOdysseyVectorTagInbetweener::Rotate( double iAngle )
-{
-    mTargetRotation = iAngle;
-}
-
-void
-FOdysseyVectorTagInbetweener::Scale( double iX, double iY )
-{
-    mTargetScalingX = iX;
-    mTargetScalingY = iY;
 }
 
 void FOdysseyVectorTagInbetweener::Added()
@@ -444,8 +411,11 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
         if ( ( iDrawingIndex > curBreakdown->GetSourceDrawingIndex() )
           && ( iDrawingIndex < curBreakdown->GetTargetDrawingIndex() ) )
         {
-            int32 sourceDrawingIndex = curBreakdown->GetSourceDrawingIndex();
-            int32 targetDrawingIndex = iDrawingIndex;
+            FInbetweenerBreakdown* prevBreakdown = curBreakdown->GetPrevBreakdown();
+            int32 curSourceDrawingIndex = curBreakdown->GetSourceDrawingIndex();
+            int32 curTargetDrawingIndex = curBreakdown->GetTargetDrawingIndex();
+            int32 newSourceDrawingIndex = curSourceDrawingIndex;
+            int32 newTargetDrawingIndex = iDrawingIndex;
             FInbetweenerBreakdown* newBreakdown = iNewBreakdown ? iNewBreakdown 
                                                                 : new FInbetweenerBreakdown( this );
 
@@ -453,8 +423,8 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
             // (then its pointer to the tag would be null)
             newBreakdown->SetInbetweenerTag( this );
 
-            newBreakdown->SetSourceDrawingIndex( sourceDrawingIndex );
-            newBreakdown->SetTargetDrawingIndex( targetDrawingIndex );
+            newBreakdown->SetSourceDrawingIndex( newSourceDrawingIndex );
+            newBreakdown->SetTargetDrawingIndex( newTargetDrawingIndex );
 
             if( iCopyGeometry )
             {
@@ -473,8 +443,28 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
             // must be done after the intertweaning of the breakdowns
             if( iCopyGeometry )
             {
+                // compute mid-way transformation
+                double t = ( double ) ( iDrawingIndex - curSourceDrawingIndex ) / ( curTargetDrawingIndex - curSourceDrawingIndex );
+                double prevTranslationX = prevBreakdown ? prevBreakdown->GetTargetTranslationX() : 0.0f;
+                double prevTranslationY = prevBreakdown ? prevBreakdown->GetTargetTranslationY() : 0.0f;
+                double prevRotation = prevBreakdown ? prevBreakdown->GetTargetRotation() : 0.0f;
+                double prevScalingX = prevBreakdown ? prevBreakdown->GetTargetScalingX() : 1.0f;
+                double prevScalingY = prevBreakdown ? prevBreakdown->GetTargetScalingY() : 1.0f;
+                double translationX = curBreakdown->GetTargetTranslationX();
+                double translationY = curBreakdown->GetTargetTranslationY();
+                double rotation = curBreakdown->GetTargetRotation();
+                double scalingX = curBreakdown->GetTargetScalingX();
+                double scalingY = curBreakdown->GetTargetScalingY();
+
                 newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
                 newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::TargetPosition );
+
+                newBreakdown->SetTargetTransform( prevTranslationX + ( ( translationX - prevTranslationX ) * t )
+                                                , prevTranslationY + ( ( translationY - prevTranslationY ) * t )
+                                                , prevRotation     + ( ( rotation     - prevRotation     ) * t )
+                                                , prevScalingX     + ( ( scalingX     - prevScalingX     ) * t )
+                                                , prevScalingY     + ( ( scalingY     - prevScalingY     ) * t ) );
+                newBreakdown->UpdateMatrix();
             }
 
             Invalidate( INVALIDATE_BREAKDOWN_LIST );
@@ -617,13 +607,14 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         {
             if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
             {
+/*
                 mSourceBBox = mOwner->GetBBox( false );
 
                 mSourceBBox.x -= 0.1f;
                 mSourceBBox.y -= 0.1f;
                 mSourceBBox.w += 0.2f;
                 mSourceBBox.h += 0.2f;
-
+*/
                 for( FInbetweenerBreakdown* breakdown : mBreakdownList )
                 {
                     std::vector<::ULIS::FVec2D> sourceGeometry;
@@ -657,26 +648,61 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             mInvalidationFlags |= ( INVALIDATE_SPACING );
         }
 
-        if( mInvalidationFlags & INVALIDATE_TARGET )
+        // will update grids' BBoxes (needed for mapping and transform HUD) and center of mass (needed for interpolation).
+        for( FInbetweenerBreakdown* breakdown : mBreakdownList )
         {
-            UpdateBBox( mTargetBBox, eInbetweenerPointPositionType::TargetPosition );
+            breakdown->GetGrid()->Update( iUpdateFlags, mInvalidationFlags );
         }
 
         if( ( mInvalidationFlags & INVALIDATE_MAP            )
+         || ( mInvalidationFlags & INVALIDATE_SOURCE         )
          || ( mInvalidationFlags & INVALIDATE_BREAKDOWN_LIST ) )
         {
+            // map object to the first grid
             Map();
 
             mInvalidationFlags |= INVALIDATE_BUFFERS;
         }
 
-        if( mInvalidationFlags & INVALIDATE_BUFFERS )
+        if( ( mInvalidationFlags & INVALIDATE_BUFFERS )
+         || ( mInvalidationFlags & INVALIDATE_TARGET  ) )
         {
+            // alloc buffers for interpolation
             AllocBuffers();
         }
 
 // TODO: needs to be placed somewhere else
     DispatchInbetweensToBreakdowns();
+
+        if( ( mInvalidationFlags & INVALIDATE_TARGET         )
+          ||( mInvalidationFlags & INVALIDATE_BREAKDOWN_LIST ) )
+        {
+            ResizeRoutes();
+        }
+
+        // Precompute ARAP interpolation after the grid and routes have been updated
+        if( ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCE     )
+         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGET     )
+         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE   )
+         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SPACING    )
+         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_ROUTE_LIST )
+         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_MAP        ) )
+        {
+            if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
+            {
+                for( FInbetweenerBreakdown* breakdown : mBreakdownList )
+                {
+                    if( breakdown->GetInbetweenerTag()->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
+                    {
+                        if( breakdown->GetGrid()->PrecomputeARAPInterpolation() == false )
+                        {
+                            UE_LOG( LogTemp, Warning, TEXT("ERROR DURING PRECOMPUTE"));
+                        }
+                    }
+                }
+            }
+        }
+
 
         if( mInvalidationFlags & INVALIDATE_TARGET )
         {
@@ -688,12 +714,6 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             }
         }
 
-        if( ( mInvalidationFlags & INVALIDATE_TARGET         )
-          ||( mInvalidationFlags & INVALIDATE_BREAKDOWN_LIST ) )
-        {
-            ResizeRoutes();
-        }
-
         //if( ( mInvalidationFlags & INVALIDATE_ROUTES )
         //||  ( mInvalidationFlags & INVALIDATE_TARGET ) )
         {
@@ -703,10 +723,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             }
         }
 
-        for( FInbetweenerBreakdown* breakdown : mBreakdownList )
-        {
-            breakdown->GetGrid()->Update( iUpdateFlags, mInvalidationFlags );
-        }
+
 
         if( ( mInvalidationFlags & INVALIDATE_SPACING )
          || ( mInvalidationFlags & INVALIDATE_MAP     )
@@ -738,7 +755,7 @@ FOdysseyVectorTagInbetweener::Invalidate( uint64 iInvalidationFlags )
 
     mInvalidationFlags |= iInvalidationFlags;
 }
-
+/*
 BLMatrix2D&
 FOdysseyVectorTagInbetweener::GetTargetWorldMatrix()
 {
@@ -750,47 +767,7 @@ FOdysseyVectorTagInbetweener::GetTargetInverseWorldMatrix()
 {
     return mTargetInverseWorldMatrix;
 }
-
-::ULIS::FRectD
-FOdysseyVectorTagInbetweener::GetSourceBBox( bool iWorld )
-{
-    if ( iWorld == true )
-    {
-        BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
-        BLPoint p0 = worldMatrix.mapPoint( mSourceBBox.x                , mSourceBBox.y                 );
-        BLPoint p1 = worldMatrix.mapPoint( mSourceBBox.x + mSourceBBox.w, mSourceBBox.y                 );
-        BLPoint p2 = worldMatrix.mapPoint( mSourceBBox.x + mSourceBBox.w, mSourceBBox.y + mSourceBBox.h );
-        BLPoint p3 = worldMatrix.mapPoint( mSourceBBox.x                , mSourceBBox.y + mSourceBBox.h );
-        ::ULIS::FRectD worldBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
-                                                             , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
-                                                             , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
-                                                             , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
-
-        return worldBBox;
-    }
-
-    return mSourceBBox;
-}
-
-::ULIS::FRectD
-FOdysseyVectorTagInbetweener::GetTargetBBox( bool iWorld )
-{
-    if ( iWorld == true )
-    {
-        BLPoint p0 = mTargetWorldMatrix.mapPoint( mTargetBBox.x                , mTargetBBox.y                 );
-        BLPoint p1 = mTargetWorldMatrix.mapPoint( mTargetBBox.x + mTargetBBox.w, mTargetBBox.y                 );
-        BLPoint p2 = mTargetWorldMatrix.mapPoint( mTargetBBox.x + mTargetBBox.w, mTargetBBox.y + mTargetBBox.h );
-        BLPoint p3 = mTargetWorldMatrix.mapPoint( mTargetBBox.x                , mTargetBBox.y + mTargetBBox.h );
-        ::ULIS::FRectD worldBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
-                                                             , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
-                                                             , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
-                                                             , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
-
-        return worldBBox;
-    }
-
-    return mTargetBBox;
-}
+*/
 
 void
 FOdysseyVectorTagInbetweener::ResetChart()
@@ -832,55 +809,13 @@ FOdysseyVectorTagInbetweener::SetChart( const FInbetweenerChart& iChart )
 }
 
 void
-FOdysseyVectorTagInbetweener::GetTargetTransform( double& oTranslationX
-                                                , double& oTranslationY
-                                                , double& oRotation
-                                                , double& oScalingX
-                                                , double& oScalingY )
-{
-    oTranslationX = mTargetTranslationX;
-    oTranslationY = mTargetTranslationY;
-    oRotation = mTargetRotation;
-    oScalingX = mTargetScalingX;
-    oScalingY = mTargetScalingY;
-}
-
-void
-FOdysseyVectorTagInbetweener::SetTargetTransform( double iTranslationX
-                                                , double iTranslationY
-                                                , double iRotation
-                                                , double iScalingX
-                                                , double iScalingY )
-{
-    mTargetTranslationX = iTranslationX;
-    mTargetTranslationY = iTranslationY;
-    mTargetRotation = iRotation;
-    mTargetScalingX = iScalingX;
-    mTargetScalingY = iScalingY;
-
-    UpdateMatrix( );
-}
-
-void
 FOdysseyVectorTagInbetweener::UpdateMatrix()
 {
-    mTargetLocalMatrix.reset();
-    mTargetLocalMatrix.translate( mTargetTranslationX, mTargetTranslationY );
-    mTargetLocalMatrix.rotate( mTargetRotation * M_PI / 180.0f );
-    mTargetLocalMatrix.scale( mTargetScalingX, mTargetScalingY );
-
-    mTargetWorldMatrix = mOwner->GetWorldMatrix();
-    mTargetWorldMatrix.transform( mTargetLocalMatrix );
-
-    BLMatrix2D::invert( mTargetInverseWorldMatrix, mTargetWorldMatrix );
-
-    // first drawing does not need interpolation. It is actually the source position
-    for( uint32 drawingIndex = 1; drawingIndex < GetDrawingCount(); drawingIndex++ )
+    for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
-        InterpolateTransform( drawingIndex );
+        // deform the path according to grid geometry
+        breakdown->UpdateMatrix();
     }
-
-    Invalidate( INVALIDATE_CELLS | INVALIDATE_ROUTES | INVALIDATE_SPACING );
 }
 
 void
@@ -1020,27 +955,6 @@ FOdysseyVectorTagInbetweener::RedrawAnimationCells( uint32 iDrawingCount )
 }
 
 void
-FOdysseyVectorTagInbetweener::InterpolateTransform( uint32 iDrawingIndex )
-{
-    FInbetweenerDrawing* drawing = &mChart.drawingBuffer[iDrawingIndex];
-    double translationX, translationY, rotation, scalingX, scalingY;
-    double spacing = drawing->spacing;
-
-    translationX = mTargetTranslationX * spacing;
-    translationY = mTargetTranslationY * spacing;
-    rotation = mTargetRotation * spacing;
-    scalingX = 1.0f + ( ( mTargetScalingX - 1.0f ) * spacing );
-    scalingY = 1.0f + ( ( mTargetScalingY - 1.0f ) * spacing );
-
-    drawing->matrix.reset();
-    drawing->matrix.translate( translationX, translationY );
-    drawing->matrix.rotate( rotation * M_PI / 180.0f ); // convert to radians
-    drawing->matrix.scale( scalingX, scalingY );
-
-    BLMatrix2D::invert( drawing->inverseMatrix, drawing->matrix );
-}
-
-void
 FOdysseyVectorTagInbetweener::Interpolate()
 {
     if( mInterpolationType == eInbetweenerInterpolationType::ARAP )
@@ -1053,9 +967,9 @@ FOdysseyVectorTagInbetweener::Interpolate()
 */
     }
 
-    for( uint32 i = 1; i < ( GetDrawingCount() - 2 ); i++ )
+    for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
-        InterpolateTransform( i );
+        breakdown->InterpolateTransform();
     }
 
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
@@ -1261,7 +1175,8 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( uint32 iDrawingIndex
     iBLContext->save();
     iBLContext->resetMatrix();
 
-    worldMatrix.transform( mChart.drawingBuffer[iDrawingIndex].matrix );
+    // passed to DrawPathAt()
+    worldMatrix.transform( mChart.drawingBuffer[iDrawingIndex].localMatrix );
 
     for( FInterpolatedPath& interpolatedPath : mInterpolatedPathBuffer )
     {
@@ -1344,35 +1259,7 @@ FOdysseyVectorTagInbetweener::MoveInbetween( FInbetweenerDrawing* iDrawing
     Invalidate( INVALIDATE_ROUTES | INVALIDATE_SPACING );
 }
 
-double
-FOdysseyVectorTagInbetweener::GetTargetTranslationX()
-{
-    return mTargetTranslationX;
-}
 
-double
-FOdysseyVectorTagInbetweener::GetTargetTranslationY()
-{
-    return mTargetTranslationY;
-}
-
-double
-FOdysseyVectorTagInbetweener::GetTargetRotation()
-{
-    return mTargetRotation;
-}
-
-double
-FOdysseyVectorTagInbetweener::GetTargetScalingX()
-{
-    return mTargetScalingX;
-}
-
-double
-FOdysseyVectorTagInbetweener::GetTargetScalingY()
-{
-    return mTargetScalingY;
-}
 
 void
 FOdysseyVectorTagInbetweener::AllocBuffers()
@@ -1519,7 +1406,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                 if( tag )
                 {
                     FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-                    FInbetweenerDrawing* inbetween = &inbetweenerTag->mChart.drawingBuffer[drawingIndex];
+                    FInbetweenerDrawing* drawing = &inbetweenerTag->mChart.drawingBuffer[drawingIndex];
 
                     if( inbetweenerTag->GetMapAsPolyline() )
                     {
@@ -1544,8 +1431,8 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                             //double transformedLocalRadius;
                             //BLPoint transformedWorldPosition;
 
-                            transformedLocalPosition = FOdysseyVector::MapPoint( inbetween->matrix, ::ULIS::FVec2D( commitPosition->x
-                                                                                                                  , commitPosition->y ) );
+                            transformedLocalPosition = FOdysseyVector::MapPoint( drawing->localMatrix, ::ULIS::FVec2D( commitPosition->x
+                                                                                                                     , commitPosition->y ) );
 
 /*
                             transformedWorldPosition = ownerWorldMatrix.mapPoint( transformedLocalPosition.x
@@ -1579,7 +1466,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                     FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
                     FInbetweenerDrawing* drawing = &inbetweenerTag->mChart.drawingBuffer[drawingIndex];
 
-                    drawing->matrix.reset();
+                    drawing->localMatrix.reset();
 
                     // revert vertices coords after having copied the object.
                     // Coords were saved in the point position buffer
