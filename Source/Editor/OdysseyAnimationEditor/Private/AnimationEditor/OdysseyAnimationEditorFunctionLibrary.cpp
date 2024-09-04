@@ -32,6 +32,9 @@ UOdysseyAnimationEditorFunctionLibrary::CreateAnimationAsset(FString AssetName, 
 		)
 	);
 
+	if (!animation)
+		return nullptr;
+
 	FOdysseyAnimationConfiguration conf;
 	conf.Width = Width;
 	conf.Height = Height;
