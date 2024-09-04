@@ -83,7 +83,7 @@ public:
     UPROPERTY(EditAnywhere, Category="Out Of Pegs", meta = (LinearDeltaSensitivity="1") )
     FVector2D Pan = FVector2D(0, 0);
 
-    UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( ClampMin = "0", ClampMax = "360", UIMin = "0", UIMax = "360", Units="Degrees" ) )
+    UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( Units="Degrees", LinearDeltaSensitivity="1" ) )
     float Rotation = 0.f;
 
     UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( ClampMin = "0", UIMin = "0", Units="Percent" ) )

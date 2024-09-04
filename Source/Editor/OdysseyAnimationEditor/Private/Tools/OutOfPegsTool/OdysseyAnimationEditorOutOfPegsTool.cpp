@@ -166,7 +166,7 @@ UOdysseyAnimationEditorOutOfPegsTool::PostEditChangeProperty( FPropertyChangedEv
     if ( propertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Rotation) )
     {
 		FOdysseyAnimationCellOutOfPegs outOfPegs = mCell->OutOfPegs;
-		outOfPegs.Rotation = Rotation;
+		outOfPegs.Rotation = FMath::UnwindDegrees(Rotation);
 		FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), outOfPegs, iEvent.ChangeType);
     }
     if ( propertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Zoom) )
