@@ -35,13 +35,10 @@ UOdysseyAnimationEditorFunctionLibrary::CreateAnimationAsset(FString AssetName, 
 	if (!animation)
 		return nullptr;
 
-	FOdysseyAnimationConfiguration conf;
-	conf.Width = Width;
-	conf.Height = Height;
-	conf.Format = Format;
-	conf.FramesPerSecond = FramesPerSecond;
-
-	animation->Init(conf);
+	animation->mWidth = Width;
+	animation->mHeight = Height;
+	animation->Format = Format;
+	animation->FramesPerSecond = FramesPerSecond;
 
 	return animation;
 }

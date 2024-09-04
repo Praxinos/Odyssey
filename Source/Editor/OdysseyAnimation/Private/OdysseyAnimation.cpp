@@ -32,65 +32,6 @@ UOdysseyAnimation::OnFramesPerSecondChanged()
     return onFramesPerSecondChanged;
 }
 
-void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguration)
-{
-	mWidth = iConfiguration.Width;
-	mHeight = iConfiguration.Height;
-	mFormat = iConfiguration.ULISFormat();
-	Format = iConfiguration.Format;
-	FramesPerSecond = iConfiguration.FramesPerSecond;
-
-	mLayerStack = NewObject<UOdysseyAnimationLayerStack>(this, "LayerStack", RF_Public | RF_Transactional);
-
-	switch (iConfiguration.LayerType)
-	{
-		case EOdysseyAnimationDefaultLayerType::kRaster:
-		{
-			UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(mLayerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-			mLayerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
-			layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
-		}
-		break;
-
-		case EOdysseyAnimationDefaultLayerType::kVector:
-		{
-			UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(mLayerStack->AddLayer(UOdysseyAnimationLayerImageVector::StaticClass()));
-			mLayerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
-			layer->AddCell(UOdysseyAnimationCellImageVector::StaticClass());
-		}
-		break;
-
-		default:
-			check(false); //should not be called
-	}
-
-	//Background Layer
-	if (iConfiguration.BackgroundColor != EOdysseyAnimationBackgroundColor::kTransparent)
-	{	
-		UOdysseyAnimationLayerImageRaster* backgroundLayer = Cast<UOdysseyAnimationLayerImageRaster>(mLayerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), nullptr, 1));
-		backgroundLayer->PostBehaviour = EOdysseyAnimationLayerImagePostBehaviour::Hold;
-		backgroundLayer->Name = LOCTEXT("animation.default-background-layer.name", "Background");
-
-		UOdysseyAnimationCellImageRaster* backgroundCell = Cast<UOdysseyAnimationCellImageRaster>(backgroundLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
-		TSharedPtr<FOdysseyRasterBlock> backgroundRasterBlock = backgroundCell->GetRasterBlock();
-
-		FLinearColor backgorundColor = iConfiguration.GetBackgroundColor();
-
-		FOdysseyRasterBlockMutator rasterBlockMutator(backgroundRasterBlock);
-		rasterBlockMutator.EditTilesFromRects(
-			{ backgroundRasterBlock->GetRect() },
-			[backgorundColor](TSharedPtr<::ULIS::FBlock> ioBlock, const FULISInvalidTileMap& iInvalidTileMap) -> TArray<::ULIS::FEvent>
-			{
-				::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ioBlock->Format());
-				::ULIS::FColor color( ::ULIS::FColor::FromRGBAF( backgorundColor.R, backgorundColor.G, backgorundColor.B, backgorundColor.A ) );
-				ctx.Fill(*ioBlock, color);
-				ctx.Finish();
-				return {};
-			}
-		);
-	}
-}
-
 int
 UOdysseyAnimation::GetWidth() const
 {
@@ -108,8 +49,8 @@ UOdysseyAnimation::GetFormat() const
 {
 	switch(Format)
 	{
-		case EOdysseyAnimationFormat::kBGRA8: return ::ULIS::Format_BGRA8;
-		case EOdysseyAnimationFormat::kRGBAF: return ::ULIS::Format_RGBAF;
+		case EOdysseyAnimationFormat::BGRA8: return ::ULIS::Format_BGRA8;
+		case EOdysseyAnimationFormat::RGBAF: return ::ULIS::Format_RGBAF;
 	}
 	checkf(false, TEXT("Format not found"));
 	return ::ULIS::Format_BGRA8;
@@ -217,6 +158,7 @@ UOdysseyAnimation::PostInitProperties()
     if (HasAnyFlags(RF_ClassDefaultObject))
         return;
 	
+	mLayerStack = NewObject<UOdysseyAnimationLayerStack>(this, "LayerStack", RF_Public | RF_Transactional);
 	mProxy = MakeShared<FOdysseyAnimationProxy>(this);
 
 	OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimation::OnImageRenderingChanged);
@@ -251,11 +193,11 @@ UOdysseyAnimation::PostLoad()
 
 	if (mFormat == ::ULIS::Format_BGRA8)
 	{
-		Format = EOdysseyAnimationFormat::kBGRA8;
+		Format = EOdysseyAnimationFormat::BGRA8;
 	}
 	if (mFormat == ::ULIS::Format_RGBAF)
 	{
-		Format = EOdysseyAnimationFormat::kRGBAF;
+		Format = EOdysseyAnimationFormat::RGBAF;
 	}
 
 	mProxy->PostLoad();

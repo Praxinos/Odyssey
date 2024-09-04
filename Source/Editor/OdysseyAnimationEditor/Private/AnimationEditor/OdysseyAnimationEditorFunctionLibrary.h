@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "OdysseyLayer.h"
+#include "OdysseyAnimation.h"
 #include "OdysseyAnimationEditorFunctionLibrary.generated.h"
 
 UCLASS()
@@ -13,5 +13,5 @@ class UOdysseyAnimationEditorFunctionLibrary : public UBlueprintFunctionLibrary
 
 public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Animation")
-    static UOdysseyAnimation* CreateAnimationAsset(FString AssetName, FString PackagePath, int Width, int Height, EOdysseyAnimationFormat Format, float FramesPerSecond);
+    static UOdysseyAnimation* CreateAnimationAsset(FString AssetName="Animation", FString PackagePath="/Game/", int Width=1920, int Height=1080, EOdysseyAnimationFormat Format=EOdysseyAnimationFormat::BGRA8, float FramesPerSecond=24.f);
 };

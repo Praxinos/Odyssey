@@ -5,7 +5,6 @@
 
 #include "CoreMinimal.h"
 
-#include "Widgets/SOdysseyAnimationConfigureWindow.h"
 #include "OdysseyRasterBlock.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "BaseMediaSource.h"
@@ -14,6 +13,13 @@
 #include <ULIS>
 
 #include "OdysseyAnimation.generated.h"
+
+UENUM()
+enum class EOdysseyAnimationFormat : uint8
+{
+	BGRA8 UMETA(DisplayName = "BGRA 8"),
+	RGBAF UMETA(DisplayName = "RGBA F")
+};
 
 UCLASS(config=EditorPerProjectUserSettings, PerObjectConfig, HideCategories=(Platforms))
 class ODYSSEYANIMATION_API UOdysseyAnimation
@@ -37,9 +43,6 @@ public:
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnFramesPerSecondChanged, UOdysseyAnimation*)
     static FOnFramesPerSecondChanged& OnFramesPerSecondChanged();
-
-public:
-	void Init(const FOdysseyAnimationConfiguration& iConfiguration);
 
 public:
 
@@ -91,9 +94,9 @@ public:
 	 *
 	 * @param Ar
 	 */
+	virtual void PostInitProperties() override;
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
-	virtual void PostInitProperties() override;
 	virtual void PostLoad() override;
 	
 protected:
@@ -114,6 +117,9 @@ public:
 	float FramesPerSecond = 24.0f;
 
 protected:
+	friend class UOdysseyAnimationFactory;
+	friend class UOdysseyAnimationEditorFunctionLibrary;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(DisplayName="Width"), Category="Odyssey|Animation")
 	int mWidth = -1;
 
@@ -124,7 +130,7 @@ protected:
 	int mFormat = ::ULIS::Format_BGRA8; //Deprecated: only present for compatibility, use Format instead
 
 	UPROPERTY(BlueprintReadOnly, Category="Odyssey|Animation")
-	EOdysseyAnimationFormat Format = EOdysseyAnimationFormat::kBGRA8;
+	EOdysseyAnimationFormat Format = EOdysseyAnimationFormat::BGRA8;
 
 	UPROPERTY(BlueprintReadOnly, Category="Odyssey|Animation", meta=(DisplayName="Layer Stack", LoadBehavior = "LazyOnDemand"))
 	TObjectPtr<UOdysseyAnimationLayerStack> mLayerStack;

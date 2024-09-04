@@ -85,7 +85,7 @@ private:
     FSimpleMulticastDelegate mOnZoomChanged;
     FSimpleMulticastDelegate mOnOffsetChanged;
 
-	UOdysseyAnimationLayer* mLayer;
+	UOdysseyAnimationLayer* mLayer = nullptr;
 
     EOdysseyTimelineTool mSelectedTool;
     TSharedPtr<FOdysseyAnimationTimelineSelectionTool> mSelectionTool;

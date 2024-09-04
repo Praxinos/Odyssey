@@ -24,4 +24,5 @@ private:
 
 private:
     FOdysseyAnimationConfiguration mConfiguration;
+	bool mConfigured = false;
 };
