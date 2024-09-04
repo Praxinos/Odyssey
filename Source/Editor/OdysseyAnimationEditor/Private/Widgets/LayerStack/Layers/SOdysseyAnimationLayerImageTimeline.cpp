@@ -41,19 +41,11 @@ SOdysseyAnimationLayerImageTimeline::Construct(
     mExtension = iExtension;
     mLayer = iLayer;
     mDisplayOptions = iArgs._DisplayOptions;
-
-    TAttribute<FMargin> cellsPadding = TAttribute<FMargin>::CreateLambda(
-        [this]()
-        {
-            return /*!DisplayOptions() ? FMargin(0.f, 5.f, 0.f, 5.f) :*/ FMargin(0);
-        }
-    );
     
     ChildSlot
     [
         SNew(SVerticalBox)
         + SVerticalBox::Slot()
-        .Padding(cellsPadding)
         [
             SNew(SOdysseyAnimationCells, mExtension, mLayer)
             .IsEnabled_Lambda([this](){ return !mLayer->IsLockedRecursively();})

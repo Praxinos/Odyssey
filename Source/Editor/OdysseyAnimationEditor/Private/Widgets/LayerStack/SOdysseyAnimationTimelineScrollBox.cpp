@@ -107,7 +107,7 @@ void
 SOdysseyAnimationTimelineScrollPanel::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const
 {
 	float scrollPadding = AllottedGeometry.GetLocalSize().X;
-	float currentChildOffset = -mExtension->Timeline()->GetOffset() * mExtension->Timeline()->GetFrameWidth();
+	float currentChildOffset = -mExtension->Timeline()->GetOffset() * mExtension->Timeline()->GetFrameWidth() + mExtension->Timeline()->GetPadding();
 
 	for (int32 SlotIndex = 0; SlotIndex < mChildren.Num(); ++SlotIndex)
 	{

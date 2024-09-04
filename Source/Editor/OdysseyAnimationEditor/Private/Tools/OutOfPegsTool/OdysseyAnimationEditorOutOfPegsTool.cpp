@@ -13,8 +13,63 @@
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyAnimation.h"
+#include "DetailLayoutBuilder.h"
 
 #include <ULIS>
+
+TSharedRef<IDetailCustomization>
+FOdysseyAnimationEditorOutOfPegsToolDetails::MakeInstance()
+{
+    return MakeShared<FOdysseyAnimationEditorOutOfPegsToolDetails>();
+}
+
+void
+FOdysseyAnimationEditorOutOfPegsToolDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
+{
+	TArray<TWeakObjectPtr<UObject>> ObjectsBeingCustomized;
+	DetailLayout.GetObjectsBeingCustomized(ObjectsBeingCustomized);
+
+	UOdysseyAnimationEditorOutOfPegsTool* tool = Cast<UOdysseyAnimationEditorOutOfPegsTool>(ObjectsBeingCustomized[0].Get());
+	if (!tool)
+		return;
+
+	TSharedRef<IPropertyHandle> panHandle = DetailLayout.GetProperty( GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Pan));
+	TSharedRef<IPropertyHandle> rotationHandle = DetailLayout.GetProperty( GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Rotation));
+	TSharedRef<IPropertyHandle> zoomHandle = DetailLayout.GetProperty( GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Zoom));
+
+	IDetailPropertyRow* panRow = DetailLayout.EditDefaultProperty(panHandle);
+	IDetailPropertyRow* rotationRow = DetailLayout.EditDefaultProperty(rotationHandle);
+	IDetailPropertyRow* zoomRow = DetailLayout.EditDefaultProperty(zoomHandle);
+
+	TAttribute<bool> panIsResetToDefaultVisible = TAttribute<bool>::CreateLambda(
+		[tool]()
+		{
+			return tool->GetCell() && tool->GetCell()->OutOfPegs.Pan != FVector2D(0, 0);
+		}
+	);
+
+	TAttribute<bool> rotationIsResetToDefaultVisible = TAttribute<bool>::CreateLambda(
+		[tool]()
+		{
+			return tool->GetCell() && tool->GetCell()->OutOfPegs.Rotation != 0.f;
+		}
+	);
+
+	TAttribute<bool> zoomIsResetToDefaultVisible = TAttribute<bool>::CreateLambda(
+		[tool]()
+		{
+			return tool->GetCell() && tool->GetCell()->OutOfPegs.Zoom != 100.f;
+		}
+	);
+
+	FResetToDefaultOverride panResetToDefault = FResetToDefaultOverride::Create(panIsResetToDefaultVisible);
+	FResetToDefaultOverride rotationResetToDefault = FResetToDefaultOverride::Create(rotationIsResetToDefaultVisible);
+	FResetToDefaultOverride zoomResetToDefault = FResetToDefaultOverride::Create(zoomIsResetToDefaultVisible);
+
+	panRow->OverrideResetToDefault(panResetToDefault);
+	rotationRow->OverrideResetToDefault(rotationResetToDefault);
+	zoomRow->OverrideResetToDefault(zoomResetToDefault);
+}
 
 UOdysseyAnimationEditorOutOfPegsTool::~UOdysseyAnimationEditorOutOfPegsTool()
 {

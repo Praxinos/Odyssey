@@ -49,6 +49,7 @@ public:
 	float GetFrameWidth() const;
 	float GetZoom() const;
 	float GetOffset() const;
+	float GetPadding() const;
     //FInt32Range GetSelectedFrames() const;
     //FInt32Range GetSelectableFrames() const;
     const TArray<UOdysseyAnimationCell*>& GetSelectedCells() const;

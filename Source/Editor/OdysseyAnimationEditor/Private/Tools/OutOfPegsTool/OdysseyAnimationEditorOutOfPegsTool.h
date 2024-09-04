@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
+#include "IDetailCustomization.h"
 #include "OdysseyAnimationEditorOutOfPegsTool.generated.h"
 
 class FOdysseyPaintEngine;
@@ -112,4 +113,15 @@ private:
     FVector2D mZoomCenter;
     float mZoomDistanceReference;
     float mZoomReference;
+};
+
+class FOdysseyAnimationEditorOutOfPegsToolDetails : public IDetailCustomization
+{
+public:
+    /** Makes a new instance of this detail layout class for a specific detail view requesting it */
+    static TSharedRef<IDetailCustomization> MakeInstance();
+
+    // IDetailCustomization interface
+    virtual void CustomizeDetails(IDetailLayoutBuilder& DetailLayout) override;
+    // End of IDetailCustomization interface
 };

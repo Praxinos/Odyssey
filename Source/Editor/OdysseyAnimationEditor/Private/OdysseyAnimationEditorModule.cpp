@@ -154,6 +154,9 @@ void
 FOdysseyAnimationEditorModule::RegisterDetailCustomizations()
 {
 	FOdysseyAnimationEditorFlipSystem::RegisterDetailCustomization();
+	
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    PropertyModule.RegisterCustomClassLayout(UOdysseyAnimationEditorOutOfPegsTool::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(&FOdysseyAnimationEditorOutOfPegsToolDetails::MakeInstance));
 }
 
 void

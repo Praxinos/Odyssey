@@ -52,7 +52,7 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 	float offset = mExtension->Timeline()->GetOffset();
 	const float frameNumberMinSize = 30.f;
 	const int32 frameNumberFrequency = FMath::Max(1, FGenericPlatformMath::CeilToInt(frameNumberMinSize / frameSize));
-	int32 startKey = FMath::Max(0, FGenericPlatformMath::FloorToInt(offset - padding));
+	int32 startKey = FMath::Max(0, FGenericPlatformMath::FloorToInt(offset - padding ));
 	int32 endKey = FMath::Max(0, FGenericPlatformMath::CeilToInt(offset - padding + (width / frameSize)));
 
 	UOdysseyAnimation* animation = mExtension->Animation();
@@ -61,7 +61,7 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 
 	for(int32 keyNum = startKey; keyNum <= endKey; keyNum++)
 	{
-		float x = (keyNum - offset + padding) * frameSize;
+		float x = (keyNum - offset + padding ) * frameSize;
 
 		//Draw background
 		const FColor backgroundColor = (keyNum & 1) ? backgroundColorOdd.ToFColor(true) : backgroundColorEven.ToFColor(true);

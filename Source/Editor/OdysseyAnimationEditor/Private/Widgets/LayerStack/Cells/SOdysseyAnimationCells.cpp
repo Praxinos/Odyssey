@@ -79,6 +79,7 @@ SOdysseyAnimationCells::Construct(
             ]
 			+ SHorizontalBox::Slot()
 			.AutoWidth()
+			.Padding(FMargin(-preBehaviourPadding, 0, 0, 0))
 			[
 				SNew(SBox)
 				.WidthOverride(preBehaviourPadding)

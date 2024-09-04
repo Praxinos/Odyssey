@@ -25,7 +25,7 @@ FOdysseyAnimationEditorTimeline::~FOdysseyAnimationEditorTimeline()
 FOdysseyAnimationEditorTimeline::FOdysseyAnimationEditorTimeline(FOdysseyAnimationEditorExtension* iExtension)
     : mExtension(iExtension)
     , mZoom(1.f)
-    , mOffset(0.f)
+    , mOffset(0)
     , mSelectedTool(EOdysseyTimelineTool::None)
     , mSelectionTool()
     , mMoveTool()
@@ -234,7 +234,7 @@ FOdysseyAnimationEditorTimeline::SetZoom(float iZoom)
 void 
 FOdysseyAnimationEditorTimeline::SetOffset(float iOffset)
 {
-    mOffset = iOffset;
+    mOffset = FMath::Max(0, iOffset);
     mOnOffsetChanged.Broadcast();
 }
 
@@ -304,6 +304,12 @@ float
 FOdysseyAnimationEditorTimeline::GetOffset() const
 {
     return mOffset;
+}
+
+float
+FOdysseyAnimationEditorTimeline::GetPadding() const
+{
+	return FOdysseyStyle::GetFloat(TEXT("Animation.Timeline.Padding"));
 }
 
 float
