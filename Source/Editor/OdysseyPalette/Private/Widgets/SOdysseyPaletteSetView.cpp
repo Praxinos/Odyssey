@@ -12,12 +12,14 @@ static FName contextSetMenuName = "OdysseyPaletteSetContextMenu";
 
 SOdysseyPaletteSetView::~SOdysseyPaletteSetView()
 {
+    UOdysseyPalette::OnSetsChanged().RemoveAll(this);
 }
 
 SOdysseyPaletteSetView::SOdysseyPaletteSetView():
     mCommandList(MakeShared<FUICommandList>())
 {
     MapActionsToCommandList();
+    UOdysseyPalette::OnSetsChanged().AddRaw(this, &SOdysseyPaletteSetView::OnPaletteSetsChanged);
 }
 
 //CONSTRUCTION/DESTRUCTION-----------------------------------------------
@@ -36,15 +38,19 @@ SOdysseyPaletteSetView::Construct(const FArguments& InArgs)
             .ListItemsSource(&(mPalette->Sets))
             .ItemAlignment(EListItemAlignment::LeftAligned)
             .SelectionMode(ESelectionMode::Single)
+            .OnMouseButtonClick(this, &SOdysseyPaletteSetView::OnItemClicked)
+            .ClearSelectionOnClick(false)
             .OnGenerateTile(this, &SOdysseyPaletteSetView::OnGenerateTile)
-            .OnContextMenuOpening(this, &SOdysseyPaletteSetView::OnContextMenuOpening)
+            .OnSelectionChanged(this, &SOdysseyPaletteSetView::OnSelectionChanged )
+            .OnContextMenuOpening(this, &SOdysseyPaletteSetView::OnContextMenuOpening )
         );
+
     }
 
     CreateContextMenu();
 
     if (mPalette)
-        OnSetSelected(mPalette->Sets[mPalette->UsedSet] );
+        SelectSet( mPalette->Sets[mPalette->UsedSet] );
 }
 
 void
@@ -56,7 +62,7 @@ SOdysseyPaletteSetView::DeleteSelectedSet()
     mPalette->RemoveSet( mPalette->UsedSet );
 
     mPalette->UsedSet = 1;
-    OnSetSelected(mPalette->Sets[0]);
+    SelectSet(mPalette->Sets[0]);
 }
 
 bool
@@ -78,7 +84,7 @@ SOdysseyPaletteSetView::DuplicateSelectedSet()
         return;
 
     mPalette->DuplicateSet();
-    OnSetSelected(mPalette->Sets.Last());
+    SelectSet(mPalette->Sets.Last());
 }
 
 bool
@@ -151,16 +157,46 @@ TSharedPtr<SWidget> SOdysseyPaletteSetView::OnContextMenuOpening()
     return UToolMenus::Get()->GenerateWidget(contextSetMenuName, menuContext);
 }
 
+void SOdysseyPaletteSetView::OnItemClicked(FName iSet)
+{
+    if (FSlateApplication::Get().GetPressedMouseButtons().Contains(EKeys::RightMouseButton))
+    {
+        CreateContextMenu();
+    }
+    else
+    {
+        SelectSet(iSet);
+    }
+}
+
 TSharedRef<class ITableRow>
 SOdysseyPaletteSetView::OnGenerateTile(FName iSet, const TSharedRef< class STableViewBase >& iTable)
 {
     return SNew(SOdysseyPaletteSetTile, iTable)
         .UsedSet(iSet) //All sets one after the other
-        .OnSelected(this, &SOdysseyPaletteSetView::OnSetSelected, iSet);
+        .OnSelected(this, &SOdysseyPaletteSetView::SelectSet, iSet);
 }
 
 void
-SOdysseyPaletteSetView::OnSetSelected(FName iSet)
+SOdysseyPaletteSetView::OnPaletteSetsChanged(UOdysseyPalette* iPalette)
+{
+    RequestListRefresh();
+    Private_ClearSelection();
+    Private_SetItemSelection(iPalette->GetUsedSet(), true, true);
+    mOnSetSelected.ExecuteIfBound(iPalette->GetUsedSet());
+}
+
+void
+SOdysseyPaletteSetView::SelectSet(FName iSet)
+{
+    RequestListRefresh();
+    Private_ClearSelection();
+    Private_SetItemSelection(iSet, true, true);
+    mOnSetSelected.ExecuteIfBound(iSet);
+}
+
+void
+SOdysseyPaletteSetView::OnSelectionChanged(FName iSet, ESelectInfo::Type iType)
 {
     RequestListRefresh();
     Private_ClearSelection();

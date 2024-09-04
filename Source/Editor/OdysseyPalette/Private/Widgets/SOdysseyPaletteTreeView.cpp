@@ -4,6 +4,7 @@
 #include "Widgets/SOdysseyPaletteTreeView.h"
 #include "OdysseyStyleSet.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "UObject/SavePackage.h"
 #include "ToolMenus.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "ToolMenuContext.h"
@@ -259,9 +260,29 @@ SOdysseyPaletteTreeView::ResetDropZone()
 FReply SOdysseyPaletteTreeView::AddSetToPalette()
 {
     mPalette->AddSet();
-    mPaletteSetView->OnSetSelected( mPalette->Sets.Last() );
+    mPaletteSetView->SelectSet( mPalette->Sets.Last() );
 
     return FReply::Handled();
+}
+
+FReply SOdysseyPaletteTreeView::SavePalette()
+{
+    if (!mPalette)
+        return FReply::Unhandled();
+
+    UPackage* package = mPalette->GetOutermost();
+    mPalette->MarkPackageDirty();
+
+    FSavePackageArgs packageArgs;
+    packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone | EObjectFlags::RF_HasExternalPackage;
+    FString packageFileName = FPackageName::LongPackageNameToFilename(package->GetName(), FPackageName::GetAssetPackageExtension());
+
+    bool isSaved = UPackage::SavePackage( package, nullptr, *packageFileName, packageArgs );
+
+    if( isSaved )
+        return FReply::Handled();
+    else
+        return FReply::Unhandled();
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -313,11 +334,6 @@ SOdysseyPaletteTreeView::SetCurrentEntryFromSelectorItem()
     FOdysseyObjectEditorUtils::SetPropertyValue(mPalette, "CurrentEntry", TSoftObjectPtr<UOdysseyPaletteEntry>(SelectorItem));
 }
 
-void SOdysseyPaletteTreeView::RefreshRootEntriesArray()
-{
-    
-}
-
 void SOdysseyPaletteTreeView::RefreshAllExpansionStates()
 {
     if ( !mPalette )
@@ -349,10 +365,25 @@ TSharedRef<SWidget> SOdysseyPaletteTreeView::CreateSetWidget()
         .VAlign(VAlign_Top)
         [
             SNew(SButton)
-            .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("OdysseyPalette.AddSet"))
             .HAlign(HAlign_Center)
             .VAlign(VAlign_Center)
             .OnClicked(this, &SOdysseyPaletteTreeView::AddSetToPalette)
+            [
+                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddSet24"))
+            ]
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .HAlign(HAlign_Right)
+        .VAlign(VAlign_Top)
+        [
+            SNew(SButton)
+            .HAlign(HAlign_Center)
+            .VAlign(VAlign_Center)
+            .OnClicked(this, &SOdysseyPaletteTreeView::SavePalette)
+            [
+                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.Save24"))
+            ]
         ];
  }
 

@@ -28,11 +28,14 @@ public:
     SOdysseyPaletteSetView();
     
     void Construct(const FArguments& InArgs);
-    void OnSetSelected(FName iSet);
+    void OnSelectionChanged( FName iSet, ESelectInfo::Type iType );
+    void OnPaletteSetsChanged(UOdysseyPalette* iPalette);
 
+public:
+    //Setters/Getters
+    void SelectSet(FName iSet);
 
-protected:
-    
+protected:    
     void DeleteSelectedSet();
     
     bool CanDeleteSelectedSet();
@@ -65,7 +68,9 @@ private:
      */
     TSharedPtr<SWidget> OnContextMenuOpening();
 
-	TSharedRef<class ITableRow> OnGenerateTile(FName iSet, const TSharedRef< class STableViewBase >& iTable);
+    void OnItemClicked(FName iSet);
+
+    TSharedRef<class ITableRow> OnGenerateTile(FName iSet, const TSharedRef< class STableViewBase >& iTable);
 
 private:
     UOdysseyPalette* mPalette;

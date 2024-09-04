@@ -58,6 +58,7 @@ FReply SOdysseyPaletteColorRow::HandleEntryColorMouseButtonDown(const FGeometry&
         PickerArgs.bOnlyRefreshOnOk = false;
         PickerArgs.sRGBOverride = false;
         PickerArgs.OnColorCommitted = FOnLinearColorValueChanged::CreateSP(this, &SOdysseyPaletteColorRow::OnSetColorFromColorPicker);
+        PickerArgs.bOnlyRefreshOnOk = true;
         PickerArgs.InitialColor = mColorEntry->GetUsedColor();
         PickerArgs.ParentWidget = mColorWidget;
         PickerArgs.OptionalOwningDetailsView = mColorWidget;

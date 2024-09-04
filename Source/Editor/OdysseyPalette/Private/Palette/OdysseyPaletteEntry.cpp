@@ -163,15 +163,15 @@ void UOdysseyPaletteEntry::ChildrenChanged()
 
 void UOdysseyPaletteEntry::PropertyChanged(const FName& iPropertyName)
 {
-    if (iPropertyName == "Name")
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntry, EntryName))
         NameChanged();
-    if (iPropertyName == "IsActivated")
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntry, IsActivated))
         IsActivatedChanged();
-    if (iPropertyName == "IsExpanded")
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntry, IsExpanded))
         IsExpandedChanged();
-    if (iPropertyName == "Parent")
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntry, Parent))
         ParentChanged();
-    if (iPropertyName == "Children")
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntry, Children))
         ChildrenChanged();
 }
 

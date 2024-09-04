@@ -83,12 +83,6 @@ private:
     void SetCurrentEntryFromSelectorItem();
 
     /**
-     * @brief Refresh the list of root entries
-     * 
-     */
-    void RefreshRootEntriesArray();
-
-    /**
      * @brief Refreshes all rows expansion states from the state stored in the entry
      * 
      */
@@ -209,6 +203,11 @@ public:
      * @brief Adds a new set to the palette represented by this view
      */
     FReply AddSetToPalette();
+
+    /**
+     * @brief Saves palette
+     */
+    FReply SavePalette();
 
 protected:
     UOdysseyPalette* mPalette;

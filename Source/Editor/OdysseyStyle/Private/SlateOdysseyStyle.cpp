@@ -198,11 +198,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("OdysseyPalette.EntryColor", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteEntryColor_16", mIcon16x16));
     Set("OdysseyPalette.EntryMaterial", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteEntryMaterial_16", mIcon16x16));
     Set("OdysseyPalette.PaletteTab", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteTab_16", mIcon16x16));
-    Set("OdysseyPalette.AddSet", FButtonStyle(mButton)
-		.SetNormal(IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteAddSet_24", mIcon24x24))
-		.SetHovered(IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteAddSet_24", mIcon24x24))
-		.SetPressed(IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteAddSet_24", mIcon24x24))
-	);
+    Set("OdysseyPalette.AddSet24", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteAddSet_24", mIcon24x24));
+    Set("OdysseyPalette.Save24", new IMAGE_BRUSH_SVG("PainterEditor/save", mIcon24x24));
 
 
     // OdysseyWidgets - AdvancedColorWheel

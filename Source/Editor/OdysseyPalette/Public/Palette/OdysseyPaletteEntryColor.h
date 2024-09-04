@@ -16,8 +16,20 @@ class ODYSSEYPALETTE_API UOdysseyPaletteEntryColor : public UOdysseyPaletteEntry
     GENERATED_BODY()
 
 public:
+    /**
+     * @brief Delegate called when something changed the color of this entry
+     *
+     */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnEntryColorChanged, UOdysseyPaletteEntryColor*)
+
+
+public:
     UOdysseyPaletteEntryColor();
 
+public:
+    static FOnEntryColorChanged& OnEntryColorChanged();
+
+public:
     FColor& GetUsedColor();
     void SetUsedColor( FColor iColor );
 
@@ -25,6 +37,17 @@ public:
     virtual void DuplicateSetAt( int iIndex = -1 ) override;
 
     virtual void RemoveSet(int iIndex = -1) override;
+
+public:
+    // UObject overrides
+    virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+    virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
+
+protected:
+    //Property changed methods
+    virtual void EntryColorChanged();
+
+    virtual void PropertyChanged(const FName& iPropertyName);
 
 public:
     UPROPERTY(EditAnywhere, Category = Palette)

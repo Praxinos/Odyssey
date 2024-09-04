@@ -26,6 +26,9 @@ public:
     /* Called when the Entry hierarchy changed at some point */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnHierarchyChanged, UOdysseyPalette*);
 
+    /* Called when the sets changed at some point */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnSetsChanged, UOdysseyPalette*);
+
 public:
     //Delegates
 
@@ -38,6 +41,11 @@ public:
      * @brief Returns the HierarchyChanged delegate
      */
     static FOnHierarchyChanged& OnHierarchyChanged();
+
+    /**
+     * @brief Returns the SetsChanged delegate
+     */
+    static FOnHierarchyChanged& OnSetsChanged();
 
 
 public:
@@ -79,6 +87,13 @@ public:
      */
     UFUNCTION(BlueprintPure, Category = "Palette")
     const TArray<UOdysseyPaletteEntry*>& GetRootEntries() const;
+
+    /**
+     * @brief Returns the set used as a FName
+     *
+     * @return FName
+     */
+    FName GetUsedSet() const;
 
     /**
      * @brief Returns all Entries
@@ -180,6 +195,7 @@ public:
 protected:
     //Property changed methods
     void CurrentEntryChanged();
+    void SetsChanged();
     virtual void PropertyChanged(const FName& iPropertyName);
 
 public:

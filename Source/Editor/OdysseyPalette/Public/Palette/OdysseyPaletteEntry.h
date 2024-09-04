@@ -36,13 +36,13 @@ class ODYSSEYPALETTE_API UOdysseyPaletteEntry : public UObject
 
     public:
     /**
-     * @brief Delegate called when something changed the result of RenderImage()
+     * @brief Delegate called when something changed the name on this entry
      * 
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnNameChanged, UOdysseyPaletteEntry*)
 
     /**
-     * @brief Delegate called when something changed the result of RenderImage()
+     * @brief Delegate called when something changed the activated state of this entry
      * 
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsActivatedChanged, UOdysseyPaletteEntry*)

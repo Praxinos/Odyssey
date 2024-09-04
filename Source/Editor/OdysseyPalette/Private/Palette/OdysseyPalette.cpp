@@ -25,6 +25,12 @@ UOdysseyPalette::FOnHierarchyChanged& UOdysseyPalette::OnHierarchyChanged()
     return onHierarchyChanged;
 }
 
+UOdysseyPalette::FOnSetsChanged& UOdysseyPalette::OnSetsChanged()
+{
+    static FOnSetsChanged onSetsChanged;
+    return onSetsChanged;
+}
+
 UOdysseyPaletteEntry* UOdysseyPalette::AddEntry(TSubclassOf<UOdysseyPaletteEntry> iEntryType, UOdysseyPaletteEntry* iParentEntry /*= nullptr*/, int iIndexInParent /*= 0*/)
 {
     UClass* entryType = iEntryType.Get();
@@ -91,6 +97,12 @@ bool UOdysseyPalette::ContainsEntry(const UOdysseyPaletteEntry* iEntry) const
 const TArray<UOdysseyPaletteEntry*>& UOdysseyPalette::GetRootEntries() const
 {
     return PaletteRoot->Children;
+}
+
+FName UOdysseyPalette::GetUsedSet() const
+{
+    FString usedSet = FString("Set") + FString::FromInt(UsedSet);
+    return FName(usedSet);
 }
 
 TArray<UOdysseyPaletteEntry*> UOdysseyPalette::GetEntries() const
@@ -403,17 +415,27 @@ void UOdysseyPalette::AddSet()
 {
     if (Sets.Num() < 8)
     {
-        FString text = FString("Set") + FString::FromInt( Sets.Num() );
+        const FScopedTransaction transaction(NSLOCTEXT("Palette", "AddSet_Transaction", "Add Set"));
+
+        FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "Sets");
+
+        FString text = FString("Set") + FString::FromInt(Sets.Num());
         Sets.Add(FName(text));
 
         TArray<UOdysseyPaletteEntry*> entries = GetEntries();
-        for( int i = 0; i < entries.Num(); i++ )
+        for (int i = 0; i < entries.Num(); i++)
             entries[i]->AddSet();
+
+        FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "Sets", EPropertyChangeType::ArrayAdd);
     }
 }
 
 void UOdysseyPalette::DuplicateSet()
 {
+    const FScopedTransaction transaction(NSLOCTEXT("Palette", "DuplicateSet_Transaction", "Duplicate Set"));
+
+    FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "Sets");
+
     TArray<UOdysseyPaletteEntry*> entries = GetEntries();
     for (int i = 0; i < entries.Num(); i++)
     {
@@ -422,10 +444,16 @@ void UOdysseyPalette::DuplicateSet()
 
     FString text = FString("Set") + FString::FromInt(Sets.Num());
     Sets.Add(FName(text));
+
+    FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "Sets", EPropertyChangeType::ArrayAdd);
 }
 
 void UOdysseyPalette::RemoveSet(int iIndex /*= -1 */)
 {
+    const FScopedTransaction transaction(NSLOCTEXT("Palette", "RemoveSet_Transaction", "Remove Set"));
+
+    FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "Sets");
+
     TArray<UOdysseyPaletteEntry*> entries = GetEntries();
     for (int i = 0; i < entries.Num(); i++)
         entries[i]->RemoveSet( iIndex );
@@ -439,6 +467,8 @@ void UOdysseyPalette::RemoveSet(int iIndex /*= -1 */)
         FString text = FString("Set") + FString::FromInt(i);
         Sets[i] = (FName(text));
     }
+
+    FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "Sets", EPropertyChangeType::ArrayRemove);
 }
 
 void UOdysseyPalette::HierarchyChanged()
@@ -451,10 +481,17 @@ void UOdysseyPalette::CurrentEntryChanged()
     OnCurrentEntryChanged().Broadcast(this);
 }
 
+void UOdysseyPalette::SetsChanged()
+{
+    OnSetsChanged().Broadcast(this);
+}
+
 void UOdysseyPalette::PropertyChanged(const FName& iPropertyName)
 {
-    if (iPropertyName == "CurrentEntry")
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPalette, CurrentEntry))
         CurrentEntryChanged();
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPalette, Sets))
+        SetsChanged();
 }
 
 void UOdysseyPalette::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -592,3 +629,4 @@ void UOdysseyPalette::GetEntriesUniqueParents(TArray<UOdysseyPaletteEntry*> iEnt
         oParents.AddUnique(entry->Parent);
     }
 }
+
