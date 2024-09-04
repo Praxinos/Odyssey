@@ -14,14 +14,17 @@ FOdysseyVectorUndoSegmentReshape::~FOdysseyVectorUndoSegmentReshape()
     }
 }
 
-FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene )
-    : FOdysseyVectorUndo( iScene )
+FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene
+                                                                  , uint64 iReturnFlags
+ )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
 }
 
 FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene
-                                                                  , const std::vector<FOdysseyVectorVertex*>& iVertexArray )
-    : FOdysseyVectorUndo( iScene )
+                                                                  , const std::vector<FOdysseyVectorVertex*>& iVertexArray
+                                                                  , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     std::vector<FOdysseyVectorSegment*> segmentArray;
 
@@ -39,8 +42,9 @@ FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVect
 }
 
 FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene
-                                                                  , const std::vector<FOdysseyVectorSegment*>& iSegmentArray )
-    : FOdysseyVectorUndo( iScene )
+                                                                  , const std::vector<FOdysseyVectorSegment*>& iSegmentArray
+                                                                  , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     RecordSegment( iSegmentArray );
 }
@@ -142,8 +146,7 @@ FOdysseyVectorUndoSegmentReshape::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 void
@@ -167,8 +170,7 @@ FOdysseyVectorUndoSegmentReshape::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

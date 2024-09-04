@@ -8,8 +8,9 @@ FOdysseyVectorUndoDeleteVertex::~FOdysseyVectorUndoDeleteVertex()
 }
 
 FOdysseyVectorUndoDeleteVertex::FOdysseyVectorUndoDeleteVertex( FOdysseyVectorGroupPaint* iScene
-                                                              , const std::list<FOdysseyVectorObject*>& iObjectList )
-    : FOdysseyVectorUndo( iScene )
+                                                              , const std::list<FOdysseyVectorObject*>& iObjectList
+                                                              , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     mPathSnapshotArray.reserve( iObjectList.size() );
 
@@ -40,9 +41,7 @@ FOdysseyVectorUndoDeleteVertex::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 void
@@ -61,9 +60,7 @@ FOdysseyVectorUndoDeleteVertex::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

@@ -24,8 +24,9 @@ FOdysseyVectorUndoTagInbetweenerCommit::~FOdysseyVectorUndoTagInbetweenerCommit(
 FOdysseyVectorUndoTagInbetweenerCommit::FOdysseyVectorUndoTagInbetweenerCommit( FOdysseyVectorGroupPaint* iScene
                                                                               , const std::list<FOdysseyVectorTag*>& iRemovedTagList 
                                                                               , const std::list<FOdysseyVectorObject*>& iAddedObjectList
-                                                                              , const std::list<FOdysseyVectorGroupPaint*>& iCommittedSceneList )
-    : FOdysseyVectorUndo( iScene )
+                                                                              , const std::list<FOdysseyVectorGroupPaint*>& iCommittedSceneList
+                                                                              , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
     , mRemovedTagList( iRemovedTagList )
     , mAddedObjectList( iAddedObjectList )
     , mCommittedSceneList( iCommittedSceneList )
@@ -60,8 +61,7 @@ FOdysseyVectorUndoTagInbetweenerCommit::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 void
@@ -92,8 +92,7 @@ FOdysseyVectorUndoTagInbetweenerCommit::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

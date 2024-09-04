@@ -63,6 +63,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
                                                           , const FKey& iKey )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 
     mPickedInbetween = nullptr;
 
@@ -86,7 +87,9 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
                 GEditor->BeginTransaction(LOCTEXT("vector-chart-tool.transaction.edit-chart","Vector Chart Tool"));
                 if( GUndo )
                 {
-                    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene, inbetweenerTag );
+                    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene
+                                                                                             , inbetweenerTag
+                                                                                             , retFlags );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -99,8 +102,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
         }
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
 uint64
@@ -117,6 +119,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                                                        , const FOdysseyPoint& iPointInTexture )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
@@ -143,8 +146,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
         }
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
 uint64
@@ -153,6 +155,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseUpVector( FOdysseyVectorGroupPaint*
                                                         , const FKey& iKey )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -173,7 +176,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseUpVector( FOdysseyVectorGroupPaint*
         }
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    return retFlags;
 }
 
 uint64

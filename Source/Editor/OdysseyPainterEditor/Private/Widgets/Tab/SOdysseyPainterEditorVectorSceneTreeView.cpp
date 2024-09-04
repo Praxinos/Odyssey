@@ -194,6 +194,10 @@ void
 SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem
                                                             , ESelectInfo::Type SelectInfo )
 {
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                    | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+
     if( mRootItem && ( SelectInfo != ESelectInfo::Type::Direct ) )
     {
         FOdysseyVectorGroupPaint* scene = static_cast<FOdysseyVectorGroupPaint*>(mRootItem.Get()->GetVectorObject());
@@ -202,7 +206,7 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
         GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.selection-changed","Selection Changed"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( scene );
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( scene, retFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -233,15 +237,7 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
 
         scene->GetEngine()->ResetHUD();
 
-        scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                                 // sending the MODIFIED flag will trigger the update
-                                 // of the Object's DetailsView. If we send the SELECTED signal
-                                 // it makes more sense but this widget will be immediately 
-                                 // updated whereas it's already being updated, hence it creates
-                                 // some problems, one of them being the selection of the whole
-                                 //  vector scene when holding the shift key.
-                                 // See https://github.com/Praxinos/IliadDev/issues/411
-                                  | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+        scene->GetEngine()->Signal( retFlags );
     }
 }
 

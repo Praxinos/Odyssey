@@ -64,23 +64,18 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
 
     private:
         void SetBucketColor( FOdysseyVectorBucket* iBucket );
-        void OnMouseUpVectorClearBucket( FOdysseyVectorGroupPaint* iScene
+        uint64 OnMouseUpVectorClearBucket( FOdysseyVectorGroupPaint* iScene
                                        , FOdysseyVectorBucket* iBucket );
-        void OnMouseUpVectorCreateBucket( FOdysseyVectorGroupPaint* iScene
+        uint64 OnMouseUpVectorCreateBucket( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
                                         , const FKey& iKey );
-        void OnMouseUpVectorRemoveBucket( FOdysseyVectorGroupPaint* iScene
+        uint64 OnMouseUpVectorRemoveBucket( FOdysseyVectorGroupPaint* iScene
                                         , FOdysseyVectorBucket* iBucket );
-        void OnMouseUpVectorMovePoint( FOdysseyVectorGroupPaint* iScene
-                                     , FOdysseyVectorPoint* iPoint
-                                     , ::ULIS::FVec2D iPointOriginalPosition );
-        void OnMouseUpVectorPropagateBucket( FOdysseyVectorGroupPaint* iScene
+        uint64 OnMouseUpVectorPropagateBucket( FOdysseyVectorGroupPaint* iScene
                                             , FOdysseyVectorBucket* iBucket
                                             , bool iPropagate );
-        void OnMouseUpVectorColorBucket( FOdysseyVectorGroupPaint* iScene
+        uint64 OnMouseUpVectorColorBucket( FOdysseyVectorGroupPaint* iScene
                                         , FOdysseyVectorBucket* iBucket );
-        void OnMouseDownVectorRotateBucket( FOdysseyVectorGroupPaint* iScene
-                                          , FOdysseyVectorBucket* iBucket );
         double GetRotationAngle( FOdysseyVectorBucket* iBucket
                                 , const FOdysseyPoint& iPointInTexture );
 

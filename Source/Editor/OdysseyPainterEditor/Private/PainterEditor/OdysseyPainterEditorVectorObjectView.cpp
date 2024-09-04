@@ -58,13 +58,11 @@ UOdysseyPainterEditorVectorObjectView::Update( FOdysseyPainterEditor* iEditor
     ImportParam();
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyName
                                                       , const FName& iMemberPropertyName
                                                       , const FName& iCategory )
 {
-    uint64 signalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
-
     for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
     {
         // We have to change properties one by one especially in case of multiple selection.
@@ -74,9 +72,6 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
         if( iPropertyName == "Name" )
         {
             selectedObject->SetName( Name );
-
-            signalFlags |= ( FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                           | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
         }
 
         // Category "Transform"
@@ -121,8 +116,6 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
         if( ( iPropertyName == "BackgroundColor" ) || ( iMemberPropertyName == "BackgroundColor" ) )
             selectedObject->GetBackgroundBucket().SetSolidColor( BackgroundColor );
     }
-
-    return signalFlags;
 }
 
 void
@@ -135,13 +128,15 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
 
     if( mScene )
     {
-        uint64 signalFlags;
+        uint64 signalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                           | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                           | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW;
 
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("vector-object.transaction.property-changed","Property Changed"));
         if( GUndo )
         {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectParam( mScene, mFocusedObjectList );
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectParam( mScene, mFocusedObjectList, signalFlags );
             // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
             // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
             // of a call to GEditor::PostEditChangeProperty()
@@ -153,9 +148,9 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
         }
         GEditor->EndTransaction();
 
-        signalFlags = PropertyChanged( PropertyChangedEvent.GetPropertyName()
-                                     , PropertyChangedEvent.MemberProperty->GetFName()
-                                     , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
+        PropertyChanged( PropertyChangedEvent.GetPropertyName()
+                       , PropertyChangedEvent.MemberProperty->GetFName()
+                       , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
         mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 

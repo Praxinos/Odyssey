@@ -225,11 +225,13 @@ FOdysseyAnimationEditorSource::Clear()
 		for (TSharedPtr<FOdysseyMediaVector> mediaVector : mediasVector)
 		{
 			FOdysseyVectorEngine* vectorEngine = mediaVector->GetScene()->GetEngine();
+            uint64 retFlags = FOdysseyVectorEngine::SIGNAL_ALL;
+
 			// needed for undos
 			GEditor->BeginTransaction(transactionName);
 			if (GUndo)
 			{
-				FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear(vectorEngine);
+				FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear(vectorEngine, retFlags );
 
 				GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
 			
@@ -240,7 +242,7 @@ FOdysseyAnimationEditorSource::Clear()
 			GEditor->EndTransaction();
 
 			vectorEngine->SetScene(new FOdysseyVectorGroupPaint("Scene"));
-			vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
+			vectorEngine->Signal( retFlags );
 		}
 	}
 }

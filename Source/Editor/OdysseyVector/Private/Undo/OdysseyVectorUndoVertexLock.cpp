@@ -15,8 +15,9 @@ FOdysseyVectorUndoVertexLock::~FOdysseyVectorUndoVertexLock()
 }
 
 FOdysseyVectorUndoVertexLock::FOdysseyVectorUndoVertexLock( FOdysseyVectorGroupPaint* iScene
-                                                          , const std::vector<FOdysseyVectorVertex*>& iAlignedVertexArray )
-    : FOdysseyVectorUndo( iScene )
+                                                          , const std::vector<FOdysseyVectorVertex*>& iAlignedVertexArray
+                                                          , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     //------ Backup vertex lock flag part ---------//
 
@@ -44,8 +45,7 @@ FOdysseyVectorUndoVertexLock::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 void
@@ -64,8 +64,7 @@ FOdysseyVectorUndoVertexLock::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

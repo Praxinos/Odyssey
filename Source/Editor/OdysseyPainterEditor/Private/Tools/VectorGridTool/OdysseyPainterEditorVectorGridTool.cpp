@@ -86,6 +86,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
                                                       , const FKey& iKey )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -94,7 +95,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
         GEditor->BeginTransaction(LOCTEXT("vector-grid-tool.transaction.edit-grid","Vector Grid Tool"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPointArray );
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPointArray, retFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -129,8 +130,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
         }
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
 uint64
@@ -147,6 +147,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorGroupPaint
                                                       , const FOdysseyPoint& iPointInTexture )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
@@ -176,8 +177,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorGroupPaint
         }
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
 uint64
@@ -186,6 +186,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorGroupPaint* 
                                                     , const FKey& iKey )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -200,7 +201,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorGroupPaint* 
         mMultipleSelectionMode = false;
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    return retFlags;
 }
 
 uint64

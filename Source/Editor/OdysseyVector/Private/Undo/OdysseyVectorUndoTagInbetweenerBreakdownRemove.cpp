@@ -16,18 +16,21 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::~FOdysseyVectorUndoTagInbetween
 }
 
 FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorGroupPaint* iScene
-                                                                                                , FOdysseyVectorTagInbetweener* iInbetweenerTag )
+                                                                                                , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                                                                , uint64 iReturnFlags )
     : FOdysseyVectorUndoTagInbetweenerBreakdownRemove( iScene
                                                    , { iInbetweenerTag }
-                                                   , { iInbetweenerTag->GetOwner()->GetEngine() } )
+                                                   , { iInbetweenerTag->GetOwner()->GetEngine() }
+                                                   , iReturnFlags )
 {
 
 }
 
 FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorGroupPaint* iScene
                                                                                                 , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
-                                                                                                , const std::list<FOdysseyVectorEngine*>& iEngineList )
-    : FOdysseyVectorUndo( iScene )
+                                                                                                , const std::list<FOdysseyVectorEngine*>& iEngineList
+                                                                                                , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     mInbetweenerTagSnapshotBuffer.reserve( iInbetweenerTagList.size() );
 
@@ -71,8 +74,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::Apply( UObject* iIgnored )
     //mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::OnSignalDelegate().Broadcast( nullptr
-                                                     , ( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                                                       | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED ) );
+                                                     , ( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags ) );
 }
 
 void
@@ -97,8 +99,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::Revert( UObject* iIgnored )
     //mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::OnSignalDelegate().Broadcast( nullptr
-                                                     , ( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                                                       | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED ) );
+                                                     , ( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags ) );
 }
 
 /** Describes this change (for debugging) */

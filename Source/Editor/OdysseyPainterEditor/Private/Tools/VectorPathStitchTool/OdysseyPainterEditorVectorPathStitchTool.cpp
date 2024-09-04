@@ -66,6 +66,11 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , const FKey& iKey )
 {
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                    | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -135,14 +140,15 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
                 if( GUndo )
                 {
                     FOdysseyVectorUndo *undo = new FOdysseyVectorUndoPathStitch( iScene
-                                                                                , removedPathArray
-                                                                                , removedVertexArray
-                                                                                , removedSegmentArray
-                                                                                , addedPathArray
-                                                                                , addedVertexArray
-                                                                                , addedSegmentArray
-                                                                                , mergedVertexArray
-                                                                                , mergedSegmentArray );
+                                                                               , removedPathArray
+                                                                               , removedVertexArray
+                                                                               , removedSegmentArray
+                                                                               , addedPathArray
+                                                                               , addedVertexArray
+                                                                               , addedSegmentArray
+                                                                               , mergedVertexArray
+                                                                               , mergedSegmentArray
+                                                                               , retFlags );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -159,11 +165,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
         mPathStitchHUD->Reset( iScene ); // rebuilds QuadTree after path alter.
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-         | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-         | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
 uint64

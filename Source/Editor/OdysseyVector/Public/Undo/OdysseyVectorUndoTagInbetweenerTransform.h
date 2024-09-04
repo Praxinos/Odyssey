@@ -15,7 +15,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerTransform : public FOdys
     public:
         ~FOdysseyVectorUndoTagInbetweenerTransform();
         FOdysseyVectorUndoTagInbetweenerTransform( FOdysseyVectorGroupPaint* iScene
-                                                 , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList );
+                                                 , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                 , uint64 iReturnFlags );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

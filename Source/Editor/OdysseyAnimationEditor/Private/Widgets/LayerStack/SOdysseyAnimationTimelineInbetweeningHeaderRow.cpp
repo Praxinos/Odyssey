@@ -81,10 +81,10 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonDown( const FGeomet
 
     for( FOdysseyVectorTag* tag : tagList )
     {
-        tag->SetSelected( false );
+        tag->GetOwner()->GetEngine()->ClearObjectSelection();
     }
 
-    mInbetweenerTag->SetSelected( true );
+    mInbetweenerTag->GetOwner()->GetEngine()->SelectObject( mInbetweenerTag->GetOwner() );
 
     return FReply::Handled();
 }
@@ -92,7 +92,7 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonDown( const FGeomet
 bool
 SOdysseyAnimationTimelineInbetweeningHeaderRow::IsItemSelected() const
 {
-    return mInbetweenerTag->IsSelected();
+    return mInbetweenerTag->GetOwner()->IsSelected();
 }
 
 FVector2D

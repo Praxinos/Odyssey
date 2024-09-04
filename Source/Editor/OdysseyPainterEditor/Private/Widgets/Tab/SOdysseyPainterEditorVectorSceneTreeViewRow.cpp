@@ -137,7 +137,8 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged( const FText& InText
 
     mTextBlockWidget.Get()->SetText( FText::FromString( mItem.Get()->GetVectorObject()->GetName() ) );
 
-    itemScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    itemScene->GetEngine()->Signal( FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                                  | FOdysseyPainterEditor::UI_UPDATE_TIMELINE );
 }
 
 FReply
@@ -150,13 +151,18 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     FOdysseyVectorGroupPaint* itemScene = itemObject->GetScene();
     std::list<FOdysseyVectorObject*> focusedObjectList;
     FOdysseyVectorObject* insertObject = itemObject;
+    uint32 retFlags =  FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                     | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                     | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
     itemScene->GetEngine()->GetFocusedAncestorList( focusedObjectList );
 
     GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.drag-drop-object", "Drop Objects"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoTransferObjects( itemScene, focusedObjectList ) );
+        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoTransferObjects( itemScene
+                                                                                                          , focusedObjectList
+                                                                                                          , retFlags ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -220,10 +226,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
 
     itemScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    itemScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                                  | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                                  | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                                  | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    itemScene->GetEngine()->Signal( retFlags );
 
     return FReply::Handled();
 }

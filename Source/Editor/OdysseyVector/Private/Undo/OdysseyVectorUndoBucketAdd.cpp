@@ -18,8 +18,9 @@ FOdysseyVectorUndoBucketAdd::~FOdysseyVectorUndoBucketAdd()
 }
 
 FOdysseyVectorUndoBucketAdd::FOdysseyVectorUndoBucketAdd( FOdysseyVectorGroupPaint* iScene
-                                                        , std::vector<FOdysseyVectorBucket*>& iBucketArray )
-    : FOdysseyVectorUndo( iScene )
+                                                        , std::vector<FOdysseyVectorBucket*>& iBucketArray
+                                                        , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     mBucketArray = iBucketArray;
 }
@@ -42,8 +43,7 @@ FOdysseyVectorUndoBucketAdd::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 void
@@ -64,8 +64,7 @@ FOdysseyVectorUndoBucketAdd::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

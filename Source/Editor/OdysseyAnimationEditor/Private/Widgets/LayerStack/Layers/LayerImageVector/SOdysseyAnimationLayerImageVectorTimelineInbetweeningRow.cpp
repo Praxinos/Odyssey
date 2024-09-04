@@ -68,6 +68,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     FOdysseyVectorGroupPaint* scene = mInbetweenerTag->GetOwner()->GetScene();
     FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetEngine()->GetSharedEnv();
     std::list<FOdysseyVectorTag*>& tagList = sharedEnv->GetTagList();
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 
     // for AddBreakdown / RemoveBreakdown functions in the context menu
     treeView.Get()->SetCursorPos( cursorPos );
@@ -76,11 +77,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
 
     for( FOdysseyVectorTag* tag : tagList )
     {
-        tag->SetSelected( false );
+        tag->GetOwner()->GetEngine()->ClearObjectSelection();
     }
 
     // This is used by the list view to determine which row is selected.
-    mInbetweenerTag->SetSelected( true );
+    mInbetweenerTag->GetOwner()->GetEngine()->SelectObject( mInbetweenerTag->GetOwner() );
 
 /*
     SetItemSelection ( const ItemType& InItem,
@@ -108,7 +109,8 @@ ESelectInfo::Type SelectInfo
                 if( GUndo )
                 {
                     FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( scene
-                                                                                                 , mInbetweenerTag );
+                                                                                                 , mInbetweenerTag
+                                                                                                 , retFlags );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -180,6 +182,10 @@ FReply
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const FGeometry & MyGeometry
                                                                          , const FPointerEvent & MouseEvent )
 {
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW;
+
     //STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonUp( MyGeometry, MouseEvent );
 
     mPickedBreakdown = nullptr;
@@ -188,8 +194,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
     {
         mInbetweenerTag->GetOwner()->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-        mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                                                                    | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+        mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->Signal( retFlags );
 
         return FReply::Handled();
     }
@@ -275,7 +280,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::ComputeDesiredSize ( f
 bool  	
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::IsItemSelected() const
 {
-    return mInbetweenerTag->IsSelected();
+    return mInbetweenerTag->GetOwner()->IsSelected();
 }
 
 FCursorReply

@@ -47,16 +47,18 @@ FOdysseyVectorUndoObjectParam::CreateObjectSnapshot( FOdysseyVectorObject* iObje
 
 // Backup bucket params in the constructor
 FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
-                                                            , FOdysseyVectorObject* iObject )
-    : FOdysseyVectorUndo( iScene )
+                                                            , FOdysseyVectorObject* iObject
+                                                            , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     mObjectSnapshotArray.push_back( CreateObjectSnapshot( iObject ) );
 }
 
 // Backup bucket params in the constructor
 FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
-                                                            , const std::vector<FOdysseyVectorObject*>& iObjectArray )
-    : FOdysseyVectorUndo( iScene )
+                                                            , const std::vector<FOdysseyVectorObject*>& iObjectArray
+                                                            , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     mObjectSnapshotArray.reserve( iObjectArray.size() );
 
@@ -70,8 +72,9 @@ FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorGrou
 
 // Backup bucket params in the constructor
 FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
-                                                            , const std::list<FOdysseyVectorObject*>& iObjectList )
-    : FOdysseyVectorUndo( iScene )
+                                                            , const std::list<FOdysseyVectorObject*>& iObjectList
+                                                            , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     mObjectSnapshotArray.reserve( iObjectList.size() );
 
@@ -99,9 +102,7 @@ FOdysseyVectorUndoObjectParam::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 void
@@ -120,9 +121,7 @@ FOdysseyVectorUndoObjectParam::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

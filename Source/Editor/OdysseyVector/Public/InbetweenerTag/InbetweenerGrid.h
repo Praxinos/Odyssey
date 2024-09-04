@@ -65,15 +65,6 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
          */
         int GetQuadIndex( const ::ULIS::FVec2D& iLocalCoords );
 
-
-        /**
-         * @brief Update the grid when the owner object is updated.
-         * @param iUpdateFlags update flags receieved by the owner object
-         * @param iTagInvalidationFlags inbetweener tag invalidation flags
-         */
-        virtual void Update( uint32 iOwnerObjectUpdateFlags
-                           , uint64 iTagInvalidationFlags );
-
         /**
          * @brief Map paths to the grid according to the needs of the grid
          * @param iPathBuffer the paths to map
@@ -112,10 +103,16 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         const ::ULIS::FRectD& GetTargetBBox();
         const ::ULIS::FRectD& GetSourceBBox();
 
+        void UpdateBBox( uint32 iUpdateFlags
+                       , uint64 iTagInvalidationFlags );
+        void UpdateCenterOfMass( uint32 iUpdateFlags
+                               , uint64 iTagInvalidationFlags );
+
         friend class FOdysseyVectorTagInbetweener;
 
     protected:
-        ::ULIS::FVec2D GetCenterOfMass( eInbetweenerPointPositionType iPositionType, ::ULIS::FRectD& oBBox );
+        ::ULIS::FVec2D GetCenterOfMass( eInbetweenerPointPositionType iPositionType );
+        ::ULIS::FRectD GetBBox( eInbetweenerPointPositionType iPositionType );
         virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint
                                           , eInbetweenerPointPositionType iPositionType );
 

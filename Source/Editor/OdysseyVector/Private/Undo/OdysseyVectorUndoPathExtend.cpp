@@ -29,8 +29,9 @@ FOdysseyVectorUndoPathExtend::~FOdysseyVectorUndoPathExtend()
 }
 
 FOdysseyVectorUndoPathExtend::FOdysseyVectorUndoPathExtend( FOdysseyVectorGroupPaint* iScene
-                                                          , FOdysseyVectorPath* iPath )
-    : FOdysseyVectorUndo( iScene )
+                                                          , FOdysseyVectorPath* iPath 
+                                                          , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
     , mPath( iPath )
 {
 }
@@ -69,9 +70,7 @@ FOdysseyVectorUndoPathExtend::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 void
@@ -95,9 +94,7 @@ FOdysseyVectorUndoPathExtend::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

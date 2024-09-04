@@ -65,6 +65,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
                                                           , const FKey& iKey )
 {
     FOdysseyVectorEngine* engine = iScene->GetEngine();
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 
     mPickedPointArray.clear();
     mPickedGridArray.clear();
@@ -87,7 +88,9 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
             GEditor->BeginTransaction(LOCTEXT("vector-matching-tool.transaction.match-grid","Vector Matching Tool"));
             if( GUndo )
             {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerMatching( iScene, mPickedInbetweenerTag );
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerMatching( iScene
+                                                                                       , mPickedInbetweenerTag
+                                                                                       , retFlags );
 
                 GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         
@@ -112,8 +115,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
         }
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
 uint64
@@ -132,6 +134,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
                                                           , const FOdysseyPoint& iPointInTexture )
 {
     FOdysseyVectorEngine* engine = iScene->GetEngine();
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 
     mMatchingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
@@ -167,8 +170,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
         }
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
 uint64
@@ -177,6 +179,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseUpVector( FOdysseyVectorGroupPai
                                                         , const FKey& iKey )
 {
     FOdysseyVectorEngine* engine = iScene->GetEngine();
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -187,7 +190,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseUpVector( FOdysseyVectorGroupPai
         }
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    return retFlags;
 }
 
 uint64

@@ -76,24 +76,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
         // signal flags
         static const uint64 SIGNAL_SCENE_REDRAW       = ( 1ULL << 0 );
-        static const uint64 SIGNAL_SCENE_HIERARCHY    = ( 1ULL << 1 );
-        static const uint64 SIGNAL_OBJECT_TRANSFORMED = ( 1ULL << 2 );
-        static const uint64 SIGNAL_OBJECT_MODIFIED    = ( 1ULL << 3 );
-        static const uint64 SIGNAL_OBJECT_SELECTED    = ( 1ULL << 4 );
+        //static const uint64 SIGNAL_SCENE_HIERARCHY    = ( 1ULL << 1 );
+        //static const uint64 SIGNAL_OBJECT_TRANSFORMED = ( 1ULL << 2 );
+        //static const uint64 SIGNAL_OBJECT_MODIFIED    = ( 1ULL << 3 );
+        //static const uint64 SIGNAL_OBJECT_SELECTED    = ( 1ULL << 4 );
         static const uint64 SIGNAL_INTERACTIVE        = ( 1ULL << 5 );
         static const uint64 SIGNAL_SCENE_CLEAR_ALL    = ( 1ULL << 6 );
         static const uint64 SIGNAL_ALL                = 0x0FFFFFFFFFFFFFFF & (~SIGNAL_INTERACTIVE);
-        static const uint64 SIGNAL_SCENE_FORCE_REDRAW = ( SIGNAL_SCENE_REDRAW
-                                                        | SIGNAL_SCENE_CLEAR_ALL );
-
-        static const uint64 SIGNAL_USER0_RESERVED = ( 1ULL << 56 );
-        static const uint64 SIGNAL_USER1_RESERVED = ( 1ULL << 57 );
-        static const uint64 SIGNAL_USER2_RESERVED = ( 1ULL << 58 );
-        static const uint64 SIGNAL_USER3_RESERVED = ( 1ULL << 59 );
-        static const uint64 SIGNAL_USER4_RESERVED = ( 1ULL << 60 );
-        static const uint64 SIGNAL_USER5_RESERVED = ( 1ULL << 61 );
-        static const uint64 SIGNAL_USER6_RESERVED = ( 1ULL << 62 );
-        static const uint64 SIGNAL_USER7_RESERVED = ( 1ULL << 63 );
+        //static const uint64 SIGNAL_SCENE_FORCE_REDRAW = ( SIGNAL_SCENE_REDRAW
+        //                                                | SIGNAL_SCENE_CLEAR_ALL );
+        static const uint64 SIGNAL_RESERVED_SHIFT = ( 15 );
 
         static FSignalDelegate& OnSignalDelegate();
 

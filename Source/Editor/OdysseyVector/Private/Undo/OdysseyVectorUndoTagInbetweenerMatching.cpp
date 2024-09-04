@@ -16,8 +16,9 @@ FOdysseyVectorUndoTagInbetweenerMatching::~FOdysseyVectorUndoTagInbetweenerMatch
 }
 
 FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatching( FOdysseyVectorGroupPaint* iScene
-                                                                                  , FOdysseyVectorTagInbetweener* iInbetweenerTag )
-    : FOdysseyVectorUndo( iScene )
+                                                                                  , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                                                  , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     mInbetweenerTagSnapshotBuffer.emplace_back( iInbetweenerTag
                                               , 0 
@@ -26,8 +27,9 @@ FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatchi
 }
 
 FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatching( FOdysseyVectorGroupPaint* iScene
-                                                                                  , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList )
-    : FOdysseyVectorUndo( iScene )
+                                                                                  , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                                                  , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     mInbetweenerTagSnapshotBuffer.reserve( iInbetweenerTagList.size() );
 
@@ -57,8 +59,7 @@ FOdysseyVectorUndoTagInbetweenerMatching::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 void
@@ -78,8 +79,7 @@ FOdysseyVectorUndoTagInbetweenerMatching::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

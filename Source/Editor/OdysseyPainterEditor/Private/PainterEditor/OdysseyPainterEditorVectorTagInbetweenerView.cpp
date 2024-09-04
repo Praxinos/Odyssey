@@ -110,32 +110,34 @@ FOdysseyVectorUndo*
 UOdysseyPainterEditorVectorTagInbetweenerView::MakeUndo( const FName& iPropertyName
                                                        , const FName& iMemberPropertyName
                                                        , const FName& iCategory )
-{ 
+{
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                    | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
 /*
     if( iPropertyName == "InbetweenCount" )
         snapshotFlags |= FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT;
 */
     if( iPropertyName == "InterpolationType" )
-        return new FOdysseyVectorUndoTagInbetweenerInterpolationType( mScene, mSelectedInbetweenerTagArray );
+        return new FOdysseyVectorUndoTagInbetweenerInterpolationType( mScene, mSelectedInbetweenerTagArray, retFlags );
 
     if( iPropertyName == "DivisionX" )
-        return new FOdysseyVectorUndoTagInbetweenerGridSize( mScene, mSelectedInbetweenerTagArray );
+        return new FOdysseyVectorUndoTagInbetweenerGridSize( mScene, mSelectedInbetweenerTagArray, retFlags );
 
     if( iPropertyName == "DivisionY" )
-        return new FOdysseyVectorUndoTagInbetweenerGridSize( mScene, mSelectedInbetweenerTagArray );
+        return new FOdysseyVectorUndoTagInbetweenerGridSize( mScene, mSelectedInbetweenerTagArray, retFlags );
 /*
     if( iPropertyName == "Rigidity" )
         snapshotFlags |= FSnapshotFlags::Tag::Inbetweener::ARAPRIGIDITY;
 */
     if( iPropertyName == "GridType" )
-        return new FOdysseyVectorUndoTagInbetweenerGridType( mScene, mSelectedInbetweenerTagArray );
+        return new FOdysseyVectorUndoTagInbetweenerGridType( mScene, mSelectedInbetweenerTagArray, retFlags );
 
     if( iPropertyName == "Color" )
-        return new FOdysseyVectorUndoTagInbetweenerColor( mScene, mSelectedInbetweenerTagArray );
+        return new FOdysseyVectorUndoTagInbetweenerColor( mScene, mSelectedInbetweenerTagArray, retFlags );
 
     if( iPropertyName == "MapAsPolyline" )
-        return new FOdysseyVectorUndoTagInbetweenerMapAsPolyline( mScene, mSelectedInbetweenerTagArray );
+        return new FOdysseyVectorUndoTagInbetweenerMapAsPolyline( mScene, mSelectedInbetweenerTagArray, retFlags );
 
 
     return nullptr;

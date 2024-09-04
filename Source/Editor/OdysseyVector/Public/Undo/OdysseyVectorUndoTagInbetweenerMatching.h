@@ -16,9 +16,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerMatching : public FOdyss
     public:
         ~FOdysseyVectorUndoTagInbetweenerMatching();
         FOdysseyVectorUndoTagInbetweenerMatching( FOdysseyVectorGroupPaint* iScene
-                                                , FOdysseyVectorTagInbetweener* iInbetweenerTag );
+                                                , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                , uint64 iReturnFlags );
         FOdysseyVectorUndoTagInbetweenerMatching( FOdysseyVectorGroupPaint* iScene
-                                                , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList );
+                                                , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                , uint64 iReturnFlags );
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
 

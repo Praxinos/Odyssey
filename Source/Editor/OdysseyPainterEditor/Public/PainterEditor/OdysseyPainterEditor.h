@@ -27,6 +27,7 @@
 #include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.h"
 #include "Tools/VectorTrajectoryTool/OdysseyPainterEditorVectorTrajectoryTool.h"
 #include "OdysseyMediaProvider.h"
+#include "OdysseyVectorEngine.h"
 #include <ULIS>
 
 class FOdysseyHUDSystem;
@@ -37,6 +38,7 @@ class FOdysseyPainterEditorSource;
 class FOdysseyPainterEditorExtension;
 class UOdysseyLayerStack;
 class FOdysseyMeshSelector;
+class FOdysseyVectorGroupPaint;
 
 /**
  * Base class for a Painting Editor
@@ -203,6 +205,11 @@ public:
     static void CopySpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void PasteSpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+
+public:
+    static const uint64 UI_UPDATE_SCENETREEVIEW = ( 1ULL << ( FOdysseyVectorEngine::SIGNAL_RESERVED_SHIFT + 0 ) );
+    static const uint64 UI_UPDATE_TIMELINE      = ( 1ULL << ( FOdysseyVectorEngine::SIGNAL_RESERVED_SHIFT + 1 ) );
+    static const uint64 UI_UPDATE_OBJECTDETAILS = ( 1ULL << ( FOdysseyVectorEngine::SIGNAL_RESERVED_SHIFT + 2 ) );
 
     // Populates the Edit Menu everytime it is displayed
     void AddEditMenuEntry( FMenuBuilder& iMenuBuilder );

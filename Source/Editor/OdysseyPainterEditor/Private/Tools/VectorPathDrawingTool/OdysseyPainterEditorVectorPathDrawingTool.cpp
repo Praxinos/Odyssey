@@ -113,6 +113,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAlter( FOdysseyVectorG
                                                                , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                                                , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
 {
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                    | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+
     // stays empty
     std::vector<FOdysseyVectorPath*> addedObjectArray;
 
@@ -123,7 +128,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAlter( FOdysseyVectorG
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathAlter( iScene
                                                                   , addedObjectArray
                                                                   , iAddedVertexArray
-                                                                  , iAddedSegmentArray );
+                                                                  , iAddedSegmentArray
+                                                                  , retFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -140,11 +146,17 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAdd( FOdysseyVectorGro
                                                              , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                                              , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray )
 {
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW;
+
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("vector-path-drawing-tool.transaction.draw-path","Vector Path Drawing Tool"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene, iPath ) );
+        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene
+                                                                                                    , iPath
+                                                                                                    , retFlags ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -206,6 +218,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
     double pointRadius = PressureSensitive ? ( iPointInTexture.pressure * Radius ) : Radius;
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW;
 
     mPathTracer.Reset();
     mStitchedVertex = nullptr;
@@ -294,12 +309,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
         vectorEngine->ResetHUD(); // re-creates the quadtree;
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-         | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-         | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
-         | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
 uint64
@@ -311,6 +321,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGr
     uint32 height = vectorEngine->GetPreferredHeight();
     ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
     ::ULIS::FRectI imageRegion;
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW ;
 
     imageRegion.x = 0;
     imageRegion.y = 0;
@@ -324,8 +335,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGr
 
     if( Stitch )
     {
-        return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-             | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+        return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
     }
 
     return 0;
@@ -336,6 +346,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
                                                              , const FOdysseyPoint& iPointInTexture )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector);
+
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 
     // Left mouse button clicked
     // For some reason, iPointInTexture.keysDown.Find does not find the left button click for the first few events
@@ -407,8 +419,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
         iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE ); // update invalidated path after segment insertion
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
 uint64
@@ -420,6 +431,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     uint32 imgW = vectorEngine->GetPreferredWidth(),
            imgH = vectorEngine->GetPreferredHeight();
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW;
 
     mTimeAtUp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
@@ -542,9 +556,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
     // this means the Invalidation Rectangle is not resetted, so we force it.
     vectorEngine->InvalidateRect();
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY // important to remove the path builder from the hierarchy widget
-         | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED;
+    return retFlags;
 }
 
 uint64

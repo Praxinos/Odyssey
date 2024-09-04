@@ -16,8 +16,9 @@ FOdysseyVectorUndoVertexRadius::~FOdysseyVectorUndoVertexRadius()
 }
 
 FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGroupPaint* iScene
-                                                              , std::vector<FOdysseyVectorPath*>& iPathArray )
-    : FOdysseyVectorUndo( iScene )
+                                                              , std::vector<FOdysseyVectorPath*>& iPathArray
+                                                              , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     mPathSnapshotArray.reserve( iPathArray.size() );
 
@@ -28,8 +29,9 @@ FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGr
 }
 
 FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGroupPaint* iScene
-                                                              , std::vector<FOdysseyVectorVertex*>& iVertexArray )
-    : FOdysseyVectorUndo( iScene )
+                                                              , std::vector<FOdysseyVectorVertex*>& iVertexArray
+                                                              , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     mVertexSnapshotArray.reserve( iVertexArray.size() );
 
@@ -60,8 +62,7 @@ FOdysseyVectorUndoVertexRadius::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 void
@@ -85,8 +86,7 @@ FOdysseyVectorUndoVertexRadius::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

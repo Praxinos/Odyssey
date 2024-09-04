@@ -10,9 +10,10 @@ FOdysseyVectorUndo::~FOdysseyVectorUndo()
 {
 }
 
-FOdysseyVectorUndo::FOdysseyVectorUndo( FOdysseyVectorGroupPaint *iScene )
+FOdysseyVectorUndo::FOdysseyVectorUndo( FOdysseyVectorGroupPaint *iScene, uint64 iReturnFlags )
     : mApplied( true )
     , mScene( iScene )
+    , mReturnFlags( iReturnFlags )
 {
 }
 

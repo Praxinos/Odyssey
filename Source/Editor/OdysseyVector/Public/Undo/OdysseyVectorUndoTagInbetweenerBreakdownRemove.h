@@ -17,10 +17,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerBreakdownRemove : public
     public:
         ~FOdysseyVectorUndoTagInbetweenerBreakdownRemove();
         FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorGroupPaint* iScene
-                                                       , FOdysseyVectorTagInbetweener* iInbetweenerTag );
+                                                       , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                       , uint64 iReturnFlags );
         FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorGroupPaint* iScene
                                                        , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
-                                                       , const std::list<FOdysseyVectorEngine*>& iEngineList );
+                                                       , const std::list<FOdysseyVectorEngine*>& iEngineList
+                                                       , uint64 iReturnFlags );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

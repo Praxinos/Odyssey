@@ -13,6 +13,7 @@
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorTag.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorObject.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -66,7 +67,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Update()
 bool
 SOdysseyAnimationTimelineInbetweeningHeader::Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const
 {
-    return iItem.Get()->GetInbetweenerTag()->IsSelected();
+    return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected();
 }
 
 /*

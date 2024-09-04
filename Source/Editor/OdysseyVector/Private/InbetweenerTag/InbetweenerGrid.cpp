@@ -27,8 +27,8 @@ FInbetweenerGrid::GetBreakdown()
     return mBreakdown;
 }
 
-::ULIS::FVec2D
-FInbetweenerGrid::GetCenterOfMass( eInbetweenerPointPositionType iPositionType, ::ULIS::FRectD& oBBox )
+::ULIS::FRectD
+FInbetweenerGrid::GetBBox( eInbetweenerPointPositionType iPositionType )
 {
     ::ULIS::FVec2D center = ::ULIS::FVec2D( 0.0f, 0.0f );
     uint32 pointCount = 0;
@@ -39,9 +39,24 @@ FInbetweenerGrid::GetCenterOfMass( eInbetweenerPointPositionType iPositionType, 
         ::ULIS::FVec2D pointPosition = point.GetPosition( iPositionType );
 
         if( pointPosition.x < xmin ) xmin = pointPosition.x;
-        if( pointPosition.y < xmin ) ymin = pointPosition.y;
+        if( pointPosition.y < ymin ) ymin = pointPosition.y;
         if( pointPosition.x > xmax ) xmax = pointPosition.x;
         if( pointPosition.y > ymax ) ymax = pointPosition.y;
+
+    }
+
+    return ( ( xmin < xmax ) && ( ymin < ymax ) ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax )
+                                                  : ::ULIS::FRectD::FromXYWH( 0, 0, 0, 0 );
+}
+
+::ULIS::FVec2D
+FInbetweenerGrid::GetCenterOfMass( eInbetweenerPointPositionType iPositionType )
+{
+    ::ULIS::FVec2D center = ::ULIS::FVec2D( 0.0f, 0.0f );
+    uint32 pointCount = 0;
+    for ( FInbetweenerPoint& point : mPointBuffer )
+    {
+        ::ULIS::FVec2D pointPosition = point.GetPosition( iPositionType );
 
         if( point.GetQuadCount() )
         {
@@ -51,10 +66,41 @@ FInbetweenerGrid::GetCenterOfMass( eInbetweenerPointPositionType iPositionType, 
         }
     }
 
-    oBBox = ( ( xmin < xmax ) && ( ymin < ymax ) ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax )
-                                                   : ::ULIS::FRectD::FromXYWH( 0, 0, 0, 0 );
-
     return pointCount ? ( center / pointCount ) : ::ULIS::FVec2D( 0.0f, 0.0f );
+}
+
+void
+FInbetweenerGrid::UpdateBBox( uint32 iUpdateFlags
+                            , uint64 iTagInvalidationFlags )
+{
+    if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCE   )
+     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE ) )
+    {
+        mSourceBBox = GetBBox( eInbetweenerPointPositionType::SourcePosition );
+    }
+
+    if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGET )
+     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE   ) )
+    {
+        mTargetBBox = GetBBox( eInbetweenerPointPositionType::TargetPosition );
+    }
+}
+
+void
+FInbetweenerGrid::UpdateCenterOfMass( uint32 iUpdateFlags
+                                    , uint64 iTagInvalidationFlags )
+{
+    if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCE   )
+     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE ) )
+    {
+        mSourceCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::SourcePosition );
+    }
+
+    if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGET )
+     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE   ) )
+    {
+        mTargetCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::TargetPosition );
+    }
 }
 
 void FInbetweenerGrid::Make()
@@ -71,15 +117,15 @@ FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
 {
     uint32 numQuadX = mBreakdown->GetInbetweenerTag()->GetGridNumQuadX();
     uint32 numQuadY = mBreakdown->GetInbetweenerTag()->GetGridNumQuadY();
+    ::ULIS::FRectD bbox = mBreakdown->GetInbetweenerTag()->GetOwner()->GetBBox( false );
 
-    mSourceBBox = mBreakdown->GetInbetweenerTag()->GetOwner()->GetBBox( false );
     // add some margin to prevent point that would be outside the box due to precision errors
-    mSourceBBox.x -= 0.01f;
-    mSourceBBox.y -= 0.01f;
-    mSourceBBox.w += 0.02f;
-    mSourceBBox.h += 0.02f;
+    bbox.x -= 0.01f;
+    bbox.y -= 0.01f;
+    bbox.w += 0.02f;
+    bbox.h += 0.02f;
 
-    mTargetBBox = mSourceBBox;
+    //mTargetBBox = mSourceBBox;
 
     mQuadArea = 0.0f;
 
@@ -88,10 +134,10 @@ FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
 
     if( numQuadX && numQuadY )
     {
-        double x = mSourceBBox.x;
-        double y = mSourceBBox.y;
-        double stepx = mSourceBBox.w / numQuadX;
-        double stepy = mSourceBBox.h / numQuadY;
+        double x = bbox.x;
+        double y = bbox.y;
+        double stepx = bbox.w / numQuadX;
+        double stepy = bbox.h / numQuadY;
         uint32 numVertexX = numQuadX + 1;
         uint32 numVertexY = numQuadY + 1;
         uint32 pointID = 0;
@@ -110,14 +156,14 @@ FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
                 mPointBuffer[offset].SetSourcePosition( x, y );
                 mPointBuffer[offset].SetTargetPosition( x, y );
 
-                mPointBuffer[offset].SetU( std::clamp<double>( ( x - mSourceBBox.x ) / mSourceBBox.w, 0.0f, 1.0f ) );
-                mPointBuffer[offset].SetV( std::clamp<double>( ( y - mSourceBBox.y ) / mSourceBBox.h, 0.0f, 1.0f ) );
+                mPointBuffer[offset].SetU( std::clamp<double>( ( x - bbox.x ) / bbox.w, 0.0f, 1.0f ) );
+                mPointBuffer[offset].SetV( std::clamp<double>( ( y - bbox.y ) / bbox.h, 0.0f, 1.0f ) );
 
                 x += stepx;
             }
 
             y += stepy;
-            x = mSourceBBox.x;
+            x = bbox.x;
         }
 
         if( iSourcePositionBuffer.size() )
@@ -177,27 +223,6 @@ FInbetweenerGrid::GetSourceBBox()
     return mSourceBBox;
 }
 
-void
-FInbetweenerGrid::Update( uint32 iUpdateFlags
-                        , uint64 iTagInvalidationFlags )
-{
-    if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCE   )
-     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE ) )
-    {
-        ::ULIS::FRectD ignored;
-
-        mSourceCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::SourcePosition, ignored );
-    }
-
-    if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGET )
-     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE   ) )
-    {
-        ::ULIS::FRectD ignored;
-
-        mTargetCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::TargetPosition, ignored );
-    }
-}
-
 ::ULIS::FVec2D
 FInbetweenerGrid::DeformPoint( FInterpolatedPoint* iInterpolatedPoint, eInbetweenerPointPositionType iPositionType )
 {
@@ -218,8 +243,6 @@ FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPath
                              , uint32 iInbetweenIndex
                              , eInbetweenerPointPositionType iPositionType )
 {
-    ::ULIS::FRectD sourceBBox = mSourceBBox;
-
     for( FInterpolatedPath& interpolatedPath : iInterpolatedPathBuffer )
     {
         std::vector<::ULIS::FVec2D>& interpolatedPointPositionBuffer = interpolatedPath.GetInterpolatedPointPositionBuffer();
@@ -610,8 +633,8 @@ FInbetweenerGrid::ComputeARAPInterpolation( const FInbetweenerDrawing* iDrawing
     // Main constraint (linear interp of center of mass)
     if ( routeList.size() == 0 )
     {
-        PTAD( idx, 0 ) = mSourceCenterOfMass.x * ( 1.0f - t ) + mTargetCenterOfMass.x * t;
-        PTAD( idx, 1 ) = mSourceCenterOfMass.y * ( 1.0f - t ) + mTargetCenterOfMass.y * t;
+        PTAD( idx, 0 ) = mSourceCenterOfMass.x + ( ( mTargetCenterOfMass.x - mSourceCenterOfMass.x ) * t );
+        PTAD( idx, 1 ) = mSourceCenterOfMass.y + ( ( mTargetCenterOfMass.y - mSourceCenterOfMass.y ) * t );
         ++idx;
     }
 

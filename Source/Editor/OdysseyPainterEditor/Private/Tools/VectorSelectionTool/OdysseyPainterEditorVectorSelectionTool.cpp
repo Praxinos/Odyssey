@@ -191,7 +191,7 @@ UOdysseyPainterEditorVectorSelectionTool::GenerateMask()
     return roi;
 }
 
-void
+uint64
 UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVectorGroupPaint* iScene
                                                                    , const FOdysseyPoint& iPointInTexture
                                                                    , const FKey& iKey )
@@ -199,6 +199,10 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorObject*> pickedObjectArray;
     ::ULIS::FRectD roi;
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                    | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
     if( UOdysseyPainterEditorVectorBaseTool::DoubleClicked() == true )
     {
@@ -227,7 +231,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
         GEditor->BeginTransaction(LOCTEXT("vector-object-selection-tool.transaction.select-object","Vector Object Pick Tool"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene );
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene, retFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -272,9 +276,11 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
     }
 
     iEngine->ResetHUD(); // updates the current HUD (in most cases wil be this tool's HUD)
+
+    return retFlags;
 }
 
-void
+uint64
 UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVectorGroupPaint* iScene
                                                                    , const FOdysseyPoint& iPointInTexture
                                                                    , const FKey& iKey )
@@ -283,6 +289,10 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     std::vector<FOdysseyVectorVertex*> pickedVertexArray;
     std::vector<FOdysseyVectorBucket*> pickedBucketArray;
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                    | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
     // run lambda on object tree
     iEngine->Traverse
@@ -325,7 +335,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     GEditor->BeginTransaction(LOCTEXT("vector-object-selection-tool.transaction.select-vertex","Vector Vertex Pick Tool"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectVertex( iScene, objectList );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectVertex( iScene, objectList, retFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -386,6 +396,8 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
 
 
     iEngine->ResetHUD(); // updates the current HUD (in most cases wil be this tool's HUD)
+
+    return retFlags;
 }
 
 uint64
@@ -395,6 +407,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPa
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     ::ULIS::FRectD roi;
+    uint64 retFlags = 0;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -406,12 +419,12 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPa
         if( ( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT    )
          || ( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) )
         {
-            OnMouseUpVectorObjectMode( iScene, iPointInTexture, iKey );
+            retFlags |= OnMouseUpVectorObjectMode( iScene, iPointInTexture, iKey );
         }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
         {
-            OnMouseUpVectorVertexMode( iScene, iPointInTexture, iKey );
+            retFlags |= OnMouseUpVectorVertexMode( iScene, iPointInTexture, iKey );
         }
         iEngine->SetBLMask( nullptr );
 
@@ -425,9 +438,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPa
 */
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-         | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED;
+    return retFlags;
 }
 
 std::vector<::ULIS::FVec2D>&

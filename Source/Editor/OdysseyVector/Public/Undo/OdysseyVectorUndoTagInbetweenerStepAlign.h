@@ -17,7 +17,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerStepAlign : public FOdys
         ~FOdysseyVectorUndoTagInbetweenerStepAlign();
         FOdysseyVectorUndoTagInbetweenerStepAlign( FOdysseyVectorGroupPaint* iScene
                                                  , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                 , FInbetweenerRoute* iRoute );
+                                                 , FInbetweenerRoute* iRoute
+                                                 , uint64 iReturnFlags );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

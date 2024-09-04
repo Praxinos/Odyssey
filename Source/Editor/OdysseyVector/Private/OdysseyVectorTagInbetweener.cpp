@@ -254,7 +254,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
                         | INVALIDATE_SPACING
                         | INVALIDATE_CELLS )
     , mColor ( 255, 0, 255, 255 )
-    , bMapAsPolyline( false )
+    , bMapAsPolyline( true )
     , bShared ( false )
     , mARAPRigidity ( 10 )
     , mMasterBreakdown( this )
@@ -648,10 +648,10 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             mInvalidationFlags |= ( INVALIDATE_SPACING );
         }
 
-        // will update grids' BBoxes (needed for mapping and transform HUD) and center of mass (needed for interpolation).
+        // will update grids' BBoxes (needed for transform HUD and discarding of unused quads in ARAP grids)
         for( FInbetweenerBreakdown* breakdown : mBreakdownList )
         {
-            breakdown->GetGrid()->Update( iUpdateFlags, mInvalidationFlags );
+            breakdown->GetGrid()->UpdateBBox( iUpdateFlags, mInvalidationFlags );
         }
 
         if( ( mInvalidationFlags & INVALIDATE_MAP            )
@@ -662,6 +662,14 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             Map();
 
             mInvalidationFlags |= INVALIDATE_BUFFERS;
+        }
+
+        // will update grids' center of mass (needed for interpolation).
+        // MUST be done after mapping because mapping will elimniate some quads, and this is taken into account
+        // for the center of mass.
+        for( FInbetweenerBreakdown* breakdown : mBreakdownList )
+        {
+            breakdown->GetGrid()->UpdateCenterOfMass( iUpdateFlags, mInvalidationFlags );
         }
 
         if( ( mInvalidationFlags & INVALIDATE_BUFFERS )
@@ -1072,8 +1080,8 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
             uint32 tagCellIndex = tagCell->GetIndex();
             uint32 displayedCellIndex = displayedCell->GetIndex();
 
-            if ( ( displayedCellIndex >   tagCellIndex                     )
-              && ( displayedCellIndex < ( tagCellIndex + GetDrawingCount() ) ) )
+            if ( ( displayedCellIndex >   tagCellIndex                         )
+              && ( displayedCellIndex < ( tagCellIndex + GetDrawingCount() - 1 ) ) )
             {
                 DrawPathsInbetween( displayedCellIndex - tagCellIndex , iBLContext );
             }

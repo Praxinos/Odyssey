@@ -16,8 +16,9 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::~FOdysseyVectorUndoTagInbetweenerCha
 }
 
 FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChartAlter( FOdysseyVectorGroupPaint* iScene
-                                                                                      , FOdysseyVectorTagInbetweener* iInbetweenerTag )
-    : FOdysseyVectorUndo( iScene )
+                                                                                      , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                                                      , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     mInbetweenerTagSnapshotBuffer.emplace_back( iInbetweenerTag
                                               , FSnapshotFlags::Tag::Inbetweener::CHART
@@ -26,8 +27,9 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChar
 }
 
 FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChartAlter( FOdysseyVectorGroupPaint* iScene
-                                                                                      , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList )
-    : FOdysseyVectorUndo( iScene )
+                                                                                      , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                                                      , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     mInbetweenerTagSnapshotBuffer.reserve( iInbetweenerTagList.size() );
 
@@ -57,8 +59,7 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 void
@@ -78,8 +79,7 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

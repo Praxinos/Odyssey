@@ -17,8 +17,9 @@ FOdysseyVectorUndoTagInbetweenerStepAlign::~FOdysseyVectorUndoTagInbetweenerStep
 
 FOdysseyVectorUndoTagInbetweenerStepAlign::FOdysseyVectorUndoTagInbetweenerStepAlign( FOdysseyVectorGroupPaint* iScene
                                                                                     , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                                                    , FInbetweenerRoute* iRoute )
-    : FOdysseyVectorUndo( iScene )
+                                                                                    , FInbetweenerRoute* iRoute
+                                                                                    , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
     , mInbetweenerTag( iInbetweenerTag )
     , mRouteSnapshot( iRoute
                     , FSnapshotFlags::Route::TRAJECTORIES | FSnapshotFlags::Route::STEPS
@@ -40,8 +41,7 @@ FOdysseyVectorUndoTagInbetweenerStepAlign::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 void
@@ -58,8 +58,7 @@ FOdysseyVectorUndoTagInbetweenerStepAlign::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

@@ -226,17 +226,9 @@ FInbetweenerGridARAP::Regularize()
 }
 
 void
-FInbetweenerGridARAP::Update( uint32 iUpdateFlags
-                            , uint64 iTagInvalidationFlags )
-{
-    FInbetweenerGrid::Update( iUpdateFlags, iTagInvalidationFlags );
-}
-
-void
 FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer )
 {
     BLMatrix2D& ownerInverseWorldMatrix = mBreakdown->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
-    ::ULIS::FRectD spaceBBox = mSourceBBox;
     BLMatrix2D conversionMatrix;
     uint32 pointID = 0;
     uint32 segmentID = 0;

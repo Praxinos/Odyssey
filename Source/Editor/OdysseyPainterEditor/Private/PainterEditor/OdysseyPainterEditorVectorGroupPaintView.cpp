@@ -36,14 +36,14 @@ UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
     }
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iPropertyName
                                                           , const FName& iMemberPropertyName
                                                           , const FName& iCategory)
 {
-    uint64 signalFlags = UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName
-                                                                               , iMemberPropertyName
-                                                                               , iCategory );
+    UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName
+                                                          , iMemberPropertyName
+                                                          , iCategory );
 
     for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
     {
@@ -83,6 +83,4 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
                 selectedPaintGroup->SetMultithreaded( Multithreaded );
         }
     }
-
-    return signalFlags;
 }

@@ -7,8 +7,9 @@ FOdysseyVectorUndoEngineClear::~FOdysseyVectorUndoEngineClear()
     delete mScene;
 }
 
-FOdysseyVectorUndoEngineClear::FOdysseyVectorUndoEngineClear( FOdysseyVectorEngine* iEngine )
-    : FOdysseyVectorUndo( iEngine->GetScene() )
+FOdysseyVectorUndoEngineClear::FOdysseyVectorUndoEngineClear( FOdysseyVectorEngine* iEngine
+                                                            , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iEngine->GetScene(), iReturnFlags )
     , mEngine ( iEngine )
 {
 }
@@ -27,9 +28,7 @@ FOdysseyVectorUndoEngineClear::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 
     mScene = savedScene;
 }
@@ -45,9 +44,7 @@ FOdysseyVectorUndoEngineClear::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 
     mScene = savedScene;
 }

@@ -475,7 +475,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
 {
     public:
         ~FOdysseyVectorUndo();
-        FOdysseyVectorUndo( FOdysseyVectorGroupPaint* iScene );
+        FOdysseyVectorUndo( FOdysseyVectorGroupPaint* iScene, uint64 iReturnFlags );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -489,4 +489,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
     protected:
         bool mApplied;
         FOdysseyVectorGroupPaint* mScene;
+        uint64 mReturnFlags;
 };

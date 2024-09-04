@@ -183,8 +183,7 @@ void
 FOdysseyAnimationEditorGUI::ParseVectorSignal( FOdysseyVectorGroupPaint* iScene
                                              , uint64 iSignalFlags )
 {
-    if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
-     || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED ) )
+    if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW )
     {
         TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
 
@@ -192,17 +191,14 @@ FOdysseyAnimationEditorGUI::ParseVectorSignal( FOdysseyVectorGroupPaint* iScene
             
     }
 
-    if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED )
-     || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED    )
-     || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED    ) )
+    if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS )
     {
         TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
 
         vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( iScene );
     }
 
-    if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
-     || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED ) )
+    if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_TIMELINE )
     {
         TSharedPtr<FOdysseyAnimationEditorTimelineTab> timelineTab = mExtension->GetEditor()->FindTab<FOdysseyAnimationEditorTimelineTab>();
         TSharedPtr<SWidgetSwitcher> widgetSwitcher = StaticCastSharedPtr<SWidgetSwitcher>(timelineTab.Get()->Widget());
@@ -255,6 +251,22 @@ FOdysseyAnimationEditorGUI::OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScen
             FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
 
             ParseVectorSignal( vectorScene, iSignalFlags );
+        }
+    }
+    // for some reason when Unreal loads, the layerstack is NULL. But the medias exist. So in that case we use 
+    // the media provider.
+    else
+    {
+        if( mExtension->GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>() )
+        {
+            TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mExtension->GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+            if( mediaVectors.Num() )
+            {
+                FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+
+                ParseVectorSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
+            }
         }
     }
 }

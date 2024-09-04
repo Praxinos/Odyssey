@@ -33,14 +33,16 @@ FOdysseyVectorUndoPathStitch::FOdysseyVectorUndoPathStitch( FOdysseyVectorGroupP
                                                           , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                                           , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
                                                           , std::vector<FOdysseyVectorVertex*>& iMergedVertexArray
-                                                          , std::vector<FOdysseyVectorSegment*>& iMergedSegmentArray )
+                                                          , std::vector<FOdysseyVectorSegment*>& iMergedSegmentArray
+                                                          , uint64 iReturnFlags )
     : FOdysseyVectorUndoPathAlter( iScene
                                  , iRemovedPathArray
                                  , iRemovedVertexArray
                                  , iRemovedSegmentArray
                                  , iAddedPathArray
                                  , iAddedVertexArray
-                                 , iAddedSegmentArray )
+                                 , iAddedSegmentArray
+                                 , iReturnFlags )
 {
     mMergedVertexArray = iMergedVertexArray;
     mMergedSegmentArray = iMergedSegmentArray;
@@ -67,11 +69,7 @@ FOdysseyVectorUndoPathStitch::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 void
@@ -94,11 +92,7 @@ FOdysseyVectorUndoPathStitch::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

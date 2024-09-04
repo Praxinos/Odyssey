@@ -19,15 +19,17 @@ FOdysseyVectorUndoTagRemove::~FOdysseyVectorUndoTagRemove()
 }
 
 FOdysseyVectorUndoTagRemove::FOdysseyVectorUndoTagRemove( FOdysseyVectorGroupPaint* iScene
-                                                        , FOdysseyVectorTag* iTag )
-    : FOdysseyVectorUndo( iScene )
+                                                        , FOdysseyVectorTag* iTag
+                                                        , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     mTagArray.push_back( iTag );
 }
 
 FOdysseyVectorUndoTagRemove::FOdysseyVectorUndoTagRemove( FOdysseyVectorGroupPaint* iScene
-                                                        , const std::vector<FOdysseyVectorTag*>& iTagArray )
-    : FOdysseyVectorUndo( iScene )
+                                                        , const std::vector<FOdysseyVectorTag*>& iTagArray
+                                                        , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
     , mTagArray( iTagArray )
 {
 }
@@ -48,8 +50,7 @@ FOdysseyVectorUndoTagRemove::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 void
@@ -68,8 +69,7 @@ FOdysseyVectorUndoTagRemove::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

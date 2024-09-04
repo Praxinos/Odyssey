@@ -15,8 +15,9 @@ FOdysseyVectorUndoPointPosition::~FOdysseyVectorUndoPointPosition()
 }
 
 FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorGroupPaint* iScene
-                                                                , std::vector<FOdysseyVectorPoint*>& iPointArray )
-    : FOdysseyVectorUndo( iScene )
+                                                                , std::vector<FOdysseyVectorPoint*>& iPointArray
+                                                                , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     mPointSnapshotArray.reserve( iPointArray.size() );
 
@@ -28,8 +29,9 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
 
 FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorGroupPaint* iScene
                                                                 , std::vector<FOdysseyVectorVertex*>& iVertexArray
-                                                                , std::vector<FOdysseyVectorHandleSegment*>& iHandleArray )
-    : FOdysseyVectorUndo( iScene )
+                                                                , std::vector<FOdysseyVectorHandleSegment*>& iHandleArray
+                                                                , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     mPointSnapshotArray.reserve( iVertexArray.size() + iHandleArray.size() );
 
@@ -45,8 +47,9 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
 }
 
 FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorGroupPaint* iScene
-                                                                , FOdysseyVectorPoint* iPoint )
-    : FOdysseyVectorUndo( iScene )
+                                                                , FOdysseyVectorPoint* iPoint
+                                                                , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     mPointSnapshotArray.push_back( FSnapshotPoint( iPoint, FSnapshotFlags::ALL ) );
 }
@@ -67,8 +70,7 @@ FOdysseyVectorUndoPointPosition::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 void
@@ -87,8 +89,7 @@ FOdysseyVectorUndoPointPosition::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

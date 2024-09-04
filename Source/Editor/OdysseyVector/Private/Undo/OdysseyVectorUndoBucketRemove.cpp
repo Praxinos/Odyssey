@@ -17,15 +17,17 @@ FOdysseyVectorUndoBucketRemove::~FOdysseyVectorUndoBucketRemove()
 }
 
 FOdysseyVectorUndoBucketRemove::FOdysseyVectorUndoBucketRemove( FOdysseyVectorGroupPaint* iScene
-                                                              , FOdysseyVectorBucket* iBucket )
-    : FOdysseyVectorUndo( iScene )
+                                                              , FOdysseyVectorBucket* iBucket
+                                                              , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
     mBucketArray.push_back( iBucket );
 }
 
 FOdysseyVectorUndoBucketRemove::FOdysseyVectorUndoBucketRemove( FOdysseyVectorGroupPaint* iScene
-                                                              , std::vector<FOdysseyVectorBucket*>& iBucketArray )
-    : FOdysseyVectorUndo( iScene )
+                                                              , std::vector<FOdysseyVectorBucket*>& iBucketArray
+                                                              , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
     , mBucketArray( iBucketArray )
 {
 }
@@ -53,8 +55,7 @@ FOdysseyVectorUndoBucketRemove::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 void
@@ -80,8 +81,7 @@ FOdysseyVectorUndoBucketRemove::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

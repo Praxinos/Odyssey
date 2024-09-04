@@ -16,14 +16,6 @@ class ODYSSEYVECTOR_API FInbetweenerGridARAP : public FInbetweenerGrid
         void Regularize();
 
         /**
-         * @brief Update the grid when the owner object is updated.
-         * @param iUpdateFlags update flags receieved by the owner object
-         * @param iTagInvalidationFlags inbetweener tag invalidation flags
-         */
-        virtual void Update( uint32 iUpdateFlags
-                           , uint64 iTagInvalidationFlags ) override;
-
-        /**
          * @brief Map paths to the grid according to the needs of the grid
          * @param iPathBuffer the paths to map
          */

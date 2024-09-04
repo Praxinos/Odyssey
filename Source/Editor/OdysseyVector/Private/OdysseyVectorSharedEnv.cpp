@@ -1,5 +1,6 @@
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorTag.h"
+#include "OdysseyVectorObject.h"
 
 FOdysseyVectorSharedEnv::~FOdysseyVectorSharedEnv()
 {
@@ -46,7 +47,7 @@ FOdysseyVectorSharedEnv::GetSelectedTagByClassType( uint32 iClassType )
     {
         if( tag->GetClass() == iClassType )
         {
-            if( tag->IsSelected() )
+            if( tag->GetOwner()->IsSelected() )
             {
                 return tag;
             }

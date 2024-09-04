@@ -16,7 +16,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerBreakdownAlter : public 
     public:
         ~FOdysseyVectorUndoTagInbetweenerBreakdownAlter();
         FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorGroupPaint* iScene
-                                                      , FOdysseyVectorTagInbetweener* iInbetweenerTag );
+                                                      , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                      , uint64 iReturnFlags );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

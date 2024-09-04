@@ -15,22 +15,3 @@ FOdysseyVectorTag::GetOwner()
 {
     return mOwner;
 }
-
-void
-FOdysseyVectorTag::SetSelected( bool iSelected )
-{
-    if( iSelected )
-    {
-        mFlags |= SELECTED;
-    }
-    else
-    {
-        mFlags &= (~SELECTED);
-    }
-}
-
-bool
-FOdysseyVectorTag::IsSelected()
-{
-    return ( mFlags & SELECTED ) ? true : false;
-}

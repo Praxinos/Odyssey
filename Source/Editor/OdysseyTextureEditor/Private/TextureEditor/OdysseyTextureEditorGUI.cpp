@@ -195,15 +195,12 @@ FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScene,
 
         if( currentVectorLayer && ( currentVectorLayer->GetEngine()->GetScene() == iScene ) )
         {
-            if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
-             || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED ) )
+            if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW )
             {
                 vectorSceneTreeViewTab.Get()->UpdateSceneTreeView( iScene );
             }
 
-            if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED )
-             || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED    )
-             || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED    ) )
+            if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS )
             {
                 vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( iScene );
             }

@@ -177,6 +177,8 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+
     mTransformHUD->SetCenterGizmo( false );
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
@@ -204,7 +206,8 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
             // it could conflict with the undo created by the mouse up event in the case of a no-drag
             mUndo = new FOdysseyVectorUndoPointPosition( iScene
                                                        , mTransformedVertexArray
-                                                       , mTransformedHandleArray );
+                                                       , mTransformedHandleArray
+                                                       , retFlags );
         }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
@@ -215,7 +218,9 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
 
             // remember for undos. we don't register the undo in the mouse down event yet because
             // it could conflict with the undo created by th emouse up event in the case of a no-drag
-            mUndo = new FOdysseyVectorUndoObjectTransform( iScene, transformedObjectList );
+            mUndo = new FOdysseyVectorUndoObjectTransform( iScene
+                                                         , transformedObjectList
+                                                         , retFlags );
         }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
@@ -224,7 +229,9 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
 
             // remember for undos. we don't register the undo in the mouse down event yet because
             // it could conflict with the undo created by th emouse up event in the case of a no-drag
-            mUndo = new FOdysseyVectorUndoTagInbetweenerTransform( iScene, mTransformedInbetweenerTagList );
+            mUndo = new FOdysseyVectorUndoTagInbetweenerTransform( iScene
+                                                                 , mTransformedInbetweenerTagList
+                                                                 , retFlags );
         }
 
         if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ROTATE )
@@ -988,6 +995,8 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
                                                          , const FKey& iKey)
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -1048,8 +1057,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
 
     mTransformHUD->SetCenterGizmo( true );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED;
+    return retFlags;
 }
 
 uint64
