@@ -3,6 +3,9 @@
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorAnimationCell.h"
 
 FOdysseyPainterEditorVectorTransformToolHUD::~FOdysseyPainterEditorVectorTransformToolHUD()
 {
@@ -335,8 +338,15 @@ FOdysseyPainterEditorVectorTransformToolHUD::CenterGizmo()
 }
 
 void
-FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorGroupPaint* iScene)
+FOdysseyPainterEditorVectorTransformToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
+    uint64 hudFlags = mTransformTool->GetEditor()->GetVectorHUDFlags();
+
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+    {
+        UpdateSelectionInbetweenMode( iScene );
+    }
+
     UpdateSelectionBox( iScene, mTransformTool->World, mTransformTool->GetEditor()->GetVectorHUDFlags() );
 
     if( mCenterGizmo )
@@ -358,6 +368,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
     static BLRgba32 greyColor = BLRgba32( 128, 128, 128, 128 );
     uint32 selectedObjectCount = iScene->GetEngine()->GetSelectedObjectList().size();
     uint64 hudFlags = mTransformTool->GetEditor()->GetVectorHUDFlags();
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
     // Draw default
     // -> nothing in object mode.
@@ -370,6 +381,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
 
     if( hudFlags & HUD_MODE_INBETWEEN )
     {
+/*
         DrawObjects( iBLContext
                    , iScene
                    , greyColor
@@ -383,6 +395,32 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
                    , bgColor
                    , hcColor
                    , hudFlags | HUD_TAGINBETWEENER_TARGET );
+*/
+        for( FOdysseyVectorTag* tag : vectorEngine->GetSharedEnv()->GetTagList() )
+        {
+            if( ( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+             && ( tag->GetOwner()->IsSelected() ) )
+            {
+                FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+                FOdysseyVectorGroupPaint* inbetweenerTagScene = inbetweenerTag->GetOwner()->GetScene();
+                uint32 frameIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex()
+                                  - inbetweenerTagScene->GetEngine()->GetAnimationCell()->GetIndex();
+
+                for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
+                {
+                    if( breakdown->GetTargetDrawingIndex() == frameIndex )
+                    {
+                       DrawBreakdown( iBLContext
+                                    , breakdown
+                                    , fgColor
+                                    , bgColor
+                                    , hcColor
+                                    , true
+                                    , hudFlags  );
+                    }
+                }
+            }
+        }
     }
 
     iBLContext->save();

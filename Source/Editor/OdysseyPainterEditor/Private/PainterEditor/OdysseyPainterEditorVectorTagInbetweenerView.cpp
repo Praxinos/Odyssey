@@ -13,6 +13,16 @@ UOdysseyPainterEditorVectorTagInbetweenerView::~UOdysseyPainterEditorVectorTagIn
 UOdysseyPainterEditorVectorTagInbetweenerView::UOdysseyPainterEditorVectorTagInbetweenerView()
     : mEditor( nullptr )
     , mScene( nullptr )
+    , InterpolationType ( eInbetweenerInterpolationType::ARAP )
+    , GridType ( eInbetweenerGridType::ARAP )
+    , DivisionX ( 8 )
+    , DivisionY ( 8 )
+    , Rigidity ( 10 )
+    , MapAsPolyline( true )
+    , Color( FOdysseyVectorTagInbetweener::DEFAULT_RED_UINT8
+           , FOdysseyVectorTagInbetweener::DEFAULT_GREEN_UINT8
+           , FOdysseyVectorTagInbetweener::DEFAULT_BLUE_UINT8
+           , FOdysseyVectorTagInbetweener::DEFAULT_ALPHA_UINT8 )
 {
 }
 

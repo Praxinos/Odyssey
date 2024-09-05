@@ -26,6 +26,8 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         void SetGrid( eInbetweenerGridType iGridType );
         BLMatrix2D& GetSourceLocalMatrix();
         BLMatrix2D& GetTargetLocalMatrix();
+        BLMatrix2D& GetTargetWorldMatrix();
+        BLMatrix2D& GetTargetInverseWorldMatrix();
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
         FInbetweenerBreakdown* GetMasterBreakdown();
         void DrawPathsAtTarget( BLContext* iBLContext );

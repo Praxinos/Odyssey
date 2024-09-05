@@ -10,6 +10,8 @@
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTag.h"
+#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorAnimationCell.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorObject.h"
 #include "Undo/OdysseyVectorUndoPointPosition.h"
@@ -162,16 +164,6 @@ UOdysseyPainterEditorVectorTransformTool::GetTransformedObjectList( FOdysseyVect
       } );
 }
 
-void
-UOdysseyPainterEditorVectorTransformTool::UpdateTransformedInbetweenerTagList( FOdysseyVectorGroupPaint* iScene )
-{
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-
-    mTransformedInbetweenerTagList.clear();
-
-    vectorEngine->GetFocusedInbetweenerTagList( mTransformedInbetweenerTagList );
-}
-
 uint64
 UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
@@ -225,13 +217,13 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
         {
-            UpdateTransformedInbetweenerTagList( iScene );
-
+/*
             // remember for undos. we don't register the undo in the mouse down event yet because
             // it could conflict with the undo created by th emouse up event in the case of a no-drag
             mUndo = new FOdysseyVectorUndoTagInbetweenerTransform( iScene
-                                                                 , mTransformedInbetweenerTagList
+                                                                 , mTransformedBreakdownList
                                                                  , retFlags );
+*/
         }
 
         if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ROTATE )
@@ -429,13 +421,13 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         pivot.y = selectionBox.rect.y + spacePivot.y;
     }
 
-#ifdef unused
+
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
         BLPoint spacePivot = BLPoint( pivot.x - selectionBox.rect.x
                                     , pivot.y - selectionBox.rect.y );
 
-        for( FOdysseyVectorTagInbetweener* inbetweenerTag : mTransformedInbetweenerTagList )
+        for( FInbetweenerBreakdown* breakdown : mTransformHUD->GetSelectedBreakdownList() )
         {
             double translationX;
             double translationY;
@@ -445,8 +437,8 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
             BLMatrix2D tagSpaceMatrix;
             BLMatrix2D tagTranslateMatrix;
             BLMatrix2D tagLocalMatrix;
-            BLMatrix2D tagWorldMatrix = inbetweenerTag->GetTargetWorldMatrix();
-            BLMatrix2D parentInverseWorldMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
+            BLMatrix2D tagWorldMatrix = breakdown->GetTargetWorldMatrix();
+            BLMatrix2D parentInverseWorldMatrix = breakdown->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
 
             // transfer object in "Selection Space" coordinates system
             FOdysseyVector::MatrixMultiply( inverseSpaceMatrix, tagWorldMatrix, tagSpaceMatrix );
@@ -469,11 +461,11 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
                                                  , &scalingY );
 
             // Apply the local transformations
-            inbetweenerTag->Translate( translationX, translationY );
-            inbetweenerTag->Rotate( rotation / M_PI * 180 ); // in degrees
-            inbetweenerTag->Scale( scalingX, scalingY );
+            breakdown->Translate( translationX, translationY );
+            breakdown->Rotate( rotation / M_PI * 180 ); // in degrees
+            breakdown->Scale( scalingX, scalingY );
 
-            inbetweenerTag->UpdateMatrix();
+            breakdown->UpdateMatrix();
         } 
 
         iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
@@ -485,7 +477,6 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         pivot.x = selectionBox.rect.x + spacePivot.x;
         pivot.y = selectionBox.rect.y + spacePivot.y;
     }
-#endif
 }
 
 double
@@ -622,13 +613,13 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
               return 0;
           } );
     }
-#ifdef unused
+
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
         BLPoint spacePivot = BLPoint( pivot.x - selectionBox.rect.x
                                     , pivot.y - selectionBox.rect.y );
 
-        for( FOdysseyVectorTagInbetweener* inbetweenerTag : mTransformedInbetweenerTagList )
+        for( FInbetweenerBreakdown* breakdown : mTransformHUD->GetSelectedBreakdownList() )
         {
             double translationX;
             double translationY;
@@ -638,8 +629,8 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
             BLMatrix2D tagSpaceMatrix;
             BLMatrix2D tagRotateMatrix;
             BLMatrix2D tagLocalMatrix;
-            BLMatrix2D tagWorldMatrix = inbetweenerTag->GetTargetWorldMatrix();
-            BLMatrix2D parentInverseWorldMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
+            BLMatrix2D tagWorldMatrix = breakdown->GetTargetWorldMatrix();
+            BLMatrix2D parentInverseWorldMatrix = breakdown->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
 
             // transfer object in "Rotation Space" coordinates system
             FOdysseyVector::MatrixMultiply( inverseSpaceMatrix, tagWorldMatrix, tagSpaceMatrix );
@@ -662,14 +653,13 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
                                                   , &scalingY );
 
             // Apply the local transformations
-            inbetweenerTag->Translate( translationX, translationY );
-            inbetweenerTag->Rotate( rotation / M_PI * 180 ); // in degrees
-            inbetweenerTag->Scale( scalingX, scalingY );
+            breakdown->Translate( translationX, translationY );
+            breakdown->Rotate( rotation / M_PI * 180 ); // in degrees
+            breakdown->Scale( scalingX, scalingY );
 
-            inbetweenerTag->UpdateMatrix();
+            breakdown->UpdateMatrix();
         }
     }
-#endif
 
     // Update the matrix for all objects
     //iScene->UpdateMatrix();
@@ -865,13 +855,13 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
                   return 0;
               } );
         }
-#ifdef unused
+
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
         {
             BLPoint spacePivot = BLPoint( pivot.x - selectionBox.rect.x
                                         , pivot.y - selectionBox.rect.y );
 
-            for( FOdysseyVectorTagInbetweener* inbetweenerTag : mTransformedInbetweenerTagList )
+            for( FInbetweenerBreakdown* breakdown : mTransformHUD->GetSelectedBreakdownList() )
             {
                 double translationX;
                 double translationY;
@@ -881,8 +871,8 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
                 BLMatrix2D tagSpaceMatrix;
                 BLMatrix2D tagScaledMatrix;
                 BLMatrix2D tagLocalMatrix;
-                BLMatrix2D tagWorldMatrix = inbetweenerTag->GetTargetWorldMatrix();
-                BLMatrix2D parentInverseWorldMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
+                BLMatrix2D tagWorldMatrix = breakdown->GetTargetWorldMatrix();
+                BLMatrix2D parentInverseWorldMatrix = breakdown->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
 
                 // transfer object in "Rotation Space" coordinates system
                 FOdysseyVector::MatrixMultiply( inverseSpaceMatrix, tagWorldMatrix, tagSpaceMatrix );
@@ -905,15 +895,14 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
                                                       , &scalingY );
 
                 // Apply the local transformations
-                inbetweenerTag->Translate( translationX, translationY );
+                breakdown->Translate( translationX, translationY );
                 // for some reasons this affects the rotation, so we ignore it.
-                inbetweenerTag->Rotate( inbetweenerTag->GetTargetRotation() ); // in degrees
-                inbetweenerTag->Scale( scalingX, scalingY );
+                breakdown->Rotate( breakdown->GetTargetRotation() ); // in degrees
+                breakdown->Scale( scalingX, scalingY );
 
-                inbetweenerTag->UpdateMatrix();
+                breakdown->UpdateMatrix();
             }
         }
-#endif
     }
 
     // Update the matrix for all objects

@@ -52,7 +52,9 @@ struct FInbetweenerDrawing
     float breakdownSpacing; // spacing relative to the current breakdown
     FInbetweenerBreakdown* breakdown;
     BLMatrix2D localMatrix;
+    BLMatrix2D worldMatrix;
     BLMatrix2D inverseMatrix;
+    BLMatrix2D inverseWorldMatrix;
     uint32 index;
 };
 
@@ -218,7 +220,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void DrawPathsInbetween( uint32 iDrawingIndex
                                , BLContext* iBLContext );
         void DrawPathsTarget( BLContext* iBLContext );
-        void DeformPathsAtInbetween( uint32 iDrawingIndex );
+
         void DeformPathsAtTarget();
         std::list<FInbetweenerBreakdown*>& GetBreakdownList();
         FInbetweenerBreakdown* AddBreakdown( uint32 iDrawingIndex, bool iCopyGeometry );
@@ -273,9 +275,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void Share();
         void Unshare();
         void ChainBreakdowns();
-
-
+        void DeformGridAtInbetween( uint32 iDrawingIndex );
+        void DeformPathsAtInbetween( uint32 iDrawingIndex );
     public:
+        static const uint8 DEFAULT_RED_UINT8   = 255;
+        static const uint8 DEFAULT_GREEN_UINT8 = 0;
+        static const uint8 DEFAULT_BLUE_UINT8  = 255;
+        static const uint8 DEFAULT_ALPHA_UINT8 = 255;
+
         static const uint64 INVALIDATE_MAP            = ( 1LL << 0 );
         static const uint64 INVALIDATE_BUFFERS        = ( 1LL << 1 );
         static const uint64 INVALIDATE_SPACING        = ( 1LL << 2 );

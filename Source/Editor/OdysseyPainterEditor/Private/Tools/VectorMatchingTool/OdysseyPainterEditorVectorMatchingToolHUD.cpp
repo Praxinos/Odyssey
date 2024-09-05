@@ -94,50 +94,51 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
     {
         // Caution: even though here we pick a tag that is displayed in the scene,
         // it does not mean it belongs to an object that belongs to the scene.
-        FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(engine->GetSharedEnv()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass() ));
-
-        if( inbetweenerTag )
+        for( FOdysseyVectorTag* tag : engine->GetSharedEnv()->GetTagList() )
         {
-            FOdysseyVectorGroupPaint* inbetweenerTagScene = inbetweenerTag->GetOwner()->GetScene();
-            uint32 frameIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex()
-                              - inbetweenerTagScene->GetEngine()->GetAnimationCell()->GetIndex();
-
-            for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
+            if( ( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+             && ( tag->GetOwner()->IsSelected() ) )
             {
-                if( breakdown->GetTargetDrawingIndex() == frameIndex )
+                FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+                FOdysseyVectorGroupPaint* inbetweenerTagScene = inbetweenerTag->GetOwner()->GetScene();
+                uint32 frameIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex()
+                                  - inbetweenerTagScene->GetEngine()->GetAnimationCell()->GetIndex();
+
+                for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
                 {
-/*
-                    DrawObjects( iBLContext
-                               // we draw the tag owner's scene over the current scene.
-                               , inbetweenerTag->GetOwner()->GetScene()
-                               , greyColor
-                               , bgColor
-                               , hcColor
-                               , hudFlags | HUD_TAGINBETWEENER_TARGET | HUD_DRAW_ALL );
+                    if( breakdown->GetTargetDrawingIndex() == frameIndex )
+                    {
+    /*
+                        DrawObjects( iBLContext
+                                   // we draw the tag owner's scene over the current scene.
+                                   , inbetweenerTag->GetOwner()->GetScene()
+                                   , greyColor
+                                   , bgColor
+                                   , hcColor
+                                   , hudFlags | HUD_TAGINBETWEENER_TARGET | HUD_DRAW_ALL );
 
-                    DrawObjects( iBLContext
-                               // we draw the tag owner's scene over the current scene.
-                               , inbetweenerTag->GetOwner()->GetScene()
-                               , fgColor
-                               , bgColor
-                               , hcColor
-                               , hudFlags | HUD_TAGINBETWEENER_TARGET );
-*/
-                   DrawBreakdown( iBLContext
-                                , breakdown
-                                , fgColor
-                                , bgColor
-                                , hcColor
-                                , true
-                                , hudFlags  );
-
-                    DrawTargetGrid ( iBLContext
-                                   , breakdown
+                        DrawObjects( iBLContext
+                                   // we draw the tag owner's scene over the current scene.
+                                   , inbetweenerTag->GetOwner()->GetScene()
                                    , fgColor
                                    , bgColor
-                                   , hcColor );
+                                   , hcColor
+                                   , hudFlags | HUD_TAGINBETWEENER_TARGET );
+    */
+                       DrawBreakdown( iBLContext
+                                    , breakdown
+                                    , fgColor
+                                    , bgColor
+                                    , hcColor
+                                    , true
+                                    , hudFlags  );
 
-
+                        DrawTargetGrid ( iBLContext
+                                       , breakdown
+                                       , fgColor
+                                       , bgColor
+                                       , hcColor );
+                    }
                 }
             }
         }

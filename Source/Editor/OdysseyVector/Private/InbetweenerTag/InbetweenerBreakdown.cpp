@@ -268,6 +268,11 @@ FInbetweenerBreakdown::UpdateMatrix()
     drawing->localMatrix.rotate( mTargetRotation * M_PI / 180.0f );
     drawing->localMatrix.scale( mTargetScalingX, mTargetScalingY );
 
+    drawing->worldMatrix = mInbetweenerTag->GetOwner()->GetWorldMatrix();
+    drawing->worldMatrix.transform( drawing->localMatrix );
+
+    BLMatrix2D::invert( drawing->inverseWorldMatrix, drawing->worldMatrix );
+
 /*
     mTargetWorldMatrix = mOwner->GetWorldMatrix();
     mTargetWorldMatrix.transform( mTargetLocalMatrix );
@@ -324,6 +329,18 @@ FInbetweenerBreakdown::GetTargetLocalMatrix()
     return mInbetweenerTag->GetChart().drawingBuffer[mTargetDrawingIndex].localMatrix;
 }
 
+BLMatrix2D&
+FInbetweenerBreakdown::GetTargetWorldMatrix()
+{
+    return mInbetweenerTag->GetChart().drawingBuffer[mTargetDrawingIndex].worldMatrix;
+}
+
+BLMatrix2D&
+FInbetweenerBreakdown::GetTargetInverseWorldMatrix()
+{
+    return mInbetweenerTag->GetChart().drawingBuffer[mTargetDrawingIndex].inverseWorldMatrix;
+}
+
 void
 FInbetweenerBreakdown::SetSourceDrawingIndex( uint32 iSourceDrawingIndex )
 {
@@ -335,7 +352,6 @@ FInbetweenerBreakdown::SetSourceDrawingIndex( uint32 iSourceDrawingIndex )
     }
 
     mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING 
-                               | FOdysseyVectorTagInbetweener::INVALIDATE_BREAKDOWN_LIST
                                // force deformation of interpolated paths at target
                                | FOdysseyVectorTagInbetweener::INVALIDATE_TARGET  );
 }
@@ -356,7 +372,6 @@ FInbetweenerBreakdown::SetTargetDrawingIndex( uint32 iTargetDrawingIndex )
     mInbetweenerTag->UpdateMatrix();
 
     mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING 
-                               | FOdysseyVectorTagInbetweener::INVALIDATE_BREAKDOWN_LIST
                                // force deformation of interpolated paths at target
                                | FOdysseyVectorTagInbetweener::INVALIDATE_TARGET );
 }

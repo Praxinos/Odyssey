@@ -135,7 +135,7 @@ FOdysseyVectorTagInbetweener::~FOdysseyVectorTagInbetweener()
     //delete mGrid;
     mBreakdownList.remove_if( []( FInbetweenerBreakdown* breakdown )
                               {
-                                  if( breakdown->GetMasterBreakdown() != nullptr )
+                                  if( breakdown != breakdown->GetMasterBreakdown() )
                                   {
                                       delete breakdown;
                                   }
@@ -253,7 +253,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
                         | INVALIDATE_ROUTES
                         | INVALIDATE_SPACING
                         | INVALIDATE_CELLS )
-    , mColor ( 255, 0, 255, 255 )
+    , mColor ( DEFAULT_RED_UINT8, DEFAULT_GREEN_UINT8, DEFAULT_BLUE_UINT8, DEFAULT_ALPHA_UINT8 )
     , bMapAsPolyline( true )
     , bShared ( false )
     , mARAPRigidity ( 10 )
@@ -402,6 +402,7 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
                                           , bool iCopyGeometry )
 {
     std::vector<::ULIS::FVec2D> curBreakdownSourceGeometry;
+    std::vector<::ULIS::FVec2D> curBreakdownInterpGeometry;
     std::list<FInbetweenerBreakdown*>::iterator curBreakdownIterator = GetBreakdownItem( iDrawingIndex );
 
     if( curBreakdownIterator!= mBreakdownList.end() )
@@ -423,13 +424,18 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
             // (then its pointer to the tag would be null)
             newBreakdown->SetInbetweenerTag( this );
 
-            newBreakdown->SetSourceDrawingIndex( newSourceDrawingIndex );
-            newBreakdown->SetTargetDrawingIndex( newTargetDrawingIndex );
-
+            // Note: SetTargetDrawingIndex() will reset the chart so we do this before the call to SetTargetDrawingIndex()
             if( iCopyGeometry )
             {
+                // we will take grid coords from interpolated coords
+                DeformGridAtInbetween( iDrawingIndex );
+
                 curBreakdown->GetGrid()->GetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+                curBreakdown->GetGrid()->GetGeometry( curBreakdownInterpGeometry, eInbetweenerPointPositionType::InterpPosition );
             }
+
+            newBreakdown->SetSourceDrawingIndex( newSourceDrawingIndex );
+            newBreakdown->SetTargetDrawingIndex( newTargetDrawingIndex );
 
             mBreakdownList.insert( curBreakdownIterator, newBreakdown );
 
@@ -457,7 +463,7 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
                 double scalingY = curBreakdown->GetTargetScalingY();
 
                 newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
-                newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::TargetPosition );
+                newBreakdown->GetGrid()->SetGeometry( curBreakdownInterpGeometry, eInbetweenerPointPositionType::TargetPosition );
 
                 newBreakdown->SetTargetTransform( prevTranslationX + ( ( translationX - prevTranslationX ) * t )
                                                 , prevTranslationY + ( ( translationY - prevTranslationY ) * t )
@@ -508,18 +514,28 @@ FOdysseyVectorTagInbetweener::GetBreakdownItem( uint32 iDrawingIndex )
 void
 FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown, bool iFreeMemNow )
 {
+    FInbetweenerBreakdown* nextBreakdown = iBreakdown->GetNextBreakdown();
+
     mBreakdownList.remove_if( [iBreakdown]( FInbetweenerBreakdown* listedBreakdown )
                               {
                                   return ( iBreakdown == listedBreakdown ) ? true : false;
                               } );
 
-    if( iBreakdown->GetNextBreakdown() )
+    if( nextBreakdown )
     {
-        iBreakdown->GetNextBreakdown()->SetSourceDrawingIndex( iBreakdown->GetSourceDrawingIndex() );
+        std::vector<::ULIS::FVec2D> breakdownSourceGeometry;
+
+        iBreakdown->GetGrid()->GetGeometry( breakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+
+        // nextBreakdown source grid gets its shape from this removed breakdown source grid.
+        nextBreakdown->GetGrid()->SetGeometry( breakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+        // as well as its source drawing index
+        nextBreakdown->SetSourceDrawingIndex( iBreakdown->GetSourceDrawingIndex() );
     }
 
     iBreakdown->SetInbetweenerTag( nullptr );
 
+    // Readd if its the default breakdown
     if( iBreakdown == &mMasterBreakdown )
     {
         mMasterBreakdown.SetInbetweenerTag( this );
@@ -655,7 +671,6 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         }
 
         if( ( mInvalidationFlags & INVALIDATE_MAP            )
-         || ( mInvalidationFlags & INVALIDATE_SOURCE         )
          || ( mInvalidationFlags & INVALIDATE_BREAKDOWN_LIST ) )
         {
             // map object to the first grid
@@ -692,11 +707,11 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         if( ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCE     )
          || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGET     )
          || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE   )
-         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SPACING    )
+        // || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SPACING    )
          || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_ROUTE_LIST )
          || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_MAP        ) )
         {
-            if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
+            //if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
             {
                 for( FInbetweenerBreakdown* breakdown : mBreakdownList )
                 {
@@ -869,7 +884,7 @@ FOdysseyVectorTagInbetweener::DispatchInbetweensToBreakdowns()
 }
 
 void
-FOdysseyVectorTagInbetweener::DeformPathsAtInbetween( uint32 iDrawingIndex )
+FOdysseyVectorTagInbetweener::DeformGridAtInbetween( uint32 iDrawingIndex )
 {
     FInbetweenerDrawing* drawing = &mChart.drawingBuffer[iDrawingIndex];
     double t = mChart.drawingBuffer[iDrawingIndex].breakdownSpacing;
@@ -893,16 +908,16 @@ FOdysseyVectorTagInbetweener::DeformPathsAtInbetween( uint32 iDrawingIndex )
     {
         drawing->breakdown->GetGrid()->ComputeARAPInterpolation( drawing, false );
     }
-/*
-    if( mGridType == eInbetweenerGridType::FFD )
-    {
-        for( FInbetweenerPoint& point : mGrid->GetPointBuffer() )
-        {
-            point.SetU( ( point.mInterpPosition.x - bbox.x ) / bbox.w );
-            point.SetV( ( point.mInterpPosition.y - bbox.y ) / bbox.h );
-        }
-    }
-*/
+}
+
+void
+FOdysseyVectorTagInbetweener::DeformPathsAtInbetween( uint32 iDrawingIndex )
+{
+    FInbetweenerDrawing* drawing = &mChart.drawingBuffer[iDrawingIndex];
+    double t = mChart.drawingBuffer[iDrawingIndex].breakdownSpacing;
+
+    DeformGridAtInbetween( iDrawingIndex );
+
     // deform the path according to grid geometry
     drawing->breakdown->GetGrid()->DeformPaths( mInterpolatedPathBuffer
                                               , iDrawingIndex

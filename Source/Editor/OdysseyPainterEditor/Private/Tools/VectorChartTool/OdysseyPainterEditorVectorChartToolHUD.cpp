@@ -36,25 +36,41 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
     iBLContext->setStrokeStyle( BLRgba32( 255, 0, 0, 255 ) );
     iBLContext->setStrokeWidth( 1.0f );
 
+    // horizontal line
     iBLContext->strokeLine( mChartRect.x               , cursorY
                           , mChartRect.x + mChartRect.w, cursorY );
 
-    for( uint32 i = 1; i < ( iInbetweenerTag->GetDrawingCount() - 1 ); i++ )
+    for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
     {
-        FInbetweenerDrawing& drawing = chart.drawingBuffer[i];
-        float cursorX = mChartRect.x + ( drawing.spacing * mChartRect.w );
+        uint32 sourceDrawingIndex = breakdown->GetSourceDrawingIndex();
+        uint32 targetDrawingIndex = breakdown->GetTargetDrawingIndex();
+        FInbetweenerDrawing* sourceDrawing = iInbetweenerTag->GetDrawing( sourceDrawingIndex );
+        FInbetweenerDrawing* targetDrawing = iInbetweenerTag->GetDrawing( targetDrawingIndex );
 
-        iBLContext->strokeLine( cursorX, cursorY - cursorRadius
-                              , cursorX, cursorY + cursorRadius );
+        iBLContext->setStrokeWidth( 1.0f );
+        iBLContext->setStrokeStyle( BLRgba32( 255, 0, 0, 255 ) );
+
+        for( uint32 i = sourceDrawingIndex + 1; i < targetDrawingIndex; i++ )
+        {
+            FInbetweenerDrawing* drawing = iInbetweenerTag->GetDrawing( i );
+            float cursorX = mChartRect.x + ( drawing->spacing * mChartRect.w );
+
+            iBLContext->strokeLine( cursorX, cursorY - cursorRadius
+                                  , cursorX, cursorY + cursorRadius );
+        }
+
+
+        iBLContext->setStrokeWidth( 3.0f );
+        iBLContext->setStrokeStyle( BLRgba32( 255, 127, 127, 255 ) );
+
+        // initial keypose. Vertical line
+        iBLContext->strokeLine( mChartRect.x + ( sourceDrawing->spacing * mChartRect.w ), cursorY - cursorRadius
+                              , mChartRect.x + ( sourceDrawing->spacing * mChartRect.w ), cursorY + cursorRadius );
+
+        // final keypose. Vertical line
+        iBLContext->strokeLine( mChartRect.x + ( targetDrawing->spacing * mChartRect.w ), cursorY - cursorRadius
+                              , mChartRect.x + ( targetDrawing->spacing * mChartRect.w ), cursorY + cursorRadius );
     }
-
-    iBLContext->setStrokeWidth( 3.0f );
-    // initial keypose
-    iBLContext->strokeLine( mChartRect.x, cursorY - 20
-                          , mChartRect.x, cursorY + 20 );
-    // final keypose
-    iBLContext->strokeLine( mChartRect.x + mChartRect.w, cursorY - cursorRadius
-                          , mChartRect.x + mChartRect.w, cursorY + cursorRadius );
 
     iBLContext->restore();
 }
@@ -110,15 +126,23 @@ FOdysseyPainterEditorVectorChartToolHUD::PickInbetween( FOdysseyVectorTagInbetwe
 
     if( mChartRect.HitTest( ::ULIS::FVec2D( iWorldX, iWorldY ) ) )
     {
-        for( uint32 i = 1; i < ( iInbetweenerTag->GetDrawingCount() - 1 ); i++ )
+        for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
         {
-            FInbetweenerDrawing& drawing = chart.drawingBuffer[i];
-            float cursorX = mChartRect.x + ( drawing.spacing * mChartRect.w );
+            uint32 sourceDrawingIndex = breakdown->GetSourceDrawingIndex();
+            uint32 targetDrawingIndex = breakdown->GetTargetDrawingIndex();
+            FInbetweenerDrawing* sourceDrawing = iInbetweenerTag->GetDrawing( sourceDrawingIndex );
+            FInbetweenerDrawing* targetDrawing = iInbetweenerTag->GetDrawing( targetDrawingIndex );
 
-            if( ( iWorldX >= ( cursorX - iRadius ) )
-             && ( iWorldX <= ( cursorX + iRadius ) ) )
+            for( uint32 i = sourceDrawingIndex + 1; i < targetDrawingIndex; i++ )
             {
-                return &drawing;
+                FInbetweenerDrawing* drawing = iInbetweenerTag->GetDrawing( i );
+                float cursorX = mChartRect.x + ( drawing->spacing * mChartRect.w );
+
+                if( ( iWorldX >= ( cursorX - iRadius ) )
+                 && ( iWorldX <= ( cursorX + iRadius ) ) )
+                {
+                    return drawing;
+                }
             }
         }
     }

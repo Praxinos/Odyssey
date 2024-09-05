@@ -34,6 +34,9 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
 
         FSelectionBox& GetSelectionBox();
 
+        std::list<FInbetweenerBreakdown*>& GetSelectedBreakdownList();
+        std::list<FOdysseyVectorTagInbetweener*>& GetSelectedInbetweenerTagList();
+
     protected:
         void UpdateSelectionBoxVertexMode( FOdysseyVectorGroupPaint* iScene );
 
@@ -51,8 +54,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
                              , BLRgba32& iBackgroundColor
                              , BLRgba32& iHighlightColor
                              , uint64 iHUDFlags );
+        void UpdateSelectionInbetweenMode( FOdysseyVectorGroupPaint* iScene );
 
     protected:
         UOdysseyPainterEditorVectorBaseTool* mBaseTool;
         FSelectionBox mSelectionBox;
+        std::list<FInbetweenerBreakdown*> mSelectedBreakdownList;
+        std::list<FOdysseyVectorTagInbetweener*> mSelectedInbetweenerTagList;
 };

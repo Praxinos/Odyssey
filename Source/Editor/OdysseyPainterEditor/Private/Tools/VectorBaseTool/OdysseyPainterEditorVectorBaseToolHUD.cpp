@@ -1,5 +1,7 @@
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorAnimationCell.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorGroupPaint.h"
@@ -27,13 +29,62 @@ FOdysseyPainterEditorVectorBaseToolHUD::Unload( FOdysseyVectorGroupPaint* iScene
 void
 FOdysseyPainterEditorVectorBaseToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
+    uint64 hudFlags = mBaseTool->GetEditor()->GetVectorHUDFlags();
 
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+    {
+        UpdateSelectionInbetweenMode( iScene );
+    }
 }
 
 FSelectionBox&
 FOdysseyPainterEditorVectorBaseToolHUD::GetSelectionBox()
 {
     return mSelectionBox;
+}
+
+void
+FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    FOdysseyVectorSharedEnv* sharedEnv = vectorEngine->GetSharedEnv();
+    uint32 cellIndex = vectorEngine->GetAnimationCell()->GetIndex();
+
+    mSelectedInbetweenerTagList.clear();
+    mSelectedBreakdownList.clear();
+
+    for( FOdysseyVectorTag* tag : sharedEnv->GetTagList() )
+    {
+        if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+        {
+            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+            if( tag->GetOwner()->IsSelected() )
+            {
+                mSelectedInbetweenerTagList.push_back( inbetweenerTag );
+
+                for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
+                {
+                    if( breakdown->GetTargetDrawingIndex() == cellIndex )
+                    {
+                        mSelectedBreakdownList.push_back( breakdown );
+                    }
+                }
+            }
+        }
+    }
+}
+
+std::list<FInbetweenerBreakdown*>&
+FOdysseyPainterEditorVectorBaseToolHUD::GetSelectedBreakdownList()
+{
+    return mSelectedBreakdownList;
+}
+
+std::list<FOdysseyVectorTagInbetweener*>&
+FOdysseyPainterEditorVectorBaseToolHUD::GetSelectedInbetweenerTagList()
+{
+    return mSelectedInbetweenerTagList;
 }
 
 void
@@ -162,33 +213,14 @@ void
 FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( FOdysseyVectorGroupPaint* iScene
                                                                        , bool iForceWorld )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetEngine()->GetSelectedObjectList();
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-
-    if( ( selectedObjectList.size() == 1 ) && ( iForceWorld == false ) )
+    if( mSelectedBreakdownList.size() == 1 )
     {
-        FOdysseyVectorObject* selectedObject = selectedObjectList.size() ? selectedObjectList.front() : iScene;
-        FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
-/*
-        if( tag )
-        {
-            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+        FInbetweenerBreakdown* breakdown = mSelectedBreakdownList.front();
 
-            mSelectionBox.inited = true;
-            mSelectionBox.rect = inbetweenerTag->GetBreakdownList().front()->GetSourceBBox( false );
-            mSelectionBox.worldMatrix = inbetweenerTag->GetOwner()->GetWorldMatrix();
-            mSelectionBox.inverseWorldMatrix = inbetweenerTag->GetOwner()->GetWorldMatrix();
-        }
-        else
-        {
-*/
-            mSelectionBox.inited = true;
-            mSelectionBox.rect = selectedObject->GetBBox( false );
-            mSelectionBox.worldMatrix = selectedObject->GetWorldMatrix();
-            mSelectionBox.inverseWorldMatrix = selectedObject->GetInverseWorldMatrix();
-/*
-        }
-*/
+        mSelectionBox.inited = true;
+        mSelectionBox.rect = breakdown->GetTargetBBox( false );
+        mSelectionBox.worldMatrix = breakdown->GetTargetWorldMatrix();
+        mSelectionBox.inverseWorldMatrix = breakdown->GetTargetInverseWorldMatrix();
     }
     else 
     {
@@ -197,43 +229,15 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( FOdysse
         mSelectionBox.worldMatrix = iScene->GetWorldMatrix();
         mSelectionBox.inverseWorldMatrix = iScene->GetInverseWorldMatrix();
 
-        // call lambda on each object of the tree
-        vectorEngine->Traverse
-        ( iScene
-        , 0
-        , [ this
-          , iScene
-          , vectorEngine
-          , &selectedObjectList ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
-          {
-              if( vectorEngine->ObjectHasFocus( iScene, object, iTraversalFlags ) )
-              {
-                  FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
-                  ::ULIS::FRectD selectedObjectBBox;
-/*
-                  if( tag )
-                  {
-                      FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+        for( FInbetweenerBreakdown* breakdown : mSelectedBreakdownList )
+        {
+            ::ULIS::FRectD breakdownBBox = breakdown->GetTargetBBox( true );
 
-                      selectedObjectBBox = inbetweenerTag->GetTargetBBox( true );
-                  }
-                  else
-                  {
-*/
-                      selectedObjectBBox = object->GetBBox( true );
-/*
-                  }
-*/
-                  mSelectionBox.rect = mSelectionBox.inited ? mSelectionBox.rect | selectedObjectBBox
-                                                            : selectedObjectBBox;
+             mSelectionBox.rect = mSelectionBox.inited ? mSelectionBox.rect | breakdownBBox
+                                                       : breakdownBBox;
 
-                  mSelectionBox.inited = true;
-
-                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
-              }
-
-              return 0;
-          } );
+            mSelectionBox.inited = true;
+        }
 
         if( mSelectionBox.inited )
         {

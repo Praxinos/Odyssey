@@ -11,6 +11,7 @@
 class FOdysseyPainterEditorVectorTransformToolHUD;
 class FOdysseyVectorTagInbetweener;
 class FOdysseyVectorUndo;
+class FInbetweenerBreakdown;
 
 UCLASS( HideCategories = (SelectionTool) )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public UOdysseyPainterEditorVectorSelectionTool
@@ -64,10 +65,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
                                  , const FOdysseyPoint& iPointInTexture );
         void GetTransformedObjectList( FOdysseyVectorGroupPaint* iScene
                                      , std::list<FOdysseyVectorObject*>& oObjectList );
-        void UpdateTransformedInbetweenerTagList( FOdysseyVectorGroupPaint* iScene );
 
     private:
-        std::list<FOdysseyVectorTagInbetweener*> mTransformedInbetweenerTagList;
+        std::list<FInbetweenerBreakdown*> mTransformedBreakdownList;
         FOdysseyPainterEditorVectorTransformToolHUD* mTransformHUD;
         std::vector<FOdysseyVectorVertex*> mTransformedVertexArray;
         std::vector<FOdysseyVectorHandleSegment*> mTransformedHandleArray;

@@ -300,6 +300,10 @@ FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPat
         {
             point.SetID( usedPointCount++ );
         }
+        else
+        {
+            point.SetID( 0xFFFFFFFFUL );
+        }
     }
 
     mBreakdown->GetInbetweenerTag()->SetUsedQuadCount( usedQuadCount );
