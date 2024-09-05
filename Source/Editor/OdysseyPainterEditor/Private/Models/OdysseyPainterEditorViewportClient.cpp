@@ -160,7 +160,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         FTexture* textureToDisplay = texture->GetResource();
         if (!texture->IsCurrentlyVirtualTextured())
         {
-            textureToDisplay = GetZoom() <= 1.0 ? &mBilinearTexture : &mNearestNeighbourTexture;
+            textureToDisplay = GetZoom() <= 1.5 ? &mBilinearTexture : &mNearestNeighbourTexture;
         }
         // END PATCH:
 
