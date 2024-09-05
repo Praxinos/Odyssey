@@ -50,6 +50,7 @@ FOdysseyAnimationEditorExtension::Initialize()
 void
 FOdysseyAnimationEditorExtension::Finalize()
 {
+    FSlateApplication::Get().UnregisterInputPreProcessor(mFlipSystem);
 	mGUI->Finalize();
     GetEditor()->OnSourceChanged().RemoveAll(this);
 

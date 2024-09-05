@@ -59,8 +59,11 @@ UOdysseyAnimation::GetFormat() const
 FTimespan
 UOdysseyAnimation::GetDuration() const
 {
-	FInt32Range range = GetFrameRange();
-	return FTimespan::FromSeconds((range.GetUpperBoundValue() - range.GetLowerBoundValue() + 1) / GetFramesPerSecond()) - FTimespan(1);
+	if (GetFrameCount() == 0)
+	{
+		return FTimespan::FromSeconds(0);
+	}
+	return FTimespan::FromSeconds(GetFrameCount() / GetFramesPerSecond()) - FTimespan(1);
 }
 
 FInt32Range
@@ -80,10 +83,10 @@ UOdysseyAnimation::GetFrameRange() const
 int
 UOdysseyAnimation::GetFrameCount() const
 {
-	FInt32Range frameRange = mLayerStack->GetFrameRange();
+	FInt32Range frameRange = GetFrameRange();
 	int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
 	int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
-	return endFrame - startFrame + 1;
+	return FMath::Max(0, endFrame - startFrame + 1);
 }
 
 double
