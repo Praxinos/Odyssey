@@ -32,6 +32,7 @@ enum class EOdysseyTextureSourceFormat : uint8
 UENUM()
 enum class EOdysseyTextureDefaultLayerType : uint8
 {
+	kNone UMETA(Hidden),
 	kRaster UMETA(DisplayName = "Raster"),
 	kVector UMETA(DisplayName = "Vector")
 };
@@ -98,6 +99,6 @@ private:
 
 private:
     FOdysseyTextureConfiguration  mConfiguration;
-    bool                            mWindowAnswer;
+    bool                            mWindowAnswer = false;
     TSharedPtr< SEnumComboBox >     mFormatComboBox;
 };

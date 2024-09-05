@@ -22,6 +22,12 @@ UOdysseyTextureFactory::UOdysseyTextureFactory( const FObjectInitializer& iObjec
     SupportedClass = UTexture2D::StaticClass();
 }
 
+void
+UOdysseyTextureFactory::SetConfiguration(const FOdysseyTextureConfiguration& iConfiguration)
+{
+	mTextureConfiguration = iConfiguration;
+}
+
 bool UOdysseyTextureFactory::ConfigureProperties()
 {
     //We go in here before creating the texture: Meaning we can have any modal window here.

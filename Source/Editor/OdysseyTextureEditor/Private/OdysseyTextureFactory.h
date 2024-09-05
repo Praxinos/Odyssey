@@ -17,6 +17,9 @@ class UOdysseyTextureFactory
 {
     GENERATED_UCLASS_BODY()
 
+public:
+	void SetConfiguration(const FOdysseyTextureConfiguration& iConfiguration);
+
 private:
     virtual UObject* FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn ) override;
 

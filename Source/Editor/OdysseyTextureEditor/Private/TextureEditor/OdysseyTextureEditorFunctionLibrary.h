@@ -3,8 +3,10 @@
 
 #pragma once
 
-#include "OdysseyLayer.h"
+#include "Widgets/SOdysseyTextureConfigureWindow.h"
 #include "OdysseyTextureEditorFunctionLibrary.generated.h"
+
+class UOdysseyTextureFactory;
 
 UCLASS()
 class UOdysseyTextureEditorFunctionLibrary : public UBlueprintFunctionLibrary
@@ -12,6 +14,9 @@ class UOdysseyTextureEditorFunctionLibrary : public UBlueprintFunctionLibrary
     GENERATED_BODY()
 
 public:
+	static UOdysseyTextureFactory* GetTextureFactory();
+
+public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Texture")
-    static UTexture2D* CreateTextureAsset(FString AssetName, FString PackagePath, int Width, int Height, EOdysseyTextureSourceFormat Format);
+    static UTexture2D* CreateTextureAsset(FString AssetName="Texture", FString PackagePath="/Game/", int Width=1024, int Height=1024, EOdysseyTextureSourceFormat Format=EOdysseyTextureSourceFormat::kBGRA8);
 };
