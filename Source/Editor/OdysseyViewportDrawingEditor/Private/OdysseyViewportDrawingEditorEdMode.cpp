@@ -90,6 +90,7 @@ FOdysseyViewportDrawingEditorEdMode::DrawHUD(FEditorViewportClient* ViewportClie
     mEditor->HUDSystem()->DrawHUD(params);
 }
 
+
 bool FOdysseyViewportDrawingEditorEdMode::Select(AActor* InActor, bool bInSelected)
 {
     if (!bInSelected)
@@ -97,7 +98,12 @@ bool FOdysseyViewportDrawingEditorEdMode::Select(AActor* InActor, bool bInSelect
     else
         mViewportDrawingEditorExtension->SetActor(InActor);
 
-    return false;
+    return FEdMode::Select(InActor, bInSelected);
+}
+
+bool FOdysseyViewportDrawingEditorEdMode::HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click)
+{
+    return true;
 }
 
 bool FOdysseyViewportDrawingEditorEdMode::MouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY)

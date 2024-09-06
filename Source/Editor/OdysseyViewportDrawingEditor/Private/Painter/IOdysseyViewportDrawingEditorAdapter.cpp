@@ -227,7 +227,7 @@ IOdysseyViewportDrawingEditorAdapter::ViewportCoordinatesToTextureCoordinates(FV
 
     meshAdapter->LineTraceComponent(traceHitResult, rayOrigin, rayEnd, CollisionParams);
     
-    UE_LOG(LogTemp, Display, TEXT("%d"), traceHitResult.FaceIndex) // is 0 for Skeletal Mesh
+    //UE_LOG(LogTemp, Display, TEXT("%d"), traceHitResult.FaceIndex) // is 0 for Skeletal Mesh
 
     // Convert trace to UV position
     FVector2D coord;
