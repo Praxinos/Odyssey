@@ -60,6 +60,7 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         double GetTargetRotation();
         double GetTargetScalingX();
         double GetTargetScalingY();
+        bool  IsMaster();
 
     private:
         double mTargetTranslationX;

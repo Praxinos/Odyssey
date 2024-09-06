@@ -1737,7 +1737,7 @@ FOdysseyVectorGroupPaint::SetGapTolerance( double iGapTolerance )
 {
     mGapTolerance = iGapTolerance;
 
-    Invalidate();
+    Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
 }
 
 bool
@@ -1835,7 +1835,7 @@ FOdysseyVectorGroupPaint::SetPainted( bool iPainted )
 {
     bPainted = iPainted;
 
-    Invalidate();
+    Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
 }
 
 bool

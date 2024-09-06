@@ -7,43 +7,55 @@ FOdysseyVectorSharedEnv::~FOdysseyVectorSharedEnv()
 }
 
 FOdysseyVectorSharedEnv::FOdysseyVectorSharedEnv()
+    : FOdysseyVectorObject("SharedEnv")
 {
 }
 
-void
-FOdysseyVectorSharedEnv::AddObject( FOdysseyVectorObject* iVectorObject )
+bool
+FOdysseyVectorSharedEnv::HasBaseClass( uint32 iBaseClassID )
 {
-    mObjectList.push_back( iVectorObject );
+    if( mStaticClass == iBaseClassID )
+    {
+        return true;
+    }
+
+    return FOdysseyVectorObject::HasBaseClass( iBaseClassID );
 }
 
 void
-FOdysseyVectorSharedEnv::RemoveObject( FOdysseyVectorObject* iVectorObject )
+FOdysseyVectorSharedEnv::AddSharedObject( FOdysseyVectorObject* iVectorObject )
 {
-    mObjectList.remove( iVectorObject );
+    mSharedObjectList.push_back( iVectorObject );
 }
 
 void
-FOdysseyVectorSharedEnv::AddTag( FOdysseyVectorTag* iVectorTag )
+FOdysseyVectorSharedEnv::RemoveSharedObject( FOdysseyVectorObject* iVectorObject )
 {
-    mTagList.push_back( iVectorTag );
+    mSharedObjectList.remove( iVectorObject );
 }
 
 void
-FOdysseyVectorSharedEnv::RemoveTag( FOdysseyVectorTag* iVectorTag )
+FOdysseyVectorSharedEnv::AddSharedTag( FOdysseyVectorTag* iVectorTag )
 {
-    mTagList.remove( iVectorTag );
+    mSharedTagList.push_back( iVectorTag );
+}
+
+void
+FOdysseyVectorSharedEnv::RemoveSharedTag( FOdysseyVectorTag* iVectorTag )
+{
+    mSharedTagList.remove( iVectorTag );
 }
 
 std::list<FOdysseyVectorTag*>&
-FOdysseyVectorSharedEnv::GetTagList()
+FOdysseyVectorSharedEnv::GetSharedTagList()
 {
-    return mTagList;
+    return mSharedTagList;
 }
 
 FOdysseyVectorTag*
 FOdysseyVectorSharedEnv::GetSelectedTagByClassType( uint32 iClassType )
 {
-    for( FOdysseyVectorTag* tag : mTagList )
+    for( FOdysseyVectorTag* tag : mSharedTagList )
     {
         if( tag->GetClass() == iClassType )
         {
@@ -58,7 +70,7 @@ FOdysseyVectorSharedEnv::GetSelectedTagByClassType( uint32 iClassType )
 }
 
 bool
-FOdysseyVectorSharedEnv::HasTag( FOdysseyVectorTag* iTag )
+FOdysseyVectorSharedEnv::HasSharedTag( FOdysseyVectorTag* iTag )
 {
-    return ( std::find( mTagList.begin(), mTagList.end(), iTag ) == mTagList.end() ) ? false : true;
+    return ( std::find( mSharedTagList.begin(), mSharedTagList.end(), iTag ) == mSharedTagList.end() ) ? false : true;
 }

@@ -116,7 +116,7 @@ FOdysseyVectorRectangle::SetSize( double iWidth, double iHeight )
     mWidth  = iWidth;
     mHeight = iHeight;
 
-    Invalidate();
+    Invalidate( INVALIDATE_SHAPE );
 }
 
 double FOdysseyVectorRectangle::GetWidth()

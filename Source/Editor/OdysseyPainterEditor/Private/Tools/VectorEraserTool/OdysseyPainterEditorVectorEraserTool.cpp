@@ -215,7 +215,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
         // will have some problems because we change the children list, and Traverse is recursive.
         oAddedObjectArray[i]->GetParent()->AppendChild( oAddedObjectArray[i] );
 
-        oAddedObjectArray[i]->Invalidate();
+        //oAddedObjectArray[i]->Invalidate();
     }
 
     // Also here, we remove AFTER the Traverse() has been executed, because traverse is recursive
@@ -302,7 +302,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
         // will have some problems because we change the children list, and Traverse is recursive.
         oAddedObjectArray[i]->GetParent()->AppendChild( oAddedObjectArray[i] );
 
-        oAddedObjectArray[i]->Invalidate();
+        //oAddedObjectArray[i]->Invalidate();
     }
 
     // Also here, we remove AFTER the Traverse() has been executed, because traverse is recursive

@@ -40,7 +40,10 @@ FOdysseyAnimationCellImageVector::~FOdysseyAnimationCellImageVector()
 
     UOdysseyAnimationLayerImageVector::OnIsColoredChanged().RemoveAll( this );
     UOdysseyAnimationLayerImageVector::OnIsWireframeChanged().RemoveAll( this );
+
+    GetLayer()->GetSharedEnv()->RemoveChild( mEngine );
     delete mEngine;
+
     mEngine = nullptr;
 }
 
@@ -80,11 +83,12 @@ FOdysseyAnimationCellImageVector::Init(int iWidth, int iHeight)
     mWidth = iWidth;
     mHeight = iHeight;
 
-    mEngine = new FOdysseyVectorEngine( GetLayer()->GetSharedEnv()
-                                      , this
+    mEngine = new FOdysseyVectorEngine( this
                                       , new FOdysseyVectorGroupPaint( "Scene" )
                                       , (double)iWidth
                                       , (double)iHeight );
+
+    GetLayer()->GetSharedEnv()->AppendChild( mEngine );
 
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     UOdysseyAnimationLayerImageVector::OnIsColoredChanged().AddRaw( this, &FOdysseyAnimationCellImageVector::OnIsColoredChanged );

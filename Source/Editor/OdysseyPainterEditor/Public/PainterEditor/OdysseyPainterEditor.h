@@ -210,6 +210,7 @@ public:
     static const uint64 UI_UPDATE_SCENETREEVIEW = ( 1ULL << ( FOdysseyVectorEngine::SIGNAL_RESERVED_SHIFT + 0 ) );
     static const uint64 UI_UPDATE_TIMELINE      = ( 1ULL << ( FOdysseyVectorEngine::SIGNAL_RESERVED_SHIFT + 1 ) );
     static const uint64 UI_UPDATE_OBJECTDETAILS = ( 1ULL << ( FOdysseyVectorEngine::SIGNAL_RESERVED_SHIFT + 2 ) );
+    static const uint64 UI_UPDATE_HUD           = ( 1ULL << ( FOdysseyVectorEngine::SIGNAL_RESERVED_SHIFT + 3 ) );
 
     // Populates the Edit Menu everytime it is displayed
     void AddEditMenuEntry( FMenuBuilder& iMenuBuilder );

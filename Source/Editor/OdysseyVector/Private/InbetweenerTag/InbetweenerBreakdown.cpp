@@ -59,6 +59,12 @@ FInbetweenerBreakdown::GetSourceBBox( bool iWorld )
     return bbox;
 }
 
+bool
+FInbetweenerBreakdown::IsMaster()
+{
+    return ( this == mInbetweenerTag->GetMasterBreakdown() ) ? true : false;
+}
+
 ::ULIS::FRectD
 FInbetweenerBreakdown::GetTargetBBox( bool iWorld )
 {

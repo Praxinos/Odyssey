@@ -67,7 +67,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() );
     FOdysseyVectorGroupPaint* scene = mInbetweenerTag->GetOwner()->GetScene();
     FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetEngine()->GetSharedEnv();
-    std::list<FOdysseyVectorTag*>& tagList = sharedEnv->GetTagList();
+    std::list<FOdysseyVectorTag*>& sharedTagList = sharedEnv->GetSharedTagList();
     uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 
     // for AddBreakdown / RemoveBreakdown functions in the context menu
@@ -75,9 +75,12 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
 
     mPickedBreakdown = nullptr;
 
-    for( FOdysseyVectorTag* tag : tagList )
+    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
     {
-        tag->GetOwner()->GetEngine()->ClearObjectSelection();
+        for( FOdysseyVectorTag* tag : sharedTagList )
+        {
+            tag->GetOwner()->GetEngine()->UnselectObject( tag->GetOwner() );
+        }
     }
 
     // This is used by the list view to determine which row is selected.
@@ -184,7 +187,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
 {
     uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                     | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW;
+                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                    | FOdysseyPainterEditor::UI_UPDATE_HUD;
 
     //STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonUp( MyGeometry, MouseEvent );
 

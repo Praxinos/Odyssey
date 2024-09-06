@@ -99,8 +99,21 @@ FOdysseyVectorExportV2::WriteTagInbetweenerBreakdowns( FOdysseyVectorTagInbetwee
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        WriteTagInbetweenerBreakdownsLayout( iInbetweenerTag, Ar );
-        WriteTagInbetweenerBreakdownsGeometry( iInbetweenerTag, Ar );
+        // deprecated
+        // WriteTagInbetweenerBreakdownsLayout( iInbetweenerTag, Ar ); 
+        // WriteTagInbetweenerBreakdownsGeometry( iInbetweenerTag, Ar );
+
+        // CAUTION: write master first
+        WriteBreakdown( *iInbetweenerTag.GetMasterBreakdown(), Ar );
+
+        // then write the rest
+        for( FInbetweenerBreakdown* breakdown : iInbetweenerTag.GetBreakdownList() )
+        {
+            if( breakdown->IsMaster() == false )
+            {
+                WriteBreakdown( *breakdown, Ar );
+            }
+        }
     } );
 }
 

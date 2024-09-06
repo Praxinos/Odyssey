@@ -99,7 +99,7 @@ FOdysseyVectorUndoGroup::Apply( UObject* iIgnored )
         mAddedGroup->AppendChild( mAddedObjectArray[i] );
 
         mAddedObjectArray[i]->UpdateMatrix();
-        mAddedObjectArray[i]->Invalidate();
+        //mAddedObjectArray[i]->Invalidate( INVALIDATE_SHAPE | INVALIDATE_COLOR | INVALIDATE_TOPOLOGY );
     }
 
     // update invalidated objects
@@ -145,7 +145,7 @@ FOdysseyVectorUndoGroup::Revert( UObject* iIgnored )
         mAddedObjectOldParentArray[i]->AppendChild( mAddedObjectArray[i] );
 
         mAddedObjectArray[i]->UpdateMatrix();
-        mAddedObjectArray[i]->Invalidate();
+        //mAddedObjectArray[i]->Invalidate();
     }
 
     // update invalidated objects

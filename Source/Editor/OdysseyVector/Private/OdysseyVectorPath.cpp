@@ -32,7 +32,7 @@ FOdysseyVectorPath::FOdysseyVectorPath( const FString& iName )
 
     mChainArray.reserve( 10 );
 
-    Invalidate();
+    //Invalidate();
 /*
     mBrush = new BLImage();
     if( mBrush )
@@ -156,7 +156,7 @@ FOdysseyVectorPath::SetJointType( eJointType iJointType, bool iInvalidate )
 
     if( iInvalidate )
     {
-        Invalidate();
+        Invalidate( INVALIDATE_SHAPE );
     }
 }
 
@@ -173,7 +173,7 @@ FOdysseyVectorPath::SetMiterLimit( double iMiterLimit, bool iInvalidate )
 
     if( iInvalidate )
     {
-        Invalidate();
+        Invalidate( INVALIDATE_SHAPE );
     }
 }
 
@@ -194,7 +194,7 @@ FOdysseyVectorPath::ExportParam( FOdysseyVectorObject* iDestinationObject, bool 
 
     if( iInvalidate )
     {
-        iDestinationObject->Invalidate();
+        iDestinationObject->Invalidate( INVALIDATE_SHAPE | INVALIDATE_COLOR | INVALIDATE_TOPOLOGY );
     }
 }
 
@@ -563,13 +563,6 @@ FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
     // would be added to the list of segments to invalidate BUT the segment does
     // not belong to the path anymore, leading to issues if it has been freed.
     Invalidate( INVALIDATE_TOPOLOGY );
-}
-
-
-void
-FOdysseyVectorPath::Invalidate()
-{
-    Invalidate( INVALIDATE_ALL );
 }
 
 void
@@ -1175,7 +1168,7 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
     //UE_LOG(LogTemp, Warning, TEXT("Added Segments: %d"), oAddedVertexArray.size() );
     //UE_LOG(LogTemp, Warning, TEXT("Added Vertices: %d"), oAddedSegmentArray.size() );
 
-    Invalidate();
+    Invalidate( INVALIDATE_SHAPE | INVALIDATE_COLOR | INVALIDATE_TOPOLOGY );
 
     // return true if path is empty
     return ( mVertexList.size() == 0 ) && ( mSegmentList.size() == 0 );

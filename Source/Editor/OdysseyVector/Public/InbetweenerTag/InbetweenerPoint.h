@@ -56,6 +56,7 @@ class ODYSSEYVECTOR_API FInbetweenerPoint
         void Init( FInbetweenerGrid* iGrid );
         bool IsNeeded();
         void SetNeeded( bool iNeeded );
+        FInbetweenerGrid* GetGrid();
 
         friend class FOdysseyVectorTagInbetweener;
 

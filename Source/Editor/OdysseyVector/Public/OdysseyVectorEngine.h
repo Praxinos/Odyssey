@@ -109,8 +109,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         /**
          * @brief Constructor
          */
-        FOdysseyVectorEngine( FOdysseyVectorSharedEnv* iSharedEnv
-                            , IOdysseyVectorAnimationCell* iAnimationCell
+        FOdysseyVectorEngine( IOdysseyVectorAnimationCell* iAnimationCell
                             , FOdysseyVectorGroupPaint* iScene
                             , uint32 iPreferredWidth
                             , uint32 iPreferredHeight );
@@ -384,7 +383,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
     protected:
         uint32 mCellIndex;
-        FOdysseyVectorSharedEnv* mSharedEnv;
         IOdysseyVectorAnimationCell* mAnimationCell;
         std::list<FOdysseyVectorObject*> mSelectedObjectList;
         BLContextCreateInfo mCreateInfo;

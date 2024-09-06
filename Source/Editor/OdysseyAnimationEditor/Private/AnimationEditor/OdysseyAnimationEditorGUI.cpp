@@ -230,6 +230,11 @@ FOdysseyAnimationEditorGUI::ParseVectorSignal( FOdysseyVectorGroupPaint* iScene
             }
         }
     }
+
+    if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_HUD )
+    {
+        iScene->GetEngine()->ResetHUD();
+    }
 }
 
 void

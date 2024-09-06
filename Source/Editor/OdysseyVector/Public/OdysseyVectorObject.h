@@ -10,6 +10,7 @@ class FOdysseyVectorEngine;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorGroup;
 class FOdysseyVectorTag;
+class FOdysseyVectorSharedEnv;
 
 class ODYSSEYVECTOR_API FOdysseyVectorObject
 {
@@ -42,17 +43,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 UPDATE_NEEDPOLYLINE      = ( 1 << 5 );
 
         // invalidation flags
-        static const uint32 INVALIDATE_MATRIX        = ( 1 << 0 );
-        static const uint32 INVALIDATE_HIERARCHY     = ( 1 << 1 );
-        static const uint32 INVALIDATE_SHAPE         = ( 1 << 2 );
-        static const uint32 INVALIDATE_COLOR         = ( 1 << 3 );
-        static const uint32 INVALIDATE_TOPOLOGY      = ( 1 << 4 );
-        static const uint32 INVALIDATE_TAG           = ( 1 << 5 );
-        static const uint32 INVALIDATE_TAG_LIST      = ( 1 << 6 );
-        static const uint32 INVALIDATE_ALL           = ( INVALIDATE_SHAPE
-                                                       | INVALIDATE_HIERARCHY
-                                                       | INVALIDATE_TOPOLOGY
-                                                       | INVALIDATE_COLOR );
+        static const uint32 INVALIDATE_DEFAULT        = ( 1 << 0 );
+        static const uint32 INVALIDATE_MATRIX         = ( 1 << 1 );
+        static const uint32 INVALIDATE_HIERARCHY      = ( 1 << 2 );
+        static const uint32 INVALIDATE_SHAPE          = ( 1 << 3 );
+        static const uint32 INVALIDATE_COLOR          = ( 1 << 4 );
+        static const uint32 INVALIDATE_TOPOLOGY       = ( 1 << 5 );
+        static const uint32 INVALIDATE_TAG            = ( 1 << 6 );
+        static const uint32 INVALIDATE_TAG_LIST       = ( 1 << 7 );
         static const uint32 INVALIDATE_CHILD_SHIFT    = 15;
         static const uint32 INVALIDATE_CHILD_SHAPE    = ( INVALIDATE_SHAPE    << INVALIDATE_CHILD_SHIFT );
         static const uint32 INVALIDATE_CHILD_COLOR    = ( INVALIDATE_COLOR    << INVALIDATE_CHILD_SHIFT );
@@ -328,11 +326,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual void Invalidate( uint32 iInvalidationFlags );
 
         /**
-         * @brief Invalidates the object and its ancestor objects as well
-         */
-        virtual void Invalidate();
-
-        /**
          * @brief Get the expansion status
          * @return true or false 
          */
@@ -534,6 +527,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         std::list<FOdysseyVectorTag*>& GetTagList();
         void InvalidateTag( FOdysseyVectorTag* iTag );
+        FOdysseyVectorSharedEnv* GetSharedEnv();
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags );

@@ -82,7 +82,9 @@ void
 FInbetweenerPoint::SetSourcePosition( double iX, double iY )
 {
     FInbetweenerBreakdown* prevBreakdown = mGrid->GetBreakdown()->GetPrevBreakdown();
-    uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_SOURCE;
+    uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_SOURCE
+                             | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
+                             | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING;
     uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
 
     mSourcePosition.x = iX;
@@ -104,6 +106,7 @@ FInbetweenerPoint::SetTargetPosition( double iX, double iY )
 {
     FInbetweenerBreakdown* nextBreakdown = mGrid->GetBreakdown()->GetNextBreakdown();
     uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_TARGET
+                             | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
                              | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING;
     uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
 
@@ -145,6 +148,12 @@ const ::ULIS::FVec2D&
 FInbetweenerPoint::GetTargetPosition()
 {
     return mTargetPosition;
+}
+
+FInbetweenerGrid*
+FInbetweenerPoint::GetGrid()
+{
+    return mGrid;
 }
 
 void

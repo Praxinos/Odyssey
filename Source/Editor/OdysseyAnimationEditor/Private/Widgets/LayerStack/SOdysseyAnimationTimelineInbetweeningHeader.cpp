@@ -49,7 +49,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Update()
 {
     mItemsSource.Reset();
 
-    for( FOdysseyVectorTag* tag : mVectorSharedEnv->GetTagList() )
+    for( FOdysseyVectorTag* tag : mVectorSharedEnv->GetSharedTagList() )
     {
         if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
         {

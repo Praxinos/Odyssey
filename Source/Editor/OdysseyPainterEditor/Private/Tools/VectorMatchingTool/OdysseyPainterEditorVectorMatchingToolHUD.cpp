@@ -24,7 +24,12 @@ FOdysseyPainterEditorVectorMatchingToolHUD::FOdysseyPainterEditorVectorMatchingT
 void
 FOdysseyPainterEditorVectorMatchingToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
+    uint64 hudFlags = mMatchingTool->GetEditor()->GetVectorHUDFlags();
 
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+    {
+        UpdateSelectionInbetweenMode( iScene );
+    }
 }
 
 void
@@ -94,7 +99,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
     {
         // Caution: even though here we pick a tag that is displayed in the scene,
         // it does not mean it belongs to an object that belongs to the scene.
-        for( FOdysseyVectorTag* tag : engine->GetSharedEnv()->GetTagList() )
+        for( FOdysseyVectorTag* tag : engine->GetSharedEnv()->GetSharedTagList() )
         {
             if( ( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
              && ( tag->GetOwner()->IsSelected() ) )

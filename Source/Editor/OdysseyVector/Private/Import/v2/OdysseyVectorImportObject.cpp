@@ -299,7 +299,7 @@ FOdysseyVectorImportV2::ReadObjectsDefine( uint64 iChunkEnd, FArchive &Ar )
 
                     FOdysseyVectorImportV2::ReadGroup( *group, Ar.Tell() + iChunkLen, Ar );
  
-                    group->Invalidate();
+                    //group->Invalidate();
                 }
                 break;
 
@@ -320,7 +320,7 @@ FOdysseyVectorImportV2::ReadObjectsDefine( uint64 iChunkEnd, FArchive &Ar )
 
                     FOdysseyVectorImportV2::ReadGroupPaint( *paintGroup, Ar.Tell() + iChunkLen, Ar );
 
-                    paintGroup->Invalidate();
+                    //paintGroup->Invalidate();
                 }
                 break;
 

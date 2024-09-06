@@ -237,7 +237,7 @@ FOdysseyVectorImportV1::ReadObjectsDefine( std::vector<FOdysseyVectorObject*>& v
 
                     FOdysseyVectorImportV1::ReadGroupPaint( *paintGroup, Ar.Tell() + iChunkLen, Ar );
 
-                    paintGroup->Invalidate();
+                    //paintGroup->Invalidate();
                 }
                 break;
 

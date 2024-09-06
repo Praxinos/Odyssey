@@ -129,7 +129,7 @@ FOdysseyVectorEllipse::SetRadius( double iRadiusX, double iRadiusY )
     mRadiusX = iRadiusX;
     mRadiusY = iRadiusY;
 
-    Invalidate();
+    Invalidate( INVALIDATE_SHAPE );
 }
 
 double

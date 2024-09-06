@@ -303,7 +303,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
             mPrimitive = nullptr;
 
             parentObject->AppendChild( path );
-            path->Invalidate();
+            //path->Invalidate();
             path->UpdateMatrix();
 
             //iScene->GetEngine()->SelectObject( path );

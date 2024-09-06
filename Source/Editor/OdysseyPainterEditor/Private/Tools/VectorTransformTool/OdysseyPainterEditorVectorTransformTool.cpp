@@ -1023,7 +1023,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
                 GEditor->EndTransaction();
             }
 
-            iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+            iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
             // quick fix to place the gizmo at the right place
             FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();

@@ -57,7 +57,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public 
         FOdysseyPainterEditorVectorMatchingToolHUD* mMatchingHUD;
         std::vector<FInbetweenerPoint*> mPickedPointArray;
         std::vector<FInbetweenerGrid*> mPickedGridArray;
-        FOdysseyVectorTagInbetweener* mPickedInbetweenerTag;
 
     public:
         UPROPERTY( EditAnywhere

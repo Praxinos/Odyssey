@@ -120,10 +120,10 @@ namespace FOdysseyFile
                                 static const uint32 CHUNK_TAGINBETWEENER_DRAWINGCOUNT = 0x73d1119d; // uint32(count)
                                 static const uint32 CHUNK_TAGINBETWEENER_MAPASPOLYLINE = 0x12201950; // uint32(bool)
                                 static const uint32 CHUNK_TAGINBETWEENER_CHART = 0x953d8893; // array[float]
-                                static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM = 0xdc0fe227; // container
-                                    static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM_TRANSLATION = 0xaf8ba83b; // double(X)-double(Y)
-                                    static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM_ROTATION = 0xb941a26b; // double(A)
-                                    static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM_SCALING = 0xf6a73728; // double(X)-double(Y)
+             /* Deprecated */   static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM = 0xdc0fe227; // container
+             /* Deprecated */       static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM_TRANSLATION = 0xaf8ba83b; // double(X)-double(Y)
+             /* Deprecated */       static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM_ROTATION = 0xb941a26b; // double(A)
+             /* Deprecated */       static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM_SCALING = 0xf6a73728; // double(X)-double(Y)
 
              /* Deprecated */   static const uint32 CHUNK_TAGINBETWEENER_GRID = 0x6b443e74; // container0
              /* Deprecated */       static const uint32 CHUNK_TAGINBETWEENER_GRID_TYPE = 0x31327385; // uint32(type)
@@ -144,8 +144,14 @@ namespace FOdysseyFile
                                 static const uint32 CHUNK_TAGINBETWEENER_DIMENSION  = 0x8421afc9; // uint32(nbquadx)-uint32(nbquady)
                                 static const uint32 CHUNK_TAGINBETWEENER_ARAPRIGIDITY = 0x1b0b5379; // uint32
                                 static const uint32 CHUNK_TAGINBETWEENER_BREAKDOWNS = 0xe9893b5d; // container
-                                    static const uint32 CHUNK_TAGINBETWEENER_BREAKDOWNS_LAYOUT =  0x1f69cf20; // uint32(count) array[uint32(bool)-uint32(sourceDrawingIndex)-uint32(targetDrawingIndex)]
-                                    static const uint32 CHUNK_TAGINBETWEENER_BREAKDOWNS_GRIDGEOMETRY = 0x7e734517; // array[double(sourcex)-double(sourcey)-double(targetx)-double(targety)]
+             /* Deprecated */       static const uint32 CHUNK_TAGINBETWEENER_BREAKDOWNS_LAYOUT =  0x1f69cf20; // uint32(count) array[uint32(bool)-uint32(sourceDrawingIndex)-uint32(targetDrawingIndex)]
+             /* Deprecated */       static const uint32 CHUNK_TAGINBETWEENER_BREAKDOWNS_GRIDGEOMETRY = 0x7e734517; // array[double(sourcex)-double(sourcey)-double(targetx)-double(targety)]
+                                    static const uint32 CHUNK_BREAKDOWN =  0xfcd64f4f; // container, uint32(bool)-uint32(targetIndex)
+                                        static const uint32 CHUNK_BREAKDOWN_TRANSFORM = 0x8fda6a1; // container
+                                            static const uint32 CHUNK_BREAKDOWN_TRANSFORM_TRANSLATION = 0xc3264834; // double(translationX)-double(translationY)
+                                            static const uint32 CHUNK_BREAKDOWN_TRANSFORM_ROTATION = 0xb788e00d; // double(rotation)
+                                            static const uint32 CHUNK_BREAKDOWN_TRANSFORM_SCALING = 0xe46d6320; // double(scalingX)-double(scalingY)
+                                        static const uint32 CHUNK_BREAKDOWN_GRIDGEOMETRY = 0xfe47d3ff;  // array[double(sourcex)-double(sourcey)-double(targetx)-double(targety)]
 
                                 static const uint32 CHUNK_TAGINBETWEENER_ROUTES = 0xbb7682f1; // container
                                     static const uint32 CHUNK_ROUTE = 0x25f4d3c5; // container

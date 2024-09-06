@@ -316,7 +316,7 @@ void FOdysseyVectorTagInbetweener::Removed()
 void
 FOdysseyVectorTagInbetweener::Share()
 {
-    mSharedEnv->AddTag( this );
+    mSharedEnv->AddSharedTag( this );
 
     bShared = true;
 }
@@ -324,7 +324,7 @@ FOdysseyVectorTagInbetweener::Share()
 void
 FOdysseyVectorTagInbetweener::Unshare()
 {
-    mSharedEnv->RemoveTag( this );
+    mSharedEnv->RemoveSharedTag( this );
 
     bShared = false;
 }
@@ -606,7 +606,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         }
         else
         {
-            if( mSharedEnv->HasTag( this ) == false )
+            if( mSharedEnv->HasSharedTag( this ) == false )
             {
                 Share();
             }
@@ -681,7 +681,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
 
         // will update grids' center of mass (needed for interpolation).
         // MUST be done after mapping because mapping will elimniate some quads, and this is taken into account
-        // for the center of mass.
+        // for the center of mass.²
         for( FInbetweenerBreakdown* breakdown : mBreakdownList )
         {
             breakdown->GetGrid()->UpdateCenterOfMass( iUpdateFlags, mInvalidationFlags );
@@ -704,12 +704,13 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         }
 
         // Precompute ARAP interpolation after the grid and routes have been updated
-        if( ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCE     )
-         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGET     )
-         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE   )
+        if( ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCE              )
+         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGET              )
+         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_INTERPOLATIONTYPE   )
+         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE            )
         // || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SPACING    )
-         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_ROUTE_LIST )
-         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_MAP        ) )
+         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_ROUTE_LIST          )
+         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_MAP                 ) )
         {
             //if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
             {
@@ -952,27 +953,33 @@ FOdysseyVectorTagInbetweener::RedrawAnimationCells()
     RedrawAnimationCells( GetDrawingCount() );
 }
 
+
 void
 FOdysseyVectorTagInbetweener::RedrawAnimationCells( uint32 iDrawingCount )
 {
-    IOdysseyVectorAnimationCell* animationCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
-
-    if( animationCell )
+    // scene could be non existent when the tag's owner is removed, as it would still trigger call to Update()
+    // right after the removal of an object in the hierarchy.
+    if( mOwner->GetSharedEnv() )
     {
-        int32 animationCellIndex = animationCell->GetIndex();
+        IOdysseyVectorAnimationCell* animationCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
 
-        // Redraw impacted cells
-        for( uint32 i = 1; ( i < iDrawingCount ) && ( animationCell != nullptr ); i++ )
+        if( animationCell )
         {
-            IOdysseyVectorAnimationCell* nextAnimationCell = animationCell->GetCellByIndex( animationCellIndex + i );
+            int32 animationCellIndex = animationCell->GetIndex();
 
-            if( nextAnimationCell )
+            // Redraw impacted cells
+            for( uint32 i = 1; ( i < iDrawingCount ) && ( animationCell != nullptr ); i++ )
             {
-                //nextAnimationCell->GetEngine()->Invalidate();
-                nextAnimationCell->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
-            }
+                IOdysseyVectorAnimationCell* nextAnimationCell = animationCell->GetCellByIndex( animationCellIndex + i );
 
-            animationCell = nextAnimationCell;
+                if( nextAnimationCell )
+                {
+                    //nextAnimationCell->GetEngine()->Invalidate();
+                    nextAnimationCell->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+                }
+
+                animationCell = nextAnimationCell;
+            }
         }
     }
 }
@@ -1585,5 +1592,6 @@ FOdysseyVectorTagInbetweener::SetInterpolationType( eInbetweenerInterpolationTyp
     mInterpolationType = iInterpolationType;
 
     Invalidate( INVALIDATE_SPACING
+              | INVALIDATE_INTERPOLATIONTYPE
               | INVALIDATE_CELLS );
 }

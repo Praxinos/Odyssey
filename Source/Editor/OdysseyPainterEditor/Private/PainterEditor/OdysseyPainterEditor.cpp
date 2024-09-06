@@ -1108,7 +1108,8 @@ FOdysseyPainterEditor::_Group( FOdysseyPainterEditor* iEditor
     FOdysseyVectorGroup* group;
     uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                     | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS;
+                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                    | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
     vectorEngine->GetFocusedAncestorList( objectList );
 
@@ -2259,7 +2260,7 @@ FOdysseyPainterEditor::PasteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVec
 
         //shifting = iScene->GetInverseWorldMatrix().mapVector( 10.0f, 10.0f ); // shift object by 10 pixels
 
-        pastedObject->Invalidate();
+        //pastedObject->Invalidate();
         //pastedObject->Translate( newObject->GetTranslationX() + shifting.x, newObject->GetTranslationY() + shifting.y );
         pastedObject->UpdateMatrix();
 

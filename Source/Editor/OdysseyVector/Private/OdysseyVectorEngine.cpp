@@ -13,14 +13,12 @@ FOdysseyVectorEngine::~FOdysseyVectorEngine()
 {
 }
 
-FOdysseyVectorEngine::FOdysseyVectorEngine( FOdysseyVectorSharedEnv* iSharedEnv
-                                          , IOdysseyVectorAnimationCell* iAnimationCell
+FOdysseyVectorEngine::FOdysseyVectorEngine( IOdysseyVectorAnimationCell* iAnimationCell
                                           , FOdysseyVectorGroupPaint* iScene
                                           , uint32 iPreferredWidth
                                           , uint32 iPreferredHeight )
     : FOdysseyVectorObject( "Engine" )
     , mCellIndex( 0 )
-    , mSharedEnv ( iSharedEnv )
     , mAnimationCell( iAnimationCell )
     , mSelectionSpace( nullptr )
     , mInvalidTileMap( 64, iPreferredWidth, iPreferredHeight )
@@ -96,7 +94,15 @@ FOdysseyVectorEngine::GetRenderData()
 FOdysseyVectorSharedEnv*
 FOdysseyVectorEngine::GetSharedEnv()
 {
-    return mSharedEnv;
+    if( mParent )
+    {
+        if( mParent->GetClass() == FOdysseyVectorSharedEnv::StaticClass() )
+        {
+            return static_cast<FOdysseyVectorSharedEnv*>(mParent);
+        }
+    }
+
+    return nullptr;
 }
 
 IOdysseyVectorAnimationCell*
@@ -339,9 +345,9 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 
         iBLContext->restore();
 
-        if( mSharedEnv )
+        if( GetSharedEnv() )
         {
-            for ( FOdysseyVectorTag* tag : mSharedEnv->GetTagList() )
+            for ( FOdysseyVectorTag* tag : GetSharedEnv()->GetSharedTagList() )
             {
                 // only draw tag as a shared tag if it does NOT belong to the scene
                 if( tag->GetOwner()->GetScene() != mScene )
@@ -531,7 +537,7 @@ FOdysseyVectorEngine::Signal( uint64 iSignalFlags )
     // This should be removed once we have per-rectangle invalidation
     if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW )
     {
-        Invalidate();
+        Invalidate( FOdysseyVectorObject::INVALIDATE_DEFAULT );
     }
 
     OnSignalDelegate().Broadcast( mScene, iSignalFlags );
@@ -1646,7 +1652,7 @@ FOdysseyVectorEngine::GroupObjects( FOdysseyVectorObject* iParent
             }
         }
 
-        group->Invalidate();
+        //group->Invalidate();
 
         return group;
     }

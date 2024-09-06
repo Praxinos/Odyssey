@@ -71,7 +71,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Update()
 {
     mItemsSource.Reset();
 
-    for( FOdysseyVectorTag* tag : mAnimationLayerImageVector->GetSharedEnv()->GetTagList() )
+    for( FOdysseyVectorTag* tag : mAnimationLayerImageVector->GetSharedEnv()->GetSharedTagList() )
     {
         if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
         {
@@ -139,7 +139,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetSelectedInbetweenerTag
     oEngineList.clear();
 
     // I could not make it work using SListView SelectedItems methods, for some reason. So I use the SharedEnv
-    for( FOdysseyVectorTag* tag : sharedEnv->GetTagList() )
+    for( FOdysseyVectorTag* tag : sharedEnv->GetSharedTagList() )
     {
         if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
         {

@@ -3,6 +3,7 @@
 #include "OdysseyVectorTag.h"
 #include "OdysseyVectorGroup.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 
 #ifndef M_PI
@@ -188,14 +189,31 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
 {
     if( mInvalidationFlags )
     {
-        // update children first by recursively calling the Update function and, if needed,
-        // removing the object from the invalidated object list, in the same call.
-        mInvalidatedChildrenList.remove_if( [iUpdateFlags] ( FOdysseyVectorObject* child )
-                                            {
-                                                child->Update( iUpdateFlags );
+        if( mInvalidationFlags & INVALIDATE_HIERARCHY )
+        {
+            for( FOdysseyVectorObject* child : mChildrenList )
+            {
+                child->mInvalidationFlags |= INVALIDATE_HIERARCHY;
 
-                                                return child->IsInvalidated() == false;
-                                            } );
+                child->Update( iUpdateFlags );
+            }
+
+            mInvalidatedChildrenList.remove_if( [iUpdateFlags] ( FOdysseyVectorObject* child )
+                                                {
+                                                    return child->IsInvalidated() == false;
+                                                } );
+        }
+        else
+        {
+            // update children first by recursively calling the Update function and, if needed,
+            // removing the object from the invalidated object list, in the same call.
+            mInvalidatedChildrenList.remove_if( [iUpdateFlags] ( FOdysseyVectorObject* child )
+                                                {
+                                                    child->Update( iUpdateFlags );
+
+                                                    return child->IsInvalidated() == false;
+                                                } );
+        }
 
         UpdateShape( iUpdateFlags );
 
@@ -436,7 +454,7 @@ FOdysseyVectorObject::ExportParam( FOdysseyVectorObject* iDestinationObject, boo
 
     if( iInvalidate )
     {
-        iDestinationObject->Invalidate();
+        iDestinationObject->Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR  );
     }
 }
 
@@ -695,12 +713,6 @@ FOdysseyVectorObject::InvalidateChild( FOdysseyVectorObject* iChild
 }
 
 void
-FOdysseyVectorObject::Invalidate()
-{
-    Invalidate( FOdysseyVectorObject::INVALIDATE_ALL );
-}
-
-void
 FOdysseyVectorObject::InvalidateTag( FOdysseyVectorTag* iTag )
 {
     Invalidate( FOdysseyVectorObject::INVALIDATE_TAG );
@@ -714,23 +726,43 @@ FOdysseyVectorObject::Invalidate( uint32 iInvalidationFlags )
         mParent->InvalidateChild( this, iInvalidationFlags );
     }
 
-    mInvalidationFlags |= iInvalidationFlags;
+    mInvalidationFlags |= ( INVALIDATE_DEFAULT | iInvalidationFlags );
 }
 
 FOdysseyVectorEngine*
 FOdysseyVectorObject::GetEngine()
 {
-    FOdysseyVectorObject* parent = mParent;
-    FOdysseyVectorObject* root = this;
+    FOdysseyVectorObject* candidate = this;
 
-    while ( parent )
+    while ( candidate )
     {
-        root = parent;
+        if( candidate->GetClass() == FOdysseyVectorEngine::StaticClass() )
+        {
+            return static_cast<FOdysseyVectorEngine*>(candidate);
+        }
 
-        parent = parent->GetParent();
+        candidate = candidate->GetParent();
     }
 
-    return ( root->GetClass() == FOdysseyVectorEngine::StaticClass() ) ? static_cast<FOdysseyVectorEngine*>(root) : nullptr;
+    return nullptr;
+}
+
+FOdysseyVectorSharedEnv*
+FOdysseyVectorObject::GetSharedEnv()
+{
+    FOdysseyVectorObject* candidate = this;
+
+    while ( candidate )
+    {
+        if( candidate->GetClass() == FOdysseyVectorSharedEnv::StaticClass() )
+        {
+            return static_cast<FOdysseyVectorSharedEnv*>(candidate);
+        }
+
+        candidate = candidate->GetParent();
+    }
+
+    return nullptr;
 }
 
 FOdysseyVectorGroupPaint*

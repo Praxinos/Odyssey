@@ -69,49 +69,35 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
 
     mPickedPointArray.clear();
     mPickedGridArray.clear();
-    mPickedInbetweenerTag = nullptr;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        // Caution: even though here we pick a tag that is displayed in the scene,
-        // it does not mean it belongs to an object that belongs to the scene.
-        mPickedInbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(engine->GetSharedEnv()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass() ));
-
-        if( mPickedInbetweenerTag )
+        // needed for valid GUndo pointer
+/*
+        GEditor->BeginTransaction(LOCTEXT("vector-matching-tool.transaction.match-grid","Vector Matching Tool"));
+        if( GUndo )
         {
-            FOdysseyVectorGroupPaint* inbetweenerTagScene = mPickedInbetweenerTag->GetOwner()->GetScene();
-            uint32 frameIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex()
-                              - inbetweenerTagScene->GetEngine()->GetAnimationCell()->GetIndex();
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerMatching( iScene
+                                                                                    , mPickedInbetweenerTag
+                                                                                    , retFlags );
 
-            // needed for valid GUndo pointer
-            GEditor->BeginTransaction(LOCTEXT("vector-matching-tool.transaction.match-grid","Vector Matching Tool"));
-            if( GUndo )
-            {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerMatching( iScene
-                                                                                       , mPickedInbetweenerTag
-                                                                                       , retFlags );
-
-                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         
-                TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-                if (source)
-                    source->RecordCurrentFrameUndo();
-            }
-            GEditor->EndTransaction();
-
-            for( FInbetweenerBreakdown* breakdown : mPickedInbetweenerTag->GetBreakdownList() )
-            {
-                if( breakdown->GetTargetDrawingIndex() == frameIndex )
-                {
-                    mMatchingHUD->PickTargetPoints( breakdown
-                                                  , iPointInTexture.x
-                                                  , iPointInTexture.y
-                                                  , PickingRadius
-                                                  , mPickedPointArray
-                                                  , mPickedGridArray );
-                }
-            }
+            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
+        }
+        GEditor->EndTransaction();
+*/
+        for( FInbetweenerBreakdown* breakdown : mMatchingHUD->GetSelectedBreakdownList() )
+        {
+            mMatchingHUD->PickTargetPoints( breakdown
+                                          , iPointInTexture.x
+                                          , iPointInTexture.y
+                                          , PickingRadius
+                                          , mPickedPointArray
+                                          , mPickedGridArray );
         }
     }
 
@@ -140,34 +126,30 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
 
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        if( mPickedInbetweenerTag )
+        for( FInbetweenerPoint* gridPoint : mPickedPointArray )
         {
-            BLPoint localDiff = mPickedInbetweenerTag->GetOwner()->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
-                                                                                                    , iPointInTexture.deltaPosition.Y );
+            ::ULIS::FVec2D targetPosition = gridPoint->GetTargetPosition();
+            BLPoint localDiff = gridPoint->GetGrid()->GetBreakdown()->GetTargetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
+                                                                                                             , iPointInTexture.deltaPosition.Y );
 
-            for( FInbetweenerPoint* gridPoint : mPickedPointArray )
-            {
-                ::ULIS::FVec2D targetPosition = gridPoint->GetTargetPosition();
+            targetPosition.x += localDiff.x;
+            targetPosition.y += localDiff.y;
 
-                targetPosition.x += localDiff.x;
-                targetPosition.y += localDiff.y;
-
-                gridPoint->SetTargetPosition( targetPosition.x, targetPosition.y );
-            }
-
-            for( FInbetweenerGrid* grid : mPickedGridArray )
-            {
-                if( mPickedInbetweenerTag->GetGridType() == eInbetweenerGridType::ARAP )
-                {
-                    FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(grid);
-
-                    arapGrid->Regularize();
-                }
-            }
-
-            // update
-            mPickedInbetweenerTag->GetOwner()->GetScene()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+            gridPoint->SetTargetPosition( targetPosition.x, targetPosition.y );
         }
+
+        for( FInbetweenerGrid* grid : mPickedGridArray )
+        {
+            if( grid->GetBreakdown()->GetInbetweenerTag()->GetGridType() == eInbetweenerGridType::ARAP )
+            {
+                FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(grid);
+
+                arapGrid->Regularize();
+            }
+        }
+
+        // update
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
     }
 
     return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
@@ -184,10 +166,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseUpVector( FOdysseyVectorGroupPai
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        if( mPickedInbetweenerTag )
-        {
-            mPickedInbetweenerTag->GetOwner()->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        }
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
     return retFlags;

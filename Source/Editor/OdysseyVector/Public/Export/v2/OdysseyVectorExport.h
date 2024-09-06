@@ -126,9 +126,20 @@ namespace FOdysseyVectorExportV2
     void WriteTagInbetweenerBreakdownsGeometry( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerRoutes( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
 
+    ////////////////////////////////////
+    void ODYSSEYVECTOR_API WriteBreakdown( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );
+    void WriteBreakdownGridGeometry( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );
+    void WriteBreakdownTransformScaling( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );
+    void WriteBreakdownTransformRotation( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );
+    void WriteBreakdownTransformTranslation( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );
+    void WriteBreakdownTransform( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );
+    void WriteBreakdownReach( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );
+    void WriteBreakdownMaster( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );
+
     void ODYSSEYVECTOR_API WriteRoute( FInbetweenerRoute& iRoute, FArchive &Ar );
     void WriteRouteCoords( FInbetweenerRoute& iRoute, FArchive &Ar );
     void WriteRouteTrajectories( FInbetweenerRoute& iRoute, FArchive &Ar );
+
 
 /*
     void ODYSSEYVECTOR_API WriteTrajectory( FInbetweenerTrajectory& iTrajectory

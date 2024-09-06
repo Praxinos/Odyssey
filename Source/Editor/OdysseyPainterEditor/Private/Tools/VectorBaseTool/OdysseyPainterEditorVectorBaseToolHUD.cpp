@@ -53,7 +53,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( FOdysseyVe
     mSelectedInbetweenerTagList.clear();
     mSelectedBreakdownList.clear();
 
-    for( FOdysseyVectorTag* tag : sharedEnv->GetTagList() )
+    for( FOdysseyVectorTag* tag : sharedEnv->GetSharedTagList() )
     {
         if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
         {

@@ -61,10 +61,11 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
     Height = iHeight;
 
     mEngine = new FOdysseyVectorEngine( nullptr
-                                      , nullptr
                                       , new FOdysseyVectorGroupPaint( "Scene" )
                                       , (double)iWidth
                                       , (double)iHeight );
+
+    mSharedEnv.AppendChild( mEngine );
 }
 
 
@@ -231,7 +232,7 @@ UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName)
 void
 UOdysseyTextureLayerImageVector::IsWireframeChanged()
 {
-    mEngine->Invalidate(); //Force engine invalidation here, because IsColored is not a part of the engine, but still needs the engine to redraw itself
+    mEngine->Invalidate( FOdysseyVectorObject::INVALIDATE_DEFAULT ); //Force engine invalidation here, because IsColored is not a part of the engine, but still needs the engine to redraw itself
 
     mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 
@@ -241,7 +242,7 @@ UOdysseyTextureLayerImageVector::IsWireframeChanged()
 void
 UOdysseyTextureLayerImageVector::IsColoredChanged()
 {
-    mEngine->Invalidate(); //Force engine invalidation here, because IsColored is not a part of the engine, but still needs the engine to redraw itself
+    mEngine->Invalidate( FOdysseyVectorObject::INVALIDATE_DEFAULT ); //Force engine invalidation here, because IsColored is not a part of the engine, but still needs the engine to redraw itself
 
     mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
 

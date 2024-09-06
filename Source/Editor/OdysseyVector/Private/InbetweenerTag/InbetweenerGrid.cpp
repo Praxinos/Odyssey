@@ -38,10 +38,13 @@ FInbetweenerGrid::GetBBox( eInbetweenerPointPositionType iPositionType )
     {
         ::ULIS::FVec2D pointPosition = point.GetPosition( iPositionType );
 
-        if( pointPosition.x < xmin ) xmin = pointPosition.x;
-        if( pointPosition.y < ymin ) ymin = pointPosition.y;
-        if( pointPosition.x > xmax ) xmax = pointPosition.x;
-        if( pointPosition.y > ymax ) ymax = pointPosition.y;
+        //if( point.GetQuadCount() )
+        {
+            if( pointPosition.x < xmin ) xmin = pointPosition.x;
+            if( pointPosition.y < ymin ) ymin = pointPosition.y;
+            if( pointPosition.x > xmax ) xmax = pointPosition.x;
+            if( pointPosition.y > ymax ) ymax = pointPosition.y;
+        }
 
     }
 

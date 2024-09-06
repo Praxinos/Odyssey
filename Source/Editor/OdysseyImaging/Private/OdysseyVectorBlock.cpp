@@ -306,7 +306,7 @@ FOdysseyVectorBlock::Invalidate(bool iIsInteractive)
         mNeedsRender = true;
     }
 
-    mEngine->Invalidate();
+    mEngine->Invalidate( FOdysseyVectorObject::INVALIDATE_DEFAULT );
     //SetState(kNeedsRender);
     mOnInvalidated.Broadcast( { sanitizedRect }, iIsInteractive );
 }
