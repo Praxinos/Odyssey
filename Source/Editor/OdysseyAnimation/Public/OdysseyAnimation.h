@@ -109,11 +109,18 @@ protected:
 private:
 	void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
 
+private:
+	UFUNCTION(BlueprintSetter)
+	void CurrentFrameBlueprintSetter(int Value);
+
+	UFUNCTION(BlueprintSetter)
+	void FramesPerSecondBlueprintSetter(float Value);
+
 public:
-	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Animation", DuplicateTransient, NonTransactional, meta=(ClampMin=0, UIMin=0))
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Animation", BlueprintSetter=CurrentFrameBlueprintSetter, DuplicateTransient, NonTransactional, meta=(ClampMin=0, UIMin=0))
 	int CurrentFrame = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ClampMin=1, UIMin=1), Category="Odyssey|Animation")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation", BlueprintSetter=FramesPerSecondBlueprintSetter, meta=(ClampMin=1, UIMin=1))
 	float FramesPerSecond = 24.0f;
 
 protected:

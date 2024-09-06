@@ -45,6 +45,11 @@ public:
     bool SupportsLayerClass(UClass* Class) const;
 
 public:
+	//GETTER/SETTER
+	UFUNCTION(BlueprintSetter)
+	void CurrentLayerBlueprintSetter(TSoftObjectPtr<UOdysseyLayer> Layer);
+
+public:
     //Layers management
 
     /**
@@ -293,8 +298,8 @@ public:
     //Default properties
     UPROPERTY(Transient)
     TSet<UClass*> CompatibleLayers; //Contains compatible C++ layer types
-
-	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LayerStack", meta = (AllowedClasses = "OdysseyLayer"))
+	
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LayerStack", BlueprintSetter=CurrentLayerBlueprintSetter)
 	TSoftObjectPtr<UOdysseyLayer> CurrentLayer;
 
     UPROPERTY()

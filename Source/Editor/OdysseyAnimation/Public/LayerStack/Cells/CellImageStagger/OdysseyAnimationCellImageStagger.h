@@ -45,6 +45,13 @@ protected:
 
 	virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
 
+private:
+	UFUNCTION(BlueprintSetter)
+	void BehaviourBlueprintSetter(EOdysseyAnimationCellImageStaggerBehaviour Value);
+	
+	UFUNCTION(BlueprintSetter)
+	void ReachBlueprintSetter(int Value);
+
 public:
 	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
     EOdysseyAnimationCellImageStaggerBehaviour Behaviour = EOdysseyAnimationCellImageStaggerBehaviour::Loop;

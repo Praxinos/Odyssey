@@ -477,3 +477,27 @@ UOdysseyAnimationLayer::CopyCells(TArray<UOdysseyAnimationCell*> iCells, int Ind
 
     return cellCopies;
 }
+
+void
+UOdysseyAnimationLayer::CellsOffsetBlueprintSetter(int Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), Value);
+}
+
+void
+UOdysseyAnimationLayer::PreBehaviourBlueprintSetter(EOdysseyAnimationLayerImagePostBehaviour Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, PreBehaviour), Value);
+}
+
+void
+UOdysseyAnimationLayer::PostBehaviourBlueprintSetter(EOdysseyAnimationLayerImagePostBehaviour Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, PostBehaviour), Value);
+}
+
+void
+UOdysseyAnimationLayer::LighttableBlueprintSetter(FOdysseyAnimationLightTable Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), Value);
+}

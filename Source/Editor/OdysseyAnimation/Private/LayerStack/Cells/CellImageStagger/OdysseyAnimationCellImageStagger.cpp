@@ -176,3 +176,15 @@ UOdysseyAnimationCellImageStagger::PropertyChanged(const FName& iPropertyName, c
 		ReachChanged(iIsInteractive);
 	}
 }
+
+void
+UOdysseyAnimationCellImageStagger::BehaviourBlueprintSetter(EOdysseyAnimationCellImageStaggerBehaviour Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Behaviour), Value);
+}
+
+void
+UOdysseyAnimationCellImageStagger::ReachBlueprintSetter(int Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Reach), Value);
+}

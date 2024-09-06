@@ -220,4 +220,10 @@ UOdysseyTextureLayerImageRaster::GetImageRenderingComposition(IOdysseyImageRende
     return { GetImageRenderingId() };
 }
 
+void
+UOdysseyTextureLayerImageRaster::IsAlphaLockedBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageRaster, IsAlphaLocked), Value);
+}
+
 #undef LOCTEXT_NAMESPACE

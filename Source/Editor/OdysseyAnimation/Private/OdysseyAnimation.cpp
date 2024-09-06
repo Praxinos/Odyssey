@@ -32,6 +32,18 @@ UOdysseyAnimation::OnFramesPerSecondChanged()
     return onFramesPerSecondChanged;
 }
 
+void
+UOdysseyAnimation::CurrentFrameBlueprintSetter(int Value)
+{
+	FObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), Value);
+}
+
+void
+UOdysseyAnimation::FramesPerSecondBlueprintSetter(float Value)
+{
+	FObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, FramesPerSecond), Value);
+}
+
 int
 UOdysseyAnimation::GetWidth() const
 {

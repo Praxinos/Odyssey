@@ -242,26 +242,49 @@ public:
     UPROPERTY()
     TArray<UOdysseyLayer*> Children;
 
+private:
+    //Instance properties
+    UFUNCTION(BlueprintSetter)
+    void NameBlueprintSetter(FText Value);
+
+    UFUNCTION(BlueprintSetter)
+    void IsActivatedBlueprintSetter(bool Value);
+
+    UFUNCTION(BlueprintSetter)
+    void IsLockedBlueprintSetter(bool Value);
+
+    UFUNCTION(BlueprintSetter)
+    void DisplayChildrenBlueprintSetter(bool Value);
+
+    UFUNCTION(BlueprintSetter)
+    void DisplayOptionsBlueprintSetter(bool Value);
+
+    UFUNCTION(BlueprintSetter)
+	void BlendModeBlueprintSetter(EOdysseyBlendingMode Value);
+
+    UFUNCTION(BlueprintSetter)
+    void OpacityBlueprintSetter(float Value);
+
 public:
     //Instance properties
-    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Odyssey|Layer")
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=NameBlueprintSetter)
     FText Name;
 
-    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Odyssey|Layer")
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=IsActivatedBlueprintSetter)
     bool IsActivated = true;
 
-    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Odyssey|Layer")
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=IsLockedBlueprintSetter)
     bool IsLocked = false;
 
-    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer")
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=DisplayChildrenBlueprintSetter)
     bool DisplayChildren = true;
 
-    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer")
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=DisplayOptionsBlueprintSetter)
     bool DisplayOptions = true;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=BlendModeBlueprintSetter)
 	EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=OpacityBlueprintSetter)
     float Opacity = 1.0f;
 };

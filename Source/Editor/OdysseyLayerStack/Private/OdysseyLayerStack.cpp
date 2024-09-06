@@ -50,6 +50,12 @@ UOdysseyLayerStack::SupportsLayerClass(UClass* iClass) const
 
 //--- Layers management
 
+void
+UOdysseyLayerStack::CurrentLayerBlueprintSetter(TSoftObjectPtr<UOdysseyLayer> Layer)
+{
+	FObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), Layer);
+}
+
 UOdysseyLayer*
 UOdysseyLayerStack::AddLayer(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLayer* ParentLayer, int IndexInParent)
 {

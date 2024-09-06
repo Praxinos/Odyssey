@@ -269,4 +269,16 @@ UOdysseyTextureLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
     mEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
 }
 
+void
+UOdysseyTextureLayerImageVector::IsWireframeBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsWireframe), Value);
+}
+
+void
+UOdysseyTextureLayerImageVector::IsColoredBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsColored), Value);
+}
+
 #undef LOCTEXT_NAMESPACE

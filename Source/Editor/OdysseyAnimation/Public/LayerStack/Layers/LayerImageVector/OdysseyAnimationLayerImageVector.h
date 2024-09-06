@@ -55,10 +55,17 @@ private:
     TSharedPtr<IOdysseyMedia> GetCellMediaVector(uint32 iFrameIndex) const;
     void AutoCreateCell(int iFrameIndex);
 
+private:
+    UFUNCTION(BlueprintSetter)
+    void IsWireframeBlueprintSetter(bool Value);
+
+    UFUNCTION(BlueprintSetter)
+    void IsColoredBlueprintSetter(bool Value);
+
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=IsWireframeBlueprintSetter, NonTransactional)
     bool IsWireframe = false;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=IsColoredBlueprintSetter, NonTransactional)
     bool IsColored = true;
 };

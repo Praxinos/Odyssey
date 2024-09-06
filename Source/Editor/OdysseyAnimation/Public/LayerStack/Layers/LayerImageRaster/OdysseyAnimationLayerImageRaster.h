@@ -42,7 +42,11 @@ private:
     void AutoCreateCell(int iFrameIndex);
     void CreateCell( const FName& iCellType);
 
+private:
+	UFUNCTION(BlueprintSetter)
+	void IsAlphaLockedBlueprintSetter(bool Value);
+
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=IsAlphaLockedBlueprintSetter, NonTransactional)
     bool IsAlphaLocked = false;
 };

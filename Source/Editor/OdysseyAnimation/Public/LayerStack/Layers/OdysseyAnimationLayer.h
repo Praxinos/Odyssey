@@ -115,20 +115,33 @@ protected:
 	UPROPERTY()
 	TArray<TObjectPtr<UOdysseyAnimationCell>> Cells;
 
+private:
+	UFUNCTION(BlueprintSetter)
+	void CellsOffsetBlueprintSetter(int Value);
+
+	UFUNCTION(BlueprintSetter)
+	void PreBehaviourBlueprintSetter(EOdysseyAnimationLayerImagePostBehaviour Value);
+
+	UFUNCTION(BlueprintSetter)
+	void PostBehaviourBlueprintSetter(EOdysseyAnimationLayerImagePostBehaviour Value);
+
+	UFUNCTION(BlueprintSetter)
+	void LighttableBlueprintSetter(FOdysseyAnimationLightTable Value);
+
 public:
 	UPROPERTY(BlueprintReadOnly, Category="Odyssey|Layer")
 	TObjectPtr<UClass> DefaultCellClass = nullptr;
 
-	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer")
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=CellsOffsetBlueprintSetter)
 	int CellsOffset = 0;
 
-    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer")
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=PreBehaviourBlueprintSetter)
     EOdysseyAnimationLayerImagePostBehaviour PreBehaviour = EOdysseyAnimationLayerImagePostBehaviour::None;
 
-    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer")
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=PostBehaviourBlueprintSetter)
     EOdysseyAnimationLayerImagePostBehaviour PostBehaviour = EOdysseyAnimationLayerImagePostBehaviour::None;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", NonTransactional)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=LighttableBlueprintSetter, NonTransactional)
 	FOdysseyAnimationLightTable Lighttable;
 
     FSimpleMulticastDelegate mOnLightTableChanged;

@@ -344,4 +344,10 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
     }
 }
 
+void
+UOdysseyAnimationLayerImageRaster::IsAlphaLockedBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageRaster, IsAlphaLocked), Value);
+}
+
 #undef LOCTEXT_NAMESPACE

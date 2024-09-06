@@ -83,17 +83,27 @@ protected:
 
     virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive);
 
+private:
+	UFUNCTION(BlueprintSetter)
+    void ExposureBlueprintSetter(int Value);
+
+	UFUNCTION(BlueprintSetter)
+    void MarkBlueprintSetter(int Value);
+
+	UFUNCTION(BlueprintSetter)
+    void OutOfPegsBlueprintSetter(FOdysseyAnimationCellOutOfPegs Value);
+
 public:
 	UPROPERTY(BlueprintReadOnly, Category="Odyssey|Cell")
     int IndexInLayer = -1;
 
-	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")//TODO: meta (minvalue 1)
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell", BlueprintSetter=ExposureBlueprintSetter)//TODO: meta (minvalue 1)
     int Exposure = 1;
 
-	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell") //TODO: GetOptions ? Is that possible ?
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell", BlueprintSetter=MarkBlueprintSetter) //TODO: GetOptions ? Is that possible ?
     int Mark = -1;
 
-	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell", NonTransactional, DuplicateTransient)
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell", BlueprintSetter=OutOfPegsBlueprintSetter, NonTransactional, DuplicateTransient)
     FOdysseyAnimationCellOutOfPegs OutOfPegs;
 
 private:

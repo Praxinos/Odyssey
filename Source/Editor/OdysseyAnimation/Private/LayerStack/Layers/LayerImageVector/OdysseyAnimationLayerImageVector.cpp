@@ -396,4 +396,16 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
     }
 }
 
+void
+UOdysseyAnimationLayerImageVector::IsWireframeBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsWireframe), Value);
+}
+
+void
+UOdysseyAnimationLayerImageVector::IsColoredBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsColored), Value);
+}
+
 #undef LOCTEXT_NAMESPACE

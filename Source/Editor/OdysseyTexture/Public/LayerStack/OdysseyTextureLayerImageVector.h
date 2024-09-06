@@ -19,60 +19,67 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
 {
     GENERATED_BODY()
 
-    private:
-        // handle to a callback to refresh the layer when a property of an object's details view is changed
-        FOdysseyVectorEngine* mEngine;
-        TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
+private:
+	// handle to a callback to refresh the layer when a property of an object's details view is changed
+	FOdysseyVectorEngine* mEngine;
+	TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
 
-        void Init( uint32 iWidth, uint32 iHeight );
+	void Init( uint32 iWidth, uint32 iHeight );
 
-    public:
-        ~UOdysseyTextureLayerImageVector();
-        UOdysseyTextureLayerImageVector();
+public:
+	~UOdysseyTextureLayerImageVector();
+	UOdysseyTextureLayerImageVector();
 
-    protected:
-        UPROPERTY()
-        uint32 Width;
+protected:
+	UPROPERTY()
+	uint32 Width;
 
-        UPROPERTY()
-        uint32 Height;
+	UPROPERTY()
+	uint32 Height;
 
-        UPROPERTY()
-        FGuid mVectorBlockId;
+	UPROPERTY()
+	FGuid mVectorBlockId;
 
-    public:
-        //UOdysseyLayer overrides
-        virtual void PostInitProperties() override;
-        virtual void PostLoad() override;
-        virtual void PostDuplicate(bool bDuplicateForPIE) override;
-        virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
+public:
+	//UOdysseyLayer overrides
+	virtual void PostInitProperties() override;
+	virtual void PostLoad() override;
+	virtual void PostDuplicate(bool bDuplicateForPIE) override;
+	virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
-        FOdysseyVectorEngine* GetEngine();
- 
-        void IsWireframeChanged();
-        void IsColoredChanged();
-        void Serialize(FArchive& Ar);
-        virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
+	FOdysseyVectorEngine* GetEngine();
 
-        virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
+	void IsWireframeChanged();
+	void IsColoredChanged();
+	void Serialize(FArchive& Ar);
+	virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
 
-    public:
-        //FOdysseyImageRenderingAbility overrides
-        virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-        virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0) const override;
-        
-    private:
-        void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+	virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
-    private:
-        //Import/Export
-        friend class FOdysseyTextureLayerImageVectorExport;
-        friend class FOdysseyTextureLayerImageVectorImport;
+public:
+	//FOdysseyImageRenderingAbility overrides
+	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
+	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0) const override;
+	
+private:
+	void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
 
-    public:
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
-        bool IsWireframe = false;
+private:
+	//Import/Export
+	friend class FOdysseyTextureLayerImageVectorExport;
+	friend class FOdysseyTextureLayerImageVectorImport;
 
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
-        bool IsColored = true;
+private:
+	UFUNCTION(BlueprintSetter)
+	void IsWireframeBlueprintSetter(bool Value);
+
+	UFUNCTION(BlueprintSetter)
+	void IsColoredBlueprintSetter(bool Value);
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
+	bool IsWireframe = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
+	bool IsColored = true;
 };

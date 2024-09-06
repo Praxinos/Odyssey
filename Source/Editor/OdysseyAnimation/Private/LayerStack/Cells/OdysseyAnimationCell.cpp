@@ -177,3 +177,21 @@ UOdysseyAnimationCell::IsThumbnailDirty() const
 {
 	return ThumbnailIsDirty;
 }
+
+void
+UOdysseyAnimationCell::ExposureBlueprintSetter(int Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Value);
+}
+
+void
+UOdysseyAnimationCell::MarkBlueprintSetter(int Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), Value);
+}
+
+void
+UOdysseyAnimationCell::OutOfPegsBlueprintSetter(FOdysseyAnimationCellOutOfPegs Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), Value);
+}

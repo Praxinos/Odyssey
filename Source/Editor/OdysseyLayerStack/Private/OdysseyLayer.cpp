@@ -336,8 +336,6 @@ UOdysseyLayer::GetImageRenderingRects() const
     return layerStack->GetImageRenderingRects();
 }
 
-
-
 TSharedPtr<IOdysseyImageRenderer>
 UOdysseyLayer::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
@@ -345,4 +343,46 @@ UOdysseyLayer::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType
         return nullptr;
     
     return MakeShared<FOdysseyLayerImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
+}
+
+void
+UOdysseyLayer::NameBlueprintSetter(FText Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Name), Value);
+}
+
+void
+UOdysseyLayer::IsActivatedBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsActivated), Value);
+}
+
+void
+UOdysseyLayer::IsLockedBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsLocked), Value);
+}
+
+void
+UOdysseyLayer::DisplayChildrenBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren), Value);
+}
+
+void
+UOdysseyLayer::DisplayOptionsBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayOptions), Value);
+}
+
+void
+UOdysseyLayer::BlendModeBlueprintSetter(EOdysseyBlendingMode Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode), Value);
+}
+
+void
+UOdysseyLayer::OpacityBlueprintSetter(float Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), Value);
 }
