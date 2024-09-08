@@ -120,6 +120,7 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
         ::ULIS::FRectI boundingBox = GetTransformAreaBoundingRect();
         int rotationDelta = GetRotationAngleFromLastReference(FVector2D(point.x, point.y)) - mLastReferenceRotation;
         mLastReferenceRotation += rotationDelta;
+
         TArray<FVector2D>& points = mTransformArea->GetPoints();
         double cosAngle = FMath::Cos(::FMath::DegreesToRadians(-rotationDelta));
         double sinAngle = FMath::Sin(::FMath::DegreesToRadians(-rotationDelta));
@@ -211,7 +212,7 @@ void UOdysseyPainterEditorRasterTransformTool::Unload()
     mHUD->RemoveElement(rasterSelection->GetHUD());
     mHUD->RemoveElement(mTransformHUD);
 
-    ClearTransform();
+    CommitTransform();
     
     mSelectionBlock = nullptr;
     UOdysseyPainterEditorTool::Unload();
@@ -367,7 +368,28 @@ void UOdysseyPainterEditorRasterTransformTool::ConstrainToRectangle(FVector2D iP
 {
     if( !mTransformArea )
         return;
+        
+    
+    FVector2D centerRect;
 
+    double rotationRectangle = 0;
+    double rotationDiag = 0;
+
+    for (int i = 0; i < 4; i++)
+    {
+        if (mHandles[i]->IsCaptured())
+        {
+            centerRect = FVector2D(mHandles[i]->GetPosition() + mHandles[(i + 2) % 4]->GetPosition()) / 2.f;
+
+            FVector2D rotRectPoint = mTransformArea->GetPoints()[1] - mTransformArea->GetPoints()[0];
+            rotationRectangle = FMath::Atan2(rotRectPoint.X, rotRectPoint.Y) - PI / 2.f;
+
+            FVector2D rotDiagPoint = mHandles[(i+2)%4]->GetPosition() - mHandles[i]->GetPosition();
+            rotationDiag = FMath::Atan2(rotDiagPoint.X, rotDiagPoint.Y);
+        }
+    }
+
+    /*
     if (Uniform)
     {
         int opposite = 0;
@@ -398,39 +420,44 @@ void UOdysseyPainterEditorRasterTransformTool::ConstrainToRectangle(FVector2D iP
             iPosition.X = mHandles[opposite]->GetPosition().X + shiftY * mult * (1.0 / ratio);
             iPosition.Y = mHandles[opposite]->GetPosition().Y + shiftY;
         }
-    }
-
+    }*/
+    
     int next;
     int opposite;
     int previous;
-    for( int i = 0; i < 4; i++ )
+
+    double cosRotation = cos( - 2 * (rotationDiag - rotationRectangle));
+    double sinRotation = sin( - 2 * (rotationDiag - rotationRectangle));
+    const FMatrix2x2 rotationMatrix = FMatrix2x2( cosRotation, -sinRotation,
+                                                  sinRotation, cosRotation);
+
+    FTransform2D diagTransform = FTransform2D(rotationMatrix);
+
+    for (int i = 0; i < 4; i++)
     {
-        if( mHandles[i]->IsCaptured() )
+        if (mHandles[i]->IsCaptured())
         {
             next = (i + 1) % 4;
             opposite = (i + 2) % 4;
             previous = (i + 3) % 4;
-
-            if( i % 2 == 0 )
+            if (i % 2 == 0)
             {
-                mHandles[i]->SetPosition(iPosition);
                 mTransformArea->GetPoints()[i] = mHandles[i]->GetPosition();
-                mHandles[next]->SetPosition(FVector2D(mHandles[opposite]->GetPosition().X, iPosition.Y));
+                mHandles[next]->SetPosition(diagTransform.TransformPoint(mHandles[i]->GetPosition() - centerRect) + centerRect);
                 mTransformArea->GetPoints()[next] = mHandles[next]->GetPosition();
-                mHandles[previous]->SetPosition(FVector2D(iPosition.X, mHandles[opposite]->GetPosition().Y));
-                mTransformArea->GetPoints()[previous] = FVector2D(iPosition.X, mHandles[opposite]->GetPosition().Y);
+                mHandles[previous]->SetPosition(diagTransform.TransformPoint(mHandles[opposite]->GetPosition() - centerRect) + centerRect);
+                mTransformArea->GetPoints()[previous] = mHandles[previous]->GetPosition();
             }
             else
             {
-                mHandles[i]->SetPosition(iPosition);
                 mTransformArea->GetPoints()[i] = mHandles[i]->GetPosition();
-                mHandles[next]->SetPosition(FVector2D(iPosition.X, mHandles[opposite]->GetPosition().Y));
+                mHandles[next]->SetPosition(diagTransform.TransformPoint(mHandles[opposite]->GetPosition() - centerRect) + centerRect);
                 mTransformArea->GetPoints()[next] = mHandles[next]->GetPosition();
-                mHandles[previous]->SetPosition(FVector2D(mHandles[opposite]->GetPosition().X, iPosition.Y));
+                mHandles[previous]->SetPosition(diagTransform.TransformPoint(mHandles[i]->GetPosition() - centerRect) + centerRect);
                 mTransformArea->GetPoints()[previous] = mHandles[previous]->GetPosition();
             }
 
-            mHandles[4]->SetPosition( ( mTransformArea->GetPoints()[0] + mTransformArea->GetPoints()[2] ) / 2 );
+            mHandles[4]->SetPosition(centerRect);
         }
     }
 }
