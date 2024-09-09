@@ -33,6 +33,6 @@ struct ODYSSEYSHAPES_API FOdysseySmoothingOptions
     bool    SmoothingRealTime;
 
     /** Should smoothing catch-up to the cursor before releasing the stroke. */
-    UPROPERTY( EditAnywhere, Category="Smoothing" )
+    UPROPERTY( EditAnywhere, Category="Smoothing", meta = (EditCondition = "SmoothingMethod == EOdysseySmoothingMethod::kAverage", EditConditionHides) )
     bool    SmoothingCatchUp;
 };
