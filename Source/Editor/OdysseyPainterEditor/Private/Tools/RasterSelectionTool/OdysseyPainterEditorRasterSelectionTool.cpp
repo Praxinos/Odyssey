@@ -64,36 +64,18 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnMouseDown(const FOdysseyPoint& 
         return true;
 
     FOdysseyPoint point = iPointInTexture;
-    /* if (!SubPixel)
-    {
-        point.x = FMath::Floor(point.x);
-        point.y = FMath::Floor(point.y);
-    } */
-
     return SelectedShapeInstance->OnMouseDown(point, iKey);
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
     FOdysseyPoint point = iPointInTexture;
-    /* if (!SubPixel)
-    {
-        point.x = FMath::Floor(point.x);
-        point.y = FMath::Floor(point.y);
-    } */
-
     SelectedShapeInstance->OnMouseHover( point );
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     FOdysseyPoint point = iPointInTexture;
-    /* if (!SubPixel)
-    {
-        point.x = FMath::Floor(point.x);
-        point.y = FMath::Floor(point.y);
-    } */
-
     SelectedShapeInstance->OnMouseDrag(point);
 }
 
@@ -103,12 +85,6 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iP
         return true;
 
     FOdysseyPoint point = iPointInTexture;
-    /* if (!SubPixel)
-    {
-        point.x = FMath::Floor(point.x);
-        point.y = FMath::Floor(point.y);
-    } */
-
     return SelectedShapeInstance->OnMouseUp(point, iKey);
 }
 

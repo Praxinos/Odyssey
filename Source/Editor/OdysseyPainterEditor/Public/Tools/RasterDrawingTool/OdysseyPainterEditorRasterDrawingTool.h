@@ -202,12 +202,21 @@ protected:
     UPROPERTY()
     TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
 
+
+
+private:
+	UFUNCTION(BlueprintSetter)
+	void SubPixelBlueprintSetter(bool Value);
+
 public:
     UPROPERTY(EditAnywhere, Category="Shape")
     EOdysseyShape SelectedShape;
 
     UPROPERTY(VisibleInstanceOnly, Category="Shape", Instanced, meta=(ShowInnerProperties))
     class UOdysseyShape* SelectedShapeInstance;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Shape", BlueprintSetter=SubPixelBlueprintSetter)
+    bool SubPixel = true;
 
     UPROPERTY(EditAnywhere, Category="Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1"))
     float   Step = 1.0;
@@ -245,4 +254,6 @@ protected:
 
     FOdysseyPoint mLastPoint;
     bool mIsFirstPoint = true;
+
+	FOdysseyPoint mSubPixelPoint;
 };

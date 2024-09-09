@@ -165,8 +165,15 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseDown(const FOdysseyPoint& iPointI
     mPaintEngine.RasterBlock(rasterBlock);
     if ( BrushInstance )
 		BrushInstance->SetBlock(mPaintEngine.PaintBlock());
+
+	mSubPixelPoint = iPointInTexture;
+    if (!SubPixel)
+    {
+        mSubPixelPoint.x = FMath::Floor(mSubPixelPoint.x) + 0.5f;
+        mSubPixelPoint.y = FMath::Floor(mSubPixelPoint.y) + 0.5f;
+    }
         
-    return SelectedShapeInstance->OnMouseDown(iPointInTexture, iKey);
+    return SelectedShapeInstance->OnMouseDown(mSubPixelPoint, iKey);
 }
 
 bool
@@ -188,7 +195,14 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInT
     if( mediaRasters.Num() <= 0 )
         return false;
 
-    return SelectedShapeInstance->OnMouseUp(iPointInTexture, iKey);
+	mSubPixelPoint = iPointInTexture;
+    if (!SubPixel)
+    {
+        mSubPixelPoint.x = FMath::Floor(mSubPixelPoint.x) + 0.5f;
+        mSubPixelPoint.y = FMath::Floor(mSubPixelPoint.y) + 0.5f;
+    }
+
+    return SelectedShapeInstance->OnMouseUp(mSubPixelPoint, iKey);
 }
 
 void
@@ -210,7 +224,14 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseHover(const FOdysseyPoint& iPoint
     if (BrushInstance)
         BrushInstance->StrokeMoveTo(iPointInTexture);
 
-    SelectedShapeInstance->OnMouseHover(iPointInTexture);
+	mSubPixelPoint = iPointInTexture;
+    if (!SubPixel)
+    {
+        mSubPixelPoint.x = FMath::Floor(mSubPixelPoint.x) + 0.5f;
+        mSubPixelPoint.y = FMath::Floor(mSubPixelPoint.y) + 0.5f;
+    }
+
+    SelectedShapeInstance->OnMouseHover(mSubPixelPoint);
 }
 
 void
@@ -229,7 +250,19 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointI
     if( mediaRasters.Num() <= 0 )
         return;
 
-    SelectedShapeInstance->OnMouseDrag(iPointInTexture);
+	FOdysseyPoint point = iPointInTexture;
+    if (!SubPixel)
+    {
+        point.x = FMath::Floor(point.x) + 0.5f;
+        point.y = FMath::Floor(point.y) + 0.5f;
+
+		if (mSubPixelPoint == point)
+			return;
+    }
+
+	mSubPixelPoint = point;
+
+    SelectedShapeInstance->OnMouseDrag(point);
 }
 
 bool
@@ -708,6 +741,16 @@ UOdysseyPainterEditorRasterDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* i
             FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Flow), brushOptionsOverrides->Flow);
     }
 
+	UOdysseyPainterEditorRasterDrawingToolOverrides* toolOverrides = Cast<UOdysseyPainterEditorRasterDrawingToolOverrides>(iBrushInstance->EditorOverrides[UOdysseyPainterEditorRasterDrawingToolOverrides::StaticClass()]);
+    if (toolOverrides)
+	{
+		if (toolOverrides->bOverride_Shape)
+			FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, SelectedShape), toolOverrides->Shape);
+
+		if (toolOverrides->bOverride_SubPixel)
+			FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, SubPixel), toolOverrides->SubPixel);
+	}
+
     //PATCH: Use Step / AdaptativeStep / InterpolationType from FreehandShapeOverrides
     //But we should have a RasterDrawingToolOverrides class
     const UOdysseyFreehandShapeOverrides* freehandShapeOverrides = Cast<const UOdysseyFreehandShapeOverrides>(iBrushInstance->EditorOverrides[UOdysseyFreehandShapeOverrides::StaticClass()]);
@@ -957,5 +1000,11 @@ UOdysseyPainterEditorRasterDrawingTool::ResetInterpolation()
     mInterpolator = nullptr;
     mLastPoint = FOdysseyPoint();
 }
+
+void
+UOdysseyPainterEditorRasterDrawingTool::SubPixelBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, SubPixel), Value);
+}   
 
 #undef LOCTEXT_NAMESPACE

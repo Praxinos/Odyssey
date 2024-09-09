@@ -71,18 +71,6 @@ public:
     FOnCommit& OnCommit() { return mOnCommit; }
     FSimpleMulticastDelegate& OnAbort() { return mOnAbort; }
 
-public:
-    //Property to hide the step property depending on how the shape is used. If used in a primitive tool, step is irrelevant and is hidden. Else, it is visible and editable
-    //The EditCondition property here should always be false, else, IsPrimitive will always be visible as a checkbox next to Step for some reason. So... Yeah.
-    //UPROPERTY(EditAnywhere, Category="Shape", meta = (EditCondition = "1==0", EditConditionHides))
-    //bool IsPrimitive = false;
-
-    //UPROPERTY(EditInstanceOnly, Category="Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1", DisplayPriority="0"), meta = (EditCondition = "!IsPrimitive", EditConditionHides))
-    //float   Step = 1.0;
-
-    //UPROPERTY(EditAnywhere, Category="Shape")
-    //bool Uniform = false;
-
 protected:
     TArray<FOdysseyPoint> GeneratePointsFromFunction(TFunction<FVector2D(float)> iFunction) const;
 

@@ -630,7 +630,7 @@ IOdysseyViewportDrawingEditorAdapter::MouseDrag(const FOdysseyRay& iRay)
     mLastStrokeRay = mCurrentStrokeRay;
     mCurrentStrokeRay = iRay;
 
-    bool hasMoved = long(mCurrentStrokeRay.mPoint.x) != long(mLastStrokeRay.mPoint.x) || long(mCurrentStrokeRay.mPoint.y) != long(mLastStrokeRay.mPoint.y);
+	bool hasMoved = !FMath::IsNearlyEqual(mCurrentStrokeRay.mPoint.x - mLastStrokeRay.mPoint.x, 0.f) || !FMath::IsNearlyEqual(mCurrentStrokeRay.mPoint.y - mLastStrokeRay.mPoint.y, 0.f);
 
     if (mState == eState::kDrawing)
     {
