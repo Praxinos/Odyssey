@@ -3,6 +3,7 @@
 
 #include "OdysseyVectorBlock.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorAnimationCell.h"
 #include "ULISLoaderModule.h"
 
 #define FOdysseyVectorBlock_CACHE_NAME TEXT("OdysseyVectorBlock")

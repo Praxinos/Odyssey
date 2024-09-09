@@ -233,7 +233,10 @@ FOdysseyAnimationEditorGUI::ParseVectorSignal( FOdysseyVectorGroupPaint* iScene
 
     if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_HUD )
     {
-        iScene->GetEngine()->ResetHUD();
+        if( iScene )
+        {
+            iScene->GetEngine()->ResetHUD();
+        }
     }
 }
 
@@ -252,7 +255,7 @@ FOdysseyAnimationEditorGUI::OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScen
         if( cell )
         {
             FOdysseyVectorEngine* vectorEngine = cell->GetEngine();
-            // Note: iScene is ignored. We update the widget according to the current scene.
+            // Note: iScene is ignored. We update the widget according to the current scene if any.
             FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
 
             ParseVectorSignal( vectorScene, iSignalFlags );

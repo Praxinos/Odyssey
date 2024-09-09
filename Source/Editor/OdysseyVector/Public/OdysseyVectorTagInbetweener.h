@@ -13,6 +13,7 @@
 #include "InbetweenerTag/InbetweenerGrid.h"
 #include "InbetweenerTag/InbetweenerGridFFD.h"
 #include "InbetweenerTag/InbetweenerGridARAP.h"
+#include "InbetweenerTag/InbetweenerChart.h"
 #include "InbetweenerTag/InbetweenerPoint.h"
 #include "InbetweenerTag/InbetweenerQuad.h"
 #include "InbetweenerTag/InbetweenerRoute.h"
@@ -42,25 +43,6 @@ enum class eInbetweenerInterpolationType : uint8
 {
     Linear = 0,
     ARAP = 1
-};
-
-//////////////// Grid data structures //////////////////
-
-struct FInbetweenerDrawing
-{
-    float spacing;
-    float breakdownSpacing; // spacing relative to the current breakdown
-    FInbetweenerBreakdown* breakdown;
-    BLMatrix2D localMatrix;
-    BLMatrix2D worldMatrix;
-    BLMatrix2D inverseMatrix;
-    BLMatrix2D inverseWorldMatrix;
-    uint32 index;
-};
-
-struct FInbetweenerChart
-{
-    std::vector<FInbetweenerDrawing> drawingBuffer;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
@@ -181,7 +163,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
 
         void RedrawAnimationCells();
         void RedrawAnimationCells( uint32 iInbetweenCount );
-        void ResetChart();
+        void ResizeChart( bool iResetSpacing );
         //void SetDrawingCount( uint32 iInbetweenCount );
         void SetGrid( eInbetweenerGridType iGridType
                     , uint32 iGridNumQuadX

@@ -491,12 +491,12 @@ FOdysseyVectorHUD::DrawInbetweens( BLContext* iBLContext
 
             for( int32 i = sourceInbetweenIndex + 1; i < targetInbetweenIndex; i++ )
             {
-                FInbetweenerDrawing& drawing = iInbetweenerTag->GetChart().drawingBuffer[i];
+                FInbetweenerDrawing* drawing = iInbetweenerTag->GetChart().GetDrawing( i );
 
                 iBLContext->setStrokeStyle( BLRgba32( color.R
                                                     , color.G
                                                     , color.B
-                                                    , 127 + ( color.A * 0.5f * drawing.spacing ) ) );
+                                                    , 127 + ( color.A * 0.5f * drawing->spacing ) ) );
 
                 iInbetweenerTag->DrawPathsInbetween( i, iBLContext );
             }

@@ -686,6 +686,12 @@ FOdysseyVectorObject::GetTagByType( uint32 iTagClass )
     return nullptr;
 }
 
+uint32
+FOdysseyVectorObject::GetInvalidationFlags()
+{
+    return mInvalidationFlags;
+}
+
 void
 FOdysseyVectorObject::InvalidateChild( FOdysseyVectorObject* iChild
                                      , uint32 iChildInvalidationFlags )

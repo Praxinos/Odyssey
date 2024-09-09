@@ -33,7 +33,7 @@ FInbetweenerBreakdown::FInbetweenerBreakdown( FOdysseyVectorTagInbetweener* iInb
 ::ULIS::FRectD
 FInbetweenerBreakdown::GetSourceBBox( bool iWorld )
 {
-    FInbetweenerDrawing* drawing = &mInbetweenerTag->GetChart().drawingBuffer[mTargetDrawingIndex];
+    FInbetweenerDrawing* drawing = mInbetweenerTag->GetChart().GetDrawing( mTargetDrawingIndex );
     ::ULIS::FRectD bbox = mGrid->GetSourceBBox();
 
     if ( iWorld == true )
@@ -68,7 +68,7 @@ FInbetweenerBreakdown::IsMaster()
 ::ULIS::FRectD
 FInbetweenerBreakdown::GetTargetBBox( bool iWorld )
 {
-    FInbetweenerDrawing* drawing = &mInbetweenerTag->GetChart().drawingBuffer[mTargetDrawingIndex];
+    FInbetweenerDrawing* drawing = mInbetweenerTag->GetChart().GetDrawing( mTargetDrawingIndex );
     ::ULIS::FRectD bbox = mGrid->GetTargetBBox();
 
     if ( iWorld == true )
@@ -137,7 +137,7 @@ FInbetweenerBreakdown::InterpolateTransform()
 
     for( uint32 i = ( mSourceDrawingIndex + 1 ); i < mTargetDrawingIndex; i++ ) 
     {
-        FInbetweenerDrawing* drawing = &mInbetweenerTag->GetChart().drawingBuffer[i];
+        FInbetweenerDrawing* drawing = mInbetweenerTag->GetChart().GetDrawing( i );
         double translationX, translationY, rotation, scalingX, scalingY;
         double t = drawing->breakdownSpacing;
 
@@ -267,7 +267,7 @@ FInbetweenerBreakdown::SetTargetTransform( double iTranslationX
 void
 FInbetweenerBreakdown::UpdateMatrix()
 {
-    FInbetweenerDrawing* drawing = &mInbetweenerTag->GetChart().drawingBuffer[mTargetDrawingIndex];
+    FInbetweenerDrawing* drawing = mInbetweenerTag->GetChart().GetDrawing( mTargetDrawingIndex );
 
     drawing->localMatrix.reset();
     drawing->localMatrix.translate( mTargetTranslationX, mTargetTranslationY );
@@ -326,25 +326,25 @@ FInbetweenerBreakdown::GetSourceLocalMatrix()
         return identityMatrix;
     }
 
-    return mInbetweenerTag->GetChart().drawingBuffer[mSourceDrawingIndex].localMatrix;
+    return mInbetweenerTag->GetChart().GetDrawing( mSourceDrawingIndex )->localMatrix;
 }
 
 BLMatrix2D&
 FInbetweenerBreakdown::GetTargetLocalMatrix()
 {
-    return mInbetweenerTag->GetChart().drawingBuffer[mTargetDrawingIndex].localMatrix;
+    return mInbetweenerTag->GetChart().GetDrawing( mTargetDrawingIndex )->localMatrix;
 }
 
 BLMatrix2D&
 FInbetweenerBreakdown::GetTargetWorldMatrix()
 {
-    return mInbetweenerTag->GetChart().drawingBuffer[mTargetDrawingIndex].worldMatrix;
+    return mInbetweenerTag->GetChart().GetDrawing( mTargetDrawingIndex )->worldMatrix;
 }
 
 BLMatrix2D&
 FInbetweenerBreakdown::GetTargetInverseWorldMatrix()
 {
-    return mInbetweenerTag->GetChart().drawingBuffer[mTargetDrawingIndex].inverseWorldMatrix;
+    return mInbetweenerTag->GetChart().GetDrawing( mTargetDrawingIndex )->inverseWorldMatrix;
 }
 
 void
@@ -372,7 +372,7 @@ FInbetweenerBreakdown::SetTargetDrawingIndex( uint32 iTargetDrawingIndex )
         mNextBreakdown->mSourceDrawingIndex = iTargetDrawingIndex;
     }
 
-    mInbetweenerTag->ResetChart();
+    mInbetweenerTag->ResizeChart( false );
     // TODO: put this somewhere else. I put it here so it can geenrate matrices based on
     // the t value fromthe chart, but I don't think it is the best place. 
     mInbetweenerTag->UpdateMatrix();

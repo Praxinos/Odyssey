@@ -316,7 +316,7 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
         mHorizontalLineBuffer.resize( mRenderData.size.h );
     }
 
-    if( mInvalidationFlags )
+    if( sanitizedRect.Area() )
     {
         BLRgba32 blFillColor;
         FColor fillColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? mScene->GetMonochromeColor()
@@ -359,8 +359,6 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 
         iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
     }
-
-    mInvalidationFlags = 0;
 
     // reset invalidation region
     // ( refresh the whole screen at next iteration unless this is set

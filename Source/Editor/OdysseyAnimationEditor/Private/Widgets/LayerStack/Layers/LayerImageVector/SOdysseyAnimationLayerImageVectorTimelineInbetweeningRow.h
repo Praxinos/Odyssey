@@ -13,6 +13,31 @@ class FOdysseyVectorTagInbetweener;
 class FInbetweeningListViewItem;
 class FInbetweenerBreakdown;
 
+enum EInbetweeningRowCellBoxType : uint8
+{
+    None      = 0,
+    Source    = 1,
+    Inbetween = 2,
+    Target    = 3
+};
+
+struct FInbetweeningRowCellBox
+{
+    FInbetweeningRowCellBox( EInbetweeningRowCellBoxType iType, uint32 iIndex, double iX, double iY, double iW, double iH )
+        : type ( iType )
+        , index( iIndex )
+        , x ( iX )
+        , y ( iY )
+        , w ( iW )
+        , h ( iH )
+    {
+    }
+
+    EInbetweeningRowCellBoxType type;
+    double x, y, w, h;
+    uint32 index;
+};
+
 /**
  * Implements the List View Widget
  */
@@ -49,16 +74,12 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
 
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        FVector2D mSourcePos;
-        FVector2D mSourceSize;
-        TArray<FVector2D> mInterpPosBuffer;
-        TArray<FVector2D> mInterpSizeBuffer;
-        // there are as many target poses as breakdowns
-        TArray<FVector2D> mTargetPosBuffer;
-        TArray<FVector2D> mTargetSizeBuffer;
+        TArray<FInbetweeningRowCellBox> mCellBoxBuffer;
         FVector2D mBoxPos;
         FVector2D mBoxSize;
+        FInbetweeningRowCellBox mCandidateTargetCellBox;
         FInbetweenerBreakdown* mPickedBreakdown;
         //Box containing the cells widgets
         //TSharedPtr<SHorizontalBox> mCellsBox;
+        float mLayoutScaleMultiplier;
 };

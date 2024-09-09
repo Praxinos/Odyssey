@@ -35,9 +35,9 @@ FInbetweenerWaypoint::SetT( float iT )
     uint32 targetDrawingIndex = mTrajectory->GetBreakdown()->GetTargetDrawingIndex();
     uint32 waypointIndex = ( this - &mTrajectory->GetWaypointBuffer()[0] );
     uint32 waypointDrawingIndex = waypointIndex + sourceDrawingIndex + 1;
-    double sourceDrawingT   = inbetweenerTag->GetChart().drawingBuffer[sourceDrawingIndex  ].spacing;
-    double targetDrawingT   = inbetweenerTag->GetChart().drawingBuffer[targetDrawingIndex  ].spacing;
-    double waypointDrawingT = inbetweenerTag->GetChart().drawingBuffer[waypointDrawingIndex].spacing;
+    double sourceDrawingT   = inbetweenerTag->GetChart().GetDrawing( sourceDrawingIndex   )->spacing;
+    double targetDrawingT   = inbetweenerTag->GetChart().GetDrawing( targetDrawingIndex   )->spacing;
+    double waypointDrawingT = inbetweenerTag->GetChart().GetDrawing( waypointDrawingIndex )->spacing;
     double relativeT = ( waypointDrawingT - sourceDrawingT ) / ( targetDrawingT - sourceDrawingT );
 
     // waypoint is precisely on inbetween
@@ -66,9 +66,9 @@ FInbetweenerWaypoint::GetT()
     uint32 targetDrawingIndex = mTrajectory->GetBreakdown()->GetTargetDrawingIndex();
     uint32 waypointIndex = ( this - &mTrajectory->GetWaypointBuffer()[0] );
     uint32 waypointDrawingIndex = waypointIndex + sourceDrawingIndex + 1;
-    double sourceDrawingT   = inbetweenerTag->GetChart().drawingBuffer[sourceDrawingIndex  ].spacing;
-    double targetDrawingT   = inbetweenerTag->GetChart().drawingBuffer[targetDrawingIndex  ].spacing;
-    double waypointDrawingT = inbetweenerTag->GetChart().drawingBuffer[waypointDrawingIndex].spacing;
+    double sourceDrawingT   = inbetweenerTag->GetChart().GetDrawing( sourceDrawingIndex   )->spacing;
+    double targetDrawingT   = inbetweenerTag->GetChart().GetDrawing( targetDrawingIndex   )->spacing;
+    double waypointDrawingT = inbetweenerTag->GetChart().GetDrawing( waypointDrawingIndex )->spacing;
     double relativeT = ( waypointDrawingT - sourceDrawingT ) / ( targetDrawingT - sourceDrawingT );
 
     if( mRatio > 0.0f )

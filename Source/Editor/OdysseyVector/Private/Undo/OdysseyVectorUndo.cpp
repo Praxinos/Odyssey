@@ -410,6 +410,7 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
     , mRouteSnapshotFlags( iRouteSnapshotFlags )
     , mLayout()
     , mDynamics()
+    , mChart( iInbetweenerTag )
 {
     /*-----------------------  Backup Transformations ---------------------- */
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::TRANSFORMATIONS )

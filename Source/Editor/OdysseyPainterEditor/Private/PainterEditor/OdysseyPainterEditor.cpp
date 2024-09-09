@@ -1781,7 +1781,7 @@ FOdysseyPainterEditor::ResetSpacingChart( FOdysseyPainterEditor* iEditor, FOdyss
 
         for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
         {
-            inbetweenerTag->ResetChart();
+            inbetweenerTag->ResizeChart( true );
         }
     }
 
@@ -2040,7 +2040,7 @@ FOdysseyPainterEditor::UnpropagateBucket( FOdysseyPainterEditor* iEditor, FOdyss
 static FInbetweenerChart*
 GetCopiedChart()
 {
-    static FInbetweenerChart copiedChart;
+    static FInbetweenerChart copiedChart( nullptr );
 
     return &copiedChart;
 }
@@ -2055,11 +2055,11 @@ FOdysseyPainterEditor::PasteSpacingChart( FOdysseyPainterEditor* iEditor
     FInbetweenerChart* copiedChart = GetCopiedChart();
     uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 
-    if( copiedChart->drawingBuffer.size() > 0 )
+    if( copiedChart->GetDrawingBuffer().size() > 0 )
     {
         // we substract 1 because the buffer also holds the final position
         // which is not an inbetween per-se.
-        uint32 drawingCount = copiedChart->drawingBuffer.size();
+        uint32 drawingCount = copiedChart->GetDrawingBuffer().size();
 
         vectorEngine->GetSelectedInbetweenerTagList( selectedInbetweenerTagList );
 
@@ -2087,7 +2087,7 @@ FOdysseyPainterEditor::PasteSpacingChart( FOdysseyPainterEditor* iEditor
                 {
                     for( uint32 i = 0; i < drawingCount; i++ )
                     {
-                        inbetweenerTag->GetChart().drawingBuffer[i].spacing = copiedChart->drawingBuffer[i].spacing;
+                        inbetweenerTag->GetChart().GetDrawing( i )->spacing = copiedChart->GetDrawing( i )->spacing;
                     }
 
                     inbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );

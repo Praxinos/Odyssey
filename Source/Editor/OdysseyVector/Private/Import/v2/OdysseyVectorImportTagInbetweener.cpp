@@ -54,7 +54,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     iInbetweenerTag.SetMapAsPolyline( mapAsPolyline ? true : false );
                 }
                 break;
-/*
+
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_CHART:
                 {
                     for( uint32 i = 0; i < iInbetweenerTag.GetDrawingCount(); i++ )
@@ -63,11 +63,11 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
 
                         Ar << spacing;
 
-                        iInbetweenerTag.GetChart().drawingBuffer[i].spacing = spacing;
+                        iInbetweenerTag.GetChart().GetDrawing( i )->spacing = spacing;
                     }
                 }
                 break;
-*/
+
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM:  // container
                 break;
 
@@ -209,8 +209,6 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                             breakdown->SetTargetDrawingIndex( targetDrawingIndex );
                         }
                     }
-
-                    iInbetweenerTag.ResetChart();
                 }
                 break;
 

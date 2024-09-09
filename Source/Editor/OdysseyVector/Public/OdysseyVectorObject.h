@@ -528,6 +528,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         std::list<FOdysseyVectorTag*>& GetTagList();
         void InvalidateTag( FOdysseyVectorTag* iTag );
         FOdysseyVectorSharedEnv* GetSharedEnv();
+        uint32 GetInvalidationFlags();
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags );

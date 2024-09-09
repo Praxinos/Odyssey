@@ -230,8 +230,8 @@ FOdysseyVectorExportV2::WriteTagInbetweenerChart( FOdysseyVectorTagInbetweener& 
     {
         for( uint32 i = 0; i < iInbetweenerTag.GetDrawingCount(); i++ )
         {
-            FInbetweenerDrawing& drawing = iInbetweenerTag.GetChart().drawingBuffer[i];
-            float spacing = drawing.spacing;
+            FInbetweenerDrawing* drawing = iInbetweenerTag.GetChart().GetDrawing( i );
+            float spacing = drawing->spacing;
 
             Ar << spacing;
         }

@@ -28,7 +28,7 @@ FInbetweenerGrid::GetBreakdown()
 }
 
 ::ULIS::FRectD
-FInbetweenerGrid::GetBBox( eInbetweenerPointPositionType iPositionType )
+FInbetweenerGrid::GetBBox( eInbetweenerPointPositionType iPositionType, bool iLinkedOnly )
 {
     ::ULIS::FVec2D center = ::ULIS::FVec2D( 0.0f, 0.0f );
     uint32 pointCount = 0;
@@ -38,7 +38,7 @@ FInbetweenerGrid::GetBBox( eInbetweenerPointPositionType iPositionType )
     {
         ::ULIS::FVec2D pointPosition = point.GetPosition( iPositionType );
 
-        //if( point.GetQuadCount() )
+        if( ( iLinkedOnly == false ) || point.GetQuadCount() )
         {
             if( pointPosition.x < xmin ) xmin = pointPosition.x;
             if( pointPosition.y < ymin ) ymin = pointPosition.y;
@@ -79,13 +79,13 @@ FInbetweenerGrid::UpdateBBox( uint32 iUpdateFlags
     if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCE   )
      || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE ) )
     {
-        mSourceBBox = GetBBox( eInbetweenerPointPositionType::SourcePosition );
+        mSourceBBox = GetBBox( eInbetweenerPointPositionType::SourcePosition, false );
     }
 
     if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGET )
      || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE   ) )
     {
-        mTargetBBox = GetBBox( eInbetweenerPointPositionType::TargetPosition );
+        mTargetBBox = GetBBox( eInbetweenerPointPositionType::TargetPosition, true );
     }
 }
 
@@ -594,7 +594,7 @@ FInbetweenerGrid::ComputeQuadA( FInbetweenerQuad* iQuad
  * @param useRigidTransform If true the global rigid transformation is applied.
  */
 bool
-FInbetweenerGrid::ComputeARAPInterpolation( const FInbetweenerDrawing* iDrawing
+FInbetweenerGrid::ComputeARAPInterpolation( FInbetweenerDrawing* iDrawing
                                           , bool useRigidTransform )
 {
     std::list<FInbetweenerRoute*>& routeList = mBreakdown->GetInbetweenerTag()->GetRouteList();
@@ -646,7 +646,7 @@ FInbetweenerGrid::ComputeARAPInterpolation( const FInbetweenerDrawing* iDrawing
     {
         FInbetweenerTrajectory* trajectory = &route->GetTrajectoryBuffer()[mBreakdown->GetIndex()];
         ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
-        uint32 waypointIndex = iDrawing->index - mBreakdown->GetSourceDrawingIndex() - 1;
+        uint32 waypointIndex = iDrawing->GetIndex() - mBreakdown->GetSourceDrawingIndex() - 1;
         double waypointT = trajectory->GetWaypointBuffer()[waypointIndex].GetT();
         ::ULIS::FVec2D coords = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( cubicBezier[0]
                                                                                    , cubicBezier[1]

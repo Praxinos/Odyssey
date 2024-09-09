@@ -112,7 +112,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
 
     protected:
         ::ULIS::FVec2D GetCenterOfMass( eInbetweenerPointPositionType iPositionType );
-        ::ULIS::FRectD GetBBox( eInbetweenerPointPositionType iPositionType );
+        ::ULIS::FRectD GetBBox( eInbetweenerPointPositionType iPositionType, bool iLinkedOnly );
         virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint
                                           , eInbetweenerPointPositionType iPositionType );
 
@@ -121,7 +121,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
     // applies to all types of grid.
     protected:
         bool PrecomputeARAPInterpolation();
-        bool ComputeARAPInterpolation( const FInbetweenerDrawing* iInbetween
+        bool ComputeARAPInterpolation( FInbetweenerDrawing* iInbetween
                                      , bool useRigidTransform );
         void ComputePStar( FInbetweenerPoint* iTriangle[3]
                          , int triRow
