@@ -25,6 +25,7 @@
 #include "FreehandShape/Interpolation/OdysseyInterpolationLine.h"
 #include "FreehandShape/OdysseyFreehandShapeOverrides.h"
 #include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
+#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingToolOverrides.h"
 
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDSystem.h"

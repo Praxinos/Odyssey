@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyShape.h"
 #include "OdysseyPainterEditorRasterDrawingToolOverrides.generated.h"
 
 /////////////////////////////////////////////////////
