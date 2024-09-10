@@ -369,7 +369,25 @@ void UOdysseyPainterEditorRasterTransformTool::ConstrainToRectangle(FVector2D iP
     if( !mTransformArea )
         return;
         
-    
+
+    if (Uniform)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            if (mHandles[i]->IsCaptured())
+            {
+                FVector point = FVector(iPosition.X, iPosition.Y, 0);
+
+                FVector diagonalPt1 = FVector(mTransformArea->GetPoints()[i].X, mTransformArea->GetPoints()[i].Y, 0);
+                FVector diagonalPt2 = FVector(mTransformArea->GetPoints()[(i+2)%4].X, mTransformArea->GetPoints()[(i+2)%4].Y, 0);
+
+                FVector closestDiag = FMath::ClosestPointOnInfiniteLine(diagonalPt1, diagonalPt2, point);
+
+                iPosition = FVector2D(closestDiag.X, closestDiag.Y);
+            }
+        }
+    }
+
     FVector2D centerRect;
 
     double rotationRectangle = 0;
@@ -379,48 +397,15 @@ void UOdysseyPainterEditorRasterTransformTool::ConstrainToRectangle(FVector2D iP
     {
         if (mHandles[i]->IsCaptured())
         {
-            centerRect = FVector2D(mHandles[i]->GetPosition() + mHandles[(i + 2) % 4]->GetPosition()) / 2.f;
+            centerRect = FVector2D(iPosition + mHandles[(i + 2) % 4]->GetPosition()) / 2.f;
 
             FVector2D rotRectPoint = mTransformArea->GetPoints()[1] - mTransformArea->GetPoints()[0];
             rotationRectangle = FMath::Atan2(rotRectPoint.X, rotRectPoint.Y) - PI / 2.f;
 
-            FVector2D rotDiagPoint = mHandles[(i+2)%4]->GetPosition() - mHandles[i]->GetPosition();
+            FVector2D rotDiagPoint = mHandles[(i+2)%4]->GetPosition() - iPosition;
             rotationDiag = FMath::Atan2(rotDiagPoint.X, rotDiagPoint.Y);
         }
     }
-
-    /*
-    if (Uniform)
-    {
-        int opposite = 0;
-        for (int i = 0; i < 4; i++)
-        {
-            if (mHandles[i]->IsCaptured())
-            {
-                opposite = (i + 2) % 4;
-            }
-        }
-        int shiftX = iPosition.X - mHandles[opposite]->GetPosition().X;
-        int shiftY = iPosition.Y - mHandles[opposite]->GetPosition().Y;
-
-        float ratio = FMath::Abs(float(mSelectionBlock->Height()) / float(mSelectionBlock->Width()));
-
-        int signX = shiftX < 0 ? -1 : 1;
-        int signY = shiftY < 0 ? -1 : 1;
-
-        int mult = signX == signY ? 1 : -1;
-
-        if (FMath::Abs(shiftX * ratio) > FMath::Abs(shiftY))
-        {
-            iPosition.X = mHandles[opposite]->GetPosition().X + shiftX;
-            iPosition.Y = mHandles[opposite]->GetPosition().Y + shiftX * mult * ratio;
-        }
-        else
-        {
-            iPosition.X = mHandles[opposite]->GetPosition().X + shiftY * mult * (1.0 / ratio);
-            iPosition.Y = mHandles[opposite]->GetPosition().Y + shiftY;
-        }
-    }*/
     
     int next;
     int opposite;
@@ -442,6 +427,7 @@ void UOdysseyPainterEditorRasterTransformTool::ConstrainToRectangle(FVector2D iP
             previous = (i + 3) % 4;
             if (i % 2 == 0)
             {
+                mHandles[i]->SetPosition( iPosition );
                 mTransformArea->GetPoints()[i] = mHandles[i]->GetPosition();
                 mHandles[next]->SetPosition(diagTransform.TransformPoint(mHandles[i]->GetPosition() - centerRect) + centerRect);
                 mTransformArea->GetPoints()[next] = mHandles[next]->GetPosition();
@@ -450,6 +436,7 @@ void UOdysseyPainterEditorRasterTransformTool::ConstrainToRectangle(FVector2D iP
             }
             else
             {
+                mHandles[i]->SetPosition( iPosition );
                 mTransformArea->GetPoints()[i] = mHandles[i]->GetPosition();
                 mHandles[next]->SetPosition(diagTransform.TransformPoint(mHandles[opposite]->GetPosition() - centerRect) + centerRect);
                 mTransformArea->GetPoints()[next] = mHandles[next]->GetPosition();
