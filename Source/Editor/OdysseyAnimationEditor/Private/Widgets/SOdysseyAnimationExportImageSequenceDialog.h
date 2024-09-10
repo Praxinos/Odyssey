@@ -37,6 +37,36 @@ enum class EOdysseyAnimationExportImageSequenceRange : uint8
 	Custom
 };
 
+class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationImageSequenceExporter
+{
+public:
+	FOdysseyAnimationImageSequenceExporter();
+	FOdysseyAnimationImageSequenceExporter(UOdysseyAnimation* iAnimation);
+
+public:
+	::ULIS::eFileFormat GetFileFormat();
+
+	struct FSource
+	{
+		FOdysseyImageRenderingAbility* mImageRenderingAbility;
+		FString mFilename;
+		FInt32Range mRange;
+	};
+	TArray<FSource> GetSources();
+	FInt32Range GetSourceRange(const FSource& iSource);
+
+	void Export(const FString& iFilename);
+	void ExportSource(const FSource& iSource, const FString& iFilename, int iNumZero);
+
+public:
+	UOdysseyAnimation* mAnimation = nullptr;
+	EOdysseyAnimationExportImageSequenceFormat mFormat = EOdysseyAnimationExportImageSequenceFormat::PNG;
+	EOdysseyAnimationExportImageSequenceSource mSource = EOdysseyAnimationExportImageSequenceSource::Animation;
+	EOdysseyAnimationExportImageSequenceRange mRange = EOdysseyAnimationExportImageSequenceRange::AllCells;
+	FInt32Range mCustomRange;
+	bool mUniqueFramesOnly = true;
+};
+
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationExportImageSequenceDialog : public SCompoundWidget
 {
 public:
@@ -59,25 +89,8 @@ public:
 
 private:
 	FString GetSaveFileDialogExtension();
-	::ULIS::eFileFormat GetFileFormat();
-
-	struct FSource
-	{
-		FOdysseyImageRenderingAbility* mImageRenderingAbility;
-		FString mFilename;
-		FInt32Range mRange;
-	};
-	TArray<FSource> GetSources();
-	FInt32Range GetSourceRange(const FSource& iSource);
-
 	void Export();
-	void ExportSource(const FSource& iSource, const FString& iFilename, int iNumZero);
 
 private:
-    UOdysseyAnimation* mAnimation;
-	EOdysseyAnimationExportImageSequenceFormat mFormat;
-	EOdysseyAnimationExportImageSequenceSource mSource;
-	EOdysseyAnimationExportImageSequenceRange mRange;
-	FInt32Range mCustomRange;
-	bool mUniqueFramesOnly;
+    FOdysseyAnimationImageSequenceExporter mExporter;
 };

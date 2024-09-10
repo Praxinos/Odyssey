@@ -28,6 +28,7 @@
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
+#include "OdysseyAnimationEditorFunctionLibrary.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -260,37 +261,13 @@ FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
     if ( assetsData.Num() <= 0 )
         return;
 
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Import Textures Sequence"));
-    layerStack->Modify();
+	TArray<UTexture2D*> textures;
+	for(FAssetData& assetData : assetsData)
+	{
+		textures.Add(Cast<UTexture2D>(assetsData[0].GetAsset()));
+	}
 
-    UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass());
-    UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
-    
-	layerImageRaster->Modify();
-    
-    FScopedSlowTask progressBar(assetsData.Num(), LOCTEXT("timeline-tab.import-texture-dialog.progress-bar.title", "Importing Texture Sequence"));
-    progressBar.MakeDialog();
-
-	UTexture2D* openedTexture = Cast<UTexture2D>(assetsData[0].GetAsset());
-    TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(openedTexture, animation->GetFormat()));    
-
-    for( int i = 0; i < assetsData.Num(); i++ )
-    {
-        progressBar.EnterProgressFrame();
-        /* UTexture2D* openedTexture = Cast<UTexture2D>(assetsData[i].GetAsset());
-        TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(openedTexture, animation->GetFormat())); */
-	
-		UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(layerImageRaster->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
-		TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
-		FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
-		::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
-		rasterBlockMutator.Copy(textureBlock, { invalidRect });
-		rasterBlockMutator.Commit();
-    }
-    
-    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
-    currentFrameMutator.Set(0);
-    currentFrameMutator.Commit();
+	UOdysseyAnimationEditorFunctionLibrary::ImportTextureSequence(animation, textures);
 }
 
 void           
@@ -326,95 +303,7 @@ FOdysseyAnimationEditorTimelineTab::ImportImageSequence()
 		}
 	);
 
-    FScopedSlowTask progressBar(filenames.Num(), LOCTEXT("timeline-tab.import-image-sequence.progress-bar.title", "Importing Image Sequence"));
-    progressBar.MakeDialog();
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( animation->GetFormat() );
-    TArray<TSharedPtr<::ULIS::FBlock>> blocks;
-    for (const FString& filename : filenames)
-    {
-        progressBar.EnterProgressFrame();
-        FString path( FPaths::ConvertRelativePathToFull( filename ) );
-        FString extension = FPaths::GetExtension(path, false);
-        ::ULIS::eFileFormat exportImageFormat = ::ULIS::FileFormat_png;
-        bool extensionFound = false;
-        for( int i = 0; i <= ::ULIS::FileFormat_hdr; ++i )
-        {
-            if( extension == ::ULIS::kwImageFormat[i] )
-            {
-                exportImageFormat = static_cast< ::ULIS::eFileFormat >( i );
-                extensionFound = true;
-                break;
-            }
-        }
-
-        if( !extensionFound )
-            continue;
-
-        TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>();
-        std::string stdPath( TCHAR_TO_UTF8(*path) );
-        ::ULIS::ulError error = ctx.XLoadBlockFromDisk(
-              *block
-            , stdPath
-        );
-
-        if (error != ULIS_NO_ERROR)
-            continue;
-
-        ctx.Finish();
-
-        if (block->IsHollow())
-            continue;
-
-        if (block->Width() == animation->GetWidth() && block->Height() == animation->GetHeight() && block->Format() == animation->GetFormat())
-        {
-            blocks.Add(block);
-            continue;
-        }
-        
-        //Need to convert the block before adding it to the layer
-        TSharedPtr<::ULIS::FBlock> blockProxy = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
-
-        ::ULIS::FEvent eventConvert;
-        ctx.ConvertFormat(
-            *block
-            , *blockProxy
-            , ::ULIS::FRectI::Auto
-            , ::ULIS::FVec2I( 0 )
-            , ULIS::FSchedulePolicy::CacheEfficient
-            , 0
-            , nullptr
-            , &eventConvert
-        );
-
-        ctx.Finish();
-        
-        blocks.Add(blockProxy);
-    }
-
-    if (blocks.IsEmpty())
-        return;
-
-    #ifdef WITH_EDITOR
-        FScopedTransaction ScopedTransaction(LOCTEXT("timeline-tab.transaction.import-image-sequence", "Import Image Sequence"));
-    #endif
-	layerStack->Modify();
-    UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-	layer->Modify();
-    for (TSharedPtr<::ULIS::FBlock> block : blocks)
-    {
-		UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
-		
-		TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
-		FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
-		::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
-		rasterBlockMutator.Copy(block,{ invalidRect });
-		rasterBlockMutator.Commit();
-    }
-
-    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
-    currentFrameMutator.Set(0);
-    currentFrameMutator.Commit();
+	UOdysseyAnimationEditorFunctionLibrary::ImportImageSequence(animation, filenames);
 }
 
 void           
@@ -454,112 +343,10 @@ FOdysseyAnimationEditorTimelineTab::ExportAsFlipbook()
     if ( saveObjectPath == "" )
         return;
 
-    FInt32Range frameRange = animation->GetFrameRange();
-    int startFrame = frameRange.GetLowerBoundValue();
-    int endFrame = frameRange.GetUpperBoundValue();
-	FString endFrameStr = FString::FromInt(endFrame);
-	int numZero = endFrameStr.Len();
-
-    FScopedSlowTask progressBar(endFrame - startFrame + 1, LOCTEXT("timeline-tab.export-as-flipbook.progress-bar.title", "Export As Flipbook"));
-    progressBar.MakeDialog();
-
-    // Create flipbook asset
-    FString assetPath = FPaths::GetPath(saveObjectPath) + "/";
+	FString assetPath = FPaths::GetPath(saveObjectPath) + "/";
     FString flipbookAssetName = FPaths::GetBaseFilename(saveObjectPath);
-    FString flipbookPackagePath = assetPath + flipbookAssetName;
-    UPackage* flipbookPackage = CreatePackage(*flipbookPackagePath);
-    UPaperFlipbook* flipbook = NewObject<UPaperFlipbook>(flipbookPackage, UPaperFlipbook::StaticClass(), FName(*flipbookAssetName), EObjectFlags::RF_Public | EObjectFlags::RF_Standalone | RF_Transactional);
 
-    ETextureSourceFormat textureSourceFormat = TextureSourceFormatForULISFormat(animation->GetFormat());    
-
-    ::ULIS::eFormat blockFormat = ULISFormatForTextureSourceFormat(textureSourceFormat);
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), blockFormat);
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(blockFormat);
-    TArray<FGuid> lastRenderingComposition;
-
-    FOdysseyFlipbookWrapper flipbookWrapper;
-    flipbookWrapper.SetFlipbook(flipbook);
-
-    int lastKeyFrameIndex = -1;
-    int lastKeyFrameFirstFrame = -1;
-    for (int i = startFrame; i <= endFrame; i++)
-    {
-        progressBar.EnterProgressFrame();
-
-        TArray<FGuid> renderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, i);
-        if (renderingComposition == lastRenderingComposition)
-            continue;
-
-        lastRenderingComposition = renderingComposition;
-
-        if (lastKeyFrameIndex >= 0)
-            flipbookWrapper.SetKeyFrameLength(lastKeyFrameIndex, i - lastKeyFrameFirstFrame);
-        
-        //Render frame block
-        TSharedPtr<IOdysseyImageRenderer> renderer = animation->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, i);
-        renderer->Init();
-
-        FOdysseyImageRendererCopyParams params(block, { block->Rect() });
-        renderer->Copy(params, {});
-        ctx.Finish();
-
-        int keyFrameIndex = flipbook->GetNumKeyFrames();
-
-        FString numStr = FString::Format(TEXT("{0}"), {i});
-        FString textureName = flipbookAssetName + TEXT("_Texture_") + numStr;
-        FString spriteName = flipbookAssetName + TEXT("_Sprite_") + numStr;
-
-        FOdysseyTextureConfiguration textureConfiguration;
-        textureConfiguration.Width = animation->GetWidth();
-        textureConfiguration.Height = animation->GetHeight();
-        textureConfiguration.Format = EOdysseyTextureSourceFormat::kCustom;
-        textureConfiguration.CustomFormat = textureSourceFormat;
-        textureConfiguration.Name = FName(*textureName);
-        
-        //Create the keyframe
-        flipbookWrapper.CreateEmptyKeyFrame(keyFrameIndex);
-        lastKeyFrameIndex = keyFrameIndex;
-        lastKeyFrameFirstFrame = i;
-
-        //Create the sprite and add it to the keyframe
-        UPaperSprite* sprite = flipbookWrapper.CreateSprite(spriteName);
-        if (!sprite)
-            continue;
-
-        //Create the texture and add it to the keyframe
-        UTexture2D* texture = flipbookWrapper.CreateTexture(textureConfiguration);
-        if (!texture)
-            continue;
-
-        flipbookWrapper.SetSpriteTexture(sprite, texture); //Finishes the sprite initialization before giving it to the flipbook, otherwise it calls some unwanted callbacks in the GUI
-        flipbookWrapper.SetKeyframeSprite(keyFrameIndex, sprite);
-
-        //can be false on a FX Layer for example
-        InitTextureWithBlockData(block.Get(), texture, textureSourceFormat);
-
-        texture->PostEditChange();
-        texture->UpdateResource();
-    }
-
-    if (lastKeyFrameIndex >= 0)
-        flipbookWrapper.SetKeyFrameLength(lastKeyFrameIndex, endFrame - lastKeyFrameFirstFrame + 1);
-
-    //Configure flipbook asset
-    UClass* flipbookClass = flipbook->StaticClass();
-    FObjectProperty* defaultMaterialProperty = FindFProperty<FObjectProperty>(flipbookClass, "DefaultMaterial");
-    defaultMaterialProperty->SetObjectPropertyValue(defaultMaterialProperty->ContainerPtrToValuePtr<UPaperFlipbook>(flipbook), LoadObject<UMaterialInterface>(nullptr, TEXT("/Iliad/Animation2D/DefaultFlipbookMaterialInstance.DefaultFlipbookMaterialInstance")));
-
-    FScopedFlipbookMutator mutator(flipbook);
-	mutator.FramesPerSecond = animation->FramesPerSecond;
-
-    FAssetRegistryModule::AssetCreated(flipbook);
-
-    FSavePackageArgs packageArgs;
-    packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
-    UPackage::SavePackage( flipbookPackage, flipbook, *flipbookAssetName, packageArgs );
-        
-    flipbookPackage->MarkAsFullyLoaded();
-    flipbook->MarkPackageDirty();
+	UOdysseyAnimationEditorFunctionLibrary::ExportAsFlipbook(animation, flipbookAssetName, assetPath);
 }
 
 void
