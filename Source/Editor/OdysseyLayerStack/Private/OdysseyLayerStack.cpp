@@ -51,7 +51,7 @@ UOdysseyLayerStack::SupportsLayerClass(UClass* iClass) const
 //--- Layers management
 
 void
-UOdysseyLayerStack::CurrentLayerBlueprintSetter(TSoftObjectPtr<UOdysseyLayer> Layer)
+UOdysseyLayerStack::CurrentLayerBlueprintSetter(UOdysseyLayer* Layer)
 {
 	FObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), Layer);
 }
@@ -176,7 +176,7 @@ UOdysseyLayerStack::DuplicateLayers(TArray<UOdysseyLayer*> Layers)
     }
 
     if (layersDuplicates.Num() != 0)
-        FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), TSoftObjectPtr<UOdysseyLayer>(layersDuplicates[0]));
+        FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), layersDuplicates[0]);
 
     return layersDuplicates;
 }

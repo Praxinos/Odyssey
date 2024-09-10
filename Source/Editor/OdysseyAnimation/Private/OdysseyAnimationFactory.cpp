@@ -67,7 +67,7 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
 		case EOdysseyAnimationDefaultLayerType::Raster:
 		{
 			UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(animation->GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-			animation->GetLayerStack()->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
+			animation->GetLayerStack()->CurrentLayer = layer;
 			layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
 		}
 		break;
@@ -75,7 +75,7 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
 		case EOdysseyAnimationDefaultLayerType::Vector:
 		{
 			UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(animation->GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageVector::StaticClass()));
-			animation->GetLayerStack()->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
+			animation->GetLayerStack()->CurrentLayer = layer;
 			layer->AddCell(UOdysseyAnimationCellImageVector::StaticClass());
 		}
 		break;

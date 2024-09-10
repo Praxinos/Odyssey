@@ -47,7 +47,7 @@ UOdysseyTextureLayerStack::CreateFromTexture(UTexture2D* iTexture, UObject* iOut
 
     //Set the layer as Current Layer
     layerStack->AddLayersToHierarchy({ layer }, layerStack->LayerRoot, 0);
-    layerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
+    layerStack->CurrentLayer = layer;
 
     return layerStack;
 }
@@ -63,7 +63,7 @@ UOdysseyTextureLayerStack::CreateWithEmptyVectorLayer(UTexture2D* iTexture, UObj
 
     //Set the layer as Current Layer
     layerStack->AddLayersToHierarchy({ layer }, layerStack->LayerRoot, 0);
-    layerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
+    layerStack->CurrentLayer = layer;
 
     return layerStack;
 }

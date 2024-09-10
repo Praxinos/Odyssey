@@ -296,7 +296,7 @@ FOdysseyTextureEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> iB
     GetLayerStack()->Modify();
 
 	UOdysseyTextureLayerImageRaster* layer = Cast< UOdysseyTextureLayerImageRaster >(GetLayerStack()->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
-    FOdysseyObjectEditorUtils::SetPropertyValue(GetLayerStack(), GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), TSoftObjectPtr<UOdysseyLayer>(layer));
+    FOdysseyObjectEditorUtils::SetPropertyValue(GetLayerStack(), GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), layer);
 
 	FOdysseyRasterBlockMutator mutator(layer->GetRasterBlock());
 	mutator.Copy(iBlock, {});

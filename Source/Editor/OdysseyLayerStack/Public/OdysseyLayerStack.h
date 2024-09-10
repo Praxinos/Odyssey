@@ -47,7 +47,7 @@ public:
 public:
 	//GETTER/SETTER
 	UFUNCTION(BlueprintSetter)
-	void CurrentLayerBlueprintSetter(TSoftObjectPtr<UOdysseyLayer> Layer);
+	void CurrentLayerBlueprintSetter(UOdysseyLayer* Layer);
 
 public:
     //Layers management
@@ -300,7 +300,7 @@ public:
     TSet<UClass*> CompatibleLayers; //Contains compatible C++ layer types
 	
 	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LayerStack", BlueprintSetter=CurrentLayerBlueprintSetter)
-	TSoftObjectPtr<UOdysseyLayer> CurrentLayer;
+	TObjectPtr<UOdysseyLayer> CurrentLayer;
 
     UPROPERTY()
     TObjectPtr<UOdysseyLayer> LayerRoot;

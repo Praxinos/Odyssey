@@ -334,7 +334,7 @@ FOdysseyAnimationEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> 
     UOdysseyAnimationLayerImageRaster* layer = Cast< UOdysseyAnimationLayerImageRaster >(GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
 	layer->Modify();
 	
-	GetLayerStack()->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
+	GetLayerStack()->CurrentLayer = layer;
 
     FPropertyChangedEvent PropertyChangedEvent(UOdysseyLayerStack::StaticClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer)), EPropertyChangeType::ValueSet);
     GetLayerStack()->PostEditChangeProperty(PropertyChangedEvent);

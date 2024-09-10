@@ -369,7 +369,7 @@ SOdysseyLayerStackTreeView::SetCurrentLayerFromSelectorItem()
 
     if (!SelectorItem)
     {
-        FOdysseyObjectEditorUtils::SetPropertyValue(mLayerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), TSoftObjectPtr<UOdysseyLayer>(mLayerStack->GetRootLayers()[0]));
+        FOdysseyObjectEditorUtils::SetPropertyValue(mLayerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), mLayerStack->GetRootLayers()[0]);
         return;
     }
 
@@ -380,7 +380,7 @@ SOdysseyLayerStackTreeView::SetCurrentLayerFromSelectorItem()
     if (SelectorItem == mLayerStack->CurrentLayer)
         return;
         
-    FOdysseyObjectEditorUtils::SetPropertyValue(mLayerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), TSoftObjectPtr<UOdysseyLayer>(SelectorItem));
+    FOdysseyObjectEditorUtils::SetPropertyValue(mLayerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), SelectorItem);
 }
 
 void

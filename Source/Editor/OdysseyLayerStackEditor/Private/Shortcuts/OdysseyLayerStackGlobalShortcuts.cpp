@@ -73,7 +73,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToNextLayer()
         );
     }
     
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), TSoftObjectPtr<UOdysseyLayer>(layer));
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), layer);
 }
 
 void
@@ -112,7 +112,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToPreviousLayer()
         );
     }
     
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), TSoftObjectPtr<UOdysseyLayer>(layer));
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), layer);
 }
 
 void
