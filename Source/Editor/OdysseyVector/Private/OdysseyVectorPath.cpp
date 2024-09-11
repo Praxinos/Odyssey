@@ -566,7 +566,7 @@ FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
 }
 
 void
-FOdysseyVectorPath::Invalidate( uint32 iInvalidationFlags )
+FOdysseyVectorPath::Invalidate( uint64 iInvalidationFlags )
 {
     //if( iInvalidationFlags & INVALIDATE_MATRIX )
     //{

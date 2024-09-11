@@ -13,6 +13,7 @@
 
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorRoot.h"
 
 #include "OdysseyTextureLayerImageVector.generated.h"
 
@@ -46,7 +47,7 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
 
     private:
         // handle to a callback to refresh the layer when a property of an object's details view is changed
-        FOdysseyVectorEngine* mEngine;
+        FOdysseyVectorRoot* mRoot;
         FOdysseyVectorSharedEnv mSharedEnv;
         TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
 

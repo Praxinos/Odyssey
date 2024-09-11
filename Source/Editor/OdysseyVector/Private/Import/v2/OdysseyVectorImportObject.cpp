@@ -238,9 +238,7 @@ FOdysseyVectorImportV2::ParseObjectChunks( FOdysseyVectorObject& iObject
 
         case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER:
         {
-            FOdysseyVectorEngine* vectorEngine = iObject.GetEngine();
-
-            FOdysseyVectorTagInbetweener* inbetweenerTag = new FOdysseyVectorTagInbetweener( vectorEngine->GetSharedEnv()
+            FOdysseyVectorTagInbetweener* inbetweenerTag = new FOdysseyVectorTagInbetweener( iObject.GetSharedEnv()
                                                                                            , &iObject
                                                                                            , 0
                                                                                            , 0 );

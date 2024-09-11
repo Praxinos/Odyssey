@@ -51,7 +51,10 @@ UOdysseyPainterEditorVectorTrajectoryTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorTrajectoryTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
@@ -62,14 +65,17 @@ UOdysseyPainterEditorVectorTrajectoryTool::LoadVector( FOdysseyVectorGroupPaint*
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // force redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
 UOdysseyPainterEditorVectorTrajectoryTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
                                                                 , const FKey& iKey )
 {
-    uint64 retFlags = 0;
+    uint64 notificationFlags = 0;
 
     mPickingMode = eTrajectoryPickingMode::Add;
 
@@ -79,8 +85,6 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyDownGlobalVector( FOdysseyVector
       || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand ) )
     {
         mPickingMode = eTrajectoryPickingMode::Alter;
-
-        retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
     }
 
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
@@ -89,8 +93,6 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyDownGlobalVector( FOdysseyVector
     {
         mPickingMode  = eTrajectoryPickingMode::Shift;
         //mPickingFlags = FOdysseyVectorPath::PICK_HANDLE_VERTEX;
-
-        retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
     }
 
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
@@ -98,12 +100,13 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyDownGlobalVector( FOdysseyVector
     if ( ( iKey == EKeys::LeftAlt ) || ( iKey == EKeys::RightAlt ) )
     {
         mPickingMode = eTrajectoryPickingMode::Remove;
-
-        retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
     }
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( iScene, iKey )
-         | retFlags;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( iScene, iKey ) 
+         | notificationFlags;
 }
 
 uint64
@@ -111,7 +114,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyUpGlobalVector( FOdysseyVectorGr
                                                               , const FKey& iKey )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-    uint64 retFlags = 0;
+    uint64 notificationFlags = 0;
 
     // note, we cannot use FSlateApplication::Get().GetModifierKeys()
     // because the keys are already released. For consistency we do
@@ -122,14 +125,15 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyUpGlobalVector( FOdysseyVectorGr
       || ( iKey == EKeys::LeftShift   ) || ( iKey == EKeys::RightShift   )
       || ( iKey == EKeys::LeftAlt     ) || ( iKey == EKeys::RightAlt     ) )
     {
-        retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+        // redraw
+        iScene->GetEngine()->Invalidate( 0 );
     }
 
     // first reset display mode
     mPickingMode = eTrajectoryPickingMode::Add;
 
     return UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( iScene, iKey )
-         | retFlags;
+         | notificationFlags;
 }
 
 
@@ -140,7 +144,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                                                             , const FKey& iKey )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    uint64 notificationFlags = 0;
 
     mPickedStep = nullptr;
     mPickedHandle = nullptr;
@@ -173,7 +177,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerRouteAdd( iScene
                                                                                                    , inbetweenerTag
                                                                                                    , route
-                                                                                                   , retFlags );
+                                                                                                   , notificationFlags );
 
                             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -202,7 +206,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                 {
                     FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerTrajectoryAlter( iScene
                                                                                                   , mPickedHandle->GetTrajectory()
-                                                                                                  , retFlags );
+                                                                                                  , notificationFlags );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -246,7 +250,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                         {
                             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint( iScene
                                                                                                                   , mPickedWaypoint->GetTrajectory()
-                                                                                                                  , retFlags );
+                                                                                                                  , notificationFlags );
 
                             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -279,7 +283,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                     FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerRouteRemove( iScene
                                                                                               , pickedRoute->GetInbetweenerTag()
                                                                                               , pickedRoute
-                                                                                              , retFlags );
+                                                                                              , notificationFlags );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -294,7 +298,10 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
 
     iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return notificationFlags;
 }
 
 FInbetweenerQuad*
@@ -345,7 +352,10 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseHoverVector( FOdysseyVectorGro
         }
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
@@ -416,8 +426,10 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
 
     iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return 0;
 }
 
 uint64
@@ -426,7 +438,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseUpVector( FOdysseyVectorGroupP
                                                           , const FKey& iKey )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    uint64 notificationFlags = 0;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -450,7 +462,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseUpVector( FOdysseyVectorGroupP
                         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerStepAlign( iScene
                                                                                                 , route->GetInbetweenerTag()
                                                                                                 , route
-                                                                                                , retFlags );
+                                                                                                , notificationFlags );
 
                         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
@@ -468,7 +480,10 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseUpVector( FOdysseyVectorGroupP
 
     iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    return retFlags;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return notificationFlags;
 }
 
 uint64
@@ -479,7 +494,10 @@ UOdysseyPainterEditorVectorTrajectoryTool::PropertyChangedVector( FOdysseyVector
 
     iEngine->ResetHUD();
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 TSharedRef<SWidget>

@@ -23,7 +23,7 @@ FOdysseyVectorExportV2::WriteTagInbetweenerRoutes( FOdysseyVectorTagInbetweener&
         }
     } );
 }
-
+/*
 void
 FOdysseyVectorExportV2::WriteTagInbetweenerArapRigidity( FOdysseyVectorTagInbetweener& iInbetweenerTag
                                                        , FArchive &Ar )
@@ -37,7 +37,7 @@ FOdysseyVectorExportV2::WriteTagInbetweenerArapRigidity( FOdysseyVectorTagInbetw
         Ar << arapRigidty;
     } );
 }
-
+*/
 void
 FOdysseyVectorExportV2::WriteTagInbetweenerBreakdownsLayout( FOdysseyVectorTagInbetweener& iInbetweenerTag
                                                              , FArchive &Ar )
@@ -301,7 +301,7 @@ FOdysseyVectorExportV2::WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbe
         WriteTagInbetweenerDeformation( iInbetweenerTag, Ar );
         WriteTagInbetweenerInterpolation( iInbetweenerTag, Ar );
         WriteTagInbetweenerDimension( iInbetweenerTag, Ar );
-        WriteTagInbetweenerArapRigidity( iInbetweenerTag, Ar );
+        //WriteTagInbetweenerArapRigidity( iInbetweenerTag, Ar );
         WriteTagInbetweenerBreakdowns( iInbetweenerTag, Ar );
         WriteTagInbetweenerRoutes( iInbetweenerTag, Ar );
         WriteTagInbetweenerChart( iInbetweenerTag, Ar );

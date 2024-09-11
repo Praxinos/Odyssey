@@ -16,18 +16,16 @@ FOdysseyVectorUndoTagInbetweenerTransform::~FOdysseyVectorUndoTagInbetweenerTran
 }
 
 FOdysseyVectorUndoTagInbetweenerTransform::FOdysseyVectorUndoTagInbetweenerTransform( FOdysseyVectorGroupPaint* iScene
-                                                                                    , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                                                    , const std::list<FInbetweenerBreakdown*>& iBreakdownList
                                                                                     , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene, iReturnFlags )
 {
-    mInbetweenerTagArray.reserve( iInbetweenerTagList.size() );
+    mBreakdownSnapshotBuffer.reserve( iBreakdownList.size() );
 
-    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
+    for( FInbetweenerBreakdown* breakdown : iBreakdownList )
     {
-        mInbetweenerTagArray.emplace_back( inbetweenerTag
-                                         , FSnapshotFlags::Tag::Inbetweener::TRANSFORMATIONS
-                                         , 0 
-                                         , 0 );
+        mBreakdownSnapshotBuffer.emplace_back( breakdown
+                                             , FSnapshotFlags::Breakdown::TRANSFORMATIONS );
     }
 }
 
@@ -37,10 +35,10 @@ FOdysseyVectorUndoTagInbetweenerTransform::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagArray )
+    for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
     {
-        inbetweenerTagSnapshot.Preswap();
-        inbetweenerTagSnapshot.Restore();
+        breakdownSnapshot.Preswap();
+        breakdownSnapshot.Restore();
     }
 
     // update invalidated objects
@@ -48,7 +46,8 @@ FOdysseyVectorUndoTagInbetweenerTransform::Apply( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
+    mScene->GetEngine()->Invalidate( 0 );
+    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 }
 
 void
@@ -57,10 +56,10 @@ FOdysseyVectorUndoTagInbetweenerTransform::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagArray )
+    for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
     {
-        inbetweenerTagSnapshot.Preswap();
-        inbetweenerTagSnapshot.Restore();
+        breakdownSnapshot.Preswap();
+        breakdownSnapshot.Restore();
     }
 
     // update invalidated objects
@@ -68,7 +67,8 @@ FOdysseyVectorUndoTagInbetweenerTransform::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
+    mScene->GetEngine()->Invalidate( 0 );
+    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

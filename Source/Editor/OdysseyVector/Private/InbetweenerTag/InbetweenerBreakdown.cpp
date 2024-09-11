@@ -372,7 +372,7 @@ FInbetweenerBreakdown::SetTargetDrawingIndex( uint32 iTargetDrawingIndex )
         mNextBreakdown->mSourceDrawingIndex = iTargetDrawingIndex;
     }
 
-    mInbetweenerTag->ResizeChart( false );
+    mInbetweenerTag->ResizeChart();
     // TODO: put this somewhere else. I put it here so it can geenrate matrices based on
     // the t value fromthe chart, but I don't think it is the best place. 
     mInbetweenerTag->UpdateMatrix();

@@ -17,13 +17,13 @@ FOdysseyVectorBlock::OnInvalidated()
 
 FOdysseyVectorBlock::~FOdysseyVectorBlock()
 {
-    FOdysseyVectorEngine::OnSignalDelegate().RemoveAll( this );
+    mEngine->OnInvalidateDelegate().RemoveAll( this );
 }
 
 FOdysseyVectorBlock::FOdysseyVectorBlock()
     : mBlockData(nullptr)
 {
-    FOdysseyVectorEngine::OnSignalDelegate().AddRaw( this, &FOdysseyVectorBlock::OnVectorEngineSignal );
+
 }
 
 void
@@ -35,6 +35,8 @@ FOdysseyVectorBlock::Init(const FGuid& iId, FOdysseyVectorEngine* iEngine, int i
     mHeight = iHeight;
     mFormat = iFormat;
     mNeedsRender = false;
+
+    mEngine->OnInvalidateDelegate().AddRaw( this, &FOdysseyVectorBlock::OnVectorEngineInvalidate );
 }
 
 int
@@ -270,15 +272,9 @@ FOdysseyVectorBlock::GetBlock(uint64 iDrawingFlags)
 }
 
 void
-FOdysseyVectorBlock::OnVectorEngineSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags )
+FOdysseyVectorBlock::OnVectorEngineInvalidate( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags )
 {
-    if (!mEngine || mEngine->GetScene() != iScene)
-        return;
-
-    if( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW )
-    {
-        Invalidate(iSignalFlags & FOdysseyVectorEngine::SIGNAL_INTERACTIVE);
-    }
+    Invalidate(iSignalFlags & FOdysseyVectorEngine::INVALIDATE_INTERACTIVE);
 }
 
 /*
@@ -307,7 +303,7 @@ FOdysseyVectorBlock::Invalidate(bool iIsInteractive)
         mNeedsRender = true;
     }
 
-    mEngine->Invalidate( FOdysseyVectorObject::INVALIDATE_DEFAULT );
+    //mEngine->Invalidate( FOdysseyVectorEngine::INVALIDATE_DEFAULT );
     //SetState(kNeedsRender);
     mOnInvalidated.Broadcast( { sanitizedRect }, iIsInteractive );
 }

@@ -76,12 +76,12 @@ FReply
 SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonDown( const FGeometry & MyGeometry
                                                                  , const FPointerEvent & MouseEvent )
 {
-    FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetEngine()->GetSharedEnv();
-    std::list<FOdysseyVectorTag*>& tagList = sharedEnv->GetTagList();
+    FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetSharedEnv();
+    std::list<FOdysseyVectorTag*>& sharedTagList = sharedEnv->GetSharedTagList();
 
-    for( FOdysseyVectorTag* tag : tagList )
+    for( FOdysseyVectorTag* sharedTag : sharedTagList )
     {
-        tag->GetOwner()->GetEngine()->ClearObjectSelection();
+        sharedTag->GetOwner()->GetEngine()->ClearObjectSelection();
     }
 
     mInbetweenerTag->GetOwner()->GetEngine()->SelectObject( mInbetweenerTag->GetOwner() );

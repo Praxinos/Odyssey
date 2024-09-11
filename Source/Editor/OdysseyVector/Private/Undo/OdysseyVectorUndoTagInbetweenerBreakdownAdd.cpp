@@ -69,12 +69,13 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::Apply( UObject* iIgnored )
     {
         // update invalidated objects
         tagEngine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        // request redraw attached cells
+        tagEngine->Invalidate( 0 );
     }
 
-    //mScene->GetEngine()->ResetHUD();
+    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::OnSignalDelegate().Broadcast( nullptr
-                                                     , ( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags ) );
+    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 }
 
 void
@@ -94,12 +95,13 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::Revert( UObject* iIgnored )
     {
         // update invalidated objects
         tagEngine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        // request redraw attached cells
+        tagEngine->Invalidate( 0 );
     }
 
-   // mScene->GetEngine()->ResetHUD();
+    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::OnSignalDelegate().Broadcast( nullptr
-                                                     , ( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags ) );
+    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

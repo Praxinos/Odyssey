@@ -72,6 +72,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
                             , BLRgba32& iFgColor
                             , BLRgba32& iBgColor
                             , BLRgba32& iHcColor );
+        void DrawSourceGrid( BLContext* iBLContext
+                           , BLRgba32& iFgColor
+                           , BLRgba32& iBgColor
+                           , BLRgba32& iHcColor
+                           , FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
     private:
         UOdysseyPainterEditorVectorTrajectoryTool* mTrajectoryTool;

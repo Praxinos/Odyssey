@@ -8,6 +8,7 @@
 
 class FOdysseyVectorObject;
 class FOdysseyVectorGroupPaint;
+class FOdysseyVectorSharedEnv;
 
 class ODYSSEYVECTOR_API FOdysseyVectorTag
 {
@@ -32,13 +33,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorTag
                          , uint64 iDrawingFlags ) = 0;
         virtual void Update( uint32 iUpdateFlags
                            , uint64 iOwnerInvalidationFlags ) = 0;
-        virtual void Added() = 0;
-        virtual void Removed() = 0;
         virtual void UpdateMatrix() = 0;
+        virtual void Share( FOdysseyVectorSharedEnv* iSharedEnv );
+        virtual void Unshare( FOdysseyVectorSharedEnv* iSharedEnv );
 
         FOdysseyVectorObject* GetOwner();
 
     protected:
         FOdysseyVectorObject* mOwner;
         uint32 mFlags;
+        bool bShared;
 };

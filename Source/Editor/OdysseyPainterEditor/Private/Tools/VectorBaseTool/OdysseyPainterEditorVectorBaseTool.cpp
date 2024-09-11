@@ -233,11 +233,11 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            uint64 signalFlags;
+            uint64 notificationFlags;
 
-            signalFlags = UnloadVector( vectorScene );
+            notificationFlags = UnloadVector( vectorScene );
 
-            vectorEngine->Signal( signalFlags );
+            FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
 
             if( mBaseHUD )
             {
@@ -268,7 +268,7 @@ UOdysseyPainterEditorVectorBaseTool::Load()
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            uint64 signalFlags;
+            uint64 notificationFlags;
 
             vectorEngine->ClearHUD();
 
@@ -280,9 +280,9 @@ UOdysseyPainterEditorVectorBaseTool::Load()
                 vectorEngine->ResetHUD();
             }
 
-            signalFlags = LoadVector( vectorScene );
+            notificationFlags = LoadVector( vectorScene );
 
-            vectorEngine->Signal( signalFlags );
+            FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
         }
     }
 }
@@ -313,11 +313,11 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobal( const FKey& iKey )
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            uint64 signalFlags;
+            uint64 notificationFlags;
 
-            signalFlags = OnKeyDownGlobalVector( vectorScene, iKey );
+            notificationFlags = OnKeyDownGlobalVector( vectorScene, iKey );
 
-            vectorEngine->Signal( signalFlags );
+            FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
         }
     }
 
@@ -333,7 +333,10 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* 
     {
         Delete();
 
-        return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+        // force redraw
+        iScene->GetEngine()->Invalidate( 0 );
+
+        return 0;
     }
 
     //if( iKey == EKeys::Add )
@@ -381,13 +384,13 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            uint64 signalFlags;
+            uint64 notificationFlags;
 
-            signalFlags = OnKeyDownVector( vectorScene, iKey );
+            notificationFlags = OnKeyDownVector( vectorScene, iKey );
 
-            vectorEngine->Signal( signalFlags );
+            FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
 
-            return signalFlags ? true : false;
+            return notificationFlags ? true : false;
         }
     }
 
@@ -418,11 +421,11 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobal( const FKey& iKey )
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            uint64 signalFlags;
+            uint64 notificationFlags;
 
-            signalFlags = OnKeyUpGlobalVector(vectorScene,iKey);
+            notificationFlags = OnKeyUpGlobalVector(vectorScene,iKey);
 
-            vectorEngine->Signal( signalFlags );
+            FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
         }
     }
 
@@ -454,13 +457,13 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUp( const FKey& iKey )
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            uint64 signalFlags;
+            uint64 notificationFlags;
 
-            signalFlags = OnKeyUpVector(vectorScene,iKey);
+            notificationFlags = OnKeyUpVector(vectorScene,iKey);
 
-            vectorEngine->Signal( signalFlags );
+            FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
 
-            return signalFlags ? true : false;
+            return notificationFlags ? true : false;
         }
     }
 
@@ -492,11 +495,11 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            uint64 signalFlags;
+            uint64 notificationFlags;
 
-            signalFlags = OnMouseDownVector( vectorScene, iPointInTexture, iKey );
+            notificationFlags = OnMouseDownVector( vectorScene, iPointInTexture, iKey );
 
-            vectorEngine->Signal( signalFlags );
+            FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
         }
 
        return true;
@@ -529,11 +532,11 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseHover( const FOdysseyPoint& iPointIn
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            uint64 signalFlags;
+            uint64 notificationFlags;
 
-            signalFlags = OnMouseHoverVector( vectorScene, iPointInTexture );
+            notificationFlags = OnMouseHoverVector( vectorScene, iPointInTexture );
 
-            vectorEngine->Signal( signalFlags );
+            FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
         }
     }
 }
@@ -603,11 +606,11 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDrag( const FOdysseyPoint& iPointInT
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            uint64 signalFlags;
+            uint64 notificationFlags;
 
-            signalFlags = OnMouseDragVector( vectorScene, iPointInTexture );
+            notificationFlags = OnMouseDragVector( vectorScene, iPointInTexture );
 
-            vectorEngine->Signal( signalFlags );
+            FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
         }
     }
 }
@@ -637,11 +640,11 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseUp( const FOdysseyPoint& iPointInTex
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            uint64 signalFlags;
+            uint64 notificationFlags;
 
-            signalFlags = OnMouseUpVector( vectorScene, iPointInTexture, iKey );
+            notificationFlags = OnMouseUpVector( vectorScene, iPointInTexture, iKey );
 
-            vectorEngine->Signal( signalFlags );
+            FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
 
             if( iKey == EKeys::RightMouseButton )
             {
@@ -668,7 +671,7 @@ UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( FOdysseyVectorGroupP
         iScene->GetEngine()->ResetHUD();
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    return 0;
 }
 
 void
@@ -688,11 +691,11 @@ UOdysseyPainterEditorVectorBaseTool::PostEditChangeProperty( FPropertyChangedEve
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            uint64 signalFlags;
+            uint64 notificationFlags;
 
-            signalFlags = PropertyChangedVector( vectorScene, PropertyChangedEvent.GetPropertyName() );
+            notificationFlags = PropertyChangedVector( vectorScene, PropertyChangedEvent.GetPropertyName() );
 
-            vectorEngine->Signal( signalFlags );
+            FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
         }
     }
 }

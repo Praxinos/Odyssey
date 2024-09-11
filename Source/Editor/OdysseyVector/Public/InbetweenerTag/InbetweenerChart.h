@@ -31,7 +31,8 @@ class ODYSSEYVECTOR_API FInbetweenerChart
         FInbetweenerChart();
         FInbetweenerChart( FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
-        void Resize( bool iResetSpacing );
+        void Resize();
+        void Reset();
 
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
         std::vector<FInbetweenerDrawing>& GetDrawingBuffer();

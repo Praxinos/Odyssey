@@ -174,10 +174,10 @@ FInbetweenerGridARAP::Regularize( eInbetweenerPointPositionType iSourcePositionT
 
         }
 
-        if ( allGrid )
+        /*if ( allGrid )
         {
             point.SetDeformable( true );
-        }
+        }*/
     }
     // Compute all quad centroids
     for ( FInbetweenerQuad& quad : mQuadBuffer )
@@ -216,11 +216,11 @@ FInbetweenerGridARAP::Regularize( eInbetweenerPointPositionType iSourcePositionT
 
 // polymorphic
 void
-FInbetweenerGridARAP::Regularize()
+FInbetweenerGridARAP::Regularize( uint32 iRigidity )
 {
     Regularize( eInbetweenerPointPositionType::SourcePosition
               , eInbetweenerPointPositionType::TargetPosition
-              , mBreakdown->GetInbetweenerTag()->GetARAPRigidity()
+              , iRigidity
               , true
               , true );
 }

@@ -19,6 +19,7 @@ class FOdysseyVectorGroupPaint;
 class FOdysseyVectorVertex;
 class FOdysseyVectorSegmentCubic;
 class FOdysseyVectorTagInbetweener;
+class FOdysseyVectorSharedEnv;
 
 namespace FSnapshotFlags
 {
@@ -85,23 +86,23 @@ namespace FSnapshotFlags
 
     namespace Breakdown
     {
-        static const uint64 GRIDGEOMETRY = ( 1ULL <<  0 );
+        static const uint64 GRIDGEOMETRY    = ( 1ULL <<  0 );
+        static const uint64 TRANSFORMATIONS = ( 1ULL <<  1 );
     }
 
     namespace Tag
     {
         namespace Inbetweener
         {
-            static const uint64 TRANSFORMATIONS   = ( 1ULL <<  0 );
-            static const uint64 CHART             = ( 1ULL <<  1 );
-            static const uint64 GRIDSIZE          = ( 1ULL <<  2 );
-            static const uint64 GRIDTYPE          = ( 1ULL <<  3 );
-            static const uint64 BREAKDOWNS        = ( 1ULL <<  4 );
-            static const uint64 ROUTES            = ( 1ULL <<  5 );
-            static const uint64 INTERPOLATIONTYPE = ( 1ULL <<  6 );
-            static const uint64 ARAPRIGIDITY      = ( 1ULL <<  7 );
-            static const uint64 COLOR             = ( 1ULL <<  8 );
-            static const uint64 MAPASPOLYLINE     = ( 1ULL <<  9 );
+            static const uint64 CHART             = ( 1ULL <<  0 );
+            static const uint64 GRIDSIZE          = ( 1ULL <<  1 );
+            static const uint64 GRIDTYPE          = ( 1ULL <<  2 );
+            static const uint64 BREAKDOWNS        = ( 1ULL <<  3 );
+            static const uint64 ROUTES            = ( 1ULL <<  4 );
+            static const uint64 INTERPOLATIONTYPE = ( 1ULL <<  5);
+            static const uint64 ARAPRIGIDITY      = ( 1ULL <<  6 );
+            static const uint64 COLOR             = ( 1ULL <<  7 );
+            static const uint64 MAPASPOLYLINE     = ( 1ULL <<  8 );
             static const uint64 PARAM             = ( GRIDSIZE
                                                     | GRIDTYPE
                                                     | INTERPOLATIONTYPE
@@ -341,8 +342,18 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
         FInbetweenerBreakdown* mBreakdown;
         // Saved-state
         std::vector<::ULIS::FVec2D> mGridGeometry;
+        double mTranslationX;
+        double mTranslationY;
+        double mRotation;
+        double mScalingX;
+        double mScalingY;
         // Pre-swap
         std::vector<::ULIS::FVec2D> mPreswapGridGeometry;
+        double mPreswapTranslationX;
+        double mPreswapTranslationY;
+        double mPreswapRotation;
+        double mPreswapScalingX;
+        double mPreswapScalingY;
 };
 
 class ODYSSEYVECTOR_API FSnapshotTagInbetweener
@@ -370,11 +381,6 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         FSnapshotDynamics mDynamics;
         // Swappable values
         FInbetweenerChart  mChart;
-        double mTranslationX;
-        double mTranslationY;
-        double mRotation;
-        double mScalingX;
-        double mScalingY;
         uint32 mDrawingCount;
         eInbetweenerGridType mGridType;
         eInbetweenerInterpolationType mInterpolationType;
@@ -388,11 +394,6 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         bool bMapAsPolyline;
         // Preswap
         FInbetweenerChart mPreswapChart;
-        double mPreswapTranslationX;
-        double mPreswapTranslationY;
-        double mPreswapRotation;
-        double mPreswapScalingX;
-        double mPreswapScalingY;
         uint32 mPreswapDrawingCount;
         eInbetweenerGridType mPreswapGridType;
         eInbetweenerInterpolationType mPreswapInterpolationType;
@@ -489,5 +490,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
     protected:
         bool mApplied;
         FOdysseyVectorGroupPaint* mScene;
+        FOdysseyVectorSharedEnv* mSharedEnv;
         uint64 mReturnFlags;
 };

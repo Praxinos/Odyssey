@@ -88,6 +88,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
     static BLRgba32 greyColor = BLRgba32( 128, 128, 128, 128 );
     uint64 hudFlags = mMatchingTool->GetEditor()->GetVectorHUDFlags();
     FOdysseyVectorEngine *engine = iScene->GetEngine();
+    FOdysseyVectorSharedEnv *sharedEnv = iScene->GetSharedEnv();
 
     // Draw default
     // -> nothing in object mode.
@@ -99,7 +100,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
     {
         // Caution: even though here we pick a tag that is displayed in the scene,
         // it does not mean it belongs to an object that belongs to the scene.
-        for( FOdysseyVectorTag* tag : engine->GetSharedEnv()->GetSharedTagList() )
+        for( FOdysseyVectorTag* tag : sharedEnv->GetSharedTagList() )
         {
             if( ( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
              && ( tag->GetOwner()->IsSelected() ) )

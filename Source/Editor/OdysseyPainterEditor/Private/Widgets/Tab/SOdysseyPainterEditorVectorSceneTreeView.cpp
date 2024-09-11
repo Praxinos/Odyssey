@@ -194,8 +194,7 @@ void
 SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem
                                                             , ESelectInfo::Type SelectInfo )
 {
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+    uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                     | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
     if( mRootItem && ( SelectInfo != ESelectInfo::Type::Direct ) )
@@ -236,8 +235,8 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
         }
 
         scene->GetEngine()->ResetHUD();
-
-        scene->GetEngine()->Signal( retFlags );
+        scene->GetEngine()->Invalidate( 0 );
+        FOdysseyVectorEngine::Notify( scene, retFlags );
     }
 }
 

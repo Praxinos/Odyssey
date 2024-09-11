@@ -137,8 +137,9 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged( const FText& InText
 
     mTextBlockWidget.Get()->SetText( FText::FromString( mItem.Get()->GetVectorObject()->GetName() ) );
 
-    itemScene->GetEngine()->Signal( FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                                  | FOdysseyPainterEditor::UI_UPDATE_TIMELINE );
+    FOdysseyVectorEngine::Notify( itemScene, 
+                                  FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                                | FOdysseyPainterEditor::UI_UPDATE_TIMELINE );
 }
 
 FReply
@@ -151,9 +152,8 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     FOdysseyVectorGroupPaint* itemScene = itemObject->GetScene();
     std::list<FOdysseyVectorObject*> focusedObjectList;
     FOdysseyVectorObject* insertObject = itemObject;
-    uint32 retFlags =  FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                     | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                     | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+    uint32 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
     itemScene->GetEngine()->GetFocusedAncestorList( focusedObjectList );
 
@@ -162,7 +162,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     {
         FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoTransferObjects( itemScene
                                                                                                           , focusedObjectList
-                                                                                                          , retFlags ) );
+                                                                                                          , notificationFlags ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -225,8 +225,8 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     mDropZone = DROPZONE_NONE;
 
     itemScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-    itemScene->GetEngine()->Signal( retFlags );
+    itemScene->GetEngine()->Invalidate( 0 );
+    FOdysseyVectorEngine::Notify( itemScene, notificationFlags );
 
     return FReply::Handled();
 }

@@ -35,7 +35,7 @@ FOdysseyAnimationEditorGUI::~FOdysseyAnimationEditorGUI()
 {
 	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll( this );
 	UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll( this );
-	FOdysseyVectorEngine::OnSignalDelegate().RemoveAll( this );
+	FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll( this );
 }
 
 FOdysseyAnimationEditorGUI::FOdysseyAnimationEditorGUI(FOdysseyAnimationEditorExtension* iExtension)
@@ -45,7 +45,7 @@ FOdysseyAnimationEditorGUI::FOdysseyAnimationEditorGUI(FOdysseyAnimationEditorEx
 
     UOdysseyAnimation::OnCurrentFrameChanged().AddRaw( this, &FOdysseyAnimationEditorGUI::OnCurrentFrameChanged );
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
-    FOdysseyVectorEngine::OnSignalDelegate().AddRaw( this, &FOdysseyAnimationEditorGUI::OnVectorSceneSignal );
+    FOdysseyVectorEngine::OnNotifyDelegate().AddRaw( this, &FOdysseyAnimationEditorGUI::OnVectorSceneNotify );
     // bind refresh function to delegates on existing vector scenes when the source changes. Needed to refresh necessary widgets.
     mExtension->GetEditor()->OnSourceChanged().AddRaw( this, &FOdysseyAnimationEditorGUI::OnSourceChanged );
 }
@@ -129,7 +129,7 @@ FOdysseyAnimationEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerSta
     }
     else
     {
-        ParseVectorSignal( nullptr, FOdysseyVectorEngine::SIGNAL_ALL );
+        ParseVectorNotifications( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
     }
 }
 
@@ -146,11 +146,11 @@ FOdysseyAnimationEditorGUI::OnSourceChanged()
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
-            OnVectorSceneSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
+            OnVectorSceneNotify( vectorScene, FOdysseyVectorEngine::NOTIFY_ALL );
         }
         else
         {
-            ParseVectorSignal( nullptr, FOdysseyVectorEngine::SIGNAL_ALL );
+            ParseVectorNotifications( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
         }
     }
 }
@@ -166,22 +166,22 @@ FOdysseyAnimationEditorGUI::OnCurrentFrameChanged( UOdysseyAnimation* iAnimation
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
 
-            ParseVectorSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
+            ParseVectorNotifications( vectorScene, FOdysseyVectorEngine::NOTIFY_ALL );
         }
         else
         {
-            ParseVectorSignal( nullptr, FOdysseyVectorEngine::SIGNAL_ALL );
+            ParseVectorNotifications( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
         }
     }
     else
     {
-        ParseVectorSignal( nullptr, FOdysseyVectorEngine::SIGNAL_ALL );
+        ParseVectorNotifications( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
     }
 }
 
 void
-FOdysseyAnimationEditorGUI::ParseVectorSignal( FOdysseyVectorGroupPaint* iScene
-                                             , uint64 iSignalFlags )
+FOdysseyAnimationEditorGUI::ParseVectorNotifications( FOdysseyVectorGroupPaint* iScene
+                                                    , uint64 iSignalFlags )
 {
     if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW )
     {
@@ -241,7 +241,7 @@ FOdysseyAnimationEditorGUI::ParseVectorSignal( FOdysseyVectorGroupPaint* iScene
 }
 
 void
-FOdysseyAnimationEditorGUI::OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags )
+FOdysseyAnimationEditorGUI::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iNotificationFlags )
 {
     UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
 
@@ -258,7 +258,7 @@ FOdysseyAnimationEditorGUI::OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScen
             // Note: iScene is ignored. We update the widget according to the current scene if any.
             FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
 
-            ParseVectorSignal( vectorScene, iSignalFlags );
+            ParseVectorNotifications( vectorScene, iNotificationFlags );
         }
     }
     // for some reason when Unreal loads, the layerstack is NULL. But the medias exist. So in that case we use 
@@ -273,7 +273,7 @@ FOdysseyAnimationEditorGUI::OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScen
             {
                 FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
 
-                ParseVectorSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
+                ParseVectorNotifications( vectorScene, iNotificationFlags );
             }
         }
     }

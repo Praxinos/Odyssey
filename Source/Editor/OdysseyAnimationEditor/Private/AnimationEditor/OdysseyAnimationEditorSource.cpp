@@ -14,6 +14,7 @@
 #include "ULISLoaderModule.h"
 #include "Undo/OdysseyVectorUndoEngineClear.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -222,16 +223,17 @@ FOdysseyAnimationEditorSource::Clear()
 	else if (mediaProvider.HasMedia<FOdysseyMediaVector>())
 	{
 		TArray<TSharedPtr<FOdysseyMediaVector>> mediasVector = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
+        uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_ALL;
+
 		for (TSharedPtr<FOdysseyMediaVector> mediaVector : mediasVector)
 		{
 			FOdysseyVectorEngine* vectorEngine = mediaVector->GetScene()->GetEngine();
-            uint64 retFlags = FOdysseyVectorEngine::SIGNAL_ALL;
 
 			// needed for undos
 			GEditor->BeginTransaction(transactionName);
 			if (GUndo)
 			{
-				FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear(vectorEngine, retFlags );
+				FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear(vectorEngine, notificationFlags );
 
 				GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
 			
@@ -241,9 +243,12 @@ FOdysseyAnimationEditorSource::Clear()
 			}
 			GEditor->EndTransaction();
 
-			vectorEngine->SetScene(new FOdysseyVectorGroupPaint("Scene"));
-			vectorEngine->Signal( retFlags );
+			vectorEngine->GetRoot()->SetScene(new FOdysseyVectorGroupPaint("Scene"));
+			vectorEngine->Invalidate( 0 );
+
 		}
+
+        FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
 	}
 }
 

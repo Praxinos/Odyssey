@@ -47,13 +47,19 @@ UOdysseyPainterEditorVectorPathPushTool::LoadVector( FOdysseyVectorGroupPaint* i
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // force redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+     return 0;
 }
 
 uint64
 UOdysseyPainterEditorVectorPathPushTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+     return 0;
 }
 
 FPushedPoint*
@@ -75,7 +81,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    uint64 notificationFlags = 0;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -197,7 +203,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
         GEditor->BeginTransaction(LOCTEXT("vector-path-push-tool.transaction.push-path","Vector Path Push Tool"));
         if( GUndo )
         {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoSegmentReshape( iScene, vertexArray, retFlags );
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoSegmentReshape( iScene, vertexArray, notificationFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -208,7 +214,10 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
         GEditor->EndTransaction();
     }
 
-    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return notificationFlags;
 }
 
 uint64
@@ -220,18 +229,21 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseHoverVector( FOdysseyVectorGroup
                           , (int)iPointInTexture.y - (int)Radius
                           , (int)diameter
                           , (int)diameter };
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    uint64 notificationFlags = 0;
 
     mPathPushHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return notificationFlags;
 }
 
 uint64
 UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture )
 {
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    uint64 notificationFlags = 0;
 
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
@@ -287,7 +299,10 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorGroupP
         iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
     }
 
-    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return notificationFlags;
 }
 
 uint64
@@ -295,7 +310,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseUpVector( FOdysseyVectorGroupPai
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    uint64 notificationFlags = 0;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -307,7 +322,10 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseUpVector( FOdysseyVectorGroupPai
         vectorEngine->ResetHUD();
     }
 
-    return retFlags;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return notificationFlags;
 }
 
 TSharedRef<SWidget>

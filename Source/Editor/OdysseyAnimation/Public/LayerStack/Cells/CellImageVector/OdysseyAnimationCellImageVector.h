@@ -12,6 +12,7 @@ class FOdysseyVectorBlock;
 class FOdysseyMediaVector;
 class FOdysseyVectorEngine;
 class FOdysseyVectorGroupPaint;
+class FOdysseyVectorRoot;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageVector
     : public FOdysseyAnimationCell, public IOdysseyVectorAnimationCell
@@ -35,6 +36,7 @@ public:
     virtual void PostLoad() override;
         
     FOdysseyVectorEngine* GetEngine() const;
+    FOdysseyVectorRoot* GetRoot() const;
     TSharedPtr<FOdysseyVectorBlock> GetVectorBlock() const;
     uint32 GetWidth();
     uint32 GetHeight();
@@ -77,7 +79,7 @@ private:
     friend class FOdysseyAnimationCellImageVectorImport;
 
 private:
-    FOdysseyVectorEngine* mEngine;
+    FOdysseyVectorRoot* mRoot;
     FGuid mVectorBlockId;
     TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
     uint32 mWidth;

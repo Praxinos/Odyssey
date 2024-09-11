@@ -53,15 +53,17 @@ FOdysseyVectorUndoTagInbetweenerCommit::Apply( UObject* iIgnored )
     {
         //will update paintgroup's mPathList e.
         scene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+        // request redraw attached cells
+        scene->GetEngine()->Invalidate( 0 );
     }
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
+    // request call callbacks if any (for refreshing GUI e.g)
+    mScene->GetEngine()->Invalidate( 0 );
+    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 }
 
 void
@@ -84,7 +86,7 @@ FOdysseyVectorUndoTagInbetweenerCommit::Revert( UObject* iIgnored )
     {
         //will update paintgroup's mPathList e.g
         scene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+        scene->GetEngine()->Invalidate( 0 );
     }
 
     // update invalidated objects
@@ -92,7 +94,8 @@ FOdysseyVectorUndoTagInbetweenerCommit::Revert( UObject* iIgnored )
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
+    mScene->GetEngine()->Invalidate( 0 );
+    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

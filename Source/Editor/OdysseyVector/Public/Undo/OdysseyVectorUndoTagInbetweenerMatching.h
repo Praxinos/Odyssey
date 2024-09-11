@@ -16,8 +16,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerMatching : public FOdyss
     public:
         ~FOdysseyVectorUndoTagInbetweenerMatching();
         FOdysseyVectorUndoTagInbetweenerMatching( FOdysseyVectorGroupPaint* iScene
-                                                , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                , const std::list<FInbetweenerBreakdown*>& iBreakdownList
                                                 , uint64 iReturnFlags );
+
         FOdysseyVectorUndoTagInbetweenerMatching( FOdysseyVectorGroupPaint* iScene
                                                 , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
                                                 , uint64 iReturnFlags );
@@ -31,5 +32,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerMatching : public FOdyss
         virtual FString ToString() const override;
 
     private:
-        std::vector<FSnapshotTagInbetweener> mInbetweenerTagSnapshotBuffer;
+        std::vector<FSnapshotInbetweenerBreakdown> mBreakdownSnapshotBuffer;
 };

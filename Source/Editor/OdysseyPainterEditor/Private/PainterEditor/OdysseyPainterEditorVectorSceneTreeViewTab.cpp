@@ -5,6 +5,7 @@
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeView.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVector.h"
+#include "OdysseyVectorRoot.h"
 #include "HUD/OdysseyVectorHUD.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "OdysseyPainterEditorVectorObjectView.h"
@@ -84,7 +85,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateObjectPropertiesPanel( FOdyss
         else
         {
             // defaults to scene
-            std::list<FOdysseyVectorObject*>& sceneAsList = iScene->GetEngine()->GetChildrenList();
+            std::list<FOdysseyVectorObject*>& sceneAsList = iScene->GetRoot()->GetChildrenList();
             std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetEngine()->GetSelectedObjectList();
             std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList
                                                                                             : sceneAsList;

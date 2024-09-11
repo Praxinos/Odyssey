@@ -40,7 +40,8 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::Apply( UObject* iIgnore
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
+    mScene->GetEngine()->Invalidate( 0 );
+    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 }
 
 void
@@ -60,7 +61,8 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::Revert( UObject* iIgnor
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
+    mScene->GetEngine()->Invalidate( 0 );
+    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

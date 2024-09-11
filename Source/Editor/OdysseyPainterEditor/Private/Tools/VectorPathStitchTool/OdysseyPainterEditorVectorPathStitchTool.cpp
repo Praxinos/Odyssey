@@ -50,7 +50,10 @@ UOdysseyPainterEditorVectorPathStitchTool::LoadVector( FOdysseyVectorGroupPaint*
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // force redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
@@ -58,7 +61,10 @@ UOdysseyPainterEditorVectorPathStitchTool::UnloadVector( FOdysseyVectorGroupPain
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // force redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
@@ -66,10 +72,9 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , const FKey& iKey )
 {
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                    | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -148,7 +153,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
                                                                                , addedSegmentArray
                                                                                , mergedVertexArray
                                                                                , mergedSegmentArray
-                                                                               , retFlags );
+                                                                               , notificationFlags );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -165,7 +170,10 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
         mPathStitchHUD->Reset( iScene ); // rebuilds QuadTree after path alter.
     }
 
-    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return notificationFlags;
 }
 
 uint64
@@ -190,8 +198,11 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorGro
     if( rect.Area() )
     {*/
     /*}*/
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return 0;
 }
 
 uint64
@@ -204,8 +215,10 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorGrou
         mPathStitchHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return 0;
 }
 
 uint64
@@ -213,7 +226,10 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( FOdysseyVectorGroupP
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
@@ -227,8 +243,10 @@ UOdysseyPainterEditorVectorPathStitchTool::PropertyChangedVector( FOdysseyVector
         iEngine->ResetHUD(); // rebuild the quad tree
     }
 
-    return UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName )
-         | FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName );
 }
 
 TSharedRef<SWidget>

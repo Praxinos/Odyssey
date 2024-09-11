@@ -56,7 +56,10 @@ UOdysseyPainterEditorVectorPathEditTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorPathEditTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // force redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
@@ -75,16 +78,16 @@ UOdysseyPainterEditorVectorPathEditTool::LoadVector( FOdysseyVectorGroupPaint* i
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // force redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
 UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
                                                               , const FKey& iKey )
 {
-    uint64 retFlags = 0;
-
-
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
     // with the events processing in the OnKeyUpGlobalVector(), we do like that.
     if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
@@ -93,8 +96,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
         mPickingMode   = ePathPickingMode::SegmentHandle;
         mPickingFlags  = FOdysseyVectorPath::PICK_HANDLE_SEGMENT
                        | FOdysseyVectorPath::PICK_VERTEX ;
-
-        retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
     }
 
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
@@ -103,8 +104,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
     {
         mPickingMode  = ePathPickingMode::VertexHandle;
         mPickingFlags = FOdysseyVectorPath::PICK_HANDLE_VERTEX;
-
-        retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
     }
 
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
@@ -113,12 +112,12 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
     {
         mPickingMode  = ePathPickingMode::Alter;
         mPickingFlags = FOdysseyVectorPath::PICK_VERTEX;
-
-        retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
     }
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( iScene, iKey )
-         | retFlags;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( iScene, iKey );
 }
 
 uint64
@@ -126,7 +125,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyUpGlobalVector( FOdysseyVectorGrou
                                                             , const FKey& iKey )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-    uint64 retFlags = 0;
 
     // note, we cannot use FSlateApplication::Get().GetModifierKeys()
     // because the keys are already released. For consistency we do
@@ -137,15 +135,15 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyUpGlobalVector( FOdysseyVectorGrou
       || ( iKey == EKeys::LeftShift   ) || ( iKey == EKeys::RightShift   )
       || ( iKey == EKeys::LeftAlt     ) || ( iKey == EKeys::RightAlt     ) )
     {
-        retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+        // redraw
+        iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
     }
 
     // first reset display mode
     mPickingMode = ePathPickingMode::Vertex;
     mPickingFlags = FOdysseyVectorPath::PICK_VERTEX;
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( iScene, iKey )
-         | retFlags;
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( iScene, iKey );
 }
 
 // temporary structure to store the path that will have their vertices removed.
@@ -203,7 +201,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpCutPaths( FOdysseyVectorGroupP
     std::vector<FOdysseyVectorSegment*> addedSegmentArray;
     std::vector<FOdysseyVectorSegment*> removedSegmentArray;
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    uint64 notificationFlags = 0;
 
     // crashes if I don't reserve. Why that ?
     removedSegmentArray.reserve(50);
@@ -257,7 +255,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpCutPaths( FOdysseyVectorGroupP
                                                                     , addedPathArray
                                                                     , addedVertexArray
                                                                     , addedSegmentArray
-                                                                    , retFlags );
+                                                                    , notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         
@@ -269,7 +267,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpCutPaths( FOdysseyVectorGroupP
 
     iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidated objects
 
-    return retFlags;
+    return notificationFlags;
 }
 
 uint64
@@ -284,10 +282,9 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpDeletePoint( FOdysseyVectorGro
     std::vector<FOdysseyVectorVertex*> addedVertexArray; // not filled, here just for the undo record
     std::vector<FOdysseyVectorSegment*> addedSegmentArray;
     std::vector<FAlteredPathRecord> alteredPathRecordArray;
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                    | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS;
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS;
     bool hasHit = false;
 
     alteredPathRecordArray.reserve( 10 );
@@ -348,7 +345,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpDeletePoint( FOdysseyVectorGro
                                                                       , addedPathArray
                                                                       , addedVertexArray
                                                                       , addedSegmentArray
-                                                                      , retFlags );
+                                                                      , notificationFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -359,7 +356,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpDeletePoint( FOdysseyVectorGro
         GEditor->EndTransaction();
     }
 
-    return retFlags;
+    return notificationFlags;
 }
 
 uint64
@@ -373,7 +370,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpAddPoint( FOdysseyVectorGroupP
     std::vector<FOdysseyVectorPath*> addedPathArray; // not filled, here just for the undo record
     std::vector<FOdysseyVectorVertex*> addedVertexArray;
     std::vector<FOdysseyVectorSegment*> addedSegmentArray;
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    uint64 notificationFlags = 0;
 
     for( FOdysseyVectorSegment* pickedSegment : iPickedSegmentArray )
     {
@@ -423,7 +420,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpAddPoint( FOdysseyVectorGroupP
                                                                   , addedPathArray
                                                                   , addedVertexArray
                                                                   , addedSegmentArray
-                                                                  , retFlags );
+                                                                  , notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         
@@ -433,7 +430,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpAddPoint( FOdysseyVectorGroupP
     }
     GEditor->EndTransaction();
 
-    return retFlags;
+    return notificationFlags;
 }
 
 void
@@ -484,10 +481,9 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                                                              , const FKey& iKey )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                    | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
     mSelectedPathArray.clear();
     mPickedVertexArray.clear();
@@ -533,7 +529,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlignment( iScene
                                                                              , mPickedVertexArray
-                                                                             , retFlags );
+                                                                             , notificationFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -567,11 +563,11 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                     {
                         GetPathsFromSelection( iScene, mSelectedPathArray );
 
-                        undo = new FOdysseyVectorUndoVertexRadius( iScene, mSelectedPathArray, retFlags );
+                        undo = new FOdysseyVectorUndoVertexRadius( iScene, mSelectedPathArray, notificationFlags );
                     }
                     else
                     {
-                        undo = new FOdysseyVectorUndoVertexRadius( iScene, mPickedVertexArray, retFlags );
+                        undo = new FOdysseyVectorUndoVertexRadius( iScene, mPickedVertexArray, notificationFlags );
                     }
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
@@ -613,7 +609,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                     FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathEdit( iScene
                                                                              , mPickedVertexArray
                                                                              , alteredSegmentArray
-                                                                             , retFlags );
+                                                                             , notificationFlags );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -643,7 +639,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                     FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathEdit( iScene
                                                                              , mPickedVertexArray // empty
                                                                              , alteredSegmentArray
-                                                                             , retFlags );
+                                                                             , notificationFlags );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -661,7 +657,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
         }
     }
 
-    return retFlags;
+    return notificationFlags;
 }
 
 uint64
@@ -669,7 +665,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorGroupP
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
 {
-    uint64 retFlags = 0;
+    uint64 notificationFlags = 0;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -686,12 +682,15 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorGroupP
             break;
 
             default:
-                retFlags = OnMouseDownPickPoint( iScene, iPointInTexture, iKey );
+                notificationFlags = OnMouseDownPickPoint( iScene, iPointInTexture, iKey );
             break;
         }
     }
 
-    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return notificationFlags;
 }
 
 uint64
@@ -699,7 +698,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( FOdysseyVectorGroup
                                                            , const FOdysseyPoint& iPointInTexture )
 {
     std::vector<FOdysseyVectorPoint*>& hoveredPointArray = mPathEditHUD->GetHoveredPointArray();
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    uint64 notificationFlags = 0;
 
     // we need the focus on the viewport for keyboard 
     //FSlateApplication::Get().SetKeyboardFocus( mViewportWidget.ToSharedRef() );
@@ -719,7 +718,10 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( FOdysseyVectorGroup
     // This populates mPathEditHUD::mHoveredPointArray
     mPathEditHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return notificationFlags;
 }
 
 ::ULIS::FRectD
@@ -798,7 +800,7 @@ uint64
 UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture )
 {
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    uint64 notificationFlags = 0;
     double pointInTextureX = iPointInTexture.x;
     double pointInTextureY = iPointInTexture.y;
 /*
@@ -913,7 +915,10 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
         iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
     }
 
-    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return notificationFlags;
 }
 
 uint64
@@ -924,16 +929,15 @@ UOdysseyPainterEditorVectorPathEditTool::PickObjects( FOdysseyVectorGroupPaint* 
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FOdysseyVectorObject*> pickedObjectArray;
     ::ULIS::FRectD roi;
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                    | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("vector-path-edit-tool.transaction.select-object","Vector Path Edit Tool"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene, retFlags );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene, notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -965,7 +969,7 @@ UOdysseyPainterEditorVectorPathEditTool::PickObjects( FOdysseyVectorGroupPaint* 
 
     vectorEngine->SetBLMask( nullptr );
 
-    return retFlags;
+    return notificationFlags;
 }
 
 uint64
@@ -973,7 +977,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
-    uint64 retFlags = 0;
+    uint64 notificationFlags = 0;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -991,7 +995,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
 
                 if( hoveredPointArray.size() )
                 {
-                    retFlags |= OnMouseUpDeletePoint( iScene, hoveredPointArray );
+                    notificationFlags |= OnMouseUpDeletePoint( iScene, hoveredPointArray );
                 }
                 else
                 {
@@ -1008,13 +1012,13 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
 
                     if( pickedSegmentArray.size() )
                     {
-                        retFlags |= OnMouseUpAddPoint( iScene
-                                                     , iPointInTexture
-                                                     , pickedSegmentArray );
+                        notificationFlags |= OnMouseUpAddPoint( iScene
+                                                              , iPointInTexture
+                                                              , pickedSegmentArray );
                     }
                     else
                     {
-                        retFlags |= OnMouseUpCutPaths( iScene, iPointInTexture );
+                        notificationFlags |= OnMouseUpCutPaths( iScene, iPointInTexture );
                     }
                 }
             }
@@ -1025,7 +1029,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
                 // If nothing was selected, we pick an object
                 if( ( mPickedVertexArray.size() == 0 ) && ( mPickedHandleArray.size() == 0 ) )
                 {
-                    retFlags |= PickObjects( iScene, iPointInTexture.x, iPointInTexture.y );
+                    notificationFlags |= PickObjects( iScene, iPointInTexture.x, iPointInTexture.y );
                 }
             }
             break;
@@ -1036,7 +1040,10 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
         vectorEngine->ResetHUD();
     }
 
-    return retFlags;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return notificationFlags;
 }
 
 ePathPickingMode

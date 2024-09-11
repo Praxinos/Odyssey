@@ -65,4 +65,18 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public 
                           , ClampMin = "0.0"
                           , UIMin    = "0.0" ) )
         double PickingRadius;
+
+        UPROPERTY( EditAnywhere
+                 , Category = MatchingTool
+                 , meta = ( ToolTip  = "Rigidity"
+                          , ClampMin = "1"
+                          , UIMin    = "1"
+                          , ClampMax = "20"
+                          , UIMax    = "20" ) )
+        uint32 Rigidity;
+
+        UPROPERTY( EditAnywhere
+                 , Category = MatchingTool
+                 , meta = ( ToolTip  = "Rigidify Selection Only" ) )
+        bool RigidifySelectionOnly;
 };

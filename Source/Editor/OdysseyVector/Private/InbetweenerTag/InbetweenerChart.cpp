@@ -60,22 +60,13 @@ FInbetweenerChart::GetSpacing( std::vector<float>& oSpacingArray )
 }
 
 void
-FInbetweenerChart::Resize( bool iReset )
+FInbetweenerChart::Reset()
 {
     uint32 drawingCount = mInbetweenerTag->GetDrawingCount();
-    FInbetweenerDrawing& lastInbewteen = *std::prev( mDrawingBuffer.end(), 2 );
-    uint32 fromIndex = lastInbewteen.GetIndex();
-    float fromT = lastInbewteen.spacing;
-    float stepT = (  1.0f - fromT ) / ( drawingCount - fromIndex );
-    float nextT = fromT;
-    std::vector<float> spacingArray;
+    float stepT = 1.0f / ( drawingCount - 1 );
+    float nextT = 0.0f;
 
-    // remember former spacing
-    GetSpacing( spacingArray );
-
-    mDrawingBuffer.resize( drawingCount, this );
-
-    for( uint32 i = lastInbewteen.GetIndex(); i < drawingCount - 1; i++ )
+    for( uint32 i = 0; i < drawingCount - 1; i++ )
     {
         mDrawingBuffer[i].spacing = nextT;
 
@@ -84,14 +75,34 @@ FInbetweenerChart::Resize( bool iReset )
 
     mDrawingBuffer.back().spacing = 1.0f;
 
-    if( iReset == false )
+    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
+}
+
+void
+FInbetweenerChart::Resize()
+{
+    uint32 drawingCount = mInbetweenerTag->GetDrawingCount();
+    FInbetweenerDrawing& lastInbewteen = *std::prev( mDrawingBuffer.end(), 2 );
+    uint32 fromIndex = lastInbewteen.GetIndex();
+    float fromT = lastInbewteen.spacing;
+    float stepT = (  1.0f - fromT ) / ( drawingCount - fromIndex - 1 );
+    float nextT = fromT;
+    std::vector<float> spacingArray;
+
+    // remember former spacing
+    GetSpacing( spacingArray );
+
+    mDrawingBuffer.resize( drawingCount, this );
+
+    for( uint32 i = fromIndex; i < drawingCount - 1; i++ )
     {
-        for( uint32 i = 1; ( i < ( spacingArray.size()   - 1 ) ) 
-                        && ( i < ( mDrawingBuffer.size() - 1 ) ); i++ )
-        {
-            mDrawingBuffer[i].spacing = spacingArray[i];
-        }
+        mDrawingBuffer[i].spacing = nextT;
+
+        nextT += stepT;
     }
+
+    mDrawingBuffer.back().spacing = 1.0f;
 
     mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
                                | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );

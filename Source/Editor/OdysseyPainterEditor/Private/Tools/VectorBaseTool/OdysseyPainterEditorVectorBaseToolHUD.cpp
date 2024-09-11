@@ -47,7 +47,7 @@ void
 FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    FOdysseyVectorSharedEnv* sharedEnv = vectorEngine->GetSharedEnv();
+    FOdysseyVectorSharedEnv* sharedEnv = iScene->GetSharedEnv();
     uint32 cellIndex = vectorEngine->GetAnimationCell()->GetIndex();
 
     mSelectedInbetweenerTagList.clear();

@@ -4,6 +4,7 @@
 #include "OdysseyVectorGroup.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorRoot.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 
 #ifndef M_PI
@@ -14,8 +15,6 @@ FOdysseyVectorObject::~FOdysseyVectorObject()
 {
     mTagList.remove_if( []( FOdysseyVectorTag *tag ) -> bool
                           {
-                              tag->Removed();
-
                               delete tag;
 
                               return true;
@@ -83,8 +82,6 @@ FOdysseyVectorObject::AddTag( FOdysseyVectorTag* iTag )
 {
     mTagList.push_back( iTag );
 
-    iTag->Added();
-
     Invalidate( FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST );
 }
 
@@ -92,8 +89,6 @@ void
 FOdysseyVectorObject::RemoveTag( FOdysseyVectorTag* iTag )
 {
     mTagList.remove( iTag );
-
-    iTag->Removed();
 
     Invalidate( FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST );
 }
@@ -686,7 +681,7 @@ FOdysseyVectorObject::GetTagByType( uint32 iTagClass )
     return nullptr;
 }
 
-uint32
+uint64
 FOdysseyVectorObject::GetInvalidationFlags()
 {
     return mInvalidationFlags;
@@ -694,7 +689,7 @@ FOdysseyVectorObject::GetInvalidationFlags()
 
 void
 FOdysseyVectorObject::InvalidateChild( FOdysseyVectorObject* iChild
-                                     , uint32 iChildInvalidationFlags )
+                                     , uint64 iChildInvalidationFlags )
 {
     // this is temporary and should be optimized somehow
     if( std::find( mInvalidatedChildrenList.begin(), mInvalidatedChildrenList.end(), iChild ) == mInvalidatedChildrenList.end() )
@@ -725,26 +720,35 @@ FOdysseyVectorObject::InvalidateTag( FOdysseyVectorTag* iTag )
 }
 
 void
-FOdysseyVectorObject::Invalidate( uint32 iInvalidationFlags )
+FOdysseyVectorObject::Invalidate( uint64 iInvalidationFlags )
 {
-    if ( mParent )
+    if( ( mInvalidationFlags & iInvalidationFlags ) == 0 )
     {
-        mParent->InvalidateChild( this, iInvalidationFlags );
-    }
+        if ( mParent )
+        {
+            mParent->InvalidateChild( this, iInvalidationFlags );
+        }
 
-    mInvalidationFlags |= ( INVALIDATE_DEFAULT | iInvalidationFlags );
+        mInvalidationFlags |= ( INVALIDATE_DEFAULT | iInvalidationFlags );
+    }
 }
 
 FOdysseyVectorEngine*
 FOdysseyVectorObject::GetEngine()
 {
+    return GetRoot()->GetEngine();
+}
+
+FOdysseyVectorRoot*
+FOdysseyVectorObject::GetRoot()
+{
     FOdysseyVectorObject* candidate = this;
 
     while ( candidate )
     {
-        if( candidate->GetClass() == FOdysseyVectorEngine::StaticClass() )
+        if( candidate->GetClass() == FOdysseyVectorRoot::StaticClass() )
         {
-            return static_cast<FOdysseyVectorEngine*>(candidate);
+            return static_cast<FOdysseyVectorRoot*>(candidate);
         }
 
         candidate = candidate->GetParent();

@@ -15,7 +15,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerTransform : public FOdys
     public:
         ~FOdysseyVectorUndoTagInbetweenerTransform();
         FOdysseyVectorUndoTagInbetweenerTransform( FOdysseyVectorGroupPaint* iScene
-                                                 , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                 , const std::list<FInbetweenerBreakdown*>& iBreakdownList
                                                  , uint64 iReturnFlags );
 
         /** Called when redoing */
@@ -28,5 +28,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerTransform : public FOdys
         virtual FString ToString() const override;
 
     private:
-        std::vector<FSnapshotTagInbetweener> mInbetweenerTagArray;
+        std::vector<FSnapshotInbetweenerBreakdown> mBreakdownSnapshotBuffer;
 };

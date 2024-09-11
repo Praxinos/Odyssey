@@ -55,7 +55,10 @@ UOdysseyPainterEditorVectorTransformTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorTransformTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // force redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
@@ -75,7 +78,10 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorGroupPaint* 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // force redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
@@ -130,7 +136,8 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorGrou
     {
         iEngine->GetInvalidTileMap().Invalidate(redrawRegion);
 
-        return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+        // redraw
+        iScene->GetEngine()->Invalidate( 0 );
     }
 
     return 0;
@@ -169,7 +176,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    uint64 notificationFlags = 0;
 
     mTransformHUD->SetCenterGizmo( false );
 
@@ -199,7 +206,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
             mUndo = new FOdysseyVectorUndoPointPosition( iScene
                                                        , mTransformedVertexArray
                                                        , mTransformedHandleArray
-                                                       , retFlags );
+                                                       , notificationFlags );
         }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
@@ -212,18 +219,16 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
             // it could conflict with the undo created by th emouse up event in the case of a no-drag
             mUndo = new FOdysseyVectorUndoObjectTransform( iScene
                                                          , transformedObjectList
-                                                         , retFlags );
+                                                         , notificationFlags );
         }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
         {
-/*
             // remember for undos. we don't register the undo in the mouse down event yet because
             // it could conflict with the undo created by th emouse up event in the case of a no-drag
             mUndo = new FOdysseyVectorUndoTagInbetweenerTransform( iScene
-                                                                 , mTransformedBreakdownList
-                                                                 , retFlags );
-*/
+                                                                 , mTransformHUD->GetSelectedBreakdownList()
+                                                                 , notificationFlags );
         }
 
         if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ROTATE )
@@ -231,8 +236,11 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
             mTransformHUD->ShowSelectionBox( false );
         }
     }
+
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
  
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    return 0;
 }
 
 static void
@@ -970,8 +978,10 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
                 }
             }
 
-            return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                 /*| FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED*/;
+            // redraw
+            iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+            return 0;
         }
     }
 
@@ -984,8 +994,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
                                                          , const FKey& iKey)
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS;
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -1046,7 +1055,10 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
 
     mTransformHUD->SetCenterGizmo( true );
 
-    return retFlags;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return notificationFlags;
 }
 
 uint64
@@ -1062,8 +1074,10 @@ UOdysseyPainterEditorVectorTransformTool::PropertyChangedVector( FOdysseyVectorG
         mTransformHUD->CenterGizmo();
     }
 
-    return UOdysseyPainterEditorVectorSelectionTool::PropertyChangedVector( iScene, iPropertyName )
-         | FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return UOdysseyPainterEditorVectorSelectionTool::PropertyChangedVector( iScene, iPropertyName );
 }
 
 TSharedRef<SWidget>

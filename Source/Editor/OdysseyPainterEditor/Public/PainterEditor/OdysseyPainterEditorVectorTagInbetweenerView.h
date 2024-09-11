@@ -87,7 +87,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
                           , UIMin    = "1"
                           , UIMax    = "16" ) )
         uint32 DivisionY;
-
+/*
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"
                  , meta = ( ToolTip  = "Rigidity"
@@ -98,7 +98,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
                           , UIMin    = "1"
                           , UIMax    = "100" ) )
         uint32 Rigidity;
-
+*/
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"
                  , meta = ( ToolTip  = "Map As Polyline" ) )

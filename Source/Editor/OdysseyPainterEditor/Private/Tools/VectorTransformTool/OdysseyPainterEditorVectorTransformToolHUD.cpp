@@ -396,7 +396,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
                    , hcColor
                    , hudFlags | HUD_TAGINBETWEENER_TARGET );
 */
-        for( FOdysseyVectorTag* tag : vectorEngine->GetSharedEnv()->GetSharedTagList() )
+        for( FOdysseyVectorTag* tag : iScene->GetSharedEnv()->GetSharedTagList() )
         {
             if( ( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
              && ( tag->GetOwner()->IsSelected() ) )

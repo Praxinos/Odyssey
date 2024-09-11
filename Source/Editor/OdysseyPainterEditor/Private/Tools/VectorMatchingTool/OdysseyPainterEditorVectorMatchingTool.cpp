@@ -24,6 +24,8 @@ UOdysseyPainterEditorVectorMatchingTool::~UOdysseyPainterEditorVectorMatchingToo
 UOdysseyPainterEditorVectorMatchingTool::UOdysseyPainterEditorVectorMatchingTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorMatchingToolHUD( this ), false )
     , PickingRadius( 75.0f )
+    , Rigidity( 5 )
+    , RigidifySelectionOnly( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching64");
 
@@ -45,7 +47,10 @@ UOdysseyPainterEditorVectorMatchingTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorMatchingTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // force redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
@@ -56,7 +61,10 @@ UOdysseyPainterEditorVectorMatchingTool::LoadVector( FOdysseyVectorGroupPaint* i
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // force redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
@@ -65,7 +73,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
                                                           , const FKey& iKey )
 {
     FOdysseyVectorEngine* engine = iScene->GetEngine();
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    uint64 notificationFlags = 0;
 
     mPickedPointArray.clear();
     mPickedGridArray.clear();
@@ -74,13 +82,13 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
     if( iKey == EKeys::LeftMouseButton )
     {
         // needed for valid GUndo pointer
-/*
+
         GEditor->BeginTransaction(LOCTEXT("vector-matching-tool.transaction.match-grid","Vector Matching Tool"));
         if( GUndo )
         {
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerMatching( iScene
-                                                                                    , mPickedInbetweenerTag
-                                                                                    , retFlags );
+                                                                                    , mMatchingHUD->GetSelectedBreakdownList()
+                                                                                    , notificationFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
         
@@ -89,7 +97,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
                 source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
-*/
+
         for( FInbetweenerBreakdown* breakdown : mMatchingHUD->GetSelectedBreakdownList() )
         {
             mMatchingHUD->PickTargetPoints( breakdown
@@ -99,9 +107,20 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
                                           , mPickedPointArray
                                           , mPickedGridArray );
         }
+
+        for( FInbetweenerGrid* grid : mPickedGridArray )
+        {
+            for( FInbetweenerPoint& point : grid->GetPointBuffer() )
+            {
+                point.SetDeformable( RigidifySelectionOnly ? false : true );
+            }
+        }
     }
 
-    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return notificationFlags;
 }
 
 uint64
@@ -112,7 +131,10 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseHoverVector( FOdysseyVectorGroup
 
     mMatchingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
@@ -120,7 +142,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
                                                           , const FOdysseyPoint& iPointInTexture )
 {
     FOdysseyVectorEngine* engine = iScene->GetEngine();
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    uint64 notificationFlags = 0;
 
     mMatchingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
@@ -136,6 +158,11 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
             targetPosition.y += localDiff.y;
 
             gridPoint->SetTargetPosition( targetPosition.x, targetPosition.y );
+
+            if( RigidifySelectionOnly )
+            {
+                gridPoint->SetDeformable( true );
+            }
         }
 
         for( FInbetweenerGrid* grid : mPickedGridArray )
@@ -144,7 +171,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
             {
                 FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(grid);
 
-                arapGrid->Regularize();
+                arapGrid->Regularize( Rigidity );
             }
         }
 
@@ -152,7 +179,10 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
         iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
     }
 
-    return retFlags | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return notificationFlags;
 }
 
 uint64
@@ -161,7 +191,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseUpVector( FOdysseyVectorGroupPai
                                                         , const FKey& iKey )
 {
     FOdysseyVectorEngine* engine = iScene->GetEngine();
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    uint64 notificationFlags = 0;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -169,7 +199,10 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseUpVector( FOdysseyVectorGroupPai
         iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
-    return retFlags;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return notificationFlags;
 }
 
 uint64
@@ -180,7 +213,7 @@ UOdysseyPainterEditorVectorMatchingTool::PropertyChangedVector( FOdysseyVectorGr
 
     iEngine->ResetHUD();
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    return 0;
 }
 
 TSharedRef<SWidget>
@@ -190,6 +223,10 @@ UOdysseyPainterEditorVectorMatchingTool::CreateTopTabWidget()
     FSinglePropertyParams defaultPropertyParams;
     const TSharedPtr<ISinglePropertyView> pickingRadiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "PickingRadius", defaultPropertyParams);
     TSharedPtr<class IPropertyHandle> pickingRadiusHandle = pickingRadiusPropertyView->GetPropertyHandle();
+    const TSharedPtr<ISinglePropertyView> rigidityPropertyView = propertyEditorModule.CreateSingleProperty(this, "Rigidity", defaultPropertyParams);
+    TSharedPtr<class IPropertyHandle> rigidityHandle = rigidityPropertyView->GetPropertyHandle();
+    const TSharedPtr<ISinglePropertyView> rigidifySelectionOnlyPropertyView = propertyEditorModule.CreateSingleProperty(this, "RigidifySelectionOnly", defaultPropertyParams);
+    TSharedPtr<class IPropertyHandle> rigidifySelectionOnlyHandle = rigidifySelectionOnlyPropertyView->GetPropertyHandle();
 
     return SNew(SUniformWrapPanel)
         .SlotPadding(FVector2D(3.f, 0.f))
@@ -204,12 +241,14 @@ UOdysseyPainterEditorVectorMatchingTool::CreateTopTabWidget()
         [
             CreatePropertyWidget(pickingRadiusHandle, pickingRadiusPropertyView).ToSharedRef()
         ]
-/*
         + SUniformWrapPanel::Slot()
         [
-            CreatePropertyWidget(YDivHandle, YDivPropertyView).ToSharedRef()
+            CreatePropertyWidget(rigidityHandle, rigidityPropertyView).ToSharedRef()
         ]
-*/;
+        + SUniformWrapPanel::Slot()
+        [
+            CreatePropertyWidget(rigidifySelectionOnlyHandle, rigidifySelectionOnlyPropertyView).ToSharedRef()
+        ];
 }
 
 FText

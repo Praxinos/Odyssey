@@ -88,7 +88,7 @@ UOdysseyPainterEditorVectorBucketView::PropertyChanged( const FName& iPropertyNa
 void
 UOdysseyPainterEditorVectorBucketView::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    uint64 retFlags = 0;
 
     Super::PostEditChangeProperty(PropertyChangedEvent);
 
@@ -120,8 +120,8 @@ UOdysseyPainterEditorVectorBucketView::PostEditChangeProperty( FPropertyChangedE
                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
         vectorScene->Update( 0 );
-        // calls delegates
-        vectorScene->GetEngine()->Signal( retFlags );
+        // request refresh
+        vectorScene->GetEngine()->Invalidate( 0 );
     }
 }
 

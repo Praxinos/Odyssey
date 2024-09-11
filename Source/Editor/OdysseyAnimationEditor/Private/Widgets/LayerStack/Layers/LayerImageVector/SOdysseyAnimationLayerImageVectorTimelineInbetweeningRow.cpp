@@ -67,9 +67,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     FOdysseyAnimationEditorExtension* animationEditorExtension = treeView.Get()->GetAnimationEditorExtension();
     const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() );
     FOdysseyVectorGroupPaint* scene = mInbetweenerTag->GetOwner()->GetScene();
-    FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetEngine()->GetSharedEnv();
+    FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetSharedEnv();
     std::list<FOdysseyVectorTag*>& sharedTagList = sharedEnv->GetSharedTagList();
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    uint64 notificationFlags = 0;
 
     // for AddBreakdown / RemoveBreakdown functions in the context menu
     treeView.Get()->SetCursorPos( cursorPos );
@@ -102,28 +102,31 @@ ESelectInfo::Type SelectInfo
         {
             uint32 bi = breakdown->GetTargetDrawingIndex();
 
-            if( ( cursorPos.X >   mCellBoxBuffer[bi].x )
-             && ( cursorPos.Y >   mCellBoxBuffer[bi].y )
-             && ( cursorPos.X < ( mCellBoxBuffer[bi].x + mCellBoxBuffer[bi].w ) )
-             && ( cursorPos.Y < ( mCellBoxBuffer[bi].y + mCellBoxBuffer[bi].h ) ) )
+            if( bi < (uint32) mCellBoxBuffer.Num() )
             {
-                mPickedBreakdown = breakdown;
-
-                // needed for valid GUndo pointer
-                GEditor->BeginTransaction(LOCTEXT("vector-timeline-row.transaction.alter","Vector Timeline Alter"));
-                if( GUndo )
+                if( ( cursorPos.X >   mCellBoxBuffer[bi].x )
+                 && ( cursorPos.Y >   mCellBoxBuffer[bi].y )
+                 && ( cursorPos.X < ( mCellBoxBuffer[bi].x + mCellBoxBuffer[bi].w ) )
+                 && ( cursorPos.Y < ( mCellBoxBuffer[bi].y + mCellBoxBuffer[bi].h ) ) )
                 {
-                    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( scene
-                                                                                                 , mInbetweenerTag
-                                                                                                 , retFlags );
+                    mPickedBreakdown = breakdown;
 
-                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                    // needed for valid GUndo pointer
+                    GEditor->BeginTransaction(LOCTEXT("vector-timeline-row.transaction.alter","Vector Timeline Alter"));
+                    if( GUndo )
+                    {
+                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( scene
+                                                                                                     , mInbetweenerTag
+                                                                                                     , notificationFlags );
 
-                    TSharedPtr<FOdysseyPainterEditorSource> source = animationEditorExtension->GetEditor()->GetSource();
-                    if (source)
-                        source->RecordCurrentFrameUndo();
+                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+                        TSharedPtr<FOdysseyPainterEditorSource> source = animationEditorExtension->GetEditor()->GetSource();
+                        if (source)
+                            source->RecordCurrentFrameUndo();
+                    }
+                    GEditor->EndTransaction();
                 }
-                GEditor->EndTransaction();
             }
         }
 
@@ -195,8 +198,7 @@ FReply
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const FGeometry & MyGeometry
                                                                          , const FPointerEvent & MouseEvent )
 {
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+    uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                     | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                     | FOdysseyPainterEditor::UI_UPDATE_HUD;
     FReply reply = FReply::Unhandled();
@@ -214,7 +216,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
         }
 
         mInbetweenerTag->GetOwner()->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->Signal( retFlags );
+        mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->Invalidate( 0 );
+        FOdysseyVectorEngine::Notify( nullptr, retFlags );
 
         reply = FReply::Handled();
     }
@@ -269,27 +272,32 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
         uint32 sourceIndex = breakdown->GetSourceDrawingIndex();
         uint32 targetIndex = breakdown->GetTargetDrawingIndex();
         IOdysseyVectorAnimationCell* targetCell = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetCellByIndex( tagCellIndex + breakdown->GetTargetDrawingIndex() );
-        uint32 targetFrame = targetCell->GetFrame();
 
-        for( uint32 i = sourceIndex + 1; i < targetIndex; i++ )
+        // targetCell can be NULL if there is no further cell
+        if( targetCell )
         {
-            IOdysseyVectorAnimationCell* inbetweenCell = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetCellByIndex( tagCellIndex + i );
-            uint32 inbetweenFrame = inbetweenCell->GetFrame();
+            uint32 targetFrame = targetCell->GetFrame();
 
-            mCellBoxBuffer.Emplace( EInbetweeningRowCellBoxType::Inbetween
-                                  , i
-                                  , inbetweenFrame * frameWidth * LayoutScaleMultiplier
+            for( uint32 i = sourceIndex + 1; i < targetIndex; i++ )
+            {
+                IOdysseyVectorAnimationCell* inbetweenCell = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetCellByIndex( tagCellIndex + i );
+                uint32 inbetweenFrame = inbetweenCell->GetFrame();
+
+                mCellBoxBuffer.Emplace( EInbetweeningRowCellBoxType::Inbetween
+                                      , i
+                                      , inbetweenFrame * frameWidth * LayoutScaleMultiplier
+                                      , 0.0f
+                                      , inbetweenCell->GetLength() * frameWidth * LayoutScaleMultiplier
+                                      , mBoxSize.Y );
+            }
+
+            mCellBoxBuffer.Emplace( EInbetweeningRowCellBoxType::Target
+                                  , targetIndex
+                                  , targetFrame * frameWidth * LayoutScaleMultiplier
                                   , 0.0f
-                                  , inbetweenCell->GetLength() * frameWidth * LayoutScaleMultiplier
+                                  , targetCell->GetLength() * frameWidth * LayoutScaleMultiplier
                                   , mBoxSize.Y );
         }
-
-        mCellBoxBuffer.Emplace( EInbetweeningRowCellBoxType::Target
-                              , targetIndex
-                              , targetFrame * frameWidth * LayoutScaleMultiplier
-                              , 0.0f
-                              , targetCell->GetLength() * frameWidth * LayoutScaleMultiplier
-                              , mBoxSize.Y );
     }
 
     mBoxSize.X = mCellBoxBuffer.Last().x + mCellBoxBuffer.Last().w;
@@ -359,7 +367,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                                            , inbetweenerTagColor.G
                                            , inbetweenerTagColor.B
                                            , 0.25f );
-    FLinearColor targetColor = FLinearColor( 1.0f, 0.5f, 0.0f, 0.25f );
+    FLinearColor targetColor = FLinearColor( 1.0f, 0.5f, 0.5f, 0.5f );
     TArray< FVector2D > lines;
 
     for( int i = 0; ( i < (int) mCellBoxBuffer.Num() ); i++ )

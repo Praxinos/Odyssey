@@ -44,7 +44,10 @@ UOdysseyPainterEditorVectorEraserTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorEraserTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // force redrawing
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
@@ -52,8 +55,10 @@ UOdysseyPainterEditorVectorEraserTool::LoadVector( FOdysseyVectorGroupPaint* iSc
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
     iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing
+    iScene->GetEngine()->Invalidate( 0 );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    return 0;
 }
 
 uint64
@@ -76,8 +81,9 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorGroupPai
         iScene->Update( 0 );
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return 0;
 }
 
 uint64
@@ -102,8 +108,9 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorGroupPa
 
     /*}*/
     // refresh vector scene and GUI widgets via delegates.
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return 0;
 }
 
 uint64
@@ -124,8 +131,9 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorGroupPai
                                               , iPointInTexture.y ) );
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return 0;
 }
 
 void
@@ -336,10 +344,9 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
                                                            , mMin.y - Radius
                                                            , mMax.x + Radius
                                                            , mMax.y + Radius );
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                    | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                    | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -392,7 +399,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
                                                                   , removedObjectArray
                                                                   , removedVertexArray
                                                                   , removedSegmentArray
-                                                                  , retFlags );
+                                                                  , notificationFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -406,7 +413,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
     // this will resize the selection box, knowing that some paths may have been removed after erasal.
     vectorEngine->ResetHUD();
 
-    return retFlags;
+    return notificationFlags;
 }
 
 TSharedRef<SWidget>

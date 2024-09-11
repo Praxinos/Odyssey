@@ -25,6 +25,7 @@
 #include "OdysseyVectorTagInbetweener.generated.h"
 
 class FOdysseyVectorObject;
+class FOdysseyVectorGroupPaint;
 class FOdysseyVectorPoint;
 class FOdysseyVectorSegment;
 class FOdysseyVectorSegmentCubic;
@@ -118,16 +119,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void ResetGrid();
 
         /**
-         * @brief Callback called when the tag is added to the object's list of tags
-         */
-        virtual void Added() override;
-
-        /**
-         * @brief Callback called when the tag is removed from the object's list of tags
-         */
-        virtual void Removed() override;
-
-        /**
          * @brief Get the number of inbetween
          * @return the number of inbetween
          */
@@ -149,21 +140,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                           , float iNewSpacing
                           , bool iRelative );
 
-        /**
-         * @brief Get the rigidity for ARAP deformation
-         * @return the rigidity
-         */
-        uint32 GetARAPRigidity();
-
-        /**
-         * @brief Set the rigidity for ARAP deformation
-         * @param iRigidity
-         */
-        void SetARAPRigidity( uint32 iRigidity );
-
         void RedrawAnimationCells();
         void RedrawAnimationCells( uint32 iInbetweenCount );
-        void ResizeChart( bool iResetSpacing );
+        void ResetChart();
+        void ResizeChart();
         //void SetDrawingCount( uint32 iInbetweenCount );
         void SetGrid( eInbetweenerGridType iGridType
                     , uint32 iGridNumQuadX
@@ -254,8 +234,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void MoveWaypointsWithInbetween( uint32 iDrawingIndex
                                        , double iInbetweenOldSpacing
                                        , double iInbetweenNewSpacing );
-        void Share();
-        void Unshare();
         void ChainBreakdowns();
         void DeformGridAtInbetween( uint32 iDrawingIndex );
         void DeformPathsAtInbetween( uint32 iDrawingIndex );
@@ -289,7 +267,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                                                            | INVALIDATE_BREAKDOWN_LIST );
 
     protected:
+        FOdysseyVectorGroupPaint* mScene;
         FOdysseyVectorSharedEnv* mSharedEnv;
+        //FOdysseyVectorSharedEnv* mSharedEnv;
         std::vector<FInterpolatedPath> mInterpolatedPathBuffer;
         std::list<FInbetweenerRoute*> mRouteList;
         std::list<FInbetweenerBreakdown*> mBreakdownList;
@@ -301,9 +281,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         uint64 mInvalidationFlags;
         FColor mColor;
         bool bMapAsPolyline;
-        bool bShared;
         FInbetweenerBreakdown mMasterBreakdown;
         uint32 mUsedQuadCount;
         uint32 mUsedPointCount;
-        uint32 mARAPRigidity;
 };

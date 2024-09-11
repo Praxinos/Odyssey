@@ -11,6 +11,7 @@ class FOdysseyVectorGroupPaint;
 class FOdysseyVectorGroup;
 class FOdysseyVectorTag;
 class FOdysseyVectorSharedEnv;
+class FOdysseyVectorRoot;
 
 class ODYSSEYVECTOR_API FOdysseyVectorObject
 {
@@ -43,21 +44,21 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 UPDATE_NEEDPOLYLINE      = ( 1 << 5 );
 
         // invalidation flags
-        static const uint32 INVALIDATE_DEFAULT        = ( 1 << 0 );
-        static const uint32 INVALIDATE_MATRIX         = ( 1 << 1 );
-        static const uint32 INVALIDATE_HIERARCHY      = ( 1 << 2 );
-        static const uint32 INVALIDATE_SHAPE          = ( 1 << 3 );
-        static const uint32 INVALIDATE_COLOR          = ( 1 << 4 );
-        static const uint32 INVALIDATE_TOPOLOGY       = ( 1 << 5 );
-        static const uint32 INVALIDATE_TAG            = ( 1 << 6 );
-        static const uint32 INVALIDATE_TAG_LIST       = ( 1 << 7 );
-        static const uint32 INVALIDATE_CHILD_SHIFT    = 15;
-        static const uint32 INVALIDATE_CHILD_SHAPE    = ( INVALIDATE_SHAPE    << INVALIDATE_CHILD_SHIFT );
-        static const uint32 INVALIDATE_CHILD_COLOR    = ( INVALIDATE_COLOR    << INVALIDATE_CHILD_SHIFT );
-        static const uint32 INVALIDATE_CHILD_TOPOLOGY = ( INVALIDATE_TOPOLOGY << INVALIDATE_CHILD_SHIFT );
-        static const uint32 INVALIDATE_CHILD_TAG      = ( INVALIDATE_TAG      << INVALIDATE_CHILD_SHIFT );
-        static const uint32 INVALIDATE_CHILD_TAG_LIST = ( INVALIDATE_TAG_LIST << INVALIDATE_CHILD_SHIFT );
-        static const uint32 INVALIDATE_CHILD_MATRIX   = ( INVALIDATE_MATRIX   << INVALIDATE_CHILD_SHIFT );
+        static const uint64 INVALIDATE_DEFAULT        = ( 1ULL << 0 );
+        static const uint64 INVALIDATE_MATRIX         = ( 1ULL << 1 );
+        static const uint64 INVALIDATE_HIERARCHY      = ( 1ULL << 2 );
+        static const uint64 INVALIDATE_SHAPE          = ( 1ULL << 3 );
+        static const uint64 INVALIDATE_COLOR          = ( 1ULL << 4 );
+        static const uint64 INVALIDATE_TOPOLOGY       = ( 1ULL << 5 );
+        static const uint64 INVALIDATE_TAG            = ( 1ULL << 6 );
+        static const uint64 INVALIDATE_TAG_LIST       = ( 1ULL << 7 );
+        static const uint64 INVALIDATE_CHILD_SHIFT    = 15;
+        static const uint64 INVALIDATE_CHILD_SHAPE    = ( INVALIDATE_SHAPE    << INVALIDATE_CHILD_SHIFT );
+        static const uint64 INVALIDATE_CHILD_COLOR    = ( INVALIDATE_COLOR    << INVALIDATE_CHILD_SHIFT );
+        static const uint64 INVALIDATE_CHILD_TOPOLOGY = ( INVALIDATE_TOPOLOGY << INVALIDATE_CHILD_SHIFT );
+        static const uint64 INVALIDATE_CHILD_TAG      = ( INVALIDATE_TAG      << INVALIDATE_CHILD_SHIFT );
+        static const uint64 INVALIDATE_CHILD_TAG_LIST = ( INVALIDATE_TAG_LIST << INVALIDATE_CHILD_SHIFT );
+        static const uint64 INVALIDATE_CHILD_MATRIX   = ( INVALIDATE_MATRIX   << INVALIDATE_CHILD_SHIFT );
 
     public:
         static uint32 TreeToList( FOdysseyVectorObject* iObject, std::list<FOdysseyVectorObject*>& iOutList );
@@ -323,7 +324,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
          * @brief Invalidates the object and its ancestor objects as well
          * @param iInvalidationFlags
          */
-        virtual void Invalidate( uint32 iInvalidationFlags );
+        virtual void Invalidate( uint64 iInvalidationFlags );
 
         /**
          * @brief Get the expansion status
@@ -528,7 +529,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         std::list<FOdysseyVectorTag*>& GetTagList();
         void InvalidateTag( FOdysseyVectorTag* iTag );
         FOdysseyVectorSharedEnv* GetSharedEnv();
-        uint32 GetInvalidationFlags();
+        uint64 GetInvalidationFlags();
+        FOdysseyVectorRoot* GetRoot();
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags );
@@ -539,7 +541,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
                                , uint64 iFlags ){};
         virtual bool PickShape( const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ){ return false; };
         virtual void InvalidateChild( FOdysseyVectorObject* iChild
-                                    , uint32 iChildInvalidationFlags );
+                                    , uint64 iChildInvalidationFlags );
 
     protected:
         BLMatrix2D mLocalMatrix;
@@ -557,7 +559,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorBucket mBackgroundBucket;
         FOdysseyVectorBucket mForegroundBucket;
         uint32 mID;
-        uint32 mInvalidationFlags;
+        uint64 mInvalidationFlags;
         FString mName;
         double mOpacity;
         double mTranslationX;

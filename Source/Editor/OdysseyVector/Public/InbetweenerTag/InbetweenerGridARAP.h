@@ -13,7 +13,7 @@ class ODYSSEYVECTOR_API FInbetweenerGridARAP : public FInbetweenerGrid
         virtual ~FInbetweenerGridARAP(){};
         FInbetweenerGridARAP( FInbetweenerBreakdown* iBreakdown );
 
-        void Regularize();
+        void Regularize( uint32 iRigidity );
 
         /**
          * @brief Map paths to the grid according to the needs of the grid

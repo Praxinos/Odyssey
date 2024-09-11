@@ -13,6 +13,7 @@ FOdysseyVectorUndo::~FOdysseyVectorUndo()
 FOdysseyVectorUndo::FOdysseyVectorUndo( FOdysseyVectorGroupPaint *iScene, uint64 iReturnFlags )
     : mApplied( true )
     , mScene( iScene )
+    , mSharedEnv( iScene->GetSharedEnv() )
     , mReturnFlags( iReturnFlags )
 {
 }
@@ -246,6 +247,15 @@ FSnapshotInbetweenerBreakdown::FSnapshotInbetweenerBreakdown( FInbetweenerBreakd
         mBreakdown->GetGrid()->GetGeometry( mGridGeometry
                                           , eInbetweenerPointPositionType::TargetPosition );
     }
+
+    if( mSnapshotFlags & FSnapshotFlags::Breakdown::TRANSFORMATIONS )
+    {
+        mBreakdown->GetTargetTransform( mTranslationX
+                                      , mTranslationY
+                                      , mRotation
+                                      , mScalingX
+                                      , mScalingY );
+    }
 }
 
 void
@@ -255,6 +265,15 @@ FSnapshotInbetweenerBreakdown::Preswap()
     {
         mBreakdown->GetGrid()->GetGeometry( mPreswapGridGeometry
                                           , eInbetweenerPointPositionType::TargetPosition );
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Breakdown::TRANSFORMATIONS )
+    {
+        mBreakdown->GetTargetTransform( mPreswapTranslationX
+                                      , mPreswapTranslationY
+                                      , mPreswapRotation
+                                      , mPreswapScalingX
+                                      , mPreswapScalingY );
     }
 }
 
@@ -266,6 +285,23 @@ FSnapshotInbetweenerBreakdown::Restore()
         mBreakdown->GetGrid()->SetGeometry( mGridGeometry   , eInbetweenerPointPositionType::TargetPosition );
 
         mGridGeometry = mPreswapGridGeometry;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Breakdown::TRANSFORMATIONS )
+    {
+        mBreakdown->SetTargetTransform( mTranslationX
+                                      , mTranslationY
+                                      , mRotation
+                                      , mScalingX
+                                      , mScalingY );
+
+        mBreakdown->UpdateMatrix();
+
+        mTranslationX = mPreswapTranslationX;
+        mTranslationY = mPreswapTranslationY;
+        mRotation     = mPreswapRotation;
+        mScalingX     = mPreswapScalingX;
+        mScalingY     = mPreswapScalingY;
     }
 
     return true; // restore succeeded
@@ -412,16 +448,6 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
     , mDynamics()
     , mChart( iInbetweenerTag )
 {
-    /*-----------------------  Backup Transformations ---------------------- */
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::TRANSFORMATIONS )
-    {
-        mInbetweenerTag->GetMasterBreakdown()->GetTargetTransform( mTranslationX
-                                                                 , mTranslationY
-                                                                 , mRotation
-                                                                 , mScalingX
-                                                                 , mScalingY );
-    }
-
     /*-------------------------  Backup Mapping Type ----------------------- */
 /*
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::DRAWINGCOUNT )
@@ -503,15 +529,6 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
 void
 FSnapshotTagInbetweener::Preswap()
 {
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::TRANSFORMATIONS )
-    {
-        mInbetweenerTag->GetMasterBreakdown()->GetTargetTransform( mPreswapTranslationX
-                                                                 , mPreswapTranslationY
-                                                                 , mPreswapRotation
-                                                                 , mPreswapScalingX
-                                                                 , mPreswapScalingY );
-    }
-
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE )
     {
         bPreswapMapAsPolyline = mInbetweenerTag->GetMapAsPolyline();
@@ -575,24 +592,6 @@ FSnapshotTagInbetweener::Preswap()
 bool
 FSnapshotTagInbetweener::Restore()
 {
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::TRANSFORMATIONS )
-    {
-
-        mInbetweenerTag->GetMasterBreakdown()->SetTargetTransform( mTranslationX
-                                                                 , mTranslationY
-                                                                 , mRotation
-                                                                 , mScalingX
-                                                                 , mScalingY );
-
-        mInbetweenerTag->GetMasterBreakdown()->UpdateMatrix();
-
-        mTranslationX = mPreswapTranslationX;
-        mTranslationY = mPreswapTranslationY;
-        mRotation     = mPreswapRotation;
-        mScalingX     = mPreswapScalingX;
-        mScalingY     = mPreswapScalingY;
-    }
-
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE )
     {
         mInbetweenerTag->SetMapAsPolyline( bMapAsPolyline );

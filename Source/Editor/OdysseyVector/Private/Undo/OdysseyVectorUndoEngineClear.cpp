@@ -1,6 +1,7 @@
 #include "Undo/OdysseyVectorUndoEngineClear.h"
 
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 
 FOdysseyVectorUndoEngineClear::~FOdysseyVectorUndoEngineClear()
 {
@@ -21,14 +22,15 @@ FOdysseyVectorUndoEngineClear::Apply( UObject* iIgnored )
 
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mEngine->SetScene( mScene );
+    mEngine->GetRoot()->SetScene( mScene );
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
+    mScene->GetEngine()->Invalidate( 0 );
+    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 
     mScene = savedScene;
 }
@@ -40,11 +42,12 @@ FOdysseyVectorUndoEngineClear::Revert( UObject* iIgnored )
 
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mEngine->SetScene( mScene );
+    mEngine->GetRoot()->SetScene( mScene );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | mReturnFlags );
+    mScene->GetEngine()->Invalidate( 0 );
+    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 
     mScene = savedScene;
 }

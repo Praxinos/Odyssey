@@ -24,28 +24,68 @@
 #define M_PI 3.14159265358979323846L
 #endif
 
-void
-FOdysseyVectorTagInbetweener::UpdateBBox( ::ULIS::FRectD& iBBox
-                                        , eInbetweenerPointPositionType iPositionType )
+FOdysseyVectorTagInbetweener::~FOdysseyVectorTagInbetweener()
 {
-    double xmin = DBL_MAX, ymin = DBL_MAX, xmax = -DBL_MAX, ymax = -DBL_MAX;
-    bool hasBBox = false;
+    mRouteList.remove_if( []( FInbetweenerRoute* route )
+                              {
+                                  delete route;
 
-    for( FInbetweenerPoint& gridPoint : mBreakdownList.back()->GetGrid()->GetPointBuffer() )
-    {
-        const ::ULIS::FVec2D& position = gridPoint.GetPosition( iPositionType );
+                                  return true;
+                              } );
 
-        hasBBox = true;
+    //delete mGrid;
+    mBreakdownList.remove_if( []( FInbetweenerBreakdown* breakdown )
+                              {
+                                  if( breakdown != breakdown->GetMasterBreakdown() )
+                                  {
+                                      delete breakdown;
+                                  }
 
-        if ( position.x < xmin ) xmin = position.x;
-        if ( position.y < ymin ) ymin = position.y;
-        if ( position.x > xmax ) xmax = position.x;
-        if ( position.y > ymax ) ymax = position.y;
-    }
+                                  return true;
+                              } );
+}
 
-    iBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin - 0.001f, ymin - 0.001f
-                                                    , xmax + 0.001f, ymax + 0.001f ) 
-                        : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
+FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorSharedEnv* iSharedEnv
+                                                          , FOdysseyVectorObject* iOwnerObject
+                                                          , uint32 iNumQuadX
+                                                          , uint32 iNumQuadY )
+    : FOdysseyVectorTag( iOwnerObject )
+    //, mSharedEnv ( iSharedEnv )
+    // Remember the scene because when removing the tag, we'll need to be able to redraw inbetween cells but
+    // as the owner object won't be linked to the screne anymore, the scene won't be retrievable.
+    // Note: hence the Owner MUST be in the scene's hierarchy
+    , mScene ( iOwnerObject->GetScene() )
+    , mSharedEnv ( iOwnerObject->GetSharedEnv() )
+    //, mGrid( nullptr )
+    , mGridType( eInbetweenerGridType::ARAP )
+    , mGridNumQuadX( iNumQuadX )
+    , mGridNumQuadY( iNumQuadY )
+    , mInterpolationType( eInbetweenerInterpolationType::ARAP )
+    , mInvalidationFlags( INVALIDATE_MAP
+                        | INVALIDATE_BUFFERS
+                        | INVALIDATE_SOURCE
+                        | INVALIDATE_TARGET
+                        | INVALIDATE_ROUTES
+                        | INVALIDATE_SPACING
+                        | INVALIDATE_CELLS )
+    , mColor ( DEFAULT_RED_UINT8, DEFAULT_GREEN_UINT8, DEFAULT_BLUE_UINT8, DEFAULT_ALPHA_UINT8 )
+    , bMapAsPolyline( true )
+    , mMasterBreakdown( this )
+    , mChart( this )
+{
+    // the default breakdown (has range 0 <-> 1 )
+    mBreakdownList.emplace_back( &mMasterBreakdown );
+
+    // Note: Grid building needs the bbox to be set.
+    //SetGrid( mGridType, iNumQuadX, iNumQuadY );
+
+    // chart has 2 drawings at first.
+    mChart.GetDrawingBuffer().emplace_back( &mChart ).spacing = 0.0f;
+    mChart.GetDrawingBuffer().emplace_back( &mChart ).spacing = 1.0f;
+    //ResizeChart( true );
+
+    // Note: Matrix needs chart to be allocated first.
+    UpdateMatrix();
 }
 
 void
@@ -121,27 +161,6 @@ FOdysseyVectorTagInbetweener::Map()
 
     /* Map on first grid */
     mBreakdownList.front()->GetGrid()->MapInterpolatedPaths( mInterpolatedPathBuffer );
-}
-
-FOdysseyVectorTagInbetweener::~FOdysseyVectorTagInbetweener()
-{
-    mRouteList.remove_if( []( FInbetweenerRoute* route )
-                              {
-                                  delete route;
-
-                                  return true;
-                              } );
-
-    //delete mGrid;
-    mBreakdownList.remove_if( []( FInbetweenerBreakdown* breakdown )
-                              {
-                                  if( breakdown != breakdown->GetMasterBreakdown() )
-                                  {
-                                      delete breakdown;
-                                  }
-
-                                  return true;
-                              } );
 }
 
 std::list<FInbetweenerRoute*>&
@@ -232,61 +251,6 @@ FOdysseyVectorTagInbetweener::SetMapAsPolyline( bool iMapAsPolyline )
     Invalidate( INVALIDATE_MAP | INVALIDATE_CELLS | INVALIDATE_TARGET );
 }
 
-FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorSharedEnv* iSharedEnv
-                                                          , FOdysseyVectorObject* iOwnerObject
-                                                          , uint32 iNumQuadX
-                                                          , uint32 iNumQuadY )
-    : FOdysseyVectorTag( iOwnerObject )
-    // note: mSharedEnv is remebered as a member variable because GetEngine() calls
-    // GetClass() and the latter is a virtual function. virtual function don't work
-    // in destructors.
-    , mSharedEnv ( iSharedEnv )
-    //, mGrid( nullptr )
-    , mGridType( eInbetweenerGridType::ARAP )
-    , mGridNumQuadX( iNumQuadX )
-    , mGridNumQuadY( iNumQuadY )
-    , mInterpolationType( eInbetweenerInterpolationType::ARAP )
-    , mInvalidationFlags( INVALIDATE_MAP
-                        | INVALIDATE_BUFFERS
-                        | INVALIDATE_SOURCE
-                        | INVALIDATE_TARGET
-                        | INVALIDATE_ROUTES
-                        | INVALIDATE_SPACING
-                        | INVALIDATE_CELLS )
-    , mColor ( DEFAULT_RED_UINT8, DEFAULT_GREEN_UINT8, DEFAULT_BLUE_UINT8, DEFAULT_ALPHA_UINT8 )
-    , bMapAsPolyline( true )
-    , bShared ( false )
-    , mARAPRigidity ( 10 )
-    , mMasterBreakdown( this )
-    , mChart( this )
-{
-    // the default breakdown (has range 0 <-> 1 )
-    mBreakdownList.emplace_back( &mMasterBreakdown );
-
-    // Note: Grid building needs the bbox to be set.
-    //SetGrid( mGridType, iNumQuadX, iNumQuadY );
-
-    // chart has 2 drawings at first.
-    mChart.GetDrawingBuffer().emplace_back( &mChart ).spacing = 0.0f;
-    mChart.GetDrawingBuffer().emplace_back( &mChart ).spacing = 1.0f;
-    //ResizeChart( true );
-
-    // Note: Matrix needs chart to be allocated first.
-    UpdateMatrix();
-}
-
-uint32
-FOdysseyVectorTagInbetweener::GetARAPRigidity()
-{
-    return mARAPRigidity;
-}
-
-void
-FOdysseyVectorTagInbetweener::SetARAPRigidity( uint32 iRigidity )
-{
-    mARAPRigidity = iRigidity;
-}
-
 const FColor&
 FOdysseyVectorTagInbetweener::GetColor()
 {
@@ -306,32 +270,6 @@ void
 FOdysseyVectorTagInbetweener::SetColor( const FColor& iColor )
 {
     mColor = iColor;
-}
-
-void FOdysseyVectorTagInbetweener::Added()
-{
-    Share();
-}
-
-void FOdysseyVectorTagInbetweener::Removed()
-{
-    Unshare();
-}
-
-void
-FOdysseyVectorTagInbetweener::Share()
-{
-    mSharedEnv->AddSharedTag( this );
-
-    bShared = true;
-}
-
-void
-FOdysseyVectorTagInbetweener::Unshare()
-{
-    mSharedEnv->RemoveSharedTag( this );
-
-    bShared = false;
 }
 
 FInbetweenerBreakdown*
@@ -605,16 +543,14 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
 {
     if( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY )
     {
-        if( mOwner->GetScene() == nullptr )
+        if( ( mOwner->GetSharedEnv() != nullptr ) && ( bShared == false ) )
         {
-            Unshare();
+            Share( mSharedEnv );
         }
-        else
+
+        if( ( mOwner->GetSharedEnv() == nullptr ) && ( bShared == true ) )
         {
-            if( mSharedEnv->HasSharedTag( this ) == false )
-            {
-                Share();
-            }
+            Unshare( mSharedEnv );
         }
     }
 
@@ -623,6 +559,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST )
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
         {
@@ -760,29 +697,35 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         {
             Interpolate();
         }
+    }
 
-        if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
+    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
+    {
+        //if( mInvalidationFlags & INVALIDATE_CELLS )
         {
-            //if( mInvalidationFlags & INVALIDATE_CELLS )
-            {
-                RedrawAnimationCells();
-            }
+            RedrawAnimationCells();
         }
+    }
 
-        // reset tag's invalidation flags (do not confuse with object's invalidation flags)
-        if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
-        {
-            mInvalidationFlags = 0;
-        }
+    // reset tag's invalidation flags (do not confuse with object's invalidation flags)
+    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
+    {
+        mInvalidationFlags = 0;
     }
 }
 
 void
 FOdysseyVectorTagInbetweener::Invalidate( uint64 iInvalidationFlags )
 {
-    mOwner->InvalidateTag( this );
+    if( ( mInvalidationFlags & iInvalidationFlags ) == 0 )
+    {
+        if( mInvalidationFlags == 0 )
+        {
+            mOwner->InvalidateTag( this );
+        }
 
-    mInvalidationFlags |= iInvalidationFlags;
+        mInvalidationFlags |= iInvalidationFlags;
+    }
 }
 /*
 BLMatrix2D&
@@ -799,9 +742,15 @@ FOdysseyVectorTagInbetweener::GetTargetInverseWorldMatrix()
 */
 
 void
-FOdysseyVectorTagInbetweener::ResizeChart( bool iResetSpacing )
+FOdysseyVectorTagInbetweener::ResetChart()
 {
-    mChart.Resize( iResetSpacing );
+    mChart.Reset();
+}
+
+void
+FOdysseyVectorTagInbetweener::ResizeChart()
+{
+    mChart.Resize();
 }
 
 FInbetweenerChart&
@@ -944,9 +893,9 @@ FOdysseyVectorTagInbetweener::RedrawAnimationCells( uint32 iDrawingCount )
 {
     // scene could be non existent when the tag's owner is removed, as it would still trigger call to Update()
     // right after the removal of an object in the hierarchy.
-    if( mOwner->GetSharedEnv() )
+    if( mScene->GetSharedEnv() )
     {
-        IOdysseyVectorAnimationCell* animationCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
+        IOdysseyVectorAnimationCell* animationCell = mScene->GetEngine()->GetAnimationCell();
 
         if( animationCell )
         {
@@ -960,7 +909,8 @@ FOdysseyVectorTagInbetweener::RedrawAnimationCells( uint32 iDrawingCount )
                 if( nextAnimationCell )
                 {
                     //nextAnimationCell->GetEngine()->Invalidate();
-                    nextAnimationCell->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+                    // request redraw
+                    nextAnimationCell->GetEngine()->Invalidate( 0 );
                 }
 
                 animationCell = nextAnimationCell;
@@ -1295,6 +1245,8 @@ FOdysseyVectorTagInbetweener::ResetGrid()
     {
         breakdown->GetGrid()->Make();
     }
+
+    Invalidate( INVALIDATE_MAP );
 }
 
 eInbetweenerGridType

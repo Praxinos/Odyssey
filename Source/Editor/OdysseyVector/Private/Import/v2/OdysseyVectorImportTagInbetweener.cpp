@@ -135,7 +135,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     iInbetweenerTag.SetGridNumQuad( numQuadX, numQuadY );
                 }
                 break;
-
+/*
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_ARAPRIGIDITY:
                 {
                     uint32 arapRigidity;
@@ -145,7 +145,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     iInbetweenerTag.SetARAPRigidity( arapRigidity );
                 }
                 break;
-
+*/
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_BREAKDOWNS: // container
                 break;
 

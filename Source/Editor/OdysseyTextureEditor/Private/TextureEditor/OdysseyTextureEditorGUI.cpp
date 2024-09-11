@@ -25,7 +25,7 @@
 FOdysseyTextureEditorGUI::~FOdysseyTextureEditorGUI()
 {
 	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-	FOdysseyVectorEngine::OnSignalDelegate().RemoveAll(this);
+	FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll(this);
 }
 
 FOdysseyTextureEditorGUI::FOdysseyTextureEditorGUI(FOdysseyTextureEditorExtension* iExtension) :
@@ -34,7 +34,7 @@ FOdysseyTextureEditorGUI::FOdysseyTextureEditorGUI(FOdysseyTextureEditorExtensio
     // Get sure the binding is set up everytime we add or remove a layer in the layer stack.
 	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw( this, &FOdysseyTextureEditorGUI::OnCurrentLayerChanged );
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
-    FOdysseyVectorEngine::OnSignalDelegate().AddRaw( this, &FOdysseyTextureEditorGUI::OnVectorSceneSignal );
+    FOdysseyVectorEngine::OnNotifyDelegate().AddRaw( this, &FOdysseyTextureEditorGUI::OnVectorSceneNotify );
     // bind refresh function to delegates on existing vector scenes when the source changes. Needed to refresh necessary widgets.
     mExtension->GetEditor()->OnSourceChanged().AddRaw( this, &FOdysseyTextureEditorGUI::OnSourceChanged );
 }
@@ -49,7 +49,7 @@ FOdysseyTextureEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack
         FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
         FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
 
-        OnVectorSceneSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
+        OnVectorSceneNotify( vectorScene, FOdysseyVectorEngine::NOTIFY_ALL );
     }
     else
     {
@@ -74,11 +74,11 @@ FOdysseyTextureEditorGUI::OnSourceChanged()
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
-            OnVectorSceneSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
+            OnVectorSceneNotify( vectorScene, FOdysseyVectorEngine::NOTIFY_ALL );
         }
         else
         {
-            OnVectorSceneSignal( nullptr, FOdysseyVectorEngine::SIGNAL_ALL );
+            OnVectorSceneNotify( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
         }
     }
 }
@@ -178,7 +178,7 @@ FOdysseyTextureEditorGUI::BindShortcuts(FBaseToolkit* iToolkit)
 //------------------------------------------------------------------------------ Getters
 
 void
-FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags )
+FOdysseyTextureEditorGUI::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags )
 {
     TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
     if (!source)

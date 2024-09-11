@@ -17,7 +17,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::UOdysseyPainterEditorVectorTagInb
     , GridType ( eInbetweenerGridType::ARAP )
     , DivisionX ( 8 )
     , DivisionY ( 8 )
-    , Rigidity ( 10 )
+    //, Rigidity ( 10 )
     , MapAsPolyline( true )
     , Color( FOdysseyVectorTagInbetweener::DEFAULT_RED_UINT8
            , FOdysseyVectorTagInbetweener::DEFAULT_GREEN_UINT8
@@ -50,7 +50,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
         DivisionX = selectedInbetweenerTag->GetGridNumQuadX();
         DivisionY = selectedInbetweenerTag->GetGridNumQuadY();
 
-        Rigidity = selectedInbetweenerTag->GetARAPRigidity();
+        //Rigidity = selectedInbetweenerTag->GetARAPRigidity();
     }
 }
 
@@ -92,12 +92,12 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
 
         if( iPropertyName == "DivisionY" )
             selectedInbetweenerTag->SetGridNumQuad( selectedInbetweenerTag->GetGridNumQuadX(), DivisionY );
-
+/*
         if( iPropertyName == "Rigidity" )
         {
             selectedInbetweenerTag->SetARAPRigidity( Rigidity );
         }
-
+*/
         if( iPropertyName == "MapAsPolyline" )
             selectedInbetweenerTag->SetMapAsPolyline( MapAsPolyline );
 
@@ -121,33 +121,32 @@ UOdysseyPainterEditorVectorTagInbetweenerView::MakeUndo( const FName& iPropertyN
                                                        , const FName& iMemberPropertyName
                                                        , const FName& iCategory )
 {
-    uint64 retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                    | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
 /*
     if( iPropertyName == "InbetweenCount" )
         snapshotFlags |= FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT;
 */
     if( iPropertyName == "InterpolationType" )
-        return new FOdysseyVectorUndoTagInbetweenerInterpolationType( mScene, mSelectedInbetweenerTagArray, retFlags );
+        return new FOdysseyVectorUndoTagInbetweenerInterpolationType( mScene, mSelectedInbetweenerTagArray, notificationFlags );
 
     if( iPropertyName == "DivisionX" )
-        return new FOdysseyVectorUndoTagInbetweenerGridSize( mScene, mSelectedInbetweenerTagArray, retFlags );
+        return new FOdysseyVectorUndoTagInbetweenerGridSize( mScene, mSelectedInbetweenerTagArray, notificationFlags );
 
     if( iPropertyName == "DivisionY" )
-        return new FOdysseyVectorUndoTagInbetweenerGridSize( mScene, mSelectedInbetweenerTagArray, retFlags );
+        return new FOdysseyVectorUndoTagInbetweenerGridSize( mScene, mSelectedInbetweenerTagArray, notificationFlags );
 /*
     if( iPropertyName == "Rigidity" )
         snapshotFlags |= FSnapshotFlags::Tag::Inbetweener::ARAPRIGIDITY;
 */
     if( iPropertyName == "GridType" )
-        return new FOdysseyVectorUndoTagInbetweenerGridType( mScene, mSelectedInbetweenerTagArray, retFlags );
+        return new FOdysseyVectorUndoTagInbetweenerGridType( mScene, mSelectedInbetweenerTagArray, notificationFlags );
 
     if( iPropertyName == "Color" )
-        return new FOdysseyVectorUndoTagInbetweenerColor( mScene, mSelectedInbetweenerTagArray, retFlags );
+        return new FOdysseyVectorUndoTagInbetweenerColor( mScene, mSelectedInbetweenerTagArray, notificationFlags );
 
     if( iPropertyName == "MapAsPolyline" )
-        return new FOdysseyVectorUndoTagInbetweenerMapAsPolyline( mScene, mSelectedInbetweenerTagArray, retFlags );
+        return new FOdysseyVectorUndoTagInbetweenerMapAsPolyline( mScene, mSelectedInbetweenerTagArray, notificationFlags );
 
 
     return nullptr;
@@ -187,8 +186,8 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PostEditChangeProperty( FProperty
                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
         mScene->Update( 0 );
-        // calls delegates
-        mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+        // redraw
+        mScene->GetEngine()->Invalidate( 0 );
     }
 }
 

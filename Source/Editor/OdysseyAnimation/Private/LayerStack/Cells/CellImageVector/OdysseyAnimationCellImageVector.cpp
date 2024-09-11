@@ -16,6 +16,7 @@
 // from module OdysseyFile
 #include "OdysseyFile.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
 
 TSharedRef<FOdysseyAnimationCellImageVector>
@@ -41,15 +42,15 @@ FOdysseyAnimationCellImageVector::~FOdysseyAnimationCellImageVector()
     UOdysseyAnimationLayerImageVector::OnIsColoredChanged().RemoveAll( this );
     UOdysseyAnimationLayerImageVector::OnIsWireframeChanged().RemoveAll( this );
 
-    GetLayer()->GetSharedEnv()->RemoveChild( mEngine );
-    delete mEngine;
+    GetLayer()->GetSharedEnv()->RemoveChild( mRoot );
+    delete mRoot;
 
-    mEngine = nullptr;
+    mRoot = nullptr;
 }
 
 FOdysseyAnimationCellImageVector::FOdysseyAnimationCellImageVector(UOdysseyAnimationLayerImageVector* iLayer, int iLength)
     : FOdysseyAnimationCell(iLength, iLayer)
-    , mEngine(nullptr)
+    , mRoot(nullptr)
     , mVectorBlockId(FGuid::NewGuid())
     , mWidth(0)
     , mHeight(0)
@@ -83,19 +84,19 @@ FOdysseyAnimationCellImageVector::Init(int iWidth, int iHeight)
     mWidth = iWidth;
     mHeight = iHeight;
 
-    mEngine = new FOdysseyVectorEngine( this
-                                      , new FOdysseyVectorGroupPaint( "Scene" )
-                                      , (double)iWidth
-                                      , (double)iHeight );
+    mRoot = new FOdysseyVectorRoot( this
+                                  , new FOdysseyVectorGroupPaint( "Scene" )
+                                  , (double)iWidth
+                                  , (double)iHeight );
 
-    GetLayer()->GetSharedEnv()->AppendChild( mEngine );
+    GetLayer()->GetSharedEnv()->AppendChild( mRoot );
 
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     UOdysseyAnimationLayerImageVector::OnIsColoredChanged().AddRaw( this, &FOdysseyAnimationCellImageVector::OnIsColoredChanged );
     UOdysseyAnimationLayerImageVector::OnIsWireframeChanged().AddRaw( this, &FOdysseyAnimationCellImageVector::OnIsWireframeChanged );
 
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
-    mVectorBlock->Init(mVectorBlockId, mEngine, iWidth, iHeight, animation->Format());
+    mVectorBlock->Init(mVectorBlockId, mRoot->GetEngine(), iWidth, iHeight, animation->Format());
     mVectorBlock->OnInvalidated().AddRaw(this, &FOdysseyAnimationCellImageVector::OnVectorBlockInvalidated);
 }
 
@@ -108,7 +109,13 @@ FOdysseyAnimationCellImageVector::GetType() const
 FOdysseyVectorEngine*
 FOdysseyAnimationCellImageVector::GetEngine() const
 {
-    return mEngine;
+    return mRoot->GetEngine();
+}
+
+FOdysseyVectorRoot*
+FOdysseyAnimationCellImageVector::GetRoot() const
+{
+    return mRoot;
 }
 
 TSharedPtr<FOdysseyVectorBlock>
@@ -165,6 +172,13 @@ FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 
     if( Ar.IsLoading() )
     {
+        if ( mRoot == nullptr )
+        {
+            UOdysseyAnimation* animation = GetLayer()->GetAnimation();
+
+            Init( animation->Width(), animation->Height() );
+        }
+
         if (!FOdysseyAnimationCellImageVectorImport::Read( this, Ar ))
         {
             //Old Style No Chunk Loading
@@ -176,7 +190,8 @@ FOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 void
 FOdysseyAnimationCellImageVector::PostLoad()
 {
-    mEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
+    mRoot->GetEngine()->Invalidate( 0 );
+    FOdysseyVectorEngine::Notify( mRoot->GetScene(), FOdysseyVectorEngine::NOTIFY_ALL );
 }
 
 void
@@ -185,7 +200,7 @@ FOdysseyAnimationCellImageVector::OnIsColoredChanged(UOdysseyAnimationLayerImage
     if (iLayer != GetLayer())
         return;
 
-    mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    mRoot->GetEngine()->Invalidate( 0 );
 }
 
 void
@@ -194,7 +209,7 @@ FOdysseyAnimationCellImageVector::OnIsWireframeChanged(UOdysseyAnimationLayerIma
     if (iLayer != GetLayer())
         return;
 
-    mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    mRoot->GetEngine()->Invalidate( 0 );
 }
 
 bool
@@ -231,7 +246,7 @@ FOdysseyAnimationCellImageVector::GetMediaProvider(uint32 iFrameIndex) const
     //Don't create a mediaRaster if there is an image render in use
     FScopeLock lock(&mImageRenderingMutex);
 
-    TSharedPtr<FOdysseyMediaVector> mediaVector = MakeShared<FOdysseyMediaVector>(mEngine->GetScene());
+    TSharedPtr<FOdysseyMediaVector> mediaVector = MakeShared<FOdysseyMediaVector>(mRoot->GetScene());
     mMediaVector = mediaVector;
     FOdysseyMediaProvider mediaProvider;
     mediaProvider.Add(mediaVector);
@@ -250,8 +265,8 @@ FOdysseyAnimationCellImageVector::CreateCellFromFrame(uint32 iFrameIndex) const
     //Copy Current Cell block at given frameindex
     //Create a new Vector cell from the given block
     TSharedRef<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(GetLayer(), 1, mWidth, mHeight);
-    FOdysseyVectorGroupPaint* newScene = static_cast<FOdysseyVectorGroupPaint*>(mEngine->GetScene()->Copy());
-    cell->GetEngine()->SetScene(newScene);
+    FOdysseyVectorGroupPaint* newScene = static_cast<FOdysseyVectorGroupPaint*>(mRoot->GetScene()->Copy());
+    cell->GetRoot()->SetScene(newScene);
     newScene->UpdateMatrix();
     newScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
@@ -293,7 +308,7 @@ FOdysseyAnimationCellImageVector::GetLastCell()
 FOdysseyVectorEngine* 
 FOdysseyAnimationCellImageVector::GetEngine()
 {
-    return mEngine;
+    return mRoot->GetEngine();
 }
 
 // Implements Interface IOdysseyVectorAnimationCell::GetIndex
