@@ -68,14 +68,13 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
             std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
             uint32 fractionCount = segment->GetFractionCount();
 
-            polylinePointArray.reserve( 2 + ( fractionCount - 1 ) );
-
+            polylinePointArray.reserve( 2 + fractionCount - 1 );
             polylinePointArray.push_back( &mInterpolatedPointBuffer[vertex0->GetID()] );
 
-            for( uint32 i = 0; i < fractionCount - 1; i++ )
+            for( uint32 i = 1; i < fractionCount; i++ )
             {
                 FOdysseyVectorFraction& fraction = fractionCache[i];
-                FInterpolatedPoint& interpolatedPoint = mInterpolatedPointBuffer.emplace_back( fraction.point[1], mInterpolatedPointBuffer.size() );
+                FInterpolatedPoint& interpolatedPoint = mInterpolatedPointBuffer.emplace_back( fraction.point[0], mInterpolatedPointBuffer.size() );
 
                 polylinePointArray.push_back( &interpolatedPoint );
             }

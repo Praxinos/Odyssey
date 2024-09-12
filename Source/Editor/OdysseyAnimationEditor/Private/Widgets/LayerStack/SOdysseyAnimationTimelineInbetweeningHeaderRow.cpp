@@ -13,6 +13,7 @@
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorGroupPaint.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -73,20 +74,42 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::Construct( const typename STable
 }
 
 FReply
+SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonUp( const FGeometry & MyGeometry
+                                                               , const FPointerEvent & MouseEvent )
+{
+    return FReply::Handled();
+}
+
+FReply
 SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonDown( const FGeometry & MyGeometry
                                                                  , const FPointerEvent & MouseEvent )
 {
-    FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetSharedEnv();
-    std::list<FOdysseyVectorTag*>& sharedTagList = sharedEnv->GetSharedTagList();
+    uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                    | FOdysseyPainterEditor::UI_UPDATE_HUD;
+    FReply reply = FReply::Unhandled();
 
-    for( FOdysseyVectorTag* sharedTag : sharedTagList )
+	if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
     {
-        sharedTag->GetOwner()->GetEngine()->ClearObjectSelection();
+        FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetSharedEnv();
+        std::list<FOdysseyVectorTag*>& sharedTagList = sharedEnv->GetSharedTagList();
+
+        for( FOdysseyVectorTag* sharedTag : sharedTagList )
+        {
+            sharedTag->GetOwner()->GetEngine()->ClearObjectSelection();
+        }
+
+        // This is used by the list view to determine which row is selected.
+        mInbetweenerTag->GetOwner()->GetEngine()->SelectObject( mInbetweenerTag->GetOwner() );
+        // request redraw
+        mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->Invalidate( 0 );
+        // update UI
+        FOdysseyVectorEngine::Notify( nullptr, retFlags );
+
+        reply = FReply::Handled();
     }
 
-    mInbetweenerTag->GetOwner()->GetEngine()->SelectObject( mInbetweenerTag->GetOwner() );
-
-    return FReply::Handled();
+    return reply;
 }
 
 bool

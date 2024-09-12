@@ -146,8 +146,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                                                , iPointInTexture.y
                                                , FSlateApplication::Get().GetModifierKeys().IsControlDown() );
 
-                    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS
-                                  | FOdysseyVectorObject::UPDATE_INTERACTIVE );
+                    iScene->Update( /*| FOdysseyVectorObject::UPDATE_INTERACTIVE*/0 );
                 }
             }
         }

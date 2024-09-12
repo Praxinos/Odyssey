@@ -36,6 +36,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorTag
         virtual void UpdateMatrix() = 0;
         virtual void Share( FOdysseyVectorSharedEnv* iSharedEnv );
         virtual void Unshare( FOdysseyVectorSharedEnv* iSharedEnv );
+        virtual void ObjectAdded();
+        virtual void ObjectRemoved();
+        virtual void Added();
+        virtual void Removed();
 
         FOdysseyVectorObject* GetOwner();
 

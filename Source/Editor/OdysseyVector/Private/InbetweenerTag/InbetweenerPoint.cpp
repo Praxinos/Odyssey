@@ -82,7 +82,7 @@ void
 FInbetweenerPoint::SetSourcePosition( double iX, double iY )
 {
     FInbetweenerBreakdown* prevBreakdown = mGrid->GetBreakdown()->GetPrevBreakdown();
-    uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_SOURCE
+    uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEGRID
                              | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
                              | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING;
     uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
@@ -95,7 +95,7 @@ FInbetweenerPoint::SetSourcePosition( double iX, double iY )
         prevBreakdown->GetGrid()->GetPointBuffer()[pointIndex].mTargetPosition.x = mSourcePosition.x;
         prevBreakdown->GetGrid()->GetPointBuffer()[pointIndex].mTargetPosition.y = mSourcePosition.y;
 
-        invalidationFlags |= FOdysseyVectorTagInbetweener::INVALIDATE_TARGET;
+        invalidationFlags |= FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID;
     }
 
     mGrid->GetBreakdown()->GetInbetweenerTag()->Invalidate( invalidationFlags );
@@ -105,7 +105,7 @@ void
 FInbetweenerPoint::SetTargetPosition( double iX, double iY )
 {
     FInbetweenerBreakdown* nextBreakdown = mGrid->GetBreakdown()->GetNextBreakdown();
-    uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_TARGET
+    uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID
                              | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
                              | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING;
     uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
@@ -118,7 +118,7 @@ FInbetweenerPoint::SetTargetPosition( double iX, double iY )
         nextBreakdown->GetGrid()->GetPointBuffer()[pointIndex].mSourcePosition.x = mTargetPosition.x;
         nextBreakdown->GetGrid()->GetPointBuffer()[pointIndex].mSourcePosition.y = mTargetPosition.y;
 
-        invalidationFlags |= FOdysseyVectorTagInbetweener::INVALIDATE_SOURCE;
+        invalidationFlags |= FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEGRID;
     }
 
     mGrid->GetBreakdown()->GetInbetweenerTag()->Invalidate( invalidationFlags );

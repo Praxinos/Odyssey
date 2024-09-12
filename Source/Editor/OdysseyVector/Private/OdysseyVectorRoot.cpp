@@ -7,6 +7,7 @@ FOdysseyVectorRoot::FOdysseyVectorRoot( IOdysseyVectorAnimationCell* iAnimationC
                                       , uint32 iPreferredHeight )
     : FOdysseyVectorObject("ROOT")
     , mEngine ( iAnimationCell, this, iPreferredWidth, iPreferredHeight )
+    , mScene ( nullptr )
 {
     SetScene( iScene );
 }
@@ -43,32 +44,16 @@ FOdysseyVectorRoot::Invalidate( uint64 iInvalidationFlags )
 void
 FOdysseyVectorRoot::SetScene( FOdysseyVectorGroupPaint* iScene )
 {
-    // We dont use AddChild or RemoveChild because they are
-    // overlodaded to prevent manual addition or removal of child objects.
+    if( mScene )
+    {
+        RemoveChild( mScene );
+    }
 
-    mChildrenList.clear();
-    mInvalidatedChildrenList.clear();
-
-    iScene->SetParent( this );
-    mChildrenList.push_back( iScene );
+    AppendChild( iScene );
 
     mEngine.ResetHUD();
 
-    iScene->UpdateMatrix();
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-}
-
-// forbid child removal
-uint32
-FOdysseyVectorRoot::RemoveChild( FOdysseyVectorObject* iChild )
-{
-    return FOdysseyVectorObject::HIERARCHY_CHANGE_FORBIDDEN;
-}
-
-// forbid child addition
-uint32
-FOdysseyVectorRoot::AddChild( FOdysseyVectorObject* iChild
-                            , FOdysseyVectorObject* iInsertAfter )
-{
-    return FOdysseyVectorObject::HIERARCHY_CHANGE_FORBIDDEN;
+    mScene = iScene;
+    mScene->UpdateMatrix();
+    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 }

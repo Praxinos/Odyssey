@@ -39,12 +39,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorRoot : public FOdysseyVectorObject
 
         void SetScene( FOdysseyVectorGroupPaint* iScene );
         FOdysseyVectorGroupPaint* GetScene();
-        virtual uint32 RemoveChild( FOdysseyVectorObject* iChild ) override;
-        virtual uint32 AddChild( FOdysseyVectorObject* iChild
-                               , FOdysseyVectorObject* iInsertAfter ) override;
         virtual void Invalidate( uint64 iInvalidationFlags ) override;
         FOdysseyVectorEngine* GetEngine();
 
     protected:
         FOdysseyVectorEngine mEngine;
+       FOdysseyVectorGroupPaint* mScene;
 };

@@ -240,8 +240,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
     // retrieve parent widget
     const TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> listView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
     // retrieve timing data
-    int32 tagCellIndex = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetIndex();
-    IOdysseyVectorAnimationCell* sourceCell = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell();
+    uint32 tagCellIndex = mInbetweenerTag->GetAnimationCellIndex();
+    IOdysseyVectorAnimationCell* sourceCell = mInbetweenerTag->GetAnimationCell();
     uint32 sourceFrame = sourceCell->GetFrame();
     // compute geometry
     FOdysseyAnimationEditorExtension* animationEditorExtension = listView.Get()->GetAnimationEditorExtension();
@@ -300,7 +300,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
         }
     }
 
-    mBoxSize.X = mCellBoxBuffer.Last().x + mCellBoxBuffer.Last().w;
+    mBoxSize.X = ( mCellBoxBuffer.Last().x + mCellBoxBuffer.Last().w ) - ( mCellBoxBuffer[0].x );
 }
 
 FVector2D
@@ -421,7 +421,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
     lines.Push( FVector2D( mBoxPos.X             , mBoxPos.Y              ) );
     lines.Push( FVector2D( mBoxPos.X + mBoxSize.X, mBoxPos.Y              ) );
     lines.Push( FVector2D( mBoxPos.X + mBoxSize.X, mBoxPos.Y + mBoxSize.Y ) );
-    lines.Push( FVector2D( 0.0f                  , mBoxPos.Y + mBoxSize.Y ) );
+    lines.Push( FVector2D( mBoxPos.X             , mBoxPos.Y + mBoxSize.Y ) );
 
 	FSlateDrawElement::MakeLines( OutDrawElements
 		                        , LayerId

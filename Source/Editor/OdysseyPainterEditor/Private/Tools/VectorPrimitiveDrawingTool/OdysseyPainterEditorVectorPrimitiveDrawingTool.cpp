@@ -176,7 +176,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
 
         //mSelectionChanged.Broadcast(iScene);
 
-        iScene->Update( 0 ); // update invalidated objects
+        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE ); // update invalidated objects
     }
 
     // redraw

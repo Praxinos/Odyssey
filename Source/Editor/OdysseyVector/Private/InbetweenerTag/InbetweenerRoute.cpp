@@ -83,9 +83,9 @@ FInbetweenerRoute::Update( uint32 iUpdateFlags
                          , uint64 iOwnerInvalidationFlags
                          , uint64 iTagInvalidationFlags )
 {
-    if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_ROUTES  )
-     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGET  ) 
-     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SPACING ) ) // when chart is modified
+    if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_ROUTES     )
+     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID ) 
+     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SPACING    ) ) // when chart is modified
     {
         for( FInbetweenerTrajectory& trajectory : mTrajectoryBuffer )
         {

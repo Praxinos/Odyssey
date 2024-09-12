@@ -531,6 +531,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorSharedEnv* GetSharedEnv();
         uint64 GetInvalidationFlags();
         FOdysseyVectorRoot* GetRoot();
+        virtual void Added();
+        virtual void Removed();
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags );
@@ -542,6 +544,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual bool PickShape( const ::ULIS::FRectD& iRoi, uint32 iSelectionFlags ){ return false; };
         virtual void InvalidateChild( FOdysseyVectorObject* iChild
                                     , uint64 iChildInvalidationFlags );
+        void Recurse( void (FOdysseyVectorObject::*Func)() );
 
     protected:
         BLMatrix2D mLocalMatrix;

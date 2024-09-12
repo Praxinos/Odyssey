@@ -1718,9 +1718,12 @@ FOdysseyVectorEngine::RemoveObjects( const std::list<FOdysseyVectorObject*>& iOb
 {
     for( FOdysseyVectorObject* vectorObject : iObjectList )
     {
-        if( vectorObject->GetParent()->RemoveChild( vectorObject ) == FOdysseyVectorObject::HIERARCHY_CHANGE_SUCCESS )
+        if( vectorObject != GetScene() )
         {
-            oRemovedObjectArray.push_back( vectorObject );
+            if( vectorObject->GetParent()->RemoveChild( vectorObject ) == FOdysseyVectorObject::HIERARCHY_CHANGE_SUCCESS )
+            {
+                oRemovedObjectArray.push_back( vectorObject );
+            }
         }
     }
 }

@@ -33,3 +33,23 @@ FOdysseyVectorTag::Unshare( FOdysseyVectorSharedEnv* iSharedEnv )
 
     bShared = false;
 }
+
+void
+FOdysseyVectorTag::ObjectAdded()
+{
+}
+
+void
+FOdysseyVectorTag::ObjectRemoved()
+{
+}
+
+void
+FOdysseyVectorTag::Added()
+{
+}
+
+void
+FOdysseyVectorTag::Removed()
+{
+}

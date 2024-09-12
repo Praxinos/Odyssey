@@ -82,6 +82,8 @@ FOdysseyVectorObject::AddTag( FOdysseyVectorTag* iTag )
 {
     mTagList.push_back( iTag );
 
+    iTag->Added();
+
     Invalidate( FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST );
 }
 
@@ -89,6 +91,8 @@ void
 FOdysseyVectorObject::RemoveTag( FOdysseyVectorTag* iTag )
 {
     mTagList.remove( iTag );
+
+    iTag->Removed();
 
     Invalidate( FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST );
 }
@@ -167,6 +171,23 @@ FOdysseyVectorObject::HasBaseClass( uint32 iBaseClassID )
     return false;
 }
 
+void
+FOdysseyVectorObject::Added()
+{
+    for( FOdysseyVectorTag* tag : mTagList )
+    {
+        tag->ObjectAdded();
+    }
+}
+
+void
+FOdysseyVectorObject::Removed()
+{
+    for( FOdysseyVectorTag* tag : mTagList )
+    {
+        tag->ObjectRemoved();
+    }
+}
 
 void
 FOdysseyVectorObject::UpdateShape( uint32 iUpdateFlags )
@@ -184,31 +205,14 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
 {
     if( mInvalidationFlags )
     {
-        if( mInvalidationFlags & INVALIDATE_HIERARCHY )
-        {
-            for( FOdysseyVectorObject* child : mChildrenList )
-            {
-                child->mInvalidationFlags |= INVALIDATE_HIERARCHY;
+        // update children first by recursively calling the Update function and, if needed,
+        // removing the object from the invalidated object list, in the same call.
+        mInvalidatedChildrenList.remove_if( [iUpdateFlags] ( FOdysseyVectorObject* child )
+                                            {
+                                                child->Update( iUpdateFlags );
 
-                child->Update( iUpdateFlags );
-            }
-
-            mInvalidatedChildrenList.remove_if( [iUpdateFlags] ( FOdysseyVectorObject* child )
-                                                {
-                                                    return child->IsInvalidated() == false;
-                                                } );
-        }
-        else
-        {
-            // update children first by recursively calling the Update function and, if needed,
-            // removing the object from the invalidated object list, in the same call.
-            mInvalidatedChildrenList.remove_if( [iUpdateFlags] ( FOdysseyVectorObject* child )
-                                                {
-                                                    child->Update( iUpdateFlags );
-
-                                                    return child->IsInvalidated() == false;
-                                                } );
-        }
+                                                return child->IsInvalidated() == false;
+                                            } );
 
         UpdateShape( iUpdateFlags );
 
@@ -484,7 +488,6 @@ FOdysseyVectorObject::UpdateMatrix()
 {
     FOdysseyVectorGroupPaint* scene = GetScene();
 
-    // TODO: I believe this check can be removed
     if( scene )
     {
         mLocalMatrix.reset();
@@ -722,21 +725,20 @@ FOdysseyVectorObject::InvalidateTag( FOdysseyVectorTag* iTag )
 void
 FOdysseyVectorObject::Invalidate( uint64 iInvalidationFlags )
 {
-    if( ( mInvalidationFlags & iInvalidationFlags ) == 0 )
+    if ( mParent )
     {
-        if ( mParent )
-        {
-            mParent->InvalidateChild( this, iInvalidationFlags );
-        }
-
-        mInvalidationFlags |= ( INVALIDATE_DEFAULT | iInvalidationFlags );
+        mParent->InvalidateChild( this, iInvalidationFlags );
     }
+
+    mInvalidationFlags |= ( INVALIDATE_DEFAULT | iInvalidationFlags );
 }
 
 FOdysseyVectorEngine*
 FOdysseyVectorObject::GetEngine()
 {
-    return GetRoot()->GetEngine();
+    FOdysseyVectorRoot* root = GetRoot();
+
+    return root ? root->GetEngine() : nullptr;
 }
 
 FOdysseyVectorRoot*
@@ -888,6 +890,17 @@ FOdysseyVectorObject::Pick( FOdysseyVectorGroup* iSelectionSpace, const ::ULIS::
     return nullptr;
 }
 
+void
+FOdysseyVectorObject::Recurse( void (FOdysseyVectorObject::*Func)() )
+{
+    (this->*Func)();
+
+    for( FOdysseyVectorObject* child : mChildrenList )
+    {
+        child->Recurse( Func );
+    }
+}
+
 uint32
 FOdysseyVectorObject::AppendChild( FOdysseyVectorObject* iChild )
 {
@@ -947,6 +960,11 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
         iChild->Invalidate( INVALIDATE_HIERARCHY );
     }
 
+    if( ret == HIERARCHY_CHANGE_SUCCESS )
+    {
+        iChild->Recurse( &FOdysseyVectorObject::Added );
+    }
+
     return ret;
 }
 
@@ -971,11 +989,12 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
         iChild->mOldParent = this;
         iChild->mParent = nullptr;
 
-        // update removed object immediately so that it can unregister itself e.g
-        iChild->Invalidate( INVALIDATE_HIERARCHY );
-        iChild->Update( 0 );
-
         ret = HIERARCHY_CHANGE_SUCCESS; // removal succeeded
+    }
+
+    if( ret == HIERARCHY_CHANGE_SUCCESS )
+    {
+        iChild->Recurse( &FOdysseyVectorObject::Removed );
     }
 
     return ret;

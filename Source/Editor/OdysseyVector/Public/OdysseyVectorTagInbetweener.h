@@ -31,6 +31,7 @@ class FOdysseyVectorSegment;
 class FOdysseyVectorSegmentCubic;
 class FOdysseyVectorPath;
 class FOdysseyVectorSharedEnv;
+class IOdysseyVectorAnimationCell;
 
 UENUM()
 enum class eInbetweenerGridType : uint8
@@ -206,6 +207,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void ResetLayout( bool iFreeMemNow );
         FInbetweenerDrawing* GetDrawing( uint32 iIndex );
         virtual void UpdateMatrix() override;
+        virtual void ObjectAdded() override;
+        virtual void ObjectRemoved() override;
+        virtual void Added() override;
+        virtual void Removed() override;
+        uint32 GetAnimationCellIndex();
+        IOdysseyVectorAnimationCell* GetAnimationCell();
 
     protected:
         /**
@@ -244,24 +251,26 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         static const uint8 DEFAULT_ALPHA_UINT8 = 255;
 
         static const uint64 INVALIDATE_MAP               = ( 1LL <<  0 );
-        static const uint64 INVALIDATE_BUFFERS           = ( 1LL <<  1 );
-        static const uint64 INVALIDATE_SPACING           = ( 1LL <<  2 );
-        static const uint64 INVALIDATE_GRIDTYPE          = ( 1LL <<  3 );
-        static const uint64 INVALIDATE_INTERPOLATIONTYPE = ( 1LL <<  4 );
-        static const uint64 INVALIDATE_CELLS             = ( 1LL <<  5 );
-        static const uint64 INVALIDATE_SOURCE            = ( 1LL <<  6 );
-        static const uint64 INVALIDATE_TARGET            = ( 1LL <<  7 );
-        static const uint64 INVALIDATE_ROUTES            = ( 1LL <<  8 );
-        static const uint64 INVALIDATE_ROUTE_LIST        = ( 1LL <<  9 );
-        static const uint64 INVALIDATE_BREAKDOWN_LIST    = ( 1LL << 10 );
+        static const uint64 INVALIDATE_RANGE             = ( 1LL <<  1 );
+        static const uint64 INVALIDATE_BUFFERS           = ( 1LL <<  2 );
+        static const uint64 INVALIDATE_SPACING           = ( 1LL <<  3 );
+        static const uint64 INVALIDATE_GRIDTYPE          = ( 1LL <<  4 );
+        static const uint64 INVALIDATE_INTERPOLATIONTYPE = ( 1LL <<  5 );
+        static const uint64 INVALIDATE_CELLS             = ( 1LL <<  6 );
+        static const uint64 INVALIDATE_SOURCEGRID        = ( 1LL <<  7 );
+        static const uint64 INVALIDATE_TARGETGRID        = ( 1LL <<  8 );
+        static const uint64 INVALIDATE_ROUTES            = ( 1LL <<  9 );
+        static const uint64 INVALIDATE_ROUTE_LIST        = ( 1LL << 10 );
+        static const uint64 INVALIDATE_BREAKDOWN_LIST    = ( 1LL << 11 );
         static const uint64 INVALIDATE_ALL               = ( INVALIDATE_MAP
+                                                           | INVALIDATE_RANGE
                                                            | INVALIDATE_BUFFERS
                                                            | INVALIDATE_SPACING
                                                            | INVALIDATE_GRIDTYPE
                                                            | INVALIDATE_INTERPOLATIONTYPE
                                                            | INVALIDATE_CELLS
-                                                           | INVALIDATE_SOURCE
-                                                           | INVALIDATE_TARGET
+                                                           | INVALIDATE_SOURCEGRID
+                                                           | INVALIDATE_TARGETGRID
                                                            | INVALIDATE_ROUTES
                                                            | INVALIDATE_ROUTE_LIST
                                                            | INVALIDATE_BREAKDOWN_LIST );
@@ -284,4 +293,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         FInbetweenerBreakdown mMasterBreakdown;
         uint32 mUsedQuadCount;
         uint32 mUsedPointCount;
+        bool bARAPPrecomputeSucceded;
 };

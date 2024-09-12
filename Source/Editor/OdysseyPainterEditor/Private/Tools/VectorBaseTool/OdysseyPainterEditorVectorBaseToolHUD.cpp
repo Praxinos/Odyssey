@@ -58,6 +58,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( FOdysseyVe
         if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
         {
             FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+            uint32 tagCellIndex = inbetweenerTag->GetAnimationCellIndex();
 
             if( tag->GetOwner()->IsSelected() )
             {
@@ -65,7 +66,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( FOdysseyVe
 
                 for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
                 {
-                    if( breakdown->GetTargetDrawingIndex() == cellIndex )
+                    if( tagCellIndex + breakdown->GetTargetDrawingIndex() == cellIndex )
                     {
                         mSelectedBreakdownList.push_back( breakdown );
                     }

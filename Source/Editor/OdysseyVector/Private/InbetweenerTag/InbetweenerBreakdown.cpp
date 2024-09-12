@@ -359,7 +359,7 @@ FInbetweenerBreakdown::SetSourceDrawingIndex( uint32 iSourceDrawingIndex )
 
     mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING 
                                // force deformation of interpolated paths at target
-                               | FOdysseyVectorTagInbetweener::INVALIDATE_TARGET  );
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_RANGE  );
 }
 
 void
@@ -379,7 +379,7 @@ FInbetweenerBreakdown::SetTargetDrawingIndex( uint32 iTargetDrawingIndex )
 
     mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING 
                                // force deformation of interpolated paths at target
-                               | FOdysseyVectorTagInbetweener::INVALIDATE_TARGET );
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_RANGE );
 }
 
 uint32

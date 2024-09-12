@@ -424,7 +424,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
         }
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+    iScene->Update( /*FOdysseyVectorObject::UPDATE_INTERACTIVE*/0 );
 
     // redraw
     iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );

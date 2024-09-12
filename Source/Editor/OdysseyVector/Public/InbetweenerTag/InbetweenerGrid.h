@@ -136,7 +136,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
                          , float iT
                          , bool iInverseOrientation );
         double PolarDecomp( Eigen::Matrix2d &A, Eigen::Matrix2d &S );
-
+        void GetValidRouteArray( std::vector<FInbetweenerRoute*>& oValidRouteArray );
 
     protected:
         FInbetweenerBreakdown* mBreakdown;

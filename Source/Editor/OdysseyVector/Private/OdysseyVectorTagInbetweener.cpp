@@ -62,9 +62,8 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     , mGridNumQuadY( iNumQuadY )
     , mInterpolationType( eInbetweenerInterpolationType::ARAP )
     , mInvalidationFlags( INVALIDATE_MAP
-                        | INVALIDATE_BUFFERS
-                        | INVALIDATE_SOURCE
-                        | INVALIDATE_TARGET
+                        | INVALIDATE_SOURCEGRID
+                        | INVALIDATE_TARGETGRID
                         | INVALIDATE_ROUTES
                         | INVALIDATE_SPACING
                         | INVALIDATE_CELLS )
@@ -72,6 +71,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     , bMapAsPolyline( true )
     , mMasterBreakdown( this )
     , mChart( this )
+    , bARAPPrecomputeSucceded( false )
 {
     // the default breakdown (has range 0 <-> 1 )
     mBreakdownList.emplace_back( &mMasterBreakdown );
@@ -248,7 +248,7 @@ FOdysseyVectorTagInbetweener::SetMapAsPolyline( bool iMapAsPolyline )
 {
     bMapAsPolyline = iMapAsPolyline;
 
-    Invalidate( INVALIDATE_MAP | INVALIDATE_CELLS | INVALIDATE_TARGET );
+    Invalidate( INVALIDATE_MAP | INVALIDATE_CELLS | INVALIDATE_TARGETGRID );
 }
 
 const FColor&
@@ -538,9 +538,40 @@ FOdysseyVectorTagInbetweener::GetUsedPointCount()
     return mUsedPointCount;
 }
 
+void
+FOdysseyVectorTagInbetweener::ObjectAdded()
+{
+    if( bShared == false )
+    {
+        Share( mSharedEnv );
+    }
+}
+
+void
+FOdysseyVectorTagInbetweener::ObjectRemoved()
+{
+    if( bShared == true )
+    {
+        Unshare( mSharedEnv );
+    }
+}
+
+void
+FOdysseyVectorTagInbetweener::Added()
+{
+    Share( mSharedEnv );
+}
+
+void
+FOdysseyVectorTagInbetweener::Removed()
+{
+    Unshare( mSharedEnv );
+}
+
 void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
                                          , uint64 iOwnerInvalidationFlags )
 {
+/*
     if( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY )
     {
         if( ( mOwner->GetSharedEnv() != nullptr ) && ( bShared == false ) )
@@ -553,8 +584,9 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             Unshare( mSharedEnv );
         }
     }
-
-    if( bShared == true )
+*/
+    if( ( bShared == true )
+     && ( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 ) )
     {
         if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
@@ -563,47 +595,16 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
         {
-            if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
+            for( FInbetweenerBreakdown* breakdown : mBreakdownList )
             {
-/*
-                mSourceBBox = mOwner->GetBBox( false );
+                std::vector<::ULIS::FVec2D> sourceGeometry;
+                std::vector<::ULIS::FVec2D> targetGeometry;
 
-                mSourceBBox.x -= 0.1f;
-                mSourceBBox.y -= 0.1f;
-                mSourceBBox.w += 0.2f;
-                mSourceBBox.h += 0.2f;
-*/
-                for( FInbetweenerBreakdown* breakdown : mBreakdownList )
-                {
-                    std::vector<::ULIS::FVec2D> sourceGeometry;
-                    std::vector<::ULIS::FVec2D> targetGeometry;
-
-                    // save positions for restoring when calling Make()
-                    breakdown->GetGrid()->GetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
-                    breakdown->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
-                    breakdown->GetGrid()->Make( sourceGeometry, targetGeometry );
-                }
+                // save positions for restoring when calling Make()
+                //breakdown->GetGrid()->GetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+                breakdown->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
+                breakdown->GetGrid()->Make( sourceGeometry, targetGeometry );
             }
-        }
-
-        if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST )
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY ) 
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
-        {
-            mInvalidationFlags |= INVALIDATE_MAP;
-        }
-
-        if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE    )
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TAG_LIST )
-         //|| ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_MATRIX   )
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    )
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST ) )
-         //|| ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_MATRIX   ) )
-        {
-            mInvalidationFlags |= ( INVALIDATE_SPACING );
         }
 
         // will update grids' BBoxes (needed for transform HUD and discarding of unused quads in ARAP grids)
@@ -613,12 +614,26 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         }
 
         if( ( mInvalidationFlags & INVALIDATE_MAP            )
-         || ( mInvalidationFlags & INVALIDATE_BREAKDOWN_LIST ) )
+         || ( mInvalidationFlags & INVALIDATE_BREAKDOWN_LIST )
+         // owner flags
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST )
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY ) 
+         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
         {
             // map object to the first grid
             Map();
 
             mInvalidationFlags |= INVALIDATE_BUFFERS;
+        }
+
+        if( ( mInvalidationFlags & INVALIDATE_RANGE   )
+         || ( mInvalidationFlags & INVALIDATE_BUFFERS ) )
+        {
+            // alloc position for points at each interpolation step
+            AllocBuffers();
         }
 
         // will update grids' center of mass (needed for interpolation).
@@ -629,103 +644,79 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             breakdown->GetGrid()->UpdateCenterOfMass( iUpdateFlags, mInvalidationFlags );
         }
 
-        if( ( mInvalidationFlags & INVALIDATE_BUFFERS )
-         || ( mInvalidationFlags & INVALIDATE_TARGET  ) )
-        {
-            // alloc buffers for interpolation
-            AllocBuffers();
-        }
-
 // TODO: needs to be placed somewhere else
     DispatchInbetweensToBreakdowns();
 
-        if( ( mInvalidationFlags & INVALIDATE_TARGET         )
-          ||( mInvalidationFlags & INVALIDATE_BREAKDOWN_LIST ) )
+        if( ( mInvalidationFlags & INVALIDATE_RANGE          )
+         || ( mInvalidationFlags & INVALIDATE_BREAKDOWN_LIST ) )
         {
             ResizeRoutes();
         }
 
         // Precompute ARAP interpolation after the grid and routes have been updated
-        if( ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCE              )
-         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGET              )
+        if( ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEGRID          )
+         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID          )
          || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_INTERPOLATIONTYPE   )
          || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE            )
         // || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SPACING    )
          || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_ROUTE_LIST          )
          || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_MAP                 ) )
         {
-            //if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
+            for( FInbetweenerBreakdown* breakdown : mBreakdownList )
             {
-                for( FInbetweenerBreakdown* breakdown : mBreakdownList )
+                if( breakdown->GetInbetweenerTag()->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
                 {
-                    if( breakdown->GetInbetweenerTag()->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
+                    bARAPPrecomputeSucceded = breakdown->GetGrid()->PrecomputeARAPInterpolation();
+
+                    if( bARAPPrecomputeSucceded  == false )
                     {
-                        if( breakdown->GetGrid()->PrecomputeARAPInterpolation() == false )
-                        {
-                            UE_LOG( LogTemp, Warning, TEXT("ERROR DURING PRECOMPUTE"));
-                        }
+                        UE_LOG( LogTemp, Error, TEXT("ERROR DURING ARAP PRECOMPUTE"));
                     }
                 }
             }
         }
 
-
-        if( mInvalidationFlags & INVALIDATE_TARGET )
+        // altering breakdown range alters buffers. We then have to deform target anew.
+        if( ( mInvalidationFlags & INVALIDATE_TARGETGRID )
+         || ( mInvalidationFlags & INVALIDATE_RANGE      ) )
         {
             DeformPathsAtTarget( );
-
-            if( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE )
-            {
-                mInvalidationFlags &= (~INVALIDATE_SPACING);
-            }
         }
 
-        //if( ( mInvalidationFlags & INVALIDATE_ROUTES )
-        //||  ( mInvalidationFlags & INVALIDATE_TARGET ) )
+        for( FInbetweenerRoute* route : mRouteList )
         {
-            for( FInbetweenerRoute* route : mRouteList )
-            {
-                route->Update( iUpdateFlags, iOwnerInvalidationFlags, mInvalidationFlags );
-            }
+            route->Update( iUpdateFlags, iOwnerInvalidationFlags, mInvalidationFlags );
         }
 
+        Interpolate();
 
+        RedrawAnimationCells();
 
-        if( ( mInvalidationFlags & INVALIDATE_SPACING )
-         || ( mInvalidationFlags & INVALIDATE_MAP     )
-         || ( mInvalidationFlags & INVALIDATE_TARGET  ) )
-        {
-            Interpolate();
-        }
-    }
-
-    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
-    {
-        //if( mInvalidationFlags & INVALIDATE_CELLS )
-        {
-            RedrawAnimationCells();
-        }
-    }
-
-    // reset tag's invalidation flags (do not confuse with object's invalidation flags)
-    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
-    {
         mInvalidationFlags = 0;
     }
+}
+
+IOdysseyVectorAnimationCell*
+FOdysseyVectorTagInbetweener::GetAnimationCell()
+{
+    return mOwner->GetEngine()->GetAnimationCell();
+}
+
+uint32
+FOdysseyVectorTagInbetweener::GetAnimationCellIndex()
+{
+    return mOwner->GetEngine()->GetAnimationCell()->GetIndex();
 }
 
 void
 FOdysseyVectorTagInbetweener::Invalidate( uint64 iInvalidationFlags )
 {
-    if( ( mInvalidationFlags & iInvalidationFlags ) == 0 )
+    if( mInvalidationFlags == 0 )
     {
-        if( mInvalidationFlags == 0 )
-        {
-            mOwner->InvalidateTag( this );
-        }
-
-        mInvalidationFlags |= iInvalidationFlags;
+        mOwner->InvalidateTag( this );
     }
+
+    mInvalidationFlags |= iInvalidationFlags;
 }
 /*
 BLMatrix2D&
@@ -841,7 +832,10 @@ FOdysseyVectorTagInbetweener::DeformGridAtInbetween( uint32 iDrawingIndex )
 
     if( mInterpolationType == eInbetweenerInterpolationType::ARAP )
     {
-        drawing->breakdown->GetGrid()->ComputeARAPInterpolation( drawing, false );
+        if( bARAPPrecomputeSucceded )
+        {
+            drawing->breakdown->GetGrid()->ComputeARAPInterpolation( drawing, false );
+        }
     }
 }
 
@@ -1289,7 +1283,6 @@ FOdysseyVectorTagInbetweener::SetGrid( eInbetweenerGridType iGridType
 
     Invalidate( INVALIDATE_MAP
               | INVALIDATE_SPACING
-              | INVALIDATE_BUFFERS
               | INVALIDATE_GRIDTYPE
               | INVALIDATE_CELLS );
 
