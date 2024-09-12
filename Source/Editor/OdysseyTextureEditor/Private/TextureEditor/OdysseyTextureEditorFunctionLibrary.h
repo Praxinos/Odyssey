@@ -9,7 +9,7 @@
 class UOdysseyTextureFactory;
 
 UCLASS()
-class UOdysseyTextureEditorFunctionLibrary : public UBlueprintFunctionLibrary
+class UOdysseyTextureEditorTextureFunctionLibrary : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 
@@ -19,4 +19,42 @@ public:
 public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Texture")
     static UTexture2D* CreateTextureAsset(FString AssetName="Texture", FString PackagePath="/Game/", int Width=1024, int Height=1024, EOdysseyTextureSourceFormat Format=EOdysseyTextureSourceFormat::kBGRA8);
+	
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Texture")
+	static UOdysseyTextureLayerImageRaster* ImportTexture(UTexture2D* Texture, UTexture2D* TextureToImport, UOdysseyTextureLayer* ParentLayer = nullptr, int IndexInLayer = -1);
+
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Texture")
+	static UOdysseyTextureLayerImageRaster* ImportImage(UTexture2D* Texture, FString Path, UOdysseyTextureLayer* ParentLayer = nullptr, int IndexInLayer = -1);
+
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Texture")
+	static FString ExportAsImage(
+		UTexture2D* Texture,
+		FString Filename,
+		FString Path,
+		EOdysseyExportImageFormat Format
+	);
+};
+
+
+
+UCLASS()
+class UOdysseyTextureEditorLayerFunctionLibrary : public UBlueprintFunctionLibrary
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Texture")
+	static FString ExportAsImage(
+		UOdysseyTextureLayer* Layer,
+		FString Filename,
+		FString Path,
+		EOdysseyExportImageFormat Format
+	);
+
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Texture")
+	static UTexture2D* ExportAsTexture(
+		UOdysseyTextureLayer* Layer,
+		FString Filename,
+		FString Path
+	);
 };

@@ -10,7 +10,7 @@ UOdysseyTextureFunctionLibrary::HasLayerStack(UTexture2D* iTexture)
 	return !!GetLayerStack(iTexture);
 }
 
-UOdysseyLayerStack*
+UOdysseyTextureLayerStack*
 UOdysseyTextureFunctionLibrary::GetLayerStack(UTexture2D* iTexture)
 {
 	if ( !iTexture )

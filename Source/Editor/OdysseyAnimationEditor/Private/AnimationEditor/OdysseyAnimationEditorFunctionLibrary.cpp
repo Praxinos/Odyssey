@@ -57,9 +57,9 @@ UOdysseyAnimationEditorAnimationFunctionLibrary::CreateAnimationAsset(FString As
 }
 
 UOdysseyAnimationLayerImageRaster*
-UOdysseyAnimationEditorAnimationFunctionLibrary::ImportTextureSequence(UOdysseyAnimation* Animation, TArray<UTexture2D*> Textures)
+UOdysseyAnimationEditorAnimationFunctionLibrary::ImportTextureSequence(UOdysseyAnimation* Animation, TArray<UTexture2D*> Textures, UOdysseyAnimationLayer* ParentLayer, int IndexInParent)
 {
-    if ( Textures.Num() <= 0 || !Animation)
+    if ( Textures.Num() <= 0 || !Animation || (ParentLayer && ParentLayer->GetAnimation() != Animation))
         return nullptr;
 
 	UOdysseyLayerStack* layerStack = Animation->GetLayerStack();
@@ -69,7 +69,7 @@ UOdysseyAnimationEditorAnimationFunctionLibrary::ImportTextureSequence(UOdysseyA
     FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Import Textures Sequence"));
     layerStack->Modify();
 
-    UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass());
+    UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), ParentLayer, IndexInParent);
     UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
     
     FScopedSlowTask progressBar(Textures.Num(), LOCTEXT("animation-editor.import-texture-dialog.progress-bar.title", "Importing Texture Sequence"));
@@ -81,9 +81,9 @@ UOdysseyAnimationEditorAnimationFunctionLibrary::ImportTextureSequence(UOdysseyA
 }
 
 UOdysseyAnimationLayerImageRaster*
-UOdysseyAnimationEditorAnimationFunctionLibrary::ImportImageSequence(UOdysseyAnimation* Animation, TArray<FString> Paths)
+UOdysseyAnimationEditorAnimationFunctionLibrary::ImportImageSequence(UOdysseyAnimation* Animation, TArray<FString> Paths, UOdysseyAnimationLayer* ParentLayer, int IndexInParent)
 {
-    if ( Paths.Num() <= 0 || !Animation)
+    if ( Paths.Num() <= 0 || !Animation || (ParentLayer && ParentLayer->GetAnimation() != Animation))
         return nullptr;
 
 	UOdysseyLayerStack* layerStack = Animation->GetLayerStack();
@@ -93,7 +93,7 @@ UOdysseyAnimationEditorAnimationFunctionLibrary::ImportImageSequence(UOdysseyAni
     #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("animation-editor.transaction.import-image-sequence", "Import Image Sequence"));
     #endif
-    UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
+    UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), ParentLayer, IndexInParent));
     
 	UOdysseyAnimationEditorLayerFunctionLibrary::ImportImageSequence(layer, Paths, 0);
 

@@ -6,9 +6,11 @@
 #include "AssetToolsModule.h"
 #include "IAssetTools.h"
 #include "OdysseyTextureFactory.h"
+#include "OdysseyTextureFunctionLibrary.h"
+#include "LayerStack/OdysseyTextureLayerImageRaster.h"
 
 UOdysseyTextureFactory*
-UOdysseyTextureEditorFunctionLibrary::GetTextureFactory()
+UOdysseyTextureEditorTextureFunctionLibrary::GetTextureFactory()
 {
 	static UOdysseyTextureFactory* textureFactory = nullptr;
 	if (!textureFactory)
@@ -20,7 +22,7 @@ UOdysseyTextureEditorFunctionLibrary::GetTextureFactory()
 }
 
 UTexture2D*
-UOdysseyTextureEditorFunctionLibrary::CreateTextureAsset(FString AssetName, FString PackagePath, int Width, int Height, EOdysseyTextureSourceFormat Format)
+UOdysseyTextureEditorTextureFunctionLibrary::CreateTextureAsset(FString AssetName, FString PackagePath, int Width, int Height, EOdysseyTextureSourceFormat Format)
 {
 	if (AssetName.IsEmpty())
 		return nullptr;
@@ -51,4 +53,165 @@ UOdysseyTextureEditorFunctionLibrary::CreateTextureAsset(FString AssetName, FStr
 	);
 
 	return Texture;
+}
+
+UOdysseyTextureLayerImageRaster*
+UOdysseyTextureEditorTextureFunctionLibrary::ImportTexture(UTexture2D* Texture, UTexture2D* TextureToImport, UOdysseyTextureLayer* ParentLayer, int IndexInLayer)
+{
+    if ( !Texture || !TextureToImport || ParentLayer->GetTexture() != Texture)
+        return nullptr;
+
+	UOdysseyTextureLayerStack* layerStack = UOdysseyTextureFunctionLibrary::GetLayerStack(Texture);
+    if ( !layerStack )
+        return nullptr;
+
+    UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), ParentLayer, IndexInLayer);
+    UOdysseyTextureLayerImageRaster* layerImageRaster = Cast<UOdysseyTextureLayerImageRaster>(layer);
+	
+	TSharedPtr<FOdysseyRasterBlock> rasterBlock = layerImageRaster->GetRasterBlock();
+    TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(TextureToImport, rasterBlock->GetFormat()));
+	FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
+	rasterBlockMutator.Copy(textureBlock, { textureBlock->Rect() });
+	rasterBlockMutator.Commit();
+
+	return layerImageRaster;
+}
+
+UOdysseyTextureLayerImageRaster*
+UOdysseyTextureEditorTextureFunctionLibrary::ImportImage(UTexture2D* Texture, FString Path, UOdysseyTextureLayer* ParentLayer, int IndexInLayer)
+{
+    if ( Path.IsEmpty() || !Texture || ParentLayer->GetTexture() != Texture)
+        return nullptr;
+
+	UOdysseyTextureLayerStack* layerStack = UOdysseyTextureFunctionLibrary::GetLayerStack(Texture);
+    if ( !layerStack )
+        return nullptr;
+
+    UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), ParentLayer, IndexInLayer));
+
+	::ULIS::eFormat format = layer->GetRasterBlock()->GetFormat();
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( format );
+	FString path( FPaths::ConvertRelativePathToFull( Path ) );
+	FString extension = FPaths::GetExtension(path, false);
+	::ULIS::eFileFormat exportImageFormat = ::ULIS::FileFormat_png;
+	bool extensionFound = false;
+	for( int i = 0; i <= ::ULIS::FileFormat_hdr; ++i )
+	{
+		if( extension == ::ULIS::kwImageFormat[i] )
+		{
+			exportImageFormat = static_cast< ::ULIS::eFileFormat >( i );
+			extensionFound = true;
+			break;
+		}
+	}
+
+	if( !extensionFound )
+		return nullptr;
+
+	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>();
+	std::string stdPath( TCHAR_TO_UTF8(*path) );
+	::ULIS::ulError error = ctx.XLoadBlockFromDisk(
+			*block
+		, stdPath
+	);
+
+	if (error != ULIS_NO_ERROR)
+		return nullptr;
+
+	ctx.Finish();
+
+	if (block->IsHollow())
+		return nullptr;
+
+	TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock();
+
+	if (block->Width() != rasterBlock->GetWidth() || block->Height() != rasterBlock->GetHeight() || block->Format() != rasterBlock->GetFormat())
+	{
+	
+		//Need to convert the block before adding it to the layer
+		TSharedPtr<::ULIS::FBlock> blockProxy = MakeShared<::ULIS::FBlock>(rasterBlock->GetWidth(), rasterBlock->GetHeight(), rasterBlock->GetFormat());
+
+		::ULIS::FEvent eventConvert;
+		ctx.ConvertFormat(
+			*block
+			, *blockProxy
+			, ::ULIS::FRectI::Auto
+			, ::ULIS::FVec2I( 0 )
+			, ULIS::FSchedulePolicy::CacheEfficient
+			, 0
+			, nullptr
+			, &eventConvert
+		);
+
+		ctx.Finish();
+
+		block = blockProxy;
+	}
+	
+	FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
+	rasterBlockMutator.Copy(block, { block->Rect() });
+	rasterBlockMutator.Commit();
+
+	return layer;
+}
+
+FString
+UOdysseyTextureEditorTextureFunctionLibrary::ExportAsImage(
+	UTexture2D* Texture,
+	FString Filename,
+	FString Path,
+	EOdysseyExportImageFormat Format
+)
+{
+	if (!Texture)
+		return TEXT("");
+
+	UOdysseyTextureLayerStack* layerStack = UOdysseyTextureFunctionLibrary::GetLayerStack(Texture);
+    if ( !layerStack )
+        return TEXT("");
+
+	::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Texture->Source.GetSizeX(), Texture->Source.GetSizeY());
+	
+	::ULIS::eFormat format = ULISFormatForTextureSourceFormat(Texture->Source.GetFormat());
+	//let's ensure the format has alpha, so add alpha channel of needed
+	format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
+
+	return layerStack->ExportAsImage(format, 0, Format, rect, Filename, Path );
+}
+
+FString
+UOdysseyTextureEditorLayerFunctionLibrary::ExportAsImage(
+	UOdysseyTextureLayer* Layer,
+	FString Filename,
+	FString Path,
+	EOdysseyExportImageFormat Format
+)
+{
+	if (!Layer)
+		return TEXT("");
+
+	UTexture2D* texture = Layer->GetTexture();
+
+	::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+	//let's ensure the format has alpha, so add alpha channel of needed
+	format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
+
+	::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY());
+	return Layer->ExportAsImage(format, 0, Format, rect, Filename, Path );
+}
+
+UTexture2D*
+UOdysseyTextureEditorLayerFunctionLibrary::ExportAsTexture(
+	UOdysseyTextureLayer* Layer,
+	FString Filename,
+	FString Path
+)
+{
+	if (!Layer)
+		return nullptr;
+
+	
+	UTexture2D* texture = Layer->GetTexture();
+	::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY());
+	return Layer->ExportAsTexture(0, rect, texture->Source.GetFormat(), Filename, Path );
 }

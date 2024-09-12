@@ -18,5 +18,5 @@ public:
     static bool HasLayerStack(UTexture2D* Texture);
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Texture", meta = (HideSelfPin="Texture", DefaultToSelf="Texture"))
-    static UOdysseyLayerStack* GetLayerStack(UTexture2D* Texture);
+    static UOdysseyTextureLayerStack* GetLayerStack(UTexture2D* Texture);
 };
