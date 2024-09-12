@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "OdysseyImageRenderer.h"
 #include "OdysseyImageRenderingAbility.h"
+#include "OdysseyExportImageFormat.h"
 
 class ODYSSEYIMAGING_API FOdysseyImageRenderingChangedEvent
 {
@@ -81,6 +82,13 @@ public:
      * @return const FGuid&
      */
     virtual FGuid GetImageRenderingId() const;
+
+public:
+	UTexture2D* ExportAsTexture(int iFrame, const ::ULIS::FRectI& iRect, ETextureSourceFormat iFormat, FString iAssetName, FString iPath);
+	FString ExportAsImage(::ULIS::eFormat iULISFormat, int iFrame, EOdysseyExportImageFormat iFormat, const ::ULIS::FRectI& iRect, FString iFilename, FString iPath);
+	class UPaperFlipbook* ExportAsFlipbook(::ULIS::eFormat iULISFormat, const FInt32Range& iRange, const ::ULIS::FRectI& iRect, float iFramesPerSecond, FString AssetName, FString Path);
+	TArray<UTexture2D*> ExportAsTextureSequence(::ULIS::eFormat iULISFormat, const FInt32Range& iRange, const ::ULIS::FRectI& iRect, FString AssetName, FString Path);
+	TArray<FString> ExportAsImageSequence( ::ULIS::eFormat iULISFormat, const FInt32Range& iRange, const ::ULIS::FRectI& iRect, FString Filename, FString Path, EOdysseyExportImageFormat Format);
 
 private:
 	FGuid mImageRenderingId;

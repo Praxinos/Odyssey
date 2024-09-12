@@ -70,10 +70,10 @@ SOdysseyAnimationExportImageSequenceDialog::Construct(const FArguments& InArgs, 
         ]
         + SGridPanel::Slot(1, 0)
         [
-            SNew(SEnumComboBox, StaticEnum<EOdysseyAnimationExportImageSequenceFormat>())
+            SNew(SEnumComboBox, StaticEnum<EOdysseyExportImageFormat>())
             .ContentPadding(FMargin(0))
             .CurrentValue_Lambda([this](){ return (int32)mExporter.mFormat;})
-            .OnEnumSelectionChanged_Lambda([this](int32 iValue, ESelectInfo::Type iSelectInfo){ mExporter.mFormat = (EOdysseyAnimationExportImageSequenceFormat)iValue;})
+            .OnEnumSelectionChanged_Lambda([this](int32 iValue, ESelectInfo::Type iSelectInfo){ mExporter.mFormat = (EOdysseyExportImageFormat)iValue;})
         ]
         + SGridPanel::Slot(1, 1)
         [
@@ -140,10 +140,10 @@ SOdysseyAnimationExportImageSequenceDialog::GetSaveFileDialogExtension()
 {
     switch(mExporter.mFormat)
     {
-        case EOdysseyAnimationExportImageSequenceFormat::PNG: return FString::Format(TEXT("{0} (.png)|*.png"), { LOCTEXT("export-image-sequence-dialog.format-extension.png", "PNG Image").ToString() } );
-        case EOdysseyAnimationExportImageSequenceFormat::BMP: return FString::Format(TEXT("{0} (.bmp)|*.bmp"), { LOCTEXT("export-image-sequence-dialog.format-extension.bmp", "BMP Image").ToString() } );
-        case EOdysseyAnimationExportImageSequenceFormat::TGA: return FString::Format(TEXT("{0} (.tga)|*.tga"), { LOCTEXT("export-image-sequence-dialog.format-extension.tga", "TGA Image").ToString() } );
-        case EOdysseyAnimationExportImageSequenceFormat::Jpeg: return FString::Format(TEXT("{0} (.jpg)|*.jpg"), { LOCTEXT("export-image-sequence-dialog.format-extension.jpeg", "Jpeg Image").ToString() } );
+        case EOdysseyExportImageFormat::PNG: return FString::Format(TEXT("{0} (.png)|*.png"), { LOCTEXT("export-image-sequence-dialog.format-extension.png", "PNG Image").ToString() } );
+        case EOdysseyExportImageFormat::BMP: return FString::Format(TEXT("{0} (.bmp)|*.bmp"), { LOCTEXT("export-image-sequence-dialog.format-extension.bmp", "BMP Image").ToString() } );
+        case EOdysseyExportImageFormat::TGA: return FString::Format(TEXT("{0} (.tga)|*.tga"), { LOCTEXT("export-image-sequence-dialog.format-extension.tga", "TGA Image").ToString() } );
+        case EOdysseyExportImageFormat::Jpeg: return FString::Format(TEXT("{0} (.jpg)|*.jpg"), { LOCTEXT("export-image-sequence-dialog.format-extension.jpeg", "Jpeg Image").ToString() } );
     }
 
     return TEXT("");
@@ -158,20 +158,6 @@ FOdysseyAnimationImageSequenceExporter::FOdysseyAnimationImageSequenceExporter(U
 	: mAnimation(iAnimation)
 	, mCustomRange(iAnimation->GetFrameRange())
 {
-}
-
-::ULIS::eFileFormat
-FOdysseyAnimationImageSequenceExporter::GetFileFormat()
-{
-    switch(mFormat)
-    {
-        case EOdysseyAnimationExportImageSequenceFormat::PNG: return ::ULIS::FileFormat_png;
-        case EOdysseyAnimationExportImageSequenceFormat::BMP: return ::ULIS::FileFormat_bmp;
-        case EOdysseyAnimationExportImageSequenceFormat::TGA: return ::ULIS::FileFormat_tga;
-        case EOdysseyAnimationExportImageSequenceFormat::Jpeg: return ::ULIS::FileFormat_jpg;
-    }
-
-    return ::ULIS::FileFormat_png;
 }
 
 FInt32Range
@@ -301,7 +287,7 @@ FOdysseyAnimationImageSequenceExporter::ExportSource(const FSource& iSource, con
         filename += TEXT("_") + iSource.mFilename;
     FString extension = FPaths::GetExtension(path, false);
     
-    ::ULIS::eFileFormat exportImageFormat = GetFileFormat();
+    ::ULIS::eFileFormat exportImageFormat = FOdysseyExportImageFormat::GetFileFormat(mFormat);
     FInt32Range frameRange = GetSourceRange(iSource);
     int startFrame = frameRange.GetLowerBoundValue();
 	int endFrame = frameRange.GetUpperBoundValue();

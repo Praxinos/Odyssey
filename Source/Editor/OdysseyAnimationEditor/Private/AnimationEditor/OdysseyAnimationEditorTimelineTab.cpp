@@ -267,7 +267,7 @@ FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
 		textures.Add(Cast<UTexture2D>(assetsData[0].GetAsset()));
 	}
 
-	UOdysseyAnimationEditorFunctionLibrary::ImportTextureSequence(animation, textures);
+	UOdysseyAnimationEditorAnimationFunctionLibrary::ImportTextureSequence(animation, textures);
 }
 
 void           
@@ -303,7 +303,7 @@ FOdysseyAnimationEditorTimelineTab::ImportImageSequence()
 		}
 	);
 
-	UOdysseyAnimationEditorFunctionLibrary::ImportImageSequence(animation, filenames);
+	UOdysseyAnimationEditorAnimationFunctionLibrary::ImportImageSequence(animation, filenames);
 }
 
 void           
@@ -346,7 +346,7 @@ FOdysseyAnimationEditorTimelineTab::ExportAsFlipbook()
 	FString assetPath = FPaths::GetPath(saveObjectPath) + "/";
     FString flipbookAssetName = FPaths::GetBaseFilename(saveObjectPath);
 
-	UOdysseyAnimationEditorFunctionLibrary::ExportAsFlipbook(animation, flipbookAssetName, assetPath);
+	UOdysseyAnimationEditorAnimationFunctionLibrary::ExportAsFlipbook(animation, animation->GetFrameRange(), flipbookAssetName, assetPath);
 }
 
 void

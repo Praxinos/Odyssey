@@ -12,15 +12,6 @@ class UOdysseyAnimation;
 class FOdysseyImageRenderingAbility;
 
 UENUM()
-enum class EOdysseyAnimationExportImageSequenceFormat : uint8
-{
-	PNG,
-	BMP,
-	TGA,
-	Jpeg
-};
-
-UENUM()
 enum class EOdysseyAnimationExportImageSequenceSource : uint8
 {
 	Animation,
@@ -44,8 +35,6 @@ public:
 	FOdysseyAnimationImageSequenceExporter(UOdysseyAnimation* iAnimation);
 
 public:
-	::ULIS::eFileFormat GetFileFormat();
-
 	struct FSource
 	{
 		FOdysseyImageRenderingAbility* mImageRenderingAbility;
@@ -60,7 +49,7 @@ public:
 
 public:
 	UOdysseyAnimation* mAnimation = nullptr;
-	EOdysseyAnimationExportImageSequenceFormat mFormat = EOdysseyAnimationExportImageSequenceFormat::PNG;
+	EOdysseyExportImageFormat mFormat = EOdysseyExportImageFormat::PNG;
 	EOdysseyAnimationExportImageSequenceSource mSource = EOdysseyAnimationExportImageSequenceSource::Animation;
 	EOdysseyAnimationExportImageSequenceRange mRange = EOdysseyAnimationExportImageSequenceRange::AllCells;
 	FInt32Range mCustomRange;
