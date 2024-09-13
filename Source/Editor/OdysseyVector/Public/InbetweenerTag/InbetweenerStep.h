@@ -3,16 +3,6 @@
 #include "CoreMinimal.h"
 #include <ULIS>
 
-// MACRO check exists in Unreal and conflicts with another one defined in Eigen. We temporarily undefine it.
-#pragma push_macro("check")
-#undef check
-
-#include <Eigen/Geometry>
-#include <Eigen/SparseCore>
-#include <Eigen/SparseLU>
-
-#pragma pop_macro("check")
-
 class FInbetweenerRoute;
 class FInbetweenerTrajectory;
 
