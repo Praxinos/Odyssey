@@ -419,12 +419,14 @@ void UOdysseyPalette::AddSet()
 
         FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "Sets");
 
-        FString text = FString("Set") + FString::FromInt(Sets.Num());
-        Sets.Add(FName(text));
-
         TArray<UOdysseyPaletteEntry*> entries = GetEntries();
         for (int i = 0; i < entries.Num(); i++)
-            entries[i]->AddSet();
+        {
+            entries[i]->DuplicateSetAt(UsedSet);
+        }
+
+        FString text = FString("Set") + FString::FromInt(Sets.Num());
+        Sets.Add(FName(text));
 
         FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "Sets", EPropertyChangeType::ArrayAdd);
     }
