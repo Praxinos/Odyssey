@@ -8,6 +8,8 @@ FInbetweenerStep::FInbetweenerStep( FInbetweenerRoute* iRoute )
     mTrajectoryArray.reserve( 2 );
 }
 
+#pragma warning(push)
+#pragma warning(disable: 4702)
 void
 FInbetweenerStep::SetAligned( bool iIsAligned )
 {
@@ -40,6 +42,7 @@ FInbetweenerStep::SetAligned( bool iIsAligned )
         mFlags &= (~ALIGNED);
     }
 }
+#pragma warning(pop)
 
 bool
 FInbetweenerStep::IsAligned()
