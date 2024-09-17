@@ -2,6 +2,7 @@
 // EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 using EpicGames.Core;
+using System;
 using System.IO;
 using UnrealBuildBase;
 using UnrealBuildTool;
@@ -123,5 +124,22 @@ public class EposSequenceEditor : ModuleRules
             "FBX"
         );
 
+        //--- WIBU
+
+        if (Target.Platform.IsInGroup(UnrealPlatformGroup.Windows))
+        {
+            string AxProtectorSDKPath = Environment.GetEnvironmentVariable("AXPROTECTOR_SDK");
+
+            PublicSystemIncludePaths.Add(Path.Combine(AxProtectorSDKPath, "bin", "ctp", "pass", "include"));
+        }
+        else if (Target.Platform == UnrealTargetPlatform.Mac)
+        {
+            string AxProtectorSDKPath = "/Applications/WIBU-SYSTEMS Devkit/AxProtector";
+
+            PublicSystemIncludePaths.Add(Path.Combine(AxProtectorSDKPath, "ctp", "pass", "include"));
+        }
+
+        string pathfile_to_protection_specification = Path.Combine(PluginDirectory, "Wibu", "ProtectionSpecification.yaml");
+        PublicDefinitions.Add($"WIBU_CTP_YAML_PATH={pathfile_to_protection_specification}");
     }
 }

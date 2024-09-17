@@ -1,0 +1,12 @@
+
+Licenses:
+  - Name: testit
+    Type: CodeMeter
+    FirmCode: 6000010
+    ProductCode: 13
+    SubSystem: LocalLan
+
+LicenseLists:
+  - Id: 0
+    Licenses:
+      - testit
