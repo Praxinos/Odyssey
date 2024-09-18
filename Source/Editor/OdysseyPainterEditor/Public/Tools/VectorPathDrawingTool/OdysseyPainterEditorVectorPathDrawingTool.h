@@ -34,7 +34,8 @@ enum class eTracingFidelity: uint8
     Low     =  8,
     Average =  6,
     High    =  4,
-    Highest =  2
+    Higher  =  2,
+    Highest =  1
 };
 
 UCLASS()
