@@ -27,6 +27,7 @@ class FInterpolatedPoint;
 class FInterpolatedPath;
 struct FInbetweenerDrawing;
 class FInbetweenerBreakdown;
+struct FChartInbetween;
 
 typedef Eigen::Triplet<double> TripletD;
 
@@ -55,7 +56,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
          * @param iInbetweenIndex Inbetween index
          */
         virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
-                                , uint32 iInbetweenIndex
+                                , FChartInbetween *iInbetween
                                 , eInbetweenerPointPositionType iPositionType );
 
         /**
@@ -121,7 +122,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
     // applies to all types of grid.
     protected:
         bool PrecomputeARAPInterpolation();
-        bool ComputeARAPInterpolation( FInbetweenerDrawing* iInbetween
+        bool ComputeARAPInterpolation( FChartInbetween* iInbetween
                                      , bool useRigidTransform );
         void ComputePStar( FInbetweenerPoint* iTriangle[3]
                          , int triRow

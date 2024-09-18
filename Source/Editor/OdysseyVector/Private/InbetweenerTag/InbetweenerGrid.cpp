@@ -243,14 +243,15 @@ FInbetweenerGrid::DeformPoint( FInterpolatedPoint* iInterpolatedPoint, eInbetwee
 
 void
 FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
-                             , uint32 iInbetweenIndex
+                             , FChartInbetween *iInbetween
                              , eInbetweenerPointPositionType iPositionType )
 {
     for( FInterpolatedPath& interpolatedPath : iInterpolatedPathBuffer )
     {
         std::vector<::ULIS::FVec2D>& interpolatedPointPositionBuffer = interpolatedPath.GetInterpolatedPointPositionBuffer();
         uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
-        uint32 skippedOffset = ( iInbetweenIndex * pointCount );
+        uint32 inbetweenAbsoluteIndex = iInbetween->GetAbsoluteIndex();
+        uint32 skippedOffset = ( inbetweenAbsoluteIndex * pointCount );
 
         for( uint32 i = 0; i < pointCount; i++ )
         {
@@ -613,7 +614,7 @@ FInbetweenerGrid::ComputeQuadA( FInbetweenerQuad* iQuad
  * @param useRigidTransform If true the global rigid transformation is applied.
  */
 bool
-FInbetweenerGrid::ComputeARAPInterpolation( FInbetweenerDrawing* iDrawing
+FInbetweenerGrid::ComputeARAPInterpolation( FChartInbetween* iInbetween
                                           , bool useRigidTransform )
 {
     uint32 usedQuadCount = mBreakdown->GetInbetweenerTag()->GetUsedQuadCount();
@@ -626,7 +627,7 @@ FInbetweenerGrid::ComputeARAPInterpolation( FInbetweenerDrawing* iDrawing
     auto startTotal = std::chrono::high_resolution_clock::now();
 */
     Eigen::MatrixXd A( 2, 8 * usedQuadCount  );
-    double t = iDrawing->breakdownSpacing;
+    double t = iInbetween->spacing;
     // Compute A(t)
     int i = 0;
 
@@ -668,14 +669,14 @@ FInbetweenerGrid::ComputeARAPInterpolation( FInbetweenerDrawing* iDrawing
     {
         FInbetweenerTrajectory* trajectory = &route->GetTrajectoryBuffer()[mBreakdown->GetIndex()];
         ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
-        uint32 waypointIndex = iDrawing->GetIndex() - mBreakdown->GetSourceDrawingIndex() - 1;
+        uint32 waypointIndex = iInbetween->drawing->GetIndex() - mBreakdown->GetSourceDrawingIndex() - 1;
         double waypointT = trajectory->GetWaypointBuffer()[waypointIndex].GetT();
         ::ULIS::FVec2D coords = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( cubicBezier[0]
                                                                                    , cubicBezier[1]
                                                                                    , cubicBezier[2]
                                                                                    , cubicBezier[3]
                                                                                    , waypointT );
-        BLPoint inbetweenCoords = iDrawing->inverseMatrix.mapPoint( coords.x, coords.y );
+        BLPoint inbetweenCoords = iInbetween->drawing->inverseMatrix.mapPoint( coords.x, coords.y );
 
         PTAD( idx, 0 ) = inbetweenCoords.x;
         PTAD( idx, 1 ) = inbetweenCoords.y;

@@ -57,6 +57,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
 
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_CHART:
                 {
+/*--------
                     for( uint32 i = 0; i < iInbetweenerTag.GetDrawingCount(); i++ )
                     {
                         float spacing;
@@ -65,6 +66,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
 
                         iInbetweenerTag.GetChart().GetDrawing( i )->spacing = spacing;
                     }
+*/
                 }
                 break;
 

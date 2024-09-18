@@ -489,16 +489,16 @@ FOdysseyVectorHUD::DrawInbetweens( BLContext* iBLContext
             int32 sourceInbetweenIndex = breakdown->GetSourceDrawingIndex();
             int32 targetInbetweenIndex = breakdown->GetTargetDrawingIndex();
 
-            for( int32 i = sourceInbetweenIndex + 1; i < targetInbetweenIndex; i++ )
+            for( uint32 i = 1; i < breakdown->GetDrawingCount() - 1; i++ )
             {
-                FInbetweenerDrawing* drawing = iInbetweenerTag->GetChart().GetDrawing( i );
+                FChartInbetween* inbetween = &breakdown->GetChart()->GetInbetweenArray()[i];
 
                 iBLContext->setStrokeStyle( BLRgba32( color.R
                                                     , color.G
                                                     , color.B
-                                                    , 127 + ( color.A * 0.5f * drawing->spacing ) ) );
+                                                    , 127 + ( color.A * 0.5f * inbetween->spacing ) ) );
 
-                iInbetweenerTag->DrawPathsInbetween( i, iBLContext );
+                iInbetweenerTag->DrawPathsInbetween( inbetween, iBLContext );
             }
         }
     }

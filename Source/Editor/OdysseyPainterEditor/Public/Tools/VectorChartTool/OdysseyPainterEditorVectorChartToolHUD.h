@@ -9,6 +9,7 @@
 class FOdysseyVectorTagInbetweener;
 class FInbetweenerBreakdown;
 struct FInbetweenerDrawing;
+struct FChartInbetween;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
@@ -20,11 +21,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) override;
         virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
-        FInbetweenerDrawing* PickInbetween( double iWorldX
-                                          , double iWorldY
-                                          , double iRadius );
+        FChartInbetween* PickInbetween( double iWorldX
+                                      , double iWorldY
+                                      , double iRadius );
         void MoveInbetween( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                          , FInbetweenerDrawing* iDrawing
+                          , FChartInbetween* iInbetween
                           , double iWorldX
                           , double iWorldY
                           , bool iRelative );

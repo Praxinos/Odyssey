@@ -446,7 +446,7 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
     , mRouteSnapshotFlags( iRouteSnapshotFlags )
     , mLayout()
     , mDynamics()
-    , mChart( iInbetweenerTag )
+    , mChart( iInbetweenerTag->GetMasterBreakdown() )
 {
     /*-------------------------  Backup Mapping Type ----------------------- */
 /*
@@ -522,7 +522,7 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
     if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS )
      || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::CHART ) )
     {
-        mChart = mInbetweenerTag->GetChart();
+        //mChart = mInbetweenerTag->GetChart();
     }
 }
 
@@ -585,7 +585,7 @@ FSnapshotTagInbetweener::Preswap()
     if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS )
     ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::CHART          ) )
     {
-        mPreswapChart = mInbetweenerTag->GetChart();
+        //mPreswapChart = mInbetweenerTag->GetChart();
     }
 }
 
@@ -675,9 +675,9 @@ FSnapshotTagInbetweener::Restore()
     if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS )
     ||  ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::CHART      ) )
     {
-        mInbetweenerTag->SetChart( mChart );
+        //mInbetweenerTag->SetChart( mChart );
 
-        mChart = mPreswapChart;
+        //mChart = mPreswapChart;
     }
 
     return true; // restore succeeded

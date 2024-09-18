@@ -31,28 +31,23 @@ void
 FInbetweenerWaypoint::SetT( float iT )
 {
     FOdysseyVectorTagInbetweener* inbetweenerTag = mTrajectory->GetRoute()->GetInbetweenerTag();
-    uint32 sourceDrawingIndex = mTrajectory->GetBreakdown()->GetSourceDrawingIndex();
-    uint32 targetDrawingIndex = mTrajectory->GetBreakdown()->GetTargetDrawingIndex();
-    uint32 waypointIndex = ( this - &mTrajectory->GetWaypointBuffer()[0] );
-    uint32 waypointDrawingIndex = waypointIndex + sourceDrawingIndex + 1;
-    double sourceDrawingT   = inbetweenerTag->GetChart().GetDrawing( sourceDrawingIndex   )->spacing;
-    double targetDrawingT   = inbetweenerTag->GetChart().GetDrawing( targetDrawingIndex   )->spacing;
-    double waypointDrawingT = inbetweenerTag->GetChart().GetDrawing( waypointDrawingIndex )->spacing;
-    double relativeT = ( waypointDrawingT - sourceDrawingT ) / ( targetDrawingT - sourceDrawingT );
+    FInbetweenerBreakdown* breakdown = mTrajectory->GetBreakdown();
+    uint32 inbetweenIndex = ( this - &mTrajectory->GetWaypointBuffer()[0] );
+    double inbetweenT = breakdown->GetChart()->GetInbetweenArray()[inbetweenIndex].spacing;
 
     // waypoint is precisely on inbetween
     mRatio = 0.0f;
 
     // positive waypoint is after on inbetween
-    if( iT > relativeT )
+    if( iT > inbetweenT )
     {
-        mRatio =  ( iT - relativeT ) / ( 1.0f - relativeT );
+        mRatio =  ( iT - inbetweenT ) / ( 1.0f - inbetweenT );
     }
 
     // negative waypoint is before on inbetween
-    if ( iT < relativeT )
+    if ( iT < inbetweenT )
     {
-        mRatio = -( relativeT - iT ) / (        relativeT );
+        mRatio = -( inbetweenT - iT ) / (        inbetweenT );
     }
 
     mTrajectory->GetRoute()->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
@@ -62,24 +57,19 @@ float
 FInbetweenerWaypoint::GetT()
 {
     FOdysseyVectorTagInbetweener* inbetweenerTag = mTrajectory->GetRoute()->GetInbetweenerTag();
-    uint32 sourceDrawingIndex = mTrajectory->GetBreakdown()->GetSourceDrawingIndex();
-    uint32 targetDrawingIndex = mTrajectory->GetBreakdown()->GetTargetDrawingIndex();
-    uint32 waypointIndex = ( this - &mTrajectory->GetWaypointBuffer()[0] );
-    uint32 waypointDrawingIndex = waypointIndex + sourceDrawingIndex + 1;
-    double sourceDrawingT   = inbetweenerTag->GetChart().GetDrawing( sourceDrawingIndex   )->spacing;
-    double targetDrawingT   = inbetweenerTag->GetChart().GetDrawing( targetDrawingIndex   )->spacing;
-    double waypointDrawingT = inbetweenerTag->GetChart().GetDrawing( waypointDrawingIndex )->spacing;
-    double relativeT = ( waypointDrawingT - sourceDrawingT ) / ( targetDrawingT - sourceDrawingT );
+    FInbetweenerBreakdown* breakdown = mTrajectory->GetBreakdown();
+    uint32 inbetweenIndex = ( this - &mTrajectory->GetWaypointBuffer()[0] );
+    double inbetweenT = breakdown->GetChart()->GetInbetweenArray()[inbetweenIndex].spacing;
 
     if( mRatio > 0.0f )
     {
-        return relativeT + ( mRatio * ( 1.0f - relativeT ) );
+        return inbetweenT + ( mRatio * ( 1.0f - inbetweenT ) );
     }
 
     if( mRatio < 0.0f )
     {
-        return relativeT + ( mRatio * (        relativeT ) );
+        return inbetweenT + ( mRatio * (        inbetweenT ) );
     }
 
-    return relativeT;
+    return inbetweenT;
 }

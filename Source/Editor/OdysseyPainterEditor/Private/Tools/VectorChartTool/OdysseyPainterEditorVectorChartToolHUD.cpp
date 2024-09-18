@@ -80,7 +80,6 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
                                                   , FInbetweenerBreakdown* iBreakdown )
 {
     FOdysseyVectorTagInbetweener* inbetweenerTag = iBreakdown->GetInbetweenerTag();
-    FInbetweenerChart& chart = inbetweenerTag->GetChart();
     double cursorRadius = mChartRect.h *.5f;
     float indicatorY = mChartRect.y + cursorRadius;
     float fontSize = mFont.size();
@@ -107,10 +106,10 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
                           , mChartRect.x + mChartRect.w, indicatorY );
 
     // vertical lines
-    for( uint32 i = sourceDrawingIndex + 1, n = 0; i < targetDrawingIndex; i++, n++ )
+    for( uint32 i = 1, n = 0; i < iBreakdown->GetDrawingCount() - 1; i++, n++ )
     {
-        FInbetweenerDrawing* drawing = inbetweenerTag->GetDrawing( i );
-        float indicatorX = mChartRect.x + ( drawing->breakdownSpacing * mChartRect.w );
+        FChartInbetween* inbetween = &iBreakdown->GetChart()->GetInbetweenArray()[i];
+        float indicatorX = mChartRect.x + ( inbetween->spacing * mChartRect.w );
         float frameNumberX = indicatorX - ( fontSize * 0.25f );
         float frameNumberY = indicatorY + cursorRadius + fontSize + 2.0f;
         char frameNumber[6];
@@ -178,7 +177,7 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
     iBLContext->resetMatrix();
 }
 
-FInbetweenerDrawing*
+FChartInbetween*
 FOdysseyPainterEditorVectorChartToolHUD::PickInbetween( double iWorldX
                                                       , double iWorldY
                                                       , double iRadius )
@@ -186,7 +185,6 @@ FOdysseyPainterEditorVectorChartToolHUD::PickInbetween( double iWorldX
     if( mBreakdown )
     {
         FOdysseyVectorTagInbetweener* inbetweenerTag = mBreakdown->GetInbetweenerTag();
-        FInbetweenerChart& chart = inbetweenerTag->GetChart();
         double cursorRadius = mChartRect.h *.5f;
         double cursorY = mChartRect.y + cursorRadius;
 
@@ -195,15 +193,15 @@ FOdysseyPainterEditorVectorChartToolHUD::PickInbetween( double iWorldX
             uint32 sourceDrawingIndex = mBreakdown->GetSourceDrawingIndex();
             uint32 targetDrawingIndex = mBreakdown->GetTargetDrawingIndex();
 
-            for( uint32 i = sourceDrawingIndex + 1; i < targetDrawingIndex; i++ )
+            for( uint32 i = 1; i < mBreakdown->GetDrawingCount() - 1; i++ )
             {
-                FInbetweenerDrawing* drawing = inbetweenerTag->GetDrawing( i );
-                float cursorX = mChartRect.x + ( drawing->breakdownSpacing * mChartRect.w );
+                FChartInbetween* inbetween = &mBreakdown->GetChart()->GetInbetweenArray()[i];
+                float cursorX = mChartRect.x + ( inbetween->spacing * mChartRect.w );
 
                 if( ( iWorldX >= ( cursorX - iRadius ) )
                  && ( iWorldX <= ( cursorX + iRadius ) ) )
                 {
-                    return drawing;
+                    return inbetween;
                 }
             }
         }
@@ -214,12 +212,12 @@ FOdysseyPainterEditorVectorChartToolHUD::PickInbetween( double iWorldX
 
 void
 FOdysseyPainterEditorVectorChartToolHUD::MoveInbetween( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                      , FInbetweenerDrawing* iDrawing
+                                                      , FChartInbetween* iInbetween
                                                       , double iWorldX
                                                       , double iWorldY
                                                       , bool iRelative )
 {
     double newSpacing = ( iWorldX - mChartRect.x ) / mChartRect.w;
 
-    iInbetweenerTag->MoveInbetween( iDrawing, newSpacing, iRelative );
+    iInbetweenerTag->MoveInbetween( iInbetween, newSpacing, iRelative );
 }

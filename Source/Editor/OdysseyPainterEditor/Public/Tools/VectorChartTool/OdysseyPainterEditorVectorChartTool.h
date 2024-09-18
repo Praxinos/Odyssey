@@ -9,6 +9,7 @@
 #include "OdysseyPainterEditorVectorChartTool.generated.h"
 
 struct FInbetweenerDrawing;
+struct FChartInbetween;
 class FOdysseyPainterEditorVectorChartToolHUD;
 
 UCLASS( HideCategories = (SelectionTool) )
@@ -51,7 +52,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
 
     private:
         FOdysseyPainterEditorVectorChartToolHUD* mChartHUD;
-        FInbetweenerDrawing* mPickedInbetween;
+        FChartInbetween* mPickedInbetween;
 
     public:
         UPROPERTY( EditAnywhere

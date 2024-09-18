@@ -14,6 +14,7 @@
 #include "InbetweenerTag/InbetweenerGridFFD.h"
 #include "InbetweenerTag/InbetweenerGridARAP.h"
 #include "InbetweenerTag/InbetweenerChart.h"
+#include "InbetweenerTag/InbetweenerDrawing.h"
 #include "InbetweenerTag/InbetweenerPoint.h"
 #include "InbetweenerTag/InbetweenerQuad.h"
 #include "InbetweenerTag/InbetweenerRoute.h"
@@ -136,7 +137,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
          * @brief Get the spacing chart
          * @return a reference to the spacing chart
          */
-        FInbetweenerChart& GetChart();
+        //FInbetweenerChart& GetChart();
 
         /**
          * @brief Get the spacing chart
@@ -144,14 +145,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
          * @param iNewSpacing
          * @param iRelative move all inbetweens relative to the one passed as parameter
          */
-        void MoveInbetween( FInbetweenerDrawing* iInbetween
+        void MoveInbetween( FChartInbetween* iInbetween
                           , float iNewSpacing
                           , bool iRelative );
 
         void RedrawAnimationCells();
         void RedrawAnimationCells( uint32 iInbetweenCount );
-        void ResetChart();
-        void ResizeChart();
+        //void ResetChart();
+        //void ResizeChart();
         //void SetDrawingCount( uint32 iInbetweenCount );
         void SetGrid( eInbetweenerGridType iGridType
                     , uint32 iGridNumQuadX
@@ -187,7 +188,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void SetColor( const FColor& iColor );
         void SetMapAsPolyline( bool iMapAsPolyline );
         bool GetMapAsPolyline();
-        void DrawPathsInbetween( uint32 iDrawingIndex
+        void DrawPathsInbetween( FChartInbetween* inbetween
                                , BLContext* iBLContext );
         void DrawPathsTarget( BLContext* iBLContext );
 
@@ -195,7 +196,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         std::list<FInbetweenerBreakdown*>& GetBreakdownList();
         FInbetweenerBreakdown* AddBreakdown( uint32 iDrawingIndex, bool iCopyGeometry );
         FInbetweenerBreakdown* AddBreakdown( FInbetweenerBreakdown* iNewBreakdown, uint32 iDrawingIndex, bool iCopyGeometry );
-        void DispatchInbetweensToBreakdowns();
+
         void SetUsedQuadCount( uint32 );
         void SetUsedPointCount( uint32 );
         uint32 GetUsedQuadCount();
@@ -210,7 +211,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         FInbetweenerBreakdown* GetBreakdown( uint32 iDrawingIndex );
         std::list<FInbetweenerBreakdown*>::iterator GetBreakdownItem( uint32 iDrawingIndex );
         void ResizeRoutes();
-        void SetChart( const FInbetweenerChart& iChart );
+        //void SetChart( const FInbetweenerChart& iChart );
         void ResetLayout( bool iFreeMemNow );
         FInbetweenerDrawing* GetDrawing( uint32 iIndex );
         virtual void UpdateMatrix() override;
@@ -224,6 +225,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         eInbetweenerInterpolationDirection GetInterpolationDirection();
         int32 GetDrawingIndexFromCellIndex( uint32 iCellIndex );
         void InvertInterpolationDirection();
+        std::vector<FInbetweenerDrawing>& GetDrawingBuffer();
 
     protected:
         /**
@@ -253,8 +255,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                                        , double iInbetweenOldSpacing
                                        , double iInbetweenNewSpacing );
         void ChainBreakdowns();
-        void DeformGridAtInbetween( uint32 iDrawingIndex );
-        void DeformPathsAtInbetween( uint32 iDrawingIndex );
+        void DeformGridAtInbetween( FChartInbetween *iInbetween );
+        void DeformPathsAtInbetween( FChartInbetween *iInbetween );
+        void DispatchDrawings();
+
+
     public:
         // Odyssey Teal
         static const uint8 DEFAULT_RED_UINT8   = 0;
@@ -298,7 +303,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         uint32 mGridNumQuadX;
         uint32 mGridNumQuadY;
         eInbetweenerInterpolationType mInterpolationType;
-        FInbetweenerChart mChart;
+        std::vector<FInbetweenerDrawing> mDrawingBuffer;
         uint64 mInvalidationFlags;
         FColor mColor;
         bool bMapAsPolyline;

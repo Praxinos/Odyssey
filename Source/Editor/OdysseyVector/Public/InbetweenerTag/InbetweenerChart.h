@@ -7,21 +7,17 @@
 class FOdysseyVectorTagInbetweener;
 class FInbetweenerBreakdown;
 class FInbetweenerChart;
+struct FInbetweenerDrawing;
 
-struct ODYSSEYVECTOR_API FInbetweenerDrawing
+struct ODYSSEYVECTOR_API FChartInbetween
 {
     float spacing;
-    float breakdownSpacing; // spacing relative to the current breakdown
-    FInbetweenerBreakdown* breakdown;
-    BLMatrix2D localMatrix;
-    BLMatrix2D worldMatrix;
-    BLMatrix2D inverseMatrix;
-    BLMatrix2D inverseWorldMatrix;
-    FInbetweenerChart* mChart;
+    FInbetweenerChart* chart;
+    FInbetweenerDrawing *drawing;
 
-    FInbetweenerDrawing( FInbetweenerChart* iChart );
-
+    FChartInbetween( FInbetweenerChart* iChart );
     uint32 GetIndex();
+    uint32 GetAbsoluteIndex();
     int32 GetAnimationCellIndex();
 };
 
@@ -30,17 +26,17 @@ class ODYSSEYVECTOR_API FInbetweenerChart
     public:
         ~FInbetweenerChart();
         FInbetweenerChart();
-        FInbetweenerChart( FOdysseyVectorTagInbetweener* iInbetweenerTag );
+        FInbetweenerChart( FInbetweenerBreakdown* iBreakdown );
 
         void Resize();
         void Reset();
 
-        FOdysseyVectorTagInbetweener* GetInbetweenerTag();
-        std::vector<FInbetweenerDrawing>& GetDrawingBuffer();
-        FInbetweenerDrawing* GetDrawing( uint32 iIndex );
+        FInbetweenerBreakdown* GetBreakdown();
+        std::vector<FChartInbetween>& GetInbetweenArray();
+        //FInbetweenerDrawing* GetDrawing( uint32 iIndex );
         void GetSpacing( std::vector<float>& oSpacingArray );
 
     private:
-        FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        std::vector<FInbetweenerDrawing> mDrawingBuffer;
+        FInbetweenerBreakdown* mBreakdown;
+        std::vector<FChartInbetween> mInbetweenArray;
 };

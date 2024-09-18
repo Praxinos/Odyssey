@@ -224,6 +224,7 @@ void
 FOdysseyVectorExportV2::WriteTagInbetweenerChart( FOdysseyVectorTagInbetweener& iInbetweenerTag
                                                 , FArchive &Ar )
 {
+/*------------
     FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_CHART
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
@@ -236,6 +237,7 @@ FOdysseyVectorExportV2::WriteTagInbetweenerChart( FOdysseyVectorTagInbetweener& 
             Ar << spacing;
         }
     } );
+*/
 }
 
 void

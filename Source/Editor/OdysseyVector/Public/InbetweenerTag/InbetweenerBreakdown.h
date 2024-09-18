@@ -5,6 +5,7 @@
 
 #include "blend2d.h"
 
+#include "InbetweenerTag/InbetweenerChart.h"
 
 class FInbetweenerGrid;
 class FOdysseyVectorTagInbetweener;
@@ -63,6 +64,8 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         double GetTargetScalingX();
         double GetTargetScalingY();
         bool  IsMaster();
+        uint32 GetDrawingCount();
+        FInbetweenerChart* GetChart();
 
     private:
         double mTargetTranslationX;
@@ -82,4 +85,5 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         uint32 mSourceDrawingIndex;
         uint32 mTargetDrawingIndex;
         uint32 mIndex;
+        FInbetweenerChart mChart;
 };
