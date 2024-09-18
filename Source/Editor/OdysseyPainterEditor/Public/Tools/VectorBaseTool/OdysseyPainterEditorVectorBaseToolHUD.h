@@ -55,6 +55,14 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorBaseToolHUD : public F
                              , BLRgba32& iHighlightColor
                              , uint64 iHUDFlags );
         void UpdateSelectionInbetweenMode( FOdysseyVectorGroupPaint* iScene );
+        void DrawText( BLContext* iBLContext
+                     , const BLFont& iBLFont
+                     , const BLRgba32& iForegroundColor
+                     , const BLRgba32& iBackgroundColor
+                     , const BLRgba32& iHighlightColor
+                     , char* iText
+                     , uint32 iX
+                     , uint32 iY );
 
     protected:
         UOdysseyPainterEditorVectorBaseTool* mBaseTool;

@@ -406,9 +406,9 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
                 uint32 frameIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex()
                                   - inbetweenerTagScene->GetEngine()->GetAnimationCell()->GetIndex();
 
-                for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
+                for( FInbetweenerBreakdown* breakdown : mSelectedBreakdownList )
                 {
-                    if( breakdown->GetTargetDrawingIndex() == frameIndex )
+                    //if( breakdown->GetTargetAnimationCellIndex() == frameIndex )
                     {
                        DrawBreakdown( iBLContext
                                     , breakdown

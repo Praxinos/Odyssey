@@ -4,6 +4,8 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorAnimationCell.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyPainterEditorVectorChartToolHUD::~FOdysseyPainterEditorVectorChartToolHUD()
 {
@@ -12,72 +14,141 @@ FOdysseyPainterEditorVectorChartToolHUD::~FOdysseyPainterEditorVectorChartToolHU
 FOdysseyPainterEditorVectorChartToolHUD::FOdysseyPainterEditorVectorChartToolHUD( UOdysseyPainterEditorVectorChartTool* iChartTool )
     : FOdysseyPainterEditorVectorBaseToolHUD( iChartTool )
     , mChartRect( 200.0f, 40, 400.0f, 40 )
+    , mChartTool( iChartTool )
 {
-    mChartTool = iChartTool;
+    BLFontFace face;
+   // TODO: do something depending on to the O.S
+    BLResult err = face.createFromFile("C:/Windows/Fonts/lucon.ttf"); // Lucida console
+ 
+    mFont.createFromFace( face, 16.0f );
 }
 
 void
 FOdysseyPainterEditorVectorChartToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
+    uint64 hudFlags = mChartTool->GetEditor()->GetVectorHUDFlags();
 
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+    {
+        UpdateBreakdown( iScene );
+    }
+}
+
+FInbetweenerBreakdown*
+FOdysseyPainterEditorVectorChartToolHUD::GetBreakdown()
+{
+    return mBreakdown;
+}
+
+void
+FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdown( FOdysseyVectorGroupPaint* iScene )
+{
+    uint32 cellIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex();
+
+    mBreakdown = nullptr;
+
+    for( FOdysseyVectorTag* tag : iScene->GetSharedEnv()->GetSharedTagList() )
+    {
+        if( tag->GetOwner()->IsSelected() )
+        {
+            if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+            {
+                FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>( tag );
+
+                for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
+                {
+                    uint32 sourceCellIndex = breakdown->GetSourceAnimationCellIndex();
+                    uint32 targetCellIndex = breakdown->GetTargetAnimationCellIndex();
+
+                    if( ( cellIndex >= sourceCellIndex ) && ( cellIndex <= targetCellIndex ) )
+                    {
+                        mBreakdown = breakdown;
+
+                        return;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void
 FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
-                                                  , FOdysseyVectorTagInbetweener* iInbetweenerTag )
+                                                  , BLRgba32& iFgColor
+                                                  , BLRgba32& iBgColor
+                                                  , BLRgba32& iHcColor
+                                                  , FInbetweenerBreakdown* iBreakdown )
 {
-    FInbetweenerChart& chart = iInbetweenerTag->GetChart();
+    FOdysseyVectorTagInbetweener* inbetweenerTag = iBreakdown->GetInbetweenerTag();
+    FInbetweenerChart& chart = inbetweenerTag->GetChart();
     double cursorRadius = mChartRect.h *.5f;
-    double cursorY = mChartRect.y + cursorRadius;
+    float indicatorY = mChartRect.y + cursorRadius;
+    float fontSize = mFont.size();
+    const FColor& GetColor();
+    BLRgba32 tagColor = BLRgba32( inbetweenerTag->GetColor().R
+                                , inbetweenerTag->GetColor().G
+                                , inbetweenerTag->GetColor().B
+                                , 255 );
+    BLRgba32 blackColor = BLRgba32( 0, 0, 0, 255 );
+    uint32 sourceDrawingIndex = iBreakdown->GetSourceDrawingIndex();
+    uint32 targetDrawingIndex = iBreakdown->GetTargetDrawingIndex();
+    FInbetweenerDrawing* sourceDrawing = inbetweenerTag->GetDrawing( sourceDrawingIndex );
+    FInbetweenerDrawing* targetDrawing = inbetweenerTag->GetDrawing( targetDrawingIndex );
 
     iBLContext->save();
     iBLContext->resetMatrix();
 
-    iBLContext->setStrokeStyle( BLRgba32( 255, 0, 0, 255 ) );
+    iBLContext->setCompOp( BL_COMP_OP_SRC_OVER  );
+    iBLContext->setStrokeStyle( tagColor );
     iBLContext->setStrokeWidth( 1.0f );
 
     // horizontal line
-    iBLContext->strokeLine( mChartRect.x               , cursorY
-                          , mChartRect.x + mChartRect.w, cursorY );
+    iBLContext->strokeLine( mChartRect.x               , indicatorY
+                          , mChartRect.x + mChartRect.w, indicatorY );
 
-    for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
+    // vertical lines
+    for( uint32 i = sourceDrawingIndex + 1, n = 0; i < targetDrawingIndex; i++, n++ )
     {
-        uint32 sourceDrawingIndex = breakdown->GetSourceDrawingIndex();
-        uint32 targetDrawingIndex = breakdown->GetTargetDrawingIndex();
-        FInbetweenerDrawing* sourceDrawing = iInbetweenerTag->GetDrawing( sourceDrawingIndex );
-        FInbetweenerDrawing* targetDrawing = iInbetweenerTag->GetDrawing( targetDrawingIndex );
+        FInbetweenerDrawing* drawing = inbetweenerTag->GetDrawing( i );
+        float indicatorX = mChartRect.x + ( drawing->breakdownSpacing * mChartRect.w );
+        float frameNumberX = indicatorX - ( fontSize * 0.25f );
+        float frameNumberY = indicatorY + cursorRadius + fontSize + 2.0f;
+        char frameNumber[6];
 
+        // draw indicator
         iBLContext->setStrokeWidth( 1.0f );
-        iBLContext->setStrokeStyle( BLRgba32( 255, 0, 0, 255 ) );
+        iBLContext->setStrokeStyle( tagColor );
+        iBLContext->strokeLine( indicatorX, indicatorY - cursorRadius
+                                , indicatorX, indicatorY + cursorRadius );
 
-        for( uint32 i = sourceDrawingIndex + 1; i < targetDrawingIndex; i++ )
-        {
-            FInbetweenerDrawing* drawing = iInbetweenerTag->GetDrawing( i );
-            float cursorX = mChartRect.x + ( drawing->spacing * mChartRect.w );
+        // draw inbetween number
+        snprintf( frameNumber, 6, "%d", n + 1 );
 
-            iBLContext->strokeLine( cursorX, cursorY - cursorRadius
-                                  , cursorX, cursorY + cursorRadius );
-        }
+        iBLContext->setStrokeStyle( blackColor );
+        iBLContext->setStrokeWidth( 1.0f );
+        iBLContext->strokeUtf8Text( BLPoint( frameNumberX, frameNumberY ), mFont, frameNumber );
 
-
-        iBLContext->setStrokeWidth( 3.0f );
-        iBLContext->setStrokeStyle( BLRgba32( 255, 127, 127, 255 ) );
-
-        // initial keypose. Vertical line
-        iBLContext->strokeLine( mChartRect.x + ( sourceDrawing->spacing * mChartRect.w ), cursorY - cursorRadius
-                              , mChartRect.x + ( sourceDrawing->spacing * mChartRect.w ), cursorY + cursorRadius );
-
-        // final keypose. Vertical line
-        iBLContext->strokeLine( mChartRect.x + ( targetDrawing->spacing * mChartRect.w ), cursorY - cursorRadius
-                              , mChartRect.x + ( targetDrawing->spacing * mChartRect.w ), cursorY + cursorRadius );
+        iBLContext->setFillStyle( tagColor );
+        iBLContext->fillUtf8Text( BLPoint( frameNumberX, frameNumberY ), mFont, frameNumber );
     }
+
+    iBLContext->setStrokeWidth( 3.0f );
+    iBLContext->setStrokeStyle( BLRgba32( 255, 127, 127, 255 ) );
+
+    // initial keypose. Vertical line
+    iBLContext->strokeLine( mChartRect.x, indicatorY - cursorRadius
+                          , mChartRect.x, indicatorY + cursorRadius );
+
+    // final keypose. Vertical line
+    iBLContext->strokeLine( mChartRect.x + mChartRect.w, indicatorY - cursorRadius
+                          , mChartRect.x + mChartRect.w, indicatorY + cursorRadius );
 
     iBLContext->restore();
 }
 
 void
 FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
-                                                , FOdysseyVectorGroupPaint* iScene )
+                                             , FOdysseyVectorGroupPaint* iScene )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -86,6 +157,7 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint64 hudFlags = mChartTool->GetEditor()->GetVectorHUDFlags();
+    uint32 cellIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex();
 
     // Draw default
     // -> nothing in object mode.
@@ -95,19 +167,11 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
-        FOdysseyVectorObject* selectedObject = iScene->GetEngine()->GetLastSelectedObject();
-
-        if( selectedObject )
-        {
-            FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
-
-            if( tag )
-            {
-                FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>( tag );
-
-                DrawChart( iBLContext, inbetweenerTag );
-            }
-        }
+        DrawChart( iBLContext
+                    , fgColor
+                    , bgColor
+                    , hcColor
+                    , mBreakdown );
     }
 
     iBLContext->save();
@@ -115,28 +179,26 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
 }
 
 FInbetweenerDrawing*
-FOdysseyPainterEditorVectorChartToolHUD::PickInbetween( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                      , double iWorldX
+FOdysseyPainterEditorVectorChartToolHUD::PickInbetween( double iWorldX
                                                       , double iWorldY
                                                       , double iRadius )
 {
-    FInbetweenerChart& chart = iInbetweenerTag->GetChart();
-    double cursorRadius = mChartRect.h *.5f;
-    double cursorY = mChartRect.y + cursorRadius;
-
-    if( mChartRect.HitTest( ::ULIS::FVec2D( iWorldX, iWorldY ) ) )
+    if( mBreakdown )
     {
-        for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
+        FOdysseyVectorTagInbetweener* inbetweenerTag = mBreakdown->GetInbetweenerTag();
+        FInbetweenerChart& chart = inbetweenerTag->GetChart();
+        double cursorRadius = mChartRect.h *.5f;
+        double cursorY = mChartRect.y + cursorRadius;
+
+        if( mChartRect.HitTest( ::ULIS::FVec2D( iWorldX, iWorldY ) ) )
         {
-            uint32 sourceDrawingIndex = breakdown->GetSourceDrawingIndex();
-            uint32 targetDrawingIndex = breakdown->GetTargetDrawingIndex();
-            FInbetweenerDrawing* sourceDrawing = iInbetweenerTag->GetDrawing( sourceDrawingIndex );
-            FInbetweenerDrawing* targetDrawing = iInbetweenerTag->GetDrawing( targetDrawingIndex );
+            uint32 sourceDrawingIndex = mBreakdown->GetSourceDrawingIndex();
+            uint32 targetDrawingIndex = mBreakdown->GetTargetDrawingIndex();
 
             for( uint32 i = sourceDrawingIndex + 1; i < targetDrawingIndex; i++ )
             {
-                FInbetweenerDrawing* drawing = iInbetweenerTag->GetDrawing( i );
-                float cursorX = mChartRect.x + ( drawing->spacing * mChartRect.w );
+                FInbetweenerDrawing* drawing = inbetweenerTag->GetDrawing( i );
+                float cursorX = mChartRect.x + ( drawing->breakdownSpacing * mChartRect.w );
 
                 if( ( iWorldX >= ( cursorX - iRadius ) )
                  && ( iWorldX <= ( cursorX + iRadius ) ) )

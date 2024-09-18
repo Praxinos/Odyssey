@@ -10,6 +10,10 @@
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+// From module OdysseyAnimation
+#include "OdysseyAnimation.h"
+// From module OdysseyLayerStack
+#include "OdysseyLayerStack.h"
 // From module OdysseyPainterEditor
 #include "OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
@@ -17,6 +21,7 @@
 #include "OdysseyStyleSet.h"
 // From module OdysseyVector
 #include "OdysseyVectorObject.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorSharedEnv.h"
@@ -63,16 +68,25 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
                                                                            , const FPointerEvent & MouseEvent )
 {
     TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
-    // compute geometry
     FOdysseyAnimationEditorExtension* animationEditorExtension = treeView.Get()->GetAnimationEditorExtension();
     const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() );
-    FOdysseyVectorGroupPaint* scene = mInbetweenerTag->GetOwner()->GetScene();
+    UOdysseyAnimationLayerImageVector* layer = treeView.Get()->GetAnimationLayerImageVector();
+    UOdysseyLayerStack* layerStack = animationEditorExtension->GetEditor()->LayerStack();
     FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetSharedEnv();
     std::list<FOdysseyVectorTag*>& sharedTagList = sharedEnv->GetSharedTagList();
+    FOdysseyVectorGroupPaint* scene = mInbetweenerTag->GetOwner()->GetScene();
     uint64 notificationFlags = 0;
+    
 
     // for AddBreakdown / RemoveBreakdown functions in the context menu
     treeView.Get()->SetCursorPos( cursorPos );
+
+    if ( layerStack->CurrentLayer.Get() != layer )
+    {
+        FOdysseyObjectEditorUtils::SetPropertyValue( layerStack
+                                                    , "CurrentLayer"
+                                                    , TSoftObjectPtr<UOdysseyLayer>( layer ) );
+    }
 
     mPickedBreakdown = nullptr;
     mCandidateTargetCellBox.type = EInbetweeningRowCellBoxType::None;
@@ -136,7 +150,6 @@ ESelectInfo::Type SelectInfo
     return FReply::Unhandled();
 }
 
-
 FReply
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FGeometry& MyGeometry
                                                                       , const FPointerEvent& MouseEvent )
@@ -164,22 +177,39 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
 
             if( cell.IsValid() )
             {
-                //uint32 inbetweenCount = cell.Get()->GetIndex();
-                uint32 cellIndex = cell.Get()->GetIndex();
-                uint32 inbetweenCellIndex = cellIndex - tagCellIndex;
-                uint32 inbetweenMaxCellIndex = maxCellIndex - tagCellIndex;
-                FInbetweenerBreakdown* prevBreakdown = mPickedBreakdown->GetPrevBreakdown();
-                FInbetweenerBreakdown* nextBreakdown = mPickedBreakdown->GetNextBreakdown();
-                uint32 drawingCount = mInbetweenerTag->GetDrawingCount();
-                uint32 prevInbetweenIndex = prevBreakdown ? prevBreakdown->GetTargetDrawingIndex() : 0;
-                uint32 nextInbetweenIndex = nextBreakdown ? nextBreakdown->GetTargetDrawingIndex() : inbetweenMaxCellIndex + 1;
+                 uint32 cellIndex = cell.Get()->GetIndex();
+                 int32 drawingIndex = ( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Forward ) ? (int32)( cellIndex - tagCellIndex ) 
+                                                                                                                                      : (int32)( tagCellIndex - cellIndex );
+                 FInbetweenerBreakdown* prevBreakdown = mPickedBreakdown->GetPrevBreakdown();
+                 FInbetweenerBreakdown* nextBreakdown = mPickedBreakdown->GetNextBreakdown();
 
-                if( ( inbetweenCellIndex > prevInbetweenIndex ) && ( inbetweenCellIndex < nextInbetweenIndex ) )
+                 // reverse the whole thing now to ease the calculations
+                 if( drawingIndex < 0 )
+                 {
+                     if( mInbetweenerTag->GetBreakdownCount() == 1 )
+                     {
+                         mInbetweenerTag->InvertInterpolationDirection();
+
+                         mInbetweenerTag->GetOwner()->GetScene()->Update( 0 );
+
+                         CacheDesiredSize( mLayoutScaleMultiplier );
+
+                         drawingIndex = -drawingIndex;
+                     }
+                     else
+                     {
+                         drawingIndex = mPickedBreakdown->GetSourceDrawingIndex();
+                     }
+                 }
+
+                 uint32 maxDrawingIndex = ( maxCellIndex - tagCellIndex );
+                 uint32 prevDrawingIndex = prevBreakdown ? prevBreakdown->GetTargetDrawingIndex() : 0;
+                 uint32 nextDrawingIndex = nextBreakdown ? nextBreakdown->GetTargetDrawingIndex() : maxDrawingIndex + 1;
+
+                if( ( (uint32)drawingIndex > prevDrawingIndex ) && ( (uint32)drawingIndex < nextDrawingIndex ) )
                 {
-                    //mPickedBreakdown->SetTargetDrawingIndex( inbetweenCellIndex );
-
                     mCandidateTargetCellBox = FInbetweeningRowCellBox( EInbetweeningRowCellBoxType::Target
-                                                                     , inbetweenCellIndex
+                                                                     , drawingIndex
                                                                      , cell->GetFrame() * frameWidth * mLayoutScaleMultiplier
                                                                      , 0.0f
                                                                      , cell->GetLength() * frameWidth * mLayoutScaleMultiplier
@@ -198,28 +228,39 @@ FReply
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const FGeometry & MyGeometry
                                                                          , const FPointerEvent & MouseEvent )
 {
-    uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                    | FOdysseyPainterEditor::UI_UPDATE_HUD;
+    TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
+    FOdysseyAnimationEditorExtension* animationEditorExtension = treeView.Get()->GetAnimationEditorExtension();
+    int currentFrame = animationEditorExtension->Animation()->CurrentFrame;
+    UOdysseyAnimationLayerImageVector* vectorLayer = treeView.Get()->GetAnimationLayerImageVector();
+    TSharedPtr<FOdysseyAnimationCell> cell = vectorLayer->GetCellsContainer()->GetCellAtFrame( currentFrame );
     FReply reply = FReply::Unhandled();
 
-    //STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonUp( MyGeometry, MouseEvent );
-
-	if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    if( cell.IsValid() )
     {
-        if( mPickedBreakdown )
+        FOdysseyAnimationCellImageVector* vectorCell = static_cast<FOdysseyAnimationCellImageVector*>(cell.Get());
+        uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                        | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                        | FOdysseyPainterEditor::UI_UPDATE_HUD;
+
+        //STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonUp( MyGeometry, MouseEvent );
+
+	    if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
         {
-            if( mCandidateTargetCellBox.type == EInbetweeningRowCellBoxType::Target )
+            if( mPickedBreakdown )
             {
-                mPickedBreakdown->SetTargetDrawingIndex( mCandidateTargetCellBox.index );
+                if( mCandidateTargetCellBox.type == EInbetweeningRowCellBoxType::Target )
+                {
+                    mPickedBreakdown->SetTargetDrawingIndex( mCandidateTargetCellBox.index );
+                }
             }
+
+            mInbetweenerTag->GetOwner()->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+            // request for redrawing of the current displayed cell
+            vectorCell->GetRoot()->GetEngine()->Invalidate( 0 );
+            FOdysseyVectorEngine::Notify( nullptr, retFlags );
+
+            reply = FReply::Handled();
         }
-
-        mInbetweenerTag->GetOwner()->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->Invalidate( 0 );
-        FOdysseyVectorEngine::Notify( nullptr, retFlags );
-
-        reply = FReply::Handled();
     }
 
     mPickedBreakdown = nullptr;
@@ -246,14 +287,15 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
     // compute geometry
     FOdysseyAnimationEditorExtension* animationEditorExtension = listView.Get()->GetAnimationEditorExtension();
     float frameWidth = animationEditorExtension->Timeline()->GetFrameWidth();
+    FOdysseyVectorEngine* vectorEngine = mInbetweenerTag->GetOwner()->GetScene()->GetEngine();
+    double xmin, xmax;
 
     // call from base class
     STableRow<TSharedPtr<FInbetweeningListViewItem>>::CacheDesiredSize( LayoutScaleMultiplier );
 
     mLayoutScaleMultiplier = LayoutScaleMultiplier;
 
-    // total size of the widget
-    mBoxPos.X  = sourceFrame * frameWidth * LayoutScaleMultiplier;
+    // total vertical pos & size of the widget
     mBoxPos.Y  = 0.0f;
     mBoxSize.Y = 20.0f * LayoutScaleMultiplier;
 
@@ -271,7 +313,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
     {
         uint32 sourceIndex = breakdown->GetSourceDrawingIndex();
         uint32 targetIndex = breakdown->GetTargetDrawingIndex();
-        IOdysseyVectorAnimationCell* targetCell = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetCellByIndex( tagCellIndex + breakdown->GetTargetDrawingIndex() );
+        uint32 targetCellIndex = breakdown->GetTargetAnimationCellIndex();
+        IOdysseyVectorAnimationCell* targetCell = vectorEngine->GetAnimationCell()->GetCellByIndex( targetCellIndex );
 
         // targetCell can be NULL if there is no further cell
         if( targetCell )
@@ -280,15 +323,21 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
 
             for( uint32 i = sourceIndex + 1; i < targetIndex; i++ )
             {
-                IOdysseyVectorAnimationCell* inbetweenCell = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell()->GetCellByIndex( tagCellIndex + i );
-                uint32 inbetweenFrame = inbetweenCell->GetFrame();
+                FInbetweenerDrawing* drawing = mInbetweenerTag->GetDrawing( i );
+                int32 inbetweenCellIndex = drawing->GetAnimationCellIndex();
+                IOdysseyVectorAnimationCell* inbetweenCell = vectorEngine->GetAnimationCell()->GetCellByIndex(inbetweenCellIndex);
 
-                mCellBoxBuffer.Emplace( EInbetweeningRowCellBoxType::Inbetween
-                                      , i
-                                      , inbetweenFrame * frameWidth * LayoutScaleMultiplier
-                                      , 0.0f
-                                      , inbetweenCell->GetLength() * frameWidth * LayoutScaleMultiplier
-                                      , mBoxSize.Y );
+                if( inbetweenCell )
+                {
+                    uint32 inbetweenFrame = inbetweenCell->GetFrame();
+
+                    mCellBoxBuffer.Emplace( EInbetweeningRowCellBoxType::Inbetween
+                                          , i
+                                          , inbetweenFrame * frameWidth * LayoutScaleMultiplier
+                                          , 0.0f
+                                          , inbetweenCell->GetLength() * frameWidth * LayoutScaleMultiplier
+                                          , mBoxSize.Y );
+                }
             }
 
             mCellBoxBuffer.Emplace( EInbetweeningRowCellBoxType::Target
@@ -300,7 +349,21 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
         }
     }
 
-    mBoxSize.X = ( mCellBoxBuffer.Last().x + mCellBoxBuffer.Last().w ) - ( mCellBoxBuffer[0].x );
+    // the whole bounding box
+    xmin = xmax = mBoxPos.X;
+
+    for( int32 i = 0; i < mCellBoxBuffer.Num(); i++ )
+    {
+        double x1 = mCellBoxBuffer[i].x;
+        double x2 = mCellBoxBuffer[i].x + mCellBoxBuffer[i].w - 1;
+
+        xmin = std::min( x1, xmin );
+        xmax = std::max( x2, xmax );
+    }
+
+    // total horizontal pos & size of the widget
+    mBoxPos.X = xmin;
+    mBoxSize.X = xmax - xmin + 1;
 }
 
 FVector2D
@@ -348,9 +411,16 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                                                                  , const FWidgetStyle& InWidgetStyle
                                                                  , bool bParentEnabled ) const
 {
+    TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
+    // compute geometry
+    FOdysseyAnimationEditorExtension* animationEditorExtension = treeView.Get()->GetAnimationEditorExtension();
     uint32 inbetweenCount = ( mInbetweenerTag->GetDrawingCount() - 2 );
     uint32 breakdownCount = mInbetweenerTag->GetBreakdownCount();
     const FColor& inbetweenerTagColor = mInbetweenerTag->GetColor();
+    // offset in "number of frames"
+	float offset = animationEditorExtension->Timeline()->GetOffset();
+	float frameSize = animationEditorExtension->Timeline()->GetFrameWidth();
+    float scrollByPixels = offset * frameSize * mLayoutScaleMultiplier;
     static FSlateBrush defaultBrush;
 
 	LayerId = STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnPaint( Args
@@ -394,7 +464,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 
 	    FSlateDrawElement::MakeBox( OutDrawElements
 		                          , LayerId
-		                          , AllottedGeometry.ToPaintGeometry( FVector2D( mCellBoxBuffer[i].x
+		                          , AllottedGeometry.ToPaintGeometry( FVector2D( mCellBoxBuffer[i].x - ( scrollByPixels )
                                                                                , mCellBoxBuffer[i].y )
                                                                     , FVector2D( mCellBoxBuffer[i].w
                                                                                , mCellBoxBuffer[i].h ) )
@@ -408,7 +478,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
         // draw candidate target (when resizing breakdown)
 	    FSlateDrawElement::MakeBox( OutDrawElements
 		                          , LayerId
-		                          , AllottedGeometry.ToPaintGeometry( FVector2D( mCandidateTargetCellBox.x
+		                          , AllottedGeometry.ToPaintGeometry( FVector2D( mCandidateTargetCellBox.x - ( scrollByPixels )
                                                                                , mCandidateTargetCellBox.y )
                                                                     , FVector2D( mCandidateTargetCellBox.w
                                                                                , mCandidateTargetCellBox.h ) )
@@ -417,15 +487,18 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 		                          , targetColor );
     }
 
-    lines.Reserve( 5 );
-    lines.Push( FVector2D( mBoxPos.X             , mBoxPos.Y              ) );
-    lines.Push( FVector2D( mBoxPos.X + mBoxSize.X, mBoxPos.Y              ) );
-    lines.Push( FVector2D( mBoxPos.X + mBoxSize.X, mBoxPos.Y + mBoxSize.Y ) );
-    lines.Push( FVector2D( mBoxPos.X             , mBoxPos.Y + mBoxSize.Y ) );
+    lines.Reserve( 4 );
+    lines.Push( FVector2D( 0.0f      , 0.0f       ) );
+    lines.Push( FVector2D( mBoxSize.X, 0.0f       ) );
+    lines.Push( FVector2D( mBoxSize.X, mBoxSize.Y ) );
+    lines.Push( FVector2D( 0.0f      , mBoxSize.Y ) );
 
 	FSlateDrawElement::MakeLines( OutDrawElements
 		                        , LayerId
-                                , AllottedGeometry.ToPaintGeometry()
+		                        , AllottedGeometry.ToPaintGeometry( FVector2D( mBoxPos.X - ( scrollByPixels )
+                                                                             , mBoxPos.Y )
+                                                                  , FVector2D( mBoxSize.X
+                                                                             , mBoxSize.Y ) )
 		                        , lines
 		                        , ESlateDrawEffect::None
 		                        , strokeColor

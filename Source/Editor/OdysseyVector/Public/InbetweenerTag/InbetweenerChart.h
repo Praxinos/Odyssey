@@ -22,6 +22,7 @@ struct ODYSSEYVECTOR_API FInbetweenerDrawing
     FInbetweenerDrawing( FInbetweenerChart* iChart );
 
     uint32 GetIndex();
+    int32 GetAnimationCellIndex();
 };
 
 class ODYSSEYVECTOR_API FInbetweenerChart

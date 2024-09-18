@@ -1077,10 +1077,14 @@ FOdysseyPainterEditor::GroupAndAddInbetweenerTag( FOdysseyPainterEditor* iEditor
 
     if( group )
     {
-        group->AddTag( new FOdysseyVectorTagInbetweener( iScene->GetSharedEnv()
-                                                       , group
-                                                       , 8
-                                                       , 8 ) );
+        FOdysseyVectorTagInbetweener *inbetweenerTag = new FOdysseyVectorTagInbetweener( iScene->GetSharedEnv()
+                                                                                       , group
+                                                                                       , 8
+                                                                                       , 8 );
+
+        inbetweenerTag->SetInterpolationDirection( eInbetweenerInterpolationDirection::Backward );
+
+        group->AddTag( inbetweenerTag );
     }
 
     // call callbacks if any (for refreshing GUI e.g)

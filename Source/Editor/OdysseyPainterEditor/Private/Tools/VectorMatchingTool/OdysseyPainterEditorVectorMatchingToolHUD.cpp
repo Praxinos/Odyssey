@@ -107,12 +107,11 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
             {
                 FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
                 FOdysseyVectorGroupPaint* inbetweenerTagScene = inbetweenerTag->GetOwner()->GetScene();
-                uint32 frameIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex()
-                                  - inbetweenerTagScene->GetEngine()->GetAnimationCell()->GetIndex();
+                uint32 currentCellIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex();
 
                 for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
                 {
-                    if( breakdown->GetTargetDrawingIndex() == frameIndex )
+                    if( breakdown->GetTargetAnimationCellIndex() == currentCellIndex )
                     {
     /*
                         DrawObjects( iBLContext

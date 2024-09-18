@@ -9,6 +9,8 @@
 
 class FInbetweeningListViewItem;
 class FOdysseyVectorSharedEnv;
+class FOdysseyAnimationEditorExtension;
+class UOdysseyAnimationLayerImageVector;
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationTimelineInbetweeningHeader
@@ -24,7 +26,10 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeader
         SLATE_END_ARGS()
 
 	    void Construct( const FArguments& InArgs
-                      , FOdysseyVectorSharedEnv* iVectorSharedEnv );
+                      , UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector
+                      , FOdysseyAnimationEditorExtension* iAnimationEditorExtension );
+        FOdysseyAnimationEditorExtension* GetAnimationEditorExtension();
+        UOdysseyAnimationLayerImageVector* GetAnimationLayerImageVector();
 
         void Update();
 
@@ -35,6 +40,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeader
         virtual bool Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const override;
 
     protected:
+        UOdysseyAnimationLayerImageVector* mAnimationLayerImageVector;
+	    FOdysseyAnimationEditorExtension* mAnimationEditorExtension;
         TArray<TSharedPtr<FInbetweeningListViewItem>> mItemsSource;
-        FOdysseyVectorSharedEnv* mVectorSharedEnv;
 };

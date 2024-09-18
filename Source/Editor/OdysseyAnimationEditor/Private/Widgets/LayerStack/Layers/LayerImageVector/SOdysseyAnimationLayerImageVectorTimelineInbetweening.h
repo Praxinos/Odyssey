@@ -42,6 +42,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
         TSharedPtr<SWidget> OnContextMenuOpening();
         void AddBreakdown();
         void RemoveBreakdown();
+        void ChangeDirection();
         void GetSelectedInbetweenerTags( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList
                                        , std::list<FOdysseyVectorEngine*>& oEngineList );
 

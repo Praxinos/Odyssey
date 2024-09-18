@@ -167,6 +167,9 @@ FOdysseyAnimationEditorGUI::OnCurrentFrameChanged( UOdysseyAnimation* iAnimation
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
 
             ParseVectorNotifications( vectorScene, FOdysseyVectorEngine::NOTIFY_ALL );
+
+            // force redraw after snudging the timeline
+            vectorScene->GetEngine()->Invalidate( 0 );
         }
         else
         {
@@ -249,16 +252,22 @@ FOdysseyAnimationEditorGUI::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScen
     if( layerStack )
     {
         UOdysseyAnimationLayerImageVector* currentVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(layerStack->CurrentLayer.Get());
-        int frame = mExtension->Animation()->CurrentFrame;
-        FOdysseyAnimationCellImageVector* cell = static_cast<FOdysseyAnimationCellImageVector*>(currentVectorLayer->GetCellsContainer()->GetCellAtFrame(frame).Get());
 
-        if( cell )
+        if( currentVectorLayer )
         {
-            FOdysseyVectorEngine* vectorEngine = cell->GetEngine();
-            // Note: iScene is ignored. We update the widget according to the current scene if any.
-            FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
+            int frame = mExtension->Animation()->CurrentFrame;
+            FOdysseyAnimationCellImageVector* cell = static_cast<FOdysseyAnimationCellImageVector*>(currentVectorLayer->GetCellsContainer()->GetCellAtFrame(frame).Get());
 
-            ParseVectorNotifications( vectorScene, iNotificationFlags );
+            if( cell )
+            {
+                FOdysseyVectorEngine* vectorEngine = cell->GetEngine();
+                // Note: iScene is ignored. We update the widget according to the current scene if any.
+                FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
+
+                ParseVectorNotifications( vectorScene, iNotificationFlags );
+
+                return;
+            }
         }
     }
     // for some reason when Unreal loads, the layerstack is NULL. But the medias exist. So in that case we use 
@@ -274,7 +283,11 @@ FOdysseyAnimationEditorGUI::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScen
                 FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
 
                 ParseVectorNotifications( vectorScene, iNotificationFlags );
+
+                return;
             }
         }
     }
+
+    ParseVectorNotifications( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
 }

@@ -37,7 +37,7 @@ SOdysseyAnimationLayerImageVectorTimeline::Construct(
     mInbetweeningListView = SNew( SOdysseyAnimationLayerImageVectorTimelineInbetweening
                                 , iAnimationLayerImageVector
                                 , iExtension )
-                            .Visibility( this, &SOdysseyAnimationLayerImageVectorTimeline::IsVisible );
+                            .Visibility( this, &SOdysseyAnimationLayerImageVectorTimeline::InbetweenModeOn );
 
     verticalBox.Get().AddSlot()
     .AutoHeight()
@@ -47,7 +47,7 @@ SOdysseyAnimationLayerImageVectorTimeline::Construct(
 }
 
 EVisibility
-SOdysseyAnimationLayerImageVectorTimeline::IsVisible() const
+SOdysseyAnimationLayerImageVectorTimeline::InbetweenModeOn() const
 {
     return ( mExtension->GetEditor()->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) ? EVisibility::Visible 
                                                                                                     : EVisibility::Collapsed;

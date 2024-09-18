@@ -47,6 +47,13 @@ enum class eInbetweenerInterpolationType : uint8
     ARAP = 1
 };
 
+UENUM()
+enum class eInbetweenerInterpolationDirection : int8
+{
+    Forward  = 1,
+    Backward = -1
+};
+
 class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
 {
     private:
@@ -213,6 +220,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         virtual void Removed() override;
         uint32 GetAnimationCellIndex();
         IOdysseyVectorAnimationCell* GetAnimationCell();
+        void SetInterpolationDirection( eInbetweenerInterpolationDirection iDirection );
+        eInbetweenerInterpolationDirection GetInterpolationDirection();
+        int32 GetDrawingIndexFromCellIndex( uint32 iCellIndex );
+        void InvertInterpolationDirection();
 
     protected:
         /**
@@ -245,9 +256,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void DeformGridAtInbetween( uint32 iDrawingIndex );
         void DeformPathsAtInbetween( uint32 iDrawingIndex );
     public:
-        static const uint8 DEFAULT_RED_UINT8   = 255;
-        static const uint8 DEFAULT_GREEN_UINT8 = 0;
-        static const uint8 DEFAULT_BLUE_UINT8  = 255;
+        // Odyssey Teal
+        static const uint8 DEFAULT_RED_UINT8   = 0;
+        static const uint8 DEFAULT_GREEN_UINT8 = 169;
+        static const uint8 DEFAULT_BLUE_UINT8  = 157;
         static const uint8 DEFAULT_ALPHA_UINT8 = 255;
 
         static const uint64 INVALIDATE_MAP               = ( 1LL <<  0 );
@@ -294,4 +306,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         uint32 mUsedQuadCount;
         uint32 mUsedPointCount;
         bool bARAPPrecomputeSucceded;
+        eInbetweenerInterpolationDirection mInterpolationDirection;
 };

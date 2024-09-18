@@ -66,7 +66,8 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( FOdysseyVe
 
                 for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
                 {
-                    if( tagCellIndex + breakdown->GetTargetDrawingIndex() == cellIndex )
+
+                    if( breakdown->GetTargetAnimationCellIndex() == cellIndex )
                     {
                         mSelectedBreakdownList.push_back( breakdown );
                     }
@@ -86,6 +87,28 @@ std::list<FOdysseyVectorTagInbetweener*>&
 FOdysseyPainterEditorVectorBaseToolHUD::GetSelectedInbetweenerTagList()
 {
     return mSelectedInbetweenerTagList;
+}
+
+void
+FOdysseyPainterEditorVectorBaseToolHUD::DrawText( BLContext* iBLContext
+                                                , const BLFont& iBLFont
+                                                , const BLRgba32& iForegroundColor
+                                                , const BLRgba32& iBackgroundColor
+                                                , const BLRgba32& iHighlightColor
+                                                , char* iText
+                                                , uint32 iX
+                                                , uint32 iY )
+{
+    iBLContext->setCompOp( BL_COMP_OP_SRC_OVER  );
+    iBLContext->setFillStyle( iForegroundColor );
+    iBLContext->setStrokeWidth( 10.0f );
+
+    iBLContext->strokeUtf8Text( BLPoint( iX, iY ), iBLFont, iText );
+    iBLContext->fillUtf8Text( BLPoint( iX, iY ), iBLFont, iText );
+
+//    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
+//    blctx->setStrokeWidth( 1.0f );
+//    blctx->strokeUtf8Text( BLPoint( iFrame.x + 10, iFrame.y + iFrame.h - 10 ), mFont, str );
 }
 
 void

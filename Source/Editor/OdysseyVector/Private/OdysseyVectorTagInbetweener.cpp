@@ -72,6 +72,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     , mMasterBreakdown( this )
     , mChart( this )
     , bARAPPrecomputeSucceded( false )
+    , mInterpolationDirection( eInbetweenerInterpolationDirection::Forward )
 {
     // the default breakdown (has range 0 <-> 1 )
     mBreakdownList.emplace_back( &mMasterBreakdown );
@@ -173,6 +174,41 @@ FInbetweenerDrawing*
 FOdysseyVectorTagInbetweener::GetDrawing( uint32 iIndex )
 {
     return mChart.GetDrawing( iIndex );
+}
+
+eInbetweenerInterpolationDirection
+FOdysseyVectorTagInbetweener::GetInterpolationDirection()
+{
+    return mInterpolationDirection;
+}
+
+void
+FOdysseyVectorTagInbetweener::InvertInterpolationDirection()
+{
+    if( mInterpolationDirection == eInbetweenerInterpolationDirection::Forward )
+    {
+        SetInterpolationDirection( eInbetweenerInterpolationDirection::Backward );
+
+        return;
+    }
+
+    if( mInterpolationDirection == eInbetweenerInterpolationDirection::Backward )
+    {
+        SetInterpolationDirection( eInbetweenerInterpolationDirection::Forward );
+
+        return;
+    }
+}
+
+void
+FOdysseyVectorTagInbetweener::SetInterpolationDirection( eInbetweenerInterpolationDirection iDirection )
+{
+    // Invalidate current cells
+    RedrawAnimationCells();
+
+    mInterpolationDirection = iDirection;
+
+    Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
 }
 
 void
@@ -881,6 +917,24 @@ FOdysseyVectorTagInbetweener::RedrawAnimationCells()
     RedrawAnimationCells( GetDrawingCount() );
 }
 
+int32
+FOdysseyVectorTagInbetweener::GetDrawingIndexFromCellIndex( uint32 iCellIndex )
+{
+    uint32 tagCellIndex = GetAnimationCellIndex();
+
+    if( mInterpolationDirection == eInbetweenerInterpolationDirection::Forward )
+    {
+        return iCellIndex - tagCellIndex;
+    }
+
+
+    if( mInterpolationDirection == eInbetweenerInterpolationDirection::Backward )
+    {
+        return tagCellIndex - iCellIndex;
+    }
+
+    return 0;
+}
 
 void
 FOdysseyVectorTagInbetweener::RedrawAnimationCells( uint32 iDrawingCount )
@@ -898,7 +952,9 @@ FOdysseyVectorTagInbetweener::RedrawAnimationCells( uint32 iDrawingCount )
             // Redraw impacted cells
             for( uint32 i = 1; ( i < iDrawingCount ) && ( animationCell != nullptr ); i++ )
             {
-                IOdysseyVectorAnimationCell* nextAnimationCell = animationCell->GetCellByIndex( animationCellIndex + i );
+                FInbetweenerDrawing* drawing = GetDrawing( i );
+                int32 inbetweenCellIndex = drawing->GetAnimationCellIndex();
+                IOdysseyVectorAnimationCell* nextAnimationCell = animationCell->GetCellByIndex( inbetweenCellIndex );
 
                 if( nextAnimationCell )
                 {
@@ -1028,13 +1084,18 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
         // if th eobject hasn't been removed from the scene
         if( displayedCell && tagCell )
         {
-            uint32 tagCellIndex = tagCell->GetIndex();
+            uint32 sourceCellIndex = tagCell->GetIndex();
+            uint32 targetCellIndex = sourceCellIndex + ( ( GetDrawingCount() - 1 ) * (int)mInterpolationDirection );
             uint32 displayedCellIndex = displayedCell->GetIndex();
+            uint32 fromCellIndex = std::min( sourceCellIndex, targetCellIndex );
+            uint32   toCellIndex = std::max( sourceCellIndex, targetCellIndex );
 
-            if ( ( displayedCellIndex >   tagCellIndex                         )
-              && ( displayedCellIndex < ( tagCellIndex + GetDrawingCount() - 1 ) ) )
+            if ( ( displayedCellIndex > fromCellIndex )
+              && ( displayedCellIndex < toCellIndex   ) )
             {
-                DrawPathsInbetween( displayedCellIndex - tagCellIndex , iBLContext );
+                int32 deltaCellIndex = displayedCellIndex - sourceCellIndex;
+
+                DrawPathsInbetween( abs( deltaCellIndex ) , iBLContext );
             }
         }
 

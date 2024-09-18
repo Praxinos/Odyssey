@@ -51,6 +51,8 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
                                , double iRotation
                                , double iScalingX
                                , double iScalingY );
+        int32 GetTargetAnimationCellIndex();
+        int32 GetSourceAnimationCellIndex();
         void UpdateMatrix();
         ::ULIS::FRectD GetTargetBBox( bool iWorld );
         ::ULIS::FRectD GetSourceBBox( bool iWorld );

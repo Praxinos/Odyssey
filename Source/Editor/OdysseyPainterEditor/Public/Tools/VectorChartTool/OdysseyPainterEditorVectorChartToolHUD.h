@@ -7,6 +7,7 @@
 #include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.h"
 
 class FOdysseyVectorTagInbetweener;
+class FInbetweenerBreakdown;
 struct FInbetweenerDrawing;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
@@ -19,8 +20,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) override;
         virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
-        FInbetweenerDrawing* PickInbetween( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                          , double iWorldX
+        FInbetweenerDrawing* PickInbetween( double iWorldX
                                           , double iWorldY
                                           , double iRadius );
         void MoveInbetween( FOdysseyVectorTagInbetweener* iInbetweenerTag
@@ -29,10 +29,19 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
                           , double iWorldY
                           , bool iRelative );
 
+        void UpdateBreakdown( FOdysseyVectorGroupPaint* iScene );
+        FInbetweenerBreakdown* GetBreakdown();
+
     private:
-        void DrawChart( BLContext* iBLContext, FOdysseyVectorTagInbetweener* iInbetweenerTag );
+        void DrawChart( BLContext* iBLContext
+                      , BLRgba32& iFgColor
+                      , BLRgba32& iBgColor
+                      , BLRgba32& iHcColor
+                      , FInbetweenerBreakdown* iBreakdown );
 
     private:
         UOdysseyPainterEditorVectorChartTool* mChartTool;
+        FInbetweenerBreakdown* mBreakdown;
         ::ULIS::FRectD mChartRect;
+        BLFont mFont;
 };

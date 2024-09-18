@@ -4,6 +4,9 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeader.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
 
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "Widgets/Input/SNumericEntryBox.h"
@@ -23,9 +26,11 @@ SOdysseyAnimationTimelineInbetweeningHeader::SOdysseyAnimationTimelineInbetweeni
 
 void
 SOdysseyAnimationTimelineInbetweeningHeader::Construct( const FArguments& InArgs
-                                                      , FOdysseyVectorSharedEnv* iVectorSharedEnv )
+                                                      , UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector
+                                                      , FOdysseyAnimationEditorExtension* iAnimationEditorExtension )
 {
-    mVectorSharedEnv = iVectorSharedEnv;
+    mAnimationLayerImageVector = iAnimationLayerImageVector;
+    mAnimationEditorExtension = iAnimationEditorExtension;
 
     SListView<TSharedPtr<FInbetweeningListViewItem>>::Construct(
         SListView<TSharedPtr<FInbetweeningListViewItem>>::FArguments()
@@ -49,7 +54,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Update()
 {
     mItemsSource.Reset();
 
-    for( FOdysseyVectorTag* tag : mVectorSharedEnv->GetSharedTagList() )
+    for( FOdysseyVectorTag* tag : mAnimationLayerImageVector->GetSharedEnv()->GetSharedTagList() )
     {
         if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
         {
@@ -70,15 +75,6 @@ SOdysseyAnimationTimelineInbetweeningHeader::Private_IsItemSelected( const TShar
     return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected();
 }
 
-/*
-void
-SOdysseyAnimationTimelineInbetweeningHeader::OnGetChildren( TSharedPtr<FInbetweeningListViewItem> iParent
-                                                          , TArray<TSharedPtr<FInbetweeningListViewItem>>& oChildren ) const
-{
-    oChildren = iParent.Get()->mChildren;
-}
-*/
-
 TSharedRef<ITableRow>
 SOdysseyAnimationTimelineInbetweeningHeader::OnGenerateRow( TSharedPtr<FInbetweeningListViewItem> iItem
                                                           , const TSharedRef<STableViewBase>& iOwnerTable )
@@ -86,76 +82,17 @@ SOdysseyAnimationTimelineInbetweeningHeader::OnGenerateRow( TSharedPtr<FInbetwee
     return SNew( SOdysseyAnimationTimelineInbetweeningHeaderRow, iOwnerTable, iItem );
 }
 
-/*
-void
-SOdysseyAnimationTimelineInbetweeningHeader::OnExpansionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem
-                                                               , bool mExpanded )
+FOdysseyAnimationEditorExtension*
+SOdysseyAnimationTimelineInbetweeningHeader::GetAnimationEditorExtension()
 {
-    FOdysseyVectorObject* expandedObject = iItem.Get()->GetVectorObject();
-
-    expandedObject->SetExpanded( mExpanded );
-
-    // Reselect
-    SelectedItems.Empty();
-    SelectTree( mRootItem );
+    return mAnimationEditorExtension;
 }
-*/
 
-/*
-void
-SOdysseyAnimationTimelineInbetweeningHeader::OnSelectionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem
-                                                               , ESelectInfo::Type SelectInfo )
+UOdysseyAnimationLayerImageVector*
+SOdysseyAnimationTimelineInbetweeningHeader::GetAnimationLayerImageVector()
 {
-    if( mRootItem && ( SelectInfo != ESelectInfo::Type::Direct ) )
-    {
-        FOdysseyVectorGroupPaint* scene = static_cast<FOdysseyVectorGroupPaint*>(mRootItem.Get()->GetVectorObject());
-
-        // needed for valid GUndo pointer
-        GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.selection-changed","Selection Changed"));
-        if( GUndo )
-        {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( scene );
-
-            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
-            TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
-            if (source)
-                source->RecordCurrentFrameUndo();
-        }
-        GEditor->EndTransaction();
-
-        scene->GetEngine()->ClearObjectSelection();
-
-        // iTtem is null when selection is empty
-        if( iItem )
-        {
-            TArray<TSharedPtr<FVectorSceneTreeViewItem>> selectedItems = GetSelectedItems();
-
-            // no need to create an undo record or do anything if the selection is empty
-            if( selectedItems.Num() )
-            {
-                for( int i = 0; i < selectedItems.Num(); i++ )
-                {
-                    FOdysseyVectorObject* selectedObject = selectedItems[i].Get()->GetVectorObject();
-
-                    scene->GetEngine()->SelectObject( selectedObject );
-                }
-            }
-        }
-
-        scene->GetEngine()->ResetHUD();
-
-        scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                                 // sending the MODIFIED flag will trigger the update
-                                 // of the Object's DetailsView. If we send the SELECTED signal
-                                 // it makes more sense but this widget will be immediately 
-                                 // updated whereas it's already being updated, hence it creates
-                                 // some problems, one of them being the selection of the whole
-                                 //  vector scene when holding the shift key.
-                                 // See https://github.com/Praxinos/IliadDev/issues/411
-                                  | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
-    }
+    return mAnimationLayerImageVector;
 }
-*/
+
 
 #undef LOCTEXT_NAMESPACE

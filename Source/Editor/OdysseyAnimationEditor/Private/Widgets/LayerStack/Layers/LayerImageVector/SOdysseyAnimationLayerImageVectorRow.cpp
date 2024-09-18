@@ -126,7 +126,8 @@ TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
 {
     mInbetweeningHeader = SNew( SOdysseyAnimationTimelineInbetweeningHeader
-                              , mAnimationLayerImageVector->GetSharedEnv() )
+                              , mAnimationLayerImageVector 
+                              , mExtension )
                          .Visibility( this, &SOdysseyAnimationLayerImageVectorRow::IsVisible );
 
 	return SNew(SVerticalBox)

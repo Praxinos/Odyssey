@@ -126,6 +126,12 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnContextMenuOpening()
                      , FSlateIcon()
                      , FUIAction(FExecuteAction::CreateSP( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown )));
 
+    menu.AddMenuEntry( LOCTEXT("vector-tool.inbetweening-context-menu.remove-breakdown.name", "Change direction")
+                     , LOCTEXT("vector-tool.inbetweening-context-menu.remove-breakdown.tooltip", "Change direction")
+                     , FSlateIcon()
+                     , FUIAction(FExecuteAction::CreateSP( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection )));
+
+
     return menu.MakeWidget();
 }
 
@@ -198,15 +204,15 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
     {
         uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetIndex();
-        uint32 drawingIndex = breakdownCellIndex - tagCellIndex;
+        int32 drawingIndex = inbetweenerTag->GetDrawingIndexFromCellIndex( breakdownCellIndex );
         FInbetweenerBreakdown* curBreakdown = inbetweenerTag->GetBreakdown( drawingIndex );
 
-        FOdysseyVectorGroupPaint* scene = inbetweenerTag->GetOwner()->GetScene();
+        //FOdysseyVectorGroupPaint* scene = inbetweenerTag->GetOwner()->GetScene();
 
         if(  ( curBreakdown )
-          // check new breakdown isn't on an existing breakdown limits
-          && ( curBreakdown->GetSourceDrawingIndex() < drawingIndex )
-          && ( curBreakdown->GetTargetDrawingIndex() > drawingIndex ) )
+            // check new breakdown isn't on an existing breakdown limits
+            && ( drawingIndex > (int32)curBreakdown->GetSourceDrawingIndex() )
+            && ( drawingIndex < (int32)curBreakdown->GetTargetDrawingIndex() ) )
         {
             FInbetweenerBreakdown* newbreakdown = new FInbetweenerBreakdown( inbetweenerTag );
 
@@ -227,10 +233,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
     }
 
     FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
-
-    //mAnimationLayerImageVector.Get
-
-    //Update();
 }
 
 void
@@ -266,14 +268,18 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
     {
         uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetIndex();
         FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
-        uint32 drawingIndex = breakdownCellIndex - tagCellIndex;
+        int32 drawingIndex = inbetweenerTag->GetDrawingIndexFromCellIndex( breakdownCellIndex );
         FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdown( drawingIndex );
-        FOdysseyVectorGroupPaint* scene = inbetweenerTag->GetOwner()->GetScene();
 
-        // we delete the breakdown only if it is not the master breakdown ( the default one)
-        if( breakdown && breakdown->GetMasterBreakdown() )
+        if( breakdown )
         {
-            inbetweenerTag->RemoveBreakdown( breakdown, false );
+            //FOdysseyVectorGroupPaint* scene = inbetweenerTag->GetOwner()->GetScene();
+
+            // we delete the breakdown only if it is not the master breakdown ( the default one)
+            if( breakdown && breakdown->GetMasterBreakdown() )
+            {
+                inbetweenerTag->RemoveBreakdown( breakdown, false );
+            }
         }
     }
 
@@ -291,10 +297,65 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
 
     // static call
     FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
+}
 
-    //mAnimationLayerImageVector.Get
+void
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection()
+{
+    std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
+    std::list<FOdysseyVectorEngine*> engineList;
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
-    //Update();
+    GetSelectedInbetweenerTags( selectedInbetweenerTagList, engineList );
+
+    //---------- needed for undos-----------//
+/*
+    GEditor->BeginTransaction(LOCTEXT("vector-timeline.transaction.change-diretion", "Change Direction"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownRemove( nullptr
+                                                                                      , selectedInbetweenerTagList
+                                                                                      , engineList
+                                                                                      , notificationFlags );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+        TSharedPtr<FOdysseyPainterEditorSource> source = mAnimationEditorExtension->GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
+    }
+    GEditor->EndTransaction();
+*/
+    //--------------------------------------//
+
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
+    {
+        switch( inbetweenerTag->GetInterpolationDirection() )
+        {
+            case eInbetweenerInterpolationDirection::Forward :
+                inbetweenerTag->SetInterpolationDirection( eInbetweenerInterpolationDirection::Backward );
+            break;
+
+            case eInbetweenerInterpolationDirection::Backward :
+                inbetweenerTag->SetInterpolationDirection( eInbetweenerInterpolationDirection::Forward );
+            break;
+        }
+    }
+
+    // force recompute internal geometry of the attached widget
+    for( TSharedPtr<FInbetweeningListViewItem> item : GetItems() )
+    {
+        WidgetFromItem ( item ).Get()->AsWidget()->MarkPrepassAsDirty();
+    }
+
+    for( FOdysseyVectorEngine* engine : engineList )
+    {
+        engine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        engine->Invalidate( 0 );
+    }
+
+    // static call
+    FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
 }
 
 #undef LOCTEXT_NAMESPACE

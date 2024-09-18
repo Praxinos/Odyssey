@@ -304,6 +304,15 @@ FOdysseyAnimationCellImageVector::GetLastCell()
     return static_cast<FOdysseyAnimationCellImageVector*>(lastCell);
 }
 
+// Implements Interface IOdysseyVectorAnimationCell::GetLastCell
+IOdysseyVectorAnimationCell*
+FOdysseyAnimationCellImageVector::GetFirstCell()
+{
+    FOdysseyAnimationCell* firstCell = GetLayer()->GetCellsContainer()->GetCells().Top().Get();
+
+    return static_cast<FOdysseyAnimationCellImageVector*>(firstCell);
+}
+
 // Implements Interface IOdysseyVectorAnimationCell::GetEngine
 FOdysseyVectorEngine* 
 FOdysseyAnimationCellImageVector::GetEngine()

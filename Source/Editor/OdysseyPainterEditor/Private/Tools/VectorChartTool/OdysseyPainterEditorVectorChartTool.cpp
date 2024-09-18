@@ -75,35 +75,27 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        if( iEngine->GetSelectedObjectList().size() )
+        mPickedInbetween = mChartHUD->PickInbetween( iPointInTexture.x
+                                                   , iPointInTexture.y
+                                                   , 10 );
+
+        if( mPickedInbetween )
         {
-            FOdysseyVectorObject* selectedObject = iEngine->GetSelectedObjectList().front();
-            FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
-            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-
-            if( inbetweenerTag )
+            // needed for valid GUndo pointer
+            /*GEditor->BeginTransaction(LOCTEXT("vector-chart-tool.transaction.edit-chart","Vector Chart Tool"));
+            if( GUndo )
             {
-                mPickedInbetween = mChartHUD->PickInbetween( inbetweenerTag
-                                                             , iPointInTexture.x
-                                                             , iPointInTexture.y
-                                                             , 10 );
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene
+                                                                                          , inbetweenerTag
+                                                                                          , notificationFlags );
 
-                // needed for valid GUndo pointer
-                GEditor->BeginTransaction(LOCTEXT("vector-chart-tool.transaction.edit-chart","Vector Chart Tool"));
-                if( GUndo )
-                {
-                    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene
-                                                                                             , inbetweenerTag
-                                                                                             , notificationFlags );
-
-                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
-                    TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-                    if (source)
-                        source->RecordCurrentFrameUndo();
-                }
-                GEditor->EndTransaction();
+                TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                if (source)
+                    source->RecordCurrentFrameUndo();
             }
+            GEditor->EndTransaction();*/
         }
     }
 

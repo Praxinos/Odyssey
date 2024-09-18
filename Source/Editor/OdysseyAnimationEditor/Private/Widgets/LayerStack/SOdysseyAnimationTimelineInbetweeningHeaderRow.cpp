@@ -4,6 +4,10 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeader.h"
 
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+#include "OdysseyLayerStack.h"
+
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseyPainterEditor.h"
@@ -84,10 +88,21 @@ FReply
 SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonDown( const FGeometry & MyGeometry
                                                                  , const FPointerEvent & MouseEvent )
 {
+    TSharedPtr<SOdysseyAnimationTimelineInbetweeningHeader> treeView = StaticCastSharedPtr<SOdysseyAnimationTimelineInbetweeningHeader>(OwnerTablePtr.Pin());
+    FOdysseyAnimationEditorExtension* animationEditorExtension = treeView.Get()->GetAnimationEditorExtension();
+    UOdysseyAnimationLayerImageVector* layer = treeView.Get()->GetAnimationLayerImageVector();
+    UOdysseyLayerStack* layerStack = animationEditorExtension->GetEditor()->LayerStack();
     uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                     | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                     | FOdysseyPainterEditor::UI_UPDATE_HUD;
     FReply reply = FReply::Unhandled();
+
+    if ( layerStack->CurrentLayer.Get() != layer )
+    {
+        FOdysseyObjectEditorUtils::SetPropertyValue( layerStack
+                                                    , "CurrentLayer"
+                                                    , TSoftObjectPtr<UOdysseyLayer>( layer ) );
+    }
 
 	if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
     {

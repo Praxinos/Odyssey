@@ -36,7 +36,10 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
             TSharedPtr<FOdysseyAnimationCell> cell = layer->GetCellsContainer()->GetCellAtFrame(animation->CurrentFrame);
             int frame = layer->GetCellsContainer()->GetCellFrameAtFrame(animation->CurrentFrame);
 
-            mRenderHUD = cell == mCell && frame == iFrame && layerStack->CurrentLayer.Get() == layer;
+            mRenderHUD = ( cell == mCell )
+                      && ( frame == iFrame )
+                      && ( layerStack->CurrentLayer.Get() == layer )
+                      && ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Editor );
         }
 
         // this is per-layer

@@ -14,6 +14,14 @@ FInbetweenerDrawing::GetIndex()
     return this - &mChart->GetDrawingBuffer()[0];
 }
 
+int32
+FInbetweenerDrawing::GetAnimationCellIndex()
+{
+    uint32 tagCellIndex = mChart->GetInbetweenerTag()->GetAnimationCellIndex();
+
+    return (int32)tagCellIndex + (int32)( GetIndex() * (int)mChart->GetInbetweenerTag()->GetInterpolationDirection());
+}
+
 FInbetweenerChart::~FInbetweenerChart()
 {
 }

@@ -365,6 +365,9 @@ FInbetweenerBreakdown::SetSourceDrawingIndex( uint32 iSourceDrawingIndex )
 void
 FInbetweenerBreakdown::SetTargetDrawingIndex( uint32 iTargetDrawingIndex )
 {
+    // Invalidate current cells
+    mInbetweenerTag->RedrawAnimationCells();
+
     mTargetDrawingIndex = iTargetDrawingIndex;
 
     if( mNextBreakdown )
@@ -392,6 +395,22 @@ uint32
 FInbetweenerBreakdown::GetTargetDrawingIndex()
 {
     return mTargetDrawingIndex;
+}
+
+int32
+FInbetweenerBreakdown::GetTargetAnimationCellIndex()
+{
+    uint32 tagCellIndex = mInbetweenerTag->GetAnimationCellIndex();
+
+    return (int32)tagCellIndex + (int32)( mTargetDrawingIndex * (int)mInbetweenerTag->GetInterpolationDirection());
+}
+
+int32
+FInbetweenerBreakdown::GetSourceAnimationCellIndex()
+{
+    uint32 tagCellIndex = mInbetweenerTag->GetAnimationCellIndex();
+
+    return (int32)tagCellIndex + (int32)( mSourceDrawingIndex * (int)mInbetweenerTag->GetInterpolationDirection());
 }
 
 void
