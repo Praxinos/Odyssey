@@ -37,6 +37,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorMatchingToolHUD : publ
                            , const BLRgba32& iFgColor
                            , const BLRgba32& iBgColor
                            , const BLRgba32& iHcColor );
+        void UpdateBreakdown( FOdysseyVectorGroupPaint* iScene );
 
     private:
         UOdysseyPainterEditorVectorMatchingTool* mMatchingTool;

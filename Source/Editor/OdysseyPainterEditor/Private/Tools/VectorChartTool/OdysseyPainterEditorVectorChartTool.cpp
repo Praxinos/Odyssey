@@ -9,6 +9,7 @@
 #include "ISinglePropertyView.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorTagInbetweener.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -98,7 +99,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
             GEditor->EndTransaction();*/
         }
     }
-
+    // request redraw
     iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
 
     return notificationFlags;
@@ -122,25 +123,18 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
 
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        if( iEngine->GetSelectedObjectList().size() )
+        if( mPickedInbetween )
         {
-            FOdysseyVectorObject* selectedObject = iEngine->GetSelectedObjectList().front();
-            FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
-            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+            FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->chart->GetBreakdown()->GetInbetweenerTag();
 
-            if( inbetweenerTag )
-            {
-                if( mPickedInbetween )
-                {
-                    mChartHUD->MoveInbetween( inbetweenerTag
-                                               , mPickedInbetween
-                                               , iPointInTexture.x
-                                               , iPointInTexture.y
-                                               , FSlateApplication::Get().GetModifierKeys().IsControlDown() );
+            mChartHUD->MoveInbetween( inbetweenerTag
+                                    , mPickedInbetween
+                                    , iPointInTexture.x
+                                    , iPointInTexture.y
+                                    , FSlateApplication::Get().GetModifierKeys().IsControlDown() );
 
-                    iScene->Update( /*| FOdysseyVectorObject::UPDATE_INTERACTIVE*/0 );
-                }
-            }
+             // update ALL impacted scenes
+            iScene->GetSharedEnv()->Update( /*| FOdysseyVectorObject::UPDATE_INTERACTIVE*/0 );
         }
     }
 
@@ -160,19 +154,15 @@ UOdysseyPainterEditorVectorChartTool::OnMouseUpVector( FOdysseyVectorGroupPaint*
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        if( iEngine->GetSelectedObjectList().size() )
+        if( mPickedInbetween )
         {
-            FOdysseyVectorObject* selectedObject = iEngine->GetSelectedObjectList().front();
-            FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
-            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+            FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->chart->GetBreakdown()->GetInbetweenerTag();
 
-            if( inbetweenerTag )
-            {
-                // we need to manually redraw because no object is modified
-                inbetweenerTag->RedrawAnimationCells();
+            // we need to manually redraw because no object is modified
+            inbetweenerTag->RedrawAnimationCells();
 
-                iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-            }
+             // update ALL impacted scenes
+            iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         }
     }
 

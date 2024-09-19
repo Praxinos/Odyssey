@@ -131,7 +131,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
          * @brief Get the number of inbetween
          * @return the number of inbetween
          */
-        uint32 GetDrawingCount();
+        uint32 GetLength();
 
         /**
          * @brief Get the spacing chart
@@ -145,7 +145,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
          * @param iNewSpacing
          * @param iRelative move all inbetweens relative to the one passed as parameter
          */
-        void MoveInbetween( FChartInbetween* iInbetween
+        void MoveInbetween( FChartDivision* iInbetween
                           , float iNewSpacing
                           , bool iRelative );
 
@@ -188,11 +188,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void SetColor( const FColor& iColor );
         void SetMapAsPolyline( bool iMapAsPolyline );
         bool GetMapAsPolyline();
-        void DrawPathsInbetween( FChartInbetween* inbetween
+        void DrawPathsInbetween( FChartDivision* inbetween
                                , BLContext* iBLContext );
         void DrawPathsTarget( BLContext* iBLContext );
 
         void DeformPathsAtTarget();
+        void DeformPathsAtSource();
+
         std::list<FInbetweenerBreakdown*>& GetBreakdownList();
         FInbetweenerBreakdown* AddBreakdown( uint32 iDrawingIndex, bool iCopyGeometry );
         FInbetweenerBreakdown* AddBreakdown( FInbetweenerBreakdown* iNewBreakdown, uint32 iDrawingIndex, bool iCopyGeometry );
@@ -208,8 +210,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         uint32 GetBreakdownCount();
         FInbetweenerBreakdown* GetMasterBreakdown();
         void RemoveBreakdown( FInbetweenerBreakdown* iBreakdown, bool iFreeMemNow );
-        FInbetweenerBreakdown* GetBreakdown( uint32 iDrawingIndex );
-        std::list<FInbetweenerBreakdown*>::iterator GetBreakdownItem( uint32 iDrawingIndex );
+        FInbetweenerBreakdown* GetBreakdown( uint32 iDrawingIndex, bool iStrict );
+        std::list<FInbetweenerBreakdown*>::iterator GetBreakdownItem( uint32 iDrawingIndex, bool iStrict  );
         void ResizeRoutes();
         //void SetChart( const FInbetweenerChart& iChart );
         void ResetLayout( bool iFreeMemNow );
@@ -226,6 +228,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         int32 GetDrawingIndexFromCellIndex( uint32 iCellIndex );
         void InvertInterpolationDirection();
         std::vector<FInbetweenerDrawing>& GetDrawingBuffer();
+        void ResizeDrawings();
 
     protected:
         /**
@@ -255,8 +258,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                                        , double iInbetweenOldSpacing
                                        , double iInbetweenNewSpacing );
         void ChainBreakdowns();
-        void DeformGridAtInbetween( FChartInbetween *iInbetween );
-        void DeformPathsAtInbetween( FChartInbetween *iInbetween );
+        void DeformGridAtInbetween( FChartDivision *iInbetween );
+        void DeformPathsAtInbetween( FChartDivision *iInbetween );
         void DispatchDrawings();
 
 

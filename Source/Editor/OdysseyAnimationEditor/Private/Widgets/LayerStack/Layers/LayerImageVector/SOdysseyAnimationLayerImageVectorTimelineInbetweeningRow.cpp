@@ -272,7 +272,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
 FText
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::GetInbetweenerTagInbetweenCount() const
 {
-    return FText::FromString( FString::FromInt( (int32)mInbetweenerTag->GetDrawingCount() ) );
+    return FText::FromString( FString::FromInt( (int32)mInbetweenerTag->GetLength() ) );
 }
 
 void
@@ -300,7 +300,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
     mBoxSize.Y = 20.0f * LayoutScaleMultiplier;
 
     mCellBoxBuffer.Reset();
-    mCellBoxBuffer.Reserve( mInbetweenerTag->GetDrawingCount() );
+    mCellBoxBuffer.Reserve( mInbetweenerTag->GetLength() );
 
     mCellBoxBuffer.Emplace( EInbetweeningRowCellBoxType::Source
                           , 0
@@ -414,7 +414,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
     TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
     // compute geometry
     FOdysseyAnimationEditorExtension* animationEditorExtension = treeView.Get()->GetAnimationEditorExtension();
-    uint32 inbetweenCount = ( mInbetweenerTag->GetDrawingCount() - 2 );
+    uint32 inbetweenCount = ( mInbetweenerTag->GetLength() - 2 );
     uint32 breakdownCount = mInbetweenerTag->GetBreakdownCount();
     const FColor& inbetweenerTagColor = mInbetweenerTag->GetColor();
     // offset in "number of frames"

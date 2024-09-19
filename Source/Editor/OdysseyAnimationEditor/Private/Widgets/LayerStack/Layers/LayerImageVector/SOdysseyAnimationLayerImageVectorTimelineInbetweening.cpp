@@ -205,14 +205,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
     {
         uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetIndex();
         int32 drawingIndex = inbetweenerTag->GetDrawingIndexFromCellIndex( breakdownCellIndex );
-        FInbetweenerBreakdown* curBreakdown = inbetweenerTag->GetBreakdown( drawingIndex );
+        FInbetweenerBreakdown* curBreakdown = inbetweenerTag->GetBreakdown( drawingIndex, true );
 
         //FOdysseyVectorGroupPaint* scene = inbetweenerTag->GetOwner()->GetScene();
 
-        if(  ( curBreakdown )
-            // check new breakdown isn't on an existing breakdown limits
-            && ( drawingIndex > (int32)curBreakdown->GetSourceDrawingIndex() )
-            && ( drawingIndex < (int32)curBreakdown->GetTargetDrawingIndex() ) )
+        if( curBreakdown )
         {
             FInbetweenerBreakdown* newbreakdown = new FInbetweenerBreakdown( inbetweenerTag );
 
@@ -269,7 +266,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
         uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetIndex();
         FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
         int32 drawingIndex = inbetweenerTag->GetDrawingIndexFromCellIndex( breakdownCellIndex );
-        FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdown( drawingIndex );
+        FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdown( drawingIndex, false );
 
         if( breakdown )
         {

@@ -82,6 +82,8 @@ FOdysseyVectorImportV2::ReadRoute( FInbetweenerRoute& iRoute
                 }
                 break;
 
+                case 0:
+                break;
                 default:
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );

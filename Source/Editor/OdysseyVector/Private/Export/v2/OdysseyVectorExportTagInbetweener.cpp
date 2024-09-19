@@ -244,11 +244,11 @@ void
 FOdysseyVectorExportV2::WriteTagInbetweenerDrawingCount( FOdysseyVectorTagInbetweener& iInbetweenerTag
                                                        , FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_DRAWINGCOUNT
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_LENGTH
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        uint32 inbetweenCount = iInbetweenerTag.GetDrawingCount();
+        uint32 inbetweenCount = iInbetweenerTag.GetLength();
 
         Ar << inbetweenCount;
     } );

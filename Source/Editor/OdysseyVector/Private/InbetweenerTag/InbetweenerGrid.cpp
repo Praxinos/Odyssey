@@ -243,7 +243,7 @@ FInbetweenerGrid::DeformPoint( FInterpolatedPoint* iInterpolatedPoint, eInbetwee
 
 void
 FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
-                             , FChartInbetween *iInbetween
+                             , FChartDivision *iInbetween
                              , eInbetweenerPointPositionType iPositionType )
 {
     for( FInterpolatedPath& interpolatedPath : iInterpolatedPathBuffer )
@@ -614,7 +614,7 @@ FInbetweenerGrid::ComputeQuadA( FInbetweenerQuad* iQuad
  * @param useRigidTransform If true the global rigid transformation is applied.
  */
 bool
-FInbetweenerGrid::ComputeARAPInterpolation( FChartInbetween* iInbetween
+FInbetweenerGrid::ComputeARAPInterpolation( FChartDivision* iInbetween
                                           , bool useRigidTransform )
 {
     uint32 usedQuadCount = mBreakdown->GetInbetweenerTag()->GetUsedQuadCount();
@@ -669,7 +669,7 @@ FInbetweenerGrid::ComputeARAPInterpolation( FChartInbetween* iInbetween
     {
         FInbetweenerTrajectory* trajectory = &route->GetTrajectoryBuffer()[mBreakdown->GetIndex()];
         ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
-        uint32 waypointIndex = iInbetween->drawing->GetIndex() - mBreakdown->GetSourceDrawingIndex() - 1;
+        uint32 waypointIndex = iInbetween->GetIndex() ;
         double waypointT = trajectory->GetWaypointBuffer()[waypointIndex].GetT();
         ::ULIS::FVec2D coords = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( cubicBezier[0]
                                                                                    , cubicBezier[1]

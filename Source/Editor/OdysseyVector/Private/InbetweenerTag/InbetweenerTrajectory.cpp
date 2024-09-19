@@ -117,15 +117,8 @@ FInbetweenerTrajectory::GetBreakdown()
 void
 FInbetweenerTrajectory::Resize( uint32 iDrawingCount )
 {
-    uint32 inbetweenCount = ( iDrawingCount - 2 );
-
     mWaypointBuffer.clear();
-    mWaypointBuffer.reserve( inbetweenCount );
-
-    for( uint32 i = 0; i < inbetweenCount; i++ )
-    {
-        FInbetweenerWaypoint& waypoint = mWaypointBuffer.emplace_back( this );
-    }
+    mWaypointBuffer.resize( iDrawingCount, this );
 }
 
 FInbetweenerHandleTrajectory*

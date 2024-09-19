@@ -32,7 +32,7 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
         FInbetweenerBreakdown* GetMasterBreakdown();
         void DrawPathsAtTarget( BLContext* iBLContext );
-
+        void DrawPathsAtSource( BLContext* iBLContext );
         void SetPrevBreakdown( FInbetweenerBreakdown* iPrevBreakdown );
         void SetNextBreakdown( FInbetweenerBreakdown* iNextBreakdown );
 

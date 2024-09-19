@@ -2,27 +2,28 @@
 #include "InbetweenerTag/InbetweenerBreakdown.h"
 #include "OdysseyVectorTagInbetweener.h"
 
-FChartInbetween::FChartInbetween( FInbetweenerChart* iChart )
+FChartDivision::FChartDivision( FInbetweenerChart* iChart )
     : chart( iChart )
     , spacing( 0.0f )
+    , drawing ( nullptr )
 {
 
 }
 
 uint32
-FChartInbetween::GetIndex()
+FChartDivision::GetIndex()
 {
-    return this - &chart->GetInbetweenArray()[0];
+    return this - &chart->GetDivisionArray()[0];
 }
 
 uint32
-FChartInbetween::GetAbsoluteIndex()
+FChartDivision::GetAbsoluteIndex()
 {
     return GetIndex() + chart->GetBreakdown()->GetSourceDrawingIndex();
 }
 
 int32
-FChartInbetween::GetAnimationCellIndex()
+FChartDivision::GetAnimationCellIndex()
 {
     FOdysseyVectorTagInbetweener* inbetweenerTag = chart->GetBreakdown()->GetInbetweenerTag();
     uint32 tagCellIndex = inbetweenerTag->GetAnimationCellIndex();
@@ -35,15 +36,20 @@ FInbetweenerChart::~FInbetweenerChart()
 {
 }
 
+/*
 FInbetweenerChart::FInbetweenerChart()
     : mBreakdown( nullptr  )
 {
-    mInbetweenArray.reserve( 16 );
+    mDivisionArray.reserve( 16 );
 }
-
+*/
 FInbetweenerChart::FInbetweenerChart( FInbetweenerBreakdown* iBreakdown )
     : mBreakdown( iBreakdown )
 {
+    mDivisionArray.reserve( 16 );
+
+    mDivisionArray.emplace_back( this ).spacing = 0.0f;
+    mDivisionArray.emplace_back( this ).spacing = 1.0f;
 }
 
 FInbetweenerBreakdown*
@@ -52,19 +58,19 @@ FInbetweenerChart::GetBreakdown()
     return mBreakdown;
 }
 
-std::vector<FChartInbetween>&
-FInbetweenerChart::GetInbetweenArray()
+std::vector<FChartDivision>&
+FInbetweenerChart::GetDivisionArray()
 {
-    return mInbetweenArray;
+    return mDivisionArray;
 }
 
 void
 FInbetweenerChart::GetSpacing( std::vector<float>& oSpacingArray )
 {
     oSpacingArray.clear();
-    oSpacingArray.reserve( mInbetweenArray.size() );
+    oSpacingArray.reserve( mDivisionArray.size() );
 
-    for( FChartInbetween& inbetween : mInbetweenArray )
+    for( FChartDivision& inbetween : mDivisionArray )
     {
         oSpacingArray.push_back( inbetween.spacing );
     }
@@ -79,12 +85,12 @@ FInbetweenerChart::Reset()
 
     for( uint32 i = 0; i < drawingCount - 1; i++ )
     {
-        mInbetweenArray[i].spacing = nextT;
+        mDivisionArray[i].spacing = nextT;
 
         nextT += stepT;
     }
     // due to float imprecision, we get sure the last one is 1.0f
-    mInbetweenArray.back().spacing = 1.0f;
+    mDivisionArray.back().spacing = 1.0f;
 
     mBreakdown->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
                                                | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
@@ -94,7 +100,7 @@ void
 FInbetweenerChart::Resize()
 {
     uint32 drawingCount = mBreakdown->GetDrawingCount();
-    FChartInbetween& lastInbetween = *std::prev( mInbetweenArray.end(), 2 );
+    FChartDivision& lastInbetween = *std::prev( mDivisionArray.end(), 2 );
     uint32 fromIndex = lastInbetween.GetIndex();
     float fromT = lastInbetween.spacing;
     float stepT = (  1.0f - fromT ) / ( drawingCount - fromIndex - 1 );
@@ -104,16 +110,16 @@ FInbetweenerChart::Resize()
     // remember former spacing
     GetSpacing( spacingArray );
 
-    mInbetweenArray.resize( drawingCount, this );
+    mDivisionArray.resize( drawingCount, this );
 
     for( uint32 i = fromIndex; i < drawingCount - 1; i++ )
     {
-        mInbetweenArray[i].spacing = nextT;
+        mDivisionArray[i].spacing = nextT;
 
         nextT += stepT;
     }
 
-    mInbetweenArray.back().spacing = 1.0f;
+    mDivisionArray.back().spacing = 1.0f;
 
     mBreakdown->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
                                                | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );

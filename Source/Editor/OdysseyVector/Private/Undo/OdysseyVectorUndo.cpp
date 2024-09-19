@@ -447,6 +447,7 @@ FSnapshotTagInbetweener::FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* 
     , mLayout()
     , mDynamics()
     , mChart( iInbetweenerTag->GetMasterBreakdown() )
+    , mPreswapChart( iInbetweenerTag->GetMasterBreakdown() )
 {
     /*-------------------------  Backup Mapping Type ----------------------- */
 /*

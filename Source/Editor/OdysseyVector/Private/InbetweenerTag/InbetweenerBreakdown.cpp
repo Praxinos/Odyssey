@@ -27,6 +27,7 @@ FInbetweenerBreakdown::FInbetweenerBreakdown( FOdysseyVectorTagInbetweener* iInb
     , mTargetScalingX    ( 1.0f )
     , mTargetScalingY    ( 1.0f )
     , mTargetRotation    ( 0.0f )
+    , mChart( this )
 {
     SetGrid( iInbetweenerTag->GetGridType() );
 }
@@ -138,7 +139,7 @@ FInbetweenerBreakdown::InterpolateTransform()
 
     for( uint32 i = 1; i < GetDrawingCount() - 1; i++ )
     {
-        FChartInbetween* inbetween = &mChart.GetInbetweenArray()[i];
+        FChartDivision* inbetween = &mChart.GetDivisionArray()[i];
         double translationX, translationY, rotation, scalingX, scalingY;
         double t = inbetween->spacing;
 
@@ -225,6 +226,28 @@ FInbetweenerBreakdown::DrawPathsAtTarget( BLContext* iBLContext )
     {
         uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
         ::ULIS::FVec2D* pointPositionBuffer = &interpolatedPath.GetInterpolatedPointPositionBuffer()[pointCount * mTargetDrawingIndex];
+
+        mInbetweenerTag->DrawPathAt( &interpolatedPath
+                                   , pointPositionBuffer
+                                   , worldMatrix
+                                   , iBLContext );
+    }
+
+    iBLContext->restore();
+}
+
+void
+FInbetweenerBreakdown::DrawPathsAtSource( BLContext* iBLContext )
+{
+    BLMatrix2D worldMatrix = mInbetweenerTag->GetOwner()->GetWorldMatrix();
+
+    iBLContext->save();
+    iBLContext->resetMatrix();
+
+    for( FInterpolatedPath& interpolatedPath : mInbetweenerTag->GetInterpolatedPathBuffer() )
+    {
+        uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
+        ::ULIS::FVec2D* pointPositionBuffer = &interpolatedPath.GetInterpolatedPointPositionBuffer()[pointCount * mSourceDrawingIndex];
 
         mInbetweenerTag->DrawPathAt( &interpolatedPath
                                    , pointPositionBuffer
@@ -356,7 +379,13 @@ FInbetweenerBreakdown::SetSourceDrawingIndex( uint32 iSourceDrawingIndex )
     if( mPrevBreakdown )
     {
         mPrevBreakdown->mTargetDrawingIndex = iSourceDrawingIndex;
+
+        mPrevBreakdown->mChart.Resize();
     }
+
+    mChart.Resize();
+
+    mInbetweenerTag->ResizeDrawings();
 
     mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING 
                                // force deformation of interpolated paths at target
@@ -380,9 +409,13 @@ FInbetweenerBreakdown::SetTargetDrawingIndex( uint32 iTargetDrawingIndex )
     if( mNextBreakdown )
     {
         mNextBreakdown->mSourceDrawingIndex = iTargetDrawingIndex;
+
+        mNextBreakdown->mChart.Resize();
     }
 
     mChart.Resize();
+
+    mInbetweenerTag->ResizeDrawings();
 
     // TODO: put this somewhere else. I put it here so it can geenrate matrices based on
     // the t value fromthe chart, but I don't think it is the best place. 

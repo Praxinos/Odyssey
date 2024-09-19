@@ -113,30 +113,11 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
                 {
                     if( breakdown->GetTargetAnimationCellIndex() == currentCellIndex )
                     {
-    /*
-                        DrawObjects( iBLContext
-                                   // we draw the tag owner's scene over the current scene.
-                                   , inbetweenerTag->GetOwner()->GetScene()
-                                   , greyColor
-                                   , bgColor
-                                   , hcColor
-                                   , hudFlags | HUD_TAGINBETWEENER_TARGET | HUD_DRAW_ALL );
-
-                        DrawObjects( iBLContext
-                                   // we draw the tag owner's scene over the current scene.
-                                   , inbetweenerTag->GetOwner()->GetScene()
-                                   , fgColor
-                                   , bgColor
-                                   , hcColor
-                                   , hudFlags | HUD_TAGINBETWEENER_TARGET );
-    */
-                       DrawBreakdown( iBLContext
-                                    , breakdown
-                                    , fgColor
-                                    , bgColor
-                                    , hcColor
-                                    , true
-                                    , hudFlags  );
+                        DrawBreakdown( iBLContext
+                                     , breakdown
+                                     , BLRgba32( 127, 127, 127, 255 )
+                                     , BLRgba32( 255, 127, 127, 255 )
+                                     , HUD_BREAKDOWN_SOURCE | HUD_BREAKDOWN_TARGET | HUD_BREAKDOWN_INBETWEEN );
 
                         DrawTargetGrid ( iBLContext
                                        , breakdown

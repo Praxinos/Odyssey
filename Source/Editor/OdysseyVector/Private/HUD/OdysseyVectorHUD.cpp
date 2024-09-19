@@ -466,6 +466,54 @@ FOdysseyVectorHUD::DrawCubicSegment( BLContext* iBLContext
 
 // static
 void
+FOdysseyVectorHUD::DrawBreakdown( BLContext* iBLContext
+                                , FInbetweenerBreakdown* iBreakdown
+                                , const BLRgba32& iSourceDrawingColor
+                                , const BLRgba32& iTargetDrawingColor
+                                , uint64 iHUDFlags )
+{
+    FOdysseyVectorTagInbetweener* inbetweenerTag = iBreakdown->GetInbetweenerTag();
+    BLMatrix2D worldMatrix = inbetweenerTag->GetOwner()->GetWorldMatrix();
+    FColor color = inbetweenerTag->GetColor();
+
+    if( iHUDFlags & HUD_BREAKDOWN_INBETWEEN )
+    {
+        iBLContext->setStrokeWidth( 2.0f );
+        int32 sourceInbetweenIndex = iBreakdown->GetSourceDrawingIndex();
+        int32 targetInbetweenIndex = iBreakdown->GetTargetDrawingIndex();
+
+        for( uint32 i = 1; i < iBreakdown->GetDrawingCount() - 1; i++ )
+        {
+            FChartDivision* inbetween = &iBreakdown->GetChart()->GetDivisionArray()[i];
+
+            iBLContext->setStrokeStyle( BLRgba32( color.R
+                                                , color.G
+                                                , color.B
+                                                , 127 + ( color.A * 0.5f * inbetween->spacing ) ) );
+
+            inbetweenerTag->DrawPathsInbetween( inbetween, iBLContext );
+        }
+    }
+
+    if( iHUDFlags & HUD_BREAKDOWN_TARGET )
+    {
+        iBLContext->setStrokeWidth( 3.0f );
+        iBLContext->setStrokeStyle( iTargetDrawingColor );
+
+        iBreakdown->DrawPathsAtTarget( iBLContext );
+    }
+
+    if( iHUDFlags & HUD_BREAKDOWN_SOURCE )
+    {
+        iBLContext->setStrokeWidth( 3.0f );
+        iBLContext->setStrokeStyle( iSourceDrawingColor );
+
+        iBreakdown->DrawPathsAtSource( iBLContext );
+    }
+}
+
+// static
+void
 FOdysseyVectorHUD::DrawInbetweens( BLContext* iBLContext
                                  , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                  , const BLRgba32& fgColor
@@ -480,7 +528,7 @@ FOdysseyVectorHUD::DrawInbetweens( BLContext* iBLContext
                                                         , fgColor.a() )
                                                :  iInbetweenerTag->GetColor();
 
-    if( iHUDFlags & HUD_TAGINBETWEENER_INBETWEEN )
+    if( iHUDFlags & HUD_BREAKDOWN_INBETWEEN )
     {
         iBLContext->setStrokeWidth( 2.0f );
 
@@ -491,7 +539,7 @@ FOdysseyVectorHUD::DrawInbetweens( BLContext* iBLContext
 
             for( uint32 i = 1; i < breakdown->GetDrawingCount() - 1; i++ )
             {
-                FChartInbetween* inbetween = &breakdown->GetChart()->GetInbetweenArray()[i];
+                FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionArray()[i];
 
                 iBLContext->setStrokeStyle( BLRgba32( color.R
                                                     , color.G
@@ -503,7 +551,7 @@ FOdysseyVectorHUD::DrawInbetweens( BLContext* iBLContext
         }
     }
 
-    if( iHUDFlags & HUD_TAGINBETWEENER_TARGET )
+    if( iHUDFlags & HUD_BREAKDOWN_TARGET )
     {
         iBLContext->setStrokeWidth( 3.0f );
 
