@@ -53,7 +53,7 @@ UOdysseyPainterEditorVectorBaseTool::ExtendMenu(TSharedRef<FExtender> iExtender)
 				if (!IsActivated())
 					return;
 				
-				iBuilder.BeginSection("Tool Options", TAttribute(FText::FromString("Tool/Options")));
+				iBuilder.BeginSection("ToolOptions", LOCTEXT("vector-base-tool.edit-menu.tool-options", "Tool Options"));
 				{
 					ExtendContextMenu( iBuilder );
 				}
