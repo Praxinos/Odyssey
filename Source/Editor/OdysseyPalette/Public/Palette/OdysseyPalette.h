@@ -215,7 +215,7 @@ protected:
     void GetEntriesUniqueParents(TArray<UOdysseyPaletteEntry*> iEntries, TArray<UOdysseyPaletteEntry*>& oParents);
 
 public:
-    UPROPERTY(config, DuplicateTransient, meta = (AllowedClasses = "OdysseyPaletteEntry"))
+    UPROPERTY(config, DuplicateTransient, meta = (AllowedClasses = "/Script/OdysseyPaletteEntry.OdysseyPaletteEntry"))
     TSoftObjectPtr<UOdysseyPaletteEntry> CurrentEntry;
 
     UPROPERTY()
