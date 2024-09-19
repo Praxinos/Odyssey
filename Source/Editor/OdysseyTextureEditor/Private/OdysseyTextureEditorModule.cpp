@@ -61,21 +61,6 @@ FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( TArray<UTexture2D*> iTe
 		TSharedPtr<FOdysseyTextureEditorToolkit> toolkit = MakeShared<FOdysseyTextureEditorToolkit>();
 		toolkit->Initialize(texture, editor);
 
-		//----- Extend the Edit menu using the FMenuBuilder API
-		TSharedPtr<FExtender> menuExtender = MakeShareable(new FExtender());
-		// Extend the Edit menu after the "Configuration" category
-		menuExtender->AddMenuExtension(
-			"Configuration",
-			EExtensionHook::After,
-			NULL,
-			FMenuExtensionDelegate::CreateRaw( editor.Get(), &FOdysseyPainterEditor::AddEditMenuEntry )
-		);
-		toolkit->AddMenuExtender( menuExtender );
-		// Rebuild the the menu bar and take into account the above extender. 
-		// FOdysseyPainterEditor::AddEditMenuEntry() will then be called each time the Edit menu needs to be shown.
-		toolkit->RegenerateMenusAndToolbars();
-		//-----
-
 		TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
 		editor->SetSource(source);
 	}

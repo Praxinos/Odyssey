@@ -66,7 +66,7 @@ public:
     virtual void Commit() override;
 
     virtual void BindShortcuts(class FBaseToolkit* iToolkit) override;
-    virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
+    virtual void ExtendMenu( TSharedRef<FExtender> iExtender) override;
     virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
     virtual EMouseCursor::Type GetMouseCursor() const override;

@@ -24,7 +24,7 @@ public:
 public:
     virtual void Initialize() override;
     virtual void Finalize() override;
-    virtual void ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName ) override;
+    virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder) override;
 

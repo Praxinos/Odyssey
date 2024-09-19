@@ -41,11 +41,12 @@ public:
 	virtual TSharedPtr<class FTabManager> GetAssociatedTabManager() override;
 	virtual double GetLastActivationTime() override;
 	virtual void RemoveEditingAsset(UObject* Asset) override;
-	virtual void ExtendMenu();
 	virtual void RequestModeUITabs() override;
 	virtual void InvokeUI() override;
 	virtual void SetModeUILayer(const TSharedPtr<FAssetEditorModeUILayer> InLayer) override;
 	
+	void RebuildLevelEditorMenu() const;
+
 	void OnToolkitHostReadyForUI();
 	void OnToolkitHostShutdownUI();
 
@@ -55,4 +56,5 @@ public:
 public:
 	TSharedPtr<FOdysseyEditor> mEditor;
 	bool mTabSaved;
+	TSharedPtr<FExtender> mLevelEditorMenuExtender;
 };

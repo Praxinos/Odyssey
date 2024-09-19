@@ -34,11 +34,6 @@ public:
     void CreateTabs();
     void BindShortcuts(FBaseToolkit* iToolkit);
 
-public:
-    // Menu And Toolbar
-    void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
-    void ExtendMenuAbout(FToolMenuOwner iOwner, FName iMenuName );
-
 protected:
 	// Layout
 	void	CreateLeftSection(FOdysseyEditorLayoutBuilder& iBuilder);
@@ -47,11 +42,6 @@ protected:
 
 protected:
     // Shortcuts
-    void AboutIliad();
-    void VisitPraxinosWebsite();
-    void ManualAndReleaseNotes();
-    void GetBrushPack();
-    void Discord();
     void SwitchTabletAPI();
 
     void ClearCurrentLayer();
@@ -66,18 +56,5 @@ private:
     FOdysseyPainterEditor*                          mEditor;
 	TSharedPtr<FTabManager::FLayout>                mLayout;
     TSharedPtr<SWidget>                             mWidget;
-
-protected:
-    /*
-    TSharedPtr<FOdysseyPainterEditorHUDTab>                     mHUDTab;
-    TSharedPtr<FOdysseyPainterEditorViewportTab>                mViewportTab;
-    TSharedPtr<FOdysseyPainterEditorBrushSelectorTab>           mBrushSelectorTab;
-    TSharedPtr<FOdysseyPainterEditorMeshSelectorTab>            mMeshSelectorTab;
-    TSharedPtr<FOdysseyPainterEditorPaletteTab>                 mColorPaletteTab;
-    TSharedPtr<FOdysseyPainterEditorColorWheelTab>              mColorWheelTab;
-    TSharedPtr<FOdysseyPainterEditorColorSlidersTab>            mColorSlidersTab;
-    TSharedPtr<FOdysseyPainterEditorTopTab>                     mTopTab;
-    TSharedPtr<FOdysseyPainterEditorToolsTab>                   mToolsTab;
-    TSharedPtr<FOdysseyPainterEditorToolOptionsTab>             mToolOptionsTab; */
 };
 

@@ -57,7 +57,7 @@ public:
 
 public:
     // Overridable Methods
-    virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
+    virtual void ExtendMenu( TSharedRef<FExtender> iExtender );
     virtual void BindShortcuts(FBaseToolkit* iToolkit);
     virtual bool OnCloseRequested();
     virtual void OnClose();

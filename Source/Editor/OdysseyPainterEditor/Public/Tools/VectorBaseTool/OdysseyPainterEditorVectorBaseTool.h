@@ -59,6 +59,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey );
         virtual void Commit();
         virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
+    	virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
         virtual void ExtendContextMenu( FMenuBuilder& menu );
         virtual void BindShortcuts( FBaseToolkit* iToolkit );
         virtual EMouseCursor::Type GetMouseCursor() const override;

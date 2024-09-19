@@ -99,33 +99,13 @@ void
 FOdysseyAnimationEditorTimelineTab::BindShortcuts(FBaseToolkit* iToolkit)
 {
     const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
-    const FOdysseyAnimationEditorCommands& AnimationEditorCommands = FOdysseyAnimationEditorCommands::Get();
-
-    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyAnimationEditorTimelineTab::__VA_ARGS__ ), FCanExecuteAction() );
-
-    MAP_ACTION(AnimationEditorCommands.ImportTextureSequence, ImportTextureSequence )
-    MAP_ACTION(AnimationEditorCommands.ImportImageSequence, ImportImageSequence )
-    MAP_ACTION(AnimationEditorCommands.ExportImageSequence, ExportImageSequence )
-    MAP_ACTION(AnimationEditorCommands.ExportAsFlipbook, ExportAsFlipbook )
-    MAP_ACTION(AnimationEditorCommands.CreateNewAnimationLayerImageRaster, CreateNewLayer )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity10, ChangeLayerOpacity, 0.1f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity20, ChangeLayerOpacity, 0.2f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity30, ChangeLayerOpacity, 0.3f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity40, ChangeLayerOpacity, 0.4f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity50, ChangeLayerOpacity, 0.5f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity60, ChangeLayerOpacity, 0.6f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity70, ChangeLayerOpacity, 0.7f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity80, ChangeLayerOpacity, 0.8f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity90, ChangeLayerOpacity, 0.9f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity100, ChangeLayerOpacity, 1.0f )
-
-    #undef MAP_ACTION
+	MapActions(toolkitCommands);
 }
 
 void
-FOdysseyAnimationEditorTimelineTab::ExtendMenu(FToolMenuOwner iOwner, FName iMenuName)
+FOdysseyAnimationEditorTimelineTab::ExtendMenu(TSharedRef<FExtender> iExtender)
 {
-    ExtendMenuFile(iOwner, iMenuName);
+    ExtendMenuFile(iExtender);
 }
 
 //--------------------------------------------------------------------------------------
@@ -162,31 +142,54 @@ FOdysseyAnimationEditorTimelineTab::PlaybackFramesPerSecond() const
 //------------------------------------------------------------------------------ Methods
 
 void
-FOdysseyAnimationEditorTimelineTab::ExtendMenuFile( FToolMenuOwner iOwner, FName iMenuName )
+FOdysseyAnimationEditorTimelineTab::MapActions( TSharedPtr<FUICommandList> iCommandList )
 {
-    UToolMenu* menu = UToolMenus::Get()->FindMenu(*(iMenuName.ToString() + FString(".File")));
+    const FOdysseyAnimationEditorCommands& AnimationEditorCommands = FOdysseyAnimationEditorCommands::Get();
 
-    FToolMenuInsert menuInsert;
-    if (menu->FindSection("FileActors")) //FileActirs is a weird name but it is the actual name of the "Import/Export" Section from Unreal File Menu
-        menuInsert = FToolMenuInsert("FileActors", EToolMenuInsertType::After);
+    #define MAP_ACTION(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyAnimationEditorTimelineTab::__VA_ARGS__ ), FCanExecuteAction() );
 
-    menu->AddDynamicSection(
-        "OdysseyAnimationDynamic",
-        FNewToolMenuDelegate::CreateLambda(
-            [this](UToolMenu* iToolMenu)
-            {
-                FOdysseyPainterEditor* editor = mExtension->GetEditor();
+    MAP_ACTION(AnimationEditorCommands.ImportTextureSequence, ImportTextureSequence )
+    MAP_ACTION(AnimationEditorCommands.ImportImageSequence, ImportImageSequence )
+    MAP_ACTION(AnimationEditorCommands.ExportImageSequence, ExportImageSequence )
+    MAP_ACTION(AnimationEditorCommands.ExportAsFlipbook, ExportAsFlipbook )
+    MAP_ACTION(AnimationEditorCommands.CreateNewAnimationLayerImageRaster, CreateNewLayer )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity10, ChangeLayerOpacity, 0.1f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity20, ChangeLayerOpacity, 0.2f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity30, ChangeLayerOpacity, 0.3f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity40, ChangeLayerOpacity, 0.4f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity50, ChangeLayerOpacity, 0.5f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity60, ChangeLayerOpacity, 0.6f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity70, ChangeLayerOpacity, 0.7f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity80, ChangeLayerOpacity, 0.8f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity90, ChangeLayerOpacity, 0.9f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity100, ChangeLayerOpacity, 1.0f )
+
+    #undef MAP_ACTION
+}
+
+void
+FOdysseyAnimationEditorTimelineTab::ExtendMenuFile( TSharedRef<FExtender> iExtender )
+{
+	TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
+	MapActions(commandList);
+	iExtender->AddMenuExtension(
+		"OdysseyFile",
+		EExtensionHook::After,
+		commandList,
+		FMenuExtensionDelegate::CreateLambda(
+			[this](FMenuBuilder& iBuilder)
+			{
+				FOdysseyPainterEditor* editor = mExtension->GetEditor();
                 if (!editor)
                     return;
 
                 TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
                 if (!source || source->Id() != FOdysseyAnimationEditorSource::StaticId())
                     return;
-                
-                FToolMenuSection& section = iToolMenu->AddSection("OdysseyAnimation", LOCTEXT("timeline-tab.file-menu.animation-import-export-section.name", "Animation Import / Export"));
+
+				iBuilder.BeginSection("OdysseyAnimation", LOCTEXT("timeline-tab.file-menu.animation-import-export-section.name", "Animation Import / Export"));
                 {
-                    section.AddSubMenu(
-                        TEXT("Import"),
+                    iBuilder.AddSubMenu(
                         LOCTEXT("timeline-tab.file-menu.import-submenu.name", "Import"),
                         LOCTEXT("timeline-tab.file-menu.import-submenu.tooltip", "Contains Import actions"),
                         FNewMenuDelegate::CreateRaw(this, &FOdysseyAnimationEditorTimelineTab::BuildImportMenu),
@@ -194,8 +197,7 @@ FOdysseyAnimationEditorTimelineTab::ExtendMenuFile( FToolMenuOwner iOwner, FName
                         FSlateIcon( "OdysseyStyle", "AnimationEditor.File-Menu.Import" )
                     );
 
-                    section.AddSubMenu(
-                        TEXT("Export"),
+                    iBuilder.AddSubMenu(
                         LOCTEXT("timeline-tab.file-menu.export-submenu.name", "Export"),
                         LOCTEXT("timeline-tab.file-menu.export-submenu.tooltip", "Contains Export actions"),
                         FNewMenuDelegate::CreateRaw(this, &FOdysseyAnimationEditorTimelineTab::BuildExportMenu),
@@ -203,10 +205,10 @@ FOdysseyAnimationEditorTimelineTab::ExtendMenuFile( FToolMenuOwner iOwner, FName
                         FSlateIcon( "OdysseyStyle", "AnimationEditor.File-Menu.Export" )
                     );
                 }
-            }
-        )
-        , menuInsert
-    );
+				iBuilder.EndSection();
+			}
+		)
+	);
 }
 
 void

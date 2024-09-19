@@ -21,11 +21,11 @@ public:
     /////////////////////////////////////////////////////
     // Enable Overrides
     /** Enable Modifier SubPixel Override. */
-    UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
-    bool    bOverride_SubPixel;
-
 	UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_Shape;
+
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
+    bool    bOverride_SubPixel;
 
 
     /////////////////////////////////////////////////////

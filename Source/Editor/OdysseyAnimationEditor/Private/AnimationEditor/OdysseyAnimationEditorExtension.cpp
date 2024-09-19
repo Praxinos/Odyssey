@@ -221,11 +221,11 @@ FOdysseyAnimationEditorExtension::AddReferencedObjects(FReferenceCollector& Coll
 }
 
 void
-FOdysseyAnimationEditorExtension::ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName )
+FOdysseyAnimationEditorExtension::ExtendMenu( TSharedRef<FExtender> iExtender )
 {
-	FOdysseyPainterEditorExtension::ExtendMenu(iOwnerFName, iMenuName);
+	FOdysseyPainterEditorExtension::ExtendMenu(iExtender);
 
-    mOutOfPegsTool->ExtendMenu(iOwnerFName, iMenuName);
+    mOutOfPegsTool->ExtendMenu(iExtender);
 }
 
 void

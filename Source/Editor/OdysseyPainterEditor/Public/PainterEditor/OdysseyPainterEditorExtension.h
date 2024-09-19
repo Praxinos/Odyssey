@@ -21,7 +21,7 @@ public:
 public:
     virtual void Initialize();
     virtual void Finalize();
-    virtual void ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName );
+    virtual void ExtendMenu( TSharedRef<FExtender> iExtender );
     virtual void BindShortcuts(FBaseToolkit* iToolkit);
 	virtual void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
 

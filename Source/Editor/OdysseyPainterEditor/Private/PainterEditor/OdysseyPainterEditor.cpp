@@ -190,34 +190,32 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 }
 
 void
-FOdysseyPainterEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+FOdysseyPainterEditor::ExtendMenu( TSharedRef<FExtender> iExtender )
 {
-    FOdysseyEditor::ExtendMenu(iOwner, iMenuName);
+    FOdysseyEditor::ExtendMenu(iExtender);
 
-    GetGUI()->ExtendMenu(iOwner, iMenuName);
-
-    mRasterDrawingTool->ExtendMenu(iOwner, iMenuName);
-    mRasterEraserTool->ExtendMenu(iOwner, iMenuName);
-    mRasterSelectionTool->ExtendMenu(iOwner, iMenuName);
-    mRasterTransformTool->ExtendMenu(iOwner, iMenuName);
-	mRasterPaintBucketTool->ExtendMenu(iOwner, iMenuName);
-    mVectorPathDrawingTool->ExtendMenu(iOwner,iMenuName);
-    mVectorPathEditTool->ExtendMenu(iOwner,iMenuName);
-    mRasterPrimitiveDrawingTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPrimitiveDrawingTool->ExtendMenu(iOwner, iMenuName);
-	mVectorSelectionTool->ExtendMenu(iOwner, iMenuName);
-	mVectorScenePanTool->ExtendMenu(iOwner, iMenuName);
-	mVectorEraserTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPathPushTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPathSmoothTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPathStitchTool->ExtendMenu(iOwner, iMenuName);
-	mVectorPaintBucketTool->ExtendMenu(iOwner, iMenuName);
-	mColorPickerTool->ExtendMenu(iOwner, iMenuName);
-	mVectorGridTool->ExtendMenu(iOwner, iMenuName);
-	mVectorTransformTool->ExtendMenu(iOwner, iMenuName);
+    mRasterDrawingTool->ExtendMenu(iExtender);
+    mRasterEraserTool->ExtendMenu(iExtender);
+    mRasterSelectionTool->ExtendMenu(iExtender);
+    mRasterTransformTool->ExtendMenu(iExtender);
+	mRasterPaintBucketTool->ExtendMenu(iExtender);
+    mVectorPathDrawingTool->ExtendMenu(iExtender);
+    mVectorPathEditTool->ExtendMenu(iExtender);
+    mRasterPrimitiveDrawingTool->ExtendMenu(iExtender);
+	mVectorPrimitiveDrawingTool->ExtendMenu(iExtender);
+	mVectorSelectionTool->ExtendMenu(iExtender);
+	mVectorScenePanTool->ExtendMenu(iExtender);
+	mVectorEraserTool->ExtendMenu(iExtender);
+	mVectorPathPushTool->ExtendMenu(iExtender);
+	mVectorPathSmoothTool->ExtendMenu(iExtender);
+	mVectorPathStitchTool->ExtendMenu(iExtender);
+	mVectorPaintBucketTool->ExtendMenu(iExtender);
+	mColorPickerTool->ExtendMenu(iExtender);
+	mVectorGridTool->ExtendMenu(iExtender);
+	mVectorTransformTool->ExtendMenu(iExtender);
 
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
-        extension->ExtendMenu(iOwner, iMenuName);
+        extension->ExtendMenu(iExtender);
 }
 
 void 

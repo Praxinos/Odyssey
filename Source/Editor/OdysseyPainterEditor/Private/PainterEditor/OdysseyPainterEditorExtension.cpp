@@ -27,7 +27,7 @@ FOdysseyPainterEditorExtension::Finalize()
 }
 
 void
-FOdysseyPainterEditorExtension::ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName )
+FOdysseyPainterEditorExtension::ExtendMenu( TSharedRef<FExtender> iExtender )
 {
 
 }

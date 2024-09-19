@@ -39,6 +39,31 @@ UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool( FOdyss
 {
 }
 
+void
+UOdysseyPainterEditorVectorBaseTool::ExtendMenu(TSharedRef<FExtender> iExtender)
+{
+	TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
+	iExtender->AddMenuExtension(
+		"OdysseyEdit",
+		EExtensionHook::After,
+		commandList,
+		FMenuExtensionDelegate::CreateLambda(
+			[this](FMenuBuilder& iBuilder)
+			{
+				if (!IsActivated())
+					return;
+				
+				iBuilder.BeginSection("Tool Options", TAttribute(FText::FromString("Tool/Options")));
+				{
+					ExtendContextMenu( iBuilder );
+				}
+				iBuilder.EndSection();
+			}
+		)
+	);
+	
+}
+
 //static
 bool
 UOdysseyPainterEditorVectorBaseTool::DoubleClicked()

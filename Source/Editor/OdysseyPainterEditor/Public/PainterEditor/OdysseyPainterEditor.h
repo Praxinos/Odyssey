@@ -52,7 +52,7 @@ public:
     virtual void Initialize() override;
     virtual TSharedRef<FTabManager::FLayout> CreateLayout() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
-    virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
+    virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
     virtual void OnClose() override;
 
 public:

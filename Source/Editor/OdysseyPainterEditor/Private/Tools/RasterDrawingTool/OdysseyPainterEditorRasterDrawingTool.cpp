@@ -423,9 +423,9 @@ UOdysseyPainterEditorRasterDrawingTool::BindShortcuts(FBaseToolkit* iToolkit)
 }
 
 void
-UOdysseyPainterEditorRasterDrawingTool::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+UOdysseyPainterEditorRasterDrawingTool::ExtendMenu( TSharedRef<FExtender> iExtender )
 {
-    Super::ExtendMenu(iOwner, iMenuName);
+    Super::ExtendMenu(iExtender);
 }
 
 TSharedRef<SWidget>

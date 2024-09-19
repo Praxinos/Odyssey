@@ -43,9 +43,9 @@ FOdysseyTextureEditorExtension::Finalize()
 }
 
 void
-FOdysseyTextureEditorExtension::ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName )
+FOdysseyTextureEditorExtension::ExtendMenu( TSharedRef<FExtender> iExtender )
 {
-	mGUI->ExtendMenu(iOwnerFName, iMenuName);
+	mGUI->ExtendMenu(iExtender);
 }
 
 void

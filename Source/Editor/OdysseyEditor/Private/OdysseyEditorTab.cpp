@@ -91,7 +91,7 @@ FOdysseyEditorTab::BindShortcuts(FBaseToolkit* iToolkit)
 }
 
 void
-FOdysseyEditorTab::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+FOdysseyEditorTab::ExtendMenu( TSharedRef<FExtender> iExtender )
 {
 }
 
