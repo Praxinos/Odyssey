@@ -11,6 +11,7 @@
 #include "Widgets/Layout/SWrapBox.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "GenericPlatform/GenericPlatformTime.h"
+#include "Models/OdysseyPainterEditorCommands.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -47,6 +48,30 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
+
+
+void
+UOdysseyPainterEditorVectorPathDrawingTool::BindShortcuts(FBaseToolkit* iToolkit)
+{
+    Super::BindShortcuts(iToolkit);
+
+    const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
+    const FOdysseyPainterEditorCommands& painterEditorToolCommands = FOdysseyPainterEditorCommands::Get();
+
+    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorPathDrawingTool::__VA_ARGS__ ), FCanExecuteAction() );
+
+    MAP_ACTION(painterEditorToolCommands.IncreaseBrushSize, AddSize, 1)
+    MAP_ACTION(painterEditorToolCommands.DecreaseBrushSize, AddSize, -1)
+
+    #undef MAP_ACTION
+}
+
+void
+UOdysseyPainterEditorVectorPathDrawingTool::AddSize(int iAmount)
+{
+    double value = FMath::Max(Radius + iAmount, 0.f);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathDrawingTool, Radius), value);
+}
 
 bool
 UOdysseyPainterEditorVectorPathDrawingTool::IsActivable() const

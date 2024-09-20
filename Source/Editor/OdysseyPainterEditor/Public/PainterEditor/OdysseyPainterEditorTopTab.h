@@ -29,7 +29,6 @@ protected:
     // FOdysseyEditorTab interface
     virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
-    virtual void BindShortcuts( FBaseToolkit* iToolkit ) override;
 
 protected:
     // Widget Getters
