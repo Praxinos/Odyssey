@@ -223,7 +223,7 @@ UOdysseyAnimationLayer::GetPostBehaviourFrame(EOdysseyAnimationLayerImagePostBeh
     return frame;
 }
 
-const TArray<UClass*>&
+const TArray<TSubclassOf<UOdysseyAnimationCell>>&
 UOdysseyAnimationLayer::GetSupportedCellTypes() const
 {
 	return SupportedCellTypes;
@@ -299,7 +299,7 @@ UOdysseyAnimationLayer::AddCells(TSubclassOf<UOdysseyAnimationCell> CellType, in
 		return {};
 
     //cellType Not supported
-    if (!SupportedCellTypes.Contains(cellType))
+    if (!SupportedCellTypes.Contains(CellType))
         return {};
 
 	if (Index < 0 )

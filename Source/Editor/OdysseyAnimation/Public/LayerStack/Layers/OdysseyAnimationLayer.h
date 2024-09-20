@@ -52,7 +52,7 @@ public:
 public:
 	//Cells
 	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-	const TArray<UClass*>& GetSupportedCellTypes() const;
+	const TArray<TSubclassOf<UOdysseyAnimationCell>>& GetSupportedCellTypes() const;
 
 	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
 	const TArray<UOdysseyAnimationCell*>& GetCells() const;
@@ -82,7 +82,7 @@ public:
     UOdysseyAnimationCell* CopyCell(UOdysseyAnimationCell* Cell, int Index = -1);
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
-    TArray<UOdysseyAnimationCell*> CopyCells(TArray<UOdysseyAnimationCell*> Layers, int Index = -1);
+    TArray<UOdysseyAnimationCell*> CopyCells(TArray<UOdysseyAnimationCell*> Cells, int Index = -1);
 
 protected:
     //Property changes
@@ -110,7 +110,7 @@ protected:
 	friend class FOdysseyAnimationLayerImageVectorImport;
 
 	UPROPERTY()
-	TArray<TObjectPtr<UClass>> SupportedCellTypes;
+	TArray<TSubclassOf<UOdysseyAnimationCell>> SupportedCellTypes;
 
 	UPROPERTY()
 	TArray<TObjectPtr<UOdysseyAnimationCell>> Cells;
@@ -130,7 +130,7 @@ private:
 
 public:
 	UPROPERTY(BlueprintReadOnly, Category="Odyssey|Layer")
-	TObjectPtr<UClass> DefaultCellClass = nullptr;
+	TSubclassOf<UOdysseyAnimationCell> DefaultCellClass = nullptr;
 
 	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=CellsOffsetBlueprintSetter)
 	int CellsOffset = 0;
