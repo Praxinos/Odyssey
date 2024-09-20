@@ -7,7 +7,7 @@
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyAnimationLayerRoot.generated.h"
 
-UCLASS()
+UCLASS(NotBlueprintType, HideDropdown)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerRoot
 	: public UOdysseyAnimationLayer
 {

@@ -28,7 +28,7 @@ struct FPaletteEntryDescription
 
 /////////////////////////////////////////////////////
 // OdysseyColorPaletteEntry
-UCLASS(Abstract, BlueprintType, config = EditorPerProjectUserSettings, PerObjectConfig)
+UCLASS(Abstract, HideDropdown, BlueprintType, config = EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYPALETTE_API UOdysseyPaletteEntry : public UObject
 {
     GENERATED_BODY()

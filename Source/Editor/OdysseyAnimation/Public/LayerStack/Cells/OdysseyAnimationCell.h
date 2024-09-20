@@ -24,7 +24,7 @@ struct FOdysseyAnimationCellOutOfPegs
     float Zoom = 100.f; //TODO:
 };
 
-UCLASS(BlueprintType)
+UCLASS(Abstract, BlueprintType, HideDropdown)
 class ODYSSEYANIMATION_API UOdysseyAnimationCell
 	: public UObject
     , public FOdysseyImageRenderingAbility

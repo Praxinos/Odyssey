@@ -59,32 +59,48 @@ UOdysseyLayerStack::CurrentLayerBlueprintSetter(UOdysseyLayer* Layer)
 UOdysseyLayer*
 UOdysseyLayerStack::AddLayer(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLayer* ParentLayer, int IndexInParent)
 {
+    TArray<UOdysseyLayer*> layers = AddLayers(LayerType, ParentLayer, IndexInParent, 1);
+	if (layers.IsEmpty())
+		return nullptr;
+
+	return layers[0];
+}
+
+TArray<UOdysseyLayer*>
+UOdysseyLayerStack::AddLayers(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLayer* ParentLayer, int IndexInParent, int Count)
+{
     UClass* layerType = LayerType.Get();
 
     //No LayerType
 	if ( !layerType )
-		return nullptr;
+		return {};
 
     //LayerType Not supported
     if (!SupportsLayerClass(layerType))
-        return nullptr;
+        return {};
 
     //If the given parent can't have children or isn't contained in this layerstack
     if (!ParentLayer)
         ParentLayer = LayerRoot;
 
     if (!ParentLayer->CanHaveChildren || !ContainsLayer(ParentLayer))
-        return nullptr;
+        return {};
 
     //Create the Layer
-	UOdysseyLayer* layer = CreateLayer(LayerType);
-    if (!layer )
-        return nullptr;
+	TArray<UOdysseyLayer*> layers;
+	for (int i = 0; i < Count; i++)
+	{
+		UOdysseyLayer* layer = CreateLayer(LayerType);
+		if (!layer )
+			return {};
 
-    //Add the layer to the hierarchy
-    AddLayersToHierarchy({ layer }, ParentLayer, IndexInParent);
+		layers.Add(layer);
+	}
 
-    return layer;
+	//Add the layer to the hierarchy
+	AddLayersToHierarchy(layers, ParentLayer, IndexInParent);
+
+    return layers;
 }
 
 void

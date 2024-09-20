@@ -7,7 +7,7 @@
 #include "OdysseyTextureLayer.h"
 #include "OdysseyTextureLayerRoot.generated.h"
 
-UCLASS()
+UCLASS(NotBlueprintType, HideDropdown)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerRoot
 	: public UOdysseyTextureLayer
 {

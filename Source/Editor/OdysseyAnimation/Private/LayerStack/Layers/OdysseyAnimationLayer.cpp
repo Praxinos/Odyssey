@@ -299,7 +299,7 @@ UOdysseyAnimationLayer::AddCells(TSubclassOf<UOdysseyAnimationCell> CellType, in
 		return {};
 
     //cellType Not supported
-    if (!SupportedCellTypes.Contains(CellType))
+    if (!SupportedCellTypes.Contains(cellType))
         return {};
 
 	if (Index < 0 )

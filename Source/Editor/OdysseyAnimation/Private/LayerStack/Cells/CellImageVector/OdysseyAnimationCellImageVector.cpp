@@ -134,7 +134,7 @@ UOdysseyAnimationCellImageVector::PostLoad()
 
 	UOdysseyAnimation* animation = GetAnimation();
     mVectorBlock->Init(mVectorBlockId, mEngine, animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
-    mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY );
+    //mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY );
 }
 
 void

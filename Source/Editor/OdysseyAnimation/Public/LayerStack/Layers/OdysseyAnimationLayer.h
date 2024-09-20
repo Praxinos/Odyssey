@@ -20,7 +20,7 @@ enum class EOdysseyAnimationLayerImagePostBehaviour : uint8
     PingPong
 };
 
-UCLASS(BlueprintType)
+UCLASS(Abstract, BlueprintType, HideDropdown)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayer
     : public UOdysseyLayer
 {
@@ -63,10 +63,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
 	bool HasCellAtFrame(int Frame) const;
 
-	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer", meta=(DeterminesOutputType = "CellType"))
 	UOdysseyAnimationCell* AddCell(TSubclassOf<UOdysseyAnimationCell> CellType, int Index = -1 );
 
-	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer", meta=(DeterminesOutputType = "CellType"))
 	TArray<UOdysseyAnimationCell*> AddCells(TSubclassOf<UOdysseyAnimationCell> CellType, int Index = -1, int Count = 1 );
 
 	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")

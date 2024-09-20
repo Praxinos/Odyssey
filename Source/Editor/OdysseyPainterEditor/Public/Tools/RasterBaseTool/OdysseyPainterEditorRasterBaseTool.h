@@ -7,7 +7,7 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyPainterEditorRasterBaseTool.generated.h"
 
-UCLASS(Abstract)
+UCLASS(Abstract, HideDropdown)
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterBaseTool : public UOdysseyPainterEditorTool
 {
     public:

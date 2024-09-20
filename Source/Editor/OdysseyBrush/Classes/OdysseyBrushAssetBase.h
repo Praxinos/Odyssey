@@ -39,7 +39,7 @@ private:
  * BrushAssetBase
  * Base class for OdysseyBrush Blueprint.
  */
-UCLASS(Abstract, hideCategories=(Object), Blueprintable)
+UCLASS(Abstract, hideCategories=(Object), Blueprintable, HideDropdown)
 class ODYSSEYBRUSH_API UOdysseyBrushAssetBase : public UObject
 {
     GENERATED_BODY()

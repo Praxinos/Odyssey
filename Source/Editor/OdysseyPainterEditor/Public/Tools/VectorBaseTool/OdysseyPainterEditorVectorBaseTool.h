@@ -19,7 +19,7 @@ enum class eMouseEventName : uint8
     MouseUp    = 3
 };
 
-UCLASS(Abstract)
+UCLASS(Abstract, HideDropdown)
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdysseyPainterEditorTool
 {
     public:

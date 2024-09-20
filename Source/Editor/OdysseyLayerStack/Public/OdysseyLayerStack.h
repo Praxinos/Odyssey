@@ -8,7 +8,7 @@
 #include "OdysseyImageRenderingAbility.h"
 #include "OdysseyLayerStack.generated.h"
 
-UCLASS(Abstract, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
+UCLASS(Abstract, HideDropdown, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYLAYERSTACK_API UOdysseyLayerStack
     : public UObject
 	, public FOdysseyImageRenderingAbility
@@ -62,6 +62,9 @@ public:
      */
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack", meta=(DeterminesOutputType="LayerType"))
     UOdysseyLayer* AddLayer(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLayer* ParentLayer = nullptr, int IndexInParent = 0);
+
+	UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack", meta=(DeterminesOutputType="LayerType"))
+	TArray<UOdysseyLayer*> AddLayers(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLayer* ParentLayer = nullptr, int IndexInParent = 0, int Count = 1);
 
     /**
      * @brief Removes Layer from the LayerStack
@@ -297,7 +300,7 @@ protected:
 public:
     //Default properties
     UPROPERTY(Transient)
-    TSet<UClass*> CompatibleLayers; //Contains compatible C++ layer types
+    TArray<TSubclassOf<UOdysseyLayer>> CompatibleLayers; //Contains compatible C++ layer types
 	
 	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LayerStack", BlueprintSetter=CurrentLayerBlueprintSetter)
 	TObjectPtr<UOdysseyLayer> CurrentLayer;
