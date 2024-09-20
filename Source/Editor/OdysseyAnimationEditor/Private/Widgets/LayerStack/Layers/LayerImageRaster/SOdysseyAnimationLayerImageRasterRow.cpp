@@ -121,7 +121,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
             .Padding(FMargin(0, 0, 1.f, 0))
             [
                 SNew(SNumericEntryBox<int>)
-                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageRaster->GetIsLocked();})
+                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageRaster->IsLockedRecursively();})
                 .Value_Lambda([this]() { return (int)(mAnimationLayerImageRaster->Opacity * 100.f + 0.5f);})
                 .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
                 .AllowSpin(true)
@@ -142,7 +142,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
             .VAlign(VAlign_Center)
             [
                 SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageRaster->GetIsLocked();})
+                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageRaster->IsLockedRecursively();})
                 .CurrentValue_Lambda([this](){ return (int32)mAnimationLayerImageRaster->BlendMode;})
                 .ContentPadding(FMargin(0))
                 .OnEnumSelectionChanged(this, &SOdysseyAnimationLayerImageRasterRow::OnBlendModeComboBoxChanged)
@@ -152,7 +152,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
         .AutoHeight()
         [
             SNew(SOdysseyAnimationTimelineLightTableHeader)
-            .LightTable(mAnimationLayerImageRaster->GetLightTable())
+            .Layer(mAnimationLayerImageRaster)
 		    .Visibility(this, &SOdysseyAnimationLayerImageRasterRow::GetLightTableVisibility)
         ];
 }
@@ -161,40 +161,42 @@ TSharedRef<SWidget>
 SOdysseyAnimationLayerImageRasterRow::GenerateTimelineWidget()
 {
     return SNew(SOdysseyAnimationLayerImageRasterTimeline, GetExtension(), mAnimationLayerImageRaster)
-        .IsCollapsed(this, &SOdysseyAnimationLayerImageRasterRow::IsCollapsed);
+        .DisplayOptions(this, &SOdysseyAnimationLayerImageRasterRow::DisplayOptions);
 }
 
 void
 SOdysseyAnimationLayerImageRasterRow::OnLightTableCheckStateChanged(ECheckBoxState iState)
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "bIsLightTableActivated", iState == ECheckBoxState::Checked);
+	FOdysseyAnimationLightTable lighttable = mAnimationLayerImageRaster->Lighttable;
+	lighttable.bIsActivated = iState == ECheckBoxState::Checked;
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
     GetTreeView()->RequestTreeRefresh(); //needed to display layers previously hidden
 }
 
 void
 SOdysseyAnimationLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState)
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "IsAlphaLocked", iState == ECheckBoxState::Checked);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageRaster,  IsAlphaLocked), iState == ECheckBoxState::Checked);
 }
 
 void
 SOdysseyAnimationLayerImageRasterRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
-    if ( mAnimationLayerImageRaster->GetIsLocked() )
+    if ( mAnimationLayerImageRaster->IsLockedRecursively() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::ValueSet);
 }
 
 void
 SOdysseyAnimationLayerImageRasterRow::OnOpacityValueChanged(int iValue)
 {
-    if ( mAnimationLayerImageRaster->GetIsLocked() )
+    if ( mAnimationLayerImageRaster->IsLockedRecursively() )
         return;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "Opacity", iValue / 100.f, EPropertyChangeType::Interactive);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::Interactive);
 }
 
 void
@@ -213,7 +215,7 @@ SOdysseyAnimationLayerImageRasterRow::OnOpacityEndSliderMovement(int iValue)
 ECheckBoxState
 SOdysseyAnimationLayerImageRasterRow::GetLightTableIsChecked() const
 {
-	return mAnimationLayerImageRaster->bIsLightTableActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+	return mAnimationLayerImageRaster->Lighttable.bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 ECheckBoxState
@@ -225,24 +227,24 @@ SOdysseyAnimationLayerImageRasterRow::GetIsAlphaLockedIsChecked() const
 void
 SOdysseyAnimationLayerImageRasterRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
-    if ( mAnimationLayerImageRaster->GetIsLocked() )
+    if ( mAnimationLayerImageRaster->IsLockedRecursively() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-raster.transaction.set-blend-mode", "Change Layer BlendMode"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, "BlendMode", EOdysseyBlendingMode(iValue));
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode), EOdysseyBlendingMode(iValue));
 }
 
 EVisibility
 SOdysseyAnimationLayerImageRasterRow::GetCollapsedOpacityVisibility() const
 {
-    return IsCollapsed() ? EVisibility::Visible : EVisibility::Collapsed;
+    return DisplayOptions() ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 EVisibility
 SOdysseyAnimationLayerImageRasterRow::GetLightTableVisibility() const
 {
-    return mAnimationLayerImageRaster->bIsLightTableActivated ? EVisibility::Visible : EVisibility::Collapsed;
+    return mAnimationLayerImageRaster->Lighttable.bIsActivated ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -4,10 +4,6 @@
 #pragma once
 
 #include "LayerStack/OdysseyTextureLayer.h"
-#include "Image/OdysseyBlendingMode.h"
-#include "Misc/TransactionObjectEvent.h"
-#include "Misc/ITransaction.h"
-#include "Misc/ITransactionObjectAnnotation.h"
 
 #include <ULIS>
 
@@ -23,89 +19,67 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
 {
     GENERATED_BODY()
 
-    public:
-        /**
-         * @brief Delegate called when something changed the result of RenderImage()
-         * 
-         */
-        DECLARE_MULTICAST_DELEGATE_OneParam(FOnBlendModeChanged, UOdysseyTextureLayerImageVector*)
+private:
+	// handle to a callback to refresh the layer when a property of an object's details view is changed
+	FOdysseyVectorEngine* mEngine;
+	TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
 
-        /**
-         * @brief Delegate called when something changed the result of RenderImage()
-         * 
-         */
-        DECLARE_MULTICAST_DELEGATE_OneParam(FOnOpacityChanged, UOdysseyTextureLayerImageVector*)
+	void Init( uint32 iWidth, uint32 iHeight );
 
-    public:
-        static FOnBlendModeChanged& OnBlendModeChanged();
-        static FOnOpacityChanged& OnOpacityChanged();
+public:
+	~UOdysseyTextureLayerImageVector();
+	UOdysseyTextureLayerImageVector();
 
+protected:
+	UPROPERTY()
+	uint32 Width;
 
-    private:
-        // handle to a callback to refresh the layer when a property of an object's details view is changed
-        FOdysseyVectorEngine* mEngine;
-        TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
+	UPROPERTY()
+	uint32 Height;
 
-        void Init( uint32 iWidth, uint32 iHeight );
+	UPROPERTY()
+	FGuid mVectorBlockId;
 
-    public:
-        ~UOdysseyTextureLayerImageVector();
-        UOdysseyTextureLayerImageVector();
+public:
+	//UOdysseyLayer overrides
+	virtual void PostInitProperties() override;
+	virtual void PostLoad() override;
+	virtual void PostDuplicate(bool bDuplicateForPIE) override;
+	virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
-    protected:
-        UPROPERTY()
-        uint32 Width;
+	FOdysseyVectorEngine* GetEngine();
 
-        UPROPERTY()
-        uint32 Height;
+	void IsWireframeChanged();
+	void IsColoredChanged();
+	void Serialize(FArchive& Ar);
+	virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
 
-        UPROPERTY()
-        FGuid mVectorBlockId;
+	virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
-    public:
-        //UOdysseyLayer overrides
-        virtual void OnCreated_Implementation() override;
-        virtual void PostInitProperties() override;
-        virtual void PostLoad() override;
-        virtual void PostDuplicate(bool bDuplicateForPIE) override;
-        virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
+public:
+	//FOdysseyImageRenderingAbility overrides
+	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
+	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0) const override;
+	
+private:
+	void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
 
-        FOdysseyVectorEngine* GetEngine();
- 
-        void OpacityChanged();
-        void BlendModeChanged();
-        void IsWireframeChanged();
-        void IsColoredChanged();
-        void Serialize(FArchive& Ar);
-        virtual void PropertyChanged(const FName& iPropertyName) override;
+private:
+	//Import/Export
+	friend class FOdysseyTextureLayerImageVectorExport;
+	friend class FOdysseyTextureLayerImageVectorImport;
 
-        virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
+private:
+	UFUNCTION(BlueprintSetter)
+	void IsWireframeBlueprintSetter(bool Value);
 
-    public:
-        //FOdysseyImageRenderingAbility overrides
-        virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-        virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const override;
-        virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
-        virtual float GetImageRenderingOpacity() const override;
+	UFUNCTION(BlueprintSetter)
+	void IsColoredBlueprintSetter(bool Value);
 
-    private:
-        void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
+	bool IsWireframe = false;
 
-    private:
-        //Import/Export
-        friend class FOdysseyTextureLayerImageVectorExport;
-        friend class FOdysseyTextureLayerImageVectorImport;
-
-    public:
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Texture | LayerStack")
-        bool IsWireframe = false;
-
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Texture | LayerStack")
-        bool IsColored = true;
-
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Texture | LayerStack")
-	    EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
-
-        UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Texture | LayerStack")
-        float Opacity = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
+	bool IsColored = true;
 };

@@ -9,7 +9,6 @@
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 #include "OdysseyRasterBlockMutator.h"
 
 #include "Misc/TransactionObjectEvent.h"
@@ -33,105 +32,56 @@ UOdysseyAnimation::OnFramesPerSecondChanged()
     return onFramesPerSecondChanged;
 }
 
-void UOdysseyAnimation::Init(const FOdysseyAnimationConfiguration& iConfiguration)
+void
+UOdysseyAnimation::CurrentFrameBlueprintSetter(int Value)
 {
-	mWidth = iConfiguration.Width;
-	mHeight = iConfiguration.Height;
-	mFormat = iConfiguration.ULISFormat();
-	FramesPerSecond = iConfiguration.FramesPerSecond;
-
-	mLayerStack = NewObject<UOdysseyAnimationLayerStack>(this, "LayerStack", RF_Public | RF_Transactional);
-
-	switch (iConfiguration.LayerType)
-	{
-		case EOdysseyAnimationDefaultLayerType::kRaster:
-		{
-			UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(mLayerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-			mLayerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
-
-			TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, 1, mWidth, mHeight, Format());
-			FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
-			mutator.Add({ cell });
-			mutator.Commit();
-		}
-		break;
-
-		case EOdysseyAnimationDefaultLayerType::kVector:
-		{
-			UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(mLayerStack->AddLayer(UOdysseyAnimationLayerImageVector::StaticClass()));
-			mLayerStack->CurrentLayer = TSoftObjectPtr<UOdysseyLayer>(layer);
-
-			TSharedPtr<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(layer, 1, mWidth, mHeight);
-			FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
-			mutator.Add({ cell });
-			mutator.Commit();
-		}
-		break;
-
-		default:
-			check(false); //should not be called
-	}
-
-	//Background Layer
-	if (iConfiguration.BackgroundColor != EOdysseyAnimationBackgroundColor::kTransparent)
-	{	
-		UOdysseyAnimationLayerImageRaster* backgroundLayer = Cast<UOdysseyAnimationLayerImageRaster>(mLayerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), nullptr, 1));
-		backgroundLayer->PostBehaviour = EOdysseyAnimationLayerImagePostBehaviour::Hold;
-		backgroundLayer->Name = LOCTEXT("animation.default-background-layer.name", "Background");
-
-		TSharedPtr<FOdysseyAnimationCellImageRaster> backgroundCell = FOdysseyAnimationCellImageRaster::Create(backgroundLayer, 1, mWidth, mHeight, Format());
-		TSharedPtr<FOdysseyRasterBlock> backgroundRasterBlock = backgroundCell->GetRasterBlock();
-
-		FLinearColor backgorundColor = iConfiguration.GetBackgroundColor();
-
-		FOdysseyRasterBlockMutator rasterBlockMutator(backgroundRasterBlock);
-		rasterBlockMutator.EditTilesFromRects({backgroundRasterBlock->GetRect()},
-			FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-				[backgorundColor](TSharedPtr<::ULIS::FBlock> ioBlock, const FULISInvalidTileMap& iInvalidTileMap) -> TArray<::ULIS::FEvent>
-				{
-					::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ioBlock->Format());
-					::ULIS::FColor color( ::ULIS::FColor::FromRGBAF( backgorundColor.R, backgorundColor.G, backgorundColor.B, backgorundColor.A ) );
-					ctx.Fill(*ioBlock, color);
-					ctx.Finish();
-					return {};
-				}
-			)
-		);
-
-		FOdysseyAnimationCellsMutator cellsMutator(backgroundLayer, backgroundLayer->GetCellsContainer());
-		cellsMutator.Add({ backgroundCell });
-		cellsMutator.Commit();
-	}
+	FObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), Value);
 }
 
-uint32
-UOdysseyAnimation::Width() const
+void
+UOdysseyAnimation::FramesPerSecondBlueprintSetter(float Value)
+{
+	FObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, FramesPerSecond), Value);
+}
+
+int
+UOdysseyAnimation::GetWidth() const
 {
 	return mWidth;
 }
 
-uint32
-UOdysseyAnimation::Height() const
+int
+UOdysseyAnimation::GetHeight() const
 {
 	return mHeight;
 }
 
 ::ULIS::eFormat
-UOdysseyAnimation::Format() const
+UOdysseyAnimation::GetFormat() const
 {
-	return ::ULIS::eFormat(mFormat);
+	switch(Format)
+	{
+		case EOdysseyAnimationFormat::BGRA8: return ::ULIS::Format_BGRA8;
+		case EOdysseyAnimationFormat::RGBAF: return ::ULIS::Format_RGBAF;
+	}
+	checkf(false, TEXT("Format not found"));
+	return ::ULIS::Format_BGRA8;
 }
 
 FTimespan
 UOdysseyAnimation::GetDuration() const
 {
-	FInt32Range range = GetFrameRange();
-	return FTimespan::FromSeconds((range.GetUpperBoundValue() - range.GetLowerBoundValue() + 1) / GetFramesPerSecond()) - FTimespan(1);
+	if (GetFrameCount() == 0)
+	{
+		return FTimespan::FromSeconds(0);
+	}
+	return FTimespan::FromSeconds(GetFrameCount() / GetFramesPerSecond()) - FTimespan(1);
 }
 
 FInt32Range
 UOdysseyAnimation::GetFrameRange() const
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetFrameRange);
 	//TODO: deduce frame count from :
 	// - startPoint / endPoint
 
@@ -142,13 +92,13 @@ UOdysseyAnimation::GetFrameRange() const
 	return FInt32Range::Inclusive(0, layerStackFrameRange.GetUpperBoundValue()); //Animation starts always at 0 if there is no startPoint
 }
 
-uint32
+int
 UOdysseyAnimation::GetFrameCount() const
 {
-	FInt32Range frameRange = mLayerStack->GetFrameRange();
+	FInt32Range frameRange = GetFrameRange();
 	int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
 	int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
-	return endFrame - startFrame + 1;
+	return FMath::Max(0, endFrame - startFrame + 1);
 }
 
 double
@@ -223,7 +173,8 @@ UOdysseyAnimation::PostInitProperties()
     if (HasAnyFlags(RF_ClassDefaultObject))
         return;
 	
-    mProxy = MakeShared<FOdysseyAnimationProxy>(this);
+	mLayerStack = NewObject<UOdysseyAnimationLayerStack>(this, "LayerStack", RF_Public | RF_Transactional);
+	mProxy = MakeShared<FOdysseyAnimationProxy>(this);
 
 	OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimation::OnImageRenderingChanged);
 }
@@ -231,6 +182,7 @@ UOdysseyAnimation::PostInitProperties()
 void
 UOdysseyAnimation::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::OnImageRenderingChanged);
 	if (iEvent.IsInteractive())
 		return;
 
@@ -253,15 +205,25 @@ void
 UOdysseyAnimation::PostLoad()
 {
 	Super::PostLoad();
+
+	if (mFormat == ::ULIS::Format_BGRA8)
+	{
+		Format = EOdysseyAnimationFormat::BGRA8;
+	}
+	if (mFormat == ::ULIS::Format_RGBAF)
+	{
+		Format = EOdysseyAnimationFormat::RGBAF;
+	}
+
 	mProxy->PostLoad();
 }
 
 void
 UOdysseyAnimation::PropertyChanged(const FName& iPropertyName)
 {
-	if ( iPropertyName == "CurrentFrame" )
+	if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame) )
         CurrentFrameChanged();
-    if ( iPropertyName == "FramesPerSecond" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, FramesPerSecond) )
         FramesPerSecondChanged();
 }
 
@@ -318,7 +280,7 @@ UOdysseyAnimation::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderTy
 TArray<::ULIS::FRectI>
 UOdysseyAnimation::GetImageRenderingRects() const
 {
-    return { ::ULIS::FRectI::FromXYWH(0, 0, Width(), Height()) };
+    return { ::ULIS::FRectI::FromXYWH(0, 0, GetWidth(), GetHeight()) };
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -2,7 +2,7 @@
 
 #include <Core/Core.h>
 
-class FOdysseyAnimationCellImageRaster;
+class UOdysseyAnimationCellImageRaster;
 
 class FOdysseyAnimationCellImageRasterImport
 {
@@ -13,7 +13,7 @@ public:
      * @param iAnimationCellImageRaster 
      * @param Ar 
      */
-    static bool ODYSSEYANIMATION_API Read( FOdysseyAnimationCellImageRaster* iAnimationCellImageRaster
+    static bool ODYSSEYANIMATION_API Read( UOdysseyAnimationCellImageRaster* iAnimationCellImageRaster
                                   , FArchive &Ar );
 
 private:
@@ -21,7 +21,7 @@ private:
      * Private import functions
      */
 
-    static void Read( FOdysseyAnimationCellImageRaster* iAnimationCellImageRaster
+    static void Read( UOdysseyAnimationCellImageRaster* iAnimationCellImageRaster
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };

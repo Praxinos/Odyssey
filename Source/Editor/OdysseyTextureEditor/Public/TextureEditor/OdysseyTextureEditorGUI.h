@@ -26,7 +26,7 @@ public:
 public:
     void Init();
     void BindShortcuts( FBaseToolkit* iToolkit );
-    void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
+    void ExtendMenu( TSharedRef<FExtender> iExtender );
 	void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
 
 private:

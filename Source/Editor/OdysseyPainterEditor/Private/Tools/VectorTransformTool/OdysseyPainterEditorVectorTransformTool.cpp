@@ -875,7 +875,7 @@ UOdysseyPainterEditorVectorTransformTool::PropertyChangedVector( FOdysseyVectorG
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     //mTransformHUD->MakeTransform( iScene, DivisionsX, DivisionsY );
 
-    if( iPropertyName == "World" )
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorTransformTool, World) )
     {
         iEngine->ResetHUD();
         mTransformHUD->CenterGizmo();

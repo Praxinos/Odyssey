@@ -12,7 +12,6 @@
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyRasterBlockUndo.h"
 #include "OdysseyTextureLayerImageRaster.h"
-#include "OdysseyLayerFunctionLibrary.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "LayerStack/OdysseyTextureLayerImageRasterImageRenderer.h"
 #include "OdysseyTextureLayerImageRasterImport.h"
@@ -21,54 +20,14 @@
 
 #define LOCTEXT_NAMESPACE "Texture"
 
-UOdysseyTextureLayerImageRaster::FOnBlendModeChanged&
-UOdysseyTextureLayerImageRaster::OnBlendModeChanged()
-{
-    static FOnBlendModeChanged onBlendModeChanged;
-    return onBlendModeChanged;
-}
-
-UOdysseyTextureLayerImageRaster::FOnOpacityChanged&
-UOdysseyTextureLayerImageRaster::OnOpacityChanged()
-{
-    static FOnOpacityChanged onOpacityChanged;
-    return onOpacityChanged;
-}
-
 UOdysseyTextureLayerImageRaster::~UOdysseyTextureLayerImageRaster()
 {
 }
 
 UOdysseyTextureLayerImageRaster::UOdysseyTextureLayerImageRaster()
-    : RasterBlock(MakeShared<FOdysseyRasterBlock>(this))
 {
 	LayerTypeName = LOCTEXT("layer-image-raster.type", "Raster Image Layer");
     Icon = FSlateIcon("OdysseyStyle", "OdysseyLayerStack.LayerBitmap16");
-}
-
-void
-UOdysseyTextureLayerImageRaster::OnCreated_Implementation()
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    if(!layerStack)
-        return;
-
-    UTexture2D* texture = layerStack->GetTexture();
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-    //let's ensure the format has alpha, so add alpha channel of needed
-    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>( texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
-
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-    ctx.Clear(*block.Get());
-    ctx.Finish();
-
-    //Caches the tiles on disk, we do this
-    RasterBlock->SetBlock(block);
-    RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
-    RasterBlock->OnBlockCommited().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockCommited);
-    RasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockPtrChanged);
 }
 
 TSharedPtr<FOdysseyRasterBlock>
@@ -90,69 +49,34 @@ UOdysseyTextureLayerImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& i
 }
 
 void
-UOdysseyTextureLayerImageRaster::OnBlockPtrChanged()
-{
-    ImageRenderingChanged();
-}
-
-void
 UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
 {   
     FOdysseyRasterBlockMutator mutator(RasterBlock);
     mutator.EditTilesFromRects(
         { ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) },
-        FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-            {
-                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(RasterBlock->GetFormat());
-                TArray<::ULIS::FEvent> lastEvent = {};
-                for ( UOdysseyLayer* layer : iLayers )
-                {
-                    UOdysseyTextureLayer* textureLayer = Cast<UOdysseyTextureLayer>(layer);
-                    if ( !textureLayer )
-                        continue;
+		[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+		{
+			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(RasterBlock->GetFormat());
+			TArray<::ULIS::FEvent> lastEvent = {};
+			for ( UOdysseyLayer* layer : iLayers )
+			{
+				UOdysseyTextureLayer* textureLayer = Cast<UOdysseyTextureLayer>(layer);
+				if ( !textureLayer )
+					continue;
 
-                    TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
-		            renderer->Init();
+				TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
+				renderer->Init();
 
-                    FOdysseyImageRendererBlendParams params(iBlock, {iBlock->Rect()});
-                    params.mBlendMode = textureLayer->GetImageRenderingBlendMode();
-                    params.mOpacity = textureLayer->GetImageRenderingOpacity();
+				FOdysseyImageRendererBlendParams params(iBlock, {iBlock->Rect()});
+				params.mBlendMode = (::ULIS::eBlendMode)textureLayer->BlendMode;
+				params.mOpacity = textureLayer->Opacity;
 
-                    lastEvent = renderer->Blend(params, lastEvent);
-                }
-                return { lastEvent };
-            }
-        )
+				lastEvent = renderer->Blend(params, lastEvent);
+			}
+			return { lastEvent };
+		}
     );
     mutator.Commit();
-}
-
-void
-UOdysseyTextureLayerImageRaster::OpacityChanged()
-{
-    OnOpacityChanged().Broadcast(this);
-
-    ImageRenderingChanged();
-}
-
-void
-UOdysseyTextureLayerImageRaster::BlendModeChanged()
-{
-    OnBlendModeChanged().Broadcast(this);
-    
-    ImageRenderingChanged();
-}
-
-void
-UOdysseyTextureLayerImageRaster::PropertyChanged(const FName& iPropertyName)
-{
-    Super::PropertyChanged(iPropertyName);
-
-    if (iPropertyName == "BlendMode")
-        BlendModeChanged();
-    if (iPropertyName == "Opacity")
-        OpacityChanged();
 }
 
 void
@@ -160,23 +84,28 @@ UOdysseyTextureLayerImageRaster::PostInitProperties()
 {
     Super::PostInitProperties();
 
-    RasterBlock->PostProcess().BindUObject(this, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);
-}
+	if (GetFlags() & RF_ClassDefaultObject)
+		return;
 
-void
-UOdysseyTextureLayerImageRaster::PostLoad()
-{
-    Super::PostLoad();
-    if ( RasterBlock )
+    UTexture2D* texture = GetTexture();
+    if (texture->Source.GetFormat() != TSF_Invalid)
     {
-        RasterBlock->OnBlockChanged().RemoveAll(this);
-        RasterBlock->OnBlockCommited().RemoveAll(this);
-        RasterBlock->OnBlockPtrChanged().RemoveAll(this);
-        RasterBlock->PostProcess().Unbind();
+        ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+        //let's ensure the format has alpha, so add alpha channel of needed
+        format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
+
+        //Caches the tiles on disk
+        RasterBlock = MakeShared<FOdysseyRasterBlock>(this, texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
         RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
         RasterBlock->OnBlockCommited().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockCommited);
-        RasterBlock->OnBlockPtrChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockPtrChanged);
-        RasterBlock->PostProcess().BindUObject(this, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);   
+        RasterBlock->PostProcess().BindUObject(this, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);
+    }
+    else
+    {
+        RasterBlock = MakeShared<FOdysseyRasterBlock>(this);
+        RasterBlock->OnBlockChanged().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockChanged);
+        RasterBlock->OnBlockCommited().AddUObject(this, &::UOdysseyTextureLayerImageRaster::OnBlockCommited);
+        RasterBlock->PostProcess().BindUObject(this, &UOdysseyTextureLayerImageRaster::RasterBlockPostProcess);
     }
 }
 
@@ -200,30 +129,15 @@ UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
     format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
     int width = texture->Source.GetSizeX();
     int height = texture->Source.GetSizeY();
-    RasterBlock->PostDuplicate(width, height, format);
-    
-    /* TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> originalBlock = RasterBlock->GetBlock();
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> duplicatedBlock = MakeShared<::ULIS::FBlock>( texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-    ctx.ConvertFormat(
-        *originalBlock.Get(),
-        *duplicatedBlock.Get(),
-        ::ULIS::FRectI::Auto,
-        ::ULIS::FVec2I( 0 ),
-        ::ULIS::FSchedulePolicy::AsyncCacheEfficient
-    );
-    ctx.Finish();
-
-    //Replace old rasterblock with an owned one
-    RasterBlock->SetBlock(duplicatedBlock); */
+    RasterBlock->PostDuplicate();
+	RasterBlock->ConvertTo(width, height, format);
 }
 
 FOdysseyMediaProvider
 UOdysseyTextureLayerImageRaster::GetMediaProvider(uint32 iFrameIndex) const
 {
-    bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(this);
-    bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(this);
+    bool isActive = IsActivatedRecursively();
+    bool isLocked = IsLockedRecursively();
 
     FOdysseyMediaProvider mediaProvider;
     mediaProvider.IsLocked(!isActive || isLocked);
@@ -237,6 +151,9 @@ void
 UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
+
+	if (GetFlags() & RF_ClassDefaultObject)
+		return;
     
     if( Ar.IsSaving() )
     {
@@ -289,7 +206,7 @@ UOdysseyTextureLayerImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TS
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyTextureLayerImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter) const
+UOdysseyTextureLayerImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
@@ -298,21 +215,15 @@ UOdysseyTextureLayerImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRend
 }
 
 TArray<FGuid>
-UOdysseyTextureLayerImageRaster::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const
+UOdysseyTextureLayerImageRaster::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
 {
     return { GetImageRenderingId() };
 }
 
-::ULIS::eBlendMode
-UOdysseyTextureLayerImageRaster::GetImageRenderingBlendMode() const
+void
+UOdysseyTextureLayerImageRaster::IsAlphaLockedBlueprintSetter(bool Value)
 {
-    return (::ULIS::eBlendMode)BlendMode;
-}
-
-float
-UOdysseyTextureLayerImageRaster::GetImageRenderingOpacity() const
-{
-    return Opacity;
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageRaster, IsAlphaLocked), Value);
 }
 
 #undef LOCTEXT_NAMESPACE

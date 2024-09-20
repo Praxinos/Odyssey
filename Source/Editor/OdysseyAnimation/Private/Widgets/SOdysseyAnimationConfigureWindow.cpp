@@ -24,13 +24,13 @@ FOdysseyAnimationConfiguration::ULISFormat() const
 {
     switch(Format)
     {
-        case EOdysseyAnimationFormat::kBGRA8:
+        case EOdysseyAnimationFormat::BGRA8:
         {
             return ::ULIS::Format_BGRA8;
         }
         break;
 
-        case EOdysseyAnimationFormat::kRGBAF:
+        case EOdysseyAnimationFormat::RGBAF:
         {
             return ::ULIS::Format_RGBAF;
         }
@@ -46,9 +46,9 @@ FOdysseyAnimationConfiguration::GetBackgroundColor() const
 {
     switch(BackgroundColor)
     {
-        case EOdysseyAnimationBackgroundColor::kTransparent:  return FLinearColor( 0.f, 0.f, 0.f, 0.f );
-        case EOdysseyAnimationBackgroundColor::kWhite:        return FLinearColor( 1.f, 1.f, 1.f );
-        case EOdysseyAnimationBackgroundColor::kNormal:       return FLinearColor( .5f, .5f, 1.f );
+        case EOdysseyAnimationBackgroundColor::Transparent:  return FLinearColor( 0.f, 0.f, 0.f, 0.f );
+        case EOdysseyAnimationBackgroundColor::White:        return FLinearColor( 1.f, 1.f, 1.f );
+        case EOdysseyAnimationBackgroundColor::Normal:       return FLinearColor( .5f, .5f, 1.f );
         default: break;
     }
 

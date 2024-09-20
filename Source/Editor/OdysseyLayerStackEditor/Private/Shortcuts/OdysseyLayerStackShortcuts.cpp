@@ -312,6 +312,10 @@ FOdysseyLayerStackShortcuts::Action_FlattenSelectedLayers()
     if (selectedLayers.Num() <= 0)
         return;
 
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.flatten-layers", "Flatten Layers"));
+#endif
+
     mLayerStack->FlattenLayers(selectedLayers);
 }
 
@@ -346,10 +350,6 @@ FOdysseyLayerStackShortcuts::CanAction_FlattenSelectedLayers()
     TArray<UOdysseyLayer*> selectedLayers = treeView->GetSelectedItems();
     if (selectedLayers.Num() <= 0)
         return false;
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.flatten-layers", "Flatten Layers"));
-#endif
 
     return mLayerStack->CanFlattenLayers(selectedLayers);
 }

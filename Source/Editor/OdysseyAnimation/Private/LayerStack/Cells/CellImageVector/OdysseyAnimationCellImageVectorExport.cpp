@@ -4,15 +4,15 @@
 #include "OdysseyFile.h"
 
 void
-FOdysseyAnimationCellImageVectorExport::WriteResolution( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
+FOdysseyAnimationCellImageVectorExport::WriteResolution( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                                        , FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR_RESOLUTION
                             , Ar
                             , [iAnimationCellImageVector](FArchive &Ar) -> void
     {
-        uint32 width = iAnimationCellImageVector->GetWidth();
-        uint32 height = iAnimationCellImageVector->GetHeight();
+        uint32 width = iAnimationCellImageVector->GetEngine()->GetPreferredWidth();
+        uint32 height = iAnimationCellImageVector->GetEngine()->GetPreferredHeight();
 
         Ar << width;
         Ar << height;
@@ -20,7 +20,7 @@ FOdysseyAnimationCellImageVectorExport::WriteResolution( FOdysseyAnimationCellIm
 }
 
 void
-FOdysseyAnimationCellImageVectorExport::WriteVectorBlockID( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
+FOdysseyAnimationCellImageVectorExport::WriteVectorBlockID( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                                           , FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR_BLOCK_ID
@@ -34,7 +34,7 @@ FOdysseyAnimationCellImageVectorExport::WriteVectorBlockID( FOdysseyAnimationCel
 }
 
 void
-FOdysseyAnimationCellImageVectorExport::WriteVectorBlock( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
+FOdysseyAnimationCellImageVectorExport::WriteVectorBlock( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                                         , FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR_BLOCK
@@ -46,7 +46,7 @@ FOdysseyAnimationCellImageVectorExport::WriteVectorBlock( FOdysseyAnimationCellI
 }
 
 void
-FOdysseyAnimationCellImageVectorExport::Write( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
+FOdysseyAnimationCellImageVectorExport::Write( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                              , FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_CELLIMAGEVECTOR

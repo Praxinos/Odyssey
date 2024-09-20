@@ -9,16 +9,7 @@
 #include "SOdysseyAnimationExportImageSequenceDialog.generated.h"
 
 class UOdysseyAnimation;
-class FOdysseyAnimationImageRenderingAbility;
-
-UENUM()
-enum class EOdysseyAnimationExportImageSequenceFormat : uint8
-{
-	PNG,
-	BMP,
-	TGA,
-	Jpeg
-};
+class FOdysseyImageRenderingAbility;
 
 UENUM()
 enum class EOdysseyAnimationExportImageSequenceSource : uint8
@@ -35,6 +26,34 @@ enum class EOdysseyAnimationExportImageSequenceRange : uint8
 	AllFrames,
 	AllCells,
 	Custom
+};
+
+class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationImageSequenceExporter
+{
+public:
+	FOdysseyAnimationImageSequenceExporter();
+	FOdysseyAnimationImageSequenceExporter(UOdysseyAnimation* iAnimation);
+
+public:
+	struct FSource
+	{
+		FOdysseyImageRenderingAbility* mImageRenderingAbility;
+		FString mFilename;
+		FInt32Range mRange;
+	};
+	TArray<FSource> GetSources();
+	FInt32Range GetSourceRange(const FSource& iSource);
+
+	void Export(const FString& iFilename);
+	void ExportSource(const FSource& iSource, const FString& iFilename, int iNumZero);
+
+public:
+	UOdysseyAnimation* mAnimation = nullptr;
+	EOdysseyExportImageFormat mFormat = EOdysseyExportImageFormat::PNG;
+	EOdysseyAnimationExportImageSequenceSource mSource = EOdysseyAnimationExportImageSequenceSource::Animation;
+	EOdysseyAnimationExportImageSequenceRange mRange = EOdysseyAnimationExportImageSequenceRange::AllCells;
+	FInt32Range mCustomRange;
+	bool mUniqueFramesOnly = true;
 };
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationExportImageSequenceDialog : public SCompoundWidget
@@ -59,25 +78,8 @@ public:
 
 private:
 	FString GetSaveFileDialogExtension();
-	::ULIS::eFileFormat GetFileFormat();
-
-	struct FSource
-	{
-		FOdysseyAnimationImageRenderingAbility* mImageRenderingAbility;
-		FString mFilename;
-		FInt32Range mRange;
-	};
-	TArray<FSource> GetSources();
-	FInt32Range GetSourceRange(const FSource& iSource);
-
 	void Export();
-	void ExportSource(const FSource& iSource, const FString& iFilename);
 
 private:
-    UOdysseyAnimation* mAnimation;
-	EOdysseyAnimationExportImageSequenceFormat mFormat;
-	EOdysseyAnimationExportImageSequenceSource mSource;
-	EOdysseyAnimationExportImageSequenceRange mRange;
-	FInt32Range mCustomRange;
-	bool mUniqueFramesOnly;
+    FOdysseyAnimationImageSequenceExporter mExporter;
 };

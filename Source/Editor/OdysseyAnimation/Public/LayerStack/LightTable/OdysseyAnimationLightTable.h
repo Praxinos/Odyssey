@@ -4,75 +4,74 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OdysseyAnimationImageRenderingAbility.h"
+#include "OdysseyImageRenderingAbility.h"
 
 #include "OdysseyAnimationLightTable.generated.h"
 
+USTRUCT(BlueprintType)
 struct FOdysseyAnimationLightTableKey
 {
-    friend class FOdysseyAnimationLightTableKeyImport;
-    friend class FOdysseyAnimationLightTableKeyExport;
+	GENERATED_BODY()
 
-    bool mIsActivated;
-    float mOpacity;
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LightTable")
+    bool bIsActivated = false;
+
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LightTable")
+    float Opacity = 100.f; //TODO: UIMin = 0, UIMax = 100, Linear
 };
 
-UENUM()
-enum class EOdysseyLightTableDisplayPosition
+UENUM(BlueprintType)
+enum class EOdysseyLightTableDisplayPosition : uint8
 {
     AboveLayer,
     UnderLayer
 };
 
-class UOdysseyAnimationLayer;
-
-class ODYSSEYANIMATION_API FOdysseyAnimationLightTable
-    : public TSharedFromThis<FOdysseyAnimationLightTable>
-    , public FOdysseyAnimationImageRenderingAbility
+USTRUCT(BlueprintType)
+struct FOdysseyAnimationLightTable
 {
-public:
-    virtual ~FOdysseyAnimationLightTable();
-    FOdysseyAnimationLightTable(UOdysseyAnimationLayer* iLayer);
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LightTable")
+    bool bIsActivated = false;
+
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LightTable")
+    EOdysseyLightTableDisplayPosition DisplayPosition = EOdysseyLightTableDisplayPosition::UnderLayer;
+
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LightTable")
+    FLinearColor PreviousKeysColor = FColor::Orange;
+
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LightTable")
+    FLinearColor NextKeysColor = FColor(0, 128, 255);
+
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LightTable")
+    float PreviousKeysContrast = 0.f; //TODO: UIMin = 0 UIMax = 100 and Linear
+
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LightTable")
+    float NextKeysContrast = 0.f;  //TODO: UIMin = 0 UIMax = 100 and Linear
+
+	UPROPERTY() //Static array cannot be exposed to blueprint Class (Use UOdysseyAnimationLighttableFunctionLibrary::GetPreviousKey())
+    FOdysseyAnimationLightTableKey PreviousKeys[10];
+
+	UPROPERTY() //Static array cannot be exposed to blueprint Class (Use UOdysseyAnimationLighttableFunctionLibrary::GetPreviousKey())
+	FOdysseyAnimationLightTableKey NextKeys[10];
+};
+
+UCLASS()
+class UOdysseyAnimationLighttableFunctionLibrary : public UBlueprintFunctionLibrary
+{
+    GENERATED_BODY()
 
 public:
-    UOdysseyAnimationLayer* GetLayer() const;
-    EOdysseyLightTableDisplayPosition GetDisplayPosition() const;
+	UFUNCTION(BlueprintPure, Category="Odyssey|LightTable")
+	static FOdysseyAnimationLightTableKey GetPreviousKey(FOdysseyAnimationLightTable Lighttable, int Index = 0);
 
-public:
-    bool GetKeyIsActivated(int iIndex) const;
-    int GetKeyOffset(int iIndex) const;
-    float GetKeyOpacity(int iIndex) const;
-    ::ULIS::FColor GetKeyColor(int iIndex) const;
-    const FLinearColor& GetNextKeysColor() const;
-    const FLinearColor& GetPreviousKeysColor() const;
-    float GetNextKeysContrast() const;
-    float GetPreviousKeysContrast() const;
+	UFUNCTION(BlueprintPure, Category="Odyssey|LightTable")
+	static FOdysseyAnimationLightTableKey GetNextKey(FOdysseyAnimationLightTable Lighttable, int Index = 0);
 
-    const FOdysseyAnimationLightTableKey* GetKey(int iIndex) const;
-    int GetRange() const;
+	UFUNCTION(BlueprintPure, Category="Odyssey|LightTable")
+	static FOdysseyAnimationLightTable SetPreviousKey(FOdysseyAnimationLightTable Lighttable, FOdysseyAnimationLightTableKey Key, int Index = 0);
 
-public:
-	//FOdysseyImageRenderingAbility overrides
-	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
-	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
-
-    void Serialize(FArchive& Ar);
-
-private:
-    FOdysseyAnimationLightTableKey* GetKey(int iIndex);
-
-private:
-    friend class FOdysseyAnimationLightTableMutator;
-    friend class FOdysseyAnimationLightTableImport;
-    friend class FOdysseyAnimationLightTableExport;
-
-    UOdysseyAnimationLayer* mLayer;
-    EOdysseyLightTableDisplayPosition mDisplayPosition;
-    FLinearColor mPreviousKeysColor;
-    FLinearColor mNextKeysColor;
-    float mPreviousKeysContrast;
-    float mNextKeysContrast;
-
-    TArray<FOdysseyAnimationLightTableKey> mKeys;
+	UFUNCTION(BlueprintPure, Category="Odyssey|LightTable")
+	static FOdysseyAnimationLightTable SetNextKey(FOdysseyAnimationLightTable Lighttable, FOdysseyAnimationLightTableKey Key, int Index = 0);
 };

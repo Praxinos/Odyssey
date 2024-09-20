@@ -66,7 +66,7 @@ public:
     virtual void Commit() override;
 
     virtual void BindShortcuts(class FBaseToolkit* iToolkit) override;
-    virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
+    virtual void ExtendMenu( TSharedRef<FExtender> iExtender) override;
     virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
     virtual EMouseCursor::Type GetMouseCursor() const override;
@@ -202,6 +202,12 @@ protected:
     UPROPERTY()
     TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
 
+
+
+private:
+	UFUNCTION(BlueprintSetter)
+	void SubPixelBlueprintSetter(bool Value);
+
 public:
     UPROPERTY(EditAnywhere, Category="Shape")
     EOdysseyShape SelectedShape;
@@ -209,7 +215,10 @@ public:
     UPROPERTY(VisibleInstanceOnly, Category="Shape", Instanced, meta=(ShowInnerProperties))
     class UOdysseyShape* SelectedShapeInstance;
 
-    UPROPERTY(EditAnywhere, Category = "Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1"))
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Shape", BlueprintSetter=SubPixelBlueprintSetter)
+    bool SubPixel = true;
+
+    UPROPERTY(EditAnywhere, Category="Interpolation", meta = (ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple = "1"))
     float   Step = 1.0;
 
     UPROPERTY( EditAnywhere, Category="Interpolation")
@@ -245,4 +254,6 @@ protected:
 
     FOdysseyPoint mLastPoint;
     bool mIsFirstPoint = true;
+
+	FOdysseyPoint mSubPixelPoint;
 };

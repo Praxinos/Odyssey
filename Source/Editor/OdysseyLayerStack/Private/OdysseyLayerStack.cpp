@@ -4,6 +4,7 @@
 #include "OdysseyLayerStack.h"
 
 #include "OdysseyLayer.h"
+#include "OdysseyLayerStackImageRenderer.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Misc/ScopedSlowTask.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -38,74 +39,68 @@ UOdysseyLayerStack::OnCurrentLayerChanged()
     return onCurrentLayerChanged;
 }
 
-//--- Layer Class Support
-
-/*
-TArray<UClass*>
-UOdysseyLayerStack::FindSupportedCustomLayerClasses() const
-{
-    TArray<UClass*> supportedClasses;
-    TArray<FAssetData> layersAssetData = UOdysseyCustomLayer::FindAllCustomLayerClassesAssetData();
-    for (const FAssetData& assetData : layersAssetData)
-	{
-        UClass* layerClass = UOdysseyCustomLayer::LoadClassFromAssetData(assetData);
-        if (!layerClass)
-            continue;
-
-        if (!SupportsLayerClass(layerClass))
-            continue;
-        
-        supportedClasses.Add(layerClass);
-    }
-
-    return supportedClasses;
-}
-*/
-
 bool
 UOdysseyLayerStack::SupportsLayerClass(UClass* iClass) const
 {
     if (CompatibleLayers.Contains(iClass))
         return true;
 
-    /* UOdysseyCustomLayer* layerCDO = UOdysseyCustomLayer::StaticClass()->GetDefaultObject<UOdysseyCustomLayer>();
-    if (layerCDO && layerCDO->CompatibleLayerStacks.Contains(GetClass()))
-        return true; */
-
     return false;
 }
 
 //--- Layers management
 
+void
+UOdysseyLayerStack::CurrentLayerBlueprintSetter(UOdysseyLayer* Layer)
+{
+	FObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), Layer);
+}
+
 UOdysseyLayer*
 UOdysseyLayerStack::AddLayer(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLayer* ParentLayer, int IndexInParent)
+{
+    TArray<UOdysseyLayer*> layers = AddLayers(LayerType, ParentLayer, IndexInParent, 1);
+	if (layers.IsEmpty())
+		return nullptr;
+
+	return layers[0];
+}
+
+TArray<UOdysseyLayer*>
+UOdysseyLayerStack::AddLayers(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLayer* ParentLayer, int IndexInParent, int Count)
 {
     UClass* layerType = LayerType.Get();
 
     //No LayerType
 	if ( !layerType )
-		return nullptr;
+		return {};
 
     //LayerType Not supported
     if (!SupportsLayerClass(layerType))
-        return nullptr;
+        return {};
 
     //If the given parent can't have children or isn't contained in this layerstack
     if (!ParentLayer)
         ParentLayer = LayerRoot;
 
     if (!ParentLayer->CanHaveChildren || !ContainsLayer(ParentLayer))
-        return nullptr;
+        return {};
 
     //Create the Layer
-    UOdysseyLayer* layer = CreateLayer(LayerType);
-    if (!layer )
-        return nullptr;
+	TArray<UOdysseyLayer*> layers;
+	for (int i = 0; i < Count; i++)
+	{
+		UOdysseyLayer* layer = CreateLayer(LayerType);
+		if (!layer )
+			return {};
 
-    //Add the layer to the hierarchy
-    AddLayersToHierarchy({ layer }, ParentLayer, IndexInParent);
+		layers.Add(layer);
+	}
 
-    return layer;
+	//Add the layer to the hierarchy
+	AddLayersToHierarchy(layers, ParentLayer, IndexInParent);
+
+    return layers;
 }
 
 void
@@ -197,7 +192,7 @@ UOdysseyLayerStack::DuplicateLayers(TArray<UOdysseyLayer*> Layers)
     }
 
     if (layersDuplicates.Num() != 0)
-        FOdysseyObjectEditorUtils::SetPropertyValue(this, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(layersDuplicates[0]));
+        FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), layersDuplicates[0]);
 
     return layersDuplicates;
 }
@@ -678,9 +673,6 @@ UOdysseyLayerStack::CreateLayer(UClass* iLayerType)
     FString name = layer->DefaultName.ToString() + TEXT(" ") + FString::FromInt(GetLayers().Num() + 1);
     layer->Name = FText::FromString(name);
 
-    //Initialize the layer
-    layer->OnCreated();
-
     return layer;
 }
 
@@ -789,7 +781,7 @@ UOdysseyLayerStack::CurrentLayerChanged()
 void
 UOdysseyLayerStack::PropertyChanged(const FName& iPropertyName)
 {
-    if ( iPropertyName == "CurrentLayer" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer) )
         CurrentLayerChanged();
 }
 
@@ -815,4 +807,27 @@ UOdysseyLayerStack::PostTransacted(const FTransactionObjectEvent& iTransactionEv
     {
         PropertyChanged(propertyName);
     }
+}
+
+
+TSharedPtr<IOdysseyImageRenderer>
+UOdysseyLayerStack::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+{
+    if (iFilter.IsBound() && !iFilter.Execute(this))
+        return nullptr;
+    
+    return MakeShared<FOdysseyLayerStackImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
+}
+
+TArray<FGuid>
+UOdysseyLayerStack::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
+{
+    TArray<FGuid> idComposition = { GetImageRenderingId() };
+
+    UOdysseyLayer* layerRoot = Cast<UOdysseyLayer>(LayerRoot);
+    if ( !layerRoot )
+        return idComposition;
+    
+    idComposition.Append(layerRoot->GetImageRenderingComposition(iRenderType, iFrameIndex));
+    return idComposition;
 }

@@ -131,7 +131,7 @@ SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
             .Padding(FMargin(0, 0, 1.f, 0))
             [
                 SNew(SNumericEntryBox<int>)
-                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageVector->GetIsLocked();})
+                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageVector->IsLockedRecursively();})
                 .Value_Lambda([this]() { return (int)(mAnimationLayerImageVector->Opacity * 100.f + 0.5f);})
                 .TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
                 .AllowSpin(true)
@@ -152,7 +152,7 @@ SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
             .VAlign(VAlign_Center)
             [
                 SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageVector->GetIsLocked();})
+                .IsEnabled_Lambda([this](){ return !mAnimationLayerImageVector->IsLockedRecursively();})
                 .CurrentValue_Lambda([this](){ return (int32)mAnimationLayerImageVector->BlendMode;})
                 .ContentPadding(FMargin(0))
                 .OnEnumSelectionChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnBlendModeComboBoxChanged)
@@ -162,7 +162,7 @@ SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
         .AutoHeight()
         [
             SNew(SOdysseyAnimationTimelineLightTableHeader)
-            .LightTable(mAnimationLayerImageVector->GetLightTable())
+            .Layer(mAnimationLayerImageVector)
 		    .Visibility(this, &SOdysseyAnimationLayerImageVectorRow::GetLightTableVisibility)
         ];
 }
@@ -171,48 +171,50 @@ TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorRow::GenerateTimelineWidget()
 {
     return SNew(SOdysseyAnimationLayerImageVectorTimeline, GetExtension(), mAnimationLayerImageVector)
-        .IsCollapsed(this, &SOdysseyAnimationLayerImageVectorRow::IsCollapsed);
+        .DisplayOptions(this, &SOdysseyAnimationLayerImageVectorRow::DisplayOptions);
 }
 
 void
 SOdysseyAnimationLayerImageVectorRow::OnIsWireframeCheckStateChanged( ECheckBoxState iState )
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-wireframe", "Change Layer Wireframe status"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "IsWireframe", iState == ECheckBoxState::Checked);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsWireframe), iState == ECheckBoxState::Checked);
 }
 
 void
 SOdysseyAnimationLayerImageVectorRow::OnIsColoredCheckStateChanged( ECheckBoxState iState )
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-coloring", "Change Layer Coloring"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "IsColored", iState == ECheckBoxState::Checked);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsColored), iState == ECheckBoxState::Checked);
 }
 
 void
 SOdysseyAnimationLayerImageVectorRow::OnLightTableCheckStateChanged(ECheckBoxState iState)
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "bIsLightTableActivated", iState == ECheckBoxState::Checked);
+	FOdysseyAnimationLightTable lighttable = mAnimationLayerImageVector->Lighttable;
+	lighttable.bIsActivated = iState == ECheckBoxState::Checked;
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
     GetTreeView()->RequestTreeRefresh(); //needed to display layers previously hidden
 }
 
 void
 SOdysseyAnimationLayerImageVectorRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
-    if ( mAnimationLayerImageVector->GetIsLocked() )
+    if ( mAnimationLayerImageVector->IsLockedRecursively() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::ValueSet);
 }
 
 void
 SOdysseyAnimationLayerImageVectorRow::OnOpacityValueChanged(int iValue)
 {
-    if ( mAnimationLayerImageVector->GetIsLocked() )
+    if ( mAnimationLayerImageVector->IsLockedRecursively() )
         return;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "Opacity", iValue / 100.f, EPropertyChangeType::Interactive);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::Interactive);
 }
 
 void
@@ -243,30 +245,30 @@ SOdysseyAnimationLayerImageVectorRow::GetIsColoredIsChecked() const
 ECheckBoxState
 SOdysseyAnimationLayerImageVectorRow::GetLightTableIsChecked() const
 {
-	return mAnimationLayerImageVector->bIsLightTableActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+	return mAnimationLayerImageVector->Lighttable.bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 void
 SOdysseyAnimationLayerImageVectorRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
-    if ( mAnimationLayerImageVector->GetIsLocked() )
+    if ( mAnimationLayerImageVector->IsLockedRecursively() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-blend-mode", "Change Layer BlendMode"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, "BlendMode", EOdysseyBlendingMode(iValue));
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode), EOdysseyBlendingMode(iValue));
 }
 
 EVisibility
 SOdysseyAnimationLayerImageVectorRow::GetLightTableVisibility() const
 {
-    return mAnimationLayerImageVector->bIsLightTableActivated ? EVisibility::Visible : EVisibility::Collapsed;
+    return mAnimationLayerImageVector->Lighttable.bIsActivated ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 EVisibility
 SOdysseyAnimationLayerImageVectorRow::GetCollapsedOpacityVisibility() const
 {
-    return IsCollapsed() ? EVisibility::Visible : EVisibility::Collapsed;
+    return DisplayOptions() ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 #undef LOCTEXT_NAMESPACE

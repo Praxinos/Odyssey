@@ -51,35 +51,35 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
         {
             FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
 
-            if( iPropertyName == "Painted" )
+            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Painted) )
                 selectedPaintGroup->SetPainted( Painted );
 
-            if( iPropertyName == "Monochrome" )
+            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Monochrome) )
                 selectedPaintGroup->SetMonochrome( Monochrome );
 
             // Note: iMemberPropertyName because FColor is a struct 
             // and we can edit individual struct members RGBA
-            if( ( iPropertyName == "MonochromeColor" ) || ( iMemberPropertyName == "MonochromeColor" ) )
+            if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, MonochromeColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, MonochromeColor) ) )
                 selectedPaintGroup->SetMonochromeColor( MonochromeColor );
 
-            if( iPropertyName == "Realtime" )
+            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Realtime) )
                 selectedPaintGroup->SetRealtime( Realtime );
 
-            if( iPropertyName == "GapTolerance" )
+            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, GapTolerance) )
                 selectedPaintGroup->SetGapTolerance( GapTolerance );
 
-            if( iPropertyName == "IntersectsCanevas" )
+            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, IntersectsCanevas) )
                 selectedPaintGroup->SetIntersectsCanevas( IntersectsCanevas );
 
-            //if( iPropertyName == "Wireframe" )
+            //if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Wireframe) )
             //    selectedPaintGroup->SetWireframe( Wireframe );
 
             // Note: iMemberPropertyName because FColor is a struct 
             // and we can edit individual struct members RGBA
-            if( ( iPropertyName == "WireframeColor" ) || ( iMemberPropertyName == "WireframeColor" ) )
+            if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, WireframeColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, WireframeColor) ) )
                 selectedPaintGroup->SetWireframeColor( WireframeColor );
 
-            if( iPropertyName == "Multithreaded" )
+            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Multithreaded) )
                 selectedPaintGroup->SetMultithreaded( Multithreaded );
         }
     }

@@ -22,28 +22,28 @@ public:
 
 public:
     /** Enable Modifier Opacity Override. */
-    UPROPERTY( EditAnywhere, Category = "Modifiers", meta=(InlineEditConditionToggle) )
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_Opacity;
 
     /** Enable Modifier BlendingMode Override. */
-    UPROPERTY( EditAnywhere, Category = "Modifiers", meta=(InlineEditConditionToggle) )
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_BlendingMode;
 
     /** Enable Modifier AlphaMode Override. */
-    UPROPERTY( EditAnywhere, Category = "Modifiers", meta=(InlineEditConditionToggle) )
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_AlphaMode;
 
     /////////////////////////////////////////////////////
     // Overrides Values
     /** Modifier Opacity Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Modifiers", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", SliderExponent = "1", editcondition = "bOverride_Opacity" ) )
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", SliderExponent = "1", editcondition = "bOverride_Opacity" ) )
     float  Opacity;
 
     /** Modifier BlendingMode Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Modifiers", meta = ( editcondition = "bOverride_BlendingMode" ) )
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_BlendingMode" ) )
     EOdysseyBlendingMode    BlendingMode;
 
     /** Modifier AlphaMode Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Modifiers", meta = ( editcondition = "bOverride_AlphaMode" ) )
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_AlphaMode" ) )
     EOdysseyAlphaMode       AlphaMode;
 };

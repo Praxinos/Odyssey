@@ -891,7 +891,10 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
         ctx.Finish();
 
         UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(mLayerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
-        layer->GetRasterBlock()->SetBlock(layerBlock);
+		
+		FOdysseyRasterBlockMutator mutator(layer->GetRasterBlock());
+		mutator.Copy(layerBlock, {});
+		mutator.Commit();
 
         delete srcblock;
     }
@@ -1071,7 +1074,10 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             imageLayer->IsAlphaLocked = mLayersInfo[i].mFlags & 0x01;
             imageLayer->IsActivated = !(mLayersInfo[i].mFlags & 0x02);
             imageLayer->BlendMode = (EOdysseyBlendingMode)GetBlendingModeFromPSD(mLayersInfo[i].mBlendModeKey);
-            imageLayer->GetRasterBlock()->SetBlock(layerBlock);
+			
+			FOdysseyRasterBlockMutator mutator(imageLayer->GetRasterBlock());
+			mutator.Copy(layerBlock, {});
+			mutator.Commit();
             
             //UE_LOG(LogTemp,Display,TEXT("flags: %d"),mLayersInfo[i].mFlags)
             //Todo: Locked

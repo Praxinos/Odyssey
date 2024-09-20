@@ -56,13 +56,14 @@ private:
 
     TArray<TSharedPtr<FBlockData>> mBlockData;
     TMap<int, TSharedPtr<FBlockData>> mFramesToBlockData;
-    TQueue<TSharedPtr<FBlockData>> mPendingBlockData;
+    TQueue<TSharedPtr<FBlockData>, EQueueMode::Mpsc> mPendingBlockData;
     FInt32Range mAnimationRange;
 };
 
 class FBlockData
 {
 public:
+	~FBlockData();
     FBlockData(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iComposition);
 
 public:
@@ -94,6 +95,7 @@ private:
     FULISInvalidTileMap mInvalidTileMap;
     TSet<int> mFrameIndexes;
     TSharedPtr<IOdysseyImageRenderer> mRenderer;
+	bool mIsReadyToRender = false;
     bool mIsInvalid;
     
     FCriticalSection mEditMutex;

@@ -4,8 +4,7 @@
 #include "LayerStack/Tools/OdysseyAnimationTimelineCutTool.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyAnimationEditorTimeline.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -24,29 +23,31 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
     if (iParams.mMouseEvent.GetEffectingButton() != EKeys::LeftMouseButton)
         return FReply::Unhandled();
 
-    if (iParams.mLayer->GetIsLocked())
+    if (iParams.mLayer->IsLockedRecursively())
         return FReply::Unhandled();
 
     if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
 		return FReply::Unhandled();
 
-    float timelineOffset = mTimelineParams->GetOffset();
     float posX = iParams.mGeometry.AbsoluteToLocal(iParams.mMouseEvent.GetScreenSpacePosition()).X;
-    float frameWidth = mTimelineParams->GetFrameWidth();
-    float frame = (int)(posX / frameWidth + timelineOffset + 0.5f);
+    int frame = (int)(mTimelineParams->MousePositionToFrame(posX) + 0.5f);
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = iParams.mLayer->GetCellsContainer();
-    int cellFrame = cellsContainer->GetCellFrameAtFrame(frame);
-    if (cellFrame == INDEX_NONE || cellFrame == 0)
+    UOdysseyAnimationCell* cell = iParams.mLayer->GetCellAtFrame(frame);
+    if (!cell || cell->GetFrameRange().GetLowerBoundValue() == frame)
         return FReply::Unhandled();
 
 #ifdef WITH_EDITOR
-        FScopedTransaction ScopedTransaction(LOCTEXT("timeline.move-tool.transaction.set-offset", "Change Layer Offset"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline.cut-tool.transaction.break-cell", "Break Cell"));
 #endif
-    TSharedRef<FOdysseyAnimationCellsMutator> cellsMutator = MakeShared<FOdysseyAnimationCellsMutator>(iParams.mLayer, iParams.mLayer->GetCellsContainer().ToSharedRef());
-    cellsMutator->BreakCellAtFrame(frame);
+	UOdysseyAnimationCell* newCell = cell->Break(frame - cell->GetFrameRange().GetLowerBoundValue());
+	if (!newCell)
+		return FReply::Unhandled();
 
-    return FReply::Unhandled();
+	//Remove mark from the new cell, because we consider the new cell will be modified by the user and will not represent the original cell anymore
+	//This is an arbitrary choice, you are free to change this behaviour whenever you want without any side effect
+	FOdysseyObjectEditorUtils::SetPropertyValue(newCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
+
+    return FReply::Handled();
 }
 
 #undef LOCTEXT_NAMESPACE

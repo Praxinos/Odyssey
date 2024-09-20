@@ -117,18 +117,18 @@ protected:
     void OnExpansionChanged(UOdysseyLayer* iLayer, bool iIsExpanded);
 
     /**
-     * @brief The layer's IsExpanded property changes
+     * @brief The layer's DisplayChildren property changes
      * 
      * @param iLayer 
      */
-    void OnLayerIsExpandedChanged(UOdysseyLayer* iLayer);
+    void OnLayerDisplayChildrenChanged(UOdysseyLayer* iLayer);
 
     /**
-     * @brief The layer's IsCollapsed property changes
+     * @brief The layer's DisplayOptions property changes
      * 
      * @param iLayer 
      */
-    void OnLayerIsCollapsedChanged(UOdysseyLayer* iLayer);
+    void OnLayerDisplayOptionsChanged(UOdysseyLayer* iLayer);
 
     /**
      * @brief Called when the layerstack's currentLayer changed to another layer

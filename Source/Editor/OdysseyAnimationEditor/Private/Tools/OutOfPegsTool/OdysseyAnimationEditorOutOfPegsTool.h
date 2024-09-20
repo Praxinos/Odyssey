@@ -5,14 +5,15 @@
 
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
+#include "IDetailCustomization.h"
 #include "OdysseyAnimationEditorOutOfPegsTool.generated.h"
 
 class FOdysseyPaintEngine;
-class FOdysseyAnimationCell;
 class UOdysseyAnimationLayer;
 class FOdysseyHUDPolygon;
 class FOdysseyHUDHandle;
 class FOdysseyHUDLine;
+class UOdysseyAnimationCell;
 
 UCLASS()
 class UOdysseyAnimationEditorOutOfPegsTool :
@@ -43,12 +44,12 @@ public:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& iEvent) override;
 
 public:
-    TSharedPtr<FOdysseyAnimationCell> GetCell() const;
-    void SetCell(TSharedPtr<FOdysseyAnimationCell> iCell);
+    UOdysseyAnimationCell* GetCell() const;
+    void SetCell(UOdysseyAnimationCell* iCell);
 
 private:
     void OnCellOutOfPegsChanged(bool iIsInteractive);
-    void OnLightTableIsActivatedChanged();
+    void OnLightTableChanged();
     void RebuildHUD();
     void RefreshHUD();
     FVector2D GetCenter() const;
@@ -72,10 +73,17 @@ private:
     void OnRotationHandleDragEnd();
 
 public:
+	UFUNCTION(BlueprintCallable, Category="Actions", CallInEditor)
+	void Reset();
+
+	UFUNCTION(BlueprintCallable, Category="Actions", CallInEditor)
+	void ResetAll();
+
+public:
     UPROPERTY(EditAnywhere, Category="Out Of Pegs", meta = (LinearDeltaSensitivity="1") )
     FVector2D Pan = FVector2D(0, 0);
 
-    UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( ClampMin = "0", ClampMax = "360", UIMin = "0", UIMax = "360", Units="Degrees" ) )
+    UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( Units="Degrees", LinearDeltaSensitivity="1" ) )
     float Rotation = 0.f;
 
     UPROPERTY( EditAnywhere, Category="Out Of Pegs", meta = ( ClampMin = "0", UIMin = "0", Units="Percent" ) )
@@ -83,7 +91,7 @@ public:
 
 private:
     UOdysseyAnimationLayer* mLayer;
-    TSharedPtr<FOdysseyAnimationCell> mCell;
+    UOdysseyAnimationCell* mCell;
     TSharedPtr<FOdysseyHUDPolygon> mTransformHUD = nullptr;
     TSharedPtr<FOdysseyHUDHandle> mTransformTopLeftHandleHUD = nullptr;
     TSharedPtr<FOdysseyHUDHandle> mTransformTopRightHandleHUD = nullptr;
@@ -105,4 +113,15 @@ private:
     FVector2D mZoomCenter;
     float mZoomDistanceReference;
     float mZoomReference;
+};
+
+class FOdysseyAnimationEditorOutOfPegsToolDetails : public IDetailCustomization
+{
+public:
+    /** Makes a new instance of this detail layout class for a specific detail view requesting it */
+    static TSharedRef<IDetailCustomization> MakeInstance();
+
+    // IDetailCustomization interface
+    virtual void CustomizeDetails(IDetailLayoutBuilder& DetailLayout) override;
+    // End of IDetailCustomization interface
 };

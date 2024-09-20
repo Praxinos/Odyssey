@@ -2,70 +2,15 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
-#include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStaggerExport.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStaggerImport.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStaggerImageRenderer.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
-
-#include "Misc/OdysseyDuplicate.h"
-
-TSharedRef<FOdysseyAnimationCellImageStagger>
-FOdysseyAnimationCellImageStagger::Create(UOdysseyAnimationLayer* iLayer, int iLength)
-{
-    TSharedRef<FOdysseyAnimationCellImageStagger> cell = MakeShared<FOdysseyAnimationCellImageStagger>(iLayer, iLength);
-    cell->Init();
-    return cell;
-}
-
-const FName&
-FOdysseyAnimationCellImageStagger::StaticType()
-{
-    static FName type = TEXT("FOdysseyAnimationCellImageStagger");
-    return type;
-}
-
-FOdysseyAnimationCellImageStagger::~FOdysseyAnimationCellImageStagger()
-{
-}
-
-FOdysseyAnimationCellImageStagger::FOdysseyAnimationCellImageStagger(UOdysseyAnimationLayer* iLayer, int iLength)
-    : FOdysseyAnimationCell(iLength, iLayer)
-    , mBehaviour(eBehaviour::Loop)
-    , mReach(0) // <= 0 is Infinite reach
-{
-}
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 void
-FOdysseyAnimationCellImageStagger::Init()
+UOdysseyAnimationCellImageStagger::OldSerialize(FArchive& Ar)
 {
-}
-
-TSharedPtr<FOdysseyAnimationCell>
-FOdysseyAnimationCellImageStagger::Clone(UOdysseyAnimationLayer* iLayer, int iLength) const
-{
-    TSharedPtr<FOdysseyAnimationCellImageStagger> cloneCell = MakeShared<FOdysseyAnimationCellImageStagger>(iLayer, 1);
-    ::Odyssey::Duplicate(const_cast<FOdysseyAnimationCellImageStagger*>(this), cloneCell.Get());
-    cloneCell->mLength = iLength;
-    return cloneCell;
-}
-
-const FName&
-FOdysseyAnimationCellImageStagger::GetType() const
-{
-    return StaticType();
-}
-
-void
-FOdysseyAnimationCellImageStagger::Serialize(FArchive& Ar)
-{
-    FOdysseyAnimationCell::Serialize(Ar);
-
-    if( Ar.IsSaving() )
-    {
-        FOdysseyAnimationCellImageStaggerExport::Write( this, Ar );
-    }
-
+    Super::OldSerialize(Ar);
     if( Ar.IsLoading() )
     {
         if (!FOdysseyAnimationCellImageStaggerImport::Read( this, Ar ))
@@ -76,43 +21,67 @@ FOdysseyAnimationCellImageStagger::Serialize(FArchive& Ar)
 }
 
 TSharedPtr<IOdysseyImageRenderer>
-FOdysseyAnimationCellImageStagger::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+UOdysseyAnimationCellImageStagger::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
     
-    return MakeShared<FOdysseyAnimationCellImageStaggerImageRenderer>(SharedThis(this), iFrame, iRenderType, GetImageRenderingRects(), iFilter);
+    return MakeShared<FOdysseyAnimationCellImageStaggerImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
+}
+
+UOdysseyAnimationCell*
+UOdysseyAnimationCellImageStagger::GetReferenceCellAtFrame(int Frame, bool Recursive) const
+{
+	int staggerFrame = GetReferenceFrameAtFrame(Frame);
+	UOdysseyAnimationCell* referenceCell = GetLayer()->GetCellAtFrame(staggerFrame);
+	if (!referenceCell)
+		return nullptr;
+
+	int frame = staggerFrame - referenceCell->GetFrameRange().GetLowerBoundValue();
+
+	while(referenceCell->IsA<UOdysseyAnimationCellImageStagger>())
+	{
+		UOdysseyAnimationCellImageStagger* referenceStaggerCell = Cast<UOdysseyAnimationCellImageStagger>(referenceCell);
+		staggerFrame = referenceStaggerCell->GetReferenceFrameAtFrame(frame);
+		referenceCell = GetLayer()->GetCellAtFrame(staggerFrame);
+		if (!referenceCell)
+			return nullptr;
+
+		frame = staggerFrame - referenceCell->GetFrameRange().GetLowerBoundValue();
+	}
+	return referenceCell;
 }
 
 int
-FOdysseyAnimationCellImageStagger::GetStaggerFrame(int iFrameIndex) const
+UOdysseyAnimationCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) const
 {
-    int cellStartFrame = GetLayer()->GetCellsContainer()->GetCellFrame(SharedThis(this));
-    if (cellStartFrame == INDEX_NONE)
+	FInt32Range frameRange = GetFrameRange();
+    if (frameRange.IsEmpty())
         return INDEX_NONE;
 
-    int cellIndex = GetLayer()->GetCellsContainer()->GetCellIndex(SharedThis(this));
-    if (cellIndex == INDEX_NONE || cellIndex == 0)
-        return INDEX_NONE;
-
-    FInt32Range frameRange = GetLayer()->GetFrameRange();
-
+    int cellStartFrame = frameRange.GetLowerBoundValue();
     int frame = INDEX_NONE;
-    switch(mBehaviour)
+    switch(Behaviour)
     {
-        case eBehaviour::Loop:
+        case EOdysseyAnimationCellImageStaggerBehaviour::Loop:
         {
-            int layerStartFrame = frameRange.GetLowerBoundValue();
-            int startFrame = mReach <= 0 ? layerStartFrame : FMath::Max(layerStartFrame, int(cellStartFrame - mReach));
-            int offset = iFrameIndex % (cellStartFrame - startFrame);
-            frame = startFrame + offset;
+            int layerStartFrame = GetLayer()->GetFrameRange().GetLowerBoundValue();
+            int startFrame = Reach <= 0 ? layerStartFrame : FMath::Max(layerStartFrame, int(cellStartFrame - Reach));
+			if (cellStartFrame - startFrame <= 0)
+				return INDEX_NONE;
+			
+			int offset = iFrameIndex % (cellStartFrame - startFrame);
+			frame = startFrame + offset;
         }
         break;
 
-        case eBehaviour::PingPong:
+        case EOdysseyAnimationCellImageStaggerBehaviour::PingPong:
         {
-            int layerStartFrame = frameRange.GetLowerBoundValue();
-            int startFrame = mReach <= 0 ? layerStartFrame : FMath::Max(layerStartFrame, int(cellStartFrame - mReach));
+            int layerStartFrame = GetLayer()->GetFrameRange().GetLowerBoundValue();
+            int startFrame = Reach <= 0 ? layerStartFrame : FMath::Max(layerStartFrame, int(cellStartFrame - Reach));
+
+			if (cellStartFrame - startFrame <= 0)
+				return INDEX_NONE;
 
             //If there is only one frame before the stagger cell,
             //we return that one frame because PingPong needs at least 2 frames to work properly
@@ -132,73 +101,90 @@ FOdysseyAnimationCellImageStagger::GetStaggerFrame(int iFrameIndex) const
             break;;
     }
     
-    if (!GetLayer()->GetCellsContainer()->HasCellAtFrame(frame))
+    if (!GetLayer()->HasCellAtFrame(frame))
         return INDEX_NONE;
 
     return frame;
 }
 
-int
-FOdysseyAnimationCellImageStagger::GetReach() const
-{
-    return mReach;
-}
-
-FOdysseyAnimationCellImageStagger::eBehaviour
-FOdysseyAnimationCellImageStagger::GetBehaviour() const
-{
-    return mBehaviour;
-}
-
-TSharedPtr<FOdysseyAnimationCell>
-FOdysseyAnimationCellImageStagger::GetReferenceCellAtFrame(int iFrameIndex, int* oCellFrameIndex) const
-{
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = GetLayer()->GetCellsContainer();
-    if (!cellsContainer)
-        return nullptr;
-
-    int frame = GetStaggerFrame(iFrameIndex);
-    if (frame == INDEX_NONE)
-        return nullptr;
-
-    TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame(frame);
-    if (!cell)
-        return nullptr;
-
-    if (oCellFrameIndex)
-        *oCellFrameIndex = cellsContainer->GetCellFrameAtFrame(frame);
-
-    return cell;
-}
-
 TArray<FGuid>
-FOdysseyAnimationCellImageStagger::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
+UOdysseyAnimationCellImageStagger::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
 {
     TArray<FGuid> idComposition = { GetImageRenderingId() };
     
-    int cellFrameIndex = INDEX_NONE;
-    TSharedPtr<FOdysseyAnimationCell> cell = GetReferenceCellAtFrame(iFrameIndex, &cellFrameIndex);
+	int staggerFrame = GetReferenceFrameAtFrame(iFrameIndex);
+	if (staggerFrame == INDEX_NONE)
+        return idComposition;
+
+	UOdysseyAnimationCell* cell =  GetLayer()->GetCellAtFrame(staggerFrame);
     if (!cell)
         return idComposition;
 
-    idComposition.Append(cell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, cellFrameIndex));
+    int cellFrame = staggerFrame - cell->GetFrameRange().GetLowerBoundValue();
+    idComposition.Append(cell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, cellFrame));
     
     return idComposition;
 }
 
 TArray<::ULIS::FRectI>
-FOdysseyAnimationCellImageStagger::GetImageRenderingRects() const
+UOdysseyAnimationCellImageStagger::GetImageRenderingRects() const
 {
     return GetLayer()->GetImageRenderingRects();
 }
 
-TSharedPtr<FOdysseyAnimationCell>
-FOdysseyAnimationCellImageStagger::CreateCellFromFrame(uint32 iFrameIndex) const
+UOdysseyAnimationCell*
+UOdysseyAnimationCellImageStagger::Break(int Frame)
 {
-    int cellFrameIndex = INDEX_NONE;
-    TSharedPtr<FOdysseyAnimationCell> cell = GetReferenceCellAtFrame(iFrameIndex, &cellFrameIndex);
-    if (!cell)
-        return nullptr;
+	if (Frame <= 0 || Frame >= Exposure)
+		return nullptr;
 
-    return cell->CreateCellFromFrame(cellFrameIndex);
+	UOdysseyAnimationCell* cell = GetReferenceCellAtFrame(Frame);
+	if (!cell)
+		return nullptr;
+
+	UOdysseyAnimationCell* copiedCell = GetLayer()->CopyCell(cell, IndexInLayer + 1);
+	FOdysseyObjectEditorUtils::SetPropertyValue(copiedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Exposure - Frame);
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Frame);
+
+	return copiedCell;
+}
+
+void
+UOdysseyAnimationCellImageStagger::BehaviourChanged()
+{
+    ImageRenderingCompositionChanged();
+}
+
+void
+UOdysseyAnimationCellImageStagger::ReachChanged(bool iIsInteractive)
+{
+    ImageRenderingCompositionChanged(iIsInteractive);
+}
+
+void
+UOdysseyAnimationCellImageStagger::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
+{
+	Super::PropertyChanged(iPropertyName, iMemberPropertyName, iIsInteractive);
+
+	if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Behaviour))
+	{
+		BehaviourChanged();
+	}
+
+	if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Reach))
+	{
+		ReachChanged(iIsInteractive);
+	}
+}
+
+void
+UOdysseyAnimationCellImageStagger::BehaviourBlueprintSetter(EOdysseyAnimationCellImageStaggerBehaviour Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Behaviour), Value);
+}
+
+void
+UOdysseyAnimationCellImageStagger::ReachBlueprintSetter(int Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Reach), Value);
 }

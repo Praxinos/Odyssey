@@ -3,7 +3,6 @@
 
 #include "OdysseyEditor.h"
 
-#include "OdysseyEditorGUI.h"
 #include "OdysseyEditorTab.h"
 #include "ToolMenus.h"
 #include "ToolMenuOwner.h"
@@ -86,12 +85,11 @@ FOdysseyEditor::OnClose()
 //---------------------------------------------------------------------------- Interface
 
 void
-FOdysseyEditor::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+FOdysseyEditor::ExtendMenu( TSharedRef<FExtender> iExtender )
 {
-    FToolMenuOwnerScoped menuOwnerScoped(iOwner); //Allows for dynamic sections of menus to be destroyed automatically when the editor is destroyed
     for (const TSharedPtr<FOdysseyEditorTab> tab : mTabs)
     {
-        tab->ExtendMenu( iOwner, iMenuName );
+        tab->ExtendMenu( iExtender );
     }
 }
 

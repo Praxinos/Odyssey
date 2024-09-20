@@ -50,6 +50,6 @@ protected:
     virtual void PropertyChanged(const FName& iPropertyName);
 
 public:
-    UPROPERTY(EditAnywhere, Category = Palette)
+    UPROPERTY(EditAnywhere, Category=Palette)
     TArray<FColor> EntryColors;
 };

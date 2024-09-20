@@ -4,7 +4,6 @@
 #include "AnimationEditor/OdysseyAnimationEditorTimelineTab.h"
 
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 #include "ULISEventBuilder.h"
@@ -29,6 +28,7 @@
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
+#include "OdysseyAnimationEditorFunctionLibrary.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -99,33 +99,13 @@ void
 FOdysseyAnimationEditorTimelineTab::BindShortcuts(FBaseToolkit* iToolkit)
 {
     const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
-    const FOdysseyAnimationEditorCommands& AnimationEditorCommands = FOdysseyAnimationEditorCommands::Get();
-
-    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyAnimationEditorTimelineTab::__VA_ARGS__ ), FCanExecuteAction() );
-
-    MAP_ACTION(AnimationEditorCommands.ImportTextureSequence, ImportTextureSequence )
-    MAP_ACTION(AnimationEditorCommands.ImportImageSequence, ImportImageSequence )
-    MAP_ACTION(AnimationEditorCommands.ExportImageSequence, ExportImageSequence )
-    MAP_ACTION(AnimationEditorCommands.ExportAsFlipbook, ExportAsFlipbook )
-    MAP_ACTION(AnimationEditorCommands.CreateNewAnimationLayerImageRaster, CreateNewLayer )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity10, ChangeLayerOpacity, 0.1f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity20, ChangeLayerOpacity, 0.2f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity30, ChangeLayerOpacity, 0.3f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity40, ChangeLayerOpacity, 0.4f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity50, ChangeLayerOpacity, 0.5f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity60, ChangeLayerOpacity, 0.6f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity70, ChangeLayerOpacity, 0.7f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity80, ChangeLayerOpacity, 0.8f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity90, ChangeLayerOpacity, 0.9f )
-    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity100, ChangeLayerOpacity, 1.0f )
-
-    #undef MAP_ACTION
+	MapActions(toolkitCommands);
 }
 
 void
-FOdysseyAnimationEditorTimelineTab::ExtendMenu(FToolMenuOwner iOwner, FName iMenuName)
+FOdysseyAnimationEditorTimelineTab::ExtendMenu(TSharedRef<FExtender> iExtender)
 {
-    ExtendMenuFile(iOwner, iMenuName);
+    ExtendMenuFile(iExtender);
 }
 
 //--------------------------------------------------------------------------------------
@@ -162,31 +142,54 @@ FOdysseyAnimationEditorTimelineTab::PlaybackFramesPerSecond() const
 //------------------------------------------------------------------------------ Methods
 
 void
-FOdysseyAnimationEditorTimelineTab::ExtendMenuFile( FToolMenuOwner iOwner, FName iMenuName )
+FOdysseyAnimationEditorTimelineTab::MapActions( TSharedPtr<FUICommandList> iCommandList )
 {
-    UToolMenu* menu = UToolMenus::Get()->FindMenu(*(iMenuName.ToString() + FString(".File")));
+    const FOdysseyAnimationEditorCommands& AnimationEditorCommands = FOdysseyAnimationEditorCommands::Get();
 
-    FToolMenuInsert menuInsert;
-    if (menu->FindSection("FileActors")) //FileActirs is a weird name but it is the actual name of the "Import/Export" Section from Unreal File Menu
-        menuInsert = FToolMenuInsert("FileActors", EToolMenuInsertType::After);
+    #define MAP_ACTION(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyAnimationEditorTimelineTab::__VA_ARGS__ ), FCanExecuteAction() );
 
-    menu->AddDynamicSection(
-        "OdysseyAnimationDynamic",
-        FNewToolMenuDelegate::CreateLambda(
-            [this](UToolMenu* iToolMenu)
-            {
-                FOdysseyPainterEditor* editor = mExtension->GetEditor();
+    MAP_ACTION(AnimationEditorCommands.ImportTextureSequence, ImportTextureSequence )
+    MAP_ACTION(AnimationEditorCommands.ImportImageSequence, ImportImageSequence )
+    MAP_ACTION(AnimationEditorCommands.ExportImageSequence, ExportImageSequence )
+    MAP_ACTION(AnimationEditorCommands.ExportAsFlipbook, ExportAsFlipbook )
+    MAP_ACTION(AnimationEditorCommands.CreateNewAnimationLayerImageRaster, CreateNewLayer )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity10, ChangeLayerOpacity, 0.1f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity20, ChangeLayerOpacity, 0.2f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity30, ChangeLayerOpacity, 0.3f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity40, ChangeLayerOpacity, 0.4f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity50, ChangeLayerOpacity, 0.5f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity60, ChangeLayerOpacity, 0.6f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity70, ChangeLayerOpacity, 0.7f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity80, ChangeLayerOpacity, 0.8f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity90, ChangeLayerOpacity, 0.9f )
+    MAP_ACTION(AnimationEditorCommands.ChangeLayerOpacity100, ChangeLayerOpacity, 1.0f )
+
+    #undef MAP_ACTION
+}
+
+void
+FOdysseyAnimationEditorTimelineTab::ExtendMenuFile( TSharedRef<FExtender> iExtender )
+{
+	TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
+	MapActions(commandList);
+	iExtender->AddMenuExtension(
+		"OdysseyFile",
+		EExtensionHook::After,
+		commandList,
+		FMenuExtensionDelegate::CreateLambda(
+			[this](FMenuBuilder& iBuilder)
+			{
+				FOdysseyPainterEditor* editor = mExtension->GetEditor();
                 if (!editor)
                     return;
 
                 TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
                 if (!source || source->Id() != FOdysseyAnimationEditorSource::StaticId())
                     return;
-                
-                FToolMenuSection& section = iToolMenu->AddSection("OdysseyAnimation", LOCTEXT("timeline-tab.file-menu.animation-import-export-section.name", "Animation Import / Export"));
+
+				iBuilder.BeginSection("OdysseyAnimation", LOCTEXT("timeline-tab.file-menu.animation-import-export-section.name", "Animation Import / Export"));
                 {
-                    section.AddSubMenu(
-                        TEXT("Import"),
+                    iBuilder.AddSubMenu(
                         LOCTEXT("timeline-tab.file-menu.import-submenu.name", "Import"),
                         LOCTEXT("timeline-tab.file-menu.import-submenu.tooltip", "Contains Import actions"),
                         FNewMenuDelegate::CreateRaw(this, &FOdysseyAnimationEditorTimelineTab::BuildImportMenu),
@@ -194,8 +197,7 @@ FOdysseyAnimationEditorTimelineTab::ExtendMenuFile( FToolMenuOwner iOwner, FName
                         FSlateIcon( "OdysseyStyle", "AnimationEditor.File-Menu.Import" )
                     );
 
-                    section.AddSubMenu(
-                        TEXT("Export"),
+                    iBuilder.AddSubMenu(
                         LOCTEXT("timeline-tab.file-menu.export-submenu.name", "Export"),
                         LOCTEXT("timeline-tab.file-menu.export-submenu.tooltip", "Contains Export actions"),
                         FNewMenuDelegate::CreateRaw(this, &FOdysseyAnimationEditorTimelineTab::BuildExportMenu),
@@ -203,10 +205,10 @@ FOdysseyAnimationEditorTimelineTab::ExtendMenuFile( FToolMenuOwner iOwner, FName
                         FSlateIcon( "OdysseyStyle", "AnimationEditor.File-Menu.Export" )
                     );
                 }
-            }
-        )
-        , menuInsert
-    );
+				iBuilder.EndSection();
+			}
+		)
+	);
 }
 
 void
@@ -246,8 +248,6 @@ FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
     if ( !layerStack )
         return;
 
-    FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Import Textures Sequence"));
-
     FOpenAssetDialogConfig openAssetDialogConfig;
     openAssetDialogConfig.DialogTitleOverride = LOCTEXT( "timeline-tab.import-texture-dialog.title", "Import Textures Sequence" );
     openAssetDialogConfig.DefaultPath = FPaths::GetPath(mExtension->Animation()->GetPathName() );
@@ -263,58 +263,13 @@ FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
     if ( assetsData.Num() <= 0 )
         return;
 
-    UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass());
-    UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
-    if ( !layerImageRaster )
-        return;
-    
-    layerStack->Modify();
-    
-    FScopedSlowTask progressBar(assetsData.Num(), LOCTEXT("timeline-tab.import-texture-dialog.progress-bar.title", "Importing Texture Sequence"));
-    progressBar.MakeDialog();
+	TArray<UTexture2D*> textures;
+	for(FAssetData& assetData : assetsData)
+	{
+		textures.Add(Cast<UTexture2D>(assetsData[0].GetAsset()));
+	}
 
-    TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
-    for( int i = 0; i < assetsData.Num(); i++ )
-    {
-        progressBar.EnterProgressFrame();
-        UTexture2D* openedTexture = static_cast<UTexture2D*>(assetsData[i].GetAsset());
-        TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(openedTexture, animation->Format()));
-        if (textureBlock->Width() == animation->Width() && textureBlock->Height() == animation->Height() && textureBlock->Format() == animation->Format())
-        {
-            TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layerImageRaster, 1, textureBlock);
-            cells.Add(cell);
-        }
-        else
-        {
-            TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layerImageRaster, 1, animation->Width(), animation->Height(), animation->Format());
-            TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
-            FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
-            ::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
-            rasterBlockMutator.EditTilesFromRects(
-                { invalidRect },
-                FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-                    {
-                        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
-                        ::ULIS::FEvent eventConvertFormat = FULISEventBuilder().RetainBlock(iBlock).RetainBlock(textureBlock).Build();
-                        ctx.ConvertFormat(*textureBlock, *iBlock, ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventConvertFormat);
-                        return { eventConvertFormat };
-                    }
-                )
-            );
-            rasterBlockMutator.Commit();
-            
-            cells.Add(cell);
-        }
-    }
-    
-    FOdysseyAnimationCellsMutator mutator(layerImageRaster, layerImageRaster->GetCellsContainer());
-    mutator.Add(cells);
-    mutator.Commit(); 
-    
-    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
-    currentFrameMutator.Set(0);
-    currentFrameMutator.Commit();
+	UOdysseyAnimationEditorAnimationFunctionLibrary::ImportTextureSequence(animation, textures);
 }
 
 void           
@@ -343,93 +298,14 @@ FOdysseyAnimationEditorTimelineTab::ImportImageSequence()
     if (!dialogValidated || filenames.Num() <= 0)
         return;
 
-    FScopedSlowTask progressBar(filenames.Num(), LOCTEXT("timeline-tab.import-image-sequence.progress-bar.title", "Importing Image Sequence"));
-    progressBar.MakeDialog();
+	filenames.Sort(
+		[](const FString& iA, const FString& iB)
+		{
+			return iA < iB;
+		}
+	);
 
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( animation->Format() );
-    TArray<TSharedPtr<::ULIS::FBlock>> blocks;
-    for (const FString& filename : filenames)
-    {
-        progressBar.EnterProgressFrame();
-        FString path( FPaths::ConvertRelativePathToFull( filename ) );
-        FString extension = FPaths::GetExtension(path, false);
-        ::ULIS::eFileFormat exportImageFormat = ::ULIS::FileFormat_png;
-        bool extensionFound = false;
-        for( int i = 0; i <= ::ULIS::FileFormat_hdr; ++i )
-        {
-            if( extension == ::ULIS::kwImageFormat[i] )
-            {
-                exportImageFormat = static_cast< ::ULIS::eFileFormat >( i );
-                extensionFound = true;
-                break;
-            }
-        }
-
-        if( !extensionFound )
-            continue;
-
-        TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>();
-        std::string stdPath( TCHAR_TO_UTF8(*path) );
-        ::ULIS::ulError error = ctx.XLoadBlockFromDisk(
-              *block
-            , stdPath
-        );
-
-        if (error != ULIS_NO_ERROR)
-            continue;
-
-        ctx.Finish();
-
-        if (block->IsHollow())
-            continue;
-
-        if (block->Width() == animation->Width() && block->Height() == animation->Height() && block->Format() == animation->Format())
-        {
-            blocks.Add(block);
-            continue;
-        }
-        
-        //Need to convert the block before adding it to the layer
-        TSharedPtr<::ULIS::FBlock> blockProxy = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), animation->Format());
-
-        ::ULIS::FEvent eventConvert;
-        ctx.ConvertFormat(
-            *block
-            , *blockProxy
-            , ::ULIS::FRectI::Auto
-            , ::ULIS::FVec2I( 0 )
-            , ULIS::FSchedulePolicy::CacheEfficient
-            , 0
-            , nullptr
-            , &eventConvert
-        );
-
-        ctx.Finish();
-        
-        blocks.Add(blockProxy);
-    }
-
-    if (blocks.IsEmpty())
-        return;
-
-    #ifdef WITH_EDITOR
-        FScopedTransaction ScopedTransaction(LOCTEXT("timeline-tab.transaction.import-image-sequence", "Import Image Sequence"));
-    #endif
-    UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-    TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
-    for (TSharedPtr<::ULIS::FBlock> block : blocks)
-    {
-        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(layer, 1, block);
-        cells.Add(cell);
-    }
-    
-    FOdysseyAnimationCellsMutator mutator(layer, layer->GetCellsContainer());
-    mutator.Add(cells);
-    mutator.Commit();
-
-    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
-    currentFrameMutator.Set(0);
-    currentFrameMutator.Commit();
+	UOdysseyAnimationEditorAnimationFunctionLibrary::ImportImageSequence(animation, filenames);
 }
 
 void           
@@ -469,112 +345,10 @@ FOdysseyAnimationEditorTimelineTab::ExportAsFlipbook()
     if ( saveObjectPath == "" )
         return;
 
-    FInt32Range frameRange = animation->GetFrameRange();
-    int startFrame = frameRange.GetLowerBoundValue();
-    int endFrame = frameRange.GetUpperBoundValue();
-
-    FScopedSlowTask progressBar(endFrame - startFrame + 1, LOCTEXT("timeline-tab.export-as-flipbook.progress-bar.title", "Export As Flipbook"));
-    progressBar.MakeDialog();
-
-    // Create flipbook asset
-    FString assetPath = FPaths::GetPath(saveObjectPath) + "/";
+	FString assetPath = FPaths::GetPath(saveObjectPath) + "/";
     FString flipbookAssetName = FPaths::GetBaseFilename(saveObjectPath);
-    FString flipbookPackagePath = assetPath + flipbookAssetName;
-    UPackage* flipbookPackage = CreatePackage(*flipbookPackagePath);
-    UPaperFlipbook* flipbook = NewObject<UPaperFlipbook>(flipbookPackage, UPaperFlipbook::StaticClass(), FName(*flipbookAssetName), EObjectFlags::RF_Public | EObjectFlags::RF_Standalone | RF_Transactional);
 
-    ETextureSourceFormat textureSourceFormat = TextureSourceFormatForULISFormat(animation->Format());    
-
-    ::ULIS::eFormat blockFormat = ULISFormatForTextureSourceFormat(textureSourceFormat);
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(animation->Width(), animation->Height(), blockFormat);
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(blockFormat);
-    TArray<FGuid> lastRenderingComposition;
-
-    FOdysseyFlipbookWrapper flipbookWrapper;
-    flipbookWrapper.SetFlipbook(flipbook);
-
-    int lastKeyFrameIndex = -1;
-    int lastKeyFrameFirstFrame = -1;
-    for (int i = startFrame; i <= endFrame; i++)
-    {
-        progressBar.EnterProgressFrame();
-
-        TArray<FGuid> renderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, i);
-        if (renderingComposition == lastRenderingComposition)
-            continue;
-
-        lastRenderingComposition = renderingComposition;
-
-        if (lastKeyFrameIndex >= 0)
-            flipbookWrapper.SetKeyFrameLength(lastKeyFrameIndex, i - lastKeyFrameFirstFrame);
-        
-        //Render frame block
-        TSharedPtr<IOdysseyImageRenderer> renderer = animation->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, i);
-        renderer->Init();
-
-        FOdysseyImageRendererCopyParams params(block, { block->Rect() });
-        renderer->Copy(params, {});
-        ctx.Finish();
-
-        //FString assetName = FPaths::GetBaseFilename(saveObjectPath) + FString::Format(TEXT("_{0}"), { i });
-        //UTexture2D* texture = CreateTextureFromBlock(block, textureSourceFormat, assetPath, FString assetName);
-
-        int keyFrameIndex = flipbook->GetNumKeyFrames();
-
-        FString textureName = flipbookAssetName + TEXT("_Texture_") + FString::Format(TEXT("{0}"), { i });
-        FString spriteName = flipbookAssetName + TEXT("_Sprite_") + FString::Format(TEXT("{0}"), { i });
-
-        FOdysseyTextureConfiguration textureConfiguration;
-        textureConfiguration.Width = animation->Width();
-        textureConfiguration.Height = animation->Height();
-        textureConfiguration.Format = EOdysseyTextureSourceFormat::kCustom;
-        textureConfiguration.CustomFormat = textureSourceFormat;
-        textureConfiguration.Name = FName(*textureName);
-        
-        //Create the keyframe
-        flipbookWrapper.CreateEmptyKeyFrame(keyFrameIndex);
-        lastKeyFrameIndex = keyFrameIndex;
-        lastKeyFrameFirstFrame = i;
-
-        //Create the sprite and add it to the keyframe
-        UPaperSprite* sprite = flipbookWrapper.CreateSprite(spriteName);
-        if (!sprite)
-            continue;
-
-        //Create the texture and add it to the keyframe
-        UTexture2D* texture = flipbookWrapper.CreateTexture(textureConfiguration);
-        if (!texture)
-            continue;
-
-        flipbookWrapper.SetSpriteTexture(sprite, texture); //Finishes the sprite initialization before giving it to the flipbook, otherwise it calls some unwanted callbacks in the GUI
-        flipbookWrapper.SetKeyframeSprite(keyFrameIndex, sprite);
-
-        //can be false on a FX Layer for example
-        InitTextureWithBlockData(block.Get(), texture, textureSourceFormat);
-
-        texture->PostEditChange();
-        texture->UpdateResource();
-    }
-
-    if (lastKeyFrameIndex >= 0)
-        flipbookWrapper.SetKeyFrameLength(lastKeyFrameIndex, endFrame - lastKeyFrameFirstFrame + 1);
-
-    //Configure flipbook asset
-    UClass* flipbookClass = flipbook->StaticClass();
-    FObjectProperty* defaultMaterialProperty = FindFProperty<FObjectProperty>(flipbookClass, "DefaultMaterial");
-    defaultMaterialProperty->SetObjectPropertyValue(defaultMaterialProperty->ContainerPtrToValuePtr<UPaperFlipbook>(flipbook), LoadObject<UMaterialInterface>(nullptr, TEXT("/Iliad/Animation2D/DefaultFlipbookMaterialInstance.DefaultFlipbookMaterialInstance")));
-
-    FScopedFlipbookMutator mutator(flipbook);
-	mutator.FramesPerSecond = animation->FramesPerSecond;
-
-    FAssetRegistryModule::AssetCreated(flipbook);
-
-    FSavePackageArgs packageArgs;
-    packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
-    UPackage::SavePackage( flipbookPackage, flipbook, *flipbookAssetName, packageArgs );
-        
-    flipbookPackage->MarkAsFullyLoaded();
-    flipbook->MarkPackageDirty();
+	UOdysseyAnimationEditorAnimationFunctionLibrary::ExportAsFlipbook(animation, animation->GetFrameRange(), flipbookAssetName, assetPath);
 }
 
 void
@@ -593,10 +367,11 @@ FOdysseyAnimationEditorTimelineTab::CreateNewLayer()
     #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("timeline-tab.transaction.shortcut.create-new-layer", "Add Layer"));
     #endif
+		layerStack->Modify();
         UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
         if (currentLayer)
         {
-            if (currentLayer->CanHaveChildren && currentLayer->IsExpanded)
+            if (currentLayer->CanHaveChildren && currentLayer->DisplayChildren)
             {
                 layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), currentLayer);
             }
@@ -616,18 +391,15 @@ FOdysseyAnimationEditorTimelineTab::CreateNewLayer()
         if (!animLayer)
             return;
 
-        TSharedPtr<FOdysseyAnimationCellImageRaster> cell = FOdysseyAnimationCellImageRaster::Create(animLayer, 1, animation->Width(), animation->Height(), animation->Format());
-        FOdysseyAnimationCellsMutator mutator(animLayer, animLayer->GetCellsContainer());
-        mutator.Add({ cell });
-        mutator.SetOffset(animation->CurrentFrame);
-        mutator.Commit();
+		animLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
+		FOdysseyObjectEditorUtils::SetPropertyValue(animLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), animation->CurrentFrame);
     
         FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
         currentFrameMutator.Set(animation->CurrentFrame);
         currentFrameMutator.Commit();
     }
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(layer));
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED( UOdysseyLayerStack, CurrentLayer), layer);
 }
 
 void
@@ -640,16 +412,13 @@ FOdysseyAnimationEditorTimelineTab::ChangeLayerOpacity( float iOpacity )
     if ( !layerStack->CurrentLayer )
         return;
 
-    if ( layerStack->CurrentLayer->GetIsLocked() )
-        return;
-
-    if ( !FOdysseyObjectEditorUtils::HasProperty(layerStack->CurrentLayer.Get(), "Opacity") )
+    if ( layerStack->CurrentLayer->IsLockedRecursively() )
         return;
 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-tab.transaction.shortcut.set-layer-opacity", "Change Layer Opacity"));
 #endif
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack->CurrentLayer.Get(), "Opacity", FMath::Clamp(iOpacity, 0.f, 1.f));
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack->CurrentLayer.Get(), GET_MEMBER_NAME_CHECKED( UOdysseyLayer, Opacity), FMath::Clamp(iOpacity, 0.f, 1.f));
 }
 
 #undef LOCTEXT_NAMESPACE

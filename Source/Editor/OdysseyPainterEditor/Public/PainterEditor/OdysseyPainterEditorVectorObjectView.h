@@ -19,14 +19,14 @@ struct FPaletteEntrySelection
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere
-        , Category = Appearance
+        , Category=Appearance
         , meta = (ToolTip = "Palette Used for Foreground Color"
             , EditCondition = "(ForegroundColorMode == eForegroundColorMode::Palette)"
             , EditConditionHides))
     UOdysseyPalette* OdysseyPalette;
 
     UPROPERTY(EditAnywhere
-        , Category = Appearance
+        , Category=Appearance
         , meta = (ToolTip = "Palette Entry Used for Foreground Color"
             , EditCondition = "OdysseyPalette != nullptr"
             , EditConditionHides))
@@ -59,7 +59,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
 
     public:
         UPROPERTY( EditAnywhere
-                 , Category = Identity
+                 , Category=Identity
                  , meta = ( ToolTip = "Name" ) )
         FString Name;
 
@@ -89,46 +89,46 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorObjectView : public UO
         double ScalingY;
 
         // unused for now
-        //UPROPERTY( EditAnywhere, Category = Appearance , meta = (ClampMin = "0.0", UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
+        //UPROPERTY( EditAnywhere, Category=Appearance , meta = (ClampMin = "0.0", UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
         double Opacity;
 
         UPROPERTY( EditAnywhere
-                 , Category = Appearance
+                 , Category=Appearance
                  , meta = ( ToolTip = "Visible" ) )
         bool Visible;
 
         UPROPERTY( EditAnywhere
-                 , Category = Appearance
+                 , Category=Appearance
                  , meta = ( ToolTip = "Foreground Color Mode" ) )
         eForegroundColorMode ForegroundColorMode;
 
         UPROPERTY( EditAnywhere
-                 , Category = Appearance
+                 , Category=Appearance
                  , meta = ( ToolTip = "Foreground Color"
                           , EditCondition = "(ForegroundColorMode == eForegroundColorMode::SolidColor)"
                           , EditConditionHides) )
         FColor ForegroundColor;
 
         UPROPERTY( EditAnywhere,
-                   Category = Appearance,
+                   Category=Appearance,
                    meta = ( EditCondition = "(ForegroundColorMode == eForegroundColorMode::Palette)"
                           , EditConditionHides ))
         FPaletteEntrySelection ForegroundPaletteSelection;
 
         UPROPERTY( EditAnywhere
-                 , Category = Appearance
+                 , Category=Appearance
                  , meta = ( ToolTip = "Background Color Mode" ) )
         eBackgroundColorMode BackgroundColorMode;
 
         UPROPERTY( EditAnywhere
-                 , Category = Appearance
+                 , Category=Appearance
                  , meta = ( ToolTip = "Background Color"
                           , EditCondition = "(BackgroundColorMode == eBackgroundColorMode::SolidColor)"
                           , EditConditionHides ) )
         FColor BackgroundColor;
 
         UPROPERTY(EditAnywhere,
-            Category = Appearance,
+            Category=Appearance,
             meta = (EditCondition = "(BackgroundColorMode == eBackgroundColorMode::Palette)"
                 , EditConditionHides))
         FPaletteEntrySelection BackgroundPaletteSelection;

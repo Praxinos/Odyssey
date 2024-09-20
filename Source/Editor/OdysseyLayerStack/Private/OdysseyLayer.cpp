@@ -5,6 +5,7 @@
 
 #include "OdysseyLayerStack.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyLayerImageRenderer.h"
 #include "Misc/TransactionObjectEvent.h"
 
 UOdysseyLayer::FOnNameChanged&
@@ -28,18 +29,18 @@ UOdysseyLayer::OnIsLockedChanged()
     return onIsLockedChanged;
 }
 
-UOdysseyLayer::FOnIsExpandedChanged&
-UOdysseyLayer::OnIsExpandedChanged()
+UOdysseyLayer::FOnDisplayChildrenChanged&
+UOdysseyLayer::OnDisplayChildrenChanged()
 {
-    static FOnIsExpandedChanged onIsExpandedChanged;
-    return onIsExpandedChanged;
+    static FOnDisplayChildrenChanged onDisplayChildrenChanged;
+    return onDisplayChildrenChanged;
 }
 
-UOdysseyLayer::FOnIsCollapsedChanged&
-UOdysseyLayer::OnIsCollapsedChanged()
+UOdysseyLayer::FOnDisplayOptionsChanged&
+UOdysseyLayer::OnDisplayOptionsChanged()
 {
-    static FOnIsCollapsedChanged onIsCollapsedChanged;
-    return onIsCollapsedChanged;
+    static FOnDisplayOptionsChanged onDisplayOptionsChanged;
+    return onDisplayOptionsChanged;
 }
 
 UOdysseyLayer::FOnParentChanged&
@@ -61,6 +62,20 @@ UOdysseyLayer::OnMediaChanged()
 {
     static FSimpleMulticastDelegate onMediaChanged;
     return onMediaChanged;
+}
+
+UOdysseyLayer::FOnBlendModeChanged&
+UOdysseyLayer::OnBlendModeChanged()
+{
+    static FOnBlendModeChanged onBlendModeChanged;
+    return onBlendModeChanged;
+}
+
+UOdysseyLayer::FOnOpacityChanged&
+UOdysseyLayer::OnOpacityChanged()
+{
+    static FOnOpacityChanged onOpacityChanged;
+    return onOpacityChanged;
 }
 
 UOdysseyLayer*
@@ -142,11 +157,6 @@ UOdysseyLayer::GetLayerStack() const
 }
 
 void
-UOdysseyLayer::OnCreated_Implementation()
-{
-}
-
-void
 UOdysseyLayer::Merge(const TArray<UOdysseyLayer*>& Layers)
 {
 }
@@ -160,6 +170,8 @@ UOdysseyLayer::NameChanged()
 void
 UOdysseyLayer::IsActivatedChanged()
 {
+	if (Parent)
+		Parent->ImageRenderingCompositionChanged();
     OnIsActivatedChanged().Broadcast(this);
 }
 
@@ -170,15 +182,15 @@ UOdysseyLayer::IsLockedChanged()
 }
 
 void
-UOdysseyLayer::IsExpandedChanged()
+UOdysseyLayer::DisplayChildrenChanged()
 {
-    OnIsExpandedChanged().Broadcast(this);
+    OnDisplayChildrenChanged().Broadcast(this);
 }
 
 void
-UOdysseyLayer::IsCollapsedChanged()
+UOdysseyLayer::DisplayOptionsChanged()
 {
-    OnIsCollapsedChanged().Broadcast(this);
+    OnDisplayOptionsChanged().Broadcast(this);
 }
 
 void
@@ -195,43 +207,57 @@ UOdysseyLayer::ParentChanged()
 void
 UOdysseyLayer::ChildrenChanged()
 {
-    OnChildrenChanged().Broadcast(this);
-
     UOdysseyLayerStack* layerStack = GetLayerStack();
     if ( !layerStack )
         return;
 
+	ImageRenderingCompositionChanged();
+    OnChildrenChanged().Broadcast(this);
     layerStack->HierarchyChanged();
 }
 
 void
-UOdysseyLayer::PropertyChanged(const FName& iPropertyName)
+UOdysseyLayer::OpacityChanged(bool iIsInteractive)
 {
-    if ( iPropertyName == "Name" )
+    OnOpacityChanged().Broadcast(this);
+    ImageRenderingChanged(iIsInteractive);
+}
+
+void
+UOdysseyLayer::BlendModeChanged()
+{
+    OnBlendModeChanged().Broadcast(this);
+    ImageRenderingChanged();
+}
+
+void
+UOdysseyLayer::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
+{
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Name) )
         NameChanged();
-    if ( iPropertyName == "IsActivated" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsActivated) )
         IsActivatedChanged();
-    if ( iPropertyName == "IsLocked" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsLocked) )
         IsLockedChanged();
-    if ( iPropertyName == "IsExpanded" )
-        IsExpandedChanged();
-    if ( iPropertyName == "IsCollapsed" )
-        IsCollapsedChanged();
-    if ( iPropertyName == "Parent" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren) )
+        DisplayChildrenChanged();
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayOptions) )
+        DisplayOptionsChanged();
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Parent) )
         ParentChanged();
-    if ( iPropertyName == "Children" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Children) )
         ChildrenChanged();
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode) )
+        BlendModeChanged();
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity) )
+        OpacityChanged(iIsInteractive);
 }
 
 void
 UOdysseyLayer::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
-    
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
-        return;
-
-    PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    PropertyChanged(PropertyChangedEvent.GetPropertyName(), PropertyChangedEvent.GetMemberPropertyName(), PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive );
 }
 
 void
@@ -245,7 +271,7 @@ UOdysseyLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
     const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
     for ( const FName& propertyName : changedPropertyNames )
     {
-        PropertyChanged(propertyName);
+        PropertyChanged(propertyName, propertyName, false);
     }
 }
 
@@ -256,11 +282,22 @@ UOdysseyLayer::GetMediaProvider(uint32 iFrameIndex) const
 }
 
 bool
-UOdysseyLayer::GetIsLocked(bool iIgnoreParentState) const
+UOdysseyLayer::IsActivatedRecursively() const
 {
-    if (iIgnoreParentState)
-        return IsLocked;
+    const UOdysseyLayer* layer = this;
+    while(layer)
+    {
+        if (!layer->IsActivated)
+            return false;
+        layer = layer->Parent;
+    }
 
+    return true;
+}
+
+bool
+UOdysseyLayer::IsLockedRecursively() const
+{
     const UOdysseyLayer* layer = this;
     while(layer)
     {
@@ -272,8 +309,80 @@ UOdysseyLayer::GetIsLocked(bool iIgnoreParentState) const
     return false;
 }
 
-void
-UOdysseyLayer::SetIsLocked(bool Value)
+TArray<FGuid>
+UOdysseyLayer::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "IsLocked", Value);
+    TArray<FGuid> idComposition = { GetImageRenderingId() };
+
+    const TArray<UOdysseyLayer*>& children = GetChildren();
+    for (UOdysseyLayer* child : children)
+    {
+        if (!child->IsActivated)
+            continue;
+
+        idComposition.Append(child->GetImageRenderingComposition(iRenderType, iFrame));
+    }
+
+    return idComposition;
+}
+
+TArray<::ULIS::FRectI>
+UOdysseyLayer::GetImageRenderingRects() const
+{
+    UOdysseyLayerStack* layerStack = GetLayerStack();
+    if(!layerStack)
+        return {};
+
+    return layerStack->GetImageRenderingRects();
+}
+
+TSharedPtr<IOdysseyImageRenderer>
+UOdysseyLayer::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
+{
+    if (iFilter.IsBound() && !iFilter.Execute(this))
+        return nullptr;
+    
+    return MakeShared<FOdysseyLayerImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
+}
+
+void
+UOdysseyLayer::NameBlueprintSetter(FText Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Name), Value);
+}
+
+void
+UOdysseyLayer::IsActivatedBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsActivated), Value);
+}
+
+void
+UOdysseyLayer::IsLockedBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsLocked), Value);
+}
+
+void
+UOdysseyLayer::DisplayChildrenBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren), Value);
+}
+
+void
+UOdysseyLayer::DisplayOptionsBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayOptions), Value);
+}
+
+void
+UOdysseyLayer::BlendModeBlueprintSetter(EOdysseyBlendingMode Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode), Value);
+}
+
+void
+UOdysseyLayer::OpacityBlueprintSetter(float Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), Value);
 }

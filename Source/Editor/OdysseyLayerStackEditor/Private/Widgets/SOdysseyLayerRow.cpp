@@ -49,9 +49,9 @@ SOdysseyLayerRow::GenerateWidgetForColumn( const FName& InColumnName )
     {
         return GenerateIsLockedWidget();
     }
-	else if (InColumnName == "IsCollapsed")
+	else if (InColumnName == "DisplayOptions")
     {
-        return GenerateIsCollapsedWidget();
+        return GenerateDisplayOptionsWidget();
     }
     else if (InColumnName == "Header")
     {
@@ -134,7 +134,7 @@ SOdysseyLayerRow::GenerateOptionsWidget()
 EVisibility
 SOdysseyLayerRow::OptionsWidgetVisibility() const
 {
-	return mLayer->IsCollapsed ? EVisibility::Collapsed : EVisibility::Visible;
+	return mLayer->DisplayOptions ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 TSharedPtr<SOdysseyLayerStackTreeView>
@@ -144,13 +144,13 @@ SOdysseyLayerRow::GetTreeView() const
 }
 
 TSharedRef<SWidget>
-SOdysseyLayerRow::GenerateIsCollapsedWidget()
+SOdysseyLayerRow::GenerateDisplayOptionsWidget()
 {
-	const FCheckBoxStyle* isCollapsedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("LayerStack.IsCollapsedToggle");
+	const FCheckBoxStyle* displayOptionsToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("LayerStack.DisplayOptionsToggle");
 	return SNew(SCheckBox)
-		.Style(isCollapsedToggleStyle)
-		.OnCheckStateChanged(this, &SOdysseyLayerRow::OnIsCollapsedCheckBoxStateChanged)
-		.IsChecked(this, &SOdysseyLayerRow::GetIsCollapsedCheckBoxState);
+		.Style(displayOptionsToggleStyle)
+		.OnCheckStateChanged(this, &SOdysseyLayerRow::OnDisplayOptionsCheckBoxStateChanged)
+		.IsChecked(this, &SOdysseyLayerRow::GetDisplayOptionsCheckBoxState);
 }
 
 TSharedRef<SWidget>
@@ -179,7 +179,7 @@ void
 SOdysseyLayerRow::OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState)
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-is-activated", "Change Layer Active"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "IsActivated", iState == ECheckBoxState::Checked);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsActivated), iState == ECheckBoxState::Checked);
 }
 
 ECheckBoxState
@@ -192,13 +192,13 @@ void
 SOdysseyLayerRow::OnIsLockedCheckBoxStateChanged(ECheckBoxState iState)
 {
 	FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-is-locked", "Change Layer Lock"));
-	mLayer->SetIsLocked(iState == ECheckBoxState::Checked);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsLocked), iState == ECheckBoxState::Checked);
 }
 
 ECheckBoxState
 SOdysseyLayerRow::GetIsLockedCheckBoxState() const
 {
-	return mLayer->GetIsLocked(true) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+	return mLayer->IsLocked ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 FText
@@ -217,7 +217,7 @@ void
 SOdysseyLayerRow::OnLayerNameCommited(const FText& iText, ETextCommit::Type iType)
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-name", "Change Layer Name"));
-	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "Name", iText);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Name), iText);
 }
 
 FSlateFontInfo
@@ -235,9 +235,9 @@ SOdysseyLayerRow::GetLayerNameFont() const
 }
 
 bool
-SOdysseyLayerRow::IsCollapsed() const
+SOdysseyLayerRow::DisplayOptions() const
 {
-	return mLayer->IsCollapsed;
+	return mLayer->DisplayOptions;
 }
 
 void
@@ -317,7 +317,7 @@ SOdysseyLayerRow::OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone
 
 	FGeometry geometry = GetTickSpaceGeometry();
 	const FVector2D localPointerPos = geometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition());
-	EItemDropZone expectedDropZone = ComputeItemDropZoneForLeaf(localPointerPos, geometry.GetLocalSize(), mLayer->CanHaveChildren, mLayer->IsExpanded);
+	EItemDropZone expectedDropZone = ComputeItemDropZoneForLeaf(localPointerPos, geometry.GetLocalSize(), mLayer->CanHaveChildren, mLayer->DisplayChildren);
 
 	if ( operationLayerStack == layerStack ) //droped from same layerstack, do a move of topmost dropped layers
 	{
@@ -480,15 +480,15 @@ SOdysseyLayerRow::OnRowDragDetected(const FGeometry& iGeometry, const FPointerEv
 }
 
 void
-SOdysseyLayerRow::OnIsCollapsedCheckBoxStateChanged(ECheckBoxState iState)
+SOdysseyLayerRow::OnDisplayOptionsCheckBoxStateChanged(ECheckBoxState iState)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "IsCollapsed", iState != ECheckBoxState::Checked);
+	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayOptions), iState == ECheckBoxState::Checked);
 }
 
 ECheckBoxState
-SOdysseyLayerRow::GetIsCollapsedCheckBoxState() const
+SOdysseyLayerRow::GetDisplayOptionsCheckBoxState() const
 {
-	return mLayer->IsCollapsed ? ECheckBoxState::Unchecked : ECheckBoxState::Checked;
+	return mLayer->DisplayOptions ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 #undef LOCTEXT_NAMESPACE

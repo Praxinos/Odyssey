@@ -266,7 +266,7 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Tick(float iDeltaTime)
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::SelectedShapeChanged()
 {
     SelectedShapeInstance->Abort();
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "SelectedShapeInstance", AvailableShapes[SelectedShape]);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPrimitiveDrawingTool, SelectedShapeInstance), AvailableShapes[SelectedShape]);
     mOnShapeChanged.Broadcast();
 }
 
@@ -311,23 +311,11 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
     }
 
     BLPath path;
-
-    //if ( SubPixel )
-    //{
-        path.moveTo(mPath[0].x, mPath[0].y);
-        for ( int i = 1; i < mPath.Num(); i++ )
-        {
-            path.lineTo(mPath[i].x, mPath[i].y);
-        }
-    /* }
-    else
-    {
-        path.moveTo(FMath::Floor(mPath[0].x) + 0.5f, FMath::Floor(mPath[0].y) + 0.5f);
-        for ( int i = 1; i < mPath.Num(); i++ )
-        {
-            path.lineTo(FMath::Floor(mPath[i].x) + 0.5f, FMath::Floor(mPath[i].y) + 0.5f);
-        }
-    } */
+	path.moveTo(mPath[0].x, mPath[0].y);
+	for ( int i = 1; i < mPath.Num(); i++ )
+	{
+		path.lineTo(mPath[i].x, mPath[i].y);
+	}
 
     if ( !isLine && !isBezier || !isLine && Filled)
     {
@@ -412,7 +400,7 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::PropertyChanged(const FName& iPropertyName)
 {
-    if (iPropertyName == "SelectedShape")
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPrimitiveDrawingTool, SelectedShape))
         SelectedShapeChanged();
 }
 

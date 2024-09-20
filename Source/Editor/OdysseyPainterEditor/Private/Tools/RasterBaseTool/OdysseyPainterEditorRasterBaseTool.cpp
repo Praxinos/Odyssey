@@ -23,6 +23,31 @@ UOdysseyPainterEditorRasterBaseTool::UOdysseyPainterEditorRasterBaseTool()
 {
 }
 
+void
+UOdysseyPainterEditorRasterBaseTool::ExtendMenu(TSharedRef<FExtender> iExtender)
+{
+	TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
+	iExtender->AddMenuExtension(
+		"OdysseyEdit",
+		EExtensionHook::After,
+		commandList,
+		FMenuExtensionDelegate::CreateLambda(
+			[this](FMenuBuilder& iBuilder)
+			{
+				if (!IsActivated())
+					return;
+				
+				iBuilder.BeginSection("ToolOptions", LOCTEXT("raster-base-tool.edit-menu.tool-options", "Tool Options"));
+				{
+					ExtendContextMenu( iBuilder );
+				}
+				iBuilder.EndSection();
+			}
+		)
+	);
+	
+}
+
 //static
 bool
 UOdysseyPainterEditorRasterBaseTool::DoubleClicked()

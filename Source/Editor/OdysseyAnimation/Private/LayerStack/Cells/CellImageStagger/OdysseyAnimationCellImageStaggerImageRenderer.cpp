@@ -7,14 +7,18 @@
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"
 
-FOdysseyAnimationCellImageStaggerImageRenderer::FOdysseyAnimationCellImageStaggerImageRenderer(TSharedRef<const FOdysseyAnimationCellImageStagger> iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
+FOdysseyAnimationCellImageStaggerImageRenderer::FOdysseyAnimationCellImageStaggerImageRenderer( const UOdysseyAnimationCellImageStagger* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mCellRenderer(nullptr)
 {
-    int cellFrame = INDEX_NONE;
-    TSharedPtr<FOdysseyAnimationCell> cell = iCell->GetReferenceCellAtFrame(iFrame, &cellFrame);
+	int staggerFrame = iCell->GetReferenceFrameAtFrame(iFrame);
+	UOdysseyAnimationCell* cell =  iCell->GetLayer()->GetCellAtFrame(staggerFrame);
+    
     if (cell)
+	{
+    	int cellFrame = iFrame - cell->GetFrameRange().GetLowerBoundValue();
         mCellRenderer = cell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFrame, iFilter);
+	}
 }
     
 void

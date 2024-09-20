@@ -25,25 +25,30 @@ SOdysseyAnimationLayerImageVectorTimeline::Construct(
 {
     ensure(iAnimationLayerImageVector);
     SOdysseyAnimationLayerImageTimeline::FArguments args;
-    args.IsCollapsed(InArgs._IsCollapsed);
+    args.DisplayOptions(InArgs._DisplayOptions);
     SOdysseyAnimationLayerImageTimeline::Construct(args, iExtension, iAnimationLayerImageVector);
 }
 
-TSharedRef<FOdysseyAnimationCell>
-SOdysseyAnimationLayerImageVectorTimeline::OnCreateCell()
-{
-    UOdysseyAnimation* animation = mLayer->GetAnimation();
-    return FOdysseyAnimationCellImageVector::Create(Cast<UOdysseyAnimationLayerImageVector>(mLayer), 1, animation->Width(), animation->Height());
-}
-
 TSharedRef<SWidget>
-SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell)
+SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(UOdysseyAnimationCell* iCell)
 {
-    if (!iCell || iCell->GetType() == FOdysseyAnimationCellImageVector::StaticType())
-        return SNew(SOdysseyAnimationCellImageVector);
-    else if (iCell->GetType() == FOdysseyAnimationCellImageStagger::StaticType())
-        return SNew(SOdysseyAnimationCellImageStagger, StaticCastSharedPtr<FOdysseyAnimationCellImageStagger>(iCell), mExtension)
-            .ShowContent(this, &SOdysseyAnimationLayerImageVectorTimeline::GetShowStaggerCellContent);
+    if (!iCell)
+	{
+        return SNew(SOdysseyAnimationCellImageVector, Cast<UOdysseyAnimationCellImageVector>(iCell))
+			.Clipping(EWidgetClipping::ClipToBoundsAlways)
+			.ShowContent(this, &SOdysseyAnimationLayerImageVectorTimeline::GetShowCellContent); //DefaultCell, this can be called when creating cells, because the celle does not really exist yet
+	}
+    if (iCell->IsA<UOdysseyAnimationCellImageVector>())
+	{
+        return SNew(SOdysseyAnimationCellImageVector, Cast<UOdysseyAnimationCellImageVector>(iCell))
+			.Clipping(EWidgetClipping::ClipToBoundsAlways)
+			.ShowContent(this, &SOdysseyAnimationLayerImageVectorTimeline::GetShowCellContent);
+	}
+    else if (iCell->IsA<UOdysseyAnimationCellImageStagger>())
+	{
+        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell), mExtension)
+            .ShowContent(this, &SOdysseyAnimationLayerImageVectorTimeline::GetShowCellContent);
+	}
 
     return SNullWidget::NullWidget;
 }
@@ -58,16 +63,16 @@ SOdysseyAnimationLayerImageVectorTimeline::OnPreviewMouseButtonDown(const FGeome
     if (layerStack->CurrentLayer.Get() == mLayer)
         return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(mLayer));
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), mLayer);
 
     return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 }
 
 bool
-SOdysseyAnimationLayerImageVectorTimeline::GetShowStaggerCellContent() const
+SOdysseyAnimationLayerImageVectorTimeline::GetShowCellContent() const
 {
-    if (mLayer->GetIsLocked())
+    if (mLayer->IsLockedRecursively())
         return false;
         
-    return !IsCollapsed();
+    return DisplayOptions();
 }

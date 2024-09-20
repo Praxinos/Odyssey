@@ -4,7 +4,6 @@
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyRectUtils.h"
-#include "OdysseyAnimationImageRenderingAbility.h"
 
 #include "ULISLoaderModule.h"
 
@@ -229,14 +228,14 @@ UOdysseyAnimationPlayer::UpdateTexture()
 		renderer->Init();
 		mRenderer = renderer; //Init Renderer before assigning mRenderer to avoid caching (raster / vector blocks) when unneeded
 
-		::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height());
-		TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(Animation->Width(), Animation->Height(), Animation->Format());
+		::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight());
+		TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(Animation->GetWidth(), Animation->GetHeight(), Animation->GetFormat());
 
 		{
 			FOdysseyImageRendererCopyParams params(block, { block->Rect() });
 			mRenderer->Copy(params, {});
 
-			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->Format());
+			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->GetFormat());
 			ctx.Finish();
 		}
 
@@ -259,13 +258,13 @@ UOdysseyAnimationPlayer::UpdateTexture()
 			TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::UpdateTexture::Copy);
 			for ( const ::ULIS::FRectI& rect : invalidRects )
 			{
-				TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, Animation->Format());
+				TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, Animation->GetFormat());
 				FOdysseyImageRendererCopyParams params(block, { block->Rect() }, rect.Position());
 				mRenderer->Copy(params, {});
 				blocks.Add(block);
 			}
 			
-			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->Format());
+			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->GetFormat());
 			ctx.Finish();
 		}
 
@@ -282,6 +281,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
 void
 UOdysseyAnimationPlayer::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::OnImageRenderingChanged);
 	if ( !Animation )
 		return;
 
@@ -307,7 +307,7 @@ UOdysseyAnimationPlayer::OnImageRenderingChanged(const FOdysseyImageRenderingCha
 		if ( imageRenderingComposition == mImageRenderingComposition )
 			return;
 
-		mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH(0, 0, Animation->Width(), Animation->Height()));
+		mInvalidTileMap.Invalidate(::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight()));
 	}
 }
 
@@ -385,9 +385,9 @@ UOdysseyAnimationPlayer::AnimationChanged()
 		return;
 	}
 
-	Texture = UTexture2D::CreateTransient(Animation->Width(), Animation->Height(), PF_B8G8R8A8);
+	Texture = UTexture2D::CreateTransient(Animation->GetWidth(), Animation->GetHeight(), PF_B8G8R8A8);
 	Texture->UpdateResource();
-	mInvalidTileMap = FULISInvalidTileMap(64, Animation->Width(), Animation->Height());
+	mInvalidTileMap = FULISInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
 
 	UOdysseyAnimation::OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
 
@@ -423,19 +423,19 @@ UOdysseyAnimationPlayer::IsLoopingChanged()
 void
 UOdysseyAnimationPlayer::PropertyChanged(const FName& iPropertyName)
 {
-    if ( iPropertyName == "Animation" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Animation) )
 		AnimationChanged();
 
-	if ( iPropertyName == "Texture" )
+	if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Texture) )
 		TextureChanged();
 
-	if ( iPropertyName == "Status" )
+	if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Status) )
 		StatusChanged();
 
-	if ( iPropertyName == "FrameRate" )
+	if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, FrameRate) )
 		FrameRateChanged();
 
-	if ( iPropertyName == "IsLooping" )
+	if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping) )
 		IsLoopingChanged();
 }
 

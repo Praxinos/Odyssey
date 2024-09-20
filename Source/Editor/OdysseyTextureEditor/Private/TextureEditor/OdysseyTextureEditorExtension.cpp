@@ -43,9 +43,9 @@ FOdysseyTextureEditorExtension::Finalize()
 }
 
 void
-FOdysseyTextureEditorExtension::ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName )
+FOdysseyTextureEditorExtension::ExtendMenu( TSharedRef<FExtender> iExtender )
 {
-	mGUI->ExtendMenu(iOwnerFName, iMenuName);
+	mGUI->ExtendMenu(iExtender);
 }
 
 void
@@ -99,6 +99,15 @@ TSharedPtr<FOdysseyTextureEditorSource>
 FOdysseyTextureEditorExtension::GetTextureSource() const
 {
 	return mTextureSource;
+}
+
+UOdysseyTextureLayerStack*
+FOdysseyTextureEditorExtension::GetLayerStack() const
+{
+	if (!mTextureSource)
+		return nullptr;
+
+	return mTextureSource->GetLayerStack();
 }
 
 void

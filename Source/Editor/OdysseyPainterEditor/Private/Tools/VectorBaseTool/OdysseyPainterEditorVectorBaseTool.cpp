@@ -39,6 +39,31 @@ UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool( FOdyss
 {
 }
 
+void
+UOdysseyPainterEditorVectorBaseTool::ExtendMenu(TSharedRef<FExtender> iExtender)
+{
+	TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
+	iExtender->AddMenuExtension(
+		"OdysseyEdit",
+		EExtensionHook::After,
+		commandList,
+		FMenuExtensionDelegate::CreateLambda(
+			[this](FMenuBuilder& iBuilder)
+			{
+				if (!IsActivated())
+					return;
+				
+				iBuilder.BeginSection("ToolOptions", LOCTEXT("vector-base-tool.edit-menu.tool-options", "Tool Options"));
+				{
+					ExtendContextMenu( iBuilder );
+				}
+				iBuilder.EndSection();
+			}
+		)
+	);
+	
+}
+
 //static
 bool
 UOdysseyPainterEditorVectorBaseTool::DoubleClicked()
@@ -661,10 +686,10 @@ UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( FOdysseyVectorGroupP
                                                           , const FName& iPropertyName )
 {
     // RestrictToSelection was changed, return redraw flag
-    if( iPropertyName == "RestrictToSelectedObjects" )
+    /* if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBaseTool, RestrictToSelectedObjects) )
     {
         iScene->GetEngine()->ResetHUD();
-    }
+    } */
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }

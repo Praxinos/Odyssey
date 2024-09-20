@@ -55,7 +55,7 @@ namespace
             ::ULIS::FEvent eventClear;
             ctx.Clear(*dst, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
 
-            TSharedPtr<IOdysseyImageRenderer> imageRenderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
+            TSharedPtr<IOdysseyImageRenderer> imageRenderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
             imageRenderer->Init();
 
             ::ULIS::FRectI dstRect = ::ULIS::FRectI::FromXYWH(dst_pos.x, dst_pos.y, given_rect.w - dst_pos.x, given_rect.h - dst_pos.y);
@@ -73,14 +73,14 @@ namespace
             if (!animation)
                 return FOdysseyBlockProxy::MakeNullProxy();
             
-            ::ULIS::FRectI animationRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->Width(), animation->Height());
+            ::ULIS::FRectI animationRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
             ::ULIS::FRectI given_rect = Area.IsInitialized() ? Area.GetValue() : animationRect;
             //be sure we copy only the needed part //TODO: Should be done directly in ULIS
             ::ULIS::FRectI src_rect = given_rect & animationRect;
             ::ULIS::FVec2I dst_pos(src_rect.x - given_rect.x, src_rect.y - given_rect.y);
-            TSharedPtr<::ULIS::FBlock> dst = MakeShareable(new ::ULIS::FBlock( given_rect.w, given_rect.h, animation->Format() ));
+            TSharedPtr<::ULIS::FBlock> dst = MakeShareable(new ::ULIS::FBlock( given_rect.w, given_rect.h, animation->GetFormat() ));
 
-            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->Format());
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(animation->GetFormat());
             ::ULIS::FEvent eventClear;
             ctx.Clear(*dst, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
 

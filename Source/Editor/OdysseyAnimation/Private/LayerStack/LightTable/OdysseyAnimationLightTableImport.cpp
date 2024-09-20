@@ -1,7 +1,6 @@
 #include "LayerStack/LightTable/OdysseyAnimationLightTableImport.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTableKeyImport.h"
-#include "LayerStack/LightTable/OdysseyAnimationLightTableKeyExport.h"
 #include "OdysseyFile.h"
 
 bool
@@ -48,29 +47,40 @@ FOdysseyAnimationLightTableImport::Read( FOdysseyAnimationLightTable* iAnimation
             {
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_DISPLAY_POSITION:
                 {
-                    Ar << iAnimationLightTable->mDisplayPosition;
+					uint32 displayPosition;
+                    Ar << displayPosition;
+					iAnimationLightTable->DisplayPosition = (EOdysseyLightTableDisplayPosition)displayPosition;
                 }
                 break;
 
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_COLORS:
                 {
-                    Ar << iAnimationLightTable->mPreviousKeysColor;
-                    Ar << iAnimationLightTable->mNextKeysColor;
+                    Ar << iAnimationLightTable->PreviousKeysColor;
+                    Ar << iAnimationLightTable->NextKeysColor;
                 }
                 break;
 
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_CONTRAST:
                 {
-                    Ar << iAnimationLightTable->mPreviousKeysContrast;
-                    Ar << iAnimationLightTable->mNextKeysContrast;
+					float prev = 0.f;
+					float next = 0.f;
+                    Ar << prev;
+                    Ar << next;
+					iAnimationLightTable->PreviousKeysContrast = prev * 100.f;
+                    iAnimationLightTable->NextKeysContrast = next * 100.f;
                 }
                 break;
 
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_KEYS:
                 {
-                    for ( FOdysseyAnimationLightTableKey& key : iAnimationLightTable->mKeys )
+                    for ( int i = 0; i < 10; i++ )
                     {
-                        FOdysseyAnimationLightTableKeyExport::Write( &key, Ar );
+                        FOdysseyAnimationLightTableKeyImport::Read( &iAnimationLightTable->PreviousKeys[i], Ar );
+                    }
+
+					for ( int i = 0; i < 10; i++ )
+                    {
+                        FOdysseyAnimationLightTableKeyImport::Read( &iAnimationLightTable->NextKeys[i], Ar );
                     }
                 }
                 break;

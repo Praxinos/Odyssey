@@ -34,11 +34,6 @@ public:
     void CreateTabs();
     void BindShortcuts(FBaseToolkit* iToolkit);
 
-public:
-    // Menu And Toolbar
-    void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName );
-    void ExtendMenuAbout(FToolMenuOwner iOwner, FName iMenuName );
-
 protected:
 	// Layout
 	void	CreateLeftSection(FOdysseyEditorLayoutBuilder& iBuilder);
@@ -47,11 +42,6 @@ protected:
 
 protected:
     // Shortcuts
-    void AboutIliad();
-    void VisitPraxinosWebsite();
-    void ManualAndReleaseNotes();
-    void GetBrushPack();
-    void Discord();
     void SwitchTabletAPI();
 
     void ClearCurrentLayer();

@@ -89,17 +89,17 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
 
     public:
         UPROPERTY( EditAnywhere
-                 , Category = PaintBucketTool
+                 , Category=PaintBucketTool
                  , meta = ( ToolTip  = "Propagate" ) )
         bool Propagate;
 
         UPROPERTY( EditAnywhere
-                 , Category = PaintBucketTool
+                 , Category=PaintBucketTool
                  , meta = ( ToolTip  = "Color Mode" ) )
         eBucketColorMode ColorMode;
 
         UPROPERTY( EditAnywhere
-                 , Category = PaintBucketTool
+                 , Category=PaintBucketTool
                  , meta = ( ToolTip  = "Opacity"
                           , ClampMin = "0.0"
                           , UIMin    = "0.0"
@@ -108,21 +108,21 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
         double Opacity;
 
         UPROPERTY( EditAnywhere
-                 , Category = PaintBucketTool
+                 , Category=PaintBucketTool
                  , meta = ( ToolTip = "Color1"
                           , EditCondition = "(ColorMode == eBucketColorMode::LinearGradient) || (ColorMode == eBucketColorMode::RadialGradient)"
                           , EditConditionHides ) )
         FColor Color1;
 
         UPROPERTY( EditAnywhere
-                 , Category = PaintBucketTool
+                 , Category=PaintBucketTool
                  , meta = ( ToolTip = "Color2"
                           , EditCondition = "(ColorMode == eBucketColorMode::LinearGradient) || (ColorMode == eBucketColorMode::RadialGradient)"
                           , EditConditionHides ) )
         FColor Color2;
 
         UPROPERTY( EditAnywhere
-                 , Category = PaintBucketTool
+                 , Category=PaintBucketTool
                  , meta = ( ToolTip = "Picking Radius" ) )
         double PickingRadius;
 

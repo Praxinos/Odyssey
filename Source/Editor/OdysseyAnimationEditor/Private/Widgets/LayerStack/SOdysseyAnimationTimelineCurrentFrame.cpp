@@ -27,14 +27,13 @@ SOdysseyAnimationTimelineCurrentFrame::OnPaint(const FPaintArgs& Args, const FGe
 
 	const float height = AllottedGeometry.GetLocalSize().Y;
 	const float width = AllottedGeometry.GetLocalSize().X;
-	float offset = mExtension->Timeline()->GetOffset();
 	const float frameSize = mExtension->Timeline()->GetFrameWidth();
 
 	FLinearColor lineColor = FLinearColor::Red;
 	lineColor.A = 0.3f;
 
 	int currentFrame = mExtension->Animation()->GetFrameIndexAtTime(mExtension->Player()->GetCurrentTime());
-	float currentFramePos = (currentFrame - offset) * frameSize;
+	float currentFramePos = mExtension->Timeline()->FrameToMousePosition(currentFrame);
 
 	FSlateDrawElement::MakeBox(
 		OutDrawElements,

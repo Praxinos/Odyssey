@@ -13,8 +13,63 @@
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyAnimation.h"
+#include "DetailLayoutBuilder.h"
 
 #include <ULIS>
+
+TSharedRef<IDetailCustomization>
+FOdysseyAnimationEditorOutOfPegsToolDetails::MakeInstance()
+{
+    return MakeShared<FOdysseyAnimationEditorOutOfPegsToolDetails>();
+}
+
+void
+FOdysseyAnimationEditorOutOfPegsToolDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
+{
+	TArray<TWeakObjectPtr<UObject>> ObjectsBeingCustomized;
+	DetailLayout.GetObjectsBeingCustomized(ObjectsBeingCustomized);
+
+	UOdysseyAnimationEditorOutOfPegsTool* tool = Cast<UOdysseyAnimationEditorOutOfPegsTool>(ObjectsBeingCustomized[0].Get());
+	if (!tool)
+		return;
+
+	TSharedRef<IPropertyHandle> panHandle = DetailLayout.GetProperty( GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Pan));
+	TSharedRef<IPropertyHandle> rotationHandle = DetailLayout.GetProperty( GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Rotation));
+	TSharedRef<IPropertyHandle> zoomHandle = DetailLayout.GetProperty( GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Zoom));
+
+	IDetailPropertyRow* panRow = DetailLayout.EditDefaultProperty(panHandle);
+	IDetailPropertyRow* rotationRow = DetailLayout.EditDefaultProperty(rotationHandle);
+	IDetailPropertyRow* zoomRow = DetailLayout.EditDefaultProperty(zoomHandle);
+
+	TAttribute<bool> panIsResetToDefaultVisible = TAttribute<bool>::CreateLambda(
+		[tool]()
+		{
+			return tool->GetCell() && tool->GetCell()->OutOfPegs.Pan != FVector2D(0, 0);
+		}
+	);
+
+	TAttribute<bool> rotationIsResetToDefaultVisible = TAttribute<bool>::CreateLambda(
+		[tool]()
+		{
+			return tool->GetCell() && tool->GetCell()->OutOfPegs.Rotation != 0.f;
+		}
+	);
+
+	TAttribute<bool> zoomIsResetToDefaultVisible = TAttribute<bool>::CreateLambda(
+		[tool]()
+		{
+			return tool->GetCell() && tool->GetCell()->OutOfPegs.Zoom != 100.f;
+		}
+	);
+
+	FResetToDefaultOverride panResetToDefault = FResetToDefaultOverride::Create(panIsResetToDefaultVisible);
+	FResetToDefaultOverride rotationResetToDefault = FResetToDefaultOverride::Create(rotationIsResetToDefaultVisible);
+	FResetToDefaultOverride zoomResetToDefault = FResetToDefaultOverride::Create(zoomIsResetToDefaultVisible);
+
+	panRow->OverrideResetToDefault(panResetToDefault);
+	rotationRow->OverrideResetToDefault(rotationResetToDefault);
+	zoomRow->OverrideResetToDefault(zoomResetToDefault);
+}
 
 UOdysseyAnimationEditorOutOfPegsTool::~UOdysseyAnimationEditorOutOfPegsTool()
 {
@@ -56,7 +111,7 @@ UOdysseyAnimationEditorOutOfPegsTool::OnMouseUp(const FOdysseyPoint& iPointInTex
 
     if (mIsPanning)
     {
-        FOdysseyObjectEditorUtils::SetPropertyValue(this, "Pan", mCell->OutOfPegsPan(), EPropertyChangeType::ValueSet);
+        FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Pan), mCell->OutOfPegs.Pan, EPropertyChangeType::ValueSet);
         mIsPanning = false;
     }
     return true;
@@ -77,7 +132,7 @@ UOdysseyAnimationEditorOutOfPegsTool::OnMouseDrag(const FOdysseyPoint& iPointInT
     if (mIsPanning)
     {
         FVector2D pan = mPanReference + FVector2D(point.x, point.y) - mPanPointReference;
-        FOdysseyObjectEditorUtils::SetPropertyValue(this, "Pan", pan, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
+        FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Pan), pan, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
     }
 }
 
@@ -102,28 +157,34 @@ UOdysseyAnimationEditorOutOfPegsTool::PostEditChangeProperty( FPropertyChangedEv
     FName memberPropertyName = iEvent.MemberProperty->GetFName();
     
     bool isInteractive = EPropertyChangeType::ValueSet | (iEvent.ChangeType & EPropertyChangeType::Interactive);
-    if ( memberPropertyName == TEXT("Pan") )
+    if ( memberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Pan) )
     {
-        mCell->SetOutOfPegsPan(Pan, isInteractive);
+		FOdysseyAnimationCellOutOfPegs outOfPegs = mCell->OutOfPegs;
+		outOfPegs.Pan = Pan;
+		FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), outOfPegs, iEvent.ChangeType);
     }
-    if ( propertyName == TEXT("Rotation") )
+    if ( propertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Rotation) )
     {
-        mCell->SetOutOfPegsRotation(Rotation, isInteractive);
+		FOdysseyAnimationCellOutOfPegs outOfPegs = mCell->OutOfPegs;
+		outOfPegs.Rotation = FMath::UnwindDegrees(Rotation);
+		FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), outOfPegs, iEvent.ChangeType);
     }
-    if ( propertyName == TEXT("Zoom") )
+    if ( propertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Zoom) )
     {
-        mCell->SetOutOfPegsZoom(Zoom / 100.f, isInteractive);
+		FOdysseyAnimationCellOutOfPegs outOfPegs = mCell->OutOfPegs;
+		outOfPegs.Zoom = Zoom;
+		FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), outOfPegs, iEvent.ChangeType);
     }
 }
 
-TSharedPtr<FOdysseyAnimationCell>
+UOdysseyAnimationCell*
 UOdysseyAnimationEditorOutOfPegsTool::GetCell() const
 {
     return mCell;
 }
 
 void
-UOdysseyAnimationEditorOutOfPegsTool::SetCell(TSharedPtr<FOdysseyAnimationCell> iCell)
+UOdysseyAnimationEditorOutOfPegsTool::SetCell(UOdysseyAnimationCell* iCell)
 {
     if (iCell == mCell)
         return;
@@ -132,18 +193,18 @@ UOdysseyAnimationEditorOutOfPegsTool::SetCell(TSharedPtr<FOdysseyAnimationCell> 
         mCell->OnOutOfPegsChanged().RemoveAll(this);
     
     if (mLayer)
-        mLayer->OnLightTableIsActivatedChanged().RemoveAll(this);
+        mLayer->OnLightTableChanged().RemoveAll(this);
 
     mCell = iCell;
 
     if (mCell)
     {
         mLayer = mCell->GetLayer();
-        mLayer->OnLightTableIsActivatedChanged().AddUObject(this, &UOdysseyAnimationEditorOutOfPegsTool::OnLightTableIsActivatedChanged);
+        mLayer->OnLightTableChanged().AddUObject(this, &UOdysseyAnimationEditorOutOfPegsTool::OnLightTableChanged);
 
-        Pan = mCell->OutOfPegsPan();
-        Rotation = mCell->OutOfPegsRotation();
-        Zoom = mCell->OutOfPegsZoom() * 100.f;
+        Pan = mCell->OutOfPegs.Pan;
+        Rotation = mCell->OutOfPegs.Rotation;
+        Zoom = mCell->OutOfPegs.Zoom;
 
         mCell->OnOutOfPegsChanged().AddUObject(this, &UOdysseyAnimationEditorOutOfPegsTool::OnCellOutOfPegsChanged);
     }
@@ -154,17 +215,17 @@ UOdysseyAnimationEditorOutOfPegsTool::SetCell(TSharedPtr<FOdysseyAnimationCell> 
 void
 UOdysseyAnimationEditorOutOfPegsTool::OnCellOutOfPegsChanged(bool iIsInteractive)
 {
-    Pan = mCell->OutOfPegsPan();
-    Rotation = mCell->OutOfPegsRotation();
-    Zoom = mCell->OutOfPegsZoom() * 100.f;
+    Pan = mCell->OutOfPegs.Pan;
+    Rotation = mCell->OutOfPegs.Rotation;
+    Zoom = mCell->OutOfPegs.Zoom;
 
     RefreshHUD();
 }
 
 void
-UOdysseyAnimationEditorOutOfPegsTool::OnLightTableIsActivatedChanged()
+UOdysseyAnimationEditorOutOfPegsTool::OnLightTableChanged()
 {
-    if (!mLayer->GetIsLightTableActivated())
+    if (!mLayer->Lighttable.bIsActivated)
     {
         GetEditor()->InactivateTemporaryTool();
     }
@@ -242,8 +303,8 @@ UOdysseyAnimationEditorOutOfPegsTool::GetCenter() const
     if (!animation)
         return FVector2D();
 
-    float width = animation->Width();
-    float height = animation->Height();
+    float width = animation->GetWidth();
+    float height = animation->GetHeight();
 
     ::ULIS::FMat3F oopTransform = mCell->OutOfPegsTransform();
     ::ULIS::FVec2F center = oopTransform * ::ULIS::FVec3F(width / 2.f, height / 2.f, 1.f);
@@ -261,8 +322,8 @@ UOdysseyAnimationEditorOutOfPegsTool::RefreshHUD()
     if (!animation)
         return;
 
-    float width = animation->Width();
-    float height = animation->Height();
+    float width = animation->GetWidth();
+    float height = animation->GetHeight();
 
     ::ULIS::FMat3F oopTransform = mCell->OutOfPegsTransform();
 
@@ -299,7 +360,7 @@ UOdysseyAnimationEditorOutOfPegsTool::RefreshHUD()
 void
 UOdysseyAnimationEditorOutOfPegsTool::OnTopLeftHandleDragBegin()
 {
-    mZoomReference = mCell->OutOfPegsZoom();
+    mZoomReference = mCell->OutOfPegs.Zoom;
     mZoomCenter = GetCenter();
     mZoomDistanceReference = FVector2D::Distance( mZoomCenter, mTransformTopLeftHandleHUD->GetPosition() );
 }
@@ -307,7 +368,7 @@ UOdysseyAnimationEditorOutOfPegsTool::OnTopLeftHandleDragBegin()
 void
 UOdysseyAnimationEditorOutOfPegsTool::OnTopRightHandleDragBegin()
 {
-    mZoomReference = mCell->OutOfPegsZoom();
+    mZoomReference = mCell->OutOfPegs.Zoom;
     mZoomCenter = GetCenter();
     mZoomDistanceReference = FVector2D::Distance( mZoomCenter, mTransformTopRightHandleHUD->GetPosition() );
 }
@@ -315,7 +376,7 @@ UOdysseyAnimationEditorOutOfPegsTool::OnTopRightHandleDragBegin()
 void
 UOdysseyAnimationEditorOutOfPegsTool::OnBottomRightHandleDragBegin()
 {
-    mZoomReference = mCell->OutOfPegsZoom();
+    mZoomReference = mCell->OutOfPegs.Zoom;
     mZoomCenter = GetCenter();
     mZoomDistanceReference = FVector2D::Distance( mZoomCenter, mTransformBottomRightHandleHUD->GetPosition() );
 }
@@ -323,7 +384,7 @@ UOdysseyAnimationEditorOutOfPegsTool::OnBottomRightHandleDragBegin()
 void
 UOdysseyAnimationEditorOutOfPegsTool::OnBottomLeftHandleDragBegin()
 {
-    mZoomReference = mCell->OutOfPegsZoom();
+    mZoomReference = mCell->OutOfPegs.Zoom;
     mZoomCenter = GetCenter();
     mZoomDistanceReference = FVector2D::Distance( mZoomCenter, mTransformBottomLeftHandleHUD->GetPosition() );
 }
@@ -340,7 +401,7 @@ UOdysseyAnimationEditorOutOfPegsTool::OnTopLeftHandleDragged()
     float distance = FVector2D::Distance( mZoomCenter, mTransformTopLeftHandleHUD->GetPosition() );
     float zoomRatio = distance / mZoomDistanceReference;
     float zoom = mZoomReference * zoomRatio;
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Zoom", zoom * 100.f, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Zoom), zoom, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
 }
 
 void
@@ -349,7 +410,7 @@ UOdysseyAnimationEditorOutOfPegsTool::OnTopRightHandleDragged()
     float distance = FVector2D::Distance( mZoomCenter, mTransformTopRightHandleHUD->GetPosition() );
     float zoomRatio = distance / mZoomDistanceReference;
     float zoom = mZoomReference * zoomRatio;
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Zoom", zoom * 100.f, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Zoom), zoom, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
 }
 
 void
@@ -358,7 +419,7 @@ UOdysseyAnimationEditorOutOfPegsTool::OnBottomRightHandleDragged()
     float distance = FVector2D::Distance( mZoomCenter, mTransformBottomRightHandleHUD->GetPosition() );
     float zoomRatio = distance / mZoomDistanceReference;
     float zoom = mZoomReference * zoomRatio;
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Zoom", zoom * 100.f, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Zoom), zoom, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
 }
 
 void
@@ -367,7 +428,7 @@ UOdysseyAnimationEditorOutOfPegsTool::OnBottomLeftHandleDragged()
     float distance = FVector2D::Distance( mZoomCenter, mTransformBottomLeftHandleHUD->GetPosition() );
     float zoomRatio = distance / mZoomDistanceReference;
     float zoom = mZoomReference * zoomRatio;
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Zoom", zoom * 100.f, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Zoom), zoom, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
 }
 
 void
@@ -375,35 +436,51 @@ UOdysseyAnimationEditorOutOfPegsTool::OnRotationHandleDragged()
 {
     FVector2D vector = mTransformRotationHandleHUD->GetPosition() - mRotationCenter;
     float rotation = FMath::RadiansToDegrees(FMath::Atan2(vector.Y, vector.X));
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Rotation", rotation, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Rotation), rotation, EPropertyChangeType::ValueSet | EPropertyChangeType::Interactive);
 }
 
 void
 UOdysseyAnimationEditorOutOfPegsTool::OnTopLeftHandleDragEnd()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Zoom", mCell->OutOfPegsZoom() * 100.f, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Zoom), mCell->OutOfPegs.Zoom, EPropertyChangeType::ValueSet);
 }
 
 void
 UOdysseyAnimationEditorOutOfPegsTool::OnTopRightHandleDragEnd()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Zoom", mCell->OutOfPegsZoom() * 100.f, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Zoom), mCell->OutOfPegs.Zoom, EPropertyChangeType::ValueSet);
 }
 
 void
 UOdysseyAnimationEditorOutOfPegsTool::OnBottomRightHandleDragEnd()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Zoom", mCell->OutOfPegsZoom() * 100.f, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Zoom), mCell->OutOfPegs.Zoom, EPropertyChangeType::ValueSet);
 }
 
 void
 UOdysseyAnimationEditorOutOfPegsTool::OnBottomLeftHandleDragEnd()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Zoom", mCell->OutOfPegsZoom() * 100.f, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Zoom), mCell->OutOfPegs.Zoom, EPropertyChangeType::ValueSet);
 }
 
 void
 UOdysseyAnimationEditorOutOfPegsTool::OnRotationHandleDragEnd()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "Rotation", mCell->OutOfPegsRotation(), EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Rotation), mCell->OutOfPegs.Rotation, EPropertyChangeType::ValueSet);
+}
+
+void
+UOdysseyAnimationEditorOutOfPegsTool::Reset()
+{
+    FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), FOdysseyAnimationCellOutOfPegs());
+}
+
+void
+UOdysseyAnimationEditorOutOfPegsTool::ResetAll()
+{
+	const TArray<UOdysseyAnimationCell*> cells = mCell->GetLayer()->GetCells();
+	for (UOdysseyAnimationCell* cell : cells)
+	{
+		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), FOdysseyAnimationCellOutOfPegs());
+	}
 }

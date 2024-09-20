@@ -96,7 +96,7 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
         // We just cannot copy the whole block of properties.
 
         // Category "Identity"
-        if( iPropertyName == "Name" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Name) )
         {
             selectedObject->SetName( Name );
 
@@ -104,51 +104,51 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
         }
 
         // Category "Transform"
-        if( iPropertyName == "TranslationX" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, TranslationX) )
             selectedObject->Translate( TranslationX, selectedObject->GetTranslationY() );
 
-        if( iPropertyName == "TranslationY" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, TranslationY) )
             selectedObject->Translate( selectedObject->GetTranslationX(), TranslationY );
 
-        if( iPropertyName == "Rotation" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Rotation) )
             selectedObject->Rotate( Rotation );
 
-        if( iPropertyName == "ScalingX" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ScalingX) )
             selectedObject->Scale( ScalingX, selectedObject->GetScalingY() );
 
-        if( iPropertyName == "ScalingY" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ScalingY) )
             selectedObject->Scale( selectedObject->GetScalingX(), ScalingY );
 
         if( iCategory == "Transform" )
             selectedObject->UpdateMatrix();
 
         // Category "Appearance"
-        if( iPropertyName == "Opacity" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Opacity) )
             selectedObject->SetOpacity( Opacity );
 
-        if( iPropertyName == "Visible" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, Visible) )
             selectedObject->SetOpacity( Visible ? 1.0f : 0.0f );
 
-        if( iPropertyName == "ForegroundColorMode" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColorMode) )
             selectedObject->GetForegroundBucket().SetColorMode( static_cast<eBucketColorMode>(ForegroundColorMode) );
 
         // note: iMemberPropertyName because FColor is a struct 
         // and we can edit individual struct members RGBA
-        if( ( iPropertyName == "ForegroundColor" ) || ( iMemberPropertyName == "ForegroundColor" ) )
+        if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColor) ) )
             selectedObject->GetForegroundBucket().SetSolidColor( ForegroundColor );
             
-        if ( (iPropertyName == "ForegroundPaletteSelection") || (iMemberPropertyName == "ForegroundPaletteSelection") )
+        if ( (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundPaletteSelection)) || (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundPaletteSelection)) )
             selectedObject->GetForegroundBucket().SetPaletteEntry( ForegroundPaletteSelection.OdysseyPaletteEntryColor );
 
-        if ((iPropertyName == "BackgroundPaletteSelection") || (iMemberPropertyName == "BackgroundPaletteSelection"))
+        if ((iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundPaletteSelection)) || (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundPaletteSelection)))
             selectedObject->GetBackgroundBucket().SetPaletteEntry( BackgroundPaletteSelection.OdysseyPaletteEntryColor);
 
-        if( iPropertyName == "BackgroundColorMode" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColorMode) )
             selectedObject->GetBackgroundBucket().SetColorMode( static_cast<eBucketColorMode>(BackgroundColorMode) );
 
         // note: iMemberPropertyName because FColor is a struct 
         // and we can edit individual struct members RGBA
-        if( ( iPropertyName == "BackgroundColor" ) || ( iMemberPropertyName == "BackgroundColor" ) )
+        if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColor) ) )
             selectedObject->GetBackgroundBucket().SetSolidColor( BackgroundColor );
     }
 

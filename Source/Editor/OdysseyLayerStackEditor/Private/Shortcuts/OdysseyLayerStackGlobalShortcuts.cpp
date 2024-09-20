@@ -68,12 +68,12 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToNextLayer()
         isHidden = parents.ContainsByPredicate(
             [](UOdysseyLayer* iLayer)
             {
-                return !iLayer->IsExpanded;
+                return !iLayer->DisplayChildren;
             }
         );
     }
     
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(layer));
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), layer);
 }
 
 void
@@ -107,12 +107,12 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToPreviousLayer()
         isHidden = parents.ContainsByPredicate(
             [](UOdysseyLayer* iLayer)
             {
-                return !iLayer->IsExpanded;
+                return !iLayer->DisplayChildren;
             }
         );
     }
     
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(layer));
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), layer);
 }
 
 void
@@ -129,7 +129,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_OpenFolderLayer()
     if (currentLayer->GetChildren().Num() <= 0)
         return;
     
-    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, "IsExpanded", true);
+    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren), true);
 }
 
 void
@@ -146,7 +146,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_CloseFolderLayer()
     if (currentLayer->GetChildren().Num() <= 0)
         return;
     
-    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, "IsExpanded", false);
+    FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren), false);
 }
 
 #undef LOCTEXT_NAMESPACE

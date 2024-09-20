@@ -551,7 +551,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::PropertyChangedVector( FOdysseyVecto
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
-    if( iPropertyName == "TracingType" )
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathDrawingTool, TracingType) )
     {
         switch( TracingType )
         {
@@ -568,7 +568,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::PropertyChangedVector( FOdysseyVecto
         }
     }
 
-    if( iPropertyName == "TracingFidelity" )
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathDrawingTool, TracingFidelity) )
     {
         mPathTracer.SetTracingWidth( (double) TracingFidelity );
     }

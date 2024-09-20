@@ -7,7 +7,6 @@
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 class FOdysseyAnimationEditorExtension;
-class FOdysseyAnimationCell;
 class UOdysseyAnimationLayer;
 class FOdysseyAnimationTimelineCellsShortcuts;
 
@@ -23,9 +22,9 @@ public:
     SOdysseyAnimationLayerImageTimeline();
 
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageTimeline)
-        : _IsCollapsed(false)
+        : _DisplayOptions(false)
         {}
-        SLATE_ATTRIBUTE(bool, IsCollapsed)
+        SLATE_ATTRIBUTE(bool, DisplayOptions)
     SLATE_END_ARGS()
 
 protected:
@@ -50,8 +49,7 @@ public:
     virtual FReply OnKeyUp( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
 
 protected:
-    virtual TSharedRef<FOdysseyAnimationCell> OnCreateCell() = 0;
-    virtual TSharedRef<SWidget> OnGenerateCellWidget(TSharedPtr<FOdysseyAnimationCell> iCell) = 0;
+    virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyAnimationCell* iCell) = 0;
 
 protected:
     //TArray<TSharedPtr<FOdysseyAnimationCell>> GetSelectedCells() const;
@@ -61,7 +59,7 @@ protected:
 
     FOptionalSize GetCellsHeight() const;
     FOptionalSize GetLightTableHeight() const;
-    bool IsCollapsed() const;
+    bool DisplayOptions() const;
 
     bool GetShowCellsHandles() const;
 
@@ -72,17 +70,6 @@ protected:
     virtual void MapActions(TSharedPtr<FUICommandList> iCommandList, int iFrame);
 
 private:
-    void BuildPostBehaviourSubMenu(FMenuBuilder& iMenuBuilder);
-    void BuildPreBehaviourSubMenu(FMenuBuilder& iMenuBuilder);
-
-    void SetPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour);
-    bool IsPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
-    bool CanSetPostBehaviour() const;
-
-    void SetPreBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour);
-    bool IsPreBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
-    bool CanSetPreBehaviour() const;
-
     void RemoveCellMark();
     bool CanRemoveCellMark() const;
     void SetCellMark( int iMarkId );
@@ -109,7 +96,8 @@ protected:
     bool mIsDraggingOver;
     eDragState mDragState;
     int mDragPosition;
-    TAttribute<bool> mIsCollapsed;
+    TAttribute<bool> mDisplayOptions;
 
     TSharedPtr<FOdysseyAnimationTimelineCellsShortcuts> mAnimationTimelineCellsShortcuts;
+	TSharedPtr<FOdysseyAnimationTimelineCellImageStaggerShortcuts> mAnimationTimelineCellImageStaggerShortcuts;
 };

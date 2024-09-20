@@ -14,7 +14,7 @@ SOdysseyAnimationCell::Construct(
     const FArguments& InArgs,
     FOdysseyAnimationEditorExtension* iExtension,
     UOdysseyAnimationLayer* iAnimationLayer,
-    TSharedPtr<FOdysseyAnimationCell> iCell
+    UOdysseyAnimationCell* iCell
 )
 {
     ensure(iAnimationLayer);
@@ -144,11 +144,11 @@ SOdysseyAnimationCell::IsSelectionCursor() const
 const FSlateBrush*
 SOdysseyAnimationCell::GetMarkBrush() const
 {
-    if (mCell->GetMarkId() == INDEX_NONE)
+    if (mCell->Mark == INDEX_NONE)
         return nullptr;
     
     UOdysseyAnimationEditorProjectSettings* settings = UOdysseyAnimationEditorProjectSettings::Get();
-    const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[mCell->GetMarkId()];
+    const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[mCell->Mark];
     const FSlateBrush* icon = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
     switch(markSettings.Symbol)
     {
@@ -169,11 +169,11 @@ SOdysseyAnimationCell::GetMarkBrush() const
 float
 SOdysseyAnimationCell::GetMarkOpacity() const
 {
-    if (mCell->GetMarkId() == INDEX_NONE)
+    if (mCell->Mark == INDEX_NONE)
         return 0.f;
     
     UOdysseyAnimationEditorProjectSettings* settings = UOdysseyAnimationEditorProjectSettings::Get();
-    const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[mCell->GetMarkId()];
+    const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[mCell->Mark];
     if (markSettings.Symbol != EOdysseyAnimationCellMarkSymbol::Fill)
         return 1.f;
 
@@ -183,11 +183,11 @@ SOdysseyAnimationCell::GetMarkOpacity() const
 FLinearColor
 SOdysseyAnimationCell::GetMarkColor() const
 {
-    if (mCell->GetMarkId() == INDEX_NONE)
+    if (mCell->Mark == INDEX_NONE)
         return FLinearColor();
     
     UOdysseyAnimationEditorProjectSettings* settings = UOdysseyAnimationEditorProjectSettings::Get();
-    const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[mCell->GetMarkId()];
+    const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[mCell->Mark];
     FLinearColor color = markSettings.Color;
     color.A = settings->AnimationCellsMarksFillOpacity / 100.f;
 
@@ -197,22 +197,22 @@ SOdysseyAnimationCell::GetMarkColor() const
 bool
 SOdysseyAnimationCell::IsMarkSymbol() const
 {
-    if (mCell->GetMarkId() == INDEX_NONE)
+    if (mCell->Mark == INDEX_NONE)
         return false;
     
     UOdysseyAnimationEditorProjectSettings* settings = UOdysseyAnimationEditorProjectSettings::Get();
-    const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[mCell->GetMarkId()];
+    const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[mCell->Mark];
     return markSettings.Symbol != EOdysseyAnimationCellMarkSymbol::Fill;
 }
 
 bool
 SOdysseyAnimationCell::IsMarkFill() const
 {
-    if (mCell->GetMarkId() == INDEX_NONE)
+    if (mCell->Mark == INDEX_NONE)
         return false;
     
     UOdysseyAnimationEditorProjectSettings* settings = UOdysseyAnimationEditorProjectSettings::Get();
-    const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[mCell->GetMarkId()];
+    const FAnimationCellMarkSettings& markSettings = settings->AnimationCellsMarks[mCell->Mark];
     return markSettings.Symbol == EOdysseyAnimationCellMarkSymbol::Fill;
 }
 

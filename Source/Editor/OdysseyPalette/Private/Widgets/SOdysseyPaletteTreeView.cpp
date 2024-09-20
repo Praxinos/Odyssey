@@ -320,7 +320,7 @@ SOdysseyPaletteTreeView::SetCurrentEntryFromSelectorItem()
 
     if (!SelectorItem)
     {
-        FOdysseyObjectEditorUtils::SetPropertyValue(mPalette, "CurrentEntry", TSoftObjectPtr<UOdysseyPaletteEntry>(mPalette->GetRootEntries()[0]));
+        FOdysseyObjectEditorUtils::SetPropertyValue(mPalette, GET_MEMBER_NAME_CHECKED(UOdysseyPalette, CurrentEntry), TSoftObjectPtr<UOdysseyPaletteEntry>(mPalette->GetRootEntries()[0]));
         return;
     }
 
@@ -331,7 +331,7 @@ SOdysseyPaletteTreeView::SetCurrentEntryFromSelectorItem()
     if (SelectorItem == mPalette->CurrentEntry)
         return;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(mPalette, "CurrentEntry", TSoftObjectPtr<UOdysseyPaletteEntry>(SelectorItem));
+    FOdysseyObjectEditorUtils::SetPropertyValue(mPalette, GET_MEMBER_NAME_CHECKED(UOdysseyPalette, CurrentEntry), TSoftObjectPtr<UOdysseyPaletteEntry>(SelectorItem));
 }
 
 void SOdysseyPaletteTreeView::RefreshAllExpansionStates()
@@ -612,7 +612,7 @@ SOdysseyPaletteTreeView::OnEntryIsExpandedChanged(UOdysseyPaletteEntry* iEntryNo
 void
 SOdysseyPaletteTreeView::OnExpansionChanged( UOdysseyPaletteEntry* iEntryNode, bool iIsExpanded )
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(iEntryNode, "IsExpanded", iIsExpanded);
+    FOdysseyObjectEditorUtils::SetPropertyValue(iEntryNode, GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntry, IsExpanded), iIsExpanded);
 }
 
 void

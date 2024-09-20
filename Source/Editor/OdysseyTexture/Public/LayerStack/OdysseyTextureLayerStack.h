@@ -7,7 +7,7 @@
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "Misc/OdysseyHandle.h"
 #include "ULISInvalidTileMap.h"
-#include "OdysseyStaticImageRenderingAbility.h"
+#include "OdysseyImageRenderingAbility.h"
 
 #include <ULIS>
 
@@ -26,7 +26,6 @@ enum class EOdysseyTextureLayerStackTextureUpdateMode
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerStack
     : public UOdysseyLayerStack
-    , public FOdysseyStaticImageRenderingAbility
     , public FTickableGameObject
 {
     GENERATED_BODY()
@@ -41,7 +40,7 @@ public:
     virtual void PostLoad() override;
 
 public:
-    UFUNCTION(BlueprintPure, Category="LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|LayerStack")
     UTexture2D* GetTexture() const;
 
 public:
@@ -92,8 +91,6 @@ public:
 
 public:
     //FOdysseyImageRenderingAbility overrides
-    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const override;
     virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
 
 private:

@@ -6,6 +6,8 @@
 #include "CoreMinimal.h"
 #include "OdysseyPerformanceMode.h"
 #include "OdysseyMediaProvider.h"
+#include "Image/OdysseyBlendingMode.h"
+#include "OdysseyImageRenderingAbility.h"
 #include "OdysseyLayer.generated.h"
 
 class UOdysseyLayerStack;
@@ -17,9 +19,10 @@ enum  class  EGetLayerChildrenMethod : uint8
     BreadthFirst
 };
 
-UCLASS(Abstract, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
+UCLASS(Abstract, HideDropdown, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYLAYERSTACK_API UOdysseyLayer
 	: public UObject
+	, public FOdysseyImageRenderingAbility
 {
     GENERATED_BODY()
 
@@ -44,15 +47,15 @@ public:
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsLockedChanged, UOdysseyLayer*)
 
-    /* IsExpandedChanged
+    /* DisplayChildrenChanged
      * - concerned Child 
      */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsExpandedChanged, UOdysseyLayer*);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayChildrenChanged, UOdysseyLayer*);
 
-    /* IsCollapsedChanged
+    /* DisplayOptionsChanged
      * - concerned Child 
      */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsCollapsedChanged, UOdysseyLayer*);
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnDisplayOptionsChanged, UOdysseyLayer*);
 
     /* ParentChanged
      * - concerned Child
@@ -64,27 +67,30 @@ public:
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnChildrenChanged, UOdysseyLayer*);
 
+    /**
+     * @brief Delegate called when something changed the result of RenderImage()
+     * 
+     */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnBlendModeChanged, UOdysseyLayer*)
+
+    /**
+     * @brief Delegate called when something changed the result of RenderImage()
+     * 
+     */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnOpacityChanged, UOdysseyLayer*)
+
 
 public:
     static FOnNameChanged& OnNameChanged();
     static FOnIsActivatedChanged& OnIsActivatedChanged();
     static FOnIsLockedChanged& OnIsLockedChanged();
-    static FOnIsExpandedChanged& OnIsExpandedChanged();
-    static FOnIsCollapsedChanged& OnIsCollapsedChanged();
+    static FOnDisplayChildrenChanged& OnDisplayChildrenChanged();
+    static FOnDisplayOptionsChanged& OnDisplayOptionsChanged();
     static FOnParentChanged& OnParentChanged();
     static FOnChildrenChanged& OnChildrenChanged();
     static FSimpleMulticastDelegate& OnMediaChanged();
-    
-public:
-    // Events
-
-    /**
-	 * @brief Called when the node has been created by the given LayerStack
-	 *
-	 */
-    UFUNCTION(BlueprintNativeEvent, Category = "LayerStack")
-    void OnCreated();
-    virtual void OnCreated_Implementation();
+    static FOnBlendModeChanged& OnBlendModeChanged();
+    static FOnOpacityChanged& OnOpacityChanged();
 
 public:
     // API
@@ -95,7 +101,7 @@ public:
      * @param Layer
      * @return int
      */
-    UFUNCTION(BlueprintPure, Category = "LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     UOdysseyLayer* GetParent() const;
 
     /**
@@ -104,7 +110,7 @@ public:
      * @param Layer
      * @return int
      */
-    UFUNCTION(BlueprintPure, Category = "LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     TArray<UOdysseyLayer*> GetParents() const;
 
     /**
@@ -113,7 +119,7 @@ public:
      * @param Layer
      * @return int
      */
-    UFUNCTION(BlueprintPure, Category = "LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     const TArray<UOdysseyLayer*>& GetChildren() const;
 
     /**
@@ -122,7 +128,7 @@ public:
      * @param Layer
      * @return int
      */
-    UFUNCTION(BlueprintPure, Category = "LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     TArray<UOdysseyLayer*> GetChildrenRecursively(EGetLayerChildrenMethod Method = EGetLayerChildrenMethod::DepthFirst) const;
 
     /**
@@ -131,7 +137,7 @@ public:
      * @param Layer
      * @return int
      */
-    UFUNCTION(BlueprintPure, Category = "LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     int GetIndexInParent() const;
 
     /**
@@ -141,7 +147,7 @@ public:
      * @param ParentLayer
      * @return bool
      */
-    UFUNCTION(BlueprintPure, Category = "LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool IsChildOf(UOdysseyLayer* Layer) const;
 
     /**
@@ -150,7 +156,7 @@ public:
      * 
      * @return TSet<UClass*> 
      */
-    UFUNCTION(BlueprintPure, Category = "LayerStack" )
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer" )
     virtual TSet<UClass*> GetMergeDefaultLayerTypes() const;
 
     /**
@@ -159,18 +165,15 @@ public:
      * 
      * @return TSet<UClass*> 
      */
-    UFUNCTION(BlueprintPure, Category = "LayerStack" )
-    virtual TSet<UClass*> GetMergeLayerTypesFromTypes(TSet<UClass*> iLayerTypes) const;
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer" )
+    virtual TSet<UClass*> GetMergeLayerTypesFromTypes(TSet<UClass*> LayerTypes) const;
 
     /**
      * @brief Merges the given layers into this layer
      * Only works with Layer class being a child of classes returned by GetMergeLayerTypes()
      */
-    UFUNCTION(BlueprintCallable, Category = "LayerStack")
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers);
-    
-    UFUNCTION(BlueprintCallable, Category="LayerStack")
-    void SetIsLocked(bool Value);
 
 public:
     // Getters
@@ -178,12 +181,19 @@ public:
 	 * @brief Returns the topmost parent of this node
 	 *
 	 */
-    UFUNCTION(BlueprintPure, Category="LayerStack")
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     UOdysseyLayerStack* GetLayerStack() const;
 
-    UFUNCTION(BlueprintPure, Category="LayerStack")
-    bool GetIsLocked(bool IgnoreParentState = false) const;
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
+    bool IsActivatedRecursively() const;
 
+    UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
+    bool IsLockedRecursively() const;
+
+public:
+	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
+	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
+	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
 
 protected:
@@ -191,12 +201,14 @@ protected:
     virtual void NameChanged();
     virtual void IsActivatedChanged();
     virtual void IsLockedChanged();
-    virtual void IsExpandedChanged();
-    virtual void IsCollapsedChanged();
+    virtual void DisplayChildrenChanged();
+    virtual void DisplayOptionsChanged();
     virtual void ParentChanged();
     virtual void ChildrenChanged();
+    virtual void OpacityChanged(bool iIsInteractive);
+    virtual void BlendModeChanged();
 
-    virtual void PropertyChanged(const FName& iPropertyName);
+    virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive);
 
 public:
     // UObject overrides
@@ -205,47 +217,74 @@ public:
 
 public:
     //Default properties
-    UPROPERTY(EditDefaultsOnly, Category="Layer")
+    UPROPERTY(EditDefaultsOnly, Category="Odyssey|Layer")
     FText LayerTypeName = FText::FromString(TEXT("Unnamed Layer Type"));
 
-    UPROPERTY(EditDefaultsOnly, Category="Layer")
+    UPROPERTY(EditDefaultsOnly, Category="Odyssey|Layer")
     FText DefaultName = FText::FromString(TEXT("Layer"));
 
-    UPROPERTY(EditDefaultsOnly, Category="Layer")
+    UPROPERTY(EditDefaultsOnly, Category="Odyssey|Layer")
 	FText Description = FText::FromString(TEXT(""));
 
-    //UPROPERTY(EditDefaultsOnly, Category="Layer")
+    //UPROPERTY(EditDefaultsOnly, Category="Odyssey|Layer")
     FSlateIcon Icon;
 
-    //UPROPERTY(EditDefaultsOnly, Category="Layer")
+    //UPROPERTY(EditDefaultsOnly, Category="Odyssey|Layer")
     FSlateIcon IconExpanded;
     
     //Defaults Properties
-    UPROPERTY(EditDefaultsOnly, Category="Layer")
+    UPROPERTY(EditDefaultsOnly, Category="Odyssey|Layer")
 	bool CanHaveChildren = false;
-
-protected:
-    //Instance properties (protected)
-    UPROPERTY(EditInstanceOnly, Category="LayerStack|Layer")
-    bool IsLocked = false;
-
-public:
-    //Instance properties
-    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="LayerStack|Layer")
-    FText Name;
-
-    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="LayerStack|Layer")
-    bool IsActivated = true;
-
-    UPROPERTY(config, BlueprintReadWrite, Category="LayerStack|Layer", NonTransactional)
-    bool IsExpanded = true; //Displays children or not
-
-    UPROPERTY(config, BlueprintReadWrite, Category="LayerStack|Layer", NonTransactional)
-    bool IsCollapsed = false; //Is it in "small" mode (hiding some options)
 
     UPROPERTY()
     UOdysseyLayer* Parent;
 
     UPROPERTY()
     TArray<UOdysseyLayer*> Children;
+
+private:
+    //Instance properties
+    UFUNCTION(BlueprintSetter)
+    void NameBlueprintSetter(FText Value);
+
+    UFUNCTION(BlueprintSetter)
+    void IsActivatedBlueprintSetter(bool Value);
+
+    UFUNCTION(BlueprintSetter)
+    void IsLockedBlueprintSetter(bool Value);
+
+    UFUNCTION(BlueprintSetter)
+    void DisplayChildrenBlueprintSetter(bool Value);
+
+    UFUNCTION(BlueprintSetter)
+    void DisplayOptionsBlueprintSetter(bool Value);
+
+    UFUNCTION(BlueprintSetter)
+	void BlendModeBlueprintSetter(EOdysseyBlendingMode Value);
+
+    UFUNCTION(BlueprintSetter)
+    void OpacityBlueprintSetter(float Value);
+
+public:
+    //Instance properties
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=NameBlueprintSetter)
+    FText Name;
+
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=IsActivatedBlueprintSetter)
+    bool IsActivated = true;
+
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=IsLockedBlueprintSetter)
+    bool IsLocked = false;
+
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=DisplayChildrenBlueprintSetter)
+    bool DisplayChildren = true;
+
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=DisplayOptionsBlueprintSetter)
+    bool DisplayOptions = true;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=BlendModeBlueprintSetter)
+	EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=OpacityBlueprintSetter)
+    float Opacity = 1.0f;
 };

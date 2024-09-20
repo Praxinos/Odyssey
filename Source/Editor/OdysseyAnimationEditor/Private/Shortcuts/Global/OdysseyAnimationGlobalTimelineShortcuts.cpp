@@ -6,7 +6,6 @@
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyAnimation.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimationEditorUserSettings.h"
@@ -156,7 +155,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextFrame()
         return;
 
     int currentFrame = animation->CurrentFrame + 1;
-    FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", currentFrame);
+    FOdysseyObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), currentFrame);
 }
 
 void
@@ -174,7 +173,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToPreviousFrame()
     if (currentFrame < 0)
         return;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", currentFrame);
+    FOdysseyObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), currentFrame);
 }
 
 void
@@ -196,12 +195,11 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextCell()
     if (!currentLayer)
         return;
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = currentLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return;
+	if (currentLayer->GetCells().IsEmpty())
+		return;
 
     int currentFrame = animation->CurrentFrame;
-    FInt32Range frameRange = cellsContainer->GetFrameRange();
+    FInt32Range frameRange = currentLayer->GetFrameRange();
     if (currentFrame > frameRange.GetUpperBoundValue())
         return;
 
@@ -212,15 +210,15 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextCell()
     }
     else
     {
-        cellIndex = cellsContainer->GetCellIndexAtFrame(currentFrame);
-        if (cellIndex == INDEX_NONE || cellIndex == cellsContainer->GetCells().Num() - 1)
+        UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(currentFrame);
+        if (!cell || cell == currentLayer->GetCells().Last())
             return;
         
-        cellIndex++;
+        cellIndex = cell->IndexInLayer + 1;
     }
 
-    int nextCellFrame = cellsContainer->GetCellFrame(cellsContainer->GetCells()[cellIndex]);
-    FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", nextCellFrame);
+	UOdysseyAnimationCell* nextCell = currentLayer->GetCells()[cellIndex];
+    FOdysseyObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), nextCell->GetFrameRange().GetLowerBoundValue());
 }
 
 void
@@ -242,31 +240,30 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToPreviousCell()
     if (!currentLayer)
         return;
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = currentLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return;
+	if (currentLayer->GetCells().IsEmpty())
+		return;
 
     int currentFrame = animation->CurrentFrame;
-    FInt32Range frameRange = cellsContainer->GetFrameRange();
+    FInt32Range frameRange = currentLayer->GetFrameRange();
     if (currentFrame < frameRange.GetLowerBoundValue())
         return;
 
     int cellIndex = INDEX_NONE;
     if (currentFrame > frameRange.GetUpperBoundValue())
     {
-        cellIndex = cellsContainer->GetCells().Num() - 1;
+        cellIndex = currentLayer->GetCells().Num() - 1;
     }
     else
     {
-        cellIndex = cellsContainer->GetCellIndexAtFrame(currentFrame);
-        if (cellIndex == INDEX_NONE || cellIndex == 0)
+        UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(currentFrame);
+        if (!cell || cell == currentLayer->GetCells()[0])
             return;
         
-        cellIndex--;
+        cellIndex = cell->IndexInLayer - 1;
     }
 
-    int previousCellFrame = cellsContainer->GetCellFrame(cellsContainer->GetCells()[cellIndex]);
-    FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", previousCellFrame);
+    UOdysseyAnimationCell* prevCell = currentLayer->GetCells()[cellIndex];
+    FOdysseyObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), prevCell->GetFrameRange().GetLowerBoundValue());
 }
 
 void
@@ -281,7 +278,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToAnimationFirstFrame()
         return;
 
     FInt32Range frameRange = animation->GetFrameRange();
-    FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", frameRange.GetLowerBoundValue());
+    FOdysseyObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frameRange.GetLowerBoundValue());
 }
 
 void
@@ -296,7 +293,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToAnimationLastFrame()
         return;
 
     FInt32Range frameRange = animation->GetFrameRange();
-    FOdysseyObjectEditorUtils::SetPropertyValue(animation, "CurrentFrame", frameRange.GetUpperBoundValue());
+    FOdysseyObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frameRange.GetUpperBoundValue());
 }
 
 void
@@ -366,7 +363,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_ActivateLooping()
     UOdysseyAnimationPlayer* player = extension->Player();
     if (!player)
         return;
-    FOdysseyObjectEditorUtils::SetPropertyValue(player, "IsLooping", true);
+    FOdysseyObjectEditorUtils::SetPropertyValue(player, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping), true);
 }
 
 void
@@ -379,7 +376,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_InactivateLooping()
     UOdysseyAnimationPlayer* player = extension->Player();
     if (!player)
         return;
-    FOdysseyObjectEditorUtils::SetPropertyValue(player, "IsLooping", false);
+    FOdysseyObjectEditorUtils::SetPropertyValue(player, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping), false);
 }
 
 void
@@ -392,7 +389,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_ToggleLooping()
     UOdysseyAnimationPlayer* player = extension->Player();
     if (!player)
         return;
-    FOdysseyObjectEditorUtils::SetPropertyValue(player, "IsLooping", !player->IsLooping);
+    FOdysseyObjectEditorUtils::SetPropertyValue(player, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping), !player->IsLooping);
 }
 
 void

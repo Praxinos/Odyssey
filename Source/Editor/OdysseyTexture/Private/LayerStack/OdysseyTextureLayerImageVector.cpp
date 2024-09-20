@@ -13,7 +13,6 @@
 #include "LayerStack/OdysseyTextureLayerImageVectorImageRenderer.h"
 #include "OdysseyTextureLayerImageVectorImport.h"
 #include "OdysseyTextureLayerImageVectorExport.h"
-#include "OdysseyLayerFunctionLibrary.h"
 // from module OdysseyVector
 #include "Import/v1/OdysseyVectorImport.h"
 #include "Import/v2/OdysseyVectorImport.h"
@@ -23,20 +22,6 @@
 #include "blend2d.h"
 
 #define LOCTEXT_NAMESPACE "Texture"
-
-UOdysseyTextureLayerImageVector::FOnBlendModeChanged&
-UOdysseyTextureLayerImageVector::OnBlendModeChanged()
-{
-    static FOnBlendModeChanged onBlendModeChanged;
-    return onBlendModeChanged;
-}
-
-UOdysseyTextureLayerImageVector::FOnOpacityChanged&
-UOdysseyTextureLayerImageVector::OnOpacityChanged()
-{
-    static FOnOpacityChanged onOpacityChanged;
-    return onOpacityChanged;
-}
 
 UOdysseyTextureLayerImageVector::~UOdysseyTextureLayerImageVector()
 {
@@ -74,8 +59,8 @@ UOdysseyTextureLayerImageVector::GetEngine()
 FOdysseyMediaProvider
 UOdysseyTextureLayerImageVector::GetMediaProvider(uint32 iFrameIndex) const
 {
-    bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(this);
-    bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(this);
+    bool isActive = IsActivatedRecursively();
+    bool isLocked = IsLockedRecursively();
 
     FOdysseyMediaProvider mediaProvider;
     mediaProvider.IsLocked(!isActive || isLocked);
@@ -86,8 +71,13 @@ UOdysseyTextureLayerImageVector::GetMediaProvider(uint32 iFrameIndex) const
 }
 
 void
-UOdysseyTextureLayerImageVector::OnCreated_Implementation()
+UOdysseyTextureLayerImageVector::PostInitProperties()
 {
+    Super::PostInitProperties();
+	
+	if (GetFlags() & RF_ClassDefaultObject)
+		return;
+
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
     if(!layerStack)
         return;
@@ -100,19 +90,10 @@ UOdysseyTextureLayerImageVector::OnCreated_Implementation()
     //let's ensure the format has alpha, so add alpha channel of needed
     format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
 
-    
-
+    mVectorBlockId = FGuid::NewGuid();
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
     mVectorBlock->Init(mVectorBlockId, mEngine, Width, Height, format);
     mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
-}
-
-void
-UOdysseyTextureLayerImageVector::PostInitProperties()
-{
-    Super::PostInitProperties();
-
-    mVectorBlockId = FGuid::NewGuid();
 }
 
 void
@@ -211,17 +192,13 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 }
 
 void
-UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName)
+UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
 {
-    Super::PropertyChanged(iPropertyName);
-    if(iPropertyName == "IsWireframe")
+    Super::PropertyChanged(iPropertyName, iMemberPropertyName, iIsInteractive);
+    if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsWireframe))
         IsWireframeChanged();
-    if(iPropertyName == "IsColored")
+    if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsColored))
         IsColoredChanged();
-    if (iPropertyName == "BlendMode")
-        BlendModeChanged();
-    if (iPropertyName == "Opacity")
-        OpacityChanged();
 }
 
 void
@@ -244,24 +221,8 @@ UOdysseyTextureLayerImageVector::IsColoredChanged()
     ImageRenderingChanged();
 }
 
-void
-UOdysseyTextureLayerImageVector::OpacityChanged()
-{
-    OnOpacityChanged().Broadcast(this);
-    
-    ImageRenderingChanged();
-}
-
-void
-UOdysseyTextureLayerImageVector::BlendModeChanged()
-{
-    OnBlendModeChanged().Broadcast(this);
-    
-    ImageRenderingChanged();
-}
-
 TSharedPtr<IOdysseyImageRenderer>
-UOdysseyTextureLayerImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter) const
+UOdysseyTextureLayerImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
@@ -270,21 +231,9 @@ UOdysseyTextureLayerImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRend
 }
 
 TArray<FGuid>
-UOdysseyTextureLayerImageVector::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const
+UOdysseyTextureLayerImageVector::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const
 {
     return { GetImageRenderingId() };
-}
-
-::ULIS::eBlendMode
-UOdysseyTextureLayerImageVector::GetImageRenderingBlendMode() const
-{
-    return (::ULIS::eBlendMode)BlendMode;
-}
-
-float
-UOdysseyTextureLayerImageVector::GetImageRenderingOpacity() const
-{
-    return Opacity;
 }
 
 void
@@ -318,6 +267,18 @@ UOdysseyTextureLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
     destinationScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
     
     mEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
+}
+
+void
+UOdysseyTextureLayerImageVector::IsWireframeBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsWireframe), Value);
+}
+
+void
+UOdysseyTextureLayerImageVector::IsColoredBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsColored), Value);
 }
 
 #undef LOCTEXT_NAMESPACE

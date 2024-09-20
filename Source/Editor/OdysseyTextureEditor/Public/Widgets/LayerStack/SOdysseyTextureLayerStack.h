@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Widgets/SOdysseyLayerStackTreeView.h"
+class SOdysseyTextureLayerStackTreeView;
 
 /**
  * Implements the Texture Layer stack widget
@@ -25,13 +25,14 @@ public:
     ~SOdysseyTextureLayerStack();
     SOdysseyTextureLayerStack();
     
-    void Construct(const FArguments& InArgs);
+    void Construct(const FArguments& InArgs, FOdysseyTextureEditorExtension* iTextureExtension);
 
 private:
     TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
     void RebuildWidgets();
 
 private:
+    FOdysseyTextureEditorExtension* mExtension;
     TSlateAttribute<UOdysseyLayerStack*> mLayerStack;
-    TSharedPtr<SOdysseyLayerStackTreeView> mTreeView;
+    TSharedPtr<SOdysseyTextureLayerStackTreeView> mTreeView;
 };

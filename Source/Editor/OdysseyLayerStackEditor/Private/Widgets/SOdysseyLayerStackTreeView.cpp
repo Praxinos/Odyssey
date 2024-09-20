@@ -20,8 +20,8 @@ SOdysseyLayerStackTreeView::~SOdysseyLayerStackTreeView()
 {
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     UOdysseyLayerStack::OnHierarchyChanged().RemoveAll(this);
-	UOdysseyLayer::OnIsExpandedChanged().RemoveAll(this);
-    UOdysseyLayer::OnIsCollapsedChanged().RemoveAll(this);
+	UOdysseyLayer::OnDisplayChildrenChanged().RemoveAll(this);
+    UOdysseyLayer::OnDisplayOptionsChanged().RemoveAll(this);
 }
 
 SOdysseyLayerStackTreeView::SOdysseyLayerStackTreeView()
@@ -31,8 +31,8 @@ SOdysseyLayerStackTreeView::SOdysseyLayerStackTreeView()
 {
     UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnCurrentLayerChanged);
     UOdysseyLayerStack::OnHierarchyChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnLayerStackHierarchyChanged);
-	UOdysseyLayer::OnIsExpandedChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnLayerIsExpandedChanged);
-    UOdysseyLayer::OnIsCollapsedChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnLayerIsCollapsedChanged);
+	UOdysseyLayer::OnDisplayChildrenChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnLayerDisplayChildrenChanged);
+    UOdysseyLayer::OnDisplayOptionsChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnLayerDisplayOptionsChanged);
 }
 
 //CONSTRUCTION/DESTRUCTION-----------------------------------------------
@@ -72,8 +72,8 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
                 .ColorAndOpacity(FSlateColor::UseForeground())
                 .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Locked16"))
             ]
-        + SHeaderRow::Column("IsCollapsed")
-            .ToolTipText(LOCTEXT("header-row.is-layer-collapsed.tooltip", "Collapse / Uncollapse Layer"))
+        + SHeaderRow::Column("DisplayOptions")
+            .ToolTipText(LOCTEXT("header-row.display-options.tooltip", "Display / Hide Layer's Options"))
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)
             .VAlignHeader(VAlign_Center)
@@ -341,7 +341,7 @@ SOdysseyLayerStackTreeView::RefreshAllExpansionStates()
         if(!layer )
             continue;
 
-        SetItemExpansion(layer, layer->IsExpanded);
+        SetItemExpansion(layer, layer->DisplayChildren);
     }
 }
 
@@ -369,7 +369,7 @@ SOdysseyLayerStackTreeView::SetCurrentLayerFromSelectorItem()
 
     if (!SelectorItem)
     {
-        FOdysseyObjectEditorUtils::SetPropertyValue(mLayerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(mLayerStack->GetRootLayers()[0]));
+        FOdysseyObjectEditorUtils::SetPropertyValue(mLayerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), mLayerStack->GetRootLayers()[0]);
         return;
     }
 
@@ -380,7 +380,7 @@ SOdysseyLayerStackTreeView::SetCurrentLayerFromSelectorItem()
     if (SelectorItem == mLayerStack->CurrentLayer)
         return;
         
-    FOdysseyObjectEditorUtils::SetPropertyValue(mLayerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(SelectorItem));
+    FOdysseyObjectEditorUtils::SetPropertyValue(mLayerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), SelectorItem);
 }
 
 void
@@ -489,7 +489,7 @@ SOdysseyLayerStackTreeView::ExtendContextMenu()
 }
 
 void
-SOdysseyLayerStackTreeView::OnLayerIsExpandedChanged(UOdysseyLayer* iLayerNode)
+SOdysseyLayerStackTreeView::OnLayerDisplayChildrenChanged(UOdysseyLayer* iLayerNode)
 {
     if ( !mLayerStack )
         return;
@@ -497,14 +497,14 @@ SOdysseyLayerStackTreeView::OnLayerIsExpandedChanged(UOdysseyLayer* iLayerNode)
     if (iLayerNode->GetLayerStack() != mLayerStack )
         return;
     
-    if(IsItemExpanded(Cast<UOdysseyLayer>(iLayerNode)) == iLayerNode->IsExpanded )
+    if(IsItemExpanded(Cast<UOdysseyLayer>(iLayerNode)) == iLayerNode->DisplayChildren )
         return;
 
-    SetItemExpansion(Cast<UOdysseyLayer>(iLayerNode), iLayerNode->IsExpanded);
+    SetItemExpansion(Cast<UOdysseyLayer>(iLayerNode), iLayerNode->DisplayChildren);
 }
 
 void
-SOdysseyLayerStackTreeView::OnLayerIsCollapsedChanged(UOdysseyLayer* iLayerNode)
+SOdysseyLayerStackTreeView::OnLayerDisplayOptionsChanged(UOdysseyLayer* iLayerNode)
 {   
     if ( !mLayerStack )
         return;
@@ -518,7 +518,7 @@ SOdysseyLayerStackTreeView::OnLayerIsCollapsedChanged(UOdysseyLayer* iLayerNode)
 void
 SOdysseyLayerStackTreeView::OnExpansionChanged( UOdysseyLayer* iLayerNode, bool iIsExpanded )
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(iLayerNode, "IsExpanded", iIsExpanded);
+    FOdysseyObjectEditorUtils::SetPropertyValue(iLayerNode, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren), iIsExpanded);
 }
 
 void

@@ -23,21 +23,21 @@ public:
     /////////////////////////////////////////////////////
     // Enable Overrides
     /** Enable Modifier Size Override. */
-    UPROPERTY( EditAnywhere, Category = "Modifiers", meta=(InlineEditConditionToggle) )
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_Size;
 
     /** Enable Modifier Flow Override. */
-    UPROPERTY( EditAnywhere, Category = "Modifiers", meta=(InlineEditConditionToggle) )
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_Flow;
 
 
     /////////////////////////////////////////////////////
     // Overrides Values
     /** Modifier Size Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Modifiers", meta = ( ClampMin = "1", ClampMax = "1000", UIMin = "1", UIMax = "1000", SliderExponent = "1", editcondition = "bOverride_Size" ) )
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( ClampMin = "1", ClampMax = "1000", UIMin = "1", UIMax = "1000", SliderExponent = "1", editcondition = "bOverride_Size" ) )
     float  Size;
 
     /** Modifier Flow Override Value. */
-    UPROPERTY( EditAnywhere, Category = "Modifiers", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", SliderExponent = "1", editcondition = "bOverride_Flow" ) )
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( ClampMin = "0", ClampMax = "100", UIMin = "0", UIMax = "100", SliderExponent = "1", editcondition = "bOverride_Flow" ) )
     float  Flow;
 };

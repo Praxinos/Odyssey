@@ -9,25 +9,24 @@
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"
 
-FOdysseyAnimationCellImageRasterImageRenderer::FOdysseyAnimationCellImageRasterImageRenderer(TSharedRef<const FOdysseyAnimationCellImageRaster> iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
+FOdysseyAnimationCellImageRasterImageRenderer::FOdysseyAnimationCellImageRasterImageRenderer(const UOdysseyAnimationCellImageRaster* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mCell(iCell)
     , mBlock(nullptr)
 {
-    UOdysseyAnimationLayer* layer = mCell->GetLayer();
-    UOdysseyAnimation* animation = layer->GetAnimation();
+    UOdysseyAnimation* animation = mCell->GetAnimation();
 
-    FVector2D outOfPegsPan = mCell->OutOfPegsPan();
-    float outOfPegsRotation = mCell->OutOfPegsRotation();
-    float outOfPegsZoom = mCell->OutOfPegsZoom();
+    FVector2D outOfPegsPan = mCell->OutOfPegs.Pan;
+    float outOfPegsRotation = mCell->OutOfPegs.Rotation;
+    float outOfPegsZoom = mCell->OutOfPegs.Zoom;
 
     if (mCell->IsOutOfPegs())
     {
-        mOutOfPegsTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
+        mOutOfPegsTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->GetWidth() / 2.f, animation->GetHeight() / 2.f)
             * ::ULIS::FMat3F::MakeTranslationMatrix(outOfPegsPan.X, outOfPegsPan.Y)
             * ::ULIS::FMat3F::MakeRotationMatrix(FMath::DegreesToRadians(outOfPegsRotation))
-            * ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom, outOfPegsZoom)
-            * ::ULIS::FMat3F::MakeTranslationMatrix( animation->Width() / -2.f, animation->Height() / -2.f);
+            * ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom / 100.f, outOfPegsZoom / 100.f)
+            * ::ULIS::FMat3F::MakeTranslationMatrix( animation->GetWidth() / -2.f, animation->GetHeight() / -2.f);
     }
 }
     
@@ -83,4 +82,19 @@ FOdysseyAnimationCellImageRasterImageRenderer::Copy(const FOdysseyImageRendererC
         params.mTransform = mOutOfPegsTransform;
 
     return ConvertAndCopy(mBlock, ::ULIS::FVec2I(0), params, iWaitList);
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------- FGCObject implementation
+
+void
+FOdysseyAnimationCellImageRasterImageRenderer::AddReferencedObjects(FReferenceCollector& Collector)
+{
+	Collector.AddReferencedObject(mCell);
+}
+
+FString
+FOdysseyAnimationCellImageRasterImageRenderer::GetReferencerName() const
+{
+    return "FOdysseyAnimationCellImageRasterImageRenderer";
 }

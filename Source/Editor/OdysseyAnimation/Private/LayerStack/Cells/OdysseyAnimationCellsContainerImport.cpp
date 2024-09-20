@@ -1,10 +1,9 @@
 #include "LayerStack/Cells/OdysseyAnimationCellsContainerImport.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "OdysseyFile.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 
 bool
-FOdysseyAnimationCellsContainerImport::Read( FOdysseyAnimationCellsContainer* iAnimationCellsContainer
+FOdysseyAnimationCellsContainerImport::Read( UOdysseyAnimationLayer* iAnimationLayer
                                             , FArchive &Ar )
 {
     uint64 start = Ar.Tell();
@@ -24,7 +23,7 @@ FOdysseyAnimationCellsContainerImport::Read( FOdysseyAnimationCellsContainer* iA
         case FOdysseyFile::Animation::CHUNK_CELLSCONTAINER :
             //UE_LOG(LogTemp, Warning, TEXT("CHUNK_CELLSCONTAINER") );
 
-            FOdysseyAnimationCellsContainerImport::Read( iAnimationCellsContainer, Ar, chunkEnd );
+            FOdysseyAnimationCellsContainerImport::Read( iAnimationLayer, Ar, chunkEnd );
         break;
 
         default:
@@ -32,25 +31,26 @@ FOdysseyAnimationCellsContainerImport::Read( FOdysseyAnimationCellsContainer* iA
             Ar.Seek( start );
             return false;
     }
+	iAnimationLayer->UpdateCellsIndexInLayer();
     return true;
 }
 
 void
-FOdysseyAnimationCellsContainerImport::Read( FOdysseyAnimationCellsContainer* iAnimationCellsContainer
+FOdysseyAnimationCellsContainerImport::Read( UOdysseyAnimationLayer* iAnimationLayer
                                             , FArchive &Ar
                                             , uint64 iChunkEnd )
 {
-    iAnimationCellsContainer->mCells.Empty();
+    iAnimationLayer->Cells.Empty();
 
     FOdysseyFile::ReadChunks( iChunkEnd
                               , Ar
-                              , [iAnimationCellsContainer](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+                              , [iAnimationLayer](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
             switch ( iChunkID )
             {
                 case FOdysseyFile::Animation::CHUNK_CELLSCONTAINER_OFFSET :
                 {
-                    Ar << iAnimationCellsContainer->mOffset;
+                    Ar << iAnimationLayer->CellsOffset;
                 }
                 break;
 
@@ -58,23 +58,32 @@ FOdysseyAnimationCellsContainerImport::Read( FOdysseyAnimationCellsContainer* iA
                 case FOdysseyFile::Animation::CHUNK_CELLSCONTAINER_CELLS :
                 break;
 
-                
                 case FOdysseyFile::Animation::CHUNK_CELLSCONTAINER_CELLTYPE :
                 {
                     FName cellType;
                     Ar << cellType;
 
-                    //Create a cell of the given type
-                    TSharedPtr<FOdysseyAnimationCell> cell = iAnimationCellsContainer->mCreateCell.Execute(cellType, true);
-                    checkf(!!cell, TEXT("Failed to create a cell of the given type"));
-                    iAnimationCellsContainer->mCells.Add(cell);
+					if (cellType == TEXT("FOdysseyAnimationCellImageRaster"))
+					{
+						UOdysseyAnimationCellImageRaster* cell = NewObject<UOdysseyAnimationCellImageRaster>(iAnimationLayer, UOdysseyAnimationCellImageRaster::StaticClass(), NAME_None, RF_Public | RF_Transactional);
+                    	iAnimationLayer->Cells.Add(cell);
+					}
+					else if (cellType == TEXT("FOdysseyAnimationCellImageVector"))
+					{
+						UOdysseyAnimationCellImageVector* cell = NewObject<UOdysseyAnimationCellImageVector>(iAnimationLayer, UOdysseyAnimationCellImageVector::StaticClass(), NAME_None, RF_Public | RF_Transactional);
+						iAnimationLayer->Cells.Add(cell);
+					}
+					else if (cellType == TEXT("FOdysseyAnimationCellImageStagger"))
+					{
+						UOdysseyAnimationCellImageStagger* cell = NewObject<UOdysseyAnimationCellImageStagger>(iAnimationLayer, UOdysseyAnimationCellImageStagger::StaticClass(), NAME_None, RF_Public | RF_Transactional);
+						iAnimationLayer->Cells.Add(cell);
+					}
                 }
                 break;
-
                 
                 case FOdysseyFile::Animation::CHUNK_CELLSCONTAINER_CELL :
                 {
-                    iAnimationCellsContainer->mCells.Last()->Serialize(Ar);
+                    iAnimationLayer->Cells.Last()->OldSerialize(Ar);
                 }
                 break;
 

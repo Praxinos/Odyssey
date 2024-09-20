@@ -5,7 +5,6 @@
 
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
-#include "LayerStack/LightTable/OdysseyAnimationLightTableMutator.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SSlider.h"
 #include "OdysseyLayerStack.h"
@@ -53,20 +52,6 @@ SOdysseyAnimationLightTable::Construct(const FArguments& InArgs, FOdysseyAnimati
 	RequestRebuild();
 }
 
-TSharedPtr<FOdysseyAnimationLightTable>
-SOdysseyAnimationLightTable::GetLightTable() const
-{
-	UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
-	if (!layerStack)
-		return nullptr;
-
-	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
-	if (!currentLayer)
-		return nullptr;
-
-	return currentLayer->GetLightTable();
-}
-
 void
 SOdysseyAnimationLightTable::Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime )
 {
@@ -87,32 +72,27 @@ void
 SOdysseyAnimationLightTable::Rebuild()
 {
 	mSlidersBox->ClearChildren();
-
-	TSharedPtr<FOdysseyAnimationLightTable> lightTable = GetLightTable();
-	if (!lightTable)
-		return;
-
-	for (int i = -lightTable->GetRange(); i <= -1 ; i++)
+	for (int i = 9; i >= 0 ; i--)
     {
 		mSlidersBox->AddSlot()
 		[
-			GenerateKeyWidget(i)
+			GeneratePreviousKeyWidget(i)
 		];
 	}
 
-	for (int i = 1; i <= lightTable->GetRange(); i++)
+	for (int i = 0; i <= 9; i++)
     {
 		mSlidersBox->AddSlot()
 		[
-			GenerateKeyWidget(i)
+			GenerateNextKeyWidget(i)
 		];
 	}
 }
 
 TSharedRef<SWidget>
-SOdysseyAnimationLightTable::GenerateKeyWidget(int iKeyIndex)
+SOdysseyAnimationLightTable::GeneratePreviousKeyWidget(int iKeyIndex)
 {
-	FText offsetText = FText::AsNumber(iKeyIndex);
+	FText offsetText = FText::AsNumber(iKeyIndex + 1);
 	return SNew(SVerticalBox)
 	+SVerticalBox::Slot()
 	.AutoHeight()
@@ -126,17 +106,48 @@ SOdysseyAnimationLightTable::GenerateKeyWidget(int iKeyIndex)
 	.HAlign(HAlign_Center)
 	[
 		SNew(SCheckBox)
-		.OnCheckStateChanged(this, &SOdysseyAnimationLightTable::OnKeyIsActivatedCheckStateChanged, iKeyIndex)
-		.IsChecked(this, &SOdysseyAnimationLightTable::GetKeyIsActivated, iKeyIndex )
+		.OnCheckStateChanged(this, &SOdysseyAnimationLightTable::OnPreviousKeyIsActivatedCheckStateChanged, iKeyIndex)
+		.IsChecked(this, &SOdysseyAnimationLightTable::GetPreviousKeyIsActivated, iKeyIndex )
 	]
 	+SVerticalBox::Slot()
 	[
 		SNew(SSlider)
 		.Orientation(Orient_Vertical)
 		.MinValue(0.f)
-		.MaxValue(1.f)
-		.OnValueChanged(this, &SOdysseyAnimationLightTable::OnKeyOpacitySliderValueChanged, iKeyIndex)
-		.Value(this, &SOdysseyAnimationLightTable::GetKeyOpacity, iKeyIndex)
+		.MaxValue(100.f)
+		.OnValueChanged(this, &SOdysseyAnimationLightTable::OnPreviousKeyOpacitySliderValueChanged, iKeyIndex)
+		.Value(this, &SOdysseyAnimationLightTable::GetPreviousKeyOpacity, iKeyIndex)
+	];
+}
+
+TSharedRef<SWidget>
+SOdysseyAnimationLightTable::GenerateNextKeyWidget(int iKeyIndex)
+{
+	FText offsetText = FText::AsNumber(iKeyIndex + 1);
+	return SNew(SVerticalBox)
+	+SVerticalBox::Slot()
+	.AutoHeight()
+	[
+		SNew(STextBlock)
+		.Text(offsetText)
+		.Justification(ETextJustify::Center)
+	]
+	+SVerticalBox::Slot()
+	.AutoHeight()
+	.HAlign(HAlign_Center)
+	[
+		SNew(SCheckBox)
+		.OnCheckStateChanged(this, &SOdysseyAnimationLightTable::OnNextKeyIsActivatedCheckStateChanged, iKeyIndex)
+		.IsChecked(this, &SOdysseyAnimationLightTable::GetNextKeyIsActivated, iKeyIndex )
+	]
+	+SVerticalBox::Slot()
+	[
+		SNew(SSlider)
+		.Orientation(Orient_Vertical)
+		.MinValue(0.f)
+		.MaxValue(100.f)
+		.OnValueChanged(this, &SOdysseyAnimationLightTable::OnNextKeyOpacitySliderValueChanged, iKeyIndex)
+		.Value(this, &SOdysseyAnimationLightTable::GetNextKeyOpacity, iKeyIndex)
 	];
 }
 
@@ -150,43 +161,121 @@ SOdysseyAnimationLightTable::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerSta
 }
 
 void
-SOdysseyAnimationLightTable::OnKeyIsActivatedCheckStateChanged( ECheckBoxState iState, int iKeyIndex )
+SOdysseyAnimationLightTable::OnPreviousKeyIsActivatedCheckStateChanged( ECheckBoxState iState, int iKeyIndex )
 {
-	TSharedPtr<FOdysseyAnimationLightTable> lightTable = GetLightTable();
-	if (!lightTable)
+	UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+	if (!layerStack)
 		return;
 
-	FOdysseyAnimationLightTableMutator mutator(lightTable);
-	mutator.SetKeyIsActivated(iKeyIndex, iState == ECheckBoxState::Checked);
-}
+	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+	if (!currentLayer)
+		return;
 
-ECheckBoxState
-SOdysseyAnimationLightTable::GetKeyIsActivated( int iKeyIndex ) const
-{
-	TSharedPtr<FOdysseyAnimationLightTable> lightTable = GetLightTable();
-	if (!lightTable)
-		return ECheckBoxState::Unchecked;
-
-	return lightTable->GetKeyIsActivated(iKeyIndex) ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+	FOdysseyAnimationLightTable lighttable = currentLayer->Lighttable;
+	lighttable.PreviousKeys[iKeyIndex].bIsActivated = iState == ECheckBoxState::Checked;
+	FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
 }
 
 void
-SOdysseyAnimationLightTable::OnKeyOpacitySliderValueChanged( float iValue, int iKeyIndex)
+SOdysseyAnimationLightTable::OnNextKeyIsActivatedCheckStateChanged( ECheckBoxState iState, int iKeyIndex )
 {
-	TSharedPtr<FOdysseyAnimationLightTable> lightTable = GetLightTable();
-	if (!lightTable)
+	UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+	if (!layerStack)
 		return;
 
-	FOdysseyAnimationLightTableMutator mutator(lightTable);
-	mutator.SetKeyOpacity(iKeyIndex, iValue);
+	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+	if (!currentLayer)
+		return;
+
+	FOdysseyAnimationLightTable lighttable = currentLayer->Lighttable;
+	lighttable.NextKeys[iKeyIndex].bIsActivated = iState == ECheckBoxState::Checked;
+	FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
+}
+
+ECheckBoxState
+SOdysseyAnimationLightTable::GetPreviousKeyIsActivated( int iKeyIndex ) const
+{
+	UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+	if (!layerStack)
+		return ECheckBoxState::Unchecked;
+
+	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+	if (!currentLayer)
+		return ECheckBoxState::Unchecked;
+
+	return currentLayer->Lighttable.PreviousKeys[iKeyIndex].bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+}
+
+ECheckBoxState
+SOdysseyAnimationLightTable::GetNextKeyIsActivated( int iKeyIndex ) const
+{
+	UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+	if (!layerStack)
+		return ECheckBoxState::Unchecked;
+
+	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+	if (!currentLayer)
+		return ECheckBoxState::Unchecked;
+
+	return currentLayer->Lighttable.NextKeys[iKeyIndex].bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+}
+
+void
+SOdysseyAnimationLightTable::OnPreviousKeyOpacitySliderValueChanged( float iValue, int iKeyIndex)
+{
+	UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+	if (!layerStack)
+		return;
+
+	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+	if (!currentLayer)
+		return;
+
+	FOdysseyAnimationLightTable lighttable = currentLayer->Lighttable;
+	lighttable.PreviousKeys[iKeyIndex].Opacity = iValue;
+	FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
+}
+
+void
+SOdysseyAnimationLightTable::OnNextKeyOpacitySliderValueChanged( float iValue, int iKeyIndex)
+{
+	UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+	if (!layerStack)
+		return;
+
+	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+	if (!currentLayer)
+		return;
+
+	FOdysseyAnimationLightTable lighttable = currentLayer->Lighttable;
+	lighttable.NextKeys[iKeyIndex].Opacity = iValue;
+	FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
 }
 
 float
-SOdysseyAnimationLightTable::GetKeyOpacity( int iKeyIndex ) const
+SOdysseyAnimationLightTable::GetPreviousKeyOpacity( int iKeyIndex ) const
 {
-	TSharedPtr<FOdysseyAnimationLightTable> lightTable = GetLightTable();
-	if (!lightTable)
+	UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+	if (!layerStack)
 		return 0.f;
 
-	return lightTable->GetKeyOpacity(iKeyIndex);
+	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+	if (!currentLayer)
+		return 0.f;
+
+	return currentLayer->Lighttable.PreviousKeys[iKeyIndex].Opacity;
+}
+
+float
+SOdysseyAnimationLightTable::GetNextKeyOpacity( int iKeyIndex ) const
+{
+	UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+	if (!layerStack)
+		return 0.f;
+
+	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
+	if (!currentLayer)
+		return 0.f;
+
+	return currentLayer->Lighttable.NextKeys[iKeyIndex].Opacity;
 }

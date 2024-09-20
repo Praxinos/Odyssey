@@ -14,23 +14,16 @@ class SEnumComboBox;
 UENUM()
 enum class EOdysseyAnimationBackgroundColor : uint8
 {
-	kTransparent UMETA(DisplayName = "Transparent"),
-	kWhite UMETA(DisplayName = "White"),
-	kNormal UMETA(DisplayName = "Purple (127, 127, 255)")
-};
-
-UENUM()
-enum class EOdysseyAnimationFormat : uint8
-{
-	kBGRA8 UMETA(DisplayName = "BGRA 8"),
-	kRGBAF UMETA(DisplayName = "RGBA F")
+	Transparent,
+	White,
+	Normal UMETA(DisplayName = "Purple (127, 127, 255)")
 };
 
 UENUM()
 enum class EOdysseyAnimationDefaultLayerType : uint8
 {
-	kRaster UMETA(DisplayName = "Raster"),
-	kVector UMETA(DisplayName = "Vector")
+	Raster,
+	Vector
 };
 
 USTRUCT()
@@ -53,16 +46,16 @@ public:
     uint32                  Height = 1080;
 
     UPROPERTY(EditAnywhere, Category="OdysseyAnimationConfiguration")
-    EOdysseyAnimationFormat   Format = EOdysseyAnimationFormat::kBGRA8;
+    EOdysseyAnimationFormat   Format = EOdysseyAnimationFormat::BGRA8;
 
     UPROPERTY(EditAnywhere, Category="OdysseyAnimationConfiguration", meta=(ClampMin=1, UIMin=1, LinearDeltaSensitivity=1) )
     float                   FramesPerSecond = 24.f;
 
     UPROPERTY(EditAnywhere, Category="OdysseyAnimationConfiguration")
-	EOdysseyAnimationBackgroundColor BackgroundColor = EOdysseyAnimationBackgroundColor::kTransparent;
+	EOdysseyAnimationBackgroundColor BackgroundColor = EOdysseyAnimationBackgroundColor::Transparent;
 
     UPROPERTY(EditAnywhere, Category="OdysseyAnimationConfiguration")
-	EOdysseyAnimationDefaultLayerType LayerType = EOdysseyAnimationDefaultLayerType::kRaster;
+	EOdysseyAnimationDefaultLayerType LayerType = EOdysseyAnimationDefaultLayerType::Raster;
 };
 
 class ODYSSEYANIMATION_API SOdysseyAnimationConfigureWindow

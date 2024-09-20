@@ -182,7 +182,7 @@ UOdysseyPainterEditorTool::BindShortcuts(FBaseToolkit* iToolkit)
 }
 
 void
-UOdysseyPainterEditorTool::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+UOdysseyPainterEditorTool::ExtendMenu( TSharedRef<FExtender> iExtender )
 {
 
 }

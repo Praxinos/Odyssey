@@ -3,7 +3,7 @@
 #include "OdysseyFile.h"
 
 bool
-FOdysseyAnimationCellImport::Read( FOdysseyAnimationCell* iAnimationCell
+FOdysseyAnimationCellImport::Read( UOdysseyAnimationCell* iAnimationCell
                                             , FArchive &Ar )
 {
     uint64 start = Ar.Tell();
@@ -35,7 +35,7 @@ FOdysseyAnimationCellImport::Read( FOdysseyAnimationCell* iAnimationCell
 }
 
 void
-FOdysseyAnimationCellImport::Read( FOdysseyAnimationCell* iAnimationCell
+FOdysseyAnimationCellImport::Read( UOdysseyAnimationCell* iAnimationCell
                                             , FArchive &Ar
                                             , uint64 iChunkEnd )
 {
@@ -47,13 +47,13 @@ FOdysseyAnimationCellImport::Read( FOdysseyAnimationCell* iAnimationCell
             {
                 case FOdysseyFile::Animation::CHUNK_CELL_LENGTH :
                 {
-                    Ar << iAnimationCell->mLength;
+                    Ar << iAnimationCell->Exposure;
                 }
                 break;
 
                 case FOdysseyFile::Animation::CHUNK_CELL_MARKID :
                 {
-                    Ar << iAnimationCell->mMarkId;
+                    Ar << iAnimationCell->Mark;
                 }
                 break;
 

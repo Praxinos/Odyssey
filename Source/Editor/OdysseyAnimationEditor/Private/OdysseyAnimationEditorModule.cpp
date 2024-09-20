@@ -46,36 +46,12 @@ FOdysseyAnimationEditorModule::CreateOdysseyAnimationEditor( UOdysseyAnimation* 
 
     TSharedPtr<FOdysseyAnimationEditorToolkit> toolkit = MakeShared<FOdysseyAnimationEditorToolkit>();
     toolkit->Initialize(iAnimation, editor);
-
-    //----- Extend the Edit menu using the FMenuBuilder API
-	TSharedPtr<FExtender> menuExtender = MakeShareable(new FExtender());
-    // Extend the Edit menu after the "Configuration" category
-	menuExtender->AddMenuExtension(
-		"Configuration",
-		EExtensionHook::After,
-		NULL,
-		FMenuExtensionDelegate::CreateRaw( editor.Get(), &FOdysseyPainterEditor::AddEditMenuEntry )
-	);
-	toolkit->AddMenuExtender( menuExtender );
-    // Rebuild the the menu bar and take into account the above extender.
-    // FOdysseyPainterEditor::AddEditMenuEntry() will then be called each time the Edit menu needs to be shown.
-	toolkit->RegenerateMenusAndToolbars();
     //-----
 
 	TSharedPtr<FOdysseyAnimationEditorSource> source = MakeShared<FOdysseyAnimationEditorSource>(iAnimation);
 	editor->SetSource(source);
 
     return toolkit.ToSharedRef();
-
-	/* TSharedPtr<FOdysseyAnimationEditor> editor = MakeShareable(new FOdysseyAnimationEditor());
-    TSharedPtr<FOdysseyAnimationEditorToolkit> toolkit = MakeShareable( new FOdysseyAnimationEditorToolkit(editor) );
-	editor->Initialize(iAnimation);
-    toolkit->Initialize();
-
-	TSharedPtr<FOdysseyAnimationEditorSource> source = MakeShared<FOdysseyAnimationEditorSource>(iAnimation);
-	editor->SetSource(source);
-
-    return toolkit.ToSharedRef(); */
 }
 
 void
@@ -91,6 +67,8 @@ FOdysseyAnimationEditorModule::StartupModule()
 	RegisterLevelEditorLayoutExtensions();
 
 	RegisterDetailCustomizations();
+
+	RegisterThumbnailRenderers();
 }
 
 void
@@ -107,6 +85,8 @@ FOdysseyAnimationEditorModule::ShutdownModule()
 	UnregisterLevelEditorLayoutExtensions();
 
 	UnregisterDetailCustomization();
+
+	UnregisterThumbnailRenderers();
 }
 
 void
@@ -150,6 +130,9 @@ void
 FOdysseyAnimationEditorModule::RegisterDetailCustomizations()
 {
 	FOdysseyAnimationEditorFlipSystem::RegisterDetailCustomization();
+	
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    PropertyModule.RegisterCustomClassLayout(UOdysseyAnimationEditorOutOfPegsTool::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(&FOdysseyAnimationEditorOutOfPegsToolDetails::MakeInstance));
 }
 
 void
@@ -201,6 +184,18 @@ FOdysseyAnimationEditorModule::UnregisterSettings()
         
     settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyAnimationEditor" );
 	settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyAnimationEditorUserSettings" );
+}
+
+void
+FOdysseyAnimationEditorModule::RegisterThumbnailRenderers()
+{
+	UThumbnailManager::Get().RegisterCustomRenderer(UOdysseyAnimationCell::StaticClass(), UOdysseyAnimationCellThumbnailRenderer::StaticClass());
+}
+
+void
+FOdysseyAnimationEditorModule::UnregisterThumbnailRenderers()
+{
+	//UThumbnailManager::Get().UnregisterCustomRenderer(UOdysseyAnimationCellImageRaster::StaticClass());
 }
 
 IMPLEMENT_MODULE( FOdysseyAnimationEditorModule, OdysseyAnimationEditor );

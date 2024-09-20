@@ -19,10 +19,7 @@ public:
 
 public:
     //Common Shortcuts
-    void Action_ConvertToRasterCell();
     void Action_CrossFade();
-
-    bool CanAction_ConvertToRasterCell();
     bool CanAction_CrossFade();
 
 private:

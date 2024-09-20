@@ -4,13 +4,14 @@
 #pragma once
 
 #include "OdysseyImageRenderer.h"
-#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+
+class UOdysseyAnimationLayer;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationLightTableImageRenderer
     : public IOdysseyImageRenderer
 {
 public:
-    FOdysseyAnimationLightTableImageRenderer(TSharedRef<const FOdysseyAnimationLightTable> iLightTable, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
+    FOdysseyAnimationLightTableImageRenderer(const UOdysseyAnimationLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
 
 public:
     virtual void Init() override;

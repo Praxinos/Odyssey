@@ -7,7 +7,7 @@
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyAnimationLayerRoot.generated.h"
 
-UCLASS()
+UCLASS(NotBlueprintType, HideDropdown)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerRoot
 	: public UOdysseyAnimationLayer
 {
@@ -15,6 +15,4 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayerRoot
 
 public:
     UOdysseyAnimationLayerRoot();
-
-    virtual TSharedPtr<FOdysseyAnimationCellsContainer> GetCellsContainer() const override { return nullptr; }
 };

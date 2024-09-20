@@ -19,7 +19,7 @@ enum class eMouseEventName : uint8
     MouseUp    = 3
 };
 
-UCLASS(Abstract)
+UCLASS(Abstract, HideDropdown)
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdysseyPainterEditorTool
 {
     public:
@@ -59,6 +59,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey );
         virtual void Commit();
         virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
+    	virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
         virtual void ExtendContextMenu( FMenuBuilder& menu );
         virtual void BindShortcuts( FBaseToolkit* iToolkit );
         virtual EMouseCursor::Type GetMouseCursor() const override;
@@ -148,6 +149,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         eMouseEventName mPreviousMouseEvent; // filter faulty stylus events
 
     public:
-        //UPROPERTY( EditAnywhere, Category = Behavior )
+        //UPROPERTY( EditAnywhere, Category=Behavior )
         //bool RestrictToSelectedObjects;
 };

@@ -74,20 +74,14 @@ public:
     virtual void PropertyChanged(const FName& iPropertyName) override;
 
 protected:
-    UPROPERTY(EditAnywhere, Category = "Shape")
+    UPROPERTY(EditAnywhere, Category="Shape")
     EOdysseyFillShape SelectedShape;
 
-    UPROPERTY(VisibleInstanceOnly, Category = "Shape", Instanced, meta = (ShowInnerProperties))
+    UPROPERTY(VisibleInstanceOnly, Category="Shape", Instanced, meta = (ShowInnerProperties))
     UOdysseyShape* SelectedShapeInstance;
 
     UPROPERTY()
     TMap<EOdysseyFillShape, UOdysseyShape*> AvailableShapes;
-
-    /* UPROPERTY(EditAnywhere, Category = "Parameters")
-    bool Antialiasing = true;
-
-    UPROPERTY(EditAnywhere, Category = "Parameters")
-    bool SubPixel = true; */
 
     EOdysseySelectionState mSelectionState;
     TSharedPtr<FOdysseyHUDElement> mShapeHUD;

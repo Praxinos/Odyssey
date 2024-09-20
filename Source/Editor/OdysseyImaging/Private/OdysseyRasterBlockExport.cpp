@@ -53,7 +53,7 @@ FOdysseyRasterBlockExport::WriteId( FOdysseyRasterBlock* iRasterBlock
                             , Ar
                             , [iRasterBlock](FArchive &Ar) -> void
     {
-        Ar << iRasterBlock->Id; //unique ID identifying the block
+        Ar << iRasterBlock->mId; //unique ID identifying the block
     });
 }
 
@@ -65,8 +65,8 @@ FOdysseyRasterBlockExport::WriteResolution( FOdysseyRasterBlock* iRasterBlock
                             , Ar
                             , [iRasterBlock](FArchive &Ar) -> void
     {
-        Ar << iRasterBlock->Width;
-        Ar << iRasterBlock->Height;
+        Ar << iRasterBlock->mWidth;
+        Ar << iRasterBlock->mHeight;
     });
 }
 
@@ -78,7 +78,9 @@ FOdysseyRasterBlockExport::WriteFormat( FOdysseyRasterBlock* iRasterBlock
                             , Ar
                             , [iRasterBlock](FArchive &Ar) -> void
     {
-        Ar << iRasterBlock->Format;
+		int format = iRasterBlock->mFormat;
+        Ar << format;
+		iRasterBlock->mFormat = (::ULIS::eFormat)format;
     });
 }
 

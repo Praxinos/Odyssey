@@ -3,7 +3,7 @@
 #include "OdysseyFile.h"
 
 bool
-FOdysseyAnimationCellImageStaggerImport::Read( FOdysseyAnimationCellImageStagger* iAnimationCellImageStagger
+FOdysseyAnimationCellImageStaggerImport::Read( UOdysseyAnimationCellImageStagger* iAnimationCellImageStagger
                                             , FArchive &Ar )
 {
     uint64 start = Ar.Tell();
@@ -35,7 +35,7 @@ FOdysseyAnimationCellImageStaggerImport::Read( FOdysseyAnimationCellImageStagger
 }
 
 void
-FOdysseyAnimationCellImageStaggerImport::Read( FOdysseyAnimationCellImageStagger* iAnimationCellImageStagger
+FOdysseyAnimationCellImageStaggerImport::Read( UOdysseyAnimationCellImageStagger* iAnimationCellImageStagger
                                             , FArchive &Ar
                                             , uint64 iChunkEnd )
 {
@@ -47,13 +47,17 @@ FOdysseyAnimationCellImageStaggerImport::Read( FOdysseyAnimationCellImageStagger
             {
                 case FOdysseyFile::Animation::CHUNK_CELLIMAGESTAGGER_BEHAVIOUR :
                 {
-                    Ar << iAnimationCellImageStagger->mBehaviour;
+					uint32 behaviour;
+                    Ar << behaviour;
+
+					behaviour = FMath::Max(uint32(0), behaviour - 1); //first value was "Invalid" which does not exist anymore
+					iAnimationCellImageStagger->Behaviour = (EOdysseyAnimationCellImageStaggerBehaviour)behaviour;
                 }
                 break;
 
                 case FOdysseyFile::Animation::CHUNK_CELLIMAGESTAGGER_REACH :
                 {
-                    Ar << iAnimationCellImageStagger->mReach;
+                    Ar << iAnimationCellImageStagger->Reach;
                 }
                 break;
 

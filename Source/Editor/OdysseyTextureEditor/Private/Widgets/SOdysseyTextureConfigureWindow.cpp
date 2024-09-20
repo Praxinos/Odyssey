@@ -83,43 +83,50 @@ FOdysseyTextureConfiguration::CreateTexture(UObject* iParent, FName iName, EObje
     UTexture2D* texture = NewObject<UTexture2D>( iParent, iName, iFlags );
     texture->SRGB = useSRGB;
     InitTextureWithBlockData(&block, texture, textureFormat);
+	
+	//Init user data
+    UOdysseyTextureLayerStackUserData* userData = NewObject<UOdysseyTextureLayerStackUserData>(texture, NAME_None, RF_Public);
 
-    if (defaultLayerType != EOdysseyTextureDefaultLayerType::kRaster) //Raster is heavy and will be automatically created on Texture Editor first launch
+	if (defaultLayerType == EOdysseyTextureDefaultLayerType::kRaster)
+	{
+        userData->InitWithDefaultLayerStack();
+	}
+    else if (defaultLayerType == EOdysseyTextureDefaultLayerType::kVector)
     {
-        //Init user data
-        UOdysseyTextureLayerStackUserData* userData = NewObject<UOdysseyTextureLayerStackUserData>(texture, NAME_None, RF_Public);
         userData->InitWithEmptyVectorLayer();
-
-        if (BackgroundColor != EOdysseyTextureBackgroundColor::kTransparent)
-        {
-            UOdysseyLayerStack* layerStack = userData->GetLayerStack();
-            
-            //Add first layer image
-            
-
-            //Set the layer as Current Layer
-            UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), nullptr, 1));
-            layer->Name = LOCTEXT("texture.default-background-layer.name", "Background");
-
-            //Fill LayerImage with content of Texture
-            TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock();
-            FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
-            rasterBlockMutator.EditTilesFromRects(
-                { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-                FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
-                    {
-                        FillOdysseyBlockFromUTextureData(iBlock.Get(), texture, iBlock->Format());
-                        return {};
-                    }
-                )
-            );
-            rasterBlockMutator.Commit();
-        }
-
-        // Notify for changes
-        texture->AddAssetUserData( userData );
     }
+	else if (defaultLayerType == EOdysseyTextureDefaultLayerType::kNone)
+	{
+        userData->InitWithEmptyLayerStack();
+	}
+	
+	// Notify for changes
+	texture->AddAssetUserData( userData );
+
+	if (BackgroundColor != EOdysseyTextureBackgroundColor::kTransparent)
+	{
+		UOdysseyLayerStack* layerStack = userData->GetLayerStack();
+		
+		//Add first layer image
+		
+
+		//Set the layer as Current Layer
+		UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), nullptr, 1));
+		layer->Name = LOCTEXT("texture.default-background-layer.name", "Background");
+
+		//Fill LayerImage with content of Texture
+		TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock();
+		FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
+		rasterBlockMutator.EditTilesFromRects(
+			{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
+			[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
+			{
+				FillOdysseyBlockFromUTextureData(iBlock.Get(), texture, iBlock->Format());
+				return {};
+			}
+		);
+		rasterBlockMutator.Commit();
+	}
 
     texture->PostEditChange();
 

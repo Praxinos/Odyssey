@@ -57,11 +57,11 @@ FOdysseyLayerStackClipboardData::Paste(UOdysseyLayerStack* iLayerStack) const
     UOdysseyLayer* parent = currentLayer->GetParent();
     int index = currentLayer->GetIndexInParent();
 
-    if (currentLayer->CanHaveChildren && currentLayer->IsExpanded)
+    if (currentLayer->CanHaveChildren && currentLayer->DisplayChildren)
         pastedLayers = iLayerStack->CopyLayers(mLayers, currentLayer);
     else
 		pastedLayers = iLayerStack->CopyLayers(mLayers, parent, index);
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(iLayerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(pastedLayers[0]));
+    FOdysseyObjectEditorUtils::SetPropertyValue(iLayerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), pastedLayers[0]);
     return pastedLayers;
 }

@@ -5,20 +5,26 @@
 
 #include "CoreMinimal.h"
 
-#include "Widgets/SOdysseyAnimationConfigureWindow.h"
 #include "OdysseyRasterBlock.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "BaseMediaSource.h"
 #include "OdysseyAnimationProxy.h"
-#include "OdysseyAnimationImageRenderingAbility.h"
+#include "OdysseyImageRenderingAbility.h"
 #include <ULIS>
 
 #include "OdysseyAnimation.generated.h"
 
+UENUM()
+enum class EOdysseyAnimationFormat : uint8
+{
+	BGRA8 UMETA(DisplayName = "BGRA 8"),
+	RGBAF UMETA(DisplayName = "RGBA F")
+};
+
 UCLASS(config=EditorPerProjectUserSettings, PerObjectConfig, HideCategories=(Platforms))
 class ODYSSEYANIMATION_API UOdysseyAnimation
 	: public UBaseMediaSource
-    , public FOdysseyAnimationImageRenderingAbility
+    , public FOdysseyImageRenderingAbility
 	//, public FTickableEditorObject //Allows us to react to Tick events
 {
 	GENERATED_BODY()
@@ -39,9 +45,6 @@ public:
     static FOnFramesPerSecondChanged& OnFramesPerSecondChanged();
 
 public:
-	void Init(const FOdysseyAnimationConfiguration& iConfiguration);
-
-public:
 
 	//~ UMediaSource interface
 	virtual FString GetUrl() const override;
@@ -53,23 +56,29 @@ public:
 	TSharedPtr<FOdysseyAnimationProxy> GetProxy() const;
 
 	//Size and Format
-	uint32 Width() const;
-	uint32 Height() const;
-	::ULIS::eFormat Format() const;
+	int GetWidth() const;
+	int GetHeight() const;
+	::ULIS::eFormat GetFormat() const;
 
 	//Duration and speed
+	UFUNCTION(BlueprintPure, Category="Odyssey|Animation")
 	FTimespan GetDuration() const;
+
+	UFUNCTION(BlueprintPure, Category="Odyssey|Animation")
 	FInt32Range GetFrameRange() const;
-	uint32 GetFrameCount() const;
+
+	UFUNCTION(BlueprintPure, Category="Odyssey|Animation")
+	int GetFrameCount() const;
+
 	double GetFramesPerSecond() const;
 
 	//Time
 	//Index to the frame at a given time
-	int GetFrameIndexAtTime(FTimespan iTime) const;
+	UFUNCTION(BlueprintPure, Category="Odyssey|Animation")
+	int GetFrameIndexAtTime(FTimespan Time) const;
 
 	//Time range of the frame at iFrameIndex
 	TRange<FTimespan> GetFrameTimeRange(int iFrameIndex) const;
-	//TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlockAtIndex(uint32 iIndex);
 
 public:
 	//FOdysseyImageRenderingAbility overrides
@@ -85,9 +94,9 @@ public:
 	 *
 	 * @param Ar
 	 */
+	virtual void PostInitProperties() override;
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
-	virtual void PostInitProperties() override;
 	virtual void PostLoad() override;
 	
 protected:
@@ -100,45 +109,38 @@ protected:
 private:
 	void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
 
+private:
+	UFUNCTION(BlueprintSetter)
+	void CurrentFrameBlueprintSetter(int Value);
+
+	UFUNCTION(BlueprintSetter)
+	void FramesPerSecondBlueprintSetter(float Value);
+
 public:
-	//CurrentFrame is specific to the user, not to the animation itself
-    //So we save it in user's config, instead of the animation
-	UPROPERTY(config, DuplicateTransient, NonTransactional, meta=(ClampMin=0, UIMin=0))
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Animation", BlueprintSetter=CurrentFrameBlueprintSetter, DuplicateTransient, NonTransactional, meta=(ClampMin=0, UIMin=0))
 	int CurrentFrame = 0;
 
-	UPROPERTY(EditAnywhere, meta=(ClampMin=1, UIMin=1), Category="Animation")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation", BlueprintSetter=FramesPerSecondBlueprintSetter, meta=(ClampMin=1, UIMin=1))
 	float FramesPerSecond = 24.0f;
 
-private:
-	UPROPERTY(VisibleAnywhere, meta=(DisplayName="Width"), Category = "Animation")
-	uint32 mWidth = -1;
+protected:
+	friend class UOdysseyAnimationFactory;
+	friend class UOdysseyAnimationEditorAnimationFunctionLibrary;
 
-	UPROPERTY(VisibleAnywhere, meta=(DisplayName="Height"), Category = "Animation")
-	uint32 mHeight = -1;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(DisplayName="Width"), Category="Odyssey|Animation")
+	int mWidth = -1;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(DisplayName="Height"), Category="Odyssey|Animation")
+	int mHeight = -1;
 
 	UPROPERTY()
-	uint32 mFormat = ::ULIS::Format_RGBA8;
+	int mFormat = ::ULIS::Format_BGRA8; //Deprecated: only present for compatibility, use Format instead
 
-	UPROPERTY(meta=(LoadBehavior = "LazyOnDemand"))
+	UPROPERTY(BlueprintReadOnly, Category="Odyssey|Animation")
+	EOdysseyAnimationFormat Format = EOdysseyAnimationFormat::BGRA8;
+
+	UPROPERTY(BlueprintReadOnly, Category="Odyssey|Animation", meta=(DisplayName="Layer Stack", LoadBehavior = "LazyOnDemand"))
 	TObjectPtr<UOdysseyAnimationLayerStack> mLayerStack;
 
 	TSharedPtr<FOdysseyAnimationProxy> mProxy;
-
-
-
-	/*
-	//This is an attemps to create a simple proxy
-
-	UPROPERTY()
-	TArray<TArray<FGuid>> mFrameIds;
-
-	struct FFrameBlock
-	{
-		TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
-		TArray<::ULIS::FRectI> mInvalidRects;
-		TArray<int> mFrameIndexes;
-	};
-
-	//Not UPROPERTY because of FOdysseyRasterBlock needing an owner on load (causes crash)
-	TMap<TArray<FGuid>, FFrameBlock> mFrameBlocks; */
 };

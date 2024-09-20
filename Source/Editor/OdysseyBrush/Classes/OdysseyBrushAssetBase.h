@@ -39,7 +39,7 @@ private:
  * BrushAssetBase
  * Base class for OdysseyBrush Blueprint.
  */
-UCLASS(Abstract, hideCategories=(Object), Blueprintable)
+UCLASS(Abstract, hideCategories=(Object), Blueprintable, HideDropdown)
 class ODYSSEYBRUSH_API UOdysseyBrushAssetBase : public UObject
 {
     GENERATED_BODY()
@@ -317,11 +317,11 @@ public:
     // float  GetOpacityModifier();
 
     //Gets the editor's currently selected color (in the color wheel for example).
-    UFUNCTION( BlueprintPure, Category = "Odyssey|Modifiers", meta = (DisplayName = "Get Color Modifier") )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Modifiers", meta = (DisplayName = "Get Color Modifier") )
     FOdysseyBrushColor GetColor();
 
     //Gets size from Top Bar.
-    UFUNCTION(BlueprintPure, Category = "Odyssey|Modifiers" )
+    UFUNCTION(BlueprintPure, Category="Odyssey|Modifiers" )
     float GetSizeModifier();
 
     //Gets flow from Top Bar.
@@ -358,7 +358,7 @@ public:
     //TODO: GetCanvas Transform
 
     //Gets Stroke Block.
-    UFUNCTION( BlueprintPure, Category = "Odyssey|Stroke")
+    UFUNCTION( BlueprintPure, Category="Odyssey|Stroke")
     FOdysseyBlockProxy GetStrokeBlock( FOdysseyBrushRect Area );
 
     //TODO: GetLayerStack...()

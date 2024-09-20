@@ -4,15 +4,7 @@
 #pragma once
 
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "Image/OdysseyBlendingMode.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
-
-#include <ULIS>
-
 #include "OdysseyAnimationLayerImageRaster.generated.h"
-
-class FOdysseyAnimationLightTable;
 
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageRaster
@@ -21,51 +13,13 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageRaster
     GENERATED_BODY()
 
 public:
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     * 
-     */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnBlendModeChanged, UOdysseyAnimationLayerImageRaster*)
-
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     * 
-     */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnOpacityChanged, UOdysseyAnimationLayerImageRaster*)
-
-public:
-    static FOnBlendModeChanged& OnBlendModeChanged();
-    static FOnOpacityChanged& OnOpacityChanged();
-
-public:
-    ~UOdysseyAnimationLayerImageRaster();
-    UOdysseyAnimationLayerImageRaster();
-
-public:
     // UObject overrides
 	virtual void PostInitProperties() override;
-    virtual void PostDuplicate(bool bDuplicateForPIE) override;
-
-    /**
-     * @brief Serialize this object
-     *
-     * @param Ar
-     */
-    virtual void Serialize(FArchive& Ar) override;
+	virtual void Serialize(FArchive& Ar) override;
 
 public:
     //UOdysseyLayer overrides
-    virtual void OnCreated_Implementation() override;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
-
-public:
-    //UOdysseyAnimationLayer overrides
-    virtual FInt32Range GetFrameRange() const override;
-
-public:
-    virtual TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const override;
-    virtual bool GetIsLightTableActivated() const override;
-    virtual TSharedPtr<FOdysseyAnimationCellsContainer> GetCellsContainer() const override;
 
 public:
     // UOdysseyLayer Overrides
@@ -81,18 +35,6 @@ public:
 	//FOdysseyImageRenderingAbility overrides
 	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
 	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
-    virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
-    virtual float GetImageRenderingOpacity() const override;
-
-protected:
-    void IsLightTableActivatedChanged();
-    void OpacityChanged();
-    void BlendModeChanged();
-    virtual void PropertyChanged(const FName& iPropertyName) override;
-    
-private:
-    void OnCellsChanged();
-    TSharedPtr<FOdysseyAnimationCell> CreateCell( const FName& iCellType, bool iForSerialization);
 
 private:
     TSharedPtr<IOdysseyMedia> CreateMediaRaster(int iFrameIndex);
@@ -101,27 +43,10 @@ private:
     void CreateCell( const FName& iCellType);
 
 private:
-    //Import/Export
-    friend class FOdysseyAnimationLayerImageRasterExport;
-    friend class FOdysseyAnimationLayerImageRasterImport;
+	UFUNCTION(BlueprintSetter)
+	void IsAlphaLockedBlueprintSetter(bool Value);
 
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Animation | LayerStack")
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=IsAlphaLockedBlueprintSetter, NonTransactional)
     bool IsAlphaLocked = false;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
-	EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
-    float Opacity = 1.0f;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
-    bool bIsLightTableActivated = false;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
-    bool bAutoAddCells = true;
-
-private:
-    TSharedRef<FOdysseyAnimationCellsContainer> mCellsContainer;
-    TSharedPtr<FOdysseyAnimationLightTable> mLightTable;
 };

@@ -7,7 +7,6 @@
 #include "Widgets/Input/SButton.h"
 
 class FOdysseyAnimationEditorExtension;
-class FOdysseyAnimationLightTable;
 class UOdysseyLayerStack;
 class UOdysseyAnimationLayerStack;
 
@@ -33,18 +32,23 @@ private:
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 
 private:
-	TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const;
-
 	void RequestRebuild();
 	void Rebuild();
 	
 	void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
-	void OnKeyIsActivatedCheckStateChanged(ECheckBoxState iState, int iKeyIndex);
-	void OnKeyOpacitySliderValueChanged(float iValue, int iKeyIndex );
+	
+	void OnPreviousKeyIsActivatedCheckStateChanged(ECheckBoxState iState, int iKeyIndex);
+	void OnNextKeyIsActivatedCheckStateChanged(ECheckBoxState iState, int iKeyIndex);
+	void OnPreviousKeyOpacitySliderValueChanged(float iValue, int iKeyIndex );
+	void OnNextKeyOpacitySliderValueChanged(float iValue, int iKeyIndex );
 
-	ECheckBoxState GetKeyIsActivated( int iKeyIndex ) const;
-	float GetKeyOpacity( int iKeyIndex ) const;
-	TSharedRef<SWidget> GenerateKeyWidget(int iKeyIndex);
+	ECheckBoxState GetPreviousKeyIsActivated( int iKeyIndex ) const;
+	ECheckBoxState GetNextKeyIsActivated( int iKeyIndex ) const;
+	float GetPreviousKeyOpacity( int iKeyIndex ) const;
+	float GetNextKeyOpacity( int iKeyIndex ) const;
+
+	TSharedRef<SWidget> GeneratePreviousKeyWidget(int iKeyIndex);
+	TSharedRef<SWidget> GenerateNextKeyWidget(int iKeyIndex);
 
 private:
 	FOdysseyAnimationEditorExtension* mExtension;

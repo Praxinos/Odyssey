@@ -2,7 +2,6 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorImageRenderer.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorBlock.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
@@ -15,7 +14,7 @@
 
 static FCriticalSection mEngineMutex;
 
-FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorImageRenderer(TSharedRef<const FOdysseyAnimationCellImageVector> iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
+FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorImageRenderer(const UOdysseyAnimationCellImageVector* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mCell(iCell)
     , mBlock(nullptr)
@@ -28,13 +27,15 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
     if (layer)
     {
         UOdysseyAnimation* animation = layer->GetAnimation();
-        UOdysseyLayerStack* layerStack = layer->GetLayerStack();
-        if (animation && layerStack)
+        if (animation)
         {
-            TSharedPtr<FOdysseyAnimationCell> cell = layer->GetCellsContainer()->GetCellAtFrame(animation->CurrentFrame);
-            int frame = layer->GetCellsContainer()->GetCellFrameAtFrame(animation->CurrentFrame);
-
-            mRenderHUD = cell == mCell && frame == iFrame && layerStack->CurrentLayer.Get() == layer;
+            UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
+			if (cell)
+			{
+        		UOdysseyLayerStack* layerStack = layer->GetLayerStack();
+            	int frame = animation->CurrentFrame - cell->GetFrameRange().GetLowerBoundValue();
+            	mRenderHUD = cell == mCell && frame == iFrame && layerStack->CurrentLayer.Get() == layer;
+			}
         }
 
         // this is per-layer
@@ -46,15 +47,15 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
         mDrawingFlags |= layer->IsWireframe ? mDrawingFlags | ( FOdysseyVectorEngine::DRAWING_WIREFRAME)
                                             : mDrawingFlags & (~FOdysseyVectorEngine::DRAWING_WIREFRAME);
 
-        FVector2D outOfPegsPan = mCell->OutOfPegsPan();
-        float outOfPegsRotation = mCell->OutOfPegsRotation();
-        float outOfPegsZoom = mCell->OutOfPegsZoom();
+        FVector2D outOfPegsPan = mCell->OutOfPegs.Pan;
+        float outOfPegsRotation = mCell->OutOfPegs.Rotation;
+        float outOfPegsZoom = mCell->OutOfPegs.Zoom;
 
-        mOutOfPegsTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->Width() / 2.f, animation->Height() / 2.f)
+        mOutOfPegsTransform = ::ULIS::FMat3F::MakeTranslationMatrix(animation->GetWidth() / 2.f, animation->GetHeight() / 2.f)
             * ::ULIS::FMat3F::MakeTranslationMatrix(outOfPegsPan.X, outOfPegsPan.Y)
             * ::ULIS::FMat3F::MakeRotationMatrix(FMath::DegreesToRadians(outOfPegsRotation))
-            * ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom, outOfPegsZoom)
-            * ::ULIS::FMat3F::MakeTranslationMatrix( animation->Width() / -2.f, animation->Height() / -2.f);
+            * ::ULIS::FMat3F::MakeScaleMatrix(outOfPegsZoom / 100.f, outOfPegsZoom / 100.f)
+            * ::ULIS::FMat3F::MakeTranslationMatrix( animation->GetWidth() / -2.f, animation->GetHeight() / -2.f);
     }
 }
     
@@ -62,7 +63,6 @@ void
 FOdysseyAnimationCellImageVectorImageRenderer::Init()
 {
     TSharedPtr<FOdysseyVectorBlock> vectorBlock = mCell->GetVectorBlock();
-
 
     if (vectorBlock)
     {
@@ -129,4 +129,19 @@ bool
 FOdysseyAnimationCellImageVectorImageRenderer::IsGameThreadOnly()
 {
     return mCell->IsImageRenderingGameThreadOnly();
+}
+
+//--------------------------------------------------------------------------------------
+//------------------------------------------------------------- FGCObject implementation
+
+void
+FOdysseyAnimationCellImageVectorImageRenderer::AddReferencedObjects(FReferenceCollector& Collector)
+{
+	Collector.AddReferencedObject(mCell);
+}
+
+FString
+FOdysseyAnimationCellImageVectorImageRenderer::GetReferencerName() const
+{
+    return "FOdysseyAnimationCellImageVectorImageRenderer";
 }

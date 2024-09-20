@@ -11,30 +11,12 @@
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVectorImageRenderer.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
-#include "OdysseyLayerFunctionLibrary.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
-#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVectorExport.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVectorImport.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyMediaVector.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
-
-UOdysseyAnimationLayerImageVector::FOnBlendModeChanged&
-UOdysseyAnimationLayerImageVector::OnBlendModeChanged()
-{
-    static FOnBlendModeChanged onBlendModeChanged;
-    return onBlendModeChanged;
-}
-
-UOdysseyAnimationLayerImageVector::FOnOpacityChanged&
-UOdysseyAnimationLayerImageVector::OnOpacityChanged()
-{
-    static FOnOpacityChanged onOpacityChanged;
-    return onOpacityChanged;
-}
 
 UOdysseyAnimationLayerImageVector::FOnIsColoredChanged&
 UOdysseyAnimationLayerImageVector::OnIsColoredChanged()
@@ -50,57 +32,93 @@ UOdysseyAnimationLayerImageVector::OnIsWireframeChanged()
     return onIsWireframeChanged;
 }
 
-UOdysseyAnimationLayerImageVector::~UOdysseyAnimationLayerImageVector()
+void
+UOdysseyAnimationLayerImageVector::PostInitProperties()
 {
-}
+    Super::PostInitProperties();
 
-UOdysseyAnimationLayerImageVector::UOdysseyAnimationLayerImageVector()
-    : mCellsContainer(MakeShared<FOdysseyAnimationCellsContainer>())
-{
 	LayerTypeName = LOCTEXT("layer-image-vector.type", "Vector Image Layer");
     Icon = FSlateIcon("OdysseyStyle", "OdysseyLayerStack.LayerVector16");
+	DefaultCellClass = UOdysseyAnimationCellImageVector::StaticClass();
 
-    mCellsContainer->AddSupportedType(FOdysseyAnimationCellImageVector::StaticType());
-    mCellsContainer->AddSupportedType(FOdysseyAnimationCellImageStagger::StaticType());
+    SupportedCellTypes.Add(UOdysseyAnimationCellImageVector::StaticClass());
+    SupportedCellTypes.Add(UOdysseyAnimationCellImageStagger::StaticClass());
 }
+
+struct FOdysseyAnimationLayerImageVectorObjectVersion
+{
+	enum Type
+	{
+		// Before any version changes were made
+		BeforeCustomVersionWasAdded,
+
+		// Reworked how anim blueprint root nodes are recovered
+		RefactorCellsToUObject,
+
+		// -----<new versions can be added above this line>-------------------------------------------------
+		VersionPlusOne,
+		LatestVersion = VersionPlusOne - 1
+	};
+
+	// The GUID for this custom version number
+	const static FGuid GUID;
+
+private:
+	FOdysseyAnimationLayerImageVectorObjectVersion() {}
+};
+
+const FGuid FOdysseyAnimationLayerImageVectorObjectVersion::GUID(0x8799329A, 0x214C4880, 0xB9229B09, 0x30C8D2BB);
+FDevVersionRegistration GRegisterOdysseyAnimationLayerImageVectorObjectVersion(FOdysseyAnimationLayerImageVectorObjectVersion::GUID, FOdysseyAnimationLayerImageVectorObjectVersion::LatestVersion, TEXT("OdysseyAnimationLayerImageVector"));
 
 void
-UOdysseyAnimationLayerImageVector::OnCreated_Implementation()
+UOdysseyAnimationLayerImageVector::Serialize(FArchive& Ar)
 {
-}
+    Super::Serialize(Ar);
 
-FInt32Range
-UOdysseyAnimationLayerImageVector::GetFrameRange() const
-{
-    return mCellsContainer->GetFrameRange();
-}
+	Ar.UsingCustomVersion(FOdysseyAnimationLayerImageVectorObjectVersion::GUID);
 
-TSharedPtr<FOdysseyAnimationLightTable>
-UOdysseyAnimationLayerImageVector::GetLightTable() const
-{
-    return mLightTable;
-}
+    if( Ar.IsLoading() && Ar.CustomVer(FOdysseyAnimationLayerImageVectorObjectVersion::GUID) < FOdysseyAnimationLayerImageVectorObjectVersion::RefactorCellsToUObject)
+    {
+        if (!FOdysseyAnimationLayerImageVectorImport::Read( this, Ar ))
+        {
+            //Old Style No Chunk Loading
+			//DEPRECATED: Keep for compatibility with Odyssey 2.0 and prior
+            if (!FOdysseyAnimationCellsContainerImport::Read( this, Ar ))
+			{
+				//Old Style No Chunk Loading
+				//Load or Save the offset
+				Ar << CellsOffset;
 
-bool
-UOdysseyAnimationLayerImageVector::GetIsLightTableActivated() const
-{
-    return bIsLightTableActivated;
-}
+				//Empty Cells to prepare for loading
+				Cells.Empty();
 
-TSharedPtr<FOdysseyAnimationCellsContainer>
-UOdysseyAnimationLayerImageVector::GetCellsContainer() const
-{
-    return mCellsContainer;
-}
+				//Load or Save number of cells
+				int32 numCells = 0;
+				Ar << numCells;
 
-void
-UOdysseyAnimationLayerImageVector::IsLightTableActivatedChanged()
-{   
-    UOdysseyAnimation* animation = GetAnimation();
-    if ( !animation )
-        return;
+				for ( int i = 0; i < numCells; i++ )
+				{
+					//Load the cell type
+                    FName cellType;
+                    Ar << cellType;
 
-    ImageRenderingChanged();
+					if (cellType == TEXT("FOdysseyAnimationCellImageVector"))
+					{
+						UOdysseyAnimationCellImageVector* cell = NewObject<UOdysseyAnimationCellImageVector>(this, UOdysseyAnimationCellImageVector::StaticClass(), NAME_None, RF_Public | RF_Transactional);
+						Cells.Add(cell);
+						cell->OldSerialize(Ar);
+					}
+					else if (cellType == TEXT("FOdysseyAnimationCellImageStagger"))
+					{
+						UOdysseyAnimationCellImageStagger* cell = NewObject<UOdysseyAnimationCellImageStagger>(this, UOdysseyAnimationCellImageStagger::StaticClass(), NAME_None, RF_Public | RF_Transactional);
+						Cells.Add(cell);
+						cell->OldSerialize(Ar);
+					}
+				}
+				UpdateCellsIndexInLayer();
+			}
+        }
+    }
 }
 
 void
@@ -120,112 +138,15 @@ UOdysseyAnimationLayerImageVector::IsWireframeChanged()
 }
 
 void
-UOdysseyAnimationLayerImageVector::OpacityChanged()
+UOdysseyAnimationLayerImageVector::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
 {
-    OnOpacityChanged().Broadcast(this);
+    Super::PropertyChanged(iPropertyName, iMemberPropertyName, iIsInteractive);
 
-    ImageRenderingChanged();
-}
-
-void
-UOdysseyAnimationLayerImageVector::BlendModeChanged()
-{
-    OnBlendModeChanged().Broadcast(this);
-    
-    ImageRenderingChanged();
-}
-
-void
-UOdysseyAnimationLayerImageVector::OnCellsChanged()
-{
-    //OnCellsChanged().Broadcast(this);
-    ImageRenderingCompositionChanged();
-    UOdysseyLayer::OnMediaChanged().Broadcast();
-}
-
-void
-UOdysseyAnimationLayerImageVector::PropertyChanged(const FName& iPropertyName)
-{
-    Super::PropertyChanged(iPropertyName);
-
-    if(iPropertyName == "IsColored")
+    if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsColored))
         IsColoredChanged();
-    if(iPropertyName == "IsWireframe")
+    if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsWireframe))
         IsWireframeChanged();
-    if (iPropertyName == "BlendMode")
-        BlendModeChanged();
-    if (iPropertyName == "Opacity")
-        OpacityChanged();
-    if (iPropertyName == "bIsLightTableActivated")
-        IsLightTableActivatedChanged();
 }
-
-TSharedPtr<FOdysseyAnimationCell>
-UOdysseyAnimationLayerImageVector::CreateCell( const FName& iCellType, bool iForSerialization)
-{
-    if (iCellType == FOdysseyAnimationCellImageVector::StaticType())
-    {
-        if (iForSerialization)
-            return MakeShared<FOdysseyAnimationCellImageVector>(this, 1);
-
-        UOdysseyAnimation* animation = GetAnimation();
-        return FOdysseyAnimationCellImageVector::Create(this, 1, animation->Width(), animation->Height());
-    }
-    else if (iCellType == FOdysseyAnimationCellImageStagger::StaticType())
-    {
-        if (iForSerialization)
-            return FOdysseyAnimationCellImageStagger::Create(this, 1);
-    }
-    return nullptr;
-}
-
-void
-UOdysseyAnimationLayerImageVector::PostInitProperties()
-{
-    Super::PostInitProperties();
-
-    mCellsContainer->CreateCellDelegate().BindUObject(this, &UOdysseyAnimationLayerImageVector::CreateCell);
-    mCellsContainer->OnCellsChanged().AddUObject(this, &UOdysseyAnimationLayerImageVector::OnCellsChanged);
-    mLightTable = MakeShared<FOdysseyAnimationLightTable>(this);
-}
-
-void
-UOdysseyAnimationLayerImageVector::Serialize(FArchive& Ar)
-{
-    Super::Serialize(Ar);
-
-    if( Ar.IsSaving() )
-    {
-        FOdysseyAnimationLayerImageVectorExport::Write( this, Ar );
-    }
-
-    if( Ar.IsLoading() )
-    {
-        if (!FOdysseyAnimationLayerImageVectorImport::Read( this, Ar ))
-        {
-            //Old Style No Chunk Loading
-            mCellsContainer->Serialize(Ar);
-        }
-    }
-}
-
-/* void
-UOdysseyAnimationLayerImageVector::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
-{
-	if ( iLayerStack != GetLayerStack() )
-		return;
-
-    bool isCurrentLayer = iLayerStack->CurrentLayer.Get() == this;
-    const TArray<TSharedPtr<FOdysseyAnimationCell>>& cells = mCellsContainer->GetCells();
-    for (TSharedPtr<FOdysseyAnimationCell> cell : cells)
-    {
-        if (cell->GetType() != FOdysseyAnimationCellImageVector::StaticType())
-            continue;
-
-        TSharedPtr<FOdysseyAnimationCellImageVector> cellImageVector = StaticCastSharedPtr<FOdysseyAnimationCellImageVector>(cell);
-        cellImageVector->GetVectorBlock()->SetRenderHUD(isCurrentLayer);
-    }
-} */
 
 TSharedPtr<IOdysseyImageRenderer>
 UOdysseyAnimationLayerImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter) const
@@ -241,10 +162,9 @@ UOdysseyAnimationLayerImageVector::GetImageRenderingComposition(IOdysseyImageRen
 {
     TArray<FGuid> idComposition = { GetImageRenderingId() };
 
-    if (iRenderType == IOdysseyImageRenderer::eRenderType::Editor && bIsLightTableActivated && mLightTable->GetDisplayPosition() == EOdysseyLightTableDisplayPosition::UnderLayer )
-    {
-        idComposition.Append(mLightTable->GetImageRenderingComposition(iRenderType, iFrameIndex));
-    }
+	bool showLighttable = iRenderType == IOdysseyImageRenderer::eRenderType::Editor && Lighttable.bIsActivated;
+    if (showLighttable && Lighttable.DisplayPosition == EOdysseyLightTableDisplayPosition::UnderLayer )
+		idComposition.Append(GetLighttableImageRenderingComposition(iFrameIndex));
 
     int frame = iFrameIndex;
     FInt32Range frameRange = GetFrameRange();
@@ -257,42 +177,28 @@ UOdysseyAnimationLayerImageVector::GetImageRenderingComposition(IOdysseyImageRen
         frame = GetPostBehaviourFrame(PostBehaviour, iFrameIndex);
     }
 
-    int celFrameIndex = mCellsContainer->GetCellFrameAtFrame(frame);
-    TSharedPtr<FOdysseyAnimationCell> cell = mCellsContainer->GetCellAtFrame(frame);
-    if (cell)
-    {
-        idComposition.Append(cell->GetImageRenderingComposition(iRenderType, celFrameIndex));
+    UOdysseyAnimationCell* cell = GetCellAtFrame(frame);
+	if (cell)
+	{
+		int cellFrame = frame - cell->GetFrameRange().GetLowerBoundValue();
+        idComposition.Append(cell->GetImageRenderingComposition(iRenderType, cellFrame));
     }
 
-    if (iRenderType == IOdysseyImageRenderer::eRenderType::Editor && bIsLightTableActivated && mLightTable->GetDisplayPosition() == EOdysseyLightTableDisplayPosition::AboveLayer )
-    {
-        idComposition.Append(mLightTable->GetImageRenderingComposition(iRenderType, iFrameIndex));
-    }
+    if (showLighttable && Lighttable.DisplayPosition == EOdysseyLightTableDisplayPosition::AboveLayer )
+        idComposition.Append(GetLighttableImageRenderingComposition(iFrameIndex));
 
     return idComposition;
-}
-
-::ULIS::eBlendMode
-UOdysseyAnimationLayerImageVector::GetImageRenderingBlendMode() const
-{
-    return (::ULIS::eBlendMode)BlendMode;
-}
-
-float
-UOdysseyAnimationLayerImageVector::GetImageRenderingOpacity() const
-{
-    return Opacity;
 }
 
 TSharedPtr<IOdysseyMedia>
 UOdysseyAnimationLayerImageVector::GetCellMediaVector(uint32 iFrameIndex) const
 {
-	int celFrameIndex = mCellsContainer->GetCellFrameAtFrame(iFrameIndex);
-    TSharedPtr<FOdysseyAnimationCell> cell = mCellsContainer->GetCellAtFrame(iFrameIndex);
+	UOdysseyAnimationCell* cell = GetCellAtFrame(iFrameIndex);
     if (!cell)
         return nullptr;
-
-    FOdysseyMediaProvider provider = cell->GetMediaProvider(celFrameIndex);
+	
+	int cellFrame = iFrameIndex - cell->GetFrameRange().GetLowerBoundValue();
+    FOdysseyMediaProvider provider = cell->GetMediaProvider(cellFrame);
     if (!provider.HasMedia<FOdysseyMediaVector>())
         return nullptr;
 
@@ -308,8 +214,8 @@ UOdysseyAnimationLayerImageVector::GetMediaProvider(uint32 iFrameIndex) const
 {
 	FOdysseyMediaProvider provider;
 
-    bool isActive = UOdysseyLayerFunctionLibrary::IsLayerActivatedInStack(this);
-    bool isLocked = UOdysseyLayerFunctionLibrary::IsLayerLockedInStack(this);
+    bool isActive = IsActivatedRecursively();
+    bool isLocked = IsLockedRecursively();
     provider.IsLocked(!isActive || isLocked);
 
 	TSharedPtr<IOdysseyMedia> cellMediaVector = GetCellMediaVector(iFrameIndex);
@@ -330,22 +236,7 @@ UOdysseyAnimationLayerImageVector::CreateMediaVector(int iFrameIndex)
 {
     //Create the cell if needed
     AutoCreateCell(iFrameIndex);
-
-    int celFrameIndex = mCellsContainer->GetCellFrameAtFrame(iFrameIndex);
-    TSharedPtr<FOdysseyAnimationCell> cell = mCellsContainer->GetCellAtFrame(iFrameIndex);
-    if (!cell)
-        return nullptr;
-
-    FOdysseyMediaProvider provider = cell->GetMediaProvider(celFrameIndex);
-    if (!provider.HasMedia<FOdysseyMediaVector>())
-        return nullptr;
-
-    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectorList = provider.GetOrCreateMedias<FOdysseyMediaVector>();
-    if (mediaVectorList.Num() <= 0)
-        return nullptr;
-
-    TSharedPtr<FOdysseyMediaVector> mediaVector = mediaVectorList[0];
-    return mediaVector;
+	return GetCellMediaVector(iFrameIndex);
 }
 
 void
@@ -355,24 +246,20 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
         return;
 
     FScopedTransaction transaction(LOCTEXT("layer-image-vector.create-cell-transaction", "Create Cell"));
+
     UOdysseyAnimation* animation = GetAnimation();
+
+	FInt32Range range = GetFrameRange();
+
     //Check if iFrameIndex is Out Of Range
-    FInt32Range range = mCellsContainer->GetFrameRange();
-    if ( iFrameIndex < range.GetLowerBoundValue())
+	if ( iFrameIndex < range.GetLowerBoundValue())
     {
-        if (!bAutoAddCells) //If out of range is not allowed, return
-            return;
-
-        int length = range.GetLowerBoundValue() - iFrameIndex;
-
-        //Add a frame at current frame and extend it 
-        TSharedPtr<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(this, length, animation->Width(), animation->Height());
-
-        FOdysseyAnimationCellsMutator mutator(this, mCellsContainer);
-        mutator.Add({cell}, 0);
-        mutator.SetOffset(mCellsContainer->GetOffset() - length);
-        mutator.Commit();
-
+		Modify();
+        //Add a frame at current frame and extend it
+		UOdysseyAnimationCell* cell = AddCell(UOdysseyAnimationCellImageVector::StaticClass(), 0);
+		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), range.GetLowerBoundValue() - iFrameIndex);
+		FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), CellsOffset - cell->Exposure);
+        
         FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
         currentFrameMutator.Set(animation->CurrentFrame);
         currentFrameMutator.Commit();
@@ -381,19 +268,10 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
 
     if ( iFrameIndex > range.GetUpperBoundValue())
     {
-        if (!bAutoAddCells) //If out of range is not allowed, return
-            return;
-
-        //Add a frame at current frame and extend previous frame to it 
-        TSharedPtr<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(this, 1, animation->Width(), animation->Height());
-        
-        int cellCount = mCellsContainer->GetCells().Num();
-        int lastCellLength = mCellsContainer->GetCells().Last()->GetLength();
-
-        FOdysseyAnimationCellsMutator mutator(this, mCellsContainer);
-        mutator.SetLength( cellCount - 1, lastCellLength + iFrameIndex - range.GetUpperBoundValue() - 1);
-        mutator.Add({cell});
-        mutator.Commit();
+		Modify();
+        int cellExposure = Cells.Last()->Exposure + iFrameIndex - range.GetUpperBoundValue() - 1;
+		FOdysseyObjectEditorUtils::SetPropertyValue(Cells.Last(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cellExposure);
+		UOdysseyAnimationCell* cell = AddCell(UOdysseyAnimationCellImageVector::StaticClass());
 
         FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
         currentFrameMutator.Set(animation->CurrentFrame);
@@ -425,10 +303,10 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
     FInt32Range frameRange = FInt32Range::Hull(frameRanges);
 
     //Deduce offset from frame ranges
-    int offset = frameRange.GetLowerBoundValue();
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), frameRange.GetLowerBoundValue());
 
     //Get cell ranges from each frame ImageRenderAbility composition
-    int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
+    int startFrame = frameRange.GetLowerBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
 	int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
     TArray<FGuid> previousIds;
     TArray<FInt32Range> cellRanges;
@@ -457,18 +335,16 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
         }
     }
 
-    TArray<TSharedPtr<FOdysseyAnimationCell>> cells;
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
+	RemoveCells(Cells);
+	TArray<UOdysseyAnimationCell*> cells = AddCells(UOdysseyAnimationCellImageVector::StaticClass(), 0, cellRanges.Num());
     
-    FOdysseyAnimationCellsMutator mutator(this, mCellsContainer);
-    mutator.Remove(0, mCellsContainer->GetCells().Num());
-    
-    for (const FInt32Range& cellRange : cellRanges)
+   	for (int i = 0; i < cellRanges.Num(); i++)
     {
-        int cellLength = cellRange.GetUpperBoundValue() - cellRange.GetLowerBoundValue() + 1;
-        TSharedPtr<FOdysseyAnimationCellImageVector> cell = FOdysseyAnimationCellImageVector::Create(this, cellLength, animation->Width(), animation->Height());
-        int frame = cellRange.GetLowerBoundValue();
-
+		const FInt32Range& cellRange = cellRanges[i];
+		UOdysseyAnimationCellImageVector* cell = Cast<UOdysseyAnimationCellImageVector>(cells[i]);
+		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cellRange.GetUpperBoundValue() - cellRange.GetLowerBoundValue() + 1);
+        
+		int frame = cellRange.GetLowerBoundValue();
         FOdysseyVectorGroupPaint* destinationScene = cell->GetEngine()->GetScene();
 
         for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
@@ -477,15 +353,24 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
             if ( !vectorLayer )
                 continue;
 
-            TSharedPtr<FOdysseyAnimationCell> srcCell = vectorLayer->GetCellsContainer()->GetCellAtFrame(frame);
-            int srcCellFrame = vectorLayer->GetCellsContainer()->GetCellFrameAtFrame(frame);
-            while(srcCell && srcCell->GetType() == FOdysseyAnimationCellImageStagger::StaticType())
-            {
-                TSharedPtr<FOdysseyAnimationCellImageStagger> cellStagger = StaticCastSharedPtr<FOdysseyAnimationCellImageStagger>(srcCell);
-                srcCell = cellStagger->GetReferenceCellAtFrame(srcCellFrame, &srcCellFrame);
-            }
+			UOdysseyAnimationCell* srcCell = vectorLayer->GetCellAtFrame(frame);
+			if (!srcCell)
+				continue;
 
-            TSharedPtr<FOdysseyAnimationCellImageVector> cellVector = StaticCastSharedPtr<FOdysseyAnimationCellImageVector>(srcCell);
+			if (srcCell && srcCell->IsA<UOdysseyAnimationCellImageStagger>())
+			{
+				int staggerFrame = frame;
+				while(srcCell && srcCell->IsA<UOdysseyAnimationCellImageStagger>())
+				{
+					UOdysseyAnimationCellImageStagger* cellStagger = Cast<UOdysseyAnimationCellImageStagger>(srcCell);
+					int srcCellFrame = staggerFrame - srcCell->GetFrameRange().GetLowerBoundValue();
+					
+					staggerFrame = cellStagger->GetReferenceFrameAtFrame(srcCellFrame);
+					srcCell = vectorLayer->GetCellAtFrame(staggerFrame);
+				}
+			}
+
+            UOdysseyAnimationCellImageVector* cellVector = Cast<UOdysseyAnimationCellImageVector>(srcCell);
             if (!cellVector)
                 continue;
 
@@ -498,23 +383,29 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
                 scene->CopyBuckets( destinationScene, false );
             }
         }
-
-        cells.Add(cell);
     }
     
-    mutator.Add(cells);
-    mutator.SetOffset(offset);
-    mutator.Commit();
-    
-    for ( TSharedPtr<FOdysseyAnimationCell> cell : mCellsContainer->GetCells())
+    for ( UOdysseyAnimationCell* cell : Cells)
     {
-        TSharedPtr<FOdysseyAnimationCellImageVector> vectorCell = StaticCastSharedPtr<FOdysseyAnimationCellImageVector>(cell);
+        UOdysseyAnimationCellImageVector* vectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
         FOdysseyVectorEngine* engine = vectorCell->GetEngine();
         FOdysseyVectorGroupPaint* scene = engine->GetScene();
         scene->UpdateMatrix();
         scene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
         engine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
     }
+}
+
+void
+UOdysseyAnimationLayerImageVector::IsWireframeBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsWireframe), Value);
+}
+
+void
+UOdysseyAnimationLayerImageVector::IsColoredBlueprintSetter(bool Value)
+{
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsColored), Value);
 }
 
 #undef LOCTEXT_NAMESPACE

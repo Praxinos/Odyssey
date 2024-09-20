@@ -23,7 +23,6 @@ public:
 
 private:
     FOdysseyAnimationEditorTimeline* mTimelineParams;
-    TSharedPtr<FOdysseyAnimationCellsMutator> mCellsMutator;
     bool mOffsettingLayer;
     struct
     {

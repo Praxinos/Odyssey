@@ -8,25 +8,17 @@
 #include "UObject/OdysseyObjectPropertyTracker.h"
 #include "Misc/OdysseyHandle.h"
 #include "OdysseyMediaProvider.h"
-#include "OdysseyStaticImageRenderingAbility.h"
 #include <ULIS>
 
 #include "OdysseyTextureLayer.generated.h"
 
-UCLASS(BlueprintType)
+UCLASS(Abstract, HideDropdown, BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayer
     : public UOdysseyLayer
-    , public FOdysseyStaticImageRenderingAbility
 {
     GENERATED_BODY()
 
-protected:
-    virtual void IsActivatedChanged() override;
-    virtual void ChildrenChanged() override;
-
 public:
-	//FOdysseyImageRenderingAbility overrides
-	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const override;
-	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
+	UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
+	UTexture2D* GetTexture() const;
 };

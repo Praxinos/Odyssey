@@ -11,7 +11,7 @@
 void
 UOdysseyAnimationTexture::SetPlayer(UOdysseyAnimationPlayer* iPlayer)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, "Player", iPlayer);
+	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationTexture, Player), iPlayer);
 }
 
 UOdysseyAnimationPlayer*
@@ -70,7 +70,7 @@ UOdysseyAnimationTexture::PlayerChanged()
 void
 UOdysseyAnimationTexture::PropertyChanged(const FName& iPropertyName)
 {
-    if ( iPropertyName == "Player" )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationTexture, Player) )
         PlayerChanged();
 }
 

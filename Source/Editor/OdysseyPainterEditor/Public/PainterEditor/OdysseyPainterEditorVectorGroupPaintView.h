@@ -28,46 +28,46 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
 
     public:
         UPROPERTY( EditAnywhere
-                 , Category = PaintGroup
+                 , Category=PaintGroup
                  , meta = ( ToolTip = "Painted" ) )
         bool Painted;
 
         UPROPERTY( EditAnywhere
-                 , Category = PaintGroup
+                 , Category=PaintGroup
                  , meta = ( ToolTip = "Monochrome" ) )
         bool Monochrome;
 
         UPROPERTY( EditAnywhere
-                 , Category = PaintGroup
+                 , Category=PaintGroup
                  , meta = ( ToolTip = "MonochromeColor" ) )
         FColor MonochromeColor;
 
         UPROPERTY( EditAnywhere
-                 , Category = PaintGroup
+                 , Category=PaintGroup
                  , meta = ( ToolTip  = "Gap Tolerance"
                           , ClampMin = "0.0"
                           , UIMin    = "0.0" ) )
         double GapTolerance;
 
         UPROPERTY( EditAnywhere
-                 , Category = PaintGroup
+                 , Category=PaintGroup
                  , meta = ( ToolTip = "Intersects Canevas" ) )
         bool IntersectsCanevas;
 
         // commented out: now handled at layer level
-        //UPROPERTY( EditAnywhere, Category = PaintGroup )
+        //UPROPERTY( EditAnywhere, Category=PaintGroup )
         //bool Wireframe;
 
         UPROPERTY( EditAnywhere
-                 , Category = PaintGroup
+                 , Category=PaintGroup
                  , meta = ( ToolTip = "Wireframe Color" ) )
         FColor WireframeColor;
 
         UPROPERTY( EditAnywhere
-                 , Category = Advanced
+                 , Category=Advanced
                  , meta = ( ToolTip = "Realtime" ) )
         bool Realtime; // relatime updates
 
-        //UPROPERTY( EditAnywhere, Category = Advanced )
+        //UPROPERTY( EditAnywhere, Category=Advanced )
         bool Multithreaded;
 };

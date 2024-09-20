@@ -85,36 +85,18 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnMouseDown(const FOdysseyPoint& 
     }
 
     FOdysseyPoint point = iPointInTexture;
-    /* if (!SubPixel)
-    {
-        point.x = FMath::Floor(point.x);
-        point.y = FMath::Floor(point.y);
-    } */
-
     return SelectedShapeInstance->OnMouseDown(point, iKey);
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
     FOdysseyPoint point = iPointInTexture;
-    /* if (!SubPixel)
-    {
-        point.x = FMath::Floor(point.x);
-        point.y = FMath::Floor(point.y);
-    } */
-
     SelectedShapeInstance->OnMouseHover( point );
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     FOdysseyPoint point = iPointInTexture;
-    /* if (!SubPixel)
-    {
-        point.x = FMath::Floor(point.x);
-        point.y = FMath::Floor(point.y);
-    } */
-
     SelectedShapeInstance->OnMouseDrag(point);
 }
 
@@ -124,12 +106,6 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iP
         return true;
 
     FOdysseyPoint point = iPointInTexture;
-    /* if (!SubPixel)
-    {
-        point.x = FMath::Floor(point.x);
-        point.y = FMath::Floor(point.y);
-    } */
-
     return SelectedShapeInstance->OnMouseUp(point, iKey);
 }
 
@@ -288,7 +264,7 @@ TSharedPtr<SWidget> UOdysseyPainterEditorRasterSelectionTool::CreateContextMenu(
 void UOdysseyPainterEditorRasterSelectionTool::SelectedShapeChanged()
 {
     SelectedShapeInstance->Abort();
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, "SelectedShapeInstance", AvailableShapes[SelectedShape]);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterSelectionTool, SelectedShapeInstance), AvailableShapes[SelectedShape]);
 }
 
 void
@@ -365,7 +341,7 @@ void UOdysseyPainterEditorRasterSelectionTool::InvertSelection()
 
 void UOdysseyPainterEditorRasterSelectionTool::PropertyChanged(const FName& iPropertyName)
 {
-    if (iPropertyName == "SelectedShape")
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterSelectionTool, SelectedShape))
         SelectedShapeChanged();
 }
 

@@ -36,6 +36,6 @@ public:
     static const UOdysseyAnimationEditorUserSettings* Get();
 
 public:
-    UPROPERTY(config, EditAnywhere, EditFixedSize, Category = "Animation Flip Settings", meta=(NoElementDuplicate, EditFixedOrder, ArraySizeEnum="/Script/OdysseyAnimationEditor.EOdysseyAnimationEditorUserSettingsFlipConfigurations"))
+    UPROPERTY(config, EditAnywhere, EditFixedSize, Category="Animation Flip Settings", meta=(NoElementDuplicate, EditFixedOrder, ArraySizeEnum="/Script/OdysseyAnimationEditor.EOdysseyAnimationEditorUserSettingsFlipConfigurations"))
     FOdysseyAnimationFlipConfiguration FlipConfigurations[10];
 };

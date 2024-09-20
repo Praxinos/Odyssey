@@ -4,64 +4,13 @@
 #include "LayerStack/OdysseyTextureLayer.h"
 
 #include "LayerStack/OdysseyTextureLayerStack.h"
-#include "OdysseyTextureLayerImageRenderer.h"
 
-void
-UOdysseyTextureLayer::IsActivatedChanged()
+UTexture2D*
+UOdysseyTextureLayer::GetTexture() const
 {
-    Super::IsActivatedChanged();
-
-    UOdysseyTextureLayer* parentLayer = Cast<UOdysseyTextureLayer>(GetParent());
-    if (!parentLayer)
-        return;
-
-    parentLayer->ImageRenderingCompositionChanged();
-}
-
-void
-UOdysseyTextureLayer::ChildrenChanged()
-{
-    Super::ChildrenChanged();
-
-    ImageRenderingCompositionChanged();
-}
-
-TSharedPtr<IOdysseyImageRenderer>
-UOdysseyTextureLayer::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter) const
-{
-    if (iFilter.IsBound() && !iFilter.Execute(this))
-        return nullptr;
-    
-    return MakeShared<FOdysseyTextureLayerImageRenderer>(this, iRenderType, GetImageRenderingRects(), iFilter);
-}
-
-TArray<FGuid>
-UOdysseyTextureLayer::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const
-{
-    TArray<FGuid> idComposition = { GetImageRenderingId() };
-
-    const TArray<UOdysseyLayer*>& children = GetChildren();
-    for (UOdysseyLayer* child : children)
-    {
-        if (!child->IsActivated)
-            continue;
-
-        UOdysseyTextureLayer* textureChild = Cast<UOdysseyTextureLayer>(child);
-        if (!textureChild)
-            continue;
-
-        idComposition.Append(textureChild->GetImageRenderingComposition(iRenderType));
-    }
-
-    return idComposition;
-}
-
-TArray<::ULIS::FRectI>
-UOdysseyTextureLayer::GetImageRenderingRects() const
-{
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+	UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
     if(!layerStack)
-        return {};
+        return nullptr;
 
-    return layerStack->GetImageRenderingRects();
+	return layerStack->GetTexture();
 }

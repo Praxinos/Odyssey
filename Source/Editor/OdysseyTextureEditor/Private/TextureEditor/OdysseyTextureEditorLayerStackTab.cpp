@@ -59,7 +59,7 @@ FOdysseyTextureEditorLayerStackTab::GetId() const
 TSharedPtr<SWidget>
 FOdysseyTextureEditorLayerStackTab::CreateWidget()
 {
-    return SNew(SOdysseyTextureLayerStack)
+    return SNew(SOdysseyTextureLayerStack, mExtension)
             .LayerStack(this, &FOdysseyTextureEditorLayerStackTab::LayerStack);
 }
 
@@ -67,34 +67,13 @@ void
 FOdysseyTextureEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
 {
     const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
-    const FOdysseyTextureEditorCommands& textureEditorCommands = FOdysseyTextureEditorCommands::Get();
-    //const FOdysseyLayerStackEditorCommands& layerStackEditorCommands = FOdysseyLayerStackEditorCommands::Get();
-
-    #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyTextureEditorLayerStackTab::__VA_ARGS__ ), FCanExecuteAction() );
-
-    MAP_ACTION(textureEditorCommands.ImportTexturesAsLayers, ImportTexturesAsLayers )
-    MAP_ACTION(textureEditorCommands.ExportLayersAsTextures, ExportLayersAsTextures )
-    MAP_ACTION(textureEditorCommands.ExportCurrentLayerAsTexture, ExportCurrentLayerAsTexture )
-    MAP_ACTION(textureEditorCommands.ExportTextureToOperatingSystem, ExportTextureToOperatingSystem )
-    MAP_ACTION(textureEditorCommands.CreateNewLayer, CreateNewLayer )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity10, ChangeLayerOpacity, 0.1f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity20, ChangeLayerOpacity, 0.2f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity30, ChangeLayerOpacity, 0.3f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity40, ChangeLayerOpacity, 0.4f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity50, ChangeLayerOpacity, 0.5f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity60, ChangeLayerOpacity, 0.6f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity70, ChangeLayerOpacity, 0.7f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity80, ChangeLayerOpacity, 0.8f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity90, ChangeLayerOpacity, 0.9f )
-    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity100, ChangeLayerOpacity, 1.0f )
-
-    #undef MAP_ACTION
+	MapActions(toolkitCommands);
 }
 
 void
-FOdysseyTextureEditorLayerStackTab::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+FOdysseyTextureEditorLayerStackTab::ExtendMenu( TSharedRef<FExtender> iExtender )
 {
-    ExtendMenuFile( iOwner, iMenuName );
+    ExtendMenuFile(iExtender);
 }
 
 //--------------------------------------------------------------------------------------
@@ -117,37 +96,61 @@ FOdysseyTextureEditorLayerStackTab::LayerStack() const
 //------------------------------------------------------------------------------ Methods
 
 void
-FOdysseyTextureEditorLayerStackTab::ExtendMenuFile( FToolMenuOwner iOwner, FName iMenuName )
+FOdysseyTextureEditorLayerStackTab::MapActions( TSharedPtr<FUICommandList> iCommandList )
 {
-    UToolMenu* menu = UToolMenus::Get()->FindMenu(*(iMenuName.ToString() + FString(".File")));
+    const FOdysseyTextureEditorCommands& textureEditorCommands = FOdysseyTextureEditorCommands::Get();
 
-    FToolMenuInsert menuInsert;
-    if (menu->FindSection("FileActors")) //FileActirs is a weird name but it is the actual name of the "Import/Export" Section from Unreal File Menu
-        menuInsert = FToolMenuInsert("FileActors", EToolMenuInsertType::After);
+	#define MAP_ACTION(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyTextureEditorLayerStackTab::__VA_ARGS__ ), FCanExecuteAction() );
 
-    menu->AddDynamicSection(
-        "OdysseyTextureDynamic",
-        FNewToolMenuDelegate::CreateLambda(
-            [this](UToolMenu* iToolMenu)
-            {
-                FOdysseyPainterEditor* editor = mExtension->GetEditor();
-                if (!editor)
-                    return;
+    MAP_ACTION(textureEditorCommands.ImportTexturesAsLayers, ImportTexturesAsLayers )
+    MAP_ACTION(textureEditorCommands.ExportLayersAsTextures, ExportLayersAsTextures )
+    MAP_ACTION(textureEditorCommands.ExportCurrentLayerAsTexture, ExportCurrentLayerAsTexture )
+    MAP_ACTION(textureEditorCommands.ExportTextureToOperatingSystem, ExportTextureToOperatingSystem )
+    MAP_ACTION(textureEditorCommands.CreateNewLayer, CreateNewLayer )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity10, ChangeLayerOpacity, 0.1f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity20, ChangeLayerOpacity, 0.2f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity30, ChangeLayerOpacity, 0.3f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity40, ChangeLayerOpacity, 0.4f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity50, ChangeLayerOpacity, 0.5f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity60, ChangeLayerOpacity, 0.6f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity70, ChangeLayerOpacity, 0.7f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity80, ChangeLayerOpacity, 0.8f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity90, ChangeLayerOpacity, 0.9f )
+    MAP_ACTION(textureEditorCommands.ChangeLayerOpacity100, ChangeLayerOpacity, 1.0f )
 
-                TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
-                if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
-                    return;
-                
-                FToolMenuSection& section = iToolMenu->AddSection("OdysseyTexture", LOCTEXT("main-menu.file.texture-import-export-section.name", "Texture Import/Export"));
-                {
-                    section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ImportTexturesAsLayers );
-                    section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportLayersAsTextures );
-                    section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportCurrentLayerAsTexture );
-                    section.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportTextureToOperatingSystem );
-                }
-            }
-        )
-        , menuInsert
+    #undef MAP_ACTION
+}
+
+void
+FOdysseyTextureEditorLayerStackTab::ExtendMenuFile( TSharedRef<FExtender> iExtender )
+{
+	TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
+	MapActions(commandList);
+    iExtender->AddMenuExtension(
+		"OdysseyFile",
+		EExtensionHook::After,
+		commandList,
+		FMenuExtensionDelegate::CreateLambda(
+			[this](FMenuBuilder& iBuilder)
+			{
+				FOdysseyPainterEditor* editor = mExtension->GetEditor();
+				if (!editor)
+					return;
+
+				TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
+				if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+					return;
+
+				iBuilder.BeginSection("OdysseyTexture", LOCTEXT("main-menu.file.texture-import-export-section.name", "Texture Import/Export"));
+				{
+					iBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ImportTexturesAsLayers );
+					iBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportLayersAsTextures );
+					iBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportCurrentLayerAsTexture );
+					iBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportTextureToOperatingSystem );
+				}
+				iBuilder.EndSection();
+			}
+		)
     );
 }
 
@@ -298,14 +301,12 @@ FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
         FOdysseyRasterBlockMutator rasterBlockMutator(layerImageRaster->GetRasterBlock(), false);
         rasterBlockMutator.EditTilesFromRects(
             { textureBlock->Rect() },
-            FOdysseyRasterBlockMutator::FEditDelegate::CreateLambda(
-                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
-                {
-                    ctx.Copy(*textureBlock, *iBlock);
-                    ctx.Finish();
-                    return {};
-                }
-            )
+			[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
+			{
+				ctx.Copy(*textureBlock, *iBlock);
+				ctx.Finish();
+				return {};
+			}
         );
         rasterBlockMutator.Commit();
         
@@ -353,7 +354,7 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
         if ( !textureLayer )
             continue;
 
-        TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
+        TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
         renderer->Init();
 
         FOdysseyImageRendererCopyParams params(block, { block->Rect() });
@@ -425,7 +426,7 @@ FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
     outTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
     outTexture->LODGroup = TextureGroup::TEXTUREGROUP_Pixels2D;
 
-    TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
+    TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
     renderer->Init();
 
     FOdysseyImageRendererCopyParams params(block, { block->Rect() });
@@ -454,7 +455,7 @@ FOdysseyTextureEditorLayerStackTab::CreateNewLayer()
         UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
         if (currentLayer)
         {
-            if (currentLayer->CanHaveChildren && currentLayer->IsExpanded)
+            if (currentLayer->CanHaveChildren && currentLayer->DisplayChildren)
             {
                 layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), currentLayer);
             }
@@ -474,7 +475,7 @@ FOdysseyTextureEditorLayerStackTab::CreateNewLayer()
             return;
     }
             
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(layer));
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), layer);
 }
 
 void
@@ -487,7 +488,7 @@ FOdysseyTextureEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
     if ( !layerStack->CurrentLayer )
         return;
         
-    if ( layerStack->CurrentLayer->GetIsLocked() )
+    if ( layerStack->CurrentLayer->IsLockedRecursively() )
         return;
 
     if ( !FOdysseyObjectEditorUtils::HasProperty(layerStack->CurrentLayer.Get(), "Opacity") )
@@ -497,7 +498,7 @@ FOdysseyTextureEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("layerstack-tab.transaction.shortcut.set-layer-opacity", "Change Layer Opacity"));
 #endif
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack->CurrentLayer.Get(), "Opacity", FMath::Clamp(iOpacity, 0.f, 1.f));
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack->CurrentLayer.Get(), GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), FMath::Clamp(iOpacity, 0.f, 1.f));
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -4,17 +4,12 @@
 #pragma once
 
 #include "OdysseyLayer.h"
-
-#include "UObject/OdysseyObjectPropertyTracker.h"
-#include "Misc/OdysseyHandle.h"
-#include "OdysseyAnimationImageRenderingAbility.h"
-#include <ULIS>
+#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 
 #include "OdysseyAnimationLayer.generated.h"
 
-class FOdysseyAnimationCellsContainer;
-class FOdysseyAnimationLightTable;
 class UOdysseyAnimation;
+class UOdysseyAnimationCell;
 
 UENUM(BlueprintType)
 enum class EOdysseyAnimationLayerImagePostBehaviour : uint8
@@ -25,49 +20,130 @@ enum class EOdysseyAnimationLayerImagePostBehaviour : uint8
     PingPong
 };
 
-UCLASS(BlueprintType)
+UCLASS(Abstract, BlueprintType, HideDropdown)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayer
     : public UOdysseyLayer
-    , public FOdysseyAnimationImageRenderingAbility
 {
     GENERATED_BODY()
 
 public:
-    //Getters
-    UOdysseyAnimation* GetAnimation() const;
-    virtual FInt32Range GetFrameRange() const;
-    virtual TSharedPtr<FOdysseyAnimationCellsContainer> GetCellsContainer() const { return nullptr; }
+	virtual void PostInitProperties() override;
 
-    int GetPreBehaviourFrame(EOdysseyAnimationLayerImagePostBehaviour iBehaviour, int iFrame) const;
-    int GetPostBehaviourFrame(EOdysseyAnimationLayerImagePostBehaviour iBehaviour, int iFrame) const;
-    
+public:
+	//Invalidate the frame ranges of all cells
+	//Used for performance optimisation to avoid iterating over all cells each time we need a cell's frame range
+	void InvalidateCellsFrameRanges();
+	const TArray<FInt32Range>& GetCellsFrameRanges() const;
+
+public:
+    //Getters
+	UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
+    UOdysseyAnimation* GetAnimation() const;
+
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    virtual FInt32Range GetFrameRange() const;
+
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    int GetPreBehaviourFrame(EOdysseyAnimationLayerImagePostBehaviour Behaviour, int Frame) const;
+
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    int GetPostBehaviourFrame(EOdysseyAnimationLayerImagePostBehaviour Behaviour, int Frame) const;
+
+public:
+	//Cells
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+	const TArray<TSubclassOf<UOdysseyAnimationCell>>& GetSupportedCellTypes() const;
+
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+	const TArray<UOdysseyAnimationCell*>& GetCells() const;
+
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+	UOdysseyAnimationCell* GetCellAtFrame(int Frame) const;
+	
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+	bool HasCellAtFrame(int Frame) const;
+
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer", meta=(DeterminesOutputType = "CellType"))
+	UOdysseyAnimationCell* AddCell(TSubclassOf<UOdysseyAnimationCell> CellType, int Index = -1 );
+
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer", meta=(DeterminesOutputType = "CellType"))
+	TArray<UOdysseyAnimationCell*> AddCells(TSubclassOf<UOdysseyAnimationCell> CellType, int Index = -1, int Count = 1 );
+
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+	void RemoveCell(UOdysseyAnimationCell* Cell); //Prevent Empty Layer ?
+
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+	void RemoveCells(const TArray<UOdysseyAnimationCell*>& Cells); //Prevent Empty Layer ?
+
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+	void RemoveCellAtIndex(int Index);
+
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    UOdysseyAnimationCell* CopyCell(UOdysseyAnimationCell* Cell, int Index = -1);
+
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
+    TArray<UOdysseyAnimationCell*> CopyCells(TArray<UOdysseyAnimationCell*> Cells, int Index = -1);
+
 protected:
     //Property changes
-    virtual void ChildrenChanged() override;
-    virtual void IsActivatedChanged() override;
+	virtual void LightTableChanged(bool iIsInteractive);
     virtual void PreBehaviourChanged();
     virtual void PostBehaviourChanged();
-    virtual void PropertyChanged(const FName& iPropertyName) override;
+	virtual void CellsChanged(bool iIsInteractive);
+	virtual void CellsOffsetChanged(bool iIsInteractive);
+    virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
+
+protected:
+	TArray<FGuid> GetLighttableImageRenderingComposition(int iFrameIndex) const;
+	void UpdateCellsIndexInLayer();
 
 public:
-	//FOdysseyImageRenderingAbility overrides
-	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
-	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
-    virtual TSharedPtr<FOdysseyAnimationLightTable> GetLightTable() const;
-    virtual bool GetIsLightTableActivated() const;
-    virtual FSimpleMulticastDelegate& OnLightTableIsActivatedChanged();
+    FSimpleMulticastDelegate& OnLightTableChanged();
+    FSimpleMulticastDelegate& OnCellsChanged();
+
+private:
+	mutable TArray<FInt32Range> mCellsFrameRanges;
+
+protected:
+	friend class FOdysseyAnimationCellsContainerImport;
+	friend class FOdysseyAnimationLayerImageRasterImport;
+	friend class FOdysseyAnimationLayerImageVectorImport;
+
+	UPROPERTY()
+	TArray<TSubclassOf<UOdysseyAnimationCell>> SupportedCellTypes;
+
+	UPROPERTY()
+	TArray<TObjectPtr<UOdysseyAnimationCell>> Cells;
+
+private:
+	UFUNCTION(BlueprintSetter)
+	void CellsOffsetBlueprintSetter(int Value);
+
+	UFUNCTION(BlueprintSetter)
+	void PreBehaviourBlueprintSetter(EOdysseyAnimationLayerImagePostBehaviour Value);
+
+	UFUNCTION(BlueprintSetter)
+	void PostBehaviourBlueprintSetter(EOdysseyAnimationLayerImagePostBehaviour Value);
+
+	UFUNCTION(BlueprintSetter)
+	void LighttableBlueprintSetter(FOdysseyAnimationLightTable Value);
 
 public:
-    //UObject overrides
-    virtual void PostLoad() override;
+	UPROPERTY(BlueprintReadOnly, Category="Odyssey|Layer")
+	TSubclassOf<UOdysseyAnimationCell> DefaultCellClass = nullptr;
 
-public:
-    UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=CellsOffsetBlueprintSetter)
+	int CellsOffset = 0;
+
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=PreBehaviourBlueprintSetter)
     EOdysseyAnimationLayerImagePostBehaviour PreBehaviour = EOdysseyAnimationLayerImagePostBehaviour::None;
 
-    UPROPERTY()
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=PostBehaviourBlueprintSetter)
     EOdysseyAnimationLayerImagePostBehaviour PostBehaviour = EOdysseyAnimationLayerImagePostBehaviour::None;
 
-    FSimpleMulticastDelegate mOnLightTableIsActivatedChanged;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=LighttableBlueprintSetter, NonTransactional)
+	FOdysseyAnimationLightTable Lighttable;
+
+    FSimpleMulticastDelegate mOnLightTableChanged;
+	FSimpleMulticastDelegate mOnCellsChanged;
 };

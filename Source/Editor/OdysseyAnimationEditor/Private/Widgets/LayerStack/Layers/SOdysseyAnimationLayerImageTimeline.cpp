@@ -7,7 +7,6 @@
 #include "Widgets/LayerStack/Cells/SOdysseyAnimationCells.h"
 #include "LayerStack/Tools/OdysseyAnimationTimelineTool.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "DragDropOperations/OdysseyAnimationCellsDragDropOperation.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
@@ -15,7 +14,6 @@
 #include "OdysseyStyleSet.h"
 #include "Shortcuts/Timeline/OdysseyAnimationTimelineCellsShortcuts.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -42,24 +40,15 @@ SOdysseyAnimationLayerImageTimeline::Construct(
 
     mExtension = iExtension;
     mLayer = iLayer;
-    mIsCollapsed = iArgs._IsCollapsed;
-
-    TAttribute<FMargin> cellsPadding = TAttribute<FMargin>::CreateLambda(
-        [this]()
-        {
-            return /*IsCollapsed() ? FMargin(0.f, 5.f, 0.f, 5.f) :*/ FMargin(0);
-        }
-    );
+    mDisplayOptions = iArgs._DisplayOptions;
     
     ChildSlot
     [
         SNew(SVerticalBox)
         + SVerticalBox::Slot()
-        .Padding(cellsPadding)
         [
-            SNew(SOdysseyAnimationCells, mExtension, mLayer, mLayer->GetCellsContainer())
-            .IsEnabled_Lambda([this](){ return !mLayer->GetIsLocked();})
-            .OnCreateCell(this, &SOdysseyAnimationLayerImageTimeline::OnCreateCell)
+            SNew(SOdysseyAnimationCells, mExtension, mLayer)
+            .IsEnabled_Lambda([this](){ return !mLayer->IsLockedRecursively();})
             .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
             .ShowHandles(this, &SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles)
         ]
@@ -119,20 +108,16 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry,
 {
 	if (iEvent.GetEffectingButton() == EKeys::RightMouseButton)
     {
-        int frame = mExtension->Timeline()->GetFrameIndexAtMousePosition(iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X);
-        if (frame == INDEX_NONE)
+        int frame = (int)mExtension->Timeline()->MousePositionToFrame(iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X);
+        if (frame < 0)
             return FReply::Unhandled();
 
         //On Right click, select cell if none are selected yet
-        TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-        if (!cellsContainer)
-            return FReply::Unhandled();
-
-        TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame(frame);
+        UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame(frame);
         if (!cell)
             return FReply::Unhandled();
 
-        const TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
+        const TArray<UOdysseyAnimationCell*> selectedCells = mExtension->Timeline()->GetSelectedCells();
         if (selectedCells.IsEmpty() || !selectedCells.Contains(cell))
             mExtension->Timeline()->SetSelectedCells({cell});
 
@@ -182,14 +167,12 @@ SOdysseyAnimationLayerImageTimeline::OnPaint(const FPaintArgs& Args, const FGeom
 
 	const float height = AllottedGeometry.GetLocalSize().Y;
 	const float width = AllottedGeometry.GetLocalSize().X;
-	float offset = mExtension->Timeline()->GetOffset();
-	const float frameSize = mExtension->Timeline()->GetFrameWidth();
 
 	if(mIsDraggingOver && mDragState != kDrag_None)
 	{
         //Dragging Zone
         FLinearColor lineColor(0.2f, 0.2f, 1.f);
-		float dragPos = (mDragPosition - offset) * frameSize;
+		float dragPos = mExtension->Timeline()->FrameToMousePosition(mDragPosition);
 
         //Dragging Bar
 		FSlateDrawElement::MakeBox(
@@ -265,29 +248,23 @@ SOdysseyAnimationLayerImageTimeline::OnDragOver(const FGeometry& iGeometry, cons
 
     if (!operation->GetData().CanPaste(mLayer))
         return FReply::Unhandled();
-    
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return FReply::Unhandled();
 
-    float timelineOffset = mExtension->Timeline()->GetOffset();
     float posX = iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X;
-    float frameWidth = mExtension->Timeline()->GetFrameWidth();
-    float frame = (posX / frameWidth + timelineOffset);
+    float frame = mExtension->Timeline()->MousePositionToFrame(posX);
 
-    TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCellAtFrame((int)frame);
+    UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame((int)frame);
     if (!cell)
         return FReply::Unhandled();
 
-    int cellStartFrame = cellsContainer->GetCellFrame(cell);
-    float position = (frame - cellStartFrame) / cell->GetLength();
+    int cellStartFrame = cell->GetFrameRange().GetLowerBoundValue();
+    float position = (frame - cellStartFrame) / cell->Exposure;
     if (position < 0.5f)
     {
         mDragPosition = cellStartFrame;
     }
     else
     {
-        mDragPosition = cellStartFrame + cell->GetLength();
+        mDragPosition = cellStartFrame + cell->Exposure;
     }
 
     /*
@@ -302,9 +279,9 @@ SOdysseyAnimationLayerImageTimeline::OnDragOver(const FGeometry& iGeometry, cons
     UOdysseyAnimationLayer* layer = operation->GetLayer();
     if (layer == mLayer)
     {
-        const TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
-        TSharedPtr<FOdysseyAnimationCell> nextCell = cellsContainer->GetCellAtFrame(mDragPosition);
-        TSharedPtr<FOdysseyAnimationCell> previousCell = cellsContainer->GetCellAtFrame(mDragPosition - 1);
+        const TArray<UOdysseyAnimationCell*> selectedCells = mExtension->Timeline()->GetSelectedCells();
+        UOdysseyAnimationCell* nextCell = layer->GetCellAtFrame(mDragPosition);
+        UOdysseyAnimationCell* previousCell = layer->GetCellAtFrame(mDragPosition - 1);
 
         if (selectedCells.Contains(nextCell) && selectedCells.Contains(previousCell))
         {
@@ -396,28 +373,16 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder
 
     iMenuBuilder.BeginSection("Cells", LOCTEXT("timeline-cells.context-menu.cells-section.name", "Cells"));
         iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().ConvertToStaggerCell, TEXT("ConvertToStagger"));
+		iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().ConvertToReferenceCells);
         iMenuBuilder.AddMenuEntry(
-            FOdysseyAnimationEditorCommands::Get().SetCellLength,
+            FOdysseyAnimationEditorCommands::Get().SetCellExposure,
             NAME_None,
-            LOCTEXT("timeline-cells.context-menu.set-selected-cells-length.name", "Set Length")
+            LOCTEXT("timeline-cells.context-menu.set-selected-cells-exposure.name", "Set Exposure")
         );
         iMenuBuilder.AddSubMenu(
             LOCTEXT("timeline-cells.context-menu.cell-mark.name", "Mark"),
             LOCTEXT("timeline-cells.context-menu.cell-mark.tooltip", "Set a mark on the selected cells"),
             FNewMenuDelegate::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::BuildCellsMarksSubMenu)
-        );
-    iMenuBuilder.EndSection();
-
-    iMenuBuilder.BeginSection("Layer", LOCTEXT("timeline-cells.context-menu.layer-section.name", "Layer"));
-        iMenuBuilder.AddSubMenu(
-            LOCTEXT("timeline-cells.context-menu.pre-behaviour-submenu.name", "Pre Behaviour"),
-            LOCTEXT("timeline-cells.context-menu.pre-behaviour-submenu.tooltip", "Set Layer's Pre Behaviour"),
-            FNewMenuDelegate::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::BuildPreBehaviourSubMenu)
-        );
-        iMenuBuilder.AddSubMenu(
-            LOCTEXT("timeline-cells.context-menu.post-behaviour-submenu.name", "Post Behaviour"),
-            LOCTEXT("timeline-cells.context-menu.post-behaviour-submenu.tooltip", "Set Layer's Post Behaviour"),
-            FNewMenuDelegate::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::BuildPostBehaviourSubMenu)
         );
     iMenuBuilder.EndSection();
 }
@@ -494,235 +459,77 @@ SOdysseyAnimationLayerImageTimeline::BuildCellsMarksSubMenu(FMenuBuilder& iMenuB
 }
 
 void
-SOdysseyAnimationLayerImageTimeline::BuildPreBehaviourSubMenu(FMenuBuilder& iMenuBuilder)
-{
-    iMenuBuilder.AddMenuEntry(
-        LOCTEXT("timeline-cells.context-menu.pre-behaviour.none", "None"),
-        TAttribute<FText>(),
-        FSlateIcon(),
-        FUIAction(
-            FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SetPreBehaviour, EOdysseyAnimationLayerImagePostBehaviour::None),
-            FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanSetPreBehaviour),
-            FIsActionChecked::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::IsPreBehaviour, EOdysseyAnimationLayerImagePostBehaviour::None)
-        ),
-        NAME_None,
-        EUserInterfaceActionType::RadioButton
-    );
-    iMenuBuilder.AddMenuEntry(
-        LOCTEXT("timeline-cells.context-menu.pre-behaviour.hold", "Hold"),
-        TAttribute<FText>(),
-        FSlateIcon(),
-        FUIAction(
-            FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SetPreBehaviour, EOdysseyAnimationLayerImagePostBehaviour::Hold),
-            FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanSetPreBehaviour),
-            FIsActionChecked::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::IsPreBehaviour, EOdysseyAnimationLayerImagePostBehaviour::Hold)
-        ),
-        NAME_None,
-        EUserInterfaceActionType::RadioButton
-    );
-    iMenuBuilder.AddMenuEntry(
-        LOCTEXT("timeline-cells.context-menu.pre-behaviour.loop", "Loop"),
-        TAttribute<FText>(),
-        FSlateIcon(),
-        FUIAction(
-            FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SetPreBehaviour, EOdysseyAnimationLayerImagePostBehaviour::Loop),
-            FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanSetPreBehaviour),
-            FIsActionChecked::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::IsPreBehaviour, EOdysseyAnimationLayerImagePostBehaviour::Loop)
-        ),
-        NAME_None,
-        EUserInterfaceActionType::RadioButton
-    );
-    iMenuBuilder.AddMenuEntry(
-        LOCTEXT("timeline-cells.context-menu.pre-behaviour.pingpong", "PingPong"),
-        TAttribute<FText>(),
-        FSlateIcon(),
-        FUIAction(
-            FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SetPreBehaviour, EOdysseyAnimationLayerImagePostBehaviour::PingPong),
-            FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanSetPreBehaviour),
-            FIsActionChecked::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::IsPreBehaviour, EOdysseyAnimationLayerImagePostBehaviour::PingPong)
-        ),
-        NAME_None,
-        EUserInterfaceActionType::RadioButton
-    );
-}
-
-void
-SOdysseyAnimationLayerImageTimeline::BuildPostBehaviourSubMenu(FMenuBuilder& iMenuBuilder)
-{
-    iMenuBuilder.AddMenuEntry(
-        LOCTEXT("timeline-cells.context-menu.post-behaviour.none", "None"),
-        TAttribute<FText>(),
-        FSlateIcon(),
-        FUIAction(
-            FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SetPostBehaviour, EOdysseyAnimationLayerImagePostBehaviour::None),
-            FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanSetPostBehaviour),
-            FIsActionChecked::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::IsPostBehaviour, EOdysseyAnimationLayerImagePostBehaviour::None)
-        ),
-        NAME_None,
-        EUserInterfaceActionType::RadioButton
-    );
-    iMenuBuilder.AddMenuEntry(
-        LOCTEXT("timeline-cells.context-menu.post-behaviour.hold", "Hold"),
-        TAttribute<FText>(),
-        FSlateIcon(),
-        FUIAction(
-            FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SetPostBehaviour, EOdysseyAnimationLayerImagePostBehaviour::Hold),
-            FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanSetPostBehaviour),
-            FIsActionChecked::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::IsPostBehaviour, EOdysseyAnimationLayerImagePostBehaviour::Hold)
-        ),
-        NAME_None,
-        EUserInterfaceActionType::RadioButton
-    );
-    iMenuBuilder.AddMenuEntry(
-        LOCTEXT("timeline-cells.context-menu.post-behaviour.loop", "Loop"),
-        TAttribute<FText>(),
-        FSlateIcon(),
-        FUIAction(
-            FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SetPostBehaviour, EOdysseyAnimationLayerImagePostBehaviour::Loop),
-            FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanSetPostBehaviour),
-            FIsActionChecked::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::IsPostBehaviour, EOdysseyAnimationLayerImagePostBehaviour::Loop)
-        ),
-        NAME_None,
-        EUserInterfaceActionType::RadioButton
-    );
-    iMenuBuilder.AddMenuEntry(
-        LOCTEXT("timeline-cells.context-menu.post-behaviour.pingpong", "PingPong"),
-        TAttribute<FText>(),
-        FSlateIcon(),
-        FUIAction(
-            FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::SetPostBehaviour, EOdysseyAnimationLayerImagePostBehaviour::PingPong),
-            FCanExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::CanSetPostBehaviour),
-            FIsActionChecked::CreateRaw(this, &SOdysseyAnimationLayerImageTimeline::IsPostBehaviour, EOdysseyAnimationLayerImagePostBehaviour::PingPong)
-        ),
-        NAME_None,
-        EUserInterfaceActionType::RadioButton
-    );
-}
-
-void
-SOdysseyAnimationLayerImageTimeline::SetPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour)
-{
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-post-behaviour", "Set Post Behaviour"));
-#endif
-    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "PostBehaviour", iBehaviour);
-}
-
-bool
-SOdysseyAnimationLayerImageTimeline::IsPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const
-{
-    return mLayer->PostBehaviour == iBehaviour;
-}
-
-bool
-SOdysseyAnimationLayerImageTimeline::CanSetPostBehaviour() const
-{
-    return !mLayer->GetIsLocked();
-}
-
-void
-SOdysseyAnimationLayerImageTimeline::SetPreBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour)
-{
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-pre-behaviour", "Set Pre Behaviour"));
-#endif
-    FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, "PreBehaviour", iBehaviour);
-}
-
-bool
-SOdysseyAnimationLayerImageTimeline::IsPreBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const
-{
-    return mLayer->PreBehaviour == iBehaviour;
-}
-
-bool
-SOdysseyAnimationLayerImageTimeline::CanSetPreBehaviour() const
-{
-    return !mLayer->GetIsLocked();
-}
-
-void
 SOdysseyAnimationLayerImageTimeline::MapActions(TSharedPtr<FUICommandList> iCommandList, int iFrame)
 {
     mAnimationTimelineCellsShortcuts = MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(mLayer->GetLayerStack(), mExtension);
     mAnimationTimelineCellsShortcuts->MapActionsToCommandList(iCommandList.ToSharedRef());
+
+	mAnimationTimelineCellImageStaggerShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(mLayer->GetLayerStack(), mExtension);
+	mAnimationTimelineCellImageStaggerShortcuts->MapActionsToCommandList(iCommandList.ToSharedRef());
 }
 
 EVisibility
 SOdysseyAnimationLayerImageTimeline::GetLightTableVisibility() const
 {
-    return mLayer->GetIsLightTableActivated() && !mIsCollapsed.Get() ? EVisibility::Visible : EVisibility::Collapsed;
+    return mLayer->Lighttable.bIsActivated && mDisplayOptions.Get() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 bool
-SOdysseyAnimationLayerImageTimeline::IsCollapsed() const
+SOdysseyAnimationLayerImageTimeline::DisplayOptions() const
 {
-    return mIsCollapsed.Get();
+    return mDisplayOptions.Get();
 }
 
 bool
 SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles() const
 {
-    return !mIsCollapsed.Get();
+    return mDisplayOptions.Get();
 }
 
 FReply
 SOdysseyAnimationLayerImageTimeline::OnContextMenuMinusButtonClicked()
 {
-    mAnimationTimelineCellsShortcuts->Action_DecreaseCellLength();
+    mAnimationTimelineCellsShortcuts->Action_DecreaseCellExposure();
     return FReply::Handled();
 }
 
 FReply
 SOdysseyAnimationLayerImageTimeline::OnContextMenuPlusButtonClicked()
 {
-    mAnimationTimelineCellsShortcuts->Action_IncreaseCellLength();
+    mAnimationTimelineCellsShortcuts->Action_IncreaseCellExposure();
     return FReply::Handled();
 }
 
 void
 SOdysseyAnimationLayerImageTimeline::RemoveCellMark()
 {
-    if (mLayer->GetIsLocked())
+    if (mLayer->IsLockedRecursively())
         return;
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return;
-
-    TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = mExtension->Timeline()->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return;
 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-mark", "Set cell mark"));
 #endif
-    int frame = cellsContainer->GetCellFrame(selectedCells[0]);
-    UOdysseyAnimation* animation = mLayer->GetAnimation();
-
-    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
-    currentFrameMutator.Set(frame);
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(selectedCells[0]->GetAnimation());
+    currentFrameMutator.Set(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
     currentFrameMutator.Commit();
     
-    FOdysseyAnimationCellsMutator mutator(mLayer, cellsContainer);
-    for (TSharedPtr<FOdysseyAnimationCell> selectedCell : selectedCells)
+    for (UOdysseyAnimationCell* selectedCell : selectedCells)
     {
-        mutator.SetMarkId(selectedCell, INDEX_NONE);
+		FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
     }
-    mutator.Commit();
 }
 
 bool
 SOdysseyAnimationLayerImageTimeline::CanRemoveCellMark() const
 {
-    if (mLayer->GetIsLocked())
+    if (mLayer->IsLockedRecursively())
         return false;
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return false;
-
-    TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = mExtension->Timeline()->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return false;
 
@@ -732,46 +539,33 @@ SOdysseyAnimationLayerImageTimeline::CanRemoveCellMark() const
 void
 SOdysseyAnimationLayerImageTimeline::SetCellMark( int iMarkId )
 {
-    if (mLayer->GetIsLocked())
+    if (mLayer->IsLockedRecursively())
         return;
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return;
-
-    TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = mExtension->Timeline()->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return;
 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.set-mark", "Set cell mark"));
 #endif
-    int frame = cellsContainer->GetCellFrame(selectedCells[0]);
-    UOdysseyAnimation* animation = mLayer->GetAnimation();
-
-    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
-    currentFrameMutator.Set(frame);
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(selectedCells[0]->GetAnimation());
+    currentFrameMutator.Set(selectedCells[0]->GetFrameRange().GetLowerBoundValue());
     currentFrameMutator.Commit();
     
-    FOdysseyAnimationCellsMutator mutator(mLayer, cellsContainer);
-    for (TSharedPtr<FOdysseyAnimationCell> selectedCell : selectedCells)
+    for (UOdysseyAnimationCell* selectedCell : selectedCells)
     {
-        mutator.SetMarkId(selectedCell, iMarkId);
+		FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), iMarkId);
     }
-    mutator.Commit();
 }
 
 bool
 SOdysseyAnimationLayerImageTimeline::CanSetCellMark() const
 {
-    if (mLayer->GetIsLocked())
+    if (mLayer->IsLockedRecursively())
         return false;
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return false;
-
-    TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = mExtension->Timeline()->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return false;
 
@@ -781,20 +575,16 @@ SOdysseyAnimationLayerImageTimeline::CanSetCellMark() const
 bool
 SOdysseyAnimationLayerImageTimeline::IsCellMarkChecked(int iMarkId) const
 {
-    if (mLayer->GetIsLocked())
+    if (mLayer->IsLockedRecursively())
         return false;
 
-    TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-    if (!cellsContainer)
-        return false;
-
-    TArray<TSharedPtr<FOdysseyAnimationCell>> selectedCells = mExtension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = mExtension->Timeline()->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return false;
 
-    for (TSharedPtr<FOdysseyAnimationCell> selectedCell : selectedCells)
+    for (UOdysseyAnimationCell* selectedCell : selectedCells)
     {
-        if (selectedCell->GetMarkId() != iMarkId)
+        if (selectedCell->Mark != iMarkId)
             return false;
     }
 

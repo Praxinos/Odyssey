@@ -157,7 +157,7 @@ FOdysseyTextureEditorGUI::CreateRightSection()
 } */
 
 void
-FOdysseyTextureEditorGUI::ExtendMenu( FToolMenuOwner iOwner, FName iMenuName )
+FOdysseyTextureEditorGUI::ExtendMenu( TSharedRef<FExtender> iExtender )
 {
 }
 

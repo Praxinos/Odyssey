@@ -19,23 +19,6 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageRaster
     : public UOdysseyTextureLayer
 {
     GENERATED_BODY()
-    
-public:
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     * 
-     */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnBlendModeChanged, UOdysseyTextureLayerImageRaster*)
-
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     * 
-     */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnOpacityChanged, UOdysseyTextureLayerImageRaster*)
-
-public:
-    static FOnBlendModeChanged& OnBlendModeChanged();
-    static FOnOpacityChanged& OnOpacityChanged();
 
 public:
     ~UOdysseyTextureLayerImageRaster();
@@ -43,7 +26,6 @@ public:
 
 public:
     //UOdysseyLayer overrides
-    virtual void OnCreated_Implementation() override;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
 public:
@@ -65,15 +47,10 @@ protected:
     void OnBlockCommited(const TArray<::ULIS::FRectI>& iRects);
     void OnBlockPtrChanged();
 
-    void OpacityChanged();
-    void BlendModeChanged();
-    virtual void PropertyChanged(const FName& iPropertyName) override;
-
 public:
     // UObject overrides
     virtual void PostInitProperties() override;
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
-    virtual void PostLoad() override;
 
 public:
     //UObject overrides
@@ -87,10 +64,8 @@ public:
 
 public:
 	//FOdysseyImageRenderingAbility overrides
-	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType) const override;
-    virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
-    virtual float GetImageRenderingOpacity() const override;
+	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
+	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0) const override;
 
 private:
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
@@ -103,13 +78,11 @@ private:
 private:
     TSharedPtr<FOdysseyRasterBlock> RasterBlock;
 
+private:
+	UFUNCTION(BlueprintSetter)
+	void IsAlphaLockedBlueprintSetter(bool Value);
+
 public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Texture | LayerStack")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
     bool IsAlphaLocked = false;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Texture | LayerStack")
-	EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Texture | LayerStack")
-    float Opacity = 1.0f;
 };

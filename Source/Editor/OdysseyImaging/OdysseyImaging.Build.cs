@@ -16,6 +16,8 @@ public class OdysseyImaging : ModuleRules
                 "DerivedDataCache",
                 "Engine",
                 "ImageCore",
+				"Paper2D",
+				"Paper2DEditor",
                 "RenderCore",
                 "RHI",
                 "TargetPlatform",

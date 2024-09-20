@@ -13,7 +13,7 @@
 
 #include "OdysseyTextureLayerStackUserData.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerStackUserData : public UAssetUserData
 {
     GENERATED_BODY()
@@ -34,8 +34,8 @@ public:
     UOdysseyTextureLayerStack* GetLayerStack();
     UTexture2D* GetTexture();
     
-private:
-	UPROPERTY()
+public:
+	UPROPERTY(BlueprintReadOnly, Category="Odyssey|LayerStack")
     TObjectPtr<UOdysseyTextureLayerStack> LayerStack;
 };
 

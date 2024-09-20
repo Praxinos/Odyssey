@@ -24,7 +24,7 @@ protected:
     virtual const FName& GetId() const override;
     virtual TSharedPtr<SWidget> CreateWidget() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
-    virtual void ExtendMenu( FToolMenuOwner iOwner, FName iMenuName ) override;
+    virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
 
 protected:
     // Widget Getters
@@ -35,7 +35,8 @@ protected:
 
 private:
     //Methods
-    virtual void ExtendMenuFile( FToolMenuOwner iOwner, FName iMenuName );
+	void MapActions( TSharedPtr<FUICommandList> iCommandList );
+    virtual void ExtendMenuFile( TSharedRef<FExtender> iExtender );
     virtual void ImportTexturesAsLayers();
     virtual void ExportTextureToOperatingSystem();
     virtual void ExportLayersAsTextures();

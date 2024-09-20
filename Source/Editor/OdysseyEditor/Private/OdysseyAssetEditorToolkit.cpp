@@ -31,14 +31,35 @@ FOdysseyAssetEditorToolkit::Initialize(UObject* iEditedObject, TSharedPtr<FOdyss
     editedObjects.Add(iEditedObject);
 
     FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->CreateLayout(), true, false, editedObjects);
-    
-    mEditor->ExtendMenu( this, GetToolMenuName() );
-    mEditor->BindShortcuts( this );
 
+	//Add Odyssey Specific section to the main menu to add entries at the right place easier
+	UToolMenu* fileMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".File")));
+	fileMenu->FindOrAddSection("OdysseyFile");
+
+	UToolMenu* editMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".Edit")));
+	editMenu->FindOrAddSection("OdysseyEdit");
+
+	UToolMenu* assetMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".Asset")));
+	assetMenu->FindOrAddSection("OdysseyAsset");
+
+	UToolMenu* windowMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".Window")));
+	windowMenu->FindOrAddSection("OdysseyWindow");
+
+	UToolMenu* toolsMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".Tools")));
+	toolsMenu->FindOrAddSection("OdysseyTools");
+
+	UToolMenu* helpMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".Help")));
+	helpMenu->FindOrAddSection("OdysseyHelp");
+
+	TSharedRef<FExtender> extender = MakeShared<FExtender>();
+	mEditor->ExtendMenu( extender );
+	AddMenuExtender(extender);
+
+    mEditor->BindShortcuts( this );
     mEditor->OnAddEditedObjectDelegate().AddRaw(this, &FOdysseyAssetEditorToolkit::OnAddEditedObject);
     mEditor->OnRemoveEditedObjectDelegate().AddRaw(this, &FOdysseyAssetEditorToolkit::OnRemoveEditedObject);
 
-    UToolMenus::Get()->RefreshAllWidgets(); //Requested after ExtendMenu
+	RegenerateMenusAndToolbars();
 }
 
 //--------------------------------------------------------------------------------------

@@ -62,25 +62,25 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : publi
 
     public:
         UPROPERTY( EditAnywhere
-                 , Category = PathSmoothTool 
+                 , Category=PathSmoothTool 
                  , meta = ( ToolTip  = "Smoothing Mode" ) )
         ePathSmoothingMode SmoothingMode;
         ePathSmoothingMode SmoothingModeAtKeyDown; // when pressing shift
 
         UPROPERTY( EditAnywhere
-                 , Category = PathSmoothTool
+                 , Category=PathSmoothTool
                  , meta = ( ToolTip  = "Picking Radius"
                           , ClampMin = "0.0"
                           , UIMin    = "0.0" ) )
         double PickingRadius;
 
         UPROPERTY( EditAnywhere
-                 , Category = PathSmoothTool
+                 , Category=PathSmoothTool
                  , meta = ( ToolTip  = "Preserve Handle Length" ) )
         bool PreserveHandleLength;
 
         UPROPERTY( EditAnywhere
-                 , Category = PathSmoothTool
+                 , Category=PathSmoothTool
                  , meta = ( ToolTip  = "Restrict To Selected Objects" ) )
         bool RestrictToSelectedObjects;
 };

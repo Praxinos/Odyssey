@@ -7,7 +7,7 @@
 #include "PainterEditor/OdysseyPainterEditorExtension.h"
 #include "OdysseyAnimationEditorTimeline.h"
 #include "OdysseyAnimationEditorFlipSystem.h"
-#include "OdysseyAnimationImageRenderingAbility.h"
+#include "OdysseyImageRenderingAbility.h"
 
 class FOdysseyPainterEditor;
 class UOdysseyAnimation;
@@ -34,7 +34,7 @@ public:
     virtual void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder) override;
     virtual void AddReferencedObjects(FReferenceCollector& Collector);
     
-    virtual void ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName ) override;
+    virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 public:

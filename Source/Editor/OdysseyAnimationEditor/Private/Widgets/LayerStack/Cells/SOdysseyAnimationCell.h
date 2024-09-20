@@ -8,7 +8,7 @@
 struct FSlateBrush;
 class FOdysseyAnimationEditorExtension;
 class UOdysseyAnimationLayer;
-class FOdysseyAnimationCell;
+class UOdysseyAnimationCell;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationCell
     : public SCompoundWidget
@@ -25,7 +25,7 @@ public:
         const FArguments& iArgs,
         FOdysseyAnimationEditorExtension* iExtension,
         UOdysseyAnimationLayer* iAnimationLayer,
-        TSharedPtr<FOdysseyAnimationCell> iCell
+        UOdysseyAnimationCell* iCell
     );
 
 public:
@@ -50,5 +50,5 @@ private:
 private:
     FOdysseyAnimationEditorExtension* mExtension;
     UOdysseyAnimationLayer* mAnimationLayer;
-    TSharedPtr<FOdysseyAnimationCell> mCell;
+    UOdysseyAnimationCell* mCell;
 };

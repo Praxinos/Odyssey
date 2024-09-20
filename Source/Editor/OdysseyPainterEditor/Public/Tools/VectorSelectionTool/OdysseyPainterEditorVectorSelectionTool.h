@@ -91,7 +91,7 @@ protected:
 
 public:
     UPROPERTY( EditAnywhere
-             , Category = SelectionTool
+             , Category=SelectionTool
              , meta = ( ToolTip  = "Selection Shape" ) )
     EOdysseyVectorSelectionShape SelectionShape;
 };

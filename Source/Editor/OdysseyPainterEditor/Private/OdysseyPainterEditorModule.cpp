@@ -19,6 +19,7 @@
 #include "Tools/RasterDrawingTool/OdysseyBrushOptionsOverrides.h"
 #include "Tools/RasterDrawingTool/OdysseyBlendParametersOverrides.h"
 #include "FreehandShape/OdysseyFreehandShapeOverrides.h"
+#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingToolOverrides.h"
 
 #include "PainterEditor/OdysseyPainterEditorGUI.h"
 #include <ULIS>
@@ -97,6 +98,7 @@ FOdysseyPainterEditorModule::RegisterBrushOverrides()
     FOdysseyBrushOverride::Register(UOdysseyBrushOptionsOverrides::StaticClass());
     FOdysseyBrushOverride::Register(UOdysseyBlendParametersOverrides::StaticClass());
     FOdysseyBrushOverride::Register(UOdysseyFreehandShapeOverrides::StaticClass());
+	FOdysseyBrushOverride::Register(UOdysseyPainterEditorRasterDrawingToolOverrides::StaticClass());
 }
 
 void

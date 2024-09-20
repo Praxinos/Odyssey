@@ -4,7 +4,7 @@
 #include "OdysseyRasterBlock.h"
 
 void
-FOdysseyAnimationCellImageRasterExport::WriteRasterBlock( FOdysseyAnimationCellImageRaster* iAnimationCellImageRaster
+FOdysseyAnimationCellImageRasterExport::WriteRasterBlock( UOdysseyAnimationCellImageRaster* iAnimationCellImageRaster
                                                        , FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_CELLIMAGERASTER_RASTERBLOCK
@@ -16,13 +16,14 @@ FOdysseyAnimationCellImageRasterExport::WriteRasterBlock( FOdysseyAnimationCellI
 }
 
 void
-FOdysseyAnimationCellImageRasterExport::Write( FOdysseyAnimationCellImageRaster* iAnimationCellImageRaster
+FOdysseyAnimationCellImageRasterExport::Write( UOdysseyAnimationCellImageRaster* iAnimationCellImageRaster
                                              , FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::Animation::CHUNK_CELLIMAGERASTER
                             , Ar
                             , [iAnimationCellImageRaster](FArchive &Ar) -> void
     {
-        WriteRasterBlock( iAnimationCellImageRaster, Ar );
+		if (iAnimationCellImageRaster->mRasterBlock)
+        	WriteRasterBlock( iAnimationCellImageRaster, Ar );
     } );
 }

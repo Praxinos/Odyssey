@@ -4,7 +4,6 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.h"
 
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
-#include "LayerStack/LightTable/OdysseyAnimationLightTableMutator.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "Widgets/Input/SNumericEntryBox.h"
@@ -26,12 +25,12 @@ SOdysseyAnimationTimelineLightTableHeader::SOdysseyAnimationTimelineLightTableHe
 void
 SOdysseyAnimationTimelineLightTableHeader::Construct(const FArguments& iArgs)
 {
-	mLightTable = iArgs._LightTable;
+	mLayer = iArgs._Layer;
 
     ChildSlot
 	[
 		SNew(SBox)
-		.HeightOverride(FOptionalSize(SOdysseyAnimationTimelineLightTableKey::mDesiredHeight))
+		.HeightOverride(FOptionalSize(SOdysseyAnimationTimelineLightTable::mDesiredHeight))
 		[
 			SNew(SVerticalBox)
 			+ SVerticalBox::Slot()
@@ -96,19 +95,13 @@ SOdysseyAnimationTimelineLightTableHeader::Construct(const FArguments& iArgs)
 FLinearColor
 SOdysseyAnimationTimelineLightTableHeader::GetLightTablePreviousKeysColor() const
 {
-    TSharedPtr<FOdysseyAnimationLightTable> lightTable = mLightTable.Pin();
-	if (!lightTable)
-		return FLinearColor();
-    return lightTable->GetPreviousKeysColor();
+    return mLayer->Lighttable.PreviousKeysColor;
 }
 
 FLinearColor
 SOdysseyAnimationTimelineLightTableHeader::GetLightTableNextKeysColor() const
 {
-    TSharedPtr<FOdysseyAnimationLightTable> lightTable = mLightTable.Pin();
-	if (!lightTable)
-		return FLinearColor();
-    return lightTable->GetNextKeysColor();
+    return mLayer->Lighttable.NextKeysColor;
 }
 
 FReply
@@ -119,19 +112,33 @@ SOdysseyAnimationTimelineLightTableHeader::OnLightTablePreviousKeysColorMouseBut
 		PickerArgs.bUseAlpha = false;
 		PickerArgs.bOnlyRefreshOnMouseUp = false;
 		PickerArgs.bOnlyRefreshOnOk = false;
-		PickerArgs.OnColorCommitted = FOnLinearColorValueChanged::CreateLambda(
-            [this](FLinearColor iColor)
-            {
-				TSharedPtr<FOdysseyAnimationLightTable> lightTable = mLightTable.Pin();
-				if (!lightTable)
-					return;
-                FOdysseyAnimationLightTableMutator mutator(lightTable);
-                mutator.SetPreviousKeysColor(iColor);
-            }
-        );
 		PickerArgs.InitialColor = GetLightTablePreviousKeysColor();
 		PickerArgs.ParentWidget = mLightTablePreviousKeysColorBlockWidget;
 		PickerArgs.bOpenAsMenu = true;
+		PickerArgs.OnColorCommitted = FOnLinearColorValueChanged::CreateLambda(
+            [this](FLinearColor iColor)
+            {
+				FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+				lighttable.PreviousKeysColor = iColor;
+				FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
+            }
+        );
+		/** A delegate to be called when the color picker window closes. */
+		PickerArgs.OnColorPickerWindowClosed = FOnWindowClosed::CreateLambda(
+			[this](const TSharedRef<SWindow>& iWindow)
+			{
+				FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), mLayer->Lighttable, EPropertyChangeType::ValueSet);
+			}
+		);
+
+		PickerArgs.OnColorPickerCancelled = FOnColorPickerCancelled::CreateLambda(
+			[this](FLinearColor iColor)
+			{
+				FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+				lighttable.PreviousKeysColor = iColor;
+				FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
+			}
+		);
 	}
 
 	OpenColorPicker(PickerArgs);
@@ -147,19 +154,33 @@ SOdysseyAnimationTimelineLightTableHeader::OnLightTableNextKeysColorMouseButtonD
 		PickerArgs.bUseAlpha = false;
 		PickerArgs.bOnlyRefreshOnMouseUp = false;
 		PickerArgs.bOnlyRefreshOnOk = false;
-		PickerArgs.OnColorCommitted = FOnLinearColorValueChanged::CreateLambda(
-            [this](FLinearColor iColor)
-            {
-                TSharedPtr<FOdysseyAnimationLightTable> lightTable = mLightTable.Pin();
-				if (!lightTable)
-					return;
-                FOdysseyAnimationLightTableMutator mutator(lightTable);
-                mutator.SetNextKeysColor(iColor);
-            }
-        );
 		PickerArgs.InitialColor = GetLightTableNextKeysColor();
 		PickerArgs.ParentWidget = mLightTableNextKeysColorBlockWidget;
 		PickerArgs.bOpenAsMenu = true;
+		PickerArgs.OnColorCommitted = FOnLinearColorValueChanged::CreateLambda(
+            [this](FLinearColor iColor)
+            {
+				FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+				lighttable.NextKeysColor = iColor;
+				FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
+            }
+        );
+		/** A delegate to be called when the color picker window closes. */
+		PickerArgs.OnColorPickerWindowClosed = FOnWindowClosed::CreateLambda(
+			[this](const TSharedRef<SWindow>& iWindow)
+			{
+				FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), mLayer->Lighttable, EPropertyChangeType::ValueSet);
+			}
+		);
+
+		PickerArgs.OnColorPickerCancelled = FOnColorPickerCancelled::CreateLambda(
+			[this](FLinearColor iColor)
+			{
+				FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+				lighttable.NextKeysColor = iColor;
+				FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
+			}
+		);
 	}
 
 	OpenColorPicker(PickerArgs);
@@ -217,10 +238,7 @@ SOdysseyAnimationTimelineLightTableHeader::OnOptionsGetMenuContent()
 				.Value_Lambda(
 					[this]()
 					{
-						TSharedPtr<FOdysseyAnimationLightTable> lightTable = mLightTable.Pin();
-						if (!lightTable)
-							return 0;
-						return (int)(lightTable->GetPreviousKeysContrast() * 100.f + 0.5f);
+						return (int)(mLayer->Lighttable.PreviousKeysContrast + 0.5f);
 					}
 				)
 				.TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
@@ -251,10 +269,7 @@ SOdysseyAnimationTimelineLightTableHeader::OnOptionsGetMenuContent()
 				.Value_Lambda(
 					[this]()
 					{
-						TSharedPtr<FOdysseyAnimationLightTable> lightTable = mLightTable.Pin();
-						if (!lightTable)
-							return 0;
-						return (int)(lightTable->GetNextKeysContrast() * 100.f + 0.5f);
+						return (int)(mLayer->Lighttable.NextKeysContrast + 0.5f);
 					}
 				)
 				.TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
@@ -276,66 +291,47 @@ SOdysseyAnimationTimelineLightTableHeader::OnOptionsGetMenuContent()
 void
 SOdysseyAnimationTimelineLightTableHeader::OnPreviousKeysContrastValueCommitted(int iValue, ETextCommit::Type iType)
 {
-	TSharedPtr<FOdysseyAnimationLightTable> lightTable = mLightTable.Pin();
-	if (!lightTable)
-		return;
-
-	FOdysseyAnimationLightTableMutator mutator(lightTable);
-	mutator.SetPreviousKeysContrast(iValue / 100.f);
+	FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+	lighttable.PreviousKeysContrast = iValue;
+	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
 }
 
 void
 SOdysseyAnimationTimelineLightTableHeader::OnPreviousKeysContrastValueChanged(int iValue)
 {
-    TSharedPtr<FOdysseyAnimationLightTable> lightTable = mLightTable.Pin();
-	if (!lightTable)
-		return;
-	 
-	FOdysseyAnimationLightTableMutator mutator(lightTable);
-	mutator.SetPreviousKeysContrast(iValue / 100.f);
+    FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+	lighttable.PreviousKeysContrast = iValue;
+	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
 }
 
 void
 SOdysseyAnimationTimelineLightTableHeader::OnNextKeysContrastValueCommitted(int iValue, ETextCommit::Type iType)
 {
-	TSharedPtr<FOdysseyAnimationLightTable> lightTable = mLightTable.Pin();
-	if (!lightTable)
-		return;
-
-	FOdysseyAnimationLightTableMutator mutator(lightTable);
-	mutator.SetNextKeysContrast(iValue / 100.f);
+	FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+	lighttable.NextKeysContrast = iValue;
+	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
 }
 
 void
 SOdysseyAnimationTimelineLightTableHeader::OnNextKeysContrastValueChanged(int iValue)
 {
-    TSharedPtr<FOdysseyAnimationLightTable> lightTable = mLightTable.Pin();
-	if (!lightTable)
-		return;
-	 
-	FOdysseyAnimationLightTableMutator mutator(lightTable);
-	mutator.SetNextKeysContrast(iValue / 100.f);
+    FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+	lighttable.NextKeysContrast = iValue;
+	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
 }
 
 void
 SOdysseyAnimationTimelineLightTableHeader::SetDisplayPosition(EOdysseyLightTableDisplayPosition iPosition)
 {
-	TSharedPtr<FOdysseyAnimationLightTable> lightTable = mLightTable.Pin();
-	if (!lightTable)
-		return;
-
-	FOdysseyAnimationLightTableMutator mutator(lightTable);
-	mutator.SetDisplayPosition(iPosition);
+	FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+	lighttable.DisplayPosition = iPosition;
+	FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
 }
 
 bool
 SOdysseyAnimationTimelineLightTableHeader::IsDisplayPositionSet(EOdysseyLightTableDisplayPosition iPosition) const
 {
-	TSharedPtr<FOdysseyAnimationLightTable> lightTable = mLightTable.Pin();
-	if (!lightTable)
-		return false;
-
-	return lightTable->GetDisplayPosition() == iPosition;
+	return mLayer->Lighttable.DisplayPosition == iPosition;
 }
 
 #undef LOCTEXT_NAMESPACE

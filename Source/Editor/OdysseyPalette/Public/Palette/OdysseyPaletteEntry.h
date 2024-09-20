@@ -28,7 +28,7 @@ struct FPaletteEntryDescription
 
 /////////////////////////////////////////////////////
 // OdysseyColorPaletteEntry
-UCLASS(Abstract, BlueprintType, config = EditorPerProjectUserSettings, PerObjectConfig)
+UCLASS(Abstract, HideDropdown, BlueprintType, config = EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYPALETTE_API UOdysseyPaletteEntry : public UObject
 {
     GENERATED_BODY()
@@ -77,15 +77,15 @@ public:
      * @brief Called when the node has been created by the given Palette
      *
      */
-    UFUNCTION(BlueprintNativeEvent, Category = "Palette")
+    UFUNCTION(BlueprintNativeEvent, Category="Palette")
     void OnCreated();
     virtual void OnCreated_Implementation();
 
 public:
-    UFUNCTION(BlueprintPure, Category = "Palette")
+    UFUNCTION(BlueprintPure, Category="Palette")
     UOdysseyPalette* GetPalette() const;
 
-    UFUNCTION(BlueprintPure, Category = "Palette")
+    UFUNCTION(BlueprintPure, Category="Palette")
     uint8 GetUsedSetInPalete() const;
 
     /**
@@ -93,7 +93,7 @@ public:
      *
      * @return int
      */
-    UFUNCTION(BlueprintPure, Category = "Palette")
+    UFUNCTION(BlueprintPure, Category="Palette")
     TArray<UOdysseyPaletteEntry*> GetChildrenRecursively(EGetEntryChildrenMethod iMethod = EGetEntryChildrenMethod::DepthFirst) const;
 
     /**
@@ -101,7 +101,7 @@ public:
     *
     * @return int
     */
-    UFUNCTION(BlueprintPure, Category = "Palette")
+    UFUNCTION(BlueprintPure, Category="Palette")
     int GetIndexInParent() const;
 
 
@@ -110,7 +110,7 @@ public:
      *
      * @return bool
      */
-    UFUNCTION(BlueprintPure, Category = "Palette")
+    UFUNCTION(BlueprintPure, Category="Palette")
     bool IsChildOf(UOdysseyPaletteEntry* iEntry) const;
 
      /**
@@ -118,7 +118,7 @@ public:
      *
      * @return int
      */
-    UFUNCTION(BlueprintPure, Category = "Palette")
+    UFUNCTION(BlueprintPure, Category="Palette")
     UOdysseyPaletteEntry* GetParent() const;
 
     /**
@@ -126,7 +126,7 @@ public:
      *
      * @return int
      */
-    UFUNCTION(BlueprintPure, Category = "Palette")
+    UFUNCTION(BlueprintPure, Category="Palette")
     TArray<UOdysseyPaletteEntry*> GetParents() const;
 
      /**
@@ -134,7 +134,7 @@ public:
      *
      * @return int
      */
-    UFUNCTION(BlueprintPure, Category = "Palette")
+    UFUNCTION(BlueprintPure, Category="Palette")
     const TArray<UOdysseyPaletteEntry*>& GetChildren() const;
 
     virtual void AddSet();
@@ -158,32 +158,32 @@ public:
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 
 public:
-    UPROPERTY(EditAnywhere, Category = "PaletteEntry")
+    UPROPERTY(EditAnywhere, Category="PaletteEntry")
     FText EntryName;
 
-    UPROPERTY(EditDefaultsOnly, Category = "PaletteEntry")
+    UPROPERTY(EditDefaultsOnly, Category="PaletteEntry")
     FText EntryTypeName = FText::FromString(TEXT("Unnamed Entry Type"));
 
-    UPROPERTY(EditDefaultsOnly, Category = "PaletteEntry")
+    UPROPERTY(EditDefaultsOnly, Category="PaletteEntry")
     FText DefaultName = FText::FromString(TEXT("Entry"));
 
-    UPROPERTY(EditDefaultsOnly, Category = "PaletteEntry")
+    UPROPERTY(EditDefaultsOnly, Category="PaletteEntry")
     FText Description = FText::FromString(TEXT(""));
 
-    UPROPERTY(EditDefaultsOnly, Category = "PaletteEntry")
+    UPROPERTY(EditDefaultsOnly, Category="PaletteEntry")
     FSlateBrush Icon;
 
-    UPROPERTY(EditDefaultsOnly, Category = "PaletteEntry")
+    UPROPERTY(EditDefaultsOnly, Category="PaletteEntry")
     FSlateBrush IconExpanded;
 
-    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "PaletteEntry")
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="PaletteEntry")
     bool IsActivated = true;
 
     //Defaults Properties
-    UPROPERTY(EditDefaultsOnly, Category = "PaletteEntry")
+    UPROPERTY(EditDefaultsOnly, Category="PaletteEntry")
     bool CanHaveChildren = false;
 
-    UPROPERTY(config, BlueprintReadWrite, Category = "PaletteEntry", NonTransactional)
+    UPROPERTY(config, BlueprintReadWrite, Category="PaletteEntry", NonTransactional)
     bool IsExpanded = true;
 
     UPROPERTY()

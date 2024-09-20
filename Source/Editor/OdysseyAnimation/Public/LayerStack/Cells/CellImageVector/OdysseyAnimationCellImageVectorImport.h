@@ -2,7 +2,7 @@
 
 #include <Core/Core.h>
 
-class FOdysseyAnimationCellImageVector;
+class UOdysseyAnimationCellImageVector;
 
 class FOdysseyAnimationCellImageVectorImport
 {
@@ -13,14 +13,14 @@ public:
      * @param iAnimationCellImageVector 
      * @param Ar 
      */
-    static bool ODYSSEYANIMATION_API Read( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
+    static bool ODYSSEYANIMATION_API Read( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                   , FArchive &Ar );
 
 private:
     /**
      * Private import functions
      */
-    static void Read( FOdysseyAnimationCellImageVector* iAnimationCellImageVector
+    static void Read( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                   , FArchive &Ar
                                   , uint64 iChunkEnd );
 };

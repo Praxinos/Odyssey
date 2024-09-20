@@ -30,12 +30,12 @@ FOdysseyAnimationMediaSamples::OnOpen(UOdysseyAnimation* iAnimation)
 	mAnimation = iAnimation;
 	FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddRaw(this, &FOdysseyAnimationMediaSamples::OnImageRenderingChanged);
 	//IOdysseyAnimationImageRenderingAbility::OnCompositionChanged().AddRaw(this, &FOdysseyAnimationMediaSamples::OnImageRenderingCompositionChanged);
-	mTexture = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(mAnimation->Width(), mAnimation->Height(), PF_B8G8R8A8));
+	mTexture = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(mAnimation->GetWidth(), mAnimation->GetHeight(), PF_B8G8R8A8));
 	//mTexture2 = TStrongObjectPtr<UTexture2D>(UTexture2D::CreateTransient(mAnimation->Width(), mAnimation->Height(), PF_B8G8R8A8));
-	mSample = MakeShared<FOdysseyAnimationMediaTextureSample>(mAnimation->Width(), mAnimation->Height(), mTexture.Get());
+	mSample = MakeShared<FOdysseyAnimationMediaTextureSample>(mAnimation->GetWidth(), mAnimation->GetHeight(), mTexture.Get());
 	mImageRenderingComposition.Empty();
 
-	mInvalidTileMap = FULISInvalidTileMap(64, mAnimation->Width(), mAnimation->Height());
+	mInvalidTileMap = FULISInvalidTileMap(64, mAnimation->GetWidth(), mAnimation->GetHeight());
 
 	mTexture->UpdateResource();
 }
@@ -303,13 +303,13 @@ FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex)
 
 	mImageRenderingComposition = imageRenderingComposition;
 
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mAnimation->Format());
-	::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->Width(), mAnimation->Height());
+	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mAnimation->GetFormat());
+	::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight());
 	TArray<::ULIS::FEvent> events;
 	TSharedPtr<IOdysseyImageRenderer> renderer = mAnimation->BuildImageRenderer(mRenderType, mCurrentFrameIndex);
 	renderer->Init();
 
-	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format());
+	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->GetWidth(), mAnimation->GetHeight(), mAnimation->GetFormat());
 	FOdysseyImageRendererBlendParams params(block, {block->Rect()});
 	renderer->Copy(params, {});
 	ctx.Finish();
@@ -413,12 +413,12 @@ FOdysseyAnimationMediaSamples::Render()
 
     TSharedPtr<IOdysseyImageRenderer> renderer = mAnimation->BuildImageRenderer(mRenderType, mCurrentFrameIndex);
 	renderer->Init();
-	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format());
+	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->GetWidth(), mAnimation->GetHeight(), mAnimation->GetFormat());
 
 	FOdysseyImageRendererBlendParams params(block, mInvalidTileMap.InvalidRects());
 	renderer->Copy(params, {});
 
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mAnimation->Format());
+	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mAnimation->GetFormat());
 	ctx.Finish();
 
 	CopyBlockToTexture(block, mInvalidTileMap.InvalidRects());

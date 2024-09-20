@@ -5,30 +5,20 @@
 
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 
-class ODYSSEYANIMATION_API FOdysseyAnimationCellImageStagger
-    : public FOdysseyAnimationCell
-{    
-public:
-    enum class eBehaviour
-    {
-        Loop = 1, //needs to be 1 for compatibility reasons when Hold was an option
-        PingPong
-    };
+#include "OdysseyAnimationCellImageStagger.generated.h"
 
-public:
-    static TSharedRef<FOdysseyAnimationCellImageStagger> Create(UOdysseyAnimationLayer* iLayer, int iLength);
-    static const FName& StaticType();
+UENUM(BlueprintType)
+enum class EOdysseyAnimationCellImageStaggerBehaviour : uint8
+{
+	Loop,
+	PingPong
+};
 
-public:
-    virtual ~FOdysseyAnimationCellImageStagger();
-    FOdysseyAnimationCellImageStagger(UOdysseyAnimationLayer* iLayer, int iLength);
-    void Init();
-
-public:
-    virtual TSharedPtr<FOdysseyAnimationCell> Clone(UOdysseyAnimationLayer* iLayer, int iLength) const override;
-    virtual const FName& GetType() const override;
-    virtual void Serialize(FArchive& Ar);
-    virtual TSharedPtr<FOdysseyAnimationCell> CreateCellFromFrame(uint32 iFrameIndex) const override;
+UCLASS(BlueprintType)
+class ODYSSEYANIMATION_API UOdysseyAnimationCellImageStagger
+    : public UOdysseyAnimationCell
+{
+	GENERATED_BODY()
 
 public:
 	//FOdysseyImageRenderingAbility overrides
@@ -37,21 +27,35 @@ public:
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
     bool IsImageRenderingGameThreadOnly() const;
 
+	virtual void OldSerialize(FArchive& Ar) override; //DEPRECATED: Keep that for compatibility with early versions of Odyssey
+
 public:
-    TSharedPtr<FOdysseyAnimationCell> GetReferenceCellAtFrame(int iFrameIndex, int* oCellFrameIndex) const;
-    int GetStaggerFrame(int iFrameIndex) const;
-    int GetReach() const;
-    eBehaviour GetBehaviour() const;
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
+    int GetReferenceFrameAtFrame(int Frame) const;
+
+	UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
+	UOdysseyAnimationCell* GetReferenceCellAtFrame(int Frame, bool Recursive = true) const;
+
+public:
+	virtual UOdysseyAnimationCell* Break(int Frame) override;
+
+protected:	
+	void BehaviourChanged();
+	void ReachChanged(bool iIsInteractive);
+
+	virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
 
 private:
-    //Import/Export
-    friend class FOdysseyAnimationCellImageStaggerExport;
-    friend class FOdysseyAnimationCellImageStaggerImport;
-    friend class FOdysseyAnimationCellImageStaggerMutator;
-    friend class FOdysseySetBehaviourMutation;
-    friend class FOdysseySetReachMutation;
+	UFUNCTION(BlueprintSetter)
+	void BehaviourBlueprintSetter(EOdysseyAnimationCellImageStaggerBehaviour Value);
+	
+	UFUNCTION(BlueprintSetter)
+	void ReachBlueprintSetter(int Value);
 
-private:
-    eBehaviour mBehaviour;
-    uint32 mReach;
+public:
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
+    EOdysseyAnimationCellImageStaggerBehaviour Behaviour = EOdysseyAnimationCellImageStaggerBehaviour::Loop;
+
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|Cell")
+    int Reach = 0;
 };

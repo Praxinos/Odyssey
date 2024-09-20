@@ -11,6 +11,7 @@ class FOdysseyTextureEditorGUI;
 class FOdysseyTextureEditorSource;
 class FOdysseyLayerStackEditorBrushContext;
 class UOdysseyLayerStack;
+class UOdysseyTextureLayerStack;
 
 class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorExtension
     : public FOdysseyPainterEditorExtension
@@ -23,13 +24,14 @@ public:
 public:
     virtual void Initialize() override;
     virtual void Finalize() override;
-    virtual void ExtendMenu( FToolMenuOwner iOwnerFName, FName iMenuName ) override;
+    virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder) override;
 
 public:
     UTexture2D* Texture() const;
     TSharedPtr<FOdysseyTextureEditorSource> GetTextureSource() const;
+	UOdysseyTextureLayerStack* GetLayerStack() const;
 
 private:
     void OnSourceChanged();

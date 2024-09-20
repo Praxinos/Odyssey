@@ -2,29 +2,10 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyTextureLayerFolder.h"
-#include "OdysseyTextureLayerStack.h"
-#include "OdysseyTextureLayerImageRaster.h"
-#include "OdysseyPixelFormat.h"
+#include "OdysseyLayerStack.h"
 #include "EditorStyleSet.h"
-#include "ULISEventBuilder.h"
-#include "ULISLoaderModule.h"
-#include "ULISUtils.h"
 
 #define LOCTEXT_NAMESPACE "Texture"
-
-UOdysseyTextureLayerFolder::FOnBlendModeChanged&
-UOdysseyTextureLayerFolder::OnBlendModeChanged()
-{
-    static FOnBlendModeChanged onBlendModeChanged;
-    return onBlendModeChanged;
-}
-
-UOdysseyTextureLayerFolder::FOnOpacityChanged&
-UOdysseyTextureLayerFolder::OnOpacityChanged()
-{
-    static FOnOpacityChanged onOpacityChanged;
-    return onOpacityChanged;
-}
 
 UOdysseyTextureLayerFolder::UOdysseyTextureLayerFolder()
 {
@@ -61,46 +42,6 @@ UOdysseyTextureLayerFolder::GetMergeLayerTypesFromTypes(TSet<UClass*> iLayerType
     }
 
     return types;
-}
-
-void
-UOdysseyTextureLayerFolder::OpacityChanged()
-{
-    OnOpacityChanged().Broadcast(this);
-
-    //TODO: react to interactive events by not commiting immediately
-    ImageRenderingChanged();
-}
-
-void
-UOdysseyTextureLayerFolder::BlendModeChanged()
-{
-    OnBlendModeChanged().Broadcast(this);
-
-    ImageRenderingChanged();
-}
-
-void
-UOdysseyTextureLayerFolder::PropertyChanged(const FName& iPropertyName)
-{
-    Super::PropertyChanged(iPropertyName);
-
-    if (iPropertyName == "BlendMode")
-        BlendModeChanged();
-    if (iPropertyName == "Opacity")
-        OpacityChanged();
-}
-
-::ULIS::eBlendMode
-UOdysseyTextureLayerFolder::GetImageRenderingBlendMode() const
-{
-    return (::ULIS::eBlendMode)BlendMode;
-}
-
-float
-UOdysseyTextureLayerFolder::GetImageRenderingOpacity() const
-{
-    return Opacity;
 }
 
 #undef LOCTEXT_NAMESPACE

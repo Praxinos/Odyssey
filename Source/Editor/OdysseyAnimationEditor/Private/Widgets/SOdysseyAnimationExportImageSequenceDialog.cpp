@@ -42,9 +42,8 @@ SOdysseyAnimationExportImageSequenceDialog::Open(UOdysseyAnimation* iAnimation)
 void
 SOdysseyAnimationExportImageSequenceDialog::Construct(const FArguments& InArgs, UOdysseyAnimation* iAnimation)
 {
-    mAnimation = iAnimation;
-
-    mCustomRange = iAnimation->GetFrameRange();
+    mExporter.mAnimation = iAnimation;
+    mExporter.mCustomRange = iAnimation->GetFrameRange();
 
     ChildSlot
     [
@@ -71,24 +70,24 @@ SOdysseyAnimationExportImageSequenceDialog::Construct(const FArguments& InArgs, 
         ]
         + SGridPanel::Slot(1, 0)
         [
-            SNew(SEnumComboBox, StaticEnum<EOdysseyAnimationExportImageSequenceFormat>())
+            SNew(SEnumComboBox, StaticEnum<EOdysseyExportImageFormat>())
             .ContentPadding(FMargin(0))
-            .CurrentValue_Lambda([this](){ return (int32)mFormat;})
-            .OnEnumSelectionChanged_Lambda([this](int32 iValue, ESelectInfo::Type iSelectInfo){ mFormat = (EOdysseyAnimationExportImageSequenceFormat)iValue;})
+            .CurrentValue_Lambda([this](){ return (int32)mExporter.mFormat;})
+            .OnEnumSelectionChanged_Lambda([this](int32 iValue, ESelectInfo::Type iSelectInfo){ mExporter.mFormat = (EOdysseyExportImageFormat)iValue;})
         ]
         + SGridPanel::Slot(1, 1)
         [
             SNew(SEnumComboBox, StaticEnum<EOdysseyAnimationExportImageSequenceSource>())
             .ContentPadding(FMargin(0))
-            .CurrentValue_Lambda([this](){ return (int32)mSource;})
-            .OnEnumSelectionChanged_Lambda([this](int32 iValue, ESelectInfo::Type iSelectInfo){ mSource = (EOdysseyAnimationExportImageSequenceSource)iValue;})
+            .CurrentValue_Lambda([this](){ return (int32)mExporter.mSource;})
+            .OnEnumSelectionChanged_Lambda([this](int32 iValue, ESelectInfo::Type iSelectInfo){ mExporter.mSource = (EOdysseyAnimationExportImageSequenceSource)iValue;})
         ]
         + SGridPanel::Slot(1, 2)
         [
             SNew(SEnumComboBox, StaticEnum<EOdysseyAnimationExportImageSequenceRange>())
             .ContentPadding(FMargin(0))
-            .CurrentValue_Lambda([this](){ return (int32)mRange;})
-            .OnEnumSelectionChanged_Lambda([this](int32 iValue, ESelectInfo::Type iSelectInfo){ mRange = (EOdysseyAnimationExportImageSequenceRange)iValue;})
+            .CurrentValue_Lambda([this](){ return (int32)mExporter.mRange;})
+            .OnEnumSelectionChanged_Lambda([this](int32 iValue, ESelectInfo::Type iSelectInfo){ mExporter.mRange = (EOdysseyAnimationExportImageSequenceRange)iValue;})
         ]
         + SGridPanel::Slot(1, 3)
         [
@@ -97,8 +96,8 @@ SOdysseyAnimationExportImageSequenceDialog::Construct(const FArguments& InArgs, 
             + SHorizontalBox::Slot()
             [
                 SNew(SNumericEntryBox<int>)
-                .Visibility_Lambda([this](){ return mRange == EOdysseyAnimationExportImageSequenceRange::Custom ? EVisibility::Visible : EVisibility::Collapsed; })
-                .Value_Lambda([this](){ return mCustomRange.GetLowerBoundValue(); })
+                .Visibility_Lambda([this](){ return mExporter.mRange == EOdysseyAnimationExportImageSequenceRange::Custom ? EVisibility::Visible : EVisibility::Collapsed; })
+                .Value_Lambda([this](){ return mExporter.mCustomRange.GetLowerBoundValue(); })
                 .AllowSpin(true)
                 .Delta(1)
                 .LinearDeltaSensitivity(10)
@@ -106,15 +105,15 @@ SOdysseyAnimationExportImageSequenceDialog::Construct(const FArguments& InArgs, 
                 .MaxValue(TOptional<int>())
                 .MinSliderValue(0)
                 .MaxSliderValue(TOptional<int>())
-                .OnValueChanged_Lambda([this](int iValue) { mCustomRange.SetLowerBoundValue(FMath::Clamp(iValue, 0, mCustomRange.GetUpperBoundValue())); })
-                .OnValueCommitted_Lambda([this](int iValue, ETextCommit::Type iType) { mCustomRange.SetLowerBoundValue(FMath::Clamp(iValue, 0, mCustomRange.GetUpperBoundValue())); })
+                .OnValueChanged_Lambda([this](int iValue) { mExporter.mCustomRange.SetLowerBoundValue(FMath::Clamp(iValue, 0, mExporter.mCustomRange.GetUpperBoundValue())); })
+                .OnValueCommitted_Lambda([this](int iValue, ETextCommit::Type iType) { mExporter.mCustomRange.SetLowerBoundValue(FMath::Clamp(iValue, 0, mExporter.mCustomRange.GetUpperBoundValue())); })
             ]
             
             + SHorizontalBox::Slot()
             [
                 SNew(SNumericEntryBox<int>)
-                .Visibility_Lambda([this](){ return mRange == EOdysseyAnimationExportImageSequenceRange::Custom ? EVisibility::Visible : EVisibility::Collapsed; })
-                .Value_Lambda([this](){ return mCustomRange.GetUpperBoundValue(); })
+                .Visibility_Lambda([this](){ return mExporter.mRange == EOdysseyAnimationExportImageSequenceRange::Custom ? EVisibility::Visible : EVisibility::Collapsed; })
+                .Value_Lambda([this](){ return mExporter.mCustomRange.GetUpperBoundValue(); })
                 .AllowSpin(true)
                 .Delta(1)
                 .LinearDeltaSensitivity(10)
@@ -122,15 +121,15 @@ SOdysseyAnimationExportImageSequenceDialog::Construct(const FArguments& InArgs, 
                 .MaxValue(TOptional<int>())
                 .MinSliderValue(0)
                 .MaxSliderValue(TOptional<int>())
-                .OnValueChanged_Lambda([this](int iValue) { mCustomRange.SetUpperBoundValue(FMath::Max(iValue, mCustomRange.GetLowerBoundValue())); })
-                .OnValueCommitted_Lambda([this](int iValue, ETextCommit::Type iType) { mCustomRange.SetUpperBoundValue(FMath::Max(iValue, mCustomRange.GetLowerBoundValue())); })
+                .OnValueChanged_Lambda([this](int iValue) { mExporter.mCustomRange.SetUpperBoundValue(FMath::Max(iValue, mExporter.mCustomRange.GetLowerBoundValue())); })
+                .OnValueCommitted_Lambda([this](int iValue, ETextCommit::Type iType) { mExporter.mCustomRange.SetUpperBoundValue(FMath::Max(iValue, mExporter.mCustomRange.GetLowerBoundValue())); })
             ]
         ]
         + SGridPanel::Slot(1, 4)
         [
             SNew( SCheckBox )
-            .IsChecked_Lambda( [this](){ return mUniqueFramesOnly ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;} )
-            .OnCheckStateChanged_Lambda( [this](ECheckBoxState iNewCheckedState){ mUniqueFramesOnly = iNewCheckedState == ECheckBoxState::Checked; } )
+            .IsChecked_Lambda( [this](){ return mExporter.mUniqueFramesOnly ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;} )
+            .OnCheckStateChanged_Lambda( [this](ECheckBoxState iNewCheckedState){ mExporter.mUniqueFramesOnly = iNewCheckedState == ECheckBoxState::Checked; } )
             .ToolTipText( LOCTEXT( "export-image-sequence-dialog.unique-frames-only.tooltip", "Export only unique frames instead of every single frames" ) )
         ]
     ];
@@ -139,33 +138,30 @@ SOdysseyAnimationExportImageSequenceDialog::Construct(const FArguments& InArgs, 
 FString
 SOdysseyAnimationExportImageSequenceDialog::GetSaveFileDialogExtension()
 {
-    switch(mFormat)
+    switch(mExporter.mFormat)
     {
-        case EOdysseyAnimationExportImageSequenceFormat::PNG: return FString::Format(TEXT("{0} (.png)|*.png"), { LOCTEXT("export-image-sequence-dialog.format-extension.png", "PNG Image").ToString() } );
-        case EOdysseyAnimationExportImageSequenceFormat::BMP: return FString::Format(TEXT("{0} (.bmp)|*.bmp"), { LOCTEXT("export-image-sequence-dialog.format-extension.bmp", "BMP Image").ToString() } );
-        case EOdysseyAnimationExportImageSequenceFormat::TGA: return FString::Format(TEXT("{0} (.tga)|*.tga"), { LOCTEXT("export-image-sequence-dialog.format-extension.tga", "TGA Image").ToString() } );
-        case EOdysseyAnimationExportImageSequenceFormat::Jpeg: return FString::Format(TEXT("{0} (.jpg)|*.jpg"), { LOCTEXT("export-image-sequence-dialog.format-extension.jpeg", "Jpeg Image").ToString() } );
+        case EOdysseyExportImageFormat::PNG: return FString::Format(TEXT("{0} (.png)|*.png"), { LOCTEXT("export-image-sequence-dialog.format-extension.png", "PNG Image").ToString() } );
+        case EOdysseyExportImageFormat::BMP: return FString::Format(TEXT("{0} (.bmp)|*.bmp"), { LOCTEXT("export-image-sequence-dialog.format-extension.bmp", "BMP Image").ToString() } );
+        case EOdysseyExportImageFormat::TGA: return FString::Format(TEXT("{0} (.tga)|*.tga"), { LOCTEXT("export-image-sequence-dialog.format-extension.tga", "TGA Image").ToString() } );
+        case EOdysseyExportImageFormat::Jpeg: return FString::Format(TEXT("{0} (.jpg)|*.jpg"), { LOCTEXT("export-image-sequence-dialog.format-extension.jpeg", "Jpeg Image").ToString() } );
     }
 
     return TEXT("");
 }
 
-::ULIS::eFileFormat
-SOdysseyAnimationExportImageSequenceDialog::GetFileFormat()
+FOdysseyAnimationImageSequenceExporter::FOdysseyAnimationImageSequenceExporter()
+	: mAnimation(nullptr)
 {
-    switch(mFormat)
-    {
-        case EOdysseyAnimationExportImageSequenceFormat::PNG: return ::ULIS::FileFormat_png;
-        case EOdysseyAnimationExportImageSequenceFormat::BMP: return ::ULIS::FileFormat_bmp;
-        case EOdysseyAnimationExportImageSequenceFormat::TGA: return ::ULIS::FileFormat_tga;
-        case EOdysseyAnimationExportImageSequenceFormat::Jpeg: return ::ULIS::FileFormat_jpg;
-    }
+}
 
-    return ::ULIS::FileFormat_png;
+FOdysseyAnimationImageSequenceExporter::FOdysseyAnimationImageSequenceExporter(UOdysseyAnimation* iAnimation)
+	: mAnimation(iAnimation)
+	, mCustomRange(iAnimation->GetFrameRange())
+{
 }
 
 FInt32Range
-SOdysseyAnimationExportImageSequenceDialog::GetSourceRange(const FSource& iSource)
+FOdysseyAnimationImageSequenceExporter::GetSourceRange(const FSource& iSource)
 {
     switch(mRange)
     {
@@ -182,8 +178,8 @@ SOdysseyAnimationExportImageSequenceDialog::GetSourceRange(const FSource& iSourc
     return FInt32Range::Empty();
 }
 
-TArray<SOdysseyAnimationExportImageSequenceDialog::FSource>
-SOdysseyAnimationExportImageSequenceDialog::GetSources()
+TArray<FOdysseyAnimationImageSequenceExporter::FSource>
+FOdysseyAnimationImageSequenceExporter::GetSources()
 {
     switch(mSource)
     {
@@ -232,11 +228,6 @@ SOdysseyAnimationExportImageSequenceDialog::GetSources()
                 }
             };
         }
-
-        /*case EOdysseyAnimationExportImageSequenceSource::SelectedLayers:
-        {
-            GetLayers()
-        }*/
     }
 
     return {{nullptr, FString()}};
@@ -245,13 +236,13 @@ SOdysseyAnimationExportImageSequenceDialog::GetSources()
 void
 SOdysseyAnimationExportImageSequenceDialog::Export()
 {
-    IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
+	IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
     TArray< FString > filenames;
     bool saveSuccess = desktopPlatformHandle->SaveFileDialog(
         FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr)
         , LOCTEXT("animation.export-image-sequence.save-dialog.title", "Select Export Path & Name").ToString()
         , FPaths::ProjectDir()
-        , mAnimation->GetName()
+        , mExporter.mAnimation->GetName()
         , GetSaveFileDialogExtension()
         , EFileDialogFlags::None
         , filenames
@@ -260,20 +251,34 @@ SOdysseyAnimationExportImageSequenceDialog::Export()
     if( !saveSuccess || filenames.Num() <= 0 )
         return;
 
+	mExporter.Export(filenames[0]);
+}
+
+void
+FOdysseyAnimationImageSequenceExporter::Export(const FString& iFilename)
+{
     TArray<FSource> sources = GetSources();
     
     FScopedSlowTask progressBar(sources.Num(), LOCTEXT("timeline-tab.export-image-sequence.progress-bar.title", "Exporting Image Sequence"));
     progressBar.MakeDialog();
 
+	TArray<FInt32Range> ranges;
+	for (const FSource& source : sources)
+	{
+		ranges.Add(GetSourceRange(source));
+	}
+	FInt32Range fullRange = FInt32Range::Hull(ranges);
+	FString endFrameStr = FString::FromInt(fullRange.GetUpperBoundValue());
+
     for (const FSource& source : sources)
     {
         progressBar.EnterProgressFrame();
-        ExportSource(source, filenames[0]);
+        ExportSource(source, iFilename, endFrameStr.Len());
     }
 }
 
 void
-SOdysseyAnimationExportImageSequenceDialog::ExportSource(const FSource& iSource, const FString& iFilename)
+FOdysseyAnimationImageSequenceExporter::ExportSource(const FSource& iSource, const FString& iFilename, int iNumZero)
 {
     FString path( FPaths::ConvertRelativePathToFull( iFilename ) );
     FString folder = FPaths::GetPath(path);
@@ -282,15 +287,15 @@ SOdysseyAnimationExportImageSequenceDialog::ExportSource(const FSource& iSource,
         filename += TEXT("_") + iSource.mFilename;
     FString extension = FPaths::GetExtension(path, false);
     
-    ::ULIS::eFileFormat exportImageFormat = GetFileFormat();
+    ::ULIS::eFileFormat exportImageFormat = FOdysseyExportImageFormat::GetFileFormat(mFormat);
     FInt32Range frameRange = GetSourceRange(iSource);
     int startFrame = frameRange.GetLowerBoundValue();
 	int endFrame = frameRange.GetUpperBoundValue();
 
     FScopedSlowTask progressBar(endFrame - startFrame + 1);
 
-    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format());
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( mAnimation->Format() );
+    TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->GetWidth(), mAnimation->GetHeight(), mAnimation->GetFormat());
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( mAnimation->GetFormat() );
     TArray<FGuid> lastRenderingComposition;
 
     for (int i = startFrame; i <= endFrame; i++)
@@ -313,7 +318,14 @@ SOdysseyAnimationExportImageSequenceDialog::ExportSource(const FSource& iSource,
         ctx.Finish();
 
         //Path
-        FString imagePath = folder / filename + FString::Printf(TEXT("_%d."), i) + extension;
+		
+		FString frameStr = FString::FromInt(i);
+        FString imagePath = folder / filename + TEXT("_");
+	 	for (int j = 0; j < iNumZero - frameStr.Len(); j++)
+		{
+			imagePath += TEXT("0");
+		}
+		imagePath += FString::Printf(TEXT("%d."), i) + extension;
         std::string str = std::string( TCHAR_TO_UTF8( *imagePath ) );
 
         bool canSaveDirectly = false;

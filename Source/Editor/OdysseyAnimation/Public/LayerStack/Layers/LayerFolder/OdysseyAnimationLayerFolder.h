@@ -4,8 +4,6 @@
 #pragma once
 
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "Image/OdysseyBlendingMode.h"
-
 #include "OdysseyAnimationLayerFolder.generated.h"
 
 UCLASS(BlueprintType)
@@ -13,23 +11,6 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayerFolder
     : public UOdysseyAnimationLayer
 {
     GENERATED_BODY()
-
-public:
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     * 
-     */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnBlendModeChanged, UOdysseyAnimationLayerFolder*)
-
-    /**
-     * @brief Delegate called when something changed the result of RenderImage()
-     * 
-     */
-    DECLARE_MULTICAST_DELEGATE_OneParam(FOnOpacityChanged, UOdysseyAnimationLayerFolder*)
-
-public:
-    static FOnBlendModeChanged& OnBlendModeChanged();
-    static FOnOpacityChanged& OnOpacityChanged();
 
 public:
     UOdysseyAnimationLayerFolder();
@@ -52,24 +33,4 @@ public:
      * @return TSet<UClass*> 
      */
     virtual TSet<UClass*> GetMergeLayerTypesFromTypes(TSet<UClass*> iLayerTypes) const override;
-
-    virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
-
-    virtual float GetImageRenderingOpacity() const override;
-
-    virtual TSharedPtr<FOdysseyAnimationCellsContainer> GetCellsContainer() const override { return nullptr; }
-
-private:
-    //Property changed methods
-    void OpacityChanged();
-    void BlendModeChanged();
-
-    virtual void PropertyChanged(const FName& iPropertyName) override;
-
-public:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
-	EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation | LayerStack")
-    float Opacity = 1.0f;
 };

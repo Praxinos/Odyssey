@@ -60,7 +60,8 @@ public:
     // Construction / Destruction
     ~FOdysseyRasterBlock();
     FOdysseyRasterBlock();
-    FOdysseyRasterBlock(UObject* iOwner);
+	FOdysseyRasterBlock(UObject* iOwner);
+    FOdysseyRasterBlock(UObject* iOwner, int iWidth, int iHeight, ::ULIS::eFormat  iFormat);
 
 public:
     /**
@@ -69,24 +70,6 @@ public:
      * @return int 
      */
     UObject* GetOwner() const;
-
-    /**
-    * 
-    */
-    void ConvertTo();
-
-    /**
-    * Needs to be called in owner PostDuplicate()
-    * Also converts the block to the given size and format if needed
-    */
-    void PostDuplicate(int iWidth, int iHeight, ::ULIS::eFormat iFormat);
-
-    /**
-     * @brief Returns the block unique ID
-     * 
-     * @return const FGuid& 
-     */
-    const FGuid& GetId() const;
     
     /**
      * @brief Get the block Width
@@ -102,19 +85,40 @@ public:
      */
     int GetHeight() const;
 
-    ::ULIS::FRectI GetRect() const;
-    
     /**
      * @brief Get the block Format
      * 
      * @return ::ULIS::eFormat 
      */
     ::ULIS::eFormat GetFormat() const;
-    
+
     /**
-     * @brief Initialize the Block with given ULIS block
+     * @brief Returns the block unique ID
+     * 
+     * @return const FGuid& 
      */
-    void SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock);
+    const FGuid& GetId() const;
+
+    /**
+     * @brief Get the rect of this block
+     * 
+     * @return ::ULIS::FRectI 
+     */
+    ::ULIS::FRectI GetRect() const;
+
+    /**
+    * Needs to be called in owner PostDuplicate()
+    */
+    void PostDuplicate();
+
+	/**
+	 * @brief Converts the block to the given size(crop) and format
+	 * 
+	 * @param iWidth 
+	 * @param iHeight 
+	 * @param iFormat 
+	 */
+	void ConvertTo(int iWidth, int iHeight, ::ULIS::eFormat iFormat);
 
     /**
      * @brief Get the Block object
@@ -134,25 +138,13 @@ public:
      */
     FPostProcess& PostProcess();
 
-    //If the result of GetBlock() is kept in memory by someone
-    //OnBlockPtrChanged will be called to inform that the block is no longer valid
-    //(because width/height/format changed) and must be retrieved again by that "someone"
-    FSimpleMulticastDelegate& OnBlockPtrChanged();
-
-    void InvalidateCache();
-
 private:
     //--- Block Caching / Loading
-    
-    //Loads and returns a block from cache
-    //bool LoadBlockFromCache(TSharedRef<::ULIS::FBlock, ESPMode::ThreadSafe> oBlock, const FString& iId);
+    void InvalidateCache();
 
     //Loads and return a block from bulkdata
     bool LoadBlockFromBulkData(FUniqueBuffer& oBuffer);
-
     static void CleanupBlock(uint8* iData, void* iInfo);
-    //Saves the block corresponding to the tile at iTileIndex into the cache and removes the block from memory
-    //static void SaveBlockToCache(const ::ULIS::FBlock& iBlock, const FString& iId);
 
 public:
     /**
@@ -166,19 +158,16 @@ private:
     //Import/Export
     friend class FOdysseyRasterBlockExport;
     friend class FOdysseyRasterBlockImport;
-
-private:
+    friend class FOdysseyRasterBlockUndo;
     friend class FOdysseyRasterBlockMutator;
 
-    //FOdysseyDiskCache mCache;
-    //FSharedBuffer mSharedBuffer;
-
+private:
     UObject* mOwner;
+    int mWidth = -1;
+    int mHeight = -1;
+    ::ULIS::eFormat mFormat = ::ULIS::Format_RGBA8;
 
-    FGuid Id; //unique ID identifying the block
-    int Width = -1;
-    int Height = -1;
-    int Format;
+    FGuid mId; //unique ID identifying the block
 
     //The stable block for which edition is finished
     TWeakPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock; //Loaded on demand from cache, can be destroyed at any time if noone keeps a sharedptr on it
@@ -197,23 +186,19 @@ private:
 
     FPostProcess mPostProcess;
 
-    //If the result of GetBlock() is kept in memory by someone
-    //mOnBlockPtrChanged will be called to inform that the block is no longer valid
-    //(because width/height/format changed) and must be retrieved again by that "someone"
-    FSimpleMulticastDelegate mOnBlockPtrChanged;
-
     // 
     // OPTIMIZATIONS
     //
 
     FCriticalSection mMutex;
-    //bool mIsCacheInvalid;
+	TSharedPtr<FCriticalSection> mConstructionDestructionMutex;
 
     struct FBlockData
     {
         bool mIsCacheInvalid;
         FUniqueBuffer mBuffer;
         FGuid mId;
+		TSharedPtr<FCriticalSection> mConstructionDestructionMutex;
     };
 
     FBlockData* mBlockData;

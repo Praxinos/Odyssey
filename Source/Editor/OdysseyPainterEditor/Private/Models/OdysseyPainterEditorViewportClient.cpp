@@ -160,7 +160,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         FTexture* textureToDisplay = texture->GetResource();
         if (!texture->IsCurrentlyVirtualTextured())
         {
-            textureToDisplay = GetZoom() <= 1.0 ? &mBilinearTexture : &mNearestNeighbourTexture;
+            textureToDisplay = GetZoom() <= 1.5 ? &mBilinearTexture : &mNearestNeighbourTexture;
         }
         // END PATCH:
 
@@ -523,7 +523,7 @@ FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, i
     FOdysseyPoint pointInTexture = GetLocalMousePosition(mCurrentPointInViewport);
     pointInTexture.keysDown = pressedKeys;
     pointInTexture.ComputeRelativeParameters(mCurrentPointInTexture);
-    bool hasMoved = long(mCurrentPointInTexture.x) != long(pointInTexture.x) || long(mCurrentPointInTexture.y) != long(pointInTexture.y);
+	bool hasMoved = !FMath::IsNearlyEqual(mCurrentPointInTexture.x - pointInTexture.x, 0.f) || !FMath::IsNearlyEqual(mCurrentPointInTexture.y - pointInTexture.y, 0.f);
     mCurrentPointInTexture = pointInTexture;
 
     if (mCurrentToolState == eState::kIdle)
@@ -565,7 +565,6 @@ FOdysseyPainterEditorViewportClient::MouseDown(const FOdysseyPoint& iPoint)
     FOdysseyPoint pointInTexture = GetLocalMousePosition(mCurrentPointInViewport);
     pointInTexture.keysDown = pressedKeys;
     pointInTexture.ComputeRelativeParameters(mCurrentPointInTexture);
-    bool hasMoved = long(mCurrentPointInTexture.x) != long(pointInTexture.x) || long(mCurrentPointInTexture.y) != long(pointInTexture.y);
     mCurrentPointInTexture = pointInTexture;
 
     if( mCurrentToolState == eState::kIdle )
@@ -636,7 +635,6 @@ FOdysseyPainterEditorViewportClient::MouseUp(const FOdysseyPoint& iPoint)
     FOdysseyPoint pointInTexture = GetLocalMousePosition(mCurrentPointInViewport);
     pointInTexture.keysDown = pressedKeys;
     pointInTexture.ComputeRelativeParameters(mCurrentPointInTexture);
-    bool hasMoved = long(mCurrentPointInTexture.x) != long(pointInTexture.x) || long(mCurrentPointInTexture.y) != long(pointInTexture.y);
     mCurrentPointInTexture = pointInTexture;
 
     if( mCurrentToolState == eState::kIdle)
@@ -686,7 +684,7 @@ FOdysseyPainterEditorViewportClient::MouseDrag(const FOdysseyPoint& iPoint)
     FOdysseyPoint pointInTexture = GetLocalMousePosition(mCurrentPointInViewport);
     pointInTexture.keysDown = pressedKeys;
     pointInTexture.ComputeRelativeParameters(mCurrentPointInTexture);
-    bool hasMoved = long(mCurrentPointInTexture.x) != long(pointInTexture.x) || long(mCurrentPointInTexture.y) != long(pointInTexture.y);
+    bool hasMoved = !FMath::IsNearlyEqual(mCurrentPointInTexture.x - pointInTexture.x, 0.f) || !FMath::IsNearlyEqual(mCurrentPointInTexture.y - pointInTexture.y, 0.f);
     mCurrentPointInTexture = pointInTexture;
 
     if( mCurrentToolState == eState::kIdle )

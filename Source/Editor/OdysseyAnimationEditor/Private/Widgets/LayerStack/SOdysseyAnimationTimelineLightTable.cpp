@@ -8,19 +8,10 @@
 #include "OdysseyAnimation.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineSection.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
-#include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyPainterEditor.h"
-
-SOdysseyAnimationTimelineLightTable::SOdysseyAnimationTimelineLightTable()
-	: mLayer(nullptr)
-	, mExtension(nullptr)
-	, mCurrentCellIndex(INDEX_NONE)
-{
-}
 
 void
 SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysseyAnimationLayer* iLayer, FOdysseyAnimationEditorExtension* iExtension)
@@ -39,12 +30,12 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 			.WidthInFrames_Lambda(
 				[this]()
 				{
-					if (mCurrentCellIndex == INDEX_NONE)
+					if (!mCurrentCell)
 						return 0;
 
-					TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-					int firstCellIndex = FMath::Max(mCurrentCellIndex - mLayer->GetLightTable()->GetRange(), 0);
-					int width = cellsContainer->GetCellFrame(cellsContainer->GetCells()[firstCellIndex]);
+					int firstCellIndex = FMath::Max(mCurrentCell->IndexInLayer - 10, 0);
+					UOdysseyAnimationCell* cell = mLayer->GetCells()[firstCellIndex];
+					int width = cell->GetFrameRange().GetLowerBoundValue();
 					return width;
 				}
 			)
@@ -55,22 +46,74 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 		];
 
 	//Previous cells
-	for (int i = -mLayer->GetLightTable()->GetRange(); i <= -1; i++)
+	for (int i = 9; i >= 0; i--)
 	{
 		horizontalBox->AddSlot()
 		.AutoWidth()
 		[
-			CreateKeyWidget(i)
-		];
-
-		horizontalBox->AddSlot()
-		.AutoWidth()
-		[
 			SNew(SOdysseyAnimationTimelineSection, mExtension)
-			.WidthInFrames(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyRemainingLength, i)
-			.Visibility(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyVisibility, i)
+			.HAlign(HAlign_Left)
+			.WidthInFrames_Lambda(
+				[this, i]()
+				{
+					if (!mCurrentCell)
+						return 0;
+
+					const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
+					int cellIndex = mCurrentCell->IndexInLayer - i - 1;
+					if (cellIndex < 0 || cellIndex >= cells.Num())
+						return 0;
+
+					return cells[cellIndex]->Exposure;
+				}
+			)
 			[
-				SNullWidget::NullWidget
+
+				SNew(SOdysseyAnimationTimelineLightTableKey, mExtension)
+				.Visibility_Lambda(
+					[this, i]()
+					{
+						if (!mCurrentCell)
+							return EVisibility::Collapsed;
+
+						int cellIndex = mCurrentCell->IndexInLayer - i - 1;
+						if (cellIndex < 0 || cellIndex >= mLayer->GetCells().Num())
+							return EVisibility::Collapsed;
+
+						return EVisibility::Visible;
+					}
+				)
+				.Key_Lambda([this, i]() { return mLayer->Lighttable.PreviousKeys[i];})
+				.Cell_Lambda(
+					[this, i]() -> UOdysseyAnimationCell*
+					{
+						if (!mCurrentCell)
+							return nullptr;
+
+						const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
+						int cellIndex = mCurrentCell->IndexInLayer - i - 1;
+						if (cellIndex < 0 || cellIndex >= cells.Num())
+							return nullptr;
+
+						return cells[cellIndex];
+					}
+				)
+				.OnChanged_Lambda(
+					[this, i](FOdysseyAnimationLightTableKey iKey)
+					{
+						FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+						lighttable.PreviousKeys[i] = iKey;
+						FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
+					}
+				)
+				.OnCommited_Lambda(
+					[this, i](FOdysseyAnimationLightTableKey iKey)
+					{
+						FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+						lighttable.PreviousKeys[i] = iKey;
+						FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
+					}
+				)
 			]
 		];
 	}
@@ -80,31 +123,98 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 	.AutoWidth()
 	[
 		SNew(SOdysseyAnimationTimelineSection, mExtension)
-		.Visibility(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyVisibility, 0)
-		.WidthInFrames(this, &SOdysseyAnimationTimelineLightTable::GetCurrentCellLength)
+		.Visibility_Lambda(
+			[this]()
+			{
+				if (!mCurrentCell)
+					return EVisibility::Collapsed;
+
+				return EVisibility::Visible;
+			}
+		)
+		.WidthInFrames_Lambda(
+			[this]()
+			{
+				if (!mCurrentCell)
+					return 0;
+
+				return mCurrentCell->Exposure;
+			}
+		)
 		[
 			SNullWidget::NullWidget
 		]
 	];
 
 	//Next cells
-	for (int i = 1; i <= mLayer->GetLightTable()->GetRange(); i++)
+	for (int i = 0; i <= 9; i++)
 	{
-		
-		horizontalBox->AddSlot()
-		.AutoWidth()
-		[
-			CreateKeyWidget(i)
-		];
-
 		horizontalBox->AddSlot()
 		.AutoWidth()
 		[
 			SNew(SOdysseyAnimationTimelineSection, mExtension)
-			.WidthInFrames(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyRemainingLength, i)
-			.Visibility(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyVisibility, i)
+			.HAlign(HAlign_Left)
+			.WidthInFrames_Lambda(
+				[this, i]()
+				{
+					if (!mCurrentCell)
+						return 0;
+
+					const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
+					int cellIndex = mCurrentCell->IndexInLayer + i + 1;
+					if (cellIndex < 0 || cellIndex >= cells.Num())
+						return 0;
+
+					return cells[cellIndex]->Exposure;
+				}
+			)
 			[
-				SNullWidget::NullWidget
+
+				SNew(SOdysseyAnimationTimelineLightTableKey, mExtension)
+				.Visibility_Lambda(
+					[this, i]()
+					{
+						if (!mCurrentCell)
+							return EVisibility::Collapsed;
+
+						int cellIndex = mCurrentCell->IndexInLayer + i + 1;
+						if (cellIndex < 0 || cellIndex >= mLayer->GetCells().Num())
+							return EVisibility::Collapsed;
+
+						return EVisibility::Visible;
+					}
+				)
+				.Key_Lambda([this, i]() { return mLayer->Lighttable.NextKeys[i];})
+				.Cell_Lambda(
+					[this, i]() -> UOdysseyAnimationCell*
+					{
+						if (!mCurrentCell)
+							return nullptr;
+
+						const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
+						int cellIndex = mCurrentCell->IndexInLayer + i + 1;
+						if (cellIndex < 0 || cellIndex >= cells.Num())
+							return nullptr;
+
+						return cells[cellIndex];
+					}
+				)
+				.OnChanged_Lambda(
+					[this, i](FOdysseyAnimationLightTableKey iKey)
+					{
+						FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+						lighttable.NextKeys[i] = iKey;
+						FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
+					}
+				)
+				.OnCommited_Lambda(
+					[this, i](FOdysseyAnimationLightTableKey iKey)
+					{
+						FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+						lighttable.NextKeys[i] = iKey;
+						FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
+					}
+				)
 			]
 		];
 	}
@@ -112,7 +222,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 	ChildSlot
 	[
 		SNew(SBox)
-        .HeightOverride(FOptionalSize(SOdysseyAnimationTimelineLightTableKey::mDesiredHeight))
+        .HeightOverride(FOptionalSize(mDesiredHeight))
 		[
 			SNew(SOdysseyAnimationTimelineScrollBox, mExtension)
 			+ SOdysseyAnimationTimelineScrollBox::Slot()
@@ -123,45 +233,6 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 	];
 
 	Update();
-}
-
-TSharedRef<SWidget>
-SOdysseyAnimationTimelineLightTable::CreateKeyWidget(int iCellOffset)
-{
-	//const FButtonStyle* outOfPegButtonStyle = &FOdysseyStyle::GetWidgetStyle<FButtonStyle>("Button.TransparentNoPadding");
-	const FCheckBoxStyle* checkboxStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.ToggleButton");
-
-	return SNew(SOdysseyAnimationTimelineSection, mExtension)
-		.WidthInFrames(1)
-		.Visibility(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyVisibility, iCellOffset)
-		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
-			.HAlign(HAlign_Center)
-			[
-				SNew(SBox)
-        		.HeightOverride(FOptionalSize(SOdysseyAnimationTimelineLightTableKey::mDesiredSliderHeight))
-				[
-					SNew(SOdysseyAnimationTimelineLightTableKey, mLayer, iCellOffset)
-					.IsActivated(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyIsActivated, iCellOffset)
-				]
-			]
-			+ SVerticalBox::Slot()
-			.HAlign(HAlign_Center)
-			.AutoHeight()
-			[
-				SNew(SCheckBox)
-				.IsEnabled(this, &SOdysseyAnimationTimelineLightTable::GetLightTableKeyIsActivated, iCellOffset)
-				.Style( checkboxStyle )
-				.OnCheckStateChanged(this, &SOdysseyAnimationTimelineLightTable::OnOutOfPegsCheckStateChanged, iCellOffset)
-				.IsChecked(this, &SOdysseyAnimationTimelineLightTable::IsOutOfPegsChecked, iCellOffset)
-				.Padding(FMargin(2.f))
-				[
-					SNew(SImage)
-					.Image(this, &SOdysseyAnimationTimelineLightTable::GetOutOfPegsButtonImage, iCellOffset)
-				]
-			]
-		];
 }
 
 void
@@ -176,6 +247,7 @@ SOdysseyAnimationTimelineLightTable::OnCurrentFrameChanged(UOdysseyAnimation* iA
 void
 SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged);
 	if (iEvent.IsInteractive())
 		return;
 
@@ -196,144 +268,11 @@ SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged(const FOdysseyImage
 void
 SOdysseyAnimationTimelineLightTable::Update()
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationTimelineLightTable::Update);
 	UOdysseyAnimation* animation = mLayer->GetAnimation();
 	if (!animation)
 		return;
 
 	int currentFrame = animation->CurrentFrame;
-	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-	mCurrentCellIndex = cellsContainer->GetCellIndexAtFrame(currentFrame);
-}
-
-float
-SOdysseyAnimationTimelineLightTable::GetLightTableKeyRemainingLength(int iCellOffset) const
-{
-	if (mCurrentCellIndex == INDEX_NONE)
-		return 0;
-
-	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-
-	int cellIndex = mCurrentCellIndex + iCellOffset;
-	if (cellIndex < 0 || cellIndex >= cellsContainer->GetCells().Num())
-		return 0;
-
-	int width = cellsContainer->GetCells()[cellIndex]->GetLength() - 1;
-	return width;
-}
-
-float
-SOdysseyAnimationTimelineLightTable::GetCurrentCellLength() const
-{
-	if (mCurrentCellIndex == INDEX_NONE)
-		return 0;
-
-	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-
-	int cellIndex = mCurrentCellIndex;
-	if (cellIndex < 0 || cellIndex >= cellsContainer->GetCells().Num())
-		return 0;
-
-	int width = cellsContainer->GetCells()[cellIndex]->GetLength();
-	return width;
-}
-
-EVisibility
-SOdysseyAnimationTimelineLightTable::GetLightTableKeyVisibility(int iCellOffset) const
-{
-	if (mCurrentCellIndex == INDEX_NONE)
-		return EVisibility::Collapsed;
-
-	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-
-	int cellIndex = mCurrentCellIndex + iCellOffset;
-	if (cellIndex < 0 || cellIndex >= cellsContainer->GetCells().Num())
-		return EVisibility::Collapsed;
-
-	return EVisibility::Visible;
-}
-
-bool
-SOdysseyAnimationTimelineLightTable::GetLightTableKeyIsActivated(int iCellOffset) const
-{
-	return mLayer->GetLightTable()->GetKeyIsActivated(iCellOffset);
-}
-
-const FSlateBrush*
-SOdysseyAnimationTimelineLightTable::GetOutOfPegsButtonImage(int iCellOffset) const
-{
-	if (mCurrentCellIndex == INDEX_NONE)
-		return nullptr;
-
-	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-
-	int cellIndex = mCurrentCellIndex + iCellOffset;
-	if (cellIndex < 0 || cellIndex >= cellsContainer->GetCells().Num())
-		return nullptr;
-
-	TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCells()[cellIndex];
-	if (cell->IsOutOfPegs())
-		return FOdysseyStyle::GetBrush("Animation.LightTable.OutOfPegs.Button.On");
-
-	return FOdysseyStyle::GetBrush("Animation.LightTable.OutOfPegs.Button.Off");
-}
-
-void
-SOdysseyAnimationTimelineLightTable::OnOutOfPegsCheckStateChanged(ECheckBoxState iValue, int iCellOffset)
-{
-	FOdysseyPainterEditor* editor = mExtension->GetEditor();
-	if (!editor)
-		return;
-
-	if (iValue == ECheckBoxState::Checked)
-	{
-		if (mCurrentCellIndex == INDEX_NONE)
-			return;
-
-		TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-
-		int cellIndex = mCurrentCellIndex + iCellOffset;
-		if (cellIndex < 0 || cellIndex >= cellsContainer->GetCells().Num())
-			return;
-
-		TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCells()[cellIndex];
-		mExtension->GetOutOfPegsTool()->SetCell(cell);
-		editor->ActivateTemporaryTool(mExtension->GetOutOfPegsTool());
-	}
-	else
-	{
-		editor->InactivateTemporaryTool();
-	}
-}
-
-ECheckBoxState
-SOdysseyAnimationTimelineLightTable::IsOutOfPegsChecked(int iCellOffset) const
-{
-	FOdysseyPainterEditor* editor = mExtension->GetEditor();
-	if (!editor)
-		return ECheckBoxState::Unchecked;
-
-	UOdysseyPainterEditorTool* tool = editor->GetCurrentTool();
-	if (!tool)
-		return ECheckBoxState::Unchecked;
-
-	if (mCurrentCellIndex == INDEX_NONE)
-		return ECheckBoxState::Unchecked;
-
-	TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = mLayer->GetCellsContainer();
-
-	int cellIndex = mCurrentCellIndex + iCellOffset;
-	if (cellIndex < 0 || cellIndex >= cellsContainer->GetCells().Num())
-		return ECheckBoxState::Unchecked;
-
-	TSharedPtr<FOdysseyAnimationCell> cell = cellsContainer->GetCells()[cellIndex];
-
-	bool isToolActive = tool->IsA(UOdysseyAnimationEditorOutOfPegsTool::StaticClass());
-	if (isToolActive)
-	{
-		UOdysseyAnimationEditorOutOfPegsTool* outOfPegsTool = Cast<UOdysseyAnimationEditorOutOfPegsTool>(tool);
-		if (outOfPegsTool->GetCell() == cell)
-			return ECheckBoxState::Checked;
-	}
-	
-	return ECheckBoxState::Unchecked;
+	mCurrentCell = mLayer->GetCellAtFrame(currentFrame);
 }

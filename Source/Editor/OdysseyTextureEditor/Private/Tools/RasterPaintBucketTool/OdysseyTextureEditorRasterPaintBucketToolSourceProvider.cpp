@@ -60,7 +60,7 @@ FOdysseyTextureEditorRasterPaintBucketToolSourceProvider::GetCurrentLayerBlock()
 	::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
 	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
 	UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-	TSharedPtr<IOdysseyImageRenderer> renderer = currentLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
+	TSharedPtr<IOdysseyImageRenderer> renderer = currentLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
 	renderer->Init();
 
 	FOdysseyImageRendererCopyParams params(block, { block->Rect() });
@@ -94,7 +94,7 @@ FOdysseyTextureEditorRasterPaintBucketToolSourceProvider::GetForegroundLayersBlo
 		}
 	);
 
-	TSharedPtr<IOdysseyImageRenderer> renderer = layerStack->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, filter);
+	TSharedPtr<IOdysseyImageRenderer> renderer = layerStack->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0, filter);
 	if (!renderer)
 		return nullptr;
 
@@ -131,7 +131,7 @@ FOdysseyTextureEditorRasterPaintBucketToolSourceProvider::GetBackgroundLayersBlo
 		}
 	);
 
-	TSharedPtr<IOdysseyImageRenderer> renderer = layerStack->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, filter);
+	TSharedPtr<IOdysseyImageRenderer> renderer = layerStack->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0, filter);
 	if (!renderer)
 		return nullptr;
 
@@ -159,7 +159,7 @@ FOdysseyTextureEditorRasterPaintBucketToolSourceProvider::GetAllLayersBlock() co
 	
 	::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
 	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
-	TSharedPtr<IOdysseyImageRenderer> renderer = layerStack->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render);
+	TSharedPtr<IOdysseyImageRenderer> renderer = layerStack->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
 	renderer->Init();
 
 	FOdysseyImageRendererCopyParams params(block, { block->Rect() });

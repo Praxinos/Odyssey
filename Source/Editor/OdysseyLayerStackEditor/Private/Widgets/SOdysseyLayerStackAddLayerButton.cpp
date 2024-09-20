@@ -113,7 +113,7 @@ SOdysseyLayerStackAddLayerButton::AddLayerFromClass(FAssetData iAssetData)
     UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
     if (currentLayer)
     {
-        if (currentLayer->CanHaveChildren && currentLayer->IsExpanded)
+        if (currentLayer->CanHaveChildren && currentLayer->DisplayChildren)
         {
 			currentLayer = layerStack->AddLayer(layerClass, currentLayer);
         }
@@ -130,7 +130,7 @@ SOdysseyLayerStackAddLayerButton::AddLayerFromClass(FAssetData iAssetData)
     }
     
     mOnAdded.ExecuteIfBound(currentLayer);
-    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, "CurrentLayer", TSoftObjectPtr<UOdysseyLayer>(currentLayer));
+    FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), currentLayer);
 }
 
 #undef LOCTEXT_NAMESPACE

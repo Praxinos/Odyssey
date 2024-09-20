@@ -5,16 +5,17 @@
 
 #include "OdysseyClipboard.h"
 
-class FOdysseyAnimationCell;
+class UOdysseyAnimationCell;
 class UOdysseyAnimationLayer;
 
 class FOdysseyAnimationCellClipboardData
     : public IOdysseyClipboardData
+	, public FGCObject //Allows us to register External UObject in Garbage Collector
 {
 public:
     virtual ~FOdysseyAnimationCellClipboardData() {};
     FOdysseyAnimationCellClipboardData();
-    FOdysseyAnimationCellClipboardData(const TArray<TSharedPtr<FOdysseyAnimationCell>>& iCells);
+    FOdysseyAnimationCellClipboardData(const TArray<UOdysseyAnimationCell*>& iCells);
 
 public:
     static const FGuid& StaticId();
@@ -25,15 +26,19 @@ public:
     void Move(UOdysseyAnimationLayer* iLayer, int iFrame) const;
     int GetCellCount() const;
 
-private:
-    void Copy(const TArray<TSharedPtr<FOdysseyAnimationCell>>& iCells);
+public:
+	// FGCObject implementation
+    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+    virtual FString GetReferencerName() const override;
 
 private:
-    UOdysseyAnimationLayer* mLayer;
+    void Copy(const TArray<UOdysseyAnimationCell*>& iCells);
+
+private:
     struct FCellCopy
     {
-        TSharedPtr<FOdysseyAnimationCell> mCell;
-        int mLength;
+        UOdysseyAnimationCell* mCell;
+        int mExposure;
     };
     TArray<FCellCopy> mCellCopies;
 };

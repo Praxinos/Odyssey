@@ -111,7 +111,7 @@ SOdysseyTextureLayerImageVectorRow::GenerateOptionsWidget()
             .Padding(FMargin(0, 0, 1.f, 0))
             [
                 SNew(SNumericEntryBox<int>)
-                .IsEnabled_Lambda([this](){ return !mTextureLayerImageVector->GetIsLocked();})
+                .IsEnabled_Lambda([this](){ return !mTextureLayerImageVector->IsLockedRecursively();})
                 .Value_Lambda([this]() { return (int)(mTextureLayerImageVector->Opacity * 100.f + 0.5f);})
                 .AllowSpin(true)
                 .ShiftMouseMovePixelPerDelta(10)
@@ -131,7 +131,7 @@ SOdysseyTextureLayerImageVectorRow::GenerateOptionsWidget()
             .VAlign(VAlign_Center)
             [
                 SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-                .IsEnabled_Lambda([this](){ return !mTextureLayerImageVector->GetIsLocked();})
+                .IsEnabled_Lambda([this](){ return !mTextureLayerImageVector->IsLockedRecursively();})
                 .CurrentValue_Lambda([this](){ return (int32)mTextureLayerImageVector->BlendMode;})
                 .ContentPadding(FMargin(0))
                 .OnEnumSelectionChanged(this, &SOdysseyTextureLayerImageVectorRow::OnBlendModeComboBoxChanged)
@@ -143,34 +143,34 @@ void
 SOdysseyTextureLayerImageVectorRow::OnIsWireframeCheckStateChanged( ECheckBoxState iState )
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-wireframe", "Change Layer Wireframe status"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "IsWireframe", iState == ECheckBoxState::Checked);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsWireframe), iState == ECheckBoxState::Checked);
 }
 
 void
 SOdysseyTextureLayerImageVectorRow::OnIsColoredCheckStateChanged( ECheckBoxState iState )
 {
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-coloring", "Change Layer Coloring"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "IsColored", iState == ECheckBoxState::Checked);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsColored), iState == ECheckBoxState::Checked);
 }
 
 void
 SOdysseyTextureLayerImageVectorRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
-    if ( mTextureLayerImageVector->GetIsLocked() )
+    if ( mTextureLayerImageVector->IsLockedRecursively() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::ValueSet);
 }
 
 void
 SOdysseyTextureLayerImageVectorRow::OnOpacityValueChanged(int iValue)
 {
-    if ( mTextureLayerImageVector->GetIsLocked() )
+    if ( mTextureLayerImageVector->IsLockedRecursively() )
         return;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "Opacity", iValue / 100.f, EPropertyChangeType::Interactive);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::Interactive);
 }
 
 void
@@ -201,18 +201,18 @@ SOdysseyTextureLayerImageVectorRow::GetIsColoredIsChecked() const
 void
 SOdysseyTextureLayerImageVectorRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
-    if ( mTextureLayerImageVector->GetIsLocked() )
+    if ( mTextureLayerImageVector->IsLockedRecursively() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-image-vector.transaction.set-blend-mode", "Change Layer BlendMode"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, "BlendMode", EOdysseyBlendingMode(iValue));
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTextureLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode), EOdysseyBlendingMode(iValue));
 }
 
 EVisibility
 SOdysseyTextureLayerImageVectorRow::GetCollapsedOpacityVisibility() const
 {
-    return IsCollapsed() ? EVisibility::Visible : EVisibility::Collapsed;
+    return DisplayOptions() ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 #undef LOCTEXT_NAMESPACE

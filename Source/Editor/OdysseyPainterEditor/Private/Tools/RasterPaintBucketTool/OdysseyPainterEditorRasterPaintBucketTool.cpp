@@ -25,11 +25,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::~UOdysseyPainterEditorRasterPaintBuc
 }
 
 UOdysseyPainterEditorRasterPaintBucketTool::UOdysseyPainterEditorRasterPaintBucketTool()
-    : ColorToleranceSource(EOdysseyRasterPaintBucketToolColorToleranceSource::ColorAndTransparency)
-    , ColorTolerance( 0 )
-    , Expansion( 0 )
-    , GapTolerance( 0 )
-    , mSourceProvider(nullptr)
+    : mSourceProvider(nullptr)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket64");
 }

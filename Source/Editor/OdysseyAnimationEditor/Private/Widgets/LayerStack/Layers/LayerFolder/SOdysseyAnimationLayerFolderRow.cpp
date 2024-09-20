@@ -86,7 +86,7 @@ SOdysseyAnimationLayerFolderRow::GenerateOptionsWidget()
         .Padding(FMargin(0, 0, 1.f, 0))
         [
             SNew(SNumericEntryBox<int>)
-            .IsEnabled_Lambda([this](){ return !mAnimationLayerFolder->GetIsLocked();})
+            .IsEnabled_Lambda([this](){ return !mAnimationLayerFolder->IsLockedRecursively();})
             .Value_Lambda([this]() { return (int)(mAnimationLayerFolder->Opacity * 100.f + 0.5f);})
             .AllowSpin(true)
             .ShiftMouseMovePixelPerDelta(10)
@@ -106,7 +106,7 @@ SOdysseyAnimationLayerFolderRow::GenerateOptionsWidget()
         .VAlign(VAlign_Center)
         [
             SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
-            .IsEnabled_Lambda([this](){ return !mAnimationLayerFolder->GetIsLocked();})
+            .IsEnabled_Lambda([this](){ return !mAnimationLayerFolder->IsLockedRecursively();})
             .CurrentValue_Lambda([this](){ return (int32)mAnimationLayerFolder->BlendMode;})
             .ContentPadding(FMargin(0))
             .OnEnumSelectionChanged(this, &SOdysseyAnimationLayerFolderRow::OnBlendModeComboBoxChanged)
@@ -116,31 +116,31 @@ SOdysseyAnimationLayerFolderRow::GenerateOptionsWidget()
 void
 SOdysseyAnimationLayerFolderRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
 {
-    if ( mAnimationLayerFolder->GetIsLocked() )
+    if ( mAnimationLayerFolder->IsLockedRecursively() )
         return;
         
     FScopedTransaction ScopedTransaction(LOCTEXT("layer-folder.transaction.set-blend-mode", "Change Layer BlendMode"));
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerFolder, "BlendMode", EOdysseyBlendingMode(iValue), EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerFolder, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode), EOdysseyBlendingMode(iValue), EPropertyChangeType::ValueSet);
 }
 
 void
 SOdysseyAnimationLayerFolderRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
 {
-    if ( mAnimationLayerFolder->GetIsLocked() )
+    if ( mAnimationLayerFolder->IsLockedRecursively() )
         return;
 
     //Creating a transaction here manages entering a value using keyboard
     FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerFolder, "Opacity", iValue / 100.f, EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerFolder, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::ValueSet);
 }
 
 void
 SOdysseyAnimationLayerFolderRow::OnOpacityValueChanged(int iValue)
 {
-    if ( mAnimationLayerFolder->GetIsLocked() )
+    if ( mAnimationLayerFolder->IsLockedRecursively() )
         return;
 
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerFolder, "Opacity", iValue / 100.f, EPropertyChangeType::Interactive);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerFolder, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::Interactive);
 }
 
 void
@@ -159,7 +159,7 @@ SOdysseyAnimationLayerFolderRow::OnOpacityEndSliderMovement(int iValue)
 EVisibility
 SOdysseyAnimationLayerFolderRow::GetCollapsedOpacityVisibility() const
 {
-    return IsCollapsed() ? EVisibility::Visible : EVisibility::Collapsed;
+    return DisplayOptions() ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -22,15 +22,15 @@ public:
     //TODO: make a GetEditorFromBrush() and 
 
     //Gets zoom value from ILIAD viewport.
-    UFUNCTION( BlueprintPure, Category = "Odyssey|Canvas", meta = (HidePin="BrushInstance", DefaultToSelf="BrushInstance") )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Canvas", meta = (HidePin="BrushInstance", DefaultToSelf="BrushInstance") )
     static float GetViewportZoom( UOdysseyBrushAssetBase* BrushInstance );
     
     //Gets rotation value from ILIAD viewport.
-    UFUNCTION( BlueprintPure, Category = "Odyssey|Canvas", meta = (HidePin="BrushInstance", DefaultToSelf="BrushInstance") )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Canvas", meta = (HidePin="BrushInstance", DefaultToSelf="BrushInstance") )
     static float GetViewportRotation( UOdysseyBrushAssetBase* BrushInstance );
     
     //Gets pan value from ILIAD viewport.
-    UFUNCTION( BlueprintPure, Category = "Odyssey|Canvas", meta = (HidePin="BrushInstance", DefaultToSelf="BrushInstance") )
+    UFUNCTION( BlueprintPure, Category="Odyssey|Canvas", meta = (HidePin="BrushInstance", DefaultToSelf="BrushInstance") )
     static FVector2D GetViewportPan( UOdysseyBrushAssetBase* BrushInstance );
 
     //Gets step from Stroke Options.
