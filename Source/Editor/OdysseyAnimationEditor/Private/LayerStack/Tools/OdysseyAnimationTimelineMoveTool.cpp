@@ -25,7 +25,7 @@ FOdysseyAnimationTimelineMoveTool::OnMouseButtonDown(const FMouseEventParams& iP
     if (iParams.mLayer->GetIsLocked())
         return FReply::Unhandled();
 
-	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
+    if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
 		return FReply::Unhandled();
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = iParams.mLayer->GetCellsContainer();
@@ -48,7 +48,7 @@ FOdysseyAnimationTimelineMoveTool::OnDragDetected(const FMouseEventParams& iPara
     if (iParams.mLayer->GetIsLocked())
         return FReply::Unhandled();
 
-	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
+    if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
 		return FReply::Unhandled();
 
     if (mOffsettingLayer)
@@ -66,7 +66,7 @@ FOdysseyAnimationTimelineMoveTool::OnMouseMove(const FMouseEventParams& iParams)
     if (iParams.mLayer->GetIsLocked())
         return FReply::Unhandled();
 
-	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
+    if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
 		return FReply::Unhandled();
 		
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = iParams.mLayer->GetCellsContainer();
@@ -91,7 +91,7 @@ FOdysseyAnimationTimelineMoveTool::OnMouseButtonUp(const FMouseEventParams& iPar
     if (iParams.mLayer->GetIsLocked())
         return FReply::Unhandled();
 
-	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
+    if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
 		return FReply::Unhandled();
 
     TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = iParams.mLayer->GetCellsContainer();

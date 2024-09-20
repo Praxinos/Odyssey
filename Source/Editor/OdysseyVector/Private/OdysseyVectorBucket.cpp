@@ -225,9 +225,10 @@ FOdysseyVectorBucket::GetColor()
         if( mPaletteEntry && mPaletteEntry->IsValidLowLevel() )
             return Cast< UOdysseyPaletteEntryColor >(mPaletteEntry)->GetUsedColor();
         else
+        {
             mPaletteEntry = nullptr;
             return mSolidColor;
-
+        }
         case eBucketColorMode::SolidColor:
         return mSolidColor;
     }

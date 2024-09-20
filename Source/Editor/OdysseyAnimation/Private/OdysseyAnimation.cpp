@@ -223,7 +223,7 @@ UOdysseyAnimation::PostInitProperties()
     if (HasAnyFlags(RF_ClassDefaultObject))
         return;
 	
-	mProxy = MakeShared<FOdysseyAnimationProxy>(this);
+    mProxy = MakeShared<FOdysseyAnimationProxy>(this);
 
 	OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimation::OnImageRenderingChanged);
 }

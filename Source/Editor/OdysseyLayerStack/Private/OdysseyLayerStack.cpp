@@ -98,7 +98,7 @@ UOdysseyLayerStack::AddLayer(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLayer
         return nullptr;
 
     //Create the Layer
-	UOdysseyLayer* layer = CreateLayer(LayerType);
+    UOdysseyLayer* layer = CreateLayer(LayerType);
     if (!layer )
         return nullptr;
 
@@ -338,7 +338,7 @@ UOdysseyLayerStack::MergeLayers(TArray<UOdysseyLayer*> iLayers)
         return nullptr;
 
     //Create the Layer
-	UOdysseyLayer* mergedLayer = CreateLayer(layerMergeType);
+    UOdysseyLayer* mergedLayer = CreateLayer(layerMergeType);
     if (!mergedLayer )
         return nullptr;
 
@@ -475,7 +475,7 @@ UOdysseyLayerStack::CanMoveLayer(UOdysseyLayer* Layer, UOdysseyLayer* ParentLaye
     if (Layer == ParentLayer || ParentLayer->IsChildOf(Layer))
         return false;
 
-	return true;
+    return true;
 }
 
 bool
@@ -506,7 +506,7 @@ UOdysseyLayerStack::CanMoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* 
     if (Layers.Num()<= 0)
         return false;
 
-	return true;
+    return true;
 }
 
 void
@@ -551,7 +551,7 @@ UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
         ParentLayer = LayerRoot;
 
 	//If the given parent can't have children or isn't contained in this layerstack
-	if ( !ParentLayer->CanHaveChildren || !ContainsLayer(ParentLayer))
+    if ( !ParentLayer->CanHaveChildren || !ContainsLayer(ParentLayer))
 		return;
 
 	//Sanitize Layers array

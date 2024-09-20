@@ -53,7 +53,7 @@ FOdysseyAnimationMediaControls::GetDuration() const
     if (!mAnimation)
         return FTimespan();
 
-	FInt32Range range = GetFrameRange();
+    FInt32Range range = GetFrameRange();
 	FTimespan duration = FTimespan::FromSeconds((range.GetUpperBoundValue() + 1) / mAnimation->GetFramesPerSecond()) - FTimespan(1);
 	return duration;
 }

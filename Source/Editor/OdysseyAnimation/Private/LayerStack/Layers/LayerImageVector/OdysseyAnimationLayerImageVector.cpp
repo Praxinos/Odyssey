@@ -300,7 +300,7 @@ UOdysseyAnimationLayerImageVector::GetCellMediaVector(uint32 iFrameIndex) const
     if (mediaVectorList.Num() <= 0)
         return nullptr;
 
-	return mediaVectorList[0];
+    return mediaVectorList[0];
 }
 
 FOdysseyMediaProvider

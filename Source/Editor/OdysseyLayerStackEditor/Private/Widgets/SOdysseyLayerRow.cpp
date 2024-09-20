@@ -68,7 +68,7 @@ SOdysseyLayerRow::GetBorder() const
     if (!mLayer) 
         return borderBrush;
 
-	UOdysseyLayerStack* layerStack = mLayer->GetLayerStack();
+    UOdysseyLayerStack* layerStack = mLayer->GetLayerStack();
 	if ( !layerStack || layerStack->CurrentLayer != mLayer)
 		return borderBrush;
 
@@ -301,7 +301,7 @@ SOdysseyLayerRow::OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone
     if (!operation)
         return TOptional<EItemDropZone>();
 
-	UOdysseyLayerStack* operationLayerStack = operation->GetLayerStack();
+    UOdysseyLayerStack* operationLayerStack = operation->GetLayerStack();
 	if ( !operationLayerStack )
 		return TOptional<EItemDropZone>();
 
@@ -354,7 +354,7 @@ SOdysseyLayerRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iD
     if (!dropZone.IsSet())
         return FReply::Unhandled();
 
-	TSharedPtr<FOdysseyLayerStackDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyLayerStackDragDropOperation>();
+    TSharedPtr<FOdysseyLayerStackDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyLayerStackDragDropOperation>();
     if (!operation)
         return FReply::Unhandled();
 

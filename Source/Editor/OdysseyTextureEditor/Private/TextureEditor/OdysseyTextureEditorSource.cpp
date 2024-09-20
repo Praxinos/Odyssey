@@ -126,7 +126,7 @@ FOdysseyTextureEditorSource::InitTextureUserData()
         return;
 
     //Init user data
-	userData = NewObject<UOdysseyTextureLayerStackUserData>(mTexture, NAME_None, RF_Public);
+    userData = NewObject<UOdysseyTextureLayerStackUserData>(mTexture, NAME_None, RF_Public);
     userData->InitWithDefaultLayerStack();
 
     // Notify for changes

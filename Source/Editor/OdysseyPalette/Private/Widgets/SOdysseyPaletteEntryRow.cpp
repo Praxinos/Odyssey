@@ -62,9 +62,9 @@ SOdysseyPaletteEntryRow::GetBorder() const
     if (!mEntry) 
         return borderBrush;
 
-	UOdysseyPalette* palette = mEntry->GetPalette();
-	if ( !palette || palette->CurrentEntry != mEntry)
-		return borderBrush;
+    UOdysseyPalette* palette = mEntry->GetPalette();
+    if ( !palette || palette->CurrentEntry != mEntry)
+        return borderBrush;
 
     const bool bIsActive = OwnerTablePtr.Pin()->AsWidget()->HasKeyboardFocus();
     return bIsActive ? FOdysseyStyle::GetBrush("OdysseyLayerStack.CurrentLayerBackgroundBrush") : FOdysseyStyle::GetBrush("OdysseyLayerStack.CurrentLayerInactiveBackgroundBrush");
@@ -226,11 +226,11 @@ SOdysseyPaletteEntryRow::OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemD
     if (!operation)
         return emptyDropZone;
 
-	UOdysseyPalette* operationPalette = operation->GetPalette();
-	if ( !operationPalette )
-		return emptyDropZone;
+    UOdysseyPalette* operationPalette = operation->GetPalette();
+    if ( !operationPalette )
+        return emptyDropZone;
 
-	FGeometry geometry = GetTickSpaceGeometry();
+    FGeometry geometry = GetTickSpaceGeometry();
 	const FVector2D localPointerPos = geometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition());
 	EItemDropZone expectedDropZone = ComputeItemDropZoneForLeaf(localPointerPos, geometry.GetLocalSize(), mEntry->CanHaveChildren, mEntry->IsExpanded);
 
@@ -269,19 +269,19 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
     if (!dropZone.IsSet())
         return FReply::Unhandled();
 
-	TSharedPtr<FOdysseyPaletteDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyPaletteDragDropOperation>();
+    TSharedPtr<FOdysseyPaletteDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyPaletteDragDropOperation>();
     if (!operation)
         return FReply::Unhandled();
 
     UOdysseyPalette* palette = mEntry->GetPalette();
-	if ( !palette )
-		return FReply::Unhandled();
+    if ( !palette )
+        return FReply::Unhandled();
 
-	UOdysseyPalette* operationPalette = operation->GetPalette();
-	if ( !operationPalette )
-		return FReply::Unhandled();
+    UOdysseyPalette* operationPalette = operation->GetPalette();
+    if ( !operationPalette )
+        return FReply::Unhandled();
 
-	UOdysseyPaletteEntry* parent = mEntry->GetParent();
+    UOdysseyPaletteEntry* parent = mEntry->GetParent();
     TArray<UOdysseyPaletteEntry*> entries = operation->GetPaletteEntries();
 	int index = mEntry->GetIndexInParent();
 

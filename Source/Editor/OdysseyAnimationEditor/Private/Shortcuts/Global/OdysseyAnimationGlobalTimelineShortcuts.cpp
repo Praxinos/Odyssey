@@ -402,8 +402,8 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_Flip(int iConfigurationIndex)
     if (!extension)
         return;
 
-	const UOdysseyAnimationEditorUserSettings* settings = UOdysseyAnimationEditorUserSettings::Get();
-	extension->FlipSystem()->StartFlipping(settings->FlipConfigurations[iConfigurationIndex]);
+    const UOdysseyAnimationEditorUserSettings* settings = UOdysseyAnimationEditorUserSettings::Get();
+    extension->FlipSystem()->StartFlipping(settings->FlipConfigurations[iConfigurationIndex]);
 }
 
 

@@ -231,8 +231,8 @@ SOdysseyPaletteTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropEven
         return FReply::Unhandled();
 
     //do nothing
-	FText copyEntriesTransactionName = LOCTEXT("tree-view.drag-drop.transaction.copy-entries", "Copy Entries");
-	FText moveEntriesTransactionName = LOCTEXT("tree-view.drag-drop.transaction.move-entries", "Move Entries");
+    FText copyEntriesTransactionName = LOCTEXT("tree-view.drag-drop.transaction.copy-entries", "Copy Entries");
+    FText moveEntriesTransactionName = LOCTEXT("tree-view.drag-drop.transaction.move-entries", "Move Entries");
     TArray<UOdysseyPaletteEntry*> entries = operation->GetPaletteEntries();
     if ( operationPalette == mPalette ) //dropped from same Palette, do a move of topmost dropped entries
     {

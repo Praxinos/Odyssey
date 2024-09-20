@@ -53,7 +53,7 @@ FOdysseyEditorModule::GetOpenedTabIds(const FName& iEditorName, const TArray<FNa
     if (!mOpenedTabIds.Contains(iEditorName))
         LoadOpenedTabIds(iEditorName, iDefaultOpenedTabIds);
 
-	return mOpenedTabIds[iEditorName];
+    return mOpenedTabIds[iEditorName];
 }
 
 FString

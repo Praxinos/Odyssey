@@ -143,7 +143,7 @@ FOdysseyViewportDrawingEditorExtension::OnSourceChanged()
         return;
 
 	//If the source is a texture, then change its parameters for display reasons
-	if (mCurrentSource->Id() == FOdysseyTextureEditorSource::StaticId())
+    if (mCurrentSource->Id() == FOdysseyTextureEditorSource::StaticId())
 	{
 		TSharedPtr<FOdysseyTextureEditorSource> textureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(mCurrentSource);
 		UTexture2D* texture = textureSource->GetTexture();
@@ -1014,7 +1014,7 @@ FOdysseyViewportDrawingEditorExtension::GetDrawHUDParams(const FSceneView* View,
     if (!texture)
         return false;
 
-	FBox meshBoundingBox = staticMesh->GetBoundingBox();
+    FBox meshBoundingBox = staticMesh->GetBoundingBox();
 	FVector meshSize = meshBoundingBox.GetSize();
 
 	float meshW = meshSize.X;

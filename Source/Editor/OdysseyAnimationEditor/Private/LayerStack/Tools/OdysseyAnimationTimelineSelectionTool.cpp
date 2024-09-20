@@ -54,12 +54,12 @@ FOdysseyAnimationTimelineSelectionTool::OnDragDetected(const FMouseEventParams& 
     if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
         return FReply::Unhandled();
 
-	switch(mSelectionMode)
-	{
-		case ESelectionMode::Default: return OnDefaultSelectionDragDetected(iParams);
-		case ESelectionMode::Contiguous: return OnContiguousSelectionDragDetected(iParams);
-		case ESelectionMode::NonContiguous: return OnNonContiguousSelectionDragDetected(iParams);
-	}
+    switch(mSelectionMode)
+    {
+        case ESelectionMode::Default: return OnDefaultSelectionDragDetected(iParams);
+        case ESelectionMode::Contiguous: return OnContiguousSelectionDragDetected(iParams);
+        case ESelectionMode::NonContiguous: return OnNonContiguousSelectionDragDetected(iParams);
+    }
 
     return FReply::Handled();
 }
@@ -70,12 +70,12 @@ FOdysseyAnimationTimelineSelectionTool::OnMouseMove(const FMouseEventParams& iPa
     if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
         return FReply::Unhandled();
 
-	switch(mSelectionMode)
-	{
-		case ESelectionMode::Default: return OnDefaultSelectionMouseMove(iParams);
-		case ESelectionMode::Contiguous: return OnContiguousSelectionMouseMove(iParams);
-		case ESelectionMode::NonContiguous: return OnNonContiguousSelectionMouseMove(iParams);
-	}
+    switch(mSelectionMode)
+    {
+        case ESelectionMode::Default: return OnDefaultSelectionMouseMove(iParams);
+        case ESelectionMode::Contiguous: return OnContiguousSelectionMouseMove(iParams);
+        case ESelectionMode::NonContiguous: return OnNonContiguousSelectionMouseMove(iParams);
+    }
 
     //updateSelection
     return FReply::Unhandled();
@@ -87,12 +87,12 @@ FOdysseyAnimationTimelineSelectionTool::OnMouseButtonUp(const FMouseEventParams&
     if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
         return FReply::Unhandled();
 
-	switch(mSelectionMode)
-	{
-		case ESelectionMode::Default: return OnDefaultSelectionMouseButtonUp(iParams);
-		case ESelectionMode::Contiguous: return OnContiguousSelectionMouseButtonUp(iParams);
-		case ESelectionMode::NonContiguous: return OnNonContiguousSelectionMouseButtonUp(iParams);
-	}
+    switch(mSelectionMode)
+    {
+        case ESelectionMode::Default: return OnDefaultSelectionMouseButtonUp(iParams);
+        case ESelectionMode::Contiguous: return OnContiguousSelectionMouseButtonUp(iParams);
+        case ESelectionMode::NonContiguous: return OnNonContiguousSelectionMouseButtonUp(iParams);
+    }
 
     return FReply::Unhandled();
 }

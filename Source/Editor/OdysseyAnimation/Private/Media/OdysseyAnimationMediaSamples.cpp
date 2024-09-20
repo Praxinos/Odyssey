@@ -91,7 +91,7 @@ FOdysseyAnimationMediaSamples::FindMaxOverlapingFrame(FTimespan iStartTime, FTim
     if (!mAnimation)
         return FTimespan();
 
-	int startFrameIndex = mAnimation->GetFrameIndexAtTime(iStartTime);
+    int startFrameIndex = mAnimation->GetFrameIndexAtTime(iStartTime);
 	int endFrameIndex = mAnimation->GetFrameIndexAtTime(iEndTime);
 	FTimespan bestOverlap(-1);
 	int bestFrameIndex = INDEX_NONE;
@@ -120,7 +120,7 @@ FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeR
     if (!mAnimation)
         return false;
 
-	TRange<FMediaTimeStamp>& timeRange = *oTimeRange;
+    TRange<FMediaTimeStamp>& timeRange = *oTimeRange;
 	TSharedPtr<FOdysseyAnimationMediaControls> controls = mControls.Pin();
 	if ( !controls )
 		return false;
@@ -411,7 +411,7 @@ FOdysseyAnimationMediaSamples::Render()
     if ( mInvalidTileMap.InvalidTiles().IsEmpty() )
         return;
 
-	TSharedPtr<IOdysseyImageRenderer> renderer = mAnimation->BuildImageRenderer(mRenderType, mCurrentFrameIndex);
+    TSharedPtr<IOdysseyImageRenderer> renderer = mAnimation->BuildImageRenderer(mRenderType, mCurrentFrameIndex);
 	renderer->Init();
 	TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(mAnimation->Width(), mAnimation->Height(), mAnimation->Format());
 

@@ -254,7 +254,7 @@ SOdysseyFlipbookTimelineView::Tick(const FGeometry& AllottedGeometry, const doub
     if (!mIsPlaying)
         return;
 
-	TSharedPtr<FOdysseyFlipbookWrapper> wrapper = mFlipbookWrapper.Pin();
+    TSharedPtr<FOdysseyFlipbookWrapper> wrapper = mFlipbookWrapper.Pin();
 	if (!wrapper)
 		return;
 
@@ -608,7 +608,7 @@ SOdysseyFlipbookTimelineView::AddFrame(int32 iIndex)
     if (!wrapper->CreateKeyFrame(iIndex, &createdTexture, &createdSprite))
         return;
 
-	mTimelineTrackWidget->InsertFrame(iIndex, createdTexture, 1);
+    mTimelineTrackWidget->InsertFrame(iIndex, createdTexture, 1);
 
     mOnSpriteCreated.ExecuteIfBound(createdSprite);
     mOnTextureCreated.ExecuteIfBound(createdTexture);

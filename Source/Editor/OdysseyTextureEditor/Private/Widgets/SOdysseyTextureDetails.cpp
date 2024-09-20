@@ -167,7 +167,7 @@ SOdysseyTextureDetails::GetImportedText() const
     if (!texture)
         return FText();
 
-	UVolumeTexture* VolumeTexture = Cast<UVolumeTexture>(texture);
+    UVolumeTexture* VolumeTexture = Cast<UVolumeTexture>(texture);
 	UTextureRenderTargetVolume* VolumeTextureRT = Cast<UTextureRenderTargetVolume>(texture);
 
 	const uint32 SurfaceWidth = (uint32)texture->GetSurfaceWidth();
@@ -208,7 +208,7 @@ SOdysseyTextureDetails::GetCurrentText() const
     if (!texture)
         return FText();
 
-	UVolumeTexture* VolumeTexture = Cast<UVolumeTexture>(texture);
+    UVolumeTexture* VolumeTexture = Cast<UVolumeTexture>(texture);
     UTextureCube* TextureCube = Cast<UTextureCube>(texture);
 	UTextureRenderTargetVolume* VolumeTextureRT = Cast<UTextureRenderTargetVolume>(texture);
 
@@ -314,7 +314,7 @@ SOdysseyTextureDetails::GetSizeText() const
         return FText();
 
     // Texture asset size
-	const uint32 Size = (texture->GetResourceSizeBytes(EResourceSizeMode::Exclusive) + 512) / 1024;
+    const uint32 Size = (texture->GetResourceSizeBytes(EResourceSizeMode::Exclusive) + 512) / 1024;
 
 	FNumberFormattingOptions SizeOptions;
 	SizeOptions.UseGrouping = false;
@@ -344,7 +344,7 @@ SOdysseyTextureDetails::GetFormatText() const
     if (!texture)
         return FText();
 
-	UTexture2D* Texture2D = Cast<UTexture2D>(texture);
+    UTexture2D* Texture2D = Cast<UTexture2D>(texture);
 	UTextureRenderTarget2D* Texture2DRT = Cast<UTextureRenderTarget2D>(texture);
 	UTextureCube* TextureCube = Cast<UTextureCube>(texture);
 	UTexture2DArray* Texture2DArray = Cast<UTexture2DArray>(texture);
@@ -428,7 +428,7 @@ SOdysseyTextureDetails::GetNumMipsText() const
     if (!texture)
         return FText();
 
-	UTexture2D* Texture2D = Cast<UTexture2D>(texture);
+    UTexture2D* Texture2D = Cast<UTexture2D>(texture);
 	UTextureRenderTarget2D* Texture2DRT = Cast<UTextureRenderTarget2D>(texture);
 	UTextureCube* TextureCube = Cast<UTextureCube>(texture);
 	UTexture2DArray* Texture2DArray = Cast<UTexture2DArray>(texture);

@@ -351,8 +351,8 @@ SOdysseyLayerStackTreeView::OnLayerStackHierarchyChanged(UOdysseyLayerStack* iLa
     if ( !mLayerStack )
         return;
 
-	if ( iLayerStack != mLayerStack )
-		return;
+    if ( iLayerStack != mLayerStack )
+        return;
 
     RefreshAllExpansionStates();
     RequestTreeRefresh();
@@ -364,8 +364,8 @@ SOdysseyLayerStackTreeView::SetCurrentLayerFromSelectorItem()
     if ( !mLayerStack )
         return;
 
-	if ( mLayerStack->GetLayers().Num() == 0)
-		return;
+    if ( mLayerStack->GetLayers().Num() == 0)
+        return;
 
     if (!SelectorItem)
     {

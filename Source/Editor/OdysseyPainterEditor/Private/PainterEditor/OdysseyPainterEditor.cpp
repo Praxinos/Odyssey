@@ -646,7 +646,7 @@ FOdysseyPainterEditor::SanitizeCurrentTool()
     if (!tool || !tool->IsActivable())
         return;
 
-	ActivateMainTool(tool);
+    ActivateMainTool(tool);
 }
 
 FOdysseyMediaProvider

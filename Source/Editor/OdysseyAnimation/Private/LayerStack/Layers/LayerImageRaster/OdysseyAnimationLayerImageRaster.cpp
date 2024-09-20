@@ -465,7 +465,7 @@ UOdysseyAnimationLayerImageRaster::GetCellMediaRaster(uint32 iFrameIndex) const
     if (mediaRasterList.Num() <= 0)
         return nullptr;
 
-	return mediaRasterList[0];
+    return mediaRasterList[0];
 }
 
 FOdysseyMediaProvider

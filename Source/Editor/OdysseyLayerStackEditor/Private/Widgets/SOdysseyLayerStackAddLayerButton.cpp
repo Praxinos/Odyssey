@@ -94,7 +94,7 @@ SOdysseyLayerStackAddLayerButton::AddLayerFromClass(FAssetData iAssetData)
     if (!layerStack)
         return;
 
-	UObject* loadedAsset = iAssetData.FastGetAsset(true);
+    UObject* loadedAsset = iAssetData.FastGetAsset(true);
 	if ( !loadedAsset )
 		return;
 

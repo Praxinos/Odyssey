@@ -162,7 +162,7 @@ FOdysseyFlipbookWrapper::FixKeyFrame(int32 iIndex, UTexture2D** oTexture, UPaper
     if (iIndex < 0 || iIndex >= mFlipbook->GetNumKeyFrames())
         return false;
 
-	UTexture2D* texture = GetKeyframeTexture(iIndex);
+    UTexture2D* texture = GetKeyframeTexture(iIndex);
 	if (texture)
 		return false;
 
@@ -297,11 +297,11 @@ FOdysseyFlipbookWrapper::CreateSprite(FString iName)
     if (!renderGeometryProperty)
         return NULL;
 
-	FByteProperty* geometryType = FindFProperty<FByteProperty>(renderGeometryProperty->Struct, "GeometryType");
+    FByteProperty* geometryType = FindFProperty<FByteProperty>(renderGeometryProperty->Struct, "GeometryType");
     if (!geometryType)
         return NULL;
 
-	geometryType->SetPropertyValue_InContainer(renderGeometryProperty->ContainerPtrToValuePtr<FSpriteGeometryCollection>(sprite), ESpritePolygonMode::SourceBoundingBox);
+    geometryType->SetPropertyValue_InContainer(renderGeometryProperty->ContainerPtrToValuePtr<FSpriteGeometryCollection>(sprite), ESpritePolygonMode::SourceBoundingBox);
 
     //Init sprite
 	FSpriteAssetInitParameters spriteInitParams;
@@ -433,7 +433,7 @@ FOdysseyFlipbookWrapper::OpenKeyFrameSpriteEditor(int32 iIndex)
     if (!sprite)
         return;
 
-	GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAsset(sprite);
+    GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAsset(sprite);
 }
 
 FOnSpriteTextureChanged&

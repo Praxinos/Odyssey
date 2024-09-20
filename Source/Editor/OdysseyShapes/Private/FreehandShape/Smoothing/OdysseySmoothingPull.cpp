@@ -41,16 +41,16 @@ FOdysseySmoothingPull::ComputePoint()
     if( !IsReady() )
         return FOdysseyPoint();
 
-	if (mPoints.Num() == 1)
-		return mPoints[0];
+    if (mPoints.Num() == 1)
+        return mPoints[0];
 
-	if (mSmoothingOptions->SmoothingStrength <= 0)
-	{
-		FOdysseyPoint outPoint = mPoints[mPoints.Num() - 1];
-		mPoints.Empty();
-		mPoints.Add(outPoint);
-		return outPoint;
-	}
+    if (mSmoothingOptions->SmoothingStrength <= 0)
+    {
+        FOdysseyPoint outPoint = mPoints[mPoints.Num() - 1];
+        mPoints.Empty();
+        mPoints.Add(outPoint);
+        return outPoint;
+    }
 
     FOdysseyPoint point = mPoints[mPoints.Num() - 1];
     float x = point.x - mPoints[0].x;

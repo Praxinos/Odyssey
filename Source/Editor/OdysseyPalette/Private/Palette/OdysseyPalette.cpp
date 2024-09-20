@@ -47,7 +47,7 @@ UOdysseyPaletteEntry* UOdysseyPalette::AddEntry(TSubclassOf<UOdysseyPaletteEntry
         return nullptr;
 
     //Create the entry
-	UOdysseyPaletteEntry* entry = CreateEntry(entryType);
+    UOdysseyPaletteEntry* entry = CreateEntry(entryType);
     if (!entry)
         return nullptr;
 
@@ -294,7 +294,7 @@ bool UOdysseyPalette::CanMoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOd
     if (iEntries.Num()<= 0)
         return false;
 
-	return true;
+    return true;
 }
 
 void UOdysseyPalette::MoveEntry(UOdysseyPaletteEntry* iEntry, UOdysseyPaletteEntry* iParentEntry /*= nullptr*/, int iIndexInParent /*= 0*/)
@@ -337,13 +337,13 @@ void UOdysseyPalette::MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdyss
         iParentEntry = PaletteRoot;
 
 	//If the given parent can't have children or isn't contained in this palette
-	if ( !iParentEntry->CanHaveChildren || !ContainsEntry(iParentEntry))
-		return;
+    if ( !iParentEntry->CanHaveChildren || !ContainsEntry(iParentEntry))
+        return;
 
 	//Sanitize Entries array
-	iEntries.RemoveAll(
-		[this, iParentEntry](UOdysseyPaletteEntry* iEntry)
-		{
+    iEntries.RemoveAll(
+        [this, iParentEntry](UOdysseyPaletteEntry* iEntry)
+        {
 			if ( !iEntry || !ContainsEntry(iEntry) )
 				return true;
 

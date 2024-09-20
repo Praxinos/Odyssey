@@ -27,7 +27,7 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
     if (iParams.mLayer->GetIsLocked())
         return FReply::Unhandled();
 
-	if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
+    if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
 		return FReply::Unhandled();
 
     float timelineOffset = mTimelineParams->GetOffset();

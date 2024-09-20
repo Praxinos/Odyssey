@@ -87,16 +87,16 @@ SOdysseyPaletteAddEntryButton::AddEntryFromClass(FAssetData iAssetData)
     if (!palette)
         return;
 
-	UObject* loadedAsset = iAssetData.FastGetAsset(true);
-	if ( !loadedAsset )
-		return;
+    UObject* loadedAsset = iAssetData.FastGetAsset(true);
+    if ( !loadedAsset )
+        return;
 
-	UClass* entryClass = Cast<UClass>(loadedAsset);
-	if ( UBlueprint* blueprint = Cast<UBlueprint>(loadedAsset) )
-		entryClass = blueprint->GeneratedClass;
+    UClass* entryClass = Cast<UClass>(loadedAsset);
+    if ( UBlueprint* blueprint = Cast<UBlueprint>(loadedAsset) )
+        entryClass = blueprint->GeneratedClass;
 
-	if ( !entryClass )
-		return;
+    if ( !entryClass )
+        return;
 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("add-entry-button.transaction.add-entry", "Add Entry"));
