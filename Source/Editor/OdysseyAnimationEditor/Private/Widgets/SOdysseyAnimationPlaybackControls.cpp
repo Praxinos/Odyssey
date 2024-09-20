@@ -280,16 +280,80 @@ SOdysseyAnimationPlaybackControls::OnNextClicked()
 FReply
 SOdysseyAnimationPlaybackControls::OnPreviousKeyClicked()
 {
-    OnPreviousClicked();
-    //TODO: Seek to Previous KeyFrame instead of previous frame
+	UOdysseyAnimation* animation = mExtension->Animation();
+	if (!animation)
+		return FReply::Handled();
+
+	UOdysseyAnimationLayerStack* layerStack = animation->GetLayerStack();
+	UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer);
+	
+	if (layer->GetCells().IsEmpty())
+		return FReply::Handled();
+
+	FInt32Range range = layer->GetFrameRange();
+	int index = INDEX_NONE;
+	if (animation->CurrentFrame > range.GetUpperBoundValue())
+	{
+		index = layer->GetCells().Num() - 1;
+	}
+	else if (animation->CurrentFrame < range.GetLowerBoundValue())
+	{
+		index = 0;
+	}
+	else
+	{
+		UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
+		if (!cell)
+			return FReply::Handled();
+
+		index = cell->IndexInLayer - 1;
+		if (index < 0)
+			return FReply::Handled();
+	}
+	
+	UOdysseyAnimationCell* cell = layer->GetCells()[index];
+	range = cell->GetFrameRange();
+	FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), range.GetLowerBoundValue());
     return FReply::Handled();
 }
 
 FReply
 SOdysseyAnimationPlaybackControls::OnNextKeyClicked()
 {
-    OnNextClicked();
-    //TODO: Seek to Next KeyFrame instead of next frame
+    UOdysseyAnimation* animation = mExtension->Animation();
+	if (!animation)
+		return FReply::Handled();
+
+	UOdysseyAnimationLayerStack* layerStack = animation->GetLayerStack();
+	UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer);
+	
+	if (layer->GetCells().IsEmpty())
+		return FReply::Handled();
+
+	int index = INDEX_NONE;
+	FInt32Range range = layer->GetFrameRange();
+	if (animation->CurrentFrame > range.GetUpperBoundValue())
+	{
+		index = layer->GetCells().Num() - 1;
+	}
+	else if (animation->CurrentFrame < range.GetLowerBoundValue())
+	{
+		index = 0;
+	}
+	else
+	{
+		UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
+		if (!cell)
+			return FReply::Handled();
+
+		index = cell->IndexInLayer + 1;
+		if (index == layer->GetCells().Num())
+			return FReply::Handled();
+	}
+
+	UOdysseyAnimationCell* cell = layer->GetCells()[index];
+	range = cell->GetFrameRange();
+	FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), range.GetLowerBoundValue());
     return FReply::Handled();
 }
 
