@@ -594,7 +594,7 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     RegisterToolBarExtender();
     TSharedRef<SWidget> ToolBar = SNew(SHorizontalBox)
-        .Visibility_Lambda([] { return GLevelEditorModeTools().IsViewportUIHidden() ? EVisibility::Hidden : EVisibility::Visible; })
+        .Visibility_Lambda([] { return GLevelEditorModeTools().IsViewportUIHidden() ? EVisibility::Hidden : EVisibility::SelfHitTestInvisible; })
         + SHorizontalBox::Slot()
         [
             ViewportWidget->MakeExternalViewportToolbar().ToSharedRef()
