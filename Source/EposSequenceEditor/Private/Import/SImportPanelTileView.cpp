@@ -3,6 +3,8 @@
 
 #include "Import/SImportPanelTileView.h"
 
+#include "Brushes/SlateImageBrush.h"
+#include "Engine/Texture2D.h"
 #include "ImageUtils.h"
 #include "Internationalization/BreakIterator.h"
 #include "ISequencer.h"

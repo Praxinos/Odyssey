@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "CineCameraComponent.h"
 #include "Engine/DeveloperSettings.h"
+#include "Misc/FrameRate.h"
 #include "UObject/Object.h"
 
 #include "PatternKeywordList.h"

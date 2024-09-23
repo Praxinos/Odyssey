@@ -7,6 +7,7 @@
 
 //---
 
+class FTextureRenderTargetResource;
 class ISequencer;
 class UCameraComponent;
 struct FExportPanel;

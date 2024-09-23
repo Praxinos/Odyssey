@@ -4,6 +4,7 @@
 #include "Export/PDF/ExportPDFExporter.h"
 
 #include "Engine/TextureRenderTarget2D.h"
+#include "HAL/FileManager.h"
 #include "ImageUtils.h"
 #include "IImageWrapperModule.h"
 #include "Input/HittestGrid.h"

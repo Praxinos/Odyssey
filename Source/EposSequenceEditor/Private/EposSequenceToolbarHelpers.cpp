@@ -6,6 +6,7 @@
 #include "ISequencer.h"
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Colors/SColorPicker.h"
+#include "Widgets/Input/SComboButton.h"
 
 #include "EposSequenceEditorCommands.h"
 #include "EposTracksToolbarHelpers.h"
