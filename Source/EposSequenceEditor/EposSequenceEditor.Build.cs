@@ -126,6 +126,8 @@ public class EposSequenceEditor : ModuleRules
 
         //--- WIBU
 
+        PCHUsage = PCHUsageMode.NoPCHs;
+
         if (Target.Platform.IsInGroup(UnrealPlatformGroup.Windows))
         {
             string AxProtectorSDKPath = Environment.GetEnvironmentVariable("AXPROTECTOR_SDK");
