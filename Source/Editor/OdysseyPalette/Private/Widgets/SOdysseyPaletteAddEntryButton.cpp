@@ -9,6 +9,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "SPositiveActionButton.h"
 #include "OdysseyPalette.h"
+#include "OdysseyStyleSet.h"
 
 #define LOCTEXT_NAMESPACE "Palette"
 
@@ -26,9 +27,34 @@ void SOdysseyPaletteAddEntryButton::Construct(const FArguments& InArgs)
 
     ChildSlot
     [
-        SNew(SPositiveActionButton)
-        .Text(LOCTEXT("add-entry-button.add-color", "Add"))
-        .OnGetMenuContent(this, &SOdysseyPaletteAddEntryButton::MakeMenu)
+        SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
+        [
+            SNew(SButton)
+            .HAlign(HAlign_Left)
+            .OnClicked(this, &SOdysseyPaletteAddEntryButton::AddColorEntry )
+            [
+                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddSet24"))
+            ]
+        ]
+        + SHorizontalBox::Slot()
+        [
+            SNew(SButton)
+            .HAlign(HAlign_Left)
+            .OnClicked(this, &SOdysseyPaletteAddEntryButton::AddMaterialEntry)
+            [
+                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddSet24"))
+            ]
+        ]
+        + SHorizontalBox::Slot()
+        [
+            SNew(SButton)
+            .HAlign(HAlign_Left)
+            .OnClicked(this, &SOdysseyPaletteAddEntryButton::AddFolderEntry)
+            [
+                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddSet24"))
+            ]
+        ]
     ];
 }
 
@@ -37,69 +63,15 @@ void SOdysseyPaletteAddEntryButton::Construct(const FArguments& InArgs)
 
 //PRIVATE API-----------------------------------------------------------
 
-TSharedRef<SWidget> SOdysseyPaletteAddEntryButton::MakeMenu()
+FReply
+SOdysseyPaletteAddEntryButton::AddColorEntry()
 {
     UOdysseyPalette* palette = mPalette.Get();
     if (!palette)
-        return SNullWidget::NullWidget;
-
-    
-    FMenuBuilder menuBuilder(true, nullptr);
-    menuBuilder.BeginSection("AddEntries");
-    {
-        //Color
-        UOdysseyPaletteEntry* entryCDO = UOdysseyPaletteEntryColor::StaticClass()->GetDefaultObject<UOdysseyPaletteEntryColor>();
-                
-        menuBuilder.AddMenuEntry(
-            entryCDO->EntryTypeName,
-            entryCDO->Description,
-            FSlateIcon(),
-            FUIAction(FExecuteAction::CreateRaw(this, &SOdysseyPaletteAddEntryButton::AddEntryFromClass, FAssetData(UOdysseyPaletteEntryColor::StaticClass()))));
-
-        //Material
-        entryCDO = UOdysseyPaletteEntryMaterial::StaticClass()->GetDefaultObject<UOdysseyPaletteEntryMaterial>();
-        FUIAction action = FUIAction(FExecuteAction::CreateRaw(this, &SOdysseyPaletteAddEntryButton::AddEntryFromClass, FAssetData(UOdysseyPaletteEntryMaterial::StaticClass())), FCanExecuteAction::CreateLambda([](){return false;}));
-
-        menuBuilder.AddMenuEntry(
-            entryCDO->EntryTypeName,
-            entryCDO->Description,
-            FSlateIcon(),
-            FUIAction( action ));
-
-        //Folder
-        entryCDO = UOdysseyPaletteEntryFolder::StaticClass()->GetDefaultObject<UOdysseyPaletteEntryFolder>();
-
-        menuBuilder.AddMenuEntry(
-            entryCDO->EntryTypeName,
-            entryCDO->Description,
-            FSlateIcon(),
-            FUIAction(FExecuteAction::CreateRaw(this, &SOdysseyPaletteAddEntryButton::AddEntryFromClass, FAssetData(UOdysseyPaletteEntryFolder::StaticClass()))));
-    }
-    menuBuilder.EndSection();
-    
-    return menuBuilder.MakeWidget();
-}
-
-void
-SOdysseyPaletteAddEntryButton::AddEntryFromClass(FAssetData iAssetData)
-{
-    UOdysseyPalette* palette = mPalette.Get();
-    if (!palette)
-        return;
-
-    UObject* loadedAsset = iAssetData.FastGetAsset(true);
-    if ( !loadedAsset )
-        return;
-
-    UClass* entryClass = Cast<UClass>(loadedAsset);
-    if ( UBlueprint* blueprint = Cast<UBlueprint>(loadedAsset) )
-        entryClass = blueprint->GeneratedClass;
-
-    if ( !entryClass )
-        return;
+        return FReply::Unhandled();
 
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("add-entry-button.transaction.add-entry", "Add Entry"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("add-color-entry-button.transaction.add-color-entry", "Add Color Entry"));
 #endif
 
     UOdysseyPaletteEntry* currentEntry = palette->CurrentEntry.Get();
@@ -107,22 +79,67 @@ SOdysseyPaletteAddEntryButton::AddEntryFromClass(FAssetData iAssetData)
     {
         if (currentEntry->CanHaveChildren)
         {
-			currentEntry = palette->AddEntry(entryClass, currentEntry);
+            currentEntry = palette->AddEntry(UOdysseyPaletteEntryColor::StaticClass(), currentEntry);
         }
         else
         {
-			UOdysseyPaletteEntry* parent = currentEntry->GetParent();
-			int index = currentEntry->GetIndexInParent();
-			currentEntry = palette->AddEntry(entryClass, parent, index);
+            UOdysseyPaletteEntry* parent = currentEntry->GetParent();
+            int index = currentEntry->GetIndexInParent();
+            currentEntry = palette->AddEntry(UOdysseyPaletteEntryColor::StaticClass(), parent, index);
         }
     }
     else
     {
-		currentEntry = palette->AddEntry(entryClass);
+        currentEntry = palette->AddEntry(UOdysseyPaletteEntryColor::StaticClass());
     }
 
     mOnAdded.ExecuteIfBound(currentEntry);
-    FOdysseyObjectEditorUtils::SetPropertyValue(palette, GET_MEMBER_NAME_CHECKED(UOdysseyPalette, CurrentEntry), TSoftObjectPtr<UOdysseyPaletteEntry>(currentEntry));
+    FOdysseyObjectEditorUtils::SetPropertyValue(palette, "CurrentEntry", TSoftObjectPtr<UOdysseyPaletteEntry>(currentEntry));
+
+    return FReply::Handled();
 }
+
+FReply
+SOdysseyPaletteAddEntryButton::AddMaterialEntry()
+{
+    return FReply::Handled();
+}
+
+FReply
+SOdysseyPaletteAddEntryButton::AddFolderEntry()
+{
+    UOdysseyPalette* palette = mPalette.Get();
+    if (!palette)
+        return FReply::Unhandled();
+
+#ifdef WITH_EDITOR
+    FScopedTransaction ScopedTransaction(LOCTEXT("add-folder-entry-button.transaction.add-folder-entry", "Add Folder Entry"));
+#endif
+
+    UOdysseyPaletteEntry* currentEntry = palette->CurrentEntry.Get();
+    if (currentEntry)
+    {
+        if (currentEntry->CanHaveChildren)
+        {
+            currentEntry = palette->AddEntry(UOdysseyPaletteEntryFolder::StaticClass(), currentEntry);
+        }
+        else
+        {
+            UOdysseyPaletteEntry* parent = currentEntry->GetParent();
+            int index = currentEntry->GetIndexInParent();
+            currentEntry = palette->AddEntry(UOdysseyPaletteEntryFolder::StaticClass(), parent, index);
+        }
+    }
+    else
+    {
+        currentEntry = palette->AddEntry(UOdysseyPaletteEntryFolder::StaticClass());
+    }
+
+    mOnAdded.ExecuteIfBound(currentEntry);
+    FOdysseyObjectEditorUtils::SetPropertyValue(palette, "CurrentEntry", TSoftObjectPtr<UOdysseyPaletteEntry>(currentEntry));
+
+    return FReply::Handled();
+}
+
 
 #undef LOCTEXT_NAMESPACE

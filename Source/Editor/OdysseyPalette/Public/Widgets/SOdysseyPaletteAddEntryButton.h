@@ -32,6 +32,9 @@ public:
 
 private:
     //PRIVATE API
+    FReply AddColorEntry();
+    FReply AddMaterialEntry();
+    FReply AddFolderEntry();
     TSharedRef<SWidget> MakeMenu();
     void AddEntryFromClass(FAssetData iAssetData);
 
