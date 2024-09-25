@@ -2,6 +2,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTag.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoTagInbetweenerCommit::~FOdysseyVectorUndoTagInbetweenerCommit()
 {
@@ -51,18 +52,17 @@ FOdysseyVectorUndoTagInbetweenerCommit::Apply( UObject* iIgnored )
 
     for( FOdysseyVectorGroupPaint* scene : mCommittedSceneList )
     {
-        //will update paintgroup's mPathList e.
-        scene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         // request redraw attached cells
         scene->GetEngine()->Invalidate( 0 );
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
-    // request call callbacks if any (for refreshing GUI e.g)
+    // request radraw
     mScene->GetEngine()->Invalidate( 0 );
+    // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 }
 
@@ -84,17 +84,16 @@ FOdysseyVectorUndoTagInbetweenerCommit::Revert( UObject* iIgnored )
 
     for( FOdysseyVectorGroupPaint* scene : mCommittedSceneList )
     {
-        //will update paintgroup's mPathList e.g
-        scene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         scene->GetEngine()->Invalidate( 0 );
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
+    // request radraw
     mScene->GetEngine()->Invalidate( 0 );
+    // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 }
 

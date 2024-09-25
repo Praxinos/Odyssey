@@ -7,6 +7,8 @@
 #include "OdysseyVectorAnimationCell.h"
 #include "OdysseyVectorSharedEnv.h"
 
+#define INDICATOR_RADIUS 20.0f
+
 FOdysseyPainterEditorVectorChartToolHUD::~FOdysseyPainterEditorVectorChartToolHUD()
 {
 }
@@ -77,9 +79,11 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
                                                   , BLRgba32& iFgColor
                                                   , BLRgba32& iBgColor
                                                   , BLRgba32& iHcColor
-                                                  , FInbetweenerBreakdown* iBreakdown )
+                                                  , FInbetweenerBreakdown* iBreakdown
+                                                  , uint32 iRenderedCellIndex )
 {
     FOdysseyVectorTagInbetweener* inbetweenerTag = iBreakdown->GetInbetweenerTag();
+    FInbetweenerChart* chart = iBreakdown->GetChart();
     double cursorRadius = mChartRect.h *.5f;
     float indicatorY = mChartRect.y + cursorRadius;
     float fontSize = mFont.size();
@@ -88,59 +92,135 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
                                 , inbetweenerTag->GetColor().G
                                 , inbetweenerTag->GetColor().B
                                 , 255 );
-    BLRgba32 blackColor = BLRgba32( 0, 0, 0, 255 );
+    BLRgba32 blackColor = BLRgba32(   0,   0,   0, 255 );
+    BLRgba32 greyColor  = BLRgba32( 127, 127, 127, 255 );
+    BLRgba32 whiteColor = BLRgba32( 255, 255, 255, 255 );
     uint32 sourceDrawingIndex = iBreakdown->GetSourceDrawingIndex();
     uint32 targetDrawingIndex = iBreakdown->GetTargetDrawingIndex();
     FInbetweenerDrawing* sourceDrawing = inbetweenerTag->GetDrawing( sourceDrawingIndex );
     FInbetweenerDrawing* targetDrawing = inbetweenerTag->GetDrawing( targetDrawingIndex );
+    ::ULIS::FVec2D* HUDBezier = chart->GetHUDBezier();
 
     iBLContext->save();
     iBLContext->resetMatrix();
 
     iBLContext->setCompOp( BL_COMP_OP_SRC_OVER  );
-    iBLContext->setStrokeStyle( tagColor );
+
+    iBLContext->setStrokeStyle( iHcColor );
     iBLContext->setStrokeWidth( 1.0f );
 
-    // horizontal line
+    // chart quadratic bezier line
+    {
+        BLPath path;
+
+        path.moveTo( HUDBezier[0].x, HUDBezier[0].y );
+        path.quadTo( HUDBezier[1].x, HUDBezier[1].y
+                   , HUDBezier[2].x, HUDBezier[2].y );
+
+        iBLContext->strokePath( path );
+    }
+/*
     iBLContext->strokeLine( mChartRect.x               , indicatorY
                           , mChartRect.x + mChartRect.w, indicatorY );
-
+*/
     // vertical lines
-    for( uint32 i = 1, n = 0; i < iBreakdown->GetDrawingCount() - 1; i++, n++ )
+    for( uint32 i = 0; i < iBreakdown->GetDrawingCount(); i++ )
     {
         FChartDivision* inbetween = &iBreakdown->GetChart()->GetDivisionArray()[i];
         float indicatorX = mChartRect.x + ( inbetween->spacing * mChartRect.w );
         float frameNumberX = indicatorX - ( fontSize * 0.25f );
         float frameNumberY = indicatorY + cursorRadius + fontSize + 2.0f;
         char frameNumber[6];
+        ::ULIS::FVec2D indicatorPosition = ::ULIS::QuadraticBezierPointAtParameter( HUDBezier[0],
+                                                                                    HUDBezier[1],
+                                                                                    HUDBezier[2],
+                                                                                    inbetween->spacing );
+        ::ULIS::FVec2D indicatorTangent = ::ULIS::QuadraticBezierTangentAtParameter( HUDBezier[0],
+                                                                                     HUDBezier[1],
+                                                                                     HUDBezier[2],
+                                                                                     inbetween->spacing );
+        ::ULIS::FVec2D indicatorPerpendicular = ::ULIS::FVec2D( -indicatorTangent.y, indicatorTangent.x );
+        bool hovered = ( inbetween == mChartTool->GetHoveredInbetween() );
+        bool current = ( inbetween->GetAnimationCellIndex() == iRenderedCellIndex );
 
-        // draw indicator
-        iBLContext->setStrokeWidth( 1.0f );
-        iBLContext->setStrokeStyle( tagColor );
-        iBLContext->strokeLine( indicatorX, indicatorY - cursorRadius
-                                , indicatorX, indicatorY + cursorRadius );
+        if( indicatorPerpendicular.DistanceSquared() )
+        {
+            indicatorPerpendicular.Normalize();
 
-        // draw inbetween number
-        snprintf( frameNumber, 6, "%d", n + 1 );
+            if( ( inbetween->spacing == 0.0f ) || ( inbetween->spacing == 1.0f ) )
+            {
+                iBLContext->setStrokeWidth( 3.0f );
+                iBLContext->setStrokeStyle( BLRgba32( 255, 127, 127, 255 ) );
+            }
+            else
+            {
+                iBLContext->setStrokeWidth( hovered ? 3.0f     : 1.0f     );
+                iBLContext->setStrokeStyle( hovered ? iHcColor : tagColor );
+            }
 
-        iBLContext->setStrokeStyle( blackColor );
-        iBLContext->setStrokeWidth( 1.0f );
-        iBLContext->strokeUtf8Text( BLPoint( frameNumberX, frameNumberY ), mFont, frameNumber );
+            // draw indicator
+            iBLContext->strokeLine( indicatorPosition.x + ( indicatorPerpendicular.x * INDICATOR_RADIUS )
+                                  , indicatorPosition.y + ( indicatorPerpendicular.y * INDICATOR_RADIUS )
+                                  , indicatorPosition.x - ( indicatorPerpendicular.x * INDICATOR_RADIUS )
+                                  , indicatorPosition.y - ( indicatorPerpendicular.y * INDICATOR_RADIUS ) );
 
-        iBLContext->setFillStyle( tagColor );
-        iBLContext->fillUtf8Text( BLPoint( frameNumberX, frameNumberY ), mFont, frameNumber );
+            // draw inbetween number
+            {
+                ::ULIS::FVec2D frameNumberPosition = ::ULIS::FVec2D( indicatorPosition.x + ( indicatorPerpendicular.x * 2.0f * INDICATOR_RADIUS )
+                                                                   , indicatorPosition.y + ( indicatorPerpendicular.y * 2.0f * INDICATOR_RADIUS ) );
+
+                snprintf( frameNumber, 6, "%d", i + 1 );
+
+                iBLContext->setStrokeStyle( blackColor );
+                iBLContext->setStrokeWidth( hovered ? 2.0f : 1.0f );
+                iBLContext->strokeUtf8Text( BLPoint( frameNumberPosition.x
+                                                   , frameNumberPosition.y ), mFont, frameNumber );
+
+                iBLContext->setFillStyle( hovered ? iHcColor : greyColor );
+                iBLContext->fillUtf8Text( BLPoint( frameNumberPosition.x
+                                                 , frameNumberPosition.y ), mFont, frameNumber );
+
+                // underline the current frame
+                if( current )
+                {
+                    iBLContext->setStrokeWidth( 4.0f );
+                    iBLContext->strokeLine( frameNumberPosition.x
+                                          , frameNumberPosition.y + 4
+                                          , frameNumberPosition.x + 11
+                                          , frameNumberPosition.y + 4 );
+                }
+            }
+        }
     }
 
-    iBLContext->setStrokeWidth( 3.0f );
-    iBLContext->setStrokeStyle( BLRgba32( 255, 127, 127, 255 ) );
+    if( mChartTool->GetPickingMode() == eChartPickingMode::Control )
+    {
+        DrawLine( iBLContext
+                , HUDBezier[0].x
+                , HUDBezier[0].y
+                , HUDBezier[1].x
+                , HUDBezier[1].y
+                , iFgColor
+                , iBgColor );
 
-    // initial keypose. Vertical line
-    iBLContext->strokeLine( mChartRect.x, indicatorY - cursorRadius
-                          , mChartRect.x, indicatorY + cursorRadius );
-
-    // final keypose. Vertical line
-    iBLContext->strokeLine( mChartRect.x + mChartRect.w, indicatorY - cursorRadius
-                          , mChartRect.x + mChartRect.w, indicatorY + cursorRadius );
+        DrawLine( iBLContext
+                , HUDBezier[1].x
+                , HUDBezier[1].y
+                , HUDBezier[2].x
+                , HUDBezier[2].y
+                , iFgColor
+                , iBgColor );
+   
+        for( uint32 i = 0; i < 3; i++ )
+        {
+            DrawCircle( iBLContext
+                      , HUDBezier[i].x
+                      , HUDBezier[i].y
+                      , 3.0f
+                      , iFgColor
+                      , iBgColor );
+        }
+    }
 
     iBLContext->restore();
 }
@@ -175,10 +255,11 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
                          , HUD_BREAKDOWN_SOURCE | HUD_BREAKDOWN_TARGET | HUD_BREAKDOWN_INBETWEEN );
 
             DrawChart( iBLContext
-                        , fgColor
-                        , bgColor
-                        , hcColor
-                        , mBreakdown );
+                      , fgColor
+                      , bgColor
+                      , hcColor
+                      , mBreakdown
+                      , iScene->GetEngine()->GetAnimationCell()->GetIndex() );
         }
     }
 
@@ -188,30 +269,49 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
 
 FChartDivision*
 FOdysseyPainterEditorVectorChartToolHUD::PickInbetween( double iWorldX
-                                                      , double iWorldY
-                                                      , double iRadius )
+                                                      , double iWorldY )
 {
     if( mBreakdown )
     {
         FOdysseyVectorTagInbetweener* inbetweenerTag = mBreakdown->GetInbetweenerTag();
-        double cursorRadius = mChartRect.h *.5f;
-        double cursorY = mChartRect.y + cursorRadius;
+        FInbetweenerChart* chart = mBreakdown->GetChart();
+        ::ULIS::FVec2D* HUDBezier = chart->GetHUDBezier();
 
-        if( mChartRect.HitTest( ::ULIS::FVec2D( iWorldX, iWorldY ) ) )
+        for( uint32 i = 1; i < mBreakdown->GetDrawingCount() - 1; i++ )
         {
-            uint32 sourceDrawingIndex = mBreakdown->GetSourceDrawingIndex();
-            uint32 targetDrawingIndex = mBreakdown->GetTargetDrawingIndex();
+            FChartDivision* inbetween = &mBreakdown->GetChart()->GetDivisionArray()[i];
+            ::ULIS::FVec2D indicatorPosition = ::ULIS::QuadraticBezierPointAtParameter( HUDBezier[0],
+                                                                                        HUDBezier[1],
+                                                                                        HUDBezier[2],
+                                                                                        inbetween->spacing );
 
-            for( uint32 i = 1; i < mBreakdown->GetDrawingCount() - 1; i++ )
+            if( ::ULIS::FVec2D( iWorldX - indicatorPosition.x
+                              , iWorldY - indicatorPosition.y ).Distance() < INDICATOR_RADIUS )
             {
-                FChartDivision* inbetween = &mBreakdown->GetChart()->GetDivisionArray()[i];
-                float cursorX = mChartRect.x + ( inbetween->spacing * mChartRect.w );
+                return inbetween;
+            }
+        }
+    }
 
-                if( ( iWorldX >= ( cursorX - iRadius ) )
-                 && ( iWorldX <= ( cursorX + iRadius ) ) )
-                {
-                    return inbetween;
-                }
+    return nullptr;
+}
+
+::ULIS::FVec2D*
+FOdysseyPainterEditorVectorChartToolHUD::PickBezierPoint( double iWorldX
+                                                        , double iWorldY
+                                                        , double iRadius )
+{
+    if( mBreakdown )
+    {
+        FOdysseyVectorTagInbetweener* inbetweenerTag = mBreakdown->GetInbetweenerTag();
+        FInbetweenerChart* chart = mBreakdown->GetChart();
+        ::ULIS::FVec2D* HUDBezier = chart->GetHUDBezier();
+
+        for( uint32 i = 0; i < 3; i++ )
+        {
+            if( ::ULIS::FVec2D( iWorldX - HUDBezier[i].x, iWorldY - HUDBezier[i].y ).Distance() < iRadius )
+            {
+                return &HUDBezier[i];
             }
         }
     }

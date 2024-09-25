@@ -34,6 +34,20 @@ FOdysseyVectorUndoTagRemove::FOdysseyVectorUndoTagRemove( FOdysseyVectorGroupPai
 {
 }
 
+FOdysseyVectorUndoTagRemove::FOdysseyVectorUndoTagRemove( FOdysseyVectorGroupPaint* iScene
+                                                        , const std::list<FOdysseyVectorTag*>& iTagList
+                                                        , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    , mTagArray()
+{
+    mTagArray.reserve( iTagList.size() );
+
+    for( FOdysseyVectorTag* tag : iTagList )
+    {
+        mTagArray.push_back( tag );
+    }
+}
+
 void
 FOdysseyVectorUndoTagRemove::Apply( UObject* iIgnored )
 {

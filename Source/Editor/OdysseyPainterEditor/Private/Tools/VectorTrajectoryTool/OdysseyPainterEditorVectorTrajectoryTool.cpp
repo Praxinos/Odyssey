@@ -378,15 +378,13 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
             {
                 FInbetweenerTrajectory* trajectory = mPickedWaypoint->GetTrajectory();
                 FOdysseyVectorTagInbetweener* inbetweenerTag = trajectory->GetRoute()->GetInbetweenerTag();
-
                 ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
-
-                double newT = FOdysseyVector::BezierHitTest( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y )
-                                                           , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[0] )
-                                                           , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[1] )
-                                                           , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[2] )
-                                                           , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[3] )
-                                                           , 16 );
+                double newT = FOdysseyVector::CubicBezierHitTest( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y )
+                                                                  , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[0] )
+                                                                  , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[1] )
+                                                                  , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[2] )
+                                                                  , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[3] )
+                                                                  , 16 );
 
                 //if( ( newT > prevT ) && ( newT < nextT ) )
                 {

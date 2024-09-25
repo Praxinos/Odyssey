@@ -32,6 +32,14 @@ FChartDivision::GetAnimationCellIndex()
     return (int32)tagCellIndex + (int32)( inbetweenIndex * (int)inbetweenerTag->GetInterpolationDirection());
 }
 
+void
+FChartDivision::SetSpacing( float iSpacing )
+{
+    spacing = iSpacing;
+
+    chart->GetBreakdown()->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
+}
+
 FInbetweenerChart::~FInbetweenerChart()
 {
 }
@@ -45,6 +53,9 @@ FInbetweenerChart::FInbetweenerChart()
 */
 FInbetweenerChart::FInbetweenerChart( FInbetweenerBreakdown* iBreakdown )
     : mBreakdown( iBreakdown )
+    , mHUDBezier { ::ULIS::FVec2D( 200.0f, 40.0f )
+                 , ::ULIS::FVec2D( 399.0f, 40.0f )
+                 , ::ULIS::FVec2D( 599.0f, 40.0f )  }
 {
     mDivisionArray.reserve( 16 );
 
@@ -123,4 +134,10 @@ FInbetweenerChart::Resize()
 
     mBreakdown->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
                                                | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
+}
+
+::ULIS::FVec2D*
+FInbetweenerChart::GetHUDBezier()
+{
+    return mHUDBezier;
 }

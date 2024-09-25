@@ -2,6 +2,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTag.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoTagInbetweenerParam::~FOdysseyVectorUndoTagInbetweenerParam()
 {
@@ -38,8 +39,9 @@ FOdysseyVectorUndoTagInbetweenerGridSize::FOdysseyVectorUndoTagInbetweenerGridSi
                                                  , ( FSnapshotFlags::Tag::Inbetweener::GRIDSIZE
                                                    | FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
                                                    | FSnapshotFlags::Tag::Inbetweener::ROUTES )
-                                                 , FSnapshotFlags::ALL
-                                                 , FSnapshotFlags::ALL );
+                                                 , FSnapshotFlags::ALL    // save all breakdown details
+                                                 , FSnapshotFlags::ALL    // save all route details
+                                                 , FSnapshotFlags::ALL ); // save all trajectory details
     }
 }
 
@@ -60,8 +62,9 @@ FOdysseyVectorUndoTagInbetweenerGridType::FOdysseyVectorUndoTagInbetweenerGridTy
                                                  , ( FSnapshotFlags::Tag::Inbetweener::GRIDTYPE
                                                    | FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
                                                    | FSnapshotFlags::Tag::Inbetweener::ROUTES )
-                                                 , FSnapshotFlags::ALL
-                                                 , FSnapshotFlags::ALL );
+                                                 , FSnapshotFlags::ALL    // save all breakdown details
+                                                 , FSnapshotFlags::ALL    // save all route details
+                                                 , FSnapshotFlags::ALL ); // save all trajectory details
     }
 }
 
@@ -81,8 +84,9 @@ FOdysseyVectorUndoTagInbetweenerInterpolationType::FOdysseyVectorUndoTagInbetwee
         mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
                                                  , ( FSnapshotFlags::Tag::Inbetweener::INTERPOLATIONTYPE
                                                    | FSnapshotFlags::Tag::Inbetweener::ROUTES )
-                                                 , 0 
-                                                 , FSnapshotFlags::ALL );
+                                                 , 0                      // ignore breakdowns (grids)
+                                                 , FSnapshotFlags::ALL    // save all route details
+                                                 , FSnapshotFlags::ALL ); // save all trajectory details
     }
 }
 
@@ -102,6 +106,7 @@ FOdysseyVectorUndoTagInbetweenerColor::FOdysseyVectorUndoTagInbetweenerColor( FO
         mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
                                                  , FSnapshotFlags::Tag::Inbetweener::COLOR
                                                  , 0 
+                                                 , 0
                                                  , 0 );
     }
 }
@@ -122,6 +127,7 @@ FOdysseyVectorUndoTagInbetweenerMapAsPolyline::FOdysseyVectorUndoTagInbetweenerM
         mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
                                                  , FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE
                                                  , 0 
+                                                 , 0 
                                                  , 0 );
     }
 }
@@ -134,16 +140,16 @@ FOdysseyVectorUndoTagInbetweenerParam::Apply( UObject* iIgnored )
 
     for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotArray )
     {
-        inbetweenerTagSnapshot.Preswap();
-        inbetweenerTagSnapshot.Restore();
+        inbetweenerTagSnapshot.LoadAlteredState();
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
+    // request redraw
     mScene->GetEngine()->Invalidate( 0 );
+    // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 }
 
@@ -155,16 +161,17 @@ FOdysseyVectorUndoTagInbetweenerParam::Revert( UObject* iIgnored )
 
     for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotArray )
     {
-        inbetweenerTagSnapshot.Preswap();
-        inbetweenerTagSnapshot.Restore();
+        inbetweenerTagSnapshot.RecordAlteredState();
+        inbetweenerTagSnapshot.LoadInitialState();
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
+    // request redraw
     mScene->GetEngine()->Invalidate( 0 );
+    // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 }
 

@@ -2,6 +2,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTag.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoTagInbetweenerBreakdownAlter::~FOdysseyVectorUndoTagInbetweenerBreakdownAlter()
 {
@@ -23,7 +24,9 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweener
                              , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
                              , FSnapshotFlags::Breakdown::GRIDGEOMETRY
                              , FSnapshotFlags::Route::TRAJECTORIES
-                             | FSnapshotFlags::Route::STEPS )
+                             | FSnapshotFlags::Route::STEPS
+                             , FSnapshotFlags::Trajectory::BEZIER
+                             | FSnapshotFlags::Trajectory::WAYPOINTS )
 {
 }
 
@@ -33,15 +36,15 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mInbetweenerTagSnapshot.Preswap();
-    mInbetweenerTagSnapshot.Restore();
+    mInbetweenerTagSnapshot.LoadAlteredState();
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
+    // request redraw
     mScene->GetEngine()->Invalidate( 0 );
+    // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 }
 
@@ -51,15 +54,16 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mInbetweenerTagSnapshot.Preswap();
-    mInbetweenerTagSnapshot.Restore();
+    mInbetweenerTagSnapshot.RecordAlteredState();
+    mInbetweenerTagSnapshot.LoadInitialState();
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
+    // request redraw
     mScene->GetEngine()->Invalidate( 0 );
+    // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 }
 

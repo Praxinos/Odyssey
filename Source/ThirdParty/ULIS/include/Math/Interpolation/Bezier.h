@@ -40,6 +40,11 @@ template< class T > inline T CubicBezierPointAtParameter( const T& iP0, const T&
            + iP3 * t2*t;
 }
 
+template< class T > inline T QuadraticBezierTangentAtParameter( const T& iP0, const T& iP1, const T& iP2, float t ) {
+    return  ( iP1 + ( iP2 - iP1 ) * t )
+          - ( iP0 + ( iP1 - iP0 ) * t );
+}
+
 template< class T > inline T QuadraticBezierPointAtParameter( const T& iP0, const T& iP1, const T& iP2, float t ) {
     float u = ( 1 - t );
     return   iP0 * u*u

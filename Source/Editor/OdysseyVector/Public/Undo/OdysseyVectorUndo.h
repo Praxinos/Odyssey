@@ -88,21 +88,27 @@ namespace FSnapshotFlags
     {
         static const uint64 GRIDGEOMETRY    = ( 1ULL <<  0 );
         static const uint64 TRANSFORMATIONS = ( 1ULL <<  1 );
+        static const uint64 CHART           = ( 1ULL <<  2 );
+    }
+
+    namespace Chart
+    {
+        static const uint64 SPACING = ( 1ULL <<  1 );
+        static const uint64 BEZIER  = ( 1ULL <<  2 );
     }
 
     namespace Tag
     {
         namespace Inbetweener
         {
-            static const uint64 CHART             = ( 1ULL <<  0 );
-            static const uint64 GRIDSIZE          = ( 1ULL <<  1 );
-            static const uint64 GRIDTYPE          = ( 1ULL <<  2 );
-            static const uint64 BREAKDOWNS        = ( 1ULL <<  3 );
-            static const uint64 ROUTES            = ( 1ULL <<  4 );
-            static const uint64 INTERPOLATIONTYPE = ( 1ULL <<  5);
-            static const uint64 ARAPRIGIDITY      = ( 1ULL <<  6 );
-            static const uint64 COLOR             = ( 1ULL <<  7 );
-            static const uint64 MAPASPOLYLINE     = ( 1ULL <<  8 );
+            static const uint64 GRIDSIZE          = ( 1ULL <<  0 );
+            static const uint64 GRIDTYPE          = ( 1ULL <<  1 );
+            static const uint64 BREAKDOWNS        = ( 1ULL <<  2 );
+            static const uint64 ROUTES            = ( 1ULL <<  3 );
+            static const uint64 INTERPOLATIONTYPE = ( 1ULL <<  4 );
+            static const uint64 ARAPRIGIDITY      = ( 1ULL <<  5 );
+            static const uint64 COLOR             = ( 1ULL <<  6 );
+            static const uint64 MAPASPOLYLINE     = ( 1ULL <<  7 );
             static const uint64 PARAM             = ( GRIDSIZE
                                                     | GRIDTYPE
                                                     | INTERPOLATIONTYPE
@@ -158,32 +164,6 @@ namespace FSnapshotFlags
         }
     }
 }
-
-class ODYSSEYVECTOR_API FSnapshotTrajectory
-{
-    public:
-        virtual ~FSnapshotTrajectory();
-        FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory, uint64 iSnapshotFlags );
-
-        void Preswap();
-        virtual void Restore();
-
-        static void WaypointSpacingToArray( FInbetweenerTrajectory* iTrajectory
-                                          , std::vector<float>& oSpacingBuffer );
-
-    protected:
-        uint64 mSnapshotFlags;
-        FInbetweenerRoute* mRoute;
-        uint32 mIndex;
-        // Swappable values
-        ::ULIS::FVec2D mHandleDirection[2];
-        double mHandleLengthRatio[2];
-        std::vector<float> mWaypointSpacingBuffer;
-        // Preswap
-        ::ULIS::FVec2D mPreswapHandleDirection[2];
-        double mPreswapHandleLengthRatio[2];
-        std::vector<float> mPreswapWaypointSpacingBuffer;
-};
 
 class ODYSSEYVECTOR_API FSnapshotPoint
 {
@@ -255,18 +235,68 @@ class ODYSSEYVECTOR_API FSnapshotSegmentCubic
         ULIS::FVec2D mHandleCoords[2];
 };
 
+class ODYSSEYVECTOR_API FSnapshotTrajectory
+{
+    struct State
+    {
+        bool inited;
+        ::ULIS::FVec2D handleDirection[2];
+        double handleLengthRatio[2];
+        std::vector<float> waypointSpacingBuffer;
+
+        State() { inited = false; }
+    };
+
+    public:
+        virtual ~FSnapshotTrajectory();
+        FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory, uint64 iSnapshotFlags );
+
+        void RecordAlteredState();
+        bool LoadInitialState();
+        bool LoadAlteredState();
+
+    protected:
+        void RecordLocalState( State* iState );
+        bool LoadState( State* iState );
+
+        static void WaypointSpacingToArray( FInbetweenerTrajectory* iTrajectory
+                                          , std::vector<float>& oSpacingBuffer );
+
+    protected:
+        uint64 mSnapshotFlags;
+        FInbetweenerRoute* mRoute;
+        uint32 mIndex;
+        State mInitialState;
+        State mAlteredState;
+};
+
 class ODYSSEYVECTOR_API FSnapshotStep
 {
+    struct State
+    {
+        bool inited;
+        bool aligned;
+
+        State() { inited = false; }
+    };
+
     public:
         virtual ~FSnapshotStep();
         FSnapshotStep( FInbetweenerStep* iStep );
 
-        virtual bool Restore();
+        void RecordAlteredState();
+        bool LoadInitialState();
+        bool LoadAlteredState();
+
+    protected:
+        void RecordLocalState( State* iState );
+        bool LoadState( State* iState );
 
     protected:
         FInbetweenerRoute* mRoute;
         uint32 mIndex;
-        bool bIsAligned;
+        State mInitialState;
+        State mAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotRoute
@@ -277,134 +307,186 @@ class ODYSSEYVECTOR_API FSnapshotRoute
                       , uint64 iSnapshotflags
                       , uint64 iTrajectorySnapshotflags );
 
-        void Preswap();
-        virtual bool Restore();
+        void RecordAlteredState();
+        bool LoadInitialState();
+        bool LoadAlteredState();
 
     protected:
         FInbetweenerRoute* mRoute;
         uint64 mSnapshotFlags;
-        uint64 mTrajectorySnapshotFlags;
         std::vector<FSnapshotTrajectory> mTrajectorySnapshotBuffer;
         std::vector<FSnapshotStep> mStepSnapshotBuffer;
-        // preswap
-        std::vector<FSnapshotTrajectory> mPreswapTrajectorySnapshotBuffer;
-        std::vector<FSnapshotStep> mPreswapStepSnapshotBuffer;
 };
 
 class ODYSSEYVECTOR_API FSnapshotLayout
 {
+    struct State
+    {
+        bool inited;
+        std::vector<FInbetweenerBreakdown*> breakdownArray;
+        std::vector<uint32> targetBuffer;
+
+        State() { inited = false; }
+    };
+
     public:
         ~FSnapshotLayout();
         FSnapshotLayout();
         FSnapshotLayout( FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
-        void Preswap();
-        bool Restore();
+        void RecordAlteredState();
+        bool LoadInitialState();
+        bool LoadAlteredState();
+
+    protected:
+        void RecordLocalState( State* iState );
+        bool LoadState( State* iState );
 
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        std::vector<FInbetweenerBreakdown*> mBreakdownArray;
-        std::vector<uint32> mTargetBuffer;
-        // Preswap
-        std::vector<FInbetweenerBreakdown*> mPreswapBreakdownArray;
-        std::vector<uint32> mPreswapTargetBuffer;
+        State mInitialState;
+        State mAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotDynamics
 {
+    struct State
+    {
+        bool inited;
+        std::vector<FInbetweenerRoute*> routeArray;
+
+        State() { inited = false; }
+    };
+
     public:
         ~FSnapshotDynamics();
         FSnapshotDynamics();
         FSnapshotDynamics( FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
-        void Preswap();
-        bool Restore();
+        void RecordAlteredState();
+        bool LoadInitialState();
+        bool LoadAlteredState();
+
+    protected:
+        void RecordLocalState( State* iState );
+        bool LoadState( State* iState );
 
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        std::vector<FInbetweenerRoute*> mRouteArray;
-        // Preswap
-        std::vector<FInbetweenerRoute*> mPreswapRouteArray;
+        State mInitialState;
+        State mAlteredState;
+};
+
+class ODYSSEYVECTOR_API FSnapshotInbetweenerChart
+{
+    struct State
+    {
+        bool inited;
+        std::vector<float> spacing;
+        ::ULIS::FVec2D HUDBezier[3];
+
+        State() { inited = false; }
+    };
+
+    public:
+        ~FSnapshotInbetweenerChart();
+        FSnapshotInbetweenerChart();
+        FSnapshotInbetweenerChart( FInbetweenerChart* iChart
+                                 , uint64 iSnapshotFlags );
+
+        void RecordAlteredState();
+        bool LoadInitialState();
+        bool LoadAlteredState();
+
+    protected:
+        void RecordLocalState( State* iState );
+        bool LoadState( State* iState );
+
+    protected:
+        uint64 mSnapshotFlags;
+        FInbetweenerChart* mChart;
+        State mInitialState;
+        State mAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
 {
+    struct State
+    {
+        bool inited;
+        std::vector<::ULIS::FVec2D> gridGeometry;
+        double translationX;
+        double translationY;
+        double rotation;
+        double scalingX;
+        double scalingY;
+
+        State() { inited = false; }
+    };
+
     public:
         virtual ~FSnapshotInbetweenerBreakdown();
         FSnapshotInbetweenerBreakdown( FInbetweenerBreakdown* iBreakdown
                                      , uint64 iSnapshotFlags );
 
-        virtual bool Restore();
-        void Preswap();
+        void RecordAlteredState();
+        bool LoadInitialState();
+        bool LoadAlteredState();
+
+    protected:
+        void RecordLocalState( State* iState );
+        bool LoadState( State* iState );
 
     protected:
         uint64 mSnapshotFlags;
         FInbetweenerBreakdown* mBreakdown;
-        // Saved-state
-        std::vector<::ULIS::FVec2D> mGridGeometry;
-        double mTranslationX;
-        double mTranslationY;
-        double mRotation;
-        double mScalingX;
-        double mScalingY;
-        // Pre-swap
-        std::vector<::ULIS::FVec2D> mPreswapGridGeometry;
-        double mPreswapTranslationX;
-        double mPreswapTranslationY;
-        double mPreswapRotation;
-        double mPreswapScalingX;
-        double mPreswapScalingY;
+        FSnapshotInbetweenerChart mChartSnapshot;
+        State mInitialState;
+        State mAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotTagInbetweener
 {
+    struct State
+    {
+        bool inited;
+        uint32 drawingCount;
+        eInbetweenerGridType gridType;
+        eInbetweenerInterpolationType interpolationType;
+        uint32 gridSizeX;
+        uint32 gridSizeY;
+        uint32 ARAPRigidity;
+        FColor color;
+        bool mapAsPolyline;
+
+        State() { inited = false; }
+    };
+
     public:
         virtual ~FSnapshotTagInbetweener();
         FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* iObject
                                , uint64 iSnapshotFlags
                                , uint64 iBreakdownSnapshotFlags
-                               , uint64 iRouteSnapshotFlags );
+                               , uint64 iRouteSnapshotFlags
+                               , uint64 iTrajectorySnapshotFlags );
 
-        virtual bool Restore();
-        void Preswap();
+        void RecordAlteredState();
+        bool LoadInitialState();
+        bool LoadAlteredState();
 
     protected:
-        void SaveTrajectories( std::vector<FInbetweenerTrajectory*>& oTrajectoryArray );
-        void RestoreTrajectories();
+        void RecordLocalState( State* iState );
+        bool LoadLocalState( State* iState );
 
     protected:
         uint64 mSnapshotFlags;
-        uint64 mBreakdownSnapshotFlags;
-        uint64 mRouteSnapshotFlags;
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        FSnapshotLayout mLayout;
-        FSnapshotDynamics mDynamics;
-        // Swappable values
-        FInbetweenerChart  mChart;
-        uint32 mDrawingCount;
-        eInbetweenerGridType mGridType;
-        eInbetweenerInterpolationType mInterpolationType;
-        uint32 mGridSizeX;
-        uint32 mGridSizeY;
-        uint32 mARAPRigidity;
-        std::vector<FInbetweenerTrajectory*> mTrajectoryArray;
+        FSnapshotLayout mLayoutSnapshot;
+        FSnapshotDynamics mDynamicsSnapshot;
         std::vector<FSnapshotInbetweenerBreakdown> mInbetweenerBreakdownSnapshotBuffer;
         std::vector<FSnapshotRoute> mRouteSnapshotBuffer;
-        FColor mColor;
-        bool bMapAsPolyline;
-        // Preswap
-        FInbetweenerChart mPreswapChart;
-        uint32 mPreswapDrawingCount;
-        eInbetweenerGridType mPreswapGridType;
-        eInbetweenerInterpolationType mPreswapInterpolationType;
-        uint32 mPreswapGridSizeX;
-        uint32 mPreswapGridSizeY;
-        uint32 mPreswapARAPRigidity;
-        std::vector<FInbetweenerTrajectory*> mPreswapTrajectoryArray;
-        std::vector<FSnapshotInbetweenerBreakdown> mPreswapInbetweenerBreakdownSnapshotBuffer;
-        std::vector<FSnapshotRoute> mPreswapRouteSnapshotBuffer;
-        FColor mPreswapColor;
-        bool bPreswapMapAsPolyline;
+        State mInitialState;
+        State mAlteredState;
 };
 
 class ODYSSEYVECTOR_API FSnapshotObject

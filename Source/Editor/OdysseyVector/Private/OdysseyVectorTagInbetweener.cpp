@@ -365,11 +365,11 @@ FOdysseyVectorTagInbetweener::ResetLayout( bool iFreeMemNow )
                                   return true;
                               } );
 
-    mMasterBreakdown.SetSourceDrawingIndex( 0 );
-
     mBreakdownList.push_back( &mMasterBreakdown );
 
     ChainBreakdowns();
+
+    mMasterBreakdown.SetSourceDrawingIndex( 0 );
 
     mMasterBreakdown.GetGrid()->SetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
     mMasterBreakdown.GetGrid()->SetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
@@ -419,8 +419,8 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
         // this also alters the previous breakdown target index, so it must be done after the chaining has been updated
         curBreakdown->SetSourceDrawingIndex( iDrawingIndex );
 
-        newBreakdown->SetSourceDrawingIndex( newSourceDrawingIndex );
         newBreakdown->SetTargetDrawingIndex( newTargetDrawingIndex );
+        newBreakdown->SetSourceDrawingIndex( newSourceDrawingIndex );
 
         ChainBreakdowns();
 
@@ -610,12 +610,16 @@ void
 FOdysseyVectorTagInbetweener::Added()
 {
     Share( mSharedEnv );
+
+    RedrawAnimationCells();
 }
 
 void
 FOdysseyVectorTagInbetweener::Removed()
 {
     Unshare( mSharedEnv );
+
+    RedrawAnimationCells();
 }
 
 void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags

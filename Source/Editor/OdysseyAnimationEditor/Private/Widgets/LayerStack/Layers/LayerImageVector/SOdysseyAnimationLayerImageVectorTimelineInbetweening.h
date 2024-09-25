@@ -35,6 +35,8 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
         FOdysseyAnimationEditorExtension* GetAnimationEditorExtension();
         UOdysseyAnimationLayerImageVector* GetAnimationLayerImageVector();
         void SetCursorPos( FVector2D iCursorPos );
+        const FSlateBrush *GetForwardArrowBrush();
+        const FSlateBrush *GetBackwardArrowBrush();
 
     protected:
         TSharedRef<ITableRow> OnGenerateRow( TSharedPtr<FInbetweeningListViewItem> iItem
@@ -54,4 +56,6 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
 	    FOdysseyAnimationEditorExtension* mAnimationEditorExtension;
         TArray<TSharedPtr<FInbetweeningListViewItem>> mItemsSource;
         FVector2D mCursorPos;
+        const FSlateBrush *mForwardArrowBrush;
+        const FSlateBrush *mBackwardArrowBrush;
 };

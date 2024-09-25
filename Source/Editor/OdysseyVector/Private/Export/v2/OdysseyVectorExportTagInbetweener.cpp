@@ -23,21 +23,7 @@ FOdysseyVectorExportV2::WriteTagInbetweenerRoutes( FOdysseyVectorTagInbetweener&
         }
     } );
 }
-/*
-void
-FOdysseyVectorExportV2::WriteTagInbetweenerArapRigidity( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                                       , FArchive &Ar )
-{
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_ARAPRIGIDITY
-                            , Ar
-                            , [&iInbetweenerTag](FArchive &Ar) -> void
-    {
-        uint32 arapRigidty = static_cast<uint32>(iInbetweenerTag.GetARAPRigidity());
 
-        Ar << arapRigidty;
-    } );
-}
-*/
 void
 FOdysseyVectorExportV2::WriteTagInbetweenerBreakdownsLayout( FOdysseyVectorTagInbetweener& iInbetweenerTag
                                                              , FArchive &Ar )

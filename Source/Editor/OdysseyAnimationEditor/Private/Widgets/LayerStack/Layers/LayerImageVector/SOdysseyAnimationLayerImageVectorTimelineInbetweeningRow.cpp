@@ -75,8 +75,10 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetSharedEnv();
     std::list<FOdysseyVectorTag*>& sharedTagList = sharedEnv->GetSharedTagList();
     FOdysseyVectorGroupPaint* scene = mInbetweenerTag->GetOwner()->GetScene();
-    uint64 notificationFlags = 0;
-    
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+    FReply reply = FReply::Unhandled();
 
     // for AddBreakdown / RemoveBreakdown functions in the context menu
     treeView.Get()->SetCursorPos( cursorPos );
@@ -102,16 +104,24 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     // This is used by the list view to determine which row is selected.
     mInbetweenerTag->GetOwner()->GetEngine()->SelectObject( mInbetweenerTag->GetOwner() );
 
-/*
-    SetItemSelection ( const ItemType& InItem,
-bool bSelected,
-ESelectInfo::Type SelectInfo
-)
-*/
-    //STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonDown( MyGeometry, MouseEvent );
-
     if( MouseEvent.IsMouseButtonDown( EKeys::LeftMouseButton ) )
     {
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("vector-timeline-row.transaction.alter","Vector Timeline Alter"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( scene
+                                                                                         , mInbetweenerTag
+                                                                                         , notificationFlags );
+
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+            TSharedPtr<FOdysseyPainterEditorSource> source = animationEditorExtension->GetEditor()->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
+        }
+        GEditor->EndTransaction();
+
         for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
         {
             uint32 bi = breakdown->GetTargetDrawingIndex();
@@ -124,30 +134,19 @@ ESelectInfo::Type SelectInfo
                  && ( cursorPos.Y < ( mCellBoxBuffer[bi].y + mCellBoxBuffer[bi].h ) ) )
                 {
                     mPickedBreakdown = breakdown;
-
-                    // needed for valid GUndo pointer
-                    GEditor->BeginTransaction(LOCTEXT("vector-timeline-row.transaction.alter","Vector Timeline Alter"));
-                    if( GUndo )
-                    {
-                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( scene
-                                                                                                     , mInbetweenerTag
-                                                                                                     , notificationFlags );
-
-                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-
-                        TSharedPtr<FOdysseyPainterEditorSource> source = animationEditorExtension->GetEditor()->GetSource();
-                        if (source)
-                            source->RecordCurrentFrameUndo();
-                    }
-                    GEditor->EndTransaction();
                 }
             }
         }
 
-        return FReply::Handled();
+        reply = FReply::Handled();
     }
 
-    return FReply::Unhandled();
+    // request redraw
+    mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->Invalidate( 0 );
+    // update UI
+    FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
+
+    return reply;
 }
 
 FReply
@@ -166,53 +165,54 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
             uint32 frameIndex = animationEditorExtension->Timeline()->GetFrameIndexAtMousePosition( cursorPos.X );
             TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = listView.Get()->GetAnimationLayerImageVector()->GetCellsContainer();
             IOdysseyVectorAnimationCell* tagCell = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell();
-            int32 tagCellIndex = tagCell->GetIndex();
-            int32 maxCellIndex = tagCell->GetLastCell()->GetIndex();
             float frameWidth = animationEditorExtension->Timeline()->GetFrameWidth();
 
             if (!cellsContainer)
                 return FReply::Unhandled();
 
-            TSharedPtr<FOdysseyAnimationCellImageVector> cell = StaticCastSharedPtr<FOdysseyAnimationCellImageVector>(cellsContainer->GetCellAtFrame(frameIndex));
+            TSharedPtr<FOdysseyAnimationCellImageVector> cursorCell = StaticCastSharedPtr<FOdysseyAnimationCellImageVector>(cellsContainer->GetCellAtFrame(frameIndex));
 
-            if( cell.IsValid() )
+            if( cursorCell.IsValid() )
             {
-                 uint32 cellIndex = cell.Get()->GetIndex();
-                 int32 drawingIndex = ( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Forward ) ? (int32)( cellIndex - tagCellIndex ) 
-                                                                                                                                      : (int32)( tagCellIndex - cellIndex );
-                 FInbetweenerBreakdown* prevBreakdown = mPickedBreakdown->GetPrevBreakdown();
-                 FInbetweenerBreakdown* nextBreakdown = mPickedBreakdown->GetNextBreakdown();
+                uint32 cursorCellIndex = cursorCell.Get()->GetIndex();
+                uint32 tagCellIndex = tagCell->GetIndex();
+                int32 drawingIndex = ( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Forward ) ? (int32)( cursorCellIndex - tagCellIndex ) 
+                                                                                                                                      : (int32)( tagCellIndex - cursorCellIndex );
+                FInbetweenerBreakdown* prevBreakdown = mPickedBreakdown->GetPrevBreakdown();
+                FInbetweenerBreakdown* nextBreakdown = mPickedBreakdown->GetNextBreakdown();
 
                  // reverse the whole thing now to ease the calculations
-                 if( drawingIndex < 0 )
-                 {
-                     if( mInbetweenerTag->GetBreakdownCount() == 1 )
-                     {
-                         mInbetweenerTag->InvertInterpolationDirection();
+                if( cursorCellIndex < tagCellIndex )
+                {
+                    if( mInbetweenerTag->GetBreakdownCount() == 1 )
+                    {
+                        mInbetweenerTag->InvertInterpolationDirection();
 
-                         mInbetweenerTag->GetOwner()->GetScene()->Update( 0 );
+                        mInbetweenerTag->GetOwner()->GetScene()->Update( 0 );
 
-                         CacheDesiredSize( mLayoutScaleMultiplier );
+                        CacheDesiredSize( mLayoutScaleMultiplier );
 
-                         drawingIndex = -drawingIndex;
-                     }
-                     else
-                     {
-                         drawingIndex = mPickedBreakdown->GetSourceDrawingIndex();
-                     }
-                 }
+                        drawingIndex = -drawingIndex;
+                    }
+                    else
+                    {
+                        drawingIndex = mPickedBreakdown->GetSourceDrawingIndex();
+                    }
+                }
 
-                 uint32 maxDrawingIndex = ( maxCellIndex - tagCellIndex );
-                 uint32 prevDrawingIndex = prevBreakdown ? prevBreakdown->GetTargetDrawingIndex() : 0;
-                 uint32 nextDrawingIndex = nextBreakdown ? nextBreakdown->GetTargetDrawingIndex() : maxDrawingIndex + 1;
+                uint32 maxCellIndex = ( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Forward ) ? tagCell->GetLastCell()->GetIndex()
+                                                                                                                                      : tagCell->GetFirstCell()->GetIndex();
+                uint32 maxDrawingIndex = ( maxCellIndex - cursorCellIndex );
+                uint32 prevDrawingIndex = prevBreakdown ? prevBreakdown->GetTargetDrawingIndex() : 0;
+                uint32 nextDrawingIndex = nextBreakdown ? nextBreakdown->GetTargetDrawingIndex() : maxDrawingIndex + 1;
 
                 if( ( (uint32)drawingIndex > prevDrawingIndex ) && ( (uint32)drawingIndex < nextDrawingIndex ) )
                 {
                     mCandidateTargetCellBox = FInbetweeningRowCellBox( EInbetweeningRowCellBoxType::Target
                                                                      , drawingIndex
-                                                                     , cell->GetFrame() * frameWidth * mLayoutScaleMultiplier
+                                                                     , cursorCell->GetFrame() * frameWidth * mLayoutScaleMultiplier
                                                                      , 0.0f
-                                                                     , cell->GetLength() * frameWidth * mLayoutScaleMultiplier
+                                                                     , cursorCell->GetLength() * frameWidth * mLayoutScaleMultiplier
                                                                      , mBoxSize.Y );
 
                     //MarkPrepassAsDirty();
@@ -431,11 +431,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                                                                        , InWidgetStyle
                                                                        , bParentEnabled );
 	++LayerId;
-    FLinearColor strokeColor = FLinearColor( 0.5f, 0.5f, 0.5f, 0.5f  );
-    FLinearColor sourceColor = FLinearColor( 0.5f, 0.5f, 0.5f, 0.25f );
-    FLinearColor interpColor = FLinearColor( inbetweenerTagColor.R
-                                           , inbetweenerTagColor.G
-                                           , inbetweenerTagColor.B
+    FLinearColor strokeColor = FLinearColor( 0.5f, 0.5f, 0.5f, 0.5f );
+    FLinearColor sourceColor = FLinearColor( 0.5f, 0.5f, 0.5f, 0.5f );
+    FLinearColor interpColor = FLinearColor( 0.25f
+                                           , 0.25f
+                                           , 0.25f
                                            , 0.25f );
     FLinearColor targetColor = FLinearColor( 1.0f, 0.5f, 0.5f, 0.5f );
     TArray< FVector2D > lines;
@@ -471,6 +471,37 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 		                          , &defaultBrush
 		                          , ESlateDrawEffect::None
 		                          , color );
+
+        if( mCellBoxBuffer[i].type == EInbetweeningRowCellBoxType::Source )
+        {
+            // draw forward arrow
+            if( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Forward )
+            {
+	            FSlateDrawElement::MakeBox( OutDrawElements
+		                                  , LayerId
+		                                  , AllottedGeometry.ToPaintGeometry( FVector2D( mCellBoxBuffer[i].x - ( scrollByPixels )
+                                                                                       , mCellBoxBuffer[i].y )
+                                                                            , FVector2D( 16
+                                                                                       , mCellBoxBuffer[i].h ) )
+		                                  , treeView.Get()->GetForwardArrowBrush()
+		                                  , ESlateDrawEffect::None
+		                                  , color );
+            }
+
+            // draw backward arrow
+            if( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Backward )
+            {
+	            FSlateDrawElement::MakeBox( OutDrawElements
+		                                  , LayerId
+		                                  , AllottedGeometry.ToPaintGeometry( FVector2D( mCellBoxBuffer[i].x + mCellBoxBuffer[i].w - 16  - ( scrollByPixels )
+                                                                                       , mCellBoxBuffer[i].y )
+                                                                            , FVector2D( 16
+                                                                                       , mCellBoxBuffer[i].h ) )
+		                                  , treeView.Get()->GetBackwardArrowBrush()
+		                                  , ESlateDrawEffect::None
+		                                  , color );
+            }
+        }
     }
 
     if( mCandidateTargetCellBox.type == EInbetweeningRowCellBoxType::Target )

@@ -205,12 +205,12 @@ FOdysseyVector::IntersectSegment( const ::ULIS::FVec2D& line0p0
 }
 
 double 
-FOdysseyVector::BezierHitTest( const ::ULIS::FVec2D& iPt
-                             , const ::ULIS::FVec2D& iBezier0
-                             , const ::ULIS::FVec2D& iBezier1
-                             , const ::ULIS::FVec2D& iBezier2
-                             , const ::ULIS::FVec2D& iBezier3
-                             , uint32 iDivisions )
+FOdysseyVector::CubicBezierHitTest( const ::ULIS::FVec2D& iPt
+                                  , const ::ULIS::FVec2D& iBezier0
+                                  , const ::ULIS::FVec2D& iBezier1
+                                  , const ::ULIS::FVec2D& iBezier2
+                                  , const ::ULIS::FVec2D& iBezier3
+                                  , uint32 iDivisions )
 {
     double t = 0.0f;
     double step = 1.0f / ( iDivisions + 1 );
@@ -247,6 +247,45 @@ FOdysseyVector::BezierHitTest( const ::ULIS::FVec2D& iPt
     return absoluteT;
 }
 
+double 
+FOdysseyVector::QuadraticBezierHitTest( const ::ULIS::FVec2D& iPt
+                                      , const ::ULIS::FVec2D& iBezier0
+                                      , const ::ULIS::FVec2D& iBezier1
+                                      , const ::ULIS::FVec2D& iBezier2
+                                      , uint32 iDivisions )
+{
+    double t = 0.0f;
+    double step = 1.0f / ( iDivisions + 1 );
+    double minDistance = DBL_MAX;
+    double absoluteT = 0.0f;
+
+    for( uint32 i = 0; i <= iDivisions; i++ )
+    {
+        double fragmentT0 = t;
+        double fragmentT1 = t + step;;
+        ::ULIS::FVec2D fragmentP0 = ::ULIS::QuadraticBezierPointAtParameter<::ULIS::FVec2D>( iBezier0
+                                                                                          , iBezier1
+                                                                                          , iBezier2
+                                                                                          , fragmentT0 );
+        ::ULIS::FVec2D fragmentP1 = ::ULIS::QuadraticBezierPointAtParameter<::ULIS::FVec2D>( iBezier0
+                                                                                          , iBezier1
+                                                                                          , iBezier2
+                                                                                          , fragmentT1 );
+        double distance;
+        double relativeT = FOdysseyVector::DistanceToSegmentConstrained( iPt, fragmentP0, fragmentP1, distance );
+
+        if( distance < minDistance )
+        {
+            minDistance = distance;
+
+            absoluteT = fragmentT0 + ( ( fragmentT1 - fragmentT0 ) * relativeT );
+        }
+
+        t = fragmentT1;
+    }
+
+    return absoluteT;
+}
 
 //static
 bool

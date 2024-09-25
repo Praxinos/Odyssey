@@ -3,6 +3,7 @@
 #include <vector>
 #include "CoreMinimal.h"
 #include <blend2d.h>
+#include <ULIS>
 
 class FOdysseyVectorTagInbetweener;
 class FInbetweenerBreakdown;
@@ -19,6 +20,7 @@ struct ODYSSEYVECTOR_API FChartDivision
     uint32 GetIndex();
     uint32 GetAbsoluteIndex();
     int32 GetAnimationCellIndex();
+    void SetSpacing( float iSpacing );
 };
 
 class ODYSSEYVECTOR_API FInbetweenerChart
@@ -29,6 +31,7 @@ class ODYSSEYVECTOR_API FInbetweenerChart
 
         void Resize();
         void Reset();
+        ::ULIS::FVec2D* GetHUDBezier();
 
         FInbetweenerBreakdown* GetBreakdown();
         std::vector<FChartDivision>& GetDivisionArray();
@@ -38,4 +41,6 @@ class ODYSSEYVECTOR_API FInbetweenerChart
     private:
         FInbetweenerBreakdown* mBreakdown;
         std::vector<FChartDivision> mDivisionArray;
+        ::ULIS::FVec2D mHUDBezier[3]; // quadratic bezier
+
 };

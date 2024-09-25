@@ -26,6 +26,7 @@ UOdysseyPainterEditorVectorMatchingTool::UOdysseyPainterEditorVectorMatchingTool
     , PickingRadius( 75.0f )
     , Rigidity( 5 )
     , RigidifySelectionOnly( false )
+    , ShowInbetweens ( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching64");
 
@@ -213,6 +214,9 @@ UOdysseyPainterEditorVectorMatchingTool::PropertyChangedVector( FOdysseyVectorGr
 
     iEngine->ResetHUD();
 
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
     return 0;
 }
 
@@ -227,6 +231,8 @@ UOdysseyPainterEditorVectorMatchingTool::CreateTopTabWidget()
     TSharedPtr<class IPropertyHandle> rigidityHandle = rigidityPropertyView->GetPropertyHandle();
     const TSharedPtr<ISinglePropertyView> rigidifySelectionOnlyPropertyView = propertyEditorModule.CreateSingleProperty(this, "RigidifySelectionOnly", defaultPropertyParams);
     TSharedPtr<class IPropertyHandle> rigidifySelectionOnlyHandle = rigidifySelectionOnlyPropertyView->GetPropertyHandle();
+    const TSharedPtr<ISinglePropertyView> showInbetweensPropertyView = propertyEditorModule.CreateSingleProperty(this, "ShowInbetweens", defaultPropertyParams);
+    TSharedPtr<class IPropertyHandle> showInbetweensOnlyHandle = showInbetweensPropertyView->GetPropertyHandle();
 
     return SNew(SUniformWrapPanel)
         .SlotPadding(FVector2D(3.f, 0.f))
@@ -248,6 +254,10 @@ UOdysseyPainterEditorVectorMatchingTool::CreateTopTabWidget()
         + SUniformWrapPanel::Slot()
         [
             CreatePropertyWidget(rigidifySelectionOnlyHandle, rigidifySelectionOnlyPropertyView).ToSharedRef()
+        ]
+        + SUniformWrapPanel::Slot()
+        [
+            CreatePropertyWidget(showInbetweensOnlyHandle, showInbetweensPropertyView).ToSharedRef()
         ];
 }
 

@@ -13,10 +13,17 @@
 #include "Math/UnitConversion.h"
 #include "OdysseyStyleSet.h"
 
+// from module OdysseyPainterEditor
+#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditor.h"
+
+// from module OdysseyVector
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorTag.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorObject.h"
+#include "OdysseyVectorEngine.h"
+#include "Undo/OdysseyVectorUndoTagRemove.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -41,7 +48,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Construct( const FArguments& InArgs
         //.OnGetChildren( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnGetChildren )
         //.OnSelectionChanged( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnSelectionChanged )
         //.OnItemScrolledIntoView(this, &SOdysseyLayerStackTreeView::OnItemScrolledIntoView)
-        //.OnContextMenuOpening( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnContextMenuOpening )
+        .OnContextMenuOpening( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnContextMenuOpening )
         //.SelectionMode( ESelectionMode::Multi )
         //.HeaderRow(headerRow)
     );
@@ -80,6 +87,60 @@ SOdysseyAnimationTimelineInbetweeningHeader::OnGenerateRow( TSharedPtr<FInbetwee
                                                           , const TSharedRef<STableViewBase>& iOwnerTable )
 {
     return SNew( SOdysseyAnimationTimelineInbetweeningHeaderRow, iOwnerTable, iItem );
+}
+
+TSharedPtr<SWidget>
+SOdysseyAnimationTimelineInbetweeningHeader::OnContextMenuOpening()
+{
+    FMenuBuilder menu( true, nullptr );
+
+    menu.AddMenuEntry( LOCTEXT("vector-tool.inbetweening-context-menu.add-breakdown.name", "Remove Inbetweener tags")
+                     , LOCTEXT("vector-tool.inbetweening-context-menu.add-breakdown.tooltip", "Remove Inbetweener tags")
+                     , FSlateIcon()
+                     , FUIAction(FExecuteAction::CreateSP( this, &SOdysseyAnimationTimelineInbetweeningHeader::RemoveInbetweenerTags )));
+
+    return menu.MakeWidget();
+}
+
+void
+SOdysseyAnimationTimelineInbetweeningHeader::RemoveInbetweenerTags()
+{
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+    std::list<FOdysseyVectorTag*> tagList;
+
+    mAnimationLayerImageVector->GetSharedEnv()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
+                                                                         , tagList );
+
+    if( tagList.size() )
+    {
+        // needed for undos
+        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.delete-tags", "Delete Tags"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagRemove( tagList.front()->GetOwner()->GetScene()
+                                                                      , tagList
+                                                                      , notificationFlags );
+
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+            TSharedPtr<FOdysseyPainterEditorSource> source = mAnimationEditorExtension->GetEditor()->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
+        }
+        GEditor->EndTransaction();
+
+        for( FOdysseyVectorTag* tag : tagList )
+        {
+            tag->GetOwner()->RemoveTag( tag );
+            tag->GetOwner()->GetEngine()->UnselectObject( tag->GetOwner() );
+
+            tag->GetOwner()->GetEngine()->Invalidate( 0 );
+        }
+    }
+
+    // update UI
+    FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
 }
 
 FOdysseyAnimationEditorExtension*

@@ -7,6 +7,55 @@
 #include "OdysseyVectorTagInbetweener.h"
 
 void
+FOdysseyVectorExportV2::WriteBreakdownChartHUBBezier( FInbetweenerBreakdown& iBreakdown
+                                                    , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_BREAKDOWN_CHART_HUDBEZIER
+                            , Ar
+                            , [&iBreakdown](FArchive &Ar) -> void
+    {
+        ::ULIS::FVec2D *quadraticBezier = iBreakdown.GetChart()->GetHUDBezier();
+
+        Ar << quadraticBezier[0].x;
+        Ar << quadraticBezier[0].y;
+        Ar << quadraticBezier[1].x;
+        Ar << quadraticBezier[1].y;
+        Ar << quadraticBezier[2].x;
+        Ar << quadraticBezier[2].y;
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteBreakdownChartSpacing( FInbetweenerBreakdown& iBreakdown
+                                                  , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_BREAKDOWN_CHART_SPACING
+                            , Ar
+                            , [&iBreakdown](FArchive &Ar) -> void
+    {
+        for( FChartDivision& division : iBreakdown.GetChart()->GetDivisionArray() )
+        {
+            float spacing = division.spacing;
+
+            Ar << spacing;
+        }
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteBreakdownChart( FInbetweenerBreakdown& iBreakdown
+                                           , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_BREAKDOWN_CHART
+                            , Ar
+                            , [&iBreakdown](FArchive &Ar) -> void
+    {
+        WriteBreakdownChartHUBBezier( iBreakdown, Ar );
+        WriteBreakdownChartSpacing( iBreakdown, Ar );
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteBreakdownGridGeometry( FInbetweenerBreakdown& iBreakdown
                                                   , FArchive &Ar )
 {
@@ -107,5 +156,6 @@ FOdysseyVectorExportV2::WriteBreakdown( FInbetweenerBreakdown& iBreakdown
 
         WriteBreakdownTransform( iBreakdown, Ar );
         WriteBreakdownGridGeometry( iBreakdown, Ar );
+        WriteBreakdownChart( iBreakdown, Ar );
     } );
 }

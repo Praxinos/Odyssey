@@ -115,7 +115,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
     }
 
     // redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
 
     return UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( iScene, iKey );
 }
@@ -136,7 +136,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyUpGlobalVector( FOdysseyVectorGrou
       || ( iKey == EKeys::LeftAlt     ) || ( iKey == EKeys::RightAlt     ) )
     {
         // redraw
-        iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+        iScene->GetEngine()->Invalidate( 0 );
     }
 
     // first reset display mode

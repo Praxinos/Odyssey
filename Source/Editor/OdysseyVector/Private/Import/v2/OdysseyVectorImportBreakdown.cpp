@@ -96,6 +96,35 @@ FOdysseyVectorImportV2::ReadBreakdown( FInbetweenerBreakdown& iBreakdown
                 }
                 break;
 
+                case FOdysseyFile::VectorV2::CHUNK_BREAKDOWN_CHART:
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_BREAKDOWN_CHART_HUDBEZIER:
+                {
+                    ::ULIS::FVec2D* quadraticBezier = iBreakdown.GetChart()->GetHUDBezier();
+
+                    Ar << quadraticBezier[0].x;
+                    Ar << quadraticBezier[0].y;
+                    Ar << quadraticBezier[1].x;
+                    Ar << quadraticBezier[1].y;
+                    Ar << quadraticBezier[2].x;
+                    Ar << quadraticBezier[2].y;
+                }
+                break;
+/*
+                case FOdysseyFile::VectorV2::CHUNK_BREAKDOWN_CHART_SPACING:
+                {
+                    for( FChartDivision& division : iBreakdown.GetChart()->GetDivisionArray() )
+                    {
+                        float spacing;
+
+                        Ar << spacing;
+
+                        division.SetSpacing( spacing );
+                    }
+                }
+                break;
+*/
                 default:
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );

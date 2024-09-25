@@ -3,6 +3,7 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorTag.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoTagInbetweenerMatching::~FOdysseyVectorUndoTagInbetweenerMatching()
 {
@@ -60,16 +61,16 @@ FOdysseyVectorUndoTagInbetweenerMatching::Apply( UObject* iIgnored )
 
     for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
     {
-        breakdownSnapshot.Preswap();
-        breakdownSnapshot.Restore();
+        breakdownSnapshot.LoadAlteredState();
     }
 
     // update invalidated objects
-    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
+    // request radraw
     mScene->GetEngine()->Invalidate( 0 );
+    // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 }
 
@@ -81,16 +82,17 @@ FOdysseyVectorUndoTagInbetweenerMatching::Revert( UObject* iIgnored )
 
     for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
     {
-        breakdownSnapshot.Preswap();
-        breakdownSnapshot.Restore();
+        breakdownSnapshot.RecordAlteredState();
+        breakdownSnapshot.LoadInitialState();
     }
 
     // update invalidated objects
-    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
+    // request radraw
     mScene->GetEngine()->Invalidate( 0 );
+    // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 }
 

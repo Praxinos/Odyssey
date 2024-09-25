@@ -113,11 +113,20 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
                 {
                     if( breakdown->GetTargetAnimationCellIndex() == currentCellIndex )
                     {
+                        if( mMatchingTool->ShowInbetweens )
+                        {
+                            DrawBreakdown( iBLContext
+                                         , breakdown
+                                         , BLRgba32( 127, 127, 127, 255 )
+                                         , BLRgba32( 255, 127, 127, 255 )
+                                         , /*HUD_BREAKDOWN_SOURCE | HUD_BREAKDOWN_TARGET |*/ HUD_BREAKDOWN_INBETWEEN );
+                        }
+
                         DrawBreakdown( iBLContext
-                                     , breakdown
-                                     , BLRgba32( 127, 127, 127, 255 )
-                                     , BLRgba32( 255, 127, 127, 255 )
-                                     , HUD_BREAKDOWN_SOURCE | HUD_BREAKDOWN_TARGET | HUD_BREAKDOWN_INBETWEEN );
+                                      , breakdown
+                                      , BLRgba32( 127, 127, 127, 255 )
+                                      , BLRgba32( 255, 127, 127, 255 )
+                                      , HUD_BREAKDOWN_SOURCE | HUD_BREAKDOWN_TARGET );
 
                         DrawTargetGrid ( iBLContext
                                        , breakdown

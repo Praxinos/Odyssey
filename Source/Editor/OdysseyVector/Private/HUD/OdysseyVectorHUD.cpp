@@ -495,20 +495,20 @@ FOdysseyVectorHUD::DrawBreakdown( BLContext* iBLContext
         }
     }
 
-    if( iHUDFlags & HUD_BREAKDOWN_TARGET )
-    {
-        iBLContext->setStrokeWidth( 3.0f );
-        iBLContext->setStrokeStyle( iTargetDrawingColor );
-
-        iBreakdown->DrawPathsAtTarget( iBLContext );
-    }
-
     if( iHUDFlags & HUD_BREAKDOWN_SOURCE )
     {
         iBLContext->setStrokeWidth( 3.0f );
         iBLContext->setStrokeStyle( iSourceDrawingColor );
 
         iBreakdown->DrawPathsAtSource( iBLContext );
+    }
+
+    if( iHUDFlags & HUD_BREAKDOWN_TARGET )
+    {
+        iBLContext->setStrokeWidth( 3.0f );
+        iBLContext->setStrokeStyle( iTargetDrawingColor );
+
+        iBreakdown->DrawPathsAtTarget( iBLContext );
     }
 }
 

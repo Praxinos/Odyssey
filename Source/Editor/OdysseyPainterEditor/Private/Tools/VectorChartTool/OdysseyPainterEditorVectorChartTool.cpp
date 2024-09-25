@@ -23,6 +23,7 @@ UOdysseyPainterEditorVectorChartTool::~UOdysseyPainterEditorVectorChartTool()
 UOdysseyPainterEditorVectorChartTool::UOdysseyPainterEditorVectorChartTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorChartToolHUD( this ), false )
     , PickingRadius( 10.0f )
+    , mPickingMode( eChartPickingMode::Default )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart64");
 
@@ -64,6 +65,56 @@ UOdysseyPainterEditorVectorChartTool::LoadVector( FOdysseyVectorGroupPaint* iSce
 }
 
 uint64
+UOdysseyPainterEditorVectorChartTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                                            , const FKey& iKey )
+{
+    // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
+    // with the events processing in the OnKeyUpGlobalVector(), we do like that.
+    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
+      || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand ) )
+    {
+        mPickingMode  = eChartPickingMode::Control;
+    }
+
+    // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
+    // with the events processing in the OnKeyUpGlobalVector(), we do like that.
+    if ( ( iKey == EKeys::LeftAlt ) || ( iKey == EKeys::RightAlt ) )
+    {
+        mPickingMode  = eChartPickingMode::Shift;
+    }
+
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( iScene, iKey );
+}
+
+uint64
+UOdysseyPainterEditorVectorChartTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                                         , const FKey& iKey )
+{
+    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+
+    // note, we cannot use FSlateApplication::Get().GetModifierKeys()
+    // because the keys are already released. For consistency we do
+    // the same in the KeyDown event even though we could use 
+    // FSlateApplication::Get().GetModifierKeys()
+    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
+      || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand )
+      || ( iKey == EKeys::LeftShift   ) || ( iKey == EKeys::RightShift   )
+      || ( iKey == EKeys::LeftAlt     ) || ( iKey == EKeys::RightAlt     ) )
+    {
+        // redraw
+        iScene->GetEngine()->Invalidate( 0 );
+    }
+
+    // first reset display mode
+    mPickingMode = eChartPickingMode::Default;
+
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( iScene, iKey );
+}
+
+uint64
 UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey )
@@ -72,31 +123,43 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
     uint64 notificationFlags = 0;
 
     mPickedInbetween = nullptr;
+    mPickedBezierPoint = nullptr;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        mPickedInbetween = mChartHUD->PickInbetween( iPointInTexture.x
-                                                   , iPointInTexture.y
-                                                   , 10 );
-
-        if( mPickedInbetween )
+        if( mPickingMode == eChartPickingMode::Default )
         {
-            // needed for valid GUndo pointer
-            /*GEditor->BeginTransaction(LOCTEXT("vector-chart-tool.transaction.edit-chart","Vector Chart Tool"));
-            if( GUndo )
-            {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene
-                                                                                          , inbetweenerTag
-                                                                                          , notificationFlags );
+            mPickedInbetween = mChartHUD->PickInbetween( iPointInTexture.x
+                                                       , iPointInTexture.y );
 
-                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+            if( mPickedInbetween )
+            {
+                FOdysseyVectorTagInbetweener* inbetweenerTag = mChartHUD->GetBreakdown()->GetInbetweenerTag();
+
+                // needed for valid GUndo pointer
+                GEditor->BeginTransaction(LOCTEXT("vector-chart-tool.transaction.edit-chart","Vector Chart Tool"));
+                if( GUndo )
+                {
+                    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene
+                                                                                             , inbetweenerTag
+                                                                                             , notificationFlags );
+
+                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
-                TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-                if (source)
-                    source->RecordCurrentFrameUndo();
+                    TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                    if (source)
+                        source->RecordCurrentFrameUndo();
+                }
+                GEditor->EndTransaction();
             }
-            GEditor->EndTransaction();*/
+        }
+
+        if( mPickingMode == eChartPickingMode::Control )
+        {
+            mPickedBezierPoint = mChartHUD->PickBezierPoint( iPointInTexture.x
+                                                           , iPointInTexture.y
+                                                           , 10 );
         }
     }
     // request redraw
@@ -105,11 +168,27 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
     return notificationFlags;
 }
 
+FChartDivision*
+UOdysseyPainterEditorVectorChartTool::GetHoveredInbetween()
+{
+    return mHoveredInbetween;
+}
+
 uint64
 UOdysseyPainterEditorVectorChartTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                        , const FOdysseyPoint& iPointInTexture )
 {
-    // TODO: highlight grid handles ?
+    mHoveredInbetween = nullptr;
+
+    if( mPickingMode == eChartPickingMode::Default )
+    {
+        // TODO: highlight grid handles ?
+        mHoveredInbetween = mChartHUD->PickInbetween( iPointInTexture.x
+                                                    , iPointInTexture.y );
+
+        // redraw
+        iScene->GetEngine()->Invalidate( 0 );
+    }
 
     return 0;
 }
@@ -123,18 +202,47 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
 
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        if( mPickedInbetween )
+        if( mChartHUD->GetBreakdown() )
         {
-            FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->chart->GetBreakdown()->GetInbetweenerTag();
+            ::ULIS::FVec2D* HUDBezier = mChartHUD->GetBreakdown()->GetChart()->GetHUDBezier();
 
-            mChartHUD->MoveInbetween( inbetweenerTag
-                                    , mPickedInbetween
-                                    , iPointInTexture.x
-                                    , iPointInTexture.y
-                                    , FSlateApplication::Get().GetModifierKeys().IsControlDown() );
+            if( mPickingMode == eChartPickingMode::Default )
+            {
+                if( mPickedInbetween )
+                {
+                    FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->chart->GetBreakdown()->GetInbetweenerTag();
+                    double newT = FOdysseyVector::QuadraticBezierHitTest( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y )
+                                                                        , HUDBezier[0]
+                                                                        , HUDBezier[1]
+                                                                        , HUDBezier[2]
+                                                                        , 16 );
 
-             // update ALL impacted scenes
-            iScene->GetSharedEnv()->Update( /*| FOdysseyVectorObject::UPDATE_INTERACTIVE*/0 );
+                    inbetweenerTag->MoveInbetween( mPickedInbetween
+                                                 , newT
+                                                 , FSlateApplication::Get().GetModifierKeys().IsShiftDown() );
+
+                     // update ALL impacted scenes
+                    iScene->GetSharedEnv()->Update( /*| FOdysseyVectorObject::UPDATE_INTERACTIVE*/0 );
+                }
+            }
+
+            if( mPickingMode == eChartPickingMode::Control )
+            {
+                if( mPickedBezierPoint )
+                {
+                    mPickedBezierPoint->x += iPointInTexture.deltaPosition.X;
+                    mPickedBezierPoint->y += iPointInTexture.deltaPosition.Y;
+                }
+                else
+                {
+                    HUDBezier[0].x += iPointInTexture.deltaPosition.X;
+                    HUDBezier[0].y += iPointInTexture.deltaPosition.Y;
+                    HUDBezier[1].x += iPointInTexture.deltaPosition.X;
+                    HUDBezier[1].y += iPointInTexture.deltaPosition.Y;
+                    HUDBezier[2].x += iPointInTexture.deltaPosition.X;
+                    HUDBezier[2].y += iPointInTexture.deltaPosition.Y;
+                }
+            }
         }
     }
 
@@ -167,6 +275,12 @@ UOdysseyPainterEditorVectorChartTool::OnMouseUpVector( FOdysseyVectorGroupPaint*
     }
 
     return retFlags;
+}
+
+eChartPickingMode
+UOdysseyPainterEditorVectorChartTool::GetPickingMode()
+{
+    return mPickingMode;
 }
 
 uint64

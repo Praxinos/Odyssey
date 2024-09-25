@@ -79,4 +79,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public 
                  , Category = MatchingTool
                  , meta = ( ToolTip  = "Rigidify Selection Only" ) )
         bool RigidifySelectionOnly;
+
+        UPROPERTY( EditAnywhere
+                 , Category = MatchingTool
+                 , meta = ( ToolTip  = "Show Inbetweens" ) )
+        bool ShowInbetweens;
 };

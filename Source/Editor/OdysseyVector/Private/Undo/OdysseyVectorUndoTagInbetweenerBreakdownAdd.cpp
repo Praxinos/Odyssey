@@ -2,6 +2,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTag.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoTagInbetweenerBreakdownAdd::~FOdysseyVectorUndoTagInbetweenerBreakdownAdd()
 {
@@ -42,7 +43,9 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::FOdysseyVectorUndoTagInbetweenerBr
                                                   , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
                                                   , 0
                                                   , FSnapshotFlags::Route::TRAJECTORIES
-                                                  | FSnapshotFlags::Route::STEPS );
+                                                  | FSnapshotFlags::Route::STEPS
+                                                  , FSnapshotFlags::Trajectory::BEZIER
+                                                  | FSnapshotFlags::Trajectory::WAYPOINTS );
     }
 
     mEngineArray.reserve( iEngineList.size() );
@@ -61,17 +64,16 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::Apply( UObject* iIgnored )
 
     for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
     {
-        inbetweenerTagSnapshot.Preswap();
-        inbetweenerTagSnapshot.Restore();
+        inbetweenerTagSnapshot.LoadAlteredState();
     }
 
     for( FOdysseyVectorEngine* tagEngine : mEngineArray )
     {
-        // update invalidated objects
-        tagEngine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         // request redraw attached cells
         tagEngine->Invalidate( 0 );
     }
+
+    mScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
@@ -86,20 +88,19 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::Revert( UObject* iIgnored )
 
     for( FSnapshotTagInbetweener& inbetweenerTagSnapshot : mInbetweenerTagSnapshotBuffer )
     {
-        inbetweenerTagSnapshot.Preswap();
-        inbetweenerTagSnapshot.Restore();
+        inbetweenerTagSnapshot.RecordAlteredState(); // will run once
+        inbetweenerTagSnapshot.LoadInitialState();
     }
 
     // update invalidated objects
     for( FOdysseyVectorEngine* tagEngine : mEngineArray )
     {
-        // update invalidated objects
-        tagEngine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         // request redraw attached cells
         tagEngine->Invalidate( 0 );
     }
 
-    mScene->GetEngine()->ResetHUD();
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
 }

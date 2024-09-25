@@ -20,6 +20,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagRemove : public FOdysseyVectorUndo
         FOdysseyVectorUndoTagRemove( FOdysseyVectorGroupPaint* iScene
                                    , const std::vector<FOdysseyVectorTag*>& iTagArray
                                    , uint64 iReturnFlags );
+        FOdysseyVectorUndoTagRemove( FOdysseyVectorGroupPaint* iScene
+                                   , const std::list<FOdysseyVectorTag*>& iTagList
+                                   , uint64 iReturnFlags );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

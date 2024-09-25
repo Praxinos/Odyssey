@@ -81,7 +81,7 @@ FReply
 SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonUp( const FGeometry & MyGeometry
                                                                , const FPointerEvent & MouseEvent )
 {
-    return FReply::Handled();
+    return FReply::Unhandled();
 }
 
 FReply
@@ -92,9 +92,11 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonDown( const FGeomet
     FOdysseyAnimationEditorExtension* animationEditorExtension = treeView.Get()->GetAnimationEditorExtension();
     UOdysseyAnimationLayerImageVector* layer = treeView.Get()->GetAnimationLayerImageVector();
     UOdysseyLayerStack* layerStack = animationEditorExtension->GetEditor()->LayerStack();
-    uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                    | FOdysseyPainterEditor::UI_UPDATE_HUD;
+    FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetSharedEnv();
+    std::list<FOdysseyVectorTag*>& sharedTagList = sharedEnv->GetSharedTagList();
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
     FReply reply = FReply::Unhandled();
 
     if ( layerStack->CurrentLayer.Get() != layer )
@@ -104,25 +106,26 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonDown( const FGeomet
                                                     , TSoftObjectPtr<UOdysseyLayer>( layer ) );
     }
 
-	if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
     {
-        FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetSharedEnv();
-        std::list<FOdysseyVectorTag*>& sharedTagList = sharedEnv->GetSharedTagList();
-
-        for( FOdysseyVectorTag* sharedTag : sharedTagList )
+        for( FOdysseyVectorTag* tag : sharedTagList )
         {
-            sharedTag->GetOwner()->GetEngine()->ClearObjectSelection();
+            tag->GetOwner()->GetEngine()->UnselectObject( tag->GetOwner() );
         }
+    }
 
-        // This is used by the list view to determine which row is selected.
-        mInbetweenerTag->GetOwner()->GetEngine()->SelectObject( mInbetweenerTag->GetOwner() );
-        // request redraw
-        mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->Invalidate( 0 );
-        // update UI
-        FOdysseyVectorEngine::Notify( nullptr, retFlags );
+    // This is used by the list view to determine which row is selected.
+    mInbetweenerTag->GetOwner()->GetEngine()->SelectObject( mInbetweenerTag->GetOwner() );
 
+    if( MouseEvent.IsMouseButtonDown( EKeys::LeftMouseButton ) )
+    {
         reply = FReply::Handled();
     }
+
+    // request redraw
+    mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->Invalidate( 0 );
+    // update UI
+    FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
 
     return reply;
 }

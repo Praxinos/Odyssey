@@ -30,6 +30,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSharedEnv : public FOdysseyVectorObject
         void RemoveSharedObject( FOdysseyVectorObject* iVectorObject );
         bool HasSharedTag( FOdysseyVectorTag* iTag );
         FOdysseyVectorTag* GetSelectedTagByClassType( uint32 iClassType );
+        void GetSelectedTagByClassType( uint32 iClassType
+                                      , std::list<FOdysseyVectorTag*>& oSelectedTagList );
 
         std::list<FOdysseyVectorTag*>& GetSharedTagList();
 

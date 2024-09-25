@@ -121,7 +121,8 @@ UOdysseyPainterEditorVectorTagInbetweenerView::MakeUndo( const FName& iPropertyN
                                                        , const FName& iMemberPropertyName
                                                        , const FName& iCategory )
 {
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS;
 
 /*
     if( iPropertyName == "InbetweenCount" )

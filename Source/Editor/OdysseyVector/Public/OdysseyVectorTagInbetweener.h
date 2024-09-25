@@ -264,10 +264,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
 
 
     public:
-        // Odyssey Teal
-        static const uint8 DEFAULT_RED_UINT8   = 0;
-        static const uint8 DEFAULT_GREEN_UINT8 = 169;
-        static const uint8 DEFAULT_BLUE_UINT8  = 157;
+        static const uint8 DEFAULT_RED_UINT8   = 255;
+        static const uint8 DEFAULT_GREEN_UINT8 = 0;
+        static const uint8 DEFAULT_BLUE_UINT8  = 255;
         static const uint8 DEFAULT_ALPHA_UINT8 = 255;
 
         static const uint64 INVALIDATE_MAP               = ( 1LL <<  0 );

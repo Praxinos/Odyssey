@@ -69,6 +69,22 @@ FOdysseyVectorSharedEnv::GetSelectedTagByClassType( uint32 iClassType )
     return nullptr;
 }
 
+void
+FOdysseyVectorSharedEnv::GetSelectedTagByClassType( uint32 iClassType
+                                                  , std::list<FOdysseyVectorTag*>& oSelectedTagList )
+{
+    for( FOdysseyVectorTag* tag : mSharedTagList )
+    {
+        if( tag->GetClass() == iClassType )
+        {
+            if( tag->GetOwner()->IsSelected() )
+            {
+                oSelectedTagList.push_back(tag);
+            }
+        }
+    }
+}
+
 bool
 FOdysseyVectorSharedEnv::HasSharedTag( FOdysseyVectorTag* iTag )
 {
