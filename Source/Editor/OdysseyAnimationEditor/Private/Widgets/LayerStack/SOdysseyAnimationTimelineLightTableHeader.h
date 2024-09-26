@@ -8,6 +8,7 @@
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 
 class SColorBlock;
+class UOdysseyAnimationLayer;
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationTimelineLightTableHeader

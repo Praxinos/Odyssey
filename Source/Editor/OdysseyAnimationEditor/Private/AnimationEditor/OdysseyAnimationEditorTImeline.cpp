@@ -9,7 +9,9 @@
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyAnimation.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
+#include "OdysseyStyleSet.h"
 
 //Define base frame width to be 50 pixels
 #define BASE_FRAMEWIDTH 50.f

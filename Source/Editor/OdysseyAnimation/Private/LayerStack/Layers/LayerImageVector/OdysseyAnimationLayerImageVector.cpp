@@ -9,12 +9,14 @@
 #include "OdysseyStyleSet.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainerImport.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVectorImageRenderer.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVectorImport.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyMediaVector.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 

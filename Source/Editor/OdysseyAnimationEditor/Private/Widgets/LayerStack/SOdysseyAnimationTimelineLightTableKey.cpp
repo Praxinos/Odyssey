@@ -5,6 +5,11 @@
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 #include "OdysseyStyleSet.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
+#include "PainterEditor/OdysseyPainterEditor.h"
+#include "SOdysseyAnimationTimelineSection.h"
 
 void
 SOdysseyAnimationTimelineLightTableKey::Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension)

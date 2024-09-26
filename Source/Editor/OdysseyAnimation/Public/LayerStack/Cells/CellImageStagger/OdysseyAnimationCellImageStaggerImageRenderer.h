@@ -7,6 +7,8 @@
 
 #include <ULIS>
 
+class UOdysseyAnimationCellImageStagger;
+
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageStaggerImageRenderer
     : public IOdysseyImageRenderer
 {

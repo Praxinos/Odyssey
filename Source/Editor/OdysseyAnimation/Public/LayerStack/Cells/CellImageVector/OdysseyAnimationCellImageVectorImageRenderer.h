@@ -7,6 +7,8 @@
 
 #include <ULIS>
 
+class UOdysseyAnimationCellImageVector;
+
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageVectorImageRenderer
     : public IOdysseyImageRenderer
 	, public FGCObject

@@ -19,6 +19,11 @@
 #include "OdysseyTextureFunctionLibrary.h"
 #include "LayerStack/OdysseyTextureLayerImageRaster.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "ScopedTransaction.h"
+#include "OdysseyRasterBlockMutator.h"
+#include "ULISLoaderModule.h"
+
+#define LOCTEXT_NAMESPACE "UOdysseyAnimationEditorAnimationFunctionLibrary"
 
 UOdysseyAnimation*
 UOdysseyAnimationEditorAnimationFunctionLibrary::CreateAnimationAsset(FString AssetName, FString PackagePath, int Width, int Height, EOdysseyAnimationFormat Format, float FramesPerSecond)
@@ -410,3 +415,5 @@ UOdysseyAnimationEditorLayerFunctionLibrary::ExportAsFlipbook(UOdysseyAnimationL
 		Path
 	);
 }
+
+#undef LOCTEXT_NAMESPACE

@@ -10,6 +10,7 @@
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "OdysseyAnimation.h"
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

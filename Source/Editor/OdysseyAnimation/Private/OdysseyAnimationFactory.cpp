@@ -4,12 +4,18 @@
 #include "OdysseyAnimationFactory.h"
 
 #include "OdysseyAnimation.h"
+#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "Widgets/SOdysseyAnimationConfigureWindow.h"
+#include "OdysseyRasterBlockMutator.h"
 
 #include "Editor.h"
 #include "EditorStyleSet.h"
 
 #include <ULIS>
+#include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 

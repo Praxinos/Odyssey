@@ -14,6 +14,8 @@
 #include "ULISLoaderModule.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "Shortcuts/Timeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyRasterBlockMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

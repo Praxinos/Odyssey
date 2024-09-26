@@ -3,6 +3,7 @@
 
 #include "LayerStack/Tools/OdysseyAnimationTimelineCutTool.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "OdysseyAnimationEditorTimeline.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 

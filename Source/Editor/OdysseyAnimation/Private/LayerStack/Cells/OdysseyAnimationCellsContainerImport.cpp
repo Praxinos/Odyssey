@@ -1,6 +1,11 @@
 #include "LayerStack/Cells/OdysseyAnimationCellsContainerImport.h"
+
 #include "OdysseyFile.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+#include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
 
 bool
 FOdysseyAnimationCellsContainerImport::Read( UOdysseyAnimationLayer* iAnimationLayer

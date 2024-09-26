@@ -6,6 +6,8 @@
 #include "OdysseyImageRenderer.h"
 #include <ULIS>
 
+class UOdysseyAnimationCellImageRaster;
+
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRasterImageRenderer
     : public IOdysseyImageRenderer
 	, public FGCObject

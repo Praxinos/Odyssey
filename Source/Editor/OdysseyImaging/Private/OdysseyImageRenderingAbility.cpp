@@ -11,6 +11,7 @@
 #include "PaperFlipbookFactory.h"
 #include "PaperSpriteFactory.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "Imaging"
 

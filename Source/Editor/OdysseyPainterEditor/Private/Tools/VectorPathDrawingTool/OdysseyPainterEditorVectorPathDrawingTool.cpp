@@ -12,6 +12,7 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "GenericPlatform/GenericPlatformTime.h"
 #include "Models/OdysseyPainterEditorCommands.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

@@ -5,6 +5,7 @@
 
 #include "OdysseyImageRenderingAbility.h"
 #include "OdysseyMediaProvider.h"
+#include "OdysseyRasterBlock.h"
 #include "OdysseyAnimationCell.generated.h"
 
 class UOdysseyAnimationLayer;

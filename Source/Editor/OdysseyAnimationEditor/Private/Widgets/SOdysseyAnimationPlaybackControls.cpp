@@ -7,6 +7,8 @@
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimation.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 void
 SOdysseyAnimationPlaybackControls::Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension)

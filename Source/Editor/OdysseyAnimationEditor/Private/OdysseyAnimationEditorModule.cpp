@@ -24,6 +24,9 @@
 #include "OdysseyAnimation.h"
 #include "AnimationEditor/OdysseyAnimationEditorSource.h"
 #include "OdysseyAnimationEditorFlipSystem.h"
+#include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "LayerStack/Cells/OdysseyAnimationCellThumbnailRenderer.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

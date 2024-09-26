@@ -42,7 +42,7 @@ SOdysseyTextureLayerStack::Construct(const FArguments& InArgs, FOdysseyTextureEd
 	mExtension = iTextureExtension;
     mLayerStack.Assign(*this, InArgs._LayerStack);
 
-    RebuildWidgets();
+    this->RebuildWidgets();
 }
 
 void

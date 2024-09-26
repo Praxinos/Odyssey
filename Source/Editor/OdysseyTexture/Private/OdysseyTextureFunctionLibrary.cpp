@@ -3,6 +3,7 @@
 
 #include "OdysseyTextureFunctionLibrary.h"
 #include "Engine/Texture2D.h"
+#include "OdysseyTextureLayerStackUserData.h"
 
 bool
 UOdysseyTextureFunctionLibrary::HasLayerStack(UTexture2D* iTexture)

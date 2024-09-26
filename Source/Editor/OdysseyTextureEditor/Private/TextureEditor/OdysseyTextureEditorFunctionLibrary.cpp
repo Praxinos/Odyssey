@@ -5,9 +5,13 @@
 #include "OdysseyLayerStack.h"
 #include "AssetToolsModule.h"
 #include "IAssetTools.h"
+#include "OdysseyPixelFormat.h"
 #include "OdysseyTextureFactory.h"
 #include "OdysseyTextureFunctionLibrary.h"
 #include "LayerStack/OdysseyTextureLayerImageRaster.h"
+#include "LayerStack/OdysseyTextureLayerStack.h"
+#include "OdysseyRasterBlockMutator.h"
+#include "ULISLoaderModule.h"
 
 UOdysseyTextureFactory*
 UOdysseyTextureEditorTextureFunctionLibrary::GetTextureFactory()

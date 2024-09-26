@@ -4,6 +4,8 @@
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 #include "LayerStack/OdysseyAnimationLayerStack.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 #include "ULISLoaderModule.h"
 
 //===========================

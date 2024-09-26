@@ -3,6 +3,8 @@
 
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStaggerImageRenderer.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
 #include "ULISUtils.h"
 #include "ULISEventBuilder.h"
@@ -13,7 +15,7 @@ FOdysseyAnimationCellImageStaggerImageRenderer::FOdysseyAnimationCellImageStagge
 {
 	int staggerFrame = iCell->GetReferenceFrameAtFrame(iFrame);
 	UOdysseyAnimationCell* cell =  iCell->GetLayer()->GetCellAtFrame(staggerFrame);
-    
+
     if (cell)
 	{
     	int cellFrame = iFrame - cell->GetFrameRange().GetLowerBoundValue();

@@ -2,6 +2,8 @@
 
 #include <Core/Core.h>
 
+class UOdysseyAnimationLayer;
+
 class FOdysseyAnimationCellsContainerImport
 {
 public:

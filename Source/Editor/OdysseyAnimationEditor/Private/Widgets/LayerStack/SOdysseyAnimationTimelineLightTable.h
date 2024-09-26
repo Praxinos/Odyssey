@@ -9,6 +9,7 @@
 class UOdysseyAnimationLayer;
 class FOdysseyAnimationEditorExtension;
 class UOdysseyAnimation;
+class UOdysseyAnimationCell;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTable
 	: public SCompoundWidget

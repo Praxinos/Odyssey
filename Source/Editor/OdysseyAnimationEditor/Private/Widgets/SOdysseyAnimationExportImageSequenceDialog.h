@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyExportImageFormat.h"
 #include <ULIS>
 
 #include "SOdysseyAnimationExportImageSequenceDialog.generated.h"

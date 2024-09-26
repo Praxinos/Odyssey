@@ -5,6 +5,7 @@
 
 #include "Shortcuts/Timeline/OdysseyAnimationTimelineCellsShortcuts.h"
 #include "Shortcuts/Timeline/OdysseyAnimationTimelineCellImageRasterShortcuts.h"
+#include "Shortcuts/Timeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

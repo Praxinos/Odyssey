@@ -4,9 +4,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 
 class UOdysseyAnimationLayer;
 class UOdysseyAnimationCell;
+class FOdysseyAnimationEditorExtension;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTableKey
 	: public SCompoundWidget

@@ -1,7 +1,12 @@
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVectorImport.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+#include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+#include "LayerStack/Cells/OdysseyAnimationCellsContainerImport.h"
+#include "LayerStack/LightTable/OdysseyAnimationLightTableImport.h"
 #include "OdysseyFile.h"
+
 
 bool
 FOdysseyAnimationLayerImageVectorImport::Read( UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector

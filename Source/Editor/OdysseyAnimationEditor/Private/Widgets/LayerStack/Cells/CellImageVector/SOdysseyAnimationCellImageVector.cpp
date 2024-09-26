@@ -3,6 +3,8 @@
 
 #include "Widgets/LayerStack/Cells/CellImageVector/SOdysseyAnimationCellImageVector.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+#include "OdysseyAnimation.h"
+#include "ThumbnailRendering/ThumbnailManager.h"
 
 #define THUMBNAIL_SIZE 32
 

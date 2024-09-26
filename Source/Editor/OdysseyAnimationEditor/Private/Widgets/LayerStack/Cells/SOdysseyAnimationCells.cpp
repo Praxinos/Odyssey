@@ -12,6 +12,7 @@
 #include "Widgets/LayerStack/Cells/SOdysseyAnimationCellHandle.h"
 #include "LayerStack/Tools/OdysseyAnimationTimelineTool.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

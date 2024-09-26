@@ -11,6 +11,7 @@
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 SLATE_IMPLEMENT_WIDGET(SOdysseyAnimationLightTable)
 void

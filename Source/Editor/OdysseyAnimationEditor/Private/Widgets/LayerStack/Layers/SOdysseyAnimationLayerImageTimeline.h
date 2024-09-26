@@ -9,6 +9,7 @@
 class FOdysseyAnimationEditorExtension;
 class UOdysseyAnimationLayer;
 class FOdysseyAnimationTimelineCellsShortcuts;
+class FOdysseyAnimationTimelineCellImageStaggerShortcuts;
 
 /**
  * Implements a layer row widget

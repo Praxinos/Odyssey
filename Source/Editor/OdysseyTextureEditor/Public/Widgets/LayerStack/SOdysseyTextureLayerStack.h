@@ -4,6 +4,9 @@
 #pragma once
 
 class SOdysseyTextureLayerStackTreeView;
+class UOdysseyLayerStack;
+class UOdysseyLayer;
+class FOdysseyTextureEditorExtension;
 
 /**
  * Implements the Texture Layer stack widget

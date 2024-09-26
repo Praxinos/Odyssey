@@ -2,12 +2,17 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyAnimationCellThumbnailRenderer.h"
+
+#include "OdysseyAnimation.h"
 #include "CanvasItem.h"
 #include "CanvasTypes.h"
 #include "TextureCompiler.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
 #include "ImageUtils.h"
 #include "OdysseyPainterEditorSettings.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "ULISLoaderModule.h"
+#include "OdysseyRasterBlockMutator.h"
 
 #define THUMBNAIL_RENDER_SIZE 64
 

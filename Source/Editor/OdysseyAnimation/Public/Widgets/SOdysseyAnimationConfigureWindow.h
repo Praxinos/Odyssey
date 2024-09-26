@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/SWindow.h"
 #include <ULIS>
+#include "OdysseyAnimation.h" //For EOdysseyAnimationFormat
 
 #include "SOdysseyAnimationConfigureWindow.generated.h"
 

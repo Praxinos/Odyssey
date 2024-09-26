@@ -131,7 +131,7 @@ FOdysseyAnimationTimelineSelectionTool::OnDefaultSelectionMouseButtonDown(const 
 	}
 		
 	mIsDragnDrop = false;
-	mInitialSelection = {};
+	mInitialSelection = TArray<UOdysseyAnimationCell*>();
 
 	if (!SetCellSelectionCursorAtFrame(iParams.mLayer, frame))
 		return FReply::Unhandled();
@@ -211,7 +211,7 @@ FOdysseyAnimationTimelineSelectionTool::OnContiguousSelectionMouseButtonDown(con
 
 	mShouldDeselect = false;
 	mIsDragDetected = false;
-	mInitialSelection = {};
+	mInitialSelection = TArray<UOdysseyAnimationCell*>();
 
 	float frame = GetFrameUnderCursor(iParams);
 

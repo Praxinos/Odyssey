@@ -11,6 +11,8 @@
 #include "OdysseyAnimationEditorTimeline.h"
 #include "Widgets/Input/SSegmentedControl.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyStyleSet.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineControl.h"

@@ -16,6 +16,7 @@
 #include <ULIS>
 #include "ULISLoaderModule.h"
 
+#include "../../Engine/Public/ObjectEditorUtils.h"
 #define LOCTEXT_NAMESPACE "Animation"
 
 UOdysseyAnimation::FOnCurrentFrameChanged&

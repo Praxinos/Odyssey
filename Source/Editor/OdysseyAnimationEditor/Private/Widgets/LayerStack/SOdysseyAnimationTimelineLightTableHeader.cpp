@@ -4,14 +4,17 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.h"
 
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "Math/UnitConversion.h"
+#include "OdysseyStyleSet.h"
 #include "Widgets/Input/NumericTypeInterface.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "Widgets/Input/SNumericEntryBox.h"
-#include "Math/UnitConversion.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
-#include "OdysseyStyleSet.h"
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Colors/SColorPicker.h"
+#include "SOdysseyAnimationTimelineLightTable.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

@@ -6,9 +6,11 @@
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

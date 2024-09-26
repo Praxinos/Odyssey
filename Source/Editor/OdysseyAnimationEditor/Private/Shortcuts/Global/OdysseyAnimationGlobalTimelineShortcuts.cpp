@@ -7,6 +7,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyAnimation.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimationEditorUserSettings.h"
 

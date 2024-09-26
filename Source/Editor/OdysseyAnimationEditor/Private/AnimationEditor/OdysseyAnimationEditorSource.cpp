@@ -15,6 +15,7 @@
 #include "Undo/OdysseyVectorUndoEngineClear.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"

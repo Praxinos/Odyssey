@@ -8,10 +8,12 @@
 #include "OdysseyAnimation.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineSection.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyPainterEditor.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 void
 SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysseyAnimationLayer* iLayer, FOdysseyAnimationEditorExtension* iExtension)

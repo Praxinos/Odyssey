@@ -5,6 +5,7 @@
 
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 FOdysseyAnimationCellClipboardData::FOdysseyAnimationCellClipboardData()
     : IOdysseyClipboardData(StaticId())
