@@ -372,6 +372,7 @@ class ODYSSEYVECTOR_API FSnapshotDynamics
         bool LoadState( State* iState );
 
     protected:
+        bool bApplied;
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
         State mInitialState;
         State mAlteredState;
@@ -453,6 +454,7 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         uint32 drawingCount;
         eInbetweenerGridType gridType;
         eInbetweenerInterpolationType interpolationType;
+        eInbetweenerInterpolationDirection interpolationDirection;
         uint32 gridSizeX;
         uint32 gridSizeY;
         uint32 ARAPRigidity;

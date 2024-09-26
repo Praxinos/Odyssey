@@ -60,10 +60,9 @@ FOdysseyVectorUndoTagInbetweenerGridType::FOdysseyVectorUndoTagInbetweenerGridTy
     {
         mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
                                                  , ( FSnapshotFlags::Tag::Inbetweener::GRIDTYPE
-                                                   | FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
-                                                   | FSnapshotFlags::Tag::Inbetweener::ROUTES )
+                                                   | FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS )
                                                  , FSnapshotFlags::ALL    // save all breakdown details
-                                                 , FSnapshotFlags::ALL    // save all route details
+                                                 , 0                      // ignore route details
                                                  , FSnapshotFlags::ALL ); // save all trajectory details
     }
 }

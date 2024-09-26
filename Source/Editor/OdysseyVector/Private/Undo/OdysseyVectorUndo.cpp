@@ -289,11 +289,9 @@ FSnapshotLayout::RecordLocalState( FSnapshotLayout::State* iState )
     {
         uint32 breakdownCount = mInbetweenerTag->GetBreakdownCount();
 
-        // Do not forget to clear as it could be called several times when calling Preswap()
         iState->breakdownArray.clear();
         iState->breakdownArray.reserve( breakdownCount );
 
-        // Do not forget to clear as it could be called several times when calling Preswap()
         iState->targetBuffer.clear();
         iState->targetBuffer.reserve( breakdownCount );
 
@@ -358,6 +356,26 @@ FSnapshotLayout::LoadAlteredState()
 
 FSnapshotDynamics::~FSnapshotDynamics()
 {
+    if( bApplied )
+    {
+        for( FInbetweenerRoute* route : mInitialState.routeArray )
+        {
+            if( route->GetInbetweenerTag() == nullptr )
+            {
+                delete route;
+            }
+        }
+    }
+    else
+    {
+        for( FInbetweenerRoute* route : mAlteredState.routeArray )
+        {
+            if( route->GetInbetweenerTag() == nullptr )
+            {
+                delete route;
+            }
+        }
+    }
 }
 
 FSnapshotDynamics::FSnapshotDynamics()
@@ -366,6 +384,7 @@ FSnapshotDynamics::FSnapshotDynamics()
 
 FSnapshotDynamics::FSnapshotDynamics( FOdysseyVectorTagInbetweener* iInbetweenerTag )
     : mInbetweenerTag( iInbetweenerTag )
+    , bApplied ( true )
 {
     RecordLocalState( &mInitialState );
 }
@@ -410,12 +429,16 @@ FSnapshotDynamics::LoadState( FSnapshotDynamics::State* iState )
 bool
 FSnapshotDynamics::LoadInitialState()
 {
+    bApplied = false;
+
     return LoadState( &mInitialState );
 }
 
 bool
 FSnapshotDynamics::LoadAlteredState()
 {
+    bApplied = true;
+
     return LoadState( &mAlteredState );
 }
 
@@ -605,6 +628,8 @@ FSnapshotTagInbetweener::RecordLocalState( FSnapshotTagInbetweener::State* iStat
 {
     if( iState->inited == false )
     {
+        iState->interpolationDirection = mInbetweenerTag->GetInterpolationDirection();
+
         if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
          || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE ) )
         {
@@ -715,6 +740,8 @@ FSnapshotTagInbetweener::RecordAlteredState()
 bool
 FSnapshotTagInbetweener::LoadLocalState( FSnapshotTagInbetweener::State* iState )
 {
+    mInbetweenerTag->SetInterpolationDirection( iState->interpolationDirection );
+
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE )
     {
         mInbetweenerTag->SetMapAsPolyline( iState->mapAsPolyline );

@@ -164,7 +164,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
             const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() );
             uint32 frameIndex = animationEditorExtension->Timeline()->GetFrameIndexAtMousePosition( cursorPos.X );
             TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = listView.Get()->GetAnimationLayerImageVector()->GetCellsContainer();
-            IOdysseyVectorAnimationCell* tagCell = mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->GetAnimationCell();
+            IOdysseyVectorAnimationCell* tagCell = mInbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell();
             float frameWidth = animationEditorExtension->Timeline()->GetFrameWidth();
 
             if (!cellsContainer)
@@ -176,33 +176,29 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
             {
                 uint32 cursorCellIndex = cursorCell.Get()->GetIndex();
                 uint32 tagCellIndex = tagCell->GetIndex();
-                int32 drawingIndex = ( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Forward ) ? (int32)( cursorCellIndex - tagCellIndex ) 
-                                                                                                                                      : (int32)( tagCellIndex - cursorCellIndex );
+                uint32 drawingIndex = abs( (int)(cursorCellIndex - tagCellIndex) );
                 FInbetweenerBreakdown* prevBreakdown = mPickedBreakdown->GetPrevBreakdown();
                 FInbetweenerBreakdown* nextBreakdown = mPickedBreakdown->GetNextBreakdown();
 
                  // reverse the whole thing now to ease the calculations
-                if( cursorCellIndex < tagCellIndex )
+                if( mInbetweenerTag->GetBreakdownCount() == 1 )
                 {
-                    if( mInbetweenerTag->GetBreakdownCount() == 1 )
+                    eInbetweenerInterpolationDirection direction = ( cursorCellIndex < tagCellIndex ) ? eInbetweenerInterpolationDirection::Backward
+                                                                                                      : eInbetweenerInterpolationDirection::Forward;
+
+                    if( mInbetweenerTag->GetInterpolationDirection() != direction )
                     {
-                        mInbetweenerTag->InvertInterpolationDirection();
+                        mInbetweenerTag->SetInterpolationDirection( direction );
 
                         mInbetweenerTag->GetOwner()->GetScene()->Update( 0 );
 
                         CacheDesiredSize( mLayoutScaleMultiplier );
-
-                        drawingIndex = -drawingIndex;
-                    }
-                    else
-                    {
-                        drawingIndex = mPickedBreakdown->GetSourceDrawingIndex();
                     }
                 }
 
                 uint32 maxCellIndex = ( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Forward ) ? tagCell->GetLastCell()->GetIndex()
                                                                                                                                       : tagCell->GetFirstCell()->GetIndex();
-                uint32 maxDrawingIndex = ( maxCellIndex - cursorCellIndex );
+                uint32 maxDrawingIndex = abs( (int)(maxCellIndex - tagCellIndex) );
                 uint32 prevDrawingIndex = prevBreakdown ? prevBreakdown->GetTargetDrawingIndex() : 0;
                 uint32 nextDrawingIndex = nextBreakdown ? nextBreakdown->GetTargetDrawingIndex() : maxDrawingIndex + 1;
 

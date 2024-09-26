@@ -30,6 +30,7 @@ class ODYSSEYVECTOR_API FInbetweenerRoute
         std::vector<FInbetweenerTrajectory>& GetTrajectoryBuffer();
         std::vector<FInbetweenerStep>& GetStepBuffer();
         void Resize();
+        void SetInbetweenerTag( FOdysseyVectorTagInbetweener* iInbetweenerTag );
 
     private:
         std::vector<FInbetweenerStep> mStepBuffer;

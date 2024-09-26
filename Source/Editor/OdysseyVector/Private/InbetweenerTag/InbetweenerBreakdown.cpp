@@ -244,6 +244,8 @@ FInbetweenerBreakdown::DrawPathsAtSource( BLContext* iBLContext )
     iBLContext->save();
     iBLContext->resetMatrix();
 
+    worldMatrix.transform( GetSourceLocalMatrix() );
+
     for( FInterpolatedPath& interpolatedPath : mInbetweenerTag->GetInterpolatedPathBuffer() )
     {
         uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();

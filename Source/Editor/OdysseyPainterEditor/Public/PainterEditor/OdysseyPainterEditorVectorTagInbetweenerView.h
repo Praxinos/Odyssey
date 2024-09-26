@@ -25,9 +25,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
         UOdysseyPainterEditorVectorTagInbetweenerView( FOdysseyPainterEditor* iEditor
                                                      , FOdysseyVectorGroupPaint* iScene );
 
-        void Update( FOdysseyPainterEditor* iEditor
-                   , FOdysseyVectorGroupPaint* iScene
-                   , const std::list<FOdysseyVectorTagInbetweener*>& iSelectedInbetweenerTagList );
+        bool Update( FOdysseyPainterEditor* iEditor
+                   , FOdysseyVectorGroupPaint* iScene );
         void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
     protected:
@@ -46,6 +45,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
         FOdysseyPainterEditor* mEditor;
         FOdysseyVectorGroupPaint* mScene;
         std::vector<FOdysseyVectorTagInbetweener*> mSelectedInbetweenerTagArray;
+        bool SelectionHasRoutes();
 
     public:
 /*

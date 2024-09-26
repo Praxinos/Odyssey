@@ -218,6 +218,8 @@ FOdysseyVectorTagInbetweener::AddRoute( FInbetweenerRoute* iRoute )
 {
     mRouteList.push_back( iRoute );
 
+    iRoute->SetInbetweenerTag( this );
+
     Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_ROUTES
               | FOdysseyVectorTagInbetweener::INVALIDATE_ROUTE_LIST
               | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
@@ -228,6 +230,8 @@ void
 FOdysseyVectorTagInbetweener::RemoveRoute( FInbetweenerRoute* iRoute )
 {
     mRouteList.remove( iRoute );
+
+    iRoute->SetInbetweenerTag( nullptr );
 
     Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_ROUTE_LIST
               | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
@@ -1660,6 +1664,11 @@ FOdysseyVectorTagInbetweener::GetInterpolationType()
 void
 FOdysseyVectorTagInbetweener::SetInterpolationType( eInbetweenerInterpolationType iInterpolationType )
 {
+    if( iInterpolationType == eInbetweenerInterpolationType::Linear )
+    {
+        RemoveAllRoutes();
+    }
+
     mInterpolationType = iInterpolationType;
 
     Invalidate( INVALIDATE_SPACING

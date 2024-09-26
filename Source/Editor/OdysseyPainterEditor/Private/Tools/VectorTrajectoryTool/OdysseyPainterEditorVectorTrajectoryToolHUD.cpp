@@ -39,7 +39,12 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::FOdysseyPainterEditorVectorTraject
 void
 FOdysseyPainterEditorVectorTrajectoryToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
+    uint64 hudFlags = mTrajectoryTool->GetEditor()->GetVectorHUDFlags();
 
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+    {
+        UpdateSelectionInbetweenMode( iScene );
+    }
 }
 
 FInbetweenerRoute*
@@ -49,47 +54,21 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickRoute( FOdysseyVectorGroupPain
                                                        , double iPickingRadius )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    FInbetweenerRoute* retRoute = nullptr;
 
-    vectorEngine->Traverse
-    ( iScene
-    , 0
-    , [ vectorEngine
-      , iScene
-      , &retRoute
-      , this
-      , iWorldX
-      , iWorldY
-      , iPickingRadius ]( FOdysseyVectorObject* object
-                        , uint64 travesalFlags ) -> uint64
-      {
-          if( vectorEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
-          {
-              FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : mSelectedInbetweenerTagList )
+    {
+        FInbetweenerRoute* route = PickRouteFromTag( inbetweenerTag
+                                                   , iWorldX
+                                                   , iWorldY
+                                                   , iPickingRadius );
 
-              if( tag )
-              {
-                  FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-                  FInbetweenerRoute* route = PickRouteFromTag( inbetweenerTag
-                                                             , iWorldX
-                                                             , iWorldY
-                                                             , iPickingRadius );
+        if( route )
+        {
+            return route;
+        }
+    }
 
-                  if( route )
-                  {
-                      retRoute = route;
-
-                      return FOdysseyVectorEngine::TRAVERSE_STOP;
-                  }
-              }
-
-              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
-          }
-
-          return 0;
-      } );
-
-    return retRoute;
+    return nullptr;
 }
 
 FInbetweenerQuad*
@@ -145,51 +124,24 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickHandle( FOdysseyVectorGroupPai
                                                         , double iPickingRadius )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    FInbetweenerHandleTrajectory* retHandle = nullptr;
 
-    vectorEngine->Traverse
-    ( iScene
-    , 0
-    , [ vectorEngine
-      , iScene
-      , this
-      , &retHandle
-      , iWorldX
-      , iWorldY
-      , iPickingRadius ]( FOdysseyVectorObject* object
-                        , uint64 travesalFlags ) -> uint64
-      {
-          if( vectorEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
-          {
-              FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : mSelectedInbetweenerTagList )
+    {
+        if( inbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
+        {
+            FInbetweenerHandleTrajectory* trajectoryHandle = PickHandleFromTag( inbetweenerTag
+                                                                              , iWorldX
+                                                                              , iWorldY
+                                                                              , iPickingRadius );
 
-              if( tag )
-              {
-                  FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+            if( trajectoryHandle )
+            {
+                return trajectoryHandle;
+            }
+        }
+    }
 
-                  if( inbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
-                  {
-                      FInbetweenerHandleTrajectory* trajectoryHandle = PickHandleFromTag( inbetweenerTag
-                                                                                        , iWorldX
-                                                                                        , iWorldY
-                                                                                        , iPickingRadius );
-
-                      if( trajectoryHandle )
-                      {
-                          retHandle = trajectoryHandle;
-
-                          return FOdysseyVectorEngine::TRAVERSE_STOP;
-                      }
-                  }
-              }
-
-              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
-          }
-
-          return 0;
-      } );
-
-    return retHandle;
+    return nullptr;
 }
 
 static FInbetweenerHandleTrajectory*
@@ -235,47 +187,21 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickStep( FOdysseyVectorGroupPaint
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     FInbetweenerStep* retStep = nullptr;
 
-    vectorEngine->Traverse
-    ( iScene
-    , 0
-    , [ vectorEngine
-      , iScene
-      , this
-      , &retStep
-      , iWorldX
-      , iWorldY
-      , iPickingRadius ]( FOdysseyVectorObject* object
-                        , uint64 travesalFlags ) -> uint64
-      {
-          if( vectorEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
-          {
-              FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : mSelectedInbetweenerTagList )
+    {
+        if( inbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
+        {
+            FInbetweenerStep* step = PickStepFromTag( inbetweenerTag
+                                                    , iWorldX
+                                                    , iWorldY
+                                                    , iPickingRadius );
 
-              if( tag )
-              {
-                  FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-
-                  if( inbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
-                  {
-                      FInbetweenerStep* step = PickStepFromTag( inbetweenerTag
-                                                              , iWorldX
-                                                              , iWorldY
-                                                              , iPickingRadius );
-
-                      if( step )
-                      {
-                          retStep = step;
-
-                          return FOdysseyVectorEngine::TRAVERSE_STOP;
-                      }
-                  }
-              }
-
-              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
-          }
-
-          return 0;
-      } );
+            if( step )
+            {
+                return step;
+            }
+        }
+    }
 
     return retStep;
 }
@@ -586,57 +512,37 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.
     // -> inbetweens in inbetween mode.
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
+    //FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
-        FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+        for( FOdysseyVectorTagInbetweener* inbetweenerTag : mSelectedInbetweenerTagList )
+        {
+            for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
+            {
+                FOdysseyVectorHUD::DrawBreakdown( iBLContext
+                                                , breakdown
+                                                , BLRgba32( 127, 127, 127, 255 )
+                                                , BLRgba32( 255, 127, 127, 255 )
+                                                , ( HUD_BREAKDOWN_SOURCE
+                                                  | HUD_BREAKDOWN_TARGET
+                                                   | HUD_BREAKDOWN_INBETWEEN ) );
+            }
 
-        vectorEngine->Traverse
-        ( iScene
-        , 0
-        , [ vectorEngine
-          , iScene
-          , iBLContext
-          , &fgColor
-          , &bgColor
-          , &hcColor
-          , this ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
-          {
-              if( vectorEngine->ObjectHasFocus( iScene, object, travesalFlags ) )
-              {
-                  FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
-
-                  if( tag )
-                  {
-                      FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-/*
-                      DrawSourceGrid( iBLContext
-                                    , fgColor
-                                    , bgColor
-                                    , hcColor
-                                    , inbetweenerTag );
-*/
-                      for( FInbetweenerRoute* route : inbetweenerTag->GetRouteList() )
-                      {
-                          for( FInbetweenerTrajectory& trajectory : route->GetTrajectoryBuffer() )
-                          {
-                              DrawTrajectory( iBLContext
-                                            , fgColor
-                                            , bgColor
-                                            , hcColor
-                                            , inbetweenerTag
-                                            , &trajectory );
-                          }
-                      }
-                  }
-
-                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
-              }
-
-              return 0;
-          } );
-
+            for( FInbetweenerRoute* route : inbetweenerTag->GetRouteList() )
+            {
+                for( FInbetweenerTrajectory& trajectory : route->GetTrajectoryBuffer() )
+                {
+                    DrawTrajectory( iBLContext
+                                , fgColor
+                                , bgColor
+                                , hcColor
+                                , inbetweenerTag
+                                , &trajectory );
+                }
+            }
+        }
+ 
         if( mTrajectoryTool->GetPickingMode() == eTrajectoryPickingMode::Add )
         {
             DrawHoveredQuad( iBLContext

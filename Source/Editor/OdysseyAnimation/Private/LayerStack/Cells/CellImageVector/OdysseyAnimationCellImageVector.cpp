@@ -308,7 +308,7 @@ FOdysseyAnimationCellImageVector::GetLastCell()
 IOdysseyVectorAnimationCell*
 FOdysseyAnimationCellImageVector::GetFirstCell()
 {
-    FOdysseyAnimationCell* firstCell = GetLayer()->GetCellsContainer()->GetCells().Top().Get();
+    FOdysseyAnimationCell* firstCell = GetLayer()->GetCellsContainer()->GetCells()[0].Get();
 
     return static_cast<FOdysseyAnimationCellImageVector*>(firstCell);
 }

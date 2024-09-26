@@ -52,14 +52,15 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::Construct( const typename STable
     STableRow<TSharedPtr<FInbetweeningListViewItem>>::Construct( InArgs, InOwnerTableView );
     TSharedPtr<SHorizontalBox> tagBox;
     const FSlateBrush* objectIcon = nullptr;
-    const FSlateBrush* inbetweenerTagIcon = nullptr;
+    const FSlateBrush* inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching16" );
+    FOdysseyVectorTagInbetweener* inbetweenerTag = iTem.Get()->GetInbetweenerTag();
+    uint32 cellIndex = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetIndex();
 
-    inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching16" );
-
-    mInbetweenerTag = iTem.Get()->GetInbetweenerTag();
+    mInbetweenerTag = inbetweenerTag;
 
     mTextBlockWidget = SNew(STextBlock)
-                       .Text( FText::FromString( mInbetweenerTag->GetOwner()->GetName() ) );
+                       .Text( FText::FromString( FString::Printf( TEXT("Cell %d / "), cellIndex )
+                                               + mInbetweenerTag->GetOwner()->GetName() ) );
 
     tagBox = SNew(SHorizontalBox);
 

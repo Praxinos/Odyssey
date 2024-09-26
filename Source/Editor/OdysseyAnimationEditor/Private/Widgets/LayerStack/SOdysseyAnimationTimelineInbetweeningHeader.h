@@ -30,7 +30,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeader
                       , FOdysseyAnimationEditorExtension* iAnimationEditorExtension );
         FOdysseyAnimationEditorExtension* GetAnimationEditorExtension();
         UOdysseyAnimationLayerImageVector* GetAnimationLayerImageVector();
-
+        virtual FReply OnKeyUp ( const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent ) override;
         void Update();
 
     protected:

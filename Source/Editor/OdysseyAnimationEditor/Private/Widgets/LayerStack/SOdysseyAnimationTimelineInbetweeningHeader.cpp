@@ -56,6 +56,22 @@ SOdysseyAnimationTimelineInbetweeningHeader::Construct( const FArguments& InArgs
     Update();
 }
 
+FReply
+SOdysseyAnimationTimelineInbetweeningHeader::OnKeyUp ( const FGeometry& MyGeometry
+                                                        , const FKeyEvent& InKeyEvent )
+{
+// Commented-out. Pressing delete would delete the whole Cell due to the way events are managed in Odyssey.
+/*
+    if( InKeyEvent.GetKey() == EKeys::Delete )
+    {
+        RemoveInbetweenerTags();
+
+        return FReply::Handled();
+    }
+*/
+    return FReply::Unhandled();
+}
+
 void
 SOdysseyAnimationTimelineInbetweeningHeader::Update()
 {

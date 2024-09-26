@@ -9,6 +9,7 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "InbetweenerTag/InbetweenerRoute.h"
 #include "undo/OdysseyVectorUndoTagInbetweenerTrajectoryAlter.h"
@@ -422,7 +423,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
         }
     }
 
-    iScene->Update( /*FOdysseyVectorObject::UPDATE_INTERACTIVE*/0 );
+    iScene->GetSharedEnv()->Update( /*FOdysseyVectorObject::UPDATE_INTERACTIVE*/0 );
 
     // redraw
     iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );

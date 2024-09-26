@@ -40,6 +40,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeaderRow
         // from STableRow::IsSelected
         virtual bool IsItemSelected() const override;
 
+
         virtual FReply OnMouseButtonDown( const FGeometry & MyGeometry, const FPointerEvent & MouseEvent ) override;
         virtual FReply OnMouseButtonUp( const FGeometry & MyGeometry, const FPointerEvent & MouseEvent ) override;
 

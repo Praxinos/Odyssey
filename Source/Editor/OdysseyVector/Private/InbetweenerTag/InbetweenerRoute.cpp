@@ -134,3 +134,9 @@ FInbetweenerRoute::GetInbetweenerTag()
 {
     return mInbetweenerTag;
 }
+
+void
+FInbetweenerRoute::SetInbetweenerTag( FOdysseyVectorTagInbetweener* iInbetweenerTag )
+{
+    mInbetweenerTag = iInbetweenerTag;
+}

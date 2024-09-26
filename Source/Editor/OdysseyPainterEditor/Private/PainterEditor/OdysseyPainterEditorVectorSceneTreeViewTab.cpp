@@ -62,23 +62,8 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateObjectPropertiesPanel( FOdyss
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
         {
-            std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
-
-            if(  iScene->GetEngine()->GetSelectedObjectList().size() )
+            if( mTagInbetweenerView->Update( mEditor, iScene ) )
             {
-                for( FOdysseyVectorObject* selectedObject : iScene->GetEngine()->GetSelectedObjectList() )
-                {
-                    FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
-
-                    if( tag )
-                    {
-                        FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-
-                        selectedInbetweenerTagList.push_back( inbetweenerTag );
-                    }
-                }
-
-                mTagInbetweenerView->Update( mEditor, iScene, selectedInbetweenerTagList );
                 mDetailsView->SetObject( mTagInbetweenerView );
             }
         }

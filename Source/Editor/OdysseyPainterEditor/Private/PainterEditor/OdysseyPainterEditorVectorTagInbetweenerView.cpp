@@ -1,10 +1,13 @@
 #include "OdysseyPainterEditorVectorTagInbetweenerView.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerParam.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
+#define WARNING_INTERP_ROUTE_REMOVAL "Trajectories are only valid with ARAP interpolation. Existing trajectories will be removed. Proceed ?"
+#define WARNING_GRIDSIZE_ROUTE_REMOVAL "Changing grid size will remove existing trajectories. Proceed ?"
 
 UOdysseyPainterEditorVectorTagInbetweenerView::~UOdysseyPainterEditorVectorTagInbetweenerView()
 {
@@ -31,7 +34,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::UOdysseyPainterEditorVectorTagInb
 {
     std::list<FOdysseyVectorTagInbetweener*> emptyList;
 
-    Update( iEditor, iScene, emptyList );
+    Update( iEditor, iScene );
 }
 
 void
@@ -54,23 +57,47 @@ UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
     }
 }
 
-void 
+bool 
 UOdysseyPainterEditorVectorTagInbetweenerView::Update( FOdysseyPainterEditor* iEditor
-                                                     , FOdysseyVectorGroupPaint* iScene
-                                                     , const std::list<FOdysseyVectorTagInbetweener*>& iSelectedInbetweenerTagList )
+                                                     , FOdysseyVectorGroupPaint* iScene )
 {
     mEditor = iEditor;
     mScene = iScene;
 
     mSelectedInbetweenerTagArray.clear();
-    mSelectedInbetweenerTagArray.reserve( iSelectedInbetweenerTagList.size() );
+    // note: it may reserve more than needed.
+    mSelectedInbetweenerTagArray.reserve( iScene->GetSharedEnv()->GetSharedTagList().size() );
 
-    for( FOdysseyVectorTagInbetweener* selectedInbetweenerTag : iSelectedInbetweenerTagList )
+    for( FOdysseyVectorTag* tag : iScene->GetSharedEnv()->GetSharedTagList() )
     {
-        mSelectedInbetweenerTagArray.push_back( selectedInbetweenerTag );
+        if( tag->GetOwner()->IsSelected() )
+        {
+            if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+            {
+                FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+                mSelectedInbetweenerTagArray.push_back( inbetweenerTag );
+            }
+        }
     }
 
     ImportParam();
+
+    return ( mSelectedInbetweenerTagArray.size() > 0 );
+}
+
+bool
+UOdysseyPainterEditorVectorTagInbetweenerView::SelectionHasRoutes()
+{
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : mSelectedInbetweenerTagArray )
+    {
+        if( inbetweenerTag->GetRouteList().size() )
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void
@@ -78,12 +105,41 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
                                                               , const FName& iMemberPropertyName
                                                               , const FName& iCategory)
 {
+    if( SelectionHasRoutes() )
+    {
+        if( iPropertyName == "InterpolationType" )
+        {
+            if( InterpolationType == eInbetweenerInterpolationType::Linear )
+            {
+                FText dialogText = FText::FromString( TEXT ( WARNING_INTERP_ROUTE_REMOVAL ) );
+
+                if( FMessageDialog::Open( EAppMsgType::OkCancel, dialogText ) == EAppReturnType::Cancel )
+                {
+                    // restore displayed values
+                    ImportParam();
+
+                    return;
+                }
+            }
+        }
+
+        if( ( iPropertyName == "DivisionX" )
+          ||( iPropertyName == "DivisionY" ) )
+        {
+            FText dialogText = FText::FromString( TEXT ( WARNING_GRIDSIZE_ROUTE_REMOVAL ) );
+
+            if( FMessageDialog::Open( EAppMsgType::OkCancel, dialogText ) == EAppReturnType::Cancel )
+            {
+                // restore displayed values
+                ImportParam();
+
+                return;
+            }
+        }
+    }
+
     for( FOdysseyVectorTagInbetweener* selectedInbetweenerTag : mSelectedInbetweenerTagArray )
     {
-        //////////
-/*        if( iPropertyName == "InbetweenCount" )
-            selectedInbetweenerTag->SetDrawingCount( DrawingCount );
-*/
         if( iPropertyName == "InterpolationType" )
             selectedInbetweenerTag->SetInterpolationType( InterpolationType );
 
@@ -92,12 +148,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
 
         if( iPropertyName == "DivisionY" )
             selectedInbetweenerTag->SetGridNumQuad( selectedInbetweenerTag->GetGridNumQuadX(), DivisionY );
-/*
-        if( iPropertyName == "Rigidity" )
-        {
-            selectedInbetweenerTag->SetARAPRigidity( Rigidity );
-        }
-*/
+
         if( iPropertyName == "MapAsPolyline" )
             selectedInbetweenerTag->SetMapAsPolyline( MapAsPolyline );
 
@@ -124,30 +175,35 @@ UOdysseyPainterEditorVectorTagInbetweenerView::MakeUndo( const FName& iPropertyN
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
                              | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS;
 
-/*
-    if( iPropertyName == "InbetweenCount" )
-        snapshotFlags |= FSnapshotFlags::Tag::Inbetweener::INBETWEENCOUNT;
-*/
     if( iPropertyName == "InterpolationType" )
-        return new FOdysseyVectorUndoTagInbetweenerInterpolationType( mScene, mSelectedInbetweenerTagArray, notificationFlags );
+        return new FOdysseyVectorUndoTagInbetweenerInterpolationType( mScene
+                                                                    , mSelectedInbetweenerTagArray
+                                                                    , notificationFlags );
 
     if( iPropertyName == "DivisionX" )
-        return new FOdysseyVectorUndoTagInbetweenerGridSize( mScene, mSelectedInbetweenerTagArray, notificationFlags );
+        return new FOdysseyVectorUndoTagInbetweenerGridSize( mScene
+                                                           , mSelectedInbetweenerTagArray
+                                                           , notificationFlags );
 
     if( iPropertyName == "DivisionY" )
-        return new FOdysseyVectorUndoTagInbetweenerGridSize( mScene, mSelectedInbetweenerTagArray, notificationFlags );
-/*
-    if( iPropertyName == "Rigidity" )
-        snapshotFlags |= FSnapshotFlags::Tag::Inbetweener::ARAPRIGIDITY;
-*/
+        return new FOdysseyVectorUndoTagInbetweenerGridSize( mScene
+                                                           , mSelectedInbetweenerTagArray
+                                                           , notificationFlags );
+
     if( iPropertyName == "GridType" )
-        return new FOdysseyVectorUndoTagInbetweenerGridType( mScene, mSelectedInbetweenerTagArray, notificationFlags );
+        return new FOdysseyVectorUndoTagInbetweenerGridType( mScene
+                                                           , mSelectedInbetweenerTagArray
+                                                           , notificationFlags );
 
     if( iPropertyName == "Color" )
-        return new FOdysseyVectorUndoTagInbetweenerColor( mScene, mSelectedInbetweenerTagArray, notificationFlags );
+        return new FOdysseyVectorUndoTagInbetweenerColor( mScene
+                                                        , mSelectedInbetweenerTagArray
+                                                        , notificationFlags );
 
     if( iPropertyName == "MapAsPolyline" )
-        return new FOdysseyVectorUndoTagInbetweenerMapAsPolyline( mScene, mSelectedInbetweenerTagArray, notificationFlags );
+        return new FOdysseyVectorUndoTagInbetweenerMapAsPolyline( mScene
+                                                                , mSelectedInbetweenerTagArray
+                                                                , notificationFlags );
 
 
     return nullptr;
@@ -186,7 +242,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PostEditChangeProperty( FProperty
                        , PropertyChangedEvent.MemberProperty->GetFName()
                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
-        mScene->Update( 0 );
+        mScene->GetSharedEnv()->Update( 0 );
         // redraw
         mScene->GetEngine()->Invalidate( 0 );
     }
