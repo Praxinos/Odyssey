@@ -34,5 +34,4 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerBreakdownAdd : public FO
 
     private:
         std::vector<FSnapshotTagInbetweener> mInbetweenerTagSnapshotBuffer;
-        std::vector<FOdysseyVectorEngine*> mEngineArray;
 };

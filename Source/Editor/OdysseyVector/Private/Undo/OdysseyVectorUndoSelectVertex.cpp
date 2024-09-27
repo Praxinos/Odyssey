@@ -2,6 +2,7 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoSelectVertex::~FOdysseyVectorUndoSelectVertex()
 {
@@ -10,8 +11,10 @@ FOdysseyVectorUndoSelectVertex::~FOdysseyVectorUndoSelectVertex()
 FOdysseyVectorUndoSelectVertex::FOdysseyVectorUndoSelectVertex( FOdysseyVectorGroupPaint* iScene
                                                               , const std::list<FOdysseyVectorObject*>& iObjectList
                                                               , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mPathSnapshotArray.reserve( iObjectList.size() );
 
     for( FOdysseyVectorObject* object : iObjectList )
@@ -49,12 +52,12 @@ FOdysseyVectorUndoSelectVertex::Apply( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( 0 );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 void
@@ -74,12 +77,12 @@ FOdysseyVectorUndoSelectVertex::Revert( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( 0 );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

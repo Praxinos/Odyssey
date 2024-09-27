@@ -2,6 +2,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTag.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoTagRemove::~FOdysseyVectorUndoTagRemove()
 {
@@ -21,29 +22,49 @@ FOdysseyVectorUndoTagRemove::~FOdysseyVectorUndoTagRemove()
 FOdysseyVectorUndoTagRemove::FOdysseyVectorUndoTagRemove( FOdysseyVectorGroupPaint* iScene
                                                         , FOdysseyVectorTag* iTag
                                                         , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
     mTagArray.push_back( iTag );
+
+    mEngineList.push_back( iTag->GetOwner()->GetEngine() );
 }
 
 FOdysseyVectorUndoTagRemove::FOdysseyVectorUndoTagRemove( FOdysseyVectorGroupPaint* iScene
                                                         , const std::vector<FOdysseyVectorTag*>& iTagArray
                                                         , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mTagArray( iTagArray )
 {
+    // we build a list of engines we will need to redraw
+    for( FOdysseyVectorTag* tag : iTagArray )
+    {
+        FOdysseyVectorEngine* engine = tag->GetOwner()->GetEngine();
+
+        if( std::find( mEngineList.begin(), mEngineList.end(), engine ) == mEngineList.end() )
+        {
+            mEngineList.push_back( engine );
+        }
+    }
 }
 
 FOdysseyVectorUndoTagRemove::FOdysseyVectorUndoTagRemove( FOdysseyVectorGroupPaint* iScene
                                                         , const std::list<FOdysseyVectorTag*>& iTagList
                                                         , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mTagArray()
 {
     mTagArray.reserve( iTagList.size() );
 
     for( FOdysseyVectorTag* tag : iTagList )
     {
+        FOdysseyVectorEngine* engine = tag->GetOwner()->GetEngine();
+
+        // we build a list of engines we will need to redraw
+        if( std::find( mEngineList.begin(), mEngineList.end(), engine ) == mEngineList.end() )
+        {
+            mEngineList.push_back( engine );
+        }
+
         mTagArray.push_back( tag );
     }
 }
@@ -60,12 +81,12 @@ FOdysseyVectorUndoTagRemove::Apply( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 void
@@ -80,12 +101,12 @@ FOdysseyVectorUndoTagRemove::Revert( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

@@ -1178,7 +1178,7 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FMenuBuilder& m
                     LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.name", "Commit Inbetweener Tag")
                   , LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.tooltip", "Commit Inbetweener Tag")
                   , FSlateIcon()
-                  , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CommitInbetweenerTag, GetEditor(), vectorScene )));
+                  , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CommitSelectedInbetweenerTag, GetEditor(), vectorScene->GetSharedEnv() )));
 
             menu.AddMenuEntry(
                   LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.name", "Reset Grid")

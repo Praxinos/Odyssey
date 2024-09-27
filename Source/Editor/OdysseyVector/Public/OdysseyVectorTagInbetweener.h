@@ -230,6 +230,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         std::vector<FInbetweenerDrawing>& GetDrawingBuffer();
         void ResizeDrawings();
 
+        bool IsTopSelectedTag();
+
     protected:
         /**
          * @brief Map paths to the grid

@@ -1,5 +1,6 @@
 #include "Undo/OdysseyVectorUndoBucketParam.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoBucketParam::~FOdysseyVectorUndoBucketParam()
 {
@@ -20,8 +21,10 @@ FOdysseyVectorUndoBucketParam::~FOdysseyVectorUndoBucketParam()
 FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorGroupPaint* iScene
                                                             , FOdysseyVectorBucket* iBucket
                                                             , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mBucketSnapshotArray.push_back( FSnapshotBucket( iBucket, FSnapshotFlags::Point::Bucket::PARAM ));
 }
 
@@ -30,8 +33,10 @@ FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorGrou
                                                             , std::vector<FOdysseyVectorBucket*>& iAddedBucketArray
                                                             , std::vector<FOdysseyVectorBucket*>& iBucketArray
                                                             , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mAddedBucketArray = iAddedBucketArray;
 
     mBucketSnapshotArray.reserve( iBucketArray.size() );
@@ -68,12 +73,12 @@ FOdysseyVectorUndoBucketParam::Apply( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 void
@@ -100,12 +105,12 @@ FOdysseyVectorUndoBucketParam::Revert( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

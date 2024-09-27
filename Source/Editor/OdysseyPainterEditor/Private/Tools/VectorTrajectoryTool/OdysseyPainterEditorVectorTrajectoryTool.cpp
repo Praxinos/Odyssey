@@ -157,37 +157,31 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
     {
         if( mPickingMode == eTrajectoryPickingMode::Add )
         {
-            if( iEngine->GetSelectedObjectList().size() )
+            if( mTrajectoryHUD->GetSelectedInbetweenerTagList().size() )
             {
-                FOdysseyVectorObject* selectedObject = iEngine->GetSelectedObjectList().front();
-                FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+                FOdysseyVectorTagInbetweener* inbetweenerTag = mTrajectoryHUD->GetSelectedInbetweenerTagList().front();
+                BLMatrix2D& ownerInverseWorldMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
+                BLPoint pt = ownerInverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+                FInbetweenerRoute* route = inbetweenerTag->AddRoute( ::ULIS::FVec2D( pt.x, pt.y ));
 
-                if( tag )
+                if( route )
                 {
-                    FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-                    BLMatrix2D& ownerInverseWorldMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
-                    BLPoint pt = ownerInverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
-                    FInbetweenerRoute* route = inbetweenerTag->AddRoute( ::ULIS::FVec2D( pt.x, pt.y ));
-
-                    if( route )
+                    // needed for valid GUndo pointer
+                    GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.add","Vector Trajectory Tool"));
+                    if( GUndo )
                     {
-                        // needed for valid GUndo pointer
-                        GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.add","Vector Trajectory Tool"));
-                        if( GUndo )
-                        {
-                            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerRouteAdd( iScene
-                                                                                                   , inbetweenerTag
-                                                                                                   , route
-                                                                                                   , notificationFlags );
+                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerRouteAdd( iScene
+                                                                                                , inbetweenerTag
+                                                                                                , route
+                                                                                                , notificationFlags );
 
-                            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
-                            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-                            if (source)
-                                source->RecordCurrentFrameUndo();
-                        }
-                        GEditor->EndTransaction();
+                        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                        if (source)
+                            source->RecordCurrentFrameUndo();
                     }
+                    GEditor->EndTransaction();
                 }
             }
         }
@@ -229,38 +223,31 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
 
         if( mPickingMode == eTrajectoryPickingMode::Shift )
         {
-            if( iEngine->GetSelectedObjectList().size() )
+            if( mTrajectoryHUD->GetSelectedInbetweenerTagList().size() )
             {
-                FOdysseyVectorObject* selectedObject = iEngine->GetSelectedObjectList().front();
-                FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+                FOdysseyVectorTagInbetweener* inbetweenerTag = mTrajectoryHUD->GetSelectedInbetweenerTagList().front();
+                mPickedWaypoint = mTrajectoryHUD->PickWaypoint( inbetweenerTag
+                                                              , iPointInTexture.x
+                                                              , iPointInTexture.y
+                                                              , PickingRadius );
 
-                if( tag )
+                if( mPickedWaypoint )
                 {
-                    FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-
-                    mPickedWaypoint = mTrajectoryHUD->PickWaypoint( inbetweenerTag
-                                                                  , iPointInTexture.x
-                                                                  , iPointInTexture.y
-                                                                  , PickingRadius );
-
-                    if( mPickedWaypoint )
+                    // needed for valid GUndo pointer
+                    GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.shift","Vector Trajectory Tool"));
+                    if( GUndo )
                     {
-                        // needed for valid GUndo pointer
-                        GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.shift","Vector Trajectory Tool"));
-                        if( GUndo )
-                        {
-                            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint( iScene
-                                                                                                                  , mPickedWaypoint->GetTrajectory()
-                                                                                                                  , notificationFlags );
+                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint( iScene
+                                                                                                              , mPickedWaypoint->GetTrajectory()
+                                                                                                              , notificationFlags );
 
-                            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
-                            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-                            if (source)
-                                source->RecordCurrentFrameUndo();
-                        }
-                        GEditor->EndTransaction();
+                        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                        if (source)
+                            source->RecordCurrentFrameUndo();
                     }
+                    GEditor->EndTransaction();
                 }
             }
         }
@@ -297,7 +284,9 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
         }
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // Updating via the Shared env allow multiple cells to be updated which is paramount
+    // here because we may be on a cell different from the tag's starting cell
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     // redraw
     iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
@@ -335,27 +324,21 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseHoverVector( FOdysseyVectorGro
 
     if( mPickingMode == eTrajectoryPickingMode::Add )
     {
-        if( iEngine->GetSelectedObjectList().size() )
+        if( mTrajectoryHUD->GetSelectedInbetweenerTagList().size() )
         {
-            FOdysseyVectorObject* selectedObject = iEngine->GetSelectedObjectList().front();
-            FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+            FOdysseyVectorTagInbetweener* inbetweenerTag = mTrajectoryHUD->GetSelectedInbetweenerTagList().front();
 
-            if( tag )
-            {
-                FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+            mHoveredQuad = mTrajectoryHUD->PickSourceQuad( inbetweenerTag->GetBreakdownList().front()->GetGrid()
+                                                         , iPointInTexture.x
+                                                         , iPointInTexture.y
+                                                         , PickingRadius );
 
-                mHoveredQuad = mTrajectoryHUD->PickSourceQuad( inbetweenerTag->GetBreakdownList().front()->GetGrid()
-                                                             , iPointInTexture.x
-                                                             , iPointInTexture.y
-                                                             , PickingRadius );
-
-            }
         }
     }
 
     // redraw
     iScene->GetEngine()->Invalidate( 0 );
-
+ 
     return 0;
 }
 
@@ -423,6 +406,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
         }
     }
 
+    // Updating via the Shared env allow multiple cells to be updated which is paramount
+    // here because we may be on a cell different from the tag's starting cell
     iScene->GetSharedEnv()->Update( /*FOdysseyVectorObject::UPDATE_INTERACTIVE*/0 );
 
     // redraw
@@ -442,42 +427,34 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseUpVector( FOdysseyVectorGroupP
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        if( iEngine->GetSelectedObjectList().size() )
+        if( mPickedStep )
         {
-            FOdysseyVectorObject* selectedObject = iEngine->GetSelectedObjectList().front();
-            FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
-            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+            FInbetweenerRoute* route = mPickedStep->GetRoute();
 
-            if( inbetweenerTag )
+            // needed for valid GUndo pointer
+            GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.align","Vector Trajectory Tool"));
+            if( GUndo )
             {
-                if( mPickedStep )
-                {
-                    FInbetweenerRoute* route = mPickedStep->GetRoute();
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerStepAlign( iScene
+                                                                                        , route->GetInbetweenerTag()
+                                                                                        , route
+                                                                                        , notificationFlags );
 
-                    // needed for valid GUndo pointer
-                    GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.align","Vector Trajectory Tool"));
-                    if( GUndo )
-                    {
-                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerStepAlign( iScene
-                                                                                                , route->GetInbetweenerTag()
-                                                                                                , route
-                                                                                                , notificationFlags );
+                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
-                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-
-                        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-                        if (source)
-                            source->RecordCurrentFrameUndo();
-                    }
-                    GEditor->EndTransaction();
-
-                    mPickedStep->SetAligned( mPickedStep->IsAligned() ? false : true );
-                }
+                TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                if (source)
+                    source->RecordCurrentFrameUndo();
             }
+            GEditor->EndTransaction();
+
+            mPickedStep->SetAligned( mPickedStep->IsAligned() ? false : true );
         }
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // Updating via the Shared env allow multiple cells to be updated which is paramount
+    // here because we may be on a cell different from the tag's starting cell
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     // redraw
     iScene->GetEngine()->Invalidate( 0 );

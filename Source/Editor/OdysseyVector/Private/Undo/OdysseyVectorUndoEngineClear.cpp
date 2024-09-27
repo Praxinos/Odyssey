@@ -10,46 +10,50 @@ FOdysseyVectorUndoEngineClear::~FOdysseyVectorUndoEngineClear()
 
 FOdysseyVectorUndoEngineClear::FOdysseyVectorUndoEngineClear( FOdysseyVectorEngine* iEngine
                                                             , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iEngine->GetScene(), iReturnFlags )
-    , mEngine ( iEngine )
+    : FOdysseyVectorUndo( iEngine->GetScene()->GetSharedEnv(), iReturnFlags )
+    , mScene ( iEngine->GetScene() )
 {
+    mEngineList.push_back( iEngine );
 }
 
 void
 FOdysseyVectorUndoEngineClear::Apply( UObject* iIgnored )
 {
-    FOdysseyVectorGroupPaint* savedScene = mEngine->GetScene();
+    FOdysseyVectorGroupPaint* savedScene = mEngineList.front()->GetScene();
 
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mEngine->GetRoot()->SetScene( mScene );
+    mEngineList.front()->GetRoot()->SetScene( mScene );
+
+    mScene = savedScene;
 
     // update invalidated objects
     mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
-
-    mScene = savedScene;
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 void
 FOdysseyVectorUndoEngineClear::Revert( UObject* iIgnored )
 {
-    FOdysseyVectorGroupPaint* savedScene = mEngine->GetScene();
+    FOdysseyVectorGroupPaint* savedScene = mEngineList.front()->GetScene();
 
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mEngine->GetRoot()->SetScene( mScene );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    mEngineList.front()->GetRoot()->SetScene( mScene );
 
     mScene = savedScene;
+
+    // update invalidated objects
+    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
+
+    // call callbacks if any (for refreshing GUI e.g)
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

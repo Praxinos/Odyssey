@@ -1,6 +1,7 @@
 #include "Undo/OdysseyVectorUndoVertexLock.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoVertexLock::~FOdysseyVectorUndoVertexLock()
 {
@@ -17,8 +18,10 @@ FOdysseyVectorUndoVertexLock::~FOdysseyVectorUndoVertexLock()
 FOdysseyVectorUndoVertexLock::FOdysseyVectorUndoVertexLock( FOdysseyVectorGroupPaint* iScene
                                                           , const std::vector<FOdysseyVectorVertex*>& iAlignedVertexArray
                                                           , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     //------ Backup vertex lock flag part ---------//
 
     mVertexSnapshotArray.reserve( iAlignedVertexArray.size() );
@@ -41,12 +44,12 @@ FOdysseyVectorUndoVertexLock::Apply( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 void
@@ -61,12 +64,12 @@ FOdysseyVectorUndoVertexLock::Revert( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

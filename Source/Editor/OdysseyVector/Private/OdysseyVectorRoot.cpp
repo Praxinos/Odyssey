@@ -39,6 +39,8 @@ void
 FOdysseyVectorRoot::Invalidate( uint64 iInvalidationFlags )
 {
     FOdysseyVectorObject::Invalidate( iInvalidationFlags );
+
+    mEngine.Invalidate( 0 );
 }
 
 void

@@ -25,5 +25,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoEngineClear : public FOdysseyVectorUnd
         virtual FString ToString() const override;
 
     private:
-        FOdysseyVectorEngine* mEngine;
+        FOdysseyVectorGroupPaint* mScene;
 };

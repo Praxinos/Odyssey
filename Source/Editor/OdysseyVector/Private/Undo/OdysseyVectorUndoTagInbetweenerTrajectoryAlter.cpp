@@ -19,9 +19,10 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::~FOdysseyVectorUndoTagInbetween
 FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::FOdysseyVectorUndoTagInbetweenerTrajectoryAlter( FOdysseyVectorGroupPaint* iScene
                                                                                                 , FInbetweenerTrajectory* iTrajectory
                                                                                                 , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mTrajectorySnapshot( iTrajectory, FSnapshotFlags::Trajectory::BEZIER )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
 }
 
 void
@@ -33,13 +34,12 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::Apply( UObject* iIgnored )
     mTrajectorySnapshot.LoadAlteredState();
 
     // update invalidated objects
-    mScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
-    // request radraw
-    mScene->GetEngine()->Invalidate( 0 );
     // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 void
@@ -52,13 +52,12 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::Revert( UObject* iIgnored )
     mTrajectorySnapshot.LoadInitialState();
 
     // update invalidated objects
-    mScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
-    // request radraw
-    mScene->GetEngine()->Invalidate( 0 );
     // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

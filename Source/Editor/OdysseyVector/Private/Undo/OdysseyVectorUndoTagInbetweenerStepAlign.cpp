@@ -20,12 +20,13 @@ FOdysseyVectorUndoTagInbetweenerStepAlign::FOdysseyVectorUndoTagInbetweenerStepA
                                                                                     , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                                                     , FInbetweenerRoute* iRoute
                                                                                     , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mInbetweenerTag( iInbetweenerTag )
     , mRouteSnapshot( iRoute
                     , FSnapshotFlags::Route::TRAJECTORIES | FSnapshotFlags::Route::STEPS
                     , FSnapshotFlags::Trajectory::BEZIER )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
 }
 
 void
@@ -37,13 +38,12 @@ FOdysseyVectorUndoTagInbetweenerStepAlign::Apply( UObject* iIgnored )
     mRouteSnapshot.LoadAlteredState();
 
     // update invalidated objects
-    mScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     // request redraw
-    mScene->GetEngine()->Invalidate( 0 );
+    InvalidateEngineList( 0 );
+
     // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 void
@@ -56,13 +56,12 @@ FOdysseyVectorUndoTagInbetweenerStepAlign::Revert( UObject* iIgnored )
     mRouteSnapshot.LoadInitialState();
 
     // update invalidated objects
-    mScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     // request redraw
-    mScene->GetEngine()->Invalidate( 0 );
+    InvalidateEngineList( 0 );
+
     // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

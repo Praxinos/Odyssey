@@ -560,7 +560,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
 {
     public:
         ~FOdysseyVectorUndo();
-        FOdysseyVectorUndo( FOdysseyVectorGroupPaint* iScene, uint64 iReturnFlags );
+        FOdysseyVectorUndo( FOdysseyVectorSharedEnv* iSharedEnv, uint64 iReturnFlags );
+
+    protected:
+        static void GetEngineListFromObjectList( const std::list<FOdysseyVectorObject*>& iObjectList
+                                               , std::list<FOdysseyVectorEngine*>& oEngineList );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -571,9 +575,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
         /** Describes this change (for debugging) */
         //virtual FString ToString() const override;
 
+        void InvalidateEngineList( uint64 iInvalidationFlags );
+
     protected:
         bool mApplied;
-        FOdysseyVectorGroupPaint* mScene;
+        std::list<FOdysseyVectorEngine*> mEngineList; // list of engines that need to be redrawn
         FOdysseyVectorSharedEnv* mSharedEnv;
         uint64 mReturnFlags;
 };

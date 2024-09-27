@@ -142,6 +142,7 @@ namespace FOdysseyVectorExportV2
     void ODYSSEYVECTOR_API WriteRoute( FInbetweenerRoute& iRoute, FArchive &Ar );
     void WriteRouteCoords( FInbetweenerRoute& iRoute, FArchive &Ar );
     void WriteRouteTrajectories( FInbetweenerRoute& iRoute, FArchive &Ar );
+    void WriteRouteTrajectoriesWaypoints( FInbetweenerRoute& iRoute, FArchive &Ar );
 
 
 /*

@@ -5,15 +5,15 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorPath.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorUndo::~FOdysseyVectorUndo()
 {
 }
 
-FOdysseyVectorUndo::FOdysseyVectorUndo( FOdysseyVectorGroupPaint *iScene, uint64 iReturnFlags )
+FOdysseyVectorUndo::FOdysseyVectorUndo( FOdysseyVectorSharedEnv* iSharedEnv, uint64 iReturnFlags )
     : mApplied( true )
-    , mScene( iScene )
-    , mSharedEnv( iScene->GetSharedEnv() )
+    , mSharedEnv( iSharedEnv )
     , mReturnFlags( iReturnFlags )
 {
 }
@@ -28,6 +28,31 @@ void
 FOdysseyVectorUndo::Revert( UObject* iIgnored )
 {
     mApplied = false;
+}
+
+void
+FOdysseyVectorUndo::InvalidateEngineList( uint64 iInvalidationFlags )
+{
+    for( FOdysseyVectorEngine* engine : mEngineList )
+    {
+        engine->Invalidate( iInvalidationFlags );
+    }
+}
+
+//static
+void
+FOdysseyVectorUndo::GetEngineListFromObjectList( const std::list<FOdysseyVectorObject*>& iObjectList
+                                               , std::list<FOdysseyVectorEngine*>& oEngineList )
+{
+    for( FOdysseyVectorObject* vectorObject : iObjectList )
+    {
+        FOdysseyVectorEngine* engine = vectorObject->GetEngine();
+
+        if( std::find( oEngineList.begin(), oEngineList.end(), engine ) == oEngineList.end() )
+        {
+            oEngineList.push_back( engine );
+        }
+    }
 }
 
 FSnapshotTrajectory::~FSnapshotTrajectory()

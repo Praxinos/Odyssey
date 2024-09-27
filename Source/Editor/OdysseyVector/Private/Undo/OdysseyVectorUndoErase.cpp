@@ -1,5 +1,6 @@
 #include "Undo/OdysseyVectorUndoErase.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoErase::~FOdysseyVectorUndoErase()
 {
@@ -60,8 +61,10 @@ FOdysseyVectorUndoErase::FOdysseyVectorUndoErase( FOdysseyVectorGroupPaint* iSce
                                                 , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
                                                 , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                                                 , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mAddedObjectArray = iAddedObjectArray;
     mAddedVertexArray = iAddedVertexArray;
     mAddedSegmentArray = iAddedSegmentArray;
@@ -115,12 +118,12 @@ FOdysseyVectorUndoErase::Apply( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 void
@@ -168,12 +171,12 @@ FOdysseyVectorUndoErase::Revert( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

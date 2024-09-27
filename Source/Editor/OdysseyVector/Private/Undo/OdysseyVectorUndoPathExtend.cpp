@@ -1,7 +1,7 @@
 #include "Undo/OdysseyVectorUndoPathExtend.h"
-
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoPathExtend::~FOdysseyVectorUndoPathExtend()
 {
@@ -31,9 +31,10 @@ FOdysseyVectorUndoPathExtend::~FOdysseyVectorUndoPathExtend()
 FOdysseyVectorUndoPathExtend::FOdysseyVectorUndoPathExtend( FOdysseyVectorGroupPaint* iScene
                                                           , FOdysseyVectorPath* iPath 
                                                           , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mPath( iPath )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
 }
 
 void
@@ -66,12 +67,12 @@ FOdysseyVectorUndoPathExtend::Apply( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 void
@@ -91,12 +92,12 @@ FOdysseyVectorUndoPathExtend::Revert( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

@@ -47,16 +47,21 @@ FOdysseyVectorEngine::GetRoot()
 void
 FOdysseyVectorEngine::Invalidate( uint64 iExtraInvalidationFlags )
 {
-    FOdysseyVectorGroupPaint* scene = GetScene();
+    uint64 newInvalidationflags = ( mInvalidationFlags | INVALIDATE_DEFAULT | iExtraInvalidationFlags );
 
-    mInvalidationFlags |= ( INVALIDATE_DEFAULT | iExtraInvalidationFlags );
-
-    if( iExtraInvalidationFlags & INVALIDATE_CLEAR_ALL )
+    //if( mInvalidationFlags != newInvalidationflags )
     {
-        mInvalidatedRect = ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
-    }
+        FOdysseyVectorGroupPaint* scene = GetScene();
 
-    mOnInvalidateDelegate.Broadcast( scene, mInvalidationFlags );
+        mInvalidationFlags = newInvalidationflags;
+
+        if( iExtraInvalidationFlags & INVALIDATE_CLEAR_ALL )
+        {
+            mInvalidatedRect = ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
+        }
+
+        mOnInvalidateDelegate.Broadcast( scene, mInvalidationFlags );
+    }
 }
 
 void

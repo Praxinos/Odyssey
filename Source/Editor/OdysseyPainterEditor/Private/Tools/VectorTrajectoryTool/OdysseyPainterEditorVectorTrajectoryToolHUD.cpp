@@ -256,8 +256,9 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickWaypoint( FOdysseyVectorTagInb
             {
                 ::ULIS::FVec2D* cubicBezier = trajectory.GetCubicBezier();
 
-                for( FInbetweenerWaypoint& waypoint : trajectory.GetWaypointBuffer() )
+                for( uint32 i = 1; i < trajectory.GetWaypointBuffer().size() - 1; i++ )
                 {
+                    FInbetweenerWaypoint& waypoint = trajectory.GetWaypointBuffer()[i];
                     ::ULIS::FVec2D waypointAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( cubicBezier[0]
                                                                                                    , cubicBezier[1]
                                                                                                    , cubicBezier[2]
@@ -479,8 +480,9 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLCont
 
         if( mTrajectoryTool->GetPickingMode() == eTrajectoryPickingMode::Shift )
         {
-            for( FInbetweenerWaypoint& waypoint : iTrajectory->GetWaypointBuffer() )
+            for( uint32 i = 1; i < iTrajectory->GetWaypointBuffer().size() - 1; i++ )
             {
+                FInbetweenerWaypoint& waypoint = iTrajectory->GetWaypointBuffer()[i];
                 ::ULIS::FVec2D waypointAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( cubicBezier[0]
                                                                                                , cubicBezier[1]
                                                                                                , cubicBezier[2]

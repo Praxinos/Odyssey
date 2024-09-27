@@ -31,8 +31,10 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::FOdysseyVectorUndoTagInbetweenerBr
                                                                                           , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
                                                                                           , const std::list<FOdysseyVectorEngine*>& iEngineList
                                                                                           , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    mEngineList = iEngineList;
+
     mInbetweenerTagSnapshotBuffer.reserve( iInbetweenerTagList.size() );
 
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
@@ -47,13 +49,6 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::FOdysseyVectorUndoTagInbetweenerBr
                                                   , FSnapshotFlags::Trajectory::BEZIER
                                                   | FSnapshotFlags::Trajectory::WAYPOINTS );
     }
-
-    mEngineArray.reserve( iEngineList.size() );
-
-    for( FOdysseyVectorEngine* tagEngine : iEngineList )
-    {
-        mEngineArray.push_back( tagEngine );
-    }
 }
 
 void
@@ -67,17 +62,12 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::Apply( UObject* iIgnored )
         inbetweenerTagSnapshot.LoadAlteredState();
     }
 
-    for( FOdysseyVectorEngine* tagEngine : mEngineArray )
-    {
-        // request redraw attached cells
-        tagEngine->Invalidate( 0 );
-    }
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 void
@@ -92,17 +82,12 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::Revert( UObject* iIgnored )
         inbetweenerTagSnapshot.LoadInitialState();
     }
 
-    // update invalidated objects
-    for( FOdysseyVectorEngine* tagEngine : mEngineArray )
-    {
-        // request redraw attached cells
-        tagEngine->Invalidate( 0 );
-    }
-
     mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

@@ -20,29 +20,6 @@ FOdysseyVectorImportV2::ReadRoute( FInbetweenerRoute& iRoute
         {
             switch( iChunkID )
             {
-/*-----------------
-                case FOdysseyFile::VectorV2::CHUNK_TRAJECTORY_WAYPOINTS:
-                // container
-                break;
-*/
-/*----------------
-                case FOdysseyFile::VectorV2::CHUNK_TRAJECTORY_WAYPOINTS_RATIO:
-                {
-                    uint32 inbetweenCount = iTrajectory.GetInbetweenerTag()->GetInbetweenCount();
-                    std::vector<FInbetweenerWaypoint>& waypointBuffer = iTrajectory.GetWaypointBuffer();
-
-                    for( uint32 i = 0; i < inbetweenCount; i++ )
-                    {
-                        float ratio;
-
-                        Ar << ratio;
-
-                        waypointBuffer[i].SetRatio( ratio );
-                    }
-                }
-                break;
-*/
-
                 case FOdysseyFile::VectorV2::CHUNK_ROUTE_COORDS:
                 {
                     uint32 quadID;
@@ -59,9 +36,9 @@ FOdysseyVectorImportV2::ReadRoute( FInbetweenerRoute& iRoute
 
                 case FOdysseyFile::VectorV2::CHUNK_ROUTE_TRAJECTORIES:
                 {
-                    for( FInbetweenerBreakdown* breakdown : iRoute.GetInbetweenerTag()->GetBreakdownList() )
+                    // Note: there are as many trajectories as breakdowns
+                    for( FInbetweenerTrajectory& trajectory : iRoute.GetTrajectoryBuffer() )     
                     {
-                        uint32 breakdownIndex = breakdown->GetIndex();
                         double handle0DirX;
                         double handle0DirY;
                         double handle0LengthRatio;
@@ -76,14 +53,31 @@ FOdysseyVectorImportV2::ReadRoute( FInbetweenerRoute& iRoute
                         Ar << handle1DirY;
                         Ar << handle1LengthRatio;
 
-                        iRoute.GetTrajectoryBuffer()[breakdownIndex].GetHandle(0)->Set( ::ULIS::FVec2D( handle0DirX, handle0DirY ), handle0LengthRatio );
-                        iRoute.GetTrajectoryBuffer()[breakdownIndex].GetHandle(1)->Set( ::ULIS::FVec2D( handle1DirX, handle1DirY ), handle1LengthRatio );
+                        trajectory.GetHandle(0)->Set( ::ULIS::FVec2D( handle0DirX, handle0DirY ), handle0LengthRatio );
+                        trajectory.GetHandle(1)->Set( ::ULIS::FVec2D( handle1DirX, handle1DirY ), handle1LengthRatio );
                     }
                 }
                 break;
 
-                case 0:
+                case FOdysseyFile::VectorV2::CHUNK_ROUTE_TRAJECTORIES_WAYPOINTS:
+                {
+                    // Note: there are as many trajectories as breakdowns
+                    for( FInbetweenerTrajectory& trajectory : iRoute.GetTrajectoryBuffer() )     
+                    {
+                        std::vector<FInbetweenerWaypoint>& waypointBuffer = trajectory.GetWaypointBuffer();
+
+                        for( uint32 i = 0; i < waypointBuffer.size(); i++ )
+                        {
+                            float ratio;
+
+                            Ar << ratio;
+
+                            waypointBuffer[i].SetRatio( ratio );
+                        }
+                    }
+                }
                 break;
+
                 default:
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );

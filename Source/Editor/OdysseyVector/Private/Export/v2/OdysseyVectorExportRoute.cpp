@@ -9,88 +9,28 @@
 #include "InbetweenerTag/InbetweenerGrid.h"
 #include "OdysseyVectorTagInbetweener.h"
 
-#ifdef unused
 void
-FOdysseyVectorExportV2::WriteTrajectoryGeometry( FInbetweenerTrajectory& iTrajectory
-                                               , FArchive &Ar )
+FOdysseyVectorExportV2::WriteRouteTrajectoriesWaypoints( FInbetweenerRoute& iRoute
+                                                       , FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TRAJECTORY_GEOMETRY
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_ROUTE_TRAJECTORIES_WAYPOINTS
                             , Ar
-                            , [&iTrajectory](FArchive &Ar) -> void
+                            , [&iRoute](FArchive &Ar) -> void
     {
-        FInbetweenerHandleTrajectory* handle0 = iTrajectory.GetHandle(0);
-        FInbetweenerHandleTrajectory* handle1 = iTrajectory.GetHandle(1);
-        double handle0DirX = handle0->GetDirection().x;
-        double handle0DirY = handle0->GetDirection().y;
-        double handle0LengthRatio = handle0->GetLengthRatio();
-        double handle1DirX = handle1->GetDirection().x;
-        double handle1DirY = handle1->GetDirection().y;
-        double handle1LengthRatio = handle1->GetLengthRatio();
-
-        Ar << handle0DirX;
-        Ar << handle0DirY;
-        Ar << handle0LengthRatio;
-        Ar << handle1DirX;
-        Ar << handle1DirY;
-        Ar << handle1LengthRatio;
-    } );
-}
-
-void
-FOdysseyVectorExportV2::WriteTrajectoryCoords( FInbetweenerTrajectory& iTrajectory
-                                             , FArchive &Ar )
-{
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TRAJECTORY_COORDS
-                            , Ar
-                            , [&iTrajectory](FArchive &Ar) -> void
-    {
-/*--------------
-        std::vector<FInbetweenerQuad>& quadBuffer = iTrajectory.GetInbetweenerTag()->GetGrid()->GetQuadBuffer();
-        uint32 quadIndex = iTrajectory.GetQuadIndex();
-        double quadU = iTrajectory.GetQuadU();
-        double quadV = iTrajectory.GetQuadV();
-
-        Ar << quadIndex;
-        Ar << quadU;
-        Ar << quadV;
-*/
-    } );
-}
-
-void
-FOdysseyVectorExportV2::WriteTrajectoryWaypointsRatio( FInbetweenerTrajectory& iTrajectory
-                                                     , FArchive &Ar )
-{
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TRAJECTORY_WAYPOINTS_RATIO
-                            , Ar
-                            , [&iTrajectory](FArchive &Ar) -> void
-    {
-/*-----------
-        uint32 inbetweenCount = iTrajectory.GetInbetweenerTag()->GetInbetweenCount();
-        std::vector<FInbetweenerWaypoint>& waypointBuffer = iTrajectory.GetWaypointBuffer();
-
-        for( uint32 i = 0; i < inbetweenCount; i++ )
+        // Note: there are as many trajectories as breakdowns
+        for( FInbetweenerTrajectory& trajectory : iRoute.GetTrajectoryBuffer() )     
         {
-            float ratio = waypointBuffer[i].GetRatio();
+            std::vector<FInbetweenerWaypoint>& waypointBuffer = trajectory.GetWaypointBuffer();
 
-            Ar << ratio;
+            for( uint32 i = 0; i < waypointBuffer.size(); i++ )
+            {
+                float ratio = waypointBuffer[i].GetRatio();
+
+                Ar << ratio;
+            }
         }
-*/
     } );
 }
-
-void
-FOdysseyVectorExportV2::WriteTrajectoryWaypoints( FInbetweenerTrajectory& iTrajectory
-                                                , FArchive &Ar )
-{
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TRAJECTORY_WAYPOINTS
-                            , Ar
-                            , [&iTrajectory](FArchive &Ar) -> void
-    {
-        WriteTrajectoryWaypointsRatio( iTrajectory, Ar );
-    } );
-}
-#endif
 
 void
 FOdysseyVectorExportV2::WriteRouteTrajectories( FInbetweenerRoute& iRoute
@@ -150,6 +90,6 @@ FOdysseyVectorExportV2::WriteRoute( FInbetweenerRoute& iRoute
     {
         WriteRouteCoords( iRoute, Ar );
         WriteRouteTrajectories( iRoute, Ar );
-        //WriteRouteWaypoints( iRoute, Ar );
+        WriteRouteTrajectoriesWaypoints( iRoute, Ar );
     } );
 }

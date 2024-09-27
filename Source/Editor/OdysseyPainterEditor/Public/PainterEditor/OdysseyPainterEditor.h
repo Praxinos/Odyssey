@@ -201,7 +201,7 @@ public:
     static void AddInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void ResetSpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
-    static void CommitInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void CommitSelectedInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorSharedEnv* iSharedEnv );
     static void CopySpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void PasteSpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );

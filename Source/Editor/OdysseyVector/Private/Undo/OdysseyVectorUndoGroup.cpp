@@ -1,10 +1,7 @@
 #include "Undo/OdysseyVectorUndoGroup.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorGroupPaint.h"
-
-#include "OdysseyVectorGroup.h"
-#include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoGroup::~FOdysseyVectorUndoGroup()
 {
@@ -33,9 +30,11 @@ FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iSce
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
                                                 , std::vector<FOdysseyVectorBucket*>& iRemovedBucketArray 
                                                 , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mAddedGroup( iAddedGroup )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mRemovedBucketArray = iRemovedBucketArray;
     mAddedObjectArray = iAddedObjectArray;
 
@@ -51,9 +50,11 @@ FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iSce
                                                 , FOdysseyVectorGroup* iAddedGroup
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
                                                 , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mAddedGroup( iAddedGroup )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mAddedObjectArray = iAddedObjectArray;
 
     mAddedObjectOldParentArray.reserve( iAddedObjectArray.size() );
@@ -69,7 +70,7 @@ FOdysseyVectorUndoGroup::Apply( UObject* iIgnored )
 {
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mScene->GetEngine()->ClearObjectSelection();
+    mEngineList.front()->ClearObjectSelection();
 
     // destroy the former hierarchy.
     for( int i = 0; i < mAddedObjectArray.size(); i++ )
@@ -103,12 +104,12 @@ FOdysseyVectorUndoGroup::Apply( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 void
@@ -116,7 +117,7 @@ FOdysseyVectorUndoGroup::Revert( UObject* iIgnored )
 {
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mScene->GetEngine()->ClearObjectSelection();
+    mEngineList.front()->ClearObjectSelection();
 
     // Remove all children from the created group
     for( int i = 0; i < mAddedObjectArray.size(); i++ )
@@ -150,12 +151,12 @@ FOdysseyVectorUndoGroup::Revert( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

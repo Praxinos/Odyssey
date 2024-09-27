@@ -1485,6 +1485,24 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
     }
 }
 
+bool
+FOdysseyVectorTagInbetweener::IsTopSelectedTag()
+{
+    FOdysseyVectorObject* parent = mOwner->GetParent();
+
+    while( parent )
+    {
+        if( parent->IsSelected() && parent->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() ) )
+        {
+            return false;
+        }
+
+        parent = parent->GetParent();
+    }
+
+    return true;
+}
+
 void
 FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTagList
                                     , std::list<FOdysseyVectorObject*>& oAddedObjectList
@@ -1496,7 +1514,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
 
     for( uint32 drawingIndex = 1; drawingIndex < ( GetLength() - 1 ); drawingIndex++ )
     {
-        IOdysseyVectorAnimationCell* inbetweenAnimationCell = animationCell->GetCellByIndex( animationCellIndex + drawingIndex );
+        IOdysseyVectorAnimationCell* inbetweenAnimationCell = animationCell->GetCellByIndex( animationCellIndex + ( drawingIndex * (int)mInterpolationDirection ) );
 
         if( inbetweenAnimationCell )
         {
@@ -1601,7 +1619,13 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                                              , postProcess );
 
             oAddedObjectList.push_back( copiedObject );
-            oCommittedSceneList.push_back( inbetweenScene );
+
+            if( std::find( oCommittedSceneList.begin()
+                         , oCommittedSceneList.end()
+                         , inbetweenScene ) == oCommittedSceneList.end() )
+            {
+                oCommittedSceneList.push_back( inbetweenScene );
+            }
 
             inbetweenScene->AppendChild( copiedObject );
 

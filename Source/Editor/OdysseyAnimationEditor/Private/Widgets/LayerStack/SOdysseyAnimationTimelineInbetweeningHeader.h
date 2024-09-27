@@ -37,7 +37,8 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeader
         TSharedRef<ITableRow> OnGenerateRow( TSharedPtr<FInbetweeningListViewItem> iItem
                                            , const TSharedRef<STableViewBase>& iOwnerTable );
         TSharedPtr<SWidget> OnContextMenuOpening();
-        void RemoveInbetweenerTags();
+        void RemoveInbetweenerTag();
+        void Commit();
 
     private :
         virtual bool Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const override;

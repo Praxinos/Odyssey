@@ -1,8 +1,7 @@
 #include "Undo/OdysseyVectorUndoRemoveObjects.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorGroupPaint.h"
-
-#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoRemoveObjects::~FOdysseyVectorUndoRemoveObjects()
 {
@@ -23,8 +22,10 @@ FOdysseyVectorUndoRemoveObjects::~FOdysseyVectorUndoRemoveObjects()
 FOdysseyVectorUndoRemoveObjects::FOdysseyVectorUndoRemoveObjects( FOdysseyVectorGroupPaint* iScene
                                                                 , const std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
                                                                 , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mRemovedObjectArray = iRemovedObjectArray;
 }
 
@@ -39,15 +40,15 @@ FOdysseyVectorUndoRemoveObjects::Apply( UObject* iIgnored )
         object->GetParent()->RemoveChild( object );
     }
 
-    mScene->GetEngine()->ClearObjectSelection();
+    mEngineList.front()->ClearObjectSelection();
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 void
@@ -56,7 +57,7 @@ FOdysseyVectorUndoRemoveObjects::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mScene->GetEngine()->ClearObjectSelection();
+    mEngineList.front()->ClearObjectSelection();
 
     for( FOdysseyVectorObject* object : mRemovedObjectArray )
     {
@@ -66,12 +67,12 @@ FOdysseyVectorUndoRemoveObjects::Revert( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

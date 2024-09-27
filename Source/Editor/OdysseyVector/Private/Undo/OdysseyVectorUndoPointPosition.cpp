@@ -1,6 +1,7 @@
 #include "Undo/OdysseyVectorUndoPointPosition.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoPointPosition::~FOdysseyVectorUndoPointPosition()
 {
@@ -17,8 +18,10 @@ FOdysseyVectorUndoPointPosition::~FOdysseyVectorUndoPointPosition()
 FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorGroupPaint* iScene
                                                                 , std::vector<FOdysseyVectorPoint*>& iPointArray
                                                                 , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mPointSnapshotArray.reserve( iPointArray.size() );
 
     for( int i = 0; i < iPointArray.size(); i++ )
@@ -31,8 +34,10 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
                                                                 , std::vector<FOdysseyVectorVertex*>& iVertexArray
                                                                 , std::vector<FOdysseyVectorHandleSegment*>& iHandleArray
                                                                 , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mPointSnapshotArray.reserve( iVertexArray.size() + iHandleArray.size() );
 
     for( int i = 0; i < iVertexArray.size(); i++ )
@@ -49,8 +54,10 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
 FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorGroupPaint* iScene
                                                                 , FOdysseyVectorPoint* iPoint
                                                                 , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene, iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mPointSnapshotArray.push_back( FSnapshotPoint( iPoint, FSnapshotFlags::ALL ) );
 }
 
@@ -66,12 +73,12 @@ FOdysseyVectorUndoPointPosition::Apply( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 void
@@ -86,12 +93,12 @@ FOdysseyVectorUndoPointPosition::Revert( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Invalidate( 0 );
-    FOdysseyVectorEngine::Notify( mScene, mReturnFlags );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */
