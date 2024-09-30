@@ -78,9 +78,9 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         BLMatrix2D mTargetWorldMatrix;
         BLMatrix2D mTargetInverseWorldMatrix;
 */
+        FOdysseyVectorTagInbetweener* mInbetweenerTag;
         FInbetweenerBreakdown* mPrevBreakdown;
         FInbetweenerBreakdown* mNextBreakdown;
-        FOdysseyVectorTagInbetweener* mInbetweenerTag;
         FInbetweenerGrid* mGrid;
         uint32 mSourceDrawingIndex;
         uint32 mTargetDrawingIndex;

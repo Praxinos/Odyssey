@@ -73,9 +73,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
                  , meta = ( ToolTip  = "Divisions X"
                           , DisplayName = "Divisions X"
                           , ClampMin = "1"
-                          , ClampMax = "16"
+                          , ClampMax = "32"
                           , UIMin    = "1"
-                          , UIMax    = "16" ) )
+                          , UIMax    = "32" ) )
         uint32 DivisionX;
 
         UPROPERTY( EditAnywhere
@@ -83,9 +83,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
                  , meta = ( ToolTip  = "Divisions Y"
                           , DisplayName = "Divisions Y"
                           , ClampMin = "1"
-                          , ClampMax = "16"
+                          , ClampMax = "32"
                           , UIMin    = "1"
-                          , UIMax    = "16" ) )
+                          , UIMax    = "32" ) )
         uint32 DivisionY;
 /*
         UPROPERTY( EditAnywhere

@@ -111,10 +111,10 @@ FOdysseyVectorImportV2::ReadBreakdown( FInbetweenerBreakdown& iBreakdown
                     Ar << quadraticBezier[2].y;
                 }
                 break;
-/*
+
                 case FOdysseyFile::VectorV2::CHUNK_BREAKDOWN_CHART_SPACING:
                 {
-                    for( FChartDivision& division : iBreakdown.GetChart()->GetDivisionArray() )
+                    for( FChartDivision& division : iBreakdown.GetChart()->GetDivisionBuffer() )
                     {
                         float spacing;
 
@@ -124,7 +124,7 @@ FOdysseyVectorImportV2::ReadBreakdown( FInbetweenerBreakdown& iBreakdown
                     }
                 }
                 break;
-*/
+
                 default:
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );

@@ -34,13 +34,13 @@ class ODYSSEYVECTOR_API FInbetweenerChart
         ::ULIS::FVec2D* GetHUDBezier();
 
         FInbetweenerBreakdown* GetBreakdown();
-        std::vector<FChartDivision>& GetDivisionArray();
+        std::vector<FChartDivision>& GetDivisionBuffer();
         //FInbetweenerDrawing* GetDrawing( uint32 iIndex );
         void GetSpacing( std::vector<float>& oSpacingArray );
 
     private:
         FInbetweenerBreakdown* mBreakdown;
-        std::vector<FChartDivision> mDivisionArray;
+        std::vector<FChartDivision> mDivisionBuffer;
         ::ULIS::FVec2D mHUDBezier[3]; // quadratic bezier
 
 };

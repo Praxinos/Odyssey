@@ -33,7 +33,7 @@ FOdysseyVectorExportV2::WriteBreakdownChartSpacing( FInbetweenerBreakdown& iBrea
                             , Ar
                             , [&iBreakdown](FArchive &Ar) -> void
     {
-        for( FChartDivision& division : iBreakdown.GetChart()->GetDivisionArray() )
+        for( FChartDivision& division : iBreakdown.GetChart()->GetDivisionBuffer() )
         {
             float spacing = division.spacing;
 

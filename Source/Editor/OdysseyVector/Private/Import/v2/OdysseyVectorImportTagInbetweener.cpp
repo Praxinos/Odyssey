@@ -161,15 +161,13 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     Ar << targetIndex;
 
                     // We don't create a new breakdown if it's the master one, a.k.a the default one.
-                    breakdown = ( master ) ? iInbetweenerTag.GetMasterBreakdown() : 
-                                             new FInbetweenerBreakdown( &iInbetweenerTag );
+                    breakdown = iInbetweenerTag.GetBreakdownByTargetIndex( targetIndex );
 
-                    if( master == 1 )
+                    // fix for misdesign of breakdown layout chunk. Should be removed on the long term.
+                    if( breakdown == nullptr ) 
                     {
-                        breakdown->SetTargetDrawingIndex( targetIndex );
-                    }
-                    else
-                    {
+                        breakdown = new FInbetweenerBreakdown( &iInbetweenerTag );
+
                         iInbetweenerTag.AddBreakdown( breakdown, targetIndex, false );
                     }
 
@@ -179,7 +177,6 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                 }
                 break;
 
-                // deprecated. Kept for compatibility
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_BREAKDOWNS_LAYOUT: // container
                 {
                     FInbetweenerBreakdown* masterBreakdown = iInbetweenerTag.GetMasterBreakdown();

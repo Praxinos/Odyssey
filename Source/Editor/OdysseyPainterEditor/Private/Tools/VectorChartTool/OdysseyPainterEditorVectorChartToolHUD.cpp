@@ -126,7 +126,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
     // vertical lines
     for( uint32 i = 0; i < iBreakdown->GetDrawingCount(); i++ )
     {
-        FChartDivision* inbetween = &iBreakdown->GetChart()->GetDivisionArray()[i];
+        FChartDivision* inbetween = &iBreakdown->GetChart()->GetDivisionBuffer()[i];
         float indicatorX = mChartRect.x + ( inbetween->spacing * mChartRect.w );
         float frameNumberX = indicatorX - ( fontSize * 0.25f );
         float frameNumberY = indicatorY + cursorRadius + fontSize + 2.0f;
@@ -279,7 +279,7 @@ FOdysseyPainterEditorVectorChartToolHUD::PickInbetween( double iWorldX
 
         for( uint32 i = 1; i < mBreakdown->GetDrawingCount() - 1; i++ )
         {
-            FChartDivision* inbetween = &mBreakdown->GetChart()->GetDivisionArray()[i];
+            FChartDivision* inbetween = &mBreakdown->GetChart()->GetDivisionBuffer()[i];
             ::ULIS::FVec2D indicatorPosition = ::ULIS::QuadraticBezierPointAtParameter( HUDBezier[0],
                                                                                         HUDBezier[1],
                                                                                         HUDBezier[2],

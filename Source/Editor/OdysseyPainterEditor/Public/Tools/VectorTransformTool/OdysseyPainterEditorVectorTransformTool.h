@@ -66,6 +66,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
         void GetTransformedObjectList( FOdysseyVectorGroupPaint* iScene
                                      , std::list<FOdysseyVectorObject*>& oObjectList );
 
+        EVisibility IsModeInbetween() const;
+
     private:
         std::list<FInbetweenerBreakdown*> mTransformedBreakdownList;
         FOdysseyPainterEditorVectorTransformToolHUD* mTransformHUD;
@@ -95,4 +97,16 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
                  , Category = TransformTool
                  , meta = ( ToolTip = "World" ) )
         bool World;
+
+        UPROPERTY( EditAnywhere
+                 , Category = TransformTool
+                 , meta = ( ToolTip = "Inbetween Mode" ) )
+        bool InbetweenMode;
+
+        UPROPERTY( EditAnywhere
+                 , Category = TransformTool
+                 , meta = ( ToolTip = "Show Inbetweens"
+                          , EditCondition = "InbetweenMode"
+                          , EditConditionHides ) )
+        bool ShowInbetweens;
 };

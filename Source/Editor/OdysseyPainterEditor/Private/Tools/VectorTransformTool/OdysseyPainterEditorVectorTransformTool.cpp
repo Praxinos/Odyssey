@@ -7,6 +7,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "ISinglePropertyView.h"
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTag.h"
@@ -37,6 +38,8 @@ UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTo
     , PickingRadius(10.0f)
     , Uniform( true )
     , World( false )
+    , ShowInbetweens( true )
+    , InbetweenMode( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform32");
 
@@ -80,6 +83,8 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorGroupPaint* 
 
     // force redraw
     iScene->GetEngine()->Invalidate( 0 );
+
+    InbetweenMode = ( mTransformHUD->GetFlags()  & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) ? true : false;
 
     return 0;
 }
@@ -1080,11 +1085,43 @@ UOdysseyPainterEditorVectorTransformTool::PropertyChangedVector( FOdysseyVectorG
     return UOdysseyPainterEditorVectorSelectionTool::PropertyChangedVector( iScene, iPropertyName );
 }
 
+EVisibility
+UOdysseyPainterEditorVectorTransformTool::IsModeInbetween() const
+{
+    uint32 hudFlags = mEditor->GetVectorHUDFlags();
+
+    return ( hudFlags  & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) ? EVisibility::Visible
+                                                                 : EVisibility::Hidden;
+}
+
 TSharedRef<SWidget>
 UOdysseyPainterEditorVectorTransformTool::CreateTopTabWidget()
 {
-    // return the BaseTool top tab instead the SelectionTool top tab (which is the base class for this class).
-    return UOdysseyPainterEditorVectorBaseTool::CreateTopTabWidget();
+    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    FSinglePropertyParams defaultPropertyParams;
+    const TSharedPtr<ISinglePropertyView> showInbetweensPropertyView = propertyEditorModule.CreateSingleProperty(this, "ShowInbetweens", defaultPropertyParams);
+    TSharedPtr<class IPropertyHandle> showInbetweensHandle = showInbetweensPropertyView->GetPropertyHandle();
+    TSharedRef<SWidget> showInbetweensWidget = CreatePropertyWidget( showInbetweensHandle
+                                                                   , showInbetweensPropertyView).ToSharedRef();
+
+
+    // what an awful syntax, damn
+    TAttribute<EVisibility> value = TAttribute<EVisibility>::Create(TAttribute<EVisibility>::FGetter::CreateUObject (this, &UOdysseyPainterEditorVectorTransformTool::IsModeInbetween) );
+
+    showInbetweensWidget.Get().SetVisibility( value );
+
+    return SNew(SUniformWrapPanel)
+        .SlotPadding(FVector2D(3.f, 0.f))
+        .EvenRowDistribution(true)
+        .HAlign(HAlign_Left)
+        + SUniformWrapPanel::Slot()
+        [
+            SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+        ]
+        + SUniformWrapPanel::Slot()
+        [
+            showInbetweensWidget
+        ];
 }
 
 FText

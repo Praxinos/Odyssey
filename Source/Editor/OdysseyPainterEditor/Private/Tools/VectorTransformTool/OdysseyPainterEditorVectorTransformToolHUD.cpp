@@ -408,6 +408,15 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
 
                 for( FInbetweenerBreakdown* breakdown : mSelectedBreakdownList )
                 {
+                    if( mTransformTool->ShowInbetweens )
+                    {
+                        DrawBreakdown( iBLContext
+                                      , breakdown
+                                      , BLRgba32( 127, 127, 127, 255 )
+                                      , BLRgba32( 255, 127, 127, 255 )
+                                      , HUD_BREAKDOWN_SOURCE /*| HUD_BREAKDOWN_TARGET*/ | HUD_BREAKDOWN_INBETWEEN );
+                    }
+
                     //if( breakdown->GetTargetAnimationCellIndex() == frameIndex )
                     {
                        DrawBreakdown( iBLContext
@@ -416,7 +425,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
                                     , bgColor
                                     , hcColor
                                     , true
-                                    , hudFlags  );
+                                    , HUD_BREAKDOWN_TARGET );
                     }
                 }
             }

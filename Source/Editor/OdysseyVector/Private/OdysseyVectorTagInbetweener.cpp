@@ -320,6 +320,37 @@ FOdysseyVectorTagInbetweener::AddBreakdown( uint32 iDrawingIndex, bool iCopyGeom
     return AddBreakdown( nullptr, iDrawingIndex, iCopyGeometry );
 }
 
+// Removes all breakdowns but the default one
+void
+FOdysseyVectorTagInbetweener::ResetLayout( bool iFreeMemNow )
+{
+    std::vector<::ULIS::FVec2D> sourceGeometry;
+    std::vector<::ULIS::FVec2D> targetGeometry;
+
+    mBreakdownList.front()->GetGrid()->GetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+    mBreakdownList.back() ->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
+
+    mBreakdownList.remove_if( [ this
+                              , iFreeMemNow ]( FInbetweenerBreakdown* breakdown )
+                              {
+                                  if( iFreeMemNow && ( breakdown != breakdown->GetMasterBreakdown() ) )
+                                  {
+                                      delete breakdown;
+                                  }
+
+                                  return true;
+                              } );
+
+    mBreakdownList.push_back( &mMasterBreakdown );
+
+    mMasterBreakdown.SetSourceDrawingIndex( 0 );
+
+    mMasterBreakdown.GetGrid()->SetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+    mMasterBreakdown.GetGrid()->SetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
+
+    Invalidate( INVALIDATE_BREAKDOWN_LIST );
+}
+
 void
 FOdysseyVectorTagInbetweener::ChainBreakdowns()
 {
@@ -348,39 +379,6 @@ FOdysseyVectorTagInbetweener::ChainBreakdowns()
 */
 }
 
-// Removes all breakdowns but the default one
-void
-FOdysseyVectorTagInbetweener::ResetLayout( bool iFreeMemNow )
-{
-    std::vector<::ULIS::FVec2D> sourceGeometry;
-    std::vector<::ULIS::FVec2D> targetGeometry;
-
-    mBreakdownList.front()->GetGrid()->GetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
-    mBreakdownList.back() ->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
-
-    mBreakdownList.remove_if( [ this
-                              , iFreeMemNow ]( FInbetweenerBreakdown* breakdown )
-                              {
-                                  if( iFreeMemNow && ( breakdown != breakdown->GetMasterBreakdown() ) )
-                                  {
-                                      delete breakdown;
-                                  }
-
-                                  return true;
-                              } );
-
-    mBreakdownList.push_back( &mMasterBreakdown );
-
-    ChainBreakdowns();
-
-    mMasterBreakdown.SetSourceDrawingIndex( 0 );
-
-    mMasterBreakdown.GetGrid()->SetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
-    mMasterBreakdown.GetGrid()->SetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
-
-    Invalidate( INVALIDATE_BREAKDOWN_LIST );
-}
-
 FInbetweenerBreakdown*
 FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
                                           , uint32 iDrawingIndex
@@ -400,7 +398,7 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
         int32 newTargetDrawingIndex = iDrawingIndex;
         // relative inbetween index, i.e within the breakdown
         uint32 inbetweenIndex = iDrawingIndex - curSourceDrawingIndex;
-        FChartDivision* inbetween = &curBreakdown->GetChart()->GetDivisionArray()[inbetweenIndex];
+        FChartDivision* inbetween = &curBreakdown->GetChart()->GetDivisionBuffer()[inbetweenIndex];
         FInbetweenerBreakdown* newBreakdown = iNewBreakdown ? iNewBreakdown 
                                                             : new FInbetweenerBreakdown( this );
 
@@ -420,13 +418,13 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
 
         mBreakdownList.insert( curBreakdownIterator, newBreakdown );
 
-        // this also alters the previous breakdown target index, so it must be done after the chaining has been updated
-        curBreakdown->SetSourceDrawingIndex( iDrawingIndex );
-
-        newBreakdown->SetTargetDrawingIndex( newTargetDrawingIndex );
-        newBreakdown->SetSourceDrawingIndex( newSourceDrawingIndex );
-
         ChainBreakdowns();
+
+        // this also alters the previous breakdown target index, so it must be done after the chaining has been updated
+//        curBreakdown->SetSourceDrawingIndex( newTargetDrawingIndex );
+
+        newBreakdown->SetSourceDrawingIndex( newSourceDrawingIndex );
+        newBreakdown->SetTargetDrawingIndex( newTargetDrawingIndex );
 
         /*ResizeRoutes();*/
 
@@ -465,6 +463,20 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
     }
 
     //DispatchInbetweensToBreakdowns();
+    return nullptr;
+}
+
+FInbetweenerBreakdown*
+FOdysseyVectorTagInbetweener::GetBreakdownByTargetIndex( uint32 iDrawingIndex )
+{
+    for( FInbetweenerBreakdown* breakdown : mBreakdownList )
+    {
+        if( breakdown->GetTargetDrawingIndex() == iDrawingIndex )
+        {
+            return breakdown;
+        }
+    }
+
     return nullptr;
 }
 
@@ -511,36 +523,31 @@ FOdysseyVectorTagInbetweener::GetBreakdownItem( uint32 iDrawingIndex, bool iStri
 void
 FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown, bool iFreeMemNow )
 {
-    FInbetweenerBreakdown* nextBreakdown = iBreakdown->GetNextBreakdown();
-
-    mBreakdownList.remove_if( [iBreakdown]( FInbetweenerBreakdown* listedBreakdown )
-                              {
-                                  return ( iBreakdown == listedBreakdown ) ? true : false;
-                              } );
-
-    if( nextBreakdown )
+    if( iBreakdown != &mMasterBreakdown )
     {
-        std::vector<::ULIS::FVec2D> breakdownSourceGeometry;
+        FInbetweenerBreakdown* nextBreakdown = iBreakdown->GetNextBreakdown();
 
-        iBreakdown->GetGrid()->GetGeometry( breakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+        mBreakdownList.remove_if( [iBreakdown]( FInbetweenerBreakdown* listedBreakdown )
+                                  {
+                                      return ( iBreakdown == listedBreakdown ) ? true : false;
+                                  } );
 
-        // nextBreakdown source grid gets its shape from this removed breakdown source grid.
-        nextBreakdown->GetGrid()->SetGeometry( breakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
-        // as well as its source drawing index
-        nextBreakdown->SetSourceDrawingIndex( iBreakdown->GetSourceDrawingIndex() );
+        ChainBreakdowns();
+
+        if( nextBreakdown )
+        {
+            std::vector<::ULIS::FVec2D> breakdownSourceGeometry;
+
+            iBreakdown->GetGrid()->GetGeometry( breakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+
+            // nextBreakdown source grid gets its shape from this removed breakdown source grid.
+            nextBreakdown->GetGrid()->SetGeometry( breakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+            // as well as its source drawing index
+            nextBreakdown->SetSourceDrawingIndex( iBreakdown->GetSourceDrawingIndex() );
+        }
+
+        iBreakdown->SetInbetweenerTag( nullptr );
     }
-
-    iBreakdown->SetInbetweenerTag( nullptr );
-
-    // Readd if its the default breakdown
-    if( iBreakdown == &mMasterBreakdown )
-    {
-        mMasterBreakdown.SetInbetweenerTag( this );
-
-        mBreakdownList.push_back( &mMasterBreakdown );
-    }
-
-    ChainBreakdowns();
 
     /*ResizeRoutes();*/
 
@@ -659,7 +666,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
                 std::vector<::ULIS::FVec2D> targetGeometry;
 
                 // save positions for restoring when calling Make()
-                //breakdown->GetGrid()->GetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+                breakdown->GetGrid()->GetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
                 breakdown->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
                 breakdown->GetGrid()->Make( sourceGeometry, targetGeometry );
             }
@@ -840,7 +847,7 @@ FOdysseyVectorTagInbetweener::DeformPathsAtSource()
 {
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
-        FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionArray().front();
+        FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionBuffer().front();
 
         // deform the path according to grid geometry
         breakdown->GetGrid()->DeformPaths( mInterpolatedPathBuffer
@@ -857,7 +864,7 @@ FOdysseyVectorTagInbetweener::DeformPathsAtTarget()
 {
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
-        FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionArray().back();
+        FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionBuffer().back();
 
         // deform the path according to grid geometry
         breakdown->GetGrid()->DeformPaths( mInterpolatedPathBuffer
@@ -888,7 +895,7 @@ FOdysseyVectorTagInbetweener::DispatchDrawings()
             {
                 uint32 chartDivisionIndex = i - sourceDrawingIndex;
 
-                breakdown->GetChart()->GetDivisionArray()[chartDivisionIndex].drawing = &mDrawingBuffer[i];
+                breakdown->GetChart()->GetDivisionBuffer()[chartDivisionIndex].drawing = &mDrawingBuffer[i];
             }
         }
 /*
@@ -1058,7 +1065,7 @@ FOdysseyVectorTagInbetweener::Interpolate()
 
         for( uint32 i = 1; i < breakdown->GetDrawingCount() - 1; i++ )
         {
-            FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionArray()[i];
+            FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionBuffer()[i];
 
             DeformPathsAtInbetween( inbetween );
         }
@@ -1136,67 +1143,72 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
 {
     IOdysseyVectorAnimationCell* displayedCell = iDisplayedScene->GetEngine()->GetAnimationCell();
 
-    // check the object is still displayed (it could have been removed but still in memory)
-    if( mOwner->GetScene() )
+    // we draw only if the object is fully updated. Indeed, the Animation Proxy is a thread and might
+    // draw whenever the buffers haven't been updated yet, resulting in a crash
+    if( mInvalidationFlags == 0 )
     {
-        IOdysseyVectorAnimationCell* tagCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
-
-        iBLContext->save();
-        iBLContext->resetMatrix();
-
-        iBLContext->setStrokeStyle( BLRgba32( 0, 0, 0, 255 ) );
-        iBLContext->setStrokeWidth( 3.0f );
-
-        // if th eobject hasn't been removed from the scene
-        if( displayedCell && tagCell )
+        // check the object is still displayed (it could have been removed but still in memory)
+        if( mOwner->GetScene() )
         {
-            uint32 sourceCellIndex = tagCell->GetIndex();
-            uint32 targetCellIndex = sourceCellIndex + ( ( GetLength() - 1 ) * (int)mInterpolationDirection );
-            uint32 displayedCellIndex = displayedCell->GetIndex();
-            uint32 fromCellIndex = std::min( sourceCellIndex, targetCellIndex );
-            uint32   toCellIndex = std::max( sourceCellIndex, targetCellIndex );
+            IOdysseyVectorAnimationCell* tagCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
 
-            if ( ( displayedCellIndex > fromCellIndex )
-              && ( displayedCellIndex < toCellIndex   ) )
+            iBLContext->save();
+            iBLContext->resetMatrix();
+
+            iBLContext->setStrokeStyle( BLRgba32( 0, 0, 0, 255 ) );
+            iBLContext->setStrokeWidth( 3.0f );
+
+            // if th eobject hasn't been removed from the scene
+            if( displayedCell && tagCell )
             {
-                uint32 drawingIndex = abs( (int) (displayedCellIndex - sourceCellIndex) );
+                uint32 sourceCellIndex = tagCell->GetIndex();
+                uint32 targetCellIndex = sourceCellIndex + ( ( GetLength() - 1 ) * (int)mInterpolationDirection );
+                uint32 displayedCellIndex = displayedCell->GetIndex();
+                uint32 fromCellIndex = std::min( sourceCellIndex, targetCellIndex );
+                uint32   toCellIndex = std::max( sourceCellIndex, targetCellIndex );
 
-                // don't draw the object at the source position, it's already drawn
-                if( drawingIndex > 0 )
+                if ( ( displayedCellIndex > fromCellIndex )
+                  && ( displayedCellIndex < toCellIndex   ) )
                 {
-                    FInbetweenerBreakdown* breakdown = GetBreakdown( drawingIndex, false );
-                    uint32 inbetweenIndex = drawingIndex - breakdown->GetSourceDrawingIndex();
-                    FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionArray()[inbetweenIndex];
+                    uint32 drawingIndex = abs( (int) (displayedCellIndex - sourceCellIndex) );
 
-                    DrawPathsInbetween( inbetween, iBLContext );
+                    // don't draw the object at the source position, it's already drawn
+                    if( drawingIndex > 0 )
+                    {
+                        FInbetweenerBreakdown* breakdown = GetBreakdown( drawingIndex, false );
+                        uint32 inbetweenIndex = drawingIndex - breakdown->GetSourceDrawingIndex();
+                        FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionBuffer()[inbetweenIndex];
+
+                        DrawPathsInbetween( inbetween, iBLContext );
+                    }
                 }
             }
+
+            iBLContext->restore();
+
+    ////////////////////////////////// TEMP /////////////////////////
+    /*
+            if( mInterpolationType == eInbetweenerInterpolationType::ARAP )
+            {
+                uint32 tagCellIndex = tagCell->GetIndex();
+                uint32 displayedCellIndex = displayedCell->GetIndex();
+                uint32 iDrawingIndex = ( displayedCellIndex - tagCellIndex - 1 );
+                double t = mChart.drawingBuffer[iDrawingIndex].spacing;
+
+                mGrid->ComputeARAPInterpolation( t
+                                               , t
+                                               // , const FInbetweenerPoint::Affine &globalRigidTransform
+                                               , false );
+
+                DrawMotionGrid( iDrawingIndex
+                              , iBLContext
+                              , iInvalidationArea
+                              , iAncestorsOpacity
+                              , iDrawingFlags );
+            }
+    */
+    ////////////////////////////////////////////////////////////////
         }
-
-        iBLContext->restore();
-
-////////////////////////////////// TEMP /////////////////////////
-/*
-        if( mInterpolationType == eInbetweenerInterpolationType::ARAP )
-        {
-            uint32 tagCellIndex = tagCell->GetIndex();
-            uint32 displayedCellIndex = displayedCell->GetIndex();
-            uint32 iDrawingIndex = ( displayedCellIndex - tagCellIndex - 1 );
-            double t = mChart.drawingBuffer[iDrawingIndex].spacing;
-
-            mGrid->ComputeARAPInterpolation( t
-                                           , t
-                                           // , const FInbetweenerPoint::Affine &globalRigidTransform
-                                           , false );
-
-            DrawMotionGrid( iDrawingIndex
-                          , iBLContext
-                          , iInvalidationArea
-                          , iAncestorsOpacity
-                          , iDrawingFlags );
-        }
-*/
-////////////////////////////////////////////////////////////////
     }
 }
 
@@ -1299,8 +1311,8 @@ FOdysseyVectorTagInbetweener::MoveInbetween( FChartDivision* iInbetween
         IOdysseyVectorAnimationCell* animationCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
         int32  prevIndex  = iInbetween->GetIndex() - 1;
         uint32 nextIndex  = iInbetween->GetIndex() + 1;
-        float prevSpacing = iInbetween->chart->GetDivisionArray()[prevIndex].spacing;
-        float nextSpacing = iInbetween->chart->GetDivisionArray()[nextIndex].spacing;
+        float prevSpacing = iInbetween->chart->GetDivisionBuffer()[prevIndex].spacing;
+        float nextSpacing = iInbetween->chart->GetDivisionBuffer()[nextIndex].spacing;
 
         if( iRelative == false )
         {
@@ -1328,7 +1340,7 @@ FOdysseyVectorTagInbetweener::MoveInbetween( FChartDivision* iInbetween
         {
             for( uint32 i = 1; i < breakdown->GetDrawingCount()- 1; i++ )
             {
-                FChartDivision* otherInbetween = &breakdown->GetChart()->GetDivisionArray()[i];
+                FChartDivision* otherInbetween = &breakdown->GetChart()->GetDivisionBuffer()[i];
 
                 if( otherInbetween != iInbetween )
                 {

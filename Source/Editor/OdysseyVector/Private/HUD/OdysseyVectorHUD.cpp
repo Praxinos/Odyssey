@@ -484,7 +484,7 @@ FOdysseyVectorHUD::DrawBreakdown( BLContext* iBLContext
 
         for( uint32 i = 1; i < iBreakdown->GetDrawingCount() - 1; i++ )
         {
-            FChartDivision* inbetween = &iBreakdown->GetChart()->GetDivisionArray()[i];
+            FChartDivision* inbetween = &iBreakdown->GetChart()->GetDivisionBuffer()[i];
 
             iBLContext->setStrokeStyle( BLRgba32( color.R
                                                 , color.G
@@ -539,7 +539,7 @@ FOdysseyVectorHUD::DrawInbetweens( BLContext* iBLContext
 
             for( uint32 i = 1; i < breakdown->GetDrawingCount() - 1; i++ )
             {
-                FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionArray()[i];
+                FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionBuffer()[i];
 
                 iBLContext->setStrokeStyle( BLRgba32( color.R
                                                     , color.G

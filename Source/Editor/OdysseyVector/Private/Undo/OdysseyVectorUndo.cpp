@@ -501,7 +501,7 @@ FSnapshotInbetweenerChart::RecordLocalState( FSnapshotInbetweenerChart::State* i
 
             for( uint32 i = 0; i < drawingCount; i++ )
             {
-                 iState->spacing[i] = mChart->GetDivisionArray()[i].spacing;
+                 iState->spacing[i] = mChart->GetDivisionBuffer()[i].spacing;
             }
         }
 
@@ -531,7 +531,7 @@ FSnapshotInbetweenerChart::LoadState( FSnapshotInbetweenerChart::State* iState )
     {
         for( uint32 i = 0; i < iState->spacing.size(); i++ )
         {
-            mChart->GetDivisionArray()[i].SetSpacing( iState->spacing[i] );
+            mChart->GetDivisionBuffer()[i].SetSpacing( iState->spacing[i] );
         }
     }
 

@@ -135,6 +135,8 @@ void
 SOdysseyAnimationTimelineInbetweeningHeader::RemoveInbetweenerTag()
 {
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_HUD;
     std::list<FOdysseyVectorTag*> tagList;
 

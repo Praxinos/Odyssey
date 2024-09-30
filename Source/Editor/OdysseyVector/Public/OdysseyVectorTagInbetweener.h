@@ -229,7 +229,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void InvertInterpolationDirection();
         std::vector<FInbetweenerDrawing>& GetDrawingBuffer();
         void ResizeDrawings();
-
+        FInbetweenerBreakdown* GetBreakdownByTargetIndex( uint32 iDrawingIndex );
         bool IsTopSelectedTag();
 
     protected:

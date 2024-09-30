@@ -16,12 +16,12 @@ FInbetweenerBreakdown::~FInbetweenerBreakdown()
 
 FInbetweenerBreakdown::FInbetweenerBreakdown( FOdysseyVectorTagInbetweener* iInbetweenerTag )
     : mInbetweenerTag( iInbetweenerTag )
+    , mPrevBreakdown( nullptr )
+    , mNextBreakdown( nullptr )
     , mSourceDrawingIndex( 0 )
     , mTargetDrawingIndex( 1 )
     , mIndex( 0 )
     , mGrid( nullptr )
-    , mPrevBreakdown( nullptr )
-    , mNextBreakdown( nullptr )
     , mTargetTranslationX( 0.0f )
     , mTargetTranslationY( 0.0f )
     , mTargetScalingX    ( 1.0f )
@@ -139,7 +139,7 @@ FInbetweenerBreakdown::InterpolateTransform()
 
     for( uint32 i = 1; i < GetDrawingCount() - 1; i++ )
     {
-        FChartDivision* inbetween = &mChart.GetDivisionArray()[i];
+        FChartDivision* inbetween = &mChart.GetDivisionBuffer()[i];
         double translationX, translationY, rotation, scalingX, scalingY;
         double t = inbetween->spacing;
 
@@ -170,18 +170,6 @@ FInbetweenerBreakdown::SetInbetweenerTag( FOdysseyVectorTagInbetweener* iInbetwe
     mInbetweenerTag = iInbetweenerTag;
 }
 
-void
-FInbetweenerBreakdown::SetPrevBreakdown( FInbetweenerBreakdown* iPrevBreakdown )
-{
-    mPrevBreakdown = iPrevBreakdown;
-}
-
-void
-FInbetweenerBreakdown::SetNextBreakdown( FInbetweenerBreakdown* iNextBreakdown )
-{
-    mNextBreakdown = iNextBreakdown;
-}
-
 FInbetweenerBreakdown*
 FInbetweenerBreakdown::GetPrevBreakdown()
 {
@@ -192,6 +180,18 @@ FInbetweenerBreakdown*
 FInbetweenerBreakdown::GetNextBreakdown()
 {
     return mNextBreakdown;
+}
+
+void
+FInbetweenerBreakdown::SetPrevBreakdown( FInbetweenerBreakdown* iPrevBreakdown )
+{
+    mPrevBreakdown = iPrevBreakdown;
+}
+
+void
+FInbetweenerBreakdown::SetNextBreakdown( FInbetweenerBreakdown* iNextBreakdown )
+{
+    mNextBreakdown = iNextBreakdown;
 }
 
 FOdysseyVectorTagInbetweener*
@@ -376,13 +376,15 @@ FInbetweenerBreakdown::GetTargetInverseWorldMatrix()
 void
 FInbetweenerBreakdown::SetSourceDrawingIndex( uint32 iSourceDrawingIndex )
 {
+    FInbetweenerBreakdown* prevBreakdown = GetPrevBreakdown();
+
     mSourceDrawingIndex = iSourceDrawingIndex;
 
-    if( mPrevBreakdown )
+    if( prevBreakdown )
     {
-        mPrevBreakdown->mTargetDrawingIndex = iSourceDrawingIndex;
+        prevBreakdown->mTargetDrawingIndex = iSourceDrawingIndex;
 
-        mPrevBreakdown->mChart.Resize();
+        prevBreakdown->mChart.Resize();
     }
 
     mChart.Resize();
@@ -403,16 +405,18 @@ FInbetweenerBreakdown::GetChart()
 void
 FInbetweenerBreakdown::SetTargetDrawingIndex( uint32 iTargetDrawingIndex )
 {
+    FInbetweenerBreakdown* nextBreakdown = GetNextBreakdown();
+
     // Invalidate current cells
     mInbetweenerTag->RedrawAnimationCells();
 
     mTargetDrawingIndex = iTargetDrawingIndex;
 
-    if( mNextBreakdown )
+    if( nextBreakdown )
     {
-        mNextBreakdown->mSourceDrawingIndex = iTargetDrawingIndex;
+        nextBreakdown->mSourceDrawingIndex = iTargetDrawingIndex;
 
-        mNextBreakdown->mChart.Resize();
+        nextBreakdown->mChart.Resize();
     }
 
     mChart.Resize();
