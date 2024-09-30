@@ -101,11 +101,6 @@ bool FOdysseyViewportDrawingEditorEdMode::Select(AActor* InActor, bool bInSelect
     return FEdMode::Select(InActor, bInSelected);
 }
 
-bool FOdysseyViewportDrawingEditorEdMode::HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click)
-{
-    return true;
-}
-
 bool FOdysseyViewportDrawingEditorEdMode::MouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY)
 {
     IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
