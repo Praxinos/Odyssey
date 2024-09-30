@@ -83,33 +83,43 @@ UOdysseyTextureLayerImageVector::PostInitProperties()
         return;
 
     UTexture2D* texture = layerStack->GetTexture();
-
-    Init( texture->Source.GetSizeX(), texture->Source.GetSizeY() );
+    if( texture && texture->Source.GetFormat() != TSF_Invalid )
+    {
+    	Init( texture->Source.GetSizeX(), texture->Source.GetSizeY() );
     
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-    //let's ensure the format has alpha, so add alpha channel of needed
-    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
+		::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+		//let's ensure the format has alpha, so add alpha channel of needed
+		format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
 
-    mVectorBlockId = FGuid::NewGuid();
-    mVectorBlock = MakeShared<FOdysseyVectorBlock>();
-    mVectorBlock->Init(mVectorBlockId, mEngine, Width, Height, format);
-    mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
+		mVectorBlockId = FGuid::NewGuid();
+		mVectorBlock = MakeShared<FOdysseyVectorBlock>();
+		mVectorBlock->Init(mVectorBlockId, mEngine, Width, Height, format);
+
+    	mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
+	}
 }
 
 void
 UOdysseyTextureLayerImageVector::PostLoad()
 {
     Super::PostLoad();
+	
+	if (GetFlags() & RF_ClassDefaultObject)
+		return;
     
-    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
-    UTexture2D* texture = layerStack->GetTexture();
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
-    //let's ensure the format has alpha, so add alpha channel of needed
-    format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
+	UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+	UTexture2D* texture = layerStack->GetTexture();
+	
+	if( texture && texture->Source.GetFormat() != TSF_Invalid )
+    {
+		::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
+		//let's ensure the format has alpha, so add alpha channel of needed
+		format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
 
-    mVectorBlock = MakeShared<FOdysseyVectorBlock>();
-    mVectorBlock->Init(mVectorBlockId, mEngine, Width, Height, format);
-    mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
+		mVectorBlock = MakeShared<FOdysseyVectorBlock>();
+		mVectorBlock->Init(mVectorBlockId, mEngine, Width, Height, format);
+		mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
+	}
 }
 
 void
@@ -119,10 +129,12 @@ UOdysseyTextureLayerImageVector::PostDuplicate(bool bDuplicateForPIE)
 
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
     UTexture2D* texture = layerStack->GetTexture();
-
-    Width = texture->Source.GetSizeX();
-    Height = texture->Source.GetSizeY();
-    mVectorBlockId = FGuid::NewGuid();
+	if( texture && texture->Source.GetFormat() != TSF_Invalid )
+    {
+		Width = texture->Source.GetSizeX();
+		Height = texture->Source.GetSizeY();
+		mVectorBlockId = FGuid::NewGuid();
+	}
 }
 
 void
@@ -226,6 +238,9 @@ UOdysseyTextureLayerImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRend
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
+
+	if (!mVectorBlock)
+		return nullptr;
     
     return MakeShared<FOdysseyTextureLayerImageVectorImageRenderer>(this, mVectorBlock, iRenderType, GetImageRenderingRects(), iFilter);
 }
