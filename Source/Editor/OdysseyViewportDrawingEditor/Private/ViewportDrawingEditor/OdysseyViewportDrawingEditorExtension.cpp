@@ -728,7 +728,7 @@ FOdysseyViewportDrawingEditorExtension::SelectDefaultTexture()
 		if (paintableTexture.Texture == Texture()) //if the texture is already selected we assume we have nothing to do
 			break;
 
-		if( !FOdysseyViewportDrawingEditorUtils::OdysseyDoesMaterialUseTexture( mMaterial, paintableTexture.Texture ) )
+		if( !DoesMaterialUseTexture( mMaterial, paintableTexture.Texture ) )
 			continue;
 
 		bool succeeded = SetTexture(paintableTexture.Texture, displayWarning);

@@ -307,7 +307,7 @@ SOdysseyViewportDrawingEditorMasterTab::ShouldFilterMaterialAsset(const FAssetDa
 bool
 SOdysseyViewportDrawingEditorMasterTab::ShouldFilterTextureAsset(const FAssetData& iAssetData) const
 {
-    return !(mExtension->SelectableTextures().ContainsByPredicate([=, this](const FPaintableTexture& iTexture) { return (iAssetData.FastGetAsset() != nullptr && iTexture.Texture->GetFullName() == iAssetData.FastGetAsset()->GetFullName() && FOdysseyViewportDrawingEditorUtils::OdysseyDoesMaterialUseTexture( mExtension->Material(), iTexture.Texture ) ); }));
+    return !(mExtension->SelectableTextures().ContainsByPredicate([=, this](const FPaintableTexture& iTexture) { return (iAssetData.FastGetAsset() != nullptr && iTexture.Texture->GetFullName() == iAssetData.FastGetAsset()->GetFullName() && DoesMaterialUseTexture( mExtension->Material(), iTexture.Texture ) ); }));
 }
 
 //--------------------------------------------------------------------------------------

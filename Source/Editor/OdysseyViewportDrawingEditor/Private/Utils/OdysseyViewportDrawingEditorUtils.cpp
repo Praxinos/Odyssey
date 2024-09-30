@@ -159,22 +159,6 @@ void FOdysseyViewportDrawingEditorUtils::InternalQueryPaintableTextures(int32 iM
 }
 
 bool
-FOdysseyViewportDrawingEditorUtils::OdysseyDoesMaterialUseTexture(UMaterialInterface* iMaterial, UTexture* iTexture)
-{
-    if (!iMaterial)
-		return false;
-
-	// Only grab the textures from the top level of samples
-	for ( UMaterialExpression* expression : iMaterial->GetMaterial()->GetExpressions())
-	{
-		UMaterialExpressionTextureBase* textureBase = Cast<UMaterialExpressionTextureBase>(expression);
-		if (textureBase != NULL && textureBase->Texture == iTexture)
-			return true;
-	}
-	return false;
-}
-
-bool
 FOdysseyViewportDrawingEditorUtils::GenerateSeamMask(UMeshComponent* MeshComponent, int32 UVSet, UTextureRenderTarget2D* SeamRenderTexture, UTexture* Texture, UTextureRenderTarget2D* RenderTargetTexture)
 {
 	UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponent);
@@ -217,13 +201,13 @@ FOdysseyViewportDrawingEditorUtils::GenerateSeamMask(UMeshComponent* MeshCompone
 		UMaterialInterface* ElementMat = StaticMeshComponent->GetMaterial(ElementIndex);
 		if (ElementMat != nullptr)
 		{
-			ElementUsesTargetTexture[ElementIndex] |= OdysseyDoesMaterialUseTexture(ElementMat, TargetTexture2D);
+			ElementUsesTargetTexture[ElementIndex] |= DoesMaterialUseTexture(ElementMat, TargetTexture2D);
 
 			if (ElementUsesTargetTexture[ElementIndex] == false && RenderTargetTexture != nullptr)
 			{
 				// If we didn't get a match on our selected texture, we'll check to see if the the material uses a
 				//  render target texture override that we put on during painting.
-				ElementUsesTargetTexture[ElementIndex] |= OdysseyDoesMaterialUseTexture(ElementMat, RenderTargetTexture);
+				ElementUsesTargetTexture[ElementIndex] |= DoesMaterialUseTexture(ElementMat, RenderTargetTexture);
 			}
 		}
 	}
