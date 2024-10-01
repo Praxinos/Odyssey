@@ -369,7 +369,7 @@ TSharedRef<SWidget> SOdysseyPaletteTreeView::CreateSetWidget()
             .VAlign(VAlign_Center)
             .OnClicked(this, &SOdysseyPaletteTreeView::AddSetToPalette)
             [
-                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddSet24"))
+                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddSet"))
             ]
         ]
         + SHorizontalBox::Slot()
@@ -382,7 +382,7 @@ TSharedRef<SWidget> SOdysseyPaletteTreeView::CreateSetWidget()
             .VAlign(VAlign_Center)
             .OnClicked(this, &SOdysseyPaletteTreeView::SavePalette)
             [
-                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.Save24"))
+                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.Save"))
             ]
         ];
  }

@@ -195,12 +195,15 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 
     // OdysseyPalette
     Set("ClassThumbnail.OdysseyPalette", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteDefaultThumbnail_64", mIcon64x64));
-    Set("OdysseyPalette.EntryColor", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteEntryColor_16", mIcon16x16));
-    Set("OdysseyPalette.EntryMaterial", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteEntryMaterial_16", mIcon16x16));
-    Set("OdysseyPalette.PaletteTab", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteTab_16", mIcon16x16));
-    Set("OdysseyPalette.AddSet24", new IMAGE_BRUSH("OdysseyPalette/OdysseyPaletteAddSet_24", mIcon24x24));
-    Set("OdysseyPalette.Save24", new IMAGE_BRUSH_SVG("PainterEditor/save", mIcon24x24));
-
+    Set("OdysseyPalette.PaletteTab", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteTab", mIcon16x16));
+    Set("OdysseyPalette.EntryColor", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteEntryColor", mIcon16x16));
+    Set("OdysseyPalette.EntryFolder", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteEntryFolder", mIcon16x16));
+    Set("OdysseyPalette.EntryMaterial", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteEntryMaterial", mIcon16x16));
+    Set("OdysseyPalette.AddColor", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddColor", mIcon24x24));
+    Set("OdysseyPalette.AddFolder", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddFolder", mIcon24x24));
+    Set("OdysseyPalette.AddMaterial", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddMaterial", mIcon24x24));
+    Set("OdysseyPalette.AddSet", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddSet", mIcon24x24));
+    Set("OdysseyPalette.Save", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteSave", mIcon24x24));
 
     // OdysseyWidgets - AdvancedColorWheel
     FVector2D AdvancedColorWheelSize( 1024, 1024 );

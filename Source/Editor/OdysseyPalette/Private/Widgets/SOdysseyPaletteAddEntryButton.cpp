@@ -34,7 +34,7 @@ void SOdysseyPaletteAddEntryButton::Construct(const FArguments& InArgs)
             .HAlign(HAlign_Left)
             .OnClicked(this, &SOdysseyPaletteAddEntryButton::AddColorEntry )
             [
-                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddSet24"))
+                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddColor"))
             ]
         ]
         + SHorizontalBox::Slot()
@@ -43,7 +43,7 @@ void SOdysseyPaletteAddEntryButton::Construct(const FArguments& InArgs)
             .HAlign(HAlign_Left)
             .OnClicked(this, &SOdysseyPaletteAddEntryButton::AddMaterialEntry)
             [
-                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddSet24"))
+                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddMaterial"))
             ]
         ]
         + SHorizontalBox::Slot()
@@ -52,7 +52,7 @@ void SOdysseyPaletteAddEntryButton::Construct(const FArguments& InArgs)
             .HAlign(HAlign_Left)
             .OnClicked(this, &SOdysseyPaletteAddEntryButton::AddFolderEntry)
             [
-                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddSet24"))
+                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddFolder"))
             ]
         ]
     ];
