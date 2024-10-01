@@ -142,6 +142,11 @@ public class EposSequenceEditor : ModuleRules
         }
 
         string pathfile_to_protection_specification = Path.Combine(PluginDirectory, "Wibu", "ProtectionSpecification.yaml");
-        PublicDefinitions.Add($"WIBU_CTP_YAML_PATH={pathfile_to_protection_specification}");
+        // WIBU_CTP_YAML_PATH is only valid directly on command line or in environment variable
+        // As compilation is done via .rsp, we can't use PublicDefinitions because it adds WIBU_CTP_YAML_PATH in the .rsp
+        // So we must use the environment variable
+        // (See Wibu Ticket T-165355)
+        Environment.SetEnvironmentVariable("WIBU_CTP_YAML_PATH", pathfile_to_protection_specification);
+        //PublicDefinitions.Add($"WIBU_CTP_YAML_PATH=\"{pathfile_to_protection_specification}\"");
     }
 }
