@@ -513,6 +513,7 @@ SOdysseyViewport::HandleViewportReset()
     Zoom(1.f);
     SetFitToViewport(false);
     UpdateScrollBars();
+    mFlipStateUV = FVector2D(0.f, 0.f);
 }
 
 
