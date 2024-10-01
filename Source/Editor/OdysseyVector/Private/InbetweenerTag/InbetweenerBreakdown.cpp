@@ -487,7 +487,7 @@ FInbetweenerBreakdown::SetGrid( eInbetweenerGridType iGridType )
         break;
     }
 
-    mGrid->Make();
+    mGrid->Make( );
 }
 
 FInbetweenerGrid*

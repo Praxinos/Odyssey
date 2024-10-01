@@ -656,14 +656,12 @@ FSnapshotTagInbetweener::RecordLocalState( FSnapshotTagInbetweener::State* iStat
         iState->interpolationDirection = mInbetweenerTag->GetInterpolationDirection();
 
         if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
-         || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE ) )
+         || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE )
+         || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::SQUARE   ) )
         {
             iState->gridSizeX = mInbetweenerTag->GetGridNumQuadX();
             iState->gridSizeY = mInbetweenerTag->GetGridNumQuadY();
-        }
-
-        if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE )
-        {
+            iState->square = mInbetweenerTag->IsSquare();
             iState->gridType = mInbetweenerTag->GetGridType();
         }
 
@@ -772,17 +770,14 @@ FSnapshotTagInbetweener::LoadLocalState( FSnapshotTagInbetweener::State* iState 
         mInbetweenerTag->SetMapAsPolyline( iState->mapAsPolyline );
     }
 
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
-    {
-        mInbetweenerTag->SetGridNumQuad( iState->gridSizeX
-                                       , iState->gridSizeY );
-    }
-
-    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE )
+    if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
+     || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE )
+     || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::SQUARE   ) )
     {
         mInbetweenerTag->SetGrid( iState->gridType
                                 , iState->gridSizeX
-                                , iState->gridSizeY );
+                                , iState->gridSizeY
+                                , iState->square );
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INTERPOLATIONTYPE )

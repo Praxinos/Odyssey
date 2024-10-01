@@ -156,10 +156,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         //void SetDrawingCount( uint32 iInbetweenCount );
         void SetGrid( eInbetweenerGridType iGridType
                     , uint32 iGridNumQuadX
-                    , uint32 iGridNumQuadY );
-        void SetGridNumQuad( uint32 iNumQuadX, uint32 iNumQuadY );
+                    , uint32 iGridNumQuadY
+                    , bool iSquare );
+        void SetGridNumQuad( uint32 iNumQuadX, uint32 iNumQuadY, bool iSquare );
         void SetGridNumQuad( uint32 iNumQuadX
                            , uint32 iNumQuadY
+                           , bool iSquare
                            , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
                            , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer );
 
@@ -231,6 +233,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void ResizeDrawings();
         FInbetweenerBreakdown* GetBreakdownByTargetIndex( uint32 iDrawingIndex );
         bool IsTopSelectedTag();
+        bool IsSquare();
 
     protected:
         /**
@@ -316,4 +319,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         uint32 mUsedPointCount;
         bool bARAPPrecomputeSucceded;
         eInbetweenerInterpolationDirection mInterpolationDirection;
+        bool bSquare;
 };

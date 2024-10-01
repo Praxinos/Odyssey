@@ -52,6 +52,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerGridType : public FOdyss
 
 };
 
+class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerSquare : public FOdysseyVectorUndoTagInbetweenerParam
+{
+    public:
+        ~FOdysseyVectorUndoTagInbetweenerSquare();
+        FOdysseyVectorUndoTagInbetweenerSquare( FOdysseyVectorGroupPaint* iScene
+                                                , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
+                                                , uint64 iReturnFlags );
+
+};
+
 class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerInterpolationType : public FOdysseyVectorUndoTagInbetweenerParam
 {
     public:

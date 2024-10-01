@@ -59,7 +59,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
         void SetCursorPosition( double ix, double iY );
 
     protected:
-        static constexpr double WAYPOINTRADIUS = 2.5f;
+        static constexpr double WAYPOINTRADIUS = 3.5f;
 
     private:
         void DrawTrajectory( BLContext* iBLContext

@@ -101,15 +101,19 @@ void
 FOdysseyVectorExportV2::WriteTagInbetweenerDimension( FOdysseyVectorTagInbetweener& iInbetweenerTag
                                                     , FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_DIMENSION
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_SPECS
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
+        uint32 gridType = static_cast<uint32>(iInbetweenerTag.GetGridType());
         uint32 numQuadX = iInbetweenerTag.GetGridNumQuadX();
         uint32 numQuadY = iInbetweenerTag.GetGridNumQuadY();
+        uint32 square = iInbetweenerTag.IsSquare() ? 1 : 0;
 
+        Ar << gridType;
         Ar << numQuadX;
         Ar << numQuadY;
+        Ar << square;
     } );
 }
 

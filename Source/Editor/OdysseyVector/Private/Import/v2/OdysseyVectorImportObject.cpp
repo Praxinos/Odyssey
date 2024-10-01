@@ -307,7 +307,7 @@ FOdysseyVectorImportV2::ReadObjectsDefine( uint64 iChunkEnd, FArchive &Ar )
 
                     FOdysseyVectorImportV2::ReadPath( *path, Ar.Tell() + iChunkLen, Ar );
                     // immediately update invalidated segments and updates the path's BBox
-                    path->Update( 0 );
+                    path->Update( FOdysseyVectorObject::UPDATE_FROMFILE );
                 }
                 break;
 

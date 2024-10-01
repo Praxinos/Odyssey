@@ -8,6 +8,7 @@
 #define LOCTEXT_NAMESPACE "PainterEditor"
 #define WARNING_INTERP_ROUTE_REMOVAL "Trajectories are only valid with ARAP interpolation. Existing trajectories will be removed. Proceed ?"
 #define WARNING_GRIDSIZE_ROUTE_REMOVAL "Changing grid size will remove existing trajectories. Proceed ?"
+#define WARNING_SQUARE_ROUTE_REMOVAL "Changing grid shape will remove existing trajectories. Proceed ?"
 
 UOdysseyPainterEditorVectorTagInbetweenerView::~UOdysseyPainterEditorVectorTagInbetweenerView()
 {
@@ -22,6 +23,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::UOdysseyPainterEditorVectorTagInb
     , DivisionY ( 8 )
     //, Rigidity ( 10 )
     , MapAsPolyline( true )
+    , Square( true )
     , Color( FOdysseyVectorTagInbetweener::DEFAULT_RED_UINT8
            , FOdysseyVectorTagInbetweener::DEFAULT_GREEN_UINT8
            , FOdysseyVectorTagInbetweener::DEFAULT_BLUE_UINT8
@@ -49,6 +51,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
         //DrawingCount = selectedInbetweenerTag->GetDrawingCount();
         Color = selectedInbetweenerTag->GetColor();
         MapAsPolyline = selectedInbetweenerTag->GetMapAsPolyline();
+        Square = selectedInbetweenerTag->IsSquare();
 
         DivisionX = selectedInbetweenerTag->GetGridNumQuadX();
         DivisionY = selectedInbetweenerTag->GetGridNumQuadY();
@@ -136,6 +139,19 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
                 return;
             }
         }
+
+        if( iPropertyName == "Square" )
+        {
+            FText dialogText = FText::FromString( TEXT ( WARNING_SQUARE_ROUTE_REMOVAL ) );
+
+            if( FMessageDialog::Open( EAppMsgType::OkCancel, dialogText ) == EAppReturnType::Cancel )
+            {
+                // restore displayed values
+                ImportParam();
+
+                return;
+            }
+        }
     }
 
     for( FOdysseyVectorTagInbetweener* selectedInbetweenerTag : mSelectedInbetweenerTagArray )
@@ -144,13 +160,18 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
             selectedInbetweenerTag->SetInterpolationType( InterpolationType );
 
         if( iPropertyName == "DivisionX" )
-            selectedInbetweenerTag->SetGridNumQuad( DivisionX, selectedInbetweenerTag->GetGridNumQuadY() );
+            selectedInbetweenerTag->SetGridNumQuad( DivisionX, selectedInbetweenerTag->GetGridNumQuadY(), Square );
 
         if( iPropertyName == "DivisionY" )
-            selectedInbetweenerTag->SetGridNumQuad( selectedInbetweenerTag->GetGridNumQuadX(), DivisionY );
+            selectedInbetweenerTag->SetGridNumQuad( selectedInbetweenerTag->GetGridNumQuadX(), DivisionY, Square );
 
         if( iPropertyName == "MapAsPolyline" )
             selectedInbetweenerTag->SetMapAsPolyline( MapAsPolyline );
+
+        if( iPropertyName == "Square" )
+        {
+            selectedInbetweenerTag->SetGrid( GridType, DivisionX, DivisionY, Square );
+        }
 
         if( iPropertyName == "Color" )
             selectedInbetweenerTag->SetColor( Color );
@@ -158,7 +179,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
         // must be last to be able to update correctly grid type-dependent fields
         if( iPropertyName == "GridType" )
         {
-            selectedInbetweenerTag->SetGrid( GridType, DivisionX, DivisionY );
+            selectedInbetweenerTag->SetGrid( GridType, DivisionX, DivisionY, Square );
 
             // updates grid type-dependent fields
             ImportParam();
@@ -205,6 +226,10 @@ UOdysseyPainterEditorVectorTagInbetweenerView::MakeUndo( const FName& iPropertyN
                                                                 , mSelectedInbetweenerTagArray
                                                                 , notificationFlags );
 
+    if( iPropertyName == "Square" )
+        return new FOdysseyVectorUndoTagInbetweenerSquare( mScene
+                                                         , mSelectedInbetweenerTagArray
+                                                         , notificationFlags );
 
     return nullptr;
 }

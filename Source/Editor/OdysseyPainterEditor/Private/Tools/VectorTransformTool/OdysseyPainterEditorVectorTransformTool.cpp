@@ -346,7 +346,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
                           , translateMatrix );
         }
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
         // update the selection box with the newly modified matrices
         iEngine->ResetHUD();
@@ -424,7 +424,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         // Update the matrix for all objects
         //iScene->UpdateMatrix();
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
         // update the selection box with the newly modified matrices
         iEngine->ResetHUD();
@@ -481,7 +481,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
             breakdown->UpdateMatrix();
         } 
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
         // update the selection box with the newly modified matrices
         iEngine->ResetHUD();
@@ -677,7 +677,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
     // Update the matrix for all objects
     //iScene->UpdateMatrix();
 
-    iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
     // update the selection box with the newly modified matrices
     iEngine->ResetHUD();
@@ -921,7 +921,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
     // Update the matrix for all objects
     //iScene->UpdateMatrix();
 
-    iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
     // update the selection box with the newly modified matrices
     iEngine->ResetHUD();

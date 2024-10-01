@@ -13,6 +13,7 @@
 #include "Widgets/Layout/SWrapBox.h"
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorSharedEnv.h"
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "Undo/OdysseyVectorUndoSelectVertex.h"
 
@@ -95,6 +96,8 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDownVector( FOdysseyVectorGroup
     // redraw
     iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
 
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+
     return 0;
 }
 
@@ -132,6 +135,8 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDragVector( FOdysseyVectorGroup
 
     // redraw
     iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
     return 0;
 
@@ -211,7 +216,8 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
     ::ULIS::FRectD roi;
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
 
     if( UOdysseyPainterEditorVectorBaseTool::DoubleClicked() == true )
     {
@@ -284,7 +290,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
         }
     }
 
-    iEngine->ResetHUD(); // updates the current HUD (in most cases wil be this tool's HUD)
+    //iEngine->ResetHUD(); // updates the current HUD (in most cases wil be this tool's HUD)
 
     return notificationFlags;
 }
@@ -300,7 +306,8 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
 
     // run lambda on object tree
     iEngine->Traverse
@@ -402,7 +409,8 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
         }
     }
 
-    iEngine->ResetHUD(); // updates the current HUD (in most cases wil be this tool's HUD)
+
+    //iEngine->ResetHUD(); // updates the current HUD (in most cases wil be this tool's HUD)
 
     return notificationFlags;
 }
@@ -436,12 +444,12 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPa
         iEngine->SetBLMask( nullptr );
 
         mPointArray.clear();
-
-        iScene->Update( 0 ); // update invalidated objects
     }
 
     // redraw
     iScene->GetEngine()->Invalidate( 0 );
+
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidated objects
 
     return notificationFlags;
 }

@@ -55,21 +55,6 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                 }
                 break;
 
-/*--------
-                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_CHART:
-                {
-                    for( uint32 i = 0; i < iInbetweenerTag.GetDrawingCount(); i++ )
-                    {
-                        float spacing;
-
-                        Ar << spacing;
-
-                        iInbetweenerTag.GetChart().GetDrawing( i )->spacing = spacing;
-                    }
-                }
-                break;
-*/
-
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM:  // container
                 break;
 
@@ -104,6 +89,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     //iInbetweenerTag.UpdateMatrix();
                 break;
 
+                // legacy
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_DEFORMATION:
                 {
                     uint32 gridType;
@@ -112,7 +98,8 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
 
                     iInbetweenerTag.SetGrid( static_cast<eInbetweenerGridType>(gridType)
                                            , iInbetweenerTag.GetGridNumQuadX()
-                                           , iInbetweenerTag.GetGridNumQuadY() );
+                                           , iInbetweenerTag.GetGridNumQuadY()
+                                           , iInbetweenerTag.IsSquare() );
                 }
                 break;
 
@@ -126,6 +113,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                 }
                 break;
 
+                // legacy
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_DIMENSION:
                 {
                     uint32 numQuadX;
@@ -134,20 +122,29 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     Ar << numQuadX;
                     Ar << numQuadY;
 
-                    iInbetweenerTag.SetGridNumQuad( numQuadX, numQuadY );
+                    iInbetweenerTag.SetGridNumQuad( numQuadX, numQuadY, false );
                 }
                 break;
-/*
-                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_ARAPRIGIDITY:
+
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRID_SPECS:
                 {
-                    uint32 arapRigidity;
+                    uint32 gridType;
+                    uint32 numQuadX;
+                    uint32 numQuadY;
+                    uint32 square;
 
-                    Ar << arapRigidity;
+                    Ar << gridType;
+                    Ar << numQuadX;
+                    Ar << numQuadY;
+                    Ar << square;
 
-                    iInbetweenerTag.SetARAPRigidity( arapRigidity );
+                    iInbetweenerTag.SetGrid( static_cast<eInbetweenerGridType>(gridType)
+                                           , numQuadX
+                                           , numQuadY
+                                           , square ? true : false );
                 }
                 break;
-*/
+
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_BREAKDOWNS: // container
                 break;
 

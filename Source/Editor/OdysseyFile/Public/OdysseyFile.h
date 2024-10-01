@@ -139,9 +139,11 @@ namespace FOdysseyFile
              /* Deprecated */               static const uint32 CHUNK_TRAJECTORY_WAYPOINTS = 0xf60935b9; // container
              /* Deprecated */                   static const uint32 CHUNK_TRAJECTORY_WAYPOINTS_RATIO = 0x1949a3f0; // array[float]
 
-                                static const uint32 CHUNK_TAGINBETWEENER_DEFORMATION = 0x6501ffec; // uint32(type)
+             /* Deprecated */   static const uint32 CHUNK_TAGINBETWEENER_DEFORMATION = 0x6501ffec; // uint32(type)
                                 static const uint32 CHUNK_TAGINBETWEENER_INTERPOLATION = 0x45b060f6; // uint32(type)
-                                static const uint32 CHUNK_TAGINBETWEENER_DIMENSION  = 0x8421afc9; // uint32(nbquadx)-uint32(nbquady)
+             /* Deprecated */   static const uint32 CHUNK_TAGINBETWEENER_DIMENSION = 0x8421afc9; // uint32(nbquadx)-uint32(nbquady)
+                                static const uint32 CHUNK_TAGINBETWEENER_GRID_SPECS = 0xed07a244; // uint32(type)-uint32(nbquadx)-uint32(nbquady)-uint32(square)
+
                                 static const uint32 CHUNK_TAGINBETWEENER_ARAPRIGIDITY = 0x1b0b5379; // uint32
                                 static const uint32 CHUNK_TAGINBETWEENER_BREAKDOWNS = 0xe9893b5d; // container
                                     static const uint32 CHUNK_TAGINBETWEENER_BREAKDOWNS_LAYOUT =  0x1f69cf20; // uint32(count) array[uint32(bool)-uint32(sourceDrawingIndex)-uint32(targetDrawingIndex)]

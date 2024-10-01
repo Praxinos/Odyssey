@@ -78,6 +78,29 @@ FOdysseyVectorUndoTagInbetweenerGridType::FOdysseyVectorUndoTagInbetweenerGridTy
     }
 }
 
+FOdysseyVectorUndoTagInbetweenerSquare::~FOdysseyVectorUndoTagInbetweenerSquare()
+{
+}
+
+FOdysseyVectorUndoTagInbetweenerSquare::FOdysseyVectorUndoTagInbetweenerSquare( FOdysseyVectorGroupPaint* iScene
+                                                                              , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
+                                                                              , uint64 iReturnFlags )
+    : FOdysseyVectorUndoTagInbetweenerParam( iScene, iInbetweenerTagArray, iReturnFlags )
+{
+    mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
+
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagArray )
+    {
+        mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
+                                                 , ( FSnapshotFlags::Tag::Inbetweener::SQUARE
+                                                   | FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
+                                                   | FSnapshotFlags::Tag::Inbetweener::ROUTES )
+                                                 , FSnapshotFlags::ALL    // save all breakdown details
+                                                 , FSnapshotFlags::ALL    // save all route details
+                                                 , FSnapshotFlags::ALL ); // save all trajectory details
+    }
+}
+
 FOdysseyVectorUndoTagInbetweenerInterpolationType::~FOdysseyVectorUndoTagInbetweenerInterpolationType()
 {
 }

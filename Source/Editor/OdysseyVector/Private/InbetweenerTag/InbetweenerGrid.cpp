@@ -114,13 +114,42 @@ void FInbetweenerGrid::Make()
     Make( sourcePositionBuffer, targetPositionBuffer );
 }
 
+//static
+void
+SquareGridBBox( ::ULIS::FRectD& iBBox )
+{
+    double difw, difh;
+
+    if ( iBBox.h > iBBox.w )
+    {
+        difw = iBBox.h - iBBox.w;
+        iBBox.w = iBBox.h;
+    }
+    else
+    {
+        difh = iBBox.w - iBBox.h;
+        iBBox.h = iBBox.w;
+    }
+
+    iBBox.x -= ( difw * 0.5f );
+    iBBox.y -= ( difh * 0.5f );
+}
+
 void
 FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
                       , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer )
 {
     uint32 numQuadX = mBreakdown->GetInbetweenerTag()->GetGridNumQuadX();
     uint32 numQuadY = mBreakdown->GetInbetweenerTag()->GetGridNumQuadY();
+    bool square = mBreakdown->GetInbetweenerTag()->IsSquare();
     ::ULIS::FRectD bbox = mBreakdown->GetInbetweenerTag()->GetOwner()->GetBBox( false );
+
+
+    //---- make it square ---//
+    if( square )
+    {
+        SquareGridBBox( bbox );
+    }
 
     // add some margin to prevent point that would be outside the box due to precision errors
     bbox.x -= 0.01f;

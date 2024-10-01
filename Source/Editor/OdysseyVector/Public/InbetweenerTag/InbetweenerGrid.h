@@ -116,6 +116,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         ::ULIS::FRectD GetBBox( eInbetweenerPointPositionType iPositionType, bool iLinkedOnly );
         virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint
                                           , eInbetweenerPointPositionType iPositionType );
+        static void SquareBBox( ::ULIS::FRectD& iBBox );
 
 
     // ARAP interpolation (do not confuse with ARAP deformation)

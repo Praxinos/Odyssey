@@ -51,7 +51,7 @@ FOdysseyVectorImportV2::Read( FOdysseyVectorGroupPaint* iScene, FArchive &Ar, ui
 
         iScene->UpdateMatrix();
         iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS
-                      | FOdysseyVectorObject::UPDATE_LOADED );
+                      | FOdysseyVectorObject::UPDATE_FROMFILE );
     }
 
     // Jump to the end of the junk, regardless of the fact that we've read nested chunks or not.

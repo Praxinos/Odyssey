@@ -72,6 +72,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     , mMasterBreakdown( this )
     , bARAPPrecomputeSucceded( false )
     , mInterpolationDirection( eInbetweenerInterpolationDirection::Forward )
+    , bSquare ( true )
 {
     // the default breakdown (has range 0 <-> 1 )
     mBreakdownList.emplace_back( &mMasterBreakdown );
@@ -213,6 +214,12 @@ FOdysseyVectorTagInbetweener::SetInterpolationDirection( eInbetweenerInterpolati
     Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
 }
 
+bool
+FOdysseyVectorTagInbetweener::IsSquare()
+{
+    return bSquare;
+}
+
 void
 FOdysseyVectorTagInbetweener::AddRoute( FInbetweenerRoute* iRoute )
 {
@@ -342,6 +349,8 @@ FOdysseyVectorTagInbetweener::ResetLayout( bool iFreeMemNow )
                               } );
 
     mBreakdownList.push_back( &mMasterBreakdown );
+
+    ChainBreakdowns();
 
     mMasterBreakdown.SetSourceDrawingIndex( 0 );
 
@@ -651,7 +660,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
     }
 */
     if( ( bShared == true )
-     && ( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 ) )
+     /*&& ( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )*/ )
     {
         if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
@@ -660,15 +669,18 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
         {
-            for( FInbetweenerBreakdown* breakdown : mBreakdownList )
+            if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_FROMFILE ) == 0 )
             {
-                std::vector<::ULIS::FVec2D> sourceGeometry;
-                std::vector<::ULIS::FVec2D> targetGeometry;
+                for( FInbetweenerBreakdown* breakdown : mBreakdownList )
+                {
+                    std::vector<::ULIS::FVec2D> sourceGeometry;
+                    std::vector<::ULIS::FVec2D> targetGeometry;
 
-                // save positions for restoring when calling Make()
-                breakdown->GetGrid()->GetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
-                breakdown->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
-                breakdown->GetGrid()->Make( sourceGeometry, targetGeometry );
+                    // save positions for restoring when calling Make()
+                    //breakdown->GetGrid()->GetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+                    breakdown->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
+                    breakdown->GetGrid()->Make( sourceGeometry, targetGeometry );
+                }
             }
         }
 
@@ -754,9 +766,9 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
 
         Interpolate();
 
-        RedrawAnimationCells();
-
         mInvalidationFlags = 0;
+
+        RedrawAnimationCells();
     }
 }
 
@@ -1218,49 +1230,54 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FInterpolatedPath* iInterpolatedPath
                                         , const BLMatrix2D& iWorldMatrix
                                         , BLContext* iBLContext )
 {
-    for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->mInterpolatedSegmentBuffer )
+    // ensure buffers are up-to-date 
+    // (this function is used by the HUD and might be called by the animation Proxy in another thread)
+    if( mInvalidationFlags == 0 )
     {
-        if( bMapAsPolyline )
+        for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->mInterpolatedSegmentBuffer )
         {
-             uint32 pointCount = interpolatedSegment.mInterpolatedPointArray.size();
-
-            for( uint32 i = 0; i < pointCount - 1; i++ )
+            if( bMapAsPolyline )
             {
-                uint32 n = i + 1;
-                FInterpolatedPoint* pointi = interpolatedSegment.mInterpolatedPointArray[i];
-                FInterpolatedPoint* pointn = interpolatedSegment.mInterpolatedPointArray[n];
-                BLPoint pt[2] = { iWorldMatrix.mapPoint( iPointPositionBuffer[pointi->mIndex].x
-                                                       , iPointPositionBuffer[pointi->mIndex].y )
-                                , iWorldMatrix.mapPoint( iPointPositionBuffer[pointn->mIndex].x
-                                                       , iPointPositionBuffer[pointn->mIndex].y ) };
+                 uint32 pointCount = interpolatedSegment.mInterpolatedPointArray.size();
 
-                iBLContext->strokeLine( pt[0].x, pt[0].y, pt[1].x, pt[1].y );
+                for( uint32 i = 0; i < pointCount - 1; i++ )
+                {
+                    uint32 n = i + 1;
+                    FInterpolatedPoint* pointi = interpolatedSegment.mInterpolatedPointArray[i];
+                    FInterpolatedPoint* pointn = interpolatedSegment.mInterpolatedPointArray[n];
+                    BLPoint pt[2] = { iWorldMatrix.mapPoint( iPointPositionBuffer[pointi->mIndex].x
+                                                           , iPointPositionBuffer[pointi->mIndex].y )
+                                    , iWorldMatrix.mapPoint( iPointPositionBuffer[pointn->mIndex].x
+                                                           , iPointPositionBuffer[pointn->mIndex].y ) };
+
+                    iBLContext->strokeLine( pt[0].x, pt[0].y, pt[1].x, pt[1].y );
+                }
             }
-        }
-        else
-        {
-            if( interpolatedSegment.GetOriginalSegment()->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+            else
             {
-                FInterpolatedPoint* interpolatedPoint[4] = { interpolatedSegment.mInterpolatedPointArray[0]
-                                                           , interpolatedSegment.mInterpolatedPointArray[1]
-                                                           , interpolatedSegment.mInterpolatedPointArray[2]
-                                                           , interpolatedSegment.mInterpolatedPointArray[3] };
-                BLPoint pt[4] = { iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[0]->mIndex].x
-                                                       , iPointPositionBuffer[interpolatedPoint[0]->mIndex].y )
-                                , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[1]->mIndex].x
-                                                       , iPointPositionBuffer[interpolatedPoint[1]->mIndex].y )
-                                , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[2]->mIndex].x
-                                                       , iPointPositionBuffer[interpolatedPoint[2]->mIndex].y )
-                                , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[3]->mIndex].x
-                                                       , iPointPositionBuffer[interpolatedPoint[3]->mIndex].y ) };
-                BLPath path;
+                if( interpolatedSegment.GetOriginalSegment()->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+                {
+                    FInterpolatedPoint* interpolatedPoint[4] = { interpolatedSegment.mInterpolatedPointArray[0]
+                                                               , interpolatedSegment.mInterpolatedPointArray[1]
+                                                               , interpolatedSegment.mInterpolatedPointArray[2]
+                                                               , interpolatedSegment.mInterpolatedPointArray[3] };
+                    BLPoint pt[4] = { iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[0]->mIndex].x
+                                                           , iPointPositionBuffer[interpolatedPoint[0]->mIndex].y )
+                                    , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[1]->mIndex].x
+                                                           , iPointPositionBuffer[interpolatedPoint[1]->mIndex].y )
+                                    , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[2]->mIndex].x
+                                                           , iPointPositionBuffer[interpolatedPoint[2]->mIndex].y )
+                                    , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[3]->mIndex].x
+                                                           , iPointPositionBuffer[interpolatedPoint[3]->mIndex].y ) };
+                    BLPath path;
 
-                path.moveTo ( pt[0].x, pt[0].y );
-                path.cubicTo( pt[1].x, pt[1].y
-                            , pt[2].x, pt[2].y
-                            , pt[3].x, pt[3].y );
+                    path.moveTo ( pt[0].x, pt[0].y );
+                    path.cubicTo( pt[1].x, pt[1].y
+                                , pt[2].x, pt[2].y
+                                , pt[3].x, pt[3].y );
 
-                iBLContext->strokePath( path );
+                    iBLContext->strokePath( path );
+                }
             }
         }
     }
@@ -1427,9 +1444,12 @@ FOdysseyVectorTagInbetweener::GetMasterBreakdown()
 void
 FOdysseyVectorTagInbetweener::SetGrid( eInbetweenerGridType iGridType
                                      , uint32 iGridNumQuadX
-                                     , uint32 iGridNumQuadY )
+                                     , uint32 iGridNumQuadY
+                                     , bool iSquare )
 {
-    if( ( mGridNumQuadX != iGridNumQuadX ) || ( mGridNumQuadY != iGridNumQuadY ) )
+    if( ( mGridNumQuadX != iGridNumQuadX )
+     || ( mGridNumQuadY != iGridNumQuadY )
+     || ( iSquare != bSquare ) )
     {
         RemoveAllRoutes();
     }
@@ -1437,6 +1457,7 @@ FOdysseyVectorTagInbetweener::SetGrid( eInbetweenerGridType iGridType
     mGridType = iGridType;
     mGridNumQuadX = iGridNumQuadX ? iGridNumQuadX : 1;
     mGridNumQuadY = iGridNumQuadY ? iGridNumQuadY : 1;
+    bSquare = iSquare;
 
     Invalidate( INVALIDATE_MAP
               | INVALIDATE_SPACING
@@ -1453,6 +1474,7 @@ FOdysseyVectorTagInbetweener::SetGrid( eInbetweenerGridType iGridType
 void
 FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
                                             , uint32 iGridNumQuadY
+                                            , bool iSquare
                                             , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
                                             , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer )
 {
@@ -1467,17 +1489,19 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
 
     mGridNumQuadX = iGridNumQuadX;
     mGridNumQuadY = iGridNumQuadY;
+    bSquare = iSquare;
 
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
         breakdown->GetGrid()->Make( iSourcePositionBuffer
-                                 , iTargetPositionBuffer );
+                                  , iTargetPositionBuffer );
     }
 }
 
 void
 FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
-                                            , uint32 iGridNumQuadY )
+                                            , uint32 iGridNumQuadY
+                                            , bool iSquare )
 {
     Invalidate( INVALIDATE_MAP
               | INVALIDATE_SPACING
@@ -1490,6 +1514,7 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
 
     mGridNumQuadX = iGridNumQuadX;
     mGridNumQuadY = iGridNumQuadY;
+    bSquare = iSquare;
 
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
