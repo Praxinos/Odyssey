@@ -55,6 +55,15 @@ void SOdysseyPaletteAddEntryButton::Construct(const FArguments& InArgs)
                 SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddFolder"))
             ]
         ]
+        + SHorizontalBox::Slot()
+        [
+            SNew(SButton)
+            .HAlign(HAlign_Left)
+            .OnClicked(this, &SOdysseyPaletteAddEntryButton::AddColorEntry)
+            [
+                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddPicker"))
+            ]
+        ]
     ];
 }
 

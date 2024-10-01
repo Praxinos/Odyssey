@@ -203,7 +203,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("OdysseyPalette.AddFolder", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddFolder", mIcon24x24));
     Set("OdysseyPalette.AddMaterial", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddMaterial", mIcon24x24));
     Set("OdysseyPalette.AddSet", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddSet", mIcon24x24));
+    Set("OdysseyPalette.AddPicker", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddPicker", mIcon24x24));
     Set("OdysseyPalette.Save", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteSave", mIcon24x24));
+
 
     // OdysseyWidgets - AdvancedColorWheel
     FVector2D AdvancedColorWheelSize( 1024, 1024 );
