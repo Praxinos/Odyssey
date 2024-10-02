@@ -55,6 +55,38 @@ FOdysseyVectorUndo::GetEngineListFromObjectList( const std::list<FOdysseyVectorO
     }
 }
 
+//static
+void
+FOdysseyVectorUndo::GetEngineListFromInbetweenerTagList( const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                       , std::list<FOdysseyVectorEngine*>& oEngineList )
+{
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
+    {
+        FOdysseyVectorEngine* engine = inbetweenerTag->GetOwner()->GetEngine();
+
+        if( std::find( oEngineList.begin(), oEngineList.end(), engine ) == oEngineList.end() )
+        {
+            oEngineList.push_back( engine );
+        }
+    }
+}
+
+//static
+void
+FOdysseyVectorUndo::GetEngineListFromInbetweenerTagArray( const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
+                                                        , std::list<FOdysseyVectorEngine*>& oEngineList )
+{
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagArray )
+    {
+        FOdysseyVectorEngine* engine = inbetweenerTag->GetOwner()->GetEngine();
+
+        if( std::find( oEngineList.begin(), oEngineList.end(), engine ) == oEngineList.end() )
+        {
+            oEngineList.push_back( engine );
+        }
+    }
+}
+
 FSnapshotTrajectory::~FSnapshotTrajectory()
 {
 }

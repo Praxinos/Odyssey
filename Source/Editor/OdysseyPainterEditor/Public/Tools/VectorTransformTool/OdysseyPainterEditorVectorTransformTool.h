@@ -98,15 +98,13 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
                  , meta = ( ToolTip = "World" ) )
         bool World;
 
-        UPROPERTY( EditAnywhere
-                 , Category = TransformTool
-                 , meta = ( ToolTip = "Inbetween Mode" ) )
-        bool InbetweenMode;
+        UPROPERTY( EditDefaultsOnly )
+        bool bInbetweenMode;
 
         UPROPERTY( EditAnywhere
                  , Category = TransformTool
                  , meta = ( ToolTip = "Show Inbetweens"
-                          , EditCondition = "InbetweenMode"
+                          , EditCondition = "bInbetweenMode"
                           , EditConditionHides ) )
         bool ShowInbetweens;
 };

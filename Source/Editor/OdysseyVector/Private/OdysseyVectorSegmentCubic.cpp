@@ -1289,7 +1289,7 @@ FOdysseyVectorSegmentCubic::Update( uint32 iUpdateFlags )
 
     if( mNeedWidth )
     {
-        BuildVariable( iUpdateFlags & FOdysseyVectorObject::UPDATE_NEEDPOLYLINE ? 4 : MINRECURSE
+        BuildVariable( iUpdateFlags & FOdysseyVectorObject::UPDATE_NEEDPOLYLINE ? 5 : MINRECURSE
                      , MAXRECURSE );
     }
 }

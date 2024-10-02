@@ -568,7 +568,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
     protected:
         static void GetEngineListFromObjectList( const std::list<FOdysseyVectorObject*>& iObjectList
                                                , std::list<FOdysseyVectorEngine*>& oEngineList );
-
+        static void GetEngineListFromInbetweenerTagList( const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                       , std::list<FOdysseyVectorEngine*>& oEngineList );
+        static void GetEngineListFromInbetweenerTagArray( const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
+                                                        , std::list<FOdysseyVectorEngine*>& oEngineList );
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
 

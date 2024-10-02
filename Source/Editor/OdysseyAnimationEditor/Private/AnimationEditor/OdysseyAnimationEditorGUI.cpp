@@ -11,6 +11,7 @@
 #include "PainterEditor/OdysseyPainterEditorVectorSceneTreeViewTab.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorSource.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyAnimation.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
@@ -18,6 +19,10 @@
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorTag.h"
+#include "OdysseyVectorTagInbetweener.h"
+#include "InbetweenerTag/InbetweenerBreakdown.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAlter.h"
 
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
@@ -26,6 +31,8 @@
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.h"
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimeline.h"
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
+
+#define LOCTEXT_NAMESPACE "AnimationEditorGUI"
 
 /////////////////////////////////////////////////////
 // FOdysseyAnimationEditorGUI
@@ -36,6 +43,7 @@ FOdysseyAnimationEditorGUI::~FOdysseyAnimationEditorGUI()
 	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll( this );
 	UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll( this );
 	FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll( this );
+	UOdysseyLayer::OnMediaChanged().RemoveAll( this );
 }
 
 FOdysseyAnimationEditorGUI::FOdysseyAnimationEditorGUI(FOdysseyAnimationEditorExtension* iExtension)
@@ -48,6 +56,8 @@ FOdysseyAnimationEditorGUI::FOdysseyAnimationEditorGUI(FOdysseyAnimationEditorEx
     FOdysseyVectorEngine::OnNotifyDelegate().AddRaw( this, &FOdysseyAnimationEditorGUI::OnVectorSceneNotify );
     // bind refresh function to delegates on existing vector scenes when the source changes. Needed to refresh necessary widgets.
     mExtension->GetEditor()->OnSourceChanged().AddRaw( this, &FOdysseyAnimationEditorGUI::OnSourceChanged );
+
+    UOdysseyLayer::OnMediaChanged().AddRaw( this, &FOdysseyAnimationEditorGUI::OnMediaChanged );
 }
 
 //--------------------------------------------------------------------------------------
@@ -115,8 +125,59 @@ FOdysseyAnimationEditorGUI::CreateBottomSection()
 		);
 } */
 
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------ Getters
+void
+FOdysseyAnimationEditorGUI::OnMediaChanged()
+{
+    UOdysseyAnimationLayerImageVector* currentVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(mExtension->GetEditor()->LayerStack()->CurrentLayer.Get());
+    uint64 returnFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                       | FOdysseyPainterEditor::UI_UPDATE_HUD;
+    std::list<FOdysseyVectorTagInbetweener*> inbetweenerTagList;
+
+    if( currentVectorLayer )
+    {
+
+        // check the validity of inbetweener tags and prepare a list for processing
+        for( FOdysseyVectorTag* tag : currentVectorLayer->GetSharedEnv()->GetSharedTagList() )
+        {
+            if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+            {
+                FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+                int32 targetCellIndex = inbetweenerTag->GetDrawingBuffer().back().GetAnimationCellIndex();
+
+                if( inbetweenerTag->GetAnimationCell()->GetCellByIndex( targetCellIndex ) == nullptr )
+                {
+                    inbetweenerTagList.push_back( inbetweenerTag );
+                }
+            }
+        }
+/*
+        //------------- undo ----------------//
+        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.reset-breakdown-layout","Reset Breakdown Layout"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( currentVectorLayer->GetSharedEnv()
+                                                                                         , inbetweenerTagList
+                                                                                         , returnFlags );
+
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+        
+            TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
+        }
+        GEditor->EndTransaction();
+        //---------- end of undo ------------//
+*/
+        // proceed
+        for( FOdysseyVectorTagInbetweener* inbetweenerTag : inbetweenerTagList )
+        {
+            inbetweenerTag->ResetLayout( false );
+            inbetweenerTag->GetBreakdownList().back()->SetTargetDrawingIndex( 1 );
+        }
+    }
+
+    ParseVectorNotifications( nullptr, FOdysseyPainterEditor::UI_UPDATE_TIMELINE );
+}
 
 void
 FOdysseyAnimationEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack )
@@ -291,3 +352,5 @@ FOdysseyAnimationEditorGUI::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScen
 
     ParseVectorNotifications( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
 }
+
+#undef LOCTEXT_NAMESPACE

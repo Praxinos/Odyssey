@@ -669,7 +669,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
         {
-            if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_FROMFILE ) == 0 )
+            //if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_FROMFILE ) == 0 )
             {
                 for( FInbetweenerBreakdown* breakdown : mBreakdownList )
                 {
@@ -677,17 +677,11 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
                     std::vector<::ULIS::FVec2D> targetGeometry;
 
                     // save positions for restoring when calling Make()
-                    //breakdown->GetGrid()->GetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+                    breakdown->GetGrid()->GetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
                     breakdown->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
                     breakdown->GetGrid()->Make( sourceGeometry, targetGeometry );
                 }
             }
-        }
-
-        // will update grids' BBoxes (needed for transform HUD and discarding of unused quads in ARAP grids)
-        for( FInbetweenerBreakdown* breakdown : mBreakdownList )
-        {
-            breakdown->GetGrid()->UpdateBBox( iUpdateFlags, mInvalidationFlags );
         }
 
         if( ( mInvalidationFlags & INVALIDATE_MAP            )
@@ -704,6 +698,12 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             Map();
 
             mInvalidationFlags |= INVALIDATE_BUFFERS;
+        }
+
+        // will update grids' BBoxes (needed for transform HUD and discarding of unused quads in ARAP grids)
+        for( FInbetweenerBreakdown* breakdown : mBreakdownList )
+        {
+            breakdown->GetGrid()->UpdateBBox( iUpdateFlags, mInvalidationFlags );
         }
 
         if( ( mInvalidationFlags & INVALIDATE_RANGE   )

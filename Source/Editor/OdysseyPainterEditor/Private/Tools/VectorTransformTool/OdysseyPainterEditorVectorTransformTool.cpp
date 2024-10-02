@@ -39,7 +39,7 @@ UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTo
     , Uniform( true )
     , World( false )
     , ShowInbetweens( true )
-    , InbetweenMode( false )
+    , bInbetweenMode( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform32");
 
@@ -71,6 +71,8 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorGroupPaint* 
                                             // Prevents the user from having to click at least once in the viewport.
     // we need the focus on the viewport for keyboard 
     TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+    uint32 hudFlags = mEditor->GetVectorHUDFlags();
+
     viewportWidget = viewportTab->GetViewport()->GetViewportWidget();
 
     // we need the focus on the viewport for keyboard 
@@ -84,7 +86,7 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorGroupPaint* 
     // force redraw
     iScene->GetEngine()->Invalidate( 0 );
 
-    InbetweenMode = ( mTransformHUD->GetFlags()  & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) ? true : false;
+    bInbetweenMode = ( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) ? true : false;
 
     return 0;
 }
@@ -1091,7 +1093,7 @@ UOdysseyPainterEditorVectorTransformTool::IsModeInbetween() const
     uint32 hudFlags = mEditor->GetVectorHUDFlags();
 
     return ( hudFlags  & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) ? EVisibility::Visible
-                                                                 : EVisibility::Hidden;
+                                                                 : EVisibility::Collapsed;
 }
 
 TSharedRef<SWidget>
@@ -1106,6 +1108,7 @@ UOdysseyPainterEditorVectorTransformTool::CreateTopTabWidget()
 
 
     // what an awful syntax, damn
+
     TAttribute<EVisibility> value = TAttribute<EVisibility>::Create(TAttribute<EVisibility>::FGetter::CreateUObject (this, &UOdysseyPainterEditorVectorTransformTool::IsModeInbetween) );
 
     showInbetweensWidget.Get().SetVisibility( value );

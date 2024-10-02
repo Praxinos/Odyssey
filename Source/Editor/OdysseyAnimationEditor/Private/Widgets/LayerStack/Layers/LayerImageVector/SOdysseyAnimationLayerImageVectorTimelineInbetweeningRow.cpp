@@ -110,7 +110,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
         GEditor->BeginTransaction(LOCTEXT("vector-timeline-row.transaction.alter","Vector Timeline Alter"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( scene
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( sharedEnv
                                                                                          , mInbetweenerTag
                                                                                          , notificationFlags );
 

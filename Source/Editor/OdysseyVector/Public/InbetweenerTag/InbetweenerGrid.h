@@ -161,4 +161,5 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         double mQuadArea;
         ::ULIS::FRectD mSourceBBox;
         ::ULIS::FRectD mTargetBBox;
+        ::ULIS::FRectD mGridBBox;
 };

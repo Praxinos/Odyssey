@@ -15,10 +15,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerBreakdownAlter : public 
 {
     public:
         ~FOdysseyVectorUndoTagInbetweenerBreakdownAlter();
-        FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorGroupPaint* iScene
+        FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorSharedEnv* iSharedEnv
                                                       , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                       , uint64 iReturnFlags );
-
+        FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorSharedEnv* iSharedEnv
+                                                      , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
+                                                      , uint64 iReturnFlags );
+        FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorSharedEnv* iSharedEnv
+                                                      , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                      , uint64 iReturnFlags );
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
 
@@ -29,5 +34,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerBreakdownAlter : public 
         virtual FString ToString() const override;
 
     private:
-        FSnapshotTagInbetweener mInbetweenerTagSnapshot;
+        std::vector<FSnapshotTagInbetweener> mInbetweenerTagSnapshotArray;
 };

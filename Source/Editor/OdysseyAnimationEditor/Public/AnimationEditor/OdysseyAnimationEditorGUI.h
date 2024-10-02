@@ -32,6 +32,7 @@ public:
     void ParseVectorNotifications( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
     void OnSourceChanged();
     void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
+    void OnMediaChanged();
 
 protected:
     //Init

@@ -16,19 +16,62 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::~FOdysseyVectorUndoTagInbetweene
     }
 }
 
-FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorGroupPaint* iScene
+FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorSharedEnv* iSharedEnv
                                                                                               , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                                                               , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
-    , mInbetweenerTagSnapshot( iInbetweenerTag
-                             , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
-                             , FSnapshotFlags::Breakdown::GRIDGEOMETRY
-                             , FSnapshotFlags::Route::TRAJECTORIES
-                             | FSnapshotFlags::Route::STEPS
-                             , FSnapshotFlags::Trajectory::BEZIER
-                             | FSnapshotFlags::Trajectory::WAYPOINTS )
+    : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
+    mEngineList.push_back( iInbetweenerTag->GetOwner()->GetEngine() );
+
+    mInbetweenerTagSnapshotArray.emplace_back(  iInbetweenerTag
+                                              , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
+                                              , FSnapshotFlags::Breakdown::GRIDGEOMETRY
+                                              , ( FSnapshotFlags::Route::TRAJECTORIES
+                                                | FSnapshotFlags::Route::STEPS )
+                                              , ( FSnapshotFlags::Trajectory::BEZIER
+                                                | FSnapshotFlags::Trajectory::WAYPOINTS ) );
+}
+
+FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorSharedEnv* iSharedEnv
+                                                                                              , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
+                                                                                              , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
+{
+    GetEngineListFromInbetweenerTagArray( iInbetweenerTagArray, mEngineList );
+
+    mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
+
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagArray )
+    {
+        mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
+                                                 , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
+                                                 , FSnapshotFlags::Breakdown::GRIDGEOMETRY
+                                                 , ( FSnapshotFlags::Route::TRAJECTORIES
+                                                   | FSnapshotFlags::Route::STEPS )
+                                                 , ( FSnapshotFlags::Trajectory::BEZIER
+                                                   | FSnapshotFlags::Trajectory::WAYPOINTS ) );
+    }
+}
+
+FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorSharedEnv* iSharedEnv
+                                                                                              , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                                                              , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
+{
+    GetEngineListFromInbetweenerTagList( iInbetweenerTagList, mEngineList );
+
+    mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagList.size() );
+
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
+    {
+        mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
+                                                 , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
+                                                 , FSnapshotFlags::Breakdown::GRIDGEOMETRY
+                                                 , ( FSnapshotFlags::Route::TRAJECTORIES
+                                                   | FSnapshotFlags::Route::STEPS )
+                                                 , ( FSnapshotFlags::Trajectory::BEZIER
+                                                   | FSnapshotFlags::Trajectory::WAYPOINTS ) );
+    }
 }
 
 void
@@ -37,7 +80,10 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mInbetweenerTagSnapshot.LoadAlteredState();
+    for( FSnapshotTagInbetweener inbetweenerTagsnapshot : mInbetweenerTagSnapshotArray )
+    {
+        inbetweenerTagsnapshot.LoadAlteredState();
+    }
 
     // update invalidated objects
     mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
@@ -54,8 +100,11 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mInbetweenerTagSnapshot.RecordAlteredState();
-    mInbetweenerTagSnapshot.LoadInitialState();
+    for( FSnapshotTagInbetweener inbetweenerTagsnapshot : mInbetweenerTagSnapshotArray )
+    {
+        inbetweenerTagsnapshot.RecordAlteredState();
+        inbetweenerTagsnapshot.LoadInitialState();
+    }
 
     // update invalidated objects
     mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );

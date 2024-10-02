@@ -79,7 +79,7 @@ FInbetweenerGrid::UpdateBBox( uint32 iUpdateFlags
     if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEGRID )
      || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE   ) )
     {
-        mSourceBBox = GetBBox( eInbetweenerPointPositionType::SourcePosition, false );
+        mSourceBBox = GetBBox( eInbetweenerPointPositionType::SourcePosition, true );
     }
 
     if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID )
@@ -142,20 +142,21 @@ FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
     uint32 numQuadX = mBreakdown->GetInbetweenerTag()->GetGridNumQuadX();
     uint32 numQuadY = mBreakdown->GetInbetweenerTag()->GetGridNumQuadY();
     bool square = mBreakdown->GetInbetweenerTag()->IsSquare();
-    ::ULIS::FRectD bbox = mBreakdown->GetInbetweenerTag()->GetOwner()->GetBBox( false );
+
+    mGridBBox = mBreakdown->GetInbetweenerTag()->GetOwner()->GetBBox( false );
 
 
     //---- make it square ---//
     if( square )
     {
-        SquareGridBBox( bbox );
+        SquareGridBBox( mGridBBox );
     }
 
     // add some margin to prevent point that would be outside the box due to precision errors
-    bbox.x -= 0.01f;
-    bbox.y -= 0.01f;
-    bbox.w += 0.02f;
-    bbox.h += 0.02f;
+    mGridBBox.x -= 0.01f;
+    mGridBBox.y -= 0.01f;
+    mGridBBox.w += 0.02f;
+    mGridBBox.h += 0.02f;
 
     //mTargetBBox = mSourceBBox;
 
@@ -166,10 +167,10 @@ FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
 
     if( numQuadX && numQuadY )
     {
-        double x = bbox.x;
-        double y = bbox.y;
-        double stepx = bbox.w / numQuadX;
-        double stepy = bbox.h / numQuadY;
+        double x = mGridBBox.x;
+        double y = mGridBBox.y;
+        double stepx = mGridBBox.w / numQuadX;
+        double stepy = mGridBBox.h / numQuadY;
         uint32 numVertexX = numQuadX + 1;
         uint32 numVertexY = numQuadY + 1;
         uint32 pointID = 0;
@@ -188,14 +189,14 @@ FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
                 mPointBuffer[offset].SetSourcePosition( x, y );
                 mPointBuffer[offset].SetTargetPosition( x, y );
 
-                mPointBuffer[offset].SetU( std::clamp<double>( ( x - bbox.x ) / bbox.w, 0.0f, 1.0f ) );
-                mPointBuffer[offset].SetV( std::clamp<double>( ( y - bbox.y ) / bbox.h, 0.0f, 1.0f ) );
+                mPointBuffer[offset].SetU( std::clamp<double>( ( x - mGridBBox.x ) / mGridBBox.w, 0.0f, 1.0f ) );
+                mPointBuffer[offset].SetV( std::clamp<double>( ( y - mGridBBox.y ) / mGridBBox.h, 0.0f, 1.0f ) );
 
                 x += stepx;
             }
 
             y += stepy;
-            x = bbox.x;
+            x = mGridBBox.x;
         }
 
         if( iSourcePositionBuffer.size() )
@@ -236,7 +237,7 @@ FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
             }
         }
 
-        mQuadArea = mQuadBuffer[0].GetSourceArea();
+        mQuadArea = ( mGridBBox.w * mGridBBox.h ) / mQuadBuffer.size();
 
         mBreakdown->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEGRID
                                                    | FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID );
@@ -294,7 +295,7 @@ FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPath
 int
 FInbetweenerGrid::GetQuadIndex( const ::ULIS::FVec2D& iLocalCoords )
 {
-    ::ULIS::FRectD bbox = mSourceBBox;
+    ::ULIS::FRectD bbox = mGridBBox;
     double difX = iLocalCoords.x - bbox.x;
     double difY = iLocalCoords.y - bbox.y;
     double u = difX / bbox.w;
@@ -405,6 +406,8 @@ FInbetweenerGrid::GetValidRouteArray( std::vector<FInbetweenerRoute*>& oValidRou
         }
     }
 }
+
+#include <chrono>
 
 /**
  * Precompute the sparse matrices P^T and prefactor P^T*P for later computations

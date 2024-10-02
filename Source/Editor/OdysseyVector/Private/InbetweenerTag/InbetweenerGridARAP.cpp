@@ -367,7 +367,7 @@ FInbetweenerGridARAP::IntersectNeededQuads( const ::ULIS::FRectD& iSourceBBox
 void
 FInbetweenerGridARAP::DiscardEmptyQuads( std::vector<FInterpolatedPath>& iPathBuffer )
 {
-    ::ULIS::FRectD tagBBox = mSourceBBox;
+    ::ULIS::FRectD tagBBox = mGridBBox;
 
     for( FInterpolatedPath& interpolatedPath : iPathBuffer )
     {
