@@ -195,6 +195,12 @@ private:
     /* Handles Rotate Right button clicked event */
     void            HandleRotationRight();
 
+    /* Handles Flip X clicked event */
+    void            HandleFlipHorizontal(ECheckBoxState iState);
+
+    /* Handles Flip Y clicked event */
+    void            HandleFlipVertical(ECheckBoxState iState);
+
     /* Handles Viewport Reset button clicked event */
     void            HandleViewportReset();
 

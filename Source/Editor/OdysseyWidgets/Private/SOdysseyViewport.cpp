@@ -222,9 +222,10 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
                     .Padding(4.0f, 0.0f)
                     .VAlign(VAlign_Center)
                     [
-                        SNew(SButton)
-                            .ButtonStyle(FCoreStyle::Get(), "NoBorder")
-                            .OnPressed(this, &SOdysseyViewport::FlipHorizontal)
+                        SNew(SCheckBox)
+                            .Style(&FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("CheckBox.BasicOnOff"))
+                            .OnCheckStateChanged(this, &SOdysseyViewport::HandleFlipHorizontal)
+                            .IsChecked_Lambda([this]() -> ECheckBoxState { return mFlipStateUV.X == 1 ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; })
                             [
                                 SNew(SImage).Image(FOdysseyStyle::GetBrush("PainterEditor.FlipHorizontal16"))
                             ]
@@ -234,9 +235,10 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
                     .Padding(4.0f, 0.0f)
                     .VAlign(VAlign_Center)
                     [
-                        SNew(SButton)
-                            .ButtonStyle(FCoreStyle::Get(), "NoBorder")
-                            .OnPressed(this, &SOdysseyViewport::FlipVertical)
+                        SNew(SCheckBox)
+                            .Style(&FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("CheckBox.BasicOnOff"))
+                            .OnCheckStateChanged(this, &SOdysseyViewport::HandleFlipVertical)
+                            .IsChecked_Lambda([this]() -> ECheckBoxState { return mFlipStateUV.Y == 1 ? ECheckBoxState::Checked : ECheckBoxState::Unchecked; })
                             [
                                 SNew(SImage).Image(FOdysseyStyle::GetBrush("PainterEditor.FlipVertical16"))
                             ]
@@ -503,6 +505,16 @@ void
 SOdysseyViewport::HandleRotationRight()
 {
     RotateRight();
+}
+
+void SOdysseyViewport::HandleFlipHorizontal(ECheckBoxState iState)
+{
+    FlipHorizontal();
+}
+
+void SOdysseyViewport::HandleFlipVertical(ECheckBoxState iState)
+{
+    FlipVertical();
 }
 
 void

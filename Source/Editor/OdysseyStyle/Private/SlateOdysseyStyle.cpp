@@ -843,6 +843,19 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/wireframe_on_16", mIcon16x16))
         .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/wireframe_on_16", mIcon16x16))
 	);
+
+    Set("CheckBox.BasicOnOff", FCheckBoxStyle()
+        //.Padding(FMargin(0,0,0,0))
+        .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
+        .SetForegroundColor(FLinearColor(0, 0, 0, 0))
+        .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
+        .SetUncheckedImage(FSlateColorBrush(FLinearColor::Transparent))
+        .SetUncheckedHoveredImage(FSlateColorBrush(FLinearColor(1, 1, 1, 0.25)))
+        .SetUncheckedPressedImage(FSlateColorBrush(FLinearColor(1, 1, 1, 0.25)))
+        .SetCheckedImage(FSlateColorBrush(FLinearColor(1, 1, 1, 0.25 )))
+        .SetCheckedHoveredImage(FSlateColorBrush(FLinearColor(1, 1, 1, 0.25)))
+        .SetCheckedPressedImage(FSlateColorBrush(FLinearColor::Transparent))
+    );
 #endif
 }
 
