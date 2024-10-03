@@ -189,6 +189,9 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
     currentFrameMutator.Commit();
 
     layer->RemoveCells(selectedCells);
+
+	if (layer->GetCells().IsEmpty())
+		layer->AddCell(layer->DefaultCellClass);
 }
 
 
