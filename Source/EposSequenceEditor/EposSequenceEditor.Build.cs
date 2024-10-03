@@ -139,6 +139,8 @@ public class EposSequenceEditor : ModuleRules
             //string AxProtectorSDKPath = "/Applications/WIBU-SYSTEMS Devkit/AxProtector";
 
             //PublicSystemIncludePaths.Add(Path.Combine(AxProtectorSDKPath, "ctp", "pass", "include"));
+
+            PublicDefinitions.Add("USE_WIBU_CTP");
         }
 
         string pathfile_to_protection_specification = Path.Combine(PluginDirectory, "Wibu", "ProtectionSpecification.yaml");
