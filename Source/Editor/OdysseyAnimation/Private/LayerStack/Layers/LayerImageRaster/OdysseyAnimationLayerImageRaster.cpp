@@ -317,6 +317,20 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
     UOdysseyAnimation* animation = GetAnimation();
     //Check if iFrameIndex is Out Of Range
     FInt32Range range = GetFrameRange();
+
+	//special case when there is no cells in the layer and current frame is exactly at cells offset
+	if (iFrameIndex == range.GetLowerBoundValue() && iFrameIndex == range.GetUpperBoundValue())
+	{
+		//Add a frame at current frame and extend it
+		Modify();
+		UOdysseyAnimationCell* cell = AddCell(UOdysseyAnimationCellImageRaster::StaticClass(), 0);
+
+		FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
+        currentFrameMutator.Set(animation->CurrentFrame);
+        currentFrameMutator.Commit();
+        return;
+	}
+
     if ( iFrameIndex < range.GetLowerBoundValue())
     {
         //Add a frame at current frame and extend it
@@ -334,10 +348,18 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
     if ( iFrameIndex > range.GetUpperBoundValue())
     {
 		Modify();
-        int cellExposure = Cells.Last()->Exposure + iFrameIndex - range.GetUpperBoundValue() - 1;
-		FOdysseyObjectEditorUtils::SetPropertyValue(Cells.Last(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cellExposure);
-		UOdysseyAnimationCell* cell = AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
 
+		UOdysseyAnimationCell* lastCell = Cells.IsEmpty() ? nullptr : Cells.Last();
+		int cellExposure = iFrameIndex - CellsOffset + 1;
+		if(lastCell)
+		{
+			cellExposure = 1;
+        	int lastCellExposure = lastCell->Exposure + iFrameIndex - range.GetUpperBoundValue() - 1;
+			FOdysseyObjectEditorUtils::SetPropertyValue(lastCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), lastCellExposure);
+		}
+		UOdysseyAnimationCell* cell = AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
+		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cellExposure);
+		
         FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
         currentFrameMutator.Set(animation->CurrentFrame);
         currentFrameMutator.Commit();

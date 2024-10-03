@@ -56,9 +56,14 @@ UOdysseyAnimationLayer::GetFrameRange() const
         ranges.Add(animationLayer->GetFrameRange());
     }
 
-	if (!Cells.IsEmpty())
+	
+	if (Cells.IsEmpty())
 	{
-		ranges.Add(FInt32Range::Inclusive(Cells[0]->GetFrameRange().GetLowerBoundValue(), Cells.Last()->GetFrameRange().GetUpperBoundValue() ));
+		ranges.Add(FInt32Range::Exclusive(CellsOffset, CellsOffset ));
+	}
+	else
+	{
+		ranges.Add(FInt32Range::Inclusive(CellsOffset, Cells.Last()->GetFrameRange().GetUpperBoundValue() ));
 	}
 
     return FInt32Range::Hull(ranges);
