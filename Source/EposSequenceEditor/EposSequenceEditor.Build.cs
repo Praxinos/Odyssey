@@ -130,15 +130,15 @@ public class EposSequenceEditor : ModuleRules
 
         if (Target.Platform.IsInGroup(UnrealPlatformGroup.Windows))
         {
-            string AxProtectorSDKPath = Environment.GetEnvironmentVariable("AXPROTECTOR_SDK");
+            //string AxProtectorSDKPath = Environment.GetEnvironmentVariable("AXPROTECTOR_SDK");
 
-            PublicSystemIncludePaths.Add(Path.Combine(AxProtectorSDKPath, "bin", "ctp", "pass", "include"));
+            //PublicSystemIncludePaths.Add(Path.Combine(AxProtectorSDKPath, "bin", "ctp", "pass", "include"));
         }
         else if (Target.Platform == UnrealTargetPlatform.Mac)
         {
-            string AxProtectorSDKPath = "/Applications/WIBU-SYSTEMS Devkit/AxProtector";
+            //string AxProtectorSDKPath = "/Applications/WIBU-SYSTEMS Devkit/AxProtector";
 
-            PublicSystemIncludePaths.Add(Path.Combine(AxProtectorSDKPath, "ctp", "pass", "include"));
+            //PublicSystemIncludePaths.Add(Path.Combine(AxProtectorSDKPath, "ctp", "pass", "include"));
         }
 
         string pathfile_to_protection_specification = Path.Combine(PluginDirectory, "Wibu", "ProtectionSpecification.yaml");
