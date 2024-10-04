@@ -28,6 +28,14 @@ UOdysseyPainterEditorVectorTagInbetweenerView::UOdysseyPainterEditorVectorTagInb
            , FOdysseyVectorTagInbetweener::DEFAULT_GREEN_UINT8
            , FOdysseyVectorTagInbetweener::DEFAULT_BLUE_UINT8
            , FOdysseyVectorTagInbetweener::DEFAULT_ALPHA_UINT8 )
+    , ChartColor( FOdysseyVectorTagInbetweener::CHART_DEFAULT_RED_UINT8
+                , FOdysseyVectorTagInbetweener::CHART_DEFAULT_GREEN_UINT8
+                , FOdysseyVectorTagInbetweener::CHART_DEFAULT_BLUE_UINT8
+                , FOdysseyVectorTagInbetweener::CHART_DEFAULT_ALPHA_UINT8 )
+    , GridColor( FOdysseyVectorTagInbetweener::GRID_DEFAULT_RED_UINT8
+               , FOdysseyVectorTagInbetweener::GRID_DEFAULT_GREEN_UINT8
+               , FOdysseyVectorTagInbetweener::GRID_DEFAULT_BLUE_UINT8
+               , FOdysseyVectorTagInbetweener::GRID_DEFAULT_ALPHA_UINT8 )
 {
 }
 
@@ -50,6 +58,8 @@ UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
         GridType = selectedInbetweenerTag->GetGridType();
         //DrawingCount = selectedInbetweenerTag->GetDrawingCount();
         Color = selectedInbetweenerTag->GetColor();
+        ChartColor = selectedInbetweenerTag->GetChartColor();
+        GridColor = selectedInbetweenerTag->GetGridColor();
         MapAsPolyline = selectedInbetweenerTag->GetMapAsPolyline();
         Square = selectedInbetweenerTag->IsSquare();
 
@@ -176,6 +186,12 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
         if( iPropertyName == "Color" )
             selectedInbetweenerTag->SetColor( Color );
 
+        if( iPropertyName == "ChartColor" )
+            selectedInbetweenerTag->SetChartColor( ChartColor );
+
+        if( iPropertyName == "GridColor" )
+            selectedInbetweenerTag->SetGridColor( GridColor );
+
         // must be last to be able to update correctly grid type-dependent fields
         if( iPropertyName == "GridType" )
         {
@@ -216,7 +232,9 @@ UOdysseyPainterEditorVectorTagInbetweenerView::MakeUndo( const FName& iPropertyN
                                                            , mSelectedInbetweenerTagArray
                                                            , notificationFlags );
 
-    if( iPropertyName == "Color" )
+    if( ( iPropertyName == "Color"      )
+      ||( iPropertyName == "ChartColor" )
+      ||( iPropertyName == "GridColor"  ) )
         return new FOdysseyVectorUndoTagInbetweenerColor( mScene
                                                         , mSelectedInbetweenerTagArray
                                                         , notificationFlags );

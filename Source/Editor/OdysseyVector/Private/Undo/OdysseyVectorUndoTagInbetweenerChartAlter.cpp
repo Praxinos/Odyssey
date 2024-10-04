@@ -49,6 +49,27 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChar
     }
 }
 
+FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChartAlter( FOdysseyVectorSharedEnv* iSharedEnv
+                                                                                      , const std::list<FOdysseyVectorTag*>& iTagList
+                                                                                      , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
+{
+    GetEngineListFromTagList( iTagList, mEngineList );
+
+    mInbetweenerTagSnapshotBuffer.reserve( iTagList.size() );
+
+    for( FOdysseyVectorTag* tag : iTagList )
+    {
+        FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+        mInbetweenerTagSnapshotBuffer.emplace_back( inbetweenerTag
+                                                  , 0
+                                                  , FSnapshotFlags::Breakdown::CHART
+                                                  , 0
+                                                  , 0 );
+    }
+}
+
 void
 FOdysseyVectorUndoTagInbetweenerChartAlter::Apply( UObject* iIgnored )
 {

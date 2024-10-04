@@ -38,6 +38,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeader
                                            , const TSharedRef<STableViewBase>& iOwnerTable );
         TSharedPtr<SWidget> OnContextMenuOpening();
         void RemoveInbetweenerTag();
+        void ResetSpacingCharts();
         void Commit();
 
     private :

@@ -461,6 +461,8 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         uint32 gridSizeY;
         uint32 ARAPRigidity;
         FColor color;
+        FColor chartColor;
+        FColor gridColor;
         bool mapAsPolyline;
         bool square;
 
@@ -572,6 +574,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
                                                        , std::list<FOdysseyVectorEngine*>& oEngineList );
         static void GetEngineListFromInbetweenerTagArray( const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
                                                         , std::list<FOdysseyVectorEngine*>& oEngineList );
+        static void GetEngineListFromTagList( const std::list<FOdysseyVectorTag*>& iTagList
+                                            , std::list<FOdysseyVectorEngine*>& oEngineList );
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
 

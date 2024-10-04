@@ -73,6 +73,22 @@ FOdysseyVectorUndo::GetEngineListFromInbetweenerTagList( const std::list<FOdysse
 
 //static
 void
+FOdysseyVectorUndo::GetEngineListFromTagList( const std::list<FOdysseyVectorTag*>& iTagList
+                                            , std::list<FOdysseyVectorEngine*>& oEngineList )
+{
+    for( FOdysseyVectorTag* tag : iTagList )
+    {
+        FOdysseyVectorEngine* engine = tag->GetOwner()->GetEngine();
+
+        if( std::find( oEngineList.begin(), oEngineList.end(), engine ) == oEngineList.end() )
+        {
+            oEngineList.push_back( engine );
+        }
+    }
+}
+
+//static
+void
 FOdysseyVectorUndo::GetEngineListFromInbetweenerTagArray( const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
                                                         , std::list<FOdysseyVectorEngine*>& oEngineList )
 {
@@ -605,6 +621,8 @@ FSnapshotInbetweenerBreakdown::RecordLocalState( FSnapshotInbetweenerBreakdown::
                                           , iState->scalingX
                                           , iState->scalingY );
         }
+
+        iState->inited = true;
     }
 }
 
@@ -705,12 +723,16 @@ FSnapshotTagInbetweener::RecordLocalState( FSnapshotTagInbetweener::State* iStat
         if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::COLOR )
         {
             iState->color = mInbetweenerTag->GetColor();
+            iState->chartColor = mInbetweenerTag->GetChartColor();
+            iState->gridColor = mInbetweenerTag->GetGridColor();
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE )
         {
             iState->mapAsPolyline = mInbetweenerTag->GetMapAsPolyline();
         }
+
+        iState->inited = true;
     }
 }
 
@@ -820,6 +842,8 @@ FSnapshotTagInbetweener::LoadLocalState( FSnapshotTagInbetweener::State* iState 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::COLOR )
     {
         mInbetweenerTag->SetColor( iState->color );
+        mInbetweenerTag->SetChartColor( iState->chartColor );
+        mInbetweenerTag->SetGridColor( iState->gridColor );
     }
 
     return true; // restore succeeded

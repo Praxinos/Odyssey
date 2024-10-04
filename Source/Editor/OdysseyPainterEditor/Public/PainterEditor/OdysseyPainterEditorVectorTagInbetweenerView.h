@@ -48,16 +48,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
         bool SelectionHasRoutes();
 
     public:
-/*
-        UPROPERTY( EditAnywhere
-                 , Category = "Inbetweener"
-                 , meta = ( ToolTip  = "Drawing Count"
-                          , ClampMin = "2"
-                          , ClampMax = "16"
-                          , UIMin    = "2"
-                          , UIMax    = "16" ) )
-        uint32 DrawingCount;
-*/
+
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"
                  , meta = ( ToolTip  = "Interpolation Type" ) )
@@ -87,18 +78,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
                           , UIMin    = "1"
                           , UIMax    = "32" ) )
         uint32 DivisionY;
-/*
-        UPROPERTY( EditAnywhere
-                 , Category = "Inbetweener"
-                 , meta = ( ToolTip  = "Rigidity"
-                          , EditCondition = "( GridType == eInbetweenerGridType::ARAP )"
-                          , EditConditionHides
-                          , ClampMin = "1"
-                          , ClampMax = "100"
-                          , UIMin    = "1"
-                          , UIMax    = "100" ) )
-        uint32 Rigidity;
-*/
+
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"
                  , meta = ( ToolTip  = "Map As Polyline" ) )
@@ -110,7 +90,17 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
         bool Square;
 
         UPROPERTY( EditAnywhere
-                 , Category = "Inbetweener"
+                 , Category = "Coloring"
                  , meta = ( ToolTip  = "Color" ) )
         FColor Color;
+
+        UPROPERTY( EditAnywhere
+                 , Category = "Coloring"
+                 , meta = ( ToolTip  = "Chart Color" ) )
+        FColor ChartColor;
+
+        UPROPERTY( EditAnywhere
+                 , Category = "Coloring"
+                 , meta = ( ToolTip  = "Grid Color" ) )
+        FColor GridColor;
 };

@@ -13,6 +13,17 @@ struct FChartDivision;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
+    struct FGlyph
+    {
+        char str[6];
+        ::ULIS::FRectI bbox;
+
+        FGlyph()
+            : bbox ( 0, 0, 0, 0 )
+        {
+        }
+    };
+
     public:
         //static const uint32 HANDLE_RADIUS = 5;
 
@@ -34,6 +45,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
         ::ULIS::FVec2D* PickBezierPoint( double iWorldX
                                        , double iWorldY
                                        , double iRadius );
+        const FGlyph* GetGlyph( uint32 iNum );
 
     private:
         void DrawChart( BLContext* iBLContext
@@ -48,4 +60,5 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
         FInbetweenerBreakdown* mBreakdown;
         ::ULIS::FRectD mChartRect;
         BLFont mFont;
+        std::vector<FGlyph> mGlyphBuffer;
 };

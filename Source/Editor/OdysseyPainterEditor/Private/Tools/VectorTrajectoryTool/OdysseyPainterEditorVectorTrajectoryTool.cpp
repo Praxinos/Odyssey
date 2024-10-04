@@ -19,6 +19,7 @@
 #include "undo/OdysseyVectorUndoTagInbetweenerStepAlign.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
+#define WARNING_LINEAR_ROUTE_FORBIDDEN "Trajectories are only allowed when interpolation type is set to ARAP"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -137,7 +138,21 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyUpGlobalVector( FOdysseyVectorGr
          | notificationFlags;
 }
 
+EMouseCursor::Type
+UOdysseyPainterEditorVectorTrajectoryTool::GetMouseCursor() const
+{
+    if( mTrajectoryHUD->GetSelectedInbetweenerTagList().size() )
+    {
+        FOdysseyVectorTagInbetweener* inbetweenerTag = mTrajectoryHUD->GetSelectedInbetweenerTagList().front();
 
+        if( inbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::Linear )
+        {
+            return EMouseCursor::SlashedCircle;
+        }
+    }
+
+    return EMouseCursor::Default;
+}
 
 uint64
 UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
@@ -160,28 +175,37 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
             if( mTrajectoryHUD->GetSelectedInbetweenerTagList().size() )
             {
                 FOdysseyVectorTagInbetweener* inbetweenerTag = mTrajectoryHUD->GetSelectedInbetweenerTagList().front();
-                BLMatrix2D& ownerInverseWorldMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
-                BLPoint pt = ownerInverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
-                FInbetweenerRoute* route = inbetweenerTag->AddRoute( ::ULIS::FVec2D( pt.x, pt.y ));
 
-                if( route )
+                if( inbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
                 {
-                    // needed for valid GUndo pointer
-                    GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.add","Vector Trajectory Tool"));
-                    if( GUndo )
+                    BLMatrix2D& ownerInverseWorldMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
+                    BLPoint pt = ownerInverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+                    FInbetweenerRoute* route = inbetweenerTag->AddRoute( ::ULIS::FVec2D( pt.x, pt.y ));
+
+                    if( route )
                     {
-                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerRouteAdd( iScene
-                                                                                                , inbetweenerTag
-                                                                                                , route
-                                                                                                , notificationFlags );
+                        // needed for valid GUndo pointer
+                        GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.add","Vector Trajectory Tool"));
+                        if( GUndo )
+                        {
+                            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerRouteAdd( iScene
+                                                                                                    , inbetweenerTag
+                                                                                                    , route
+                                                                                                    , notificationFlags );
 
-                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
-                        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-                        if (source)
-                            source->RecordCurrentFrameUndo();
+                            TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                            if (source)
+                                source->RecordCurrentFrameUndo();
+                        }
+                        GEditor->EndTransaction();
                     }
-                    GEditor->EndTransaction();
+                }
+                else
+                {
+                    FMessageDialog::Open( EAppMsgType::Ok
+                                        , FText::FromString( TEXT ( WARNING_LINEAR_ROUTE_FORBIDDEN ) ) );
                 }
             }
         }
@@ -328,11 +352,13 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseHoverVector( FOdysseyVectorGro
         {
             FOdysseyVectorTagInbetweener* inbetweenerTag = mTrajectoryHUD->GetSelectedInbetweenerTagList().front();
 
-            mHoveredQuad = mTrajectoryHUD->PickSourceQuad( inbetweenerTag->GetBreakdownList().front()->GetGrid()
-                                                         , iPointInTexture.x
-                                                         , iPointInTexture.y
-                                                         , PickingRadius );
-
+            if( inbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
+            {
+                mHoveredQuad = mTrajectoryHUD->PickSourceQuad( inbetweenerTag->GetBreakdownList().front()->GetGrid()
+                                                             , iPointInTexture.x
+                                                             , iPointInTexture.y
+                                                             , PickingRadius );
+            }
         }
     }
 

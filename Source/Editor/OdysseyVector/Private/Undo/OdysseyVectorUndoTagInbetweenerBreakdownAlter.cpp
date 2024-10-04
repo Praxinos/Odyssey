@@ -80,7 +80,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    for( FSnapshotTagInbetweener inbetweenerTagsnapshot : mInbetweenerTagSnapshotArray )
+    for( FSnapshotTagInbetweener& inbetweenerTagsnapshot : mInbetweenerTagSnapshotArray )
     {
         inbetweenerTagsnapshot.LoadAlteredState();
     }
@@ -100,7 +100,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    for( FSnapshotTagInbetweener inbetweenerTagsnapshot : mInbetweenerTagSnapshotArray )
+    for( FSnapshotTagInbetweener& inbetweenerTagsnapshot : mInbetweenerTagSnapshotArray )
     {
         inbetweenerTagsnapshot.RecordAlteredState();
         inbetweenerTagsnapshot.LoadInitialState();

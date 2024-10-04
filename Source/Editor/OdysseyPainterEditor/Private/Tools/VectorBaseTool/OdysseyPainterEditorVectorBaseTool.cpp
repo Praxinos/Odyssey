@@ -1187,11 +1187,11 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FMenuBuilder& m
                 , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetInbetweenerGrid, GetEditor(), vectorScene )));
 
             menu.AddMenuEntry(
-                  LOCTEXT("vector-tool.inbetween-context-menu.reset-spacing-chart.name", "Reset Spacing Chart")
-                , LOCTEXT("vector-tool.inbetween-context-menu.reset-spacing-chart.tooltip", "Reset Spacing Chart")
+                  LOCTEXT("vector-tool.inbetween-context-menu.reset-breakdown-spacing-chart.name", "Reset Spacing Chart")
+                , LOCTEXT("vector-tool.inbetween-context-menu.reset-breakdown-spacing-chart.tooltip", "Reset Spacing Chart")
                 , FSlateIcon()
-                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetSpacingChart, GetEditor(), vectorScene )));
-
+                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetBreakdownSpacingChart, GetEditor(), vectorScene )));
+/*
             menu.AddMenuEntry(
                   LOCTEXT("vector-tool.inbetween-context-menu.copy-spacing-chart.name", "Copy Spacing Chart")
                 , LOCTEXT("vector-tool.inbetween-context-menu.copy-spacing-chart.tooltip", "Copy Spacing Chart")
@@ -1203,6 +1203,7 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FMenuBuilder& m
                 , LOCTEXT("vector-tool.inbetween-context-menu.paste-spacing-chart.tooltip", "Paste Spacing Chart")
                 , FSlateIcon()
                 , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::PasteSpacingChart, GetEditor(), vectorScene )));
+*/
         }
     }
 

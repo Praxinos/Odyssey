@@ -120,6 +120,10 @@ SOdysseyAnimationTimelineInbetweeningHeader::OnContextMenuOpening()
                      , FSlateIcon()
                      , FUIAction(FExecuteAction::CreateSP( this, &SOdysseyAnimationTimelineInbetweeningHeader::Commit )));
 
+    menu.AddMenuEntry( LOCTEXT("vector-tool.inbetweening-context-menu.reset-spacing-charts.name", "Reset spacing charts")
+                     , LOCTEXT("vector-tool.inbetweening-context-menu.reset-spacing-charts.tooltip", "Reset spacing charts")
+                     , FSlateIcon()
+                     , FUIAction(FExecuteAction::CreateSP( this, &SOdysseyAnimationTimelineInbetweeningHeader::ResetSpacingCharts )));
 
     return menu.MakeWidget();
 }
@@ -129,6 +133,15 @@ SOdysseyAnimationTimelineInbetweeningHeader::Commit()
 {
     FOdysseyPainterEditor::CommitSelectedInbetweenerTag( mAnimationEditorExtension->GetEditor()
                                                        , mAnimationLayerImageVector->GetSharedEnv() );
+}
+
+void
+SOdysseyAnimationTimelineInbetweeningHeader::ResetSpacingCharts()
+{
+    FOdysseyPainterEditor::ResetInbetweenerTagSpacingChart( mAnimationEditorExtension->GetEditor()
+                                                          , mAnimationLayerImageVector->GetSharedEnv() );
+
+
 }
 
 void

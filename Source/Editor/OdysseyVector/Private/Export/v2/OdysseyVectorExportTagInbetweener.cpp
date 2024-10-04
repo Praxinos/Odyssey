@@ -260,6 +260,48 @@ FOdysseyVectorExportV2::WriteTagInbetweenerColor( FOdysseyVectorTagInbetweener& 
 }
 
 void
+FOdysseyVectorExportV2::WriteTagInbetweenerChartColor( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                     , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_CHARTCOLOR
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        FColor color = iInbetweenerTag.GetChartColor();
+        uint8 r8 = color.R;
+        uint8 g8 = color.G;
+        uint8 b8 = color.B;
+        uint8 a8 = color.A;
+
+        Ar << r8;
+        Ar << g8;
+        Ar << b8;
+        Ar << a8;
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteTagInbetweenerGridColor( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                     , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRIDCOLOR
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        FColor color = iInbetweenerTag.GetGridColor();
+        uint8 r8 = color.R;
+        uint8 g8 = color.G;
+        uint8 b8 = color.B;
+        uint8 a8 = color.A;
+
+        Ar << r8;
+        Ar << g8;
+        Ar << b8;
+        Ar << a8;
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteTagInbetweenerMapAsPolyline( FOdysseyVectorTagInbetweener& iInbetweenerTag
                                                         , FArchive &Ar )
 {
@@ -281,13 +323,14 @@ FOdysseyVectorExportV2::WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbe
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
         WriteTagInbetweenerColor( iInbetweenerTag, Ar );
+        WriteTagInbetweenerChartColor( iInbetweenerTag, Ar );
+        WriteTagInbetweenerGridColor( iInbetweenerTag, Ar );
         WriteTagInbetweenerDrawingCount( iInbetweenerTag, Ar );
         WriteTagInbetweenerMapAsPolyline( iInbetweenerTag, Ar );
         WriteTagInbetweenerTransform( iInbetweenerTag, Ar );
         WriteTagInbetweenerDeformation( iInbetweenerTag, Ar );
         WriteTagInbetweenerInterpolation( iInbetweenerTag, Ar );
         WriteTagInbetweenerDimension( iInbetweenerTag, Ar );
-        //WriteTagInbetweenerArapRigidity( iInbetweenerTag, Ar );
         WriteTagInbetweenerBreakdowns( iInbetweenerTag, Ar );
         WriteTagInbetweenerRoutes( iInbetweenerTag, Ar );
         WriteTagInbetweenerChart( iInbetweenerTag, Ar );

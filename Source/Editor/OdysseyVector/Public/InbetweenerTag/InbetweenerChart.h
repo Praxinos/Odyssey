@@ -42,5 +42,4 @@ class ODYSSEYVECTOR_API FInbetweenerChart
         FInbetweenerBreakdown* mBreakdown;
         std::vector<FChartDivision> mDivisionBuffer;
         ::ULIS::FVec2D mHUDBezier[3]; // quadratic bezier
-
 };

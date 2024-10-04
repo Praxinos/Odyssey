@@ -10,6 +10,7 @@
 #include "OdysseyVectorTagInbetweener.h"
 
 class FOdysseyVectorGroupPaint;
+class FOdysseyVectorSharedEnv;
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerChartAlter : public FOdysseyVectorUndo
 {
@@ -21,7 +22,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerChartAlter : public FOdy
         FOdysseyVectorUndoTagInbetweenerChartAlter( FOdysseyVectorGroupPaint* iScene
                                                   , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
                                                   , uint64 iReturnFlags );
-
+        FOdysseyVectorUndoTagInbetweenerChartAlter( FOdysseyVectorSharedEnv* iSharedEnv
+                                                  , const std::list<FOdysseyVectorTag*>& tagList
+                                                  , uint64 iReturnFlags );
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
 

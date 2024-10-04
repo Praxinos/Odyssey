@@ -203,6 +203,9 @@ FOdysseyVectorObject::UpdateShape( uint32 iUpdateFlags )
 void
 FOdysseyVectorObject::Update( uint32 iUpdateFlags )
 {
+    // prevents DrawShape() to be called while the object has'nt been updated
+    mDrawingMutex.lock();
+
     if( mInvalidationFlags )
     {
         // update children first by recursively calling the Update function and, if needed,
@@ -213,7 +216,6 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
 
                                                 return child->IsInvalidated() == false;
                                             } );
-
         UpdateShape( iUpdateFlags );
 
         // update tags
@@ -227,6 +229,8 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
             mInvalidationFlags = 0;
         }
     }
+
+    mDrawingMutex.unlock();
 }
 
 void
@@ -639,6 +643,8 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext
 {
     double combinedOpacity = iAncestorsOpacity *= mOpacity;
 
+    mDrawingMutex.lock();
+
     iBLContext->save();
     iBLContext->transform( mLocalMatrix );
 
@@ -656,6 +662,8 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext
     DrawTags( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
 
     iBLContext->restore();
+
+    mDrawingMutex.unlock();
 }
 
 bool

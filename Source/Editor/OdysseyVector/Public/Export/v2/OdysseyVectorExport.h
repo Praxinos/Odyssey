@@ -106,6 +106,8 @@ namespace FOdysseyVectorExportV2
 
     void ODYSSEYVECTOR_API WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerColor( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerChartColor( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerGridColor( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerDrawingCount( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerMapAsPolyline( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerChart( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );

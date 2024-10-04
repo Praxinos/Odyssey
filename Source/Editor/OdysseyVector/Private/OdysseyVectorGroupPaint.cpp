@@ -1053,28 +1053,6 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
             }
 
             Colorize();
-/*
-            if( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE )
-            {
-                if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
-                {
-                    mInvalidationFlags &= (~INVALIDATE_SHAPE);
-                }
-            }
-
-            if( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD )
-            {
-                if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
-                {
-                    mInvalidationFlags &= (~INVALIDATE_CHILD);
-                }
-            }
-
-            if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
-            {
-                mInvalidationFlags &= (~INVALIDATE_COLOR);
-            }
-*/
         }
     }
     else

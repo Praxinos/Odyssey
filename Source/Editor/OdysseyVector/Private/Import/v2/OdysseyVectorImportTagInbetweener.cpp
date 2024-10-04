@@ -35,6 +35,32 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                 }
                 break;
 
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_CHARTCOLOR:
+                {
+                    uint8 r, g, b, a;
+
+                    Ar << r;
+                    Ar << g;
+                    Ar << b;
+                    Ar << a;
+
+                    iInbetweenerTag.SetChartColor( FColor( r, g, b, a ) );
+                }
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_GRIDCOLOR:
+                {
+                    uint8 r, g, b, a;
+
+                    Ar << r;
+                    Ar << g;
+                    Ar << b;
+                    Ar << a;
+
+                    iInbetweenerTag.SetGridColor( FColor( r, g, b, a ) );
+                }
+                break;
+
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_LENGTH:
                 {
                     uint32 drawingCount;

@@ -234,6 +234,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         FInbetweenerBreakdown* GetBreakdownByTargetIndex( uint32 iDrawingIndex );
         bool IsTopSelectedTag();
         bool IsSquare();
+        FInbetweenerBreakdown* GetBreakdownByCellIndex( uint32 iCellIndex );
+        const FColor& GetChartColor();
+        void SetChartColor( const FColor& iChartColor );
+        const FColor& GetGridColor();
+        void SetGridColor( const FColor& iGridColor );
 
     protected:
         /**
@@ -273,6 +278,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         static const uint8 DEFAULT_GREEN_UINT8 = 0;
         static const uint8 DEFAULT_BLUE_UINT8  = 255;
         static const uint8 DEFAULT_ALPHA_UINT8 = 255;
+        static const uint8 CHART_DEFAULT_RED_UINT8   = 64;
+        static const uint8 CHART_DEFAULT_GREEN_UINT8 = 64;
+        static const uint8 CHART_DEFAULT_BLUE_UINT8  = 64;
+        static const uint8 CHART_DEFAULT_ALPHA_UINT8 = 255;
+        static const uint8 GRID_DEFAULT_RED_UINT8   = 255;
+        static const uint8 GRID_DEFAULT_GREEN_UINT8 = 0;
+        static const uint8 GRID_DEFAULT_BLUE_UINT8  = 0;
+        static const uint8 GRID_DEFAULT_ALPHA_UINT8 = 255;
 
         static const uint64 INVALIDATE_MAP               = ( 1LL <<  0 );
         static const uint64 INVALIDATE_RANGE             = ( 1LL <<  1 );
@@ -320,4 +333,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         bool bARAPPrecomputeSucceded;
         eInbetweenerInterpolationDirection mInterpolationDirection;
         bool bSquare;
+        FColor mChartColor;
+        FColor mGridColor;
 };

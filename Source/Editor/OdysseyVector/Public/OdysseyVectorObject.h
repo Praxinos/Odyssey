@@ -569,5 +569,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         double mTranslationY;
         double mRotation;
         double mScalingX;
-        double mScalingY; 
+        double mScalingY;
+        // mutex to prevent drawing whil update isn't complete. this is necessary due to the Proxy renderer
+        // which runs in a different thread
+        std::mutex mDrawingMutex;
 };

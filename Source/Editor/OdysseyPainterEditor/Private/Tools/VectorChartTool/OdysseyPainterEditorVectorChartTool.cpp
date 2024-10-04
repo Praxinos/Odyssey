@@ -128,6 +128,8 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
+        FOdysseyVectorTagInbetweener* inbetweenerTag = mChartHUD->GetBreakdown()->GetInbetweenerTag();
+
         if( mPickingMode == eChartPickingMode::Default )
         {
             mPickedInbetween = mChartHUD->PickInbetween( iPointInTexture.x
@@ -135,7 +137,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
 
             if( mPickedInbetween )
             {
-                FOdysseyVectorTagInbetweener* inbetweenerTag = mChartHUD->GetBreakdown()->GetInbetweenerTag();
+
 
                 // needed for valid GUndo pointer
                 GEditor->BeginTransaction(LOCTEXT("vector-chart-tool.transaction.edit-chart","Vector Chart Tool"));
@@ -160,6 +162,22 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
             mPickedBezierPoint = mChartHUD->PickBezierPoint( iPointInTexture.x
                                                            , iPointInTexture.y
                                                            , 10 );
+
+            // needed for valid GUndo pointer
+            GEditor->BeginTransaction(LOCTEXT("vector-chart-tool.transaction.edit-chart","Vector Chart Tool"));
+            if( GUndo )
+            {
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene
+                                                                                         , inbetweenerTag
+                                                                                         , notificationFlags );
+
+                GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+                TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                if (source)
+                    source->RecordCurrentFrameUndo();
+            }
+            GEditor->EndTransaction();
         }
     }
     // request redraw

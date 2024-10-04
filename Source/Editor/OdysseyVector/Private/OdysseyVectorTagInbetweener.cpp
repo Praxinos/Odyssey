@@ -73,6 +73,8 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
     , bARAPPrecomputeSucceded( false )
     , mInterpolationDirection( eInbetweenerInterpolationDirection::Forward )
     , bSquare ( true )
+    , mChartColor( 64, 64, 64, 255 )
+    , mGridColor( 255, 0, 0, 255 )
 {
     // the default breakdown (has range 0 <-> 1 )
     mBreakdownList.emplace_back( &mMasterBreakdown );
@@ -165,6 +167,30 @@ FOdysseyVectorTagInbetweener::Map()
 
     /* Map on first grid */
     mBreakdownList.front()->GetGrid()->MapInterpolatedPaths( mInterpolatedPathBuffer );
+}
+
+const FColor&
+FOdysseyVectorTagInbetweener::GetChartColor()
+{
+    return mChartColor;
+}
+
+void
+FOdysseyVectorTagInbetweener::SetChartColor( const FColor& iChartColor )
+{
+    mChartColor = iChartColor;
+}
+
+const FColor&
+FOdysseyVectorTagInbetweener::GetGridColor()
+{
+    return mGridColor;
+}
+
+void
+FOdysseyVectorTagInbetweener::SetGridColor( const FColor& iGridColor )
+{
+    mGridColor = iGridColor;
 }
 
 std::list<FInbetweenerRoute*>&
@@ -490,6 +516,21 @@ FOdysseyVectorTagInbetweener::GetBreakdownByTargetIndex( uint32 iDrawingIndex )
 }
 
 FInbetweenerBreakdown*
+FOdysseyVectorTagInbetweener::GetBreakdownByCellIndex( uint32 iCellIndex )
+{
+    uint32 tagCellIndex = mScene->GetEngine()->GetAnimationCell()->GetIndex();
+    int32 drawingIndex = ( mInterpolationDirection == eInbetweenerInterpolationDirection::Forward ) ? ( iCellIndex - tagCellIndex )
+                                                                                                    : ( tagCellIndex - iCellIndex );
+
+    if( drawingIndex >= 0 )
+    {
+        return GetBreakdown( drawingIndex, false );
+    }
+
+    return nullptr;
+}
+
+FInbetweenerBreakdown*
 FOdysseyVectorTagInbetweener::GetBreakdown( uint32 iDrawingIndex, bool iStrict )
 {
     std::list<FInbetweenerBreakdown*>::iterator curBreakdownIterator = GetBreakdownItem( iDrawingIndex, iStrict );
@@ -722,13 +763,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         {
             breakdown->GetGrid()->UpdateCenterOfMass( iUpdateFlags, mInvalidationFlags );
         }
-/*
-        if( ( mInvalidationFlags & INVALIDATE_RANGE          )
-         || ( mInvalidationFlags & INVALIDATE_BREAKDOWN_LIST ) )
-        {
-            ResizeRoutes();
-        }
-*/
+
         // Precompute ARAP interpolation after the grid and routes have been updated
         if( ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEGRID          )
          || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID          )
@@ -794,45 +829,6 @@ FOdysseyVectorTagInbetweener::Invalidate( uint64 iInvalidationFlags )
 
     mInvalidationFlags |= iInvalidationFlags;
 }
-/*
-BLMatrix2D&
-FOdysseyVectorTagInbetweener::GetTargetWorldMatrix()
-{
-    return mTargetWorldMatrix;
-}
-
-BLMatrix2D&
-FOdysseyVectorTagInbetweener::GetTargetInverseWorldMatrix()
-{
-    return mTargetInverseWorldMatrix;
-}
-*/
-/*
-void
-FOdysseyVectorTagInbetweener::ResetChart()
-{
-    mChart.Reset();
-}
-
-void
-FOdysseyVectorTagInbetweener::ResizeChart()
-{
-    mChart.Resize();
-}
-
-FInbetweenerChart&
-FOdysseyVectorTagInbetweener::GetChart()
-{
-    return mChart;
-}
-void
-FOdysseyVectorTagInbetweener::SetChart( const FInbetweenerChart& iChart )
-{
-    mChart = iChart;
-
-    Invalidate( INVALIDATE_SPACING | INVALIDATE_CELLS );
-}
-*/
 
 void
 FOdysseyVectorTagInbetweener::ResizeDrawings()
@@ -910,23 +906,6 @@ FOdysseyVectorTagInbetweener::DispatchDrawings()
                 breakdown->GetChart()->GetDivisionBuffer()[chartDivisionIndex].drawing = &mDrawingBuffer[i];
             }
         }
-/*
-        for( uint32 i = 0; i < GetDrawingCount(); i++ )
-        {
-            FInbetweenerDrawing* inbetween = mChart.GetDrawing( i );
-
-            if( ( i >= sourceDrawingIndex ) && ( i < targetDrawingIndex ) )
-            {
-                double spacing = inbetween->spacing;
-
-                inbetween->breakdown = breakdown;
-                // compute the spacing relative to the start of the breakdown
-                inbetween->breakdownSpacing = ( spacing - breakdownFirstSpacing ) / ( breakdownLastSpacing - breakdownFirstSpacing );
-            }
-        }
-
-        breakdownFirstSpacing = breakdownLastSpacing;
-*/
     }
 }
 
@@ -934,7 +913,6 @@ void
 FOdysseyVectorTagInbetweener::DeformGridAtInbetween( FChartDivision *iInbetween )
 {
     double t = iInbetween->spacing;
-    //::ULIS::FRectD bbox = mSourceBBox;
 
     if( mInterpolationType == eInbetweenerInterpolationType::Linear )
     {
@@ -977,23 +955,7 @@ FOdysseyVectorTagInbetweener::GetLength()
 {
     return mBreakdownList.back()->GetTargetDrawingIndex() + 1;
 }
-/*
-void
-FOdysseyVectorTagInbetweener::SetDrawingCount( uint32 iDrawingCount )
-{
-    uint32 minDrawingCount = ::ULIS::FMath::Max( (int)iDrawingCount, 2 );
 
-    mBreakdownList.back()->SetTargetDrawingIndex( minDrawingCount - 1 );
-
-    Invalidate( INVALIDATE_SPACING
-              | INVALIDATE_BUFFERS
-              | INVALIDATE_CELLS );
-
-    ResetChart();
-
-    RedrawAnimationCells( minDrawingCount );
-}
-*/
 void
 FOdysseyVectorTagInbetweener::RedrawAnimationCells()
 {
@@ -1055,16 +1017,6 @@ FOdysseyVectorTagInbetweener::RedrawAnimationCells( uint32 iDrawingCount )
 void
 FOdysseyVectorTagInbetweener::Interpolate()
 {
-    if( mInterpolationType == eInbetweenerInterpolationType::ARAP )
-    {
-/*
-        if( mGrid->PrecomputeARAPInterpolation() == false )
-        {
-            UE_LOG( LogTemp, Warning, TEXT("ERROR DURING PRECOMPUTE"));
-        }
-*/
-    }
-
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
         breakdown->InterpolateTransform();
@@ -1082,16 +1034,6 @@ FOdysseyVectorTagInbetweener::Interpolate()
             DeformPathsAtInbetween( inbetween );
         }
     }
-
-    //UE_LOG( LogTemp, Warning, TEXT("Interpolate geometry"));
-/*
-    for( uint32 i = 0; i < mDrawingCount; i++ )
-    {
-        InterpolateTransform( i );
-        DeformPathsAtInbetween( i );
-    }
-*/
-    //UE_LOG( LogTemp, Warning, TEXT("-------------------"));
 }
 
 /*
@@ -1140,9 +1082,7 @@ FOdysseyVectorTagInbetweener::Draw( BLContext* iBLContext
                                   , double iAncestorsOpacity
                                   , uint64 iDrawingFlags )
 {
-    //DrawPaths( iBLContext, iInvalidationArea, iAncestorsOpacity, iDrawingFlags );
 
-    //DrawGrid( iBLContext, iInvalidationArea, iAncestorsOpacity, iDrawingFlags );
 }
 
 // when drawn as a shared tag
@@ -1594,18 +1534,13 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                             transformedLocalPosition = FOdysseyVector::MapPoint( drawing->localMatrix, ::ULIS::FVec2D( commitPosition->x
                                                                                                                      , commitPosition->y ) );
 
-/*
-                            transformedWorldPosition = ownerWorldMatrix.mapPoint( transformedLocalPosition.x
-                                                                                , transformedLocalPosition.y );
-*/
+
                             interpolatedPoint->mOriginalPoint->Set( transformedLocalPosition.x
                                                                   , transformedLocalPosition.y );
 
                             *commitPosition = swapPosition;
                         }
                     }
-
-                    //tag->GetOwner()->RemoveTag( tag );
                 }
 
                 return copyFlags;

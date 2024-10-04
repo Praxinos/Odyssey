@@ -21,6 +21,7 @@
 #include "Models/OdysseyPainterEditorCommands.h"
 
 #include "OdysseyVector.h"
+#include "OdysseyVectorAnimationCell.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorObject.h"
@@ -1808,22 +1809,25 @@ FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor, FOd
 
 // static
 void
-FOdysseyPainterEditor::ResetSpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::ResetBreakdownSpacingChart( FOdysseyPainterEditor* iEditor
+                                                 , FOdysseyVectorGroupPaint* iScene )
 {
-    std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    std::list<FOdysseyVectorTag*> selectedTagList;
+    uint32 cellIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex();
 
-    vectorEngine->GetSelectedInbetweenerTagList( selectedInbetweenerTagList );
+    iScene->GetSharedEnv()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
+                                                     , selectedTagList );
 
-    if( selectedInbetweenerTagList.size() )
+    if( selectedTagList.size() )
     {
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.reset-chart","Reset Spacing Chart"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene
-                                                                                     , selectedInbetweenerTagList
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene->GetSharedEnv()
+                                                                                     , selectedTagList
                                                                                      , notificationFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
@@ -1834,22 +1838,74 @@ FOdysseyPainterEditor::ResetSpacingChart( FOdysseyPainterEditor* iEditor, FOdyss
         }
         GEditor->EndTransaction();
 
-        for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
+        for( FOdysseyVectorTag* tag : selectedTagList )
         {
-            for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
+            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+            FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdownByCellIndex( cellIndex );
+
+            if( breakdown )
             {
                 breakdown->GetChart()->Reset();
             }
         }
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     // request redraw
     vectorEngine->Invalidate( 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( iScene, notificationFlags );
+    FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
+}
+
+// static
+void
+FOdysseyPainterEditor::ResetInbetweenerTagSpacingChart( FOdysseyPainterEditor* iEditor
+                                                      , FOdysseyVectorSharedEnv* iSharedEnv )
+{
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    std::list<FOdysseyVectorTag*> selectedTagList;
+
+    iSharedEnv->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
+                                         , selectedTagList );
+
+    if( selectedTagList.size() )
+    {
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.reset-chart","Reset Spacing Chart"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iSharedEnv
+                                                                                     , selectedTagList
+                                                                                     , notificationFlags );
+
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                
+            TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
+        }
+        GEditor->EndTransaction();
+
+        for( FOdysseyVectorTag* tag : selectedTagList )
+        {
+            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+            for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
+            {
+                breakdown->GetChart()->Reset();
+            }
+
+             // request redraw
+            inbetweenerTag->GetOwner()->GetEngine()->Invalidate( 0 );
+        }
+    }
+
+    iSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+    // call callbacks if any (for refreshing GUI e.g)
+    FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
 }
 
 // static

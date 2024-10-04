@@ -39,13 +39,18 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawTargetGrid( BLContext* iBLContex
                                                           , const BLRgba32& iBgColor
                                                           , const BLRgba32& iHcColor )
 {
+    FOdysseyVectorTagInbetweener* inbetweenerTag = iBreakdown->GetInbetweenerTag();
+    BLRgba32 gridColor = BLRgba32( inbetweenerTag->GetGridColor().R
+                                 , inbetweenerTag->GetGridColor().G
+                                 , inbetweenerTag->GetGridColor().B
+                                 , inbetweenerTag->GetGridColor().A );
     iBLContext->save();
     iBLContext->resetMatrix();
 
-    iBLContext->setStrokeStyle( iHcColor );
+    iBLContext->setStrokeStyle( gridColor );
     iBLContext->setStrokeWidth( 1.0f );
 
-    BLMatrix2D worldMatrix = iBreakdown->GetInbetweenerTag()->GetOwner()->GetWorldMatrix();
+    BLMatrix2D worldMatrix = inbetweenerTag->GetOwner()->GetWorldMatrix();
     BLMatrix2D& localMatrix = iBreakdown->GetTargetLocalMatrix();
 
     worldMatrix.transform( localMatrix );
