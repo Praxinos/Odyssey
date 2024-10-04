@@ -126,6 +126,7 @@ public class EposSequenceEditor : ModuleRules
 
         //--- WIBU
 
+        /*
         PCHUsage = PCHUsageMode.NoPCHs;
 
         if (Target.Platform.IsInGroup(UnrealPlatformGroup.Windows))
@@ -150,5 +151,19 @@ public class EposSequenceEditor : ModuleRules
         // (See Wibu Ticket T-165355)
         Environment.SetEnvironmentVariable("WIBU_CTP_YAML_PATH", pathfile_to_protection_specification);
         //PublicDefinitions.Add($"WIBU_CTP_YAML_PATH=\"{pathfile_to_protection_specification}\"");
+        */
+
+        string enable_wibu_encryption = Environment.GetEnvironmentVariable("ENABLE_WIBU_ENCRYPTION");
+        if( enable_wibu_encryption != null )
+        {
+            PCHUsage = PCHUsageMode.NoPCHs;
+            PublicDefinitions.Add("USE_WIBU_CTP");
+        }
+
+        // For XCode -> To generate environment variable at build time:
+        // Right click the project on the left
+        // Add new config file
+        // Write the environment variables inside said config file
+        // Left click on project, info, Configurations -> Add config file to wanted deployment target
     }
 }
