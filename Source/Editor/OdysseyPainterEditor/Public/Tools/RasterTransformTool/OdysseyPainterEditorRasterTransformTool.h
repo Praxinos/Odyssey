@@ -59,12 +59,12 @@ public:
 private:
     int GetRotationAngleFromLastReference(FVector2D iPointInTexture);
 
-    void CreateTransformAreaFromSelection();
     EOdysseyTransformCapture DetectCaptureMode( FVector2D iPoint );
     void ConstrainToRectangle( FVector2D iPosition );
     void ConstrainToParallelogram(FVector2D iPosition);
 
-    void CreateTransformBlockFromSelectionBlock();
+    void UpdateTransformHUD(); // Update the HUD of the transform based on current selection
+    void UpdateTransformBlock(); // Update the pixel block of the transform based on current selection
     ::ULIS::FRectI GetTransformAreaBoundingRect();
     
     void BlendTransformAreaToPaintBlock();
@@ -100,8 +100,8 @@ private:
     FOdysseyRasterBlockMutator mRasterMutator;
 
     EOdysseyTransformCapture mTransformCaptureMode;
-    TSharedPtr<FOdysseyHUDElement> mTransformHUD;
-    TSharedPtr<FOdysseyHUDPolygon> mTransformArea;
+    TSharedPtr<FOdysseyHUDElement> mTransformToolHUD; // The whole HUD displayed by the tool, selection + transform 
+    TSharedPtr<FOdysseyHUDPolygon> mTransformAreaHUD; // The "rectangle" HUD with four handles used for the transformation
     TArray<TSharedPtr<FOdysseyHUDHandle>> mHandles;
 
     int mLastReferenceRotation;
@@ -109,7 +109,7 @@ private:
 
     EMouseCursor::Type mMouseCursor;
 
-    TSharedPtr<::ULIS::FBlock> mSelectionBlock;
-    TSharedPtr<::ULIS::FBlock> mTransformSelectionBlock;
+    TSharedPtr<::ULIS::FBlock> mSelectionBlock; // The base block we transform
+    TSharedPtr<::ULIS::FBlock> mTransformedBlock; // The transformed block
     ::ULIS::FRectI mSelectionBoundingBox;
 };

@@ -20,10 +20,10 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorRasterTransformTool::~UOdysseyPainterEditorRasterTransformTool()
 {
-    if (mTransformSelectionBlock)
+    if (mTransformedBlock)
     {
-        mTransformSelectionBlock.Reset();
-        mTransformSelectionBlock = nullptr;
+        mTransformedBlock.Reset();
+        mTransformedBlock = nullptr;
     }
 
     if (mSelectionBlock)
@@ -33,18 +33,18 @@ UOdysseyPainterEditorRasterTransformTool::~UOdysseyPainterEditorRasterTransformT
     }
 
     mHandles.Empty();
-    mTransformHUD->EmptyElements();
+    mTransformToolHUD->EmptyElements();
 }
 
 UOdysseyPainterEditorRasterTransformTool::UOdysseyPainterEditorRasterTransformTool()
     : mPaintEngine()
     , mRasterMutator(true)
     , mTransformCaptureMode(EOdysseyTransformCapture::NoCapture)
-    , mTransformHUD(MakeShared<FOdysseyHUDElement>())
-    , mTransformArea(nullptr)
+    , mTransformToolHUD(MakeShared<FOdysseyHUDElement>())
+    , mTransformAreaHUD(nullptr)
     , mMouseCursor(EMouseCursor::Crosshairs)
     , mSelectionBlock(nullptr)
-    , mTransformSelectionBlock(nullptr)
+    , mTransformedBlock(nullptr)
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform32");
 }
@@ -62,7 +62,7 @@ TSharedRef<SWidget> UOdysseyPainterEditorRasterTransformTool::CreateTopTabWidget
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if( !mTransformArea )
+    if( !mTransformAreaHUD )
         return false;
 
     FOdysseyPoint point = iPointInTexture;
@@ -72,14 +72,17 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& 
     mTransformCaptureMode = DetectCaptureMode( FVector2D( iPointInTexture.x, iPointInTexture.y ));
     mMouseLastReferencePoint = FVector2D(point.x, point.y);
     if( mTransformCaptureMode != EOdysseyTransformCapture::NoCapture )
+    {
+        UpdateTransformBlock();
         return true;
+    }
 
     return false;
 }
 
 void UOdysseyPainterEditorRasterTransformTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
-    if (!mTransformArea)
+    if (!mTransformAreaHUD)
         return;
 
     switch (DetectCaptureMode(FVector2D(iPointInTexture.x, iPointInTexture.y)))
@@ -94,7 +97,7 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseHover(const FOdysseyPoint&
 
 void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
-    if (!mTransformArea)
+    if (!mTransformAreaHUD)
         return;
 
     FOdysseyPoint point = iPointInTexture;
@@ -107,13 +110,16 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
         {
             mHandles[i]->SetPosition(mHandles[i]->GetPosition() - (mMouseLastReferencePoint - FVector2D(point.x, point.y)));
         }
-        TArray<FVector2D>& points = mTransformArea->GetPoints();
+        TArray<FVector2D>& points = mTransformAreaHUD->GetPoints();
         for (int i = 0; i < points.Num(); i++)
         {
             points[i] = mHandles[i]->GetPosition();
         }
 
         mMouseLastReferencePoint = FVector2D(point.x, point.y);
+
+        if (!Perspective)
+            ConstrainToRectangle(FVector2D(point.x, point.y));
     }
     else if (mTransformCaptureMode == EOdysseyTransformCapture::Rotation)
     {
@@ -121,7 +127,7 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
         int rotationDelta = GetRotationAngleFromLastReference(FVector2D(point.x, point.y)) - mLastReferenceRotation;
         mLastReferenceRotation += rotationDelta;
 
-        TArray<FVector2D>& points = mTransformArea->GetPoints();
+        TArray<FVector2D>& points = mTransformAreaHUD->GetPoints();
         double cosAngle = FMath::Cos(::FMath::DegreesToRadians(-rotationDelta));
         double sinAngle = FMath::Sin(::FMath::DegreesToRadians(-rotationDelta));
         for (int i = 0; i < points.Num(); i++)
@@ -131,17 +137,17 @@ void UOdysseyPainterEditorRasterTransformTool::OnMouseDrag(const FOdysseyPoint& 
             points[i] = mHandles[4]->GetPosition() + newPt;
             mHandles[i]->SetPosition( points[i] );
         }
+
+        if (!Perspective)
+            ConstrainToRectangle(FVector2D(point.x, point.y));
+
+        UpdateTransformBlock();
     }
-
-    if( !Perspective )
-        ConstrainToRectangle(FVector2D(point.x, point.y));
-
-    CreateTransformBlockFromSelectionBlock();
 }
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    if (!mTransformArea)
+    if (!mTransformAreaHUD)
         return false;
 
     FOdysseyPoint point = iPointInTexture;
@@ -179,7 +185,6 @@ bool UOdysseyPainterEditorRasterTransformTool::OnKeyUp(const FKey& iKey)
     else if( iKey == EKeys::Escape )
     {
         ClearTransform();
-        CreateTransformAreaFromSelection();
         return true;
     }
 
@@ -197,11 +202,11 @@ void UOdysseyPainterEditorRasterTransformTool::Load()
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnRasterSelectionChanged);
     mHUD->AddElement(rasterSelection->GetHUD());
-    mHUD->AddElement(mTransformHUD);
+    mHUD->AddElement(mTransformToolHUD);
 
     UpdateRasterSelection( true ); //Create new selection if empty
     
-    CreateTransformAreaFromSelection();
+    UpdateTransformHUD();
     UOdysseyPainterEditorTool::Load();
 }
 
@@ -210,7 +215,7 @@ void UOdysseyPainterEditorRasterTransformTool::Unload()
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->OnChanged().RemoveAll(this);
     mHUD->RemoveElement(rasterSelection->GetHUD());
-    mHUD->RemoveElement(mTransformHUD);
+    mHUD->RemoveElement(mTransformToolHUD);
 
     CommitTransform();
     
@@ -234,7 +239,7 @@ UOdysseyPainterEditorRasterTransformTool::GetRotationAngleFromLastReference( FVe
     point.X = FMath::RoundToInt(point.X);
     point.Y = FMath::RoundToInt(point.Y);
 
-    if( !mTransformArea )
+    if( !mTransformAreaHUD )
         return 0;
 
     FVector2D refPoint = mHandles[4]->GetPosition() - point;
@@ -242,7 +247,7 @@ UOdysseyPainterEditorRasterTransformTool::GetRotationAngleFromLastReference( FVe
     return FMath::RadiansToDegrees(FMath::Atan2(refPoint.X, refPoint.Y));
 }
 
-void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection()
+void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
 {
     if( !mSelectionBlock )
         return;
@@ -261,15 +266,15 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
     if (boundingBox.Area() <= 0)
         boundingBox = ::ULIS::FRectI::FromMinMax(0, 0, mediaRasters[0]->GetRasterBlock()->GetWidth(), mediaRasters[0]->GetRasterBlock()->GetHeight());
 
-    mTransformArea = MakeShared<FOdysseyHUDPolygon>();
-    TArray<FVector2D>& areaPoints = mTransformArea->GetPoints();
+    mTransformAreaHUD = MakeShared<FOdysseyHUDPolygon>();
+    TArray<FVector2D>& areaPoints = mTransformAreaHUD->GetPoints();
     areaPoints.Add( FVector2D( boundingBox.x, boundingBox.y ) );
     areaPoints.Add( FVector2D( boundingBox.x + boundingBox.w, boundingBox.y ) );
     areaPoints.Add( FVector2D( boundingBox.x + boundingBox.w, boundingBox.y + boundingBox.h ) );
     areaPoints.Add( FVector2D( boundingBox.x, boundingBox.y + boundingBox.h ) );
 
-    mTransformHUD->EmptyElements(); //Deleting the HUD of the selection to create the one for the transform
-    mTransformHUD->AddElement(mTransformArea);
+    mTransformToolHUD->EmptyElements(); //Deleting the HUD of the selection to create the one for the transform
+    mTransformToolHUD->AddElement(mTransformAreaHUD);
 
     TSharedPtr<FOdysseyHUDHandle> handleTopLeft = MakeShared<FOdysseyHUDHandle>(areaPoints[0]);
     TSharedPtr<FOdysseyHUDHandle> handleTopRight = MakeShared<FOdysseyHUDHandle>(areaPoints[1]);
@@ -283,11 +288,11 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
     handleBottomLeft->OnDragged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnBottomLeftHandleDragged);
     pivot->OnDragged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnPivotHandleDragged);
 
-    mTransformArea->AddElement(handleTopLeft);
-    mTransformArea->AddElement(handleTopRight);
-    mTransformArea->AddElement(handleBottomRight);
-    mTransformArea->AddElement(handleBottomLeft);
-    mTransformArea->AddElement(pivot);
+    mTransformAreaHUD->AddElement(handleTopLeft);
+    mTransformAreaHUD->AddElement(handleTopRight);
+    mTransformAreaHUD->AddElement(handleBottomRight);
+    mTransformAreaHUD->AddElement(handleBottomLeft);
+    mTransformAreaHUD->AddElement(pivot);
 
     mHandles.Add(handleTopLeft);
     mHandles.Add(handleTopRight);
@@ -318,7 +323,7 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
 				::ULIS::Blend_Normal,
 				::ULIS::Alpha_Sub,
 				1.f,
-				::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+				::ULIS::FSchedulePolicy::MultiScanlines,
 				0,
 				nullptr,
 				nullptr
@@ -334,7 +339,7 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
 				::ULIS::Blend_Normal,
 				::ULIS::Alpha_Normal,
 				1.f,
-				::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+				::ULIS::FSchedulePolicy::MultiScanlines,
 				0,
 				nullptr,
 				&blendEvent
@@ -351,7 +356,7 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformAreaFromSelection(
 
 EOdysseyTransformCapture UOdysseyPainterEditorRasterTransformTool::DetectCaptureMode( FVector2D iPoint )
 {
-    if (FGeomTools2D::IsPointInPolygon( iPoint, mTransformArea->GetPoints()))
+    if (FGeomTools2D::IsPointInPolygon( iPoint, mTransformAreaHUD->GetPoints()))
     {
         return EOdysseyTransformCapture::Inside;
     }
@@ -364,7 +369,7 @@ EOdysseyTransformCapture UOdysseyPainterEditorRasterTransformTool::DetectCapture
 
 void UOdysseyPainterEditorRasterTransformTool::ConstrainToRectangle(FVector2D iPosition)
 {
-    if( !mTransformArea )
+    if( !mTransformAreaHUD )
         return;
         
 
@@ -376,8 +381,8 @@ void UOdysseyPainterEditorRasterTransformTool::ConstrainToRectangle(FVector2D iP
             {
                 FVector point = FVector(iPosition.X, iPosition.Y, 0);
 
-                FVector diagonalPt1 = FVector(mTransformArea->GetPoints()[i].X, mTransformArea->GetPoints()[i].Y, 0);
-                FVector diagonalPt2 = FVector(mTransformArea->GetPoints()[(i+2)%4].X, mTransformArea->GetPoints()[(i+2)%4].Y, 0);
+                FVector diagonalPt1 = FVector(mTransformAreaHUD->GetPoints()[i].X, mTransformAreaHUD->GetPoints()[i].Y, 0);
+                FVector diagonalPt2 = FVector(mTransformAreaHUD->GetPoints()[(i+2)%4].X, mTransformAreaHUD->GetPoints()[(i+2)%4].Y, 0);
 
                 FVector closestDiag = FMath::ClosestPointOnInfiniteLine(diagonalPt1, diagonalPt2, point);
 
@@ -397,7 +402,7 @@ void UOdysseyPainterEditorRasterTransformTool::ConstrainToRectangle(FVector2D iP
         {
             centerRect = FVector2D(iPosition + mHandles[(i + 2) % 4]->GetPosition()) / 2.f;
 
-            FVector2D rotRectPoint = mTransformArea->GetPoints()[1] - mTransformArea->GetPoints()[0];
+            FVector2D rotRectPoint = mTransformAreaHUD->GetPoints()[1] - mTransformAreaHUD->GetPoints()[0];
             rotationRectangle = FMath::Atan2(rotRectPoint.X, rotRectPoint.Y) - PI / 2.f;
 
             FVector2D rotDiagPoint = mHandles[(i+2)%4]->GetPosition() - iPosition;
@@ -426,20 +431,20 @@ void UOdysseyPainterEditorRasterTransformTool::ConstrainToRectangle(FVector2D iP
             if (i % 2 == 0)
             {
                 mHandles[i]->SetPosition( iPosition );
-                mTransformArea->GetPoints()[i] = mHandles[i]->GetPosition();
+                mTransformAreaHUD->GetPoints()[i] = mHandles[i]->GetPosition();
                 mHandles[next]->SetPosition(diagTransform.TransformPoint(mHandles[i]->GetPosition() - centerRect) + centerRect);
-                mTransformArea->GetPoints()[next] = mHandles[next]->GetPosition();
+                mTransformAreaHUD->GetPoints()[next] = mHandles[next]->GetPosition();
                 mHandles[previous]->SetPosition(diagTransform.TransformPoint(mHandles[opposite]->GetPosition() - centerRect) + centerRect);
-                mTransformArea->GetPoints()[previous] = mHandles[previous]->GetPosition();
+                mTransformAreaHUD->GetPoints()[previous] = mHandles[previous]->GetPosition();
             }
             else
             {
                 mHandles[i]->SetPosition( iPosition );
-                mTransformArea->GetPoints()[i] = mHandles[i]->GetPosition();
+                mTransformAreaHUD->GetPoints()[i] = mHandles[i]->GetPosition();
                 mHandles[next]->SetPosition(diagTransform.TransformPoint(mHandles[opposite]->GetPosition() - centerRect) + centerRect);
-                mTransformArea->GetPoints()[next] = mHandles[next]->GetPosition();
+                mTransformAreaHUD->GetPoints()[next] = mHandles[next]->GetPosition();
                 mHandles[previous]->SetPosition(diagTransform.TransformPoint(mHandles[i]->GetPosition() - centerRect) + centerRect);
-                mTransformArea->GetPoints()[previous] = mHandles[previous]->GetPosition();
+                mTransformAreaHUD->GetPoints()[previous] = mHandles[previous]->GetPosition();
             }
 
             mHandles[4]->SetPosition(centerRect);
@@ -452,23 +457,23 @@ void UOdysseyPainterEditorRasterTransformTool::ConstrainToParallelogram(FVector2
 
 }
 
-void UOdysseyPainterEditorRasterTransformTool::CreateTransformBlockFromSelectionBlock()
+void UOdysseyPainterEditorRasterTransformTool::UpdateTransformBlock()
 {
-    if( !mSelectionBlock || !mTransformArea )
+    if( !mSelectionBlock || !mTransformAreaHUD )
         return;
 
     ::ULIS::eFormat format = mSelectionBlock->Format();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 
-    mTransformSelectionBlock = nullptr;
+    mTransformedBlock = nullptr;
     
     ::ULIS::FRectI boundingBox = GetTransformAreaBoundingRect();
 
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     if (mSelectionBlock)
     {
-        mTransformSelectionBlock = MakeShareable(new ::ULIS::FBlock(boundingBox.w, boundingBox.h, mSelectionBlock->Format()));
-        ClearBlock( mTransformSelectionBlock );
+        mTransformedBlock = MakeShareable(new ::ULIS::FBlock(boundingBox.w, boundingBox.h, mSelectionBlock->Format()));
+        ClearBlock( mTransformedBlock );
     }
 
     TArray<FVector2D> basePoints;
@@ -477,7 +482,7 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformBlockFromSelection
     basePoints.Add(FVector2D(mSelectionBlock->Width(), mSelectionBlock->Height()));
     basePoints.Add(FVector2D(0, mSelectionBlock->Height()));
 
-    TArray<FVector2D> vertices = mTransformArea->GetPoints();
+    TArray<FVector2D> vertices = mTransformAreaHUD->GetPoints();
     for( int i = 0; i < vertices.Num(); i++ )
     {
         vertices[i] -= FVector2D( boundingBox.x, boundingBox.y );
@@ -497,9 +502,10 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformBlockFromSelection
         vertices[3]
     );
     
+    // This is a very slow operation unfortunately
     ctx.TransformPerspective(
         *mSelectionBlock
-        , *mTransformSelectionBlock
+        , *mTransformedBlock
         , ::ULIS::FRectI::Auto
         , transformation.m
     );
@@ -509,18 +515,18 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformBlockFromSelection
 
 ::ULIS::FRectI UOdysseyPainterEditorRasterTransformTool::GetTransformAreaBoundingRect()
 {
-    if( mTransformArea )
+    if( mTransformAreaHUD )
     {   
-        int minX = mTransformArea->GetPoints()[0].X;
-        int maxX = mTransformArea->GetPoints()[0].X;
-        int minY = mTransformArea->GetPoints()[0].Y;
-        int maxY = mTransformArea->GetPoints()[0].Y;
-        for( int i = 1; i < mTransformArea->GetPoints().Num(); i++ )
+        int minX = mTransformAreaHUD->GetPoints()[0].X;
+        int maxX = mTransformAreaHUD->GetPoints()[0].X;
+        int minY = mTransformAreaHUD->GetPoints()[0].Y;
+        int maxY = mTransformAreaHUD->GetPoints()[0].Y;
+        for( int i = 1; i < mTransformAreaHUD->GetPoints().Num(); i++ )
         {
-            minX = FMath::Min( minX, mTransformArea->GetPoints()[i].X );
-            maxX = FMath::Max( maxX, mTransformArea->GetPoints()[i].X );
-            minY = FMath::Min( minY, mTransformArea->GetPoints()[i].Y );
-            maxY = FMath::Max( maxY, mTransformArea->GetPoints()[i].Y );
+            minX = FMath::Min( minX, mTransformAreaHUD->GetPoints()[i].X );
+            maxX = FMath::Max( maxX, mTransformAreaHUD->GetPoints()[i].X );
+            minY = FMath::Min( minY, mTransformAreaHUD->GetPoints()[i].Y );
+            maxY = FMath::Max( maxY, mTransformAreaHUD->GetPoints()[i].Y );
         }
         return ::ULIS::FRectI::FromMinMax(minX, minY, maxX, maxY);
     }
@@ -530,11 +536,11 @@ void UOdysseyPainterEditorRasterTransformTool::CreateTransformBlockFromSelection
 
 void UOdysseyPainterEditorRasterTransformTool::BlendTransformAreaToPaintBlock()
 {
-    if( mTransformArea )
+    if( mTransformAreaHUD )
     {
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
 
-        if( !paintBlock || !mSelectionBlock || !mTransformSelectionBlock )
+        if( !paintBlock || !mSelectionBlock || !mTransformedBlock )
             return;
 
         ::ULIS::eFormat format = paintBlock->Format();
@@ -546,20 +552,20 @@ void UOdysseyPainterEditorRasterTransformTool::BlendTransformAreaToPaintBlock()
         ctx.Clear(
             *paintBlock,
             paintBlock->Rect(),
-            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+            ::ULIS::FSchedulePolicy::MultiScanlines,
             0,
             nullptr,
             &clearEvent);
 
         ctx.Blend(
-            *mTransformSelectionBlock,
+            *mTransformedBlock,
             *paintBlock,
-            mTransformSelectionBlock->Rect(),
+            mTransformedBlock->Rect(),
             ::ULIS::FVec2I(boundingBox.x, boundingBox.y),
             ::ULIS::Blend_Normal,
             ::ULIS::Alpha_Normal,
             1.f,
-            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+            ::ULIS::FSchedulePolicy::MultiScanlines,
             1,
             &clearEvent,
             &blendEvent
@@ -567,16 +573,16 @@ void UOdysseyPainterEditorRasterTransformTool::BlendTransformAreaToPaintBlock()
 
         ctx.Finish();
 
-        if (mTransformSelectionBlock)
+        if (mTransformedBlock)
         {
             TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
             ClearBlock(rasterSelection->GetBlock());
 
             ::ULIS::FContext& selectionCtx = IULISLoaderModule::StaticFindOrAddContext(mSelectionBlock->Format());
             selectionCtx.Blend(
-                *mTransformSelectionBlock,
+                *mTransformedBlock,
                 *rasterSelection->GetBlock(),
-                mTransformSelectionBlock->Rect(),
+                mTransformedBlock->Rect(),
                 ::ULIS::FVec2I(boundingBox.x, boundingBox.y)
             );
             selectionCtx.Finish();
@@ -591,7 +597,7 @@ void UOdysseyPainterEditorRasterTransformTool::BlendTransformAreaToPaintBlock()
 
 void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
 {
-    if( !mTransformArea )
+    if( !mTransformAreaHUD )
         return;
 
     if( mRasterMutator.GetRasterBlock() != nullptr )
@@ -613,7 +619,6 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
             rasterSelection->OnChanged().Broadcast();
     }
     ClearTransform();
-    CreateTransformAreaFromSelection();
 }
 
 void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
@@ -626,11 +631,11 @@ void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
     }
 
     mSelectionBlock = nullptr;
-    mTransformSelectionBlock = nullptr;
+    mTransformedBlock = nullptr;
     mLastReferenceRotation = 0;
     mHandles.Empty();
-    mTransformHUD->EmptyElements();
-    mTransformArea = nullptr;
+    mTransformToolHUD->EmptyElements();
+    mTransformAreaHUD = nullptr;
     mTransformCaptureMode = EOdysseyTransformCapture::NoCapture;
     ResetRasterSelection();
 }
@@ -642,15 +647,14 @@ void UOdysseyPainterEditorRasterTransformTool::ClearBlock(TSharedPtr<::ULIS::FBl
 
     ::ULIS::eFormat format = iBlock->Format();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
-    ::ULIS::FEvent clearEvent;
 
     ctx.Clear(
         *iBlock,
         iBlock->Rect(),
-        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+        ::ULIS::FSchedulePolicy::MultiScanlines,
         0,
         nullptr,
-        &clearEvent);
+        nullptr);
 
     ctx.Finish();
 }
@@ -720,7 +724,7 @@ bool UOdysseyPainterEditorRasterTransformTool::FlipHorizontal()
         copyBlock,
         ::ULIS::FRectI::Auto,
         ::ULIS::FVec2I(0, 0),
-        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+        ::ULIS::FSchedulePolicy::MultiScanlines,
         0,
         nullptr,
         nullptr
@@ -737,7 +741,7 @@ bool UOdysseyPainterEditorRasterTransformTool::FlipHorizontal()
 
     ctx.Finish();
 
-    CreateTransformBlockFromSelectionBlock();
+    UpdateTransformBlock();
 
     return true;
 }
@@ -773,7 +777,7 @@ bool UOdysseyPainterEditorRasterTransformTool::FlipVertical()
         copyBlock,
         ::ULIS::FRectI::Auto,
         ::ULIS::FVec2I(0, 0),
-        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+        ::ULIS::FSchedulePolicy::MultiScanlines,
         0,
         nullptr,
         nullptr
@@ -790,7 +794,7 @@ bool UOdysseyPainterEditorRasterTransformTool::FlipVertical()
 
     ctx.Finish();
 
-    CreateTransformBlockFromSelectionBlock();
+    UpdateTransformBlock();
 
     return true;
 }
@@ -801,9 +805,9 @@ UOdysseyPainterEditorRasterTransformTool::OnTopLeftHandleDragged()
     if( !Perspective )
         ConstrainToRectangle( mHandles[0]->GetPosition() );
     else
-        mTransformArea->GetPoints()[0] = mHandles[0]->GetPosition();
+        mTransformAreaHUD->GetPoints()[0] = mHandles[0]->GetPosition();
 
-    CreateTransformBlockFromSelectionBlock();
+    UpdateTransformBlock();
 }
 
 void
@@ -812,9 +816,9 @@ UOdysseyPainterEditorRasterTransformTool::OnTopRightHandleDragged()
     if( !Perspective )
         ConstrainToRectangle( mHandles[1]->GetPosition() );
     else
-        mTransformArea->GetPoints()[1] = mHandles[1]->GetPosition();
+        mTransformAreaHUD->GetPoints()[1] = mHandles[1]->GetPosition();
 
-    CreateTransformBlockFromSelectionBlock();
+    UpdateTransformBlock();
 }
 
 void
@@ -823,9 +827,9 @@ UOdysseyPainterEditorRasterTransformTool::OnBottomRightHandleDragged()
     if( !Perspective )
         ConstrainToRectangle( mHandles[2]->GetPosition() );
     else
-        mTransformArea->GetPoints()[2] = mHandles[2]->GetPosition();
+        mTransformAreaHUD->GetPoints()[2] = mHandles[2]->GetPosition();
 
-    CreateTransformBlockFromSelectionBlock();
+    UpdateTransformBlock();
 }
 
 void
@@ -834,9 +838,9 @@ UOdysseyPainterEditorRasterTransformTool::OnBottomLeftHandleDragged()
     if( !Perspective )
         ConstrainToRectangle( mHandles[3]->GetPosition() );
     else
-        mTransformArea->GetPoints()[3] = mHandles[3]->GetPosition();
+        mTransformAreaHUD->GetPoints()[3] = mHandles[3]->GetPosition();
 
-    CreateTransformBlockFromSelectionBlock();
+    UpdateTransformBlock();
 }
 
 void
@@ -861,7 +865,7 @@ UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection( bool iCreateNew
         if( !iCreateNewIfEmpty )
         {
             mSelectionBlock = nullptr;
-            mTransformSelectionBlock = nullptr;
+            mTransformedBlock = nullptr;
             return;
         }
         else //If we have no selection, by default, transform tool with select whole block
@@ -897,7 +901,7 @@ UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection( bool iCreateNew
             *mSelectionBlock,
             boundingBox,
             ::ULIS::FVec2I(0,0),
-            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+            ::ULIS::FSchedulePolicy::MultiScanlines,
             0,
             nullptr,
             &copyEvent
@@ -949,7 +953,7 @@ UOdysseyPainterEditorRasterTransformTool::OnRasterSelectionChanged()
 {
     UpdateRasterSelection();
     ClearTransform();
-    CreateTransformAreaFromSelection();
+    UpdateTransformHUD();
 }
 
 
