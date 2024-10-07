@@ -29,15 +29,15 @@ void SOdysseyPaletteAddEntryButton::Construct(const FArguments& InArgs)
     [
         SNew(SHorizontalBox)
         + SHorizontalBox::Slot()
+        .AutoWidth()
         [
             SNew(SButton)
-            .HAlign(HAlign_Left)
             .OnClicked(this, &SOdysseyPaletteAddEntryButton::AddColorEntry )
             [
                 SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddColor"))
             ]
         ]
-        + SHorizontalBox::Slot()
+        /*+ SHorizontalBox::Slot()
         [
             SNew(SButton)
             .HAlign(HAlign_Left)
@@ -45,25 +45,26 @@ void SOdysseyPaletteAddEntryButton::Construct(const FArguments& InArgs)
             [
                 SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddMaterial"))
             ]
-        ]
+        ]*/
         + SHorizontalBox::Slot()
+        .AutoWidth()
         [
             SNew(SButton)
-            .HAlign(HAlign_Left)
             .OnClicked(this, &SOdysseyPaletteAddEntryButton::AddFolderEntry)
             [
                 SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddFolder"))
             ]
         ]
-        + SHorizontalBox::Slot()
+        /*+ SHorizontalBox::Slot()
+        .AutoWidth()
+        .Padding(40, 0, 0, 0) //24 pixels for the icon + 16 pixels from border
         [
             SNew(SButton)
-            .HAlign(HAlign_Left)
             .OnClicked(this, &SOdysseyPaletteAddEntryButton::AddColorEntry)
             [
                 SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddPicker"))
             ]
-        ]
+        ]*/
     ];
 }
 
