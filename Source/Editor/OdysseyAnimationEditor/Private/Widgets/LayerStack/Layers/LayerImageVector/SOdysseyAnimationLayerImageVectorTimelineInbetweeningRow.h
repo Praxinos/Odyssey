@@ -13,17 +13,9 @@ class FOdysseyVectorTagInbetweener;
 class FInbetweeningListViewItem;
 class FInbetweenerBreakdown;
 
-enum EInbetweeningRowCellBoxType : uint8
-{
-    None      = 0,
-    Source    = 1,
-    Inbetween = 2,
-    Target    = 3
-};
-
 struct FInbetweeningRowCellBox
 {
-    FInbetweeningRowCellBox( EInbetweeningRowCellBoxType iType, uint32 iIndex, double iX, double iY, double iW, double iH )
+    FInbetweeningRowCellBox( uint32 iType, uint32 iIndex, double iX, double iY, double iW, double iH )
         : type ( iType )
         , index( iIndex )
         , x ( iX )
@@ -33,7 +25,11 @@ struct FInbetweeningRowCellBox
     {
     }
 
-    EInbetweeningRowCellBoxType type;
+    static const uint32 TYPE_SOURCE    = ( 1UL << 0 );
+    static const uint32 TYPE_INBETWEEN = ( 1UL << 1 );
+    static const uint32 TYPE_TARGET    = ( 1UL << 2 );
+
+    uint32 type;
     double x, y, w, h;
     uint32 index;
 };
