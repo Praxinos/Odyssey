@@ -1055,9 +1055,6 @@ FOdysseyViewportDrawingEditorExtension::GetDrawHUDParams(const FSceneView* View,
 			FVector2D hudPoint;
 			View->WorldToPixel(worldPoint, hudPoint);
 
-			FVector test1;
-			test1 = View->PixelToWorld(hudPoint.X, hudPoint.Y, 0.5f);
-			test1 = textureToWorld.InverseTransformPosition(test1);
 			return hudPoint;
 		}
 	);
