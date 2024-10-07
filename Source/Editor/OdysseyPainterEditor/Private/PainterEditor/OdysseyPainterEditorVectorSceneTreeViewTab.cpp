@@ -27,7 +27,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::~FOdysseyPainterEditorVectorSceneTr
 
 FOdysseyPainterEditorVectorSceneTreeViewTab::FOdysseyPainterEditorVectorSceneTreeViewTab(FOdysseyPainterEditor* iEditor)
     : FOdysseyEditorTab( LOCTEXT( "vector-scene-tree-view-tab.name", "Vector Scene Tree View" ),
-                         FSlateIcon( "OdysseyStyle", "PainterEditor.Tools16" ))
+                         FSlateIcon( "OdysseyStyle", "PainterEditor.VectorSceneTreeView.MenuIcon" ))
     , mEditor(iEditor)
 {
     mObjectView = NewObject<UOdysseyPainterEditorVectorObjectView>();

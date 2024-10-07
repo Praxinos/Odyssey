@@ -188,7 +188,7 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
                             .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
                             .OnPressed(this, &SOdysseyViewport::HandleRotationLeft)
                         [
-                            SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.RotateLeft16"))
+                            SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.RotateLeft"))
                         ]
                     ]
 
@@ -201,7 +201,7 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
                             .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
                             .OnPressed(this, &SOdysseyViewport::HandleViewportReset)
                         [
-                            SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.RotateReset16"))
+                            SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.RotateReset"))
                         ]
                     ]
 
@@ -214,7 +214,7 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
                             .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
                             .OnPressed(this, &SOdysseyViewport::HandleRotationRight)
                         [
-                            SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.RotateRight16"))
+                            SNew(SImage) .Image(FOdysseyStyle::GetBrush("PainterEditor.RotateRight"))
                         ]
                     ]
                 + SHorizontalBox::Slot()

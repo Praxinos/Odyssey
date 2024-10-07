@@ -282,6 +282,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.Tools64", new IMAGE_BRUSH( "PainterEditor/tools_64", mIcon64x64 ) );
     Set( "PainterEditor.Tools20", new IMAGE_BRUSH( "PainterEditor/tools_20", mIcon20x20 ) );
     Set( "PainterEditor.Tools16", new IMAGE_BRUSH( "PainterEditor/tools_16", mIcon16x16 ) );
+    Set( "PainterEditor.Tools", new IMAGE_BRUSH_SVG( "PainterEditor/tools", mIcon16x16 ) );
 
     Set( "PainterEditor.Layers64", new IMAGE_BRUSH( "PainterEditor/layers_64", mIcon64x64 ) );
     Set( "PainterEditor.Layers20", new IMAGE_BRUSH( "PainterEditor/layers_20", mIcon20x20 ) );
@@ -298,13 +299,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ColorSelectorBis64", new IMAGE_BRUSH( "PainterEditor/color_selector_bis_64", mIcon64x64 ) );
     Set( "PainterEditor.ColorSelectorBis16", new IMAGE_BRUSH( "PainterEditor/color_selector_bis_16", mIcon16x16 ) );
 
-    Set( "PainterEditor.StrokeOptions64", new IMAGE_BRUSH( "PainterEditor/tool_options_64", mIcon64x64 ) );
-    Set( "PainterEditor.StrokeOptions20", new IMAGE_BRUSH( "PainterEditor/tool_options_64", mIcon20x20 ) );
-    Set( "PainterEditor.StrokeOptions16", new IMAGE_BRUSH( "PainterEditor/tool_options_16", mIcon16x16 ) );
-
     Set( "PainterEditor.BrushExposedParameters64", new IMAGE_BRUSH( "PainterEditor/brush_exposed_parameters_64", mIcon64x64 ) );
     Set( "PainterEditor.BrushExposedParameters20", new IMAGE_BRUSH( "PainterEditor/brush_exposed_parameters_20", mIcon20x20 ) );
     Set( "PainterEditor.BrushExposedParameters16", new IMAGE_BRUSH( "PainterEditor/brush_exposed_parameters_16", mIcon16x16 ) );
+    Set( "PainterEditor.ToolOptions", new IMAGE_BRUSH_SVG( "PainterEditor/ToolOptions", mIcon16x16 ) );
 
     Set( "PainterEditor.BrushSelector64", new IMAGE_BRUSH( "PainterEditor/brush_selector_64", mIcon64x64 ) );
     Set( "PainterEditor.BrushSelector20", new IMAGE_BRUSH( "PainterEditor/brush_selector_20", mIcon20x20 ) );
@@ -319,10 +317,6 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 
     Set( "PainterEditor.PerformanceTools64", new IMAGE_BRUSH( "PainterEditor/performance_tools_64", mIcon64x64 ) );
     Set( "PainterEditor.PerformanceTools16", new IMAGE_BRUSH( "PainterEditor/performance_tools_16", mIcon16x16 ) );
-
-    Set( "PainterEditor.TopBar64", new IMAGE_BRUSH( "PainterEditor/top_bar_64", mIcon64x64 ) );
-    Set( "PainterEditor.TopBar20", new IMAGE_BRUSH( "PainterEditor/top_bar_20", mIcon20x20 ) );
-    Set( "PainterEditor.TopBar16", new IMAGE_BRUSH( "PainterEditor/top_bar_16", mIcon16x16 ) );
 
     Set( "PainterEditor.BotBar64", new IMAGE_BRUSH( "PainterEditor/bot_bar_64", mIcon64x64 ) );
     Set( "PainterEditor.BotBar16", new IMAGE_BRUSH( "PainterEditor/bot_bar_16", mIcon16x16 ) );
@@ -362,8 +356,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 
     Set( "PainterEditor.RotateLeft64", new IMAGE_BRUSH( "PainterEditor/rotate_left_64", mIcon64x64 ) );
     Set( "PainterEditor.RotateLeft16", new IMAGE_BRUSH( "PainterEditor/rotate_left_16", mIcon16x16 ) );
+    Set( "PainterEditor.RotateLeft", new IMAGE_BRUSH_SVG( "PainterEditor/rotate_left", mIcon16x16 ) );
     Set( "PainterEditor.RotateRight64", new IMAGE_BRUSH( "PainterEditor/rotate_right_64", mIcon64x64 ) );
     Set( "PainterEditor.RotateRight16", new IMAGE_BRUSH( "PainterEditor/rotate_right_16", mIcon16x16 ) );
+    Set( "PainterEditor.RotateRight", new IMAGE_BRUSH_SVG( "PainterEditor/rotate_right", mIcon16x16 ) );
 
     Set( "PainterEditor.ArrowDown64", new IMAGE_BRUSH( "PainterEditor/arrow_down_64", mIcon64x64 ) );
     Set( "PainterEditor.ArrowDown16", new IMAGE_BRUSH( "PainterEditor/arrow_down_16", mIcon16x16 ) );
@@ -387,11 +383,13 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 
     Set( "PainterEditor.RotateReset64", new IMAGE_BRUSH( "PainterEditor/rotate_reset_64", mIcon64x64 ) );
     Set( "PainterEditor.RotateReset16", new IMAGE_BRUSH( "PainterEditor/rotate_reset_16", mIcon16x16 ) );
+    Set( "PainterEditor.RotateReset", new IMAGE_BRUSH_SVG( "PainterEditor/rotate_reset", mIcon16x16 ) );
 
     //PainterEditor - Vector Scene Tree View
-    Set( "PainterEditor.VectorSceneTreeView.Paintgroup16", new IMAGE_BRUSH( "PainterEditor/VectorSceneTreeView/paintgroup_16", mIcon16x16 ) );
-    Set( "PainterEditor.VectorSceneTreeView.Path16", new IMAGE_BRUSH( "PainterEditor/VectorSceneTreeView/path_16", mIcon16x16 ) );
-    Set( "PainterEditor.VectorSceneTreeView.Group16", new IMAGE_BRUSH( "PainterEditor/VectorSceneTreeView/group_16", mIcon16x16 ) );
+    Set( "PainterEditor.VectorSceneTreeView.Paintgroup", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/paintgroup", mIcon16x16 ) );
+    Set( "PainterEditor.VectorSceneTreeView.Path", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/path", mIcon16x16 ) );
+    Set( "PainterEditor.VectorSceneTreeView.Group", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/group", mIcon16x16 ) );
+    Set( "PainterEditor.VectorSceneTreeView.MenuIcon", new IMAGE_BRUSH_SVG( "OdysseyVectorSceneTreeView/MenuIcon", mIcon16x16 ) );
 
     //PainterEditor - Top Bar
     Set( "PainterEditor.TopBar.Undo32", new IMAGE_BRUSH_SVG( "PainterEditor/undo", mIcon32x32 ) );

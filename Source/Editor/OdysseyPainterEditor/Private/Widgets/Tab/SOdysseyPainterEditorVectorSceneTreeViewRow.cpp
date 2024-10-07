@@ -47,17 +47,17 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow
 
     if ( vectorObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
     {
-        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Paintgroup16" );
+        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Paintgroup" );
     }
     else
     if ( vectorObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
     {
-        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Group16" );
+        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Group" );
     }
     else
     if ( vectorObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
     {
-        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Path16" );
+        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Path" );
     }
     else
     {
