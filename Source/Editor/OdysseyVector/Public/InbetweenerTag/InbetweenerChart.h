@@ -30,7 +30,7 @@ class ODYSSEYVECTOR_API FInbetweenerChart
         FInbetweenerChart( FInbetweenerBreakdown* iBreakdown );
 
         void Resize();
-        void Reset();
+        void Reset( bool iResetPositionning );
         ::ULIS::FVec2D* GetHUDBezier();
 
         FInbetweenerBreakdown* GetBreakdown();

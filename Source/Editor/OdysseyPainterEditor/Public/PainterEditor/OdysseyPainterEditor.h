@@ -200,7 +200,9 @@ public:
                                  , bool   iAbsolute );
     static void AddInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
-    static void ResetBreakdownSpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void ResetBreakdownSpacingChart( FOdysseyPainterEditor* iEditor
+                                          , FOdysseyVectorGroupPaint* iScene
+                                          , bool iResetPositionning );
     static void ResetInbetweenerTagSpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorSharedEnv* iSharedEnv );
     static void CommitSelectedInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorSharedEnv* iSharedEnv );
     static void CopySpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );

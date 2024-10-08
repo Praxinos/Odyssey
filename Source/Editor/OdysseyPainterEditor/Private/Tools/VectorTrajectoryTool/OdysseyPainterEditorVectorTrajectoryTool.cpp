@@ -372,9 +372,17 @@ uint64
 UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+    FOdysseyVectorEngine* engine = iScene->GetEngine();
 
     mTrajectoryHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
+
+    // For some reason we receive quite a lot of mouse events between 2 screen refresh, I don't know why
+    // The issue is absent with the Ink driver. It is present with the Wintab and Native drivers. The simpliest
+    // solution I've found is to discard events until the screen has been refreshed.
+    if( engine->GetInvalidationFlags()  )
+    {
+        return 0;
+    }
 
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {

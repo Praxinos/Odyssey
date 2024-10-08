@@ -47,6 +47,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawTargetGrid( BLContext* iBLContex
     iBLContext->save();
     iBLContext->resetMatrix();
 
+    iBLContext->setFillStyle( gridColor );
     iBLContext->setStrokeStyle( gridColor );
     iBLContext->setStrokeWidth( 1.0f );
 
@@ -55,6 +56,17 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawTargetGrid( BLContext* iBLContex
 
     worldMatrix.transform( localMatrix );
 
+    for( FInbetweenerPoint& point : iBreakdown->GetGrid()->GetPointBuffer() )
+    {
+        BLPoint pt = worldMatrix.mapPoint( point.GetTargetPosition().x
+                                         , point.GetTargetPosition().y );
+
+        if( point.GetQuadCount() )
+        {
+            iBLContext->fillCircle( pt.x, pt.y, 2 );
+        }
+    }
+/*
     for( FInbetweenerQuad& quad : iBreakdown->GetGrid()->GetQuadBuffer() )
     {
         if( quad.IsLinked() )
@@ -76,7 +88,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::DrawTargetGrid( BLContext* iBLContex
             iBLContext->strokeLine( pt[3], pt[0] );
         }
     }
-
+*/
     iBLContext->restore();
 }
 

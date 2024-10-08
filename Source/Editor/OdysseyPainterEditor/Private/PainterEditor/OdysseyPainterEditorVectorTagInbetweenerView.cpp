@@ -176,7 +176,21 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
             selectedInbetweenerTag->SetGridNumQuad( selectedInbetweenerTag->GetGridNumQuadX(), DivisionY, Square );
 
         if( iPropertyName == "MapAsPolyline" )
+        {
             selectedInbetweenerTag->SetMapAsPolyline( MapAsPolyline );
+
+            // regularize the groid at least once after remapping or else some grid points that were not moved before 
+            // will stay at there position
+            if( selectedInbetweenerTag->GetGridType() == eInbetweenerGridType::ARAP )
+            {
+                for( FInbetweenerBreakdown* breakdown : selectedInbetweenerTag->GetBreakdownList() )
+                {
+                    FInbetweenerGridARAP* arapGrid = static_cast<FInbetweenerGridARAP*>(breakdown->GetGrid());
+
+                    arapGrid->Regularize( 1 );
+                }
+            }
+        }
 
         if( iPropertyName == "Square" )
         {

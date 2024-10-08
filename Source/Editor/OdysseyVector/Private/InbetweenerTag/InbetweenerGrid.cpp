@@ -407,8 +407,6 @@ FInbetweenerGrid::GetValidRouteArray( std::vector<FInbetweenerRoute*>& oValidRou
     }
 }
 
-#include <chrono>
-
 /**
  * Precompute the sparse matrices P^T and prefactor P^T*P for later computations
  * See Baxter et al. 2008
@@ -416,6 +414,8 @@ FInbetweenerGrid::GetValidRouteArray( std::vector<FInbetweenerRoute*>& oValidRou
 bool
 FInbetweenerGrid::PrecomputeARAPInterpolation()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FInbetweenerGrid::PrecomputeARAPInterpolation);
+
     std::vector<FInbetweenerRoute*> validRouteArray;
     uint32 usedQuadCount = mBreakdown->GetInbetweenerTag()->GetUsedQuadCount();
     uint32 usedPointCount = mBreakdown->GetInbetweenerTag()->GetUsedPointCount();
@@ -649,6 +649,8 @@ bool
 FInbetweenerGrid::ComputeARAPInterpolation( FChartDivision* iInbetween
                                           , bool useRigidTransform )
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(FInbetweenerGrid::ComputeARAPInterpolation);
+
     uint32 usedQuadCount = mBreakdown->GetInbetweenerTag()->GetUsedQuadCount();
     uint32 usedPointCount = mBreakdown->GetInbetweenerTag()->GetUsedPointCount();
     std::vector<FInbetweenerRoute*> validRouteArray;

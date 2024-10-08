@@ -2,6 +2,7 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
 
+
 FOdysseyPainterEditorVectorPathDrawingToolHUD::~FOdysseyPainterEditorVectorPathDrawingToolHUD()
 {
 }
@@ -9,6 +10,10 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::~FOdysseyPainterEditorVectorPathD
 FOdysseyPainterEditorVectorPathDrawingToolHUD::FOdysseyPainterEditorVectorPathDrawingToolHUD( UOdysseyPainterEditorVectorPathDrawingTool* iPathDrawingTool )
     : FOdysseyPainterEditorVectorBaseToolHUD( iPathDrawingTool )
     , mPathDrawingTool( iPathDrawingTool )
+    , mOwnerObject ( "DummyOwnerObject" ) // unused . testing
+    , mVertex { FOdysseyVectorVertex( 0.0f, 0.0f, 0.0f ) // unused . testing
+              , FOdysseyVectorVertex( 0.0f, 0.0f, 0.0f ) } // unused . testing
+    , mCubicSegment ( &mOwnerObject, &mVertex[0], &mVertex[1], true ) // unused . testing
 {
 }
 
@@ -156,7 +161,14 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
             }
         }
     }
+/*
+    iBLContext->save();
+    iBLContext->resetMatrix();
 
+    mCubicSegment.Draw( iBLContext );
+
+    iBLContext->restore();
+*/
     if( path )
     {
         FColor pathcolor = path->GetForegroundColor();
@@ -219,6 +231,8 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
 bool
 FOdysseyPainterEditorVectorPathDrawingToolHUD::SetCursorPosition( double iX, double iY )
 {
+    FOdysseyVectorPathTracer& pathTracer = mPathDrawingTool->GetPathTracer();
+    FTracerBezier& bestBezier = pathTracer.GetBestBezier();
     bool needsFullRedrawing = false;
 
     mX = iX;
@@ -241,6 +255,18 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::SetCursorPosition( double iX, dou
             needsFullRedrawing = true; // tells to redraw the whole buffer
         }
     }
+
+/*
+    mVertex[0].Set( bestBezier.pt[0] );
+    mVertex[0].SetRadius( bestBezier.firstRecordRadius );
+UE_LOG(LogTemp, Warning, TEXT("Hello World %f"), bestBezier.firstRecordRadius );
+    mVertex[1].Set( bestBezier.pt[3] );
+    mVertex[1].SetRadius( bestBezier.lastRecordRadius );
+UE_LOG(LogTemp, Warning, TEXT("Hello World %f"), bestBezier.lastRecordRadius );
+    mCubicSegment.GetHandle(0)->Set( bestBezier.pt[1] );
+    mCubicSegment.GetHandle(1)->Set( bestBezier.pt[2] );
+    mCubicSegment.Update( 0 );
+*/
 
     return needsFullRedrawing;
 }

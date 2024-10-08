@@ -2,6 +2,13 @@
 #include "InbetweenerTag/InbetweenerBreakdown.h"
 #include "OdysseyVectorTagInbetweener.h"
 
+#define DEFAULT_POSITION_P0_X 200.0f
+#define DEFAULT_POSITION_P0_Y 40.0f
+#define DEFAULT_POSITION_P1_X 399.0f
+#define DEFAULT_POSITION_P1_Y 40.0f
+#define DEFAULT_POSITION_P2_X 599.0f
+#define DEFAULT_POSITION_P2_Y 40.0f
+
 FChartDivision::FChartDivision( FInbetweenerChart* iChart )
     : chart( iChart )
     , spacing( 0.0f )
@@ -53,9 +60,9 @@ FInbetweenerChart::FInbetweenerChart()
 */
 FInbetweenerChart::FInbetweenerChart( FInbetweenerBreakdown* iBreakdown )
     : mBreakdown( iBreakdown )
-    , mHUDBezier { ::ULIS::FVec2D( 200.0f, 40.0f )
-                 , ::ULIS::FVec2D( 399.0f, 40.0f )
-                 , ::ULIS::FVec2D( 599.0f, 40.0f )  }
+    , mHUDBezier { ::ULIS::FVec2D( DEFAULT_POSITION_P0_X, DEFAULT_POSITION_P0_Y )
+                 , ::ULIS::FVec2D( DEFAULT_POSITION_P1_X, DEFAULT_POSITION_P1_Y )
+                 , ::ULIS::FVec2D( DEFAULT_POSITION_P2_X, DEFAULT_POSITION_P2_Y ) }
 {
     mDivisionBuffer.reserve( 16 );
 
@@ -88,7 +95,7 @@ FInbetweenerChart::GetSpacing( std::vector<float>& oSpacingArray )
 }
 
 void
-FInbetweenerChart::Reset()
+FInbetweenerChart::Reset( bool iResetPositionning )
 {
     uint32 drawingCount = mBreakdown->GetDrawingCount();
     float stepT = 1.0f / ( drawingCount - 1 );
@@ -102,6 +109,16 @@ FInbetweenerChart::Reset()
     }
     // due to float imprecision, we get sure the last one is 1.0f
     mDivisionBuffer.back().spacing = 1.0f;
+
+    if( iResetPositionning )
+    {
+        mHUDBezier[0].x = DEFAULT_POSITION_P0_X;
+        mHUDBezier[0].y = DEFAULT_POSITION_P0_Y;
+        mHUDBezier[1].x = DEFAULT_POSITION_P1_X;
+        mHUDBezier[1].y = DEFAULT_POSITION_P1_Y;
+        mHUDBezier[2].x = DEFAULT_POSITION_P2_X;
+        mHUDBezier[2].y = DEFAULT_POSITION_P2_Y;
+    }
 
     mBreakdown->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
                                                | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );

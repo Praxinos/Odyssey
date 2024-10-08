@@ -1810,7 +1810,8 @@ FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor, FOd
 // static
 void
 FOdysseyPainterEditor::ResetBreakdownSpacingChart( FOdysseyPainterEditor* iEditor
-                                                 , FOdysseyVectorGroupPaint* iScene )
+                                                 , FOdysseyVectorGroupPaint* iScene
+                                                 , bool iResetPositionning )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
@@ -1845,7 +1846,7 @@ FOdysseyPainterEditor::ResetBreakdownSpacingChart( FOdysseyPainterEditor* iEdito
 
             if( breakdown )
             {
-                breakdown->GetChart()->Reset();
+                breakdown->GetChart()->Reset( iResetPositionning );
             }
         }
     }
@@ -1894,7 +1895,7 @@ FOdysseyPainterEditor::ResetInbetweenerTagSpacingChart( FOdysseyPainterEditor* i
 
             for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
             {
-                breakdown->GetChart()->Reset();
+                breakdown->GetChart()->Reset( false );
             }
 
              // request redraw

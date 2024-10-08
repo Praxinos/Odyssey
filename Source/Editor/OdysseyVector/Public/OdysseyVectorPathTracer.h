@@ -92,24 +92,6 @@ typedef struct _FTracerBezier
 
 class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
 {
-    private:
-        double mDotLimit;
-        uint32 mPointID;
-        double mSampleDistance;
-        double mTracingWidth;
-        BLImage* mBLImage;
-        BLContext mBLContext;
-        std::vector<FTracerPoint> mPointArray;
-        std::vector<FTracerRecord> mRecordArray;
-        std::vector<FTracerEdge> mEdgeArray;
-        ::ULIS::FVec2D mSmoothVector;
-        FTracerBezier mCandidateBezier;
-        FTracerBezier mBestBezier;
-        FTracerBezier mRawBezier;
-        FOdysseyVectorPath* mCubicPath;
-        uint32 mWidth, mHeight;
-        uint8* mPixelData;
-
     public:
         ~FOdysseyVectorPathTracer();
         FOdysseyVectorPathTracer();
@@ -149,4 +131,22 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
         void SetDotLimit( double iDotLimit );
         void SetTracingWidth( double iTracingWidth );
         ::ULIS::FRectD GetRedrawRect();
+
+    private:
+        double mDotLimit;
+        uint32 mPointID;
+        double mSampleDistance;
+        double mTracingWidth;
+        BLImage* mBLImage;
+        BLContext mBLContext;
+        std::vector<FTracerPoint> mPointArray;
+        std::vector<FTracerRecord> mRecordArray;
+        std::vector<FTracerEdge> mEdgeArray;
+        ::ULIS::FVec2D mSmoothVector;
+        FTracerBezier mCandidateBezier;
+        FTracerBezier mBestBezier;
+        FTracerBezier mRawBezier;
+        FOdysseyVectorPath* mCubicPath;
+        uint32 mWidth, mHeight;
+        uint8* mPixelData;
 };

@@ -12,7 +12,7 @@
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorAnimationCell.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerMatching.h"
-
+#include <chrono>
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 //--------------------------------------------------------------------------------------
@@ -144,6 +144,16 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
 {
     FOdysseyVectorEngine* engine = iScene->GetEngine();
     uint64 notificationFlags = 0;
+
+//UE_LOG(LogTemp, Warning, TEXT("UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector %d") );
+
+    // For some reason we receive quite a lot of mouse events between 2 screen refresh, I don't know why
+    // The issue is absent with the Ink driver. It is present with the Wintab and Native drivers. The simpliest
+    // solution I've found is to discard events until the screen has been refreshed.
+    if( engine->GetInvalidationFlags()  )
+    {
+        return 0;
+    }
 
     mMatchingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
