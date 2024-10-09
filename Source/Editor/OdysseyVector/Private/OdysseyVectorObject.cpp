@@ -34,10 +34,16 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     SetTransform( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f );
 
     mForegroundBucket.SetColorMode( eBucketColorMode::SolidColor );
-    mForegroundBucket.SetSolidColor( 0, 0, 0, 255 );
+    mForegroundBucket.SetSolidColor( FOREGROUNDCOLOR_DEFAULT_R
+                                   , FOREGROUNDCOLOR_DEFAULT_G
+                                   , FOREGROUNDCOLOR_DEFAULT_B
+                                   , FOREGROUNDCOLOR_DEFAULT_A );
 
     mBackgroundBucket.SetColorMode( eBucketColorMode::SolidColor );
-    mBackgroundBucket.SetSolidColor( 0, 0, 0, 0 );
+    mBackgroundBucket.SetSolidColor( BACKGROUNDCOLOR_DEFAULT_R
+                                   , BACKGROUNDCOLOR_DEFAULT_G
+                                   , BACKGROUNDCOLOR_DEFAULT_B
+                                   , BACKGROUNDCOLOR_DEFAULT_A );
 }
 
 FOdysseyVectorBucket&

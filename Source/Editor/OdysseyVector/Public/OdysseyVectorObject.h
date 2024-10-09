@@ -50,6 +50,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 INVALIDATE_CHILD_TOPOLOGY = ( INVALIDATE_TOPOLOGY << INVALIDATE_CHILD_SHIFT );
         static const uint32 INVALIDATE_CHILD_MATRIX   = ( INVALIDATE_MATRIX   << INVALIDATE_CHILD_SHIFT );
 
+        static const uint8 FOREGROUNDCOLOR_DEFAULT_R = 0;
+        static const uint8 FOREGROUNDCOLOR_DEFAULT_G = 0;
+        static const uint8 FOREGROUNDCOLOR_DEFAULT_B = 0;
+        static const uint8 FOREGROUNDCOLOR_DEFAULT_A = 255;
+
+        static const uint8 BACKGROUNDCOLOR_DEFAULT_R = 0;
+        static const uint8 BACKGROUNDCOLOR_DEFAULT_G = 0;
+        static const uint8 BACKGROUNDCOLOR_DEFAULT_B = 0;
+        static const uint8 BACKGROUNDCOLOR_DEFAULT_A = 0;
+
     public:
         static uint32 TreeToList( FOdysseyVectorObject* iObject, std::list<FOdysseyVectorObject*>& iOutList );
         static uint32 TreeToArray( FOdysseyVectorObject* iObject, std::vector<FOdysseyVectorObject*>& iOutArray );

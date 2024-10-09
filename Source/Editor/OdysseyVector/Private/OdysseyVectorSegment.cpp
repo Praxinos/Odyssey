@@ -345,6 +345,8 @@ void
 FOdysseyVectorSegment::Update()
 {
     mIsInvalidated = false;
+
+    mLength = ::ULIS::FVec2D( mPoint[1]->GetCoords() - mPoint[0]->GetCoords() ).Distance();
 }
 
 std::list<FOdysseyVectorIntersection*>&
@@ -427,7 +429,8 @@ FOdysseyVectorSegment::GetVectorFromVertex( FOdysseyVectorVertex* iVertex, bool 
 double
 FOdysseyVectorSegment::GetLength()
 {
-    return ::ULIS::FVec2D( mPoint[1]->GetCoords() - mPoint[0]->GetCoords() ).Distance();
+    //return ::ULIS::FVec2D( mPoint[1]->GetCoords() - mPoint[0]->GetCoords() ).Distance();
+    return mLength;
 }
 
 void

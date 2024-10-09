@@ -1431,7 +1431,7 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
     oSectionArray.push_back( iSection );
     iSection->Block( iSectionVertexIndex );
 
-//UE_LOG(LogTemp, Warning, TEXT("Next vertex valence %d"), sectionNextVertex->GetSectionCount() );
+    //UE_LOG(LogTemp, Warning, TEXT("Next vertex valence %d"), sectionNextVertex->GetSectionCount() );
     //iSection->Print();
 
 //UE_LOG(LogTemp, Warning, TEXT("vertices %x %x"), sectionNextVertex, oSectionArray[0]->GetVertex(oVertexIndexArray[0]) );

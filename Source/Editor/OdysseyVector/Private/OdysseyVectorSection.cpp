@@ -27,13 +27,29 @@ FOdysseyVectorSection::Stitch()
     // unlink first or else it will be returned in the arrays
     Unlink( false );
 
-    mVertex[0]->GetSectionLinkInfo( sectionLinkInfoArray );
-
-    for( FSectionLinkInfo& sectionLinkInfo : sectionLinkInfoArray )
+    // Intersection vertices have priority because exploration pairs are built from it
+    // so we wan't to keep them in the graph
+    if( mVertex[1]->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
     {
-        sectionLinkInfo.section->Unlink( false );
-        sectionLinkInfo.section->mVertex[sectionLinkInfo.sectionVertexIndex] = mVertex[1];
-        sectionLinkInfo.section->Link();
+        mVertex[0]->GetSectionLinkInfo( sectionLinkInfoArray );
+
+        for( FSectionLinkInfo& sectionLinkInfo : sectionLinkInfoArray )
+        {
+            sectionLinkInfo.section->Unlink( false );
+            sectionLinkInfo.section->mVertex[sectionLinkInfo.sectionVertexIndex] = mVertex[1];
+            sectionLinkInfo.section->Link();
+        }
+    }
+    else
+    {
+        mVertex[1]->GetSectionLinkInfo( sectionLinkInfoArray );
+
+        for( FSectionLinkInfo& sectionLinkInfo : sectionLinkInfoArray )
+        {
+            sectionLinkInfo.section->Unlink( false );
+            sectionLinkInfo.section->mVertex[sectionLinkInfo.sectionVertexIndex] = mVertex[0];
+            sectionLinkInfo.section->Link();
+        }
     }
 }
 
