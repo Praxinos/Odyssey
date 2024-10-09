@@ -1880,7 +1880,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
 
     // act as boolean without the need to reinitialize its value
     ++mPaintingCode;
-
+//UE_LOG(LogTemp, Warning, TEXT("Hello world!"));
     if( bMultithreaded )
     {
 #if !PLATFORM_MAC

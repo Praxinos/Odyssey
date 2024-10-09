@@ -428,7 +428,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
             vectorEngine->InvalidateRect();
         }
 
-        iScene->Update( 0 ); // update invalidated path after segment insertion
+        // Keep the scene invalidated. Indeed, we may never receive the MouseUP event for some multiple reasons.
+        // That way, the full update will be realized when another tool is selected ( because at load, the tool
+        // calls iScene->Update()
+        iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED ); // update invalidated path after segment insertion
     }
 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
