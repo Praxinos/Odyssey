@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Iliad\n"
-"POT-Creation-Date: 2024-07-15 12:51\n"
-"PO-Revision-Date: 2024-07-15 12:51\n"
+"POT-Creation-Date: 2024-10-10 15:58\n"
+"PO-Revision-Date: 2024-10-10 15:58\n"
 "Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -14,43 +14,43 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. Key:	layer-folder.type
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.cpp(30)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.cpp(30)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.cpp(12)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.cpp(12)
 msgctxt "Animation,layer-folder.type"
 msgid "Folder Layer"
 msgstr "Calque dossier"
 
 #. Key:	layer-folder.default-name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.cpp(31)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.cpp(31)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.cpp(13)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.cpp(13)
 msgctxt "Animation,layer-folder.default-name"
 msgid "Folder"
 msgstr "Dossier"
 
 #. Key:	layer-image-raster.create-cell-transaction
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.cpp(522)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.cpp(522)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.cpp(315)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.cpp(315)
 msgctxt "Animation,layer-image-raster.create-cell-transaction"
 msgid "Create Cell"
 msgstr "Créer une cellule"
 
 #. Key:	layer-image-raster.type
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.cpp(55)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.cpp(55)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.cpp(32)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.cpp(32)
 msgctxt "Animation,layer-image-raster.type"
 msgid "Raster Image Layer"
 msgstr "Calque Bitmap"
 
 #. Key:	layer-image-vector.create-cell-transaction
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.cpp(357)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.cpp(357)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.cpp(250)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.cpp(250)
 msgctxt "Animation,layer-image-vector.create-cell-transaction"
 msgid "Create Cell"
 msgstr "Créer une cellule"
 
 #. Key:	layer-image-vector.type
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.cpp(60)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.cpp(60)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.cpp(42)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.cpp(42)
 msgctxt "Animation,layer-image-vector.type"
 msgid "Vector Image Layer"
 msgstr "Calque Vectoriel"
@@ -84,8 +84,8 @@ msgid "Video Track"
 msgstr "Piste Vidéo"
 
 #. Key:	animation.default-background-layer.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/OdysseyAnimation.cpp(80)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/OdysseyAnimation.cpp(80)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/OdysseyAnimationFactory.cpp(98)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimation/Private/OdysseyAnimationFactory.cpp(98)
 msgctxt "Animation,animation.default-background-layer.name"
 msgid "Background"
 msgstr "Arrière plan"
@@ -189,31 +189,52 @@ msgid "Sets the Cell Mark #{0} on selected cells"
 msgstr "Définit la marque de cellule #{0} sur les cellules sélectionnées"
 
 #. Key:	flip-detail-customization.all-cell-marks
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(249)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(249)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(248)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(248)
 msgctxt "AnimationEditor,flip-detail-customization.all-cell-marks"
 msgid "All Cell Marks"
 msgstr ""
 
 #. Key:	flip-detail-customization.invalid-cell-mark
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(253)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(253)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(252)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(252)
 msgctxt "AnimationEditor,flip-detail-customization.invalid-cell-mark"
 msgid "Invalid Value"
 msgstr ""
 
 #. Key:	flip-detail-customization.limits-cell-mark.custum-row.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(80)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(80)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(79)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(79)
 msgctxt "AnimationEditor,flip-detail-customization.limits-cell-mark.custum-row.name"
 msgid "Limits Cell Mark"
 msgstr ""
 
 #. Key:	flip-detail-customization.keys-cell-mark.custum-row.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(99)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(99)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(98)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFlipSystem.cpp(98)
 msgctxt "AnimationEditor,flip-detail-customization.keys-cell-mark.custum-row.name"
 msgid "Keys Cell Mark"
+msgstr ""
+
+#. Key:	animation-editor.import-image-sequence.progress-bar.title
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFunctionLibrary.cpp(240)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFunctionLibrary.cpp(240)
+msgctxt "UOdysseyAnimationEditorAnimationFunctionLibrary,animation-editor.import-image-sequence.progress-bar.title"
+msgid "Importing Image Sequence"
+msgstr ""
+
+#. Key:	LayerStack
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFunctionLibrary.cpp(74)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFunctionLibrary.cpp(74)
+msgctxt "UOdysseyAnimationEditorAnimationFunctionLibrary,LayerStack"
+msgid "Import Textures Sequence"
+msgstr ""
+
+#. Key:	animation-editor.import-texture-dialog.progress-bar.title
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFunctionLibrary.cpp(80)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorFunctionLibrary.cpp(80)
+msgctxt "UOdysseyAnimationEditorAnimationFunctionLibrary,animation-editor.import-texture-dialog.progress-bar.title"
+msgid "Importing Texture Sequence"
 msgstr ""
 
 #. Key:	lighttable-tab.name
@@ -224,141 +245,113 @@ msgid "LightTable"
 msgstr "Table Lumineuse"
 
 #. Key:	actions.clear
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(195)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(195)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(194)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(194)
 msgctxt "AnimationEditor,actions.clear"
 msgid "Clear"
 msgstr "Effacer"
 
 #. Key:	actions.cut
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(265)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(265)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(262)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorSource.cpp(262)
 msgctxt "AnimationEditor,actions.cut"
 msgid "Cut"
 msgstr ""
 
 #. Key:	timeline-tab.file-menu.animation-import-export-section.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(186)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(186)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(191)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(191)
 msgctxt "AnimationEditor,timeline-tab.file-menu.animation-import-export-section.name"
 msgid "Animation Import / Export"
 msgstr "Import / export d'animation"
 
 #. Key:	timeline-tab.file-menu.import-submenu.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(190)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(190)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(194)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(194)
 msgctxt "AnimationEditor,timeline-tab.file-menu.import-submenu.name"
 msgid "Import"
 msgstr "Import"
 
 #. Key:	timeline-tab.file-menu.import-submenu.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(191)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(191)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(195)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(195)
 msgctxt "AnimationEditor,timeline-tab.file-menu.import-submenu.tooltip"
 msgid "Contains Import actions"
 msgstr "Contient des actions d'importation"
 
 #. Key:	timeline-tab.file-menu.export-submenu.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(199)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(199)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(202)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(202)
 msgctxt "AnimationEditor,timeline-tab.file-menu.export-submenu.name"
 msgid "Export"
 msgstr "Export"
 
 #. Key:	timeline-tab.file-menu.export-submenu.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(200)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(200)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(203)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(203)
 msgctxt "AnimationEditor,timeline-tab.file-menu.export-submenu.tooltip"
 msgid "Contains Export actions"
 msgstr "Contient des actions d'exportation"
 
 #. Key:	timeline-tab.file-menu.import-texture-sequence.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(218)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(218)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(221)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(221)
 msgctxt "AnimationEditor,timeline-tab.file-menu.import-texture-sequence.name"
 msgid "Texture Sequence..."
 msgstr "Sequence de textures ..."
 
 #. Key:	timeline-tab.file-menu.import-image-sequence.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(223)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(223)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(226)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(226)
 msgctxt "AnimationEditor,timeline-tab.file-menu.import-image-sequence.name"
 msgid "Image Sequence..."
 msgstr "Sequence d'images..."
 
 #. Key:	timeline-tab.file-menu.export-image-sequence.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(233)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(233)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(236)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(236)
 msgctxt "AnimationEditor,timeline-tab.file-menu.export-image-sequence.name"
 msgid "Image Sequence..."
 msgstr "Sequence d'images..."
 
 #. Key:	timeline-tab.file-menu.export-as-flipbook.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(238)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(238)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(241)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(241)
 msgctxt "AnimationEditor,timeline-tab.file-menu.export-as-flipbook.name"
 msgid "Flipbook..."
 msgstr "FlipBook..."
 
-#. Key:	LayerStack
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(249)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(249)
-msgctxt "AnimationEditor,LayerStack"
-msgid "Import Textures Sequence"
-msgstr "Importer une séquence de textures"
-
 #. Key:	timeline-tab.import-texture-dialog.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(252)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(252)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(253)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(253)
 msgctxt "AnimationEditor,timeline-tab.import-texture-dialog.title"
 msgid "Import Textures Sequence"
 msgstr "Importer une séquence de textures"
 
-#. Key:	timeline-tab.import-texture-dialog.progress-bar.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(273)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(273)
-msgctxt "AnimationEditor,timeline-tab.import-texture-dialog.progress-bar.title"
-msgid "Importing Texture Sequence"
-msgstr "Importation d'une séquence de textures"
-
 #. Key:	animation.import-image-sequence.dialog.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(335)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(335)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(291)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(291)
 msgctxt "AnimationEditor,animation.import-image-sequence.dialog.title"
 msgid "Select Images to import"
 msgstr "Sélectionner les images à importer"
 
-#. Key:	timeline-tab.import-image-sequence.progress-bar.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(346)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(346)
-msgctxt "AnimationEditor,timeline-tab.import-image-sequence.progress-bar.title"
-msgid "Importing Image Sequence"
-msgstr "Importation d'une séquence d'images"
-
 #. Key:	export-layers-as-textures.save-asset-dialog.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(460)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(460)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(337)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(337)
 msgctxt "AnimationEditor,export-layers-as-textures.save-asset-dialog.title"
 msgid "Export Layers As Texture"
 msgstr "Exporter les calques en tant que textures"
 
-#. Key:	timeline-tab.export-as-flipbook.progress-bar.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(476)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(476)
-msgctxt "AnimationEditor,timeline-tab.export-as-flipbook.progress-bar.title"
-msgid "Export As Flipbook"
-msgstr "Exporter comme un Flipbook"
-
 #. Key:	timeline-tab.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(51)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(51)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(52)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(52)
 msgctxt "AnimationEditor,timeline-tab.name"
 msgid "Timeline"
 msgstr "Ligne de Temps"
 
 #. Key:	timeline-tab.nothing-to-display
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(95)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(95)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(96)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/AnimationEditor/OdysseyAnimationEditorTimelineTab.cpp(96)
 msgctxt "AnimationEditor,timeline-tab.nothing-to-display"
 msgid "No Timeline can be displayed"
 msgstr "Aucune ligne du temps ne peut être affichée"
@@ -378,29 +371,29 @@ msgid "Animation"
 msgstr "Animation"
 
 #. Key:	asset-category.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(118)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(118)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(101)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(101)
 msgctxt "AnimationEditor,asset-category.name"
 msgid "ILIAD"
 msgstr "ILIAD"
 
 #. Key:	settings.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(184)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(184)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(170)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(170)
 msgctxt "AnimationEditor,settings.name"
 msgid "2D Animation Editor"
 msgstr "Editeur d'animation 2D"
 
 #. Key:	settings.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(185)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(185)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(171)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(171)
 msgctxt "AnimationEditor,settings.tooltip"
 msgid "Configure the look and feel of the 2D Animation Editor."
 msgstr "Configurer l'aspect et les fonctionnalités de l'éditeur d'animation 2D."
 
 #. Key:	main-menu.category
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(39)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(39)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(42)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/OdysseyAnimationEditorModule.cpp(42)
 msgctxt "AnimationEditor,main-menu.category"
 msgid "Odyssey Animation Editor"
 msgstr "Editeur d'Animation Odyssey"
@@ -420,53 +413,116 @@ msgid "Animation "
 msgstr "Animation "
 
 #. Key:	cell-image-raster.cross-fade.progress-bar.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Shortcuts/Timeline/OdysseyAnimationTimelineCellImageRasterShortcuts.cpp(212)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Shortcuts/Timeline/OdysseyAnimationTimelineCellImageRasterShortcuts.cpp(212)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Shortcuts/Timeline/OdysseyAnimationTimelineCellImageRasterShortcuts.cpp(69)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Shortcuts/Timeline/OdysseyAnimationTimelineCellImageRasterShortcuts.cpp(69)
 msgctxt "AnimationEditor,cell-image-raster.cross-fade.progress-bar.title"
 msgid "Applying Cross Fade"
 msgstr "Application du fondu enchaîné"
 
-#. Key:	cell-image-raster.convert-to-raster-cell.progress-bar.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Shortcuts/Timeline/OdysseyAnimationTimelineCellImageRasterShortcuts.cpp(87)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Shortcuts/Timeline/OdysseyAnimationTimelineCellImageRasterShortcuts.cpp(87)
-msgctxt "AnimationEditor,cell-image-raster.convert-to-raster-cell.progress-bar.title"
-msgid "Converting To Raster Cell"
-msgstr "Conversion en cellule bitmap"
+#. Key:	animation.cell.convert-to-reference-cell.progress-bar.title
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Shortcuts/Timeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.cpp(72)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Shortcuts/Timeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.cpp(72)
+msgctxt "AnimationEditor,animation.cell.convert-to-reference-cell.progress-bar.title"
+msgid "Converting To Reference Cell"
+msgstr ""
 
-#. Key:	timeline-cells.dialog.set-selected-cells-length.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Shortcuts/Timeline/OdysseyAnimationTimelineCellsShortcuts.cpp(394)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Shortcuts/Timeline/OdysseyAnimationTimelineCellsShortcuts.cpp(394)
-msgctxt "AnimationEditor,timeline-cells.dialog.set-selected-cells-length.title"
-msgid "Set Selected Cells Length"
-msgstr "Régler la longueur des cellules sélectionnées"
+#. Key:	timeline-cells.dialog.set-selected-cells-exposure.title
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Shortcuts/Timeline/OdysseyAnimationTimelineCellsShortcuts.cpp(348)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Shortcuts/Timeline/OdysseyAnimationTimelineCellsShortcuts.cpp(348)
+msgctxt "AnimationEditor,timeline-cells.dialog.set-selected-cells-exposure.title"
+msgid "Set Selected Cells Exposure"
+msgstr ""
 
-#. Key:	timeline-cells.dialog.set-selected-cells-length.label
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Shortcuts/Timeline/OdysseyAnimationTimelineCellsShortcuts.cpp(411)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Shortcuts/Timeline/OdysseyAnimationTimelineCellsShortcuts.cpp(411)
-msgctxt "AnimationEditor,timeline-cells.dialog.set-selected-cells-length.label"
-msgid "Length"
-msgstr "Longueur"
+#. Key:	timeline-cells.dialog.set-selected-cells-exposure.label
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Shortcuts/Timeline/OdysseyAnimationTimelineCellsShortcuts.cpp(365)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Shortcuts/Timeline/OdysseyAnimationTimelineCellsShortcuts.cpp(365)
+msgctxt "AnimationEditor,timeline-cells.dialog.set-selected-cells-exposure.label"
+msgid "Exposure"
+msgstr ""
+
+#. Key:	cell-image-stagger.set-reach
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.cpp(17)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.cpp(17)
+msgctxt "AnimationEditor,cell-image-stagger.set-reach"
+msgid "Set Stagger Cell Reach"
+msgstr ""
 
 #. Key:	cell-image-stagger.behaviour-menu.behaviour-section.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.cpp(231)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.cpp(231)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.cpp(221)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.cpp(221)
 msgctxt "AnimationEditor,cell-image-stagger.behaviour-menu.behaviour-section.name"
 msgid "Behaviour"
 msgstr "Comportement"
 
 #. Key:	cell-image-stagger.behaviour-menu.loop
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.cpp(233)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.cpp(233)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.cpp(223)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.cpp(223)
 msgctxt "AnimationEditor,cell-image-stagger.behaviour-menu.loop"
 msgid "Loop"
 msgstr "Boucle"
 
 #. Key:	cell-image-stagger.behaviour-menu.pingpong
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.cpp(245)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.cpp(245)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.cpp(235)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.cpp(235)
 msgctxt "AnimationEditor,cell-image-stagger.behaviour-menu.pingpong"
 msgid "PingPong"
 msgstr "PingPong"
+
+#. Key:	animation.layer.prebehaviour-menu.loop
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/SOdysseyAnimationCells.cpp(1011)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/SOdysseyAnimationCells.cpp(1011)
+msgctxt "AnimationEditor,animation.layer.prebehaviour-menu.loop"
+msgid "Loop"
+msgstr ""
+
+#. Key:	animation.layer.prebehaviour-menu.pingpong
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/SOdysseyAnimationCells.cpp(1024)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/SOdysseyAnimationCells.cpp(1024)
+msgctxt "AnimationEditor,animation.layer.prebehaviour-menu.pingpong"
+msgid "PingPong"
+msgstr ""
+
+#. Key:	animation.layer.postbehaviour-menu.none
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/SOdysseyAnimationCells.cpp(1088)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/SOdysseyAnimationCells.cpp(1088)
+msgctxt "AnimationEditor,animation.layer.postbehaviour-menu.none"
+msgid "None"
+msgstr ""
+
+#. Key:	animation.layer.postbehaviour-menu.hold
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/SOdysseyAnimationCells.cpp(1101)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/SOdysseyAnimationCells.cpp(1101)
+msgctxt "AnimationEditor,animation.layer.postbehaviour-menu.hold"
+msgid "Hold"
+msgstr ""
+
+#. Key:	animation.layer.postbehaviour-menu.loop
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/SOdysseyAnimationCells.cpp(1114)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/SOdysseyAnimationCells.cpp(1114)
+msgctxt "AnimationEditor,animation.layer.postbehaviour-menu.loop"
+msgid "Loop"
+msgstr ""
+
+#. Key:	animation.layer.postbehaviour-menu.pingpong
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/SOdysseyAnimationCells.cpp(1127)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/SOdysseyAnimationCells.cpp(1127)
+msgctxt "AnimationEditor,animation.layer.postbehaviour-menu.pingpong"
+msgid "PingPong"
+msgstr ""
+
+#. Key:	animation.layer.prebehaviour-menu.none
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/SOdysseyAnimationCells.cpp(985)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/SOdysseyAnimationCells.cpp(985)
+msgctxt "AnimationEditor,animation.layer.prebehaviour-menu.none"
+msgid "None"
+msgstr ""
+
+#. Key:	animation.layer.prebehaviour-menu.hold
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/SOdysseyAnimationCells.cpp(998)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Cells/SOdysseyAnimationCells.cpp(998)
+msgctxt "AnimationEditor,animation.layer.prebehaviour-menu.hold"
+msgid "Hold"
+msgstr ""
 
 #. Key:	layer-folder.transaction.set-blend-mode
 #. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerFolder/SOdysseyAnimationLayerFolderRow.cpp(122)
@@ -483,8 +539,8 @@ msgid "Change Layer Opacity"
 msgstr "Changer l'opacité du calque"
 
 #. Key:	layer-image-raster.transaction.set-blend-mode
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.cpp(232)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.cpp(232)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.cpp(234)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.cpp(234)
 msgctxt "AnimationEditor,layer-image-raster.transaction.set-blend-mode"
 msgid "Change Layer BlendMode"
 msgstr "Changer le mode de fusion"
@@ -497,8 +553,8 @@ msgid "Change Layer Opacity"
 msgstr "Changer l'opacité du calque"
 
 #. Key:	timeline-cells.context-menu.cross-fade.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.cpp(114)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.cpp(114)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.cpp(105)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.cpp(105)
 msgctxt "AnimationEditor,timeline-cells.context-menu.cross-fade.name"
 msgid "Cross Fade"
 msgstr "Fondu enchaîné"
@@ -525,176 +581,85 @@ msgid "Change Layer Opacity"
 msgstr "Changer l'opacité du calque"
 
 #. Key:	layer-image-vector.transaction.set-blend-mode
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.cpp(256)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.cpp(256)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.cpp(258)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.cpp(258)
 msgctxt "AnimationEditor,layer-image-vector.transaction.set-blend-mode"
 msgid "Change Layer BlendMode"
 msgstr "Changer le mode de fusion"
 
 #. Key:	timeline-cells.context-menu.selection-section.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(385)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(385)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(364)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(364)
 msgctxt "AnimationEditor,timeline-cells.context-menu.selection-section.name"
 msgid "Selection"
 msgstr "Sélection"
 
 #. Key:	timeline-cells.context-menu.common-section.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(389)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(389)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(368)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(368)
 msgctxt "AnimationEditor,timeline-cells.context-menu.common-section.name"
 msgid "Common"
 msgstr "Commun"
 
 #. Key:	timeline-cells.context-menu.cells-section.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(397)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(397)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(376)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(376)
 msgctxt "AnimationEditor,timeline-cells.context-menu.cells-section.name"
 msgid "Cells"
 msgstr "Cellules"
 
-#. Key:	timeline-cells.context-menu.set-selected-cells-length.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(402)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(402)
-msgctxt "AnimationEditor,timeline-cells.context-menu.set-selected-cells-length.name"
-msgid "Set Length"
-msgstr "Définir la longueur"
+#. Key:	timeline-cells.context-menu.set-selected-cells-exposure.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(382)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(382)
+msgctxt "AnimationEditor,timeline-cells.context-menu.set-selected-cells-exposure.name"
+msgid "Set Exposure"
+msgstr ""
 
 #. Key:	timeline-cells.context-menu.cell-mark.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(405)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(405)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(385)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(385)
 msgctxt "AnimationEditor,timeline-cells.context-menu.cell-mark.name"
 msgid "Mark"
 msgstr "Marqueur"
 
 #. Key:	timeline-cells.context-menu.cell-mark.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(406)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(406)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(386)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(386)
 msgctxt "AnimationEditor,timeline-cells.context-menu.cell-mark.tooltip"
 msgid "Set a mark on the selected cells"
 msgstr "Mettre une marque sur les cellules sélectionnées"
 
-#. Key:	timeline-cells.context-menu.layer-section.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(411)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(411)
-msgctxt "AnimationEditor,timeline-cells.context-menu.layer-section.name"
-msgid "Layer"
-msgstr "Calque"
-
-#. Key:	timeline-cells.context-menu.pre-behaviour-submenu.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(413)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(413)
-msgctxt "AnimationEditor,timeline-cells.context-menu.pre-behaviour-submenu.name"
-msgid "Pre Behaviour"
-msgstr "Pré comportement"
-
-#. Key:	timeline-cells.context-menu.pre-behaviour-submenu.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(414)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(414)
-msgctxt "AnimationEditor,timeline-cells.context-menu.pre-behaviour-submenu.tooltip"
-msgid "Set Layer's Pre Behaviour"
-msgstr "Définir le pré comportement du calque"
-
-#. Key:	timeline-cells.context-menu.post-behaviour-submenu.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(418)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(418)
-msgctxt "AnimationEditor,timeline-cells.context-menu.post-behaviour-submenu.name"
-msgid "Post Behaviour"
-msgstr "Post comportement"
-
-#. Key:	timeline-cells.context-menu.post-behaviour-submenu.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(419)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(419)
-msgctxt "AnimationEditor,timeline-cells.context-menu.post-behaviour-submenu.tooltip"
-msgid "Set Layer's Post Behaviour"
-msgstr "Définir le post  comportement du calque"
-
 #. Key:	timeline-cells.context-menu.cell-mark.reset.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(468)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(468)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(435)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(435)
 msgctxt "AnimationEditor,timeline-cells.context-menu.cell-mark.reset.name"
 msgid "Remove"
 msgstr "Retirer"
 
 #. Key:	timeline-cells.context-menu.cell-mark.reset.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(469)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(469)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(436)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(436)
 msgctxt "AnimationEditor,timeline-cells.context-menu.cell-mark.reset.tooltip"
 msgid "Removes the any mark from selected cells"
 msgstr "Supprime les marqueurs des cellules sélectionnées"
 
-#. Key:	timeline-cells.context-menu.pre-behaviour.none
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(500)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(500)
-msgctxt "AnimationEditor,timeline-cells.context-menu.pre-behaviour.none"
-msgid "None"
-msgstr "Aucun"
-
-#. Key:	timeline-cells.context-menu.pre-behaviour.hold
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(512)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(512)
-msgctxt "AnimationEditor,timeline-cells.context-menu.pre-behaviour.hold"
-msgid "Hold"
-msgstr "Maintenir"
-
-#. Key:	timeline-cells.context-menu.pre-behaviour.loop
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(524)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(524)
-msgctxt "AnimationEditor,timeline-cells.context-menu.pre-behaviour.loop"
-msgid "Loop"
-msgstr "Boucle"
-
-#. Key:	timeline-cells.context-menu.pre-behaviour.pingpong
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(536)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(536)
-msgctxt "AnimationEditor,timeline-cells.context-menu.pre-behaviour.pingpong"
-msgid "PingPong"
-msgstr "Ping Pong"
-
-#. Key:	timeline-cells.context-menu.post-behaviour.none
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(553)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(553)
-msgctxt "AnimationEditor,timeline-cells.context-menu.post-behaviour.none"
-msgid "None"
-msgstr "Aucun"
-
-#. Key:	timeline-cells.context-menu.post-behaviour.hold
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(565)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(565)
-msgctxt "AnimationEditor,timeline-cells.context-menu.post-behaviour.hold"
-msgid "Hold"
-msgstr "Maintenir"
-
-#. Key:	timeline-cells.context-menu.post-behaviour.loop
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(577)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(577)
-msgctxt "AnimationEditor,timeline-cells.context-menu.post-behaviour.loop"
-msgid "Loop"
-msgstr "Boucle"
-
-#. Key:	timeline-cells.context-menu.post-behaviour.pingpong
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(589)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.cpp(589)
-msgctxt "AnimationEditor,timeline-cells.context-menu.post-behaviour.pingpong"
-msgid "PingPong"
-msgstr "Ping Pong"
-
 #. Key:	timeline.move-tool.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationLayerStack.cpp(100)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationLayerStack.cpp(100)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationLayerStack.cpp(101)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationLayerStack.cpp(101)
 msgctxt "AnimationEditor,timeline.move-tool.tooltip"
 msgid "Move Tool"
 msgstr "Outil de déplacement"
 
 #. Key:	timeline.cut-tool.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationLayerStack.cpp(105)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationLayerStack.cpp(105)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationLayerStack.cpp(106)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationLayerStack.cpp(106)
 msgctxt "AnimationEditor,timeline.cut-tool.tooltip"
 msgid "Cut Tool"
 msgstr "Outil de découpe"
 
 #. Key:	timeline.selection-tool.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationLayerStack.cpp(95)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationLayerStack.cpp(95)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationLayerStack.cpp(96)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationLayerStack.cpp(96)
 msgctxt "AnimationEditor,timeline.selection-tool.tooltip"
 msgid "Selection Tool"
 msgstr "Outil de sélection"
@@ -721,106 +686,106 @@ msgid "Convert to Raster"
 msgstr "Convertir en bitmap"
 
 #. Key:	lighttable.timeline-header.options-menu.display-position-section.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(174)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(174)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(198)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(198)
 msgctxt "AnimationEditor,lighttable.timeline-header.options-menu.display-position-section.name"
 msgid "Display Position"
 msgstr "Afficher la position"
 
 #. Key:	lighttable.timeline-header.options-menu.display-position-above-layer.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(177)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(177)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(201)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(201)
 msgctxt "AnimationEditor,lighttable.timeline-header.options-menu.display-position-above-layer.name"
 msgid "Above Layer"
 msgstr "Calque du dessus"
 
 #. Key:	lighttable.timeline-header.options-menu.display-position-above-layer.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(178)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(178)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(202)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(202)
 msgctxt "AnimationEditor,lighttable.timeline-header.options-menu.display-position-above-layer.tooltip"
 msgid "Displays the lightTable frames above Layer"
 msgstr "Affiche les images de la table lumineuse au  dessus du calque courant"
 
 #. Key:	lighttable.timeline-header.options-menu.display-position-under-layer.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(190)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(190)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(214)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(214)
 msgctxt "AnimationEditor,lighttable.timeline-header.options-menu.display-position-under-layer.name"
 msgid "Under Layer"
 msgstr "Calque du dessous"
 
 #. Key:	lighttable.timeline-header.options-menu.display-position-under-layer.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(191)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(191)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(215)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(215)
 msgctxt "AnimationEditor,lighttable.timeline-header.options-menu.display-position-under-layer.tooltip"
 msgid "Displays the lightTable frames under Layer"
 msgstr "Affiche les images de la table lumineuse au dessous du calque courant"
 
 #. Key:	lighttable.timeline-header.options-menu.options-section.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(204)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(204)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(228)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(228)
 msgctxt "AnimationEditor,lighttable.timeline-header.options-menu.options-section.name"
 msgid "Options"
 msgstr "Options"
 
 #. Key:	lighttable.timeline-header.options-menu.previous-keys-contrast.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(236)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(236)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(257)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(257)
 msgctxt "AnimationEditor,lighttable.timeline-header.options-menu.previous-keys-contrast.name"
 msgid "Previous Keys Contrast"
 msgstr "Contraste des images précédentes"
 
 #. Key:	lighttable.timeline-header.options-menu.next-keys-contrast.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(267)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(267)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(285)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(285)
 msgctxt "AnimationEditor,lighttable.timeline-header.options-menu.next-keys-contrast.name"
 msgid "Next Keys Contrast"
 msgstr "Contraste des images suivantes"
 
 #. Key:	lighttable.timeline-header.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(45)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(45)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(47)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(47)
 msgctxt "AnimationEditor,lighttable.timeline-header.name"
 msgid "LightTable"
 msgstr "Table lumineuse"
 
 #. Key:	lighttable.timeline-header.out-of-pegs.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(89)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(89)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(91)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.cpp(91)
 msgctxt "AnimationEditor,lighttable.timeline-header.out-of-pegs.name"
 msgid "Out Of Pegs"
 msgstr "En dehors des tenons"
 
 #. Key:	export-image-sequence-dialog.unique-frames-only.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(134)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(134)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(133)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(133)
 msgctxt "AnimationEditor,export-image-sequence-dialog.unique-frames-only.tooltip"
 msgid "Export only unique frames instead of every single frames"
 msgstr "Exporter uniquement les images uniques au lieu de toutes les images"
 
 #. Key:	export-image-sequence-dialog.format-extension.png
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(144)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(144)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(143)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(143)
 msgctxt "AnimationEditor,export-image-sequence-dialog.format-extension.png"
 msgid "PNG Image"
 msgstr "Image PNG"
 
 #. Key:	export-image-sequence-dialog.format-extension.bmp
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(145)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(145)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(144)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(144)
 msgctxt "AnimationEditor,export-image-sequence-dialog.format-extension.bmp"
 msgid "BMP Image"
 msgstr "Image BMP"
 
 #. Key:	export-image-sequence-dialog.format-extension.tga
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(146)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(146)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(145)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(145)
 msgctxt "AnimationEditor,export-image-sequence-dialog.format-extension.tga"
 msgid "TGA Image"
 msgstr "Image TGA"
 
 #. Key:	export-image-sequence-dialog.format-extension.jpeg
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(147)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(147)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(146)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(146)
 msgctxt "AnimationEditor,export-image-sequence-dialog.format-extension.jpeg"
 msgid "Jpeg Image"
 msgstr "Image JPEG"
@@ -847,43 +812,43 @@ msgid "Cancel"
 msgstr "Annuler"
 
 #. Key:	animation.export-image-sequence.save-dialog.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(252)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(252)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(243)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(243)
 msgctxt "AnimationEditor,animation.export-image-sequence.save-dialog.title"
 msgid "Select Export Path & Name"
 msgstr "Sélectionner un chemin et un nom d'exportation"
 
 #. Key:	timeline-tab.export-image-sequence.progress-bar.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(265)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(265)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(262)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(262)
 msgctxt "AnimationEditor,timeline-tab.export-image-sequence.progress-bar.title"
 msgid "Exporting Image Sequence"
 msgstr "Exporter une séquence d'images"
 
 #. Key:	export-image-sequence-dialog.format.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(55)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(55)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(54)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(54)
 msgctxt "AnimationEditor,export-image-sequence-dialog.format.name"
 msgid "Format"
 msgstr "Format"
 
 #. Key:	export-image-sequence-dialog.source.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(60)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(60)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(59)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(59)
 msgctxt "AnimationEditor,export-image-sequence-dialog.source.name"
 msgid "Source"
 msgstr "Source"
 
 #. Key:	export-image-sequence-dialog.range.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(65)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(65)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(64)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(64)
 msgctxt "AnimationEditor,export-image-sequence-dialog.range.name"
 msgid "Range"
 msgstr "Étendue"
 
 #. Key:	export-image-sequence-dialog.unique-frames-only.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(70)
-#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(70)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(69)
+#: Plugins/Iliad/Source/Editor/OdysseyAnimationEditor/Private/Widgets/SOdysseyAnimationExportImageSequenceDialog.cpp(69)
 msgctxt "AnimationEditor,export-image-sequence-dialog.unique-frames-only.name"
 msgid "Unique Frames Only"
 msgstr "Cadres uniques uniquement"
@@ -1336,6 +1301,20 @@ msgctxt "FlipbookEditor,timeline.framerate.n-fps.tooltip"
 msgid "{0} frame(s) per second"
 msgstr "{0} image(s) par seconde"
 
+#. Key:	image-rendering-ability.export-as-flipbook.progress-bar.title
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyImaging/Private/OdysseyImageRenderingAbility.cpp(247)
+#: Plugins/Iliad/Source/Editor/OdysseyImaging/Private/OdysseyImageRenderingAbility.cpp(247)
+msgctxt "Imaging,image-rendering-ability.export-as-flipbook.progress-bar.title"
+msgid "Export As Flipbook"
+msgstr ""
+
+#. Key:	image-rendering-ability.export-as-texture-sequence.progress-bar.title
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyImaging/Private/OdysseyImageRenderingAbility.cpp(332)
+#: Plugins/Iliad/Source/Editor/OdysseyImaging/Private/OdysseyImageRenderingAbility.cpp(332)
+msgctxt "Imaging,image-rendering-ability.export-as-texture-sequence.progress-bar.title"
+msgid "Export As Texture Sequence"
+msgstr ""
+
 #. Key:	editor-commands.name
 #. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Commands/OdysseyLayerStackEditorCommands.cpp(16)
 #: Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Commands/OdysseyLayerStackEditorCommands.cpp(16)
@@ -1434,12 +1413,12 @@ msgctxt "LayerStackEditor,header-row.is-layer-locked.tooltip"
 msgid "Toggle Layer Locked State"
 msgstr "Changer le verrouillage du calque"
 
-#. Key:	header-row.is-layer-collapsed.tooltip
+#. Key:	header-row.display-options.tooltip
 #. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(76)
 #: Plugins/Iliad/Source/Editor/OdysseyLayerStackEditor/Private/Widgets/SOdysseyLayerStackTreeView.cpp(76)
-msgctxt "LayerStackEditor,header-row.is-layer-collapsed.tooltip"
-msgid "Collapse / Uncollapse Layer"
-msgstr "Plier / Déplier le calque"
+msgctxt "LayerStackEditor,header-row.display-options.tooltip"
+msgid "Display / Hide Layer's Options"
+msgstr ""
 
 #. Key:	editor-commands.name
 #. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Models/OdysseyPainterEditorCommands.cpp(22)
@@ -1498,15 +1477,15 @@ msgid "Uncategorized Yet Shortcuts"
 msgstr "Raccourcis non catégorisés"
 
 #. Key:	settings.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(66)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(66)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(67)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(67)
 msgctxt "PainterEditor,settings.name"
 msgid "ILIAD Painter Editor"
 msgstr "Editeur de dessin Iliad"
 
 #. Key:	settings.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(67)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(67)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(68)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/OdysseyPainterEditorModule.cpp(68)
 msgctxt "PainterEditor,settings.tooltip"
 msgid "Configure the look and feel of the ILIAD Editor."
 msgstr "Configurer l'aspect et l'ergonomie de l'éditeur ILIAD."
@@ -1526,148 +1505,148 @@ msgid "None"
 msgstr ""
 
 #. Key:	vector-scene.transaction.ungroup
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1012)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1012)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1011)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1011)
 msgctxt "PainterEditor,vector-scene.transaction.ungroup"
 msgid "Ungroup"
 msgstr "Dégrouper"
 
 #. Key:	vector-scene.transaction.group
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1063)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1063)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1062)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1062)
 msgctxt "PainterEditor,vector-scene.transaction.group"
 msgid "Group"
 msgstr "Group"
 
 #. Key:	vector-scene.transaction.select-all-points
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1104)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1104)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1103)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1103)
 msgctxt "PainterEditor,vector-scene.transaction.select-all-points"
 msgid "Select All Points"
 msgstr "Sélectionner tous les points"
 
 #. Key:	vector-scene.transaction.select-all-objects
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1149)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1149)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1148)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1148)
 msgctxt "PainterEditor,vector-scene.transaction.select-all-objects"
 msgid "Select All"
 msgstr "Sélectionner tout"
 
 #. Key:	vector-scene.transaction.reset-view
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1178)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1178)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1177)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1177)
 msgctxt "PainterEditor,vector-scene.transaction.reset-view"
 msgid "Reset view"
 msgstr "Réinitialiser la vue"
 
 #. Key:	vector-scene.transaction.unalign-point-selection
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1214)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1214)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1213)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1213)
 msgctxt "PainterEditor,vector-scene.transaction.unalign-point-selection"
 msgid "Unalign Point Selection"
 msgstr "Désalignement de la sélection des points"
 
 #. Key:	vector-scene.transaction.align-point-selection
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1338)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1338)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1337)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1337)
 msgctxt "PainterEditor,vector-scene.transaction.align-point-selection"
 msgid "Align Point Selection"
 msgstr "Aligner la sélection de points"
 
 #. Key:	vector-scene.transaction.delete-point-selection
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1422)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1422)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1421)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1421)
 msgctxt "PainterEditor,vector-scene.transaction.delete-point-selection"
 msgid "Delete Point Selection"
 msgstr "Supprimer la sélection de points"
 
 #. Key:	vector-scene.transaction.delete-objects
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1462)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1462)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1461)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1461)
 msgctxt "PainterEditor,vector-scene.transaction.delete-objects"
 msgid "Delete Objects"
 msgstr "Supprimer des objets"
 
 #. Key:	vector-scene.transaction.flip-horizontal
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1496)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1496)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1495)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1495)
 msgctxt "PainterEditor,vector-scene.transaction.flip-horizontal"
 msgid "Flip Horizontal"
 msgstr "Retournement horizontal"
 
 #. Key:	vector-scene.transaction.flip-vertical
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1530)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1530)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1529)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1529)
 msgctxt "PainterEditor,vector-scene.transaction.flip-vertical"
 msgid "Flip Vertical"
 msgstr "Retournement vertical"
 
 #. Key:	vector-scene.transaction.clear-coloring
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1593)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1593)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1592)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1592)
 msgctxt "PainterEditor,vector-scene.transaction.clear-coloring"
 msgid "Clear Coloring"
 msgstr "Supprimer la mise en couleur"
 
 #. Key:	vector-scene.transaction.delete-bucket
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1629)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1629)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1628)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1628)
 msgctxt "PainterEditor,vector-scene.transaction.delete-bucket"
 msgid "Delete Bucket"
 msgstr "Supprimer la pastille"
 
 #. Key:	vector-scene.transaction.propagate-bucket
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1834)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1834)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1848)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1848)
 msgctxt "PainterEditor,vector-scene.transaction.propagate-bucket"
 msgid "Propagate Bucket"
 msgstr "Propager la zone de couleur"
 
 #. Key:	PasteTransformation
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1910)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1910)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1924)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1924)
 msgctxt "PainterEditor,PasteTransformation"
 msgid "Paste Transformation"
 msgstr "Coller la transformation"
 
 #. Key:	vector-scene.transaction.paste-objects
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1977)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1977)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1991)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(1991)
 msgctxt "PainterEditor,vector-scene.transaction.paste-objects"
 msgid "Paste"
 msgstr "Coller"
 
 #. Key:	vector-scene.transaction.stitch-vertices
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(2086)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(2086)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(2100)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(2100)
 msgctxt "PainterEditor,vector-scene.transaction.stitch-vertices"
 msgid "Vector Path Stitch Tool"
 msgstr "Outil de raccord de tracés vectoriels"
 
 #. Key:	vector-scene.transaction.bring-forward
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(845)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(845)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(844)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(844)
 msgctxt "PainterEditor,vector-scene.transaction.bring-forward"
 msgid "Bring forward"
 msgstr "Déplacer au premier plan"
 
 #. Key:	vector-scene.transaction.send-backward
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(879)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(879)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(878)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(878)
 msgctxt "PainterEditor,vector-scene.transaction.send-backward"
 msgid "Send backward"
 msgstr "Déplacer à l'arrière plan"
 
 #. Key:	vector-scene.transaction.apply-transformations
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(915)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(915)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(914)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(914)
 msgctxt "PainterEditor,vector-scene.transaction.apply-transformations"
 msgid "Apply Transformations"
 msgstr "Appliquer les transformations"
 
 #. Key:	vector-scene.transaction.make-group-paint
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(965)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(965)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(964)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditor.cpp(964)
 msgctxt "PainterEditor,vector-scene.transaction.make-group-paint"
 msgid "Group Paint"
 msgstr "Groupe de mise en couleur"
@@ -1706,104 +1685,6 @@ msgstr "Curseurs de couleur"
 msgctxt "PainterEditor,color-wheel-tab.name"
 msgid "Color Wheel"
 msgstr "Roue chromatique"
-
-#. Key:	about-menu.iliad-submenu.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(161)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(161)
-msgctxt "PainterEditor,about-menu.iliad-submenu.name"
-msgid "Iliad"
-msgstr "Iliad"
-
-#. Key:	about-menu.iliad-submenu.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(162)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(162)
-msgctxt "PainterEditor,about-menu.iliad-submenu.tooltip"
-msgid "Iliad Actions"
-msgstr "Actions Iliad"
-
-#. Key:	about-menu.iliad.iliad-section.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(168)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(168)
-msgctxt "PainterEditor,about-menu.iliad.iliad-section.name"
-msgid "ILIAD"
-msgstr "ILIAD"
-
-#. Key:	about-menu.iliad.about-iliad.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(172)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(172)
-msgctxt "PainterEditor,about-menu.iliad.about-iliad.name"
-msgid "About Iliad"
-msgstr "A propos d'iliad"
-
-#. Key:	about-menu.iliad.about-iliad.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(173)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(173)
-msgctxt "PainterEditor,about-menu.iliad.about-iliad.tooltip"
-msgid "to get more information about the plugin, the team that created it, etc."
-msgstr "pour obtenir plus d'informations sur le plugin, l'équipe qui l'a créé, etc."
-
-#. Key:	about-menu.iliad.about-iliad.visit-praxinos-website.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(178)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(178)
-msgctxt "PainterEditor,about-menu.iliad.about-iliad.visit-praxinos-website.name"
-msgid "About Praxinos ..."
-msgstr "A propos de Praxinos..."
-
-#. Key:	about-menu.iliad.about-iliad.visit-praxinos-website.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(179)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(179)
-msgctxt "PainterEditor,about-menu.iliad.about-iliad.visit-praxinos-website.tooltip"
-msgid "to get more information about the company Praxinos, its projects, etc."
-msgstr "pour obtenir plus d'informations sur l'entreprise Praxinos, ses projets, etc."
-
-#. Key:	about-menu.iliad.about-iliad.manual-and-release-notes.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(184)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(184)
-msgctxt "PainterEditor,about-menu.iliad.about-iliad.manual-and-release-notes.name"
-msgid "Manual and Release Notes ..."
-msgstr "Manuel et notes de mise à jour ..."
-
-#. Key:	about-menu.iliad.about-iliad.manual-and-release-notes.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(185)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(185)
-msgctxt "PainterEditor,about-menu.iliad.about-iliad.manual-and-release-notes.tooltip"
-msgid "to get a full changelog of each Iliad version."
-msgstr "pour obtenir une liste complète des modifications apportées à chaque version d'Iliad."
-
-#. Key:	about-menu.iliad.about-iliad.get-more-brushes.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(190)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(190)
-msgctxt "PainterEditor,about-menu.iliad.about-iliad.get-more-brushes.name"
-msgid "Get more brushes ..."
-msgstr "Obtenir plus de brosses ..."
-
-#. Key:	about-menu.iliad.about-iliad.get-more-brushes.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(191)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(191)
-msgctxt "PainterEditor,about-menu.iliad.about-iliad.get-more-brushes.tooltip"
-msgid "Want more brushes ? Just follow this link !"
-msgstr "Vous voulez plus de brosses ? Suivez ce lien !"
-
-#. Key:	about-menu.iliad.about-iliad.talk-with-the-developpers.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(196)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(196)
-msgctxt "PainterEditor,about-menu.iliad.about-iliad.talk-with-the-developpers.name"
-msgid "Talk with the developpers ..."
-msgstr "Discutez avec les développeurs ..."
-
-#. Key:	about-menu.iliad.about-iliad.talk-with-the-developpers.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(197)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorGUI.cpp(197)
-msgctxt "PainterEditor,about-menu.iliad.about-iliad.talk-with-the-developpers.tooltip"
-msgid "For those who want to discuss with us about the next improvements"
-msgstr "Pour ceux qui veulent discuter avec nous des futures améliorations"
-
-#. Key:	hud-tab.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorHUDTab.cpp(31)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorHUDTab.cpp(31)
-msgctxt "PainterEditor,hud-tab.name"
-msgid "HUD"
-msgstr "HUD"
 
 #. Key:	mesh-selector-tab.name
 #. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorMeshSelectorTab.cpp(27)
@@ -1876,8 +1757,8 @@ msgid "Property Changed"
 msgstr "Propriété modifiée"
 
 #. Key:	vector-object.transaction.property-changed
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorVectorObjectView.cpp(171)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorVectorObjectView.cpp(171)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorVectorObjectView.cpp(188)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/PainterEditor/OdysseyPainterEditorVectorObjectView.cpp(188)
 msgctxt "PainterEditor,vector-object.transaction.property-changed"
 msgid "Property Changed"
 msgstr "Propriété modifiée"
@@ -1910,16 +1791,23 @@ msgctxt "PainterEditor,color-picker-tool.tooltip"
 msgid "Color Picker Tool"
 msgstr "Outil de sélection des couleurs"
 
+#. Key:	raster-base-tool.edit-menu.tool-options
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.cpp(40)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.cpp(40)
+msgctxt "PainterEditor,raster-base-tool.edit-menu.tool-options"
+msgid "Tool Options"
+msgstr ""
+
 #. Key:	raster-drawing-tool.transaction.paint-stroke
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.cpp(310)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.cpp(310)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.cpp(344)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.cpp(344)
 msgctxt "PainterEditor,raster-drawing-tool.transaction.paint-stroke"
 msgid "Paint Stroke"
 msgstr "Outil de dessin"
 
 #. Key:	raster-drawing-tool.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.cpp(802)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.cpp(802)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.cpp(846)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.cpp(846)
 msgctxt "PainterEditor,raster-drawing-tool.tooltip"
 msgid "Drawing Tool"
 msgstr "Outil de dessin"
@@ -1932,291 +1820,410 @@ msgid "Switch the current tool to Eraser mode."
 msgstr "Passer l'outil actuel en mode gomme."
 
 #. Key:	raster-eraser-tool.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.cpp(405)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.cpp(405)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.cpp(408)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.cpp(408)
 msgctxt "PainterEditor,raster-eraser-tool.tooltip"
 msgid "Eraser Tool"
 msgstr "Outil gomme"
 
 #. Key:	raster-paint-bucket-tool.transaction.paint-stroke
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(190)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(190)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(186)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(186)
 msgctxt "PainterEditor,raster-paint-bucket-tool.transaction.paint-stroke"
 msgid "FloodFill"
 msgstr "Pot de peinture"
 
 #. Key:	raster-paint-bucket-tool.context-menu.include-color.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(252)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(252)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(248)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(248)
 msgctxt "PainterEditor,raster-paint-bucket-tool.context-menu.include-color.name"
 msgid "Include Color"
 msgstr "Inclure la couleur"
 
 #. Key:	raster-paint-bucket-tool.context-menu.include-color.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(253)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(253)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(249)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(249)
 msgctxt "PainterEditor,raster-paint-bucket-tool.context-menu.include-color.tooltip"
 msgid "Adds this color in the paint bucket include color list."
 msgstr "Ajoute cette couleur dans la liste du pot de peinture."
 
 #. Key:	raster-paint-bucket-tool.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(506)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(506)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(502)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.cpp(502)
 msgctxt "PainterEditor,raster-paint-bucket-tool.tooltip"
 msgid "Paint Bucket Tool"
 msgstr "Outil pot de peinture"
 
 #. Key:	raster-primitive-drawing-tool.transaction.draw-shape
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(275)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(275)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(278)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(278)
 msgctxt "PainterEditor,raster-primitive-drawing-tool.transaction.draw-shape"
 msgid "Draw Primitive Shape"
 msgstr "Dessiner une forme géomêtrique"
 
 #. Key:	raster-primitive-drawing-tool.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(434)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(434)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(425)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.cpp(425)
 msgctxt "PainterEditor,raster-primitive-drawing-tool.tooltip"
 msgid "Primitive Drawing Tool"
 msgstr "Outil de tracé de formes géométriques"
 
+#. Key:	raster-tool.object-context-menu.select-all.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(172)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(172)
+msgctxt "OdysseyPainterEditorRasterSelectionTool,raster-tool.object-context-menu.select-all.name"
+msgid "Select All"
+msgstr ""
+
+#. Key:	raster-tool.object-context-menu.select-all.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(173)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(173)
+msgctxt "OdysseyPainterEditorRasterSelectionTool,raster-tool.object-context-menu.select-all.tooltip"
+msgid "Select All"
+msgstr ""
+
+#. Key:	raster-tool.object-context-menu.clear-selection.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(181)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(181)
+msgctxt "OdysseyPainterEditorRasterSelectionTool,raster-tool.object-context-menu.clear-selection.name"
+msgid "Clear Selection"
+msgstr ""
+
+#. Key:	raster-tool.object-context-menu.clear-selection.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(182)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(182)
+msgctxt "OdysseyPainterEditorRasterSelectionTool,raster-tool.object-context-menu.clear-selection.tooltip"
+msgid "Clear Selection"
+msgstr ""
+
+#. Key:	raster-tool.object-context-menu.copy-selection.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(190)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(190)
+msgctxt "OdysseyPainterEditorRasterSelectionTool,raster-tool.object-context-menu.copy-selection.name"
+msgid "Copy Selection"
+msgstr ""
+
+#. Key:	raster-tool.object-context-menu.copy-selection.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(191)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(191)
+msgctxt "OdysseyPainterEditorRasterSelectionTool,raster-tool.object-context-menu.copy-selection.tooltip"
+msgid "Copy Selection"
+msgstr ""
+
+#. Key:	raster-tool.object-context-menu.cut-selection.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(199)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(199)
+msgctxt "OdysseyPainterEditorRasterSelectionTool,raster-tool.object-context-menu.cut-selection.name"
+msgid "Cut Selection"
+msgstr ""
+
+#. Key:	raster-tool.object-context-menu.cut-selection.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(200)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(200)
+msgctxt "OdysseyPainterEditorRasterSelectionTool,raster-tool.object-context-menu.cut-selection.tooltip"
+msgid "Cut Selection"
+msgstr ""
+
+#. Key:	raster-tool.object-context-menu.paste-selection.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(208)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(208)
+msgctxt "OdysseyPainterEditorRasterSelectionTool,raster-tool.object-context-menu.paste-selection.name"
+msgid "Paste Selection"
+msgstr ""
+
+#. Key:	raster-tool.object-context-menu.paste-selection.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(209)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(209)
+msgctxt "OdysseyPainterEditorRasterSelectionTool,raster-tool.object-context-menu.paste-selection.tooltip"
+msgid "Paste Selection"
+msgstr ""
+
+#. Key:	raster-tool.object-context-menu.paste-selection-in-new-layer.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(218)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(218)
+msgctxt "OdysseyPainterEditorRasterSelectionTool,raster-tool.object-context-menu.paste-selection-in-new-layer.name"
+msgid "Paste Selection In New Layer"
+msgstr ""
+
+#. Key:	raster-tool.object-context-menu.paste-selection-in-new-layer.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(219)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(219)
+msgctxt "OdysseyPainterEditorRasterSelectionTool,raster-tool.object-context-menu.paste-selection-in-new-layer.tooltip"
+msgid "Paste Selection In New Layer"
+msgstr ""
+
+#. Key:	raster-tool.object-context-menu.invert-selection.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(227)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(227)
+msgctxt "OdysseyPainterEditorRasterSelectionTool,raster-tool.object-context-menu.invert-selection.name"
+msgid "Invert Selection"
+msgstr ""
+
+#. Key:	raster-tool.object-context-menu.invert-selection.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(228)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.cpp(228)
+msgctxt "OdysseyPainterEditorRasterSelectionTool,raster-tool.object-context-menu.invert-selection.tooltip"
+msgid "Invert Selection"
+msgstr ""
+
 #. Key:	raster-transform-tool.transaction.transform
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(581)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(581)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(605)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(605)
 msgctxt "PainterEditor,raster-transform-tool.transaction.transform"
 msgid "Transform"
 msgstr "Transformer"
 
 #. Key:	raster-transform-tool.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(671)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(671)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(693)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.cpp(693)
 msgctxt "PainterEditor,raster-transform-tool.tooltip"
 msgid "Transform Tool"
 msgstr "Outil de transformation"
 
-#. Key:	vector-tool.object-context-menu.group.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1000)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1000)
-msgctxt "PainterEditor,vector-tool.object-context-menu.group.name"
-msgid "Group"
-msgstr "Grouper"
+#. Key:	raster-transform-tool.top-tab.flip_horizontal
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/Widgets/SOdysseyPainterEditorRasterTransformToolTopTab.cpp(62)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/Widgets/SOdysseyPainterEditorRasterTransformToolTopTab.cpp(62)
+msgctxt "PainterEditor,raster-transform-tool.top-tab.flip_horizontal"
+msgid "Flip the selection horizontally"
+msgstr ""
 
-#. Key:	vector-tool.object-context-menu.group.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1001)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1001)
-msgctxt "PainterEditor,vector-tool.object-context-menu.group.tooltip"
-msgid "Group"
-msgstr "Group"
-
-#. Key:	vector-tool.object-context-menu.ungroup.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1005)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1005)
-msgctxt "PainterEditor,vector-tool.object-context-menu.ungroup.name"
-msgid "Ungroup"
-msgstr "Dégrouper"
-
-#. Key:	vector-tool.object-context-menu.ungroup.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1006)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1006)
-msgctxt "PainterEditor,vector-tool.object-context-menu.ungroup.tooltip"
-msgid "Ungroup"
-msgstr "Dégrouper"
-
-#. Key:	vector-tool.object-context-menu.bring-forward.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1010)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1010)
-msgctxt "PainterEditor,vector-tool.object-context-menu.bring-forward.name"
-msgid "Bring forward"
-msgstr "Mettre au premier plan"
-
-#. Key:	vector-tool.object-context-menu.bring-forward.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1011)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1011)
-msgctxt "PainterEditor,vector-tool.object-context-menu.bring-forward.tooltip"
-msgid "Bring forward"
-msgstr "Mettre au premier plan"
-
-#. Key:	vector-tool.object-context-menu.send-backward.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1015)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1015)
-msgctxt "PainterEditor,vector-tool.object-context-menu.send-backward.name"
-msgid "Send backward"
-msgstr "Mettre à l'arrière plan"
-
-#. Key:	vector-tool.object-context-menu.send-backward.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1016)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1016)
-msgctxt "PainterEditor,vector-tool.object-context-menu.send-backward.tooltip"
-msgid "Send backward"
-msgstr "Mettre à l'arrière plan"
-
-#. Key:	vector-tool.object-context-menu.delete-selection.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1020)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1020)
-msgctxt "PainterEditor,vector-tool.object-context-menu.delete-selection.name"
-msgid "Delete Selection"
-msgstr "Supprimer sélection"
-
-#. Key:	vector-tool.object-context-menu.delete-selection.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1021)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1021)
-msgctxt "PainterEditor,vector-tool.object-context-menu.delete-selection.tooltip"
-msgid "Delete Selection"
-msgstr "Supprimer sélection"
-
-#. Key:	vector-tool.object-context-menu.flip-horizontal.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1025)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1025)
-msgctxt "PainterEditor,vector-tool.object-context-menu.flip-horizontal.name"
-msgid "Flip Horizontal"
-msgstr "Symétrie axe horizontal"
-
-#. Key:	vector-tool.object-context-menu.flip-horizontal.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1026)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1026)
-msgctxt "PainterEditor,vector-tool.object-context-menu.flip-horizontal.tooltip"
-msgid "Flip Horizontal"
-msgstr "Symétrie axe horizontal"
-
-#. Key:	vector-tool.object-context-menu.flip-vertical.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1030)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1030)
-msgctxt "PainterEditor,vector-tool.object-context-menu.flip-vertical.name"
-msgid "Flip Vertical"
-msgstr "Symétrie axe horizontal"
-
-#. Key:	vector-tool.object-context-menu.flip-vertical.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1031)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1031)
-msgctxt "PainterEditor,vector-tool.object-context-menu.flip-vertical.tooltip"
-msgid "Flip Vertical"
-msgstr "Symétrie axe horizontal"
-
-#. Key:	vector-tool.object-context-menu.clear-coloring.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1035)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1035)
-msgctxt "PainterEditor,vector-tool.object-context-menu.clear-coloring.name"
-msgid "Clear Coloring"
-msgstr "Supprimer la mise en couleur"
-
-#. Key:	vector-tool.object-context-menu.clear-coloring.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1036)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1036)
-msgctxt "PainterEditor,vector-tool.object-context-menu.clear-coloring.tooltip"
-msgid "Clear Coloring"
-msgstr "Supprimer la mise en couleur"
-
-#. Key:	vector-tool.object-context-menu.apply-transformations.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1040)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1040)
-msgctxt "PainterEditor,vector-tool.object-context-menu.apply-transformations.name"
-msgid "Apply Transformations"
-msgstr "Appliquer les changements"
-
-#. Key:	vector-tool.object-context-menu.apply-transformations.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1041)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1041)
-msgctxt "PainterEditor,vector-tool.object-context-menu.apply-transformations.tooltip"
-msgid "Apply Transformations"
-msgstr "Appliquer les changements"
-
-#. Key:	vector-tool.vertex-context-menu.delete-selection.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1091)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1091)
-msgctxt "PainterEditor,vector-tool.vertex-context-menu.delete-selection.name"
-msgid "Delete Selection"
-msgstr "Supprimer sélection"
-
-#. Key:	vector-tool.vertex-context-menu.delete-selection.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1092)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1092)
-msgctxt "PainterEditor,vector-tool.vertex-context-menu.delete-selection.tooltip"
-msgid "Delete Selection"
-msgstr "Supprimer sélection"
-
-#. Key:	vector-tool.vertex-context-menu.align-point-selection.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1096)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1096)
-msgctxt "PainterEditor,vector-tool.vertex-context-menu.align-point-selection.name"
-msgid "Align Point Selection"
-msgstr "Aligner la sélection de points"
-
-#. Key:	vector-tool.vertex-context-menu.align-point-selection.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1097)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1097)
-msgctxt "PainterEditor,vector-tool.vertex-context-menu.align-point-selection.tooltip"
-msgid "Align Point Selection"
-msgstr "Aligner la sélection de points"
-
-#. Key:	vector-tool.vertex-context-menu.unalign-point-selection.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1101)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1101)
-msgctxt "PainterEditor,vector-tool.vertex-context-menu.unalign-point-selection.name"
-msgid "Unalign Point Selection"
-msgstr "Désalignement de la sélection des points"
-
-#. Key:	vector-tool.vertex-context-menu.unalign-point-selection.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1102)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1102)
-msgctxt "PainterEditor,vector-tool.vertex-context-menu.unalign-point-selection.tooltip"
-msgid "Unalign Point Selection"
-msgstr "Désalignement de la sélection des points"
-
-#. Key:	vector-tool.vertex-context-menu.lock-point-selection.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1106)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1106)
-msgctxt "PainterEditor,vector-tool.vertex-context-menu.lock-point-selection.name"
-msgid "Lock Point Selection"
-msgstr "Verrouiller la sélection de points"
-
-#. Key:	vector-tool.vertex-context-menu.lock-point-selection.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1107)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1107)
-msgctxt "PainterEditor,vector-tool.vertex-context-menu.lock-point-selection.tooltip"
-msgid "Lock Point Selection"
-msgstr "Verrouiller la sélection de points"
-
-#. Key:	vector-tool.vertex-context-menu.unlock-point-selection.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1111)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1111)
-msgctxt "PainterEditor,vector-tool.vertex-context-menu.unlock-point-selection.name"
-msgid "Unlock Point Selection"
-msgstr "Déverrouiller la sélection de points"
-
-#. Key:	vector-tool.vertex-context-menu.unlock-point-selection.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1112)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1112)
-msgctxt "PainterEditor,vector-tool.vertex-context-menu.unlock-point-selection.tooltip"
-msgid "Unlock Point Selection"
-msgstr "Déverrouiller la sélection de points"
+#. Key:	raster-transform-tool.top-tab.flip_vertical
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/Widgets/SOdysseyPainterEditorRasterTransformToolTopTab.cpp(76)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/RasterTransformTool/Widgets/SOdysseyPainterEditorRasterTransformToolTopTab.cpp(76)
+msgctxt "PainterEditor,raster-transform-tool.top-tab.flip_vertical"
+msgid "Flip the selection vertically"
+msgstr ""
 
 #. Key:	vector-tool.object-context-menu.reset-view.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(985)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(985)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1010)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1010)
 msgctxt "PainterEditor,vector-tool.object-context-menu.reset-view.name"
 msgid "Reset View"
 msgstr "Réinitialiser l'affichage"
 
 #. Key:	vector-tool.object-context-menu.reset-view.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(986)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(986)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1011)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1011)
 msgctxt "PainterEditor,vector-tool.object-context-menu.reset-view.tooltip"
 msgid "Reset View"
 msgstr "Réinitialiser l'affichage"
 
 #. Key:	vector-tool.object-context-menu.group-paint.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(990)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(990)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1015)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1015)
 msgctxt "PainterEditor,vector-tool.object-context-menu.group-paint.name"
 msgid "Make Paint Group"
 msgstr "Créer un groupe de mise en couleur"
 
 #. Key:	vector-tool.object-context-menu.group-paint.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(991)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(991)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1016)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1016)
 msgctxt "PainterEditor,vector-tool.object-context-menu.group-paint.tooltip"
 msgid "Make Paint Group"
 msgstr "Créer un groupe de mise en couleur"
+
+#. Key:	vector-tool.object-context-menu.group.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1025)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1025)
+msgctxt "PainterEditor,vector-tool.object-context-menu.group.name"
+msgid "Group"
+msgstr "Grouper"
+
+#. Key:	vector-tool.object-context-menu.group.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1026)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1026)
+msgctxt "PainterEditor,vector-tool.object-context-menu.group.tooltip"
+msgid "Group"
+msgstr "Group"
+
+#. Key:	vector-tool.object-context-menu.ungroup.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1030)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1030)
+msgctxt "PainterEditor,vector-tool.object-context-menu.ungroup.name"
+msgid "Ungroup"
+msgstr "Dégrouper"
+
+#. Key:	vector-tool.object-context-menu.ungroup.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1031)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1031)
+msgctxt "PainterEditor,vector-tool.object-context-menu.ungroup.tooltip"
+msgid "Ungroup"
+msgstr "Dégrouper"
+
+#. Key:	vector-tool.object-context-menu.bring-forward.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1035)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1035)
+msgctxt "PainterEditor,vector-tool.object-context-menu.bring-forward.name"
+msgid "Bring forward"
+msgstr "Mettre au premier plan"
+
+#. Key:	vector-tool.object-context-menu.bring-forward.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1036)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1036)
+msgctxt "PainterEditor,vector-tool.object-context-menu.bring-forward.tooltip"
+msgid "Bring forward"
+msgstr "Mettre au premier plan"
+
+#. Key:	vector-tool.object-context-menu.send-backward.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1040)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1040)
+msgctxt "PainterEditor,vector-tool.object-context-menu.send-backward.name"
+msgid "Send backward"
+msgstr "Mettre à l'arrière plan"
+
+#. Key:	vector-tool.object-context-menu.send-backward.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1041)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1041)
+msgctxt "PainterEditor,vector-tool.object-context-menu.send-backward.tooltip"
+msgid "Send backward"
+msgstr "Mettre à l'arrière plan"
+
+#. Key:	vector-tool.object-context-menu.delete-selection.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1045)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1045)
+msgctxt "PainterEditor,vector-tool.object-context-menu.delete-selection.name"
+msgid "Delete Selection"
+msgstr "Supprimer sélection"
+
+#. Key:	vector-tool.object-context-menu.delete-selection.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1046)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1046)
+msgctxt "PainterEditor,vector-tool.object-context-menu.delete-selection.tooltip"
+msgid "Delete Selection"
+msgstr "Supprimer sélection"
+
+#. Key:	vector-tool.object-context-menu.flip-horizontal.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1050)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1050)
+msgctxt "PainterEditor,vector-tool.object-context-menu.flip-horizontal.name"
+msgid "Flip Horizontal"
+msgstr "Symétrie axe horizontal"
+
+#. Key:	vector-tool.object-context-menu.flip-horizontal.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1051)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1051)
+msgctxt "PainterEditor,vector-tool.object-context-menu.flip-horizontal.tooltip"
+msgid "Flip Horizontal"
+msgstr "Symétrie axe horizontal"
+
+#. Key:	vector-tool.object-context-menu.flip-vertical.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1055)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1055)
+msgctxt "PainterEditor,vector-tool.object-context-menu.flip-vertical.name"
+msgid "Flip Vertical"
+msgstr "Symétrie axe horizontal"
+
+#. Key:	vector-tool.object-context-menu.flip-vertical.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1056)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1056)
+msgctxt "PainterEditor,vector-tool.object-context-menu.flip-vertical.tooltip"
+msgid "Flip Vertical"
+msgstr "Symétrie axe horizontal"
+
+#. Key:	vector-tool.object-context-menu.clear-coloring.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1060)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1060)
+msgctxt "PainterEditor,vector-tool.object-context-menu.clear-coloring.name"
+msgid "Clear Coloring"
+msgstr "Supprimer la mise en couleur"
+
+#. Key:	vector-tool.object-context-menu.clear-coloring.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1061)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1061)
+msgctxt "PainterEditor,vector-tool.object-context-menu.clear-coloring.tooltip"
+msgid "Clear Coloring"
+msgstr "Supprimer la mise en couleur"
+
+#. Key:	vector-tool.object-context-menu.apply-transformations.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1065)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1065)
+msgctxt "PainterEditor,vector-tool.object-context-menu.apply-transformations.name"
+msgid "Apply Transformations"
+msgstr "Appliquer les changements"
+
+#. Key:	vector-tool.object-context-menu.apply-transformations.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1066)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1066)
+msgctxt "PainterEditor,vector-tool.object-context-menu.apply-transformations.tooltip"
+msgid "Apply Transformations"
+msgstr "Appliquer les changements"
+
+#. Key:	vector-tool.vertex-context-menu.delete-selection.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1116)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1116)
+msgctxt "PainterEditor,vector-tool.vertex-context-menu.delete-selection.name"
+msgid "Delete Selection"
+msgstr "Supprimer sélection"
+
+#. Key:	vector-tool.vertex-context-menu.delete-selection.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1117)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1117)
+msgctxt "PainterEditor,vector-tool.vertex-context-menu.delete-selection.tooltip"
+msgid "Delete Selection"
+msgstr "Supprimer sélection"
+
+#. Key:	vector-tool.vertex-context-menu.align-point-selection.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1121)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1121)
+msgctxt "PainterEditor,vector-tool.vertex-context-menu.align-point-selection.name"
+msgid "Align Point Selection"
+msgstr "Aligner la sélection de points"
+
+#. Key:	vector-tool.vertex-context-menu.align-point-selection.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1122)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1122)
+msgctxt "PainterEditor,vector-tool.vertex-context-menu.align-point-selection.tooltip"
+msgid "Align Point Selection"
+msgstr "Aligner la sélection de points"
+
+#. Key:	vector-tool.vertex-context-menu.unalign-point-selection.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1126)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1126)
+msgctxt "PainterEditor,vector-tool.vertex-context-menu.unalign-point-selection.name"
+msgid "Unalign Point Selection"
+msgstr "Désalignement de la sélection des points"
+
+#. Key:	vector-tool.vertex-context-menu.unalign-point-selection.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1127)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1127)
+msgctxt "PainterEditor,vector-tool.vertex-context-menu.unalign-point-selection.tooltip"
+msgid "Unalign Point Selection"
+msgstr "Désalignement de la sélection des points"
+
+#. Key:	vector-tool.vertex-context-menu.lock-point-selection.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1131)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1131)
+msgctxt "PainterEditor,vector-tool.vertex-context-menu.lock-point-selection.name"
+msgid "Lock Point Selection"
+msgstr "Verrouiller la sélection de points"
+
+#. Key:	vector-tool.vertex-context-menu.lock-point-selection.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1132)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1132)
+msgctxt "PainterEditor,vector-tool.vertex-context-menu.lock-point-selection.tooltip"
+msgid "Lock Point Selection"
+msgstr "Verrouiller la sélection de points"
+
+#. Key:	vector-tool.vertex-context-menu.unlock-point-selection.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1136)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1136)
+msgctxt "PainterEditor,vector-tool.vertex-context-menu.unlock-point-selection.name"
+msgid "Unlock Point Selection"
+msgstr "Déverrouiller la sélection de points"
+
+#. Key:	vector-tool.vertex-context-menu.unlock-point-selection.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1137)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(1137)
+msgctxt "PainterEditor,vector-tool.vertex-context-menu.unlock-point-selection.tooltip"
+msgid "Unlock Point Selection"
+msgstr "Déverrouiller la sélection de points"
+
+#. Key:	vector-base-tool.edit-menu.tool-options
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(56)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.cpp(56)
+msgctxt "PainterEditor,vector-base-tool.edit-menu.tool-options"
+msgid "Tool Options"
+msgstr ""
 
 #. Key:	vector-eraser-tool.transaction.erase
 #. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.cpp(376)
@@ -2394,22 +2401,22 @@ msgid "Paint Bucket Tool"
 msgstr "Outil pot de peinture"
 
 #. Key:	vector-path-drawing-tool.transaction.draw-path-and-stitch
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.cpp(116)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.cpp(116)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.cpp(144)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.cpp(144)
 msgctxt "PainterEditor,vector-path-drawing-tool.transaction.draw-path-and-stitch"
 msgid "Vector Path Drawing Tool"
 msgstr "Outil de tracé vectoriel"
 
 #. Key:	vector-path-drawing-tool.transaction.draw-path
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.cpp(140)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.cpp(140)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.cpp(168)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.cpp(168)
 msgctxt "PainterEditor,vector-path-drawing-tool.transaction.draw-path"
 msgid "Vector Path Drawing Tool"
 msgstr "Outil de tracé vectoriel"
 
 #. Key:	vector-path-drawing-tool.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.cpp(613)
-#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.cpp(613)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.cpp(644)
+#: Plugins/Iliad/Source/Editor/OdysseyPainterEditor/Private/Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.cpp(644)
 msgctxt "PainterEditor,vector-path-drawing-tool.tooltip"
 msgid "Drawing Tool"
 msgstr "Outil de dessin"
@@ -2757,19 +2764,47 @@ msgctxt "Palette,asset-category.name"
 msgid "ILIAD"
 msgstr "ILIAD"
 
+#. Key:	AddSet_Transaction
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Palette/OdysseyPalette.cpp(418)
+#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Palette/OdysseyPalette.cpp(418)
+msgctxt "Palette,AddSet_Transaction"
+msgid "Add Set"
+msgstr ""
+
+#. Key:	DuplicateSet_Transaction
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Palette/OdysseyPalette.cpp(437)
+#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Palette/OdysseyPalette.cpp(437)
+msgctxt "Palette,DuplicateSet_Transaction"
+msgid "Duplicate Set"
+msgstr ""
+
+#. Key:	RemoveSet_Transaction
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Palette/OdysseyPalette.cpp(455)
+#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Palette/OdysseyPalette.cpp(455)
+msgctxt "Palette,RemoveSet_Transaction"
+msgid "Remove Set"
+msgstr ""
+
 #. Key:	entry-color.type
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Palette/OdysseyPaletteEntryColor.cpp(12)
-#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Palette/OdysseyPaletteEntryColor.cpp(12)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Palette/OdysseyPaletteEntryColor.cpp(14)
+#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Palette/OdysseyPaletteEntryColor.cpp(14)
 msgctxt "Palette,entry-color.type"
 msgid "Color"
 msgstr "Couleur"
 
 #. Key:	entry-color.default-name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Palette/OdysseyPaletteEntryColor.cpp(13)
-#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Palette/OdysseyPaletteEntryColor.cpp(13)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Palette/OdysseyPaletteEntryColor.cpp(15)
+#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Palette/OdysseyPaletteEntryColor.cpp(15)
 msgctxt "Palette,entry-color.default-name"
 msgid "Color"
 msgstr "Couleur"
+
+#. Key:	ChangeColorEntry_Transaction
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Palette/OdysseyPaletteEntryColor.cpp(38)
+#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Palette/OdysseyPaletteEntryColor.cpp(38)
+msgctxt "Palette,ChangeColorEntry_Transaction"
+msgid "Change color entry"
+msgstr ""
 
 #. Key:	entry-folder.type
 #. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Palette/OdysseyPaletteEntryFolder.cpp(10)
@@ -2798,13 +2833,6 @@ msgstr "Matériel"
 msgctxt "Palette,entry-material.default-name"
 msgid "Material"
 msgstr "Matériel"
-
-#. Key:	add-entry-button.add-color
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteAddEntryButton.cpp(30)
-#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteAddEntryButton.cpp(30)
-msgctxt "Palette,add-entry-button.add-color"
-msgid "Add"
-msgstr "Créer"
 
 #. Key:	entry-row.set-is-activated
 #. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteEntryRow.cpp(137)
@@ -2835,36 +2863,36 @@ msgid "Move Entries"
 msgstr "Déplacer les entrées"
 
 #. Key:	set-view.context-menu.common-section.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteSetView.cpp(131)
-#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteSetView.cpp(131)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteSetView.cpp(137)
+#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteSetView.cpp(137)
 msgctxt "Palette,set-view.context-menu.common-section.name"
 msgid "Common"
 msgstr "Commun"
 
 #. Key:	tree-view.drag-drop.transaction.copy-entries
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(233)
-#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(233)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(234)
+#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(234)
 msgctxt "Palette,tree-view.drag-drop.transaction.copy-entries"
 msgid "Copy Entries"
 msgstr "Copier les entrées"
 
 #. Key:	tree-view.drag-drop.transaction.move-entries
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(234)
-#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(234)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(235)
+#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(235)
 msgctxt "Palette,tree-view.drag-drop.transaction.move-entries"
 msgid "Move Entries"
 msgstr "Déplacer les entrées"
 
 #. Key:	entries-tree-view.context-menu.selection-section
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(434)
-#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(434)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(465)
+#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(465)
 msgctxt "Palette,entries-tree-view.context-menu.selection-section"
 msgid "Selection"
 msgstr "Sélectionner"
 
 #. Key:	entries-tree-view.context-menu.common-section
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(439)
-#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(439)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(470)
+#: Plugins/Iliad/Source/Editor/OdysseyPalette/Private/Widgets/SOdysseyPaletteTreeView.cpp(470)
 msgctxt "Palette,entries-tree-view.context-menu.common-section"
 msgid "Common"
 msgstr "Commun"
@@ -3038,29 +3066,29 @@ msgid "Tangent Pressure"
 msgstr "Pression tangente"
 
 #. Key:	layer-folder.type
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerFolder.cpp(31)
-#: Plugins/Iliad/Source/Editor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerFolder.cpp(31)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerFolder.cpp(12)
+#: Plugins/Iliad/Source/Editor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerFolder.cpp(12)
 msgctxt "Texture,layer-folder.type"
 msgid "Folder Layer"
 msgstr "Calque dossier"
 
 #. Key:	layer-folder.default-name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerFolder.cpp(32)
-#: Plugins/Iliad/Source/Editor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerFolder.cpp(32)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerFolder.cpp(13)
+#: Plugins/Iliad/Source/Editor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerFolder.cpp(13)
 msgctxt "Texture,layer-folder.default-name"
 msgid "Folder"
 msgstr "Dossier"
 
 #. Key:	layer-image-raster.type
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerImageRaster.cpp(45)
-#: Plugins/Iliad/Source/Editor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerImageRaster.cpp(45)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerImageRaster.cpp(29)
+#: Plugins/Iliad/Source/Editor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerImageRaster.cpp(29)
 msgctxt "Texture,layer-image-raster.type"
 msgid "Raster Image Layer"
 msgstr "Calque Bitmap"
 
 #. Key:	layer-image-vector.type
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerImageVector.cpp(51)
-#: Plugins/Iliad/Source/Editor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerImageVector.cpp(51)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerImageVector.cpp(36)
+#: Plugins/Iliad/Source/Editor/OdysseyTexture/Private/LayerStack/OdysseyTextureLayerImageVector.cpp(36)
 msgctxt "Texture,layer-image-vector.type"
 msgid "Vector Image Layer"
 msgstr "Calque Vectoriel"
@@ -3150,22 +3178,22 @@ msgid "Texture"
 msgstr "Texture"
 
 #. Key:	asset-category.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/OdysseyTextureEditorModule.cpp(133)
-#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/OdysseyTextureEditorModule.cpp(133)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/OdysseyTextureEditorModule.cpp(118)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/OdysseyTextureEditorModule.cpp(118)
 msgctxt "TextureEditor,asset-category.name"
 msgid "ILIAD"
 msgstr "ILIAD"
 
 #. Key:	settings.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/OdysseyTextureEditorModule.cpp(160)
-#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/OdysseyTextureEditorModule.cpp(160)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/OdysseyTextureEditorModule.cpp(145)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/OdysseyTextureEditorModule.cpp(145)
 msgctxt "TextureEditor,settings.name"
 msgid "ILIAD Texture2D Editor"
 msgstr "Éditeur ILIAD Texture2D"
 
 #. Key:	settings.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/OdysseyTextureEditorModule.cpp(161)
-#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/OdysseyTextureEditorModule.cpp(161)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/OdysseyTextureEditorModule.cpp(146)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/OdysseyTextureEditorModule.cpp(146)
 msgctxt "TextureEditor,settings.tooltip"
 msgid "Configure the look and feel of the ILIAD Editor."
 msgstr "Configurer l'aspect et l'ergonomie de l'éditeur ILIAD."
@@ -3227,50 +3255,50 @@ msgid "LayerStack Shortcuts"
 msgstr "Raccourcis relatifs à la pile de calques"
 
 #. Key:	main-menu.file.texture-import-export-section.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(141)
-#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(141)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(144)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(144)
 msgctxt "TextureEditor,main-menu.file.texture-import-export-section.name"
 msgid "Texture Import/Export"
 msgstr "Importation/Exportation de textures"
 
 #. Key:	export-texture-to-os.save-dialog.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(168)
-#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(168)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(171)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(171)
 msgctxt "TextureEditor,export-texture-to-os.save-dialog.title"
 msgid "Select Export Path & Name"
 msgstr "Sélectionner un chemin et un nom pour l'export"
 
 #. Key:	export-texture-to-os.invalid-extension-dialog.message
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(196)
-#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(196)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(199)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(199)
 msgctxt "TextureEditor,export-texture-to-os.invalid-extension-dialog.message"
 msgid "The file extension or the file format is not supported"
 msgstr "L'extension ou le format de fichier n'est pas pris en charge"
 
 #. Key:	export-texture-to-os.invalid-extension-dialog.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(196)
-#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(196)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(199)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(199)
 msgctxt "TextureEditor,export-texture-to-os.invalid-extension-dialog.title"
 msgid "Invalid extension"
 msgstr "Extension invalide"
 
 #. Key:	import-textures-as-layers.transaction.import
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(270)
-#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(270)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(273)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(273)
 msgctxt "TextureEditor,import-textures-as-layers.transaction.import"
 msgid "Import Textures As Layers"
 msgstr "Importer des textures sous forme de calques"
 
 #. Key:	import-textures-as-layers.open-asset-dialog.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(273)
-#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(273)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(276)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(276)
 msgctxt "TextureEditor,import-textures-as-layers.open-asset-dialog.title"
 msgid "Import Textures As Layers"
 msgstr "Importer des textures sous forme de calques"
 
 #. Key:	export-layers-as-textures.save-asset-dialog.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(330)
-#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(330)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(331)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/TextureEditor/OdysseyTextureEditorLayerStackTab.cpp(331)
 msgctxt "TextureEditor,export-layers-as-textures.save-asset-dialog.title"
 msgid "Export Layers As Texture"
 msgstr "Exporter les calques en tant que textures"
@@ -3346,36 +3374,57 @@ msgid "Change Layer BlendMode"
 msgstr "Changer le mode de fusion"
 
 #. Key:	texture-layerstack.no-layerstack
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerStack.cpp(78)
-#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerStack.cpp(78)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerStack.cpp(80)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerStack.cpp(80)
 msgctxt "TextureEditor,texture-layerstack.no-layerstack"
 msgid "No Layer Stack can be displayed"
 msgstr "Aucune pile de calques ne peut être affichée"
 
+#. Key:	texture.layerstack.context-menu.vector-layer-section
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerStackTreeView.cpp(70)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerStackTreeView.cpp(70)
+msgctxt "TextureEditor,texture.layerstack.context-menu.vector-layer-section"
+msgid "Vector Layer"
+msgstr ""
+
+#. Key:	texture.layerstack.context-menu.convert-vector-layer-to-raster-layer.name
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerStackTreeView.cpp(73)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerStackTreeView.cpp(73)
+msgctxt "TextureEditor,texture.layerstack.context-menu.convert-vector-layer-to-raster-layer.name"
+msgid "Convert to Raster"
+msgstr ""
+
+#. Key:	texture.layerstack.context-menu.convert-vector-layer-to-raster-layer.tooltip
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerStackTreeView.cpp(74)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/LayerStack/SOdysseyTextureLayerStackTreeView.cpp(74)
+msgctxt "TextureEditor,texture.layerstack.context-menu.convert-vector-layer-to-raster-layer.tooltip"
+msgid "Converts the selected layers to raster layers"
+msgstr ""
+
 #. Key:	texture.default-background-layer.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/SOdysseyTextureConfigureWindow.cpp(102)
-#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/SOdysseyTextureConfigureWindow.cpp(102)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/SOdysseyTextureConfigureWindow.cpp(115)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/SOdysseyTextureConfigureWindow.cpp(115)
 msgctxt "Texture,texture.default-background-layer.name"
 msgid "Background"
 msgstr "Arrière plan"
 
 #. Key:	configure-window.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/SOdysseyTextureConfigureWindow.cpp(153)
-#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/SOdysseyTextureConfigureWindow.cpp(153)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/SOdysseyTextureConfigureWindow.cpp(160)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/SOdysseyTextureConfigureWindow.cpp(160)
 msgctxt "Texture,configure-window.title"
 msgid "Create Texture Asset"
 msgstr "Créer une texture"
 
 #. Key:	configure-window.create-asset
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/SOdysseyTextureConfigureWindow.cpp(181)
-#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/SOdysseyTextureConfigureWindow.cpp(181)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/SOdysseyTextureConfigureWindow.cpp(188)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/SOdysseyTextureConfigureWindow.cpp(188)
 msgctxt "Texture,configure-window.create-asset"
 msgid "Create Asset"
 msgstr "Créer une ressource"
 
 #. Key:	configure-window.cancel
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/SOdysseyTextureConfigureWindow.cpp(190)
-#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/SOdysseyTextureConfigureWindow.cpp(190)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/SOdysseyTextureConfigureWindow.cpp(197)
+#: Plugins/Iliad/Source/Editor/OdysseyTextureEditor/Private/Widgets/SOdysseyTextureConfigureWindow.cpp(197)
 msgctxt "Texture,configure-window.cancel"
 msgid "Cancel"
 msgstr "Annuler"
@@ -3514,22 +3563,22 @@ msgid "Odyssey Viewport Drawing Edit Mode"
 msgstr "Mode d'édition de dessin d'Odyssey"
 
 #. Key:	main-menu.category
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/OdysseyViewportDrawingEditorEdMode.cpp(170)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/OdysseyViewportDrawingEditorEdMode.cpp(170)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/OdysseyViewportDrawingEditorEdMode.cpp(171)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/OdysseyViewportDrawingEditorEdMode.cpp(171)
 msgctxt "ViewportDrawingEditor,main-menu.category"
 msgid "Odyssey Viewport Drawing Editor"
 msgstr "Éditeur de dessins d'Odyssey"
 
 #. Key:	editor-mode.no-collision-uv-support-window.message
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/OdysseyViewportDrawingEditorEdMode.cpp(225)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/OdysseyViewportDrawingEditorEdMode.cpp(225)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/OdysseyViewportDrawingEditorEdMode.cpp(226)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/OdysseyViewportDrawingEditorEdMode.cpp(226)
 msgctxt "ViewportDrawingEditor,editor-mode.no-collision-uv-support-window.message"
 msgid "'Support UV From Hit Results' doesn't seem to be enabled. Enable it from project settings in order to use this paint editor properly."
 msgstr "« Prendre en charge les UV résultantes des intersections/collisions » ne semble pas être activé. Activez-le depuis les paramètres du projet afin d'utiliser correctement cet éditeur de peinture."
 
 #. Key:	editor-mode.no-collision-uv-support-window.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/OdysseyViewportDrawingEditorEdMode.cpp(225)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/OdysseyViewportDrawingEditorEdMode.cpp(225)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/OdysseyViewportDrawingEditorEdMode.cpp(226)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/OdysseyViewportDrawingEditorEdMode.cpp(226)
 msgctxt "ViewportDrawingEditor,editor-mode.no-collision-uv-support-window.title"
 msgid "CollisionUVNoSupport"
 msgstr "CollisionUVNoSupport"
@@ -3556,18 +3605,32 @@ msgid "Display {TabName}"
 msgstr "Afficher {TabName}"
 
 #. Key:	painter-editor-extension.texture-already-opened-dialog.message
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(395)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(395)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(396)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(396)
 msgctxt "ViewportDrawingEditor,painter-editor-extension.texture-already-opened-dialog.message"
 msgid "The selected texture is already opened in an other editor. Please close the editor before selecting this texture."
 msgstr "La texture sélectionnée est déjà ouverte dans un autre éditeur. Veuillez fermer cet éditeur avant de sélectionner cette texture."
 
 #. Key:	painter-editor-extension.texture-already-opened-dialog.title
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(395)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(395)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(396)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(396)
 msgctxt "ViewportDrawingEditor,painter-editor-extension.texture-already-opened-dialog.title"
 msgid "Selected Texture Already Opened"
 msgstr "Texture sélectionnée déjà ouverte"
+
+#. Key:	painter-editor-extension.media-texture-fail-dialog.message
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(398)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(398)
+msgctxt "ViewportDrawingEditor,painter-editor-extension.media-texture-fail-dialog.message"
+msgid "A media texture doesn't have a media source and therefore can't be edited. Please setup all your media textures correctly by assigning them a media source."
+msgstr ""
+
+#. Key:	painter-editor-extension.media-texture-fail-dialog.title
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(398)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.cpp(398)
+msgctxt "ViewportDrawingEditor,painter-editor-extension.media-texture-fail-dialog.title"
+msgid "Media source missing"
+msgstr ""
 
 #. Key:	animation.timeline-tab.empty-timeline-message-1
 #. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/ViewportDrawingEditor/OdysseyViewportDrawingEditorGUI.cpp(53)
@@ -3605,78 +3668,78 @@ msgid "- The cursor in the Sequencer is off of the corresponding Media Track."
 msgstr "- Le curseur dans le séquenceur est hors de la piste média correspondante."
 
 #. Key:	master-tab.select-mesh
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(220)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(220)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(221)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(221)
 msgctxt "ViewportDrawingEditor,master-tab.select-mesh"
 msgid "Select Mesh"
 msgstr "Sélectionnez le maillage"
 
 #. Key:	master-tab.painting-adapter-method.texture-based.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(248)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(248)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(249)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(249)
 msgctxt "ViewportDrawingEditor,master-tab.painting-adapter-method.texture-based.name"
 msgid "Texture UV"
 msgstr "Textures UV"
 
 #. Key:	master-tab.painting-adapter-method.mesh-based-planar.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(249)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(249)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(250)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(250)
 msgctxt "ViewportDrawingEditor,master-tab.painting-adapter-method.mesh-based-planar.name"
 msgid "Mesh (planar drawing)"
 msgstr "Maillage (dessin plan)"
 
 #. Key:	master-tab.painting-adapter-method.mesh-based-sphere.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(250)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(250)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(251)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(251)
 msgctxt "ViewportDrawingEditor,master-tab.painting-adapter-method.mesh-based-sphere.name"
 msgid "Mesh (sphere drawing)"
 msgstr "Maillage (dessin de sphère)"
 
 #. Key:	master-tab.painting-adapter-method.screen-based.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(251)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(251)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(252)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(252)
 msgctxt "ViewportDrawingEditor,master-tab.painting-adapter-method.screen-based.name"
 msgid "Screen"
 msgstr "Écran"
 
 #. Key:	master-tab.painting-adapter-method.invalid.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(253)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(253)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(254)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(254)
 msgctxt "ViewportDrawingEditor,master-tab.painting-adapter-method.invalid.name"
 msgid "Invalid"
 msgstr "Invalide"
 
 #. Key:	master-tab.painting-adapter-method.texture-based.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(260)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(260)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(261)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(261)
 msgctxt "ViewportDrawingEditor,master-tab.painting-adapter-method.texture-based.tooltip"
 msgid "Stamp will be based on texture (2D) UVs size and orientation"
 msgstr "Le motif de dessin sera basé sur la taille et l'orientation des UV de texture (2D)"
 
 #. Key:	master-tab.painting-adapter-method.mesh-based-planar.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(261)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(261)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(262)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(262)
 msgctxt "ViewportDrawingEditor,master-tab.painting-adapter-method.mesh-based-planar.tooltip"
 msgid "Stamp will be based on mesh (3D) size and orientation. The Z axis is normal to hit plane on the mesh and will follow each edge"
 msgstr "Le motif de dessin sera basé sur la taille et l’orientation du maillage (3D). L'axe Z est normal pour frapper le plan sur le maillage et suivra chaque bord"
 
 #. Key:	master-tab.painting-adapter-method.mesh-based-sphere.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(262)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(262)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(263)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(263)
 msgctxt "ViewportDrawingEditor,master-tab.painting-adapter-method.mesh-based-sphere.tooltip"
 msgid "Stamp will be based on mesh (3D) size and orientation. The stamp will be interpreted as a sphere and applied to the mesh"
 msgstr "Le motif de dessin sera basé sur la taille et l’orientation du maillage (3D). Le tampon sera interprété comme une sphère et appliqué au maillage"
 
 #. Key:	master-tab.painting-adapter-method.screen-based.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(263)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(263)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(264)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(264)
 msgctxt "ViewportDrawingEditor,master-tab.painting-adapter-method.screen-based.tooltip"
 msgid "Stamp will be based on viewport screen view. Its size and orientation depend on the position of the view."
 msgstr "Le timbre sera basé sur la vue de l'écran du viewport. Sa taille et son orientation dépendent de la position de la vue."
 
 #. Key:	master-tab.painting-adapter-method.invalid.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(265)
-#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(265)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(266)
+#: Plugins/Iliad/Source/Editor/OdysseyViewportDrawingEditor/Private/Widgets/SOdysseyViewportDrawingEditorMasterTab.cpp(266)
 msgctxt "ViewportDrawingEditor,master-tab.painting-adapter-method.invalid.tooltip"
 msgid "Invalid"
 msgstr "Invalide"
@@ -4039,113 +4102,113 @@ msgid "Cancel"
 msgstr "Annuler"
 
 #. Key:	viewport.rotation
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(166)
-#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(166)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(168)
+#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(168)
 msgctxt "Widgets,viewport.rotation"
 msgid "Rotation: "
 msgstr "Rotation: "
 
 #. Key:	viewport.zoom
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(229)
-#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(229)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(257)
+#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(257)
 msgctxt "Widgets,viewport.zoom"
 msgid "Zoom:"
 msgstr "Zoom:"
 
-#. Key:	viewport.no-texture-provided
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(508)
-#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(508)
-msgctxt "Widgets,viewport.no-texture-provided"
-msgid "No Texture Provided"
-msgstr "Aucune Texture à afficher"
-
-#. Key:	viewport.texture-dimensions
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(510)
-#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(510)
-msgctxt "Widgets,viewport.texture-dimensions"
-msgid "{0}x{1} px"
-msgstr "{0}x{1} px"
-
 #. Key:	viewport.zoom.25percent.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(54)
-#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(54)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(56)
+#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(56)
 msgctxt "Widgets,viewport.zoom.25percent.name"
 msgid "25%"
 msgstr "25%"
 
 #. Key:	viewport.zoom.25percent.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(54)
-#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(54)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(56)
+#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(56)
 msgctxt "Widgets,viewport.zoom.25percent.tooltip"
 msgid "Show the texture at a quarter of its size."
 msgstr "Afficher la texture au quart de sa taille."
 
+#. Key:	viewport.no-texture-provided
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(560)
+#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(560)
+msgctxt "Widgets,viewport.no-texture-provided"
+msgid "No Texture Provided"
+msgstr "Aucune Texture à afficher"
+
+#. Key:	viewport.texture-dimensions
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(562)
+#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(562)
+msgctxt "Widgets,viewport.texture-dimensions"
+msgid "{0}x{1} px"
+msgstr "{0}x{1} px"
+
 #. Key:	viewport.zoom.50percent.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(57)
-#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(57)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(59)
+#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(59)
 msgctxt "Widgets,viewport.zoom.50percent.name"
 msgid "50%"
 msgstr "50%"
 
 #. Key:	viewport.zoom.50percent.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(57)
-#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(57)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(59)
+#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(59)
 msgctxt "Widgets,viewport.zoom.50percent.tooltip"
 msgid "Show the texture at half its size."
 msgstr "Afficher la texture à la moitié de sa taille."
 
 #. Key:	viewport.zoom.100percent.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(60)
-#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(60)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(62)
+#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(62)
 msgctxt "Widgets,viewport.zoom.100percent.name"
 msgid "100%"
 msgstr "100%"
 
 #. Key:	viewport.zoom.100percent.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(60)
-#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(60)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(62)
+#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(62)
 msgctxt "Widgets,viewport.zoom.100percent.tooltip"
 msgid "Show the texture in its original size."
 msgstr "Afficher la texture dans sa taille originale."
 
 #. Key:	viewport.zoom.200percent.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(63)
-#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(63)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(65)
+#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(65)
 msgctxt "Widgets,viewport.zoom.200percent.name"
 msgid "200%"
 msgstr "200%"
 
 #. Key:	viewport.zoom.200percent.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(63)
-#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(63)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(65)
+#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(65)
 msgctxt "Widgets,viewport.zoom.200percent.tooltip"
 msgid "Show the texture at twice its size."
 msgstr "Afficher la texture à deux fois sa taille."
 
 #. Key:	viewport.zoom.400percent.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(66)
-#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(66)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(68)
+#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(68)
 msgctxt "Widgets,viewport.zoom.400percent.name"
 msgid "400%"
 msgstr "400%"
 
 #. Key:	viewport.zoom.400percent.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(66)
-#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(66)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(68)
+#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(68)
 msgctxt "Widgets,viewport.zoom.400percent.tooltip"
 msgid "Show the texture at four times its size."
 msgstr "Afficher la texture au quadruple de sa taille."
 
 #. Key:	viewport.zoom.fit.name
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(75)
-#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(75)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(77)
+#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(77)
 msgctxt "Widgets,viewport.zoom.fit.name"
 msgid "Scale To Fit"
 msgstr "Échelle à ajuster"
 
 #. Key:	viewport.zoom.fit.tooltip
-#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(75)
-#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(75)
+#. SourceLocation:	Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(77)
+#: Plugins/Iliad/Source/Editor/OdysseyWidgets/Private/SOdysseyViewport.cpp(77)
 msgctxt "Widgets,viewport.zoom.fit.tooltip"
 msgid "Scale the texture to fit the viewport."
 msgstr "Adapter la texture à la fenêtre d'affichage."
