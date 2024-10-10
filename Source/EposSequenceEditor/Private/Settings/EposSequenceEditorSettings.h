@@ -67,7 +67,7 @@ struct FStoryboardViewportSettings
 
 public:
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
-    bool OverlayToolbar { true };
+    bool OverlayToolbar { false };
 
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
     bool DisplayPlaybackTrack { true };
