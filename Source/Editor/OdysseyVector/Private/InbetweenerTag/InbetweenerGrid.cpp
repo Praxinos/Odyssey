@@ -428,12 +428,14 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
 
     // Compute P (sparse) and store its transpose to construct the RHS of the equation later
     // TODO refactorize concatenation
-    for( FInbetweenerQuad& quad : mQuadBuffer )
-    //for( FInbetweenerQuad* quad : mQuadArray )
+    //for( FInbetweenerQuad& quad : mQuadBuffer )
+    // we use an index that is stored in the inbetweener tag because it is computed only once for the front grid
+    for( uint32 quadIndex : mBreakdown->GetInbetweenerTag()->GetUsedQuadIndexBuffer() )
     {
-        if( quad.IsLinked() )
-        {
+        FInbetweenerQuad& quad = mQuadBuffer[quadIndex];
 
+        //if( quad.IsLinked() )
+        {
             FInbetweenerPoint** points = quad.GetPoints();
             FInbetweenerPoint* triangleA[3] = { points[0], points[1], points[2] };
             FInbetweenerPoint* triangleB[3] = { points[2], points[3], points[0] };
@@ -445,10 +447,13 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
         }
     }
 
-    for( FInbetweenerQuad& quad : mQuadBuffer )
-    //for( FInbetweenerQuad* quad : mQuadArray )
+    //for( FInbetweenerQuad& quad : mQuadBuffer )
+    // we use an index that is stored in the inbetweener tag because it is computed only once for the front grid
+    for( uint32 quadIndex : mBreakdown->GetInbetweenerTag()->GetUsedQuadIndexBuffer() )
     {
-        if( quad.IsLinked() )
+        FInbetweenerQuad& quad = mQuadBuffer[quadIndex];
+
+        //if( quad.IsLinked() )
         {
             FInbetweenerPoint** points = quad.GetPoints();
             FInbetweenerPoint* triangleA[3] = { points[0], points[1], points[2] };
@@ -665,19 +670,25 @@ FInbetweenerGrid::ComputeARAPInterpolation( FChartDivision* iInbetween
     // Compute A(t)
     int i = 0;
 
-    for ( FInbetweenerQuad& quad : mQuadBuffer )
-    //for ( FInbetweenerQuad* quad : mQuadArray )
+    //for ( FInbetweenerQuad& quad : mQuadBuffer )
+    // we use an index that is stored in the inbetweener tag because it is computed only once for the front grid
+    for( uint32 quadIndex : mBreakdown->GetInbetweenerTag()->GetUsedQuadIndexBuffer() )
     {
-        if( quad.IsLinked() )
+        FInbetweenerQuad& quad = mQuadBuffer[quadIndex];
+
+        //if( quad.IsLinked() )
         {
             ComputeQuadA( &quad, A, i, t, false );
         }
     }
 
-    for ( FInbetweenerQuad& quad : mQuadBuffer )
-    //for ( FInbetweenerQuad* quad : mQuadArray )
+    //for ( FInbetweenerQuad& quad : mQuadBuffer )
+    // we use an index that is stored in the inbetweener tag because it is computed only once for the front grid
+    for( uint32 quadIndex : mBreakdown->GetInbetweenerTag()->GetUsedQuadIndexBuffer() )
     {
-        if( quad.IsLinked() )
+        FInbetweenerQuad& quad = mQuadBuffer[quadIndex];
+
+        //if( quad.IsLinked() )
         {
             ComputeQuadA( &quad, A, i, t, true );
         }
@@ -727,9 +738,13 @@ FInbetweenerGrid::ComputeARAPInterpolation( FChartDivision* iInbetween
     }
 
     // Setting new interpolated vertices in corners INTERP_POS coordinates
-    for ( FInbetweenerPoint& point : mPointBuffer )
+    //for ( FInbetweenerPoint& point : mPointBuffer )
+    // we use an index that is stored in the inbetweener tag because it is computed only once for the front grid
+    for( uint32 pointIndex : mBreakdown->GetInbetweenerTag()->GetUsedPointIndexBuffer() )
     {
-        if( point.GetQuadCount() )
+        FInbetweenerPoint& point = mPointBuffer[pointIndex];
+
+        //if( point.GetQuadCount() )
         {
             FInbetweenerPoint::VectorType coords = V.row( point.GetID() );
 

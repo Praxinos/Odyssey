@@ -203,11 +203,13 @@ FOdysseyVectorObject::UpdateShape( uint32 iUpdateFlags )
 void
 FOdysseyVectorObject::Update( uint32 iUpdateFlags )
 {
-    // prevents DrawShape() to be called while the object has'nt been updated
-    mDrawingMutex.lock();
 
     if( mInvalidationFlags )
     {
+        // prevents DrawShape() to be called while the object has'nt been updated
+        // Indeed, it could be called by the animation proxy
+        mDrawingMutex.lock();
+
         // update children first by recursively calling the Update function and, if needed,
         // removing the object from the invalidated object list, in the same call.
         mInvalidatedChildrenList.remove_if( [iUpdateFlags] ( FOdysseyVectorObject* child )
@@ -217,6 +219,8 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
                                                 return child->IsInvalidated() == false;
                                             } );
         UpdateShape( iUpdateFlags );
+
+        mDrawingMutex.unlock();
 
         // update tags
         for( FOdysseyVectorTag* tag : mTagList )
@@ -229,8 +233,6 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
             mInvalidationFlags = 0;
         }
     }
-
-    mDrawingMutex.unlock();
 }
 
 void
@@ -643,8 +645,6 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext
 {
     double combinedOpacity = iAncestorsOpacity *= mOpacity;
 
-    mDrawingMutex.lock();
-
     iBLContext->save();
     iBLContext->transform( mLocalMatrix );
 
@@ -652,7 +652,11 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext
     //Get sure everything is drawn before we draw in the BLend2D buffer.
     iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
 
+    mDrawingMutex.lock();
+
     DrawShape( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
+
+    mDrawingMutex.unlock();
 
     // get sure the parent has finished drawing before drawing its children
     iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
@@ -662,8 +666,6 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext
     DrawTags( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
 
     iBLContext->restore();
-
-    mDrawingMutex.unlock();
 }
 
 bool

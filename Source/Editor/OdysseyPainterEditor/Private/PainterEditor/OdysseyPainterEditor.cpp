@@ -1771,8 +1771,17 @@ FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor, FOd
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    std::list<FOdysseyVectorTag*> selectedTagList;
 
-    vectorEngine->GetSelectedInbetweenerTagList( selectedInbetweenerTagList );
+    iScene->GetSharedEnv()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
+                                                     , selectedTagList );
+
+    for( FOdysseyVectorTag* tag : selectedTagList )
+    {
+        FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+        selectedInbetweenerTagList.push_back( inbetweenerTag );
+    }
 
     if( selectedInbetweenerTagList.size() )
     {
@@ -1798,7 +1807,7 @@ FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor, FOd
         }
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     // request redraw
     vectorEngine->Invalidate( 0 );

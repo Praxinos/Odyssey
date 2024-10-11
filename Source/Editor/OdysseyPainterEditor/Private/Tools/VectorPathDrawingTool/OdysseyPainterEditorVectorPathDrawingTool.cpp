@@ -309,7 +309,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
         //iScene->Select( path );
 
         // update invalidated objects
-        iScene->Update( 0 );
+        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
 
         vectorEngine->ResetHUD(); // re-creates the quadtree;
     }
@@ -427,7 +428,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
             vectorEngine->InvalidateRect();
         }
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE ); // update invalidated path after segment insertion
+        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated path after segment insertion
     }
 
     // redraw

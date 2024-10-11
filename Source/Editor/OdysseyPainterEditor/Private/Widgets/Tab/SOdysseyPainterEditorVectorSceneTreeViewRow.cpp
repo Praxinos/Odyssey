@@ -17,15 +17,22 @@ FVectorSceneTreeViewItem::~FVectorSceneTreeViewItem()
 {
 }
 
-FVectorSceneTreeViewItem::FVectorSceneTreeViewItem( FOdysseyVectorObject* iVectorObject )
+FVectorSceneTreeViewItem::FVectorSceneTreeViewItem( FOdysseyVectorObject* iVectorObject, bool iSensitive )
+    : mVectorObject( iVectorObject )
+    , bSensitive( iSensitive )
 {
-    mVectorObject = iVectorObject;
 }
 
 FOdysseyVectorObject*
 FVectorSceneTreeViewItem::GetVectorObject()
 {
     return mVectorObject;
+}
+
+bool
+FVectorSceneTreeViewItem::IsSensitive()
+{
+    return bSensitive;
 }
 
 SOdysseyPainterEditorVectorSceneTreeViewRow::~SOdysseyPainterEditorVectorSceneTreeViewRow()
@@ -94,6 +101,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow
     }
 
     SetContent( SNew(SHorizontalBox)
+                .IsEnabled( mItem.Get()->IsSensitive() )
                 + SHorizontalBox::Slot()
                 .AutoWidth()
                 [
@@ -112,6 +120,13 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow
                     tagBox.ToSharedRef()
                 ] );
 }
+
+ESelectionMode::Type
+SOdysseyPainterEditorVectorSceneTreeViewRow::GetSelectionMode () const
+{
+    return mItem.Get()->IsSensitive() ?ESelectionMode::Type::Single :  ESelectionMode::Type::None;
+}
+
 
 bool
 SOdysseyPainterEditorVectorSceneTreeViewRow::OnVerifyTextChanged( const FText& NewText

@@ -277,7 +277,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
     // retrieve parent widget
     const TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> listView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
     // retrieve timing data
-    uint32 tagCellIndex = mInbetweenerTag->GetAnimationCellIndex();
+    uint32 tagCellIndex = mInbetweenerTag->GetSourceAnimationCellIndex();
     IOdysseyVectorAnimationCell* sourceCell = mInbetweenerTag->GetAnimationCell();
     uint32 sourceFrame = sourceCell->GetFrame();
     // compute geometry

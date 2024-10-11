@@ -144,9 +144,6 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         FInbetweenerBreakdown* mBreakdown;
         std::vector<FInbetweenerPoint> mPointBuffer;
         std::vector<FInbetweenerQuad> mQuadBuffer;
-        //std::vector<FInbetweenerQuad*> mQuadArray;
-        //uint32 mUsedQuadCount;
-        //uint32 mUsedPointCount;
 
     // ARAP interpolation (do not confuse with ARAP deformation)
     protected:

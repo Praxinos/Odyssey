@@ -31,8 +31,8 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         BLMatrix2D& GetTargetInverseWorldMatrix();
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
         FInbetweenerBreakdown* GetMasterBreakdown();
-        void DrawPathsAtTarget( BLContext* iBLContext );
-        void DrawPathsAtSource( BLContext* iBLContext );
+        void DrawPathsAtTarget( BLContext* iBLContext, bool iLock );
+        void DrawPathsAtSource( BLContext* iBLContext, bool iLock );
         void SetPrevBreakdown( FInbetweenerBreakdown* iPrevBreakdown );
         void SetNextBreakdown( FInbetweenerBreakdown* iNextBreakdown );
 

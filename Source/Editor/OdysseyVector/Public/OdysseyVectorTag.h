@@ -5,6 +5,7 @@
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
+#include <mutex>
 
 class FOdysseyVectorObject;
 class FOdysseyVectorGroupPaint;
@@ -47,4 +48,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorTag
         FOdysseyVectorObject* mOwner;
         uint32 mFlags;
         bool bShared;
+
+    public:
+        // mutex to prevent drawing whil update isn't complete. this is necessary due to the Proxy renderer
+        // which runs in a different thread
+        std::mutex mDrawingMutex;
 };

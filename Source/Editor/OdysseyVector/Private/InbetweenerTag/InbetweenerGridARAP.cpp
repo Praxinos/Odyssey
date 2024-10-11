@@ -308,30 +308,6 @@ FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPat
 
     mBreakdown->GetInbetweenerTag()->SetUsedQuadCount( usedQuadCount );
     mBreakdown->GetInbetweenerTag()->SetUsedPointCount( usedPointCount );
-
-/*
-    mQuadArray.clear();
-    mQuadArray.reserve( mQuadBuffer.size() );
-
-    // TODO: do this in base class
-    for( FInbetweenerQuad& quad : mQuadBuffer )
-    {
-        if( quad.IsLinked() )
-        {
-            mUsedQuadCount++;
-            mQuadArray.push_back( &quad );
-        }
-    }
-
-    for( FInbetweenerPoint& point : mPointBuffer )
-    {
-        if( point.GetQuadCount() )
-        {
-            point.SetID( mUsedPointCount++ );
-        }
-    }
-    //---------------
-*/
 }
 
 void

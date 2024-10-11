@@ -90,6 +90,9 @@ FInbetweenerPoint::SetSourcePosition( double iX, double iY )
     mSourcePosition.x = iX;
     mSourcePosition.y = iY;
 
+// commented-out: target impacts source but source does not impact target. this makes file loading much easier.
+// We don't manipulate the source grid anyways.
+/*
     if( prevBreakdown )
     {
         prevBreakdown->GetGrid()->GetPointBuffer()[pointIndex].mTargetPosition.x = mSourcePosition.x;
@@ -97,7 +100,7 @@ FInbetweenerPoint::SetSourcePosition( double iX, double iY )
 
         invalidationFlags |= FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID;
     }
-
+*/
     mGrid->GetBreakdown()->GetInbetweenerTag()->Invalidate( invalidationFlags );
 }
 

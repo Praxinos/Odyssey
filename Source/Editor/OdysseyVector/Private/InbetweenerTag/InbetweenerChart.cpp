@@ -33,7 +33,7 @@ int32
 FChartDivision::GetAnimationCellIndex()
 {
     FOdysseyVectorTagInbetweener* inbetweenerTag = chart->GetBreakdown()->GetInbetweenerTag();
-    uint32 tagCellIndex = inbetweenerTag->GetAnimationCellIndex();
+    uint32 tagCellIndex = inbetweenerTag->GetSourceAnimationCellIndex();
     uint32 inbetweenIndex = chart->GetBreakdown()->GetSourceDrawingIndex() + GetIndex();
 
     return (int32)tagCellIndex + (int32)( inbetweenIndex * (int)inbetweenerTag->GetInterpolationDirection());

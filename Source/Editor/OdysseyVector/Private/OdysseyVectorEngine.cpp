@@ -345,8 +345,10 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
         {
             for ( FOdysseyVectorTag* tag : scene->GetSharedEnv()->GetSharedTagList() )
             {
+                FOdysseyVectorObject* tagOwner = tag->GetOwner();
+
                 // only draw tag as a shared tag if it does NOT belong to the scene
-                if( tag->GetOwner()->GetScene() != scene )
+                if( tagOwner->GetScene() != scene )
                 {
                     tag->Draw( scene, iBLContext, sanitizedRect, 1.0f, iDrawingFlags );
                 }

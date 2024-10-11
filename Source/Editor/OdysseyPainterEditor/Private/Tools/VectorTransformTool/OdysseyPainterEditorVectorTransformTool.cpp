@@ -933,10 +933,19 @@ uint64
 UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture )
 {
+    FOdysseyVectorEngine* engine = iScene->GetEngine();
+
+    // For some reason we receive quite a lot of mouse events between 2 screen refresh, I don't know why
+    // The issue is absent with the Ink driver. It is present with the Wintab and Native drivers. The simpliest
+    // solution I've found is to discard events until the screen has been refreshed.
+    if( engine->GetInvalidationFlags()  )
+    {
+        return 0;
+    }
+
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        FOdysseyVectorEngine* iEngine = iScene->GetEngine();
         FVector2D currCursorPos = FSlateApplication::Get().GetCursorPos();
         FVector2D deltaPos = currCursorPos - mScreenMouseAtDown;
         FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
@@ -967,12 +976,12 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
                      || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_YAXIS     )
                      || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_TRANSLATE ) )
                     {
-                        TranslateObjectSelection( iEngine, iScene, iPointInTexture );
+                        TranslateObjectSelection( engine, iScene, iPointInTexture );
                     }
                     else
                     if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ROTATE )
                     {
-                        RotateObjectSelection( iEngine, iScene, iPointInTexture );
+                        RotateObjectSelection( engine, iScene, iPointInTexture );
                     }
                     else
                     if( ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_TOPLEFT     )
@@ -980,7 +989,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
                      || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMRIGHT )
                      || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMLEFT  ) )
                     {
-                        ScaleObjectSelection( iEngine, iScene, iPointInTexture );
+                        ScaleObjectSelection( engine, iScene, iPointInTexture );
                     }
                 }
             }

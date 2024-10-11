@@ -42,6 +42,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 UPDATE_FROMFILE          = ( 1 << 3 );
         static const uint32 UPDATE_INTERACTIVE       = ( 1 << 4 );
         static const uint32 UPDATE_NEEDPOLYLINE      = ( 1 << 5 );
+        static const uint32 UPDATE_NOINBETWEENING    = ( 1 << 6 );
 
         // invalidation flags
         static const uint64 INVALIDATE_DEFAULT        = ( 1ULL << 0 );

@@ -491,7 +491,7 @@ FOdysseyVectorHUD::DrawBreakdown( BLContext* iBLContext
                                                 , color.B
                                                 , 127 + ( color.A * 0.5f * inbetween->spacing ) ) );
 
-            inbetweenerTag->DrawPathsInbetween( inbetween, iBLContext );
+            inbetweenerTag->DrawPathsInbetween( inbetween, iBLContext, true );
         }
     }
 
@@ -500,7 +500,7 @@ FOdysseyVectorHUD::DrawBreakdown( BLContext* iBLContext
         iBLContext->setStrokeWidth( 3.0f );
         iBLContext->setStrokeStyle( iSourceDrawingColor );
 
-        iBreakdown->DrawPathsAtSource( iBLContext );
+        iBreakdown->DrawPathsAtSource( iBLContext, true );
     }
 
     if( iHUDFlags & HUD_BREAKDOWN_TARGET )
@@ -508,7 +508,7 @@ FOdysseyVectorHUD::DrawBreakdown( BLContext* iBLContext
         iBLContext->setStrokeWidth( 3.0f );
         iBLContext->setStrokeStyle( iTargetDrawingColor );
 
-        iBreakdown->DrawPathsAtTarget( iBLContext );
+        iBreakdown->DrawPathsAtTarget( iBLContext, true );
     }
 }
 
@@ -546,7 +546,7 @@ FOdysseyVectorHUD::DrawInbetweens( BLContext* iBLContext
                                                     , color.B
                                                     , 127 + ( color.A * 0.5f * inbetween->spacing ) ) );
 
-                iInbetweenerTag->DrawPathsInbetween( inbetween, iBLContext );
+                iInbetweenerTag->DrawPathsInbetween( inbetween, iBLContext, true );
             }
         }
     }
@@ -562,7 +562,7 @@ FOdysseyVectorHUD::DrawInbetweens( BLContext* iBLContext
 
         for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
         {
-            breakdown->DrawPathsAtTarget( iBLContext );
+            breakdown->DrawPathsAtTarget( iBLContext, true );
         }
     }
 }
@@ -602,7 +602,8 @@ FOdysseyVectorHUD::DrawBreakdown( BLContext* iBLContext
         inbetweenerTag->DrawPathAt( &interpolatedPath
                                    , pointPositionBuffer
                                    , worldMatrix
-                                   , iBLContext );
+                                   , iBLContext
+                                   , true );
     }
 
     iBLContext->restore();

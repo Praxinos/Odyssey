@@ -15,7 +15,7 @@ FInbetweenerDrawing::GetIndex()
 int32
 FInbetweenerDrawing::GetAnimationCellIndex()
 {
-    uint32 tagCellIndex = inbetweenerTag->GetAnimationCellIndex();
+    uint32 tagCellIndex = inbetweenerTag->GetSourceAnimationCellIndex();
 
     return (int32)tagCellIndex + (int32)( GetIndex() * (int)inbetweenerTag->GetInterpolationDirection());
 }

@@ -625,16 +625,59 @@ FOdysseyVectorTagInbetweener::GetBreakdownCount()
     return mBreakdownList.size();
 }
 
+std::vector<uint32>&
+FOdysseyVectorTagInbetweener::GetUsedQuadIndexBuffer()
+{
+    return mUsedQuadIndexBuffer;
+}
+
+std::vector<uint32>&
+FOdysseyVectorTagInbetweener::GetUsedPointIndexBuffer()
+{
+    return mUsedPointIndexBuffer;
+}
+
 void
 FOdysseyVectorTagInbetweener::SetUsedQuadCount( uint32 iUsedQuadCount )
 {
+    std::vector<FInbetweenerQuad>& quadBuffer = mBreakdownList.front()->GetGrid()->GetQuadBuffer();
+
     mUsedQuadCount = iUsedQuadCount;
+
+    // acceleration structure
+    mUsedQuadIndexBuffer.clear();
+    mUsedQuadIndexBuffer.reserve( iUsedQuadCount );
+
+    // Acceleration structure for faster access to the useful quads
+    for( uint32 i = 0; i < quadBuffer.size(); i++ )
+    {
+        if( quadBuffer[i].IsLinked() )
+        {
+            mUsedQuadIndexBuffer.push_back( i );
+        }
+    }
+    //---------------
 }
 
 void
 FOdysseyVectorTagInbetweener::SetUsedPointCount( uint32 iUsedPointCount  )
 {
+    std::vector<FInbetweenerPoint>& pointBuffer = mBreakdownList.front()->GetGrid()->GetPointBuffer();
+
     mUsedPointCount = iUsedPointCount;
+
+    // acceleration structure
+    mUsedPointIndexBuffer.clear();
+    mUsedPointIndexBuffer.reserve( iUsedPointCount );
+
+    // Acceleration structure for faster access to the useful points
+    for( uint32 i = 0; i < pointBuffer.size(); i++ )
+    {
+        if( pointBuffer[i].GetQuadCount() )
+        {
+            mUsedPointIndexBuffer.push_back( i );
+        }
+    }
 }
 
 uint32
@@ -672,6 +715,11 @@ FOdysseyVectorTagInbetweener::Added()
 {
     Share( mSharedEnv );
 
+    for( FInbetweenerBreakdown* breakdown : mBreakdownList )
+    {
+        breakdown->GetGrid()->Make();
+    }
+
     RedrawAnimationCells();
 }
 
@@ -686,23 +734,11 @@ FOdysseyVectorTagInbetweener::Removed()
 void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
                                          , uint64 iOwnerInvalidationFlags )
 {
-/*
-    if( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY )
-    {
-        if( ( mOwner->GetSharedEnv() != nullptr ) && ( bShared == false ) )
-        {
-            Share( mSharedEnv );
-        }
-
-        if( ( mOwner->GetSharedEnv() == nullptr ) && ( bShared == true ) )
-        {
-            Unshare( mSharedEnv );
-        }
-    }
-*/
     if( ( bShared == true )
-     /*&& ( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )*/ )
+     && ( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_NOINBETWEENING ) == 0 ) )
     {
+        mDrawingMutex.lock();
+
         if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
@@ -710,30 +746,31 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
         {
-            //if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_FROMFILE ) == 0 )
+            for( FInbetweenerBreakdown* breakdown : mBreakdownList )
             {
-                for( FInbetweenerBreakdown* breakdown : mBreakdownList )
-                {
-                    std::vector<::ULIS::FVec2D> sourceGeometry;
-                    std::vector<::ULIS::FVec2D> targetGeometry;
+                std::vector<::ULIS::FVec2D> sourceGeometry;
+                std::vector<::ULIS::FVec2D> targetGeometry;
 
-                    // save positions for restoring when calling Make()
+                // save positions for restoring when calling Make()
+                if( iUpdateFlags & FOdysseyVectorObject::UPDATE_FROMFILE )
+                {
                     breakdown->GetGrid()->GetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
-                    breakdown->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
-                    breakdown->GetGrid()->Make( sourceGeometry, targetGeometry );
                 }
+
+                breakdown->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
+                breakdown->GetGrid()->Make( sourceGeometry, targetGeometry );
             }
         }
 
         if( ( mInvalidationFlags & INVALIDATE_MAP            )
-         || ( mInvalidationFlags & INVALIDATE_BREAKDOWN_LIST )
-         // owner flags
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST )
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY ) 
-         || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
+            || ( mInvalidationFlags & INVALIDATE_BREAKDOWN_LIST )
+            // owner flags
+            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
+            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
+            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
+            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST )
+            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY ) 
+            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
         {
             // map object to the first grid
             Map();
@@ -799,9 +836,16 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             route->Update( iUpdateFlags, iOwnerInvalidationFlags, mInvalidationFlags );
         }
 
+        // TODO: separate Transform interpolation from shape interpolation. Transform interpolation
+        // should then react to a specific flag, as well as shape interpolation
         Interpolate();
 
-        mInvalidationFlags = 0;
+        if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
+        {
+            mInvalidationFlags = 0;
+        }
+
+        mDrawingMutex.unlock();
 
         RedrawAnimationCells();
     }
@@ -813,10 +857,16 @@ FOdysseyVectorTagInbetweener::GetAnimationCell()
     return mOwner->GetEngine()->GetAnimationCell();
 }
 
-uint32
-FOdysseyVectorTagInbetweener::GetAnimationCellIndex()
+int32
+FOdysseyVectorTagInbetweener::GetSourceAnimationCellIndex()
 {
-    return mOwner->GetEngine()->GetAnimationCell()->GetIndex();
+    return mBreakdownList.front()->GetSourceAnimationCellIndex();
+}
+
+int32
+FOdysseyVectorTagInbetweener::GetTargetAnimationCellIndex()
+{
+    return mBreakdownList.back()->GetTargetAnimationCellIndex();
 }
 
 void
@@ -965,7 +1015,7 @@ FOdysseyVectorTagInbetweener::RedrawAnimationCells()
 int32
 FOdysseyVectorTagInbetweener::GetDrawingIndexFromCellIndex( uint32 iCellIndex )
 {
-    uint32 tagCellIndex = GetAnimationCellIndex();
+    uint32 tagCellIndex = GetSourceAnimationCellIndex();
 
     if( mInterpolationDirection == eInbetweenerInterpolationDirection::Forward )
     {
@@ -1095,132 +1145,111 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
 {
     IOdysseyVectorAnimationCell* displayedCell = iDisplayedScene->GetEngine()->GetAnimationCell();
 
-    // we draw only if the object is fully updated. Indeed, the Animation Proxy is a thread and might
-    // draw whenever the buffers haven't been updated yet, resulting in a crash
-    if( mInvalidationFlags == 0 )
+    mDrawingMutex.lock();
+
+    // check the object is still displayed (it could have been removed but still in memory)
+    if( mOwner->GetScene() )
     {
-        // check the object is still displayed (it could have been removed but still in memory)
-        if( mOwner->GetScene() )
+
+        IOdysseyVectorAnimationCell* tagCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
+
+        iBLContext->save();
+        iBLContext->resetMatrix();
+
+        iBLContext->setStrokeStyle( BLRgba32( 0, 0, 0, 255 ) );
+        iBLContext->setStrokeWidth( 3.0f );
+
+        // if th eobject hasn't been removed from the scene
+        if( displayedCell && tagCell )
         {
-            IOdysseyVectorAnimationCell* tagCell = mOwner->GetScene()->GetEngine()->GetAnimationCell();
+            uint32 sourceCellIndex = tagCell->GetIndex();
+            uint32 targetCellIndex = sourceCellIndex + ( ( GetLength() - 1 ) * (int)mInterpolationDirection );
+            uint32 displayedCellIndex = displayedCell->GetIndex();
+            uint32 fromCellIndex = std::min( sourceCellIndex, targetCellIndex );
+            uint32   toCellIndex = std::max( sourceCellIndex, targetCellIndex );
 
-            iBLContext->save();
-            iBLContext->resetMatrix();
-
-            iBLContext->setStrokeStyle( BLRgba32( 0, 0, 0, 255 ) );
-            iBLContext->setStrokeWidth( 3.0f );
-
-            // if th eobject hasn't been removed from the scene
-            if( displayedCell && tagCell )
+            if ( ( displayedCellIndex > fromCellIndex )
+                && ( displayedCellIndex < toCellIndex   ) )
             {
-                uint32 sourceCellIndex = tagCell->GetIndex();
-                uint32 targetCellIndex = sourceCellIndex + ( ( GetLength() - 1 ) * (int)mInterpolationDirection );
-                uint32 displayedCellIndex = displayedCell->GetIndex();
-                uint32 fromCellIndex = std::min( sourceCellIndex, targetCellIndex );
-                uint32   toCellIndex = std::max( sourceCellIndex, targetCellIndex );
+                uint32 drawingIndex = abs( (int) (displayedCellIndex - sourceCellIndex) );
 
-                if ( ( displayedCellIndex > fromCellIndex )
-                  && ( displayedCellIndex < toCellIndex   ) )
+                // don't draw the object at the source position, it's already drawn
+                if( drawingIndex > 0 )
                 {
-                    uint32 drawingIndex = abs( (int) (displayedCellIndex - sourceCellIndex) );
+                    FInbetweenerBreakdown* breakdown = GetBreakdown( drawingIndex, false );
+                    uint32 inbetweenIndex = drawingIndex - breakdown->GetSourceDrawingIndex();
+                    FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionBuffer()[inbetweenIndex];
 
-                    // don't draw the object at the source position, it's already drawn
-                    if( drawingIndex > 0 )
-                    {
-                        FInbetweenerBreakdown* breakdown = GetBreakdown( drawingIndex, false );
-                        uint32 inbetweenIndex = drawingIndex - breakdown->GetSourceDrawingIndex();
-                        FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionBuffer()[inbetweenIndex];
-
-                        DrawPathsInbetween( inbetween, iBLContext );
-                    }
+                    DrawPathsInbetween( inbetween, iBLContext, false );
                 }
             }
-
-            iBLContext->restore();
-
-    ////////////////////////////////// TEMP /////////////////////////
-    /*
-            if( mInterpolationType == eInbetweenerInterpolationType::ARAP )
-            {
-                uint32 tagCellIndex = tagCell->GetIndex();
-                uint32 displayedCellIndex = displayedCell->GetIndex();
-                uint32 iDrawingIndex = ( displayedCellIndex - tagCellIndex - 1 );
-                double t = mChart.drawingBuffer[iDrawingIndex].spacing;
-
-                mGrid->ComputeARAPInterpolation( t
-                                               , t
-                                               // , const FInbetweenerPoint::Affine &globalRigidTransform
-                                               , false );
-
-                DrawMotionGrid( iDrawingIndex
-                              , iBLContext
-                              , iInvalidationArea
-                              , iAncestorsOpacity
-                              , iDrawingFlags );
-            }
-    */
-    ////////////////////////////////////////////////////////////////
         }
+
+        iBLContext->restore();
     }
+
+    mDrawingMutex.unlock();
 }
 
 void
 FOdysseyVectorTagInbetweener::DrawPathAt( FInterpolatedPath* iInterpolatedPath
                                         , ::ULIS::FVec2D* iPointPositionBuffer
                                         , const BLMatrix2D& iWorldMatrix
-                                        , BLContext* iBLContext )
+                                        , BLContext* iBLContext
+                                        , bool iLock )
 {
-    // ensure buffers are up-to-date 
-    // (this function is used by the HUD and might be called by the animation Proxy in another thread)
-    if( mInvalidationFlags == 0 )
+    if( iLock )
+        mDrawingMutex.lock(); 
+
+    for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->mInterpolatedSegmentBuffer )
     {
-        for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->mInterpolatedSegmentBuffer )
+        if( bMapAsPolyline )
         {
-            if( bMapAsPolyline )
+            uint32 pointCount = interpolatedSegment.mInterpolatedPointArray.size();
+
+            for( uint32 i = 0; i < pointCount - 1; i++ )
             {
-                 uint32 pointCount = interpolatedSegment.mInterpolatedPointArray.size();
+                uint32 n = i + 1;
+                FInterpolatedPoint* pointi = interpolatedSegment.mInterpolatedPointArray[i];
+                FInterpolatedPoint* pointn = interpolatedSegment.mInterpolatedPointArray[n];
+                BLPoint pt[2] = { iWorldMatrix.mapPoint( iPointPositionBuffer[pointi->mIndex].x
+                                                       , iPointPositionBuffer[pointi->mIndex].y )
+                                , iWorldMatrix.mapPoint( iPointPositionBuffer[pointn->mIndex].x
+                                                       , iPointPositionBuffer[pointn->mIndex].y ) };
 
-                for( uint32 i = 0; i < pointCount - 1; i++ )
-                {
-                    uint32 n = i + 1;
-                    FInterpolatedPoint* pointi = interpolatedSegment.mInterpolatedPointArray[i];
-                    FInterpolatedPoint* pointn = interpolatedSegment.mInterpolatedPointArray[n];
-                    BLPoint pt[2] = { iWorldMatrix.mapPoint( iPointPositionBuffer[pointi->mIndex].x
-                                                           , iPointPositionBuffer[pointi->mIndex].y )
-                                    , iWorldMatrix.mapPoint( iPointPositionBuffer[pointn->mIndex].x
-                                                           , iPointPositionBuffer[pointn->mIndex].y ) };
-
-                    iBLContext->strokeLine( pt[0].x, pt[0].y, pt[1].x, pt[1].y );
-                }
+                iBLContext->strokeLine( pt[0].x, pt[0].y, pt[1].x, pt[1].y );
             }
-            else
+        }
+        else
+        {
+            if( interpolatedSegment.GetOriginalSegment()->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
             {
-                if( interpolatedSegment.GetOriginalSegment()->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
-                {
-                    FInterpolatedPoint* interpolatedPoint[4] = { interpolatedSegment.mInterpolatedPointArray[0]
-                                                               , interpolatedSegment.mInterpolatedPointArray[1]
-                                                               , interpolatedSegment.mInterpolatedPointArray[2]
-                                                               , interpolatedSegment.mInterpolatedPointArray[3] };
-                    BLPoint pt[4] = { iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[0]->mIndex].x
-                                                           , iPointPositionBuffer[interpolatedPoint[0]->mIndex].y )
-                                    , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[1]->mIndex].x
-                                                           , iPointPositionBuffer[interpolatedPoint[1]->mIndex].y )
-                                    , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[2]->mIndex].x
-                                                           , iPointPositionBuffer[interpolatedPoint[2]->mIndex].y )
-                                    , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[3]->mIndex].x
-                                                           , iPointPositionBuffer[interpolatedPoint[3]->mIndex].y ) };
-                    BLPath path;
+                FInterpolatedPoint* interpolatedPoint[4] = { interpolatedSegment.mInterpolatedPointArray[0]
+                                                           , interpolatedSegment.mInterpolatedPointArray[1]
+                                                           , interpolatedSegment.mInterpolatedPointArray[2]
+                                                           , interpolatedSegment.mInterpolatedPointArray[3] };
+                BLPoint pt[4] = { iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[0]->mIndex].x
+                                                       , iPointPositionBuffer[interpolatedPoint[0]->mIndex].y )
+                                , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[1]->mIndex].x
+                                                       , iPointPositionBuffer[interpolatedPoint[1]->mIndex].y )
+                                , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[2]->mIndex].x
+                                                       , iPointPositionBuffer[interpolatedPoint[2]->mIndex].y )
+                                , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[3]->mIndex].x
+                                                       , iPointPositionBuffer[interpolatedPoint[3]->mIndex].y ) };
+                BLPath path;
 
-                    path.moveTo ( pt[0].x, pt[0].y );
-                    path.cubicTo( pt[1].x, pt[1].y
-                                , pt[2].x, pt[2].y
-                                , pt[3].x, pt[3].y );
+                path.moveTo ( pt[0].x, pt[0].y );
+                path.cubicTo( pt[1].x, pt[1].y
+                            , pt[2].x, pt[2].y
+                            , pt[3].x, pt[3].y );
 
-                    iBLContext->strokePath( path );
-                }
+                iBLContext->strokePath( path );
             }
         }
     }
+
+    if( iLock )
+        mDrawingMutex.unlock(); 
 }
 
 std::vector<FInterpolatedPath>&
@@ -1231,9 +1260,13 @@ FOdysseyVectorTagInbetweener::GetInterpolatedPathBuffer()
 
 void
 FOdysseyVectorTagInbetweener::DrawPathsInbetween( FChartDivision* inbetween
-                                                , BLContext* iBLContext )
+                                                , BLContext* iBLContext
+                                                , bool iLock )
 {
     BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
+
+    if( iLock )
+        mDrawingMutex.lock(); 
 
     iBLContext->save();
     iBLContext->resetMatrix();
@@ -1250,10 +1283,14 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( FChartDivision* inbetween
         DrawPathAt( &interpolatedPath
                   , pointPositionBuffer
                   , worldMatrix
-                  , iBLContext );
+                  , iBLContext
+                  , false );
     }
 
     iBLContext->restore();
+
+    if( iLock )
+        mDrawingMutex.unlock(); 
 }
 
 void

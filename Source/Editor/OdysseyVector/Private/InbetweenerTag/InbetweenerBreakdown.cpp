@@ -3,7 +3,9 @@
 #include "InbetweenerTag/InbetweenerDrawing.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVector.h"
+#include "OdysseyVectorEngine.h"
 #include "OdysseyVectorObject.h"
+#include "OdysseyVectorAnimationCell.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
@@ -213,9 +215,12 @@ FInbetweenerBreakdown::GetIndex()
 }
 
 void
-FInbetweenerBreakdown::DrawPathsAtTarget( BLContext* iBLContext )
+FInbetweenerBreakdown::DrawPathsAtTarget( BLContext* iBLContext, bool iLock )
 {
     BLMatrix2D worldMatrix = mInbetweenerTag->GetOwner()->GetWorldMatrix();
+
+    if( iLock )
+        mInbetweenerTag->mDrawingMutex.lock();
 
     iBLContext->save();
     iBLContext->resetMatrix();
@@ -230,16 +235,23 @@ FInbetweenerBreakdown::DrawPathsAtTarget( BLContext* iBLContext )
         mInbetweenerTag->DrawPathAt( &interpolatedPath
                                    , pointPositionBuffer
                                    , worldMatrix
-                                   , iBLContext );
+                                   , iBLContext
+                                   , false );
     }
 
     iBLContext->restore();
+
+    if( iLock )
+        mInbetweenerTag->mDrawingMutex.unlock();
 }
 
 void
-FInbetweenerBreakdown::DrawPathsAtSource( BLContext* iBLContext )
+FInbetweenerBreakdown::DrawPathsAtSource( BLContext* iBLContext, bool iLock )
 {
     BLMatrix2D worldMatrix = mInbetweenerTag->GetOwner()->GetWorldMatrix();
+
+    if( iLock )
+        mInbetweenerTag->mDrawingMutex.lock();
 
     iBLContext->save();
     iBLContext->resetMatrix();
@@ -254,10 +266,14 @@ FInbetweenerBreakdown::DrawPathsAtSource( BLContext* iBLContext )
         mInbetweenerTag->DrawPathAt( &interpolatedPath
                                    , pointPositionBuffer
                                    , worldMatrix
-                                   , iBLContext );
+                                   , iBLContext
+                                   , false );
     }
 
     iBLContext->restore();
+
+    if( iLock )
+        mInbetweenerTag->mDrawingMutex.unlock();
 }
 
 void
@@ -453,7 +469,7 @@ FInbetweenerBreakdown::GetDrawingCount()
 int32
 FInbetweenerBreakdown::GetTargetAnimationCellIndex()
 {
-    uint32 tagCellIndex = mInbetweenerTag->GetAnimationCellIndex();
+    uint32 tagCellIndex = mInbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetIndex();
 
     return (int32)tagCellIndex + (int32)( mTargetDrawingIndex * (int)mInbetweenerTag->GetInterpolationDirection());
 }
@@ -461,7 +477,7 @@ FInbetweenerBreakdown::GetTargetAnimationCellIndex()
 int32
 FInbetweenerBreakdown::GetSourceAnimationCellIndex()
 {
-    uint32 tagCellIndex = mInbetweenerTag->GetAnimationCellIndex();
+    uint32 tagCellIndex = mInbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetIndex();
 
     return (int32)tagCellIndex + (int32)( mSourceDrawingIndex * (int)mInbetweenerTag->GetInterpolationDirection());
 }

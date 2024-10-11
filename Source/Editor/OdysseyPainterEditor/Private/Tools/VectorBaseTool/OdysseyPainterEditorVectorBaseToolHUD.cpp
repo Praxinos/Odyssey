@@ -58,7 +58,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( FOdysseyVe
         if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
         {
             FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-            uint32 tagCellIndex = inbetweenerTag->GetAnimationCellIndex();
+            uint32 tagCellIndex = inbetweenerTag->GetSourceAnimationCellIndex();
 
             if( tag->GetOwner()->IsSelected() )
             {

@@ -68,7 +68,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::Init()
             mHUDBlock = vectorBlock->GetHUDBlock();
     }
 
-    {   
+    {
         FScopeLock renderLock(&mEngineMutex);
         vectorBlock->Render( mDrawingFlags );
     }

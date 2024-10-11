@@ -7,6 +7,9 @@
 #include "OdysseyStyleSet.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "OdysseyVector.h"
+#include "OdysseyVectorAnimationCell.h"
+#include "OdysseyVectorSharedEnv.h"
+#include "HUD/OdysseyVectorHUD.h"
 #include "OdysseyPainterEditor.h"
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
@@ -95,7 +98,7 @@ SOdysseyPainterEditorVectorSceneTreeView::BuildTree( const TSharedPtr<FVectorSce
 
     for( FOdysseyVectorObject* child : childrenList )
     {
-        TSharedPtr<FVectorSceneTreeViewItem> childItem = MakeShareable(new FVectorSceneTreeViewItem(child));
+        TSharedPtr<FVectorSceneTreeViewItem> childItem = MakeShareable(new FVectorSceneTreeViewItem(child, true ));
 
         //iItem.Get()->mChildren.Add( childItem );
         // reverse order in order to get the most forward objet on top of the hierarchy 
@@ -143,13 +146,37 @@ SOdysseyPainterEditorVectorSceneTreeView::ExpandTree( const TSharedPtr<FVectorSc
 void
 SOdysseyPainterEditorVectorSceneTreeView::Update( FOdysseyVectorGroupPaint* iScene )
 {
+    uint64 hudFlags = mEditor->GetVectorHUDFlags();
+
     mItemsSource.Empty();
 
     RequestTreeRefresh();
 
     if( iScene )
     {
-        mRootItem = MakeShareable(new FVectorSceneTreeViewItem(iScene));
+        //if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+        {
+            int32 sceneCellIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex();
+
+            for( FOdysseyVectorTag* tag : iScene->GetSharedEnv()->GetSharedTagList() )
+            {
+                if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+                {
+                    FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+                    int32 sourceCellIndex = inbetweenerTag->GetSourceAnimationCellIndex();
+                    int32 targetCellIndex = inbetweenerTag->GetTargetAnimationCellIndex();
+
+                    if ((sceneCellIndex > sourceCellIndex) && ( sceneCellIndex < targetCellIndex ) )
+                    {
+                        FOdysseyVectorObject* owner = inbetweenerTag->GetOwner();
+
+                        mItemsSource.Add( MakeShareable(new FVectorSceneTreeViewItem( owner, false ) ) );
+                    }
+                }
+            }
+        }
+
+        mRootItem = MakeShareable(new FVectorSceneTreeViewItem(iScene, true ));
 
         BuildTree( mRootItem );
 

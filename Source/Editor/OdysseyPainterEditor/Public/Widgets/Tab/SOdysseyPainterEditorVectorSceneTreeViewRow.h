@@ -15,12 +15,14 @@ class FVectorSceneTreeViewItem
 {
     public:
         ~FVectorSceneTreeViewItem();
-        FVectorSceneTreeViewItem(FOdysseyVectorObject* iVectorObject);
+        FVectorSceneTreeViewItem(FOdysseyVectorObject* iVectorObject, bool iSensitive);
 
         FOdysseyVectorObject* GetVectorObject();
+        bool IsSensitive();
 
     public:
         FOdysseyVectorObject* mVectorObject;
+        bool bSensitive;
         TArray<TSharedPtr<FVectorSceneTreeViewItem>> mChildren;
 };
 
@@ -64,6 +66,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeViewRow
                              , bool bParentEnabled ) const override;
         void OnTextChanged( const FText& InText, ETextCommit::Type CommitInfo );
         bool OnVerifyTextChanged( const FText& NewText, FText& OutErrorMessage );
+        virtual ESelectionMode::Type GetSelectionMode () const;
 
     protected:
         uint32 mDropZone;

@@ -191,7 +191,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void SetMapAsPolyline( bool iMapAsPolyline );
         bool GetMapAsPolyline();
         void DrawPathsInbetween( FChartDivision* inbetween
-                               , BLContext* iBLContext );
+                               , BLContext* iBLContext
+                               , bool iLock );
         void DrawPathsTarget( BLContext* iBLContext );
 
         void DeformPathsAtTarget();
@@ -208,7 +209,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void DrawPathAt( FInterpolatedPath* iInterpolatedPath
                        , ::ULIS::FVec2D* iPointPositionBuffer
                        , const BLMatrix2D& iWorldMatrix
-                       , BLContext* iBLContext );
+                       , BLContext* iBLContext
+                       , bool iLock );
         uint32 GetBreakdownCount();
         FInbetweenerBreakdown* GetMasterBreakdown();
         void RemoveBreakdown( FInbetweenerBreakdown* iBreakdown, bool iFreeMemNow );
@@ -223,7 +225,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         virtual void ObjectRemoved() override;
         virtual void Added() override;
         virtual void Removed() override;
-        uint32 GetAnimationCellIndex();
         IOdysseyVectorAnimationCell* GetAnimationCell();
         void SetInterpolationDirection( eInbetweenerInterpolationDirection iDirection );
         eInbetweenerInterpolationDirection GetInterpolationDirection();
@@ -239,6 +240,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void SetChartColor( const FColor& iChartColor );
         const FColor& GetGridColor();
         void SetGridColor( const FColor& iGridColor );
+        int32 GetSourceAnimationCellIndex();
+        int32 GetTargetAnimationCellIndex();
+        std::vector<uint32>& GetUsedQuadIndexBuffer();
+        std::vector<uint32>& GetUsedPointIndexBuffer();
 
     protected:
         /**
@@ -335,4 +340,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         bool bSquare;
         FColor mChartColor;
         FColor mGridColor;
+        // arrays for accessing only useful grid quads (for faster processing or ARAP interpolation)
+        std::vector<uint32> mUsedQuadIndexBuffer;
+        // arrays for accessing only useful grid points (for faster processing or ARAP interpolation)
+        std::vector<uint32> mUsedPointIndexBuffer;
 };
