@@ -16,6 +16,9 @@ class ODYSSEYVECTOR_API FInbetweenerQuad
         void Link();
         void Unlink();
         bool IsLinked();
+        bool IsVisited();
+        void SetVisited( bool iVisited );
+        uint32 GetNeighbours( FInbetweenerQuad* oNeighbours[4] );
         void ComputeCentroids();
         void ComputeCentroid( eInbetweenerPointPositionType iPositionType );
         ::ULIS::FVec2D BiasedCentroid( eInbetweenerPointPositionType iPositionType );
@@ -34,7 +37,8 @@ class ODYSSEYVECTOR_API FInbetweenerQuad
         friend class FOdysseyVectorTagInbetweener;
 
     public:
-        static const uint32 LINKED = 1L << 0;
+        static const uint32 LINKED  = 1L << 0;
+        static const uint32 VISITED = 1L << 1;
 
     protected:
         uint32 mFlags;

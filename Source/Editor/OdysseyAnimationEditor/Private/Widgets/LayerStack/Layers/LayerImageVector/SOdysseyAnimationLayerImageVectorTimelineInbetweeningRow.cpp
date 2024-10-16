@@ -371,12 +371,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::ComputeDesiredSize ( f
     return FVector2D( mBoxSize.X, mBoxSize.Y );
 }
 
-bool  	
-SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::IsItemSelected() const
-{
-    return mInbetweenerTag->GetOwner()->IsSelected();
-}
-
 FCursorReply
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnCursorQuery ( const FGeometry& MyGeometry
                                                                         , const FPointerEvent& CursorEvent ) const

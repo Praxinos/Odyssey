@@ -14,6 +14,7 @@ class ODYSSEYVECTOR_API FInbetweenerGridARAP : public FInbetweenerGrid
         FInbetweenerGridARAP( FInbetweenerBreakdown* iBreakdown );
 
         void Regularize( uint32 iRigidity );
+        bool IsContiguous( uint32 iUsedQuadCount );
 
         /**
          * @brief Map paths to the grid according to the needs of the grid

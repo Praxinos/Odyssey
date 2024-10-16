@@ -528,7 +528,8 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
                                                 , BLRgba32( 255, 127, 127, 255 )
                                                 , ( HUD_BREAKDOWN_SOURCE
                                                   | HUD_BREAKDOWN_TARGET
-                                                   | HUD_BREAKDOWN_INBETWEEN ) );
+                                                  | ( ( breakdown->GetPrevBreakdown() == nullptr ) ? HUD_BREAKDOWN_SOURCE_GRID : 0 )
+                                                  | HUD_BREAKDOWN_INBETWEEN ) );
             }
 
             for( FInbetweenerRoute* route : inbetweenerTag->GetRouteList() )
@@ -536,11 +537,11 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
                 for( FInbetweenerTrajectory& trajectory : route->GetTrajectoryBuffer() )
                 {
                     DrawTrajectory( iBLContext
-                                , fgColor
-                                , bgColor
-                                , hcColor
-                                , inbetweenerTag
-                                , &trajectory );
+                                  , fgColor
+                                  , bgColor
+                                  , hcColor
+                                  , inbetweenerTag
+                                  , &trajectory );
                 }
             }
         }

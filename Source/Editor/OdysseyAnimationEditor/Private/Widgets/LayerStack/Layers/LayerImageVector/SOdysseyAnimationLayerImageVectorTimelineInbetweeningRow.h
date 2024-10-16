@@ -51,9 +51,6 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
         virtual FReply OnMouseMove ( const FGeometry& MyGeometry, const FPointerEvent& MouseEvent ) override;
         virtual FReply OnMouseButtonUp( const FGeometry & MyGeometry, const FPointerEvent & MouseEvent ) override;
         virtual FCursorReply OnCursorQuery ( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
-        // from STableRow::IsSelected
-        virtual bool IsItemSelected() const override;
-
 
     protected:
         virtual int32 OnPaint( const FPaintArgs& Args

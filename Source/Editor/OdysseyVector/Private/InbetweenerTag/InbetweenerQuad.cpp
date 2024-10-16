@@ -27,6 +27,61 @@ FInbetweenerQuad::Init( FInbetweenerGrid* iGrid )
 }
 
 bool
+FInbetweenerQuad::IsVisited()
+{
+    return ( mFlags & VISITED ) ? true : false; 
+}
+
+void
+FInbetweenerQuad::SetVisited( bool iVisited )
+{
+    if( iVisited )
+    {
+        mFlags |= VISITED;
+    }
+    else
+    {
+        mFlags &= (~VISITED);
+    }
+}
+
+uint32
+FInbetweenerQuad::GetNeighbours( FInbetweenerQuad* oNeighbours[4] )
+{
+    FOdysseyVectorTagInbetweener* inbetweenerTag = mGrid->GetBreakdown()->GetInbetweenerTag();
+    uint32 quadIndex = this - &mGrid->GetQuadBuffer()[0];
+    uint32 numQuadX = inbetweenerTag->GetGridNumQuadX();
+    uint32 numQuadY = inbetweenerTag->GetGridNumQuadY();
+    uint32 count = 0;
+
+    if( numQuadX && numQuadY )
+    {
+        uint32 x = quadIndex % numQuadX;
+        uint32 y = quadIndex / numQuadY;
+        int32 coords[4][2] = { { (int32)x    , (int32)y - 1 }
+                             , { (int32)x    , (int32)y + 1 }
+                             , { (int32)x + 1, (int32)y }
+                             , { (int32)x - 1, (int32)y } };
+
+
+        oNeighbours[0] = oNeighbours[1] = oNeighbours[2] = oNeighbours[3] = nullptr;
+
+        for( uint32 i = 0; i < 4; i++ )
+        {
+            if( ( coords[i][0] >= 0 ) && ( coords[i][0] < (int32) numQuadX )
+             && ( coords[i][1] >= 0 ) && ( coords[i][1] < (int32) numQuadY ) )
+            {
+                uint32 neighbourOffset = ( coords[i][1] * numQuadX ) + coords[i][0];
+
+                oNeighbours[count++] = &mGrid->GetQuadBuffer()[neighbourOffset];
+            }
+        }
+    }
+
+    return count;
+}
+
+bool
 FInbetweenerQuad::IsLinked()
 {
     FInbetweenerBreakdown* firstBreakdown = mGrid->GetBreakdown()->GetInbetweenerTag()->GetBreakdownList().front();

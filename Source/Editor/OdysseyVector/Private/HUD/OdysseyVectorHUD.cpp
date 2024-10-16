@@ -510,6 +510,16 @@ FOdysseyVectorHUD::DrawBreakdown( BLContext* iBLContext
 
         iBreakdown->DrawPathsAtTarget( iBLContext, true );
     }
+
+    if( iHUDFlags & HUD_BREAKDOWN_SOURCE_GRID )
+    {
+        iBreakdown->DrawSourceGrid( iBLContext, true );
+    }
+
+    if( iHUDFlags & HUD_BREAKDOWN_TARGET_GRID )
+    {
+        iBreakdown->DrawTargetGrid( iBLContext, true );
+    }
 }
 
 // static

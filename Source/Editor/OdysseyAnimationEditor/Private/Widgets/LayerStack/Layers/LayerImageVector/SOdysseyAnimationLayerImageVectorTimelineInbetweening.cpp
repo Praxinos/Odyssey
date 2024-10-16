@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 // From module OdysseyAnimationEditor
+#include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
@@ -91,7 +92,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Update()
 bool
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const
 {
-    return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected();
+    UOdysseyAnimationLayerStack* layerStack = mAnimationEditorExtension->LayerStack();
+
+    return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected() && ( layerStack->CurrentLayer == mAnimationLayerImageVector );
 }
 
 UOdysseyAnimationLayerImageVector*

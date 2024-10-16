@@ -33,66 +33,6 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Reset( FOdysseyVectorGroupPaint* iSc
 }
 
 void
-FOdysseyPainterEditorVectorMatchingToolHUD::DrawTargetGrid( BLContext* iBLContext
-                                                          , FInbetweenerBreakdown* iBreakdown
-                                                          , const BLRgba32& iFgColor
-                                                          , const BLRgba32& iBgColor
-                                                          , const BLRgba32& iHcColor )
-{
-    FOdysseyVectorTagInbetweener* inbetweenerTag = iBreakdown->GetInbetweenerTag();
-    BLRgba32 gridColor = BLRgba32( inbetweenerTag->GetGridColor().R
-                                 , inbetweenerTag->GetGridColor().G
-                                 , inbetweenerTag->GetGridColor().B
-                                 , inbetweenerTag->GetGridColor().A );
-    iBLContext->save();
-    iBLContext->resetMatrix();
-
-    iBLContext->setFillStyle( gridColor );
-    iBLContext->setStrokeStyle( gridColor );
-    iBLContext->setStrokeWidth( 1.0f );
-
-    BLMatrix2D worldMatrix = inbetweenerTag->GetOwner()->GetWorldMatrix();
-    BLMatrix2D& localMatrix = iBreakdown->GetTargetLocalMatrix();
-
-    worldMatrix.transform( localMatrix );
-
-    for( FInbetweenerPoint& point : iBreakdown->GetGrid()->GetPointBuffer() )
-    {
-        BLPoint pt = worldMatrix.mapPoint( point.GetTargetPosition().x
-                                         , point.GetTargetPosition().y );
-
-        if( point.GetQuadCount() )
-        {
-            iBLContext->fillCircle( pt.x, pt.y, 2 );
-        }
-    }
-/*
-    for( FInbetweenerQuad& quad : iBreakdown->GetGrid()->GetQuadBuffer() )
-    {
-        if( quad.IsLinked() )
-        {
-            FInbetweenerPoint** gridPoint = quad.GetPoints();
-
-            BLPoint pt[4] = { worldMatrix.mapPoint( gridPoint[0]->GetTargetPosition().x
-                                                  , gridPoint[0]->GetTargetPosition().y )
-                            , worldMatrix.mapPoint( gridPoint[1]->GetTargetPosition().x
-                                                  , gridPoint[1]->GetTargetPosition().y )
-                            , worldMatrix.mapPoint( gridPoint[2]->GetTargetPosition().x
-                                                  , gridPoint[2]->GetTargetPosition().y )
-                            , worldMatrix.mapPoint( gridPoint[3]->GetTargetPosition().x
-                                                  , gridPoint[3]->GetTargetPosition().y ) };
-
-            iBLContext->strokeLine( pt[0], pt[1] );
-            iBLContext->strokeLine( pt[1], pt[2] );
-            iBLContext->strokeLine( pt[2], pt[3] );
-            iBLContext->strokeLine( pt[3], pt[0] );
-        }
-    }
-*/
-    iBLContext->restore();
-}
-
-void
 FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
                                                 , FOdysseyVectorGroupPaint* iScene )
 {
@@ -143,13 +83,13 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
                                       , breakdown
                                       , BLRgba32( 127, 127, 127, 255 )
                                       , BLRgba32( 255, 127, 127, 255 )
-                                      , HUD_BREAKDOWN_SOURCE | HUD_BREAKDOWN_TARGET );
+                                      , HUD_BREAKDOWN_SOURCE | HUD_BREAKDOWN_TARGET_GRID | HUD_BREAKDOWN_TARGET );
 
-                        DrawTargetGrid ( iBLContext
+                        /*DrawTargetGrid ( iBLContext
                                        , breakdown
                                        , fgColor
                                        , bgColor
-                                       , hcColor );
+                                       , hcColor );*/
                     }
                 }
             }

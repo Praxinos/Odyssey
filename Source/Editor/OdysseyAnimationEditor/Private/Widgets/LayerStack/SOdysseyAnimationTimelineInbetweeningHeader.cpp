@@ -3,7 +3,7 @@
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeader.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
-
+#include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 
@@ -95,7 +95,9 @@ SOdysseyAnimationTimelineInbetweeningHeader::Update()
 bool
 SOdysseyAnimationTimelineInbetweeningHeader::Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const
 {
-    return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected();
+    UOdysseyAnimationLayerStack* layerStack = mAnimationEditorExtension->LayerStack();
+
+    return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected() && ( layerStack->CurrentLayer == mAnimationLayerImageVector );
 }
 
 TSharedRef<ITableRow>

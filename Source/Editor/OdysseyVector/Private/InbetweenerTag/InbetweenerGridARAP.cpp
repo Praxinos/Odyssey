@@ -225,6 +225,53 @@ FInbetweenerGridARAP::Regularize( uint32 iRigidity )
               , true );
 }
 
+bool
+FInbetweenerGridARAP::IsContiguous( uint32 iUsedQuadCount )
+{
+    std::vector<FInbetweenerQuad*> quadStackArray;
+    FInbetweenerQuad* rootQuad = nullptr;
+
+    quadStackArray.reserve( mQuadBuffer.size() );
+
+    for( FInbetweenerQuad& quad : mQuadBuffer )
+    {
+        quad.SetVisited( false );
+
+        if( quad.IsLinked() && ( quadStackArray.size() == 0 ) )
+        {
+            quadStackArray.push_back( &quad );
+            quad.SetVisited( true );
+        }
+    }
+
+    if( quadStackArray.size() )
+    {
+        FInbetweenerQuad** currentQuad = &quadStackArray[0];
+
+        while( currentQuad != &quadStackArray[quadStackArray.size()] )
+        {
+            FInbetweenerQuad* neighbourQuad[4] = { 0 };
+
+            (*currentQuad)->GetNeighbours( neighbourQuad );
+
+            for( uint32 i = 0; i < 4; i++ )
+            {
+                if( ( neighbourQuad[i] )
+                 && ( neighbourQuad[i]->IsLinked() )
+                 && ( neighbourQuad[i]->IsVisited() == false ) )
+                {
+                    quadStackArray.push_back( neighbourQuad[i] );
+                    neighbourQuad[i]->SetVisited( true );
+                }
+            }
+
+            currentQuad++;
+        }
+    }
+
+    return ( quadStackArray.size() == iUsedQuadCount ) ? true : false;
+}
+
 void
 FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer )
 {
@@ -292,6 +339,12 @@ FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPat
         {
             usedQuadCount++;
         }
+    }
+
+    // ARAP interpolation will not work if the grid is not contiguous
+    if( IsContiguous( usedQuadCount ) == false )
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Not contiguous"));
     }
 
     for( FInbetweenerPoint& point : mPointBuffer )

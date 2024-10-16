@@ -6,8 +6,8 @@
 #include "blend2d.h"
 
 #include "InbetweenerTag/InbetweenerChart.h"
+#include "InbetweenerTag/InbetweenerGrid.h"
 
-class FInbetweenerGrid;
 class FOdysseyVectorTagInbetweener;
 enum class eInbetweenerGridType : uint8;
 
@@ -66,6 +66,14 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         bool  IsMaster();
         uint32 GetDrawingCount();
         FInbetweenerChart* GetChart();
+        void DrawSourceGrid( BLContext* iBLContext, bool iLock );
+        void DrawTargetGrid( BLContext* iBLContext, bool iLock );
+
+    protected:
+        void DrawGrid( BLContext* iBLContext
+                     , eInbetweenerPointPositionType iPositionType
+                     , const FColor& iGridColor
+                     , bool iLock );
 
     private:
         double mTargetTranslationX;

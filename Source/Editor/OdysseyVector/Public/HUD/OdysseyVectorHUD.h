@@ -202,12 +202,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         static const uint64 HUD_BREAKDOWN_SOURCE         = ( 1ULL << 15 );
         static const uint64 HUD_BREAKDOWN_TARGET         = ( 1ULL << 16 );
         static const uint64 HUD_BREAKDOWN_INBETWEEN      = ( 1ULL << 17 );
+        static const uint64 HUD_BREAKDOWN_SOURCE_GRID    = ( 1ULL << 18 );
+        static const uint64 HUD_BREAKDOWN_TARGET_GRID    = ( 1ULL << 19 );
         static const uint64 HUD_TAGINBETWEENER_ALL       = HUD_BREAKDOWN_SOURCE
                                                          | HUD_BREAKDOWN_TARGET
+                                                         | HUD_BREAKDOWN_SOURCE_GRID
+                                                         | HUD_BREAKDOWN_TARGET_GRID
                                                          | HUD_BREAKDOWN_INBETWEEN;
-        static const uint64 HUD_SELECTIONBOX             = ( 1ULL << 18 );
-        static const uint64 HUD_SIZE_SMALL               = ( 1ULL << 19 );
-        static const uint64 HUD_DRAW_ALL                 = ( 1ULL << 20 );
+        static const uint64 HUD_SELECTIONBOX             = ( 1ULL << 20 );
+        static const uint64 HUD_SIZE_SMALL               = ( 1ULL << 21 );
+        static const uint64 HUD_DRAW_ALL                 = ( 1ULL << 22 );
         //static const uint64 VIEW_ALL              = 0xFFFFFFFFFFFFFFFFULL;
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) = 0;
