@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Curves/KeyHandle.h"
 #include "Misc/Guid.h"
 #include "KeyParams.h"
 #include "Misc/FrameNumber.h"

@@ -9,6 +9,7 @@
 #include "ISettingsModule.h"
 #include "LevelEditor.h"
 #include "Modules/ModuleManager.h"
+#include "PropertyEditorModule.h"
 #include "SequencerSettings.h"
 
 #include "Board/BoardSequence.h"

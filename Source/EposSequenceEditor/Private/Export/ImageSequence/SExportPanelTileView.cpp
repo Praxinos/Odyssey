@@ -8,6 +8,7 @@
 #include "MovieSceneSequence.h"
 #include "Slate/SlateTextures.h"
 #include "Styling/StyleColors.h"
+#include "Widgets/Input/SCheckBox.h"
 #include "Widgets/Layout/SScaleBox.h"
 #include "Widgets/SViewport.h"
 

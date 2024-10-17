@@ -12,6 +12,7 @@ class APlaneActor;
 class FString;
 class ISequencer;
 class IMovieScenePlayer;
+class UMaterialInstance;
 class UMaterialInstanceConstant;
 class UMaterialInterface;
 class UMovieSceneSequence;
