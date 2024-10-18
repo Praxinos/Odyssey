@@ -52,8 +52,9 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
         void OnExpansionChanged( TSharedPtr<FVectorSceneTreeViewItem> iItem, bool mExpanded );
         void ExpandTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem );
         void BuildTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem );
-        void SelectTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem );
+        //void SelectTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem );
         //FReply OnDragOver( const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent );
+        virtual bool Private_IsItemSelected( const TSharedPtr<FVectorSceneTreeViewItem>& iItem ) const override;
 
         void MapActionsToCommandList();
 

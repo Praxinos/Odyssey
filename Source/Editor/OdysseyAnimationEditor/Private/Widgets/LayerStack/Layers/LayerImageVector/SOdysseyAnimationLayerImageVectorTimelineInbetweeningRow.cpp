@@ -72,6 +72,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() );
     UOdysseyAnimationLayerImageVector* layer = treeView.Get()->GetAnimationLayerImageVector();
     UOdysseyLayerStack* layerStack = animationEditorExtension->GetEditor()->LayerStack();
+    FOdysseyVectorObject* ownerObject = mInbetweenerTag->GetOwner();
+    FOdysseyVectorEngine* vectorEngine = ownerObject->GetEngine();
     FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetSharedEnv();
     std::list<FOdysseyVectorTag*>& sharedTagList = sharedEnv->GetSharedTagList();
     FOdysseyVectorGroupPaint* scene = mInbetweenerTag->GetOwner()->GetScene();
@@ -93,16 +95,53 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     mPickedBreakdown = nullptr;
     mCandidateTargetCellBox.type = 0;
 
-    if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
+    // Note: we don't rely on STreeView::SelectedItems to keep track of the selection.
+    // That way we don't have to update the widget.
+    // We directly rely on the selection from our vector engine. However this implies
+    // that we have to deal with the multiple selection by ourselves.
+
+    if( FSlateApplication::Get().GetModifierKeys().IsShiftDown() == true )
     {
-        for( FOdysseyVectorTag* tag : sharedTagList )
+        FOdysseyVectorObject* lastSelectedObject = vectorEngine->GetLastSelectedObject();
+
+        if( lastSelectedObject )
         {
-            tag->GetOwner()->GetEngine()->UnselectObject( tag->GetOwner() );
+            bool doSelect = false;
+
+            for( const TSharedPtr<FInbetweeningListViewItem>& item : treeView.Get()->GetItems() )
+            {
+                FOdysseyVectorObject* itemObject = item.Get()->GetInbetweenerTag()->GetOwner();
+
+                if( ( itemObject == ownerObject ) || ( itemObject == lastSelectedObject ) )
+                {
+                    doSelect = !doSelect;
+                }
+
+                if( doSelect )
+                {
+                    if( itemObject->IsSelected() == false )
+                    {
+                        vectorEngine->SelectObject( itemObject );
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
+        {
+            for( FOdysseyVectorObject* rootObject : sharedEnv->GetChildrenList() )
+            {
+                rootObject->GetEngine()->ClearObjectSelection();
+            }
         }
     }
 
-    // This is used by the list view to determine which row is selected.
-    mInbetweenerTag->GetOwner()->GetEngine()->SelectObject( mInbetweenerTag->GetOwner() );
+    if( ownerObject->IsSelected() == false )
+    {
+        vectorEngine->SelectObject( ownerObject );
+    }
 
     if( MouseEvent.IsMouseButtonDown( EKeys::LeftMouseButton ) )
     {

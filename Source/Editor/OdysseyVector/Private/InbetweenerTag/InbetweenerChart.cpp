@@ -140,11 +140,18 @@ FInbetweenerChart::Resize()
 
     mDivisionBuffer.resize( drawingCount, this );
 
-    for( uint32 i = fromIndex; i < drawingCount - 1; i++ )
+    if( drawingCount )
     {
-        mDivisionBuffer[i].spacing = nextT;
+        for( uint32 i = fromIndex; i < drawingCount - 1; i++ )
+        {
+            mDivisionBuffer[i].spacing = nextT;
 
-        nextT += stepT;
+            nextT += stepT;
+        }
+    }
+    else
+    {
+        mDivisionBuffer.front().spacing = 0.0f;
     }
 
     mDivisionBuffer.back().spacing = 1.0f;

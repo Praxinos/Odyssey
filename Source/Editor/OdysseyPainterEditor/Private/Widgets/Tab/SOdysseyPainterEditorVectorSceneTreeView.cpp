@@ -39,7 +39,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs, F
         .OnGenerateRow( this, &SOdysseyPainterEditorVectorSceneTreeView::OnGenerateRow ) 
         .OnGetChildren( this, &SOdysseyPainterEditorVectorSceneTreeView::OnGetChildren )
         .OnExpansionChanged( this, &SOdysseyPainterEditorVectorSceneTreeView::OnExpansionChanged )
-        .OnSelectionChanged( this, &SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged )
+        //.OnSelectionChanged( this, &SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged )
         //.OnItemScrolledIntoView(this, &SOdysseyLayerStackTreeView::OnItemScrolledIntoView)
         .OnContextMenuOpening( this, &SOdysseyPainterEditorVectorSceneTreeView::OnContextMenuOpening )
         .SelectionMode( ESelectionMode::Multi )
@@ -108,6 +108,7 @@ SOdysseyPainterEditorVectorSceneTreeView::BuildTree( const TSharedPtr<FVectorSce
     }
 }
 
+/*
 void
 SOdysseyPainterEditorVectorSceneTreeView::SelectTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem )
 {
@@ -126,6 +127,7 @@ SOdysseyPainterEditorVectorSceneTreeView::SelectTree( const TSharedPtr<FVectorSc
         SelectTree( iItem.Get()->mChildren[i] );
     }
 }
+*/
 
 void
 SOdysseyPainterEditorVectorSceneTreeView::ExpandTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem )
@@ -141,6 +143,12 @@ SOdysseyPainterEditorVectorSceneTreeView::ExpandTree( const TSharedPtr<FVectorSc
             ExpandTree( iItem.Get()->mChildren[i] );
         }
     }
+}
+
+bool
+SOdysseyPainterEditorVectorSceneTreeView::Private_IsItemSelected( const TSharedPtr<FVectorSceneTreeViewItem>& iItem )  const
+{
+    return iItem.Get()->GetVectorObject()->IsSelected();
 }
 
 void
@@ -188,7 +196,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Update( FOdysseyVectorGroupPaint* iSce
         ExpandTree( mRootItem );
         // Select items if needed
         SelectedItems.Empty();
-        SelectTree( mRootItem );
+        //SelectTree( mRootItem );
     }
 }
 
@@ -213,8 +221,8 @@ SOdysseyPainterEditorVectorSceneTreeView::OnExpansionChanged( TSharedPtr<FVector
     expandedObject->SetExpanded( mExpanded );
 
     // Reselect
-    SelectedItems.Empty();
-    SelectTree( mRootItem );
+    //SelectedItems.Empty();
+    //SelectTree( mRootItem );
 }
 
 void
@@ -235,13 +243,13 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( scene, retFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
             TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
-
+/*
         scene->GetEngine()->ClearObjectSelection();
 
         // iTtem is null when selection is empty
@@ -260,7 +268,7 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
                 }
             }
         }
-
+*/
         scene->GetEngine()->ResetHUD();
         scene->GetEngine()->Invalidate( 0 );
         FOdysseyVectorEngine::Notify( scene, retFlags );
@@ -270,15 +278,13 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
 void
 SOdysseyPainterEditorVectorSceneTreeView::SelectAll()
 {
-    TArray<TSharedPtr<FVectorSceneTreeViewItem>> selectedItems = GetSelectedItems();
-/*
-    for( int i = 0; selectedItems.Num(); i++ )
+    if( mRootItem )
     {
-    }
-*/
-}
+        FOdysseyVectorGroupPaint* scene = static_cast<FOdysseyVectorGroupPaint*>(mRootItem.Get()->GetVectorObject());
 
-//FOdysseyVectorGroupPaint* scene = static_cast<FOdysseyVectorGroupPaint*>(mRootItem.Get()->GetVectorObject());
+        FOdysseyPainterEditor::SelectAllObjects( mEditor, scene );
+    }
+}
 
 void
 SOdysseyPainterEditorVectorSceneTreeView::DeleteObjects()

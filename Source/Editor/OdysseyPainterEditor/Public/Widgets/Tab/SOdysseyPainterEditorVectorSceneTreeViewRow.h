@@ -46,6 +46,10 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeViewRow
                       , const TSharedPtr<FVectorSceneTreeViewItem> iItem );
 
         void Rename();
+        FReply OnMouseButtonUp( const FGeometry & MyGeometry
+                              , const FPointerEvent & MouseEvent ) override;
+        FReply OnMouseButtonDown( const FGeometry & MyGeometry
+                                , const FPointerEvent & MouseEvent ) override;
 
     protected:
         virtual FReply OnDragDetected ( const FGeometry& MyGeometry,

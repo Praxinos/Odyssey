@@ -121,6 +121,75 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow
                 ] );
 }
 
+FReply
+SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonUp( const FGeometry & MyGeometry
+                                                            , const FPointerEvent & MouseEvent )
+{
+    return FReply::Unhandled();
+}
+
+FReply
+SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonDown( const FGeometry & MyGeometry
+                                                              , const FPointerEvent & MouseEvent )
+{
+    const TSharedPtr< SOdysseyPainterEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SOdysseyPainterEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
+    FOdysseyVectorObject* vectorObject = mItem.Get()->GetVectorObject();
+    FOdysseyVectorGroupPaint* vectorScene = vectorObject->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorObject->GetEngine();
+
+    if( mItem.Get()->IsSensitive() == false )
+    {
+        return FReply::Unhandled();
+    }
+
+    // Note: we don't rely on STreeView::SelectedItems to keep track of the selection.
+    // That way we don't have to update the widget.
+    // We directly rely on the selection from our vector engine. However this implies
+    // that we have to deal with the multiple selection by ourselves.
+
+    if( FSlateApplication::Get().GetModifierKeys().IsShiftDown() == true )
+    {
+        FOdysseyVectorObject* lastSelectedObject = vectorEngine->GetLastSelectedObject();
+
+        if( lastSelectedObject )
+        {
+            bool doSelect = false;
+
+            for( const TSharedPtr<FVectorSceneTreeViewItem>& item : treeView.Get()->GetItems() )
+            {
+                FOdysseyVectorObject* itemObject = item.Get()->GetVectorObject();
+
+                if( ( itemObject == vectorObject ) || ( itemObject == lastSelectedObject ) )
+                {
+                    doSelect = !doSelect;
+                }
+
+                if( doSelect )
+                {
+                    if( itemObject->IsSelected() == false )
+                    {
+                        vectorEngine->SelectObject( itemObject );
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
+        {
+            vectorEngine->ClearObjectSelection();
+        }
+    }
+
+    if( vectorObject->IsSelected() == false )
+    {
+        mItem.Get()->GetVectorObject()->GetEngine()->SelectObject( vectorObject );
+    }
+
+    return FReply::Handled();
+}
+
 ESelectionMode::Type
 SOdysseyPainterEditorVectorSceneTreeViewRow::GetSelectionMode () const
 {

@@ -220,8 +220,6 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
                                             } );
         UpdateShape( iUpdateFlags );
 
-        mDrawingMutex.unlock();
-
         // update tags
         for( FOdysseyVectorTag* tag : mTagList )
         {
@@ -232,6 +230,8 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
         {
             mInvalidationFlags = 0;
         }
+
+        mDrawingMutex.unlock();
     }
 }
 

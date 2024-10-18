@@ -57,7 +57,7 @@ FInbetweenerQuad::GetNeighbours( FInbetweenerQuad* oNeighbours[4] )
     if( numQuadX && numQuadY )
     {
         uint32 x = quadIndex % numQuadX;
-        uint32 y = quadIndex / numQuadY;
+        uint32 y = quadIndex / numQuadX;
         int32 coords[4][2] = { { (int32)x    , (int32)y - 1 }
                              , { (int32)x    , (int32)y + 1 }
                              , { (int32)x + 1, (int32)y }

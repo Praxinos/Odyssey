@@ -184,7 +184,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
     int breakdownCellIndex = mAnimationLayerImageVector->GetCellsContainer()->GetCellIndexAtFrame( breakdownFrameIndex );
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     std::list<FOdysseyVectorEngine*> engineList;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+    uint64 notificationFlags = /*FOdysseyPainterEditor::UI_UPDATE_TIMELINE*/0
                              | FOdysseyPainterEditor::UI_UPDATE_HUD;
 
     GetSelectedInbetweenerTags( selectedInbetweenerTagList, engineList );
@@ -231,6 +231,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
             WidgetFromItem ( item ).Get()->AsWidget()->MarkPrepassAsDirty();
         }
 
+        // update first
         for( FOdysseyVectorEngine* engine : engineList )
         {
             engine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
