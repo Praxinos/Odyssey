@@ -51,7 +51,7 @@ public:
     /* Return the Rotation Value to display (in degrees) */
     int             GetGuiRotationValue() const;
 
-    /* Get the Pan value*/
+    /* Get the Pan value */
     FVector2D       GetPan() const;
 
     /* Get the flip state */
@@ -121,6 +121,9 @@ public:
     /* Flip the canvas Vertically */
     void            FlipVertical();
 
+    /* Returns the tranformation matrix with the eventual flip */
+    const FMatrix2x2            GetFlipMatrix() const;
+
 private:
     // Private API
 
@@ -155,8 +158,8 @@ private:
     /* Update the scrollbars according to the texture transform */
     void                        UpdateScrollBars();
 
-    /* Returns the tranformation matrix with the eventual flip */
-    const FMatrix2x2            GetFlipMatrix() const;
+    /* Update the transform matrix after an action (pan, rotation, flip...) from an user */
+    void                        UpdateTransform();
 
 private:
     // SWidget overrides
@@ -219,6 +222,16 @@ private:
     FTransform2D                        mTransform;
     bool                                mIsFitToViewport;
 
-    //0,0 if no flip, 1,0 if flip X, 0,1 if flip Y, 1,1 if both axis are flipped
+
+    /* The scale applied to the viewport */
+    double                              mZoom;
+
+    /* The rotation (in radians) applied to the viewport */
+    double                              mRotation;
+
+    /* The translation applied to the viewport */ 
+    FVector2D                           mPan;
+
+    /* (0,0) if no flip, (1,0) if flip X, (0,1) if flip Y, (1,1) if both axis are flipped */
     FVector2D                           mFlipStateUV;
 };

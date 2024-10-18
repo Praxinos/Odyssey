@@ -237,7 +237,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
     params.mTextureToHUD = FOdysseyHUDSystem::FDrawHUDParams::FTextureToHUD::CreateLambda(
 		[viewportWidget, w = params.mTextureWidth, h = params.mTextureHeight](const FVector2D& iPosition)
 		{
-			return viewportWidget->ToWorld(iPosition - FVector2D(w / 2.f, h / 2.f));
+            return viewportWidget->ToWorld(iPosition - FVector2D(w / 2.f, h / 2.f));
 		}
 	);
 
@@ -1027,50 +1027,20 @@ FOdysseyPainterEditorViewportClient::GetZoom() const
 FVector2D
 FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FVector2D& iMouseInViewport ) const
 {
-    FVector2D pointInTexture = mOdysseyPainterEditorViewportPtr.Pin()->GetTransformToDisplayedTexture().Inverse().TransformPoint(iMouseInViewport);
-
-    UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
-    if (!texture)
-        return pointInTexture;
-
-    if (mOdysseyPainterEditorViewportPtr.Pin()->GetFlip().X == 1)
-    {
-        pointInTexture.X = texture->GetSurfaceWidth() - pointInTexture.X;
-    }
-
-    if (mOdysseyPainterEditorViewportPtr.Pin()->GetFlip().Y == 1)
-    {
-        pointInTexture.Y = texture->GetSurfaceHeight() - pointInTexture.Y;
-    }
-
-    return pointInTexture;
+    return mOdysseyPainterEditorViewportPtr.Pin()->GetTransformToDisplayedTexture().Inverse().TransformPoint(iMouseInViewport);
 }
 
 FOdysseyPoint
 FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FOdysseyPoint& iPointInViewport ) const
 {
-    FVector2D positionInViewport(iPointInViewport.x, iPointInViewport.y);
-    FVector2D positionInTexture = mOdysseyPainterEditorViewportPtr.Pin()->GetTransformToSourceTexture().Inverse().TransformPoint(positionInViewport);
-    FOdysseyPoint pointInTexture(iPointInViewport);
+    FVector2D position_in_viewport(iPointInViewport.x, iPointInViewport.y);
+    FVector2D position_in_texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTransformToSourceTexture().Inverse().TransformPoint(position_in_viewport);
 
-    UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
-    if (!texture)
-        return pointInTexture;
+    FOdysseyPoint point_in_texture(iPointInViewport);
+    point_in_texture.x = position_in_texture.X;
+    point_in_texture.y = position_in_texture.Y;
 
-    if( mOdysseyPainterEditorViewportPtr.Pin()->GetFlip().X == 1)
-    {
-        positionInTexture.X = texture->GetSurfaceWidth() - positionInTexture.X;
-    }
-
-    if (mOdysseyPainterEditorViewportPtr.Pin()->GetFlip().Y == 1)
-    {
-        positionInTexture.Y = texture->GetSurfaceHeight() - positionInTexture.Y;
-    }
-
-    pointInTexture.x = positionInTexture.X;
-    pointInTexture.y = positionInTexture.Y;
-
-    return pointInTexture;
+    return point_in_texture;
 }
 
 void 
@@ -1148,10 +1118,7 @@ FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iView
 
                 FVector pIntersect;
                 FVector2D p1 = transform.TransformPoint(UVs[corner1] * textureSurfaceSize);
-                p1 = p1 - (2 * p1 * mOdysseyPainterEditorViewportPtr.Pin()->GetFlip());
-
                 FVector2D p2 = transform.TransformPoint(UVs[corner2] * textureSurfaceSize);
-                p2 = p2 - (2 * p2 * mOdysseyPainterEditorViewportPtr.Pin()->GetFlip());
 
                 #define V(p) FVector(p, 0.f)
                 bool intersect = FMath::SegmentIntersection2D(V(p1), V(p2), vp1, vp2, pIntersect) ||

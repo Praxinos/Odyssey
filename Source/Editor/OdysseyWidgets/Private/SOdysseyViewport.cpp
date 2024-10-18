@@ -45,9 +45,12 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
 {
     mTexture = InArgs._Texture;
 
-    mTransform = FTransform2D(1.0f, FVector2D(0.0f, 0.0f));
-
     mFlipStateUV = FVector2D(0.f, 0.f);
+    mPan = FVector2D( 0.f, 0.f );
+    mRotation = 0;
+    mZoom = 1;
+
+    UpdateTransform();
 
     // create zoom menu
     FMenuBuilder ZoomMenuBuilder(true, NULL);
@@ -348,7 +351,7 @@ SOdysseyViewport::UpdateScrollBars()
 
     //Get the BoundingBox
 
-    //All calculations are done in the Transform Coodinate system
+    //All calculations are done in the Transform Coordinate system
     //So (0,0) is bottom left
     TArray<FVector2D> points;
     points.Add(mTransform.TransformPoint(FVector2D(width / 2.f, height / 2.f)));
@@ -369,6 +372,13 @@ SOdysseyViewport::UpdateScrollBars()
 
     mHorizontalScrollBar->SetState((1.0 - pos.X) * ScrollbarSpaceRatio, ScrollbarThumbRatio);
     mVerticalScrollBar->SetState((1.0 - pos.Y) * ScrollbarSpaceRatio, ScrollbarThumbRatio);
+}
+
+void SOdysseyViewport::UpdateTransform()
+{
+    mTransform = FTransform2D( GetFlipMatrix() );
+    mTransform = mTransform.Concatenate( FTransform2D(FQuat2D(mRotation)));
+    mTransform = mTransform.Concatenate( FTransform2D( mZoom, mPan ) );
 }
 
 const FMatrix2x2 SOdysseyViewport::GetFlipMatrix() const
@@ -466,7 +476,8 @@ void
 SOdysseyViewport::HandleHorizontalScrollBarScrolled(float InScrollOffsetFraction)
 {
     FVector2D translation = GetTranslationFromSlidersOffsets(InScrollOffsetFraction, mVerticalScrollBar->DistanceFromTop());
-    mTransform.SetTranslation(FVector2D(translation.X, mTransform.GetTranslation().Y));
+    mPan = FVector2D(translation.X, mPan.Y);
+    UpdateTransform();
     mHorizontalScrollBar->SetState(FMath::Clamp(InScrollOffsetFraction, 0.f, ScrollbarSpaceRatio), ScrollbarThumbRatio);
     SetFitToViewport(false);
 }
@@ -476,7 +487,8 @@ void
 SOdysseyViewport::HandleVerticalScrollBarScrolled( float InScrollOffsetFraction )
 {
     FVector2D translation = GetTranslationFromSlidersOffsets(mHorizontalScrollBar->DistanceFromTop(), InScrollOffsetFraction);
-    mTransform.SetTranslation(FVector2D(mTransform.GetTranslation().X, translation.Y));
+    mPan = FVector2D(mPan.X, translation.Y);
+    UpdateTransform();
     mVerticalScrollBar->SetState(FMath::Clamp(InScrollOffsetFraction, 0.f, ScrollbarSpaceRatio), ScrollbarThumbRatio);
     SetFitToViewport(false);
 }
@@ -520,12 +532,13 @@ void SOdysseyViewport::HandleFlipVertical(ECheckBoxState iState)
 void
 SOdysseyViewport::HandleViewportReset()
 {
-    Pan(FVector2D(0.f, 0.f));
-    Rotate( 0 );
-    Zoom(1.f);
+    mTransform = FTransform2D(1.0f, FVector2D(0.0f, 0.0f));
+    mFlipStateUV = FVector2D(0.f, 0.f);
+    mPan = FVector2D( 0.f, 0.f );
+    mRotation = 0;
+    mZoom = 1.f;
     SetFitToViewport(false);
     UpdateScrollBars();
-    mFlipStateUV = FVector2D(0.f, 0.f);
 }
 
 
@@ -575,7 +588,7 @@ SOdysseyViewport::HandleZoomSliderChanged( float NewValue )
 double
 SOdysseyViewport::GetZoom() const
 {
-    return mTransform.GetMatrix().GetScale().GetVector()[0];
+    return mZoom;
 }
 
 
@@ -592,13 +605,19 @@ SOdysseyViewport::Zoom(double ZoomValue, const FVector2D& iZoomPosition)
 {
     ZoomValue = FMath::Clamp( ZoomValue, MinZoom, MaxZoom );
 
+    FTransform2D zoomTransform = FTransform2D(ZoomValue / GetZoom(), FVector2D(0, 0));
+
+    mZoom = ZoomValue;
+
     FVector2D translation = iZoomPosition;
 
-    FTransform2D zoomTransform = FTransform2D(ZoomValue / GetZoom(), FVector2D(0,0));
+    FTransform2D translationDiff = mTransform.Concatenate(FTransform2D(-translation));
+    translationDiff = FTransform2D(Concatenate(translationDiff, zoomTransform.GetMatrix()));
+    translationDiff = translationDiff.Concatenate(FTransform2D(translation));
 
-    mTransform = mTransform.Concatenate(FTransform2D(-translation));
-    mTransform = FTransform2D( Concatenate(mTransform, zoomTransform.GetMatrix()));
-    mTransform = mTransform.Concatenate(FTransform2D(translation));
+    mPan = translationDiff.GetTranslation();
+
+    UpdateTransform();
 }
 
 void
@@ -685,31 +704,27 @@ SOdysseyViewport::ToggleFitToViewport()
 
 double SOdysseyViewport::GetRotation() const
 {
-    //PATCH: At first I wanted to use t.GetMatrix().GetRotationAngle(), but it uses Atan instead of Atan2 leading to wrong angles
-    float A, B, C, D;
-    mTransform.GetMatrix().GetMatrix(A, B, C, D);
-    return FMath::Atan2(B, D);
-    //return mTransform.GetMatrix().GetRotationAngle();
+    return mRotation;
 }
 
 void SOdysseyViewport::SetRotation(double RotationValue, const FVector2D& iPivotPoint)
 {
-    Rotate(RotationValue, iPivotPoint);
+    
+    mRotation = fmod( 2 * PI + fmod(RotationValue, 2 * PI), 2 * PI); //Positive modulo;
+    UpdateTransform();
     UpdateScrollBars();
     //SetFitToViewport(false);
 }
 
 void SOdysseyViewport::Rotate(double RotationValue, const FVector2D& iPivotPoint)
 {
-    mTransform = mTransform.Concatenate(FTransform2D(FVector2D(iPivotPoint.X, iPivotPoint.Y)));
-    mTransform = mTransform.Concatenate(FTransform2D(FQuat2D(RotationValue - GetRotation())));
-    mTransform = mTransform.Concatenate(FTransform2D(-FVector2D(iPivotPoint.X, iPivotPoint.Y)));
+    mRotation = fmod( 2 * PI + fmod(mRotation + RotationValue, 2 * PI), 2 * PI); //Positive modulo
+    UpdateTransform();
 }
 
 FVector2D SOdysseyViewport::GetPan() const
 {
-    //ordinate inversion because the computer coordinate system is inverted
-    return FVector2D(mTransform.GetTranslation().X, mTransform.GetTranslation().Y);
+    return mPan;
 }
 
 FVector2D SOdysseyViewport::GetFlip() const
@@ -724,9 +739,8 @@ FVector2D SOdysseyViewport::GetViewportCenter() const
 
 void SOdysseyViewport::AddPan( FVector2D iPanValue )
 {
-    //ordinate inversion because the computer coordinate system is inverted
-    FVector2D panValue = mTransform.GetTranslation() + FVector2D(iPanValue.X, iPanValue.Y);
-    Pan(panValue);
+    mPan = mPan + iPanValue;
+    UpdateTransform();
     UpdateScrollBars();
     SetFitToViewport(false);
 }
@@ -734,12 +748,14 @@ void SOdysseyViewport::AddPan( FVector2D iPanValue )
 void
 SOdysseyViewport::SOdysseyViewport::Pan(FVector2D iPanValue)
 {
-    mTransform.SetTranslation(iPanValue);
+    mPan = iPanValue;
+    UpdateTransform();
 }
 
 void SOdysseyViewport::ResetPan()
 {
-    mTransform.SetTranslation(FVector2D(0.0f, 0.0f));
+    mPan = FVector2D(0.0f, 0.0f);
+    UpdateTransform();
     UpdateScrollBars();
     SetFitToViewport(false);
 }
@@ -747,30 +763,24 @@ void SOdysseyViewport::ResetPan()
 
 void SOdysseyViewport::RotateLeft()
 {
-    SetRotation(GetRotation() - FMath::DegreesToRadians(RotationStep));
+    Rotate(- FMath::DegreesToRadians(RotationStep));
 }
 
 void SOdysseyViewport::RotateRight()
 {
-    SetRotation(GetRotation() + FMath::DegreesToRadians(RotationStep));
+    Rotate(FMath::DegreesToRadians(RotationStep));
 }
 
 void SOdysseyViewport::FlipHorizontal()
 {
-    /*FMatrix2x2 invertY = FMatrix2x2( -1.f, 0.f,
-                                     0.f, 1.f );
-    mTransform = mTransform.Concatenate( FTransform2D(invertY) );*/
-
     mFlipStateUV.X = int(mFlipStateUV.X + 1) % 2;
+    UpdateTransform();
 }
 
 void SOdysseyViewport::FlipVertical()
 {
-    /*FMatrix2x2 invertY = FMatrix2x2( 1.f, 0.f,
-                                     0.f, -1.f );
-    mTransform = mTransform.Concatenate( FTransform2D(invertY) );*/
-
     mFlipStateUV.Y = int(mFlipStateUV.Y + 1) % 2;
+    UpdateTransform();
 }
 
 void SOdysseyViewport::ComputeTextureDisplayDimensions( uint32& Width, uint32& Height ) const
@@ -788,23 +798,24 @@ void SOdysseyViewport::ComputeTextureDisplayDimensions( uint32& Width, uint32& H
 
 FTransform2D
 SOdysseyViewport::GetTransformToDisplayedTexture()
-{   
+{
     UTexture* texture = GetTexture();
     if (!texture)
         return FTransform2D();
+
 
     uint32 width = texture->GetSurfaceWidth();
     uint32 height = texture->GetSurfaceHeight();
 
     FVector2D translation = (FVector2D(width, height) / 2.0f);
     FTransform2D transform(-translation);
+
     transform = transform.Concatenate(mTransform);
 
     translation = GetViewportCenter();
     transform = transform.Concatenate(FTransform2D(translation));
-    //FTransform2D transform = transform.Concatenate(translation);
-    
-    return mTransform;
+
+    return transform;
 }
 
 FTransform2D
@@ -837,14 +848,13 @@ SOdysseyViewport::GetTransformToSourceTexture()
         break;
     }
 
-
     uint32 width = texture->GetSurfaceWidth();
     uint32 height = texture->GetSurfaceHeight();
 
     FVector2D translation = (FVector2D(width, height) / 2.0f);
     
-    
     FTransform2D transform(FScale2D(width / textureFullWidth, height / textureFullHeight));
+
     transform = transform.Concatenate(FTransform2D(-translation));
     transform = transform.Concatenate(mTransform);
 
@@ -859,6 +869,7 @@ SOdysseyViewport::ToLocal(const FVector2D& iPoint) const
 {
     FVector2D center = GetViewportCenter();
     FVector2D pos = iPoint - center;
+
     FVector2D tpos = mTransform.Inverse().TransformPoint(pos);
 
     return tpos;
@@ -869,6 +880,7 @@ SOdysseyViewport::ToWorld(const FVector2D& iPoint) const
 {
     FVector2D center = GetViewportCenter();
     FVector2D tpos = mTransform.TransformPoint(iPoint) + center;
+
     return tpos;
 }
 
