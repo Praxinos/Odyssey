@@ -2,11 +2,11 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 // From module OdysseyAnimationEditor
-#include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "LayerStack/Cells/OdysseyAnimationCellsContainer.h"
 // From module OdysseyPainterEditor
@@ -232,6 +232,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
         }
 
         // update first
+
         for( FOdysseyVectorEngine* engine : engineList )
         {
             engine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );

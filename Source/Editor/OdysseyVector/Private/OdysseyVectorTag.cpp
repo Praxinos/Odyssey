@@ -53,3 +53,15 @@ void
 FOdysseyVectorTag::Removed()
 {
 }
+
+void
+FOdysseyVectorTag::LockDrawing()
+{
+    mDrawingMutex.lock();
+}
+
+void
+FOdysseyVectorTag::UnlockDrawing()
+{
+    mDrawingMutex.unlock();
+}

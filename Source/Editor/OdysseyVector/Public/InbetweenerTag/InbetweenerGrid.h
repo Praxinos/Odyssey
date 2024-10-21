@@ -40,7 +40,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         /**
          * @brief Build the grid.
          */
-        void Make();
+        void Make( bool iInvalidate );
 
         /**
          * @brief Build the grid.
@@ -48,7 +48,8 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
          * @param iTargetPositionBuffer target position of the points in the grid. Can be empty.
          */
         virtual void Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
-                         , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer );
+                         , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer
+                         , bool iInvalidate );
 
         /**
          * @brief Deform the paths passed as parameter.

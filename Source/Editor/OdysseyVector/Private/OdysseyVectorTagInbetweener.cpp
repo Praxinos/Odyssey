@@ -142,13 +142,15 @@ FOdysseyVectorTagInbetweener::Map()
               {
                   FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
 
-                  // force minimum segment subdivision (important for being able to deform
-                  // straight segments
-                  path->InvalidateAllSegments();
                   // do not call Update(), call UpdateShape().
                   //  Update would call tag->Update() (this fuinction)
                   // resulting in a inifinite loop.
-                  path->UpdateShape( FOdysseyVectorObject::UPDATE_NEEDPOLYLINE );
+                  path->UpdateShape( // force minimum segment subdivision (important for being able to deform
+                                     // straight segments
+                                     FOdysseyVectorObject::UPDATE_NEEDPOLYLINE
+                                     // passing FORCe will force the update of all segments. We cannot call InvalidateallSegments()
+                                     // because this is an Update process and it should not call an Invalidate process.
+                                   | FOdysseyVectorObject::UPDATE_FORCE );
 
                   mInterpolatedPathBuffer.emplace_back( path
                                                       , GetLength()
@@ -378,8 +380,6 @@ FOdysseyVectorTagInbetweener::ResetLayout( bool iFreeMemNow )
 
     ChainBreakdowns();
 
-    mMasterBreakdown.SetSourceDrawingIndex( 0 );
-
     mMasterBreakdown.GetGrid()->SetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
     mMasterBreakdown.GetGrid()->SetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
 
@@ -437,6 +437,8 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
         FInbetweenerBreakdown* newBreakdown = iNewBreakdown ? iNewBreakdown 
                                                             : new FInbetweenerBreakdown( this );
 
+        LockDrawing();
+
         // This is for an already existing breakdown if it had been removed before
         // (then its pointer to the tag would be null)
         newBreakdown->SetInbetweenerTag( this );
@@ -455,15 +457,9 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
 
         ChainBreakdowns();
 
-        // this also alters the previous breakdown target index, so it must be done after the chaining has been updated
-//        curBreakdown->SetSourceDrawingIndex( newTargetDrawingIndex );
-
-        newBreakdown->SetSourceDrawingIndex( newSourceDrawingIndex );
         newBreakdown->SetTargetDrawingIndex( newTargetDrawingIndex );
 
         /*ResizeRoutes();*/
-
-
 
         // must be done after the intertweaning of the breakdowns
         if( iCopyGeometry )
@@ -492,12 +488,13 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
             newBreakdown->UpdateMatrix();
         }
 
+        UnlockDrawing();
+
         Invalidate( INVALIDATE_BREAKDOWN_LIST );
 
         return newBreakdown;
     }
 
-    //DispatchInbetweensToBreakdowns();
     return nullptr;
 }
 
@@ -592,8 +589,6 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
 
             // nextBreakdown source grid gets its shape from this removed breakdown source grid.
             nextBreakdown->GetGrid()->SetGeometry( breakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
-            // as well as its source drawing index
-            nextBreakdown->SetSourceDrawingIndex( iBreakdown->GetSourceDrawingIndex() );
         }
 
         iBreakdown->SetInbetweenerTag( nullptr );
@@ -717,7 +712,7 @@ FOdysseyVectorTagInbetweener::Added()
 
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
-        breakdown->GetGrid()->Make();
+        breakdown->GetGrid()->Make( true );
     }
 
     RedrawAnimationCells();
@@ -737,7 +732,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
     if( ( bShared == true )
      && ( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_NOINBETWEENING ) == 0 ) )
     {
-        mDrawingMutex.lock();
+        LockDrawing();
 
         if( ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
          || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
@@ -758,7 +753,11 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
                 }
 
                 breakdown->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
-                breakdown->GetGrid()->Make( sourceGeometry, targetGeometry );
+                breakdown->GetGrid()->Make( sourceGeometry, targetGeometry, false );
+
+                // Note: we cannot call Invalidate in Make() (hence the "false" arg), so we set the flags manually.
+                // calling Invalidate make trigger a call to draw and this would block due to the mutexes.
+                mInvalidationFlags |= ( INVALIDATE_SOURCEGRID | INVALIDATE_TARGETGRID );
             }
         }
 
@@ -845,7 +844,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             mInvalidationFlags = 0;
         }
 
-        mDrawingMutex.unlock();
+        UnlockDrawing();
 
         RedrawAnimationCells();
     }
@@ -1145,7 +1144,7 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
 {
     IOdysseyVectorAnimationCell* displayedCell = iDisplayedScene->GetEngine()->GetAnimationCell();
 
-    mDrawingMutex.lock();
+    LockDrawing();
 
     // check the object is still displayed (it could have been removed but still in memory)
     if( mOwner->GetScene() )
@@ -1188,7 +1187,7 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
         iBLContext->restore();
     }
 
-    mDrawingMutex.unlock();
+    UnlockDrawing();
 }
 
 void
@@ -1199,7 +1198,7 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FInterpolatedPath* iInterpolatedPath
                                         , bool iLock )
 {
     if( iLock )
-        mDrawingMutex.lock(); 
+        LockDrawing();
 
     for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->mInterpolatedSegmentBuffer )
     {
@@ -1249,7 +1248,7 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FInterpolatedPath* iInterpolatedPath
     }
 
     if( iLock )
-        mDrawingMutex.unlock(); 
+        UnlockDrawing();
 }
 
 std::vector<FInterpolatedPath>&
@@ -1266,7 +1265,7 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( FChartDivision* inbetween
     BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
 
     if( iLock )
-        mDrawingMutex.lock(); 
+        LockDrawing();
 
     iBLContext->save();
     iBLContext->resetMatrix();
@@ -1290,7 +1289,7 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( FChartDivision* inbetween
     iBLContext->restore();
 
     if( iLock )
-        mDrawingMutex.unlock(); 
+        UnlockDrawing();
 }
 
 void
@@ -1388,7 +1387,7 @@ FOdysseyVectorTagInbetweener::ResetGrid()
 {
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
-        breakdown->GetGrid()->Make();
+        breakdown->GetGrid()->Make( true );
     }
 
     Invalidate( INVALIDATE_MAP );
@@ -1444,7 +1443,7 @@ FOdysseyVectorTagInbetweener::SetGrid( eInbetweenerGridType iGridType
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
         breakdown->SetGrid( iGridType );
-        breakdown->GetGrid()->Make();
+        breakdown->GetGrid()->Make( true );
     }
 }
 
@@ -1471,7 +1470,8 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
         breakdown->GetGrid()->Make( iSourcePositionBuffer
-                                  , iTargetPositionBuffer );
+                                  , iTargetPositionBuffer
+                                  , true );
     }
 }
 
@@ -1495,7 +1495,7 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
 
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
-        breakdown->GetGrid()->Make();
+        breakdown->GetGrid()->Make( true );
     }
 }
 

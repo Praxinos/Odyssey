@@ -317,11 +317,22 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
                  , mInvalidatedSegmentList.end()
                  , [ this ]( FOdysseyVectorSegment *segment )*/
 
-    for ( FOdysseyVectorSegment* segment : mInvalidatedSegmentList )
+    if( iUpdateFlags & UPDATE_FORCE )
     {
-        segment->Update( iUpdateFlags );
+        for ( FOdysseyVectorSegment* segment : mSegmentList )
+        {
+            segment->Update( iUpdateFlags );
+        }
+    }
+    else
+    {
+        for ( FOdysseyVectorSegment* segment : mInvalidatedSegmentList )
+        {
+            segment->Update( iUpdateFlags );
+        }
     }
 
+    // clear this anyway
     mInvalidatedSegmentList.clear();
 
     /*);*/

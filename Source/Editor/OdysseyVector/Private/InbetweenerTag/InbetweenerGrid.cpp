@@ -106,12 +106,12 @@ FInbetweenerGrid::UpdateCenterOfMass( uint32 iUpdateFlags
     }
 }
 
-void FInbetweenerGrid::Make()
+void FInbetweenerGrid::Make( bool iInvalidate )
 {
     std::vector<::ULIS::FVec2D> sourcePositionBuffer;
     std::vector<::ULIS::FVec2D> targetPositionBuffer;
 
-    Make( sourcePositionBuffer, targetPositionBuffer );
+    Make( sourcePositionBuffer, targetPositionBuffer, iInvalidate );
 }
 
 //static
@@ -137,7 +137,8 @@ SquareGridBBox( ::ULIS::FRectD& iBBox )
 
 void
 FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
-                      , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer )
+                      , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer
+                      , bool iInvalidate )
 {
     uint32 numQuadX = mBreakdown->GetInbetweenerTag()->GetGridNumQuadX();
     uint32 numQuadY = mBreakdown->GetInbetweenerTag()->GetGridNumQuadY();
@@ -239,8 +240,11 @@ FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
 
         mQuadArea = ( mGridBBox.w * mGridBBox.h ) / mQuadBuffer.size();
 
-        mBreakdown->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEGRID
-                                                   | FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID );
+        if( iInvalidate )
+        {
+            mBreakdown->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEGRID
+                                                       | FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID );
+        }
     }
 }
 

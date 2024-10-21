@@ -20,7 +20,6 @@ FInbetweenerBreakdown::FInbetweenerBreakdown( FOdysseyVectorTagInbetweener* iInb
     : mInbetweenerTag( iInbetweenerTag )
     , mPrevBreakdown( nullptr )
     , mNextBreakdown( nullptr )
-    , mSourceDrawingIndex( 0 )
     , mTargetDrawingIndex( 1 )
     , mIndex( 0 )
     , mGrid( nullptr )
@@ -314,6 +313,7 @@ void
 FInbetweenerBreakdown::DrawPathsAtSource( BLContext* iBLContext, bool iLock )
 {
     BLMatrix2D worldMatrix = mInbetweenerTag->GetOwner()->GetWorldMatrix();
+    uint32 sourceDrawingIndex = GetSourceDrawingIndex();
 
     // lock because the proxy could call the draw function at anytime even though inbetweenerTag isn't up-to-date.
     // This mutex is then also locked in by Update function.
@@ -328,7 +328,7 @@ FInbetweenerBreakdown::DrawPathsAtSource( BLContext* iBLContext, bool iLock )
     for( FInterpolatedPath& interpolatedPath : mInbetweenerTag->GetInterpolatedPathBuffer() )
     {
         uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
-        ::ULIS::FVec2D* pointPositionBuffer = &interpolatedPath.GetInterpolatedPointPositionBuffer()[pointCount * mSourceDrawingIndex];
+        ::ULIS::FVec2D* pointPositionBuffer = &interpolatedPath.GetInterpolatedPointPositionBuffer()[pointCount * sourceDrawingIndex];
 
         mInbetweenerTag->DrawPathAt( &interpolatedPath
                                    , pointPositionBuffer
@@ -429,13 +429,14 @@ BLMatrix2D&
 FInbetweenerBreakdown::GetSourceLocalMatrix()
 {
     static BLMatrix2D identityMatrix = BLMatrix2D::makeIdentity();
+    uint32 sourceDrawingIndex = GetSourceDrawingIndex();
 
-    if( mSourceDrawingIndex == 0 )
+    if( sourceDrawingIndex == 0 )
     {
         return identityMatrix;
     }
 
-    return mInbetweenerTag->GetDrawing( mSourceDrawingIndex )->localMatrix;
+    return mInbetweenerTag->GetDrawing( sourceDrawingIndex )->localMatrix;
 }
 
 BLMatrix2D&
@@ -457,26 +458,31 @@ FInbetweenerBreakdown::GetTargetInverseWorldMatrix()
 }
 
 void
-FInbetweenerBreakdown::SetSourceDrawingIndex( uint32 iSourceDrawingIndex )
+FInbetweenerBreakdown::SetTargetDrawingIndex( uint32 iTargetDrawingIndex )
 {
-    FInbetweenerBreakdown* prevBreakdown = GetPrevBreakdown();
+    FInbetweenerBreakdown* nextBreakdown = GetNextBreakdown();
 
-    mSourceDrawingIndex = iSourceDrawingIndex;
-
-    if( prevBreakdown )
+    if( mTargetDrawingIndex != iTargetDrawingIndex )
     {
-        prevBreakdown->mTargetDrawingIndex = iSourceDrawingIndex;
+        mTargetDrawingIndex = iTargetDrawingIndex;
 
-        prevBreakdown->mChart.Resize();
+        if( nextBreakdown )
+        {
+            nextBreakdown->mChart.Resize();
+        }
+
+        mChart.Resize();
+
+        mInbetweenerTag->ResizeDrawings();
+
+        // TODO: put this somewhere else. I put it here so it can geenrate matrices based on
+        // the t value fromthe chart, but I don't think it is the best place. 
+        mInbetweenerTag->UpdateMatrix();
+
+        mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING 
+                                   // force deformation of interpolated paths at target
+                                   | FOdysseyVectorTagInbetweener::INVALIDATE_RANGE  );
     }
-
-    mChart.Resize();
-
-    mInbetweenerTag->ResizeDrawings();
-
-    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING 
-                               // force deformation of interpolated paths at target
-                               | FOdysseyVectorTagInbetweener::INVALIDATE_RANGE  );
 }
 
 FInbetweenerChart*
@@ -485,40 +491,12 @@ FInbetweenerBreakdown::GetChart()
     return &mChart;
 }
 
-void
-FInbetweenerBreakdown::SetTargetDrawingIndex( uint32 iTargetDrawingIndex )
-{
-    FInbetweenerBreakdown* nextBreakdown = GetNextBreakdown();
-
-    // Invalidate current cells
-    mInbetweenerTag->RedrawAnimationCells();
-
-    mTargetDrawingIndex = iTargetDrawingIndex;
-
-    if( nextBreakdown )
-    {
-        nextBreakdown->mSourceDrawingIndex = iTargetDrawingIndex;
-
-        nextBreakdown->mChart.Resize();
-    }
-
-    mChart.Resize();
-
-    mInbetweenerTag->ResizeDrawings();
-
-    // TODO: put this somewhere else. I put it here so it can geenrate matrices based on
-    // the t value fromthe chart, but I don't think it is the best place. 
-    mInbetweenerTag->UpdateMatrix();
-
-    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING 
-                               // force deformation of interpolated paths at target
-                               | FOdysseyVectorTagInbetweener::INVALIDATE_RANGE );
-}
-
 uint32
 FInbetweenerBreakdown::GetSourceDrawingIndex()
 {
-    return mSourceDrawingIndex;
+    FInbetweenerBreakdown* prevBreakdown = GetPrevBreakdown();
+
+    return prevBreakdown ? prevBreakdown->mTargetDrawingIndex : 0;
 }
 
 uint32
@@ -530,7 +508,9 @@ FInbetweenerBreakdown::GetTargetDrawingIndex()
 uint32
 FInbetweenerBreakdown::GetDrawingCount()
 {
-    return mTargetDrawingIndex - mSourceDrawingIndex + 1;
+    uint32 sourceDrawingIndex = GetSourceDrawingIndex();
+
+    return mTargetDrawingIndex - sourceDrawingIndex + 1;
 }
 
 int32
@@ -545,8 +525,9 @@ int32
 FInbetweenerBreakdown::GetSourceAnimationCellIndex()
 {
     uint32 tagCellIndex = mInbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetIndex();
+    uint32 sourceDrawingIndex = GetSourceDrawingIndex();
 
-    return (int32)tagCellIndex + (int32)( mSourceDrawingIndex * (int)mInbetweenerTag->GetInterpolationDirection());
+    return (int32)tagCellIndex + (int32)( sourceDrawingIndex * (int)mInbetweenerTag->GetInterpolationDirection());
 }
 
 void
@@ -570,7 +551,7 @@ FInbetweenerBreakdown::SetGrid( eInbetweenerGridType iGridType )
         break;
     }
 
-    mGrid->Make( );
+    mGrid->Make( true );
 }
 
 FInbetweenerGrid*

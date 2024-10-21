@@ -227,7 +227,6 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                         }
                         else
                         {
-                            breakdown->SetSourceDrawingIndex( sourceDrawingIndex );
                             breakdown->SetTargetDrawingIndex( targetDrawingIndex );
                         }
                     }
