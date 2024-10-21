@@ -10,6 +10,7 @@
 
 #include "OdysseyVector.h"
 #include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h" // interface
 
 #include "OdysseyAnimationLayerImageVector.generated.h"
 
@@ -17,7 +18,7 @@ class FOdysseyAnimationCell;
 
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageVector
-    : public UOdysseyAnimationLayer
+    : public UOdysseyAnimationLayer, public IOdysseyVectorLayer
 {
     GENERATED_BODY()
 
@@ -88,6 +89,12 @@ public:
 	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
     virtual ::ULIS::eBlendMode GetImageRenderingBlendMode() const override;
     virtual float GetImageRenderingOpacity() const override;
+
+public:
+    // Implements Interface IOdysseyVectorAnimationLayer
+    virtual IOdysseyVectorCell* GetCellByIndex( uint32 iIndex ) override;
+    virtual IOdysseyVectorCell* GetFirstCell() override;
+    virtual IOdysseyVectorCell* GetLastCell() override;
 
 protected:
     void IsColoredChanged();

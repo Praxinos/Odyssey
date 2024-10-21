@@ -1,7 +1,7 @@
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorSharedEnv.h"
-#include "OdysseyVectorAnimationCell.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorGroupPaint.h"
@@ -48,7 +48,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( FOdysseyVe
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     FOdysseyVectorSharedEnv* sharedEnv = iScene->GetSharedEnv();
-    uint32 cellIndex = vectorEngine->GetAnimationCell()->GetIndex();
+    uint32 cellIndex = vectorEngine->GetCell()->GetIndex();
 
     mSelectedInbetweenerTagList.clear();
     mSelectedBreakdownList.clear();
@@ -58,7 +58,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( FOdysseyVe
         if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
         {
             FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-            uint32 tagCellIndex = inbetweenerTag->GetSourceAnimationCellIndex();
+            uint32 tagCellIndex = inbetweenerTag->GetSourceCellIndex();
 
             if( tag->GetOwner()->IsSelected() )
             {
@@ -67,7 +67,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( FOdysseyVe
                 for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
                 {
 
-                    if( breakdown->GetTargetAnimationCellIndex() == cellIndex )
+                    if( breakdown->GetTargetCellIndex() == cellIndex )
                     {
                         mSelectedBreakdownList.push_back( breakdown );
                     }

@@ -11,8 +11,8 @@ class FInterpolatedSegment
     public:
         virtual ~FInterpolatedSegment();
         FInterpolatedSegment( FOdysseyVectorSegment* iSegment );
-        ::FInterpolatedSegment( FOdysseyVectorSegment* iSegment
-                              , const std::vector<FInterpolatedPoint*>& iPolylinePointArray );
+        FInterpolatedSegment( FOdysseyVectorSegment* iSegment
+                            , const std::vector<FInterpolatedPoint*>& iPolylinePointArray );
         FOdysseyVectorSegment* GetOriginalSegment();
         std::vector<FInterpolatedPoint*>& GetInterpolatedPointArray();
 

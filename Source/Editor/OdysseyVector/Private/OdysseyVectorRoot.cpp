@@ -1,12 +1,13 @@
 #include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
 
-FOdysseyVectorRoot::FOdysseyVectorRoot( IOdysseyVectorAnimationCell* iAnimationCell
+FOdysseyVectorRoot::FOdysseyVectorRoot( IOdysseyVectorLayer* iLayer
+                                      , IOdysseyVectorCell* iCell
                                       , FOdysseyVectorGroupPaint* iScene
                                       , uint32 iPreferredWidth
                                       , uint32 iPreferredHeight )
     : FOdysseyVectorObject("ROOT")
-    , mEngine ( iAnimationCell, this, iPreferredWidth, iPreferredHeight )
+    , mEngine ( iLayer, iCell, this, iPreferredWidth, iPreferredHeight )
     , mScene ( nullptr )
 {
     SetScene( iScene );

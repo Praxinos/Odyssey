@@ -54,7 +54,7 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::Construct( const typename STable
     const FSlateBrush* objectIcon = nullptr;
     const FSlateBrush* inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching16" );
     FOdysseyVectorTagInbetweener* inbetweenerTag = iTem.Get()->GetInbetweenerTag();
-    uint32 cellIndex = inbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetIndex();
+    uint32 cellIndex = inbetweenerTag->GetOwner()->GetEngine()->GetCell()->GetIndex();
 
     mInbetweenerTag = inbetweenerTag;
 

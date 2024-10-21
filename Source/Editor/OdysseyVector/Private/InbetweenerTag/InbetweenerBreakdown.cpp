@@ -5,7 +5,7 @@
 #include "OdysseyVector.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorObject.h"
-#include "OdysseyVectorAnimationCell.h"
+#include "OdysseyVectorCell.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
@@ -514,17 +514,17 @@ FInbetweenerBreakdown::GetDrawingCount()
 }
 
 int32
-FInbetweenerBreakdown::GetTargetAnimationCellIndex()
+FInbetweenerBreakdown::GetTargetCellIndex()
 {
-    uint32 tagCellIndex = mInbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetIndex();
+    uint32 tagCellIndex = mInbetweenerTag->GetOwner()->GetEngine()->GetCell()->GetIndex();
 
     return (int32)tagCellIndex + (int32)( mTargetDrawingIndex * (int)mInbetweenerTag->GetInterpolationDirection());
 }
 
 int32
-FInbetweenerBreakdown::GetSourceAnimationCellIndex()
+FInbetweenerBreakdown::GetSourceCellIndex()
 {
-    uint32 tagCellIndex = mInbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell()->GetIndex();
+    uint32 tagCellIndex = mInbetweenerTag->GetOwner()->GetEngine()->GetCell()->GetIndex();
     uint32 sourceDrawingIndex = GetSourceDrawingIndex();
 
     return (int32)tagCellIndex + (int32)( sourceDrawingIndex * (int)mInbetweenerTag->GetInterpolationDirection());

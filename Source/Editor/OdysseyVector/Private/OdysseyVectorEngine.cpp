@@ -14,14 +14,15 @@ FOdysseyVectorEngine::~FOdysseyVectorEngine()
 {
 }
 
-FOdysseyVectorEngine::FOdysseyVectorEngine( IOdysseyVectorAnimationCell* iAnimationCell
+FOdysseyVectorEngine::FOdysseyVectorEngine( IOdysseyVectorLayer* iLayer
+                                          , IOdysseyVectorCell* iCell
                                           , FOdysseyVectorRoot* iRoot
                                           , uint32 iPreferredWidth
                                           , uint32 iPreferredHeight )
     : mInvalidationFlags( 0 )
     , mRoot( iRoot )
-    , mCellIndex( 0 )
-    , mAnimationCell( iAnimationCell )
+    , mLayer( iLayer )
+    , mCell( iCell )
     , mSelectionSpace( nullptr )
     , mInvalidTileMap( 64, iPreferredWidth, iPreferredHeight )
     , mPreferredWidth( iPreferredWidth )
@@ -112,10 +113,16 @@ FOdysseyVectorEngine::GetRenderData()
     return mRenderData;
 }
 
-IOdysseyVectorAnimationCell*
-FOdysseyVectorEngine::GetAnimationCell()
+IOdysseyVectorLayer*
+FOdysseyVectorEngine::GetLayer()
 {
-    return mAnimationCell;
+    return mLayer;
+}
+
+IOdysseyVectorCell*
+FOdysseyVectorEngine::GetCell()
+{
+    return mCell;
 }
 
 FOdysseyVectorGroupPaint*

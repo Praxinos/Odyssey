@@ -26,7 +26,7 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorTagInbetweener.h"
-#include "OdysseyVectorAnimationCell.h"
+#include "OdysseyVectorCell.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAlter.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -203,7 +203,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
             const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() );
             uint32 frameIndex = animationEditorExtension->Timeline()->GetFrameIndexAtMousePosition( cursorPos.X );
             TSharedPtr<FOdysseyAnimationCellsContainer> cellsContainer = listView.Get()->GetAnimationLayerImageVector()->GetCellsContainer();
-            IOdysseyVectorAnimationCell* tagCell = mInbetweenerTag->GetOwner()->GetEngine()->GetAnimationCell();
+            IOdysseyVectorCell* tagCell = mInbetweenerTag->GetOwner()->GetEngine()->GetCell();
             float frameWidth = animationEditorExtension->Timeline()->GetFrameWidth();
 
             if (!cellsContainer)
@@ -235,8 +235,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
                     }
                 }
 
-                uint32 maxCellIndex = ( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Forward ) ? tagCell->GetLastCell()->GetIndex()
-                                                                                                                                      : tagCell->GetFirstCell()->GetIndex();
+                uint32 maxCellIndex = ( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Forward ) ? listView->GetAnimationLayerImageVector()->GetLastCell()->GetIndex()
+                                                                                                                                      : listView->GetAnimationLayerImageVector()->GetFirstCell()->GetIndex();
                 uint32 maxDrawingIndex = abs( (int)(maxCellIndex - tagCellIndex) );
                 uint32 prevDrawingIndex = prevBreakdown ? prevBreakdown->GetTargetDrawingIndex() : 0;
                 uint32 nextDrawingIndex = nextBreakdown ? nextBreakdown->GetTargetDrawingIndex() : maxDrawingIndex + 1;
@@ -316,13 +316,14 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
     // retrieve parent widget
     const TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> listView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
     // retrieve timing data
-    uint32 tagCellIndex = mInbetweenerTag->GetSourceAnimationCellIndex();
-    IOdysseyVectorAnimationCell* sourceCell = mInbetweenerTag->GetAnimationCell();
+    uint32 tagCellIndex = mInbetweenerTag->GetSourceCellIndex();
+    IOdysseyVectorCell* sourceCell = mInbetweenerTag->GetCell();
     uint32 sourceFrame = sourceCell->GetFrame();
     // compute geometry
     FOdysseyAnimationEditorExtension* animationEditorExtension = listView.Get()->GetAnimationEditorExtension();
     float frameWidth = animationEditorExtension->Timeline()->GetFrameWidth();
     FOdysseyVectorEngine* vectorEngine = mInbetweenerTag->GetOwner()->GetScene()->GetEngine();
+    IOdysseyVectorLayer* layer = vectorEngine->GetLayer();
     double xmin, xmax;
 
     // call from base class
@@ -348,8 +349,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
     {
         uint32 sourceIndex = breakdown->GetSourceDrawingIndex();
         uint32 targetIndex = breakdown->GetTargetDrawingIndex();
-        uint32 targetCellIndex = breakdown->GetTargetAnimationCellIndex();
-        IOdysseyVectorAnimationCell* targetCell = vectorEngine->GetAnimationCell()->GetCellByIndex( targetCellIndex );
+        uint32 targetCellIndex = breakdown->GetTargetCellIndex();
+        IOdysseyVectorCell* targetCell = layer->GetCellByIndex( targetCellIndex );
 
         // targetCell can be NULL if there is no further cell
         if( targetCell )
@@ -359,8 +360,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
             for( uint32 i = sourceIndex + 1; i < targetIndex; i++ )
             {
                 FInbetweenerDrawing* drawing = mInbetweenerTag->GetDrawing( i );
-                int32 inbetweenCellIndex = drawing->GetAnimationCellIndex();
-                IOdysseyVectorAnimationCell* inbetweenCell = vectorEngine->GetAnimationCell()->GetCellByIndex(inbetweenCellIndex);
+                int32 inbetweenCellIndex = drawing->GetCellIndex();
+                IOdysseyVectorCell* inbetweenCell = layer->GetCellByIndex( inbetweenCellIndex );
 
                 if( inbetweenCell )
                 {

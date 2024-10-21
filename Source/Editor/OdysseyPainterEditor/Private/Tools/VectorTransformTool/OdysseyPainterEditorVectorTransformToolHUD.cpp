@@ -5,7 +5,7 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorTagInbetweener.h"
-#include "OdysseyVectorAnimationCell.h"
+#include "OdysseyVectorCell.h"
 
 FOdysseyPainterEditorVectorTransformToolHUD::~FOdysseyPainterEditorVectorTransformToolHUD()
 {
@@ -403,8 +403,8 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
             {
                 FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
                 FOdysseyVectorGroupPaint* inbetweenerTagScene = inbetweenerTag->GetOwner()->GetScene();
-                uint32 frameIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex()
-                                  - inbetweenerTagScene->GetEngine()->GetAnimationCell()->GetIndex();
+                uint32 frameIndex = iScene->GetEngine()->GetCell()->GetIndex()
+                                  - inbetweenerTagScene->GetEngine()->GetCell()->GetIndex();
 
                 for( FInbetweenerBreakdown* breakdown : mSelectedBreakdownList )
                 {

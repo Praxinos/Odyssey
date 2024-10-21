@@ -10,7 +10,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorSharedEnv.h"
-#include "OdysseyVectorAnimationCell.h"
+#include "OdysseyVectorCell.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerMatching.h"
 #include <chrono>
 #define LOCTEXT_NAMESPACE "PainterEditor"

@@ -32,7 +32,7 @@ class FOdysseyVectorSegment;
 class FOdysseyVectorSegmentCubic;
 class FOdysseyVectorPath;
 class FOdysseyVectorSharedEnv;
-class IOdysseyVectorAnimationCell;
+class IOdysseyVectorCell;
 
 UENUM()
 enum class eInbetweenerGridType : uint8
@@ -149,8 +149,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                           , float iNewSpacing
                           , bool iRelative );
 
-        void RedrawAnimationCells();
-        void RedrawAnimationCells( uint32 iInbetweenCount );
+        void RedrawCells();
+        void RedrawCells( uint32 iInbetweenCount );
         //void ResetChart();
         //void ResizeChart();
         //void SetDrawingCount( uint32 iInbetweenCount );
@@ -225,7 +225,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         virtual void ObjectRemoved() override;
         virtual void Added() override;
         virtual void Removed() override;
-        IOdysseyVectorAnimationCell* GetAnimationCell();
+        IOdysseyVectorCell* GetCell();
         void SetInterpolationDirection( eInbetweenerInterpolationDirection iDirection );
         eInbetweenerInterpolationDirection GetInterpolationDirection();
         int32 GetDrawingIndexFromCellIndex( uint32 iCellIndex );
@@ -240,8 +240,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void SetChartColor( const FColor& iChartColor );
         const FColor& GetGridColor();
         void SetGridColor( const FColor& iGridColor );
-        int32 GetSourceAnimationCellIndex();
-        int32 GetTargetAnimationCellIndex();
+        int32 GetSourceCellIndex();
+        int32 GetTargetCellIndex();
         std::vector<uint32>& GetUsedQuadIndexBuffer();
         std::vector<uint32>& GetUsedPointIndexBuffer();
 

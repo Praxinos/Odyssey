@@ -18,5 +18,5 @@ struct ODYSSEYVECTOR_API FInbetweenerDrawing
  
     FInbetweenerDrawing( FOdysseyVectorTagInbetweener* iInbetweenerTag );
     uint32 GetIndex();
-    int32 GetAnimationCellIndex();
+    int32 GetCellIndex();
 };

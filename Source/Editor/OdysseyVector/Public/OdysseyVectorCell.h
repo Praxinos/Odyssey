@@ -9,12 +9,9 @@
 
 class FOdysseyVectorEngine;
 
-class IOdysseyVectorAnimationCell
+class IOdysseyVectorCell
 {
     public:
-        virtual IOdysseyVectorAnimationCell* GetCellByIndex( uint32 iIndex ) = 0;
-        virtual IOdysseyVectorAnimationCell* GetLastCell() = 0;
-        virtual IOdysseyVectorAnimationCell* GetFirstCell() = 0;
         virtual FOdysseyVectorEngine* GetEngine() = 0;
         virtual int32 GetIndex() = 0;
         virtual uint32 GetLength() = 0;

@@ -5,7 +5,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorTagInbetweener.h"
-#include "OdysseyVectorAnimationCell.h"
+#include "OdysseyVectorCell.h"
 #include "InbetweenerTag/InbetweenerPoint.h"
 #include "InbetweenerTag/InbetweenerQuad.h"
 #include "InbetweenerTag/InbetweenerBreakdown.h"
@@ -64,11 +64,11 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
             {
                 FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
                 FOdysseyVectorGroupPaint* inbetweenerTagScene = inbetweenerTag->GetOwner()->GetScene();
-                uint32 currentCellIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex();
+                uint32 currentCellIndex = iScene->GetEngine()->GetCell()->GetIndex();
 
                 for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
                 {
-                    if( breakdown->GetTargetAnimationCellIndex() == currentCellIndex )
+                    if( breakdown->GetTargetCellIndex() == currentCellIndex )
                     {
                         if( mMatchingTool->ShowInbetweens )
                         {

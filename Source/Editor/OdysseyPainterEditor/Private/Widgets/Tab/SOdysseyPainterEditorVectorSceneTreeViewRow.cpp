@@ -6,6 +6,7 @@
 #include "OdysseyStyleSet.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyPainterEditor.h"
 #include "Undo/OdysseyVectorUndoTransferObjects.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
@@ -54,6 +55,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow
     TSharedPtr<SHorizontalBox> tagBox;
     const FSlateBrush* objectIcon = nullptr;
     const FSlateBrush* inbetweenerTagIcon = nullptr;
+    uint32 cellIndex = vectorObject->GetEngine()->GetCell()->GetIndex();
 
     //inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.InbetweenerTag16" );
     inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching16" );
@@ -80,7 +82,10 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow
     mItem = iItem;
 
     mTextBlockWidget = SNew(SInlineEditableTextBlock)
-                       .Text( FText::FromString( mItem.Get()->GetVectorObject()->GetName() ) )
+                       // display cell name only for insensitive objects, i.e objects from another cell
+                       .Text( FText::FromString( iItem->IsSensitive() ? vectorObject->GetName()
+                                                                      : FString::Printf( TEXT("Cell %d / "), cellIndex )
+                                                                      + vectorObject->GetName() ) )
                        .OnVerifyTextChanged( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnVerifyTextChanged )
                        .OnTextCommitted( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged );
 

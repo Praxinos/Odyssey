@@ -19,7 +19,8 @@ class FOdysseyVectorGroup;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorSharedEnv;
 class FOdysseyVectorHandleSegment;
-class IOdysseyVectorAnimationCell;
+class IOdysseyVectorLayer;
+class IOdysseyVectorCell;
 class FOdysseyVectorTagInbetweener;
 class FOdysseyVectorRoot;
 
@@ -100,7 +101,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         /**
          * @brief Constructor
          */
-        FOdysseyVectorEngine( IOdysseyVectorAnimationCell* iAnimationCell
+        FOdysseyVectorEngine( IOdysseyVectorLayer* iLayer
+                            , IOdysseyVectorCell* iCell
                             , FOdysseyVectorRoot* iRoot
                             , uint32 iPreferredWidth
                             , uint32 iPreferredHeight );
@@ -210,9 +212,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
 
         uint32 GetPreferredWidth();
         uint32 GetPreferredHeight();
-
-        //FOdysseyVectorSharedEnv* GetSharedEnv();
-        IOdysseyVectorAnimationCell* GetAnimationCell();
+        IOdysseyVectorLayer* GetLayer();
+        IOdysseyVectorCell* GetCell();
 
         void TraceLine ( int32 iX0
                        , int32 iY0
@@ -377,8 +378,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         uint64 mInvalidationFlags;
         FOdysseyVectorRoot* mRoot;
         FInvalidateDelegate mOnInvalidateDelegate;
-        uint32 mCellIndex;
-        IOdysseyVectorAnimationCell* mAnimationCell;
+        IOdysseyVectorLayer* mLayer;
+        IOdysseyVectorCell* mCell;
         std::list<FOdysseyVectorObject*> mSelectedObjectList;
         BLContextCreateInfo mCreateInfo;
         BLImage* mBLMask;

@@ -142,9 +142,9 @@ FOdysseyAnimationEditorGUI::OnMediaChanged()
             if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
             {
                 FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-                int32 targetCellIndex = inbetweenerTag->GetDrawingBuffer().back().GetAnimationCellIndex();
+                int32 targetCellIndex = inbetweenerTag->GetDrawingBuffer().back().GetCellIndex();
 
-                if( inbetweenerTag->GetAnimationCell()->GetCellByIndex( targetCellIndex ) == nullptr )
+                if( currentVectorLayer->GetCellByIndex( targetCellIndex ) == nullptr )
                 {
                     inbetweenerTagList.push_back( inbetweenerTag );
                 }

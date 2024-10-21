@@ -7,7 +7,7 @@
 #include "OdysseyStyleSet.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "OdysseyVector.h"
-#include "OdysseyVectorAnimationCell.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "HUD/OdysseyVectorHUD.h"
 #include "OdysseyPainterEditor.h"
@@ -164,15 +164,15 @@ SOdysseyPainterEditorVectorSceneTreeView::Update( FOdysseyVectorGroupPaint* iSce
     {
         //if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
         {
-            int32 sceneCellIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex();
+            int32 sceneCellIndex = iScene->GetEngine()->GetCell()->GetIndex();
 
             for( FOdysseyVectorTag* tag : iScene->GetSharedEnv()->GetSharedTagList() )
             {
                 if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
                 {
                     FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-                    int32 sourceCellIndex = inbetweenerTag->GetSourceAnimationCellIndex();
-                    int32 targetCellIndex = inbetweenerTag->GetTargetAnimationCellIndex();
+                    int32 sourceCellIndex = inbetweenerTag->GetSourceCellIndex();
+                    int32 targetCellIndex = inbetweenerTag->GetTargetCellIndex();
 
                     if ((sceneCellIndex > sourceCellIndex) && ( sceneCellIndex < targetCellIndex ) )
                     {

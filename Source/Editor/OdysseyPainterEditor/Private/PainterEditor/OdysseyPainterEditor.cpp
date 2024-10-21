@@ -21,7 +21,7 @@
 #include "Models/OdysseyPainterEditorCommands.h"
 
 #include "OdysseyVector.h"
-#include "OdysseyVectorAnimationCell.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorObject.h"
@@ -1618,7 +1618,7 @@ FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
 
             removedTagArray.push_back( tag );
 
-            inbetweenerTag->RedrawAnimationCells();
+            inbetweenerTag->RedrawCells();
         }
     }
 
@@ -1824,7 +1824,7 @@ FOdysseyPainterEditor::ResetBreakdownSpacingChart( FOdysseyPainterEditor* iEdito
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
     std::list<FOdysseyVectorTag*> selectedTagList;
-    uint32 cellIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex();
+    uint32 cellIndex = iScene->GetEngine()->GetCell()->GetIndex();
 
     iScene->GetSharedEnv()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
                                                      , selectedTagList );

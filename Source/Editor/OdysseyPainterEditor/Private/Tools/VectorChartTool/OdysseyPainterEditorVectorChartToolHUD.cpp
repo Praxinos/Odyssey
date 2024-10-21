@@ -4,7 +4,7 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorAnimationCell.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "Interfaces/IPluginManager.h"
 
@@ -84,7 +84,7 @@ FOdysseyPainterEditorVectorChartToolHUD::GetBreakdown()
 void
 FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdown( FOdysseyVectorGroupPaint* iScene )
 {
-    uint32 cellIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex();
+    uint32 cellIndex = iScene->GetEngine()->GetCell()->GetIndex();
 
     mBreakdown = nullptr;
 
@@ -98,8 +98,8 @@ FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdown( FOdysseyVectorGroupPai
 
                 for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
                 {
-                    uint32 sourceCellIndex = breakdown->GetSourceAnimationCellIndex();
-                    uint32 targetCellIndex = breakdown->GetTargetAnimationCellIndex();
+                    uint32 sourceCellIndex = breakdown->GetSourceCellIndex();
+                    uint32 targetCellIndex = breakdown->GetTargetCellIndex();
 
                     if( ( cellIndex >= sourceCellIndex ) && ( cellIndex <= targetCellIndex ) )
                     {
@@ -180,7 +180,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
                                                                                      inbetween->spacing );
         ::ULIS::FVec2D indicatorPerpendicular = ::ULIS::FVec2D( -indicatorTangent.y, indicatorTangent.x );
         bool hovered = ( inbetween == mChartTool->GetHoveredInbetween() );
-        bool current = ( inbetween->GetAnimationCellIndex() == iRenderedCellIndex );
+        bool current = ( inbetween->GetCellIndex() == iRenderedCellIndex );
 
         if( indicatorPerpendicular.DistanceSquared() )
         {
@@ -289,7 +289,7 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint64 hudFlags = mChartTool->GetEditor()->GetVectorHUDFlags();
-    uint32 cellIndex = iScene->GetEngine()->GetAnimationCell()->GetIndex();
+    uint32 cellIndex = iScene->GetEngine()->GetCell()->GetIndex();
 
     // Draw default
     // -> nothing in object mode.
@@ -312,7 +312,7 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
                       , bgColor
                       , hcColor
                       , mBreakdown
-                      , iScene->GetEngine()->GetAnimationCell()->GetIndex() );
+                      , iScene->GetEngine()->GetCell()->GetIndex() );
         }
     }
 

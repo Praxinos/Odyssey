@@ -6,7 +6,7 @@
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "OdysseyAnimationImageRenderingAbility.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
-#include "OdysseyVectorAnimationCell.h"
+#include "OdysseyVectorCell.h"
 
 class FOdysseyVectorBlock;
 class FOdysseyMediaVector;
@@ -15,7 +15,7 @@ class FOdysseyVectorGroupPaint;
 class FOdysseyVectorRoot;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageVector
-    : public FOdysseyAnimationCell, public IOdysseyVectorAnimationCell
+    : public FOdysseyAnimationCell, public IOdysseyVectorCell
 {    
 public:
     static TSharedRef<FOdysseyAnimationCellImageVector> Create(UOdysseyAnimationLayerImageVector* iLayer, int iLength, int iWidth, int iHeight);
@@ -63,9 +63,6 @@ public:
 
 public:
     // Implements Interface IOdysseyVectorAnimationCell
-    virtual IOdysseyVectorAnimationCell* GetCellByIndex( uint32 iIndex ) override;
-    virtual IOdysseyVectorAnimationCell* GetFirstCell() override;
-    virtual IOdysseyVectorAnimationCell* GetLastCell() override;
     virtual FOdysseyVectorEngine* GetEngine() override;
     virtual int32 GetIndex() override;
     virtual uint32 GetLength() override;

@@ -530,4 +530,38 @@ UOdysseyAnimationLayerImageVector::GetSharedEnv()
     return &mSharedEnv;
 }
 
+// Implements Interface IOdysseyVectorAnimationCell::GetCellByIndex
+IOdysseyVectorCell*
+UOdysseyAnimationLayerImageVector::GetCellByIndex( uint32 iIndex )
+{
+    uint32 cellCount = GetCellsContainer()->GetCells().Num();
+
+    if( ( iIndex >= 0 ) && ( iIndex < cellCount ) )
+    {
+        FOdysseyAnimationCell* cell = GetCellsContainer()->GetCells()[iIndex].Get();
+
+        return static_cast<FOdysseyAnimationCellImageVector*>(cell);
+    }
+
+    return nullptr;
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetLastCell
+IOdysseyVectorCell*
+UOdysseyAnimationLayerImageVector::GetLastCell()
+{
+    FOdysseyAnimationCell* lastCell = GetCellsContainer()->GetCells().Last().Get();
+
+    return static_cast<FOdysseyAnimationCellImageVector*>(lastCell);
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetLastCell
+IOdysseyVectorCell*
+UOdysseyAnimationLayerImageVector::GetFirstCell()
+{
+    FOdysseyAnimationCell* firstCell = GetCellsContainer()->GetCells()[0].Get();
+
+    return static_cast<FOdysseyAnimationCellImageVector*>(firstCell);
+}
+
 #undef LOCTEXT_NAMESPACE

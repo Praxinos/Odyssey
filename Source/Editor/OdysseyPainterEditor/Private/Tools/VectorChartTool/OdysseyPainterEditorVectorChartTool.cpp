@@ -293,7 +293,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseUpVector( FOdysseyVectorGroupPaint*
             FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->chart->GetBreakdown()->GetInbetweenerTag();
 
             // we need to manually redraw because no object is modified
-            inbetweenerTag->RedrawAnimationCells();
+            inbetweenerTag->RedrawCells();
 
              // update ALL impacted scenes
             iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );

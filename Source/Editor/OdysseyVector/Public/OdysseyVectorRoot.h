@@ -9,7 +9,8 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorEngine.h"
 
-class IOdysseyVectorAnimationCell;
+class IOdysseyVectorLayer;
+class IOdysseyVectorCell;
 class FOdysseyVectorGroupPaint;
 
 //#include "OdysseyVectorRoot.generated.h"
@@ -32,7 +33,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorRoot : public FOdysseyVectorObject
         /**
          * @brief constructor
          */
-        FOdysseyVectorRoot( IOdysseyVectorAnimationCell* iAnimationCell
+        FOdysseyVectorRoot( IOdysseyVectorLayer* iLayer
+                          , IOdysseyVectorCell* iCell
                           , FOdysseyVectorGroupPaint* iScene
                           , uint32 iPreferredWidth
                           , uint32 iPreferredHeight );

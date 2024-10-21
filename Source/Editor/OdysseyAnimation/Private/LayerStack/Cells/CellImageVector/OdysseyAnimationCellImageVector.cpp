@@ -84,7 +84,8 @@ FOdysseyAnimationCellImageVector::Init(int iWidth, int iHeight)
     mWidth = iWidth;
     mHeight = iHeight;
 
-    mRoot = new FOdysseyVectorRoot( this
+    mRoot = new FOdysseyVectorRoot( static_cast<UOdysseyAnimationLayerImageVector*>(mLayer)
+                                  , this
                                   , new FOdysseyVectorGroupPaint( "Scene" )
                                   , (double)iWidth
                                   , (double)iHeight );
@@ -277,40 +278,6 @@ void
 FOdysseyAnimationCellImageVector::OnVectorBlockInvalidated( const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive)
 {
     ImageRenderingChanged( iRects, iIsInteractive);
-}
-
-// Implements Interface IOdysseyVectorAnimationCell::GetCellByIndex
-IOdysseyVectorAnimationCell*
-FOdysseyAnimationCellImageVector::GetCellByIndex( uint32 iIndex )
-{
-    uint32 cellCount = GetLayer()->GetCellsContainer()->GetCells().Num();
-
-    if( ( iIndex >= 0 ) && ( iIndex < cellCount ) )
-    {
-        FOdysseyAnimationCell* cell = GetLayer()->GetCellsContainer()->GetCells()[iIndex].Get();
-
-        return static_cast<FOdysseyAnimationCellImageVector*>(cell);
-    }
-
-    return nullptr;
-}
-
-// Implements Interface IOdysseyVectorAnimationCell::GetLastCell
-IOdysseyVectorAnimationCell*
-FOdysseyAnimationCellImageVector::GetLastCell()
-{
-    FOdysseyAnimationCell* lastCell = GetLayer()->GetCellsContainer()->GetCells().Last().Get();
-
-    return static_cast<FOdysseyAnimationCellImageVector*>(lastCell);
-}
-
-// Implements Interface IOdysseyVectorAnimationCell::GetLastCell
-IOdysseyVectorAnimationCell*
-FOdysseyAnimationCellImageVector::GetFirstCell()
-{
-    FOdysseyAnimationCell* firstCell = GetLayer()->GetCellsContainer()->GetCells()[0].Get();
-
-    return static_cast<FOdysseyAnimationCellImageVector*>(firstCell);
 }
 
 // Implements Interface IOdysseyVectorAnimationCell::GetEngine

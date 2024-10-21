@@ -62,6 +62,7 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
     Height = iHeight;
 
     mRoot = new FOdysseyVectorRoot( nullptr
+                                  , nullptr
                                   , new FOdysseyVectorGroupPaint( "Scene" )
                                   , (double)iWidth
                                   , (double)iHeight );
