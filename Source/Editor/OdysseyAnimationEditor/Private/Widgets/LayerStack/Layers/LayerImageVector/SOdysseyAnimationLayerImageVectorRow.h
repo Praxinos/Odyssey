@@ -37,7 +37,6 @@ public:
 private:
     virtual TSharedRef<SWidget> GenerateHeaderWidget() override;
     virtual TSharedRef<SWidget> GenerateOptionsWidget() override;
-    virtual TSharedRef<SWidget> GenerateTimelineWidget() override;
     void OnLightTableCheckStateChanged(ECheckBoxState iState);
     void OnIsColoredCheckStateChanged( ECheckBoxState iState );
     void OnIsWireframeCheckStateChanged( ECheckBoxState iState );

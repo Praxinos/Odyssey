@@ -29,12 +29,6 @@ public:
         class UOdysseyAnimationLayer* iLayer
     );
 
-public:
-    virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
-
-protected:
-    virtual TSharedRef<SWidget> GenerateTimelineWidget();
-
 protected:
 	TAttribute<int> mCurrentFrame;
 	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;

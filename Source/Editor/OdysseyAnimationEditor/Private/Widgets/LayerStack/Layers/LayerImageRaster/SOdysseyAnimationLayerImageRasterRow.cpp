@@ -47,8 +47,6 @@ void SOdysseyAnimationLayerImageRasterRow::Construct(
         iOwnerTableView,
 		iAnimationLayerImageRaster
     );
-
-	SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -161,18 +159,6 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
         ];
 }
 
-TSharedRef<SWidget>
-SOdysseyAnimationLayerImageRasterRow::GenerateTimelineWidget()
-{
-    return SNew(SOdysseyAnimationLayerImageRasterTimeline, mAnimationLayerImageRaster)
-        .DisplayOptions(this, &SOdysseyAnimationLayerImageRasterRow::DisplayOptions)
-		.TimelinePosition(mTimelinePosition)
-		.TimelineCellSelection(mTimelineCellSelection)
-		.OnActivateOutOfPegs(mOnActivateOutOfPegs)
-		.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
-		.OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked);
-}
-
 void
 SOdysseyAnimationLayerImageRasterRow::OnLightTableCheckStateChanged(ECheckBoxState iState)
 {
@@ -247,7 +233,7 @@ SOdysseyAnimationLayerImageRasterRow::OnBlendModeComboBoxChanged(int32 iValue, E
 EVisibility
 SOdysseyAnimationLayerImageRasterRow::GetCollapsedOpacityVisibility() const
 {
-    return DisplayOptions() ? EVisibility::Collapsed : EVisibility::Visible;
+    return mAnimationLayerImageRaster->DisplayOptions ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 EVisibility

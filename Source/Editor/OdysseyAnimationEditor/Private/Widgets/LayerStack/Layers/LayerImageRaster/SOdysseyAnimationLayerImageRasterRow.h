@@ -37,7 +37,6 @@ public:
 private:
     virtual TSharedRef<SWidget> GenerateHeaderWidget() override;
     virtual TSharedRef<SWidget> GenerateOptionsWidget() override;
-    virtual TSharedRef<SWidget> GenerateTimelineWidget() override;
     void OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState);
     ECheckBoxState GetIsAlphaLockedIsChecked() const;
     void OnLightTableCheckStateChanged(ECheckBoxState iState);

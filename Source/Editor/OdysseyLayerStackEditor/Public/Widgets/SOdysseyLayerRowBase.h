@@ -1,0 +1,45 @@
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#pragma once
+
+#include "OdysseyLayer.h"
+
+#include "CoreMinimal.h"
+#include "Widgets/Views/STableRow.h"
+
+class SOdysseyLayerStackTreeView;
+
+/**
+ * Implements a layer row widget
+ */
+class ODYSSEYLAYERSTACKEDITOR_API SOdysseyLayerRowBase
+    : public SMultiColumnTableRow<UOdysseyLayer*>
+{
+public:
+    SLATE_BEGIN_ARGS(SOdysseyLayerRowBase)
+        {}
+    SLATE_END_ARGS()
+    
+public:
+    // Construction / Destruction
+    void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, UOdysseyLayer* iLayer);
+
+public:
+    //Getters
+    UOdysseyLayer* GetLayer() const;
+    TSharedPtr<SOdysseyLayerStackTreeView> GetTreeView() const;
+
+protected:
+    //SMultiColumnTableRow overrides
+	virtual const FSlateBrush* GetBorder() const override;
+    
+    TOptional<EItemDropZone> OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iDropZone, UOdysseyLayer* iLayer);
+    FReply OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iDropZone, UOdysseyLayer* iLayer);
+	virtual FReply OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<SOdysseyLayerStackTreeView> iTreeView);
+	EItemDropZone ComputeItemDropZoneForLeaf(FVector2D iLocalPointerPos, FVector2D iLocalSize, bool iCanHaveChildren, bool iIsExpanded);
+
+private:
+    UOdysseyLayer* mLayer = nullptr;
+    TWeakPtr<SOdysseyLayerStackTreeView> mTreeView;
+};

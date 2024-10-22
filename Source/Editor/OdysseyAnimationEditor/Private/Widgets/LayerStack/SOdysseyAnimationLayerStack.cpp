@@ -8,6 +8,7 @@
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStackTreeView.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineTreeView.h"
 #include "OdysseyAnimationEditorTimelinePosition.h"
 #include "OdysseyAnimationEditorTimelineCellSelection.h"
 #include "Widgets/Input/SSegmentedControl.h"
@@ -75,7 +76,7 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
 	if (!animation)
 		return;
 
-	UOdysseyLayerStack* layerStack = animation->GetLayerStack();
+	UOdysseyAnimationLayerStack* layerStack = animation->GetLayerStack();
     
     TSharedPtr<SWidget> widget =
     SNew(SVerticalBox)
@@ -139,31 +140,27 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
     +SVerticalBox::Slot()
     .FillHeight(1.0f)
     [
-        SAssignNew(mTreeView, SOdysseyAnimationLayerStackTreeView)
-        .LayerStack(layerStack)
-		.TimelineCellSelection(mTimelineCellSelection.Get())
-        .OnGenerateRow(this, &SOdysseyAnimationLayerStack::OnGenerateRow)
-        .HeaderManualWidth(200.f)
-        .AdditionalColumns(
-            {
-                SHeaderRow::Column("Timeline")
-                .DefaultLabel(FText())
-                .VAlignCell(VAlign_Fill)
-                .HAlignCell(HAlign_Fill)
-                [
-                    SAssignNew(mTimelineControl, SOdysseyAnimationTimelineControl)
-					.Animation(mAnimation.Get())
-					.CurrentFrame(this, &SOdysseyAnimationLayerStack::GetCurrentFrame)
-					.TimelinePosition(mTimelinePosition.Get())
-                    [
-                        SNew(SOdysseyAnimationTimelineHeader)
-						.Animation(mAnimation.Get())
-						.Player(mPlayer.Get())
-						.TimelinePosition(mTimelinePosition.Get())
-                    ]
-                ]
-            }
-        )
+		SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot()
+		[
+			SAssignNew(mTreeView, SOdysseyAnimationLayerStackTreeView)
+			.LayerStack(layerStack)
+			.TimelineCellSelection(mTimelineCellSelection.Get())
+			.OnGenerateRow(this, &SOdysseyAnimationLayerStack::OnGenerateRow)
+		]
+		+ SHorizontalBox::Slot()
+		.AutoWidth()
+		[
+			SNullWidget::NullWidget //TODO: Add a drag bar
+		]
+		+ SHorizontalBox::Slot()
+		[
+			SNew(SOdysseyAnimationTimelineTreeView)
+			.LayerStack(layerStack)
+			.Player(mPlayer.Get())
+			.TimelineCellSelection(mTimelineCellSelection.Get())
+			.TimelinePosition(mTimelinePosition.Get())
+		]
     ]
     +SVerticalBox::Slot()
     .AutoHeight()
@@ -224,10 +221,7 @@ SOdysseyAnimationLayerStack::OnGenerateRow(UOdysseyLayer* iLayer, const TSharedR
 			.OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked);
     }
 
-    return SNew(SOdysseyAnimationLayerRow, GetTreeView().ToSharedRef(), Cast<UOdysseyAnimationLayer>(iLayer))
-		.CurrentFrame(this, &SOdysseyAnimationLayerStack::GetCurrentFrame)
-		.TimelinePosition(mTimelinePosition.Get())
-		.TimelineCellSelection(mTimelineCellSelection.Get()); //Default widget
+    return SNew(STableRow<UOdysseyLayer*>, iOwnerTable);
 }
 
 void

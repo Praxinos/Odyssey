@@ -32,19 +32,26 @@ SOdysseyAnimationLayerImageTimeline::SOdysseyAnimationLayerImageTimeline()
 
 void
 SOdysseyAnimationLayerImageTimeline::Construct(
-    const FArguments& iArgs, 
+    const FArguments& iArgs,
+	const TSharedRef<SOdysseyAnimationLayerStackTreeView>& iOwnerTableView,
     UOdysseyAnimationLayer* iLayer
 )
-{
+{	
     ensure(iLayer);
     mLayer = iLayer;
-    mDisplayOptions = iArgs._DisplayOptions;
 	mTimelinePosition = iArgs._TimelinePosition;
 	mTimelineCellSelection = iArgs._TimelineCellSelection;
-    
-    ChildSlot
-    [
-        SNew(SVerticalBox)
+	mOnActivateOutOfPegs = iArgs._OnActivateOutOfPegs;
+	mOnInactivateOutOfPegs = iArgs._OnInactivateOutOfPegs;
+	mOnIsOutOfPegsChecked = iArgs._OnIsOutOfPegsChecked;
+
+    SOdysseyLayerRowBase::Construct(SOdysseyLayerRowBase::FArguments(), iOwnerTableView, iLayer);
+}
+
+TSharedRef<SWidget>
+SOdysseyAnimationLayerImageTimeline::GenerateWidgetForColumn( const FName& InColumnName )
+{   
+    return SNew(SVerticalBox)
         + SVerticalBox::Slot()
         [
             SNew(SOdysseyAnimationCells, mLayer)
@@ -60,11 +67,10 @@ SOdysseyAnimationLayerImageTimeline::Construct(
             SNew(SOdysseyAnimationTimelineLightTable, mLayer)
 			.TimelinePosition(mTimelinePosition)
             .Visibility(this, &SOdysseyAnimationLayerImageTimeline::GetLightTableVisibility)
-			.OnActivateOutOfPegs(iArgs._OnActivateOutOfPegs)
-			.OnInactivateOutOfPegs(iArgs._OnInactivateOutOfPegs)
-			.OnIsOutOfPegsChecked(iArgs._OnIsOutOfPegsChecked)
-        ]
-    ];
+			.OnActivateOutOfPegs(mOnActivateOutOfPegs)
+			.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
+			.OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked)
+        ];
 }
 
 FReply
@@ -497,19 +503,16 @@ SOdysseyAnimationLayerImageTimeline::MapActions(TSharedPtr<FUICommandList> iComm
 EVisibility
 SOdysseyAnimationLayerImageTimeline::GetLightTableVisibility() const
 {
-    return mLayer->Lighttable.bIsActivated && mDisplayOptions.Get() ? EVisibility::Visible : EVisibility::Collapsed;
-}
-
-bool
-SOdysseyAnimationLayerImageTimeline::DisplayOptions() const
-{
-    return mDisplayOptions.Get();
+    return mLayer->Lighttable.bIsActivated && mLayer->DisplayOptions ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 bool
 SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles() const
 {
-    return mDisplayOptions.Get();
+	if (mLayer->IsLockedRecursively())
+        return false;
+
+    return mLayer->DisplayOptions;;
 }
 
 FReply

@@ -25,33 +25,3 @@ SOdysseyAnimationLayerRow::Construct(
 		iLayer
     );
 }
-
-TSharedRef<SWidget>
-SOdysseyAnimationLayerRow::GenerateWidgetForColumn( const FName& InColumnName )
-{
-    if (InColumnName == "Timeline")
-    {
-		UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(GetLayer());
-
-        return 
-            SNew(SBorder)
-            .Padding(FMargin(4.f, 0.f, 0.f, 0.f)) //Patch
-            [
-                SNew(SOdysseyAnimationTimelineControl)
-				.Animation(layer->GetAnimation())
-				.CurrentFrame(mCurrentFrame)
-				.TimelinePosition(mTimelinePosition)
-                .Clipping(EWidgetClipping::ClipToBoundsAlways)
-                [
-                    GenerateTimelineWidget()
-                ]
-            ];
-    }
-    return SOdysseyLayerRow::GenerateWidgetForColumn(InColumnName);
-}
-
-TSharedRef<SWidget>
-SOdysseyAnimationLayerRow::GenerateTimelineWidget()
-{
-    return SNullWidget::NullWidget;
-}

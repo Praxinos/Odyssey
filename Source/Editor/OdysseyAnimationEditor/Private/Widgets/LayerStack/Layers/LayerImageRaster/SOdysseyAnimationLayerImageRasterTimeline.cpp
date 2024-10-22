@@ -22,46 +22,23 @@ SOdysseyAnimationLayerImageRasterTimeline::SOdysseyAnimationLayerImageRasterTime
 {
 }
 
-void
-SOdysseyAnimationLayerImageRasterTimeline::Construct(
-    const FArguments& InArgs,
-    UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
-)
-{
-	mTimelinePosition = InArgs._TimelinePosition;
-	mTimelineCellSelection = InArgs._TimelineCellSelection;
-	
-    ensure(iAnimationLayerImageRaster);
-    SOdysseyAnimationLayerImageTimeline::FArguments args;
-    args.DisplayOptions(InArgs._DisplayOptions)
-		.TimelinePosition(mTimelinePosition)
-		.TimelineCellSelection(mTimelineCellSelection)
-		.OnActivateOutOfPegs(InArgs._OnActivateOutOfPegs)
-		.OnInactivateOutOfPegs(InArgs._OnInactivateOutOfPegs)
-		.OnIsOutOfPegsChecked(InArgs._OnIsOutOfPegsChecked);
-    SOdysseyAnimationLayerImageTimeline::Construct(args, iAnimationLayerImageRaster);
-}
-
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageRasterTimeline::OnGenerateCellWidget(UOdysseyAnimationCell* iCell)
 {
     if (!iCell)
 	{
         return SNew(SOdysseyAnimationCellImageRaster, Cast<UOdysseyAnimationCellImageRaster>(iCell))
-			.Clipping(EWidgetClipping::ClipToBoundsAlways)
-			.ShowContent(this, &SOdysseyAnimationLayerImageRasterTimeline::GetShowCellContent); //DefaultCell, this can be called when creating cells, because the celle does not really exist yet
+			.Clipping(EWidgetClipping::ClipToBoundsAlways);
 	}
     if (iCell->IsA<UOdysseyAnimationCellImageRaster>())
 	{
         return SNew(SOdysseyAnimationCellImageRaster, Cast<UOdysseyAnimationCellImageRaster>(iCell))
-			.Clipping(EWidgetClipping::ClipToBoundsAlways)
-			.ShowContent(this, &SOdysseyAnimationLayerImageRasterTimeline::GetShowCellContent);
+			.Clipping(EWidgetClipping::ClipToBoundsAlways);
 	}
     else if (iCell->IsA<UOdysseyAnimationCellImageStagger>())
 	{
         return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell))
-			.TimelinePosition(mTimelinePosition)
-            .ShowContent(this, &SOdysseyAnimationLayerImageRasterTimeline::GetShowCellContent);
+			.TimelinePosition(mTimelinePosition);
 	}
 
     return SNullWidget::NullWidget;
@@ -80,15 +57,6 @@ SOdysseyAnimationLayerImageRasterTimeline::OnPreviewMouseButtonDown(const FGeome
     FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), mLayer);
 
     return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
-}
-
-bool
-SOdysseyAnimationLayerImageRasterTimeline::GetShowCellContent() const
-{
-    if (mLayer->IsLockedRecursively())
-        return false;
-
-    return DisplayOptions();
 }
 
 TSharedPtr<FExtender>

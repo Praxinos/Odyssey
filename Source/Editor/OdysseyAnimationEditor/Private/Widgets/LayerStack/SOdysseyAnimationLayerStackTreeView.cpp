@@ -20,17 +20,14 @@ SOdysseyAnimationLayerStackTreeView::Construct(const FArguments& InArgs)
 {
 	mTimelineCellSelection = InArgs._TimelineCellSelection;
 
+	mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(InArgs._LayerStack, mTimelineCellSelection);
+
     SOdysseyLayerStackTreeView::Construct(
 		SOdysseyLayerStackTreeView::FArguments()
-			.LayerStack(InArgs._LayerStack)
-			.AdditionalColumns(InArgs._AdditionalColumns)
-			.HeaderFillWidth(InArgs._HeaderFillWidth)
-			.HeaderFixedWidth(InArgs._HeaderFixedWidth)
-			.HeaderManualWidth(InArgs._HeaderManualWidth)
-			.HeaderFillSized(InArgs._HeaderFillSized)
-			.OnGenerateRow(InArgs._OnGenerateRow)
+		.LayerStack(InArgs._LayerStack)
+        .OnGenerateRow(InArgs._OnGenerateRow)
+		.Columns(InArgs._Columns)
 	);
-    mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(InArgs._LayerStack, mTimelineCellSelection);
 }
 
 FReply
@@ -45,14 +42,18 @@ SOdysseyAnimationLayerStackTreeView::OnKeyDown( const FGeometry& iGeometry, cons
 void
 SOdysseyAnimationLayerStackTreeView::Private_SignalSelectionChanged(ESelectInfo::Type SelectInfo)
 {
-    mTimelineCellSelection->SetSelectedCells({});
+	if (mTimelineCellSelection)
+    	mTimelineCellSelection->SetSelectedCells({});
+
     SOdysseyLayerStackTreeView::Private_SignalSelectionChanged(SelectInfo);
 }
 
 FReply
 SOdysseyAnimationLayerStackTreeView::OnFocusReceived(const FGeometry& MyGeometry, const FFocusEvent& InFocusEvent)
 {
-    mTimelineCellSelection->SetSelectedCells({});
+	if (mTimelineCellSelection)
+    	mTimelineCellSelection->SetSelectedCells({});
+
     return SOdysseyLayerStackTreeView::OnFocusReceived(MyGeometry, InFocusEvent);
 }
 

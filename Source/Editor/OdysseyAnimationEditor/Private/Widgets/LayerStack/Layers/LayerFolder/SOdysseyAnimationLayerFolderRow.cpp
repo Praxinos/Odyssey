@@ -39,8 +39,6 @@ void SOdysseyAnimationLayerFolderRow::Construct(
         iOwnerTableView,
 		iAnimationLayerFolder
     );
-
-	SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -160,7 +158,7 @@ SOdysseyAnimationLayerFolderRow::OnOpacityEndSliderMovement(int iValue)
 EVisibility
 SOdysseyAnimationLayerFolderRow::GetCollapsedOpacityVisibility() const
 {
-    return DisplayOptions() ? EVisibility::Collapsed : EVisibility::Visible;
+    return mAnimationLayerFolder->DisplayOptions ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -151,7 +151,7 @@ SOdysseyTextureLayerFolderRow::OnOpacityEndSliderMovement(int iValue)
 EVisibility
 SOdysseyTextureLayerFolderRow::GetCollapsedOpacityVisibility() const
 {
-    return DisplayOptions() ? EVisibility::Collapsed : EVisibility::Visible;
+    return mTextureLayerFolder->DisplayOptions ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 #undef LOCTEXT_NAMESPACE

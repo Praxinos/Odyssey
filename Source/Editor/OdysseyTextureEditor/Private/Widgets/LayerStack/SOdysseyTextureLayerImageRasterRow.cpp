@@ -185,7 +185,7 @@ SOdysseyTextureLayerImageRasterRow::OnBlendModeComboBoxChanged(int32 iValue, ESe
 EVisibility
 SOdysseyTextureLayerImageRasterRow::GetCollapsedOpacityVisibility() const
 {
-    return DisplayOptions() ? EVisibility::Collapsed : EVisibility::Visible;
+    return mTextureLayerImageRaster->DisplayOptions ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 #undef LOCTEXT_NAMESPACE

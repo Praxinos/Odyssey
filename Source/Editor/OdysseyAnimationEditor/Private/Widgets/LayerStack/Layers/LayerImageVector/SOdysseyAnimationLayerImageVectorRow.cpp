@@ -171,18 +171,6 @@ SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
         ];
 }
 
-TSharedRef<SWidget>
-SOdysseyAnimationLayerImageVectorRow::GenerateTimelineWidget()
-{
-    return SNew(SOdysseyAnimationLayerImageVectorTimeline, mAnimationLayerImageVector)
-        .DisplayOptions(this, &SOdysseyAnimationLayerImageVectorRow::DisplayOptions)
-		.TimelinePosition(mTimelinePosition)
-		.TimelineCellSelection(mTimelineCellSelection)
-		.OnActivateOutOfPegs(mOnActivateOutOfPegs)
-		.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
-		.OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked);;
-}
-
 void
 SOdysseyAnimationLayerImageVectorRow::OnIsWireframeCheckStateChanged( ECheckBoxState iState )
 {
@@ -277,7 +265,7 @@ SOdysseyAnimationLayerImageVectorRow::GetLightTableVisibility() const
 EVisibility
 SOdysseyAnimationLayerImageVectorRow::GetCollapsedOpacityVisibility() const
 {
-    return DisplayOptions() ? EVisibility::Collapsed : EVisibility::Visible;
+    return mAnimationLayerImageVector->DisplayOptions ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 #undef LOCTEXT_NAMESPACE

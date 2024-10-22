@@ -10,12 +10,13 @@
 class UOdysseyAnimationLayer;
 class FOdysseyAnimationTimelineCellsShortcuts;
 class FOdysseyAnimationTimelineCellImageStaggerShortcuts;
+class SOdysseyAnimationLayerStackTreeView;
 
 /**
  * Implements a layer row widget
  */
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageTimeline
-    : public SCompoundWidget
+    : public SOdysseyLayerRowBase
 {
 public:
     // Construction / Destruction
@@ -23,9 +24,7 @@ public:
     SOdysseyAnimationLayerImageTimeline();
 
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageTimeline)
-        : _DisplayOptions(false)
         {}
-        SLATE_ATTRIBUTE(bool, DisplayOptions)
 		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
 		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
 		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
@@ -33,11 +32,15 @@ public:
 		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
     SLATE_END_ARGS()
 
-protected:
+public:
     void Construct(
         const FArguments& iArgs,
+		const TSharedRef<SOdysseyAnimationLayerStackTreeView>& iOwnerTableView,
         UOdysseyAnimationLayer* iLayer
     );
+
+protected:
+	virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
 
 public:
     virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
@@ -89,9 +92,13 @@ private:
 
 protected:
     UOdysseyAnimationLayer* mLayer;
-	TSharedPtr<FOdysseyAnimationTimelineTool> mTool;
 	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
 	TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> mTimelineCellSelection;
+	SOdysseyAnimationTimelineLightTableKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
+	FSimpleDelegate mOnInactivateOutOfPegs;
+	SOdysseyAnimationTimelineLightTableKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
+
+	TSharedPtr<FOdysseyAnimationTimelineTool> mTool;
 
     enum eDragState
     {

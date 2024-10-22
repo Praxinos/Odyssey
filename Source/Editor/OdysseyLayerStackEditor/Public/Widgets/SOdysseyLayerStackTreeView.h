@@ -22,18 +22,9 @@ class ODYSSEYLAYERSTACKEDITOR_API SOdysseyLayerStackTreeView
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyLayerStackTreeView)
-        : _HeaderFillWidth( 1.0f )
         {}
         SLATE_ARGUMENT( UOdysseyLayerStack*, LayerStack )
-        SLATE_ARGUMENT( TArray<SHeaderRow::FColumn::FArguments>, AdditionalColumns )
-        /** Set the HeaderColumn Size Mode to Fill. It's a fraction between 0 and 1 */
-        SLATE_ATTRIBUTE( float, HeaderFillWidth )
-        /** Set the HeaderColumn Size Mode to Fixed. */
-        SLATE_ARGUMENT( TOptional< float >, HeaderFixedWidth )
-        /** Set the HeaderColumn Size Mode to Manual. */
-        SLATE_ATTRIBUTE( float, HeaderManualWidth )
-        /** Set the HeaderColumn Size Mode to Fill Sized. */
-        SLATE_ARGUMENT(TOptional< float >, HeaderFillSized)
+        SLATE_ARGUMENT( TOptional<TArray<SHeaderRow::FColumn::FArguments>>, Columns )
         SLATE_EVENT( FOnGenerateRow, OnGenerateRow )
     SLATE_END_ARGS()
 
