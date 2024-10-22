@@ -24,13 +24,13 @@ FOdysseyAnimationComponentTrackEditorSection::FOdysseyAnimationComponentTrackEdi
 float
 FOdysseyAnimationComponentTrackEditorSection::GetLayerHeight(UOdysseyLayer* iLayer) const
 {
-	float height = 0.f;
+	float height = 0.f; //line padding
 
 	TArray<FName> rows = iLayer->GetRows();
 	for (const FName& row : rows)
 	{
 		height += iLayer->GetRowHeight(row).Get();
-		height += 1.f; //Padding between each line
+		height += 1.f; //Padding between each subrow
 	}
 
 	if (iLayer->DisplayChildren)
@@ -58,14 +58,14 @@ FOdysseyAnimationComponentTrackEditorSection::GetSectionHeight( const UE::Sequen
 		
 	UOdysseyAnimationLayerStack* layerStack = animation->GetLayerStack();
 	TArray<UOdysseyLayer*> layers = layerStack->GetRootLayers();
-	int layersHeight = 2.f; //Initial treeview padding
+	int layersHeight = 0.f; //Initial treeview padding
 	for (UOdysseyLayer* layer : layers)
 	{
 		layersHeight += GetLayerHeight(layer);
 	}
 
 	return 25.f //Add Button and Timeline tools row
-		+ 20.f //headerRow
+		+ 22.f //headerRow
 		+ layersHeight;
 }
 
