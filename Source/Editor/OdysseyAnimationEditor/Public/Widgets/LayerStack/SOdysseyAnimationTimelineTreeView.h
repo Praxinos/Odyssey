@@ -23,7 +23,8 @@ public:
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineTreeView)
-		: _HeaderHeight(25)
+		: _Player(nullptr)
+		, _HeaderHeight(25)
 		, _ExternalScrollbar(nullptr)
         {}
         SLATE_ARGUMENT( UOdysseyAnimationLayerStack*, LayerStack )
