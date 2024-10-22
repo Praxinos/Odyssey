@@ -17,7 +17,7 @@ enum class EOdysseyAnimationComponentMode
 /**
  * A component containing an animation to attach to an actor
  */
-UCLASS(meta=(PrioritizeCategories="Actions"))
+UCLASS(Blueprintable, ClassGroup=(Animation), editinlinenew, meta=(BlueprintSpawnableComponent, PrioritizeCategories="Actions"))
 class ODYSSEYANIMATION_API UOdysseyAnimationComponent : public UStaticMeshComponent
 {
 	GENERATED_UCLASS_BODY()
@@ -35,6 +35,7 @@ public:
 public:
 	virtual void PostInitProperties() override;
 	virtual void PostLoad() override;
+	virtual void PostDuplicate(bool bDuplicateForPIE) override;
 
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;

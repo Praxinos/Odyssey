@@ -58,17 +58,6 @@ UOdysseyAnimationComponent::Stop()
 UOdysseyAnimationComponent::UOdysseyAnimationComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	DefaultPlayer = CreateDefaultSubobject<UOdysseyAnimationPlayer>(TEXT("DefaultPlayer"));
-}
-
-void
-UOdysseyAnimationComponent::PostInitProperties()
-{
-	Super::PostInitProperties();
-
-	if (HasAnyFlags(RF_ClassDefaultObject))
-        return;
-
 	SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
 	Mobility = EComponentMobility::Movable;
 	SetGenerateOverlapEvents(false);
@@ -87,6 +76,17 @@ UOdysseyAnimationComponent::PostInitProperties()
 	UMaterialInstanceConstant* materialInstance = CreateDefaultSubobject<UMaterialInstanceConstant>(TEXT("DefaultAnimationMaterialInstance"));
 	materialInstance->SetParentEditorOnly(material);
 	SetMaterial(0, materialInstance);
+
+	DefaultPlayer = CreateDefaultSubobject<UOdysseyAnimationPlayer>(TEXT("DefaultPlayer"));
+}
+
+void
+UOdysseyAnimationComponent::PostInitProperties()
+{
+	Super::PostInitProperties();
+
+	if (HasAnyFlags(RF_ClassDefaultObject))
+        return;
 
 	DefaultPlayer->OnTextureChanged().AddUObject(this, &UOdysseyAnimationComponent::OnDefaultPlayerTextureChanged);
 }
@@ -202,18 +202,29 @@ UOdysseyAnimationComponent::PostTransacted(const FTransactionObjectEvent& iTrans
 }
 
 void
+UOdysseyAnimationComponent::PostDuplicate(bool bDuplicateForPIE)
+{
+	Super::PostDuplicate(bDuplicateForPIE);
+
+	DefaultPlayer->OnTextureChanged().AddUObject(this, &UOdysseyAnimationComponent::OnDefaultPlayerTextureChanged);
+	
+	RefreshMaterialTexture();
+}
+
+void
 UOdysseyAnimationComponent::RefreshMaterialTexture()
 {
 	UMaterialInstanceConstant* materialInstance = Cast<UMaterialInstanceConstant>(GetMaterial(0));
 	if (!materialInstance)
 		return;
 
-	if (Mode == EOdysseyAnimationComponentMode::Player)
-	{
-		materialInstance->SetTextureParameterValueEditorOnly(FMaterialParameterInfo("AnimationTexture"), Player->GetTexture());
-	}
-	else
-	{
-		materialInstance->SetTextureParameterValueEditorOnly(FMaterialParameterInfo("AnimationTexture"), DefaultPlayer->GetTexture());
-	}
+	UOdysseyAnimationPlayer* player = GetActivePlayer();
+	UTexture* texture = player->GetTexture();
+	
+	materialInstance->SetTextureParameterValueEditorOnly(FMaterialParameterInfo("AnimationTexture"), texture);
+	materialInstance->PostEditChange();
+
+	FMaterialUpdateContext UpdateContext(FMaterialUpdateContext::EOptions::Default, GMaxRHIShaderPlatform);
+	UpdateContext.AddMaterialInstance(materialInstance);
+	materialInstance->MarkPackageDirty();
 }

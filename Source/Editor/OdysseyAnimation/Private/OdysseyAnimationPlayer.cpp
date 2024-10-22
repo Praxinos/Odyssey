@@ -4,6 +4,7 @@
 #include "OdysseyAnimationPlayer.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyRectUtils.h"
+#include "TextureCompiler.h"
 
 #include "ULISLoaderModule.h"
 
@@ -150,7 +151,7 @@ UOdysseyAnimationPlayer::GetRenderType() const
 void
 UOdysseyAnimationPlayer::Tick(float iDeltaTime)
 {
-	if (!Animation)
+	if (!Animation || !Texture)
 		return;
 
 	if (Status == EOdysseyAnimationPlayerStatus::Playing)
@@ -373,6 +374,10 @@ UOdysseyAnimationPlayer::CopyBlocksToTexture(const TArray<TSharedPtr<::ULIS::FBl
 	fence.Wait();
 }
 
+UOdysseyAnimationPlayer::UOdysseyAnimationPlayer()
+{
+}
+
 void
 UOdysseyAnimationPlayer::AnimationChanged()
 {
@@ -385,8 +390,18 @@ UOdysseyAnimationPlayer::AnimationChanged()
 		return;
 	}
 
-	Texture = UTexture2D::CreateTransient(Animation->GetWidth(), Animation->GetHeight(), PF_B8G8R8A8);
+	Texture = NewObject<UTexture2D>(this);
+	Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+
+	FTextureFormatSettings textureFormatSettings;
+    Texture->GetLayerFormatSettings(0, textureFormatSettings);
+    textureFormatSettings.CompressionNone = 1;
+    Texture->SetLayerFormatSettings(0, textureFormatSettings);
+
+	Texture->Source.Init(Animation->GetWidth(), Animation->GetHeight(), 1, 1, TSF_BGRA8, nullptr);
 	Texture->UpdateResource();
+    FTextureCompilingManager::Get().FinishCompilation({ Texture });
+
 	mInvalidTileMap = FULISInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
 
 	UOdysseyAnimation::OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
@@ -461,4 +476,14 @@ UOdysseyAnimationPlayer::PostLoad()
 	//will create the texture if needed
 	if (!Texture)
 		AnimationChanged();
+}
+
+void
+UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
+{
+	Super::PostDuplicate(iDuplicateMode);
+
+	//will create the texture if needed
+	AnimationChanged();
+	mImageRenderingComposition.Empty();
 }

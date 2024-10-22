@@ -13,6 +13,20 @@
 // AOdysseyAnimationActor
 
 void
+AOdysseyAnimationActor::Play()
+{
+	if (AnimationComponent)
+		AnimationComponent->Play();
+}
+
+void
+AOdysseyAnimationActor::Stop()
+{
+	if (AnimationComponent)
+		AnimationComponent->Stop();
+}
+
+void
 AOdysseyAnimationActor::FaceCamera()
 {
 	UUnrealEditorSubsystem* UnrealEditorSubsystem = GEditor->GetEditorSubsystem<UUnrealEditorSubsystem>();

@@ -33,6 +33,9 @@ class ODYSSEYANIMATION_API UOdysseyAnimationPlayer
 	GENERATED_BODY()
 
 public:
+	UOdysseyAnimationPlayer();
+
+public:
 	//Events
 	FSimpleMulticastDelegate& OnAnimationChanged();
 	FSimpleMulticastDelegate& OnTextureChanged();
@@ -47,6 +50,7 @@ public:
 
 public:
 	virtual void PostLoad() override;
+	virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
 	virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
 	void PropertyChanged(const FName& iPropertyName);
 
@@ -98,9 +102,9 @@ public:
 	UPROPERTY()
 	bool IsLooping = true;
 
-private:
-	UPROPERTY()
-	TObjectPtr<UTexture2D>	Texture;
+public:
+	UPROPERTY(DuplicateTransient)
+	TObjectPtr<UTexture2D> Texture;
 
 private:
 	bool mIsBackward = false;

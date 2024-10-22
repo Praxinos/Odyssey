@@ -27,6 +27,12 @@ public:
 
 public:
 	UFUNCTION(Category="Actions", CallInEditor)
+	void Play();
+
+	UFUNCTION(Category="Actions", CallInEditor)
+	void Stop();
+
+	UFUNCTION(Category="Actions", CallInEditor)
 	void FaceCamera();
 
 	UFUNCTION(Category="Actions", CallInEditor)
