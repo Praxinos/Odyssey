@@ -4,6 +4,12 @@
 #include "Widgets/SOdysseyAnimationComponentTrack.h"
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineToolSelector.h"
+#include "Widgets/SOdysseyLayerStackAddLayerButton.h"
+#include "Widgets/LayerStack/SOdysseyAnimationLayerStackTreeView.h"
+#include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
+#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

@@ -16,7 +16,7 @@ class FOdysseyHUDLine;
 class UOdysseyAnimationCell;
 
 UCLASS()
-class UOdysseyAnimationEditorOutOfPegsTool :
+class ODYSSEYANIMATIONEDITOR_API UOdysseyAnimationEditorOutOfPegsTool :
     public UOdysseyPainterEditorTool
 {
     GENERATED_BODY()

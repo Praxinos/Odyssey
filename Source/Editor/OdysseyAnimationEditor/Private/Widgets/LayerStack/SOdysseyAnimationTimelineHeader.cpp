@@ -9,6 +9,7 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
 #include "OdysseyStyleSet.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyAnimationProxy.h"
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationTimelineHeader

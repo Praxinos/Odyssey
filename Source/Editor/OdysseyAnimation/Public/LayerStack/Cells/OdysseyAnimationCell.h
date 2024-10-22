@@ -9,6 +9,7 @@
 #include "OdysseyAnimationCell.generated.h"
 
 class UOdysseyAnimationLayer;
+class FOdysseyRasterBlock;
 
 USTRUCT(BlueprintType)
 struct FOdysseyAnimationCellOutOfPegs

@@ -4,20 +4,20 @@
 #pragma once
 
 #include "MovieSceneTrackEditor.h"
-#include "TrackEditors/SubTrackEditorBase.h"
 
 class UOdysseyAnimationLayerStack;
+class UOdysseyAnimationComponent;
 
-class FOdysseyAnimationComponentTrackEditor
+class FOdysseyAnimationTrackEditor
 	: public FMovieSceneTrackEditor
 {
 public:
 
 	/** Constructor. */
-	FOdysseyAnimationComponentTrackEditor( TSharedRef<ISequencer> InSequencer );
+	FOdysseyAnimationTrackEditor( TSharedRef<ISequencer> InSequencer );
 
 	/** Virtual destructor. */
-	virtual ~FOdysseyAnimationComponentTrackEditor();
+	virtual ~FOdysseyAnimationTrackEditor();
 
 	static TSharedRef<ISequencerTrackEditor> CreateTrackEditor( TSharedRef<ISequencer> OwningSequencer );
 	static void OnNewActorTrackAdded(const AActor& iActor, const FGuid& iBinding, TSharedPtr< ISequencer > iSequencer);

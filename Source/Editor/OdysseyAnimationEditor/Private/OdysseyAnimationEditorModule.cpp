@@ -75,8 +75,6 @@ FOdysseyAnimationEditorModule::StartupModule()
 	RegisterDetailCustomizations();
 
 	RegisterThumbnailRenderers();
-
-	RegisterSequencerTracks();
 }
 
 void
@@ -95,8 +93,6 @@ FOdysseyAnimationEditorModule::ShutdownModule()
 	UnregisterDetailCustomization();
 
 	UnregisterThumbnailRenderers();
-
-	UnregisterSequencerTracks();
 }
 
 void
@@ -207,27 +203,6 @@ FOdysseyAnimationEditorModule::UnregisterThumbnailRenderers()
 {
 	//UThumbnailManager::Get().UnregisterCustomRenderer(UOdysseyAnimationCellImageRaster::StaticClass());
 }
-
-void
-FOdysseyAnimationEditorModule::RegisterSequencerTracks()
-{
-	ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
-	mAnimationComponentTrackCreateEditorHandle = SequencerModule.RegisterTrackEditor( FOnCreateTrackEditor::CreateStatic( &FOdysseyAnimationComponentTrackEditor::CreateTrackEditor ) );
-
-	ILevelSequenceModule& LevelSequenceModule = FModuleManager::LoadModuleChecked<ILevelSequenceModule>("LevelSequence");
-	mAnimationComponentOnNewActorTrackAddedHandle = LevelSequenceModule.OnNewActorTrackAdded().AddStatic( FOdysseyAnimationComponentTrackEditor::OnNewActorTrackAdded );
-}
-
-void
-FOdysseyAnimationEditorModule::UnregisterSequencerTracks()
-{
-	ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
-	SequencerModule.UnRegisterTrackEditor( mAnimationComponentTrackCreateEditorHandle );
-
-	ILevelSequenceModule& LevelSequenceModule = FModuleManager::LoadModuleChecked<ILevelSequenceModule>("LevelSequence");
-	LevelSequenceModule.OnNewActorTrackAdded().Remove( mAnimationComponentOnNewActorTrackAddedHandle );
-}
-	
 
 IMPLEMENT_MODULE( FOdysseyAnimationEditorModule, OdysseyAnimationEditor );
 

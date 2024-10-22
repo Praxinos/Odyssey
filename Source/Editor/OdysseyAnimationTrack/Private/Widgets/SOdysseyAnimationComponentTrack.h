@@ -5,6 +5,8 @@
 
 #include "CoreMinimal.h"
 
+class UOdysseyLayer;
+
 class SOdysseyAnimationComponentTrack
     : public SCompoundWidget
 {

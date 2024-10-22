@@ -5,12 +5,14 @@
 
 #include "OdysseyModeToolkit.h"
 #include "OdysseyPainterEditor.h"
-#include "ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.h"
+
 
 class FOdysseyViewportDrawingEditor;
+class FOdysseyViewportDrawingEditorExtension;
+class FOdysseyAnimationEditorExtension;
 class FEdMode;
 
-class FOdysseyViewportDrawingEditorToolkit : public FOdysseyModeToolkit
+class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorToolkit : public FOdysseyModeToolkit
 {
 public:
 	FOdysseyViewportDrawingEditorToolkit(TSharedRef<FOdysseyPainterEditor> iEditor, FEdMode* iEdMode);
@@ -26,9 +28,11 @@ public:
     virtual void GetToolPaletteNames( TArray<FName>& ioPaletteNames ) const override;
     virtual void BuildToolPalette( FName iPalette, class FToolBarBuilder& ioToolbarBuilder ) override;
 
-	TSharedRef<FOdysseyViewportDrawingEditorExtension> GetViewportDrawingExtension() const;
+	TSharedPtr<FOdysseyViewportDrawingEditorExtension> GetViewportDrawingExtension() const;
+	TSharedPtr<FOdysseyAnimationEditorExtension> GetAnimationExtension() const;
 
 private:
 	TSharedPtr<FOdysseyViewportDrawingEditorExtension> mViewportDrawingExtension;
+	TSharedPtr<FOdysseyAnimationEditorExtension> mAnimationExtension;
 	FEdMode* mEdMode;
 };

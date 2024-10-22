@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 #pragma once
 
-class FOdysseyAnimationEditorTimelinePosition
+class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorTimelinePosition
 {
 public:
     FOdysseyAnimationEditorTimelinePosition(); //default

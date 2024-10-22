@@ -5,14 +5,14 @@
 
 #include "CoreMinimal.h"
 
-#include "OdysseyRasterBlock.h"
-#include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "BaseMediaSource.h"
-#include "OdysseyAnimationProxy.h"
 #include "OdysseyImageRenderingAbility.h"
 #include <ULIS>
 
 #include "OdysseyAnimation.generated.h"
+
+class FOdysseyAnimationProxy;
+class UOdysseyAnimationLayerStack;
 
 UENUM()
 enum class EOdysseyAnimationFormat : uint8

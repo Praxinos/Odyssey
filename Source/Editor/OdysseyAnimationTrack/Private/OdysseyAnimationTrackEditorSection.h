@@ -6,14 +6,15 @@
 #include "TrackEditors/SubTrackEditorBase.h"
 
 class UOdysseyAnimationComponentSection;
+class FOdysseyAnimationEditorTimelinePosition;
 
-class FOdysseyAnimationComponentTrackEditorSection
+class FOdysseyAnimationTrackEditorSection
 	: public TSubSectionMixin<>
-	, public TSharedFromThis<FOdysseyAnimationComponentTrackEditorSection>
+	, public TSharedFromThis<FOdysseyAnimationTrackEditorSection>
 {
 public:
-	FOdysseyAnimationComponentTrackEditorSection(TSharedPtr<ISequencer> InSequencer, UOdysseyAnimationComponentSection* InSection);
-	virtual ~FOdysseyAnimationComponentTrackEditorSection();
+	FOdysseyAnimationTrackEditorSection(TSharedPtr<ISequencer> InSequencer, UOdysseyAnimationComponentSection* InSection);
+	virtual ~FOdysseyAnimationTrackEditorSection();
 
 public:
 	virtual float GetSectionHeight( const UE::Sequencer::FViewDensityInfo& ViewDensity ) const override;

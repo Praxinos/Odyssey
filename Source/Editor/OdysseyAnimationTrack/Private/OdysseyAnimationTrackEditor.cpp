@@ -1,40 +1,38 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "OdysseyAnimationComponentTrackEditor.h"
-
+#include "OdysseyAnimationTrackEditor.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationActor.h"
+#include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationComponentTrack.h"
 #include "OdysseyAnimationComponentSection.h"
 #include "SequencerUtilities.h"
-#include "MVVM/Extensions/IOutlinerExtension.h"
 #include "MVVM/Extensions/ITrackExtension.h"
-#include "MVVM/ViewModels/EditorViewModel.h"
-#include "MVVM/ViewModels/OutlinerColumns/OutlinerColumnTypes.h"
 #include "MVVM/ViewModels/SequencerEditorViewModel.h"
-#include "MVVM/ViewModelPtr.h"
-#include "MVVM/Views/SOutlinerItemViewBase.h"
+#include "MVVM/ViewModels/OutlinerColumns/OutlinerColumnTypes.h"
 #include "Widgets/SOdysseyAnimationComponentTrack.h"
-#include "OdysseyAnimationComponentTrackEditorSection.h"
+#include "OdysseyAnimationTrackEditorSection.h"
 
-#define LOCTEXT_NAMESPACE "AnimationEditor"
+#define LOCTEXT_NAMESPACE "AnimationTrack"
 
-FOdysseyAnimationComponentTrackEditor::~FOdysseyAnimationComponentTrackEditor()
+FOdysseyAnimationTrackEditor::~FOdysseyAnimationTrackEditor()
 {
 }
 
-FOdysseyAnimationComponentTrackEditor::FOdysseyAnimationComponentTrackEditor( TSharedRef<ISequencer> InSequencer )
+FOdysseyAnimationTrackEditor::FOdysseyAnimationTrackEditor( TSharedRef<ISequencer> InSequencer )
 	: FMovieSceneTrackEditor( InSequencer )
 {
 }
 
 TSharedRef<ISequencerTrackEditor>
-FOdysseyAnimationComponentTrackEditor::CreateTrackEditor( TSharedRef<ISequencer> OwningSequencer )
+FOdysseyAnimationTrackEditor::CreateTrackEditor( TSharedRef<ISequencer> OwningSequencer )
 {
-	return MakeShareable( new FOdysseyAnimationComponentTrackEditor( OwningSequencer ) );
+	return MakeShareable( new FOdysseyAnimationTrackEditor( OwningSequencer ) );
 }
 
 void
-FOdysseyAnimationComponentTrackEditor::OnNewActorTrackAdded(const AActor& iActor, const FGuid& iBinding, TSharedPtr< ISequencer > iSequencer)
+FOdysseyAnimationTrackEditor::OnNewActorTrackAdded(const AActor& iActor, const FGuid& iBinding, TSharedPtr< ISequencer > iSequencer)
 {
 	const AActor* actor = &iActor;
 	if (!actor->IsA<AOdysseyAnimationActor>())
@@ -80,7 +78,7 @@ FOdysseyAnimationComponentTrackEditor::OnNewActorTrackAdded(const AActor& iActor
 }
 
 float
-FOdysseyAnimationComponentTrackEditor::GetDefaultSectionDuration(UOdysseyAnimationComponent* iComponent)
+FOdysseyAnimationTrackEditor::GetDefaultSectionDuration(UOdysseyAnimationComponent* iComponent)
 {
 	float duration = 10.f;
 	if (!iComponent)
@@ -101,13 +99,13 @@ FOdysseyAnimationComponentTrackEditor::GetDefaultSectionDuration(UOdysseyAnimati
 }
 
 bool
-FOdysseyAnimationComponentTrackEditor::SupportsType( TSubclassOf<class UMovieSceneTrack> TrackClass ) const
+FOdysseyAnimationTrackEditor::SupportsType( TSubclassOf<class UMovieSceneTrack> TrackClass ) const
 {
 	return TrackClass == UOdysseyAnimationComponentTrack::StaticClass();
 }
 
 void
-FOdysseyAnimationComponentTrackEditor::BuildObjectBindingTrackMenu(FMenuBuilder& iMenuBuilder, const TArray<FGuid>& iObjectBindings, const UClass* iObjectClass)
+FOdysseyAnimationTrackEditor::BuildObjectBindingTrackMenu(FMenuBuilder& iMenuBuilder, const TArray<FGuid>& iObjectBindings, const UClass* iObjectClass)
 {
 	if (!iObjectClass->IsChildOf(UOdysseyAnimationComponent::StaticClass()))
 		return;
@@ -117,7 +115,7 @@ FOdysseyAnimationComponentTrackEditor::BuildObjectBindingTrackMenu(FMenuBuilder&
 		LOCTEXT("component-track.object-binding-track-menu.animation-track.tooltip", "Adds a track that can play an animation component."),
 		FSlateIcon(),
 		FUIAction(
-			FExecuteAction::CreateRaw(this, &FOdysseyAnimationComponentTrackEditor::AddAnimationTrack, iObjectBindings)
+			FExecuteAction::CreateRaw(this, &FOdysseyAnimationTrackEditor::AddAnimationTrack, iObjectBindings)
 		),
 		NAME_None,
 		EUserInterfaceActionType::Button
@@ -125,17 +123,17 @@ FOdysseyAnimationComponentTrackEditor::BuildObjectBindingTrackMenu(FMenuBuilder&
 }
 
 void
-FOdysseyAnimationComponentTrackEditor::AddAnimationTrack(TArray<FGuid> ObjectBindings)
+FOdysseyAnimationTrackEditor::AddAnimationTrack(TArray<FGuid> ObjectBindings)
 {
 	UMovieScene* FocusedMovieScene = GetFocusedMovieScene();
 	if (FocusedMovieScene == nullptr || FocusedMovieScene->IsReadOnly())
 		return;
 
-	AnimatablePropertyChanged(FOnKeyProperty::CreateRaw(this, &FOdysseyAnimationComponentTrackEditor::AddAnimationTrackKeyInternal, ObjectBindings));
+	AnimatablePropertyChanged(FOnKeyProperty::CreateRaw(this, &FOdysseyAnimationTrackEditor::AddAnimationTrackKeyInternal, ObjectBindings));
 }
 
 FKeyPropertyResult
-FOdysseyAnimationComponentTrackEditor::AddAnimationTrackKeyInternal(FFrameNumber KeyTime, TArray<FGuid> ObjectBindings)
+FOdysseyAnimationTrackEditor::AddAnimationTrackKeyInternal(FFrameNumber KeyTime, TArray<FGuid> ObjectBindings)
 {
 	FKeyPropertyResult KeyPropertyResult;
 
@@ -200,7 +198,7 @@ FOdysseyAnimationComponentTrackEditor::AddAnimationTrackKeyInternal(FFrameNumber
 }
 
 TSharedPtr<SWidget>
-FOdysseyAnimationComponentTrackEditor::BuildOutlinerColumnWidget(const FBuildColumnWidgetParams& iParams, const FName& iColumnName)
+FOdysseyAnimationTrackEditor::BuildOutlinerColumnWidget(const FBuildColumnWidgetParams& iParams, const FName& iColumnName)
 {
 	UOdysseyAnimationComponentTrack* track = Cast<UOdysseyAnimationComponentTrack>(iParams.TrackModel->GetTrack());
 	::UE::Sequencer::TViewModelPtr< ::UE::Sequencer::FSequencerEditorViewModel > editorViewModel = iParams.Editor->CastThisShared< ::UE::Sequencer::FSequencerEditorViewModel >();
@@ -251,12 +249,12 @@ FOdysseyAnimationComponentTrackEditor::BuildOutlinerColumnWidget(const FBuildCol
 }
 
 TSharedRef<ISequencerSection>
-FOdysseyAnimationComponentTrackEditor::MakeSectionInterface( UMovieSceneSection& SectionObject, UMovieSceneTrack& Track, FGuid ObjectBinding )
+FOdysseyAnimationTrackEditor::MakeSectionInterface( UMovieSceneSection& SectionObject, UMovieSceneTrack& Track, FGuid ObjectBinding )
 {
 	UOdysseyAnimationComponentSection* animationComponentSection = Cast<UOdysseyAnimationComponentSection>(&SectionObject);
 	checkf( animationComponentSection != nullptr, TEXT("Unsupported section type.") );
 
-	return MakeShareable(new FOdysseyAnimationComponentTrackEditorSection(GetSequencer(), animationComponentSection));
+	return MakeShareable(new FOdysseyAnimationTrackEditorSection(GetSequencer(), animationComponentSection));
 }
 
 #undef LOCTEXT_NAMESPACE

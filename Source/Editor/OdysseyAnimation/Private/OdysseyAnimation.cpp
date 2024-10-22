@@ -10,6 +10,7 @@
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "OdysseyRasterBlockMutator.h"
+#include "OdysseyAnimationProxy.h"
 
 #include "Misc/TransactionObjectEvent.h"
 

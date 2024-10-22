@@ -8,6 +8,7 @@
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorImport.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "ULISLoaderModule.h"
+#include "OdysseyVector.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyVectorBlock.h"
 #include "Misc/OdysseyDuplicate.h"
