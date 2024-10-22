@@ -98,6 +98,9 @@ LighttableTools::Deactivate( ISequencer* iSequencer )
             const FMovieSceneSequenceHierarchy* Hierarchy = mSequencer->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( mSequencer->GetEvaluationTemplate().GetCompiledDataID() );
             UMovieSceneSequence* subsequence = Hierarchy->FindSubSequence( iLocalSpace.SequenceID );
 
+            if( iLocalSpace.SequenceID == MovieSceneSequenceID::Root )
+                subsequence = mSequencer->GetRootMovieSceneSequence();
+
             LighttableTools::Deactivate( *mSequencer, subsequence, iLocalSpace.SequenceID, iBinding.GetObjectGuid() );
         }
 
