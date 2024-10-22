@@ -74,12 +74,12 @@ SOdysseyAnimationLayerImageTimeline::GetRowHeight(FName iRow) const
 {
 	if (iRow == "Main")
 	{
-		int height = GetLayer()->GetRowHeight("Main").Get();
-		int blendRowHeight = GetLayer()->GetRowHeight("Blend").Get();
-		if (blendRowHeight > 0)
+		int height = GetLayer()->GetRowHeight("Main");
+
+		if (GetLayer()->IsRowVisible("Blend"))
 		{
-			height += blendRowHeight;
-			height += GetRowPadding("Blend").Bottom;
+			height += GetLayer()->GetRowHeight("Blend");
+			height += GetLayer()->GetRowPadding("Blend").Bottom + GetLayer()->GetRowPadding("Blend").Top;
 		}
 		return height;
 	}
@@ -89,6 +89,30 @@ SOdysseyAnimationLayerImageTimeline::GetRowHeight(FName iRow) const
 	}
 	return SOdysseyAnimationLayerTimeline::GetRowHeight(iRow);
 }
+
+EVisibility
+SOdysseyAnimationLayerImageTimeline::GetRowVisibility(FName iRow) const
+{
+	if (iRow == "Blend")
+	{
+		return EVisibility::Collapsed;
+	}
+
+	return SOdysseyAnimationLayerTimeline::GetRowVisibility(iRow);
+}
+
+FMargin
+SOdysseyAnimationLayerImageTimeline::GetRowPadding(FName iRow) const
+{
+	if (iRow == "Blend")
+	{
+		return FMargin(0);
+	}
+
+	return SOdysseyAnimationLayerTimeline::GetRowPadding(iRow);
+}
+
+
 
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageTimeline::GenerateMainRowTimelineWidget()

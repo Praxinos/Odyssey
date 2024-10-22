@@ -41,6 +41,8 @@ public:
 protected:
 	virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
 	virtual FOptionalSize GetRowHeight(FName iRow) const override;
+	virtual EVisibility GetRowVisibility(FName iRow) const override;
+	virtual FMargin GetRowPadding(FName iRow) const override;
 	
 	TSharedRef<SWidget> GenerateMainRowTimelineWidget();
 	TSharedRef<SWidget> GenerateLightTableRowTimelineWidget();

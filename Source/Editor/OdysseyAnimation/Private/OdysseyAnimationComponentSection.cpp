@@ -34,5 +34,15 @@ UOdysseyAnimationComponentSection::CacheChannelProxy()
 	return EMovieSceneChannelProxyType::Dynamic;
 }
 
+void
+UOdysseyAnimationComponentSection::MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate)
+{
+	if (StartFrameOffset.Value > 0)
+	{
+		FFrameNumber NewStartFrameOffset = ConvertFrameTime(FFrameTime(StartFrameOffset), SourceRate, DestinationRate).FloorToFrame();
+		StartFrameOffset = NewStartFrameOffset;
+	}
+}
+
 #undef LOCTEXT_NAMESPACE
 

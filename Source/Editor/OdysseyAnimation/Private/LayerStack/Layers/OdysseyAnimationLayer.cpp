@@ -527,16 +527,28 @@ UOdysseyAnimationLayer::GetRows() const
 	return rows;
 }
 
-FOptionalSize
+int
 UOdysseyAnimationLayer::GetRowHeight(FName iSubRowName) const
 {
 	if (iSubRowName == "Lighttable")
-		return DisplayOptions && HasLighttable && Lighttable.bIsActivated ? 40 : 0;
+		return 40;
 
 	if (iSubRowName == "OutOfPegs")
-		return DisplayOptions && HasLighttable && Lighttable.bIsActivated ? 20 : 0;
+		return 20;
 		
 	return Super::GetRowHeight(iSubRowName);
+}
+
+bool
+UOdysseyAnimationLayer::IsRowVisible(FName iSubRowName) const
+{
+	if (iSubRowName == "Lighttable")
+		return DisplayOptions && HasLighttable && Lighttable.bIsActivated;
+
+	if (iSubRowName == "OutOfPegs")
+		return DisplayOptions && HasLighttable && Lighttable.bIsActivated;
+		
+	return Super::IsRowVisible(iSubRowName);
 }
 
 #endif

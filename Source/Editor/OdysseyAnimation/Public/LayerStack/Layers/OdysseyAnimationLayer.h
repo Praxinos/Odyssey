@@ -89,7 +89,8 @@ public:
 public:
 #ifdef WITH_EDITOR
 	virtual TArray<FName> GetRows() const override;
-	virtual FOptionalSize GetRowHeight(FName iSubRowName) const override;
+	virtual int GetRowHeight(FName iSubRowName) const override;
+	virtual bool IsRowVisible(FName iSubRowName) const override;
 #endif
 
 protected:

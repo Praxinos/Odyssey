@@ -30,8 +30,12 @@ FOdysseyAnimationComponentTrackEditorSection::GetLayerHeight(UOdysseyLayer* iLay
 	TArray<FName> rows = iLayer->GetRows();
 	for (const FName& row : rows)
 	{
-		height += iLayer->GetRowHeight(row).Get();
-		height += 1.f; //Padding between each subrow
+		if (!iLayer->IsRowVisible(row))
+			continue;
+
+		height += iLayer->GetRowHeight(row);
+		FMargin padding = iLayer->GetRowPadding(row);
+		height += padding.Top + padding.Bottom; //Padding between each subrow
 	}
 
 	if (iLayer->DisplayChildren)

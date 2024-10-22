@@ -27,6 +27,7 @@ public:
 
 protected:
 	virtual EMovieSceneChannelProxyType CacheChannelProxy() override;
+	virtual void MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate) override;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")

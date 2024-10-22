@@ -81,13 +81,13 @@ SOdysseyLayerRowBase::GetRowHeight(FName iRow) const
 EVisibility
 SOdysseyLayerRowBase::GetRowVisibility(FName iRow) const
 {
-	return GetRowHeight(iRow).Get() > 0 ? EVisibility::Visible : EVisibility::Collapsed;
+	return GetLayer()->IsRowVisible(iRow) ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 FMargin
 SOdysseyLayerRowBase::GetRowPadding( FName iRow ) const
 {
-	return FMargin(0.f, 0.f, 0.f, 2.f);
+	return GetLayer()->GetRowPadding(iRow);
 }
 
 FMargin

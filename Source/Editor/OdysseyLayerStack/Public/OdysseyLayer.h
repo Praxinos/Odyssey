@@ -199,7 +199,9 @@ public:
 	public:
 	#ifdef WITH_EDITOR
 		virtual TArray<FName> GetRows() const;
-		virtual FOptionalSize GetRowHeight(FName iSubRowName) const;
+		virtual int GetRowHeight(FName iSubRowName) const;
+		virtual bool IsRowVisible(FName iSubRowName) const;
+		virtual FMargin GetRowPadding(FName iSubRowName) const;
 	#endif
 
 protected:
