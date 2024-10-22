@@ -149,18 +149,16 @@ FOdysseyAnimationTimelineSelectionTool::OnDefaultSelectionMouseButtonDown(const 
 FReply
 FOdysseyAnimationTimelineSelectionTool::OnDefaultSelectionDragDetected(const FMouseEventParams& iParams)
 {
+	mIsDragDetected = true;
 	if (mIsDragnDrop)
 	{
-		mIsDragnDrop = false;
 		mIsSelecting = false;
-		mIsDragDetected = false;
 		TSharedRef<FOdysseyAnimationCellsDragDropOperation> operation = FOdysseyAnimationCellsDragDropOperation::Create(iParams.mLayer, mTimelineParams->GetSelectedCells());
     	return FReply::Handled().BeginDragDrop(operation);
 	}
 	
     if (mIsSelecting)
 	{
-		mIsDragDetected = true;
 		return FReply::Handled().CaptureMouse( iParams.mWidget.ToSharedRef() ).PreventThrottling();
 	}
 	
@@ -188,10 +186,14 @@ FOdysseyAnimationTimelineSelectionTool::OnDefaultSelectionMouseMove(const FMouse
 FReply
 FOdysseyAnimationTimelineSelectionTool::OnDefaultSelectionMouseButtonUp(const FMouseEventParams& iParams)
 {
-    if(!mIsSelecting)
-		return FReply::Unhandled();
+	if (!mIsSelecting && !mIsDragDetected)
+	{
+		mTimelineParams->SetSelectedCells({});
+		return FReply::Handled();
+	}
 
 	mIsSelecting = false;
+	mIsDragnDrop = false;
 	mIsDragDetected = false;
 
 	return FReply::Handled().ReleaseMouseCapture();
