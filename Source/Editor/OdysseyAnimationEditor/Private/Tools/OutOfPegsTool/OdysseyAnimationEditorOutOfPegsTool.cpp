@@ -41,30 +41,37 @@ FOdysseyAnimationEditorOutOfPegsToolDetails::CustomizeDetails(IDetailLayoutBuild
 	IDetailPropertyRow* rotationRow = DetailLayout.EditDefaultProperty(rotationHandle);
 	IDetailPropertyRow* zoomRow = DetailLayout.EditDefaultProperty(zoomHandle);
 
-	TAttribute<bool> panIsResetToDefaultVisible = TAttribute<bool>::CreateLambda(
-		[tool]()
+	FIsResetToDefaultVisible panIsResetToDefaultVisible = FIsResetToDefaultVisible::CreateLambda(
+		[tool](TSharedPtr<IPropertyHandle> iHandle)
 		{
 			return tool->GetCell() && tool->GetCell()->OutOfPegs.Pan != FVector2D(0, 0);
 		}
 	);
 
-	TAttribute<bool> rotationIsResetToDefaultVisible = TAttribute<bool>::CreateLambda(
-		[tool]()
+	FIsResetToDefaultVisible rotationIsResetToDefaultVisible = FIsResetToDefaultVisible::CreateLambda(
+		[tool](TSharedPtr<IPropertyHandle> iHandle)
 		{
 			return tool->GetCell() && tool->GetCell()->OutOfPegs.Rotation != 0.f;
 		}
 	);
 
-	TAttribute<bool> zoomIsResetToDefaultVisible = TAttribute<bool>::CreateLambda(
-		[tool]()
+	FIsResetToDefaultVisible zoomIsResetToDefaultVisible = FIsResetToDefaultVisible::CreateLambda(
+		[tool](TSharedPtr<IPropertyHandle> iHandle)
 		{
 			return tool->GetCell() && tool->GetCell()->OutOfPegs.Zoom != 100.f;
 		}
 	);
 
-	FResetToDefaultOverride panResetToDefault = FResetToDefaultOverride::Create(panIsResetToDefaultVisible);
-	FResetToDefaultOverride rotationResetToDefault = FResetToDefaultOverride::Create(rotationIsResetToDefaultVisible);
-	FResetToDefaultOverride zoomResetToDefault = FResetToDefaultOverride::Create(zoomIsResetToDefaultVisible);
+	FResetToDefaultHandler onResetToDefaultClicked = FResetToDefaultHandler::CreateLambda(
+		[](TSharedPtr<IPropertyHandle> iHandle)
+		{
+			iHandle->ResetToDefault();
+		}
+	);
+
+	FResetToDefaultOverride panResetToDefault = FResetToDefaultOverride::Create(panIsResetToDefaultVisible, onResetToDefaultClicked);
+	FResetToDefaultOverride rotationResetToDefault = FResetToDefaultOverride::Create(rotationIsResetToDefaultVisible, onResetToDefaultClicked);
+	FResetToDefaultOverride zoomResetToDefault = FResetToDefaultOverride::Create(zoomIsResetToDefaultVisible, onResetToDefaultClicked);
 
 	panRow->OverrideResetToDefault(panResetToDefault);
 	rotationRow->OverrideResetToDefault(rotationResetToDefault);
