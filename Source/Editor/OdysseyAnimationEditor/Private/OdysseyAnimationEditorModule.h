@@ -49,4 +49,5 @@ private:
 	TSharedPtr<IAssetTypeActions> mIliadTypeActions;
     FDelegateHandle mExtendLevelEditorLayout;
 	FDelegateHandle mAnimationComponentTrackCreateEditorHandle;
+	FDelegateHandle mAnimationComponentOnNewActorTrackAddedHandle;
 };

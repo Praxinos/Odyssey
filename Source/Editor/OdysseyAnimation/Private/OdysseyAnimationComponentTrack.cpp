@@ -62,6 +62,7 @@ UOdysseyAnimationComponentTrack::AddNewSection(FFrameNumber KeyTime, UOdysseyAni
 	}
 
 	AddSection(*NewSection);
+	UpdateEasing();
 
 	return NewSection;
 }

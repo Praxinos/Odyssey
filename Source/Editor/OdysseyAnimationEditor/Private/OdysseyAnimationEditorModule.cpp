@@ -28,6 +28,7 @@
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "LayerStack/Cells/OdysseyAnimationCellThumbnailRenderer.h"
 #include "ISequencerModule.h"
+#include "ILevelSequenceModule.h"
 
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -211,17 +212,22 @@ void
 FOdysseyAnimationEditorModule::RegisterSequencerTracks()
 {
 	ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
-
 	mAnimationComponentTrackCreateEditorHandle = SequencerModule.RegisterTrackEditor( FOnCreateTrackEditor::CreateStatic( &FOdysseyAnimationComponentTrackEditor::CreateTrackEditor ) );
+
+	ILevelSequenceModule& LevelSequenceModule = FModuleManager::LoadModuleChecked<ILevelSequenceModule>("LevelSequence");
+	mAnimationComponentOnNewActorTrackAddedHandle = LevelSequenceModule.OnNewActorTrackAdded().AddStatic( FOdysseyAnimationComponentTrackEditor::OnNewActorTrackAdded );
 }
 
 void
 FOdysseyAnimationEditorModule::UnregisterSequencerTracks()
 {
 	ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
-
 	SequencerModule.UnRegisterTrackEditor( mAnimationComponentTrackCreateEditorHandle );
+
+	ILevelSequenceModule& LevelSequenceModule = FModuleManager::LoadModuleChecked<ILevelSequenceModule>("LevelSequence");
+	LevelSequenceModule.OnNewActorTrackAdded().Remove( mAnimationComponentOnNewActorTrackAddedHandle );
 }
+	
 
 IMPLEMENT_MODULE( FOdysseyAnimationEditorModule, OdysseyAnimationEditor );
 

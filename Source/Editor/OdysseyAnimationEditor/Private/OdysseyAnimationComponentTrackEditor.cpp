@@ -4,6 +4,7 @@
 
 #include "OdysseyAnimationComponentTrack.h"
 #include "OdysseyAnimationComponentSection.h"
+#include "SequencerUtilities.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -20,6 +21,50 @@ TSharedRef<ISequencerTrackEditor>
 FOdysseyAnimationComponentTrackEditor::CreateTrackEditor( TSharedRef<ISequencer> OwningSequencer )
 {
 	return MakeShareable( new FOdysseyAnimationComponentTrackEditor( OwningSequencer ) );
+}
+
+void
+FOdysseyAnimationComponentTrackEditor::OnNewActorTrackAdded(const AActor& iActor, const FGuid& iBinding, TSharedPtr< ISequencer > iSequencer)
+{
+	const AActor* actor = &iActor;
+	if (!actor->IsA<AOdysseyAnimationActor>())
+		return;
+
+	const AOdysseyAnimationActor* animationActor = Cast<const AOdysseyAnimationActor>(actor);
+	if (!animationActor)
+		return;
+
+	UOdysseyAnimationComponent* animationComponent = animationActor->AnimationComponent;
+	if (!animationComponent)
+		return;
+	
+	UMovieScene* MovieScene = iSequencer->GetFocusedMovieSceneSequence()->GetMovieScene();
+	if (MovieScene == nullptr || MovieScene->IsReadOnly())
+		return;
+
+	// @todo Sequencer - The sequencer probably should have taken care of this
+	iSequencer->GetFocusedMovieSceneSequence()->SetFlags(RF_Transactional);
+	
+	// Create a transaction record because we are about to add keys
+	const bool bShouldActuallyTransact = !GIsTransacting;		// Don't transact if we're recording in a PIE world.  That type of keyframe capture cannot be undone.
+	FScopedTransaction AutoKeyTransaction( LOCTEXT("PropertyChanged", "Animatable Property Changed"), bShouldActuallyTransact );
+
+	FGuid componentBinding = FSequencerUtilities::CreateBinding(iSequencer.ToSharedRef(), *animationComponent);
+
+	UMovieSceneTrack* NewTrack = MovieScene->AddTrack(UOdysseyAnimationComponentTrack::StaticClass(), componentBinding);
+	if (!NewTrack)
+		return;
+
+	UOdysseyAnimationComponentTrack* animationTrack = Cast<UOdysseyAnimationComponentTrack>(NewTrack);
+	if (!animationTrack)
+		return;
+
+	animationTrack->Modify();
+	UMovieSceneSection* section = animationTrack->AddNewSection(iSequencer->GetLocalTime().Time.FrameNumber, animationComponent);
+
+	iSequencer->EmptySelection();
+	iSequencer->SelectSection(section);
+	iSequencer->ThrobSectionSelection();
 }
 
 bool

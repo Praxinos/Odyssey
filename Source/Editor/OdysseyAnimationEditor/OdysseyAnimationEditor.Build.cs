@@ -45,6 +45,7 @@ namespace UnrealBuildTool.Rules
 					"EditorWidgets",
 					"Engine",
 					"InputCore",
+					"LevelSequence",
 					"ToolMenus",
 					"Media",
 					"MediaAssets",
