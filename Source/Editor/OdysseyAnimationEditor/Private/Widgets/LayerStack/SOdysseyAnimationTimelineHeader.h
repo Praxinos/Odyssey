@@ -10,6 +10,8 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineHeader
 {
 public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineHeader)
+		: _Animation(nullptr)
+		, _Player(nullptr)
 	{}
 		SLATE_ARGUMENT( UOdysseyAnimation*, Animation )
 		SLATE_ARGUMENT( UOdysseyAnimationPlayer*, Player )
