@@ -11,6 +11,23 @@
 //////////////////////////////////////////////////////////////////////////
 // UOdysseyAnimationComponent
 
+UOdysseyAnimation*
+UOdysseyAnimationComponent::GetActiveAnimation() const
+{
+	if (Mode == EOdysseyAnimationComponentMode::Animation)
+	{
+		return Animation;
+	}
+
+	if (Mode == EOdysseyAnimationComponentMode::Player)
+	{
+		if (Player)
+			return Player->Animation;
+	}
+
+	return nullptr;
+}
+
 UOdysseyAnimationPlayer*
 UOdysseyAnimationComponent::GetActivePlayer() const
 {

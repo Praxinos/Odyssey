@@ -40,9 +40,13 @@ private:
 
 	void RegisterThumbnailRenderers();
 	void UnregisterThumbnailRenderers();
+
+	void RegisterSequencerTracks();
+	void UnregisterSequencerTracks();
     
 private:
 	/** All created asset type actions. Cached here so that we can unregister them during shutdown. */
 	TSharedPtr<IAssetTypeActions> mIliadTypeActions;
     FDelegateHandle mExtendLevelEditorLayout;
+	FDelegateHandle mAnimationComponentTrackCreateEditorHandle;
 };

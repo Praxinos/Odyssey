@@ -27,6 +27,8 @@
 #include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "LayerStack/Cells/OdysseyAnimationCellThumbnailRenderer.h"
+#include "ISequencerModule.h"
+
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -72,6 +74,8 @@ FOdysseyAnimationEditorModule::StartupModule()
 	RegisterDetailCustomizations();
 
 	RegisterThumbnailRenderers();
+
+	RegisterSequencerTracks();
 }
 
 void
@@ -90,6 +94,8 @@ FOdysseyAnimationEditorModule::ShutdownModule()
 	UnregisterDetailCustomization();
 
 	UnregisterThumbnailRenderers();
+
+	UnregisterSequencerTracks();
 }
 
 void
@@ -199,6 +205,22 @@ void
 FOdysseyAnimationEditorModule::UnregisterThumbnailRenderers()
 {
 	//UThumbnailManager::Get().UnregisterCustomRenderer(UOdysseyAnimationCellImageRaster::StaticClass());
+}
+
+void
+FOdysseyAnimationEditorModule::RegisterSequencerTracks()
+{
+	ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
+
+	mAnimationComponentTrackCreateEditorHandle = SequencerModule.RegisterTrackEditor( FOnCreateTrackEditor::CreateStatic( &FOdysseyAnimationComponentTrackEditor::CreateTrackEditor ) );
+}
+
+void
+FOdysseyAnimationEditorModule::UnregisterSequencerTracks()
+{
+	ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
+
+	SequencerModule.UnRegisterTrackEditor( mAnimationComponentTrackCreateEditorHandle );
 }
 
 IMPLEMENT_MODULE( FOdysseyAnimationEditorModule, OdysseyAnimationEditor );

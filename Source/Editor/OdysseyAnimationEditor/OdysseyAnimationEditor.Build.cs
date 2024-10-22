@@ -48,6 +48,8 @@ namespace UnrealBuildTool.Rules
 					"ToolMenus",
 					"Media",
 					"MediaAssets",
+					"MovieScene",
+					"MovieSceneTools",
 					"OdysseyAnimation",
 					"OdysseyBrush",
 					"OdysseyCore",
@@ -70,6 +72,7 @@ namespace UnrealBuildTool.Rules
 					"RenderCore",
                 	"Slate",
 					"SlateCore",
+					"Sequencer",
 					"ToolWidgets",
 					"UnrealEd",
 				}

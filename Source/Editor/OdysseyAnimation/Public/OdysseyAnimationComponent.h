@@ -30,6 +30,7 @@ public:
 	void Stop();
 
 public:
+	UOdysseyAnimation* GetActiveAnimation() const;
 	UOdysseyAnimationPlayer* GetActivePlayer() const;
 
 public:
