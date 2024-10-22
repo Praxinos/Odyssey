@@ -12,6 +12,7 @@
 #include "OdysseyViewportDrawingEditorUtils.h"
 #include "SAssetView.h"
 #include "OdysseyAnimationActor.h"
+#include "OdysseyAnimationComponent.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
@@ -73,7 +74,7 @@ SOdysseyViewportDrawingEditorMasterTab::Construct(const FArguments& InArgs, FOdy
 				.Visibility_Lambda(
 					[this]()
 					{
-						if ( !mExtension->Actor() || !mExtension->Actor()->IsA<AOdysseyAnimationActor>() )
+						if ( !mExtension->Component() || !mExtension->Component()->IsA<UOdysseyAnimationComponent>() )
 							return EVisibility::Visible;
 
 						return EVisibility::Collapsed;
