@@ -47,6 +47,12 @@ FOdysseyAnimationComponentTrackEditorSection::GetSectionHeight( const UE::Sequen
 		+ layersHeight;
 }
 
+float
+FOdysseyAnimationComponentTrackEditorSection::GetSectionGripHeight(float iSectionHeight) const
+{
+	return 25.f;
+}
+
 FText
 FOdysseyAnimationComponentTrackEditorSection::GetSectionTitle() const
 {

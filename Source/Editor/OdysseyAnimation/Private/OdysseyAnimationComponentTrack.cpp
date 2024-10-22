@@ -10,7 +10,6 @@
 UOdysseyAnimationComponentTrack::UOdysseyAnimationComponentTrack(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	SupportedBlendTypes.Add(EMovieSceneBlendType::Absolute);
 }
 
 bool
@@ -42,23 +41,17 @@ UOdysseyAnimationComponentTrack::AddNewSection(FFrameNumber KeyTime)
 	{
 		UMovieScene* OuterMovieScene = GetTypedOuter<UMovieScene>();
 		UOdysseyAnimation* animation = Component->GetActiveAnimation();
+		float duration = 10.f;
 		if (animation)
 		{
 			FInt32Range range = animation->GetFrameRange();
-			float duration = 0.f;
 			int32 lastFrame = range.GetUpperBoundValue();
 			if (lastFrame >= 0)
 			{
 				duration = (lastFrame + 1) / animation->GetFramesPerSecond();
 			}
-		
-			NewSection->InitialPlacement(Sections, KeyTime, OuterMovieScene->GetTickResolution().AsFrameNumber(duration).Value, false);
 		}
-		else
-		{
-			
-			NewSection->InitialPlacement(Sections, KeyTime, OuterMovieScene->GetTickResolution().AsFrameNumber(10).Value, false);
-		}
+		NewSection->InitialPlacement(Sections, KeyTime, OuterMovieScene->GetTickResolution().AsFrameNumber(duration).Value, 0);
 	}
 
 	AddSection(*NewSection);

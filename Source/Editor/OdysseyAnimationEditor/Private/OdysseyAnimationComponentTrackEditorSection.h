@@ -17,6 +17,7 @@ public:
 
 public:
 	virtual float GetSectionHeight( const UE::Sequencer::FViewDensityInfo& ViewDensity ) const override;
+	virtual float GetSectionGripHeight(float iSectionHeight) const override;
 	virtual FText   GetSectionTitle() const override;
     virtual FText   GetSectionToolTip() const override;
 	virtual TSharedRef<SWidget> GenerateSectionWidget() override;
