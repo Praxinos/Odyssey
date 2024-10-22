@@ -21,6 +21,8 @@ public:
 	virtual FText   GetSectionTitle() const override;
     virtual FText   GetSectionToolTip() const override;
 	virtual TSharedRef<SWidget> GenerateSectionWidget() override;
+	virtual void BeginResizeSection() override;
+	virtual void ResizeSection(ESequencerSectionResizeMode ResizeMode, FFrameNumber ResizeTime) override;
 
 	virtual void Tick( const FGeometry& AllottedGeometry, const FGeometry& ClippedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
 
@@ -35,4 +37,8 @@ private:
 	TSharedPtr<SBox> mSectionWidget;
 	UOdysseyAnimationComponentSection* mSection;
 	TSharedRef<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+
+
+	FFrameNumber mInitialStartOffsetDuringResize;
+	FFrameNumber mInitialStartTimeDuringResize;
 };

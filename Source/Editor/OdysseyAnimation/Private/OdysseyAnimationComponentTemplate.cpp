@@ -92,7 +92,7 @@ FOdysseyAnimationComponentTemplate::FOdysseyAnimationComponentTemplate(const UOd
 		mParams.SectionEndFrame = InSection.GetRange().GetUpperBoundValue();
 	}
 	mParams.bLooping = 0.f; //InSection.bLooping;
-	mParams.StartFrameOffset = 0 ; //InSection.StartFrameOffset;
+	mParams.StartFrameOffset = InSection.StartFrameOffset;
 }
 
 

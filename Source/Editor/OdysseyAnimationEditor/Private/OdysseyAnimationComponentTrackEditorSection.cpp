@@ -173,6 +173,10 @@ FOdysseyAnimationComponentTrackEditorSection::Tick( const FGeometry& AllottedGeo
 
 	double zoom = sequencerSecondInPixels / animationSecondInPixels;
 	mTimelinePosition->SetZoom(zoom);
+
+
+	double offset = movieScene->GetTickResolution().AsSeconds(mSection->StartFrameOffset) * animationFramesPerSecond;
+	mTimelinePosition->SetOffset(offset);
 }
 
 void
@@ -210,6 +214,34 @@ FOdysseyAnimationComponentTrackEditorSection::GetComponent() const
 	return nullptr;
 }
 
+void
+FOdysseyAnimationComponentTrackEditorSection::BeginResizeSection()
+{
+	mInitialStartOffsetDuringResize = mSection->StartFrameOffset;
+	mInitialStartTimeDuringResize = mSection->HasStartFrame() ? mSection->GetInclusiveStartFrame() : 0;
 
+	TSubSectionMixin::BeginResizeSection();
+}
+
+void
+FOdysseyAnimationComponentTrackEditorSection::ResizeSection(ESequencerSectionResizeMode iResizeMode, FFrameNumber iResizeTime)
+{
+	if (iResizeMode == SSRM_LeadingEdge)
+	{
+		FFrameNumber mStartOffset = iResizeTime - mInitialStartTimeDuringResize;
+		mStartOffset += mInitialStartOffsetDuringResize;
+
+		// Ensure start offset is not less than 0
+		if (mStartOffset < 0)
+		{
+			iResizeTime = iResizeTime - mStartOffset;
+			mStartOffset = FFrameNumber(0);
+		}
+
+		mSection->StartFrameOffset = mStartOffset;
+	}
+
+	TSubSectionMixin::ResizeSection(iResizeMode, iResizeTime);
+}
 
 #undef LOCTEXT_NAMESPACE

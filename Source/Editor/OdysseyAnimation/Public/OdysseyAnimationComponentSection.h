@@ -27,4 +27,8 @@ public:
 
 protected:
 	virtual EMovieSceneChannelProxyType CacheChannelProxy() override;
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
+	FFrameNumber StartFrameOffset = 0;
 };
