@@ -36,9 +36,6 @@ struct FAnimationCellMarkSettings
 
     UPROPERTY(EditAnywhere, Category="Cell Marks")
     EOdysseyAnimationCellMarkSymbol Symbol;
-
-    UPROPERTY(EditAnywhere, Category="Cell Marks")
-    bool DisplayInContextMenu = true;
 };
 
 UCLASS(config=EditorPerProjectUserSettings)
