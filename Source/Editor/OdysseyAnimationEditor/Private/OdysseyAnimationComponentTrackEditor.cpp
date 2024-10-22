@@ -70,12 +70,34 @@ FOdysseyAnimationComponentTrackEditor::OnNewActorTrackAdded(const AActor& iActor
 		return;
 
 	animationTrack->Modify();
-	animationTrack->Component = animationComponent;
-	UMovieSceneSection* section = animationTrack->AddNewSection(iSequencer->GetLocalTime().Time.FrameNumber);
+	
+	UMovieSceneSection* section = animationTrack->AddNewSection(iSequencer->GetLocalTime().Time.FrameNumber, GetDefaultSectionDuration(animationComponent));
+	section->Modify();
 
 	iSequencer->EmptySelection();
 	iSequencer->SelectSection(section);
 	iSequencer->ThrobSectionSelection();
+}
+
+float
+FOdysseyAnimationComponentTrackEditor::GetDefaultSectionDuration(UOdysseyAnimationComponent* iComponent)
+{
+	float duration = 10.f;
+	if (!iComponent)
+		return duration;
+	
+	UOdysseyAnimation* animation = iComponent->GetActiveAnimation();
+	if (!animation)
+		return duration;
+
+	FInt32Range range = animation->GetFrameRange();
+	int32 lastFrame = range.GetUpperBoundValue();
+	if (lastFrame >= 0)
+	{
+		duration = (lastFrame + 1) / animation->GetFramesPerSecond();
+	}
+
+	return duration;
 }
 
 bool
@@ -153,13 +175,8 @@ FOdysseyAnimationComponentTrackEditor::AddAnimationTrackKeyInternal(FFrameNumber
 					if (component)
 					{
 						animationTrack->Modify();
-						
-						if (TrackResult.bWasCreated)
-						{
-							animationTrack->Component = component;
-						}
-
-						UMovieSceneSection* NewSection = animationTrack->AddNewSection(KeyTime);
+						UMovieSceneSection* NewSection = animationTrack->AddNewSection(KeyTime, GetDefaultSectionDuration(component));
+						NewSection->Modify();
 						KeyPropertyResult.bTrackModified = true;
 						KeyPropertyResult.SectionsCreated.Add(NewSection);
 						NewSections.Add(NewSection);
@@ -204,11 +221,6 @@ FOdysseyAnimationComponentTrackEditor::BuildOutlinerColumnWidget(const FBuildCol
 			return nullptr;
 
 		TSharedPtr<SVerticalBox> verticalBox = SNew(SVerticalBox);
-			/* + SVerticalBox::Slot()
-			.AutoHeight()
-			[
-				SNew(::UE::Sequencer::SOutlinerItemViewBase, outlinerExtension, iParams.Editor, iParams.TreeViewRow)
-			]; */
 
 		TArrayView<TWeakObjectPtr<>> boundObjects = SequencerPtr->FindObjectsInCurrentSequence(track->FindObjectBindingGuid());
 		for (TWeakObjectPtr<>& boundObjectPtr : boundObjects)
@@ -229,16 +241,6 @@ FOdysseyAnimationComponentTrackEditor::BuildOutlinerColumnWidget(const FBuildCol
 			[
 				SNew(SOdysseyAnimationComponentTrack, animationComponent)
 				.Clipping(EWidgetClipping::ClipToBoundsAlways)
-				/* SNew(SOdysseyAnimationLayerStack)
-				.Animation_UObject(animationComponent, &UOdysseyAnimationComponent::GetActiveAnimation)
-				.Player_UObject(animationComponent, &UOdysseyAnimationComponent::GetActivePlayer)
-				.PlayerControlsVisibility(EVisibility::Collapsed)
-				.PlayerControlsVisibility(EVisibility::Collapsed)
-				.TimelinePosition(timelinePosition)
-				.TimelineCellSelection(timelineCellSelection)
-				.OnActivateOutOfPegs_Lambda([](UOdysseyAnimationCell* iCell){})
-				.OnInactivateOutOfPegs_Lambda([](){})
-				.OnIsOutOfPegsChecked_Lambda([](UOdysseyAnimationCell* iCell){ return ECheckBoxState::Unchecked; }) */
 			];
 		}
 		

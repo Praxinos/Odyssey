@@ -19,11 +19,19 @@ UOdysseyAnimationComponentSection::UOdysseyAnimationComponentSection(const FObje
 	SetBlendType(EMovieSceneBlendType::Absolute);
 }
 
-EMovieSceneChannelProxyType UOdysseyAnimationComponentSection::CacheChannelProxy()
+
+void
+UOdysseyAnimationComponentSection::PostInitProperties()
+{
+	Super::PostInitProperties();
+}
+
+EMovieSceneChannelProxyType
+UOdysseyAnimationComponentSection::CacheChannelProxy()
 {
 	FMovieSceneChannelProxyData Channels;
 	ChannelProxy = MakeShared<FMovieSceneChannelProxy>(MoveTemp(Channels));
-	return EMovieSceneChannelProxyType::Dynamic;	
+	return EMovieSceneChannelProxyType::Dynamic;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -237,6 +237,9 @@ UOdysseyAnimationComponent::RefreshMaterialTexture()
 		return;
 
 	UOdysseyAnimationPlayer* player = GetActivePlayer();
+	if (!player)
+		return;
+		
 	UTexture* texture = player->GetTexture();
 	
 	materialInstance->SetTextureParameterValueEditorOnly(FMaterialParameterInfo("AnimationTexture"), texture);

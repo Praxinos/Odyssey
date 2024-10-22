@@ -22,6 +22,9 @@ public:
 
 	UOdysseyAnimationComponentSection(const FObjectInitializer& ObjInitializer);
 
+public:
+	virtual void PostInitProperties() override;
+
 protected:
 	virtual EMovieSceneChannelProxyType CacheChannelProxy() override;
 };

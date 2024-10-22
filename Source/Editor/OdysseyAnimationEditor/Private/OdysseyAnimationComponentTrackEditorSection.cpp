@@ -9,7 +9,8 @@
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
 FOdysseyAnimationComponentTrackEditorSection::~FOdysseyAnimationComponentTrackEditorSection()
-{}
+{
+}
 
 FOdysseyAnimationComponentTrackEditorSection::FOdysseyAnimationComponentTrackEditorSection(TSharedPtr<ISequencer> InSequencer, UOdysseyAnimationComponentSection* InSection)
 	: TSubSectionMixin(InSequencer, *InSection)
@@ -47,12 +48,12 @@ FOdysseyAnimationComponentTrackEditorSection::GetLayerHeight(UOdysseyLayer* iLay
 float
 FOdysseyAnimationComponentTrackEditorSection::GetSectionHeight( const UE::Sequencer::FViewDensityInfo& ViewDensity ) const
 {
-	UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
-	UOdysseyAnimationComponent* component = track->Component;
+	UOdysseyAnimationComponent* component = GetComponent();
 	if (!component)
 		return TSubSectionMixin::GetSectionHeight(ViewDensity);
 
 	UOdysseyAnimation* animation = component->GetActiveAnimation();
+	
 	if (!animation)
 		return TSubSectionMixin::GetSectionHeight(ViewDensity);
 		
@@ -72,6 +73,15 @@ FOdysseyAnimationComponentTrackEditorSection::GetSectionHeight( const UE::Sequen
 float
 FOdysseyAnimationComponentTrackEditorSection::GetSectionGripHeight(float iSectionHeight) const
 {
+	UOdysseyAnimationComponent* component = GetComponent();
+	if (!component)
+		return TSubSectionMixin::GetSectionGripHeight(iSectionHeight);
+
+	UOdysseyAnimation* animation = component->GetActiveAnimation();
+	
+	if (!animation)
+		return TSubSectionMixin::GetSectionGripHeight(iSectionHeight);
+
 	return 25.f;
 }
 
@@ -90,19 +100,30 @@ FOdysseyAnimationComponentTrackEditorSection::GetSectionToolTip() const
 TSharedRef<SWidget>
 FOdysseyAnimationComponentTrackEditorSection::GenerateSectionWidget()
 {	
-	UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
+	mSectionWidget = SNew(SBox);
+	RebuildSectionWidget();
+    return mSectionWidget.ToSharedRef();
+}
 
-	UOdysseyAnimationComponent* component = track->Component;
+void
+FOdysseyAnimationComponentTrackEditorSection::RebuildSectionWidget()
+{
+	UOdysseyAnimationComponent* component = GetComponent();
 	if (!component)
-		return SNullWidget::NullWidget;
+		return;
 
 	UOdysseyAnimation* animation = component->GetActiveAnimation();
+
 	if (!animation)
-		return SNullWidget::NullWidget;
+	{
+		mSectionWidget->SetContent(SNullWidget::NullWidget);
+		return;
+	}
 
 	UOdysseyAnimationLayerStack* layerStack = animation->GetLayerStack();
 
-    return SNew(SVerticalBox)
+	mSectionWidget->SetContent(
+		SNew(SVerticalBox)
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
@@ -123,7 +144,8 @@ FOdysseyAnimationComponentTrackEditorSection::GenerateSectionWidget()
 			SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
 			SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked) */
 			.ExternalScrollbar( SNew(SScrollBar) )
-		];
+		]
+	);
 }
 
 void
@@ -132,7 +154,7 @@ FOdysseyAnimationComponentTrackEditorSection::Tick( const FGeometry& AllottedGeo
 	UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
 	UMovieScene* movieScene = track->GetTypedOuter<UMovieScene>();
 
-	UOdysseyAnimationComponent* component = track->Component;
+	UOdysseyAnimationComponent* component = GetComponent();
 	if (!component)
 		return;
 
@@ -140,7 +162,6 @@ FOdysseyAnimationComponentTrackEditorSection::Tick( const FGeometry& AllottedGeo
 	if (!animation)
 		return;
 
-	//FFrameNumber sequencerFramesPerSecond = movieScene->GetTickResolution().AsFrameNumber(1.0f);
 	float animationFramesPerSecond = animation->GetFramesPerSecond();
 
 	FMovieSceneFrameRange sectionRange = mSection->SectionRange;
@@ -153,4 +174,42 @@ FOdysseyAnimationComponentTrackEditorSection::Tick( const FGeometry& AllottedGeo
 	double zoom = sequencerSecondInPixels / animationSecondInPixels;
 	mTimelinePosition->SetZoom(zoom);
 }
+
+void
+FOdysseyAnimationComponentTrackEditorSection::OnSectionChanged()
+{
+	RebuildSectionWidget();
+}
+
+UOdysseyAnimationComponent*
+FOdysseyAnimationComponentTrackEditorSection::GetComponent() const
+{
+	UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
+
+	TSharedPtr<ISequencer> sequencer = GetSequencer();
+	if (!sequencer)
+		return nullptr;
+
+	TArrayView<TWeakObjectPtr<>> boundObjects = sequencer->FindObjectsInCurrentSequence(track->FindObjectBindingGuid());
+	for (TWeakObjectPtr<>& boundObjectPtr : boundObjects)
+	{
+		UObject* boundObject = boundObjectPtr.Get();
+		if (!boundObject)
+			continue;
+
+		if (!boundObject->IsA<UOdysseyAnimationComponent>())
+			continue;
+
+		UOdysseyAnimationComponent* animationComponent = Cast<UOdysseyAnimationComponent>(boundObject);
+		if (!animationComponent)
+			continue;
+
+		return animationComponent;
+	}
+
+	return nullptr;
+}
+
+
+
 #undef LOCTEXT_NAMESPACE

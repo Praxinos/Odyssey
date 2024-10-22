@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "OdysseyAnimationComponentTrack.h"
+#include "OdysseyAnimationComponentTemplate.h"
 #include "MovieScene.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationComponentTrack)
@@ -35,24 +36,15 @@ UOdysseyAnimationComponentTrack::GetDisplayName() const
 #endif
 
 UMovieSceneSection*
-UOdysseyAnimationComponentTrack::AddNewSection(FFrameNumber KeyTime)
+UOdysseyAnimationComponentTrack::AddNewSection(FFrameNumber KeyTime, float iDurationInSeconds)
 {
+
+	UMovieScene* movieScene = GetTypedOuter<UMovieScene>();
+	if (!movieScene)
+		return nullptr;
+
 	UOdysseyAnimationComponentSection* NewSection = Cast<UOdysseyAnimationComponentSection>(CreateNewSection());
-	{
-		UMovieScene* OuterMovieScene = GetTypedOuter<UMovieScene>();
-		UOdysseyAnimation* animation = Component->GetActiveAnimation();
-		float duration = 10.f;
-		if (animation)
-		{
-			FInt32Range range = animation->GetFrameRange();
-			int32 lastFrame = range.GetUpperBoundValue();
-			if (lastFrame >= 0)
-			{
-				duration = (lastFrame + 1) / animation->GetFramesPerSecond();
-			}
-		}
-		NewSection->InitialPlacement(Sections, KeyTime, OuterMovieScene->GetTickResolution().AsFrameNumber(duration).Value, 0);
-	}
+	NewSection->InitialPlacement(Sections, KeyTime, movieScene->GetTickResolution().AsFrameNumber(iDurationInSeconds).Value, 0);
 
 	AddSection(*NewSection);
 	UpdateEasing();
@@ -70,6 +62,12 @@ bool
 UOdysseyAnimationComponentTrack::SupportsMultipleRows() const
 {
 	return false;
+}
+
+FMovieSceneEvalTemplatePtr
+UOdysseyAnimationComponentTrack::CreateTemplateForSection(const UMovieSceneSection& InSection) const
+{
+	return FOdysseyAnimationComponentTemplate(*CastChecked<const UOdysseyAnimationComponentSection>(&InSection), *this);
 }
 
 #undef LOCTEXT_NAMESPACE

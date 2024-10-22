@@ -26,8 +26,13 @@ public:
 
 private:
 	float GetLayerHeight(UOdysseyLayer* iLayer) const;
+	void OnSectionChanged();
+	void RebuildSectionWidget();
+
+	UOdysseyAnimationComponent* GetComponent() const;
 
 private:
+	TSharedPtr<SBox> mSectionWidget;
 	UOdysseyAnimationComponentSection* mSection;
 	TSharedRef<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
 };
