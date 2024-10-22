@@ -27,9 +27,6 @@ void SOdysseyAnimationLayerImageVectorRow::Construct(
 {
     ensure(iAnimationLayerImageVector);
     mAnimationLayerImageVector = iAnimationLayerImageVector;
-	mOnActivateOutOfPegs = InArgs._OnActivateOutOfPegs;
-	mOnInactivateOutOfPegs = InArgs._OnInactivateOutOfPegs;
-	mOnIsOutOfPegsChecked = InArgs._OnIsOutOfPegsChecked;
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments()

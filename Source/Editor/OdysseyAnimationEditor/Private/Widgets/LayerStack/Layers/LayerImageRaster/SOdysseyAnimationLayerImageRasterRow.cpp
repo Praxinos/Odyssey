@@ -29,9 +29,6 @@ void SOdysseyAnimationLayerImageRasterRow::Construct(
 {
     ensure(iAnimationLayerImageRaster);
     mAnimationLayerImageRaster = iAnimationLayerImageRaster;
-	mOnActivateOutOfPegs = InArgs._OnActivateOutOfPegs;
-	mOnInactivateOutOfPegs = InArgs._OnInactivateOutOfPegs;
-	mOnIsOutOfPegsChecked = InArgs._OnIsOutOfPegsChecked;
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments()

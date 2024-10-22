@@ -164,6 +164,9 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
 			.TimelineCellSelection(mTimelineCellSelection.Get())
 			.TimelinePosition(mTimelinePosition.Get())
 			.HeaderHeight(HEADER_HEIGHT)
+			.OnActivateOutOfPegs(mOnActivateOutOfPegs)
+			.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
+			.OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked)
 		]
     ]
     +SVerticalBox::Slot()
@@ -209,20 +212,14 @@ SOdysseyAnimationLayerStack::OnGenerateRow(UOdysseyLayer* iLayer, const TSharedR
         return SNew(SOdysseyAnimationLayerImageRasterRow, GetTreeView().ToSharedRef(), Cast<UOdysseyAnimationLayerImageRaster>(iLayer))
 			.CurrentFrame(this, &SOdysseyAnimationLayerStack::GetCurrentFrame)
 			.TimelinePosition(mTimelinePosition.Get())
-			.TimelineCellSelection(mTimelineCellSelection.Get())
-			.OnActivateOutOfPegs(mOnActivateOutOfPegs)
-			.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
-			.OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked);
+			.TimelineCellSelection(mTimelineCellSelection.Get());
     }
     else if (layerClass == UOdysseyAnimationLayerImageVector::StaticClass())
     {
         return SNew(SOdysseyAnimationLayerImageVectorRow, GetTreeView().ToSharedRef(), Cast<UOdysseyAnimationLayerImageVector>(iLayer))
 			.CurrentFrame(this, &SOdysseyAnimationLayerStack::GetCurrentFrame)
 			.TimelinePosition(mTimelinePosition.Get())
-			.TimelineCellSelection(mTimelineCellSelection.Get())
-			.OnActivateOutOfPegs(mOnActivateOutOfPegs)
-			.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
-			.OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked);
+			.TimelineCellSelection(mTimelineCellSelection.Get());
     }
 
     return SNew(STableRow<UOdysseyLayer*>, iOwnerTable);
