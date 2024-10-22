@@ -52,33 +52,54 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
 
     UpdateTransform();
 
-    // create zoom menu
-    FMenuBuilder ZoomMenuBuilder(true, NULL);
-    {
-        FUIAction Zoom25Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 0.25));
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.25percent.name", "25%"), LOCTEXT("viewport.zoom.25percent.tooltip", "Show the texture at a quarter of its size."), FSlateIcon(), Zoom25Action);
+    mAlignWithViewport = true;
 
-        FUIAction Zoom50Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 0.5));
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.50percent.name", "50%"), LOCTEXT("viewport.zoom.50percent.tooltip", "Show the texture at half its size."), FSlateIcon(), Zoom50Action);
+    FMenuBuilder ViewportMenu(true, NULL);
 
-        FUIAction Zoom100Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 1.0));
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.100percent.name", "100%"), LOCTEXT("viewport.zoom.100percent.tooltip", "Show the texture in its original size."), FSlateIcon(), Zoom100Action);
+    ViewportMenu.AddSubMenu(
+        FText::FromString("Zoom options"),
+        FText::FromString(""),
+        FNewMenuDelegate::CreateLambda([this](FMenuBuilder& ZoomMenuBuilder)
+        {
+                FUIAction Zoom25Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 0.25));
+                ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.25percent.name", "25%"), LOCTEXT("viewport.zoom.25percent.tooltip", "Show the texture at a quarter of its size."), FSlateIcon(), Zoom25Action);
 
-        FUIAction Zoom200Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 2.0));
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.200percent.name", "200%"), LOCTEXT("viewport.zoom.200percent.tooltip", "Show the texture at twice its size."), FSlateIcon(), Zoom200Action);
+                FUIAction Zoom50Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 0.5));
+                ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.50percent.name", "50%"), LOCTEXT("viewport.zoom.50percent.tooltip", "Show the texture at half its size."), FSlateIcon(), Zoom50Action);
 
-        FUIAction Zoom400Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 4.0));
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.400percent.name", "400%"), LOCTEXT("viewport.zoom.400percent.tooltip", "Show the texture at four times its size."), FSlateIcon(), Zoom400Action);
+                FUIAction Zoom100Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 1.0));
+                ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.100percent.name", "100%"), LOCTEXT("viewport.zoom.100percent.tooltip", "Show the texture in its original size."), FSlateIcon(), Zoom100Action);
 
-        ZoomMenuBuilder.AddMenuSeparator();
+                FUIAction Zoom200Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 2.0));
+                ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.200percent.name", "200%"), LOCTEXT("viewport.zoom.200percent.tooltip", "Show the texture at twice its size."), FSlateIcon(), Zoom200Action);
 
-        FUIAction ZoomFitAction(
-            FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuFitClicked),
-            FCanExecuteAction(),
-            FIsActionChecked::CreateSP(this, &SOdysseyViewport::IsZoomMenuFitChecked)
-            );
-        ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.fit.name", "Scale To Fit"), LOCTEXT("viewport.zoom.fit.tooltip", "Scale the texture to fit the viewport."), FSlateIcon(), ZoomFitAction, NAME_None, EUserInterfaceActionType::ToggleButton);
-    }
+                FUIAction Zoom400Action(FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuEntryClicked, 4.0));
+                ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.400percent.name", "400%"), LOCTEXT("viewport.zoom.400percent.tooltip", "Show the texture at four times its size."), FSlateIcon(), Zoom400Action);
+
+                ZoomMenuBuilder.AddMenuSeparator();
+
+                FUIAction ZoomFitAction(
+                    FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleZoomMenuFitClicked),
+                    FCanExecuteAction(),
+                    FIsActionChecked::CreateSP(this, &SOdysseyViewport::IsZoomMenuFitChecked)
+                );
+                ZoomMenuBuilder.AddMenuEntry(LOCTEXT("viewport.zoom.fit.name", "Scale To Fit"), LOCTEXT("viewport.zoom.fit.tooltip", "Scale the texture to fit the viewport."), FSlateIcon(), ZoomFitAction, NAME_None, EUserInterfaceActionType::ToggleButton);
+        })
+    );
+
+    ViewportMenu.AddSubMenu(
+        FText::FromString("Flip options"),
+        FText::FromString(""),
+        FNewMenuDelegate::CreateLambda([this](FMenuBuilder& FlipMenuBuilder)
+            {
+                FUIAction AlignCenterOption(
+                    FExecuteAction::CreateSP(this, &SOdysseyViewport::HandleAlignWithViewportClicked),
+                    FCanExecuteAction(),
+                    FIsActionChecked::CreateSP(this, &SOdysseyViewport::IsAlignWithViewportChecked)
+                );
+                FlipMenuBuilder.AddMenuEntry(LOCTEXT("viewport.flip.align.name", "Align with viewport center on flip"), LOCTEXT("viewport.flip.align.tooltip", "Keep the center of the viewport at the same position when flipping it when on"), FSlateIcon(), AlignCenterOption, NAME_None, EUserInterfaceActionType::ToggleButton);
+            })
+    );
 
 
     TSharedPtr<SHorizontalBox> HorizontalBox;
@@ -289,7 +310,7 @@ SOdysseyViewport::Construct( const FArguments& InArgs )
                             .ContentPadding(FMargin(0.0))
                             .MenuContent()
                             [
-                                ZoomMenuBuilder.MakeWidget()
+                                ViewportMenu.MakeWidget()
                             ]
                     ]
              ]
@@ -447,7 +468,7 @@ SOdysseyViewport::GetTranslationFromSlidersOffsets( float InScrollOffsetFraction
 
     //Get the BoundingBox
 
-    //All calculations are done in the Transform Coodinate system
+    //All calculations are done in the Transform Coordinate system
     //So (0,0) is bottom left
     TArray<FVector2D> points;
     points.Add(mTransform.TransformPoint(FVector2D(width / 2.f, height / 2.f)));
@@ -508,6 +529,12 @@ SOdysseyViewport::HandleZoomMenuFitClicked()
 }
 
 void
+SOdysseyViewport::HandleAlignWithViewportClicked()
+{
+    ToggleAlignWithViewport();
+}
+
+void
 SOdysseyViewport::HandleRotationLeft()
 {
     RotateLeft();
@@ -546,6 +573,12 @@ bool
 SOdysseyViewport::IsZoomMenuFitChecked() const
 {
     return GetFitToViewport();
+}
+
+bool
+SOdysseyViewport::IsAlignWithViewportChecked() const
+{
+    return mAlignWithViewport;
 }
 
 void
@@ -701,6 +734,12 @@ SOdysseyViewport::ToggleFitToViewport()
     SetFitToViewport(!mIsFitToViewport);
 }
 
+void
+SOdysseyViewport::ToggleAlignWithViewport()
+{
+    mAlignWithViewport = !mAlignWithViewport;
+}
+
 
 double SOdysseyViewport::GetRotation() const
 {
@@ -774,12 +813,25 @@ void SOdysseyViewport::RotateRight()
 void SOdysseyViewport::FlipHorizontal()
 {
     mFlipStateUV.X = int(mFlipStateUV.X + 1) % 2;
+
+    if( mAlignWithViewport )
+    {
+        HandleHorizontalScrollBarScrolled(ScrollbarSpaceRatio - mHorizontalScrollBar->DistanceFromTop());
+        SetRotation(-mRotation);
+    }
+
     UpdateTransform();
 }
 
 void SOdysseyViewport::FlipVertical()
 {
     mFlipStateUV.Y = int(mFlipStateUV.Y + 1) % 2;
+
+    if (mAlignWithViewport)
+    {
+        HandleVerticalScrollBarScrolled(ScrollbarSpaceRatio - mVerticalScrollBar->DistanceFromTop());
+    }
+
     UpdateTransform();
 }
 

@@ -88,6 +88,9 @@ public:
     /* Toggle the Fit To Viewport option state */
     void            ToggleFitToViewport();
 
+    /* Toggle the option to have the center of the viewport be the reference point while flipping instead of the center of the texture */
+    void            ToggleAlignWithViewport();
+
     /* Returns the dimensions of the texture when displayed in the viewport (this is not a AABB) */
     void            ComputeTextureDisplayDimensions(uint32& Width, uint32& Height) const;
 
@@ -149,9 +152,6 @@ private:
     /* Get the Horizontal Scrolbar Widget */
     TSharedPtr<SScrollBar>              GetHorizontalScrollBar()   const;
 
-private:
-    //Private probably unneeded API
-
     /* Returns the expected translation from the given scrollbars offsets */
     FVector2D                   GetTranslationFromSlidersOffsets(float InScrollOffsetFractionX, float InScrollOffsetFractionY);
 
@@ -174,6 +174,9 @@ private:
     /* Return the zoom menu Fit To Viewport option state */
     bool            IsZoomMenuFitChecked() const;
 
+    /* Return the align with viewport option state */
+    bool            IsAlignWithViewportChecked() const;
+
     /* Return the Texture Infos to display */
     FText           GetTextureInfosValue() const;
 
@@ -188,6 +191,9 @@ private:
 
     /* Handles the zoom menu Fit To Viewport option clicked event */
     void            HandleZoomMenuFitClicked();
+
+    /* Handles the align with viewport option when flipping */
+    void            HandleAlignWithViewportClicked();
 
     /* Handles the zoom slider changed event */
     void            HandleZoomSliderChanged( float NewValue );
@@ -221,7 +227,7 @@ private:
     TSharedPtr<SSpinBox<float>>         mZoomSpinBox;
     FTransform2D                        mTransform;
     bool                                mIsFitToViewport;
-
+    bool                                mAlignWithViewport; // Keep the center of the viewport at the same position when flipping it when on.
 
     /* The scale applied to the viewport */
     double                              mZoom;
