@@ -100,10 +100,6 @@ FOdysseyAnimationComponentTrackEditorSection::GenerateSectionWidget()
 	if (!animation)
 		return SNullWidget::NullWidget;
 
-	UOdysseyAnimationPlayer* player = component->GetActivePlayer();
-	if (!player)
-		return SNullWidget::NullWidget;
-
 	UOdysseyAnimationLayerStack* layerStack = animation->GetLayerStack();
 
     return SNew(SVerticalBox)
@@ -121,7 +117,6 @@ FOdysseyAnimationComponentTrackEditorSection::GenerateSectionWidget()
 		[
 			SNew( SOdysseyAnimationTimelineTreeView )
 			.LayerStack(layerStack)
-			.Player(player)
 			.TimelinePosition(mTimelinePosition)
 			.HeaderHeight(20.f)
 			/* SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)

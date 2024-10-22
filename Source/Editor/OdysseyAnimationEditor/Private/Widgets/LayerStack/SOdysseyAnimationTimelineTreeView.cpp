@@ -89,17 +89,4 @@ SOdysseyAnimationTimelineTreeView::OnGenerateRow(UOdysseyLayer* iLayer, const TS
     return SNew(STableRow<UOdysseyLayer*>, iOwnerTable);;
 }
 
-int
-SOdysseyAnimationTimelineTreeView::GetCurrentFrame() const
-{
-	if (!mPlayer)
-		return 0;
-
-	UOdysseyAnimation* animation = mPlayer->Animation;
-	if (!animation)
-		return 0;
-
-	return animation->GetFrameIndexAtTime(mPlayer->GetCurrentTime());
-}
-
 #undef LOCTEXT_NAMESPACE

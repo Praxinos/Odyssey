@@ -121,7 +121,7 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 FReply 
 SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {	
-	if (!mIsScrubbing && MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	if (mPlayer && !mIsScrubbing && MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
 		mIsScrubbing = true;
 
@@ -143,7 +143,7 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeometry, 
 FReply
 SOdysseyAnimationTimelineHeader::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	if(mIsScrubbing)
+	if(mPlayer && mIsScrubbing)
 	{
 		const float minScrub = 0.0f;
 		float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
@@ -159,7 +159,7 @@ SOdysseyAnimationTimelineHeader::OnMouseMove(const FGeometry& MyGeometry, const 
 FReply
 SOdysseyAnimationTimelineHeader::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	if (mIsScrubbing)
+	if (mPlayer && mIsScrubbing)
 	{
 		const float minScrub = 0.0f;
 		float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;

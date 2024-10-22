@@ -41,7 +41,6 @@ private:
 	//Events
 	TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
     void OnGetChildren(UOdysseyLayer* iParent, TArray<UOdysseyLayer*>& oChildren) const;
-	int GetCurrentFrame() const;
 
 private:
 	UOdysseyAnimationLayerStack* mLayerStack;
