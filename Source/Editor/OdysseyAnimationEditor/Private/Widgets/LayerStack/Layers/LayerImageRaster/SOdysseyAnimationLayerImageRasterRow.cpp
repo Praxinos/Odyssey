@@ -30,17 +30,21 @@ SOdysseyAnimationLayerImageRasterRow::SOdysseyAnimationLayerImageRasterRow()
 void SOdysseyAnimationLayerImageRasterRow::Construct(
     const FArguments& InArgs,
     const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
-    FOdysseyAnimationEditorExtension* iExtension,
     UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
 )
 {
     ensure(iAnimationLayerImageRaster);
     mAnimationLayerImageRaster = iAnimationLayerImageRaster;
+	mOnActivateOutOfPegs = InArgs._OnActivateOutOfPegs;
+	mOnInactivateOutOfPegs = InArgs._OnInactivateOutOfPegs;
+	mOnIsOutOfPegsChecked = InArgs._OnIsOutOfPegsChecked;
 
     SOdysseyAnimationLayerRow::Construct(
-        SOdysseyAnimationLayerRow::FArguments(),
+        SOdysseyAnimationLayerRow::FArguments()
+			.CurrentFrame(InArgs._CurrentFrame)
+			.TimelinePosition(InArgs._TimelinePosition)
+			.TimelineCellSelection(InArgs._TimelineCellSelection),
         iOwnerTableView,
-        iExtension,
 		iAnimationLayerImageRaster
     );
 
@@ -160,8 +164,13 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageRasterRow::GenerateTimelineWidget()
 {
-    return SNew(SOdysseyAnimationLayerImageRasterTimeline, GetExtension(), mAnimationLayerImageRaster)
-        .DisplayOptions(this, &SOdysseyAnimationLayerImageRasterRow::DisplayOptions);
+    return SNew(SOdysseyAnimationLayerImageRasterTimeline, mAnimationLayerImageRaster)
+        .DisplayOptions(this, &SOdysseyAnimationLayerImageRasterRow::DisplayOptions)
+		.TimelinePosition(mTimelinePosition)
+		.TimelineCellSelection(mTimelineCellSelection)
+		.OnActivateOutOfPegs(mOnActivateOutOfPegs)
+		.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
+		.OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked);
 }
 
 void

@@ -6,8 +6,6 @@
 #include "CoreMinimal.h"
 #include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerRow.h"
 
-class FOdysseyAnimationEditorExtension;
-
 /**
  * Implements a layer row widget
  */
@@ -17,6 +15,9 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerFolderRow
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerFolderRow)
         {}
+		SLATE_ATTRIBUTE(int, CurrentFrame)
+		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
     SLATE_END_ARGS()
 
 public:
@@ -25,7 +26,6 @@ public:
     void Construct(
         const FArguments& iArgs,
         const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
-        FOdysseyAnimationEditorExtension* iExtension,
         class UOdysseyAnimationLayerFolder* iAnimationLayerFolder
     );
     

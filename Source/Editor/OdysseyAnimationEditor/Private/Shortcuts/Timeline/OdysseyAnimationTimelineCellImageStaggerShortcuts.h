@@ -11,7 +11,7 @@ class FOdysseyAnimationEditorExtension;
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineCellImageStaggerShortcuts
 {
 public:
-    FOdysseyAnimationTimelineCellImageStaggerShortcuts(UOdysseyLayerStack* iLayerStack, FOdysseyAnimationEditorExtension* iAnimationExtension);
+    FOdysseyAnimationTimelineCellImageStaggerShortcuts(UOdysseyLayerStack* iLayerStack, TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> iTimelineCellSelection);
 
 public:
     //Shortcuts
@@ -24,5 +24,5 @@ public:
 
 private:
     UOdysseyLayerStack* mLayerStack;
-    FOdysseyAnimationEditorExtension* mAnimationExtension;
+	TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> mTimelineCellSelection;
 };

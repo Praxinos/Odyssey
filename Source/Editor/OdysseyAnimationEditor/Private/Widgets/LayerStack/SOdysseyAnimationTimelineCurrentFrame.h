@@ -5,8 +5,6 @@
 
 #include "CoreMinimal.h"
 
-class FOdysseyAnimationEditorExtension;
-
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineCurrentFrame
     : public SLeafWidget
 {
@@ -15,15 +13,14 @@ public:
         {
             _Visibility = EVisibility::SelfHitTestInvisible;
         }
+		SLATE_ATTRIBUTE(int, CurrentFrame)
+		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
 public:
     SOdysseyAnimationTimelineCurrentFrame();
 
-    void Construct(
-        const FArguments& iArgs,
-        FOdysseyAnimationEditorExtension* iExtension
-    );
+    void Construct(const FArguments& iArgs);
 
 public:
     virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
@@ -39,5 +36,6 @@ public:
     virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 
 private:
-    FOdysseyAnimationEditorExtension*            mExtension;
+    TAttribute<int> mCurrentFrame;
+	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
 };

@@ -21,25 +21,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::FOdysseyAnimationGlobalTimelineShortcu
 void
 FOdysseyAnimationGlobalTimelineShortcuts::MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList)
 {
-    //Tools actions
-    iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().ActivateTimelineSelectionTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_ActivateTimelineSelectionTool)
-    );
-
-    iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().ActivateTimelineMoveTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_ActivateTimelineMoveTool)
-    );
-    
-    iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().ActivateTimelineCutTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_ActivateTimelineCutTool)
-    );
-
-    //Navigation Actions
-
-    
+    //Navigation Actions   
     iCommandList->MapAction(
         FOdysseyAnimationEditorCommands::Get().NavigateToNextFrame,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextFrame)
@@ -112,36 +94,6 @@ FOdysseyAnimationGlobalTimelineShortcuts::MapActionsToCommandList(TSharedRef<FUI
 			FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_Flip, i )
 		);
 	}
-}
-
-void
-FOdysseyAnimationGlobalTimelineShortcuts::Action_ActivateTimelineSelectionTool()
-{
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    extension->Timeline()->SetSelectedTool(EOdysseyTimelineTool::Selection);
-}
-
-void
-FOdysseyAnimationGlobalTimelineShortcuts::Action_ActivateTimelineMoveTool()
-{
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    extension->Timeline()->SetSelectedTool(EOdysseyTimelineTool::Move);
-}
-
-void
-FOdysseyAnimationGlobalTimelineShortcuts::Action_ActivateTimelineCutTool()
-{
-    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
-    if (!extension)
-        return;
-
-    extension->Timeline()->SetSelectedTool(EOdysseyTimelineTool::Cut);
 }
 
 void

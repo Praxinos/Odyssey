@@ -9,7 +9,6 @@
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyLayerStack.h"
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyAnimation.h"
 #include "ULISLoaderModule.h"
 #include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
@@ -19,9 +18,9 @@
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
-FOdysseyAnimationTimelineCellImageRasterShortcuts::FOdysseyAnimationTimelineCellImageRasterShortcuts(UOdysseyLayerStack* iLayerStack, FOdysseyAnimationEditorExtension* iAnimationExtension)
+FOdysseyAnimationTimelineCellImageRasterShortcuts::FOdysseyAnimationTimelineCellImageRasterShortcuts(UOdysseyLayerStack* iLayerStack, TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> iTimelineCellSelection)
     : mLayerStack(iLayerStack)
-    , mAnimationExtension(iAnimationExtension)
+	, mTimelineCellSelection(iTimelineCellSelection)
 {
 }
 
@@ -47,7 +46,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
 
     UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return;
 
@@ -71,13 +70,13 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     progressBar.EnterProgressFrame();
 
     //Convert Selected Stagger Cells to ImageRaster Cells
-	FOdysseyAnimationTimelineCellImageStaggerShortcuts staggerShortcuts(mLayerStack, mAnimationExtension);
+	FOdysseyAnimationTimelineCellImageStaggerShortcuts staggerShortcuts(mLayerStack, mTimelineCellSelection);
     staggerShortcuts.Action_ConvertToReferenceCells();
 
     progressBar.EnterProgressFrame();
 
     //Get the selected cells again to ensure having the converted cells
-    selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    selectedCells = mTimelineCellSelection->GetSelectedCells();
     TArray<UOdysseyAnimationCell*> cellsToSelect = selectedCells;
 
     //Cross Fade all selected cells
@@ -200,7 +199,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
             cellsToSelect.Append(rasterCells);
         }
     }
-    mAnimationExtension->Timeline()->SetSelectedCells(cellsToSelect);
+    mTimelineCellSelection->SetSelectedCells(cellsToSelect);
 }
 
 bool
@@ -215,7 +214,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::CanAction_CrossFade()
 
     UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(mLayerStack->CurrentLayer.Get());
 
-    const TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    const TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return false;
 

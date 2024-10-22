@@ -12,22 +12,25 @@
 
 SOdysseyAnimationLayerStackTreeView::SOdysseyAnimationLayerStackTreeView()
     : mTimelineShortcuts(nullptr)
-    , mExtension(nullptr)
 {
-}
-
-FOdysseyAnimationEditorExtension*
-SOdysseyAnimationLayerStackTreeView::GetAnimationEditorExtension() const
-{
-    return mExtension;
 }
 
 void
-SOdysseyAnimationLayerStackTreeView::Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iAnimationExtension)
+SOdysseyAnimationLayerStackTreeView::Construct(const FArguments& InArgs)
 {
-    SOdysseyLayerStackTreeView::Construct(InArgs);
-    mExtension = iAnimationExtension;
-    mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(GetLayerStack(), iAnimationExtension);
+	mTimelineCellSelection = InArgs._TimelineCellSelection;
+
+    SOdysseyLayerStackTreeView::Construct(
+		SOdysseyLayerStackTreeView::FArguments()
+			.LayerStack(InArgs._LayerStack)
+			.AdditionalColumns(InArgs._AdditionalColumns)
+			.HeaderFillWidth(InArgs._HeaderFillWidth)
+			.HeaderFixedWidth(InArgs._HeaderFixedWidth)
+			.HeaderManualWidth(InArgs._HeaderManualWidth)
+			.HeaderFillSized(InArgs._HeaderFillSized)
+			.OnGenerateRow(InArgs._OnGenerateRow)
+	);
+    mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(InArgs._LayerStack, mTimelineCellSelection);
 }
 
 FReply
@@ -42,14 +45,14 @@ SOdysseyAnimationLayerStackTreeView::OnKeyDown( const FGeometry& iGeometry, cons
 void
 SOdysseyAnimationLayerStackTreeView::Private_SignalSelectionChanged(ESelectInfo::Type SelectInfo)
 {
-    mExtension->Timeline()->SetSelectedCells({});
+    mTimelineCellSelection->SetSelectedCells({});
     SOdysseyLayerStackTreeView::Private_SignalSelectionChanged(SelectInfo);
 }
 
 FReply
 SOdysseyAnimationLayerStackTreeView::OnFocusReceived(const FGeometry& MyGeometry, const FFocusEvent& InFocusEvent)
 {
-    mExtension->Timeline()->SetSelectedCells({});
+    mTimelineCellSelection->SetSelectedCells({});
     return SOdysseyLayerStackTreeView::OnFocusReceived(MyGeometry, InFocusEvent);
 }
 
@@ -73,11 +76,7 @@ SOdysseyAnimationLayerStackTreeView::ExtendContextMenu()
 
 void
 SOdysseyAnimationLayerStackTreeView::ExtendContextMenuLayerSection(FMenuBuilder& iMenuBuilder)
-{
-    UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
-    if ( !layerStack )
-        return;
-    
+{   
     TArray<UOdysseyLayer*> selectedLayers = GetSelectedItems();
     if (selectedLayers.Num() <= 0)
         return;
@@ -108,10 +107,8 @@ SOdysseyAnimationLayerStackTreeView::ExtendContextMenuLayerSection(FMenuBuilder&
 void
 SOdysseyAnimationLayerStackTreeView::Action_ConvertLayerToRasterLayer()
 {
-    UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
-    if ( !layerStack )
-        return;
-    
+	UOdysseyLayerStack* layerStack = GetLayerStack();
+
     TArray<UOdysseyLayer*> selectedLayers = GetSelectedItems();
     if (selectedLayers.Num() <= 0)
         return;

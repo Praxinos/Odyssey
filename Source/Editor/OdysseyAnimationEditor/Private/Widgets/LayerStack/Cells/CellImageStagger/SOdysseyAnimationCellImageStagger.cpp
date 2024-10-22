@@ -4,7 +4,6 @@
 #include "Widgets/LayerStack/Cells/CellImageStagger/SOdysseyAnimationCellImageStagger.h"
 #include "Widgets/Input/SSpinBox.h"
 #include "OdysseyStyleSet.h"
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
 
@@ -12,12 +11,12 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 void
-SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyAnimationCellImageStagger* iCell, FOdysseyAnimationEditorExtension* iExtension)
+SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyAnimationCellImageStagger* iCell)
 {
 	mSetReachTransactionName = (LOCTEXT("cell-image-stagger.set-reach", "Set Stagger Cell Reach"));
-    mExtension = iExtension;
     mCell = iCell;
     mShowContent = iArgs._ShowContent;
+	mTimelinePosition = iArgs._TimelinePosition;
         
     FSlateColor behaviourColor( FOdysseyStyle::GetColor( "Animation.CellImageStagger.BehaviourColor" ) );
 
@@ -73,7 +72,7 @@ SOdysseyAnimationCellImageStagger::OnPaint(const FPaintArgs& Args, const FGeomet
     const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
 	const float height = AllottedGeometry.GetLocalSize().Y;  
 	const float width = AllottedGeometry.GetLocalSize().X;
-	const float frameSize = mExtension->Timeline()->GetFrameWidth();
+	const float frameSize = mTimelinePosition->GetFrameSize();
 
     int reach = GetClampedReach();
     int staggerLength = GetStaggerLength();

@@ -5,8 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerRow.h"
-
-class FOdysseyAnimationEditorExtension;
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
 
 /**
  * Implements a layer row widget
@@ -17,6 +16,12 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageRasterRow
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageRasterRow)
         {}
+		SLATE_ATTRIBUTE(int, CurrentFrame)
+		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
+		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
+		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
+		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
     SLATE_END_ARGS()
 
 public:
@@ -26,7 +31,6 @@ public:
     void Construct(
         const FArguments& iArgs,
         const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
-        FOdysseyAnimationEditorExtension* iExtension,
         class UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
     );
 
@@ -51,4 +55,7 @@ private:
 private:
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
     FText mSetOpacityTransactionName;
+	SOdysseyAnimationTimelineLightTableKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
+	FSimpleDelegate mOnInactivateOutOfPegs;
+	SOdysseyAnimationTimelineLightTableKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
 };

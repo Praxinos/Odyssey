@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 
 class SOdysseyAnimationTimelineScrollPanel;
-class FOdysseyAnimationEditorExtension;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineScrollBox
     : public SCompoundWidget
@@ -18,26 +17,21 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineScrollBox)
         {}
         SLATE_SLOT_ARGUMENT( FSlot, Slots )
+		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
 public:
     SOdysseyAnimationTimelineScrollBox();
 
-    void Construct(
-        const FArguments& iArgs,
-        FOdysseyAnimationEditorExtension* iExtension
-    );
+    void Construct(const FArguments& iArgs);
 
 public:
     /** @return a new slot. Slots contain children */
     static FSlot::FSlotArguments Slot();
-
-    FOdysseyAnimationEditorExtension* GetExtension() const;
     void ClearChildren();
     FScopedWidgetSlotArguments AddChild();
 
 private:
-    FOdysseyAnimationEditorExtension*            mExtension;
     TSharedPtr<SOdysseyAnimationTimelineScrollPanel> mPanel;
 };
 
@@ -47,6 +41,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineScrollPanel
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineScrollPanel)
         {}
+		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
 public:
@@ -54,8 +49,7 @@ public:
 
     void Construct(
         const FArguments& iArgs,
-        TArray<SOdysseyAnimationTimelineScrollBox::FSlot::FSlotArguments> iSlots,
-        FOdysseyAnimationEditorExtension* iExtension
+        TArray<SOdysseyAnimationTimelineScrollBox::FSlot::FSlotArguments> iSlots
     );
 
 public:
@@ -78,8 +72,7 @@ private:
     float ArrangeChildHorizontalAndReturnOffset(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren, const SOdysseyAnimationTimelineScrollBox::FSlot& ThisSlot, float CurChildOffset) const;
 
 private:
-    FOdysseyAnimationEditorExtension*            mExtension;
-
 	//State
+	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
 	TPanelChildren<SOdysseyAnimationTimelineScrollBox::FSlot>   mChildren;
 };

@@ -2,22 +2,18 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineCurrentFrame.h"
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationPlayer.h"
 
 SOdysseyAnimationTimelineCurrentFrame::SOdysseyAnimationTimelineCurrentFrame()
-	: mExtension(nullptr)
 {
 }
 
 void
-SOdysseyAnimationTimelineCurrentFrame::Construct(
-    const FArguments& iArgs,
-	FOdysseyAnimationEditorExtension* iExtension
-)
+SOdysseyAnimationTimelineCurrentFrame::Construct(const FArguments& iArgs)
 {
-    mExtension = iExtension;
+    mCurrentFrame = iArgs._CurrentFrame;
+	mTimelinePosition = iArgs._TimelinePosition;
 }
 
 int32
@@ -27,13 +23,13 @@ SOdysseyAnimationTimelineCurrentFrame::OnPaint(const FPaintArgs& Args, const FGe
 
 	const float height = AllottedGeometry.GetLocalSize().Y;
 	const float width = AllottedGeometry.GetLocalSize().X;
-	const float frameSize = mExtension->Timeline()->GetFrameWidth();
+	const float frameSize = mTimelinePosition->GetFrameSize();
 
 	FLinearColor lineColor = FLinearColor::Red;
 	lineColor.A = 0.3f;
 
-	int currentFrame = mExtension->Animation()->GetFrameIndexAtTime(mExtension->Player()->GetCurrentTime());
-	float currentFramePos = mExtension->Timeline()->FrameToMousePosition(currentFrame);
+	int currentFrame = mCurrentFrame.Get();
+	float currentFramePos = mTimelinePosition->FrameToMousePosition(currentFrame);
 
 	FSlateDrawElement::MakeBox(
 		OutDrawElements,

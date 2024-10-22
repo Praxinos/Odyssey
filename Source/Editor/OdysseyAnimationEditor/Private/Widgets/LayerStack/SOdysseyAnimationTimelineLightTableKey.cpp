@@ -12,17 +12,21 @@
 #include "SOdysseyAnimationTimelineSection.h"
 
 void
-SOdysseyAnimationTimelineLightTableKey::Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension)
+SOdysseyAnimationTimelineLightTableKey::Construct(const FArguments& InArgs)
 {
-	mExtension = iExtension;
 	mCell = InArgs._Cell;
 	mKey = InArgs._Key;
+
+	mOnActivateOutOfPegs = InArgs._OnActivateOutOfPegs;
+	mOnInactivateOutOfPegs = InArgs._OnInactivateOutOfPegs;
+	mOnIsOutOfPegsChecked = InArgs._OnIsOutOfPegsChecked;
 
 	const FCheckBoxStyle* checkboxStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.ToggleButton");
 
 	ChildSlot
 	[
-		SNew(SOdysseyAnimationTimelineSection, mExtension)
+		SNew(SOdysseyAnimationTimelineSection)
+		.TimelinePosition(InArgs._TimelinePosition)
 		.WidthInFrames(1)
 		[
 			SNew(SVerticalBox)
@@ -75,49 +79,25 @@ SOdysseyAnimationTimelineLightTableKey::GetOutOfPegsButtonImage() const
 void
 SOdysseyAnimationTimelineLightTableKey::OnOutOfPegsCheckStateChanged(ECheckBoxState iValue)
 {
-	FOdysseyPainterEditor* editor = mExtension->GetEditor();
-	if (!editor)
-		return;
-
 	if (iValue == ECheckBoxState::Checked)
 	{
-		UOdysseyAnimationCell* cell = mCell.Get();
-		if (!cell)
-			return;
-
-		mExtension->GetOutOfPegsTool()->SetCell(cell);
-		editor->ActivateTemporaryTool(mExtension->GetOutOfPegsTool());
+		if (mOnActivateOutOfPegs.IsBound())
+			mOnActivateOutOfPegs.Execute(mCell.Get());
 	}
 	else
 	{
-		editor->InactivateTemporaryTool();
+		if (mOnInactivateOutOfPegs.IsBound())
+			mOnInactivateOutOfPegs.Execute();
 	}
 }
 
 ECheckBoxState
 SOdysseyAnimationTimelineLightTableKey::IsOutOfPegsChecked() const
 {
-	FOdysseyPainterEditor* editor = mExtension->GetEditor();
-	if (!editor)
-		return ECheckBoxState::Unchecked;
+	if (mOnIsOutOfPegsChecked.IsBound())
+		return mOnIsOutOfPegsChecked.Execute(mCell.Get());
 
-	UOdysseyPainterEditorTool* tool = editor->GetCurrentTool();
-	if (!tool)
-		return ECheckBoxState::Unchecked;
-
-	UOdysseyAnimationCell* cell = mCell.Get();
-	if (!cell)
-		return ECheckBoxState::Unchecked;
-
-	bool isToolActive = tool->IsA(UOdysseyAnimationEditorOutOfPegsTool::StaticClass());
-	if (!isToolActive)
-		return ECheckBoxState::Unchecked;
-
-	UOdysseyAnimationEditorOutOfPegsTool* outOfPegsTool = Cast<UOdysseyAnimationEditorOutOfPegsTool>(tool);
-	if (outOfPegsTool->GetCell() != cell)
-		return ECheckBoxState::Unchecked;
-		
-	return ECheckBoxState::Checked;
+	return ECheckBoxState::Unchecked;
 }
 
 void

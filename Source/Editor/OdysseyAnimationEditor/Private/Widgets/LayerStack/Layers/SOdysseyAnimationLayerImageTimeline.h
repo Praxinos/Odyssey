@@ -5,8 +5,8 @@
 
 #include "CoreMinimal.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
 
-class FOdysseyAnimationEditorExtension;
 class UOdysseyAnimationLayer;
 class FOdysseyAnimationTimelineCellsShortcuts;
 class FOdysseyAnimationTimelineCellImageStaggerShortcuts;
@@ -26,12 +26,16 @@ public:
         : _DisplayOptions(false)
         {}
         SLATE_ATTRIBUTE(bool, DisplayOptions)
+		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
+		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
+		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
+		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
     SLATE_END_ARGS()
 
 protected:
     void Construct(
-        const FArguments& iArgs, 
-        FOdysseyAnimationEditorExtension* iExtension,
+        const FArguments& iArgs,
         UOdysseyAnimationLayer* iLayer
     );
 
@@ -84,8 +88,10 @@ private:
     FReply OnContextMenuPlusButtonClicked();
 
 protected:
-    FOdysseyAnimationEditorExtension* mExtension;
     UOdysseyAnimationLayer* mLayer;
+	TSharedPtr<FOdysseyAnimationTimelineTool> mTool;
+	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+	TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> mTimelineCellSelection;
 
     enum eDragState
     {

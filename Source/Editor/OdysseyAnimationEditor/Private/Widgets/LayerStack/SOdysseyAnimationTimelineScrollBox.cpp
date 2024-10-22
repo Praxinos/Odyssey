@@ -2,7 +2,6 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 
 SOdysseyAnimationTimelineScrollBox::FSlot::FSlotArguments
 SOdysseyAnimationTimelineScrollBox::Slot()
@@ -11,29 +10,20 @@ SOdysseyAnimationTimelineScrollBox::Slot()
 }
 
 SOdysseyAnimationTimelineScrollBox::SOdysseyAnimationTimelineScrollBox()
-	: mExtension(nullptr)
 {
 }
 
 void
 SOdysseyAnimationTimelineScrollBox::Construct(
-    const FArguments& iArgs,
-	FOdysseyAnimationEditorExtension* iExtension
+    const FArguments& iArgs
 )
 {
-    mExtension = iExtension;
-
 	ChildSlot
 	[
-		SAssignNew(mPanel, SOdysseyAnimationTimelineScrollPanel, MoveTemp(const_cast<TArray<FSlot::FSlotArguments>&>(iArgs._Slots)),  iExtension)
+		SAssignNew(mPanel, SOdysseyAnimationTimelineScrollPanel, MoveTemp(const_cast<TArray<FSlot::FSlotArguments>&>(iArgs._Slots)))
+		.TimelinePosition(iArgs._TimelinePosition)
 		.Clipping(EWidgetClipping::ClipToBounds)
 	];
-}
-
-FOdysseyAnimationEditorExtension*
-SOdysseyAnimationTimelineScrollBox::GetExtension() const
-{
-    return mExtension;
 }
 
 void
@@ -60,11 +50,10 @@ SOdysseyAnimationTimelineScrollPanel::SOdysseyAnimationTimelineScrollPanel()
 void
 SOdysseyAnimationTimelineScrollPanel::Construct(
     const FArguments& iArgs,
-    TArray<SOdysseyAnimationTimelineScrollBox::FSlot::FSlotArguments> iSlots,
-	FOdysseyAnimationEditorExtension* iExtension
+    TArray<SOdysseyAnimationTimelineScrollBox::FSlot::FSlotArguments> iSlots
 )
 {
-    mExtension = iExtension;
+	mTimelinePosition = iArgs._TimelinePosition;
 	mChildren.AddSlots(MoveTemp(iSlots));
 }
 
@@ -107,7 +96,8 @@ void
 SOdysseyAnimationTimelineScrollPanel::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const
 {
 	float scrollPadding = AllottedGeometry.GetLocalSize().X;
-	float currentChildOffset = -mExtension->Timeline()->GetOffset() * mExtension->Timeline()->GetFrameWidth() + mExtension->Timeline()->GetPadding();
+	float padding = FOdysseyStyle::GetFloat(TEXT("Animation.Timeline.Padding"));
+	float currentChildOffset = -mTimelinePosition->GetOffset() * mTimelinePosition->GetFrameSize() + padding;
 
 	for (int32 SlotIndex = 0; SlotIndex < mChildren.Num(); ++SlotIndex)
 	{

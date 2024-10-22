@@ -5,6 +5,13 @@
 #include "OdysseyAnimationComponentTrack.h"
 #include "OdysseyAnimationComponentSection.h"
 #include "SequencerUtilities.h"
+#include "MVVM/Extensions/IOutlinerExtension.h"
+#include "MVVM/Extensions/ITrackExtension.h"
+#include "MVVM/ViewModels/EditorViewModel.h"
+#include "MVVM/ViewModels/OutlinerColumns/OutlinerColumnTypes.h"
+#include "MVVM/ViewModels/SequencerEditorViewModel.h"
+#include "MVVM/ViewModelPtr.h"
+#include "MVVM/Views/SOutlinerItemViewBase.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -166,13 +173,41 @@ FOdysseyAnimationComponentTrackEditor::AddAnimationTrackKeyInternal(FFrameNumber
 }
 
 TSharedPtr<SWidget>
-FOdysseyAnimationComponentTrackEditor::BuildOutlinerEditWidget( const FGuid& ObjectBinding, UMovieSceneTrack* Track, const FBuildEditWidgetParams& Params )
+FOdysseyAnimationComponentTrackEditor::BuildOutlinerColumnWidget(const FBuildColumnWidgetParams& iParams, const FName& iColumnName)
 {
-	//UOdysseyAnimationComponentTrack* MaterialTrack = Cast<UOdysseyAnimationComponentTrack>(Track);
-	//FOnGetContent MenuContent = FOnGetContent::CreateSP(this, &FMaterialTrackEditor::OnGetAddMenuContent, ObjectBinding, MaterialTrack, Params.TrackInsertRowIndex);
+	UMovieSceneTrack* track = iParams.TrackModel->GetTrack();
+	::UE::Sequencer::TViewModelPtr< ::UE::Sequencer::FSequencerEditorViewModel > editorViewModel = iParams.Editor->CastThisShared< ::UE::Sequencer::FSequencerEditorViewModel >();
+	::UE::Sequencer::TViewModelPtr<::UE::Sequencer::IOutlinerExtension>        outlinerExtension = iParams.ViewModel.ImplicitCast();
+	if (!track || !editorViewModel || !outlinerExtension)
+		return SNullWidget::NullWidget;
 
-	return SNew(STextBlock)
-		.Text(FText::FromString("Coucou")); //UE::Sequencer::MakeAddButton(LOCTEXT( "AddParameterButton", "Parameter" ), MenuContent, Params.ViewModel);
+	if (iColumnName == ::UE::Sequencer::FCommonOutlinerNames::Edit)
+		return nullptr;
+
+	if (iColumnName == ::UE::Sequencer::FCommonOutlinerNames::Add)
+		return nullptr;
+
+	if (iColumnName == ::UE::Sequencer::FCommonOutlinerNames::Label)
+	{
+		return SNew(STextBlock)
+			.Text(FText::FromString("Label"));
+		return SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			[
+				SNew(::UE::Sequencer::SOutlinerItemViewBase, outlinerExtension, iParams.Editor, iParams.TreeViewRow)
+			]
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			[
+				SNew(SOdysseyAnimationLayerStack)
+			];
+		
+	}
+
+	
+
+	return FMovieSceneTrackEditor::BuildOutlinerColumnWidget(iParams, iColumnName);
 }
 
 class FOdysseyAnimationComponentSection

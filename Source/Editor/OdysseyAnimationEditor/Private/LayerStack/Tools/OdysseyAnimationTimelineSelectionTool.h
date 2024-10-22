@@ -5,15 +5,15 @@
 
 #include "LayerStack/Tools/OdysseyAnimationTimelineTool.h"
 
-class FOdysseyAnimationEditorTimeline;
-class UOdysseyAnimationCell;
+class FOdysseyAnimationEditorTimelineCellSelection;
+class FOdysseyAnimationEditorTimelinePosition;
 
 class FOdysseyAnimationTimelineSelectionTool
     : public FOdysseyAnimationTimelineTool
 {
 public:
     virtual ~FOdysseyAnimationTimelineSelectionTool();
-    FOdysseyAnimationTimelineSelectionTool(FOdysseyAnimationEditorTimeline* iTimelineParams);
+    FOdysseyAnimationTimelineSelectionTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationEditorTimelineCellSelection> iTimelineCellSelection);
 
 public:
     virtual FReply OnMouseButtonDown(const FMouseEventParams& iParams) override;
@@ -53,7 +53,8 @@ private:
         NonContiguous
     };
 
-    FOdysseyAnimationEditorTimeline* mTimelineParams;
+    TSharedRef<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+	TSharedRef<FOdysseyAnimationEditorTimelineCellSelection> mTimelineCellSelection;
 	bool mIsSelecting = false;
 	bool mIsDragDetected = false;
     bool mIsDragnDrop = false;

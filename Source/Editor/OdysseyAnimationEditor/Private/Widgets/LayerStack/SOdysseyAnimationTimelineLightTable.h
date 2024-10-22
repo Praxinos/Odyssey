@@ -5,9 +5,9 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyImageRenderingAbility.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
 
 class UOdysseyAnimationLayer;
-class FOdysseyAnimationEditorExtension;
 class UOdysseyAnimation;
 class UOdysseyAnimationCell;
 
@@ -20,12 +20,16 @@ public:
 public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTable)
 	{}
+		SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
+		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
+		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
+		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
 	SLATE_END_ARGS()
 
 	void Construct(
 		const FArguments& InArgs,
-		UOdysseyAnimationLayer* iLayer,
-		FOdysseyAnimationEditorExtension* iExtension);
+		UOdysseyAnimationLayer* iLayer
+	);
 
 private:
 	void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
@@ -34,6 +38,5 @@ private:
 
 private:
 	UOdysseyAnimationLayer* mLayer = nullptr;
-	FOdysseyAnimationEditorExtension* mExtension = nullptr;
 	UOdysseyAnimationCell* mCurrentCell = nullptr;
 };

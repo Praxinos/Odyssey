@@ -5,7 +5,8 @@
 
 #include "CoreMinimal.h"
 #include "PainterEditor/OdysseyPainterEditorExtension.h"
-#include "OdysseyAnimationEditorTimeline.h"
+#include "OdysseyAnimationEditorTimelinePosition.h"
+#include "OdysseyAnimationEditorTimelineCellSelection.h"
 #include "OdysseyAnimationEditorFlipSystem.h"
 #include "OdysseyImageRenderingAbility.h"
 
@@ -41,7 +42,8 @@ public:
     UOdysseyAnimation*				    Animation() const;
     UOdysseyAnimationLayerStack*	    LayerStack() const;
     UOdysseyAnimationPlayer*            Player() const;
-    FOdysseyAnimationEditorTimeline*    Timeline();
+    TSharedRef<FOdysseyAnimationEditorTimelinePosition>    TimelinePosition();
+	TSharedRef<FOdysseyAnimationEditorTimelineCellSelection>    TimelineCellSelection();
     float                               PlaybackFramesPerSecond() const;
 	TSharedPtr<FOdysseyAnimationEditorFlipSystem> FlipSystem() const;
 
@@ -59,7 +61,8 @@ private:
 public:
     TSharedPtr<FOdysseyAnimationEditorSource> mAnimationSource;
     TSharedPtr<FOdysseyAnimationEditorGUI> mGUI;
-    FOdysseyAnimationEditorTimeline mTimeline; //Those are just the editor specific data of the timeline
+    TSharedRef<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+	TSharedRef<FOdysseyAnimationEditorTimelineCellSelection> mTimelineCellSelection;
     TSharedPtr<FOdysseyAnimationEditorFlipSystem> mFlipSystem;
 
     float mPlaybackFramesPerSecond;

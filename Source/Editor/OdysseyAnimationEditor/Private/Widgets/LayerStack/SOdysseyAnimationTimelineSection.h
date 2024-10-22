@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
 
-class FOdysseyAnimationEditorExtension;
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineSection
     : public SCompoundWidget
 {
@@ -17,22 +16,22 @@ public:
     {}
         SLATE_DEFAULT_SLOT( FArguments, Content )
         SLATE_ATTRIBUTE(float, WidthInFrames)
+		SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
         SLATE_ARGUMENT(EHorizontalAlignment, HAlign)
         SLATE_ARGUMENT(EVerticalAlignment, VAlign)
     SLATE_END_ARGS()
 
 public:
-    void Construct(const FArguments& iArgs, FOdysseyAnimationEditorExtension* iExtension );
+    void Construct(const FArguments& iArgs );
 
 public:
-    FOdysseyAnimationEditorExtension* GetExtension() const;
 	void SetContent(TSharedPtr<SWidget> iContent);
 
 private:
     virtual FOptionalSize GetSectionWidth() const;
 
 private:
-    FOdysseyAnimationEditorExtension* mExtension;
+	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
     TAttribute<float> mWidthInFrames;
     TAttribute<float> mHeightInScreenUnits;
     TSharedPtr<SBox> mBox;

@@ -3,13 +3,12 @@
 
 #pragma once
 
-class FOdysseyAnimationEditorExtension;
 class UOdysseyLayerStack;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineCellsShortcuts
 {
 public:
-    FOdysseyAnimationTimelineCellsShortcuts(UOdysseyLayerStack* iLayerStack, FOdysseyAnimationEditorExtension* iAnimationExtension);
+    FOdysseyAnimationTimelineCellsShortcuts(UOdysseyLayerStack* iLayerStack, TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> iTimelineCellSelection);
 
 public:
     //Shortcuts
@@ -39,5 +38,5 @@ public:
 
 private:
     UOdysseyLayerStack* mLayerStack;
-    FOdysseyAnimationEditorExtension* mAnimationExtension;
+	TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> mTimelineCellSelection;
 };

@@ -7,7 +7,6 @@
 #include "Widgets/SOdysseyLayerRow.h"
 
 class SOdysseyAnimationLayerStack;
-class FOdysseyAnimationEditorExtension;
 
 /**
  * Implements a layer row widget
@@ -18,18 +17,17 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerRow
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerRow)
         {}
+		SLATE_ATTRIBUTE( int, CurrentFrame )
+		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
     SLATE_END_ARGS()
 
 public:
     void Construct(
         const FArguments& iArgs,
         const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
-        FOdysseyAnimationEditorExtension* iExtension,
         class UOdysseyAnimationLayer* iLayer
     );
-
-public:
-    FOdysseyAnimationEditorExtension* GetExtension();
 
 public:
     virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
@@ -37,6 +35,8 @@ public:
 protected:
     virtual TSharedRef<SWidget> GenerateTimelineWidget();
 
-private:
-    FOdysseyAnimationEditorExtension* mExtension;
+protected:
+	TAttribute<int> mCurrentFrame;
+	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+	TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> mTimelineCellSelection;
 };

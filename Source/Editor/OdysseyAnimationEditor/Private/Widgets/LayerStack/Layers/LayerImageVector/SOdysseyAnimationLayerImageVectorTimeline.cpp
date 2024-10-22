@@ -21,14 +21,21 @@ SOdysseyAnimationLayerImageVectorTimeline::SOdysseyAnimationLayerImageVectorTime
 void
 SOdysseyAnimationLayerImageVectorTimeline::Construct(
     const FArguments& InArgs,
-    FOdysseyAnimationEditorExtension* iExtension,
     UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector
 )
 {
+	mTimelinePosition = InArgs._TimelinePosition;
+	mTimelineCellSelection = InArgs._TimelineCellSelection;
+
     ensure(iAnimationLayerImageVector);
     SOdysseyAnimationLayerImageTimeline::FArguments args;
-    args.DisplayOptions(InArgs._DisplayOptions);
-    SOdysseyAnimationLayerImageTimeline::Construct(args, iExtension, iAnimationLayerImageVector);
+    args.DisplayOptions(InArgs._DisplayOptions)
+		.TimelinePosition(mTimelinePosition)
+		.TimelineCellSelection(InArgs._TimelineCellSelection)
+		.OnActivateOutOfPegs(InArgs._OnActivateOutOfPegs)
+		.OnInactivateOutOfPegs(InArgs._OnInactivateOutOfPegs)
+		.OnIsOutOfPegsChecked(InArgs._OnIsOutOfPegsChecked);
+    SOdysseyAnimationLayerImageTimeline::Construct(args, iAnimationLayerImageVector);
 }
 
 TSharedRef<SWidget>
@@ -48,7 +55,8 @@ SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(UOdysseyAnimatio
 	}
     else if (iCell->IsA<UOdysseyAnimationCellImageStagger>())
 	{
-        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell), mExtension)
+        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell))
+			.TimelinePosition(mTimelinePosition)
             .ShowContent(this, &SOdysseyAnimationLayerImageVectorTimeline::GetShowCellContent);
 	}
 

@@ -33,10 +33,11 @@ protected:
 
 protected:
     // Widget Getters
-    virtual UOdysseyAnimationLayerStack* LayerStack() const;
     virtual UOdysseyAnimation* Animation() const;
     virtual UOdysseyAnimationPlayer* Player() const;
     virtual float PlaybackFramesPerSecond() const;
+	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> GetTimelinePosition() const;
+	TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> GetTimelineCellSelection() const;
 
 protected:
     // Event 
@@ -64,6 +65,10 @@ private:
     void StepBackward();
 
     TSharedPtr<SWidget> CreateDefaultEmptyTimelineTabWidget() const;
+
+	void OnActivateOutOfPegs(UOdysseyAnimationCell* iCell);
+	void OnInactivateOutOfPegs();
+	ECheckBoxState OnIsOutOfPegsChecked(UOdysseyAnimationCell* iCell);
 
 private:
     FOdysseyAnimationEditorExtension* mExtension;

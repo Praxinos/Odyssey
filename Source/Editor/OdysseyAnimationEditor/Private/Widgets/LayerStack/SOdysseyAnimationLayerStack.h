@@ -4,15 +4,18 @@
 #pragma once
 
 #include "Widgets/SOdysseyLayerStackTreeView.h"
-#include "OdysseyAnimationEditorTimeline.h"
+#include "LayerStack/Tools/OdysseyAnimationTimelineTools.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
 
 /**
  * Implements the Animation Layer stack widget
  */
 
-class FOdysseyAnimationEditorExtension;
 class SOdysseyLayerStackTreeView;
 class UOdysseyAnimationLayerStack;
+class FOdysseyAnimationTimelineTool;
+class FOdysseyAnimationEditorTimelinePosition;
+class FOdysseyAnimationEditorTimelineCellSelection;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStack
     : public SCompoundWidget
@@ -21,9 +24,21 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStack
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerStack)
+		: _Animation(nullptr)
+		, _PlayerControlsVisibility(EVisibility::Visible)
+		, _ScrollbarVisibility(EVisibility::Visible)
+		, _PlaybackFramesPerSecond(24.0f)
         {}
-        SLATE_DEFAULT_SLOT(FArguments, Content)
-        SLATE_ATTRIBUTE( UOdysseyAnimationLayerStack*, LayerStack )
+        SLATE_ATTRIBUTE( UOdysseyAnimation*, Animation )
+		SLATE_ATTRIBUTE( UOdysseyAnimationPlayer*, Player )
+		SLATE_ATTRIBUTE( EVisibility, PlayerControlsVisibility)
+		SLATE_ATTRIBUTE( EVisibility, ScrollbarVisibility)
+		SLATE_ATTRIBUTE( float, PlaybackFramesPerSecond )
+		SLATE_ATTRIBUTE( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+		SLATE_ATTRIBUTE( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
+		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
+		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
+		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
     SLATE_END_ARGS()
 
 public:
@@ -31,7 +46,7 @@ public:
     ~SOdysseyAnimationLayerStack();
     SOdysseyAnimationLayerStack();
     
-    void Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iAnimationExtension);
+    void Construct(const FArguments& InArgs);
     TSharedPtr<SOdysseyLayerStackTreeView> GetTreeView() const;
 
 private:
@@ -45,12 +60,23 @@ private:
     void OnLayerAdded(UOdysseyLayer* iLayer);
     float PlaybackFramesPerSecond() const;
 
-    EOdysseyTimelineTool GetCurrentTool() const;
+	EOdysseyTimelineTool GetCurrentTool() const;
     void OnToolChecked(EOdysseyTimelineTool iTool, ECheckBoxState iState);
 
+	int GetCurrentFrame() const;
+
 private:
-    FOdysseyAnimationEditorExtension* mExtension;
-    TSlateAttribute<UOdysseyAnimationLayerStack*> mLayerStack;
+    TSlateAttribute<UOdysseyAnimation*> mAnimation;
+	TAttribute<UOdysseyAnimationPlayer*> mPlayer;
+	TAttribute<EVisibility> mPlayerControlsVisibility;
+	TAttribute<EVisibility> mScrollbarVisibility;
+	TAttribute<float> mPlaybackFramesPerSecond;
+	TAttribute<TSharedPtr<FOdysseyAnimationEditorTimelinePosition>> mTimelinePosition;
+	TAttribute<TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>> mTimelineCellSelection;
+	SOdysseyAnimationTimelineLightTableKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
+	FSimpleDelegate mOnInactivateOutOfPegs;
+	SOdysseyAnimationTimelineLightTableKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
+
     TSharedPtr<SOdysseyLayerStackTreeView> mTreeView;
 	TSharedPtr<SScrollBar> mTimelineScrollBar;
     TSharedPtr<class SOdysseyAnimationTimelineControl> mTimelineControl;

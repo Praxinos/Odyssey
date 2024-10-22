@@ -5,7 +5,7 @@
 
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStackTreeView.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
-#include "OdysseyAnimationEditorTimeline.h"
+#include "OdysseyAnimationEditorTimelineCellSelection.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/Cells/OdysseyAnimationCellClipboardData.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
@@ -14,16 +14,15 @@
 #include "Dialogs/Dialogs.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
-FOdysseyAnimationTimelineCellsShortcuts::FOdysseyAnimationTimelineCellsShortcuts(UOdysseyLayerStack* iLayerStack, FOdysseyAnimationEditorExtension* iAnimationExtension)
+FOdysseyAnimationTimelineCellsShortcuts::FOdysseyAnimationTimelineCellsShortcuts(UOdysseyLayerStack* iLayerStack, TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> iTimelineCellSelection)
     : mLayerStack(iLayerStack)
-    , mAnimationExtension(iAnimationExtension)
+	, mTimelineCellSelection(iTimelineCellSelection)
 {
 }
 
@@ -88,7 +87,7 @@ FOdysseyAnimationTimelineCellsShortcuts::MapActionsToCommandList(TSharedRef<FUIC
 void
 FOdysseyAnimationTimelineCellsShortcuts::Action_Copy()
 {
-    const TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    const TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return;
 
@@ -110,7 +109,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Cut()
         return;
     }
 
-    const TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    const TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return;
 
@@ -161,7 +160,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SelectAll()
     if (!layer)
         return;
 
-    mAnimationExtension->Timeline()->SetSelectedCells(layer->GetCells());
+    mTimelineCellSelection->SetSelectedCells(layer->GetCells());
 }
 
 void
@@ -174,7 +173,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
     if (layer->IsLockedRecursively())
         return;
 
-    const TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    const TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return;
 
@@ -210,7 +209,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
     if (!animation)
         return;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
@@ -259,7 +258,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellExposure()
     if (!animation)
         return;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
@@ -296,7 +295,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellExposure()
     if (!animation)
         return;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
@@ -333,7 +332,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure()
     if (!animation)
         return;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
@@ -398,7 +397,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Copy()
     if (!layer)
         return false;
 
-    const TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    const TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return false;
 
@@ -415,7 +414,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Cut()
     if (layer->IsLockedRecursively())
         return false;
 
-    const TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    const TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return false;
 
@@ -448,7 +447,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_SelectAll()
         return false;
         
     //Authorize SelectAll only if there is already an active selection
-    const TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    const TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return false;
 
@@ -465,7 +464,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Delete()
     if (layer->IsLockedRecursively())
         return false;
 
-    const TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    const TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
     if (selectedCells.IsEmpty())
         return false;
 
@@ -487,7 +486,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell()
     if (!animation)
         return false;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
@@ -523,7 +522,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_IncreaseCellExposure()
     if (!animation)
         return false;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
@@ -548,7 +547,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_DecreaseCellExposure()
     if (!animation)
         return false;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
@@ -573,7 +572,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_SetCellExposure()
     if (!animation)
         return false;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);

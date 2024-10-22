@@ -3,27 +3,24 @@
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineControl.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineCurrentFrame.h"
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyKeyState.h"
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
 #include "OdysseyAnimation.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 SOdysseyAnimationTimelineControl::SOdysseyAnimationTimelineControl()
-	: mExtension(nullptr)
-	, mOffsetMousePosition(0)
+	: mOffsetMousePosition(0)
 	, mIsOffsetting(false)
 	, mIsZooming(false)
 {
 }
 
 void
-SOdysseyAnimationTimelineControl::Construct(
-    const FArguments& iArgs,
-	FOdysseyAnimationEditorExtension* iExtension
-)
+SOdysseyAnimationTimelineControl::Construct(const FArguments& iArgs)
 {
-    mExtension = iExtension;
+    mAnimation = iArgs._Animation;
+	mTimelinePosition = iArgs._TimelinePosition;
+
 	ChildSlot
 	[
 		SNew(SOverlay)
@@ -33,7 +30,9 @@ SOdysseyAnimationTimelineControl::Construct(
 		]
 		+ SOverlay::Slot()
 		[
-			SNew(SOdysseyAnimationTimelineCurrentFrame, mExtension)
+			SNew(SOdysseyAnimationTimelineCurrentFrame)
+			.CurrentFrame(iArgs._CurrentFrame)
+			.TimelinePosition(mTimelinePosition)
 		]
 	];
 }
@@ -45,11 +44,11 @@ SOdysseyAnimationTimelineControl::OnMouseWheel(const FGeometry& MyGeometry, cons
 	{
 		if (MouseEvent.GetWheelDelta() > 0.f)
 		{
-			mExtension->Timeline()->ZoomOut();
+			mTimelinePosition->ZoomOut();
 		}
 		else
 		{
-			mExtension->Timeline()->ZoomIn();
+			mTimelinePosition->ZoomIn();
 		}
 		return FReply::Handled();
 	}
@@ -81,16 +80,16 @@ SOdysseyAnimationTimelineControl::OnPreviewMouseButtonDown(const FGeometry& MyGe
 		{
 			mIsOffsetting = true;
 			mOffsetMousePosition = MouseEvent.GetScreenSpacePosition();
-			mOffsetMousePosition.Y = mExtension->Timeline()->GetOffset();
+			mOffsetMousePosition.Y = mTimelinePosition->GetOffset();
     		return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
 		}
 		else if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
 		{
 			mIsZooming = true;
 			mZoomMousePosition = MouseEvent.GetScreenSpacePosition();
-			mZoomInitialValue = mExtension->Timeline()->GetZoom();
-			mOffsetInitialValue = mExtension->Timeline()->GetOffset();
-			mInitialValueFrameWidth = mExtension->Timeline()->GetFrameWidth();
+			mZoomInitialValue = mTimelinePosition->GetZoom();
+			mOffsetInitialValue = mTimelinePosition->GetOffset();
+			mInitialValueFrameWidth = mTimelinePosition->GetFrameSize();
     		return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
 		}
     }
@@ -113,7 +112,7 @@ SOdysseyAnimationTimelineControl::OnMouseMove(const FGeometry& MyGeometry, const
 		const float minOffset = 0.0f;
 		float mouseOffset = MouseEvent.GetScreenSpacePosition().X - mOffsetMousePosition.X;
         //mOffsetMousePosition.Y contains the starting offset instead of the Y position
-		mExtension->Timeline()->SetOffset(mOffsetMousePosition.Y - (mouseOffset / mExtension->Timeline()->GetFrameWidth()));
+		mTimelinePosition->SetOffset(mOffsetMousePosition.Y - (mouseOffset / mTimelinePosition->GetFrameSize()));
 		return FReply::Handled();
 	}
 
@@ -127,9 +126,9 @@ SOdysseyAnimationTimelineControl::OnMouseMove(const FGeometry& MyGeometry, const
 		double sliderPos = FMath::Loge(mZoomInitialValue);
 		sliderPos += mouseOffset / 200.f;
 		double newZoom = FMath::Exp(sliderPos);
-		mExtension->Timeline()->SetZoom(newZoom);
+		mTimelinePosition->SetZoom(newZoom);
 
-		mExtension->Timeline()->SetOffset(offset - mousePosition / mExtension->Timeline()->GetFrameWidth());
+		mTimelinePosition->SetOffset(offset - mousePosition / mTimelinePosition->GetFrameSize());
 
 		return FReply::Handled();
 	}
@@ -158,13 +157,13 @@ SOdysseyAnimationTimelineControl::OnNavigation(const FGeometry& MyGeometry, cons
 {
     if (InNavigationEvent.GetNavigationType() == EUINavigation::Left)
     {
-        int frame = FMath::Max(0, mExtension->Animation()->CurrentFrame - 1);
-        FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
+        int frame = FMath::Max(0, mAnimation->CurrentFrame - 1);
+        FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
     }
     else if (InNavigationEvent.GetNavigationType() == EUINavigation::Right)
     {
-        int frame = mExtension->Animation()->CurrentFrame + 1;
-        FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
+        int frame = mAnimation->CurrentFrame + 1;
+        FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
     }
 	return FNavigationReply::Stop();
 }

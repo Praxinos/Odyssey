@@ -25,7 +25,6 @@ SOdysseyAnimationLayerFolderRow::SOdysseyAnimationLayerFolderRow()
 void SOdysseyAnimationLayerFolderRow::Construct(
     const FArguments& iArgs,
     const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
-    FOdysseyAnimationEditorExtension* iExtension,
     class UOdysseyAnimationLayerFolder* iAnimationLayerFolder
 )
 {
@@ -33,9 +32,11 @@ void SOdysseyAnimationLayerFolderRow::Construct(
     mAnimationLayerFolder = iAnimationLayerFolder;
 
     SOdysseyAnimationLayerRow::Construct(
-        SOdysseyAnimationLayerRow::FArguments(),
+        SOdysseyAnimationLayerRow::FArguments()
+			.CurrentFrame(iArgs._CurrentFrame)
+			.TimelinePosition(iArgs._TimelinePosition)
+			.TimelineCellSelection(iArgs._TimelineCellSelection),
         iOwnerTableView,
-        iExtension,
 		iAnimationLayerFolder
     );
 

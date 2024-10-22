@@ -18,6 +18,11 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageRasterTimeline)
         {}
         SLATE_ATTRIBUTE(bool, DisplayOptions)
+		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
+		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
+		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
+		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
     SLATE_END_ARGS()
 
 public:
@@ -26,7 +31,6 @@ public:
     SOdysseyAnimationLayerImageRasterTimeline();
     void Construct(
         const FArguments& iArgs, 
-        FOdysseyAnimationEditorExtension* iExtension,
         UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
     );
 
@@ -42,5 +46,7 @@ private:
     bool GetShowCellContent() const;
 
 private:
+	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+	TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> mTimelineCellSelection;
     TSharedPtr<FOdysseyAnimationTimelineCellImageRasterShortcuts> mAnimationTimelineCellImageRasterShortcuts;
 };

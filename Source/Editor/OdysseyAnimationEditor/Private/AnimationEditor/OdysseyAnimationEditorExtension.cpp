@@ -24,7 +24,8 @@ FOdysseyAnimationEditorExtension::FOdysseyAnimationEditorExtension(FOdysseyPaint
 	: FOdysseyPainterEditorExtension(iEditor)
 	, mAnimationSource(nullptr)
 	, mGUI(nullptr)
-	, mTimeline(this)
+	, mTimelinePosition(MakeShared<FOdysseyAnimationEditorTimelinePosition>())
+	, mTimelineCellSelection(MakeShared<FOdysseyAnimationEditorTimelineCellSelection>(nullptr))
 	, mFlipSystem(MakeShared<FOdysseyAnimationEditorFlipSystem>(this))
 	, mPlaybackFramesPerSecond(0)
 	, mLayerStackBrushEditorContext(MakeShared<FOdysseyLayerStackEditorBrushContext>(nullptr))
@@ -79,7 +80,10 @@ FOdysseyAnimationEditorExtension::OnSourceChanged()
 	{
 		GetEditor()->GetBrushContexts().Remove(mLayerStackBrushEditorContext.Get());
 		mAnimationSource = nullptr;
-		mTimeline.Finalize();
+		
+		mTimelinePosition = MakeShared<FOdysseyAnimationEditorTimelinePosition>();
+		mTimelineCellSelection = MakeShared<FOdysseyAnimationEditorTimelineCellSelection>(nullptr);
+
 		UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll(this);
 		FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
         UOdysseyLayer::OnMediaChanged().RemoveAll(this);
@@ -88,9 +92,11 @@ FOdysseyAnimationEditorExtension::OnSourceChanged()
 
 	mAnimationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(source);
 
-	mTimeline.Initialize();
-
     UOdysseyAnimation* animation = Animation();
+
+	mTimelinePosition = MakeShared<FOdysseyAnimationEditorTimelinePosition>();
+	mTimelineCellSelection = MakeShared<FOdysseyAnimationEditorTimelineCellSelection>(animation);
+
 	mImageRenderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
 	mPlaybackFramesPerSecond = animation->GetFramesPerSecond();
 
@@ -135,10 +141,16 @@ FOdysseyAnimationEditorExtension::Player() const
     return mAnimationSource->GetAnimationPlayer();
 }
 
-FOdysseyAnimationEditorTimeline*
-FOdysseyAnimationEditorExtension::Timeline()
+TSharedRef<FOdysseyAnimationEditorTimelinePosition>
+FOdysseyAnimationEditorExtension::TimelinePosition()
 {
-	return &mTimeline;
+	return mTimelinePosition;
+}
+
+TSharedRef<FOdysseyAnimationEditorTimelineCellSelection>
+FOdysseyAnimationEditorExtension::TimelineCellSelection()
+{
+	return mTimelineCellSelection;
 }
 
 float

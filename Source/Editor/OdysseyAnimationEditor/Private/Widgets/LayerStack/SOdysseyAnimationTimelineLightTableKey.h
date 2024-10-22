@@ -15,17 +15,23 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTableKey
 {
 public:
 	DECLARE_DELEGATE_OneParam(FOnKeyChanged, FOdysseyAnimationLightTableKey)
+	DECLARE_DELEGATE_OneParam(FOnActivateOutOfPegs, UOdysseyAnimationCell*)
+	DECLARE_DELEGATE_RetVal_OneParam(ECheckBoxState, FOnIsOutOfPegsChecked, UOdysseyAnimationCell*)
 	
 public:
 	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTableKey)
 	{}
+		SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
 		SLATE_ATTRIBUTE(UOdysseyAnimationCell*, Cell)
 		SLATE_ATTRIBUTE(FOdysseyAnimationLightTableKey, Key)
 		SLATE_EVENT(FOnKeyChanged, OnChanged)
 		SLATE_EVENT(FOnKeyChanged, OnCommited)
+		SLATE_EVENT(FOnActivateOutOfPegs, OnActivateOutOfPegs)
+		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
+		SLATE_EVENT(FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
 	SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension);
+	void Construct(const FArguments& InArgs);
 
 private:
 	bool IsOutOfPegsEnabled() const;
@@ -34,9 +40,12 @@ private:
 	ECheckBoxState IsOutOfPegsChecked() const;
 
 private:
-	FOdysseyAnimationEditorExtension* mExtension = nullptr;
 	TAttribute<UOdysseyAnimationCell*> mCell;
 	TAttribute<FOdysseyAnimationLightTableKey> mKey;
+	
+	FOnActivateOutOfPegs mOnActivateOutOfPegs;
+	FSimpleDelegate mOnInactivateOutOfPegs;
+	FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
 };
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTableKeySlider

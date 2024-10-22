@@ -25,14 +25,21 @@ SOdysseyAnimationLayerImageRasterTimeline::SOdysseyAnimationLayerImageRasterTime
 void
 SOdysseyAnimationLayerImageRasterTimeline::Construct(
     const FArguments& InArgs,
-    FOdysseyAnimationEditorExtension* iExtension,
     UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
 )
 {
+	mTimelinePosition = InArgs._TimelinePosition;
+	mTimelineCellSelection = InArgs._TimelineCellSelection;
+	
     ensure(iAnimationLayerImageRaster);
     SOdysseyAnimationLayerImageTimeline::FArguments args;
-    args.DisplayOptions(InArgs._DisplayOptions);
-    SOdysseyAnimationLayerImageTimeline::Construct(args, iExtension, iAnimationLayerImageRaster);
+    args.DisplayOptions(InArgs._DisplayOptions)
+		.TimelinePosition(mTimelinePosition)
+		.TimelineCellSelection(mTimelineCellSelection)
+		.OnActivateOutOfPegs(InArgs._OnActivateOutOfPegs)
+		.OnInactivateOutOfPegs(InArgs._OnInactivateOutOfPegs)
+		.OnIsOutOfPegsChecked(InArgs._OnIsOutOfPegsChecked);
+    SOdysseyAnimationLayerImageTimeline::Construct(args, iAnimationLayerImageRaster);
 }
 
 TSharedRef<SWidget>
@@ -52,7 +59,8 @@ SOdysseyAnimationLayerImageRasterTimeline::OnGenerateCellWidget(UOdysseyAnimatio
 	}
     else if (iCell->IsA<UOdysseyAnimationCellImageStagger>())
 	{
-        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell), mExtension)
+        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell))
+			.TimelinePosition(mTimelinePosition)
             .ShowContent(this, &SOdysseyAnimationLayerImageRasterTimeline::GetShowCellContent);
 	}
 
@@ -87,7 +95,7 @@ TSharedPtr<FExtender>
 SOdysseyAnimationLayerImageRasterTimeline::ExtendContextMenu()
 {
     TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
-    mAnimationTimelineCellImageRasterShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(mLayer->GetLayerStack(), mExtension);
+    mAnimationTimelineCellImageRasterShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(mLayer->GetLayerStack(), mTimelineCellSelection);
     mAnimationTimelineCellImageRasterShortcuts->MapActionsToCommandList(commandList);
 
     TSharedRef<FExtender> extender = MakeShared<FExtender>();

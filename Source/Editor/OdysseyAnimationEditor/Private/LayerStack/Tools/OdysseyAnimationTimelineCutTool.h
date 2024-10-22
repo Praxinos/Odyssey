@@ -5,18 +5,18 @@
 
 #include "LayerStack/Tools/OdysseyAnimationTimelineTool.h"
 
-class FOdysseyAnimationEditorTimeline;
+class FOdysseyAnimationEditorTimelinePosition;
 
 class FOdysseyAnimationTimelineCutTool
     : public FOdysseyAnimationTimelineTool
 {
 public:
     virtual ~FOdysseyAnimationTimelineCutTool();
-    FOdysseyAnimationTimelineCutTool(FOdysseyAnimationEditorTimeline* iTimelineParams);
+    FOdysseyAnimationTimelineCutTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition);
 
 public:
     virtual FReply OnMouseButtonUp(const FMouseEventParams& iParams) override;
 
 private:
-    FOdysseyAnimationEditorTimeline* mTimelineParams;
+    TSharedRef<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
 };

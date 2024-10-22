@@ -5,8 +5,6 @@
 
 #include "CoreMinimal.h"
 
-class FOdysseyAnimationEditorExtension;
-
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineControl
     : public SCompoundWidget
 {
@@ -14,15 +12,15 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineControl)
         {}
         SLATE_DEFAULT_SLOT( FArguments, Content )
+		SLATE_ARGUMENT(UOdysseyAnimation*, Animation)
+		SLATE_ATTRIBUTE(int, CurrentFrame)
+		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
 public:
     SOdysseyAnimationTimelineControl();
 
-    void Construct(
-        const FArguments& iArgs,
-        FOdysseyAnimationEditorExtension* iExtension
-    );
+    void Construct(const FArguments& iArgs);
 
 public:
     virtual FReply OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
@@ -34,7 +32,8 @@ public:
     virtual bool SupportsKeyboardFocus() const override { return true; }
 
 private:
-    FOdysseyAnimationEditorExtension*            mExtension;
+    UOdysseyAnimation* mAnimation;
+	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
     
 	FVector2D 					        mOffsetMousePosition;
 	bool 						        mIsOffsetting;

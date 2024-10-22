@@ -3,8 +3,7 @@
 
 #include "LayerStack/Tools/OdysseyAnimationTimelineMoveTool.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "OdysseyAnimationEditorTimeline.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyAnimationEditorTimelinePosition.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -12,8 +11,8 @@ FOdysseyAnimationTimelineMoveTool::~FOdysseyAnimationTimelineMoveTool()
 {
 }
 
-FOdysseyAnimationTimelineMoveTool::FOdysseyAnimationTimelineMoveTool(FOdysseyAnimationEditorTimeline* iTimelineParams)
-    : mTimelineParams(iTimelineParams)
+FOdysseyAnimationTimelineMoveTool::FOdysseyAnimationTimelineMoveTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition)
+    : mTimelinePosition(iTimelinePosition)
 {   
 }
 
@@ -72,7 +71,7 @@ FOdysseyAnimationTimelineMoveTool::OnMouseMove(const FMouseEventParams& iParams)
     {
         const int minOffset = 0;
         float mouseOffset = iParams.mMouseEvent.GetScreenSpacePosition().X - mLayerOffsetData.mMousePosition;
-        int offset = (int)(mLayerOffsetData.mInitialOffset + (mouseOffset / mTimelineParams->GetFrameWidth()));
+        int offset = (int)(mLayerOffsetData.mInitialOffset + (mouseOffset / mTimelinePosition->GetFrameSize()));
 
 		FOdysseyObjectEditorUtils::SetPropertyValue(iParams.mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), FMath::Max(minOffset, offset), EPropertyChangeType::Interactive);
 

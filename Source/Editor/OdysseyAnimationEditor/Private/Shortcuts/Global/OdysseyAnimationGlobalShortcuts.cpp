@@ -4,9 +4,11 @@
 #include "Shortcuts/Global/OdysseyAnimationGlobalShortcuts.h"
 #include "Shortcuts/Global/OdysseyAnimationGlobalCellsShortcuts.h"
 #include "Shortcuts/Global/OdysseyAnimationGlobalTimelineShortcuts.h"
+#include "Shortcuts/Global/OdysseyAnimationGlobalTimelineToolsShortcuts.h"
 
 FOdysseyAnimationGlobalShortcuts::FOdysseyAnimationGlobalShortcuts(TSharedPtr<FOdysseyAnimationEditorExtension> iExtension)
 {
     Add(MakeShared<FOdysseyAnimationGlobalCellsShortcuts>(iExtension));
     Add(MakeShared<FOdysseyAnimationGlobalTimelineShortcuts>(iExtension));
+	Add(MakeShared<FOdysseyAnimationGlobalTimelineToolsShortcuts>());
 }

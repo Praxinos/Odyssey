@@ -74,6 +74,7 @@ namespace UnrealBuildTool.Rules
                 	"Slate",
 					"SlateCore",
 					"Sequencer",
+					"SequencerCore",
 					"ToolWidgets",
 					"UnrealEd",
 				}
