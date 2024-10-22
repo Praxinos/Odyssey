@@ -11,7 +11,7 @@ class SOdysseyAnimationLayerStack;
 /**
  * Implements a layer row widget
  */
-class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerRow
+class SOdysseyAnimationLayerRow
     : public SOdysseyLayerRow
 {
 public:

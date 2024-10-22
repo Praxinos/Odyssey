@@ -5,19 +5,24 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyImageRenderingAbility.h"
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineOutOfPegsKey.h"
 
 class UOdysseyAnimationLayer;
 class UOdysseyAnimation;
-class UOdysseyAnimationCell;
 
-class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTable
+class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineOutOfPegs
 	: public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTable)
+	static inline const float mDesiredHeight = 60.f;
+
+public:
+	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineOutOfPegs)
 	{}
 		SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
+		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
+		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
+		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
 	SLATE_END_ARGS()
 
 	void Construct(

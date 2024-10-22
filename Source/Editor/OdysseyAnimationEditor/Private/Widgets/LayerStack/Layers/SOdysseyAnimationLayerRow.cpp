@@ -70,14 +70,17 @@ SOdysseyAnimationLayerRow::GenerateMainRowHeaderOptionWidgets()
 {
 	TArray<TSharedPtr<SWidget>> widgets;
 
-    const FCheckBoxStyle* lightTableToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Animation.LightTableToggle");
+	if (mLayer->HasLighttable)
+	{
+		const FCheckBoxStyle* lightTableToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Animation.LightTableToggle");
 
-	widgets.Add(
-		SNew(SCheckBox)
-		.Style(lightTableToggleStyle)
-		.OnCheckStateChanged(this, &SOdysseyAnimationLayerRow::OnLightTableCheckStateChanged)
-		.IsChecked(this, &SOdysseyAnimationLayerRow::GetLightTableIsChecked)
-	);
+		widgets.Add(
+			SNew(SCheckBox)
+			.Style(lightTableToggleStyle)
+			.OnCheckStateChanged(this, &SOdysseyAnimationLayerRow::OnLightTableCheckStateChanged)
+			.IsChecked(this, &SOdysseyAnimationLayerRow::GetLightTableIsChecked)
+		);
+	}
 
 	widgets.Append(SOdysseyLayerRow::GenerateMainRowHeaderOptionWidgets());
 

@@ -33,6 +33,14 @@ public:
 protected:
     //SMultiColumnTableRow overrides
 	virtual const FSlateBrush* GetBorder() const override;
+	
+protected:
+	virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
+	virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn );
+	virtual FOptionalSize GetRowHeight(FName iRow) const;
+	virtual EVisibility GetRowVisibility(FName iRow) const;
+	virtual FMargin GetRowPadding( FName iRow ) const;
+	virtual FMargin GetColumnPadding( FName iColumn ) const;
     
     TOptional<EItemDropZone> OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iDropZone, UOdysseyLayer* iLayer);
     FReply OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iDropZone, UOdysseyLayer* iLayer);

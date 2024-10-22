@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineOutOfPegsKey.h"
 
 class UOdysseyAnimationLayer;
 class FOdysseyAnimationTimelineCellsShortcuts;
@@ -16,7 +16,7 @@ class SOdysseyAnimationLayerStackTreeView;
  * Implements a layer row widget
  */
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageTimeline
-    : public SOdysseyLayerRowBase
+    : public SOdysseyAnimationLayerTimeline
 {
 public:
     // Construction / Destruction
@@ -27,9 +27,9 @@ public:
         {}
 		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
 		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
-		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
+		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
 		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
-		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
+		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
     SLATE_END_ARGS()
 
 public:
@@ -40,7 +40,12 @@ public:
     );
 
 protected:
-	virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
+	virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
+	virtual FOptionalSize GetRowHeight(FName iRow) const override;
+	
+	TSharedRef<SWidget> GenerateMainRowTimelineWidget();
+	TSharedRef<SWidget> GenerateLightTableRowTimelineWidget();
+	TSharedRef<SWidget> GenerateOutOfPegsRowTimelineWidget();
 
 public:
     virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
@@ -94,9 +99,9 @@ protected:
     UOdysseyAnimationLayer* mLayer;
 	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
 	TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> mTimelineCellSelection;
-	SOdysseyAnimationTimelineLightTableKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
+	SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
 	FSimpleDelegate mOnInactivateOutOfPegs;
-	SOdysseyAnimationTimelineLightTableKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
+	SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
 
 	TSharedPtr<FOdysseyAnimationTimelineTool> mTool;
 

@@ -25,9 +25,9 @@ public:
         SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
 		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
 		SLATE_ARGUMENT( int, HeaderHeight )
-		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
+		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
 		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
-		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
+		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
     SLATE_END_ARGS()
 
 public:
@@ -52,7 +52,7 @@ private:
 	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
 	TSharedPtr<SOdysseyAnimationTimelineControl> mTimelineControl;
 	TSharedPtr<SOdysseyAnimationLayerStackTreeView> mTreeView;
-	SOdysseyAnimationTimelineLightTableKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
+	SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
 	FSimpleDelegate mOnInactivateOutOfPegs;
-	SOdysseyAnimationTimelineLightTableKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
+	SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
 };

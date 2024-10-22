@@ -27,12 +27,9 @@ public:
 	//Commands
 	void Rename();
 
-private:
-    //SMultiColumnTableRow overrides
-    virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
-
 protected:
-	virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn );
+	virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
+	virtual FMargin GetColumnPadding( FName iColumn ) const override;
 	
     TSharedRef<SWidget> GenerateMainRowIsActivatedWidget();
     TSharedRef<SWidget> GenerateMainRowIsLockedWidget();
@@ -51,7 +48,6 @@ protected:
 
 	void OnLayerNameCommited(const FText& iText, ETextCommit::Type iType);
     FText GetLayerName() const;
-	EVisibility GetRowVisibility(FName iRow) const;
     FSlateFontInfo GetLayerNameFont() const;
 
     virtual FReply OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<SOdysseyLayerStackTreeView> iTreeView) override;

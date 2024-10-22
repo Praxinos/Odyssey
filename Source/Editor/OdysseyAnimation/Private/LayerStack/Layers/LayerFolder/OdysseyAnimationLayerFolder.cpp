@@ -15,6 +15,7 @@ UOdysseyAnimationLayerFolder::UOdysseyAnimationLayerFolder()
     Icon = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetTreeFolderClosed");
     IconExpanded = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetTreeFolderOpen");
     CanHaveChildren = true;
+	HasLighttable = false;
 }
 
 TSet<UClass*>
@@ -44,18 +45,5 @@ UOdysseyAnimationLayerFolder::GetMergeLayerTypesFromTypes(TSet<UClass*> iLayerTy
 
     return types;
 }
-
-#ifdef WITH_EDITOR
-
-FOptionalSize
-UOdysseyAnimationLayerFolder::GetRowHeight(FName iSubRowName) const
-{
-	if (iSubRowName == "Lighttable")
-		return 0; //No lighttable visible for the folder
-		
-	return UOdysseyLayer::GetRowHeight(iSubRowName);
-}
-
-#endif
 
 #undef LOCTEXT_NAMESPACE

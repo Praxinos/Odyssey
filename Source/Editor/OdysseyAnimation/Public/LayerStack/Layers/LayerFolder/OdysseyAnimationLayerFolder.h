@@ -16,11 +16,6 @@ public:
     UOdysseyAnimationLayerFolder();
 
 public:
-#ifdef WITH_EDITOR
-	virtual FOptionalSize GetRowHeight(FName iSubRowName) const override;
-#endif
-
-public:
     // UOdysseyLayer Overrides
 
     /**

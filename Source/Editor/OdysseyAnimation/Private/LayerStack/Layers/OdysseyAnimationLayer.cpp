@@ -525,10 +525,10 @@ FOptionalSize
 UOdysseyAnimationLayer::GetRowHeight(FName iSubRowName) const
 {
 	if (iSubRowName == "Lighttable")
-		return DisplayOptions && Lighttable.bIsActivated ? 40 : 0;
+		return DisplayOptions && HasLighttable && Lighttable.bIsActivated ? 40 : 0;
 
 	if (iSubRowName == "OutOfPegs")
-		return DisplayOptions && Lighttable.bIsActivated ? 20 : 0;
+		return DisplayOptions && HasLighttable && Lighttable.bIsActivated ? 20 : 0;
 		
 	return Super::GetRowHeight(iSubRowName);
 }

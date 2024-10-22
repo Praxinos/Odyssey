@@ -4,6 +4,7 @@
 #include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.h"
 #include "LayerStack/Cells/CellImageStagger/OdysseyAnimationCellImageStagger.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTable.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineOutOfPegs.h"
 #include "Widgets/LayerStack/Cells/SOdysseyAnimationCells.h"
 #include "LayerStack/Tools/OdysseyAnimationTimelineTool.h"
 #include "DragDropOperations/OdysseyAnimationCellsDragDropOperation.h"
@@ -45,32 +46,77 @@ SOdysseyAnimationLayerImageTimeline::Construct(
 	mOnInactivateOutOfPegs = iArgs._OnInactivateOutOfPegs;
 	mOnIsOutOfPegsChecked = iArgs._OnIsOutOfPegsChecked;
 
-    SOdysseyLayerRowBase::Construct(SOdysseyLayerRowBase::FArguments(), iOwnerTableView, iLayer);
+    SOdysseyAnimationLayerTimeline::Construct(SOdysseyAnimationLayerTimeline::FArguments(), iOwnerTableView, iLayer);
 }
 
 TSharedRef<SWidget>
-SOdysseyAnimationLayerImageTimeline::GenerateWidgetForColumn( const FName& InColumnName )
-{   
-    return SNew(SVerticalBox)
-        + SVerticalBox::Slot()
-        [
-            SNew(SOdysseyAnimationCells, mLayer)
-			.TimelinePosition(mTimelinePosition)
-			.TimelineCellSelection(mTimelineCellSelection)
-            .IsEnabled_Lambda([this](){ return !mLayer->IsLockedRecursively();})
-            .OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
-            .ShowHandles(this, &SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles)
-        ]
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        [
-            SNew(SOdysseyAnimationTimelineLightTable, mLayer)
-			.TimelinePosition(mTimelinePosition)
-            .Visibility(this, &SOdysseyAnimationLayerImageTimeline::GetLightTableVisibility)
-			.OnActivateOutOfPegs(mOnActivateOutOfPegs)
-			.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
-			.OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked)
-        ];
+SOdysseyAnimationLayerImageTimeline::GenerateWidget( const FName& iRow, const FName& iColumn )
+{
+	ensure(iColumn == "Timeline");
+
+	if (iRow == "Main")
+	{
+		return GenerateMainRowTimelineWidget();
+	}
+	if (iRow == "Lighttable")
+	{
+		return GenerateLightTableRowTimelineWidget();
+	}
+	if (iRow == "OutOfPegs")
+	{
+		return GenerateOutOfPegsRowTimelineWidget();
+	}
+
+	return SOdysseyAnimationLayerTimeline::GenerateWidget( iRow, iColumn );
+}
+
+FOptionalSize
+SOdysseyAnimationLayerImageTimeline::GetRowHeight(FName iRow) const
+{
+	if (iRow == "Main")
+	{
+		int height = GetLayer()->GetRowHeight("Main").Get();
+		int blendRowHeight = GetLayer()->GetRowHeight("Blend").Get();
+		if (blendRowHeight > 0)
+		{
+			height += blendRowHeight;
+			height += GetRowPadding("Blend").Bottom;
+		}
+		return height;
+	}
+	if (iRow == "Blend")
+	{
+		return 0;
+	}
+	return SOdysseyAnimationLayerTimeline::GetRowHeight(iRow);
+}
+
+TSharedRef<SWidget>
+SOdysseyAnimationLayerImageTimeline::GenerateMainRowTimelineWidget()
+{
+	return SNew(SOdysseyAnimationCells, mLayer)
+		.TimelinePosition(mTimelinePosition)
+		.TimelineCellSelection(mTimelineCellSelection)
+		.IsEnabled_Lambda([this](){ return !mLayer->IsLockedRecursively();})
+		.OnCreateCellWidget(this, &SOdysseyAnimationLayerImageTimeline::OnGenerateCellWidget)
+		.ShowHandles(this, &SOdysseyAnimationLayerImageTimeline::GetShowCellsHandles);
+}
+
+TSharedRef<SWidget>
+SOdysseyAnimationLayerImageTimeline::GenerateLightTableRowTimelineWidget()
+{
+	return SNew(SOdysseyAnimationTimelineLightTable, mLayer)
+		.TimelinePosition(mTimelinePosition);
+}
+
+TSharedRef<SWidget>
+SOdysseyAnimationLayerImageTimeline::GenerateOutOfPegsRowTimelineWidget()
+{
+	return SNew(SOdysseyAnimationTimelineOutOfPegs, mLayer)
+		.TimelinePosition(mTimelinePosition)
+		.OnActivateOutOfPegs(mOnActivateOutOfPegs)
+		.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
+		.OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked);
 }
 
 FReply
@@ -192,7 +238,7 @@ int32
 SOdysseyAnimationLayerImageTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
 	// Draw a current frame
-	LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+	LayerId = SOdysseyAnimationLayerTimeline::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
 	++LayerId;
 
 	const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );

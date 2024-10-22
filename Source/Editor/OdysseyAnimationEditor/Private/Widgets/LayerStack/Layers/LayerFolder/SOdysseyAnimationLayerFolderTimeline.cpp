@@ -9,17 +9,11 @@
 void
 SOdysseyAnimationLayerFolderTimeline::Construct(
     const FArguments& InArgs,
-	const TSharedRef<SOdysseyAnimationLayerStackTreeView>& iOwnerTableView,
+	const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
     UOdysseyAnimationLayerFolder* iLayer
 )
 {	
-    SOdysseyLayerRowBase::Construct(InArgs, iOwnerTableView, iLayer);
-}
-
-TSharedRef<SWidget>
-SOdysseyAnimationLayerFolderTimeline::GenerateWidgetForColumn( const FName& InColumnName )
-{
-	return SNullWidget::NullWidget;
+    SOdysseyAnimationLayerTimeline::Construct(InArgs, iOwnerTableView, iLayer);
 }
 
 #undef LOCTEXT_NAMESPACE

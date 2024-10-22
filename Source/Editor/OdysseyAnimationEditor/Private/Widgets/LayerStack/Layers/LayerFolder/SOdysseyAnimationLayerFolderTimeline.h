@@ -3,24 +3,21 @@
 
 #pragma once
 
-#include "Widgets/SOdysseyLayerRowBase.h"
+#include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerTimeline.h"
 
 class UOdysseyAnimationLayerFolder;
-class SOdysseyAnimationLayerStackTreeView;
+class SOdysseyAnimationTimelineTreeView;
 /**
  * Implements a layer row widget
  */
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerFolderTimeline
-    : public SOdysseyLayerRowBase
+    : public SOdysseyAnimationLayerTimeline
 {
 public:
     // Construction / Destruction
     void Construct(
         const FArguments& iArgs, 
-		const TSharedRef<SOdysseyAnimationLayerStackTreeView>& iOwnerTableView,
+		const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
         UOdysseyAnimationLayerFolder* iLayer
     );
-
-private:
-	virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
 };

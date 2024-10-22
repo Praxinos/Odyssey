@@ -17,10 +17,6 @@ SOdysseyAnimationTimelineLightTableKey::Construct(const FArguments& InArgs)
 	mCell = InArgs._Cell;
 	mKey = InArgs._Key;
 
-	mOnActivateOutOfPegs = InArgs._OnActivateOutOfPegs;
-	mOnInactivateOutOfPegs = InArgs._OnInactivateOutOfPegs;
-	mOnIsOutOfPegsChecked = InArgs._OnIsOutOfPegsChecked;
-
 	const FCheckBoxStyle* checkboxStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.ToggleButton");
 
 	ChildSlot
@@ -28,76 +24,14 @@ SOdysseyAnimationTimelineLightTableKey::Construct(const FArguments& InArgs)
 		SNew(SOdysseyAnimationTimelineSection)
 		.TimelinePosition(InArgs._TimelinePosition)
 		.WidthInFrames(1)
+		.HAlign(HAlign_Center)
 		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
-			.HAlign(HAlign_Center)
-			[
-				SNew(SOdysseyAnimationTimelineLightTableKeySlider)
-				.Key(mKey)
-				.OnChanged(InArgs._OnChanged)
-				.OnCommited(InArgs._OnCommited)
-			]
-			+ SVerticalBox::Slot()
-			.HAlign(HAlign_Center)
-			.AutoHeight()
-			[
-				SNew(SCheckBox)
-				.IsEnabled(this, &SOdysseyAnimationTimelineLightTableKey::IsOutOfPegsEnabled)
-				.Style( checkboxStyle )
-				.OnCheckStateChanged(this, &SOdysseyAnimationTimelineLightTableKey::OnOutOfPegsCheckStateChanged)
-				.IsChecked(this, &SOdysseyAnimationTimelineLightTableKey::IsOutOfPegsChecked)
-				.Padding(FMargin(2.f))
-				[
-					SNew(SImage)
-					.Image(this, &SOdysseyAnimationTimelineLightTableKey::GetOutOfPegsButtonImage)
-				]
-			]
+			SNew(SOdysseyAnimationTimelineLightTableKeySlider)
+			.Key(mKey)
+			.OnChanged(InArgs._OnChanged)
+			.OnCommited(InArgs._OnCommited)
 		]
 	];
-}
-
-bool
-SOdysseyAnimationTimelineLightTableKey::IsOutOfPegsEnabled() const
-{
-	return mKey.Get().bIsActivated;
-}
-
-const FSlateBrush*
-SOdysseyAnimationTimelineLightTableKey::GetOutOfPegsButtonImage() const
-{
-	UOdysseyAnimationCell* cell = mCell.Get();
-	if (!cell)
-		return nullptr;
-
-	if (cell->IsOutOfPegs())
-		return FOdysseyStyle::GetBrush("Animation.LightTable.OutOfPegs.Button.On");
-
-	return FOdysseyStyle::GetBrush("Animation.LightTable.OutOfPegs.Button.Off");
-}
-
-void
-SOdysseyAnimationTimelineLightTableKey::OnOutOfPegsCheckStateChanged(ECheckBoxState iValue)
-{
-	if (iValue == ECheckBoxState::Checked)
-	{
-		if (mOnActivateOutOfPegs.IsBound())
-			mOnActivateOutOfPegs.Execute(mCell.Get());
-	}
-	else
-	{
-		if (mOnInactivateOutOfPegs.IsBound())
-			mOnInactivateOutOfPegs.Execute();
-	}
-}
-
-ECheckBoxState
-SOdysseyAnimationTimelineLightTableKey::IsOutOfPegsChecked() const
-{
-	if (mOnIsOutOfPegsChecked.IsBound())
-		return mOnIsOutOfPegsChecked.Execute(mCell.Get());
-
-	return ECheckBoxState::Unchecked;
 }
 
 void

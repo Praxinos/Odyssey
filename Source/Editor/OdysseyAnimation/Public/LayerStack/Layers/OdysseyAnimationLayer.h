@@ -150,6 +150,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=LighttableBlueprintSetter, NonTransactional)
 	FOdysseyAnimationLightTable Lighttable;
 
+	UPROPERTY(BlueprintReadOnly, Category="Odyssey|Layer", NonTransactional)
+	bool HasLighttable = true;
+
     FSimpleMulticastDelegate mOnLightTableChanged;
 	FSimpleMulticastDelegate mOnCellsChanged;
 };

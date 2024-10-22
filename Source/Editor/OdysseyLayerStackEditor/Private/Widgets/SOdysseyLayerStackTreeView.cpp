@@ -118,6 +118,11 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
             .DefaultLabel(FText())
             .VAlignCell(VAlign_Top)
             .FillWidth(1.0f)
+			[
+				SNew(SBox)
+				.HeightOverride(InArgs._HeaderHeight)
+				.VAlign(VAlign_Center)
+			]
 		);
 	}
 

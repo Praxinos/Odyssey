@@ -5,7 +5,7 @@
 
 #include "Widgets/SOdysseyLayerStackTreeView.h"
 #include "LayerStack/Tools/OdysseyAnimationTimelineTools.h"
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineOutOfPegsKey.h"
 
 /**
  * Implements the Animation Layer stack widget
@@ -36,9 +36,9 @@ public:
 		SLATE_ATTRIBUTE( float, PlaybackFramesPerSecond )
 		SLATE_ATTRIBUTE( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
 		SLATE_ATTRIBUTE( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
-		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
+		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
 		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
-		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
+		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
     SLATE_END_ARGS()
 
 public:
@@ -73,9 +73,9 @@ private:
 	TAttribute<float> mPlaybackFramesPerSecond;
 	TAttribute<TSharedPtr<FOdysseyAnimationEditorTimelinePosition>> mTimelinePosition;
 	TAttribute<TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>> mTimelineCellSelection;
-	SOdysseyAnimationTimelineLightTableKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
+	SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
 	FSimpleDelegate mOnInactivateOutOfPegs;
-	SOdysseyAnimationTimelineLightTableKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
+	SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
 
     TSharedPtr<SOdysseyLayerStackTreeView> mTreeView;
 	TSharedPtr<SScrollBar> mTimelineScrollBar;

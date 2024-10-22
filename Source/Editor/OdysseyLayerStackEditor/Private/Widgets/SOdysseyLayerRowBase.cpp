@@ -30,6 +30,72 @@ void SOdysseyLayerRowBase::Construct(const FArguments& InArgs, const TSharedRef<
 
 //PRIVATE API-----------------------------------------------------------
 
+TSharedRef<SWidget>
+SOdysseyLayerRowBase::GenerateWidgetForColumn( const FName& InColumnName )
+{
+	TSharedRef<SVerticalBox> verticalBox = SNew(SVerticalBox);	
+	TArray<FName> rows = GetLayer()->GetRows();
+	FMargin columnPadding = GetColumnPadding(InColumnName);
+	for (const FName& row : rows)
+	{
+		FMargin padding = GetRowPadding(row);
+		padding.Left += columnPadding.Left;
+		padding.Right += columnPadding.Right;
+		if (row == rows[0])
+		{
+			padding.Top += columnPadding.Top;
+		}
+		if (row == rows.Last())
+		{
+			padding.Bottom += columnPadding.Bottom;
+		}
+
+		verticalBox->AddSlot()
+		.AutoHeight()
+		.Padding(padding)
+		[
+			SNew(SBox)
+			.HeightOverride(this, &SOdysseyLayerRowBase::GetRowHeight, row)
+			.Visibility(this, &SOdysseyLayerRowBase::GetRowVisibility, row)
+			[
+				GenerateWidget(row, InColumnName)
+			]
+		];
+	}
+
+	return verticalBox;
+}
+
+TSharedRef<SWidget>
+SOdysseyLayerRowBase::GenerateWidget( const FName& iRow, const FName& iColumn )
+{
+    return SNullWidget::NullWidget;
+}
+
+FOptionalSize
+SOdysseyLayerRowBase::GetRowHeight(FName iRow) const
+{
+	return GetLayer()->GetRowHeight(iRow);
+}
+
+EVisibility
+SOdysseyLayerRowBase::GetRowVisibility(FName iRow) const
+{
+	return GetRowHeight(iRow).Get() > 0 ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+FMargin
+SOdysseyLayerRowBase::GetRowPadding( FName iRow ) const
+{
+	return FMargin(0.f, 0.f, 0.f, 2.f);
+}
+
+FMargin
+SOdysseyLayerRowBase::GetColumnPadding( FName iColumn ) const
+{
+	return FMargin(0);
+}
+
 const FSlateBrush*
 SOdysseyLayerRowBase::GetBorder() const 
 {

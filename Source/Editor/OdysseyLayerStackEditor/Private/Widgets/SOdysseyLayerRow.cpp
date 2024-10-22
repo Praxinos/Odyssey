@@ -39,31 +39,6 @@ void SOdysseyLayerRow::Construct(const FArguments& InArgs, const TSharedRef<SOdy
 //PRIVATE API-----------------------------------------------------------
 
 TSharedRef<SWidget>
-SOdysseyLayerRow::GenerateWidgetForColumn( const FName& InColumnName )
-{
-	FMargin padding = InColumnName == "Header" ? FMargin(0.f, 0.f, 2.f, 2.f) : FMargin(0.f);
-	TSharedRef<SVerticalBox> verticalBox = SNew(SVerticalBox);
-	
-	TArray<FName> rows = GetLayer()->GetRows();
-	for (const FName& row : rows)
-	{
-		verticalBox->AddSlot()
-		.AutoHeight()
-		.Padding(padding)
-		[
-			SNew(SBox)
-			.HeightOverride_UObject(GetLayer(), &UOdysseyLayer::GetRowHeight, row)
-			.Visibility(this, &SOdysseyLayerRow::GetRowVisibility, row)
-			[
-				GenerateWidget(row, InColumnName)
-			]
-		];
-	}
-
-	return verticalBox;
-}
-
-TSharedRef<SWidget>
 SOdysseyLayerRow::GenerateWidget( const FName& iRow, const FName& iColumn )
 {
 	if (iRow == "Main")
@@ -92,7 +67,16 @@ SOdysseyLayerRow::GenerateWidget( const FName& iRow, const FName& iColumn )
 			return GenerateBlendRowHeaderWidget();
 		}
 	}
-    return SNullWidget::NullWidget;
+    return SOdysseyLayerRowBase::GenerateWidget(iRow, iColumn);
+}
+
+FMargin
+SOdysseyLayerRow::GetColumnPadding( FName iColumn ) const
+{
+	if (iColumn == "Header")
+		return FMargin(0.f, 0.f, 2.f, 0.f);
+	
+	return SOdysseyLayerRowBase::GetColumnPadding(iColumn);
 }
 
 TSharedRef<SWidget>
@@ -198,12 +182,6 @@ SOdysseyLayerRow::GenerateBlendRowHeaderWidget()
 			.ContentPadding(FMargin(0))
 			.OnEnumSelectionChanged(this, &SOdysseyLayerRow::OnBlendModeComboBoxChanged)
 		];
-}
-
-EVisibility
-SOdysseyLayerRow::GetRowVisibility(FName iRow) const
-{
-	return GetLayer()->GetRowHeight(iRow).Get() > 0 ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 TSharedRef<SWidget>

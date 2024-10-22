@@ -565,10 +565,11 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
                 .SetInactiveHoveredBrush(FSlateColorBrush(selectedInactiveRow))
                 .SetActiveHighlightedBrush(FSlateColorBrush(selectedParentRow)) // This is the parent hightlight
                 .SetInactiveHighlightedBrush(FSlateColorBrush(selectedParentRow))// This is the parent highlight
-        );
-    }
-    
-    
+				//.SetDropIndicator_Above(const FSlateBrush& InValue)
+				//.SetDropIndicator_Onto(const FSlateBrush& InValue)
+				//.SetDropIndicator_Below(const FSlateBrush& InValue)
+		);
+	}
 
     Set("OdysseySpinBoxStyle.DarkSpinBox",FSpinBoxStyle()
         .SetBackgroundBrush(BOX_BRUSH("SpinBox/Spinbox",FMargin(4.0f/16.0f), FLinearColor( 0.05f, 0.05f, 0.05f )))

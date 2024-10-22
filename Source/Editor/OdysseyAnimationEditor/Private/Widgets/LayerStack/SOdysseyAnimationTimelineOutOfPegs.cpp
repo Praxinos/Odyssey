@@ -1,23 +1,22 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTable.h"
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineOutOfPegs.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineOutOfPegsKey.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+#include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
 #include "OdysseyAnimation.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineSection.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "OdysseyPainterEditor.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
 
 void
-SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysseyAnimationLayer* iLayer)
+SOdysseyAnimationTimelineOutOfPegs::Construct(const FArguments& InArgs, UOdysseyAnimationLayer* iLayer)
 {
-	UOdysseyAnimation::OnCurrentFrameChanged().AddSP(SharedThis(this), &SOdysseyAnimationTimelineLightTable::OnCurrentFrameChanged);
-	FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddSP(this, &SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged);
+	UOdysseyAnimation::OnCurrentFrameChanged().AddSP(SharedThis(this), &SOdysseyAnimationTimelineOutOfPegs::OnCurrentFrameChanged);
+	FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddSP(this, &SOdysseyAnimationTimelineOutOfPegs::OnImageRenderingChanged);
 
 	mLayer = iLayer;
 
@@ -70,7 +69,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 			)
 			[
 
-				SNew(SOdysseyAnimationTimelineLightTableKey)
+				SNew(SOdysseyAnimationTimelineOutOfPegsKey)
 				.Visibility_Lambda(
 					[this, i]()
 					{
@@ -99,23 +98,10 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 						return cells[cellIndex];
 					}
 				)
-				.OnChanged_Lambda(
-					[this, i](FOdysseyAnimationLightTableKey iKey)
-					{
-						FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
-						lighttable.PreviousKeys[i] = iKey;
-						FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
-					}
-				)
-				.OnCommited_Lambda(
-					[this, i](FOdysseyAnimationLightTableKey iKey)
-					{
-						FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
-						lighttable.PreviousKeys[i] = iKey;
-						FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
-					}
-				)
 				.TimelinePosition(InArgs._TimelinePosition)
+				.OnActivateOutOfPegs(InArgs._OnActivateOutOfPegs)
+				.OnInactivateOutOfPegs(InArgs._OnInactivateOutOfPegs)
+				.OnIsOutOfPegsChecked(InArgs._OnIsOutOfPegsChecked)
 			]
 		];
 	}
@@ -174,7 +160,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 			)
 			[
 
-				SNew(SOdysseyAnimationTimelineLightTableKey)
+				SNew(SOdysseyAnimationTimelineOutOfPegsKey)
 				.Visibility_Lambda(
 					[this, i]()
 					{
@@ -203,34 +189,25 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 						return cells[cellIndex];
 					}
 				)
-				.OnChanged_Lambda(
-					[this, i](FOdysseyAnimationLightTableKey iKey)
-					{
-						FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
-						lighttable.NextKeys[i] = iKey;
-						FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
-					}
-				)
-				.OnCommited_Lambda(
-					[this, i](FOdysseyAnimationLightTableKey iKey)
-					{
-						FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
-						lighttable.NextKeys[i] = iKey;
-						FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
-					}
-				)
 				.TimelinePosition(InArgs._TimelinePosition)
+				.OnActivateOutOfPegs(InArgs._OnActivateOutOfPegs)
+				.OnInactivateOutOfPegs(InArgs._OnInactivateOutOfPegs)
+				.OnIsOutOfPegsChecked(InArgs._OnIsOutOfPegsChecked)
 			]
 		];
 	}
 
 	ChildSlot
 	[
-		SNew(SOdysseyAnimationTimelineScrollBox)
-		.TimelinePosition(InArgs._TimelinePosition)
-		+ SOdysseyAnimationTimelineScrollBox::Slot()
+		SNew(SBox)
+        .HeightOverride(FOptionalSize(mDesiredHeight))
 		[
-			horizontalBox
+			SNew(SOdysseyAnimationTimelineScrollBox)
+			.TimelinePosition(InArgs._TimelinePosition)
+			+ SOdysseyAnimationTimelineScrollBox::Slot()
+			[
+				horizontalBox
+			]
 		]
 	];
 
@@ -238,7 +215,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 }
 
 void
-SOdysseyAnimationTimelineLightTable::OnCurrentFrameChanged(UOdysseyAnimation* iAnimation)
+SOdysseyAnimationTimelineOutOfPegs::OnCurrentFrameChanged(UOdysseyAnimation* iAnimation)
 {
 	if (iAnimation != mLayer->GetAnimation())
 		return;
@@ -247,9 +224,9 @@ SOdysseyAnimationTimelineLightTable::OnCurrentFrameChanged(UOdysseyAnimation* iA
 }
 
 void
-SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
+SOdysseyAnimationTimelineOutOfPegs::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged);
+	TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationTimelineOutOfPegs::OnImageRenderingChanged);
 	if (iEvent.IsInteractive())
 		return;
 
@@ -268,9 +245,9 @@ SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged(const FOdysseyImage
 }
 
 void
-SOdysseyAnimationTimelineLightTable::Update()
+SOdysseyAnimationTimelineOutOfPegs::Update()
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationTimelineLightTable::Update);
+	TRACE_CPUPROFILER_EVENT_SCOPE(SOdysseyAnimationTimelineOutOfPegs::Update);
 	UOdysseyAnimation* animation = mLayer->GetAnimation();
 	if (!animation)
 		return;
