@@ -34,8 +34,8 @@ SOdysseyAnimationTimelineTreeView::Construct(const FArguments& InArgs)
 			[
 				SNew(SOdysseyAnimationTimelineHeader)
 				.Animation(mLayerStack->GetAnimation())
-				.Player(InArgs._Player)
-				.TimelinePosition(InArgs._TimelinePosition)
+				.Player(mPlayer)
+				.TimelinePosition(mTimelinePosition)
 			]
 		]
 	};
@@ -45,10 +45,11 @@ SOdysseyAnimationTimelineTreeView::Construct(const FArguments& InArgs)
 		SAssignNew(mTimelineControl, SOdysseyAnimationTimelineControl)
 		.Animation(mLayerStack->GetAnimation())
 		.CurrentFrame(this, &SOdysseyAnimationTimelineTreeView::GetCurrentFrame)
-		.TimelinePosition(InArgs._TimelinePosition)
+		.TimelinePosition(mTimelinePosition)
 		[
 			SAssignNew(mTreeView, SOdysseyAnimationLayerStackTreeView)
 			.LayerStack(mLayerStack)
+			.TimelineCellSelection(mTimelineCellSelection)
 			.OnGenerateRow( this, &SOdysseyAnimationTimelineTreeView::OnGenerateRow )
 			.Columns(columns)
 			//.SelectionMode( ESelectionMode::None )

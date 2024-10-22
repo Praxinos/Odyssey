@@ -123,6 +123,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation", BlueprintSetter=FramesPerSecondBlueprintSetter, meta=(ClampMin=1, UIMin=1))
 	float FramesPerSecond = 24.0f;
 
+	UPROPERTY(config)
+	float TimelineSplitterPosition = 0.2f;
+
 protected:
 	friend class UOdysseyAnimationFactory;
 	friend class UOdysseyAnimationEditorAnimationFunctionLibrary;

@@ -142,8 +142,28 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
     +SVerticalBox::Slot()
     .FillHeight(1.0f)
     [
-		SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot()
+		SAssignNew(mSplitter, SSplitter)
+		.Orientation(EOrientation::Orient_Horizontal)
+		.OnSplitterFinishedResizing_Lambda(
+			[this]()
+			{
+				mAnimation.Get()->TimelineSplitterPosition = mSplitter->SlotAt(0).GetSizeValue();
+				mAnimation.Get()->SaveConfig();
+			}
+		)
+		+ SSplitter::Slot()
+		.Value_Lambda(
+			[this]()
+			{
+				return mAnimation.Get()->TimelineSplitterPosition;
+			}
+		)
+		.OnSlotResized_Lambda(
+			[this](float iSize)
+			{
+				mAnimation.Get()->TimelineSplitterPosition = iSize;
+			}
+		)
 		[
 			SAssignNew(mTreeView, SOdysseyAnimationLayerStackTreeView)
 			.LayerStack(layerStack)
@@ -151,12 +171,7 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
 			.OnGenerateRow(this, &SOdysseyAnimationLayerStack::OnGenerateRow)
 			.HeaderHeight(HEADER_HEIGHT)
 		]
-		+ SHorizontalBox::Slot()
-		.AutoWidth()
-		[
-			SNullWidget::NullWidget //TODO: Add a drag bar
-		]
-		+ SHorizontalBox::Slot()
+		+ SSplitter::Slot()
 		[
 			SNew(SOdysseyAnimationTimelineTreeView)
 			.LayerStack(layerStack)

@@ -80,4 +80,5 @@ private:
     TSharedPtr<SOdysseyLayerStackTreeView> mTreeView;
 	TSharedPtr<SScrollBar> mTimelineScrollBar;
     TSharedPtr<class SOdysseyAnimationTimelineControl> mTimelineControl;
+	TSharedPtr<SSplitter> mSplitter;
 };
