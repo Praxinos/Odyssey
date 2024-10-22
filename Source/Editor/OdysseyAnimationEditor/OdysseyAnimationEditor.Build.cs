@@ -49,8 +49,6 @@ namespace UnrealBuildTool.Rules
 					"Media",
 					"MediaAssets",
 					"OdysseyAnimation",
-					"OdysseyAnimationPlayer",
-					"OdysseyAnimationTexture",
 					"OdysseyBrush",
 					"OdysseyCore",
 					"OdysseyFlipbookEditor",

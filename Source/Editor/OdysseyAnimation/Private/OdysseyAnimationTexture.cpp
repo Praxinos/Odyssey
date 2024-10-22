@@ -2,42 +2,58 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyAnimationTexture.h"
+/*
 #include "OdysseyAnimationTextureResource.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "TextureCompiler.h"
+#include "ImageUtils.h"
 
-#include "UObject/OdysseyObjectEditorUtils.h"
+#include "UObject/OdysseyObjectEditorUtils.h" */
 
-void
-UOdysseyAnimationTexture::SetPlayer(UOdysseyAnimationPlayer* iPlayer)
+/**
+ * Get the optimal placeholder to use during texture compilation
+ */ 
+/* static UTexture2D* GetDefaultTexture2D()
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationTexture, Player), iPlayer);
-}
+	static TStrongObjectPtr<UTexture2D> CheckerboardTexture;
 
-UOdysseyAnimationPlayer*
-UOdysseyAnimationTexture::GetPlayer() const
-{
-	return Player;
+	if (!CheckerboardTexture.IsValid())
+		CheckerboardTexture.Reset(FImageUtils::CreateCheckerboardTexture(FColor(200, 200, 200, 128), FColor(128, 128, 128, 128)));
+
+	return CheckerboardTexture.Get();
 }
 
 FTextureResource*
 UOdysseyAnimationTexture::CreateResource()
 {
 	FOdysseyAnimationTextureResource* resource = new FOdysseyAnimationTextureResource(*this, mDimensions);
-	FRHITexture2D* rhi = nullptr;
-	if (Player)
-	{
-		UTexture2D* playerTexture = Player->GetTexture();
-		if (playerTexture)
-		{
-			FTextureCompilingManager::Get().FinishCompilation({playerTexture});
-			FTextureResource* playerResource = playerTexture->GetResource();
-			if ( playerResource )
-				rhi = playerResource->TextureRHI;
-		}
-	}
+	if (!Player)
+		return new FTexture2DResource(this, GetDefaultTexture2D()->GetResource()->GetTexture2DResource());
+
+	UTexture2D* playerTexture = Player->GetTexture();
+	if (!playerTexture)
+		return new FTexture2DResource(this, GetDefaultTexture2D()->GetResource()->GetTexture2DResource());
+
+	FTextureCompilingManager::Get().FinishCompilation({playerTexture});
+	FTextureResource* playerResource = playerTexture->GetResource();
+	if ( !playerResource )
+		return new FTexture2DResource(this, GetDefaultTexture2D()->GetResource()->GetTexture2DResource());
+	
+	FRHITexture2D* rhi = playerResource->TextureRHI;
 	resource->UpdateTextureReference(rhi);
 	return resource;
+}
+
+void
+UOdysseyAnimationTexture::PostLoad()
+{
+	Super::PostLoad();
+
+	if (Player)
+	{
+		Player->OnTextureChanged().AddUObject(this, &UOdysseyAnimationTexture::OnPlayerTextureChanged);
+		PlayerHandle = Player;
+	}
 }
 
 EMaterialValueType
@@ -61,7 +77,14 @@ UOdysseyAnimationTexture::GetSurfaceHeight() const
 void
 UOdysseyAnimationTexture::PlayerChanged()
 {
-	//TODO: Connect to Player's TextureChanged Event and call UpdateResource() when it happens
+	if (PlayerHandle)
+	{
+		PlayerHandle->OnTextureChanged().RemoveAll(this);
+		PlayerHandle = Player;
+	}
+
+	if (Player)
+		Player->OnTextureChanged().AddUObject(this, &UOdysseyAnimationTexture::OnPlayerTextureChanged);
 
 	//When the player changes we have to update our resource accordingly
     UpdateResource();
@@ -99,3 +122,9 @@ UOdysseyAnimationTexture::PostTransacted(const FTransactionObjectEvent& iTransac
         PropertyChanged(propertyName);
     }
 }
+
+void
+UOdysseyAnimationTexture::OnPlayerTextureChanged()
+{
+	UpdateResource();
+} */

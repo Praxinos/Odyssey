@@ -26,7 +26,7 @@ enum class EOdysseyAnimationPlayerStatus
 };
 
 UCLASS()
-class ODYSSEYANIMATIONPLAYER_API UOdysseyAnimationPlayer
+class ODYSSEYANIMATION_API UOdysseyAnimationPlayer
 	: public UObject
 	, public FTickableEditorObject //Allows us to react to Tick events
 {
@@ -46,6 +46,7 @@ public:
 	FSimpleMulticastDelegate& OnStop();
 
 public:
+	virtual void PostLoad() override;
 	virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
 	void PropertyChanged(const FName& iPropertyName);
 
@@ -86,7 +87,7 @@ private:
 
 public:
 	UPROPERTY()
-	UOdysseyAnimation* 	Animation = nullptr;
+	TObjectPtr<UOdysseyAnimation> Animation;
 
 	UPROPERTY()
 	EOdysseyAnimationPlayerStatus Status = EOdysseyAnimationPlayerStatus::Stopped;
@@ -99,7 +100,7 @@ public:
 
 private:
 	UPROPERTY()
-	UTexture2D*	Texture = nullptr;
+	TObjectPtr<UTexture2D>	Texture;
 
 private:
 	bool mIsBackward = false;

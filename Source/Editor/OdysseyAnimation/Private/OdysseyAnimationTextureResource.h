@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+/* #include "CoreMinimal.h"
 
 class UOdysseyAnimationTexture;
 
@@ -25,5 +25,6 @@ public:
 
 private:
 	UOdysseyAnimationTexture& mOwner;
-	FIntPoint& mOwnerDimensions;
-};
+	uint32 SizeX = 0;
+	uint32 SizeY = 0;
+}; */

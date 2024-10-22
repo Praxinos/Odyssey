@@ -159,6 +159,39 @@ void FOdysseyViewportDrawingEditorUtils::InternalQueryPaintableTextures(int32 iM
 }
 
 bool
+FOdysseyViewportDrawingEditorUtils::OdysseyDoesMaterialUseTexture(UMaterialInterface* iMaterial, UTexture* iTexture)
+{
+    if (!iMaterial)
+		return false;
+
+	// Only grab the textures from the top level of samples
+	for ( UMaterialExpression* expression : iMaterial->GetMaterial()->GetExpressions())
+	{
+		UMaterialExpressionTextureSample* textureSample = Cast<UMaterialExpressionTextureSample>(expression);
+		if (textureSample != NULL)
+		{
+			// Handle texture parameter expressions
+			UMaterialExpressionTextureSampleParameter* textureSampleParameter = Cast<UMaterialExpressionTextureSampleParameter>(textureSample);
+			if (textureSampleParameter)
+			{
+				// Grab the overridden texture if it exists.  
+				UTexture* texture = nullptr;
+				iMaterial->GetTextureParameterValue(textureSampleParameter->ParameterName, texture);
+				if (texture && texture == iTexture)
+					return true;
+				
+				continue;
+			}
+		}
+
+		UMaterialExpressionTextureBase* textureBase = Cast<UMaterialExpressionTextureBase>(expression);
+		if (textureBase && textureBase->Texture == iTexture)
+			return true;
+	}
+	return false;
+}
+
+bool
 FOdysseyViewportDrawingEditorUtils::GenerateSeamMask(UMeshComponent* MeshComponent, int32 UVSet, UTextureRenderTarget2D* SeamRenderTexture, UTexture* Texture, UTextureRenderTarget2D* RenderTargetTexture)
 {
 	UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponent);

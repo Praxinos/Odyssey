@@ -449,3 +449,16 @@ UOdysseyAnimationPlayer::PostEditChangeProperty( FPropertyChangedEvent& Property
 
     PropertyChanged(PropertyChangedEvent.GetPropertyName());
 }
+
+void
+UOdysseyAnimationPlayer::PostLoad()
+{
+	Super::PostLoad();
+	
+	if (GetFlags() & RF_ClassDefaultObject)
+		return;
+
+	//will create the texture if needed
+	if (!Texture)
+		AnimationChanged();
+}

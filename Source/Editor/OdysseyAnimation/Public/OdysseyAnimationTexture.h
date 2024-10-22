@@ -3,20 +3,16 @@
 
 #pragma once
 
-#include "OdysseyAnimationPlayer.h"
+/* #include "OdysseyAnimationPlayer.h"
 #include "Engine/Texture.h"
 
 #include "OdysseyAnimationTexture.generated.h"
 
 UCLASS(hidecategories=(Adjustments, Compositing, LevelOfDetail, ImportSettings, Object))
-class ODYSSEYANIMATIONTEXTURE_API UOdysseyAnimationTexture
+class ODYSSEYANIMATION_API UOdysseyAnimationTexture
 	: public UTexture
 {
 	GENERATED_BODY()
-
-public:
-	void SetPlayer(UOdysseyAnimationPlayer* iPlayer);
-	UOdysseyAnimationPlayer* GetPlayer() const;
 
 public:
 	//~ UTexture interface.
@@ -35,23 +31,19 @@ protected:
 
 public:
     // UObject overrides
+	virtual void PostLoad() override;
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 
+private:
+	void OnPlayerTextureChanged();
+
 public:
-	//~ UObject interface.
-	//virtual void PostLoad() override;
-	//virtual bool IsPostLoadThreadSafe() const override;
-
-//#if WITH_EDITOR
-	//virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-//#endif
-
-private:
 	UPROPERTY()
-	UOdysseyAnimationPlayer* 	Player = nullptr;
+	TObjectPtr<UOdysseyAnimationPlayer> Player;
+
+	UOdysseyAnimationPlayer* PlayerHandle = nullptr;
 
 private:
-	/** Current width and height of the resource (in pixels). */
 	FIntPoint mDimensions;
-};
+}; */

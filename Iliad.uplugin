@@ -163,16 +163,6 @@
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "OdysseyAnimationPlayer",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "OdysseyAnimationTexture",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		},
-		{
 			"Name": "OdysseyPainterEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
