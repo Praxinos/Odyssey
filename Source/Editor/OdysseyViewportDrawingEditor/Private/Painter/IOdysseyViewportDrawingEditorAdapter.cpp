@@ -140,7 +140,7 @@ void IOdysseyViewportDrawingEditorAdapter::StartPainting()
 
     if (mTool)
     {
-        mCapturedByEditor = mTool->OnMouseDown(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
+        mCapturedByEditor = mTool->OnMouseDown(mCurrentStrokeRay.mPoint, mMouseButton);
     }
 }
 
@@ -170,7 +170,7 @@ void IOdysseyViewportDrawingEditorAdapter::FinishPainting()
     if (!mTool)
         return;
     
-    mTool->OnMouseUp(mCurrentStrokeRay.mPoint, EKeys::LeftMouseButton);
+    mTool->OnMouseUp(mCurrentStrokeRay.mPoint, mMouseButton);
     mCapturedByEditor = false;
 
     UOdysseyPainterEditorRasterDrawingTool* rasterDrawingTool = Cast<UOdysseyPainterEditorRasterDrawingTool>(mTool.Get());
@@ -589,7 +589,7 @@ IOdysseyViewportDrawingEditorAdapter::MouseDown(const FOdysseyRay& iRay)
     mLastStrokeRay = mCurrentStrokeRay;
     mCurrentStrokeRay = iRay;
 
-    if (mState == eState::kIdleReady && mMouseButton == EKeys::LeftMouseButton)
+    if (mState == eState::kIdleReady && (mMouseButton == EKeys::LeftMouseButton || mMouseButton == EKeys::RightMouseButton))
     {
         mState = eState::kDrawing;
         StartPainting();
@@ -611,7 +611,7 @@ IOdysseyViewportDrawingEditorAdapter::MouseUp(const FOdysseyRay& iRay)
 
     mIsMouseDown = false;
 
-    if (mState == eState::kDrawing && mMouseButton == EKeys::LeftMouseButton)
+    if (mState == eState::kDrawing && (mMouseButton == EKeys::LeftMouseButton || mMouseButton == EKeys::RightMouseButton))
     {
         FinishPainting();
         mState = eState::kIdleReady;

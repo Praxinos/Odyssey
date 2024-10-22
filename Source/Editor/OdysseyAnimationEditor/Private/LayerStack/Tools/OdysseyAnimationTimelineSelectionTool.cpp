@@ -19,26 +19,25 @@ FOdysseyAnimationTimelineSelectionTool::FOdysseyAnimationTimelineSelectionTool(F
 FReply
 FOdysseyAnimationTimelineSelectionTool::OnMouseButtonDown(const FMouseEventParams& iParams)
 {
+	if (iParams.mMouseEvent.GetEffectingButton() != EKeys::LeftMouseButton)
+		return FReply::Unhandled();
+
 	switch(iParams.mOrigin)
 	{
 		case EMouseEventOrigin::Layer:
 		{
-			if (iParams.mMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
-			{
-				mTimelineParams->SetSelectedCells({});
-				return FReply::Handled();
-			}
-			return FReply::Unhandled();
+			mTimelineParams->SetSelectedCells({});
+			return FReply::Handled();
 		}
 		break;
 
 		case EMouseEventOrigin::CellsTimeline:
 		{
-			if (iParams.mMouseEvent.IsShiftDown() && iParams.mMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+			if (iParams.mMouseEvent.IsShiftDown())
 				return OnContiguousSelectionMouseButtonDown(iParams);
-			else if (iParams.mMouseEvent.IsControlDown() && iParams.mMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+			else if (iParams.mMouseEvent.IsControlDown())
 				return OnNonContiguousSelectionMouseButtonDown(iParams);
-			else if ( iParams.mMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+			else
 				return OnDefaultSelectionMouseButtonDown(iParams);
 		}
 		break;
@@ -83,6 +82,9 @@ FOdysseyAnimationTimelineSelectionTool::OnMouseMove(const FMouseEventParams& iPa
 FReply
 FOdysseyAnimationTimelineSelectionTool::OnMouseButtonUp(const FMouseEventParams& iParams)
 {
+	if (iParams.mMouseEvent.GetEffectingButton() != EKeys::LeftMouseButton)
+		return FReply::Unhandled();
+		
     if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
         return FReply::Unhandled();
 

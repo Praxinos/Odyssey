@@ -156,8 +156,11 @@ void UOdysseyPainterEditorRasterBaseTool::PopupContextMenu()
 {
     TSharedPtr<SWidget> contextMenu = CreateContextMenu();
 
-    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
-    FSlateApplication::Get().PushMenu(viewportTab->Widget().ToSharedRef(),
+    TSharedPtr<SWindow> window = FSlateApplication::Get().GetActiveTopLevelWindow();
+	if (!window)
+		return;
+
+    FSlateApplication::Get().PushMenu( window.ToSharedRef(),
         FWidgetPath(),
         contextMenu.ToSharedRef(),
         FSlateApplication::Get().GetCursorPos(),
