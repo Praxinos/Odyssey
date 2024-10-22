@@ -30,7 +30,7 @@ SOdysseyAnimationTimelineTreeView::Construct(const FArguments& InArgs)
 		.HAlignCell(HAlign_Fill)
 		[
 			SNew(SBox)
-			.HeightOverride(20)
+			.HeightOverride(InArgs._HeaderHeight)
 			[
 				SNew(SOdysseyAnimationTimelineHeader)
 				.Animation(mLayerStack->GetAnimation())

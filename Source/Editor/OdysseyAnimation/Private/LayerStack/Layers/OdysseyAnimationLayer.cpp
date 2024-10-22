@@ -508,3 +508,29 @@ UOdysseyAnimationLayer::LighttableBlueprintSetter(FOdysseyAnimationLightTable Va
 {
 	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), Value);
 }
+
+#ifdef WITH_EDITOR
+
+TArray<FName>
+UOdysseyAnimationLayer::GetRows() const
+{
+	TArray<FName> rows = UOdysseyLayer::GetRows();
+	rows.Add("Lighttable");
+	rows.Add("OutOfPegs");
+
+	return rows;
+}
+
+FOptionalSize
+UOdysseyAnimationLayer::GetRowHeight(FName iSubRowName) const
+{
+	if (iSubRowName == "Lighttable")
+		return DisplayOptions && Lighttable.bIsActivated ? 40 : 0;
+
+	if (iSubRowName == "OutOfPegs")
+		return DisplayOptions && Lighttable.bIsActivated ? 20 : 0;
+		
+	return Super::GetRowHeight(iSubRowName);
+}
+
+#endif

@@ -11,9 +11,18 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyLayerStack.h"
 #include "Widgets/SOdysseyLayerExpanderArrow.h"
+#include "Widgets/Input/SNumericEntryBox.h"
 #include "OdysseyLayerStack.h"
+#include "Math/UnitConversion.h"
+#include "SEnumCombo.h"
+#include "Widgets/Input/NumericUnitTypeInterface.inl"
 
 #define LOCTEXT_NAMESPACE "LayerStackEditor"
+
+SOdysseyLayerRow::SOdysseyLayerRow()
+    : mSetOpacityTransactionName(LOCTEXT("layer-image-raster.transaction.set-opacity", "Change Layer Opacity"))
+{
+}
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
 void SOdysseyLayerRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, UOdysseyLayer* iLayer)
@@ -32,116 +41,214 @@ void SOdysseyLayerRow::Construct(const FArguments& InArgs, const TSharedRef<SOdy
 TSharedRef<SWidget>
 SOdysseyLayerRow::GenerateWidgetForColumn( const FName& InColumnName )
 {
-    if (InColumnName == "IsActivated")
-    {
-        return GenerateIsActivatedWidget();
-    }
-    else if (InColumnName == "IsLocked")
-    {
-        return GenerateIsLockedWidget();
-    }
-	else if (InColumnName == "DisplayOptions")
-    {
-        return GenerateDisplayOptionsWidget();
-    }
-    else if (InColumnName == "Header")
-    {
-        return GenerateExpandableHeaderWidget();
-    }
+	FMargin padding = InColumnName == "Header" ? FMargin(0.f, 0.f, 2.f, 2.f) : FMargin(0.f);
+	TSharedRef<SVerticalBox> verticalBox = SNew(SVerticalBox);
+	
+	TArray<FName> rows = GetLayer()->GetRows();
+	for (const FName& row : rows)
+	{
+		verticalBox->AddSlot()
+		.AutoHeight()
+		.Padding(padding)
+		[
+			SNew(SBox)
+			.HeightOverride_UObject(GetLayer(), &UOdysseyLayer::GetRowHeight, row)
+			.Visibility(this, &SOdysseyLayerRow::GetRowVisibility, row)
+			[
+				GenerateWidget(row, InColumnName)
+			]
+		];
+	}
+
+	return verticalBox;
+}
+
+TSharedRef<SWidget>
+SOdysseyLayerRow::GenerateWidget( const FName& iRow, const FName& iColumn )
+{
+	if (iRow == "Main")
+	{
+		if (iColumn == "IsActivated")
+		{
+			return GenerateMainRowIsActivatedWidget();
+		}
+		else if (iColumn == "IsLocked")
+		{
+			return GenerateMainRowIsLockedWidget();
+		}
+		else if (iColumn == "DisplayOptions")
+		{
+			return GenerateMainRowDisplayOptionsWidget();
+		}
+		else if (iColumn == "Header")
+		{
+			return GenerateMainRowHeaderWidget();
+		}
+	}
+	if (iRow == "Blend")
+	{
+		if (iColumn == "Header")
+		{
+			return GenerateBlendRowHeaderWidget();
+		}
+	}
     return SNullWidget::NullWidget;
 }
 
 TSharedRef<SWidget>
-SOdysseyLayerRow::GenerateHeaderWidget()
+SOdysseyLayerRow::GenerateMainRowHeaderWidget()
 {
-	return SAssignNew(mNameWidget, SInlineEditableTextBlock)
-		.Text(this, &SOdysseyLayerRow::GetLayerName)
-		.Font(this, &SOdysseyLayerRow::GetLayerNameFont)
-		.OnTextCommitted(this, &SOdysseyLayerRow::OnLayerNameCommited)
-		.IsSelected(this, &SOdysseyLayerRow::IsSelectedExclusively); //Allows edition to work
-		//.Clipping(EWidgetClipping::ClipToBounds)
+	TSharedRef<SHorizontalBox> horizontalBox = SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot()
+		.Padding(FMargin(2.f, 0.f, 0.f, 0.f))
+		.AutoWidth()
+		.VAlign(VAlign_Center)
+		[
+			SNew( SOdysseyLayerExpanderArrow, SharedThis(this) )
+				.ArrowPadding(FMargin(0.f, 2.f, 0.f, 0.f))
+				.ExpanderImageOpened(GetLayer()->IconExpanded.GetIcon())
+				.ExpanderImageClosed(GetLayer()->Icon.GetIcon())
+				.IndentAmount(16.f)
+				.ShouldDrawWires( true )
+		]
+		+ SHorizontalBox::Slot()
+		.Padding(FMargin(2.f, 0.f, 0.f, 0.f))
+		.VAlign(VAlign_Center)
+		[
+			SAssignNew(mNameWidget, SInlineEditableTextBlock)
+				.Text(this, &SOdysseyLayerRow::GetLayerName)
+				.Font(this, &SOdysseyLayerRow::GetLayerNameFont)
+				.OnTextCommitted(this, &SOdysseyLayerRow::OnLayerNameCommited)
+				.IsSelected(this, &SOdysseyLayerRow::IsSelectedExclusively) //Allows edition to work
+		]
+        + SHorizontalBox::Slot()
+        .Padding(FMargin(2.f, 0.f, 0.f, 0.f))
+        .VAlign(VAlign_Center)
+        .AutoWidth()
+        [
+            SNew(SNumericEntryBox<int>)
+            .Visibility(this, &SOdysseyLayerRow::GetCollapsedOpacityVisibility)
+            .Value_Lambda([this]() { return (int)(GetLayer()->Opacity * 100.f + 0.5f);})
+            .AllowSpin(true)
+            .ShiftMouseMovePixelPerDelta(10)
+            .Delta(1)
+            .MinValue(0)
+            .MinSliderValue(0)
+            .MaxValue(100)
+            .MaxSliderValue(100)
+            .OnValueChanged(this, &SOdysseyLayerRow::OnOpacityValueChanged)
+            .OnValueCommitted(this, &SOdysseyLayerRow::OnOpacityValueCommitted)
+            .OnBeginSliderMovement(this, &SOdysseyLayerRow::OnOpacityBeginSliderMovement)
+            .OnEndSliderMovement(this, &SOdysseyLayerRow::OnOpacityEndSliderMovement)
+            //.MinDesiredValueWidth  
+        ];
+
+	TArray<TSharedPtr<SWidget>> optionWidgets = GenerateMainRowHeaderOptionWidgets();
+	for (TSharedPtr<SWidget> widget : optionWidgets)
+	{
+		horizontalBox->AddSlot()
+		.AutoWidth()
+		.Padding(FMargin(2.f, 0.f, 0.f, 0.f))
+		.VAlign(VAlign_Center)
+		[
+			widget.ToSharedRef()
+		];
+	}
+
+	return horizontalBox;
+}
+
+TArray<TSharedPtr<SWidget>>
+SOdysseyLayerRow::GenerateMainRowHeaderOptionWidgets()
+{
+	return {};
 }
 
 TSharedRef<SWidget>
-SOdysseyLayerRow::GenerateExpandableHeaderWidget()
+SOdysseyLayerRow::GenerateBlendRowHeaderWidget()
 {
-    return SNew(SHorizontalBox)
-        + SHorizontalBox::Slot()
-        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
-        .AutoWidth()
-        [
-            SNew( SOdysseyLayerExpanderArrow, SharedThis(this) )
-                .ArrowPadding(FMargin(0.f, 2.f, 0.f, 0.f))
-                .ExpanderImageOpened(GetLayer()->IconExpanded.GetIcon())
-                .ExpanderImageClosed(GetLayer()->Icon.GetIcon())
-                .IndentAmount(16.f)
-                .ShouldDrawWires( true )
-        ]
-		+ SHorizontalBox::Slot()
-        .Padding(FMargin(0.f, 2.f, 0.f, 2.f))
+	return SNew(SHorizontalBox)
+		+SHorizontalBox::Slot()
+		.Padding(FMargin(0, 0, 1.f, 0))
 		[
-            SNew(SVerticalBox)
-            + SVerticalBox::Slot()
-            .Padding(FMargin(0.f, 0.f, 0.f, 2.f))
-            .AutoHeight()
-            [
-			    GenerateHeaderWidget()
-            ]
-            + SVerticalBox::Slot()
-            .AutoHeight()
-            [
-				SNew(SBox)
-				.Visibility(this, &SOdysseyLayerRow::OptionsWidgetVisibility)
-                [
-                    GenerateOptionsWidget()
-                ]
-            ]
+			SNew(SNumericEntryBox<int>)
+			.IsEnabled_Lambda([this](){ return !GetLayer()->IsLockedRecursively();})
+			.Value_Lambda([this]() { return (int)(GetLayer()->Opacity * 100.f + 0.5f);})
+			.TypeInterface(MakeShareable( new TNumericUnitTypeInterface<int32>( EUnit::Percentage ) ))
+			.AllowSpin(true)
+			.ShiftMouseMovePixelPerDelta(10)
+			.Delta(1)
+			.MinValue(0)
+			.MinSliderValue(0)
+			.MaxValue(100)
+			.MaxSliderValue(100)
+			.OnValueChanged(this, &SOdysseyLayerRow::OnOpacityValueChanged)
+			.OnValueCommitted(this, &SOdysseyLayerRow::OnOpacityValueCommitted)
+			.OnBeginSliderMovement(this, &SOdysseyLayerRow::OnOpacityBeginSliderMovement)
+			.OnEndSliderMovement(this, &SOdysseyLayerRow::OnOpacityEndSliderMovement)
+			//.MinDesiredValueWidth  
+		]
+		+SHorizontalBox::Slot()
+		.Padding(FMargin(1.f, 0, 0, 0))
+		.VAlign(VAlign_Center)
+		[
+			SNew(SEnumComboBox, StaticEnum<EOdysseyBlendingMode>())
+			.IsEnabled_Lambda([this](){ return !GetLayer()->IsLockedRecursively();})
+			.CurrentValue_Lambda([this](){ return (int32)GetLayer()->BlendMode;})
+			.ContentPadding(FMargin(0))
+			.OnEnumSelectionChanged(this, &SOdysseyLayerRow::OnBlendModeComboBoxChanged)
+		];
+}
+
+EVisibility
+SOdysseyLayerRow::GetRowVisibility(FName iRow) const
+{
+	return GetLayer()->GetRowHeight(iRow).Get() > 0 ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+TSharedRef<SWidget>
+SOdysseyLayerRow::GenerateMainRowDisplayOptionsWidget()
+{
+	const FCheckBoxStyle* displayOptionsToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("LayerStack.DisplayOptionsToggle");
+	
+	return SNew(SBox)
+		.VAlign(VAlign_Center)
+		[
+			SNew(SCheckBox)
+			.Style(displayOptionsToggleStyle)
+			.OnCheckStateChanged(this, &SOdysseyLayerRow::OnDisplayOptionsCheckBoxStateChanged)
+			.IsChecked(this, &SOdysseyLayerRow::GetDisplayOptionsCheckBoxState)
 		];
 }
 
 TSharedRef<SWidget>
-SOdysseyLayerRow::GenerateOptionsWidget()
-{
-    TSharedRef<SWidget> optionsWidget = SNullWidget::NullWidget;
-    return optionsWidget;
-}
-
-EVisibility
-SOdysseyLayerRow::OptionsWidgetVisibility() const
-{
-	return GetLayer()->DisplayOptions ? EVisibility::Visible : EVisibility::Collapsed;
-}
-
-TSharedRef<SWidget>
-SOdysseyLayerRow::GenerateDisplayOptionsWidget()
-{
-	const FCheckBoxStyle* displayOptionsToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("LayerStack.DisplayOptionsToggle");
-	return SNew(SCheckBox)
-		.Style(displayOptionsToggleStyle)
-		.OnCheckStateChanged(this, &SOdysseyLayerRow::OnDisplayOptionsCheckBoxStateChanged)
-		.IsChecked(this, &SOdysseyLayerRow::GetDisplayOptionsCheckBoxState);
-}
-
-TSharedRef<SWidget>
-SOdysseyLayerRow::GenerateIsActivatedWidget()
+SOdysseyLayerRow::GenerateMainRowIsActivatedWidget()
 {
 	const FCheckBoxStyle* isActivatedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("LayerStack.IsActivatedToggle");
 
-	return SNew(SCheckBox)
-		.Style(isActivatedToggleStyle)
-		.OnCheckStateChanged(this, &SOdysseyLayerRow::OnIsActivatedCheckBoxStateChanged)
-		.IsChecked(this, &SOdysseyLayerRow::GetIsActivatedCheckBoxState);
+	return SNew(SBox)
+		.VAlign(VAlign_Center)
+		[
+			SNew(SCheckBox)
+			.Style(isActivatedToggleStyle)
+			.OnCheckStateChanged(this, &SOdysseyLayerRow::OnIsActivatedCheckBoxStateChanged)
+			.IsChecked(this, &SOdysseyLayerRow::GetIsActivatedCheckBoxState)
+		];
 }
 
 TSharedRef<SWidget>
-SOdysseyLayerRow::GenerateIsLockedWidget()
+SOdysseyLayerRow::GenerateMainRowIsLockedWidget()
 {
 	const FCheckBoxStyle* isLockedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("LayerStack.IsLockedToggle");
 
-	return SNew(SCheckBox)
-		.Style(isLockedToggleStyle)
-		.OnCheckStateChanged(this, &SOdysseyLayerRow::OnIsLockedCheckBoxStateChanged)
-		.IsChecked(this, &SOdysseyLayerRow::GetIsLockedCheckBoxState);
+	return SNew(SBox)
+		.VAlign(VAlign_Center)
+		[
+			SNew(SCheckBox)
+			.Style(isLockedToggleStyle)
+			.OnCheckStateChanged(this, &SOdysseyLayerRow::OnIsLockedCheckBoxStateChanged)
+			.IsChecked(this, &SOdysseyLayerRow::GetIsLockedCheckBoxState)
+		];
 }
 
 void
@@ -240,6 +347,56 @@ ECheckBoxState
 SOdysseyLayerRow::GetDisplayOptionsCheckBoxState() const
 {
 	return GetLayer()->DisplayOptions ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+}
+
+void
+SOdysseyLayerRow::OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo)
+{
+    if ( GetLayer()->IsLockedRecursively() )
+        return;
+
+    //Creating a transaction here manages entering a value using keyboard
+    FScopedTransaction ScopedTransaction(LOCTEXT("layer.transaction.set-blend-mode", "Change Layer BlendMode"));
+    FOdysseyObjectEditorUtils::SetPropertyValue(GetLayer(), GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode), EOdysseyBlendingMode(iValue));
+}
+
+void
+SOdysseyLayerRow::OnOpacityValueCommitted(int iValue, ETextCommit::Type iType)
+{
+    if ( GetLayer()->IsLockedRecursively() )
+        return;
+
+    //Creating a transaction here manages entering a value using keyboard
+    FScopedTransaction ScopedTransaction(mSetOpacityTransactionName);
+    FOdysseyObjectEditorUtils::SetPropertyValue(GetLayer(), GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::ValueSet);
+}
+
+void
+SOdysseyLayerRow::OnOpacityValueChanged(int iValue)
+{
+    if ( GetLayer()->IsLockedRecursively() )
+        return;
+
+    FOdysseyObjectEditorUtils::SetPropertyValue(GetLayer(), GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), iValue / 100.f, EPropertyChangeType::Interactive);
+}
+
+void
+SOdysseyLayerRow::OnOpacityBeginSliderMovement()
+{
+    //Creating a transaction here manages entering a value using slider
+    GEditor->BeginTransaction(mSetOpacityTransactionName);
+}
+
+void
+SOdysseyLayerRow::OnOpacityEndSliderMovement(int iValue)
+{
+    GEditor->EndTransaction();
+}
+
+EVisibility
+SOdysseyLayerRow::GetCollapsedOpacityVisibility() const
+{
+    return GetLayer()->DisplayOptions ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 #undef LOCTEXT_NAMESPACE

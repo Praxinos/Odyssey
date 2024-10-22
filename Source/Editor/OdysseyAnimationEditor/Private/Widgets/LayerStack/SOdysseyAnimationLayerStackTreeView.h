@@ -13,10 +13,12 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStackTreeView
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerStackTreeView)
+		: _HeaderHeight(25)
         {}
         SLATE_ARGUMENT( UOdysseyLayerStack*, LayerStack )
 		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
-        SLATE_ARGUMENT( TOptional<TArray<SHeaderRow::FColumn::FArguments>>, Columns )
+		SLATE_ARGUMENT( TOptional<TArray<SHeaderRow::FColumn::FArguments>>, Columns )
+		SLATE_ARGUMENT( int, HeaderHeight)
         SLATE_EVENT( FOnGenerateRow, OnGenerateRow )
     SLATE_END_ARGS()
 

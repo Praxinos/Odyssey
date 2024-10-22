@@ -27,6 +27,7 @@ SOdysseyAnimationLayerStackTreeView::Construct(const FArguments& InArgs)
 		.LayerStack(InArgs._LayerStack)
         .OnGenerateRow(InArgs._OnGenerateRow)
 		.Columns(InArgs._Columns)
+		.HeaderHeight(InArgs._HeaderHeight)
 	);
 }
 

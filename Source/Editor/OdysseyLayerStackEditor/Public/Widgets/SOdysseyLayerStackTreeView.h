@@ -25,6 +25,7 @@ public:
         {}
         SLATE_ARGUMENT( UOdysseyLayerStack*, LayerStack )
         SLATE_ARGUMENT( TOptional<TArray<SHeaderRow::FColumn::FArguments>>, Columns )
+		SLATE_ARGUMENT( int, HeaderHeight )
         SLATE_EVENT( FOnGenerateRow, OnGenerateRow )
     SLATE_END_ARGS()
 

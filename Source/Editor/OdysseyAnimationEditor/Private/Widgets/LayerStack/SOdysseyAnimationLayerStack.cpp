@@ -23,6 +23,8 @@
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
+#define HEADER_HEIGHT 20
+
 SLATE_IMPLEMENT_WIDGET(SOdysseyAnimationLayerStack)
 void
 SOdysseyAnimationLayerStack::PrivateRegisterAttributes(FSlateAttributeInitializer& AttributeInitializer)
@@ -147,6 +149,7 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
 			.LayerStack(layerStack)
 			.TimelineCellSelection(mTimelineCellSelection.Get())
 			.OnGenerateRow(this, &SOdysseyAnimationLayerStack::OnGenerateRow)
+			.HeaderHeight(HEADER_HEIGHT)
 		]
 		+ SHorizontalBox::Slot()
 		.AutoWidth()
@@ -160,6 +163,7 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
 			.Player(mPlayer.Get())
 			.TimelineCellSelection(mTimelineCellSelection.Get())
 			.TimelinePosition(mTimelinePosition.Get())
+			.HeaderHeight(HEADER_HEIGHT)
 		]
     ]
     +SVerticalBox::Slot()

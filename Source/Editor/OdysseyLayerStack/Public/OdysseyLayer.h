@@ -196,6 +196,12 @@ public:
 	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
 
+	public:
+	#ifdef WITH_EDITOR
+		virtual TArray<FName> GetRows() const;
+		virtual FOptionalSize GetRowHeight(FName iSubRowName) const;
+	#endif
+
 protected:
     //Property changed methods
     virtual void NameChanged();

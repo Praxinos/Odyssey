@@ -21,27 +21,13 @@ public:
     SLATE_END_ARGS()
 
 public:
-    SOdysseyAnimationLayerFolderRow();
     // Construction / Destruction
     void Construct(
         const FArguments& iArgs,
         const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
         class UOdysseyAnimationLayerFolder* iAnimationLayerFolder
     );
-    
-private:
-    virtual TSharedRef<SWidget> GenerateHeaderWidget() override;
-    virtual TSharedRef<SWidget> GenerateOptionsWidget() override;
-    EVisibility GetCollapsedOpacityVisibility() const;
-
-private:
-    void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);
-    void OnOpacityValueChanged(int iValue);
-    void OnOpacityValueCommitted(int iValue, ETextCommit::Type iType);
-    void OnOpacityBeginSliderMovement();
-    void OnOpacityEndSliderMovement(int iValue);
 
 private:
     class UOdysseyAnimationLayerFolder* mAnimationLayerFolder;
-    FText mSetOpacityTransactionName;
 };

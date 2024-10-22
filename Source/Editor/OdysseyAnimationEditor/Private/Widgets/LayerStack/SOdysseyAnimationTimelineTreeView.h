@@ -18,11 +18,13 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineTreeView
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineTreeView)
+		: _HeaderHeight(25)
         {}
         SLATE_ARGUMENT( UOdysseyAnimationLayerStack*, LayerStack )
 		SLATE_ARGUMENT( UOdysseyAnimationPlayer*, Player )
         SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
 		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+		SLATE_ARGUMENT( int, HeaderHeight )
 		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
 		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
 		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)

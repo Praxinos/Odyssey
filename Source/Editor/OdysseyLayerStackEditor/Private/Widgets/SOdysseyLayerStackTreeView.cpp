@@ -63,9 +63,14 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
             .HAlignCell(HAlign_Center)
             .VAlignCell(VAlign_Top)
             [
-                SNew(SImage)
-                .ColorAndOpacity(FSlateColor::UseForeground())
-                .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
+				SNew(SBox)
+				.HeightOverride(InArgs._HeaderHeight)
+				.VAlign(VAlign_Center)
+				[
+					SNew(SImage)
+					.ColorAndOpacity(FSlateColor::UseForeground())
+					.Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
+				]
             ]
 		);
 		headerRow->AddColumn(
@@ -77,9 +82,14 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
             .HAlignCell(HAlign_Center)
             .VAlignCell(VAlign_Top)
             [
-                SNew(SImage)
-                .ColorAndOpacity(FSlateColor::UseForeground())
-                .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Locked16"))
+				SNew(SBox)
+				.HeightOverride(InArgs._HeaderHeight)
+				.VAlign(VAlign_Center)
+				[
+					SNew(SImage)
+					.ColorAndOpacity(FSlateColor::UseForeground())
+					.Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Locked16"))
+				]
             ]
 		);
 
@@ -92,9 +102,14 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
             .HAlignCell(HAlign_Center)
             .VAlignCell(VAlign_Top)
             [
-                SNew(SImage)
-                .ColorAndOpacity(FSlateColor::UseForeground())
-                .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.OptionsHeader16"))
+				SNew(SBox)
+				.HeightOverride(InArgs._HeaderHeight)
+				.VAlign(VAlign_Center)
+				[
+					SNew(SImage)
+					.ColorAndOpacity(FSlateColor::UseForeground())
+					.Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.OptionsHeader16"))
+				]
             ]
 		);
 

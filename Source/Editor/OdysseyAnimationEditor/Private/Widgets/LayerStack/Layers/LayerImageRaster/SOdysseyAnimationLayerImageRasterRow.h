@@ -26,34 +26,21 @@ public:
 
 public:
     // Construction / Destruction
-    SOdysseyAnimationLayerImageRasterRow();
-
     void Construct(
         const FArguments& iArgs,
         const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
         class UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
     );
 
-private:
-    virtual TSharedRef<SWidget> GenerateHeaderWidget() override;
-    virtual TSharedRef<SWidget> GenerateOptionsWidget() override;
-    void OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState);
-    ECheckBoxState GetIsAlphaLockedIsChecked() const;
-    void OnLightTableCheckStateChanged(ECheckBoxState iState);
-    ECheckBoxState GetLightTableIsChecked() const;
-    EVisibility GetCollapsedOpacityVisibility() const;
-    EVisibility GetLightTableVisibility() const;
+protected:
+	virtual TArray<TSharedPtr<SWidget>> GenerateMainRowHeaderOptionWidgets() override;
 
 private:
-    void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);
-    void OnOpacityValueChanged(int iValue);
-    void OnOpacityValueCommitted(int iValue, ETextCommit::Type iType);
-    void OnOpacityBeginSliderMovement();
-    void OnOpacityEndSliderMovement(int iValue);
+    void OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState);
+    ECheckBoxState GetIsAlphaLockedIsChecked() const;
 
 private:
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
-    FText mSetOpacityTransactionName;
 	SOdysseyAnimationTimelineLightTableKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
 	FSimpleDelegate mOnInactivateOutOfPegs;
 	SOdysseyAnimationTimelineLightTableKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;

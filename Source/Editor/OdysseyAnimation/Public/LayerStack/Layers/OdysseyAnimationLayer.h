@@ -84,6 +84,12 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     TArray<UOdysseyAnimationCell*> CopyCells(TArray<UOdysseyAnimationCell*> Cells, int Index = -1);
 
+public:
+#ifdef WITH_EDITOR
+	virtual TArray<FName> GetRows() const override;
+	virtual FOptionalSize GetRowHeight(FName iSubRowName) const override;
+#endif
+
 protected:
     //Property changes
 	virtual void LightTableChanged(bool iIsInteractive);
