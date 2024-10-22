@@ -16,8 +16,14 @@ struct FOdysseyAnimationLightTableKey
 	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LightTable")
     bool bIsActivated = false;
 
-	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LightTable")
-    float Opacity = 100.f; //TODO: UIMin = 0, UIMax = 100, Linear
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LightTable"
+                , meta = ( ClampMin = "0"
+                , UIMin    = "0"
+                , ClampMax = "100"
+                , UIMax    = "100"
+                , Delta = "1"
+                , Units = "Percent"))
+    float Opacity = 100.f;
 };
 
 UENUM(BlueprintType)
@@ -44,11 +50,23 @@ struct FOdysseyAnimationLightTable
 	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LightTable")
     FLinearColor NextKeysColor = FColor(0, 128, 255);
 
-	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LightTable")
-    float PreviousKeysContrast = 0.f; //TODO: UIMin = 0 UIMax = 100 and Linear
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LightTable"
+                , meta = ( ClampMin = "0"
+                , UIMin    = "0"
+                , ClampMax = "100"
+                , UIMax    = "100"
+                , Delta = "1"
+                , Units = "Percent"))
+    float PreviousKeysContrast = 50.f;
 
-	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LightTable")
-    float NextKeysContrast = 0.f;  //TODO: UIMin = 0 UIMax = 100 and Linear
+	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LightTable"
+                , meta = ( ClampMin = "0"
+                , UIMin    = "0"
+                , ClampMax = "100"
+                , UIMax    = "100"
+                , Delta = "1"
+                , Units = "Percent"))
+    float NextKeysContrast = 50.f;
 
 	UPROPERTY() //Static array cannot be exposed to blueprint Class (Use UOdysseyAnimationLighttableFunctionLibrary::GetPreviousKey())
     FOdysseyAnimationLightTableKey PreviousKeys[10];
