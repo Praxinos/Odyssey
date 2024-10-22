@@ -87,7 +87,7 @@ SOdysseyAnimationTimelineLightTableKeySlider::OnMouseButtonDown(const FGeometry&
 	if (iMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{	
 		// This has prevent throttling on so that viewports continue to run whilst dragging the slider
-		return FReply::Handled().DetectDrag(SharedThis(this), EKeys::LeftMouseButton);
+		return FReply::Handled().DetectDrag(SharedThis(this), EKeys::LeftMouseButton).PreventThrottling();
 	}
 
 	return FReply::Unhandled();
@@ -116,7 +116,7 @@ SOdysseyAnimationTimelineLightTableKeySlider::OnMouseMove(const FGeometry& iGeom
 		mOnChanged.ExecuteIfBound(key);
 		
 		// This has prevent throttling on so that viewports continue to run whilst dragging the slider
-		return FReply::Handled();
+		return FReply::Handled().PreventThrottling();
 	}
 
 	return FReply::Unhandled();
