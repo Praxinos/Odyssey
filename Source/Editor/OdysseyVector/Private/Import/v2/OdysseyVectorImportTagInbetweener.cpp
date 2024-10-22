@@ -139,6 +139,16 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                 }
                 break;
 
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_DIRECTION:
+                {
+                    uint32 directionType;
+
+                    Ar << directionType;
+
+                    iInbetweenerTag.SetInterpolationDirection( static_cast<eInbetweenerInterpolationDirection>(directionType) );
+                }
+                break;
+
                 // legacy
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_DIMENSION:
                 {

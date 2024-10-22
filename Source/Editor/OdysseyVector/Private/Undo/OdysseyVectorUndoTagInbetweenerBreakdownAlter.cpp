@@ -25,7 +25,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweener
 
     mInbetweenerTagSnapshotArray.emplace_back(  iInbetweenerTag
                                               , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
-                                              , FSnapshotFlags::Breakdown::GRIDGEOMETRY
+                                              , ( FSnapshotFlags::Breakdown::GRIDGEOMETRY
+                                                | FSnapshotFlags::Breakdown::CHART )
                                               , ( FSnapshotFlags::Route::TRAJECTORIES
                                                 | FSnapshotFlags::Route::STEPS )
                                               , ( FSnapshotFlags::Trajectory::BEZIER
@@ -45,7 +46,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweener
     {
         mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
                                                  , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
-                                                 , FSnapshotFlags::Breakdown::GRIDGEOMETRY
+                                                 , ( FSnapshotFlags::Breakdown::GRIDGEOMETRY
+                                                   | FSnapshotFlags::Breakdown::CHART )
                                                  , ( FSnapshotFlags::Route::TRAJECTORIES
                                                    | FSnapshotFlags::Route::STEPS )
                                                  , ( FSnapshotFlags::Trajectory::BEZIER
@@ -66,7 +68,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweener
     {
         mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
                                                  , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
-                                                 , FSnapshotFlags::Breakdown::GRIDGEOMETRY
+                                                 , ( FSnapshotFlags::Breakdown::GRIDGEOMETRY
+                                                   | FSnapshotFlags::Breakdown::CHART )
                                                  , ( FSnapshotFlags::Route::TRAJECTORIES
                                                    | FSnapshotFlags::Route::STEPS )
                                                  , ( FSnapshotFlags::Trajectory::BEZIER

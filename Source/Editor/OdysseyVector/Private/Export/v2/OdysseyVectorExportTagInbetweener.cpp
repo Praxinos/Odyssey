@@ -118,6 +118,19 @@ FOdysseyVectorExportV2::WriteTagInbetweenerDimension( FOdysseyVectorTagInbetween
 }
 
 void
+FOdysseyVectorExportV2::WriteTagInbetweenerDirection( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_DIRECTION
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        uint32 directionType = static_cast<uint32>(iInbetweenerTag.GetInterpolationDirection());
+
+        Ar << directionType;
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteTagInbetweenerInterpolation( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_INTERPOLATION
@@ -202,26 +215,6 @@ FOdysseyVectorExportV2::WriteTagInbetweenerTransform( FOdysseyVectorTagInbetween
         WriteTagInbetweenerTransformRotation( iInbetweenerTag, Ar );
         WriteTagInbetweenerTransformScaling( iInbetweenerTag, Ar );
     } );
-}
-
-void
-FOdysseyVectorExportV2::WriteTagInbetweenerChart( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                                , FArchive &Ar )
-{
-/*------------
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_CHART
-                            , Ar
-                            , [&iInbetweenerTag](FArchive &Ar) -> void
-    {
-        for( uint32 i = 0; i < iInbetweenerTag.GetDrawingCount(); i++ )
-        {
-            FInbetweenerDrawing* drawing = iInbetweenerTag.GetChart().GetDrawing( i );
-            float spacing = drawing->spacing;
-
-            Ar << spacing;
-        }
-    } );
-*/
 }
 
 void
@@ -330,9 +323,9 @@ FOdysseyVectorExportV2::WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbe
         WriteTagInbetweenerTransform( iInbetweenerTag, Ar );
         WriteTagInbetweenerDeformation( iInbetweenerTag, Ar );
         WriteTagInbetweenerInterpolation( iInbetweenerTag, Ar );
+        WriteTagInbetweenerDirection( iInbetweenerTag, Ar );
         WriteTagInbetweenerDimension( iInbetweenerTag, Ar );
         WriteTagInbetweenerBreakdowns( iInbetweenerTag, Ar );
         WriteTagInbetweenerRoutes( iInbetweenerTag, Ar );
-        WriteTagInbetweenerChart( iInbetweenerTag, Ar );
     } );
 }

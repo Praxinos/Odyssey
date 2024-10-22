@@ -143,6 +143,7 @@ namespace FOdysseyFile
 
              /* Deprecated */   static const uint32 CHUNK_TAGINBETWEENER_DEFORMATION = 0x6501ffec; // uint32(type)
                                 static const uint32 CHUNK_TAGINBETWEENER_INTERPOLATION = 0x45b060f6; // uint32(type)
+                                static const uint32 CHUNK_TAGINBETWEENER_DIRECTION = 0x64557749; // uint32(type)
              /* Deprecated */   static const uint32 CHUNK_TAGINBETWEENER_DIMENSION = 0x8421afc9; // uint32(nbquadx)-uint32(nbquady)
                                 static const uint32 CHUNK_TAGINBETWEENER_GRID_SPECS = 0xed07a244; // uint32(type)-uint32(nbquadx)-uint32(nbquady)-uint32(square)
 

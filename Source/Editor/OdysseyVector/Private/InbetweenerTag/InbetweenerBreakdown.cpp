@@ -462,27 +462,24 @@ FInbetweenerBreakdown::SetTargetDrawingIndex( uint32 iTargetDrawingIndex )
 {
     FInbetweenerBreakdown* nextBreakdown = GetNextBreakdown();
 
-    if( mTargetDrawingIndex != iTargetDrawingIndex )
+    mTargetDrawingIndex = iTargetDrawingIndex;
+
+    if( nextBreakdown )
     {
-        mTargetDrawingIndex = iTargetDrawingIndex;
-
-        if( nextBreakdown )
-        {
-            nextBreakdown->mChart.Resize();
-        }
-
-        mChart.Resize();
-
-        mInbetweenerTag->ResizeDrawings();
-
-        // TODO: put this somewhere else. I put it here so it can geenrate matrices based on
-        // the t value fromthe chart, but I don't think it is the best place. 
-        mInbetweenerTag->UpdateMatrix();
-
-        mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING 
-                                   // force deformation of interpolated paths at target
-                                   | FOdysseyVectorTagInbetweener::INVALIDATE_RANGE  );
+        nextBreakdown->mChart.Resize();
     }
+
+    mChart.Resize();
+
+    mInbetweenerTag->ResizeDrawings();
+
+    // TODO: put this somewhere else. I put it here so it can geenrate matrices based on
+    // the t value fromthe chart, but I don't think it is the best place. 
+    mInbetweenerTag->UpdateMatrix();
+
+    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING 
+                                // force deformation of interpolated paths at target
+                                | FOdysseyVectorTagInbetweener::INVALIDATE_RANGE  );
 }
 
 FInbetweenerChart*

@@ -98,10 +98,14 @@ FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdown( FOdysseyVectorGroupPai
 
                 for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
                 {
-                    uint32 sourceCellIndex = breakdown->GetSourceCellIndex();
-                    uint32 targetCellIndex = breakdown->GetTargetCellIndex();
+                    uint32 sourceCellIndex = inbetweenerTag->GetSourceCellIndex();
+                    uint32 sourceDrawingIndex = breakdown->GetSourceDrawingIndex();
+                    uint32 targetDrawingIndex = breakdown->GetTargetDrawingIndex();
+                    int32 relativeDrawingIndex = ( inbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Forward ) ? ( cellIndex - sourceCellIndex )
+                                                                                                                                                : ( sourceCellIndex - cellIndex );
 
-                    if( ( cellIndex >= sourceCellIndex ) && ( cellIndex <= targetCellIndex ) )
+                    if( ( relativeDrawingIndex >= (int32)sourceDrawingIndex )
+                     && ( relativeDrawingIndex <= (int32)targetDrawingIndex ) )
                     {
                         mBreakdown = breakdown;
 

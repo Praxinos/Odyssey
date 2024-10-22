@@ -156,6 +156,13 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonDown( const FGeomet
     {
         vectorEngine->SelectObject( ownerObject );
     }
+    else
+    {
+        if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
+        {
+            vectorEngine->UnselectObject( ownerObject );
+        }
+    }
 
     if( MouseEvent.IsMouseButtonDown( EKeys::LeftMouseButton ) )
     {

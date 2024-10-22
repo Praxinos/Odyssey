@@ -18,8 +18,10 @@ class FInterpolatedSegment
 
         friend class FOdysseyVectorTagInbetweener;
 
+        void Thicken();
+
     protected:
         FOdysseyVectorSegment* mOriginalSegment;
         std::vector<FInterpolatedPoint*> mInterpolatedPointArray;
-        //std::vector<FOdysseyVectorPoint> mPolygonPointBuffer[2];
+        std::vector<FOdysseyVectorPoint> mThicknessPointBuffer[2];
 };

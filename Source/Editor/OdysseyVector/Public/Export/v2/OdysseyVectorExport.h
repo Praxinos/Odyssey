@@ -114,6 +114,7 @@ namespace FOdysseyVectorExportV2
     void WriteTagInbetweenerGrid( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerDeformation( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerInterpolation( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
+    void WriteTagInbetweenerDirection( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerDimension( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerGridGeometry( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerGridGeometryMk2( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );

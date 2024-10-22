@@ -189,8 +189,22 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonDown( const FGeometry 
 
     if( vectorObject->IsSelected() == false )
     {
-        mItem.Get()->GetVectorObject()->GetEngine()->SelectObject( vectorObject );
+        vectorEngine->SelectObject( vectorObject );
     }
+    else
+    {
+        if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
+        {
+            vectorEngine->UnselectObject( vectorObject );
+        }
+    }
+
+    // request redraw
+    mItem.Get()->GetVectorObject()->GetEngine()->Invalidate( 0 );
+
+    FOdysseyVectorEngine::Notify( nullptr, 
+                                  FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                                | FOdysseyPainterEditor::UI_UPDATE_HUD );
 
     return FReply::Handled();
 }

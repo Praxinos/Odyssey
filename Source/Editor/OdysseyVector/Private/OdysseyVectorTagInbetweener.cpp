@@ -491,6 +491,8 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
 
         UnlockDrawing();
 
+        // Invalidation might trigger a redrawing. It must be done outside the mutex locking mechanism
+        // because redrawing will also lock the mutex.
         Invalidate( INVALIDATE_BREAKDOWN_LIST );
 
         return newBreakdown;
@@ -571,6 +573,8 @@ FOdysseyVectorTagInbetweener::GetBreakdownItem( uint32 iDrawingIndex, bool iStri
 void
 FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown, bool iFreeMemNow )
 {
+    LockDrawing();
+
     if( iBreakdown != &mMasterBreakdown )
     {
         FInbetweenerBreakdown* nextBreakdown = iBreakdown->GetNextBreakdown();
@@ -581,6 +585,9 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
                                   } );
 
         ChainBreakdowns();
+
+        // This will force reallocation of the chart and dispatching of drawings
+        nextBreakdown->SetTargetDrawingIndex( nextBreakdown->GetTargetDrawingIndex() );
 
         if( nextBreakdown )
         {
@@ -595,8 +602,10 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
         iBreakdown->SetInbetweenerTag( nullptr );
     }
 
-    /*ResizeRoutes();*/
+    UnlockDrawing();
 
+    // Invalidation might trigger a redrawing. It must be done outside the mutex locking mechanism
+    // because redrawing will also lock the mutex.
     Invalidate( INVALIDATE_BREAKDOWN_LIST );
 }
 

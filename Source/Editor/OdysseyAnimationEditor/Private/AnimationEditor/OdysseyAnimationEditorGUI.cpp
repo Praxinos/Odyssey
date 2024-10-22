@@ -219,6 +219,10 @@ FOdysseyAnimationEditorGUI::OnSourceChanged()
 void
 FOdysseyAnimationEditorGUI::OnCurrentFrameChanged( UOdysseyAnimation* iAnimation )
 {
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+
     if( mExtension->GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>() )
     {
         TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mExtension->GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
@@ -227,19 +231,19 @@ FOdysseyAnimationEditorGUI::OnCurrentFrameChanged( UOdysseyAnimation* iAnimation
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
 
-            ParseVectorNotifications( vectorScene, FOdysseyVectorEngine::NOTIFY_ALL );
+            ParseVectorNotifications( vectorScene, notificationFlags );
 
             // force redraw after snudging the timeline
             vectorScene->GetEngine()->Invalidate( 0 );
         }
         else
         {
-            ParseVectorNotifications( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
+            ParseVectorNotifications( nullptr, notificationFlags );
         }
     }
     else
     {
-        ParseVectorNotifications( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
+        ParseVectorNotifications( nullptr, notificationFlags );
     }
 }
 

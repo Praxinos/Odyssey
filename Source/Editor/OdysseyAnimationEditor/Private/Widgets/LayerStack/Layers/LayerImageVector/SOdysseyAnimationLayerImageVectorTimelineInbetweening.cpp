@@ -184,8 +184,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
     int breakdownCellIndex = mAnimationLayerImageVector->GetCellsContainer()->GetCellIndexAtFrame( breakdownFrameIndex );
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     std::list<FOdysseyVectorEngine*> engineList;
-    uint64 notificationFlags = /*FOdysseyPainterEditor::UI_UPDATE_TIMELINE*/0
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
 
     GetSelectedInbetweenerTags( selectedInbetweenerTagList, engineList );
 
@@ -226,11 +225,12 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
         }
 
         // force recompute internal geometry of the attached widget
+/*
         for( TSharedPtr<FInbetweeningListViewItem> item : GetItems() )
         {
             WidgetFromItem ( item ).Get()->AsWidget()->MarkPrepassAsDirty();
         }
-
+*/
         // update first
 
         for( FOdysseyVectorEngine* engine : engineList )
@@ -250,8 +250,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
     int breakdownCellIndex = mAnimationLayerImageVector->GetCellsContainer()->GetCellIndexAtFrame( breakdownFrameIndex );
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     std::list<FOdysseyVectorEngine*> engineList;
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
 
     GetSelectedInbetweenerTags( selectedInbetweenerTagList, engineList );
 
@@ -294,17 +293,19 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
             }
         }
 
-        // force recompute internal geometry of the attached widget
-        for( TSharedPtr<FInbetweeningListViewItem> item : GetItems() )
-        {
-            WidgetFromItem ( item ).Get()->AsWidget()->MarkPrepassAsDirty();
-        }
-
         for( FOdysseyVectorEngine* engine : engineList )
         {
             engine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
             engine->Invalidate( 0 );
         }
+
+        // force recompute internal geometry of the attached widget
+/*
+        for( TSharedPtr<FInbetweeningListViewItem> item : GetItems() )
+        {
+            WidgetFromItem ( item ).Get()->AsWidget()->MarkPrepassAsDirty();
+        }
+*/
     }
 
     // static call
@@ -368,11 +369,12 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection()
     }
 
     // force recompute internal geometry of the attached widget
+/*
     for( TSharedPtr<FInbetweeningListViewItem> item : GetItems() )
     {
         WidgetFromItem ( item ).Get()->AsWidget()->MarkPrepassAsDirty();
     }
-
+*/
     for( FOdysseyVectorEngine* engine : engineList )
     {
         engine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
