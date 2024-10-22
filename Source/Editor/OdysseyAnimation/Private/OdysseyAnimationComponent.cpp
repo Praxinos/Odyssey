@@ -134,6 +134,7 @@ UOdysseyAnimationComponent::AnimationChanged()
 	{
 		float scaleW = (float)Animation->GetWidth() / (float)Animation->GetHeight();
 		SetRelativeScale3D(FVector(scaleW, 1, 1));
+		MarkRenderStateDirty();
 	}
 }
 
