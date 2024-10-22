@@ -23,5 +23,5 @@ class FInterpolatedSegment
     protected:
         FOdysseyVectorSegment* mOriginalSegment;
         std::vector<FInterpolatedPoint*> mInterpolatedPointArray;
-        std::vector<FOdysseyVectorPoint> mThicknessPointBuffer[2];
+        //std::vector<FOdysseyVectorPoint> mThicknessPointBuffer[2];
 };
