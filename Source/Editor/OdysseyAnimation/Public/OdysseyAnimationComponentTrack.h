@@ -5,8 +5,8 @@
 #include "Tracks/MovieSceneSubTrack.h"
 #include "OdysseyAnimationComponentTrack.generated.h"
 
-UCLASS(MinimalAPI)
-class UOdysseyAnimationComponentTrack
+UCLASS()
+class ODYSSEYANIMATION_API UOdysseyAnimationComponentTrack
 	: public UMovieSceneSubTrack
 {
 public:

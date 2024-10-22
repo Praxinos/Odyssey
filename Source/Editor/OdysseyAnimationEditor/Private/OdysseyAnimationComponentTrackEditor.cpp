@@ -175,7 +175,7 @@ FOdysseyAnimationComponentTrackEditor::AddAnimationTrackKeyInternal(FFrameNumber
 TSharedPtr<SWidget>
 FOdysseyAnimationComponentTrackEditor::BuildOutlinerColumnWidget(const FBuildColumnWidgetParams& iParams, const FName& iColumnName)
 {
-	UMovieSceneTrack* track = iParams.TrackModel->GetTrack();
+	UOdysseyAnimationComponentTrack* track = Cast<UOdysseyAnimationComponentTrack>(iParams.TrackModel->GetTrack());
 	::UE::Sequencer::TViewModelPtr< ::UE::Sequencer::FSequencerEditorViewModel > editorViewModel = iParams.Editor->CastThisShared< ::UE::Sequencer::FSequencerEditorViewModel >();
 	::UE::Sequencer::TViewModelPtr<::UE::Sequencer::IOutlinerExtension>        outlinerExtension = iParams.ViewModel.ImplicitCast();
 	if (!track || !editorViewModel || !outlinerExtension)
@@ -189,23 +189,52 @@ FOdysseyAnimationComponentTrackEditor::BuildOutlinerColumnWidget(const FBuildCol
 
 	if (iColumnName == ::UE::Sequencer::FCommonOutlinerNames::Label)
 	{
-		return SNew(STextBlock)
-			.Text(FText::FromString("Label"));
-		return SNew(SVerticalBox)
+		TSharedPtr<ISequencer> SequencerPtr = GetSequencer();
+		if (!SequencerPtr)
+			return nullptr;
+
+		TSharedPtr<SVerticalBox> verticalBox = SNew(SVerticalBox)
 			+ SVerticalBox::Slot()
 			.AutoHeight()
 			[
 				SNew(::UE::Sequencer::SOutlinerItemViewBase, outlinerExtension, iParams.Editor, iParams.TreeViewRow)
-			]
-			+ SVerticalBox::Slot()
+			];
+
+		TArrayView<TWeakObjectPtr<>> boundObjects = SequencerPtr->FindObjectsInCurrentSequence(track->FindObjectBindingGuid());
+		for (TWeakObjectPtr<>& boundObjectPtr : boundObjects)
+		{
+			UObject* boundObject = boundObjectPtr.Get();
+			if (!boundObject)
+				continue;
+
+			if (!boundObject->IsA<UOdysseyAnimationComponent>())
+				continue;
+
+			UOdysseyAnimationComponent* animationComponent = Cast<UOdysseyAnimationComponent>(boundObject);
+			if (!animationComponent)
+				continue;
+
+			TSharedRef<FOdysseyAnimationEditorTimelinePosition> timelinePosition = MakeShared<FOdysseyAnimationEditorTimelinePosition>();
+			TSharedRef<FOdysseyAnimationEditorTimelineCellSelection> timelineCellSelection = MakeShared<FOdysseyAnimationEditorTimelineCellSelection>(animationComponent->GetActiveAnimation());
+
+			verticalBox->AddSlot()
 			.AutoHeight()
 			[
 				SNew(SOdysseyAnimationLayerStack)
+				.Animation_UObject(animationComponent, &UOdysseyAnimationComponent::GetActiveAnimation)
+				.Player_UObject(animationComponent, &UOdysseyAnimationComponent::GetActivePlayer)
+				.PlayerControlsVisibility(EVisibility::Collapsed)
+				.PlayerControlsVisibility(EVisibility::Collapsed)
+				.TimelinePosition(timelinePosition)
+				.TimelineCellSelection(timelineCellSelection)
+				.OnActivateOutOfPegs_Lambda([](UOdysseyAnimationCell* iCell){})
+				.OnInactivateOutOfPegs_Lambda([](){})
+				.OnIsOutOfPegsChecked_Lambda([](UOdysseyAnimationCell* iCell){ return ECheckBoxState::Unchecked; })
 			];
+		}
 		
+		return verticalBox;
 	}
-
-	
 
 	return FMovieSceneTrackEditor::BuildOutlinerColumnWidget(iParams, iColumnName);
 }
