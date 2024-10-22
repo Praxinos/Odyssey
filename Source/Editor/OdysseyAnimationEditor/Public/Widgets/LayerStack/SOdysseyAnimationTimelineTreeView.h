@@ -24,13 +24,11 @@ public:
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineTreeView)
 		: _Player(nullptr)
-		, _HeaderHeight(25)
 		, _ExternalScrollbar(nullptr)
         {}
         SLATE_ARGUMENT( UOdysseyAnimationLayerStack*, LayerStack )
 		SLATE_ARGUMENT( UOdysseyAnimationPlayer*, Player )
 		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
-		SLATE_ARGUMENT( int, HeaderHeight )
 		SLATE_EVENT(FOnActivateOutOfPegs, OnActivateOutOfPegs)
 		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
 		SLATE_EVENT(FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)

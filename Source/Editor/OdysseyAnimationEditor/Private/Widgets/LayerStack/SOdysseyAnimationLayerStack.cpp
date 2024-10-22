@@ -2,27 +2,16 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineHeader.h"
-#include "Widgets/SOdysseyLayerStackAddLayerButton.h"
 #include "Widgets/SOdysseyAnimationPlaybackControls.h"
-#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
-#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStackTreeView.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineTreeView.h"
 #include "OdysseyAnimationEditorTimelinePosition.h"
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineToolSelector.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "OdysseyStyleSet.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineControl.h"
-#include "LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.h"
-#include "Widgets/LayerStack/Layers/LayerFolder/SOdysseyAnimationLayerFolderRow.h"
-#include "Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterRow.h"
-#include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.h"
 #include "OdysseyAnimation.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
-
-#define HEADER_HEIGHT 20
 
 SLATE_IMPLEMENT_WIDGET(SOdysseyAnimationLayerStack)
 void
@@ -89,42 +78,14 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
     SNew(SVerticalBox)
     + SVerticalBox::Slot()
     .AutoHeight()
+	.HAlign( HAlign_Center )
+	.VAlign( VAlign_Center )
     [
-        SNew(SHorizontalBox)
-        //Left part 
-        + SHorizontalBox::Slot()
-        [
-            SNew(SHorizontalBox)
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            [
-                SNew(SOdysseyLayerStackAddLayerButton)
-                .LayerStack(layerStack)
-                .OnAdded( this, &SOdysseyAnimationLayerStack::OnLayerAdded)
-            ]
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            .VAlign(VAlign_Center)
-            [
-                SNew(SOdysseyAnimationTimelineToolSelector)
-            ]
-        ]
-
-        //Center part
-        + SHorizontalBox::Slot()
-        .AutoWidth()
-        .VAlign( VAlign_Center )
-        [
-            SNew(SOdysseyAnimationPlaybackControls)
-			.Visibility(mPlayerControlsVisibility)
-			.Animation(mAnimation.Get())
-			.Player(mPlayer.Get())
-            .PlaybackFramesPerSecond(mPlaybackFramesPerSecond)
-        ]
-
-        //Right part (empty but needed to center the center part)
-        + SHorizontalBox::Slot()
-        
+		SNew(SOdysseyAnimationPlaybackControls)
+		.Visibility(mPlayerControlsVisibility)
+		.Animation(mAnimation.Get())
+		.Player(mPlayer.Get())
+		.PlaybackFramesPerSecond(mPlaybackFramesPerSecond)
     ]
     +SVerticalBox::Slot()
     .FillHeight(1.0f)
@@ -155,7 +116,6 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
 			SAssignNew(mTreeView, SOdysseyAnimationLayerStackTreeView)
 			.LayerStack(layerStack)
 			.TimelinePosition(mTimelinePosition.Get())
-			.HeaderHeight(HEADER_HEIGHT)
 			.ExternalScrollbar(mTimelineScrollBarV)
 			.OnTreeViewScrolled(this, &SOdysseyAnimationLayerStack::OnTreeViewScrolled)
 		]
@@ -173,7 +133,6 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
 					.LayerStack(layerStack)
 					.Player(mPlayer.Get())
 					.TimelinePosition(mTimelinePosition.Get())
-					.HeaderHeight(HEADER_HEIGHT)
 					.OnActivateOutOfPegs(mOnActivateOutOfPegs)
 					.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
 					.OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked)
@@ -288,21 +247,6 @@ SOdysseyAnimationLayerStack::Tick( const FGeometry& AllottedGeometry, const doub
         mTimelineScrollBarH->SetState(scrollbarOffset, visiblePercent);
 
         break;
-    }
-}
-
-void
-SOdysseyAnimationLayerStack::OnLayerAdded(UOdysseyLayer* iLayer)
-{
-    if (iLayer->GetClass() == UOdysseyAnimationLayerImageRaster::StaticClass())
-    {
-		UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(iLayer);
-		layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
-    }
-    else if (iLayer->GetClass() == UOdysseyAnimationLayerImageVector::StaticClass())
-    {
-		UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(iLayer);
-        layer->AddCell(UOdysseyAnimationCellImageVector::StaticClass());
     }
 }
 

@@ -7,6 +7,10 @@
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineToolSelector.h"
+#include "Widgets/SOdysseyLayerStackAddLayerButton.h"
+#include "LayerStack/Cells/CellImageRaster/OdysseyAnimationCellImageRaster.h"
+#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -29,9 +33,29 @@ SOdysseyAnimationLayerStackTreeView::Construct(const FArguments& InArgs)
 		.LayerStack(mLayerStack)
         .OnGenerateRow(this, &SOdysseyAnimationLayerStackTreeView::OnGenerateRow)
 		.Columns(InArgs._Columns)
-		.HeaderHeight(InArgs._HeaderHeight)
 		.ExternalScrollbar(InArgs._ExternalScrollbar)
 		.OnTreeViewScrolled(InArgs._OnTreeViewScrolled)
+		.HeaderContent()
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			[
+				SNew(SOdysseyLayerStackAddLayerButton)
+				.LayerStack(mLayerStack)
+				.OnAdded( this, &SOdysseyAnimationLayerStackTreeView::OnLayerAdded)
+			]
+			+ SHorizontalBox::Slot()
+			[
+				SNullWidget::NullWidget
+			]
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			.VAlign(VAlign_Center)
+			[
+				SNew(SOdysseyAnimationTimelineToolSelector)
+			]
+		]
 	);
 }
 
@@ -162,6 +186,21 @@ SOdysseyAnimationLayerStackTreeView::Action_ConvertLayerToRasterLayer()
         UOdysseyLayer* layerRaster = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), parent, indexInParent);
         layerRaster->Merge({layer});
         layerStack->RemoveLayer(layer);
+    }
+}
+
+void
+SOdysseyAnimationLayerStackTreeView::OnLayerAdded(UOdysseyLayer* iLayer)
+{
+    if (iLayer->GetClass() == UOdysseyAnimationLayerImageRaster::StaticClass())
+    {
+		UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(iLayer);
+		layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
+    }
+    else if (iLayer->GetClass() == UOdysseyAnimationLayerImageVector::StaticClass())
+    {
+		UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(iLayer);
+        layer->AddCell(UOdysseyAnimationCellImageVector::StaticClass());
     }
 }
 

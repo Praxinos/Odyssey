@@ -64,7 +64,7 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
             .VAlignCell(VAlign_Top)
             [
 				SNew(SBox)
-				.HeightOverride(InArgs._HeaderHeight)
+				.HeightOverride(25.f)
 				.VAlign(VAlign_Center)
 				[
 					SNew(SImage)
@@ -83,7 +83,7 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
             .VAlignCell(VAlign_Top)
             [
 				SNew(SBox)
-				.HeightOverride(InArgs._HeaderHeight)
+				.HeightOverride(25.f)
 				.VAlign(VAlign_Center)
 				[
 					SNew(SImage)
@@ -103,7 +103,7 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
             .VAlignCell(VAlign_Top)
             [
 				SNew(SBox)
-				.HeightOverride(InArgs._HeaderHeight)
+				.HeightOverride(25.f)
 				.VAlign(VAlign_Center)
 				[
 					SNew(SImage)
@@ -117,11 +117,16 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
 			SHeaderRow::Column("Header")
             .DefaultLabel(FText())
             .VAlignCell(VAlign_Top)
+            .HAlignHeader(HAlign_Fill)
+            .VAlignHeader(VAlign_Center)
             .FillWidth(1.0f)
 			[
 				SNew(SBox)
-				.HeightOverride(InArgs._HeaderHeight)
+				.HeightOverride(25.f)
 				.VAlign(VAlign_Center)
+				[
+					InArgs._HeaderContent.Widget
+				]
 			]
 		);
 	}

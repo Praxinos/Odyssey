@@ -151,7 +151,6 @@ FOdysseyAnimationTrackEditorSection::RebuildSectionWidget()
 			SNew( SOdysseyAnimationTimelineTreeView )
 			.LayerStack(layerStack)
 			.TimelinePosition(mTimelinePosition)
-			.HeaderHeight(20.f)
 			.OnActivateOutOfPegs_Lambda(
 				[](UOdysseyAnimationCell* iCell)
 				{

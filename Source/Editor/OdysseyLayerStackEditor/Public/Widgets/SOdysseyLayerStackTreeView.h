@@ -24,9 +24,9 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyLayerStackTreeView)
 		: _ExternalScrollbar(nullptr)
         {}
+		SLATE_NAMED_SLOT(FArguments, HeaderContent)
         SLATE_ARGUMENT( UOdysseyLayerStack*, LayerStack )
         SLATE_ARGUMENT( TOptional<TArray<SHeaderRow::FColumn::FArguments>>, Columns )
-		SLATE_ARGUMENT( int, HeaderHeight )
         SLATE_EVENT( FOnGenerateRow, OnGenerateRow )
 		SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
 		SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )

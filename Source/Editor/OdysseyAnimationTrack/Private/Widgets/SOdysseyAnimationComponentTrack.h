@@ -20,7 +20,6 @@ public:
 
 private:
 	void RebuildWidgets();
-	void OnLayerAdded(UOdysseyLayer* iLayer);
 
 private:
 	UOdysseyAnimationComponent* mComponent;

@@ -13,13 +13,11 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStackTreeView
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerStackTreeView)
-		: _HeaderHeight(25)
-		, _ExternalScrollbar(nullptr)
+		: _ExternalScrollbar(nullptr)
         {}
         SLATE_ARGUMENT( UOdysseyAnimationLayerStack*, LayerStack )
 		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
 		SLATE_ARGUMENT( TOptional<TArray<SHeaderRow::FColumn::FArguments>>, Columns )
-		SLATE_ARGUMENT( int, HeaderHeight)
         SLATE_EVENT( FOnGenerateRow, OnGenerateRow )
 		SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
 		SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )
@@ -40,6 +38,7 @@ private:
 private:
     void ExtendContextMenuLayerSection(FMenuBuilder& iMenuBuilder);
     void Action_ConvertLayerToRasterLayer();
+	void OnLayerAdded(UOdysseyLayer* iLayer);
 
 private:
     TSharedPtr<FOdysseyAnimationTimelineShortcuts> mTimelineShortcuts;
