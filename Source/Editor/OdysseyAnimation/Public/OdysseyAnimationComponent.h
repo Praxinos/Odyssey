@@ -1,0 +1,72 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
+#pragma once
+
+#include "OdysseyAnimationComponent.generated.h"
+
+class UOdysseyAnimation;
+class UOdysseyAnimationPlayer;
+
+UENUM()
+enum class EOdysseyAnimationComponentMode
+{
+	Animation,
+	Player
+};
+
+/**
+ * A component containing an animation to attach to an actor
+ */
+UCLASS(meta=(PrioritizeCategories="Actions"))
+class ODYSSEYANIMATION_API UOdysseyAnimationComponent : public UStaticMeshComponent
+{
+	GENERATED_UCLASS_BODY()
+
+public:
+	UFUNCTION(Category="Actions", CallInEditor)
+	void Play();
+
+	UFUNCTION(Category="Actions", CallInEditor)
+	void Stop();
+
+public:
+	UOdysseyAnimationPlayer* GetActivePlayer() const;
+
+public:
+	virtual void PostInitProperties() override;
+	virtual void PostLoad() override;
+
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
+    virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
+
+protected:
+    //Property changed methods
+    virtual void PropertyChanged(const FName& iPropertyName);
+	
+	virtual void ModeChanged();
+    virtual void AnimationChanged();
+	virtual void PlayerChanged();
+
+private:
+	void RefreshMaterialTexture();
+
+	void OnDefaultPlayerTextureChanged();
+	void OnPlayerTextureChanged();
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
+	EOdysseyAnimationComponentMode Mode = EOdysseyAnimationComponentMode::Animation;
+
+	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation", meta=(EditCondition = "Mode==EOdysseyAnimationComponentMode::Animation", EditConditionHides))
+	TObjectPtr<UOdysseyAnimation> Animation;
+
+	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation", meta=(EditCondition = "Mode==EOdysseyAnimationComponentMode::Player", EditConditionHides))
+	TObjectPtr<UOdysseyAnimationPlayer> Player;
+
+private:
+	UPROPERTY()
+	TObjectPtr<UOdysseyAnimationPlayer> DefaultPlayer;
+
+	UPROPERTY()
+	TObjectPtr<UOdysseyAnimationPlayer> PreviousPlayer;
+};

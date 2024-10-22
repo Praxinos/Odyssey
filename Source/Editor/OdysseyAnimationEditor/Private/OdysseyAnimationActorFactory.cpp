@@ -3,6 +3,7 @@
 #include "OdysseyAnimationActorFactory.h"
 #include "AssetRegistry/AssetData.h"
 #include "OdysseyAnimationActor.h"
+#include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimation.h"
 #include "Subsystems/UnrealEditorSubsystem.h"
 
@@ -29,7 +30,7 @@ void UOdysseyAnimationActorFactory::PostSpawnActor(UObject* iAsset, AActor* iAct
 		return;
 
 	AOdysseyAnimationActor* animationActor = CastChecked<AOdysseyAnimationActor>(iActor);
-	FOdysseyObjectEditorUtils::SetPropertyValue(animationActor, GET_MEMBER_NAME_CHECKED(AOdysseyAnimationActor, Animation), animation);
+	FOdysseyObjectEditorUtils::SetPropertyValue(animationActor->AnimationComponent, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Animation), animation);
 
 	//Set plane in front of the camera
 
@@ -47,8 +48,9 @@ void UOdysseyAnimationActorFactory::PostSpawnActor(UObject* iAsset, AActor* iAct
 
     //---
 
-    //animationActor->SetActorLocation( plane_location );
-	animationActor->SetActorRotation( plane_rotator );
+	animationActor->SetActorRotation( FRotator(0, 90, 90) );
+	animationActor->AddActorWorldRotation( plane_rotator );
+
 }
 
 bool UOdysseyAnimationActorFactory::CanCreateActorFrom(const FAssetData& AssetData, FText& OutErrorMsg)

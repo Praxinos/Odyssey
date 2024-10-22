@@ -62,6 +62,12 @@ SOdysseyViewportDrawingEditorMasterTab::Construct(const FArguments& InArgs, FOdy
                 .ThumbnailSizeOverride(FIntPoint(30, 30))
             ]
 			+SVerticalBox::Slot()
+			.Padding(2)
+			.AutoHeight()
+			[
+				CreateMeshComponentMenuWidget()
+			]
+			+SVerticalBox::Slot()
 			[
 				SNew( SVerticalBox )
 				.Visibility_Lambda(
@@ -73,12 +79,6 @@ SOdysseyViewportDrawingEditorMasterTab::Construct(const FArguments& InArgs, FOdy
 						return EVisibility::Collapsed;
 					}
 				)
-				+SVerticalBox::Slot()
-				.Padding(2)
-				.AutoHeight()
-				[
-					CreateMeshComponentMenuWidget()
-				]
 				+SVerticalBox::Slot()
 				.Padding(2)
 				.AutoHeight()

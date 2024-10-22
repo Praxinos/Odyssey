@@ -33,6 +33,7 @@
 #include "MeshPaintHelpers.h"
 #include "OdysseyViewportDrawingEditorUtils.h"
 #include "OdysseyAnimationActor.h"
+#include "OdysseyAnimationComponent.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
@@ -444,14 +445,14 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
 
 	if (mTexture->IsA(UTexture2D::StaticClass()))
 	{
-		if (mActor->IsA<AOdysseyAnimationActor>())
+		if (mComponent->IsA<UOdysseyAnimationComponent>())
 		{
-			AOdysseyAnimationActor* animationActor = Cast<AOdysseyAnimationActor>(mActor);
-			if (!animationActor)
+			UOdysseyAnimationComponent* animationComponent = Cast<UOdysseyAnimationComponent>(mComponent);
+			if (!animationComponent)
 				return;
 
-			TSharedPtr<FOdysseyAnimationEditorSource> animationSource = MakeShared<FOdysseyAnimationEditorSource>(animationActor->Animation);
-			animationSource->SetExternalPlayer(animationActor->GetActivePlayer());
+			TSharedPtr<FOdysseyAnimationEditorSource> animationSource = MakeShared<FOdysseyAnimationEditorSource>(animationComponent->Animation);
+			animationSource->SetExternalPlayer(animationComponent->GetActivePlayer());
 			mEditor->SetSource(animationSource);
 		}
 		else
