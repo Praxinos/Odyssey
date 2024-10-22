@@ -34,10 +34,8 @@ public:
 
     //Layers Specific Shortcuts
     void Action_MergeSelectedLayers();
-    void Action_FlattenSelectedLayers();
 
     bool CanAction_MergeSelectedLayers();
-    bool CanAction_FlattenSelectedLayers();
 
 private:
     //Shortcuts

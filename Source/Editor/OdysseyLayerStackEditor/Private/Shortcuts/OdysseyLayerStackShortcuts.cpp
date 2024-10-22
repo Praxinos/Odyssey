@@ -77,12 +77,6 @@ FOdysseyLayerStackShortcuts::MapActionsToCommandList()
         FExecuteAction::CreateRaw(this, &FOdysseyLayerStackShortcuts::Action_MergeSelectedLayers),
         FCanExecuteAction::CreateRaw(this, &FOdysseyLayerStackShortcuts::CanAction_MergeSelectedLayers)
     );
-
-    mCommandList->MapAction(
-        FOdysseyLayerStackEditorCommands::Get().FlattenSelectedLayers,
-        FExecuteAction::CreateRaw(this, &FOdysseyLayerStackShortcuts::Action_FlattenSelectedLayers),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyLayerStackShortcuts::CanAction_FlattenSelectedLayers)
-    );
 }
 
 //Common Shortcuts 
@@ -298,27 +292,6 @@ FOdysseyLayerStackShortcuts::Action_MergeSelectedLayers()
     mLayerStack->MergeLayers(selectedLayers);
 }
 
-void
-FOdysseyLayerStackShortcuts::Action_FlattenSelectedLayers()
-{
-    if ( !mLayerStack )
-        return;
-        
-    TSharedPtr<SOdysseyLayerStackTreeView> treeView = mTreeView.Pin();
-    if (!treeView)
-        return;
-
-    TArray<UOdysseyLayer*> selectedLayers = treeView->GetSelectedItems();
-    if (selectedLayers.Num() <= 0)
-        return;
-
-#ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.flatten-layers", "Flatten Layers"));
-#endif
-
-    mLayerStack->FlattenLayers(selectedLayers);
-}
-
 
 bool
 FOdysseyLayerStackShortcuts::CanAction_MergeSelectedLayers()
@@ -335,23 +308,6 @@ FOdysseyLayerStackShortcuts::CanAction_MergeSelectedLayers()
         return false;
 
     return mLayerStack->CanMergeLayers(selectedLayers);
-}
-
-bool
-FOdysseyLayerStackShortcuts::CanAction_FlattenSelectedLayers()
-{
-    if ( !mLayerStack )
-        return false;
-        
-    TSharedPtr<SOdysseyLayerStackTreeView> treeView = mTreeView.Pin();
-    if (!treeView)
-        return false;
-
-    TArray<UOdysseyLayer*> selectedLayers = treeView->GetSelectedItems();
-    if (selectedLayers.Num() <= 0)
-        return false;
-
-    return mLayerStack->CanFlattenLayers(selectedLayers);
 }
 
 #undef LOCTEXT_NAMESPACE

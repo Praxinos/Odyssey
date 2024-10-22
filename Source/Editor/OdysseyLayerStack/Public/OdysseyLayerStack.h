@@ -172,44 +172,6 @@ public:
      */
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     UOdysseyLayer* MergeLayers(TArray<UOdysseyLayer*> Layers);
-
-    /**
-     * @brief Return wether the given layer can be flattened
-     * 
-     * @param iLayer 
-     * @return true 
-     * @return false 
-     */
-    UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
-    bool CanFlattenLayer(UOdysseyLayer* Layer);
-
-    /**
-     * @brief Flattens the given layer
-     * 
-     * @param iLayer 
-     * @return TArray<UOdysseyLayer*> 
-     */
-    UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
-    TArray<UOdysseyLayer*> FlattenLayer(UOdysseyLayer* Layer);
-
-    /**
-     * @brief Return wether the given layers can be flattened
-     * 
-     * @param iLayers 
-     * @return true 
-     * @return false 
-     */
-    UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
-    bool CanFlattenLayers(TArray<UOdysseyLayer*> Layers);
-
-    /**
-     * @brief Flattens the given layers
-     * 
-     * @param iLayers 
-     * @return TArray<UOdysseyLayer*> 
-     */
-    UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
-    TArray<UOdysseyLayer*> FlattenLayers(TArray<UOdysseyLayer*> Layers);
     
     /**
      * @brief Returns wether the given layer can be moved in the given ParentLayer

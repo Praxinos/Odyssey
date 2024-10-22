@@ -23,8 +23,6 @@ FOdysseyLayerStackEditorCommands::RegisterCommands()
 {
 // LayerStack Shortcuts Category
     UI_BUNDLE_COMMAND( MergeSelectedLayers, LayerStackShortcuts, "Merge Selected Layers", "Merge Selected Layers", EUserInterfaceActionType::Button, FInputChord() );
-    UI_BUNDLE_COMMAND( FlattenSelectedLayers, LayerStackShortcuts, "Flatten Selected Layers", "Flatten Selected Layers", EUserInterfaceActionType::Button, FInputChord() );
-
     UI_BUNDLE_COMMAND( NavigateToNextLayer, LayerStackShortcuts, "Navigate To The Layer Below", "Navigate To The Layer Below The Current Layer", EUserInterfaceActionType::Button, FInputChord(EKeys::L) );
     UI_BUNDLE_COMMAND( NavigateToPreviousLayer, LayerStackShortcuts, "Navigate To The Layer Above", "Navigate To The Layer Above The Current Layer", EUserInterfaceActionType::Button, FInputChord(EKeys::O) );
     UI_BUNDLE_COMMAND( OpenFolderLayer, LayerStackShortcuts, "Open Folder Layer", "Open Folder Layer", EUserInterfaceActionType::Button, FInputChord() );

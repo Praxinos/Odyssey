@@ -478,7 +478,6 @@ void SOdysseyLayerStackTreeView::CreateContextMenu()
     FToolMenuSection& layerSection = Menu->AddSection("LayerSection", LOCTEXT("context-menu.layer-section", "Layer"));
     {
         layerSection.AddMenuEntry(FOdysseyLayerStackEditorCommands::Get().MergeSelectedLayers);
-        layerSection.AddMenuEntry(FOdysseyLayerStackEditorCommands::Get().FlattenSelectedLayers);
     }
 }
 

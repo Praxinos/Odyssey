@@ -5,7 +5,6 @@
 
 #include "Shortcuts/Timeline/OdysseyAnimationTimelineShortcuts.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
-#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 
@@ -83,31 +82,31 @@ SOdysseyAnimationLayerStackTreeView::ExtendContextMenuLayerSection(FMenuBuilder&
     if (selectedLayers.Num() <= 0)
         return;
 
-    bool allLayersAreVectors = !selectedLayers.ContainsByPredicate(
+    bool canConvert = selectedLayers.ContainsByPredicate(
         [](UOdysseyLayer* iLayer) -> bool
         {
-            return iLayer->GetClass() != UOdysseyAnimationLayerImageVector::StaticClass();
+            return iLayer->GetClass() != UOdysseyAnimationLayerImageRaster::StaticClass();
         }
     );
 
-    if (!allLayersAreVectors)
+    if (!canConvert)
         return;
 
-    iMenuBuilder.BeginSection("VectorLayer", LOCTEXT("animation.layerstack.context-menu.vector-layer-section", "Vector Layer"));
+    iMenuBuilder.BeginSection("Convertions", LOCTEXT("animation.layerstack.context-menu.convertions-section", "Convertions"));
     {
         iMenuBuilder.AddMenuEntry(
-            LOCTEXT("animation.layerstack.context-menu.convert-vector-layer-to-raster-layer.name", "Convert to Raster")
-            , LOCTEXT("animation.layerstack.context-menu.convert-vector-layer-to-raster-layer.tooltip", "Converts the selected layers to raster layers")
+            LOCTEXT("animation.layerstack.context-menu.convert-layer-to-raster-layer.name", "Convert to Raster")
+            , LOCTEXT("animation.layerstack.context-menu.convert-layer-to-raster-layer.tooltip", "Converts the selected layers to raster layers")
             , FSlateIcon()
             , FUIAction(
-                FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerStackTreeView::Action_ConvertVectorLayerToRasterLayer)
+                FExecuteAction::CreateRaw(this, &SOdysseyAnimationLayerStackTreeView::Action_ConvertLayerToRasterLayer)
             )
         );
     }
 }
 
 void
-SOdysseyAnimationLayerStackTreeView::Action_ConvertVectorLayerToRasterLayer()
+SOdysseyAnimationLayerStackTreeView::Action_ConvertLayerToRasterLayer()
 {
     UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
     if ( !layerStack )
@@ -117,28 +116,28 @@ SOdysseyAnimationLayerStackTreeView::Action_ConvertVectorLayerToRasterLayer()
     if (selectedLayers.Num() <= 0)
         return;
 
-    bool allLayersAreVectors = !selectedLayers.ContainsByPredicate(
+    bool shouldConvert = selectedLayers.ContainsByPredicate(
         [](UOdysseyLayer* iLayer) -> bool
         {
-            return iLayer->GetClass() != UOdysseyAnimationLayerImageVector::StaticClass();
+            return iLayer->GetClass() != UOdysseyAnimationLayerImageRaster::StaticClass();
         }
     );
 
-    if (!allLayersAreVectors)
+    if (!shouldConvert)
         return;
     
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("animation.layer-image-vector.transaction.convert-to-raster", "Convert Vector Layer To Raster Layer"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("animation.layer.transaction.convert-to-raster", "Convert Layer To Raster Layer"));
 #endif
 
-    for (UOdysseyLayer* layerVector : selectedLayers)
+    for (UOdysseyLayer* layer : selectedLayers)
     {
-        UOdysseyLayer* parent = layerVector->GetParent();
-        int indexInParent = layerVector->GetIndexInParent();
+        UOdysseyLayer* parent = layer->GetParent();
+        int indexInParent = layer->GetIndexInParent();
 
         UOdysseyLayer* layerRaster = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), parent, indexInParent);
-        layerRaster->Merge({layerVector});
-        layerStack->RemoveLayer(layerVector);
+        layerRaster->Merge({layer});
+        layerStack->RemoveLayer(layer);
     }
 }
 

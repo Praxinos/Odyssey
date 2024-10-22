@@ -4,7 +4,6 @@
 #include "Widgets/LayerStack/SOdysseyTextureLayerStackTreeView.h"
 
 #include "TextureEditor/OdysseyTextureEditorExtension.h"
-#include "LayerStack/OdysseyTextureLayerImageVector.h"
 #include "LayerStack/OdysseyTextureLayerImageRaster.h"
 #include "LayerStack/OdysseyTextureLayerStack.h"
 
@@ -57,31 +56,31 @@ SOdysseyTextureLayerStackTreeView::ExtendContextMenuLayerSection(FMenuBuilder& i
     if (selectedLayers.Num() <= 0)
         return;
 
-    bool allLayersAreVectors = !selectedLayers.ContainsByPredicate(
+    bool canConvert = selectedLayers.ContainsByPredicate(
         [](UOdysseyLayer* iLayer) -> bool
         {
-            return iLayer->GetClass() != UOdysseyTextureLayerImageVector::StaticClass();
+            return iLayer->GetClass() != UOdysseyTextureLayerImageRaster::StaticClass();
         }
     );
 
-    if (!allLayersAreVectors)
+    if (!canConvert)
         return;
 
-    iMenuBuilder.BeginSection("VectorLayer", LOCTEXT("texture.layerstack.context-menu.vector-layer-section", "Vector Layer"));
+    iMenuBuilder.BeginSection("Convertions", LOCTEXT("texture.layerstack.context-menu.convertions-section", "Convertions"));
     {
         iMenuBuilder.AddMenuEntry(
-            LOCTEXT("texture.layerstack.context-menu.convert-vector-layer-to-raster-layer.name", "Convert to Raster")
-            , LOCTEXT("texture.layerstack.context-menu.convert-vector-layer-to-raster-layer.tooltip", "Converts the selected layers to raster layers")
+            LOCTEXT("texture.layerstack.context-menu.convert-layer-to-raster-layer.name", "Convert to Raster")
+            , LOCTEXT("texture.layerstack.context-menu.convert-layer-to-raster-layer.tooltip", "Converts the selected layers to raster layers")
             , FSlateIcon()
             , FUIAction(
-                FExecuteAction::CreateRaw(this, &SOdysseyTextureLayerStackTreeView::Action_ConvertVectorLayerToRasterLayer)
+                FExecuteAction::CreateRaw(this, &SOdysseyTextureLayerStackTreeView::Action_ConvertLayerToRasterLayer)
             )
         );
     }
 }
 
 void
-SOdysseyTextureLayerStackTreeView::Action_ConvertVectorLayerToRasterLayer()
+SOdysseyTextureLayerStackTreeView::Action_ConvertLayerToRasterLayer()
 {
     UOdysseyTextureLayerStack* layerStack = mExtension->GetLayerStack();
     if ( !layerStack )
@@ -91,28 +90,28 @@ SOdysseyTextureLayerStackTreeView::Action_ConvertVectorLayerToRasterLayer()
     if (selectedLayers.Num() <= 0)
         return;
 
-    bool allLayersAreVectors = !selectedLayers.ContainsByPredicate(
+    bool canConvert = selectedLayers.ContainsByPredicate(
         [](UOdysseyLayer* iLayer) -> bool
         {
-            return iLayer->GetClass() != UOdysseyTextureLayerImageVector::StaticClass();
+            return iLayer->GetClass() != UOdysseyTextureLayerImageRaster::StaticClass();
         }
     );
 
-    if (!allLayersAreVectors)
+    if (!canConvert)
         return;
     
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("texture.layer-image-vector.transaction.convert-to-raster", "Convert Vector Layer To Raster Layer"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("texture.layer.transaction.convert-to-raster", "Convert Layer To Raster Layer"));
 #endif
 
-    for (UOdysseyLayer* layerVector : selectedLayers)
+    for (UOdysseyLayer* layer : selectedLayers)
     {
-        UOdysseyLayer* parent = layerVector->GetParent();
-        int indexInParent = layerVector->GetIndexInParent();
+        UOdysseyLayer* parent = layer->GetParent();
+        int indexInParent = layer->GetIndexInParent();
 
         UOdysseyLayer* layerRaster = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), parent, indexInParent);
-        layerRaster->Merge({layerVector});
-        layerStack->RemoveLayer(layerVector);
+        layerRaster->Merge({layer});
+        layerStack->RemoveLayer(layer);
     }
 }
 

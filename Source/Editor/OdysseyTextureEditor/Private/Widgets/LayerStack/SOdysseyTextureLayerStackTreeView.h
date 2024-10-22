@@ -21,7 +21,7 @@ public:
 
 private:
     void ExtendContextMenuLayerSection(FMenuBuilder& iMenuBuilder);
-    void Action_ConvertVectorLayerToRasterLayer();
+    void Action_ConvertLayerToRasterLayer();
 
 private:
     FOdysseyTextureEditorExtension* mExtension;

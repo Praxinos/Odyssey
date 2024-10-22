@@ -27,7 +27,7 @@ private:
 
 private:
     void ExtendContextMenuLayerSection(FMenuBuilder& iMenuBuilder);
-    void Action_ConvertVectorLayerToRasterLayer();
+    void Action_ConvertLayerToRasterLayer();
 
 private:
     TSharedPtr<FOdysseyAnimationTimelineShortcuts> mTimelineShortcuts;
