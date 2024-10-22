@@ -16,9 +16,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageRasterRow
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageRasterRow)
         {}
-		SLATE_ATTRIBUTE(int, CurrentFrame)
 		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
     SLATE_END_ARGS()
 
 public:

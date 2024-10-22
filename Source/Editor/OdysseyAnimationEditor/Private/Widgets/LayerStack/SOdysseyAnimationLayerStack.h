@@ -16,7 +16,6 @@ class SOdysseyAnimationTimelineTreeView;
 class UOdysseyAnimationLayerStack;
 class FOdysseyAnimationTimelineTool;
 class FOdysseyAnimationEditorTimelinePosition;
-class FOdysseyAnimationEditorTimelineCellSelection;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStack
     : public SCompoundWidget
@@ -36,7 +35,6 @@ public:
 		SLATE_ATTRIBUTE( EVisibility, ScrollbarVisibility)
 		SLATE_ATTRIBUTE( float, PlaybackFramesPerSecond )
 		SLATE_ATTRIBUTE( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
-		SLATE_ATTRIBUTE( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
 		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
 		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
 		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
@@ -54,7 +52,6 @@ private:
     virtual void Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
 
 private:
-    TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
     void OnTimelineScrollBarHScrolled(float iOffset);
 	void OnTreeViewScrolled(double iOffset);
 	void OnTimelineTreeViewScrolled(double iOffset);
@@ -62,9 +59,6 @@ private:
 
     void OnLayerAdded(UOdysseyLayer* iLayer);
     float PlaybackFramesPerSecond() const;
-
-	EOdysseyTimelineTool GetCurrentTool() const;
-    void OnToolChecked(EOdysseyTimelineTool iTool, ECheckBoxState iState);
 
 	int GetCurrentFrame() const;
 
@@ -75,7 +69,6 @@ private:
 	TAttribute<EVisibility> mScrollbarVisibility;
 	TAttribute<float> mPlaybackFramesPerSecond;
 	TAttribute<TSharedPtr<FOdysseyAnimationEditorTimelinePosition>> mTimelinePosition;
-	TAttribute<TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>> mTimelineCellSelection;
 	SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
 	FSimpleDelegate mOnInactivateOutOfPegs;
 	SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;

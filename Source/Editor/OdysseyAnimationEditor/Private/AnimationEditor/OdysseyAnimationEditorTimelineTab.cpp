@@ -84,7 +84,6 @@ FOdysseyAnimationEditorTimelineTab::CreateWidget()
 			.Player(this, &FOdysseyAnimationEditorTimelineTab::Player)
 			.PlaybackFramesPerSecond(this, &FOdysseyAnimationEditorTimelineTab::PlaybackFramesPerSecond)
 			.TimelinePosition(this, &FOdysseyAnimationEditorTimelineTab::GetTimelinePosition)
-			.TimelineCellSelection(this, &FOdysseyAnimationEditorTimelineTab::GetTimelineCellSelection)
 			.OnActivateOutOfPegs(this, &FOdysseyAnimationEditorTimelineTab::OnActivateOutOfPegs)
 			.OnInactivateOutOfPegs(this, &FOdysseyAnimationEditorTimelineTab::OnInactivateOutOfPegs)
 			.OnIsOutOfPegsChecked(this, &FOdysseyAnimationEditorTimelineTab::OnIsOutOfPegsChecked)
@@ -141,12 +140,6 @@ TSharedPtr<FOdysseyAnimationEditorTimelinePosition>
 FOdysseyAnimationEditorTimelineTab::GetTimelinePosition() const
 {
 	return mExtension->TimelinePosition();
-}
-
-TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>
-FOdysseyAnimationEditorTimelineTab::GetTimelineCellSelection() const
-{
-	return mExtension->TimelineCellSelection();
 }
 
 //--------------------------------------------------------------------------------------

@@ -10,7 +10,7 @@
 class UOdysseyAnimationLayer;
 class FOdysseyAnimationTimelineCellsShortcuts;
 class FOdysseyAnimationTimelineCellImageStaggerShortcuts;
-class SOdysseyAnimationLayerStackTreeView;
+class SOdysseyLayerStackTreeView;
 
 /**
  * Implements a layer row widget
@@ -26,7 +26,6 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageTimeline)
         {}
 		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
 		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
 		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
 		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
@@ -35,7 +34,7 @@ public:
 public:
     void Construct(
         const FArguments& iArgs,
-		const TSharedRef<SOdysseyAnimationLayerStackTreeView>& iOwnerTableView,
+		const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
         UOdysseyAnimationLayer* iLayer
     );
 
@@ -98,7 +97,6 @@ private:
 protected:
     UOdysseyAnimationLayer* mLayer;
 	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
-	TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> mTimelineCellSelection;
 	SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
 	FSimpleDelegate mOnInactivateOutOfPegs;
 	SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;

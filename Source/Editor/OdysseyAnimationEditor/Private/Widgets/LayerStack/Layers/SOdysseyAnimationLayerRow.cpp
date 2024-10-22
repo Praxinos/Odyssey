@@ -18,8 +18,6 @@ SOdysseyAnimationLayerRow::Construct(
 )
 {
 	mTimelinePosition = iArgs._TimelinePosition;
-	mTimelineCellSelection = iArgs._TimelineCellSelection;
-	mCurrentFrame = iArgs._CurrentFrame;
 	mLayer = iLayer;
 
     SOdysseyLayerRow::Construct(

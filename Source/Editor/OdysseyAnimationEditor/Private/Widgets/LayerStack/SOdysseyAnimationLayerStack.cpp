@@ -10,8 +10,7 @@
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStackTreeView.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineTreeView.h"
 #include "OdysseyAnimationEditorTimelinePosition.h"
-#include "OdysseyAnimationEditorTimelineCellSelection.h"
-#include "Widgets/Input/SSegmentedControl.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineToolSelector.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "OdysseyStyleSet.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineControl.h"
@@ -63,7 +62,6 @@ SOdysseyAnimationLayerStack::Construct(const FArguments& InArgs)
 	mPlaybackFramesPerSecond = InArgs._PlaybackFramesPerSecond;
 	mScrollbarVisibility = InArgs._ScrollbarVisibility;
 	mTimelinePosition = InArgs._TimelinePosition;
-	mTimelineCellSelection = InArgs._TimelineCellSelection;
 	mOnActivateOutOfPegs = InArgs._OnActivateOutOfPegs;
 	mOnInactivateOutOfPegs = InArgs._OnInactivateOutOfPegs;
 	mOnIsOutOfPegsChecked = InArgs._OnIsOutOfPegsChecked;
@@ -108,24 +106,7 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
             .AutoWidth()
             .VAlign(VAlign_Center)
             [
-                SNew(SSegmentedControl<EOdysseyTimelineTool>)
-                .Value(this, &SOdysseyAnimationLayerStack::GetCurrentTool)
-                .OnValueChecked(this, &SOdysseyAnimationLayerStack::OnToolChecked)
-
-                //Selection Tool
-                + SSegmentedControl<EOdysseyTimelineTool>::Slot(EOdysseyTimelineTool::Selection)
-                .Icon(FOdysseyStyle::GetBrush( "Animation.Timeline.Tools.Selection" ))
-                .ToolTip(LOCTEXT("timeline.selection-tool.tooltip", "Selection Tool"))
-
-                //Move Tool
-                + SSegmentedControl<EOdysseyTimelineTool>::Slot(EOdysseyTimelineTool::Move)
-                .Icon(FOdysseyStyle::GetBrush( "Animation.Timeline.Tools.Move" ))
-                .ToolTip(LOCTEXT("timeline.move-tool.tooltip", "Move Tool"))
-
-                //Cut Tool
-                + SSegmentedControl<EOdysseyTimelineTool>::Slot(EOdysseyTimelineTool::Cut)
-                .Icon(FOdysseyStyle::GetBrush( "Animation.Timeline.Tools.Cut" ))
-                .ToolTip(LOCTEXT("timeline.cut-tool.tooltip", "Cut Tool"))
+                SNew(SOdysseyAnimationTimelineToolSelector)
             ]
         ]
 
@@ -138,7 +119,6 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
 			.Visibility(mPlayerControlsVisibility)
 			.Animation(mAnimation.Get())
 			.Player(mPlayer.Get())
-			.TimelineCellSelection(mTimelineCellSelection.Get())
             .PlaybackFramesPerSecond(mPlaybackFramesPerSecond)
         ]
 
@@ -174,8 +154,7 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
 		[
 			SAssignNew(mTreeView, SOdysseyAnimationLayerStackTreeView)
 			.LayerStack(layerStack)
-			.TimelineCellSelection(mTimelineCellSelection.Get())
-			.OnGenerateRow(this, &SOdysseyAnimationLayerStack::OnGenerateRow)
+			.TimelinePosition(mTimelinePosition.Get())
 			.HeaderHeight(HEADER_HEIGHT)
 			.ExternalScrollbar(mTimelineScrollBarV)
 			.OnTreeViewScrolled(this, &SOdysseyAnimationLayerStack::OnTreeViewScrolled)
@@ -185,17 +164,22 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
 			SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot()
 			[
-				SAssignNew(mTimelineTreeView, SOdysseyAnimationTimelineTreeView)
-				.LayerStack(layerStack)
-				.Player(mPlayer.Get())
-				.TimelineCellSelection(mTimelineCellSelection.Get())
+				SNew(SOdysseyAnimationTimelineControl)
+				.Animation(mAnimation.Get())
+				.CurrentFrame(this, &SOdysseyAnimationLayerStack::GetCurrentFrame)
 				.TimelinePosition(mTimelinePosition.Get())
-				.HeaderHeight(HEADER_HEIGHT)
-				.OnActivateOutOfPegs(mOnActivateOutOfPegs)
-				.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
-				.OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked)
-				.ExternalScrollbar(dummyScrollBar)
-				.OnTreeViewScrolled(this, &SOdysseyAnimationLayerStack::OnTimelineTreeViewScrolled)
+				[
+					SAssignNew(mTimelineTreeView, SOdysseyAnimationTimelineTreeView)
+					.LayerStack(layerStack)
+					.Player(mPlayer.Get())
+					.TimelinePosition(mTimelinePosition.Get())
+					.HeaderHeight(HEADER_HEIGHT)
+					.OnActivateOutOfPegs(mOnActivateOutOfPegs)
+					.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
+					.OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked)
+					.ExternalScrollbar(dummyScrollBar)
+					.OnTreeViewScrolled(this, &SOdysseyAnimationLayerStack::OnTimelineTreeViewScrolled)
+				]
 			]
 			+ SHorizontalBox::Slot()
 			.AutoWidth()
@@ -226,50 +210,6 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
     this->ChildSlot.AttachWidget(widget.ToSharedRef());
 }
 
-EOdysseyTimelineTool
-SOdysseyAnimationLayerStack::GetCurrentTool() const
-{
-	return FOdysseyAnimationTimelineTools::Get().GetCurrentTool();
-}
-
-void
-SOdysseyAnimationLayerStack::OnToolChecked(EOdysseyTimelineTool iTool, ECheckBoxState iState)
-{
-    if (iState == ECheckBoxState::Checked)
-		FOdysseyAnimationTimelineTools::Get().SetCurrentTool(iTool);
-}
-
-TSharedRef<ITableRow>
-SOdysseyAnimationLayerStack::OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable)
-{
-    check(iLayer);
-
-    UClass* layerClass = iLayer->GetClass();
-    if (layerClass == UOdysseyAnimationLayerFolder::StaticClass())
-    {
-        return SNew(SOdysseyAnimationLayerFolderRow, GetTreeView().ToSharedRef(), Cast<UOdysseyAnimationLayerFolder>(iLayer))
-			.CurrentFrame(this, &SOdysseyAnimationLayerStack::GetCurrentFrame)
-			.TimelinePosition(mTimelinePosition.Get())
-			.TimelineCellSelection(mTimelineCellSelection.Get());
-    }
-    else if (layerClass == UOdysseyAnimationLayerImageRaster::StaticClass())
-    {
-        return SNew(SOdysseyAnimationLayerImageRasterRow, GetTreeView().ToSharedRef(), Cast<UOdysseyAnimationLayerImageRaster>(iLayer))
-			.CurrentFrame(this, &SOdysseyAnimationLayerStack::GetCurrentFrame)
-			.TimelinePosition(mTimelinePosition.Get())
-			.TimelineCellSelection(mTimelineCellSelection.Get());
-    }
-    else if (layerClass == UOdysseyAnimationLayerImageVector::StaticClass())
-    {
-        return SNew(SOdysseyAnimationLayerImageVectorRow, GetTreeView().ToSharedRef(), Cast<UOdysseyAnimationLayerImageVector>(iLayer))
-			.CurrentFrame(this, &SOdysseyAnimationLayerStack::GetCurrentFrame)
-			.TimelinePosition(mTimelinePosition.Get())
-			.TimelineCellSelection(mTimelineCellSelection.Get());
-    }
-
-    return SNew(STableRow<UOdysseyLayer*>, iOwnerTable);
-}
-
 void
 SOdysseyAnimationLayerStack::OnTimelineScrollBarHScrolled(float iOffset)
 {
@@ -294,7 +234,7 @@ SOdysseyAnimationLayerStack::OnTimelineScrollBarHScrolled(float iOffset)
 void
 SOdysseyAnimationLayerStack::OnTreeViewScrolled(double iOffset)
 {
-	mTimelineTreeView->GetTreeView()->ScrollTo(iOffset);
+	mTimelineTreeView->ScrollTo(iOffset);
 }
 
 void
@@ -319,7 +259,7 @@ SOdysseyAnimationLayerStack::Tick( const FGeometry& AllottedGeometry, const doub
 	if (!animation)
 		return;
 
-    TSharedPtr<SHeaderRow> headerRow = mTimelineTreeView->GetTreeView()->GetHeaderRow();
+    TSharedPtr<SHeaderRow> headerRow = mTimelineTreeView->GetHeaderRow();
     if (!headerRow)
         return;
 

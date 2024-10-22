@@ -30,9 +30,7 @@ void SOdysseyAnimationLayerImageVectorRow::Construct(
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments()
-			.CurrentFrame(InArgs._CurrentFrame)
-			.TimelinePosition(InArgs._TimelinePosition)
-			.TimelineCellSelection(InArgs._TimelineCellSelection),
+			.TimelinePosition(InArgs._TimelinePosition),
         iOwnerTableView,
 		iAnimationLayerImageVector
     );

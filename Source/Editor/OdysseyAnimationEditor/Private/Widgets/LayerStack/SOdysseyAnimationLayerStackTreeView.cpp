@@ -18,19 +18,46 @@ SOdysseyAnimationLayerStackTreeView::SOdysseyAnimationLayerStackTreeView()
 void
 SOdysseyAnimationLayerStackTreeView::Construct(const FArguments& InArgs)
 {
-	mTimelineCellSelection = InArgs._TimelineCellSelection;
+	mTimelinePosition = InArgs._TimelinePosition;
 
-	mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(InArgs._LayerStack, mTimelineCellSelection);
+	mLayerStack = InArgs._LayerStack;
+
+	mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(mLayerStack);
 
     SOdysseyLayerStackTreeView::Construct(
 		SOdysseyLayerStackTreeView::FArguments()
-		.LayerStack(InArgs._LayerStack)
-        .OnGenerateRow(InArgs._OnGenerateRow)
+		.LayerStack(mLayerStack)
+        .OnGenerateRow(this, &SOdysseyAnimationLayerStackTreeView::OnGenerateRow)
 		.Columns(InArgs._Columns)
 		.HeaderHeight(InArgs._HeaderHeight)
 		.ExternalScrollbar(InArgs._ExternalScrollbar)
 		.OnTreeViewScrolled(InArgs._OnTreeViewScrolled)
 	);
+}
+
+TSharedRef<ITableRow>
+SOdysseyAnimationLayerStackTreeView::OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable)
+{
+    check(iLayer);
+
+    UClass* layerClass = iLayer->GetClass();
+    if (layerClass == UOdysseyAnimationLayerFolder::StaticClass())
+    {
+        return SNew(SOdysseyAnimationLayerFolderRow, SharedThis(this), Cast<UOdysseyAnimationLayerFolder>(iLayer))
+			.TimelinePosition(mTimelinePosition);
+    }
+    else if (layerClass == UOdysseyAnimationLayerImageRaster::StaticClass())
+    {
+        return SNew(SOdysseyAnimationLayerImageRasterRow, SharedThis(this), Cast<UOdysseyAnimationLayerImageRaster>(iLayer))
+			.TimelinePosition(mTimelinePosition);
+    }
+    else if (layerClass == UOdysseyAnimationLayerImageVector::StaticClass())
+    {
+        return SNew(SOdysseyAnimationLayerImageVectorRow, SharedThis(this), Cast<UOdysseyAnimationLayerImageVector>(iLayer))
+			.TimelinePosition(mTimelinePosition);
+    }
+
+    return SNew(STableRow<UOdysseyLayer*>, iOwnerTable);
 }
 
 FReply
@@ -45,18 +72,14 @@ SOdysseyAnimationLayerStackTreeView::OnKeyDown( const FGeometry& iGeometry, cons
 void
 SOdysseyAnimationLayerStackTreeView::Private_SignalSelectionChanged(ESelectInfo::Type SelectInfo)
 {
-	if (mTimelineCellSelection)
-    	mTimelineCellSelection->SetSelectedCells({});
-
+    mLayerStack->GetCellSelection()->SetSelectedCells({});
     SOdysseyLayerStackTreeView::Private_SignalSelectionChanged(SelectInfo);
 }
 
 FReply
 SOdysseyAnimationLayerStackTreeView::OnFocusReceived(const FGeometry& MyGeometry, const FFocusEvent& InFocusEvent)
 {
-	if (mTimelineCellSelection)
-    	mTimelineCellSelection->SetSelectedCells({});
-
+	mLayerStack->GetCellSelection()->SetSelectedCells({});
     return SOdysseyLayerStackTreeView::OnFocusReceived(MyGeometry, InFocusEvent);
 }
 

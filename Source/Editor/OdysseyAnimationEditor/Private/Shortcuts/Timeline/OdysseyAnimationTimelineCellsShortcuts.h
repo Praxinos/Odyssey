@@ -8,7 +8,7 @@ class UOdysseyLayerStack;
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineCellsShortcuts
 {
 public:
-    FOdysseyAnimationTimelineCellsShortcuts(UOdysseyLayerStack* iLayerStack, TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> iTimelineCellSelection);
+    FOdysseyAnimationTimelineCellsShortcuts(UOdysseyAnimationLayerStack* iLayerStack);
 
 public:
     //Shortcuts
@@ -37,6 +37,5 @@ public:
     bool CanAction_SetCellExposure();
 
 private:
-    UOdysseyLayerStack* mLayerStack;
-	TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> mTimelineCellSelection;
+    UOdysseyAnimationLayerStack* mLayerStack;
 };

@@ -6,7 +6,7 @@
 #include "Widgets/SOdysseyLayerStackTreeView.h"
 
 class FOdysseyAnimationTimelineShortcuts;
-class FOdysseyAnimationEditorTimelineCellSelection;
+class FOdysseyAnimationEditorTimelinePosition;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStackTreeView
     : public SOdysseyLayerStackTreeView
@@ -16,8 +16,8 @@ public:
 		: _HeaderHeight(25)
 		, _ExternalScrollbar(nullptr)
         {}
-        SLATE_ARGUMENT( UOdysseyLayerStack*, LayerStack )
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
+        SLATE_ARGUMENT( UOdysseyAnimationLayerStack*, LayerStack )
+		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
 		SLATE_ARGUMENT( TOptional<TArray<SHeaderRow::FColumn::FArguments>>, Columns )
 		SLATE_ARGUMENT( int, HeaderHeight)
         SLATE_EVENT( FOnGenerateRow, OnGenerateRow )
@@ -28,6 +28,7 @@ public:
 public:
     SOdysseyAnimationLayerStackTreeView();
     void Construct(const FArguments& InArgs);
+	TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
 
 private:
     virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
@@ -42,5 +43,7 @@ private:
 
 private:
     TSharedPtr<FOdysseyAnimationTimelineShortcuts> mTimelineShortcuts;
-	TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> mTimelineCellSelection;
+	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+
+	UOdysseyAnimationLayerStack* mLayerStack;
 };

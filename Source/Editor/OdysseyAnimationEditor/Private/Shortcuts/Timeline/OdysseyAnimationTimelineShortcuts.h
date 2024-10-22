@@ -13,7 +13,7 @@ class FOdysseyAnimationTimelineCellImageStaggerShortcuts;
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineShortcuts
 {
 public:
-    FOdysseyAnimationTimelineShortcuts(UOdysseyLayerStack* iLayerStack, TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> iTimelineCellSelection);
+    FOdysseyAnimationTimelineShortcuts(UOdysseyAnimationLayerStack* iLayerStack);
 
 public:
     TSharedRef<FUICommandList> GetCommandList() const;

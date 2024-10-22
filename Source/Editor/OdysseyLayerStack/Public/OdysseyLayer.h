@@ -182,7 +182,7 @@ public:
 	 *
 	 */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
-    UOdysseyLayerStack* GetLayerStack() const;
+    virtual UOdysseyLayerStack* GetLayerStack() const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool IsActivatedRecursively() const;

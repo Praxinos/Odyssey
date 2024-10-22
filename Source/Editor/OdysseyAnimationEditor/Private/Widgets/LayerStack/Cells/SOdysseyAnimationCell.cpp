@@ -17,8 +17,6 @@ SOdysseyAnimationCell::Construct(
 {
     ensure(iAnimationLayer);
 
-	mTimelineCellSelection = InArgs._TimelineCellSelection;
-
     mAnimationLayer = iAnimationLayer;
     mCell = iCell;
 
@@ -131,13 +129,13 @@ int32 SOdysseyAnimationCell::OnPaint(const FPaintArgs& Args, const FGeometry& Al
 bool
 SOdysseyAnimationCell::IsSelected() const
 {
-	return mTimelineCellSelection->GetSelectedCells().Contains(mCell);
+	return mCell->GetLayerStack()->GetCellSelection()->GetSelectedCells().Contains(mCell);
 }
 
 bool
 SOdysseyAnimationCell::IsSelectionCursor() const
 {
-	return mTimelineCellSelection->GetCellSelectionCursor() == mCell;
+	return mCell->GetLayerStack()->GetCellSelection()->GetCellSelectionCursor() == mCell;
 }
 
 const FSlateBrush*

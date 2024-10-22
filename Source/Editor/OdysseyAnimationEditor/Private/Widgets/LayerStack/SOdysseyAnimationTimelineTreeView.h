@@ -8,13 +8,12 @@
 class UOdysseyAnimationLayerStack;
 class UOdysseyAnimationPlayer;
 class FOdysseyAnimationTimelineShortcuts;
-class FOdysseyAnimationEditorTimelineCellSelection;
 class FOdysseyAnimationEditorTimelinePosition;
 class SOdysseyAnimationTimelineControl;
 class ITableRow;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineTreeView
-    : public SCompoundWidget
+    : public SOdysseyLayerStackTreeView
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineTreeView)
@@ -23,7 +22,6 @@ public:
         {}
         SLATE_ARGUMENT( UOdysseyAnimationLayerStack*, LayerStack )
 		SLATE_ARGUMENT( UOdysseyAnimationPlayer*, Player )
-        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
 		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
 		SLATE_ARGUMENT( int, HeaderHeight )
 		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
@@ -35,8 +33,6 @@ public:
 
 public:
     void Construct(const FArguments& InArgs);
-
-	TSharedPtr<SOdysseyAnimationLayerStackTreeView> GetTreeView() const;
 
 private:
     virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
@@ -51,10 +47,7 @@ private:
 	UOdysseyAnimationLayerStack* mLayerStack;
 	UOdysseyAnimationPlayer* mPlayer;
     TSharedPtr<FOdysseyAnimationTimelineShortcuts> mTimelineShortcuts;
-	TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> mTimelineCellSelection;
 	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
-	TSharedPtr<SOdysseyAnimationTimelineControl> mTimelineControl;
-	TSharedPtr<SOdysseyAnimationLayerStackTreeView> mTreeView;
 	SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
 	FSimpleDelegate mOnInactivateOutOfPegs;
 	SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;

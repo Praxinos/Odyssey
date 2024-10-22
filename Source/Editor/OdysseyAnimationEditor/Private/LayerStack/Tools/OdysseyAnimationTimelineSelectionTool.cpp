@@ -6,12 +6,13 @@
 #include "DragDropOperations/OdysseyAnimationCellsDragDropOperation.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
 
 FOdysseyAnimationTimelineSelectionTool::~FOdysseyAnimationTimelineSelectionTool()
 {
 }
 
-FOdysseyAnimationTimelineSelectionTool::FOdysseyAnimationTimelineSelectionTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationEditorTimelineCellSelection> iTimelineCellSelection)
+FOdysseyAnimationTimelineSelectionTool::FOdysseyAnimationTimelineSelectionTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection)
     : mTimelinePosition(iTimelinePosition)
 	, mTimelineCellSelection(iTimelineCellSelection)
 {   

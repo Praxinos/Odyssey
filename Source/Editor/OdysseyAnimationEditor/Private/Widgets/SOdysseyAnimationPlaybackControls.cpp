@@ -15,7 +15,6 @@ SOdysseyAnimationPlaybackControls::Construct(const FArguments& InArgs)
 	mAnimation = InArgs._Animation;
 	mPlayer = InArgs._Player;
     mPlaybackFramesPerSecond = InArgs._PlaybackFramesPerSecond;
-	mTimelineCellSelection = InArgs._TimelineCellSelection;
 
 	ChildSlot
 	[
@@ -178,7 +177,7 @@ SOdysseyAnimationPlaybackControls::GetNotLoopingButtonVisibility() const
 FReply
 SOdysseyAnimationPlaybackControls::OnPlayClicked()
 {
-	TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
+	TArray<UOdysseyAnimationCell*> selectedCells = mAnimation->GetLayerStack()->GetCellSelection()->GetSelectedCells();
 	if (selectedCells.IsEmpty())
 	{
 		mPlayer->SetFrameRange(TOptional<FInt32Range>());
@@ -201,7 +200,7 @@ SOdysseyAnimationPlaybackControls::OnPlayClicked()
 FReply
 SOdysseyAnimationPlaybackControls::OnPlayBackwardClicked()
 {
-	TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
+	TArray<UOdysseyAnimationCell*> selectedCells = mAnimation->GetLayerStack()->GetCellSelection()->GetSelectedCells();
 	if (selectedCells.IsEmpty())
 	{
 		mPlayer->SetFrameRange(TOptional<FInt32Range>());

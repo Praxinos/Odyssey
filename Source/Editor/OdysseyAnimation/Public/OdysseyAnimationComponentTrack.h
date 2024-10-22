@@ -14,7 +14,7 @@ public:
 
 	UOdysseyAnimationComponentTrack(const FObjectInitializer& ObjectInitializer);
 
-	virtual UMovieSceneSection* AddNewSection(FFrameNumber KeyTime, UOdysseyAnimationComponent* iComponent);
+	virtual UMovieSceneSection* AddNewSection(FFrameNumber KeyTime);
 
 	// UMovieSceneTrack interface
 	virtual bool SupportsType(TSubclassOf<UMovieSceneSection> SectionClass) const override;
@@ -23,4 +23,8 @@ public:
 #if WITH_EDITORONLY_DATA
 	virtual FText GetDisplayName() const override;
 #endif
+
+public:
+	UPROPERTY()
+	UOdysseyAnimationComponent* Component;
 };

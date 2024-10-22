@@ -1,0 +1,25 @@
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+class SOdysseyAnimationComponentTrack
+    : public SCompoundWidget
+{
+public:
+    SLATE_BEGIN_ARGS(SOdysseyAnimationComponentTrack)
+    {}
+    SLATE_END_ARGS()
+
+public:
+    void Construct(const FArguments& iArgs, UOdysseyAnimationComponent* iComponent);
+
+private:
+	void RebuildWidgets();
+	void OnLayerAdded(UOdysseyLayer* iLayer);
+
+private:
+	UOdysseyAnimationComponent* mComponent;
+};

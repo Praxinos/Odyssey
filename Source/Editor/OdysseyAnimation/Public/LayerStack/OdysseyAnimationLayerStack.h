@@ -11,6 +11,7 @@
 #include "OdysseyAnimationLayerStack.generated.h"
 
 class UOdysseyAnimationLayer;
+class FOdysseyAnimationCellSelection;
 
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerStack
@@ -37,4 +38,8 @@ public:
 
 public:
 	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
+	TSharedRef<FOdysseyAnimationCellSelection> GetCellSelection() const;
+
+private:
+	TSharedRef<FOdysseyAnimationCellSelection> mCellSelection;
 };

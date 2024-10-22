@@ -13,9 +13,8 @@
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
-FOdysseyAnimationTimelineCellImageStaggerShortcuts::FOdysseyAnimationTimelineCellImageStaggerShortcuts(UOdysseyLayerStack* iLayerStack, TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> iTimelineCellSelection)
+FOdysseyAnimationTimelineCellImageStaggerShortcuts::FOdysseyAnimationTimelineCellImageStaggerShortcuts(UOdysseyLayerStack* iLayerStack)
     : mLayerStack(iLayerStack)
-	, mTimelineCellSelection(iTimelineCellSelection)
 {
 }
 
@@ -43,7 +42,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
     if (!animation)
         return;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = layer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
@@ -141,7 +140,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
         selectedCells.Append(newCells);
     }
 
-    mTimelineCellSelection->SetSelectedCells(selectedCells);
+    layer->GetLayerStack()->GetCellSelection()->SetSelectedCells(selectedCells);
 }
 
 bool
@@ -158,7 +157,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::CanAction_ConvertToReference
     if (!animation)
         return false;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mTimelineCellSelection->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = layer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);

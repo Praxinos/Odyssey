@@ -4,6 +4,7 @@
 #pragma once
 
 #include "OdysseyLayer.h"
+#include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 
 #include "OdysseyAnimationLayer.generated.h"
@@ -28,6 +29,7 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayer
 
 public:
 	virtual void PostInitProperties() override;
+	virtual UOdysseyAnimationLayerStack* GetLayerStack() const;
 
 public:
 	//Invalidate the frame ranges of all cells

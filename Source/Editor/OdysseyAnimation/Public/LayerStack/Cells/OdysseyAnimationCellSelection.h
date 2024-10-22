@@ -4,17 +4,16 @@
 
 #include "CoreMinimal.h"
 
-class UOdysseyAnimation;
 class UOdysseyLayerStack;
 class UOdysseyAnimationLayer;
 class UOdysseyAnimationCell;
 
-class FOdysseyAnimationEditorTimelineCellSelection
+class ODYSSEYANIMATION_API FOdysseyAnimationCellSelection
 {
 public:
-    ~FOdysseyAnimationEditorTimelineCellSelection();
-	FOdysseyAnimationEditorTimelineCellSelection();
-    FOdysseyAnimationEditorTimelineCellSelection(UOdysseyAnimation* iAnimation);
+    ~FOdysseyAnimationCellSelection();
+	FOdysseyAnimationCellSelection();
+    FOdysseyAnimationCellSelection(UOdysseyAnimationLayerStack* iLayerStack);
 
 public:
     void SelectCell(UOdysseyAnimationCell* iCell, bool iSetAsCursor = false);
@@ -33,7 +32,7 @@ private:
     void UnbindOnCellsChanged();
 
 private:
-	UOdysseyAnimation* mAnimation;
+	UOdysseyAnimationLayerStack* mLayerStack;
     TArray<UOdysseyAnimationCell*> mSelectedCells;
     UOdysseyAnimationCell* mCellSelectionCursor;
 	UOdysseyAnimationLayer* mLayer = nullptr;

@@ -36,12 +36,12 @@ UOdysseyAnimationComponentTrack::GetDisplayName() const
 #endif
 
 UMovieSceneSection*
-UOdysseyAnimationComponentTrack::AddNewSection(FFrameNumber KeyTime, UOdysseyAnimationComponent* iComponent)
+UOdysseyAnimationComponentTrack::AddNewSection(FFrameNumber KeyTime)
 {
 	UOdysseyAnimationComponentSection* NewSection = Cast<UOdysseyAnimationComponentSection>(CreateNewSection());
 	{
 		UMovieScene* OuterMovieScene = GetTypedOuter<UMovieScene>();
-		UOdysseyAnimation* animation = iComponent->GetActiveAnimation();
+		UOdysseyAnimation* animation = Component->GetActiveAnimation();
 		if (animation)
 		{
 			FInt32Range range = animation->GetFrameRange();

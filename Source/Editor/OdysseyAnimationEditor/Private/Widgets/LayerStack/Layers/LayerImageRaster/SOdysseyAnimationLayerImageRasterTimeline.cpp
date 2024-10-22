@@ -63,7 +63,7 @@ TSharedPtr<FExtender>
 SOdysseyAnimationLayerImageRasterTimeline::ExtendContextMenu()
 {
     TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
-    mAnimationTimelineCellImageRasterShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(mLayer->GetLayerStack(), mTimelineCellSelection);
+    mAnimationTimelineCellImageRasterShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(mLayer->GetLayerStack());
     mAnimationTimelineCellImageRasterShortcuts->MapActionsToCommandList(commandList);
 
     TSharedRef<FExtender> extender = MakeShared<FExtender>();

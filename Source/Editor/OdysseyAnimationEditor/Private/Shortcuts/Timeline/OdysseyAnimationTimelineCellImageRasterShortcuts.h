@@ -10,7 +10,7 @@ class UOdysseyLayerStack;
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineCellImageRasterShortcuts
 {
 public:
-    FOdysseyAnimationTimelineCellImageRasterShortcuts(UOdysseyLayerStack* iLayerStack, TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> iTimelineCellSelection);
+    FOdysseyAnimationTimelineCellImageRasterShortcuts(UOdysseyLayerStack* iLayerStack);
 
 public:
     //Shortcuts
@@ -23,5 +23,4 @@ public:
 
 private:
     UOdysseyLayerStack* mLayerStack;
-	TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> mTimelineCellSelection;
 };

@@ -16,7 +16,6 @@ public:
 		{}
 		SLATE_ARGUMENT(UOdysseyAnimation*, Animation)
 		SLATE_ARGUMENT(UOdysseyAnimationPlayer*, Player)
-		SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection)
         SLATE_ATTRIBUTE(float, PlaybackFramesPerSecond)
 	SLATE_END_ARGS()
 
@@ -50,5 +49,4 @@ private:
     TAttribute<float> mPlaybackFramesPerSecond;
 	UOdysseyAnimation* mAnimation;
 	UOdysseyAnimationPlayer* mPlayer;
-	TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> mTimelineCellSelection;
 };

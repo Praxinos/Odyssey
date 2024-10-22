@@ -21,7 +21,6 @@ public:
         : _ShowHandles(false)
         {}
 		SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
         SLATE_EVENT(FOnCreateCellWidget, OnCreateCellWidget)
         SLATE_ATTRIBUTE(bool, ShowHandles)
     SLATE_END_ARGS()
@@ -109,7 +108,6 @@ private:
 
 private:
 	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
-	TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> mTimelineCellSelection;
     class UOdysseyAnimationLayer* mAnimationLayer;
 	TSharedPtr<FOdysseyAnimationTimelineTool> mTool;
 

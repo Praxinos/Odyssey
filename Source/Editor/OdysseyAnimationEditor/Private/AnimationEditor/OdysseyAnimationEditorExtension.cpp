@@ -25,7 +25,6 @@ FOdysseyAnimationEditorExtension::FOdysseyAnimationEditorExtension(FOdysseyPaint
 	, mAnimationSource(nullptr)
 	, mGUI(nullptr)
 	, mTimelinePosition(MakeShared<FOdysseyAnimationEditorTimelinePosition>())
-	, mTimelineCellSelection(MakeShared<FOdysseyAnimationEditorTimelineCellSelection>(nullptr))
 	, mFlipSystem(MakeShared<FOdysseyAnimationEditorFlipSystem>(this))
 	, mPlaybackFramesPerSecond(0)
 	, mLayerStackBrushEditorContext(MakeShared<FOdysseyLayerStackEditorBrushContext>(nullptr))
@@ -82,7 +81,6 @@ FOdysseyAnimationEditorExtension::OnSourceChanged()
 		mAnimationSource = nullptr;
 		
 		mTimelinePosition = MakeShared<FOdysseyAnimationEditorTimelinePosition>();
-		mTimelineCellSelection = MakeShared<FOdysseyAnimationEditorTimelineCellSelection>(nullptr);
 
 		UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll(this);
 		FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
@@ -95,7 +93,6 @@ FOdysseyAnimationEditorExtension::OnSourceChanged()
     UOdysseyAnimation* animation = Animation();
 
 	mTimelinePosition = MakeShared<FOdysseyAnimationEditorTimelinePosition>();
-	mTimelineCellSelection = MakeShared<FOdysseyAnimationEditorTimelineCellSelection>(animation);
 
 	mImageRenderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
 	mPlaybackFramesPerSecond = animation->GetFramesPerSecond();
@@ -145,12 +142,6 @@ TSharedRef<FOdysseyAnimationEditorTimelinePosition>
 FOdysseyAnimationEditorExtension::TimelinePosition()
 {
 	return mTimelinePosition;
-}
-
-TSharedRef<FOdysseyAnimationEditorTimelineCellSelection>
-FOdysseyAnimationEditorExtension::TimelineCellSelection()
-{
-	return mTimelineCellSelection;
 }
 
 float

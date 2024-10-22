@@ -15,9 +15,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerFolderRow
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerFolderRow)
         {}
-		SLATE_ATTRIBUTE(int, CurrentFrame)
 		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
     SLATE_END_ARGS()
 
 public:

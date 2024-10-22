@@ -1,4 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyAnimationComponentTrackEditor.h"
 
@@ -12,6 +13,8 @@
 #include "MVVM/ViewModels/SequencerEditorViewModel.h"
 #include "MVVM/ViewModelPtr.h"
 #include "MVVM/Views/SOutlinerItemViewBase.h"
+#include "Widgets/SOdysseyAnimationComponentTrack.h"
+#include "OdysseyAnimationComponentTrackEditorSection.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -67,7 +70,8 @@ FOdysseyAnimationComponentTrackEditor::OnNewActorTrackAdded(const AActor& iActor
 		return;
 
 	animationTrack->Modify();
-	UMovieSceneSection* section = animationTrack->AddNewSection(iSequencer->GetLocalTime().Time.FrameNumber, animationComponent);
+	animationTrack->Component = animationComponent;
+	UMovieSceneSection* section = animationTrack->AddNewSection(iSequencer->GetLocalTime().Time.FrameNumber);
 
 	iSequencer->EmptySelection();
 	iSequencer->SelectSection(section);
@@ -123,9 +127,10 @@ FOdysseyAnimationComponentTrackEditor::AddAnimationTrackKeyInternal(FFrameNumber
 			{
 				FFindOrCreateTrackResult TrackResult = FindOrCreateTrackForObject(ObjectBindingGuid, UOdysseyAnimationComponentTrack::StaticClass());
 				UMovieSceneTrack* Track = TrackResult.Track;
+				UOdysseyAnimationComponentTrack* animationTrack = Cast<UOdysseyAnimationComponentTrack>(Track);
 				KeyPropertyResult.bTrackCreated |= TrackResult.bWasCreated;
 
-				if (ensure(Track) && Track->CanModify())
+				if (ensure(animationTrack) && animationTrack->CanModify())
 				{
 					UOdysseyAnimationComponent* component = nullptr;
 					TArrayView<TWeakObjectPtr<>> boundObjects = SequencerPtr->FindObjectsInCurrentSequence(ObjectBindingGuid);
@@ -147,9 +152,14 @@ FOdysseyAnimationComponentTrackEditor::AddAnimationTrackKeyInternal(FFrameNumber
 
 					if (component)
 					{
-						Track->Modify();
+						animationTrack->Modify();
+						
+						if (TrackResult.bWasCreated)
+						{
+							animationTrack->Component = component;
+						}
 
-						UMovieSceneSection* NewSection = Cast<UOdysseyAnimationComponentTrack>(Track)->AddNewSection(KeyTime, component);
+						UMovieSceneSection* NewSection = animationTrack->AddNewSection(KeyTime);
 						KeyPropertyResult.bTrackModified = true;
 						KeyPropertyResult.SectionsCreated.Add(NewSection);
 						NewSections.Add(NewSection);
@@ -193,12 +203,12 @@ FOdysseyAnimationComponentTrackEditor::BuildOutlinerColumnWidget(const FBuildCol
 		if (!SequencerPtr)
 			return nullptr;
 
-		TSharedPtr<SVerticalBox> verticalBox = SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
+		TSharedPtr<SVerticalBox> verticalBox = SNew(SVerticalBox);
+			/* + SVerticalBox::Slot()
 			.AutoHeight()
 			[
 				SNew(::UE::Sequencer::SOutlinerItemViewBase, outlinerExtension, iParams.Editor, iParams.TreeViewRow)
-			];
+			]; */
 
 		TArrayView<TWeakObjectPtr<>> boundObjects = SequencerPtr->FindObjectsInCurrentSequence(track->FindObjectBindingGuid());
 		for (TWeakObjectPtr<>& boundObjectPtr : boundObjects)
@@ -214,13 +224,12 @@ FOdysseyAnimationComponentTrackEditor::BuildOutlinerColumnWidget(const FBuildCol
 			if (!animationComponent)
 				continue;
 
-			TSharedRef<FOdysseyAnimationEditorTimelinePosition> timelinePosition = MakeShared<FOdysseyAnimationEditorTimelinePosition>();
-			TSharedRef<FOdysseyAnimationEditorTimelineCellSelection> timelineCellSelection = MakeShared<FOdysseyAnimationEditorTimelineCellSelection>(animationComponent->GetActiveAnimation());
-
 			verticalBox->AddSlot()
 			.AutoHeight()
 			[
-				SNew(SOdysseyAnimationLayerStack)
+				SNew(SOdysseyAnimationComponentTrack, animationComponent)
+				.Clipping(EWidgetClipping::ClipToBoundsAlways)
+				/* SNew(SOdysseyAnimationLayerStack)
 				.Animation_UObject(animationComponent, &UOdysseyAnimationComponent::GetActiveAnimation)
 				.Player_UObject(animationComponent, &UOdysseyAnimationComponent::GetActivePlayer)
 				.PlayerControlsVisibility(EVisibility::Collapsed)
@@ -229,7 +238,7 @@ FOdysseyAnimationComponentTrackEditor::BuildOutlinerColumnWidget(const FBuildCol
 				.TimelineCellSelection(timelineCellSelection)
 				.OnActivateOutOfPegs_Lambda([](UOdysseyAnimationCell* iCell){})
 				.OnInactivateOutOfPegs_Lambda([](){})
-				.OnIsOutOfPegsChecked_Lambda([](UOdysseyAnimationCell* iCell){ return ECheckBoxState::Unchecked; })
+				.OnIsOutOfPegsChecked_Lambda([](UOdysseyAnimationCell* iCell){ return ECheckBoxState::Unchecked; }) */
 			];
 		}
 		
@@ -239,31 +248,13 @@ FOdysseyAnimationComponentTrackEditor::BuildOutlinerColumnWidget(const FBuildCol
 	return FMovieSceneTrackEditor::BuildOutlinerColumnWidget(iParams, iColumnName);
 }
 
-class FOdysseyAnimationComponentSection
-	: public TSubSectionMixin<>
-	, public TSharedFromThis<FOdysseyAnimationComponentSection>
-{
-public:
-	FOdysseyAnimationComponentSection(TSharedPtr<ISequencer> InSequencer, UOdysseyAnimationComponentSection& InSection);
-	virtual ~FOdysseyAnimationComponentSection();
-};
-
 TSharedRef<ISequencerSection>
 FOdysseyAnimationComponentTrackEditor::MakeSectionInterface( UMovieSceneSection& SectionObject, UMovieSceneTrack& Track, FGuid ObjectBinding )
 {
 	UOdysseyAnimationComponentSection* animationComponentSection = Cast<UOdysseyAnimationComponentSection>(&SectionObject);
 	checkf( animationComponentSection != nullptr, TEXT("Unsupported section type.") );
 
-	return MakeShareable(new FOdysseyAnimationComponentSection(GetSequencer(), *animationComponentSection));
-}
-
-
-FOdysseyAnimationComponentSection::~FOdysseyAnimationComponentSection()
-{}
-
-FOdysseyAnimationComponentSection::FOdysseyAnimationComponentSection(TSharedPtr<ISequencer> InSequencer, UOdysseyAnimationComponentSection& InSection)
-	: TSubSectionMixin(InSequencer, InSection)
-{
+	return MakeShareable(new FOdysseyAnimationComponentTrackEditorSection(GetSequencer(), animationComponentSection));
 }
 
 #undef LOCTEXT_NAMESPACE

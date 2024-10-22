@@ -16,7 +16,6 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationCell)
         {}
         SLATE_DEFAULT_SLOT(FArguments, Content)
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection>, TimelineCellSelection )
     SLATE_END_ARGS()
 
 public:
@@ -43,7 +42,6 @@ private:
     bool IsMarkFill() const;
 
 private:
-	TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> mTimelineCellSelection;
     UOdysseyAnimationLayer* mAnimationLayer;
     UOdysseyAnimationCell* mCell;
 };

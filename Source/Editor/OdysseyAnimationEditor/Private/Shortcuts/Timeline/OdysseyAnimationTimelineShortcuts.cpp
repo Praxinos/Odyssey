@@ -9,11 +9,11 @@
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
-FOdysseyAnimationTimelineShortcuts::FOdysseyAnimationTimelineShortcuts(UOdysseyLayerStack* iLayerStack, TSharedPtr<FOdysseyAnimationEditorTimelineCellSelection> iTimelineCellSelection)
+FOdysseyAnimationTimelineShortcuts::FOdysseyAnimationTimelineShortcuts(UOdysseyAnimationLayerStack* iLayerStack)
     : mCommandList(MakeShared<FUICommandList>())
-    , mCellsShortcuts(MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(iLayerStack, iTimelineCellSelection))
-    , mCellImageRasterShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(iLayerStack, iTimelineCellSelection))
-	, mCellImageStaggerShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(iLayerStack, iTimelineCellSelection))
+    , mCellsShortcuts(MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(iLayerStack))
+    , mCellImageRasterShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(iLayerStack))
+	, mCellImageStaggerShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(iLayerStack))
 {
     MapActionsToCommandList();
 }

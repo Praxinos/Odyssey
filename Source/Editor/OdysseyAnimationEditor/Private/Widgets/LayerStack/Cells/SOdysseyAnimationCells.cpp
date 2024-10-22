@@ -44,7 +44,6 @@ SOdysseyAnimationCells::Construct(
     ensure(iAnimationLayer);
 
 	mTimelinePosition = InArgs._TimelinePosition;
-	mTimelineCellSelection = InArgs._TimelineCellSelection;
 
     mTimingHandleBrush = FOdysseyStyle::GetBrush("Animation.CellTimingHandle");
 	mExposureHandleBrush = FOdysseyStyle::GetBrush("Animation.CellExposureHandle");
@@ -400,7 +399,6 @@ SOdysseyAnimationCells::CreateCellWidget(int iCellIndex)
         .Visibility(this, &SOdysseyAnimationCells::GetCellVisibility, cell)
         [
 			SNew(SOdysseyAnimationCell, mAnimationLayer, cell)
-			.TimelineCellSelection(mTimelineCellSelection)
 			[
 				cellWidget.ToSharedRef()
 			]
@@ -432,7 +430,7 @@ SOdysseyAnimationCells::OnMouseButtonDown(const FGeometry& iGeometry, const FPoi
         mAnimationLayer
     };
 
-	mTool = FOdysseyAnimationTimelineTools::Get().CreateTool(mTimelinePosition.ToSharedRef(), mTimelineCellSelection.ToSharedRef());
+	mTool = FOdysseyAnimationTimelineTools::Get().CreateTool(mTimelinePosition.ToSharedRef(), mAnimationLayer->GetLayerStack()->GetCellSelection());
 	if (!mTool)
 		return FReply::Unhandled();
     

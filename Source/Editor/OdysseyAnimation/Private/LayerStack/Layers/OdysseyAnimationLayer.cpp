@@ -42,6 +42,12 @@ UOdysseyAnimationLayer::GetAnimation() const
     return layerStack->GetAnimation();
 }
 
+UOdysseyAnimationLayerStack*
+UOdysseyAnimationLayer::GetLayerStack() const
+{
+	return Cast<UOdysseyAnimationLayerStack>(UOdysseyLayer::GetLayerStack());
+}
+
 FInt32Range
 UOdysseyAnimationLayer::GetFrameRange() const
 {
