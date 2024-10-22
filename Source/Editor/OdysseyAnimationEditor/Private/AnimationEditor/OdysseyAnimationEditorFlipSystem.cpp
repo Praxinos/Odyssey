@@ -460,72 +460,9 @@ FOdysseyAnimationEditorFlipSystem::FlipTo(int iDelta)
 }
 
 bool
-FOdysseyAnimationEditorFlipSystem::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
-{
-    if (!InKeyEvent.GetKey().IsModifierKey())
-        mLastKey = InKeyEvent.GetKey();
-
-    if (mLastKey != FKey())
-    {
-        FModifierKeysState modifierKeysState = FSlateApplication::Get().GetModifierKeys();
-        const FInputChord activeChord(mLastKey,
-            EModifierKey::FromBools(
-                modifierKeysState.IsControlDown(),
-                modifierKeysState.IsAltDown(),
-                modifierKeysState.IsShiftDown(),
-                modifierKeysState.IsCommandDown()
-            )
-        );
-
-
-        for (int i = 0; i < FOdysseyAnimationEditorCommands::Get().Flip.Num(); i++)
-        {
-            if (FOdysseyAnimationEditorCommands::Get().Flip[i]->HasActiveChord(activeChord))
-            {
-                const UOdysseyAnimationEditorUserSettings* settings = UOdysseyAnimationEditorUserSettings::Get();
-                StartFlipping(settings->FlipConfigurations[i]);
-                return false;
-            }
-        }
-    }
-
-    EndFlipping();
-
-    return false; //false means Unreal will continue as if we did nothing
-}
-
-bool
 FOdysseyAnimationEditorFlipSystem::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {
-    if (InKeyEvent.GetKey() == mLastKey)
-        mLastKey = FKey();
-
-    if (mLastKey != FKey())
-    {
-        FModifierKeysState modifierKeysState = FSlateApplication::Get().GetModifierKeys();
-        
-        const FInputChord activeChord(mLastKey,
-            EModifierKey::FromBools(
-                modifierKeysState.IsControlDown(),
-                modifierKeysState.IsAltDown(),
-                modifierKeysState.IsShiftDown(),
-                modifierKeysState.IsCommandDown()
-            )
-        );
-
-        for (int i = 0; i < FOdysseyAnimationEditorCommands::Get().Flip.Num(); i++)
-        {
-            if (FOdysseyAnimationEditorCommands::Get().Flip[i]->HasActiveChord(activeChord))
-            {
-                const UOdysseyAnimationEditorUserSettings* settings = UOdysseyAnimationEditorUserSettings::Get();
-                StartFlipping(settings->FlipConfigurations[i]);
-                return false;
-            }
-        }
-    }
-
     EndFlipping();
-
     return false; //false means Unreal will continue as if we did nothing
 }
 
