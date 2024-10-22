@@ -855,6 +855,18 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedHoveredImage(FSlateColorBrush(FLinearColor(1, 1, 1, 0.25)))
         .SetCheckedPressedImage(FSlateColorBrush(FLinearColor::Transparent))
     );
+	
+    Set("Sequencer.AnimationComponentTrack.DisplayLayersToggle", FCheckBoxStyle()
+        .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
+		.SetBorderBackgroundColor(FSlateColor::UseSubduedForeground())
+        .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
+        .SetUncheckedImage(*FAppStyle::Get().GetBrush("TreeArrow_Collapsed"))
+        .SetUncheckedHoveredImage(*FAppStyle::Get().GetBrush("TreeArrow_Collapsed_Hovered"))
+        .SetUncheckedPressedImage(*FAppStyle::Get().GetBrush("TreeArrow_Collapsed_Hovered"))
+        .SetCheckedImage(*FAppStyle::Get().GetBrush("TreeArrow_Expanded"))
+        .SetCheckedHoveredImage(*FAppStyle::Get().GetBrush("TreeArrow_Expanded_Hovered"))
+        .SetCheckedPressedImage(*FAppStyle::Get().GetBrush("TreeArrow_Expanded_Hovered"))
+	);
 #endif
 }
 

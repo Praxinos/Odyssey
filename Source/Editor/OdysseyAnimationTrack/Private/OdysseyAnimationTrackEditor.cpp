@@ -11,6 +11,7 @@
 #include "MVVM/Extensions/ITrackExtension.h"
 #include "MVVM/ViewModels/SequencerEditorViewModel.h"
 #include "MVVM/ViewModels/OutlinerColumns/OutlinerColumnTypes.h"
+#include "MVVM/Views/ViewUtilities.h"
 #include "Widgets/SOdysseyAnimationComponentTrack.h"
 #include "OdysseyAnimationTrackEditorSection.h"
 
@@ -111,7 +112,7 @@ FOdysseyAnimationTrackEditor::BuildObjectBindingTrackMenu(FMenuBuilder& iMenuBui
 		return;
 
 	iMenuBuilder.AddMenuEntry(
-		LOCTEXT("component-track.object-binding-track-menu.animation-track.name", "Animation Track"),
+		LOCTEXT("component-track.object-binding-track-menu.animation-track.name", "Timeline"),
 		LOCTEXT("component-track.object-binding-track-menu.animation-track.tooltip", "Adds a track that can play an animation component."),
 		FSlateIcon(),
 		FUIAction(
@@ -202,47 +203,58 @@ FOdysseyAnimationTrackEditor::BuildOutlinerColumnWidget(const FBuildColumnWidget
 {
 	UOdysseyAnimationComponentTrack* track = Cast<UOdysseyAnimationComponentTrack>(iParams.TrackModel->GetTrack());
 	::UE::Sequencer::TViewModelPtr< ::UE::Sequencer::FSequencerEditorViewModel > editorViewModel = iParams.Editor->CastThisShared< ::UE::Sequencer::FSequencerEditorViewModel >();
-	::UE::Sequencer::TViewModelPtr<::UE::Sequencer::IOutlinerExtension>        outlinerExtension = iParams.ViewModel.ImplicitCast();
+	::UE::Sequencer::TViewModelPtr<::UE::Sequencer::IOutlinerExtension> outlinerExtension = iParams.ViewModel.ImplicitCast();
 	if (!track || !editorViewModel || !outlinerExtension)
-		return SNullWidget::NullWidget;
+		return nullptr;
+
+	
+	TSharedPtr<ISequencer> SequencerPtr = GetSequencer();
+	if (!SequencerPtr)
+		return nullptr;
+
+	UOdysseyAnimationComponent* component = nullptr;
+	TArrayView<TWeakObjectPtr<>> boundObjects = SequencerPtr->FindObjectsInCurrentSequence(track->FindObjectBindingGuid());
+	for (TWeakObjectPtr<>& boundObjectPtr : boundObjects)
+	{
+		UObject* boundObject = boundObjectPtr.Get();
+		if (!boundObject)
+			continue;
+
+		if (!boundObject->IsA<UOdysseyAnimationComponent>())
+			continue;
+
+		component = Cast<UOdysseyAnimationComponent>(boundObject);
+		if (!component)
+			continue;
+	}
+
+	if (!component)
+		return nullptr;
 
 	if (iColumnName == ::UE::Sequencer::FCommonOutlinerNames::Edit)
 		return nullptr;
 
 	if (iColumnName == ::UE::Sequencer::FCommonOutlinerNames::Add)
-		return nullptr;
+	{
+		FGuid objectBinding = track->FindObjectBindingGuid();
+		return SNew(SBox)
+			.HeightOverride(FOdysseyAnimationTrackEditorSection::GetUncollapsedSectionHeight(component))
+			.VAlign(VAlign_Top)
+			[
+				SNew(SBox)
+				.HeightOverride(FOdysseyAnimationTrackEditorSection::GetCollapsedSectionHeight())
+				.VAlign(VAlign_Center)
+				.HAlign(HAlign_Center)
+				[
+					UE::Sequencer::MakeAddButton(LOCTEXT("sequencer.animation-timeline-track.add-button.tooltip", "Add Section"), FOnClicked::CreateRaw(this, &FOdysseyAnimationTrackEditor::OnAddButtonClicked, objectBinding), iParams.ViewModel)
+				]
+			];
+	}
 
 	if (iColumnName == ::UE::Sequencer::FCommonOutlinerNames::Label)
-	{
-		TSharedPtr<ISequencer> SequencerPtr = GetSequencer();
-		if (!SequencerPtr)
-			return nullptr;
-
-		TSharedPtr<SVerticalBox> verticalBox = SNew(SVerticalBox);
-
-		TArrayView<TWeakObjectPtr<>> boundObjects = SequencerPtr->FindObjectsInCurrentSequence(track->FindObjectBindingGuid());
-		for (TWeakObjectPtr<>& boundObjectPtr : boundObjects)
-		{
-			UObject* boundObject = boundObjectPtr.Get();
-			if (!boundObject)
-				continue;
-
-			if (!boundObject->IsA<UOdysseyAnimationComponent>())
-				continue;
-
-			UOdysseyAnimationComponent* animationComponent = Cast<UOdysseyAnimationComponent>(boundObject);
-			if (!animationComponent)
-				continue;
-
-			verticalBox->AddSlot()
-			.AutoHeight()
-			[
-				SNew(SOdysseyAnimationComponentTrack, animationComponent)
-				.Clipping(EWidgetClipping::ClipToBoundsAlways)
-			];
-		}
-		
-		return verticalBox;
+	{	
+		return SNew(SOdysseyAnimationComponentTrack, component, track, iParams)
+				.Clipping(EWidgetClipping::ClipToBoundsAlways);
 	}
 
 	return FMovieSceneTrackEditor::BuildOutlinerColumnWidget(iParams, iColumnName);
@@ -255,6 +267,13 @@ FOdysseyAnimationTrackEditor::MakeSectionInterface( UMovieSceneSection& SectionO
 	checkf( animationComponentSection != nullptr, TEXT("Unsupported section type.") );
 
 	return MakeShareable(new FOdysseyAnimationTrackEditorSection(GetSequencer(), animationComponentSection));
+}
+
+FReply
+FOdysseyAnimationTrackEditor::OnAddButtonClicked(FGuid iObjectBinding)
+{
+	AddAnimationTrack({ iObjectBinding });
+	return FReply::Handled();
 }
 
 #undef LOCTEXT_NAMESPACE

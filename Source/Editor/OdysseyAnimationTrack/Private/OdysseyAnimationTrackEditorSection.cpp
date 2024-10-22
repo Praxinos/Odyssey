@@ -31,7 +31,7 @@ FOdysseyAnimationTrackEditorSection::FOdysseyAnimationTrackEditorSection(TShared
 }
 
 float
-FOdysseyAnimationTrackEditorSection::GetLayerHeight(UOdysseyLayer* iLayer) const
+FOdysseyAnimationTrackEditorSection::GetLayerHeight(UOdysseyLayer* iLayer)
 {
 	float height = 0.f; //line padding
 
@@ -60,41 +60,25 @@ FOdysseyAnimationTrackEditorSection::GetLayerHeight(UOdysseyLayer* iLayer) const
 float
 FOdysseyAnimationTrackEditorSection::GetSectionHeight( const UE::Sequencer::FViewDensityInfo& ViewDensity ) const
 {
-	UOdysseyAnimationComponent* component = GetComponent();
-	if (!component)
-		return TSubSectionMixin::GetSectionHeight(ViewDensity);
+	UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
+	if (!track)
+		return GetCollapsedSectionHeight();
 
-	UOdysseyAnimation* animation = component->GetActiveAnimation();
 	
-	if (!animation)
-		return TSubSectionMixin::GetSectionHeight(ViewDensity);
-		
-	UOdysseyAnimationLayerStack* layerStack = animation->GetLayerStack();
-	TArray<UOdysseyLayer*> layers = layerStack->GetRootLayers();
-	int layersHeight = 0.f; //Initial treeview padding
-	for (UOdysseyLayer* layer : layers)
-	{
-		layersHeight += GetLayerHeight(layer);
-	}
+	if (track->DisplayLayers)
+		return GetUncollapsedSectionHeight(GetComponent());
 
-	return 25.f //Add Button and Timeline tools row
-		+ 22.f //headerRow
-		+ layersHeight;
+	return GetCollapsedSectionHeight();
 }
 
 float
 FOdysseyAnimationTrackEditorSection::GetSectionGripHeight(float iSectionHeight) const
 {
-	UOdysseyAnimationComponent* component = GetComponent();
-	if (!component)
+	UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
+	if (!track)
 		return TSubSectionMixin::GetSectionGripHeight(iSectionHeight);
 
-	UOdysseyAnimation* animation = component->GetActiveAnimation();
-	
-	if (!animation)
-		return TSubSectionMixin::GetSectionGripHeight(iSectionHeight);
-
-	return 25.f;
+	return GetCollapsedSectionHeight();
 }
 
 FText
@@ -120,6 +104,10 @@ FOdysseyAnimationTrackEditorSection::GenerateSectionWidget()
 void
 FOdysseyAnimationTrackEditorSection::RebuildSectionWidget()
 {
+	UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
+	if (!track)
+		return;
+
 	UOdysseyAnimationComponent* component = GetComponent();
 	if (!component)
 		return;
@@ -140,7 +128,7 @@ FOdysseyAnimationTrackEditorSection::RebuildSectionWidget()
 		.AutoHeight()
 		[
 			SNew(SBox)
-			.HeightOverride(25.f)
+			.HeightOverride(GetCollapsedSectionHeight())
 			[
 				SNullWidget::NullWidget
 			]
@@ -149,6 +137,7 @@ FOdysseyAnimationTrackEditorSection::RebuildSectionWidget()
 		.AutoHeight()
 		[
 			SNew( SOdysseyAnimationTimelineTreeView )
+			.Visibility(this, &FOdysseyAnimationTrackEditorSection::GetLayersVisibility)
 			.LayerStack(layerStack)
 			.TimelinePosition(mTimelinePosition)
 			.OnActivateOutOfPegs_Lambda(
@@ -355,6 +344,46 @@ FOdysseyAnimationTrackEditorSection::ResizeSection(ESequencerSectionResizeMode i
 	}
 
 	TSubSectionMixin::ResizeSection(iResizeMode, iResizeTime);
+}
+
+float
+FOdysseyAnimationTrackEditorSection::GetCollapsedSectionHeight()
+{
+	return 28.f;
+}
+
+float
+FOdysseyAnimationTrackEditorSection::GetUncollapsedSectionHeight(UOdysseyAnimationComponent* iComponent)
+{
+	if (!iComponent)
+		return GetCollapsedSectionHeight();
+
+	UOdysseyAnimation* animation = iComponent->GetActiveAnimation();
+	if (!animation)
+		return GetCollapsedSectionHeight();
+		
+	int height = 0;
+	height += GetCollapsedSectionHeight(); //Expander Arrow + Name + Section Add Button
+	height += 27.f; //Expander Arrow + Name + Section Add Button
+	UOdysseyAnimationLayerStack* layerStack = animation->GetLayerStack();
+	TArray<UOdysseyLayer*> layers = layerStack->GetRootLayers();
+	int layersHeight = 0.f; //Initial treeview padding
+	for (UOdysseyLayer* layer : layers)
+	{
+		layersHeight += GetLayerHeight(layer);
+	}
+	height += layersHeight;
+	return height;
+}
+
+EVisibility
+FOdysseyAnimationTrackEditorSection::GetLayersVisibility() const
+{
+	UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
+	if (!track)
+		return EVisibility::Collapsed;
+
+	return track->DisplayLayers ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 #undef LOCTEXT_NAMESPACE

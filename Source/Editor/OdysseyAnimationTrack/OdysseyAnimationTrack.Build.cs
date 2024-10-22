@@ -37,6 +37,7 @@ namespace UnrealBuildTool.Rules
 					"OdysseyLayerStack",
 					"OdysseyLayerStackEditor",
 					"OdysseyPainterEditor",
+					"OdysseyStyle",
 					"OdysseyViewportDrawingEditor",
 
 					"Core",

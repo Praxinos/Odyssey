@@ -16,7 +16,6 @@
 UOdysseyAnimationComponentSection::UOdysseyAnimationComponentSection(const FObjectInitializer& ObjInitializer)
 	: Super(ObjInitializer)
 {
-	SetBlendType(EMovieSceneBlendType::Absolute);
 }
 
 

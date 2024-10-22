@@ -4,8 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SequencerCoreFwd.h"
+#include "MVVM/Extensions/IOutlinerExtension.h"
 
 class UOdysseyLayer;
+class UOdysseyAnimationComponent;
+class UOdysseyAnimationComponentTrack;
+class ISequencerTreeViewRow;
 
 class SOdysseyAnimationComponentTrack
     : public SCompoundWidget
@@ -16,11 +21,18 @@ public:
     SLATE_END_ARGS()
 
 public:
-    void Construct(const FArguments& iArgs, UOdysseyAnimationComponent* iComponent);
+    void Construct(const FArguments& iArgs, UOdysseyAnimationComponent* iComponent, UOdysseyAnimationComponentTrack* iTrack, const FBuildColumnWidgetParams& iParams);
 
 private:
 	void RebuildWidgets();
 
+	void OnDisplayLayersCheckBoxStateChanged(ECheckBoxState iState);
+	ECheckBoxState GetDisplayLayersCheckBoxState() const;
+	EVisibility GetLayersVisibility() const;
+	FMargin GetDisplayLayersPadding() const;
+
 private:
 	UOdysseyAnimationComponent* mComponent;
+	UOdysseyAnimationComponentTrack* mTrack;
+	TSharedPtr<UE::Sequencer::ISequencerTreeViewRow> mRow;
 };

@@ -28,4 +28,8 @@ public:
 #if WITH_EDITORONLY_DATA
 	virtual FText GetDisplayName() const override;
 #endif
+
+public:
+	UPROPERTY()
+	bool DisplayLayers = true;
 };
