@@ -130,8 +130,8 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
 			referenceCells.Add(resultingCell.mReferenceCell);
 		}
 
-		layer->RemoveCell(originalCell);
 		TArray<UOdysseyAnimationCell*> newCells = layer->CopyCells(referenceCells, originalCell->IndexInLayer);
+		layer->RemoveCell(originalCell);
 
 		for (int i = 0; i < resultingCells.Num(); i++)
         {
