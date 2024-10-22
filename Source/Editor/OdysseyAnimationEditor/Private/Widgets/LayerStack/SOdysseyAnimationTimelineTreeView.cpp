@@ -89,4 +89,16 @@ SOdysseyAnimationTimelineTreeView::OnGenerateRow(UOdysseyLayer* iLayer, const TS
     return SNew(STableRow<UOdysseyLayer*>, iOwnerTable);;
 }
 
+
+
+FCursorReply
+SOdysseyAnimationTimelineTreeView::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const
+{
+	FCursorReply reply = SOdysseyLayerStackTreeView::OnCursorQuery( MyGeometry, CursorEvent );
+	if (reply.IsEventHandled())
+		return reply;
+
+	return FCursorReply::Cursor( EMouseCursor::Default );
+}
+
 #undef LOCTEXT_NAMESPACE
