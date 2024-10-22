@@ -138,6 +138,8 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
         .OnContextMenuOpening( this, &SOdysseyLayerStackTreeView::OnContextMenuOpening )
         .SelectionMode( ESelectionMode::Multi )
         .HeaderRow(headerRow)
+		.ExternalScrollbar(InArgs._ExternalScrollbar)
+		.OnTreeViewScrolled(InArgs._OnTreeViewScrolled)
     );
 
     //Menus

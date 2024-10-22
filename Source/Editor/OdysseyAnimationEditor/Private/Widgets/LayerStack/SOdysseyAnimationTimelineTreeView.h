@@ -19,6 +19,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineTreeView
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineTreeView)
 		: _HeaderHeight(25)
+		, _ExternalScrollbar(nullptr)
         {}
         SLATE_ARGUMENT( UOdysseyAnimationLayerStack*, LayerStack )
 		SLATE_ARGUMENT( UOdysseyAnimationPlayer*, Player )
@@ -28,6 +29,8 @@ public:
 		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
 		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
 		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
+		SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
+		SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )
     SLATE_END_ARGS()
 
 public:

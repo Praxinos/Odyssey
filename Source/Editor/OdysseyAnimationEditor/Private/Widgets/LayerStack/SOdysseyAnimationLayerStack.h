@@ -12,6 +12,7 @@
  */
 
 class SOdysseyLayerStackTreeView;
+class SOdysseyAnimationTimelineTreeView;
 class UOdysseyAnimationLayerStack;
 class FOdysseyAnimationTimelineTool;
 class FOdysseyAnimationEditorTimelinePosition;
@@ -54,7 +55,9 @@ private:
 
 private:
     TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
-    void OnTimelineScrollBarScrolled(float iOffset);
+    void OnTimelineScrollBarHScrolled(float iOffset);
+	void OnTreeViewScrolled(double iOffset);
+	void OnTimelineTreeViewScrolled(double iOffset);
     void RebuildWidgets();
 
     void OnLayerAdded(UOdysseyLayer* iLayer);
@@ -78,7 +81,8 @@ private:
 	SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
 
     TSharedPtr<SOdysseyLayerStackTreeView> mTreeView;
-	TSharedPtr<SScrollBar> mTimelineScrollBar;
-    TSharedPtr<class SOdysseyAnimationTimelineControl> mTimelineControl;
+	TSharedPtr<SOdysseyAnimationTimelineTreeView> mTimelineTreeView;
+	TSharedPtr<SScrollBar> mTimelineScrollBarH;
+	TSharedPtr<SScrollBar> mTimelineScrollBarV;
 	TSharedPtr<SSplitter> mSplitter;
 };

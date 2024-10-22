@@ -28,6 +28,8 @@ SOdysseyAnimationLayerStackTreeView::Construct(const FArguments& InArgs)
         .OnGenerateRow(InArgs._OnGenerateRow)
 		.Columns(InArgs._Columns)
 		.HeaderHeight(InArgs._HeaderHeight)
+		.ExternalScrollbar(InArgs._ExternalScrollbar)
+		.OnTreeViewScrolled(InArgs._OnTreeViewScrolled)
 	);
 }
 

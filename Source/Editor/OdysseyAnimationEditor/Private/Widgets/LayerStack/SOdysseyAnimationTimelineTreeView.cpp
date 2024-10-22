@@ -52,6 +52,8 @@ SOdysseyAnimationTimelineTreeView::Construct(const FArguments& InArgs)
 			.TimelineCellSelection(mTimelineCellSelection)
 			.OnGenerateRow( this, &SOdysseyAnimationTimelineTreeView::OnGenerateRow )
 			.Columns(columns)
+			.ExternalScrollbar(InArgs._ExternalScrollbar)
+			.OnTreeViewScrolled(InArgs._OnTreeViewScrolled)
 			//.SelectionMode( ESelectionMode::None )
 		]
 	];

@@ -48,7 +48,8 @@ SOdysseyAnimationLayerStack::SOdysseyAnimationLayerStack()
 	, mScrollbarVisibility(EVisibility::Visible)
 	, mPlaybackFramesPerSecond(24.0f)
     , mTreeView()
-	, mTimelineScrollBar(nullptr)
+	, mTimelineScrollBarH(nullptr)
+	, mTimelineScrollBarV(nullptr)
 {
 }
 
@@ -80,6 +81,12 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
 
 	UOdysseyAnimationLayerStack* layerStack = animation->GetLayerStack();
     
+	mTimelineScrollBarV = SNew(SScrollBar)
+		.Visibility(mScrollbarVisibility)
+		.Orientation(Orient_Vertical);
+
+	TSharedPtr<SScrollBar> dummyScrollBar = SNew(SScrollBar);
+
     TSharedPtr<SWidget> widget =
     SNew(SVerticalBox)
     + SVerticalBox::Slot()
@@ -170,28 +177,51 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
 			.TimelineCellSelection(mTimelineCellSelection.Get())
 			.OnGenerateRow(this, &SOdysseyAnimationLayerStack::OnGenerateRow)
 			.HeaderHeight(HEADER_HEIGHT)
+			.ExternalScrollbar(mTimelineScrollBarV)
+			.OnTreeViewScrolled(this, &SOdysseyAnimationLayerStack::OnTreeViewScrolled)
 		]
 		+ SSplitter::Slot()
 		[
-			SNew(SOdysseyAnimationTimelineTreeView)
-			.LayerStack(layerStack)
-			.Player(mPlayer.Get())
-			.TimelineCellSelection(mTimelineCellSelection.Get())
-			.TimelinePosition(mTimelinePosition.Get())
-			.HeaderHeight(HEADER_HEIGHT)
-			.OnActivateOutOfPegs(mOnActivateOutOfPegs)
-			.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
-			.OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked)
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot()
+			[
+				SAssignNew(mTimelineTreeView, SOdysseyAnimationTimelineTreeView)
+				.LayerStack(layerStack)
+				.Player(mPlayer.Get())
+				.TimelineCellSelection(mTimelineCellSelection.Get())
+				.TimelinePosition(mTimelinePosition.Get())
+				.HeaderHeight(HEADER_HEIGHT)
+				.OnActivateOutOfPegs(mOnActivateOutOfPegs)
+				.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
+				.OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked)
+				.ExternalScrollbar(dummyScrollBar)
+				.OnTreeViewScrolled(this, &SOdysseyAnimationLayerStack::OnTimelineTreeViewScrolled)
+			]
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			[
+				mTimelineScrollBarV.ToSharedRef()
+			]
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			[
+				SNew(SBox)
+				.Visibility(EVisibility::Collapsed)
+				[
+					dummyScrollBar.ToSharedRef() //a dummy scrollbar that is never shown
+					//is only here to avoid to have a second automatic scrollbar shown in the treeview
+				]
+			]
 		]
     ]
-    +SVerticalBox::Slot()
-    .AutoHeight()
-    [
-        SAssignNew(mTimelineScrollBar, SScrollBar)
+	+SVerticalBox::Slot()
+	.AutoHeight()
+	[
+		SAssignNew(mTimelineScrollBarH, SScrollBar)
 		.Visibility(mScrollbarVisibility)
-        .Orientation( Orient_Horizontal )
-        .OnUserScrolled_Raw(this, &SOdysseyAnimationLayerStack::OnTimelineScrollBarScrolled)
-    ];
+		.Orientation( Orient_Horizontal )
+		.OnUserScrolled_Raw(this, &SOdysseyAnimationLayerStack::OnTimelineScrollBarHScrolled)
+	];
 
     this->ChildSlot.AttachWidget(widget.ToSharedRef());
 }
@@ -241,7 +271,7 @@ SOdysseyAnimationLayerStack::OnGenerateRow(UOdysseyLayer* iLayer, const TSharedR
 }
 
 void
-SOdysseyAnimationLayerStack::OnTimelineScrollBarScrolled(float iOffset)
+SOdysseyAnimationLayerStack::OnTimelineScrollBarHScrolled(float iOffset)
 {
 	UOdysseyAnimation* animation = mAnimation.Get();
 	if (!animation)
@@ -251,7 +281,7 @@ SOdysseyAnimationLayerStack::OnTimelineScrollBarScrolled(float iOffset)
 
     int lastFrameIndex = animation->GetFrameRange().GetUpperBoundValue();
     float frameWidth = timelinePosition->GetFrameSize();
-    float columnWidth = mTimelineControl->GetPaintSpaceGeometry().GetLocalSize().X;
+    float columnWidth = mTimelineTreeView->GetPaintSpaceGeometry().GetLocalSize().X;
     float contentWidth = (lastFrameIndex + 1) * frameWidth;
     float adjustedContentWidth = FMath::Max(contentWidth, columnWidth) + columnWidth - frameWidth;
     float visiblePercent = columnWidth / adjustedContentWidth;
@@ -259,6 +289,18 @@ SOdysseyAnimationLayerStack::OnTimelineScrollBarScrolled(float iOffset)
     float offsetPercent = (scrollbarOffset / (1.f - visiblePercent));
     float offsetAmount = FMath::Max(lastFrameIndex, columnWidth / frameWidth - 1.f);
     timelinePosition->SetOffset( offsetPercent * offsetAmount );
+}
+
+void
+SOdysseyAnimationLayerStack::OnTreeViewScrolled(double iOffset)
+{
+	mTimelineTreeView->GetTreeView()->ScrollTo(iOffset);
+}
+
+void
+SOdysseyAnimationLayerStack::OnTimelineTreeViewScrolled(double iOffset)
+{
+	mTreeView->ScrollTo(iOffset);
 }
 
 TSharedPtr<SOdysseyLayerStackTreeView>
@@ -270,14 +312,14 @@ SOdysseyAnimationLayerStack::GetTreeView() const
 void
 SOdysseyAnimationLayerStack::Tick( const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime )
 {
-    if (!mTreeView)
+    if (!mTimelineTreeView)
         return;
         
 	UOdysseyAnimation* animation = mAnimation.Get();
 	if (!animation)
 		return;
 
-    TSharedPtr<SHeaderRow> headerRow = mTreeView->GetHeaderRow();
+    TSharedPtr<SHeaderRow> headerRow = mTimelineTreeView->GetTreeView()->GetHeaderRow();
     if (!headerRow)
         return;
 
@@ -294,7 +336,7 @@ SOdysseyAnimationLayerStack::Tick( const FGeometry& AllottedGeometry, const doub
         float frameWidth = timelinePosition->GetFrameSize();
         float offset = timelinePosition->GetOffset() * frameWidth;
 
-        float columnWidth = mTimelineControl->GetPaintSpaceGeometry().GetLocalSize().X;
+        float columnWidth = mTimelineTreeView->GetPaintSpaceGeometry().GetLocalSize().X;
         float contentWidth = (lastFrameIndex + 1) * frameWidth;
         float adjustedContentWidth = FMath::Max(contentWidth, columnWidth) + columnWidth - frameWidth;
 
@@ -303,7 +345,7 @@ SOdysseyAnimationLayerStack::Tick( const FGeometry& AllottedGeometry, const doub
 
         float offsetPercent = offset / adjustedContentWidth;
         float scrollbarOffset = FMath::Clamp(offsetPercent, 0.f, 1.f - visiblePercent);
-        mTimelineScrollBar->SetState(scrollbarOffset, visiblePercent);
+        mTimelineScrollBarH->SetState(scrollbarOffset, visiblePercent);
 
         break;
     }

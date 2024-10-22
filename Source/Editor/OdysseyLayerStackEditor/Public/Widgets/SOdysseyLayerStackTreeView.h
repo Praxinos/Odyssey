@@ -22,11 +22,14 @@ class ODYSSEYLAYERSTACKEDITOR_API SOdysseyLayerStackTreeView
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyLayerStackTreeView)
+		: _ExternalScrollbar(nullptr)
         {}
         SLATE_ARGUMENT( UOdysseyLayerStack*, LayerStack )
         SLATE_ARGUMENT( TOptional<TArray<SHeaderRow::FColumn::FArguments>>, Columns )
 		SLATE_ARGUMENT( int, HeaderHeight )
         SLATE_EVENT( FOnGenerateRow, OnGenerateRow )
+		SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
+		SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )
     SLATE_END_ARGS()
 
 public:
@@ -37,6 +40,8 @@ public:
     void Construct(const FArguments& InArgs);
     
 public:
+	using STreeView<UOdysseyLayer*>::ScrollTo;
+
     UOdysseyLayerStack* GetLayerStack() const;
     void SetIsRenamePending(bool iValue);
     TSharedPtr<FOdysseyLayerStackDragDropOperation> CreateDragDropOperation() const;
