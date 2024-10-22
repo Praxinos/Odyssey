@@ -32,13 +32,17 @@ public:
 
 private:
 	static float GetLayerHeight(UOdysseyLayer* iLayer);
-	void OnSectionChanged();
 	void RebuildSectionWidget();
 
 	UOdysseyAnimationComponent* GetComponent() const;
 	EVisibility GetLayersVisibility() const;
+	
+	void OnAnimationChanged();
+	void OnPlayerChanged();
+	void OnModeChanged();
 
 private:
+	UOdysseyAnimationComponent* mComponent; //used to remove callbacks
 	TSharedPtr<SBox> mSectionWidget;
 	UOdysseyAnimationComponentSection* mSection;
 	TSharedRef<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;

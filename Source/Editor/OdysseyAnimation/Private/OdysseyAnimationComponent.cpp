@@ -44,6 +44,24 @@ UOdysseyAnimationComponent::GetActivePlayer() const
 	return nullptr;
 }
 
+FSimpleMulticastDelegate&
+UOdysseyAnimationComponent::OnAnimationChanged()
+{
+	return mOnAnimationChanged;
+}
+
+FSimpleMulticastDelegate&
+UOdysseyAnimationComponent::OnPlayerChanged()
+{
+	return mOnPlayerChanged;
+}
+
+FSimpleMulticastDelegate&
+UOdysseyAnimationComponent::OnModeChanged()
+{
+	return mOnModeChanged;
+}
+
 void
 UOdysseyAnimationComponent::Play()
 {
@@ -137,48 +155,52 @@ void
 UOdysseyAnimationComponent::ModeChanged()
 {
 	RefreshMaterialTexture();
+	mOnModeChanged.Broadcast();
 }
 
 void
 UOdysseyAnimationComponent::AnimationChanged()
 {
-	if (Mode != EOdysseyAnimationComponentMode::Animation)
-		return;
-
-	FOdysseyObjectEditorUtils::SetPropertyValue(DefaultPlayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Animation), Animation);
-
-	if (Animation)
+	if (Mode == EOdysseyAnimationComponentMode::Animation)
 	{
-		float scaleW = (float)Animation->GetWidth() / (float)Animation->GetHeight();
-		SetRelativeScale3D(FVector(scaleW, 1, 1));
-		MarkRenderStateDirty();
+		FOdysseyObjectEditorUtils::SetPropertyValue(DefaultPlayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Animation), Animation);
+		if (Animation)
+		{
+			float scaleW = (float)Animation->GetWidth() / (float)Animation->GetHeight();
+			SetRelativeScale3D(FVector(scaleW, 1, 1));
+			MarkRenderStateDirty();
+		}
 	}
+
+	mOnAnimationChanged.Broadcast();
 }
 
 void
 UOdysseyAnimationComponent::PlayerChanged()
 {
-	if (Mode != EOdysseyAnimationComponentMode::Player)
-		return;
-	
-	if (PreviousPlayer)
-		PreviousPlayer->OnTextureChanged().RemoveAll(this);
-	 
-	PreviousPlayer = Player;
-
-	if (Player)
+	if (Mode == EOdysseyAnimationComponentMode::Player)
 	{
-		Player->OnTextureChanged().AddUObject(this, &UOdysseyAnimationComponent::OnPlayerTextureChanged);
+		if (PreviousPlayer)
+			PreviousPlayer->OnTextureChanged().RemoveAll(this);
+		
+		PreviousPlayer = Player;
 
-		UOdysseyAnimation* animation = Player->Animation;
-		if (animation)
+		if (Player)
 		{
-			float scaleW = (float)animation->GetWidth() / (float)animation->GetHeight();
-			SetRelativeScale3D(FVector(scaleW, 1, 1));
+			Player->OnTextureChanged().AddUObject(this, &UOdysseyAnimationComponent::OnPlayerTextureChanged);
+
+			UOdysseyAnimation* animation = Player->Animation;
+			if (animation)
+			{
+				float scaleW = (float)animation->GetWidth() / (float)animation->GetHeight();
+				SetRelativeScale3D(FVector(scaleW, 1, 1));
+			}
 		}
+
+		RefreshMaterialTexture();
 	}
 
-	RefreshMaterialTexture();
+	mOnPlayerChanged.Broadcast();
 }
 
 void

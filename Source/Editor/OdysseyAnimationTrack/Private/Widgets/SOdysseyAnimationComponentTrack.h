@@ -31,6 +31,10 @@ private:
 	EVisibility GetLayersVisibility() const;
 	FMargin GetDisplayLayersPadding() const;
 
+	void OnAnimationChanged();
+	void OnPlayerChanged();
+	void OnModeChanged();
+
 private:
 	UOdysseyAnimationComponent* mComponent;
 	UOdysseyAnimationComponentTrack* mTrack;

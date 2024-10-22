@@ -18,6 +18,10 @@ SOdysseyAnimationComponentTrack::Construct(const FArguments& iArgs, UOdysseyAnim
 	mTrack = iTrack;
 	mRow = iParams.TreeViewRow;
     RebuildWidgets();
+
+	mComponent->OnAnimationChanged().AddSP(this, &SOdysseyAnimationComponentTrack::OnAnimationChanged);
+	mComponent->OnPlayerChanged().AddSP(this, &SOdysseyAnimationComponentTrack::OnPlayerChanged);
+	mComponent->OnModeChanged().AddSP(this, &SOdysseyAnimationComponentTrack::OnModeChanged);
 }
 
 void
@@ -94,6 +98,24 @@ SOdysseyAnimationComponentTrack::GetDisplayLayersPadding() const
 	const int32 NestingDepth = FMath::Max(0, mRow->GetIndentLevel());
 	const float Indent = 10.f;
 	return FMargin( NestingDepth * Indent, 0.f, 2.f, 0.f );
+}
+
+void
+SOdysseyAnimationComponentTrack::OnAnimationChanged()
+{
+	RebuildWidgets();
+}
+
+void
+SOdysseyAnimationComponentTrack::OnPlayerChanged()
+{
+	RebuildWidgets();
+}
+
+void
+SOdysseyAnimationComponentTrack::OnModeChanged()
+{
+	RebuildWidgets();
 }
 
 #undef LOCTEXT_NAMESPACE

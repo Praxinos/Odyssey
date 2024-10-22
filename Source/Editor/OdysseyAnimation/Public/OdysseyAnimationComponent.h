@@ -33,6 +33,10 @@ public:
 	UOdysseyAnimation* GetActiveAnimation() const;
 	UOdysseyAnimationPlayer* GetActivePlayer() const;
 
+	FSimpleMulticastDelegate& OnAnimationChanged();
+	FSimpleMulticastDelegate& OnPlayerChanged();
+	FSimpleMulticastDelegate& OnModeChanged();
+
 public:
 	virtual void PostInitProperties() override;
 	virtual void PostLoad() override;
@@ -71,4 +75,8 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UOdysseyAnimationPlayer> PreviousPlayer;
+
+	FSimpleMulticastDelegate mOnAnimationChanged;
+	FSimpleMulticastDelegate mOnPlayerChanged;
+	FSimpleMulticastDelegate mOnModeChanged;
 };

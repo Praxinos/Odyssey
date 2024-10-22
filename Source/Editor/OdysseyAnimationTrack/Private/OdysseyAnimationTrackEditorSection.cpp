@@ -18,6 +18,12 @@
 
 FOdysseyAnimationTrackEditorSection::~FOdysseyAnimationTrackEditorSection()
 {
+	if (mComponent)
+	{	
+		mComponent->OnAnimationChanged().RemoveAll(this);
+		mComponent->OnPlayerChanged().RemoveAll(this);
+		mComponent->OnModeChanged().RemoveAll(this);
+	}
 }
 
 FOdysseyAnimationTrackEditorSection::FOdysseyAnimationTrackEditorSection(TSharedPtr<ISequencer> InSequencer, UOdysseyAnimationComponentSection* InSection)
@@ -28,6 +34,14 @@ FOdysseyAnimationTrackEditorSection::FOdysseyAnimationTrackEditorSection(TShared
 	mTimelinePosition->SetPadding(0.f);
 	mTimelinePosition->HasMinZoom(false);
 	mTimelinePosition->HasMaxZoom(false);
+
+	mComponent = GetComponent();
+	if (mComponent)
+	{
+		mComponent->OnAnimationChanged().AddRaw(this, &FOdysseyAnimationTrackEditorSection::OnAnimationChanged);
+		mComponent->OnPlayerChanged().AddRaw(this, &FOdysseyAnimationTrackEditorSection::OnPlayerChanged);
+		mComponent->OnModeChanged().AddRaw(this, &FOdysseyAnimationTrackEditorSection::OnModeChanged);
+	}
 }
 
 float
@@ -281,12 +295,6 @@ FOdysseyAnimationTrackEditorSection::Tick( const FGeometry& AllottedGeometry, co
 	mTimelinePosition->SetOffset(offset);
 }
 
-void
-FOdysseyAnimationTrackEditorSection::OnSectionChanged()
-{
-	RebuildSectionWidget();
-}
-
 UOdysseyAnimationComponent*
 FOdysseyAnimationTrackEditorSection::GetComponent() const
 {
@@ -384,6 +392,24 @@ FOdysseyAnimationTrackEditorSection::GetLayersVisibility() const
 		return EVisibility::Collapsed;
 
 	return track->DisplayLayers ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+void
+FOdysseyAnimationTrackEditorSection::OnAnimationChanged()
+{
+	RebuildSectionWidget();
+}
+
+void
+FOdysseyAnimationTrackEditorSection::OnPlayerChanged()
+{
+	RebuildSectionWidget();
+}
+
+void
+FOdysseyAnimationTrackEditorSection::OnModeChanged()
+{
+	RebuildSectionWidget();
 }
 
 #undef LOCTEXT_NAMESPACE
