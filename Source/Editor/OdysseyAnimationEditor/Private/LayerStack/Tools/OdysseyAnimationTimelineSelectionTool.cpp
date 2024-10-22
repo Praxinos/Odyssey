@@ -192,7 +192,7 @@ FOdysseyAnimationTimelineSelectionTool::OnDefaultSelectionMouseButtonUp(const FM
 {
 	if (!mIsSelecting && !mIsDragDetected)
 	{
-		mTimelineParams->SetSelectedCells({});
+		mTimelineCellSelection->SetSelectedCells({});
 		return FReply::Handled();
 	}
 
