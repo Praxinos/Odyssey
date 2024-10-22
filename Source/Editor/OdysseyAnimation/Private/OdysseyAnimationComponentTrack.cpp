@@ -60,5 +60,17 @@ UOdysseyAnimationComponentTrack::AddNewSection(FFrameNumber KeyTime)
 	return NewSection;
 }
 
+EMovieSceneTrackEasingSupportFlags
+UOdysseyAnimationComponentTrack::SupportsEasing(FMovieSceneSupportsEasingParams& Params) const
+{
+	return EMovieSceneTrackEasingSupportFlags::None;
+}
+
+bool
+UOdysseyAnimationComponentTrack::SupportsMultipleRows() const
+{
+	return false;
+}
+
 #undef LOCTEXT_NAMESPACE
 

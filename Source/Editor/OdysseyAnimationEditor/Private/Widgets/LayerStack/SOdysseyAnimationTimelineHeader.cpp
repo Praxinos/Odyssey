@@ -47,7 +47,7 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 	const float height = AllottedGeometry.GetLocalSize().Y;  
 	const float width = AllottedGeometry.GetLocalSize().X;
 	const float frameSize = mTimelinePosition->GetFrameSize();
-	float padding = FOdysseyStyle::GetFloat(TEXT("Animation.Timeline.Padding")) / frameSize; //fixed padding in pixels to display layer pre behaviour
+	float padding = mTimelinePosition->GetPadding() / frameSize; //fixed padding in pixels to display layer pre behaviour
 	float offset = mTimelinePosition->GetOffset();
 	const float frameNumberMinSize = 30.f;
 	const int32 frameNumberFrequency = FMath::Max(1, FGenericPlatformMath::CeilToInt(frameNumberMinSize / frameSize));

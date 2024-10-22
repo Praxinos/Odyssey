@@ -22,6 +22,11 @@ public:
     virtual FText   GetSectionToolTip() const override;
 	virtual TSharedRef<SWidget> GenerateSectionWidget() override;
 
+	virtual void Tick( const FGeometry& AllottedGeometry, const FGeometry& ClippedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
+
+private:
+	float GetLayerHeight(UOdysseyLayer* iLayer) const;
+
 private:
 	UOdysseyAnimationComponentSection* mSection;
 	TSharedRef<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;

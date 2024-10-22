@@ -4,6 +4,7 @@
 #include "OdysseyAnimationComponentTrackEditorSection.h"
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineTreeView.h"
+#include "ISequencer.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -15,6 +16,32 @@ FOdysseyAnimationComponentTrackEditorSection::FOdysseyAnimationComponentTrackEdi
 	, mSection(InSection)
 	, mTimelinePosition(MakeShared<FOdysseyAnimationEditorTimelinePosition>())
 {
+	mTimelinePosition->SetPadding(0.f);
+	mTimelinePosition->HasMinZoom(false);
+	mTimelinePosition->HasMaxZoom(false);
+}
+
+float
+FOdysseyAnimationComponentTrackEditorSection::GetLayerHeight(UOdysseyLayer* iLayer) const
+{
+	float height = 0.f;
+
+	TArray<FName> rows = iLayer->GetRows();
+	for (const FName& row : rows)
+	{
+		height += iLayer->GetRowHeight(row).Get();
+		height += 1.f; //Padding between each line
+	}
+
+	if (iLayer->DisplayChildren)
+	{
+		for (UOdysseyLayer* child : iLayer->Children)
+		{
+			height += GetLayerHeight(child);
+		}	
+	}
+
+	return height;
 }
 
 float
@@ -30,16 +57,11 @@ FOdysseyAnimationComponentTrackEditorSection::GetSectionHeight( const UE::Sequen
 		return TSubSectionMixin::GetSectionHeight(ViewDensity);
 		
 	UOdysseyAnimationLayerStack* layerStack = animation->GetLayerStack();
-	TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
+	TArray<UOdysseyLayer*> layers = layerStack->GetRootLayers();
 	int layersHeight = 2.f; //Initial treeview padding
 	for (UOdysseyLayer* layer : layers)
 	{
-		TArray<FName> rows = layer->GetRows();
-		for (const FName& row : rows)
-		{
-			layersHeight += layer->GetRowHeight(row).Get();
-			layersHeight += 1.f; //Padding between each line
-		}
+		layersHeight += GetLayerHeight(layer);
 	}
 
 	return 25.f //Add Button and Timeline tools row
@@ -109,4 +131,31 @@ FOdysseyAnimationComponentTrackEditorSection::GenerateSectionWidget()
 		];
 }
 
+void
+FOdysseyAnimationComponentTrackEditorSection::Tick( const FGeometry& AllottedGeometry, const FGeometry& ClippedGeometry, const double InCurrentTime, const float InDeltaTime )
+{
+	UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
+	UMovieScene* movieScene = track->GetTypedOuter<UMovieScene>();
+
+	UOdysseyAnimationComponent* component = track->Component;
+	if (!component)
+		return;
+
+	UOdysseyAnimation* animation = component->GetActiveAnimation();
+	if (!animation)
+		return;
+
+	//FFrameNumber sequencerFramesPerSecond = movieScene->GetTickResolution().AsFrameNumber(1.0f);
+	float animationFramesPerSecond = animation->GetFramesPerSecond();
+
+	FMovieSceneFrameRange sectionRange = mSection->SectionRange;
+	FFrameNumber sectionFrameLength = sectionRange.Value.GetUpperBoundValue() - sectionRange.Value.GetLowerBoundValue();
+	double sectionSecondLength = movieScene->GetTickResolution().AsSeconds(sectionFrameLength);
+
+	double animationSecondInPixels = (animationFramesPerSecond * mTimelinePosition->GetBaseFrameSize());
+	double sequencerSecondInPixels = AllottedGeometry.Size.X / sectionSecondLength;
+
+	double zoom = sequencerSecondInPixels / animationSecondInPixels;
+	mTimelinePosition->SetZoom(zoom);
+}
 #undef LOCTEXT_NAMESPACE

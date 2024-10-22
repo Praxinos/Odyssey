@@ -27,6 +27,7 @@ SOdysseyAnimationTimelineTreeView::Construct(const FArguments& InArgs)
 		.DefaultLabel(FText())
 		.VAlignCell(VAlign_Fill)
 		.HAlignCell(HAlign_Fill)
+		.HeaderContentPadding(FMargin(0.f))
 		[
 			SNew(SBox)
 			.HeightOverride(InArgs._HeaderHeight)

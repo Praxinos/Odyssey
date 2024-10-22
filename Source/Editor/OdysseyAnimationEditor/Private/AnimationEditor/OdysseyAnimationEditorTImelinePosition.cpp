@@ -11,6 +11,9 @@ FOdysseyAnimationEditorTimelinePosition::FOdysseyAnimationEditorTimelinePosition
 	, mMaxZoom(1.0f)
 	, mZoomStep(0.08f)
 	, mCanZoom(true)
+	, mPadding(FOdysseyStyle::GetFloat(TEXT("Animation.Timeline.Padding")))
+	, mHasMinZoom(true)
+	, mHasMaxZoom(true)
 {
 }
 
@@ -59,7 +62,14 @@ FOdysseyAnimationEditorTimelinePosition::ZoomOut()
 void 
 FOdysseyAnimationEditorTimelinePosition::SetZoom(float iZoom)
 {
-    mZoom = FMath::Clamp(iZoom, mMinZoom, mMaxZoom);
+	float zoom = iZoom;
+	if (mHasMinZoom)
+    	zoom = FMath::Max(zoom, mMinZoom);
+
+	if (mHasMaxZoom)
+		zoom = FMath::Min(zoom, mMaxZoom);
+
+	mZoom = zoom;
 }
 
 void 
@@ -121,15 +131,49 @@ FOdysseyAnimationEditorTimelinePosition::GetOffset() const
 float
 FOdysseyAnimationEditorTimelinePosition::MousePositionToFrame(float iX) const
 {
-	float padding = FOdysseyStyle::GetFloat(TEXT("Animation.Timeline.Padding"));
-    float frame = (iX - padding) / GetFrameSize() + mOffset;
+    float frame = (iX - mPadding) / GetFrameSize() + mOffset;
 	return frame;
 }
 
 float
 FOdysseyAnimationEditorTimelinePosition::FrameToMousePosition(float iFrame) const
 {
-	float padding = FOdysseyStyle::GetFloat(TEXT("Animation.Timeline.Padding"));
-	float pos = (iFrame - mOffset) * GetFrameSize() + padding;
+	float pos = (iFrame - mOffset) * GetFrameSize() + mPadding;
 	return pos;
+}
+
+void
+FOdysseyAnimationEditorTimelinePosition::SetPadding(float iPadding)
+{
+	mPadding = iPadding;
+}
+
+float
+FOdysseyAnimationEditorTimelinePosition::GetPadding() const
+{
+	return mPadding;
+}
+
+bool
+FOdysseyAnimationEditorTimelinePosition::HasMinZoom() const
+{
+	return mHasMinZoom;
+}
+
+void
+FOdysseyAnimationEditorTimelinePosition::HasMinZoom(bool iHasMinZoom)
+{
+	mHasMinZoom = iHasMinZoom;
+}
+
+bool
+FOdysseyAnimationEditorTimelinePosition::HasMaxZoom() const
+{
+	return mHasMaxZoom;
+}
+
+void
+FOdysseyAnimationEditorTimelinePosition::HasMaxZoom(bool iHasMaxZoom)
+{
+	mHasMaxZoom = iHasMaxZoom;
 }

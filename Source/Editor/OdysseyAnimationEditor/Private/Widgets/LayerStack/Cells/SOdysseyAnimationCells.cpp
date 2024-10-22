@@ -52,7 +52,7 @@ SOdysseyAnimationCells::Construct(
     mCellBreakIndicatorBrush = FOdysseyStyle::GetBrush("Animation.CellBreakIndicator");
     FSlateColor preBehaviourColor( FOdysseyStyle::GetColor( "Animation.Layer.PreBehaviourColor" ) );
 	FSlateColor postBehaviourColor( FOdysseyStyle::GetColor( "Animation.Layer.PostBehaviourColor" ) );
-	float preBehaviourPadding = FOdysseyStyle::GetFloat(TEXT("Animation.Timeline.Padding"));
+	float preBehaviourPadding = mTimelinePosition->GetPadding();
     mAnimationLayer = iAnimationLayer;
 
     mOnCreateCellWidget = InArgs._OnCreateCellWidget;
