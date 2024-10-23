@@ -176,7 +176,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
 
         //mSelectionChanged.Broadcast(iScene);
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE ); // update invalidated objects
+        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated objects
     }
 
     // redraw
@@ -281,7 +282,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
             }
         }
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE ); // update invalidated objects
+        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated objects
     }
 
     // redraw

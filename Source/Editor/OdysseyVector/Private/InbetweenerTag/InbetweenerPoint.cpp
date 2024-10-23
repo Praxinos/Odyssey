@@ -79,7 +79,7 @@ FInbetweenerPoint::IsNeeded()
 }
 
 void
-FInbetweenerPoint::SetSourcePosition( double iX, double iY )
+FInbetweenerPoint::SetSourcePosition( double iX, double iY, bool iInvalidate )
 {
     FInbetweenerBreakdown* prevBreakdown = mGrid->GetBreakdown()->GetPrevBreakdown();
     uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEGRID
@@ -101,13 +101,14 @@ FInbetweenerPoint::SetSourcePosition( double iX, double iY )
         invalidationFlags |= FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID;
     }
 */
-    mGrid->GetBreakdown()->GetInbetweenerTag()->Invalidate( invalidationFlags );
+    if( iInvalidate )
+        mGrid->GetBreakdown()->GetInbetweenerTag()->Invalidate( invalidationFlags );
 }
 
 void
-FInbetweenerPoint::SetTargetPosition( double iX, double iY )
+FInbetweenerPoint::SetTargetPosition( double iX, double iY, bool iInvalidate )
 {
-    FInbetweenerBreakdown* nextBreakdown = mGrid->GetBreakdown()->GetNextBreakdown();
+    //FInbetweenerBreakdown* nextBreakdown = mGrid->GetBreakdown()->GetNextBreakdown();
     uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID
                              | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
                              | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING;
@@ -115,7 +116,7 @@ FInbetweenerPoint::SetTargetPosition( double iX, double iY )
 
     mTargetPosition.x = iX;
     mTargetPosition.y = iY;
-
+/*
     if( nextBreakdown )
     {
         nextBreakdown->GetGrid()->GetPointBuffer()[pointIndex].mSourcePosition.x = mTargetPosition.x;
@@ -123,8 +124,9 @@ FInbetweenerPoint::SetTargetPosition( double iX, double iY )
 
         invalidationFlags |= FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEGRID;
     }
-
-    mGrid->GetBreakdown()->GetInbetweenerTag()->Invalidate( invalidationFlags );
+*/
+    if( iInvalidate )
+        mGrid->GetBreakdown()->GetInbetweenerTag()->Invalidate( invalidationFlags );
 }
 
 void
@@ -141,16 +143,16 @@ FInbetweenerPoint::SetDeformPosition( double iX, double iY )
     mDeformPosition.y = iY;
 }
 
-const ::ULIS::FVec2D&
+::ULIS::FVec2D
 FInbetweenerPoint::GetSourcePosition()
 {
-    return mSourcePosition;
+    return GetPosition( eInbetweenerPointPositionType::SourcePosition );
 }
 
-const ::ULIS::FVec2D&
+::ULIS::FVec2D
 FInbetweenerPoint::GetTargetPosition()
 {
-    return mTargetPosition;
+    return GetPosition( eInbetweenerPointPositionType::TargetPosition );
 }
 
 FInbetweenerGrid*
@@ -216,6 +218,16 @@ FInbetweenerPoint::GetPosition( eInbetweenerPointPositionType iPositionType )
     switch( iPositionType )
     {
         case eInbetweenerPointPositionType::SourcePosition : 
+        {
+            FInbetweenerBreakdown* prevBreakdown = mGrid->GetBreakdown()->GetPrevBreakdown();
+
+            if( prevBreakdown )
+            {
+                uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
+
+                return prevBreakdown->GetGrid()->GetPointBuffer()[pointIndex].GetPosition( eInbetweenerPointPositionType::TargetPosition );
+            }
+        }
         return mSourcePosition;
 
         case eInbetweenerPointPositionType::InterpPosition : 
@@ -224,7 +236,7 @@ FInbetweenerPoint::GetPosition( eInbetweenerPointPositionType iPositionType )
         case eInbetweenerPointPositionType::DeformPosition : 
         return mDeformPosition;
 
-        case eInbetweenerPointPositionType::TargetPosition : 
+        case eInbetweenerPointPositionType::TargetPosition :
         return mTargetPosition;
 
         default:
@@ -237,12 +249,13 @@ FInbetweenerPoint::GetPosition( eInbetweenerPointPositionType iPositionType )
 void
 FInbetweenerPoint::SetPosition( eInbetweenerPointPositionType iPositionType
                               , double iX
-                              , double iY )
+                              , double iY
+                              , bool iInvalidate )
 {
     switch( iPositionType )
     {
         case eInbetweenerPointPositionType::SourcePosition : 
-            SetSourcePosition( iX, iY );
+            SetSourcePosition( iX, iY, iInvalidate );
         break;
 
         case eInbetweenerPointPositionType::InterpPosition : 
@@ -254,7 +267,7 @@ FInbetweenerPoint::SetPosition( eInbetweenerPointPositionType iPositionType
         break;
 
         case eInbetweenerPointPositionType::TargetPosition : 
-            SetTargetPosition( iX, iY );
+            SetTargetPosition( iX, iY, iInvalidate );
         break;
 
         default:

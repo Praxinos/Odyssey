@@ -279,8 +279,8 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                             }
                         }
 
-                        breakdown->GetGrid()->SetGeometry( sourcePosition, eInbetweenerPointPositionType::SourcePosition );
-                        breakdown->GetGrid()->SetGeometry( targetPosition, eInbetweenerPointPositionType::TargetPosition );
+                        breakdown->GetGrid()->SetGeometry( sourcePosition, eInbetweenerPointPositionType::SourcePosition, true );
+                        breakdown->GetGrid()->SetGeometry( targetPosition, eInbetweenerPointPositionType::TargetPosition, true );
                     }
                 }
                 break;

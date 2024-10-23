@@ -124,7 +124,7 @@ FInbetweenerGridARAP::RegularizeQuads( eInbetweenerPointPositionType iPositionTy
                 ::ULIS::FVec2D deformPosition = point.GetPosition( eInbetweenerPointPositionType::DeformPosition );
 
 
-                point.SetPosition( iPositionType, deformPosition.x, deformPosition.y );
+                point.SetPosition( iPositionType, deformPosition.x, deformPosition.y, true );
 
                 if ( disp > maxDisp )
                 {
@@ -207,7 +207,8 @@ FInbetweenerGridARAP::Regularize( eInbetweenerPointPositionType iSourcePositionT
 
             point.SetPosition( eInbetweenerPointPositionType::DeformPosition
                              , interpPosition.x
-                             , interpPosition.y );
+                             , interpPosition.y
+                             , true );
         }
     }
 

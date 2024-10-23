@@ -485,11 +485,13 @@ FOdysseyVectorHUD::DrawBreakdown( BLContext* iBLContext
         for( uint32 i = 1; i < iBreakdown->GetDrawingCount() - 1; i++ )
         {
             FChartDivision* inbetween = &iBreakdown->GetChart()->GetDivisionBuffer()[i];
+            BLRgba32 style = BLRgba32( color.R
+                                     , color.G
+                                     , color.B
+                                     , 127 + ( color.A * 0.5f * inbetween->spacing ) );
 
-            iBLContext->setStrokeStyle( BLRgba32( color.R
-                                                , color.G
-                                                , color.B
-                                                , 127 + ( color.A * 0.5f * inbetween->spacing ) ) );
+            iBLContext->setStrokeStyle( style );
+            iBLContext->setFillStyle( style );
 
             inbetweenerTag->DrawPathsInbetween( inbetween, iBLContext, true );
         }
@@ -499,6 +501,7 @@ FOdysseyVectorHUD::DrawBreakdown( BLContext* iBLContext
     {
         iBLContext->setStrokeWidth( 3.0f );
         iBLContext->setStrokeStyle( iSourceDrawingColor );
+        iBLContext->setFillStyle( iSourceDrawingColor );
 
         iBreakdown->DrawPathsAtSource( iBLContext, true );
     }
@@ -507,6 +510,7 @@ FOdysseyVectorHUD::DrawBreakdown( BLContext* iBLContext
     {
         iBLContext->setStrokeWidth( 3.0f );
         iBLContext->setStrokeStyle( iTargetDrawingColor );
+        iBLContext->setFillStyle( iTargetDrawingColor );
 
         iBreakdown->DrawPathsAtTarget( iBLContext, true );
     }
@@ -588,13 +592,11 @@ FOdysseyVectorHUD::DrawBreakdown( BLContext* iBLContext
 {
     FOdysseyVectorTagInbetweener* inbetweenerTag = iBreakdown->GetInbetweenerTag();
     uint32 targetDrawingIndex = iBreakdown->GetTargetDrawingIndex();
+    BLRgba32 style = BLRgba32( 255, 127, 127, 255 );
 
     iBLContext->setStrokeWidth( 3.0f );
-
-    iBLContext->setStrokeStyle( BLRgba32( 255
-                                        , 127
-                                        , 127
-                                        , 255 ) );
+    iBLContext->setStrokeStyle( style );
+    iBLContext->setFillStyle( style );
 
     BLMatrix2D worldMatrix = inbetweenerTag->GetOwner()->GetWorldMatrix();
     FInbetweenerDrawing* drawing = inbetweenerTag->GetDrawing( targetDrawingIndex );

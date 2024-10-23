@@ -86,6 +86,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
 
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"
+                 , meta = ( ToolTip  = "With Thickness" ) )
+        bool WithThickness;
+
+        UPROPERTY( EditAnywhere
+                 , Category = "Inbetweener"
                  , meta = ( ToolTip  = "Square Shaped" ) )
         bool Square;
 

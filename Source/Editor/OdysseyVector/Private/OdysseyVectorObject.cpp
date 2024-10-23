@@ -999,6 +999,10 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
         iChild->mOldParent = this;
         iChild->mParent = nullptr;
 
+        // update now
+        iChild->mInvalidationFlags |= INVALIDATE_HIERARCHY;
+        iChild->Update( 0 );
+
         ret = HIERARCHY_CHANGE_SUCCESS; // removal succeeded
     }
 

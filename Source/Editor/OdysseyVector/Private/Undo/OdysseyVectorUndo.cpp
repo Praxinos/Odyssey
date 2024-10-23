@@ -651,7 +651,8 @@ FSnapshotInbetweenerBreakdown::LoadState( FSnapshotInbetweenerBreakdown::State* 
     if( mSnapshotFlags & FSnapshotFlags::Breakdown::GRIDGEOMETRY )
     {
         mBreakdown->GetGrid()->SetGeometry( iState->gridGeometry
-                                          , eInbetweenerPointPositionType::TargetPosition );
+                                          , eInbetweenerPointPositionType::TargetPosition
+                                          , true );
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Breakdown::TRANSFORMATIONS )

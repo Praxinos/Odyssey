@@ -187,8 +187,8 @@ FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
                 uint32 offset = ( i * numVertexX ) + j;
 
                 mPointBuffer[offset].Init( this );
-                mPointBuffer[offset].SetSourcePosition( x, y );
-                mPointBuffer[offset].SetTargetPosition( x, y );
+                mPointBuffer[offset].SetSourcePosition( x, y, iInvalidate );
+                mPointBuffer[offset].SetTargetPosition( x, y, iInvalidate );
 
                 mPointBuffer[offset].SetU( std::clamp<double>( ( x - mGridBBox.x ) / mGridBBox.w, 0.0f, 1.0f ) );
                 mPointBuffer[offset].SetV( std::clamp<double>( ( y - mGridBBox.y ) / mGridBBox.h, 0.0f, 1.0f ) );
@@ -200,21 +200,23 @@ FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
             x = mGridBBox.x;
         }
 
-        if( iSourcePositionBuffer.size() )
+        if( iSourcePositionBuffer.size() /*== mPointBuffer.size()*/ )
         {
             for( uint32 i = 0; i < mPointBuffer.size(); i++ )
             {
                 mPointBuffer[i].SetSourcePosition( iSourcePositionBuffer[i].x
-                                                 , iSourcePositionBuffer[i].y  );
+                                                 , iSourcePositionBuffer[i].y
+                                                 , iInvalidate  );
             }
         }
 
-        if( iTargetPositionBuffer.size() )
+        if( iTargetPositionBuffer.size() /*== mPointBuffer.size()*/ )
         {
             for( uint32 i = 0; i < mPointBuffer.size(); i++ )
             {
                 mPointBuffer[i].SetTargetPosition( iTargetPositionBuffer[i].x
-                                                 , iTargetPositionBuffer[i].y  );
+                                                 , iTargetPositionBuffer[i].y
+                                                 , iInvalidate  );
             }
         }
 
@@ -326,11 +328,12 @@ FInbetweenerGrid::GetQuadIndex( const ::ULIS::FVec2D& iLocalCoords )
 
 void
 FInbetweenerGrid::SetGeometry( const std::vector<::ULIS::FVec2D>& iGeometry
-                             , eInbetweenerPointPositionType iPositionType )
+                             , eInbetweenerPointPositionType iPositionType
+                             , bool iInvalidate )
 {
     for( uint32 i = 0; i < mPointBuffer.size(); i++ )
     {
-        mPointBuffer[i].SetPosition( iPositionType, iGeometry[i].x, iGeometry[i].y );
+        mPointBuffer[i].SetPosition( iPositionType, iGeometry[i].x, iGeometry[i].y, iInvalidate );
     }
 }
 
@@ -708,8 +711,17 @@ FInbetweenerGrid::ComputeARAPInterpolation( FChartDivision* iInbetween
     // Main constraint (linear interp of center of mass)
     if ( validRouteArray.size() == 0 )
     {
-        PTAD( idx, 0 ) = mSourceCenterOfMass.x + ( ( mTargetCenterOfMass.x - mSourceCenterOfMass.x ) * t );
-        PTAD( idx, 1 ) = mSourceCenterOfMass.y + ( ( mTargetCenterOfMass.y - mSourceCenterOfMass.y ) * t );
+        // get grid center of mass in their respective boundary space
+        BLPoint sourceCenterOfMass = mBreakdown->GetSourceLocalMatrix().mapPoint( mSourceCenterOfMass.x
+                                                                                , mSourceCenterOfMass.y );
+        BLPoint targetCenterOfMass = mBreakdown->GetTargetLocalMatrix().mapPoint( mTargetCenterOfMass.x
+                                                                                , mTargetCenterOfMass.y );
+        // convert to inbetween space
+        BLPoint inbetweenSourceCenterOfMass = iInbetween->drawing->inverseMatrix.mapPoint( sourceCenterOfMass.x, sourceCenterOfMass.y );
+        BLPoint inbetweenTargetCenterOfMass = iInbetween->drawing->inverseMatrix.mapPoint( targetCenterOfMass.x, targetCenterOfMass.y );
+
+        PTAD( idx, 0 ) = inbetweenSourceCenterOfMass.x + ( ( inbetweenTargetCenterOfMass.x - inbetweenSourceCenterOfMass.x ) * t );
+        PTAD( idx, 1 ) = inbetweenSourceCenterOfMass.y + ( ( inbetweenTargetCenterOfMass.y - inbetweenSourceCenterOfMass.y ) * t );
         ++idx;
     }
 

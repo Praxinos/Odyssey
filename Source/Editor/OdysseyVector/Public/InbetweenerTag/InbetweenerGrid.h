@@ -99,7 +99,8 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
          * @param iPositionType position type (source, target, interp, deform)
          */
         void SetGeometry( const std::vector<::ULIS::FVec2D>& iGeometry
-                        , eInbetweenerPointPositionType iPositionType );
+                        , eInbetweenerPointPositionType iPositionType
+                        , bool iInvalidate );
 
         FInbetweenerBreakdown* GetBreakdown();
         const ::ULIS::FRectD& GetTargetBBox();

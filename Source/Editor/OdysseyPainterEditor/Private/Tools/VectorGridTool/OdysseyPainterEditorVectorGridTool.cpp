@@ -181,7 +181,8 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorGroupPaint
                 mGridHUD->Deform();
 
                 // update invalidated objects
-                iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+                iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                              | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
             }
         }
     }

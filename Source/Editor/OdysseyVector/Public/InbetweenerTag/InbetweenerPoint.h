@@ -33,12 +33,12 @@ class ODYSSEYVECTOR_API FInbetweenerPoint
         virtual ~FInbetweenerPoint(){};
         FInbetweenerPoint( );
 
-        void SetSourcePosition( double iX, double iY );
-        void SetTargetPosition( double iX, double iY );
+        void SetSourcePosition( double iX, double iY, bool iInvalidate );
+        void SetTargetPosition( double iX, double iY, bool iInvalidate );
         void SetInterpPosition( double iX, double iY );
         void SetDeformPosition( double iX, double iY );
-        const ::ULIS::FVec2D& GetSourcePosition();
-        const ::ULIS::FVec2D& GetTargetPosition();
+        ::ULIS::FVec2D GetSourcePosition();
+        ::ULIS::FVec2D GetTargetPosition();
         void AddQuad( FInbetweenerQuad* iQuad );
         void RemoveQuad( FInbetweenerQuad* iQuad );
         std::list<FInbetweenerQuad*>& GetQuadList();
@@ -46,7 +46,7 @@ class ODYSSEYVECTOR_API FInbetweenerPoint
         void SetID( uint32 iID );
         uint32 GetID();
         ::ULIS::FVec2D GetPosition( eInbetweenerPointPositionType iPositionType );
-        void SetPosition( eInbetweenerPointPositionType iPositionType, double iX, double iY );
+        void SetPosition( eInbetweenerPointPositionType iPositionType, double iX, double iY, bool iInvalidate );
         void SetDeformable( bool iIsDeformable );
         bool IsDeformable();
         void SetU( double iU );

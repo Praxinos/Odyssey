@@ -49,7 +49,7 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
     for( FOdysseyVectorVertex* vertex : iPath->GetVertexList() )
     {
             // Note: we add +1 for the target position
-        mInterpolatedPointBuffer.emplace_back( vertex, mInterpolatedPointBuffer.size() );
+        mInterpolatedPointBuffer.emplace_back( vertex, vertex->GetRadius(), mInterpolatedPointBuffer.size() );
 
         vertex->SetID( pointID++ );
     }
@@ -58,6 +58,9 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
     {
         FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
         FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
+        double radius0 = vertex0->GetRadius();
+        double radius1 = vertex1->GetRadius();
+        double diffrad = radius1 - radius0;
 
         if( iPolyline )
         {
@@ -74,7 +77,9 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
             for( uint32 i = 1; i < fractionCount; i++ )
             {
                 FOdysseyVectorFraction& fraction = fractionCache[i];
-                FInterpolatedPoint& interpolatedPoint = mInterpolatedPointBuffer.emplace_back( fraction.point[0], mInterpolatedPointBuffer.size() );
+                FInterpolatedPoint& interpolatedPoint = mInterpolatedPointBuffer.emplace_back( fraction.point[0]
+                                                                                             , radius0 + ( diffrad * fraction.fromT )
+                                                                                             , mInterpolatedPointBuffer.size() );
 
                 polylinePointArray.push_back( &interpolatedPoint );
             }
@@ -95,10 +100,10 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
                 std::vector<FInterpolatedPoint*> cubicSegmentPointArray;
 
                 // Note: we add +1 for the target position
-                mInterpolatedPointBuffer.emplace_back( handle0, mInterpolatedPointBuffer.size() );
+                mInterpolatedPointBuffer.emplace_back( handle0, 0.0f, mInterpolatedPointBuffer.size() );
                 handle0->SetID( pointID++ );
                 // Note: we add +1 for the target position
-                mInterpolatedPointBuffer.emplace_back( handle1, mInterpolatedPointBuffer.size() );
+                mInterpolatedPointBuffer.emplace_back( handle1, 0.0f, mInterpolatedPointBuffer.size() );
                 handle1->SetID( pointID++ );
 
                 cubicSegmentPointArray.resize( 4 );

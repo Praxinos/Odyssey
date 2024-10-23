@@ -168,7 +168,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
             targetPosition.x += localDiff.x;
             targetPosition.y += localDiff.y;
 
-            gridPoint->SetTargetPosition( targetPosition.x, targetPosition.y );
+            gridPoint->SetTargetPosition( targetPosition.x, targetPosition.y, true );
 
             if( RigidifySelectionOnly )
             {

@@ -23,6 +23,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::UOdysseyPainterEditorVectorTagInb
     , DivisionY ( 8 )
     //, Rigidity ( 10 )
     , MapAsPolyline( true )
+    , WithThickness( true )
     , Square( true )
     , Color( FOdysseyVectorTagInbetweener::DEFAULT_RED_UINT8
            , FOdysseyVectorTagInbetweener::DEFAULT_GREEN_UINT8
@@ -61,6 +62,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
         ChartColor = selectedInbetweenerTag->GetChartColor();
         GridColor = selectedInbetweenerTag->GetGridColor();
         MapAsPolyline = selectedInbetweenerTag->GetMapAsPolyline();
+        WithThickness = selectedInbetweenerTag->GetWithThickness();
         Square = selectedInbetweenerTag->IsSquare();
 
         DivisionX = selectedInbetweenerTag->GetGridNumQuadX();
@@ -190,6 +192,11 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
                     arapGrid->Regularize( 1 );
                 }
             }
+        }
+
+        if( iPropertyName == "WithThickness" )
+        {
+            selectedInbetweenerTag->SetWithThickness( WithThickness );
         }
 
         if( iPropertyName == "Square" )

@@ -70,6 +70,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
                         | INVALIDATE_CELLS )
     , mColor ( DEFAULT_RED_UINT8, DEFAULT_GREEN_UINT8, DEFAULT_BLUE_UINT8, DEFAULT_ALPHA_UINT8 )
     , bMapAsPolyline( true )
+    , bWithThickness( false )
     , mMasterBreakdown( this )
     , bARAPPrecomputeSucceded( false )
     , mInterpolationDirection( eInbetweenerInterpolationDirection::Forward )
@@ -316,6 +317,18 @@ FOdysseyVectorTagInbetweener::AddRoute( const ::ULIS::FVec2D& iLocalCoords )
 }
 
 bool
+FOdysseyVectorTagInbetweener::GetWithThickness()
+{
+    return bWithThickness;
+}
+
+void
+FOdysseyVectorTagInbetweener::SetWithThickness( bool iWithThickness )
+{
+    bWithThickness = iWithThickness;
+}
+
+bool
 FOdysseyVectorTagInbetweener::GetMapAsPolyline()
 {
     return bMapAsPolyline;
@@ -381,8 +394,8 @@ FOdysseyVectorTagInbetweener::ResetLayout( bool iFreeMemNow )
 
     ChainBreakdowns();
 
-    mMasterBreakdown.GetGrid()->SetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
-    mMasterBreakdown.GetGrid()->SetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
+    mMasterBreakdown.GetGrid()->SetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition, true );
+    mMasterBreakdown.GetGrid()->SetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition, true );
 
     Invalidate( INVALIDATE_BREAKDOWN_LIST );
 }
@@ -478,8 +491,8 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
             double scalingX = curBreakdown->GetTargetScalingX();
             double scalingY = curBreakdown->GetTargetScalingY();
 
-            newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
-            newBreakdown->GetGrid()->SetGeometry( curBreakdownInterpGeometry, eInbetweenerPointPositionType::TargetPosition );
+            newBreakdown->GetGrid()->SetGeometry( curBreakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition, true );
+            newBreakdown->GetGrid()->SetGeometry( curBreakdownInterpGeometry, eInbetweenerPointPositionType::TargetPosition, true );
 
             newBreakdown->SetTargetTransform( prevTranslationX + ( ( translationX - prevTranslationX ) * t )
                                             , prevTranslationY + ( ( translationY - prevTranslationY ) * t )
@@ -596,7 +609,7 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
             iBreakdown->GetGrid()->GetGeometry( breakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
 
             // nextBreakdown source grid gets its shape from this removed breakdown source grid.
-            nextBreakdown->GetGrid()->SetGeometry( breakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
+            nextBreakdown->GetGrid()->SetGeometry( breakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition, true );
         }
 
         iBreakdown->SetInbetweenerTag( nullptr );
@@ -703,6 +716,9 @@ FOdysseyVectorTagInbetweener::ObjectAdded()
     if( bShared == false )
     {
         Share( mSharedEnv );
+
+        // commented-out : celles are redrawn in the FOdysseyVectorTagInbetweener::Update() method
+        //RedrawCells();
     }
 }
 
@@ -712,6 +728,9 @@ FOdysseyVectorTagInbetweener::ObjectRemoved()
     if( bShared == true )
     {
         Unshare( mSharedEnv );
+
+        // commented-out : celles are redrawn in the FOdysseyVectorTagInbetweener::Update() method
+        //RedrawCells();
     }
 }
 
@@ -767,7 +786,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
 
                 // Note: we cannot call Invalidate in Make() (hence the "false" arg), so we set the flags manually.
                 // calling Invalidate make trigger a call to draw and this would block due to the mutexes.
-                mInvalidationFlags |= ( INVALIDATE_SOURCEGRID | INVALIDATE_TARGETGRID );
+                mInvalidationFlags |= ( INVALIDATE_SOURCEGRID | INVALIDATE_TARGETGRID | INVALIDATE_MAP );
             }
         }
 
@@ -855,9 +874,15 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         }
 
         UnlockDrawing();
-
-        RedrawCells();
     }
+
+    RedrawCells();
+}
+
+FOdysseyVectorGroupPaint*
+FOdysseyVectorTagInbetweener::GetScene()
+{
+    return mScene;
 }
 
 IOdysseyVectorCell*
@@ -979,10 +1004,13 @@ FOdysseyVectorTagInbetweener::DeformGridAtInbetween( FChartDivision *iInbetween 
         {
             if( point.GetQuadCount() )
             {
-                ::ULIS::FVec2D diff = ( point.mTargetPosition - point.mSourcePosition );
+                ::ULIS::FVec2D targetPosition = point.GetTargetPosition();
+                ::ULIS::FVec2D sourcePosition = point.GetSourcePosition();
+                ::ULIS::FVec2D diff = ( targetPosition - sourcePosition );
                 ::ULIS::FVec2D step = diff * t;
 
-                point.mInterpPosition = point.mSourcePosition + step;
+                // TODO: protect the access by using methods
+                point.mInterpPosition = sourcePosition + step;
             }
         }
     }
@@ -1201,6 +1229,37 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
     UnlockDrawing();
 }
 
+static ::ULIS::FVec2D
+GetPerpendicularVector( const ::ULIS::FVec2D* iP0
+                      , const ::ULIS::FVec2D& iP1
+                      , const ::ULIS::FVec2D* iP2 )
+{
+   ::ULIS::FVec2D p0p1 = ::ULIS::FVec2D( 0.0f, 0.0f );
+   ::ULIS::FVec2D p1p2 = ::ULIS::FVec2D( 0.0f, 0.0f );
+   ::ULIS::FVec2D average;
+
+    if( iP0 )
+    {
+        p0p1 = iP1 - (*iP0);
+    }
+
+    if( iP2 )
+    {
+        p1p2 = (*iP2) - iP1;
+    }
+
+    average = ( p0p1 + p1p2 );
+
+    if( average.DistanceSquared() )
+    {
+        average.Normalize();
+
+        return ::ULIS::FVec2D( -average.y, average.x );
+    }
+
+    return ::ULIS::FVec2D( 0.0f, 0.0f );
+}
+
 void
 FOdysseyVectorTagInbetweener::DrawPathAt( FInterpolatedPath* iInterpolatedPath
                                         , ::ULIS::FVec2D* iPointPositionBuffer
@@ -1216,18 +1275,59 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FInterpolatedPath* iInterpolatedPath
         if( bMapAsPolyline )
         {
             uint32 pointCount = interpolatedSegment.mInterpolatedPointArray.size();
+            ::ULIS::FVec2D perpi;
+            ::ULIS::FVec2D perpn;
 
             for( uint32 i = 0; i < pointCount - 1; i++ )
             {
+                uint32 p = i - 1;
                 uint32 n = i + 1;
+                uint32 q = i + 2;
+                FInterpolatedPoint* pointp = ( i == 0          ) ? nullptr : interpolatedSegment.mInterpolatedPointArray[p];
                 FInterpolatedPoint* pointi = interpolatedSegment.mInterpolatedPointArray[i];
                 FInterpolatedPoint* pointn = interpolatedSegment.mInterpolatedPointArray[n];
-                BLPoint pt[2] = { iWorldMatrix.mapPoint( iPointPositionBuffer[pointi->mIndex].x
-                                                       , iPointPositionBuffer[pointi->mIndex].y )
-                                , iWorldMatrix.mapPoint( iPointPositionBuffer[pointn->mIndex].x
-                                                       , iPointPositionBuffer[pointn->mIndex].y ) };
+                FInterpolatedPoint* pointq = ( q == pointCount ) ? nullptr : interpolatedSegment.mInterpolatedPointArray[q];
+                ::ULIS::FVec2D* localPointPositionp = pointp ? &iPointPositionBuffer[pointp->mIndex] : nullptr;
+                ::ULIS::FVec2D* localPointPositioni = &iPointPositionBuffer[pointi->mIndex];
+                ::ULIS::FVec2D* localPointPositionn = &iPointPositionBuffer[pointn->mIndex];
+                ::ULIS::FVec2D* localPointPositionq = pointq ? &iPointPositionBuffer[pointq->mIndex] : nullptr;
 
-                iBLContext->strokeLine( pt[0].x, pt[0].y, pt[1].x, pt[1].y );
+                if( bWithThickness )
+                {
+                    perpi = i == 0 ? GetPerpendicularVector(  localPointPositionp
+                                                           , *localPointPositioni
+                                                           ,  localPointPositionn )
+                                   // No need to recompute, just use the next value
+                                   : perpn;
+                    perpn = GetPerpendicularVector(  localPointPositioni
+                                                  , *localPointPositionn
+                                                  ,  localPointPositionq );
+                    double radiusi = pointi->GetRadius();
+                    double radiusn = pointn->GetRadius();
+                    BLPoint pt[6] = { iWorldMatrix.mapPoint( localPointPositioni->x
+                                                           , localPointPositioni->y )
+                                    , iWorldMatrix.mapPoint( localPointPositioni->x + ( perpi.x * radiusi )
+                                                           , localPointPositioni->y + ( perpi.y * radiusi ) )
+                                    , iWorldMatrix.mapPoint( localPointPositionn->x + ( perpn.x * radiusn )
+                                                           , localPointPositionn->y + ( perpn.y * radiusn ) )
+                                    , iWorldMatrix.mapPoint( localPointPositionn->x
+                                                           , localPointPositionn->y )
+                                    , iWorldMatrix.mapPoint( localPointPositionn->x - ( perpn.x * radiusn )
+                                                           , localPointPositionn->y - ( perpn.y * radiusn ) )
+                                    , iWorldMatrix.mapPoint( localPointPositioni->x - ( perpi.x * radiusi )
+                                                           , localPointPositioni->y - ( perpi.y * radiusi ) ) };
+
+                    iBLContext->fillPolygon( pt, 6 );
+                }
+                else
+                {
+                    BLPoint pt[2] = { iWorldMatrix.mapPoint( localPointPositioni->x
+                                                           , localPointPositioni->y )
+                                    , iWorldMatrix.mapPoint( localPointPositionn->x
+                                                           , localPointPositionn->y ) };
+
+                    iBLContext->strokeLine( pt[0].x, pt[0].y, pt[1].x, pt[1].y );
+                }
             }
         }
         else

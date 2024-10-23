@@ -91,8 +91,8 @@ FOdysseyVectorImportV2::ReadBreakdown( FInbetweenerBreakdown& iBreakdown
                         }
                     }
 
-                    iBreakdown.GetGrid()->SetGeometry( sourcePosition, eInbetweenerPointPositionType::SourcePosition );
-                    iBreakdown.GetGrid()->SetGeometry( targetPosition, eInbetweenerPointPositionType::TargetPosition );
+                    iBreakdown.GetGrid()->SetGeometry( sourcePosition, eInbetweenerPointPositionType::SourcePosition, true );
+                    iBreakdown.GetGrid()->SetGeometry( targetPosition, eInbetweenerPointPositionType::TargetPosition, true );
                 }
                 break;
 

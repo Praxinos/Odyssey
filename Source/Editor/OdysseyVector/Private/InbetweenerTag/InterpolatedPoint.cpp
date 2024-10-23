@@ -6,8 +6,9 @@ FInterpolatedPoint::~FInterpolatedPoint()
 {
 }
 
-FInterpolatedPoint::FInterpolatedPoint( FOdysseyVectorPoint* iPoint, uint32 iIndex  )
+FInterpolatedPoint::FInterpolatedPoint( FOdysseyVectorPoint* iPoint, double iRadius, uint32 iIndex  )
     : mOriginalPoint( iPoint )
+    , mRadius ( iRadius )
     , mIndex ( iIndex )
     , mMappedQuadIndex ( 0 )
     , mU ( 0.0f )
@@ -25,6 +26,12 @@ void
 FInterpolatedPoint::SetV( double iV )
 {
     mV = iV;
+}
+
+double
+FInterpolatedPoint::GetRadius()
+{
+    return mRadius;
 }
 
 double

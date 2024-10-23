@@ -5,6 +5,7 @@
 #include "OdysseyVector.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorObject.h"
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCell.h"
 
 #ifndef M_PI
@@ -521,7 +522,9 @@ FInbetweenerBreakdown::GetTargetCellIndex()
 int32
 FInbetweenerBreakdown::GetSourceCellIndex()
 {
-    uint32 tagCellIndex = mInbetweenerTag->GetOwner()->GetEngine()->GetCell()->GetIndex();
+    // we use GetSecene because the Scene is stored as a member varriable in order to be able to 
+    // redraw when the owner object is removed (its scene would be null then)
+    uint32 tagCellIndex = mInbetweenerTag->GetScene()->GetEngine()->GetCell()->GetIndex();
     uint32 sourceDrawingIndex = GetSourceDrawingIndex();
 
     return (int32)tagCellIndex + (int32)( sourceDrawingIndex * (int)mInbetweenerTag->GetInterpolationDirection());

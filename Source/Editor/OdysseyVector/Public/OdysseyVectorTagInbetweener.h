@@ -190,6 +190,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void SetColor( const FColor& iColor );
         void SetMapAsPolyline( bool iMapAsPolyline );
         bool GetMapAsPolyline();
+        void SetWithThickness( bool iWithThickness );
+        bool GetWithThickness();
         void DrawPathsInbetween( FChartDivision* inbetween
                                , BLContext* iBLContext
                                , bool iLock );
@@ -244,6 +246,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         int32 GetTargetCellIndex();
         std::vector<uint32>& GetUsedQuadIndexBuffer();
         std::vector<uint32>& GetUsedPointIndexBuffer();
+        FOdysseyVectorGroupPaint* GetScene();
 
     protected:
         /**
@@ -332,6 +335,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         uint64 mInvalidationFlags;
         FColor mColor;
         bool bMapAsPolyline;
+        bool bWithThickness;
         FInbetweenerBreakdown mMasterBreakdown;
         uint32 mUsedQuadCount;
         uint32 mUsedPointCount;

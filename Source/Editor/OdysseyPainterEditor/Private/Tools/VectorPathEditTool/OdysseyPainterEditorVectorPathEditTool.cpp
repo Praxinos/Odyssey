@@ -688,7 +688,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorGroupP
     }
 
     // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE
+                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
 
     return notificationFlags;
 }
@@ -912,7 +913,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
     */
         mOldPointInTexture = ::ULIS::FVec2D( pointInTextureX, pointInTextureY );
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
     }
 
     // redraw
