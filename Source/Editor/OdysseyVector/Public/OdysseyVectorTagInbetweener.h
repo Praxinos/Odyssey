@@ -176,7 +176,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         std::list<FInbetweenerRoute*>& GetRouteList();
         void RemoveRoute( FInbetweenerRoute* iRoute );
         void RemoveAllRoutes();
-
+        virtual FOdysseyVectorTagInbetweener* Copy( FOdysseyVectorObject* iOwnerObject ) override;
         virtual void Update( uint32 iUpdateFlags
                            , uint64 iOwnerInvalidationFlags ) override;
         void Commit( std::list<FOdysseyVectorTag*>& oRemovedTagList
@@ -336,6 +336,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         FColor mColor;
         bool bMapAsPolyline;
         bool bWithThickness;
+        bool bContiguous;
         FInbetweenerBreakdown mMasterBreakdown;
         uint32 mUsedQuadCount;
         uint32 mUsedPointCount;

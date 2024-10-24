@@ -10,6 +10,7 @@
 
 #define INDICATOR_RADIUS 20.0f
 #define FONT_SIZE        24.0f
+#define DEFAULT_SURFACE  (1920*1080)
 
 FOdysseyPainterEditorVectorChartToolHUD::~FOdysseyPainterEditorVectorChartToolHUD()
 {
@@ -146,6 +147,10 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
     FInbetweenerDrawing* sourceDrawing = inbetweenerTag->GetDrawing( sourceDrawingIndex );
     FInbetweenerDrawing* targetDrawing = inbetweenerTag->GetDrawing( targetDrawingIndex );
     ::ULIS::FVec2D* HUDBezier = chart->GetHUDBezier();
+    float displayRatio = ( float ) ( iBLContext->targetWidth() * iBLContext->targetHeight() ) / DEFAULT_SURFACE;
+
+     // On my colleague's request, the width of the stroke varies relative to the size of the image
+    displayRatio = std::max( 1.0f, 1.0f + ( ( displayRatio - 1.0f ) * 0.25f ) );
 
     iBLContext->save();
     iBLContext->resetMatrix();
@@ -153,7 +158,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
     iBLContext->setCompOp( BL_COMP_OP_SRC_OVER  );
 
     iBLContext->setStrokeStyle( chartColor );
-    iBLContext->setStrokeWidth( 2.0f );
+    iBLContext->setStrokeWidth( 2.0f * displayRatio );
 
     // chart quadratic bezier line
     {
@@ -196,15 +201,15 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
 
             if( ( inbetween->spacing == 0.0f ) || ( inbetween->spacing == 1.0f ) )
             {
-                iBLContext->setStrokeWidth( 3.0f );
+                iBLContext->setStrokeWidth( 3.0f * displayRatio );
                 iBLContext->setStrokeStyle( chartColor );
 
-                iBLContext->setStrokeWidth( 2.0f );
+                iBLContext->setStrokeWidth( 2.0f * displayRatio );
                 iBLContext->strokeCircle( frameInfoPosition.x, frameInfoPosition.y, fontSize );
             }
             else
             {
-                iBLContext->setStrokeWidth( hovered ? 3.0f     : 2.0f     );
+                iBLContext->setStrokeWidth( hovered ? 3.0f * displayRatio: 2.0f * displayRatio );
                 iBLContext->setStrokeStyle( hovered ? iHcColor : tagColor );
             }
 
@@ -225,7 +230,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
                 if( current )
                 {
                     iBLContext->setStrokeStyle( blackColor );
-                    iBLContext->setStrokeWidth( 1.5f );
+                    iBLContext->setStrokeWidth( 1.5f * displayRatio );
                     iBLContext->strokeUtf8Text( BLPoint( frameNumberPosition.x
                                                        , frameNumberPosition.y ), mFont, glyph->str );
                 }

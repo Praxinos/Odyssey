@@ -265,6 +265,11 @@ UOdysseyPainterEditorVectorTagInbetweenerView::MakeUndo( const FName& iPropertyN
                                                                 , mSelectedInbetweenerTagArray
                                                                 , notificationFlags );
 
+    if( iPropertyName == "WithThickness" )
+        return new FOdysseyVectorUndoTagInbetweenerWithThickness( mScene
+                                                                , mSelectedInbetweenerTagArray
+                                                                , notificationFlags );
+
     if( iPropertyName == "Square" )
         return new FOdysseyVectorUndoTagInbetweenerSquare( mScene
                                                          , mSelectedInbetweenerTagArray

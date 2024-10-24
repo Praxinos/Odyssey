@@ -706,14 +706,19 @@ FSnapshotTagInbetweener::RecordLocalState( FSnapshotTagInbetweener::State* iStat
     {
         iState->interpolationDirection = mInbetweenerTag->GetInterpolationDirection();
 
+        if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::WITHTHICKNESS )
+        {
+            iState->withThickness = mInbetweenerTag->GetWithThickness();
+        }
+
         if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
          || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE )
          || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::SQUARE   ) )
         {
             iState->gridSizeX = mInbetweenerTag->GetGridNumQuadX();
             iState->gridSizeY = mInbetweenerTag->GetGridNumQuadY();
-            iState->square = mInbetweenerTag->IsSquare();
-            iState->gridType = mInbetweenerTag->GetGridType();
+            iState->square    = mInbetweenerTag->IsSquare();
+            iState->gridType  = mInbetweenerTag->GetGridType();
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::INTERPOLATIONTYPE )
@@ -819,6 +824,11 @@ bool
 FSnapshotTagInbetweener::LoadLocalState( FSnapshotTagInbetweener::State* iState )
 {
     mInbetweenerTag->SetInterpolationDirection( iState->interpolationDirection );
+
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::WITHTHICKNESS )
+    {
+        mInbetweenerTag->SetWithThickness( iState->withThickness );
+    }
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE )
     {

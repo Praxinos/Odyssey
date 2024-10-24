@@ -70,7 +70,8 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
                         | INVALIDATE_CELLS )
     , mColor ( DEFAULT_RED_UINT8, DEFAULT_GREEN_UINT8, DEFAULT_BLUE_UINT8, DEFAULT_ALPHA_UINT8 )
     , bMapAsPolyline( true )
-    , bWithThickness( false )
+    , bWithThickness( true )
+    , bContiguous( true )
     , mMasterBreakdown( this )
     , bARAPPrecomputeSucceded( false )
     , mInterpolationDirection( eInbetweenerInterpolationDirection::Forward )
@@ -94,6 +95,18 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
 
     // Note: Matrix needs chart to be allocated first.
     UpdateMatrix();
+}
+
+FOdysseyVectorTagInbetweener*
+FOdysseyVectorTagInbetweener::Copy( FOdysseyVectorObject* iOwnerObject )
+{
+    FOdysseyVectorTagInbetweener* newTag = new FOdysseyVectorTagInbetweener ( iOwnerObject->GetSharedEnv()
+                                                                            , iOwnerObject
+                                                                            , mGridNumQuadX
+                                                                            , mGridNumQuadY );
+
+
+    return newTag;
 }
 
 void

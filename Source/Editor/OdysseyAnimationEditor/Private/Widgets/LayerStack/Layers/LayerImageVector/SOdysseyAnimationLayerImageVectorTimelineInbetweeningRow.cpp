@@ -192,7 +192,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     // update UI
     FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
 
-    return reply;
+    return reply.CaptureMouse( AsShared() );
 }
 
 FReply
@@ -308,7 +308,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
     mPickedBreakdown = nullptr;
     mCandidateTargetCellBox.type = 0;
 
-    return reply;
+    return reply.ReleaseMouseCapture();
 }
 
 FText
@@ -472,6 +472,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 	++LayerId;
     // declared static to save some CPU cycles as there is no need to initialize them at each all
     static const FLinearColor strokeColor = FLinearColor( 0.75f, 0.75f, 0.75f, 1.00f );
+    static const FLinearColor frameColor  = FLinearColor( 0.75f, 0.75f, 0.75f, 0.25f );
     static const FLinearColor sourceColor = FLinearColor( 0.50f, 0.50f, 0.50f, 0.50f );
     static const FLinearColor interpColor = FLinearColor( 0.25f
                                                         , 0.25f
@@ -538,22 +539,53 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
             // draw forward arrow
             if( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Forward )
             {
-                line.Push( FVector2D( midX + 2 , midY ) );
+                line.Push( FVector2D( midX + 6 , midY ) );
                 line.Push( FVector2D( cellBox.w, midY ) );
 
-                arrow.Push( FVector2D( midX + 2, midY - 4 ) );
-                arrow.Push( FVector2D( midX + 6, midY     ) );
-                arrow.Push( FVector2D( midX + 2, midY + 4 ) );
+                if( cellBox.type & FInbetweeningRowCellBox::TYPE_TARGET )
+                {
+                    arrow.Push( FVector2D( midX + 2, midY - 5 ) );
+                    arrow.Push( FVector2D( midX + 6, midY     ) );
+                    arrow.Push( FVector2D( midX + 2, midY + 5 ) );
+                }
+                /*else
+                {
+                    arrow.Push( FVector2D( midX + 2, midY - 4 ) );
+                    arrow.Push( FVector2D( midX + 2, midY + 4 ) );
+                }*/
             }
 
             if( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Backward )
             {
-                line.Push( FVector2D( midX - 2 , midY ) );
+                line.Push( FVector2D( midX - 6 , midY ) );
                 line.Push( FVector2D( 0.0f     , midY ) );
 
-                arrow.Push( FVector2D( midX - 2, midY - 4 ) );
-                arrow.Push( FVector2D( midX - 6, midY     ) );
-                arrow.Push( FVector2D( midX - 2, midY + 4 ) );
+                if( cellBox.type & FInbetweeningRowCellBox::TYPE_TARGET )
+                {
+                    arrow.Push( FVector2D( midX - 2, midY - 5 ) );
+                    arrow.Push( FVector2D( midX - 6, midY     ) );
+                    arrow.Push( FVector2D( midX - 2, midY + 5 ) );
+                }
+                /*else
+                {
+                    arrow.Push( FVector2D( midX - 2, midY - 4 ) );
+                    arrow.Push( FVector2D( midX - 2, midY + 4 ) );
+                }*/
+            }
+
+            if( arrow.Num() )
+            {
+	            FSlateDrawElement::MakeLines( OutDrawElements
+		                                    , LayerId
+		                                    , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x - ( scrollByPixels )
+                                                                                         , cellBox.y )
+                                                                              , FVector2D( cellBox.w
+                                                                                         , cellBox.h ) )
+		                                    , arrow
+		                                    , ESlateDrawEffect::None
+		                                    , strokeColor
+		                                    , true
+		                                    , 2.0f );
             }
 
 	        FSlateDrawElement::MakeLines( OutDrawElements
@@ -563,18 +595,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                                                                           , FVector2D( cellBox.w
                                                                                      , cellBox.h ) )
 		                                , line
-		                                , ESlateDrawEffect::None
-		                                , strokeColor
-		                                , true
-		                                , 2.0f );
-
-	        FSlateDrawElement::MakeLines( OutDrawElements
-		                                , LayerId
-		                                , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x - ( scrollByPixels )
-                                                                                     , cellBox.y )
-                                                                          , FVector2D( cellBox.w
-                                                                                     , cellBox.h ) )
-		                                , arrow
 		                                , ESlateDrawEffect::None
 		                                , strokeColor
 		                                , true
@@ -595,9 +615,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                 line.Push( FVector2D( 0.0f    , midY ) );
                 line.Push( FVector2D( midX - 2, midY ) );
 
-                arrow.Push( FVector2D( midX - 6, midY - 4 ) );
+                arrow.Push( FVector2D( midX - 6, midY - 5 ) );
                 arrow.Push( FVector2D( midX - 2, midY     ) );
-                arrow.Push( FVector2D( midX - 6, midY + 4 ) );
+                arrow.Push( FVector2D( midX - 6, midY + 5 ) );
             }
 
             // draw backward arrow
@@ -606,9 +626,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                 line.Push( FVector2D( cellBox.w, midY ) );
                 line.Push( FVector2D( midX + 2 , midY ) );
 
-                arrow.Push( FVector2D( midX + 6, midY - 4 ) );
+                arrow.Push( FVector2D( midX + 6, midY - 5 ) );
                 arrow.Push( FVector2D( midX + 2, midY     ) );
-                arrow.Push( FVector2D( midX + 6, midY + 4 ) );
+                arrow.Push( FVector2D( midX + 6, midY + 5 ) );
             }
 
 	        FSlateDrawElement::MakeLines( OutDrawElements
@@ -665,7 +685,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                                                                              , mBoxSize.Y ) )
 		                        , framePointBuffer
 		                        , ESlateDrawEffect::None
-		                        , strokeColor
+		                        , frameColor
 		                        , true
 		                        , 2.0f );
 

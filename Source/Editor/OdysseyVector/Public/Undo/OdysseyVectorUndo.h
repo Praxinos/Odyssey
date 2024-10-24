@@ -110,13 +110,15 @@ namespace FSnapshotFlags
             static const uint64 COLOR             = ( 1ULL <<  6 );
             static const uint64 MAPASPOLYLINE     = ( 1ULL <<  7 );
             static const uint64 SQUARE            = ( 1ULL <<  8 );
+            static const uint64 WITHTHICKNESS     = ( 1ULL <<  9 );
             static const uint64 PARAM             = ( GRIDSIZE
                                                     | GRIDTYPE
                                                     | INTERPOLATIONTYPE
                                                     | ARAPRIGIDITY
                                                     | COLOR
                                                     | MAPASPOLYLINE
-                                                    | SQUARE );
+                                                    | SQUARE
+                                                    | WITHTHICKNESS );
         }
     }
 
@@ -465,6 +467,7 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         FColor gridColor;
         bool mapAsPolyline;
         bool square;
+        bool withThickness;
 
         State() { inited = false; }
     };

@@ -43,8 +43,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorTag
         virtual void Removed();
         void LockDrawing();
         void UnlockDrawing();
+        virtual FOdysseyVectorTag* Copy( FOdysseyVectorObject* iOwnerObject ) = 0;
 
-        FOdysseyVectorObject* GetOwner();
+        FOdysseyVectorObject* GetOwner( );
 
     protected:
         FOdysseyVectorObject* mOwner;
