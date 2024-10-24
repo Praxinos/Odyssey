@@ -577,26 +577,10 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
 		double totalSecondsNext = (animationDisplayedFrame + 1) / animation->FramesPerSecond;
 		FFrameNumber frameNext = tickResolution.AsFrameNumber(totalSecondsNext);
 
-		/* if (frame <= sectionStartFrame)
-		{
-			sequencer->SetLocalTime(sectionStartFrame, STM_Interval, false);
-			sequencer->ForceEvaluate(); //SetLocalTime does not ensure evaluation is made, so we force it here and ask SetLocalTime to not perform any evaluation
-			return;
-		}
-
-		if (frame >= sectionEndFrame)
-		{
-			sequencer->SetLocalTime(sectionEndFrame, STM_Interval, false);
-			sequencer->ForceEvaluate(); //SetLocalTime does not ensure evaluation is made, so we force it here and ask SetLocalTime to not perform any evaluation
-			return;
-		} */
-
 		frame = FMath::Clamp(frame, sectionStartFrame, sectionEndFrame);
 
-		//FFrameTime intervalStartFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(sequencer->GetLocalTime().Time, tickResolution, displayRate).RoundToFrame(), displayRate, tickResolution);
 		FFrameTime intervalNextFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(frame, tickResolution, displayRate).CeilToFrame(), displayRate, tickResolution);
 		FFrameTime intervalPrevFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(frame, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution);
-		//FFrameTime intervalEndFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(sequencer->GetLocalTime().Time, tickResolution, displayRate).RoundToFrame() + 1, displayRate, tickResolution);
 
 		if (frameNext >= intervalNextFrame)
 		{
@@ -608,32 +592,6 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
 			sequencer->SetLocalTime(intervalPrevFrame, STM_Interval, false);
 			sequencer->ForceEvaluate(); //SetLocalTime does not ensure evaluation is made, so we force it here and ask SetLocalTime to not perform any evaluation
 		}
-
-		/*double animationStartFrame = animation->GetFramesPerSecond() * tickResolution.AsSeconds(intervalStartFrame - sectionStartFrame + section->StartFrameOffset);
-		//double animationEndFrame = animation->GetFramesPerSecond() * tickResolution.AsSeconds(intervalEndFrame - sectionStartFrame + section->StartFrameOffset);
-
-		int animationStartFrameInt = FMath::Floor(animationStartFrame);
-		//int animationEndFrameInt = FMath::Floor(animationEndFrame);
-
-		int animationFrame = animationStartFrameInt;
-		/* if (animationEndFrameInt == animationStartFrameInt + 1)
-		{
-			double startOverlap = 1.0f - (animationStartFrame - animationStartFrameInt);
-			double endOverlap = animationEndFrame - animationEndFrameInt;
-
-			animationFrame = startOverlap > endOverlap ? animationStartFrameInt : animationEndFrameInt;
-		}
-		else if (animationEndFrameInt > animationStartFrameInt + 1)
-		{
-			double startOverlap = 1.0f - (animationStartFrame - animationStartFrameInt);
-			animationFrame = startOverlap > 1.f - UE_SMALL_NUMBER ? animationStartFrameInt : animationStartFrameInt + 1;
-		}*/
-
-		/*if (animationFrame != animationDisplayedFrame)
-		{
-			sequencer->SetLocalTime(frame, STM_Interval, false);
-			sequencer->ForceEvaluate(); //SetLocalTime does not ensure evaluation is made, so we force it here and ask SetLocalTime to not perform any evaluation
-		} */
 	}
 }
 
