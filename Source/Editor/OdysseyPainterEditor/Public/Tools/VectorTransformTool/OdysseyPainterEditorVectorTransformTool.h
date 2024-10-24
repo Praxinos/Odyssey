@@ -98,7 +98,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
                  , meta = ( ToolTip = "World" ) )
         bool World;
 
-        UPROPERTY( EditDefaultsOnly )
+        UPROPERTY( EditDefaultsOnly
+                 , Category = TransformTool )
         bool bInbetweenMode;
 
         UPROPERTY( EditAnywhere
