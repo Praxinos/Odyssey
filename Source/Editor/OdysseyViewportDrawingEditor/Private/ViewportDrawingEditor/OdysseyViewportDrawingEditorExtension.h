@@ -50,6 +50,7 @@ public:
     UMeshComponent* Component() const;
     UMaterialInterface* Material() const;
     UTexture* Texture() const;
+	TArray<TWeakPtr<ISequencer>> Sequencers() const;
 
     bool IsPlaneComponent() const;
 
@@ -120,6 +121,8 @@ private:
     void SyncMediaPlayerWithAnimationPlayer();
     void SyncMediaPlayerWithAnimationCurrentFrame();
     void SyncAnimationCurrentFrameWithMediaPlayer();
+
+	void SyncSequencerWithAnimationPlayer();
 
     bool EnsureMediaPlateIsOpened();
 

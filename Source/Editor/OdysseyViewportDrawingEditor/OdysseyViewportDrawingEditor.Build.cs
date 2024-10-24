@@ -53,6 +53,7 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 "MeshPaint",
                 "MediaAssets",
                 "MediaPlate",
+				"MovieScene",
                 "OdysseyAnimation",
                 "OdysseyAnimationEditor",
                 "OdysseyCore",

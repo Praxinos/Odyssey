@@ -10,7 +10,6 @@ class UOdysseyAnimationLayerStack;
 class UOdysseyAnimationPlayer;
 class FOdysseyAnimationTimelineShortcuts;
 class FOdysseyAnimationEditorTimelinePosition;
-class SOdysseyAnimationTimelineControl;
 class UOdysseyAnimationCell;
 class ITableRow;
 

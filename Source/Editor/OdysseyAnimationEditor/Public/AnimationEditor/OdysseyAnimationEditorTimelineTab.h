@@ -24,6 +24,9 @@ public:
 
 public:
     void SetEmptyTimelineWidget(TSharedRef<SWidget> iWidget);
+	
+	FInt32Range GetAnimationValidRange() const;
+	void SetAnimationValidRange(const TAttribute<FInt32Range>& iValue);
 
 protected:
     // FOdysseyAnimationEditorTab interface
@@ -74,5 +77,6 @@ private:
     FOdysseyAnimationEditorExtension* mExtension;
     FText mEmptyTimelineMessage;
     TSharedPtr<SWidget> mEmptyTimelineTabWidget;
+	TAttribute<FInt32Range> mAnimationValidRange;
 };
 

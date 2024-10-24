@@ -2,7 +2,6 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineControl.h"
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineCurrentFrame.h"
 #include "OdysseyKeyState.h"
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
 #include "OdysseyAnimation.h"
@@ -20,21 +19,78 @@ SOdysseyAnimationTimelineControl::Construct(const FArguments& iArgs)
 {
     mAnimation = iArgs._Animation;
 	mTimelinePosition = iArgs._TimelinePosition;
+	mCurrentFrame = iArgs._CurrentFrame;
+	mCustomValidRange = iArgs._CustomValidRange;
 
 	ChildSlot
 	[
-		SNew(SOverlay)
-		+ SOverlay::Slot()
-		[
-			iArgs._Content.Widget
-		]
-		+ SOverlay::Slot()
-		[
-			SNew(SOdysseyAnimationTimelineCurrentFrame)
-			.CurrentFrame(iArgs._CurrentFrame)
-			.TimelinePosition(mTimelinePosition)
-		]
+		iArgs._Content.Widget
 	];
+}
+
+int32
+SOdysseyAnimationTimelineControl::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+	LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+	LayerId++;
+
+	const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush("GenericWhiteBox");
+
+	const float height = AllottedGeometry.GetLocalSize().Y;
+	const float width = AllottedGeometry.GetLocalSize().X;
+	const float frameSize = mTimelinePosition->GetFrameSize();
+
+	FLinearColor lineColor = FLinearColor::Red;
+	lineColor.A = 0.3f;
+
+	int currentFrame = mCurrentFrame.Get();
+	float currentFramePos = mTimelinePosition->FrameToMousePosition(currentFrame);
+
+	FSlateDrawElement::MakeBox(
+		OutDrawElements,
+		LayerId,
+        AllottedGeometry.ToPaintGeometry( FVector2D(frameSize, height), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(currentFramePos, 0.f) ) ) ),
+		GenericBrush,
+		ESlateDrawEffect::None,
+		lineColor
+	);
+
+	FInt32Range validRange = mCustomValidRange.Get();
+	if (!validRange.IsEmpty())
+	{	
+		FLinearColor outOfRangeColor = FLinearColor::Black;
+		outOfRangeColor.A = 0.3f;
+
+		float leftRangeX = FMath::Min(width, mTimelinePosition->FrameToMousePosition(validRange.GetLowerBoundValue()));
+		float rightRangeX = FMath::Max(0, mTimelinePosition->FrameToMousePosition(validRange.GetUpperBoundValue() + 1));
+
+		if (leftRangeX > 0.f)
+		{
+			FSlateDrawElement::MakeBox(
+				OutDrawElements,
+				LayerId,
+				AllottedGeometry.ToPaintGeometry( FVector2D(leftRangeX, height), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(0.f, 0.f) ) ) ),
+				GenericBrush,
+				ESlateDrawEffect::None,
+				outOfRangeColor
+			);
+		}
+
+		if (rightRangeX < width)
+		{
+			FSlateDrawElement::MakeBox(
+				OutDrawElements,
+				LayerId,
+				AllottedGeometry.ToPaintGeometry( FVector2D(width - rightRangeX, height), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(rightRangeX, 0.f) ) ) ),
+				GenericBrush,
+				ESlateDrawEffect::None,
+				outOfRangeColor
+			);
+		}
+	}
+
+	++LayerId;
+	return LayerId;
 }
 
 FReply

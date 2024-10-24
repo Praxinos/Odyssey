@@ -35,6 +35,7 @@ public:
 		SLATE_ATTRIBUTE( EVisibility, ScrollbarVisibility)
 		SLATE_ATTRIBUTE( float, PlaybackFramesPerSecond )
 		SLATE_ATTRIBUTE( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+		SLATE_ATTRIBUTE( FInt32Range, CustomValidRange)
 		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
 		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
 		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
@@ -69,6 +70,7 @@ private:
 	TAttribute<EVisibility> mScrollbarVisibility;
 	TAttribute<float> mPlaybackFramesPerSecond;
 	TAttribute<TSharedPtr<FOdysseyAnimationEditorTimelinePosition>> mTimelinePosition;
+	TAttribute<FInt32Range> mCustomValidRange;
 	SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
 	FSimpleDelegate mOnInactivateOutOfPegs;
 	SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;

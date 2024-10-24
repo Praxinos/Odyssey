@@ -34,6 +34,9 @@
 #include "OdysseyViewportDrawingEditorUtils.h"
 #include "OdysseyAnimationActor.h"
 #include "OdysseyAnimationComponent.h"
+#include "OdysseyAnimationComponentTrack.h"
+#include "OdysseyAnimationComponentSection.h"
+#include "MovieScene.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
@@ -432,7 +435,7 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
 					animationMediaPlayer->UnsetFrameToIncludeIntoDuration();
 				}
 			}
-		}
+		}		
 	}
 
 	mTexture = nullptr;
@@ -449,20 +452,20 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
 		{
 			UOdysseyAnimationComponent* animationComponent = Cast<UOdysseyAnimationComponent>(mComponent);
 			if (!animationComponent)
-				return;
-
+			return;
+		
 			TSharedPtr<FOdysseyAnimationEditorSource> animationSource = MakeShared<FOdysseyAnimationEditorSource>(animationComponent->Animation);
 			animationSource->SetExternalPlayer(animationComponent->GetActivePlayer());
 			mEditor->SetSource(animationSource);
 		}
 		else
 		{
-			UTexture2D* texture = Cast<UTexture2D>(mTexture);
+		UTexture2D* texture = Cast<UTexture2D>(mTexture);
 
-			//TODO: change the texture for display
+		//TODO: change the texture for display
 
-			TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
-			mEditor->SetSource(source);
+		TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
+		mEditor->SetSource(source);
 		}
 	}
 
@@ -495,6 +498,142 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
 
 		if (wasOpened)
 			SyncMediaPlayerWithAnimationCurrentFrame();
+	}
+}
+
+void
+FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
+{
+	if (!mComponent->IsA<UOdysseyAnimationComponent>())
+		return;
+
+	UOdysseyAnimationComponent* animationComponent = Cast<UOdysseyAnimationComponent>(mComponent);
+	if (!animationComponent)
+		return;
+
+	UOdysseyAnimation* animation = animationComponent->GetActiveAnimation();
+	if (!animation)
+		return;
+
+	UOdysseyAnimationPlayer* player = animationComponent->GetActivePlayer();
+	if (!player)
+		return;
+
+	for (TWeakPtr<ISequencer> weakSequencer : mSequencers)
+	{
+		TSharedPtr<ISequencer> sequencer = weakSequencer.Pin();
+		if (!sequencer)
+			continue;
+
+		UMovieSceneSequence* movieSceneSequence = sequencer->GetFocusedMovieSceneSequence();
+		if (!movieSceneSequence)
+			continue;
+
+		FGuid binding = sequencer->GetHandleToObject(animationComponent, false);
+		if (!binding.IsValid())
+			continue;
+
+		UMovieScene* movieScene = movieSceneSequence->GetMovieScene();
+		if (!movieScene)
+			continue;
+
+		UOdysseyAnimationComponentTrack* track =  movieScene->FindTrack<UOdysseyAnimationComponentTrack>(binding);
+		if (!track)
+			continue;
+
+		TArray<UMovieSceneSection*> sections = track->GetAllSections();
+
+		UMovieSceneSection** sectionPtr = sections.FindByPredicate(
+			[sequencer](UMovieSceneSection* iSection)
+			{
+				if (!iSection->IsActive())
+					return false;
+
+				if (!iSection->IsTimeWithinSection(sequencer->GetLocalTime().Time.FrameNumber))
+					return false;
+
+				return true;
+			}
+		);
+
+		if (!sectionPtr)
+			continue;
+
+		UOdysseyAnimationComponentSection* section = Cast<UOdysseyAnimationComponentSection>(*sectionPtr);
+		if (!section)
+			continue;
+
+		int animationDisplayedFrame = animation->GetFrameIndexAtTime(player->GetCurrentTime());
+	
+		FFrameRate tickResolution = movieScene->GetTickResolution();
+		FFrameRate displayRate = sequencer->GetFocusedDisplayRate();
+
+		TRange<FFrameNumber> sectionRange = section->GetTrueRange();
+		FFrameNumber sectionStartFrame = sectionRange.GetLowerBoundValue();
+		FFrameNumber sectionEndFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(sectionRange.GetUpperBoundValue() - 1, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution).FrameNumber;
+		
+		double totalSeconds = animationDisplayedFrame / animation->FramesPerSecond;
+		FFrameNumber frame = tickResolution.AsFrameNumber(totalSeconds);
+		double totalSecondsNext = (animationDisplayedFrame + 1) / animation->FramesPerSecond;
+		FFrameNumber frameNext = tickResolution.AsFrameNumber(totalSecondsNext);
+
+		/* if (frame <= sectionStartFrame)
+		{
+			sequencer->SetLocalTime(sectionStartFrame, STM_Interval, false);
+			sequencer->ForceEvaluate(); //SetLocalTime does not ensure evaluation is made, so we force it here and ask SetLocalTime to not perform any evaluation
+			return;
+		}
+
+		if (frame >= sectionEndFrame)
+		{
+			sequencer->SetLocalTime(sectionEndFrame, STM_Interval, false);
+			sequencer->ForceEvaluate(); //SetLocalTime does not ensure evaluation is made, so we force it here and ask SetLocalTime to not perform any evaluation
+			return;
+		} */
+
+		frame = FMath::Clamp(frame, sectionStartFrame, sectionEndFrame);
+
+		//FFrameTime intervalStartFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(sequencer->GetLocalTime().Time, tickResolution, displayRate).RoundToFrame(), displayRate, tickResolution);
+		FFrameTime intervalNextFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(frame, tickResolution, displayRate).CeilToFrame(), displayRate, tickResolution);
+		FFrameTime intervalPrevFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(frame, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution);
+		//FFrameTime intervalEndFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(sequencer->GetLocalTime().Time, tickResolution, displayRate).RoundToFrame() + 1, displayRate, tickResolution);
+
+		if (frameNext >= intervalNextFrame)
+		{
+			sequencer->SetLocalTime(intervalNextFrame, STM_Interval, false);
+			sequencer->ForceEvaluate(); //SetLocalTime does not ensure evaluation is made, so we force it here and ask SetLocalTime to not perform any evaluation
+		}
+		else
+		{
+			sequencer->SetLocalTime(intervalPrevFrame, STM_Interval, false);
+			sequencer->ForceEvaluate(); //SetLocalTime does not ensure evaluation is made, so we force it here and ask SetLocalTime to not perform any evaluation
+		}
+
+		/*double animationStartFrame = animation->GetFramesPerSecond() * tickResolution.AsSeconds(intervalStartFrame - sectionStartFrame + section->StartFrameOffset);
+		//double animationEndFrame = animation->GetFramesPerSecond() * tickResolution.AsSeconds(intervalEndFrame - sectionStartFrame + section->StartFrameOffset);
+
+		int animationStartFrameInt = FMath::Floor(animationStartFrame);
+		//int animationEndFrameInt = FMath::Floor(animationEndFrame);
+
+		int animationFrame = animationStartFrameInt;
+		/* if (animationEndFrameInt == animationStartFrameInt + 1)
+		{
+			double startOverlap = 1.0f - (animationStartFrame - animationStartFrameInt);
+			double endOverlap = animationEndFrame - animationEndFrameInt;
+
+			animationFrame = startOverlap > endOverlap ? animationStartFrameInt : animationEndFrameInt;
+		}
+		else if (animationEndFrameInt > animationStartFrameInt + 1)
+		{
+			double startOverlap = 1.0f - (animationStartFrame - animationStartFrameInt);
+			animationFrame = startOverlap > 1.f - UE_SMALL_NUMBER ? animationStartFrameInt : animationStartFrameInt + 1;
+		}*/
+
+		/*if (animationFrame != animationDisplayedFrame)
+		{
+			sequencer->SetLocalTime(frame, STM_Interval, false);
+			sequencer->ForceEvaluate(); //SetLocalTime does not ensure evaluation is made, so we force it here and ask SetLocalTime to not perform any evaluation
+		} */
 	}
 }
 
@@ -769,6 +908,12 @@ FOdysseyViewportDrawingEditorExtension::SelectDefaultMaterial()
     }
 }
 
+TArray<TWeakPtr<ISequencer>>
+FOdysseyViewportDrawingEditorExtension::Sequencers() const
+{
+	return mSequencers;
+}
+
 void
 FOdysseyViewportDrawingEditorExtension::OnSequencersChanged()
 {
@@ -876,6 +1021,7 @@ void
 FOdysseyViewportDrawingEditorExtension::OnAnimationPlayerCurrentTimeChanged()
 {
 	SyncMediaPlayerWithAnimationPlayer();
+	SyncSequencerWithAnimationPlayer();
 }
 
 void

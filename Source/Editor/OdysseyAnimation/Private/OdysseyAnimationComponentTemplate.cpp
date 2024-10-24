@@ -56,19 +56,20 @@ struct FOdysseyAnimationComponentSectionExecutionToken
 		int frame = startFrameInt;
 		if (endFrameInt == startFrameInt + 1)
 		{
-			double startOverlap = startFrame - startFrameInt;
+			double startOverlap = 1.0f - (startFrame - startFrameInt);
 			double endOverlap = endFrame - endFrameInt;
 
 			frame = startOverlap > endOverlap ? startFrameInt : endFrameInt;
 		}
 		else if (endFrameInt > startFrameInt + 1)
 		{
-			double startOverlap = startFrame - startFrameInt;
-			frame = startOverlap < 1.f - UE_SMALL_NUMBER ? startFrameInt : startFrameInt + 1;
+			double startOverlap = 1.0f - (startFrame - startFrameInt);
+			frame = startOverlap > 1.f - UE_SMALL_NUMBER ? startFrameInt : startFrameInt + 1;
 		}
 
 		player->SeekToFrame(frame);
-		FObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
+		if (frame != animation->CurrentFrame)
+			FObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
 	}
 
 private:
@@ -115,11 +116,8 @@ FOdysseyAnimationComponentTemplate::Evaluate(const FMovieSceneEvaluationOperand&
 	const FFrameTime FrameTime(Context.GetTime().FrameNumber - mParams.SectionStartFrame + mParams.StartFrameOffset);
 	const double FrameTimeInSeconds = FrameRate.AsSeconds(FrameTime);
 
-	const int64 FrameTicks = static_cast<int64>(FrameTimeInSeconds * ETimespan::TicksPerSecond);
-
 	// With zero-length frames (which can occur occasionally), we use the fixed frame time, matching previous behavior.
-	const double FrameDurationInSeconds = FMath::Max(FrameRate.AsSeconds(FFrameTime(1)), (Context.GetRange().Size<FFrameTime>()) / Context.GetFrameRate());
-	const int64 FrameDurationTicks = static_cast<int64>(FrameDurationInSeconds * ETimespan::TicksPerSecond);
+	const double FrameDurationInSeconds = FMath::Clamp( (Context.GetRange().Size<FFrameTime>()) / Context.GetFrameRate(), FrameRate.AsSeconds(FFrameTime(1)), FrameRate.AsSeconds((mParams.SectionEndFrame - mParams.SectionStartFrame) - FrameTime));
 	
 	ExecutionTokens.Add(FOdysseyAnimationComponentSectionExecutionToken(FrameTimeInSeconds, FrameDurationInSeconds));
 }

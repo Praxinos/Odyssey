@@ -74,15 +74,14 @@ FOdysseyAnimationTrackEditorSection::GetLayerHeight(UOdysseyLayer* iLayer)
 float
 FOdysseyAnimationTrackEditorSection::GetSectionHeight( const UE::Sequencer::FViewDensityInfo& ViewDensity ) const
 {
-	UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
-	if (!track)
-		return GetCollapsedSectionHeight();
-
+	int height = GetCollapsedSectionHeight();
 	
-	if (track->DisplayLayers)
-		return GetUncollapsedSectionHeight(GetComponent());
+	UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
+	if (track && track->DisplayLayers)
+		height = GetUncollapsedSectionHeight(GetComponent());
 
-	return GetCollapsedSectionHeight();
+	track->SetRowHeight( height ); // Arbitrary value which should only be used for one (or some) tick(s) waiting the creation of the layout widget in the section
+    return track->GetRowHeight();
 }
 
 float
@@ -92,7 +91,7 @@ FOdysseyAnimationTrackEditorSection::GetSectionGripHeight(float iSectionHeight) 
 	if (!track)
 		return TSubSectionMixin::GetSectionGripHeight(iSectionHeight);
 
-	return GetCollapsedSectionHeight();
+	return FMath::Min(iSectionHeight, GetCollapsedSectionHeight());
 }
 
 FText

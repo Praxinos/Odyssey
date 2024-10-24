@@ -87,6 +87,7 @@ FOdysseyAnimationEditorTimelineTab::CreateWidget()
 			.OnActivateOutOfPegs(this, &FOdysseyAnimationEditorTimelineTab::OnActivateOutOfPegs)
 			.OnInactivateOutOfPegs(this, &FOdysseyAnimationEditorTimelineTab::OnInactivateOutOfPegs)
 			.OnIsOutOfPegsChecked(this, &FOdysseyAnimationEditorTimelineTab::OnIsOutOfPegsChecked)
+			.CustomValidRange(this, &FOdysseyAnimationEditorTimelineTab::GetAnimationValidRange)
         ]
         +SWidgetSwitcher::Slot()
         [
@@ -473,6 +474,21 @@ FOdysseyAnimationEditorTimelineTab::OnIsOutOfPegsChecked(UOdysseyAnimationCell* 
 		return ECheckBoxState::Unchecked;
 		
 	return ECheckBoxState::Checked;
+}
+
+FInt32Range
+FOdysseyAnimationEditorTimelineTab::GetAnimationValidRange() const
+{
+	if (mAnimationValidRange.IsBound())
+		return mAnimationValidRange.Get();
+
+	return FInt32Range::Empty();
+}
+
+void
+FOdysseyAnimationEditorTimelineTab::SetAnimationValidRange(const TAttribute<FInt32Range>& iValue)
+{
+	mAnimationValidRange = iValue;
 }
 
 #undef LOCTEXT_NAMESPACE

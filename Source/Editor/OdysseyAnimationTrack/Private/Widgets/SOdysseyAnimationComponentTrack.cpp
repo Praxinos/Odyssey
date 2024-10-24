@@ -95,7 +95,11 @@ SOdysseyAnimationComponentTrack::GetLayersVisibility() const
 FMargin
 SOdysseyAnimationComponentTrack::GetDisplayLayersPadding() const
 {
-	const int32 NestingDepth = FMath::Max(0, mRow->GetIndentLevel());
+	TSharedPtr<UE::Sequencer::ISequencerTreeViewRow> row = mRow.Pin();
+	if (!row)
+		return FMargin();
+
+	const int32 NestingDepth = FMath::Max(0, row->GetIndentLevel());
 	const float Indent = 10.f;
 	return FMargin( NestingDepth * Indent, 0.f, 2.f, 0.f );
 }

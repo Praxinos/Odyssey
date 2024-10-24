@@ -38,5 +38,5 @@ private:
 private:
 	UOdysseyAnimationComponent* mComponent;
 	UOdysseyAnimationComponentTrack* mTrack;
-	TSharedPtr<UE::Sequencer::ISequencerTreeViewRow> mRow;
+	TWeakPtr<UE::Sequencer::ISequencerTreeViewRow> mRow; //Must be a WeakPtr, otherwise the row is never killed and is still displayed when it should be hidden
 };

@@ -54,6 +54,7 @@ SOdysseyAnimationLayerStack::Construct(const FArguments& InArgs)
 	mOnActivateOutOfPegs = InArgs._OnActivateOutOfPegs;
 	mOnInactivateOutOfPegs = InArgs._OnInactivateOutOfPegs;
 	mOnIsOutOfPegsChecked = InArgs._OnIsOutOfPegsChecked;
+	mCustomValidRange = InArgs._CustomValidRange;
 
     RebuildWidgets();
 }
@@ -128,6 +129,7 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
 				.Animation(mAnimation.Get())
 				.CurrentFrame(this, &SOdysseyAnimationLayerStack::GetCurrentFrame)
 				.TimelinePosition(mTimelinePosition.Get())
+				.CustomValidRange(mCustomValidRange)
 				[
 					SAssignNew(mTimelineTreeView, SOdysseyAnimationTimelineTreeView)
 					.LayerStack(layerStack)
