@@ -34,6 +34,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         // copy flags
         static const uint32 COPY_RETOPOLOGY          = ( 1 << 0 );
         static const uint32 COPY_WORLDCOORDS         = ( 1 << 1 );
+        static const uint32 COPY_NOTAG               = ( 1 << 2 );
 
         // update flags
         //static const uint32 FREQUENTUPDATES = ( 1 << 0 );

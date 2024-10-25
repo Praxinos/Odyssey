@@ -432,11 +432,14 @@ FOdysseyVectorObject::Copy( uint64 iCopyFlags
         }
 
         // copy tags
-        for( FOdysseyVectorTag* tag : mTagList )
+        if( ( iCopyFlags & COPY_NOTAG ) == 0 )
         {
-            FOdysseyVectorTag* tagCopy = tag->Copy( objectCopy );
+            for( FOdysseyVectorTag* tag : mTagList )
+            {
+                FOdysseyVectorTag* tagCopy = tag->Copy( objectCopy );
 
-            objectCopy->AddTag( tagCopy );
+                objectCopy->AddTag( tagCopy );
+            }
         }
     }
 

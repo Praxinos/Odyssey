@@ -1779,6 +1779,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
             FOdysseyVectorGroupPaint* inbetweenScene = inbetweenCell->GetEngine()->GetScene();
 
             FOdysseyVectorObject* copiedObject = mOwner->Copy( FOdysseyVectorObject::COPY_WORLDCOORDS
+                                                             | FOdysseyVectorObject::COPY_NOTAG
                                                              , preProcess
                                                              , postProcess );
 
