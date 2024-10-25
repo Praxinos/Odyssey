@@ -577,8 +577,12 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
 		double totalSecondsNext = (animationDisplayedFrame + 1) / animation->FramesPerSecond;
 		FFrameNumber frameNext = tickResolution.AsFrameNumber(totalSecondsNext);
 
-		frame = FMath::Clamp(frame, sectionStartFrame, sectionEndFrame);
+		FFrameTime currentFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(sequencer->GetLocalTime().Time.FrameNumber, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution);
 
+		if (currentFrame >= frame && currentFrame < frameNext)
+			return;
+
+		frame = FMath::Clamp(frame, sectionStartFrame, sectionEndFrame);
 		FFrameTime intervalNextFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(frame, tickResolution, displayRate).CeilToFrame(), displayRate, tickResolution);
 		FFrameTime intervalPrevFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(frame, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution);
 
