@@ -10,6 +10,8 @@ FOdysseyVectorRoot::FOdysseyVectorRoot( IOdysseyVectorLayer* iLayer
     , mEngine ( iLayer, iCell, this, iPreferredWidth, iPreferredHeight )
     , mScene ( nullptr )
 {
+    bIsSystem = true;
+
     SetScene( iScene );
 }
 

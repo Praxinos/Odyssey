@@ -46,19 +46,18 @@ FOdysseyVectorTagInbetweener::~FOdysseyVectorTagInbetweener()
                               } );
 }
 
-FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorSharedEnv* iSharedEnv
-                                                          , FOdysseyVectorObject* iOwnerObject
+FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject* iOwnerObject
                                                           , uint32 iNumQuadX
-                                                          , uint32 iNumQuadY )
+                                                          , uint32 iNumQuadY
+                                                          , eInbetweenerGridType iGridType )
     : FOdysseyVectorTag( iOwnerObject )
     //, mSharedEnv ( iSharedEnv )
     // Remember the scene because when removing the tag, we'll need to be able to redraw inbetween cells but
     // as the owner object won't be linked to the screne anymore, the scene won't be retrievable.
     // Note: hence the Owner MUST be in the scene's hierarchy
     , mScene ( iOwnerObject->GetScene() )
-    , mSharedEnv ( iOwnerObject->GetSharedEnv() )
     //, mGrid( nullptr )
-    , mGridType( eInbetweenerGridType::ARAP )
+    , mGridType( iGridType )
     , mGridNumQuadX( iNumQuadX )
     , mGridNumQuadY( iNumQuadY )
     , mInterpolationType( eInbetweenerInterpolationType::ARAP )
@@ -98,14 +97,35 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorShared
 }
 
 FOdysseyVectorTagInbetweener*
-FOdysseyVectorTagInbetweener::Copy( FOdysseyVectorObject* iOwnerObject )
+FOdysseyVectorTagInbetweener::Copy( FOdysseyVectorObject* iDestOwnerObject )
 {
-    FOdysseyVectorTagInbetweener* newTag = new FOdysseyVectorTagInbetweener ( iOwnerObject->GetSharedEnv()
-                                                                            , iOwnerObject
+    FOdysseyVectorTagInbetweener* newTag = new FOdysseyVectorTagInbetweener ( iDestOwnerObject
                                                                             , mGridNumQuadX
-                                                                            , mGridNumQuadY );
+                                                                            , mGridNumQuadY
+                                                                            , mGridType );
 
+    newTag->mInterpolationType = mInterpolationType;
+    newTag->mColor = mColor;
+    newTag->bMapAsPolyline = bMapAsPolyline;
+    newTag->bWithThickness = bWithThickness;
+    newTag->bContiguous = bContiguous;
+    newTag->mInterpolationDirection = mInterpolationDirection;
+    newTag->bSquare = bSquare;
+    newTag->mChartColor = mChartColor;
+    newTag->mGridColor = mGridColor;
 
+    newTag->GetMasterBreakdown()->SetTargetDrawingIndex( GetLength() - 1 );
+
+    for( FInbetweenerBreakdown* breakdown : mBreakdownList )
+    {
+        newTag->AddBreakdown( breakdown->GetTargetDrawingIndex(), false );
+    }
+/*
+    for( FInbetweenerRoute* route : mRouteList )
+    {
+        newTag->AddRoute( breakdown->GetTargetDrawingIndex(), false );
+    }
+*/
     return newTag;
 }
 
@@ -726,9 +746,15 @@ FOdysseyVectorTagInbetweener::GetUsedPointCount()
 void
 FOdysseyVectorTagInbetweener::ObjectAdded()
 {
+    mScene = mOwner->GetScene();
+    mSharedEnv = mOwner->GetSharedEnv();
+
     if( bShared == false )
     {
-        Share( mSharedEnv );
+        if( mScene )
+        {
+            Share( mSharedEnv );
+        }
 
         // commented-out : celles are redrawn in the FOdysseyVectorTagInbetweener::Update() method
         //RedrawCells();
@@ -742,7 +768,6 @@ FOdysseyVectorTagInbetweener::ObjectRemoved()
     {
         Unshare( mSharedEnv );
 
-        // commented-out : celles are redrawn in the FOdysseyVectorTagInbetweener::Update() method
         //RedrawCells();
     }
 }
@@ -750,7 +775,13 @@ FOdysseyVectorTagInbetweener::ObjectRemoved()
 void
 FOdysseyVectorTagInbetweener::Added()
 {
-    Share( mSharedEnv );
+    mScene = mOwner->GetScene();
+    mSharedEnv = mOwner->GetSharedEnv();
+
+    if( mSharedEnv )
+    {
+        Share( mSharedEnv );
+    }
 
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
@@ -1086,7 +1117,7 @@ FOdysseyVectorTagInbetweener::RedrawCells( uint32 iDrawingCount )
 {
     // scene could be non existent when the tag's owner is removed, as it would still trigger call to Update()
     // right after the removal of an object in the hierarchy.
-    if( mScene->GetSharedEnv() )
+    if( mSharedEnv )
     {
         IOdysseyVectorCell* cell = mScene->GetEngine()->GetCell();
         IOdysseyVectorLayer* layer = mScene->GetEngine()->GetLayer();

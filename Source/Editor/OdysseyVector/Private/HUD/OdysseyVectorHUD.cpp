@@ -476,6 +476,8 @@ FOdysseyVectorHUD::DrawBreakdown( BLContext* iBLContext
     BLMatrix2D worldMatrix = inbetweenerTag->GetOwner()->GetWorldMatrix();
     FColor color = inbetweenerTag->GetColor();
 
+    iBreakdown->GetInbetweenerTag()->LockDrawing();
+
     if( iHUDFlags & HUD_BREAKDOWN_INBETWEEN )
     {
         iBLContext->setStrokeWidth( 2.0f );
@@ -493,7 +495,7 @@ FOdysseyVectorHUD::DrawBreakdown( BLContext* iBLContext
             iBLContext->setStrokeStyle( style );
             iBLContext->setFillStyle( style );
 
-            inbetweenerTag->DrawPathsInbetween( inbetween, iBLContext, true );
+            inbetweenerTag->DrawPathsInbetween( inbetween, iBLContext, false );
         }
     }
 
@@ -503,7 +505,7 @@ FOdysseyVectorHUD::DrawBreakdown( BLContext* iBLContext
         iBLContext->setStrokeStyle( iSourceDrawingColor );
         iBLContext->setFillStyle( iSourceDrawingColor );
 
-        iBreakdown->DrawPathsAtSource( iBLContext, true );
+        iBreakdown->DrawPathsAtSource( iBLContext, false );
     }
 
     if( iHUDFlags & HUD_BREAKDOWN_TARGET )
@@ -512,18 +514,20 @@ FOdysseyVectorHUD::DrawBreakdown( BLContext* iBLContext
         iBLContext->setStrokeStyle( iTargetDrawingColor );
         iBLContext->setFillStyle( iTargetDrawingColor );
 
-        iBreakdown->DrawPathsAtTarget( iBLContext, true );
+        iBreakdown->DrawPathsAtTarget( iBLContext, false );
     }
 
     if( iHUDFlags & HUD_BREAKDOWN_SOURCE_GRID )
     {
-        iBreakdown->DrawSourceGrid( iBLContext, true );
+        iBreakdown->DrawSourceGrid( iBLContext, false );
     }
 
     if( iHUDFlags & HUD_BREAKDOWN_TARGET_GRID )
     {
-        iBreakdown->DrawTargetGrid( iBLContext, true );
+        iBreakdown->DrawTargetGrid( iBLContext, false );
     }
+
+    iBreakdown->GetInbetweenerTag()->UnlockDrawing();
 }
 
 // static

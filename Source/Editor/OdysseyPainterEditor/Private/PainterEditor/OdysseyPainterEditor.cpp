@@ -1090,10 +1090,10 @@ FOdysseyPainterEditor::GroupAndAddInbetweenerTag( FOdysseyPainterEditor* iEditor
 
     if( group )
     {
-        FOdysseyVectorTagInbetweener *inbetweenerTag = new FOdysseyVectorTagInbetweener( iScene->GetSharedEnv()
-                                                                                       , group
+        FOdysseyVectorTagInbetweener *inbetweenerTag = new FOdysseyVectorTagInbetweener( group
                                                                                        , 16
-                                                                                       , 16 );
+                                                                                       , 16
+                                                                                       , eInbetweenerGridType::ARAP );
 
         //inbetweenerTag->SetInterpolationDirection( eInbetweenerInterpolationDirection::Backward );
 
@@ -1727,10 +1727,10 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
 
         if( tag == nullptr )
         {
-            FOdysseyVectorTagInbetweener* inbetweenerTag = new FOdysseyVectorTagInbetweener( iScene->GetSharedEnv()
-                                                                                           , selectedObject
+            FOdysseyVectorTagInbetweener* inbetweenerTag = new FOdysseyVectorTagInbetweener( selectedObject
                                                                                            , 16
-                                                                                           , 16 );
+                                                                                           , 16
+                                                                                           , eInbetweenerGridType::ARAP );
 
             selectedObject->AddTag( inbetweenerTag );
 

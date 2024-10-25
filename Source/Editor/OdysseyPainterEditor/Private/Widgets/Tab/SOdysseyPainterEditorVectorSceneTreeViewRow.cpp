@@ -130,9 +130,49 @@ FReply
 SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonUp( const FGeometry & MyGeometry
                                                             , const FPointerEvent & MouseEvent )
 {
-    return FReply::Unhandled();
+    FReply reply = FReply::Handled();
+
+    reply = STableRow::OnMouseButtonUp( MyGeometry, MouseEvent );
+
+    // request redraw
+    mItem.Get()->GetVectorObject()->GetEngine()->Invalidate( 0 );
+
+    FOdysseyVectorEngine::Notify( nullptr, 
+                                  FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                                //| FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                                | FOdysseyPainterEditor::UI_UPDATE_HUD );
+
+    return reply;
 }
 
+
+FReply
+SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonDown( const FGeometry & MyGeometry
+                                                              , const FPointerEvent & MouseEvent )
+{
+    const TSharedPtr< SOdysseyPainterEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SOdysseyPainterEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
+    FOdysseyVectorObject* vectorObject = mItem.Get()->GetVectorObject();
+    FOdysseyVectorEngine* vectorEngine = vectorObject->GetEngine();
+    FReply reply = FReply::Handled();
+/*
+    if( mItem.Get()->IsSensitive() == false )
+    {
+        return FReply::Unhandled();
+    }
+*/
+/*
+    if( vectorObject->IsSelected() == false )
+    {
+        vectorEngine->SelectObject( vectorObject );
+    }
+*/
+    reply = STableRow::OnMouseButtonDown( MyGeometry, MouseEvent );
+
+
+    return reply;
+}
+
+/*
 FReply
 SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonDown( const FGeometry & MyGeometry
                                                               , const FPointerEvent & MouseEvent )
@@ -141,10 +181,18 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonDown( const FGeometry 
     FOdysseyVectorObject* vectorObject = mItem.Get()->GetVectorObject();
     FOdysseyVectorGroupPaint* vectorScene = vectorObject->GetScene();
     FOdysseyVectorEngine* vectorEngine = vectorObject->GetEngine();
+    FReply reply = FReply::Handled();
 
     if( mItem.Get()->IsSensitive() == false )
     {
         return FReply::Unhandled();
+    }
+
+    if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    {
+          reply
+          .DetectDrag(SharedThis(this), EKeys::LeftMouseButton)
+          .SetUserFocus(treeView->AsWidget(), EFocusCause::Mouse);
     }
 
     // Note: we don't rely on STreeView::SelectedItems to keep track of the selection.
@@ -206,13 +254,14 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonDown( const FGeometry 
                                   FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                                 | FOdysseyPainterEditor::UI_UPDATE_HUD );
 
-    return FReply::Handled();
+    return reply;
 }
+*/
 
 ESelectionMode::Type
 SOdysseyPainterEditorVectorSceneTreeViewRow::GetSelectionMode () const
 {
-    return mItem.Get()->IsSensitive() ?ESelectionMode::Type::Single :  ESelectionMode::Type::None;
+    return mItem.Get()->IsSensitive() ? ESelectionMode::Type::Multi :  ESelectionMode::Type::None;
 }
 
 
@@ -286,12 +335,16 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
             {
                 FOdysseyVectorObject* parentObject = itemObject->GetParent();
 
-                // don't drop onto the same object or else expect some infinite loop
-                if( parentObject != focusedObject )
+                // note: SharedEnv and Root are system objects
+                if( parentObject->IsSystem() == false )
                 {
-                    parentObject->TransferChild( focusedObject, parentObject->GetPreviousChild( insertObject ) );
+                    // don't drop onto the same object or else expect some infinite loop
+                    if( parentObject != focusedObject )
+                    {
+                        parentObject->TransferChild( focusedObject, parentObject->GetPreviousChild( insertObject ) );
 
-                    insertObject = focusedObject;
+                        insertObject = focusedObject;
+                    }
                 }
             }
             break;
@@ -310,12 +363,16 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
             {
                 FOdysseyVectorObject* parentObject = itemObject->GetParent();
 
-                // don't drop onto the same object or else expect some infinite loop
-                if( parentObject != focusedObject )
+                // note: SharedEnv and Root are system objects
+                if( parentObject->IsSystem() == false )
                 {
-                    parentObject->TransferChild( focusedObject, insertObject );
 
-                    insertObject = focusedObject;
+                    if( parentObject != focusedObject )
+                    {
+                        parentObject->TransferChild( focusedObject, insertObject );
+
+                        insertObject = focusedObject;
+                    }
                 }
             }
             break;

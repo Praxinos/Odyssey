@@ -145,6 +145,77 @@ SOdysseyPainterEditorVectorSceneTreeView::ExpandTree( const TSharedPtr<FVectorSc
     }
 }
 
+void
+SOdysseyPainterEditorVectorSceneTreeView::Private_SelectRangeFromCurrentTo ( TSharedPtr<FVectorSceneTreeViewItem> iItem )
+{
+    if( RangeSelectionStart )
+    {
+        FOdysseyVectorObject* fromObject = RangeSelectionStart.Get()->GetVectorObject();
+        FOdysseyVectorObject* toObject = iItem.Get()->GetVectorObject();
+        FOdysseyVectorObject* vectorObject = mRootItem.Get()->GetVectorObject();
+        FOdysseyVectorEngine* vectorEngine = vectorObject->GetEngine();
+        bool doSelect = false;
+
+        for( const TSharedPtr<FVectorSceneTreeViewItem>& item : GetItems() )
+        {
+            FOdysseyVectorObject* itemObject = item.Get()->GetVectorObject();
+
+            if( ( itemObject == fromObject ) || ( itemObject == toObject ) )
+            {
+                if( itemObject->IsSelected() == false )
+                {
+                    vectorEngine->SelectObject( itemObject );
+                }
+
+                doSelect = !doSelect;
+            }
+            else
+            {
+                if( doSelect )
+                {
+                    if( itemObject->IsSelected() == false )
+                    {
+                        vectorEngine->SelectObject( itemObject );
+                    }
+                }
+            }
+        }
+    }
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::Private_SetItemSelection ( TSharedPtr<FVectorSceneTreeViewItem> iItem
+                                                                   , bool bShouldBeSelected
+                                                                   , bool bWasUserDirected )
+{
+    FOdysseyVectorObject* vectorObject = iItem.Get()->GetVectorObject();
+    FOdysseyVectorEngine* vectorEngine = vectorObject->GetEngine();
+
+    if( bShouldBeSelected )
+    {
+        vectorEngine->SelectObject( vectorObject );
+
+        RangeSelectionStart = iItem;
+    }
+    else
+    {
+        vectorEngine->UnselectObject( vectorObject );
+    }
+}
+
+void
+SOdysseyPainterEditorVectorSceneTreeView::Private_ClearSelection()
+{
+    if( mRootItem )
+    {
+        // the scene
+        FOdysseyVectorObject* vectorObject = mRootItem.Get()->GetVectorObject();
+        FOdysseyVectorEngine* vectorEngine = vectorObject->GetEngine();
+
+        vectorEngine->ClearObjectSelection();
+    }
+}
+
 bool
 SOdysseyPainterEditorVectorSceneTreeView::Private_IsItemSelected( const TSharedPtr<FVectorSceneTreeViewItem>& iItem )  const
 {

@@ -32,6 +32,7 @@ FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     : mParent( nullptr )
     , bSelected( false )
     , bExpanded( false )
+    , bIsSystem( false )
     , mBackgroundBucket( this, 0.0f, 0.0f, false )
     , mForegroundBucket( this, 0.0f, 0.0f, false )
     , mInvalidationFlags ( 0 )
@@ -178,6 +179,12 @@ FOdysseyVectorObject::Added()
     {
         tag->ObjectAdded();
     }
+}
+
+bool
+FOdysseyVectorObject::IsSystem()
+{
+    return bIsSystem;
 }
 
 void
@@ -422,6 +429,14 @@ FOdysseyVectorObject::Copy( uint64 iCopyFlags
             FOdysseyVectorObject *childCopy = child->Copy( copyFlags, iPreCallback, iPostCallback );
 
             objectCopy->AppendChild( childCopy );
+        }
+
+        // copy tags
+        for( FOdysseyVectorTag* tag : mTagList )
+        {
+            FOdysseyVectorTag* tagCopy = tag->Copy( objectCopy );
+
+            objectCopy->AddTag( tagCopy );
         }
     }
 

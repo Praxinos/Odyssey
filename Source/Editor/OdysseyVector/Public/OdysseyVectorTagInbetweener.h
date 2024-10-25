@@ -65,10 +65,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         virtual uint32 GetClass() { return mStaticClass; };
 
         virtual ~FOdysseyVectorTagInbetweener();
-        FOdysseyVectorTagInbetweener( FOdysseyVectorSharedEnv* iSharedEnv
-                                    , FOdysseyVectorObject* iOwnerObject
+        FOdysseyVectorTagInbetweener( FOdysseyVectorObject* iOwnerObject
                                     , uint32 iNumCellX
-                                    , uint32 iNumCellY );
+                                    , uint32 iNumCellY
+                                    , eInbetweenerGridType iGridType  );
 
         /**
          * @brief Draw the tag to the Blend2D context passed as parameter
@@ -176,7 +176,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         std::list<FInbetweenerRoute*>& GetRouteList();
         void RemoveRoute( FInbetweenerRoute* iRoute );
         void RemoveAllRoutes();
-        virtual FOdysseyVectorTagInbetweener* Copy( FOdysseyVectorObject* iOwnerObject ) override;
+        virtual FOdysseyVectorTagInbetweener* Copy( FOdysseyVectorObject* iDestOwnerObject ) override;
         virtual void Update( uint32 iUpdateFlags
                            , uint64 iOwnerInvalidationFlags ) override;
         void Commit( std::list<FOdysseyVectorTag*>& oRemovedTagList
@@ -323,7 +323,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
     protected:
         FOdysseyVectorGroupPaint* mScene;
         FOdysseyVectorSharedEnv* mSharedEnv;
-        //FOdysseyVectorSharedEnv* mSharedEnv;
         std::vector<FInterpolatedPath> mInterpolatedPathBuffer;
         std::list<FInbetweenerRoute*> mRouteList;
         std::list<FInbetweenerBreakdown*> mBreakdownList;

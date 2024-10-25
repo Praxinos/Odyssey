@@ -238,10 +238,10 @@ FOdysseyVectorImportV2::ParseObjectChunks( FOdysseyVectorObject& iObject
 
         case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER:
         {
-            FOdysseyVectorTagInbetweener* inbetweenerTag = new FOdysseyVectorTagInbetweener( iObject.GetSharedEnv()
-                                                                                           , &iObject
+            FOdysseyVectorTagInbetweener* inbetweenerTag = new FOdysseyVectorTagInbetweener( &iObject
                                                                                            , 0
-                                                                                           , 0 );
+                                                                                           , 0
+                                                                                           , eInbetweenerGridType::ARAP );
 
             iObject.AddTag( inbetweenerTag );
 

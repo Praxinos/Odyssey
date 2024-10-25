@@ -9,6 +9,7 @@ FOdysseyVectorSharedEnv::~FOdysseyVectorSharedEnv()
 FOdysseyVectorSharedEnv::FOdysseyVectorSharedEnv()
     : FOdysseyVectorObject("SharedEnv")
 {
+    bIsSystem = true;
 }
 
 bool

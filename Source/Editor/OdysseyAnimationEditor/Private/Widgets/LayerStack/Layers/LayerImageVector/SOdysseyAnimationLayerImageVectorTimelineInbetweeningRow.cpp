@@ -184,7 +184,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
             }
         }
 
-        reply = FReply::Handled();
+        reply = FReply::Handled().CaptureMouse( AsShared() );
     }
 
     // request redraw
@@ -192,7 +192,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     // update UI
     FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
 
-    return reply.CaptureMouse( AsShared() );
+    return reply;
 }
 
 FReply
@@ -301,14 +301,14 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
             vectorCell->GetRoot()->GetEngine()->Invalidate( 0 );
             FOdysseyVectorEngine::Notify( nullptr, retFlags );
 
-            reply = FReply::Handled();
+            reply = FReply::Handled().ReleaseMouseCapture();
         }
     }
 
     mPickedBreakdown = nullptr;
     mCandidateTargetCellBox.type = 0;
 
-    return reply.ReleaseMouseCapture();
+    return reply;
 }
 
 FText

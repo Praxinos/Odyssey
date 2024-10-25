@@ -410,11 +410,22 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
                 {
                     if( mTransformTool->ShowInbetweens )
                     {
+                        FInbetweenerBreakdown* nextBreakdown = breakdown->GetNextBreakdown();
+
                         DrawBreakdown( iBLContext
                                       , breakdown
                                       , BLRgba32( 127, 127, 127, 255 )
                                       , BLRgba32( 255, 127, 127, 255 )
                                       , HUD_BREAKDOWN_SOURCE /*| HUD_BREAKDOWN_TARGET*/ | HUD_BREAKDOWN_INBETWEEN );
+
+                        if( nextBreakdown )
+                        {
+                            DrawBreakdown( iBLContext
+                                          , nextBreakdown
+                                          , BLRgba32( 127, 127, 127, 255 )
+                                          , BLRgba32( 255, 127, 127, 255 )
+                                          , HUD_BREAKDOWN_SOURCE /*| HUD_BREAKDOWN_TARGET*/ | HUD_BREAKDOWN_INBETWEEN );
+                        }
                     }
 
                     //if( breakdown->GetTargetAnimationCellIndex() == frameIndex )

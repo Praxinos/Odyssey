@@ -535,6 +535,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorRoot* GetRoot();
         virtual void Added();
         virtual void Removed();
+        bool IsSystem();
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags );
@@ -560,6 +561,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         FOdysseyVectorObject* mParent;
         bool bSelected;
         bool bExpanded;
+        bool bIsSystem;
         ::ULIS::FRectD mBBox;
         FOdysseyVectorBucket mBackgroundBucket;
         FOdysseyVectorBucket mForegroundBucket;

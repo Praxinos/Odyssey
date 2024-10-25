@@ -183,7 +183,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
-    uint64 notificationFlags = 0;
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
 
     mTransformHUD->SetCenterGizmo( false );
 

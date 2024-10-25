@@ -1197,6 +1197,12 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FMenuBuilder& m
                 , LOCTEXT("vector-tool.inbetween-context-menu.reset-breakdown-spacing-chart.tooltip", "Reset Chart" )
                 , FSlateIcon()
                 , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetBreakdownSpacingChart, GetEditor(), vectorScene, true )));
+
+            menu.AddMenuEntry(
+                  LOCTEXT("vector-tool.object-context-menu.delete-selection.name","Delete Selection")
+                , LOCTEXT("vector-tool.object-context-menu.delete-selection.tooltip","Delete Selection")
+                , FSlateIcon()
+                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::DeleteObjects, GetEditor(), vectorScene )));
 /*
             menu.AddMenuEntry(
                   LOCTEXT("vector-tool.inbetween-context-menu.copy-spacing-chart.name", "Copy Spacing Chart")
