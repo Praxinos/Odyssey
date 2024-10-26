@@ -12,6 +12,7 @@
 #include "EposNamingConventionBlueprintLibrary.h"
 #include "EposSequenceEditorBlueprintLibrary.h"
 #include "EposSequenceEditorCommands.h"
+#include "EposSequenceHelpers.h"
 #include "EposSequenceToolbarHelpers.h"
 #include "Misc/EposSequenceFBXInterop.h"
 #include "PlaneActor.h"
@@ -85,6 +86,8 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
     mSequencerActorAddedDelegates = mSequencer->OnActorAddedToSequencer().AddStatic( &ToolkitHelpers::HandleActorAddedToSequencer, mSequencer );
     mSequencerActivatedDelegates = mSequencer->OnActivateSequence().AddStatic( &ToolkitHelpers::HandleOnActivateSequence, mSequencer );
     mSequencerSelectionSectionChangedDelegates = mSequencer->GetSelectionChangedSections().AddStatic( &ToolkitHelpers::HandleOnSelectionChangedSections, mSequencer );
+
+    mMovieSceneDataChangedHandle = mSequencer->OnMovieSceneDataChanged().AddRaw( this, &FShotSequenceCustomization::MovieSceneDataChanged );
 }
 
 void
@@ -103,6 +106,8 @@ FShotSequenceCustomization::UnregisterSequencerCustomization()
         mSequencer->OnActorAddedToSequencer().Remove( mSequencerActorAddedDelegates );
         mSequencer->OnActivateSequence().Remove( mSequencerActivatedDelegates );
         mSequencer->GetSelectionChangedSections().Remove( mSequencerSelectionSectionChangedDelegates );
+
+        mSequencer->OnMovieSceneDataChanged().Remove( mMovieSceneDataChangedHandle );
     }
 
     mSequencer = nullptr;
@@ -117,6 +122,31 @@ FShotSequenceCustomization::OnSequencerClosed( TSharedRef<ISequencer> iSequencer
         mSequencer->OnCloseEvent().RemoveAll( this );
 
         mSequencer = nullptr;
+    }
+}
+
+void
+FShotSequenceCustomization::MovieSceneDataChanged( EMovieSceneDataChangeType iType )
+{
+    TArray<FDrawing> cached_drawings;
+    TArray<FGuid> plane_bindings;
+    int32 plane_count = ShotSequenceHelpers::GetAllPlanes( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), EGetPlane::kAll, nullptr, &plane_bindings );
+    for( FGuid plane_binding : plane_bindings )
+    {
+        cached_drawings.Append( ShotSequenceHelpers::GetAllDrawings( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_binding ) );
+    }
+
+    static TArray<FDrawing> sCachedDrawings;
+    // To not call for every ticks when something is resizing
+    if( sCachedDrawings != cached_drawings )
+    {
+        sCachedDrawings = cached_drawings;
+
+        // Mainly to update lighttable when creating new drawing
+        for( FGuid plane_binding : plane_bindings )
+        {
+            LighttableTools::Update( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_binding );
+        }
     }
 }
 
