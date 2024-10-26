@@ -31,6 +31,8 @@
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
 #include "AnimatedRange.h"
 #include "LevelEditor.h"
+#include "PropertyCustomizationHelpers.h"
+#include "Animation/SkeletalMeshActor.h"
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
@@ -486,6 +488,15 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                     .Value( this, &SStoryboardLevelViewport::GetMoveAndScalePlaneDistance )
                                     .OnValueChanged( this, &SStoryboardLevelViewport::SetMoveAndScalePlaneDistance )
                                     .OnValueCommitted_Lambda( [this]( float iNewValue, ETextCommit::Type iType ) { SetMoveAndScalePlaneDistance( iNewValue ); } )
+                                ]
+
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                [
+                                    PropertyCustomizationHelpers::MakeInteractiveActorPicker(
+                                        FOnGetAllowedClasses::CreateSP( this, &SStoryboardLevelViewport::OnGetAllowedClassesForPlaneDistance ),
+                                        FOnShouldFilterActor::CreateSP( this, &SStoryboardLevelViewport::OnShouldFilterActorForPlaneDistance ),
+                                        FOnActorSelected::CreateSP( this, &SStoryboardLevelViewport::OnActorSelectedForPlaneDistance ) )
                                 ]
 
                                 + SHorizontalBox::Slot()
@@ -1497,6 +1508,63 @@ SStoryboardLevelViewport::SetMoveAndScalePlaneDistance( float iDistance )
     ACineCameraActor* camera = Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() );
 
     ShotSequenceTools::MoveAndScalePlane( mPlaneToMove.Get(), camera, iDistance, mScalePlaneType );
+}
+
+void
+SStoryboardLevelViewport::OnGetAllowedClassesForPlaneDistance( TArray<const UClass*>& ioAllowedClasses )
+{
+    //ioAllowedClasses.Add( AStaticMeshActor::StaticClass() );
+    //ioAllowedClasses.Add( ASkeletalMeshActor::StaticClass() );
+    ioAllowedClasses.Add( AActor::StaticClass() );
+}
+
+bool
+SStoryboardLevelViewport::OnShouldFilterActorForPlaneDistance( const AActor* const iActor )
+{
+    ////if( iActor->IsA<APlaneActor>() )
+    //    return false;
+
+    return true;
+}
+
+void
+SStoryboardLevelViewport::OnActorSelectedForPlaneDistance( AActor* ioActor )
+{
+    if( !mPlaneToMove.IsValid() )
+        return;
+
+    ACineCameraActor* camera = Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() );
+    if( !camera )
+        return;
+
+    // The destination plane on the selected actor is parallel to camera plane (which is orthogonal to camera forward vector)
+    // When the plane to move is moved, it will overlap this destination plane
+    // Then the new distance can be computed and set
+
+    TArray<float> distances;
+
+    // Get all vertices of the bounding box of the selected actor
+    FBox3d bounding_box = ioActor->GetComponentsBoundingBox();
+    FVector3d vertices[8];
+    bounding_box.GetVertices( vertices );
+    // For each vertex of the bounding box
+    for( const FVector4d vertex : vertices )
+    {
+        // Compute the destination plane corresponding to the current vertex
+        FPlane4d destination_plane( vertex, camera->GetActorForwardVector() );
+
+        // Project the camera location on the destination plane
+        FVector4d projection_point_on_destination_plane = FMath::RayPlaneIntersection( camera->GetActorLocation(), camera->GetActorForwardVector(), destination_plane );
+
+        // Compute the distance from the camera to the destination plane
+        float distance = FVector::Distance( camera->GetActorLocation(), projection_point_on_destination_plane );
+
+        // Store the distance of the destination plane of each vertices
+        distances.Add( distance );
+    }
+
+    // Select the closest distance from the camera to move the "plane to move"
+    ShotSequenceTools::MoveAndScalePlane( mPlaneToMove.Get(), camera, FMath::Min( distances ), mScalePlaneType );
 }
 
 int32

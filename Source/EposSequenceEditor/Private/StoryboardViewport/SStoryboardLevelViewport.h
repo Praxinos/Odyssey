@@ -172,6 +172,10 @@ private:
     float GetMoveAndScalePlaneDistance() const;
     void SetMoveAndScalePlaneDistance( float iDistance );
 
+    void OnGetAllowedClassesForPlaneDistance( TArray<const UClass*>& ioAllowedClasses );
+    bool OnShouldFilterActorForPlaneDistance( const AActor* const iActor );
+    void OnActorSelectedForPlaneDistance( AActor* ioActor );
+
     int32 GetScalePlaneType() const;
     void OnScalePlaneTypeChanged( int32 iScalePlaneType, ESelectInfo::Type iSelectType );
 
