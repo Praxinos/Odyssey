@@ -33,6 +33,8 @@
 #include "LevelEditor.h"
 #include "PropertyCustomizationHelpers.h"
 #include "Animation/SkeletalMeshActor.h"
+#include "SceneOutlinerModule.h"
+#include "ActorTreeItem.h"
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
@@ -317,6 +319,121 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     //---
 
+    mActorPickerList = SNew( SComboButton )
+        .ButtonStyle( FAppStyle::Get(), "PropertyEditor.AssetComboStyle" )
+        .ForegroundColor( FAppStyle::GetColor( "PropertyEditor.AssetName.ColorAndOpacity" ) )
+        .OnGetMenuContent_Lambda( [this]() -> TSharedRef<SWidget>
+                                  {
+                                      ////FAssetData AssetData;
+                                      ////GetActorAssetData( AssetData );
+
+                                      //return PropertyCustomizationHelpers::MakeActorPickerWithMenu(
+                                      //    nullptr,
+                                      //    true,
+                                      //    // ActorFilter
+                                      //    FOnShouldFilterActor::CreateLambda( [this]( const AActor* const InActor ) -> bool
+                                      //                                        {
+                                      //                                            const bool IsAllowed = !InActor->IsChildActor()
+                                      //                                                && InActor->IsA<AActor>()
+                                      //                                                && !InActor->IsA<APlaneActor>()
+                                      //                                                && !InActor->IsA<ACameraActor>()
+                                      //                                                && !InActor->GetClass()->HasAnyClassFlags( CLASS_Interface );
+
+                                      //                                            return IsAllowed;
+                                      //                                        } ),
+                                      //    // OnSet
+                                      //    FOnActorSelected::CreateLambda( [this]( AActor* InActor ) -> void
+                                      //                                    {
+                                      //                                        OnActorSelectedForPlaneDistance( InActor );
+                                      //                                    } ),
+                                      //    // OnClose
+                                      //    FSimpleDelegate::CreateLambda( [this]() -> void
+                                      //                                   {
+                                      //                                       mActorPickerList->SetIsOpen( false );
+                                      //                                   } ),
+                                      //    // OnUseSelected
+                                      //    FSimpleDelegate::CreateLambda( [this]() -> void
+                                      //                                   {
+                                      //                                       if( AActor* Selection = Cast<AActor>( GEditor->GetSelectedActors()->GetTop( AActor::StaticClass() ) ) )
+                                      //                                       {
+                                      //                                           OnActorSelectedForPlaneDistance( Selection );
+                                      //                                       }
+                                      //                                   } ) );
+
+                                      //---
+
+                                      auto IsActorValidForAssignment = []( const AActor* InActor )
+                                          {
+                                              const bool IsAllowed = !InActor->IsChildActor()
+                                                  && InActor->IsA<AActor>()
+                                                  && !InActor->IsA<APlaneActor>()
+                                                  && !InActor->IsA<ACameraActor>()
+                                                  && !InActor->GetClass()->HasAnyClassFlags( CLASS_Interface );
+
+                                              return IsAllowed;
+                                          };
+
+                                      // Set up a menu entry to assign an actor to the object binding node
+                                      FSceneOutlinerInitializationOptions InitOptions;
+                                      {
+                                          // We hide the header row to keep the UI compact.
+                                          InitOptions.bShowHeaderRow = false;
+                                          InitOptions.bShowSearchBox = true;
+                                          InitOptions.bShowCreateNewFolder = false;
+                                          InitOptions.bFocusSearchBoxWhenOpened = true;
+                                          // Only want the actor label column
+                                          InitOptions.ColumnMap.Add( FSceneOutlinerBuiltInColumnTypes::Label(), FSceneOutlinerColumnInfo( ESceneOutlinerColumnVisibility::Visible, 0 ) );
+
+                                          // Only display actors that are not possessed already
+                                          InitOptions.Filters->AddFilterPredicate<FActorTreeItem>( FActorTreeItem::FFilterPredicate::CreateLambda( IsActorValidForAssignment ) );
+                                      }
+
+                                      // actor selector to allow the user to choose an actor
+                                      FSceneOutlinerModule& SceneOutlinerModule = FModuleManager::LoadModuleChecked<FSceneOutlinerModule>( "SceneOutliner" );
+                                      return
+                                          SNew( SBox )
+                                          .MaxDesiredHeight( 400.0f )
+                                          .WidthOverride( 300.0f )
+                                          .Padding( 5.f )
+                                          [
+                                              SceneOutlinerModule.CreateActorPicker(
+                                                  InitOptions,
+                                                  FOnActorPicked::CreateLambda( [this]( AActor* Actor )
+                                                                                {
+                                                                                    // Create a new binding for this actor
+                                                                                    FSlateApplication::Get().DismissAllMenus();
+                                                                                    OnActorSelectedForPlaneDistance( Actor );
+                                                                                } )
+                                              )
+                                          ];
+                                  } )
+        .OnMenuOpenChanged_Lambda( [this]( bool bOpen ) -> void
+                                   {
+                                       if( !bOpen )
+                                       {
+                                           mActorPickerList->SetMenuContent( SNullWidget::NullWidget );
+                                       }
+                                   } )
+        .IsEnabled( true )
+        .ContentPadding( 2.0f )
+        .ButtonContent()
+        [
+            SNew( SHorizontalBox )
+
+            + SHorizontalBox::Slot()
+            .FillWidth( 1.0f )
+            .VAlign( VAlign_Center )
+            [
+                SNew( SImage )
+                .Image( FAppStyle::GetBrush( "Icons.EyeDropper" ) )
+                .ColorAndOpacity( FSlateColor::UseForeground() )
+            ]
+        ]
+        ;
+
+
+    //---
+
     //HACK: ue4
     TSharedPtr<SSpinBox<float>> planeDistanceSpinBox;
     TSharedPtr<SSpinBox<float>> cameraFocalLengthSpinBox;
@@ -497,6 +614,12 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                                         FOnGetAllowedClasses::CreateSP( this, &SStoryboardLevelViewport::OnGetAllowedClassesForPlaneDistance ),
                                         FOnShouldFilterActor::CreateSP( this, &SStoryboardLevelViewport::OnShouldFilterActorForPlaneDistance ),
                                         FOnActorSelected::CreateSP( this, &SStoryboardLevelViewport::OnActorSelectedForPlaneDistance ) )
+                                ]
+
+                                + SHorizontalBox::Slot()
+                                .AutoWidth()
+                                [
+                                    mActorPickerList.ToSharedRef()
                                 ]
 
                                 + SHorizontalBox::Slot()

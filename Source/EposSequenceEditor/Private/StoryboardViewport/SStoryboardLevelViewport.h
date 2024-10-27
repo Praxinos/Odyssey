@@ -274,6 +274,7 @@ private:
 
     TWeakObjectPtr<ACineCameraActor>    mCameraToFocalLength;
     TWeakObjectPtr<APlaneActor>         mPlaneToMove;
+    TSharedPtr<SComboButton>            mActorPickerList;
     EScalePlane                         mScalePlaneType { EScalePlane::kFitToCamera };
     TArray<TWeakObjectPtr<UStoryNote>>  mNotes;
     TSharedPtr<SNotesInViewport>        mWidgetNotesInViewport;
