@@ -11,6 +11,8 @@
 #include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "Evaluation/MovieSceneSequenceHierarchy.h"
 #include "IMovieScenePlayer.h"
+#include "Materials/MaterialInstance.h"
+#include "Materials/MaterialInterface.h"
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
 #include "MovieSceneToolsProjectSettings.h"

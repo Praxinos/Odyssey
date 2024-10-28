@@ -37,6 +37,8 @@
 #include "ActorTreeItem.h"
 #include "EngineUtils.h"
 #include "EditorModes.h"
+#include "SceneView.h"
+
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"

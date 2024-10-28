@@ -6,6 +6,7 @@
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "IDetailsView.h"
 #include "PropertyEditorModule.h"
+#include "Widgets/Input/SEditableTextBox.h"
 
 #include "Settings/EposTracksEditorSettings.h"
 

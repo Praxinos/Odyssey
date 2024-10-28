@@ -7,6 +7,7 @@
 #include "Modules/ModuleManager.h"
 
 class FBoardSequenceActions;
+class FExtender;
 class FShotSequenceActions;
 class USequencerSettings;
 

@@ -3,7 +3,9 @@
 
 #include "EposSequenceEditorCommands.h"
 
+#include "Framework/Docking/TabManager.h"
 #include "ISettingsModule.h"
+#include "Modules/ModuleManager.h"
 
 #include "Widgets/SAboutWindow.h"
 #include "Styles/EposSequenceEditorStyle.h"

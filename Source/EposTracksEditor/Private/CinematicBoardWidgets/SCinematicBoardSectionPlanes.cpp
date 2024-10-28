@@ -6,6 +6,7 @@
 #include "Brushes/SlateColorBrush.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
+#include "Engine/Texture2D.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "Sections/MovieScene3DTransformSection.h"
 #include "Sections/MovieSceneBoolSection.h"
@@ -15,6 +16,7 @@
 #include "Subsystems/AssetEditorSubsystem.h"
 #include "TimeToPixel.h"
 #include "Tracks/MovieSceneVisibilityTrack.h"
+#include "Widgets/Input/SButton.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 
 #include "EposSequenceHelpers.h"

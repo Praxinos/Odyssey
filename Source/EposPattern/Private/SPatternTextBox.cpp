@@ -7,8 +7,11 @@
 #include "HAL/PlatformApplicationMisc.h"
 #include "PropertyHandle.h"
 #include "Styling/StyleColors.h"
+#include "Widgets/Input/SButton.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Layout/SSpacer.h"
+#include "Widgets/Text/STextBlock.h"
+
 
 #define LOCTEXT_NAMESPACE "SPatternTextBox"
 

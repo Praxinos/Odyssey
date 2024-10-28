@@ -7,6 +7,7 @@
 #include "AssetToolsModule.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "CineCameraActor.h"
+#include "Components/StaticMeshComponent.h"
 #include "IAssetTools.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieSceneTimeHelpers.h"

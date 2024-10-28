@@ -13,6 +13,7 @@
 #include "IMovieScenePlayer.h"
 #include "ISequencer.h"
 #include "MaterialEditingLibrary.h"
+#include "Materials/Material.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieSceneSequence.h"
 #include "ObjectTools.h"
