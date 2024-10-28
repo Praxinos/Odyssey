@@ -7,7 +7,7 @@
 #include "SOdysseyPackageReportDialog.h"
 #include <ULIS>
 
-class FOdysseyExportFolderExtension
+class FOdysseyTextureExportFolderExtension
 {
 public:
     static void Register( FContentBrowserModule& iContentBrowserModule );

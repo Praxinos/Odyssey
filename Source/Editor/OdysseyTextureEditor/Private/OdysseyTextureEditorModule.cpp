@@ -22,6 +22,7 @@
 #include "TextureEditor/OdysseyTextureEditorSource.h"
 #include "TextureEditor/OdysseyTextureEditorGUI.h"
 #include "Extensions/OdysseyTextureContentBrowserExtensions.h"
+#include "Extensions/OdysseyTextureExportFolderExtension.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
@@ -83,6 +84,9 @@ FOdysseyTextureEditorModule::StartupModule()
 	if (!IsRunningCommandlet())
 	{
 		FOdysseyTextureContentBrowserExtensions::InstallHooks();
+
+		FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( TEXT("ContentBrowser") );
+		FOdysseyTextureExportFolderExtension::Register( contentBrowserModule );
 	}
 
 	RegisterLevelEditorLayoutExtensions();

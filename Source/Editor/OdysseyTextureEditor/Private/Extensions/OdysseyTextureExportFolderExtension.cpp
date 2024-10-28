@@ -2,8 +2,9 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 // Fyi : Original code is here : C:\Program Files\Epic Games\UE_4.27\Engine\Source\Developer\AssetTools\Private\AssetTools.cpp
 
-#include "OdysseyExportFolderExtension.h"
+#include "Extensions/OdysseyTextureExportFolderExtension.h"
 #include "SOdysseyDiscoveringAssetsDialog.h"
+#include "OdysseyScopedTextureSettings.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
 #include "FileHelpers.h"
@@ -12,7 +13,6 @@
 #include "AssetRegistry/ARFilter.h"
 #include "IDesktopPlatform.h"
 #include "DesktopPlatformModule.h"
-#include "OdysseyScopedTextureSettings.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "OdysseyPixelFormat.h"
 #include "EditorDirectories.h"
@@ -23,11 +23,11 @@
 #define LOCTEXT_NAMESPACE "ContentBrowserExtension"
 
 /*-----------------------------------------------------------------------------
-   FOdysseyExportFolderExtension
+   FOdysseyTextureExportFolderExtension
 -----------------------------------------------------------------------------*/
 
 void
-FOdysseyExportFolderExtension::Register( FContentBrowserModule& iContentBrowserModule )
+FOdysseyTextureExportFolderExtension::Register( FContentBrowserModule& iContentBrowserModule )
 {
     iContentBrowserModule.GetAllPathViewContextMenuExtenders().Add( FContentBrowserMenuExtender_SelectedPaths::CreateLambda( [] ( const TArray<FString>& iSelectedPaths )
     {
@@ -41,7 +41,7 @@ FOdysseyExportFolderExtension::Register( FContentBrowserModule& iContentBrowserM
                 ioMenuBuilder.AddSubMenu(
                   LOCTEXT( "context-menu.export-folder-submenu.name", "ILIAD Actions" )
                 , LOCTEXT( "context-menu.export-folder-submenu.tooltip", "All actions related to ILIAD" )
-                , FNewMenuDelegate::CreateStatic( &FOdysseyExportFolderExtension::PopulateIliadActionsSubMenu, iSelectedPaths )
+                , FNewMenuDelegate::CreateStatic( &FOdysseyTextureExportFolderExtension::PopulateIliadActionsSubMenu, iSelectedPaths )
                 , false
                 , FSlateIcon( "OdysseyStyle", "OdysseyLogo.Iliad16" )
                 );
@@ -51,18 +51,18 @@ FOdysseyExportFolderExtension::Register( FContentBrowserModule& iContentBrowserM
 }
 
 void
-FOdysseyExportFolderExtension::PopulateIliadActionsSubMenu( FMenuBuilder& ioMenuBuilder, const TArray<FString> iSelectedPaths )
+FOdysseyTextureExportFolderExtension::PopulateIliadActionsSubMenu( FMenuBuilder& ioMenuBuilder, const TArray<FString> iSelectedPaths )
 {
     ioMenuBuilder.AddMenuEntry(
         LOCTEXT( "context-menu.export-folder.export-all-textures.name", "Export all Textures" ),
         LOCTEXT( "context-menu.export-folder.export-all-textures.tooltip", "Export all Textures within the selected folder" ),
         FSlateIcon( "OdysseyStyle", "OdysseyTexture.ExportTexture_16" ),
-        FUIAction( FExecuteAction::CreateStatic( &FOdysseyExportFolderExtension::ExecuteExportFolder, iSelectedPaths ) )
+        FUIAction( FExecuteAction::CreateStatic( &FOdysseyTextureExportFolderExtension::ExecuteExportFolder, iSelectedPaths ) )
     );
 }
 
 void
-FOdysseyExportFolderExtension::ExecuteExportFolder( TArray<FString> iSelectedPaths )
+FOdysseyTextureExportFolderExtension::ExecuteExportFolder( TArray<FString> iSelectedPaths )
 {
     const FString& sourcesPath = iSelectedPaths[0];
     if ( ensure( sourcesPath.Len()) )
@@ -102,7 +102,7 @@ FOdysseyExportFolderExtension::ExecuteExportFolder( TArray<FString> iSelectedPat
     }
 }
 
-void FOdysseyExportFolderExtension::ExportFolderTextures(const TArray<FName>& iPackageNamesToExport)
+void FOdysseyTextureExportFolderExtension::ExportFolderTextures(const TArray<FName>& iPackageNamesToExport)
 {
     // Packages must be saved for the migration to work
     const bool bPromptUserToSave = true;
@@ -115,7 +115,7 @@ void FOdysseyExportFolderExtension::ExportFolderTextures(const TArray<FName>& iP
         {
             // Open a dialog asking the user to wait while assets are being discovered
             SOdysseyDiscoveringAssetsDialog::OpenDiscoveringAssetsDialog(
-                SOdysseyDiscoveringAssetsDialog::FOnAssetsDiscovered::CreateStatic(&FOdysseyExportFolderExtension::PerformExportFolder, iPackageNamesToExport)
+                SOdysseyDiscoveringAssetsDialog::FOnAssetsDiscovered::CreateStatic(&FOdysseyTextureExportFolderExtension::PerformExportFolder, iPackageNamesToExport)
             );
         }
         else
@@ -126,7 +126,7 @@ void FOdysseyExportFolderExtension::ExportFolderTextures(const TArray<FName>& iP
     }
 }
 
-void FOdysseyExportFolderExtension::PerformExportFolder(TArray<FName> iPackageNamesToExport)
+void FOdysseyTextureExportFolderExtension::PerformExportFolder(TArray<FName> iPackageNamesToExport)
 {
     // Choose a destination folder
     IDesktopPlatform* desktopPlatform = FDesktopPlatformModule::Get();
@@ -202,12 +202,12 @@ void FOdysseyExportFolderExtension::PerformExportFolder(TArray<FName> iPackageNa
         {
             reportPackages.Get()->Add({ (*packageIt).ToString(), true });
         }
-        SOdysseyPackageReportDialog::FOnReportConfirmed onReportConfirmed = SOdysseyPackageReportDialog::FOnReportConfirmed::CreateStatic(&FOdysseyExportFolderExtension::ExportFolder_ReportConfirmed, reportPackages, destinationFolder);
+        SOdysseyPackageReportDialog::FOnReportConfirmed onReportConfirmed = SOdysseyPackageReportDialog::FOnReportConfirmed::CreateStatic(&FOdysseyTextureExportFolderExtension::ExportFolder_ReportConfirmed, reportPackages, destinationFolder);
         SOdysseyPackageReportDialog::OpenPackageReportDialog(reportMessage, *reportPackages.Get(), onReportConfirmed);
     }
 }
 
-void FOdysseyExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAsByte<EExportImageFormat> iExportImageFormat, TSharedPtr<TArray<ReportPackageData>> iPackageDataToExport, FString iDestinationFolder )
+void FOdysseyTextureExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAsByte<EExportImageFormat> iExportImageFormat, TSharedPtr<TArray<ReportPackageData>> iPackageDataToExport, FString iDestinationFolder )
 {
     // Convert the Uenum into Ulis Enum
     ::ULIS::eFileFormat ulisExportImageFormat = SOdysseyPackageReportDialog::GetUlisExportImageFormat( iExportImageFormat );
@@ -323,7 +323,7 @@ void FOdysseyExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAsByte<EE
 }
 
 // TODO : check is the OdysseyBlock format is correct according to the export file format
-void FOdysseyExportFolderExtension::ExportFile( UTexture2D* iCurrentTexture, FString iSystemPathNameExt, ::ULIS::eFileFormat iExportFormat )
+void FOdysseyTextureExportFolderExtension::ExportFile( UTexture2D* iCurrentTexture, FString iSystemPathNameExt, ::ULIS::eFileFormat iExportFormat )
 {
     std::string stringSystemPathNameExt = TCHAR_TO_UTF8( *iSystemPathNameExt );
     // The OdysseyBLock is required to be used with Ulis export function
@@ -391,7 +391,7 @@ void FOdysseyExportFolderExtension::ExportFile( UTexture2D* iCurrentTexture, FSt
     delete odysseyBlockToSave;
 }
 
-void FOdysseyExportFolderExtension::RecursiveGetDependencies(const FName& iPackageName, TSet<FName>& ioAllDependencies, const FString& iOriginalRoot)
+void FOdysseyTextureExportFolderExtension::RecursiveGetDependencies(const FName& iPackageName, TSet<FName>& ioAllDependencies, const FString& iOriginalRoot)
 {
     FAssetRegistryModule& assetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
     TArray<FName> dependencies;
@@ -408,7 +408,7 @@ void FOdysseyExportFolderExtension::RecursiveGetDependencies(const FName& iPacka
             if ( !bIsEnginePackage && !bIsScriptPackage && bIsInSamePackage )
             {
                 ioAllDependencies.Add(*dependsIt);
-                FOdysseyExportFolderExtension::RecursiveGetDependencies(*dependsIt, ioAllDependencies, iOriginalRoot);
+                FOdysseyTextureExportFolderExtension::RecursiveGetDependencies(*dependsIt, ioAllDependencies, iOriginalRoot);
             }
         }
     }
