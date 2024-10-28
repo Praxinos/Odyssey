@@ -38,6 +38,10 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 
 	FAppStyle::GetBrush( TEXT( "ProgressBar.Background" ) );
 
+	
+    const UOdysseyAnimationEditorUserSettings* settings = UOdysseyAnimationEditorUserSettings::Get();
+	int startFrame = settings->StartFrame;
+
 	const int32 backgroundLayer = LayerId;
 	const int32 textLayer = backgroundLayer + 1;
 	const int32 proxyLayer = textLayer + 1;
@@ -80,7 +84,7 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 		//Draw key num
 		if (!(keyNum % frameNumberFrequency))
 		{
-			const FString frameString = FString::Printf(TEXT("%d"), keyNum);
+			const FString frameString = FString::Printf(TEXT("%d"), startFrame + keyNum);
 			const FVector2D textPos(x + 2.f, 0.f);
 
 			const TSharedRef< FSlateFontMeasure > fontMeasureService = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
