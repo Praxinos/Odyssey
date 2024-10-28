@@ -158,6 +158,10 @@ public class EposSequenceEditor : ModuleRules
         {
             PCHUsage = PCHUsageMode.NoPCHs;
             PublicDefinitions.Add("USE_WIBU_CTP");
+
+            // Should be used in CLangToolChain.cs, but doesn't work: "-l/usr/local/lib/libcpsrt.dylib: 'linker' input unused [-Werror,-Wunused-command-line-argument]"
+            // Post to UDN soon
+            PublicAdditionalLibraries.Add("/usr/local/lib/libcpsrt.dylib");
         }
 
         // For XCode -> To generate environment variable at build time:
