@@ -65,11 +65,15 @@ UOdysseyPainterEditorVectorPathPushTool::GetPushedPoint( FOdysseyVectorPoint* iP
     return nullptr;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
-                                                          , const FKey& iKey )
+                                                          , const FKey& iKey
+														  , uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -201,13 +205,16 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
         GEditor->EndTransaction();
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+
+	return true;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorPathPushTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                           , const FOdysseyPoint& iPointInTexture )
+                                                           , const FOdysseyPoint& iPointInTexture
+														   , uint64& oSignalFlags )
 {
     double diameter = Radius * 2.0f;
     ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)Radius
@@ -217,13 +224,14 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseHoverVector( FOdysseyVectorGroup
 
     mPathPushHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                          , const FOdysseyPoint& iPointInTexture )
+                                                          , const FOdysseyPoint& iPointInTexture
+														  , uint64& oSignalFlags )
 {
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
@@ -279,15 +287,19 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorGroupP
         iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPathPushTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
-                                                        , const FKey& iKey )
+                                                        , const FKey& iKey
+														, uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -298,8 +310,10 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseUpVector( FOdysseyVectorGroupPai
         vectorEngine->ResetHUD();
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED;
+
+	return true;
 }
 
 TSharedRef<SWidget>

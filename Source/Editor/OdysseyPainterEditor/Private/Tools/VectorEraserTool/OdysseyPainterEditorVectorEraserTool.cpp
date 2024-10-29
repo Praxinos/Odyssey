@@ -51,11 +51,15 @@ UOdysseyPainterEditorVectorEraserTool::LoadVector( FOdysseyVectorGroupPaint* iSc
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
-                                                        , const FKey& iKey )
+                                                        , const FKey& iKey
+														, uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
     mMin.x = mMax.x = iPointInTexture.x;
@@ -71,13 +75,16 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorGroupPai
         iScene->Update( 0 );
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+
+	return true;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                         , const FOdysseyPoint& iPointInTexture )
+                                                         , const FOdysseyPoint& iPointInTexture
+														 , uint64& oSignalFlags )
 {
     double diameter = Radius * 2.0f;
     ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)Radius
@@ -97,13 +104,14 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorGroupPa
 
     /*}*/
     // refresh vector scene and GUI widgets via delegates.
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                        , const FOdysseyPoint& iPointInTexture )
+                                                        , const FOdysseyPoint& iPointInTexture
+														, uint64& oSignalFlags )
 {
     if( iPointInTexture.x < mMin.x ) mMin.x = iPointInTexture.x;
     if( iPointInTexture.y < mMin.y ) mMin.y = iPointInTexture.y;
@@ -119,7 +127,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorGroupPai
                                               , iPointInTexture.y ) );
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
@@ -321,11 +329,15 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                       , const FOdysseyPoint& iPointInTexture
-                                                      , const FKey& iKey )
+                                                      , const FKey& iKey
+													  , uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     ::ULIS::FRectD erasureArea = ::ULIS::FRectD::FromMinMax( mMin.x - Radius
                                                            , mMin.y - Radius
@@ -396,9 +408,11 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
     // this will resize the selection box, knowing that some paths may have been removed after erasal.
     vectorEngine->ResetHUD();
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
          | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED;
+
+	return true;
 }
 
 TSharedRef<SWidget>

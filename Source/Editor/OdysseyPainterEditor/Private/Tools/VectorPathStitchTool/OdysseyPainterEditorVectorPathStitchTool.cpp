@@ -56,11 +56,15 @@ UOdysseyPainterEditorVectorPathStitchTool::UnloadVector( FOdysseyVectorGroupPain
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                             , const FOdysseyPoint& iPointInTexture
-                                                            , const FKey& iKey )
+                                                            , const FKey& iKey
+															, uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -154,16 +158,19 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
         mPathStitchHUD->Reset( iScene ); // rebuilds QuadTree after path alter.
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
          | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
          | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+
+	return true;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                             , const FOdysseyPoint& iPointInTexture )
+                                                             , const FOdysseyPoint& iPointInTexture
+															 , uint64& oSignalFlags )
 {
     double diameter = PickingRadius * 2.0f;
     ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)PickingRadius
@@ -183,13 +190,14 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorGro
     if( rect.Area() )
     {*/
     /*}*/
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                            , const FOdysseyPoint& iPointInTexture )
+                                                            , const FOdysseyPoint& iPointInTexture
+															, uint64& oSignalFlags )
 {
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
@@ -197,16 +205,21 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorGrou
         mPathStitchHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
-                                                          , const FKey& iKey )
+                                                          , const FKey& iKey
+														  , uint64& oSignalFlags )
 {
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+		
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+	return true;
 }
 
 uint64

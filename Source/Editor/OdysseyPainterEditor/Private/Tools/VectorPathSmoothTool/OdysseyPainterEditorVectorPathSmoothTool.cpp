@@ -49,9 +49,10 @@ UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( FOdysseyVectorGroupPaint*
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPathSmoothTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
-                                                          , const FKey& iKey )
+                                                          , const FKey& iKey
+														  , uint64& oSignalFlags )
 {
     // backup SmoothingMode value
     SmoothingModeAtKeyDown = SmoothingMode;
@@ -61,26 +62,32 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnKeyDownVector( FOdysseyVectorGroupP
         // flip the value
         SmoothingMode = ( SmoothingMode == ePathSmoothingMode::Round ) ? ePathSmoothingMode::Sharp 
                                                                        : ePathSmoothingMode::Round;
+		return true;
     }
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iScene, iKey );
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iScene, iKey, oSignalFlags );
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPathSmoothTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
-                                                        , const FKey& iKey )
+                                                        , const FKey& iKey
+														, uint64& oSignalFlags )
 {
     // restore SmoothingMode value
     SmoothingMode = SmoothingModeAtKeyDown;
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iScene, iKey );
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iScene, iKey, oSignalFlags );
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                             , const FOdysseyPoint& iPointInTexture
-                                                            , const FKey& iKey )
+                                                            , const FKey& iKey
+															, uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -99,13 +106,16 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGrou
         GEditor->EndTransaction();
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+
+	return true;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                             , const FOdysseyPoint& iPointInTexture )
+                                                             , const FOdysseyPoint& iPointInTexture
+															 , uint64& oSignalFlags )
 {
     double diameter = PickingRadius * 2.0f;
     ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)PickingRadius
@@ -115,13 +125,14 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorGro
 
     mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                            , const FOdysseyPoint& iPointInTexture )
+                                                            , const FOdysseyPoint& iPointInTexture
+															, uint64& oSignalFlags )
 {
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
@@ -164,15 +175,19 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorGrou
         iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
-                                                          , const FKey& iKey )
+                                                          , const FKey& iKey
+														  , uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -186,7 +201,8 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupP
         vectorEngine->ResetHUD();
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+	return true;
 }
 
 FText

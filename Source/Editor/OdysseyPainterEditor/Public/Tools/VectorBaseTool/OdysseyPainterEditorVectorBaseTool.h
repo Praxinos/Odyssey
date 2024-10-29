@@ -57,6 +57,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture );
         virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture );
         virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey );
+		virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
         virtual void Commit();
         virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
     	virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
@@ -69,24 +70,38 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
     protected:
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ){ return 0; };
         virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ){ return 0; };
-        virtual uint64 OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                            , const FKey& iKey );
-        virtual uint64 OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                          , const FKey& iKey );
-        virtual uint64 OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
-                                        , const FKey& iKey );
-        virtual uint64 OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
-                                      , const FKey& iKey );
-        virtual uint64 OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
+        virtual bool OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                            , const FKey& iKey
+											, uint64& oSignalFlags );
+        virtual bool OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                          , const FKey& iKey
+										  , uint64& oSignalFlags );
+        virtual bool OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
+                                        , const FKey& iKey
+										, uint64& oSignalFlags );
+        virtual bool OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
+                                      , const FKey& iKey
+									  , uint64& oSignalFlags );
+        virtual bool OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
-                                        , const FKey& iKey ){ return false; };
-        virtual uint64 OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                        , const FOdysseyPoint& iPointInTexture ){ return 0; };
-        virtual uint64 OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                        , const FOdysseyPoint& iPointInTexture ){ return 0; };
-        virtual uint64 OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
+                                        , const FKey& iKey
+										, uint64& oSignalFlags ){ return false; };
+        virtual void OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
+                                        , const FOdysseyPoint& iPointInTexture
+										, uint64& oSignalFlags ){};
+        virtual void OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
+                                        , const FOdysseyPoint& iPointInTexture
+										, uint64& oSignalFlags ){};
+        virtual bool OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                       , const FOdysseyPoint& iPointInTexture
-                                      , const FKey& iKey ){ return false; };
+                                      , const FKey& iKey
+									  , uint64& oSignalFlags ){ return false; };
+
+		virtual bool OnMouseClickVector(FOdysseyVectorGroupPaint* iScene
+                                      , const FOdysseyPoint& iPointInTexture
+                                      , const FKey& iKey
+									  , uint64& oSignalFlags );
+
         virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName );
         bool FilterMouseEvent( eMouseEventName iCurrentMouseEvent );

@@ -50,11 +50,15 @@ UOdysseyPainterEditorVectorScenePanTool::LoadVector( FOdysseyVectorGroupPaint* i
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
-                                                          , const FKey& iKey )
+                                                          , const FKey& iKey
+														  , uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint(iPointInTexture.x,iPointInTexture.y);
 
     mDragged = false;
@@ -77,8 +81,10 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
     mDownLocalMouseX = localCoords.x;
     mDownLocalMouseY = localCoords.y;
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+
+	return true;
 }
 
 void
@@ -139,9 +145,10 @@ UOdysseyPainterEditorVectorScenePanTool::Scale( FOdysseyVectorEngine* iEngine
     iScene->UpdateMatrix();
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                          , const FOdysseyPoint& iPointInTexture )
+                                                          , const FOdysseyPoint& iPointInTexture
+														  , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
@@ -159,18 +166,23 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorGroupP
         }
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
-                                                        , const FKey& iKey )
+                                                        , const FKey& iKey
+														, uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+		
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+	return true;
 }
 
 FText

@@ -203,6 +203,9 @@ bool
 UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
                                                        , const FKey& iKey )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
     if (mediaProvider.IsLocked())
         return false;
@@ -216,41 +219,36 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPoi
         return false;
     
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
-    if (iKey == EKeys::LeftMouseButton)
-    {
-        mPaintEngine.RasterBlock(rasterBlock);
-        return OnMouseUpRaster( rasterBlock->GetBlock(), iPointInTexture, iKey );
-    }
-    else if (iKey == EKeys::RightMouseButton)
-    {
-        TSharedPtr<SWidget> contextMenu = CreateContextMenu(rasterBlock->GetBlock(), iPointInTexture);
-
-        TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
-        FSlateApplication::Get().PushMenu( viewportTab->Widget().ToSharedRef(),
-                                        FWidgetPath(),
-                                        contextMenu.ToSharedRef(),
-                                        FSlateApplication::Get().GetCursorPos(),
-                                        FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu) );
-                                        
-        return true;
-    }
-    return false;
+	mPaintEngine.RasterBlock(rasterBlock);
+	return OnMouseUpRaster( rasterBlock->GetBlock(), iPointInTexture, iKey );
 }
 
-TSharedPtr<SWidget>
-UOdysseyPainterEditorRasterPaintBucketTool::CreateContextMenu(TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyPoint& iPointInTexture)
+void UOdysseyPainterEditorRasterPaintBucketTool::ExtendContextMenu(FMenuBuilder& iBuilder, const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-    FMenuBuilder menu( true, nullptr );
+	Super::ExtendContextMenu(iBuilder, iPointInTexture, iKey);
 
-    ::ULIS::FColor color = iBlock->Color(iPointInTexture.x, iPointInTexture.y);
+	FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return;
 
-    menu.AddMenuEntry(
-        LOCTEXT("raster-paint-bucket-tool.context-menu.include-color.name", "Include Color")
-        , LOCTEXT("raster-paint-bucket-tool.context-menu.include-color.tooltip", "Adds this color in the paint bucket include color list.")
-        , FSlateIcon()
-        , FUIAction(FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterPaintBucketTool::IncludeColor, color )));
+    if( !mediaProvider.HasMedia<FOdysseyMediaRaster>() )
+        return;
+    
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
+    if( mediaRasters.IsEmpty() )
+        return;
+    
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
+    ::ULIS::FColor color = rasterBlock->GetBlock()->Color(iPointInTexture.x, iPointInTexture.y);
 
-    return menu.MakeWidget();
+	iBuilder.BeginSection("PaintBucket", LOCTEXT("raster-paint-bucket-tool.context-menu.paint-bucket-section.name", "Paint Bucket")); 
+
+		iBuilder.AddMenuEntry(
+			LOCTEXT("raster-paint-bucket-tool.context-menu.include-color.name", "Include Color")
+			, LOCTEXT("raster-paint-bucket-tool.context-menu.include-color.tooltip", "Adds this color in the paint bucket include color list.")
+			, FSlateIcon()
+			, FUIAction(FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterPaintBucketTool::IncludeColor, color )));
+	iBuilder.EndSection();
 }
 
 void
@@ -261,23 +259,6 @@ UOdysseyPainterEditorRasterPaintBucketTool::IncludeColor( ::ULIS::FColor iColor 
     FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "IncludeColors");
     IncludeColors.AddUnique(FLinearColor(iColor.RedF(), iColor.GreenF(), iColor.BlueF(), iColor.AlphaF()));
     FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "IncludeColors", EPropertyChangeType::ArrayAdd);
-}
-
-void
-UOdysseyPainterEditorRasterPaintBucketTool::OnMouseHover( const FOdysseyPoint& iPointInTexture )
-{
-}
-
-void
-UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDrag( const FOdysseyPoint& iPointInTexture )
-{
-}
-
-bool
-UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
-                                                     , const FKey& iKey )
-{
-    return false;
 }
 
 void

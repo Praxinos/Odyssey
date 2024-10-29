@@ -68,32 +68,36 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorGroupPaint* 
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorTransformTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
-                                                         , const FKey& iKey )
+                                                         , const FKey& iKey
+														 , uint64& oSignalFlags )
 {
     UniformAtKeyDown = Uniform;
 
     if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
     {
         Uniform = !Uniform; // flip the value
+		return true;
     }
 
-    return UOdysseyPainterEditorVectorSelectionTool::OnKeyDownVector( iScene, iKey );
+    return UOdysseyPainterEditorVectorSelectionTool::OnKeyDownVector( iScene, iKey, oSignalFlags );
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorTransformTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
-                                                       , const FKey& iKey )
+                                                       , const FKey& iKey
+													   , uint64& oSignalFlags )
 {
     Uniform = UniformAtKeyDown;
 
-    return UOdysseyPainterEditorVectorSelectionTool::OnKeyUpVector( iScene, iKey );
+    return UOdysseyPainterEditorVectorSelectionTool::OnKeyUpVector( iScene, iKey, oSignalFlags );
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                            , const FOdysseyPoint& iPointInTexture )
+                                                            , const FOdysseyPoint& iPointInTexture
+															, uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
@@ -119,11 +123,8 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorGrou
     if( redrawRegion.Area() )
     {
         iEngine->GetInvalidTileMap().Invalidate(redrawRegion);
-
-        return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+        oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
     }
-
-    return 0;
 }
 
 void
@@ -154,11 +155,15 @@ UOdysseyPainterEditorVectorTransformTool::GetTransformedObjectList( FOdysseyVect
       } );
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
-                                                           , const FKey& iKey )
+                                                           , const FKey& iKey
+														   , uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     mTransformHUD->SetCenterGizmo( false );
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
@@ -206,7 +211,9 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
         }
     }
  
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+
+	return true;
 }
 
 static void
@@ -734,9 +741,10 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
     iEngine->ResetHUD();
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                           , const FOdysseyPoint& iPointInTexture )
+                                                           , const FOdysseyPoint& iPointInTexture
+														   , uint64& oSignalFlags )
 {
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
@@ -790,19 +798,21 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
                 }
             }
 
-            return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+            oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                  /*| FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED*/;
         }
     }
-
-    return 0;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                          , const FOdysseyPoint& iPointInTexture
-                                                         , const FKey& iKey)
+                                                         , const FKey& iKey
+														 , uint64& oSignalFlags)
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
@@ -864,8 +874,10 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
 
     mTransformHUD->SetCenterGizmo( true );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED;
+
+	return true;
 }
 
 uint64

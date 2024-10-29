@@ -62,27 +62,30 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorGroup
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
-                                                                , const FKey& iKey )
+                                                                , const FKey& iKey
+																, uint64& oSignalFlags )
 {
     UniformAtKeyDown = Uniform;
 
     if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
     {
         Uniform = !Uniform; // flip the value
+		return true;
     }
 
-    return 0;
+	return false;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
-                                                              , const FKey& iKey )
+                                                              , const FKey& iKey
+															  , uint64& oSignalFlags )
 {
     Uniform = UniformAtKeyDown;
 
-    return 0;
+    return false;
 }
 
 FOdysseyVectorObject*
@@ -105,11 +108,15 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetParentObject( FOdysseyVector
     return parentObject;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                                   , const FOdysseyPoint& iPointInTexture
-                                                                  , const FKey& iKey )
+                                                                  , const FKey& iKey
+																  , uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -158,9 +165,11 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
         iScene->Update( 0 ); // update invalidated objects
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+
+	return true;
 }
 
 double
@@ -184,9 +193,10 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetLineRotationAngle( FOdysseyV
     return 0.0f;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                                  , const FOdysseyPoint& iPointInTexture )
+                                                                  , const FOdysseyPoint& iPointInTexture
+																  , uint64& oSignalFlags )
 {
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
@@ -260,16 +270,20 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
         iScene->Update( /*FOdysseyVectorObject::FREQUENTUPDATES*/0 ); // update invalidated objects
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                                 , const FOdysseyPoint& iPointInTexture
-                                                                , const FKey& iKey )
+                                                                , const FKey& iKey
+																, uint64& oSignalFlags )
 {
+	if( iKey != EKeys::LeftMouseButton )
+		return false;
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -308,11 +322,13 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
         iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidate objects
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
          | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
          | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
          | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED;
+
+	return true;
 }
 
 TSharedRef<SWidget>

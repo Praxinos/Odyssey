@@ -49,10 +49,8 @@ public:
 
     virtual bool OnKeyDown( const FKey& iKey ) override;
     virtual bool OnKeyUp( const FKey& iKey ) override;
-    virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
-    virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture ) override;
-    virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture ) override;
     virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+	virtual void ExtendContextMenu(FMenuBuilder& iBuilder, const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
     virtual EMouseCursor::Type GetMouseCursor() const override;
@@ -77,7 +75,6 @@ private:
     TSharedPtr<::ULIS::FBlock> GetSourceBlock() const;
     void IncludeColorsToMaskBlock(TSharedPtr<::ULIS::FBlock> iSrcBlock, TSharedPtr<::ULIS::FBlock> iMaskBlock) const;
 
-    TSharedPtr<SWidget> CreateContextMenu(TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyPoint& iPointInTexture);
     void IncludeColor( ::ULIS::FColor iColor );
     
     void OnRasterSelectionChanged();

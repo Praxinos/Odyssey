@@ -179,27 +179,30 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAdd( FOdysseyVectorGro
     GEditor->EndTransaction();
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
-                                                           , const FKey& iKey )
+                                                           , const FKey& iKey
+														   , uint64& oSignalFlags )
 {
     StitchAtKeyDown = Stitch;
 
     if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
     {
         Stitch = !Stitch; // flip the value
+		return true;
     }
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iScene, iKey );
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iScene, iKey, oSignalFlags );
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
-                                                         , const FKey& iKey )
+                                                         , const FKey& iKey
+														 , uint64& oSignalFlags )
 {
     Stitch = StitchAtKeyDown;
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iScene, iKey );
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( iScene, iKey, oSignalFlags );
 }
 
 FOdysseyVectorObject*
@@ -222,11 +225,15 @@ UOdysseyPainterEditorVectorPathDrawingTool::GetParentObject( FOdysseyVectorGroup
     return parentObject;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture
-                                                             , const FKey& iKey )
+                                                             , const FKey& iKey
+															 , uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     double pointRadius = PressureSensitive ? ( iPointInTexture.pressure * Radius ) : Radius;
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
@@ -318,17 +325,20 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
         vectorEngine->ResetHUD(); // re-creates the quadtree;
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
          | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
          | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
          | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+
+	return true;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                              , const FOdysseyPoint& iPointInTexture )
+                                                              , const FOdysseyPoint& iPointInTexture
+															  , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     uint32 width = vectorEngine->GetPreferredWidth();
@@ -348,16 +358,15 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGr
 
     if( Stitch )
     {
-        return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+        oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
              | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
     }
-
-    return 0;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                             , const FOdysseyPoint& iPointInTexture )
+                                                             , const FOdysseyPoint& iPointInTexture
+															 , uint64& oSignalFlags )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector);
 
@@ -434,15 +443,19 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
         iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED ); // update invalidated path after segment insertion
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
-                                                           , const FKey& iKey )
+                                                           , const FKey& iKey
+														   , uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     uint32 imgW = vectorEngine->GetPreferredWidth(),
@@ -569,9 +582,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
     // this means the Invalidation Rectangle is not resetted, so we force it.
     vectorEngine->InvalidateRect();
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY // important to remove the path builder from the hierarchy widget
          | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED;
+
+	return true;
 }
 
 uint64

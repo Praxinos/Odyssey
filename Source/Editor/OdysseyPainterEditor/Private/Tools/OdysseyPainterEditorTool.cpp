@@ -122,6 +122,12 @@ UOdysseyPainterEditorTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, con
 }
 
 bool
+UOdysseyPainterEditorTool::OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey )
+{
+	return false;
+}
+
+bool
 UOdysseyPainterEditorTool::OnMouseDoubleClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     return false;

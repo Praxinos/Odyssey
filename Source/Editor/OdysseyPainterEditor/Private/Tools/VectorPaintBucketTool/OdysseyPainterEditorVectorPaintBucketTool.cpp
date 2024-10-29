@@ -73,47 +73,47 @@ UOdysseyPainterEditorVectorPaintBucketTool::LoadVector( FOdysseyVectorGroupPaint
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPaintBucketTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                                 , const FKey& iKey )
+                                                                 , const FKey& iKey
+																 , uint64& oSignalFlags )
 {
-    uint64 retFlags = 0;
-
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
     // with the events processing in the OnKeyUpGlobalVector(), we do like that.
     if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) )
     {
         mShowControls = true;
-
-        retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+        oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+		return true;
     }
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( iScene, iKey )
-         | retFlags;
+	return false;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPaintBucketTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                               , const FKey& iKey )
+                                                               , const FKey& iKey
+															   , uint64& oSignalFlags )
 {
-    uint64 retFlags = 0;
-
     if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) )
     {
-        retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+        oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    	mShowControls = false;
+		return true;
     }
 
-    mShowControls = false;
-
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( iScene, iKey )
-         | retFlags;
+    return false;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture
-                                                             , const FKey& iKey )
+                                                             , const FKey& iKey
+															 , uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     // valid for boith right and left clicks
     mPickedBucket = mBucketHUD->PickBucket( iScene, iPointInTexture.x, iPointInTexture.y );
 
@@ -204,18 +204,17 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
         }
     }
 
-    return 0;
+    return true;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorPaintBucketTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                              , const FOdysseyPoint& iPointInTexture )
+                                                              , const FOdysseyPoint& iPointInTexture
+															  , uint64& oSignalFlags )
 {
     mBucketHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
-
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
-
 }
 
 double
@@ -246,9 +245,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::GetRotationAngle( FOdysseyVectorBuck
     return 0.0f;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                             , const FOdysseyPoint& iPointInTexture )
+                                                             , const FOdysseyPoint& iPointInTexture
+															 , uint64& oSignalFlags )
 {
     // Left mouse-click
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
@@ -308,7 +308,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDragVector( FOdysseyVectorGro
 
     iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED ); // update vector scene
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
@@ -556,11 +556,15 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorClearBucket( FOdyssey
     iBucket->SetSolidColor( 0, 0, 0, 0 );
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
-                                                           , const FKey& iKey )
+                                                           , const FKey& iKey
+														   , uint64& oSignalFlags )
 {
+	if( iKey != EKeys::LeftMouseButton )
+		return false;
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -600,8 +604,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroup
         iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED;
+
+	return true;
 }
 
 bool

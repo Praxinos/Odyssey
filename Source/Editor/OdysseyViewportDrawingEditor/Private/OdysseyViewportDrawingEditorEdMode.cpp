@@ -132,6 +132,16 @@ bool FOdysseyViewportDrawingEditorEdMode::CapturedMouseMove(FEditorViewportClien
 }
 
 bool
+FOdysseyViewportDrawingEditorEdMode::HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click)
+{
+	IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
+    if (!adapter)
+        return false;
+
+    return adapter->HandleClick(InViewportClient, HitProxy, Click);
+}
+
+bool
 FOdysseyViewportDrawingEditorEdMode::GetCursor(EMouseCursor::Type& OutCursor) const
 {
     IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();

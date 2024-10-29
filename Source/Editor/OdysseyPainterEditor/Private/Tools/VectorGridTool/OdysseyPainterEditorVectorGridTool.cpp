@@ -73,11 +73,15 @@ UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorGroupPaint* iScen
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                       , const FOdysseyPoint& iPointInTexture
-                                                      , const FKey& iKey )
+                                                      , const FKey& iKey
+													  , uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
@@ -122,22 +126,24 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
         }
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+
+	return true;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorGridTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                       , const FOdysseyPoint& iPointInTexture )
+                                                       , const FOdysseyPoint& iPointInTexture
+													   , uint64& oSignalFlags )
 {
     // TODO: highlight grid handles ?
-
-    return 0;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                      , const FOdysseyPoint& iPointInTexture )
+                                                      , const FOdysseyPoint& iPointInTexture
+													  , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
@@ -169,15 +175,19 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorGroupPaint
         }
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
           | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                     , const FOdysseyPoint& iPointInTexture
-                                                    , const FKey& iKey )
+                                                    , const FKey& iKey
+													, uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
@@ -193,7 +203,8 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorGroupPaint* 
         mMultipleSelectionMode = false;
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+	return true;
 }
 
 uint64

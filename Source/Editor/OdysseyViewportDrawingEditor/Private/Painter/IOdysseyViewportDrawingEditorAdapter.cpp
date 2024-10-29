@@ -572,6 +572,30 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
     return mCapturedByEditor;
 }
 
+bool
+IOdysseyViewportDrawingEditorAdapter::HandleClick(FEditorViewportClient* iViewportClient, HHitProxy* iHitProxy, const FViewportClick& iClick)
+{
+	if(!IsReadyToDraw())
+        return false;
+
+	FOdysseyRay strokeRay;
+    GetRayParamsFromViewportPosition(iViewportClient, iClick.GetClickPos().X, iClick.GetClickPos().Y, &strokeRay.mRayOrigin, &strokeRay.mRayDirection);
+    strokeRay.mPoint = FOdysseyPoint::DefaultPoint();
+    strokeRay.mPoint.x = iClick.GetClickPos().X;
+    strokeRay.mPoint.y = iClick.GetClickPos().Y;
+    strokeRay.mPoint.keysDown = mKeysPressed;
+    strokeRay.mPoint.ComputeRelativeParameters(mCurrentStrokeRay.mPoint);
+
+    mLastStrokeRay = mCurrentStrokeRay;
+    mCurrentStrokeRay = strokeRay;
+
+    UOdysseyPainterEditorTool* selectedTool = mExtension->GetEditor()->GetCurrentTool();
+    if (selectedTool)
+        return selectedTool->OnMouseClick(mCurrentStrokeRay.mPoint, iClick.GetKey());
+
+    return false;
+}
+
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------ Input Functions----
 

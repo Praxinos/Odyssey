@@ -50,6 +50,7 @@ public:
 public:
     //Mouse events
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+	virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey );
     virtual bool OnMouseDoubleClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
     virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture);

@@ -60,6 +60,7 @@ public:
     virtual bool InputKey(FEditorViewportClient* iViewportClient, FViewport* iViewport, FKey iKey, EInputEvent iEvent);
     virtual bool CapturedMouseMove(FEditorViewportClient* iViewportClient, FViewport* iViewport, int32 iMouseX, int32 iMouseY);
     virtual bool GetCursor(EMouseCursor::Type& OutCursor) const;
+	virtual bool HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click);
 
 private:
     /** IStylusMessageHandler Overrides */

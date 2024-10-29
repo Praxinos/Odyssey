@@ -32,19 +32,20 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorScenePanTool : public 
         //OdysseyPainterVectorBaseEditorTool overrides
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;
         virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ) override;
-        //virtual uint64 OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
-        //                              , const FKey& iKey ) override;
-        //virtual uint64 OnKeyUpVector( FOdysseyVectorGroupPaint* iScene, const FKey& iKey ) override;
-        virtual uint64 OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
+        //virtual bool OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
+        //                              , const FKey& iKey, uint64& oSignalFlags ) override;
+        //virtual bool OnKeyUpVector( FOdysseyVectorGroupPaint* iScene, const FKey& iKey, uint64& oSignalFlags ) override;
+        virtual bool OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
-                                        , const FKey& iKey ) override;
-        //virtual uint64 OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-        //                                 , const FOdysseyPoint& iPointInTexture ) override;
-        virtual uint64 OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                        , const FOdysseyPoint& iPointInTexture ) override;
-        virtual uint64 OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
+                                        , const FKey& iKey
+										, uint64& oSignalFlags ) override;
+        //virtual void OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
+        //                                 , const FOdysseyPoint& iPointInTexture, uint64& oSignalFlags ) override;
+        virtual void OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
+                                        , const FOdysseyPoint& iPointInTexture, uint64& oSignalFlags ) override;
+        virtual bool OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                       , const FOdysseyPoint& iPointInTexture
-                                      , const FKey& iKey ) override;
+                                      , const FKey& iKey, uint64& oSignalFlags ) override;
         //virtual void PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
         //                                  , const FName& iPropertyName ) override;
 

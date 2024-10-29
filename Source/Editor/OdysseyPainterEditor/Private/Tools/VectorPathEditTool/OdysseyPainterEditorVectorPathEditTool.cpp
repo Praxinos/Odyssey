@@ -74,13 +74,11 @@ UOdysseyPainterEditorVectorPathEditTool::LoadVector( FOdysseyVectorGroupPaint* i
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                              , const FKey& iKey )
+                                                              , const FKey& iKey
+															  , uint64& oSignalFlags )
 {
-    uint64 retFlags = 0;
-
-
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
     // with the events processing in the OnKeyUpGlobalVector(), we do like that.
     if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) )
@@ -89,7 +87,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
         mPickingFlags  = FOdysseyVectorPath::PICK_HANDLE_SEGMENT
                        | FOdysseyVectorPath::PICK_VERTEX ;
 
-        retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+        oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+		return true;
     }
 
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
@@ -99,7 +98,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
         mPickingMode  = ePathPickingMode::VertexHandle;
         mPickingFlags = FOdysseyVectorPath::PICK_HANDLE_VERTEX;
 
-        retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+        oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+		return true;
     }
 
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
@@ -109,19 +109,24 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
         mPickingMode  = ePathPickingMode::Alter;
         mPickingFlags = FOdysseyVectorPath::PICK_VERTEX;
 
-        retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+        oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+		return true;
     }
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( iScene, iKey )
-         | retFlags;
+    return false;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPathEditTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                            , const FKey& iKey )
+                                                            , const FKey& iKey
+															, uint64& oSignalFlags )
 {
+
+    // first reset display mode
+    mPickingMode = ePathPickingMode::Vertex;
+    mPickingFlags = FOdysseyVectorPath::PICK_VERTEX;
+
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-    uint64 retFlags = 0;
 
     // note, we cannot use FSlateApplication::Get().GetModifierKeys()
     // because the keys are already released. For consistency we do
@@ -131,15 +136,11 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyUpGlobalVector( FOdysseyVectorGrou
       || ( iKey == EKeys::LeftShift   ) || ( iKey == EKeys::RightShift   )
       || ( iKey == EKeys::LeftAlt     ) || ( iKey == EKeys::RightAlt     ) )
     {
-        retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+        oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+		return true;
     }
 
-    // first reset display mode
-    mPickingMode = ePathPickingMode::Vertex;
-    mPickingFlags = FOdysseyVectorPath::PICK_VERTEX;
-
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( iScene, iKey )
-         | retFlags;
+    return false;
 }
 
 // temporary structure to store the path that will have their vertices removed.
@@ -635,11 +636,15 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
     }
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
-                                                          , const FKey& iKey )
+                                                          , const FKey& iKey
+														  , uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -660,14 +665,17 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorGroupP
         }
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW 
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW 
          | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+
+	return true;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                           , const FOdysseyPoint& iPointInTexture )
+                                                           , const FOdysseyPoint& iPointInTexture
+														   , uint64& oSignalFlags )
 {
    std::vector<FOdysseyVectorPoint*>& hoveredPointArray = mPathEditHUD->GetHoveredPointArray();
 
@@ -689,7 +697,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( FOdysseyVectorGroup
     // This populates mPathEditHUD::mHoveredPointArray
     mPathEditHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
@@ -765,9 +773,10 @@ UOdysseyPainterEditorVectorPathEditTool::DragVertex( FOdysseyVectorVertex *iVert
     return { 0, 0, 0, 0 };
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                          , const FOdysseyPoint& iPointInTexture )
+                                                          , const FOdysseyPoint& iPointInTexture
+														  , uint64& oSignalFlags )
 {
     double pointInTextureX = iPointInTexture.x;
     double pointInTextureY = iPointInTexture.y;
@@ -883,7 +892,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
         iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED );
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 }
 
@@ -933,11 +942,15 @@ UOdysseyPainterEditorVectorPathEditTool::PickObjects( FOdysseyVectorGroupPaint* 
     vectorEngine->SetBLMask( nullptr );
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
-                                                        , const FKey& iKey )
+                                                        , const FKey& iKey
+														, uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     uint64 ret = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED;
 
@@ -1004,7 +1017,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
         vectorEngine->ResetHUD();
     }
 
-    return ret;
+    oSignalFlags = ret;
+	return true;
 }
 
 ePathPickingMode

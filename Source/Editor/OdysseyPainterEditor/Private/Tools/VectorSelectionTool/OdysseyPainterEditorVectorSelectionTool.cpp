@@ -68,11 +68,15 @@ UOdysseyPainterEditorVectorSelectionTool::UnloadVector( FOdysseyVectorGroupPaint
     return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorSelectionTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
-                                                           , const FKey& iKey )
+                                                           , const FKey& iKey
+														   , uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -84,13 +88,16 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDownVector( FOdysseyVectorGroup
         mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+
+	return true;
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorSelectionTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                           , const FOdysseyPoint& iPointInTexture )
+                                                           , const FOdysseyPoint& iPointInTexture
+														   , uint64& oSignalFlags )
 {
     //::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
 
@@ -120,7 +127,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDragVector( FOdysseyVectorGroup
         }
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 
     //return redrawRegion; // unused;
@@ -386,11 +393,15 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     iEngine->ResetHUD(); // updates the current HUD (in most cases wil be this tool's HUD)
 }
 
-uint64
+bool
 UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                          , const FOdysseyPoint& iPointInTexture
-                                                         , const FKey& iKey )
+                                                         , const FKey& iKey
+														 , uint64& oSignalFlags )
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     ::ULIS::FRectD roi;
 
@@ -422,9 +433,11 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPa
 */
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+    oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
          | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED;
+
+	return true;
 }
 
 std::vector<::ULIS::FVec2D>&

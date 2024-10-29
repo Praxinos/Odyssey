@@ -49,26 +49,13 @@ public:
 
     virtual void Load() override;
     virtual void Unload() override;
-    virtual void ExtendContextMenu(FMenuBuilder& menu) override;
 
     virtual void Tick(float iDeltaTime) override;
 
 private:
-    void PopupContextMenu();
-    TSharedPtr<SWidget> CreateContextMenu();
-
     // Internal - Callbacks
     void SelectedShapeChanged();
     void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
-
-protected:
-    void SelectAll();
-    void CopySelection();
-    void CutSelection();
-    void PasteSelection();
-    void PasteSelectionInNewLayer();
-    void ClearSelection();
-    void InvertSelection();
 
 public:
     virtual void PropertyChanged(const FName& iPropertyName) override;

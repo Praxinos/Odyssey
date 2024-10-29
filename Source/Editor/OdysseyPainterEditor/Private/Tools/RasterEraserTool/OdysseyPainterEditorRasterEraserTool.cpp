@@ -148,6 +148,9 @@ UOdysseyPainterEditorRasterEraserTool::IsActivable() const
 bool
 UOdysseyPainterEditorRasterEraserTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     if (UOdysseyPainterEditorRasterBaseTool::OnMouseDown(iPointInTexture, iKey))
         return true;
 
@@ -171,6 +174,9 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseDown(const FOdysseyPoint& iPointIn
 bool
 UOdysseyPainterEditorRasterEraserTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
+	if (iKey != EKeys::LeftMouseButton)
+		return false;
+
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
     if (mediaProvider.IsLocked())
         return false;
