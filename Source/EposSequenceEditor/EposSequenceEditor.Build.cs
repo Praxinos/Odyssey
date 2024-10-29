@@ -91,6 +91,9 @@ public class EposSequenceEditor : ModuleRules
                 "CurveEditor",
                 "LevelSequenceEditor",
                 "EditorSubsystem",
+                "PropertyEditor",
+                "SceneOutliner",
+                "ActorPickerMode",
                 // [EDITOR] custom plugin dependencies
                 "EposTracksEditor",
                 "EposNamingConvention",
