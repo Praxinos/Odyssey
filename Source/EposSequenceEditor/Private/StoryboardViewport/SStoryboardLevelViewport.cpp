@@ -1826,6 +1826,77 @@ SStoryboardLevelViewport::OnActorSelectedForPlaneDistance( AActor* ioActor )
     ShotSequenceTools::MoveAndScalePlane( mPlaneToMove.Get(), camera, FMath::Min( distances ), mScalePlaneType );
 }
 
+static
+FSceneView*
+CreateSceneViewFromCamera( ACameraActor* iCamera, FStoryboardViewportClient* iViewportClient )
+{
+    UCameraComponent* PreviewCameraComponent = iCamera->GetCameraComponent();
+    if( !PreviewCameraComponent )
+    {
+        return nullptr;
+    }
+
+    FMinimalViewInfo ViewInfo;
+    PreviewCameraComponent->GetCameraView( FApp::GetDeltaTime(), ViewInfo );
+
+    UWorld* World = PreviewCameraComponent->GetWorld();
+
+    FSceneViewFamilyContext ViewFamily( FSceneViewFamily::ConstructionValues( iViewportClient->Viewport, World->Scene, FEngineShowFlags( ESFIM_Game ) )
+                                        .SetTime( FGameTime::GetTimeSinceAppStart() )
+                                        .SetResolveScene( true ) );
+
+    FSceneViewStateInterface* ViewStateInterface = nullptr;
+
+    // Screen percentage is not supported in thumbnail.
+    ViewFamily.EngineShowFlags.ScreenPercentage = false;
+
+    ViewFamily.EngineShowFlags.DisableAdvancedFeatures();
+    ViewFamily.EngineShowFlags.SetPostProcessing( false );
+
+    FSceneViewInitOptions ViewInitOptions;
+
+    // Use target exposure without blend.
+    ViewInitOptions.bInCameraCut = true;
+    ViewInitOptions.SceneViewStateInterface = ViewStateInterface;
+
+    ViewInitOptions.BackgroundColor = FLinearColor::Black;
+    ViewInitOptions.SetViewRectangle( FIntRect( FIntPoint::ZeroValue, iViewportClient->Viewport->GetSizeXY() ) );
+    ViewInitOptions.ViewFamily = &ViewFamily;
+
+    ViewInitOptions.ViewOrigin = ViewInfo.Location;
+    ViewInitOptions.ViewRotationMatrix = FInverseRotationMatrix( ViewInfo.Rotation ) * FMatrix(
+        FPlane( 0, 0, 1, 0 ),
+        FPlane( 1, 0, 0, 0 ),
+        FPlane( 0, 1, 0, 0 ),
+        FPlane( 0, 0, 0, 1 ) );
+
+    ViewInitOptions.ProjectionMatrix = ViewInfo.CalculateProjectionMatrix();
+
+    FSceneView* NewView = new FSceneView( ViewInitOptions );
+
+    return NewView;
+}
+
+TOptional<FConvexVolume>
+SStoryboardLevelViewport::GetCameraFrustum() const
+{
+    if( !mPlaneToMove.IsValid() )
+        return TOptional<FConvexVolume>();
+
+    ACineCameraActor* camera = Cast<ACineCameraActor>( mPlaneToMove->GetAttachParentActor() );
+    if( !camera )
+        return TOptional<FConvexVolume>();
+
+    FSceneView* sceneview = CreateSceneViewFromCamera( camera, ViewportClient.Get() );
+    if( !sceneview )
+        return TOptional<FConvexVolume>();
+
+    FConvexVolume frustum_volume = sceneview->ViewFrustum;
+    delete sceneview;
+
+    return frustum_volume;
+}
+
 TSharedRef<SWidget>
 SStoryboardLevelViewport::OnActorPickerListMenuContent()
 {
@@ -1843,7 +1914,10 @@ SStoryboardLevelViewport::OnActorPickerListMenuContent()
 
     menuBuilder.BeginSection( NAME_None, LOCTEXT( "storyboard-viewport-actor-picker-list-section", "Select actor" ) );
 
-    auto IsActorValidForAssignment = []( const AActor* iActor )
+    // GetCameraFrustum() create a scene view, so compute it outside the IsActorValidForAssignment() loop in the actor filter predicate, and just copy the volume as parameter
+    TOptional<FConvexVolume> frustum_volume = GetCameraFrustum();
+
+    auto IsActorValidForAssignment = [frustum_volume]( const AActor* iActor )
         {
             auto is_valid_class = []( const AActor* iActor )
                 {
@@ -1863,10 +1937,19 @@ SStoryboardLevelViewport::OnActorPickerListMenuContent()
                         || iActor->GetClass()->HasAnyClassFlags( CLASS_Interface );
                 };
 
+            auto is_in_frustum = [frustum_volume]( const AActor* iActor )
+                {
+                    if( !frustum_volume.IsSet() )
+                        return false;
+
+                    return frustum_volume->IntersectSphere( iActor->GetActorLocation(), iActor->GetSimpleCollisionRadius() );
+                };
+
             const bool IsAllowed =
                 is_valid_class( iActor )
                 && !is_invalid_class( iActor )
-                && !is_invalid_property( iActor );
+                && !is_invalid_property( iActor )
+                && is_in_frustum( iActor );
 
             // if( !mPlaneToMove.IsValid() )
             //     return;

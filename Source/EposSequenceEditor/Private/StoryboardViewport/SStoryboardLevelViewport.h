@@ -180,6 +180,7 @@ private:
     bool OnShouldFilterActorForPlaneDistance( const AActor* const iActor );
     void OnActorSelectedForPlaneDistance( AActor* ioActor );
 
+    TOptional<FConvexVolume> GetCameraFrustum() const;
     TSharedRef<SWidget> OnActorPickerListMenuContent();
 
     int32 GetScalePlaneType() const;
