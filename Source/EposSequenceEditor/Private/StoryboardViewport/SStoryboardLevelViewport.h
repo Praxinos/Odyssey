@@ -172,9 +172,15 @@ private:
     float GetMoveAndScalePlaneDistance() const;
     void SetMoveAndScalePlaneDistance( float iDistance );
 
+    void HideAllPlanes();
+    void ShowAllPlanes();
+    void OnToggleAllPlanes( const FEditorModeID& iMode, bool bIsEntering );
+
     void OnGetAllowedClassesForPlaneDistance( TArray<const UClass*>& ioAllowedClasses );
     bool OnShouldFilterActorForPlaneDistance( const AActor* const iActor );
     void OnActorSelectedForPlaneDistance( AActor* ioActor );
+
+    TSharedRef<SWidget> OnActorPickerListMenuContent();
 
     int32 GetScalePlaneType() const;
     void OnScalePlaneTypeChanged( int32 iScalePlaneType, ESelectInfo::Type iSelectType );
@@ -274,7 +280,9 @@ private:
 
     TWeakObjectPtr<ACineCameraActor>    mCameraToFocalLength;
     TWeakObjectPtr<APlaneActor>         mPlaneToMove;
-    TSharedPtr<SComboButton>            mActorPickerList;
+    TSharedPtr<SWidget>                 mActorInteractivePickerWidget;
+    TArray<APlaneActor*>                mPlanesTemporaryHidden;
+    TSharedPtr<SComboButton>            mActorPickerComboList;
     EScalePlane                         mScalePlaneType { EScalePlane::kFitToCamera };
     TArray<TWeakObjectPtr<UStoryNote>>  mNotes;
     TSharedPtr<SNotesInViewport>        mWidgetNotesInViewport;
