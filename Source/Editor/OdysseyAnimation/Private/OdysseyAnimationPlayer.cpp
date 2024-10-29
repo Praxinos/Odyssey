@@ -155,6 +155,9 @@ UOdysseyAnimationPlayer::GetRenderType() const
 void
 UOdysseyAnimationPlayer::Tick(float iDeltaTime)
 {
+	if (GetFlags() & RF_ClassDefaultObject)
+		return;
+
 	if (!Animation || !Texture)
 		return;
 
@@ -462,6 +465,9 @@ void
 UOdysseyAnimationPlayer::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
+	
+	if (GetFlags() & RF_ClassDefaultObject)
+		return;
 
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
@@ -478,14 +484,16 @@ UOdysseyAnimationPlayer::PostLoad()
 		return;
 
 	//will create the texture if needed
-	if (!Texture)
-		AnimationChanged();
+	AnimationChanged();
 }
 
 void
 UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
 {
 	Super::PostDuplicate(iDuplicateMode);
+	
+	if (GetFlags() & RF_ClassDefaultObject)
+		return;
 
 	//will create the texture if needed
 	AnimationChanged();

@@ -137,6 +137,10 @@ UOdysseyAnimationComponent::PostLoad()
 		Player->OnTextureChanged().AddUObject(this, &UOdysseyAnimationComponent::OnPlayerTextureChanged);
 	}
 
+	//Reset the callbacks in case DefaultPlayer pointer changed
+	DefaultPlayer->OnTextureChanged().RemoveAll(this);
+	DefaultPlayer->OnTextureChanged().AddUObject(this, &UOdysseyAnimationComponent::OnDefaultPlayerTextureChanged);
+
 	RefreshMaterialTexture();
 }
 

@@ -70,7 +70,7 @@ public:
 	TObjectPtr<UOdysseyAnimationPlayer> Player;
 
 private:
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<UOdysseyAnimationPlayer> DefaultPlayer;
 
 	UPROPERTY()

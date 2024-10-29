@@ -103,7 +103,7 @@ public:
 	bool IsLooping = true;
 
 public:
-	UPROPERTY(DuplicateTransient)
+	UPROPERTY(Transient, DuplicateTransient)
 	TObjectPtr<UTexture2D> Texture;
 
 private:
