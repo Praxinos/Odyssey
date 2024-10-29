@@ -161,6 +161,123 @@ FStoryboardLevelViewportInputProcessor::HandleKeyUpEvent(FSlateApplication& Slat
     return false; //false means Unreal will continue as if we did nothing
 }
 
+// Duplicate of SPropertyEditorInteractiveActorPicker to be able to manage OnClicked()
+class SStoryboardInteractiveActorPicker: public SButton
+{
+public:
+    SLATE_BEGIN_ARGS( SStoryboardInteractiveActorPicker )
+        {}
+        /** Delegate used to filter allowed actors */
+        SLATE_EVENT( FSimpleDelegate, OnBeginActorPickingMode )
+
+        /** Delegate used to filter allowed actors */
+        SLATE_EVENT( FOnGetAllowedClasses, OnGetAllowedClasses )
+
+        /** Delegate used to filter allowed actors */
+        SLATE_EVENT( FOnShouldFilterActor, OnShouldFilterActor )
+
+        /** Delegate called when an actor is selected */
+        SLATE_EVENT( FOnActorSelected, OnActorSelected )
+    SLATE_END_ARGS()
+
+    ~SStoryboardInteractiveActorPicker();
+
+    void Construct( const FArguments& InArgs );
+
+    /** Begin SWidget interface */
+    virtual FReply OnKeyDown( const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent ) override;
+    virtual bool SupportsKeyboardFocus() const override;
+    /** End SWidget interface */
+
+private:
+    /** Delegate for when the button is clicked */
+    FReply OnClicked();
+
+    /** Delegate called when picking mode begins */
+    FSimpleDelegate OnBeginActorPickingMode;
+
+    /** Delegate used to filter allowed actors */
+    FOnGetAllowedClasses OnGetAllowedClasses;
+
+    /** Delegate used to filter allowed actors */
+    FOnShouldFilterActor OnShouldFilterActor;
+
+    /** Delegate called when an actor is selected */
+    FOnActorSelected OnActorSelected;
+};
+
+SStoryboardInteractiveActorPicker::~SStoryboardInteractiveActorPicker()
+{
+    if( FActorPickerModeModule* ActorPickerMode = FModuleManager::Get().GetModulePtr<FActorPickerModeModule>( "ActorPickerMode" ) )
+    {
+        // make sure we are unregistered when this widget goes away
+        if( ActorPickerMode->IsInActorPickingMode() )
+        {
+            ActorPickerMode->EndActorPickingMode();
+        }
+    }
+}
+
+void SStoryboardInteractiveActorPicker::Construct( const FArguments& InArgs )
+{
+    OnBeginActorPickingMode = InArgs._OnBeginActorPickingMode;
+    OnActorSelected = InArgs._OnActorSelected;
+    OnGetAllowedClasses = InArgs._OnGetAllowedClasses;
+    OnShouldFilterActor = InArgs._OnShouldFilterActor;
+
+    SButton::Construct(
+        SButton::FArguments()
+        .ButtonStyle( FAppStyle::Get(), "HoverHintOnly" )
+        .OnClicked( this, &SStoryboardInteractiveActorPicker::OnClicked )
+        .ContentPadding( 4.0f )
+        .ForegroundColor( FSlateColor::UseForeground() )
+        .IsFocusable( false )
+        [
+            SNew( SImage )
+                .Image( FAppStyle::GetBrush( "Icons.EyeDropper" ) )
+                .ColorAndOpacity( FSlateColor::UseForeground() )
+        ]
+    );
+}
+
+FReply SStoryboardInteractiveActorPicker::OnKeyDown( const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent )
+{
+    if( InKeyEvent.GetKey() == EKeys::Escape )
+    {
+        FActorPickerModeModule& ActorPickerMode = FModuleManager::Get().GetModuleChecked<FActorPickerModeModule>( "ActorPickerMode" );
+
+        if( ActorPickerMode.IsInActorPickingMode() )
+        {
+            ActorPickerMode.EndActorPickingMode();
+            return FReply::Handled();
+        }
+    }
+
+    return FReply::Unhandled();
+}
+
+bool SStoryboardInteractiveActorPicker::SupportsKeyboardFocus() const
+{
+    return true;
+}
+
+FReply SStoryboardInteractiveActorPicker::OnClicked()
+{
+    FActorPickerModeModule& ActorPickerMode = FModuleManager::Get().GetModuleChecked<FActorPickerModeModule>( "ActorPickerMode" );
+
+    if( ActorPickerMode.IsInActorPickingMode() )
+    {
+        ActorPickerMode.EndActorPickingMode();
+    }
+    else
+    {
+        OnBeginActorPickingMode.ExecuteIfBound();
+        ActorPickerMode.BeginActorPickingMode( OnGetAllowedClasses, OnShouldFilterActor, OnActorSelected );
+    }
+
+    return FReply::Handled();
+}
+
 class SPreArrangedBox : public SCompoundWidget
 {
 public:
@@ -328,10 +445,21 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     //---
 
-    mActorInteractivePickerWidget = PropertyCustomizationHelpers::MakeInteractiveActorPicker(
-        FOnGetAllowedClasses::CreateSP( this, &SStoryboardLevelViewport::OnGetAllowedClassesForPlaneDistance ),
-        FOnShouldFilterActor::CreateSP( this, &SStoryboardLevelViewport::OnShouldFilterActorForPlaneDistance ),
-        FOnActorSelected::CreateSP( this, &SStoryboardLevelViewport::OnActorSelectedForPlaneDistance ) );
+    //mActorInteractivePickerWidget = PropertyCustomizationHelpers::MakeInteractiveActorPicker(
+    //    FOnGetAllowedClasses::CreateSP( this, &SStoryboardLevelViewport::OnGetAllowedClassesForPlaneDistance ),
+    //    FOnShouldFilterActor::CreateSP( this, &SStoryboardLevelViewport::OnShouldFilterActorForPlaneDistance ),
+    //    FOnActorSelected::CreateSP( this, &SStoryboardLevelViewport::OnActorSelectedForPlaneDistance ) );
+
+    mActorInteractivePickerWidget = SNew( SStoryboardInteractiveActorPicker )
+        .ToolTipText( LOCTEXT( "PickButtonLabel", "Pick Actor from scene" ) )
+        .OnBeginActorPickingMode_Lambda( [this]()
+                                         {
+                                             mStartStoryboardActorPicking = true;
+                                         } )
+        .OnGetAllowedClasses( FOnGetAllowedClasses::CreateSP( this, &SStoryboardLevelViewport::OnGetAllowedClassesForPlaneDistance ) )
+        .OnShouldFilterActor( FOnShouldFilterActor::CreateSP( this, &SStoryboardLevelViewport::OnShouldFilterActorForPlaneDistance ) )
+        .OnActorSelected( FOnActorSelected::CreateSP( this, &SStoryboardLevelViewport::OnActorSelectedForPlaneDistance ) );
+
 
     //---
 
@@ -1600,6 +1728,9 @@ SStoryboardLevelViewport::OnToggleAllPlanes( const FEditorModeID& iMode, bool bI
     if( iMode != FBuiltinEditorModes::EM_ActorPicker )
         return;
 
+    if( !mStartStoryboardActorPicking )
+        return;
+
     if( bIsEntering )
     {
         HideAllPlanes();
@@ -1607,6 +1738,7 @@ SStoryboardLevelViewport::OnToggleAllPlanes( const FEditorModeID& iMode, bool bI
     else
     {
         ShowAllPlanes();
+        mStartStoryboardActorPicking = false;
     }
 }
 

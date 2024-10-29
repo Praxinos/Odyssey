@@ -281,6 +281,7 @@ private:
     TWeakObjectPtr<ACineCameraActor>    mCameraToFocalLength;
     TWeakObjectPtr<APlaneActor>         mPlaneToMove;
     TSharedPtr<SWidget>                 mActorInteractivePickerWidget;
+    bool                                mStartStoryboardActorPicking = false;
     TArray<APlaneActor*>                mPlanesTemporaryHidden;
     TSharedPtr<SComboButton>            mActorPickerComboList;
     EScalePlane                         mScalePlaneType { EScalePlane::kFitToCamera };
