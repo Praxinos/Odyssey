@@ -11,6 +11,7 @@
 UOdysseyAnimationComponentTrack::UOdysseyAnimationComponentTrack(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	SupportedBlendTypes = FMovieSceneBlendTypeField::None();
 }
 
 bool

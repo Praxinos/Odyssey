@@ -32,7 +32,7 @@ struct FOdysseyAnimationComponentSectionParams
 
 
 USTRUCT()
-struct FOdysseyAnimationComponentTemplate
+struct ODYSSEYANIMATION_API FOdysseyAnimationComponentTemplate
 	: public FMovieSceneEvalTemplate
 {
 	GENERATED_BODY()
@@ -57,6 +57,10 @@ public:
 	virtual void Initialize(const FMovieSceneEvaluationOperand& Operand, const FMovieSceneContext& Context, FPersistentEvaluationData& PersistentData, IMovieScenePlayer& Player) const override;
 	virtual void SetupOverrides() override;
 	virtual void TearDown(FPersistentEvaluationData& PersistentData, IMovieScenePlayer& Player) const override;
+
+public:
+	static void GetStartTimeAndDuration(const TRange<FFrameTime>& iRange, const FOdysseyAnimationComponentSectionParams& iParams, const FFrameRate& iFrameRate, double& oStartTime, double& oDuration);
+	static void EvaluateImmediate(UOdysseyAnimationComponent* iComponent, const TRange<FFrameTime>& iRange, const FOdysseyAnimationComponentSectionParams& iParams, const FFrameRate& iFrameRate );
 
 private:
 	UPROPERTY()

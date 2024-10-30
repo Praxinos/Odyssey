@@ -36,6 +36,7 @@
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyAnimationComponentTrack.h"
 #include "OdysseyAnimationComponentSection.h"
+#include "OdysseyAnimationComponentTemplate.h"
 #include "MovieScene.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
@@ -543,7 +544,9 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
 
 		TArray<UMovieSceneSection*> sections = track->GetAllSections();
 
-		UMovieSceneSection** sectionPtr = sections.FindByPredicate(
+		//Using FindLastByPredicate instead of FindByPredicate to manage the case where sections are overlapping each other
+		//In that case, the last section should be used to synchronize the sequencer and the animation
+		int sectionIndex = sections.FindLastByPredicate(
 			[sequencer](UMovieSceneSection* iSection)
 			{
 				if (!iSection->IsActive())
@@ -556,10 +559,10 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
 			}
 		);
 
-		if (!sectionPtr)
+		if (sectionIndex == INDEX_NONE)
 			continue;
 
-		UOdysseyAnimationComponentSection* section = Cast<UOdysseyAnimationComponentSection>(*sectionPtr);
+		UOdysseyAnimationComponentSection* section = Cast<UOdysseyAnimationComponentSection>(sections[sectionIndex]);
 		if (!section)
 			continue;
 
@@ -573,14 +576,35 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
 		FFrameNumber sectionEndFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(sectionRange.GetUpperBoundValue() - 1, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution).FrameNumber;
 		
 		double totalSeconds = animationDisplayedFrame / animation->FramesPerSecond;
-		FFrameNumber frame = tickResolution.AsFrameNumber(totalSeconds);
+		FFrameNumber frame = tickResolution.AsFrameNumber(totalSeconds) + sectionStartFrame;
 		double totalSecondsNext = (animationDisplayedFrame + 1) / animation->FramesPerSecond;
-		FFrameNumber frameNext = tickResolution.AsFrameNumber(totalSecondsNext);
+		FFrameNumber frameNext = tickResolution.AsFrameNumber(totalSecondsNext) + sectionStartFrame;
 
 		FFrameTime currentFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(sequencer->GetLocalTime().Time.FrameNumber, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution);
 
 		if (currentFrame >= frame && currentFrame < frameNext)
 			return;
+
+		if (frame < sectionStartFrame)
+		{
+			FOdysseyAnimationComponentSectionParams params;
+			params.SectionStartFrame = sectionStartFrame;
+			params.SectionEndFrame = sectionEndFrame;
+			params.StartFrameOffset = section->StartFrameOffset;
+			TRange<FFrameTime> range = TRange<FFrameTime>::Inclusive(sectionStartFrame, sectionStartFrame);
+			FOdysseyAnimationComponentTemplate::EvaluateImmediate(animationComponent, range, params, tickResolution);
+			return;
+		}
+		if (frame > sectionEndFrame)
+		{
+			FOdysseyAnimationComponentSectionParams params;
+			params.SectionStartFrame = sectionStartFrame;
+			params.SectionEndFrame = sectionEndFrame;
+			params.StartFrameOffset = section->StartFrameOffset;
+			TRange<FFrameTime> range = TRange<FFrameTime>::Inclusive(sectionEndFrame, sectionEndFrame);
+			FOdysseyAnimationComponentTemplate::EvaluateImmediate(animationComponent, range, params, tickResolution);
+			return;
+		}
 
 		frame = FMath::Clamp(frame, sectionStartFrame, sectionEndFrame);
 		FFrameTime intervalNextFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(frame, tickResolution, displayRate).CeilToFrame(), displayRate, tickResolution);
@@ -588,13 +612,11 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
 
 		if (frameNext >= intervalNextFrame)
 		{
-			sequencer->SetLocalTime(intervalNextFrame, STM_Interval, false);
-			sequencer->ForceEvaluate(); //SetLocalTime does not ensure evaluation is made, so we force it here and ask SetLocalTime to not perform any evaluation
+			sequencer->SetLocalTime(intervalNextFrame, STM_Interval);
 		}
 		else
 		{
-			sequencer->SetLocalTime(intervalPrevFrame, STM_Interval, false);
-			sequencer->ForceEvaluate(); //SetLocalTime does not ensure evaluation is made, so we force it here and ask SetLocalTime to not perform any evaluation
+			sequencer->SetLocalTime(intervalPrevFrame, STM_Interval);
 		}
 	}
 }

@@ -36,19 +36,24 @@ struct FOdysseyAnimationComponentSectionExecutionToken
 			}
 		}
 
-		if (!component)
+		Execute(component, mStartTime, mDuration);
+	}
+
+	__declspec(noinline) static void Execute(UOdysseyAnimationComponent* iComponent, double iStartTime, double iDuration)
+	{
+		if (!iComponent)
 			return;
 
-		UOdysseyAnimation* animation = component->GetActiveAnimation();
+		UOdysseyAnimation* animation = iComponent->GetActiveAnimation();
 		if (!animation)
 			return;
 
-		UOdysseyAnimationPlayer* player = component->GetActivePlayer();
+		UOdysseyAnimationPlayer* player = iComponent->GetActivePlayer();
 		if (!player)
 			return;
 
-		double startFrame = animation->GetFramesPerSecond() * mStartTime;
-		double endFrame = animation->GetFramesPerSecond() * (mStartTime + mDuration);
+		double startFrame = animation->GetFramesPerSecond() * iStartTime;
+		double endFrame = animation->GetFramesPerSecond() * (iStartTime + iDuration);
 
 		int startFrameInt = FMath::Floor(startFrame);
 		int endFrameInt = FMath::Floor(endFrame);
@@ -111,17 +116,31 @@ FOdysseyAnimationComponentTemplate::Evaluate(const FMovieSceneEvaluationOperand&
 	
 	if (Context.GetTime().FrameNumber > mParams.SectionEndFrame || Context.GetTime().FrameNumber < mParams.SectionStartFrame)
 		return;
-		
-	const FFrameRate FrameRate = Context.GetFrameRate();
-	const FFrameTime FrameTime(Context.GetTime().FrameNumber - mParams.SectionStartFrame + mParams.StartFrameOffset);
-	const double FrameTimeInSeconds = FrameRate.AsSeconds(FrameTime);
-
-	// With zero-length frames (which can occur occasionally), we use the fixed frame time, matching previous behavior.
-	const double FrameDurationInSeconds = FMath::Clamp( (Context.GetRange().Size<FFrameTime>()) / Context.GetFrameRate(), FrameRate.AsSeconds(FFrameTime(1)), FrameRate.AsSeconds((mParams.SectionEndFrame - mParams.SectionStartFrame) - FrameTime));
 	
-	ExecutionTokens.Add(FOdysseyAnimationComponentSectionExecutionToken(FrameTimeInSeconds, FrameDurationInSeconds));
+	double startTime = 0.f;
+	double duration = 0.f;
+	GetStartTimeAndDuration(Context.GetRange(), mParams, Context.GetFrameRate(), startTime, duration);
+	ExecutionTokens.Add(FOdysseyAnimationComponentSectionExecutionToken(startTime, duration));
 }
 
+void
+FOdysseyAnimationComponentTemplate::GetStartTimeAndDuration(const TRange<FFrameTime>& iRange, const FOdysseyAnimationComponentSectionParams& iParams, const FFrameRate& iFrameRate, double& oStartTime, double& oDuration)
+{
+	const FFrameTime FrameTime(iRange.GetLowerBoundValue() - iParams.SectionStartFrame + iParams.StartFrameOffset);
+	oStartTime = iFrameRate.AsSeconds(FrameTime);
+
+	// With zero-length frames (which can occur occasionally), we use the fixed frame time, matching previous behavior.
+	oDuration = FMath::Clamp( (iRange.Size<FFrameTime>()) / iFrameRate, iFrameRate.AsSeconds(FFrameTime(1)), iFrameRate.AsSeconds((iParams.SectionEndFrame - iParams.SectionStartFrame) - FrameTime));
+}
+
+void
+FOdysseyAnimationComponentTemplate::EvaluateImmediate(UOdysseyAnimationComponent* iComponent, const TRange<FFrameTime>& iRange, const FOdysseyAnimationComponentSectionParams& iParams, const FFrameRate& iFrameRate )
+{
+	double startTime = 0.f;
+	double duration = 0.f;
+	GetStartTimeAndDuration(iRange, iParams, iFrameRate, startTime, duration);
+	FOdysseyAnimationComponentSectionExecutionToken::Execute(iComponent, startTime, duration);
+}
 
 UScriptStruct&
 FOdysseyAnimationComponentTemplate::GetScriptStructImpl() const
