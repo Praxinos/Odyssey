@@ -4,10 +4,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Image/OdysseyBlendingMode.h"
 #include "OdysseyPerformanceMode.h"
 #include "OdysseyMediaProvider.h"
-#include "Image/OdysseyBlendingMode.h"
 #include "OdysseyImageRenderingAbility.h"
+#include "Textures/SlateIcon.h"
+
 #include "OdysseyLayer.generated.h"
 
 class UOdysseyLayerStack;
@@ -21,8 +23,8 @@ enum  class  EGetLayerChildrenMethod : uint8
 
 UCLASS(Abstract, HideDropdown, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYLAYERSTACK_API UOdysseyLayer
-	: public UObject
-	, public FOdysseyImageRenderingAbility
+    : public UObject
+    , public FOdysseyImageRenderingAbility
 {
     GENERATED_BODY()
 
@@ -178,9 +180,9 @@ public:
 public:
     // Getters
     /**
-	 * @brief Returns the topmost parent of this node
-	 *
-	 */
+     * @brief Returns the topmost parent of this node
+     *
+     */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     UOdysseyLayerStack* GetLayerStack() const;
 
@@ -191,9 +193,9 @@ public:
     bool IsLockedRecursively() const;
 
 public:
-	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
-	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
-	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
+    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame) const override;
+    virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
 
 protected:
@@ -224,7 +226,7 @@ public:
     FText DefaultName = FText::FromString(TEXT("Layer"));
 
     UPROPERTY(EditDefaultsOnly, Category="Odyssey|Layer")
-	FText Description = FText::FromString(TEXT(""));
+    FText Description = FText::FromString(TEXT(""));
 
     //UPROPERTY(EditDefaultsOnly, Category="Odyssey|Layer")
     FSlateIcon Icon;
@@ -234,7 +236,7 @@ public:
     
     //Defaults Properties
     UPROPERTY(EditDefaultsOnly, Category="Odyssey|Layer")
-	bool CanHaveChildren = false;
+    bool CanHaveChildren = false;
 
     UPROPERTY()
     UOdysseyLayer* Parent;
@@ -260,7 +262,7 @@ private:
     void DisplayOptionsBlueprintSetter(bool Value);
 
     UFUNCTION(BlueprintSetter)
-	void BlendModeBlueprintSetter(EOdysseyBlendingMode Value);
+    void BlendModeBlueprintSetter(EOdysseyBlendingMode Value);
 
     UFUNCTION(BlueprintSetter)
     void OpacityBlueprintSetter(float Value);
@@ -283,7 +285,7 @@ public:
     bool DisplayOptions = true;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=BlendModeBlueprintSetter)
-	EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
+    EOdysseyBlendingMode BlendMode = EOdysseyBlendingMode::kNormal;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=OpacityBlueprintSetter)
     float Opacity = 1.0f;

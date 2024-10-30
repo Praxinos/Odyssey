@@ -35,7 +35,7 @@ public:
     UTexture2D* GetTexture();
     
 public:
-	UPROPERTY(BlueprintReadOnly, Category="Odyssey|LayerStack")
+    UPROPERTY(BlueprintReadOnly, Category="Odyssey|LayerStack")
     TObjectPtr<UOdysseyTextureLayerStack> LayerStack;
 };
 

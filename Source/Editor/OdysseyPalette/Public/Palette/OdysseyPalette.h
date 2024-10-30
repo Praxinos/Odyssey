@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "OdysseyPaletteEntry.h"
+#include "Templates/SubclassOf.h"
 
 #include "OdysseyPalette.generated.h"
 
@@ -153,15 +154,15 @@ public:
     UFUNCTION(BlueprintCallable, Category="Palette")
     bool CanMoveEntry(UOdysseyPaletteEntry* iEntry, UOdysseyPaletteEntry* iParentEntry) const;
 
-	/**
-	 * @brief Returns whether the given Entries can be moved in the given ParentEntry
-	 *
-	 * @param Entries 
-	 * @param ParentEntry has to be a Entry from this Palette or nullptr
-	 * @param IndexInParent
-	 */
-	UFUNCTION(BlueprintCallable, Category="Palette")
-	bool CanMoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdysseyPaletteEntry* iParentEntry) const;
+    /**
+     * @brief Returns whether the given Entries can be moved in the given ParentEntry
+     *
+     * @param Entries 
+     * @param ParentEntry has to be a Entry from this Palette or nullptr
+     * @param IndexInParent
+     */
+    UFUNCTION(BlueprintCallable, Category="Palette")
+    bool CanMoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdysseyPaletteEntry* iParentEntry) const;
 
     /**
      * @brief Moves Entry to become child of ParentEntry at IndexInParent
@@ -173,15 +174,15 @@ public:
     UFUNCTION(BlueprintCallable, Category="Palette")
     void MoveEntry(UOdysseyPaletteEntry* iEntry, UOdysseyPaletteEntry* iParentEntry = nullptr, int iIndexInParent = 0);
 
-	/**
-	 * @brief Moves Entries to become children of ParentEntry at IndexInParent
-	 *
-	 * @param Entries 
-	 * @param ParentEntry has to be a Entry from this Palette or nullptr
-	 * @param IndexInParent
-	 */
-	UFUNCTION(BlueprintCallable, Category="Palette")
-	void MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdysseyPaletteEntry* iParentEntry = nullptr, int iIndexInParent = 0);
+    /**
+     * @brief Moves Entries to become children of ParentEntry at IndexInParent
+     *
+     * @param Entries 
+     * @param ParentEntry has to be a Entry from this Palette or nullptr
+     * @param IndexInParent
+     */
+    UFUNCTION(BlueprintCallable, Category="Palette")
+    void MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdysseyPaletteEntry* iParentEntry = nullptr, int iIndexInParent = 0);
 
     void AddSet();
     void DuplicateSet();
@@ -201,12 +202,12 @@ protected:
 public:
     // UObject overrides
 
-	/**
-	 * Called when a property on this object has been modified
-	 *
-	 * @param PropertyThatChanged the property that was modified
-	 */
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+    /**
+     * Called when a property on this object has been modified
+     *
+     * @param PropertyThatChanged the property that was modified
+     */
+    virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
     /**
      * @brief Allows us to know which property changed on an undo/redo

@@ -7,14 +7,14 @@
 #include "OdysseyAnimationPlayer.h"
 
 SOdysseyAnimationTimelineCurrentFrame::SOdysseyAnimationTimelineCurrentFrame()
-	: mExtension(nullptr)
+    : mExtension(nullptr)
 {
 }
 
 void
 SOdysseyAnimationTimelineCurrentFrame::Construct(
     const FArguments& iArgs,
-	FOdysseyAnimationEditorExtension* iExtension
+    FOdysseyAnimationEditorExtension* iExtension
 )
 {
     mExtension = iExtension;
@@ -23,39 +23,39 @@ SOdysseyAnimationTimelineCurrentFrame::Construct(
 int32
 SOdysseyAnimationTimelineCurrentFrame::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
-	const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush("GenericWhiteBox");
+    const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush("GenericWhiteBox");
 
-	const float height = AllottedGeometry.GetLocalSize().Y;
-	const float width = AllottedGeometry.GetLocalSize().X;
-	const float frameSize = mExtension->Timeline()->GetFrameWidth();
+    const float height = AllottedGeometry.GetLocalSize().Y;
+    const float width = AllottedGeometry.GetLocalSize().X;
+    const float frameSize = mExtension->Timeline()->GetFrameWidth();
 
-	FLinearColor lineColor = FLinearColor::Red;
-	lineColor.A = 0.3f;
+    FLinearColor lineColor = FLinearColor::Red;
+    lineColor.A = 0.3f;
 
-	int currentFrame = mExtension->Animation()->GetFrameIndexAtTime(mExtension->Player()->GetCurrentTime());
-	float currentFramePos = mExtension->Timeline()->FrameToMousePosition(currentFrame);
+    int currentFrame = mExtension->Animation()->GetFrameIndexAtTime(mExtension->Player()->GetCurrentTime());
+    float currentFramePos = mExtension->Timeline()->FrameToMousePosition(currentFrame);
 
-	FSlateDrawElement::MakeBox(
-		OutDrawElements,
-		LayerId,
+    FSlateDrawElement::MakeBox(
+        OutDrawElements,
+        LayerId,
         AllottedGeometry.ToPaintGeometry( FVector2D(frameSize, height), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(currentFramePos, 0.f) ) ) ),
-		GenericBrush,
-		ESlateDrawEffect::None,
-		lineColor
-	);
+        GenericBrush,
+        ESlateDrawEffect::None,
+        lineColor
+    );
 
-	++LayerId;
-	return LayerId;
+    ++LayerId;
+    return LayerId;
 }
 
 FVector2D
 SOdysseyAnimationTimelineCurrentFrame::ComputeDesiredSize(float) const
 {
-	return FVector2D(); //no desired size
+    return FVector2D(); //no desired size
 }
 
 FReply
 SOdysseyAnimationTimelineCurrentFrame::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	return FReply::Unhandled();
+    return FReply::Unhandled();
 }

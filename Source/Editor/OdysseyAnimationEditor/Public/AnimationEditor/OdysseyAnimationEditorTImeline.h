@@ -39,17 +39,17 @@ public:
     void ZoomIn();
     void ZoomOut();
 
-	void SetZoom(float iZoom);
-	void SetOffset(float iOffset);
+    void SetZoom(float iZoom);
+    void SetOffset(float iOffset);
     //void SetSelectedFrames(const FInt32Range& iSelectedFrames);
     void SelectCell(UOdysseyAnimationCell* iCell, bool iSetAsCursor = false);
     void SetSelectedCells(const TArray<UOdysseyAnimationCell*>& iCells);
 
-	static float GetBaseFrameSize();
-	float GetFrameWidth() const;
-	float GetZoom() const;
-	float GetOffset() const;
-	float GetPadding() const;
+    static float GetBaseFrameSize();
+    float GetFrameWidth() const;
+    float GetZoom() const;
+    float GetOffset() const;
+    float GetPadding() const;
     //FInt32Range GetSelectedFrames() const;
     //FInt32Range GetSelectableFrames() const;
     const TArray<UOdysseyAnimationCell*>& GetSelectedCells() const;
@@ -58,7 +58,7 @@ public:
     void CleanCellSelectionCursor();
 
     float MousePositionToFrame(float iPos) const;
-	float FrameToMousePosition(float iFrame) const;
+    float FrameToMousePosition(float iFrame) const;
 
 public:
     //Events
@@ -77,7 +77,7 @@ private:
     FOdysseyAnimationEditorExtension* mExtension;
 
     float mZoom;
-	float mOffset;
+    float mOffset;
     //FInt32Range mSelectedFrames;
     TArray<UOdysseyAnimationCell*> mSelectedCells;
     UOdysseyAnimationCell* mCellSelectionCursor;
@@ -85,7 +85,7 @@ private:
     FSimpleMulticastDelegate mOnZoomChanged;
     FSimpleMulticastDelegate mOnOffsetChanged;
 
-	UOdysseyAnimationLayer* mLayer = nullptr;
+    UOdysseyAnimationLayer* mLayer = nullptr;
 
     EOdysseyTimelineTool mSelectedTool;
     TSharedPtr<FOdysseyAnimationTimelineSelectionTool> mSelectionTool;

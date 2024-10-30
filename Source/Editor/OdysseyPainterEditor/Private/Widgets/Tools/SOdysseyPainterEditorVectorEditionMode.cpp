@@ -5,6 +5,9 @@
 #include "ISinglePropertyView.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
+#include "Widgets/Input/SCheckBox.h"
+#include "Widgets/DeclarativeSyntaxSupport.h"
+#include "Widgets/SCompoundWidget.h" //ChildSlot
 
 /////////////////////////////////////////////////////
 // SOdysseyPainterEditorVectorEditionMode

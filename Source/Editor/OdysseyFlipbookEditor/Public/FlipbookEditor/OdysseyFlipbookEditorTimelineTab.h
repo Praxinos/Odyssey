@@ -12,7 +12,7 @@ class FOdysseyFlipbookWrapper;
 class UPaperSprite;
 
 class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorTimelineTab :
-	public FOdysseyEditorTab
+    public FOdysseyEditorTab
 {
 public:
     static const FName& StaticId();

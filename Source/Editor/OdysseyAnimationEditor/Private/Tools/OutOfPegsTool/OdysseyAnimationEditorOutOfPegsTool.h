@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "IDetailCustomization.h"
+#include "Widgets/SWidget.h"
 #include "OdysseyAnimationEditorOutOfPegsTool.generated.h"
 
 class FOdysseyPaintEngine;
@@ -73,11 +74,11 @@ private:
     void OnRotationHandleDragEnd();
 
 public:
-	UFUNCTION(BlueprintCallable, Category="Actions", CallInEditor)
-	void Reset();
+    UFUNCTION(BlueprintCallable, Category="Actions", CallInEditor)
+    void Reset();
 
-	UFUNCTION(BlueprintCallable, Category="Actions", CallInEditor)
-	void ResetAll();
+    UFUNCTION(BlueprintCallable, Category="Actions", CallInEditor)
+    void ResetAll();
 
 public:
     UPROPERTY(EditAnywhere, Category="Out Of Pegs", meta = (LinearDeltaSensitivity="1") )

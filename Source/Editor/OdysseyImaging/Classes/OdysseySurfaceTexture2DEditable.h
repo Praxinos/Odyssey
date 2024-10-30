@@ -2,9 +2,11 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 #pragma once
 #include "OdysseySurfaceEditable.h"
+#include "UObject/StrongObjectPtr.h"
 #include <ULIS>
 
 class FOdysseySurfaceTexture2DEditable;
+class UTextureRenderTarget2D;
 
 /////////////////////////////////////////////////////
 // Utlity

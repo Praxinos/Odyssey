@@ -17,11 +17,11 @@ SOdysseyTabletAPISwitcher::Open()
 
     TSharedPtr<SOdysseyTabletAPISwitcher> apiSwitcher = SNew(SOdysseyTabletAPISwitcher);
 
-	TSharedPtr<SCustomDialog> customDialog;
+    TSharedPtr<SCustomDialog> customDialog;
 
-	FText dialogTitle = LOCTEXT("tablet-api-switcher.select-tablet-api", "Select Tablet API" );
-	FText oKText = LOCTEXT("tablet-api-switcher.ok", "OK" );
-	FText cancelText = LOCTEXT("tablet-api-switcher.cancel", "Cancel");
+    FText dialogTitle = LOCTEXT("tablet-api-switcher.select-tablet-api", "Select Tablet API" );
+    FText oKText = LOCTEXT("tablet-api-switcher.ok", "OK" );
+    FText cancelText = LOCTEXT("tablet-api-switcher.cancel", "Cancel");
 
     customDialog = SNew( SCustomDialog )
         .Title( dialogTitle )
@@ -63,9 +63,9 @@ SOdysseyTabletAPISwitcher::Construct( const FArguments& iArgs )
             SNew( STextBlock )
             .Text( FText::FromString("Select tablet API") )
         ]
-		+ SVerticalBox::Slot()
-		[
-			SNew(SComboBox<TSharedPtr<EOdysseyStylusInputDriver>>)
+        + SVerticalBox::Slot()
+        [
+            SNew(SComboBox<TSharedPtr<EOdysseyStylusInputDriver>>)
             .OptionsSource(&mOptions)
             .OnGenerateWidget(this, &SOdysseyTabletAPISwitcher::GenerateTabletAPIComboBoxItem)
             .OnSelectionChanged( this, &SOdysseyTabletAPISwitcher::ChangeSelectionTabletAPIComboBoxItem )
@@ -73,7 +73,7 @@ SOdysseyTabletAPISwitcher::Construct( const FArguments& iArgs )
                 SNew( STextBlock )
                 .Text( this, &SOdysseyTabletAPISwitcher::GetComboBoxTabletAPISelectedAsText )
             ]
-		]
+        ]
     ];
 }
 
@@ -86,7 +86,7 @@ SOdysseyTabletAPISwitcher::TabletAPISelected()
 TSharedRef<SWidget>
 SOdysseyTabletAPISwitcher::GenerateTabletAPIComboBoxItem( TSharedPtr<EOdysseyStylusInputDriver> iItem )
 {
-	return  SNew(STextBlock)
+    return  SNew(STextBlock)
             .Text( UOdysseyStylusInputSettings::GetFormatText( iItem ) );
 }
 

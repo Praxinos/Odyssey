@@ -28,10 +28,10 @@ void SOdysseyTextureLayerImageRasterRow::Construct(const FArguments& InArgs, con
     SOdysseyLayerRow::Construct(
         SOdysseyLayerRow::FArguments(),
         iOwnerTableView,
-		iTextureLayerImageRaster
+        iTextureLayerImageRaster
     );
 
-	SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
+    SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -88,7 +88,7 @@ SOdysseyTextureLayerImageRasterRow::GenerateHeaderWidget()
 TSharedRef<SWidget>
 SOdysseyTextureLayerImageRasterRow::GenerateOptionsWidget()
 {
-	return SNew(SVerticalBox)
+    return SNew(SVerticalBox)
         + SVerticalBox::Slot()
         .Padding(FMargin(0, 2.f, 0, 0))
         .AutoHeight()
@@ -168,7 +168,7 @@ SOdysseyTextureLayerImageRasterRow::OnOpacityEndSliderMovement(int iValue)
 ECheckBoxState
 SOdysseyTextureLayerImageRasterRow::GetIsAlphaLockedIsChecked() const
 {
-	return mTextureLayerImageRaster->IsAlphaLocked ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mTextureLayerImageRaster->IsAlphaLocked ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 void

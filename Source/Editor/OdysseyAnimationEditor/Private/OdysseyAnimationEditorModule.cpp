@@ -37,22 +37,22 @@
 TSharedRef<FOdysseyAnimationEditorToolkit>
 FOdysseyAnimationEditorModule::CreateOdysseyAnimationEditor( UOdysseyAnimation* iAnimation )
 {
-	TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
-		TEXT("OdysseyAnimationEditor"),
-		LOCTEXT("main-menu.category", "Odyssey Animation Editor"),
-		iAnimation,
-		"OdysseyAnimationEditor_Layout"
-	);
+    TSharedPtr<FOdysseyPainterEditor> editor = MakeShared<FOdysseyPainterEditor>(
+        TEXT("OdysseyAnimationEditor"),
+        LOCTEXT("main-menu.category", "Odyssey Animation Editor"),
+        iAnimation,
+        "OdysseyAnimationEditor_Layout"
+    );
 
-	TSharedRef<FOdysseyAnimationEditorExtension> animationExtension = MakeShared<FOdysseyAnimationEditorExtension>(editor.Get());
-	editor->AddExtension(animationExtension);
+    TSharedRef<FOdysseyAnimationEditorExtension> animationExtension = MakeShared<FOdysseyAnimationEditorExtension>(editor.Get());
+    editor->AddExtension(animationExtension);
 
     TSharedPtr<FOdysseyAnimationEditorToolkit> toolkit = MakeShared<FOdysseyAnimationEditorToolkit>();
     toolkit->Initialize(iAnimation, editor);
     //-----
 
-	TSharedPtr<FOdysseyAnimationEditorSource> source = MakeShared<FOdysseyAnimationEditorSource>(iAnimation);
-	editor->SetSource(source);
+    TSharedPtr<FOdysseyAnimationEditorSource> source = MakeShared<FOdysseyAnimationEditorSource>(iAnimation);
+    editor->SetSource(source);
 
     return toolkit.ToSharedRef();
 }
@@ -62,100 +62,100 @@ FOdysseyAnimationEditorModule::StartupModule()
 {
     RegisterAssetTypeActions();
 
-	// Register Commands
-	RegisterCommands();
+    // Register Commands
+    RegisterCommands();
 
-	RegisterSettings();
+    RegisterSettings();
 
-	RegisterLevelEditorLayoutExtensions();
+    RegisterLevelEditorLayoutExtensions();
 
-	RegisterDetailCustomizations();
+    RegisterDetailCustomizations();
 
-	RegisterThumbnailRenderers();
+    RegisterThumbnailRenderers();
 }
 
 void
 FOdysseyAnimationEditorModule::ShutdownModule()
 {
-	// Unregister Commands
-	UnregisterCommands();
+    // Unregister Commands
+    UnregisterCommands();
 
-	UnregisterSettings();
+    UnregisterSettings();
 
-	// Unregister Assets Type Actions
-	UnregisterAssetTypeActions();
+    // Unregister Assets Type Actions
+    UnregisterAssetTypeActions();
 
-	UnregisterLevelEditorLayoutExtensions();
+    UnregisterLevelEditorLayoutExtensions();
 
-	UnregisterDetailCustomization();
+    UnregisterDetailCustomization();
 
-	UnregisterThumbnailRenderers();
+    UnregisterThumbnailRenderers();
 }
 
 void
 FOdysseyAnimationEditorModule::RegisterAssetTypeActions()
 {
-	IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+    IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 
-	// Create Asset Categories
-	EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("asset-category.name", "ILIAD"));
+    // Create Asset Categories
+    EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("asset-category.name", "ILIAD"));
 
-	//Create Asset Types Actions
-	mIliadTypeActions = MakeShareable(new FOdysseyAnimationAssetTypeActions(category));
+    //Create Asset Types Actions
+    mIliadTypeActions = MakeShareable(new FOdysseyAnimationAssetTypeActions(category));
 
-	//Register created Asset Type Actions
-	assetTools.RegisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
+    //Register created Asset Type Actions
+    assetTools.RegisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
 }
 
 void
 FOdysseyAnimationEditorModule::UnregisterAssetTypeActions()
 {
-	if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
-		return;
-	
-	IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
+    if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
+        return;
+    
+    IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
     assetTools.UnregisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
 }
 
 void
 FOdysseyAnimationEditorModule::RegisterCommands()
 {
-	FOdysseyAnimationEditorCommands::Register();
+    FOdysseyAnimationEditorCommands::Register();
 }
 
 void
 FOdysseyAnimationEditorModule::UnregisterCommands()
 {
-	FOdysseyAnimationEditorCommands::Unregister();
+    FOdysseyAnimationEditorCommands::Unregister();
 }
 
 void
 FOdysseyAnimationEditorModule::RegisterDetailCustomizations()
 {
-	FOdysseyAnimationEditorFlipSystem::RegisterDetailCustomization();
-	
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    FOdysseyAnimationEditorFlipSystem::RegisterDetailCustomization();
+    
+    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
     PropertyModule.RegisterCustomClassLayout(UOdysseyAnimationEditorOutOfPegsTool::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(&FOdysseyAnimationEditorOutOfPegsToolDetails::MakeInstance));
 }
 
 void
 FOdysseyAnimationEditorModule::UnregisterDetailCustomization()
 {
-	FOdysseyAnimationEditorFlipSystem::UnregisterDetailCustomization();
+    FOdysseyAnimationEditorFlipSystem::UnregisterDetailCustomization();
 }
 
 void
 FOdysseyAnimationEditorModule::RegisterLevelEditorLayoutExtensions()
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
-	mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyAnimationEditorGUI::ExtendLevelEditorLayout);
+    mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyAnimationEditorGUI::ExtendLevelEditorLayout);
 }
 
 void
 FOdysseyAnimationEditorModule::UnregisterLevelEditorLayoutExtensions()
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
-	LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
+    LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
 }
 
 void
@@ -171,10 +171,10 @@ FOdysseyAnimationEditorModule::RegisterSettings()
                                         , LOCTEXT( "settings.tooltip", "Configure the look and feel of the 2D Animation Editor." )
                                         , GetMutableDefault<UOdysseyAnimationEditorProjectSettings>() );
 
-	settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyAnimationEditorUserSettings"
-										, LOCTEXT( "settings.name", "2D Animation Editor" )
-										, LOCTEXT( "settings.tooltip", "Configure the look and feel of the 2D Animation Editor." )
-										, GetMutableDefault<UOdysseyAnimationEditorUserSettings>() );
+    settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyAnimationEditorUserSettings"
+                                        , LOCTEXT( "settings.name", "2D Animation Editor" )
+                                        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the 2D Animation Editor." )
+                                        , GetMutableDefault<UOdysseyAnimationEditorUserSettings>() );
 }
 
 void
@@ -186,19 +186,19 @@ FOdysseyAnimationEditorModule::UnregisterSettings()
         return;
         
     settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyAnimationEditor" );
-	settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyAnimationEditorUserSettings" );
+    settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyAnimationEditorUserSettings" );
 }
 
 void
 FOdysseyAnimationEditorModule::RegisterThumbnailRenderers()
 {
-	UThumbnailManager::Get().RegisterCustomRenderer(UOdysseyAnimationCell::StaticClass(), UOdysseyAnimationCellThumbnailRenderer::StaticClass());
+    UThumbnailManager::Get().RegisterCustomRenderer(UOdysseyAnimationCell::StaticClass(), UOdysseyAnimationCellThumbnailRenderer::StaticClass());
 }
 
 void
 FOdysseyAnimationEditorModule::UnregisterThumbnailRenderers()
 {
-	//UThumbnailManager::Get().UnregisterCustomRenderer(UOdysseyAnimationCellImageRaster::StaticClass());
+    //UThumbnailManager::Get().UnregisterCustomRenderer(UOdysseyAnimationCellImageRaster::StaticClass());
 }
 
 IMPLEMENT_MODULE( FOdysseyAnimationEditorModule, OdysseyAnimationEditor );

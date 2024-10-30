@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Input/DragAndDrop.h"
+
 class UOdysseyLayer;
 class UOdysseyLayerStack;
 
@@ -12,9 +14,9 @@ public:
     FOdysseyLayerStackDragDropOperation(UOdysseyLayerStack* iLayerStack, TArray<UOdysseyLayer*> iLayers);
 
 public:
-	DRAG_DROP_OPERATOR_TYPE(FOdysseyLayerStackDragDropOperation, FDragDropOperation)
+    DRAG_DROP_OPERATOR_TYPE(FOdysseyLayerStackDragDropOperation, FDragDropOperation)
 
-	using FDragDropOperation::Construct;
+    using FDragDropOperation::Construct;
 
 public:
     /**
@@ -39,11 +41,11 @@ public:
     UOdysseyLayerStack* GetLayerStack() const;
 
 public:
-	/**
-	 * Gets the widget that will serve as the decorator unless overridden. 
-	 * If you do not override, you will have no decorator
-	 */
-	virtual TSharedPtr<SWidget> GetDefaultDecorator() const override;
+    /**
+     * Gets the widget that will serve as the decorator unless overridden. 
+     * If you do not override, you will have no decorator
+     */
+    virtual TSharedPtr<SWidget> GetDefaultDecorator() const override;
 
 private:
     FText GetText() const;

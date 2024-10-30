@@ -28,37 +28,37 @@
 UOdysseyAnimation*
 UOdysseyAnimationEditorAnimationFunctionLibrary::CreateAnimationAsset(FString AssetName, FString PackagePath, int Width, int Height, EOdysseyAnimationFormat Format, float FramesPerSecond)
 {
-	if (AssetName.IsEmpty())
-		return nullptr;
+    if (AssetName.IsEmpty())
+        return nullptr;
 
-	if (PackagePath.IsEmpty())
-		return nullptr;
+    if (PackagePath.IsEmpty())
+        return nullptr;
 
-	if (Width <= 0 || Height <= 0)
-		return nullptr;
+    if (Width <= 0 || Height <= 0)
+        return nullptr;
 
-	if (FramesPerSecond < 0.f)
-		return nullptr;
+    if (FramesPerSecond < 0.f)
+        return nullptr;
 
-	IAssetTools& assetTools = FAssetToolsModule::GetModule().Get();
-	UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(
-		assetTools.CreateAsset(
-			AssetName,
-			PackagePath,
-			UOdysseyAnimation::StaticClass(),
-			UOdysseyAnimationFactory::StaticClass()->GetDefaultObject<UFactory>()
-		)
-	);
+    IAssetTools& assetTools = FAssetToolsModule::GetModule().Get();
+    UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(
+        assetTools.CreateAsset(
+            AssetName,
+            PackagePath,
+            UOdysseyAnimation::StaticClass(),
+            UOdysseyAnimationFactory::StaticClass()->GetDefaultObject<UFactory>()
+        )
+    );
 
-	if (!animation)
-		return nullptr;
+    if (!animation)
+        return nullptr;
 
-	animation->mWidth = Width;
-	animation->mHeight = Height;
-	animation->Format = Format;
-	animation->FramesPerSecond = FramesPerSecond;
+    animation->mWidth = Width;
+    animation->mHeight = Height;
+    animation->Format = Format;
+    animation->FramesPerSecond = FramesPerSecond;
 
-	return animation;
+    return animation;
 }
 
 UOdysseyAnimationLayerImageRaster*
@@ -67,7 +67,7 @@ UOdysseyAnimationEditorAnimationFunctionLibrary::ImportTextureSequence(UOdysseyA
     if ( Textures.Num() <= 0 || !Animation || (ParentLayer && ParentLayer->GetAnimation() != Animation))
         return nullptr;
 
-	UOdysseyLayerStack* layerStack = Animation->GetLayerStack();
+    UOdysseyLayerStack* layerStack = Animation->GetLayerStack();
     if ( !layerStack )
         return nullptr;
 
@@ -80,9 +80,9 @@ UOdysseyAnimationEditorAnimationFunctionLibrary::ImportTextureSequence(UOdysseyA
     FScopedSlowTask progressBar(Textures.Num(), LOCTEXT("animation-editor.import-texture-dialog.progress-bar.title", "Importing Texture Sequence"));
     progressBar.MakeDialog();
 
-	UOdysseyAnimationEditorLayerFunctionLibrary::ImportTextureSequence(layerImageRaster, Textures, 0);
+    UOdysseyAnimationEditorLayerFunctionLibrary::ImportTextureSequence(layerImageRaster, Textures, 0);
 
-	return layerImageRaster;
+    return layerImageRaster;
 }
 
 UOdysseyAnimationLayerImageRaster*
@@ -91,7 +91,7 @@ UOdysseyAnimationEditorAnimationFunctionLibrary::ImportImageSequence(UOdysseyAni
     if ( Paths.Num() <= 0 || !Animation || (ParentLayer && ParentLayer->GetAnimation() != Animation))
         return nullptr;
 
-	UOdysseyLayerStack* layerStack = Animation->GetLayerStack();
+    UOdysseyLayerStack* layerStack = Animation->GetLayerStack();
     if ( !layerStack )
         return nullptr;
 
@@ -100,88 +100,88 @@ UOdysseyAnimationEditorAnimationFunctionLibrary::ImportImageSequence(UOdysseyAni
     #endif
     UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), ParentLayer, IndexInParent));
     
-	UOdysseyAnimationEditorLayerFunctionLibrary::ImportImageSequence(layer, Paths, 0);
+    UOdysseyAnimationEditorLayerFunctionLibrary::ImportImageSequence(layer, Paths, 0);
 
-	return layer;
+    return layer;
 }
 
 TArray<FString>
 UOdysseyAnimationEditorAnimationFunctionLibrary::ExportAsImageSequence(
-	UOdysseyAnimation* Animation,
-	FInt32Range FrameRange,
-	FString Filename,
-	FString Path,
-	EOdysseyExportImageFormat Format
+    UOdysseyAnimation* Animation,
+    FInt32Range FrameRange,
+    FString Filename,
+    FString Path,
+    EOdysseyExportImageFormat Format
 )
 {
-	if (!Animation)
-		return {};
+    if (!Animation)
+        return {};
 
-	::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight());
-	return Animation->ExportAsImageSequence(Animation->GetFormat(), FrameRange, rect, Filename, Path, Format );
+    ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight());
+    return Animation->ExportAsImageSequence(Animation->GetFormat(), FrameRange, rect, Filename, Path, Format );
 }
 
 FString
 UOdysseyAnimationEditorAnimationFunctionLibrary::ExportFrameAsImage(
-	UOdysseyAnimation* Animation,
-	int Frame,
-	FString Filename,
-	FString Path,
-	EOdysseyExportImageFormat Format
+    UOdysseyAnimation* Animation,
+    int Frame,
+    FString Filename,
+    FString Path,
+    EOdysseyExportImageFormat Format
 )
 {
-	if (!Animation)
-		return TEXT("");
+    if (!Animation)
+        return TEXT("");
 
-	::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight());
-	return Animation->ExportAsImage(Animation->GetFormat(), Frame, Format, rect, Filename, Path );
+    ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight());
+    return Animation->ExportAsImage(Animation->GetFormat(), Frame, Format, rect, Filename, Path );
 }
 
 UTexture2D*
 UOdysseyAnimationEditorAnimationFunctionLibrary::ExportFrameAsTexture(
-	UOdysseyAnimation* Animation,
-	int Frame,
-	FString Filename,
-	FString Path
+    UOdysseyAnimation* Animation,
+    int Frame,
+    FString Filename,
+    FString Path
 )
 {
-	if (!Animation)
-		return nullptr;
+    if (!Animation)
+        return nullptr;
 
-	::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight());
-	ETextureSourceFormat textureSourceFormat = TextureSourceFormatForULISFormat(Animation->GetFormat());
-	return Animation->ExportAsTexture(Frame, rect, textureSourceFormat, Filename, Path );
+    ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight());
+    ETextureSourceFormat textureSourceFormat = TextureSourceFormatForULISFormat(Animation->GetFormat());
+    return Animation->ExportAsTexture(Frame, rect, textureSourceFormat, Filename, Path );
 }
 
 TArray<UTexture2D*>
 UOdysseyAnimationEditorAnimationFunctionLibrary::ExportAsTextureSequence(UOdysseyAnimation* Animation, FInt32Range FrameRange, FString AssetName, FString Path)
 {
-	if ( !Animation )
+    if ( !Animation )
         return {};
 
-	return Animation->ExportAsTextureSequence(
-		Animation->GetFormat(),
-		FrameRange,
-		::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight()),
-		AssetName,
-		Path
-	);
+    return Animation->ExportAsTextureSequence(
+        Animation->GetFormat(),
+        FrameRange,
+        ::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight()),
+        AssetName,
+        Path
+    );
 }
 
 UPaperFlipbook*
 UOdysseyAnimationEditorAnimationFunctionLibrary::ExportAsFlipbook(UOdysseyAnimation* Animation, FInt32Range FrameRange, FString AssetName, FString Path)
 {
-	if ( !Animation )
+    if ( !Animation )
         return nullptr;
 
-	return Animation->ExportAsFlipbook(
-		Animation->GetFormat(),
-		FrameRange,
-		::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight()),
-		Animation->FramesPerSecond,
-		AssetName,
-		Path
-	);
+    return Animation->ExportAsFlipbook(
+        Animation->GetFormat(),
+        FrameRange,
+        ::ULIS::FRectI::FromXYWH(0, 0, Animation->GetWidth(), Animation->GetHeight()),
+        Animation->FramesPerSecond,
+        AssetName,
+        Path
+    );
 }
 
 TArray<UOdysseyAnimationCellImageRaster*>
@@ -190,40 +190,40 @@ UOdysseyAnimationEditorLayerFunctionLibrary::ImportTextureSequence(UOdysseyAnima
     if ( Textures.Num() <= 0 || !Layer)
         return {};
 
-	UOdysseyAnimation* animation = Layer->GetAnimation();
+    UOdysseyAnimation* animation = Layer->GetAnimation();
 
-	if (iCellIndex != INDEX_NONE)
-		iCellIndex = FMath::Clamp(iCellIndex, 0, Layer->GetCells().Num());
+    if (iCellIndex != INDEX_NONE)
+        iCellIndex = FMath::Clamp(iCellIndex, 0, Layer->GetCells().Num());
 
     FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Import Textures Sequence"));
     
     FScopedSlowTask progressBar(Textures.Num(), LOCTEXT("animation-editor.import-texture-dialog.progress-bar.title", "Importing Texture Sequence"));
     progressBar.MakeDialog();
 
-	UTexture2D* openedTexture = Cast<UTexture2D>(Textures[0]);
+    UTexture2D* openedTexture = Cast<UTexture2D>(Textures[0]);
     TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(openedTexture, animation->GetFormat()));
 
-	TArray<UOdysseyAnimationCell*> cells = Layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), iCellIndex, Textures.Num());
-	TArray<UOdysseyAnimationCellImageRaster*> rasterCells;
+    TArray<UOdysseyAnimationCell*> cells = Layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), iCellIndex, Textures.Num());
+    TArray<UOdysseyAnimationCellImageRaster*> rasterCells;
     for( int i = 0; i < cells.Num(); i++ )
     {
         progressBar.EnterProgressFrame();
 
-		UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(cells[i]);
-		UTexture2D* texture = Textures[i];
+        UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(cells[i]);
+        UTexture2D* texture = Textures[i];
 
-		rasterCells.Add(cell);
+        rasterCells.Add(cell);
 
-		FillOdysseyBlockFromUTextureData(textureBlock.Get(), texture, animation->GetFormat());
+        FillOdysseyBlockFromUTextureData(textureBlock.Get(), texture, animation->GetFormat());
 
-		TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
-		FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
-		::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
-		rasterBlockMutator.Copy(textureBlock, { invalidRect });
-		rasterBlockMutator.Commit();
+        TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
+        FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
+        ::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
+        rasterBlockMutator.Copy(textureBlock, { invalidRect });
+        rasterBlockMutator.Commit();
     }
 
-	return rasterCells;
+    return rasterCells;
 }
 
 TArray<UOdysseyAnimationCellImageRaster*>
@@ -232,10 +232,10 @@ UOdysseyAnimationEditorLayerFunctionLibrary::ImportImageSequence(UOdysseyAnimati
     if ( Paths.Num() <= 0 || !Layer)
         return {};
 
-	UOdysseyAnimation* animation = Layer->GetAnimation();
+    UOdysseyAnimation* animation = Layer->GetAnimation();
 
-	if (iCellIndex != INDEX_NONE)
-		iCellIndex = FMath::Clamp(iCellIndex, 0, Layer->GetCells().Num());
+    if (iCellIndex != INDEX_NONE)
+        iCellIndex = FMath::Clamp(iCellIndex, 0, Layer->GetCells().Num());
 
     FScopedSlowTask progressBar(Paths.Num(), LOCTEXT("animation-editor.import-image-sequence.progress-bar.title", "Importing Image Sequence"));
     progressBar.MakeDialog();
@@ -310,110 +310,110 @@ UOdysseyAnimationEditorLayerFunctionLibrary::ImportImageSequence(UOdysseyAnimati
         FScopedTransaction ScopedTransaction(LOCTEXT("animation-editor.transaction.import-image-sequence", "Import Image Sequence"));
     #endif
 
-	TArray<UOdysseyAnimationCell*> cells = Layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), iCellIndex, blocks.Num());
+    TArray<UOdysseyAnimationCell*> cells = Layer->AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), iCellIndex, blocks.Num());
 
-	TArray<UOdysseyAnimationCellImageRaster*> rasterCells;
+    TArray<UOdysseyAnimationCellImageRaster*> rasterCells;
     for (int i = 0; i < cells.Num(); i++)
     {
-		TSharedPtr<::ULIS::FBlock> block = blocks[i];
-		UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(cells[i]);
-		rasterCells.Add(cell);
-		
-		TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
-		FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
-		::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
-		rasterBlockMutator.Copy(block,{ invalidRect });
-		rasterBlockMutator.Commit();
+        TSharedPtr<::ULIS::FBlock> block = blocks[i];
+        UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(cells[i]);
+        rasterCells.Add(cell);
+        
+        TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
+        FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
+        ::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
+        rasterBlockMutator.Copy(block,{ invalidRect });
+        rasterBlockMutator.Commit();
     }
 
-	return rasterCells;
+    return rasterCells;
 }
 
 TArray<FString>
 UOdysseyAnimationEditorLayerFunctionLibrary::ExportAsImageSequence(
-	UOdysseyAnimationLayer* Layer,
-	FInt32Range FrameRange,
-	FString Filename,
-	FString Path,
-	EOdysseyExportImageFormat Format
+    UOdysseyAnimationLayer* Layer,
+    FInt32Range FrameRange,
+    FString Filename,
+    FString Path,
+    EOdysseyExportImageFormat Format
 )
 {
-	if (!Layer)
-		return {};
+    if (!Layer)
+        return {};
 
-	UOdysseyAnimation* animation = Layer->GetAnimation();
+    UOdysseyAnimation* animation = Layer->GetAnimation();
 
-	::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
-	return Layer->ExportAsImageSequence(animation->GetFormat(), FrameRange, rect, Filename, Path, Format );
+    ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
+    return Layer->ExportAsImageSequence(animation->GetFormat(), FrameRange, rect, Filename, Path, Format );
 }
 
 FString
 UOdysseyAnimationEditorLayerFunctionLibrary::ExportFrameAsImage(
-	UOdysseyAnimationLayer* Layer,
-	int Frame,
-	FString Filename,
-	FString Path,
-	EOdysseyExportImageFormat Format
+    UOdysseyAnimationLayer* Layer,
+    int Frame,
+    FString Filename,
+    FString Path,
+    EOdysseyExportImageFormat Format
 )
 {
-	if (!Layer)
-		return TEXT("");
+    if (!Layer)
+        return TEXT("");
 
-	UOdysseyAnimation* animation = Layer->GetAnimation();
-	::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
-	return Layer->ExportAsImage(animation->GetFormat(), Frame, Format, rect, Filename, Path );
+    UOdysseyAnimation* animation = Layer->GetAnimation();
+    ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
+    return Layer->ExportAsImage(animation->GetFormat(), Frame, Format, rect, Filename, Path );
 }
 
 UTexture2D*
 UOdysseyAnimationEditorLayerFunctionLibrary::ExportFrameAsTexture(
-	UOdysseyAnimationLayer* Layer,
-	int Frame,
-	FString Filename,
-	FString Path
+    UOdysseyAnimationLayer* Layer,
+    int Frame,
+    FString Filename,
+    FString Path
 )
 {
-	if (!Layer)
-		return nullptr;
+    if (!Layer)
+        return nullptr;
 
-	UOdysseyAnimation* animation = Layer->GetAnimation();
-	::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
-	ETextureSourceFormat textureSourceFormat = TextureSourceFormatForULISFormat(animation->GetFormat());
-	return Layer->ExportAsTexture(Frame, rect, textureSourceFormat, Filename, Path );
+    UOdysseyAnimation* animation = Layer->GetAnimation();
+    ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
+    ETextureSourceFormat textureSourceFormat = TextureSourceFormatForULISFormat(animation->GetFormat());
+    return Layer->ExportAsTexture(Frame, rect, textureSourceFormat, Filename, Path );
 }
 
 TArray<UTexture2D*>
 UOdysseyAnimationEditorLayerFunctionLibrary::ExportAsTextureSequence(UOdysseyAnimationLayer* Layer, FInt32Range FrameRange, FString AssetName, FString Path)
 {
-	if ( !Layer )
+    if ( !Layer )
         return {};
 
-	UOdysseyAnimation* animation = Layer->GetAnimation();
+    UOdysseyAnimation* animation = Layer->GetAnimation();
 
-	return Layer->ExportAsTextureSequence(
-		animation->GetFormat(),
-		FrameRange,
-		::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight()),
-		AssetName,
-		Path
-	);
+    return Layer->ExportAsTextureSequence(
+        animation->GetFormat(),
+        FrameRange,
+        ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight()),
+        AssetName,
+        Path
+    );
 }
 
 UPaperFlipbook*
 UOdysseyAnimationEditorLayerFunctionLibrary::ExportAsFlipbook(UOdysseyAnimationLayer* Layer, FInt32Range FrameRange, FString AssetName, FString Path)
 {
-	if ( !Layer )
+    if ( !Layer )
         return nullptr;
 
-	UOdysseyAnimation* animation = Layer->GetAnimation();
+    UOdysseyAnimation* animation = Layer->GetAnimation();
 
-	return Layer->ExportAsFlipbook(
-		animation->GetFormat(),
-		FrameRange,
-		::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight()),
-		animation->FramesPerSecond,
-		AssetName,
-		Path
-	);
+    return Layer->ExportAsFlipbook(
+        animation->GetFormat(),
+        FrameRange,
+        ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight()),
+        animation->FramesPerSecond,
+        AssetName,
+        Path
+    );
 }
 
 #undef LOCTEXT_NAMESPACE

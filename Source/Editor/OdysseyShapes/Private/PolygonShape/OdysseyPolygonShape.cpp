@@ -4,6 +4,7 @@
 #include "PolygonShape/OdysseyPolygonShape.h"
 #include "OdysseyHUDHandle.h"
 #include "OdysseyHUDPolygon.h"
+#include "OdysseyHUDElement.h"
 #include <ULIS>
 
 //--------------------------------------------------------------------------------------
@@ -44,8 +45,8 @@ UOdysseyPolygonShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
     {
         //Polygon Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
         mPoints.Last() = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
-		
-		bool snapAngles = SnapAngles ^ mInvertSnapAngles;
+        
+        bool snapAngles = SnapAngles ^ mInvertSnapAngles;
         if (snapAngles)
         {
             int num = mPoints.Num() - 2; 
@@ -89,8 +90,8 @@ UOdysseyPolygonShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 
     //Polygon Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
     mPoints.Last() = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
-	
-	bool snapAngles = SnapAngles ^ mInvertSnapAngles;
+    
+    bool snapAngles = SnapAngles ^ mInvertSnapAngles;
     if (snapAngles && mPoints.Num() > 1)
     {
         int num = mPoints.Num() - 2; 
@@ -126,10 +127,10 @@ UOdysseyPolygonShape::OnKeyDown(const FKey& iKey)
     }
 
     if( iKey == EKeys::LeftShift || iKey == EKeys::RightShift )
-	{
-		mInvertSnapAngles = true;
-		return true;
-	}
+    {
+        mInvertSnapAngles = true;
+        return true;
+    }
 
     return UOdysseyShape::OnKeyDown(iKey);
 }
@@ -140,7 +141,7 @@ UOdysseyPolygonShape::OnKeyUp(const FKey& iKey)
     if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
     {
         mInvertSnapAngles = false;
-		return true;
+        return true;
     }
 
     return UOdysseyShape::OnKeyUp(iKey);

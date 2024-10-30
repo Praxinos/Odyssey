@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 
+#include "Engine/Texture2D.h"
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>

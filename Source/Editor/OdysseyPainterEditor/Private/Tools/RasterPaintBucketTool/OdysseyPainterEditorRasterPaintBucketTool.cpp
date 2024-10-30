@@ -117,10 +117,10 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUpRaster( TSharedPtr<::ULIS::
     TSharedPtr<::ULIS::FBlock> maskBlock = MakeShared<::ULIS::FBlock>(iBlock->Width(), iBlock->Height(), ::ULIS::Format_G8);
 
 
-	::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_G8);
+    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_G8);
 
     ctx.Clear(*maskBlock);
-	ctx.Finish();
+    ctx.Finish();
 
     if (GapTolerance > 0)
     {
@@ -141,7 +141,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUpRaster( TSharedPtr<::ULIS::
         , iPointInTexture.y
         , ::ULIS::FColor::FromGrey8(0)
         , ::ULIS::FColor::FromGrey8(255));
-	ctx.Finish();
+    ctx.Finish();
 
     //Expansion and final step of gap tolerance is managed in a single dilate operation
     if (Expansion != 0 || GapTolerance > 0)
@@ -186,7 +186,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUpRaster( TSharedPtr<::ULIS::
     GEditor->BeginTransaction(LOCTEXT("raster-paint-bucket-tool.transaction.paint-stroke", "FloodFill"));
     ConvertMaskBlockToColorBlock(maskBlock, paintBlock, dstColor);
     
-	paintBlock->Dirty();
+    paintBlock->Dirty();
     Commit();
     
     FOdysseyPainterEditor* editor = GetEditor();
@@ -264,7 +264,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::IncludeColor( ::ULIS::FColor iColor 
 void
 UOdysseyPainterEditorRasterPaintBucketTool::Commit()
 {
-	mPaintEngine.Commit(BlendParameters);
+    mPaintEngine.Commit(BlendParameters);
 }
 
 void

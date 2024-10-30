@@ -6,12 +6,14 @@
 #include "CoreMinimal.h"
 #include "OdysseyPerformanceMode.h"
 #include "OdysseyImageRenderingAbility.h"
+#include "Templates/SubclassOf.h"
+
 #include "OdysseyLayerStack.generated.h"
 
 UCLASS(Abstract, HideDropdown, BlueprintType, config=EditorPerProjectUserSettings, PerObjectConfig)
 class ODYSSEYLAYERSTACK_API UOdysseyLayerStack
     : public UObject
-	, public FOdysseyImageRenderingAbility
+    , public FOdysseyImageRenderingAbility
 {
     GENERATED_BODY()
 
@@ -45,9 +47,9 @@ public:
     bool SupportsLayerClass(UClass* Class) const;
 
 public:
-	//GETTER/SETTER
-	UFUNCTION(BlueprintSetter)
-	void CurrentLayerBlueprintSetter(UOdysseyLayer* Layer);
+    //GETTER/SETTER
+    UFUNCTION(BlueprintSetter)
+    void CurrentLayerBlueprintSetter(UOdysseyLayer* Layer);
 
 public:
     //Layers management
@@ -63,8 +65,8 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack", meta=(DeterminesOutputType="LayerType"))
     UOdysseyLayer* AddLayer(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLayer* ParentLayer = nullptr, int IndexInParent = 0);
 
-	UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack", meta=(DeterminesOutputType="LayerType"))
-	TArray<UOdysseyLayer*> AddLayers(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLayer* ParentLayer = nullptr, int IndexInParent = 0, int Count = 1);
+    UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack", meta=(DeterminesOutputType="LayerType"))
+    TArray<UOdysseyLayer*> AddLayers(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLayer* ParentLayer = nullptr, int IndexInParent = 0, int Count = 1);
 
     /**
      * @brief Removes Layer from the LayerStack
@@ -183,15 +185,15 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     bool CanMoveLayer(UOdysseyLayer* Layer, UOdysseyLayer* ParentLayer) const;
 
-	/**
-	 * @brief Returns wether the given layers can be moved in the given ParentLayer
-	 *
-	 * @param Layers 
-	 * @param ParentLayer has to be a layer from this layerstack or nullptr
-	 * @param IndexInParent
-	 */
-	UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
-	bool CanMoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* ParentLayer) const;
+    /**
+     * @brief Returns wether the given layers can be moved in the given ParentLayer
+     *
+     * @param Layers 
+     * @param ParentLayer has to be a layer from this layerstack or nullptr
+     * @param IndexInParent
+     */
+    UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
+    bool CanMoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* ParentLayer) const;
 
     /**
      * @brief Moves Layer to become child of ParentLayer at IndexInParent
@@ -203,15 +205,15 @@ public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     void MoveLayer(UOdysseyLayer* Layer, UOdysseyLayer* ParentLayer = nullptr, int IndexInParent = 0);
 
-	/**
-	 * @brief Moves Layers to become children of ParentLayer at IndexInParent
-	 *
-	 * @param Layers 
-	 * @param ParentLayer has to be a layer from this layerstack or nullptr
-	 * @param IndexInParent
-	 */
-	UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
-	void MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* ParentLayer = nullptr, int IndexInParent = 0);
+    /**
+     * @brief Moves Layers to become children of ParentLayer at IndexInParent
+     *
+     * @param Layers 
+     * @param ParentLayer has to be a layer from this layerstack or nullptr
+     * @param IndexInParent
+     */
+    UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
+    void MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* ParentLayer = nullptr, int IndexInParent = 0);
 
 protected:
     //Property changed methods
@@ -219,18 +221,18 @@ protected:
     virtual void PropertyChanged(const FName& iPropertyName);public:
     
 public:
-	//Called by layers when there Parent or Children changed
+    //Called by layers when there Parent or Children changed
     void HierarchyChanged();
 
 public:
     // UObject overrides
 
-	/**
-	 * Called when a property on this object has been modified
-	 *
-	 * @param PropertyThatChanged the property that was modified
-	 */
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+    /**
+     * Called when a property on this object has been modified
+     *
+     * @param PropertyThatChanged the property that was modified
+     */
+    virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
     /**
      * @brief Allows us to know which property changed on an undo/redo
@@ -243,9 +245,9 @@ public:
     virtual void PostInitProperties() override;
 
 public:
-	//FOdysseyImageRenderingAbility overrides
-	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
+    //FOdysseyImageRenderingAbility overrides
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
+    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
 
 protected:
     //Internal
@@ -263,9 +265,9 @@ public:
     //Default properties
     UPROPERTY(Transient)
     TArray<TSubclassOf<UOdysseyLayer>> CompatibleLayers; //Contains compatible C++ layer types
-	
-	UPROPERTY(BlueprintReadWrite, Category="Odyssey|LayerStack", BlueprintSetter=CurrentLayerBlueprintSetter)
-	TObjectPtr<UOdysseyLayer> CurrentLayer;
+    
+    UPROPERTY(BlueprintReadWrite, Category="Odyssey|LayerStack", BlueprintSetter=CurrentLayerBlueprintSetter)
+    TObjectPtr<UOdysseyLayer> CurrentLayer;
 
     UPROPERTY()
     TObjectPtr<UOdysseyLayer> LayerRoot;

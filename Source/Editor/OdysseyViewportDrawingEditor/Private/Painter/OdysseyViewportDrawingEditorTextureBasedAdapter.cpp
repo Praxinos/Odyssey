@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.h"
 #include "OdysseyPainterEditor.h"
+#include "TextureResource.h"
 
 FOdysseyViewportDrawingEditorTextureBasedAdapter::~FOdysseyViewportDrawingEditorTextureBasedAdapter()
 {

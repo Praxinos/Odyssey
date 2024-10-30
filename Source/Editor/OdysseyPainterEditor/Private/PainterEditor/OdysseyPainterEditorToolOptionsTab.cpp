@@ -27,7 +27,7 @@ FOdysseyPainterEditorToolOptionsTab::~FOdysseyPainterEditorToolOptionsTab()
 }
 
 FOdysseyPainterEditorToolOptionsTab::FOdysseyPainterEditorToolOptionsTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(LOCTEXT( "tool-options-tab.name", "Tool Options" ), FSlateIcon( "OdysseyStyle", "PainterEditor.ToolOptions" ))
+    : FOdysseyEditorTab(LOCTEXT( "tool-options-tab.name", "Tool Options" ), FSlateIcon( "OdysseyStyle", "PainterEditor.ToolOptions" ))
     , mEditor(iEditor)
 {
 }

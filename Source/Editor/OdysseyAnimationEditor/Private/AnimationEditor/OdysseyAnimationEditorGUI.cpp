@@ -21,15 +21,15 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyAnimationEditorGUI::~FOdysseyAnimationEditorGUI()
 {
-	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll( this );
-	UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll( this );
-	FOdysseyVectorEngine::OnSignalDelegate().RemoveAll( this );
+    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll( this );
+    UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll( this );
+    FOdysseyVectorEngine::OnSignalDelegate().RemoveAll( this );
 }
 
 FOdysseyAnimationEditorGUI::FOdysseyAnimationEditorGUI(FOdysseyAnimationEditorExtension* iExtension)
-	: mExtension(iExtension)
+    : mExtension(iExtension)
 {
-	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw( this, &FOdysseyAnimationEditorGUI::OnCurrentLayerChanged );
+    UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw( this, &FOdysseyAnimationEditorGUI::OnCurrentLayerChanged );
 
     UOdysseyAnimation::OnCurrentFrameChanged().AddRaw( this, &FOdysseyAnimationEditorGUI::OnCurrentFrameChanged );
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
@@ -44,7 +44,7 @@ FOdysseyAnimationEditorGUI::FOdysseyAnimationEditorGUI(FOdysseyAnimationEditorEx
 void
 FOdysseyAnimationEditorGUI::Initialize()
 {
-	CreateTabs();
+    CreateTabs();
 }
 
 void
@@ -55,17 +55,17 @@ FOdysseyAnimationEditorGUI::Finalize()
 
 void
 FOdysseyAnimationEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
-{	
-	TSharedRef<FTabManager::FSplitter> mainVerticalSplitter = iBuilder.GetSplitter("MainVerticalSplitter");
-	TSharedRef<FTabManager::FStack> animationTimelineStack = iBuilder.CreateStack("AnimationTimelineStack");
-	animationTimelineStack->SetHideTabWell(false);
-	animationTimelineStack->SetSizeCoefficient(0.2f);
-	animationTimelineStack->AddTab(FOdysseyAnimationEditorTimelineTab::StaticId(), ETabState::OpenedTab);
+{    
+    TSharedRef<FTabManager::FSplitter> mainVerticalSplitter = iBuilder.GetSplitter("MainVerticalSplitter");
+    TSharedRef<FTabManager::FStack> animationTimelineStack = iBuilder.CreateStack("AnimationTimelineStack");
+    animationTimelineStack->SetHideTabWell(false);
+    animationTimelineStack->SetSizeCoefficient(0.2f);
+    animationTimelineStack->AddTab(FOdysseyAnimationEditorTimelineTab::StaticId(), ETabState::OpenedTab);
 
-	mainVerticalSplitter->Split
-	(
-		animationTimelineStack
-	);
+    mainVerticalSplitter->Split
+    (
+        animationTimelineStack
+    );
 }
 
 void
@@ -77,30 +77,30 @@ FOdysseyAnimationEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
 void
 FOdysseyAnimationEditorGUI::CreateTabs()
 {
-	//ADD NEW TABS
-	TSharedRef<FOdysseyAnimationEditorTimelineTab> layerStackTab = MakeShared<FOdysseyAnimationEditorTimelineTab>(mExtension);
-	TSharedRef<FOdysseyAnimationEditorLightTableTab> lightTableTab = MakeShared<FOdysseyAnimationEditorLightTableTab>(mExtension);
+    //ADD NEW TABS
+    TSharedRef<FOdysseyAnimationEditorTimelineTab> layerStackTab = MakeShared<FOdysseyAnimationEditorTimelineTab>(mExtension);
+    TSharedRef<FOdysseyAnimationEditorLightTableTab> lightTableTab = MakeShared<FOdysseyAnimationEditorLightTableTab>(mExtension);
     TSharedRef<FOdysseyAnimationEditorAnimationDetailsTab> animationDetailsTab = MakeShared<FOdysseyAnimationEditorAnimationDetailsTab>(mExtension);
 
-	layerStackTab->ShouldOpenByDefault(true);
+    layerStackTab->ShouldOpenByDefault(true);
 
-	mExtension->GetEditor()->AddTab(layerStackTab);
-	mExtension->GetEditor()->AddTab(lightTableTab);
+    mExtension->GetEditor()->AddTab(layerStackTab);
+    mExtension->GetEditor()->AddTab(lightTableTab);
     mExtension->GetEditor()->AddTab(animationDetailsTab);
 }
 
 /* TSharedRef<FTabManager::FSplitter>
 FOdysseyAnimationEditorGUI::CreateBottomSection()
 {
-	return FOdysseyPainterEditorGUI::CreateBottomSection()
-		// Timeline
-		->Split
-		(
-			FTabManager::NewStack()
-			->AddTab(mLayerStackTab->ID(), ETabState::OpenedTab)
-			->SetHideTabWell(false)
-			->SetSizeCoefficient(0.35f)
-		);
+    return FOdysseyPainterEditorGUI::CreateBottomSection()
+        // Timeline
+        ->Split
+        (
+            FTabManager::NewStack()
+            ->AddTab(mLayerStackTab->ID(), ETabState::OpenedTab)
+            ->SetHideTabWell(false)
+            ->SetSizeCoefficient(0.35f)
+        );
 } */
 
 //--------------------------------------------------------------------------------------

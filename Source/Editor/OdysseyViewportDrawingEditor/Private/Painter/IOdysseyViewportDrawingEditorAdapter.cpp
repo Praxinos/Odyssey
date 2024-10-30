@@ -7,6 +7,9 @@
 #include "TextureEditor/OdysseyTextureEditorSource.h"
 #include "OdysseyBrushAssetBase.h"
 #include "IOdysseyStylusInputModule.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Framework/Application/SlateApplication.h"
+#include "SceneView.h"
 
 #include "IMeshPaintGeometryAdapter.h"
 #include "Tools/OdysseyPainterEditorTool.h"
@@ -654,7 +657,7 @@ IOdysseyViewportDrawingEditorAdapter::MouseDrag(const FOdysseyRay& iRay)
     mLastStrokeRay = mCurrentStrokeRay;
     mCurrentStrokeRay = iRay;
 
-	bool hasMoved = !FMath::IsNearlyEqual(mCurrentStrokeRay.mPoint.x - mLastStrokeRay.mPoint.x, 0.f) || !FMath::IsNearlyEqual(mCurrentStrokeRay.mPoint.y - mLastStrokeRay.mPoint.y, 0.f);
+    bool hasMoved = !FMath::IsNearlyEqual(mCurrentStrokeRay.mPoint.x - mLastStrokeRay.mPoint.x, 0.f) || !FMath::IsNearlyEqual(mCurrentStrokeRay.mPoint.y - mLastStrokeRay.mPoint.y, 0.f);
 
     if (mState == eState::kDrawing)
     {

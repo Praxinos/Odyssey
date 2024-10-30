@@ -11,7 +11,7 @@ class FOdysseyAnimationEditorToolkit;
 class UOdysseyAnimation;
 
 class IOdysseyAnimationEditorModule
-	: public IModuleInterface
+    : public IModuleInterface
 {
 public:
     virtual TSharedRef<FOdysseyAnimationEditorToolkit> CreateOdysseyAnimationEditor( UOdysseyAnimation* iAnimation ) = 0;

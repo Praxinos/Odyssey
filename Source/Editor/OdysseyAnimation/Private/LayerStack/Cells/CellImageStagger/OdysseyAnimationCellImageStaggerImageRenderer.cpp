@@ -13,14 +13,14 @@ FOdysseyAnimationCellImageStaggerImageRenderer::FOdysseyAnimationCellImageStagge
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mCellRenderer(nullptr)
 {
-	int staggerFrame = iCell->GetReferenceFrameAtFrame(iFrame);
-	UOdysseyAnimationCell* cell =  iCell->GetLayer()->GetCellAtFrame(staggerFrame);
+    int staggerFrame = iCell->GetReferenceFrameAtFrame(iFrame);
+    UOdysseyAnimationCell* cell =  iCell->GetLayer()->GetCellAtFrame(staggerFrame);
 
     if (cell)
-	{
-    	int cellFrame = iFrame - cell->GetFrameRange().GetLowerBoundValue();
+    {
+        int cellFrame = iFrame - cell->GetFrameRange().GetLowerBoundValue();
         mCellRenderer = cell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFrame, iFilter);
-	}
+    }
 }
     
 void

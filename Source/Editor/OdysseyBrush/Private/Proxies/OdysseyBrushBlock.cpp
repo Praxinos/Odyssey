@@ -3,6 +3,7 @@
 
 #include "Proxies/OdysseyBrushBlock.h"
 
+#include "Async/Async.h"
 #include "Engine/Font.h"
 #include "UObject/StrongObjectPtr.h"
 

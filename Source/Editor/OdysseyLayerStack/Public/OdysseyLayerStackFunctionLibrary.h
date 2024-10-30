@@ -4,6 +4,8 @@
 #pragma once
 
 #include "OdysseyLayer.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
+
 #include "OdysseyLayerStackFunctionLibrary.generated.h"
 
 UCLASS()

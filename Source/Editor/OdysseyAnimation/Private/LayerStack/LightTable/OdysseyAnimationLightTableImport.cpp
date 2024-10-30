@@ -47,9 +47,9 @@ FOdysseyAnimationLightTableImport::Read( FOdysseyAnimationLightTable* iAnimation
             {
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_DISPLAY_POSITION:
                 {
-					uint32 displayPosition;
+                    uint32 displayPosition;
                     Ar << displayPosition;
-					iAnimationLightTable->DisplayPosition = (EOdysseyLightTableDisplayPosition)displayPosition;
+                    iAnimationLightTable->DisplayPosition = (EOdysseyLightTableDisplayPosition)displayPosition;
                 }
                 break;
 
@@ -62,11 +62,11 @@ FOdysseyAnimationLightTableImport::Read( FOdysseyAnimationLightTable* iAnimation
 
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_CONTRAST:
                 {
-					float prev = 0.f;
-					float next = 0.f;
+                    float prev = 0.f;
+                    float next = 0.f;
                     Ar << prev;
                     Ar << next;
-					iAnimationLightTable->PreviousKeysContrast = prev * 100.f;
+                    iAnimationLightTable->PreviousKeysContrast = prev * 100.f;
                     iAnimationLightTable->NextKeysContrast = next * 100.f;
                 }
                 break;
@@ -78,7 +78,7 @@ FOdysseyAnimationLightTableImport::Read( FOdysseyAnimationLightTable* iAnimation
                         FOdysseyAnimationLightTableKeyImport::Read( &iAnimationLightTable->PreviousKeys[i], Ar );
                     }
 
-					for ( int i = 0; i < 10; i++ )
+                    for ( int i = 0; i < 10; i++ )
                     {
                         FOdysseyAnimationLightTableKeyImport::Read( &iAnimationLightTable->NextKeys[i], Ar );
                     }
@@ -86,7 +86,7 @@ FOdysseyAnimationLightTableImport::Read( FOdysseyAnimationLightTable* iAnimation
                 break;
                 
                 default:
-				// Mandatory
+                // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
             }

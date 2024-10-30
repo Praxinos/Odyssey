@@ -18,13 +18,13 @@ public:
     SOdysseyAnimationTimelineLightTableHeader();
 
 public:
-	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTableHeader)
-		: _Layer(nullptr)
-		{}
-		SLATE_ARGUMENT(UOdysseyAnimationLayer*, Layer)
-	SLATE_END_ARGS()
+    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTableHeader)
+        : _Layer(nullptr)
+        {}
+        SLATE_ARGUMENT(UOdysseyAnimationLayer*, Layer)
+    SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs);
+    void Construct(const FArguments& InArgs);
 
 private:
     FLinearColor GetLightTablePreviousKeysColor() const;
@@ -45,7 +45,7 @@ private:
     bool IsDisplayPositionSet(EOdysseyLightTableDisplayPosition iPosition) const;
 
 private:
-	UOdysseyAnimationLayer* mLayer;
+    UOdysseyAnimationLayer* mLayer;
     TSharedPtr<SColorBlock> mLightTablePreviousKeysColorBlockWidget;
     TSharedPtr<SColorBlock> mLightTableNextKeysColorBlockWidget;
 };

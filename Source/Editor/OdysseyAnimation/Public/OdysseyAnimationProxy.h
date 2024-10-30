@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Containers/Queue.h"
+#include "HAL/Runnable.h"
 #include "OdysseyImageRenderingAbility.h"
 #include "ULISInvalidTileMap.h"
 
@@ -63,7 +65,7 @@ private:
 class FBlockData
 {
 public:
-	~FBlockData();
+    ~FBlockData();
     FBlockData(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iComposition);
 
 public:
@@ -95,7 +97,7 @@ private:
     FULISInvalidTileMap mInvalidTileMap;
     TSet<int> mFrameIndexes;
     TSharedPtr<IOdysseyImageRenderer> mRenderer;
-	bool mIsReadyToRender = false;
+    bool mIsReadyToRender = false;
     bool mIsInvalid;
     
     FCriticalSection mEditMutex;

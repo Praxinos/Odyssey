@@ -7,44 +7,44 @@
 #include "OdysseyAnimation.h"
 
 FOdysseyAnimationMediaControls::FOdysseyAnimationMediaControls()
-	: mAnimation(nullptr)
-	, mState(EMediaState::Closed)
-	, mPlaybackIsBlocking(false)
-	, mIsLooping(false)
-	, mRate(0.0f)
+    : mAnimation(nullptr)
+    , mState(EMediaState::Closed)
+    , mPlaybackIsBlocking(false)
+    , mIsLooping(false)
+    , mRate(0.0f)
 {
 }
 
 void
 FOdysseyAnimationMediaControls::Init(TSharedPtr<FOdysseyAnimationMediaPlayer> iPlayer)
 {
-	mPlayer = iPlayer;
+    mPlayer = iPlayer;
 }
 
 void
 FOdysseyAnimationMediaControls::OnOpen( UOdysseyAnimation* iAnimation )
 {
-	mAnimation = iAnimation;
+    mAnimation = iAnimation;
     mState = EMediaState::Stopped;
-	mPlaybackIsBlocking = false;
-	mIsLooping = false;
-	mRate = 0.f;
+    mPlaybackIsBlocking = false;
+    mIsLooping = false;
+    mRate = 0.f;
 }
 
 void
 FOdysseyAnimationMediaControls::OnClose()
 {
-	mAnimation = nullptr;
-	mState = EMediaState::Closed;
-	mPlaybackIsBlocking = false;
-	mIsLooping = false;
-	mRate = 0.f;
+    mAnimation = nullptr;
+    mState = EMediaState::Closed;
+    mPlaybackIsBlocking = false;
+    mIsLooping = false;
+    mRate = 0.f;
 }
 
 bool
 FOdysseyAnimationMediaControls::CanControl(EMediaControl iControl) const
 {
-	return true; //All controls available
+    return true; //All controls available
 }
 
 FTimespan
@@ -54,147 +54,147 @@ FOdysseyAnimationMediaControls::GetDuration() const
         return FTimespan();
 
     FInt32Range range = GetFrameRange();
-	FTimespan duration = FTimespan::FromSeconds((range.GetUpperBoundValue() + 1) / mAnimation->GetFramesPerSecond()) - FTimespan(1);
-	return duration;
+    FTimespan duration = FTimespan::FromSeconds((range.GetUpperBoundValue() + 1) / mAnimation->GetFramesPerSecond()) - FTimespan(1);
+    return duration;
 }
 
 int
 FOdysseyAnimationMediaControls::GetFrameCount() const
 {
-	FInt32Range frameRange = GetFrameRange();
-	int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
-	int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
-	return endFrame - startFrame + 1;
+    FInt32Range frameRange = GetFrameRange();
+    int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
+    int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
+    return endFrame - startFrame + 1;
 }
 
 FInt32Range
 FOdysseyAnimationMediaControls::GetFrameRange() const
 {
-	FInt32Range frameRange = mAnimation->GetFrameRange();
-	if (mFrameToIncludeIntoDuration.IsSet())
-	{
-		frameRange.SetLowerBoundValue(FMath::Min(frameRange.GetLowerBoundValue(), mFrameToIncludeIntoDuration.GetValue()));
-		frameRange.SetUpperBoundValue(FMath::Max(frameRange.GetUpperBoundValue(), mFrameToIncludeIntoDuration.GetValue()));
-	}
-	return frameRange;
+    FInt32Range frameRange = mAnimation->GetFrameRange();
+    if (mFrameToIncludeIntoDuration.IsSet())
+    {
+        frameRange.SetLowerBoundValue(FMath::Min(frameRange.GetLowerBoundValue(), mFrameToIncludeIntoDuration.GetValue()));
+        frameRange.SetUpperBoundValue(FMath::Max(frameRange.GetUpperBoundValue(), mFrameToIncludeIntoDuration.GetValue()));
+    }
+    return frameRange;
 }
 
 void
 FOdysseyAnimationMediaControls::SetFrameToIncludeIntoDuration(int iFrame)
 {
-	mFrameToIncludeIntoDuration = iFrame;
+    mFrameToIncludeIntoDuration = iFrame;
 }
 
 void
 FOdysseyAnimationMediaControls::UnsetFrameToIncludeIntoDuration()
 {
-	mFrameToIncludeIntoDuration = TOptional<int>();
+    mFrameToIncludeIntoDuration = TOptional<int>();
 }
 
 float
 FOdysseyAnimationMediaControls::GetRate() const
 {
-	return mRate;
+    return mRate;
 }
 
 EMediaState
 FOdysseyAnimationMediaControls::GetState() const
 {
-	return mState;
+    return mState;
 }
 
 EMediaStatus
 FOdysseyAnimationMediaControls::GetStatus() const
 {
-	return EMediaStatus::None;
+    return EMediaStatus::None;
 }
 
 TRangeSet<float>
 FOdysseyAnimationMediaControls::GetSupportedRates(EMediaRateThinning iThinning) const
 {
-	TRangeSet<float> result;
-	result.Add(TRange<float>::Inclusive(-100000.0f, 100000.0f));
-	return result;
+    TRangeSet<float> result;
+    result.Add(TRange<float>::Inclusive(-100000.0f, 100000.0f));
+    return result;
 }
 
 FTimespan
 FOdysseyAnimationMediaControls::GetTime() const
 {
-	//deprecated: but needed to compile
-	return mTime;
+    //deprecated: but needed to compile
+    return mTime;
 }
 
 bool
 FOdysseyAnimationMediaControls::IsLooping() const
 {
-	return mIsLooping;
+    return mIsLooping;
 }
 
 bool
 FOdysseyAnimationMediaControls::Seek(const FTimespan& iTime)
 {
-	TSharedPtr<FOdysseyAnimationMediaPlayer> player = mPlayer.Pin();
-	if ( !player )
-		return false;
+    TSharedPtr<FOdysseyAnimationMediaPlayer> player = mPlayer.Pin();
+    if ( !player )
+        return false;
 
-	mTime = iTime;
+    mTime = iTime;
 
-	// scrub to desired time if needed
-	if (mState == EMediaState::Stopped)
-		mState = EMediaState::Paused;
+    // scrub to desired time if needed
+    if (mState == EMediaState::Stopped)
+        mState = EMediaState::Paused;
 
-	player->GetEventSink().ReceiveMediaEvent(EMediaEvent::SeekCompleted);
+    player->GetEventSink().ReceiveMediaEvent(EMediaEvent::SeekCompleted);
 
-	return true;
+    return true;
 }
 
 bool
 FOdysseyAnimationMediaControls::SetLooping(bool iLooping)
 {
-	mIsLooping = iLooping;
-	return true;
+    mIsLooping = iLooping;
+    return true;
 }
 
 void
 FOdysseyAnimationMediaControls::SetTime(FTimespan iTime)
 {
-	mTime = iTime;
+    mTime = iTime;
 }
 
 bool
 FOdysseyAnimationMediaControls::SetRate(float iRate)
 {
-	TSharedPtr<FOdysseyAnimationMediaPlayer> player = mPlayer.Pin();
-	if ( !player )
-		return false;
+    TSharedPtr<FOdysseyAnimationMediaPlayer> player = mPlayer.Pin();
+    if ( !player )
+        return false;
 
-	if (GetDuration() == FTimespan::Zero())
-		return false; // nothing to play
+    if (GetDuration() == FTimespan::Zero())
+        return false; // nothing to play
 
-	if (mRate == 0.0f  && iRate != 0.0f) // handle restarting
-	{
-		mState = EMediaState::Playing;
-		player->GetEventSink().ReceiveMediaEvent(EMediaEvent::PlaybackResumed);
-	}
-	else if ( mRate != 0.0f && iRate == 0.0f) // handle pausing
-	{
-		mState = EMediaState::Paused;
-		player->GetEventSink().ReceiveMediaEvent(EMediaEvent::PlaybackSuspended);
-	}
+    if (mRate == 0.0f  && iRate != 0.0f) // handle restarting
+    {
+        mState = EMediaState::Playing;
+        player->GetEventSink().ReceiveMediaEvent(EMediaEvent::PlaybackResumed);
+    }
+    else if ( mRate != 0.0f && iRate == 0.0f) // handle pausing
+    {
+        mState = EMediaState::Paused;
+        player->GetEventSink().ReceiveMediaEvent(EMediaEvent::PlaybackSuspended);
+    }
 
-	mRate = iRate;
+    mRate = iRate;
 
-	return true;
+    return true;
 }
 
 void
 FOdysseyAnimationMediaControls::SetBlockingPlaybackHint(bool iFacadeWillUseBlockingPlayback)
 {
-	mPlaybackIsBlocking = iFacadeWillUseBlockingPlayback;
+    mPlaybackIsBlocking = iFacadeWillUseBlockingPlayback;
 }
 
 void
 FOdysseyAnimationMediaControls::SetState(EMediaState iState)
 {
-	mState = iState;
+    mState = iState;
 }

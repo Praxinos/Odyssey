@@ -1,18 +1,19 @@
 #include "OdysseyAnimationEditorFlipSystem.h"
-#include "OdysseyAnimationEditorUserSettings.h"
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
-#include "OdysseyAnimation.h"
-#include "OdysseyAnimationPlayer.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
-#include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "IDetailChildrenBuilder.h"
-#include "DetailWidgetRow.h"
-#include "Widgets/Input/SComboButton.h"
-#include "AnimationEditor/OdysseyAnimationEditorProjectSettings.h"
-#include "OdysseyStyleSet.h"
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
 
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "AnimationEditor/OdysseyAnimationEditorProjectSettings.h"
+#include "DetailWidgetRow.h"
+#include "IDetailChildrenBuilder.h"
+#include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationEditorUserSettings.h"
+#include "OdysseyAnimationPlayer.h"
+#include "OdysseyStyleSet.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
+#include "Widgets/Images/SImage.h"
+#include "Widgets/Input/SComboButton.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -474,24 +475,24 @@ FOdysseyAnimationEditorFlipSystem::HandleMouseMoveEvent(FSlateApplication& Slate
         FVector2D mousePosition = MouseEvent.GetScreenSpacePosition();
         FVector2D mouseDelta = mousePosition - mMousePositionReference;
         float directiondelta = mouseDelta.X;
-		switch (mFlipConfiguration.Direction)
-		{
-			case EOdysseyAnimationFlipDirection::Horizontal:
-				directiondelta = mouseDelta.X;
-			break;
+        switch (mFlipConfiguration.Direction)
+        {
+            case EOdysseyAnimationFlipDirection::Horizontal:
+                directiondelta = mouseDelta.X;
+            break;
 
-			case EOdysseyAnimationFlipDirection::HorizontalInverted:
-				directiondelta = -mouseDelta.X;
-			break;
+            case EOdysseyAnimationFlipDirection::HorizontalInverted:
+                directiondelta = -mouseDelta.X;
+            break;
 
-			case EOdysseyAnimationFlipDirection::Vertical:
-				directiondelta = mouseDelta.Y;
-			break;
+            case EOdysseyAnimationFlipDirection::Vertical:
+                directiondelta = mouseDelta.Y;
+            break;
 
-			case EOdysseyAnimationFlipDirection::VerticalInverted:
-				directiondelta = -mouseDelta.Y;
-			break;
-		}
+            case EOdysseyAnimationFlipDirection::VerticalInverted:
+                directiondelta = -mouseDelta.Y;
+            break;
+        }
 
         const float minStep = 1;
         const float maxStep = 100;
@@ -601,7 +602,7 @@ FOdysseyAnimationEditorFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
                 lastFrameComposition = frameComposition;
                 int frame = oFrame;
 
-				//detect if we cross the start frame or not before the next cell
+                //detect if we cross the start frame or not before the next cell
                 while(frame < mStartFrame)
                 {
                     if (frame == mStartFrame)
@@ -642,7 +643,7 @@ FOdysseyAnimationEditorFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
                 }
                 while(oFrame != initialFrame && frameComposition == lastFrameComposition);
 
-				//Detect if we cross the start frame or not before the next cell
+                //Detect if we cross the start frame or not before the next cell
                 //And navigate to the start of the cell
                 lastFrameComposition = frameComposition;
                 while(oFrame > leftLimit)
@@ -680,10 +681,10 @@ FOdysseyAnimationEditorFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
             if (leftLimit > frameRange.GetUpperBoundValue() || rightLimit < frameRange.GetLowerBoundValue())
                 return;
 
-			int startCellIndex = INDEX_NONE;
+            int startCellIndex = INDEX_NONE;
             UOdysseyAnimationCell* cell = layer->GetCellAtFrame(mStartFrame);
-			if (cell)
-				startCellIndex = cell->IndexInLayer;
+            if (cell)
+                startCellIndex = cell->IndexInLayer;
 
             TArray<int> keyFrames;
             int currentKeyFrame = INDEX_NONE;
@@ -801,9 +802,9 @@ FOdysseyAnimationEditorFlipSystem::GetLimits(EOdysseyAnimationFlipLimits iLimits
             UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
 
             int startCellIndex = INDEX_NONE;
-			UOdysseyAnimationCell* startCell = layer->GetCellAtFrame(mStartFrame);
-			if (startCell)
-				startCellIndex = startCell->IndexInLayer;
+            UOdysseyAnimationCell* startCell = layer->GetCellAtFrame(mStartFrame);
+            if (startCell)
+                startCellIndex = startCell->IndexInLayer;
 
             if (startCellIndex == INDEX_NONE)
             {

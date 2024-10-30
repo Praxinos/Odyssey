@@ -3,67 +3,70 @@
 
 #include "OdysseyAnimationTexture.h"
 #include "OdysseyAnimationTextureResource.h"
+#include "Engine/Texture2D.h"
 #include "Misc/TransactionObjectEvent.h"
+#include "RHI.h"
 #include "TextureCompiler.h"
+#include "TextureResource.h"
 
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 void
 UOdysseyAnimationTexture::SetPlayer(UOdysseyAnimationPlayer* iPlayer)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationTexture, Player), iPlayer);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationTexture, Player), iPlayer);
 }
 
 UOdysseyAnimationPlayer*
 UOdysseyAnimationTexture::GetPlayer() const
 {
-	return Player;
+    return Player;
 }
 
 FTextureResource*
 UOdysseyAnimationTexture::CreateResource()
 {
-	FOdysseyAnimationTextureResource* resource = new FOdysseyAnimationTextureResource(*this, mDimensions);
-	FRHITexture2D* rhi = nullptr;
-	if (Player)
-	{
-		UTexture2D* playerTexture = Player->GetTexture();
-		if (playerTexture)
-		{
-			FTextureCompilingManager::Get().FinishCompilation({playerTexture});
-			FTextureResource* playerResource = playerTexture->GetResource();
-			if ( playerResource )
-				rhi = playerResource->TextureRHI;
-		}
-	}
-	resource->UpdateTextureReference(rhi);
-	return resource;
+    FOdysseyAnimationTextureResource* resource = new FOdysseyAnimationTextureResource(*this, mDimensions);
+    FRHITexture2D* rhi = nullptr;
+    if (Player)
+    {
+        UTexture2D* playerTexture = Player->GetTexture();
+        if (playerTexture)
+        {
+            FTextureCompilingManager::Get().FinishCompilation({playerTexture});
+            FTextureResource* playerResource = playerTexture->GetResource();
+            if ( playerResource )
+                rhi = playerResource->TextureRHI;
+        }
+    }
+    resource->UpdateTextureReference(rhi);
+    return resource;
 }
 
 EMaterialValueType
 UOdysseyAnimationTexture::GetMaterialType() const
 {
-	return MCT_Texture2D;
+    return MCT_Texture2D;
 }
 
 float
 UOdysseyAnimationTexture::GetSurfaceWidth() const
 {
-	return mDimensions.X;
+    return mDimensions.X;
 }
 
 float
 UOdysseyAnimationTexture::GetSurfaceHeight() const
 {
-	return mDimensions.Y;
+    return mDimensions.Y;
 }
 
 void
 UOdysseyAnimationTexture::PlayerChanged()
 {
-	//TODO: Connect to Player's TextureChanged Event and call UpdateResource() when it happens
+    //TODO: Connect to Player's TextureChanged Event and call UpdateResource() when it happens
 
-	//When the player changes we have to update our resource accordingly
+    //When the player changes we have to update our resource accordingly
     UpdateResource();
 }
 

@@ -118,17 +118,17 @@ UOdysseyPainterEditorRasterEraserTool::Load()
     
     mHUD->AddElement(rasterSelection->GetHUD());
     mHUD->AddElement(mShapeHUD);
-	/* TODO: Done in OnMouseDown(), but check if we need to do something here too or not
+    /* TODO: Done in OnMouseDown(), but check if we need to do something here too or not
     mPaintEngine.RasterBlock(mToolContext->GetRasterBlock());
 
-	if ( BrushInstance )
-		BrushInstance->SetBlock(mPaintEngine.PaintBlock()); */
+    if ( BrushInstance )
+        BrushInstance->SetBlock(mPaintEngine.PaintBlock()); */
 }
 
 void
 UOdysseyPainterEditorRasterEraserTool::Unload()
 {
-	mPaintEngine.RasterBlock(nullptr);
+    mPaintEngine.RasterBlock(nullptr);
     mPaintEngine.SetMaskBlock(nullptr);
     
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();

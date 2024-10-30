@@ -54,8 +54,8 @@ private:
     };
 
     FOdysseyAnimationEditorTimeline* mTimelineParams;
-	bool mIsSelecting = false;
-	bool mIsDragDetected = false;
+    bool mIsSelecting = false;
+    bool mIsDragDetected = false;
     bool mIsDragnDrop = false;
     ESelectionMode mSelectionMode = ESelectionMode::Default;
     bool mShouldDeselect = false;

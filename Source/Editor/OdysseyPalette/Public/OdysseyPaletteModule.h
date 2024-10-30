@@ -13,7 +13,7 @@ class IAssetTypeActions;
  * The Texture Asset module.
  */
 class FOdysseyPaletteModule :
-	public IModuleInterface
+    public IModuleInterface
 {
 public:
     // IModuleInterface interface

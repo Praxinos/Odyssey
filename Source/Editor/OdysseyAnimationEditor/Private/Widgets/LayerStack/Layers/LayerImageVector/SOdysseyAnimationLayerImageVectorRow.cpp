@@ -39,10 +39,10 @@ void SOdysseyAnimationLayerImageVectorRow::Construct(
         SOdysseyAnimationLayerRow::FArguments(),
         iOwnerTableView,
         iExtension,
-		iAnimationLayerImageVector
+        iAnimationLayerImageVector
     );
 
-	SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
+    SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -121,7 +121,7 @@ SOdysseyAnimationLayerImageVectorRow::GenerateHeaderWidget()
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
 {
-	return SNew(SVerticalBox)
+    return SNew(SVerticalBox)
         + SVerticalBox::Slot()
         .Padding(FMargin(0, 2.f, 0, 0))
         .AutoHeight()
@@ -163,7 +163,7 @@ SOdysseyAnimationLayerImageVectorRow::GenerateOptionsWidget()
         [
             SNew(SOdysseyAnimationTimelineLightTableHeader)
             .Layer(mAnimationLayerImageVector)
-		    .Visibility(this, &SOdysseyAnimationLayerImageVectorRow::GetLightTableVisibility)
+            .Visibility(this, &SOdysseyAnimationLayerImageVectorRow::GetLightTableVisibility)
         ];
 }
 
@@ -191,8 +191,8 @@ SOdysseyAnimationLayerImageVectorRow::OnIsColoredCheckStateChanged( ECheckBoxSta
 void
 SOdysseyAnimationLayerImageVectorRow::OnLightTableCheckStateChanged(ECheckBoxState iState)
 {
-	FOdysseyAnimationLightTable lighttable = mAnimationLayerImageVector->Lighttable;
-	lighttable.bIsActivated = iState == ECheckBoxState::Checked;
+    FOdysseyAnimationLightTable lighttable = mAnimationLayerImageVector->Lighttable;
+    lighttable.bIsActivated = iState == ECheckBoxState::Checked;
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageVector, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
     GetTreeView()->RequestTreeRefresh(); //needed to display layers previously hidden
 }
@@ -233,19 +233,19 @@ SOdysseyAnimationLayerImageVectorRow::OnOpacityEndSliderMovement(int iValue)
 ECheckBoxState
 SOdysseyAnimationLayerImageVectorRow::GetIsWireframeIsChecked() const
 {
-	return mAnimationLayerImageVector->IsWireframe ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mAnimationLayerImageVector->IsWireframe ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 ECheckBoxState
 SOdysseyAnimationLayerImageVectorRow::GetIsColoredIsChecked() const
 {
-	return mAnimationLayerImageVector->IsColored ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mAnimationLayerImageVector->IsColored ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 ECheckBoxState
 SOdysseyAnimationLayerImageVectorRow::GetLightTableIsChecked() const
 {
-	return mAnimationLayerImageVector->Lighttable.bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mAnimationLayerImageVector->Lighttable.bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 void

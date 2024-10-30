@@ -7,11 +7,11 @@
 #include "IAssetTypeActions.h"
 
 class FOdysseyAnimationEditorModule
-	: public IOdysseyAnimationEditorModule
+    : public IOdysseyAnimationEditorModule
 {
 public:
-	// IOdysseyAnimationEditorModule interface
-	virtual TSharedRef<FOdysseyAnimationEditorToolkit> CreateOdysseyAnimationEditor( UOdysseyAnimation* iAnimation ) override;
+    // IOdysseyAnimationEditorModule interface
+    virtual TSharedRef<FOdysseyAnimationEditorToolkit> CreateOdysseyAnimationEditor( UOdysseyAnimation* iAnimation ) override;
 
 public:
     // IModuleInterface interface
@@ -21,28 +21,28 @@ public:
 private:
     //Asset Type Action
     void RegisterAssetTypeActions();
-	void UnregisterAssetTypeActions();
+    void UnregisterAssetTypeActions();
 
-	//Settings
-	void RegisterSettings();
-	void UnregisterSettings();
+    //Settings
+    void RegisterSettings();
+    void UnregisterSettings();
 
-	//Commands
-	void RegisterCommands();
-	void UnregisterCommands();
+    //Commands
+    void RegisterCommands();
+    void UnregisterCommands();
 
     //Level Editor Layout
     void RegisterLevelEditorLayoutExtensions();
     void UnregisterLevelEditorLayoutExtensions();
 
-	void RegisterDetailCustomizations();
-	void UnregisterDetailCustomization();
+    void RegisterDetailCustomizations();
+    void UnregisterDetailCustomization();
 
-	void RegisterThumbnailRenderers();
-	void UnregisterThumbnailRenderers();
+    void RegisterThumbnailRenderers();
+    void UnregisterThumbnailRenderers();
     
 private:
-	/** All created asset type actions. Cached here so that we can unregister them during shutdown. */
-	TSharedPtr<IAssetTypeActions> mIliadTypeActions;
+    /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
+    TSharedPtr<IAssetTypeActions> mIliadTypeActions;
     FDelegateHandle mExtendLevelEditorLayout;
 };

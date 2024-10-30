@@ -43,7 +43,7 @@ UOdysseyEllipseShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
     FOdysseyPoint point(iPointInTexture.x, iPointInTexture.y);
     mBorderPoint = point;
 
-	bool uniform = Uniform ^ mInvertUniform;
+    bool uniform = Uniform ^ mInvertUniform;
     if (uniform)
     {
         int shiftX = FMath::Abs(mBorderPoint.x - mCenterPoint.x);
@@ -84,10 +84,10 @@ UOdysseyEllipseShape::OnKeyDown(const FKey& iKey)
     }
 
     if( iKey == EKeys::LeftShift || iKey == EKeys::RightShift )
-	{
-		mInvertUniform = true;
-		return true;
-	}
+    {
+        mInvertUniform = true;
+        return true;
+    }
 
     return UOdysseyShape::OnKeyDown(iKey);
 }
@@ -98,7 +98,7 @@ UOdysseyEllipseShape::OnKeyUp(const FKey& iKey)
     if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
     {
         mInvertUniform = false;
-		return true;
+        return true;
     }
 
     return UOdysseyShape::OnKeyUp(iKey);

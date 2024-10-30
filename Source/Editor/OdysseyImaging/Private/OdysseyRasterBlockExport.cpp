@@ -78,9 +78,9 @@ FOdysseyRasterBlockExport::WriteFormat( FOdysseyRasterBlock* iRasterBlock
                             , Ar
                             , [iRasterBlock](FArchive &Ar) -> void
     {
-		int format = iRasterBlock->mFormat;
+        int format = iRasterBlock->mFormat;
         Ar << format;
-		iRasterBlock->mFormat = (::ULIS::eFormat)format;
+        iRasterBlock->mFormat = (::ULIS::eFormat)format;
     });
 }
 

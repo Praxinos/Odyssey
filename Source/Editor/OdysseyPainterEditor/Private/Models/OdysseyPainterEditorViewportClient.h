@@ -10,6 +10,7 @@
 #include "Rendering/StaticMeshVertexBuffer.h"
 #include "UnrealClient.h"
 #include "UObject/GCObject.h"
+#include "ViewportClient.h"
 
 #include "Input/OdysseyPoint.h"
 #include "OdysseyEventState.h"
@@ -63,7 +64,7 @@ class FOdysseyPainterEditorViewportClient
     , public IStylusMessageHandler
 {
 public:
-	DECLARE_DELEGATE_TwoParams(FOnPickColor, eOdysseyEventState::Type, const FVector2D&)
+    DECLARE_DELEGATE_TwoParams(FOnPickColor, eOdysseyEventState::Type, const FVector2D&)
     DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseDown, const FOdysseyPoint&, const FKey&)
     DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseUp, const FOdysseyPoint&, const FKey&)
     DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseDoubleClick, const FOdysseyPoint&, const FKey&)
@@ -116,7 +117,7 @@ public:
 
 public:
     // Public API
-	FOnPickColor&	OnPickColor() { return mOnPickColor; }
+    FOnPickColor&    OnPickColor() { return mOnPickColor; }
     FOnMouseDown&   OnMouseDown()   { return mOnMouseDown; }
     FOnMouseDoubleClick&   OnMouseDoubleClick()   { return mOnMouseDoubleClick; }
     FOnMouseUp&     OnMouseUp()     { return mOnMouseUp; }
@@ -153,7 +154,7 @@ private:
 private:
     // Private Data Members
     UOdysseyStylusInputSubsystem*           InputSubsystem;
-    FOdysseyPainterEditor*		            mOdysseyPainterEditor;
+    FOdysseyPainterEditor*                    mOdysseyPainterEditor;
     TWeakPtr<SOdysseyViewport>              mOdysseyPainterEditorViewportPtr;
     FOdysseyMeshSelector*                   mMeshSelector;
     TObjectPtr<UTexture2D>                  mCheckerboardTexture;
@@ -166,7 +167,7 @@ private:
 
     eState                                  mCurrentToolState;
 
-	FOnPickColor							mOnPickColor;
+    FOnPickColor                            mOnPickColor;
     FOnMouseDown                            mOnMouseDown;
     FOnMouseUp                              mOnMouseUp;
     FOnMouseDoubleClick                     mOnMouseDoubleClick;
@@ -175,8 +176,8 @@ private:
     FOnKeyDown                              mOnKeyDown;
     FOnKeyUp                                mOnKeyUp;
 
-	FOdysseyPoint						    mCurrentPointInViewport;
-    FOdysseyPoint						    mCurrentPointInTexture;
+    FOdysseyPoint                            mCurrentPointInViewport;
+    FOdysseyPoint                            mCurrentPointInTexture;
     std::chrono::steady_clock::time_point   mStylusLastEventTime;
 
     TArray<FKey>                            mKeysPressed;

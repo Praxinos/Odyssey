@@ -2,6 +2,9 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "SOdysseyPaletteColorRow.h"
+
+#include "Framework/Application/SlateApplication.h"
+#include "Layout/WidgetPath.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyStyleSet.h"
 #include "SOdysseyPaletteEntryRow.h"
@@ -19,10 +22,10 @@ void SOdysseyPaletteColorRow::Construct(const FArguments& InArgs, const TSharedR
     SOdysseyPaletteEntryRow::Construct(
         SOdysseyPaletteEntryRow::FArguments(),
         iOwnerTableView,
-		iColorEntry
+        iColorEntry
     );
 
-	SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
+    SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -30,7 +33,7 @@ void SOdysseyPaletteColorRow::Construct(const FArguments& InArgs, const TSharedR
 TSharedRef<SWidget>
 SOdysseyPaletteColorRow::GenerateHeaderWidget()
 {
-	TSharedRef<SWidget> defaultWidget = SOdysseyPaletteEntryRow::GenerateHeaderWidget();
+    TSharedRef<SWidget> defaultWidget = SOdysseyPaletteEntryRow::GenerateHeaderWidget();
     return SNew(SHorizontalBox)
         +SHorizontalBox::Slot()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))

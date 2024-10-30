@@ -2,10 +2,11 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyPalette.h"
-#include "Widgets/Colors/SColorBlock.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "OdysseyPaletteEntryFolder.h"
+#include "ScopedTransaction.h"
+#include "Widgets/Colors/SColorBlock.h"
 
 UOdysseyPalette::UOdysseyPalette()
 {
@@ -36,8 +37,8 @@ UOdysseyPaletteEntry* UOdysseyPalette::AddEntry(TSubclassOf<UOdysseyPaletteEntry
     UClass* entryType = iEntryType.Get();
 
     //No entryType
-	if ( !entryType )
-		return nullptr;
+    if ( !entryType )
+        return nullptr;
 
     //If the given parent can't have children or isn't contained in this palette
     if (!iParentEntry)
@@ -194,7 +195,7 @@ UOdysseyPaletteEntry* UOdysseyPalette::CopyEntry(UOdysseyPaletteEntry* iEntry, U
 
 TArray<UOdysseyPaletteEntry*> UOdysseyPalette::CopyEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdysseyPaletteEntry* iParentEntry /*= nullptr*/, int iIndexInParent /*= 0*/)
 {
-	TArray<UOdysseyPaletteEntry*> entryCopies;
+    TArray<UOdysseyPaletteEntry*> entryCopies;
     if (!iParentEntry)
         iParentEntry = PaletteRoot;
 
@@ -299,8 +300,8 @@ bool UOdysseyPalette::CanMoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOd
 
 void UOdysseyPalette::MoveEntry(UOdysseyPaletteEntry* iEntry, UOdysseyPaletteEntry* iParentEntry /*= nullptr*/, int iIndexInParent /*= 0*/)
 {
-	if ( !CanMoveEntry(iEntry, iParentEntry) )
-		return;
+    if ( !CanMoveEntry(iEntry, iParentEntry) )
+        return;
 
     if ( !iParentEntry )
         iParentEntry = PaletteRoot;
@@ -336,23 +337,23 @@ void UOdysseyPalette::MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdyss
     if ( !iParentEntry )
         iParentEntry = PaletteRoot;
 
-	//If the given parent can't have children or isn't contained in this palette
+    //If the given parent can't have children or isn't contained in this palette
     if ( !iParentEntry->CanHaveChildren || !ContainsEntry(iParentEntry))
         return;
 
-	//Sanitize Entries array
+    //Sanitize Entries array
     iEntries.RemoveAll(
         [this, iParentEntry](UOdysseyPaletteEntry* iEntry)
         {
-			if ( !iEntry || !ContainsEntry(iEntry) )
-				return true;
+            if ( !iEntry || !ContainsEntry(iEntry) )
+                return true;
 
-			if ( iEntry == iParentEntry || iParentEntry->IsChildOf(iEntry) )
-				return true;
+            if ( iEntry == iParentEntry || iParentEntry->IsChildOf(iEntry) )
+                return true;
 
-			return false;
-		}
-	);
+            return false;
+        }
+    );
 
     iEntries.Sort(
         [this](UOdysseyPaletteEntry& iEntryA, UOdysseyPaletteEntry& iEntryB)
@@ -376,9 +377,9 @@ void UOdysseyPalette::MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdyss
         }
     );
 
-	//No Entries
-	if ( iEntries.Num() <= 0 )
-		return;
+    //No Entries
+    if ( iEntries.Num() <= 0 )
+        return;
 
     int index = FMath::Clamp(iIndexInParent, 0, iParentEntry->Children.Num());
     for (UOdysseyPaletteEntry* entry : iEntries)

@@ -4,6 +4,7 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
+#include "OdysseyVectorPoint.h"
 #include "OdysseyVectorPolygon.h"
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorIntersection.h"

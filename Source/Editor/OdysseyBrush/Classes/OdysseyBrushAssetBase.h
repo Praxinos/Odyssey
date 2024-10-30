@@ -154,7 +154,7 @@ public:
     // Tick
 
     // Called once for each engine tick
-	void Tick(float DeltaTime, bool iShouldFlush);
+    void Tick(float DeltaTime, bool iShouldFlush);
 
 private:
     // Internal - Tick API

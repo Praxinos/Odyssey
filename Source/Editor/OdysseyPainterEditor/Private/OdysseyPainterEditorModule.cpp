@@ -98,7 +98,7 @@ FOdysseyPainterEditorModule::RegisterBrushOverrides()
     FOdysseyBrushOverride::Register(UOdysseyBrushOptionsOverrides::StaticClass());
     FOdysseyBrushOverride::Register(UOdysseyBlendParametersOverrides::StaticClass());
     FOdysseyBrushOverride::Register(UOdysseyFreehandShapeOverrides::StaticClass());
-	FOdysseyBrushOverride::Register(UOdysseyPainterEditorRasterDrawingToolOverrides::StaticClass());
+    FOdysseyBrushOverride::Register(UOdysseyPainterEditorRasterDrawingToolOverrides::StaticClass());
 }
 
 void
@@ -111,14 +111,14 @@ void
 FOdysseyPainterEditorModule::RegisterLevelEditorLayoutExtensions()
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
-	mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyPainterEditorGUI::ExtendLevelEditorLayout);
+    mExtendLevelEditorLayout = LevelEditorModule.OnRegisterLayoutExtensions().AddStatic(&FOdysseyPainterEditorGUI::ExtendLevelEditorLayout);
 }
 
 void
 FOdysseyPainterEditorModule::UnregisterLevelEditorLayoutExtensions()
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
-	LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
+    LevelEditorModule.OnRegisterLayoutExtensions().Remove(mExtendLevelEditorLayout);
 }
 
 IMPLEMENT_MODULE( FOdysseyPainterEditorModule, OdysseyPainterEditor );

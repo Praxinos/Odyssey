@@ -21,13 +21,13 @@ public:
     void Construct(const FArguments& iArgs, UOdysseyAnimationCellImageRaster* iCell);
 
 private:
-	void OnThumbnailDirtied();
-	void OnThumbnailChanged();
+    void OnThumbnailDirtied();
+    void OnThumbnailChanged();
 
-	EVisibility GetContentVisibility() const;
-	
+    EVisibility GetContentVisibility() const;
+    
 private:
     UOdysseyAnimationCellImageRaster* mCell = nullptr;
-	TSharedPtr<FAssetThumbnail> mAssetThumbnail;
+    TSharedPtr<FAssetThumbnail> mAssetThumbnail;
     TAttribute<bool> mShowContent;
 };

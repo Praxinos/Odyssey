@@ -26,56 +26,56 @@ FOdysseyAnimationEditorOutOfPegsToolDetails::MakeInstance()
 void
 FOdysseyAnimationEditorOutOfPegsToolDetails::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 {
-	TArray<TWeakObjectPtr<UObject>> ObjectsBeingCustomized;
-	DetailLayout.GetObjectsBeingCustomized(ObjectsBeingCustomized);
+    TArray<TWeakObjectPtr<UObject>> ObjectsBeingCustomized;
+    DetailLayout.GetObjectsBeingCustomized(ObjectsBeingCustomized);
 
-	UOdysseyAnimationEditorOutOfPegsTool* tool = Cast<UOdysseyAnimationEditorOutOfPegsTool>(ObjectsBeingCustomized[0].Get());
-	if (!tool)
-		return;
+    UOdysseyAnimationEditorOutOfPegsTool* tool = Cast<UOdysseyAnimationEditorOutOfPegsTool>(ObjectsBeingCustomized[0].Get());
+    if (!tool)
+        return;
 
-	TSharedRef<IPropertyHandle> panHandle = DetailLayout.GetProperty( GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Pan));
-	TSharedRef<IPropertyHandle> rotationHandle = DetailLayout.GetProperty( GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Rotation));
-	TSharedRef<IPropertyHandle> zoomHandle = DetailLayout.GetProperty( GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Zoom));
+    TSharedRef<IPropertyHandle> panHandle = DetailLayout.GetProperty( GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Pan));
+    TSharedRef<IPropertyHandle> rotationHandle = DetailLayout.GetProperty( GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Rotation));
+    TSharedRef<IPropertyHandle> zoomHandle = DetailLayout.GetProperty( GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Zoom));
 
-	IDetailPropertyRow* panRow = DetailLayout.EditDefaultProperty(panHandle);
-	IDetailPropertyRow* rotationRow = DetailLayout.EditDefaultProperty(rotationHandle);
-	IDetailPropertyRow* zoomRow = DetailLayout.EditDefaultProperty(zoomHandle);
+    IDetailPropertyRow* panRow = DetailLayout.EditDefaultProperty(panHandle);
+    IDetailPropertyRow* rotationRow = DetailLayout.EditDefaultProperty(rotationHandle);
+    IDetailPropertyRow* zoomRow = DetailLayout.EditDefaultProperty(zoomHandle);
 
-	FIsResetToDefaultVisible panIsResetToDefaultVisible = FIsResetToDefaultVisible::CreateLambda(
-		[tool](TSharedPtr<IPropertyHandle> iHandle)
-		{
-			return tool->GetCell() && tool->GetCell()->OutOfPegs.Pan != FVector2D(0, 0);
-		}
-	);
+    FIsResetToDefaultVisible panIsResetToDefaultVisible = FIsResetToDefaultVisible::CreateLambda(
+        [tool](TSharedPtr<IPropertyHandle> iHandle)
+        {
+            return tool->GetCell() && tool->GetCell()->OutOfPegs.Pan != FVector2D(0, 0);
+        }
+    );
 
-	FIsResetToDefaultVisible rotationIsResetToDefaultVisible = FIsResetToDefaultVisible::CreateLambda(
-		[tool](TSharedPtr<IPropertyHandle> iHandle)
-		{
-			return tool->GetCell() && tool->GetCell()->OutOfPegs.Rotation != 0.f;
-		}
-	);
+    FIsResetToDefaultVisible rotationIsResetToDefaultVisible = FIsResetToDefaultVisible::CreateLambda(
+        [tool](TSharedPtr<IPropertyHandle> iHandle)
+        {
+            return tool->GetCell() && tool->GetCell()->OutOfPegs.Rotation != 0.f;
+        }
+    );
 
-	FIsResetToDefaultVisible zoomIsResetToDefaultVisible = FIsResetToDefaultVisible::CreateLambda(
-		[tool](TSharedPtr<IPropertyHandle> iHandle)
-		{
-			return tool->GetCell() && tool->GetCell()->OutOfPegs.Zoom != 100.f;
-		}
-	);
+    FIsResetToDefaultVisible zoomIsResetToDefaultVisible = FIsResetToDefaultVisible::CreateLambda(
+        [tool](TSharedPtr<IPropertyHandle> iHandle)
+        {
+            return tool->GetCell() && tool->GetCell()->OutOfPegs.Zoom != 100.f;
+        }
+    );
 
-	FResetToDefaultHandler onResetToDefaultClicked = FResetToDefaultHandler::CreateLambda(
-		[](TSharedPtr<IPropertyHandle> iHandle)
-		{
-			iHandle->ResetToDefault();
-		}
-	);
+    FResetToDefaultHandler onResetToDefaultClicked = FResetToDefaultHandler::CreateLambda(
+        [](TSharedPtr<IPropertyHandle> iHandle)
+        {
+            iHandle->ResetToDefault();
+        }
+    );
 
-	FResetToDefaultOverride panResetToDefault = FResetToDefaultOverride::Create(panIsResetToDefaultVisible, onResetToDefaultClicked);
-	FResetToDefaultOverride rotationResetToDefault = FResetToDefaultOverride::Create(rotationIsResetToDefaultVisible, onResetToDefaultClicked);
-	FResetToDefaultOverride zoomResetToDefault = FResetToDefaultOverride::Create(zoomIsResetToDefaultVisible, onResetToDefaultClicked);
+    FResetToDefaultOverride panResetToDefault = FResetToDefaultOverride::Create(panIsResetToDefaultVisible, onResetToDefaultClicked);
+    FResetToDefaultOverride rotationResetToDefault = FResetToDefaultOverride::Create(rotationIsResetToDefaultVisible, onResetToDefaultClicked);
+    FResetToDefaultOverride zoomResetToDefault = FResetToDefaultOverride::Create(zoomIsResetToDefaultVisible, onResetToDefaultClicked);
 
-	panRow->OverrideResetToDefault(panResetToDefault);
-	rotationRow->OverrideResetToDefault(rotationResetToDefault);
-	zoomRow->OverrideResetToDefault(zoomResetToDefault);
+    panRow->OverrideResetToDefault(panResetToDefault);
+    rotationRow->OverrideResetToDefault(rotationResetToDefault);
+    zoomRow->OverrideResetToDefault(zoomResetToDefault);
 }
 
 UOdysseyAnimationEditorOutOfPegsTool::~UOdysseyAnimationEditorOutOfPegsTool()
@@ -166,21 +166,21 @@ UOdysseyAnimationEditorOutOfPegsTool::PostEditChangeProperty( FPropertyChangedEv
     bool isInteractive = EPropertyChangeType::ValueSet | (iEvent.ChangeType & EPropertyChangeType::Interactive);
     if ( memberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Pan) )
     {
-		FOdysseyAnimationCellOutOfPegs outOfPegs = mCell->OutOfPegs;
-		outOfPegs.Pan = Pan;
-		FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), outOfPegs, iEvent.ChangeType);
+        FOdysseyAnimationCellOutOfPegs outOfPegs = mCell->OutOfPegs;
+        outOfPegs.Pan = Pan;
+        FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), outOfPegs, iEvent.ChangeType);
     }
     if ( propertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Rotation) )
     {
-		FOdysseyAnimationCellOutOfPegs outOfPegs = mCell->OutOfPegs;
-		outOfPegs.Rotation = FMath::UnwindDegrees(Rotation);
-		FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), outOfPegs, iEvent.ChangeType);
+        FOdysseyAnimationCellOutOfPegs outOfPegs = mCell->OutOfPegs;
+        outOfPegs.Rotation = FMath::UnwindDegrees(Rotation);
+        FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), outOfPegs, iEvent.ChangeType);
     }
     if ( propertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Zoom) )
     {
-		FOdysseyAnimationCellOutOfPegs outOfPegs = mCell->OutOfPegs;
-		outOfPegs.Zoom = Zoom;
-		FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), outOfPegs, iEvent.ChangeType);
+        FOdysseyAnimationCellOutOfPegs outOfPegs = mCell->OutOfPegs;
+        outOfPegs.Zoom = Zoom;
+        FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), outOfPegs, iEvent.ChangeType);
     }
 }
 
@@ -485,9 +485,9 @@ UOdysseyAnimationEditorOutOfPegsTool::Reset()
 void
 UOdysseyAnimationEditorOutOfPegsTool::ResetAll()
 {
-	const TArray<UOdysseyAnimationCell*> cells = mCell->GetLayer()->GetCells();
-	for (UOdysseyAnimationCell* cell : cells)
-	{
-		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), FOdysseyAnimationCellOutOfPegs());
-	}
+    const TArray<UOdysseyAnimationCell*> cells = mCell->GetLayer()->GetCells();
+    for (UOdysseyAnimationCell* cell : cells)
+    {
+        FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), FOdysseyAnimationCellOutOfPegs());
+    }
 }

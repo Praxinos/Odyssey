@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Framework/Application/IInputProcessor.h"
+#include "InputCoreTypes.h"
 #include "OdysseyImageRenderer.h"
 #include "OdysseyAnimationEditorFlipSystem.generated.h"
 
@@ -36,9 +37,9 @@ UENUM()
 enum class EOdysseyAnimationFlipDirection : uint8
 {
     Horizontal,
-	HorizontalInverted UMETA(DisplayName = "Horizontal (Inverted)"),
+    HorizontalInverted UMETA(DisplayName = "Horizontal (Inverted)"),
     Vertical,
-	VerticalInverted UMETA(DisplayName = "Vertical (Inverted)")
+    VerticalInverted UMETA(DisplayName = "Vertical (Inverted)")
 };
 
 USTRUCT()
@@ -119,7 +120,7 @@ public:
     FOdysseyAnimationEditorFlipSystem(FOdysseyAnimationEditorExtension* iExtension);
 
     void StartFlipping(const FOdysseyAnimationFlipConfiguration& iFlipConfiguration);
-	
+    
 private:
     void EndFlipping();
     void FlipTo(int iDelta);
@@ -129,13 +130,13 @@ private:
 
 private:
     //needed to compile against IInputProcessor
-	virtual void Tick(const float DeltaTime, FSlateApplication& SlateApp, TSharedRef<ICursor> Cursor) override;
+    virtual void Tick(const float DeltaTime, FSlateApplication& SlateApp, TSharedRef<ICursor> Cursor) override;
 
-	/** Key up input */
-	virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
+    /** Key up input */
+    virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
 
     /** Mouse movement input */
-	virtual bool HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent) override;
+    virtual bool HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent) override;
 
 private:
     FOdysseyAnimationEditorExtension* mExtension;

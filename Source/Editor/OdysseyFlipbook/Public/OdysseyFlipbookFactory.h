@@ -13,5 +13,5 @@ class UOdysseyFlipbookFactory : public UPaperFlipbookFactory
     GENERATED_UCLASS_BODY()
 
 private:
-	virtual UObject* FactoryCreateNew(UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn) override;
+    virtual UObject* FactoryCreateNew(UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn) override;
 };

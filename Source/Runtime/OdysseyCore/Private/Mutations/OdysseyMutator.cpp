@@ -20,26 +20,26 @@ public:
     {
     }
 
-	/** Makes the change to the object */
+    /** Makes the change to the object */
     //REDO
-	virtual void Apply( UObject* Object ) override
+    virtual void Apply( UObject* Object ) override
     {
         mRootMutation->Apply();
         mRootMutation->OnChanged().ExecuteIfBound();
         mRootMutation->OnCommited().ExecuteIfBound();
     }
 
-	/** Reverts change to the object */
+    /** Reverts change to the object */
     //UNDO
-	virtual void Revert( UObject* Object ) override
+    virtual void Revert( UObject* Object ) override
     {
         mRootMutation->Revert();
         mRootMutation->OnChanged().ExecuteIfBound();
         mRootMutation->OnCommited().ExecuteIfBound();
     }
 
-	/** Describes this change (for debugging) */
-	virtual FString ToString() const override
+    /** Describes this change (for debugging) */
+    virtual FString ToString() const override
     {
         return mRootMutation->GetName();
     }

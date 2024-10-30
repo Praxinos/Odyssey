@@ -28,7 +28,7 @@ SLATE_IMPLEMENT_WIDGET(SOdysseyAnimationLayerStack)
 void
 SOdysseyAnimationLayerStack::PrivateRegisterAttributes(FSlateAttributeInitializer& AttributeInitializer)
 {
-	SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, mLayerStack, EInvalidateWidgetReason::Layout)
+    SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, mLayerStack, EInvalidateWidgetReason::Layout)
     .OnValueChanged(FSlateAttributeDescriptor::FAttributeValueChangedDelegate::CreateLambda(
         [](SWidget& Widget)
         {
@@ -45,7 +45,7 @@ SOdysseyAnimationLayerStack::SOdysseyAnimationLayerStack()
     : mExtension(nullptr)
     , mLayerStack(*this, nullptr)
     , mTreeView()
-	, mTimelineScrollBar(nullptr)
+    , mTimelineScrollBar(nullptr)
 {
 }
 
@@ -253,12 +253,12 @@ SOdysseyAnimationLayerStack::OnLayerAdded(UOdysseyLayer* iLayer)
 {
     if (iLayer->GetClass() == UOdysseyAnimationLayerImageRaster::StaticClass())
     {
-		UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(iLayer);
-		layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
+        UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(iLayer);
+        layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
     }
     else if (iLayer->GetClass() == UOdysseyAnimationLayerImageVector::StaticClass())
     {
-		UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(iLayer);
+        UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(iLayer);
         layer->AddCell(UOdysseyAnimationCellImageVector::StaticClass());
     }
 }

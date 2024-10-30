@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Styling/SlateBrush.h"
 
 #include "OdysseyPaletteEntry.generated.h"
 

@@ -11,14 +11,14 @@
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
 FOdysseyViewportDrawingEditorToolkit::FOdysseyViewportDrawingEditorToolkit(TSharedRef<FOdysseyPainterEditor> iEditor, FEdMode* iEdMode)
-	: FOdysseyModeToolkit(iEditor)
+    : FOdysseyModeToolkit(iEditor)
     , mEdMode(iEdMode)
 {
-	TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(&iEditor.Get());
+    TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(&iEditor.Get());
     TSharedRef<FOdysseyAnimationEditorExtension> animationExtension = MakeShared<FOdysseyAnimationEditorExtension>(&iEditor.Get());
     mViewportDrawingExtension = MakeShared<FOdysseyViewportDrawingEditorExtension>(&iEditor.Get());
 
-	iEditor->AddExtension(textureExtension);
+    iEditor->AddExtension(textureExtension);
     iEditor->AddExtension(animationExtension);
     iEditor->AddExtension(mViewportDrawingExtension.ToSharedRef());
 }
@@ -26,13 +26,13 @@ FOdysseyViewportDrawingEditorToolkit::FOdysseyViewportDrawingEditorToolkit(TShar
 FName
 FOdysseyViewportDrawingEditorToolkit::GetToolkitFName() const
 {
-	return FName("OdysseyMeshPaintMode");
+    return FName("OdysseyMeshPaintMode");
 }
 
 FText
 FOdysseyViewportDrawingEditorToolkit::GetBaseToolkitName() const
 {
-	return LOCTEXT("editor.name", "Odyssey Mesh Paint");
+    return LOCTEXT("editor.name", "Odyssey Mesh Paint");
 }
 
 void
@@ -46,7 +46,7 @@ FOdysseyViewportDrawingEditorToolkit::GetInlineContent() const
 {
     return SNew(SOdysseyViewportDrawingEditorMasterTab, mViewportDrawingExtension.Get());
     //TODO: Create the widget in ViewportDrawingEditorToolkit
-	//return mEditor->GetGUI()->GetWidget();
+    //return mEditor->GetGUI()->GetWidget();
     //return SNullWidget::NullWidget;
 }
 

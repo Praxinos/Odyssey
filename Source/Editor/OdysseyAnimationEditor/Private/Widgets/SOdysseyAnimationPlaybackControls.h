@@ -14,39 +14,39 @@ class FOdysseyAnimationEditorExtension;
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationPlaybackControls : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SOdysseyAnimationPlaybackControls)
-		{}
+    SLATE_BEGIN_ARGS(SOdysseyAnimationPlaybackControls)
+        {}
         SLATE_ATTRIBUTE(float, PlaybackFramesPerSecond)
 
-	SLATE_END_ARGS()
+    SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension);
+    void Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension);
 
 private:
     bool IsPlayingForward() const;
     bool IsPlayingBackward() const;
 
-	EVisibility GetPlayButtonVisibility() const;
-	EVisibility GetPlayBackwardButtonVisibility() const;
-	EVisibility GetPauseButtonVisibility() const;
-	EVisibility GetPauseBackwardButtonVisibility() const;
-	EVisibility GetLoopingButtonVisibility() const;
-	EVisibility GetNotLoopingButtonVisibility() const;
+    EVisibility GetPlayButtonVisibility() const;
+    EVisibility GetPlayBackwardButtonVisibility() const;
+    EVisibility GetPauseButtonVisibility() const;
+    EVisibility GetPauseBackwardButtonVisibility() const;
+    EVisibility GetLoopingButtonVisibility() const;
+    EVisibility GetNotLoopingButtonVisibility() const;
 
 private:
     FReply OnPlayClicked();
-	FReply OnPlayBackwardClicked();
-	FReply OnPauseClicked();
-	FReply OnStopClicked();
-	FReply OnBeginningClicked();
-	FReply OnEndClicked();
-	FReply OnPreviousClicked();
-	FReply OnNextClicked();
-	FReply OnPreviousKeyClicked();
-	FReply OnNextKeyClicked();
-	FReply OnLoopClicked();
+    FReply OnPlayBackwardClicked();
+    FReply OnPauseClicked();
+    FReply OnStopClicked();
+    FReply OnBeginningClicked();
+    FReply OnEndClicked();
+    FReply OnPreviousClicked();
+    FReply OnNextClicked();
+    FReply OnPreviousKeyClicked();
+    FReply OnNextKeyClicked();
+    FReply OnLoopClicked();
 
 private:
-	FOdysseyAnimationEditorExtension* mExtension;
+    FOdysseyAnimationEditorExtension* mExtension;
     TAttribute<float> mPlaybackFramesPerSecond;
 };

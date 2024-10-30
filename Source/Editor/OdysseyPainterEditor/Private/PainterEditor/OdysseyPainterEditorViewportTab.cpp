@@ -32,7 +32,7 @@ FOdysseyPainterEditorViewportTab::~FOdysseyPainterEditorViewportTab()
 }
 
 FOdysseyPainterEditorViewportTab::FOdysseyPainterEditorViewportTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(LOCTEXT( "viewport-tab.name", "Viewport" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Viewport16" ))
+    : FOdysseyEditorTab(LOCTEXT( "viewport-tab.name", "Viewport" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Viewport16" ))
     , mEditor(iEditor)
     , mViewport(nullptr)
     , mViewportClient(nullptr)
@@ -56,8 +56,8 @@ FOdysseyPainterEditorViewportTab::CreateWidget()
         .Texture_Raw(this, &FOdysseyPainterEditorViewportTab::Texture);
 
     //TODO: not cool to have to go through the whole GUI for an info, move that in the painterEditor Data
-	mViewportClient = MakeShareable(new FOdysseyPainterEditorViewportClient(mEditor, mViewport, mEditor->GetMeshSelector().Get()));
-	
+    mViewportClient = MakeShareable(new FOdysseyPainterEditorViewportClient(mEditor, mViewport, mEditor->GetMeshSelector().Get()));
+    
     //TODO: manage colorpicking here, viewportClient itself should not know the action to pick a color
     mViewportClient->OnPickColor().BindRaw(this, &FOdysseyPainterEditorViewportTab::HandleViewportColorPicked);
     mViewportClient->OnMouseDown().BindRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseDown);
@@ -68,7 +68,7 @@ FOdysseyPainterEditorViewportTab::CreateWidget()
     mViewportClient->OnKeyDown().BindRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportKeyDown);
     mViewportClient->OnKeyUp().BindRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportKeyUp);
 
-	mViewport->SetViewportClient(mViewportClient);
+    mViewport->SetViewportClient(mViewportClient);
     //mViewport->GetViewport()->ViewportResizedEvent.AddRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportSizeChanged);
 
     return mViewport;
@@ -82,25 +82,25 @@ FOdysseyPainterEditorViewportTab::BindShortcuts(FBaseToolkit* iToolkit)
 
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorViewportTab::__VA_ARGS__ ), FCanExecuteAction() );
 
-	MAP_ACTION(painterEditorCommands.ResetViewportPosition, OnResetViewportPosition )
-	MAP_ACTION(painterEditorCommands.ResetViewportRotation, OnResetViewportRotation )
-	MAP_ACTION(painterEditorCommands.RotateViewportLeft, OnRotateViewportLeft )
-	MAP_ACTION(painterEditorCommands.RotateViewportRight, OnRotateViewportRight )
+    MAP_ACTION(painterEditorCommands.ResetViewportPosition, OnResetViewportPosition )
+    MAP_ACTION(painterEditorCommands.ResetViewportRotation, OnResetViewportRotation )
+    MAP_ACTION(painterEditorCommands.RotateViewportLeft, OnRotateViewportLeft )
+    MAP_ACTION(painterEditorCommands.RotateViewportRight, OnRotateViewportRight )
     MAP_ACTION(painterEditorCommands.FlipViewportHorizontally, OnFlipViewportHorizontally)
     MAP_ACTION(painterEditorCommands.FlipViewportVertically, OnFlipViewportVertically)
-	MAP_ACTION(painterEditorCommands.SetZoom10Percent, OnSetZoom, 0.1 )
-	MAP_ACTION(painterEditorCommands.SetZoom20Percent, OnSetZoom, 0.2 )
-	MAP_ACTION(painterEditorCommands.SetZoom30Percent, OnSetZoom, 0.3 )
-	MAP_ACTION(painterEditorCommands.SetZoom40Percent, OnSetZoom, 0.4 )
-	MAP_ACTION(painterEditorCommands.SetZoom50Percent, OnSetZoom, 0.5 )
-	MAP_ACTION(painterEditorCommands.SetZoom60Percent, OnSetZoom, 0.6 )
-	MAP_ACTION(painterEditorCommands.SetZoom70Percent, OnSetZoom, 0.7 )
-	MAP_ACTION(painterEditorCommands.SetZoom80Percent, OnSetZoom, 0.8 )
-	MAP_ACTION(painterEditorCommands.SetZoom90Percent, OnSetZoom, 0.9 )
-	MAP_ACTION(painterEditorCommands.SetZoom100Percent, OnSetZoom, 1.0 )
-	MAP_ACTION(painterEditorCommands.SetZoomFitScreen, OnSetZoomFitScreen )
-	MAP_ACTION(painterEditorCommands.ZoomInExponential, OnZoomInExponential )
-	MAP_ACTION(painterEditorCommands.ZoomOutExponential, OnZoomOutExponential )
+    MAP_ACTION(painterEditorCommands.SetZoom10Percent, OnSetZoom, 0.1 )
+    MAP_ACTION(painterEditorCommands.SetZoom20Percent, OnSetZoom, 0.2 )
+    MAP_ACTION(painterEditorCommands.SetZoom30Percent, OnSetZoom, 0.3 )
+    MAP_ACTION(painterEditorCommands.SetZoom40Percent, OnSetZoom, 0.4 )
+    MAP_ACTION(painterEditorCommands.SetZoom50Percent, OnSetZoom, 0.5 )
+    MAP_ACTION(painterEditorCommands.SetZoom60Percent, OnSetZoom, 0.6 )
+    MAP_ACTION(painterEditorCommands.SetZoom70Percent, OnSetZoom, 0.7 )
+    MAP_ACTION(painterEditorCommands.SetZoom80Percent, OnSetZoom, 0.8 )
+    MAP_ACTION(painterEditorCommands.SetZoom90Percent, OnSetZoom, 0.9 )
+    MAP_ACTION(painterEditorCommands.SetZoom100Percent, OnSetZoom, 1.0 )
+    MAP_ACTION(painterEditorCommands.SetZoomFitScreen, OnSetZoomFitScreen )
+    MAP_ACTION(painterEditorCommands.ZoomInExponential, OnZoomInExponential )
+    MAP_ACTION(painterEditorCommands.ZoomOutExponential, OnZoomOutExponential )
 
     #undef MAP_ACTION
 }

@@ -8,6 +8,8 @@
 
 #include "OdysseyPaletteEntryMaterial.generated.h"
 
+class UMaterial;
+
 /////////////////////////////////////////////////////
 // OdysseyColorPaletteEntryMaterial
 UCLASS()

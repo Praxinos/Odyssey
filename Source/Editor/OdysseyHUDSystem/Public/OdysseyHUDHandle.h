@@ -7,6 +7,7 @@
 
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDSystem.h"
+#include "Engine/Texture.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyHUDHandle

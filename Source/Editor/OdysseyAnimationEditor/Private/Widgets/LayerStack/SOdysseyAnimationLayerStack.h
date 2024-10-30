@@ -52,6 +52,6 @@ private:
     FOdysseyAnimationEditorExtension* mExtension;
     TSlateAttribute<UOdysseyAnimationLayerStack*> mLayerStack;
     TSharedPtr<SOdysseyLayerStackTreeView> mTreeView;
-	TSharedPtr<SScrollBar> mTimelineScrollBar;
+    TSharedPtr<SScrollBar> mTimelineScrollBar;
     TSharedPtr<class SOdysseyAnimationTimelineControl> mTimelineControl;
 };

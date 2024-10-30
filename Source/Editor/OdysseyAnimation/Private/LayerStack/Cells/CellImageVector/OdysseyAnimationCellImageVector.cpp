@@ -24,26 +24,26 @@ UOdysseyAnimationCellImageVector::~UOdysseyAnimationCellImageVector()
 void
 UOdysseyAnimationCellImageVector::PostInitProperties()
 {
-	Super::PostInitProperties();
-	
-	if (GetFlags() & RF_ClassDefaultObject)
-		return;
+    Super::PostInitProperties();
+    
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
 
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     UOdysseyAnimationLayerImageVector::OnIsColoredChanged().AddUObject( this, &UOdysseyAnimationCellImageVector::OnIsColoredChanged );
     UOdysseyAnimationLayerImageVector::OnIsWireframeChanged().AddUObject( this, &UOdysseyAnimationCellImageVector::OnIsWireframeChanged );
 
-	mVectorBlockId = FGuid::NewGuid();
+    mVectorBlockId = FGuid::NewGuid();
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
-    mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated);	
+    mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated);    
 
-	UOdysseyAnimation* animation = GetAnimation();
-	if (animation->GetWidth() < 0 || animation->GetHeight() < 0)
-		return;
+    UOdysseyAnimation* animation = GetAnimation();
+    if (animation->GetWidth() < 0 || animation->GetHeight() < 0)
+        return;
 
-	mEngine = new FOdysseyVectorEngine( new FOdysseyVectorGroupPaint( "Scene" )
-									, (double)animation->GetWidth()
-									, (double)animation->GetHeight() );
+    mEngine = new FOdysseyVectorEngine( new FOdysseyVectorGroupPaint( "Scene" )
+                                    , (double)animation->GetWidth()
+                                    , (double)animation->GetHeight() );
     
     mVectorBlock->Init(mVectorBlockId, mEngine, animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
 }
@@ -51,10 +51,10 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
 void
 UOdysseyAnimationCellImageVector::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
 {
-	Super::PostDuplicate(iDuplicateMode);
-	UOdysseyAnimation* animation = GetAnimation();
-	mVectorBlockId = FGuid::NewGuid();
-	mVectorBlock->Init(mVectorBlockId, mEngine, animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
+    Super::PostDuplicate(iDuplicateMode);
+    UOdysseyAnimation* animation = GetAnimation();
+    mVectorBlockId = FGuid::NewGuid();
+    mVectorBlock->Init(mVectorBlockId, mEngine, animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
 }
 
 FOdysseyVectorEngine*
@@ -85,9 +85,9 @@ void
 UOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
-	
-	if (GetFlags() & RF_ClassDefaultObject)
-		return;
+    
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
 
     if( Ar.IsSaving() )
     {
@@ -127,12 +127,12 @@ UOdysseyAnimationCellImageVector::OldSerialize(FArchive& Ar)
 void
 UOdysseyAnimationCellImageVector::PostLoad()
 {
-	Super::PostLoad();
-	
-	if (GetFlags() & RF_ClassDefaultObject)
-		return;
+    Super::PostLoad();
+    
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
 
-	UOdysseyAnimation* animation = GetAnimation();
+    UOdysseyAnimation* animation = GetAnimation();
     mVectorBlock->Init(mVectorBlockId, mEngine, animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
     //mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY );
 }
@@ -180,9 +180,9 @@ UOdysseyAnimationCellImageVector::GetImageRenderingComposition(IOdysseyImageRend
 TArray<::ULIS::FRectI>
 UOdysseyAnimationCellImageVector::GetImageRenderingRects() const
 {
-	UOdysseyAnimation* animation = GetAnimation();
-	if (!animation)
-		return {};
+    UOdysseyAnimation* animation = GetAnimation();
+    if (!animation)
+        return {};
 
     return { ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight()) };
 }
@@ -211,6 +211,6 @@ UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated( const TArray<::ULIS:
 {
     ImageRenderingChanged( iRects, iIsInteractive);
 
-	if (!iIsInteractive)
-		DirtyThumbnail();
+    if (!iIsInteractive)
+        DirtyThumbnail();
 }

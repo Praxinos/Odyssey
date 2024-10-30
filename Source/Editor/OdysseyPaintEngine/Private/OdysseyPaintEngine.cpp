@@ -23,7 +23,7 @@ FOdysseyPaintEngine::~FOdysseyPaintEngine()
 
 FOdysseyPaintEngine::FOdysseyPaintEngine()
     : mRasterBlock(nullptr)
-	, mIsBeforeUndoBound(false)
+    , mIsBeforeUndoBound(false)
 {
 }
 
@@ -214,45 +214,45 @@ FOdysseyPaintEngine::UpdateEditedBlock(const FOdysseyBlendParameters& iBlendPara
     mRasterBlockMutator.ResetTilesFromRects(mInvalidRects);
     mRasterBlockMutator.EditTilesFromRects(
         mInvalidRects,
-		[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap)
-		{
-			TArray<::ULIS::FRectI> invalidRects = iTileMap.InvalidRects();
+        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap)
+        {
+            TArray<::ULIS::FRectI> invalidRects = iTileMap.InvalidRects();
 
-			//Blend Paint Block over OriginalBlock
-			TArray<::ULIS::FEvent> events;
-			for ( const ::ULIS::FRectI& rect : invalidRects )
-			{
-				TArray<::ULIS::FEvent> eventMask;
-				if (mMaskBlock)
-				{
-					::ULIS::FEvent eventFilter = FULISEventBuilder().RetainBlock(mMaskBlock).RetainBlock(mPaintBlock).Build();
-					ctx.FilterInto(
-						[]( const ::ULIS::FPixel& iSrcPixel,  ::ULIS::FPixel& iDstPixel, uint64 iNumPixels )
-						{
-							for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
-							{
-								iDstPixel.SetAlphaF(iDstPixel.AlphaF() * iSrcPixel.GreyF());
-							}
-						}
-						, *mMaskBlock
-						, *mPaintBlock
-						, ::ULIS::FRectI::Auto
-						, ::ULIS::FVec2I(0)
-						, ::ULIS::FSchedulePolicy::MultiScanlines
-						, 0
-						, nullptr
-						, &eventFilter
-					);
-					eventMask.Add(eventFilter);
-				}
+            //Blend Paint Block over OriginalBlock
+            TArray<::ULIS::FEvent> events;
+            for ( const ::ULIS::FRectI& rect : invalidRects )
+            {
+                TArray<::ULIS::FEvent> eventMask;
+                if (mMaskBlock)
+                {
+                    ::ULIS::FEvent eventFilter = FULISEventBuilder().RetainBlock(mMaskBlock).RetainBlock(mPaintBlock).Build();
+                    ctx.FilterInto(
+                        []( const ::ULIS::FPixel& iSrcPixel,  ::ULIS::FPixel& iDstPixel, uint64 iNumPixels )
+                        {
+                            for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
+                            {
+                                iDstPixel.SetAlphaF(iDstPixel.AlphaF() * iSrcPixel.GreyF());
+                            }
+                        }
+                        , *mMaskBlock
+                        , *mPaintBlock
+                        , ::ULIS::FRectI::Auto
+                        , ::ULIS::FVec2I(0)
+                        , ::ULIS::FSchedulePolicy::MultiScanlines
+                        , 0
+                        , nullptr
+                        , &eventFilter
+                    );
+                    eventMask.Add(eventFilter);
+                }
 
 
-				::ULIS::FEvent blendEvent;
-				ctx.Blend(*mPaintBlock, *iBlock, rect, rect.Position(), ::ULIS::eBlendMode(iBlendParameters.BlendingMode), ::ULIS::eAlphaMode(iBlendParameters.AlphaMode), iBlendParameters.Opacity / 100.f, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, eventMask.Num(), eventMask.GetData(), &blendEvent);
-				events.Add(blendEvent);
-			}
-			return events;
-		}
+                ::ULIS::FEvent blendEvent;
+                ctx.Blend(*mPaintBlock, *iBlock, rect, rect.Position(), ::ULIS::eBlendMode(iBlendParameters.BlendingMode), ::ULIS::eAlphaMode(iBlendParameters.AlphaMode), iBlendParameters.Opacity / 100.f, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, eventMask.Num(), eventMask.GetData(), &blendEvent);
+                events.Add(blendEvent);
+            }
+            return events;
+        }
     );
     mInvalidRects.Empty();
     return true;

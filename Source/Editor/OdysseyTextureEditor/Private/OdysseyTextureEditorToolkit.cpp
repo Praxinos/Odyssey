@@ -18,7 +18,7 @@ FOdysseyTextureEditorToolkit::~FOdysseyTextureEditorToolkit()
 }
 
 FOdysseyTextureEditorToolkit::FOdysseyTextureEditorToolkit()
-	: FOdysseyAssetEditorToolkit( TEXT( "OdysseyTextureEditorApp" ) )
+    : FOdysseyAssetEditorToolkit( TEXT( "OdysseyTextureEditorApp" ) )
 {
 }
 
@@ -28,9 +28,9 @@ FOdysseyTextureEditorToolkit::FOdysseyTextureEditorToolkit()
 void
 FOdysseyTextureEditorToolkit::OpenAsset(UObject* iObject)
 {
-	UTexture2D* texture = Cast<UTexture2D>(iObject);
-	IOdysseyTextureEditorModule* OdysseyTextureEditorModule = &FModuleManager::GetModuleChecked<IOdysseyTextureEditorModule>("OdysseyTextureEditor");
-	OdysseyTextureEditorModule->CreateOdysseyTextureEditor( { texture } );
+    UTexture2D* texture = Cast<UTexture2D>(iObject);
+    IOdysseyTextureEditorModule* OdysseyTextureEditorModule = &FModuleManager::GetModuleChecked<IOdysseyTextureEditorModule>("OdysseyTextureEditor");
+    OdysseyTextureEditorModule->CreateOdysseyTextureEditor( { texture } );
 }
 
 FText

@@ -31,14 +31,14 @@ SOdysseyAnimationCell::Construct(
 
 int32 SOdysseyAnimationCell::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
-	// Draw a current frame
-	LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
-	++LayerId;
+    // Draw a current frame
+    LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+    ++LayerId;
 
-	const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
+    const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
 
-	const float height = AllottedGeometry.GetLocalSize().Y;  
-	const float width = AllottedGeometry.GetLocalSize().X;
+    const float height = AllottedGeometry.GetLocalSize().Y;  
+    const float width = AllottedGeometry.GetLocalSize().X;
 
     //==========Selection============
     if (IsMarkSymbol())
@@ -48,14 +48,14 @@ int32 SOdysseyAnimationCell::OnPaint(const FPaintArgs& Args, const FGeometry& Al
         const FSlateBrush* markBrush = GetMarkBrush();
         FVector2D markPosition(0, height - markBrush->ImageSize.Y);
 
-		FSlateDrawElement::MakeBox(
-			OutDrawElements,
-			LayerId,
-        	AllottedGeometry.ToPaintGeometry( markBrush->ImageSize, FSlateLayoutTransform(markPosition) ),
-			markBrush,
-			ESlateDrawEffect::None,
-			markColor
-		);
+        FSlateDrawElement::MakeBox(
+            OutDrawElements,
+            LayerId,
+            AllottedGeometry.ToPaintGeometry( markBrush->ImageSize, FSlateLayoutTransform(markPosition) ),
+            markBrush,
+            ESlateDrawEffect::None,
+            markColor
+        );
     }
 
     /* if (IsMarkInvalid())
@@ -63,14 +63,14 @@ int32 SOdysseyAnimationCell::OnPaint(const FPaintArgs& Args, const FGeometry& Al
         const FSlateBrush* markBrush = FOdysseyStyle::GetBrush("Animation.CellMark.Symbol.Invalid");;
         FVector2D markPosition(0, height - markBrush->ImageSize.Y);
 
-		FSlateDrawElement::MakeBox(
-			OutDrawElements,
-			LayerId,
-        	AllottedGeometry.ToPaintGeometry( markBrush->ImageSize, FSlateLayoutTransform(markPosition) ),
-			markBrush,
-			ESlateDrawEffect::None,
-			FLinearColor::White
-		);
+        FSlateDrawElement::MakeBox(
+            OutDrawElements,
+            LayerId,
+            AllottedGeometry.ToPaintGeometry( markBrush->ImageSize, FSlateLayoutTransform(markPosition) ),
+            markBrush,
+            ESlateDrawEffect::None,
+            FLinearColor::White
+        );
     } */
 
     if (IsMarkFill())
@@ -78,31 +78,31 @@ int32 SOdysseyAnimationCell::OnPaint(const FPaintArgs& Args, const FGeometry& Al
         FLinearColor markColor = GetMarkColor();
         markColor.A = GetMarkOpacity();
 
-		FSlateDrawElement::MakeBox(
-			OutDrawElements,
-			LayerId,
-        	AllottedGeometry.ToPaintGeometry( FVector2D(width, height), FSlateLayoutTransform() ),
-			GenericBrush,
-			ESlateDrawEffect::None,
-			markColor
-		);
+        FSlateDrawElement::MakeBox(
+            OutDrawElements,
+            LayerId,
+            AllottedGeometry.ToPaintGeometry( FVector2D(width, height), FSlateLayoutTransform() ),
+            GenericBrush,
+            ESlateDrawEffect::None,
+            markColor
+        );
     }
 
-	if(IsSelected())
-	{
+    if(IsSelected())
+    {
         FLinearColor selectionColor = FLinearColor::Green;
         selectionColor.A = 0.2f;
         FLinearColor selectionBorderColor = FLinearColor::Green;
         selectionBorderColor.A = 1.f;
 
-		FSlateDrawElement::MakeBox(
-			OutDrawElements,
-			LayerId,
-        	AllottedGeometry.ToPaintGeometry( FVector2D(width, height), FSlateLayoutTransform() ),
-			GenericBrush,
-			ESlateDrawEffect::None,
-			selectionColor
-		);
+        FSlateDrawElement::MakeBox(
+            OutDrawElements,
+            LayerId,
+            AllottedGeometry.ToPaintGeometry( FVector2D(width, height), FSlateLayoutTransform() ),
+            GenericBrush,
+            ESlateDrawEffect::None,
+            selectionColor
+        );
 
         if (IsSelectionCursor())
         {
@@ -124,21 +124,21 @@ int32 SOdysseyAnimationCell::OnPaint(const FPaintArgs& Args, const FGeometry& Al
                 1.5f
             );
         }
-	}
+    }
 
-	return LayerId;
+    return LayerId;
 }
 
 bool
 SOdysseyAnimationCell::IsSelected() const
 {
-	return mExtension->Timeline()->GetSelectedCells().Contains(mCell);
+    return mExtension->Timeline()->GetSelectedCells().Contains(mCell);
 }
 
 bool
 SOdysseyAnimationCell::IsSelectionCursor() const
 {
-	return mExtension->Timeline()->GetCellSelectionCursor() == mCell;
+    return mExtension->Timeline()->GetCellSelectionCursor() == mCell;
 }
 
 const FSlateBrush*

@@ -46,6 +46,6 @@ private:
     bool mIsDrawing = false;
 
 public:
-	UPROPERTY(EditAnywhere, Category="Shape")
-	bool Uniform = false;
+    UPROPERTY(EditAnywhere, Category="Shape")
+    bool Uniform = false;
 };

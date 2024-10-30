@@ -4,6 +4,8 @@
 #include "PropertyHandle.h"
 #include "Palette/OdysseyPaletteEntry.h"
 #include "Editor/PropertyEditor/Public/DetailCategoryBuilder.h"
+#include "Widgets/Input/SComboBox.h"
+
 
 class FOdysseyVectorObjectViewPaletteCustomization : public IPropertyTypeCustomization
 {

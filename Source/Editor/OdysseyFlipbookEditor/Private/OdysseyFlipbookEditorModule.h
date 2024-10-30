@@ -8,10 +8,10 @@ class UPaperFlipbook;
 class IAssetTypeActions;
 
 class FOdysseyFlipbookEditorModule
-	: public IOdysseyFlipbookEditorModule
+    : public IOdysseyFlipbookEditorModule
 {
 public:
-	// IOdysseyFlipbookEditorModule interface
+    // IOdysseyFlipbookEditorModule interface
     virtual void CreateOdysseyFlipbookEditor( TArray<UPaperFlipbook*> iFlipbook ) override;
 
     // IModuleInterface interface
@@ -19,27 +19,27 @@ public:
 
     virtual void ShutdownModule() override;
 
-	// AssetTypeActions
+    // AssetTypeActions
     void RegisterAssetTypeActions();
-	void UnregisterAssetTypeActions();
+    void UnregisterAssetTypeActions();
 
 private:
 
-	// Settings
-	void RegisterSettings();
-	void UnregisterSettings();
+    // Settings
+    void RegisterSettings();
+    void UnregisterSettings();
 
     // Commands
-	void RegisterCommands();
-	void UnregisterCommands();
+    void RegisterCommands();
+    void UnregisterCommands();
 
     //Level Editor Layout
     void RegisterLevelEditorLayoutExtensions();
     void UnregisterLevelEditorLayoutExtensions();
 
 private:
-	/** All created asset type actions. Cached here so that we can unregister them during shutdown. */
-	TSharedPtr<IAssetTypeActions> mIliadTypeActions;
+    /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
+    TSharedPtr<IAssetTypeActions> mIliadTypeActions;
     // AssetTypeActions that don't belong to us, we keep track of them to be able to (un)register them, based on Iliad preferences
     TSharedPtr<IAssetTypeActions> mUETypeActions;
     FDelegateHandle mExtendLevelEditorLayout;

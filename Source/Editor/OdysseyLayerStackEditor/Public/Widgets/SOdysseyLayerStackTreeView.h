@@ -4,9 +4,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DragDropOperations/OdysseyLayerStackDragDropOperation.h"
+#include "Framework/MultiBox/MultiBoxExtender.h"
 #include "OdysseyLayer.h"
 #include "Widgets/Views/STreeView.h"
-#include "DragDropOperations/OdysseyLayerStackDragDropOperation.h"
 
 class UOdysseyLayerStack;
 class FOdysseyLayerStackShortcuts;
@@ -88,7 +89,7 @@ private:
      * @brief Refreshes all rows expansion states from the state stored in the Layer
      * 
      */
-	void RefreshAllExpansionStates();
+    void RefreshAllExpansionStates();
 
 protected:
     //Callbacks

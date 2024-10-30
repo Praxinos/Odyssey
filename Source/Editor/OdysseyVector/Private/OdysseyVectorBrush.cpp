@@ -2,6 +2,7 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorPath.h"
 #include "Brush/OdysseyVectorBrushPath.h"
+#include "TextureResource.h"
 
 FOdysseyVectorBrush* demoBrush;
 

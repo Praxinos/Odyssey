@@ -28,7 +28,7 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
         return FReply::Unhandled();
 
     if (iParams.mOrigin != EMouseEventOrigin::CellsTimeline)
-		return FReply::Unhandled();
+        return FReply::Unhandled();
 
     float posX = iParams.mGeometry.AbsoluteToLocal(iParams.mMouseEvent.GetScreenSpacePosition()).X;
     int frame = (int)(mTimelineParams->MousePositionToFrame(posX) + 0.5f);
@@ -40,13 +40,13 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.cut-tool.transaction.break-cell", "Break Cell"));
 #endif
-	UOdysseyAnimationCell* newCell = cell->Break(frame - cell->GetFrameRange().GetLowerBoundValue());
-	if (!newCell)
-		return FReply::Unhandled();
+    UOdysseyAnimationCell* newCell = cell->Break(frame - cell->GetFrameRange().GetLowerBoundValue());
+    if (!newCell)
+        return FReply::Unhandled();
 
-	//Remove mark from the new cell, because we consider the new cell will be modified by the user and will not represent the original cell anymore
-	//This is an arbitrary choice, you are free to change this behaviour whenever you want without any side effect
-	FOdysseyObjectEditorUtils::SetPropertyValue(newCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
+    //Remove mark from the new cell, because we consider the new cell will be modified by the user and will not represent the original cell anymore
+    //This is an arbitrary choice, you are free to change this behaviour whenever you want without any side effect
+    FOdysseyObjectEditorUtils::SetPropertyValue(newCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
 
     return FReply::Handled();
 }

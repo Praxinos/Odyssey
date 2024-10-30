@@ -26,7 +26,7 @@ public:
 public:
     void Initialize();
     void Finalize();
-	void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
+    void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
     void OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
     void OnCurrentFrameChanged( UOdysseyAnimation* iAnimation );
     void ParseVectorSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
@@ -35,7 +35,7 @@ public:
 
 protected:
     //Init
-	void CreateTabs();
+    void CreateTabs();
 
 private:
     FOdysseyAnimationEditorExtension* mExtension;

@@ -30,12 +30,12 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
         if (animation)
         {
             UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
-			if (cell)
-			{
-        		UOdysseyLayerStack* layerStack = layer->GetLayerStack();
-            	int frame = animation->CurrentFrame - cell->GetFrameRange().GetLowerBoundValue();
-            	mRenderHUD = cell == mCell && frame == iFrame && layerStack->CurrentLayer.Get() == layer;
-			}
+            if (cell)
+            {
+                UOdysseyLayerStack* layerStack = layer->GetLayerStack();
+                int frame = animation->CurrentFrame - cell->GetFrameRange().GetLowerBoundValue();
+                mRenderHUD = cell == mCell && frame == iFrame && layerStack->CurrentLayer.Get() == layer;
+            }
         }
 
         // this is per-layer
@@ -137,7 +137,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::IsGameThreadOnly()
 void
 FOdysseyAnimationCellImageVectorImageRenderer::AddReferencedObjects(FReferenceCollector& Collector)
 {
-	Collector.AddReferencedObject(mCell);
+    Collector.AddReferencedObject(mCell);
 }
 
 FString

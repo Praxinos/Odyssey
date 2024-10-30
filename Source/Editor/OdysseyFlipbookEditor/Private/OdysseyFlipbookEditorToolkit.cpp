@@ -17,16 +17,16 @@ FOdysseyFlipbookEditorToolkit::~FOdysseyFlipbookEditorToolkit()
 }
 
 FOdysseyFlipbookEditorToolkit::FOdysseyFlipbookEditorToolkit() :
-	FOdysseyAssetEditorToolkit( TEXT("OdysseyFlipbookEditorApp"))
+    FOdysseyAssetEditorToolkit( TEXT("OdysseyFlipbookEditorApp"))
 {
 }
 
 void
 FOdysseyFlipbookEditorToolkit::OpenAsset(UObject* iObject)
 {
-	UPaperFlipbook* flipbook = Cast<UPaperFlipbook>(iObject);
-	IOdysseyFlipbookEditorModule* odysseyFlipbookEditorModule = &FModuleManager::GetModuleChecked<IOdysseyFlipbookEditorModule>("OdysseyFlipbookEditor");
-	odysseyFlipbookEditorModule->CreateOdysseyFlipbookEditor( { flipbook } );
+    UPaperFlipbook* flipbook = Cast<UPaperFlipbook>(iObject);
+    IOdysseyFlipbookEditorModule* odysseyFlipbookEditorModule = &FModuleManager::GetModuleChecked<IOdysseyFlipbookEditorModule>("OdysseyFlipbookEditor");
+    odysseyFlipbookEditorModule->CreateOdysseyFlipbookEditor( { flipbook } );
 }
 
 FText

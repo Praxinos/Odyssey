@@ -6,27 +6,27 @@
 FOdysseyAnimationLightTableKey
 UOdysseyAnimationLighttableFunctionLibrary::GetPreviousKey(FOdysseyAnimationLightTable Lighttable, int Index)
 {
-	return Lighttable.PreviousKeys[Index];
+    return Lighttable.PreviousKeys[Index];
 }
 
 FOdysseyAnimationLightTableKey
 UOdysseyAnimationLighttableFunctionLibrary::GetNextKey(FOdysseyAnimationLightTable Lighttable, int Index)
 {
-	return Lighttable.NextKeys[Index];
+    return Lighttable.NextKeys[Index];
 }
 
 FOdysseyAnimationLightTable
 UOdysseyAnimationLighttableFunctionLibrary::SetPreviousKey(FOdysseyAnimationLightTable Lighttable, FOdysseyAnimationLightTableKey Key, int Index)
 {
-	FOdysseyAnimationLightTable lighttable = Lighttable;
-	lighttable.PreviousKeys[Index] = Key;
-	return lighttable;
+    FOdysseyAnimationLightTable lighttable = Lighttable;
+    lighttable.PreviousKeys[Index] = Key;
+    return lighttable;
 }
 
 FOdysseyAnimationLightTable
 UOdysseyAnimationLighttableFunctionLibrary::SetNextKey(FOdysseyAnimationLightTable Lighttable, FOdysseyAnimationLightTableKey Key, int Index)
 {
-	FOdysseyAnimationLightTable lighttable = Lighttable;
-	lighttable.NextKeys[Index] = Key;
-	return lighttable;
+    FOdysseyAnimationLightTable lighttable = Lighttable;
+    lighttable.NextKeys[Index] = Key;
+    return lighttable;
 }

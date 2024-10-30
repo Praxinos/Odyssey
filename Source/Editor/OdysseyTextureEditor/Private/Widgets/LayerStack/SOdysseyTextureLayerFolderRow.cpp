@@ -28,10 +28,10 @@ void SOdysseyTextureLayerFolderRow::Construct(const FArguments& InArgs, const TS
     SOdysseyLayerRow::Construct(
         SOdysseyLayerRow::FArguments(),
         iOwnerTableView,
-		iTextureLayerFolder
+        iTextureLayerFolder
     );
 
-	SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
+    SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -40,12 +40,12 @@ TSharedRef<SWidget>
 SOdysseyTextureLayerFolderRow::GenerateHeaderWidget()
 {
     return SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot()
+        + SHorizontalBox::Slot()
         .VAlign(VAlign_Center)
-		[
-			//LayerName
-			SOdysseyLayerRow::GenerateHeaderWidget()
-		]
+        [
+            //LayerName
+            SOdysseyLayerRow::GenerateHeaderWidget()
+        ]
         +SHorizontalBox::Slot()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
         .VAlign(VAlign_Center)
@@ -73,7 +73,7 @@ SOdysseyTextureLayerFolderRow::GenerateHeaderWidget()
 TSharedRef<SWidget>
 SOdysseyTextureLayerFolderRow::GenerateOptionsWidget()
 {
-	return SNew(SHorizontalBox)
+    return SNew(SHorizontalBox)
         +SHorizontalBox::Slot()
         .Padding(FMargin(0, 0, 1.f, 0))
         [

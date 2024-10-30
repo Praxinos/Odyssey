@@ -2,6 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyPsdOperations.h"
+
+#include "HAL/PlatformFileManager.h"
 #include "Math/OdysseyMathUtils.h"
 #include "OdysseyPixelFormat.h"
 #include "LayerStack/OdysseyTextureLayerStack.h"
@@ -892,10 +894,10 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
         ctx.Finish();
 
         UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(mLayerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
-		
-		FOdysseyRasterBlockMutator mutator(layer->GetRasterBlock());
-		mutator.Copy(layerBlock, {});
-		mutator.Commit();
+        
+        FOdysseyRasterBlockMutator mutator(layer->GetRasterBlock());
+        mutator.Copy(layerBlock, {});
+        mutator.Commit();
 
         delete srcblock;
     }
@@ -1075,10 +1077,10 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             imageLayer->IsAlphaLocked = mLayersInfo[i].mFlags & 0x01;
             imageLayer->IsActivated = !(mLayersInfo[i].mFlags & 0x02);
             imageLayer->BlendMode = (EOdysseyBlendingMode)GetBlendingModeFromPSD(mLayersInfo[i].mBlendModeKey);
-			
-			FOdysseyRasterBlockMutator mutator(imageLayer->GetRasterBlock());
-			mutator.Copy(layerBlock, {});
-			mutator.Commit();
+            
+            FOdysseyRasterBlockMutator mutator(imageLayer->GetRasterBlock());
+            mutator.Copy(layerBlock, {});
+            mutator.Commit();
             
             //UE_LOG(LogTemp,Display,TEXT("flags: %d"),mLayersInfo[i].mFlags)
             //Todo: Locked

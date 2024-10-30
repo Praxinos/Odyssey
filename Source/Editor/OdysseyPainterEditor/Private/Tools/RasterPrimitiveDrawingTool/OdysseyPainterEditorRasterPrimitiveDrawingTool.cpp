@@ -314,11 +314,11 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
     }
 
     BLPath path;
-	path.moveTo(mPath[0].x, mPath[0].y);
-	for ( int i = 1; i < mPath.Num(); i++ )
-	{
-		path.lineTo(mPath[i].x, mPath[i].y);
-	}
+    path.moveTo(mPath[0].x, mPath[0].y);
+    for ( int i = 1; i < mPath.Num(); i++ )
+    {
+        path.lineTo(mPath[i].x, mPath[i].y);
+    }
 
     if ( !isLine && !isBezier || !isLine && Filled)
     {

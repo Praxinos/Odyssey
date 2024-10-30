@@ -35,22 +35,22 @@ TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(UOdysseyAnimationCell* iCell)
 {
     if (!iCell)
-	{
+    {
         return SNew(SOdysseyAnimationCellImageVector, Cast<UOdysseyAnimationCellImageVector>(iCell))
-			.Clipping(EWidgetClipping::ClipToBoundsAlways)
-			.ShowContent(this, &SOdysseyAnimationLayerImageVectorTimeline::GetShowCellContent); //DefaultCell, this can be called when creating cells, because the celle does not really exist yet
-	}
+            .Clipping(EWidgetClipping::ClipToBoundsAlways)
+            .ShowContent(this, &SOdysseyAnimationLayerImageVectorTimeline::GetShowCellContent); //DefaultCell, this can be called when creating cells, because the celle does not really exist yet
+    }
     if (iCell->IsA<UOdysseyAnimationCellImageVector>())
-	{
+    {
         return SNew(SOdysseyAnimationCellImageVector, Cast<UOdysseyAnimationCellImageVector>(iCell))
-			.Clipping(EWidgetClipping::ClipToBoundsAlways)
-			.ShowContent(this, &SOdysseyAnimationLayerImageVectorTimeline::GetShowCellContent);
-	}
+            .Clipping(EWidgetClipping::ClipToBoundsAlways)
+            .ShowContent(this, &SOdysseyAnimationLayerImageVectorTimeline::GetShowCellContent);
+    }
     else if (iCell->IsA<UOdysseyAnimationCellImageStagger>())
-	{
+    {
         return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell), mExtension)
             .ShowContent(this, &SOdysseyAnimationLayerImageVectorTimeline::GetShowCellContent);
-	}
+    }
 
     return SNullWidget::NullWidget;
 }

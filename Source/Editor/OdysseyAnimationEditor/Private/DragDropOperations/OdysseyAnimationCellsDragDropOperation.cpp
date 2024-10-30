@@ -12,63 +12,63 @@
 TSharedRef<FOdysseyAnimationCellsDragDropOperation>
 FOdysseyAnimationCellsDragDropOperation::Create(UOdysseyAnimationLayer* iLayer, const TArray<UOdysseyAnimationCell*>& iCells)
 {
-	TSharedRef<FOdysseyAnimationCellsDragDropOperation> operation =  MakeShared<FOdysseyAnimationCellsDragDropOperation>(iLayer, iCells);
-	operation->Construct();
+    TSharedRef<FOdysseyAnimationCellsDragDropOperation> operation =  MakeShared<FOdysseyAnimationCellsDragDropOperation>(iLayer, iCells);
+    operation->Construct();
     return operation;
 }
 
 FOdysseyAnimationCellsDragDropOperation::FOdysseyAnimationCellsDragDropOperation(UOdysseyAnimationLayer* iLayer, const TArray<UOdysseyAnimationCell*>& iCells)
-	: mData(iCells)
-	, mLayer(iLayer)
+    : mData(iCells)
+    , mLayer(iLayer)
 {
 }
 
 const FOdysseyAnimationCellClipboardData&
 FOdysseyAnimationCellsDragDropOperation::GetData() const
 {
-	return mData;
+    return mData;
 }
 
 UOdysseyAnimationLayer*
 FOdysseyAnimationCellsDragDropOperation::GetLayer() const
 {
-	return mLayer;
+    return mLayer;
 }
 
 TSharedPtr<SWidget>
 FOdysseyAnimationCellsDragDropOperation::GetDefaultDecorator() const
 {
-	return SNew(SBorder)
-		.BorderImage(FAppStyle::GetBrush("Graph.ConnectorFeedback.Border")) //weird, but everyone does this 
-		.Content()
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
-			.AutoWidth()
-			.Padding(0.f, 0.f, 2.f, 0.f)
-			[
-				SNew(SImage)
-				.Image(this, &FOdysseyAnimationCellsDragDropOperation::GetIcon)
-			]
-			+ SHorizontalBox::Slot()
-			.AutoWidth()
-			[
-				SNew(STextBlock)
-				.Text(this, &FOdysseyAnimationCellsDragDropOperation::GetText)
-			]
-		];
+    return SNew(SBorder)
+        .BorderImage(FAppStyle::GetBrush("Graph.ConnectorFeedback.Border")) //weird, but everyone does this 
+        .Content()
+        [
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .Padding(0.f, 0.f, 2.f, 0.f)
+            [
+                SNew(SImage)
+                .Image(this, &FOdysseyAnimationCellsDragDropOperation::GetIcon)
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                SNew(STextBlock)
+                .Text(this, &FOdysseyAnimationCellsDragDropOperation::GetText)
+            ]
+        ];
 }
 
 FText
 FOdysseyAnimationCellsDragDropOperation::GetText() const
-{	
-	return FText::Format(LOCTEXT("cells-drag-drop-operation.cells-count", "{0} Cells"), FText::AsNumber(mData.GetCellCount()));
+{    
+    return FText::Format(LOCTEXT("cells-drag-drop-operation.cells-count", "{0} Cells"), FText::AsNumber(mData.GetCellCount()));
 }
 
 const FSlateBrush*
 FOdysseyAnimationCellsDragDropOperation::GetIcon() const
 {
-	return FOdysseyStyle::GetBrush("PainterEditor.Layers16");
+    return FOdysseyStyle::GetBrush("PainterEditor.Layers16");
 }
 
 #undef LOCTEXT_NAMESPACE

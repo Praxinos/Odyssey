@@ -73,7 +73,7 @@ FOdysseyVectorBlock::GetRenderFlags() const
 void
 FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags )
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render);
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render);
     //Render in a BLImage (also resets the internal invalidation rectangle)
     ::ULIS::FRectD invalidatedRectD = mEngine->Render( mBlockData->mBLContext.Get(), iDrawingFlags );
     ::ULIS::FRectI invalidatedRectI = invalidatedRectD;
@@ -102,7 +102,7 @@ FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags )
 void
 FOdysseyVectorBlock::RenderHUD(::ULIS::FBlock& ioBlock)
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::RenderHUD);
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::RenderHUD);
     mEngine->RenderHUD( mHUDBlockData->mBLContext.Get() );
 
     {
@@ -193,7 +193,7 @@ FOdysseyVectorBlock::CleanupHUDBlock(uint8* iData, void* iInfo)
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 FOdysseyVectorBlock::GetHUDBlock()
 {
-	FScopeLock Lock(&mMutex);
+    FScopeLock Lock(&mMutex);
 
     if ( mWidth <= 0 || mHeight <= 0 )
         return nullptr;
@@ -222,7 +222,7 @@ FOdysseyVectorBlock::GetHUDBlock()
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 FOdysseyVectorBlock::GetBlock(uint64 iDrawingFlags)
 {
-	FScopeLock Lock(&mMutex);
+    FScopeLock Lock(&mMutex);
 
     if ( mWidth <= 0 || mHeight <= 0 )
         return nullptr;

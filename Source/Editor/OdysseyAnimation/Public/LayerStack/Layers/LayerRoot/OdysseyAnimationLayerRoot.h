@@ -9,7 +9,7 @@
 
 UCLASS(NotBlueprintType, HideDropdown)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerRoot
-	: public UOdysseyAnimationLayer
+    : public UOdysseyAnimationLayer
 {
     GENERATED_BODY()
 

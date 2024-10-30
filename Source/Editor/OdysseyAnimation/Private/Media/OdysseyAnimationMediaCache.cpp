@@ -41,7 +41,7 @@ FOdysseyAnimationMediaCache::QueryCacheState(EMediaCacheState iState, TRangeSet<
         uint32 frameCount = mAnimation->GetFrameCount();
         for (uint32 i = 0; i < frameCount; i++)
         {
-			oTimeRanges.Add(mAnimation->GetFrameTimeRange(i));
+            oTimeRanges.Add(mAnimation->GetFrameTimeRange(i));
         }
         return true;
     }

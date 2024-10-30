@@ -11,63 +11,63 @@ class UOdysseyAnimationCell;
 class FOdysseyAnimationEditorExtension;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTableKey
-	: public SCompoundWidget
+    : public SCompoundWidget
 {
 public:
-	DECLARE_DELEGATE_OneParam(FOnKeyChanged, FOdysseyAnimationLightTableKey)
-	
+    DECLARE_DELEGATE_OneParam(FOnKeyChanged, FOdysseyAnimationLightTableKey)
+    
 public:
-	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTableKey)
-	{}
-		SLATE_ATTRIBUTE(UOdysseyAnimationCell*, Cell)
-		SLATE_ATTRIBUTE(FOdysseyAnimationLightTableKey, Key)
-		SLATE_EVENT(FOnKeyChanged, OnChanged)
-		SLATE_EVENT(FOnKeyChanged, OnCommited)
-	SLATE_END_ARGS()
+    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTableKey)
+    {}
+        SLATE_ATTRIBUTE(UOdysseyAnimationCell*, Cell)
+        SLATE_ATTRIBUTE(FOdysseyAnimationLightTableKey, Key)
+        SLATE_EVENT(FOnKeyChanged, OnChanged)
+        SLATE_EVENT(FOnKeyChanged, OnCommited)
+    SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension);
-
-private:
-	bool IsOutOfPegsEnabled() const;
-	const FSlateBrush* GetOutOfPegsButtonImage() const;
-	void OnOutOfPegsCheckStateChanged(ECheckBoxState iValue);
-	ECheckBoxState IsOutOfPegsChecked() const;
+    void Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension);
 
 private:
-	FOdysseyAnimationEditorExtension* mExtension = nullptr;
-	TAttribute<UOdysseyAnimationCell*> mCell;
-	TAttribute<FOdysseyAnimationLightTableKey> mKey;
+    bool IsOutOfPegsEnabled() const;
+    const FSlateBrush* GetOutOfPegsButtonImage() const;
+    void OnOutOfPegsCheckStateChanged(ECheckBoxState iValue);
+    ECheckBoxState IsOutOfPegsChecked() const;
+
+private:
+    FOdysseyAnimationEditorExtension* mExtension = nullptr;
+    TAttribute<UOdysseyAnimationCell*> mCell;
+    TAttribute<FOdysseyAnimationLightTableKey> mKey;
 };
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTableKeySlider
-	: public SLeafWidget
+    : public SLeafWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTableKeySlider)
-	{}
-		SLATE_ATTRIBUTE(FOdysseyAnimationLightTableKey, Key)
-		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnKeyChanged, OnChanged)
-		SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnKeyChanged, OnCommited)
-	SLATE_END_ARGS()
+    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTableKeySlider)
+    {}
+        SLATE_ATTRIBUTE(FOdysseyAnimationLightTableKey, Key)
+        SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnKeyChanged, OnChanged)
+        SLATE_EVENT(SOdysseyAnimationTimelineLightTableKey::FOnKeyChanged, OnCommited)
+    SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs);
-
-private:
-	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
-	virtual FReply OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
-	virtual FReply OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
-	virtual FReply OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
-	virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
-	virtual FVector2D ComputeDesiredSize(float iLayoutScaleMultiplier) const override;
+    void Construct(const FArguments& InArgs);
 
 private:
-	TAttribute<FOdysseyAnimationLightTableKey> mKey;
-	UOdysseyAnimationLayer* mLayer = nullptr;
+    virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+    virtual FReply OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
+    virtual FReply OnDragDetected(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
+    virtual FReply OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
+    virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
+    virtual FVector2D ComputeDesiredSize(float iLayoutScaleMultiplier) const override;
 
-	float mDraggingPosition = 0.f;
-	float mOldOpacity = 0.f;
-	bool mDragging = false;
+private:
+    TAttribute<FOdysseyAnimationLightTableKey> mKey;
+    UOdysseyAnimationLayer* mLayer = nullptr;
 
-	SOdysseyAnimationTimelineLightTableKey::FOnKeyChanged mOnChanged;
-	SOdysseyAnimationTimelineLightTableKey::FOnKeyChanged mOnCommited;
+    float mDraggingPosition = 0.f;
+    float mOldOpacity = 0.f;
+    bool mDragging = false;
+
+    SOdysseyAnimationTimelineLightTableKey::FOnKeyChanged mOnChanged;
+    SOdysseyAnimationTimelineLightTableKey::FOnKeyChanged mOnCommited;
 };

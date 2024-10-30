@@ -1,78 +1,90 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
+using System;
 using System.IO;
 
 namespace UnrealBuildTool.Rules
 {
-	public class OdysseyTexture : ModuleRules
+    public class OdysseyTexture : ModuleRules
     {
-		public OdysseyTexture(ReadOnlyTargetRules Target) : base(Target)
+        public OdysseyTexture(ReadOnlyTargetRules Target) : base(Target)
         {
             PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
             PublicIncludePaths.AddRange(
-				new string[] {
-					Path.Combine(ModuleDirectory, "Private", "LayerStack")
-					// ... add public include paths required here ...
-				}
-				);
+                new string[] {
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack")
+                    // ... add public include paths required here ...
+                }
+                );
 
-			PrivateIncludePaths.AddRange(
-				new string[] {
-					Path.Combine(ModuleDirectory, "Public", "LayerStack")
-					// ... add other private include paths required here ...
-				}
-				);
+            PrivateIncludePaths.AddRange(
+                new string[] {
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack")
+                    // ... add other private include paths required here ...
+                }
+                );
 
-			PublicDependencyModuleNames.AddRange(
-				new string[]
-				{
+            PublicDependencyModuleNames.AddRange(
+                new string[]
+                {
                     "blend2d",
-					"OdysseyMedia",
+                    "OdysseyMedia",
                     "ULIS",
                     "ULISLoader",
-					// ... add other public dependencies that you statically link with here ...
-				}
-				);
+                    // ... add other public dependencies that you statically link with here ...
+                }
+                );
                 
-			PrivateDependencyModuleNames.AddRange(
-				new string[]
+            PrivateDependencyModuleNames.AddRange(
+                new string[]
                 {
                     "AssetTools",
                     "Core",
                     "CoreUObject",
                     "EditorStyle",
-					"EditorWidgets",
+                    "EditorWidgets",
                     "Engine",
                     "InputCore",
-					"OdysseyCore",
+                    "OdysseyCore",
                     "OdysseyImaging",
-					"OdysseyMaths",
-					"OdysseyMedia",
-					"OdysseyLayerStack",
-					"OdysseyStyle",
-					"OdysseyFile",
-					"OdysseyVector",
+                    "OdysseyMaths",
+                    "OdysseyMedia",
+                    "OdysseyLayerStack",
+                    "OdysseyStyle",
+                    "OdysseyFile",
+                    "OdysseyVector",
                     "Slate",
                     "SlateCore",
                     "UnrealEd",
-					"TextureEditor", //To use TextureEditorSettings in SOdysseyTextureDetails //we could also copy TextureEditorSettings content
-					"RHI", //To have access to GPixelFormats
-					"zlib"
+                    "TextureEditor", //To use TextureEditorSettings in SOdysseyTextureDetails //we could also copy TextureEditorSettings content
+                    "RHI", //To have access to GPixelFormats
+                    "zlib"
                     //"AppFramework", // For SColorPicker inside OdysseyTextureFactory.cpp
-					// "Core",
-					// "MainFrame",
-					// ... add private dependencies that you statically link with here ...
-				}
-				);
+                    // "Core",
+                    // "MainFrame",
+                    // ... add private dependencies that you statically link with here ...
+                }
+                );
 
-			DynamicallyLoadedModuleNames.AddRange(
-				new string[]
-				{
-					// ... add any modules that your module loads dynamically here ...
-				}
-				);
-		}
-	}
+            DynamicallyLoadedModuleNames.AddRange(
+                new string[]
+                {
+                    // ... add any modules that your module loads dynamically here ...
+                }
+                );
+                
+            //--- WIBU
+            
+            string enable_wibu_encryption = Environment.GetEnvironmentVariable("ENABLE_WIBU_ENCRYPTION");
+            if( enable_wibu_encryption != null )
+            {
+                PCHUsage = PCHUsageMode.NoPCHs;
+                PublicDefinitions.Add("USE_WIBU_CTP");
+                
+                PublicAdditionalLibraries.Add("/usr/local/lib/libcpsrt.dylib");
+            }
+        }
+    }
 }

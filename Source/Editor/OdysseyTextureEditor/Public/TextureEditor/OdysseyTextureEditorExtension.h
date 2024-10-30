@@ -31,7 +31,7 @@ public:
 public:
     UTexture2D* Texture() const;
     TSharedPtr<FOdysseyTextureEditorSource> GetTextureSource() const;
-	UOdysseyTextureLayerStack* GetLayerStack() const;
+    UOdysseyTextureLayerStack* GetLayerStack() const;
 
 private:
     void OnSourceChanged();
@@ -41,6 +41,6 @@ private:
 
 private:
     TSharedPtr<FOdysseyTextureEditorSource> mTextureSource;
-	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
+    TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
     TSharedPtr<FOdysseyLayerStackEditorBrushContext> mLayerStackBrushEditorContext;
 };

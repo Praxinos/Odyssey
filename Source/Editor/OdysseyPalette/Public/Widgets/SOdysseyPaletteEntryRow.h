@@ -31,22 +31,22 @@ public:
     //Getters
     UOdysseyPaletteEntry* GetPaletteEntry();
 
-	//Commands
-	void Rename();
+    //Commands
+    void Rename();
 
 protected:
     //SMultiColumnTableRow overrides
     virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
-	virtual const FSlateBrush* GetBorder() const override;
+    virtual const FSlateBrush* GetBorder() const override;
 
 protected:
-	virtual TSharedRef<SWidget> GenerateHeaderWidget();
+    virtual TSharedRef<SWidget> GenerateHeaderWidget();
     TSharedRef<SWidget> GenerateIsActivatedWidget();
     TSharedRef<SWidget> GenerateExpandableHeaderWidget();
 
     void OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState);
     ECheckBoxState GetIsActivatedCheckBoxState() const;
-	
+    
     void OnEntryNameCommited(const FText& iText, ETextCommit::Type iType);
     
     FText GetEntryName() const;

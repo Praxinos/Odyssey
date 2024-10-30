@@ -3,13 +3,15 @@
 
 #include "Shortcuts/OdysseyLayerStackShortcuts.h"
 
+#include "Commands/OdysseyLayerStackEditorCommands.h"
 #include "Framework/Commands/GenericCommands.h"
-#include "Widgets/SOdysseyLayerStackTreeView.h"
+#include "Modules/ModuleManager.h"
 #include "OdysseyLayerStack.h"
 #include "OdysseyLayerStackClipboardData.h"
-#include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyEditorModule.h"
-#include "Commands/OdysseyLayerStackEditorCommands.h"
+#include "ScopedTransaction.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
+#include "Widgets/SOdysseyLayerStackTreeView.h"
 
 #define LOCTEXT_NAMESPACE "LayerStackEditor"
 
@@ -197,8 +199,8 @@ FOdysseyLayerStackShortcuts::Action_Duplicate()
     FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.duplicate-layers", "Duplicate Layers"));
 #endif
 
-	//manage current layer seperately
-	TArray<UOdysseyLayer*> duplicatedLayers = mLayerStack->DuplicateLayers(selectedLayers);
+    //manage current layer seperately
+    TArray<UOdysseyLayer*> duplicatedLayers = mLayerStack->DuplicateLayers(selectedLayers);
 }
 
 

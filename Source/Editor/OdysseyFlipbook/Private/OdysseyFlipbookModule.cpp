@@ -8,26 +8,26 @@
 // From ...\UnrealEngine\Engine\Source\Editor\ContentBrowser\Private\SAssetView.cpp#3543
 void FOdysseyFlipbookModule::ShowPluginContentInContentBrowser()
 {
-	if (GetDefault<UContentBrowserSettings>()->GetDisplayPluginFolders())
-		return;
+    if (GetDefault<UContentBrowserSettings>()->GetDisplayPluginFolders())
+        return;
 
-	bool bDisplayPlugins = GetDefault<UContentBrowserSettings>()->GetDisplayPluginFolders();
+    bool bDisplayPlugins = GetDefault<UContentBrowserSettings>()->GetDisplayPluginFolders();
 
-	// Only if both these flags are false when toggling we want to enable the flag, otherwise we're toggling off
-	if (!bDisplayPlugins)
-	{
-		GetMutableDefault<UContentBrowserSettings>()->SetDisplayPluginFolders(true);
-	}
-	else
-	{
-		GetMutableDefault<UContentBrowserSettings>()->SetDisplayPluginFolders(false);
-	}
-	GetMutableDefault<UContentBrowserSettings>()->PostEditChange();
+    // Only if both these flags are false when toggling we want to enable the flag, otherwise we're toggling off
+    if (!bDisplayPlugins)
+    {
+        GetMutableDefault<UContentBrowserSettings>()->SetDisplayPluginFolders(true);
+    }
+    else
+    {
+        GetMutableDefault<UContentBrowserSettings>()->SetDisplayPluginFolders(false);
+    }
+    GetMutableDefault<UContentBrowserSettings>()->PostEditChange();
 }
 
 void FOdysseyFlipbookModule::StartupModule()
 {
-	ShowPluginContentInContentBrowser();
+    ShowPluginContentInContentBrowser();
 }
 
 void FOdysseyFlipbookModule::ShutdownModule()

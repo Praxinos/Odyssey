@@ -7,6 +7,9 @@
 #include "Kismet/KismetRenderingLibrary.h"
 #include "CanvasTypes.h"
 #include "CanvasItem.h"
+#include "SceneView.h"
+#include "TextureResource.h"
+#include "Engine/Canvas.h"
 #include "OdysseyViewportDrawingEditorUtils.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
@@ -66,8 +69,8 @@ FOdysseyViewportDrawingEditorMeshBasedAdapter::SetTexture(UTexture* iTexture)
 
 void
 FOdysseyViewportDrawingEditorMeshBasedAdapter::InitializeRenderTarget()
-{	
-	UTexture* texture = GetTexture();
+{    
+    UTexture* texture = GetTexture();
     if (!texture)
         return;
 
@@ -110,11 +113,11 @@ FOdysseyViewportDrawingEditorMeshBasedAdapter::InitializeRenderTarget()
 void
 FOdysseyViewportDrawingEditorMeshBasedAdapter::FinalizeRenderTarget()
 {
-	//Destroy the render target
-	if (mPaintingTexture2DRenderTarget && mPaintingTexture2DRenderTarget->IsValidLowLevel())
+    //Destroy the render target
+    if (mPaintingTexture2DRenderTarget && mPaintingTexture2DRenderTarget->IsValidLowLevel())
     {
-		mPaintingTexture2DRenderTarget->ConditionalBeginDestroy();
-    	mPaintingTexture2DRenderTarget = nullptr;
+        mPaintingTexture2DRenderTarget->ConditionalBeginDestroy();
+        mPaintingTexture2DRenderTarget = nullptr;
     }
 
     if ( mStrokeBufferRenderTarget2D && mStrokeBufferRenderTarget2D->IsValidLowLevel())
@@ -496,12 +499,12 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
             [this, strokeRenderTargetResource](FRHICommandListImmediate& RHICmdList)
             {
                 // Copy (resolve) the rendered image from the frame buffer to its render target texture
-				TransitionAndCopyTexture(
-					RHICmdList,
-                    strokeRenderTargetResource->GetRenderTargetTexture(),		// Source texture
+                TransitionAndCopyTexture(
+                    RHICmdList,
+                    strokeRenderTargetResource->GetRenderTargetTexture(),        // Source texture
                     strokeRenderTargetResource->TextureRHI,
-					{}
-				);									// Resolve parameters
+                    {}
+                );                                    // Resolve parameters
             });
     }
 
@@ -526,7 +529,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
     }
 
     // Draw a quad to copy the texture over to the render target
-    TArray< FCanvasUVTri >	TriangleList;
+    TArray< FCanvasUVTri >    TriangleList;
     FCanvasUVTri SingleTri;
     SingleTri.V0_Pos = FVector2D(MinX, MinY);
     SingleTri.V0_UV = FVector2D(MinU, MinV);
@@ -576,9 +579,9 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
             {
                 // Copy (resolve) the rendered image from the frame buffer to its render target texture*/
                 /*RHICmdList.CopyToResolveTarget(
-                    brushRenderTargetResource->GetRenderTargetTexture(),		// Source texture
+                    brushRenderTargetResource->GetRenderTargetTexture(),        // Source texture
                     brushRenderTargetResource->TextureRHI,
-                    FResolveParams());									// Resolve parameters
+                    FResolveParams());                                    // Resolve parameters
 
                 TArray<FRHIGPUTextureReadback> readbufferArray;
 

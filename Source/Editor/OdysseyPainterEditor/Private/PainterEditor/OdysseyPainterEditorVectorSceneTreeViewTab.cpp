@@ -168,10 +168,10 @@ void
 FOdysseyPainterEditorVectorSceneTreeViewTab::AddReferencedObjects(FReferenceCollector& Collector)
 {
     // Prevent these UObjects from being destroyed by garbage collection
-	Collector.AddReferencedObject(mObjectView);
-	Collector.AddReferencedObject(mPathView);
-	Collector.AddReferencedObject(mGroupPaintView);
-	//Collector.AddReferencedObject(mDetailsView);
+    Collector.AddReferencedObject(mObjectView);
+    Collector.AddReferencedObject(mPathView);
+    Collector.AddReferencedObject(mGroupPaintView);
+    //Collector.AddReferencedObject(mDetailsView);
 }
 
 //--------------------------------------------------------------------------------------

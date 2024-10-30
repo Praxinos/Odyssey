@@ -12,13 +12,13 @@ UOdysseyShape::~UOdysseyShape()
 bool
 UOdysseyShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-	return false;
+    return false;
 }
 
 bool
 UOdysseyShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-	return false;
+    return false;
 }
 
 void
@@ -36,13 +36,13 @@ UOdysseyShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 bool
 UOdysseyShape::OnKeyDown(const FKey& iKey)
 {
-	return false;
+    return false;
 }
 
 bool
 UOdysseyShape::OnKeyUp(const FKey& iKey)
 {
-	return false;
+    return false;
 }
 
 void
@@ -60,13 +60,13 @@ UOdysseyShape::ApplyOverrides(const TMap< TObjectPtr<UClass>, TObjectPtr<UObject
 void 
 UOdysseyShape::SetHUD(TSharedPtr<FOdysseyHUDElement> iHUD)
 {
-	mHUD = iHUD;
+    mHUD = iHUD;
 }
 
 bool
 UOdysseyShape::IsProgressive() const
 {
-	return mIsProgressive;
+    return mIsProgressive;
 }
 
 void

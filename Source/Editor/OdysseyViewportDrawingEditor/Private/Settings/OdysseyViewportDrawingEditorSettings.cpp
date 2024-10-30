@@ -6,19 +6,19 @@
 #include "UObject/Package.h"
 
 UOdysseyViewportDrawingEditorSettings::UOdysseyViewportDrawingEditorSettings(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+    : Super(ObjectInitializer)
 {
 }
 
 UOdysseyViewportDrawingEditorSettings* UOdysseyViewportDrawingEditorSettings::Get()
 {
-	static UOdysseyViewportDrawingEditorSettings* settings = nullptr;
-	if (!settings)
-	{
-		settings = DuplicateObject<UOdysseyViewportDrawingEditorSettings>(GetMutableDefault<UOdysseyViewportDrawingEditorSettings>(), GetTransientPackage());
-		settings->AddToRoot();
-	}
+    static UOdysseyViewportDrawingEditorSettings* settings = nullptr;
+    if (!settings)
+    {
+        settings = DuplicateObject<UOdysseyViewportDrawingEditorSettings>(GetMutableDefault<UOdysseyViewportDrawingEditorSettings>(), GetTransientPackage());
+        settings->AddToRoot();
+    }
 
-	return settings;
+    return settings;
 }
 

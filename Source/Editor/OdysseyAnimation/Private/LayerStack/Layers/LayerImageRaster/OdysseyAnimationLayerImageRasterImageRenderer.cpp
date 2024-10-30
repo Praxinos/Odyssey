@@ -24,12 +24,12 @@ FOdysseyAnimationLayerImageRasterImageRenderer::FOdysseyAnimationLayerImageRaste
         frame = iLayer->GetPostBehaviourFrame(iLayer->PostBehaviour, iFrame);
     }
 
-	UOdysseyAnimationCell* cell = iLayer->GetCellAtFrame(frame);
-	if (cell)
-	{
-		int cellFrame = frame - cell->GetFrameRange().GetLowerBoundValue();
-		mCellRenderer = cell->BuildImageRenderer(iRenderType, cellFrame, iFilter);
-	}
+    UOdysseyAnimationCell* cell = iLayer->GetCellAtFrame(frame);
+    if (cell)
+    {
+        int cellFrame = frame - cell->GetFrameRange().GetLowerBoundValue();
+        mCellRenderer = cell->BuildImageRenderer(iRenderType, cellFrame, iFilter);
+    }
 
     if ( iRenderType == IOdysseyImageRenderer::eRenderType::Editor && iLayer->Lighttable.bIsActivated )
         mLightTableRenderer = MakeShared<FOdysseyAnimationLightTableImageRenderer>(iLayer, iFrame, iRenderType, iDefaultRects, iFilter);

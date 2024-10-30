@@ -11,8 +11,8 @@
 // Definition of which data/properties we want inside wintab packets
 // Processed in the following wintab #include
 // (The #include contains examples)
-#define PACKETDATA	(PK_X | PK_Y | PK_Z | PK_BUTTONS | PK_NORMAL_PRESSURE | PK_TANGENT_PRESSURE | PK_CURSOR | PK_SERIAL_NUMBER | PK_TIME | PK_CHANGED | PK_STATUS | PK_ORIENTATION | PK_ROTATION )
-#define PACKETMODE	PK_BUTTONS
+#define PACKETDATA    (PK_X | PK_Y | PK_Z | PK_BUTTONS | PK_NORMAL_PRESSURE | PK_TANGENT_PRESSURE | PK_CURSOR | PK_SERIAL_NUMBER | PK_TIME | PK_CHANGED | PK_STATUS | PK_ORIENTATION | PK_ROTATION )
+#define PACKETMODE    PK_BUTTONS
 #include "Windows/PKTDEF.H"
 
 #include "IStylusState.h"
@@ -55,16 +55,16 @@ struct FWintabStylusState
  */
 enum class EWintabPacketType
 {
-	None,
-	X,                  // == DVC_X
-	Y,                  // == DVC_Y
-	Z,                  // == DVC_Z
+    None,
+    X,                  // == DVC_X
+    Y,                  // == DVC_Y
+    Z,                  // == DVC_Z
     Timer,              // simulated inside Tick(), it seems there are problems with the real packet value
-	NormalPressure,     // == DVC_NPRESSURE
-	TangentPressure,    // == DVC_TPRESSURE
-	Azimuth,            // == DVC_ORIENTATION
-	Altitude,           // == DVC_ORIENTATION
-	Twist,              // == DVC_ORIENTATION
+    NormalPressure,     // == DVC_NPRESSURE
+    TangentPressure,    // == DVC_TPRESSURE
+    Azimuth,            // == DVC_ORIENTATION
+    Altitude,           // == DVC_ORIENTATION
+    Twist,              // == DVC_ORIENTATION
 };
 
 /**
@@ -72,10 +72,10 @@ enum class EWintabPacketType
  */
 struct FWintabPacketDescription
 {
-	EWintabPacketType Type { EWintabPacketType::None };
-	int32 Minimum { 0 };
-	int32 Maximum { 0 };
-	float Resolution { 0 };
+    EWintabPacketType Type { EWintabPacketType::None };
+    int32 Minimum { 0 };
+    int32 Maximum { 0 };
+    float Resolution { 0 };
 };
 
 /**
@@ -93,26 +93,26 @@ public:
      *  Get from FWintabLibrary::WTInfoW() of the tablet
      *  Set when a new tablet is detected.
      */
-	TArray<FWintabPacketDescription> PacketDescriptions;
+    TArray<FWintabPacketDescription> PacketDescriptions;
     /** List of all available property types for the given input device.
      *  Deduce from PacketDescriptions
      *  Set when a new tablet is detected.
      */
-	TArray<EWintabPacketType> SupportedPackets;
+    TArray<EWintabPacketType> SupportedPackets;
 
     /** Fill all the available types (position/pressure/tilt/azimuth/...) in a generic way because it is used by the super class
      *  Set when a new tablet is detected.
      */
-	void AddSupportedInput(EStylusInputType Type) { SupportedInputs.Add(Type); }
+    void AddSupportedInput(EStylusInputType Type) { SupportedInputs.Add(Type); }
     /** Empty the generic supported input */
-	void CleanSupportedInput() { SupportedInputs.Empty(); }
+    void CleanSupportedInput() { SupportedInputs.Empty(); }
 
 public:
     /** List of all new states received by the wintab packets, converted to our wintab state type.
      *  This is an array because between 2 ticks of the subsystem, multiple wintab packets can be returned.
      *  Filled by FWintabLibrary::WTPacketsGet() inside the tick.
      */
-	TArray<FWintabStylusState> WintabStates;
+    TArray<FWintabStylusState> WintabStates;
     /** To know when the stylus is on the tablet (between a down/up) */
     bool IsTouching;
 
@@ -146,5 +146,5 @@ public:
     void CloseTabletContexts();
 
 public:
-	TArray<FWintabTabletContextInfo> mTabletContexts;
+    TArray<FWintabTabletContextInfo> mTabletContexts;
 };

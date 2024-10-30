@@ -18,16 +18,16 @@
 // I use namespaces and not ENUM_CLASS_FLAGS because I can't use them as bool without a cast, which is idiotic.
 namespace FPolygonDrawingFlags
 {
-	static const uint64 NONE	          = 0;
-	static const uint64 STROKE0           = 1ULL << 0;
-	static const uint64 STROKE1           = 1ULL << 1;
-	static const uint64 STROKE2           = 1ULL << 2;
-	static const uint64 STROKE3           = 1ULL << 3;
-	static const uint64 STROKEALL         = STROKE0 | STROKE1 | STROKE2 | STROKE3;
-	static const uint64 FILL              = 1ULL << 4;
-	static const uint64 NOOVERLAP         = 1ULL << 5;
-	static const uint64 BRUSHALPHAONLY    = 1ULL << 6;
-	static const uint64 BILINEARFILTERING = 1ULL << 7;
+    static const uint64 NONE              = 0;
+    static const uint64 STROKE0           = 1ULL << 0;
+    static const uint64 STROKE1           = 1ULL << 1;
+    static const uint64 STROKE2           = 1ULL << 2;
+    static const uint64 STROKE3           = 1ULL << 3;
+    static const uint64 STROKEALL         = STROKE0 | STROKE1 | STROKE2 | STROKE3;
+    static const uint64 FILL              = 1ULL << 4;
+    static const uint64 NOOVERLAP         = 1ULL << 5;
+    static const uint64 BRUSHALPHAONLY    = 1ULL << 6;
+    static const uint64 BILINEARFILTERING = 1ULL << 7;
 };
 
 typedef struct _FHorizontalLine

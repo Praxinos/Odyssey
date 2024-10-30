@@ -1,21 +1,24 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "OdysseyHUDHandle.h"
 #include "CanvasTypes.h"
+#include "Engine/Texture.h"
 #include "Input/OdysseyPoint.h"
+#include "OdysseyHUDHandle.h"
+#include "OdysseyHUDElement.h"
+#include "TextureResource.h"
 
 #define HANDLE_SMALL_SIZE 10
 #define HANDLE_BIG_SIZE 15
 
 struct HOdysseyHUDHandleHitProxy : public HOdysseyHUDElementHitProxy
 {
-	DECLARE_HIT_PROXY();
+    DECLARE_HIT_PROXY();
 
     HOdysseyHUDHandleHitProxy(TSharedPtr<FOdysseyHUDHandle> iHUDHandle, TOptional<EMouseCursor::Type> iMouseCursor = TOptional<EMouseCursor::Type>())
         : HOdysseyHUDElementHitProxy(iHUDHandle, iMouseCursor)
-	{
-	}  
+    {
+    }  
 };
 
 IMPLEMENT_HIT_PROXY(HOdysseyHUDHandleHitProxy, HOdysseyHUDElementHitProxy)
@@ -27,7 +30,7 @@ FOdysseyHUDHandle::~FOdysseyHUDHandle()
 
 FOdysseyHUDHandle::FOdysseyHUDHandle(const FVector2D& iPosition)
     : mPosition(iPosition)
-	, mHandleTexture(LoadObject<UTexture>(nullptr, TEXT("/Iliad/HUD/T_HUD_Handle")))
+    , mHandleTexture(LoadObject<UTexture>(nullptr, TEXT("/Iliad/HUD/T_HUD_Handle")))
 {
 }
 
@@ -37,7 +40,7 @@ FOdysseyHUDHandle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
     const FLinearColor color(1.f, 0.f, 0.f);
     
     if (iParams.mCanvas->IsHitTesting() && mIsInteractable)
-	    iParams.mCanvas->SetHitProxy(new HOdysseyHUDHandleHitProxy(SharedThis(this)));
+        iParams.mCanvas->SetHitProxy(new HOdysseyHUDHandleHitProxy(SharedThis(this)));
         
     int handleSize = mIsHovered && mIsInteractable ? HANDLE_BIG_SIZE : HANDLE_SMALL_SIZE;
 
@@ -46,7 +49,7 @@ FOdysseyHUDHandle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
     iParams.mCanvas->DrawTile(origin.X, origin.Y, handleSize, handleSize, 0, 0, 1.f, 1.f, color, mHandleTexture->GetResource(), true);
 
     if (iParams.mCanvas->IsHitTesting() && mIsInteractable)
-	    iParams.mCanvas->SetHitProxy(nullptr);
+        iParams.mCanvas->SetHitProxy(nullptr);
 
     FOdysseyHUDElement::DrawHUD(iParams); 
 }

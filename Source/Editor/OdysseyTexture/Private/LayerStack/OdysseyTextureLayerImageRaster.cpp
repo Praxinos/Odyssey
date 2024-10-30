@@ -26,14 +26,14 @@ UOdysseyTextureLayerImageRaster::~UOdysseyTextureLayerImageRaster()
 
 UOdysseyTextureLayerImageRaster::UOdysseyTextureLayerImageRaster()
 {
-	LayerTypeName = LOCTEXT("layer-image-raster.type", "Raster Image Layer");
+    LayerTypeName = LOCTEXT("layer-image-raster.type", "Raster Image Layer");
     Icon = FSlateIcon("OdysseyStyle", "OdysseyLayerStack.LayerBitmap16");
 }
 
 TSharedPtr<FOdysseyRasterBlock>
 UOdysseyTextureLayerImageRaster::GetRasterBlock() const
 {
-	return RasterBlock;
+    return RasterBlock;
 }
 
 void
@@ -54,27 +54,27 @@ UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     FOdysseyRasterBlockMutator mutator(RasterBlock);
     mutator.EditTilesFromRects(
         { ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) },
-		[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-		{
-			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(RasterBlock->GetFormat());
-			TArray<::ULIS::FEvent> lastEvent = {};
-			for ( UOdysseyLayer* layer : iLayers )
-			{
-				UOdysseyTextureLayer* textureLayer = Cast<UOdysseyTextureLayer>(layer);
-				if ( !textureLayer )
-					continue;
+        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+        {
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(RasterBlock->GetFormat());
+            TArray<::ULIS::FEvent> lastEvent = {};
+            for ( UOdysseyLayer* layer : iLayers )
+            {
+                UOdysseyTextureLayer* textureLayer = Cast<UOdysseyTextureLayer>(layer);
+                if ( !textureLayer )
+                    continue;
 
-				TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
-				renderer->Init();
+                TSharedPtr<IOdysseyImageRenderer> renderer = textureLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
+                renderer->Init();
 
-				FOdysseyImageRendererBlendParams params(iBlock, {iBlock->Rect()});
-				params.mBlendMode = (::ULIS::eBlendMode)textureLayer->BlendMode;
-				params.mOpacity = textureLayer->Opacity;
+                FOdysseyImageRendererBlendParams params(iBlock, {iBlock->Rect()});
+                params.mBlendMode = (::ULIS::eBlendMode)textureLayer->BlendMode;
+                params.mOpacity = textureLayer->Opacity;
 
-				lastEvent = renderer->Blend(params, lastEvent);
-			}
-			return { lastEvent };
-		}
+                lastEvent = renderer->Blend(params, lastEvent);
+            }
+            return { lastEvent };
+        }
     );
     mutator.Commit();
 }
@@ -84,8 +84,8 @@ UOdysseyTextureLayerImageRaster::PostInitProperties()
 {
     Super::PostInitProperties();
 
-	if (GetFlags() & RF_ClassDefaultObject)
-		return;
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
 
     UTexture2D* texture = GetTexture();
     if (texture->Source.GetFormat() != TSF_Invalid)
@@ -130,7 +130,7 @@ UOdysseyTextureLayerImageRaster::PostDuplicate(bool bDuplicateForPIE)
     int width = texture->Source.GetSizeX();
     int height = texture->Source.GetSizeY();
     RasterBlock->PostDuplicate();
-	RasterBlock->ConvertTo(width, height, format);
+    RasterBlock->ConvertTo(width, height, format);
 }
 
 FOdysseyMediaProvider
@@ -152,8 +152,8 @@ UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
 
-	if (GetFlags() & RF_ClassDefaultObject)
-		return;
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
     
     if( Ar.IsSaving() )
     {
@@ -223,7 +223,7 @@ UOdysseyTextureLayerImageRaster::GetImageRenderingComposition(IOdysseyImageRende
 void
 UOdysseyTextureLayerImageRaster::IsAlphaLockedBlueprintSetter(bool Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageRaster, IsAlphaLocked), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageRaster, IsAlphaLocked), Value);
 }
 
 #undef LOCTEXT_NAMESPACE

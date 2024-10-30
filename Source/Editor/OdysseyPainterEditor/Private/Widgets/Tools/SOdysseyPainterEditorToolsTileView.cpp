@@ -3,6 +3,7 @@
 
 #include "Widgets/Tools/SOdysseyPainterEditorToolsTileView.h"
 #include "Widgets/Layout/SWrapBox.h"
+#include "Widgets/Input/SCheckBox.h"
 
 SOdysseyPainterEditorToolsTileView::~SOdysseyPainterEditorToolsTileView()
 {

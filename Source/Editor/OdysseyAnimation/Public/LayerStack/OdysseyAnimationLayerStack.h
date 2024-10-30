@@ -32,9 +32,9 @@ public:
      * 
      * @return FInt32Range 
      */
-	UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
+    UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     FInt32Range GetFrameRange() const;
 
 public:
-	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
+    virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
 };

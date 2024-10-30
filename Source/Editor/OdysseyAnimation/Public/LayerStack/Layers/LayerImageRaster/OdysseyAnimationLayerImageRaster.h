@@ -14,8 +14,8 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageRaster
 
 public:
     // UObject overrides
-	virtual void PostInitProperties() override;
-	virtual void Serialize(FArchive& Ar) override;
+    virtual void PostInitProperties() override;
+    virtual void Serialize(FArchive& Ar) override;
 
 public:
     //UOdysseyLayer overrides
@@ -32,9 +32,9 @@ public:
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
 public:
-	//FOdysseyImageRenderingAbility overrides
-	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
+    //FOdysseyImageRenderingAbility overrides
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
+    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
 
 private:
     TSharedPtr<IOdysseyMedia> CreateMediaRaster(int iFrameIndex);
@@ -43,8 +43,8 @@ private:
     void CreateCell( const FName& iCellType);
 
 private:
-	UFUNCTION(BlueprintSetter)
-	void IsAlphaLockedBlueprintSetter(bool Value);
+    UFUNCTION(BlueprintSetter)
+    void IsAlphaLockedBlueprintSetter(bool Value);
 
 public:
     UPROPERTY(BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=IsAlphaLockedBlueprintSetter, NonTransactional)

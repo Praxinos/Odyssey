@@ -38,12 +38,12 @@ public:
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 public:
-    UOdysseyAnimation*				    Animation() const;
-    UOdysseyAnimationLayerStack*	    LayerStack() const;
+    UOdysseyAnimation*                    Animation() const;
+    UOdysseyAnimationLayerStack*        LayerStack() const;
     UOdysseyAnimationPlayer*            Player() const;
     FOdysseyAnimationEditorTimeline*    Timeline();
     float                               PlaybackFramesPerSecond() const;
-	TSharedPtr<FOdysseyAnimationEditorFlipSystem> FlipSystem() const;
+    TSharedPtr<FOdysseyAnimationEditorFlipSystem> FlipSystem() const;
 
     UOdysseyAnimationEditorOutOfPegsTool* GetOutOfPegsTool() const;
 

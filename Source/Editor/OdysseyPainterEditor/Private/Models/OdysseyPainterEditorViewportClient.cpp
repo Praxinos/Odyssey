@@ -13,10 +13,13 @@
 #include "Engine/TextureRenderTarget2D.h"
 #include "Engine/TextureRenderTargetCube.h"
 #include "Engine/VolumeTexture.h"
+#include "FOdysseySceneViewport.h"
 #include "ImageUtils.h"
 #include "RawMesh.h"
-#include "FOdysseySceneViewport.h"
+#include "RendererInterface.h"
+#include "StaticMeshResources.h"
 #include "Texture2DPreview.h"
+#include "TextureResource.h"
 #include "ThumbnailRendering/ThumbnailManager.h"
 #include "UnrealEdGlobals.h"
 #include "VolumeTexturePreview.h"
@@ -94,8 +97,8 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
 void
 FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
 {
-	const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
-	ioCanvas->Clear(settings.BackgroundColor);
+    const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
+    ioCanvas->Clear(settings.BackgroundColor);
 
     UTexture* texture       = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
     if (!texture)
@@ -235,11 +238,11 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 
     TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
     params.mTextureToHUD = FOdysseyHUDSystem::FDrawHUDParams::FTextureToHUD::CreateLambda(
-		[viewportWidget, w = params.mTextureWidth, h = params.mTextureHeight](const FVector2D& iPosition)
-		{
+        [viewportWidget, w = params.mTextureWidth, h = params.mTextureHeight](const FVector2D& iPosition)
+        {
             return viewportWidget->ToWorld(iPosition - FVector2D(w / 2.f, h / 2.f));
-		}
-	);
+        }
+    );
 
     mOdysseyPainterEditor->HUDSystem()->DrawHUD(params);
 }
@@ -523,7 +526,7 @@ FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, i
     FOdysseyPoint pointInTexture = GetLocalMousePosition(mCurrentPointInViewport);
     pointInTexture.keysDown = pressedKeys;
     pointInTexture.ComputeRelativeParameters(mCurrentPointInTexture);
-	bool hasMoved = !FMath::IsNearlyEqual(mCurrentPointInTexture.x - pointInTexture.x, 0.f) || !FMath::IsNearlyEqual(mCurrentPointInTexture.y - pointInTexture.y, 0.f);
+    bool hasMoved = !FMath::IsNearlyEqual(mCurrentPointInTexture.x - pointInTexture.x, 0.f) || !FMath::IsNearlyEqual(mCurrentPointInTexture.y - pointInTexture.y, 0.f);
     mCurrentPointInTexture = pointInTexture;
 
     if (mCurrentToolState == eState::kIdle)
@@ -689,8 +692,8 @@ FOdysseyPainterEditorViewportClient::MouseDrag(const FOdysseyPoint& iPoint)
 
     if( mCurrentToolState == eState::kIdle )
     {
-		if (!hasMoved)
-			return;
+        if (!hasMoved)
+            return;
 
         mOnMouseDrag.ExecuteIfBound(mCurrentPointInTexture);
     }
@@ -741,7 +744,7 @@ FOdysseyPainterEditorViewportClient::MouseDrag(const FOdysseyPoint& iPoint)
         if( position_in_texture.X >= 0 && position_in_texture.X < textureFullWidth &&
             position_in_texture.Y >= 0 && position_in_texture.Y < textureFullHeight)
         {
-			mOnPickColor.ExecuteIfBound(eOdysseyEventState::kAdjust, position_in_texture);
+            mOnPickColor.ExecuteIfBound(eOdysseyEventState::kAdjust, position_in_texture);
         }
     }
 }

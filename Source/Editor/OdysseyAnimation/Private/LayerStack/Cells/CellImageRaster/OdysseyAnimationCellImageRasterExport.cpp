@@ -23,7 +23,7 @@ FOdysseyAnimationCellImageRasterExport::Write( UOdysseyAnimationCellImageRaster*
                             , Ar
                             , [iAnimationCellImageRaster](FArchive &Ar) -> void
     {
-		if (iAnimationCellImageRaster->mRasterBlock)
-        	WriteRasterBlock( iAnimationCellImageRaster, Ar );
+        if (iAnimationCellImageRaster->mRasterBlock)
+            WriteRasterBlock( iAnimationCellImageRaster, Ar );
     } );
 }

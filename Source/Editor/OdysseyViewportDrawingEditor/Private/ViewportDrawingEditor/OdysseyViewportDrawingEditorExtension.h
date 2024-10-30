@@ -8,12 +8,16 @@
 #include "MeshPaintTypes.h"
 #include "ISequencer.h"
 #include "OdysseyHUDSystem.h"
+#include "TickableEditorObject.h"
+#include "Engine/Texture2D.h"
 
 class FOdysseyPainterEditor;
 class FOdysseyViewportDrawingEditorGUI;
 class IMeshPaintGeometryAdapter;
 class FOdysseyPainterEditorSource;
 class IOdysseyViewportDrawingEditorAdapter;
+class UMeshComponent;
+class FEditorViewportClient;
 
 UENUM()
 enum EOdysseyViewportDrawingPaintingAdapterMethod
@@ -53,7 +57,7 @@ public:
 
     bool IsPlaneComponent() const;
 
-	IOdysseyViewportDrawingEditorAdapter* GetOdysseyViewportDrawingEditorAdapter();
+    IOdysseyViewportDrawingEditorAdapter* GetOdysseyViewportDrawingEditorAdapter();
 
     // Delegates
     FOdysseyPaintingAdapterChanged& AdapterChangedDelegate();
@@ -84,12 +88,12 @@ public:
 private:
     // Listeners
     void OnObjectPropertyChanged(UObject* iObject, struct FPropertyChangedEvent& iPropertyChangedEvent);
-	void OnSourceChanged();
+    void OnSourceChanged();
 
 private:
     // FTickableEditorObject implementation
-	virtual void Tick(float DeltaTime) override;
-	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( FOdysseyViewportDrawingEditorExtension, STATGROUP_Tickables); }
+    virtual void Tick(float DeltaTime) override;
+    virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( FOdysseyViewportDrawingEditorExtension, STATGROUP_Tickables); }
 
 private:
     // Private Methods
@@ -108,10 +112,10 @@ private:
     void OnSequencersChanged();
     void OnSyncPaintingWithSequencer();
     void OnSyncPaintingWithSequencerMovieSceneChanged( EMovieSceneDataChangeType iChangedType );
-	void DisableDelegatesSequencer();
-	void EnableDelegatesSequencer();
+    void DisableDelegatesSequencer();
+    void EnableDelegatesSequencer();
     void SetAllDelegatesSequencers();
-	void ClearAllDelegatesSequencers();
+    void ClearAllDelegatesSequencers();
     
 private:
     void OnAnimationPlayerCurrentTimeChanged();
@@ -132,7 +136,7 @@ private:
     FOdysseyPaintingAdapterChanged mAdapterChangedDelegate;
 
     /** Struct representing the selected settings for a mesh
-     *	It allow us to remember which settings were selected when we come back to a previously selected actor
+     *    It allow us to remember which settings were selected when we come back to a previously selected actor
     */
     struct FInstanceTexturePaintSettings
     {
@@ -154,7 +158,7 @@ private:
     };
 
     /** This one allows us to remember the selected settings for a given component (like knowing which texture of the component was selected) */
-	TMap<UMeshComponent*, FInstanceTexturePaintSettings> mComponentToTexturePaintSettingsMap;
+    TMap<UMeshComponent*, FInstanceTexturePaintSettings> mComponentToTexturePaintSettingsMap;
     EOdysseyViewportDrawingPaintingAdapterMethod mPaintingAdapterMethod;
 
     AActor* mActor;
@@ -164,8 +168,8 @@ private:
     TArray<UMeshComponent*> mSelectableComponents;
     TArray<FPaintableTexture> mSelectableTextures;
 
-	/** Map of geometry adapters for each selectable mesh component, so that we don't recreate a GeometryAdapter each time we select a mesh to paint */
-	TMap<TObjectPtr<UMeshComponent>, TSharedPtr<IMeshPaintGeometryAdapter>> mComponentToAdapterMap;
+    /** Map of geometry adapters for each selectable mesh component, so that we don't recreate a GeometryAdapter each time we select a mesh to paint */
+    TMap<TObjectPtr<UMeshComponent>, TSharedPtr<IMeshPaintGeometryAdapter>> mComponentToAdapterMap;
 
     /** The corresponding render target for the Texture of the editor above */
     UTextureRenderTarget2D* mPaintingTexture2DRenderTarget;
@@ -184,8 +188,8 @@ private:
     //Sequencers used thorough the editor. They may change the current actor selected, so we need to keep track of what they are doing
     TArray<TWeakPtr<ISequencer>> mSequencers;
 
-	/** Painting Extension: describes the method by which we draw in the viewport */
-	TSharedPtr<IOdysseyViewportDrawingEditorAdapter> mPaintingAdapter;
+    /** Painting Extension: describes the method by which we draw in the viewport */
+    TSharedPtr<IOdysseyViewportDrawingEditorAdapter> mPaintingAdapter;
 
     /** Used to track the animation media being scrubbed */
     FTimespan mAnimationMediaTimespan;

@@ -6,6 +6,7 @@
 #include "OdysseyLayerStack.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include "Misc/OdysseyHandle.h"
+#include "Tickable.h"
 #include "ULISInvalidTileMap.h"
 #include "OdysseyImageRenderingAbility.h"
 

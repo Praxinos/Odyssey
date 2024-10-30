@@ -11,7 +11,7 @@ class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorTimelineTab :
-	public FOdysseyEditorTab
+    public FOdysseyEditorTab
 {
 public:
     static const FName& StaticId();
@@ -51,7 +51,7 @@ private:
     void BuildImportMenu(FMenuBuilder& iMenuBuilder);
     void BuildExportMenu(FMenuBuilder& iMenuBuilder);
 
-	void MapActions( TSharedPtr<FUICommandList> iCommandList );
+    void MapActions( TSharedPtr<FUICommandList> iCommandList );
 
     virtual void ImportTextureSequence();
     void ImportImageSequence();

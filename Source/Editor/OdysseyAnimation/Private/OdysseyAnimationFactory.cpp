@@ -38,7 +38,7 @@ bool UOdysseyAnimationFactory::ConfigureProperties()
     GEditor->EditorAddModalWindow( configurationWindow.ToSharedRef() );
     mConfiguration = configurationWindow->GetConfiguration();
 
-	mConfigured = configurationWindow->GetWindowAnswer();
+    mConfigured = configurationWindow->GetWindowAnswer();
 
     return configurationWindow->GetWindowAnswer();
 }
@@ -55,66 +55,66 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
     check(iClass->IsChildOf(UOdysseyAnimation::StaticClass()));
     
     UOdysseyAnimation* animation = NewObject<UOdysseyAnimation>( iParent, iName, iFlags | RF_Transactional );
-		
-	//happens when ConfigureProperties is not called
-	//Example : In the CreateAnimationAsset blueprint node
-	if (!mConfigured)
-		return animation;
+        
+    //happens when ConfigureProperties is not called
+    //Example : In the CreateAnimationAsset blueprint node
+    if (!mConfigured)
+        return animation;
 
-	mConfigured = false;
+    mConfigured = false;
 
-	animation->mWidth = mConfiguration.Width;
-	animation->mHeight = mConfiguration.Height;
-	animation->Format = mConfiguration.Format;
-	animation->FramesPerSecond = mConfiguration.FramesPerSecond;
+    animation->mWidth = mConfiguration.Width;
+    animation->mHeight = mConfiguration.Height;
+    animation->Format = mConfiguration.Format;
+    animation->FramesPerSecond = mConfiguration.FramesPerSecond;
 
-	switch (mConfiguration.LayerType)
-	{
-		case EOdysseyAnimationDefaultLayerType::Raster:
-		{
-			UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(animation->GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-			animation->GetLayerStack()->CurrentLayer = layer;
-			layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
-		}
-		break;
+    switch (mConfiguration.LayerType)
+    {
+        case EOdysseyAnimationDefaultLayerType::Raster:
+        {
+            UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(animation->GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
+            animation->GetLayerStack()->CurrentLayer = layer;
+            layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
+        }
+        break;
 
-		case EOdysseyAnimationDefaultLayerType::Vector:
-		{
-			UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(animation->GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageVector::StaticClass()));
-			animation->GetLayerStack()->CurrentLayer = layer;
-			layer->AddCell(UOdysseyAnimationCellImageVector::StaticClass());
-		}
-		break;
+        case EOdysseyAnimationDefaultLayerType::Vector:
+        {
+            UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(animation->GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageVector::StaticClass()));
+            animation->GetLayerStack()->CurrentLayer = layer;
+            layer->AddCell(UOdysseyAnimationCellImageVector::StaticClass());
+        }
+        break;
 
-		default:
-			check(false); //should not be called
-	}
+        default:
+            check(false); //should not be called
+    }
 
-	//Background Layer
-	if (mConfiguration.BackgroundColor != EOdysseyAnimationBackgroundColor::Transparent)
-	{	
-		UOdysseyAnimationLayerImageRaster* backgroundLayer = Cast<UOdysseyAnimationLayerImageRaster>(animation->GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), nullptr, 1));
-		backgroundLayer->PostBehaviour = EOdysseyAnimationLayerImagePostBehaviour::Hold;
-		backgroundLayer->Name = LOCTEXT("animation.default-background-layer.name", "Background");
+    //Background Layer
+    if (mConfiguration.BackgroundColor != EOdysseyAnimationBackgroundColor::Transparent)
+    {    
+        UOdysseyAnimationLayerImageRaster* backgroundLayer = Cast<UOdysseyAnimationLayerImageRaster>(animation->GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), nullptr, 1));
+        backgroundLayer->PostBehaviour = EOdysseyAnimationLayerImagePostBehaviour::Hold;
+        backgroundLayer->Name = LOCTEXT("animation.default-background-layer.name", "Background");
 
-		UOdysseyAnimationCellImageRaster* backgroundCell = Cast<UOdysseyAnimationCellImageRaster>(backgroundLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
-		TSharedPtr<FOdysseyRasterBlock> backgroundRasterBlock = backgroundCell->GetRasterBlock();
+        UOdysseyAnimationCellImageRaster* backgroundCell = Cast<UOdysseyAnimationCellImageRaster>(backgroundLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
+        TSharedPtr<FOdysseyRasterBlock> backgroundRasterBlock = backgroundCell->GetRasterBlock();
 
-		FLinearColor backgorundColor = mConfiguration.GetBackgroundColor();
+        FLinearColor backgorundColor = mConfiguration.GetBackgroundColor();
 
-		FOdysseyRasterBlockMutator rasterBlockMutator(backgroundRasterBlock);
-		rasterBlockMutator.EditTilesFromRects(
-			{ backgroundRasterBlock->GetRect() },
-			[backgorundColor](TSharedPtr<::ULIS::FBlock> ioBlock, const FULISInvalidTileMap& iInvalidTileMap) -> TArray<::ULIS::FEvent>
-			{
-				::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ioBlock->Format());
-				::ULIS::FColor color( ::ULIS::FColor::FromRGBAF( backgorundColor.R, backgorundColor.G, backgorundColor.B, backgorundColor.A ) );
-				ctx.Fill(*ioBlock, color);
-				ctx.Finish();
-				return {};
-			}
-		);
-	}
+        FOdysseyRasterBlockMutator rasterBlockMutator(backgroundRasterBlock);
+        rasterBlockMutator.EditTilesFromRects(
+            { backgroundRasterBlock->GetRect() },
+            [backgorundColor](TSharedPtr<::ULIS::FBlock> ioBlock, const FULISInvalidTileMap& iInvalidTileMap) -> TArray<::ULIS::FEvent>
+            {
+                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ioBlock->Format());
+                ::ULIS::FColor color( ::ULIS::FColor::FromRGBAF( backgorundColor.R, backgorundColor.G, backgorundColor.B, backgorundColor.A ) );
+                ctx.Fill(*ioBlock, color);
+                ctx.Finish();
+                return {};
+            }
+        );
+    }
 
     return animation;
 }

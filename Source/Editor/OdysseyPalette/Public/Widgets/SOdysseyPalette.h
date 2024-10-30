@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/StaticMesh.h"
 #include "Widgets/SCompoundWidget.h"
 #include "FOdysseyPalette.h"
 #include "SOdysseyPaletteTreeView.h"

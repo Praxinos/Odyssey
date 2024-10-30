@@ -21,7 +21,7 @@ public:
     /////////////////////////////////////////////////////
     // Enable Overrides
     /** Enable Modifier SubPixel Override. */
-	UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
     bool    bOverride_Shape;
 
     UPROPERTY( EditAnywhere, Category="Modifiers", meta=(InlineEditConditionToggle) )
@@ -31,8 +31,8 @@ public:
     /////////////////////////////////////////////////////
     // Overrides Values
 
-	/** Modifier SubPixel Override Value. */
-	UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_Shape" ) )
+    /** Modifier SubPixel Override Value. */
+    UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_Shape" ) )
     EOdysseyShape Shape;
 
     /** Modifier SubPixel Override Value. */

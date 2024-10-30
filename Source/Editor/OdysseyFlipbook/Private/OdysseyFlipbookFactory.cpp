@@ -3,6 +3,7 @@
 
 #include "OdysseyFlipbookFactory.h"
 
+#include "Materials/MaterialInterface.h"
 #include "PaperFlipbook.h"
 #include "OdysseyFlipbook.h"
 
@@ -21,7 +22,7 @@ UOdysseyFlipbookFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FNa
 {
     UPaperFlipbook* flipbook = Cast<UPaperFlipbook>(UPaperFlipbookFactory::FactoryCreateNew( UPaperFlipbook::StaticClass(), iParent, iName, iFlags, iContext, iWarn ));
     FScopedFlipbookMutator mutator(flipbook);
-	mutator.FramesPerSecond = 24.0f;
+    mutator.FramesPerSecond = 24.0f;
     // mutator.GetSourceFlipbook()->DefaultMaterial = ;
 
     UClass* flipbookClass = flipbook->StaticClass();

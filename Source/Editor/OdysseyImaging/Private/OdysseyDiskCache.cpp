@@ -62,12 +62,12 @@ FOdysseyDiskCache::Load(const FString& iId, FUniqueBuffer& oBuffer)
     FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
         *mCacheName,
         *mCacheVersion, //a GUID identifying the version of the key
-		iId
-	);
+        iId
+    );
 
     UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Blocking);
     UE::DerivedData::GetCache().GetValue(
-		{
+        {
             UE::DerivedData::FCacheGetValueRequest
             {
                 UE::DerivedData::FSharedString(TEXT("FOdysseyDiskCache")),
@@ -75,8 +75,8 @@ FOdysseyDiskCache::Load(const FString& iId, FUniqueBuffer& oBuffer)
                 UE::DerivedData::ECachePolicy::Local
             }
         },
-		getOwner,
-		[&, this](UE::DerivedData::FCacheGetValueResponse&& iResponse)
+        getOwner,
+        [&, this](UE::DerivedData::FCacheGetValueResponse&& iResponse)
         {
             if (iResponse.Status != UE::DerivedData::EStatus::Ok)
                 return;

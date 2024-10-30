@@ -29,10 +29,10 @@ class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookWrapper : public TSharedFromThis
 {
 public:
     /** The destructor */
-	~FOdysseyFlipbookWrapper();
+    ~FOdysseyFlipbookWrapper();
 
     /** The constructor */
-	FOdysseyFlipbookWrapper();
+    FOdysseyFlipbookWrapper();
 
 public:
     // 
@@ -53,8 +53,8 @@ public:
     //
     UPaperSprite* GetKeyframeSprite(int32 iIndex);
     void SetKeyframeSprite(int32 iIndex, UPaperSprite* iSprite);
-	void ShowKeyFrameSpriteInContentBrowser(int32 iIndex);
-	void OpenKeyFrameSpriteEditor(int32 iIndex);
+    void ShowKeyFrameSpriteInContentBrowser(int32 iIndex);
+    void OpenKeyFrameSpriteEditor(int32 iIndex);
 
     // 
     // Textures
@@ -91,7 +91,7 @@ private:
 
 
 private:
-	UPaperFlipbook* mFlipbook;
+    UPaperFlipbook* mFlipbook;
 
     UTexture2D* mSpritePreviousTexture; //
 
@@ -104,6 +104,6 @@ private:
     FOnSpriteTextureChanged mOnSpriteTextureChanged;
     FSimpleMulticastDelegate mOnFlipbookChanged;
 
-	FDelegateHandle mOnPrePropertyChangedDelegateHandle;
+    FDelegateHandle mOnPrePropertyChangedDelegateHandle;
     FDelegateHandle mOnPropertyChangedDelegateHandle;
 };

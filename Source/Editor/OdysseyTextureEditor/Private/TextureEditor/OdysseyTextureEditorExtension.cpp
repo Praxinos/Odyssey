@@ -20,18 +20,18 @@ FOdysseyTextureEditorExtension::~FOdysseyTextureEditorExtension()
 }
 
 FOdysseyTextureEditorExtension::FOdysseyTextureEditorExtension(FOdysseyPainterEditor* iEditor)
-	: FOdysseyPainterEditorExtension(iEditor)
-	, mTextureSource(nullptr)
-	, mGUI(nullptr)
-	, mLayerStackBrushEditorContext(MakeShared<FOdysseyLayerStackEditorBrushContext>(nullptr))
+    : FOdysseyPainterEditorExtension(iEditor)
+    , mTextureSource(nullptr)
+    , mGUI(nullptr)
+    , mLayerStackBrushEditorContext(MakeShared<FOdysseyLayerStackEditorBrushContext>(nullptr))
 {
 }
 
 void
 FOdysseyTextureEditorExtension::Initialize()
 {
-	mGUI = MakeShared<FOdysseyTextureEditorGUI>(this);
-	mGUI->Init();
+    mGUI = MakeShared<FOdysseyTextureEditorGUI>(this);
+    mGUI->Init();
 
     GetEditor()->OnSourceChanged().AddRaw(this, &FOdysseyTextureEditorExtension::OnSourceChanged);
 }
@@ -45,13 +45,13 @@ FOdysseyTextureEditorExtension::Finalize()
 void
 FOdysseyTextureEditorExtension::ExtendMenu( TSharedRef<FExtender> iExtender )
 {
-	mGUI->ExtendMenu(iExtender);
+    mGUI->ExtendMenu(iExtender);
 }
 
 void
 FOdysseyTextureEditorExtension::BindShortcuts(FBaseToolkit* iToolkit)
 {
-	mGUI->BindShortcuts(iToolkit);
+    mGUI->BindShortcuts(iToolkit);
 }
 
 void
@@ -66,64 +66,64 @@ FOdysseyTextureEditorExtension::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilde
 void
 FOdysseyTextureEditorExtension::OnSourceChanged()
 {
-	mTextureSource = nullptr;
-	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
+    mTextureSource = nullptr;
+    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
 
     //Is the source an texture
     TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-	if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())	
-	{
-		GetEditor()->GetBrushContexts().Remove(mLayerStackBrushEditorContext.Get());
-		return;
-	}
+    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())    
+    {
+        GetEditor()->GetBrushContexts().Remove(mLayerStackBrushEditorContext.Get());
+        return;
+    }
 
-	mTextureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
-	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditorExtension::OnCurrentLayerChanged);
+    mTextureSource = StaticCastSharedPtr<FOdysseyTextureEditorSource>(source);
+    UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyTextureEditorExtension::OnCurrentLayerChanged);
 
-	GetEditor()->GetBrushContexts().Add(mLayerStackBrushEditorContext.Get());
-	mLayerStackBrushEditorContext->SetLayerStack(mTextureSource->GetLayerStack());
-	
-	ConfigureTools();
+    GetEditor()->GetBrushContexts().Add(mLayerStackBrushEditorContext.Get());
+    mLayerStackBrushEditorContext->SetLayerStack(mTextureSource->GetLayerStack());
+    
+    ConfigureTools();
 }
 
 UTexture2D*
 FOdysseyTextureEditorExtension::Texture() const
 {
-	if (!mTextureSource)
-		return nullptr;
+    if (!mTextureSource)
+        return nullptr;
 
-	return mTextureSource->GetTexture();
+    return mTextureSource->GetTexture();
 }
 
 TSharedPtr<FOdysseyTextureEditorSource>
 FOdysseyTextureEditorExtension::GetTextureSource() const
 {
-	return mTextureSource;
+    return mTextureSource;
 }
 
 UOdysseyTextureLayerStack*
 FOdysseyTextureEditorExtension::GetLayerStack() const
 {
-	if (!mTextureSource)
-		return nullptr;
+    if (!mTextureSource)
+        return nullptr;
 
-	return mTextureSource->GetLayerStack();
+    return mTextureSource->GetLayerStack();
 }
 
 void
 FOdysseyTextureEditorExtension::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 {
-	if ( iLayerStack != mTextureSource->GetLayerStack() )
-		return;
+    if ( iLayerStack != mTextureSource->GetLayerStack() )
+        return;
 
     // PATCH : We have to redraw all layers in order to draw all layers without the HUD of the tool.
     // This will be removed when we'll have a dedicated HUD layer.
-	Cast<UOdysseyTextureLayerStack>(iLayerStack)->UpdateTexture(true);
+    Cast<UOdysseyTextureLayerStack>(iLayerStack)->UpdateTexture(true);
 }
 
 void
 FOdysseyTextureEditorExtension::ConfigureTools()
 {
-	TSharedPtr<FOdysseyTextureEditorRasterPaintBucketToolSourceProvider> provider = MakeShared<FOdysseyTextureEditorRasterPaintBucketToolSourceProvider>(this);
-	GetEditor()->GetRasterPaintBucketTool()->SetSourceProvider(provider);
+    TSharedPtr<FOdysseyTextureEditorRasterPaintBucketToolSourceProvider> provider = MakeShared<FOdysseyTextureEditorRasterPaintBucketToolSourceProvider>(this);
+    GetEditor()->GetRasterPaintBucketTool()->SetSourceProvider(provider);
 }

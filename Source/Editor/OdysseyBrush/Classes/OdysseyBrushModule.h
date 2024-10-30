@@ -10,16 +10,16 @@
  * The Brush Asset module.
  */
 class FOdysseyBrushModule :
-	public IModuleInterface
+    public IModuleInterface
 {
 public:
     // IModuleInterface interface
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
-	// End of IModuleInterface interface
+    // End of IModuleInterface interface
 
 private:
     //BrushOverrides Customizations
-	void RegisterBrushCustomizations();
-	void UnregisterBrushCustomizations();
+    void RegisterBrushCustomizations();
+    void UnregisterBrushCustomizations();
 };

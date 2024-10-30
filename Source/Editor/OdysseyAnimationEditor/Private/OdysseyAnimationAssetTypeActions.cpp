@@ -52,15 +52,15 @@ void FOdysseyAnimationAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& 
 {    
     EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
 
-	for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
-	{
-		auto animation = Cast<UOdysseyAnimation>(*ObjIt);
-		if (!animation)
+    for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
+    {
+        auto animation = Cast<UOdysseyAnimation>(*ObjIt);
+        if (!animation)
             continue;
 
         FOdysseyAnimationEditorModule* odysseyAnimationEditorModule = &FModuleManager::LoadModuleChecked<FOdysseyAnimationEditorModule>("OdysseyAnimationEditor");
         odysseyAnimationEditorModule->CreateOdysseyAnimationEditor(animation);
-	}
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

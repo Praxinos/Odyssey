@@ -105,13 +105,13 @@ FOdysseyAnimationGlobalTimelineShortcuts::MapActionsToCommandList(TSharedRef<FUI
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_ToggleLooping)
     );
 
-	for (int i = 0; i < FOdysseyAnimationEditorCommands::Get().Flip.Num(); i++)
+    for (int i = 0; i < FOdysseyAnimationEditorCommands::Get().Flip.Num(); i++)
     {
-		iCommandList->MapAction(
-			FOdysseyAnimationEditorCommands::Get().Flip[i],
-			FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_Flip, i )
-		);
-	}
+        iCommandList->MapAction(
+            FOdysseyAnimationEditorCommands::Get().Flip[i],
+            FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_Flip, i )
+        );
+    }
 }
 
 void
@@ -196,8 +196,8 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextCell()
     if (!currentLayer)
         return;
 
-	if (currentLayer->GetCells().IsEmpty())
-		return;
+    if (currentLayer->GetCells().IsEmpty())
+        return;
 
     int currentFrame = animation->CurrentFrame;
     FInt32Range frameRange = currentLayer->GetFrameRange();
@@ -218,7 +218,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextCell()
         cellIndex = cell->IndexInLayer + 1;
     }
 
-	UOdysseyAnimationCell* nextCell = currentLayer->GetCells()[cellIndex];
+    UOdysseyAnimationCell* nextCell = currentLayer->GetCells()[cellIndex];
     FOdysseyObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), nextCell->GetFrameRange().GetLowerBoundValue());
 }
 
@@ -241,8 +241,8 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToPreviousCell()
     if (!currentLayer)
         return;
 
-	if (currentLayer->GetCells().IsEmpty())
-		return;
+    if (currentLayer->GetCells().IsEmpty())
+        return;
 
     int currentFrame = animation->CurrentFrame;
     FInt32Range frameRange = currentLayer->GetFrameRange();
@@ -259,7 +259,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToPreviousCell()
         UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(currentFrame);
         if (!cell || cell == currentLayer->GetCells()[0])
             return;
-        
+
         cellIndex = cell->IndexInLayer - 1;
     }
 
@@ -396,7 +396,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_ToggleLooping()
 void
 FOdysseyAnimationGlobalTimelineShortcuts::Action_Flip(int iConfigurationIndex)
 {
-	TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
+    TSharedPtr<FOdysseyAnimationEditorExtension> extension = mExtension.Pin();
     if (!extension)
         return;
 

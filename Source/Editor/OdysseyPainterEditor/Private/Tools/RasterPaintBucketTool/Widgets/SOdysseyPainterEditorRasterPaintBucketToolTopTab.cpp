@@ -6,6 +6,7 @@
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
 #include "Widgets/Layout/SUniformWrapPanel.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "Widgets/Input/SButton.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

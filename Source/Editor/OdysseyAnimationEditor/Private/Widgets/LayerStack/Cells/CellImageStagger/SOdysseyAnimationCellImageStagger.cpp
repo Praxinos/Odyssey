@@ -14,7 +14,7 @@
 void
 SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyAnimationCellImageStagger* iCell, FOdysseyAnimationEditorExtension* iExtension)
 {
-	mSetReachTransactionName = (LOCTEXT("cell-image-stagger.set-reach", "Set Stagger Cell Reach"));
+    mSetReachTransactionName = (LOCTEXT("cell-image-stagger.set-reach", "Set Stagger Cell Reach"));
     mExtension = iExtension;
     mCell = iCell;
     mShowContent = iArgs._ShowContent;
@@ -47,7 +47,7 @@ SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyAn
         .AutoWidth()
         [
             SAssignNew( mReachSpinBox, SSpinBox<int> )
-			.Style(&FOdysseyStyle::GetWidgetStyle< FSpinBoxStyle >( "Animation.CellImageStagger.Reach.SpinBoxStyle" ))
+            .Style(&FOdysseyStyle::GetWidgetStyle< FSpinBoxStyle >( "Animation.CellImageStagger.Reach.SpinBoxStyle" ))
             .Value(this, &SOdysseyAnimationCellImageStagger::GetReach )
             .OnValueChanged( this, &SOdysseyAnimationCellImageStagger::OnReachValueChanged )
             .OnValueCommitted( this, &SOdysseyAnimationCellImageStagger::OnReachValueCommited )
@@ -64,16 +64,16 @@ SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyAn
 int32
 SOdysseyAnimationCellImageStagger::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
-	// Draw a current frame
+    // Draw a current frame
     
-	LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+    LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
 
-	const FSlateBrush* ArrowBrushTop = FOdysseyStyle::GetBrush("Animation.CellImageStagger.ArrowTop");
+    const FSlateBrush* ArrowBrushTop = FOdysseyStyle::GetBrush("Animation.CellImageStagger.ArrowTop");
     const FSlateBrush* ArrowBrushBottom = FOdysseyStyle::GetBrush("Animation.CellImageStagger.ArrowBottom");
     const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
-	const float height = AllottedGeometry.GetLocalSize().Y;  
-	const float width = AllottedGeometry.GetLocalSize().X;
-	const float frameSize = mExtension->Timeline()->GetFrameWidth();
+    const float height = AllottedGeometry.GetLocalSize().Y;  
+    const float width = AllottedGeometry.GetLocalSize().X;
+    const float frameSize = mExtension->Timeline()->GetFrameWidth();
 
     int reach = GetClampedReach();
     int staggerLength = GetStaggerLength();
@@ -136,7 +136,7 @@ SOdysseyAnimationCellImageStagger::OnPaint(const FPaintArgs& Args, const FGeomet
         );
     }
 
-	return LayerId;
+    return LayerId;
 }
 
 const FSlateBrush*
@@ -173,7 +173,7 @@ SOdysseyAnimationCellImageStagger::OnReachValueCommited(int iReach, ETextCommit:
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(mSetReachTransactionName);
 #endif
-	FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Reach), FMath::Max(0, iReach), EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Reach), FMath::Max(0, iReach), EPropertyChangeType::ValueSet);
 
     FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mCell->GetAnimation());
     currentFrameMutator.Set(mCell->GetFrameRange().GetLowerBoundValue());
@@ -254,7 +254,7 @@ SOdysseyAnimationCellImageStagger::SetBehaviour(EOdysseyAnimationCellImageStagge
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-stagger.transaction.set-behaviour", "Set Stagger Cell Behaviour"));
 #endif
-	FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Behaviour), iBehaviour);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Behaviour), iBehaviour);
 
     FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mCell->GetAnimation());
     currentFrameMutator.Set(mCell->GetFrameRange().GetLowerBoundValue());

@@ -37,5 +37,5 @@ FOdysseySceneViewport::OnMouseButtonUp( const FGeometry& InGeometry, const FPoin
 FNavigationReply
 FOdysseySceneViewport::OnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent)
 {
-	return FNavigationReply::Escape();
+    return FNavigationReply::Escape();
 }

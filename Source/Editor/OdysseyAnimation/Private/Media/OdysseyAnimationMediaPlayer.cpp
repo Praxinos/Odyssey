@@ -2,69 +2,69 @@
 
 #include "Media/OdysseyAnimationMediaPlayer.h"
 
-#include "UObject/UObjectGlobals.h"
-#include "IMediaTextureSample.h"
 #include "IMediaSamples.h"
+#include "IMediaTextureSample.h"
+#include "UObject/UObjectGlobals.h"
 
 FOdysseyAnimationMediaPlayer::~FOdysseyAnimationMediaPlayer()
 {
-	Close();
+    Close();
 }
 
 FOdysseyAnimationMediaPlayer::FOdysseyAnimationMediaPlayer(IMediaEventSink& iEventSink)
-	: mEventSink(iEventSink)
-	, mCache(MakeShared<FOdysseyAnimationMediaCache>())
-	, mControls(MakeShared<FOdysseyAnimationMediaControls>())
-	, mSamples(MakeShared<FOdysseyAnimationMediaSamples>())
-	, mTracks(MakeShared<FOdysseyAnimationMediaTracks>())
-	, mView(MakeShared<FOdysseyAnimationMediaView>())
+    : mEventSink(iEventSink)
+    , mCache(MakeShared<FOdysseyAnimationMediaCache>())
+    , mControls(MakeShared<FOdysseyAnimationMediaControls>())
+    , mSamples(MakeShared<FOdysseyAnimationMediaSamples>())
+    , mTracks(MakeShared<FOdysseyAnimationMediaTracks>())
+    , mView(MakeShared<FOdysseyAnimationMediaView>())
 {
 }
 
 void
 FOdysseyAnimationMediaPlayer::Init()
 {
-	mCache->Init();
-	mControls->Init(AsShared());
-	mSamples->Init(AsShared(), mControls);
-	mTracks->Init(AsShared());
-	mView->Init(AsShared());
+    mCache->Init();
+    mControls->Init(AsShared());
+    mSamples->Init(AsShared(), mControls);
+    mTracks->Init(AsShared());
+    mView->Init(AsShared());
 }
 
 UOdysseyAnimation*
 FOdysseyAnimationMediaPlayer::GetAnimation()
 {
-	return mAnimation.Get();
+    return mAnimation.Get();
 }
 
 IMediaEventSink&
 FOdysseyAnimationMediaPlayer::GetEventSink()
 {
-	return mEventSink;
+    return mEventSink;
 }
 
 IOdysseyImageRenderer::eRenderType
 FOdysseyAnimationMediaPlayer::GetRenderType() const
 {
-	return mSamples->GetRenderType();
+    return mSamples->GetRenderType();
 }
 
 void
 FOdysseyAnimationMediaPlayer::SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType)
 {
-	return mSamples->SetRenderType(iRenderType);
+    return mSamples->SetRenderType(iRenderType);
 }
 
 void
 FOdysseyAnimationMediaPlayer::SetFrameToIncludeIntoDuration(int iFrame)
 {
-	mControls->SetFrameToIncludeIntoDuration(iFrame);
+    mControls->SetFrameToIncludeIntoDuration(iFrame);
 }
 
 void
 FOdysseyAnimationMediaPlayer::UnsetFrameToIncludeIntoDuration()
 {
-	mControls->UnsetFrameToIncludeIntoDuration();
+    mControls->UnsetFrameToIncludeIntoDuration();
 }
 
 //~ IMediaPlayer interface
@@ -72,161 +72,161 @@ FOdysseyAnimationMediaPlayer::UnsetFrameToIncludeIntoDuration()
 bool
 FOdysseyAnimationMediaPlayer::Open(const FString& iUrl, const IMediaOptions* iOptions)
 {
-	Close();
+    Close();
 
-	if ( iUrl.IsEmpty() || !iUrl.StartsWith(TEXT("odysseyanimation://")))
-		return false;
+    if ( iUrl.IsEmpty() || !iUrl.StartsWith(TEXT("odysseyanimation://")))
+        return false;
 
-	mUrl = iUrl;
+    mUrl = iUrl;
 
-	//find the animation asset
-	FString assetPath = iUrl;
-	assetPath.RemoveFromStart(TEXT("odysseyanimation://"));
+    //find the animation asset
+    FString assetPath = iUrl;
+    assetPath.RemoveFromStart(TEXT("odysseyanimation://"));
 
-	mAnimation = TStrongObjectPtr<UOdysseyAnimation>(LoadObject< UOdysseyAnimation >( nullptr, *assetPath ));
-	if (!mAnimation)
-	{
-		mControls->SetState(EMediaState::Error);
-		mEventSink.ReceiveMediaEvent(EMediaEvent::MediaOpenFailed);
-		return false;
-	}
-	
-	//succeeded
-	mCache->OnOpen(mAnimation.Get());
-	mControls->OnOpen(mAnimation.Get());
-	mSamples->OnOpen(mAnimation.Get());
-	mTracks->OnOpen();
-	mView->OnOpen();
-	
-	mEventSink.ReceiveMediaEvent(EMediaEvent::MediaOpened);
+    mAnimation = TStrongObjectPtr<UOdysseyAnimation>(LoadObject< UOdysseyAnimation >( nullptr, *assetPath ));
+    if (!mAnimation)
+    {
+        mControls->SetState(EMediaState::Error);
+        mEventSink.ReceiveMediaEvent(EMediaEvent::MediaOpenFailed);
+        return false;
+    }
+    
+    //succeeded
+    mCache->OnOpen(mAnimation.Get());
+    mControls->OnOpen(mAnimation.Get());
+    mSamples->OnOpen(mAnimation.Get());
+    mTracks->OnOpen();
+    mView->OnOpen();
+    
+    mEventSink.ReceiveMediaEvent(EMediaEvent::MediaOpened);
 
-	return true;
+    return true;
 }
 
 bool
 FOdysseyAnimationMediaPlayer::Open(const TSharedRef<FArchive, ESPMode::ThreadSafe>& iArchive, const FString& iOriginalUrl, const IMediaOptions* iOptions)
 {
-	mControls->SetState(EMediaState::Error);
-	return false;
+    mControls->SetState(EMediaState::Error);
+    return false;
 }
 
 void
 FOdysseyAnimationMediaPlayer::Close()
 {
-	mCache->OnClose();
-	mControls->OnClose();
-	mSamples->OnClose();
-	mTracks->OnClose();
-	mView->OnClose();
+    mCache->OnClose();
+    mControls->OnClose();
+    mSamples->OnClose();
+    mTracks->OnClose();
+    mView->OnClose();
 
-	mAnimation = nullptr;
-	mUrl.Empty();
+    mAnimation = nullptr;
+    mUrl.Empty();
 
-	mEventSink.ReceiveMediaEvent(EMediaEvent::MediaClosed);
+    mEventSink.ReceiveMediaEvent(EMediaEvent::MediaClosed);
 }
 
 IMediaCache&
 FOdysseyAnimationMediaPlayer::GetCache()
 {
-	return *mCache;
+    return *mCache;
 }
 
 IMediaControls&
 FOdysseyAnimationMediaPlayer::GetControls()
 {
-	return *mControls;
+    return *mControls;
 }
 
 IMediaSamples&
 FOdysseyAnimationMediaPlayer::GetSamples()
 {
-	return *mSamples;
+    return *mSamples;
 }
 
 IMediaTracks&
 FOdysseyAnimationMediaPlayer::GetTracks()
 {
-	return *mTracks;
+    return *mTracks;
 }
 
 IMediaView&
 FOdysseyAnimationMediaPlayer::GetView()
 {
-	return *mView;
+    return *mView;
 }
 
 FString
 FOdysseyAnimationMediaPlayer::GetInfo() const
 {
-	/* Example
-		Info = TEXT("Image Sequence\n");
-		Info += FString::Printf(TEXT("    Dimension: %i x %i\n"), SequenceDim.X, SequenceDim.Y);
-		Info += FString::Printf(TEXT("    Format: %s\n"), *FirstFrameInfo.FormatName);
-		Info += FString::Printf(TEXT("    Compression: %s\n"), *FirstFrameInfo.CompressionName);
-		Info += FString::Printf(TEXT("    Frames: %i\n"), GetNumImages());
-		Info += FString::Printf(TEXT("    Frame Rate: %.2f (%i/%i)\n"), SequenceFrameRate.AsDecimal(), SequenceFrameRate.Numerator, SequenceFrameRate.Denominator);
+    /* Example
+        Info = TEXT("Image Sequence\n");
+        Info += FString::Printf(TEXT("    Dimension: %i x %i\n"), SequenceDim.X, SequenceDim.Y);
+        Info += FString::Printf(TEXT("    Format: %s\n"), *FirstFrameInfo.FormatName);
+        Info += FString::Printf(TEXT("    Compression: %s\n"), *FirstFrameInfo.CompressionName);
+        Info += FString::Printf(TEXT("    Frames: %i\n"), GetNumImages());
+        Info += FString::Printf(TEXT("    Frame Rate: %.2f (%i/%i)\n"), SequenceFrameRate.AsDecimal(), SequenceFrameRate.Numerator, SequenceFrameRate.Denominator);
 
-		return Info;
-	*/
+        return Info;
+    */
 
-	return FString();
+    return FString();
 }
 
 FGuid
 FOdysseyAnimationMediaPlayer::GetPlayerPluginGUID() const
 {
     static FGuid PlayerPluginGUID(0xb3da1256, 0x7366410b, 0xacfdc6e3, 0x54ff7e5d);
-	return PlayerPluginGUID;
+    return PlayerPluginGUID;
 }
 
 FString
 FOdysseyAnimationMediaPlayer::GetStats() const
 {
-	//From ImgMediaPlayer
-	FString StatsString;
-	{
-		StatsString += TEXT("not implemented yet");
-		StatsString += TEXT("\n");
-	}
+    //From ImgMediaPlayer
+    FString StatsString;
+    {
+        StatsString += TEXT("not implemented yet");
+        StatsString += TEXT("\n");
+    }
 
-	return StatsString;
+    return StatsString;
 }
 
 FString
 FOdysseyAnimationMediaPlayer::GetUrl() const
 {
-	return mUrl;
+    return mUrl;
 }
 
 bool
 FOdysseyAnimationMediaPlayer::FlushOnSeekStarted() const
 {
-	//see .h for explanations
-	return true;
+    //see .h for explanations
+    return true;
 }
 
 bool
 FOdysseyAnimationMediaPlayer::FlushOnSeekCompleted() const
 {
-	//see .h for explanations
-	return false;
+    //see .h for explanations
+    return false;
 }
 
 bool
 FOdysseyAnimationMediaPlayer::GetPlayerFeatureFlag(EFeatureFlag iFlag) const
 {
-	switch (iFlag)
-	{
-		//PlaybackTimingV2 is the new way to manage Timing
-		//Timing is now managed by the Media Framework instead of the player itself
-		//V1 is meant to disappear in the future
-		case EFeatureFlag::UsePlaybackTimingV2:
-		case EFeatureFlag::PlayerUsesInternalFlushOnSeek:
-		return true;
+    switch (iFlag)
+    {
+        //PlaybackTimingV2 is the new way to manage Timing
+        //Timing is now managed by the Media Framework instead of the player itself
+        //V1 is meant to disappear in the future
+        case EFeatureFlag::UsePlaybackTimingV2:
+        case EFeatureFlag::PlayerUsesInternalFlushOnSeek:
+        return true;
 
-		default:
-		break;
-	}
+        default:
+        break;
+    }
 
-	return IMediaPlayer::GetPlayerFeatureFlag(iFlag);
+    return IMediaPlayer::GetPlayerFeatureFlag(iFlag);
 }

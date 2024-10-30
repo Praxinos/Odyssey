@@ -137,7 +137,7 @@ public:
     virtual FOdysseyPainterEditorGUI*                    GetGUI();
 
     virtual FOdysseyHUDSystem*                               HUDSystem() const;
-	virtual const FOdysseyBrushColor&                        PaintColor() const;
+    virtual const FOdysseyBrushColor&                        PaintColor() const;
     virtual FOdysseyMediaProvider                            GetCurrentMediaProvider();
     virtual UOdysseyLayerStack*                              LayerStack() const;
     virtual TSharedPtr<FOdysseyPainterEditorRasterSelection> RasterSelection();
@@ -215,7 +215,7 @@ protected:
     void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
     
     // FTickableEditorObject implementation
-	virtual void Tick(float DeltaTime) override;
+    virtual void Tick(float DeltaTime) override;
 
 protected:
     // FGCObject implementation

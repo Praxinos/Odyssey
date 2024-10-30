@@ -10,23 +10,23 @@
 
 UCLASS(hidecategories=(Adjustments, Compositing, LevelOfDetail, ImportSettings, Object))
 class ODYSSEYANIMATIONTEXTURE_API UOdysseyAnimationTexture
-	: public UTexture
+    : public UTexture
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	void SetPlayer(UOdysseyAnimationPlayer* iPlayer);
-	UOdysseyAnimationPlayer* GetPlayer() const;
+    void SetPlayer(UOdysseyAnimationPlayer* iPlayer);
+    UOdysseyAnimationPlayer* GetPlayer() const;
 
 public:
-	//~ UTexture interface.
-	virtual FTextureResource* CreateResource() override;
-	virtual EMaterialValueType GetMaterialType() const override;
-	virtual float GetSurfaceWidth() const override;
-	virtual float GetSurfaceHeight() const override;
-	virtual float GetSurfaceDepth() const override { return 0; }
-	virtual uint32 GetSurfaceArraySize() const override { return 0; }
-	virtual ETextureClass GetTextureClass() const { return ETextureClass::Other2DNoSource; }
+    //~ UTexture interface.
+    virtual FTextureResource* CreateResource() override;
+    virtual EMaterialValueType GetMaterialType() const override;
+    virtual float GetSurfaceWidth() const override;
+    virtual float GetSurfaceHeight() const override;
+    virtual float GetSurfaceDepth() const override { return 0; }
+    virtual uint32 GetSurfaceArraySize() const override { return 0; }
+    virtual ETextureClass GetTextureClass() const { return ETextureClass::Other2DNoSource; }
 
 protected:
     //Property changed methods
@@ -39,19 +39,19 @@ public:
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 
 public:
-	//~ UObject interface.
-	//virtual void PostLoad() override;
-	//virtual bool IsPostLoadThreadSafe() const override;
+    //~ UObject interface.
+    //virtual void PostLoad() override;
+    //virtual bool IsPostLoadThreadSafe() const override;
 
 //#if WITH_EDITOR
-	//virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+    //virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 //#endif
 
 private:
-	UPROPERTY()
-	UOdysseyAnimationPlayer* 	Player = nullptr;
+    UPROPERTY()
+    UOdysseyAnimationPlayer*     Player = nullptr;
 
 private:
-	/** Current width and height of the resource (in pixels). */
-	FIntPoint mDimensions;
+    /** Current width and height of the resource (in pixels). */
+    FIntPoint mDimensions;
 };

@@ -3,6 +3,7 @@
 
 #include "Widgets/SOdysseyAnimationConfigureWindow.h"
 
+#include "PropertyEditorModule.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Layout/SBorder.h"
@@ -72,8 +73,8 @@ SOdysseyAnimationConfigureWindow::Construct( const FArguments& iArgs)
 
     FStructureDetailsViewArgs structureDetailsViewArgs;
     FDetailsViewArgs detailsViewArgs;
-	detailsViewArgs.bAllowSearch = false;
-	detailsViewArgs.bShowScrollBar = false;
+    detailsViewArgs.bAllowSearch = false;
+    detailsViewArgs.bShowScrollBar = false;
 
     FPropertyEditorModule& propertyEditor = FModuleManager::Get().LoadModuleChecked<FPropertyEditorModule>(TEXT("PropertyEditor"));
     TSharedRef<FStructOnScope> structOnScope = MakeShared<FStructOnScope>(FOdysseyAnimationConfiguration::StaticStruct(), reinterpret_cast<uint8*>(&mConfiguration));

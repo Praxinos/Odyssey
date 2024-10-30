@@ -3,6 +3,7 @@
 
 #include "Tools/RasterEraserTool/Widgets/SOdysseyPainterEditorRasterEraserToolTopTab.h"
 #include "ISinglePropertyView.h"
+#include "PropertyHandle.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
 #include "Widgets/Layout/SUniformWrapPanel.h"
 

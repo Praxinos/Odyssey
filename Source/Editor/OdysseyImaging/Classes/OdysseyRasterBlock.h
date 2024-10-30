@@ -9,6 +9,7 @@
 #include "ULISInvalidTileMap.h"
 #include "OdysseyRasterBlockUndo.h"
 #include "OdysseyDiskCache.h"
+#include "Serialization/EditorBulkData.h"
 #include <ULIS>
 
 //#include "OdysseyRasterBlock.generated.h"
@@ -60,7 +61,7 @@ public:
     // Construction / Destruction
     ~FOdysseyRasterBlock();
     FOdysseyRasterBlock();
-	FOdysseyRasterBlock(UObject* iOwner);
+    FOdysseyRasterBlock(UObject* iOwner);
     FOdysseyRasterBlock(UObject* iOwner, int iWidth, int iHeight, ::ULIS::eFormat  iFormat);
 
 public:
@@ -111,14 +112,14 @@ public:
     */
     void PostDuplicate();
 
-	/**
-	 * @brief Converts the block to the given size(crop) and format
-	 * 
-	 * @param iWidth 
-	 * @param iHeight 
-	 * @param iFormat 
-	 */
-	void ConvertTo(int iWidth, int iHeight, ::ULIS::eFormat iFormat);
+    /**
+     * @brief Converts the block to the given size(crop) and format
+     * 
+     * @param iWidth 
+     * @param iHeight 
+     * @param iFormat 
+     */
+    void ConvertTo(int iWidth, int iHeight, ::ULIS::eFormat iFormat);
 
     /**
      * @brief Get the Block object
@@ -191,14 +192,14 @@ private:
     //
 
     FCriticalSection mMutex;
-	TSharedPtr<FCriticalSection> mConstructionDestructionMutex;
+    TSharedPtr<FCriticalSection> mConstructionDestructionMutex;
 
     struct FBlockData
     {
         bool mIsCacheInvalid;
         FUniqueBuffer mBuffer;
         FGuid mId;
-		TSharedPtr<FCriticalSection> mConstructionDestructionMutex;
+        TSharedPtr<FCriticalSection> mConstructionDestructionMutex;
     };
 
     FBlockData* mBlockData;

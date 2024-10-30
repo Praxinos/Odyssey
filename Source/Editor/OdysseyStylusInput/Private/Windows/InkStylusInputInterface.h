@@ -9,22 +9,22 @@ class FInkStylusInputInterfaceImpl;
 
 // Implementation of the Windows Ink driver
 class FInkStylusInputInterface
-	: public IStylusInputInterfaceInternal
+    : public IStylusInputInterfaceInternal
 {
 public:
-	FInkStylusInputInterface(TUniquePtr<FInkStylusInputInterfaceImpl> InImpl);
-	virtual ~FInkStylusInputInterface();
+    FInkStylusInputInterface(TUniquePtr<FInkStylusInputInterfaceImpl> InImpl);
+    virtual ~FInkStylusInputInterface();
 
-	virtual void Tick() override;
-	virtual int32 NumInputDevices() const override;
-	virtual IStylusInputDevice* GetInputDevice(int32 Index) const override;
+    virtual void Tick() override;
+    virtual int32 NumInputDevices() const override;
+    virtual IStylusInputDevice* GetInputDevice(int32 Index) const override;
 
     virtual TWeakPtr<SWindow> Window() const override;
     virtual TWeakPtr<SWidget> Widget() const override;
 
 private:
-	// Impl to avoid including Windows headers.
-	TUniquePtr<FInkStylusInputInterfaceImpl> Impl;
+    // Impl to avoid including Windows headers.
+    TUniquePtr<FInkStylusInputInterfaceImpl> Impl;
 };
 
 TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceInk();

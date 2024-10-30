@@ -15,6 +15,7 @@
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "DesktopPlatformModule.h"
 
+#include "Toolkits/BaseToolkit.h"
 #include "PaperFlipbook.h"
 #include "OdysseyPixelFormat.h"
 #include "AssetRegistry/AssetRegistryModule.h"
@@ -49,7 +50,7 @@ FOdysseyAnimationEditorTimelineTab::~FOdysseyAnimationEditorTimelineTab()
 }
 
 FOdysseyAnimationEditorTimelineTab::FOdysseyAnimationEditorTimelineTab(FOdysseyAnimationEditorExtension* iExtension)
-	: FOdysseyEditorTab(LOCTEXT( "timeline-tab.name", "Timeline" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
+    : FOdysseyEditorTab(LOCTEXT( "timeline-tab.name", "Timeline" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
     , mExtension(iExtension)
     , mEmptyTimelineTabWidget(CreateDefaultEmptyTimelineTabWidget())
 {
@@ -100,7 +101,7 @@ void
 FOdysseyAnimationEditorTimelineTab::BindShortcuts(FBaseToolkit* iToolkit)
 {
     const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
-	MapActions(toolkitCommands);
+    MapActions(toolkitCommands);
 }
 
 void
@@ -171,16 +172,16 @@ FOdysseyAnimationEditorTimelineTab::MapActions( TSharedPtr<FUICommandList> iComm
 void
 FOdysseyAnimationEditorTimelineTab::ExtendMenuFile( TSharedRef<FExtender> iExtender )
 {
-	TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
-	MapActions(commandList);
-	iExtender->AddMenuExtension(
-		"OdysseyFile",
-		EExtensionHook::After,
-		commandList,
-		FMenuExtensionDelegate::CreateLambda(
-			[this](FMenuBuilder& iBuilder)
-			{
-				FOdysseyPainterEditor* editor = mExtension->GetEditor();
+    TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
+    MapActions(commandList);
+    iExtender->AddMenuExtension(
+        "OdysseyFile",
+        EExtensionHook::After,
+        commandList,
+        FMenuExtensionDelegate::CreateLambda(
+            [this](FMenuBuilder& iBuilder)
+            {
+                FOdysseyPainterEditor* editor = mExtension->GetEditor();
                 if (!editor)
                     return;
 
@@ -188,7 +189,7 @@ FOdysseyAnimationEditorTimelineTab::ExtendMenuFile( TSharedRef<FExtender> iExten
                 if (!source || source->Id() != FOdysseyAnimationEditorSource::StaticId())
                     return;
 
-				iBuilder.BeginSection("OdysseyAnimation", LOCTEXT("timeline-tab.file-menu.animation-import-export-section.name", "Animation Import / Export"));
+                iBuilder.BeginSection("OdysseyAnimation", LOCTEXT("timeline-tab.file-menu.animation-import-export-section.name", "Animation Import / Export"));
                 {
                     iBuilder.AddSubMenu(
                         LOCTEXT("timeline-tab.file-menu.import-submenu.name", "Import"),
@@ -206,10 +207,10 @@ FOdysseyAnimationEditorTimelineTab::ExtendMenuFile( TSharedRef<FExtender> iExten
                         FSlateIcon( "OdysseyStyle", "AnimationEditor.File-Menu.Export" )
                     );
                 }
-				iBuilder.EndSection();
-			}
-		)
-	);
+                iBuilder.EndSection();
+            }
+        )
+    );
 }
 
 void
@@ -264,13 +265,13 @@ FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
     if ( assetsData.Num() <= 0 )
         return;
 
-	TArray<UTexture2D*> textures;
-	for(FAssetData& assetData : assetsData)
-	{
-		textures.Add(Cast<UTexture2D>(assetsData[0].GetAsset()));
-	}
+    TArray<UTexture2D*> textures;
+    for(FAssetData& assetData : assetsData)
+    {
+        textures.Add(Cast<UTexture2D>(assetsData[0].GetAsset()));
+    }
 
-	UOdysseyAnimationEditorAnimationFunctionLibrary::ImportTextureSequence(animation, textures);
+    UOdysseyAnimationEditorAnimationFunctionLibrary::ImportTextureSequence(animation, textures);
 }
 
 void           
@@ -299,14 +300,14 @@ FOdysseyAnimationEditorTimelineTab::ImportImageSequence()
     if (!dialogValidated || filenames.Num() <= 0)
         return;
 
-	filenames.Sort(
-		[](const FString& iA, const FString& iB)
-		{
-			return iA < iB;
-		}
-	);
+    filenames.Sort(
+       [](const FString& iA, const FString& iB)
+       {
+           return iA < iB;
+       }
+    );
 
-	UOdysseyAnimationEditorAnimationFunctionLibrary::ImportImageSequence(animation, filenames);
+    UOdysseyAnimationEditorAnimationFunctionLibrary::ImportImageSequence(animation, filenames);
 }
 
 void           
@@ -346,10 +347,10 @@ FOdysseyAnimationEditorTimelineTab::ExportAsFlipbook()
     if ( saveObjectPath == "" )
         return;
 
-	FString assetPath = FPaths::GetPath(saveObjectPath) + "/";
+    FString assetPath = FPaths::GetPath(saveObjectPath) + "/";
     FString flipbookAssetName = FPaths::GetBaseFilename(saveObjectPath);
 
-	UOdysseyAnimationEditorAnimationFunctionLibrary::ExportAsFlipbook(animation, animation->GetFrameRange(), flipbookAssetName, assetPath);
+    UOdysseyAnimationEditorAnimationFunctionLibrary::ExportAsFlipbook(animation, animation->GetFrameRange(), flipbookAssetName, assetPath);
 }
 
 void
@@ -368,7 +369,7 @@ FOdysseyAnimationEditorTimelineTab::CreateNewLayer()
     #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("timeline-tab.transaction.shortcut.create-new-layer", "Add Layer"));
     #endif
-		layerStack->Modify();
+        layerStack->Modify();
         UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
         if (currentLayer)
         {
@@ -392,8 +393,8 @@ FOdysseyAnimationEditorTimelineTab::CreateNewLayer()
         if (!animLayer)
             return;
 
-		animLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
-		FOdysseyObjectEditorUtils::SetPropertyValue(animLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), animation->CurrentFrame);
+        animLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
+        FOdysseyObjectEditorUtils::SetPropertyValue(animLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), animation->CurrentFrame);
     
         FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
         currentFrameMutator.Set(animation->CurrentFrame);

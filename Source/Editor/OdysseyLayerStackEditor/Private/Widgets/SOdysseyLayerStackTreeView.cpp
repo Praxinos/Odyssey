@@ -20,7 +20,7 @@ SOdysseyLayerStackTreeView::~SOdysseyLayerStackTreeView()
 {
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
     UOdysseyLayerStack::OnHierarchyChanged().RemoveAll(this);
-	UOdysseyLayer::OnDisplayChildrenChanged().RemoveAll(this);
+    UOdysseyLayer::OnDisplayChildrenChanged().RemoveAll(this);
     UOdysseyLayer::OnDisplayOptionsChanged().RemoveAll(this);
 }
 
@@ -31,7 +31,7 @@ SOdysseyLayerStackTreeView::SOdysseyLayerStackTreeView()
 {
     UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnCurrentLayerChanged);
     UOdysseyLayerStack::OnHierarchyChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnLayerStackHierarchyChanged);
-	UOdysseyLayer::OnDisplayChildrenChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnLayerDisplayChildrenChanged);
+    UOdysseyLayer::OnDisplayChildrenChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnLayerDisplayChildrenChanged);
     UOdysseyLayer::OnDisplayOptionsChanged().AddRaw(this, &SOdysseyLayerStackTreeView::OnLayerDisplayOptionsChanged);
 }
 
@@ -174,7 +174,7 @@ SOdysseyLayerStackTreeView::OnPaint( const FPaintArgs& Args, const FGeometry& Al
             const FVector2D LocalSize(geometry.GetLocalSize());
             const FVector2D Pivot(LocalSize * 0.5f);
             const FVector2D RotatedLocalSize(LocalSize.Y, LocalSize.X);
-            FSlateLayoutTransform RotatedTransform(Pivot - RotatedLocalSize * 0.5f);	// Make the box centered to the alloted geometry, so that it can be rotated around the center.
+            FSlateLayoutTransform RotatedTransform(Pivot - RotatedLocalSize * 0.5f);    // Make the box centered to the alloted geometry, so that it can be rotated around the center.
 
             FSlateDrawElement::MakeRotatedBox(
                 OutDrawElements,
@@ -182,21 +182,21 @@ SOdysseyLayerStackTreeView::OnPaint( const FPaintArgs& Args, const FGeometry& Al
                 geometry.ToPaintGeometry(RotatedLocalSize, RotatedTransform),
                 DropIndicatorBrush,
                 ESlateDrawEffect::None,
-                -HALF_PI,	// 90 deg CCW
-                RotatedLocalSize * 0.5f,	// Relative center to the flipped
+                -HALF_PI,    // 90 deg CCW
+                RotatedLocalSize * 0.5f,    // Relative center to the flipped
                 FSlateDrawElement::RelativeToElement,
                 DropIndicatorBrush->GetTint(InWidgetStyle) * InWidgetStyle.GetColorAndOpacityTint()
             );
         }
     }
 
-	return layerId;
+    return layerId;
 }
 
 FReply
 SOdysseyLayerStackTreeView::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
 {
-	if (mLayerStackShortcuts->GetCommandList()->ProcessCommandBindings(iKeyEvent))
+    if (mLayerStackShortcuts->GetCommandList()->ProcessCommandBindings(iKeyEvent))
         return FReply::Handled();
 
     return STreeView<UOdysseyLayer*>::OnKeyDown(iGeometry, iKeyEvent);
@@ -213,8 +213,8 @@ SOdysseyLayerStackTreeView::OnDragOver(const FGeometry& MyGeometry, const FDragD
         return FReply::Unhandled();
 
     UOdysseyLayerStack* operationLayerStack = operation->GetLayerStack();
-	if ( !operationLayerStack )
-		return FReply::Unhandled();
+    if ( !operationLayerStack )
+        return FReply::Unhandled();
 
     if ( GetRootItems().Num() == 0 )
         return FReply::Unhandled();
@@ -246,7 +246,7 @@ SOdysseyLayerStackTreeView::OnDragOver(const FGeometry& MyGeometry, const FDragD
 
     mDisplayDropZone = true;
 
-	return FReply::Handled();
+    return FReply::Handled();
 }
 
 void
@@ -268,8 +268,8 @@ SOdysseyLayerStackTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropE
         return FReply::Unhandled();
 
     UOdysseyLayerStack* operationLayerStack = operation->GetLayerStack();
-	if ( !operationLayerStack )
-		return FReply::Unhandled();
+    if ( !operationLayerStack )
+        return FReply::Unhandled();
 
     TSharedPtr<SMultiColumnTableRow<UOdysseyLayer*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyLayer*>>(WidgetFromItem(GetRootItems().Last()));
     if (!rowWidget)
@@ -309,7 +309,7 @@ SOdysseyLayerStackTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropE
         #endif
         mLayerStack->CopyLayers(layers, nullptr, mLayerStack->GetRootLayers().Num());
     }
-	return FReply::Handled();
+    return FReply::Handled();
 }
 
 void
@@ -484,7 +484,7 @@ void SOdysseyLayerStackTreeView::CreateContextMenu()
 TArray<TSharedPtr<FExtender>>
 SOdysseyLayerStackTreeView::ExtendContextMenu()
 {
-	return TArray< TSharedPtr<FExtender> >();
+    return TArray< TSharedPtr<FExtender> >();
 }
 
 void
@@ -544,7 +544,7 @@ SOdysseyLayerStackTreeView::CreateDragDropOperation() const
         return nullptr;
 
     TSharedRef<FOdysseyLayerStackDragDropOperation> operation =  MakeShared<FOdysseyLayerStackDragDropOperation>(mLayerStack, GetSelectedItems());
-	operation->Construct();
+    operation->Construct();
     return operation;
 }
 

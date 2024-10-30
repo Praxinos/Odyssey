@@ -68,25 +68,25 @@ FOdysseyBrushRect::GetValue() const {
 int
 FOdysseyBrushRect::X() const
 {
-	return m.x;
+    return m.x;
 }
 
 int
 FOdysseyBrushRect::Y() const
 {
-	return m.y;
+    return m.y;
 }
 
 int
 FOdysseyBrushRect::Width() const
 {
-	return m.w;
+    return m.w;
 }
 
 int
 FOdysseyBrushRect::Height() const
 {
-	return m.h;
+    return m.h;
 }
 
 bool

@@ -35,7 +35,7 @@ FOdysseyPainterEditorTopTab::~FOdysseyPainterEditorTopTab()
 }
 
 FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(LOCTEXT( "top-tab.name", "Top Bar" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Spark16" ))
+    : FOdysseyEditorTab(LOCTEXT( "top-tab.name", "Top Bar" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Spark16" ))
     , mEditor( iEditor )
     , mToolWidgetSlot(nullptr)
     , mCurrentTool(nullptr)

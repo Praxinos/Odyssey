@@ -33,11 +33,11 @@ public:
         SLATE_EVENT(FOnScrubStarted, OnScrubStarted)
         SLATE_EVENT(FOnScrubStopped, OnScrubStopped)
         SLATE_EVENT(FOnScrubPositionChanged, OnScrubPositionChanged)
-		//SLATE_EVENT(FOnStructureChanged, OnStructureChanged)
+        //SLATE_EVENT(FOnStructureChanged, OnStructureChanged)
         SLATE_EVENT(FOnFlipbookChanged, OnFlipbookChanged)
-		//SLATE_EVENT(FOnFramesEditStop, OnFramesEditStop)
-		SLATE_EVENT( FOnSpriteCreated, OnSpriteCreated)
-		SLATE_EVENT( FOnTextureCreated, OnTextureCreated)
+        //SLATE_EVENT(FOnFramesEditStop, OnFramesEditStop)
+        SLATE_EVENT( FOnSpriteCreated, OnSpriteCreated)
+        SLATE_EVENT( FOnTextureCreated, OnTextureCreated)
         SLATE_EVENT( FOnKeyframeRemoved, OnKeyframeRemoved)
     SLATE_END_ARGS()
 
@@ -45,7 +45,7 @@ public:
     // Construction / Destruction
     ~SOdysseyFlipbookTimelineView();
     void Construct(const FArguments& InArgs);
-	void BindCommands(const TSharedRef<FUICommandList>& iCommandList);
+    void BindCommands(const TSharedRef<FUICommandList>& iCommandList);
 
 private:
     // The playback functions
@@ -78,23 +78,23 @@ private:
     // Event callbacks
 
     //SOdysseyPlaybackControls
-	FReply OnPlayClicked(bool iBackward);
-	FReply OnPauseClicked();
+    FReply OnPlayClicked(bool iBackward);
+    FReply OnPauseClicked();
     FReply OnStopClicked();
-	FReply OnBeginningClicked();
-	FReply OnEndClicked();
-	FReply OnPreviousClicked();
-	FReply OnNextClicked();
-	FReply OnPreviousKeyClicked();
-	FReply OnNextKeyClicked();
-	FReply OnLoopClicked();
-	FReply OnAddFrameClicked();
+    FReply OnBeginningClicked();
+    FReply OnEndClicked();
+    FReply OnPreviousClicked();
+    FReply OnNextClicked();
+    FReply OnPreviousKeyClicked();
+    FReply OnNextKeyClicked();
+    FReply OnLoopClicked();
+    FReply OnAddFrameClicked();
     FReply OnFixCurrentFrameClicked();
 
     void OnScrubStarted();
-	void OnScrubPositionChanged(float iOldPosition);
+    void OnScrubPositionChanged(float iOldPosition);
 
-	void OnFrameRateChanged(float iFrameRate);
+    void OnFrameRateChanged(float iFrameRate);
     void OnKeyframeAdded(FPaperFlipbookKeyFrame& iKeyFrame);
 
     void  OnZoomMenuEntryClicked( double ZoomValue );
@@ -107,11 +107,11 @@ private:
 
 private:
     //Manipulations
-	void AddFrame(int32 iIndex);
+    void AddFrame(int32 iIndex);
     void AddFrame();
     void AddFrameAfter();
     void AddFrameBefore();
-	bool FixFrame(int32 iIndex);
+    bool FixFrame(int32 iIndex);
 
     //Timeline
     void ScrubToFirstFrame();
@@ -127,8 +127,8 @@ private:
     float GetFrameRate() const;
 
 private:
-	//Slate
-	EVisibility FixCurrentFrameVisibility() const;
+    //Slate
+    EVisibility FixCurrentFrameVisibility() const;
 
 private:
     TWeakPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper;
@@ -141,18 +141,18 @@ private:
 
     //Widgets
     TSharedPtr<SOdysseyTimeline> mTimelineWidget;
-	TSharedPtr<SOdysseyFlipbookTimelineTrack> mTimelineTrackWidget;
+    TSharedPtr<SOdysseyFlipbookTimelineTrack> mTimelineTrackWidget;
     
     //Events
     FOnCurrentKeyframeChanged mOnCurrentKeyframeChanged;
     FOnPlayStarted mOnPlayStarted;
     FOnPlayStopped mOnPlayStopped;
     FOnScrubStarted mOnScrubStarted;
-	FOnScrubStopped mOnScrubStopped;
-	FOnScrubPositionChanged mOnScrubPositionChanged;
-	//FOnStructureChanged mOnStructureChanged;
+    FOnScrubStopped mOnScrubStopped;
+    FOnScrubPositionChanged mOnScrubPositionChanged;
+    //FOnStructureChanged mOnStructureChanged;
     FOnFlipbookChanged mOnFlipbookChanged;
-	//FOnFramesEditStop mOnFramesEditStop;
-	FOnSpriteCreated mOnSpriteCreated;
-	FOnTextureCreated mOnTextureCreated;
+    //FOnFramesEditStop mOnFramesEditStop;
+    FOnSpriteCreated mOnSpriteCreated;
+    FOnTextureCreated mOnTextureCreated;
 };

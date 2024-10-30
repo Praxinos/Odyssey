@@ -8,16 +8,16 @@
 
 // Implementation of the Native driver
 class FNativeStylusInputDevice
-	: public IStylusInputDevice
+    : public IStylusInputDevice
 {
 public:
-	virtual ~FNativeStylusInputDevice() {};
-	virtual void Tick() override;
-	
+    virtual ~FNativeStylusInputDevice() {};
+    virtual void Tick() override;
+    
 public:
-	void SetPenMask(const PEN_MASK& iMask);
-	void OnPointerUpdate(POINTER_PEN_INFO& iPenInfo);
+    void SetPenMask(const PEN_MASK& iMask);
+    void OnPointerUpdate(POINTER_PEN_INFO& iPenInfo);
 
 private:
-	TArray<FStylusState> mNativeState;
+    TArray<FStylusState> mNativeState;
 };

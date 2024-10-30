@@ -10,6 +10,7 @@
 #include "SPositiveActionButton.h"
 #include "OdysseyPalette.h"
 #include "OdysseyStyleSet.h"
+#include "Widgets/Input/SButton.h"
 
 #define LOCTEXT_NAMESPACE "Palette"
 

@@ -3,13 +3,14 @@
 #include "ContentBrowserModule.h" // for FContentBrowserModule
 #include "IContentBrowserSingleton.h" // for FAssetPickerConfig
 #include "PropertyCustomizationHelpers.h" // for SObjectPropertyEntryBox
+#include "Widgets/Input/SButton.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 void
 FOdysseyVectorBrushCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> StructPropertyHandle
-	                                             , class FDetailWidgetRow& HeaderRow
-	                                             , IPropertyTypeCustomizationUtils& StructCustomizationUtils )
+                                                 , class FDetailWidgetRow& HeaderRow
+                                                 , IPropertyTypeCustomizationUtils& StructCustomizationUtils )
 {
     static FSlateBrush whiteBackgroundBrush;
 
@@ -24,15 +25,15 @@ FOdysseyVectorBrushCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> S
     //TAttribute<FText> BrushToolTipAttribute = TAttribute<FText>::Create( TAttribute<FText>::FGetter::CreateRaw( this, &FOdysseyVectorBrushCustomization::UpdateButtonToolTip, StructPropertyHandle ) );
 
     mBrushButton = SNew(SButton)
-			      .Visibility( EVisibility::Visible )
-			      .ToolTipText( this, &FOdysseyVectorBrushCustomization::UpdateButtonToolTip, StructPropertyHandle )
-			      .OnClicked( this, &FOdysseyVectorBrushCustomization::OnClicked, StructPropertyHandle )
-			      .HAlign(HAlign_Center)
-			      .VAlign(VAlign_Center)
+                  .Visibility( EVisibility::Visible )
+                  .ToolTipText( this, &FOdysseyVectorBrushCustomization::UpdateButtonToolTip, StructPropertyHandle )
+                  .OnClicked( this, &FOdysseyVectorBrushCustomization::OnClicked, StructPropertyHandle )
+                  .HAlign(HAlign_Center)
+                  .VAlign(VAlign_Center)
                   [
-		              SNew(SBorder)
-	                  .HAlign(HAlign_Center)
-	                  .VAlign(VAlign_Center)
+                      SNew(SBorder)
+                      .HAlign(HAlign_Center)
+                      .VAlign(VAlign_Center)
                       .BorderImage( &whiteBackgroundBrush )
                       [
                           SNew(SImage)
@@ -46,13 +47,13 @@ FOdysseyVectorBrushCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> S
     // We don't use the SObjectPropertyEntryBox widget because I had troubles with setting the filter.
     // MoreOver, this widget was taking to much room, so I chose to use a SButton instead and display
     // an asset picker on mouse click.
-	HeaderRow.NameContent()[StructPropertyHandle->CreatePropertyNameWidget()]
-	.ValueContent()[
-		SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot()
-		.AutoWidth()
-		[
-		    mBrushButton.ToSharedRef()
+    HeaderRow.NameContent()[StructPropertyHandle->CreatePropertyNameWidget()]
+    .ValueContent()[
+        SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+            mBrushButton.ToSharedRef()
 /*
             SNew(SObjectPropertyEntryBox)
                 .AllowedClass(          UTexture2D::StaticClass() )
@@ -69,8 +70,8 @@ FOdysseyVectorBrushCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> S
                 .AllowCreate(           true )
                 .ThumbnailSizeOverride( FIntPoint( 64, 16 ) )
 */
-		]
-	];
+        ]
+    ];
 }
 
 FReply
@@ -264,14 +265,14 @@ FOdysseyVectorBrushCustomization::Register()
 void
 FOdysseyVectorBrushCustomization::Unregister()
 {
-	if( FModuleManager::Get().IsModuleLoaded( "PropertyEditor" ) )
-	{
-		// unregister properties when the module is shutdown
-		FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-		PropertyModule.UnregisterCustomPropertyTypeLayout(FOdysseyVectorBrush::StaticStruct()->GetFName());
+    if( FModuleManager::Get().IsModuleLoaded( "PropertyEditor" ) )
+    {
+        // unregister properties when the module is shutdown
+        FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+        PropertyModule.UnregisterCustomPropertyTypeLayout(FOdysseyVectorBrush::StaticStruct()->GetFName());
 
-		PropertyModule.NotifyCustomizationModuleChanged();
-	}
+        PropertyModule.NotifyCustomizationModuleChanged();
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

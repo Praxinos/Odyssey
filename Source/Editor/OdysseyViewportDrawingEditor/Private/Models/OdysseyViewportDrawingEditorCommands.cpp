@@ -6,7 +6,7 @@
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
 FOdysseyViewportDrawingEditorCommands::FOdysseyViewportDrawingEditorCommands()
-	: TCommands<FOdysseyViewportDrawingEditorCommands>( "OdysseyViewportDrawingEditMode", LOCTEXT("editor-commands.name", "Odyssey Viewport Drawing Edit Mode"), NAME_None, FOdysseyStyle::GetStyleSetName())
+    : TCommands<FOdysseyViewportDrawingEditorCommands>( "OdysseyViewportDrawingEditMode", LOCTEXT("editor-commands.name", "Odyssey Viewport Drawing Edit Mode"), NAME_None, FOdysseyStyle::GetStyleSetName())
 {}
 
 void FOdysseyViewportDrawingEditorCommands::RegisterCommands()

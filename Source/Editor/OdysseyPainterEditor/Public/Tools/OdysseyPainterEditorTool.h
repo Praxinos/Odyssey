@@ -4,12 +4,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Framework/MultiBox/MultiBoxExtender.h"
 #include "ToolMenuOwner.h"
 #include "Input/OdysseyPoint.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseyHUDSystem.h"
 #include "OdysseyPainterEditorToolContext.h"
 #include "OdysseyPainterEditorToolInputProcessor.h"
+#include "Widgets/SWidget.h"
+
 #include "OdysseyPainterEditorTool.generated.h"
 
 class FOdysseyPainterEditor;
@@ -58,7 +61,7 @@ public:
     virtual bool OnKeyDown(const FKey& iKey);
     virtual bool OnKeyUp(const FKey& iKey);
     // For global key press events
-	virtual bool OnKeyUpGlobal(const FKey& iKey);
+    virtual bool OnKeyUpGlobal(const FKey& iKey);
     virtual bool OnKeyDownGlobal(const FKey& iKey);
 
     // Tick

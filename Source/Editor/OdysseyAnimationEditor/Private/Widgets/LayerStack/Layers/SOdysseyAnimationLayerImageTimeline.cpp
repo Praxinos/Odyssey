@@ -108,7 +108,7 @@ SOdysseyAnimationLayerImageTimeline::OnDragDetected(const FGeometry& iGeometry, 
 FReply
 SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
-	if (iEvent.GetEffectingButton() == EKeys::RightMouseButton)
+    if (iEvent.GetEffectingButton() == EKeys::RightMouseButton)
     {
         int frame = (int)mExtension->Timeline()->MousePositionToFrame(iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X);
         if (frame < 0)
@@ -125,14 +125,14 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry,
 
         TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
         MapActions(commandList, frame);
-		FMenuBuilder menuBuilder(true, commandList, ExtendContextMenu());
-		BuildContextMenu(menuBuilder);
+        FMenuBuilder menuBuilder(true, commandList, ExtendContextMenu());
+        BuildContextMenu(menuBuilder);
 
-		TSharedRef<SWidget> menuContents = menuBuilder.MakeWidget();
-		FWidgetPath widgetPath = iEvent.GetEventPath() != nullptr ? *iEvent.GetEventPath() : FWidgetPath();
-		FSlateApplication::Get().PushMenu(AsShared(), widgetPath, menuContents, iEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
-    	return FReply::Handled();
-	}
+        TSharedRef<SWidget> menuContents = menuBuilder.MakeWidget();
+        FWidgetPath widgetPath = iEvent.GetEventPath() != nullptr ? *iEvent.GetEventPath() : FWidgetPath();
+        FSlateApplication::Get().PushMenu(AsShared(), widgetPath, menuContents, iEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
+        return FReply::Handled();
+    }
     
     FOdysseyAnimationTimelineTool::FMouseEventParams params =
     {
@@ -143,7 +143,7 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry,
         mLayer
     };
     mExtension->Timeline()->GetTool()->OnMouseButtonUp(params);
-	return FReply::Unhandled();
+    return FReply::Unhandled();
 }
 
 FReply
@@ -161,30 +161,30 @@ SOdysseyAnimationLayerImageTimeline::OnKeyUp( const FGeometry& iGeometry, const 
 int32
 SOdysseyAnimationLayerImageTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
-	// Draw a current frame
-	LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
-	++LayerId;
+    // Draw a current frame
+    LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+    ++LayerId;
 
-	const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
+    const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
 
-	const float height = AllottedGeometry.GetLocalSize().Y;
-	const float width = AllottedGeometry.GetLocalSize().X;
+    const float height = AllottedGeometry.GetLocalSize().Y;
+    const float width = AllottedGeometry.GetLocalSize().X;
 
-	if(mIsDraggingOver && mDragState != kDrag_None)
-	{
+    if(mIsDraggingOver && mDragState != kDrag_None)
+    {
         //Dragging Zone
         FLinearColor lineColor(0.2f, 0.2f, 1.f);
-		float dragPos = mExtension->Timeline()->FrameToMousePosition(mDragPosition);
+        float dragPos = mExtension->Timeline()->FrameToMousePosition(mDragPosition);
 
         //Dragging Bar
-		FSlateDrawElement::MakeBox(
-			OutDrawElements,
-			LayerId,
+        FSlateDrawElement::MakeBox(
+            OutDrawElements,
+            LayerId,
             AllottedGeometry.ToPaintGeometry( FVector2D(3.f, height), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(dragPos, 0.f) ) ) ),
-			GenericBrush,
-			ESlateDrawEffect::None,
-			lineColor
-		);
+            GenericBrush,
+            ESlateDrawEffect::None,
+            lineColor
+        );
 
         if (mDragState == kDrag_Copy)
         {
@@ -210,9 +210,9 @@ SOdysseyAnimationLayerImageTimeline::OnPaint(const FPaintArgs& Args, const FGeom
                 lineColor
             );
         }
-	}
+    }
 
-	return LayerId;
+    return LayerId;
 }
 
 void
@@ -375,7 +375,7 @@ SOdysseyAnimationLayerImageTimeline::BuildContextMenu(FMenuBuilder& iMenuBuilder
 
     iMenuBuilder.BeginSection("Cells", LOCTEXT("timeline-cells.context-menu.cells-section.name", "Cells"));
         iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().ConvertToStaggerCell, TEXT("ConvertToStagger"));
-		iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().ConvertToReferenceCells);
+        iMenuBuilder.AddMenuEntry(FOdysseyAnimationEditorCommands::Get().ConvertToReferenceCells);
         iMenuBuilder.AddMenuEntry(
             FOdysseyAnimationEditorCommands::Get().SetCellExposure,
             NAME_None,
@@ -466,8 +466,8 @@ SOdysseyAnimationLayerImageTimeline::MapActions(TSharedPtr<FUICommandList> iComm
     mAnimationTimelineCellsShortcuts = MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(mLayer->GetLayerStack(), mExtension);
     mAnimationTimelineCellsShortcuts->MapActionsToCommandList(iCommandList.ToSharedRef());
 
-	mAnimationTimelineCellImageStaggerShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(mLayer->GetLayerStack(), mExtension);
-	mAnimationTimelineCellImageStaggerShortcuts->MapActionsToCommandList(iCommandList.ToSharedRef());
+    mAnimationTimelineCellImageStaggerShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(mLayer->GetLayerStack(), mExtension);
+    mAnimationTimelineCellImageStaggerShortcuts->MapActionsToCommandList(iCommandList.ToSharedRef());
 }
 
 EVisibility
@@ -521,7 +521,7 @@ SOdysseyAnimationLayerImageTimeline::RemoveCellMark()
     
     for (UOdysseyAnimationCell* selectedCell : selectedCells)
     {
-		FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
+        FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
     }
 }
 
@@ -557,7 +557,7 @@ SOdysseyAnimationLayerImageTimeline::SetCellMark( int iMarkId )
     
     for (UOdysseyAnimationCell* selectedCell : selectedCells)
     {
-		FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), iMarkId);
+        FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), iMarkId);
     }
 }
 

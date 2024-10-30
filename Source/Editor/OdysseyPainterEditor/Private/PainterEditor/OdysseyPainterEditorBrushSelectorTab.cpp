@@ -26,7 +26,7 @@ FOdysseyPainterEditorBrushSelectorTab::~FOdysseyPainterEditorBrushSelectorTab()
 }
 
 FOdysseyPainterEditorBrushSelectorTab::FOdysseyPainterEditorBrushSelectorTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(LOCTEXT( "brush-selector-tab.name", "Brush Selector" ), FSlateIcon( "OdysseyStyle", "PainterEditor.BrushSelector16" ))
+    : FOdysseyEditorTab(LOCTEXT( "brush-selector-tab.name", "Brush Selector" ), FSlateIcon( "OdysseyStyle", "PainterEditor.BrushSelector16" ))
     , mEditor(iEditor)
 {
 }

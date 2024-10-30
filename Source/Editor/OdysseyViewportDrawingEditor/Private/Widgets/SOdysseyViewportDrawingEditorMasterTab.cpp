@@ -10,6 +10,8 @@
 #include "Widgets/Layout/SScrollBox.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyViewportDrawingEditorUtils.h"
+#include "Widgets/Input/SComboBox.h"
+#include "Widgets/Input/SButton.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 

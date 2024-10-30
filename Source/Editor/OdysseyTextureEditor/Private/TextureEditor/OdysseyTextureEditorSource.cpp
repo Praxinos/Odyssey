@@ -12,6 +12,7 @@
 #include "OdysseyMediaRaster.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPixelFormat.h"
+#include "ScopedTransaction.h"
 #include "TextureCompiler.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
@@ -19,8 +20,8 @@
 const FGuid&
 FOdysseyTextureEditorSource::StaticId()
 {
-	static FGuid id = FGuid::NewGuid();
-	return id;
+    static FGuid id = FGuid::NewGuid();
+    return id;
 }
 
 FOdysseyTextureEditorSource::~FOdysseyTextureEditorSource()
@@ -36,31 +37,31 @@ FOdysseyTextureEditorSource::FOdysseyTextureEditorSource(UTexture2D* iTexture)
 const FGuid&
 FOdysseyTextureEditorSource::Id() const
 {
-	return StaticId();
+    return StaticId();
 }
 
 int
 FOdysseyTextureEditorSource::Width() const
 {
-	return mTexture->Source.GetSizeX();
+    return mTexture->Source.GetSizeX();
 }
 
 int
 FOdysseyTextureEditorSource::Height() const
 {
-	return mTexture->Source.GetSizeY();
+    return mTexture->Source.GetSizeY();
 }
 
 void
 FOdysseyTextureEditorSource::Activate()
 {
-	AddEditedObject(mTexture);
+    AddEditedObject(mTexture);
 
     InitTextureUserData();
 
-	UOdysseyTextureLayerStack* layerStack = GetLayerStack();
-	if ( layerStack )
-		layerStack->ActivateTextureFastUpdate();
+    UOdysseyTextureLayerStack* layerStack = GetLayerStack();
+    if ( layerStack )
+        layerStack->ActivateTextureFastUpdate();
 
     FOdysseyPainterEditorSource::Activate();
 }
@@ -68,11 +69,11 @@ FOdysseyTextureEditorSource::Activate()
 void
 FOdysseyTextureEditorSource::Inactivate()
 {
-	RemoveEditedObject(mTexture);
+    RemoveEditedObject(mTexture);
 
-	UOdysseyTextureLayerStack* layerStack = GetLayerStack();
-	if ( layerStack )
-		layerStack->InactivateTextureFastUpdate();
+    UOdysseyTextureLayerStack* layerStack = GetLayerStack();
+    if ( layerStack )
+        layerStack->InactivateTextureFastUpdate();
 
     FOdysseyPainterEditorSource::Inactivate();
 }
@@ -87,10 +88,10 @@ TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 FOdysseyTextureEditorSource::GetDisplayBlock()
 {
     UOdysseyTextureLayerStack* layerStack = GetLayerStack();
-	if (!layerStack)
-		return nullptr;
+    if (!layerStack)
+        return nullptr;
 
-	return layerStack->GetSurface()->Block();
+    return layerStack->GetSurface()->Block();
 }
 
 UTexture2D*
@@ -103,17 +104,17 @@ UOdysseyTextureLayerStack*
 FOdysseyTextureEditorSource::GetLayerStack() const
 {
     UOdysseyTextureLayerStackUserData* userData = TextureUserData();
-	if (!userData)
-		return nullptr;
-	
-	return userData->GetLayerStack();
+    if (!userData)
+        return nullptr;
+    
+    return userData->GetLayerStack();
 }
 
 UOdysseyTextureLayerStackUserData*
 FOdysseyTextureEditorSource::TextureUserData() const
 {
-	if ( !mTexture )
-		return nullptr;
+    if ( !mTexture )
+        return nullptr;
 
     return Cast<UOdysseyTextureLayerStackUserData>(mTexture->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
 }
@@ -137,15 +138,15 @@ FOdysseyTextureEditorSource::InitTextureUserData()
 FOdysseyMediaProvider
 FOdysseyTextureEditorSource::GetCurrentMediaProvider()
 {
-	UOdysseyTextureLayerStack* layerStack = GetLayerStack();
-	if (!layerStack)
-		return FOdysseyMediaProvider();
+    UOdysseyTextureLayerStack* layerStack = GetLayerStack();
+    if (!layerStack)
+        return FOdysseyMediaProvider();
 
-	UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
-	if (!currentLayer)
-		return FOdysseyMediaProvider();
+    UOdysseyTextureLayer* currentLayer = Cast<UOdysseyTextureLayer>(layerStack->CurrentLayer.Get());
+    if (!currentLayer)
+        return FOdysseyMediaProvider();
 
-	return currentLayer->GetMediaProvider(0);
+    return currentLayer->GetMediaProvider(0);
 }
 
 
@@ -155,66 +156,66 @@ FOdysseyTextureEditorSource::GetCurrentMediaProvider()
 void
 FOdysseyTextureEditorSource::Clear()
 {
-	UOdysseyLayerStack* layerStack = GetLayerStack();
-	if ( !layerStack )
-		return;
+    UOdysseyLayerStack* layerStack = GetLayerStack();
+    if ( !layerStack )
+        return;
 
     //UOdysseyTextureLayerImageRaster* currentLayerRaster = Cast<UOdysseyTextureLayerImageRaster>(layerStack->CurrentLayer.Get());
     //UOdysseyTextureLayerImageVector* currentLayerVector = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-	#ifdef WITH_EDITOR
-		FScopedTransaction ScopedTransaction(LOCTEXT("actions.clear", "Clear"));
-	#endif
-	
-	UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
-	if (!currentLayer)
-		return;
+    #ifdef WITH_EDITOR
+        FScopedTransaction ScopedTransaction(LOCTEXT("actions.clear", "Clear"));
+    #endif
+    
+    UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
+    if (!currentLayer)
+        return;
 
-	FOdysseyMediaProvider mediaProvider = currentLayer->GetMediaProvider(0);
-	if ( mediaProvider.IsLocked() )
-		return;
-	
-	if ( mediaProvider.HasMedia<FOdysseyMediaRaster>() )
-	{
-		TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
-		for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
-		{
-			TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
-			if (!rasterBlock)
-				continue;
+    FOdysseyMediaProvider mediaProvider = currentLayer->GetMediaProvider(0);
+    if ( mediaProvider.IsLocked() )
+        return;
+    
+    if ( mediaProvider.HasMedia<FOdysseyMediaRaster>() )
+    {
+        TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
+        for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
+        {
+            TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
+            if (!rasterBlock)
+                continue;
 
-			FOdysseyRasterBlockMutator mutator(rasterBlock);
-			mutator.EditTilesFromRects(
-				{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-				[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-				{
-					::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-					::ULIS::FEvent eventClear;
-					ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
-					return { eventClear };
-				}
-			);
-			mutator.Commit();
-		}
-	}
-	else if (mediaProvider.HasMedia<FOdysseyMediaVector>())
-	{
-		TArray<TSharedPtr<FOdysseyMediaVector>> mediasVector = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
-		for (TSharedPtr<FOdysseyMediaVector> mediaVector : mediasVector)
-		{
-			FOdysseyVectorEngine* vectorEngine = mediaVector->GetScene()->GetEngine();
-			// needed for undos
-			if (GUndo)
-			{
-				FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear(vectorEngine);
-				GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
+            FOdysseyRasterBlockMutator mutator(rasterBlock);
+            mutator.EditTilesFromRects(
+                { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                {
+                    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+                    ::ULIS::FEvent eventClear;
+                    ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+                    return { eventClear };
+                }
+            );
+            mutator.Commit();
+        }
+    }
+    else if (mediaProvider.HasMedia<FOdysseyMediaVector>())
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediasVector = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
+        for (TSharedPtr<FOdysseyMediaVector> mediaVector : mediasVector)
+        {
+            FOdysseyVectorEngine* vectorEngine = mediaVector->GetScene()->GetEngine();
+            // needed for undos
+            if (GUndo)
+            {
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear(vectorEngine);
+                GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
                 RecordCurrentFrameUndo();
-			}
+            }
 
-			vectorEngine->SetScene(new FOdysseyVectorGroupPaint("Scene"));
-			vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
-		}
-	}
+            vectorEngine->SetScene(new FOdysseyVectorGroupPaint("Scene"));
+            vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
+        }
+    }
 }
 
 void 
@@ -251,27 +252,27 @@ FOdysseyTextureEditorSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock> iCopy
             FOdysseyRasterBlockMutator mutator(rasterBlock);
             mutator.EditTilesFromRects(
                 { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-				[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-				{
-					::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-					::ULIS::FEvent eventCut;
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                {
+                    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+                    ::ULIS::FEvent eventCut;
 
-					ctx.Blend(
-						*iCopyBlock,
-						*iBlock,
-						iCopyBlock->Rect(),
-						::ULIS::FVec2I(0, 0),
-						::ULIS::Blend_Normal,
-						::ULIS::Alpha_Sub,
-						1.f,
-						::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-						0,
-						nullptr,
-						&eventCut
-					);
-					
-					return { eventCut };
-				}
+                    ctx.Blend(
+                        *iCopyBlock,
+                        *iBlock,
+                        iCopyBlock->Rect(),
+                        ::ULIS::FVec2I(0, 0),
+                        ::ULIS::Blend_Normal,
+                        ::ULIS::Alpha_Sub,
+                        1.f,
+                        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+                        0,
+                        nullptr,
+                        &eventCut
+                    );
+                    
+                    return { eventCut };
+                }
             );
             mutator.Commit();
         }
@@ -334,26 +335,26 @@ void FOdysseyTextureEditorSource::PasteBlockToCurrentLayer(TSharedPtr<::ULIS::FB
             FOdysseyRasterBlockMutator mutator(rasterBlock);
             mutator.EditTilesFromRects(
                 { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-				[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-				{
-					::ULIS::FEvent eventPaste;
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                {
+                    ::ULIS::FEvent eventPaste;
 
-					ctx.Blend(
-						*copyBlock,
-						*iBlock,
-						copyBlock->Rect(),
-						::ULIS::FVec2I(0, 0),
-						::ULIS::Blend_Normal,
-						::ULIS::Alpha_Normal,
-						1.f,
-						::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-						0,
-						nullptr,
-						&eventPaste);
+                    ctx.Blend(
+                        *copyBlock,
+                        *iBlock,
+                        copyBlock->Rect(),
+                        ::ULIS::FVec2I(0, 0),
+                        ::ULIS::Blend_Normal,
+                        ::ULIS::Alpha_Normal,
+                        1.f,
+                        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+                        0,
+                        nullptr,
+                        &eventPaste);
 
-					return { eventPaste };
+                    return { eventPaste };
 
-				}
+                }
             );
             mutator.Commit();
         }
@@ -370,19 +371,19 @@ FOdysseyTextureEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> iB
         return;
 
     if (!GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>())
-		return;
+        return;
 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("actions.paste", "Paste"));
 #endif
     GetLayerStack()->Modify();
 
-	UOdysseyTextureLayerImageRaster* layer = Cast< UOdysseyTextureLayerImageRaster >(GetLayerStack()->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
+    UOdysseyTextureLayerImageRaster* layer = Cast< UOdysseyTextureLayerImageRaster >(GetLayerStack()->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
     FOdysseyObjectEditorUtils::SetPropertyValue(GetLayerStack(), GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), layer);
 
-	FOdysseyRasterBlockMutator mutator(layer->GetRasterBlock());
-	mutator.Copy(iBlock, {});
-	mutator.Commit();
+    FOdysseyRasterBlockMutator mutator(layer->GetRasterBlock());
+    mutator.Copy(iBlock, {});
+    mutator.Commit();
 }
 
 #undef LOCTEXT_NAMESPACE

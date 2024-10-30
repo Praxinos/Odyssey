@@ -11,6 +11,8 @@
 #include "Misc/MessageDialog.h"
 #include "Misc/ScopedSlowTask.h"
 #include "AssetRegistry/ARFilter.h"
+#include "Framework/Application/SlateApplication.h"
+#include "HAL/FileManager.h"
 #include "IDesktopPlatform.h"
 #include "DesktopPlatformModule.h"
 #include "OdysseySurfaceTexture2DEditable.h"

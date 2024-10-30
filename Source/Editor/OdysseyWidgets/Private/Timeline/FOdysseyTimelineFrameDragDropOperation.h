@@ -7,28 +7,29 @@
 #include "Input/DragAndDrop.h"
 #include "SOdysseyTimelineFrame.h"
 #include "SOdysseyTimelineFrameList.h"
+#include "ScopedTransaction.h"
 
 class FOdysseyTimelineFrameDragDropOperation : public FDragDropOperation
 {
 public:
-	FOdysseyTimelineFrameDragDropOperation(TSharedPtr<SOdysseyTimelineFrame> iFrame, TSharedPtr<SOdysseyTimelineFrameList> iFrameList);
+    FOdysseyTimelineFrameDragDropOperation(TSharedPtr<SOdysseyTimelineFrame> iFrame, TSharedPtr<SOdysseyTimelineFrameList> iFrameList);
 
 public:
-	DRAG_DROP_OPERATOR_TYPE(FOdysseyTimelineFrameDragDropOperation, FDragDropOperation)
+    DRAG_DROP_OPERATOR_TYPE(FOdysseyTimelineFrameDragDropOperation, FDragDropOperation)
 
-	// FDragDropOperation interface
-	virtual TSharedPtr<SWidget> GetDefaultDecorator() const override;
-	virtual void OnDragged(const class FDragDropEvent& DragDropEvent) override;
-	virtual void Construct() override;
-	virtual void OnDrop(bool bDropWasHandled, const FPointerEvent& MouseEvent) override;
-	// End of FDragDropOperation interface²
+    // FDragDropOperation interface
+    virtual TSharedPtr<SWidget> GetDefaultDecorator() const override;
+    virtual void OnDragged(const class FDragDropEvent& DragDropEvent) override;
+    virtual void Construct() override;
+    virtual void OnDrop(bool bDropWasHandled, const FPointerEvent& MouseEvent) override;
+    // End of FDragDropOperation interface²
 
-	void SetCanDropHere(bool bCanDropHere);
+    void SetCanDropHere(bool bCanDropHere);
 
-	TSharedPtr<SOdysseyTimelineFrame>& Frame();
+    TSharedPtr<SOdysseyTimelineFrame>& Frame();
 
 private:
     TSharedPtr<SOdysseyTimelineFrame> mFrame;
-	TSharedPtr<SOdysseyTimelineFrameList> mFrameList;
-	FScopedTransaction mTransaction; //Don't know why we need this
+    TSharedPtr<SOdysseyTimelineFrameList> mFrameList;
+    FScopedTransaction mTransaction; //Don't know why we need this
 };

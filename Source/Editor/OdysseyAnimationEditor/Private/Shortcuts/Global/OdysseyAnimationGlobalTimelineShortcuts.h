@@ -34,7 +34,7 @@ public:
     void Action_InactivateLooping();
     void Action_ToggleLooping();
 
-	void Action_Flip(int iConfigurationIndex);
+    void Action_Flip(int iConfigurationIndex);
 
 public:
     //Shortcuts

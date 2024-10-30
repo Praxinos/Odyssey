@@ -68,7 +68,7 @@ SOdysseyPainterEditorVectorSceneTreeView::OnContextMenuOpening()
 FReply
 SOdysseyPainterEditorVectorSceneTreeView::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
 {
-	if (mCommandList->ProcessCommandBindings(iKeyEvent))
+    if (mCommandList->ProcessCommandBindings(iKeyEvent))
         return FReply::Handled();
 
     return STreeView<TSharedPtr<FVectorSceneTreeViewItem>>::OnKeyDown( iGeometry, iKeyEvent );
@@ -77,7 +77,7 @@ SOdysseyPainterEditorVectorSceneTreeView::OnKeyDown( const FGeometry& iGeometry,
 TSharedPtr<FVectorSceneTreeViewItem>
 SOdysseyPainterEditorVectorSceneTreeView::GetRootItem()
 {
-	return mRootItem;
+    return mRootItem;
 }
 
 FOdysseyPainterEditor*

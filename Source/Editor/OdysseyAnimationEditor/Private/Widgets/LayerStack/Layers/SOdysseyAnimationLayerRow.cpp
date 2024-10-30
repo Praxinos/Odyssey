@@ -21,7 +21,7 @@ SOdysseyAnimationLayerRow::Construct(
     SOdysseyLayerRow::Construct(
         SOdysseyLayerRow::FArguments(),
         iOwnerTableView,
-		iLayer
+        iLayer
     );
 }
 

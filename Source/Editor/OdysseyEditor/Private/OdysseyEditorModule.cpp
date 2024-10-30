@@ -2,6 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyEditorModule.h"
+
+#include "Misc/ConfigCacheIni.h"
 #include "Modules/ModuleManager.h"
 #include "OdysseyClipboard.h"
 
@@ -27,7 +29,7 @@ void
 FOdysseyEditorModule::ShutdownModule()
 {
     FCoreDelegates::OnEnginePreExit.RemoveAll(this);
-	for (const auto& element : mOpenedTabIds)
+    for (const auto& element : mOpenedTabIds)
     {
         const FName& editorName = element.Key;
         SaveOpenedTabIds(editorName);
@@ -43,7 +45,7 @@ FOdysseyEditorModule::GetClipboard() const
 void
 FOdysseyEditorModule::SetOpenedTabIds(const FName& iEditorName, const TArray<FName>& iTabIds)
 {
-	TArray<FName>& tabIds = mOpenedTabIds.FindOrAdd(iEditorName);
+    TArray<FName>& tabIds = mOpenedTabIds.FindOrAdd(iEditorName);
     tabIds = iTabIds;
 }
 
@@ -60,7 +62,7 @@ FString
 FOdysseyEditorModule::GetOpenedTabIdsSavedPath() const
 {
     FString filename = FApp::GetProjectName() + FString("OdysseyLayout.ini");
-	return FPaths::Combine(FPlatformProcess::UserSettingsDir(), FApp::GetEpicProductIdentifier(), TEXT("Editor"), TEXT("Iliad"), filename);
+    return FPaths::Combine(FPlatformProcess::UserSettingsDir(), FApp::GetEpicProductIdentifier(), TEXT("Editor"), TEXT("Iliad"), filename);
 }
 
 FString
@@ -73,7 +75,7 @@ FOdysseyEditorModule::GetOpenedTabIdsProjectPath() const
 void
 FOdysseyEditorModule::LoadOpenedTabIds(const FName& iEditorName, const TArray<FName>& iDefaultOpenedTabIds)
 {    
-	FString savedPath = GetOpenedTabIdsSavedPath();
+    FString savedPath = GetOpenedTabIdsSavedPath();
     FString projectPath = GetOpenedTabIdsProjectPath();
 
     TArray<FName>& tabIds = mOpenedTabIds.FindOrAdd(iEditorName);
@@ -109,7 +111,7 @@ FOdysseyEditorModule::LoadOpenedTabIds(const FName& iEditorName, const TArray<FN
     if( !fileHandle )
     {
         tabIds = iDefaultOpenedTabIds;
-		return;
+        return;
     }
 
     FBufferArchive buffer;
@@ -156,11 +158,11 @@ FOdysseyEditorModule::SaveOpenedTabIds(const FName& iEditorName)
 
     FBufferArchive buffer;
     uint32 numTabs = tabIds.Num();
-	buffer << tabIds;
+    buffer << tabIds;
 
     fileHandle->Seek(0);
     fileHandle->Write(buffer.GetData(), buffer.Num());
     fileHandle->Flush(true);
-	
+    
     delete fileHandle; */
 }

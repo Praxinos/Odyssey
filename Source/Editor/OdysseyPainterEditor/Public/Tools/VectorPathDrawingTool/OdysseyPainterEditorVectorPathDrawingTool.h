@@ -58,7 +58,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
         virtual FText GetTooltip() const override;
-		virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
+        virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
@@ -85,7 +85,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         FOdysseyVectorObject* GetParentObject( FOdysseyVectorGroupPaint* iScene );
 
     private:
-		void AddSize(int iAmount);
+        void AddSize(int iAmount);
         FOdysseyVectorVertex* PickVertex( FOdysseyVectorGroupPaint* iScene
                                         , double iWorldX
                                         , double iWorldY

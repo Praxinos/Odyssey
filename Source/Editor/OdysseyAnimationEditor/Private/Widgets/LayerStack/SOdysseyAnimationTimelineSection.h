@@ -26,7 +26,7 @@ public:
 
 public:
     FOdysseyAnimationEditorExtension* GetExtension() const;
-	void SetContent(TSharedPtr<SWidget> iContent);
+    void SetContent(TSharedPtr<SWidget> iContent);
 
 private:
     virtual FOptionalSize GetSectionWidth() const;

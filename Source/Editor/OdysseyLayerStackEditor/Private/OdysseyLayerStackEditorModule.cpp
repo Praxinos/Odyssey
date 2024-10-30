@@ -2,7 +2,9 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyLayerStackEditorModule.h"
+
 #include "Commands/OdysseyLayerStackEditorCommands.h"
+#include "Modules/ModuleManager.h"
 
 void FOdysseyLayerStackEditorModule::StartupModule()
 {

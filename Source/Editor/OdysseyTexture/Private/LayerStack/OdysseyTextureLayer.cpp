@@ -8,9 +8,9 @@
 UTexture2D*
 UOdysseyTextureLayer::GetTexture() const
 {
-	UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
+    UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
     if(!layerStack)
         return nullptr;
 
-	return layerStack->GetTexture();
+    return layerStack->GetTexture();
 }

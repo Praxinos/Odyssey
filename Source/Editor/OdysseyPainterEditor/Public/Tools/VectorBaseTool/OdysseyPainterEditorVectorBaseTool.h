@@ -10,6 +10,8 @@
 #include "OdysseyPainterEditorVectorBaseTool.generated.h"
 
 class FOdysseyPainterEditorVectorBaseToolHUD;
+class ISinglePropertyView;
+class SViewport;
 
 enum class eMouseEventName : uint8
 {
@@ -44,8 +46,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         TSharedPtr<SWidget> CreatePropertyWidget( TSharedPtr<class IPropertyHandle> iPropertyHandle
                                                 , const TSharedPtr<ISinglePropertyView> iView );
 
-	    //virtual bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
-	    //virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
+        //virtual bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
+        //virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
 
         virtual void Load();
         virtual void Unload();
@@ -60,7 +62,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 		virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
         virtual void Commit();
         virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
-    	virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
+        virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
         virtual void ExtendContextMenu( FMenuBuilder& menu );
         virtual void BindShortcuts( FBaseToolkit* iToolkit );
         virtual EMouseCursor::Type GetMouseCursor() const override;

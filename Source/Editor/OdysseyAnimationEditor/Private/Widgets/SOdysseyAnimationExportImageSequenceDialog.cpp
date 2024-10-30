@@ -8,6 +8,7 @@
 #include "OdysseyAnimation.h"
 #include "SEnumCombo.h"
 #include "Widgets/Input/SNumericEntryBox.h"
+#include "Widgets/Layout/SGridPanel.h"
 #include "DesktopPlatformModule.h"
 #include "ULISLoaderModule.h"
 
@@ -18,9 +19,9 @@ SOdysseyAnimationExportImageSequenceDialog::Open(UOdysseyAnimation* iAnimation)
 {
     TSharedPtr<SCustomDialog> customDialog;
 
-	FText dialogTitle = LOCTEXT("export-image-sequence-dialog.title", "Export Image Sequence" );
-	FText exportText = LOCTEXT("export-image-sequence-dialog.export", "Export" );
-	FText cancelText = LOCTEXT("export-image-sequence-dialog.cancel", "Cancel");
+    FText dialogTitle = LOCTEXT("export-image-sequence-dialog.title", "Export Image Sequence" );
+    FText exportText = LOCTEXT("export-image-sequence-dialog.export", "Export" );
+    FText cancelText = LOCTEXT("export-image-sequence-dialog.cancel", "Cancel");
 
 
     TSharedRef<SOdysseyAnimationExportImageSequenceDialog> exportImageSequenceWidget = SNew(SOdysseyAnimationExportImageSequenceDialog, iAnimation);
@@ -150,13 +151,13 @@ SOdysseyAnimationExportImageSequenceDialog::GetSaveFileDialogExtension()
 }
 
 FOdysseyAnimationImageSequenceExporter::FOdysseyAnimationImageSequenceExporter()
-	: mAnimation(nullptr)
+    : mAnimation(nullptr)
 {
 }
 
 FOdysseyAnimationImageSequenceExporter::FOdysseyAnimationImageSequenceExporter(UOdysseyAnimation* iAnimation)
-	: mAnimation(iAnimation)
-	, mCustomRange(iAnimation->GetFrameRange())
+    : mAnimation(iAnimation)
+    , mCustomRange(iAnimation->GetFrameRange())
 {
 }
 
@@ -236,7 +237,7 @@ FOdysseyAnimationImageSequenceExporter::GetSources()
 void
 SOdysseyAnimationExportImageSequenceDialog::Export()
 {
-	IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
+    IDesktopPlatform* desktopPlatformHandle = FDesktopPlatformModule::Get();
     TArray< FString > filenames;
     bool saveSuccess = desktopPlatformHandle->SaveFileDialog(
         FSlateApplication::Get().FindBestParentWindowHandleForDialogs(nullptr)
@@ -251,7 +252,7 @@ SOdysseyAnimationExportImageSequenceDialog::Export()
     if( !saveSuccess || filenames.Num() <= 0 )
         return;
 
-	mExporter.Export(filenames[0]);
+    mExporter.Export(filenames[0]);
 }
 
 void
@@ -262,13 +263,13 @@ FOdysseyAnimationImageSequenceExporter::Export(const FString& iFilename)
     FScopedSlowTask progressBar(sources.Num(), LOCTEXT("timeline-tab.export-image-sequence.progress-bar.title", "Exporting Image Sequence"));
     progressBar.MakeDialog();
 
-	TArray<FInt32Range> ranges;
-	for (const FSource& source : sources)
-	{
-		ranges.Add(GetSourceRange(source));
-	}
-	FInt32Range fullRange = FInt32Range::Hull(ranges);
-	FString endFrameStr = FString::FromInt(fullRange.GetUpperBoundValue());
+    TArray<FInt32Range> ranges;
+    for (const FSource& source : sources)
+    {
+        ranges.Add(GetSourceRange(source));
+    }
+    FInt32Range fullRange = FInt32Range::Hull(ranges);
+    FString endFrameStr = FString::FromInt(fullRange.GetUpperBoundValue());
 
     for (const FSource& source : sources)
     {
@@ -290,7 +291,7 @@ FOdysseyAnimationImageSequenceExporter::ExportSource(const FSource& iSource, con
     ::ULIS::eFileFormat exportImageFormat = FOdysseyExportImageFormat::GetFileFormat(mFormat);
     FInt32Range frameRange = GetSourceRange(iSource);
     int startFrame = frameRange.GetLowerBoundValue();
-	int endFrame = frameRange.GetUpperBoundValue();
+    int endFrame = frameRange.GetUpperBoundValue();
 
     FScopedSlowTask progressBar(endFrame - startFrame + 1);
 
@@ -318,14 +319,14 @@ FOdysseyAnimationImageSequenceExporter::ExportSource(const FSource& iSource, con
         ctx.Finish();
 
         //Path
-		
-		FString frameStr = FString::FromInt(i);
+        
+        FString frameStr = FString::FromInt(i);
         FString imagePath = folder / filename + TEXT("_");
-	 	for (int j = 0; j < iNumZero - frameStr.Len(); j++)
-		{
-			imagePath += TEXT("0");
-		}
-		imagePath += FString::Printf(TEXT("%d."), i) + extension;
+         for (int j = 0; j < iNumZero - frameStr.Len(); j++)
+        {
+            imagePath += TEXT("0");
+        }
+        imagePath += FString::Printf(TEXT("%d."), i) + extension;
         std::string str = std::string( TCHAR_TO_UTF8( *imagePath ) );
 
         bool canSaveDirectly = false;

@@ -5,6 +5,7 @@
 
 #include "OdysseyHUDHandle.h"
 #include "OdysseyHUDRectangle.h"
+#include "OdysseyHUDElement.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -41,7 +42,7 @@ UOdysseyRectangleShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 
     //Rectangle Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
     mBottomRightPoint = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
-	bool uniform = Uniform ^ mInvertUniform;
+    bool uniform = Uniform ^ mInvertUniform;
     if (uniform)
     {
         int shiftX = mBottomRightPoint.x - mTopLeftPoint.x;
@@ -100,10 +101,10 @@ UOdysseyRectangleShape::OnKeyDown(const FKey& iKey)
     }
 
     if( iKey == EKeys::LeftShift || iKey == EKeys::RightShift )
-	{
-		mInvertUniform = true;
-		return true;
-	}
+    {
+        mInvertUniform = true;
+        return true;
+    }
 
     return UOdysseyShape::OnKeyDown(iKey);
 }
@@ -114,7 +115,7 @@ UOdysseyRectangleShape::OnKeyUp(const FKey& iKey)
     if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
     {
         mInvertUniform = false;
-		return true;
+        return true;
     }
 
     return UOdysseyShape::OnKeyUp(iKey);

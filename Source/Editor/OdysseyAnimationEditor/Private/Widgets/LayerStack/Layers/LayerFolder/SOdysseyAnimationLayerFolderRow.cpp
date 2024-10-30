@@ -36,10 +36,10 @@ void SOdysseyAnimationLayerFolderRow::Construct(
         SOdysseyAnimationLayerRow::FArguments(),
         iOwnerTableView,
         iExtension,
-		iAnimationLayerFolder
+        iAnimationLayerFolder
     );
 
-	SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
+    SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -47,13 +47,13 @@ void SOdysseyAnimationLayerFolderRow::Construct(
 TSharedRef<SWidget>
 SOdysseyAnimationLayerFolderRow::GenerateHeaderWidget()
 {
-	return SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot()
+    return SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
         .VAlign(VAlign_Center)
-		[
-			//LayerName
-			SOdysseyLayerRow::GenerateHeaderWidget()
-		]
+        [
+            //LayerName
+            SOdysseyLayerRow::GenerateHeaderWidget()
+        ]
         +SHorizontalBox::Slot()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
         .VAlign(VAlign_Center)
@@ -81,7 +81,7 @@ SOdysseyAnimationLayerFolderRow::GenerateHeaderWidget()
 TSharedRef<SWidget>
 SOdysseyAnimationLayerFolderRow::GenerateOptionsWidget()
 {
-	return SNew(SHorizontalBox)
+    return SNew(SHorizontalBox)
         +SHorizontalBox::Slot()
         .Padding(FMargin(0, 0, 1.f, 0))
         [

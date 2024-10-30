@@ -6,9 +6,9 @@ using UnrealBuildTool;
 
 public class WinTab : ModuleRules
 {
-	public WinTab(ReadOnlyTargetRules Target) : base(Target)
-	{
-		Type = ModuleType.External;
+    public WinTab(ReadOnlyTargetRules Target) : base(Target)
+    {
+        Type = ModuleType.External;
 
         //if (Target.Platform == UnrealTargetPlatform.Win32 || Target.Platform == UnrealTargetPlatform.Win64)
         //{

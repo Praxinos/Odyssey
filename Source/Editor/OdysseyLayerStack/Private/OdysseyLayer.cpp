@@ -170,8 +170,8 @@ UOdysseyLayer::NameChanged()
 void
 UOdysseyLayer::IsActivatedChanged()
 {
-	if (Parent)
-		Parent->ImageRenderingCompositionChanged();
+    if (Parent)
+        Parent->ImageRenderingCompositionChanged();
     OnIsActivatedChanged().Broadcast(this);
 }
 
@@ -211,7 +211,7 @@ UOdysseyLayer::ChildrenChanged()
     if ( !layerStack )
         return;
 
-	ImageRenderingCompositionChanged();
+    ImageRenderingCompositionChanged();
     OnChildrenChanged().Broadcast(this);
     layerStack->HierarchyChanged();
 }
@@ -348,41 +348,41 @@ UOdysseyLayer::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType
 void
 UOdysseyLayer::NameBlueprintSetter(FText Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Name), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Name), Value);
 }
 
 void
 UOdysseyLayer::IsActivatedBlueprintSetter(bool Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsActivated), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsActivated), Value);
 }
 
 void
 UOdysseyLayer::IsLockedBlueprintSetter(bool Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsLocked), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsLocked), Value);
 }
 
 void
 UOdysseyLayer::DisplayChildrenBlueprintSetter(bool Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren), Value);
 }
 
 void
 UOdysseyLayer::DisplayOptionsBlueprintSetter(bool Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayOptions), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayOptions), Value);
 }
 
 void
 UOdysseyLayer::BlendModeBlueprintSetter(EOdysseyBlendingMode Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode), Value);
 }
 
 void
 UOdysseyLayer::OpacityBlueprintSetter(float Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), Value);
 }

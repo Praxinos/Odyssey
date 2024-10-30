@@ -6,25 +6,25 @@
 
 void
 SOdysseyAnimationTimelineSection::Construct(
-	const FArguments& iArgs, 
-	FOdysseyAnimationEditorExtension* iExtension
+    const FArguments& iArgs, 
+    FOdysseyAnimationEditorExtension* iExtension
 )
 {
-	mExtension = iExtension;
+    mExtension = iExtension;
     mWidthInFrames = iArgs._WidthInFrames;
 
-	ChildSlot
-	[
-		SAssignNew(mBox, SBox)
-		.WidthOverride_Raw(this, &SOdysseyAnimationTimelineSection::GetSectionWidth)
-		.MinDesiredWidth(this, &SOdysseyAnimationTimelineSection::GetSectionWidth)
-		.MaxDesiredWidth(this, &SOdysseyAnimationTimelineSection::GetSectionWidth)
-		.HAlign(iArgs._HAlign)
-		.VAlign(iArgs._VAlign)
-		[
-			iArgs._Content.Widget
-		]
-	];
+    ChildSlot
+    [
+        SAssignNew(mBox, SBox)
+        .WidthOverride_Raw(this, &SOdysseyAnimationTimelineSection::GetSectionWidth)
+        .MinDesiredWidth(this, &SOdysseyAnimationTimelineSection::GetSectionWidth)
+        .MaxDesiredWidth(this, &SOdysseyAnimationTimelineSection::GetSectionWidth)
+        .HAlign(iArgs._HAlign)
+        .VAlign(iArgs._VAlign)
+        [
+            iArgs._Content.Widget
+        ]
+    ];
 }
 
 FOdysseyAnimationEditorExtension*
@@ -36,11 +36,11 @@ SOdysseyAnimationTimelineSection::GetExtension() const
 FOptionalSize
 SOdysseyAnimationTimelineSection::GetSectionWidth() const
 {
-	return mWidthInFrames.Get() * mExtension->Timeline()->GetFrameWidth();
+    return mWidthInFrames.Get() * mExtension->Timeline()->GetFrameWidth();
 }
 
 void
 SOdysseyAnimationTimelineSection::SetContent(TSharedPtr<SWidget> iContent)
 {
-	mBox->SetContent(iContent.ToSharedRef());
+    mBox->SetContent(iContent.ToSharedRef());
 }

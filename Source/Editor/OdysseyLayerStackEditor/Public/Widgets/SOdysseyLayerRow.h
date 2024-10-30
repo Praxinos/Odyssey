@@ -29,21 +29,21 @@ public:
     //Getters
     UOdysseyLayer* GetLayer();
 
-	//Commands
-	void Rename();
+    //Commands
+    void Rename();
 
     TSharedPtr<SOdysseyLayerStackTreeView> GetTreeView() const;
 
 protected:
     //SMultiColumnTableRow overrides
     virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
-	virtual const FSlateBrush* GetBorder() const override;
+    virtual const FSlateBrush* GetBorder() const override;
 
 protected:
-	virtual TSharedRef<SWidget> GenerateHeaderWidget();
+    virtual TSharedRef<SWidget> GenerateHeaderWidget();
     virtual TSharedRef<SWidget> GenerateOptionsWidget();
     TSharedRef<SWidget> GenerateExpandableHeaderWidget();
-	TSharedRef<SWidget> GenerateDisplayOptionsWidget();
+    TSharedRef<SWidget> GenerateDisplayOptionsWidget();
     TSharedRef<SWidget> GenerateIsActivatedWidget();
     TSharedRef<SWidget> GenerateIsLockedWidget();
     
@@ -52,7 +52,7 @@ protected:
     void OnIsLockedCheckBoxStateChanged(ECheckBoxState iState);
     ECheckBoxState GetIsLockedCheckBoxState() const;
 
-	void OnLayerNameCommited(const FText& iText, ETextCommit::Type iType);
+    void OnLayerNameCommited(const FText& iText, ETextCommit::Type iType);
     FText GetLayerName() const;
     FSlateFontInfo GetLayerNameFont() const;
     bool DisplayOptions() const;

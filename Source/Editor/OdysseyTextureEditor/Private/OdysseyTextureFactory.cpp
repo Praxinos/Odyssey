@@ -25,7 +25,7 @@ UOdysseyTextureFactory::UOdysseyTextureFactory( const FObjectInitializer& iObjec
 void
 UOdysseyTextureFactory::SetConfiguration(const FOdysseyTextureConfiguration& iConfiguration)
 {
-	mTextureConfiguration = iConfiguration;
+    mTextureConfiguration = iConfiguration;
 }
 
 bool UOdysseyTextureFactory::ConfigureProperties()

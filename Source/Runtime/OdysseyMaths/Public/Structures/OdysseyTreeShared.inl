@@ -18,7 +18,7 @@ template< typename tDerived >
 void
 FOdysseyNTreeShared<tDerived>::AddChild( TSharedPtr<tDerived> iChild, int iIndexEmplace )
 {
-	TSharedPtr<FOdysseyNTreeShared<tDerived>> parent = this->AsShared();
+    TSharedPtr<FOdysseyNTreeShared<tDerived>> parent = this->AsShared();
     
     TSharedPtr<tDerived> oldParent = iChild->GetParent();
     if (oldParent != nullptr)
@@ -59,8 +59,8 @@ FOdysseyNTreeShared<tDerived>::MoveTo( TSharedPtr<tDerived> iNode, ePosition iPo
     checkf( iNode != nullptr, TEXT("Null node passed in MoveTo of FOdysseyNTreeShared") );
     checkf( iNode->mParent != nullptr || ( iPosition != ePosition::kBefore && iPosition != ePosition::kAfter ), TEXT("Cannot move a node after or before the root of the tree") );
     
-	TSharedPtr<FOdysseyNTreeShared<tDerived>> selfRef = this->AsShared();
-	TSharedPtr<tDerived> self = StaticCastSharedPtr<tDerived>(selfRef);
+    TSharedPtr<FOdysseyNTreeShared<tDerived>> selfRef = this->AsShared();
+    TSharedPtr<tDerived> self = StaticCastSharedPtr<tDerived>(selfRef);
 
     if( iPosition == ePosition::kIn )
     {
@@ -93,7 +93,7 @@ FOdysseyNTreeShared<tDerived>::GetIndexInParent() const
     if( mParent == nullptr)
         return -1;
     
-	TSharedPtr<tDerived> parent = mParent.Pin();
+    TSharedPtr<tDerived> parent = mParent.Pin();
 
     for( int i = 0; i < parent->mChildren.Num(); i++ )
         if( this == parent->mChildren[i].Get() )
@@ -120,12 +120,12 @@ template< typename tDerived >
 void
 FOdysseyNTreeShared<tDerived>::DepthFirstSearchTree( TArray<TSharedPtr<tDerived>>* ioContents, bool iIncludeRoot )
 {
-	if (iIncludeRoot)
-	{
-		TSharedPtr<FOdysseyNTreeShared<tDerived>> selfRef = this->AsShared();
-		TSharedPtr<tDerived> self = StaticCastSharedPtr<tDerived>(selfRef);
-		ioContents->Add(self);
-	}
+    if (iIncludeRoot)
+    {
+        TSharedPtr<FOdysseyNTreeShared<tDerived>> selfRef = this->AsShared();
+        TSharedPtr<tDerived> self = StaticCastSharedPtr<tDerived>(selfRef);
+        ioContents->Add(self);
+    }
     
     if( mChildren.Num() == 0 )
         return;
@@ -140,12 +140,12 @@ template< typename tDerived >
 void
 FOdysseyNTreeShared<tDerived>::BreadthFirstSearchTree( TArray<TSharedPtr<tDerived>>* ioContents, bool iIncludeRoot )
 {
-	if (iIncludeRoot)
-	{
-		TSharedPtr<FOdysseyNTreeShared<tDerived>> selfRef = this->AsShared();
-		TSharedPtr<tDerived> self = StaticCastSharedPtr<tDerived>(selfRef);
-		ioContents->Add(self);
-	}
+    if (iIncludeRoot)
+    {
+        TSharedPtr<FOdysseyNTreeShared<tDerived>> selfRef = this->AsShared();
+        TSharedPtr<tDerived> self = StaticCastSharedPtr<tDerived>(selfRef);
+        ioContents->Add(self);
+    }
     
     if( mChildren.Num() == 0 )
         return;

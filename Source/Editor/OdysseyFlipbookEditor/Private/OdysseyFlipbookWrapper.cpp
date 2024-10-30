@@ -23,7 +23,7 @@
 FOdysseyFlipbookWrapper::~FOdysseyFlipbookWrapper()
 {
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.Remove(mOnPrePropertyChangedDelegateHandle);
-	FCoreUObjectDelegates::OnObjectPropertyChanged.Remove(mOnPropertyChangedDelegateHandle);
+    FCoreUObjectDelegates::OnObjectPropertyChanged.Remove(mOnPropertyChangedDelegateHandle);
 }
 
 FOdysseyFlipbookWrapper::FOdysseyFlipbookWrapper()
@@ -38,10 +38,10 @@ void
 FOdysseyFlipbookWrapper::CreateEmptyKeyFrame(int32 iIndex)
 {
     FPaperFlipbookKeyFrame keyframe;
-	FScopedFlipbookMutator mutator(mFlipbook);
-	mutator.KeyFrames.Insert(keyframe, iIndex);
+    FScopedFlipbookMutator mutator(mFlipbook);
+    mutator.KeyFrames.Insert(keyframe, iIndex);
     
-	mFlipbook->MarkPackageDirty();
+    mFlipbook->MarkPackageDirty();
 
     //TODO: Do it by changing UProperties
 }
@@ -63,7 +63,7 @@ bool
 FOdysseyFlipbookWrapper::CreateKeyFrame(int32 iIndex, UTexture2D** oTexture, UPaperSprite** oSprite)
 {
     // Displays a modal window asking for Width and Height of the new texture to draw in
-	// If validated, it creates a new sprite and a new texture using the same name and path as the flipbook but adding some suffixes
+    // If validated, it creates a new sprite and a new texture using the same name and path as the flipbook but adding some suffixes
     TSharedPtr<SOdysseyTextureConfigureWindow> textureConfigurationWindow = SNew( SOdysseyTextureConfigureWindow, mTextureConfiguration);
     GEditor->EditorAddModalWindow( textureConfigurationWindow.ToSharedRef() );
 
@@ -93,7 +93,7 @@ FOdysseyFlipbookWrapper::CreateKeyFrame(int32 iIndex, UTexture2D** oTexture, UPa
 
     SetSpriteTexture(sprite, texture); //Finishes the sprite initialization before giving it to the flipbook, otherwise it calls some unwanted callbacks in the GUI
     SetKeyframeSprite(iIndex, sprite);
-	return true;
+    return true;
 }
 
 //Duplication
@@ -153,7 +153,7 @@ FOdysseyFlipbookWrapper::DuplicateKeyFrame(int32 iIndex, UTexture2D** oTexture, 
         SetKeyframeSprite(iIndex + 1, sprite);
     }
 
-	return true;
+    return true;
 }
 
 bool
@@ -163,15 +163,15 @@ FOdysseyFlipbookWrapper::FixKeyFrame(int32 iIndex, UTexture2D** oTexture, UPaper
         return false;
 
     UTexture2D* texture = GetKeyframeTexture(iIndex);
-	if (texture)
-		return false;
+    if (texture)
+        return false;
 
     // Displays a modal window asking for Width and Height of the new texture to draw in
-	// If validated, it creates a new sprite and a new texture using the same name and path as the flipbook but adding some suffixes
+    // If validated, it creates a new sprite and a new texture using the same name and path as the flipbook but adding some suffixes
     TSharedPtr<SOdysseyTextureConfigureWindow> textureConfigurationWindow = SNew( SOdysseyTextureConfigureWindow );
     GEditor->EditorAddModalWindow( textureConfigurationWindow.ToSharedRef() );
 
-	//If cancel is clicked, we do nothing
+    //If cancel is clicked, we do nothing
     if(!textureConfigurationWindow->GetWindowAnswer())
         return false;
 
@@ -181,21 +181,21 @@ FOdysseyFlipbookWrapper::FixKeyFrame(int32 iIndex, UTexture2D** oTexture, UPaper
     textureConfiguration.Name = FName(*textureName);
 
     UPaperSprite* sprite = GetKeyframeSprite(iIndex);
-	if (!sprite)
-	{
+    if (!sprite)
+    {
         sprite = *oSprite = CreateSprite(spriteName);
-		if (!sprite)
-			return false;        
-	}
+        if (!sprite)
+            return false;        
+    }
 
-	texture = *oTexture = CreateTexture(textureConfiguration);
-	if (!texture)
-		return false;
+    texture = *oTexture = CreateTexture(textureConfiguration);
+    if (!texture)
+        return false;
 
     SetSpriteTexture(sprite, texture); //Finishes the sprite initialization before giving it to the flipbook, otherwise it calls some unwanted callbacks in the GUI
     SetKeyframeSprite(iIndex, sprite);
 
-	return true;
+    return true;
 }
 
 void
@@ -226,7 +226,7 @@ FOdysseyFlipbookWrapper::MoveKeyFrames(TArray<int32> iSrcIndexes, int32 iDstInde
     //insert keyframes at their new place
     mutator.KeyFrames.Insert(keyframes, fixedDestIndex);
     
-	mFlipbook->MarkPackageDirty();
+    mFlipbook->MarkPackageDirty();
 }
 
 //Deletion
@@ -236,13 +236,13 @@ FOdysseyFlipbookWrapper::RemoveKeyFrame(int32 iIndex)
     //TODO: Do it with UProperties
     FPaperFlipbookKeyFrame keyframe = mFlipbook->GetKeyFrameChecked(iIndex);
 
-	//Remove from Data
-	{
-		FScopedFlipbookMutator mutator(mFlipbook);
-		mutator.KeyFrames.RemoveAt(iIndex);
-	}
+    //Remove from Data
+    {
+        FScopedFlipbookMutator mutator(mFlipbook);
+        mutator.KeyFrames.RemoveAt(iIndex);
+    }
     
-	mFlipbook->MarkPackageDirty();
+    mFlipbook->MarkPackageDirty();
 }
 
 void
@@ -251,13 +251,13 @@ FOdysseyFlipbookWrapper::SetKeyFrameLength(int32 iIndex, int32 iLength)
     FScopedFlipbookMutator mutator(mFlipbook);
     mutator.KeyFrames[iIndex].FrameRun = iLength;
     
-	mFlipbook->MarkPackageDirty();
+    mFlipbook->MarkPackageDirty();
 }
 
 UTexture2D*
 FOdysseyFlipbookWrapper::CreateTexture(FOdysseyTextureConfiguration iTextureConfiguration)
 {
-	//Create Asset for Texture
+    //Create Asset for Texture
     IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
     FString PackageName = FPaths::GetPath( mFlipbook->GetPathName() ) + "/";
     FString AssetName = iTextureConfiguration.Name.ToString();
@@ -266,14 +266,14 @@ FOdysseyFlipbookWrapper::CreateTexture(FOdysseyTextureConfiguration iTextureConf
 
     UTexture2D* texture2D = iTextureConfiguration.CreateTexture(package, FName(AssetName), RF_Public | RF_Standalone | RF_Transactional);
 
-	FAssetRegistryModule::AssetCreated(texture2D);
+    FAssetRegistryModule::AssetCreated(texture2D);
     
     FSavePackageArgs packageArgs;
     packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
     UPackage::SavePackage( package, texture2D, *AssetName, packageArgs );
 
-	package->MarkAsFullyLoaded();
-	texture2D->MarkPackageDirty();
+    package->MarkAsFullyLoaded();
+    texture2D->MarkPackageDirty();
 
     return texture2D;
 }
@@ -293,7 +293,7 @@ FOdysseyFlipbookWrapper::CreateSprite(FString iName)
     //Set the correct Render Geometry Type
     UClass* spriteClass = sprite->StaticClass();
 
-	FStructProperty* renderGeometryProperty = FindFProperty<FStructProperty>(spriteClass,"RenderGeometry");
+    FStructProperty* renderGeometryProperty = FindFProperty<FStructProperty>(spriteClass,"RenderGeometry");
     if (!renderGeometryProperty)
         return NULL;
 
@@ -304,21 +304,21 @@ FOdysseyFlipbookWrapper::CreateSprite(FString iName)
     geometryType->SetPropertyValue_InContainer(renderGeometryProperty->ContainerPtrToValuePtr<FSpriteGeometryCollection>(sprite), ESpritePolygonMode::SourceBoundingBox);
 
     //Init sprite
-	FSpriteAssetInitParameters spriteInitParams;
+    FSpriteAssetInitParameters spriteInitParams;
 
-	const UPaperImporterSettings* importerSettings = GetDefault<UPaperImporterSettings>();
-	importerSettings->ApplySettingsForSpriteInit(spriteInitParams, ESpriteInitMaterialLightingMode::Automatic);
-	sprite->InitializeSprite(spriteInitParams);
+    const UPaperImporterSettings* importerSettings = GetDefault<UPaperImporterSettings>();
+    importerSettings->ApplySettingsForSpriteInit(spriteInitParams, ESpriteInitMaterialLightingMode::Automatic);
+    sprite->InitializeSprite(spriteInitParams);
 
     //Finalize asset creation
-	FAssetRegistryModule::AssetCreated(sprite);
+    FAssetRegistryModule::AssetCreated(sprite);
     
     FSavePackageArgs packageArgs;
     packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
     UPackage::SavePackage( package, sprite, *AssetName, packageArgs );
 
-	package->MarkAsFullyLoaded();
-	sprite->MarkPackageDirty();
+    package->MarkAsFullyLoaded();
+    sprite->MarkPackageDirty();
 
     return sprite;
 }
@@ -330,7 +330,7 @@ FOdysseyFlipbookWrapper::SetKeyframeSprite(int32 iIndex, UPaperSprite* iSprite)
     FScopedFlipbookMutator mutator(mFlipbook);
     mutator.KeyFrames[iIndex].Sprite = iSprite;
     
-	mFlipbook->MarkPackageDirty();
+    mFlipbook->MarkPackageDirty();
 }
 
 void
@@ -359,21 +359,21 @@ FOdysseyFlipbookWrapper::SetSpriteTexture(UPaperSprite* iSprite, UTexture2D* iTe
 UTexture2D*
 FOdysseyFlipbookWrapper::GetKeyframeTexture(int32 iIndex)
 {
-	const UPaperSprite* sprite = GetKeyframeSprite(iIndex);
-	if (!sprite)
-		return NULL;
+    const UPaperSprite* sprite = GetKeyframeSprite(iIndex);
+    if (!sprite)
+        return NULL;
 
-	return sprite->GetSourceTexture();
+    return sprite->GetSourceTexture();
 }
 
 UPaperSprite*
 FOdysseyFlipbookWrapper::GetKeyframeSprite(int32 iIndex)
 {
     if (iIndex < 0 || iIndex >= mFlipbook->GetNumKeyFrames())
-		return NULL;
+        return NULL;
 
-	const FPaperFlipbookKeyFrame& keyFrame = mFlipbook->GetKeyFrameChecked(iIndex);
-	return keyFrame.Sprite;
+    const FPaperFlipbookKeyFrame& keyFrame = mFlipbook->GetKeyFrameChecked(iIndex);
+    return keyFrame.Sprite;
 }
 
 int32
@@ -451,7 +451,7 @@ FOdysseyFlipbookWrapper::OnFlipbookChanged()
 void
 FOdysseyFlipbookWrapper::OnPreGlobalObjectPropertyChanged(UObject* iObject, const FEditPropertyChain& iEditPropertyChain)
 {
-	if (UPaperSprite* sprite = Cast<UPaperSprite>(iObject))
+    if (UPaperSprite* sprite = Cast<UPaperSprite>(iObject))
     {
         OnPreSpriteTextureChanged(sprite, iEditPropertyChain);
     }
@@ -516,7 +516,7 @@ FOdysseyFlipbookWrapper::OnPreSpriteTextureChanged(UPaperSprite* iSprite, const 
     FProperty* property = iEditPropertyChain.GetActiveNode()->GetValue();
     if (property->GetFName() == "SourceTexture")
     {
-		FSoftObjectProperty* textureProperty = CastField<FSoftObjectProperty>(property);
+        FSoftObjectProperty* textureProperty = CastField<FSoftObjectProperty>(property);
         mSpritePreviousTexture = Cast<UTexture2D>(textureProperty->GetObjectPropertyValue(textureProperty->ContainerPtrToValuePtr<UPaperSprite>(iSprite)));
     }
 }

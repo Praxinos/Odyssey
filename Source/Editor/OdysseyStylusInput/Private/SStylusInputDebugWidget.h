@@ -10,71 +10,71 @@
 
 // A debug widget which implements the IStylusMessageHandler interface to get stylus messages
 class SStylusInputDebugWidget
-	: public SCompoundWidget
-	, public IStylusMessageHandler
+    : public SCompoundWidget
+    , public IStylusMessageHandler
 {
 public:
-	SStylusInputDebugWidget();
-	virtual ~SStylusInputDebugWidget();
+    SStylusInputDebugWidget();
+    virtual ~SStylusInputDebugWidget();
 
-	SLATE_BEGIN_ARGS(SStylusInputDebugWidget)
-	{}
-	SLATE_END_ARGS();
+    SLATE_BEGIN_ARGS(SStylusInputDebugWidget)
+    {}
+    SLATE_END_ARGS();
 
-	void Construct(const FArguments& InArgs, UOdysseyStylusInputSubsystem& InSubsystem);
-	void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& InStates, int32 InIndex)
-	{
-		State = InStates.Last();
-		LastIndex = InIndex;
-	}
+    void Construct(const FArguments& InArgs, UOdysseyStylusInputSubsystem& InSubsystem);
+    void OnStylusStateChanged(const TWeakPtr<SWidget> iWidget, const TArray<FStylusState>& InStates, int32 InIndex)
+    {
+        State = InStates.Last();
+        LastIndex = InIndex;
+    }
 
 private:
     UOdysseyStylusInputSubsystem* InputSubsystem;
-	FStylusState State;
-	int32 LastIndex;
+    FStylusState State;
+    int32 LastIndex;
 
-	ECheckBoxState IsTouching() const;
-	ECheckBoxState IsInverted() const;
+    ECheckBoxState IsTouching() const;
+    ECheckBoxState IsInverted() const;
 
-	FText GetPositionText() const { return GetVector2Text(State.GetPosition()); }
-	bool IsPositionAvailable() const { return IsAvailable( EStylusInputType::Position ); }
-	FText GetZText() const { return GetFloatText(State.GetZ()); }
-	bool IsZAvailable() const { return IsAvailable( EStylusInputType::Z ); }
+    FText GetPositionText() const { return GetVector2Text(State.GetPosition()); }
+    bool IsPositionAvailable() const { return IsAvailable( EStylusInputType::Position ); }
+    FText GetZText() const { return GetFloatText(State.GetZ()); }
+    bool IsZAvailable() const { return IsAvailable( EStylusInputType::Z ); }
 
-	FText GetTiltText() const { return GetFloatText(State.GetTilt()); }
-	bool IsTiltAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
-	FText GetTiltXText() const { return GetFloatText(State.GetTiltX()); }
-	bool IsTiltXAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
-	FText GetTiltYText() const { return GetFloatText(State.GetTiltY()); }
-	bool IsTiltYAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
-	FText GetAzimuthText() const { return GetFloatText(State.GetAzimuth()); }
-	bool IsAzimuthAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
-	FText GetAltitudeText() const { return GetFloatText(State.GetAltitude()); }
-	bool IsAltitudeAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
-	FText GetTwistText() const { return GetFloatText(State.GetTwist()); }
-	bool IsTwistAvailable() const { return IsAvailable( EStylusInputType::Twist ); }
+    FText GetTiltText() const { return GetFloatText(State.GetTilt()); }
+    bool IsTiltAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
+    FText GetTiltXText() const { return GetFloatText(State.GetTiltX()); }
+    bool IsTiltXAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
+    FText GetTiltYText() const { return GetFloatText(State.GetTiltY()); }
+    bool IsTiltYAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
+    FText GetAzimuthText() const { return GetFloatText(State.GetAzimuth()); }
+    bool IsAzimuthAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
+    FText GetAltitudeText() const { return GetFloatText(State.GetAltitude()); }
+    bool IsAltitudeAvailable() const { return IsAvailable( EStylusInputType::Tilt ); }
+    FText GetTwistText() const { return GetFloatText(State.GetTwist()); }
+    bool IsTwistAvailable() const { return IsAvailable( EStylusInputType::Twist ); }
 
-	FText GetPressureText() const { return GetFloatText(State.GetPressure()); }
-	bool IsPressureAvailable() const { return IsAvailable( EStylusInputType::Pressure ); }
-	FText GetTangentPressureText() const { return GetFloatText(State.GetTangentPressure()); }
-	bool IsPressureTangentAvailable() const { return IsAvailable( EStylusInputType::TangentPressure ); }
+    FText GetPressureText() const { return GetFloatText(State.GetPressure()); }
+    bool IsPressureAvailable() const { return IsAvailable( EStylusInputType::Pressure ); }
+    FText GetTangentPressureText() const { return GetFloatText(State.GetTangentPressure()); }
+    bool IsPressureTangentAvailable() const { return IsAvailable( EStylusInputType::TangentPressure ); }
 
-	FText GetSizeText() const { return GetVector2Text(State.GetSize()); }
-	bool IsSizeAvailable() const { return IsAvailable( EStylusInputType::Size ); }
+    FText GetSizeText() const { return GetVector2Text(State.GetSize()); }
+    bool IsSizeAvailable() const { return IsAvailable( EStylusInputType::Size ); }
 
-	FText GetIndexText() const { return FText::FromString(FString::FromInt(LastIndex)); }
+    FText GetIndexText() const { return FText::FromString(FString::FromInt(LastIndex)); }
 
-	//...
+    //...
 
-	bool IsAvailable( EStylusInputType iType ) const
-	{
-		const IStylusInputDevice* device = InputSubsystem->GetInputDevice( LastIndex );
-		if( !device )
-			return false;
+    bool IsAvailable( EStylusInputType iType ) const
+    {
+        const IStylusInputDevice* device = InputSubsystem->GetInputDevice( LastIndex );
+        if( !device )
+            return false;
 
-		return device->GetSupportedInputs().Contains( iType );
-	}
+        return device->GetSupportedInputs().Contains( iType );
+    }
 
-	static FText GetVector2Text(FVector2D Value);
-	static FText GetFloatText(float Value);
+    static FText GetVector2Text(FVector2D Value);
+    static FText GetFloatText(float Value);
 };

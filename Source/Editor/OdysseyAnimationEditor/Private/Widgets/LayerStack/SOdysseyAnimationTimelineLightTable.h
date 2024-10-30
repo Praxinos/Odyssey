@@ -12,28 +12,28 @@ class UOdysseyAnimation;
 class UOdysseyAnimationCell;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTable
-	: public SCompoundWidget
+    : public SCompoundWidget
 {
 public:
-	static inline const float mDesiredHeight = 60.f;
+    static inline const float mDesiredHeight = 60.f;
 
 public:
-	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTable)
-	{}
-	SLATE_END_ARGS()
+    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTable)
+    {}
+    SLATE_END_ARGS()
 
-	void Construct(
-		const FArguments& InArgs,
-		UOdysseyAnimationLayer* iLayer,
-		FOdysseyAnimationEditorExtension* iExtension);
-
-private:
-	void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
-	void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
-	void Update();
+    void Construct(
+        const FArguments& InArgs,
+        UOdysseyAnimationLayer* iLayer,
+        FOdysseyAnimationEditorExtension* iExtension);
 
 private:
-	UOdysseyAnimationLayer* mLayer = nullptr;
-	FOdysseyAnimationEditorExtension* mExtension = nullptr;
-	UOdysseyAnimationCell* mCurrentCell = nullptr;
+    void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
+    void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
+    void Update();
+
+private:
+    UOdysseyAnimationLayer* mLayer = nullptr;
+    FOdysseyAnimationEditorExtension* mExtension = nullptr;
+    UOdysseyAnimationCell* mCurrentCell = nullptr;
 };

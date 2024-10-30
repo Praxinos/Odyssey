@@ -4,49 +4,51 @@
 #include "OdysseyAnimationTextureResource.h"
 
 #include "OdysseyAnimationTexture.h"
+#include "RenderingThread.h"
+#include "RHI.h"
 
 FOdysseyAnimationTextureResource::~FOdysseyAnimationTextureResource()
 {
 }
 
 FOdysseyAnimationTextureResource::FOdysseyAnimationTextureResource(UOdysseyAnimationTexture& iOwner, FIntPoint& oDimensions)
-	: mOwner(iOwner)
-	, mOwnerDimensions(oDimensions)
+    : mOwner(iOwner)
+    , mOwnerDimensions(oDimensions)
 {
 }
 
 FString
 FOdysseyAnimationTextureResource::GetFriendlyName() const
 {
-	return mOwner.GetPathName();
+    return mOwner.GetPathName();
 }
 
 uint32
 FOdysseyAnimationTextureResource::GetSizeX() const
 {
-	return mOwnerDimensions.X;
+    return mOwnerDimensions.X;
 }
 
 uint32
 FOdysseyAnimationTextureResource::GetSizeY() const
 {
-	return mOwnerDimensions.Y;
+    return mOwnerDimensions.Y;
 }
 
 void
 FOdysseyAnimationTextureResource::UpdateTextureReference(FRHITexture2D* iNewTexture)
 {
-	ENQUEUE_RENDER_COMMAND(UpdateTextureReferenceData)(
-		[this, iNewTexture](FRHICommandListImmediate& RHICmdList)
-		{
-			TextureRHI = iNewTexture;
-			RHIUpdateTextureReference(mOwner.TextureReference.TextureReferenceRHI, iNewTexture);
-			if ( TextureRHI != nullptr )
-				mOwnerDimensions = FIntPoint(TextureRHI->GetSizeX(), TextureRHI->GetSizeY());
-			else
-				mOwnerDimensions = FIntPoint::ZeroValue;
-		}
-	);
+    ENQUEUE_RENDER_COMMAND(UpdateTextureReferenceData)(
+        [this, iNewTexture](FRHICommandListImmediate& RHICmdList)
+        {
+            TextureRHI = iNewTexture;
+            RHIUpdateTextureReference(mOwner.TextureReference.TextureReferenceRHI, iNewTexture);
+            if ( TextureRHI != nullptr )
+                mOwnerDimensions = FIntPoint(TextureRHI->GetSizeX(), TextureRHI->GetSizeY());
+            else
+                mOwnerDimensions = FIntPoint::ZeroValue;
+        }
+    );
     
     FRenderCommandFence fence;
     fence.BeginFence();

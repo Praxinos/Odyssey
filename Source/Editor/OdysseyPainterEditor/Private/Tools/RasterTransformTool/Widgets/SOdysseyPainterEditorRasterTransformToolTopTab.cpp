@@ -4,8 +4,9 @@
 #include "Tools/RasterTransformTool/Widgets/SOdysseyPainterEditorRasterTransformToolTopTab.h"
 #include "ISinglePropertyView.h"
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
-#include "Widgets/Layout/SUniformWrapPanel.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "Widgets/Layout/SUniformWrapPanel.h"
+#include "Widgets/Input/SButton.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

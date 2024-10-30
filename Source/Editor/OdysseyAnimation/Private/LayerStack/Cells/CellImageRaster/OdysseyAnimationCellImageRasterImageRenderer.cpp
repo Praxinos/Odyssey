@@ -90,7 +90,7 @@ FOdysseyAnimationCellImageRasterImageRenderer::Copy(const FOdysseyImageRendererC
 void
 FOdysseyAnimationCellImageRasterImageRenderer::AddReferencedObjects(FReferenceCollector& Collector)
 {
-	Collector.AddReferencedObject(mCell);
+    Collector.AddReferencedObject(mCell);
 }
 
 FString

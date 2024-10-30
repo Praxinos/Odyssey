@@ -3,8 +3,13 @@
 
 #pragma once
 
+#include "Framework/Docking/TabManager.h"
+#include "Textures/SlateIcon.h"
+
+class FBaseToolkit;
+
 class ODYSSEYEDITOR_API FOdysseyEditorTab :
-	public TSharedFromThis<FOdysseyEditorTab>
+    public TSharedFromThis<FOdysseyEditorTab>
 {
 public:
     // Construction / Destruction

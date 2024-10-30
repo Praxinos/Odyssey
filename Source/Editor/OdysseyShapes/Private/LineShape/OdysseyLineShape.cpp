@@ -4,6 +4,7 @@
 #include "LineShape/OdysseyLineShape.h"
 #include "OdysseyHUDHandle.h"
 #include "OdysseyHUDLine.h"
+#include "OdysseyHUDElement.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -42,7 +43,7 @@ UOdysseyLineShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
     //Line Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
     mEndPoint = FOdysseyPoint(iPointInTexture.x, iPointInTexture.y);
 
-	bool snapAngles = SnapAngles ^ mInvertSnapAngles;
+    bool snapAngles = SnapAngles ^ mInvertSnapAngles;
     if( snapAngles )
     {
         //TODO: Angles
@@ -93,10 +94,10 @@ UOdysseyLineShape::OnKeyDown(const FKey& iKey)
     }
 
     if( iKey == EKeys::LeftShift || iKey == EKeys::RightShift )
-	{
-		mInvertSnapAngles = true;
-		return true;
-	}
+    {
+        mInvertSnapAngles = true;
+        return true;
+    }
 
     return UOdysseyShape::OnKeyDown(iKey);
 }
@@ -107,10 +108,10 @@ UOdysseyLineShape::OnKeyUp(const FKey& iKey)
     if (iKey == EKeys::LeftShift || iKey == EKeys::RightShift)
     {
         mInvertSnapAngles = false;
-		return true;
+        return true;
     }
 
-	return UOdysseyShape::OnKeyUp(iKey);
+    return UOdysseyShape::OnKeyUp(iKey);
 }
 
 void

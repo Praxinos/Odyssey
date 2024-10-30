@@ -7,6 +7,8 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyPainterEditorRasterBaseTool.generated.h"
 
+class ISinglePropertyView;
+
 //Base tool to create options that are common to all raster tools
 UCLASS(Abstract, HideDropdown)
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterBaseTool : public UOdysseyPainterEditorTool

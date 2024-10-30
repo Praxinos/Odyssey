@@ -82,10 +82,10 @@ void
 FOdysseyAnimationEditorTimeline::CleanSelectedCells()
 {
     if (!mLayer)
-	{
-		mSelectedCells.Empty();
+    {
+        mSelectedCells.Empty();
         return;
-	}
+    }
 
     TArray<UOdysseyAnimationCell*> cells = mLayer->GetCells();
     mSelectedCells = mSelectedCells.FilterByPredicate(
@@ -100,10 +100,10 @@ void
 FOdysseyAnimationEditorTimeline::CleanCellSelectionCursor()
 {
     if (!mLayer)
-	{
-		mCellSelectionCursor = nullptr;
+    {
+        mCellSelectionCursor = nullptr;
         return;
-	}
+    }
 
     TArray<UOdysseyAnimationCell*> cells = GetSelectedCells();
     if (cells.IsEmpty())
@@ -139,11 +139,11 @@ FOdysseyAnimationEditorTimeline::BindOnCellsChanged()
     if (!layerStack)
         return;
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());    
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
     if (!currentLayer)
         return;
 
-	mLayer = currentLayer;
+    mLayer = currentLayer;
     currentLayer->OnCellsChanged().AddRaw(this, &FOdysseyAnimationEditorTimeline::OnCellsChanged);
 }
 
@@ -154,7 +154,7 @@ FOdysseyAnimationEditorTimeline::UnbindOnCellsChanged()
         return;
 
     mLayer->OnCellsChanged().RemoveAll(this);
-	mLayer = nullptr;
+    mLayer = nullptr;
 }
 
 
@@ -311,23 +311,23 @@ FOdysseyAnimationEditorTimeline::GetOffset() const
 float
 FOdysseyAnimationEditorTimeline::GetPadding() const
 {
-	return FOdysseyStyle::GetFloat(TEXT("Animation.Timeline.Padding"));
+    return FOdysseyStyle::GetFloat(TEXT("Animation.Timeline.Padding"));
 }
 
 float
 FOdysseyAnimationEditorTimeline::MousePositionToFrame(float iX) const
 {
-	float padding = FOdysseyStyle::GetFloat(TEXT("Animation.Timeline.Padding"));
+    float padding = FOdysseyStyle::GetFloat(TEXT("Animation.Timeline.Padding"));
     float frame = (iX - padding) / GetFrameWidth() + mOffset;
-	return frame;
+    return frame;
 }
 
 float
 FOdysseyAnimationEditorTimeline::FrameToMousePosition(float iFrame) const
 {
-	float padding = FOdysseyStyle::GetFloat(TEXT("Animation.Timeline.Padding"));
-	float pos = (iFrame - mOffset) * GetFrameWidth() + padding;
-	return pos;
+    float padding = FOdysseyStyle::GetFloat(TEXT("Animation.Timeline.Padding"));
+    float pos = (iFrame - mOffset) * GetFrameWidth() + padding;
+    return pos;
 }
 
 const TArray<UOdysseyAnimationCell*>&
@@ -356,4 +356,4 @@ FOdysseyAnimationEditorTimeline::OnZoomChanged()
     return mOnZoomChanged;
 }
 
-		
+        

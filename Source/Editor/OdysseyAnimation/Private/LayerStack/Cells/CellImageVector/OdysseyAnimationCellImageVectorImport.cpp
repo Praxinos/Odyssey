@@ -55,9 +55,9 @@ FOdysseyAnimationCellImageVectorImport::Read( UOdysseyAnimationCellImageVector* 
                     Ar << height;
 
                     //DEPRECATED: No need to use those values, but we still need to read them
-					if( iAnimationCellImageVector->GetEngine() == nullptr )
+                    if( iAnimationCellImageVector->GetEngine() == nullptr )
                     {
-						iAnimationCellImageVector->mEngine = new FOdysseyVectorEngine( new FOdysseyVectorGroupPaint( "Scene" )
+                        iAnimationCellImageVector->mEngine = new FOdysseyVectorEngine( new FOdysseyVectorGroupPaint( "Scene" )
                                        , (double)width
                                        , (double)height );
                     }
@@ -90,7 +90,7 @@ FOdysseyAnimationCellImageVectorImport::Read( UOdysseyAnimationCellImageVector* 
                 break;
 
                 default:
-				// Mandatory
+                // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
             }

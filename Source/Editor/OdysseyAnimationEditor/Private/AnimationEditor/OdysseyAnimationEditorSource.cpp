@@ -23,8 +23,8 @@
 const FGuid&
 FOdysseyAnimationEditorSource::StaticId()
 {
-	static FGuid id = FGuid::NewGuid();
-	return id;
+    static FGuid id = FGuid::NewGuid();
+    return id;
 }
 
 FOdysseyAnimationEditorSource::~FOdysseyAnimationEditorSource()
@@ -35,44 +35,44 @@ FOdysseyAnimationEditorSource::~FOdysseyAnimationEditorSource()
 FOdysseyAnimationEditorSource::FOdysseyAnimationEditorSource(UOdysseyAnimation* iAnimation)
     : mAnimation( iAnimation )
     , mTexture( NewObject<UOdysseyAnimationTexture>() )
-	, mPlayer ( NewObject<UOdysseyAnimationPlayer>() )
+    , mPlayer ( NewObject<UOdysseyAnimationPlayer>() )
 {
-	mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
+    mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
 }
 
 const FGuid&
 FOdysseyAnimationEditorSource::Id() const
 {
-	return StaticId();
+    return StaticId();
 }
 
 int
 FOdysseyAnimationEditorSource::Width() const
 {
-	return mAnimation->GetWidth();
+    return mAnimation->GetWidth();
 }
 
 int
 FOdysseyAnimationEditorSource::Height() const
 {
-	return mAnimation->GetHeight();
+    return mAnimation->GetHeight();
 }
 
 void
 FOdysseyAnimationEditorSource::Activate()
 {
-	AddEditedObject(mAnimation);
+    AddEditedObject(mAnimation);
 
-	FOdysseyObjectEditorUtils::SetPropertyValue(mPlayer, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationPlayer, Animation), mAnimation);
-	mTexture->SetPlayer(mPlayer);
-	mTexture->UpdateResource();
+    FOdysseyObjectEditorUtils::SetPropertyValue(mPlayer, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationPlayer, Animation), mAnimation);
+    mTexture->SetPlayer(mPlayer);
+    mTexture->UpdateResource();
 
-	//Seek at current frame 
+    //Seek at current frame 
     mPlayer->SeekToFrame(mAnimation->CurrentFrame);
-	mPlayer->OnPlay().AddRaw(this, &FOdysseyAnimationEditorSource::OnPlayerPlay);
-	mPlayer->OnStop().AddRaw(this, &FOdysseyAnimationEditorSource::OnPlayerStop);
+    mPlayer->OnPlay().AddRaw(this, &FOdysseyAnimationEditorSource::OnPlayerPlay);
+    mPlayer->OnStop().AddRaw(this, &FOdysseyAnimationEditorSource::OnPlayerStop);
 
-	mAnimation->OnCurrentFrameChanged().AddRaw(this, &FOdysseyAnimationEditorSource::OnCurrentFrameChanged);
+    mAnimation->OnCurrentFrameChanged().AddRaw(this, &FOdysseyAnimationEditorSource::OnCurrentFrameChanged);
 
     FOdysseyPainterEditorSource::Activate();
 }
@@ -80,14 +80,14 @@ FOdysseyAnimationEditorSource::Activate()
 void
 FOdysseyAnimationEditorSource::Inactivate()
 {
-	RemoveEditedObject(mAnimation);
+    RemoveEditedObject(mAnimation);
 
-	mPlayer->OnPlay().RemoveAll(this);
-	mPlayer->OnStop().RemoveAll(this);
-	mPlayer->Stop();
-	FOdysseyObjectEditorUtils::SetPropertyValue(mPlayer, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationPlayer, Animation), nullptr);
+    mPlayer->OnPlay().RemoveAll(this);
+    mPlayer->OnStop().RemoveAll(this);
+    mPlayer->Stop();
+    FOdysseyObjectEditorUtils::SetPropertyValue(mPlayer, GET_MEMBER_NAME_CHECKED( UOdysseyAnimationPlayer, Animation), nullptr);
 
-	mAnimation->OnCurrentFrameChanged().RemoveAll(this);
+    mAnimation->OnCurrentFrameChanged().RemoveAll(this);
 
     FOdysseyPainterEditorSource::Inactivate();
 }
@@ -102,9 +102,9 @@ TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 FOdysseyAnimationEditorSource::GetDisplayBlock()
 {
     //TODO: this is used only for picking a color in PainterEditor's viewport tab
-	//Find a way to do it without having that method
+    //Find a way to do it without having that method
 
-	return nullptr;
+    return nullptr;
 }
 
 UOdysseyAnimation*
@@ -116,32 +116,32 @@ FOdysseyAnimationEditorSource::GetAnimation() const
 UOdysseyAnimationLayerStack*
 FOdysseyAnimationEditorSource::GetLayerStack() const
 {
-	if (!mAnimation)
-		return nullptr;
+    if (!mAnimation)
+        return nullptr;
 
-	return mAnimation->GetLayerStack();
+    return mAnimation->GetLayerStack();
 }
 
 UOdysseyAnimationTexture*
 FOdysseyAnimationEditorSource::GetAnimationTexture() const
 {
-	return mTexture;
+    return mTexture;
 }
 
 UOdysseyAnimationPlayer*
 FOdysseyAnimationEditorSource::GetAnimationPlayer() const
 {
-	return mPlayer;
+    return mPlayer;
 }
 
 FOdysseyMediaProvider
 FOdysseyAnimationEditorSource::GetCurrentMediaProvider()
 {
-	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(GetLayerStack()->CurrentLayer.Get());
-	if (!currentLayer)
-		return FOdysseyMediaProvider();
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(GetLayerStack()->CurrentLayer.Get());
+    if (!currentLayer)
+        return FOdysseyMediaProvider();
 
-	return currentLayer->GetMediaProvider(mAnimation->CurrentFrame);
+    return currentLayer->GetMediaProvider(mAnimation->CurrentFrame);
 }
 
 //--------------------------------------------------------------------------------------
@@ -150,39 +150,39 @@ FOdysseyAnimationEditorSource::GetCurrentMediaProvider()
 void
 FOdysseyAnimationEditorSource::AddReferencedObjects(FReferenceCollector& Collector)
 {
-	FOdysseyPainterEditorSource::AddReferencedObjects(Collector);
-	Collector.AddReferencedObject(mTexture);
-	Collector.AddReferencedObject(mPlayer);
+    FOdysseyPainterEditorSource::AddReferencedObjects(Collector);
+    Collector.AddReferencedObject(mTexture);
+    Collector.AddReferencedObject(mPlayer);
 }
 
 void
 FOdysseyAnimationEditorSource::OnCurrentFrameChanged(UOdysseyAnimation* iAnimation)
 {
-	if (iAnimation != mAnimation)
-		return;
+    if (iAnimation != mAnimation)
+        return;
 
-	//Display the new current frame
-	mPlayer->SeekToFrame(mAnimation->CurrentFrame);
-	mPlayer->Stop();
+    //Display the new current frame
+    mPlayer->SeekToFrame(mAnimation->CurrentFrame);
+    mPlayer->Stop();
 }
 
 void
 FOdysseyAnimationEditorSource::OnPlayerPlay()
 {
-	if (!mAnimation)
-		return;
+    if (!mAnimation)
+        return;
 
-	mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
+    mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
 }
 
 void
 FOdysseyAnimationEditorSource::OnPlayerStop()
 {
-	if (!mAnimation)
-		return;
+    if (!mAnimation)
+        return;
 
-	mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
-	mPlayer->SeekToFrame(mAnimation->CurrentFrame);
+    mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
+    mPlayer->SeekToFrame(mAnimation->CurrentFrame);
 }
 
 //--------------------------------------------------------------------------------------
@@ -191,70 +191,70 @@ FOdysseyAnimationEditorSource::OnPlayerStop()
 void
 FOdysseyAnimationEditorSource::Clear()
 {
-	FText transactionName = LOCTEXT("actions.clear", "Clear");
+    FText transactionName = LOCTEXT("actions.clear", "Clear");
 
     UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(GetLayerStack()->CurrentLayer.Get());
-	if (!currentLayer)
-		return;
-			
+    if (!currentLayer)
+        return;
+            
 #ifdef WITH_EDITOR
-	FScopedTransaction ScopedTransaction(transactionName);
+    FScopedTransaction ScopedTransaction(transactionName);
 #endif
-	FOdysseyMediaProvider mediaProvider = currentLayer->GetMediaProvider(mAnimation->CurrentFrame);
-	if ( mediaProvider.IsLocked() )
-		return;
-		
-	if ( mediaProvider.HasMedia<FOdysseyMediaRaster>() )
-	{
-		TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
-		for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
-		{
-			TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
-			if (!rasterBlock)
-				continue;
+    FOdysseyMediaProvider mediaProvider = currentLayer->GetMediaProvider(mAnimation->CurrentFrame);
+    if ( mediaProvider.IsLocked() )
+        return;
+        
+    if ( mediaProvider.HasMedia<FOdysseyMediaRaster>() )
+    {
+        TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
+        for (TSharedPtr<FOdysseyMediaRaster> mediaRaster : mediasRaster)
+        {
+            TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRaster->GetRasterBlock();
+            if (!rasterBlock)
+                continue;
 
-			FOdysseyRasterBlockMutator mutator(rasterBlock);
-			mutator.EditTilesFromRects(
-				{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-				[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-				{
-					::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-					::ULIS::FEvent eventClear;
-					ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
-					return { eventClear };
-				}
-			);
-			mutator.Commit();
-			
-			FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mAnimation);
-			currentFrameMutator.Set(mAnimation->CurrentFrame);
-			currentFrameMutator.Commit();
-		}
-	}
-	else if (mediaProvider.HasMedia<FOdysseyMediaVector>())
-	{
-		TArray<TSharedPtr<FOdysseyMediaVector>> mediasVector = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
-		for (TSharedPtr<FOdysseyMediaVector> mediaVector : mediasVector)
-		{
-			FOdysseyVectorEngine* vectorEngine = mediaVector->GetScene()->GetEngine();
-			// needed for undos
-			GEditor->BeginTransaction(transactionName);
-			if (GUndo)
-			{
-				FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear(vectorEngine);
+            FOdysseyRasterBlockMutator mutator(rasterBlock);
+            mutator.EditTilesFromRects(
+                { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                {
+                    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+                    ::ULIS::FEvent eventClear;
+                    ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+                    return { eventClear };
+                }
+            );
+            mutator.Commit();
+            
+            FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mAnimation);
+            currentFrameMutator.Set(mAnimation->CurrentFrame);
+            currentFrameMutator.Commit();
+        }
+    }
+    else if (mediaProvider.HasMedia<FOdysseyMediaVector>())
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediasVector = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
+        for (TSharedPtr<FOdysseyMediaVector> mediaVector : mediasVector)
+        {
+            FOdysseyVectorEngine* vectorEngine = mediaVector->GetScene()->GetEngine();
+            // needed for undos
+            GEditor->BeginTransaction(transactionName);
+            if (GUndo)
+            {
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear(vectorEngine);
 
-				GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
-			
-				FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mAnimation);
-				currentFrameMutator.Set(mAnimation->CurrentFrame);
-				currentFrameMutator.Commit();
-			}
-			GEditor->EndTransaction();
+                GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
+            
+                FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mAnimation);
+                currentFrameMutator.Set(mAnimation->CurrentFrame);
+                currentFrameMutator.Commit();
+            }
+            GEditor->EndTransaction();
 
-			vectorEngine->SetScene(new FOdysseyVectorGroupPaint("Scene"));
-			vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
-		}
-	}
+            vectorEngine->SetScene(new FOdysseyVectorGroupPaint("Scene"));
+            vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
+        }
+    }
 }
 
 void FOdysseyAnimationEditorSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock> iCopyBlock)
@@ -284,27 +284,27 @@ void FOdysseyAnimationEditorSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock
             FOdysseyRasterBlockMutator mutator(rasterBlock);
             mutator.EditTilesFromRects(
                 { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-				[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-				{
-					::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-					::ULIS::FEvent eventCut;
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                {
+                    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
+                    ::ULIS::FEvent eventCut;
 
-					ctx.Blend(
-						*iCopyBlock,
-						*iBlock,
-						iCopyBlock->Rect(),
-						::ULIS::FVec2I(0, 0),
-						::ULIS::Blend_Normal,
-						::ULIS::Alpha_Sub,
-						1.f,
-						::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-						0,
-						nullptr,
-						&eventCut
-					);                        
-					
-					return { eventCut };
-				}
+                    ctx.Blend(
+                        *iCopyBlock,
+                        *iBlock,
+                        iCopyBlock->Rect(),
+                        ::ULIS::FVec2I(0, 0),
+                        ::ULIS::Blend_Normal,
+                        ::ULIS::Alpha_Sub,
+                        1.f,
+                        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+                        0,
+                        nullptr,
+                        &eventCut
+                    );                        
+                    
+                    return { eventCut };
+                }
             );
             mutator.Commit();
 
@@ -371,26 +371,26 @@ void FOdysseyAnimationEditorSource::PasteBlockToCurrentLayer(TSharedPtr<::ULIS::
             FOdysseyRasterBlockMutator mutator(rasterBlock);
             mutator.EditTilesFromRects(
                 { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-				[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-				{
-					::ULIS::FEvent eventPaste;
+                [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                {
+                    ::ULIS::FEvent eventPaste;
 
-					ctx.Blend(
-						*copyBlock,
-						*iBlock,
-						copyBlock->Rect(),
-						::ULIS::FVec2I(0, 0),
-						::ULIS::Blend_Normal,
-						::ULIS::Alpha_Normal,
-						1.f,
-						::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-						0,
-						nullptr,
-						&eventPaste);
+                    ctx.Blend(
+                        *copyBlock,
+                        *iBlock,
+                        copyBlock->Rect(),
+                        ::ULIS::FVec2I(0, 0),
+                        ::ULIS::Blend_Normal,
+                        ::ULIS::Alpha_Normal,
+                        1.f,
+                        ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
+                        0,
+                        nullptr,
+                        &eventPaste);
 
-					return { eventPaste };
+                    return { eventPaste };
 
-				}
+                }
             );
             mutator.Commit();
         }
@@ -412,37 +412,37 @@ FOdysseyAnimationEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> 
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("actions.paste", "Paste"));
 #endif
-	GetLayerStack()->Modify();
+    GetLayerStack()->Modify();
 
     UOdysseyAnimationLayerImageRaster* layer = Cast< UOdysseyAnimationLayerImageRaster >(GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-	layer->Modify();
-	
-	GetLayerStack()->CurrentLayer = layer;
+    layer->Modify();
+    
+    GetLayerStack()->CurrentLayer = layer;
 
     FPropertyChangedEvent PropertyChangedEvent(UOdysseyLayerStack::StaticClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer)), EPropertyChangeType::ValueSet);
     GetLayerStack()->PostEditChangeProperty(PropertyChangedEvent);
 
-	UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass(), mAnimation->CurrentFrame));
-	cell->Modify();
+    UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass(), mAnimation->CurrentFrame));
+    cell->Modify();
 
-	FOdysseyRasterBlockMutator blockMutator(cell->GetRasterBlock(), false);
-	blockMutator.EditTilesFromRects(
-		{ cell->GetRasterBlock()->GetRect() },
-		[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-		{
-			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(cell->GetRasterBlock()->GetFormat());
-			::ULIS::FEvent eventClear;
-			ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
-			ctx.Finish();
-			ctx.Copy(
-				*iBlock,
-				*cell->GetRasterBlock()->GetBlock()
-			);
-			ctx.Finish();
-			return {};
-		}
-	);
-	blockMutator.Commit();
+    FOdysseyRasterBlockMutator blockMutator(cell->GetRasterBlock(), false);
+    blockMutator.EditTilesFromRects(
+        { cell->GetRasterBlock()->GetRect() },
+        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+        {
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(cell->GetRasterBlock()->GetFormat());
+            ::ULIS::FEvent eventClear;
+            ctx.Clear(*iBlock, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 0, nullptr, &eventClear);
+            ctx.Finish();
+            ctx.Copy(
+                *iBlock,
+                *cell->GetRasterBlock()->GetBlock()
+            );
+            ctx.Finish();
+            return {};
+        }
+    );
+    blockMutator.Commit();
 
     FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mAnimation);
     currentFrameMutator.Set(mAnimation->CurrentFrame);
@@ -452,9 +452,9 @@ FOdysseyAnimationEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> 
 void
 FOdysseyAnimationEditorSource::RecordCurrentFrameUndo() const
 {
-	FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mAnimation);
-	currentFrameMutator.Set(mAnimation->CurrentFrame);
-	currentFrameMutator.Commit();
+    FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mAnimation);
+    currentFrameMutator.Set(mAnimation->CurrentFrame);
+    currentFrameMutator.Commit();
 }
 
 #undef LOCTEXT_NAMESPACE

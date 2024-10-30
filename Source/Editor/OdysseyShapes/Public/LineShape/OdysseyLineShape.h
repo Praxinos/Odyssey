@@ -47,6 +47,6 @@ private:
     bool mInvertSnapAngles = false;
 
 public:
-	UPROPERTY(EditAnywhere, Category="Shape")
-	bool SnapAngles = false;
+    UPROPERTY(EditAnywhere, Category="Shape")
+    bool SnapAngles = false;
 };

@@ -183,13 +183,13 @@ FOdysseyRasterBlockMutator::Abort()
 void
 FOdysseyRasterBlockMutator::Copy(TSharedPtr<::ULIS::FBlock> iBlockToCopy, const TArray<::ULIS::FRectI>& iRects)
 {
-	EditTilesFromRects(iRects,
-		[this, iBlockToCopy](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-		{
-			::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
-			ctx.ConvertFormat(*iBlockToCopy, *mBlock);
-			ctx.Finish();
-			return {};
-		}
-	);
+    EditTilesFromRects(iRects,
+        [this, iBlockToCopy](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+        {
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iBlock->Format());
+            ctx.ConvertFormat(*iBlockToCopy, *mBlock);
+            ctx.Finish();
+            return {};
+        }
+    );
 }

@@ -22,6 +22,7 @@
 #include "OdysseyBrushThumbnailRenderer.h"
 #include "ObjectTools.h"
 #include "UObject/SavePackage.h"
+#include "Widgets/Input/SButton.h"
 
 #include "OdysseyBrushEditorModule.h"
 

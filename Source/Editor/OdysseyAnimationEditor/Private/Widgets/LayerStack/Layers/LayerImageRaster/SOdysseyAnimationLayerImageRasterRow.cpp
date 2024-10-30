@@ -41,10 +41,10 @@ void SOdysseyAnimationLayerImageRasterRow::Construct(
         SOdysseyAnimationLayerRow::FArguments(),
         iOwnerTableView,
         iExtension,
-		iAnimationLayerImageRaster
+        iAnimationLayerImageRaster
     );
 
-	SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
+    SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -111,7 +111,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateHeaderWidget()
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
 {
-	return SNew(SVerticalBox)
+    return SNew(SVerticalBox)
         + SVerticalBox::Slot()
         .Padding(FMargin(0, 2.f, 0, 0))
         .AutoHeight()
@@ -153,7 +153,7 @@ SOdysseyAnimationLayerImageRasterRow::GenerateOptionsWidget()
         [
             SNew(SOdysseyAnimationTimelineLightTableHeader)
             .Layer(mAnimationLayerImageRaster)
-		    .Visibility(this, &SOdysseyAnimationLayerImageRasterRow::GetLightTableVisibility)
+            .Visibility(this, &SOdysseyAnimationLayerImageRasterRow::GetLightTableVisibility)
         ];
 }
 
@@ -167,8 +167,8 @@ SOdysseyAnimationLayerImageRasterRow::GenerateTimelineWidget()
 void
 SOdysseyAnimationLayerImageRasterRow::OnLightTableCheckStateChanged(ECheckBoxState iState)
 {
-	FOdysseyAnimationLightTable lighttable = mAnimationLayerImageRaster->Lighttable;
-	lighttable.bIsActivated = iState == ECheckBoxState::Checked;
+    FOdysseyAnimationLightTable lighttable = mAnimationLayerImageRaster->Lighttable;
+    lighttable.bIsActivated = iState == ECheckBoxState::Checked;
     FOdysseyObjectEditorUtils::SetPropertyValue(mAnimationLayerImageRaster, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
     GetTreeView()->RequestTreeRefresh(); //needed to display layers previously hidden
 }
@@ -215,13 +215,13 @@ SOdysseyAnimationLayerImageRasterRow::OnOpacityEndSliderMovement(int iValue)
 ECheckBoxState
 SOdysseyAnimationLayerImageRasterRow::GetLightTableIsChecked() const
 {
-	return mAnimationLayerImageRaster->Lighttable.bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mAnimationLayerImageRaster->Lighttable.bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 ECheckBoxState
 SOdysseyAnimationLayerImageRasterRow::GetIsAlphaLockedIsChecked() const
 {
-	return mAnimationLayerImageRaster->IsAlphaLocked ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mAnimationLayerImageRaster->IsAlphaLocked ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 void

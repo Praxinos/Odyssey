@@ -66,14 +66,14 @@ FOdysseyRasterBlockImport::Read( FOdysseyRasterBlock* iRasterBlock
 
                 case FOdysseyFile::RasterBlock::CHUNK_RASTERBLOCK_FORMAT :
                 {
-					int format = iRasterBlock->mFormat;
+                    int format = iRasterBlock->mFormat;
                     Ar << format;
-					iRasterBlock->mFormat = (::ULIS::eFormat)format;
+                    iRasterBlock->mFormat = (::ULIS::eFormat)format;
                 }
                 break;
 
                 default:
-				// Mandatory
+                // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
             }

@@ -7,16 +7,16 @@
 #include "IMediaView.h"
 
 class ODYSSEYANIMATION_API FOdysseyAnimationMediaView
-	: public IMediaView
+    : public IMediaView
 {
 public:
     FOdysseyAnimationMediaView();
 
 public:
-	void Init(TWeakPtr<class FOdysseyAnimationMediaPlayer> iPlayer);
-	void OnOpen();
-	void OnClose();
+    void Init(TWeakPtr<class FOdysseyAnimationMediaPlayer> iPlayer);
+    void OnOpen();
+    void OnClose();
 
 private:
-	TWeakPtr<class FOdysseyAnimationMediaPlayer> mPlayer;
+    TWeakPtr<class FOdysseyAnimationMediaPlayer> mPlayer;
 };

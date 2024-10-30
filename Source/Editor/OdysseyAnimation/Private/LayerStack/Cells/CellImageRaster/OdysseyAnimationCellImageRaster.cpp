@@ -24,18 +24,18 @@ UOdysseyAnimationCellImageRaster::PostInitProperties()
 {
     Super::PostInitProperties();
 
-	if (GetFlags() & RF_ClassDefaultObject)
-		return;
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
 
-	int width = GetAnimation()->GetWidth();
-	int height = GetAnimation()->GetHeight();
-	::ULIS::eFormat format = GetAnimation()->GetFormat();
+    int width = GetAnimation()->GetWidth();
+    int height = GetAnimation()->GetHeight();
+    ::ULIS::eFormat format = GetAnimation()->GetFormat();
 
-	mRasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyAnimationCellImageRaster*>(this), width, height, format);
+    mRasterBlock = MakeShared<FOdysseyRasterBlock>(const_cast<UOdysseyAnimationCellImageRaster*>(this), width, height, format);
 
-	mRasterBlock->OnBlockChanged().AddUObject(const_cast<UOdysseyAnimationCellImageRaster*>(this), &UOdysseyAnimationCellImageRaster::OnBlockChanged);
-	mRasterBlock->OnBlockCommited().AddUObject(const_cast<UOdysseyAnimationCellImageRaster*>(this), &UOdysseyAnimationCellImageRaster::OnBlockCommited);
-	mRasterBlock->PostProcess().BindUObject(const_cast<UOdysseyAnimationCellImageRaster*>(this), &UOdysseyAnimationCellImageRaster::RasterBlockPostProcess);
+    mRasterBlock->OnBlockChanged().AddUObject(const_cast<UOdysseyAnimationCellImageRaster*>(this), &UOdysseyAnimationCellImageRaster::OnBlockChanged);
+    mRasterBlock->OnBlockCommited().AddUObject(const_cast<UOdysseyAnimationCellImageRaster*>(this), &UOdysseyAnimationCellImageRaster::OnBlockCommited);
+    mRasterBlock->PostProcess().BindUObject(const_cast<UOdysseyAnimationCellImageRaster*>(this), &UOdysseyAnimationCellImageRaster::RasterBlockPostProcess);
 }
 
 void
@@ -45,26 +45,26 @@ UOdysseyAnimationCellImageRaster::PostDuplicate(EDuplicateMode::Type iDuplicateM
 
     //The cell could be duplicated in a different animation with different parameters
     //Ensure the block uses those parameters
-	::ULIS::eFormat format = GetAnimation()->GetFormat();
-	int width = GetAnimation()->GetWidth();
-	int height = GetAnimation()->GetHeight();
-	mRasterBlock->PostDuplicate();
-	mRasterBlock->ConvertTo(width, height, format);
+    ::ULIS::eFormat format = GetAnimation()->GetFormat();
+    int width = GetAnimation()->GetWidth();
+    int height = GetAnimation()->GetHeight();
+    mRasterBlock->PostDuplicate();
+    mRasterBlock->ConvertTo(width, height, format);
 
-	mRasterBlock->OnBlockChanged().AddUObject(this, &UOdysseyAnimationCellImageRaster::OnBlockChanged);
-	mRasterBlock->OnBlockCommited().AddUObject(this, &UOdysseyAnimationCellImageRaster::OnBlockCommited);
-	mRasterBlock->PostProcess().BindUObject(this, &UOdysseyAnimationCellImageRaster::RasterBlockPostProcess);
+    mRasterBlock->OnBlockChanged().AddUObject(this, &UOdysseyAnimationCellImageRaster::OnBlockChanged);
+    mRasterBlock->OnBlockCommited().AddUObject(this, &UOdysseyAnimationCellImageRaster::OnBlockCommited);
+    mRasterBlock->PostProcess().BindUObject(this, &UOdysseyAnimationCellImageRaster::RasterBlockPostProcess);
 }
 
 TArray<::ULIS::FEvent>
 UOdysseyAnimationCellImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList)
 {
-	UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(GetLayer());
+    UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(GetLayer());
     if (!layer || !layer->IsAlphaLocked)
         return iWaitList;
 
     //Apply AlphaLock
-	TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlock();
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = GetRasterBlock();
 
     TArray<::ULIS::FEvent> events;
     TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
@@ -131,7 +131,7 @@ UOdysseyAnimationCellImageRaster::OnBlockChanged(const TArray<::ULIS::FRectI>& i
 void
 UOdysseyAnimationCellImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& iRects)
 {
-	DirtyThumbnail();
+    DirtyThumbnail();
     ImageRenderingChanged(iRects);
 }
 

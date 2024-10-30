@@ -53,17 +53,17 @@ UOdysseyLayerStack::SupportsLayerClass(UClass* iClass) const
 void
 UOdysseyLayerStack::CurrentLayerBlueprintSetter(UOdysseyLayer* Layer)
 {
-	FObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), Layer);
+    FObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), Layer);
 }
 
 UOdysseyLayer*
 UOdysseyLayerStack::AddLayer(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLayer* ParentLayer, int IndexInParent)
 {
     TArray<UOdysseyLayer*> layers = AddLayers(LayerType, ParentLayer, IndexInParent, 1);
-	if (layers.IsEmpty())
-		return nullptr;
+    if (layers.IsEmpty())
+        return nullptr;
 
-	return layers[0];
+    return layers[0];
 }
 
 TArray<UOdysseyLayer*>
@@ -72,8 +72,8 @@ UOdysseyLayerStack::AddLayers(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLaye
     UClass* layerType = LayerType.Get();
 
     //No LayerType
-	if ( !layerType )
-		return {};
+    if ( !layerType )
+        return {};
 
     //LayerType Not supported
     if (!SupportsLayerClass(layerType))
@@ -87,18 +87,18 @@ UOdysseyLayerStack::AddLayers(TSubclassOf<UOdysseyLayer> LayerType, UOdysseyLaye
         return {};
 
     //Create the Layer
-	TArray<UOdysseyLayer*> layers;
-	for (int i = 0; i < Count; i++)
-	{
-		UOdysseyLayer* layer = CreateLayer(LayerType);
-		if (!layer )
-			return {};
+    TArray<UOdysseyLayer*> layers;
+    for (int i = 0; i < Count; i++)
+    {
+        UOdysseyLayer* layer = CreateLayer(LayerType);
+        if (!layer )
+            return {};
 
-		layers.Add(layer);
-	}
+        layers.Add(layer);
+    }
 
-	//Add the layer to the hierarchy
-	AddLayersToHierarchy(layers, ParentLayer, IndexInParent);
+    //Add the layer to the hierarchy
+    AddLayersToHierarchy(layers, ParentLayer, IndexInParent);
 
     return layers;
 }
@@ -219,7 +219,7 @@ UOdysseyLayerStack::CopyLayer(UOdysseyLayer* Layer, UOdysseyLayer* ParentLayer, 
 TArray<UOdysseyLayer*>
 UOdysseyLayerStack::CopyLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* ParentLayer, int IndexInParent)
 {
-	TArray<UOdysseyLayer*> layerCopies;
+    TArray<UOdysseyLayer*> layerCopies;
     if (!ParentLayer)
         ParentLayer = LayerRoot;
 
@@ -406,8 +406,8 @@ UOdysseyLayerStack::CanMoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* 
 void
 UOdysseyLayerStack::MoveLayer(UOdysseyLayer* Layer, UOdysseyLayer* ParentLayer, int IndexInParent)
 {
-	if ( !CanMoveLayer(Layer, ParentLayer) )
-		return;
+    if ( !CanMoveLayer(Layer, ParentLayer) )
+        return;
 
     if ( !ParentLayer )
         ParentLayer = LayerRoot;
@@ -444,23 +444,23 @@ UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
     if ( !ParentLayer )
         ParentLayer = LayerRoot;
 
-	//If the given parent can't have children or isn't contained in this layerstack
+    //If the given parent can't have children or isn't contained in this layerstack
     if ( !ParentLayer->CanHaveChildren || !ContainsLayer(ParentLayer))
-		return;
+        return;
 
-	//Sanitize Layers array
-	Layers.RemoveAll(
-		[this, ParentLayer](UOdysseyLayer* iLayer)
-		{
-			if ( !iLayer || !ContainsLayer(iLayer) )
-				return true;
+    //Sanitize Layers array
+    Layers.RemoveAll(
+        [this, ParentLayer](UOdysseyLayer* iLayer)
+        {
+            if ( !iLayer || !ContainsLayer(iLayer) )
+                return true;
 
-			if ( iLayer == ParentLayer || ParentLayer->IsChildOf(iLayer) )
-				return true;
+            if ( iLayer == ParentLayer || ParentLayer->IsChildOf(iLayer) )
+                return true;
 
-			return false;
-		}
-	);
+            return false;
+        }
+    );
 
     //Sort Layers in reverse depth order to ease the insertion of layers in new parent later on
     Layers.Sort(
@@ -485,9 +485,9 @@ UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
         }
     );
 
-	//No Layers
-	if ( Layers.Num() <= 0 )
-		return;
+    //No Layers
+    if ( Layers.Num() <= 0 )
+        return;
 
     TArray<UOdysseyLayer*> layersParentChanged;
     TArray<UOdysseyLayer*> layersChildrenChanged;
@@ -649,7 +649,7 @@ UOdysseyLayer*
 UOdysseyLayerStack::CopyLayerInternal(UOdysseyLayer* iLayer, UOdysseyLayer* iParent , int iIndexInParent)
 {
     FObjectDuplicationParameters params(iLayer, this);
-	UOdysseyLayer* duplicatedLayer = Cast<UOdysseyLayer>(StaticDuplicateObjectEx(params));
+    UOdysseyLayer* duplicatedLayer = Cast<UOdysseyLayer>(StaticDuplicateObjectEx(params));
     if (!duplicatedLayer)
         return nullptr;
 

@@ -86,7 +86,7 @@ private:
      * @brief Refreshes all rows expansion states from the state stored in the entry
      * 
      */
-	void RefreshAllExpansionStates();
+    void RefreshAllExpansionStates();
 
     /**
      * @brief Creation of the widget to add and delete sets of palette

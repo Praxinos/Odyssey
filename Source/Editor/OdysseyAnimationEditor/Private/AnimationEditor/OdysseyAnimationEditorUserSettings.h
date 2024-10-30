@@ -39,6 +39,6 @@ public:
     UPROPERTY(config, EditAnywhere, EditFixedSize, Category="Animation Flip Settings", meta=(NoElementDuplicate, EditFixedOrder, ArraySizeEnum="/Script/OdysseyAnimationEditor.EOdysseyAnimationEditorUserSettingsFlipConfigurations"))
     FOdysseyAnimationFlipConfiguration FlipConfigurations[10];
 
-	UPROPERTY(config, EditAnywhere, Category="Animation Timeline", meta = (LinearDeltaSensitivity="1"))
-	int StartFrame = 1;
+    UPROPERTY(config, EditAnywhere, Category="Animation Timeline", meta = (LinearDeltaSensitivity="1"))
+    int StartFrame = 1;
 };

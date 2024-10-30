@@ -10,6 +10,7 @@
 #include "IContentBrowserSingleton.h"
 #include "ContentBrowserModule.h"
 #include "TextureCompiler.h"
+#include "ScopedTransaction.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "UObject/SavePackage.h"
 #include "Factories/Texture2dFactoryNew.h"
@@ -42,7 +43,7 @@ FOdysseyTextureEditorLayerStackTab::~FOdysseyTextureEditorLayerStackTab()
 }
 
 FOdysseyTextureEditorLayerStackTab::FOdysseyTextureEditorLayerStackTab(FOdysseyTextureEditorExtension* iExtension)
-	: FOdysseyEditorTab(LOCTEXT( "layerstack-tab.name", "Layer Stack" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
+    : FOdysseyEditorTab(LOCTEXT( "layerstack-tab.name", "Layer Stack" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Layers16" ))
     , mExtension(iExtension)
 {
 }
@@ -67,7 +68,7 @@ void
 FOdysseyTextureEditorLayerStackTab::BindShortcuts(FBaseToolkit* iToolkit)
 {
     const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
-	MapActions(toolkitCommands);
+    MapActions(toolkitCommands);
 }
 
 void
@@ -100,7 +101,7 @@ FOdysseyTextureEditorLayerStackTab::MapActions( TSharedPtr<FUICommandList> iComm
 {
     const FOdysseyTextureEditorCommands& textureEditorCommands = FOdysseyTextureEditorCommands::Get();
 
-	#define MAP_ACTION(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyTextureEditorLayerStackTab::__VA_ARGS__ ), FCanExecuteAction() );
+    #define MAP_ACTION(action, ...) iCommandList->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyTextureEditorLayerStackTab::__VA_ARGS__ ), FCanExecuteAction() );
 
     MAP_ACTION(textureEditorCommands.ImportTexturesAsLayers, ImportTexturesAsLayers )
     MAP_ACTION(textureEditorCommands.ExportLayersAsTextures, ExportLayersAsTextures )
@@ -124,33 +125,33 @@ FOdysseyTextureEditorLayerStackTab::MapActions( TSharedPtr<FUICommandList> iComm
 void
 FOdysseyTextureEditorLayerStackTab::ExtendMenuFile( TSharedRef<FExtender> iExtender )
 {
-	TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
-	MapActions(commandList);
+    TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
+    MapActions(commandList);
     iExtender->AddMenuExtension(
-		"OdysseyFile",
-		EExtensionHook::After,
-		commandList,
-		FMenuExtensionDelegate::CreateLambda(
-			[this](FMenuBuilder& iBuilder)
-			{
-				FOdysseyPainterEditor* editor = mExtension->GetEditor();
-				if (!editor)
-					return;
+        "OdysseyFile",
+        EExtensionHook::After,
+        commandList,
+        FMenuExtensionDelegate::CreateLambda(
+            [this](FMenuBuilder& iBuilder)
+            {
+                FOdysseyPainterEditor* editor = mExtension->GetEditor();
+                if (!editor)
+                    return;
 
-				TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
-				if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
-					return;
+                TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
+                if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
+                    return;
 
-				iBuilder.BeginSection("OdysseyTexture", LOCTEXT("main-menu.file.texture-import-export-section.name", "Texture Import/Export"));
-				{
-					iBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ImportTexturesAsLayers );
-					iBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportLayersAsTextures );
-					iBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportCurrentLayerAsTexture );
-					iBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportTextureToOperatingSystem );
-				}
-				iBuilder.EndSection();
-			}
-		)
+                iBuilder.BeginSection("OdysseyTexture", LOCTEXT("main-menu.file.texture-import-export-section.name", "Texture Import/Export"));
+                {
+                    iBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ImportTexturesAsLayers );
+                    iBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportLayersAsTextures );
+                    iBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportCurrentLayerAsTexture );
+                    iBuilder.AddMenuEntry( FOdysseyTextureEditorCommands::Get().ExportTextureToOperatingSystem );
+                }
+                iBuilder.EndSection();
+            }
+        )
     );
 }
 
@@ -301,12 +302,12 @@ FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
         FOdysseyRasterBlockMutator rasterBlockMutator(layerImageRaster->GetRasterBlock(), false);
         rasterBlockMutator.EditTilesFromRects(
             { textureBlock->Rect() },
-			[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
-			{
-				ctx.Copy(*textureBlock, *iBlock);
-				ctx.Finish();
-				return {};
-			}
+            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
+            {
+                ctx.Copy(*textureBlock, *iBlock);
+                ctx.Finish();
+                return {};
+            }
         );
         rasterBlockMutator.Commit();
         

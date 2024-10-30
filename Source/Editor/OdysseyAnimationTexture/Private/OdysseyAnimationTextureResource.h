@@ -5,25 +5,27 @@
 
 #include "CoreMinimal.h"
 
+#include "TextureResource.h"
+
 class UOdysseyAnimationTexture;
 
 class FOdysseyAnimationTextureResource
-	: public FTextureResource
+    : public FTextureResource
 {
 public:
-	~FOdysseyAnimationTextureResource();
-	FOdysseyAnimationTextureResource(UOdysseyAnimationTexture& iOwner, FIntPoint& oDimensions);
+    ~FOdysseyAnimationTextureResource();
+    FOdysseyAnimationTextureResource(UOdysseyAnimationTexture& iOwner, FIntPoint& oDimensions);
 
 public:
-	//~ FTextureResource interface
-	virtual FString GetFriendlyName() const override;
-	virtual uint32 GetSizeX() const override;
-	virtual uint32 GetSizeY() const override;
-	
+    //~ FTextureResource interface
+    virtual FString GetFriendlyName() const override;
+    virtual uint32 GetSizeX() const override;
+    virtual uint32 GetSizeY() const override;
+    
 public:
-	void UpdateTextureReference(FRHITexture2D* iNewTexture);
+    void UpdateTextureReference(FRHITexture2D* iNewTexture);
 
 private:
-	UOdysseyAnimationTexture& mOwner;
-	FIntPoint& mOwnerDimensions;
+    UOdysseyAnimationTexture& mOwner;
+    FIntPoint& mOwnerDimensions;
 };

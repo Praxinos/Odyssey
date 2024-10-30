@@ -10,14 +10,14 @@
  * The LayerStack Editor module.
  */
 class FOdysseyLayerStackEditorModule
-	: public IModuleInterface
+    : public IModuleInterface
 {
 
 public:
     // IModuleInterface interface
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
-	// End of IModuleInterface interface
+    // End of IModuleInterface interface
 
 private:
     void RegisterCommands();

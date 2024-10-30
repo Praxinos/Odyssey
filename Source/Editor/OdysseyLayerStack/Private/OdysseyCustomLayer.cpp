@@ -11,8 +11,8 @@
  void
 UOdysseyCustomLayer::GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags) const
 {
-	Super::GetAssetRegistryTags(OutTags);
-	OutTags.Add(FAssetRegistryTag(TEXT("OdysseyLayer"), "true", FAssetRegistryTag::TT_Hidden));
+    Super::GetAssetRegistryTags(OutTags);
+    OutTags.Add(FAssetRegistryTag(TEXT("OdysseyLayer"), "true", FAssetRegistryTag::TT_Hidden));
 }
 #endif
 

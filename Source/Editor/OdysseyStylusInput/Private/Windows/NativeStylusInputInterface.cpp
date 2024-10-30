@@ -25,45 +25,45 @@ public:
     // IWindowsMessageHandler interface
 
     /**
-	 * Processes a Windows message.
-	 *
-	 * @param hwnd Handle to the window that received the message.
-	 * @param msg The message.
-	 * @param wParam Additional message information.
-	 * @param lParam Additional message information.
-	 * @param OutResult Will contain the result if the message was handled.
-	 * @return true if the message was handled, false otherwise.
-	 */
-	virtual bool ProcessMessage(HWND hwnd, uint32 msg, WPARAM wParam, LPARAM lParam, int32& OutResult) override;
+     * Processes a Windows message.
+     *
+     * @param hwnd Handle to the window that received the message.
+     * @param msg The message.
+     * @param wParam Additional message information.
+     * @param lParam Additional message information.
+     * @param OutResult Will contain the result if the message was handled.
+     * @return true if the message was handled, false otherwise.
+     */
+    virtual bool ProcessMessage(HWND hwnd, uint32 msg, WPARAM wParam, LPARAM lParam, int32& OutResult) override;
 
 public:
     HWND mHwnd{ 0 };
     TWeakPtr<SWindow> Window;
     TWeakPtr<SWidget> Widget;
 
-	FNativeStylusInputDevice mDevice;
+    FNativeStylusInputDevice mDevice;
 };
 
 FNativeStylusInputInterfaceImpl::~FNativeStylusInputInterfaceImpl()
 {
-	//needed because slate is not present in some phases of Odyssey DDC building process
-	//while we are building a new release version through Odyssey's scripts
-	if ( FSlateApplication::IsInitialized() )
-	{
-		FWindowsApplication* WindowsApplication = (FWindowsApplication*)FSlateApplication::Get().GetPlatformApplication().Get();
-		WindowsApplication->RemoveMessageHandler(*this);
-	}
+    //needed because slate is not present in some phases of Odyssey DDC building process
+    //while we are building a new release version through Odyssey's scripts
+    if ( FSlateApplication::IsInitialized() )
+    {
+        FWindowsApplication* WindowsApplication = (FWindowsApplication*)FSlateApplication::Get().GetPlatformApplication().Get();
+        WindowsApplication->RemoveMessageHandler(*this);
+    }
 }
 
 FNativeStylusInputInterfaceImpl::FNativeStylusInputInterfaceImpl()
 {
-	//needed because slate is not present in some phases of Odyssey DDC building process
-	//while we are building a new release version through Odyssey's scripts
-	if ( FSlateApplication::IsInitialized() )
-	{
-		FWindowsApplication* WindowsApplication = (FWindowsApplication*)FSlateApplication::Get().GetPlatformApplication().Get();
-		WindowsApplication->AddMessageHandler(*this);
-	}
+    //needed because slate is not present in some phases of Odyssey DDC building process
+    //while we are building a new release version through Odyssey's scripts
+    if ( FSlateApplication::IsInitialized() )
+    {
+        FWindowsApplication* WindowsApplication = (FWindowsApplication*)FSlateApplication::Get().GetPlatformApplication().Get();
+        WindowsApplication->AddMessageHandler(*this);
+    }
 }
 
 bool
@@ -160,8 +160,8 @@ FNativeStylusInputInterface::Tick()
 
     FSlateApplication& Application = FSlateApplication::Get();
 
-	if (Application.GetMouseCaptureWindow() != nullptr)
-		return;
+    if (Application.GetMouseCaptureWindow() != nullptr)
+        return;
 
     // Get the widget hovered by the stylus/mouse
     FWidgetPath WidgetPath = Application.LocateWindowUnderMouse( Application.GetCursorPos(), Application.GetInteractiveTopLevelWindows() );

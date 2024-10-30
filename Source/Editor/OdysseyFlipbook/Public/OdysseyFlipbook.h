@@ -12,5 +12,5 @@
 UCLASS()
 class ODYSSEYFLIPBOOK_API UOdysseyFlipbook : public UObject
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 };

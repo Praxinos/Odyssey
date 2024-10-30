@@ -16,23 +16,23 @@ UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationCellImageRaster
     : public UOdysseyAnimationCell
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
-	TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
+    TSharedPtr<FOdysseyRasterBlock> GetRasterBlock() const;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
 public:
-	virtual void PostInitProperties() override;
+    virtual void PostInitProperties() override;
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
-	virtual void Serialize(FArchive& Ar) override;
-	virtual void OldSerialize(FArchive& Ar) override; //DEPRECATED: Keep that for compatibility with early versions of Odyssey
+    virtual void Serialize(FArchive& Ar) override;
+    virtual void OldSerialize(FArchive& Ar) override; //DEPRECATED: Keep that for compatibility with early versions of Odyssey
 
 public:
-	//FOdysseyImageRenderingAbility overrides
-	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
-	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
+    //FOdysseyImageRenderingAbility overrides
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
+    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
+    virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
     FCriticalSection* GetImageRenderingMutex() const;
     bool IsImageRenderingGameThreadOnly() const;
 

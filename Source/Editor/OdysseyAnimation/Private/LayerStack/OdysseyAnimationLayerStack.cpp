@@ -29,7 +29,7 @@ UOdysseyAnimationLayerStack::GetAnimation() const
         if (outer->GetClass() == UOdysseyAnimation::StaticClass())
             return Cast<UOdysseyAnimation>(outer);
 
-		outer = outer->GetOuter();
+        outer = outer->GetOuter();
     }
 
     return nullptr;    

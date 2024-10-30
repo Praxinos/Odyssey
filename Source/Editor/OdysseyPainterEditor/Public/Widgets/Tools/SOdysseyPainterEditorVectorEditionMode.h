@@ -6,6 +6,11 @@
 #include "CoreMinimal.h"
 
 #include "Tools/OdysseyPainterEditorTool.h"
+#include "Widgets/DeclarativeSyntaxSupport.h"
+#include "Styling/SlateTypes.h" //ECheckBoxState
+#include "Widgets/SCompoundWidget.h"
+
+class SCheckBox;
 
 class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorEditionMode : public SCompoundWidget
 {

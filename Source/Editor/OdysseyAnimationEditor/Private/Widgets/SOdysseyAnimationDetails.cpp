@@ -11,11 +11,11 @@ void SOdysseyAnimationDetails::Construct(const FArguments& InArgs)
     mAnimation = InArgs._Animation;
 
     FDetailsViewArgs Args;
-	Args.bHideSelectionTip = true;
+    Args.bHideSelectionTip = true;
 
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	mAnimationPropertiesWidget = PropertyModule.CreateDetailView(Args);
-	mAnimationPropertiesWidget->SetObject(mAnimation.Get());
+    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    mAnimationPropertiesWidget = PropertyModule.CreateDetailView(Args);
+    mAnimationPropertiesWidget->SetObject(mAnimation.Get());
 
     ChildSlot
     [

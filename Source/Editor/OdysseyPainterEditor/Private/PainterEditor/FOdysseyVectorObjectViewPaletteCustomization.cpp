@@ -8,6 +8,7 @@
 #include "Widgets/Input/SComboBox.h"
 #include "UObject/UObjectGlobals.h"
 #include "Editor/PropertyEditor/Public/IDetailChildrenBuilder.h"
+#include "Widgets/DeclarativeSyntaxSupport.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

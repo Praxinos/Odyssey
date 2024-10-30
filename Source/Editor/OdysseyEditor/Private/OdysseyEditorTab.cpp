@@ -3,6 +3,8 @@
 
 #include "OdysseyEditorTab.h"
 
+#include "Widgets/Docking/SDockTab.h"
+
 /////////////////////////////////////////////////////
 // FOdysseyEditorTab
 //--------------------------------------------------------------------------------------
@@ -12,10 +14,10 @@ FOdysseyEditorTab::~FOdysseyEditorTab()
 }
 
 FOdysseyEditorTab::FOdysseyEditorTab(FText iDisplayName, FSlateIcon iIcon)
-	: mDisplayName(iDisplayName)
-	, mIcon(iIcon)
-	, mShouldOpenByDefault(false)
-	, mWidget(nullptr)
+    : mDisplayName(iDisplayName)
+    , mIcon(iIcon)
+    , mShouldOpenByDefault(false)
+    , mWidget(nullptr)
 {
 }
 
@@ -25,18 +27,18 @@ FOdysseyEditorTab::FOdysseyEditorTab(FText iDisplayName, FSlateIcon iIcon)
 void
 FOdysseyEditorTab::Init()
 {
-	mWidget = CreateWidget();
+    mWidget = CreateWidget();
 }
 
 void
 FOdysseyEditorTab::Open()
 {
-	if (!CanOpen())
-		return;
+    if (!CanOpen())
+        return;
 
-	TSharedPtr< FTabManager > tabManager = GetTabManager();
-	if (!tabManager)
-		return;
+    TSharedPtr< FTabManager > tabManager = GetTabManager();
+    if (!tabManager)
+        return;
 
     tabManager->TryInvokeTab(FTabId(GetId()));
 }
@@ -44,42 +46,42 @@ FOdysseyEditorTab::Open()
 void
 FOdysseyEditorTab::Close()
 {
-	TSharedPtr< FTabManager > tabManager = GetTabManager();
-	if (!tabManager)
-		return;
+    TSharedPtr< FTabManager > tabManager = GetTabManager();
+    if (!tabManager)
+        return;
 
-	TSharedPtr< SDockTab > livetab = tabManager->FindExistingLiveTab(FTabId(GetId()));
-	if (livetab)
-		livetab->RequestCloseTab();
+    TSharedPtr< SDockTab > livetab = tabManager->FindExistingLiveTab(FTabId(GetId()));
+    if (livetab)
+        livetab->RequestCloseTab();
 }
 
 bool
 FOdysseyEditorTab::IsOpened() const
 {
-	TSharedPtr< FTabManager > tabManager = GetTabManager();
-	if (!tabManager)
-		return false;
+    TSharedPtr< FTabManager > tabManager = GetTabManager();
+    if (!tabManager)
+        return false;
 
-	TSharedPtr< SDockTab > livetab = tabManager->FindExistingLiveTab(FTabId(GetId()));
+    TSharedPtr< SDockTab > livetab = tabManager->FindExistingLiveTab(FTabId(GetId()));
     return !!livetab;
 }
 
 bool
 FOdysseyEditorTab::CanOpen() const
 {
-	return true;
+    return true;
 }
 
 const FText&
 FOdysseyEditorTab::GetName() const
 {
-	return mDisplayName;
+    return mDisplayName;
 }
 
 const FSlateIcon&
 FOdysseyEditorTab::GetIcon() const
 {
-	return mIcon;
+    return mIcon;
 }
 
 //--------------------------------------------------------------------------------------
@@ -101,62 +103,62 @@ FOdysseyEditorTab::ExtendMenu( TSharedRef<FExtender> iExtender )
 void
 FOdysseyEditorTab::SetTabManager(TSharedPtr< FTabManager > iTabManager)
 {
-	mTabManager = iTabManager;
+    mTabManager = iTabManager;
 }
 
 TSharedPtr< FTabManager >
 FOdysseyEditorTab::GetTabManager() const
 {
-	return mTabManager.Pin();
+    return mTabManager.Pin();
 }
 
 FMinorTabConfig
 FOdysseyEditorTab::GetMinorTabConfig()
 {
-	//Used to register tabs into the mode toolkit
-	//Also allows us to define a default layout
-	FMinorTabConfig config(GetId());
-	config.OnSpawnTab = FOnSpawnTab::CreateSP( AsShared(), &FOdysseyEditorTab::SpawnTab );
-	config.TabLabel = DisplayName();
-	config.TabIcon = Icon();
+    //Used to register tabs into the mode toolkit
+    //Also allows us to define a default layout
+    FMinorTabConfig config(GetId());
+    config.OnSpawnTab = FOnSpawnTab::CreateSP( AsShared(), &FOdysseyEditorTab::SpawnTab );
+    config.TabLabel = DisplayName();
+    config.TabIcon = Icon();
 
-	return config;
+    return config;
 }
 
 bool
 FOdysseyEditorTab::ShouldOpenByDefault() const
 {
-	return mShouldOpenByDefault;
+    return mShouldOpenByDefault;
 }
 
 void
 FOdysseyEditorTab::ShouldOpenByDefault(bool iShouldOpenByDefault)
 {
-	mShouldOpenByDefault = iShouldOpenByDefault;
+    mShouldOpenByDefault = iShouldOpenByDefault;
 }
 
 void
 FOdysseyEditorTab::Register( TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef)
 {
-	TSharedPtr< FTabManager > tabManager = GetTabManager();
-	if (!tabManager)
-		return;
+    TSharedPtr< FTabManager > tabManager = GetTabManager();
+    if (!tabManager)
+        return;
 
-	FOnSpawnTab onSpawnTab = FOnSpawnTab::CreateSP( AsShared(), &FOdysseyEditorTab::SpawnTab );
-	tabManager->RegisterTabSpawner(GetId(), onSpawnTab )
-		.SetDisplayName( DisplayName() )
-		.SetGroup(iWorkspaceMenuCategoryRef)
-		.SetIcon( Icon() );
+    FOnSpawnTab onSpawnTab = FOnSpawnTab::CreateSP( AsShared(), &FOdysseyEditorTab::SpawnTab );
+    tabManager->RegisterTabSpawner(GetId(), onSpawnTab )
+        .SetDisplayName( DisplayName() )
+        .SetGroup(iWorkspaceMenuCategoryRef)
+        .SetIcon( Icon() );
 }
 
 void
 FOdysseyEditorTab::Unregister()
 {
-	TSharedPtr< FTabManager > tabManager = GetTabManager();
-	if (!tabManager)
-		return;
+    TSharedPtr< FTabManager > tabManager = GetTabManager();
+    if (!tabManager)
+        return;
 
-	tabManager->UnregisterTabSpawner( GetId() );
+    tabManager->UnregisterTabSpawner( GetId() );
 }
 
 TSharedRef< SDockTab >
@@ -175,17 +177,17 @@ FOdysseyEditorTab::SpawnTab( const FSpawnTabArgs& iArgs )
 const FText&
 FOdysseyEditorTab::DisplayName() const
 {
-	return mDisplayName;
+    return mDisplayName;
 }
 
 const FSlateIcon&
 FOdysseyEditorTab::Icon() const
 {
-	return mIcon;
+    return mIcon;
 }
 
 const TSharedPtr<SWidget>&
 FOdysseyEditorTab::Widget() const
 {
-	return mWidget;
+    return mWidget;
 }

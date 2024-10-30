@@ -190,8 +190,8 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
 
     layer->RemoveCells(selectedCells);
 
-	if (layer->GetCells().IsEmpty())
-		layer->AddCell(layer->DefaultCellClass);
+    if (layer->GetCells().IsEmpty())
+        layer->AddCell(layer->DefaultCellClass);
 }
 
 
@@ -239,9 +239,9 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
 
     for (UOdysseyAnimationCell* cell : selectedCells)
     {
-		UOdysseyAnimationCell* staggerCell = layer->AddCell(UOdysseyAnimationCellImageStagger::StaticClass(), cell->IndexInLayer);
-		FOdysseyObjectEditorUtils::SetPropertyValue(staggerCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cell->Exposure);
-		layer->RemoveCell(cell);
+        UOdysseyAnimationCell* staggerCell = layer->AddCell(UOdysseyAnimationCellImageStagger::StaticClass(), cell->IndexInLayer);
+        FOdysseyObjectEditorUtils::SetPropertyValue(staggerCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cell->Exposure);
+        layer->RemoveCell(cell);
     }
 }
 
@@ -278,7 +278,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellExposure()
 
     for (UOdysseyAnimationCell* selectedCell : selectedCells)
     {
-		FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), selectedCell->Exposure + 1);
+        FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), selectedCell->Exposure + 1);
     }
 }
 
@@ -315,7 +315,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellExposure()
 
     for (UOdysseyAnimationCell* selectedCell : selectedCells)
     {
-		FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), FMath::Max(1, selectedCell->Exposure - 1));
+        FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), FMath::Max(1, selectedCell->Exposure - 1));
     }
 }
 
@@ -382,7 +382,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure()
 
                 for (UOdysseyAnimationCell* selectedCell : selectedCells)
                 {
-					FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), FMath::Max(1, value));
+                    FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), FMath::Max(1, value));
                 }
             }
         ),

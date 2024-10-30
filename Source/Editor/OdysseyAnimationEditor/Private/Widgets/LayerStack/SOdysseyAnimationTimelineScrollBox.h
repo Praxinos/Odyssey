@@ -67,12 +67,12 @@ public:
 
 public:
     virtual void OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const override;
-	virtual FChildren* GetChildren() override;
+    virtual FChildren* GetChildren() override;
 
 protected:
-	// Begin SWidget overrides.
-	virtual FVector2D ComputeDesiredSize(float) const override;
-	// End SWidget overrides.
+    // Begin SWidget overrides.
+    virtual FVector2D ComputeDesiredSize(float) const override;
+    // End SWidget overrides.
 
 private:
     float ArrangeChildHorizontalAndReturnOffset(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren, const SOdysseyAnimationTimelineScrollBox::FSlot& ThisSlot, float CurChildOffset) const;
@@ -80,6 +80,6 @@ private:
 private:
     FOdysseyAnimationEditorExtension*            mExtension;
 
-	//State
-	TPanelChildren<SOdysseyAnimationTimelineScrollBox::FSlot>   mChildren;
+    //State
+    TPanelChildren<SOdysseyAnimationTimelineScrollBox::FSlot>   mChildren;
 };

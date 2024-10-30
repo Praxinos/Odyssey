@@ -16,6 +16,7 @@
 #include "Interfaces/ITextureFormat.h"
 #include "DeviceProfiles/DeviceProfileManager.h"
 #include "RHI.h"
+#include "RHITypes.h"
 #include "Async/ParallelFor.h"
 #include "TextureCompiler.h"
 #include "OdysseyPixelFormat.h"
@@ -115,8 +116,8 @@ NewBlockFromUTextureData(UTexture2D* iTexture, ::ULIS::eFormat iFormat)
 void
 FillOdysseyBlockFromUTextureData( ::ULIS::FBlock* ioBlock, UTexture2D* iTexture, ::ULIS::eFormat iFormat )
 {
-	FTextureCompilingManager::Get().FinishCompilation({ iTexture });
-	
+    FTextureCompilingManager::Get().FinishCompilation({ iTexture });
+    
     if (!ioBlock)
         return;
 

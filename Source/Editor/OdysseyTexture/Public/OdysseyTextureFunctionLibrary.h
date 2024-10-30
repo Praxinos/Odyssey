@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Kismet/BlueprintFunctionLibrary.h"
+
 #include "OdysseyTextureFunctionLibrary.generated.h"
 
 class UOdysseyLayerStack;

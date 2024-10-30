@@ -74,8 +74,8 @@ public:
     FOnChildRemoved& OnChildRemovedDelegate();
 
 private:
-	void BroadcastChildAdded(TSharedPtr<tDerived> iChild);
-	void BroadcastChildRemoved(TSharedPtr<tDerived> iChild, TSharedPtr<tDerived> iParent, int iIndex);
+    void BroadcastChildAdded(TSharedPtr<tDerived> iChild);
+    void BroadcastChildRemoved(TSharedPtr<tDerived> iChild, TSharedPtr<tDerived> iParent, int iIndex);
 
 private:
     TArray<TSharedPtr<tDerived>> mChildren;

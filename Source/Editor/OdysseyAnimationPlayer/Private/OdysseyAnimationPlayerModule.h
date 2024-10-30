@@ -10,11 +10,11 @@
  * The Animation Asset module.
  */
 class FOdysseyAnimationPlayerModule
-	: public IModuleInterface
+    : public IModuleInterface
 {
 public:
     // IModuleInterface interface
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
-	// End of IModuleInterface interface
+    // End of IModuleInterface interface
 };

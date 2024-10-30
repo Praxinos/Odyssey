@@ -67,25 +67,25 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_BreakCell()
 
     if (currentLayer->IsLockedRecursively())
         return;
-		
-	UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(animation->CurrentFrame);
-	if (!cell)
-		return;
 
-	int frame = animation->CurrentFrame - cell->GetFrameRange().GetLowerBoundValue();
-	if (frame == 0)
-		return;
+    UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(animation->CurrentFrame);
+    if (!cell)
+        return;
+
+    int frame = animation->CurrentFrame - cell->GetFrameRange().GetLowerBoundValue();
+    if (frame == 0)
+        return;
         
 #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("global-cells-shortcuts.transaction.break-cell", "Break Cell"));
 #endif
-	UOdysseyAnimationCell* newCell = cell->Break(frame);
-	if (!newCell)
-		return;
+    UOdysseyAnimationCell* newCell = cell->Break(frame);
+    if (!newCell)
+        return;
 
-	//Remove mark from the new cell, because we consider the new cell will be modified by the user and will not represent the original cell anymore
-	//This is an arbitrary choice, you are free to change this behaviour whenever you want without any side effect
-	FOdysseyObjectEditorUtils::SetPropertyValue(newCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
+    //Remove mark from the new cell, because we consider the new cell will be modified by the user and will not represent the original cell anymore
+    //This is an arbitrary choice, you are free to change this behaviour whenever you want without any side effect
+    FOdysseyObjectEditorUtils::SetPropertyValue(newCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
 
     FOdysseyAnimationCurrentFrameMutator mutator(animation);
     mutator.Set(animation->CurrentFrame);
@@ -129,7 +129,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark()
 #endif
     for (UOdysseyAnimationCell* cell : selectedCells)
     {
-		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
+        FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
     }
 
     FOdysseyAnimationCurrentFrameMutator mutator(animation);
@@ -174,7 +174,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark(int iMarkId)
 #endif
     for (UOdysseyAnimationCell* cell : selectedCells)
     {
-		FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), iMarkId);
+        FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), iMarkId);
     }
 
     FOdysseyAnimationCurrentFrameMutator mutator(animation);

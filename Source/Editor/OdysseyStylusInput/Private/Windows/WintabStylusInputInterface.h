@@ -9,22 +9,22 @@ class FWintabStylusInputInterfaceImpl;
 
 // Implementation of the Wintab driver
 class FWintabStylusInputInterface
-	: public IStylusInputInterfaceInternal
+    : public IStylusInputInterfaceInternal
 {
 public:
-	FWintabStylusInputInterface(TUniquePtr<FWintabStylusInputInterfaceImpl> InImpl);
-	virtual ~FWintabStylusInputInterface();
+    FWintabStylusInputInterface(TUniquePtr<FWintabStylusInputInterfaceImpl> InImpl);
+    virtual ~FWintabStylusInputInterface();
 
-	virtual void Tick() override;
-	virtual int32 NumInputDevices() const override;
-	virtual IStylusInputDevice* GetInputDevice(int32 Index) const override;
+    virtual void Tick() override;
+    virtual int32 NumInputDevices() const override;
+    virtual IStylusInputDevice* GetInputDevice(int32 Index) const override;
 
     virtual TWeakPtr<SWindow> Window() const override;
     virtual TWeakPtr<SWidget> Widget() const override;
 
 private:
-	// Impl to avoid including Wintab headers.
-	TUniquePtr<FWintabStylusInputInterfaceImpl> Impl;
+    // Impl to avoid including Wintab headers.
+    TUniquePtr<FWintabStylusInputInterfaceImpl> Impl;
 };
 
 TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceWintab();

@@ -6,6 +6,7 @@
 #include "OdysseyPalette.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "ScopedTransaction.h"
 
 #define LOCTEXT_NAMESPACE "Palette"
 

@@ -9,22 +9,22 @@ class FNSEventStylusInputInterfaceImpl;
 
 // Implementation of the NSEvent (MacOSX) driver
 class FNSEventStylusInputInterface
-	: public IStylusInputInterfaceInternal
+    : public IStylusInputInterfaceInternal
 {
 public:
-	FNSEventStylusInputInterface(TUniquePtr<FNSEventStylusInputInterfaceImpl> InImpl);
-	virtual ~FNSEventStylusInputInterface();
+    FNSEventStylusInputInterface(TUniquePtr<FNSEventStylusInputInterfaceImpl> InImpl);
+    virtual ~FNSEventStylusInputInterface();
 
-	virtual void Tick() override;
-	virtual int32 NumInputDevices() const override;
-	virtual IStylusInputDevice* GetInputDevice(int32 Index) const override;
+    virtual void Tick() override;
+    virtual int32 NumInputDevices() const override;
+    virtual IStylusInputDevice* GetInputDevice(int32 Index) const override;
 
     virtual TWeakPtr<SWindow> Window() const override;
     virtual TWeakPtr<SWidget> Widget() const override;
 
 private:
-	// Impl to avoid including MacOSX headers.
-	TUniquePtr<FNSEventStylusInputInterfaceImpl> Impl;
+    // Impl to avoid including MacOSX headers.
+    TUniquePtr<FNSEventStylusInputInterfaceImpl> Impl;
 };
 
 TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceNSEvent();

@@ -30,15 +30,15 @@ public:
     ~FOdysseyRasterBlockUndo();
     FOdysseyRasterBlockUndo();
 
-	/** Makes the change to the object */
+    /** Makes the change to the object */
     //REDO
-	virtual void Apply( UObject* Object ) override;
+    virtual void Apply( UObject* Object ) override;
 
-	/** Reverts change to the object */
+    /** Reverts change to the object */
     //UNDO
-	virtual void Revert( UObject* Object ) override;
+    virtual void Revert( UObject* Object ) override;
 
-	/** Describes this change (for debugging) */
+    /** Describes this change (for debugging) */
     virtual FString ToString() const override;
 
 public:

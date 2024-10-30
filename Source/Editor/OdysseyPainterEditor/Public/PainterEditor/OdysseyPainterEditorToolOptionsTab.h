@@ -13,7 +13,7 @@ class FOdysseyPainterEditor;
 class UOdysseyPainterEditorTool;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorToolOptionsTab :
-	public FOdysseyEditorTab
+    public FOdysseyEditorTab
 {
 public:
     static const FName& StaticId();

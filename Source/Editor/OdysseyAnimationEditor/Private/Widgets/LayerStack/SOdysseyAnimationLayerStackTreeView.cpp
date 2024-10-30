@@ -33,7 +33,7 @@ SOdysseyAnimationLayerStackTreeView::Construct(const FArguments& InArgs, FOdysse
 FReply
 SOdysseyAnimationLayerStackTreeView::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
 {
-	if (mTimelineShortcuts->GetCommandList()->ProcessCommandBindings(iKeyEvent))
+    if (mTimelineShortcuts->GetCommandList()->ProcessCommandBindings(iKeyEvent))
         return FReply::Handled();
 
     return SOdysseyLayerStackTreeView::OnKeyDown(iGeometry, iKeyEvent);

@@ -4,8 +4,10 @@
 #pragma once
 
 #include "OdysseyEditorLayoutBuilder.h"
+#include "Framework/MultiBox/MultiBoxExtender.h"
 
 class FOdysseyPainterEditor;
+class FBaseToolkit;
 
 /**
  * Base class for an Editor Extension
@@ -23,7 +25,7 @@ public:
     virtual void Finalize();
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender );
     virtual void BindShortcuts(FBaseToolkit* iToolkit);
-	virtual void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
+    virtual void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
 
     FOdysseyPainterEditor* GetEditor() const;
     

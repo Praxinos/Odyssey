@@ -30,10 +30,10 @@ void SOdysseyTextureLayerImageVectorRow::Construct( const FArguments& InArgs
     SOdysseyLayerRow::Construct(
         SOdysseyLayerRow::FArguments(),
         iOwnerTableView,
-		iTextureLayerImageVector
+        iTextureLayerImageVector
     );
 
-	SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
+    SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -101,7 +101,7 @@ SOdysseyTextureLayerImageVectorRow::GenerateHeaderWidget()
 TSharedRef<SWidget>
 SOdysseyTextureLayerImageVectorRow::GenerateOptionsWidget()
 {
-	return SNew(SVerticalBox)
+    return SNew(SVerticalBox)
         + SVerticalBox::Slot()
         .Padding(FMargin(0, 2.f, 0, 0))
         .AutoHeight()
@@ -189,13 +189,13 @@ SOdysseyTextureLayerImageVectorRow::OnOpacityEndSliderMovement(int iValue)
 ECheckBoxState
 SOdysseyTextureLayerImageVectorRow::GetIsWireframeIsChecked() const
 {
-	return mTextureLayerImageVector->IsWireframe ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mTextureLayerImageVector->IsWireframe ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 ECheckBoxState
 SOdysseyTextureLayerImageVectorRow::GetIsColoredIsChecked() const
 {
-	return mTextureLayerImageVector->IsColored ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mTextureLayerImageVector->IsColored ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 void

@@ -17,7 +17,7 @@ FOdysseyViewportDrawingEditorGUI::~FOdysseyViewportDrawingEditorGUI()
 }
 
 FOdysseyViewportDrawingEditorGUI::FOdysseyViewportDrawingEditorGUI(FOdysseyViewportDrawingEditorExtension* iExtension)
-	: mExtension(iExtension)
+    : mExtension(iExtension)
 {
 }
 
@@ -27,7 +27,7 @@ FOdysseyViewportDrawingEditorGUI::FOdysseyViewportDrawingEditorGUI(FOdysseyViewp
 void
 FOdysseyViewportDrawingEditorGUI::Initialize()
 {
-	CustomizeAnimationEditorTimeline();
+    CustomizeAnimationEditorTimeline();
 }
 
 void
@@ -39,44 +39,44 @@ FOdysseyViewportDrawingEditorGUI::Finalize()
 void
 FOdysseyViewportDrawingEditorGUI::CustomizeAnimationEditorTimeline()
 {
-	FOdysseyPainterEditor* editor = mExtension->GetEditor();
-	TSharedPtr<FOdysseyAnimationEditorTimelineTab> timelineTab = editor->FindTab<FOdysseyAnimationEditorTimelineTab>();
-	if (!timelineTab)
-		return;
-	
+    FOdysseyPainterEditor* editor = mExtension->GetEditor();
+    TSharedPtr<FOdysseyAnimationEditorTimelineTab> timelineTab = editor->FindTab<FOdysseyAnimationEditorTimelineTab>();
+    if (!timelineTab)
+        return;
+    
     timelineTab->SetEmptyTimelineWidget(
-		SNew(SVerticalBox)
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		[
-			SNew(STextBlock)
-			.Text(LOCTEXT("animation.timeline-tab.empty-timeline-message-1", "Your timeline panel is empty for one of the following reasons:"))
-		]
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		[
-			SNew(STextBlock)
-			.Text(LOCTEXT("animation.timeline-tab.empty-timeline-message-2", "- The selected Actor does not use a 2D Animation"))
-		]
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		[
-			SNew(STextBlock)
-			.Text(LOCTEXT("animation.timeline-tab.empty-timeline-message-3", "- The Sequencer is not open."))
-		]
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		[
-			SNew(STextBlock)
-			.Text(LOCTEXT("animation.timeline-tab.empty-timeline-message-4", "- The 2D Animation is not used in the Sequencer as a Media Track."))
-		]
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		[
-			SNew(STextBlock)
-			.Text(LOCTEXT("animation.timeline-tab.empty-timeline-message-5", "- The cursor in the Sequencer is off of the corresponding Media Track."))
-		]
-	);
+        SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(STextBlock)
+            .Text(LOCTEXT("animation.timeline-tab.empty-timeline-message-1", "Your timeline panel is empty for one of the following reasons:"))
+        ]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(STextBlock)
+            .Text(LOCTEXT("animation.timeline-tab.empty-timeline-message-2", "- The selected Actor does not use a 2D Animation"))
+        ]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(STextBlock)
+            .Text(LOCTEXT("animation.timeline-tab.empty-timeline-message-3", "- The Sequencer is not open."))
+        ]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(STextBlock)
+            .Text(LOCTEXT("animation.timeline-tab.empty-timeline-message-4", "- The 2D Animation is not used in the Sequencer as a Media Track."))
+        ]
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(STextBlock)
+            .Text(LOCTEXT("animation.timeline-tab.empty-timeline-message-5", "- The cursor in the Sequencer is off of the corresponding Media Track."))
+        ]
+    );
 }
 
 #undef LOCTEXT_NAMESPACE
