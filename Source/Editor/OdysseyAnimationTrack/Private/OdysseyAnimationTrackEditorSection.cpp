@@ -360,18 +360,17 @@ FOdysseyAnimationTrackEditorSection::GetCollapsedSectionHeight()
 }
 
 float
-FOdysseyAnimationTrackEditorSection::GetUncollapsedSectionHeight(UOdysseyAnimationComponent* iComponent)
+FOdysseyAnimationTrackEditorSection::GetTreeViewHeight(UOdysseyAnimationComponent* iComponent)
 {
 	if (!iComponent)
-		return GetCollapsedSectionHeight();
+		return 0;
 
 	UOdysseyAnimation* animation = iComponent->GetActiveAnimation();
 	if (!animation)
-		return GetCollapsedSectionHeight();
-		
+		return 0;
+
 	int height = 0;
-	height += GetCollapsedSectionHeight(); //Expander Arrow + Name + Section Add Button
-	height += 27.f; //Expander Arrow + Name + Section Add Button
+	height += 27.f;
 	UOdysseyAnimationLayerStack* layerStack = animation->GetLayerStack();
 	TArray<UOdysseyLayer*> layers = layerStack->GetRootLayers();
 	int layersHeight = 0.f; //Initial treeview padding
@@ -380,6 +379,15 @@ FOdysseyAnimationTrackEditorSection::GetUncollapsedSectionHeight(UOdysseyAnimati
 		layersHeight += GetLayerHeight(layer);
 	}
 	height += layersHeight;
+	return height;
+}
+
+float
+FOdysseyAnimationTrackEditorSection::GetUncollapsedSectionHeight(UOdysseyAnimationComponent* iComponent)
+{		
+	int height = 0;
+	height += GetCollapsedSectionHeight(); //Expander Arrow + Name + Section Add Button
+	height += GetTreeViewHeight(iComponent);
 	return height;
 }
 

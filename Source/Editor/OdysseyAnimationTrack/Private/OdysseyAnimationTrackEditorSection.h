@@ -29,6 +29,7 @@ public:
 
 	static float GetCollapsedSectionHeight();
 	static float GetUncollapsedSectionHeight(UOdysseyAnimationComponent* iComponent);
+	static float GetTreeViewHeight(UOdysseyAnimationComponent* iComponent);
 
 private:
 	static float GetLayerHeight(UOdysseyLayer* iLayer);

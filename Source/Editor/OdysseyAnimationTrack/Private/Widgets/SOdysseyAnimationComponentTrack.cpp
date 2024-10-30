@@ -64,14 +64,25 @@ SOdysseyAnimationComponentTrack::RebuildWidgets()
 			]
 		]
 		+ SVerticalBox::Slot()
+		.AutoHeight()
 		[
-			SNew(SOdysseyAnimationLayerStackTreeView)
-			.Visibility(this, &SOdysseyAnimationComponentTrack::GetLayersVisibility)
-			.LayerStack(animation->GetLayerStack())
-			.ExternalScrollbar(SNew(SScrollBar))
+			SNew(SBox)
+			.HeightOverride(this, &SOdysseyAnimationComponentTrack::GetTreeViewHeight)
+			[
+				SNew(SOdysseyAnimationLayerStackTreeView)
+				.Visibility(this, &SOdysseyAnimationComponentTrack::GetLayersVisibility)
+				.LayerStack(animation->GetLayerStack())
+				.ExternalScrollbar(SNew(SScrollBar))
+			]
 		];
 
 	this->ChildSlot.AttachWidget(widget.ToSharedRef());
+}
+
+FOptionalSize
+SOdysseyAnimationComponentTrack::GetTreeViewHeight() const
+{
+	return FOdysseyAnimationTrackEditorSection::GetTreeViewHeight(mComponent);
 }
 
 void
