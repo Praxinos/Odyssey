@@ -80,6 +80,8 @@ private:
     ESequencerDropResult OnSequencerClassesDrop( const TArray<TWeakObjectPtr<UClass>>& iClasses, const FClassDragDropOp& iDragDropOp );
     ESequencerDropResult OnSequencerActorsDrop( const TArray<TWeakObjectPtr<AActor>>& iActors, const FActorDragDropOp& iDragDropOp );
 
+    void MovieSceneDataChanged( EMovieSceneDataChangeType iType );
+
 private:
     void OnSequencerClosed( TSharedRef<ISequencer> iSequencer );
 
@@ -94,4 +96,6 @@ private:
 
     /** Mapping of objects to their existing transform data (for comparing against new transform data) */
     TMap< TWeakObjectPtr<UObject>, FTransformData > mObjectToExistingTransform;
+
+    FDelegateHandle mMovieSceneDataChangedHandle;
 };

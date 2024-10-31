@@ -266,7 +266,7 @@ ShotSequenceTools::CameraAdded( ISequencer& iSequencer, UMovieSceneSequence* iSe
 {
     CreateCameraCut( iSequencer, iSequence, CameraGuid, FrameNumber );
 
-    SpawnAndBindPlane( iSequencer, iSequence, iSequenceID, CameraGuid, iCamera, FrameNumber, iPlaneArgs );
+    SpawnAndBindPlane( iSequencer, iSequence, iSequenceID, CameraGuid, iCamera, FrameNumber, iPlaneArgs, nullptr );
 }
 
 //static

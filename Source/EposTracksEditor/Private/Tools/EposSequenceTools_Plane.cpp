@@ -110,11 +110,11 @@ ShotSequenceTools::SpawnPlane( UWorld* iWorld, ACineCameraActor* iCamera, float 
 }
 
 //static
-void
-ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs )
+APlaneActor*
+ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs, FGuid* oGuid )
 {
     if( !GCurrentLevelEditingViewportClient )
-        return;
+        return nullptr;
 
     //---
 
@@ -139,7 +139,7 @@ ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequenc
                                               ? ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequence, iSequenceID, iPlaneArgs.mTexture.Get() )
                                               : ProjectAssetTools::CreateMaterialAndTexture( iSequencer, iSequence, iSequenceID, texture_size );
     if( !new_material )
-        return;
+        return nullptr;
 
     plane->GetStaticMeshComponent()->SetMaterial( 0, new_material );
 
@@ -164,10 +164,12 @@ ShotSequenceTools::SpawnAndBindPlane( ISequencer& iSequencer, UMovieSceneSequenc
 
     FGuid planeGuid = iSequencer.CreateBinding( *plane, plane_name );
 
-    // Should be done after CreateBinding(), otherwise CreateBinding() seems to unselect all actors but only when actors were selected before
-    GEditor->SelectActor( plane, true, true );
-
     iSequencer.OnActorAddedToSequencer().Broadcast( plane, planeGuid );
+
+    if( oGuid )
+        *oGuid = planeGuid;
+
+    return plane;
 }
 
 //---
@@ -327,15 +329,24 @@ ShotSequenceTools::CreatePlane( ISequencer& iSequencer, UMovieSceneSequence* iSe
 
     const FScopedTransaction transaction( LOCTEXT( "CreateStoryPlaneHere", "Create Storyboard Plane Here" ) );
 
-    cTemporarySwitchInner switch_to( iSequencer, iSequenceID );
+    APlaneActor* plane_actor;
 
-    //---
+    {
+        cTemporarySwitchInner switch_to( iSequencer, iSequenceID );
 
-    ShotSequenceTools::SpawnAndBindPlane( iSequencer, iSequence, iSequenceID, camera_guid, camera, iFrameNumber, iPlaneArgs );
+        //---
 
-    //---
+        plane_actor = ShotSequenceTools::SpawnAndBindPlane( iSequencer, iSequence, iSequenceID, camera_guid, camera, iFrameNumber, iPlaneArgs, nullptr );
 
-    iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+        //---
+
+        iSequencer.NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemAdded );
+    }
+
+    // Must be done after the inner/outer sequence switch
+    // Otherwise it resets the selection if GEditor->SelectActor() is called inside SpawnAndBindPlane()
+    // Furthermore the hidden flag must also be set to true now
+    GEditor->SelectActor( plane_actor, true /*bInSelected*/, true /*bNotify*/, true /*bSelectEvenIfHidden*/ );
 }
 
 //---

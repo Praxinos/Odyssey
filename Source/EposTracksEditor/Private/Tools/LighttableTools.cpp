@@ -98,6 +98,9 @@ LighttableTools::Deactivate( ISequencer* iSequencer )
             const FMovieSceneSequenceHierarchy* Hierarchy = mSequencer->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( mSequencer->GetEvaluationTemplate().GetCompiledDataID() );
             UMovieSceneSequence* subsequence = Hierarchy->FindSubSequence( iLocalSpace.SequenceID );
 
+            if( iLocalSpace.SequenceID == MovieSceneSequenceID::Root )
+                subsequence = mSequencer->GetRootMovieSceneSequence();
+
             LighttableTools::Deactivate( *mSequencer, subsequence, iLocalSpace.SequenceID, iBinding.GetObjectGuid() );
         }
 
@@ -234,9 +237,6 @@ LighttableTools::Deactivate( ISequencer& iSequencer, UMovieSceneSequence* iSeque
         FMovieSceneObjectPathChannel* channel = channels[0];
 
         TArrayView<FMovieSceneObjectPathChannelKeyValue> values = channel->GetData().GetValues();
-        if( values.Num() <= 1 )
-            continue;
-
         for( int i = 0; i < values.Num(); i++ )
         {
             UMaterialInstanceConstant* current_material = Cast<UMaterialInstanceConstant>( values[i].Get() );
@@ -325,9 +325,6 @@ LighttableTools::GetState( ISequencer& iSequencer, UMovieSceneSequence* iSequenc
         FMovieSceneObjectPathChannel* channel = channels[0];
 
         TArrayView<FMovieSceneObjectPathChannelKeyValue> values = channel->GetData().GetValues();
-        if( values.Num() <= 1 )
-            continue;
-
         for( int i = 0; i < values.Num(); i++ )
         {
             UMaterialInstanceConstant* current_material = Cast<UMaterialInstanceConstant>( values[i].Get() );
@@ -372,9 +369,6 @@ LighttableTools::IsOn( ISequencer& iSequencer, UMovieSceneSequence* iSequence, F
         FMovieSceneObjectPathChannel* channel = channels[0];
 
         TArrayView<FMovieSceneObjectPathChannelKeyValue> values = channel->GetData().GetValues();
-        if( values.Num() <= 1 )
-            continue;
-
         for( int i = 0; i < values.Num(); i++ )
         {
             UMaterialInstanceConstant* current_material = Cast<UMaterialInstanceConstant>( values[i].Get() );

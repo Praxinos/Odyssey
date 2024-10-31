@@ -5,8 +5,11 @@
 
 #include "AssetRegistry/AssetData.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "EditorLevelUtils.h"
 #include "EditorStyleSet.h"
+#include "Engine/LevelStreamingDynamic.h"
 #include "Factories/Factory.h"
+#include "FileHelpers.h"
 #include "Framework/Docking/TabManager.h"
 #include "IDetailsView.h"
 #include "IStructureDetailsView.h"
@@ -164,6 +167,34 @@ SNewStoryboardSettings::Construct( const FArguments& InArgs, EDialogType iDialog
 
     {
         mDetailsViewStoryboardSettings = PropertyEditor.CreateDetailView( DetailsViewArgs );
+        //auto IsPropertyVisible = [this]( const FPropertyAndParent& iPropertyAndParent ) -> bool
+        //    {
+        //        if( iPropertyAndParent.Property.GetName() == GET_MEMBER_NAME_STRING_CHECKED( UStoryboardSettings, LevelName ) )
+        //        {
+        //            return mStoryboardSettings->LevelDestination != ELevelDestination::CurrentLevel;
+        //        }
+        //        else if( iPropertyAndParent.Property.GetName() == GET_MEMBER_NAME_STRING_CHECKED( UStoryboardSettings, LevelPath ) )
+        //        {
+        //            return mStoryboardSettings->LevelDestination != ELevelDestination::CurrentLevel;
+        //        }
+
+        //        return true;
+        //    };
+        auto IsPropertyReadOnly = [this]( const FPropertyAndParent& iPropertyAndParent ) -> bool
+            {
+                if( iPropertyAndParent.Property.GetName() == GET_MEMBER_NAME_STRING_CHECKED( UStoryboardSettings, LevelName ) )
+                {
+                    return mStoryboardSettings->LevelDestination == ELevelDestination::CurrentLevel;
+                }
+                else if( iPropertyAndParent.Property.GetName() == GET_MEMBER_NAME_STRING_CHECKED( UStoryboardSettings, LevelPath ) )
+                {
+                    return mStoryboardSettings->LevelDestination == ELevelDestination::CurrentLevel;
+                }
+
+                return false;
+            };
+        //mDetailsViewStoryboardSettings->SetIsPropertyVisibleDelegate( FIsPropertyVisible::CreateLambda( IsPropertyVisible ) );
+        mDetailsViewStoryboardSettings->SetIsPropertyReadOnlyDelegate( FIsPropertyReadOnly::CreateLambda( IsPropertyReadOnly ) );
         mDetailsViewStoryboardSettings->OnFinishedChangingProperties().AddSP( this, &SNewStoryboardSettings::StoryboardSettingsChanged );
         mDetailsViewStoryboardSettings->SetObject( mStoryboardSettings );
     }
@@ -543,7 +574,14 @@ SNewStoryboardSettings::StoryboardSettingsChanged( const FPropertyChangedEvent& 
 
     mStoryboardSettings->StoryboardPath.Path = ObjectTools::SanitizeObjectPath( mStoryboardSettings->StoryboardPath.Path );
 
+    mStoryboardSettings->LevelName = FPaths::MakeValidFileName( mStoryboardSettings->LevelName );
+    mStoryboardSettings->LevelName = ObjectTools::SanitizeObjectName( mStoryboardSettings->LevelName );
+
+    mStoryboardSettings->LevelPath.Path = ObjectTools::SanitizeObjectPath( mStoryboardSettings->LevelPath.Path );
+
     mStoryboardSettings->SaveConfig();
+
+    mDetailsViewStoryboardSettings->ForceRefresh();
 }
 
 void
@@ -673,6 +711,22 @@ SNewStoryboardSettings::GetErrorText() const
     if( mStoryboardSettings->StoryboardPath.Path.IsEmpty() )
         return LOCTEXT( "StoryboardEmptyPath", "Error: Empty Storyboard Path" );
 
+    if( mStoryboardSettings->LevelDestination != ELevelDestination::CurrentLevel )
+    {
+        if( mStoryboardSettings->LevelName.IsEmpty() )
+            return LOCTEXT( "LevelEmptyName", "Error: Empty Level Name" );
+
+        if( mStoryboardSettings->LevelPath.Path.IsEmpty() )
+            return LOCTEXT( "LevelEmptyPath", "Error: Empty Level Path" );
+
+        FullPath = mStoryboardSettings->LevelPath.Path;
+        FullPath /= mStoryboardSettings->LevelName;
+
+        AssetData = AssetRegistryModule.Get().GetAssetByObjectPath( FSoftObjectPath( FullPath ) );
+        if( AssetData.IsValid() )
+            return LOCTEXT( "LevelExists", "Error: Level Exists" );
+    }
+
     if( mNamingConventionSettings->GlobalNaming.StudioName.IsEmpty() || mNamingConventionSettings->GlobalNaming.StudioAcronym.IsEmpty() )
         return LOCTEXT( "StoryboardEmptyStudioName", "Error: Empty Studio Name or Acronym" );
 
@@ -719,6 +773,39 @@ SNewStoryboardSettings::CanCreateStoryboard() const
 FReply
 SNewStoryboardSettings::OnCreateStoryboard()
 {
+    switch( mStoryboardSettings->LevelDestination )
+    {
+        case ELevelDestination::CurrentLevel:
+            // Nothing to do
+            break;
+
+        case ELevelDestination::NewSublevel:
+        {
+            ULevelStreaming* new_level_streaming = EditorLevelUtils::CreateNewStreamingLevelForWorld( *GWorld, ULevelStreamingDynamic::StaticClass(), mStoryboardSettings->LevelPath.Path / mStoryboardSettings->LevelName
+                                                                                                      , false /*bMoveSelectedActorsIntoNewLevel*/
+                                                                                                      , nullptr /*InTemplateWorld*/
+                                                                                                      , false /*bInUseSaveAs*/ );
+            if( !new_level_streaming )
+                return FReply::Handled();
+        }
+        break;
+
+        default:
+        case ELevelDestination::NewLevel:
+        {
+            UWorld* new_world = UEditorLoadingAndSavingUtils::NewBlankMap( true );
+            if( !new_world )
+                return FReply::Handled();
+
+            bool saved = UEditorLoadingAndSavingUtils::SaveMap( new_world, mStoryboardSettings->LevelPath.Path / mStoryboardSettings->LevelName );
+            if( !saved )
+                return FReply::Handled();
+        }
+        break;
+    }
+
+    //---
+
     UBoardSequence* board_sequence = BoardSequenceTools::CreateBoard( mStoryboardSettings->StoryboardPath.Path, mStoryboardSettings->StoryboardName );
     if( !board_sequence )
         return FReply::Handled();

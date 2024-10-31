@@ -53,7 +53,7 @@ struct FPlaneSettings
     GENERATED_BODY()
 
     /** This will make the plane bigger than the original size viewed by the camera by adding a margin to the plane */
-    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Plane", meta=(UIMin = "0", ClampMin = "0", UIMax = "25", ClampMax = "25", Units=Percent))
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Plane", meta=(UIMin = "0", ClampMin = "0", UIMax = "200", ClampMax = "200", Units=Percent))
     float SafeMargin { 0.f };
 
     /** This will rescale the original size of the plane
