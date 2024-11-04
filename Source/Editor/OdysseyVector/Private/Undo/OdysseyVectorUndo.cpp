@@ -728,9 +728,10 @@ FSnapshotTagInbetweener::RecordLocalState( FSnapshotTagInbetweener::State* iStat
 
         if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::COLOR )
         {
-            iState->color = mInbetweenerTag->GetColor();
+            iState->inbetweenColor = mInbetweenerTag->GetInbetweenColor();
             iState->chartColor = mInbetweenerTag->GetChartColor();
             iState->gridColor = mInbetweenerTag->GetGridColor();
+            iState->trajectoryColor = mInbetweenerTag->GetTrajectoryColor();
         }
 
         if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE )
@@ -852,9 +853,10 @@ FSnapshotTagInbetweener::LoadLocalState( FSnapshotTagInbetweener::State* iState 
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::COLOR )
     {
-        mInbetweenerTag->SetColor( iState->color );
+        mInbetweenerTag->SetInbetweenColor( iState->inbetweenColor );
         mInbetweenerTag->SetChartColor( iState->chartColor );
         mInbetweenerTag->SetGridColor( iState->gridColor );
+        mInbetweenerTag->SetTrajectoryColor( iState->trajectoryColor );
     }
 
     return true; // restore succeeded

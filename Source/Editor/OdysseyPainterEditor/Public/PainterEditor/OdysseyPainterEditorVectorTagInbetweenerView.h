@@ -64,9 +64,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
                  , meta = ( ToolTip  = "Divisions X"
                           , DisplayName = "Divisions X"
                           , ClampMin = "1"
-                          , ClampMax = "32"
+                          , ClampMax = "64"
                           , UIMin    = "1"
-                          , UIMax    = "32" ) )
+                          , UIMax    = "64" ) )
         uint32 DivisionX;
 
         UPROPERTY( EditAnywhere
@@ -74,9 +74,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
                  , meta = ( ToolTip  = "Divisions Y"
                           , DisplayName = "Divisions Y"
                           , ClampMin = "1"
-                          , ClampMax = "32"
+                          , ClampMax = "64"
                           , UIMin    = "1"
-                          , UIMax    = "32" ) )
+                          , UIMax    = "64" ) )
         uint32 DivisionY;
 
         UPROPERTY( EditAnywhere
@@ -96,16 +96,25 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
 
         UPROPERTY( EditAnywhere
                  , Category = "Coloring"
-                 , meta = ( ToolTip  = "Color" ) )
-        FColor Color;
+                 , meta = ( DisplayName = "Inbetween"
+                          , ToolTip  = "Inbetween Color" ) )
+        FColor InbetweenColor;
 
         UPROPERTY( EditAnywhere
                  , Category = "Coloring"
-                 , meta = ( ToolTip  = "Chart Color" ) )
+                 , meta = ( DisplayName = "Chart"
+                          , ToolTip  = "Chart Color" ) )
         FColor ChartColor;
 
         UPROPERTY( EditAnywhere
                  , Category = "Coloring"
-                 , meta = ( ToolTip  = "Grid Color" ) )
+                 , meta = ( DisplayName = "Grid"
+                          , ToolTip  = "Grid Color" ) )
         FColor GridColor;
+
+        UPROPERTY( EditAnywhere
+                 , Category = "Coloring"
+                 , meta = ( DisplayName = "Trajectory"
+                          , ToolTip  = "Trajectory Color" ) )
+        FColor TrajectoryColor;
 };

@@ -67,7 +67,6 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject
                         | INVALIDATE_ROUTES
                         | INVALIDATE_SPACING
                         | INVALIDATE_CELLS )
-    , mColor ( DEFAULT_RED_UINT8, DEFAULT_GREEN_UINT8, DEFAULT_BLUE_UINT8, DEFAULT_ALPHA_UINT8 )
     , bMapAsPolyline( true )
     , bWithThickness( true )
     , bContiguous( true )
@@ -75,8 +74,22 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject
     , bARAPPrecomputeSucceded( false )
     , mInterpolationDirection( eInbetweenerInterpolationDirection::Forward )
     , bSquare ( true )
-    , mChartColor( 64, 64, 64, 255 )
-    , mGridColor( 255, 0, 0, 255 )
+    , mInbetweenColor ( INBETWEEN_DEFAULT_RED_UINT8
+                      , INBETWEEN_DEFAULT_GREEN_UINT8
+                      , INBETWEEN_DEFAULT_BLUE_UINT8
+                      , INBETWEEN_DEFAULT_ALPHA_UINT8 )
+    , mChartColor( CHART_DEFAULT_RED_UINT8
+                 , CHART_DEFAULT_GREEN_UINT8
+                 , CHART_DEFAULT_BLUE_UINT8
+                 , CHART_DEFAULT_ALPHA_UINT8 )
+    , mGridColor( GRID_DEFAULT_RED_UINT8
+                , GRID_DEFAULT_GREEN_UINT8
+                , GRID_DEFAULT_BLUE_UINT8
+                , GRID_DEFAULT_ALPHA_UINT8 )
+    , mTrajectoryColor( TRAJECTORY_DEFAULT_RED_UINT8
+                      , TRAJECTORY_DEFAULT_GREEN_UINT8
+                      , TRAJECTORY_DEFAULT_BLUE_UINT8
+                      , TRAJECTORY_DEFAULT_ALPHA_UINT8 )
 {
     // the default breakdown (has range 0 <-> 1 )
     mBreakdownList.emplace_back( &mMasterBreakdown );
@@ -105,7 +118,7 @@ FOdysseyVectorTagInbetweener::Copy( FOdysseyVectorObject* iDestOwnerObject )
                                                                             , mGridType );
 
     newTag->mInterpolationType = mInterpolationType;
-    newTag->mColor = mColor;
+    newTag->mInbetweenColor = mInbetweenColor;
     newTag->bMapAsPolyline = bMapAsPolyline;
     newTag->bWithThickness = bWithThickness;
     newTag->bContiguous = bContiguous;
@@ -376,24 +389,45 @@ FOdysseyVectorTagInbetweener::SetMapAsPolyline( bool iMapAsPolyline )
 }
 
 const FColor&
-FOdysseyVectorTagInbetweener::GetColor()
+FOdysseyVectorTagInbetweener::GetInbetweenColor()
 {
-    return mColor;
+    return mInbetweenColor;
 }
 
 void
-FOdysseyVectorTagInbetweener::SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
+FOdysseyVectorTagInbetweener::SetInbetweenColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
 {
-    mColor.R = iR;
-    mColor.G = iG;
-    mColor.B = iB;
-    mColor.A = iA;
+    mInbetweenColor.R = iR;
+    mInbetweenColor.G = iG;
+    mInbetweenColor.B = iB;
+    mInbetweenColor.A = iA;
 }
 
 void
-FOdysseyVectorTagInbetweener::SetColor( const FColor& iColor )
+FOdysseyVectorTagInbetweener::SetInbetweenColor( const FColor& iColor )
 {
-    mColor = iColor;
+    mInbetweenColor = iColor;
+}
+
+const FColor&
+FOdysseyVectorTagInbetweener::GetTrajectoryColor()
+{
+    return mTrajectoryColor;
+}
+
+void
+FOdysseyVectorTagInbetweener::SetTrajectoryColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
+{
+    mTrajectoryColor.R = iR;
+    mTrajectoryColor.G = iG;
+    mTrajectoryColor.B = iB;
+    mTrajectoryColor.A = iA;
+}
+
+void
+FOdysseyVectorTagInbetweener::SetTrajectoryColor( const FColor& iColor )
+{
+    mTrajectoryColor = iColor;
 }
 
 FInbetweenerBreakdown*

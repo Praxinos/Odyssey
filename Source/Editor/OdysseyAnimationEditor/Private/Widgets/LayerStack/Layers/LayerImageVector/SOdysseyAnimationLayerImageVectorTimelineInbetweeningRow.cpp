@@ -455,7 +455,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
     FOdysseyAnimationEditorExtension* animationEditorExtension = treeView.Get()->GetAnimationEditorExtension();
     uint32 inbetweenCount = ( mInbetweenerTag->GetLength() - 2 );
     uint32 breakdownCount = mInbetweenerTag->GetBreakdownCount();
-    const FColor& inbetweenerTagColor = mInbetweenerTag->GetColor();
+    const FColor& inbetweenerTagColor = mInbetweenerTag->GetInbetweenColor();
     // offset in "number of frames"
 	float offset = animationEditorExtension->Timeline()->GetOffset();
 	float frameSize = animationEditorExtension->Timeline()->GetFrameWidth();

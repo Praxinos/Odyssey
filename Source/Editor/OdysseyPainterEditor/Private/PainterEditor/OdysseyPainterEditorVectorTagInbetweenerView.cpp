@@ -25,10 +25,10 @@ UOdysseyPainterEditorVectorTagInbetweenerView::UOdysseyPainterEditorVectorTagInb
     , MapAsPolyline( true )
     , WithThickness( true )
     , Square( true )
-    , Color( FOdysseyVectorTagInbetweener::DEFAULT_RED_UINT8
-           , FOdysseyVectorTagInbetweener::DEFAULT_GREEN_UINT8
-           , FOdysseyVectorTagInbetweener::DEFAULT_BLUE_UINT8
-           , FOdysseyVectorTagInbetweener::DEFAULT_ALPHA_UINT8 )
+    , InbetweenColor( FOdysseyVectorTagInbetweener::INBETWEEN_DEFAULT_RED_UINT8
+                    , FOdysseyVectorTagInbetweener::INBETWEEN_DEFAULT_GREEN_UINT8
+                    , FOdysseyVectorTagInbetweener::INBETWEEN_DEFAULT_BLUE_UINT8
+                    , FOdysseyVectorTagInbetweener::INBETWEEN_DEFAULT_ALPHA_UINT8 )
     , ChartColor( FOdysseyVectorTagInbetweener::CHART_DEFAULT_RED_UINT8
                 , FOdysseyVectorTagInbetweener::CHART_DEFAULT_GREEN_UINT8
                 , FOdysseyVectorTagInbetweener::CHART_DEFAULT_BLUE_UINT8
@@ -37,6 +37,10 @@ UOdysseyPainterEditorVectorTagInbetweenerView::UOdysseyPainterEditorVectorTagInb
                , FOdysseyVectorTagInbetweener::GRID_DEFAULT_GREEN_UINT8
                , FOdysseyVectorTagInbetweener::GRID_DEFAULT_BLUE_UINT8
                , FOdysseyVectorTagInbetweener::GRID_DEFAULT_ALPHA_UINT8 )
+    , TrajectoryColor( FOdysseyVectorTagInbetweener::TRAJECTORY_DEFAULT_RED_UINT8
+                     , FOdysseyVectorTagInbetweener::TRAJECTORY_DEFAULT_GREEN_UINT8
+                     , FOdysseyVectorTagInbetweener::TRAJECTORY_DEFAULT_BLUE_UINT8
+                     , FOdysseyVectorTagInbetweener::TRAJECTORY_DEFAULT_ALPHA_UINT8 )
 {
 }
 
@@ -58,9 +62,10 @@ UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
         InterpolationType = selectedInbetweenerTag->GetInterpolationType();
         GridType = selectedInbetweenerTag->GetGridType();
         //DrawingCount = selectedInbetweenerTag->GetDrawingCount();
-        Color = selectedInbetweenerTag->GetColor();
+        InbetweenColor = selectedInbetweenerTag->GetInbetweenColor();
         ChartColor = selectedInbetweenerTag->GetChartColor();
         GridColor = selectedInbetweenerTag->GetGridColor();
+        TrajectoryColor = selectedInbetweenerTag->GetTrajectoryColor();
         MapAsPolyline = selectedInbetweenerTag->GetMapAsPolyline();
         WithThickness = selectedInbetweenerTag->GetWithThickness();
         Square = selectedInbetweenerTag->IsSquare();
@@ -204,14 +209,17 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
             selectedInbetweenerTag->SetGrid( GridType, DivisionX, DivisionY, Square );
         }
 
-        if( iPropertyName == "Color" )
-            selectedInbetweenerTag->SetColor( Color );
+        if( iPropertyName == "InbetweenColor" )
+            selectedInbetweenerTag->SetInbetweenColor( InbetweenColor );
 
         if( iPropertyName == "ChartColor" )
             selectedInbetweenerTag->SetChartColor( ChartColor );
 
         if( iPropertyName == "GridColor" )
             selectedInbetweenerTag->SetGridColor( GridColor );
+
+        if( iPropertyName == "TrajectoryColor" )
+            selectedInbetweenerTag->SetTrajectoryColor( TrajectoryColor );
 
         // must be last to be able to update correctly grid type-dependent fields
         if( iPropertyName == "GridType" )
@@ -255,7 +263,8 @@ UOdysseyPainterEditorVectorTagInbetweenerView::MakeUndo( const FName& iPropertyN
 
     if( ( iPropertyName == "Color"      )
       ||( iPropertyName == "ChartColor" )
-      ||( iPropertyName == "GridColor"  ) )
+      ||( iPropertyName == "GridColor"  )
+      ||( iPropertyName == "TrajectoryColor"  ) )
         return new FOdysseyVectorUndoTagInbetweenerColor( mScene
                                                         , mSelectedInbetweenerTagArray
                                                         , notificationFlags );

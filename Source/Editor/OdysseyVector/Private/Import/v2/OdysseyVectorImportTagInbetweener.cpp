@@ -22,7 +22,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
         {
             switch( iChunkID )
             {
-                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_COLOR:
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_INBETWEENCOLOR:
                 {
                     uint8 r, g, b, a;
 
@@ -31,7 +31,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     Ar << b;
                     Ar << a;
 
-                    iInbetweenerTag.SetColor( r, g, b, a );
+                    iInbetweenerTag.SetInbetweenColor( r, g, b, a );
                 }
                 break;
 
@@ -58,6 +58,19 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     Ar << a;
 
                     iInbetweenerTag.SetGridColor( FColor( r, g, b, a ) );
+                }
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRAJECTORYCOLOR:
+                {
+                    uint8 r, g, b, a;
+
+                    Ar << r;
+                    Ar << g;
+                    Ar << b;
+                    Ar << a;
+
+                    iInbetweenerTag.SetTrajectoryColor( FColor( r, g, b, a ) );
                 }
                 break;
 

@@ -106,6 +106,18 @@ FInbetweenerGrid::UpdateCenterOfMass( uint32 iUpdateFlags
     }
 }
 
+void FInbetweenerGrid::ResetDeformation( bool iInvalidate )
+{
+    for( uint32 i = 0; i < mPointBuffer.size(); i++ )
+    {
+        ::ULIS::FVec2D sourcePosition = mPointBuffer[i].GetSourcePosition();
+
+        mPointBuffer[i].SetTargetPosition( sourcePosition.x
+                                         , sourcePosition.y
+                                         , iInvalidate  );
+    }
+}
+
 void FInbetweenerGrid::Make( bool iInvalidate )
 {
     std::vector<::ULIS::FVec2D> sourcePositionBuffer;

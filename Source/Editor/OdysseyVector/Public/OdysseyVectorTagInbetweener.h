@@ -185,9 +185,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void Invalidate( uint64 iInvalidationFlags );
         std::vector<FInterpolatedPath>& GetInterpolatedPathBuffer();
 
-        const FColor& GetColor();
-        void SetColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
-        void SetColor( const FColor& iColor );
+        const FColor& GetInbetweenColor();
+        void SetInbetweenColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
+        void SetInbetweenColor( const FColor& iColor );
+
+        const FColor& GetTrajectoryColor();
+        void SetTrajectoryColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
+        void SetTrajectoryColor( const FColor& iColor );
+
         void SetMapAsPolyline( bool iMapAsPolyline );
         bool GetMapAsPolyline();
         void SetWithThickness( bool iWithThickness );
@@ -282,18 +287,22 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
 
 
     public:
-        static const uint8 DEFAULT_RED_UINT8   = 255;
-        static const uint8 DEFAULT_GREEN_UINT8 = 0;
-        static const uint8 DEFAULT_BLUE_UINT8  = 255;
-        static const uint8 DEFAULT_ALPHA_UINT8 = 255;
+        static const uint8 INBETWEEN_DEFAULT_RED_UINT8   = 0;
+        static const uint8 INBETWEEN_DEFAULT_GREEN_UINT8 = 0;
+        static const uint8 INBETWEEN_DEFAULT_BLUE_UINT8  = 128;
+        static const uint8 INBETWEEN_DEFAULT_ALPHA_UINT8 = 255;
         static const uint8 CHART_DEFAULT_RED_UINT8   = 64;
         static const uint8 CHART_DEFAULT_GREEN_UINT8 = 64;
         static const uint8 CHART_DEFAULT_BLUE_UINT8  = 64;
         static const uint8 CHART_DEFAULT_ALPHA_UINT8 = 255;
-        static const uint8 GRID_DEFAULT_RED_UINT8   = 255;
-        static const uint8 GRID_DEFAULT_GREEN_UINT8 = 0;
+        static const uint8 GRID_DEFAULT_RED_UINT8   = 0;
+        static const uint8 GRID_DEFAULT_GREEN_UINT8 = 128;
         static const uint8 GRID_DEFAULT_BLUE_UINT8  = 0;
         static const uint8 GRID_DEFAULT_ALPHA_UINT8 = 255;
+        static const uint8 TRAJECTORY_DEFAULT_RED_UINT8   = 0;
+        static const uint8 TRAJECTORY_DEFAULT_GREEN_UINT8 = 128;
+        static const uint8 TRAJECTORY_DEFAULT_BLUE_UINT8  = 0;
+        static const uint8 TRAJECTORY_DEFAULT_ALPHA_UINT8 = 255;
 
         static const uint64 INVALIDATE_MAP               = ( 1LL <<  0 );
         static const uint64 INVALIDATE_RANGE             = ( 1LL <<  1 );
@@ -332,7 +341,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         eInbetweenerInterpolationType mInterpolationType;
         std::vector<FInbetweenerDrawing> mDrawingBuffer;
         uint64 mInvalidationFlags;
-        FColor mColor;
         bool bMapAsPolyline;
         bool bWithThickness;
         bool bContiguous;
@@ -342,8 +350,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         bool bARAPPrecomputeSucceded;
         eInbetweenerInterpolationDirection mInterpolationDirection;
         bool bSquare;
+        FColor mInbetweenColor;
         FColor mChartColor;
         FColor mGridColor;
+        FColor mTrajectoryColor;
         // arrays for accessing only useful grid quads (for faster processing or ARAP interpolation)
         std::vector<uint32> mUsedQuadIndexBuffer;
         // arrays for accessing only useful grid points (for faster processing or ARAP interpolation)

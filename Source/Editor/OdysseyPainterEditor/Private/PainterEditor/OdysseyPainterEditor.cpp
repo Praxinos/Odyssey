@@ -1765,7 +1765,10 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
 
 // static
 void
-FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor
+                                           , FOdysseyVectorGroupPaint* iScene
+                                           , bool iResetTransformation
+                                           , bool iResetDeformation )
 {
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
@@ -1802,7 +1805,21 @@ FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor, FOd
 
         for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
         {
-            inbetweenerTag->ResetGrid();
+            FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdownByCellIndex( iScene->GetEngine()->GetCell()->GetIndex() );
+
+            if( breakdown )
+            {
+                if( iResetTransformation )
+                {
+                    breakdown->SetTargetTransform( 0.0f, 0.0f, 0.0f, 1.0f, 1.0f );
+                    breakdown->UpdateMatrix();
+                }
+
+                if( iResetDeformation )
+                {
+                    breakdown->GetGrid()->ResetDeformation( true );
+                }
+            }
         }
     }
 

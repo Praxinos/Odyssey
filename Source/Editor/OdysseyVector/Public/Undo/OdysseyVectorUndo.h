@@ -462,9 +462,10 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         uint32 gridSizeX;
         uint32 gridSizeY;
         uint32 ARAPRigidity;
-        FColor color;
+        FColor inbetweenColor;
         FColor chartColor;
         FColor gridColor;
+        FColor trajectoryColor;
         bool mapAsPolyline;
         bool square;
         bool withThickness;

@@ -116,9 +116,10 @@ namespace FOdysseyFile
                             //static const uint32 CHUNK_BUCKET_ENTRY = ... // see CHUNK_BUCKET_ENTRY
                         static const uint32 CHUNK_OBJECT_TAGS = 0x6c2511f0; // container
                             static const uint32 CHUNK_TAGINBETWEENER = 0x3da0a9c0; // container
-                                static const uint32 CHUNK_TAGINBETWEENER_COLOR = 0x163dea50; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
+                                static const uint32 CHUNK_TAGINBETWEENER_INBETWEENCOLOR = 0x163dea50; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
                                 static const uint32 CHUNK_TAGINBETWEENER_CHARTCOLOR = 0xfcc41d1; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
                                 static const uint32 CHUNK_TAGINBETWEENER_GRIDCOLOR = 0x475e335a; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
+                                static const uint32 CHUNK_TAGINBETWEENER_TRAJECTORYCOLOR = 0xdb4cb02a; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
                                 static const uint32 CHUNK_TAGINBETWEENER_LENGTH = 0x73d1119d; // uint32(count)
                                 static const uint32 CHUNK_TAGINBETWEENER_MAPASPOLYLINE = 0x12201950; // uint32(bool)
              /* Deprecated */   static const uint32 CHUNK_TAGINBETWEENER_CHART = 0x953d8893; // array[float]

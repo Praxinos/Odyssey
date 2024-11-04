@@ -9,7 +9,7 @@
 #include "Interfaces/IPluginManager.h"
 
 #define INDICATOR_RADIUS 20.0f
-#define FONT_SIZE        24.0f
+#define FONT_SIZE        28.0f
 #define DEFAULT_SURFACE  (1920*1080)
 
 FOdysseyPainterEditorVectorChartToolHUD::~FOdysseyPainterEditorVectorChartToolHUD()
@@ -57,7 +57,7 @@ FOdysseyPainterEditorVectorChartToolHUD::GetGlyph( uint32 iNum )
         glyph->bbox = ::ULIS::FRectI ( 0
                                      , 0
                                      , ( blGlyphMetrics.boundingBox.x1 - blGlyphMetrics.boundingBox.x0 ) + 1
-                                     , 12
+                                     , FONT_SIZE * 0.5f
                                      // commented out. for some reason its value is 0 ??
                                      /*, ( blGlyphMetrics.boundingBox.y1 - blGlyphMetrics.boundingBox.y0 ) + 1*/ );
     }
@@ -135,10 +135,10 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
                                   , inbetweenerTag->GetChartColor().G
                                   , inbetweenerTag->GetChartColor().B
                                   , inbetweenerTag->GetChartColor().A );
-    BLRgba32 tagColor = BLRgba32( inbetweenerTag->GetColor().R
-                                , inbetweenerTag->GetColor().G
-                                , inbetweenerTag->GetColor().B
-                                , 255 );
+    BLRgba32 inbetweenColor = BLRgba32( inbetweenerTag->GetInbetweenColor().R
+                                      , inbetweenerTag->GetInbetweenColor().G
+                                      , inbetweenerTag->GetInbetweenColor().B
+                                      , 255 );
     BLRgba32 blackColor = BLRgba32(   0,   0,   0, 255 );
     BLRgba32 greyColor  = BLRgba32( 127, 127, 127, 255 );
     BLRgba32 whiteColor = BLRgba32( 255, 255, 255, 255 );
@@ -198,60 +198,55 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
              // Note: "* 0.1f" helps positionning the circle surrounding the numbers a bit away from the indicator
             ::ULIS::FVec2D frameInfoPosition = ::ULIS::FVec2D( indicatorPosition.x + ( normalizedPerpendicular.x * 1.1f * ( FONT_SIZE + ( INDICATOR_RADIUS ) ) )
                                                              , indicatorPosition.y + ( normalizedPerpendicular.y * 1.1f * ( FONT_SIZE + ( INDICATOR_RADIUS ) ) ) );
+            // calculate inbetween number position
+            const FGlyph* glyph = GetGlyph( iBreakdown->GetSourceDrawingIndex() + i + 1 );
+            ::ULIS::FVec2D frameNumberPosition = ::ULIS::FVec2D( frameInfoPosition.x - ( glyph->bbox.w * 0.5f )
+                                                               , frameInfoPosition.y + ( glyph->bbox.h * 0.5f ) );
 
             if( ( inbetween->spacing == 0.0f ) || ( inbetween->spacing == 1.0f ) )
             {
-                iBLContext->setStrokeWidth( 3.0f * displayRatio );
-                iBLContext->setStrokeStyle( chartColor );
-
                 iBLContext->setStrokeWidth( 2.0f * displayRatio );
+                iBLContext->setStrokeStyle( chartColor );
                 iBLContext->strokeCircle( frameInfoPosition.x, frameInfoPosition.y, fontSize );
+                // draw indicator
+                iBLContext->strokeLine( indicatorPosition.x + ( normalizedPerpendicular.x * INDICATOR_RADIUS )
+                                      , indicatorPosition.y + ( normalizedPerpendicular.y * INDICATOR_RADIUS )
+                                      , indicatorPosition.x - ( normalizedPerpendicular.x * INDICATOR_RADIUS )
+                                      , indicatorPosition.y - ( normalizedPerpendicular.y * INDICATOR_RADIUS ) );
+
+                iBLContext->strokeUtf8Text( BLPoint( frameNumberPosition.x
+                                                   , frameNumberPosition.y ), mFont, glyph->str );
+
+                iBLContext->setFillStyle( chartColor );
+                iBLContext->fillUtf8Text( BLPoint( frameNumberPosition.x
+                                                 , frameNumberPosition.y ), mFont, glyph->str );
             }
             else
             {
                 iBLContext->setStrokeWidth( hovered ? 3.0f * displayRatio: 2.0f * displayRatio );
-                iBLContext->setStrokeStyle( hovered ? iHcColor : tagColor );
-            }
+                iBLContext->setStrokeStyle( hovered ? iHcColor : inbetweenColor );
+                // draw indicator
+                iBLContext->strokeLine( indicatorPosition.x + ( normalizedPerpendicular.x * INDICATOR_RADIUS )
+                                      , indicatorPosition.y + ( normalizedPerpendicular.y * INDICATOR_RADIUS )
+                                      , indicatorPosition.x - ( normalizedPerpendicular.x * INDICATOR_RADIUS )
+                                      , indicatorPosition.y - ( normalizedPerpendicular.y * INDICATOR_RADIUS ) );
 
-            // draw indicator
-            iBLContext->strokeLine( indicatorPosition.x + ( normalizedPerpendicular.x * INDICATOR_RADIUS )
-                                  , indicatorPosition.y + ( normalizedPerpendicular.y * INDICATOR_RADIUS )
-                                  , indicatorPosition.x - ( normalizedPerpendicular.x * INDICATOR_RADIUS )
-                                  , indicatorPosition.y - ( normalizedPerpendicular.y * INDICATOR_RADIUS ) );
+                iBLContext->strokeUtf8Text( BLPoint( frameNumberPosition.x
+                                                   , frameNumberPosition.y ), mFont, glyph->str );
 
-            // draw inbetween number
-            {
-                const FGlyph* glyph = GetGlyph( iBreakdown->GetSourceDrawingIndex() + i + 1 );
-                ::ULIS::FVec2D frameNumberPosition;
-
-                frameNumberPosition = ::ULIS::FVec2D( frameInfoPosition.x - ( glyph->bbox.w * 0.5f )
-                                                    , frameInfoPosition.y + ( glyph->bbox.h * 0.5f ) );
-
-                if( current )
-                {
-                    iBLContext->setStrokeStyle( blackColor );
-                    iBLContext->setStrokeWidth( 1.5f * displayRatio );
-                    iBLContext->strokeUtf8Text( BLPoint( frameNumberPosition.x
-                                                       , frameNumberPosition.y ), mFont, glyph->str );
-                }
-
-                iBLContext->setFillStyle( hovered ? iHcColor : chartColor );
+                iBLContext->setFillStyle( hovered ? iHcColor : inbetweenColor );
                 iBLContext->fillUtf8Text( BLPoint( frameNumberPosition.x
                                                  , frameNumberPosition.y ), mFont, glyph->str );
-
-
-                // underline the current frame
-/*
-                if( current )
-                {
-                    iBLContext->setStrokeWidth( 4.0f );
-                    iBLContext->strokeLine( frameNumberPosition.x
-                                          , frameNumberPosition.y + 4
-                                          , frameNumberPosition.x + 11
-                                          , frameNumberPosition.y + 4 );
-                }
-*/
             }
+
+            if( current )
+            {
+                iBLContext->setStrokeStyle( blackColor );
+                iBLContext->setStrokeWidth( 3.0f * displayRatio );
+                iBLContext->strokeUtf8Text( BLPoint( frameNumberPosition.x
+                                                   , frameNumberPosition.y ), mFont, glyph->str );
+            }
+
         }
     }
 

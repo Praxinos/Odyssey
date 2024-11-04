@@ -62,15 +62,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public 
         UPROPERTY( EditAnywhere
                  , Category = MatchingTool
                  , meta = ( ToolTip  = "Picking Radius"
-                          , ClampMin = "0.0"
-                          , UIMin    = "0.0" ) )
-        double PickingRadius;
+                          , ClampMin = "0"
+                          , UIMin    = "0" ) )
+        uint32 PickingRadius;
 
         UPROPERTY( EditAnywhere
                  , Category = MatchingTool
                  , meta = ( ToolTip  = "Rigidity"
-                          , ClampMin = "1"
-                          , UIMin    = "1"
+                          , ClampMin = "0"
+                          , UIMin    = "0"
                           , ClampMax = "20"
                           , UIMax    = "20" ) )
         uint32 Rigidity;

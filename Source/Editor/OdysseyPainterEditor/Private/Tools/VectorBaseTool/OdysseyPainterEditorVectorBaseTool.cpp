@@ -1179,12 +1179,17 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FMenuBuilder& m
                   , LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.tooltip", "Commit Inbetweener Tag")
                   , FSlateIcon()
                   , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CommitSelectedInbetweenerTag, GetEditor(), vectorScene->GetSharedEnv() )));
-
+/*
             menu.AddMenuEntry(
                   LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.name", "Reset Grid")
                 , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.tooltip", "Reset Grid")
                 , FSlateIcon()
                 , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetInbetweenerGrid, GetEditor(), vectorScene )));
+*/
+            menu.AddSubMenu(
+                  LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.name", "Reset Grid")
+                , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.tooltip", "Reset Grid")
+                , FNewMenuDelegate::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::ResetGridMenu, vectorScene ) );
 
             menu.AddMenuEntry(
                   LOCTEXT("vector-tool.inbetween-context-menu.reset-breakdown-spacing-chart.name", "Reset Spacing" )
@@ -1220,6 +1225,29 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FMenuBuilder& m
     }
 
     //return menu.MakeWidget();
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ResetGridMenu( FMenuBuilder& menu
+                                                  , FOdysseyVectorGroupPaint* iScene )
+{
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.inbetween-context-menu.reset-grid-transformation.name", "Transformation")
+        , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid-transformation.tooltip", "Transformation")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetInbetweenerGrid, GetEditor(), iScene, true, false )));
+
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.inbetween-context-menu.reset-grid-deformation.name", "Deformation")
+        , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid-deformation.tooltip", "Deformation")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetInbetweenerGrid, GetEditor(), iScene, false, true )));
+
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.inbetween-context-menu.reset-grid-both.name", "Both")
+        , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid-both.tooltip", "Both")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetInbetweenerGrid, GetEditor(), iScene, true, true )));
 }
 
 #ifndef M_PI

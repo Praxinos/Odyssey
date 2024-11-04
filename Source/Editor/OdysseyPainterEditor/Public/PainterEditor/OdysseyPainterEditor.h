@@ -207,7 +207,10 @@ public:
     static void CommitSelectedInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorSharedEnv* iSharedEnv );
     static void CopySpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void PasteSpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
-    static void ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor
+                                    , FOdysseyVectorGroupPaint* iScene
+                                    , bool iResetTransformation
+                                    , bool iResetDeformation );
 
 public:
     static const uint64 UI_UPDATE_SCENETREEVIEW = ( 1ULL << ( FOdysseyVectorEngine::NOTIFY_RESERVED_SHIFT + 0 ) );

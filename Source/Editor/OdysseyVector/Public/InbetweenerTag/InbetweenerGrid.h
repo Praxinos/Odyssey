@@ -110,6 +110,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
                        , uint64 iTagInvalidationFlags );
         void UpdateCenterOfMass( uint32 iUpdateFlags
                                , uint64 iTagInvalidationFlags );
+        void ResetDeformation( bool iInvalidate );
 
         friend class FOdysseyVectorTagInbetweener;
 

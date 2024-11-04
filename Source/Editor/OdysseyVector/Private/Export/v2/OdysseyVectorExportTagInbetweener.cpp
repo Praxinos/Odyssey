@@ -235,11 +235,11 @@ void
 FOdysseyVectorExportV2::WriteTagInbetweenerColor( FOdysseyVectorTagInbetweener& iInbetweenerTag
                                                 , FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_COLOR
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_INBETWEENCOLOR
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        FColor color = iInbetweenerTag.GetColor();
+        FColor color = iInbetweenerTag.GetInbetweenColor();
         uint8 r8 = color.R;
         uint8 g8 = color.G;
         uint8 b8 = color.B;
@@ -282,6 +282,27 @@ FOdysseyVectorExportV2::WriteTagInbetweenerGridColor( FOdysseyVectorTagInbetween
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
         FColor color = iInbetweenerTag.GetGridColor();
+        uint8 r8 = color.R;
+        uint8 g8 = color.G;
+        uint8 b8 = color.B;
+        uint8 a8 = color.A;
+
+        Ar << r8;
+        Ar << g8;
+        Ar << b8;
+        Ar << a8;
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteTagInbetweenerTrajectoryColor( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                          , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRAJECTORYCOLOR
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        FColor color = iInbetweenerTag.GetTrajectoryColor();
         uint8 r8 = color.R;
         uint8 g8 = color.G;
         uint8 b8 = color.B;
