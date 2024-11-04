@@ -9,6 +9,7 @@ class FOdysseyAnimationEditorExtension;
 class UOdysseyAnimationLayerStack;
 class UOdysseyAnimation;
 class UOdysseyAnimationPlayer;
+class UOdysseyAnimationCell;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorTimelineTab :
     public FOdysseyEditorTab
@@ -23,6 +24,9 @@ public:
 
 public:
     void SetEmptyTimelineWidget(TSharedRef<SWidget> iWidget);
+	
+	FInt32Range GetAnimationValidRange() const;
+	void SetAnimationValidRange(const TAttribute<FInt32Range>& iValue);
 
 protected:
     // FOdysseyAnimationEditorTab interface
@@ -33,10 +37,10 @@ protected:
 
 protected:
     // Widget Getters
-    virtual UOdysseyAnimationLayerStack* LayerStack() const;
     virtual UOdysseyAnimation* Animation() const;
     virtual UOdysseyAnimationPlayer* Player() const;
     virtual float PlaybackFramesPerSecond() const;
+	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> GetTimelinePosition() const;
 
 protected:
     // Event 
@@ -65,9 +69,14 @@ private:
 
     TSharedPtr<SWidget> CreateDefaultEmptyTimelineTabWidget() const;
 
+	void OnActivateOutOfPegs(UOdysseyAnimationCell* iCell);
+	void OnInactivateOutOfPegs();
+	ECheckBoxState OnIsOutOfPegsChecked(UOdysseyAnimationCell* iCell);
+
 private:
     FOdysseyAnimationEditorExtension* mExtension;
     FText mEmptyTimelineMessage;
     TSharedPtr<SWidget> mEmptyTimelineTabWidget;
+	TAttribute<FInt32Range> mAnimationValidRange;
 };
 

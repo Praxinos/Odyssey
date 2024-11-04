@@ -27,6 +27,9 @@
 #include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "LayerStack/Cells/OdysseyAnimationCellThumbnailRenderer.h"
+#include "ISequencerModule.h"
+#include "ILevelSequenceModule.h"
+
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

@@ -5,14 +5,14 @@
 
 #include "CoreMinimal.h"
 
-#include "OdysseyRasterBlock.h"
-#include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "BaseMediaSource.h"
-#include "OdysseyAnimationProxy.h"
 #include "OdysseyImageRenderingAbility.h"
 #include <ULIS>
 
 #include "OdysseyAnimation.generated.h"
+
+class FOdysseyAnimationProxy;
+class UOdysseyAnimationLayerStack;
 
 UENUM()
 enum class EOdysseyAnimationFormat : uint8
@@ -122,6 +122,9 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation", BlueprintSetter=FramesPerSecondBlueprintSetter, meta=(ClampMin=1, UIMin=1))
     float FramesPerSecond = 24.0f;
+
+	UPROPERTY(config)
+	float TimelineSplitterPosition = 0.2f;
 
 protected:
     friend class UOdysseyAnimationFactory;

@@ -22,39 +22,24 @@ SOdysseyAnimationLayerImageRasterTimeline::SOdysseyAnimationLayerImageRasterTime
 {
 }
 
-void
-SOdysseyAnimationLayerImageRasterTimeline::Construct(
-    const FArguments& InArgs,
-    FOdysseyAnimationEditorExtension* iExtension,
-    UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
-)
-{
-    ensure(iAnimationLayerImageRaster);
-    SOdysseyAnimationLayerImageTimeline::FArguments args;
-    args.DisplayOptions(InArgs._DisplayOptions);
-    SOdysseyAnimationLayerImageTimeline::Construct(args, iExtension, iAnimationLayerImageRaster);
-}
-
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageRasterTimeline::OnGenerateCellWidget(UOdysseyAnimationCell* iCell)
 {
     if (!iCell)
     {
         return SNew(SOdysseyAnimationCellImageRaster, Cast<UOdysseyAnimationCellImageRaster>(iCell))
-            .Clipping(EWidgetClipping::ClipToBoundsAlways)
-            .ShowContent(this, &SOdysseyAnimationLayerImageRasterTimeline::GetShowCellContent); //DefaultCell, this can be called when creating cells, because the celle does not really exist yet
-    }
+			.Clipping(EWidgetClipping::ClipToBoundsAlways);
+	}
     if (iCell->IsA<UOdysseyAnimationCellImageRaster>())
     {
         return SNew(SOdysseyAnimationCellImageRaster, Cast<UOdysseyAnimationCellImageRaster>(iCell))
-            .Clipping(EWidgetClipping::ClipToBoundsAlways)
-            .ShowContent(this, &SOdysseyAnimationLayerImageRasterTimeline::GetShowCellContent);
-    }
+			.Clipping(EWidgetClipping::ClipToBoundsAlways);
+	}
     else if (iCell->IsA<UOdysseyAnimationCellImageStagger>())
-    {
-        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell), mExtension)
-            .ShowContent(this, &SOdysseyAnimationLayerImageRasterTimeline::GetShowCellContent);
-    }
+	{
+        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell))
+			.TimelinePosition(mTimelinePosition);
+	}
 
     return SNullWidget::NullWidget;
 }
@@ -74,20 +59,11 @@ SOdysseyAnimationLayerImageRasterTimeline::OnPreviewMouseButtonDown(const FGeome
     return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
 }
 
-bool
-SOdysseyAnimationLayerImageRasterTimeline::GetShowCellContent() const
-{
-    if (mLayer->IsLockedRecursively())
-        return false;
-
-    return DisplayOptions();
-}
-
 TSharedPtr<FExtender>
 SOdysseyAnimationLayerImageRasterTimeline::ExtendContextMenu()
 {
     TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
-    mAnimationTimelineCellImageRasterShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(mLayer->GetLayerStack(), mExtension);
+    mAnimationTimelineCellImageRasterShortcuts = MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(mLayer->GetLayerStack());
     mAnimationTimelineCellImageRasterShortcuts->MapActionsToCommandList(commandList);
 
     TSharedRef<FExtender> extender = MakeShared<FExtender>();

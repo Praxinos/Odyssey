@@ -516,6 +516,15 @@ FBlockData::Render()
         Render(renderer, rasterBlock, invalidRects);
 
         renderer->Unlock();
+		
+		AsyncTask(
+			ENamedThreads::GameThread,
+			[renderer]()
+			{
+				TSharedPtr<IOdysseyImageRenderer> r = renderer;
+				r.Reset(); //reset the renderer on GameThread to avoid crashes
+			}
+		);
 
         mEditMutex.Lock();
     }

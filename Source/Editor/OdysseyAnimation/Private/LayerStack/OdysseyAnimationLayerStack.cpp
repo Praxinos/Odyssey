@@ -8,10 +8,12 @@
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "OdysseyRectUtils.h"
 #include "OdysseyAnimation.h"
+#include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
 
 //===============================================
 
 UOdysseyAnimationLayerStack::UOdysseyAnimationLayerStack()
+	: mCellSelection(MakeShared<FOdysseyAnimationCellSelection>(this))
 {
     CompatibleLayers.Add(UOdysseyAnimationLayerFolder::StaticClass());
     CompatibleLayers.Add(UOdysseyAnimationLayerImageRaster::StaticClass());
@@ -49,4 +51,10 @@ UOdysseyAnimationLayerStack::GetImageRenderingRects() const
         return {};
 
     return animation->GetImageRenderingRects();
+}
+
+TSharedRef<FOdysseyAnimationCellSelection>
+UOdysseyAnimationLayerStack::GetCellSelection() const
+{
+	return mCellSelection;
 }

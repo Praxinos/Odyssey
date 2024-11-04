@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "OdysseyLayer.h"
+#include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 #include "OdysseyLayer.h"
 #include "Templates/SubclassOf.h"
@@ -28,7 +30,8 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayer
     GENERATED_BODY()
 
 public:
-    virtual void PostInitProperties() override;
+	virtual void PostInitProperties() override;
+	virtual UOdysseyAnimationLayerStack* GetLayerStack() const;
 
 public:
     //Invalidate the frame ranges of all cells
@@ -84,6 +87,13 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     TArray<UOdysseyAnimationCell*> CopyCells(TArray<UOdysseyAnimationCell*> Cells, int Index = -1);
+
+public:
+#ifdef WITH_EDITOR
+	virtual TArray<FName> GetRows() const override;
+	virtual int GetRowHeight(FName iSubRowName) const override;
+	virtual bool IsRowVisible(FName iSubRowName) const override;
+#endif
 
 protected:
     //Property changes
@@ -144,6 +154,9 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=LighttableBlueprintSetter, NonTransactional)
     FOdysseyAnimationLightTable Lighttable;
+
+	UPROPERTY(BlueprintReadOnly, Category="Odyssey|Layer", NonTransactional)
+	bool HasLighttable = true;
 
     FSimpleMulticastDelegate mOnLightTableChanged;
     FSimpleMulticastDelegate mOnCellsChanged;

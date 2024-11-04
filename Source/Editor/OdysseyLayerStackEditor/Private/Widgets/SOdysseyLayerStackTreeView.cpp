@@ -38,66 +38,102 @@ SOdysseyLayerStackTreeView::SOdysseyLayerStackTreeView()
 //CONSTRUCTION/DESTRUCTION-----------------------------------------------
 void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
 {
-    //mLayerStack.Assign(*this, InArgs._LayerStack);
     mLayerStack = InArgs._LayerStack;
     mLayerStackShortcuts = MakeShared<FOdysseyLayerStackShortcuts>(SharedThis(this), mLayerStack);
 
     TSharedRef<SHeaderRow> headerRow = SNew(SHeaderRow)
-        .SplitterHandleSize(0.f) //Fixes alignment between header row and actual rows
-        + SHeaderRow::Column("IsActivated")
+        .SplitterHandleSize(0.f); //Fixes alignment between header row and actual rows
+	
+	if (InArgs._Columns.IsSet())
+	{
+		TArray<SHeaderRow::FColumn::FArguments> columns = InArgs._Columns.GetValue();
+		for( SHeaderRow::FColumn::FArguments columnArguments : columns)
+		{
+			headerRow->AddColumn(columnArguments);
+		}
+	}
+	else
+	{
+		headerRow->AddColumn(
+        	SHeaderRow::Column("IsActivated")
             .ToolTipText(LOCTEXT("header-row.is-layer-activated.tooltip", "Toggle Layer Activation"))
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)
             .VAlignHeader(VAlign_Center)
             .HAlignCell(HAlign_Center)
             .VAlignCell(VAlign_Top)
-            //.DefaultTooltip(FText::FromName(GetColumnID()))
-            //.HeaderContentPadding(FMargin(20.0f, 0.0f, 20.0f, 0.0f))
+			.HeaderContentPadding(FMargin(0))
             [
-                SNew(SImage)
-                .ColorAndOpacity(FSlateColor::UseForeground())
-                .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
+				SNew(SBox)
+				.HeightOverride(25.f)
+				.VAlign(VAlign_Center)
+				[
+					SNew(SImage)
+					.ColorAndOpacity(FSlateColor::UseForeground())
+					.Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
+				]
             ]
-        + SHeaderRow::Column("IsLocked")
+		);
+		headerRow->AddColumn(
+        	SHeaderRow::Column("IsLocked")
             .ToolTipText(LOCTEXT("header-row.is-layer-locked.tooltip", "Toggle Layer Locked State"))
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)
             .VAlignHeader(VAlign_Center)
             .HAlignCell(HAlign_Center)
             .VAlignCell(VAlign_Top)
-            //.DefaultTooltip(FText::FromName(GetColumnID()))
-            //.HeaderContentPadding(FMargin(20.0f, 0.0f, 20.0f, 0.0f))
+			.HeaderContentPadding(FMargin(0))
             [
-                SNew(SImage)
-                .ColorAndOpacity(FSlateColor::UseForeground())
-                .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Locked16"))
+				SNew(SBox)
+				.HeightOverride(25.f)
+				.VAlign(VAlign_Center)
+				[
+					SNew(SImage)
+					.ColorAndOpacity(FSlateColor::UseForeground())
+					.Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Locked16"))
+				]
             ]
-        + SHeaderRow::Column("DisplayOptions")
+		);
+
+        headerRow->AddColumn(
+			SHeaderRow::Column("DisplayOptions")
             .ToolTipText(LOCTEXT("header-row.display-options.tooltip", "Display / Hide Layer's Options"))
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)
             .VAlignHeader(VAlign_Center)
             .HAlignCell(HAlign_Center)
             .VAlignCell(VAlign_Top)
-            //.DefaultTooltip(FText::FromName(GetColumnID()))
-            //.HeaderContentPadding(FMargin(20.0f, 0.0f, 20.0f, 0.0f))
+			.HeaderContentPadding(FMargin(0))
             [
-                SNew(SImage)
-                .ColorAndOpacity(FSlateColor::UseForeground())
-                .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.OptionsHeader16"))
+				SNew(SBox)
+				.HeightOverride(25.f)
+				.VAlign(VAlign_Center)
+				[
+					SNew(SImage)
+					.ColorAndOpacity(FSlateColor::UseForeground())
+					.Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.OptionsHeader16"))
+				]
             ]
-        + SHeaderRow::Column("Header")
+		);
+
+        headerRow->AddColumn(
+			SHeaderRow::Column("Header")
             .DefaultLabel(FText())
             .VAlignCell(VAlign_Top)
-            .FillWidth(InArgs._HeaderFillWidth)
-            .FixedWidth(InArgs._HeaderFixedWidth)
-            .ManualWidth(InArgs._HeaderManualWidth)
-            .FillSized(InArgs._HeaderFillSized);
-
-    for( SHeaderRow::FColumn::FArguments columnArguments : InArgs._AdditionalColumns)
-    {
-        headerRow->AddColumn(columnArguments);
-    }
+            .HAlignHeader(HAlign_Fill)
+            .VAlignHeader(VAlign_Center)
+            .FillWidth(1.0f)
+			.HeaderContentPadding(FMargin(0))
+			[
+				SNew(SBox)
+				.HeightOverride(25.f)
+				.VAlign(VAlign_Center)
+				[
+					InArgs._HeaderContent.Widget
+				]
+			]
+		);
+	}
 
     const TArray<UOdysseyLayer*>* rootLayers = mLayerStack ? &mLayerStack->GetRootLayers() : nullptr;
 
@@ -107,11 +143,12 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
         .OnGenerateRow( InArgs._OnGenerateRow )
         .OnGetChildren( this, &SOdysseyLayerStackTreeView::OnGetChildren )
         .OnExpansionChanged( this, &SOdysseyLayerStackTreeView::OnExpansionChanged )
-        //.OnSelectionChanged( this, &SOdysseyLayerStackTreeView::OnSelectionChanged )
         .OnItemScrolledIntoView(this, &SOdysseyLayerStackTreeView::OnItemScrolledIntoView)
         .OnContextMenuOpening( this, &SOdysseyLayerStackTreeView::OnContextMenuOpening )
         .SelectionMode( ESelectionMode::Multi )
         .HeaderRow(headerRow)
+		.ExternalScrollbar(InArgs._ExternalScrollbar)
+		.OnTreeViewScrolled(InArgs._OnTreeViewScrolled)
     );
 
     //Menus

@@ -77,11 +77,18 @@ FOdysseyAnimationEditorTimelineTab::CreateWidget()
     
     return 
         SNew(SWidgetSwitcher)
-        .WidgetIndex_Lambda([this](){ return LayerStack() == nullptr ? 1 : 0; })
+        .WidgetIndex_Lambda([this](){ return Animation() == nullptr ? 1 : 0; })
         +SWidgetSwitcher::Slot()
         [
-            SNew(SOdysseyAnimationLayerStack, mExtension)
-            .LayerStack(this, &FOdysseyAnimationEditorTimelineTab::LayerStack)
+            SNew(SOdysseyAnimationLayerStack)
+            .Animation(this, &FOdysseyAnimationEditorTimelineTab::Animation)
+			.Player(this, &FOdysseyAnimationEditorTimelineTab::Player)
+			.PlaybackFramesPerSecond(this, &FOdysseyAnimationEditorTimelineTab::PlaybackFramesPerSecond)
+			.TimelinePosition(this, &FOdysseyAnimationEditorTimelineTab::GetTimelinePosition)
+			.OnActivateOutOfPegs(this, &FOdysseyAnimationEditorTimelineTab::OnActivateOutOfPegs)
+			.OnInactivateOutOfPegs(this, &FOdysseyAnimationEditorTimelineTab::OnInactivateOutOfPegs)
+			.OnIsOutOfPegsChecked(this, &FOdysseyAnimationEditorTimelineTab::OnIsOutOfPegsChecked)
+			.CustomValidRange(this, &FOdysseyAnimationEditorTimelineTab::GetAnimationValidRange)
         ]
         +SWidgetSwitcher::Slot()
         [
@@ -113,12 +120,6 @@ FOdysseyAnimationEditorTimelineTab::ExtendMenu(TSharedRef<FExtender> iExtender)
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
 
-UOdysseyAnimationLayerStack*
-FOdysseyAnimationEditorTimelineTab::LayerStack() const
-{
-    return mExtension->LayerStack();
-}
-
 UOdysseyAnimation*
 FOdysseyAnimationEditorTimelineTab::Animation() const
 {
@@ -135,6 +136,12 @@ float
 FOdysseyAnimationEditorTimelineTab::PlaybackFramesPerSecond() const
 {
     return mExtension->PlaybackFramesPerSecond();
+}
+
+TSharedPtr<FOdysseyAnimationEditorTimelinePosition>
+FOdysseyAnimationEditorTimelineTab::GetTimelinePosition() const
+{
+	return mExtension->TimelinePosition();
 }
 
 //--------------------------------------------------------------------------------------
@@ -246,7 +253,11 @@ FOdysseyAnimationEditorTimelineTab::BuildExportMenu(FMenuBuilder& iMenuBuilder)
 void           
 FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
 {
-    UOdysseyLayerStack* layerStack = LayerStack();
+	UOdysseyAnimation* animation = Animation();
+	if (!animation)
+		return;
+
+    UOdysseyLayerStack* layerStack = animation->GetLayerStack();
     if ( !layerStack )
         return;
 
@@ -259,8 +270,6 @@ FOdysseyAnimationEditorTimelineTab::ImportTextureSequence()
     FContentBrowserModule& contentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>( "ContentBrowser" );
     TArray < FAssetData > assetsData = contentBrowserModule.Get().CreateModalOpenAssetDialog( openAssetDialogConfig );
     assetsData.Sort();
-
-    UOdysseyAnimation* animation = mExtension->Animation();
 
     if ( assetsData.Num() <= 0 )
         return;
@@ -360,7 +369,7 @@ FOdysseyAnimationEditorTimelineTab::CreateNewLayer()
     if (!animation)
         return;
 
-    UOdysseyLayerStack* layerStack = LayerStack();
+    UOdysseyLayerStack* layerStack = animation->GetLayerStack();
     if ( !layerStack )
         return;
 
@@ -407,7 +416,11 @@ FOdysseyAnimationEditorTimelineTab::CreateNewLayer()
 void
 FOdysseyAnimationEditorTimelineTab::ChangeLayerOpacity( float iOpacity )
 {
-    UOdysseyLayerStack* layerStack = LayerStack();
+	UOdysseyAnimation* animation = Animation();
+	if (!animation)
+		return;
+
+    UOdysseyLayerStack* layerStack = animation->GetLayerStack();
     if ( !layerStack )
         return;
 
@@ -421,6 +434,62 @@ FOdysseyAnimationEditorTimelineTab::ChangeLayerOpacity( float iOpacity )
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-tab.transaction.shortcut.set-layer-opacity", "Change Layer Opacity"));
 #endif
     FOdysseyObjectEditorUtils::SetPropertyValue(layerStack->CurrentLayer.Get(), GET_MEMBER_NAME_CHECKED( UOdysseyLayer, Opacity), FMath::Clamp(iOpacity, 0.f, 1.f));
+}
+
+void
+FOdysseyAnimationEditorTimelineTab::OnActivateOutOfPegs(UOdysseyAnimationCell* iCell)
+{
+	if (!iCell)
+		return;
+
+	mExtension->GetOutOfPegsTool()->SetCell(iCell);
+	mExtension->GetEditor()->ActivateTemporaryTool(mExtension->GetOutOfPegsTool());
+}
+
+void
+FOdysseyAnimationEditorTimelineTab::OnInactivateOutOfPegs()
+{
+	mExtension->GetEditor()->InactivateTemporaryTool();
+}
+
+ECheckBoxState
+FOdysseyAnimationEditorTimelineTab::OnIsOutOfPegsChecked(UOdysseyAnimationCell* iCell)
+{
+	if (!iCell)
+		return ECheckBoxState::Unchecked;
+
+	FOdysseyPainterEditor* editor = mExtension->GetEditor();
+	if (!editor)
+		return ECheckBoxState::Unchecked;
+
+	UOdysseyPainterEditorTool* tool = editor->GetCurrentTool();
+	if (!tool)
+		return ECheckBoxState::Unchecked;
+
+	bool isToolActive = tool->IsA(UOdysseyAnimationEditorOutOfPegsTool::StaticClass());
+	if (!isToolActive)
+		return ECheckBoxState::Unchecked;
+
+	UOdysseyAnimationEditorOutOfPegsTool* outOfPegsTool = Cast<UOdysseyAnimationEditorOutOfPegsTool>(tool);
+	if (outOfPegsTool->GetCell() != iCell)
+		return ECheckBoxState::Unchecked;
+		
+	return ECheckBoxState::Checked;
+}
+
+FInt32Range
+FOdysseyAnimationEditorTimelineTab::GetAnimationValidRange() const
+{
+	if (mAnimationValidRange.IsBound())
+		return mAnimationValidRange.Get();
+
+	return FInt32Range::Empty();
+}
+
+void
+FOdysseyAnimationEditorTimelineTab::SetAnimationValidRange(const TAttribute<FInt32Range>& iValue)
+{
+	mAnimationValidRange = iValue;
 }
 
 #undef LOCTEXT_NAMESPACE

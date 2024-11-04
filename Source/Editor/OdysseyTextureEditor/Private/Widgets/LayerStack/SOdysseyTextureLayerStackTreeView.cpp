@@ -23,8 +23,9 @@ SOdysseyTextureLayerStackTreeView::GetTextureEditorExtension() const
 void
 SOdysseyTextureLayerStackTreeView::Construct(const FArguments& InArgs, FOdysseyTextureEditorExtension* iTextureExtension)
 {
-    SOdysseyLayerStackTreeView::Construct(InArgs);
     mExtension = iTextureExtension;
+	
+    SOdysseyLayerStackTreeView::Construct(InArgs);
 }
 
 TArray<TSharedPtr<FExtender>>

@@ -5,9 +5,9 @@
 
 #include "CoreMinimal.h"
 #include "OdysseyImageRenderingAbility.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
 
 class UOdysseyAnimationLayer;
-class FOdysseyAnimationEditorExtension;
 class UOdysseyAnimation;
 class UOdysseyAnimationCell;
 
@@ -15,17 +15,15 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTable
     : public SCompoundWidget
 {
 public:
-    static inline const float mDesiredHeight = 60.f;
+	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTable)
+	{}
+		SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
+	SLATE_END_ARGS()
 
-public:
-    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTable)
-    {}
-    SLATE_END_ARGS()
-
-    void Construct(
-        const FArguments& InArgs,
-        UOdysseyAnimationLayer* iLayer,
-        FOdysseyAnimationEditorExtension* iExtension);
+	void Construct(
+		const FArguments& InArgs,
+		UOdysseyAnimationLayer* iLayer
+	);
 
 private:
     void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
@@ -33,7 +31,6 @@ private:
     void Update();
 
 private:
-    UOdysseyAnimationLayer* mLayer = nullptr;
-    FOdysseyAnimationEditorExtension* mExtension = nullptr;
-    UOdysseyAnimationCell* mCurrentCell = nullptr;
+	UOdysseyAnimationLayer* mLayer = nullptr;
+	UOdysseyAnimationCell* mCurrentCell = nullptr;
 };

@@ -2,7 +2,6 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/LayerStack/Cells/SOdysseyAnimationCell.h"
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "AnimationEditor/OdysseyAnimationEditorProjectSettings.h"
 #include "OdysseyStyleSet.h"
@@ -12,14 +11,12 @@
 void
 SOdysseyAnimationCell::Construct(
     const FArguments& InArgs,
-    FOdysseyAnimationEditorExtension* iExtension,
     UOdysseyAnimationLayer* iAnimationLayer,
     UOdysseyAnimationCell* iCell
 )
 {
     ensure(iAnimationLayer);
 
-    mExtension = iExtension;
     mAnimationLayer = iAnimationLayer;
     mCell = iCell;
 
@@ -132,13 +129,13 @@ int32 SOdysseyAnimationCell::OnPaint(const FPaintArgs& Args, const FGeometry& Al
 bool
 SOdysseyAnimationCell::IsSelected() const
 {
-    return mExtension->Timeline()->GetSelectedCells().Contains(mCell);
+	return mCell->GetLayerStack()->GetCellSelection()->GetSelectedCells().Contains(mCell);
 }
 
 bool
 SOdysseyAnimationCell::IsSelectionCursor() const
 {
-    return mExtension->Timeline()->GetCellSelectionCursor() == mCell;
+	return mCell->GetLayerStack()->GetCellSelection()->GetCellSelectionCursor() == mCell;
 }
 
 const FSlateBrush*

@@ -18,39 +18,24 @@ SOdysseyAnimationLayerImageVectorTimeline::SOdysseyAnimationLayerImageVectorTime
 {
 }
 
-void
-SOdysseyAnimationLayerImageVectorTimeline::Construct(
-    const FArguments& InArgs,
-    FOdysseyAnimationEditorExtension* iExtension,
-    UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector
-)
-{
-    ensure(iAnimationLayerImageVector);
-    SOdysseyAnimationLayerImageTimeline::FArguments args;
-    args.DisplayOptions(InArgs._DisplayOptions);
-    SOdysseyAnimationLayerImageTimeline::Construct(args, iExtension, iAnimationLayerImageVector);
-}
-
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(UOdysseyAnimationCell* iCell)
 {
     if (!iCell)
     {
         return SNew(SOdysseyAnimationCellImageVector, Cast<UOdysseyAnimationCellImageVector>(iCell))
-            .Clipping(EWidgetClipping::ClipToBoundsAlways)
-            .ShowContent(this, &SOdysseyAnimationLayerImageVectorTimeline::GetShowCellContent); //DefaultCell, this can be called when creating cells, because the celle does not really exist yet
-    }
+			.Clipping(EWidgetClipping::ClipToBoundsAlways);
+	}
     if (iCell->IsA<UOdysseyAnimationCellImageVector>())
     {
         return SNew(SOdysseyAnimationCellImageVector, Cast<UOdysseyAnimationCellImageVector>(iCell))
-            .Clipping(EWidgetClipping::ClipToBoundsAlways)
-            .ShowContent(this, &SOdysseyAnimationLayerImageVectorTimeline::GetShowCellContent);
-    }
+			.Clipping(EWidgetClipping::ClipToBoundsAlways);
+	}
     else if (iCell->IsA<UOdysseyAnimationCellImageStagger>())
-    {
-        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell), mExtension)
-            .ShowContent(this, &SOdysseyAnimationLayerImageVectorTimeline::GetShowCellContent);
-    }
+	{
+        return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell))
+			.TimelinePosition(mTimelinePosition);
+	}
 
     return SNullWidget::NullWidget;
 }
@@ -68,13 +53,4 @@ SOdysseyAnimationLayerImageVectorTimeline::OnPreviewMouseButtonDown(const FGeome
     FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), mLayer);
 
     return SOdysseyAnimationLayerImageTimeline::OnPreviewMouseButtonDown(MyGeometry, MouseEvent);
-}
-
-bool
-SOdysseyAnimationLayerImageVectorTimeline::GetShowCellContent() const
-{
-    if (mLayer->IsLockedRecursively())
-        return false;
-        
-    return DisplayOptions();
 }

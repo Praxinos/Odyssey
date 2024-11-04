@@ -8,8 +8,6 @@
 
 #include <ULIS>
 
-#include "OdysseyVector.h"
-
 #include "OdysseyAnimationLayerImageVector.generated.h"
 
 UCLASS(BlueprintType)

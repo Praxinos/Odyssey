@@ -12,112 +12,26 @@
 #include "SOdysseyAnimationTimelineSection.h"
 
 void
-SOdysseyAnimationTimelineLightTableKey::Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension)
+SOdysseyAnimationTimelineLightTableKey::Construct(const FArguments& InArgs)
 {
-    mExtension = iExtension;
-    mCell = InArgs._Cell;
-    mKey = InArgs._Key;
+	mCell = InArgs._Cell;
+	mKey = InArgs._Key;
 
     const FCheckBoxStyle* checkboxStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.ToggleButton");
 
-    ChildSlot
-    [
-        SNew(SOdysseyAnimationTimelineSection, mExtension)
-        .WidthInFrames(1)
-        [
-            SNew(SVerticalBox)
-            + SVerticalBox::Slot()
-            .HAlign(HAlign_Center)
-            [
-                SNew(SOdysseyAnimationTimelineLightTableKeySlider)
-                .Key(mKey)
-                .OnChanged(InArgs._OnChanged)
-                .OnCommited(InArgs._OnCommited)
-            ]
-            + SVerticalBox::Slot()
-            .HAlign(HAlign_Center)
-            .AutoHeight()
-            [
-                SNew(SCheckBox)
-                .IsEnabled(this, &SOdysseyAnimationTimelineLightTableKey::IsOutOfPegsEnabled)
-                .Style( checkboxStyle )
-                .OnCheckStateChanged(this, &SOdysseyAnimationTimelineLightTableKey::OnOutOfPegsCheckStateChanged)
-                .IsChecked(this, &SOdysseyAnimationTimelineLightTableKey::IsOutOfPegsChecked)
-                .Padding(FMargin(2.f))
-                [
-                    SNew(SImage)
-                    .Image(this, &SOdysseyAnimationTimelineLightTableKey::GetOutOfPegsButtonImage)
-                ]
-            ]
-        ]
-    ];
-}
-
-bool
-SOdysseyAnimationTimelineLightTableKey::IsOutOfPegsEnabled() const
-{
-    return mKey.Get().bIsActivated;
-}
-
-const FSlateBrush*
-SOdysseyAnimationTimelineLightTableKey::GetOutOfPegsButtonImage() const
-{
-    UOdysseyAnimationCell* cell = mCell.Get();
-    if (!cell)
-        return nullptr;
-
-    if (cell->IsOutOfPegs())
-        return FOdysseyStyle::GetBrush("Animation.LightTable.OutOfPegs.Button.On");
-
-    return FOdysseyStyle::GetBrush("Animation.LightTable.OutOfPegs.Button.Off");
-}
-
-void
-SOdysseyAnimationTimelineLightTableKey::OnOutOfPegsCheckStateChanged(ECheckBoxState iValue)
-{
-    FOdysseyPainterEditor* editor = mExtension->GetEditor();
-    if (!editor)
-        return;
-
-    if (iValue == ECheckBoxState::Checked)
-    {
-        UOdysseyAnimationCell* cell = mCell.Get();
-        if (!cell)
-            return;
-
-        mExtension->GetOutOfPegsTool()->SetCell(cell);
-        editor->ActivateTemporaryTool(mExtension->GetOutOfPegsTool());
-    }
-    else
-    {
-        editor->InactivateTemporaryTool();
-    }
-}
-
-ECheckBoxState
-SOdysseyAnimationTimelineLightTableKey::IsOutOfPegsChecked() const
-{
-    FOdysseyPainterEditor* editor = mExtension->GetEditor();
-    if (!editor)
-        return ECheckBoxState::Unchecked;
-
-    UOdysseyPainterEditorTool* tool = editor->GetCurrentTool();
-    if (!tool)
-        return ECheckBoxState::Unchecked;
-
-    UOdysseyAnimationCell* cell = mCell.Get();
-    if (!cell)
-        return ECheckBoxState::Unchecked;
-
-    bool isToolActive = tool->IsA(UOdysseyAnimationEditorOutOfPegsTool::StaticClass());
-    if (!isToolActive)
-        return ECheckBoxState::Unchecked;
-
-    UOdysseyAnimationEditorOutOfPegsTool* outOfPegsTool = Cast<UOdysseyAnimationEditorOutOfPegsTool>(tool);
-    if (outOfPegsTool->GetCell() != cell)
-        return ECheckBoxState::Unchecked;
-        
-    return ECheckBoxState::Checked;
+	ChildSlot
+	[
+		SNew(SOdysseyAnimationTimelineSection)
+		.TimelinePosition(InArgs._TimelinePosition)
+		.WidthInFrames(1)
+		.HAlign(HAlign_Center)
+		[
+			SNew(SOdysseyAnimationTimelineLightTableKeySlider)
+			.Key(mKey)
+			.OnChanged(InArgs._OnChanged)
+			.OnCommited(InArgs._OnCommited)
+		]
+	];
 }
 
 void
@@ -170,11 +84,11 @@ SOdysseyAnimationTimelineLightTableKeySlider::OnPaint(const FPaintArgs& Args, co
 FReply
 SOdysseyAnimationTimelineLightTableKeySlider::OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
-    if (iMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
-    {    
-        // This has prevent throttling on so that viewports continue to run whilst dragging the slider
-        return FReply::Handled().DetectDrag(SharedThis(this), EKeys::LeftMouseButton);
-    }
+	if (iMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	{	
+		// This has prevent throttling on so that viewports continue to run whilst dragging the slider
+		return FReply::Handled().DetectDrag(SharedThis(this), EKeys::LeftMouseButton).PreventThrottling();
+	}
 
     return FReply::Unhandled();
 }
@@ -197,13 +111,13 @@ SOdysseyAnimationTimelineLightTableKeySlider::OnMouseMove(const FGeometry& iGeom
         float delta = (position - mDraggingPosition) * -1;
         float sensitivity = 200.f; 
 
-        FOdysseyAnimationLightTableKey key = mKey.Get();
-        key.Opacity = FMath::Clamp(mOldOpacity + 100.f * delta / sensitivity, 0.f, 100.f);
-        mOnChanged.ExecuteIfBound(key);
-        
-        // This has prevent throttling on so that viewports continue to run whilst dragging the slider
-        return FReply::Handled();
-    }
+		FOdysseyAnimationLightTableKey key = mKey.Get();
+		key.Opacity = FMath::Clamp(mOldOpacity + 100.f * delta / sensitivity, 0.f, 100.f);
+		mOnChanged.ExecuteIfBound(key);
+		
+		// This has prevent throttling on so that viewports continue to run whilst dragging the slider
+		return FReply::Handled().PreventThrottling();
+	}
 
     return FReply::Unhandled();
 }

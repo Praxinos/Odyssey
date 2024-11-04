@@ -42,6 +42,12 @@ UOdysseyAnimationLayer::GetAnimation() const
     return layerStack->GetAnimation();
 }
 
+UOdysseyAnimationLayerStack*
+UOdysseyAnimationLayer::GetLayerStack() const
+{
+	return Cast<UOdysseyAnimationLayerStack>(UOdysseyLayer::GetLayerStack());
+}
+
 FInt32Range
 UOdysseyAnimationLayer::GetFrameRange() const
 {
@@ -507,3 +513,41 @@ UOdysseyAnimationLayer::LighttableBlueprintSetter(FOdysseyAnimationLightTable Va
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), Value);
 }
+
+#ifdef WITH_EDITOR
+
+TArray<FName>
+UOdysseyAnimationLayer::GetRows() const
+{
+	TArray<FName> rows = UOdysseyLayer::GetRows();
+	rows.Add("Lighttable");
+	rows.Add("OutOfPegs");
+
+	return rows;
+}
+
+int
+UOdysseyAnimationLayer::GetRowHeight(FName iSubRowName) const
+{
+	if (iSubRowName == "Lighttable")
+		return 40;
+
+	if (iSubRowName == "OutOfPegs")
+		return 20;
+		
+	return Super::GetRowHeight(iSubRowName);
+}
+
+bool
+UOdysseyAnimationLayer::IsRowVisible(FName iSubRowName) const
+{
+	if (iSubRowName == "Lighttable")
+		return DisplayOptions && HasLighttable && Lighttable.bIsActivated;
+
+	if (iSubRowName == "OutOfPegs")
+		return DisplayOptions && HasLighttable && Lighttable.bIsActivated;
+		
+	return Super::IsRowVisible(iSubRowName);
+}
+
+#endif

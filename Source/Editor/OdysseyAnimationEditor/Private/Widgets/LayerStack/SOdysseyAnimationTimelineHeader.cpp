@@ -8,26 +8,26 @@
 #include "OdysseyAnimationPlayer.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
 #include "OdysseyStyleSet.h"
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyAnimationProxy.h"
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationTimelineHeader
 
 void
-SOdysseyAnimationTimelineHeader::Construct(
-    const FArguments& InArgs,
-    FOdysseyAnimationEditorExtension* iExtension
-)
+SOdysseyAnimationTimelineHeader::Construct(const FArguments& InArgs)
 {
-    mExtension = iExtension;
+	mAnimation = InArgs._Animation;
+	mPlayer = InArgs._Player;
+	mTimelinePosition = InArgs._TimelinePosition;
 
-    ChildSlot
-        [
-            //use this scrollbox to display other widgets in the timeline header
-            //for now there is no wodgets to display, but I can clearly imagine some
-            SNew(SOdysseyAnimationTimelineScrollBox, iExtension)
-        ];
+	ChildSlot
+	[
+		//use this scrollbox to display other widgets in the timeline header
+		//for now there is no wodgets to display, but I can clearly imagine some
+		SNew(SOdysseyAnimationTimelineScrollBox)
+		.TimelinePosition(mTimelinePosition)
+	];
 }
 
 int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
@@ -46,22 +46,20 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
     const int32 textLayer = backgroundLayer + 1;
     const int32 proxyLayer = textLayer + 1;
 
-    const FSlateFontInfo textFontInfo = FCoreStyle::GetDefaultFontStyle("Regular", 10);
-    const FSlateBrush* backgroundBrush = FAppStyle::GetBrush( TEXT( "ProgressBar.Background" ) );
+	const FSlateFontInfo textFontInfo = FCoreStyle::GetDefaultFontStyle("Regular", 10);
+	const float height = AllottedGeometry.GetLocalSize().Y;  
+	const float width = AllottedGeometry.GetLocalSize().X;
+	const float frameSize = mTimelinePosition->GetFrameSize();
+	float padding = mTimelinePosition->GetPadding() / frameSize; //fixed padding in pixels to display layer pre behaviour
+	float offset = mTimelinePosition->GetOffset();
+	const float frameNumberMinSize = 30.f;
+	const int32 frameNumberFrequency = FMath::Max(1, FGenericPlatformMath::CeilToInt(frameNumberMinSize / frameSize));
+	int32 startKey = FMath::Max(0, FGenericPlatformMath::FloorToInt(offset - padding ));
+	int32 endKey = FMath::Max(0, FGenericPlatformMath::CeilToInt(offset - padding + (width / frameSize)));
 
-    const float height = AllottedGeometry.GetLocalSize().Y;  
-    const float width = AllottedGeometry.GetLocalSize().X;
-    const float frameSize = mExtension->Timeline()->GetFrameWidth();
-    float padding = FOdysseyStyle::GetFloat(TEXT("Animation.Timeline.Padding")) / frameSize; //fixed padding in pixels to display layer pre behaviour
-    float offset = mExtension->Timeline()->GetOffset();
-    const float frameNumberMinSize = 30.f;
-    const int32 frameNumberFrequency = FMath::Max(1, FGenericPlatformMath::CeilToInt(frameNumberMinSize / frameSize));
-    int32 startKey = FMath::Max(0, FGenericPlatformMath::FloorToInt(offset - padding ));
-    int32 endKey = FMath::Max(0, FGenericPlatformMath::CeilToInt(offset - padding + (width / frameSize)));
-
-    UOdysseyAnimation* animation = mExtension->Animation();
-    TSharedPtr<FOdysseyAnimationProxy> proxy = animation->GetProxy();
-    FInt32Range animationRange = animation->GetFrameRange();
+	UOdysseyAnimation* animation = mAnimation;
+	TSharedPtr<FOdysseyAnimationProxy> proxy = animation->GetProxy();
+	FInt32Range animationRange = animation->GetFrameRange();
 
     for(int32 keyNum = startKey; keyNum <= endKey; keyNum++)
     {
@@ -125,18 +123,18 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 
 FReply 
 SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
-{    
-    if (!mIsScrubbing && MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
-    {
-        mIsScrubbing = true;
+{	
+	if (mPlayer && !mIsScrubbing && MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	{
+		mIsScrubbing = true;
 
-        const float minScrub = 0.0f;
-        float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
-        float frame = mExtension->Timeline()->MousePositionToFrame(posX);
-        FTimespan time = FTimespan::FromSeconds(FMath::Max(0.f, frame) / mExtension->Animation()->GetFramesPerSecond());
-        mExtension->Player()->Stop();
-        mExtension->Player()->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
-        mExtension->Player()->SeekToTime(time);
+		const float minScrub = 0.0f;
+		float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
+		float frame = mTimelinePosition->MousePositionToFrame(posX);
+		FTimespan time = FTimespan::FromSeconds(FMath::Max(0.f, frame) / mAnimation->GetFramesPerSecond());
+		mPlayer->Stop();
+		mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
+		mPlayer->SeekToTime(time);
 
         // This has prevent throttling on so that viewports continue to run whilst dragging the slider
         return FReply::Handled().CaptureMouse( SharedThis(this) ).PreventThrottling();
@@ -148,32 +146,32 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeometry, 
 FReply
 SOdysseyAnimationTimelineHeader::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-    if(mIsScrubbing)
-    {
-        const float minScrub = 0.0f;
-        float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
-        float frame = mExtension->Timeline()->MousePositionToFrame(posX);
-        FTimespan time = FTimespan::FromSeconds(FMath::Max(0.f, frame) / mExtension->Animation()->GetFramesPerSecond());
-        mExtension->Player()->SeekToTime(time);
-        return FReply::Handled();
-    }
-    
-    return FReply::Unhandled();
+	if(mPlayer && mIsScrubbing)
+	{
+		const float minScrub = 0.0f;
+		float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
+		float frame = mTimelinePosition->MousePositionToFrame(posX);
+		FTimespan time = FTimespan::FromSeconds(FMath::Max(0.f, frame) / mAnimation->GetFramesPerSecond());
+		mPlayer->SeekToTime(time);
+		return FReply::Handled();
+	}
+	
+	return FReply::Unhandled();
 }
 
 FReply
 SOdysseyAnimationTimelineHeader::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-    if (mIsScrubbing)
-    {
-        const float minScrub = 0.0f;
-        float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
-        float frame = mExtension->Timeline()->MousePositionToFrame(posX);
-        FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), FMath::Max(0, (int)frame));
-        mExtension->Player()->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
-        mIsScrubbing = false;
-        return FReply::Handled().ReleaseMouseCapture();
-    }
-    
-    return FReply::Unhandled();
+	if (mPlayer && mIsScrubbing)
+	{
+		const float minScrub = 0.0f;
+		float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
+		float frame = mTimelinePosition->MousePositionToFrame(posX);
+		FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), FMath::Max(0, (int)frame));
+		mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
+		mIsScrubbing = false;
+		return FReply::Handled().ReleaseMouseCapture();
+	}
+	
+	return FReply::Unhandled();
 }

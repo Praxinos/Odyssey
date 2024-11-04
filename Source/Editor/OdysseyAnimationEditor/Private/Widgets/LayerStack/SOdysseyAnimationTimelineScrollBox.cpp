@@ -3,9 +3,6 @@
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
 
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
-#include "Layout/LayoutUtils.h"
-
 SOdysseyAnimationTimelineScrollBox::FSlot::FSlotArguments
 SOdysseyAnimationTimelineScrollBox::Slot()
 {
@@ -13,29 +10,20 @@ SOdysseyAnimationTimelineScrollBox::Slot()
 }
 
 SOdysseyAnimationTimelineScrollBox::SOdysseyAnimationTimelineScrollBox()
-    : mExtension(nullptr)
 {
 }
 
 void
 SOdysseyAnimationTimelineScrollBox::Construct(
-    const FArguments& iArgs,
-    FOdysseyAnimationEditorExtension* iExtension
+    const FArguments& iArgs
 )
 {
-    mExtension = iExtension;
-
-    ChildSlot
-    [
-        SAssignNew(mPanel, SOdysseyAnimationTimelineScrollPanel, MoveTemp(const_cast<TArray<FSlot::FSlotArguments>&>(iArgs._Slots)),  iExtension)
-        .Clipping(EWidgetClipping::ClipToBounds)
-    ];
-}
-
-FOdysseyAnimationEditorExtension*
-SOdysseyAnimationTimelineScrollBox::GetExtension() const
-{
-    return mExtension;
+	ChildSlot
+	[
+		SAssignNew(mPanel, SOdysseyAnimationTimelineScrollPanel, MoveTemp(const_cast<TArray<FSlot::FSlotArguments>&>(iArgs._Slots)))
+		.TimelinePosition(iArgs._TimelinePosition)
+		.Clipping(EWidgetClipping::ClipToBounds)
+	];
 }
 
 void
@@ -62,12 +50,11 @@ SOdysseyAnimationTimelineScrollPanel::SOdysseyAnimationTimelineScrollPanel()
 void
 SOdysseyAnimationTimelineScrollPanel::Construct(
     const FArguments& iArgs,
-    TArray<SOdysseyAnimationTimelineScrollBox::FSlot::FSlotArguments> iSlots,
-    FOdysseyAnimationEditorExtension* iExtension
+    TArray<SOdysseyAnimationTimelineScrollBox::FSlot::FSlotArguments> iSlots
 )
 {
-    mExtension = iExtension;
-    mChildren.AddSlots(MoveTemp(iSlots));
+	mTimelinePosition = iArgs._TimelinePosition;
+	mChildren.AddSlots(MoveTemp(iSlots));
 }
 
 FChildren*
@@ -108,8 +95,9 @@ SOdysseyAnimationTimelineScrollPanel::ComputeDesiredSize(float) const
 void
 SOdysseyAnimationTimelineScrollPanel::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const
 {
-    float scrollPadding = AllottedGeometry.GetLocalSize().X;
-    float currentChildOffset = -mExtension->Timeline()->GetOffset() * mExtension->Timeline()->GetFrameWidth() + mExtension->Timeline()->GetPadding();
+	float scrollPadding = AllottedGeometry.GetLocalSize().X;
+	float padding = mTimelinePosition->GetPadding();
+	float currentChildOffset = -mTimelinePosition->GetOffset() * mTimelinePosition->GetFrameSize() + padding;
 
     for (int32 SlotIndex = 0; SlotIndex < mChildren.Num(); ++SlotIndex)
     {

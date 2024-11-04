@@ -17,26 +17,20 @@ public:
     DECLARE_DELEGATE_OneParam(FOnKeyChanged, FOdysseyAnimationLightTableKey)
     
 public:
-    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTableKey)
-    {}
-        SLATE_ATTRIBUTE(UOdysseyAnimationCell*, Cell)
-        SLATE_ATTRIBUTE(FOdysseyAnimationLightTableKey, Key)
-        SLATE_EVENT(FOnKeyChanged, OnChanged)
-        SLATE_EVENT(FOnKeyChanged, OnCommited)
-    SLATE_END_ARGS()
+	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTableKey)
+	{}
+		SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
+		SLATE_ATTRIBUTE(UOdysseyAnimationCell*, Cell)
+		SLATE_ATTRIBUTE(FOdysseyAnimationLightTableKey, Key)
+		SLATE_EVENT(FOnKeyChanged, OnChanged)
+		SLATE_EVENT(FOnKeyChanged, OnCommited)
+	SLATE_END_ARGS()
 
-    void Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension);
-
-private:
-    bool IsOutOfPegsEnabled() const;
-    const FSlateBrush* GetOutOfPegsButtonImage() const;
-    void OnOutOfPegsCheckStateChanged(ECheckBoxState iValue);
-    ECheckBoxState IsOutOfPegsChecked() const;
+	void Construct(const FArguments& InArgs);
 
 private:
-    FOdysseyAnimationEditorExtension* mExtension = nullptr;
-    TAttribute<UOdysseyAnimationCell*> mCell;
-    TAttribute<FOdysseyAnimationLightTableKey> mKey;
+	TAttribute<UOdysseyAnimationCell*> mCell;
+	TAttribute<FOdysseyAnimationLightTableKey> mKey;
 };
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTableKeySlider

@@ -2,17 +2,19 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "LayerStack/Tools/OdysseyAnimationTimelineSelectionTool.h"
-#include "OdysseyAnimationEditorTimeline.h"
+#include "OdysseyAnimationEditorTimelinePosition.h"
 #include "DragDropOperations/OdysseyAnimationCellsDragDropOperation.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
 
 FOdysseyAnimationTimelineSelectionTool::~FOdysseyAnimationTimelineSelectionTool()
 {
 }
 
-FOdysseyAnimationTimelineSelectionTool::FOdysseyAnimationTimelineSelectionTool(FOdysseyAnimationEditorTimeline* iTimelineParams)
-    : mTimelineParams(iTimelineParams)
+FOdysseyAnimationTimelineSelectionTool::FOdysseyAnimationTimelineSelectionTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection)
+    : mTimelinePosition(iTimelinePosition)
+	, mTimelineCellSelection(iTimelineCellSelection)
 {   
 }
 
@@ -22,14 +24,14 @@ FOdysseyAnimationTimelineSelectionTool::OnMouseButtonDown(const FMouseEventParam
     if (iParams.mMouseEvent.GetEffectingButton() != EKeys::LeftMouseButton)
         return FReply::Unhandled();
 
-    switch(iParams.mOrigin)
-    {
-        case EMouseEventOrigin::Layer:
-        {
-            mTimelineParams->SetSelectedCells({});
-            return FReply::Handled();
-        }
-        break;
+	switch(iParams.mOrigin)
+	{
+		case EMouseEventOrigin::Layer:
+		{
+			mTimelineCellSelection->SetSelectedCells({});
+			return FReply::Handled();
+		}
+		break;
 
         case EMouseEventOrigin::CellsTimeline:
         {
@@ -101,12 +103,12 @@ FOdysseyAnimationTimelineSelectionTool::OnMouseButtonUp(const FMouseEventParams&
 FReply
 FOdysseyAnimationTimelineSelectionTool::OnKeyDown(const FKeyEvent& iKeyEvent)
 {
-    if (iKeyEvent.GetKey() == EKeys::Escape)
-    {
-        mTimelineParams->SetSelectedCells({});
-        return FReply::Handled();
-    }
-    return FReply::Unhandled();
+	if (iKeyEvent.GetKey() == EKeys::Escape)
+	{
+		mTimelineCellSelection->SetSelectedCells({});
+		return FReply::Handled();
+	}
+	return FReply::Unhandled();
 }
 
 //--------------------
@@ -138,7 +140,7 @@ FOdysseyAnimationTimelineSelectionTool::OnDefaultSelectionMouseButtonDown(const 
     if (!SetCellSelectionCursorAtFrame(iParams.mLayer, frame))
         return FReply::Unhandled();
 
-    mCellCursor = mTimelineParams->GetCellSelectionCursor();
+	mCellCursor = mTimelineCellSelection->GetCellSelectionCursor();
 
     if (!SelectFromCursorToFrame(iParams.mLayer, frame))
         return FReply::Unhandled();
@@ -151,14 +153,14 @@ FOdysseyAnimationTimelineSelectionTool::OnDefaultSelectionMouseButtonDown(const 
 FReply
 FOdysseyAnimationTimelineSelectionTool::OnDefaultSelectionDragDetected(const FMouseEventParams& iParams)
 {
-    mIsDragDetected = true;
-    if (mIsDragnDrop)
-    {
-        mIsSelecting = false;
-        TSharedRef<FOdysseyAnimationCellsDragDropOperation> operation = FOdysseyAnimationCellsDragDropOperation::Create(iParams.mLayer, mTimelineParams->GetSelectedCells());
-        return FReply::Handled().BeginDragDrop(operation);
-    }
-    
+	mIsDragDetected = true;
+	if (mIsDragnDrop)
+	{
+		mIsSelecting = false;
+		TSharedRef<FOdysseyAnimationCellsDragDropOperation> operation = FOdysseyAnimationCellsDragDropOperation::Create(iParams.mLayer, mTimelineCellSelection->GetSelectedCells());
+    	return FReply::Handled().BeginDragDrop(operation);
+	}
+	
     if (mIsSelecting)
     {
         return FReply::Handled().CaptureMouse( iParams.mWidget.ToSharedRef() ).PreventThrottling();
@@ -188,11 +190,11 @@ FOdysseyAnimationTimelineSelectionTool::OnDefaultSelectionMouseMove(const FMouse
 FReply
 FOdysseyAnimationTimelineSelectionTool::OnDefaultSelectionMouseButtonUp(const FMouseEventParams& iParams)
 {
-    if (!mIsSelecting && !mIsDragDetected)
-    {
-        mTimelineParams->SetSelectedCells({});
-        return FReply::Handled();
-    }
+	if (!mIsSelecting && !mIsDragDetected)
+	{
+		mTimelineCellSelection->SetSelectedCells({});
+		return FReply::Handled();
+	}
 
     mIsSelecting = false;
     mIsDragnDrop = false;
@@ -219,15 +221,15 @@ FOdysseyAnimationTimelineSelectionTool::OnContiguousSelectionMouseButtonDown(con
 
     float frame = GetFrameUnderCursor(iParams);
 
-    mCellCursor = mTimelineParams->GetCellSelectionCursor();
+	mCellCursor = mTimelineCellSelection->GetCellSelectionCursor();
 
-    if (!mCellCursor)
-    {    
-        if (!SetCellSelectionCursorAtFrame(iParams.mLayer, frame))
-            return FReply::Unhandled();
-    
-        mCellCursor = mTimelineParams->GetCellSelectionCursor();
-    }
+	if (!mCellCursor)
+	{	
+		if (!SetCellSelectionCursorAtFrame(iParams.mLayer, frame))
+			return FReply::Unhandled();
+	
+		mCellCursor = mTimelineCellSelection->GetCellSelectionCursor();
+	}
 
     if (!SelectFromCursorToFrame(iParams.mLayer, frame))
         return FReply::Unhandled();
@@ -278,15 +280,15 @@ FOdysseyAnimationTimelineSelectionTool::OnContiguousSelectionMouseButtonUp(const
 
 FReply
 FOdysseyAnimationTimelineSelectionTool::OnNonContiguousSelectionMouseButtonDown(const FMouseEventParams& iParams)
-{    
-    if (mIsSelecting)
-        return FReply::Handled();
-        
-    mSelectionMode = ESelectionMode::NonContiguous;
-    mIsDragDetected = false;
-    mInitialSelection = mTimelineParams->GetSelectedCells();
-    
-    float frame = GetFrameUnderCursor(iParams);
+{	
+	if (mIsSelecting)
+		return FReply::Handled();
+		
+	mSelectionMode = ESelectionMode::NonContiguous;
+	mIsDragDetected = false;
+	mInitialSelection = mTimelineCellSelection->GetSelectedCells();
+	
+	float frame = GetFrameUnderCursor(iParams);
 
     mShouldDeselect = IsFrameSelected(iParams.mLayer, frame);
         
@@ -296,16 +298,16 @@ FOdysseyAnimationTimelineSelectionTool::OnNonContiguousSelectionMouseButtonDown(
         if (!cell)
             return FReply::Unhandled();
 
-        mCellCursor = cell;
-        if (!SelectFromCursorToFrame(iParams.mLayer, frame, true))
-            return FReply::Unhandled();
-    }
-    else
-    {
-        if (!SetCellSelectionCursorAtFrame(iParams.mLayer, frame))
-            return FReply::Unhandled();
-    
-        mCellCursor = mTimelineParams->GetCellSelectionCursor();
+		mCellCursor = cell;
+		if (!SelectFromCursorToFrame(iParams.mLayer, frame, true))
+			return FReply::Unhandled();
+	}
+	else
+	{
+		if (!SetCellSelectionCursorAtFrame(iParams.mLayer, frame))
+			return FReply::Unhandled();
+	
+		mCellCursor = mTimelineCellSelection->GetCellSelectionCursor();
 
         if (!SelectFromCursorToFrame(iParams.mLayer, frame))
             return FReply::Unhandled();
@@ -354,8 +356,8 @@ FOdysseyAnimationTimelineSelectionTool::OnNonContiguousSelectionMouseButtonUp(co
 int
 FOdysseyAnimationTimelineSelectionTool::GetFrameUnderCursor(const FMouseEventParams& iParams)
 {
-    float posX = iParams.mGeometry.AbsoluteToLocal(iParams.mMouseEvent.GetScreenSpacePosition()).X;
-    int frame = (int)mTimelineParams->MousePositionToFrame(posX);
+	float posX = iParams.mGeometry.AbsoluteToLocal(iParams.mMouseEvent.GetScreenSpacePosition()).X;
+	int frame = (int)mTimelinePosition->MousePositionToFrame(posX);
 
     return frame;
 }
@@ -389,29 +391,29 @@ FOdysseyAnimationTimelineSelectionTool::SelectFromCursorToFrame(UOdysseyAnimatio
         if (!cell)
             break;
 
-        affectedCells.AddUnique(cell);
-        currentFrame += cell->Exposure;
-    }
-    
-    TArray<UOdysseyAnimationCell*> selectedCells = { mInitialSelection };
-    if (iDeselect)
-    {
-        selectedCells.RemoveAll(
-            [&affectedCells](UOdysseyAnimationCell* iCell)
-            {
-                return affectedCells.Contains(iCell);
-            }
-        );
-    }
-    else
-    {
-        for ( UOdysseyAnimationCell* affectedCell : affectedCells)
-        {
-            selectedCells.AddUnique(affectedCell);
-        }
-    }
-    mTimelineParams->SetSelectedCells(selectedCells);
-    return true;
+		affectedCells.AddUnique(cell);
+		currentFrame += cell->Exposure;
+	}
+	
+	TArray<UOdysseyAnimationCell*> selectedCells = { mInitialSelection };
+	if (iDeselect)
+	{
+		selectedCells.RemoveAll(
+			[&affectedCells](UOdysseyAnimationCell* iCell)
+			{
+				return affectedCells.Contains(iCell);
+			}
+		);
+	}
+	else
+	{
+		for ( UOdysseyAnimationCell* affectedCell : affectedCells)
+		{
+			selectedCells.AddUnique(affectedCell);
+		}
+	}
+	mTimelineCellSelection->SetSelectedCells(selectedCells);
+	return true;
 }
 
 bool
@@ -421,8 +423,8 @@ FOdysseyAnimationTimelineSelectionTool::SetCellSelectionCursorAtFrame(UOdysseyAn
     if (!cell)
         return false;
 
-    mTimelineParams->SelectCell(cell, true);
-    return true;
+	mTimelineCellSelection->SelectCell(cell, true);
+	return true;
 }
 
 bool
@@ -432,5 +434,5 @@ FOdysseyAnimationTimelineSelectionTool::IsFrameSelected(UOdysseyAnimationLayer* 
     if (!cell)
         return false;
 
-    return mTimelineParams->GetSelectedCells().Contains(cell);
+	return mTimelineCellSelection->GetSelectedCells().Contains(cell);
 }

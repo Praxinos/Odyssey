@@ -3,8 +3,7 @@
 
 #include "LayerStack/Tools/OdysseyAnimationTimelineCutTool.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "OdysseyAnimationEditorTimeline.h"
+#include "OdysseyAnimationEditorTimelinePosition.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -13,8 +12,8 @@ FOdysseyAnimationTimelineCutTool::~FOdysseyAnimationTimelineCutTool()
 {
 }
 
-FOdysseyAnimationTimelineCutTool::FOdysseyAnimationTimelineCutTool(FOdysseyAnimationEditorTimeline* iTimelineParams)
-    : mTimelineParams(iTimelineParams)
+FOdysseyAnimationTimelineCutTool::FOdysseyAnimationTimelineCutTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition)
+    : mTimelinePosition(iTimelinePosition)
 {   
 }
 
@@ -31,7 +30,7 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
         return FReply::Unhandled();
 
     float posX = iParams.mGeometry.AbsoluteToLocal(iParams.mMouseEvent.GetScreenSpacePosition()).X;
-    int frame = (int)(mTimelineParams->MousePositionToFrame(posX) + 0.5f);
+    int frame = (int)(mTimelinePosition->MousePositionToFrame(posX) + 0.5f);
 
     UOdysseyAnimationCell* cell = iParams.mLayer->GetCellAtFrame(frame);
     if (!cell || cell->GetFrameRange().GetLowerBoundValue() == frame)

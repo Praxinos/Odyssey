@@ -386,3 +386,46 @@ UOdysseyLayer::OpacityBlueprintSetter(float Value)
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), Value);
 }
+
+#ifdef WITH_EDITOR
+
+TArray<FName>
+UOdysseyLayer::GetRows() const
+{
+	return {
+		"Main",
+		"Blend"
+	};
+}
+
+int
+UOdysseyLayer::GetRowHeight(FName iSubRowName) const
+{
+	if (iSubRowName == "Main")
+		return 20;
+
+	if (iSubRowName == "Blend")
+		return 20;
+		
+	return 0;
+}
+
+bool
+UOdysseyLayer::IsRowVisible(FName iSubRowName) const
+{
+	if (iSubRowName == "Main")
+		return true;
+
+	if (iSubRowName == "Blend")
+		return DisplayOptions;
+		
+	return 0;
+}
+
+FMargin
+UOdysseyLayer::GetRowPadding(FName iSubRowName) const
+{
+	return FMargin(0.f, 0.f, 0.f, 2.f);
+}
+
+#endif

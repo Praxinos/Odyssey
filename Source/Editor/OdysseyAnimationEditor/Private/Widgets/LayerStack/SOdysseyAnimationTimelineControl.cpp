@@ -2,61 +2,116 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineControl.h"
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineCurrentFrame.h"
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyKeyState.h"
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
 #include "OdysseyAnimation.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 SOdysseyAnimationTimelineControl::SOdysseyAnimationTimelineControl()
-    : mExtension(nullptr)
-    , mOffsetMousePosition(0)
-    , mIsOffsetting(false)
-    , mIsZooming(false)
+	: mOffsetMousePosition(0)
+	, mIsOffsetting(false)
+	, mIsZooming(false)
 {
 }
 
 void
-SOdysseyAnimationTimelineControl::Construct(
-    const FArguments& iArgs,
-    FOdysseyAnimationEditorExtension* iExtension
-)
+SOdysseyAnimationTimelineControl::Construct(const FArguments& iArgs)
 {
-    mExtension = iExtension;
-    ChildSlot
-    [
-        SNew(SOverlay)
-        + SOverlay::Slot()
-        [
-            iArgs._Content.Widget
-        ]
-        + SOverlay::Slot()
-        [
-            SNew(SOdysseyAnimationTimelineCurrentFrame, mExtension)
-        ]
-    ];
+    mAnimation = iArgs._Animation;
+	mTimelinePosition = iArgs._TimelinePosition;
+	mCurrentFrame = iArgs._CurrentFrame;
+	mCustomValidRange = iArgs._CustomValidRange;
+
+	ChildSlot
+	[
+		iArgs._Content.Widget
+	];
+}
+
+int32
+SOdysseyAnimationTimelineControl::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+	LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+	LayerId++;
+
+	const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush("GenericWhiteBox");
+
+	const float height = AllottedGeometry.GetLocalSize().Y;
+	const float width = AllottedGeometry.GetLocalSize().X;
+	const float frameSize = mTimelinePosition->GetFrameSize();
+
+	FLinearColor lineColor = FLinearColor::Red;
+	lineColor.A = 0.3f;
+
+	int currentFrame = mCurrentFrame.Get();
+	float currentFramePos = mTimelinePosition->FrameToMousePosition(currentFrame);
+
+	FSlateDrawElement::MakeBox(
+		OutDrawElements,
+		LayerId,
+        AllottedGeometry.ToPaintGeometry( FVector2D(frameSize, height), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(currentFramePos, 0.f) ) ) ),
+		GenericBrush,
+		ESlateDrawEffect::None,
+		lineColor
+	);
+
+	FInt32Range validRange = mCustomValidRange.Get();
+	if (!validRange.IsEmpty())
+	{	
+		FLinearColor outOfRangeColor = FLinearColor::Black;
+		outOfRangeColor.A = 0.3f;
+
+		float leftRangeX = FMath::Min(width, mTimelinePosition->FrameToMousePosition(validRange.GetLowerBoundValue()));
+		float rightRangeX = FMath::Max(0, mTimelinePosition->FrameToMousePosition(validRange.GetUpperBoundValue() + 1));
+
+		if (leftRangeX > 0.f)
+		{
+			FSlateDrawElement::MakeBox(
+				OutDrawElements,
+				LayerId,
+				AllottedGeometry.ToPaintGeometry( FVector2D(leftRangeX, height), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(0.f, 0.f) ) ) ),
+				GenericBrush,
+				ESlateDrawEffect::None,
+				outOfRangeColor
+			);
+		}
+
+		if (rightRangeX < width)
+		{
+			FSlateDrawElement::MakeBox(
+				OutDrawElements,
+				LayerId,
+				AllottedGeometry.ToPaintGeometry( FVector2D(width - rightRangeX, height), FSlateLayoutTransform( 1.0, TransformPoint( 1.0, FVector2D(rightRangeX, 0.f) ) ) ),
+				GenericBrush,
+				ESlateDrawEffect::None,
+				outOfRangeColor
+			);
+		}
+	}
+
+	++LayerId;
+	return LayerId;
 }
 
 FReply
 SOdysseyAnimationTimelineControl::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-    if (MouseEvent.IsControlDown())
-    {
-        if (MouseEvent.GetWheelDelta() > 0.f)
-        {
-            mExtension->Timeline()->ZoomOut();
-        }
-        else
-        {
-            mExtension->Timeline()->ZoomIn();
-        }
-        return FReply::Handled();
-    }
-    else
-    {
-        return FReply::Unhandled();
-    }
+	if (MouseEvent.IsControlDown())
+	{
+		if (MouseEvent.GetWheelDelta() > 0.f)
+		{
+			mTimelinePosition->ZoomOut();
+		}
+		else
+		{
+			mTimelinePosition->ZoomIn();
+		}
+		return FReply::Handled();
+	}
+	else
+	{
+		return FReply::Unhandled();
+	}
 }
 
 FReply 
@@ -77,22 +132,22 @@ SOdysseyAnimationTimelineControl::OnPreviewMouseButtonDown(const FGeometry& MyGe
 
     if (FOdysseyAnimationEditorCommands::Get().PanZoomTimeline->HasActiveChord(activeChord))
     {
-        if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
-        {
-            mIsOffsetting = true;
-            mOffsetMousePosition = MouseEvent.GetScreenSpacePosition();
-            mOffsetMousePosition.Y = mExtension->Timeline()->GetOffset();
-            return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
-        }
-        else if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
-        {
-            mIsZooming = true;
-            mZoomMousePosition = MouseEvent.GetScreenSpacePosition();
-            mZoomInitialValue = mExtension->Timeline()->GetZoom();
-            mOffsetInitialValue = mExtension->Timeline()->GetOffset();
-            mInitialValueFrameWidth = mExtension->Timeline()->GetFrameWidth();
-            return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
-        }
+		if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+		{
+			mIsOffsetting = true;
+			mOffsetMousePosition = MouseEvent.GetScreenSpacePosition();
+			mOffsetMousePosition.Y = mTimelinePosition->GetOffset();
+    		return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
+		}
+		else if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+		{
+			mIsZooming = true;
+			mZoomMousePosition = MouseEvent.GetScreenSpacePosition();
+			mZoomInitialValue = mTimelinePosition->GetZoom();
+			mOffsetInitialValue = mTimelinePosition->GetOffset();
+			mInitialValueFrameWidth = mTimelinePosition->GetFrameSize();
+    		return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
+		}
     }
 
     return FReply::Unhandled();
@@ -113,9 +168,9 @@ SOdysseyAnimationTimelineControl::OnMouseMove(const FGeometry& MyGeometry, const
         const float minOffset = 0.0f;
         float mouseOffset = MouseEvent.GetScreenSpacePosition().X - mOffsetMousePosition.X;
         //mOffsetMousePosition.Y contains the starting offset instead of the Y position
-        mExtension->Timeline()->SetOffset(mOffsetMousePosition.Y - (mouseOffset / mExtension->Timeline()->GetFrameWidth()));
-        return FReply::Handled();
-    }
+		mTimelinePosition->SetOffset(mOffsetMousePosition.Y - (mouseOffset / mTimelinePosition->GetFrameSize()));
+		return FReply::Handled();
+	}
 
     if (mIsZooming)
     {
@@ -124,12 +179,12 @@ SOdysseyAnimationTimelineControl::OnMouseMove(const FGeometry& MyGeometry, const
 
         float offset = mOffsetInitialValue + mousePosition / mInitialValueFrameWidth;
 
-        double sliderPos = FMath::Loge(mZoomInitialValue);
-        sliderPos += mouseOffset / 200.f;
-        double newZoom = FMath::Exp(sliderPos);
-        mExtension->Timeline()->SetZoom(newZoom);
+		double sliderPos = FMath::Loge(mZoomInitialValue);
+		sliderPos += mouseOffset / 200.f;
+		double newZoom = FMath::Exp(sliderPos);
+		mTimelinePosition->SetZoom(newZoom);
 
-        mExtension->Timeline()->SetOffset(offset - mousePosition / mExtension->Timeline()->GetFrameWidth());
+		mTimelinePosition->SetOffset(offset - mousePosition / mTimelinePosition->GetFrameSize());
 
         return FReply::Handled();
     }
@@ -158,13 +213,13 @@ SOdysseyAnimationTimelineControl::OnNavigation(const FGeometry& MyGeometry, cons
 {
     if (InNavigationEvent.GetNavigationType() == EUINavigation::Left)
     {
-        int frame = FMath::Max(0, mExtension->Animation()->CurrentFrame - 1);
-        FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
+        int frame = FMath::Max(0, mAnimation->CurrentFrame - 1);
+        FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
     }
     else if (InNavigationEvent.GetNavigationType() == EUINavigation::Right)
     {
-        int frame = mExtension->Animation()->CurrentFrame + 1;
-        FOdysseyObjectEditorUtils::SetPropertyValue(mExtension->Animation(), GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
+        int frame = mAnimation->CurrentFrame + 1;
+        FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
     }
     return FNavigationReply::Stop();
 }

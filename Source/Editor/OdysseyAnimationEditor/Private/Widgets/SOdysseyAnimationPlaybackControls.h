@@ -6,21 +6,20 @@
 #include "CoreMinimal.h"
 #include "Widgets/Input/SButton.h"
 
-class FOdysseyAnimationEditorExtension;
-
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationPlaybackControls
 // Diplays all controls for a playback (play / pause / next / end / previous / start)
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationPlaybackControls : public SCompoundWidget
 {
 public:
-    SLATE_BEGIN_ARGS(SOdysseyAnimationPlaybackControls)
-        {}
+	SLATE_BEGIN_ARGS(SOdysseyAnimationPlaybackControls)
+		{}
+		SLATE_ARGUMENT(UOdysseyAnimation*, Animation)
+		SLATE_ARGUMENT(UOdysseyAnimationPlayer*, Player)
         SLATE_ATTRIBUTE(float, PlaybackFramesPerSecond)
+	SLATE_END_ARGS()
 
-    SLATE_END_ARGS()
-
-    void Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension);
+	void Construct(const FArguments& InArgs);
 
 private:
     bool IsPlayingForward() const;
@@ -47,6 +46,7 @@ private:
     FReply OnLoopClicked();
 
 private:
-    FOdysseyAnimationEditorExtension* mExtension;
     TAttribute<float> mPlaybackFramesPerSecond;
+	UOdysseyAnimation* mAnimation;
+	UOdysseyAnimationPlayer* mPlayer;
 };

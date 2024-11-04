@@ -19,26 +19,17 @@ public:
 
 public:
     // Construction / Destruction
-    SOdysseyTextureLayerImageVectorRow();
     void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, class UOdysseyTextureLayerImageVector* iTextureLayerImageVector);
     
+protected:
+	virtual TArray<TSharedPtr<SWidget>> GenerateMainRowHeaderOptionWidgets() override;
+
 private:
-    virtual TSharedRef<SWidget> GenerateHeaderWidget() override;
-    virtual TSharedRef<SWidget> GenerateOptionsWidget() override;
     void OnIsColoredCheckStateChanged( ECheckBoxState iState );
     ECheckBoxState GetIsColoredIsChecked() const;
     void OnIsWireframeCheckStateChanged( ECheckBoxState iState );
     ECheckBoxState GetIsWireframeIsChecked() const;
-    EVisibility GetCollapsedOpacityVisibility() const;
-
-private:
-    void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);
-    void OnOpacityValueChanged(int iValue);
-    void OnOpacityValueCommitted(int iValue, ETextCommit::Type iType);
-    void OnOpacityBeginSliderMovement();
-    void OnOpacityEndSliderMovement(int iValue);
 
 private:
     class UOdysseyTextureLayerImageVector* mTextureLayerImageVector;
-    FText mSetOpacityTransactionName;
 };
