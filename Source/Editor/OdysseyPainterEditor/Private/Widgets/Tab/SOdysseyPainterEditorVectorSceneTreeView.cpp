@@ -33,7 +33,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs, F
         // for some reason, SetTreeItemsSource does not work, so we have to use an array that we
         // call mItemsSource and that we will updates with the desired items
         .TreeItemsSource(&mItemsSource)
-        .OnGenerateRow( this, &SOdysseyPainterEditorVectorSceneTreeView::OnGenerateRow ) 
+        .OnGenerateRow( this, &SOdysseyPainterEditorVectorSceneTreeView::OnGenerateRow )
         .OnGetChildren( this, &SOdysseyPainterEditorVectorSceneTreeView::OnGetChildren )
         .OnExpansionChanged( this, &SOdysseyPainterEditorVectorSceneTreeView::OnExpansionChanged )
         .OnSelectionChanged( this, &SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged )
@@ -98,7 +98,7 @@ SOdysseyPainterEditorVectorSceneTreeView::BuildTree( const TSharedPtr<FVectorSce
         TSharedPtr<FVectorSceneTreeViewItem> childItem = MakeShareable(new FVectorSceneTreeViewItem(child));
 
         //iItem.Get()->mChildren.Add( childItem );
-        // reverse order in order to get the most forward objet on top of the hierarchy 
+        // reverse order in order to get the most forward objet on top of the hierarchy
         iItem.Get()->mChildren.Insert( childItem, 0 );
 
         BuildTree( childItem );
@@ -205,7 +205,7 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( scene );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
             TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();
@@ -236,7 +236,7 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
         scene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
                                  // sending the MODIFIED flag will trigger the update
                                  // of the Object's DetailsView. If we send the SELECTED signal
-                                 // it makes more sense but this widget will be immediately 
+                                 // it makes more sense but this widget will be immediately
                                  // updated whereas it's already being updated, hence it creates
                                  // some problems, one of them being the selection of the whole
                                  //  vector scene when holding the shift key.

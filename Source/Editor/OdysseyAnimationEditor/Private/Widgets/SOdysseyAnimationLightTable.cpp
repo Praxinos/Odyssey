@@ -44,7 +44,7 @@ SOdysseyAnimationLightTable::Construct(const FArguments& InArgs, FOdysseyAnimati
 
     mExtension = iExtension;
     mLayerStack.Assign(*this, InArgs._LayerStack);
-    
+
     ChildSlot
     [
         SAssignNew(mSlidersBox, SHorizontalBox)

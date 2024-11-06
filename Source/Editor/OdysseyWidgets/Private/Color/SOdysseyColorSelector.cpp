@@ -68,7 +68,7 @@ SOdysseyColorSelector::Construct( const FArguments& InArgs )
 {
     mColor = InArgs._Color;
     mOnColorChangeCallback = InArgs._OnColorChange;
-    
+
     ChildSlot
     [
         SNew( SOverlay )
@@ -217,7 +217,7 @@ void SOdysseyColorSelector::OnHexTextCommitted(const FText& Text, ETextCommit::T
         FColor color = FColor::FromHex(Text.ToString());
         ::ULIS::FColor ulisColor = ::ULIS::FColor::FromRGBA8(color.R, color.G, color.B, color.A);
         mOnColorChangeCallback.ExecuteIfBound(eOdysseyEventState::kSet, ulisColor );
-    }    
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

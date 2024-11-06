@@ -13,36 +13,36 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStackTreeView
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerStackTreeView)
-		: _ExternalScrollbar(nullptr)
+        : _ExternalScrollbar(nullptr)
         {}
         SLATE_ARGUMENT( UOdysseyAnimationLayerStack*, LayerStack )
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
-		SLATE_ARGUMENT( TOptional<TArray<SHeaderRow::FColumn::FArguments>>, Columns )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ARGUMENT( TOptional<TArray<SHeaderRow::FColumn::FArguments>>, Columns )
         SLATE_EVENT( FOnGenerateRow, OnGenerateRow )
-		SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
-		SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )
+        SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
+        SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )
     SLATE_END_ARGS()
 
 public:
     SOdysseyAnimationLayerStackTreeView();
     void Construct(const FArguments& InArgs);
-	TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
+    TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
 
 private:
     virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
     virtual FReply OnFocusReceived(const FGeometry& MyGeometry, const FFocusEvent& InFocusEvent) override;
     virtual void Private_SignalSelectionChanged(ESelectInfo::Type SelectInfo);
-    
+
     virtual TArray<TSharedPtr<FExtender>> ExtendContextMenu();
 
 private:
     void ExtendContextMenuLayerSection(FMenuBuilder& iMenuBuilder);
     void Action_ConvertLayerToRasterLayer();
-	void OnLayerAdded(UOdysseyLayer* iLayer);
+    void OnLayerAdded(UOdysseyLayer* iLayer);
 
 private:
     TSharedPtr<FOdysseyAnimationTimelineShortcuts> mTimelineShortcuts;
-	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
 
-	UOdysseyAnimationLayerStack* mLayerStack;
+    UOdysseyAnimationLayerStack* mLayerStack;
 };

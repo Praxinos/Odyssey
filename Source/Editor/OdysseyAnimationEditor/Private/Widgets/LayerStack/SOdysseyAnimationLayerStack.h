@@ -24,28 +24,28 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerStack
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerStack)
-		: _Animation(nullptr)
-		, _PlayerControlsVisibility(EVisibility::Visible)
-		, _ScrollbarVisibility(EVisibility::Visible)
-		, _PlaybackFramesPerSecond(24.0f)
+        : _Animation(nullptr)
+        , _PlayerControlsVisibility(EVisibility::Visible)
+        , _ScrollbarVisibility(EVisibility::Visible)
+        , _PlaybackFramesPerSecond(24.0f)
         {}
         SLATE_ATTRIBUTE( UOdysseyAnimation*, Animation )
-		SLATE_ATTRIBUTE( UOdysseyAnimationPlayer*, Player )
-		SLATE_ATTRIBUTE( EVisibility, PlayerControlsVisibility)
-		SLATE_ATTRIBUTE( EVisibility, ScrollbarVisibility)
-		SLATE_ATTRIBUTE( float, PlaybackFramesPerSecond )
-		SLATE_ATTRIBUTE( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
-		SLATE_ATTRIBUTE( FInt32Range, CustomValidRange)
-		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
-		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
-		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
+        SLATE_ATTRIBUTE( UOdysseyAnimationPlayer*, Player )
+        SLATE_ATTRIBUTE( EVisibility, PlayerControlsVisibility)
+        SLATE_ATTRIBUTE( EVisibility, ScrollbarVisibility)
+        SLATE_ATTRIBUTE( float, PlaybackFramesPerSecond )
+        SLATE_ATTRIBUTE( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ATTRIBUTE( FInt32Range, CustomValidRange)
+        SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
+        SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
+        SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
     SLATE_END_ARGS()
 
 public:
     // Construction / Destruction
     ~SOdysseyAnimationLayerStack();
     SOdysseyAnimationLayerStack();
-    
+
     void Construct(const FArguments& InArgs);
     TSharedPtr<SOdysseyLayerStackTreeView> GetTreeView() const;
 
@@ -54,30 +54,30 @@ private:
 
 private:
     void OnTimelineScrollBarHScrolled(float iOffset);
-	void OnTreeViewScrolled(double iOffset);
-	void OnTimelineTreeViewScrolled(double iOffset);
+    void OnTreeViewScrolled(double iOffset);
+    void OnTimelineTreeViewScrolled(double iOffset);
     void RebuildWidgets();
 
     void OnLayerAdded(UOdysseyLayer* iLayer);
     float PlaybackFramesPerSecond() const;
 
-	int GetCurrentFrame() const;
+    int GetCurrentFrame() const;
 
 private:
     TSlateAttribute<UOdysseyAnimation*> mAnimation;
-	TAttribute<UOdysseyAnimationPlayer*> mPlayer;
-	TAttribute<EVisibility> mPlayerControlsVisibility;
-	TAttribute<EVisibility> mScrollbarVisibility;
-	TAttribute<float> mPlaybackFramesPerSecond;
-	TAttribute<TSharedPtr<FOdysseyAnimationEditorTimelinePosition>> mTimelinePosition;
-	TAttribute<FInt32Range> mCustomValidRange;
-	SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
-	FSimpleDelegate mOnInactivateOutOfPegs;
-	SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
+    TAttribute<UOdysseyAnimationPlayer*> mPlayer;
+    TAttribute<EVisibility> mPlayerControlsVisibility;
+    TAttribute<EVisibility> mScrollbarVisibility;
+    TAttribute<float> mPlaybackFramesPerSecond;
+    TAttribute<TSharedPtr<FOdysseyAnimationEditorTimelinePosition>> mTimelinePosition;
+    TAttribute<FInt32Range> mCustomValidRange;
+    SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
+    FSimpleDelegate mOnInactivateOutOfPegs;
+    SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
 
     TSharedPtr<SOdysseyLayerStackTreeView> mTreeView;
-	TSharedPtr<SOdysseyAnimationTimelineTreeView> mTimelineTreeView;
-	TSharedPtr<SScrollBar> mTimelineScrollBarH;
-	TSharedPtr<SScrollBar> mTimelineScrollBarV;
-	TSharedPtr<SSplitter> mSplitter;
+    TSharedPtr<SOdysseyAnimationTimelineTreeView> mTimelineTreeView;
+    TSharedPtr<SScrollBar> mTimelineScrollBarH;
+    TSharedPtr<SScrollBar> mTimelineScrollBarV;
+    TSharedPtr<SSplitter> mSplitter;
 };

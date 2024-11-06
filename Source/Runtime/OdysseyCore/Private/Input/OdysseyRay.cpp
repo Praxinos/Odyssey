@@ -129,19 +129,19 @@ FOdysseyRay::operator/( float iRhs ) const
     return out;
 }
 
-FOdysseyRay 
+FOdysseyRay
 operator*( float iLhs, const FOdysseyRay& iRhs )
 {
     return iRhs.operator*( iLhs );
 }
 
-FOdysseyRay 
+FOdysseyRay
 operator/( float iLhs, const FOdysseyRay& iRhs )
 {
     return iRhs.operator/( iLhs );
 }
 
-FOdysseyRay 
+FOdysseyRay
 FOdysseyRay::Average( const FOdysseyRay& iRay1, const FOdysseyRay& iRay2 )
 {
     FOdysseyRay outRay = (iRay1 + iRay2) / 2;
@@ -154,7 +154,7 @@ FOdysseyRay::Average( const FOdysseyRay& iRay1, const FOdysseyRay& iRay2 )
     return outRay;
 }
 
-FOdysseyRay 
+FOdysseyRay
 FOdysseyRay::Average( const TArray< FOdysseyRay>& iRays )
 {
     //Empty array case
@@ -178,7 +178,7 @@ FOdysseyRay::Average( const TArray< FOdysseyRay>& iRays )
 
     int currentIndex = 0;
     while( azimuths.Num() != 1 )
-    {       
+    {
         if( FMath::Abs( azimuths[currentIndex] - azimuths[currentIndex + 1] ) > 180 )
         {
             azimuths[currentIndex] = FMath::Fmod( (azimuths[currentIndex] + azimuths[currentIndex + 1] + 360) / 2, 360.0 );
@@ -218,7 +218,7 @@ FOdysseyRay::ComputeRelativeParameters(const FOdysseyRay& iPreviousRay, bool iCo
     direction_angle_deg_normal = direction_angle_deg_tangent + 90;
     direction_vector_tangent = deltaPosition.GetSafeNormal();
     direction_vector_normal = FVector2D( -direction_vector_tangent.Y, direction_vector_tangent.X );
-    
+
     if (iComputeTravelledDistance)
         distance_travelled = iPreviousRay.distance_travelled + deltaPosition.Size();
 }

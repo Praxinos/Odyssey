@@ -25,7 +25,7 @@ UOdysseyAnimationCell::OldSerialize(FArchive& Ar)
 {
     if( !Ar.IsLoading() )
         return;
-    
+
     if (!FOdysseyAnimationCellImport::Read( this, Ar ))
     {
         //Old Style No Chunk Loading
@@ -152,7 +152,7 @@ UOdysseyAnimationCell::Break(int Frame)
     UOdysseyAnimationCell* copiedCell = GetLayer()->CopyCell(this, IndexInLayer + 1);
     FOdysseyObjectEditorUtils::SetPropertyValue(copiedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Exposure - Frame);
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Frame);
-    
+
     return copiedCell;
 }
 

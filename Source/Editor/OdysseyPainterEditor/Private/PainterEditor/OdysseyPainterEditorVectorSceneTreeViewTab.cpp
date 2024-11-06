@@ -98,7 +98,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::CreateObjectPropertiesPanel()
     DetailsViewArgs.bLockable = false;
     DetailsViewArgs.bAllowSearch = false;
     DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
-    
+
     detailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
 
     detailsView->SetObject(nullptr);
@@ -133,7 +133,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::CreateWidget()
                 mDetailsView.ToSharedRef()
             ]
         ];
-        
+
 }
 
 void

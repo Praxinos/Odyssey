@@ -96,7 +96,7 @@ FOdysseyHUDElement::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 void
 FOdysseyHUDElement::AddReferencedObjects(FReferenceCollector& Collector)
 {
-    
+
 }
 
 FString

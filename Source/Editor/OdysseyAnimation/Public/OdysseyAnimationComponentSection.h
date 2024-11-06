@@ -13,23 +13,23 @@ class UOdysseyAnimationComponent;
  * Defines the section for a template sequence track.
  */
 UCLASS()
-class ODYSSEYANIMATION_API UOdysseyAnimationComponentSection 
-	: public UMovieSceneSubSection
+class ODYSSEYANIMATION_API UOdysseyAnimationComponentSection
+    : public UMovieSceneSubSection
 {
 public:
 
-	GENERATED_BODY()
+    GENERATED_BODY()
 
-	UOdysseyAnimationComponentSection(const FObjectInitializer& ObjInitializer);
+    UOdysseyAnimationComponentSection(const FObjectInitializer& ObjInitializer);
 
 public:
-	virtual void PostInitProperties() override;
+    virtual void PostInitProperties() override;
 
 protected:
-	virtual EMovieSceneChannelProxyType CacheChannelProxy() override;
-	virtual void MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate) override;
+    virtual EMovieSceneChannelProxyType CacheChannelProxy() override;
+    virtual void MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate) override;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
-	FFrameNumber StartFrameOffset = 0;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
+    FFrameNumber StartFrameOffset = 0;
 };

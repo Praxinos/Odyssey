@@ -209,10 +209,10 @@ UOdysseyBlockProxyFunctionLibrary::FillPreserveAlpha( FOdysseyBlockProxy Source,
     ::ULIS::FColor color = Color.GetValue().ToFormat( format );
     TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > dst = MakeShareable( new ::ULIS::FBlock( src->Width(), src->Height(), format ));
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( format );
-    
+
     ::ULIS::FEvent eventCopy;
     ctx.Copy( *src, *dst, ::ULIS::FRectI::Auto, ::ULIS::FVec2I( 0 ), ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &Source.GetEvent(), &eventCopy );
-    
+
     ::ULIS::FEvent eventFill;
     ctx.FillPreserveAlpha( *dst, color, ::ULIS::FRectI::Auto, ::ULIS::FSchedulePolicy::AsyncCacheEfficient, 1, &eventCopy, &eventFill);
     ctx.Flush();
@@ -247,7 +247,7 @@ UOdysseyBlockProxyFunctionLibrary::Fill(
             *dst,
             ::ULIS::FRectI::Auto, ::ULIS::FVec2I(0),
             ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-            1,   
+            1,
             &Block.GetEvent(),
             &eventConvert
         );
@@ -723,7 +723,7 @@ UOdysseyBlockProxyFunctionLibrary::AdjustHSVA(
 {
     if( !Block.IsValid() )
         return  FOdysseyBlockProxy::MakeNullProxy();
-    
+
     auto filterFunc = [CurveH, CurveS, CurveV, CurveAlpha, PreserveNullAlpha]( const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels )
     {
         for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
@@ -871,7 +871,7 @@ UOdysseyBlockProxyFunctionLibrary::GetFontBlocks( const UFont* iFont, EOdysseyCo
     TArray< FOdysseyBlockProxy > blocks;
     if( iFont->FontCacheType == EFontCacheType::Runtime )
         return blocks;
-    
+
     check( iFont->Textures.Num() )
 
     ::ULIS::eFormat format = ULISFormatFromModelAndDepth( ColorModel, ChannelDepth );
@@ -881,7 +881,7 @@ UOdysseyBlockProxyFunctionLibrary::GetFontBlocks( const UFont* iFont, EOdysseyCo
         TSharedPtr< ::ULIS::FBlock, ESPMode::ThreadSafe > block = MakeShareable(NewBlockFromUTextureData( texture, format));
         blocks.Add( FOdysseyBlockProxy::MakeProxy( block ) );
     }
-    
+
     return blocks;
 }
 
@@ -892,13 +892,13 @@ UOdysseyBlockProxyFunctionLibrary::GetFontCharacterInfo( const UFont* iFont, con
     TArray< FOdysseyFontCharacter > font_characters;
     if( iFont->FontCacheType == EFontCacheType::Runtime )
         return  font_characters;
-    
+
     check( iFont->Characters.Num() )
-    
+
     for( auto character : iString )
     {
         TCHAR index_of_character = iFont->RemapChar( character );
-    
+
         const FFontCharacter& font_char = iFont->Characters[index_of_character];
 
         FOdysseyFontCharacter font_character;
@@ -911,7 +911,7 @@ UOdysseyBlockProxyFunctionLibrary::GetFontCharacterInfo( const UFont* iFont, con
 
         font_characters.Add( font_character );
     }
-    
+
     return  font_characters;
 }
 
@@ -938,7 +938,7 @@ UOdysseyBlockProxyFunctionLibrary::GetColorAtPosition( FOdysseyBlockProxy iBlock
 {
     if (!iBlock.IsValid())
         return false;
-    
+
     int x = FMath::FloorToInt( iX );
     int y = FMath::FloorToInt( iY );
 

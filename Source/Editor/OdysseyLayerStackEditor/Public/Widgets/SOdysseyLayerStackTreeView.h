@@ -23,25 +23,25 @@ class ODYSSEYLAYERSTACKEDITOR_API SOdysseyLayerStackTreeView
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyLayerStackTreeView)
-		: _ExternalScrollbar(nullptr)
+        : _ExternalScrollbar(nullptr)
         {}
-		SLATE_NAMED_SLOT(FArguments, HeaderContent)
+        SLATE_NAMED_SLOT(FArguments, HeaderContent)
         SLATE_ARGUMENT( UOdysseyLayerStack*, LayerStack )
         SLATE_ARGUMENT( TOptional<TArray<SHeaderRow::FColumn::FArguments>>, Columns )
         SLATE_EVENT( FOnGenerateRow, OnGenerateRow )
-		SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
-		SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )
+        SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
+        SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )
     SLATE_END_ARGS()
 
 public:
     // Construction / Destruction
     ~SOdysseyLayerStackTreeView();
     SOdysseyLayerStackTreeView();
-    
+
     void Construct(const FArguments& InArgs);
-    
+
 public:
-	using STreeView<UOdysseyLayer*>::ScrollTo;
+    using STreeView<UOdysseyLayer*>::ScrollTo;
 
     UOdysseyLayerStack* GetLayerStack() const;
     void SetIsRenamePending(bool iValue);
@@ -64,7 +64,7 @@ protected:
     //Context menu
     /**
      * @brief Creates and registers layerstack the context menu
-     * 
+     *
      */
     virtual void CreateContextMenu();
 
@@ -78,13 +78,13 @@ protected:
 private:
     /**
      * @brief Set the layerstack's Current Layer From the treeview Selector Item
-     * 
+     *
      */
     void SetCurrentLayerFromSelectorItem();
 
     /**
      * @brief Refreshes all rows expansion states from the state stored in the Layer
-     * 
+     *
      */
     void RefreshAllExpansionStates();
 
@@ -92,61 +92,61 @@ protected:
     //Callbacks
     /**
      * @brief Called when the treeview asks for a contextmenu to be opened (rightclick)
-     * 
-     * @return TSharedPtr<SWidget> 
+     *
+     * @return TSharedPtr<SWidget>
      */
     TSharedPtr<SWidget> OnContextMenuOpening();
 
     /**
      * @brief Called when the treeview asks for the children of a specific item
-     * 
-     * @param iParent 
-     * @param oChildren 
+     *
+     * @param iParent
+     * @param oChildren
      */
     void OnGetChildren(UOdysseyLayer* iParent, TArray<UOdysseyLayer*>& oChildren) const;
 
     /**
      * @brief Called when the treeview changed one of its row expansion state
      * Allows synchronization between treeview expansion state and layer expansion state
-     * 
-     * @param iLayer 
-     * @param iIsExpanded 
+     *
+     * @param iLayer
+     * @param iIsExpanded
      */
     void OnExpansionChanged(UOdysseyLayer* iLayer, bool iIsExpanded);
 
     /**
      * @brief The layer's DisplayChildren property changes
-     * 
-     * @param iLayer 
+     *
+     * @param iLayer
      */
     void OnLayerDisplayChildrenChanged(UOdysseyLayer* iLayer);
 
     /**
      * @brief The layer's DisplayOptions property changes
-     * 
-     * @param iLayer 
+     *
+     * @param iLayer
      */
     void OnLayerDisplayOptionsChanged(UOdysseyLayer* iLayer);
 
     /**
      * @brief Called when the layerstack's currentLayer changed to another layer
-     * 
-     * @param iLayerStack 
+     *
+     * @param iLayerStack
      */
     void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
 
     /**
      * @brief Called when the layerstack hierarchy has changed
-     * 
-     * @param iParentLayers 
+     *
+     * @param iParentLayers
      */
     void OnLayerStackHierarchyChanged( UOdysseyLayerStack* iLayerStack);
 
     /**
      * @brief Called when layers has been removed from another layer
-     * 
-     * @param iParent 
-     * @param iChildren 
+     *
+     * @param iParent
+     * @param iChildren
      */
     void OnItemScrolledIntoView(UOdysseyLayer* iLayer, const TSharedPtr<ITableRow>& iRow);
 
@@ -157,7 +157,7 @@ public:
      */
     void ResetDropZone();
 
-    
+
     int32 GetMaxIndentLevel() const;
 
 protected:

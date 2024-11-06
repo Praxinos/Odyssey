@@ -30,8 +30,8 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayer
     GENERATED_BODY()
 
 public:
-	virtual void PostInitProperties() override;
-	virtual UOdysseyAnimationLayerStack* GetLayerStack() const;
+    virtual void PostInitProperties() override;
+    virtual UOdysseyAnimationLayerStack* GetLayerStack() const;
 
 public:
     //Invalidate the frame ranges of all cells
@@ -63,7 +63,7 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     UOdysseyAnimationCell* GetCellAtFrame(int Frame) const;
-    
+
     UFUNCTION(BlueprintCallable, Category="Odyssey|Layer")
     bool HasCellAtFrame(int Frame) const;
 
@@ -90,9 +90,9 @@ public:
 
 public:
 #ifdef WITH_EDITOR
-	virtual TArray<FName> GetRows() const override;
-	virtual int GetRowHeight(FName iSubRowName) const override;
-	virtual bool IsRowVisible(FName iSubRowName) const override;
+    virtual TArray<FName> GetRows() const override;
+    virtual int GetRowHeight(FName iSubRowName) const override;
+    virtual bool IsRowVisible(FName iSubRowName) const override;
 #endif
 
 protected:
@@ -155,8 +155,8 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=LighttableBlueprintSetter, NonTransactional)
     FOdysseyAnimationLightTable Lighttable;
 
-	UPROPERTY(BlueprintReadOnly, Category="Odyssey|Layer", NonTransactional)
-	bool HasLighttable = true;
+    UPROPERTY(BlueprintReadOnly, Category="Odyssey|Layer", NonTransactional)
+    bool HasLighttable = true;
 
     FSimpleMulticastDelegate mOnLightTableChanged;
     FSimpleMulticastDelegate mOnCellsChanged;

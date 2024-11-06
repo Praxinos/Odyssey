@@ -48,11 +48,11 @@ namespace FSnapshotFlags
             static const uint64 PALETTEENTRY    = ( 1ULL << 10 );
             static const uint64 PARAM = ( COLORMODE
                                         | SPREADINGPOLICY
-                                        | SOLIDCOLOR 
+                                        | SOLIDCOLOR
                                         | ROTATION
                                         | PROPAGATION
                                         | GRADIENTCOLOR0
-                                        | GRADIENTCOLOR1 
+                                        | GRADIENTCOLOR1
                                         | RADIALRADIUS
                                         | RADIALOFFSET
                                         | PALETTEENTRY );

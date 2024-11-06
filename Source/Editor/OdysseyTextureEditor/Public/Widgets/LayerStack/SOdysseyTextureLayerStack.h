@@ -27,7 +27,7 @@ public:
     // Construction / Destruction
     ~SOdysseyTextureLayerStack();
     SOdysseyTextureLayerStack();
-    
+
     void Construct(const FArguments& InArgs, FOdysseyTextureEditorExtension* iTextureExtension);
 
 private:

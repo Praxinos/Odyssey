@@ -110,7 +110,7 @@ UOdysseyEllipseShape::Abort()
     mIsDrawing = false;
 
     RemoveHUD();
-    
+
     mOnAbort.Broadcast();
 }
 
@@ -142,7 +142,7 @@ UOdysseyEllipseShape::CreateHUD()
 
 void
 UOdysseyEllipseShape::RefreshHUD()
-{    
+{
     int xRadius = FMath::Abs((int)(mCenterPoint.x - mBorderPoint.x));
     int yRadius = FMath::Abs((int)(mCenterPoint.y - mBorderPoint.y));
 

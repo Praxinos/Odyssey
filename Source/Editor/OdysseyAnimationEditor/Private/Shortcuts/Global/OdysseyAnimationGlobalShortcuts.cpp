@@ -10,5 +10,5 @@ FOdysseyAnimationGlobalShortcuts::FOdysseyAnimationGlobalShortcuts(TSharedPtr<FO
 {
     Add(MakeShared<FOdysseyAnimationGlobalCellsShortcuts>(iExtension));
     Add(MakeShared<FOdysseyAnimationGlobalTimelineShortcuts>(iExtension));
-	Add(MakeShared<FOdysseyAnimationGlobalTimelineToolsShortcuts>());
+    Add(MakeShared<FOdysseyAnimationGlobalTimelineToolsShortcuts>());
 }

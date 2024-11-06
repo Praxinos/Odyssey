@@ -28,7 +28,7 @@ FOdysseyVectorUndoDeleteVertex::Apply( UObject* iIgnored )
 {
     // save former selection
     FOdysseyVectorUndo::Apply( iIgnored );
-    
+
     for( FSnapshotPath& pathSnapshot : mPathSnapshotArray )
     {
         pathSnapshot.Restore();

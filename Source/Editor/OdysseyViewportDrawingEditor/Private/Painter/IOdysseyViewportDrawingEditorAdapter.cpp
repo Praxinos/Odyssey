@@ -59,7 +59,7 @@ IOdysseyViewportDrawingEditorAdapter::Finalize()
     SetTexture(nullptr);
     SetTool(nullptr);
     mExtension->GetEditor()->OnCurrentToolChanged().RemoveAll(this);
-    
+
     UOdysseyStylusInputSubsystem* inputSubsystem = GEditor->GetEditorSubsystem<UOdysseyStylusInputSubsystem>();
     inputSubsystem->RemoveMessageHandler(*this);
 }
@@ -94,7 +94,7 @@ IOdysseyViewportDrawingEditorAdapter::SetTool(UOdysseyPainterEditorTool* iTool)
         drawingTool->OnDestroyBrushInstance().RemoveAll(this);
         UnbindStampBrushInstance(drawingTool->GetBrushInstance());
     }
-    
+
     mTool = TStrongObjectPtr< UOdysseyPainterEditorTool >(iTool);
 
     drawingTool = GetDrawingTool();
@@ -127,7 +127,7 @@ void IOdysseyViewportDrawingEditorAdapter::BindStampBrushInstance(UOdysseyBrushA
 void IOdysseyViewportDrawingEditorAdapter::StartPainting()
 {
     if (mIsPickingColor)
-    {   
+    {
         mCapturedByEditor = true;
         mExtension->GetEditor()->GetColorPickerTool()->PickColorMove(mCurrentStrokeRay.mPoint);
         return;
@@ -172,7 +172,7 @@ void IOdysseyViewportDrawingEditorAdapter::FinishPainting()
 
     if (!mTool)
         return;
-    
+
     mTool->OnMouseUp(mCurrentStrokeRay.mPoint, mMouseButton);
     mCapturedByEditor = false;
 
@@ -229,7 +229,7 @@ IOdysseyViewportDrawingEditorAdapter::ViewportCoordinatesToTextureCoordinates(FV
     const FVector rayEnd(rayOrigin + rayDirection * HALF_WORLD_MAX);
 
     meshAdapter->LineTraceComponent(traceHitResult, rayOrigin, rayEnd, CollisionParams);
-    
+
     //UE_LOG(LogTemp, Display, TEXT("%d"), traceHitResult.FaceIndex) // is 0 for Skeletal Mesh
 
     // Convert trace to UV position
@@ -244,7 +244,7 @@ IOdysseyViewportDrawingEditorAdapter::ViewportCoordinatesToTextureCoordinates(FV
     return false;
 }
 
-bool IOdysseyViewportDrawingEditorAdapter::IsReadyToDraw() 
+bool IOdysseyViewportDrawingEditorAdapter::IsReadyToDraw()
 {
     if( !mTexture )
         return false;
@@ -302,7 +302,7 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
         return false;
 
     mLastStrokeRay = mCurrentStrokeRay;
-    
+
     GetRayParamsFromViewportPosition(iViewportClient, iViewport->GetMouseX(), iViewport->GetMouseY(), &mCurrentStrokeRay.mRayOrigin, &mCurrentStrokeRay.mRayDirection);
     mCurrentStrokeRay.mPoint = FOdysseyPoint::DefaultPoint();
     mCurrentStrokeRay.mPoint.x = pointPos.X;
@@ -311,7 +311,7 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
     mCurrentStrokeRay.mPoint.ComputeRelativeParameters(mLastStrokeRay.mPoint);
 
     if (FOdysseyKeyState::GetLastKey() != FKey())
-    {   
+    {
         FModifierKeysState ModifierKeysState = FSlateApplication::Get().GetModifierKeys();
         const FInputChord activeChord(FOdysseyKeyState::GetLastKey(),
             EModifierKey::FromBools(
@@ -336,7 +336,7 @@ bool IOdysseyViewportDrawingEditorAdapter::MouseMove(FEditorViewportClient* iVie
     if( mExtension->GetEditor()->GetCurrentTool() )
     {
         mExtension->GetEditor()->GetCurrentTool()->OnMouseHover( mCurrentStrokeRay.mPoint );
-        
+
         mMouseCursor = mExtension->GetEditor()->GetCurrentTool()->GetMouseCursor();
         mOverrideMouseCursor = true;
     }
@@ -350,7 +350,7 @@ IOdysseyViewportDrawingEditorAdapter::GetHUDElement(FViewport* iViewport, int32 
     HOdysseyHUDElementHitProxy* hitproxy = HitProxyCast<HOdysseyHUDElementHitProxy>(iViewport->GetHitProxy(iX, iY));
     if (!hitproxy)
         return nullptr;
-    
+
     return hitproxy->HUDElement();
 }
 
@@ -365,14 +365,14 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
         //Can happen on windows with some touch options
         if (mKeysPressed.Contains(iKey))
             return true;
-            
+
         mKeysPressed.Add( iKey );
     }
-    else if( iEvent == EInputEvent::IE_Released ) 
+    else if( iEvent == EInputEvent::IE_Released )
     {
         //key already released, don't send a KeyUp or MouseUp twice
         //Can happen on windows with some touch options
-        if (!mKeysPressed.Contains(iKey)) 
+        if (!mKeysPressed.Contains(iKey))
             return true;
 
         mKeysPressed.Remove(iKey);
@@ -391,10 +391,10 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
 
         if (selectedTool->OnMouseDoubleClick(mCurrentStrokeRay.mPoint, iKey))
             return true;
-        
+
         if (mKeysPressed.Contains(iKey))
             return true;
-        
+
         mKeysPressed.Add( iKey );
     }
 
@@ -455,7 +455,7 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     bool isOutsideTexture = !ViewportCoordinatesToTextureCoordinates(pointPos, iViewportClient, &posInTexture);
     if (isTextureBased)
         pointPos = posInTexture;
-    
+
     //If we didn't initiate the drawing process in a previous event
     //and the current event is a mouse event
     //we filter some mouse events to allow (return false) :
@@ -463,7 +463,7 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     // - right click camera movement
     //and disallow (return true) left click camera movement
     bool isMouseEvent = iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton;
-    if (!mIsMouseDown && isMouseEvent && (isOutsideTexture || iEvent == IE_Released)) 
+    if (!mIsMouseDown && isMouseEvent && (isOutsideTexture || iEvent == IE_Released))
     {
         /* if (iEvent == EInputEvent::IE_DoubleClick)
             return false;
@@ -477,7 +477,7 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
         return false;
     }
 
-    //Init our StrokeRay, having all the basic info to draw 
+    //Init our StrokeRay, having all the basic info to draw
     FOdysseyRay strokeRay;
     GetRayParamsFromViewportPosition(iViewportClient, iViewport->GetMouseX(), iViewport->GetMouseY(), &strokeRay.mRayOrigin, &strokeRay.mRayDirection);
     strokeRay.mPoint = FOdysseyPoint::DefaultPoint();
@@ -509,7 +509,7 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
             {
                 MouseUp(strokeRay);
             }
-            
+
             if (mIsMouseDown && !mKeysPressed.Contains(mMouseButton))
                 mMouseButton = FKey();
         }
@@ -537,7 +537,7 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
     //HUD
     if (mCurrentHUDElement)
     {
-        
+
         FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
         FVector2D hudPoint;
         if (mExtension->ViewportToHUD(iViewportClient, viewportPoint, hudPoint))
@@ -547,7 +547,7 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
             return true;
         }
     }
-    
+
 
     FVector2D pointPos(iViewport->GetMouseX(), iViewport->GetMouseY());
     bool isTextureBased = mExtension->PaintingAdapterMethod() == EOdysseyViewportDrawingPaintingAdapterMethod::OdysseyTextureBased;
@@ -557,12 +557,12 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
     isOutsideTexture = !ViewportCoordinatesToTextureCoordinates(pointPos, iViewportClient, &posInTexture);
     if (isTextureBased)
         pointPos = posInTexture;
-    
+
     bool isEventIntercepted = mIsMouseDown;
     if (isOutsideTexture)
         return isEventIntercepted; //don't allow camera to move with left click, but allow with right click
 
-    //Init our StrokeRay, having all the basic info to draw 
+    //Init our StrokeRay, having all the basic info to draw
     FOdysseyRay strokeRay;
     GetRayParamsFromViewportPosition(iViewportClient, iViewport->GetMouseX(), iViewport->GetMouseY(), &strokeRay.mRayOrigin, &strokeRay.mRayDirection);
     strokeRay.mPoint = FOdysseyPoint::DefaultPoint();
@@ -578,10 +578,10 @@ bool IOdysseyViewportDrawingEditorAdapter::CapturedMouseMove(FEditorViewportClie
 bool
 IOdysseyViewportDrawingEditorAdapter::HandleClick(FEditorViewportClient* iViewportClient, HHitProxy* iHitProxy, const FViewportClick& iClick)
 {
-	if(!IsReadyToDraw())
+    if(!IsReadyToDraw())
         return false;
 
-	FOdysseyRay strokeRay;
+    FOdysseyRay strokeRay;
     GetRayParamsFromViewportPosition(iViewportClient, iClick.GetClickPos().X, iClick.GetClickPos().Y, &strokeRay.mRayOrigin, &strokeRay.mRayDirection);
     strokeRay.mPoint = FOdysseyPoint::DefaultPoint();
     strokeRay.mPoint.x = iClick.GetClickPos().X;
@@ -610,7 +610,7 @@ IOdysseyViewportDrawingEditorAdapter::MouseDown(const FOdysseyRay& iRay)
 
     if (mIsMouseDown)
         return;
-        
+
     mIsMouseDown = true;
 
     mLastStrokeRay = mCurrentStrokeRay;
@@ -707,7 +707,7 @@ IOdysseyViewportDrawingEditorAdapter::StartStylusInputRecord()
     auto delta = std::chrono::duration_cast<std::chrono::milliseconds>( end_time - mStylusLastEventTime).count();
     if(delta > 500 )
         return;
-        
+
     mIsRecordingStylus = true;
 
     //Down
@@ -774,7 +774,7 @@ IOdysseyViewportDrawingEditorAdapter::StylusStateToRay(const FStylusState& iStat
     if (!viewportWidget)
         return FOdysseyRay();
 
-    //Init our StrokeRay, having all the basic info to draw 
+    //Init our StrokeRay, having all the basic info to draw
     float scaleDPI = viewportWidget->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
     FVector2D positionInViewport = viewportWidget->GetCachedGeometry().AbsoluteToLocal(iState.GetPosition()) * scaleDPI;
 
@@ -820,7 +820,7 @@ IOdysseyViewportDrawingEditorAdapter::ReadStylusInput()
         const FStylusState& state = mStylusStates[i];
 
         FOdysseyRay ray = StylusStateToRay(state);
-        
+
         //Force MouseDown when using the Right Mouse Button to allow hovered mouse clicks
         if (!mStylusIsDown && (state.IsStylusDown() || mMouseButton == EKeys::RightMouseButton ))
         {

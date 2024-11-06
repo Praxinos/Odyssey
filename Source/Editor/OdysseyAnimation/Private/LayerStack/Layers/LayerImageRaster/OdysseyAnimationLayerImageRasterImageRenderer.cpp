@@ -10,9 +10,9 @@ FOdysseyAnimationLayerImageRasterImageRenderer::FOdysseyAnimationLayerImageRaste
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
     , mCellRenderer(nullptr)
     , mBlendMode(::ULIS::eBlendMode(iLayer->BlendMode))
-    , mOpacity(iLayer->Opacity) 
+    , mOpacity(iLayer->Opacity)
     , mLightTableDisplayPosition(iLayer->Lighttable.DisplayPosition)
-{   
+{
     int frame = iFrame;
     FInt32Range frameRange = iLayer->GetFrameRange();
     if (iFrame < frameRange.GetLowerBoundValue())
@@ -34,7 +34,7 @@ FOdysseyAnimationLayerImageRasterImageRenderer::FOdysseyAnimationLayerImageRaste
     if ( iRenderType == IOdysseyImageRenderer::eRenderType::Editor && iLayer->Lighttable.bIsActivated )
         mLightTableRenderer = MakeShared<FOdysseyAnimationLightTableImageRenderer>(iLayer, iFrame, iRenderType, iDefaultRects, iFilter);
 }
-    
+
 void
 FOdysseyAnimationLayerImageRasterImageRenderer::Init()
 {
@@ -52,7 +52,7 @@ FOdysseyAnimationLayerImageRasterImageRenderer::Blend(const FOdysseyImageRendere
     TArray<::ULIS::FEvent> events = iWaitList;
     if (!mCellRenderer)
         return events;
-        
+
     if ( mLightTableRenderer && mLightTableDisplayPosition == EOdysseyLightTableDisplayPosition::UnderLayer )
     {
         FOdysseyImageRendererBlendParams lightTableParams(iParams);
@@ -80,7 +80,7 @@ FOdysseyAnimationLayerImageRasterImageRenderer::Copy(const FOdysseyImageRenderer
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationLayerImageRasterImageRenderer::Copy);
     if (!mCellRenderer)
         return iWaitList;
-        
+
     TArray<::ULIS::FEvent> events = Clear(iParams.mBlock, iParams.mRects, iWaitList);
     if ( mLightTableRenderer && mLightTableDisplayPosition == EOdysseyLightTableDisplayPosition::UnderLayer )
     {

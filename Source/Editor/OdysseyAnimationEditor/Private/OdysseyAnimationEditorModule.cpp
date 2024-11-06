@@ -115,7 +115,7 @@ FOdysseyAnimationEditorModule::UnregisterAssetTypeActions()
 {
     if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
         return;
-    
+
     IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
     assetTools.UnregisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
 }
@@ -136,7 +136,7 @@ void
 FOdysseyAnimationEditorModule::RegisterDetailCustomizations()
 {
     FOdysseyAnimationEditorFlipSystem::RegisterDetailCustomization();
-    
+
     FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
     PropertyModule.RegisterCustomClassLayout(UOdysseyAnimationEditorOutOfPegsTool::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(&FOdysseyAnimationEditorOutOfPegsToolDetails::MakeInstance));
 }
@@ -187,7 +187,7 @@ FOdysseyAnimationEditorModule::UnregisterSettings()
 
     if( !settingsModule )
         return;
-        
+
     settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyAnimationEditor" );
     settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyAnimationEditorUserSettings" );
 }

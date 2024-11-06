@@ -98,7 +98,7 @@ FOdysseyMutator::Change()
 {
     if (mRootMutation->GetMutations().Num() <= 0)
         return;
-    
+
     mRootMutation->OnChanged().ExecuteIfBound();
 }
 
@@ -107,7 +107,7 @@ FOdysseyMutator::Commit()
 {
     if (mRootMutation->GetMutations().Num() <= 0)
         return;
-    
+
     mRootMutation->OnChanged().ExecuteIfBound();
 
     if ( mGenerateUndo && GEditor->IsTransactionActive() )
@@ -135,7 +135,7 @@ FOdysseyMutator::Reset()
 FOdysseyRootMutation::FOdysseyRootMutation(const FString& iName)
     : mName(iName)
 {
-    
+
 }
 
 FSimpleDelegate&
@@ -184,7 +184,7 @@ FOdysseyRootMutation::Revert()
     {
         if (!mMutations[i]->IsDirty())
             continue;
-            
+
         mMutations[i]->Revert();
     }
 }

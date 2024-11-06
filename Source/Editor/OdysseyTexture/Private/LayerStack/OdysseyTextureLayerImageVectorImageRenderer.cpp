@@ -37,7 +37,7 @@ FOdysseyTextureLayerImageVectorImageRenderer::Init()
     mBlock = mVectorBlock->GetBlock(mDrawingFlags);
     if (mRenderHUD)
         mHUDBlock = mVectorBlock->GetHUDBlock();
-    
+
     mVectorBlock->Render(mDrawingFlags);
 }
 
@@ -54,7 +54,7 @@ FOdysseyTextureLayerImageVectorImageRenderer::Blend(const FOdysseyImageRendererB
         return iWaitList;
 
     TArray<::ULIS::FEvent> events = ConvertAndBlend(mBlock, ::ULIS::FVec2I(0), iParams, iWaitList);
-    
+
     if (!mHUDBlock)
         return events;
 

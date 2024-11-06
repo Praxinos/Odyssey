@@ -69,7 +69,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     progressBar.EnterProgressFrame();
 
     //Convert Selected Stagger Cells to ImageRaster Cells
-	FOdysseyAnimationTimelineCellImageStaggerShortcuts staggerShortcuts(mLayerStack);
+    FOdysseyAnimationTimelineCellImageStaggerShortcuts staggerShortcuts(mLayerStack);
     staggerShortcuts.Action_ConvertToReferenceCells();
 
     progressBar.EnterProgressFrame();

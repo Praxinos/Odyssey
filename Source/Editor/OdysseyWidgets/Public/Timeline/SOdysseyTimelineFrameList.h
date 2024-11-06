@@ -18,7 +18,7 @@ public:
 public:
     int32 Index() const;
     void Index(int32 iIndex);
-    
+
 public:
     int32 mIndex;
 };
@@ -71,7 +71,7 @@ public:
     EVisibility GetLengthHandleVisibility() const;
     FMargin GetTimingHandlePadding() const;
     FMargin GetLengthHandlePadding() const;
-    
+
 
     // TSharedPtr<SOdysseyTimelineFrame>& GetFrame(int32 iIndex);
     // TSharedPtr<FOdysseyTimelineFrame> GetFrameAt(int32 iIndex) const;
@@ -107,7 +107,7 @@ private:
     FReply OnGenerateFrameContextMenu( const FGeometry& iGeometry, const FPointerEvent& iMouseEvent, TSharedPtr<FOdysseyTimelineFrameListFrameMetaData> iMetaData);
 
 private:
-    // Private Utilities 
+    // Private Utilities
     TSharedPtr<SWidget> CreateFrameControlWidget(TSharedPtr<SOdysseyTimelineFrame>& iFrame);
 
     EVisibility DropPreviewLeftVisibility(TSharedPtr<FOdysseyTimelineFrameListFrameMetaData> iMetaData) const;
@@ -135,7 +135,7 @@ private:
     FOnFramesEditStop mOnFramesEditStop;
     FOnFramesEditCancel mOnFramesEditCancel;
     FOnGenerateFrameContextMenu mOnGenerateFrameContextMenu;
-    
+
     //Internal
     TArray<TSharedPtr<SOdysseyTimelineFrame>> mFrames;
     int32 mFrameDragOverIndex;

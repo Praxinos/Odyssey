@@ -42,7 +42,7 @@ FOdysseyAnimationLightTableImport::Read( FOdysseyAnimationLightTable* iAnimation
                               , Ar
                               , [iAnimationLightTable](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
-            
+
             switch ( iChunkID )
             {
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_DISPLAY_POSITION:
@@ -84,7 +84,7 @@ FOdysseyAnimationLightTableImport::Read( FOdysseyAnimationLightTable* iAnimation
                     }
                 }
                 break;
-                
+
                 default:
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );

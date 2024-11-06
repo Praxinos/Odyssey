@@ -109,6 +109,6 @@ FOdysseyVectorImportV1::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, F
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
-            }    
+            }
         } );
 }

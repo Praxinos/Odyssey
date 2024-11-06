@@ -20,7 +20,7 @@ public:
 public:
     // Construction / Destruction
     void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyPaletteTreeView>& iOwnerTableView, class UOdysseyPaletteEntryFolder* iFolderEntry);
-    
+
 private:
     virtual TSharedRef<SWidget> GenerateHeaderWidget() override;
 

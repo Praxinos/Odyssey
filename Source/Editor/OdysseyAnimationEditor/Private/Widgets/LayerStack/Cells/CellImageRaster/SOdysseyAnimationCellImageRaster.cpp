@@ -22,7 +22,7 @@ SOdysseyAnimationCellImageRaster::Construct(const FArguments& iArgs, UOdysseyAni
 
     UOdysseyAnimation* animation = mCell->GetAnimation();
     float ratio = (float)animation->GetWidth() / (float)animation->GetHeight();
-    
+
     mAssetThumbnail = MakeShareable(new FAssetThumbnail(mCell, (int)(ratio * THUMBNAIL_SIZE), THUMBNAIL_SIZE, UThumbnailManager::Get().GetSharedThumbnailPool()));
     FAssetThumbnailConfig thumbnailConfig;
     thumbnailConfig.bAllowFadeIn = false;

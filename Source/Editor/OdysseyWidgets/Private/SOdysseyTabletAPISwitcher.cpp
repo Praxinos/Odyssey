@@ -90,13 +90,13 @@ SOdysseyTabletAPISwitcher::GenerateTabletAPIComboBoxItem( TSharedPtr<EOdysseySty
             .Text( UOdysseyStylusInputSettings::GetFormatText( iItem ) );
 }
 
-void 
+void
 SOdysseyTabletAPISwitcher::ChangeSelectionTabletAPIComboBoxItem( TSharedPtr<EOdysseyStylusInputDriver> iNewSelection, ESelectInfo::Type iSelectInfo )
 {
     mTabletAPISelected = iNewSelection;
 }
 
-FText 
+FText
 SOdysseyTabletAPISwitcher::GetComboBoxTabletAPISelectedAsText() const
 {
     return UOdysseyStylusInputSettings::GetFormatText( mTabletAPISelected );

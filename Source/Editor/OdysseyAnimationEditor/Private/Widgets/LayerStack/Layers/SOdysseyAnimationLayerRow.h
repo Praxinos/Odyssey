@@ -17,7 +17,7 @@ class SOdysseyAnimationLayerRow
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerRow)
         {}
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
 public:
@@ -28,17 +28,17 @@ public:
     );
 
 protected:
-	virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
-	virtual TArray<TSharedPtr<SWidget>> GenerateMainRowHeaderOptionWidgets() override;
+    virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
+    virtual TArray<TSharedPtr<SWidget>> GenerateMainRowHeaderOptionWidgets() override;
 
 private:
-	TSharedRef<SWidget> GenerateLightTableRowHeaderWidget();
-	TSharedRef<SWidget> GenerateOutOfPegsRowHeaderWidget();
-	void OnLightTableCheckStateChanged(ECheckBoxState iState);
-	ECheckBoxState GetLightTableIsChecked() const;
+    TSharedRef<SWidget> GenerateLightTableRowHeaderWidget();
+    TSharedRef<SWidget> GenerateOutOfPegsRowHeaderWidget();
+    void OnLightTableCheckStateChanged(ECheckBoxState iState);
+    ECheckBoxState GetLightTableIsChecked() const;
 
 protected:
-	UOdysseyAnimationLayer* mLayer;
-	TAttribute<int> mCurrentFrame;
-	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+    UOdysseyAnimationLayer* mLayer;
+    TAttribute<int> mCurrentFrame;
+    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
 };

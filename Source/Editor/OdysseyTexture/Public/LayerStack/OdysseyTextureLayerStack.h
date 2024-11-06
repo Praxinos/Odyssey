@@ -47,8 +47,8 @@ public:
 public:
     /**
      * @brief Returns the surface used for fast update (see ActivateTextureFastUpdate)
-     * 
-     * @return TSharedPtr<FOdysseySurfaceTexture2DEditable> 
+     *
+     * @return TSharedPtr<FOdysseySurfaceTexture2DEditable>
      */
     TSharedPtr<FOdysseySurfaceTexture2DEditable> GetSurface() const;
 
@@ -67,9 +67,9 @@ public:
      * Manually = does not update the texture automatically
      * OnTick = refresh the texture at each engine tick if needed
      * Instantaneous = refresh the texture as soon as anything has changed in the layerstack
-     * 
+     *
      * Default is OnTick
-     * 
+     *
      * This is a transient setter, it goes back to OnTick at each new Unreal session
      */
     void SetTextureUpdateMode(EOdysseyTextureLayerStackTextureUpdateMode iMode);
@@ -79,7 +79,7 @@ public:
      * Manually = does not update the text automatically
      * OnTick = refreshed the texture at each engine tick if needed
      * Instantaneous = refreshes the texture as soon as anything has changed in the layerstack
-     * 
+     *
      * Default is OnTick
      */
     EOdysseyTextureLayerStackTextureUpdateMode GetTextureUpdateMode();

@@ -118,9 +118,9 @@ void
 UOdysseyLineShape::Abort()
 {
     mIsDrawing = false;
-    
+
     RemoveHUD();
-    
+
     mOnAbort.Broadcast();
 }
 

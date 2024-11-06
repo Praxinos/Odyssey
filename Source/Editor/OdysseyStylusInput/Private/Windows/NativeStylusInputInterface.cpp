@@ -72,7 +72,7 @@ FNativeStylusInputInterfaceImpl::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wP
     switch(msg)
     {
         case WM_TABLET_QUERYSYSTEMGESTURESTATUS:
-        {   
+        {
             OutResult = TABLET_DISABLE_FLICKS //remove lag between stylus down and WM_LMOUSEBUTTONDOWN (was a 500ms lag)
                 | TABLET_DISABLE_PENTAPFEEDBACK //remove Windows circle around the pen when right click button is down
                 | TABLET_DISABLE_PENBARRELFEEDBACK;  //remove Windows waves when clicking with the stylus
@@ -93,10 +93,10 @@ FNativeStylusInputInterfaceImpl::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wP
             POINTER_INPUT_TYPE pointerType = PT_POINTER;
             if (!GetPointerType(pointerId, &pointerType))
                 return false;
-            
+
             if (pointerType != PT_PEN)
                 return false;
-    
+
             //GetPointerInfoHistory allows us to get all subpointer messages (coalesced messages)
             uint32 entries_count = 0;
             if (!GetPointerInfoHistory(pointerId, &entries_count, nullptr))
@@ -120,7 +120,7 @@ FNativeStylusInputInterfaceImpl::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wP
             //return true;
         }
         break;
-        
+
         default:
             return false;
     }
@@ -147,7 +147,7 @@ FNativeStylusInputInterface::Tick()
 {
     /*
     // If the stylus is down (= drawing), don't change the focused window (and current widget) of the plugin
-    // When we draw on a zoomed viewport and the mouse go over the limits of the viewport, 
+    // When we draw on a zoomed viewport and the mouse go over the limits of the viewport,
     // we want to continue drawing on the right window and widget and not start "drawing" on the new hovered window and widget
     for( const FNativeTabletContextInfo& Context : Impl->mContexts->mTabletContexts )
     {

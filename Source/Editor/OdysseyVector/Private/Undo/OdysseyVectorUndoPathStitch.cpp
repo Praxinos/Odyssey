@@ -11,7 +11,7 @@ FOdysseyVectorUndoPathStitch::~FOdysseyVectorUndoPathStitch()
     {
         for( int i = 0; i < mMergedSegmentArray.size(); i++ )
         {
-            //if( 
+            //if(
             delete mMergedSegmentArray[i];
         }
 

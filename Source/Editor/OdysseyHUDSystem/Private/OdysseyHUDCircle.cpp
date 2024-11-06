@@ -31,12 +31,12 @@ FOdysseyHUDCircle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
         return;
 
     FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
-        
+
     for (int i = 1; i < points.Size(); i++)
     {
         FVector2D startPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i - 1].x, points[i - 1].y));
         FVector2D endPoint = iParams.mTextureToHUD.Execute(FVector2D(points[i].x, points[i].y));
-        
+
         batchedElements->AddTranslucentLine(FVector(startPoint, 0.f), FVector(endPoint, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
     }
 

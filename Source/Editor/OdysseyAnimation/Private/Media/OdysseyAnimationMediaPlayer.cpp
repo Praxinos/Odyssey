@@ -90,14 +90,14 @@ FOdysseyAnimationMediaPlayer::Open(const FString& iUrl, const IMediaOptions* iOp
         mEventSink.ReceiveMediaEvent(EMediaEvent::MediaOpenFailed);
         return false;
     }
-    
+
     //succeeded
     mCache->OnOpen(mAnimation.Get());
     mControls->OnOpen(mAnimation.Get());
     mSamples->OnOpen(mAnimation.Get());
     mTracks->OnOpen();
     mView->OnOpen();
-    
+
     mEventSink.ReceiveMediaEvent(EMediaEvent::MediaOpened);
 
     return true;

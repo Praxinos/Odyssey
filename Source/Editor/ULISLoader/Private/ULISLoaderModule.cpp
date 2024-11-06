@@ -82,7 +82,7 @@ FULISLoaderModule::GetCurrentThreadData() {
 
 ::ULIS::FThreadPool&
 FULISLoaderModule::ThreadPool() {
-    
+
     return  *GetCurrentThreadData().mThreadPool;
 }
 

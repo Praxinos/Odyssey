@@ -85,7 +85,7 @@ FOdysseyAnimationCellsContainerImport::Read( UOdysseyAnimationLayer* iAnimationL
                     }
                 }
                 break;
-                
+
                 case FOdysseyFile::Animation::CHUNK_CELLSCONTAINER_CELL :
                 {
                     iAnimationLayer->Cells.Last()->OldSerialize(Ar);

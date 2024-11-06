@@ -16,20 +16,20 @@
 
 /**
  * @brief Represents a raster block
- * 
+ *
  * The internal ULIS::Block cannot be directly accessed and modified.
  * The reason is linked to undo/redo system, for which we need to be able to know what was the content before Update().
  * Use GetUndoableBlock to get an undoable version (copy) of the block.
- * 
+ *
  * Once you did all the modifications call Update().
- * 
+ *
  * Update can be Interactive or Non-Interactive
  * Interactive means that the content of the block changed, but it is probably not the final content of the block
  * Non-Interactive will set the final content of the block
- * 
+ *
  * If you call Update in Interactive mode and you want to validate the content to be the final content afterwards.
  * Just call Commit().
- * 
+ *
  * Please avoid using keeping the block in an Interactive state for too long,
  * because it will only cache its data when a Non-Interactive Update() or Commit() is called.
  */
@@ -49,7 +49,7 @@ public:
 
     /**
      * @brief Delegate called to apply a post process phase whenever a change is made to pixels
-     * 
+     *
      * 1st Argument : OriginalBlocks, contains all the original pixels (pixels values before the edit being made) for each tilemap position.
      * 2nd Argument : InvalidTileMap, contains the tiles on which to apply the post process
      * 3rd Argument : WaitList, contains ULIS Events on which to wait before applying any post process
@@ -67,43 +67,43 @@ public:
 public:
     /**
      * @brief Get the owner object
-     * 
-     * @return int 
+     *
+     * @return int
      */
     UObject* GetOwner() const;
-    
+
     /**
      * @brief Get the block Width
-     * 
-     * @return int 
+     *
+     * @return int
      */
     int GetWidth() const;
-    
+
     /**
      * @brief Get the block Height
-     * 
-     * @return int 
+     *
+     * @return int
      */
     int GetHeight() const;
 
     /**
      * @brief Get the block Format
-     * 
-     * @return ::ULIS::eFormat 
+     *
+     * @return ::ULIS::eFormat
      */
     ::ULIS::eFormat GetFormat() const;
 
     /**
      * @brief Returns the block unique ID
-     * 
-     * @return const FGuid& 
+     *
+     * @return const FGuid&
      */
     const FGuid& GetId() const;
 
     /**
      * @brief Get the rect of this block
-     * 
-     * @return ::ULIS::FRectI 
+     *
+     * @return ::ULIS::FRectI
      */
     ::ULIS::FRectI GetRect() const;
 
@@ -114,17 +114,17 @@ public:
 
     /**
      * @brief Converts the block to the given size(crop) and format
-     * 
-     * @param iWidth 
-     * @param iHeight 
-     * @param iFormat 
+     *
+     * @param iWidth
+     * @param iHeight
+     * @param iFormat
      */
     void ConvertTo(int iWidth, int iHeight, ::ULIS::eFormat iFormat);
 
     /**
      * @brief Get the Block object
-     * 
-     * @return TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> 
+     *
+     * @return TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
      */
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlock();
 
@@ -150,8 +150,8 @@ private:
 public:
     /**
      * @brief Serialize this object
-     * 
-     * @param Ar 
+     *
+     * @param Ar
      */
     void Serialize(FArchive& Ar);
 
@@ -175,7 +175,7 @@ private:
 
     UE::Serialization::FEditorBulkData mBulkData; //Allows serializing the block on disk when saving
 
-    // 
+    //
     // DELEGATES
     //
 
@@ -187,7 +187,7 @@ private:
 
     FPostProcess mPostProcess;
 
-    // 
+    //
     // OPTIMIZATIONS
     //
 

@@ -27,9 +27,9 @@ void SOdysseyAnimationLayerFolderRow::Construct(
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments()
-			.TimelinePosition(iArgs._TimelinePosition),
+            .TimelinePosition(iArgs._TimelinePosition),
         iOwnerTableView,
-		iAnimationLayerFolder
+        iAnimationLayerFolder
     );
 }
 

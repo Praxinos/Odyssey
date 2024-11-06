@@ -34,7 +34,7 @@ public:
     virtual bool SetLooping(bool Looping) override;
     virtual bool SetRate(float Rate) override;
     virtual void SetBlockingPlaybackHint(bool bFacadeWillUseBlockingPlayback) override;
-    
+
     //deprecated: but needed to compile and used in FOdysseyAnimationMediaSamples
     virtual FTimespan GetTime() const override;
 

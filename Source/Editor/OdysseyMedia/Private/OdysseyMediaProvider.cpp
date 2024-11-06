@@ -6,7 +6,7 @@
 FOdysseyMediaProvider::FOdysseyMediaProvider()
     : mIsLocked(false)
 {
-    
+
 }
 
 void

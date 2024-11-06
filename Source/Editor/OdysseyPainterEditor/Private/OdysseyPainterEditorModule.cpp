@@ -76,7 +76,7 @@ FOdysseyPainterEditorModule::UnregisterSettings()
 
     if( !settingsModule )
         return;
-        
+
     settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyPainterEditor" );
 }
 

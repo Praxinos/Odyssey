@@ -45,7 +45,7 @@ FOdysseyFlipbookAssetTypeActions::GetCategories()
     return EAssetTypeCategories::Animation | mMyAssetCategory;
 }
 
-void 
+void
 FOdysseyFlipbookAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 {
     InFilter.ClassPaths.Add( UPaperFlipbook::StaticClass()->GetClassPathName() );
@@ -66,7 +66,7 @@ void FOdysseyFlipbookAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& I
             odysseyFlipbookModule->CreateOdysseyFlipbookEditor({odysseyFlipbook});
         }
     }
-    
+
     if( objects.Num() != 0 )
         FAssetTypeActions_Base::OpenAssetEditor( objects, EditWithinLevelEditor );
 }

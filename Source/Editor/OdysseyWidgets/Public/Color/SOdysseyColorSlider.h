@@ -135,7 +135,7 @@ public:                                                                         
     static int GetMaxValue()                                                                        \
     {                                                                                               \
         return iClass::MaxValue;                                                                    \
-    }                                                                                               
+    }
 
 #define ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP( Setter, Getter )                                          \
 private:                                                                                            \
@@ -145,14 +145,14 @@ private:                                                                        
                                                                                                     \
     virtual float GetProportionForColor_Imp( const ::ULIS::FColor& iColor ) const override {    \
         return  iColor.Getter();                                                                    \
-    }                                                                                               
+    }
 
 #define ODYSSEY_CHANNEL_SLIDER_DATA( Min, Max, Pre, U )                                             \
 public:                                                                                             \
     static const int MinValue = Min;                                                                \
     static const int MaxValue = Max;                                                                \
     static const TCHAR Prefix = Pre;                                                                \
-    static const WIDECHAR Unit = U;                                                                 
+    static const WIDECHAR Unit = U;
 
 
 /////////////////////////////////////////////////////
@@ -247,7 +247,7 @@ private:
     virtual float GetProportionForColor_Imp( const ::ULIS::FColor& iColor ) const override {
         return  iColor.HueF();
     }
-    
+
     ODYSSEY_CHANNEL_SLIDER_DATA(0, 360, 'H', L'°')
 };
 

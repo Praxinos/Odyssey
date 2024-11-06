@@ -50,7 +50,7 @@ UOdysseyTextureLayerImageRaster::OnBlockCommited(const TArray<::ULIS::FRectI>& i
 
 void
 UOdysseyTextureLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
-{   
+{
     FOdysseyRasterBlockMutator mutator(RasterBlock);
     mutator.EditTilesFromRects(
         { ::ULIS::FRectI::FromXYWH(0, 0, RasterBlock->GetWidth(), RasterBlock->GetHeight()) },
@@ -154,7 +154,7 @@ UOdysseyTextureLayerImageRaster::Serialize(FArchive& Ar)
 
     if (GetFlags() & RF_ClassDefaultObject)
         return;
-    
+
     if( Ar.IsSaving() )
     {
         FOdysseyTextureLayerImageRasterExport::Write( this, Ar );
@@ -179,7 +179,7 @@ UOdysseyTextureLayerImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, TS
     //Apply AlphaLock
     TArray<::ULIS::FEvent> events;
     TSharedPtr<::ULIS::FBlock> block = RasterBlock->GetBlock();
-    TArray<FIntPoint> invalidTiles = iInvalidMap.InvalidTiles();    
+    TArray<FIntPoint> invalidTiles = iInvalidMap.InvalidTiles();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(RasterBlock->GetFormat());
     for (const FIntPoint& invalidTile : invalidTiles)
     {
@@ -210,7 +210,7 @@ UOdysseyTextureLayerImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRend
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
-    
+
     return MakeShared<FOdysseyTextureLayerImageRasterImageRenderer>(this, iRenderType, GetImageRenderingRects(), iFilter);
 }
 

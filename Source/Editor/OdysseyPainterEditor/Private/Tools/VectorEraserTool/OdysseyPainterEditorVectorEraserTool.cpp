@@ -55,10 +55,10 @@ bool
 UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey
-														, uint64& oSignalFlags )
+                                                        , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
@@ -78,13 +78,13 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorGroupPai
     oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 
-	return true;
+    return true;
 }
 
 void
 UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                          , const FOdysseyPoint& iPointInTexture
-														 , uint64& oSignalFlags )
+                                                         , uint64& oSignalFlags )
 {
     double diameter = Radius * 2.0f;
     ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)Radius
@@ -111,7 +111,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorGroupPa
 void
 UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
-														, uint64& oSignalFlags )
+                                                        , uint64& oSignalFlags )
 {
     if( iPointInTexture.x < mMin.x ) mMin.x = iPointInTexture.x;
     if( iPointInTexture.y < mMin.y ) mMin.y = iPointInTexture.y;
@@ -123,7 +123,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorGroupPai
         mEraserHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
         mEraserHUD->StrokeLine( ::ULIS::FVec2D( iPointInTexture.x - iPointInTexture.deltaPosition.X
                                               , iPointInTexture.y - iPointInTexture.deltaPosition.Y )
-                              , ::ULIS::FVec2D( iPointInTexture.x 
+                              , ::ULIS::FVec2D( iPointInTexture.x
                                               , iPointInTexture.y ) );
     }
 
@@ -156,7 +156,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
           // build the list of impacted paintgroups, no duplicates
           if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
           {
-              if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) ) 
+              if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
               {
                   FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
 
@@ -168,7 +168,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
                   }
               }
 
-              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) ) 
+              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
                   FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
                   FOdysseyVectorObject* parent = path->GetParent();
@@ -222,7 +222,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
     }
 
     // Also here, we remove AFTER the Traverse() has been executed, because traverse is recursive
-    // so we can't alter the hierarchy, unles traverse works on copies of the children list but that 
+    // so we can't alter the hierarchy, unles traverse works on copies of the children list but that
     // would be very inefficient.
     for( int i = 0; i < oRemovedObjectArray.size(); i++ )
     {
@@ -270,7 +270,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
       {
           if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
           {
-              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) ) 
+              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
                   FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
                   ::ULIS::FRectD pathWorldBBox = path->GetBBox( true );
@@ -309,7 +309,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
     }
 
     // Also here, we remove AFTER the Traverse() has been executed, because traverse is recursive
-    // so we can't alter the hierarchy, unless traverse works on copies of the children list but that 
+    // so we can't alter the hierarchy, unless traverse works on copies of the children list but that
     // would be very inefficient.
     for( int i = 0; i < oRemovedObjectArray.size(); i++ )
     {
@@ -333,10 +333,10 @@ bool
 UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                       , const FOdysseyPoint& iPointInTexture
                                                       , const FKey& iKey
-													  , uint64& oSignalFlags )
+                                                      , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     ::ULIS::FRectD erasureArea = ::ULIS::FRectD::FromMinMax( mMin.x - Radius
@@ -397,7 +397,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
                                                                   , removedSegmentArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
             TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();
@@ -412,7 +412,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
          | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
          | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED;
 
-	return true;
+    return true;
 }
 
 TSharedRef<SWidget>

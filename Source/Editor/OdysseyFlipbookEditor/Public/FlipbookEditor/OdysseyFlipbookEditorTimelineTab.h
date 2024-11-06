@@ -37,7 +37,7 @@ public:
     virtual TSharedPtr<FOdysseyFlipbookWrapper> FlipbookWrapper() const;
 
 protected:
-    // Event Listeners    
+    // Event Listeners
     virtual void OnTimelineCurrentKeyframeChanged(int32 iKeyframe);
     virtual void OnTimelineScrubStarted();
     virtual void OnTimelineScrubStopped();

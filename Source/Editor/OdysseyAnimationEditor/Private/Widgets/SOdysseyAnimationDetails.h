@@ -14,7 +14,7 @@ public:
     {}
         SLATE_ATTRIBUTE(UOdysseyAnimation*, Animation)
     SLATE_END_ARGS()
-    
+
 
     void Construct(const FArguments& InArgs);
 

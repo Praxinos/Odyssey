@@ -250,7 +250,7 @@ void
 SOdysseyFlipbookTimelineView::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
     SCompoundWidget::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
-    
+
     if (!mIsPlaying)
         return;
 
@@ -261,7 +261,7 @@ SOdysseyFlipbookTimelineView::Tick(const FGeometry& AllottedGeometry, const doub
     UPaperFlipbook* flipbook = wrapper->GetFlipbook();
     if (!flipbook)
         return;
-    
+
     float scrubPosition = mTimelineWidget->ScrubPosition();
     float offset = mIsPlayingBackward ? -InDeltaTime * flipbook->GetFramesPerSecond() : InDeltaTime * flipbook->GetFramesPerSecond();
     scrubPosition += offset;
@@ -278,7 +278,7 @@ SOdysseyFlipbookTimelineView::Tick(const FGeometry& AllottedGeometry, const doub
         {
             scrubPosition = FGenericPlatformMath::Fmod(scrubPosition, flipbook->GetNumFrames());
         }
-        
+
     }
     else if (!mIsPlayingBackward && scrubPosition >= flipbook->GetNumFrames())
     {
@@ -307,7 +307,7 @@ SOdysseyFlipbookTimelineView::OnScrubStarted()
         mOnPlayStopped.ExecuteIfBound();
         return;
     }
-    
+
     //If we're not playing, just start scrubbing
     mOnScrubStarted.ExecuteIfBound();
 }
@@ -441,7 +441,7 @@ SOdysseyFlipbookTimelineView::OnKeyframeAdded(FPaperFlipbookKeyFrame& iKeyFrame)
     UTexture2D* texture = iKeyFrame.Sprite->GetSourceTexture();
     if (!texture)
         return;
-    
+
     mOnTextureCreated.ExecuteIfBound(texture);
 }
 
@@ -581,10 +581,10 @@ SOdysseyFlipbookTimelineView::FixFrame(int32 iIndex)
     UPaperSprite* createdSprite = NULL;
     if (!wrapper->FixKeyFrame(iIndex, &createdTexture, &createdSprite))
         return false;
-    
+
     if (createdSprite)
         mOnSpriteCreated.ExecuteIfBound(createdSprite);
-    
+
     if (createdTexture)
     {
         mOnTextureCreated.ExecuteIfBound(createdTexture);
@@ -655,7 +655,7 @@ SOdysseyFlipbookTimelineView::AddFrameAfter()
         }
         return;
     }
-    
+
     AddFrame(index + 1);
 }
 
@@ -775,7 +775,7 @@ SOdysseyFlipbookTimelineView::ScrubToPreviousKeyFrame()
     int32 index = wrapper->GetKeyframeIndexAtPosition(mTimelineWidget->ScrubPosition());
     if (index == 0)
         return;
-        
+
     if (index < 0)
     {
         if (mTimelineWidget->ScrubPosition() >= flipbook->GetNumFrames())

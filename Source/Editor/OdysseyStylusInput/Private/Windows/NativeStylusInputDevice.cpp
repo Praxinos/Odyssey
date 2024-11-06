@@ -122,7 +122,7 @@ FNativeStylusInputDevice::Tick()
 {
     PreviousState = CurrentState;
     CurrentState.Empty();
-    
+
     CurrentState = mNativeState;
     mNativeState.Empty();
 }
@@ -137,9 +137,9 @@ FNativeStylusInputDevice::SetPenMask(const PEN_MASK& iMask)
     bool hasTiltX = iMask & PEN_MASK_TILT_X;
     bool hasTiltY = iMask & PEN_MASK_TILT_Y;
 
-    SupportedInputs.Add(EStylusInputType::Position); 
+    SupportedInputs.Add(EStylusInputType::Position);
     if (hasPressure)
-        SupportedInputs.Add(EStylusInputType::Pressure);    
+        SupportedInputs.Add(EStylusInputType::Pressure);
 
     if (hasTiltX && hasTiltY)
     {
@@ -151,7 +151,7 @@ FNativeStylusInputDevice::SetPenMask(const PEN_MASK& iMask)
 
     if (hasRotation)
         SupportedInputs.Add(EStylusInputType::Twist);
-    
+
     //SupportedInputs.Add(Z);    EStylusInputType::Z
     //SupportedInputs.Add(Timer);    EStylusInputType::Timer
     //SupportedInputs.Add(ButtonPressure);    EStylusInputType::ButtonPressure
@@ -205,7 +205,7 @@ FNativeStylusInputDevice::OnPointerUpdate(POINTER_PEN_INFO& iPenInfo)
         twist,
         pressure,
         0, //float InTanPressure,
-        FVector2D(0), //FVector2D InSize, 
+        FVector2D(0), //FVector2D InSize,
         pressure > 0,
         isInverted
     );

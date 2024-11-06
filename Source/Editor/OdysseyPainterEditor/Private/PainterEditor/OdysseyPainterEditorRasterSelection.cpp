@@ -15,7 +15,7 @@ FOdysseyPainterEditorRasterSelection::FOdysseyPainterEditorRasterSelection()
 {
 }
 
-FSimpleMulticastDelegate& 
+FSimpleMulticastDelegate&
 FOdysseyPainterEditorRasterSelection::OnChanged()
 {
     return mOnChanged;
@@ -52,7 +52,7 @@ FOdysseyPainterEditorRasterSelection::Clear()
     mOnChanged.Broadcast();
 }
 
-bool 
+bool
 FOdysseyPainterEditorRasterSelection::IsEmpty() const
 {
     return mBoundingRect.Area() <= 0;
@@ -143,7 +143,7 @@ FOdysseyPainterEditorRasterSelection::RefreshHUD()
 {
     mHUD->EmptyElements();
     mBoundingRect = ::ULIS::FRectI::FromXYWH(0, 0, 0, 0);
-    
+
     if (!mBlock)
         return;
 

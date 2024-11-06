@@ -22,14 +22,14 @@ FOdysseyAnimationEditorExtension::~FOdysseyAnimationEditorExtension()
 }
 
 FOdysseyAnimationEditorExtension::FOdysseyAnimationEditorExtension(FOdysseyPainterEditor* iEditor)
-	: FOdysseyPainterEditorExtension(iEditor)
-	, mAnimationSource(nullptr)
-	, mGUI(nullptr)
-	, mTimelinePosition(MakeShared<FOdysseyAnimationEditorTimelinePosition>())
-	, mFlipSystem(MakeShared<FOdysseyAnimationEditorFlipSystem>(this))
-	, mPlaybackFramesPerSecond(0)
-	, mLayerStackBrushEditorContext(MakeShared<FOdysseyLayerStackEditorBrushContext>(nullptr))
-	, mOutOfPegsTool(nullptr)
+    : FOdysseyPainterEditorExtension(iEditor)
+    , mAnimationSource(nullptr)
+    , mGUI(nullptr)
+    , mTimelinePosition(MakeShared<FOdysseyAnimationEditorTimelinePosition>())
+    , mFlipSystem(MakeShared<FOdysseyAnimationEditorFlipSystem>(this))
+    , mPlaybackFramesPerSecond(0)
+    , mLayerStackBrushEditorContext(MakeShared<FOdysseyLayerStackEditorBrushContext>(nullptr))
+    , mOutOfPegsTool(nullptr)
 {
 }
 
@@ -41,7 +41,7 @@ FOdysseyAnimationEditorExtension::Initialize()
     GetEditor()->OnSourceChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnSourceChanged);
     mGUI = MakeShareable(new FOdysseyAnimationEditorGUI(this));
     mGUI->Initialize();
-    
+
     mOutOfPegsTool = NewObject<UOdysseyAnimationEditorOutOfPegsTool>();
     mOutOfPegsTool->SetEditor(GetEditor());
 
@@ -76,15 +76,15 @@ FOdysseyAnimationEditorExtension::OnSourceChanged()
 {
     //Is the source an animation
     TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-	if (!source || source->Id() != FOdysseyAnimationEditorSource::StaticId())
-	{
-		GetEditor()->GetBrushContexts().Remove(mLayerStackBrushEditorContext.Get());
-		mAnimationSource = nullptr;
-		
-		mTimelinePosition = MakeShared<FOdysseyAnimationEditorTimelinePosition>();
+    if (!source || source->Id() != FOdysseyAnimationEditorSource::StaticId())
+    {
+        GetEditor()->GetBrushContexts().Remove(mLayerStackBrushEditorContext.Get());
+        mAnimationSource = nullptr;
 
-		UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll(this);
-		FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
+        mTimelinePosition = MakeShared<FOdysseyAnimationEditorTimelinePosition>();
+
+        UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll(this);
+        FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
         UOdysseyLayer::OnMediaChanged().RemoveAll(this);
         return;
     }
@@ -93,10 +93,10 @@ FOdysseyAnimationEditorExtension::OnSourceChanged()
 
     UOdysseyAnimation* animation = Animation();
 
-	mTimelinePosition = MakeShared<FOdysseyAnimationEditorTimelinePosition>();
+    mTimelinePosition = MakeShared<FOdysseyAnimationEditorTimelinePosition>();
 
-	mImageRenderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
-	mPlaybackFramesPerSecond = animation->GetFramesPerSecond();
+    mImageRenderingComposition = animation->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
+    mPlaybackFramesPerSecond = animation->GetFramesPerSecond();
 
     //Set Media player and Animation callbacks
     UOdysseyAnimation::OnCurrentFrameChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnCurrentFrameChanged);
@@ -142,7 +142,7 @@ FOdysseyAnimationEditorExtension::Player() const
 TSharedRef<FOdysseyAnimationEditorTimelinePosition>
 FOdysseyAnimationEditorExtension::TimelinePosition()
 {
-	return mTimelinePosition;
+    return mTimelinePosition;
 }
 
 float
@@ -236,6 +236,6 @@ void
 FOdysseyAnimationEditorExtension::BindShortcuts(FBaseToolkit* iToolkit)
 {
     FOdysseyPainterEditorExtension::BindShortcuts(iToolkit);
-    
+
     mOutOfPegsTool->BindShortcuts(iToolkit);
 }

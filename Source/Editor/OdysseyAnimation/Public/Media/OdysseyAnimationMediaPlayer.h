@@ -52,7 +52,7 @@ public:
     virtual bool Open(const FString& Url, const IMediaOptions* Options) override;
     virtual bool Open(const TSharedRef<FArchive, ESPMode::ThreadSafe>& Archive, const FString& OriginalUrl, const IMediaOptions* Options) override;
     virtual void Close() override;
-    
+
     virtual IMediaCache& GetCache() override;
     virtual IMediaControls& GetControls() override;
     virtual IMediaSamples& GetSamples() override;

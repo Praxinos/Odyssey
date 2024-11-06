@@ -43,7 +43,7 @@ public:
     void AddMutation(TSharedPtr<IOdysseyMutation> iMutation);
     void ApplyMutation(TSharedPtr<IOdysseyMutation> iMutation);
     void AddAndApplyMutation(TSharedPtr<IOdysseyMutation> iMutation);
-    
+
     //Defines the current state as an intermediate state (non commited)
     //Allows for UI to change interactively while changing values
     virtual void Change();

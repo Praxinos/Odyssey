@@ -12,9 +12,9 @@ class FOdysseyAnimationLightTableImport
 public:
     /**
      * @brief Imports Data from the given archive into the given object
-     * 
-     * @param iAnimationLightTable 
-     * @param Ar 
+     *
+     * @param iAnimationLightTable
+     * @param Ar
      */
     static bool ODYSSEYANIMATION_API Read( FOdysseyAnimationLightTable* iAnimationLightTable
                                   , FArchive &Ar );

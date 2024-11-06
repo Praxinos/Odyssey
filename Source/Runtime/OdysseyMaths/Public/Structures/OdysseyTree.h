@@ -27,7 +27,7 @@ public:
     // FOdysseyNTree<T>* is the previous parent node
     // int is the index of the removed node in the previous parent node
     DECLARE_MULTICAST_DELEGATE_TwoParams(FOdysseyTreeNodeRemoved, FOdysseyNTree<T>*, FOdysseyNTree<T>*, int);
-    
+
     // Tree Node Moved Event
     // FOdysseyNTree<T>* is the moved node
     // FOdysseyNTree<T>* is the previous parent node
@@ -38,29 +38,29 @@ public:
 public:
     FOdysseyNTree( T iNodeContent );
     ~FOdysseyNTree();
-    
+
 public:
     FOdysseyNTree<T>* AddNode( T iNodeContent, int iIndexEmplace = -1 );
 
     void DeleteNode( int iIndex );
     void DeleteNodeIfExist( FOdysseyNTree<T>* iNodeToDelete );
     FOdysseyNTree<T>* MoveNodeTo( FOdysseyNTree<T>* iNewPositionInTree, ePosition iPosition = ePosition::kAfter );
-    
+
     //Find the first node (depthSearch) which content is iToFind
     FOdysseyNTree<T>* FindNode( T iToFind );
-    
+
     FOdysseyNTree<T>* GetParent() const;
     int GetIndexInParent() const;
     T GetNodeContent() const;
     T* GetNodeContentPtr() const;
-    
+
     TArray<FOdysseyNTree<T>*> GetNodes() const;
-    
+
     void DepthFirstSearchTree( TArray<T>* ioContents, bool iIncludeRoot = true ) const;
     void BreadthFirstSearchTree( TArray<T>* ioContents, bool iIncludeRoot = true ) const;
-    
+
     int GetNumberParents() const;
-    
+
     //Check if iParentToSearch is a parent (direct or indirect) of the currentNode
     bool HasForParent( FOdysseyNTree<T>* iParentToSearch ) const;
 
@@ -78,7 +78,7 @@ private:
     T mNodeContent;
     TArray<FOdysseyNTree*> mNodes;
     FOdysseyNTree* mParent;
-    
+
     FOdysseyTreeNodeAdded mNodeAdded;
     FOdysseyTreeNodeRemoved mNodeRemoved;
     FOdysseyTreeNodeMoved mNodeMoved;

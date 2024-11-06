@@ -30,9 +30,9 @@ void SOdysseyAnimationLayerImageVectorRow::Construct(
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments()
-			.TimelinePosition(InArgs._TimelinePosition),
+            .TimelinePosition(InArgs._TimelinePosition),
         iOwnerTableView,
-		iAnimationLayerImageVector
+        iAnimationLayerImageVector
     );
 
     SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
@@ -43,29 +43,29 @@ void SOdysseyAnimationLayerImageVectorRow::Construct(
 TArray<TSharedPtr<SWidget>>
 SOdysseyAnimationLayerImageVectorRow::GenerateMainRowHeaderOptionWidgets()
 {
-	TArray<TSharedPtr<SWidget>> widgets = SOdysseyAnimationLayerRow::GenerateMainRowHeaderOptionWidgets();
+    TArray<TSharedPtr<SWidget>> widgets = SOdysseyAnimationLayerRow::GenerateMainRowHeaderOptionWidgets();
 
     const FCheckBoxStyle* coloredToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.ColoredToggle");
     const FCheckBoxStyle* wireframeToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.WireframeToggle");
 
-	//AlphaLock
-	widgets.Add(
-		//WireframeLock
-		SNew(SCheckBox)
-		.Style(wireframeToggleStyle)
-		.OnCheckStateChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnIsWireframeCheckStateChanged)
-		.IsChecked(this, &SOdysseyAnimationLayerImageVectorRow::GetIsWireframeIsChecked)
-	);
+    //AlphaLock
+    widgets.Add(
+        //WireframeLock
+        SNew(SCheckBox)
+        .Style(wireframeToggleStyle)
+        .OnCheckStateChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnIsWireframeCheckStateChanged)
+        .IsChecked(this, &SOdysseyAnimationLayerImageVectorRow::GetIsWireframeIsChecked)
+    );
 
-	widgets.Add(
-		//ColoredLock
-		SNew(SCheckBox)
-		.Style(coloredToggleStyle)
-		.OnCheckStateChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnIsColoredCheckStateChanged)
-		.IsChecked(this, &SOdysseyAnimationLayerImageVectorRow::GetIsColoredIsChecked)
-	);
+    widgets.Add(
+        //ColoredLock
+        SNew(SCheckBox)
+        .Style(coloredToggleStyle)
+        .OnCheckStateChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnIsColoredCheckStateChanged)
+        .IsChecked(this, &SOdysseyAnimationLayerImageVectorRow::GetIsColoredIsChecked)
+    );
 
-	return widgets;
+    return widgets;
 }
 
 void

@@ -54,7 +54,7 @@ TSharedRef<SWidget> SOdysseyLayerStackAddLayerButton::MakeMenu()
             UOdysseyLayer* layerCDO = layerClass->GetDefaultObject<UOdysseyLayer>();
             if (!layerCDO)
                 continue;
-                
+
             menuBuilder.AddMenuEntry(
                 layerCDO->LayerTypeName,
                 layerCDO->Description,
@@ -106,7 +106,7 @@ SOdysseyLayerStackAddLayerButton::AddLayerFromClass(FAssetData iAssetData)
         layerClass = blueprint->GeneratedClass;
 
     if ( !layerClass )
-        return;  
+        return;
 
 #ifdef WITH_EDITOR
     //Allows to have a single undo if there is side effects (auto adding frames in animation layer) in mOnAdded callback
@@ -131,7 +131,7 @@ SOdysseyLayerStackAddLayerButton::AddLayerFromClass(FAssetData iAssetData)
     {
         currentLayer = layerStack->AddLayer(layerClass);
     }
-    
+
     mOnAdded.ExecuteIfBound(currentLayer);
     FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), currentLayer);
 }

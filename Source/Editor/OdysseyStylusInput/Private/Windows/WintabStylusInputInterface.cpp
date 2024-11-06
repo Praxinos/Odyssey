@@ -50,7 +50,7 @@ void
 FWintabStylusInputInterface::Tick()
 {
     // If the stylus is down (= drawing), don't change the focused window (and current widget) of the plugin
-    // When we draw on a zoomed viewport and the mouse go over the limits of the viewport, 
+    // When we draw on a zoomed viewport and the mouse go over the limits of the viewport,
     // we want to continue drawing on the right window and widget and not start "drawing" on the new hovered window and widget
     for( const FWintabTabletContextInfo& Context : Impl->mContexts->mTabletContexts )
     {

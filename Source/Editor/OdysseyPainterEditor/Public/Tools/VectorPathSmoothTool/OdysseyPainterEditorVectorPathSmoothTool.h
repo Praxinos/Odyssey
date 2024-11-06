@@ -46,7 +46,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : publi
         virtual bool OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
                                         , const FKey& iKey
-										, uint64& oSignalFlags ) override;
+                                        , uint64& oSignalFlags ) override;
         virtual void OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                          , const FOdysseyPoint& iPointInTexture, uint64& oSignalFlags ) override;
         virtual void OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
@@ -63,7 +63,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : publi
 
     public:
         UPROPERTY( EditAnywhere
-                 , Category=PathSmoothTool 
+                 , Category=PathSmoothTool
                  , meta = ( ToolTip  = "Smoothing Mode" ) )
         ePathSmoothingMode SmoothingMode;
         ePathSmoothingMode SmoothingModeAtKeyDown; // when pressing shift

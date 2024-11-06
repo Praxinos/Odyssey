@@ -24,7 +24,7 @@ FOdysseyAnimationGlobalTimelineToolsShortcuts::MapActionsToCommandList(TSharedRe
         FOdysseyAnimationEditorCommands::Get().ActivateTimelineMoveTool,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineToolsShortcuts::Action_ActivateTimelineMoveTool)
     );
-    
+
     iCommandList->MapAction(
         FOdysseyAnimationEditorCommands::Get().ActivateTimelineCutTool,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineToolsShortcuts::Action_ActivateTimelineCutTool)
@@ -34,19 +34,19 @@ FOdysseyAnimationGlobalTimelineToolsShortcuts::MapActionsToCommandList(TSharedRe
 void
 FOdysseyAnimationGlobalTimelineToolsShortcuts::Action_ActivateTimelineSelectionTool()
 {
-	FOdysseyAnimationTimelineTools::Get().SetCurrentTool(EOdysseyTimelineTool::Selection);
+    FOdysseyAnimationTimelineTools::Get().SetCurrentTool(EOdysseyTimelineTool::Selection);
 }
 
 void
 FOdysseyAnimationGlobalTimelineToolsShortcuts::Action_ActivateTimelineMoveTool()
 {
-	FOdysseyAnimationTimelineTools::Get().SetCurrentTool(EOdysseyTimelineTool::Move);
+    FOdysseyAnimationTimelineTools::Get().SetCurrentTool(EOdysseyTimelineTool::Move);
 }
 
 void
 FOdysseyAnimationGlobalTimelineToolsShortcuts::Action_ActivateTimelineCutTool()
 {
-	FOdysseyAnimationTimelineTools::Get().SetCurrentTool(EOdysseyTimelineTool::Cut);
+    FOdysseyAnimationTimelineTools::Get().SetCurrentTool(EOdysseyTimelineTool::Cut);
 }
 
 #undef LOCTEXT_NAMESPACE

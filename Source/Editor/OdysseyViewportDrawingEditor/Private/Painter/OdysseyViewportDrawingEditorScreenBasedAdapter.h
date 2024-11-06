@@ -68,7 +68,7 @@ public:
     virtual void SetTexture(UTexture* iTexture) override;
 
     void InitializeRenderTarget();
-    void FinalizeRenderTarget(); 
+    void FinalizeRenderTarget();
 
     virtual void RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI) override;
 

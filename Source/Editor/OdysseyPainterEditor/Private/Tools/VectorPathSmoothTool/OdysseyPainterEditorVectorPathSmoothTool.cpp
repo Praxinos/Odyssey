@@ -52,7 +52,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( FOdysseyVectorGroupPaint*
 bool
 UOdysseyPainterEditorVectorPathSmoothTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FKey& iKey
-														  , uint64& oSignalFlags )
+                                                          , uint64& oSignalFlags )
 {
     // backup SmoothingMode value
     SmoothingModeAtKeyDown = SmoothingMode;
@@ -60,9 +60,9 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnKeyDownVector( FOdysseyVectorGroupP
     if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
     {
         // flip the value
-        SmoothingMode = ( SmoothingMode == ePathSmoothingMode::Round ) ? ePathSmoothingMode::Sharp 
+        SmoothingMode = ( SmoothingMode == ePathSmoothingMode::Round ) ? ePathSmoothingMode::Sharp
                                                                        : ePathSmoothingMode::Round;
-		return true;
+        return true;
     }
 
     return UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iScene, iKey, oSignalFlags );
@@ -71,7 +71,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnKeyDownVector( FOdysseyVectorGroupP
 bool
 UOdysseyPainterEditorVectorPathSmoothTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FKey& iKey
-														, uint64& oSignalFlags )
+                                                        , uint64& oSignalFlags )
 {
     // restore SmoothingMode value
     SmoothingMode = SmoothingModeAtKeyDown;
@@ -83,10 +83,10 @@ bool
 UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , const FKey& iKey
-															, uint64& oSignalFlags )
+                                                            , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -98,7 +98,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGrou
             mUndoSegmentReshape = new FOdysseyVectorUndoSegmentReshape( iScene );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>( mUndoSegmentReshape ) );
-                
+
             TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();
@@ -109,13 +109,13 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGrou
     oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 
-	return true;
+    return true;
 }
 
 void
 UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture
-															 , uint64& oSignalFlags )
+                                                             , uint64& oSignalFlags )
 {
     double diameter = PickingRadius * 2.0f;
     ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)PickingRadius
@@ -132,7 +132,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorGro
 void
 UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                             , const FOdysseyPoint& iPointInTexture
-															, uint64& oSignalFlags )
+                                                            , uint64& oSignalFlags )
 {
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
@@ -183,10 +183,10 @@ bool
 UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey
-														  , uint64& oSignalFlags )
+                                                          , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -202,7 +202,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupP
     }
 
     oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
-	return true;
+    return true;
 }
 
 FText

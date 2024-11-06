@@ -81,7 +81,7 @@ FOdysseyLayerStackShortcuts::MapActionsToCommandList()
     );
 }
 
-//Common Shortcuts 
+//Common Shortcuts
 void
 FOdysseyLayerStackShortcuts::Action_Rename()
 {
@@ -153,7 +153,7 @@ FOdysseyLayerStackShortcuts::Action_SelectAll()
 {
     if ( !mLayerStack )
         return;
-    
+
     TSharedPtr<SOdysseyLayerStackTreeView> treeView = mTreeView.Pin();
     if (!treeView)
         return;
@@ -168,7 +168,7 @@ FOdysseyLayerStackShortcuts::Action_Delete()
 {
     if ( !mLayerStack )
         return;
-    
+
     TSharedPtr<SOdysseyLayerStackTreeView> treeView = mTreeView.Pin();
     if (!treeView)
         return;
@@ -186,7 +186,7 @@ FOdysseyLayerStackShortcuts::Action_Duplicate()
 {
     if ( !mLayerStack )
         return;
-        
+
     TSharedPtr<SOdysseyLayerStackTreeView> treeView = mTreeView.Pin();
     if (!treeView)
         return;
@@ -245,7 +245,7 @@ FOdysseyLayerStackShortcuts::CanAction_Delete()
 {
     if ( !mLayerStack )
         return false;
-        
+
     TSharedPtr<SOdysseyLayerStackTreeView> treeView = mTreeView.Pin();
     if (!treeView)
         return false;
@@ -261,7 +261,7 @@ FOdysseyLayerStackShortcuts::CanAction_Delete()
         if (!selectedLayers.Contains(rootLayer))
             return true;
     }
-    
+
     return false;
 }
 
@@ -278,7 +278,7 @@ FOdysseyLayerStackShortcuts::Action_MergeSelectedLayers()
 {
     if ( !mLayerStack )
         return;
-        
+
     TSharedPtr<SOdysseyLayerStackTreeView> treeView = mTreeView.Pin();
     if (!treeView)
         return;
@@ -286,7 +286,7 @@ FOdysseyLayerStackShortcuts::Action_MergeSelectedLayers()
     TArray<UOdysseyLayer*> selectedLayers = treeView->GetSelectedItems();
     if (selectedLayers.Num() <= 0)
         return;
-    
+
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("shortcuts.transaction.merge-layers", "Merge Layers"));
 #endif
@@ -300,7 +300,7 @@ FOdysseyLayerStackShortcuts::CanAction_MergeSelectedLayers()
 {
     if ( !mLayerStack )
         return false;
-        
+
     TSharedPtr<SOdysseyLayerStackTreeView> treeView = mTreeView.Pin();
     if (!treeView)
         return false;

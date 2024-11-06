@@ -142,7 +142,7 @@ private:
     //Widgets
     TSharedPtr<SOdysseyTimeline> mTimelineWidget;
     TSharedPtr<SOdysseyFlipbookTimelineTrack> mTimelineTrackWidget;
-    
+
     //Events
     FOnCurrentKeyframeChanged mOnCurrentKeyframeChanged;
     FOnPlayStarted mOnPlayStarted;

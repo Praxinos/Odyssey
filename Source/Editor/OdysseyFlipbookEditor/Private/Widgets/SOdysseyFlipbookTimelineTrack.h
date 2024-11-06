@@ -24,7 +24,7 @@ public:
         SLATE_EVENT( FOnTextureCreated, OnTextureCreated)
     SLATE_END_ARGS()
 
-    
+
     ~SOdysseyFlipbookTimelineTrack();
 
     // Construct the widget
@@ -66,14 +66,14 @@ private:
     bool OnFrameAcceptDrop(TSharedPtr<SOdysseyTimelineFrame> iFrame, const FGeometry& iGeometry, const FDragDropEvent& iDragDropEvent);
     TSharedRef<SWidget> GenerateFrameContextMenu(TSharedPtr<SOdysseyTimelineFrame> iFrame); */
 
-    
+
     void OnFramesMoved(TArray<int32> iSrcIndexes, int32 iDstIndexes);
     void OnFramesLengthChanged(TArray<int32> iFrameIndexes);
     void OnFramesEditStart();
     void OnFramesEditStop();
     void OnFramesEditCancel();
     FReply OnGenerateFrameContextMenu(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent, int32 iFrameIndex);
-    
+
     void OpenSpritePickerMenu(FMenuBuilder& MenuBuilder, int32 iIndex);
     void CloseMenu();
     void OnAssetSelected(const FAssetData& AssetData, int32 iFrameIndex);

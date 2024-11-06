@@ -189,7 +189,7 @@ void FOdysseyTextureExportFolderExtension::PerformExportFolder(TArray<FName> iPa
         }
     }
 
-    // Confirm that there is at least one package to move 
+    // Confirm that there is at least one package to move
     if ( allPackageNamesToMove.Num() == 0 )
     {
         FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("export-folder.error.no-files-found-to-export", "No files were found to export"));
@@ -251,7 +251,7 @@ void FOdysseyTextureExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAs
                 }
                 const FString& packageName = packageDataIt->Name;
                 FString srcFilename;
-            
+
                 // Check if the Content Browser file exists
                 if (!FPackageName::DoesPackageExist(packageName, &srcFilename))
                 {
@@ -398,7 +398,7 @@ void FOdysseyTextureExportFolderExtension::RecursiveGetDependencies(const FName&
     FAssetRegistryModule& assetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
     TArray<FName> dependencies;
     assetRegistryModule.Get().GetDependencies(iPackageName, dependencies);
-    
+
     for ( auto dependsIt = dependencies.CreateConstIterator(); dependsIt; ++dependsIt )
     {
         if ( !ioAllDependencies.Contains(*dependsIt) )

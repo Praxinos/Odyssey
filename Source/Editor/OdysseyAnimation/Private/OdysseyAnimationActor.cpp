@@ -15,25 +15,25 @@
 void
 AOdysseyAnimationActor::Play()
 {
-	if (AnimationComponent)
-		AnimationComponent->Play();
+    if (AnimationComponent)
+        AnimationComponent->Play();
 }
 
 void
 AOdysseyAnimationActor::Stop()
 {
-	if (AnimationComponent)
-		AnimationComponent->Stop();
+    if (AnimationComponent)
+        AnimationComponent->Stop();
 }
 
 void
 AOdysseyAnimationActor::FaceCamera()
 {
-	UUnrealEditorSubsystem* UnrealEditorSubsystem = GEditor->GetEditorSubsystem<UUnrealEditorSubsystem>();
-	FVector cameraLocation;
-	FRotator cameraRotation;
-	if (!UnrealEditorSubsystem->GetLevelViewportCameraInfo(cameraLocation, cameraRotation))
-		return;
+    UUnrealEditorSubsystem* UnrealEditorSubsystem = GEditor->GetEditorSubsystem<UUnrealEditorSubsystem>();
+    FVector cameraLocation;
+    FRotator cameraRotation;
+    if (!UnrealEditorSubsystem->GetLevelViewportCameraInfo(cameraLocation, cameraRotation))
+        return;
 
     //-
 
@@ -41,17 +41,17 @@ AOdysseyAnimationActor::FaceCamera()
 
     //---
 
-	SetActorRotation( plane_rotator );
+    SetActorRotation( plane_rotator );
 }
 
 void
 AOdysseyAnimationActor::MoveInFrontOfCamera()
 {
-	UUnrealEditorSubsystem* UnrealEditorSubsystem = GEditor->GetEditorSubsystem<UUnrealEditorSubsystem>();
-	FVector cameraLocation;
-	FRotator cameraRotation;
-	if (!UnrealEditorSubsystem->GetLevelViewportCameraInfo(cameraLocation, cameraRotation))
-		return;
+    UUnrealEditorSubsystem* UnrealEditorSubsystem = GEditor->GetEditorSubsystem<UUnrealEditorSubsystem>();
+    FVector cameraLocation;
+    FRotator cameraRotation;
+    if (!UnrealEditorSubsystem->GetLevelViewportCameraInfo(cameraLocation, cameraRotation))
+        return;
 
     //-
 
@@ -62,29 +62,29 @@ AOdysseyAnimationActor::MoveInFrontOfCamera()
     //---
 
     SetActorLocation( plane_location );
-	SetActorRotation( plane_rotator );
+    SetActorRotation( plane_rotator );
 }
 
 AOdysseyAnimationActor::AOdysseyAnimationActor(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+    : Super(ObjectInitializer)
 {
-	RootComponent = AnimationComponent = CreateDefaultSubobject<UOdysseyAnimationComponent>(TEXT("AnimationComponent"));
-	AnimationComponent->SetRelativeRotation(FRotator(0, 90, 90));
+    RootComponent = AnimationComponent = CreateDefaultSubobject<UOdysseyAnimationComponent>(TEXT("AnimationComponent"));
+    AnimationComponent->SetRelativeRotation(FRotator(0, 90, 90));
 }
 
 #if WITH_EDITOR
 bool AOdysseyAnimationActor::GetReferencedContentObjects(TArray<UObject*>& Objects) const
 {
-	Super::GetReferencedContentObjects(Objects);
+    Super::GetReferencedContentObjects(Objects);
 
-	if (!AnimationComponent)
-		return true;
+    if (!AnimationComponent)
+        return true;
 
-	switch(AnimationComponent->Mode)
-	{
-		case EOdysseyAnimationComponentMode::Animation : Objects.Add(AnimationComponent->Animation); break;
-		case EOdysseyAnimationComponentMode::Player : Objects.Add(AnimationComponent->Player); break;
-	}
-	return true;
+    switch(AnimationComponent->Mode)
+    {
+        case EOdysseyAnimationComponentMode::Animation : Objects.Add(AnimationComponent->Animation); break;
+        case EOdysseyAnimationComponentMode::Player : Objects.Add(AnimationComponent->Player); break;
+    }
+    return true;
 }
 #endif

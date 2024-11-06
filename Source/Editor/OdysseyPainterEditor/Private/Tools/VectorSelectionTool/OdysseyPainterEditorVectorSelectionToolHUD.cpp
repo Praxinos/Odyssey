@@ -130,7 +130,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawPickingArea( BLContext* iBLCont
             }
             break;
 
-            case EOdysseyVectorSelectionShape::Freehand : 
+            case EOdysseyVectorSelectionShape::Freehand :
                 for( int i = 0; i < pointArray.size(); i++ )
                 {
                     int n = ( i + 1 ) % pointArray.size();

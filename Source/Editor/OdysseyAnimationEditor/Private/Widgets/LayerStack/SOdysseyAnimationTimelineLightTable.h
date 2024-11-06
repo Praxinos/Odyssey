@@ -15,15 +15,15 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTable
     : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTable)
-	{}
-		SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
-	SLATE_END_ARGS()
+    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTable)
+    {}
+        SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
+    SLATE_END_ARGS()
 
-	void Construct(
-		const FArguments& InArgs,
-		UOdysseyAnimationLayer* iLayer
-	);
+    void Construct(
+        const FArguments& InArgs,
+        UOdysseyAnimationLayer* iLayer
+    );
 
 private:
     void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
@@ -31,6 +31,6 @@ private:
     void Update();
 
 private:
-	UOdysseyAnimationLayer* mLayer = nullptr;
-	UOdysseyAnimationCell* mCurrentCell = nullptr;
+    UOdysseyAnimationLayer* mLayer = nullptr;
+    UOdysseyAnimationCell* mCurrentCell = nullptr;
 };

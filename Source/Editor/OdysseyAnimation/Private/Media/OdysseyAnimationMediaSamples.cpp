@@ -52,7 +52,7 @@ FOdysseyAnimationMediaSamples::SetRenderType(IOdysseyImageRenderer::eRenderType 
 {
     if (!mAnimation)
         return;
-        
+
     mRenderType = iRenderType;
 
     TArray<FGuid> imageRenderingComposition = mAnimation->GetImageRenderingComposition(mRenderType, mCurrentFrameIndex);
@@ -69,7 +69,7 @@ FOdysseyAnimationMediaSamples::OnClose()
     SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
     Render();
     FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
-    
+
     mInvalidTileMap.Clear();
 
     mAnimation = nullptr;
@@ -136,7 +136,7 @@ FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeR
         timeRange.SetLowerBoundValue(timestamp);
         isLowerOutOfBound = false;
     }
-    
+
     bool isUpperOutOfBound = timeRange.HasUpperBound() && timeRange.GetUpperBoundValue().Time >= controls->GetDuration();
     if (isUpperOutOfBound && controls->IsLooping())
     {
@@ -148,7 +148,7 @@ FOdysseyAnimationMediaSamples::SanitizeTimeRange(TRange<FMediaTimeStamp>* oTimeR
     }
 
     //Clamp timerange just for security
-    
+
     FMediaTimeStamp lowerBoundTimestamp = timeRange.GetLowerBoundValue();
     FMediaTimeStamp upperBoundTimestamp = timeRange.GetUpperBoundValue();
     lowerBoundTimestamp.Time = FMath::Max(FTimespan(0), lowerBoundTimestamp.Time);
@@ -207,7 +207,7 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
 
     //range is valid
     //check overlap of each frame with the time range
-    
+
     int64 resultingSequenceIndex = startSequenceIndex;
     int frameIndex = 0;
     //Only a single frame overlaps the range
@@ -258,7 +258,7 @@ FOdysseyAnimationMediaSamples::FetchBestVideoSampleForTimeRange(const TRange<FMe
         controls->Pause();
         controls->SetState(EMediaState::Stopped);
     }
-            
+
     return EFetchBestSampleResult::Ok;
 }
 
@@ -294,7 +294,7 @@ FOdysseyAnimationMediaSamples::Update(int iFrameIndex, int64 iSequenceIndex)
 
     mSample->SetTime(frameTime);
     mSample->SetDuration(frameDuration);
-    
+
     int controlsStartFrame = controls->GetFrameRange().GetLowerBoundValue();
     mCurrentFrameIndex = iFrameIndex + controlsStartFrame;
     TArray<FGuid> imageRenderingComposition = mAnimation->GetImageRenderingComposition(mRenderType, mCurrentFrameIndex);

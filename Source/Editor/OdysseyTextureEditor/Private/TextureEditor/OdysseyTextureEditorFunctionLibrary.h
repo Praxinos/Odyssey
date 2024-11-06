@@ -21,7 +21,7 @@ public:
 public:
     UFUNCTION(BlueprintCallable, Category="Odyssey|Texture")
     static UTexture2D* CreateTextureAsset(FString AssetName="Texture", FString PackagePath="/Game/", int Width=1024, int Height=1024, EOdysseyTextureSourceFormat Format=EOdysseyTextureSourceFormat::kBGRA8);
-    
+
     UFUNCTION(BlueprintCallable, Category="Odyssey|Texture")
     static UOdysseyTextureLayerImageRaster* ImportTexture(UTexture2D* Texture, UTexture2D* TextureToImport, UOdysseyTextureLayer* ParentLayer = nullptr, int IndexInLayer = -1);
 

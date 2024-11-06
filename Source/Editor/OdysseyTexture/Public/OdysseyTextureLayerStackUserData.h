@@ -23,17 +23,17 @@ public:
     void InitWithDefaultLayerStack();
     void InitWithDuplicateLayerStack(UOdysseyTextureLayerStack* iLayerStack);
     void InitWithEmptyVectorLayer();
-    
+
 
     /**
      * @brief Get the Layer Stack object
      * If there is no layerStack, creates it from the texture, with a single raster layer
-     * 
-     * @return UOdysseyTextureLayerStack* 
+     *
+     * @return UOdysseyTextureLayerStack*
      */
     UOdysseyTextureLayerStack* GetLayerStack();
     UTexture2D* GetTexture();
-    
+
 public:
     UPROPERTY(BlueprintReadOnly, Category="Odyssey|LayerStack")
     TObjectPtr<UOdysseyTextureLayerStack> LayerStack;

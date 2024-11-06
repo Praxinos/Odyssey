@@ -77,7 +77,7 @@ FOdysseyAnimationCellClipboardData::CanPaste(UOdysseyAnimationLayer* iLayer) con
 {
     if (iLayer->IsLockedRecursively())
         return false;
-        
+
     for (const FCellCopy& cellCopy : mCellCopies)
     {
         if (!iLayer->GetSupportedCellTypes().Contains(cellCopy.mCell->GetClass()))

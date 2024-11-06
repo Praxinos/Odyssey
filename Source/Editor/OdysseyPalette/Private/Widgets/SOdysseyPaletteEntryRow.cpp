@@ -13,7 +13,7 @@
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
 void SOdysseyPaletteEntryRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyPaletteTreeView>& iOwnerTableView, UOdysseyPaletteEntry* iEntry)
-{    
+{
     ensure(iEntry);
     mEntry = iEntry;
 
@@ -56,11 +56,11 @@ SOdysseyPaletteEntryRow::GenerateWidgetForColumn( const FName& InColumnName )
 
 
 const FSlateBrush*
-SOdysseyPaletteEntryRow::GetBorder() const 
+SOdysseyPaletteEntryRow::GetBorder() const
 {
     const FSlateBrush* borderBrush = SMultiColumnTableRow<UOdysseyPaletteEntry*>::GetBorder();
 
-    if (!mEntry) 
+    if (!mEntry)
         return borderBrush;
 
     UOdysseyPalette* palette = mEntry->GetPalette();
@@ -203,7 +203,7 @@ SOdysseyPaletteEntryRow::ComputeItemDropZoneForLeaf(FVector2D iLocalPointerPos, 
         }
     }
 
-    
+
 }
 
 
@@ -222,7 +222,7 @@ SOdysseyPaletteEntryRow::OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemD
         return emptyDropZone;
     //check if CanHaveChildren
     //allow Onto
-    
+
     TSharedPtr<FOdysseyPaletteDragDropOperation> operation = iEvent.GetOperationAs<FOdysseyPaletteDragDropOperation>();
     if (!operation)
         return emptyDropZone;

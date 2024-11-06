@@ -27,5 +27,5 @@ public:
     );
 
 protected:
-	virtual const FSlateBrush* GetBorder() const override;
+    virtual const FSlateBrush* GetBorder() const override;
 };

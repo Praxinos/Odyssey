@@ -59,7 +59,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture );
         virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture );
         virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey );
-		virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
+        virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
         virtual void Commit();
         virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
         virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
@@ -74,35 +74,35 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ){ return 0; };
         virtual bool OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
                                             , const FKey& iKey
-											, uint64& oSignalFlags );
+                                            , uint64& oSignalFlags );
         virtual bool OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
                                           , const FKey& iKey
-										  , uint64& oSignalFlags );
+                                          , uint64& oSignalFlags );
         virtual bool OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FKey& iKey
-										, uint64& oSignalFlags );
+                                        , uint64& oSignalFlags );
         virtual bool OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
                                       , const FKey& iKey
-									  , uint64& oSignalFlags );
+                                      , uint64& oSignalFlags );
         virtual bool OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
                                         , const FKey& iKey
-										, uint64& oSignalFlags ){ return false; };
+                                        , uint64& oSignalFlags ){ return false; };
         virtual void OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
-										, uint64& oSignalFlags ){};
+                                        , uint64& oSignalFlags ){};
         virtual void OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
-										, uint64& oSignalFlags ){};
+                                        , uint64& oSignalFlags ){};
         virtual bool OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                       , const FOdysseyPoint& iPointInTexture
                                       , const FKey& iKey
-									  , uint64& oSignalFlags ){ return false; };
+                                      , uint64& oSignalFlags ){ return false; };
 
-		virtual bool OnMouseClickVector(FOdysseyVectorGroupPaint* iScene
+        virtual bool OnMouseClickVector(FOdysseyVectorGroupPaint* iScene
                                       , const FOdysseyPoint& iPointInTexture
                                       , const FKey& iKey
-									  , uint64& oSignalFlags );
+                                      , uint64& oSignalFlags );
 
         virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName );
@@ -149,7 +149,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
 
     protected:
-        // to store the top tab widget in order to create it only once. this will prevent sizing 
+        // to store the top tab widget in order to create it only once. this will prevent sizing
         // issues in the top bar.
         // to force keyboard focus on mouse hover.
         // Prevents the user from having to click at least once in the viewport.
@@ -161,7 +161,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         // to prevent a double mouse down bug detected in
         // FOdysseyPainterEditorViewportClient::InputKey
         // FOdysseyPainterEditorViewportClient::OnStylusStateChanged
-        // they sometimes are both called and both trigger 
+        // they sometimes are both called and both trigger
         // FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint
         eMouseEventName mPreviousMouseEvent; // filter faulty stylus events
 

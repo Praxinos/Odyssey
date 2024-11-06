@@ -21,7 +21,7 @@ TSharedPtr<SWidget>
 FOdysseyPaletteDragDropOperation::GetDefaultDecorator() const
 {
     return SNew(SBorder)
-        .BorderImage(FAppStyle::GetBrush("Graph.ConnectorFeedback.Border")) //weird, but everyone does this 
+        .BorderImage(FAppStyle::GetBrush("Graph.ConnectorFeedback.Border")) //weird, but everyone does this
         .Content()
         [
             SNew(SHorizontalBox)
@@ -46,7 +46,7 @@ FOdysseyPaletteDragDropOperation::GetText() const
 {
     if (mPaletteEntries.Num() == 1)
         return mPaletteEntries[0]->EntryName;
-    
+
     return FText::Format(LOCTEXT("palette-drag-drop-operation.entries-count", "{0} Entries"), FText::AsNumber(mPaletteEntries.Num()));
 }
 

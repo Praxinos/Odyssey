@@ -59,10 +59,10 @@ FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorGroupPai
                                                         , FOdysseyVectorSegment* iAddedSegment )
     : FOdysseyVectorUndo( iScene )
 {
-    if( iRemovedVertex ) 
+    if( iRemovedVertex )
         mRemovedVertexArray.push_back( iRemovedVertex );
 
-    if( iRemovedSegment ) 
+    if( iRemovedSegment )
         mRemovedSegmentArray.push_back( iRemovedSegment );
 
     if( iAddedVertex )

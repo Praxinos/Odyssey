@@ -54,10 +54,10 @@ bool
 UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey
-														  , uint64& oSignalFlags )
+                                                          , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint(iPointInTexture.x,iPointInTexture.y);
 
@@ -71,7 +71,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -84,7 +84,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
     oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 
-	return true;
+    return true;
 }
 
 void
@@ -148,7 +148,7 @@ UOdysseyPainterEditorVectorScenePanTool::Scale( FOdysseyVectorEngine* iEngine
 void
 UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
-														  , uint64& oSignalFlags )
+                                                          , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
@@ -174,15 +174,15 @@ bool
 UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey
-														, uint64& oSignalFlags )
+                                                        , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
-		
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
+
     iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
 
     oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
-	return true;
+    return true;
 }
 
 FText

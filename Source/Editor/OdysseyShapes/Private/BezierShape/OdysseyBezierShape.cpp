@@ -26,7 +26,7 @@ UOdysseyBezierShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKe
 {
     if( mEventState != eEventState::Idle )
         return false;
-    
+
     mEventState = eEventState::EndPoint;
 
     //Bezier Shape does not manage stylus params, so we create a new OdysseyPoint from scratch
@@ -37,7 +37,7 @@ UOdysseyBezierShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKe
 
     CreateHUD();
 
-    return true;   
+    return true;
 }
 
 void
@@ -53,7 +53,7 @@ UOdysseyBezierShape::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 
         mOnInteractive.Broadcast(GeneratePoints());
     }
-    
+
     UOdysseyShape::OnMouseHover(iPointInTexture);
 }
 

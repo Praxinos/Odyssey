@@ -9,37 +9,37 @@ class UOdysseyAnimationLayer;
 class UOdysseyAnimationCell;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineOutOfPegsKey
-	: public SCompoundWidget
+    : public SCompoundWidget
 {
 public:
-	DECLARE_DELEGATE_OneParam(FOnKeyChanged, FOdysseyAnimationLightTableKey)
-	DECLARE_DELEGATE_OneParam(FOnActivateOutOfPegs, UOdysseyAnimationCell*)
-	DECLARE_DELEGATE_RetVal_OneParam(ECheckBoxState, FOnIsOutOfPegsChecked, UOdysseyAnimationCell*)
-	
+    DECLARE_DELEGATE_OneParam(FOnKeyChanged, FOdysseyAnimationLightTableKey)
+    DECLARE_DELEGATE_OneParam(FOnActivateOutOfPegs, UOdysseyAnimationCell*)
+    DECLARE_DELEGATE_RetVal_OneParam(ECheckBoxState, FOnIsOutOfPegsChecked, UOdysseyAnimationCell*)
+
 public:
-	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineOutOfPegsKey)
-	{}
-		SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
-		SLATE_ATTRIBUTE(UOdysseyAnimationCell*, Cell)
-		SLATE_ATTRIBUTE(FOdysseyAnimationLightTableKey, Key)
-		SLATE_EVENT(FOnActivateOutOfPegs, OnActivateOutOfPegs)
-		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
-		SLATE_EVENT(FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
-	SLATE_END_ARGS()
+    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineOutOfPegsKey)
+    {}
+        SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
+        SLATE_ATTRIBUTE(UOdysseyAnimationCell*, Cell)
+        SLATE_ATTRIBUTE(FOdysseyAnimationLightTableKey, Key)
+        SLATE_EVENT(FOnActivateOutOfPegs, OnActivateOutOfPegs)
+        SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
+        SLATE_EVENT(FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
+    SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs);
-
-private:
-	bool IsOutOfPegsEnabled() const;
-	const FSlateBrush* GetOutOfPegsButtonImage() const;
-	void OnOutOfPegsCheckStateChanged(ECheckBoxState iValue);
-	ECheckBoxState IsOutOfPegsChecked() const;
+    void Construct(const FArguments& InArgs);
 
 private:
-	TAttribute<UOdysseyAnimationCell*> mCell;
-	TAttribute<FOdysseyAnimationLightTableKey> mKey;
-	
-	FOnActivateOutOfPegs mOnActivateOutOfPegs;
-	FSimpleDelegate mOnInactivateOutOfPegs;
-	FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
+    bool IsOutOfPegsEnabled() const;
+    const FSlateBrush* GetOutOfPegsButtonImage() const;
+    void OnOutOfPegsCheckStateChanged(ECheckBoxState iValue);
+    ECheckBoxState IsOutOfPegsChecked() const;
+
+private:
+    TAttribute<UOdysseyAnimationCell*> mCell;
+    TAttribute<FOdysseyAnimationLightTableKey> mKey;
+
+    FOnActivateOutOfPegs mOnActivateOutOfPegs;
+    FSimpleDelegate mOnInactivateOutOfPegs;
+    FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
 };

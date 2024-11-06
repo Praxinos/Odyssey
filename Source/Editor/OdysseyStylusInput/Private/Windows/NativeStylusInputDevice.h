@@ -13,7 +13,7 @@ class FNativeStylusInputDevice
 public:
     virtual ~FNativeStylusInputDevice() {};
     virtual void Tick() override;
-    
+
 public:
     void SetPenMask(const PEN_MASK& iMask);
     void OnPointerUpdate(POINTER_PEN_INFO& iPenInfo);

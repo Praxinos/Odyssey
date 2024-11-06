@@ -32,9 +32,9 @@ void SOdysseyAnimationLayerImageRasterRow::Construct(
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments()
-			.TimelinePosition(InArgs._TimelinePosition),
+            .TimelinePosition(InArgs._TimelinePosition),
         iOwnerTableView,
-		iAnimationLayerImageRaster
+        iAnimationLayerImageRaster
     );
 }
 
@@ -43,19 +43,19 @@ void SOdysseyAnimationLayerImageRasterRow::Construct(
 TArray<TSharedPtr<SWidget>>
 SOdysseyAnimationLayerImageRasterRow::GenerateMainRowHeaderOptionWidgets()
 {
-	TArray<TSharedPtr<SWidget>> widgets = SOdysseyAnimationLayerRow::GenerateMainRowHeaderOptionWidgets();
-	
-	const FCheckBoxStyle* alphaLockedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Animation.AlphaLockedToggle");
+    TArray<TSharedPtr<SWidget>> widgets = SOdysseyAnimationLayerRow::GenerateMainRowHeaderOptionWidgets();
 
-	//AlphaLock
-	widgets.Add(
-		SNew(SCheckBox)
-		.Style(alphaLockedToggleStyle)
-		.OnCheckStateChanged(this, &SOdysseyAnimationLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged)
-		.IsChecked(this, &SOdysseyAnimationLayerImageRasterRow::GetIsAlphaLockedIsChecked)
-	);
+    const FCheckBoxStyle* alphaLockedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Animation.AlphaLockedToggle");
 
-	return widgets;
+    //AlphaLock
+    widgets.Add(
+        SNew(SCheckBox)
+        .Style(alphaLockedToggleStyle)
+        .OnCheckStateChanged(this, &SOdysseyAnimationLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged)
+        .IsChecked(this, &SOdysseyAnimationLayerImageRasterRow::GetIsAlphaLockedIsChecked)
+    );
+
+    return widgets;
 }
 
 void

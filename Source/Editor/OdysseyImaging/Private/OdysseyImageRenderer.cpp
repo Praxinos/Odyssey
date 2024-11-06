@@ -162,7 +162,7 @@ IOdysseyImageRenderer::ConvertAndBlend(TSharedPtr<::ULIS::FBlock> iFront, const 
                 &eventClear,
                 &eventTransform
             );
-            
+
             ::ULIS::FVec2I dstPos(iParams.mRects[i].x, iParams.mRects[i].y);
             TArray<::ULIS::FEvent> eventConvertAndExecute = ULISUtils::ConvertAndExecute(iParams.mBlock, iFront->Format(), ::ULIS::FRectI::Auto, dstPos, { eventTransform },
                 [&ctx, srcBlock, iParams](TSharedPtr<::ULIS::FBlock> ioDest, const ::ULIS::FRectI& iRect, const ::ULIS::FVec2I& iPos, const TArray<::ULIS::FEvent>& iWaitList) -> TArray<::ULIS::FEvent>
@@ -238,7 +238,7 @@ IOdysseyImageRenderer::ConvertAndCopy(TSharedPtr<::ULIS::FBlock> iSrc, const ::U
                 &eventClear,
                 &eventTransform
             );
-            
+
             ::ULIS::FVec2I copyPos(iParams.mRects[i].x, iParams.mRects[i].y);
 
             ::ULIS::FEvent eventCopy = FULISEventBuilder().RetainBlock(srcBlock).RetainBlock(iParams.mBlock).Build();

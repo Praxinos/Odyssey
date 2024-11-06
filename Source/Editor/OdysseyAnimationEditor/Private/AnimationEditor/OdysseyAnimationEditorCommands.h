@@ -75,7 +75,7 @@ public:
 
     TSharedPtr<FUICommandInfo> ConvertToStaggerCell;
     TSharedPtr<FUICommandInfo> ConvertToReferenceCells;
-    
+
     // Cross Fade the selected cells
     TSharedPtr<FUICommandInfo> CrossFade;
 

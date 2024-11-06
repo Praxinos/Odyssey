@@ -27,7 +27,7 @@ void
 FULISInvalidTileMap::Resize(int iWidth, int iHeight)
 {
     mTileMap.Resize(ceil( (float)iWidth / mTileSize ), ceil( (float)iHeight / mTileSize ));
-    
+
     mWidth = iWidth;
     mHeight = iHeight;
 }
@@ -43,7 +43,7 @@ FULISInvalidTileMap::Invalidate(const FIntPoint& iTileIndex)
 {
     if (mIsFullyInvalidated)
         return;
-        
+
     FIntPoint tileCount = mTileMap.Size();
 
     if (iTileIndex.X < 0 || iTileIndex.Y < 0 || iTileIndex.X >= tileCount.X || iTileIndex.Y >= tileCount.Y)
@@ -116,7 +116,7 @@ FULISInvalidTileMap::Invalidate(const TArray<::ULIS::FRectI>& iRects)
 {
     if (mIsFullyInvalidated)
         return;
-        
+
     for (int i = 0; i < iRects.Num(); i++)
     {
         Invalidate(iRects[i]);

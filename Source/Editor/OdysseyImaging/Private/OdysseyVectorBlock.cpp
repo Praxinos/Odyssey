@@ -168,9 +168,9 @@ FOdysseyVectorBlock::CleanupBlock(uint8* iData, void* iInfo)
     else
     {
         //Data is owned by the block
-        ::ULIS::OnCleanup_FreeMemory(iData, iInfo); 
+        ::ULIS::OnCleanup_FreeMemory(iData, iInfo);
     }
-    
+
     delete blockData;
 }
 
@@ -185,8 +185,8 @@ FOdysseyVectorBlock::CleanupHUDBlock(uint8* iData, void* iInfo)
     blockData->mBLContext.Get()->end();
 
     //Data is owned by the block
-    ::ULIS::OnCleanup_FreeMemory(iData, iInfo); 
-    
+    ::ULIS::OnCleanup_FreeMemory(iData, iInfo);
+
     delete blockData; //will also delete the associated BLImage
 }
 
@@ -197,7 +197,7 @@ FOdysseyVectorBlock::GetHUDBlock()
 
     if ( mWidth <= 0 || mHeight <= 0 )
         return nullptr;
-        
+
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block;
     block = mHUDBlock.Pin();
     if ( block )
@@ -226,7 +226,7 @@ FOdysseyVectorBlock::GetBlock(uint64 iDrawingFlags)
 
     if ( mWidth <= 0 || mHeight <= 0 )
         return nullptr;
-    
+
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block;
     block = mBlock.Pin();
     if ( block )
@@ -262,7 +262,7 @@ FOdysseyVectorBlock::GetBlock(uint64 iDrawingFlags)
     }
 
     block->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyVectorBlock::CleanupBlock, mBlockData));
-    
+
     mBlock = block;
 
     return block; //return the currently loaded block, the receiver can release it whenever he wants

@@ -99,7 +99,7 @@ CopyBlockDataIntoUTexture( const ::ULIS::FBlock* iBlock, UTexture2D* iTexture )
     checkf(  iBlock->Width() == iTexture->Source.GetSizeX() &&
              iBlock->Height() == iTexture->Source.GetSizeY()
            , TEXT( "Sizes do not match" ) );
-           
+
     InitTextureWithBlockData( iBlock, iTexture, iTexture->Source.GetFormat() );
 }
 
@@ -117,7 +117,7 @@ void
 FillOdysseyBlockFromUTextureData( ::ULIS::FBlock* ioBlock, UTexture2D* iTexture, ::ULIS::eFormat iFormat )
 {
     FTextureCompilingManager::Get().FinishCompilation({ iTexture });
-    
+
     if (!ioBlock)
         return;
 
@@ -156,7 +156,7 @@ NewRGBAFTextureFromBlockData(::ULIS::FBlock* iBlock)
 
     newTexture->UpdateResource();
     FTextureCompilingManager::Get().FinishCompilation({ newTexture });
-    
+
 
     return newTexture;
 
@@ -573,7 +573,7 @@ FOdysseySurfaceTexture2DEditable::FOdysseySurfaceTexture2DEditable(int iWidth,in
     mTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
     #endif
     mTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
-    
+
     //IsImageInfoValid() in ImageCore.h allows use of sRGB only on G8 and BGRA8 textures
     mTexture->SRGB = pixelFormat == EPixelFormat::PF_G8 || pixelFormat == EPixelFormat::PF_B8G8R8A8;
     mTexture->Filter = TextureFilter::TF_Nearest;

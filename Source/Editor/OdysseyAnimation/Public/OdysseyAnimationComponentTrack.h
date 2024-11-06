@@ -8,28 +8,28 @@
 
 UCLASS()
 class ODYSSEYANIMATION_API UOdysseyAnimationComponentTrack
-	: public UMovieSceneSubTrack
-	, public IMovieSceneTrackTemplateProducer
+    : public UMovieSceneSubTrack
+    , public IMovieSceneTrackTemplateProducer
 {
 public:
-	GENERATED_BODY()
+    GENERATED_BODY()
 
-	UOdysseyAnimationComponentTrack(const FObjectInitializer& ObjectInitializer);
+    UOdysseyAnimationComponentTrack(const FObjectInitializer& ObjectInitializer);
 
-	virtual UMovieSceneSection* AddNewSection(FFrameNumber KeyTime, float iDurationInSeconds);
+    virtual UMovieSceneSection* AddNewSection(FFrameNumber KeyTime, float iDurationInSeconds);
 
-	// UMovieSceneTrack interface
-	virtual bool SupportsType(TSubclassOf<UMovieSceneSection> SectionClass) const override;
-	virtual EMovieSceneTrackEasingSupportFlags SupportsEasing(FMovieSceneSupportsEasingParams& Params) const;
-	virtual bool SupportsMultipleRows() const override;
-	virtual UMovieSceneSection* CreateNewSection() override;
-	virtual FMovieSceneEvalTemplatePtr CreateTemplateForSection(const UMovieSceneSection& InSection) const override;
+    // UMovieSceneTrack interface
+    virtual bool SupportsType(TSubclassOf<UMovieSceneSection> SectionClass) const override;
+    virtual EMovieSceneTrackEasingSupportFlags SupportsEasing(FMovieSceneSupportsEasingParams& Params) const;
+    virtual bool SupportsMultipleRows() const override;
+    virtual UMovieSceneSection* CreateNewSection() override;
+    virtual FMovieSceneEvalTemplatePtr CreateTemplateForSection(const UMovieSceneSection& InSection) const override;
 
 #if WITH_EDITORONLY_DATA
-	virtual FText GetDisplayName() const override;
+    virtual FText GetDisplayName() const override;
 #endif
 
 public:
-	UPROPERTY()
-	bool DisplayLayers = true;
+    UPROPERTY()
+    bool DisplayLayers = true;
 };

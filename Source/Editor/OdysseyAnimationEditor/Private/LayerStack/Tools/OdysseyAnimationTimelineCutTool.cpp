@@ -14,7 +14,7 @@ FOdysseyAnimationTimelineCutTool::~FOdysseyAnimationTimelineCutTool()
 
 FOdysseyAnimationTimelineCutTool::FOdysseyAnimationTimelineCutTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition)
     : mTimelinePosition(iTimelinePosition)
-{   
+{
 }
 
 FReply

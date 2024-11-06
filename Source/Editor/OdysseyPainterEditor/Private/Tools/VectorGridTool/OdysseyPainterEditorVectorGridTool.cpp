@@ -77,10 +77,10 @@ bool
 UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                       , const FOdysseyPoint& iPointInTexture
                                                       , const FKey& iKey
-													  , uint64& oSignalFlags )
+                                                      , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
@@ -94,7 +94,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPointArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
             TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();
@@ -129,13 +129,13 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
     oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 
-	return true;
+    return true;
 }
 
 void
 UOdysseyPainterEditorVectorGridTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                        , const FOdysseyPoint& iPointInTexture
-													   , uint64& oSignalFlags )
+                                                       , uint64& oSignalFlags )
 {
     // TODO: highlight grid handles ?
 }
@@ -143,7 +143,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseHoverVector( FOdysseyVectorGroupPain
 void
 UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                       , const FOdysseyPoint& iPointInTexture
-													  , uint64& oSignalFlags )
+                                                      , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
@@ -183,10 +183,10 @@ bool
 UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                     , const FOdysseyPoint& iPointInTexture
                                                     , const FKey& iKey
-													, uint64& oSignalFlags )
+                                                    , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
@@ -204,7 +204,7 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorGroupPaint* 
     }
 
     oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
-	return true;
+    return true;
 }
 
 uint64

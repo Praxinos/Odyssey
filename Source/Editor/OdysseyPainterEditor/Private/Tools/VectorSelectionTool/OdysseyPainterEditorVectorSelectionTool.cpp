@@ -72,10 +72,10 @@ bool
 UOdysseyPainterEditorVectorSelectionTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey
-														   , uint64& oSignalFlags )
+                                                           , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -91,13 +91,13 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDownVector( FOdysseyVectorGroup
     oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 
-	return true;
+    return true;
 }
 
 void
 UOdysseyPainterEditorVectorSelectionTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
-														   , uint64& oSignalFlags )
+                                                           , uint64& oSignalFlags )
 {
     //::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
 
@@ -235,7 +235,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
             TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();
@@ -333,7 +333,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectVertex( iScene, objectList );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -397,10 +397,10 @@ bool
 UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                          , const FOdysseyPoint& iPointInTexture
                                                          , const FKey& iKey
-														 , uint64& oSignalFlags )
+                                                         , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     ::ULIS::FRectD roi;
@@ -437,7 +437,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPa
          | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
          | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED;
 
-	return true;
+    return true;
 }
 
 std::vector<::ULIS::FVec2D>&

@@ -39,7 +39,7 @@ public:
 public:
     virtual UOdysseyAnimationCell* Break(int Frame) override;
 
-protected:    
+protected:
     void BehaviourChanged();
     void ReachChanged(bool iIsInteractive);
 
@@ -48,7 +48,7 @@ protected:
 private:
     UFUNCTION(BlueprintSetter)
     void BehaviourBlueprintSetter(EOdysseyAnimationCellImageStaggerBehaviour Value);
-    
+
     UFUNCTION(BlueprintSetter)
     void ReachBlueprintSetter(int Value);
 

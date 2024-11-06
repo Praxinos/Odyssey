@@ -13,7 +13,7 @@ FOdysseyAnimationProxy::~FOdysseyAnimationProxy()
 {
     FOdysseyImageRenderingAbility::OnImageRenderingPreChangedDelegate().RemoveAll(this);
     FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().RemoveAll(this);
-    
+
     delete mThread;
     mThread = nullptr;
 }
@@ -45,7 +45,7 @@ FOdysseyAnimationProxy::GetBlockDataForComposition(const TArray<FGuid>& iComposi
 
 TSharedPtr<::ULIS::FBlock>
 FOdysseyAnimationProxy::GetBlock(int iFrameIndex)
-{   
+{
     TSharedPtr<FBlockData> blockData = nullptr;
     if (mFramesToBlockData.Contains(iFrameIndex))
     {
@@ -112,17 +112,17 @@ FOdysseyAnimationProxy::PostLoad()
     for (auto& element : frameIndexesToAdd)
     {
         TSharedPtr<FBlockData> blockData = element.Key;
-        TArray<int> frameIndexes = element.Value; 
+        TArray<int> frameIndexes = element.Value;
         for (int frameIndex : frameIndexes)
         {
             blockData->AddFrameIndex(frameIndex);
             mFramesToBlockData.Add(frameIndex, blockData);
-        }        
+        }
 
         //Call PreChange with default Guid and PostChange with default Guid
         //to invalidate the blockdata and create its renderer
         //so that it is ready to be enqueued
-        blockData->PreChange(FGuid(), {::ULIS::FRectI::FromXYWH(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight())}); 
+        blockData->PreChange(FGuid(), {::ULIS::FRectI::FromXYWH(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight())});
         blockData->PostChange(FGuid());
         mPendingBlockData.Enqueue(blockData); //mPendingBlockData is ThreadSafe
     }
@@ -138,7 +138,7 @@ uint32
 FOdysseyAnimationProxy::Run()
 {
     FOptionalTaskTagScope Scope(ETaskTag::EParallelGameThread);
-    //While not told to stop this thread 
+    //While not told to stop this thread
     while (mStopTaskCounter.GetValue() == 0)
     {
         //Manage pausing the thread
@@ -153,7 +153,7 @@ FOdysseyAnimationProxy::Run()
         {
             FPlatformProcess::Sleep(0.03); //Arbitrary number
             continue;
-        }   
+        }
 
         if (!blockData->Render()) //if render failed
         {
@@ -212,7 +212,7 @@ FOdysseyAnimationProxy::OnImageRenderingChanged(const FOdysseyImageRenderingChan
     const FGuid& id = iEvent.GetId();
     if(iEvent.GetType() == FOdysseyImageRenderingChangedEvent::eEventType::kCompositionChange)
     {
-        FInt32Range range = mAnimation->GetFrameRange();    
+        FInt32Range range = mAnimation->GetFrameRange();
 
         TArray<FInt32Range> rangesToRemove;
         if ( !mAnimationRange.GetUpperBound().IsOpen() && !mAnimationRange.GetLowerBound().IsOpen() )
@@ -290,7 +290,7 @@ FOdysseyAnimationProxy::OnImageRenderingChanged(const FOdysseyImageRenderingChan
         for (auto& element : frameIndexesToRemove)
         {
             TSharedPtr<FBlockData> blockData = element.Key;
-            TArray<int> frameIndexes = element.Value; 
+            TArray<int> frameIndexes = element.Value;
             for (int frameIndex : frameIndexes)
             {
                 blockData->RemoveFrameIndex(frameIndex);
@@ -301,7 +301,7 @@ FOdysseyAnimationProxy::OnImageRenderingChanged(const FOdysseyImageRenderingChan
         for (auto& element : frameIndexesToAdd)
         {
             TSharedPtr<FBlockData> blockData = element.Key;
-            TArray<int> frameIndexes = element.Value; 
+            TArray<int> frameIndexes = element.Value;
             for (int frameIndex : frameIndexes)
             {
                 blockData->AddFrameIndex(frameIndex);
@@ -319,7 +319,7 @@ FOdysseyAnimationProxy::OnImageRenderingChanged(const FOdysseyImageRenderingChan
 
         for (TSharedPtr<FBlockData> blockData : createdBlockData)
         {
-            blockData->PreChange(FGuid(), {::ULIS::FRectI::FromXYWH(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight())}); 
+            blockData->PreChange(FGuid(), {::ULIS::FRectI::FromXYWH(0, 0, mAnimation->GetWidth(), mAnimation->GetHeight())});
             bool shouldEnqueue = blockData->PostChange(FGuid());
             if (shouldEnqueue)
                 mPendingBlockData.Enqueue(blockData); //mPendingBlockData is ThreadSafe */
@@ -405,7 +405,7 @@ FBlockData::PostChange(const FGuid& iId)
         mIsReadyToRender = true;
         return true;
     }
-        
+
     return false;
 }
 
@@ -491,14 +491,14 @@ FBlockData::Render()
     {
         //Lock any data that could change while accessing
         mRenderer->Lock();
-        
+
         if (!IsInGameThread() && mRenderer->IsGameThreadOnly())
         {
             mRenderer->Unlock();
             mEditMutex.Unlock();
             return false;
         }
-        
+
         mRenderer->Init();
 
         //Get all variables we need to render, to ensure the values we use are not modified during the process
@@ -516,15 +516,15 @@ FBlockData::Render()
         Render(renderer, rasterBlock, invalidRects);
 
         renderer->Unlock();
-		
-		AsyncTask(
-			ENamedThreads::GameThread,
-			[renderer]()
-			{
-				TSharedPtr<IOdysseyImageRenderer> r = renderer;
-				r.Reset(); //reset the renderer on GameThread to avoid crashes
-			}
-		);
+
+        AsyncTask(
+            ENamedThreads::GameThread,
+            [renderer]()
+            {
+                TSharedPtr<IOdysseyImageRenderer> r = renderer;
+                r.Reset(); //reset the renderer on GameThread to avoid crashes
+            }
+        );
 
         mEditMutex.Lock();
     }

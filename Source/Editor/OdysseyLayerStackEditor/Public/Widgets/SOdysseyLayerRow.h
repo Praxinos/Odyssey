@@ -16,31 +16,31 @@ class SOdysseyLayerStackTreeView;
  */
 class ODYSSEYLAYERSTACKEDITOR_API SOdysseyLayerRow
     : public SOdysseyLayerRowBase
-{   
+{
 public:
-	SOdysseyLayerRow();
+    SOdysseyLayerRow();
 
     // Construction / Destruction
     void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, UOdysseyLayer* iLayer);
 
 public:
-	//Commands
-	void Rename();
+    //Commands
+    void Rename();
 
 protected:
-	virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
-	virtual FMargin GetColumnPadding( FName iColumn ) const override;
-	
+    virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
+    virtual FMargin GetColumnPadding( FName iColumn ) const override;
+
     TSharedRef<SWidget> GenerateMainRowIsActivatedWidget();
     TSharedRef<SWidget> GenerateMainRowIsLockedWidget();
-	TSharedRef<SWidget> GenerateMainRowDisplayOptionsWidget();
+    TSharedRef<SWidget> GenerateMainRowDisplayOptionsWidget();
 
-	TSharedRef<SWidget> GenerateMainRowHeaderWidget();
-	TSharedRef<SWidget> GenerateLayerNameWidget();
-	virtual TArray<TSharedPtr<SWidget>> GenerateMainRowHeaderOptionWidgets();
+    TSharedRef<SWidget> GenerateMainRowHeaderWidget();
+    TSharedRef<SWidget> GenerateLayerNameWidget();
+    virtual TArray<TSharedPtr<SWidget>> GenerateMainRowHeaderOptionWidgets();
 
-	TSharedRef<SWidget> GenerateBlendRowHeaderWidget();
-    
+    TSharedRef<SWidget> GenerateBlendRowHeaderWidget();
+
     void OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState);
     ECheckBoxState GetIsActivatedCheckBoxState() const;
     void OnIsLockedCheckBoxStateChanged(ECheckBoxState iState);
@@ -51,14 +51,14 @@ protected:
     FSlateFontInfo GetLayerNameFont() const;
 
     virtual FReply OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<SOdysseyLayerStackTreeView> iTreeView) override;
-	
+
 private:
     void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);
     void OnOpacityValueChanged(int iValue);
     void OnOpacityValueCommitted(int iValue, ETextCommit::Type iType);
     void OnOpacityBeginSliderMovement();
     void OnOpacityEndSliderMovement(int iValue);
-	
+
     EVisibility GetCollapsedOpacityVisibility() const;
 
 private:

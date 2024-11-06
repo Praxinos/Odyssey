@@ -183,20 +183,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         /**
          * @brief Get the object's ID. Note, this ID is never guaranted to be consistent
          *        and is there only for being used as temporary index value when working
-         *        with arrays for example. 
+         *        with arrays for example.
          * @return the object's ID.
          */
         uint32 GetID();
 
         /**
          * @brief Get the inverse local matrix
-         * @return a reference to the inverse local matrix. 
+         * @return a reference to the inverse local matrix.
          */
         BLMatrix2D& GetInverseLocalMatrix();
 
         /**
          * @brief Get the inverse world matrix
-         * @return a reference to the inverse world matrix. 
+         * @return a reference to the inverse world matrix.
          */
         BLMatrix2D& GetInverseWorldMatrix();
 
@@ -208,7 +208,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         /**
          * @brief Get the local matrix
-         * @return a reference to the local matrix. 
+         * @return a reference to the local matrix.
          */
         BLMatrix2D& GetLocalMatrix();
 
@@ -220,7 +220,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         /**
          * @brief Get the object's opacity.
-         * @return the object's opacity. 
+         * @return the object's opacity.
          */
         double GetOpacity();
 
@@ -288,7 +288,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         /**
          * @brief Get the world matrix
-         * @return a reference to the world matrix. 
+         * @return a reference to the world matrix.
          */
         BLMatrix2D& GetWorldMatrix();
 
@@ -319,7 +319,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         /**
          * @brief Get the expansion status
-         * @return true or false 
+         * @return true or false
          */
         bool IsExpanded();
 
@@ -435,7 +435,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         /**
          * @brief Sets the object's ID. Note, this ID is never guaranted to be consistent
          *        and is there only for being used as temporary index value when working
-         *        with arrays for example. 
+         *        with arrays for example.
          * @param iID the desired ID.
          */
         void SetID( uint32 iID );
@@ -449,7 +449,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         /**
          * @brief Set the object's parent. Note, this function does not technically add the object
          * to the parent's list of children. It only sets the member variable for convenience reasons.
-         * Use AddChild, AppendChild or PrependChild if you want to alter the hierarchy. 
+         * Use AddChild, AppendChild or PrependChild if you want to alter the hierarchy.
          * @param iObject a pointer to the desired parent.
          */
         void SetParent( FOdysseyVectorObject* iObject );
@@ -475,7 +475,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
                          , double iScalingY );
 
         /**
-         * @brief Transfer object to the coordinates system defined by the World matrix passed as parameter  
+         * @brief Transfer object to the coordinates system defined by the World matrix passed as parameter
          * @iMatrix The matrix representing the world coordinates system to put the object into
          */
         void Transfer( const BLMatrix2D& iMatrix );
@@ -543,5 +543,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         double mTranslationY;
         double mRotation;
         double mScalingX;
-        double mScalingY; 
+        double mScalingY;
 };

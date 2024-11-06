@@ -11,7 +11,7 @@ FOdysseyTimelineFrameDragDropOperation::FOdysseyTimelineFrameDragDropOperation(T
     , mTransaction(LOCTEXT("timeline.drag-drop-operation.moved-frames-in-timeline", "Reorder key frames"))
 {
     Construct();
-    
+
     TSharedPtr<FOdysseyTimelineFrameListFrameMetaData> metadata = iFrame->GetMetaData<FOdysseyTimelineFrameListFrameMetaData>();
     if (!metadata)
         return;

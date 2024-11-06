@@ -29,7 +29,7 @@ USTRUCT(BlueprintType, meta = (DisplayName = "Odyssey Block Reference"))
 struct ODYSSEYBRUSH_API FOdysseyBlockProxy
 {
     GENERATED_BODY()
-    
+
     ~FOdysseyBlockProxy();
 
     FOdysseyBlockProxy();
@@ -282,7 +282,7 @@ public:
     UFUNCTION( BlueprintPure
              , Category="Odyssey|Block" )
     static TArray< FOdysseyBlockProxy > GetFontBlocks( const UFont* Font, EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA, EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8 );
-    
+
     //Requires a Font and a String to return an Array of Odyssey Block Reference.
     //This node find the correspondance between letters from the String and characters from the Font.
     UFUNCTION( BlueprintPure
@@ -296,8 +296,8 @@ public:
     static void GetCharactersSize( const UFont* Font, const FString& String, TArray<float>& Width, TArray<float>& Height );
 
     //---
-    
-    //This node automatically picks the color up at position on the canvas. 
+
+    //This node automatically picks the color up at position on the canvas.
     UFUNCTION(BlueprintPure, Category="Odyssey|Block")
     static bool GetColorAtPosition( FOdysseyBlockProxy Block, float X, float Y, FOdysseyBrushColor& Color );
 

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InputCoreTypes.h" 
+#include "InputCoreTypes.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyPoint
@@ -58,10 +58,10 @@ public:
 
     void ComputeRelativeParameters(const FOdysseyPoint& iPreviousPoint, bool iComputeTravelledDistance = false);
 
-public: 
+public:
     //Returns the average of two points (It is NOT (iPt1 + iPt2) / 2)
     static FOdysseyPoint Average( const FOdysseyPoint& iPt1, const FOdysseyPoint& iPt2 );
-    
+
     //Same with multiple points
     static FOdysseyPoint Average( const TArray< FOdysseyPoint>& iPoints );
 

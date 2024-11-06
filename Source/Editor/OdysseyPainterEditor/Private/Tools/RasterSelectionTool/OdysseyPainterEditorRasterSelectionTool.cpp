@@ -63,8 +63,8 @@ bool UOdysseyPainterEditorRasterSelectionTool::IsActivable() const
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     FOdysseyPoint point = iPointInTexture;
     return SelectedShapeInstance->OnMouseDown(point, iKey);
@@ -84,8 +84,8 @@ void UOdysseyPainterEditorRasterSelectionTool::OnMouseDrag(const FOdysseyPoint& 
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     FOdysseyPoint point = iPointInTexture;
     return SelectedShapeInstance->OnMouseUp(point, iKey);

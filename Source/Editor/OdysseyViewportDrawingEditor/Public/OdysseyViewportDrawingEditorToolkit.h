@@ -28,11 +28,11 @@ public:
     virtual void GetToolPaletteNames( TArray<FName>& ioPaletteNames ) const override;
     virtual void BuildToolPalette( FName iPalette, class FToolBarBuilder& ioToolbarBuilder ) override;
 
-	TSharedPtr<FOdysseyViewportDrawingEditorExtension> GetViewportDrawingExtension() const;
-	TSharedPtr<FOdysseyAnimationEditorExtension> GetAnimationExtension() const;
+    TSharedPtr<FOdysseyViewportDrawingEditorExtension> GetViewportDrawingExtension() const;
+    TSharedPtr<FOdysseyAnimationEditorExtension> GetAnimationExtension() const;
 
 private:
-	TSharedPtr<FOdysseyViewportDrawingEditorExtension> mViewportDrawingExtension;
-	TSharedPtr<FOdysseyAnimationEditorExtension> mAnimationExtension;
-	FEdMode* mEdMode;
+    TSharedPtr<FOdysseyViewportDrawingEditorExtension> mViewportDrawingExtension;
+    TSharedPtr<FOdysseyAnimationEditorExtension> mAnimationExtension;
+    FEdMode* mEdMode;
 };

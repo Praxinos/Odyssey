@@ -54,7 +54,7 @@ public:
     UMeshComponent* Component() const;
     UMaterialInterface* Material() const;
     UTexture* Texture() const;
-	TArray<TWeakPtr<ISequencer>> Sequencers() const;
+    TArray<TWeakPtr<ISequencer>> Sequencers() const;
 
     bool IsPlaneComponent() const;
 
@@ -70,7 +70,7 @@ public:
     const TMap<TObjectPtr<UMeshComponent>, TSharedPtr<IMeshPaintGeometryAdapter>>& ComponentToAdapterMap() const;
 
     EOdysseyViewportDrawingPaintingAdapterMethod PaintingAdapterMethod() const;
-    
+
     int32 GetUVIndexUsedByCurrentTexture();
     float  GetMeshComponentMaxSize() const;
 
@@ -117,16 +117,16 @@ private:
     void EnableDelegatesSequencer();
     void SetAllDelegatesSequencers();
     void ClearAllDelegatesSequencers();
-    
+
 private:
     void OnAnimationPlayerCurrentTimeChanged();
-    
+
     void SyncMediaPlayerWithAnimationFrame(int iFrame);
     void SyncMediaPlayerWithAnimationPlayer();
     void SyncMediaPlayerWithAnimationCurrentFrame();
     void SyncAnimationCurrentFrameWithMediaPlayer();
 
-	void SyncSequencerWithAnimationPlayer();
+    void SyncSequencerWithAnimationPlayer();
 
     bool EnsureMediaPlateIsOpened();
 

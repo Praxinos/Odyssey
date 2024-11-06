@@ -82,7 +82,7 @@ FOdysseyAnimationLightTableImageRenderer::FOdysseyAnimationLightTableImageRender
         }
     }
 }
-    
+
 void
 FOdysseyAnimationLightTableImageRenderer::Init()
 {
@@ -114,8 +114,8 @@ FOdysseyAnimationLightTableImageRenderer::Blend(const FOdysseyImageRendererBlend
         TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(rect.w, rect.h, iParams.mBlock->Format());
         ::ULIS::FRectI blockRect = block->Rect();
         ::ULIS::FVec2I blockPos(iParams.mPos.x + rect.x, iParams.mPos.y + rect.y);
-        
-        
+
+
         TArray<::ULIS::FEvent> lastEvent = iWaitList;
         for (const FFrameData& frameData : mFramesData)
         {

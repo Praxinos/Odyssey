@@ -49,13 +49,13 @@ struct FOdysseyAnimationFlipConfiguration
 
     UPROPERTY(  EditAnywhere, Category="Flip Configuration" )
     EOdysseyAnimationFlipLimits Limits = EOdysseyAnimationFlipLimits::None;
-    
-    UPROPERTY(  EditAnywhere, Category="Flip Configuration" 
+
+    UPROPERTY(  EditAnywhere, Category="Flip Configuration"
                 , meta = (EditCondition = "Limits == EOdysseyAnimationFlipLimits::CellMarks"
                 , EditConditionHides) )
     int LimitsCellMark = -2;
 
-    UPROPERTY(  EditAnywhere, Category="Flip Configuration" 
+    UPROPERTY(  EditAnywhere, Category="Flip Configuration"
                 , meta = ( EditCondition = "Limits == EOdysseyAnimationFlipLimits::Custom"
                 , EditConditionHides
                 , UIMin    = "0"
@@ -65,7 +65,7 @@ struct FOdysseyAnimationFlipConfiguration
                 ) )
     int LeftLimit = 0;
 
-    UPROPERTY(  EditAnywhere, Category="Flip Configuration" 
+    UPROPERTY(  EditAnywhere, Category="Flip Configuration"
                 , meta = (EditCondition = "Limits == EOdysseyAnimationFlipLimits::Custom"
                 , EditConditionHides
                 , UIMin    = "0"
@@ -78,7 +78,7 @@ struct FOdysseyAnimationFlipConfiguration
     UPROPERTY(  EditAnywhere, Category="Flip Configuration" )
     EOdysseyAnimationFlipKeys Keys = EOdysseyAnimationFlipKeys::Cells;
 
-    UPROPERTY(  EditAnywhere, Category="Flip Configuration" 
+    UPROPERTY(  EditAnywhere, Category="Flip Configuration"
                 , meta = (EditCondition = "Limits == EOdysseyAnimationFlipKeys::CellMarks"
                 , EditConditionHides) )
     int KeysCellMark = -2;
@@ -95,7 +95,7 @@ struct FOdysseyAnimationFlipConfiguration
     UPROPERTY(  EditAnywhere, Category="Flip Configuration" )
     EOdysseyAnimationFlipDirection Direction = EOdysseyAnimationFlipDirection::Horizontal;
 
-    UPROPERTY(  EditAnywhere, Category="Flip Configuration" 
+    UPROPERTY(  EditAnywhere, Category="Flip Configuration"
                 , meta = ( ClampMin = "0"
                 , UIMin    = "0"
                 , ClampMax = "100"
@@ -120,7 +120,7 @@ public:
     FOdysseyAnimationEditorFlipSystem(FOdysseyAnimationEditorExtension* iExtension);
 
     void StartFlipping(const FOdysseyAnimationFlipConfiguration& iFlipConfiguration);
-    
+
 private:
     void EndFlipping();
     void FlipTo(int iDelta);

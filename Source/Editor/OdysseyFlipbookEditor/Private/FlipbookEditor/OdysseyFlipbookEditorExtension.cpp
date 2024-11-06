@@ -68,7 +68,7 @@ FOdysseyFlipbookEditorExtension::SetFlipbook(UPaperFlipbook* iFlipbook)
                 UTexture2D* texture = mFlipbookWrapper->GetKeyframeTexture(index);
                 if (!texture)
                     continue;
-                    
+
                 GetEditor()->RemoveEditedObject(texture);
             }
         }
@@ -79,7 +79,7 @@ FOdysseyFlipbookEditorExtension::SetFlipbook(UPaperFlipbook* iFlipbook)
         mGUI->OnFlipbookChanged();
         return;
     }
-    
+
     mFlipbookWrapper->SetFlipbook(iFlipbook);
 
     //Find all additional Edited Objects (Sprites and Textures)
@@ -94,7 +94,7 @@ FOdysseyFlipbookEditorExtension::SetFlipbook(UPaperFlipbook* iFlipbook)
         UTexture2D* texture = mFlipbookWrapper->GetKeyframeTexture(index);
         if (!texture)
             continue;
-            
+
         GetEditor()->AddEditedObject(texture);
     }
 
@@ -148,7 +148,7 @@ void
 FOdysseyFlipbookEditorExtension::SetTextureAtKeyframeIndex(int32 iKeyframeIndex)
 {
     TSharedPtr<FOdysseyFlipbookEditorTimelineTab> timelineTab = GetEditor()->FindTab<FOdysseyFlipbookEditorTimelineTab>();
-    
+
     UTexture2D* texture = mFlipbookWrapper->GetKeyframeTexture(iKeyframeIndex);
     if (timelineTab->Timeline()->IsScrubbing())
     {

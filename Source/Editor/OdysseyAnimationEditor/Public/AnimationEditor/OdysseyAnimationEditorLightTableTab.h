@@ -29,7 +29,7 @@ protected:
     UOdysseyAnimationLayerStack* LayerStack() const;
 
 protected:
-    // Event 
+    // Event
 
 private:
     //Methods

@@ -32,14 +32,14 @@ class ODYSSEYANIMATION_API UOdysseyAnimation
 public:
     /**
      * @brief Delegate called when CurrentFrame changes
-     * 
+     *
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentFrameChanged, UOdysseyAnimation*)
     static FOnCurrentFrameChanged& OnCurrentFrameChanged();
 
     /**
      * @brief Delegate called when FramesPerSecond changes
-     * 
+     *
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnFramesPerSecondChanged, UOdysseyAnimation*)
     static FOnFramesPerSecondChanged& OnFramesPerSecondChanged();
@@ -98,11 +98,11 @@ public:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
     virtual void PostLoad() override;
-    
+
 protected:
     //Property changed methods
     virtual void PropertyChanged(const FName& iPropertyName);
-    
+
     virtual void CurrentFrameChanged();
     virtual void FramesPerSecondChanged();
 
@@ -123,8 +123,8 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Animation", BlueprintSetter=FramesPerSecondBlueprintSetter, meta=(ClampMin=1, UIMin=1))
     float FramesPerSecond = 24.0f;
 
-	UPROPERTY(config)
-	float TimelineSplitterPosition = 0.2f;
+    UPROPERTY(config)
+    float TimelineSplitterPosition = 0.2f;
 
 protected:
     friend class UOdysseyAnimationFactory;

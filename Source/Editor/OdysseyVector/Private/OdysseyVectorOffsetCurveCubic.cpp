@@ -22,7 +22,7 @@ FOdysseyVectorOffsetCurveCubic::Resize( uint32 iBezierCount )
 
 std::vector<FOdysseyVectorBezierFragment>&
 FOdysseyVectorOffsetCurveCubic::GetBezierFragmentArray()
-{ 
+{
     return mBezierFragmentArray;
 }
 

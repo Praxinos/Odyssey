@@ -58,9 +58,9 @@ private:
     //void OnShapePathEnd(const FOdysseyPoint& iPoint);
     //void OnShapePathAbort();
     //void OnShapePathReset();
-    
+
     void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
-    
+
     void OnRasterSelectionChanged();
 
 public:

@@ -15,7 +15,7 @@ class UOdysseyTextureLayerStack;
 
 class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorExtension
     : public FOdysseyPainterEditorExtension
-{   
+{
 public:
     // Construction / Destruction
     virtual ~FOdysseyTextureEditorExtension();
@@ -36,7 +36,7 @@ public:
 private:
     void OnSourceChanged();
     void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
-    
+
     void ConfigureTools();
 
 private:

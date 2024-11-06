@@ -81,7 +81,7 @@ FInkStylusInputInterface::~FInkStylusInputInterface() = default;
 void FInkStylusInputInterface::Tick()
 {
     // If the stylus is down (= drawing), don't change the focused window (and current widget) of the plugin
-    // When we draw on a zoomed viewport and the mouse go over the limits of the viewport, 
+    // When we draw on a zoomed viewport and the mouse go over the limits of the viewport,
     // we want to continue drawing on the right window and widget and not start "drawing" on the new hovered window and widget
     /* for (const FInkTabletContextInfo& Context : Impl->StylusPlugin->TabletContexts)
     {
@@ -168,7 +168,7 @@ TWeakPtr<SWidget> FInkStylusInputInterface::Widget() const
 // Create the StylusInputInterface corresponding to the native Windows Ink driver
 TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceInk()
 {
-    if (!FWindowsPlatformMisc::CoInitialize()) 
+    if (!FWindowsPlatformMisc::CoInitialize())
     {
         UE_LOG(LogStylusInput, Error, TEXT("Could not initialize COM library!"));
         return nullptr;
@@ -202,7 +202,7 @@ TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceInk()
     }
 
     WindowsImpl->StylusPlugin = MakeShareable(new FInkRealTimeStylusPlugin());
-    
+
     // Create free-threaded marshaller for the plugin
     hr = ::CoCreateFreeThreadedMarshaler(WindowsImpl->StylusPlugin.Get(), &WindowsImpl->StylusPlugin->FreeThreadedMarshaller);
     if (FAILED(hr))
@@ -220,6 +220,6 @@ TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceInk()
         UE_LOG(LogStylusInput, Error, TEXT("Could not add stylus plugin to API!"));
         return nullptr;
     }
-    
+
     return MakeShared<FInkStylusInputInterface>(MoveTemp(WindowsImpl));
 }

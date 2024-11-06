@@ -22,7 +22,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorImportSVG : public IFastXmlCallback
         virtual bool ProcessAttribute ( const TCHAR* AttributeName
                                       , const TCHAR* AttributeValue ) override;
         virtual bool ProcessClose ( const TCHAR* Element ) override;
-        virtual bool ProcessComment ( const TCHAR* Comment ) override  { return true; }; 
+        virtual bool ProcessComment ( const TCHAR* Comment ) override  { return true; };
         virtual bool ProcessElement ( const TCHAR* ElementName
                                     , const TCHAR* ElementData
                                     , int32 XmlFileLineNumber ) override;

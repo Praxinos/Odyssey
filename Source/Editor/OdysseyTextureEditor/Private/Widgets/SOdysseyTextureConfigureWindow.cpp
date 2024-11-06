@@ -79,11 +79,11 @@ FOdysseyTextureConfiguration::CreateTexture(UObject* iParent, FName iName, EObje
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block.Format());
     ctx.Fill(block, color );
     ctx.Finish();
-    
+
     UTexture2D* texture = NewObject<UTexture2D>( iParent, iName, iFlags );
     texture->SRGB = useSRGB;
     InitTextureWithBlockData(&block, texture, textureFormat);
-    
+
     //Init user data
     UOdysseyTextureLayerStackUserData* userData = NewObject<UOdysseyTextureLayerStackUserData>(texture, NAME_None, RF_Public);
 
@@ -99,16 +99,16 @@ FOdysseyTextureConfiguration::CreateTexture(UObject* iParent, FName iName, EObje
     {
         userData->InitWithEmptyLayerStack();
     }
-    
+
     // Notify for changes
     texture->AddAssetUserData( userData );
 
     if (BackgroundColor != EOdysseyTextureBackgroundColor::kTransparent)
     {
         UOdysseyLayerStack* layerStack = userData->GetLayerStack();
-        
+
         //Add first layer image
-        
+
 
         //Set the layer as Current Layer
         UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), nullptr, 1));

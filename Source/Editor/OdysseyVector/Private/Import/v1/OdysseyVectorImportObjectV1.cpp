@@ -59,7 +59,7 @@ FOdysseyVectorImportV1::ReadObjectsDeclare( std::vector<FOdysseyVectorObject*>& 
                     // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
-            }    
+            }
         } );
 }
 
@@ -110,7 +110,7 @@ FOdysseyVectorImportV1::ReadObjectsDefineObjectTransform( FOdysseyVectorObject& 
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
-            }    
+            }
         } );
 }
 
@@ -135,7 +135,7 @@ FOdysseyVectorImportV1::ReadObjectsDefineObjectBucket( FOdysseyVectorBucket& iBu
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
-            }    
+            }
         });
 }
 
@@ -241,6 +241,6 @@ FOdysseyVectorImportV1::ReadObjectsDefine( std::vector<FOdysseyVectorObject*>& v
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
-            }    
+            }
         } );
 }

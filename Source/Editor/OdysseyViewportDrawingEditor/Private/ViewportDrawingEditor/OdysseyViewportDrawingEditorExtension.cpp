@@ -77,7 +77,7 @@ FOdysseyViewportDrawingEditorExtension::Initialize()
     //Handle Object Property Changed Callback to refresh when actors's visibility changes for example
     FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw(this,&FOdysseyViewportDrawingEditorExtension::OnObjectPropertyChanged);
     GetEditor()->OnSourceChanged().AddRaw(this, &FOdysseyViewportDrawingEditorExtension::OnSourceChanged);
-    
+
     FLevelEditorSequencerIntegration::Get().GetOnSequencersChanged().AddRaw( this, &FOdysseyViewportDrawingEditorExtension::OnSequencersChanged );
     mSequencers = FLevelEditorSequencerIntegration::Get().GetSequencers();
     SetAllDelegatesSequencers();
@@ -92,7 +92,7 @@ void
 FOdysseyViewportDrawingEditorExtension::Finalize()
 {
     mGUI->Finalize();
-    
+
     SetActor(nullptr);
 
     mPaintingAdapter->SetTexture(nullptr);
@@ -143,7 +143,7 @@ FOdysseyViewportDrawingEditorExtension::OnSourceChanged()
             player->OnCurrentTimeChanged().RemoveAll(this);
         }
     }
-    
+
     mCurrentSource = source;
     if (!source)
         return;
@@ -341,7 +341,7 @@ FOdysseyViewportDrawingEditorExtension::SetMaterial(UMaterialInterface* iMateria
     mMaterial = iMaterial;
     ClearSelectableTextures(); // Also clears selected Texture
     UpdateSelectableTextures();
-    
+
     if (mMaterial)
         SelectDefaultTexture();
 }
@@ -375,7 +375,7 @@ FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture, bool iWar
                     canSetTexture = AssetEditorSubsystem->FindEditorForAsset(animation, true) == nullptr;
                 }
             }
-            
+
             if (!canSetTexture)
             {
                 if (mActor->GetClass() == AMediaPlate::StaticClass())
@@ -415,60 +415,60 @@ FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture, bool iWar
 void
 FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
 {
-	
-	//Cleanup previous texture if it exist
-	if (mTexture)
-	{
-		if (mTexture->IsA(UMediaTexture::StaticClass()))
-		{
-			UMediaTexture* texture = Cast<UMediaTexture>(mTexture);
-			UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
-			if (mediaPlayer)
-			{
-				UMediaPlaylist& playlist = mediaPlayer->GetPlaylistRef();
-				int32 index = mediaPlayer->GetPlaylistIndex();
-				UMediaSource* mediaSource = playlist.Get(index);
-				if (mediaSource && mediaSource->IsA(UOdysseyAnimation::StaticClass()))
-				{
-					TSharedRef<FMediaPlayerFacade> mediaPlayerFacade = mediaPlayer->GetPlayerFacade();
-					TSharedPtr<FOdysseyAnimationMediaPlayer> animationMediaPlayer = StaticCastSharedPtr<FOdysseyAnimationMediaPlayer>(mediaPlayerFacade->GetPlayer());
-					animationMediaPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
-					animationMediaPlayer->UnsetFrameToIncludeIntoDuration();
-				}
-			}
-		}		
-	}
+
+    //Cleanup previous texture if it exist
+    if (mTexture)
+    {
+        if (mTexture->IsA(UMediaTexture::StaticClass()))
+        {
+            UMediaTexture* texture = Cast<UMediaTexture>(mTexture);
+            UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
+            if (mediaPlayer)
+            {
+                UMediaPlaylist& playlist = mediaPlayer->GetPlaylistRef();
+                int32 index = mediaPlayer->GetPlaylistIndex();
+                UMediaSource* mediaSource = playlist.Get(index);
+                if (mediaSource && mediaSource->IsA(UOdysseyAnimation::StaticClass()))
+                {
+                    TSharedRef<FMediaPlayerFacade> mediaPlayerFacade = mediaPlayer->GetPlayerFacade();
+                    TSharedPtr<FOdysseyAnimationMediaPlayer> animationMediaPlayer = StaticCastSharedPtr<FOdysseyAnimationMediaPlayer>(mediaPlayerFacade->GetPlayer());
+                    animationMediaPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
+                    animationMediaPlayer->UnsetFrameToIncludeIntoDuration();
+                }
+            }
+        }
+    }
 
     mTexture = nullptr;
     mEditor->SetSource(nullptr);
-    
+
     if (!iTexture)
         return;
 
-	mTexture = iTexture;
+    mTexture = iTexture;
 
-	if (mTexture->IsA(UTexture2D::StaticClass()))
-	{
-		if (mComponent->IsA<UOdysseyAnimationComponent>())
-		{
-			UOdysseyAnimationComponent* animationComponent = Cast<UOdysseyAnimationComponent>(mComponent);
-			if (!animationComponent)
-			return;
-		
-			TSharedPtr<FOdysseyAnimationEditorSource> animationSource = MakeShared<FOdysseyAnimationEditorSource>(animationComponent->Animation);
-			animationSource->SetExternalPlayer(animationComponent->GetActivePlayer());
-			mEditor->SetSource(animationSource);
-		}
-		else
-		{
-		UTexture2D* texture = Cast<UTexture2D>(mTexture);
+    if (mTexture->IsA(UTexture2D::StaticClass()))
+    {
+        if (mComponent->IsA<UOdysseyAnimationComponent>())
+        {
+            UOdysseyAnimationComponent* animationComponent = Cast<UOdysseyAnimationComponent>(mComponent);
+            if (!animationComponent)
+            return;
+
+            TSharedPtr<FOdysseyAnimationEditorSource> animationSource = MakeShared<FOdysseyAnimationEditorSource>(animationComponent->Animation);
+            animationSource->SetExternalPlayer(animationComponent->GetActivePlayer());
+            mEditor->SetSource(animationSource);
+        }
+        else
+        {
+        UTexture2D* texture = Cast<UTexture2D>(mTexture);
 
         //TODO: change the texture for display
 
-		TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
-		mEditor->SetSource(source);
-		}
-	}
+        TSharedPtr<FOdysseyTextureEditorSource> source = MakeShared<FOdysseyTextureEditorSource>(texture);
+        mEditor->SetSource(source);
+        }
+    }
 
     if (mTexture->IsA(UMediaTexture::StaticClass()))
     {
@@ -505,120 +505,120 @@ FOdysseyViewportDrawingEditorExtension::SetTextureInternal(UTexture* iTexture)
 void
 FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
 {
-	if (!mComponent->IsA<UOdysseyAnimationComponent>())
-		return;
+    if (!mComponent->IsA<UOdysseyAnimationComponent>())
+        return;
 
-	UOdysseyAnimationComponent* animationComponent = Cast<UOdysseyAnimationComponent>(mComponent);
-	if (!animationComponent)
-		return;
+    UOdysseyAnimationComponent* animationComponent = Cast<UOdysseyAnimationComponent>(mComponent);
+    if (!animationComponent)
+        return;
 
-	UOdysseyAnimation* animation = animationComponent->GetActiveAnimation();
-	if (!animation)
-		return;
+    UOdysseyAnimation* animation = animationComponent->GetActiveAnimation();
+    if (!animation)
+        return;
 
-	UOdysseyAnimationPlayer* player = animationComponent->GetActivePlayer();
-	if (!player)
-		return;
+    UOdysseyAnimationPlayer* player = animationComponent->GetActivePlayer();
+    if (!player)
+        return;
 
-	for (TWeakPtr<ISequencer> weakSequencer : mSequencers)
-	{
-		TSharedPtr<ISequencer> sequencer = weakSequencer.Pin();
-		if (!sequencer)
-			continue;
+    for (TWeakPtr<ISequencer> weakSequencer : mSequencers)
+    {
+        TSharedPtr<ISequencer> sequencer = weakSequencer.Pin();
+        if (!sequencer)
+            continue;
 
-		UMovieSceneSequence* movieSceneSequence = sequencer->GetFocusedMovieSceneSequence();
-		if (!movieSceneSequence)
-			continue;
+        UMovieSceneSequence* movieSceneSequence = sequencer->GetFocusedMovieSceneSequence();
+        if (!movieSceneSequence)
+            continue;
 
-		FGuid binding = sequencer->GetHandleToObject(animationComponent, false);
-		if (!binding.IsValid())
-			continue;
+        FGuid binding = sequencer->GetHandleToObject(animationComponent, false);
+        if (!binding.IsValid())
+            continue;
 
-		UMovieScene* movieScene = movieSceneSequence->GetMovieScene();
-		if (!movieScene)
-			continue;
+        UMovieScene* movieScene = movieSceneSequence->GetMovieScene();
+        if (!movieScene)
+            continue;
 
-		UOdysseyAnimationComponentTrack* track =  movieScene->FindTrack<UOdysseyAnimationComponentTrack>(binding);
-		if (!track)
-			continue;
+        UOdysseyAnimationComponentTrack* track =  movieScene->FindTrack<UOdysseyAnimationComponentTrack>(binding);
+        if (!track)
+            continue;
 
-		TArray<UMovieSceneSection*> sections = track->GetAllSections();
+        TArray<UMovieSceneSection*> sections = track->GetAllSections();
 
-		//Using FindLastByPredicate instead of FindByPredicate to manage the case where sections are overlapping each other
-		//In that case, the last section should be used to synchronize the sequencer and the animation
-		int sectionIndex = sections.FindLastByPredicate(
-			[sequencer](UMovieSceneSection* iSection)
-			{
-				if (!iSection->IsActive())
-					return false;
+        //Using FindLastByPredicate instead of FindByPredicate to manage the case where sections are overlapping each other
+        //In that case, the last section should be used to synchronize the sequencer and the animation
+        int sectionIndex = sections.FindLastByPredicate(
+            [sequencer](UMovieSceneSection* iSection)
+            {
+                if (!iSection->IsActive())
+                    return false;
 
-				if (!iSection->IsTimeWithinSection(sequencer->GetLocalTime().Time.FrameNumber))
-					return false;
+                if (!iSection->IsTimeWithinSection(sequencer->GetLocalTime().Time.FrameNumber))
+                    return false;
 
-				return true;
-			}
-		);
+                return true;
+            }
+        );
 
-		if (sectionIndex == INDEX_NONE)
-			continue;
+        if (sectionIndex == INDEX_NONE)
+            continue;
 
-		UOdysseyAnimationComponentSection* section = Cast<UOdysseyAnimationComponentSection>(sections[sectionIndex]);
-		if (!section)
-			continue;
+        UOdysseyAnimationComponentSection* section = Cast<UOdysseyAnimationComponentSection>(sections[sectionIndex]);
+        if (!section)
+            continue;
 
-		int animationDisplayedFrame = animation->GetFrameIndexAtTime(player->GetCurrentTime());
-	
-		FFrameRate tickResolution = movieScene->GetTickResolution();
-		FFrameRate displayRate = sequencer->GetFocusedDisplayRate();
+        int animationDisplayedFrame = animation->GetFrameIndexAtTime(player->GetCurrentTime());
 
-		TRange<FFrameNumber> sectionRange = section->GetTrueRange();
-		FFrameNumber sectionStartFrame = sectionRange.GetLowerBoundValue();
-		FFrameNumber sectionEndFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(sectionRange.GetUpperBoundValue() - 1, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution).FrameNumber;
-		
-		double totalSeconds = animationDisplayedFrame / animation->FramesPerSecond;
-		FFrameNumber frame = tickResolution.AsFrameNumber(totalSeconds) + sectionStartFrame;
-		double totalSecondsNext = (animationDisplayedFrame + 1) / animation->FramesPerSecond;
-		FFrameNumber frameNext = tickResolution.AsFrameNumber(totalSecondsNext) + sectionStartFrame;
+        FFrameRate tickResolution = movieScene->GetTickResolution();
+        FFrameRate displayRate = sequencer->GetFocusedDisplayRate();
 
-		FFrameTime currentFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(sequencer->GetLocalTime().Time.FrameNumber, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution);
+        TRange<FFrameNumber> sectionRange = section->GetTrueRange();
+        FFrameNumber sectionStartFrame = sectionRange.GetLowerBoundValue();
+        FFrameNumber sectionEndFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(sectionRange.GetUpperBoundValue() - 1, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution).FrameNumber;
 
-		if (currentFrame >= frame && currentFrame < frameNext)
-			return;
+        double totalSeconds = animationDisplayedFrame / animation->FramesPerSecond;
+        FFrameNumber frame = tickResolution.AsFrameNumber(totalSeconds) + sectionStartFrame;
+        double totalSecondsNext = (animationDisplayedFrame + 1) / animation->FramesPerSecond;
+        FFrameNumber frameNext = tickResolution.AsFrameNumber(totalSecondsNext) + sectionStartFrame;
 
-		if (frame < sectionStartFrame)
-		{
-			FOdysseyAnimationComponentSectionParams params;
-			params.SectionStartFrame = sectionStartFrame;
-			params.SectionEndFrame = sectionEndFrame;
-			params.StartFrameOffset = section->StartFrameOffset;
-			TRange<FFrameTime> range = TRange<FFrameTime>::Inclusive(sectionStartFrame, sectionStartFrame);
-			FOdysseyAnimationComponentTemplate::EvaluateImmediate(animationComponent, range, params, tickResolution);
-			return;
-		}
-		if (frame > sectionEndFrame)
-		{
-			FOdysseyAnimationComponentSectionParams params;
-			params.SectionStartFrame = sectionStartFrame;
-			params.SectionEndFrame = sectionEndFrame;
-			params.StartFrameOffset = section->StartFrameOffset;
-			TRange<FFrameTime> range = TRange<FFrameTime>::Inclusive(sectionEndFrame, sectionEndFrame);
-			FOdysseyAnimationComponentTemplate::EvaluateImmediate(animationComponent, range, params, tickResolution);
-			return;
-		}
+        FFrameTime currentFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(sequencer->GetLocalTime().Time.FrameNumber, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution);
 
-		frame = FMath::Clamp(frame, sectionStartFrame, sectionEndFrame);
-		FFrameTime intervalNextFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(frame, tickResolution, displayRate).CeilToFrame(), displayRate, tickResolution);
-		FFrameTime intervalPrevFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(frame, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution);
+        if (currentFrame >= frame && currentFrame < frameNext)
+            return;
 
-		if (frameNext >= intervalNextFrame)
-		{
-			sequencer->SetLocalTime(intervalNextFrame, STM_Interval);
-		}
-		else
-		{
-			sequencer->SetLocalTime(intervalPrevFrame, STM_Interval);
-		}
-	}
+        if (frame < sectionStartFrame)
+        {
+            FOdysseyAnimationComponentSectionParams params;
+            params.SectionStartFrame = sectionStartFrame;
+            params.SectionEndFrame = sectionEndFrame;
+            params.StartFrameOffset = section->StartFrameOffset;
+            TRange<FFrameTime> range = TRange<FFrameTime>::Inclusive(sectionStartFrame, sectionStartFrame);
+            FOdysseyAnimationComponentTemplate::EvaluateImmediate(animationComponent, range, params, tickResolution);
+            return;
+        }
+        if (frame > sectionEndFrame)
+        {
+            FOdysseyAnimationComponentSectionParams params;
+            params.SectionStartFrame = sectionStartFrame;
+            params.SectionEndFrame = sectionEndFrame;
+            params.StartFrameOffset = section->StartFrameOffset;
+            TRange<FFrameTime> range = TRange<FFrameTime>::Inclusive(sectionEndFrame, sectionEndFrame);
+            FOdysseyAnimationComponentTemplate::EvaluateImmediate(animationComponent, range, params, tickResolution);
+            return;
+        }
+
+        frame = FMath::Clamp(frame, sectionStartFrame, sectionEndFrame);
+        FFrameTime intervalNextFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(frame, tickResolution, displayRate).CeilToFrame(), displayRate, tickResolution);
+        FFrameTime intervalPrevFrame = FFrameRate::TransformTime(FFrameRate::TransformTime(frame, tickResolution, displayRate).FloorToFrame(), displayRate, tickResolution);
+
+        if (frameNext >= intervalNextFrame)
+        {
+            sequencer->SetLocalTime(intervalNextFrame, STM_Interval);
+        }
+        else
+        {
+            sequencer->SetLocalTime(intervalPrevFrame, STM_Interval);
+        }
+    }
 }
 
 bool
@@ -626,12 +626,12 @@ FOdysseyViewportDrawingEditorExtension::EnsureMediaPlateIsOpened()
 {
     if (!mTexture->IsA(UMediaTexture::StaticClass()))
         return false;
-    
+
     if (mActor->GetClass() != AMediaPlate::StaticClass())
         return false;
-    
+
     UMediaTexture* texture = Cast<UMediaTexture>(mTexture);
-        
+
     bool needsOpen = true;
     AMediaPlate* mediaPlate = Cast<AMediaPlate>(mActor);
     UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
@@ -643,7 +643,7 @@ FOdysseyViewportDrawingEditorExtension::EnsureMediaPlateIsOpened()
         if (mediaSource && mediaPlate->MediaPlateComponent->IsMediaPlatePlaying()) //Is the mediaplate closed ?
             return false;
     }
-    
+
     bool bPlayOnOpen = mediaPlate->MediaPlateComponent->bPlayOnOpen;
     mediaPlate->MediaPlateComponent->bPlayOnOpen = false;
     mediaPlate->MediaPlateComponent->Open();
@@ -679,7 +679,7 @@ FOdysseyViewportDrawingEditorExtension::Tick(float iDeltaTime)
                     TSharedPtr<FOdysseyAnimationEditorSource> animationSource = MakeShared<FOdysseyAnimationEditorSource>(animation);
                     mEditor->SetSource(animationSource);
                 }
-                
+
                 if (wasOpened)
                 {
                     SyncMediaPlayerWithAnimationCurrentFrame();
@@ -693,7 +693,7 @@ FOdysseyViewportDrawingEditorExtension::Tick(float iDeltaTime)
         else if (mCurrentSource)
         {
             mEditor->SetSource(nullptr);
-        }        
+        }
     }
 }
 
@@ -737,7 +737,7 @@ FOdysseyViewportDrawingEditorExtension::OnObjectPropertyChanged(UObject* iObject
     //TODO: Get the visibility value
     //AActor* actor = Cast<AActor>(iObject);
     /*if ( actor == mActor &&
-        iPropertyChangedEvent.Property && 
+        iPropertyChangedEvent.Property &&
         iPropertyChangedEvent.Property->GetName() == USceneComponent::GetVisiblePropertyName().ToString())
     {
         Refresh();
@@ -895,7 +895,7 @@ FOdysseyViewportDrawingEditorExtension::SelectDefaultMaterial()
 TArray<TWeakPtr<ISequencer>>
 FOdysseyViewportDrawingEditorExtension::Sequencers() const
 {
-	return mSequencers;
+    return mSequencers;
 }
 
 void
@@ -922,7 +922,7 @@ FOdysseyViewportDrawingEditorExtension::SetAllDelegatesSequencers()
             //When we're done, we put them back with EnableDelegatesSequencer
             itSequencer->OnEndScrubbingEvent().AddRaw(this, &FOdysseyViewportDrawingEditorExtension::EnableDelegatesSequencer);
             itSequencer->OnStopEvent().AddRaw(this, &FOdysseyViewportDrawingEditorExtension::EnableDelegatesSequencer);
-            
+
             //By default, they are enabled
             itSequencer->OnGlobalTimeChanged().AddRaw(this, &FOdysseyViewportDrawingEditorExtension::OnSyncPaintingWithSequencer);
             itSequencer->OnMovieSceneDataChanged().AddRaw( this, &FOdysseyViewportDrawingEditorExtension::OnSyncPaintingWithSequencerMovieSceneChanged );
@@ -1004,8 +1004,8 @@ void FOdysseyViewportDrawingEditorExtension::EnableDelegatesSequencer()
 void
 FOdysseyViewportDrawingEditorExtension::OnAnimationPlayerCurrentTimeChanged()
 {
-	SyncMediaPlayerWithAnimationPlayer();
-	SyncSequencerWithAnimationPlayer();
+    SyncMediaPlayerWithAnimationPlayer();
+    SyncSequencerWithAnimationPlayer();
 }
 
 void
@@ -1013,15 +1013,15 @@ FOdysseyViewportDrawingEditorExtension::SyncMediaPlayerWithAnimationFrame(int iF
 {
     if (!mCurrentSource || mCurrentSource->Id() != FOdysseyAnimationEditorSource::StaticId())
         return;
-        
+
     if (!mTexture || !mTexture->IsA(UMediaTexture::StaticClass()))
         return;
-        
+
     TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(mCurrentSource);
     UOdysseyAnimation* animation = animationSource->GetAnimation();
     if (!animation)
         return;
-    
+
     UMediaTexture* texture = Cast<UMediaTexture>(mTexture);
     UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
     if (!mediaPlayer || mediaPlayer->IsPlaying())
@@ -1032,7 +1032,7 @@ FOdysseyViewportDrawingEditorExtension::SyncMediaPlayerWithAnimationFrame(int iF
     UMediaSource* mediaSource = playlist.Get(index);
     if ( !mediaSource || !mediaSource->IsA(UOdysseyAnimation::StaticClass()) )
         return;
-    
+
     TSharedRef<FMediaPlayerFacade> mediaPlayerFacade = mediaPlayer->GetPlayerFacade();
     TSharedPtr<FOdysseyAnimationMediaPlayer> animationMediaPlayer = StaticCastSharedPtr<FOdysseyAnimationMediaPlayer>(mediaPlayerFacade->GetPlayer());
     TSharedPtr<FOdysseyAnimationMediaControls> animationMediaControls = animationMediaPlayer->GetAnimationControls();
@@ -1057,7 +1057,7 @@ FOdysseyViewportDrawingEditorExtension::SyncMediaPlayerWithAnimationPlayer()
 {
     if (!mCurrentSource || mCurrentSource->Id() != FOdysseyAnimationEditorSource::StaticId())
         return;
-        
+
     TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(mCurrentSource);
     UOdysseyAnimation* animation = animationSource->GetAnimation();
     UOdysseyAnimationPlayer* player = animationSource->GetAnimationPlayer();
@@ -1076,7 +1076,7 @@ FOdysseyViewportDrawingEditorExtension::SyncMediaPlayerWithAnimationCurrentFrame
 {
     if (!mCurrentSource || mCurrentSource->Id() != FOdysseyAnimationEditorSource::StaticId())
         return;
-        
+
     TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(mCurrentSource);
     UOdysseyAnimation* animation = animationSource->GetAnimation();
     if (!animation)
@@ -1090,15 +1090,15 @@ FOdysseyViewportDrawingEditorExtension::SyncAnimationCurrentFrameWithMediaPlayer
 {
     if (!mCurrentSource || mCurrentSource->Id() != FOdysseyAnimationEditorSource::StaticId())
         return;
-        
+
     if (!mTexture || !mTexture->IsA(UMediaTexture::StaticClass()))
         return;
-        
+
     TSharedPtr<FOdysseyAnimationEditorSource> animationSource = StaticCastSharedPtr<FOdysseyAnimationEditorSource>(mCurrentSource);
     UOdysseyAnimation* animation = animationSource->GetAnimation();
     if (!animation)
         return;
-    
+
     UMediaTexture* texture = Cast<UMediaTexture>(mTexture);
     UMediaPlayer* mediaPlayer = texture->GetMediaPlayer();
     UOdysseyAnimationPlayer* animationPlayer = animationSource->GetAnimationPlayer();
@@ -1110,7 +1110,7 @@ FOdysseyViewportDrawingEditorExtension::SyncAnimationCurrentFrameWithMediaPlayer
     UMediaSource* mediaSource = playlist.Get(index);
     if ( !mediaSource || !mediaSource->IsA(UOdysseyAnimation::StaticClass()) )
         return;
-    
+
     TSharedRef<FMediaPlayerFacade> mediaPlayerFacade = mediaPlayer->GetPlayerFacade();
     TSharedPtr<FOdysseyAnimationMediaPlayer> animationMediaPlayer = StaticCastSharedPtr<FOdysseyAnimationMediaPlayer>(mediaPlayerFacade->GetPlayer());
     TSharedPtr<FOdysseyAnimationMediaControls> animationMediaControls = animationMediaPlayer->GetAnimationControls();
@@ -1144,7 +1144,7 @@ FOdysseyViewportDrawingEditorExtension::AddReferencedObjects(FReferenceCollector
 
 bool
 FOdysseyViewportDrawingEditorExtension::GetDrawHUDParams(const FSceneView* View, FCanvas* Canvas, FOdysseyHUDSystem::FDrawHUDParams& oParams)
-{    
+{
     AActor* actor = Actor();
     UMeshComponent* component = Component();
     if (!component || !component->IsA<UStaticMeshComponent>())
@@ -1175,7 +1175,7 @@ FOdysseyViewportDrawingEditorExtension::GetDrawHUDParams(const FSceneView* View,
         FVector(meshSize.X / textureW, meshSize.Y / textureH, 1.f)
     ).ToMatrixWithScale();
 
-    
+
 
     if (actor->IsA<AMediaPlate>())
     {
@@ -1235,7 +1235,7 @@ FOdysseyViewportDrawingEditorExtension::GetHUDPlaneParams(FVector& oPlaneTopLeft
 
     FBox bbox = staticMesh->GetBoundingBox();
     FVector bboxSize = bbox.GetSize();
-    
+
     oW = bboxSize.X;
     oH = bboxSize.Y;
 
@@ -1307,7 +1307,7 @@ FOdysseyViewportDrawingEditorExtension::ViewportToHUD(FEditorViewportClient* iVi
     FVector bboxMin = bbox.Min;
 
     AActor* actor = Actor();
-    
+
     if (actor->IsA<AMediaPlate>())
     {
         componentPoint.Y -= bboxMin.Y;
@@ -1339,9 +1339,9 @@ FOdysseyViewportDrawingEditorExtension::IsPlaneComponent() const
 
     FStaticMeshLODResources& LODModel = staticMesh->GetRenderData()->LODResources[0];
 
-    // Retrieve mesh vertex and index data 
+    // Retrieve mesh vertex and index data
     const int32 NumVertices = LODModel.VertexBuffers.PositionVertexBuffer.GetNumVertices();
-    
+
     TArray<FVector> MeshVertices;
     TArray<uint32> MeshIndices;
 

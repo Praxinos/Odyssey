@@ -58,7 +58,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
             * ::ULIS::FMat3F::MakeTranslationMatrix( animation->GetWidth() / -2.f, animation->GetHeight() / -2.f);
     }
 }
-    
+
 void
 FOdysseyAnimationCellImageVectorImageRenderer::Init()
 {
@@ -72,7 +72,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::Init()
             mHUDBlock = vectorBlock->GetHUDBlock();
     }
 
-    {   
+    {
         FScopeLock renderLock(&mEngineMutex);
         vectorBlock->Render( mDrawingFlags );
     }
@@ -80,7 +80,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::Init()
 
 TArray<::ULIS::FEvent>
 FOdysseyAnimationCellImageVectorImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
-{   
+{
     if (!mBlock)
         return iWaitList;
 
@@ -89,7 +89,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::Blend(const FOdysseyImageRenderer
         params.mTransform = mOutOfPegsTransform;
 
     TArray<::ULIS::FEvent> events = ConvertAndBlend(mBlock, ::ULIS::FVec2I(0), params, iWaitList);
-    
+
     if (!mHUDBlock)
         return events;
 

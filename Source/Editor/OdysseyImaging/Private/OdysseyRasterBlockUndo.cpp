@@ -52,7 +52,7 @@ FOdysseyRasterBlockUndoBuilder::BuildRedoData(const FOdysseyRasterBlockMutator& 
         writer << rect.w;
         writer << rect.h;
     }
-    
+
     //copy the rectangle in the block
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iRasterBlockMutator.GetRasterBlock()->GetFormat());
     int tileSize = invalidTileMap.TileSize();
@@ -91,7 +91,7 @@ FOdysseyRasterBlockUndoBuilder::BuildUndoData(const FOdysseyRasterBlockMutator& 
         writer << rect.w;
         writer << rect.h;
     }
-    
+
     //copy the rectangle in the block
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iRasterBlockMutator.GetRasterBlock()->GetFormat());
     int tileSize = invalidTileMap.TileSize();
@@ -262,7 +262,7 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
             uint8* dataStart = static_cast<uint8*>(dataPtr) + reader.Tell();
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
             for (int i = 0; i < numTiles; i++)
-            {   
+            {
                 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToLoad = MakeShared<::ULIS::FBlock>( dataStart, tileSize, tileSize, rasterBlock->GetFormat());
                 const ::ULIS::FRectI& rect = rects[i];
                 ctx.Copy(*blockToLoad, *block, blockToLoad->Rect(), ::ULIS::FVec2I(rect.x, rect.y), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);

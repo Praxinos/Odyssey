@@ -74,7 +74,7 @@ FOdysseyEditorModule::GetOpenedTabIdsProjectPath() const
 
 void
 FOdysseyEditorModule::LoadOpenedTabIds(const FName& iEditorName, const TArray<FName>& iDefaultOpenedTabIds)
-{    
+{
     FString savedPath = GetOpenedTabIdsSavedPath();
     FString projectPath = GetOpenedTabIdsProjectPath();
 
@@ -146,11 +146,11 @@ FOdysseyEditorModule::SaveOpenedTabIds(const FName& iEditorName)
 
     /* IPlatformFile& platformFile = FPlatformFileManager::Get().GetPlatformFile();
     FPlatformFileManager::Get().GetPlatformFile().DeleteFile(*tabsOpenedPath);
-    
+
     FString folderPath = FPaths::GetPath(tabsOpenedPath);
     if ( !platformFile.CreateDirectoryTree(*folderPath) )
         return;
-            
+
     IFileHandle* fileHandle = platformFile.OpenWrite(*tabsOpenedPath);
 
     if( !fileHandle )
@@ -163,6 +163,6 @@ FOdysseyEditorModule::SaveOpenedTabIds(const FName& iEditorName)
     fileHandle->Seek(0);
     fileHandle->Write(buffer.GetData(), buffer.Num());
     fileHandle->Flush(true);
-    
+
     delete fileHandle; */
 }

@@ -18,6 +18,6 @@ public:
     void Construct(const FArguments& iArgs );
 
 private:
-	EOdysseyTimelineTool GetCurrentTool() const;
-	void OnToolChecked(EOdysseyTimelineTool iTool, ECheckBoxState iState);
+    EOdysseyTimelineTool GetCurrentTool() const;
+    void OnToolChecked(EOdysseyTimelineTool iTool, ECheckBoxState iState);
 };

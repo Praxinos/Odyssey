@@ -53,11 +53,11 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorGroupPaint* 
 {
     TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
                                             // Prevents the user from having to click at least once in the viewport.
-    // we need the focus on the viewport for keyboard 
+    // we need the focus on the viewport for keyboard
     TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
     viewportWidget = viewportTab->GetViewport()->GetViewportWidget();
 
-    // we need the focus on the viewport for keyboard 
+    // we need the focus on the viewport for keyboard
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
 
     mTransformHUD->CenterGizmo();
@@ -71,14 +71,14 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorGroupPaint* 
 bool
 UOdysseyPainterEditorVectorTransformTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                                          , const FKey& iKey
-														 , uint64& oSignalFlags )
+                                                         , uint64& oSignalFlags )
 {
     UniformAtKeyDown = Uniform;
 
     if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
     {
         Uniform = !Uniform; // flip the value
-		return true;
+        return true;
     }
 
     return UOdysseyPainterEditorVectorSelectionTool::OnKeyDownVector( iScene, iKey, oSignalFlags );
@@ -87,7 +87,7 @@ UOdysseyPainterEditorVectorTransformTool::OnKeyDownVector( FOdysseyVectorGroupPa
 bool
 UOdysseyPainterEditorVectorTransformTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
                                                        , const FKey& iKey
-													   , uint64& oSignalFlags )
+                                                       , uint64& oSignalFlags )
 {
     Uniform = UniformAtKeyDown;
 
@@ -97,7 +97,7 @@ UOdysseyPainterEditorVectorTransformTool::OnKeyUpVector( FOdysseyVectorGroupPain
 void
 UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                             , const FOdysseyPoint& iPointInTexture
-															, uint64& oSignalFlags )
+                                                            , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
@@ -159,10 +159,10 @@ bool
 UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey
-														   , uint64& oSignalFlags )
+                                                           , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     mTransformHUD->SetCenterGizmo( false );
 
@@ -210,10 +210,10 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
             mTransformHUD->ShowSelectionBox( false );
         }
     }
- 
+
     oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
 
-	return true;
+    return true;
 }
 
 static void
@@ -744,7 +744,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
 void
 UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
-														   , uint64& oSignalFlags )
+                                                           , uint64& oSignalFlags )
 {
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
@@ -808,10 +808,10 @@ bool
 UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                          , const FOdysseyPoint& iPointInTexture
                                                          , const FKey& iKey
-														 , uint64& oSignalFlags)
+                                                         , uint64& oSignalFlags)
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
@@ -843,7 +843,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
                 if( GUndo )
                 {
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(mUndo) );
-                
+
                     TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                     if (source)
                         source->RecordCurrentFrameUndo();
@@ -855,7 +855,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
 
             // quick fix to place the gizmo at the right place
             FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
-            ::ULIS::FVec2D& gizmo = mTransformHUD->GetGizmo(); 
+            ::ULIS::FVec2D& gizmo = mTransformHUD->GetGizmo();
             BLPoint worldGizmo = selectionBox.worldMatrix.mapPoint( gizmo.x, gizmo.y );
             // endof quickfix
 
@@ -877,7 +877,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
     oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED;
 
-	return true;
+    return true;
 }
 
 uint64

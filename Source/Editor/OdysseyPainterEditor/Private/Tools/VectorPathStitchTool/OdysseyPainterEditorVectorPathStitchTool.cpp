@@ -60,10 +60,10 @@ bool
 UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , const FKey& iKey
-															, uint64& oSignalFlags )
+                                                            , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -144,7 +144,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
                                                                                 , mergedSegmentArray );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
                     TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                     if (source)
                         source->RecordCurrentFrameUndo();
@@ -164,13 +164,13 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
          | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 
-	return true;
+    return true;
 }
 
 void
 UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture
-															 , uint64& oSignalFlags )
+                                                             , uint64& oSignalFlags )
 {
     double diameter = PickingRadius * 2.0f;
     ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)PickingRadius
@@ -197,7 +197,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorGro
 void
 UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                             , const FOdysseyPoint& iPointInTexture
-															, uint64& oSignalFlags )
+                                                            , uint64& oSignalFlags )
 {
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
@@ -213,13 +213,13 @@ bool
 UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , const FKey& iKey
-														  , uint64& oSignalFlags )
+                                                          , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
-		
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
+
     oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
-	return true;
+    return true;
 }
 
 uint64

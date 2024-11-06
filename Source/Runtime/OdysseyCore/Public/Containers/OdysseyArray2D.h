@@ -26,7 +26,7 @@ public:
 
     /** Constructor.
     *
-    * @param iSize The 
+    * @param iSize The
     */
     FORCEINLINE TOdysseyArray2D(int iSizeX, int iSizeY)
         : mArray()

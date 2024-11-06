@@ -18,7 +18,7 @@ void SOdysseyTimeline::Construct(const FArguments& InArgs)
     mZoom = FMath::Clamp(InArgs._Zoom, 0.01f, 1.0f);
     mOffset = InArgs._Offset;
     mScrubPosition = InArgs._ScrubPosition;
-    
+
     mOnScrubStarted = InArgs._OnScrubStarted;
     mOnScrubPositionChanged = InArgs._OnScrubPositionChanged;
     mOnScrubStopped = InArgs._OnScrubStopped;
@@ -172,7 +172,7 @@ int32 SOdysseyTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
                 textLayer,
                 AllottedGeometry.ToPaintGeometry( textSize, FSlateLayoutTransform( 1.0, TransformPoint( 1.0, textPos ) ) ),
                 frameString,
-                textFontInfo, 
+                textFontInfo,
                 ESlateDrawEffect::None);
         }
     }
@@ -181,13 +181,13 @@ int32 SOdysseyTimeline::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 
     // Draw a line for the current scrub cursor
     ++LayerId;
-    
+
     const float linePosition = ( mScrubPosition - offset) * frameSize;
 
     /* TArray<FVector2D> LinePoints;
     LinePoints.Add(FVector2D(linePosition, 0.f));
     LinePoints.Add(FVector2D(linePosition, AllottedGeometry.GetLocalSize().Y)); */
-    
+
     FLinearColor lineColor = FLinearColor::Red;
     lineColor.A = 0.3f;
 
@@ -250,7 +250,7 @@ FReply SOdysseyTimeline::OnMouseButtonDown(const FGeometry& MyGeometry, const FP
             mOffsetMousePosition.Y = mOffset;
             return FReply::Handled();
         }
-        else 
+        else
         {
             mIsScrubbing = true;
             mOnScrubStarted.ExecuteIfBound();
@@ -300,7 +300,7 @@ FReply SOdysseyTimeline::OnMouseButtonUp(const FGeometry& MyGeometry, const FPoi
     {
         const float minScrub = 0.0f;
         ScrubPosition(MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X / FrameSize() + mOffset);
-        
+
         mIsScrubbing = false;
         mOnScrubStopped.ExecuteIfBound();
         return FReply::Handled().ReleaseMouseCapture();

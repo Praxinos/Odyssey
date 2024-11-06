@@ -145,7 +145,7 @@ void SOdysseyPaletteSetView::CreateContextMenu()
 
 TSharedPtr<SWidget> SOdysseyPaletteSetView::OnContextMenuOpening()
 {
-    //Create a new command, so that we can add context menu specific entries 
+    //Create a new command, so that we can add context menu specific entries
     TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
     commandList->Append(mCommandList);
 

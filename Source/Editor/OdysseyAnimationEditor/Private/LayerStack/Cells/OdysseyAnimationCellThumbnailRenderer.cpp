@@ -197,7 +197,7 @@ uint32
 FOdysseyAnimationCellThumbnailProxy::Run()
 {
     FOptionalTaskTagScope Scope(ETaskTag::EParallelGameThread);
-    //While not told to stop this thread 
+    //While not told to stop this thread
     while (mStopTaskCounter.GetValue() == 0)
     {
         FOdysseyAnimationCellThumbnailTask task;
@@ -205,7 +205,7 @@ FOdysseyAnimationCellThumbnailProxy::Run()
         {
             FPlatformProcess::Sleep(0.03); //Arbitrary number
             continue;
-        }   
+        }
 
         if (!task.mCell)
             continue;
@@ -219,7 +219,7 @@ FOdysseyAnimationCellThumbnailProxy::Run()
         TSharedPtr<IOdysseyImageRenderer> renderer = mRenderers[task.mCell];
         mRenderers.Remove(task.mCell);
         mMutex.Unlock();
-        
+
 
         TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(task.mCellWidth, task.mCellHeight, task.mCellFormat);
 
@@ -243,7 +243,7 @@ FOdysseyAnimationCellThumbnailProxy::Run()
         }
 
         mMutex.Lock();
-        
+
         TSharedPtr<FOdysseyRasterBlock> rasterBlock = task.mCell->mThumbnail;
         if (!rasterBlock)
         {
@@ -275,7 +275,7 @@ FOdysseyAnimationCellThumbnailProxy::Run()
         mFinishedCellsMutex.Lock();
         mFinishedCells.Add(task.mCell);
         mFinishedCellsMutex.Unlock();
-        
+
         AsyncTask(
             ENamedThreads::GameThread,
             [this, cell = task.mCell]()

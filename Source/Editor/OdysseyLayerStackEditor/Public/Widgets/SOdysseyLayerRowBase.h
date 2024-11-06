@@ -20,7 +20,7 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyLayerRowBase)
         {}
     SLATE_END_ARGS()
-    
+
 public:
     // Construction / Destruction
     void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, UOdysseyLayer* iLayer);
@@ -32,20 +32,20 @@ public:
 
 protected:
     //SMultiColumnTableRow overrides
-	virtual const FSlateBrush* GetBorder() const override;
-	
+    virtual const FSlateBrush* GetBorder() const override;
+
 protected:
-	virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
-	virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn );
-	virtual FOptionalSize GetRowHeight(FName iRow) const;
-	virtual EVisibility GetRowVisibility(FName iRow) const;
-	virtual FMargin GetRowPadding( FName iRow ) const;
-	virtual FMargin GetColumnPadding( FName iColumn ) const;
-    
+    virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
+    virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn );
+    virtual FOptionalSize GetRowHeight(FName iRow) const;
+    virtual EVisibility GetRowVisibility(FName iRow) const;
+    virtual FMargin GetRowPadding( FName iRow ) const;
+    virtual FMargin GetColumnPadding( FName iColumn ) const;
+
     TOptional<EItemDropZone> OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iDropZone, UOdysseyLayer* iLayer);
     FReply OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iDropZone, UOdysseyLayer* iLayer);
-	virtual FReply OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<SOdysseyLayerStackTreeView> iTreeView);
-	EItemDropZone ComputeItemDropZoneForLeaf(FVector2D iLocalPointerPos, FVector2D iLocalSize, bool iCanHaveChildren, bool iIsExpanded);
+    virtual FReply OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<SOdysseyLayerStackTreeView> iTreeView);
+    EItemDropZone ComputeItemDropZoneForLeaf(FVector2D iLocalPointerPos, FVector2D iLocalSize, bool iCanHaveChildren, bool iIsExpanded);
 
 private:
     UOdysseyLayer* mLayer = nullptr;

@@ -13,7 +13,7 @@
 //===============================================
 
 UOdysseyAnimationLayerStack::UOdysseyAnimationLayerStack()
-	: mCellSelection(MakeShared<FOdysseyAnimationCellSelection>(this))
+    : mCellSelection(MakeShared<FOdysseyAnimationCellSelection>(this))
 {
     CompatibleLayers.Add(UOdysseyAnimationLayerFolder::StaticClass());
     CompatibleLayers.Add(UOdysseyAnimationLayerImageRaster::StaticClass());
@@ -34,7 +34,7 @@ UOdysseyAnimationLayerStack::GetAnimation() const
         outer = outer->GetOuter();
     }
 
-    return nullptr;    
+    return nullptr;
 }
 
 FInt32Range
@@ -56,5 +56,5 @@ UOdysseyAnimationLayerStack::GetImageRenderingRects() const
 TSharedRef<FOdysseyAnimationCellSelection>
 UOdysseyAnimationLayerStack::GetCellSelection() const
 {
-	return mCellSelection;
+    return mCellSelection;
 }

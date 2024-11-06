@@ -39,9 +39,9 @@ public:
     // Construction / Destruction
     ~SOdysseyPaletteTreeView();
     SOdysseyPaletteTreeView();
-    
+
     void Construct(const FArguments& InArgs);
-    
+
 public:
     TSharedPtr<FOdysseyPaletteDragDropOperation> CreateDragDropOperation() const;
 
@@ -62,7 +62,7 @@ protected:
     //Context menu
     /**
      * @brief Creates and registers palette context menu
-     * 
+     *
      */
     virtual void CreateContextMenu();
 
@@ -78,13 +78,13 @@ protected:
 private:
     /**
      * @brief Set the palette selected entry from the treeview Selector Item
-     * 
+     *
      */
     void SetCurrentEntryFromSelectorItem();
 
     /**
      * @brief Refreshes all rows expansion states from the state stored in the entry
-     * 
+     *
      */
     void RefreshAllExpansionStates();
 
@@ -98,41 +98,41 @@ protected:
     //CommandList Actions
     /**
      * @brief Maps palette actions to the commandList
-     * 
+     *
      */
     virtual void MapActionsToCommandList();
 
     /**
      * @brief Selects all visible entries
-     * 
+     *
      */
     void SelectAllEntries();
 
     /**
      * @brief Delete Selected Entries
-     * 
+     *
      */
     void DeleteSelectedEntries();
 
     /**
      * @brief Defines whether the "DeleteSelectedEntries" can be called
-     * 
-     * @return true 
-     * @return false 
+     *
+     * @return true
+     * @return false
      */
     bool CanDeleteSelectedEntries();
 
     /**
      * @brief Duplicates Selected Entries and Select them afterward
      * Also changes the current entry to be the duplicated version of the former current entry
-     * 
+     *
      */
     void DuplicateSelectedEntries();
 
     /**
      * @brief Start renaming the current entry
      * Also, will scroll the entry into view first.
-     * 
+     *
      */
     void RenameCurrentEntry();
 
@@ -140,55 +140,55 @@ protected:
     //Callbacks
     /**
      * @brief Called when the treeview asks for a contextmenu to be opened (rightclick)
-     * 
-     * @return TSharedPtr<SWidget> 
+     *
+     * @return TSharedPtr<SWidget>
      */
     TSharedPtr<SWidget> OnContextMenuOpening();
 
     /**
      * @brief Called when the treeview asks for the children of a specific item
-     * 
-     * @param iParent 
-     * @param oChildren 
+     *
+     * @param iParent
+     * @param oChildren
      */
     void OnGetChildren(UOdysseyPaletteEntry* iParent, TArray<UOdysseyPaletteEntry*>& oChildren) const;
 
     /**
      * @brief Called when the treeview changed one of its row expansion state
      * Allows synchronization between treeview expansion state and entry expansion state
-     * 
-     * @param iEntry 
-     * @param iIsExpanded 
+     *
+     * @param iEntry
+     * @param iIsExpanded
      */
     void OnExpansionChanged(UOdysseyPaletteEntry* iEntry, bool iIsExpanded);
 
     /**
      * @brief Called when the entry changed the expansion state it stores
      * Allows synchronization between treeview expansion state and entry expansion state
-     * 
-     * @param iEntry 
+     *
+     * @param iEntry
      */
     void OnEntryIsExpandedChanged(UOdysseyPaletteEntry* iEntry);
 
     /**
      * @brief Called when the current entry changed to another entry
-     * 
-     * @param iPalette 
+     *
+     * @param iPalette
      */
     void OnCurrentEntryChanged(UOdysseyPalette* iPalette);
 
     /**
      * @brief Called when the palette hierarchy has changed
-     * 
+     *
      * @param iPalette
      */
     void OnPaletteHierarchyChanged( UOdysseyPalette* iPalette);
 
     /**
      * @brief Called when entries have been removed from a folder entry
-     * 
-     * @param iParent 
-     * @param iChildren 
+     *
+     * @param iParent
+     * @param iChildren
      */
     void OnItemScrolledIntoView(UOdysseyPaletteEntry* iEntry, const TSharedPtr<ITableRow>& iRow);
 

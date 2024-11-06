@@ -127,7 +127,7 @@ void FOdysseyVectorObjectViewPaletteCustomization::OnPaletteChanged(const FAsset
 
         mPaletteEntries.Empty();
         for( int i = 0; i < palette->GetEntries().Num(); i++ )
-        {   
+        {
             if( palette->GetEntries()[i]->IsA(UOdysseyPaletteEntryColor::StaticClass()) )
                 mPaletteEntries.Add(palette->GetEntries()[i]);
         }

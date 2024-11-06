@@ -190,7 +190,7 @@ FOdysseyVectorSegmentCubic::HasBaseClass( uint32 iBaseClassID )
     return FOdysseyVectorSegment::HasBaseClass( iBaseClassID );
 }
 
-::ULIS::FVec2D* 
+::ULIS::FVec2D*
 FOdysseyVectorSegmentCubic::GetBezier()
 {
     return mBezier;
@@ -246,7 +246,7 @@ FOdysseyVectorSegmentCubic::GetTangentAt( double t, bool iNormalize )
     {
         tangent = ctrlPoint0 - point0;
 
-        if( tangent.Distance() == 0.0f ) 
+        if( tangent.Distance() == 0.0f )
         {
             tangent = ctrlPoint1 - point0;
         }
@@ -570,11 +570,11 @@ FOdysseyVectorSegmentCubic::Split( const ::ULIS::FVec2D& iPoint
                                                        , &tmpBezier0[3]
                                                        , iPoinT );
 
-    // here we take the vertex coords and not the one we could retrieve from the 
+    // here we take the vertex coords and not the one we could retrieve from the
     // subBezier because it might be inconsistent due to the value at T found from
     // performing linear intersection and not from a bezier-bezier intersection.
     // for this reason T might no be reliable to find the endpoints of our bezier.
-    // we only use it for the handles. 
+    // we only use it for the handles.
     newCubicSegment[0] = new FOdysseyVectorSegmentCubic( mOwner
                                                        , GetVertex(0)
                                                        , mBezier[0].x + ( tmpBezier0[1].x - tmpBezier0[0].x )
@@ -590,11 +590,11 @@ FOdysseyVectorSegmentCubic::Split( const ::ULIS::FVec2D& iPoint
                                                               , &tmpBezier1[3]
                                                               , iPoinT );
 
-    // here we take the vertex coords and not the one we could retrieve from the 
+    // here we take the vertex coords and not the one we could retrieve from the
     // subBezier because it might be inconsistent due to the value at T found from
     // performing linear intersection and not from a bezier-bezier intersection.
     // for this reason T might no be reliable to find the endpoints of our bezier.
-    // we only use it for the handles. 
+    // we only use it for the handles.
     newCubicSegment[1] = new FOdysseyVectorSegmentCubic( mOwner
                                                        , newVertex
                                                        , iPoint.x     + ( tmpBezier1[1].x - tmpBezier1[0].x )
@@ -935,7 +935,7 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( FOdysseyVectorPoint* iFromPoi
 
             BuildVariableAdaptive( iFromPoint
                                  , splitPoint
-                                 , iFromT  
+                                 , iFromT
                                  , splitsAt
                                  , iRadiusFrom
                                  , radiusAt
@@ -1009,10 +1009,10 @@ FOdysseyVectorSegmentCubic::BuildOffsetCurvesRecursive( ::ULIS::FVec2D iBezier[4
         ctrlVector[1].Normalize();
     }
 
-    if( ( iCurrentRecurse < iMinRecurse ) // <-- Force at least 4 subdivisions because the intersections for paint groups are tested 
-                                          // linearly and we need precision. If the cubic segment is made of few linear sub-segments, 
+    if( ( iCurrentRecurse < iMinRecurse ) // <-- Force at least 4 subdivisions because the intersections for paint groups are tested
+                                          // linearly and we need precision. If the cubic segment is made of few linear sub-segments,
                                           // then the T value at intersection does not match the T value we would get with mathematically
-                                          // accurate Bezier-Bezier intersection, but these are very complicated to implement so we just 
+                                          // accurate Bezier-Bezier intersection, but these are very complicated to implement so we just
                                           // stick with linear intersections. By dividing the bezier segment with smaller liner segments
                                           // whose T values at end points are known, we get almost correct values for T at intersections.
      || ( ( iCurrentRecurse < iMaxRecurse ) // <--- do not subdivide forever though.
@@ -1265,7 +1265,7 @@ FOdysseyVectorSegmentCubic::BuildOffsetCurves()
     BuildOffsetCurvesRecursive( mBezier
                               , 0.0f
                               , 1.0f
-                              , 0.97814760073f // 12deg //0.9945f // 6deg - // 
+                              , 0.97814760073f // 12deg //0.9945f // 6deg - //
                               , 3 // min recurse
                               , 4 // max recurse
                               , 0 // current recurse

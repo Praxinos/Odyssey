@@ -103,13 +103,13 @@ FOdysseyVectorVertex::GetMinMaxFromList( std::list<FOdysseyVectorVertex*>& iVert
     return false;
 }
 
-FOdysseyVectorObject* 
+FOdysseyVectorObject*
 FOdysseyVectorVertex::GetOwner()
 {
     return mOwner;
 }
 
-FOdysseyVectorPath* 
+FOdysseyVectorPath*
 FOdysseyVectorVertex::GetOwnerAsPath()
 {
     return static_cast<FOdysseyVectorPath*>(mOwner);
@@ -639,13 +639,13 @@ FOdysseyVectorVertex::SetRadius( double iRadius )
     }
 }
 
-bool 
+bool
 FOdysseyVectorVertex::IsLocked()
 {
     return ( mFlags & LOCKED ) ? true : false;
 }
 
-void 
+void
 FOdysseyVectorVertex::SetLocked( bool iIsLocked )
 {
     if( iIsLocked == true )
@@ -658,7 +658,7 @@ FOdysseyVectorVertex::SetLocked( bool iIsLocked )
     }
 }
 
-void 
+void
 FOdysseyVectorVertex::SetCoords( double iX, double iY )
 {
     if( ( mFlags & LOCKED ) == 0 )
@@ -983,7 +983,7 @@ FOdysseyVectorVertex::GetSegment( FOdysseyVectorVertex* iOtherVertex )
 {
     for( FOdysseyVectorSegment* segment : mSegmentList )
     {
-        if ( ( ( segment->GetPoint(0) == this ) && ( segment->GetPoint(1) == iOtherVertex ) ) 
+        if ( ( ( segment->GetPoint(0) == this ) && ( segment->GetPoint(1) == iOtherVertex ) )
           || ( ( segment->GetPoint(1) == this ) && ( segment->GetPoint(0) == iOtherVertex ) ) )
         {
             return segment;

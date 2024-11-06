@@ -381,10 +381,10 @@ SOdysseyViewport::UpdateScrollBars()
     points.Add(mTransform.TransformPoint(FVector2D(-width / 2.f, -height / 2.f)));
 
     FBox2D bbox(points);
-    
+
     FVector2D minPos( -bbox.GetSize().X / 2.f, -bbox.GetSize().Y / 2.f);
     FVector2D maxPos( mViewport->GetSizeXY().X + bbox.GetSize().X / 2.f, mViewport->GetSizeXY().Y + bbox.GetSize().Y / 2.f);
-    
+
     FVector2D dist = maxPos - minPos;
     FVector2D center = bbox.GetCenter() + GetViewportCenter();
 
@@ -488,7 +488,7 @@ SOdysseyViewport::GetTranslationFromSlidersOffsets( float InScrollOffsetFraction
     pos += minPos;
     pos -= GetViewportCenter();
 
-    return pos; 
+    return pos;
 }
 
 
@@ -748,7 +748,7 @@ double SOdysseyViewport::GetRotation() const
 
 void SOdysseyViewport::SetRotation(double RotationValue, const FVector2D& iPivotPoint)
 {
-    
+
     mRotation = fmod( 2 * PI + fmod(RotationValue, 2 * PI), 2 * PI); //Positive modulo;
     UpdateTransform();
     UpdateScrollBars();
@@ -843,7 +843,7 @@ void SOdysseyViewport::ComputeTextureDisplayDimensions( uint32& Width, uint32& H
     UTexture* texture = GetTexture();
     if (!texture)
         return;
-    
+
     Width = texture->GetSurfaceWidth() * GetZoom();
     Height = texture->GetSurfaceHeight() * GetZoom();
 }
@@ -904,7 +904,7 @@ SOdysseyViewport::GetTransformToSourceTexture()
     uint32 height = texture->GetSurfaceHeight();
 
     FVector2D translation = (FVector2D(width, height) / 2.0f);
-    
+
     FTransform2D transform(FScale2D(width / textureFullWidth, height / textureFullHeight));
 
     transform = transform.Concatenate(FTransform2D(-translation));

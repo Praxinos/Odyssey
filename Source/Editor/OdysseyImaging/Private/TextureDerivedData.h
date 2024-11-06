@@ -102,9 +102,9 @@ static void GetEncodeSpeedOptions(ETextureEncodeSpeed InEncodeSpeed, FTextureEnc
 // Convert the baseline build settings for all layers to one for the given layer.
 // Note this gets called twice for layer 0, so needs to be idempotent.
 static void FinalizeBuildSettingsForLayer(
-    const UTexture& Texture, 
-    int32 LayerIndex, 
-    const ITargetPlatform* TargetPlatform, 
+    const UTexture& Texture,
+    int32 LayerIndex,
+    const ITargetPlatform* TargetPlatform,
     ETextureEncodeSpeed InEncodeSpeed, // must be Final or Fast.
     FTextureBuildSettings& OutSettings,
     FTexturePlatformData::FTextureEncodeResultMetadata* OutBuildResultMetadata // can be nullptr if not needed
@@ -137,12 +137,12 @@ static void FinalizeBuildSettingsForLayer(
         //    should be done inside GetPlatformTextureFormatNamesWithPrefix
         //    this is only used by Android & iOS
         //  the reason to do it here is we now have bVirtualStreamable, which is not available at the earlier call
-        
+
         // FinalizeVirtualTextureLayerFormat assumes (incorrectly) that it gets non-prefixed names, so remove them :
 
         // VT does not tile so should never have a platform prefix, but could have an Oodle prefix
         checkSlow( OutSettings.TextureFormatName == UE::TextureBuildUtilities::TextureFormatRemovePlatformPrefixFromName(OutSettings.TextureFormatName) );
-        
+
         FName NameWithoutPrefix = UE::TextureBuildUtilities::TextureFormatRemovePrefixFromName(OutSettings.TextureFormatName);
         FName ModifiedName = TargetPlatform->FinalizeVirtualTextureLayerFormat(NameWithoutPrefix);
         if ( NameWithoutPrefix != ModifiedName )
@@ -180,7 +180,7 @@ static void FinalizeBuildSettingsForLayer(
                     OutBuildResultMetadata->bIsValid = true;
                     OutBuildResultMetadata->bSupportsEncodeSpeed = bSupportsEncodeSpeed;
                 }
-            
+
                 {
                     if (FResolvedTextureEncodingSettings::Get().Project.bSharedLinearTextureEncoding)
                     {
@@ -224,13 +224,13 @@ static void FinalizeBuildSettingsForLayer(
             switch (OutSettings.LossyCompressionAmount)
             {
             default:
-            case TLCA_Default: 
+            case TLCA_Default:
                 {
                     if (OutBuildResultMetadata)
                     {
                         OutBuildResultMetadata->RDOSource = FTexturePlatformData::FTextureEncodeResultMetadata::OodleRDOSource::Default;
                     }
-                    OutSettings.OodleRDO = Options.RDOLambda; 
+                    OutSettings.OodleRDO = Options.RDOLambda;
                     break; // Use global defaults.
                 }
             case TLCA_None:    OutSettings.OodleRDO = 0; break;        // "No lossy compression"
@@ -260,7 +260,7 @@ static void FinalizeBuildSettingsForLayer(
  * Sets texture build settings.
  * @param Texture - The texture for which to build compressor settings.
  * @param OutBuildSettings - Build settings.
- * 
+ *
  * This function creates the build settings that are shared across all layers - you can not
  * assume a texture format at this time (See FinalizeBuildSettingsForLayer)
  */
@@ -323,7 +323,7 @@ static void GetTextureBuildSettings(
     OutBuildSettings.BlueChromaticityCoordinate = FVector2f(Texture.SourceColorSettings.BlueChromaticityCoordinate);
     OutBuildSettings.WhiteChromaticityCoordinate = FVector2f(Texture.SourceColorSettings.WhiteChromaticityCoordinate);
     OutBuildSettings.ChromaticAdaptationMethod = static_cast<uint8>(Texture.SourceColorSettings.ChromaticAdaptationMethod);
-    
+
     check( OutBuildSettings.MaxTextureResolution == FTextureBuildSettings::MaxTextureResolutionDefault );
     if (Texture.MaxTextureSize > 0)
     {
@@ -331,7 +331,7 @@ static void GetTextureBuildSettings(
     }
 
     ETextureClass TextureClass = Texture.GetTextureClass();
-    
+
     if ( TextureClass == ETextureClass::TwoD )
     {
         // nada
@@ -375,7 +375,7 @@ static void GetTextureBuildSettings(
     bool bSharpenWithoutColorShift;
     bool bBorderColorBlack;
     TextureMipGenSettings MipGenSettings;
-    TextureLODSettings.GetMipGenSettings( 
+    TextureLODSettings.GetMipGenSettings(
         Texture,
         MipGenSettings,
         OutBuildSettings.MipSharpening,
@@ -409,7 +409,7 @@ static void GetTextureBuildSettings(
             if (Block.NumMips != ExpectedNumMips)
             {
                 MipGenSettings = TMGS_SimpleAverage;
-                UE_LOG(LogTexture, Warning, TEXT("Texture %s is virtual and has LeaveExistingMips with an incomplete mip chain - forcing to SimpleAverage (Block %d has %d mips, expected %d)."), 
+                UE_LOG(LogTexture, Warning, TEXT("Texture %s is virtual and has LeaveExistingMips with an incomplete mip chain - forcing to SimpleAverage (Block %d has %d mips, expected %d)."),
                     *Texture.GetPathName(),
                     BlockIndex,
                     Block.NumMips,
@@ -426,7 +426,7 @@ static void GetTextureBuildSettings(
     OutBuildSettings.bSharpenWithoutColorShift = bSharpenWithoutColorShift;
     OutBuildSettings.bBorderColorBlack = bBorderColorBlack;
     OutBuildSettings.bFlipGreenChannel = Texture.bFlipGreenChannel;
-    
+
     // these are set even if Texture.CompositeTexture == null
     //    we should not do that, but keep it the same for now to preserve DDC keys
     OutBuildSettings.CompositeTextureMode = Texture.CompositeTextureMode;
@@ -447,7 +447,7 @@ static void GetTextureBuildSettings(
     OutBuildSettings.bChromaKeyTexture = Texture.bChromaKeyTexture;
     OutBuildSettings.ChromaKeyThreshold = Texture.ChromaKeyThreshold;
     OutBuildSettings.CompressionQuality = Texture.CompressionQuality - 1; // translate from enum's 0 .. 5 to desired compression (-1 .. 4, where -1 is default while 0 .. 4 are actual quality setting override)
-    
+
     // do remap here before we send to TBW's which may not have access to config :
     OutBuildSettings.OodleTextureSdkVersion = ConditionalRemapOodleTextureSdkVersion(Texture.OodleTextureSdkVersion,&TargetPlatform);
 
@@ -474,12 +474,12 @@ static void GetTextureBuildSettings(
     // Downscale only allowed if NoMipMaps, 2d, and not VT
     //    silently does nothing otherwise
     if (! bVirtualTextureStreaming &&
-        MipGenSettings == TMGS_NoMipmaps && 
+        MipGenSettings == TMGS_NoMipmaps &&
         Texture.IsA(UTexture2D::StaticClass()))    // TODO: support more texture types
     {
         TextureLODSettings.GetDownscaleOptions(Texture, TargetPlatform, OutBuildSettings.Downscale, (ETextureDownscaleOptions&)OutBuildSettings.DownscaleOptions);
     }
-    
+
     // For virtual texturing we take the address mode into consideration
     if (OutBuildSettings.bVirtualStreamable)
     {
@@ -523,7 +523,7 @@ static void GetTextureBuildSettings(
         OutBuildSettings.VirtualTextureTileSize = 0;
         OutBuildSettings.VirtualTextureBorderSize = 0;
     }
-    
+
     OutBuildSettings.TextureAddressModeX = Texture.GetTextureAddressX();
     OutBuildSettings.TextureAddressModeY = Texture.GetTextureAddressY();
     OutBuildSettings.TextureAddressModeZ = Texture.GetTextureAddressZ();

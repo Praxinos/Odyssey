@@ -26,7 +26,7 @@ public:
     void Init(TSharedPtr<FOdysseyAnimationMediaPlayer> iPlayer, TSharedPtr<FOdysseyAnimationMediaControls> iControls);
     void OnOpen(UOdysseyAnimation* iAnimation);
     void OnClose();
-    
+
 protected:
     //~ IMediaSamples interface
     virtual void FlushSamples() override;
@@ -44,7 +44,7 @@ public:
     void CopyBlockToTexture(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects);
     IOdysseyImageRenderer::eRenderType GetRenderType() const;
     void SetRenderType(IOdysseyImageRenderer::eRenderType iRenderType);
-    
+
 protected:
     // FTickableEditorObject implementation
     virtual void Tick(float DeltaTime) override;

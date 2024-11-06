@@ -135,7 +135,7 @@ TArray<UOdysseyPaletteEntry*> UOdysseyPalette::DuplicateEntries(TArray<UOdysseyP
         }
     );
 
-    //No entry    
+    //No entry
     if (iEntries.Num()<= 0)
         return entriesDuplicates;
 
@@ -183,7 +183,7 @@ UOdysseyPaletteEntry* UOdysseyPalette::CopyEntry(UOdysseyPaletteEntry* iEntry, U
 
     if (!iParentEntry)
         iParentEntry = PaletteRoot;
-    
+
     //If the given parent can't have children or isn't contained in this Palette
     if (iParentEntry && (!iParentEntry->CanHaveChildren || !ContainsEntry(iParentEntry)) )
         return nullptr;
@@ -238,7 +238,7 @@ TArray<UOdysseyPaletteEntry*> UOdysseyPalette::CopyEntries(TArray<UOdysseyPalett
     );
 
     for (UOdysseyPaletteEntry* entry : iEntries)
-    {   
+    {
         //Duplicate the entry
         UOdysseyPaletteEntry* entryCopy = CopyEntryInternal(entry, iParentEntry, iIndexInParent);
         entryCopies.Add(entryCopy);
@@ -311,7 +311,7 @@ void UOdysseyPalette::MoveEntry(UOdysseyPaletteEntry* iEntry, UOdysseyPaletteEnt
         return;
 
     bool bChangeParent = iEntry->Parent != iParentEntry;
-    
+
     if (bChangeParent)
     {
         FOdysseyObjectEditorUtils::PreChangePropertyValue(iEntry, "Parent");
@@ -385,7 +385,7 @@ void UOdysseyPalette::MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdyss
     for (UOdysseyPaletteEntry* entry : iEntries)
     {
         bool bChangeParent = entry->Parent != iParentEntry;
-        
+
         if (bChangeParent)
         {
             FOdysseyObjectEditorUtils::PreChangePropertyValue(entry, "Parent");
@@ -538,7 +538,7 @@ UOdysseyPaletteEntry* UOdysseyPalette::CreateEntry(UClass* iEntryType)
     UOdysseyPaletteEntry* entry = NewObject<UOdysseyPaletteEntry>(this, iEntryType, NAME_None, RF_Public | RF_Transactional);
     if (!entry)
         return nullptr;
-        
+
     //Name the layer
     FString name = entry->DefaultName.ToString() + TEXT(" ") + FString::FromInt(GetEntries().Num() + 1);
     entry->EntryName = FText::FromString(name);
@@ -562,7 +562,7 @@ void UOdysseyPalette::AddEntriesToHierarchy(TArray<UOdysseyPaletteEntry*> iEntri
     {
         entry->Children.Empty();
     }
-    
+
     //Add entries to parent's children
     iParent->Children.Insert(iEntries, FMath::Clamp(iIndexInParent, 0, iParent->Children.Num()));
 

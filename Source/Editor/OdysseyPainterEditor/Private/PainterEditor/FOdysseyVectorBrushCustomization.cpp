@@ -125,7 +125,7 @@ FOdysseyVectorBrushCustomization::FilterAsset( const struct FAssetData& InAssetD
 }
 
 FOdysseyVectorBrush*
-FOdysseyVectorBrushCustomization::GetVectorBrush( TSharedRef<IPropertyHandle> StructPropertyHandle ) const 
+FOdysseyVectorBrushCustomization::GetVectorBrush( TSharedRef<IPropertyHandle> StructPropertyHandle ) const
 {
     FProperty *property = StructPropertyHandle.Get().GetProperty();
     TArray<UObject*> OuterObjects;
@@ -135,7 +135,7 @@ FOdysseyVectorBrushCustomization::GetVectorBrush( TSharedRef<IPropertyHandle> St
     if( OuterObjects.Num() == 1 )
     {
         UObject* OuterObject = OuterObjects[0];
-        FOdysseyVectorBrush* vectorBrush = property->ContainerPtrToValuePtr<FOdysseyVectorBrush>( OuterObject, 0 ); 
+        FOdysseyVectorBrush* vectorBrush = property->ContainerPtrToValuePtr<FOdysseyVectorBrush>( OuterObject, 0 );
 
         return vectorBrush;
     }
@@ -145,7 +145,7 @@ FOdysseyVectorBrushCustomization::GetVectorBrush( TSharedRef<IPropertyHandle> St
 
 //FString
 void
-FOdysseyVectorBrushCustomization::OnPropertyValueChanged( TSharedRef<IPropertyHandle> StructPropertyHandle ) 
+FOdysseyVectorBrushCustomization::OnPropertyValueChanged( TSharedRef<IPropertyHandle> StructPropertyHandle )
 {
     FOdysseyVectorBrush* vectorBrush = GetVectorBrush( StructPropertyHandle );
 
@@ -204,10 +204,10 @@ FOdysseyVectorBrushCustomization::OnAssetSelected( const FAssetData& AssetData
         FPropertyChangedEvent propertyChangedEvent = FPropertyChangedEvent( property
                                                                           , EPropertyChangeType::ValueSet
                                                                           , OuterObjects );
-        FOdysseyVectorBrush* vectorBrush = property->ContainerPtrToValuePtr<FOdysseyVectorBrush>( OuterObject, 0 ); 
+        FOdysseyVectorBrush* vectorBrush = property->ContainerPtrToValuePtr<FOdysseyVectorBrush>( OuterObject, 0 );
 
         vectorBrush->SetTexture( texture );
-        
+
 
         OuterObject->PostEditChangeProperty( propertyChangedEvent );
     }

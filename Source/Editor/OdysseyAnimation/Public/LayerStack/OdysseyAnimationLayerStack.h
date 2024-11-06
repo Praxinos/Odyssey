@@ -29,17 +29,17 @@ public:
 public:
     //Animation Specific
     /**
-     * @brief Will return the actual frame range 
-     * 
-     * @return FInt32Range 
+     * @brief Will return the actual frame range
+     *
+     * @return FInt32Range
      */
     UFUNCTION(BlueprintCallable, Category="Odyssey|LayerStack")
     FInt32Range GetFrameRange() const;
 
 public:
-	virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
-	TSharedRef<FOdysseyAnimationCellSelection> GetCellSelection() const;
+    virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
+    TSharedRef<FOdysseyAnimationCellSelection> GetCellSelection() const;
 
 private:
-	TSharedRef<FOdysseyAnimationCellSelection> mCellSelection;
+    TSharedRef<FOdysseyAnimationCellSelection> mCellSelection;
 };

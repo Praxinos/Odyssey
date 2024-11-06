@@ -56,7 +56,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathPushTool : public 
         virtual bool OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
                                         , const FKey& iKey
-										, uint64& oSignalFlags ) override;
+                                        , uint64& oSignalFlags ) override;
         virtual void OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                          , const FOdysseyPoint& iPointInTexture, uint64& oSignalFlags ) override;
         virtual void OnMouseDragVector( FOdysseyVectorGroupPaint* iScene

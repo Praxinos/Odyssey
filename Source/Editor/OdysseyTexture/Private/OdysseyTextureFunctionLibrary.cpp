@@ -20,6 +20,6 @@ UOdysseyTextureFunctionLibrary::GetLayerStack(UTexture2D* iTexture)
     UOdysseyTextureLayerStackUserData* userData = Cast<UOdysseyTextureLayerStackUserData>(iTexture->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
     if (!userData)
         return nullptr;
-    
+
     return userData->GetLayerStack();
 }

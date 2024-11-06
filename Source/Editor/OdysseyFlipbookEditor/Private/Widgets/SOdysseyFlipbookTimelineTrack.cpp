@@ -202,7 +202,7 @@ SOdysseyFlipbookTimelineTrack::DeleteFrame(int32 iIndex)
     UPaperFlipbook* flipbook = wrapper->GetFlipbook();
     if (!flipbook)
         return;
-        
+
     //Remove from GUI
     mFrameList->RemoveFrameAt(iIndex);
 
@@ -210,7 +210,7 @@ SOdysseyFlipbookTimelineTrack::DeleteFrame(int32 iIndex)
     FPaperFlipbookKeyFrame keyframe = flipbook->GetKeyFrameChecked(iIndex);
 
     wrapper->RemoveKeyFrame(iIndex);
-    
+
     mOnKeyframeRemoved.ExecuteIfBound(keyframe);
     mOnFlipbookChanged.ExecuteIfBound();
 }
@@ -238,7 +238,7 @@ SOdysseyFlipbookTimelineTrack::DuplicateFrame(int32 iIndex)
     // - Copy the previous keyframe content (layers and everything)
     //
     // This will ensure that any modifications on the source keyframe will be done before copying it.
-    
+
     FPaperFlipbookKeyFrame keyframe = flipbook->GetKeyFrameChecked(iIndex + 1);
     InsertFrame(iIndex + 1, createdTexture, keyframe.FrameRun);
 
@@ -338,7 +338,7 @@ SOdysseyFlipbookTimelineTrack::OnGenerateFrameContextMenu(const FGeometry& iGeom
     frameCommandList->MapAction(flipbookCommands.AddNewKeyFrameAfter, FExecuteAction::CreateSP(this, &SOdysseyFlipbookTimelineTrack::AddNewKeyframe, iFrameIndex + 1), FCanExecuteAction());
 
     FMenuBuilder MenuBuilder(true, frameCommandList);
-    {    
+    {
         const FText KeyframeSectionTitle = LOCTEXT("timeline.context-menu.keyframe-section.name", "Keyframe Actions");
         MenuBuilder.BeginSection("KeyframeActions", KeyframeSectionTitle);
         MenuBuilder.AddMenuEntry(FGenericCommands::Get().Duplicate);
@@ -388,7 +388,7 @@ SOdysseyFlipbookTimelineTrack::OnSpriteTextureChanged(UPaperSprite* iSprite, UTe
         {
             SetFrame(i, texture);
         }
-    }    
+    }
 }
 
 void
@@ -407,7 +407,7 @@ SOdysseyFlipbookTimelineTrack::OpenSpritePickerMenu(FMenuBuilder& MenuBuilder, i
     UPaperSprite* sprite = wrapper->GetKeyframeSprite(iIndex);
     if (!sprite)
         return;
-    
+
     FAssetData CurrentAssetData(sprite);
 
     const bool bAllowClear = true;
@@ -468,7 +468,7 @@ SOdysseyFlipbookTimelineTrack::AddNewKeyframe(int32 iIndex)
 void
 SOdysseyFlipbookTimelineTrack::BindCommands(const TSharedRef<FUICommandList>& iCommandList)
 {
-    
+
 }
 
 #undef LOCTEXT_NAMESPACE

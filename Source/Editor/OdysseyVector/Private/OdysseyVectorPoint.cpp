@@ -27,19 +27,19 @@ FOdysseyVectorPoint::Set( double iX, double iY )
     SetCoords( iX, iY );
 }
 
-void 
+void
 FOdysseyVectorPoint::SetX( double iX )
 {
     SetCoords( iX, mCoords.y );
 }
 
-void 
+void
 FOdysseyVectorPoint::SetY( double iY )
 {
     SetCoords( mCoords.x, iY );
 }
 
-void 
+void
 FOdysseyVectorPoint::SetCoords( double iX, double iY )
 {
     mCoords.x = iX;
@@ -52,13 +52,13 @@ FOdysseyVectorPoint::GetCoords()
     return mCoords;
 }
 
-double 
+double
 FOdysseyVectorPoint::GetX()
 {
     return mCoords.x;
 }
 
-double 
+double
 FOdysseyVectorPoint::GetY()
 {
     return mCoords.y;

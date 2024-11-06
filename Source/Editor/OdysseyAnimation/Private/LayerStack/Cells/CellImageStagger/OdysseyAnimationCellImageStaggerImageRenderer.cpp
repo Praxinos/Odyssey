@@ -22,7 +22,7 @@ FOdysseyAnimationCellImageStaggerImageRenderer::FOdysseyAnimationCellImageStagge
         mCellRenderer = cell->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, cellFrame, iFilter);
     }
 }
-    
+
 void
 FOdysseyAnimationCellImageStaggerImageRenderer::Init()
 {
@@ -35,13 +35,13 @@ FOdysseyAnimationCellImageStaggerImageRenderer::IsGameThreadOnly()
 {
     if (!mCellRenderer)
         return false;
-    
+
     return mCellRenderer->IsGameThreadOnly();
 }
 
 TArray<::ULIS::FEvent>
 FOdysseyAnimationCellImageStaggerImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
-{   
+{
     if (!mCellRenderer)
         return iWaitList;
 

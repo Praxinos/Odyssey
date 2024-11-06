@@ -32,9 +32,9 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SOdysseyDiscoveringAssetsDialog::Construct( const FArguments& iInArgs )
 {
     mOnAssetsDiscovered = iInArgs._mOnAssetsDiscovered;
-    
+
     FEditorWidgetsModule& editorWidgetsModule = FModuleManager::LoadModuleChecked<FEditorWidgetsModule>("EditorWidgets");
-    
+
     ChildSlot
     [
         SNew(SBorder)

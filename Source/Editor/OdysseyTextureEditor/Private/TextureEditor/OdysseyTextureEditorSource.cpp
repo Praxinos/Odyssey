@@ -106,7 +106,7 @@ FOdysseyTextureEditorSource::GetLayerStack() const
     UOdysseyTextureLayerStackUserData* userData = TextureUserData();
     if (!userData)
         return nullptr;
-    
+
     return userData->GetLayerStack();
 }
 
@@ -166,7 +166,7 @@ FOdysseyTextureEditorSource::Clear()
     #ifdef WITH_EDITOR
         FScopedTransaction ScopedTransaction(LOCTEXT("actions.clear", "Clear"));
     #endif
-    
+
     UOdysseyLayer* currentLayer = layerStack->CurrentLayer.Get();
     if (!currentLayer)
         return;
@@ -174,7 +174,7 @@ FOdysseyTextureEditorSource::Clear()
     FOdysseyMediaProvider mediaProvider = currentLayer->GetMediaProvider(0);
     if ( mediaProvider.IsLocked() )
         return;
-    
+
     if ( mediaProvider.HasMedia<FOdysseyMediaRaster>() )
     {
         TArray<TSharedPtr<FOdysseyMediaRaster>> mediasRaster = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
@@ -218,7 +218,7 @@ FOdysseyTextureEditorSource::Clear()
     }
 }
 
-void 
+void
 FOdysseyTextureEditorSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock> iCopyBlock)
 {
     if (!iCopyBlock)
@@ -270,7 +270,7 @@ FOdysseyTextureEditorSource::ClearFromCopyBlock(TSharedPtr<::ULIS::FBlock> iCopy
                         nullptr,
                         &eventCut
                     );
-                    
+
                     return { eventCut };
                 }
             );
@@ -361,7 +361,7 @@ void FOdysseyTextureEditorSource::PasteBlockToCurrentLayer(TSharedPtr<::ULIS::FB
     }
 }
 
-void 
+void
 FOdysseyTextureEditorSource::PasteBlockToNewLayer( TSharedPtr<::ULIS::FBlock> iBlock )
 {
     if (!iBlock)

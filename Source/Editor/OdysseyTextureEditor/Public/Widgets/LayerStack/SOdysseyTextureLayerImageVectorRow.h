@@ -20,9 +20,9 @@ public:
 public:
     // Construction / Destruction
     void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, class UOdysseyTextureLayerImageVector* iTextureLayerImageVector);
-    
+
 protected:
-	virtual TArray<TSharedPtr<SWidget>> GenerateMainRowHeaderOptionWidgets() override;
+    virtual TArray<TSharedPtr<SWidget>> GenerateMainRowHeaderOptionWidgets() override;
 
 private:
     void OnIsColoredCheckStateChanged( ECheckBoxState iState );

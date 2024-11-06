@@ -82,7 +82,7 @@ FOdysseyVectorImportV2::ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 i
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
-            }    
+            }
         } );
 }
 

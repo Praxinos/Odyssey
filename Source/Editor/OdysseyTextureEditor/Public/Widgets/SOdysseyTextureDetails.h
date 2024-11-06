@@ -12,7 +12,7 @@ public:
     {}
         SLATE_ATTRIBUTE(UTexture*, Texture)
     SLATE_END_ARGS()
-    
+
 
     void Construct(const FArguments& InArgs);
 

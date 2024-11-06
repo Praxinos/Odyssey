@@ -22,7 +22,7 @@ SOdysseyAnimationTimelineLightTableHeader::SOdysseyAnimationTimelineLightTableHe
     : mLightTablePreviousKeysColorBlockWidget(nullptr)
     , mLightTableNextKeysColorBlockWidget(nullptr)
 {
-    
+
 }
 
 void
@@ -31,53 +31,53 @@ SOdysseyAnimationTimelineLightTableHeader::Construct(const FArguments& iArgs)
     mLayer = iArgs._Layer;
 
     ChildSlot
-	[
-		SNew(SVerticalBox)
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		.Padding(0.f, 0.f, 0.f, 2.f)
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
-			[
-				SNew(STextBlock)
-				.Text(LOCTEXT("lighttable.timeline-header.name", "LightTable"))
-			]
-			+ SHorizontalBox::Slot()
-			.AutoWidth()
-			[
-				SNew(SComboButton)
-				.ComboButtonStyle(&FOdysseyStyle::GetWidgetStyle<FComboButtonStyle>("Animation.LightTable.Options"))
-				.OnGetMenuContent(this, &SOdysseyAnimationTimelineLightTableHeader::OnOptionsGetMenuContent)
-				.HasDownArrow(false)
-			]
-		]
-		+ SVerticalBox::Slot()
-		.Padding(0.f, 0.f, 0.f, 2.f)
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
-			.Padding(0.f, 0.f, 1.f, 0.f)
-			[
-				SAssignNew(mLightTablePreviousKeysColorBlockWidget, SColorBlock)
-				.CornerRadius(FVector4(4.0f,4.0f,4.0f,4.0f))
-				.Color(this, &SOdysseyAnimationTimelineLightTableHeader::GetLightTablePreviousKeysColor)
-				.UseSRGB(true)
-				.OnMouseButtonDown(this, &SOdysseyAnimationTimelineLightTableHeader::OnLightTablePreviousKeysColorMouseButtonDown)
-				.IgnoreAlpha(true)
-			]
-			+ SHorizontalBox::Slot()
-			.Padding(1.f, 0.f, 0.f, 0.f)
-			[
-				SAssignNew(mLightTableNextKeysColorBlockWidget, SColorBlock)
-				.CornerRadius(FVector4(4.0f,4.0f,4.0f,4.0f))
-				.Color(this, &SOdysseyAnimationTimelineLightTableHeader::GetLightTableNextKeysColor)
-				.UseSRGB(true)
-				.OnMouseButtonDown(this, &SOdysseyAnimationTimelineLightTableHeader::OnLightTableNextKeysColorMouseButtonDown)
-				.IgnoreAlpha(true)
-			]
-		]
-	];
+    [
+        SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        .AutoHeight()
+        .Padding(0.f, 0.f, 0.f, 2.f)
+        [
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            [
+                SNew(STextBlock)
+                .Text(LOCTEXT("lighttable.timeline-header.name", "LightTable"))
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                SNew(SComboButton)
+                .ComboButtonStyle(&FOdysseyStyle::GetWidgetStyle<FComboButtonStyle>("Animation.LightTable.Options"))
+                .OnGetMenuContent(this, &SOdysseyAnimationTimelineLightTableHeader::OnOptionsGetMenuContent)
+                .HasDownArrow(false)
+            ]
+        ]
+        + SVerticalBox::Slot()
+        .Padding(0.f, 0.f, 0.f, 2.f)
+        [
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            .Padding(0.f, 0.f, 1.f, 0.f)
+            [
+                SAssignNew(mLightTablePreviousKeysColorBlockWidget, SColorBlock)
+                .CornerRadius(FVector4(4.0f,4.0f,4.0f,4.0f))
+                .Color(this, &SOdysseyAnimationTimelineLightTableHeader::GetLightTablePreviousKeysColor)
+                .UseSRGB(true)
+                .OnMouseButtonDown(this, &SOdysseyAnimationTimelineLightTableHeader::OnLightTablePreviousKeysColorMouseButtonDown)
+                .IgnoreAlpha(true)
+            ]
+            + SHorizontalBox::Slot()
+            .Padding(1.f, 0.f, 0.f, 0.f)
+            [
+                SAssignNew(mLightTableNextKeysColorBlockWidget, SColorBlock)
+                .CornerRadius(FVector4(4.0f,4.0f,4.0f,4.0f))
+                .Color(this, &SOdysseyAnimationTimelineLightTableHeader::GetLightTableNextKeysColor)
+                .UseSRGB(true)
+                .OnMouseButtonDown(this, &SOdysseyAnimationTimelineLightTableHeader::OnLightTableNextKeysColorMouseButtonDown)
+                .IgnoreAlpha(true)
+            ]
+        ]
+    ];
 }
 
 FLinearColor
@@ -237,7 +237,7 @@ SOdysseyAnimationTimelineLightTableHeader::OnOptionsGetMenuContent()
                 .Justification(ETextJustify::Type::Right)
                 .OnValueChanged(this, &SOdysseyAnimationTimelineLightTableHeader::OnPreviousKeysContrastValueChanged)
                 .OnValueCommitted(this, &SOdysseyAnimationTimelineLightTableHeader::OnPreviousKeysContrastValueCommitted)
-                
+
             ]
             , LOCTEXT("lighttable.timeline-header.options-menu.previous-keys-contrast.name", "Previous Keys Contrast")
             , true

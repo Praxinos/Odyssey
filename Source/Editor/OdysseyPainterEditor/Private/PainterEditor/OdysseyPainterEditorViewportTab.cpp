@@ -57,7 +57,7 @@ FOdysseyPainterEditorViewportTab::CreateWidget()
 
     //TODO: not cool to have to go through the whole GUI for an info, move that in the painterEditor Data
     mViewportClient = MakeShareable(new FOdysseyPainterEditorViewportClient(mEditor, mViewport, mEditor->GetMeshSelector().Get()));
-    
+
     //TODO: manage colorpicking here, viewportClient itself should not know the action to pick a color
     mViewportClient->OnPickColor().BindRaw(this, &FOdysseyPainterEditorViewportTab::HandleViewportColorPicked);
     mViewportClient->OnMouseDown().BindRaw(this, &FOdysseyPainterEditorViewportTab::OnViewportMouseDown);
@@ -151,7 +151,7 @@ FOdysseyPainterEditorViewportTab::Texture() const
 
 void
 FOdysseyPainterEditorViewportTab::HandleViewportColorPicked(eOdysseyEventState::Type iEventState, const FVector2D& iPositionInTexture)
-{       
+{
     if (iEventState == eOdysseyEventState::kSet)
         mEditor->GetColorPickerTool()->PickColorUp(FOdysseyPoint(iPositionInTexture.X, iPositionInTexture.Y));
     else
@@ -220,7 +220,7 @@ FOdysseyPainterEditorViewportTab::OnViewportKeyDown(const FKey& iKey)
     UOdysseyPainterEditorTool* tool = mEditor->GetCurrentTool();
     if ( !tool )
         return false;
-    
+
     return tool->OnKeyDown(iKey);
 }
 

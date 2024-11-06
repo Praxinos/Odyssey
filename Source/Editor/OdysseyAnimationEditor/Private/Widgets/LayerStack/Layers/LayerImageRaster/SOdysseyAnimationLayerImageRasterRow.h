@@ -16,7 +16,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageRasterRow
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageRasterRow)
         {}
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
 public:
@@ -28,7 +28,7 @@ public:
     );
 
 protected:
-	virtual TArray<TSharedPtr<SWidget>> GenerateMainRowHeaderOptionWidgets() override;
+    virtual TArray<TSharedPtr<SWidget>> GenerateMainRowHeaderOptionWidgets() override;
 
 private:
     void OnIsAlphaLockedCheckStateChanged(ECheckBoxState iState);

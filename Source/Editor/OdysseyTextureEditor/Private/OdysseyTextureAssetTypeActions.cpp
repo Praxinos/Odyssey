@@ -45,7 +45,7 @@ FOdysseyTextureAssetTypeActions::GetCategories()
     return EAssetTypeCategories::Textures | mMyAssetCategory;
 }
 
-void 
+void
 FOdysseyTextureAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 {
     InFilter.ClassPaths.Add( UTexture2D::StaticClass()->GetClassPathName() );
@@ -53,7 +53,7 @@ FOdysseyTextureAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 
 
 void FOdysseyTextureAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
-{    
+{
     EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
 
     for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)

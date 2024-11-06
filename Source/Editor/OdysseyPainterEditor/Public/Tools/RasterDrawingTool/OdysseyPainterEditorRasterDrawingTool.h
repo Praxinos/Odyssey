@@ -41,7 +41,7 @@ public:
 
     //Constructor
     UOdysseyPainterEditorRasterDrawingTool();
-    
+
 public:
     //TOOL
     template<class T> T* CreateShape(FName iName);
@@ -88,7 +88,7 @@ public:
 
     //Returns the selected Brush
     UOdysseyBrush* GetBrush() const;
-    
+
     //Returns the instance of the selected Brush used to draw
     UOdysseyBrushAssetBase* GetBrushInstance() const;
 
@@ -163,7 +163,7 @@ private:
 
     //Apply brush Overrides
     void ApplyOverrides(UOdysseyBrushAssetBase* iBrushInstance);
-    
+
 private:
     void BeginStroke(const FOdysseyPoint& iPoint);
     void StrokeTo(const TArray<FOdysseyPoint>& iPoints);
@@ -223,7 +223,7 @@ public:
 
     UPROPERTY( EditAnywhere, Category="Interpolation")
     bool    AdaptativeStep = false;
-    
+
     UPROPERTY( EditInstanceOnly, Category="Interpolation")
     EOdysseyInterpolationType InterpolationType = EOdysseyInterpolationType::kCatmullRom;
 

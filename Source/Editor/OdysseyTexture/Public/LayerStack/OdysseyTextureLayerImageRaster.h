@@ -38,7 +38,7 @@ public:
     /**
      * @brief Merges this layer over iLayer (modifying its content)
      * Only works with Layer class being a child of classes returned by GetMergeLayerTypes()
-     * 
+     *
      */
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 

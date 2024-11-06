@@ -26,7 +26,7 @@ void
 UOdysseyAnimationCellImageVector::PostInitProperties()
 {
     Super::PostInitProperties();
-    
+
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
@@ -36,7 +36,7 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
 
     mVectorBlockId = FGuid::NewGuid();
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
-    mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated);    
+    mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated);
 
     UOdysseyAnimation* animation = GetAnimation();
     if (animation->GetWidth() < 0 || animation->GetHeight() < 0)
@@ -45,7 +45,7 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
     mEngine = new FOdysseyVectorEngine( new FOdysseyVectorGroupPaint( "Scene" )
                                     , (double)animation->GetWidth()
                                     , (double)animation->GetHeight() );
-    
+
     mVectorBlock->Init(mVectorBlockId, mEngine, animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
 }
 
@@ -86,7 +86,7 @@ void
 UOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
-    
+
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
@@ -129,7 +129,7 @@ void
 UOdysseyAnimationCellImageVector::PostLoad()
 {
     Super::PostLoad();
-    
+
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
@@ -168,7 +168,7 @@ UOdysseyAnimationCellImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRen
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
-    
+
     return MakeShared<FOdysseyAnimationCellImageVectorImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 

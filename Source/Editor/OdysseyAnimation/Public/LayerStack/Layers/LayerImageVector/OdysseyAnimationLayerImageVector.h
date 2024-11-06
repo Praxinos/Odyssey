@@ -19,7 +19,7 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageVector
 public:
     /**
      * @brief Delegate called when something changed the result of RenderImage()
-     * 
+     *
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsColoredChanged, UOdysseyAnimationLayerImageVector*)
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsWireframeChanged, UOdysseyAnimationLayerImageVector*)

@@ -27,19 +27,19 @@ SOdysseyPainterEditorRasterDrawingToolBrushSelector::Construct( const FArguments
     mTool->OnBrushChanged().AddRaw(this, &SOdysseyPainterEditorRasterDrawingToolBrushSelector::OnToolBrushChanged);
 
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    
+
     FDetailsViewArgs DetailsViewArgs;
     DetailsViewArgs.DefaultsOnlyVisibility = EEditDefaultsOnlyNodeVisibility::Automatic;
     DetailsViewArgs.bUpdatesFromSelection = false;
     DetailsViewArgs.bLockable = false;
     DetailsViewArgs.bAllowSearch = false;
     DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
-    
+
     mDetailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
 
     mDetailsView->SetObject(mTool->GetBrushInstance());
 
-    
+
 
     FSinglePropertyParams brushPropertyParams;
     brushPropertyParams.NamePlacement = EPropertyNamePlacement::Hidden;

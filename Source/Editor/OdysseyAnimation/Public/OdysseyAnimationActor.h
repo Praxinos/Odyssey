@@ -16,29 +16,29 @@ class UOdysseyAnimationComponent;
 UCLASS(ComponentWrapperClass, meta=(PrioritizeCategories="Actions"))
 class ODYSSEYANIMATION_API AOdysseyAnimationActor : public AActor
 {
-	GENERATED_UCLASS_BODY()
+    GENERATED_UCLASS_BODY()
 
 public:
-	// AActor interface
+    // AActor interface
 #if WITH_EDITOR
-	virtual bool GetReferencedContentObjects(TArray<UObject*>& Objects) const override;
+    virtual bool GetReferencedContentObjects(TArray<UObject*>& Objects) const override;
 #endif
-	// End of AActor interface
+    // End of AActor interface
 
 public:
-	UFUNCTION(Category="Actions", CallInEditor)
-	void Play();
+    UFUNCTION(Category="Actions", CallInEditor)
+    void Play();
 
-	UFUNCTION(Category="Actions", CallInEditor)
-	void Stop();
+    UFUNCTION(Category="Actions", CallInEditor)
+    void Stop();
 
-	UFUNCTION(Category="Actions", CallInEditor)
-	void FaceCamera();
+    UFUNCTION(Category="Actions", CallInEditor)
+    void FaceCamera();
 
-	UFUNCTION(Category="Actions", CallInEditor)
-	void MoveInFrontOfCamera();
+    UFUNCTION(Category="Actions", CallInEditor)
+    void MoveInFrontOfCamera();
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Animation")
-	TObjectPtr<UOdysseyAnimationComponent> AnimationComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Animation")
+    TObjectPtr<UOdysseyAnimationComponent> AnimationComponent;
 };

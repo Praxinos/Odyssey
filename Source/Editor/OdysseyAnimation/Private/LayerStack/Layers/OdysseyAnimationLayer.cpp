@@ -13,7 +13,7 @@
 FSimpleMulticastDelegate&
 UOdysseyAnimationLayer::OnCellsChanged()
 {
-    return mOnCellsChanged;    
+    return mOnCellsChanged;
 }
 
 void
@@ -45,7 +45,7 @@ UOdysseyAnimationLayer::GetAnimation() const
 UOdysseyAnimationLayerStack*
 UOdysseyAnimationLayer::GetLayerStack() const
 {
-	return Cast<UOdysseyAnimationLayerStack>(UOdysseyLayer::GetLayerStack());
+    return Cast<UOdysseyAnimationLayerStack>(UOdysseyLayer::GetLayerStack());
 }
 
 FInt32Range
@@ -62,7 +62,7 @@ UOdysseyAnimationLayer::GetFrameRange() const
         ranges.Add(animationLayer->GetFrameRange());
     }
 
-    
+
     if (Cells.IsEmpty())
     {
         ranges.Add(FInt32Range::Exclusive(CellsOffset, CellsOffset ));
@@ -83,7 +83,7 @@ UOdysseyAnimationLayer::OnLightTableChanged()
 
 void
 UOdysseyAnimationLayer::LightTableChanged(bool iIsInteractive)
-{   
+{
     ImageRenderingCompositionChanged(iIsInteractive); //Composition could change if lighttable or a key is activated/inactivated
     ImageRenderingChanged(iIsInteractive); //ImageRendering changes without a composition change when any other param is changed
     OnLightTableChanged().Broadcast();
@@ -288,7 +288,7 @@ UOdysseyAnimationLayer::GetCellsFrameRanges() const
             startFrame += cell->Exposure;
         }
     }
-    
+
     return mCellsFrameRanges;
 }
 
@@ -477,7 +477,7 @@ UOdysseyAnimationLayer::CopyCells(TArray<UOdysseyAnimationCell*> iCells, int Ind
         return cellCopies;
 
     for (UOdysseyAnimationCell* cell : iCells)
-    {   
+    {
         FObjectDuplicationParameters params(cell, this);
         UOdysseyAnimationCell* cellCopy = Cast<UOdysseyAnimationCell>(StaticDuplicateObjectEx(params));
         cellCopies.Add(cellCopy);
@@ -519,35 +519,35 @@ UOdysseyAnimationLayer::LighttableBlueprintSetter(FOdysseyAnimationLightTable Va
 TArray<FName>
 UOdysseyAnimationLayer::GetRows() const
 {
-	TArray<FName> rows = UOdysseyLayer::GetRows();
-	rows.Add("Lighttable");
-	rows.Add("OutOfPegs");
+    TArray<FName> rows = UOdysseyLayer::GetRows();
+    rows.Add("Lighttable");
+    rows.Add("OutOfPegs");
 
-	return rows;
+    return rows;
 }
 
 int
 UOdysseyAnimationLayer::GetRowHeight(FName iSubRowName) const
 {
-	if (iSubRowName == "Lighttable")
-		return 40;
+    if (iSubRowName == "Lighttable")
+        return 40;
 
-	if (iSubRowName == "OutOfPegs")
-		return 20;
-		
-	return Super::GetRowHeight(iSubRowName);
+    if (iSubRowName == "OutOfPegs")
+        return 20;
+
+    return Super::GetRowHeight(iSubRowName);
 }
 
 bool
 UOdysseyAnimationLayer::IsRowVisible(FName iSubRowName) const
 {
-	if (iSubRowName == "Lighttable")
-		return DisplayOptions && HasLighttable && Lighttable.bIsActivated;
+    if (iSubRowName == "Lighttable")
+        return DisplayOptions && HasLighttable && Lighttable.bIsActivated;
 
-	if (iSubRowName == "OutOfPegs")
-		return DisplayOptions && HasLighttable && Lighttable.bIsActivated;
-		
-	return Super::IsRowVisible(iSubRowName);
+    if (iSubRowName == "OutOfPegs")
+        return DisplayOptions && HasLighttable && Lighttable.bIsActivated;
+
+    return Super::IsRowVisible(iSubRowName);
 }
 
 #endif

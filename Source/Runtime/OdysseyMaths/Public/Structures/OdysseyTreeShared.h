@@ -32,7 +32,7 @@ public:
 public:
     FOdysseyNTreeShared();
     virtual ~FOdysseyNTreeShared() = 0;
-    
+
 public:
     //Adds a Child to this node
     virtual void AddChild( TSharedPtr<tDerived> iChild, int iIndexEmplace = -1 );
@@ -42,13 +42,13 @@ public:
 
     //Moves this node to somewhere else in the tree (can go from a parent to another)
     void MoveTo( TSharedPtr<tDerived> iNode, ePosition iPosition = ePosition::kAfter );
-    
+
     //Returns the Parent node
     TSharedPtr<tDerived> GetParent() const;
-    
+
     //Returns the number of parent until reaching the root
     int GetNumberParents() const;
-    
+
     //Check if iParentToSearch is a parent (direct or indirect) of the currentNode
     bool HasForParent( TSharedPtr<tDerived> iParentToSearch ) const;
 
@@ -57,13 +57,13 @@ public:
 
     //Returns the position of this node in its parent
     int GetIndexInParent() const;
-    
+
     //Retuns this node's children
     TArray<TSharedPtr<tDerived>> GetChildren() const;
 
     //Returns this node's child at given index
     TSharedPtr<tDerived> GetChild(int iIndex) const;
-    
+
     //Returns the children in depth order
     void DepthFirstSearchTree( TArray<TSharedPtr<tDerived>>* ioContents, bool iIncludeRoot = true );
 
@@ -80,7 +80,7 @@ private:
 private:
     TArray<TSharedPtr<tDerived>> mChildren;
     TWeakPtr<tDerived> mParent;
-    
+
     FOnChildAdded mOnChildAddedDelegate;
     FOnChildRemoved mOnChildRemovedDelegate;
 };

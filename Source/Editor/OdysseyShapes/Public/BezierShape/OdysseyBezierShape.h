@@ -26,7 +26,7 @@ public:
     virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture);
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture);
     virtual bool OnKeyDown(const FKey& iKey);
-    
+
     virtual void Abort() override;
 
 private:

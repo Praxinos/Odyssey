@@ -18,12 +18,12 @@ SOdysseyAnimationTimelineScrollBox::Construct(
     const FArguments& iArgs
 )
 {
-	ChildSlot
-	[
-		SAssignNew(mPanel, SOdysseyAnimationTimelineScrollPanel, MoveTemp(const_cast<TArray<FSlot::FSlotArguments>&>(iArgs._Slots)))
-		.TimelinePosition(iArgs._TimelinePosition)
-		.Clipping(EWidgetClipping::ClipToBounds)
-	];
+    ChildSlot
+    [
+        SAssignNew(mPanel, SOdysseyAnimationTimelineScrollPanel, MoveTemp(const_cast<TArray<FSlot::FSlotArguments>&>(iArgs._Slots)))
+        .TimelinePosition(iArgs._TimelinePosition)
+        .Clipping(EWidgetClipping::ClipToBounds)
+    ];
 }
 
 void
@@ -53,8 +53,8 @@ SOdysseyAnimationTimelineScrollPanel::Construct(
     TArray<SOdysseyAnimationTimelineScrollBox::FSlot::FSlotArguments> iSlots
 )
 {
-	mTimelinePosition = iArgs._TimelinePosition;
-	mChildren.AddSlots(MoveTemp(iSlots));
+    mTimelinePosition = iArgs._TimelinePosition;
+    mChildren.AddSlots(MoveTemp(iSlots));
 }
 
 FChildren*
@@ -95,9 +95,9 @@ SOdysseyAnimationTimelineScrollPanel::ComputeDesiredSize(float) const
 void
 SOdysseyAnimationTimelineScrollPanel::OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const
 {
-	float scrollPadding = AllottedGeometry.GetLocalSize().X;
-	float padding = mTimelinePosition->GetPadding();
-	float currentChildOffset = -mTimelinePosition->GetOffset() * mTimelinePosition->GetFrameSize() + padding;
+    float scrollPadding = AllottedGeometry.GetLocalSize().X;
+    float padding = mTimelinePosition->GetPadding();
+    float currentChildOffset = -mTimelinePosition->GetOffset() * mTimelinePosition->GetFrameSize() + padding;
 
     for (int32 SlotIndex = 0; SlotIndex < mChildren.Num(); ++SlotIndex)
     {
@@ -106,7 +106,7 @@ SOdysseyAnimationTimelineScrollPanel::OnArrangeChildren(const FGeometry& Allotte
 
         if (childVisibility == EVisibility::Collapsed)
             continue;
-        
+
         currentChildOffset = ArrangeChildHorizontalAndReturnOffset(AllottedGeometry, ArrangedChildren, slot, currentChildOffset);
     }
 }

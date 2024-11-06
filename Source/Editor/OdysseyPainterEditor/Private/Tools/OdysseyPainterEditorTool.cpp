@@ -39,7 +39,7 @@ UOdysseyPainterEditorTool::GetEditor() const
 
 TSharedRef<SWidget>
 UOdysseyPainterEditorTool::GetTopTabWidget() const
-{       
+{
     return mTopTabWidget.ToSharedRef();
 }
 
@@ -66,7 +66,7 @@ UOdysseyPainterEditorTool::OnToolContextChanged()
 
 void
 UOdysseyPainterEditorTool::Activate()
-{    
+{
     // register IInputProcessor interface for handling global key press
     FSlateApplication::Get().RegisterInputPreProcessor(mInputProcessor);
 
@@ -124,7 +124,7 @@ UOdysseyPainterEditorTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, con
 bool
 UOdysseyPainterEditorTool::OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
-	return false;
+    return false;
 }
 
 bool
@@ -255,7 +255,7 @@ void
 UOdysseyPainterEditorTool::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 {
     Super::PostTransacted(iTransactionEvent);
-    
+
     if ( iTransactionEvent.GetEventType() != ETransactionObjectEventType::UndoRedo )
         return;
 

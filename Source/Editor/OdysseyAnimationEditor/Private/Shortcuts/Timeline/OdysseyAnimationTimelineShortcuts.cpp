@@ -13,7 +13,7 @@ FOdysseyAnimationTimelineShortcuts::FOdysseyAnimationTimelineShortcuts(UOdysseyA
     : mCommandList(MakeShared<FUICommandList>())
     , mCellsShortcuts(MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(iLayerStack))
     , mCellImageRasterShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(iLayerStack))
-	, mCellImageStaggerShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(iLayerStack))
+    , mCellImageStaggerShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(iLayerStack))
 {
     MapActionsToCommandList();
 }

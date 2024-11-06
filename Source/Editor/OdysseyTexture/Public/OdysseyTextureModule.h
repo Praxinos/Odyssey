@@ -19,7 +19,7 @@ public:
     // IModuleInterface interface
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
-    
+
     // End of IModuleInterface interface
 
     void ShowPluginContentInContentBrowser();

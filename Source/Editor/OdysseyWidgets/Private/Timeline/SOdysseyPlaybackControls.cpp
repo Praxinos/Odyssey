@@ -153,7 +153,7 @@ SOdysseyPlaybackControls::Construct(const FArguments& InArgs)
             .VAlign(VAlign_Center)
             .OnClicked(mOnLoopClicked)
         ]
-        
+
         //SAssignNew(MainBoxPtr, SHorizontalBox)
     ];
 

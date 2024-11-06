@@ -25,7 +25,7 @@ private:
     void OnThumbnailChanged();
 
     EVisibility GetContentVisibility() const;
-    
+
 private:
     UOdysseyAnimationCellImageVector* mCell = nullptr;
     TSharedPtr<FAssetThumbnail> mAssetThumbnail;

@@ -40,7 +40,7 @@ const TArray< FOdysseyPoint >& FOdysseyInterpolationLine::ComputePoints()
     const FOdysseyPoint& P1 = mInputPoints[1];
 
     float pos = mLastDrawnLength + mStep;
-    
+
     float length = FVector2D::Distance(P0, P1);
     float start = mTotalStrokeLength;
     float next = pos - mTotalStrokeLength;

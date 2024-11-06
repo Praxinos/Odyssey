@@ -19,7 +19,7 @@ public:
 
 public:
     /**
-     * Gets the widget that will serve as the decorator unless overridden. 
+     * Gets the widget that will serve as the decorator unless overridden.
      * If you do not override, you will have no decorator
      */
     virtual TSharedPtr<SWidget> GetDefaultDecorator() const override;

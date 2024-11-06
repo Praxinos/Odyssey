@@ -39,7 +39,7 @@ struct ReportPackageData
 struct FPackageReportNode
 {
     /** The name of the tree node without the path */
-    FString NodeName; 
+    FString NodeName;
     /** A user-exposed flag determining whether the content of this node and its children should be exported or not. */
     bool bIsChecked;
     /** A flag determining whether this node should be exported or not. This node is active as long as bIsChecked is true and if all the parent nodes are also checked. */
@@ -48,7 +48,7 @@ struct FPackageReportNode
     bool* bShouldExportPackage;
     /** If true, this node is a folder instead of a package */
     bool bIsFolder;
-    
+
     /** The parent of this node */
     FPackageReportNode* Parent;
 

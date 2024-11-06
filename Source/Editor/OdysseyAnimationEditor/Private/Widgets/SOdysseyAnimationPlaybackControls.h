@@ -12,14 +12,14 @@
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationPlaybackControls : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SOdysseyAnimationPlaybackControls)
-		{}
-		SLATE_ARGUMENT(UOdysseyAnimation*, Animation)
-		SLATE_ARGUMENT(UOdysseyAnimationPlayer*, Player)
+    SLATE_BEGIN_ARGS(SOdysseyAnimationPlaybackControls)
+        {}
+        SLATE_ARGUMENT(UOdysseyAnimation*, Animation)
+        SLATE_ARGUMENT(UOdysseyAnimationPlayer*, Player)
         SLATE_ATTRIBUTE(float, PlaybackFramesPerSecond)
-	SLATE_END_ARGS()
+    SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs);
+    void Construct(const FArguments& InArgs);
 
 private:
     bool IsPlayingForward() const;
@@ -47,6 +47,6 @@ private:
 
 private:
     TAttribute<float> mPlaybackFramesPerSecond;
-	UOdysseyAnimation* mAnimation;
-	UOdysseyAnimationPlayer* mPlayer;
+    UOdysseyAnimation* mAnimation;
+    UOdysseyAnimationPlayer* mPlayer;
 };

@@ -52,7 +52,7 @@ class ODYSSEYBRUSH_API UOdysseyBrushColorFunctionLibrary : public UBlueprintFunc
     //Get the Odyssey Brush Color Channel Depth
     UFUNCTION(BlueprintPure, Category="Odyssey|Color", meta = ( DisplayName="Get OdysseyBrushColor Channel Depth" ))
     static EOdysseyChannelDepth GetChannelDepth(FOdysseyBrushColor Color);
-    
+
     //Set the Odyssey Brush Color Alpha Component
     UFUNCTION(BlueprintPure, Category="Odyssey|Color", meta = ( DisplayName="Set OdysseyBrushColor Alpha" ))
     static FOdysseyBrushColor SetAlpha(FOdysseyBrushColor Color, float Alpha);
@@ -96,7 +96,7 @@ class ODYSSEYBRUSH_API UOdysseyBrushColorFunctionLibrary : public UBlueprintFunc
     static FOdysseyBrushColor MakeOdysseyBrushColorFromLab(int L, int A, int B, int Alpha = 255);
 
     /* Make F */
-    
+
     //Make Odyssey Brush color from RGBA values (Floats).
     UFUNCTION(BlueprintPure, Category="Odyssey|Color")
     static FOdysseyBrushColor MakeOdysseyBrushColorFromRGBF( float R, float G, float B, float A = 1.f );
@@ -122,7 +122,7 @@ class ODYSSEYBRUSH_API UOdysseyBrushColorFunctionLibrary : public UBlueprintFunc
     static FOdysseyBrushColor MakeOdysseyBrushColorFromLabF( float L, float A, float B, float Alpha = 255 );
 
     /* Break */
-    
+
     //Breaks Odyssey Brush Color input into RGBA (Integers).
     UFUNCTION(BlueprintPure, Category="Odyssey|Color")
     static void BreakOdysseyBrushColorIntoRGB( const  FOdysseyBrushColor& Color, int& R, int& G, int& B, int& A );
@@ -148,11 +148,11 @@ class ODYSSEYBRUSH_API UOdysseyBrushColorFunctionLibrary : public UBlueprintFunc
     static void BreakOdysseyBrushColorIntoLabA(const  FOdysseyBrushColor& Color, int& L, int& A, int& B, int& Alpha);
 
     /* Break F */
-    
+
     //Breaks Odyssey Brush Color input into RGBA (Floats).
     UFUNCTION(BlueprintPure, Category="Odyssey|Color")
     static void BreakOdysseyBrushColorIntoRGBF( const  FOdysseyBrushColor& Color, float& R, float& G, float& B, float& A );
-    
+
     //Breaks Odyssey Brush Color input into GreyA (Floats).
     UFUNCTION(BlueprintPure, Category="Odyssey|Color")
     static void BreakOdysseyBrushColorIntoGreyF( const  FOdysseyBrushColor& Color, float& Grey, float& A );

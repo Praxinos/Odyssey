@@ -68,7 +68,7 @@ UOdysseyAnimationCellImageRaster::RasterBlockPostProcess(const TMap<FIntPoint, T
 
     TArray<::ULIS::FEvent> events;
     TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
-    TArray<FIntPoint> invalidTiles = iInvalidMap.InvalidTiles();    
+    TArray<FIntPoint> invalidTiles = iInvalidMap.InvalidTiles();
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
     for (const FIntPoint& invalidTile : invalidTiles)
     {
@@ -106,7 +106,7 @@ UOdysseyAnimationCellImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRen
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
-        
+
     return MakeShared<FOdysseyAnimationCellImageRasterImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 

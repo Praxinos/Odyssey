@@ -55,7 +55,7 @@ void SOdysseyTimelineFrameList::Construct( const SOdysseyTimelineFrameList::FArg
     //Set Internals
     mTimingHandleBrush = FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameTimingHandle");
     mLengthHandleBrush = FOdysseyStyle::GetBrush("FlipbookTimeline.TimelineFrameLengthHandle");
-    
+
     mDropPreviewAlignment = kDropPreviewAlignment_None;
     mFrameDragOverIndex = -1;
 
@@ -199,7 +199,7 @@ SOdysseyTimelineFrameList::SetFrameVisibility(int32 iIndex, EVisibility iVisibil
 
 int32
 SOdysseyTimelineFrameList::AddFrame()
-{    
+{
     TSharedPtr<FOdysseyTimelineFrameListFrameMetaData> metadata = MakeShareable(new FOdysseyTimelineFrameListFrameMetaData(mFrames.Num()));
 
     TSharedPtr<SOdysseyTimelineFrame> frame = SNew(SOdysseyTimelineFrame)
@@ -228,7 +228,7 @@ SOdysseyTimelineFrameList::AddFrame()
 
 void
 SOdysseyTimelineFrameList::InsertFrame(int32 iIndex)
-{    
+{
     TSharedPtr<FOdysseyTimelineFrameListFrameMetaData> metadata = MakeShareable(new FOdysseyTimelineFrameListFrameMetaData(iIndex));
 
     TSharedPtr<SOdysseyTimelineFrame> frame = SNew(SOdysseyTimelineFrame)
@@ -333,7 +333,7 @@ void
 SOdysseyTimelineFrameList::OnTimingHandleDragStarted(TSharedPtr<FOdysseyTimelineFrameListFrameMetaData> iMetaData)
 {
     mLengthOnDragStart = mFrames[iMetaData->Index()]->Length();
-    
+
     mOnFramesEditStart.ExecuteIfBound();
 
     if (iMetaData->Index() + 1 >= mFrames.Num())
@@ -348,20 +348,20 @@ void
 SOdysseyTimelineFrameList::OnTimingHandleDragged(int32 iOffset, TSharedPtr<FOdysseyTimelineFrameListFrameMetaData> iMetaData)
 {
     mFrames[iMetaData->Index()]->Length(mLengthOnDragStart + iOffset);
-    
+
     TArray<int32> indexes;
     indexes.Add(iMetaData->Index());
-    
+
     if (iMetaData->Index() + 1 < mFrames.Num())
     {
         TSharedPtr<SOdysseyTimelineFrame>& nextFrame = mFrames[iMetaData->Index() + 1];
-        
+
         int32 offset = mFrames[iMetaData->Index()]->Length() - mLengthOnDragStart;
         nextFrame->Length(mNextLengthOnDragStart - offset);
 
         indexes.Add(iMetaData->Index() + 1);
     }
-    
+
     mOnFramesLengthChanged.ExecuteIfBound(indexes);
 }
 
@@ -480,7 +480,7 @@ SOdysseyTimelineFrameList::OnGenerateFrameContextMenu( const FGeometry& iGeometr
 {
     if (!mOnGenerateFrameContextMenu.IsBound())
         return FReply::Unhandled();
-    
+
     return mOnGenerateFrameContextMenu.Execute(iGeometry, iMouseEvent, iMetadata->Index());
 }
 
@@ -540,7 +540,7 @@ SOdysseyTimelineFrameList::CreateFrameControlWidget(TSharedPtr<SOdysseyTimelineF
                     ]
                 ]
             ]
-            
+
             +SOverlay::Slot()
             //.Padding(0.0f, 0.0f, -mTimingHandleBrush->ImageSize.X/2, 0.f)
             .Padding(TAttribute<FMargin>(this, &SOdysseyTimelineFrameList::GetTimingHandlePadding))
@@ -564,7 +564,7 @@ SOdysseyTimelineFrameList::CreateFrameControlWidget(TSharedPtr<SOdysseyTimelineF
                 ]
             ]
         ]
-        
+
         + SOverlay::Slot()
         .Padding(-dropPreviewWidth/2, 0.0f, 0.f, 0.f)
         .HAlign(HAlign_Left)

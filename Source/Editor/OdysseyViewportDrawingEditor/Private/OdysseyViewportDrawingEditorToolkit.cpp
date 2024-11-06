@@ -15,11 +15,11 @@ FOdysseyViewportDrawingEditorToolkit::FOdysseyViewportDrawingEditorToolkit(TShar
     : FOdysseyModeToolkit(iEditor)
     , mEdMode(iEdMode)
 {
-	TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(&iEditor.Get());
+    TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(&iEditor.Get());
     mAnimationExtension = MakeShared<FOdysseyAnimationEditorExtension>(&iEditor.Get());
     mViewportDrawingExtension = MakeShared<FOdysseyViewportDrawingEditorExtension>(&iEditor.Get());
 
-	iEditor->AddExtension(textureExtension);
+    iEditor->AddExtension(textureExtension);
     iEditor->AddExtension(mAnimationExtension.ToSharedRef());
     iEditor->AddExtension(mViewportDrawingExtension.ToSharedRef());
 }
@@ -54,7 +54,7 @@ FOdysseyViewportDrawingEditorToolkit::GetInlineContent() const
 FEdMode*
 FOdysseyViewportDrawingEditorToolkit::GetEditorMode() const
 {
-    return mEdMode; 
+    return mEdMode;
 }
 
 TSharedPtr<FOdysseyViewportDrawingEditorExtension>
@@ -66,7 +66,7 @@ FOdysseyViewportDrawingEditorToolkit::GetViewportDrawingExtension() const
 TSharedPtr<FOdysseyAnimationEditorExtension>
 FOdysseyViewportDrawingEditorToolkit::GetAnimationExtension() const
 {
-	return mAnimationExtension;
+    return mAnimationExtension;
 }
 
 void

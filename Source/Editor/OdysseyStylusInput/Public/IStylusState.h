@@ -25,7 +25,7 @@ enum class ODYSSEYSTYLUSINPUT_API EStylusInputType
 //---
 
 /**
- * The current state of a single stylus, as sent by IStylusMessageHandler. 
+ * The current state of a single stylus, as sent by IStylusMessageHandler.
  */
 class ODYSSEYSTYLUSINPUT_API FStylusState
 {
@@ -38,7 +38,7 @@ public:
     }
 
     FStylusState(FVector2D InPosition, float InZ, unsigned int InTimer, const FVector2D& InTilt, float InTwist,
-        float InPressure, float InTanPressure, FVector2D InSize, 
+        float InPressure, float InTanPressure, FVector2D InSize,
         bool InDown, bool InInverted)
         : Position(InPosition), Z(InZ), Timer(InTimer), TiltX(InTilt.X), TiltY(InTilt.Y), Twist(InTwist)
         , Pressure(InPressure), TangentPressure(InTanPressure), Size(InSize)
@@ -46,10 +46,10 @@ public:
     {
         double tiltx_rad = FMath::DegreesToRadians(TiltX);
         double tilty_rad = FMath::DegreesToRadians(TiltY);
-        
+
         double sin_tiltx = FMath::Sin(tiltx_rad);
         double sin_tilty = FMath::Sin(tilty_rad);
-        
+
         double azimuth_rad = FMath::Atan2(sin_tilty, sin_tiltx);
         if (azimuth_rad < -PI / 2)
         {
@@ -67,12 +67,12 @@ public:
         dist *= ratio;
         double tilt_rad = FMath::Asin(dist);
         Tilt = FMath::RadiansToDegrees(tilt_rad);
-        
+
         Altitude = FMath::Cos(tilt_rad);
     }
 
     FStylusState(FVector2D InPosition, float InZ, unsigned int InTimer, double InAzimuth, double InAltitude, float InTwist,
-        float InPressure, float InTanPressure, FVector2D InSize, 
+        float InPressure, float InTanPressure, FVector2D InSize,
         bool InDown, bool InInverted)
         : Position(InPosition), Z(InZ), Timer(InTimer), Azimuth(InAzimuth), Altitude(InAltitude), Twist(InTwist)
         , Pressure(InPressure), TangentPressure(InTanPressure), Size(InSize)
@@ -114,7 +114,7 @@ public:
      */
     unsigned int GetTimer() const { return Timer; }
 
-    /** 
+    /**
      * The current tilt along the Z axis in degrees, normalized to the range of [0, 90]
      * Defaults to 0 if EStylusInputType::Tilt is not supported.
      * A value of 0 means that the stylus is perfectly vertical.
@@ -122,8 +122,8 @@ public:
      */
     double GetTilt() const { return Tilt; }
 
-    /** 
-     * The current tilt along the X axis in degrees, normalized to the range of [-90, 90]. 
+    /**
+     * The current tilt along the X axis in degrees, normalized to the range of [-90, 90].
      * Defaults to 0 if EStylusInputType::Tilt is not supported.
      * A value of 0 means that the stylus is perfectly vertical.
      * A value of -90 means that the stylus is perfectly horizontal and tilted to the left.
@@ -131,8 +131,8 @@ public:
      */
     double GetTiltX() const { return TiltX; }
 
-    /** 
-     * The current tilt along the Y axis in degrees, normalized to the range of [-90, 90]. 
+    /**
+     * The current tilt along the Y axis in degrees, normalized to the range of [-90, 90].
      * Defaults to 0 if EStylusInputType::Tilt is not supported.
      * A value of 0 means that the stylus is perfectly vertical.
      * A value of -90 means that the stylus is perfectly horizontal and tilted away from the user.
@@ -166,7 +166,7 @@ public:
 
     /**
      * Get the current pressure along the tablet's normal, usually straight down.
-     * Normalized to the range [0, 1]. 
+     * Normalized to the range [0, 1].
      * Defaults to 0 if EStylusInputType::Pressure is not supported.
      */
     float GetPressure() const { return Pressure; }
@@ -183,9 +183,9 @@ public:
      * Defaults to (0,0) if EStylusInputType::Size is not supported.
      */
     FVector2D GetSize() const { return Size; }
-    
+
     /**
-     * Is the stylus inverted? Ie. the eraser part is pointing down. 
+     * Is the stylus inverted? Ie. the eraser part is pointing down.
      * Defaults to false if EStylusInputType::Tilt is not supported.
      */
     bool IsStylusInverted() const { return IsInverted; }
@@ -237,7 +237,7 @@ public:
     const TArray<EStylusInputType>& GetSupportedInputs() const { return SupportedInputs; }
 
 public:
-    /** Update the input device. Not intended to be called externally. */ 
+    /** Update the input device. Not intended to be called externally. */
     virtual void Tick() = 0;
 
     /** Does the input device need to be ticked? */

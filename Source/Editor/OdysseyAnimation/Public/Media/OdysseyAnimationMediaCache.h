@@ -22,7 +22,7 @@ public:
 
 public:
     //~ IMediaCache interface
-    
+
     /**
      * Query the time ranges of cached media samples for the specified caching state.
      *
@@ -36,7 +36,7 @@ public:
      * @return true on success, false if not supported.
      */
     virtual bool QueryCacheState(EMediaCacheState State, TRangeSet<FTimespan>& OutTimeRanges) const override;
-    
+
     /**
      * Query the number of samples for the specified caching state.
      *

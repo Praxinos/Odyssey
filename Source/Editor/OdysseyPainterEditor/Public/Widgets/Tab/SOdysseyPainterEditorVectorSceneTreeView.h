@@ -27,7 +27,7 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
         // Construction / Destruction
         ~SOdysseyPainterEditorVectorSceneTreeView();
         SOdysseyPainterEditorVectorSceneTreeView();
-    
+
         void Construct(const FArguments& InArgs, FOdysseyPainterEditor* iEditor);
 
         void Update( FOdysseyVectorGroupPaint* iScene );
@@ -41,9 +41,9 @@ class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeView
     protected:
         /**
          * @brief Called when the treeview asks for the children of a specific item
-         * 
-         * @param iParent 
-         * @param oChildren 
+         *
+         * @param iParent
+         * @param oChildren
          */
         void OnGetChildren(TSharedPtr<FVectorSceneTreeViewItem> iParent, TArray<TSharedPtr<FVectorSceneTreeViewItem>>& oChildren) const;
         TSharedPtr<SWidget> OnContextMenuOpening();

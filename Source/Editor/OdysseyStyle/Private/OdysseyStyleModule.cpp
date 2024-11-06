@@ -7,13 +7,13 @@
 #include "Modules/ModuleManager.h"
 #include "SlateOdysseyStyle.h"
 
-void 
+void
 FOdysseyStyleModule::StartupModule()
 {
     FSlateOdysseyStyle::Initialize();
 }
 
-void 
+void
 FOdysseyStyleModule::ShutdownModule()
 {
     FSlateOdysseyStyle::Shutdown();

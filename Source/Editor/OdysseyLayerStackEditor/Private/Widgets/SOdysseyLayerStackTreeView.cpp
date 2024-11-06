@@ -43,97 +43,97 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
 
     TSharedRef<SHeaderRow> headerRow = SNew(SHeaderRow)
         .SplitterHandleSize(0.f); //Fixes alignment between header row and actual rows
-	
-	if (InArgs._Columns.IsSet())
-	{
-		TArray<SHeaderRow::FColumn::FArguments> columns = InArgs._Columns.GetValue();
-		for( SHeaderRow::FColumn::FArguments columnArguments : columns)
-		{
-			headerRow->AddColumn(columnArguments);
-		}
-	}
-	else
-	{
-		headerRow->AddColumn(
-        	SHeaderRow::Column("IsActivated")
+
+    if (InArgs._Columns.IsSet())
+    {
+        TArray<SHeaderRow::FColumn::FArguments> columns = InArgs._Columns.GetValue();
+        for( SHeaderRow::FColumn::FArguments columnArguments : columns)
+        {
+            headerRow->AddColumn(columnArguments);
+        }
+    }
+    else
+    {
+        headerRow->AddColumn(
+            SHeaderRow::Column("IsActivated")
             .ToolTipText(LOCTEXT("header-row.is-layer-activated.tooltip", "Toggle Layer Activation"))
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)
             .VAlignHeader(VAlign_Center)
             .HAlignCell(HAlign_Center)
             .VAlignCell(VAlign_Top)
-			.HeaderContentPadding(FMargin(0))
+            .HeaderContentPadding(FMargin(0))
             [
-				SNew(SBox)
-				.HeightOverride(25.f)
-				.VAlign(VAlign_Center)
-				[
-					SNew(SImage)
-					.ColorAndOpacity(FSlateColor::UseForeground())
-					.Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
-				]
+                SNew(SBox)
+                .HeightOverride(25.f)
+                .VAlign(VAlign_Center)
+                [
+                    SNew(SImage)
+                    .ColorAndOpacity(FSlateColor::UseForeground())
+                    .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Visible16"))
+                ]
             ]
-		);
-		headerRow->AddColumn(
-        	SHeaderRow::Column("IsLocked")
+        );
+        headerRow->AddColumn(
+            SHeaderRow::Column("IsLocked")
             .ToolTipText(LOCTEXT("header-row.is-layer-locked.tooltip", "Toggle Layer Locked State"))
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)
             .VAlignHeader(VAlign_Center)
             .HAlignCell(HAlign_Center)
             .VAlignCell(VAlign_Top)
-			.HeaderContentPadding(FMargin(0))
+            .HeaderContentPadding(FMargin(0))
             [
-				SNew(SBox)
-				.HeightOverride(25.f)
-				.VAlign(VAlign_Center)
-				[
-					SNew(SImage)
-					.ColorAndOpacity(FSlateColor::UseForeground())
-					.Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Locked16"))
-				]
+                SNew(SBox)
+                .HeightOverride(25.f)
+                .VAlign(VAlign_Center)
+                [
+                    SNew(SImage)
+                    .ColorAndOpacity(FSlateColor::UseForeground())
+                    .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.Locked16"))
+                ]
             ]
-		);
+        );
 
         headerRow->AddColumn(
-			SHeaderRow::Column("DisplayOptions")
+            SHeaderRow::Column("DisplayOptions")
             .ToolTipText(LOCTEXT("header-row.display-options.tooltip", "Display / Hide Layer's Options"))
             .FixedWidth(24.f)
             .HAlignHeader(HAlign_Center)
             .VAlignHeader(VAlign_Center)
             .HAlignCell(HAlign_Center)
             .VAlignCell(VAlign_Top)
-			.HeaderContentPadding(FMargin(0))
+            .HeaderContentPadding(FMargin(0))
             [
-				SNew(SBox)
-				.HeightOverride(25.f)
-				.VAlign(VAlign_Center)
-				[
-					SNew(SImage)
-					.ColorAndOpacity(FSlateColor::UseForeground())
-					.Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.OptionsHeader16"))
-				]
+                SNew(SBox)
+                .HeightOverride(25.f)
+                .VAlign(VAlign_Center)
+                [
+                    SNew(SImage)
+                    .ColorAndOpacity(FSlateColor::UseForeground())
+                    .Image(FOdysseyStyle::GetBrush("OdysseyLayerStack.OptionsHeader16"))
+                ]
             ]
-		);
+        );
 
         headerRow->AddColumn(
-			SHeaderRow::Column("Header")
+            SHeaderRow::Column("Header")
             .DefaultLabel(FText())
             .VAlignCell(VAlign_Top)
             .HAlignHeader(HAlign_Fill)
             .VAlignHeader(VAlign_Center)
             .FillWidth(1.0f)
-			.HeaderContentPadding(FMargin(0))
-			[
-				SNew(SBox)
-				.HeightOverride(25.f)
-				.VAlign(VAlign_Center)
-				[
-					InArgs._HeaderContent.Widget
-				]
-			]
-		);
-	}
+            .HeaderContentPadding(FMargin(0))
+            [
+                SNew(SBox)
+                .HeightOverride(25.f)
+                .VAlign(VAlign_Center)
+                [
+                    InArgs._HeaderContent.Widget
+                ]
+            ]
+        );
+    }
 
     const TArray<UOdysseyLayer*>* rootLayers = mLayerStack ? &mLayerStack->GetRootLayers() : nullptr;
 
@@ -147,8 +147,8 @@ void SOdysseyLayerStackTreeView::Construct(const FArguments& InArgs)
         .OnContextMenuOpening( this, &SOdysseyLayerStackTreeView::OnContextMenuOpening )
         .SelectionMode( ESelectionMode::Multi )
         .HeaderRow(headerRow)
-		.ExternalScrollbar(InArgs._ExternalScrollbar)
-		.OnTreeViewScrolled(InArgs._OnTreeViewScrolled)
+        .ExternalScrollbar(InArgs._ExternalScrollbar)
+        .OnTreeViewScrolled(InArgs._OnTreeViewScrolled)
     );
 
     //Menus
@@ -244,7 +244,7 @@ SOdysseyLayerStackTreeView::OnDragOver(const FGeometry& MyGeometry, const FDragD
 {
     if ( !mLayerStack )
         return FReply::Unhandled();
-    
+
     TSharedPtr<FOdysseyLayerStackDragDropOperation> operation = DragDropEvent.GetOperationAs<FOdysseyLayerStackDragDropOperation>();
     if (!operation)
         return FReply::Unhandled();
@@ -299,7 +299,7 @@ SOdysseyLayerStackTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropE
 
     if ( !mLayerStack )
         return FReply::Unhandled();
-    
+
     TSharedPtr<FOdysseyLayerStackDragDropOperation> operation = DragDropEvent.GetOperationAs<FOdysseyLayerStackDragDropOperation>();
     if (!operation)
         return FReply::Unhandled();
@@ -362,7 +362,7 @@ SOdysseyLayerStackTreeView::OnGetChildren(UOdysseyLayer* iParent, TArray<UOdysse
 {
     if ( !mLayerStack )
         return;
-    
+
     oChildren = iParent->GetChildren();
 }
 
@@ -416,7 +416,7 @@ SOdysseyLayerStackTreeView::SetCurrentLayerFromSelectorItem()
 
     if (SelectorItem == mLayerStack->CurrentLayer)
         return;
-        
+
     FOdysseyObjectEditorUtils::SetPropertyValue(mLayerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), SelectorItem);
 }
 
@@ -470,7 +470,7 @@ SOdysseyLayerStackTreeView::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStac
 TSharedPtr<SWidget>
 SOdysseyLayerStackTreeView::OnContextMenuOpening()
 {
-    //Create a new command, so that we can add context menu specific entries 
+    //Create a new command, so that we can add context menu specific entries
     TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
     commandList->Append(mLayerStackShortcuts->GetCommandList());
 
@@ -489,12 +489,12 @@ void SOdysseyLayerStackTreeView::CreateContextMenu()
     UToolMenus* ToolMenus = UToolMenus::Get();
     if (!ensure(ToolMenus))
         return;
-    
+
     if (ToolMenus->IsMenuRegistered(contextMenuName))
         return;
 
     UToolMenu* Menu = ToolMenus->RegisterMenu(contextMenuName);
-    
+
     FToolMenuSection& selectionSection = Menu->AddSection("SelectionSection", LOCTEXT("context-menu.selection-section", "Selection"));
     {
         selectionSection.AddMenuEntry(FGenericCommands::Get().SelectAll);
@@ -529,10 +529,10 @@ SOdysseyLayerStackTreeView::OnLayerDisplayChildrenChanged(UOdysseyLayer* iLayerN
 {
     if ( !mLayerStack )
         return;
-    
+
     if (iLayerNode->GetLayerStack() != mLayerStack )
         return;
-    
+
     if(IsItemExpanded(Cast<UOdysseyLayer>(iLayerNode)) == iLayerNode->DisplayChildren )
         return;
 
@@ -541,13 +541,13 @@ SOdysseyLayerStackTreeView::OnLayerDisplayChildrenChanged(UOdysseyLayer* iLayerN
 
 void
 SOdysseyLayerStackTreeView::OnLayerDisplayOptionsChanged(UOdysseyLayer* iLayerNode)
-{   
+{
     if ( !mLayerStack )
         return;
-    
+
     if (iLayerNode->GetLayerStack() != mLayerStack )
         return;
-    
+
     RequestTreeRefresh();
 }
 
@@ -573,7 +573,7 @@ SOdysseyLayerStackTreeView::OnItemScrolledIntoView(UOdysseyLayer* iLayer, const 
         mIsRenamePending = false;
     }
 }
-    
+
 TSharedPtr<FOdysseyLayerStackDragDropOperation>
 SOdysseyLayerStackTreeView::CreateDragDropOperation() const
 {

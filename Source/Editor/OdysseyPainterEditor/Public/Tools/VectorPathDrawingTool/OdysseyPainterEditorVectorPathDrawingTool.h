@@ -66,12 +66,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ) override;
         virtual bool OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                       , const FKey& iKey
-									  , uint64& oSignalFlags ) override;
+                                      , uint64& oSignalFlags ) override;
         virtual bool OnKeyUpVector( FOdysseyVectorGroupPaint* iScene, const FKey& iKey, uint64& oSignalFlags ) override;
         virtual bool OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
                                         , const FKey& iKey
-										, uint64& oSignalFlags ) override;
+                                        , uint64& oSignalFlags ) override;
         virtual void OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                          , const FOdysseyPoint& iPointInTexture, uint64& oSignalFlags ) override;
         virtual void OnMouseDragVector( FOdysseyVectorGroupPaint* iScene

@@ -157,14 +157,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                                     , bool iSmooth );
 
         /**
-         * @brief Set the selection space, i.e the group we pick objects from. 
+         * @brief Set the selection space, i.e the group we pick objects from.
          *   Default is null, meaning the scene is the selection space.
          * @param iSelectionSpace a pointer to the selection space. Use NULL to define the scene as the selection space.
          */
         void SetSelectionSpace( FOdysseyVectorGroup* iSelectionSpace );
 
         /**
-         * @brief Set the selection space, i.e the group we pick objects from. 
+         * @brief Set the selection space, i.e the group we pick objects from.
          *   Default is null, meaning the scene is the selection space.
          * @param iSelectionSpace a pointer to the selection space. Use NULL to define the scene as the selection space.
          */
@@ -172,8 +172,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
         /**
          * @brief Returns the invalid Tile map containing invalid rects
-         * 
-         * @return const FULISInvalidTileMap& 
+         *
+         * @return const FULISInvalidTileMap&
          */
         FULISInvalidTileMap& GetInvalidTileMap();
 

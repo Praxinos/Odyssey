@@ -98,6 +98,6 @@ OdysseyChannelDepthFromULISFormat(::ULIS::eFormat iFormat)
 
         default: break;
     }
-    
+
     return EOdysseyChannelDepth::k8;
 }

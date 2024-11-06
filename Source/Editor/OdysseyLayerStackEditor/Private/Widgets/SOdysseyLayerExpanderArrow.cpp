@@ -32,7 +32,7 @@ SOdysseyLayerExpanderArrow::Construct( const FArguments& InArgs, const TSharedPt
     mArrowPadding = InArgs._ArrowPadding;
 
     mLayerRow = iLayerRow;
-    
+
     //Copied from SOdysseyLayerExpanderArrow (we only change VAlign to put the button at the top of the widget
     this->ChildSlot
     .Padding(TAttribute<FMargin>(this, &SOdysseyLayerExpanderArrow::GetExpanderPadding))
@@ -57,7 +57,7 @@ SOdysseyLayerExpanderArrow::Construct( const FArguments& InArgs, const TSharedPt
 /** @return Visible when has children; invisible otherwise */
 /* EVisibility
 SOdysseyLayerExpanderArrow::GetExpanderVisibility() const
-{    
+{
     return mLayerStackNodeRow.Pin()->mLayerNode->CanHaveChildren ? EVisibility::Visible : EVisibility::Hidden;
 } */
 
@@ -73,10 +73,10 @@ SOdysseyLayerExpanderArrow::OnPaint(const FPaintArgs& Args, const FGeometry& All
     //   | '-v[B]      {1,1}
     //   |   |--[C]    {1,0,1}
     //   |   |--[D]    {1,0,1}
-    //   |   '--[E]    {1,0,1} 
+    //   |   '--[E]    {1,0,1}
     //   |>-[F]        {}
     //   '--[G]        {}
-    //   
+    //
     //
 
     static const FName NAME_VerticalBarBrush = TEXT("WhiteBrush");
@@ -90,7 +90,7 @@ SOdysseyLayerExpanderArrow::OnPaint(const FPaintArgs& Args, const FGeometry& All
         //WireTint.A = 1.f;
 
         FMargin arrowPadding = GetExpanderPadding();
-        
+
         static const float wireThickness = 2.0f;
         static const float distanceFromArrow = 1.f;
         const FVector2D arrowSize(16.f, 16.f);
@@ -178,7 +178,7 @@ SOdysseyLayerExpanderArrow::OnPaint(const FPaintArgs& Args, const FGeometry& All
                 ESlateDrawEffect::None,
                 WireTint
             );
-        }    
+        }
     }
 
     LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
@@ -207,7 +207,7 @@ FMargin SOdysseyLayerExpanderArrow::GetExpanderPadding() const
 {
     const int32 NestingDepth = FMath::Max(0, mLayerRow.Pin()->GetIndentLevel() - BaseIndentLevel.Get());
     const int32 MaxNestingDepth = FMath::Max(0, mLayerRow.Pin()->GetTreeView()->GetMaxIndentLevel() - BaseIndentLevel.Get());
-    
+
     const float Indent = IndentAmount.Get(10.f);
     return FMargin( NestingDepth * Indent, 0, (MaxNestingDepth - NestingDepth) * Indent, 0 ) + mArrowPadding;
 }
@@ -216,6 +216,6 @@ FMargin SOdysseyLayerExpanderArrow::GetExpanderPadding() const
 const FSlateBrush* SOdysseyLayerExpanderArrow::GetExpanderImage() const
 {
     const bool bIsItemExpanded = mLayerRow.Pin()->IsItemExpanded();
-    
+
     return bIsItemExpanded && mLayerRow.Pin()->GetLayer()->CanHaveChildren ? mExpanderImageOpened : mExpanderImageClosed;
 }

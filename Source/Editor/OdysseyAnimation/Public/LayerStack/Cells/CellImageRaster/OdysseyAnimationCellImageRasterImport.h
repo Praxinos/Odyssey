@@ -9,9 +9,9 @@ class FOdysseyAnimationCellImageRasterImport
 public:
     /**
      * @brief Imports Data from the given archive into the given object
-     * 
-     * @param iAnimationCellImageRaster 
-     * @param Ar 
+     *
+     * @param iAnimationCellImageRaster
+     * @param Ar
      */
     static bool ODYSSEYANIMATION_API Read( UOdysseyAnimationCellImageRaster* iAnimationCellImageRaster
                                   , FArchive &Ar );

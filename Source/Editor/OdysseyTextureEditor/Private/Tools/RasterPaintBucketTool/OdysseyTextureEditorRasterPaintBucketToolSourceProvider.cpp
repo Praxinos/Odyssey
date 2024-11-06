@@ -156,7 +156,7 @@ FOdysseyTextureEditorRasterPaintBucketToolSourceProvider::GetAllLayersBlock() co
     UOdysseyTextureLayerStack* layerStack = mExtension->GetTextureSource()->GetLayerStack();
     if (!layerStack)
         return nullptr;
-    
+
     ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
     TSharedPtr<::ULIS::FBlock> block = MakeShared<::ULIS::FBlock>(texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
     TSharedPtr<IOdysseyImageRenderer> renderer = layerStack->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, 0);
@@ -185,10 +185,10 @@ FOdysseyTextureEditorRasterPaintBucketToolSourceProvider::GetBackgroundLayersToE
     {
         if (iLayer->IsChildOf(layers[i]) && (iLayer->GetParent() != layers[i] || iLayer->GetIndexInParent() != layers[i]->GetChildren().Num() - 1))
             continue;
-    
+
         if (iLayer->IsChildOf(layers[i]))
             continue;
-    
+
         resultLayers.Add(Cast<UOdysseyTextureLayer>(layers[i]));
 
         if (layers[i] == iLayer)
@@ -208,11 +208,11 @@ FOdysseyTextureEditorRasterPaintBucketToolSourceProvider::GetForegroundLayersToE
         return resultLayers;
 
     TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
-    
+
     for( int i = layers.Num() - 1; i >= 0; i-- )
     {
         resultLayers.Add(Cast<UOdysseyTextureLayer>(layers[i]));
-        
+
         if (layers[i] == iLayer)
             break;
     }

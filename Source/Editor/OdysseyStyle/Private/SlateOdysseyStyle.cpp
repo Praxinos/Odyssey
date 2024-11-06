@@ -43,7 +43,7 @@ IncludeOdysseyEditorSpecificStyles()
 
 //---
 
-class FOdysseyStyleDefault 
+class FOdysseyStyleDefault
     : public FSlateStyleSet
 {
 public:
@@ -173,10 +173,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "ClassThumbnail.OdysseyTexture", new IMAGE_BRUSH( "OdysseyTexture/OdysseyTextureDefaultThumbnail_64", mIcon64x64 ) );
     Set( "ClassIcon.Texture2D", new IMAGE_BRUSH( "OdysseyTexture/OdysseyTextureDefaultThumbnail_16", mIcon16x16 ) );
     Set( "ClassThumbnail.Texture2D", new IMAGE_BRUSH( "OdysseyTexture/OdysseyTextureDefaultThumbnail_64", mIcon64x64 ) );
-    
+
     Set( "ClassIcon.OdysseyFlipbook", new IMAGE_BRUSH("OdysseyFlipbook/OdysseyFlipbook_16x", mIcon16x16));
     Set( "ClassThumbnail.OdysseyFlipbook", new IMAGE_BRUSH("OdysseyFlipbook/OdysseyFlipbook_64x", mIcon64x64));
-    
+
     Set( "OdysseyTexture.ExportTexture_16", new IMAGE_BRUSH("OdysseyTexture/ExportTexture_16", mIcon16x16));
     Set( "OdysseyTexture.ExportTexture_64", new IMAGE_BRUSH("OdysseyTexture/ExportTexture_64", mIcon64x64));
 
@@ -474,7 +474,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 
     //OdysseyPainterEditorTools
     Set( "OdysseyPainterEditorTools.Tile", mCoreTableRowStyle
-            
+
     );
 
     //OdysseyLayerStack
@@ -544,7 +544,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/locked_16", mIcon16x16))
         .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/locked_16", mIcon16x16))
     );
-    
+
     //OdysseyViewportDrawingEditor
     Set("OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16",new IMAGE_BRUSH("OdysseyViewportDrawing/viewport_drawing_icon_16",mIcon16x16));
     Set("OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40",new IMAGE_BRUSH("OdysseyViewportDrawing/viewport_drawing_icon_40",mIcon40x40));
@@ -565,11 +565,11 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
                 .SetInactiveHoveredBrush(FSlateColorBrush(selectedInactiveRow))
                 .SetActiveHighlightedBrush(FSlateColorBrush(selectedParentRow)) // This is the parent hightlight
                 .SetInactiveHighlightedBrush(FSlateColorBrush(selectedParentRow))// This is the parent highlight
-				//.SetDropIndicator_Above(const FSlateBrush& InValue)
-				//.SetDropIndicator_Onto(const FSlateBrush& InValue)
-				//.SetDropIndicator_Below(const FSlateBrush& InValue)
-		);
-	}
+                //.SetDropIndicator_Above(const FSlateBrush& InValue)
+                //.SetDropIndicator_Onto(const FSlateBrush& InValue)
+                //.SetDropIndicator_Below(const FSlateBrush& InValue)
+        );
+    }
 
     Set("OdysseySpinBoxStyle.DarkSpinBox",FSpinBoxStyle()
         .SetBackgroundBrush(BOX_BRUSH("SpinBox/Spinbox",FMargin(4.0f/16.0f), FLinearColor( 0.05f, 0.05f, 0.05f )))
@@ -609,7 +609,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("FlipbookTimeline.TimelineFrameWarning", new IMAGE_BRUSH("OdysseyFlipbook/icon_warning_16x", FVector2D(16.f, 16.f)));
     Set("FlipbookTimeline.BackgroundColorEven", FLinearColor(1.0f, 1.0f, 1.0f, 0.05f));
     Set("FlipbookTimeline.BackgroundColorOdd", FLinearColor(0.0f, 0.0f, 0.0f, 0.05f));
-    
+
 
     //PlaybackControls
     Set("PlaybackControls.Play", FButtonStyle(mButton)
@@ -699,7 +699,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Animation.Timeline.Tools.Selection", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Selection", mIcon16x16));
     Set("Animation.Timeline.Tools.Move", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Move", mIcon16x16));
     Set("Animation.Timeline.Tools.Cut", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Cut", mIcon16x16));
-    
+
     Set("Animation.LightTable64", new IMAGE_BRUSH("OdysseyAnimation/LightTable_64", mIcon64x64));
     Set("Animation.LightTable24", new IMAGE_BRUSH("OdysseyAnimation/LightTable_24", mIcon24x24));
     Set("Animation.LightTable16", new IMAGE_BRUSH("OdysseyAnimation/LightTable_16", mIcon16x16));
@@ -743,7 +743,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 
     Set("Animation.LightTable.Options.DisplayPosition.AboveLayer", new IMAGE_BRUSH_SVG("OdysseyAnimation/LightTable_Options_DisplayPosition_AboveLayer", mIcon16x16));
     Set("Animation.LightTable.Options.DisplayPosition.UnderLayer", new IMAGE_BRUSH_SVG("OdysseyAnimation/LightTable_Options_DisplayPosition_UnderLayer", mIcon16x16));
-    
+
 
     Set("Animation.AddCellsHandleRight", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleRight_16", mIcon16x16));
     Set("Animation.AddCellsHandleLeft", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleLeft_16", mIcon16x16));
@@ -855,10 +855,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedHoveredImage(FSlateColorBrush(FLinearColor(1, 1, 1, 0.25)))
         .SetCheckedPressedImage(FSlateColorBrush(FLinearColor::Transparent))
     );
-	
+
     Set("Sequencer.AnimationComponentTrack.DisplayLayersToggle", FCheckBoxStyle()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
-		.SetBorderBackgroundColor(FSlateColor::UseSubduedForeground())
+        .SetBorderBackgroundColor(FSlateColor::UseSubduedForeground())
         .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
         .SetUncheckedImage(*FAppStyle::Get().GetBrush("TreeArrow_Collapsed"))
         .SetUncheckedHoveredImage(*FAppStyle::Get().GetBrush("TreeArrow_Collapsed_Hovered"))
@@ -866,7 +866,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedImage(*FAppStyle::Get().GetBrush("TreeArrow_Expanded"))
         .SetCheckedHoveredImage(*FAppStyle::Get().GetBrush("TreeArrow_Expanded_Hovered"))
         .SetCheckedPressedImage(*FAppStyle::Get().GetBrush("TreeArrow_Expanded_Hovered"))
-	);
+    );
 #endif
 }
 

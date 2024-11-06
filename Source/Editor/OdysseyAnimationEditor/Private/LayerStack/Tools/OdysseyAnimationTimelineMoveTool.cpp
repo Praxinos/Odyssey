@@ -13,7 +13,7 @@ FOdysseyAnimationTimelineMoveTool::~FOdysseyAnimationTimelineMoveTool()
 
 FOdysseyAnimationTimelineMoveTool::FOdysseyAnimationTimelineMoveTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition)
     : mTimelinePosition(iTimelinePosition)
-{   
+{
 }
 
 FReply
@@ -52,7 +52,7 @@ FOdysseyAnimationTimelineMoveTool::OnDragDetected(const FMouseEventParams& iPara
     #ifdef WITH_EDITOR
         GEditor->BeginTransaction(LOCTEXT("timeline.move-tool.transaction.set-offset", "Change Layer Offset"));
     #endif
-        
+
         return FReply::Handled().CaptureMouse(iParams.mWidget.ToSharedRef()).PreventThrottling();
       }
       return FReply::Unhandled();
@@ -77,7 +77,7 @@ FOdysseyAnimationTimelineMoveTool::OnMouseMove(const FMouseEventParams& iParams)
 
         return FReply::Handled();
     }
-    
+
     //updateMove
     return FReply::Unhandled();
 }

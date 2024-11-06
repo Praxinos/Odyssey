@@ -73,8 +73,8 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::IsActivable() const
 
 bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
     if (mediaProvider.IsLocked())
@@ -168,9 +168,9 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseDrag(const FOdyssey
 
 bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
-		
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
+
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
     if (mediaProvider.IsLocked())
         return false;
@@ -212,7 +212,7 @@ bool UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnKeyUp(const FKey& iKey)
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Load()
 {
     UOdysseyPainterEditorTool::Load();
-    
+
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnRasterSelectionChanged);
     if (!rasterSelection->IsEmpty())
@@ -226,7 +226,7 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::Unload()
 {
     UOdysseyPainterEditorTool::Unload();
     mPaintEngine.SetMaskBlock(nullptr);
-    
+
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->OnChanged().RemoveAll(this);
 
@@ -391,7 +391,7 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
 
     Flush();
     Commit();
-    
+
     FOdysseyPainterEditor* editor = GetEditor();
     TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
     if (source)

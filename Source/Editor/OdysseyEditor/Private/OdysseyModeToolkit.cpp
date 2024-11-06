@@ -220,7 +220,7 @@ void FOdysseyModeToolkit::OnToolkitHostShutdownUI()
 
     mEditor->CloseAllTabs();
     mEditor->UnregisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
-    
+
     LevelEditorModule.GetMenuExtensibilityManager()->RemoveExtender(mLevelEditorMenuExtender);
     mLevelEditorMenuExtender = nullptr;
     RebuildLevelEditorMenu();

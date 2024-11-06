@@ -56,9 +56,9 @@ UOdysseyCustomLayer::FindAllCustomLayerClassesAssetData()
 
         if (!Class->IsChildOf(odysseyCustomLayerClass))
             continue;
-        
+
         if (ExistingPaths.Contains(*Class->GetPathName()))
-            continue;            
+            continue;
 
         ValidClasses.Add(*ClassIterator);
     }

@@ -36,29 +36,29 @@ void SOdysseyTextureLayerImageVectorRow::Construct( const FArguments& InArgs
 TArray<TSharedPtr<SWidget>>
 SOdysseyTextureLayerImageVectorRow::GenerateMainRowHeaderOptionWidgets()
 {
-	TArray<TSharedPtr<SWidget>> widgets = SOdysseyLayerRow::GenerateMainRowHeaderOptionWidgets();
+    TArray<TSharedPtr<SWidget>> widgets = SOdysseyLayerRow::GenerateMainRowHeaderOptionWidgets();
 
     const FCheckBoxStyle* coloredToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.ColoredToggle");
     const FCheckBoxStyle* wireframeToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.WireframeToggle");
 
-	//AlphaLock
-	widgets.Add(
-		//WireframeLock
-		SNew(SCheckBox)
-		.Style(wireframeToggleStyle)
-		.OnCheckStateChanged(this, &SOdysseyTextureLayerImageVectorRow::OnIsWireframeCheckStateChanged)
-		.IsChecked(this, &SOdysseyTextureLayerImageVectorRow::GetIsWireframeIsChecked)
-	);
+    //AlphaLock
+    widgets.Add(
+        //WireframeLock
+        SNew(SCheckBox)
+        .Style(wireframeToggleStyle)
+        .OnCheckStateChanged(this, &SOdysseyTextureLayerImageVectorRow::OnIsWireframeCheckStateChanged)
+        .IsChecked(this, &SOdysseyTextureLayerImageVectorRow::GetIsWireframeIsChecked)
+    );
 
-	widgets.Add(
-		//ColoredLock
-		SNew(SCheckBox)
-		.Style(coloredToggleStyle)
-		.OnCheckStateChanged(this, &SOdysseyTextureLayerImageVectorRow::OnIsColoredCheckStateChanged)
-		.IsChecked(this, &SOdysseyTextureLayerImageVectorRow::GetIsColoredIsChecked)
-	);
+    widgets.Add(
+        //ColoredLock
+        SNew(SCheckBox)
+        .Style(coloredToggleStyle)
+        .OnCheckStateChanged(this, &SOdysseyTextureLayerImageVectorRow::OnIsColoredCheckStateChanged)
+        .IsChecked(this, &SOdysseyTextureLayerImageVectorRow::GetIsColoredIsChecked)
+    );
 
-	return widgets;
+    return widgets;
 }
 
 void

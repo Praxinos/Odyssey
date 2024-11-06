@@ -71,7 +71,7 @@ UOdysseyTextureEditorTextureFunctionLibrary::ImportTexture(UTexture2D* Texture, 
 
     UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), ParentLayer, IndexInLayer);
     UOdysseyTextureLayerImageRaster* layerImageRaster = Cast<UOdysseyTextureLayerImageRaster>(layer);
-    
+
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = layerImageRaster->GetRasterBlock();
     TSharedPtr<::ULIS::FBlock> textureBlock = MakeShareable(NewBlockFromUTextureData(TextureToImport, rasterBlock->GetFormat()));
     FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
@@ -131,7 +131,7 @@ UOdysseyTextureEditorTextureFunctionLibrary::ImportImage(UTexture2D* Texture, FS
 
     if (block->Width() != rasterBlock->GetWidth() || block->Height() != rasterBlock->GetHeight() || block->Format() != rasterBlock->GetFormat())
     {
-    
+
         //Need to convert the block before adding it to the layer
         TSharedPtr<::ULIS::FBlock> blockProxy = MakeShared<::ULIS::FBlock>(rasterBlock->GetWidth(), rasterBlock->GetHeight(), rasterBlock->GetFormat());
 
@@ -151,7 +151,7 @@ UOdysseyTextureEditorTextureFunctionLibrary::ImportImage(UTexture2D* Texture, FS
 
         block = blockProxy;
     }
-    
+
     FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
     rasterBlockMutator.Copy(block, { block->Rect() });
     rasterBlockMutator.Commit();
@@ -175,7 +175,7 @@ UOdysseyTextureEditorTextureFunctionLibrary::ExportAsImage(
         return TEXT("");
 
     ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, Texture->Source.GetSizeX(), Texture->Source.GetSizeY());
-    
+
     ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(Texture->Source.GetFormat());
     //let's ensure the format has alpha, so add alpha channel of needed
     format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
@@ -214,7 +214,7 @@ UOdysseyTextureEditorLayerFunctionLibrary::ExportAsTexture(
     if (!Layer)
         return nullptr;
 
-    
+
     UTexture2D* texture = Layer->GetTexture();
     ::ULIS::FRectI rect = ::ULIS::FRectI::FromXYWH(0, 0, texture->Source.GetSizeX(), texture->Source.GetSizeY());
     return Layer->ExportAsTexture(0, rect, texture->Source.GetFormat(), Filename, Path );

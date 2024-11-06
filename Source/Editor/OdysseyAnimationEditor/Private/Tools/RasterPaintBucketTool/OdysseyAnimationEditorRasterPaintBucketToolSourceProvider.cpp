@@ -95,7 +95,7 @@ FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider::GetForegroundLayersB
         return nullptr;
 
     renderer->Init();
-    
+
     FOdysseyImageRendererCopyParams params(block, { block->Rect() });
     renderer->Copy(params, {});
 
@@ -173,10 +173,10 @@ FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider::GetBackgroundLayersT
     {
         if (iLayer->IsChildOf(layers[i]) && (iLayer->GetParent() != layers[i] || iLayer->GetIndexInParent() != layers[i]->GetChildren().Num() - 1))
             continue;
-    
+
         if (iLayer->IsChildOf(layers[i]))
             continue;
-    
+
         resultLayers.Add(Cast<UOdysseyAnimationLayer>(layers[i]));
 
         if (layers[i] == iLayer)
@@ -196,11 +196,11 @@ FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider::GetForegroundLayersT
         return resultLayers;
 
     TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
-    
+
     for( int i = layers.Num() - 1; i >= 0; i-- )
     {
         resultLayers.Add(Cast<UOdysseyAnimationLayer>(layers[i]));
-        
+
         if (layers[i] == iLayer)
             break;
     }

@@ -60,11 +60,11 @@ UOdysseyPainterEditorVectorPaintBucketTool::LoadVector( FOdysseyVectorGroupPaint
 {
     TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
                                             // Prevents the user from having to click at least once in the viewport.
-    // we need the focus on the viewport for keyboard 
+    // we need the focus on the viewport for keyboard
     TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
     viewportWidget = viewportTab->GetViewport()->GetViewportWidget();
 
-    // we need the focus on the viewport for keyboard 
+    // we need the focus on the viewport for keyboard
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
@@ -76,7 +76,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::LoadVector( FOdysseyVectorGroupPaint
 bool
 UOdysseyPainterEditorVectorPaintBucketTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
                                                                  , const FKey& iKey
-																 , uint64& oSignalFlags )
+                                                                 , uint64& oSignalFlags )
 {
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
     // with the events processing in the OnKeyUpGlobalVector(), we do like that.
@@ -84,22 +84,22 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnKeyDownGlobalVector( FOdysseyVecto
     {
         mShowControls = true;
         oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
-		return true;
+        return true;
     }
 
-	return false;
+    return false;
 }
 
 bool
 UOdysseyPainterEditorVectorPaintBucketTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
                                                                , const FKey& iKey
-															   , uint64& oSignalFlags )
+                                                               , uint64& oSignalFlags )
 {
     if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) )
     {
         oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
-    	mShowControls = false;
-		return true;
+        mShowControls = false;
+        return true;
     }
 
     return false;
@@ -109,10 +109,10 @@ bool
 UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey
-															 , uint64& oSignalFlags )
+                                                             , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     // valid for boith right and left clicks
     mPickedBucket = mBucketHUD->PickBucket( iScene, iPointInTexture.x, iPointInTexture.y );
@@ -149,7 +149,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPickedBucket );
 
                             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
                             TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                             if (source)
                                 source->RecordCurrentFrameUndo();
@@ -168,7 +168,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, mPickedBucket );
 
                             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
                             TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                             if (source)
                                 source->RecordCurrentFrameUndo();
@@ -188,7 +188,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, mPickedBucket );
 
                             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                                
+
                             TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                             if (source)
                                 source->RecordCurrentFrameUndo();
@@ -210,7 +210,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
 void
 UOdysseyPainterEditorVectorPaintBucketTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                               , const FOdysseyPoint& iPointInTexture
-															  , uint64& oSignalFlags )
+                                                              , uint64& oSignalFlags )
 {
     mBucketHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
     oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
@@ -248,7 +248,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::GetRotationAngle( FOdysseyVectorBuck
 void
 UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture
-															 , uint64& oSignalFlags )
+                                                             , uint64& oSignalFlags )
 {
     // Left mouse-click
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
@@ -373,7 +373,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
 
     mBucketHUD->PickCycles( iScene
                           , iPointInTexture.x
-                          , iPointInTexture.y 
+                          , iPointInTexture.y
                           , pickedCycleArray );
 
     if( pickedCycleArray.size() )
@@ -451,7 +451,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
                                                                     , paramBucketArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -484,7 +484,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorRemoveBucket( FOdysse
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( iScene, iBucket );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -504,7 +504,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorPropagateBucket( FOdy
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -525,7 +525,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorColorBucket( FOdyssey
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -546,7 +546,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorClearBucket( FOdyssey
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -560,10 +560,10 @@ bool
 UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey
-														   , uint64& oSignalFlags )
+                                                           , uint64& oSignalFlags )
 {
-	if( iKey != EKeys::LeftMouseButton )
-		return false;
+    if( iKey != EKeys::LeftMouseButton )
+        return false;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -607,7 +607,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroup
     oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
          | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED;
 
-	return true;
+    return true;
 }
 
 bool
@@ -745,7 +745,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam( FOdysseyVectorBuck
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( scene, iDestinationBucket );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();

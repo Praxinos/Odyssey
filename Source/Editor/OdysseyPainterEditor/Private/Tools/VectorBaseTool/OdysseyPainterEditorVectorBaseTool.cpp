@@ -53,7 +53,7 @@ UOdysseyPainterEditorVectorBaseTool::ExtendMenu(TSharedRef<FExtender> iExtender)
             {
                 if (!IsActivated())
                     return;
-                
+
                 iBuilder.BeginSection("ToolOptions", LOCTEXT("vector-base-tool.edit-menu.tool-options", "Tool Options"));
                 {
                     ExtendContextMenu( iBuilder );
@@ -62,7 +62,7 @@ UOdysseyPainterEditorVectorBaseTool::ExtendMenu(TSharedRef<FExtender> iExtender)
             }
         )
     );
-    
+
 }
 
 //static
@@ -207,7 +207,7 @@ UOdysseyPainterEditorVectorBaseTool::GetSelectedVertices( FOdysseyVectorGroupPai
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
                   FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
- 
+
                   path->GetSelectedVertices( oSelectedVertexArray );
               }
 
@@ -275,7 +275,7 @@ void
 UOdysseyPainterEditorVectorBaseTool::Load()
 {
     UOdysseyPainterEditorTool::Load();
-    // we need the focus on the viewport for keyboard 
+    // we need the focus on the viewport for keyboard
     TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 
@@ -314,10 +314,10 @@ UOdysseyPainterEditorVectorBaseTool::Load()
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FKey& iKey
-														  , uint64& oSignalFlags )
+                                                          , uint64& oSignalFlags )
 {
-	oSignalFlags = 0;
-	return false;
+    oSignalFlags = 0;
+    return false;
 }
 
 bool
@@ -328,46 +328,46 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobal( const FKey& iKey )
         return false;
 
     if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-		return false;
+        return false;
 
     TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
     if( mediaVectors.IsEmpty() )
-		return false;
+        return false;
 
-	FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-	FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-	uint64 signalFlags = 0;
-	bool handled = OnKeyDownGlobalVector(vectorScene,iKey, signalFlags);
-	vectorEngine->Signal( signalFlags );
-	return handled;
+    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    uint64 signalFlags = 0;
+    bool handled = OnKeyDownGlobalVector(vectorScene,iKey, signalFlags);
+    vectorEngine->Signal( signalFlags );
+    return handled;
 }
 
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                                     , const FKey& iKey
-													, uint64& oSignalFlags )
+                                                    , uint64& oSignalFlags )
 {
     if( iKey == EKeys::Delete )
     {
         Delete();
         oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
-		return true;
+        return true;
     }
 
     //if( iKey == EKeys::Add )
     //{
     //    IncreaseContourWidth();
 
-    //	  oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
-	//	  return true;
+    //      oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    //      return true;
     //}
 
     //if( iKey == EKeys::Subtract )
     //{
     //    DecreaseContourWidth();
 
-    //	  oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
-	//	  return true;
+    //      oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    //      return true;
     //}
 
     return false;
@@ -391,27 +391,27 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
         return false;
 
     if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-		return false;
+        return false;
 
-	TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
-	if( mediaVectors.IsEmpty() )
-		return false;
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
+    if( mediaVectors.IsEmpty() )
+        return false;
 
-	FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-	FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-	uint64 signalFlags = 0;
+    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    uint64 signalFlags = 0;
 
-	bool handled = OnKeyDownVector( vectorScene, iKey, signalFlags );
-	vectorEngine->Signal( signalFlags );
-	return handled;
+    bool handled = OnKeyDownVector( vectorScene, iKey, signalFlags );
+    vectorEngine->Signal( signalFlags );
+    return handled;
 }
 
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FKey& iKey
-														, uint64& oSignalFlags )
+                                                        , uint64& oSignalFlags )
 {
-	oSignalFlags = 0;
+    oSignalFlags = 0;
     return false;
 }
 
@@ -423,27 +423,27 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobal( const FKey& iKey )
         return false;
 
     if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-		return false;
+        return false;
 
     TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
     if( mediaVectors.IsEmpty() )
-		return false;
+        return false;
 
-	FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-	FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-	uint64 signalFlags = 0;
-	bool handled = OnKeyUpGlobalVector(vectorScene,iKey, signalFlags);
-	vectorEngine->Signal( signalFlags );
-	return handled;
+    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    uint64 signalFlags = 0;
+    bool handled = OnKeyUpGlobalVector(vectorScene,iKey, signalFlags);
+    vectorEngine->Signal( signalFlags );
+    return handled;
 }
 
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
                                                   , const FKey& iKey
-												  , uint64& oSignalFlags )
+                                                  , uint64& oSignalFlags )
 {
-	oSignalFlags = 0;
-	return false;
+    oSignalFlags = 0;
+    return false;
 }
 
 bool
@@ -454,19 +454,19 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUp( const FKey& iKey )
         return false;
 
     if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-		return false;
+        return false;
 
     TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
     if( mediaVectors.IsEmpty() )
-		return false;
+        return false;
 
-	FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-	FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-	uint64 signalFlags = 0;
+    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    uint64 signalFlags = 0;
 
-	bool handled = OnKeyUpVector(vectorScene,iKey, signalFlags);
-	vectorEngine->Signal( signalFlags );
-	return handled;
+    bool handled = OnKeyUpVector(vectorScene,iKey, signalFlags);
+    vectorEngine->Signal( signalFlags );
+    return handled;
 }
 
 bool
@@ -474,7 +474,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
                                                 , const FKey& iKey )
 {
     // workaround for buggy stylus drivers
-    if( FilterMouseEvent( eMouseEventName::MouseDown ) == false ) 
+    if( FilterMouseEvent( eMouseEventName::MouseDown ) == false )
         return false;
 
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
@@ -484,20 +484,20 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
     mDragging = false;
 
     if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-		return false;
+        return false;
 
-	TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mAutoCreateMedia ? mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>()
-																			: mediaProvider.GetMedias<FOdysseyMediaVector>();
-	if( mediaVectors.IsEmpty() )
-		return false;
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mAutoCreateMedia ? mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>()
+                                                                            : mediaProvider.GetMedias<FOdysseyMediaVector>();
+    if( mediaVectors.IsEmpty() )
+        return false;
 
-	FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-	FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-	uint64 signalFlags = 0;
+    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    uint64 signalFlags = 0;
 
-	bool handled = OnMouseDownVector( vectorScene, iPointInTexture, iKey, signalFlags );
-	vectorEngine->Signal( signalFlags );
-	return handled;
+    bool handled = OnMouseDownVector( vectorScene, iPointInTexture, iKey, signalFlags );
+    vectorEngine->Signal( signalFlags );
+    return handled;
 }
 
 void
@@ -511,22 +511,22 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseHover( const FOdysseyPoint& iPointIn
     if (mediaProvider.IsLocked())
         return;
 
-    // we need the focus on the viewport for keyboard 
+    // we need the focus on the viewport for keyboard
     //FSlateApplication::Get().SetKeyboardFocus( mViewportWidget );
 
     if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-		return;
-        
-	TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
-	if( mediaVectors.IsEmpty() )
-		return;
-		
-	FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-	FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-	uint64 signalFlags = 0;
+        return;
 
-	OnMouseHoverVector( vectorScene, iPointInTexture, signalFlags );
-	vectorEngine->Signal( signalFlags );
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
+    if( mediaVectors.IsEmpty() )
+        return;
+
+    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    uint64 signalFlags = 0;
+
+    OnMouseHoverVector( vectorScene, iPointInTexture, signalFlags );
+    vectorEngine->Signal( signalFlags );
 }
 
 // WorkAround for faulty stylus drivers
@@ -585,51 +585,51 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDrag( const FOdysseyPoint& iPointInT
     mDragging = true;
 
     if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-		return;
+        return;
 
     TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
     if( mediaVectors.IsEmpty())
-		return;
+        return;
 
-	FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-	FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-	uint64 signalFlags = 0;
+    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    uint64 signalFlags = 0;
 
-	OnMouseDragVector( vectorScene, iPointInTexture, signalFlags );
-	vectorEngine->Signal( signalFlags );
+    OnMouseDragVector( vectorScene, iPointInTexture, signalFlags );
+    vectorEngine->Signal( signalFlags );
 }
 
 bool
 UOdysseyPainterEditorVectorBaseTool::OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey )
 {
-	FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
     if (mediaProvider.IsLocked())
         return false;
 
     if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-		return false;
-    
-	TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
-	if( mediaVectors.IsEmpty() )
-		return false;
-	
-	FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-	FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-	uint64 signalFlags = 0;
+        return false;
 
-	bool handled = OnMouseClickVector( vectorScene, iPointInTexture, iKey, signalFlags );
-	vectorEngine->Signal( signalFlags );
-	if (!handled)
-	{
-		if( iKey == EKeys::RightMouseButton )
-		{
-			if( mHasContextMenu )
-			{
-				PopupContextMenu();
-				return true;
-			}
-		}
-	}
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
+    if( mediaVectors.IsEmpty() )
+        return false;
+
+    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    uint64 signalFlags = 0;
+
+    bool handled = OnMouseClickVector( vectorScene, iPointInTexture, iKey, signalFlags );
+    vectorEngine->Signal( signalFlags );
+    if (!handled)
+    {
+        if( iKey == EKeys::RightMouseButton )
+        {
+            if( mHasContextMenu )
+            {
+                PopupContextMenu();
+                return true;
+            }
+        }
+    }
 
     return handled;
 }
@@ -638,9 +638,9 @@ bool
 UOdysseyPainterEditorVectorBaseTool::OnMouseClickVector(FOdysseyVectorGroupPaint* iScene
                                       , const FOdysseyPoint& iPointInTexture
                                       , const FKey& iKey
-									  , uint64& oSignalFlags )
+                                      , uint64& oSignalFlags )
 {
-	return false;
+    return false;
 }
 
 bool
@@ -658,19 +658,19 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseUp( const FOdysseyPoint& iPointInTex
     mDragging = false;
 
     if( !mediaProvider.HasMedia<FOdysseyMediaVector>() )
-		return false;
+        return false;
 
-	TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
-	if( mediaVectors.IsEmpty() )
-		return false;
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetMedias<FOdysseyMediaVector>();
+    if( mediaVectors.IsEmpty() )
+        return false;
 
-	FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-	FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-	uint64 signalFlags = 0;
+    FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+    uint64 signalFlags = 0;
 
-	bool handled = OnMouseUpVector( vectorScene, iPointInTexture, iKey, signalFlags );
-	vectorEngine->Signal( signalFlags );
-	return handled;
+    bool handled = OnMouseUpVector( vectorScene, iPointInTexture, iKey, signalFlags );
+    vectorEngine->Signal( signalFlags );
+    return handled;
 }
 
 uint64

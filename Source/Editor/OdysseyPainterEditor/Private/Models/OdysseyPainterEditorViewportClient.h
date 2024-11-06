@@ -44,17 +44,17 @@ class FOdysseyHUDElement;
 //      ╚═══════╤══╤════════╝         │           ╚═══════╤══╤════════╝       │          ╚═══════╤══╤════════╝       │             ╚════╤═════════╤════╝
 //              │  │                  │                   │  │                │                  │  │                │                  │         │
 //  LMB pressed ▼  ▲ LMB released     │       LMB pressed ▼  ▲ LMB released   │      LMB pressed ▼  ▲ LMB released   │                  └────►────┘
-//              │  │                  │                   │  │                │                  │  │                │                   LMB move  
+//              │  │                  │                   │  │                │                  │  │                │                   LMB move
 //      ╔═══════╧══╧════════╗         │           ╔═══════╧══╧════════╗       │          ╔═══════╧══╧════════╗       │
 //      ║     kPanning      ╟─────────┘           ║     kRotating     ╟───────┘          ║     kPicking      ╟───────┘
 //      ╚════╤═════════╤════╝                     ╚════╤═════════╤════╝                  ╚════╤═════════╤════╝
 //           │         │                               │         │                            │         │
 //           └────►────┘                               └────►────┘                            └────►────┘
 //            LMB move                                  LMB move                               LMB move
-//  
-//  
+//
+//
 //  https://unicode-table.com/fr/#2500 ──◄──
-//                         
+//
 
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditorViewportClient
@@ -109,7 +109,7 @@ public:
     void ReadStylusInput();
 
     virtual EMouseCaptureMode GetMouseCaptureMode() const override;
-    
+
 public:
     // FGCObject API
     virtual void AddReferencedObjects( FReferenceCollector& ioCollector ) override;
@@ -188,7 +188,7 @@ private:
     bool                                    mIsMouseDown = false;
     FKey                                    mMouseButton;
 
-    
+
     TArray<FStylusState> mStylusStates;
     bool mIsRecordingStylus = false;
     int mLastStylusEventIndex = 0;

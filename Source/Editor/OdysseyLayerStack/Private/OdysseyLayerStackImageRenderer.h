@@ -15,7 +15,7 @@ class FOdysseyLayerStackImageRenderer
 public:
     FOdysseyLayerStackImageRenderer(const UOdysseyLayerStack* iLayerStack, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI> iDefaultRects, FImageRendererFilter iFilter);
 
-public:    
+public:
     virtual void Init() override;
     virtual bool IsGameThreadOnly() override;
     virtual TArray<::ULIS::FEvent> Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList) override;

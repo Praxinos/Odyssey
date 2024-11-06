@@ -91,7 +91,7 @@ public:
      */
     virtual uint32 GetStride() const;
 
-    
+
 #if WITH_ENGINE
 
     /**
@@ -115,7 +115,7 @@ public:
     virtual FMediaTimeStamp GetTime() const;
     /**
      * ATTENTION: Never actually called since at least 5 years ago
-     * 
+     *
      * Whether the sample can be held in a cache.
      *
      * Non-cacheable video samples become invalid when the next sample is available,
@@ -136,7 +136,7 @@ private:
     FIntPoint mDimensions;
     FMediaTimeStamp mTime;
     FTimespan mDuration;
-    UTexture2D* mTexture; 
+    UTexture2D* mTexture;
     //UTexture2D* mTexture2; //PATCH: Media Framework is shit when using a single texture that refreshes it self, I need 2 Textures....
     //mutable bool mCurrentTexture; //PATCH: true => use mTexture1, false => use mTexture2
     FOdysseyAnimationMediaTextureSampleConverter mConverter;

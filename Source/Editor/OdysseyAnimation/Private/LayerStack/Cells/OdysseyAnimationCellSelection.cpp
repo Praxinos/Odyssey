@@ -6,11 +6,11 @@
 
 FOdysseyAnimationCellSelection::~FOdysseyAnimationCellSelection()
 {
-	if (mLayerStack)
-	{
-		UnbindCurrentLayerChanged();
-		UnbindOnCellsChanged();
-	}
+    if (mLayerStack)
+    {
+        UnbindCurrentLayerChanged();
+        UnbindOnCellsChanged();
+    }
 }
 
 FOdysseyAnimationCellSelection::FOdysseyAnimationCellSelection()
@@ -22,14 +22,14 @@ FOdysseyAnimationCellSelection::FOdysseyAnimationCellSelection()
 FOdysseyAnimationCellSelection::FOdysseyAnimationCellSelection(UOdysseyAnimationLayerStack* iLayerStack)
     : mLayerStack(iLayerStack)
 {
-	if (mLayerStack)
-	{
-		BindCurrentLayerChanged();
-		BindOnCellsChanged();
-	}
+    if (mLayerStack)
+    {
+        BindCurrentLayerChanged();
+        BindOnCellsChanged();
+    }
 }
 
-void 
+void
 FOdysseyAnimationCellSelection::OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack)
 {
     if (!mLayerStack)
@@ -42,7 +42,7 @@ FOdysseyAnimationCellSelection::OnCurrentLayerChanged(UOdysseyLayerStack* iLayer
     BindOnCellsChanged();
 }
 
-void 
+void
 FOdysseyAnimationCellSelection::OnCellsChanged()
 {
     CleanSelectedCells();
@@ -51,12 +51,12 @@ FOdysseyAnimationCellSelection::OnCellsChanged()
 void
 FOdysseyAnimationCellSelection::CleanSelectedCells()
 {
-	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());    
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!currentLayer)
-	{
-		mSelectedCells.Empty();
+    {
+        mSelectedCells.Empty();
         return;
-	}
+    }
 
     TArray<UOdysseyAnimationCell*> cells = currentLayer->GetCells();
     mSelectedCells = mSelectedCells.FilterByPredicate(
@@ -70,12 +70,12 @@ FOdysseyAnimationCellSelection::CleanSelectedCells()
 void
 FOdysseyAnimationCellSelection::CleanCellSelectionCursor()
 {
-	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());    
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!currentLayer)
-	{
-		mCellSelectionCursor = nullptr;
+    {
+        mCellSelectionCursor = nullptr;
         return;
-	}
+    }
 
     TArray<UOdysseyAnimationCell*> cells = GetSelectedCells();
     if (cells.IsEmpty())
@@ -83,51 +83,51 @@ FOdysseyAnimationCellSelection::CleanCellSelectionCursor()
         mCellSelectionCursor = nullptr;
         return;
     }
-    
+
     if (!cells.Contains(mCellSelectionCursor))
         mCellSelectionCursor = cells[0];
 }
 
-void 
+void
 FOdysseyAnimationCellSelection::BindCurrentLayerChanged()
 {
     UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw(this, &FOdysseyAnimationCellSelection::OnCurrentLayerChanged);
 }
 
-void 
+void
 FOdysseyAnimationCellSelection::UnbindCurrentLayerChanged()
 {
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
 }
 
-void 
+void
 FOdysseyAnimationCellSelection::BindOnCellsChanged()
 {
     if (!mLayerStack)
         return;
 
-    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());    
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!currentLayer)
         return;
 
-	mLayer = currentLayer;
+    mLayer = currentLayer;
     currentLayer->OnCellsChanged().AddRaw(this, &FOdysseyAnimationCellSelection::OnCellsChanged);
 }
 
-void 
+void
 FOdysseyAnimationCellSelection::UnbindOnCellsChanged()
 {
     if (!mLayer)
         return;
 
     mLayer->OnCellsChanged().RemoveAll(this);
-	mLayer = nullptr;
+    mLayer = nullptr;
 }
 
 void
 FOdysseyAnimationCellSelection::SelectCell(UOdysseyAnimationCell* iCell, bool iSetAsCursor)
 {
-	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());    
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!currentLayer)
     {
         mCellSelectionCursor = nullptr;
@@ -151,7 +151,7 @@ FOdysseyAnimationCellSelection::SelectCell(UOdysseyAnimationCell* iCell, bool iS
 void
 FOdysseyAnimationCellSelection::SetSelectedCells(const TArray<UOdysseyAnimationCell*>& iSelectedCells)
 {
-	UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());    
+    UOdysseyAnimationLayer* currentLayer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!currentLayer)
     {
         mSelectedCells.Empty();
@@ -159,7 +159,7 @@ FOdysseyAnimationCellSelection::SetSelectedCells(const TArray<UOdysseyAnimationC
     }
 
     mSelectedCells = iSelectedCells;
-    
+
     TArray<UOdysseyAnimationCell*> cells = currentLayer->GetCells();
     mSelectedCells.Sort(
         [cells](const UOdysseyAnimationCell& iCellA, const UOdysseyAnimationCell& iCellB)
@@ -183,4 +183,3 @@ FOdysseyAnimationCellSelection::GetCellSelectionCursor() const
     return mCellSelectionCursor;
 }
 
-		

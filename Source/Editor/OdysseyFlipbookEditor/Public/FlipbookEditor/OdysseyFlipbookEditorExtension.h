@@ -13,7 +13,7 @@ class FOdysseyFlipbookEditorGUI;
 
 class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorExtension
     : public FOdysseyPainterEditorExtension
-{   
+{
 public:
     // Construction / Destruction
     virtual ~FOdysseyFlipbookEditorExtension();

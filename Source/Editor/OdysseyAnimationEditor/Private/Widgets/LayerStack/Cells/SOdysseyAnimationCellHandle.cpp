@@ -5,7 +5,7 @@
 
 void
 SOdysseyAnimationCellHandle::Construct( const SOdysseyAnimationCellHandle::FArguments& InArgs)
-{    
+{
     mOnDragStarted = InArgs._OnDragStarted;
     mOnDragged = InArgs._OnDragged;
     mOnDragStopped = InArgs._OnDragStopped;
@@ -25,7 +25,7 @@ SOdysseyAnimationCellHandle::OnMouseButtonDown(const FGeometry& iGeometry, const
     {
         mIsDragging = true;
         mOnDragStarted.ExecuteIfBound(iGeometry, iMouseEvent);
-        return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();    
+        return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
     }
     return FReply::Unhandled();
 }
@@ -36,7 +36,7 @@ SOdysseyAnimationCellHandle::OnMouseMove(const FGeometry& iGeometry, const FPoin
     if (mIsDragging)
     {
         mOnDragged.ExecuteIfBound(iGeometry, iMouseEvent);
-        return FReply::Handled();    
+        return FReply::Handled();
     }
     return FReply::Unhandled();
 }
@@ -48,7 +48,7 @@ SOdysseyAnimationCellHandle::OnMouseButtonUp(const FGeometry& iGeometry, const F
     {
         mIsDragging = false;
         mOnDragStopped.ExecuteIfBound(iGeometry, iMouseEvent);
-        return FReply::Handled().ReleaseMouseCapture();    
+        return FReply::Handled().ReleaseMouseCapture();
     }
     return FReply::Unhandled();
 }
@@ -58,6 +58,6 @@ SOdysseyAnimationCellHandle::GetCursor() const
 {
     if (!IsEnabled())
         return TOptional<EMouseCursor::Type>();
-        
+
     return EMouseCursor::ResizeLeftRight;
 }

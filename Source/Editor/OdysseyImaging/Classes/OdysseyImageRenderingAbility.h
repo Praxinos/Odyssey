@@ -74,8 +74,8 @@ public:
 public:
     /**
      * @brief Returns the full rect that can be rendered
-     * 
-     * @return ::ULIS::FRect 
+     *
+     * @return ::ULIS::FRect
      */
     virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const;
 

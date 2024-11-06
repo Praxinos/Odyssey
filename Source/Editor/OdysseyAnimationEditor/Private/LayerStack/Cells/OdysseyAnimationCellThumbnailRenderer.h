@@ -39,7 +39,7 @@ public:
 private:
     UPROPERTY()
     TMap<FVector2D, UTexture2D*> Textures;
-    
+
     UPROPERTY()
     TObjectPtr<UTexture2D> mCheckerboardTexture;
 };
@@ -73,10 +73,10 @@ public:
 private:
     // Thread to run the worker FRunnable on
     FRunnableThread* mThread;
-    
+
     // Stop this thread? Uses Thread Safe Counter
     FThreadSafeCounter mStopTaskCounter;
-    
+
     FCriticalSection mMutex;
 
     TMap<UOdysseyAnimationCell*, TSharedPtr<IOdysseyImageRenderer>> mRenderers;

@@ -27,7 +27,7 @@ public:
 
 public:
     //--- Block Caching / Loading
-    
+
     //Loads a memory from cache
     bool Load(const FString& iId, FUniqueBuffer& oBuffer);
 

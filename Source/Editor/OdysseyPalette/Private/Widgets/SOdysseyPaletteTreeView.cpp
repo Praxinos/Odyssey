@@ -70,7 +70,7 @@ void SOdysseyPaletteTreeView::Construct(const FArguments& InArgs)
     }
 
     const TArray<UOdysseyPaletteEntry*>* rootEntries = mPalette ? &mPalette->GetRootEntries() : nullptr;
-    
+
     STreeView<UOdysseyPaletteEntry*>::Construct(
         STreeView<UOdysseyPaletteEntry*>::FArguments()
         .TreeItemsSource(rootEntries)
@@ -164,7 +164,7 @@ SOdysseyPaletteTreeView::OnDragOver(const FGeometry& MyGeometry, const FDragDrop
 {
     if ( !mPalette )
         return FReply::Unhandled();
-    
+
     TSharedPtr<FOdysseyPaletteDragDropOperation> operation = DragDropEvent.GetOperationAs<FOdysseyPaletteDragDropOperation>();
     if (!operation)
         return FReply::Unhandled();
@@ -209,7 +209,7 @@ SOdysseyPaletteTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropEven
 
     if ( !mPalette )
         return FReply::Unhandled();
-    
+
     TSharedPtr<FOdysseyPaletteDragDropOperation> operation = DragDropEvent.GetOperationAs<FOdysseyPaletteDragDropOperation>();
     if (!operation)
         return FReply::Unhandled();
@@ -221,7 +221,7 @@ SOdysseyPaletteTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropEven
     TSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>> rowWidget = StaticCastSharedPtr<SMultiColumnTableRow<UOdysseyPaletteEntry*>>(WidgetFromItem(GetRootItems().Last()));
     if (!rowWidget)
         return FReply::Unhandled();
-    
+
     FGeometry geometry = rowWidget->GetTickSpaceGeometry();
     const FVector2D localPointerPos = geometry.AbsoluteToLocal(DragDropEvent.GetScreenSpacePosition());
     const FVector2D& widgetSize = geometry.GetLocalSize();
@@ -292,7 +292,7 @@ SOdysseyPaletteTreeView::OnGetChildren(UOdysseyPaletteEntry* iParent, TArray<UOd
 {
     if (!mPalette)
         return;
-    
+
     oChildren = iParent->GetChildren();
 }
 
@@ -437,7 +437,7 @@ SOdysseyPaletteTreeView::OnCurrentEntryChanged(UOdysseyPalette* iPalette)
 TSharedPtr<SWidget>
 SOdysseyPaletteTreeView::OnContextMenuOpening()
 {
-    //Create a new command, so that we can add context menu specific entries 
+    //Create a new command, so that we can add context menu specific entries
     TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
     commandList->Append(mCommandList);
 
@@ -456,12 +456,12 @@ void SOdysseyPaletteTreeView::CreateContextMenu()
     UToolMenus* ToolMenus = UToolMenus::Get();
     if (!ensure(ToolMenus))
         return;
-    
+
     if (ToolMenus->IsMenuRegistered(contextMenuName))
         return;
 
     UToolMenu* Menu = ToolMenus->RegisterMenu(contextMenuName);
-    
+
     FToolMenuSection& selectionSection = Menu->AddSection("Selection", LOCTEXT("entries-tree-view.context-menu.selection-section", "Selection"));
     {
         selectionSection.AddMenuEntry(FGenericCommands::Get().SelectAll);
@@ -559,7 +559,7 @@ SOdysseyPaletteTreeView::CanDeleteSelectedEntries()
         if (!selectedEntries.Contains(rootEntry))
             return true;
     }
-    
+
     return false;
 }
 
@@ -589,20 +589,20 @@ SOdysseyPaletteTreeView::RenameCurrentEntry()
 
     if (!mPalette->CurrentEntry)
         return;
-    
+
     mIsRenamePending = true; //has to come before ScrollItemIntoView() in case the item is already into view, which will trigger OnItemScrolledIntoView() immediately
     RequestScrollIntoView(mPalette->CurrentEntry.Get());
 }
-    
+
 void
 SOdysseyPaletteTreeView::OnEntryIsExpandedChanged(UOdysseyPaletteEntry* iEntryNode)
 {
     if ( !mPalette )
         return;
-    
+
     if ( iEntryNode->GetPalette() != mPalette )
         return;
-    
+
     if( IsItemExpanded(Cast<UOdysseyPaletteEntry>(iEntryNode)) == iEntryNode->IsExpanded )
         return;
 
@@ -631,7 +631,7 @@ SOdysseyPaletteTreeView::OnItemScrolledIntoView(UOdysseyPaletteEntry* iEntry, co
         mIsRenamePending = false;
     }
 }
-    
+
 TSharedPtr<FOdysseyPaletteDragDropOperation>
 SOdysseyPaletteTreeView::CreateDragDropOperation() const
 {

@@ -34,19 +34,19 @@ void SOdysseyTextureLayerImageRasterRow::Construct(const FArguments& InArgs, con
 TArray<TSharedPtr<SWidget>>
 SOdysseyTextureLayerImageRasterRow::GenerateMainRowHeaderOptionWidgets()
 {
-	TArray<TSharedPtr<SWidget>> widgets = SOdysseyLayerRow::GenerateMainRowHeaderOptionWidgets();
-	
-	const FCheckBoxStyle* alphaLockedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.AlphaLockedToggle");
+    TArray<TSharedPtr<SWidget>> widgets = SOdysseyLayerRow::GenerateMainRowHeaderOptionWidgets();
 
-	//AlphaLock
-	widgets.Add(
-		SNew(SCheckBox)
-		.Style(alphaLockedToggleStyle)
-		.OnCheckStateChanged(this, &SOdysseyTextureLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged)
-		.IsChecked(this, &SOdysseyTextureLayerImageRasterRow::GetIsAlphaLockedIsChecked)
-	);
+    const FCheckBoxStyle* alphaLockedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.AlphaLockedToggle");
 
-	return widgets;
+    //AlphaLock
+    widgets.Add(
+        SNew(SCheckBox)
+        .Style(alphaLockedToggleStyle)
+        .OnCheckStateChanged(this, &SOdysseyTextureLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged)
+        .IsChecked(this, &SOdysseyTextureLayerImageRasterRow::GetIsAlphaLockedIsChecked)
+    );
+
+    return widgets;
 }
 
 void

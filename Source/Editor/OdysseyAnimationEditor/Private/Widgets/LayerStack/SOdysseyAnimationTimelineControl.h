@@ -11,13 +11,13 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineControl
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineControl)
         {
-			_Visibility = EVisibility::SelfHitTestInvisible;
-		}
+            _Visibility = EVisibility::SelfHitTestInvisible;
+        }
         SLATE_DEFAULT_SLOT( FArguments, Content )
-		SLATE_ARGUMENT(UOdysseyAnimation*, Animation)
-		SLATE_ATTRIBUTE(int, CurrentFrame)
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
-		SLATE_ATTRIBUTE( FInt32Range, CustomValidRange)
+        SLATE_ARGUMENT(UOdysseyAnimation*, Animation)
+        SLATE_ATTRIBUTE(int, CurrentFrame)
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ATTRIBUTE( FInt32Range, CustomValidRange)
     SLATE_END_ARGS()
 
 public:
@@ -33,17 +33,17 @@ public:
     virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
     virtual FNavigationReply OnNavigation(const FGeometry& MyGeometry, const FNavigationEvent& InNavigationEvent) override;
     virtual bool SupportsKeyboardFocus() const override { return true; }
-	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+    virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 
 private:
     UOdysseyAnimation* mAnimation;
-	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
     TAttribute<int> mCurrentFrame;
-	TAttribute<FInt32Range> mCustomValidRange;
-    
+    TAttribute<FInt32Range> mCustomValidRange;
+
     FVector2D                             mOffsetMousePosition;
     bool                                 mIsOffsetting;
-    
+
     FVector2D                             mZoomMousePosition;
     float                                 mZoomInitialValue;
     float                                 mOffsetInitialValue;

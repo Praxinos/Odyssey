@@ -14,7 +14,7 @@ class FBaseToolkit;
  */
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorExtension
     : public FGCObject //Allows us to register External UObject in Garbage Collector
-{   
+{
 public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditorExtension();
@@ -28,7 +28,7 @@ public:
     virtual void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
 
     FOdysseyPainterEditor* GetEditor() const;
-    
+
 public:
     virtual void AddReferencedObjects(FReferenceCollector& Collector);
     virtual FString GetReferencerName() const;

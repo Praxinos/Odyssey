@@ -133,7 +133,7 @@ FOdysseyTextureEditorModule::UnregisterAssetTypeActions()
 {
     if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
         return;
-    
+
     IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
     assetTools.UnregisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
 }
@@ -158,7 +158,7 @@ FOdysseyTextureEditorModule::UnregisterSettings()
 
     if( !settingsModule )
         return;
-    
+
     settingsModule->UnregisterSettings( "Editor", "Plugins", "ILIADTexture2DEditor" );
 }
 

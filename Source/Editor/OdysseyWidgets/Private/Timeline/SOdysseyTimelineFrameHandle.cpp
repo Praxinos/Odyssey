@@ -29,7 +29,7 @@ SOdysseyTimelineFrameHandle::OnMouseButtonDown(const FGeometry& iGeometry, const
         mDragScreenSpacePosition = iMouseEvent.GetScreenSpacePosition();
         mIsDragging = true;
         mOnDragStarted.ExecuteIfBound();
-        return FReply::Handled().CaptureMouse(this->AsShared());    
+        return FReply::Handled().CaptureMouse(this->AsShared());
     }
     return FReply::Unhandled();
 }
@@ -42,7 +42,7 @@ SOdysseyTimelineFrameHandle::OnMouseMove(const FGeometry& iGeometry, const FPoin
         float offset = iMouseEvent.GetScreenSpacePosition().X - mDragScreenSpacePosition.X;
         int32 frameOffset = FGenericPlatformMath::RoundToInt(offset / mFrameSize.Get());
         mOnDragged.ExecuteIfBound(frameOffset);
-        return FReply::Handled();    
+        return FReply::Handled();
     }
     return FReply::Unhandled();
 }
@@ -54,7 +54,7 @@ SOdysseyTimelineFrameHandle::OnMouseButtonUp(const FGeometry& iGeometry, const F
     {
         mIsDragging = false;
         mOnDragStopped.ExecuteIfBound();
-        return FReply::Handled().ReleaseMouseCapture();    
+        return FReply::Handled().ReleaseMouseCapture();
     }
     return FReply::Unhandled();
 }

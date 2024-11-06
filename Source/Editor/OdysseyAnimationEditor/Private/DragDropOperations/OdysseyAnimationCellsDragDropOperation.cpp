@@ -39,7 +39,7 @@ TSharedPtr<SWidget>
 FOdysseyAnimationCellsDragDropOperation::GetDefaultDecorator() const
 {
     return SNew(SBorder)
-        .BorderImage(FAppStyle::GetBrush("Graph.ConnectorFeedback.Border")) //weird, but everyone does this 
+        .BorderImage(FAppStyle::GetBrush("Graph.ConnectorFeedback.Border")) //weird, but everyone does this
         .Content()
         [
             SNew(SHorizontalBox)
@@ -61,7 +61,7 @@ FOdysseyAnimationCellsDragDropOperation::GetDefaultDecorator() const
 
 FText
 FOdysseyAnimationCellsDragDropOperation::GetText() const
-{    
+{
     return FText::Format(LOCTEXT("cells-drag-drop-operation.cells-count", "{0} Cells"), FText::AsNumber(mData.GetCellCount()));
 }
 

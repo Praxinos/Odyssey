@@ -20,28 +20,28 @@ public:
 public:
     /**
      * @brief Get only the topmost layers, to avoid getting a parent layer and their children in the returned array
-     * 
-     * @return TArray< UOdysseyPaletteEntry* > 
+     *
+     * @return TArray< UOdysseyPaletteEntry* >
      */
     TArray< UOdysseyPaletteEntry* > GetTopmostPaletteEntries() const;
 
     /**
      * @brief Get all layers without filtering
-     * 
-     * @return TArray< UOdysseyPaletteEntry* > 
+     *
+     * @return TArray< UOdysseyPaletteEntry* >
      */
     TArray< UOdysseyPaletteEntry* > GetPaletteEntries() const;
 
     /**
      * @brief Get the Layer Stack object
-     * 
-     * @return UOdysseyPalette* 
+     *
+     * @return UOdysseyPalette*
      */
     UOdysseyPalette* GetPalette() const;
 
 public:
     /**
-     * Gets the widget that will serve as the decorator unless overridden. 
+     * Gets the widget that will serve as the decorator unless overridden.
      * If you do not override, you will have no decorator
      */
     virtual TSharedPtr<SWidget> GetDefaultDecorator() const override;

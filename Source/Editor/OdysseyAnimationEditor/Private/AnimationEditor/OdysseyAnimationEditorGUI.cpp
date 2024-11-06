@@ -55,7 +55,7 @@ FOdysseyAnimationEditorGUI::Finalize()
 
 void
 FOdysseyAnimationEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
-{    
+{
     TSharedRef<FTabManager::FSplitter> mainVerticalSplitter = iBuilder.GetSplitter("MainVerticalSplitter");
     TSharedRef<FTabManager::FStack> animationTimelineStack = iBuilder.CreateStack("AnimationTimelineStack");
     animationTimelineStack->SetHideTabWell(false);
@@ -70,7 +70,7 @@ FOdysseyAnimationEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
 
 void
 FOdysseyAnimationEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
-{   
+{
     Extender.ExtendLayout(FTabId(TEXT("Sequencer")), ELayoutExtensionPosition::Above, FTabManager::FTab(FOdysseyAnimationEditorTimelineTab::StaticId(), ETabState::ClosedTab));
 }
 
@@ -177,7 +177,7 @@ FOdysseyAnimationEditorGUI::ParseVectorSignal( FOdysseyVectorGroupPaint* iScene
         TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
 
         vectorSceneTreeViewTab.Get()->UpdateSceneTreeView( iScene );
-            
+
     }
 
     if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED )

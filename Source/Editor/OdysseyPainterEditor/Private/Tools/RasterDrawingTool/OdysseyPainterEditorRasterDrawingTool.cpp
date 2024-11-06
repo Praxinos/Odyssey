@@ -87,7 +87,7 @@ void
 UOdysseyPainterEditorRasterDrawingTool::Activate()
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Color), FOdysseyBrushColor(GetEditor()->PaintColor()));
-    
+
     //Set Default Brush
     if(!Brush)
     {
@@ -125,7 +125,7 @@ UOdysseyPainterEditorRasterDrawingTool::Unload()
 {
     mPaintEngine.RasterBlock(nullptr);
     mPaintEngine.SetMaskBlock(nullptr);
-    
+
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->OnChanged().RemoveAll(this);
     mHUD->RemoveElement(rasterSelection->GetHUD());
@@ -148,8 +148,8 @@ UOdysseyPainterEditorRasterDrawingTool::IsActivable() const
 bool
 UOdysseyPainterEditorRasterDrawingTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
     if (mediaProvider.IsLocked())
@@ -158,11 +158,11 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseDown(const FOdysseyPoint& iPointI
     bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
     if (!hasRaster)
         return false;
-    
+
     TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
     if( mediaRasters.Num() <= 0 )
         return false;
-    
+
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
     mPaintEngine.RasterBlock(rasterBlock);
     if ( BrushInstance )
@@ -174,15 +174,15 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseDown(const FOdysseyPoint& iPointI
         mSubPixelPoint.x = FMath::Floor(mSubPixelPoint.x) + 0.5f;
         mSubPixelPoint.y = FMath::Floor(mSubPixelPoint.y) + 0.5f;
     }
-        
+
     return SelectedShapeInstance->OnMouseDown(mSubPixelPoint, iKey);
 }
 
 bool
 UOdysseyPainterEditorRasterDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
-{    
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+{
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
     if (mediaProvider.IsLocked())
@@ -191,7 +191,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInT
     bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
     if (!hasRaster)
         return false;
-    
+
     //ensure we can retrieve a media
     TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetMedias<FOdysseyMediaRaster>();
     if( mediaRasters.Num() <= 0 )
@@ -217,7 +217,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseHover(const FOdysseyPoint& iPoint
     bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
     if (!hasRaster)
         return;
-    
+
     //ensure we can retrieve a media
     TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetMedias<FOdysseyMediaRaster>();
     if( mediaRasters.Num() <= 0 )
@@ -246,7 +246,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointI
     bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
     if (!hasRaster)
         return;
-    
+
     //ensure we can retrieve a media
     TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetMedias<FOdysseyMediaRaster>();
     if( mediaRasters.Num() <= 0 )
@@ -277,7 +277,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnKeyDown(const FKey& iKey)
     bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
     if (!hasRaster)
         return false;
-    
+
     //ensure we can retrieve a media
     TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetMedias<FOdysseyMediaRaster>();
     if( mediaRasters.Num() <= 0 )
@@ -296,7 +296,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnKeyUp(const FKey& iKey)
     bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
     if (!hasRaster)
         return false;
-    
+
     //ensure we can retrieve a media
     TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetMedias<FOdysseyMediaRaster>();
     if( mediaRasters.Num() <= 0 )
@@ -315,7 +315,7 @@ UOdysseyPainterEditorRasterDrawingTool::Tick(float iDeltaTime)
     bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
     if (!hasRaster)
         return;
-    
+
     //ensure we can retrieve a media
     TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetMedias<FOdysseyMediaRaster>();
     if( mediaRasters.Num() <= 0 )
@@ -350,7 +350,7 @@ UOdysseyPainterEditorRasterDrawingTool::Commit()
 {
     FScopedTransaction transaction(LOCTEXT("raster-drawing-tool.transaction.paint-stroke", "Paint Stroke"));
     mPaintEngine.Commit(BlendParameters);
-    
+
     FOdysseyPainterEditor* editor = GetEditor();
     TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
     if (source)
@@ -537,7 +537,7 @@ UOdysseyPainterEditorRasterDrawingTool::StrokeReset()
     mWorker.Finish();
     BrushInstance->StrokeFlush();
     BrushInstance->StrokeAbort();
-    
+
     //Reset the PaintEngine as if didn't draw on it
     mPaintEngine.Abort();
 }
@@ -578,7 +578,7 @@ UOdysseyPainterEditorRasterDrawingTool::SetAlphaMode(::ULIS::eAlphaMode iAlphaMo
     FOdysseyBlendParameters value = BlendParameters;
     value.AlphaMode = (EOdysseyAlphaMode)iAlphaMode;
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), value);
-    
+
 }
 
 void
@@ -607,7 +607,7 @@ UOdysseyPainterEditorRasterDrawingTool::GetBrush() const
 UOdysseyBrushAssetBase*
 UOdysseyPainterEditorRasterDrawingTool::GetBrushInstance() const
 {
-    return BrushInstance; 
+    return BrushInstance;
 }
 
 // Returns the BlendParameters
@@ -694,7 +694,7 @@ UOdysseyPainterEditorRasterDrawingTool::CreateBrushInstance(bool iApplyOverrides
     //Apply Overrides before setting the brushInstance in the strokeEngine properties
     if (iApplyOverrides)
         ApplyOverrides(brushInstance);
-    
+
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BrushInstance), brushInstance);
 
     ConfigureBrushInstance(brushInstance);
@@ -727,7 +727,7 @@ UOdysseyPainterEditorRasterDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* i
 
         if (blendParametersOverrides->bOverride_BlendingMode)
             blendParameters.BlendingMode = blendParametersOverrides->BlendingMode;
-        
+
         if (blendParametersOverrides->bOverride_AlphaMode)
             blendParameters.AlphaMode = blendParametersOverrides->AlphaMode;
 
@@ -779,7 +779,7 @@ UOdysseyPainterEditorRasterDrawingTool::BrushChanged()
 {
     if (!Brush)
         return;
-        
+
     //Destroy the brushInstance
     DestroyBrushInstance();
 
@@ -972,7 +972,7 @@ UOdysseyPainterEditorRasterDrawingTool::InterpolateTo(const FOdysseyPoint& iPoin
         {
             mInterpolator->SetStep(Step);
         }
-        
+
         mInterpolator->AddPoint( iPoint );
         mLastPoint = iPoint;
         return { iPoint };
@@ -1007,6 +1007,6 @@ void
 UOdysseyPainterEditorRasterDrawingTool::SubPixelBlueprintSetter(bool Value)
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, SubPixel), Value);
-}   
+}
 
 #undef LOCTEXT_NAMESPACE

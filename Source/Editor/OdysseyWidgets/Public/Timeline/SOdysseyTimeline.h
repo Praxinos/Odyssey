@@ -55,7 +55,7 @@ public:
     void ScrubPosition(float iPosition);
 
     bool IsScrubbing() const;
-    
+
     // Returns the framesize in pixels according to the zoom
     float FrameSize() const;
 

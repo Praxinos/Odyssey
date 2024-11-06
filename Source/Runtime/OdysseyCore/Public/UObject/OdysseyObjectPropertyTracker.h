@@ -8,14 +8,14 @@
 
 /**
  * @brief A helper class that tracks any changes to selected properties of a given object.
- * 
+ *
  * Tracking a property means that you can be informed that the property has changed,
  * either by a SetPropertyValue call, or via undo/redo.
- * 
+ *
  * The advantage of this tracker, is that it allows you to know what was the previous value
  * of the tracked property before it changed.
  * When multiple properties are changed at once (on undo for example), you can ask for oldvalues of other properties aswell.
- * 
+ *
  * Tracking a property will store a copy of this property, so use it only when you need it
  */
 class ODYSSEYCORE_API FOdysseyObjectPropertyTracker
@@ -26,26 +26,26 @@ public:
 
     /**
      * @brief Construct a property tracker to track properties changes of the given object
-     * 
-     * @param iObject 
+     *
+     * @param iObject
      */
     FOdysseyObjectPropertyTracker(UObject* iObject);
 
 public:
     /**
      * @brief Tracks the given property
-     * 
+     *
      * Please ensure the type of the template corresonds to the type of the property
-     * 
-     * @tparam T 
-     * @param iPropertyName 
+     *
+     * @tparam T
+     * @param iPropertyName
      */
     template<class T> void Track(const FName& iPropertyName, const IOdysseySinglePropertyTracker::TOnChanged<T>& iOnChanged);
 
     /**
      * @brief Untracks the given property
-     * 
-     * @param iPropertyName 
+     *
+     * @param iPropertyName
      */
     void Untrack(const FName& iPropertyName);
 

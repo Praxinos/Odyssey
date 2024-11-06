@@ -17,22 +17,22 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineTreeView
     : public SOdysseyLayerStackTreeView
 {
 public:
-	DECLARE_DELEGATE_OneParam(FOnActivateOutOfPegs, UOdysseyAnimationCell*)
-	DECLARE_DELEGATE_RetVal_OneParam(ECheckBoxState, FOnIsOutOfPegsChecked, UOdysseyAnimationCell*)
+    DECLARE_DELEGATE_OneParam(FOnActivateOutOfPegs, UOdysseyAnimationCell*)
+    DECLARE_DELEGATE_RetVal_OneParam(ECheckBoxState, FOnIsOutOfPegsChecked, UOdysseyAnimationCell*)
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineTreeView)
-		: _Player(nullptr)
-		, _ExternalScrollbar(nullptr)
+        : _Player(nullptr)
+        , _ExternalScrollbar(nullptr)
         {}
         SLATE_ARGUMENT( UOdysseyAnimationLayerStack*, LayerStack )
-		SLATE_ARGUMENT( UOdysseyAnimationPlayer*, Player )
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
-		SLATE_EVENT(FOnActivateOutOfPegs, OnActivateOutOfPegs)
-		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
-		SLATE_EVENT(FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
-		SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
-		SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )
+        SLATE_ARGUMENT( UOdysseyAnimationPlayer*, Player )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_EVENT(FOnActivateOutOfPegs, OnActivateOutOfPegs)
+        SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
+        SLATE_EVENT(FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
+        SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
+        SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )
     SLATE_END_ARGS()
 
 public:
@@ -40,19 +40,19 @@ public:
 
 private:
     virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
-	virtual FCursorReply OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
+    virtual FCursorReply OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const override;
 
 private:
-	//Events
-	TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
+    //Events
+    TSharedRef<ITableRow> OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable);
     void OnGetChildren(UOdysseyLayer* iParent, TArray<UOdysseyLayer*>& oChildren) const;
 
 private:
-	UOdysseyAnimationLayerStack* mLayerStack;
-	UOdysseyAnimationPlayer* mPlayer;
+    UOdysseyAnimationLayerStack* mLayerStack;
+    UOdysseyAnimationPlayer* mPlayer;
     TSharedPtr<FOdysseyAnimationTimelineShortcuts> mTimelineShortcuts;
-	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
-	FOnActivateOutOfPegs mOnActivateOutOfPegs;
-	FSimpleDelegate mOnInactivateOutOfPegs;
-	FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
+    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+    FOnActivateOutOfPegs mOnActivateOutOfPegs;
+    FSimpleDelegate mOnInactivateOutOfPegs;
+    FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
 };

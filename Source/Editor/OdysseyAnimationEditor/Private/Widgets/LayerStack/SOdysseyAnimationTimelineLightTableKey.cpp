@@ -14,24 +14,24 @@
 void
 SOdysseyAnimationTimelineLightTableKey::Construct(const FArguments& InArgs)
 {
-	mCell = InArgs._Cell;
-	mKey = InArgs._Key;
+    mCell = InArgs._Cell;
+    mKey = InArgs._Key;
 
     const FCheckBoxStyle* checkboxStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.ToggleButton");
 
-	ChildSlot
-	[
-		SNew(SOdysseyAnimationTimelineSection)
-		.TimelinePosition(InArgs._TimelinePosition)
-		.WidthInFrames(1)
-		.HAlign(HAlign_Center)
-		[
-			SNew(SOdysseyAnimationTimelineLightTableKeySlider)
-			.Key(mKey)
-			.OnChanged(InArgs._OnChanged)
-			.OnCommited(InArgs._OnCommited)
-		]
-	];
+    ChildSlot
+    [
+        SNew(SOdysseyAnimationTimelineSection)
+        .TimelinePosition(InArgs._TimelinePosition)
+        .WidthInFrames(1)
+        .HAlign(HAlign_Center)
+        [
+            SNew(SOdysseyAnimationTimelineLightTableKeySlider)
+            .Key(mKey)
+            .OnChanged(InArgs._OnChanged)
+            .OnCommited(InArgs._OnCommited)
+        ]
+    ];
 }
 
 void
@@ -84,11 +84,11 @@ SOdysseyAnimationTimelineLightTableKeySlider::OnPaint(const FPaintArgs& Args, co
 FReply
 SOdysseyAnimationTimelineLightTableKeySlider::OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
-	if (iMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
-	{	
-		// This has prevent throttling on so that viewports continue to run whilst dragging the slider
-		return FReply::Handled().DetectDrag(SharedThis(this), EKeys::LeftMouseButton).PreventThrottling();
-	}
+    if (iMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+    {
+        // This has prevent throttling on so that viewports continue to run whilst dragging the slider
+        return FReply::Handled().DetectDrag(SharedThis(this), EKeys::LeftMouseButton).PreventThrottling();
+    }
 
     return FReply::Unhandled();
 }
@@ -106,18 +106,18 @@ FReply
 SOdysseyAnimationTimelineLightTableKeySlider::OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
     if (mDragging)
-    {    
+    {
         float position = iMouseEvent.GetScreenSpacePosition().Y;
         float delta = (position - mDraggingPosition) * -1;
-        float sensitivity = 200.f; 
+        float sensitivity = 200.f;
 
-		FOdysseyAnimationLightTableKey key = mKey.Get();
-		key.Opacity = FMath::Clamp(mOldOpacity + 100.f * delta / sensitivity, 0.f, 100.f);
-		mOnChanged.ExecuteIfBound(key);
-		
-		// This has prevent throttling on so that viewports continue to run whilst dragging the slider
-		return FReply::Handled().PreventThrottling();
-	}
+        FOdysseyAnimationLightTableKey key = mKey.Get();
+        key.Opacity = FMath::Clamp(mOldOpacity + 100.f * delta / sensitivity, 0.f, 100.f);
+        mOnChanged.ExecuteIfBound(key);
+
+        // This has prevent throttling on so that viewports continue to run whilst dragging the slider
+        return FReply::Handled().PreventThrottling();
+    }
 
     return FReply::Unhandled();
 }
@@ -134,11 +134,11 @@ SOdysseyAnimationTimelineLightTableKeySlider::OnMouseButtonUp(const FGeometry& i
     }
 
     if (iMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
-    {    
+    {
         FOdysseyAnimationLightTableKey key = mKey.Get();
         key.bIsActivated = !key.bIsActivated;
         mOnCommited.ExecuteIfBound(key);
-        
+
         // This has prevent throttling on so that viewports continue to run whilst dragging the slider
         return FReply::Handled();
     }

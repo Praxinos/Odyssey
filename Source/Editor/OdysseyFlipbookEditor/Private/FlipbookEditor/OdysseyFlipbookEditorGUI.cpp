@@ -38,8 +38,8 @@ FOdysseyFlipbookEditorGUI::Finalize()
 
 void
 FOdysseyFlipbookEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
-{    
-    TSharedRef<FTabManager::FSplitter> mainVerticalSplitter = iBuilder.GetSplitter("MainVerticalSplitter");    
+{
+    TSharedRef<FTabManager::FSplitter> mainVerticalSplitter = iBuilder.GetSplitter("MainVerticalSplitter");
     TSharedRef<FTabManager::FStack> flipbookTimelineStack = iBuilder.CreateStack("FlipbookTimelineStack");
     flipbookTimelineStack->SetHideTabWell(false);
     flipbookTimelineStack->SetSizeCoefficient(0.2f);
@@ -90,7 +90,7 @@ FOdysseyFlipbookEditorGUI::OnFlipbookChanged()
 
 void
 FOdysseyFlipbookEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
-{   
+{
     Extender.ExtendLayout(FTabId(TEXT("LevelEditorSelectionDetails")), ELayoutExtensionPosition::Above, FTabManager::FTab(FOdysseyFlipbookEditorTimelineTab::StaticId(), ETabState::ClosedTab));
 }
 

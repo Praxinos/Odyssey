@@ -185,17 +185,17 @@ SOdysseyTextureDetails::GetImportedText() const
             }
             return 1;
         }();
-    
+
     const uint32 ImportedWidth = FMath::Max<uint32>(SurfaceWidth, texture->Source.GetSizeX());
     const uint32 ImportedHeight =  FMath::Max<uint32>(SurfaceHeight, texture->Source.GetSizeY());
     const uint32 ImportedDepth = FMath::Max<uint32>(SurfaceDepth, VolumeTexture || VolumeTextureRT ? texture->Source.GetNumSlices() : 1);
 
     FNumberFormattingOptions Options;
     Options.UseGrouping = false;
-    
+
     if (VolumeTexture || VolumeTextureRT)
         return FText::Format( LOCTEXT("texture-details.quick-info.imported-3-dimensions", "Imported: {0}x{1}x{2}"), FText::AsNumber(ImportedWidth, &Options), FText::AsNumber(ImportedHeight, &Options), FText::AsNumber(ImportedDepth, &Options));
-    
+
     return FText::Format( LOCTEXT("texture-details.quick-info.imported-2-dimensions", "Imported: {0}x{1}"), FText::AsNumber(ImportedWidth, &Options), FText::AsNumber(ImportedHeight, &Options));
 }
 
@@ -227,7 +227,7 @@ SOdysseyTextureDetails::GetCurrentText() const
             }
             return 1;
         }();
-    
+
     const FStreamableRenderResourceState SRRState = texture->GetStreamableResourceState();
     const int32 ActualMipBias = SRRState.IsValid() ? (SRRState.ResidentFirstLODIdx() + SRRState.AssetLODBias) : texture->GetCachedLODBias();
     const uint32 ActualWidth = FMath::Max<uint32>(SurfaceWidth >> ActualMipBias, 1);
@@ -243,10 +243,10 @@ SOdysseyTextureDetails::GetCurrentText() const
 
     FNumberFormattingOptions Options;
     Options.UseGrouping = false;
-    
+
     if (VolumeTexture || VolumeTextureRT)
         return FText::Format( LOCTEXT("texture-details.quick-info.displayed-3-dimensions", "Displayed: {0}x{1}x{2}"), FText::AsNumber(PreviewEffectiveTextureWidth, &Options ), FText::AsNumber(PreviewEffectiveTextureHeight, &Options), FText::AsNumber(PreviewEffectiveTextureDepth, &Options));
-    
+
     FText CubemapAdd;
     if(TextureCube)
     {
@@ -283,7 +283,7 @@ SOdysseyTextureDetails::GetMaxInGameText() const
             }
             return 1;
         }();
-    
+
     // In game max bias and dimensions
     const int32 MaxResMipBias = Texture2D ? (Texture2D->GetNumMips() - Texture2D->GetNumMipsAllowed(true)) : texture->GetCachedLODBias();
     const uint32 MaxInGameWidth = FMath::Max<uint32>(SurfaceWidth >> MaxResMipBias, 1);
@@ -292,10 +292,10 @@ SOdysseyTextureDetails::GetMaxInGameText() const
 
     FNumberFormattingOptions Options;
     Options.UseGrouping = false;
-    
+
     if (VolumeTexture || VolumeTextureRT)
         return FText::Format( LOCTEXT("texture-details.quick-info.max-in-game-3-dimensions", "Max In-Game: {0}x{1}x{2}"), FText::AsNumber(MaxInGameWidth, &Options), FText::AsNumber(MaxInGameHeight, &Options), FText::AsNumber(MaxInGameDepth, &Options));
-    
+
 
     FText CubemapAdd;
     if(TextureCube)
@@ -354,7 +354,7 @@ SOdysseyTextureDetails::GetFormatText() const
     UTextureRenderTargetVolume* VolumeTextureRT = Cast<UTextureRenderTargetVolume>(texture);
 
     int32 TextureFormatIndex = PF_MAX;
-    
+
     if (Texture2D)
     {
         //TextureFormatIndex = Texture2D->GetPixelFormat(SpecifiedLayer);
@@ -364,7 +364,7 @@ SOdysseyTextureDetails::GetFormatText() const
     {
         TextureFormatIndex = TextureCube->GetPixelFormat();
     }
-    else if (Texture2DArray) 
+    else if (Texture2DArray)
     {
         TextureFormatIndex = Texture2DArray->GetPixelFormat();
     }
@@ -391,7 +391,7 @@ SOdysseyTextureDetails::GetFormatText() const
 
     if (TextureFormatIndex == PF_MAX)
         return FText();
-    
+
     return FText::Format(LOCTEXT("texture-details.quick-info.format", "Format: {0}"), FText::FromString(GPixelFormats[TextureFormatIndex].Name));
 }
 
@@ -416,7 +416,7 @@ SOdysseyTextureDetails::GetHasAlphaChannelText() const
 
     if (!Texture2D)
         return FText();
-        
+
     return FText::Format(LOCTEXT("texture-details.quick-info.has-alpha-channel", "Has Alpha Channel: {0}"),
         Texture2D->HasAlphaChannel() ? LOCTEXT("texture-details.quick-info.has-alpha-channel.true", "True") : LOCTEXT("texture-details.quick-info.has-alpha-channel.false", "False"));
 }
@@ -446,7 +446,7 @@ SOdysseyTextureDetails::GetNumMipsText() const
     {
         NumMips = TextureCube->GetNumMips();
     }
-    else if (Texture2DArray) 
+    else if (Texture2DArray)
     {
         NumMips = Texture2DArray->GetNumMips();
     }

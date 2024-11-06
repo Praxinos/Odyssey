@@ -86,7 +86,7 @@ FOdysseyTextureEditorGUI::OnSourceChanged()
 
 void
 FOdysseyTextureEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
-{   
+{
     Extender.ExtendLayout(FTabId(TEXT("LevelEditorSelectionDetails")), ELayoutExtensionPosition::Above, FTabManager::FTab(FOdysseyTextureEditorLayerStackTab::StaticId(), ETabState::ClosedTab));
 }
 
@@ -111,9 +111,9 @@ FOdysseyTextureEditorGUI::CreateTabs()
 
 void
 FOdysseyTextureEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
-{    
+{
     TSharedRef<FTabManager::FSplitter> rightSplitter = iBuilder.GetSplitter("RightSplitter");
-    
+
     TSharedRef<FTabManager::FStack> textureLayerStackStack = iBuilder.CreateStack("TextureLayerStackStack");
     textureLayerStackStack->SetHideTabWell(false);
     textureLayerStackStack->SetSizeCoefficient(0.35f);
@@ -123,7 +123,7 @@ FOdysseyTextureEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
     textureDetailsStack->SetHideTabWell(false);
     textureDetailsStack->SetSizeCoefficient(0.15f);
     textureDetailsStack->AddTab(FOdysseyTextureEditorLayerStackTab::StaticId(), ETabState::OpenedTab);
-    
+
     rightSplitter->Split
     (
         textureLayerStackStack
@@ -183,7 +183,7 @@ FOdysseyTextureEditorGUI::OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScene,
         return;
 
     TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
-    
+
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(source->GetLayerStack());
 
     // layerStack might be NULL when closing the program

@@ -57,6 +57,6 @@ FOdysseyVectorImportV2::ReadBrush( FOdysseyVectorBrush& iBrush, uint64 iChunkEnd
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
-            }    
+            }
         } );
 }

@@ -24,7 +24,7 @@ struct FNSEventStylusState
     FVector2D          Size;
     bool               IsTouching : 1;
     bool               IsInverted : 1;
-    
+
     FNSEventStylusState() :
         Position( 0, 0 ), Z( 0 ), Timer( 0 ), Azimuth( 0 ), Altitude( 0 ), Twist( 0 ), Tilt( 0, 0 ), NormalPressure( 0 ), TangentPressure( 0 ), Size( 0, 0 ),
         IsTouching( false ), IsInverted( false )
@@ -41,9 +41,9 @@ struct FNSEventStylusState
             if( Azimuth < 0 )
                 Azimuth+= 2 * PI;
         }
-        
+
         Altitude = PI / 2 - FMath::Acos(FMath::Cos( Tilt.X ) * FMath::Cos( Tilt.Y ) );
-        
+
         Altitude = FMath::RadiansToDegrees( Altitude );
         Azimuth = FMath::RadiansToDegrees( Azimuth );
     } */
@@ -57,7 +57,7 @@ struct FNSEventStylusState
 /**
 * Description of an input device (context info) specialized for NSEvent.
 */
-struct FNSEventTabletContextInfo 
+struct FNSEventTabletContextInfo
     : public IStylusInputDevice
 {
     //Is the stylus upside down ?
@@ -71,7 +71,7 @@ struct FNSEventTabletContextInfo
     void Clear() { CurrentState.Empty(); PreviousState.Empty(); }
 
     TArray< FNSEventStylusState > mPacketsBuffer;
-    
+
     virtual void Tick() override;
 };
 
@@ -83,12 +83,12 @@ class FNSEventContext
 public:
     FNSEventContext();
     ~FNSEventContext();
-    
+
     /** Create a (tablet) context and link it to this windows */
     bool OpenContext( FCocoaWindow* iHwnd );
     /** Destroy the context when not needed anymore */
     void CloseContext();
-    
+
 private:
     /** The id of the monitor which receive the events */
     id mEventMonitor;

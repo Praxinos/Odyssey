@@ -30,7 +30,7 @@ void
 UOdysseyAnimationLayerImageRaster::PostInitProperties()
 {
     Super::PostInitProperties();
-    
+
     LayerTypeName = LOCTEXT("layer-image-raster.type", "Raster Image Layer");
     Icon = FSlateIcon("OdysseyStyle", "OdysseyLayerStack.LayerBitmap16");
     DefaultCellClass = UOdysseyAnimationCellImageRaster::StaticClass();
@@ -70,12 +70,12 @@ UOdysseyAnimationLayerImageRaster::Serialize(FArchive& Ar)
     Super::Serialize(Ar);
 
     Ar.UsingCustomVersion(FOdysseyAnimationLayerImageRasterObjectVersion::GUID);
-    
+
     if( Ar.IsLoading() && Ar.CustomVer(FOdysseyAnimationLayerImageRasterObjectVersion::GUID) < FOdysseyAnimationLayerImageRasterObjectVersion::RefactorCellsToUObject)
     {
         if (!FOdysseyAnimationLayerImageRasterImport::Read( this, Ar ))
         {
-            //Old Style No Chunk Loading 
+            //Old Style No Chunk Loading
             //DEPRECATED: Keep for compatibility with Odyssey 2.0 and prior
             if (!FOdysseyAnimationCellsContainerImport::Read( this, Ar ))
             {
@@ -120,7 +120,7 @@ UOdysseyAnimationLayerImageRaster::BuildImageRenderer(IOdysseyImageRenderer::eRe
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
-    
+
     return MakeShared<FOdysseyAnimationLayerImageRasterImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
@@ -213,16 +213,16 @@ UOdysseyAnimationLayerImageRaster::Merge(const TArray<UOdysseyLayer*>& iLayers)
     }
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_RGBA8);
-    
+
     RemoveCells(Cells);
     TArray<UOdysseyAnimationCell*> cells = AddCells(UOdysseyAnimationCellImageRaster::StaticClass(), 0, cellRanges.Num());
-    
+
     for (int i = 0; i < cellRanges.Num(); i++)
     {
         const FInt32Range& cellRange = cellRanges[i];
         UOdysseyAnimationCellImageRaster*cell = Cast<UOdysseyAnimationCellImageRaster>(cells[i]);
         FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cellRange.GetUpperBoundValue() - cellRange.GetLowerBoundValue() + 1);
-        
+
         TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
         FOdysseyRasterBlockMutator blockMutator(rasterBlock);
 
@@ -263,7 +263,7 @@ UOdysseyAnimationLayerImageRaster::GetCellMediaRaster(uint32 iFrameIndex) const
     UOdysseyAnimationCell* cell = GetCellAtFrame(iFrameIndex);
     if (!cell)
         return nullptr;
-    
+
     FInt32Range frameRange = cell->GetFrameRange();
     int cellFrame = frameRange.GetLowerBoundValue();
 
@@ -340,7 +340,7 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
         UOdysseyAnimationCell* cell = AddCell(UOdysseyAnimationCellImageRaster::StaticClass(), 0);
         FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), range.GetLowerBoundValue() - iFrameIndex);
         FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), CellsOffset - cell->Exposure);
-        
+
         FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
         currentFrameMutator.Set(animation->CurrentFrame);
         currentFrameMutator.Commit();
@@ -361,7 +361,7 @@ UOdysseyAnimationLayerImageRaster::AutoCreateCell(int iFrameIndex)
         }
         UOdysseyAnimationCell* cell = AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
         FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cellExposure);
-        
+
         FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
         currentFrameMutator.Set(animation->CurrentFrame);
         currentFrameMutator.Commit();

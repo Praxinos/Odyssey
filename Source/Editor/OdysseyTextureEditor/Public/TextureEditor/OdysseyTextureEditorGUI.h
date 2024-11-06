@@ -17,7 +17,7 @@ class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorGUI
 {
 public:
     static void ExtendLevelEditorLayout(FLayoutExtender& Extender);
-    
+
 public:
     // Construction / Destruction
     ~FOdysseyTextureEditorGUI();

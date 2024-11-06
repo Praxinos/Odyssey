@@ -2,16 +2,16 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "PainterEditor/OdysseyPainterEditorExtension.h"
-    
+
 FOdysseyPainterEditorExtension::~FOdysseyPainterEditorExtension()
 {
-   
+
 }
 
 FOdysseyPainterEditorExtension::FOdysseyPainterEditorExtension(FOdysseyPainterEditor* iEditor)
     : mEditor(iEditor)
 {
-    
+
 }
 
 void
@@ -41,7 +41,7 @@ FOdysseyPainterEditorExtension::BindShortcuts(FBaseToolkit* iToolkit)
 void
 FOdysseyPainterEditorExtension::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
 {
-    
+
 }
 
 FOdysseyPainterEditor*
@@ -53,7 +53,7 @@ FOdysseyPainterEditorExtension::GetEditor() const
 void
 FOdysseyPainterEditorExtension::AddReferencedObjects(FReferenceCollector& Collector)
 {
-    
+
 }
 
 FString

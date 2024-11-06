@@ -18,7 +18,7 @@ class UPaperFlipbook;
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSpriteTextureChanged, UPaperSprite*, UTexture2D*)
 
 /** High level wrapper class to modify or read a UPaperFlipbook
- * 
+ *
  * A Flipbook contains an array of KeyFrames
  * Each Keyframe has a length
  * Therefore, each Keyframe has a Start and an End Position
@@ -35,7 +35,7 @@ public:
     FOdysseyFlipbookWrapper();
 
 public:
-    // 
+    //
     // Keyframes
     //
     int32 GetKeyframeIndexAtPosition(float iPosition);
@@ -48,7 +48,7 @@ public:
     void RemoveKeyFrame(int32 iIndex);
     void SetKeyFrameLength(int32 iIndex, int32 iLength);
 
-    // 
+    //
     // Sprites
     //
     UPaperSprite* GetKeyframeSprite(int32 iIndex);
@@ -56,7 +56,7 @@ public:
     void ShowKeyFrameSpriteInContentBrowser(int32 iIndex);
     void OpenKeyFrameSpriteEditor(int32 iIndex);
 
-    // 
+    //
     // Textures
     //
     UTexture2D* GetKeyframeTexture(int32 iIndex);

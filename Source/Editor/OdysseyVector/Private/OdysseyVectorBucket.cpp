@@ -108,7 +108,7 @@ FOdysseyVectorBucket::SetSpreadingPolicy( eBucketSpreadingPolicy iSpreadingPolic
     mSpreadingPolicy = iSpreadingPolicy;
 }
 
-void 
+void
 FOdysseyVectorBucket::SetRotation( double iRotation )
 {
     mRotation = fmod( iRotation, M_PI * 2.0f );
@@ -192,7 +192,7 @@ FOdysseyVectorBucket::SetGradientColor0( FColor& iColor )
 void
 FOdysseyVectorBucket::SetGradientColor1( FColor& iColor )
 {
-    mGradientColor1 = iColor; 
+    mGradientColor1 = iColor;
 }
 
 void

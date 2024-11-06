@@ -15,7 +15,7 @@ UOdysseyPaletteEntryColor::UOdysseyPaletteEntryColor()
     EntryTypeName = LOCTEXT( "entry-color.type", "Color" );
     DefaultName = LOCTEXT("entry-color.default-name", "Color");
     Icon = *FOdysseyStyle::GetBrush("OdysseyPalette.EntryColor");
-    
+
     if( GetPalette() )
     {
         for (int i = 0; i < GetPalette()->Sets.Num(); i++)
@@ -58,7 +58,7 @@ void UOdysseyPaletteEntryColor::AddSet()
 void UOdysseyPaletteEntryColor::DuplicateSetAt(int iIndex /*= -1 */)
 {
     if (iIndex >= 0 && iIndex < EntryColors.Num())
-    {   
+    {
         //The transaction is in OdysseyPalette, since we're adding a set for all entries, and we want only one transaction to handle all the additions
         FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "EntryColors");
 

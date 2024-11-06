@@ -54,7 +54,7 @@ FReply UOdysseyToolEllipse::InputKey(FViewport* iViewport, int32 iControllerId, 
 void UOdysseyToolEllipse::CapturedMouseMove(FViewport* iViewport, int32 iX, int32 iY)
 {
     mEllipse->CapturedMouseMove(iViewport, iX, iY);
- 
+
     if ( !mIsReadyToBeApplied )
     {
         mEllipse->mBorderPoint.Set(iX, iY);

@@ -270,14 +270,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
 
         /**
          * @brief Check the existence of a segment within the list of segments
-         * @param iSegment  
+         * @param iSegment
          * @return true or false
          */
         bool HasSegment( FOdysseyVectorSegment* iSegment );
 
         /**
          * @brief Check the existence of a vertex within the list of vertices
-         * @param iVertex  
+         * @param iVertex
          * @return true or false
          */
         bool HasVertex( FOdysseyVectorVertex* iVertex );

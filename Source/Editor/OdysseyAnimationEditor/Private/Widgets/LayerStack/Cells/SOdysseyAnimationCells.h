@@ -20,7 +20,7 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationCells)
         : _ShowHandles(false)
         {}
-		SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
+        SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
         SLATE_EVENT(FOnCreateCellWidget, OnCreateCellWidget)
         SLATE_ATTRIBUTE(bool, ShowHandles)
     SLATE_END_ARGS()
@@ -107,9 +107,9 @@ private:
     bool IsPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
 
 private:
-	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
     class UOdysseyAnimationLayer* mAnimationLayer;
-	TSharedPtr<FOdysseyAnimationTimelineTool> mTool;
+    TSharedPtr<FOdysseyAnimationTimelineTool> mTool;
 
     //Cells creation management (add cells handles)
     FOnCreateCellWidget mOnCreateCellWidget;

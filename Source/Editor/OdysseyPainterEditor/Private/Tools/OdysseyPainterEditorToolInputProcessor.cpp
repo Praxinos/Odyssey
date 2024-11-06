@@ -30,7 +30,7 @@ FOdysseyPainterEditorToolInputProcessor::HandleKeyDownEvent(FSlateApplication& S
 {
     //false means Unreal will continue as if we did nothing
 
-    return mPainterEditorTool->OnKeyDownGlobal( InKeyEvent.GetKey() ); 
+    return mPainterEditorTool->OnKeyDownGlobal( InKeyEvent.GetKey() );
 }
 
 bool
@@ -38,5 +38,5 @@ FOdysseyPainterEditorToolInputProcessor::HandleKeyUpEvent(FSlateApplication& Sla
 {
     //false means Unreal will continue as if we did nothing
 
-    return mPainterEditorTool->OnKeyUpGlobal( InKeyEvent.GetKey() ); 
+    return mPainterEditorTool->OnKeyUpGlobal( InKeyEvent.GetKey() );
 }

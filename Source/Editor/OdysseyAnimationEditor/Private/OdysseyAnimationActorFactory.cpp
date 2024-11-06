@@ -15,30 +15,30 @@
 // UOdysseyAnimationActorFactory
 
 UOdysseyAnimationActorFactory::UOdysseyAnimationActorFactory(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+    : Super(ObjectInitializer)
 {
-	DisplayName = LOCTEXT("animation-actor-factory.display-name", "Animation Factory");
-	NewActorClass = AOdysseyAnimationActor::StaticClass();
+    DisplayName = LOCTEXT("animation-actor-factory.display-name", "Animation Factory");
+    NewActorClass = AOdysseyAnimationActor::StaticClass();
 }
 
 void UOdysseyAnimationActorFactory::PostSpawnActor(UObject* iAsset, AActor* iActor)
 {
-	Super::PostSpawnActor(iAsset, iActor);
+    Super::PostSpawnActor(iAsset, iActor);
 
-	UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(iAsset);
-	if (!animation)
-		return;
+    UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(iAsset);
+    if (!animation)
+        return;
 
-	AOdysseyAnimationActor* animationActor = CastChecked<AOdysseyAnimationActor>(iActor);
-	FOdysseyObjectEditorUtils::SetPropertyValue(animationActor->AnimationComponent, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Animation), animation);
+    AOdysseyAnimationActor* animationActor = CastChecked<AOdysseyAnimationActor>(iActor);
+    FOdysseyObjectEditorUtils::SetPropertyValue(animationActor->AnimationComponent, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Animation), animation);
 
-	//Set plane in front of the camera
+    //Set plane in front of the camera
 
-	UUnrealEditorSubsystem* UnrealEditorSubsystem = GEditor->GetEditorSubsystem<UUnrealEditorSubsystem>();
-	FVector cameraLocation;
-	FRotator cameraRotation;
-	if (!UnrealEditorSubsystem->GetLevelViewportCameraInfo(cameraLocation, cameraRotation))
-		return;
+    UUnrealEditorSubsystem* UnrealEditorSubsystem = GEditor->GetEditorSubsystem<UUnrealEditorSubsystem>();
+    FVector cameraLocation;
+    FRotator cameraRotation;
+    if (!UnrealEditorSubsystem->GetLevelViewportCameraInfo(cameraLocation, cameraRotation))
+        return;
 
     //-
 
@@ -48,22 +48,22 @@ void UOdysseyAnimationActorFactory::PostSpawnActor(UObject* iAsset, AActor* iAct
 
     //---
 
-	animationActor->SetActorRotation( FRotator(0, 90, 90) );
-	animationActor->AddActorWorldRotation( plane_rotator );
+    animationActor->SetActorRotation( FRotator(0, 90, 90) );
+    animationActor->AddActorWorldRotation( plane_rotator );
 
 }
 
 bool UOdysseyAnimationActorFactory::CanCreateActorFrom(const FAssetData& AssetData, FText& OutErrorMsg)
 {
-	if (AssetData.IsValid() && AssetData.IsInstanceOf(UOdysseyAnimation::StaticClass()))
-	{
-		return true;
-	}
-	else
-	{
-		OutErrorMsg = LOCTEXT("animation-actor-factory.error.no-animation-specified", "No animation was specified.");
-		return false;
-	}
+    if (AssetData.IsValid() && AssetData.IsInstanceOf(UOdysseyAnimation::StaticClass()))
+    {
+        return true;
+    }
+    else
+    {
+        OutErrorMsg = LOCTEXT("animation-actor-factory.error.no-animation-specified", "No animation was specified.");
+        return false;
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

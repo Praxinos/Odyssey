@@ -24,7 +24,7 @@ void FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(UTextu
     // thread.  The only thing we're allowed to do is check to see if it's nullptr or not.
     FTextureRenderTargetResource* RenderTargetResource = RenderTargetTexture->GameThread_GetRenderTargetResource();
     check(RenderTargetResource != nullptr);
-    
+
     // Create a canvas for the render target and clear it to black
     FCanvas Canvas(RenderTargetResource, nullptr, FGameTime(), FeatureLevel);
 
@@ -38,12 +38,12 @@ void FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(UTextu
 
     // @todo MeshPaint: Should use scratch texture built from original source art (when possible!)
     //        -> Current method will have compression artifacts!
-    
+
     // Grab the texture resource.  We only support 2D textures and render target textures here.
     FTexture* TextureResource = nullptr;
     TextureResource = SourceTexture->GetResource();
     check(TextureResource != nullptr);
-    
+
     // Draw a quad to copy the texture over to the render target
     {
         const float MinU = 0.0f;
@@ -81,12 +81,12 @@ void FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(UTextu
 
     // Tell the rendering thread to draw any remaining batched elements
     Canvas.Flush_GameThread(true);
-    
+
     ENQUEUE_RENDER_COMMAND(UpdateMeshPaintRTCommand)(
         [RenderTargetResource](FRHICommandListImmediate& RHICmdList)
         {
             TransitionAndCopyTexture(RHICmdList, RenderTargetResource->GetRenderTargetTexture(), RenderTargetResource->TextureRHI, {});
-        });        
+        });
 }
 
 void FOdysseyViewportDrawingEditorUtils::RetrieveTexturesForComponent(const UMeshComponent* iComponent, TArray<FPaintableTexture>& oTextures)
@@ -122,13 +122,13 @@ void FOdysseyViewportDrawingEditorUtils::InternalQueryPaintableTextures(int32 iM
                 textureBase->Texture != NULL //&&
                 //!textureBase->Texture->IsNormalMap() &&
                 //!textureBase->Texture->VirtualTextureStreaming &&
-                //!textureBase->Texture->HasHDRSource() )  // Currently HDR textures are not supported to paint on 
+                //!textureBase->Texture->HasHDRSource() )  // Currently HDR textures are not supported to paint on
                 )
             {
-                // Default UV channel to index 0. 
+                // Default UV channel to index 0.
                 paintableTexture = FPaintableTexture(textureBase->Texture, 0);
 
-                // Texture Samples can have UV's specified, check the first node for whether it has a custom UV channel set. 
+                // Texture Samples can have UV's specified, check the first node for whether it has a custom UV channel set.
                 // We only check the first as the Mesh paint mode does not support painting with UV's modified in the shader.
                 UMaterialExpressionTextureSample* textureSample = Cast<UMaterialExpressionTextureSample>(expression);
                 if (textureSample != NULL)
@@ -136,7 +136,7 @@ void FOdysseyViewportDrawingEditorUtils::InternalQueryPaintableTextures(int32 iM
                     UMaterialExpressionTextureCoordinate* TextureCoords = Cast<UMaterialExpressionTextureCoordinate>(textureSample->Coordinates.Expression);
                     if (TextureCoords != NULL)
                     {
-                        // Store the uv channel, this is set when the texture is selected. 
+                        // Store the uv channel, this is set when the texture is selected.
                         paintableTexture.UVChannelIndex = TextureCoords->CoordinateIndex;
                     }
 
@@ -144,12 +144,12 @@ void FOdysseyViewportDrawingEditorUtils::InternalQueryPaintableTextures(int32 iM
                     UMaterialExpressionTextureSampleParameter* textureSampleParameter = Cast<UMaterialExpressionTextureSampleParameter>(textureSample);
                     if (textureSampleParameter != NULL)
                     {
-                        // Grab the overridden texture if it exists.  
+                        // Grab the overridden texture if it exists.
                         material->GetTextureParameterValue(textureSampleParameter->ParameterName, paintableTexture.Texture);
                     }
                 }
 
-                // note that the same texture will be added again if its UV channel differs. 
+                // note that the same texture will be added again if its UV channel differs.
                 int32 textureIndex = ioTextureList.AddUnique(paintableTexture);
 
                 // cache the first default index, if there is no previous info this will be used as the selected texture
@@ -354,10 +354,10 @@ FOdysseyViewportDrawingEditorUtils::GenerateSeamMask(UMeshComponent* MeshCompone
             EachTri.V2_Color = FLinearColor::Black;
             TriList.Add(EachTri);
         }
-        
+
         if( TriList.Num() == 0 )
             return RetVal;
-        
+
         // Setup the tri render item with the list of tris
         FCanvasTriangleItem TriItem(TriList, RenderTargetResource);
         TriItem.BlendMode = SE_BLEND_Opaque;

@@ -449,7 +449,7 @@ FOdysseyVectorChain::EraseSections( BLImageData* iImageData
                 }
             }
                               // loop prevention
-            sectionLinkInfo = ( nextSection == firstSectionLinkInfo->section ) ? nullptr 
+            sectionLinkInfo = ( nextSection == firstSectionLinkInfo->section ) ? nullptr
                                                                                : nextSectionLinkInfo;
         }
     }
@@ -678,7 +678,7 @@ FOdysseyVectorChain::TraceLine( int32 iX0
 
                 FWayPoint wayPoint = FWayPoint( newVertex, nullptr, ( alphaValue == 0 ) ?                                                       FWayPoint::LeavesErasureArea
                                                : FWayPoint::EntersErasureArea, t );
-                
+
                 oWayPointArray.push_back( wayPoint );
 
                 newVertex->SetID( wayPointCount );

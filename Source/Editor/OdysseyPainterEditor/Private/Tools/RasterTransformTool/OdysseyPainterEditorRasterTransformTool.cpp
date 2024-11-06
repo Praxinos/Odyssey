@@ -205,7 +205,7 @@ void UOdysseyPainterEditorRasterTransformTool::Load()
     mHUD->AddElement(mTransformToolHUD);
 
     UpdateRasterSelection( true ); //Create new selection if empty
-    
+
     UpdateTransformHUD();
     UOdysseyPainterEditorTool::Load();
 }
@@ -218,7 +218,7 @@ void UOdysseyPainterEditorRasterTransformTool::Unload()
     mHUD->RemoveElement(mTransformToolHUD);
 
     CommitTransform();
-    
+
     mSelectionBlock = nullptr;
     UOdysseyPainterEditorTool::Unload();
 }
@@ -361,7 +361,7 @@ EOdysseyTransformCapture UOdysseyPainterEditorRasterTransformTool::DetectCapture
         return EOdysseyTransformCapture::Inside;
     }
     else
-    {  
+    {
         mLastReferenceRotation = GetRotationAngleFromLastReference( iPoint );
         return EOdysseyTransformCapture::Rotation;
     }
@@ -371,7 +371,7 @@ void UOdysseyPainterEditorRasterTransformTool::ConstrainToRectangle(FVector2D iP
 {
     if( !mTransformAreaHUD )
         return;
-        
+
 
     if (Uniform)
     {
@@ -409,7 +409,7 @@ void UOdysseyPainterEditorRasterTransformTool::ConstrainToRectangle(FVector2D iP
             rotationDiag = FMath::Atan2(rotDiagPoint.X, rotDiagPoint.Y);
         }
     }
-    
+
     int next;
     int opposite;
     int previous;
@@ -466,7 +466,7 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformBlock()
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 
     mTransformedBlock = nullptr;
-    
+
     ::ULIS::FRectI boundingBox = GetTransformAreaBoundingRect();
 
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
@@ -501,7 +501,7 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformBlock()
         vertices[2],
         vertices[3]
     );
-    
+
     // This is a very slow operation unfortunately
     ctx.TransformPerspective(
         *mSelectionBlock
@@ -516,7 +516,7 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformBlock()
 ::ULIS::FRectI UOdysseyPainterEditorRasterTransformTool::GetTransformAreaBoundingRect()
 {
     if( mTransformAreaHUD )
-    {   
+    {
         int minX = mTransformAreaHUD->GetPoints()[0].X;
         int maxX = mTransformAreaHUD->GetPoints()[0].X;
         int minY = mTransformAreaHUD->GetPoints()[0].Y;
@@ -530,7 +530,7 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformBlock()
         }
         return ::ULIS::FRectI::FromMinMax(minX, minY, maxX, maxY);
     }
-    
+
     return ::ULIS::FRectI::FromXYWH( 0,0,0,0 );
 }
 
@@ -893,7 +893,7 @@ UOdysseyPainterEditorRasterTransformTool::UpdateRasterSelection( bool iCreateNew
     ctx.Finish();
 
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = mEditor->RasterSelection()->GetBlock();
-    
+
     if (maskBlock)
     {
         ctx.Copy(
@@ -945,7 +945,7 @@ UOdysseyPainterEditorRasterTransformTool::ResetRasterSelection()
     ctx.Copy(*mSelectionBlock, *rasterSelection->GetBlock(), ::ULIS::FRectI::Auto, ::ULIS::FVec2I(mSelectionBoundingBox.x, mSelectionBoundingBox.y));
     ctx.Finish();
 
-    rasterSelection->RefreshHUD(); 
+    rasterSelection->RefreshHUD();
 }
 
 void

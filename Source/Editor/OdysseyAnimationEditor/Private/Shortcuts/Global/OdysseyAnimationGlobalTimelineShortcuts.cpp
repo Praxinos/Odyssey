@@ -21,7 +21,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::FOdysseyAnimationGlobalTimelineShortcu
 void
 FOdysseyAnimationGlobalTimelineShortcuts::MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList)
 {
-    //Navigation Actions   
+    //Navigation Actions
     iCommandList->MapAction(
         FOdysseyAnimationEditorCommands::Get().NavigateToNextFrame,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextFrame)
@@ -31,57 +31,57 @@ FOdysseyAnimationGlobalTimelineShortcuts::MapActionsToCommandList(TSharedRef<FUI
         FOdysseyAnimationEditorCommands::Get().NavigateToPreviousFrame,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToPreviousFrame)
     );
-    
+
     iCommandList->MapAction(
         FOdysseyAnimationEditorCommands::Get().NavigateToNextCell,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextCell)
     );
-    
+
     iCommandList->MapAction(
         FOdysseyAnimationEditorCommands::Get().NavigateToPreviousCell,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToPreviousCell)
     );
-    
+
     iCommandList->MapAction(
         FOdysseyAnimationEditorCommands::Get().NavigateToAnimationFirstFrame,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToAnimationFirstFrame)
     );
-    
+
     iCommandList->MapAction(
         FOdysseyAnimationEditorCommands::Get().NavigateToAnimationLastFrame,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToAnimationLastFrame)
     );
-    
+
     iCommandList->MapAction(
         FOdysseyAnimationEditorCommands::Get().Play,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_Play)
     );
-    
+
     iCommandList->MapAction(
         FOdysseyAnimationEditorCommands::Get().PlayStop,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_PlayStop)
     );
-    
+
     iCommandList->MapAction(
         FOdysseyAnimationEditorCommands::Get().PlayReversed,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_PlayReversed)
     );
-    
+
     iCommandList->MapAction(
         FOdysseyAnimationEditorCommands::Get().Stop,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_Stop)
     );
-    
+
     iCommandList->MapAction(
         FOdysseyAnimationEditorCommands::Get().ActivateLooping,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_ActivateLooping)
     );
-    
+
     iCommandList->MapAction(
         FOdysseyAnimationEditorCommands::Get().InactivateLooping,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_InactivateLooping)
     );
-    
+
     iCommandList->MapAction(
         FOdysseyAnimationEditorCommands::Get().ToggleLooping,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineShortcuts::Action_ToggleLooping)
@@ -166,7 +166,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_NavigateToNextCell()
         UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(currentFrame);
         if (!cell || cell == currentLayer->GetCells().Last())
             return;
-        
+
         cellIndex = cell->IndexInLayer + 1;
     }
 
@@ -259,7 +259,7 @@ FOdysseyAnimationGlobalTimelineShortcuts::Action_Play()
     UOdysseyAnimationPlayer* player = extension->Player();
     if (!player)
         return;
-        
+
     player->Play();
 }
 

@@ -43,7 +43,7 @@ FOdysseyVectorHandleSegment::GetOwner()
     return mOwnerSegment;
 }
 
-void 
+void
 FOdysseyVectorHandleSegment::SetCoords( double iX, double iY )
 {
     if( mOwnerSegment->GetVertex( mHandleID )->IsLocked() == false )

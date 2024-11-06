@@ -22,41 +22,41 @@ SOdysseyAnimationLayerStackTreeView::SOdysseyAnimationLayerStackTreeView()
 void
 SOdysseyAnimationLayerStackTreeView::Construct(const FArguments& InArgs)
 {
-	mTimelinePosition = InArgs._TimelinePosition;
+    mTimelinePosition = InArgs._TimelinePosition;
 
-	mLayerStack = InArgs._LayerStack;
+    mLayerStack = InArgs._LayerStack;
 
-	mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(mLayerStack);
+    mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(mLayerStack);
 
     SOdysseyLayerStackTreeView::Construct(
-		SOdysseyLayerStackTreeView::FArguments()
-		.LayerStack(mLayerStack)
+        SOdysseyLayerStackTreeView::FArguments()
+        .LayerStack(mLayerStack)
         .OnGenerateRow(this, &SOdysseyAnimationLayerStackTreeView::OnGenerateRow)
-		.Columns(InArgs._Columns)
-		.ExternalScrollbar(InArgs._ExternalScrollbar)
-		.OnTreeViewScrolled(InArgs._OnTreeViewScrolled)
-		.HeaderContent()
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot()
-			.AutoWidth()
-			[
-				SNew(SOdysseyLayerStackAddLayerButton)
-				.LayerStack(mLayerStack)
-				.OnAdded( this, &SOdysseyAnimationLayerStackTreeView::OnLayerAdded)
-			]
-			+ SHorizontalBox::Slot()
-			[
-				SNullWidget::NullWidget
-			]
-			+ SHorizontalBox::Slot()
-			.AutoWidth()
-			.VAlign(VAlign_Center)
-			[
-				SNew(SOdysseyAnimationTimelineToolSelector)
-			]
-		]
-	);
+        .Columns(InArgs._Columns)
+        .ExternalScrollbar(InArgs._ExternalScrollbar)
+        .OnTreeViewScrolled(InArgs._OnTreeViewScrolled)
+        .HeaderContent()
+        [
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                SNew(SOdysseyLayerStackAddLayerButton)
+                .LayerStack(mLayerStack)
+                .OnAdded( this, &SOdysseyAnimationLayerStackTreeView::OnLayerAdded)
+            ]
+            + SHorizontalBox::Slot()
+            [
+                SNullWidget::NullWidget
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .VAlign(VAlign_Center)
+            [
+                SNew(SOdysseyAnimationTimelineToolSelector)
+            ]
+        ]
+    );
 }
 
 TSharedRef<ITableRow>
@@ -68,17 +68,17 @@ SOdysseyAnimationLayerStackTreeView::OnGenerateRow(UOdysseyLayer* iLayer, const 
     if (layerClass == UOdysseyAnimationLayerFolder::StaticClass())
     {
         return SNew(SOdysseyAnimationLayerFolderRow, SharedThis(this), Cast<UOdysseyAnimationLayerFolder>(iLayer))
-			.TimelinePosition(mTimelinePosition);
+            .TimelinePosition(mTimelinePosition);
     }
     else if (layerClass == UOdysseyAnimationLayerImageRaster::StaticClass())
     {
         return SNew(SOdysseyAnimationLayerImageRasterRow, SharedThis(this), Cast<UOdysseyAnimationLayerImageRaster>(iLayer))
-			.TimelinePosition(mTimelinePosition);
+            .TimelinePosition(mTimelinePosition);
     }
     else if (layerClass == UOdysseyAnimationLayerImageVector::StaticClass())
     {
         return SNew(SOdysseyAnimationLayerImageVectorRow, SharedThis(this), Cast<UOdysseyAnimationLayerImageVector>(iLayer))
-			.TimelinePosition(mTimelinePosition);
+            .TimelinePosition(mTimelinePosition);
     }
 
     return SNew(STableRow<UOdysseyLayer*>, iOwnerTable);
@@ -103,7 +103,7 @@ SOdysseyAnimationLayerStackTreeView::Private_SignalSelectionChanged(ESelectInfo:
 FReply
 SOdysseyAnimationLayerStackTreeView::OnFocusReceived(const FGeometry& MyGeometry, const FFocusEvent& InFocusEvent)
 {
-	mLayerStack->GetCellSelection()->SetSelectedCells({});
+    mLayerStack->GetCellSelection()->SetSelectedCells({});
     return SOdysseyLayerStackTreeView::OnFocusReceived(MyGeometry, InFocusEvent);
 }
 
@@ -127,7 +127,7 @@ SOdysseyAnimationLayerStackTreeView::ExtendContextMenu()
 
 void
 SOdysseyAnimationLayerStackTreeView::ExtendContextMenuLayerSection(FMenuBuilder& iMenuBuilder)
-{   
+{
     TArray<UOdysseyLayer*> selectedLayers = GetSelectedItems();
     if (selectedLayers.Num() <= 0)
         return;
@@ -158,7 +158,7 @@ SOdysseyAnimationLayerStackTreeView::ExtendContextMenuLayerSection(FMenuBuilder&
 void
 SOdysseyAnimationLayerStackTreeView::Action_ConvertLayerToRasterLayer()
 {
-	UOdysseyLayerStack* layerStack = GetLayerStack();
+    UOdysseyLayerStack* layerStack = GetLayerStack();
 
     TArray<UOdysseyLayer*> selectedLayers = GetSelectedItems();
     if (selectedLayers.Num() <= 0)
@@ -173,7 +173,7 @@ SOdysseyAnimationLayerStackTreeView::Action_ConvertLayerToRasterLayer()
 
     if (!shouldConvert)
         return;
-    
+
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("animation.layer.transaction.convert-to-raster", "Convert Layer To Raster Layer"));
 #endif
@@ -194,12 +194,12 @@ SOdysseyAnimationLayerStackTreeView::OnLayerAdded(UOdysseyLayer* iLayer)
 {
     if (iLayer->GetClass() == UOdysseyAnimationLayerImageRaster::StaticClass())
     {
-		UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(iLayer);
-		layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
+        UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(iLayer);
+        layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
     }
     else if (iLayer->GetClass() == UOdysseyAnimationLayerImageVector::StaticClass())
     {
-		UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(iLayer);
+        UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(iLayer);
         layer->AddCell(UOdysseyAnimationCellImageVector::StaticClass());
     }
 }

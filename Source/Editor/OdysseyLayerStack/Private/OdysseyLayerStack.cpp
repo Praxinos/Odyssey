@@ -157,7 +157,7 @@ UOdysseyLayerStack::DuplicateLayers(TArray<UOdysseyLayer*> Layers)
         }
     );
 
-    //No Layers    
+    //No Layers
     if (Layers.Num()<= 0)
         return layersDuplicates;
 
@@ -206,7 +206,7 @@ UOdysseyLayerStack::CopyLayer(UOdysseyLayer* Layer, UOdysseyLayer* ParentLayer, 
 
     if (!ParentLayer)
         ParentLayer = LayerRoot;
-    
+
     //If the given parent can't have children or isn't contained in this layerstack
     if (ParentLayer && (!ParentLayer->CanHaveChildren || !ContainsLayer(ParentLayer)) )
         return nullptr;
@@ -262,7 +262,7 @@ UOdysseyLayerStack::CopyLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
     );
 
     for (UOdysseyLayer* layer : Layers)
-    {   
+    {
         //Duplicate the layer
         UOdysseyLayer* layerCopy = CopyLayerInternal(layer, ParentLayer, IndexInParent);
         layerCopies.Insert(layerCopy, 0);
@@ -347,7 +347,7 @@ UOdysseyLayerStack::MergeLayers(TArray<UOdysseyLayer*> iLayers)
 
     //Remove merged layers from the hierarchy
     RemoveLayersFromHierarchy(layersToMerge);
-    
+
     return mergedLayer;
 }
 
@@ -417,7 +417,7 @@ UOdysseyLayerStack::MoveLayer(UOdysseyLayer* Layer, UOdysseyLayer* ParentLayer, 
         return;
 
     bool bChangeParent = Layer->Parent != ParentLayer;
-    
+
     if (bChangeParent)
     {
         FOdysseyObjectEditorUtils::PreChangePropertyValue(Layer, "Parent");
@@ -500,7 +500,7 @@ UOdysseyLayerStack::MoveLayers(TArray<UOdysseyLayer*> Layers, UOdysseyLayer* Par
     {
         UOdysseyLayer* oldParent = layer->Parent;
         bool bChangeParent = oldParent != ParentLayer;
-        
+
         if (bChangeParent)
         {
             FOdysseyObjectEditorUtils::PreChangePropertyValue(layer, "Parent");
@@ -567,7 +567,7 @@ UOdysseyLayerStack::CreateLayer(UClass* iLayerType)
     UOdysseyLayer* layer = NewObject<UOdysseyLayer>(this, iLayerType, NAME_None, RF_Public | RF_Transactional);
     if (!layer )
         return nullptr;
-        
+
     //Name the layer
     FString name = layer->DefaultName.ToString() + TEXT(" ") + FString::FromInt(GetLayers().Num() + 1);
     layer->Name = FText::FromString(name);
@@ -697,7 +697,7 @@ void
 UOdysseyLayerStack::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 {
     Super::PostTransacted(iTransactionEvent);
-    
+
     if (iTransactionEvent.GetEventType() != ETransactionObjectEventType::UndoRedo)
         return;
 
@@ -714,7 +714,7 @@ UOdysseyLayerStack::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRende
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
-    
+
     return MakeShared<FOdysseyLayerStackImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
@@ -726,7 +726,7 @@ UOdysseyLayerStack::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderT
     UOdysseyLayer* layerRoot = Cast<UOdysseyLayer>(LayerRoot);
     if ( !layerRoot )
         return idComposition;
-    
+
     idComposition.Append(layerRoot->GetImageRenderingComposition(iRenderType, iFrameIndex));
     return idComposition;
 }

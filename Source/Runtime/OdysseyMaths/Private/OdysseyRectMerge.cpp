@@ -7,24 +7,24 @@
 
 /**
  * In order
- * 
+ *
  * 1) Manage active segments update first
  * 2) Merge active segments into MergedSegments
- * 3) Close rects 
- * 4) Open rects 
- * 
+ * 3) Close rects
+ * 4) Open rects
+ *
  * When to close rects ?
  * 1) 0 Opened rects => should not happen, crash please
  * 2) 1+ opened rects =>
  *      - when an opened rect is not fully covered by all mergedSegments anymore
- * 
- * 
+ *
+ *
  * When to open rects ?
- * 
+ *
  * 1) 0 Opened rects => open a rect for each start segment
- * 2) 1+ opened rects 
+ * 2) 1+ opened rects
  *      - when a mergedSegement or part of a mergedSegement is not covered by an opened rectangle
- *          - open a new rectangle for the part that is not covered 
+ *          - open a new rectangle for the part that is not covered
  */
 
 namespace OdysseyRectUtils {
@@ -125,7 +125,7 @@ MergeRects(const TArray< ::ULIS::FRectI >& iInputRects)
                 if (openedRect.y >= mergedSegment.y) //x is y and y is h
                 {
                     closeRect = false; //fully contained, do not remove
-                    break; 
+                    break;
                 }
 
                 //no need to check the next segments, as we already know it is not fully contained in a single segment
@@ -140,7 +140,7 @@ MergeRects(const TArray< ::ULIS::FRectI >& iInputRects)
                 openedRects.RemoveAt(i);
             }
         }
-        
+
         //Sort opened rects by Y
         openedRects.Sort([&outputRects](const int& A, const int& B)
         {
@@ -158,7 +158,7 @@ MergeRects(const TArray< ::ULIS::FRectI >& iInputRects)
             {
                 ::ULIS::FRectI& openedRect = outputRects[openedRects[i]];
 
-                //opened rects did not yet reached the segment 
+                //opened rects did not yet reached the segment
                 if (remainingSegment.y >= openedRect.y + openedRect.h ) //x is y
                     continue;
 

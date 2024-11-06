@@ -54,12 +54,12 @@ SOdysseyTimelineFrame::Length() const
 
 void
 SOdysseyTimelineFrame::Length(int32 iLength)
-{    
+{
     if (mMinLength >= 0 && mMaxLength >= 0)
     {
         //Clamp
         iLength = FMath::Clamp(iLength, mMinLength, mMaxLength);
-    } 
+    }
     else if (mMinLength >= 0)
     {
         iLength = FMath::Max(iLength, mMinLength);

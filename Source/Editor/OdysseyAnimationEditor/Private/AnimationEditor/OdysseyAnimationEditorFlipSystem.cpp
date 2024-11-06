@@ -31,7 +31,7 @@ public:
     FText GetCellMarkName(int iMarkId) const;
     const FSlateBrush* GetCellMarkSymbolIcon(int iMarkId) const;
     FSlateColor GetCellMarkColor(int iMarkId) const;
-    
+
     TSharedRef<SWidget> GetLimitsCellMarkMenuContent();
     TSharedRef<SWidget> GetKeysCellMarkMenuContent();
     TSharedRef<SWidget> CreateLimitsCellMarkButtonWidget();
@@ -370,9 +370,9 @@ void
 FOdysseyAnimationEditorFlipSystem::RegisterDetailCustomization()
 {
     FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    PropertyModule.RegisterCustomPropertyTypeLayout( 
+    PropertyModule.RegisterCustomPropertyTypeLayout(
         FOdysseyAnimationFlipConfiguration::StaticStruct()->GetFName(),
-        FOnGetPropertyTypeCustomizationInstance::CreateLambda( 
+        FOnGetPropertyTypeCustomizationInstance::CreateLambda(
             []()
             {
                 return MakeShareable( new FOdysseyAnimationEditorFlipDetailCustomization() );
@@ -396,7 +396,7 @@ FOdysseyAnimationEditorFlipSystem::~FOdysseyAnimationEditorFlipSystem()
 FOdysseyAnimationEditorFlipSystem::FOdysseyAnimationEditorFlipSystem(FOdysseyAnimationEditorExtension* iExtension)
     : mExtension(iExtension)
 {
-    
+
 }
 
 void
@@ -448,7 +448,7 @@ FOdysseyAnimationEditorFlipSystem::FlipTo(int iDelta)
 
     if (frame == INDEX_NONE)
         return;
-        
+
     if (frame == mStartFrame)
     {
         mExtension->Player()->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
@@ -503,7 +503,7 @@ FOdysseyAnimationEditorFlipSystem::HandleMouseMoveEvent(FSlateApplication& Slate
 
         return true;
     }
-    
+
     mMousePositionReference = MouseEvent.GetScreenSpacePosition();
     return false;
 }
@@ -514,7 +514,7 @@ FOdysseyAnimationEditorFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
     int leftLimit;
     int rightLimit;
     GetLimits(mFlipConfiguration.Limits, leftLimit, rightLimit);
-    
+
     switch(mFlipConfiguration.Keys)
     {
         case EOdysseyAnimationFlipKeys::AllFrames:
@@ -578,7 +578,7 @@ FOdysseyAnimationEditorFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
                 do
                 {
                     oFrame++;
-                    
+
                     if(rightLimit != INDEX_NONE)
                     {
                         if (oFrame > rightLimit)
@@ -796,7 +796,7 @@ FOdysseyAnimationEditorFlipSystem::GetLimits(EOdysseyAnimationFlipLimits iLimits
         }
         break;
 
-        case EOdysseyAnimationFlipLimits::CellMarks: 
+        case EOdysseyAnimationFlipLimits::CellMarks:
         {
             UOdysseyAnimationLayerStack* layerStack = mAnimation->GetLayerStack();
             UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
@@ -860,7 +860,7 @@ FOdysseyAnimationEditorFlipSystem::GetLimits(EOdysseyAnimationFlipLimits iLimits
 void
 FOdysseyAnimationEditorFlipSystem::Tick(const float DeltaTime, FSlateApplication& SlateApp, TSharedRef<ICursor> Cursor)
 {
-    
+
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -9,9 +9,9 @@ class FOdysseyAnimationCellsContainerImport
 public:
     /**
      * @brief Imports Data from the given archive into the given object
-     * 
-     * @param iAnimationCell 
-     * @param Ar 
+     *
+     * @param iAnimationCell
+     * @param Ar
      */
     static bool ODYSSEYANIMATION_API Read( UOdysseyAnimationLayer* iAnimationLayer
                                   , FArchive &Ar );

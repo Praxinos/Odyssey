@@ -173,7 +173,7 @@ FOdysseyAnimationMediaTracks::GetTrackName(EMediaTrackType TrackType, int32 Trac
         default:
             break;
     }
-    
+
     return FString();
 }
 

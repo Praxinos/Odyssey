@@ -25,28 +25,28 @@ public:
 
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageTimeline)
         {}
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
-		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
-		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
-		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
+        SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
+        SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
     SLATE_END_ARGS()
 
 public:
     void Construct(
         const FArguments& iArgs,
-		const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
+        const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
         UOdysseyAnimationLayer* iLayer
     );
 
 protected:
-	virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
-	virtual FOptionalSize GetRowHeight(FName iRow) const override;
-	virtual EVisibility GetRowVisibility(FName iRow) const override;
-	virtual FMargin GetRowPadding(FName iRow) const override;
-	
-	TSharedRef<SWidget> GenerateMainRowTimelineWidget();
-	TSharedRef<SWidget> GenerateLightTableRowTimelineWidget();
-	TSharedRef<SWidget> GenerateOutOfPegsRowTimelineWidget();
+    virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
+    virtual FOptionalSize GetRowHeight(FName iRow) const override;
+    virtual EVisibility GetRowVisibility(FName iRow) const override;
+    virtual FMargin GetRowPadding(FName iRow) const override;
+
+    TSharedRef<SWidget> GenerateMainRowTimelineWidget();
+    TSharedRef<SWidget> GenerateLightTableRowTimelineWidget();
+    TSharedRef<SWidget> GenerateOutOfPegsRowTimelineWidget();
 
 public:
     virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
@@ -98,12 +98,12 @@ private:
 
 protected:
     UOdysseyAnimationLayer* mLayer;
-	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
-	SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
-	FSimpleDelegate mOnInactivateOutOfPegs;
-	SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
+    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+    SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
+    FSimpleDelegate mOnInactivateOutOfPegs;
+    SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
 
-	TSharedPtr<FOdysseyAnimationTimelineTool> mTool;
+    TSharedPtr<FOdysseyAnimationTimelineTool> mTool;
 
     enum eDragState
     {

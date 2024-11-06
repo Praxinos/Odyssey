@@ -322,7 +322,7 @@ FOdysseyPainterEditorVectorGridToolHUD::Export( std::vector<FOdysseyVectorPoint*
 {
     uint32 count = 0;
 
-    if( mSelectionBox.rect.Area() ) // else, mPointCount is undefined 
+    if( mSelectionBox.rect.Area() ) // else, mPointCount is undefined
     {
         oPointArray.resize( mPointCount );
 
@@ -485,7 +485,7 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPaintGroup( FOdysseyVectorGroupPaint*
             pointCount += MapPath( path, iInverseGridMatrix );
         }
     }
- 
+
     pointCount += MapPaintGroupBuckets( iPaintGroup, iInverseGridMatrix );
 
     return pointCount;

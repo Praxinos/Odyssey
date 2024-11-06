@@ -24,18 +24,18 @@ SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(UOdysseyAnimatio
     if (!iCell)
     {
         return SNew(SOdysseyAnimationCellImageVector, Cast<UOdysseyAnimationCellImageVector>(iCell))
-			.Clipping(EWidgetClipping::ClipToBoundsAlways);
-	}
+            .Clipping(EWidgetClipping::ClipToBoundsAlways);
+    }
     if (iCell->IsA<UOdysseyAnimationCellImageVector>())
     {
         return SNew(SOdysseyAnimationCellImageVector, Cast<UOdysseyAnimationCellImageVector>(iCell))
-			.Clipping(EWidgetClipping::ClipToBoundsAlways);
-	}
+            .Clipping(EWidgetClipping::ClipToBoundsAlways);
+    }
     else if (iCell->IsA<UOdysseyAnimationCellImageStagger>())
-	{
+    {
         return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell))
-			.TimelinePosition(mTimelinePosition);
-	}
+            .TimelinePosition(mTimelinePosition);
+    }
 
     return SNullWidget::NullWidget;
 }

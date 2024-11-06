@@ -157,7 +157,7 @@ UOdysseyAnimationLayerImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRe
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
-    
+
     return MakeShared<FOdysseyAnimationLayerImageVectorImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
@@ -200,7 +200,7 @@ UOdysseyAnimationLayerImageVector::GetCellMediaVector(uint32 iFrameIndex) const
     UOdysseyAnimationCell* cell = GetCellAtFrame(iFrameIndex);
     if (!cell)
         return nullptr;
-    
+
     int cellFrame = iFrameIndex - cell->GetFrameRange().GetLowerBoundValue();
     FOdysseyMediaProvider provider = cell->GetMediaProvider(cellFrame);
     if (!provider.HasMedia<FOdysseyMediaVector>())
@@ -263,7 +263,7 @@ UOdysseyAnimationLayerImageVector::AutoCreateCell(int iFrameIndex)
         UOdysseyAnimationCell* cell = AddCell(UOdysseyAnimationCellImageVector::StaticClass(), 0);
         FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), range.GetLowerBoundValue() - iFrameIndex);
         FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset), CellsOffset - cell->Exposure);
-        
+
         FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
         currentFrameMutator.Set(animation->CurrentFrame);
         currentFrameMutator.Commit();
@@ -341,13 +341,13 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
 
     RemoveCells(Cells);
     TArray<UOdysseyAnimationCell*> cells = AddCells(UOdysseyAnimationCellImageVector::StaticClass(), 0, cellRanges.Num());
-    
+
        for (int i = 0; i < cellRanges.Num(); i++)
     {
         const FInt32Range& cellRange = cellRanges[i];
         UOdysseyAnimationCellImageVector* cell = Cast<UOdysseyAnimationCellImageVector>(cells[i]);
         FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cellRange.GetUpperBoundValue() - cellRange.GetLowerBoundValue() + 1);
-        
+
         int frame = cellRange.GetLowerBoundValue();
         FOdysseyVectorGroupPaint* destinationScene = cell->GetEngine()->GetScene();
 
@@ -368,7 +368,7 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
                 {
                     UOdysseyAnimationCellImageStagger* cellStagger = Cast<UOdysseyAnimationCellImageStagger>(srcCell);
                     int srcCellFrame = staggerFrame - srcCell->GetFrameRange().GetLowerBoundValue();
-                    
+
                     staggerFrame = cellStagger->GetReferenceFrameAtFrame(srcCellFrame);
                     srcCell = vectorLayer->GetCellAtFrame(staggerFrame);
                 }
@@ -388,7 +388,7 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
             }
         }
     }
-    
+
     for ( UOdysseyAnimationCell* cell : Cells)
     {
         UOdysseyAnimationCellImageVector* vectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);

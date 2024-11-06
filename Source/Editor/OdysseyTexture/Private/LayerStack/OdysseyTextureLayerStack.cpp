@@ -106,7 +106,7 @@ UOdysseyTextureLayerStack::GetTexture() const
         outer = outer->GetOuter();
     }
 
-    return nullptr;    
+    return nullptr;
 }
 
 TArray<::ULIS::FRectI>

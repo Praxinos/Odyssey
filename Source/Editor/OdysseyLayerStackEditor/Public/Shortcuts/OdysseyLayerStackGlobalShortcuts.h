@@ -8,7 +8,7 @@ class UOdysseyLayerStack;
 
 class ODYSSEYLAYERSTACKEDITOR_API FOdysseyLayerStackGlobalShortcuts
     : public IOdysseyEditorShortcuts
-    
+
 {
 public:
     virtual ~FOdysseyLayerStackGlobalShortcuts() {}

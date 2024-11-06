@@ -54,7 +54,7 @@ private:
 
 template< class T >
 /*static*/
-const T& 
+const T&
 FOdysseyStyle::GetWidgetStyle( FName PropertyName, const ANSICHAR* Specifier )
 {
     return smInstance->GetWidgetStyle< T >( PropertyName, Specifier );

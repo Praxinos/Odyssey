@@ -25,7 +25,7 @@ UOdysseyAnimationCellImageStagger::BuildImageRenderer(IOdysseyImageRenderer::eRe
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
-    
+
     return MakeShared<FOdysseyAnimationCellImageStaggerImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
@@ -69,7 +69,7 @@ UOdysseyAnimationCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) con
             int startFrame = Reach <= 0 ? layerStartFrame : FMath::Max(layerStartFrame, int(cellStartFrame - Reach));
             if (cellStartFrame - startFrame <= 0)
                 return INDEX_NONE;
-            
+
             int offset = iFrameIndex % (cellStartFrame - startFrame);
             frame = startFrame + offset;
         }
@@ -85,7 +85,7 @@ UOdysseyAnimationCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) con
 
             //If there is only one frame before the stagger cell,
             //we return that one frame because PingPong needs at least 2 frames to work properly
-            if (cellStartFrame - startFrame == 1) 
+            if (cellStartFrame - startFrame == 1)
                 return startFrame;
 
             int offset = (iFrameIndex % (cellStartFrame - startFrame - 1));
@@ -100,7 +100,7 @@ UOdysseyAnimationCellImageStagger::GetReferenceFrameAtFrame(int iFrameIndex) con
         default:
             break;;
     }
-    
+
     if (!GetLayer()->HasCellAtFrame(frame))
         return INDEX_NONE;
 
@@ -111,7 +111,7 @@ TArray<FGuid>
 UOdysseyAnimationCellImageStagger::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
 {
     TArray<FGuid> idComposition = { GetImageRenderingId() };
-    
+
     int staggerFrame = GetReferenceFrameAtFrame(iFrameIndex);
     if (staggerFrame == INDEX_NONE)
         return idComposition;
@@ -122,7 +122,7 @@ UOdysseyAnimationCellImageStagger::GetImageRenderingComposition(IOdysseyImageRen
 
     int cellFrame = staggerFrame - cell->GetFrameRange().GetLowerBoundValue();
     idComposition.Append(cell->GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Render, cellFrame));
-    
+
     return idComposition;
 }
 

@@ -73,7 +73,7 @@ TSharedPtr<::ULIS::FBlock> FOdysseyPainterEditor::mCopyBlock = nullptr;
 
 FOdysseyPainterEditor::~FOdysseyPainterEditor()
 {
-    
+
 }
 
 FOdysseyPainterEditor::FOdysseyPainterEditor(const FName& iId, const FText& iName, UObject* iEditedObject, const FName& iLayoutName)
@@ -122,7 +122,7 @@ FOdysseyPainterEditor::Initialize()
 
     //Init Tools
     InitTools();
-    
+
     //Init the GUI
     mGUI = MakeShareable(new FOdysseyPainterEditorGUI(this));
     mGUI->Initialize();
@@ -131,7 +131,7 @@ FOdysseyPainterEditor::Initialize()
     TAttribute<UOdysseyLayerStack*> layerStackAttr = TAttribute<UOdysseyLayerStack*>::CreateRaw(this, &FOdysseyPainterEditor::LayerStack);
     GetShortcuts().Add(MakeShared<FOdysseyLayerStackGlobalShortcuts>(layerStackAttr));
     GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalShortcuts>(SharedThis(this)));
-    
+
     //Init the extensions
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
         extension->Initialize();
@@ -218,7 +218,7 @@ FOdysseyPainterEditor::ExtendMenu( TSharedRef<FExtender> iExtender )
         extension->ExtendMenu(iExtender);
 }
 
-void 
+void
 FOdysseyPainterEditor::OnClose()
 {
     //BE CAREFUL: OnClose can be called twice when quiting Unreal Engine
@@ -371,7 +371,7 @@ FOdysseyPainterEditor::GetRasterSelectionTool() const
     return mRasterSelectionTool;
 }
 
-UOdysseyPainterEditorRasterTransformTool* 
+UOdysseyPainterEditorRasterTransformTool*
 FOdysseyPainterEditor::GetRasterTransformTool() const
 {
     return mRasterTransformTool;
@@ -473,7 +473,7 @@ FOdysseyPainterEditor::GetBrushContexts()
     return mBrushContexts;
 }
 
-FOdysseyHUDSystem* 
+FOdysseyHUDSystem*
 FOdysseyPainterEditor::HUDSystem() const
 {
     return mHUDSystem;
@@ -549,13 +549,13 @@ FOdysseyPainterEditor::ActivateMainTool( UOdysseyPainterEditorTool* iTool )
         mCurrentTemporaryTool = nullptr;
         mOnCurrentTemporaryToolChanged.Broadcast();
     }
-    
+
     if (mCurrentMainTool && mCurrentMainTool != iTool && mCurrentMainTool->IsActivated())
     {
         mCurrentMainTool->Inactivate();
         mCurrentMainTool = nullptr;
     }
-    
+
     if (!iTool || !iTool->IsActivable())
     {
         mOnCurrentMainToolChanged.Broadcast();
@@ -637,7 +637,7 @@ FOdysseyPainterEditor::SanitizeCurrentTool()
     UClass* layerClass = currentLayer->GetClass();
     if (mCurrentMainToolPerLayerClass.Contains(layerClass))
         tool = mCurrentMainToolPerLayerClass[layerClass];
-    
+
     if (!tool || !tool->IsActivable())
         tool = FindDefaultToolForCurrentLayer();
 
@@ -650,7 +650,7 @@ FOdysseyPainterEditor::SanitizeCurrentTool()
 FOdysseyMediaProvider
 FOdysseyPainterEditor::GetCurrentMediaProvider()
 {
-    TSharedPtr<FOdysseyPainterEditorSource> source = GetSource(); 
+    TSharedPtr<FOdysseyPainterEditorSource> source = GetSource();
     if (!source)
         return FOdysseyMediaProvider();
 
@@ -704,7 +704,7 @@ FOdysseyPainterEditor::SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource
         mSource->Activate();
 
         mRasterSelection->Init(mSource->Width(), mSource->Height());
-        
+
         if ( mCurrentMainTool && mCurrentMainTool->IsActivable() )
         {
             ActivateMainTool(mCurrentMainTool);
@@ -881,7 +881,7 @@ FOdysseyPainterEditor::SendBackward( FOdysseyPainterEditor* iEditor, FOdysseyVec
            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTransferObjects( iScene, selectedObject );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-            
+
             TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();
@@ -917,7 +917,7 @@ FOdysseyPainterEditor::ApplyTransformations( FOdysseyPainterEditor* iEditor, FOd
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoApplyTransformations( iScene, objectList );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
+
         TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -971,7 +971,7 @@ FOdysseyPainterEditor::MakePaintGroup( FOdysseyPainterEditor* iEditor, FOdysseyV
                                                                   , removedBucketArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-            
+
             TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();
@@ -1068,7 +1068,7 @@ FOdysseyPainterEditor::Group( FOdysseyPainterEditor* iEditor, FOdysseyVectorGrou
                                                                   , objectOldParentArray );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-            
+
             TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();
@@ -1106,7 +1106,7 @@ FOdysseyPainterEditor::SelectAllPoints( FOdysseyPainterEditor* iEditor, FOdyssey
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectVertex( iScene, objectList );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
+
         TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -1151,7 +1151,7 @@ FOdysseyPainterEditor::SelectAllObjects( FOdysseyPainterEditor* iEditor, FOdysse
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
+
         TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -1180,7 +1180,7 @@ FOdysseyPainterEditor::ResetView( FOdysseyPainterEditor* iEditor, FOdysseyVector
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
+
         TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -1205,7 +1205,7 @@ FOdysseyPainterEditor::LockPointSelection( FOdysseyPainterEditor* iEditor, FOdys
 
     selectedVertexArray.reserve( 50 );
 
-    // first step prepare the array. First step is needed because we are going to snapshot 
+    // first step prepare the array. First step is needed because we are going to snapshot
     // segment handles coordinates before they'll get aligned.
     vectorEngine->GetSelectedVerticesFromFocusedObjects( selectedVertexArray );
 
@@ -1216,7 +1216,7 @@ FOdysseyPainterEditor::LockPointSelection( FOdysseyPainterEditor* iEditor, FOdys
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexLock( iScene, selectedVertexArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
+
         TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -1246,7 +1246,7 @@ FOdysseyPainterEditor::UnlockPointSelection( FOdysseyPainterEditor* iEditor, FOd
 
     selectedVertexArray.reserve( 50 );
 
-    // first step prepare the array. First step is needed because we are going to snapshot 
+    // first step prepare the array. First step is needed because we are going to snapshot
     // segment handles coordinates before they'll get aligned.
     vectorEngine->GetSelectedVerticesFromFocusedObjects( selectedVertexArray );
 
@@ -1257,7 +1257,7 @@ FOdysseyPainterEditor::UnlockPointSelection( FOdysseyPainterEditor* iEditor, FOd
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexLock( iScene, selectedVertexArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
+
         TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -1287,7 +1287,7 @@ FOdysseyPainterEditor::UnalignPointSelection( FOdysseyPainterEditor* iEditor, FO
 
     selectedVertexArray.reserve( 50 );
 
-    // first step prepare the array. First step is needed because we are going to snapshot 
+    // first step prepare the array. First step is needed because we are going to snapshot
     // segment handles coordinates before they'll get aligned.
     vectorEngine->GetSelectedVerticesFromFocusedObjects( selectedVertexArray );
 
@@ -1297,7 +1297,7 @@ FOdysseyPainterEditor::UnalignPointSelection( FOdysseyPainterEditor* iEditor, FO
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlignment( iScene, selectedVertexArray );
 
-        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );        
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
         TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
         if (source)
@@ -1329,7 +1329,7 @@ FOdysseyPainterEditor::AlignPointSelection( FOdysseyPainterEditor* iEditor, FOdy
 
     selectedVertexArray.reserve( 50 );
 
-    // first step prepare the array. First step is needed because we are going to snapshot 
+    // first step prepare the array. First step is needed because we are going to snapshot
     // segment handles coordinates before they'll get aligned.
     vectorEngine->GetSelectedVerticesFromFocusedObjects( selectedVertexArray );
 
@@ -1340,12 +1340,12 @@ FOdysseyPainterEditor::AlignPointSelection( FOdysseyPainterEditor* iEditor, FOdy
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoVertexAlignment( iScene, selectedVertexArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
+
         TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
     }
-    GEditor->EndTransaction(); 
+    GEditor->EndTransaction();
     //---------- end of undo ------------//
 
     // the actual alignment ( alignment is based on the first segment met)
@@ -1430,7 +1430,7 @@ FOdysseyPainterEditor::DeletePointSelection( FOdysseyPainterEditor* iEditor, FOd
                                                                   , addedSegmentArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
+
         TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -1465,7 +1465,7 @@ FOdysseyPainterEditor::DeleteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVe
                                                                       , removedObjectArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
+
         TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -1490,7 +1490,7 @@ FOdysseyPainterEditor::FlipHorizontal( FOdysseyPainterEditor* iEditor, FOdysseyV
 
     // concerns only the top-most selected objects of a branch, including the scene
     vectorEngine->GetFocusedAncestorList( objectList );
- 
+
     // needed for undos
     GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.flip-horizontal", "Flip Horizontal"));
     if( GUndo )
@@ -1498,7 +1498,7 @@ FOdysseyPainterEditor::FlipHorizontal( FOdysseyPainterEditor* iEditor, FOdysseyV
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, objectList );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
+
         TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -1532,7 +1532,7 @@ FOdysseyPainterEditor::FlipVertical( FOdysseyPainterEditor* iEditor, FOdysseyVec
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, objectList );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
+
         TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -1595,7 +1595,7 @@ FOdysseyPainterEditor::ClearColoring( FOdysseyPainterEditor* iEditor, FOdysseyVe
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( iScene, bucketArray );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
+
         TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -1631,7 +1631,7 @@ FOdysseyPainterEditor::DeleteBucket( FOdysseyPainterEditor* iEditor, FOdysseyVec
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( scene, iBucket );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-            
+
             TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();
@@ -1666,7 +1666,7 @@ FOdysseyPainterEditor::AlterContourWidth( FOdysseyVectorGroupPaint* iScene
               if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
               {
                   FOdysseyVectorGroupPaint* paintgroup = static_cast<FOdysseyVectorGroupPaint*>(object);
- 
+
                   //paintgroupList.push_back( paintgroup );
 
                   paintgroup->AlterContourWidth( iValue, iAbsolute );
@@ -1731,7 +1731,7 @@ bool FOdysseyPainterEditor::CopyCurrentSelectionToCopyBlock()
             nullptr,
             &copyEvent
         );
-        
+
         ctx.FilterInto(
             [](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
             {
@@ -1851,7 +1851,7 @@ SetBucketPropagation( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBuc
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( scene, iBucket );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
+
         TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -1927,7 +1927,7 @@ FOdysseyPainterEditor::PasteTransformation( FOdysseyPainterEditor* iEditor, FOdy
             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, selectedObject );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-            
+
             TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();
@@ -1994,7 +1994,7 @@ FOdysseyPainterEditor::PasteObjects( FOdysseyPainterEditor* iEditor, FOdysseyVec
         FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoObjectAdd( iScene, pastedObjectList ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
+
         TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -2111,7 +2111,7 @@ FOdysseyPainterEditor::StitchVertices( FOdysseyPainterEditor* iEditor
                                                                             , mergedSegmentArray );
 
                 GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
                 TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
                 if (source)
                     source->RecordCurrentFrameUndo();

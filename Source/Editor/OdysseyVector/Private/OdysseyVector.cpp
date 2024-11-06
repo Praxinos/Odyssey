@@ -198,7 +198,7 @@ FOdysseyVector::ProjectPoint( const ::ULIS::FVec2D& iPt
     double sqLength = p0p1.DistanceSquared();  // i.e. |w-v|^2 -  avoid a sqrt
 
     // Consider the line extending the segment, parameterized as v + t (w - v).
-    // We find projection of point p onto the line. 
+    // We find projection of point p onto the line.
     // It falls where t = [(p-v) . (w-v)] / |w-v|^2
     // We clamp t from [0,1] to handle points outside the segment vw.
     ::ULIS::FVec2D p0pt = ( iPt - iSegmentP0 );
@@ -226,7 +226,7 @@ FOdysseyVector::DistanceToSegment( const ::ULIS::FVec2D& iPt
     double sqLength = p0p1.DistanceSquared();  // i.e. |w-v|^2 -  avoid a sqrt
 
     // Consider the line extending the segment, parameterized as v + t (w - v).
-    // We find projection of point p onto the line. 
+    // We find projection of point p onto the line.
     // It falls where t = [(p-v) . (w-v)] / |w-v|^2
     // We clamp t from [0,1] to handle points outside the segment vw.
     ::ULIS::FVec2D p0pt = ( iPt - iSegmentP0 );
@@ -346,7 +346,7 @@ FOdysseyVector::PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
             {
                 uint32 offset = ( y * iMaskRect.w ) + x;
 
-                if ( iPixelData[offset] != 0 ) 
+                if ( iPixelData[offset] != 0 )
                 {
                     return true;
                 }

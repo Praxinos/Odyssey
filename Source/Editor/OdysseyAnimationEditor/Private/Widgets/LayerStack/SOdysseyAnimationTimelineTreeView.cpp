@@ -13,47 +13,47 @@
 void
 SOdysseyAnimationTimelineTreeView::Construct(const FArguments& InArgs)
 {
-	mTimelinePosition = InArgs._TimelinePosition;
-	mLayerStack = InArgs._LayerStack;
-	mPlayer = InArgs._Player;
-	mOnActivateOutOfPegs = InArgs._OnActivateOutOfPegs;
-	mOnInactivateOutOfPegs = InArgs._OnInactivateOutOfPegs;
-	mOnIsOutOfPegsChecked = InArgs._OnIsOutOfPegsChecked;
+    mTimelinePosition = InArgs._TimelinePosition;
+    mLayerStack = InArgs._LayerStack;
+    mPlayer = InArgs._Player;
+    mOnActivateOutOfPegs = InArgs._OnActivateOutOfPegs;
+    mOnInactivateOutOfPegs = InArgs._OnInactivateOutOfPegs;
+    mOnIsOutOfPegsChecked = InArgs._OnIsOutOfPegsChecked;
 
     mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(mLayerStack);
 
-	TArray<SHeaderRow::FColumn::FArguments> columns = {
-		SHeaderRow::Column("Timeline")
-		.DefaultLabel(FText())
-		.VAlignCell(VAlign_Fill)
-		.HAlignCell(HAlign_Fill)
-		.HeaderContentPadding(FMargin(0.f))
-		[
-			SNew(SBox)
-			.HeightOverride(25.f)
-			[
-				SNew(SOdysseyAnimationTimelineHeader)
-				.Animation(mLayerStack->GetAnimation())
-				.Player(mPlayer)
-				.TimelinePosition(mTimelinePosition)
-			]
-		]
-	};
+    TArray<SHeaderRow::FColumn::FArguments> columns = {
+        SHeaderRow::Column("Timeline")
+        .DefaultLabel(FText())
+        .VAlignCell(VAlign_Fill)
+        .HAlignCell(HAlign_Fill)
+        .HeaderContentPadding(FMargin(0.f))
+        [
+            SNew(SBox)
+            .HeightOverride(25.f)
+            [
+                SNew(SOdysseyAnimationTimelineHeader)
+                .Animation(mLayerStack->GetAnimation())
+                .Player(mPlayer)
+                .TimelinePosition(mTimelinePosition)
+            ]
+        ]
+    };
 
-	SOdysseyLayerStackTreeView::Construct(
-		SOdysseyLayerStackTreeView::FArguments()
-		.LayerStack(mLayerStack)
-		.OnGenerateRow( this, &SOdysseyAnimationTimelineTreeView::OnGenerateRow )
-		.Columns(columns)
-		.ExternalScrollbar(InArgs._ExternalScrollbar)
-		.OnTreeViewScrolled(InArgs._OnTreeViewScrolled)
-	);
+    SOdysseyLayerStackTreeView::Construct(
+        SOdysseyLayerStackTreeView::FArguments()
+        .LayerStack(mLayerStack)
+        .OnGenerateRow( this, &SOdysseyAnimationTimelineTreeView::OnGenerateRow )
+        .Columns(columns)
+        .ExternalScrollbar(InArgs._ExternalScrollbar)
+        .OnTreeViewScrolled(InArgs._OnTreeViewScrolled)
+    );
 }
 
 FReply
 SOdysseyAnimationTimelineTreeView::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
 {
-	if (mTimelineShortcuts->GetCommandList()->ProcessCommandBindings(iKeyEvent))
+    if (mTimelineShortcuts->GetCommandList()->ProcessCommandBindings(iKeyEvent))
         return FReply::Handled();
 
     return SCompoundWidget::OnKeyDown(iGeometry, iKeyEvent);
@@ -62,29 +62,29 @@ SOdysseyAnimationTimelineTreeView::OnKeyDown( const FGeometry& iGeometry, const 
 TSharedRef<ITableRow>
 SOdysseyAnimationTimelineTreeView::OnGenerateRow(UOdysseyLayer* iLayer, const TSharedRef<STableViewBase>& iOwnerTable)
 {
-	check(iLayer);
+    check(iLayer);
 
     UClass* layerClass = iLayer->GetClass();
     if (layerClass == UOdysseyAnimationLayerFolder::StaticClass())
     {
-		return SNew(SOdysseyAnimationLayerFolderTimeline, SharedThis(this), Cast<UOdysseyAnimationLayerFolder>(iLayer));
-	}
-	if (layerClass == UOdysseyAnimationLayerImageRaster::StaticClass())
+        return SNew(SOdysseyAnimationLayerFolderTimeline, SharedThis(this), Cast<UOdysseyAnimationLayerFolder>(iLayer));
+    }
+    if (layerClass == UOdysseyAnimationLayerImageRaster::StaticClass())
     {
-		return SNew(SOdysseyAnimationLayerImageRasterTimeline, SharedThis(this), Cast<UOdysseyAnimationLayerImageRaster>(iLayer))
-			.TimelinePosition(mTimelinePosition)
-			.OnActivateOutOfPegs(mOnActivateOutOfPegs)
-			.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
-			.OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked);
-	}
-	if (layerClass == UOdysseyAnimationLayerImageVector::StaticClass())
+        return SNew(SOdysseyAnimationLayerImageRasterTimeline, SharedThis(this), Cast<UOdysseyAnimationLayerImageRaster>(iLayer))
+            .TimelinePosition(mTimelinePosition)
+            .OnActivateOutOfPegs(mOnActivateOutOfPegs)
+            .OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
+            .OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked);
+    }
+    if (layerClass == UOdysseyAnimationLayerImageVector::StaticClass())
     {
-		return SNew(SOdysseyAnimationLayerImageVectorTimeline, SharedThis(this), Cast<UOdysseyAnimationLayerImageVector>(iLayer))
-			.TimelinePosition(mTimelinePosition)
-			.OnActivateOutOfPegs(mOnActivateOutOfPegs)
-			.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
-			.OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked);
-	}
+        return SNew(SOdysseyAnimationLayerImageVectorTimeline, SharedThis(this), Cast<UOdysseyAnimationLayerImageVector>(iLayer))
+            .TimelinePosition(mTimelinePosition)
+            .OnActivateOutOfPegs(mOnActivateOutOfPegs)
+            .OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
+            .OnIsOutOfPegsChecked(mOnIsOutOfPegsChecked);
+    }
 
     return SNew(STableRow<UOdysseyLayer*>, iOwnerTable);;
 }
@@ -94,11 +94,11 @@ SOdysseyAnimationTimelineTreeView::OnGenerateRow(UOdysseyLayer* iLayer, const TS
 FCursorReply
 SOdysseyAnimationTimelineTreeView::OnCursorQuery( const FGeometry& MyGeometry, const FPointerEvent& CursorEvent ) const
 {
-	FCursorReply reply = SOdysseyLayerStackTreeView::OnCursorQuery( MyGeometry, CursorEvent );
-	if (reply.IsEventHandled())
-		return reply;
+    FCursorReply reply = SOdysseyLayerStackTreeView::OnCursorQuery( MyGeometry, CursorEvent );
+    if (reply.IsEventHandled())
+        return reply;
 
-	return FCursorReply::Cursor( EMouseCursor::Default );
+    return FCursorReply::Cursor( EMouseCursor::Default );
 }
 
 #undef LOCTEXT_NAMESPACE

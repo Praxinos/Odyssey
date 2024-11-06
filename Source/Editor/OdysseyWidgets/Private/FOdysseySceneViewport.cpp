@@ -8,7 +8,7 @@
 FOdysseySceneViewport::FOdysseySceneViewport( FViewportClient* InViewportClient, TSharedPtr<SViewport> InViewportWidget )
     : FSceneViewport(InViewportClient, InViewportWidget)
 {
-    
+
 }
 
 FReply

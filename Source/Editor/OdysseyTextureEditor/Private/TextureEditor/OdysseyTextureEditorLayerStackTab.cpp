@@ -257,7 +257,7 @@ FOdysseyTextureEditorLayerStackTab::ExportTextureToOperatingSystem()
 }
 
 
-void           
+void
 FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
 {
     UOdysseyLayerStack* layerStack = LayerStack();
@@ -310,11 +310,11 @@ FOdysseyTextureEditorLayerStackTab::ImportTexturesAsLayers()
             }
         );
         rasterBlockMutator.Commit();
-        
+
     }
 }
 
-void           
+void
 FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
 {
     UOdysseyLayerStack* layerStack = LayerStack();
@@ -342,7 +342,7 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
         return;
 
     TArray<UOdysseyLayer*> layers = layerStack->GetLayers();
-    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat()); 
+    ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(texture->Source.GetSizeX(), texture->Source.GetSizeY(), format);
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(format);
 
@@ -384,13 +384,13 @@ FOdysseyTextureEditorLayerStackTab::ExportLayersAsTextures()
         FSavePackageArgs packageArgs;
         packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
         UPackage::SavePackage( package, outTexture, *( layer->Name.ToString() ), packageArgs );
-            
+
         package->MarkAsFullyLoaded();
         outTexture->MarkPackageDirty();
     }
 }
 
-void           
+void
 FOdysseyTextureEditorLayerStackTab::ExportCurrentLayerAsTexture()
 {
     UOdysseyLayerStack* layerStack = LayerStack();
@@ -475,7 +475,7 @@ FOdysseyTextureEditorLayerStackTab::CreateNewLayer()
         if (!layer)
             return;
     }
-            
+
     FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), layer);
 }
 
@@ -488,7 +488,7 @@ FOdysseyTextureEditorLayerStackTab::ChangeLayerOpacity( float iOpacity )
 
     if ( !layerStack->CurrentLayer )
         return;
-        
+
     if ( layerStack->CurrentLayer->IsLockedRecursively() )
         return;
 

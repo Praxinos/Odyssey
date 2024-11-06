@@ -186,7 +186,7 @@ FOdysseyEditor::RemoveEditedObject(UObject* iObject)
 void
 FOdysseyEditor::AddReferencedObjects(FReferenceCollector& Collector)
 {
-    
+
 }
 
 FString
@@ -201,5 +201,5 @@ FOdysseyEditor::GetReferencerName() const
 void
 FOdysseyEditor::Tick(float DeltaTime)
 {
-    
+
 }

@@ -19,7 +19,7 @@ struct HOdysseyHUDHandleHitProxy : public HOdysseyHUDElementHitProxy
     HOdysseyHUDHandleHitProxy(TSharedPtr<FOdysseyHUDHandle> iHUDHandle, TOptional<EMouseCursor::Type> iMouseCursor = TOptional<EMouseCursor::Type>())
         : HOdysseyHUDElementHitProxy(iHUDHandle, iMouseCursor)
     {
-    }  
+    }
 };
 
 IMPLEMENT_HIT_PROXY(HOdysseyHUDHandleHitProxy, HOdysseyHUDElementHitProxy)
@@ -39,10 +39,10 @@ void
 FOdysseyHUDHandle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 {
     const FLinearColor color(1.f, 0.f, 0.f);
-    
+
     if (iParams.mCanvas->IsHitTesting() && mIsInteractable)
         iParams.mCanvas->SetHitProxy(new HOdysseyHUDHandleHitProxy(SharedThis(this)));
-        
+
     int handleSize = mIsHovered && mIsInteractable ? HANDLE_BIG_SIZE : HANDLE_SMALL_SIZE;
 
     FVector2D origin = iParams.mTextureToHUD.Execute(mPosition) - FVector2D(handleSize / 2.f, handleSize / 2.f);
@@ -52,7 +52,7 @@ FOdysseyHUDHandle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
     if (iParams.mCanvas->IsHitTesting() && mIsInteractable)
         iParams.mCanvas->SetHitProxy(nullptr);
 
-    FOdysseyHUDElement::DrawHUD(iParams); 
+    FOdysseyHUDElement::DrawHUD(iParams);
 }
 
 bool
@@ -100,7 +100,7 @@ FOdysseyHUDHandle::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey&
         mOnDragBegin.Broadcast();
         return true;  //capture the event
     }
-    
+
     return FOdysseyHUDElement::OnMouseDown(iPointInTexture, iKey);
 }
 

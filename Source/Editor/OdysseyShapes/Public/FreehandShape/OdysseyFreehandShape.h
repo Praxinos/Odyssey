@@ -28,7 +28,7 @@ public:
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture);
     virtual bool OnKeyDown(const FKey& iKey);
-    
+
     virtual void Abort() override;
 
 public:
@@ -80,7 +80,7 @@ protected:
     TArray< FOdysseyPoint >             mRawStroke; //Raw Stroke (basically mouse positions)
     TArray< FOdysseyPoint >             mSmoothedStroke; //The raw stroke once smoothed using the smoother
     TSharedPtr<IOdysseySmoothing>       mSmoother;
-    
+
     TSharedPtr<FOdysseyHUDPolygon> mPathHUD;
 
     bool mIsDrawing = false;

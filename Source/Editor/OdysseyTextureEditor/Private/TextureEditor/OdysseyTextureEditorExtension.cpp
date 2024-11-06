@@ -71,7 +71,7 @@ FOdysseyTextureEditorExtension::OnSourceChanged()
 
     //Is the source an texture
     TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())    
+    if (!source || source->Id() != FOdysseyTextureEditorSource::StaticId())
     {
         GetEditor()->GetBrushContexts().Remove(mLayerStackBrushEditorContext.Get());
         return;
@@ -82,7 +82,7 @@ FOdysseyTextureEditorExtension::OnSourceChanged()
 
     GetEditor()->GetBrushContexts().Add(mLayerStackBrushEditorContext.Get());
     mLayerStackBrushEditorContext->SetLayerStack(mTextureSource->GetLayerStack());
-    
+
     ConfigureTools();
 }
 

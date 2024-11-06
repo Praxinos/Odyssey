@@ -19,11 +19,11 @@ FOdysseyRasterBlockExport::WriteBulkData( FOdysseyRasterBlock* iRasterBlock
         //Updates the payload
         //The payload stored in mBulkData will then be removed from memory once mBulkData.Serialize() is called
         iRasterBlock->mBulkData.UpdatePayload(sharedBuffer, iRasterBlock->mOwner);
-    
+
         /**
          * @brief Here is a simple explanation of ECompressedBufferCompressor values
          * see http://www.radgametools.com/oodlecompressors.htm
-         * 
+         *
          * NotSet = 0, //No Compression
          * Selkie = 1, //Ultra-fast decompression, compression ratio > zlib but < lzma
          * Mermaid = 2, //Slower than selkie, faster than zlib/lzma, slightly better compression ratio than selkie but < lzma
@@ -34,10 +34,10 @@ FOdysseyRasterBlockExport::WriteBulkData( FOdysseyRasterBlock* iRasterBlock
         //Zlib ration compression is enough, but speed is ultra important, so Selkie compressor is what we need here
         //Unreal defaults for FCompressedBuffer is ECompressedBufferCompressor::Mermaid, ECompressedBufferCompressionLevel::VeryFast
         //But we will use custom values to balance performance at its best between compression tim, decompression time and size
-        
+
         //Needs to be called everytime UpdatePayload is called to ensure the correct compression is selected
         iRasterBlock->mBulkData.SetCompressionOptions(ECompressedBufferCompressor::Selkie, FOodleDataCompression::ECompressionLevel::Normal);
-        
+
         //Eric: I don't understand what bAllowRegister is
         //but it seems UTexture sets it to false on saving and on true on loading
         //so I'll do the same, but correct me if I'm wrong

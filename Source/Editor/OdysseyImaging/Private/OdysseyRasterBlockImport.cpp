@@ -56,7 +56,7 @@ FOdysseyRasterBlockImport::Read( FOdysseyRasterBlock* iRasterBlock
                     Ar << iRasterBlock->mId; //unique ID identifying the block
                 }
                 break;
-                
+
                 case FOdysseyFile::RasterBlock::CHUNK_RASTERBLOCK_RESOLUTION :
                 {
                     Ar << iRasterBlock->mWidth;

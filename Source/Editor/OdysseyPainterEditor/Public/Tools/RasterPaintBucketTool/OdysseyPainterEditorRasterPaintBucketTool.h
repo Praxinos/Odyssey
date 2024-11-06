@@ -44,13 +44,13 @@ public:
 
     //Constructor
     UOdysseyPainterEditorRasterPaintBucketTool();
-    
+
     void Initialize(FOdysseyPaintEngine* iPaintEngine);
 
     virtual bool OnKeyDown( const FKey& iKey ) override;
     virtual bool OnKeyUp( const FKey& iKey ) override;
     virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
-	virtual void ExtendContextMenu(FMenuBuilder& iBuilder, const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual void ExtendContextMenu(FMenuBuilder& iBuilder, const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
     virtual EMouseCursor::Type GetMouseCursor() const override;
@@ -76,7 +76,7 @@ private:
     void IncludeColorsToMaskBlock(TSharedPtr<::ULIS::FBlock> iSrcBlock, TSharedPtr<::ULIS::FBlock> iMaskBlock) const;
 
     void IncludeColor( ::ULIS::FColor iColor );
-    
+
     void OnRasterSelectionChanged();
 
 public:
@@ -92,7 +92,7 @@ public:
     float GapTolerance = 2; //pixels positive only
     UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool)
     TArray<FLinearColor> IncludeColors;
-    
+
     UPROPERTY(EditInstanceOnly, Category="Blending", meta=(ShowOnlyInnerProperties))
     FOdysseyBlendParameters BlendParameters;
 

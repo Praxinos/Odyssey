@@ -83,13 +83,13 @@ public:
     TSharedPtr<FUICommandInfo> ResetViewportPosition;
 
     /** Action to reset the viewport rotation */
-    TSharedPtr<FUICommandInfo> ResetViewportRotation; 
+    TSharedPtr<FUICommandInfo> ResetViewportRotation;
 
     /** Action to rotate the viewport left */
-    TSharedPtr<FUICommandInfo> RotateViewportLeft; 
+    TSharedPtr<FUICommandInfo> RotateViewportLeft;
 
     /** Action to rotate the viewport right */
-    TSharedPtr<FUICommandInfo> RotateViewportRight; 
+    TSharedPtr<FUICommandInfo> RotateViewportRight;
 
     /** Action to flip the viewport horizontally */
     TSharedPtr<FUICommandInfo> FlipViewportHorizontally;
@@ -98,43 +98,43 @@ public:
     TSharedPtr<FUICommandInfo> FlipViewportVertically;
 
     /** Action to set zoom pourcentage at 10% */
-    TSharedPtr<FUICommandInfo> SetZoom10Percent; 
+    TSharedPtr<FUICommandInfo> SetZoom10Percent;
 
     /** Action to set zoom pourcentage at 20% */
-    TSharedPtr<FUICommandInfo> SetZoom20Percent; 
+    TSharedPtr<FUICommandInfo> SetZoom20Percent;
 
     /** Action to set zoom pourcentage at 30% */
-    TSharedPtr<FUICommandInfo> SetZoom30Percent; 
+    TSharedPtr<FUICommandInfo> SetZoom30Percent;
 
     /** Action to set zoom pourcentage at 40% */
-    TSharedPtr<FUICommandInfo> SetZoom40Percent; 
+    TSharedPtr<FUICommandInfo> SetZoom40Percent;
 
     /** Action to set zoom pourcentage at 50% */
-    TSharedPtr<FUICommandInfo> SetZoom50Percent; 
+    TSharedPtr<FUICommandInfo> SetZoom50Percent;
 
     /** Action to set zoom pourcentage at 60% */
-    TSharedPtr<FUICommandInfo> SetZoom60Percent; 
+    TSharedPtr<FUICommandInfo> SetZoom60Percent;
 
     /** Action to set zoom pourcentage at 70% */
-    TSharedPtr<FUICommandInfo> SetZoom70Percent; 
+    TSharedPtr<FUICommandInfo> SetZoom70Percent;
 
     /** Action to set zoom pourcentage at 80% */
-    TSharedPtr<FUICommandInfo> SetZoom80Percent; 
+    TSharedPtr<FUICommandInfo> SetZoom80Percent;
 
     /** Action to set zoom pourcentage at 90% */
-    TSharedPtr<FUICommandInfo> SetZoom90Percent; 
+    TSharedPtr<FUICommandInfo> SetZoom90Percent;
 
     /** Action to set zoom pourcentage at 100% */
-    TSharedPtr<FUICommandInfo> SetZoom100Percent; 
+    TSharedPtr<FUICommandInfo> SetZoom100Percent;
 
     /** Action to set zoom at fit to screen */
-    TSharedPtr<FUICommandInfo> SetZoomFitScreen; 
+    TSharedPtr<FUICommandInfo> SetZoomFitScreen;
 
     /** Action to zoom in*/
-    TSharedPtr<FUICommandInfo> ZoomInExponential; 
+    TSharedPtr<FUICommandInfo> ZoomInExponential;
 
     /** Action to set zoom out*/
-    TSharedPtr<FUICommandInfo> ZoomOutExponential; 
+    TSharedPtr<FUICommandInfo> ZoomOutExponential;
 
 
     //Brush actions
@@ -154,16 +154,16 @@ public:
 
     /** Action to switch to Erase alpha mode */
     TSharedPtr<FUICommandInfo> SetAlphaModeErase;
-    
+
     /** Action to switch to Top alpha mode */
     TSharedPtr<FUICommandInfo> SetAlphaModeTop;
 
     /** Action to switch to Back alpha mode */
     TSharedPtr<FUICommandInfo> SetAlphaModeBack;
-    
+
     /** Action to switch to Sub alpha mode */
     TSharedPtr<FUICommandInfo> SetAlphaModeSub;
-    
+
     /** Action to switch to Add alpha mode */
     TSharedPtr<FUICommandInfo> SetAlphaModeAdd;
 
@@ -305,11 +305,11 @@ public:
     //Switch tablet API
 
     /** Action to switch tablet API */
-    TSharedPtr<FUICommandInfo> SwitchTabletAPI; 
+    TSharedPtr<FUICommandInfo> SwitchTabletAPI;
 
     // Tools
     // Generic Tools commands
-    TSharedPtr<FUICommandInfo> ActivateColorPickerTool; 
+    TSharedPtr<FUICommandInfo> ActivateColorPickerTool;
     TSharedPtr<FUICommandInfo> ActivateDrawingTool;
     TSharedPtr<FUICommandInfo> ActivateSelectionTool;
     TSharedPtr<FUICommandInfo> ActivatePaintBucketTool;

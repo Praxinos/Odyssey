@@ -76,7 +76,7 @@ public:
 
     UPROPERTY(config, EditAnywhere, Category=Shortcuts )
     FInputChord DuplicateCurrentKeyFrame;
-    
+
     UPROPERTY(config, EditAnywhere, Category=Shortcuts )
     FInputChord DeleteCurrentKeyFrame; */
 };

@@ -41,7 +41,7 @@ FOdysseyAnimationAssetTypeActions::GetCategories()
     return mMyAssetCategory;
 }
 
-void 
+void
 FOdysseyAnimationAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 {
     InFilter.ClassNames.Add( UOdysseyAnimation::StaticClass()->GetFName());
@@ -49,7 +49,7 @@ FOdysseyAnimationAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 
 
 void FOdysseyAnimationAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
-{    
+{
     EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
 
     for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)

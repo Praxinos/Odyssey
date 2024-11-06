@@ -53,9 +53,9 @@ UObject*
 UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn )
 {
     check(iClass->IsChildOf(UOdysseyAnimation::StaticClass()));
-    
+
     UOdysseyAnimation* animation = NewObject<UOdysseyAnimation>( iParent, iName, iFlags | RF_Transactional );
-        
+
     //happens when ConfigureProperties is not called
     //Example : In the CreateAnimationAsset blueprint node
     if (!mConfigured)
@@ -92,7 +92,7 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
 
     //Background Layer
     if (mConfiguration.BackgroundColor != EOdysseyAnimationBackgroundColor::Transparent)
-    {    
+    {
         UOdysseyAnimationLayerImageRaster* backgroundLayer = Cast<UOdysseyAnimationLayerImageRaster>(animation->GetLayerStack()->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), nullptr, 1));
         backgroundLayer->PostBehaviour = EOdysseyAnimationLayerImagePostBehaviour::Hold;
         backgroundLayer->Name = LOCTEXT("animation.default-background-layer.name", "Background");

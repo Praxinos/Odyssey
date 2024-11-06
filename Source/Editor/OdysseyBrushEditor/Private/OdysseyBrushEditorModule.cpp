@@ -31,7 +31,7 @@ void FOdysseyBrushEditorModule::StartupModule()
     AssetTools.RegisterAssetTypeActions( OdysseyBrushAssetTypeActions.ToSharedRef() );
 
     /////////////////
-    
+
     if( !IsRunningCommandlet() )
     {
         FOdysseyBrushContentBrowserExtensions::InstallHooks();

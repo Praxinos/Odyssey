@@ -341,7 +341,7 @@ UOdysseyLayer::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
-    
+
     return MakeShared<FOdysseyLayerImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
@@ -392,40 +392,40 @@ UOdysseyLayer::OpacityBlueprintSetter(float Value)
 TArray<FName>
 UOdysseyLayer::GetRows() const
 {
-	return {
-		"Main",
-		"Blend"
-	};
+    return {
+        "Main",
+        "Blend"
+    };
 }
 
 int
 UOdysseyLayer::GetRowHeight(FName iSubRowName) const
 {
-	if (iSubRowName == "Main")
-		return 20;
+    if (iSubRowName == "Main")
+        return 20;
 
-	if (iSubRowName == "Blend")
-		return 20;
-		
-	return 0;
+    if (iSubRowName == "Blend")
+        return 20;
+
+    return 0;
 }
 
 bool
 UOdysseyLayer::IsRowVisible(FName iSubRowName) const
 {
-	if (iSubRowName == "Main")
-		return true;
+    if (iSubRowName == "Main")
+        return true;
 
-	if (iSubRowName == "Blend")
-		return DisplayOptions;
-		
-	return 0;
+    if (iSubRowName == "Blend")
+        return DisplayOptions;
+
+    return 0;
 }
 
 FMargin
 UOdysseyLayer::GetRowPadding(FName iSubRowName) const
 {
-	return FMargin(0.f, 0.f, 0.f, 2.f);
+    return FMargin(0.f, 0.f, 0.f, 2.f);
 }
 
 #endif

@@ -33,26 +33,26 @@ class ODYSSEYANIMATION_API UOdysseyAnimationPlayer
     GENERATED_BODY()
 
 public:
-	UOdysseyAnimationPlayer();
+    UOdysseyAnimationPlayer();
 
 public:
-	//Events
-	FSimpleMulticastDelegate& OnAnimationChanged();
-	FSimpleMulticastDelegate& OnTextureChanged();
-	FSimpleMulticastDelegate& OnStatusChanged();
-	FSimpleMulticastDelegate& OnFrameRateChanged();
-	FSimpleMulticastDelegate& OnTextureUpdated();
-	FSimpleMulticastDelegate& OnIsLoopingChanged();
-	FSimpleMulticastDelegate& OnCurrentTimeChanged();
-	FSimpleMulticastDelegate& OnPlay();
-	FSimpleMulticastDelegate& OnPause();
-	FSimpleMulticastDelegate& OnStop();
+    //Events
+    FSimpleMulticastDelegate& OnAnimationChanged();
+    FSimpleMulticastDelegate& OnTextureChanged();
+    FSimpleMulticastDelegate& OnStatusChanged();
+    FSimpleMulticastDelegate& OnFrameRateChanged();
+    FSimpleMulticastDelegate& OnTextureUpdated();
+    FSimpleMulticastDelegate& OnIsLoopingChanged();
+    FSimpleMulticastDelegate& OnCurrentTimeChanged();
+    FSimpleMulticastDelegate& OnPlay();
+    FSimpleMulticastDelegate& OnPause();
+    FSimpleMulticastDelegate& OnStop();
 
 public:
-	virtual void PostLoad() override;
-	virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
-	virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
-	void PropertyChanged(const FName& iPropertyName);
+    virtual void PostLoad() override;
+    virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
+    void PropertyChanged(const FName& iPropertyName);
 
     void AnimationChanged();
     void TextureChanged();
@@ -90,8 +90,8 @@ private:
     void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
 
 public:
-	UPROPERTY()
-	TObjectPtr<UOdysseyAnimation> Animation;
+    UPROPERTY()
+    TObjectPtr<UOdysseyAnimation> Animation;
 
     UPROPERTY()
     EOdysseyAnimationPlayerStatus Status = EOdysseyAnimationPlayerStatus::Stopped;
@@ -103,12 +103,12 @@ public:
     bool IsLooping = true;
 
 public:
-	UPROPERTY(Transient, DuplicateTransient)
-	TObjectPtr<UTexture2D> Texture;
+    UPROPERTY(Transient, DuplicateTransient)
+    TObjectPtr<UTexture2D> Texture;
 
 private:
     bool mIsBackward = false;
-    FTimespan mCurrentTime; 
+    FTimespan mCurrentTime;
     TOptional<TRange<FTimespan>> mRange;
     TArray<FGuid>   mImageRenderingComposition;
     FULISInvalidTileMap mInvalidTileMap;

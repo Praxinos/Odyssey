@@ -40,7 +40,7 @@ FOdysseyFlipbookWrapper::CreateEmptyKeyFrame(int32 iIndex)
     FPaperFlipbookKeyFrame keyframe;
     FScopedFlipbookMutator mutator(mFlipbook);
     mutator.KeyFrames.Insert(keyframe, iIndex);
-    
+
     mFlipbook->MarkPackageDirty();
 
     //TODO: Do it by changing UProperties
@@ -72,12 +72,12 @@ FOdysseyFlipbookWrapper::CreateKeyFrame(int32 iIndex, UTexture2D** oTexture, UPa
         return false;
 
     mTextureConfiguration = textureConfigurationWindow->GetConfiguration();
-    
+
     FOdysseyTextureConfiguration textureConfiguration = mTextureConfiguration;
     FString textureName = textureConfiguration.Name.ToString() + TEXT("_Texture");
     FString spriteName = textureConfiguration.Name.ToString() + TEXT("_Sprite");
     textureConfiguration.Name = FName(*textureName);
-    
+
     //Create the keyframe
     CreateEmptyKeyFrame(iIndex);
 
@@ -144,7 +144,7 @@ FOdysseyFlipbookWrapper::DuplicateKeyFrame(int32 iIndex, UTexture2D** oTexture, 
             {
                 userData->InitWithDefaultLayerStack();
             }
-            
+
             //CopyTextureContent(srcTexture, texture);
 
             SetSpriteTexture(sprite, texture);  //Finishes the sprite initialization before giving it to the flipbook, otherwise it calls some unwanted callbacks in the GUI
@@ -185,7 +185,7 @@ FOdysseyFlipbookWrapper::FixKeyFrame(int32 iIndex, UTexture2D** oTexture, UPaper
     {
         sprite = *oSprite = CreateSprite(spriteName);
         if (!sprite)
-            return false;        
+            return false;
     }
 
     texture = *oTexture = CreateTexture(textureConfiguration);
@@ -222,10 +222,10 @@ FOdysseyFlipbookWrapper::MoveKeyFrames(TArray<int32> iSrcIndexes, int32 iDstInde
     {
         mutator.KeyFrames.RemoveAt(iSrcIndexes[i]);
     }
-        
+
     //insert keyframes at their new place
     mutator.KeyFrames.Insert(keyframes, fixedDestIndex);
-    
+
     mFlipbook->MarkPackageDirty();
 }
 
@@ -241,7 +241,7 @@ FOdysseyFlipbookWrapper::RemoveKeyFrame(int32 iIndex)
         FScopedFlipbookMutator mutator(mFlipbook);
         mutator.KeyFrames.RemoveAt(iIndex);
     }
-    
+
     mFlipbook->MarkPackageDirty();
 }
 
@@ -250,7 +250,7 @@ FOdysseyFlipbookWrapper::SetKeyFrameLength(int32 iIndex, int32 iLength)
 {
     FScopedFlipbookMutator mutator(mFlipbook);
     mutator.KeyFrames[iIndex].FrameRun = iLength;
-    
+
     mFlipbook->MarkPackageDirty();
 }
 
@@ -267,7 +267,7 @@ FOdysseyFlipbookWrapper::CreateTexture(FOdysseyTextureConfiguration iTextureConf
     UTexture2D* texture2D = iTextureConfiguration.CreateTexture(package, FName(AssetName), RF_Public | RF_Standalone | RF_Transactional);
 
     FAssetRegistryModule::AssetCreated(texture2D);
-    
+
     FSavePackageArgs packageArgs;
     packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
     UPackage::SavePackage( package, texture2D, *AssetName, packageArgs );
@@ -287,7 +287,7 @@ FOdysseyFlipbookWrapper::CreateSprite(FString iName)
     AssetTools.CreateUniqueAssetName(PackageName,AssetName,PackageName,AssetName);
 
     UPackage* package = CreatePackage( *PackageName );
-    
+
     UPaperSprite* sprite = NewObject<UPaperSprite>(package, FName(AssetName), RF_Public | RF_Standalone | RF_Transactional );
 
     //Set the correct Render Geometry Type
@@ -312,7 +312,7 @@ FOdysseyFlipbookWrapper::CreateSprite(FString iName)
 
     //Finalize asset creation
     FAssetRegistryModule::AssetCreated(sprite);
-    
+
     FSavePackageArgs packageArgs;
     packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
     UPackage::SavePackage( package, sprite, *AssetName, packageArgs );
@@ -329,7 +329,7 @@ FOdysseyFlipbookWrapper::SetKeyframeSprite(int32 iIndex, UPaperSprite* iSprite)
     //TODO: Do It With UProperties
     FScopedFlipbookMutator mutator(mFlipbook);
     mutator.KeyFrames[iIndex].Sprite = iSprite;
-    
+
     mFlipbook->MarkPackageDirty();
 }
 
@@ -389,7 +389,7 @@ FOdysseyFlipbookWrapper::GetKeyframeIndexAtPosition(float iFramePosition)
     for (int32 i = 0; i < mFlipbook->GetNumKeyFrames(); i++)
     {
         position += mFlipbook->GetKeyFrameChecked(i).FrameRun;
-        
+
         if (position > iFramePosition)
             return i;
     }
@@ -491,7 +491,7 @@ FOdysseyFlipbookWrapper::OnPreFlipbookPropertyChanged(UPaperFlipbook* iFlipbook,
 
             case EPropertyChangeType::ArrayClear:
                 break;
-                
+
             case EPropertyChangeType::ValueSet:
                 break;
 
@@ -500,7 +500,7 @@ FOdysseyFlipbookWrapper::OnPreFlipbookPropertyChanged(UPaperFlipbook* iFlipbook,
 
             case EPropertyChangeType::Interactive:
                 break;
-            
+
             case EPropertyChangeType::Redirected:
                 break;
         }
@@ -549,7 +549,7 @@ FOdysseyFlipbookWrapper::OnFlipbookPropertyChanged(UPaperFlipbook* iFlipbook, FP
 
             case EPropertyChangeType::ArrayClear:
                 break;
-                
+
             case EPropertyChangeType::ValueSet:
                 break;
 
@@ -558,7 +558,7 @@ FOdysseyFlipbookWrapper::OnFlipbookPropertyChanged(UPaperFlipbook* iFlipbook, FP
 
             case EPropertyChangeType::Interactive:
                 break;
-            
+
             case EPropertyChangeType::Redirected:
                 break;
         }

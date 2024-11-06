@@ -88,7 +88,7 @@ UOdysseyPainterEditorVectorObjectView::ImportParam()
     }
 }
 
-void 
+void
 UOdysseyPainterEditorVectorObjectView::Update( FOdysseyPainterEditor* iEditor
                                              , FOdysseyVectorGroupPaint* iScene
                                              , std::list<FOdysseyVectorObject*>& iFocusedObjectList )
@@ -149,11 +149,11 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
         if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColorMode) )
             selectedObject->GetForegroundBucket().SetColorMode( static_cast<eBucketColorMode>(ForegroundColorMode) );
 
-        // note: iMemberPropertyName because FColor is a struct 
+        // note: iMemberPropertyName because FColor is a struct
         // and we can edit individual struct members RGBA
         if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundColor) ) )
             selectedObject->GetForegroundBucket().SetSolidColor( ForegroundColor );
-            
+
         if ( (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundPaletteSelection)) || (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundPaletteSelection)) )
             selectedObject->GetForegroundBucket().SetPaletteEntry( ForegroundPaletteSelection.OdysseyPaletteEntryColor );
 
@@ -163,7 +163,7 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
         if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColorMode) )
             selectedObject->GetBackgroundBucket().SetColorMode( static_cast<eBucketColorMode>(BackgroundColorMode) );
 
-        // note: iMemberPropertyName because FColor is a struct 
+        // note: iMemberPropertyName because FColor is a struct
         // and we can edit individual struct members RGBA
         if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColor) ) )
             selectedObject->GetBackgroundBucket().SetSolidColor( BackgroundColor );
@@ -193,7 +193,7 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
             // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
             // of a call to GEditor::PostEditChangeProperty()
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
             TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();

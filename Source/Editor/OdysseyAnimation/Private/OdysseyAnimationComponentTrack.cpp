@@ -9,21 +9,21 @@
 #define LOCTEXT_NAMESPACE "Animation"
 
 UOdysseyAnimationComponentTrack::UOdysseyAnimationComponentTrack(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+    : Super(ObjectInitializer)
 {
-	SupportedBlendTypes = FMovieSceneBlendTypeField::None();
+    SupportedBlendTypes = FMovieSceneBlendTypeField::None();
 }
 
 bool
 UOdysseyAnimationComponentTrack::SupportsType(TSubclassOf<UMovieSceneSection> SectionClass) const
 {
-	return SectionClass == UOdysseyAnimationComponentSection::StaticClass();
+    return SectionClass == UOdysseyAnimationComponentSection::StaticClass();
 }
 
 UMovieSceneSection*
 UOdysseyAnimationComponentTrack::CreateNewSection()
 {
-	return NewObject<UOdysseyAnimationComponentSection>(this, NAME_None, RF_Transactional);
+    return NewObject<UOdysseyAnimationComponentSection>(this, NAME_None, RF_Transactional);
 }
 
 #if WITH_EDITORONLY_DATA
@@ -31,7 +31,7 @@ UOdysseyAnimationComponentTrack::CreateNewSection()
 FText
 UOdysseyAnimationComponentTrack::GetDisplayName() const
 {
-	return LOCTEXT("TrackName", "Animation");
+    return LOCTEXT("TrackName", "Animation");
 }
 
 #endif
@@ -40,35 +40,35 @@ UMovieSceneSection*
 UOdysseyAnimationComponentTrack::AddNewSection(FFrameNumber KeyTime, float iDurationInSeconds)
 {
 
-	UMovieScene* movieScene = GetTypedOuter<UMovieScene>();
-	if (!movieScene)
-		return nullptr;
+    UMovieScene* movieScene = GetTypedOuter<UMovieScene>();
+    if (!movieScene)
+        return nullptr;
 
-	UOdysseyAnimationComponentSection* NewSection = Cast<UOdysseyAnimationComponentSection>(CreateNewSection());
-	NewSection->InitialPlacement(Sections, KeyTime, movieScene->GetTickResolution().AsFrameNumber(iDurationInSeconds).Value, 0);
+    UOdysseyAnimationComponentSection* NewSection = Cast<UOdysseyAnimationComponentSection>(CreateNewSection());
+    NewSection->InitialPlacement(Sections, KeyTime, movieScene->GetTickResolution().AsFrameNumber(iDurationInSeconds).Value, 0);
 
-	AddSection(*NewSection);
-	UpdateEasing();
+    AddSection(*NewSection);
+    UpdateEasing();
 
-	return NewSection;
+    return NewSection;
 }
 
 EMovieSceneTrackEasingSupportFlags
 UOdysseyAnimationComponentTrack::SupportsEasing(FMovieSceneSupportsEasingParams& Params) const
 {
-	return EMovieSceneTrackEasingSupportFlags::None;
+    return EMovieSceneTrackEasingSupportFlags::None;
 }
 
 bool
 UOdysseyAnimationComponentTrack::SupportsMultipleRows() const
 {
-	return false;
+    return false;
 }
 
 FMovieSceneEvalTemplatePtr
 UOdysseyAnimationComponentTrack::CreateTemplateForSection(const UMovieSceneSection& InSection) const
 {
-	return FOdysseyAnimationComponentTemplate(*CastChecked<const UOdysseyAnimationComponentSection>(&InSection), *this);
+    return FOdysseyAnimationComponentTemplate(*CastChecked<const UOdysseyAnimationComponentSection>(&InSection), *this);
 }
 
 #undef LOCTEXT_NAMESPACE

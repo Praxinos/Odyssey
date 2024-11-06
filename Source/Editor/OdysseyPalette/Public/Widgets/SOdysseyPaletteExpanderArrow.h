@@ -29,7 +29,7 @@ public:
         SLATE_ARGUMENT(const FSlateBrush*, ExpanderImageOpened)
 
         SLATE_ARGUMENT(const FSlateBrush*, ExpanderImageClosed)
-        
+
         SLATE_ARGUMENT(FMargin, ArrowPadding)
 
         /** How many Slate Units to indent for every level of the tree. */

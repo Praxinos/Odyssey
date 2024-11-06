@@ -6,7 +6,7 @@
 #include "Modules/ModuleInterface.h"
 
 class FOdysseyAnimationTrackModule
-	: public IModuleInterface
+    : public IModuleInterface
 {
 public:
     // IModuleInterface interface
@@ -14,10 +14,10 @@ public:
     virtual void ShutdownModule() override;
 
 private:
-	void RegisterSequencerTracks();
-	void UnregisterSequencerTracks();
-    
+    void RegisterSequencerTracks();
+    void UnregisterSequencerTracks();
+
 private:
-	FDelegateHandle mAnimationTrackCreateEditorHandle;
-	FDelegateHandle mOnNewActorTrackAddedHandle;
+    FDelegateHandle mAnimationTrackCreateEditorHandle;
+    FDelegateHandle mOnNewActorTrackAddedHandle;
 };

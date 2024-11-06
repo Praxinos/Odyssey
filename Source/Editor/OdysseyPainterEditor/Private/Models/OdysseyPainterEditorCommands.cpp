@@ -41,12 +41,12 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( SwitchTabletAPI, HelpShortcuts, "Change Tablet API", "Switch between Ink and Wintab on Windows, use NSevent on Mac",                 EUserInterfaceActionType::Button, FInputChord() );
 
 // Uncategorized Yet Shortcuts
-    UI_BUNDLE_COMMAND( ClearCurrentLayer, UncategorizedYetShortcuts, "Clear Current Layer", "Clear current layer",                                                      EUserInterfaceActionType::Button, FInputChord( EKeys::Delete ) ); 
+    UI_BUNDLE_COMMAND( ClearCurrentLayer, UncategorizedYetShortcuts, "Clear Current Layer", "Clear current layer",                                                      EUserInterfaceActionType::Button, FInputChord( EKeys::Delete ) );
     UI_BUNDLE_COMMAND( SelectAll, UncategorizedYetShortcuts, "Select All", "Select All",                                                                                EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::A));
     UI_BUNDLE_COMMAND( ClearCurrentSelection, UncategorizedYetShortcuts, "Clear Current Selection", "Clear current selection",                                          EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::D) );
     UI_BUNDLE_COMMAND( CopyCurrentSelection, UncategorizedYetShortcuts, "Copy Current Selection", "Copy current selection",                                             EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::C));
     UI_BUNDLE_COMMAND( CutCurrentSelection, UncategorizedYetShortcuts, "Cut Current Selection", "Cut current selection",                                                EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::X));
-    UI_BUNDLE_COMMAND( PasteCurrentSelection, UncategorizedYetShortcuts, "Paste Current Selection", "Paste current selection",                                          EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::V));    
+    UI_BUNDLE_COMMAND( PasteCurrentSelection, UncategorizedYetShortcuts, "Paste Current Selection", "Paste current selection",                                          EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::V));
     UI_BUNDLE_COMMAND( PasteCurrentSelectionInNewLayer, UncategorizedYetShortcuts, "Paste Current Selection In New Layer", "Paste current selection In New Layer",      EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control | EModifierKey::Shift, EKeys::V));
     UI_BUNDLE_COMMAND( InvertSelection, UncategorizedYetShortcuts, "Invert Current Selection", "Invert Current Selection",                                              EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control, EKeys::I));
 
@@ -72,17 +72,17 @@ FOdysseyPainterEditorCommands::RegisterCommands()
     UI_BUNDLE_COMMAND( SetZoomFitScreen, ViewportShortcuts, "Set Zoom Fit Screen", "Set zoom fit screen",                                                   EUserInterfaceActionType::Button, FInputChord( EKeys::S ) );
     UI_BUNDLE_COMMAND( ZoomInExponential, ViewportShortcuts, "Zoom In (exponential)", "Zoom in (exponential)",                                              EUserInterfaceActionType::Button, FInputChord( EKeys::Multiply ) );
     UI_BUNDLE_COMMAND( ZoomOutExponential, ViewportShortcuts, "Zoom Out (exponential)", "Zoom out (exponential)",                                           EUserInterfaceActionType::Button, FInputChord( EKeys::Divide ) );
-                                                                                                                                                
-// Brushes Shortcuts Category                                                                                                                     
-    UI_BUNDLE_COMMAND( RefreshBrush, BrushStrokesShortcuts, "Refresh Brush", "Refresh Brush",                                                               EUserInterfaceActionType::Button, FInputChord( EKeys::F5 ) );                                                                                                                                                
+
+// Brushes Shortcuts Category
+    UI_BUNDLE_COMMAND( RefreshBrush, BrushStrokesShortcuts, "Refresh Brush", "Refresh Brush",                                                               EUserInterfaceActionType::Button, FInputChord( EKeys::F5 ) );
     UI_BUNDLE_COMMAND( IncreaseBrushSize, BrushStrokesShortcuts, "Increase Brush Size", "Increase Brush Size by 1",                                         EUserInterfaceActionType::Button, FInputChord( EKeys::Add ) );
     UI_BUNDLE_COMMAND( DecreaseBrushSize, BrushStrokesShortcuts, "Decrease Brush Size", "Decrease Brush Size by 1",                                         EUserInterfaceActionType::Button, FInputChord( EKeys::Subtract ) );
     UI_BUNDLE_COMMAND( ToggleEraserButton, BrushStrokesShortcuts, "Toggle current Brush to Eraser", "Toggle current Brush to Eraser",                       EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( GetBrushPack, BrushStrokesShortcuts, "Get more brushes ...", "Get more brushes ...",                                                 EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( PickColorInViewport, BrushStrokesShortcuts, "Color Picker", "Hold the key to Pick a color in the viewport",                          EUserInterfaceActionType::None, FInputChord(EKeys::I));
-                                                                                                                                                
-                                                                                                                                                
-// Brush Alpha Mode Shortcuts Category                                                                                                          
+
+
+// Brush Alpha Mode Shortcuts Category
     UI_BUNDLE_COMMAND( SetAlphaModeNormal, BrushAlphaModeShortcuts, "Normal", "Set Alpha Mode to Normal",                                                   EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( SetAlphaModeErase, BrushAlphaModeShortcuts, "Erase", "Set Brush Alpha Mode to Erase",                                                EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( SetAlphaModeTop, BrushAlphaModeShortcuts, "Top", "Set Brush Alpha Mode to Top",                                                      EUserInterfaceActionType::Button, FInputChord() );

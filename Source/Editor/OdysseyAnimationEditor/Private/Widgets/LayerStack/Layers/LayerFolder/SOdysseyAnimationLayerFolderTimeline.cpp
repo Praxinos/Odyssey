@@ -9,10 +9,10 @@
 void
 SOdysseyAnimationLayerFolderTimeline::Construct(
     const FArguments& InArgs,
-	const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
+    const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
     UOdysseyAnimationLayerFolder* iLayer
 )
-{	
+{
     SOdysseyAnimationLayerTimeline::Construct(InArgs, iOwnerTableView, iLayer);
 }
 

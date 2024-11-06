@@ -20,7 +20,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogStylusInput, Log, All);
 /**
  * Module to handle Wacom-style tablet input using styluses.
  */
-class ODYSSEYSTYLUSINPUT_API IOdysseyStylusInputModule 
+class ODYSSEYSTYLUSINPUT_API IOdysseyStylusInputModule
     : public IModuleInterface
 {
 public:
@@ -64,7 +64,7 @@ DECLARE_DELEGATE_OneParam( FOnStylusInputChanged, TSharedPtr<IStylusInputInterfa
 
 UCLASS()
 class ODYSSEYSTYLUSINPUT_API UOdysseyStylusInputSubsystem :
-    public UEditorSubsystem, 
+    public UEditorSubsystem,
     public FTickableEditorObject
 {
     GENERATED_BODY()
@@ -77,7 +77,7 @@ public:
     // FTickableEditorObject implementation
     virtual void Tick(float DeltaTime) override;
     virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( UOdysseyStylusInputSubsystem, STATGROUP_Tickables); }
-    
+
 private:
     /** FTickableEditorObject must be destroyed on the main thread. */
     virtual bool IsDestructionThreadSafe() const override { return false; }
@@ -100,7 +100,7 @@ public:
     const IStylusInputDevice* GetInputDevice(int32 Index) const;
 
     /** Return the number of active input devices. */
-    int32 NumInputDevices() const; 
+    int32 NumInputDevices() const;
 
     /** Flushes the queue, calling all message handlers for all message in the queue */
     void Flush();

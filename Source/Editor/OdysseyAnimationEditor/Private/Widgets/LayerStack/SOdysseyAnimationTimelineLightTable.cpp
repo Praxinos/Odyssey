@@ -19,19 +19,19 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
     UOdysseyAnimation::OnCurrentFrameChanged().AddSP(SharedThis(this), &SOdysseyAnimationTimelineLightTable::OnCurrentFrameChanged);
     FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddSP(this, &SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged);
 
-	mLayer = iLayer;
+    mLayer = iLayer;
 
-	TSharedRef<SHorizontalBox> horizontalBox = SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot()
-		.AutoWidth()
-		[
-			SNew(SOdysseyAnimationTimelineSection)
-			.TimelinePosition(InArgs._TimelinePosition)
-			.WidthInFrames_Lambda(
-				[this]()
-				{
-					if (!mCurrentCell)
-						return 0;
+    TSharedRef<SHorizontalBox> horizontalBox = SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+            SNew(SOdysseyAnimationTimelineSection)
+            .TimelinePosition(InArgs._TimelinePosition)
+            .WidthInFrames_Lambda(
+                [this]()
+                {
+                    if (!mCurrentCell)
+                        return 0;
 
                     int firstCellIndex = FMath::Max(mCurrentCell->IndexInLayer - 10, 0);
                     UOdysseyAnimationCell* cell = mLayer->GetCells()[firstCellIndex];
@@ -45,20 +45,20 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
             ]
         ];
 
-	//Previous cells
-	for (int i = 9; i >= 0; i--)
-	{
-		horizontalBox->AddSlot()
-		.AutoWidth()
-		[
-			SNew(SOdysseyAnimationTimelineSection)
-			.TimelinePosition(InArgs._TimelinePosition)
-			.HAlign(HAlign_Left)
-			.WidthInFrames_Lambda(
-				[this, i]()
-				{
-					if (!mCurrentCell)
-						return 0;
+    //Previous cells
+    for (int i = 9; i >= 0; i--)
+    {
+        horizontalBox->AddSlot()
+        .AutoWidth()
+        [
+            SNew(SOdysseyAnimationTimelineSection)
+            .TimelinePosition(InArgs._TimelinePosition)
+            .HAlign(HAlign_Left)
+            .WidthInFrames_Lambda(
+                [this, i]()
+                {
+                    if (!mCurrentCell)
+                        return 0;
 
                     const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
                     int cellIndex = mCurrentCell->IndexInLayer - i - 1;
@@ -70,12 +70,12 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
             )
             [
 
-				SNew(SOdysseyAnimationTimelineLightTableKey)
-				.Visibility_Lambda(
-					[this, i]()
-					{
-						if (!mCurrentCell)
-							return EVisibility::Collapsed;
+                SNew(SOdysseyAnimationTimelineLightTableKey)
+                .Visibility_Lambda(
+                    [this, i]()
+                    {
+                        if (!mCurrentCell)
+                            return EVisibility::Collapsed;
 
                         int cellIndex = mCurrentCell->IndexInLayer - i - 1;
                         if (cellIndex < 0 || cellIndex >= mLayer->GetCells().Num())
@@ -96,41 +96,41 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
                         if (cellIndex < 0 || cellIndex >= cells.Num())
                             return nullptr;
 
-						return cells[cellIndex];
-					}
-				)
-				.OnChanged_Lambda(
-					[this, i](FOdysseyAnimationLightTableKey iKey)
-					{
-						FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
-						lighttable.PreviousKeys[i] = iKey;
-						FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
-					}
-				)
-				.OnCommited_Lambda(
-					[this, i](FOdysseyAnimationLightTableKey iKey)
-					{
-						FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
-						lighttable.PreviousKeys[i] = iKey;
-						FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
-					}
-				)
-				.TimelinePosition(InArgs._TimelinePosition)
-			]
-		];
-	}
+                        return cells[cellIndex];
+                    }
+                )
+                .OnChanged_Lambda(
+                    [this, i](FOdysseyAnimationLightTableKey iKey)
+                    {
+                        FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+                        lighttable.PreviousKeys[i] = iKey;
+                        FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
+                    }
+                )
+                .OnCommited_Lambda(
+                    [this, i](FOdysseyAnimationLightTableKey iKey)
+                    {
+                        FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+                        lighttable.PreviousKeys[i] = iKey;
+                        FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
+                    }
+                )
+                .TimelinePosition(InArgs._TimelinePosition)
+            ]
+        ];
+    }
 
-	//Current Cell
-	horizontalBox->AddSlot()
-	.AutoWidth()
-	[
-		SNew(SOdysseyAnimationTimelineSection)
-		.TimelinePosition(InArgs._TimelinePosition)
-		.Visibility_Lambda(
-			[this]()
-			{
-				if (!mCurrentCell)
-					return EVisibility::Collapsed;
+    //Current Cell
+    horizontalBox->AddSlot()
+    .AutoWidth()
+    [
+        SNew(SOdysseyAnimationTimelineSection)
+        .TimelinePosition(InArgs._TimelinePosition)
+        .Visibility_Lambda(
+            [this]()
+            {
+                if (!mCurrentCell)
+                    return EVisibility::Collapsed;
 
                 return EVisibility::Visible;
             }
@@ -149,20 +149,20 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
         ]
     ];
 
-	//Next cells
-	for (int i = 0; i <= 9; i++)
-	{
-		horizontalBox->AddSlot()
-		.AutoWidth()
-		[
-			SNew(SOdysseyAnimationTimelineSection)
-			.TimelinePosition(InArgs._TimelinePosition)
-			.HAlign(HAlign_Left)
-			.WidthInFrames_Lambda(
-				[this, i]()
-				{
-					if (!mCurrentCell)
-						return 0;
+    //Next cells
+    for (int i = 0; i <= 9; i++)
+    {
+        horizontalBox->AddSlot()
+        .AutoWidth()
+        [
+            SNew(SOdysseyAnimationTimelineSection)
+            .TimelinePosition(InArgs._TimelinePosition)
+            .HAlign(HAlign_Left)
+            .WidthInFrames_Lambda(
+                [this, i]()
+                {
+                    if (!mCurrentCell)
+                        return 0;
 
                     const TArray<UOdysseyAnimationCell*>& cells = mLayer->GetCells();
                     int cellIndex = mCurrentCell->IndexInLayer + i + 1;
@@ -174,12 +174,12 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
             )
             [
 
-				SNew(SOdysseyAnimationTimelineLightTableKey)
-				.Visibility_Lambda(
-					[this, i]()
-					{
-						if (!mCurrentCell)
-							return EVisibility::Collapsed;
+                SNew(SOdysseyAnimationTimelineLightTableKey)
+                .Visibility_Lambda(
+                    [this, i]()
+                    {
+                        if (!mCurrentCell)
+                            return EVisibility::Collapsed;
 
                         int cellIndex = mCurrentCell->IndexInLayer + i + 1;
                         if (cellIndex < 0 || cellIndex >= mLayer->GetCells().Num())
@@ -200,39 +200,39 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
                         if (cellIndex < 0 || cellIndex >= cells.Num())
                             return nullptr;
 
-						return cells[cellIndex];
-					}
-				)
-				.OnChanged_Lambda(
-					[this, i](FOdysseyAnimationLightTableKey iKey)
-					{
-						FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
-						lighttable.NextKeys[i] = iKey;
-						FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
-					}
-				)
-				.OnCommited_Lambda(
-					[this, i](FOdysseyAnimationLightTableKey iKey)
-					{
-						FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
-						lighttable.NextKeys[i] = iKey;
-						FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
-					}
-				)
-				.TimelinePosition(InArgs._TimelinePosition)
-			]
-		];
-	}
+                        return cells[cellIndex];
+                    }
+                )
+                .OnChanged_Lambda(
+                    [this, i](FOdysseyAnimationLightTableKey iKey)
+                    {
+                        FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+                        lighttable.NextKeys[i] = iKey;
+                        FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::Interactive);
+                    }
+                )
+                .OnCommited_Lambda(
+                    [this, i](FOdysseyAnimationLightTableKey iKey)
+                    {
+                        FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+                        lighttable.NextKeys[i] = iKey;
+                        FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
+                    }
+                )
+                .TimelinePosition(InArgs._TimelinePosition)
+            ]
+        ];
+    }
 
-	ChildSlot
-	[
-		SNew(SOdysseyAnimationTimelineScrollBox)
-		.TimelinePosition(InArgs._TimelinePosition)
-		+ SOdysseyAnimationTimelineScrollBox::Slot()
-		[
-			horizontalBox
-		]
-	];
+    ChildSlot
+    [
+        SNew(SOdysseyAnimationTimelineScrollBox)
+        .TimelinePosition(InArgs._TimelinePosition)
+        + SOdysseyAnimationTimelineScrollBox::Slot()
+        [
+            horizontalBox
+        ]
+    ];
 
     Update();
 }

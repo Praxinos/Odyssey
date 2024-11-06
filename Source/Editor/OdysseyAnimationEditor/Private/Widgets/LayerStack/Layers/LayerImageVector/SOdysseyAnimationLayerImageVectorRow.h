@@ -16,8 +16,8 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorRow
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageVectorRow)
         {}
-		SLATE_ATTRIBUTE(int, CurrentFrame)
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ATTRIBUTE(int, CurrentFrame)
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
 public:
@@ -29,7 +29,7 @@ public:
     );
 
 protected:
-	virtual TArray<TSharedPtr<SWidget>> GenerateMainRowHeaderOptionWidgets() override;
+    virtual TArray<TSharedPtr<SWidget>> GenerateMainRowHeaderOptionWidgets() override;
 
 private:
     void OnIsColoredCheckStateChanged( ECheckBoxState iState );

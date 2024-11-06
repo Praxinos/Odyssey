@@ -96,7 +96,7 @@ FOdysseyVectorBrush::Lock()
         pixels = const_cast<FColor*>(colors);
         // Commented-out: do not use these methods. They return a wrong
         // value when the texture is first loaded. then the right value
-        // but it means that at first, the texture does not display correctly.  
+        // but it means that at first, the texture does not display correctly.
         //width  = texture->GetSurfaceWidth();
         //height = texture->GetSurfaceHeight();
         width  = mip->SizeX;
@@ -112,7 +112,7 @@ FOdysseyVectorBrush::Lock()
                 width  = 0;
                 height = 0;
                 pixels = nullptr;
-                bitsPerPixel = 0; 
+                bitsPerPixel = 0;
             break;
         }
     }

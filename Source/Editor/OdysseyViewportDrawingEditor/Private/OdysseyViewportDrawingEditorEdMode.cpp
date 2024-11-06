@@ -9,7 +9,7 @@
 #include "EdMode.h"
 #include "EditorModeManager.h"
 #include "LevelEditor.h"
-#include "Interfaces/IMainFrameModule.h" 
+#include "Interfaces/IMainFrameModule.h"
 #include "PhysicsEngine/PhysicsSettings.h"
 #include "Toolkits/ToolkitManager.h"
 #include "AssetRegistry/AssetRegistryModule.h"
@@ -74,7 +74,7 @@ void FOdysseyViewportDrawingEditorEdMode::Render(const FSceneView* View,FViewpor
     IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
     if (!adapter)
         return;
-    
+
     adapter->RenderInteractorWidget(View, Viewport, PDI);
 }
 
@@ -83,7 +83,7 @@ FOdysseyViewportDrawingEditorEdMode::DrawHUD(FEditorViewportClient* ViewportClie
 {
     if (!mViewportDrawingEditorExtension || !mViewportDrawingEditorExtension->IsPlaneComponent())
         return;
-    
+
     FOdysseyHUDSystem::FDrawHUDParams params;
     if (!mViewportDrawingEditorExtension->GetDrawHUDParams(View, Canvas, params))
         return;
@@ -135,7 +135,7 @@ bool FOdysseyViewportDrawingEditorEdMode::CapturedMouseMove(FEditorViewportClien
 bool
 FOdysseyViewportDrawingEditorEdMode::HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click)
 {
-	IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
+    IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
     if (!adapter)
         return false;
 
@@ -191,7 +191,7 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
         mViewportDrawingEditorToolkit->Initialize(this, Owner->GetToolkitHost());
 
         mViewportDrawingEditorExtension = mViewportDrawingEditorToolkit->GetViewportDrawingExtension();
-        
+
         TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor").GetFirstLevelEditor();
         levelEditor->AppendCommands( Toolkit->GetToolkitCommands() );
     }
@@ -248,7 +248,7 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
     }
 
     mViewportDrawingEditorExtension = nullptr;
-	mViewportDrawingEditorToolkit = nullptr;
+    mViewportDrawingEditorToolkit = nullptr;
 
     //mViewportDrawingEditorPainter->Finalize();
     //delete mViewportDrawingEditorPainter;
@@ -264,13 +264,13 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
 TSharedPtr<FOdysseyPainterEditor>
 FOdysseyViewportDrawingEditorEdMode::GetEditor() const
 {
-	return mEditor;
+    return mEditor;
 }
 
 TSharedPtr<FOdysseyViewportDrawingEditorToolkit>
 FOdysseyViewportDrawingEditorEdMode::GetViewportDrawingEditorToolkit() const
 {
-	return mViewportDrawingEditorToolkit;
+    return mViewportDrawingEditorToolkit;
 }
 
 #undef LOCTEXT_NAMESPACE

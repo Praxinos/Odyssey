@@ -34,9 +34,9 @@ private:
 private:
     void RequestRebuild();
     void Rebuild();
-    
+
     void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
-    
+
     void OnPreviousKeyIsActivatedCheckStateChanged(ECheckBoxState iState, int iKeyIndex);
     void OnNextKeyIsActivatedCheckStateChanged(ECheckBoxState iState, int iKeyIndex);
     void OnPreviousKeyOpacitySliderValueChanged(float iValue, int iKeyIndex );

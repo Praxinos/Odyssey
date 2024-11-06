@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "ObjectEditorUtils.h"
-    
+
 namespace FOdysseyObjectEditorUtils
 {
     void ODYSSEYCORE_API PreChangePropertyValue(UObject* Object, FName PropertyName);
@@ -40,7 +40,7 @@ namespace FOdysseyObjectEditorUtils
 
             PropertyChain.SetActivePropertyNode(Property);
             PropertyChain.SetActiveMemberPropertyNode(Property);
-            
+
             Object->Modify();
             Object->PreEditChange(PropertyChain);
         }

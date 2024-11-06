@@ -64,8 +64,8 @@ public:
     /**
      * @brief Opens the Export Image Sequence Dialog for the given animation
      * And Exports the animation according to the selected options if user clicks OK
-     * 
-     * @param iAnimation 
+     *
+     * @param iAnimation
      * @return true If user clicked on OK
      * @return false If user Cancelled
      */

@@ -106,7 +106,7 @@ FOdysseyFlipbookEditorModule::UnregisterAssetTypeActions()
 {
     if (!FModuleManager::Get().IsModuleLoaded("AssetTools"))
         return;
-    
+
     IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
     assetTools.UnregisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
     assetTools.UnregisterAssetTypeActions(mUETypeActions.ToSharedRef());
@@ -132,7 +132,7 @@ FOdysseyFlipbookEditorModule::UnregisterSettings()
 
     if( !settingsModule )
         return;
-    
+
     settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyFlipbookEditor" );
 }
 

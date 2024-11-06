@@ -76,7 +76,7 @@ UOdysseyAnimationEditorAnimationFunctionLibrary::ImportTextureSequence(UOdysseyA
 
     UOdysseyLayer* layer = layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), ParentLayer, IndexInParent);
     UOdysseyAnimationLayerImageRaster* layerImageRaster = Cast<UOdysseyAnimationLayerImageRaster>(layer);
-    
+
     FScopedSlowTask progressBar(Textures.Num(), LOCTEXT("animation-editor.import-texture-dialog.progress-bar.title", "Importing Texture Sequence"));
     progressBar.MakeDialog();
 
@@ -99,7 +99,7 @@ UOdysseyAnimationEditorAnimationFunctionLibrary::ImportImageSequence(UOdysseyAni
         FScopedTransaction ScopedTransaction(LOCTEXT("animation-editor.transaction.import-image-sequence", "Import Image Sequence"));
     #endif
     UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), ParentLayer, IndexInParent));
-    
+
     UOdysseyAnimationEditorLayerFunctionLibrary::ImportImageSequence(layer, Paths, 0);
 
     return layer;
@@ -196,7 +196,7 @@ UOdysseyAnimationEditorLayerFunctionLibrary::ImportTextureSequence(UOdysseyAnima
         iCellIndex = FMath::Clamp(iCellIndex, 0, Layer->GetCells().Num());
 
     FScopedTransaction ScopedTransaction(LOCTEXT("LayerStack", "Import Textures Sequence"));
-    
+
     FScopedSlowTask progressBar(Textures.Num(), LOCTEXT("animation-editor.import-texture-dialog.progress-bar.title", "Importing Texture Sequence"));
     progressBar.MakeDialog();
 
@@ -282,7 +282,7 @@ UOdysseyAnimationEditorLayerFunctionLibrary::ImportImageSequence(UOdysseyAnimati
             blocks.Add(block);
             continue;
         }
-        
+
         //Need to convert the block before adding it to the layer
         TSharedPtr<::ULIS::FBlock> blockProxy = MakeShared<::ULIS::FBlock>(animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
 
@@ -299,7 +299,7 @@ UOdysseyAnimationEditorLayerFunctionLibrary::ImportImageSequence(UOdysseyAnimati
         );
 
         ctx.Finish();
-        
+
         blocks.Add(blockProxy);
     }
 
@@ -318,7 +318,7 @@ UOdysseyAnimationEditorLayerFunctionLibrary::ImportImageSequence(UOdysseyAnimati
         TSharedPtr<::ULIS::FBlock> block = blocks[i];
         UOdysseyAnimationCellImageRaster* cell = Cast<UOdysseyAnimationCellImageRaster>(cells[i]);
         rasterCells.Add(cell);
-        
+
         TSharedPtr<FOdysseyRasterBlock> rasterBlock = cell->GetRasterBlock();
         FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
         ::ULIS::FRectI invalidRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());

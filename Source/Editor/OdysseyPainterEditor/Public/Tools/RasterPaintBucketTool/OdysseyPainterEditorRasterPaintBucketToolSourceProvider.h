@@ -11,7 +11,7 @@
 UENUM()
 enum class EOdysseyRasterPaintBucketToolSource : uint8
 {
-    Custom UMETA(Hidden), 
+    Custom UMETA(Hidden),
     CurrentLayer,
     ForegroundLayers,
     BackgroundLayers,

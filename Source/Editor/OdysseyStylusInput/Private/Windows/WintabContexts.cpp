@@ -36,7 +36,7 @@ ToDegrees( int Value, const FWintabPacketDescription& Desc )
     //return Value / Desc.Resolution; // Doesn't work
 }
 
-void 
+void
 FWintabTabletContextInfo::Tick()
 {
     if( !mPacketsBuffer.Num() )
@@ -119,8 +119,8 @@ FWintabTabletContextInfo::Tick()
 
 #define FIX_TO_DOUBLE(x)   ((double)(INT(x))+((double)FRAC(x)/65536))
 
-static 
-bool 
+static
+bool
 SetupPacketDescriptions( int iIndexContext, FWintabTabletContextInfo* ioTabletContext )
 {
     ioTabletContext->PacketDescriptions.Empty();
@@ -274,7 +274,7 @@ SetupPacketDescriptions( int iIndexContext, FWintabTabletContextInfo* ioTabletCo
 
     //        ioTabletContext->PacketDescriptions.Add( packet_description );
     //    }
-    //        
+    //
     //    if( orientation[1].axResolution )
     //    {
     //        packet_description.Type = EWintabPacketType::Roll;
@@ -284,7 +284,7 @@ SetupPacketDescriptions( int iIndexContext, FWintabTabletContextInfo* ioTabletCo
 
     //        ioTabletContext->PacketDescriptions.Add( packet_description );
     //    }
-    //        
+    //
     //    if( orientation[2].axResolution )
     //    {
     //        packet_description.Type = EWintabPacketType::Yaw;
@@ -299,8 +299,8 @@ SetupPacketDescriptions( int iIndexContext, FWintabTabletContextInfo* ioTabletCo
     return true;
 }
 
-static 
-void 
+static
+void
 SetupTabletSupportedPackets( FWintabTabletContextInfo* ioTabletContext )
 {
     ioTabletContext->SupportedPackets.Empty();
@@ -314,7 +314,7 @@ SetupTabletSupportedPackets( FWintabTabletContextInfo* ioTabletContext )
     {
         ioTabletContext->SupportedPackets.Add( EWintabPacketType::Y );
     }
-    if( ioTabletContext->SupportedPackets.Contains( EWintabPacketType::X ) 
+    if( ioTabletContext->SupportedPackets.Contains( EWintabPacketType::X )
         && ioTabletContext->SupportedPackets.Contains( EWintabPacketType::Y ) )
     {
         ioTabletContext->AddSupportedInput( EStylusInputType::Position );
@@ -439,7 +439,7 @@ FWintabContexts::OpenTabletContexts( HWND iHwnd )
             lcMine.lcInExtY = packet_description_y->Maximum + 1;
 
             // Set output (~screen) dimensions
-            // Guarantee the output coordinate space to be in screen coordinates.  
+            // Guarantee the output coordinate space to be in screen coordinates.
             lcMine.lcOutOrgX = GetSystemMetrics( SM_XVIRTUALSCREEN ) * 1000.f; // Scaled to have subpixel with packet.pkX / 1000.f
             lcMine.lcOutOrgY = GetSystemMetrics( SM_YVIRTUALSCREEN ) * 1000.f;
             lcMine.lcOutExtX = GetSystemMetrics( SM_CXVIRTUALSCREEN ) * 1000.f;

@@ -23,7 +23,7 @@ UOdysseyBrushShape::GenerateLinePoints( FVector2D StartPoint, FVector2D EndPoint
 }
 
 //static
-void 
+void
 UOdysseyBrushShape::GenerateArcPoints(FVector2D Center, int Radius, int StartDegree, int EndDegree, TArray<FVector2D>& GeneratedPoints)
 {
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
@@ -62,7 +62,7 @@ UOdysseyBrushShape::GenerateEllipsePoints(FVector2D Center, int A, int B, int Ro
 }
 
 //static
-void 
+void
 UOdysseyBrushShape::GenerateQuadraticBezierPoints(FVector2D Start, FVector2D ControlPoint, FVector2D End, float iWeight, TArray<FVector2D>& GeneratedPoints)
 {
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
@@ -75,7 +75,7 @@ UOdysseyBrushShape::GenerateQuadraticBezierPoints(FVector2D Start, FVector2D Con
 }
 
 //static
-void 
+void
 UOdysseyBrushShape::GenerateRectanglePoints(FVector2D TopLeft, FVector2D BottomRight, TArray<FVector2D>& GeneratedPoints)
 {
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
@@ -94,7 +94,7 @@ UOdysseyBrushShape::GeneratePolygonPoints(TArray<FVector2D> PolygonPoints, TArra
     ::ULIS::TArray<::ULIS::FVec2I> pointsArray;
     std::vector<::ULIS::FVec2I> polygonPoints;
 
-    for( int i = 0; i < PolygonPoints.Num(); i++) 
+    for( int i = 0; i < PolygonPoints.Num(); i++)
         polygonPoints.push_back( ::ULIS::FVec2I( PolygonPoints[i].X, PolygonPoints[i].Y ));
 
     ::ULIS::GeneratePolygonPoints(polygonPoints, pointsArray);

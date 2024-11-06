@@ -13,11 +13,11 @@
 void
 SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyAnimationCellImageStagger* iCell)
 {
-	mSetReachTransactionName = (LOCTEXT("cell-image-stagger.set-reach", "Set Stagger Cell Reach"));
+    mSetReachTransactionName = (LOCTEXT("cell-image-stagger.set-reach", "Set Stagger Cell Reach"));
     mCell = iCell;
     mShowContent = iArgs._ShowContent;
-	mTimelinePosition = iArgs._TimelinePosition;
-        
+    mTimelinePosition = iArgs._TimelinePosition;
+
     FSlateColor behaviourColor( FOdysseyStyle::GetColor( "Animation.CellImageStagger.BehaviourColor" ) );
 
     ChildSlot
@@ -64,15 +64,15 @@ int32
 SOdysseyAnimationCellImageStagger::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
     // Draw a current frame
-    
+
     LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
 
     const FSlateBrush* ArrowBrushTop = FOdysseyStyle::GetBrush("Animation.CellImageStagger.ArrowTop");
     const FSlateBrush* ArrowBrushBottom = FOdysseyStyle::GetBrush("Animation.CellImageStagger.ArrowBottom");
     const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
-	const float height = AllottedGeometry.GetLocalSize().Y;  
-	const float width = AllottedGeometry.GetLocalSize().X;
-	const float frameSize = mTimelinePosition->GetFrameSize();
+    const float height = AllottedGeometry.GetLocalSize().Y;
+    const float width = AllottedGeometry.GetLocalSize().X;
+    const float frameSize = mTimelinePosition->GetFrameSize();
 
     int reach = GetClampedReach();
     int staggerLength = GetStaggerLength();
@@ -216,7 +216,7 @@ SOdysseyAnimationCellImageStagger::MapActions(TSharedPtr<FUICommandList> iComman
 
 void
 SOdysseyAnimationCellImageStagger::BuildContextMenu(FMenuBuilder& iMenuBuilder)
-{  
+{
     iMenuBuilder.BeginSection("Behaviour", LOCTEXT("cell-image-stagger.behaviour-menu.behaviour-section.name", "Behaviour"));
         iMenuBuilder.AddMenuEntry(
             LOCTEXT("cell-image-stagger.behaviour-menu.loop", "Loop"),

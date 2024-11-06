@@ -7,7 +7,7 @@ void
 SOdysseyAnimationTimelineSection::Construct(const FArguments& iArgs)
 {
     mWidthInFrames = iArgs._WidthInFrames;
-	mTimelinePosition = iArgs._TimelinePosition;
+    mTimelinePosition = iArgs._TimelinePosition;
 
     ChildSlot
     [
@@ -26,7 +26,7 @@ SOdysseyAnimationTimelineSection::Construct(const FArguments& iArgs)
 FOptionalSize
 SOdysseyAnimationTimelineSection::GetSectionWidth() const
 {
-	return mWidthInFrames.Get() * mTimelinePosition->GetFrameSize();
+    return mWidthInFrames.Get() * mTimelinePosition->GetFrameSize();
 }
 
 void

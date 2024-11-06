@@ -41,7 +41,7 @@ FOdysseyPaintEngine::RasterBlock(TSharedPtr<FOdysseyRasterBlock> iRasterBlock)
         mRasterBlock = nullptr;
         if (mPaintBlock)
             mPaintBlock->OnInvalid(::ULIS::FOnInvalidBlock());
-        
+
         mPaintBlock = nullptr;
         mInvalidRects.Empty();
         return;
@@ -49,7 +49,7 @@ FOdysseyPaintEngine::RasterBlock(TSharedPtr<FOdysseyRasterBlock> iRasterBlock)
 
     mRasterBlock = iRasterBlock;
     mRasterBlockMutator.SetRasterBlock(iRasterBlock);
-    
+
     if ( !mPaintBlock || mPaintBlock->Width() != mRasterBlock->GetWidth() || mPaintBlock->Height() != mRasterBlock->GetHeight() || mPaintBlock->Format() != mRasterBlock->GetFormat() )
     {
         mPaintBlock = MakeShared<::ULIS::FBlock>(mRasterBlock->GetWidth(), mRasterBlock->GetHeight(), mRasterBlock->GetFormat());
@@ -155,7 +155,7 @@ void
 FOdysseyPaintEngine::PaintBlockChanged( const ::ULIS::FBlock* iBlock, const ::ULIS::FRectI* iRects, const uint32 iNumRects, void* iInfo )
 {
     FOdysseyPaintEngine* paintEngine = static_cast< FOdysseyPaintEngine* >( iInfo );
-    
+
     //Set Invalid Tile Map, so that the EditedBlock can refresh the right tiles on the next call of Update()
     TArray<::ULIS::FRectI> rects(iRects, iNumRects);
     paintEngine->mInvalidRects.Append(rects);
@@ -178,7 +178,7 @@ FOdysseyPaintEngine::ClearPaintBlock()
 {
     if (!mRasterBlock)
         return;
-    
+
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mPaintBlock->Format());
 
     //Finish any pending operations before clearing the paint block

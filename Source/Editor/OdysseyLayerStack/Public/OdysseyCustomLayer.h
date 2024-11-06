@@ -8,7 +8,7 @@
 
 /**
  * @brief Should be the base class for all Blueprint based Layers
- * 
+ *
  */
 
 /* UCLASS(Abstract, BlueprintType)

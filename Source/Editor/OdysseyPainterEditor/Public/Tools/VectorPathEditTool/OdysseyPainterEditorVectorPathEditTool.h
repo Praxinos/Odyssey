@@ -84,7 +84,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         uint64 GetPickingFlags();
         ePathPickingMode GetPickingMode();
         virtual TSharedRef<SWidget> CreateTopTabWidget();
-        
+
         virtual FText GetTooltip() const override;
 
     protected:
@@ -98,7 +98,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         virtual bool OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
                                         , const FKey& iKey
-										, uint64& oSignalFlags ) override;
+                                        , uint64& oSignalFlags ) override;
         virtual void OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                          , const FOdysseyPoint& iPointInTexture, uint64& oSignalFlags ) override;
         virtual void OnMouseDragVector( FOdysseyVectorGroupPaint* iScene

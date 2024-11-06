@@ -274,7 +274,7 @@ void SStylusInputDebugWidget::Construct(const FArguments& InArgs, UOdysseyStylus
             .FillWidth(1)
             [
                 SNew(SCheckBox)
-                .IsChecked(this, &SStylusInputDebugWidget::IsInverted)    
+                .IsChecked(this, &SStylusInputDebugWidget::IsInverted)
             ]
         ]
     ];

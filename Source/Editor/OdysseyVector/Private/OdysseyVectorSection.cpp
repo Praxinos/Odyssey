@@ -139,11 +139,11 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
                                          , subBezier[1]
                                          , subBezier[2]
                                          , subBezier[3] );
-            // here we take the vertex coords and not the one we could retrieve from the 
+            // here we take the vertex coords and not the one we could retrieve from the
             // subBezier because it might be inconsistent due to the value at T found from
             // performing linear intersection and not from a bezier-bezier intersection.
             // for this reason T might no be reliable to find the endpoints of our bezier.
-            // we only use it for the handles. 
+            // we only use it for the handles.
             mBezier[0] = vertex0Worldcoords;
             mBezier[3] = vertex1Worldcoords;
 
@@ -264,7 +264,7 @@ FOdysseyVectorSection::GetTangentAt( double t, bool iNormalize )
     {
         tangent = mBezier[1] - mBezier[0];
 
-        if( tangent.DistanceSquared() == 0.0f ) 
+        if( tangent.DistanceSquared() == 0.0f )
         {
             tangent = mBezier[2] - mBezier[0];
         }
@@ -353,7 +353,7 @@ FOdysseyVectorSection::GetVectorFromVertex( uint32 iVertexIndex
     return tangent;
 }
 
-void 
+void
 FOdysseyVectorSection::UnBlock( uint32 iVertexIndex )
 {
     uint32 blocked = ( iVertexIndex == 0 ) ? FOdysseyVectorSection::BLOCKVERTEX0
@@ -362,7 +362,7 @@ FOdysseyVectorSection::UnBlock( uint32 iVertexIndex )
     mFlags &= (~blocked);
 }
 
-void 
+void
 FOdysseyVectorSection::Block( uint32 iVertexIndex )
 {
     uint32 blocked = ( iVertexIndex == 0 ) ? FOdysseyVectorSection::BLOCKVERTEX0
@@ -371,7 +371,7 @@ FOdysseyVectorSection::Block( uint32 iVertexIndex )
     mFlags |= blocked;
 }
 
-bool 
+bool
 FOdysseyVectorSection::IsBlocked( uint32 iVertexIndex )
 {
     uint32 blocked = ( iVertexIndex == 0 ) ? FOdysseyVectorSection::BLOCKVERTEX0

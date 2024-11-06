@@ -30,7 +30,7 @@ SOdysseyPaletteExpanderArrow::Construct( const FArguments& InArgs, const TShared
     mArrowPadding = InArgs._ArrowPadding;
 
     mPaletteRow = iPaletteEntryRow;
-    
+
     //Copied from SOdysseyLayerExpanderArrow (we only change VAlign to put the button at the top of the widget
     this->ChildSlot
     .Padding(TAttribute<FMargin>(this, &SOdysseyPaletteExpanderArrow::GetExpanderPadding))
@@ -64,10 +64,10 @@ SOdysseyPaletteExpanderArrow::OnPaint(const FPaintArgs& Args, const FGeometry& A
     //   | '-v[B]      {1,1}
     //   |   |--[C]    {1,0,1}
     //   |   |--[D]    {1,0,1}
-    //   |   '--[E]    {1,0,1} 
+    //   |   '--[E]    {1,0,1}
     //   |>-[F]        {}
     //   '--[G]        {}
-    //   
+    //
     //
 
     static const FName NAME_VerticalBarBrush = TEXT("WhiteBrush");
@@ -81,7 +81,7 @@ SOdysseyPaletteExpanderArrow::OnPaint(const FPaintArgs& Args, const FGeometry& A
         WireTint.A = 0.15f;
 
         FMargin arrowPadding = GetExpanderPadding();
-        
+
         static const float wireThickness = 2.0f;
         static const float distanceFromArrow = 1.f;
         const FVector2D arrowSize(16.f, 16.f);
@@ -166,7 +166,7 @@ SOdysseyPaletteExpanderArrow::OnPaint(const FPaintArgs& Args, const FGeometry& A
                 ESlateDrawEffect::None,
                 WireTint
             );
-        }    
+        }
     }
 
     EntryId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, EntryId, InWidgetStyle, bParentEnabled);
@@ -202,6 +202,6 @@ FMargin SOdysseyPaletteExpanderArrow::GetExpanderPadding() const
 const FSlateBrush* SOdysseyPaletteExpanderArrow::GetExpanderImage() const
 {
     const bool bIsItemExpanded = mPaletteRow.Pin()->IsItemExpanded();
-    
+
     return bIsItemExpanded && mPaletteRow.Pin()->GetPaletteEntry()->CanHaveChildren ? mExpanderImageOpened : mExpanderImageClosed;
 }

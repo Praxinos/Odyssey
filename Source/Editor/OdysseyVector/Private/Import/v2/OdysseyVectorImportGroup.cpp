@@ -14,7 +14,7 @@ FOdysseyVectorImportV2::ParseGroupChunks( FOdysseyVectorGroup& iGroup
         default:
             FOdysseyVectorImportV2::ParseObjectChunks( iGroup, iChunkID, iChunkLen, Ar );
         break;
-    }    
+    }
 */
     FOdysseyVectorImportV2::ParseObjectChunks( iGroup, iChunkID, iChunkLen, Ar );
 }

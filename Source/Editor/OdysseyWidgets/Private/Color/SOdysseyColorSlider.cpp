@@ -87,7 +87,7 @@ IOdysseyChannelSlider::InitInternalBuffers() const
 
 void
 IOdysseyChannelSlider::PaintInternalBuffer( int iReason ) const
-{   
+{
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_BGRA8);
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBuffer = surface->Block();
     ctx.Fill( *paintBuffer, ::ULIS::FColor( ::ULIS::Format_RGB8, { 50, 50, 50 } ) );
@@ -162,7 +162,7 @@ IOdysseyChannelSlider::OnMouseButtonUp(const FGeometry& MyGeometry, const FPoint
 {
     if( !HasMouseCapture() )
         return FReply::Unhandled();
-    
+
     cursor_t = GetProportionForMousePosition(MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ));
     OnColorChangeCallback.ExecuteIfBound(eOdysseyEventState::kSet, GetColorForProportion(cursor_t) );
     return FReply::Handled().ReleaseMouseCapture();

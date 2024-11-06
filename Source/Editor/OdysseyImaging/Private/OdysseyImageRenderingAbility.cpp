@@ -137,7 +137,7 @@ FOdysseyImageRenderingAbility::ExportAsTexture(int iFrame, const ::ULIS::FRectI&
 
     //Render frame block
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = MakeShared<::ULIS::FBlock>(iRect.w, iRect.h, blockFormat);
-    
+
     TSharedPtr<IOdysseyImageRenderer> renderer = BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, iFrame);
     renderer->Init();
 
@@ -318,7 +318,7 @@ FOdysseyImageRenderingAbility::ExportAsFlipbook(::ULIS::eFormat iULISFormat, con
     //Configure flipbook asset
     UMaterialInterface* material = LoadObject<UMaterialInterface>(nullptr, TEXT("/Iliad/Animation2D/DefaultFlipbookMaterialInstance.DefaultFlipbookMaterialInstance"));
     FOdysseyObjectEditorUtils::SetPropertyValue(flipbook, "DefaultMaterial", material);
-    
+
     return flipbook;
 }
 
@@ -335,7 +335,7 @@ FOdysseyImageRenderingAbility::ExportAsTextureSequence(::ULIS::eFormat iULISForm
     FScopedSlowTask progressBar(endFrame - startFrame + 1, LOCTEXT("image-rendering-ability.export-as-texture-sequence.progress-bar.title", "Export As Texture Sequence"));
     progressBar.MakeDialog();
 
-    ETextureSourceFormat textureSourceFormat = TextureSourceFormatForULISFormat(iULISFormat);    
+    ETextureSourceFormat textureSourceFormat = TextureSourceFormatForULISFormat(iULISFormat);
     TArray<FGuid> lastRenderingComposition;
 
     TArray<UTexture2D*> textures;
@@ -351,7 +351,7 @@ FOdysseyImageRenderingAbility::ExportAsTextureSequence(::ULIS::eFormat iULISForm
         lastRenderingComposition = renderingComposition;
         FString numStr = FString::Format(TEXT("{0}"), {i});
         FString textureName = AssetName + TEXT("_") + numStr;
-        
+
         UTexture2D* texture = ExportAsTexture(i, iRect, textureSourceFormat, textureName, Path);
 
         textures.Add(texture);
@@ -364,7 +364,7 @@ TArray<FString>
 FOdysseyImageRenderingAbility::ExportAsImageSequence(
     ::ULIS::eFormat iULISFormat,
     const FInt32Range& iRange,
-    const ::ULIS::FRectI& iRect, 
+    const ::ULIS::FRectI& iRect,
     FString Filename,
     FString Path,
     EOdysseyExportImageFormat Format

@@ -64,7 +64,7 @@ UOdysseyTextureLayerImageVector::GetMediaProvider(uint32 iFrameIndex) const
 
     FOdysseyMediaProvider mediaProvider;
     mediaProvider.IsLocked(!isActive || isLocked);
-    
+
     TSharedPtr<FOdysseyMediaVector> mediaVector = MakeShared<FOdysseyMediaVector>(mEngine->GetScene());
     mediaProvider.Add(mediaVector);
     return mediaProvider;
@@ -74,7 +74,7 @@ void
 UOdysseyTextureLayerImageVector::PostInitProperties()
 {
     Super::PostInitProperties();
-    
+
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
@@ -86,7 +86,7 @@ UOdysseyTextureLayerImageVector::PostInitProperties()
     if( texture && texture->Source.GetFormat() != TSF_Invalid )
     {
         Init( texture->Source.GetSizeX(), texture->Source.GetSizeY() );
-    
+
         ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
         //let's ensure the format has alpha, so add alpha channel of needed
         format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
@@ -103,13 +103,13 @@ void
 UOdysseyTextureLayerImageVector::PostLoad()
 {
     Super::PostLoad();
-    
+
     if (GetFlags() & RF_ClassDefaultObject)
         return;
-    
+
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
     UTexture2D* texture = layerStack->GetTexture();
-    
+
     if( texture && texture->Source.GetFormat() != TSF_Invalid )
     {
         ::ULIS::eFormat format = ULISFormatForTextureSourceFormat(texture->Source.GetFormat());
@@ -141,7 +141,7 @@ void
 UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 {
     Super::Serialize( Ar );
-    
+
     if( Ar.IsSaving() )
     {
         FOdysseyTextureLayerImageVectorExport::Write( this, Ar );
@@ -151,7 +151,7 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
     {
         if ( mEngine == nullptr )
         {
-            // commented out: at that point, the texture owning the layer stack doe snot have width and height values. 
+            // commented out: at that point, the texture owning the layer stack doe snot have width and height values.
             // This should be changed. As a bypass, I store dimensions in Width and Height UProperties.
             //UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(GetLayerStack());
             //if(!layerStack)
@@ -241,7 +241,7 @@ UOdysseyTextureLayerImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRend
 
     if (!mVectorBlock)
         return nullptr;
-    
+
     return MakeShared<FOdysseyTextureLayerImageVectorImageRenderer>(this, mVectorBlock, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
@@ -267,7 +267,7 @@ UOdysseyTextureLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
         UOdysseyTextureLayerImageVector* vectorLayer = Cast<UOdysseyTextureLayerImageVector>(iLayers[i]);
         if (!vectorLayer)
             continue;
-        
+
         FOdysseyVectorGroupPaint* scene = vectorLayer->GetEngine()->GetScene();
         for( FOdysseyVectorObject* child : scene->GetChildrenList() )
         {
@@ -280,7 +280,7 @@ UOdysseyTextureLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
 
     destinationScene->UpdateMatrix();
     destinationScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-    
+
     mEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
 }
 

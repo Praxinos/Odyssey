@@ -48,10 +48,10 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
         if (!cell)
             return;
-            
+
         selectedCells.Add(cell);
     }
-        
+
     TArray<UOdysseyAnimationCell*> staggerCells = selectedCells.FilterByPredicate(
         [](UOdysseyAnimationCell* iCell)
         {
@@ -75,7 +75,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
         UOdysseyAnimationCell* mReferenceCell;
         int mExposure;
     };
-    
+
     TMap<UOdysseyAnimationCell*, TArray<FResultingCell>> resultingCellsByCell;
     for (UOdysseyAnimationCell* cell : staggerCells)
     {
@@ -118,10 +118,10 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
     {
         UOdysseyAnimationCell* originalCell = element.Key;
         TArray<FResultingCell> resultingCells = element.Value;
-        
+
         int indexInLayer = originalCell->IndexInLayer;
         TArray<UOdysseyAnimationCell*> referenceCells;
-        
+
         for (int i = 0; i < resultingCells.Num(); i++)
         {
             const FResultingCell& resultingCell = resultingCells[i];
@@ -164,7 +164,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::CanAction_ConvertToReference
         if (!cell)
             return false;
     }
-        
+
     TArray<UOdysseyAnimationCell*> staggerCells = selectedCells.FilterByPredicate(
         [](UOdysseyAnimationCell* iCell)
         {

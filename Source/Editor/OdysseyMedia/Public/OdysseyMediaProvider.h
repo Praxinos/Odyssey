@@ -73,7 +73,7 @@ FOdysseyMediaProvider::GetOrCreateMedias() const
                 continue;
 
             factory.mMedia = factory.mCreateMediaDelegate.Execute();
-            
+
             if (!factory.mMedia)
                 continue;
         }
@@ -89,7 +89,7 @@ FOdysseyMediaProvider::GetMediaCount() const
 {
     if (!mMediaFactories.Contains(T::StaticId()))
         return 0;
-    
+
 
     const TArray<FMediaFactory>& factories = mMediaFactories[T::StaticId()];
     return factories.Num();

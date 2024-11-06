@@ -11,7 +11,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::FOdysseyPainterEditorVectorBaseToolHUD( 
     mBaseTool = iBaseTool;
 }
 
-void 
+void
 FOdysseyPainterEditorVectorBaseToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
 }
@@ -107,7 +107,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVe
         mSelectionBox.worldMatrix = selectedObject->GetWorldMatrix();
         mSelectionBox.inverseWorldMatrix = selectedObject->GetInverseWorldMatrix();
     }
-    else 
+    else
     {
         mSelectionBox.inited = false;
         mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );

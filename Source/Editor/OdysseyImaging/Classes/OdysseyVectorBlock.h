@@ -26,54 +26,54 @@ public:
 public:
     /**
      * @brief Inits the Vector block to link it to the specified Vector Engine, and size/format
-     * 
-     * @param iId 
-     * @param iEngine 
-     * @param iWidth 
-     * @param iHeight 
-     * @param iFormat 
+     *
+     * @param iId
+     * @param iEngine
+     * @param iWidth
+     * @param iHeight
+     * @param iFormat
      */
     void Init(const FGuid& iId, FOdysseyVectorEngine* iEngine, int iWidth, int iHeight, ::ULIS::eFormat iFormat);
 
     /**
      * @brief Get the block Width
-     * 
-     * @return int 
+     *
+     * @return int
      */
     int GetWidth() const;
-    
+
     /**
      * @brief Get the block Height
-     * 
-     * @return int 
+     *
+     * @return int
      */
     int GetHeight() const;
-    
+
     /**
      * @brief Get the block Format
-     * 
-     * @return ::ULIS::eFormat 
+     *
+     * @return ::ULIS::eFormat
      */
     ::ULIS::eFormat GetFormat() const;
 
     /**
      * @brief Get the Block object
-     * 
-     * @return TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> 
+     *
+     * @return TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
      */
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetBlock( uint64 iDrawingFlags );
 
     /**
      * @brief Get the Block object
-     * 
-     * @return TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> 
+     *
+     * @return TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
      */
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetHUDBlock();
 
     /**
      * @brief Renders the Scene into the internal block and returns the block
-     * 
-     * @return TSharedPtr<::ULIS::FBlock> 
+     *
+     * @return TSharedPtr<::ULIS::FBlock>
      */
     TSharedPtr<::ULIS::FBlock> Render( uint64 iDrawingFlags );
 
@@ -114,7 +114,7 @@ private:
     ::ULIS::eFormat mFormat;
     //uint64 mRenderFlags; //See DRAWING_IGNORECOLOR for example
 
-    // 
+    //
     // OPTIMIZATIONS
     //
 

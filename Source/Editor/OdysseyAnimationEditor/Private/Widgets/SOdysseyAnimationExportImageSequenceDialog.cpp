@@ -109,7 +109,7 @@ SOdysseyAnimationExportImageSequenceDialog::Construct(const FArguments& InArgs, 
                 .OnValueChanged_Lambda([this](int iValue) { mExporter.mCustomRange.SetLowerBoundValue(FMath::Clamp(iValue, 0, mExporter.mCustomRange.GetUpperBoundValue())); })
                 .OnValueCommitted_Lambda([this](int iValue, ETextCommit::Type iType) { mExporter.mCustomRange.SetLowerBoundValue(FMath::Clamp(iValue, 0, mExporter.mCustomRange.GetUpperBoundValue())); })
             ]
-            
+
             + SHorizontalBox::Slot()
             [
                 SNew(SNumericEntryBox<int>)
@@ -204,7 +204,7 @@ FOdysseyAnimationImageSequenceExporter::GetSources()
             {
                 if (layer->CanHaveChildren) //do not export folders here
                     continue;
-                
+
                 UOdysseyAnimationLayer* animationLayer = Cast<UOdysseyAnimationLayer>(layer);
                 animationLayers.Add(
                     {
@@ -259,7 +259,7 @@ void
 FOdysseyAnimationImageSequenceExporter::Export(const FString& iFilename)
 {
     TArray<FSource> sources = GetSources();
-    
+
     FScopedSlowTask progressBar(sources.Num(), LOCTEXT("timeline-tab.export-image-sequence.progress-bar.title", "Exporting Image Sequence"));
     progressBar.MakeDialog();
 
@@ -287,7 +287,7 @@ FOdysseyAnimationImageSequenceExporter::ExportSource(const FSource& iSource, con
     if (!iSource.mFilename.IsEmpty())
         filename += TEXT("_") + iSource.mFilename;
     FString extension = FPaths::GetExtension(path, false);
-    
+
     ::ULIS::eFileFormat exportImageFormat = FOdysseyExportImageFormat::GetFileFormat(mFormat);
     FInt32Range frameRange = GetSourceRange(iSource);
     int startFrame = frameRange.GetLowerBoundValue();
@@ -319,7 +319,7 @@ FOdysseyAnimationImageSequenceExporter::ExportSource(const FSource& iSource, con
         ctx.Finish();
 
         //Path
-        
+
         FString frameStr = FString::FromInt(i);
         FString imagePath = folder / filename + TEXT("_");
          for (int j = 0; j < iNumZero - frameStr.Len(); j++)

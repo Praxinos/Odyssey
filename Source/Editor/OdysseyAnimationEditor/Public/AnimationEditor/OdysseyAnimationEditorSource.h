@@ -41,8 +41,8 @@ public:
     virtual void RecordCurrentFrameUndo() const override;
 
 public:
-    
-	void SetExternalPlayer(UOdysseyAnimationPlayer* iPlayer);
+
+    void SetExternalPlayer(UOdysseyAnimationPlayer* iPlayer);
 
     UOdysseyAnimation* GetAnimation() const;
     virtual UOdysseyAnimationLayerStack* GetLayerStack() const override;
@@ -53,7 +53,7 @@ public:
     virtual void AddReferencedObjects(FReferenceCollector& Collector);
 
 private:
-	void ActivatePlayer( UOdysseyAnimationPlayer* iPlayer );
+    void ActivatePlayer( UOdysseyAnimationPlayer* iPlayer );
     void InactivatePlayer( UOdysseyAnimationPlayer* iPlayer );
 
     void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
@@ -64,5 +64,5 @@ public:
     UOdysseyAnimation* mAnimation;
     //TObjectPtr<UOdysseyAnimationTexture> mTexture;
     TObjectPtr<UOdysseyAnimationPlayer> mPlayer;
-	TObjectPtr<UOdysseyAnimationPlayer> mExternalPlayer;
+    TObjectPtr<UOdysseyAnimationPlayer> mExternalPlayer;
 };

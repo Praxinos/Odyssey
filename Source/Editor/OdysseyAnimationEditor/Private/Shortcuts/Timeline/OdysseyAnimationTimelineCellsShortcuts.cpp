@@ -114,7 +114,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Cut()
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.cut-frame", "Cut Frames"));
 #endif
-    
+
     FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
     TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = MakeShared<FOdysseyAnimationCellClipboardData>(selectedCells);
     odysseyEditorModule.GetClipboard()->SetData(clipboardData);
@@ -135,7 +135,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Paste()
     TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = odysseyEditorModule.GetClipboard()->GetData<FOdysseyAnimationCellClipboardData>();
     if (!clipboardData)
         return;
-    
+
     if (!clipboardData->CanPaste(layer))
         return;
 
@@ -145,7 +145,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Paste()
 
     UOdysseyAnimation* animation = layer->GetAnimation();
     clipboardData->Paste(layer, animation->CurrentFrame);
-    
+
     FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
     currentFrameMutator.Set(animation->CurrentFrame);
     currentFrameMutator.Commit();
@@ -213,7 +213,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
         if (!cell)
             return;
-            
+
         selectedCells.Add(cell);
     }
 
@@ -262,10 +262,10 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellExposure()
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
         if (!cell)
             return;
-            
+
         selectedCells.Add(cell);
     }
-        
+
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.increase-selected-cells-exposure", "Increase Selected Cells Exposure"));
 #endif
@@ -299,10 +299,10 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellExposure()
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
         if (!cell)
             return;
-            
+
         selectedCells.Add(cell);
     }
-        
+
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.decrease-selected-cells-exposure", "Decrease Selected Cells Exposure"));
 #endif
@@ -336,14 +336,14 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure()
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
         if (!cell)
             return;
-            
+
         selectedCells.Add(cell);
     }
 
     int value = 1;
     SGenericDialogWidget::OpenDialog(
         LOCTEXT("timeline-cells.dialog.set-selected-cells-exposure.title", "Set Selected Cells Exposure"),
-        
+
         SNew(SNumericEntryBox<int>)
         .Value_Lambda([&value]() { return value; })
         .AllowSpin(true)
@@ -443,7 +443,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_SelectAll()
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
         return false;
-        
+
     //Authorize SelectAll only if there is already an active selection
     const TArray<UOdysseyAnimationCell*> selectedCells = mLayerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
@@ -472,7 +472,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Delete()
 bool
 FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell()
 {
-    
+
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
         return false;
@@ -490,7 +490,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell()
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
         if (!cell)
             return false;
-            
+
         selectedCells.Add(cell);
     }
     selectedCells = selectedCells.FilterByPredicate(

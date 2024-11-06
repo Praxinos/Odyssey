@@ -42,10 +42,10 @@ public:
 
     int32 Length() const;
     void Length(int32 iLength);
-    
+
     int32 MinLength() const;
     void MinLength(int32 iLength);
-    
+
     int32 MaxLength() const;
     void MaxLength(int32 iLength);
 

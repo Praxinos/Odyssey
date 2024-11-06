@@ -20,7 +20,7 @@ public:
 public:
     // Construction / Destruction
     void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyPaletteTreeView>& iOwnerTableView, class UOdysseyPaletteEntryColor* iColorEntry);
-    
+
 private:
     virtual TSharedRef<SWidget> GenerateHeaderWidget() override;
     FReply HandleEntryColorMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent);

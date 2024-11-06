@@ -62,7 +62,7 @@ UOdysseyAnimationPlayer::OnStop()
 void
 UOdysseyAnimationPlayer::SetTimeRange(const TOptional<TRange<FTimespan>>& iRange)
 {
-    mRange = iRange;    
+    mRange = iRange;
 }
 
 void
@@ -117,12 +117,12 @@ UOdysseyAnimationPlayer::SeekToTime(FTimespan iTime)
 void
 UOdysseyAnimationPlayer::SeekToFrame(int iFrameIndex)
 {
-	FTimespan currentTime = FTimespan::FromSeconds(iFrameIndex / Animation->GetFramesPerSecond());
-	if (currentTime == mCurrentTime)
-		return;
+    FTimespan currentTime = FTimespan::FromSeconds(iFrameIndex / Animation->GetFramesPerSecond());
+    if (currentTime == mCurrentTime)
+        return;
 
-	mCurrentTime = currentTime;
-	mOnCurrentTimeChanged.Broadcast();
+    mCurrentTime = currentTime;
+    mOnCurrentTimeChanged.Broadcast();
 }
 
 UTexture2D*
@@ -158,11 +158,11 @@ UOdysseyAnimationPlayer::GetRenderType() const
 void
 UOdysseyAnimationPlayer::Tick(float iDeltaTime)
 {
-	if (GetFlags() & RF_ClassDefaultObject)
-		return;
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
 
-	if (!Animation || !Texture)
-		return;
+    if (!Animation || !Texture)
+        return;
 
     if (Status == EOdysseyAnimationPlayerStatus::Playing)
     {
@@ -264,7 +264,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
 
         TArray<TSharedPtr<::ULIS::FBlock>> blocks;
         TArray<::ULIS::FRectI> invalidRects = mInvalidTileMap.InvalidRects();
-        
+
         {
             TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimationPlayer::UpdateTexture::Copy);
             for ( const ::ULIS::FRectI& rect : invalidRects )
@@ -274,7 +274,7 @@ UOdysseyAnimationPlayer::UpdateTexture()
                 mRenderer->Copy(params, {});
                 blocks.Add(block);
             }
-            
+
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(Animation->GetFormat());
             ctx.Finish();
         }
@@ -364,7 +364,7 @@ UOdysseyAnimationPlayer::CopyBlocksToTexture(const TArray<TSharedPtr<::ULIS::FBl
         convBlocks.Add(convBlock);
         regions.Add(MakeShared<FUpdateTextureRegion2D>(rect.x, rect.y, 0, 0, rect.w, rect.h));
     }
-    
+
     ctx.Finish();
 
     for ( int i = 0; i < regions.Num(); i++ )
@@ -400,19 +400,19 @@ UOdysseyAnimationPlayer::AnimationChanged()
         return;
     }
 
-	Texture = NewObject<UTexture2D>(this);
-	Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
+    Texture = NewObject<UTexture2D>(this);
+    Texture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
 
-	FTextureFormatSettings textureFormatSettings;
+    FTextureFormatSettings textureFormatSettings;
     Texture->GetLayerFormatSettings(0, textureFormatSettings);
     textureFormatSettings.CompressionNone = 1;
     Texture->SetLayerFormatSettings(0, textureFormatSettings);
 
-	Texture->Source.Init(Animation->GetWidth(), Animation->GetHeight(), 1, 1, TSF_BGRA8, nullptr);
-	Texture->UpdateResource();
+    Texture->Source.Init(Animation->GetWidth(), Animation->GetHeight(), 1, 1, TSF_BGRA8, nullptr);
+    Texture->UpdateResource();
     FTextureCompilingManager::Get().FinishCompilation({ Texture });
 
-	mInvalidTileMap = FULISInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
+    mInvalidTileMap = FULISInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
 
     UOdysseyAnimation::OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
 
@@ -468,9 +468,9 @@ void
 UOdysseyAnimationPlayer::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
-	
-	if (GetFlags() & RF_ClassDefaultObject)
-		return;
+
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
 
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
@@ -481,24 +481,24 @@ UOdysseyAnimationPlayer::PostEditChangeProperty( FPropertyChangedEvent& Property
 void
 UOdysseyAnimationPlayer::PostLoad()
 {
-	Super::PostLoad();
-	
-	if (GetFlags() & RF_ClassDefaultObject)
-		return;
+    Super::PostLoad();
 
-	//will create the texture if needed
-	AnimationChanged();
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
+
+    //will create the texture if needed
+    AnimationChanged();
 }
 
 void
 UOdysseyAnimationPlayer::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
 {
-	Super::PostDuplicate(iDuplicateMode);
-	
-	if (GetFlags() & RF_ClassDefaultObject)
-		return;
+    Super::PostDuplicate(iDuplicateMode);
 
-	//will create the texture if needed
-	AnimationChanged();
-	mImageRenderingComposition.Empty();
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
+
+    //will create the texture if needed
+    AnimationChanged();
+    mImageRenderingComposition.Empty();
 }

@@ -16,8 +16,8 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerFolderTimeline
 public:
     // Construction / Destruction
     void Construct(
-        const FArguments& iArgs, 
-		const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
+        const FArguments& iArgs,
+        const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
         UOdysseyAnimationLayerFolder* iLayer
     );
 };

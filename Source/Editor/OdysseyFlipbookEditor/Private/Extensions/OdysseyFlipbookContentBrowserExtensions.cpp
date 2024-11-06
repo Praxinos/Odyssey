@@ -47,14 +47,14 @@ FContentBrowserSelectedAssetExtensionBase::~FContentBrowserSelectedAssetExtensio
 {
 }
 
-void 
+void
 FContentBrowserSelectedAssetExtensionBase::Execute()
 {
 }
 
 //////////////////////////////////////////////////////////////////////////
 // FEditFlipbookExtension
-struct FEditFlipbookExtension 
+struct FEditFlipbookExtension
     : public FContentBrowserSelectedAssetExtensionBase
 {
 public:

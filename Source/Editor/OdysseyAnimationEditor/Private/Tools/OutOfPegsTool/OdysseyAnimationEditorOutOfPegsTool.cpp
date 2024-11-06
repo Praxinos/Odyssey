@@ -159,10 +159,10 @@ void
 UOdysseyAnimationEditorOutOfPegsTool::PostEditChangeProperty( FPropertyChangedEvent& iEvent)
 {
     Super::PostEditChangeProperty(iEvent);
-    
+
     FName propertyName = iEvent.GetPropertyName();
     FName memberPropertyName = iEvent.MemberProperty->GetFName();
-    
+
     bool isInteractive = EPropertyChangeType::ValueSet | (iEvent.ChangeType & EPropertyChangeType::Interactive);
     if ( memberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationEditorOutOfPegsTool, Pan) )
     {
@@ -198,7 +198,7 @@ UOdysseyAnimationEditorOutOfPegsTool::SetCell(UOdysseyAnimationCell* iCell)
 
     if (mCell)
         mCell->OnOutOfPegsChanged().RemoveAll(this);
-    
+
     if (mLayer)
         mLayer->OnLightTableChanged().RemoveAll(this);
 
@@ -215,7 +215,7 @@ UOdysseyAnimationEditorOutOfPegsTool::SetCell(UOdysseyAnimationCell* iCell)
 
         mCell->OnOutOfPegsChanged().AddUObject(this, &UOdysseyAnimationEditorOutOfPegsTool::OnCellOutOfPegsChanged);
     }
-    
+
     RebuildHUD();
 }
 
@@ -262,7 +262,7 @@ UOdysseyAnimationEditorOutOfPegsTool::RebuildHUD()
     points.Add(FVector2D(0, 0));
     points.Add(FVector2D(0, 0));
     points.Add(FVector2D(0, 0));
-    
+
     mTransformTopLeftHandleHUD = MakeShared<FOdysseyHUDHandle>(FVector2D(0, 0));
     mTransformTopRightHandleHUD = MakeShared<FOdysseyHUDHandle>(FVector2D(0, 0));
     mTransformBottomRightHandleHUD = MakeShared<FOdysseyHUDHandle>(FVector2D(0, 0));
@@ -287,7 +287,7 @@ UOdysseyAnimationEditorOutOfPegsTool::RebuildHUD()
     mTransformBottomRightHandleHUD->OnDragEnd().AddUObject(this, &UOdysseyAnimationEditorOutOfPegsTool::OnBottomRightHandleDragEnd);
     mTransformBottomLeftHandleHUD->OnDragEnd().AddUObject(this, &UOdysseyAnimationEditorOutOfPegsTool::OnBottomLeftHandleDragEnd);
     mTransformRotationHandleHUD->OnDragEnd().AddUObject(this, &UOdysseyAnimationEditorOutOfPegsTool::OnRotationHandleDragEnd);
-    
+
     mHUD->AddElement(mTransformHUD);
     mHUD->AddElement(mTransformTopLeftHandleHUD);
     mHUD->AddElement(mTransformTopRightHandleHUD);
@@ -347,7 +347,7 @@ UOdysseyAnimationEditorOutOfPegsTool::RefreshHUD()
         points[0] = FVector2D(topLeft.x, topLeft.y); //top left
         points[1] = FVector2D(topRight.x, topRight.y); //top right
         points[2] = FVector2D(bottomRight.x, bottomRight.y); //bottom right
-        points[3] = FVector2D(bottomLeft.x, bottomLeft.y); //bottom left   
+        points[3] = FVector2D(bottomLeft.x, bottomLeft.y); //bottom left
 
         ::ULIS::FVec2F rotationLineStartPoint = oopTransform * ::ULIS::FVec3F(width / 2.f, height / 2.f, 1.f);
         ::ULIS::FVec2F rotationLineEndPoint = oopTransform * ::ULIS::FVec3F(width, height / 2.f, 1.f);
@@ -361,7 +361,7 @@ UOdysseyAnimationEditorOutOfPegsTool::RefreshHUD()
         mTransformBottomLeftHandleHUD->SetPosition(points[3]);
         mTransformRotationHandleHUD->SetPosition(FVector2D(rotationLineEndPoint.x, rotationLineEndPoint.y));
     }
-        
+
 }
 
 void

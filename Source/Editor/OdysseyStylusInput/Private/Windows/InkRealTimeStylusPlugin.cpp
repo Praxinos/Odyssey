@@ -147,7 +147,7 @@ static void SetupTabletSupportedPackets(TComPtr<IRealTimeStylus> RealTimeStylus,
     int16 Supported;
 
     BSTR GuidBSTR;
-    
+
     GuidBSTR = SysAllocString(STR_GUID_X);
 
     InkTablet->IsPacketPropertySupported(GuidBSTR, &Supported);
@@ -164,7 +164,7 @@ static void SetupTabletSupportedPackets(TComPtr<IRealTimeStylus> RealTimeStylus,
     {
         TabletContext.SupportedPackets.Add( EInkPacketType::Y);
     }
-    
+
     SysFreeString(GuidBSTR);
     GuidBSTR = SysAllocString(STR_GUID_Z);
 
@@ -177,7 +177,7 @@ static void SetupTabletSupportedPackets(TComPtr<IRealTimeStylus> RealTimeStylus,
 
     SysFreeString(GuidBSTR);
     GuidBSTR = SysAllocString(STR_GUID_TIMERTICK);
-    
+
     InkTablet->IsPacketPropertySupported(GuidBSTR, &Supported);
     if (Supported)
     {
@@ -187,7 +187,7 @@ static void SetupTabletSupportedPackets(TComPtr<IRealTimeStylus> RealTimeStylus,
 
     SysFreeString(GuidBSTR);
     GuidBSTR = SysAllocString(STR_GUID_PAKETSTATUS);
-    
+
     InkTablet->IsPacketPropertySupported(GuidBSTR, &Supported);
     if (Supported)
     {
@@ -246,7 +246,7 @@ static void SetupTabletSupportedPackets(TComPtr<IRealTimeStylus> RealTimeStylus,
 
     SysFreeString(GuidBSTR);
     GuidBSTR = SysAllocString(STR_GUID_XTILTORIENTATION);
-    
+
     InkTablet->IsPacketPropertySupported(GuidBSTR, &Supported);
     if (Supported)
     {
@@ -406,7 +406,7 @@ FCriticalSection sgMutex;
 
 //---
 
-void 
+void
 FInkTabletContextInfo::Tick()
 {
     // Move the generic current states to the previous ones
@@ -471,8 +471,8 @@ void FInkRealTimeStylusPlugin::HandlePacket(IRealTimeStylus* RealTimeStylus, con
     // it can't be in AddTabletContext() because it is NOT called when moving HWND
     int dpix;
     int dpiy;
-    POINT ptClientUL; // client upper left corner 
-    POINT ptClientLR; // client lower right corner 
+    POINT ptClientUL; // client upper left corner
+    POINT ptClientLR; // client lower right corner
     GetDPI( RealTimeStylus, dpix, dpiy, ptClientUL, ptClientLR );
 
     //---

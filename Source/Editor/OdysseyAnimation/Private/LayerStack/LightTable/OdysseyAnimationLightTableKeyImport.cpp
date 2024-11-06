@@ -40,7 +40,7 @@ FOdysseyAnimationLightTableKeyImport::Read( FOdysseyAnimationLightTableKey* iKey
     FOdysseyFile::ReadChunks( iChunkEnd
                               , Ar
                               , [iKey](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
-        {           
+        {
             switch ( iChunkID )
             {
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_KEY_ISACTIVATED:

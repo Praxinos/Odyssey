@@ -183,14 +183,14 @@ UOdysseyPainterEditorVectorPathDrawingTool::RecordUndoPathAdd( FOdysseyVectorGro
 bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FKey& iKey
-														   , uint64& oSignalFlags )
+                                                           , uint64& oSignalFlags )
 {
     StitchAtKeyDown = Stitch;
 
     if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
     {
         Stitch = !Stitch; // flip the value
-		return true;
+        return true;
     }
 
     return UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( iScene, iKey, oSignalFlags );
@@ -199,7 +199,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnKeyDownVector( FOdysseyVectorGroup
 bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnKeyUpVector( FOdysseyVectorGroupPaint* iScene
                                                          , const FKey& iKey
-														 , uint64& oSignalFlags )
+                                                         , uint64& oSignalFlags )
 {
     Stitch = StitchAtKeyDown;
 
@@ -230,10 +230,10 @@ bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey
-															 , uint64& oSignalFlags )
+                                                             , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     double pointRadius = PressureSensitive ? ( iPointInTexture.pressure * Radius ) : Radius;
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
@@ -333,13 +333,13 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
          | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED
          | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
 
-	return true;
+    return true;
 }
 
 void
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                               , const FOdysseyPoint& iPointInTexture
-															  , uint64& oSignalFlags )
+                                                              , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     uint32 width = vectorEngine->GetPreferredWidth();
@@ -367,7 +367,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGr
 void
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture
-															 , uint64& oSignalFlags )
+                                                             , uint64& oSignalFlags )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector);
 
@@ -452,10 +452,10 @@ bool
 UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey
-														   , uint64& oSignalFlags )
+                                                           , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
@@ -587,7 +587,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
          | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY // important to remove the path builder from the hierarchy widget
          | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED;
 
-	return true;
+    return true;
 }
 
 uint64

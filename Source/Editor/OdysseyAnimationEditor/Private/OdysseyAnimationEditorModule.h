@@ -40,7 +40,7 @@ private:
 
     void RegisterThumbnailRenderers();
     void UnregisterThumbnailRenderers();
-    
+
 private:
     /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
     TSharedPtr<IAssetTypeActions> mIliadTypeActions;

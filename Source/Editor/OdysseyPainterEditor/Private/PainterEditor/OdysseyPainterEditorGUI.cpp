@@ -62,8 +62,8 @@ FOdysseyPainterEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
     Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorToolsTab::StaticId(), ETabState::ClosedTab));
     Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorToolOptionsTab::StaticId(), ETabState::ClosedTab));
     Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorBrushSelectorTab::StaticId(), ETabState::ClosedTab));
-    
-    
+
+
     //Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorPaletteTab::StaticId(), ETabState::ClosedTab));
     //Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorColorSlidersTab::StaticId(), ETabState::ClosedTab));
     Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorColorWheelTab::StaticId(), ETabState::ClosedTab));

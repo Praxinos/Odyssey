@@ -114,7 +114,7 @@ UOdysseyAnimation::GetFrameIndexAtTime(FTimespan iTime) const
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetFrameIndexAtTime);
     //Add 1 tick to be sure to retrieve the right frame in case the frame starts between iTime and iTime + 1 tick
-    FTimespan time = iTime + FTimespan(1); 
+    FTimespan time = iTime + FTimespan(1);
     return int(time.GetTotalSeconds() * GetFramesPerSecond());
 }
 
@@ -174,7 +174,7 @@ UOdysseyAnimation::PostInitProperties()
 
     if (HasAnyFlags(RF_ClassDefaultObject))
         return;
-    
+
     mLayerStack = NewObject<UOdysseyAnimationLayerStack>(this, "LayerStack", RF_Public | RF_Transactional);
     mProxy = MakeShared<FOdysseyAnimationProxy>(this);
 
@@ -260,7 +260,7 @@ UOdysseyAnimation::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRender
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
-    
+
     TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::BuildImageRenderer);
     return MakeShared<FOdysseyAnimationProxyImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }

@@ -22,11 +22,11 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyPaletteEntryRow)
         {}
     SLATE_END_ARGS()
-    
+
 public:
     // Construction / Destruction
     void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyPaletteTreeView>& iOwnerTableView, UOdysseyPaletteEntry* iEntry);
-    
+
 public:
     //Getters
     UOdysseyPaletteEntry* GetPaletteEntry();
@@ -46,22 +46,22 @@ protected:
 
     void OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState);
     ECheckBoxState GetIsActivatedCheckBoxState() const;
-    
+
     void OnEntryNameCommited(const FText& iText, ETextCommit::Type iType);
-    
+
     FText GetEntryName() const;
     FSlateFontInfo GetEntryNameFont() const;
-    
+
     TOptional<EItemDropZone> OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iDropZone, UOdysseyPaletteEntry* iEntry);
-    
+
     FReply OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iDropZone, UOdysseyPaletteEntry* iEntry);
 
     FReply OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<SOdysseyPaletteTreeView> iTreeView);
-    
+
 
 private:
     EItemDropZone ComputeItemDropZoneForLeaf(FVector2D iLocalPointerPos, FVector2D iLocalSize, bool iCanHaveChildren, bool iIsExpanded);
-    
+
 private:
     TSharedPtr<SInlineEditableTextBlock> mNameWidget = nullptr;
     UOdysseyPaletteEntry* mEntry = nullptr;

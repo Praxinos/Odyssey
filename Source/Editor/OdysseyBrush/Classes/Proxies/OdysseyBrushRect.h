@@ -28,7 +28,7 @@ public:
     void SetValue(const ::ULIS::FRectI&);
     void SetValue(int iX, int iY, int iW, int iH);
     bool IsInitialized() const;
-    
+
     int X() const;
     int Y() const;
     int Width() const;
