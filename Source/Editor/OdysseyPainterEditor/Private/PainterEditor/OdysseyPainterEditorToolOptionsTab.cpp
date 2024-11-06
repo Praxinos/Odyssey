@@ -8,6 +8,7 @@
 #include "Models/OdysseyPainterEditorCommands.h"
 
 #include "OdysseyPainterEditor.h"
+#include "Models/OdysseyPainterEditorCommands.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -71,6 +72,8 @@ FOdysseyPainterEditorToolOptionsTab::CreateWidget()
     SetWidgetForTool(mEditor->GetVectorPaintBucketTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorPaintBucketTool()));
     SetWidgetForTool(mEditor->GetVectorGridTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorGridTool()));
     SetWidgetForTool(mEditor->GetVectorTransformTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorTransformTool()));
+    SetWidgetForTool(mEditor->GetVectorMatchingTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorMatchingTool()));
+    SetWidgetForTool(mEditor->GetVectorChartTool(), SNew(SOdysseyPainterEditorToolOptions).Tool(mEditor->GetVectorChartTool()));
 
     //mToolsTab->GetToolsTab()->SetWidgetForTool(mEditor->GetVectorDrawingTool(), SNew(SOdysseyPainterVectorDrawingTool, mEditor->GetVectorDrawingTool()));
 

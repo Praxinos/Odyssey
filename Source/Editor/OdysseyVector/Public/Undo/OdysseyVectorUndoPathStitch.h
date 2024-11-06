@@ -19,7 +19,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoPathStitch : public FOdysseyVectorUndo
                                     , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                     , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
                                     , std::vector<FOdysseyVectorVertex*>& iMergedVertexArray
-                                    , std::vector<FOdysseyVectorSegment*>& iMergedSegmentArray );
+                                    , std::vector<FOdysseyVectorSegment*>& iMergedSegmentArray
+                                    , uint64 iReturnFlags );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

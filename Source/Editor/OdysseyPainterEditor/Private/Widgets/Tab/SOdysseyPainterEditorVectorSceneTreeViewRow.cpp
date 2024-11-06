@@ -5,6 +5,8 @@
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseyVector.h"
+#include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyPainterEditor.h"
 #include "Undo/OdysseyVectorUndoTransferObjects.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
@@ -16,15 +18,22 @@ FVectorSceneTreeViewItem::~FVectorSceneTreeViewItem()
 {
 }
 
-FVectorSceneTreeViewItem::FVectorSceneTreeViewItem( FOdysseyVectorObject* iVectorObject )
+FVectorSceneTreeViewItem::FVectorSceneTreeViewItem( FOdysseyVectorObject* iVectorObject, bool iSensitive )
+    : mVectorObject( iVectorObject )
+    , bSensitive( iSensitive )
 {
-    mVectorObject = iVectorObject;
 }
 
 FOdysseyVectorObject*
 FVectorSceneTreeViewItem::GetVectorObject()
 {
     return mVectorObject;
+}
+
+bool
+FVectorSceneTreeViewItem::IsSensitive()
+{
+    return bSensitive;
 }
 
 SOdysseyPainterEditorVectorSceneTreeViewRow::~SOdysseyPainterEditorVectorSceneTreeViewRow()
@@ -43,49 +52,218 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow
 {
     STableRow<TSharedPtr<FVectorSceneTreeViewItem>>::Construct( InArgs, InOwnerTableView );
     FOdysseyVectorObject* vectorObject = iItem->GetVectorObject();
-    const FSlateBrush* icon = nullptr;
+    TSharedPtr<SHorizontalBox> tagBox;
+    const FSlateBrush* objectIcon = nullptr;
+    const FSlateBrush* inbetweenerTagIcon = nullptr;
+    uint32 cellIndex = vectorObject->GetEngine()->GetCell()->GetIndex();
+
+    //inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.InbetweenerTag16" );
+    inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching16" );
 
     if ( vectorObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
     {
-        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Paintgroup" );
+        objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Paintgroup" );
     }
     else
     if ( vectorObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
     {
-        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Group" );
+        objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Group" );
     }
     else
     if ( vectorObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
     {
-        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Path" );
+        objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.Path" );
     }
     else
     {
-        icon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.null16" );
+        objectIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.null16" );
     }
 
     mItem = iItem;
 
     mTextBlockWidget = SNew(SInlineEditableTextBlock)
-                       .Text( FText::FromString( mItem.Get()->GetVectorObject()->GetName() ) )
+                       // display cell name only for insensitive objects, i.e objects from another cell
+                       .Text( FText::FromString( iItem->IsSensitive() ? vectorObject->GetName()
+                                                                      : FString::Printf( TEXT("Cell %d / "), cellIndex )
+                                                                      + vectorObject->GetName() ) )
                        .OnVerifyTextChanged( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnVerifyTextChanged )
                        .OnTextCommitted( this, &SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged );
 
+    tagBox = SNew(SHorizontalBox);
+
+    for( FOdysseyVectorTag* tag : vectorObject->GetTagList() )
+    {
+        if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+        {
+            //Cells widgets
+            tagBox->AddSlot()
+            .AutoWidth()
+            [
+                SNew( SImage )
+                .Image( inbetweenerTagIcon )
+            ];
+        }
+    }
+
     SetContent( SNew(SHorizontalBox)
+                .IsEnabled( mItem.Get()->IsSensitive() )
                 + SHorizontalBox::Slot()
                 .AutoWidth()
                 [
                     SNew( SImage )
-                    .Image( icon )
+                    .Image( objectIcon )
                 ]
                 + SHorizontalBox::Slot()
                 .AutoWidth()
                 [
                     mTextBlockWidget.ToSharedRef()
+                ]
+                + SHorizontalBox::Slot()
+                .Padding( 10, 0 )
+                .AutoWidth()
+                [
+                    tagBox.ToSharedRef()
                 ] );
-
-    //SetContent( mTextBlockWidget.ToSharedRef() );
 }
+
+FReply
+SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonUp( const FGeometry & MyGeometry
+                                                            , const FPointerEvent & MouseEvent )
+{
+    FReply reply = FReply::Handled();
+
+    reply = STableRow::OnMouseButtonUp( MyGeometry, MouseEvent );
+
+    // request redraw
+    mItem.Get()->GetVectorObject()->GetEngine()->Invalidate( 0 );
+
+    FOdysseyVectorEngine::Notify( nullptr, 
+                                  FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                                //| FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                                | FOdysseyPainterEditor::UI_UPDATE_HUD );
+
+    return reply;
+}
+
+
+FReply
+SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonDown( const FGeometry & MyGeometry
+                                                              , const FPointerEvent & MouseEvent )
+{
+    const TSharedPtr< SOdysseyPainterEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SOdysseyPainterEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
+    FOdysseyVectorObject* vectorObject = mItem.Get()->GetVectorObject();
+    FOdysseyVectorEngine* vectorEngine = vectorObject->GetEngine();
+    FReply reply = FReply::Handled();
+/*
+    if( mItem.Get()->IsSensitive() == false )
+    {
+        return FReply::Unhandled();
+    }
+*/
+/*
+    if( vectorObject->IsSelected() == false )
+    {
+        vectorEngine->SelectObject( vectorObject );
+    }
+*/
+    reply = STableRow::OnMouseButtonDown( MyGeometry, MouseEvent );
+
+
+    return reply;
+}
+
+/*
+FReply
+SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonDown( const FGeometry & MyGeometry
+                                                              , const FPointerEvent & MouseEvent )
+{
+    const TSharedPtr< SOdysseyPainterEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SOdysseyPainterEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
+    FOdysseyVectorObject* vectorObject = mItem.Get()->GetVectorObject();
+    FOdysseyVectorGroupPaint* vectorScene = vectorObject->GetScene();
+    FOdysseyVectorEngine* vectorEngine = vectorObject->GetEngine();
+    FReply reply = FReply::Handled();
+
+    if( mItem.Get()->IsSensitive() == false )
+    {
+        return FReply::Unhandled();
+    }
+
+    if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
+    {
+          reply
+          .DetectDrag(SharedThis(this), EKeys::LeftMouseButton)
+          .SetUserFocus(treeView->AsWidget(), EFocusCause::Mouse);
+    }
+
+    // Note: we don't rely on STreeView::SelectedItems to keep track of the selection.
+    // That way we don't have to update the widget.
+    // We directly rely on the selection from our vector engine. However this implies
+    // that we have to deal with the multiple selection by ourselves.
+
+    if( FSlateApplication::Get().GetModifierKeys().IsShiftDown() == true )
+    {
+        FOdysseyVectorObject* lastSelectedObject = vectorEngine->GetLastSelectedObject();
+
+        if( lastSelectedObject )
+        {
+            bool doSelect = false;
+
+            for( const TSharedPtr<FVectorSceneTreeViewItem>& item : treeView.Get()->GetItems() )
+            {
+                FOdysseyVectorObject* itemObject = item.Get()->GetVectorObject();
+
+                if( ( itemObject == vectorObject ) || ( itemObject == lastSelectedObject ) )
+                {
+                    doSelect = !doSelect;
+                }
+
+                if( doSelect )
+                {
+                    if( itemObject->IsSelected() == false )
+                    {
+                        vectorEngine->SelectObject( itemObject );
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
+        {
+            vectorEngine->ClearObjectSelection();
+        }
+    }
+
+    if( vectorObject->IsSelected() == false )
+    {
+        vectorEngine->SelectObject( vectorObject );
+    }
+    else
+    {
+        if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
+        {
+            vectorEngine->UnselectObject( vectorObject );
+        }
+    }
+
+    // request redraw
+    mItem.Get()->GetVectorObject()->GetEngine()->Invalidate( 0 );
+
+    FOdysseyVectorEngine::Notify( nullptr, 
+                                  FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                                | FOdysseyPainterEditor::UI_UPDATE_HUD );
+
+    return reply;
+}
+*/
+
+ESelectionMode::Type
+SOdysseyPainterEditorVectorSceneTreeViewRow::GetSelectionMode () const
+{
+    return mItem.Get()->IsSensitive() ? ESelectionMode::Type::Multi :  ESelectionMode::Type::None;
+}
+
 
 bool
 SOdysseyPainterEditorVectorSceneTreeViewRow::OnVerifyTextChanged( const FText& NewText
@@ -104,9 +282,16 @@ void
 SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged( const FText& InText
                                                           , ETextCommit::Type CommitInfo )
 {
+    FOdysseyVectorObject* itemObject = mItem.Get()->GetVectorObject();
+    FOdysseyVectorGroupPaint* itemScene = itemObject->GetScene();
+
     mItem.Get()->GetVectorObject()->SetName( InText.ToString() );
 
     mTextBlockWidget.Get()->SetText( FText::FromString( mItem.Get()->GetVectorObject()->GetName() ) );
+
+    FOdysseyVectorEngine::Notify( itemScene, 
+                                  FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                                | FOdysseyPainterEditor::UI_UPDATE_TIMELINE );
 }
 
 FReply
@@ -119,13 +304,17 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     FOdysseyVectorGroupPaint* itemScene = itemObject->GetScene();
     std::list<FOdysseyVectorObject*> focusedObjectList;
     FOdysseyVectorObject* insertObject = itemObject;
+    uint32 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
     itemScene->GetEngine()->GetFocusedAncestorList( focusedObjectList );
 
     GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.drag-drop-object", "Drop Objects"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoTransferObjects( itemScene, focusedObjectList ) );
+        FOdysseyVectorUndo* undo = static_cast<FOdysseyVectorUndo*>( new FOdysseyVectorUndoTransferObjects( itemScene
+                                                                                                          , focusedObjectList
+                                                                                                          , notificationFlags ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -146,12 +335,16 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
             {
                 FOdysseyVectorObject* parentObject = itemObject->GetParent();
 
-                // don't drop onto the same object or else expect some infinite loop
-                if( parentObject != focusedObject )
+                // note: SharedEnv and Root are system objects
+                if( parentObject->IsSystem() == false )
                 {
-                    parentObject->TransferChild( focusedObject, parentObject->GetPreviousChild( insertObject ) );
+                    // don't drop onto the same object or else expect some infinite loop
+                    if( parentObject != focusedObject )
+                    {
+                        parentObject->TransferChild( focusedObject, parentObject->GetPreviousChild( insertObject ) );
 
-                    insertObject = focusedObject;
+                        insertObject = focusedObject;
+                    }
                 }
             }
             break;
@@ -170,12 +363,16 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
             {
                 FOdysseyVectorObject* parentObject = itemObject->GetParent();
 
-                // don't drop onto the same object or else expect some infinite loop
-                if( parentObject != focusedObject )
+                // note: SharedEnv and Root are system objects
+                if( parentObject->IsSystem() == false )
                 {
-                    parentObject->TransferChild( focusedObject, insertObject );
 
-                    insertObject = focusedObject;
+                    if( parentObject != focusedObject )
+                    {
+                        parentObject->TransferChild( focusedObject, insertObject );
+
+                        insertObject = focusedObject;
+                    }
                 }
             }
             break;
@@ -187,12 +384,9 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
 
     mDropZone = DROPZONE_NONE;
 
-    itemScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    itemScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                                  | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                                  | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                                  | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    itemScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    itemScene->GetEngine()->Invalidate( 0 );
+    FOdysseyVectorEngine::Notify( itemScene, notificationFlags );
 
     return FReply::Handled();
 }

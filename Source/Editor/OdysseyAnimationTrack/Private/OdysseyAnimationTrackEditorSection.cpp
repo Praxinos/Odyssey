@@ -150,6 +150,7 @@ FOdysseyAnimationTrackEditorSection::RebuildSectionWidget()
 		.AutoHeight()
 		[
 			SNew( SOdysseyAnimationTimelineTreeView )
+			.PainterEditor_Lambda([](){ensure(false); return nullptr;}) //TODO:
 			.Visibility(this, &FOdysseyAnimationTrackEditorSection::GetLayersVisibility)
 			.LayerStack(layerStack)
 			.TimelinePosition(mTimelinePosition)

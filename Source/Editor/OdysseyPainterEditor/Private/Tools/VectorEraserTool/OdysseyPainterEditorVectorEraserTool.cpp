@@ -8,6 +8,7 @@
 #include "ISinglePropertyView.h"
 #include "OdysseyVector.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "Undo/OdysseyVectorUndoErase.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -33,22 +34,31 @@ UOdysseyPainterEditorVectorEraserTool::UOdysseyPainterEditorVectorEraserTool()
 bool
 UOdysseyPainterEditorVectorEraserTool::IsActivable() const
 {
-    return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    uint64 HUDFlags = GetEditor()->GetVectorHUDFlags();
+
+    return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>()
+          && ( HUDFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT
+            || HUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX );
 }
 
 uint64
 UOdysseyPainterEditorVectorEraserTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // force redrawing
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
 UOdysseyPainterEditorVectorEraserTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing
+    iScene->GetEngine()->Invalidate( 0 );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    return 0;
 }
 
 uint64
@@ -71,8 +81,9 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorGroupPai
         iScene->Update( 0 );
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return 0;
 }
 
 uint64
@@ -97,8 +108,9 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorGroupPa
 
     /*}*/
     // refresh vector scene and GUI widgets via delegates.
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return 0;
 }
 
 uint64
@@ -119,8 +131,9 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorGroupPai
                                               , iPointInTexture.y ) );
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return 0;
 }
 
 void
@@ -210,7 +223,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
         // will have some problems because we change the children list, and Traverse is recursive.
         oAddedObjectArray[i]->GetParent()->AppendChild( oAddedObjectArray[i] );
 
-        oAddedObjectArray[i]->Invalidate();
+        //oAddedObjectArray[i]->Invalidate();
     }
 
     // Also here, we remove AFTER the Traverse() has been executed, because traverse is recursive
@@ -231,7 +244,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
 
     iScene->UpdateMatrix();
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 }
 
 void
@@ -297,7 +310,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
         // will have some problems because we change the children list, and Traverse is recursive.
         oAddedObjectArray[i]->GetParent()->AppendChild( oAddedObjectArray[i] );
 
-        oAddedObjectArray[i]->Invalidate();
+        //oAddedObjectArray[i]->Invalidate();
     }
 
     // Also here, we remove AFTER the Traverse() has been executed, because traverse is recursive
@@ -318,7 +331,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
 
     iScene->UpdateMatrix();
 
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 }
 
 uint64
@@ -331,6 +344,9 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
                                                            , mMin.y - Radius
                                                            , mMax.x + Radius
                                                            , mMax.y + Radius );
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -382,7 +398,8 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
                                                                   , addedSegmentArray
                                                                   , removedObjectArray
                                                                   , removedVertexArray
-                                                                  , removedSegmentArray );
+                                                                  , removedSegmentArray
+                                                                  , notificationFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -396,9 +413,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
     // this will resize the selection box, knowing that some paths may have been removed after erasal.
     vectorEngine->ResetHUD();
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-         | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED;
+    return notificationFlags;
 }
 
 TSharedRef<SWidget>

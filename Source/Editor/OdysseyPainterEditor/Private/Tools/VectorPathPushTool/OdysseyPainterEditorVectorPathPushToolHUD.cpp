@@ -1,6 +1,7 @@
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushToolHUD.h"
-#include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
 
 FOdysseyPainterEditorVectorPathPushToolHUD::~FOdysseyPainterEditorVectorPathPushToolHUD()
 {
@@ -44,16 +45,11 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint64 hudFlags = mPathPushTool->GetEditor()->GetVectorHUDFlags();
 
-    // Draw object details only in vertex mode
-    if( hudFlags & HUD_MODE_VERTEX )
-    {
-        DrawObjects( iBLContext
-                   , iScene
-                   , fgColor
-                   , bgColor
-                   , hcColor
-                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
-    }
+    // Draw default
+    // -> nothing in object mode.
+    // -> vertices and segments in vertex mode.
+    // -> inbetweens in inbetween mode.
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
 
     // draw selection box only if we restrict pushing to the selection 
     if( mPathPushTool->RestrictToSelectedObjects && iScene->GetEngine()->GetSelectedObjectList().size() && ( mPathPushTool->IsDragging() == false ) )

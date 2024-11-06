@@ -80,6 +80,7 @@ FOdysseyAnimationEditorTimelineTab::CreateWidget()
         +SWidgetSwitcher::Slot()
         [
             SNew(SOdysseyAnimationLayerStack)
+			.PainterEditor(mExtension->GetEditor())
             .Animation(this, &FOdysseyAnimationEditorTimelineTab::Animation)
 			.Player(this, &FOdysseyAnimationEditorTimelineTab::Player)
 			.PlaybackFramesPerSecond(this, &FOdysseyAnimationEditorTimelineTab::PlaybackFramesPerSecond)

@@ -15,7 +15,7 @@ FOdysseyVectorHandleSegment::ArrayToVertexArray( const std::vector<FOdysseyVecto
         {
             FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
 
-            oVertexArray.push_back( cubicSegment->GetVertex( segmentHandle->GetHandleID() ) );
+            oVertexArray.push_back( segmentHandle->GetAttachedVertex() );
         }
     }
 }
@@ -24,17 +24,32 @@ FOdysseyVectorHandleSegment::~FOdysseyVectorHandleSegment()
 {
 }
 
-FOdysseyVectorHandleSegment::FOdysseyVectorHandleSegment( FOdysseyVectorSegment* iOwnerSegment, uint32 iHandleID, double iX, double iY )
+FOdysseyVectorHandleSegment::FOdysseyVectorHandleSegment( FOdysseyVectorSegment* iOwnerSegment
+                                                        , FOdysseyVectorVertex* iAttachedVertex
+                                                        , double iX
+                                                        , double iY )
     : FOdysseyVectorPoint( iX, iY )
     , mOwnerSegment ( iOwnerSegment )
-    , mHandleID(iHandleID)
+    , mAttachedVertex( iAttachedVertex )
 {
 }
 
-uint32
-FOdysseyVectorHandleSegment::GetHandleID()
+void
+FOdysseyVectorHandleSegment::SetID( uint32 iHandleID )
 {
-    return mHandleID;
+    mID = iHandleID;
+}
+
+uint32
+FOdysseyVectorHandleSegment::GetID()
+{
+    return mID;
+}
+
+FOdysseyVectorVertex*
+FOdysseyVectorHandleSegment::GetAttachedVertex()
+{
+    return mAttachedVertex;
 }
 
 FOdysseyVectorSegment*
@@ -46,7 +61,7 @@ FOdysseyVectorHandleSegment::GetOwner()
 void 
 FOdysseyVectorHandleSegment::SetCoords( double iX, double iY )
 {
-    if( mOwnerSegment->GetVertex( mHandleID )->IsLocked() == false )
+    if( mAttachedVertex->IsLocked() == false )
     {
         FOdysseyVectorPoint::SetCoords( iX, iY );
 
@@ -56,4 +71,3 @@ FOdysseyVectorHandleSegment::SetCoords( double iX, double iY )
         }
     }
 }
-

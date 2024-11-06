@@ -2,6 +2,7 @@
 #include "EditorAssetLibrary.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorBrush.h"
 
 void
 FOdysseyVectorImportV2::ReadBrush( FOdysseyVectorBrush& iBrush, uint64 iChunkEnd, FArchive &Ar )

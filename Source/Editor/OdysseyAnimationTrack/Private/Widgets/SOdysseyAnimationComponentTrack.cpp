@@ -70,6 +70,7 @@ SOdysseyAnimationComponentTrack::RebuildWidgets()
 			.HeightOverride(this, &SOdysseyAnimationComponentTrack::GetTreeViewHeight)
 			[
 				SNew(SOdysseyAnimationLayerStackTreeView)
+				.PainterEditor_Lambda([](){ensure(false); return nullptr;}) //TODO:
 				.Visibility(this, &SOdysseyAnimationComponentTrack::GetLayersVisibility)
 				.LayerStack(animation->GetLayerStack())
 				.ExternalScrollbar(SNew(SScrollBar))

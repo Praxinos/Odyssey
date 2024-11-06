@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineOutOfPegsKey.h"
+#include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerTimeline.h"
 
 class UOdysseyAnimationLayer;
 class FOdysseyAnimationTimelineCellsShortcuts;
@@ -24,11 +25,13 @@ public:
     SOdysseyAnimationLayerImageTimeline();
 
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageTimeline)
+		: _PainterEditor(nullptr)
         {}
 		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
 		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
 		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
 		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
+		SLATE_ATTRIBUTE(TSharedPtr<FOdysseyPainterEditor>, PainterEditor)
     SLATE_END_ARGS()
 
 public:
@@ -39,6 +42,7 @@ public:
     );
 
 protected:
+	virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
 	virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
 	virtual FOptionalSize GetRowHeight(FName iRow) const override;
 	virtual EVisibility GetRowVisibility(FName iRow) const override;
@@ -61,6 +65,9 @@ public:
 
     virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
     virtual FReply OnKeyUp( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
+
+public:
+    UOdysseyAnimationLayer* GetLayer() const;
 
 protected:
     virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyAnimationCell* iCell) = 0;
@@ -119,4 +126,5 @@ protected:
 
     TSharedPtr<FOdysseyAnimationTimelineCellsShortcuts> mAnimationTimelineCellsShortcuts;
 	TSharedPtr<FOdysseyAnimationTimelineCellImageStaggerShortcuts> mAnimationTimelineCellImageStaggerShortcuts;
+	TAttribute<TSharedPtr<FOdysseyPainterEditor>> mEditor;
 };

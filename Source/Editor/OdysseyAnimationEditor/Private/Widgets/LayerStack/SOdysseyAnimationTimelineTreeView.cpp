@@ -19,6 +19,7 @@ SOdysseyAnimationTimelineTreeView::Construct(const FArguments& InArgs)
 	mOnActivateOutOfPegs = InArgs._OnActivateOutOfPegs;
 	mOnInactivateOutOfPegs = InArgs._OnInactivateOutOfPegs;
 	mOnIsOutOfPegsChecked = InArgs._OnIsOutOfPegsChecked;
+	mEditor = InArgs._PainterEditor;
 
     mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(mLayerStack);
 
@@ -72,6 +73,7 @@ SOdysseyAnimationTimelineTreeView::OnGenerateRow(UOdysseyLayer* iLayer, const TS
 	if (layerClass == UOdysseyAnimationLayerImageRaster::StaticClass())
     {
 		return SNew(SOdysseyAnimationLayerImageRasterTimeline, SharedThis(this), Cast<UOdysseyAnimationLayerImageRaster>(iLayer))
+			.PainterEditor(mEditor)
 			.TimelinePosition(mTimelinePosition)
 			.OnActivateOutOfPegs(mOnActivateOutOfPegs)
 			.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)
@@ -80,6 +82,7 @@ SOdysseyAnimationTimelineTreeView::OnGenerateRow(UOdysseyLayer* iLayer, const TS
 	if (layerClass == UOdysseyAnimationLayerImageVector::StaticClass())
     {
 		return SNew(SOdysseyAnimationLayerImageVectorTimeline, SharedThis(this), Cast<UOdysseyAnimationLayerImageVector>(iLayer))
+			.PainterEditor(mEditor)
 			.TimelinePosition(mTimelinePosition)
 			.OnActivateOutOfPegs(mOnActivateOutOfPegs)
 			.OnInactivateOutOfPegs(mOnInactivateOutOfPegs)

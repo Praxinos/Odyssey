@@ -7,6 +7,7 @@
 
 class FOdysseyAnimationCellSelection;
 class FOdysseyAnimationEditorTimelinePosition;
+class UOdysseyAnimationCell;
 
 class FOdysseyAnimationTimelineSelectionTool
     : public FOdysseyAnimationTimelineTool

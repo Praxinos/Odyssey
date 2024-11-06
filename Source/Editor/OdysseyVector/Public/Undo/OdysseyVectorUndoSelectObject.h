@@ -11,7 +11,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSelectObject : public FOdysseyVectorUn
 {
     public:
         ~FOdysseyVectorUndoSelectObject();
-        FOdysseyVectorUndoSelectObject( FOdysseyVectorGroupPaint* iScene );
+        FOdysseyVectorUndoSelectObject( FOdysseyVectorGroupPaint* iScene
+                                      , uint64 iReturnFlags );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

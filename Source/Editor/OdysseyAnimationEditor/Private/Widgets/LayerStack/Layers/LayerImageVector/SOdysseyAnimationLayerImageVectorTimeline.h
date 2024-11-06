@@ -6,6 +6,7 @@
 #include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerImageTimeline.h"
 
 class UOdysseyAnimationLayerImageVector;
+class SOdysseyAnimationLayerImageVectorTimelineInbetweening;
 
 /**
  * Implements a layer row widget
@@ -18,7 +19,19 @@ public:
     virtual ~SOdysseyAnimationLayerImageVectorTimeline();
     SOdysseyAnimationLayerImageVectorTimeline();
 
+public:
+    TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> GetInbetweeningListView();
+
 private:
     virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyAnimationCell* iCell) override;
     virtual FReply OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+    EVisibility IsInbetweeningTimelineVisible() const;
+
+protected:
+	virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
+	virtual EVisibility GetRowVisibility(FName iRow) const override;
+	TSharedRef<SWidget> GenerateInbetweeningRowTimelineWidget();
+
+private:
+    TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> mInbetweeningListView;
 };

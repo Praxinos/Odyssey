@@ -6,15 +6,21 @@
 
 #include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
 #include "OdysseyMediaVector.h"
-#include "Undo/OdysseyVectorUndoBucketAdd.h"
-#include "Undo/OdysseyVectorUndoBucketRemove.h"
-#include "Undo/OdysseyVectorUndoBucketParam.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditorVectorBucketView.h"
 #include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+
+#include "OdysseyVectorCycle.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorBucket.h"
+#include "OdysseyVectorEngine.h"
+#include "Undo/OdysseyVectorUndoPointPosition.h"
+#include "Undo/OdysseyVectorUndoBucketAdd.h"
+#include "Undo/OdysseyVectorUndoBucketRemove.h"
+#include "Undo/OdysseyVectorUndoBucketParam.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -46,13 +52,20 @@ UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBuck
 bool
 UOdysseyPainterEditorVectorPaintBucketTool::IsActivable() const
 {
-    return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    uint64 HUDFlags = GetEditor()->GetVectorHUDFlags();
+
+    return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>()
+          && ( HUDFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT
+            || HUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX );
 }
 
 uint64
 UOdysseyPainterEditorVectorPaintBucketTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // force redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
@@ -68,45 +81,52 @@ UOdysseyPainterEditorVectorPaintBucketTool::LoadVector( FOdysseyVectorGroupPaint
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // force redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
 UOdysseyPainterEditorVectorPaintBucketTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
                                                                  , const FKey& iKey )
 {
-    uint64 retFlags = 0;
+    uint64 notificationFlags = 0;
 
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
     // with the events processing in the OnKeyUpGlobalVector(), we do like that.
-    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) )
+    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
+      || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand ) )
     {
         mShowControls = true;
 
-        retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+        // force redraw
+        iScene->GetEngine()->Invalidate( 0 );
     }
 
     return UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( iScene, iKey )
-         | retFlags;
+         | notificationFlags;
 }
 
 uint64
 UOdysseyPainterEditorVectorPaintBucketTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
                                                                , const FKey& iKey )
 {
-    uint64 retFlags = 0;
+    uint64 notificationFlags = 0;
 
-    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl ) )
+    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
+      || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand ) )
     {
-        retFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+        // force redraw
+        iScene->GetEngine()->Invalidate( 0 );
     }
 
     mShowControls = false;
 
     return UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( iScene, iKey )
-         | retFlags;
+         | notificationFlags;
 }
 
 uint64
@@ -114,6 +134,8 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey )
 {
+    uint64 retFlags = 0;
+
     // valid for boith right and left clicks
     mPickedBucket = mBucketHUD->PickBucket( iScene, iPointInTexture.x, iPointInTexture.y );
 
@@ -146,7 +168,9 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                         GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.move-bucket","Paint Bucket"));
                         if( GUndo )
                         {
-                            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene, mPickedBucket );
+                            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPointPosition( iScene
+                                                                                          , mPickedBucket
+                                                                                          , retFlags );
 
                             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -165,7 +189,9 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                         GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.rotate-bucket","Paint Bucket"));
                         if( GUndo )
                         {
-                            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, mPickedBucket );
+                            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene
+                                                                                        , mPickedBucket
+                                                                                        , retFlags );
 
                             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -185,7 +211,9 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                         GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.alter-bucket","Paint Bucket"));
                         if( GUndo )
                         {
-                            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, mPickedBucket );
+                            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene
+                                                                                        , mPickedBucket
+                                                                                        , retFlags );
 
                             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                                 
@@ -211,10 +239,14 @@ uint64
 UOdysseyPainterEditorVectorPaintBucketTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                               , const FOdysseyPoint& iPointInTexture )
 {
+    uint64 notificationFlags = 0;
+
     mBucketHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return notificationFlags;
 
 }
 
@@ -250,6 +282,8 @@ uint64
 UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                              , const FOdysseyPoint& iPointInTexture )
 {
+    uint64 notificationFlags = 0;
+
     // Left mouse-click
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
@@ -306,10 +340,12 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDragVector( FOdysseyVectorGro
 
     mOldPointInTexture = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
 
-    iScene->Update( FOdysseyVectorObject::KEEPINVALIDATED ); // update vector scene
+    iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE ); // update vector scene
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return notificationFlags;
 }
 
 void
@@ -361,7 +397,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket
     iBucket->SetPropagated( Propagate );
 }
 
-void
+uint64
 UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysseyVectorGroupPaint* iScene
                                                                        , const FOdysseyPoint& iPointInTexture
                                                                        , const FKey& iKey )
@@ -370,6 +406,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
     std::vector<FOdysseyVectorBucket*> addedBucketArray;
     std::vector<FOdysseyVectorBucket*> paramBucketArray;
     std::vector<FOdysseyVectorCycle*> pickedCycleArray;
+    uint64 notificationFlags = 0;
 
     mBucketHUD->PickCycles( iScene
                           , iPointInTexture.x
@@ -448,7 +485,8 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
     {
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene
                                                                     , addedBucketArray
-                                                                    , paramBucketArray );
+                                                                    , paramBucketArray
+                                                                    , notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -462,13 +500,16 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
     {
         SetBucketColor( paramBucketArray[i] );
     }
+
+    return notificationFlags;
 }
 
-void
+uint64
 UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorRemoveBucket( FOdysseyVectorGroupPaint* iScene
                                                                        , FOdysseyVectorBucket* iBucket )
 {
     FOdysseyVectorObject* ownerObject = iBucket->GetOwner();
+    uint64 notificationFlags = 0;
 
     if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
     {
@@ -481,7 +522,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorRemoveBucket( FOdysse
     GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.remove-bucket","Paint Bucket"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( iScene, iBucket );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( iScene, iBucket, notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -490,18 +531,22 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorRemoveBucket( FOdysse
             source->RecordCurrentFrameUndo();
     }
     GEditor->EndTransaction();
+
+    return notificationFlags;
 }
 
-void
+uint64
 UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorPropagateBucket( FOdysseyVectorGroupPaint* iScene
                                                                           , FOdysseyVectorBucket* iBucket
                                                                           , bool iPropagate )
 {
+    uint64 notificationFlags = 0;
+
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.propagate-bucket","Paint Bucket"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket, notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -512,17 +557,21 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorPropagateBucket( FOdy
     GEditor->EndTransaction();
 
     iBucket->SetPropagated( iPropagate );
+
+    return notificationFlags;
 }
 
-void
+uint64
 UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorColorBucket( FOdysseyVectorGroupPaint* iScene
                                                                       , FOdysseyVectorBucket* iBucket )
 {
+    uint64 notificationFlags = 0;
+
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.color-bucket","Paint Bucket"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket, notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -533,17 +582,21 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorColorBucket( FOdyssey
     GEditor->EndTransaction();
 
     SetBucketColor( iBucket );
+
+    return notificationFlags;
 }
 
-void
+uint64
 UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorClearBucket( FOdysseyVectorGroupPaint* iScene
                                                                       , FOdysseyVectorBucket* iBucket )
 {
+    uint64 notificationFlags = 0;
+
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.clear-bucket","Paint Bucket"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket, notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -554,6 +607,8 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorClearBucket( FOdyssey
     GEditor->EndTransaction();
 
     iBucket->SetSolidColor( 0, 0, 0, 0 );
+
+    return notificationFlags;
 }
 
 uint64
@@ -561,6 +616,8 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroup
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , const FKey& iKey )
 {
+    uint64 notificationFlags = 0;
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -571,7 +628,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroup
                 case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_BUCKET:
                     if ( FSlateApplication::Get().GetModifierKeys().IsAltDown() )
                     {
-                        OnMouseUpVectorRemoveBucket( iScene, mPickedBucket );
+                        notificationFlags |= OnMouseUpVectorRemoveBucket( iScene, mPickedBucket );
                         //OnMouseUpVectorClearBucket( iScene, mPickedBucket );
                     }
                     /*else
@@ -581,9 +638,9 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroup
                 break;
 
                 case FOdysseyPainterEditorVectorPaintBucketToolHUD::PICK_PROPAGATE:
-                    OnMouseUpVectorPropagateBucket( iScene
-                                                  , mPickedBucket
-                                                  , mPickedBucket->IsPropagated() ? false : true );
+                    notificationFlags |= OnMouseUpVectorPropagateBucket( iScene
+                                                                       , mPickedBucket
+                                                                       , mPickedBucket->IsPropagated() ? false : true );
                 break;
 
                 default:
@@ -592,16 +649,18 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroup
         }
         else
         {
-            OnMouseUpVectorCreateBucket( iScene, iPointInTexture, iKey );
+            notificationFlags |= OnMouseUpVectorCreateBucket( iScene, iPointInTexture, iKey );
         }
 
         mPickedBucket = nullptr;
 
-        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return notificationFlags;
 }
 
 bool
@@ -731,12 +790,13 @@ UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam( FOdysseyVectorBuck
     FOdysseyVectorGroupPaint* scene = iDestinationBucket->GetOwner()->GetScene();
     FOdysseyVectorBucket& sourceBucket = GetCopiedBucket();
     ::ULIS::FVec2D destinationBucketCoords = iDestinationBucket->GetCoords();
+    uint64 notificationFlags = 0;
 
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("vector-paint-bucket-tool.transaction.create-bucket","Paint Bucket"));
     if( GUndo )
     {
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( scene, iDestinationBucket );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( scene, iDestinationBucket, notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -749,9 +809,8 @@ UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam( FOdysseyVectorBuck
     sourceBucket.Copy( iDestinationBucket );
 
     // we only keep the coords
+    // Note: this will invalidate the engine as well.
     iDestinationBucket->SetCoords( destinationBucketCoords.x, destinationBucketCoords.y );
-
-    iDestinationBucket->Invalidate();
 }
 
 TSharedRef<SWidget>

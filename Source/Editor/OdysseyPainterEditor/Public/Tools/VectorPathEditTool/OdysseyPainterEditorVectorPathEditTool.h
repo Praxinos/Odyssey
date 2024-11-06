@@ -5,11 +5,14 @@
 
 #include "CoreMinimal.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
-#include "OdysseyVector.h"
-
+#include "OdysseyVectorSegment.h"
+#include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyPainterEditorVectorPathEditTool.generated.h"
 
 class FOdysseyPainterEditorVectorPathEditToolHUD;
+class FOdysseyVectorVertex;
+class FOdysseyVectorGroupPaint;
+class FOdysseyVectorHandleSegment;
 
 UENUM()
 enum class ePathPickingMode : uint8
@@ -109,19 +112,19 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         //                                  , const FName& iPropertyName ) override;
 
     private:
-        void OnMouseUpCutPaths( FOdysseyVectorGroupPaint* iScene
-                              , const FOdysseyPoint& iPointInTexture );
-        void OnMouseUpAddPoint( FOdysseyVectorGroupPaint* iScene
-                              , const FOdysseyPoint& iPointInTexture
-                              , const std::vector<FOdysseyVectorSegment*>& iPickedSegmentArray );
-        void OnMouseUpDeletePoint( FOdysseyVectorGroupPaint* iScene
-                                 , const std::vector<FOdysseyVectorPoint*>& iPickedPointArray );
-        void OnMouseDownPickPoint( FOdysseyVectorGroupPaint* iScene
-                                 , const FOdysseyPoint& iPointInTexture
-                                 , const FKey& iKey );
-        void PickObjects( FOdysseyVectorGroupPaint* iScene
-                        , double iX
-                        , double iY );
+        uint64 OnMouseUpCutPaths( FOdysseyVectorGroupPaint* iScene
+                                , const FOdysseyPoint& iPointInTexture );
+        uint64 OnMouseUpAddPoint( FOdysseyVectorGroupPaint* iScene
+                                , const FOdysseyPoint& iPointInTexture
+                                , const std::vector<FOdysseyVectorSegment*>& iPickedSegmentArray );
+        uint64 OnMouseUpDeletePoint( FOdysseyVectorGroupPaint* iScene
+                                   , const std::vector<FOdysseyVectorPoint*>& iPickedPointArray );
+        uint64 OnMouseDownPickPoint( FOdysseyVectorGroupPaint* iScene
+                                   , const FOdysseyPoint& iPointInTexture
+                                   , const FKey& iKey );
+        uint64 PickObjects( FOdysseyVectorGroupPaint* iScene
+                          , double iX
+                          , double iY );
 /*
         void GroupPaintDeletePoint( FOdysseyVectorGroupPaint* iGroupPaint
                                   , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray

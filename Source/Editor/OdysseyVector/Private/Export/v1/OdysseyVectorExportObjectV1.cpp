@@ -1,6 +1,9 @@
 #include "Export/v1/OdysseyVectorExport.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorPath.h"
+#include "OdysseyVectorGroup.h"
+#include "OdysseyVectorGroupPaint.h"
 
 uint32
 FOdysseyVectorExportV1::GetObjectType( FOdysseyVectorObject& iObject )

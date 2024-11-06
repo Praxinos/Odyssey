@@ -2,6 +2,7 @@
 #include "OdysseyVector.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorVertex.h"
+#include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorSegmentCubic.h"

@@ -1,6 +1,10 @@
 #include "Import/v1/OdysseyVectorImport.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorVertex.h"
+#include "OdysseyVectorSegment.h"
+#include "OdysseyVectorSegmentCubic.h"
+#include "OdysseyVectorPath.h"
 
 void
 FOdysseyVectorImportV1::ReadPathGeometryCubicSegments( FOdysseyVectorPath& iPath

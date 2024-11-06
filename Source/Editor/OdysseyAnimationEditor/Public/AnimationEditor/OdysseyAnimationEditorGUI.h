@@ -27,11 +27,12 @@ public:
     void Initialize();
     void Finalize();
 	void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
-    void OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
+    void OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iNotificationFlags );
     void OnCurrentFrameChanged( UOdysseyAnimation* iAnimation );
-    void ParseVectorSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
+    void ParseVectorNotifications( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
     void OnSourceChanged();
     void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
+    void OnMediaChanged();
 
 protected:
     //Init

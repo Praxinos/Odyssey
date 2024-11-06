@@ -12,6 +12,7 @@
 #include "BrushContext/OdysseyLayerStackEditorBrushContext.h"
 #include "Shortcuts/Global/OdysseyAnimationGlobalShortcuts.h"
 #include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
+#include "HUD/OdysseyVectorHUD.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -40,7 +41,12 @@ FOdysseyAnimationEditorExtension::Initialize()
     GetEditor()->OnSourceChanged().AddRaw(this, &FOdysseyAnimationEditorExtension::OnSourceChanged);
 	mGUI = MakeShareable(new FOdysseyAnimationEditorGUI(this));
 	mGUI->Initialize();
-	
+
+    mEditor->SetVectorHUDFlags( FOdysseyVectorHUD::HUD_MODE_OBJECT
+                              | FOdysseyVectorHUD::HUD_MODE_OBJECT_ALLOWED
+                              | FOdysseyVectorHUD::HUD_MODE_VERTEX_ALLOWED
+                              | FOdysseyVectorHUD::HUD_MODE_INBETWEEN_ALLOWED );
+
 	mOutOfPegsTool = NewObject<UOdysseyAnimationEditorOutOfPegsTool>();
 	mOutOfPegsTool->SetEditor(GetEditor());
 

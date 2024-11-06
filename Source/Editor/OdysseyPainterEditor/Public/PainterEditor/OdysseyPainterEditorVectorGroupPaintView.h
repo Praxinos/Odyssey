@@ -22,9 +22,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
 
     protected:
         virtual void ImportParam() override;
-        virtual uint64 PropertyChanged( const FName& iPropertyName
-                                      , const FName& iMemberPropertyName
-                                      , const FName& iCategory ) override;
+        virtual void PropertyChanged( const FName& iPropertyName
+                                    , const FName& iMemberPropertyName
+                                    , const FName& iCategory ) override;
 
     public:
         UPROPERTY( EditAnywhere
@@ -50,9 +50,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGroupPaintView : publi
         double GapTolerance;
 
         UPROPERTY( EditAnywhere
-                 , Category=PaintGroup
-                 , meta = ( ToolTip = "Intersects Canevas" ) )
-        bool IntersectsCanevas;
+                 , Category = PaintGroup
+                 , meta = ( ToolTip = "Intersects Canvas" ) )
+        bool IntersectsCanvas;
 
         // commented out: now handled at layer level
         //UPROPERTY( EditAnywhere, Category=PaintGroup )

@@ -2,14 +2,22 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
-#include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "OdysseyPaletteEntryColor.h"
 #include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
 #include "PainterEditor/OdysseyPainterEditor.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+
+// Vector engine
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorPrimitive.h"
+#include "OdysseyVectorEllipse.h"
+#include "OdysseyVectorLine.h"
+#include "OdysseyVectorRectangle.h"
+#include "Undo/OdysseyVectorUndoObjectAdd.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
@@ -44,22 +52,32 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrim
 bool
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::IsActivable() const
 {
-    return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
+    uint64 HUDFlags = GetEditor()->GetVectorHUDFlags();
+
+    return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>()
+          && ( HUDFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT
+            || HUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX );
 }
 
 uint64
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // force redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // force redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
@@ -110,6 +128,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
                                                                   , const FOdysseyPoint& iPointInTexture
                                                                   , const FKey& iKey )
 {
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW;
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -155,12 +176,14 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
 
         //mSelectionChanged.Broadcast(iScene);
 
-        iScene->Update( 0 ); // update invalidated objects
+        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated objects
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return notificationFlags;
 }
 
 double
@@ -188,6 +211,8 @@ uint64
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
                                                                   , const FOdysseyPoint& iPointInTexture )
 {
+    uint64 notificationFlags = 0;
+
     // Left mouse button clicked
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
@@ -257,12 +282,14 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
             }
         }
 
-        iScene->Update( /*FOdysseyVectorObject::FREQUENTUPDATES*/0 ); // update invalidated objects
+        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated objects
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return notificationFlags;
 }
 
 uint64
@@ -270,6 +297,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
                                                                 , const FOdysseyPoint& iPointInTexture
                                                                 , const FKey& iKey )
 {
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW;
+
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
@@ -285,7 +315,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
             mPrimitive = nullptr;
 
             parentObject->AppendChild( path );
-            path->Invalidate();
+            //path->Invalidate();
             path->UpdateMatrix();
 
             //iScene->GetEngine()->SelectObject( path );
@@ -294,7 +324,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
             GEditor->BeginTransaction(LOCTEXT("vector-primitive-drawing-tool.transaction.draw-primitive","Vector Primitive Drawing Tool"));
             if( GUndo )
             {
-                FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectAdd( iScene, path );
+                FOdysseyVectorUndo *undo = new FOdysseyVectorUndoObjectAdd( iScene, path, notificationFlags );
 
                 GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -305,14 +335,13 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
             GEditor->EndTransaction();
         }
 
-        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS ); // update invalidate objects
+        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidate objects
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-         | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-         | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
-         | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return notificationFlags;
 }
 
 TSharedRef<SWidget>

@@ -14,7 +14,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoBucketAdd : public FOdysseyVectorUndo
     public:
         ~FOdysseyVectorUndoBucketAdd();
         FOdysseyVectorUndoBucketAdd( FOdysseyVectorGroupPaint* iScene
-                                   , std::vector<FOdysseyVectorBucket*>& iBucketArray );
+                                   , std::vector<FOdysseyVectorBucket*>& iBucketArray
+                                   , uint64 iReturnFlags );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

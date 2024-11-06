@@ -3,10 +3,13 @@
 
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanToolHUD.h"
-#include "Undo/OdysseyVectorUndoObjectTransform.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+// Vector engine
+#include "OdysseyVectorGroupPaint.h"
+#include "Undo/OdysseyVectorUndoObjectTransform.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -38,16 +41,22 @@ UOdysseyPainterEditorVectorScenePanTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorScenePanTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // force redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
 UOdysseyPainterEditorVectorScenePanTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return 0;
 }
 
 uint64
@@ -56,6 +65,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
                                                           , const FKey& iKey )
 {
     BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint(iPointInTexture.x,iPointInTexture.y);
+    uint64 notificationFlags = 0;
 
     mDragged = false;
 
@@ -64,7 +74,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
     if( GUndo )
     {
         // save selected object translation/rotation/scaling before transform
-        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene );
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoObjectTransform( iScene, iScene, notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
                 
@@ -77,8 +87,10 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
     mDownLocalMouseX = localCoords.x;
     mDownLocalMouseY = localCoords.y;
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return notificationFlags;
 }
 
 void
@@ -144,6 +156,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorGroupP
                                                           , const FOdysseyPoint& iPointInTexture )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+    uint64 notificationFlags = 0;
 
     mDragged = true;
 
@@ -159,8 +172,10 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorGroupP
         }
     }
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-         | FOdysseyVectorEngine::SIGNAL_INTERACTIVE;
+    // redraw
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    return notificationFlags;
 }
 
 uint64
@@ -168,9 +183,14 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorGroupPai
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey )
 {
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    uint64 retFlags = 0;
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+    // redraw
+    iScene->GetEngine()->Invalidate( 0 );
+
+    return retFlags;
 }
 
 FText

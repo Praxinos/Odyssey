@@ -5,13 +5,13 @@
 
 #include "CoreMinimal.h"
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
-#include "OdysseyVector.h"
-#include "Undo/OdysseyVectorUndoPointPosition.h"
-#include "Undo/OdysseyVectorUndoObjectTransform.h"
 
 #include "OdysseyPainterEditorVectorTransformTool.generated.h"
 
 class FOdysseyPainterEditorVectorTransformToolHUD;
+class FOdysseyVectorTagInbetweener;
+class FOdysseyVectorUndo;
+class FInbetweenerBreakdown;
 
 UCLASS( HideCategories = (SelectionTool) )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public UOdysseyPainterEditorVectorSelectionTool
@@ -66,7 +66,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
         void GetTransformedObjectList( FOdysseyVectorGroupPaint* iScene
                                      , std::list<FOdysseyVectorObject*>& oObjectList );
 
+        EVisibility IsModeInbetween() const;
+
     private:
+        std::list<FInbetweenerBreakdown*> mTransformedBreakdownList;
         FOdysseyPainterEditorVectorTransformToolHUD* mTransformHUD;
         std::vector<FOdysseyVectorVertex*> mTransformedVertexArray;
         std::vector<FOdysseyVectorHandleSegment*> mTransformedHandleArray;
@@ -94,4 +97,15 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
                  , Category=TransformTool
                  , meta = ( ToolTip = "World" ) )
         bool World;
+
+        UPROPERTY( EditDefaultsOnly
+                 , Category = TransformTool )
+        bool bInbetweenMode;
+
+        UPROPERTY( EditAnywhere
+                 , Category = TransformTool
+                 , meta = ( ToolTip = "Show Inbetweens"
+                          , EditCondition = "bInbetweenMode"
+                          , EditConditionHides ) )
+        bool ShowInbetweens;
 };

@@ -633,7 +633,9 @@ FOdysseyVectorVertex::SetRadius( double iRadius )
 {
     if( ( mFlags & LOCKED ) == 0 )
     {
-        mRadius = iRadius;
+        // quickfix. sometimes intbetweenerTag functions pass a negative radius
+        // when the shape is committed but I don't know why.
+        mRadius = fabs( iRadius );
 
         InvalidateSegments();
     }

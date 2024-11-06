@@ -2,6 +2,8 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorGroupPaint.h"
 
 void
 FOdysseyVectorImportV1::Read( FOdysseyVectorGroupPaint* iScene, FArchive &Ar, uint64 iChunkEnd )
@@ -39,7 +41,7 @@ FOdysseyVectorImportV1::Read( FOdysseyVectorGroupPaint* iScene, FArchive &Ar, ui
             } );
 
         iScene->UpdateMatrix();
-        iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
     // Jump to the end of the junk, regardless of the fact that we've read nested chunks or not.

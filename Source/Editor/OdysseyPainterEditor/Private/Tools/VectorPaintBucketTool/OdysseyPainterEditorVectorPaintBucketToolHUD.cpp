@@ -2,6 +2,10 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
 
+#include "OdysseyVectorBucket.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorCycle.h"
+
 FOdysseyPainterEditorVectorPaintBucketToolHUD::~FOdysseyPainterEditorVectorPaintBucketToolHUD()
 {
 }

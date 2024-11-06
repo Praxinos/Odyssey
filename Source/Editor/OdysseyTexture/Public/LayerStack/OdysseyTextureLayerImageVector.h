@@ -7,11 +7,15 @@
 
 #include <ULIS>
 
-#include "OdysseyVector.h"
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorRoot.h"
 
 #include "OdysseyTextureLayerImageVector.generated.h"
 
 class FOdysseyVectorBlock;
+class FOdysseyVectorGroupPaint;
+class FOdysseyVectorEngine;
 
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
@@ -20,10 +24,6 @@ class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
     GENERATED_BODY()
 
 private:
-	// handle to a callback to refresh the layer when a property of an object's details view is changed
-	FOdysseyVectorEngine* mEngine;
-	TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
-
 	void Init( uint32 iWidth, uint32 iHeight );
 
 public:
@@ -36,6 +36,12 @@ protected:
 
 	UPROPERTY()
 	uint32 Height;
+
+private:
+	// handle to a callback to refresh the layer when a property of an object's details view is changed
+	FOdysseyVectorRoot* mRoot;
+	FOdysseyVectorSharedEnv mSharedEnv;
+	TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
 
 	UPROPERTY()
 	FGuid mVectorBlockId;

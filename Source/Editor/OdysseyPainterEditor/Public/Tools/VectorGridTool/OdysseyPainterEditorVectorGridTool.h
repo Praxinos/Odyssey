@@ -5,8 +5,6 @@
 
 #include "CoreMinimal.h"
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
-#include "OdysseyVector.h"
-#include "Undo/OdysseyVectorUndoPointPosition.h"
 
 #include "OdysseyPainterEditorVectorGridTool.generated.h"
 
