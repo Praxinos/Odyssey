@@ -1,6 +1,8 @@
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionToolHUD.h"
-#include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
+// Vector engine
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyPainterEditorVectorSelectionToolHUD::~FOdysseyPainterEditorVectorSelectionToolHUD()
 {
@@ -35,7 +37,16 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Unload( FOdysseyVectorGroupPaint* i
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
-    UpdateSelectionBox( iScene, false, mSelectionTool->GetEditor()->GetVectorHUDFlags() );
+    uint64 hudFlags = mSelectionTool->GetEditor()->GetVectorHUDFlags();
+
+    if( hudFlags & HUD_MODE_INBETWEEN )
+    {
+        hudFlags &= (~HUD_MODE_INBETWEEN);
+
+        hudFlags |= HUD_MODE_OBJECT;
+    }
+
+    UpdateSelectionBox( iScene, false, hudFlags );
 }
 
 BLImage*
@@ -163,7 +174,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
     uint64 hudFlags = mSelectionTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw object details only in vertex mode
-    if( hudFlags & HUD_MODE_VERTEX )
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
         DrawObjects( iBLContext
                    , iScene
@@ -173,7 +184,8 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
                    , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
     }
 
-    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT )
+    if( ( hudFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT    )
+     || ( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) )
     {
         if( iScene->GetEngine()->GetSelectedObjectList().size() )
         {

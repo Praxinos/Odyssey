@@ -3,6 +3,10 @@
 
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
 #include "OdysseyMediaRaster.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorSource.h"
+#include "OdysseyHUDElement.h"
+#include "OdysseyHUDSystem.h"
 #include "Tools/RasterEraserTool/Widgets/SOdysseyPainterEditorRasterEraserToolTopTab.h"
 
 #include "FreehandShape/OdysseyFreehandShape.h"

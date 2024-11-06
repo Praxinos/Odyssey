@@ -342,7 +342,7 @@ FOdysseyVectorSegment::Invalidate()
 }
 
 void
-FOdysseyVectorSegment::Update()
+FOdysseyVectorSegment::Update( uint32 iUpdateFlags )
 {
     mIsInvalidated = false;
 
@@ -443,6 +443,12 @@ FOdysseyVectorSegment::SetBBoxInParent( const ::ULIS::FRectD& iBBoxInParent )
 FOdysseyVectorSegment::GetBBoxInParent()
 {
     return mBBoxInParent;
+}
+
+std::vector<FOdysseyVectorPoint>&
+FOdysseyVectorSegment::GetFractionPointBuffer()
+{
+    return mFractionPointBuffer;
 }
 
 /*

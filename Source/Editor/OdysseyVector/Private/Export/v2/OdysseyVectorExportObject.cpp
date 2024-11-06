@@ -1,6 +1,11 @@
 #include "Export/v2/OdysseyVectorExport.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorPath.h"
+#include "OdysseyVectorGroup.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorTagInbetweener.h"
 
 uint32
 FOdysseyVectorExportV2::GetObjectType( FOdysseyVectorObject& iObject )
@@ -158,6 +163,25 @@ FOdysseyVectorExportV2::WriteObjectBackgroundBucket( FOdysseyVectorObject& iObje
 }
 
 void
+FOdysseyVectorExportV2::WriteObjectTags( FOdysseyVectorObject& iObject, FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_OBJECT_TAGS
+                            , Ar
+                            , [&iObject](FArchive &Ar) -> void
+    {
+        for( FOdysseyVectorTag* tag : iObject.GetTagList() )
+        {
+            if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+            {
+                FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+                FOdysseyVectorExportV2::WriteTagInbetweener( *inbetweenerTag, Ar );
+            }
+        }
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteObjectForegroundColor( FOdysseyVectorObject& iObject, FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_OBJECT_FOREGROUNDCOLOR
@@ -225,6 +249,7 @@ FOdysseyVectorExportV2::WriteObjectChunks( FOdysseyVectorObject& iObject, FArchi
     WriteObjectExpansion( iObject, Ar );
     WriteObjectForegroundBucket( iObject, Ar );
     WriteObjectBackgroundBucket( iObject, Ar );
+    WriteObjectTags( iObject, Ar );
 }
 
 void

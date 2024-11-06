@@ -88,6 +88,8 @@ UOdysseyPainterEditorVectorBucketView::PropertyChanged( const FName& iPropertyNa
 void
 UOdysseyPainterEditorVectorBucketView::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
+    uint64 retFlags = 0;
+
     Super::PostEditChangeProperty(PropertyChangedEvent);
 
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive )
@@ -101,7 +103,7 @@ UOdysseyPainterEditorVectorBucketView::PostEditChangeProperty( FPropertyChangedE
         GEditor->BeginTransaction(LOCTEXT("vector-bucket.transaction.property-changed","Property Changed"));
         if( GUndo )
         {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoBucketParam( vectorScene, mBucket );
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoBucketParam( vectorScene, mBucket, retFlags );
             // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
             // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
             // of a call to GEditor::PostEditChangeProperty()
@@ -118,8 +120,8 @@ UOdysseyPainterEditorVectorBucketView::PostEditChangeProperty( FPropertyChangedE
                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
         vectorScene->Update( 0 );
-        // calls delegates
-        vectorScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+        // request refresh
+        vectorScene->GetEngine()->Invalidate( 0 );
     }
 }
 

@@ -66,24 +66,57 @@ SOdysseyAnimationComponentTrack::RebuildWidgets()
         + SVerticalBox::Slot()
         .AutoHeight()
         [
-            SNew(SBox)
+            /* SNew(SBox)
             .HeightOverride(this, &SOdysseyAnimationComponentTrack::GetTreeViewHeight)
-            [
+            [ */
                 SNew(SOdysseyAnimationLayerStackTreeView)
+                .PainterEditor_Lambda(
+                    [animation]() ->TSharedPtr<FOdysseyPainterEditor>
+                    {
+                        if (!animation)
+                            return nullptr;
+
+                        if (!GLevelEditorModeTools().IsModeActive( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId ))
+                            return nullptr;
+
+                        FEdMode* edMode = GLevelEditorModeTools().GetActiveMode( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId );
+                        if (!edMode)
+                            return nullptr;
+
+                        FOdysseyViewportDrawingEditorEdMode* odysseyEdMode = static_cast<FOdysseyViewportDrawingEditorEdMode*>(edMode);
+
+                        TSharedPtr<FOdysseyViewportDrawingEditorToolkit> toolkit = odysseyEdMode->GetViewportDrawingEditorToolkit();
+                        if(!toolkit)
+                            return nullptr;
+
+                        TSharedPtr<FOdysseyAnimationEditorExtension> animationExtension = toolkit->GetAnimationExtension();
+                        if (!animationExtension)
+                            return nullptr;
+
+                        if (animationExtension->Animation() != animation)
+                            return nullptr;
+
+                        TSharedPtr<FOdysseyPainterEditor> editor = odysseyEdMode->GetEditor();
+                        if (!editor)
+                            return nullptr;
+
+                        return editor;
+                    }
+                )
                 .Visibility(this, &SOdysseyAnimationComponentTrack::GetLayersVisibility)
                 .LayerStack(animation->GetLayerStack())
                 .ExternalScrollbar(SNew(SScrollBar))
-            ]
+            //]
         ];
 
     this->ChildSlot.AttachWidget(widget.ToSharedRef());
 }
 
-FOptionalSize
+/* FOptionalSize
 SOdysseyAnimationComponentTrack::GetTreeViewHeight() const
 {
     return FOdysseyAnimationTrackEditorSection::GetTreeViewHeight(mComponent);
-}
+} */
 
 void
 SOdysseyAnimationComponentTrack::OnDisplayLayersCheckBoxStateChanged(ECheckBoxState iState)

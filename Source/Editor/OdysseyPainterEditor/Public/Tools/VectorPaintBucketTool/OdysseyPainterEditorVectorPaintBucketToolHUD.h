@@ -5,6 +5,10 @@
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.h"
 
+class FOdysseyVectorCycle;
+class FOdysseyVectorBucket;
+class FOdysseyVectorObject;
+
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
     public:

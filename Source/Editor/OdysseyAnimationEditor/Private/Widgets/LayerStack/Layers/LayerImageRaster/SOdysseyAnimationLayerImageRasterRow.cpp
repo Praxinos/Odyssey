@@ -29,6 +29,7 @@ void SOdysseyAnimationLayerImageRasterRow::Construct(
 {
     ensure(iAnimationLayerImageRaster);
     mAnimationLayerImageRaster = iAnimationLayerImageRaster;
+    mEditor = InArgs._PainterEditor;
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments()

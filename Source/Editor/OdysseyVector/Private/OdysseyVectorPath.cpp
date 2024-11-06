@@ -32,7 +32,7 @@ FOdysseyVectorPath::FOdysseyVectorPath( const FString& iName )
 
     mChainArray.reserve( 10 );
 
-    Invalidate();
+    //Invalidate();
 /*
     mBrush = new BLImage();
     if( mBrush )
@@ -156,7 +156,7 @@ FOdysseyVectorPath::SetJointType( eJointType iJointType, bool iInvalidate )
 
     if( iInvalidate )
     {
-        Invalidate();
+        Invalidate( INVALIDATE_SHAPE );
     }
 }
 
@@ -173,7 +173,7 @@ FOdysseyVectorPath::SetMiterLimit( double iMiterLimit, bool iInvalidate )
 
     if( iInvalidate )
     {
-        Invalidate();
+        Invalidate( INVALIDATE_SHAPE );
     }
 }
 
@@ -194,7 +194,7 @@ FOdysseyVectorPath::ExportParam( FOdysseyVectorObject* iDestinationObject, bool 
 
     if( iInvalidate )
     {
-        iDestinationObject->Invalidate();
+        iDestinationObject->Invalidate( INVALIDATE_SHAPE | INVALIDATE_COLOR | INVALIDATE_TOPOLOGY );
     }
 }
 
@@ -316,13 +316,26 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
                  , mInvalidatedSegmentList.begin()
                  , mInvalidatedSegmentList.end()
                  , [ this ]( FOdysseyVectorSegment *segment )*/
-    for ( FOdysseyVectorSegment* segment : mInvalidatedSegmentList )
-    {
-        segment->Update();
-    }
-    /*);*/
 
+    if( iUpdateFlags & UPDATE_FORCE )
+    {
+        for ( FOdysseyVectorSegment* segment : mSegmentList )
+        {
+            segment->Update( iUpdateFlags );
+        }
+    }
+    else
+    {
+        for ( FOdysseyVectorSegment* segment : mInvalidatedSegmentList )
+        {
+            segment->Update( iUpdateFlags );
+        }
+    }
+
+    // clear this anyway
     mInvalidatedSegmentList.clear();
+
+    /*);*/
 
     if( mInvalidationFlags & INVALIDATE_TOPOLOGY )
     {
@@ -358,11 +371,6 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
                            , point1.x
                            , point1.y );
         }
-    }
-
-    if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
-    {
-        mInvalidationFlags = 0;
     }
 }
 
@@ -468,9 +476,9 @@ FOdysseyVectorPath::InvalidateSegment( FOdysseyVectorSegment* iSegment )
     if( iSegment->IsInvalidated() == false )
     {
         mInvalidatedSegmentList.push_back( iSegment );
-
-        Invalidate();
     }
+
+    Invalidate( INVALIDATE_SHAPE );
 }
 
 void
@@ -568,15 +576,8 @@ FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
     Invalidate( INVALIDATE_TOPOLOGY );
 }
 
-
 void
-FOdysseyVectorPath::Invalidate()
-{
-    Invalidate( INVALIDATE_ALL );
-}
-
-void
-FOdysseyVectorPath::Invalidate( uint32 iInvalidationFlags )
+FOdysseyVectorPath::Invalidate( uint64 iInvalidationFlags )
 {
     //if( iInvalidationFlags & INVALIDATE_MATRIX )
     //{
@@ -1178,7 +1179,7 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
     //UE_LOG(LogTemp, Warning, TEXT("Added Segments: %d"), oAddedVertexArray.size() );
     //UE_LOG(LogTemp, Warning, TEXT("Added Vertices: %d"), oAddedSegmentArray.size() );
 
-    Invalidate();
+    Invalidate( INVALIDATE_SHAPE | INVALIDATE_COLOR | INVALIDATE_TOPOLOGY );
 
     // return true if path is empty
     return ( mVertexList.size() == 0 ) && ( mSegmentList.size() == 0 );
@@ -1437,6 +1438,34 @@ typedef struct FStitchingPair
         return ( ( vertex[0] == rhs.vertex[0] ) && ( vertex[1] == rhs.vertex[1] ) );
     }
 } FStitchingPair;
+
+FOdysseyVectorSegment*
+FOdysseyVectorPath::GetSegmentByID( uint32 iID )
+{
+    for( FOdysseyVectorSegment* segment : mSegmentList )
+    {
+        if( segment->GetID() == iID )
+        {
+            return segment;
+        }
+    }
+
+    return nullptr;
+}
+
+FOdysseyVectorVertex*
+FOdysseyVectorPath::GetVertexByID( uint32 iID )
+{
+    for( FOdysseyVectorVertex* vertex : mVertexList )
+    {
+        if( vertex->GetID() == iID )
+        {
+            return vertex;
+        }
+    }
+
+    return nullptr;
+}
 
 //static
 void
@@ -1997,7 +2026,7 @@ FOdysseyVectorPath::GetInvalidatedSegmentList()
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorPath::CopyShape()
+FOdysseyVectorPath::CopyShape( uint64 iCopyFlags )
 {
     FOdysseyVectorPath* cubicPathCopy = new FOdysseyVectorPath( FString("Cubic Path") );
     std::map<FOdysseyVectorVertex*, FOdysseyVectorVertex*> lookupTable;
@@ -2009,9 +2038,21 @@ FOdysseyVectorPath::CopyShape()
 
     for( FOdysseyVectorVertex* originalVertex : mVertexList )
     {
-        FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( originalVertex->GetX()
-                                                                  , originalVertex->GetY()
-                                                                  , originalVertex->GetRadius() );
+        ::ULIS::FVec2D originalVertexCoords = originalVertex->GetCoords();
+        double originalVertexRadius = originalVertex->GetRadius();
+        FOdysseyVectorVertex* newVertex;
+
+        if( iCopyFlags & COPY_WORLDCOORDS )
+        {
+            originalVertexCoords = FOdysseyVector::MapPoint( mWorldMatrix, originalVertexCoords );
+            originalVertexRadius = FOdysseyVector::MapVector( mWorldMatrix
+                                                            , ::ULIS::FVec2D( originalVertexRadius * 0.7071f
+                                                                            , originalVertexRadius * 0.7071f ) ).Distance();
+        }
+
+        newVertex = new FOdysseyVectorVertex( originalVertexCoords.x
+                                            , originalVertexCoords.y
+                                            , originalVertexRadius );
 
         newVertex->SetHandleAligned( originalVertex->IsHandleAligned() );
 
@@ -2024,21 +2065,106 @@ FOdysseyVectorPath::CopyShape()
     {
         if( originalSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
         {
-            FOdysseyVectorSegmentCubic* originalCubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(originalSegment);
-            FOdysseyVectorVertex* vertex0 = static_cast<FOdysseyVectorVertex*>( originalCubicSegment->GetPoint(0) );
-            FOdysseyVectorVertex* vertex1 = static_cast<FOdysseyVectorVertex*>( originalCubicSegment->GetPoint(1) );
-            FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( cubicPathCopy
-                                                                                        , lookupTable[vertex0]
-                                                                                        , originalCubicSegment->GetHandle(0)->GetX()
-                                                                                        , originalCubicSegment->GetHandle(0)->GetY()
-                                                                                        , originalCubicSegment->GetHandle(1)->GetX()
-                                                                                        , originalCubicSegment->GetHandle(1)->GetY()
-                                                                                        , lookupTable[vertex1]
-                                                                                        , true );
+            if( iCopyFlags & COPY_RETOPOLOGY )
+            {
+                std::vector<FOdysseyVectorFraction>& fractionCache = originalSegment->GetFractionCache();
+                uint32 fractionCount = originalSegment->GetFractionCount();
+                std::vector<::ULIS::FVec2D> pointBuffer;
+                FOdysseyVectorVertex* vertex0 = originalSegment->GetVertex(0);
+                FOdysseyVectorVertex* vertex1 = nullptr;
 
-            cubicPathCopy->AddSegment( newCubicSegment );
+                pointBuffer.reserve( originalSegment->GetFractionPointBuffer().size() + 2 );
+                pointBuffer.push_back( FOdysseyVector::MapPoint( mWorldMatrix
+                                                               , originalSegment->GetVertex(0)->GetCoords() ) );
+
+                for( uint32 i = 0; i < fractionCount - 1; i++ )
+                {
+                    FOdysseyVectorFraction& fraction = fractionCache[i];
+                    ::ULIS::FVec2D fractionPointCoords = fraction.point[1]->GetCoords();
+
+                    if( iCopyFlags & COPY_WORLDCOORDS )
+                    {
+                        fractionPointCoords = FOdysseyVector::MapPoint( mWorldMatrix, fractionPointCoords );
+                    }
+
+                    pointBuffer.push_back( fractionPointCoords );
+                }
+
+                pointBuffer.push_back( FOdysseyVector::MapPoint( mWorldMatrix
+                                                               , originalSegment->GetVertex(1)->GetCoords() ) );
+
+                FOdysseyVector::FitCurve( pointBuffer
+                                        , 4.0f
+                                        , [ &lookupTable
+                                          , cubicPathCopy
+                                          , originalSegment
+                                          , &vertex0
+                                          , &vertex1 ]( const std::vector<::ULIS::FVec2D>& bezierCurve
+                                                      , double firstT
+                                                      , double lastRecordT )
+                {
+                    if( lastRecordT == 1.0f )
+                    {
+                        vertex1 = originalSegment->GetVertex(1);
+                    }
+                    else
+                    {
+                        double radius = ( lookupTable[originalSegment->GetVertex(0)]->GetRadius() * ( 1.0f - lastRecordT ) )
+                                      + ( lookupTable[originalSegment->GetVertex(1)]->GetRadius() * ( lastRecordT        ) );
+
+                        vertex1 = new FOdysseyVectorVertex( bezierCurve[3].x
+                                                          , bezierCurve[3].y
+                                                          , radius );
+
+                        cubicPathCopy->AddVertex( vertex1 );
+                    }
+
+                    if( lookupTable[vertex0] ) vertex0 = lookupTable[vertex0];
+                    if( lookupTable[vertex1] ) vertex1 = lookupTable[vertex1];
+
+                    FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( cubicPathCopy
+                                                                                                , vertex0
+                                                                                                , bezierCurve[1].x
+                                                                                                , bezierCurve[1].y
+                                                                                                , bezierCurve[2].x
+                                                                                                , bezierCurve[2].y
+                                                                                                , vertex1
+                                                                                                , true );
+
+                    cubicPathCopy->AddSegment( newCubicSegment );
+
+                    vertex0 = vertex1;
+                } );
+            }
+            else
+            {
+                FOdysseyVectorSegmentCubic* originalCubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(originalSegment);
+                FOdysseyVectorVertex* vertex0 = static_cast<FOdysseyVectorVertex*>( originalCubicSegment->GetPoint(0) );
+                FOdysseyVectorVertex* vertex1 = static_cast<FOdysseyVectorVertex*>( originalCubicSegment->GetPoint(1) );
+                FOdysseyVectorHandleSegment* originalHandle0 = originalSegment->GetHandle(0);
+                FOdysseyVectorHandleSegment* originalHandle1 = originalSegment->GetHandle(1);
+                ::ULIS::FVec2D originalHandle0Coords = originalHandle0->GetCoords();
+                ::ULIS::FVec2D originalHandle1Coords = originalHandle1->GetCoords();
+
+                if( iCopyFlags & COPY_WORLDCOORDS )
+                {
+                    originalHandle0Coords = FOdysseyVector::MapPoint( mWorldMatrix, originalHandle0Coords );
+                    originalHandle1Coords = FOdysseyVector::MapPoint( mWorldMatrix, originalHandle1Coords );
+                }
+
+                FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( cubicPathCopy
+                                                                                            , lookupTable[vertex0]
+                                                                                            , originalHandle0Coords.x
+                                                                                            , originalHandle0Coords.y
+                                                                                            , originalHandle1Coords.x
+                                                                                            , originalHandle1Coords.y
+                                                                                            , lookupTable[vertex1]
+                                                                                            , true );
+
+                cubicPathCopy->AddSegment( newCubicSegment );
+            }
+            //newSegment->BuildVariable();
         }
-        //newSegment->BuildVariable();
     }
 
     //cubicPathCopy->Update( 0 );

@@ -14,7 +14,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoApplyTransformations : public FOdyssey
 {
     public:
         ~FOdysseyVectorUndoApplyTransformations();
-        FOdysseyVectorUndoApplyTransformations( FOdysseyVectorGroupPaint* iScene, std::list<FOdysseyVectorObject*>& iObjectList );
+        FOdysseyVectorUndoApplyTransformations( FOdysseyVectorGroupPaint* iScene
+                                              , std::list<FOdysseyVectorObject*>& iObjectList
+                                              , uint64 iReturnFlags );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

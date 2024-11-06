@@ -99,7 +99,7 @@ private:
     static void CleanupHUDBlock(uint8* iData, void* iInfo);
     void Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags);
     void RenderHUD(::ULIS::FBlock& ioBlock);
-    void OnVectorEngineSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
+    void OnVectorEngineInvalidate( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
     void Invalidate(bool iIsInteractive);
     void SetState(eBlockState iState);
 

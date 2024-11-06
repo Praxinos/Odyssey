@@ -1,6 +1,8 @@
 #include "Export/v2/OdysseyVectorExport.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorGroupPaint.h"
 
 void
 FOdysseyVectorExportV2::Write( FOdysseyVectorGroupPaint* iScene, FArchive &Ar )
