@@ -58,6 +58,12 @@ FOdysseyHUDElement::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey
 }
 
 bool
+FOdysseyHUDElement::OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
+{
+	return false;
+}
+
+bool
 FOdysseyHUDElement::OnMouseDoubleClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {
     return false;
