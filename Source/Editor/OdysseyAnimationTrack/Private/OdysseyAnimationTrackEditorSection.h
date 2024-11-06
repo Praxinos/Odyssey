@@ -28,11 +28,11 @@ public:
 	virtual void Tick( const FGeometry& AllottedGeometry, const FGeometry& ClippedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
 
 	static float GetCollapsedSectionHeight();
-	static float GetUncollapsedSectionHeight(UOdysseyAnimationComponent* iComponent);
-	static float GetTreeViewHeight(UOdysseyAnimationComponent* iComponent);
+	//static float GetUncollapsedSectionHeight(UOdysseyAnimationComponent* iComponent);
+	//static float GetTreeViewHeight(UOdysseyAnimationComponent* iComponent);
 
 private:
-	static float GetLayerHeight(UOdysseyLayer* iLayer);
+	//static float GetLayerHeight(UOdysseyLayer* iLayer);
 	void RebuildSectionWidget();
 
 	UOdysseyAnimationComponent* GetComponent() const;

@@ -35,7 +35,7 @@ private:
 	void OnPlayerChanged();
 	void OnModeChanged();
 
-	FOptionalSize GetTreeViewHeight() const;
+	//FOptionalSize GetTreeViewHeight() const;
 
 private:
 	UOdysseyAnimationComponent* mComponent;

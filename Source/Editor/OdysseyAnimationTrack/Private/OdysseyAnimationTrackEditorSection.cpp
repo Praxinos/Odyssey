@@ -44,7 +44,7 @@ FOdysseyAnimationTrackEditorSection::FOdysseyAnimationTrackEditorSection(TShared
 	}
 }
 
-float
+/* float
 FOdysseyAnimationTrackEditorSection::GetLayerHeight(UOdysseyLayer* iLayer)
 {
 	float height = 0.f; //line padding
@@ -69,18 +69,20 @@ FOdysseyAnimationTrackEditorSection::GetLayerHeight(UOdysseyLayer* iLayer)
 	}
 
 	return height;
-}
+} */
 
 float
 FOdysseyAnimationTrackEditorSection::GetSectionHeight( const UE::Sequencer::FViewDensityInfo& ViewDensity ) const
 {
-	int height = GetCollapsedSectionHeight();
+	/* int height = GetCollapsedSectionHeight();
 	
 	UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
 	if (track && track->DisplayLayers)
 		height = GetUncollapsedSectionHeight(GetComponent());
-
-	track->SetRowHeight( height ); // Arbitrary value which should only be used for one (or some) tick(s) waiting the creation of the layout widget in the section
+	
+	*/
+	UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
+	track->SetRowHeight( mSectionWidget ? mSectionWidget->GetDesiredSize().Y : 0.f ); // Arbitrary value which should only be used for one (or some) tick(s) waiting the creation of the layout widget in the section
     return track->GetRowHeight();
 }
 
@@ -150,7 +152,39 @@ FOdysseyAnimationTrackEditorSection::RebuildSectionWidget()
 		.AutoHeight()
 		[
 			SNew( SOdysseyAnimationTimelineTreeView )
-			.PainterEditor_Lambda([](){ensure(false); return nullptr;}) //TODO:
+			.PainterEditor_Lambda(
+				[animation]() ->TSharedPtr<FOdysseyPainterEditor>
+				{
+					if (!animation)
+						return nullptr;
+
+					if (!GLevelEditorModeTools().IsModeActive( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId ))
+						return nullptr;
+
+					FEdMode* edMode = GLevelEditorModeTools().GetActiveMode( FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId );
+					if (!edMode)
+						return nullptr;
+
+					FOdysseyViewportDrawingEditorEdMode* odysseyEdMode = static_cast<FOdysseyViewportDrawingEditorEdMode*>(edMode);
+
+					TSharedPtr<FOdysseyViewportDrawingEditorToolkit> toolkit = odysseyEdMode->GetViewportDrawingEditorToolkit();
+					if(!toolkit)
+						return nullptr;
+					
+					TSharedPtr<FOdysseyAnimationEditorExtension> animationExtension = toolkit->GetAnimationExtension();
+					if (!animationExtension)
+						return nullptr;
+
+					if (animationExtension->Animation() != animation)
+						return nullptr;
+
+					TSharedPtr<FOdysseyPainterEditor> editor = odysseyEdMode->GetEditor();
+					if (!editor)
+						return nullptr;
+
+					return editor;
+				}
+			)
 			.Visibility(this, &FOdysseyAnimationTrackEditorSection::GetLayersVisibility)
 			.LayerStack(layerStack)
 			.TimelinePosition(mTimelinePosition)
@@ -360,7 +394,7 @@ FOdysseyAnimationTrackEditorSection::GetCollapsedSectionHeight()
 	return 28.f;
 }
 
-float
+/* float
 FOdysseyAnimationTrackEditorSection::GetTreeViewHeight(UOdysseyAnimationComponent* iComponent)
 {
 	if (!iComponent)
@@ -381,16 +415,16 @@ FOdysseyAnimationTrackEditorSection::GetTreeViewHeight(UOdysseyAnimationComponen
 	}
 	height += layersHeight;
 	return height;
-}
+} */
 
-float
+/* float
 FOdysseyAnimationTrackEditorSection::GetUncollapsedSectionHeight(UOdysseyAnimationComponent* iComponent)
 {		
 	int height = 0;
 	height += GetCollapsedSectionHeight(); //Expander Arrow + Name + Section Add Button
 	height += GetTreeViewHeight(iComponent);
 	return height;
-}
+} */
 
 EVisibility
 FOdysseyAnimationTrackEditorSection::GetLayersVisibility() const
