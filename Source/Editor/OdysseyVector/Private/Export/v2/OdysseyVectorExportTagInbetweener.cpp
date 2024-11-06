@@ -85,7 +85,7 @@ FOdysseyVectorExportV2::WriteTagInbetweenerBreakdowns( FOdysseyVectorTagInbetwee
                             , Ar
                             , [&iInbetweenerTag](FArchive &Ar) -> void
     {
-        WriteTagInbetweenerBreakdownsLayout( iInbetweenerTag, Ar ); 
+        WriteTagInbetweenerBreakdownsLayout( iInbetweenerTag, Ar );
         // deprecated
         // WriteTagInbetweenerBreakdownsGeometry( iInbetweenerTag, Ar );
 

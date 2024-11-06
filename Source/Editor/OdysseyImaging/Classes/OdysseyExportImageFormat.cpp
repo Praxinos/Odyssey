@@ -28,6 +28,6 @@ FOdysseyExportImageFormat::GetFileFormatExtension(EOdysseyExportImageFormat iFor
         case EOdysseyExportImageFormat::Jpeg: return TEXT("jpg");
     }
 
-	check(false); //should not be called
+    check(false); //should not be called
     return TEXT("");
 }

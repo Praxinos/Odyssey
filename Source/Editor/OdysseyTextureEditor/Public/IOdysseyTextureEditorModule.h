@@ -10,7 +10,7 @@
 class FOdysseyTextureEditorToolkit;
 
 class IOdysseyTextureEditorModule
-	: public IModuleInterface
+    : public IModuleInterface
 {
 public:
     virtual void CreateOdysseyTextureEditor( TArray<UTexture2D*> iTextures ) = 0;

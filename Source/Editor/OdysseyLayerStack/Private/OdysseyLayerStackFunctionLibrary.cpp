@@ -7,55 +7,55 @@
 TArray<UOdysseyLayer*>
 UOdysseyLayerStackFunctionLibrary::FilterTopmostLayers(TArray<UOdysseyLayer*> iLayers)
 {
-	TArray< UOdysseyLayer* > topmostLayers;
-	for( UOdysseyLayer* layer : iLayers)
-	{
-		bool hasParentInDraggedLayers = false;
-		UOdysseyLayerStack* layerStack = layer->GetLayerStack();
-		if (!layerStack)
-			continue;
+    TArray< UOdysseyLayer* > topmostLayers;
+    for( UOdysseyLayer* layer : iLayers)
+    {
+        bool hasParentInDraggedLayers = false;
+        UOdysseyLayerStack* layerStack = layer->GetLayerStack();
+        if (!layerStack)
+            continue;
 
-		TArray<UOdysseyLayer*> parents = layer->GetParents();
-		for ( UOdysseyLayer* parent : parents )
-		{
-			if ( iLayers.Contains(parent) )
-			{
-				hasParentInDraggedLayers = true;
-				break;
-			}
-		}
+        TArray<UOdysseyLayer*> parents = layer->GetParents();
+        for ( UOdysseyLayer* parent : parents )
+        {
+            if ( iLayers.Contains(parent) )
+            {
+                hasParentInDraggedLayers = true;
+                break;
+            }
+        }
 
-		if (hasParentInDraggedLayers)
-			continue;
+        if (hasParentInDraggedLayers)
+            continue;
 
-		topmostLayers.Add(layer);
-	}
-	return topmostLayers;
+        topmostLayers.Add(layer);
+    }
+    return topmostLayers;
 }
 
 TArray<UOdysseyLayer*>
 UOdysseyLayerStackFunctionLibrary::SortLayers(TArray<UOdysseyLayer*> iLayers, bool iReverse)
 {
-	if (iLayers.Num() <= 0)
-		return TArray<UOdysseyLayer*>();
+    if (iLayers.Num() <= 0)
+        return TArray<UOdysseyLayer*>();
 
-	if (!iLayers[0])
-		return TArray<UOdysseyLayer*>();
+    if (!iLayers[0])
+        return TArray<UOdysseyLayer*>();
 
-	UOdysseyLayerStack* layerStack = iLayers[0]->GetLayerStack();
-	if (!layerStack)
-		return TArray<UOdysseyLayer*>();
+    UOdysseyLayerStack* layerStack = iLayers[0]->GetLayerStack();
+    if (!layerStack)
+        return TArray<UOdysseyLayer*>();
 
-	for (UOdysseyLayer* layer : iLayers)
-	{
-		if (!layer)
-			return TArray<UOdysseyLayer*>();
+    for (UOdysseyLayer* layer : iLayers)
+    {
+        if (!layer)
+            return TArray<UOdysseyLayer*>();
 
-		if (layer->GetLayerStack() != layerStack)
-			return TArray<UOdysseyLayer*>();
-	}
+        if (layer->GetLayerStack() != layerStack)
+            return TArray<UOdysseyLayer*>();
+    }
 
-	iLayers.Sort(
+    iLayers.Sort(
         [layerStack, iReverse](UOdysseyLayer& iLayerA, UOdysseyLayer& iLayerB)
         {
             //true => iLayerA is before iLayerB
@@ -77,8 +77,7 @@ UOdysseyLayerStackFunctionLibrary::SortLayers(TArray<UOdysseyLayer*> iLayers, bo
         }
     );
 
-	return iLayers;
+    return iLayers;
 }
 
 
-    

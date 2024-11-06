@@ -9,7 +9,7 @@ class FOdysseyTextureEditorExtension;
 class UOdysseyLayerStack;
 
 class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorLayerStackTab :
-	public FOdysseyEditorTab
+    public FOdysseyEditorTab
 {
 public:
     static const FName& StaticId();
@@ -35,7 +35,7 @@ protected:
 
 private:
     //Methods
-	void MapActions( TSharedPtr<FUICommandList> iCommandList );
+    void MapActions( TSharedPtr<FUICommandList> iCommandList );
     virtual void ExtendMenuFile( TSharedRef<FExtender> iExtender );
     virtual void ImportTexturesAsLayers();
     virtual void ExportTextureToOperatingSystem();

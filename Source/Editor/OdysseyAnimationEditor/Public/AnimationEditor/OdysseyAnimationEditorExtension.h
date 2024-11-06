@@ -22,7 +22,7 @@ class UOdysseyAnimationEditorOutOfPegsTool;
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorExtension
     : public FOdysseyPainterEditorExtension
     , public TSharedFromThis<FOdysseyAnimationEditorExtension>
-{   
+{
 public:
     // Construction / Destruction
     virtual ~FOdysseyAnimationEditorExtension();
@@ -33,17 +33,17 @@ public:
     virtual void Finalize() override;
     virtual void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder) override;
     virtual void AddReferencedObjects(FReferenceCollector& Collector);
-    
+
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 public:
-    UOdysseyAnimation*				    Animation() const;
-    UOdysseyAnimationLayerStack*	    LayerStack() const;
+    UOdysseyAnimation*                    Animation() const;
+    UOdysseyAnimationLayerStack*        LayerStack() const;
     UOdysseyAnimationPlayer*            Player() const;
     TSharedRef<FOdysseyAnimationEditorTimelinePosition>    TimelinePosition();
     float                               PlaybackFramesPerSecond() const;
-	TSharedPtr<FOdysseyAnimationEditorFlipSystem> FlipSystem() const;
+    TSharedPtr<FOdysseyAnimationEditorFlipSystem> FlipSystem() const;
 
     UOdysseyAnimationEditorOutOfPegsTool* GetOutOfPegsTool() const;
 
@@ -53,7 +53,7 @@ private:
     void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
     void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
     void OnLayerMediaChanged();
-    
+
     void ConfigureTools();
 
 public:

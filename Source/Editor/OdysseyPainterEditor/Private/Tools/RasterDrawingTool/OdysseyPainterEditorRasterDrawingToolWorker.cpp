@@ -27,7 +27,7 @@ FOdysseyPainterEditorRasterDrawingToolWorker::Push(tFunction iFunction)
 
 void
 FOdysseyPainterEditorRasterDrawingToolWorker::Execute(int iNum)
-{    
+{
     tFunction func;
     for( int i = 0; !mQueue.IsEmpty() && (i < iNum || iNum <= 0); i++)
     {

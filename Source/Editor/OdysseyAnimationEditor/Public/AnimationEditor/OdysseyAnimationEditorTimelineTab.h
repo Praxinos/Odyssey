@@ -12,11 +12,11 @@ class UOdysseyAnimationPlayer;
 class UOdysseyAnimationCell;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorTimelineTab :
-	public FOdysseyEditorTab
+    public FOdysseyEditorTab
 {
 public:
     static const FName& StaticId();
-    
+
 public:
     // Construction / Destruction
     virtual ~FOdysseyAnimationEditorTimelineTab();
@@ -24,9 +24,9 @@ public:
 
 public:
     void SetEmptyTimelineWidget(TSharedRef<SWidget> iWidget);
-	
-	FInt32Range GetAnimationValidRange() const;
-	void SetAnimationValidRange(const TAttribute<FInt32Range>& iValue);
+
+    FInt32Range GetAnimationValidRange() const;
+    void SetAnimationValidRange(const TAttribute<FInt32Range>& iValue);
 
 protected:
     // FOdysseyAnimationEditorTab interface
@@ -40,10 +40,10 @@ protected:
     virtual UOdysseyAnimation* Animation() const;
     virtual UOdysseyAnimationPlayer* Player() const;
     virtual float PlaybackFramesPerSecond() const;
-	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> GetTimelinePosition() const;
+    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> GetTimelinePosition() const;
 
 protected:
-    // Event 
+    // Event
     //DEBUG:
     FReply OnAddFrameClicked();
     //DEBUG:
@@ -55,7 +55,7 @@ private:
     void BuildImportMenu(FMenuBuilder& iMenuBuilder);
     void BuildExportMenu(FMenuBuilder& iMenuBuilder);
 
-	void MapActions( TSharedPtr<FUICommandList> iCommandList );
+    void MapActions( TSharedPtr<FUICommandList> iCommandList );
 
     virtual void ImportTextureSequence();
     void ImportImageSequence();
@@ -69,14 +69,14 @@ private:
 
     TSharedPtr<SWidget> CreateDefaultEmptyTimelineTabWidget() const;
 
-	void OnActivateOutOfPegs(UOdysseyAnimationCell* iCell);
-	void OnInactivateOutOfPegs();
-	ECheckBoxState OnIsOutOfPegsChecked(UOdysseyAnimationCell* iCell);
+    void OnActivateOutOfPegs(UOdysseyAnimationCell* iCell);
+    void OnInactivateOutOfPegs();
+    ECheckBoxState OnIsOutOfPegsChecked(UOdysseyAnimationCell* iCell);
 
 private:
     FOdysseyAnimationEditorExtension* mExtension;
     FText mEmptyTimelineMessage;
     TSharedPtr<SWidget> mEmptyTimelineTabWidget;
-	TAttribute<FInt32Range> mAnimationValidRange;
+    TAttribute<FInt32Range> mAnimationValidRange;
 };
 

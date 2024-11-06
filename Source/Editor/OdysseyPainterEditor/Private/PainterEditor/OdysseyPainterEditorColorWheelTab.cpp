@@ -25,7 +25,7 @@ FOdysseyPainterEditorColorWheelTab::~FOdysseyPainterEditorColorWheelTab()
 }
 
 FOdysseyPainterEditorColorWheelTab::FOdysseyPainterEditorColorWheelTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(LOCTEXT( "color-wheel-tab.name", "Color Wheel" ), FSlateIcon( "OdysseyStyle", "PainterEditor.ColorWheel16" ))
+    : FOdysseyEditorTab(LOCTEXT( "color-wheel-tab.name", "Color Wheel" ), FSlateIcon( "OdysseyStyle", "PainterEditor.ColorWheel16" ))
     , mEditor(iEditor)
 {
 }
@@ -36,8 +36,8 @@ FOdysseyPainterEditorColorWheelTab::FOdysseyPainterEditorColorWheelTab(FOdysseyP
 TSharedPtr<SWidget>
 FOdysseyPainterEditorColorWheelTab::CreateWidget()
 {
-	return SNew( SOdysseyColorSelector )
-		.Color_Raw(this, &FOdysseyPainterEditorColorWheelTab::Color)
+    return SNew( SOdysseyColorSelector )
+        .Color_Raw(this, &FOdysseyPainterEditorColorWheelTab::Color)
         .OnColorChange_Raw(this, &FOdysseyPainterEditorColorWheelTab::OnColorChange);
 }
 

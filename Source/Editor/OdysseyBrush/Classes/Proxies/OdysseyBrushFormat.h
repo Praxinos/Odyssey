@@ -23,7 +23,7 @@ enum  class  EOdysseyColorModel : uint8
     kHSLA UMETA(DisplayName = "HSLA"),
     kHSV UMETA( DisplayName="HSV" ),
     kHSVA UMETA(DisplayName = "HSVA"),
-	kCMYK UMETA(DisplayName = "CMYK"),
+    kCMYK UMETA(DisplayName = "CMYK"),
     kCMYKA UMETA(DisplayName = "CMYKA"),
     kLab UMETA( DisplayName="Lab" ),
     kLabA UMETA(DisplayName = "LabA")

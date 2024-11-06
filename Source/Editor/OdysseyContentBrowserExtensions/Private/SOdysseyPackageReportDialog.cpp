@@ -94,7 +94,7 @@ void FPackageReportNode::AddPackage_Recursive(TArray<FString>& iPathElements, bo
             child->AddPackage_Recursive(iPathElements, bInShouldExportFolder);
         }
     }
-    else 
+    else
     {
         bShouldExportPackage = bInShouldExportFolder;
     }
@@ -109,7 +109,7 @@ void SOdysseyPackageReportDialog::Construct( const FArguments& iInArgs, const FT
     mPackageBrush = FAppStyle::GetBrush("ContentBrowser.ColumnViewAssetIcon");
 
     ConstructNodeTree(iInPackageNames);
-    
+
     ChildSlot
     [
         SNew(SBorder)
@@ -211,7 +211,7 @@ void SOdysseyPackageReportDialog::OpenPackageReportDialog(const FText& iReportMe
         [
             SNew(SOdysseyPackageReportDialog, iReportMessage, iPackageNames, iInOnReportConfirmed)
         ];
-        
+
     IMainFrameModule& mainFrameModule = FModuleManager::LoadModuleChecked<IMainFrameModule>(TEXT("MainFrame"));
     if ( mainFrameModule.GetParentWindow().IsValid() )
     {
@@ -346,7 +346,7 @@ FReply SOdysseyPackageReportDialog::CancelClicked()
 void
 SOdysseyPackageReportDialog::HandleOnFormatChanged( int32 iSelection, ESelectInfo::Type iSelectInfo )
 {
-    mExportFormat = TEnumAsByte<EExportImageFormat>( iSelection ); 
+    mExportFormat = TEnumAsByte<EExportImageFormat>( iSelection );
 }
 
 int32

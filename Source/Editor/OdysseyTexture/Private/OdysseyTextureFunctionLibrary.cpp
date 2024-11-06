@@ -8,18 +8,18 @@
 bool
 UOdysseyTextureFunctionLibrary::HasLayerStack(UTexture2D* iTexture)
 {
-	return !!GetLayerStack(iTexture);
+    return !!GetLayerStack(iTexture);
 }
 
 UOdysseyTextureLayerStack*
 UOdysseyTextureFunctionLibrary::GetLayerStack(UTexture2D* iTexture)
 {
-	if ( !iTexture )
-		return nullptr;
+    if ( !iTexture )
+        return nullptr;
 
-	UOdysseyTextureLayerStackUserData* userData = Cast<UOdysseyTextureLayerStackUserData>(iTexture->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
-	if (!userData)
-		return nullptr;
-	
-	return userData->GetLayerStack();
+    UOdysseyTextureLayerStackUserData* userData = Cast<UOdysseyTextureLayerStackUserData>(iTexture->GetAssetUserDataOfClass(UOdysseyTextureLayerStackUserData::StaticClass()));
+    if (!userData)
+        return nullptr;
+
+    return userData->GetLayerStack();
 }

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InputCoreTypes.h" 
+#include "InputCoreTypes.h"
 #include "Input/OdysseyPoint.h"
 
 /////////////////////////////////////////////////////
@@ -22,7 +22,7 @@ public:
     // Makers
     static FOdysseyRay DefaultRay();
     static FOdysseyRay ZeroRay();
-    
+
 public:
     // Operators
     bool                 operator==( const FOdysseyRay& iRhs ) const;
@@ -35,16 +35,16 @@ public:
     FOdysseyRay& operator/=( float iRhs );
     FOdysseyRay  operator* ( float iRhs ) const;
     FOdysseyRay  operator/ ( float iRhs ) const;
-    
+
     //void ComputeRelativeParameters(const FOdysseyPoint& iPreviousPoint, bool iComputeTravelledDistance = false);
 
-public: 
+public:
     //Returns the average of two rays (It is NOT (iRay1 + iRay2) / 2)
     static FOdysseyRay Average( const FOdysseyRay& iRay1, const FOdysseyRay& iRay2 );
-    
+
     //Same with multiple rays
     static FOdysseyRay Average( const TArray< FOdysseyRay>& iRays );
-    
+
     //Returns the linear interpolation between two rays (It is NOT iRay1 + (iRay2 - iRay1 ) * iT )
     static FOdysseyRay Lerp( const FOdysseyRay& iRay1, const FOdysseyRay& iRay2, float iT );
 

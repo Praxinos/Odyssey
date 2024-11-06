@@ -26,8 +26,8 @@ public:
 public:
     /** Opens the UPaperSprite default editor */
     TSharedPtr<FUICommandInfo> AddNewKeyFrame;
-	TSharedPtr<FUICommandInfo> AddNewKeyFrameBefore;
-	TSharedPtr<FUICommandInfo> AddNewKeyFrameAfter;
+    TSharedPtr<FUICommandInfo> AddNewKeyFrameBefore;
+    TSharedPtr<FUICommandInfo> AddNewKeyFrameAfter;
 
     TSharedPtr<FUICommandInfo> PlayForward;
     TSharedPtr<FUICommandInfo> PlayBackward;
@@ -41,7 +41,7 @@ public:
     TSharedPtr<FUICommandInfo> LastFrame;
     TSharedPtr<FUICommandInfo> ToggleLooping;
 
-	//TSharedPtr<FUICommandInfo> PickNewSpriteForKeyFrame;
-	//TSharedPtr<FUICommandInfo> EditSpriteForKeyFrame;
-	TSharedPtr<FUICommandInfo> ShowSpriteInContentBrowser;
+    //TSharedPtr<FUICommandInfo> PickNewSpriteForKeyFrame;
+    //TSharedPtr<FUICommandInfo> EditSpriteForKeyFrame;
+    TSharedPtr<FUICommandInfo> ShowSpriteInContentBrowser;
 };

@@ -18,7 +18,7 @@ FOdysseyVectorExportV2::WriteRouteTrajectoriesWaypoints( FInbetweenerRoute& iRou
                             , [&iRoute](FArchive &Ar) -> void
     {
         // Note: there are as many trajectories as breakdowns
-        for( FInbetweenerTrajectory& trajectory : iRoute.GetTrajectoryBuffer() )     
+        for( FInbetweenerTrajectory& trajectory : iRoute.GetTrajectoryBuffer() )
         {
             std::vector<FInbetweenerWaypoint>& waypointBuffer = trajectory.GetWaypointBuffer();
 
@@ -41,8 +41,8 @@ FOdysseyVectorExportV2::WriteRouteTrajectories( FInbetweenerRoute& iRoute
                             , [&iRoute](FArchive &Ar) -> void
     {
         // Note: there are as many trajectories as breakdowns
-        for( FInbetweenerTrajectory& trajectory : iRoute.GetTrajectoryBuffer() )     
-        {   
+        for( FInbetweenerTrajectory& trajectory : iRoute.GetTrajectoryBuffer() )
+        {
             FInbetweenerHandleTrajectory* handle0 = trajectory.GetHandle(0);
             FInbetweenerHandleTrajectory* handle1 = trajectory.GetHandle(1);
             double handle0DirX = handle0->GetDirection().x;

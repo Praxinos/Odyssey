@@ -59,7 +59,7 @@ FOdysseyTextureLayerImageVectorImport::Read( UOdysseyTextureLayerImageVector* iT
                 break;
 
                 default:
-				// Mandatory
+                // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
             }

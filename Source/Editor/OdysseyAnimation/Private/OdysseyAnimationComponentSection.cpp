@@ -14,7 +14,7 @@
 #define LOCTEXT_NAMESPACE "UOdysseyAnimationComponentSection"
 
 UOdysseyAnimationComponentSection::UOdysseyAnimationComponentSection(const FObjectInitializer& ObjInitializer)
-	: Super(ObjInitializer)
+    : Super(ObjInitializer)
 {
 }
 
@@ -22,25 +22,25 @@ UOdysseyAnimationComponentSection::UOdysseyAnimationComponentSection(const FObje
 void
 UOdysseyAnimationComponentSection::PostInitProperties()
 {
-	Super::PostInitProperties();
+    Super::PostInitProperties();
 }
 
 EMovieSceneChannelProxyType
 UOdysseyAnimationComponentSection::CacheChannelProxy()
 {
-	FMovieSceneChannelProxyData Channels;
-	ChannelProxy = MakeShared<FMovieSceneChannelProxy>(MoveTemp(Channels));
-	return EMovieSceneChannelProxyType::Dynamic;
+    FMovieSceneChannelProxyData Channels;
+    ChannelProxy = MakeShared<FMovieSceneChannelProxy>(MoveTemp(Channels));
+    return EMovieSceneChannelProxyType::Dynamic;
 }
 
 void
 UOdysseyAnimationComponentSection::MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate)
 {
-	if (StartFrameOffset.Value > 0)
-	{
-		FFrameNumber NewStartFrameOffset = ConvertFrameTime(FFrameTime(StartFrameOffset), SourceRate, DestinationRate).FloorToFrame();
-		StartFrameOffset = NewStartFrameOffset;
-	}
+    if (StartFrameOffset.Value > 0)
+    {
+        FFrameNumber NewStartFrameOffset = ConvertFrameTime(FFrameTime(StartFrameOffset), SourceRate, DestinationRate).FloorToFrame();
+        StartFrameOffset = NewStartFrameOffset;
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

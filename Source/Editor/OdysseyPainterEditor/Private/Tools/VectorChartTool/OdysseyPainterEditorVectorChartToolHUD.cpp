@@ -267,7 +267,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
                 , HUDBezier[2].y
                 , iFgColor
                 , iBgColor );
-   
+
         for( uint32 i = 0; i < 3; i++ )
         {
             DrawCircle( iBLContext

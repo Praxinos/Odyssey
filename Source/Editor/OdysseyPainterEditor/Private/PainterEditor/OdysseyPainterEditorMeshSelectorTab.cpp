@@ -24,7 +24,7 @@ FOdysseyPainterEditorMeshSelectorTab::~FOdysseyPainterEditorMeshSelectorTab()
 }
 
 FOdysseyPainterEditorMeshSelectorTab::FOdysseyPainterEditorMeshSelectorTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(LOCTEXT( "mesh-selector-tab.name", "Mesh Selector" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Mesh16" ))
+    : FOdysseyEditorTab(LOCTEXT( "mesh-selector-tab.name", "Mesh Selector" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Mesh16" ))
     , mEditor(iEditor)
 {
 }
@@ -41,7 +41,7 @@ FOdysseyPainterEditorMeshSelectorTab::GetId() const
 TSharedPtr<SWidget>
 FOdysseyPainterEditorMeshSelectorTab::CreateWidget()
 {
-	return SNew( SOdysseyMeshSelector )
+    return SNew( SOdysseyMeshSelector )
             .MeshSelector(mEditor->GetMeshSelector())
             .OnMeshChanged_Raw(this, &FOdysseyPainterEditorMeshSelectorTab::OnMeshSelected );
 }

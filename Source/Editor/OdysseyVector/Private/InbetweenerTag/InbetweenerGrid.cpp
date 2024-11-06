@@ -374,7 +374,7 @@ FInbetweenerGrid::GetPointBuffer()
     return mPointBuffer;
 }
 
-/** 
+/**
  * Compute P* for the two triangles of the given quad and add them to the sparse matrix P (via the triplet list)
  * See Baxter et al. 2008
  */
@@ -555,7 +555,7 @@ FInbetweenerGrid::PrecomputeARAPInterpolation()
 /**
  * Computes "A" the transpose of the jacobian of the affine map between two triangles (ref pose vs target pose of a lattice cell) i.e. A is the linear part of the affine map between the two triangles.
  * A=(1/P)*Q   Eq. 2, Rigid Shape Interpolation Using Normal Equations, Baxter et al. 2008. i and j are corner indices used to determine which triangle of the quad we are using
- * 
+ *
  * @param q                     quad
  * @param i                     corner of the quad (!= BOTTOM_LEFT)
  * @param j                     corner of the quad (!= BOTTOM_LEFT)
@@ -589,7 +589,7 @@ void FInbetweenerGrid::ComputeJAM( FInbetweenerPoint* iTriangle[3]
 
 /**
  * Computing the polar decomposition of A
- * 
+ *
  * @param A input linear transform matrix
  * @param S output shear matrix
  * @return rotation angle in rad
@@ -662,10 +662,10 @@ FInbetweenerGrid::ComputeQuadA( FInbetweenerQuad* iQuad
 /**
  * Compute the interpolation of the lattice between its REF_POS and TARGET_POS.
  * Stores the results in INTERP_POS.
- * The resulting interpolated lattice can be additionally transformed by a given rigid transformation. 
- * 
+ * The resulting interpolated lattice can be additionally transformed by a given rigid transformation.
+ *
  * @param alphaLinear Linear interpolating factor between the two adjacent keyframes (from the timeline: (curFrame - prevKeyFrame) / (nextKeyFrame - prevKeyFrame))
- * @param alpha Remapping of the linear interpolating factor by the group's spacing function. This is what controls the interpolation.  
+ * @param alpha Remapping of the linear interpolating factor by the group's spacing function. This is what controls the interpolation.
  * @param globalRigidTransform Global rigid transformation applied after the interpolation.
  * @param useRigidTransform If true the global rigid transformation is applied.
  */

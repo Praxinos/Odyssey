@@ -30,11 +30,11 @@ UOdysseyStylusInputSettings::PostEditChangeProperty( struct FPropertyChangedEven
 {
     Super::PostEditChangeProperty( iPropertyChangedEvent );
 
-    //Get the name of the property that was changed  
+    //Get the name of the property that was changed
     FName PropertyName = ( iPropertyChangedEvent.Property != nullptr ) ? iPropertyChangedEvent.Property->GetFName() : NAME_None;
 
-    // We test using GET_MEMBER_NAME_CHECKED so that if someone changes the property name  
-    // in the future this will fail to compile and we can update it.  
+    // We test using GET_MEMBER_NAME_CHECKED so that if someone changes the property name
+    // in the future this will fail to compile and we can update it.
     if( ( PropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyStylusInputSettings, StylusInputDriver ) ) )
     {
         //RefreshStylusInputDriver();

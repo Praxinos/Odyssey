@@ -60,27 +60,27 @@ FOdysseyAnimationMediaPlayerFactory::CreatePlayer(IMediaEventSink& EventSink)
 FText
 FOdysseyAnimationMediaPlayerFactory::GetDisplayName() const
 {
-	return LOCTEXT("media-player-factory.display-name", "Odyssey Animation");
+    return LOCTEXT("media-player-factory.display-name", "Odyssey Animation");
 }
 
 FName
 FOdysseyAnimationMediaPlayerFactory::GetPlayerName() const
 {
     static FName PlayerName(TEXT("OdysseyAnimation"));
-	return PlayerName;
+    return PlayerName;
 }
 
 FGuid
 FOdysseyAnimationMediaPlayerFactory::GetPlayerPluginGUID() const
 {
     static FGuid PlayerPluginGUID(0xb3da1256, 0x7366410b, 0xacfdc6e3, 0x54ff7e5d);
-	return PlayerPluginGUID;
+    return PlayerPluginGUID;
 }
 
 const TArray<FString>&
 FOdysseyAnimationMediaPlayerFactory::GetSupportedPlatforms() const
 {
-	return mSupportedPlatforms;
+    return mSupportedPlatforms;
 }
 
 bool

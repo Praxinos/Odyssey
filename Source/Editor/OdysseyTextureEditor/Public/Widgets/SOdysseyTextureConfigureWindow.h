@@ -12,9 +12,9 @@
 UENUM()
 enum class EOdysseyTextureBackgroundColor : uint8
 {
-	kTransparent UMETA(DisplayName = "Transparent"),
-	kWhite UMETA(DisplayName = "White"),
-	kNormal UMETA(DisplayName = "Purple (127, 127, 255)")
+    kTransparent UMETA(DisplayName = "Transparent"),
+    kWhite UMETA(DisplayName = "White"),
+    kNormal UMETA(DisplayName = "Purple (127, 127, 255)")
 };
 
 UENUM()
@@ -22,9 +22,9 @@ enum class EOdysseyTextureSourceFormat : uint8
 {
     kG8 UMETA(DisplayName = "Grey 8"),
     kG16 UMETA(DisplayName = "Grey 16"),
-	kBGRA8 UMETA(DisplayName = "BGRA 8"),
+    kBGRA8 UMETA(DisplayName = "BGRA 8"),
     kBGRE8 UMETA(DisplayName = "BGRE 8"),
-	kRGBA16 UMETA(DisplayName = "RGBA 16"),
+    kRGBA16 UMETA(DisplayName = "RGBA 16"),
     kRGBA16F UMETA(DisplayName = "RGBA 16 F"),
     kCustom UMETA(Hidden)
 };
@@ -32,15 +32,15 @@ enum class EOdysseyTextureSourceFormat : uint8
 UENUM()
 enum class EOdysseyTextureDefaultLayerType : uint8
 {
-	kNone UMETA(Hidden),
-	kRaster UMETA(DisplayName = "Raster"),
-	kVector UMETA(DisplayName = "Vector")
+    kNone UMETA(Hidden),
+    kRaster UMETA(DisplayName = "Raster"),
+    kVector UMETA(DisplayName = "Vector")
 };
 
 USTRUCT()
 struct ODYSSEYTEXTUREEDITOR_API FOdysseyTextureConfiguration
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
     ETextureSourceFormat TextureSourceFormat() const;
@@ -65,7 +65,7 @@ public:
     TEnumAsByte<ETextureSourceFormat> CustomFormat = ETextureSourceFormat::TSF_BGRA8;
 
     UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration")
-	EOdysseyTextureBackgroundColor BackgroundColor = EOdysseyTextureBackgroundColor::kTransparent;
+    EOdysseyTextureBackgroundColor BackgroundColor = EOdysseyTextureBackgroundColor::kTransparent;
 
     UPROPERTY(EditAnywhere, Category="OdysseyTextureConfiguration")
     EOdysseyTextureDefaultLayerType LayerType = EOdysseyTextureDefaultLayerType::kRaster;
@@ -75,11 +75,11 @@ class ODYSSEYTEXTUREEDITOR_API SOdysseyTextureConfigureWindow
     : public SWindow
 {
 public:
-	SLATE_BEGIN_ARGS(SOdysseyTextureConfigureWindow)
-	{
+    SLATE_BEGIN_ARGS(SOdysseyTextureConfigureWindow)
+    {
 
-	}
-	SLATE_END_ARGS()
+    }
+    SLATE_END_ARGS()
 
 public:
     void Construct(const FArguments& iArgs);

@@ -24,21 +24,21 @@ public:
     void Construct(const FArguments& iArgs, UOdysseyAnimationComponent* iComponent, UOdysseyAnimationComponentTrack* iTrack, const FBuildColumnWidgetParams& iParams);
 
 private:
-	void RebuildWidgets();
+    void RebuildWidgets();
 
-	void OnDisplayLayersCheckBoxStateChanged(ECheckBoxState iState);
-	ECheckBoxState GetDisplayLayersCheckBoxState() const;
-	EVisibility GetLayersVisibility() const;
-	FMargin GetDisplayLayersPadding() const;
+    void OnDisplayLayersCheckBoxStateChanged(ECheckBoxState iState);
+    ECheckBoxState GetDisplayLayersCheckBoxState() const;
+    EVisibility GetLayersVisibility() const;
+    FMargin GetDisplayLayersPadding() const;
 
-	void OnAnimationChanged();
-	void OnPlayerChanged();
-	void OnModeChanged();
+    void OnAnimationChanged();
+    void OnPlayerChanged();
+    void OnModeChanged();
 
-	//FOptionalSize GetTreeViewHeight() const;
+    //FOptionalSize GetTreeViewHeight() const;
 
 private:
-	UOdysseyAnimationComponent* mComponent;
-	UOdysseyAnimationComponentTrack* mTrack;
-	TWeakPtr<UE::Sequencer::ISequencerTreeViewRow> mRow; //Must be a WeakPtr, otherwise the row is never killed and is still displayed when it should be hidden
+    UOdysseyAnimationComponent* mComponent;
+    UOdysseyAnimationComponentTrack* mTrack;
+    TWeakPtr<UE::Sequencer::ISequencerTreeViewRow> mRow; //Must be a WeakPtr, otherwise the row is never killed and is still displayed when it should be hidden
 };

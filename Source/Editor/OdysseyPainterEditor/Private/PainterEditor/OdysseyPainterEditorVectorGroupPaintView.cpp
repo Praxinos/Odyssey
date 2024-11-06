@@ -57,7 +57,7 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
             if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Monochrome) )
                 selectedPaintGroup->SetMonochrome( Monochrome );
 
-            // Note: iMemberPropertyName because FColor is a struct 
+            // Note: iMemberPropertyName because FColor is a struct
             // and we can edit individual struct members RGBA
             if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, MonochromeColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, MonochromeColor) ) )
                 selectedPaintGroup->SetMonochromeColor( MonochromeColor );
@@ -74,7 +74,7 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
             //if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Wireframe) )
             //    selectedPaintGroup->SetWireframe( Wireframe );
 
-            // Note: iMemberPropertyName because FColor is a struct 
+            // Note: iMemberPropertyName because FColor is a struct
             // and we can edit individual struct members RGBA
             if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, WireframeColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, WireframeColor) ) )
                 selectedPaintGroup->SetWireframeColor( WireframeColor );

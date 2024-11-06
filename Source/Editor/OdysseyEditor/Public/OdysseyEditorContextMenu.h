@@ -6,7 +6,7 @@
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 
 class ODYSSEYEDITOR_API FOdysseyEditorContextMenu :
-	public TSharedFromThis<FOdysseyEditorContextMenu>
+    public TSharedFromThis<FOdysseyEditorContextMenu>
 {
 public:
     // Construction / Destruction

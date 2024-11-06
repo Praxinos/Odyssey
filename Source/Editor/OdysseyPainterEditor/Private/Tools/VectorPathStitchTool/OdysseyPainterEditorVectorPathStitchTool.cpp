@@ -156,7 +156,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
                                                                                , notificationFlags );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
                     TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                     if (source)
                         source->RecordCurrentFrameUndo();

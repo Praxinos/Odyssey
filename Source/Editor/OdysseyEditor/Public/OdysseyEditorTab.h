@@ -4,7 +4,7 @@
 #pragma once
 
 class ODYSSEYEDITOR_API FOdysseyEditorTab :
-	public TSharedFromThis<FOdysseyEditorTab>
+    public TSharedFromThis<FOdysseyEditorTab>
 {
 public:
     // Construction / Destruction
@@ -30,7 +30,7 @@ public:
     virtual void BindShortcuts(FBaseToolkit* iToolkit);
     virtual TSharedRef<SDockTab> SpawnTab(const FSpawnTabArgs& iArgs);
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender );
-    
+
     void SetTabManager(TSharedPtr< FTabManager > iTabManager);
     TSharedPtr< FTabManager > GetTabManager() const;
     void Register(TSharedRef<FWorkspaceItem>& iWorkspaceMenuCategoryRef);

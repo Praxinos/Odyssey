@@ -71,7 +71,7 @@ FInbetweenerTrajectory::Import( FInbetweenerTrajectory& iImportFrom )
 * Updates the bezier between the source grid and the target grid
 */
 void
-FInbetweenerTrajectory::Update() 
+FInbetweenerTrajectory::Update()
 {
     const BLMatrix2D& sourceLocalMatrix = mBreakdown->GetSourceLocalMatrix();
     const BLMatrix2D& targetLocalMatrix = mBreakdown->GetTargetLocalMatrix();
@@ -133,7 +133,7 @@ FInbetweenerTrajectory::GetCubicBezier()
     return mCubicBezier;
 }
 
-FInbetweenerQuad* 
+FInbetweenerQuad*
 FInbetweenerTrajectory::GetQuad()
 {
     return &mBreakdown->GetGrid()->GetQuadBuffer()[mRoute->GetQuadIndex()];

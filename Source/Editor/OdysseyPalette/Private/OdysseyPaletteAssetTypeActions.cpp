@@ -40,7 +40,7 @@ FOdysseyPaletteAssetTypeActions::GetCategories()
     return mMyAssetCategory;
 }
 
-void 
+void
 FOdysseyPaletteAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 {
     InFilter.ClassPaths.Add( UOdysseyPalette::StaticClass()->GetClassPathName() );

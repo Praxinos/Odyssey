@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 
 class FOdysseyHUDElement;
-class ODYSSEYHUDSYSTEM_API FOdysseyHUDSystem 
+class ODYSSEYHUDSYSTEM_API FOdysseyHUDSystem
 {
 public:
     struct FDrawHUDParams

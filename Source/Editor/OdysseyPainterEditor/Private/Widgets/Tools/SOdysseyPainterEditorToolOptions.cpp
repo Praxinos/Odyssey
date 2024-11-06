@@ -27,7 +27,7 @@ SOdysseyPainterEditorToolOptions::Construct( const FArguments& InArgs )
     DetailsViewArgs.bLockable = false;
     DetailsViewArgs.bAllowSearch = false;
     DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
-    
+
     mDetailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
     mDetailsView->SetObject(mDisplayedTool);
 

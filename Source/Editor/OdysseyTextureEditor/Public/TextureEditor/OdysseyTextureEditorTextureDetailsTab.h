@@ -9,7 +9,7 @@ class FOdysseyTextureEditorExtension;
 class UTexture;
 
 class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorTextureDetailsTab :
-	public FOdysseyEditorTab
+    public FOdysseyEditorTab
 {
 public:
     static const FName& StaticId();

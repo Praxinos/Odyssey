@@ -213,6 +213,6 @@ FOdysseyVectorImportV2::ReadPath( FOdysseyVectorPath& iPath, uint64 iChunkEnd, F
                 default:
                     FOdysseyVectorImportV2::ParseObjectChunks( iPath, iChunkID, iChunkLen, Ar );
                 break;
-            }    
+            }
         } );
 }

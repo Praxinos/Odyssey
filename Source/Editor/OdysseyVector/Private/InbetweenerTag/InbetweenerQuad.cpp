@@ -8,7 +8,7 @@ FInbetweenerQuad::FInbetweenerQuad()
 {
 }
 
-FInbetweenerPoint** 
+FInbetweenerPoint**
 FInbetweenerQuad::GetPoints()
 {
     return mPoint;
@@ -29,7 +29,7 @@ FInbetweenerQuad::Init( FInbetweenerGrid* iGrid )
 bool
 FInbetweenerQuad::IsVisited()
 {
-    return ( mFlags & VISITED ) ? true : false; 
+    return ( mFlags & VISITED ) ? true : false;
 }
 
 void
@@ -93,7 +93,7 @@ FInbetweenerQuad::IsLinked()
         return firstBreakdown->GetGrid()->GetQuadBuffer()[quadIndex].IsLinked();
     }
 
-    return ( mFlags & LINKED ) ? true : false; 
+    return ( mFlags & LINKED ) ? true : false;
 }
 
 void

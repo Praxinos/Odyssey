@@ -19,10 +19,10 @@ void SOdysseyPaletteColorRow::Construct(const FArguments& InArgs, const TSharedR
     SOdysseyPaletteEntryRow::Construct(
         SOdysseyPaletteEntryRow::FArguments(),
         iOwnerTableView,
-		iColorEntry
+        iColorEntry
     );
 
-	SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
+    SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -30,7 +30,7 @@ void SOdysseyPaletteColorRow::Construct(const FArguments& InArgs, const TSharedR
 TSharedRef<SWidget>
 SOdysseyPaletteColorRow::GenerateHeaderWidget()
 {
-	TSharedRef<SWidget> defaultWidget = SOdysseyPaletteEntryRow::GenerateHeaderWidget();
+    TSharedRef<SWidget> defaultWidget = SOdysseyPaletteEntryRow::GenerateHeaderWidget();
     return SNew(SHorizontalBox)
         +SHorizontalBox::Slot()
         .Padding(FMargin(0.f, 0.f, 2.f, 0.f))

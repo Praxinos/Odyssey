@@ -15,7 +15,7 @@ FOdysseyPainterEditorVectorScenePanToolHUD::FOdysseyPainterEditorVectorScenePanT
     BLFontFace face;
    // TODO: do something depending on to the O.S
     BLResult err = face.createFromFile("C:/Windows/Fonts/lucon.ttf"); // Lucida console
- 
+
     mFont.createFromFace( face, 16.0f );
 }
 

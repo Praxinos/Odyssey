@@ -69,13 +69,13 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorGroupPaint* 
 {
     TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
                                             // Prevents the user from having to click at least once in the viewport.
-    // we need the focus on the viewport for keyboard 
+    // we need the focus on the viewport for keyboard
     TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
     uint32 hudFlags = mEditor->GetVectorHUDFlags();
 
     viewportWidget = viewportTab->GetViewport()->GetViewportWidget();
 
-    // we need the focus on the viewport for keyboard 
+    // we need the focus on the viewport for keyboard
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
 
     mTransformHUD->CenterGizmo();
@@ -246,7 +246,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
 
     // redraw
     iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
- 
+
     return 0;
 }
 
@@ -481,7 +481,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
             breakdown->Scale( scalingX, scalingY );
 
             breakdown->UpdateMatrix();
-        } 
+        }
 
         iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
@@ -1040,7 +1040,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
                 if( GUndo )
                 {
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(mUndo) );
-                
+
                     TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                     if (source)
                         source->RecordCurrentFrameUndo();
@@ -1052,7 +1052,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
 
             // quick fix to place the gizmo at the right place
             FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
-            ::ULIS::FVec2D& gizmo = mTransformHUD->GetGizmo(); 
+            ::ULIS::FVec2D& gizmo = mTransformHUD->GetGizmo();
             BLPoint worldGizmo = selectionBox.worldMatrix.mapPoint( gizmo.x, gizmo.y );
             // endof quickfix
 

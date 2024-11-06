@@ -40,7 +40,7 @@ FOdysseyAnimationLightTableKeyImport::Read( FOdysseyAnimationLightTableKey* iKey
     FOdysseyFile::ReadChunks( iChunkEnd
                               , Ar
                               , [iKey](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
-        {           
+        {
             switch ( iChunkID )
             {
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_KEY_ISACTIVATED:
@@ -51,14 +51,14 @@ FOdysseyAnimationLightTableKeyImport::Read( FOdysseyAnimationLightTableKey* iKey
 
                 case FOdysseyFile::Animation::CHUNK_LIGHTTABLE_KEY_OPACITY:
                 {
-					float opacity = 0.f;
+                    float opacity = 0.f;
                     Ar << opacity;
-					iKey->Opacity = opacity * 100.f;
+                    iKey->Opacity = opacity * 100.f;
                 }
                 break;
 
                 default:
-				// Mandatory
+                // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
             }

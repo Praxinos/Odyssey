@@ -13,54 +13,54 @@ SOdysseyAnimationCellImageRaster::Construct(const FArguments& iArgs, UOdysseyAni
 {
     mShowContent = iArgs._ShowContent;
 
-	if (!iCell)
-		return;
+    if (!iCell)
+        return;
 
-	mCell = iCell;
-	mCell->OnThumbnailDirtied().AddSP(this, &SOdysseyAnimationCellImageRaster::OnThumbnailDirtied);
-	mCell->OnThumbnailChanged().AddSP(this, &SOdysseyAnimationCellImageRaster::OnThumbnailChanged);
+    mCell = iCell;
+    mCell->OnThumbnailDirtied().AddSP(this, &SOdysseyAnimationCellImageRaster::OnThumbnailDirtied);
+    mCell->OnThumbnailChanged().AddSP(this, &SOdysseyAnimationCellImageRaster::OnThumbnailChanged);
 
-	UOdysseyAnimation* animation = mCell->GetAnimation();
-	float ratio = (float)animation->GetWidth() / (float)animation->GetHeight();
-	
-	mAssetThumbnail = MakeShareable(new FAssetThumbnail(mCell, (int)(ratio * THUMBNAIL_SIZE), THUMBNAIL_SIZE, UThumbnailManager::Get().GetSharedThumbnailPool()));
-	FAssetThumbnailConfig thumbnailConfig;
-	thumbnailConfig.bAllowFadeIn = false;
-	thumbnailConfig.bAllowHintText = false;
-	thumbnailConfig.bAllowRealTimeOnHovered = false;
-	thumbnailConfig.bForceGenericThumbnail = false;
-	thumbnailConfig.bAllowAssetSpecificThumbnailOverlay = false;
-	thumbnailConfig.ThumbnailLabel = EThumbnailLabel::NoLabel;
-	thumbnailConfig.HighlightedText = FText::FromString("");
-	thumbnailConfig.HintColorAndOpacity = FLinearColor( 1.0, 1.0, 1.0, 1.0 );
-	thumbnailConfig.AssetTypeColorOverride = FLinearColor(1.0, 1.0, 1.0, 1.0);
-	TSharedRef<SWidget> thumbnailWidget = mAssetThumbnail->MakeThumbnailWidget(thumbnailConfig);
+    UOdysseyAnimation* animation = mCell->GetAnimation();
+    float ratio = (float)animation->GetWidth() / (float)animation->GetHeight();
 
-	ChildSlot
+    mAssetThumbnail = MakeShareable(new FAssetThumbnail(mCell, (int)(ratio * THUMBNAIL_SIZE), THUMBNAIL_SIZE, UThumbnailManager::Get().GetSharedThumbnailPool()));
+    FAssetThumbnailConfig thumbnailConfig;
+    thumbnailConfig.bAllowFadeIn = false;
+    thumbnailConfig.bAllowHintText = false;
+    thumbnailConfig.bAllowRealTimeOnHovered = false;
+    thumbnailConfig.bForceGenericThumbnail = false;
+    thumbnailConfig.bAllowAssetSpecificThumbnailOverlay = false;
+    thumbnailConfig.ThumbnailLabel = EThumbnailLabel::NoLabel;
+    thumbnailConfig.HighlightedText = FText::FromString("");
+    thumbnailConfig.HintColorAndOpacity = FLinearColor( 1.0, 1.0, 1.0, 1.0 );
+    thumbnailConfig.AssetTypeColorOverride = FLinearColor(1.0, 1.0, 1.0, 1.0);
+    TSharedRef<SWidget> thumbnailWidget = mAssetThumbnail->MakeThumbnailWidget(thumbnailConfig);
+
+    ChildSlot
     .VAlign(VAlign_Center)
     .HAlign(HAlign_Left)
-	[
-		SNew(SHorizontalBox)
+    [
+        SNew(SHorizontalBox)
         .Clipping(EWidgetClipping::ClipToBoundsAlways)
-		.Visibility(this, &SOdysseyAnimationCellImageRaster::GetContentVisibility)
-		+ SHorizontalBox::Slot()
+        .Visibility(this, &SOdysseyAnimationCellImageRaster::GetContentVisibility)
+        + SHorizontalBox::Slot()
         .AutoWidth()
-		[
-			thumbnailWidget
-		]
-	];
+        [
+            thumbnailWidget
+        ]
+    ];
 }
 
 void
 SOdysseyAnimationCellImageRaster::OnThumbnailDirtied()
 {
-	mAssetThumbnail->RefreshThumbnail();
+    mAssetThumbnail->RefreshThumbnail();
 }
 
 void
 SOdysseyAnimationCellImageRaster::OnThumbnailChanged()
 {
-	mAssetThumbnail->RefreshThumbnail();
+    mAssetThumbnail->RefreshThumbnail();
 }
 
 EVisibility

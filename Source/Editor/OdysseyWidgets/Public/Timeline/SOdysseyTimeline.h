@@ -12,77 +12,77 @@ class SOdysseyScrubWidget;
 class ODYSSEYWIDGETS_API SOdysseyTimeline : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SOdysseyTimeline)
-		: _ScrubPosition(0.0f)
-		, _Offset(0.0f)
-		, _Zoom(1.0f)
-	{}
-		SLATE_DEFAULT_SLOT( FArguments, Content )
-		SLATE_ARGUMENT(float, ScrubPosition)
-		SLATE_ARGUMENT(float, Offset)
-		SLATE_ARGUMENT(float, Zoom)
-		SLATE_EVENT(FOnScrubStarted, OnScrubStarted)
-		SLATE_EVENT(FOnScrubPositionChanged, OnScrubPositionChanged)
-		SLATE_EVENT(FOnScrubStopped, OnScrubStopped)
-		SLATE_EVENT(FOnOffsetChanged, OnOffsetChanged)
-		SLATE_EVENT(FOnZoomChanged, OnZoomChanged)
-	SLATE_END_ARGS()
+    SLATE_BEGIN_ARGS(SOdysseyTimeline)
+        : _ScrubPosition(0.0f)
+        , _Offset(0.0f)
+        , _Zoom(1.0f)
+    {}
+        SLATE_DEFAULT_SLOT( FArguments, Content )
+        SLATE_ARGUMENT(float, ScrubPosition)
+        SLATE_ARGUMENT(float, Offset)
+        SLATE_ARGUMENT(float, Zoom)
+        SLATE_EVENT(FOnScrubStarted, OnScrubStarted)
+        SLATE_EVENT(FOnScrubPositionChanged, OnScrubPositionChanged)
+        SLATE_EVENT(FOnScrubStopped, OnScrubStopped)
+        SLATE_EVENT(FOnOffsetChanged, OnOffsetChanged)
+        SLATE_EVENT(FOnZoomChanged, OnZoomChanged)
+    SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs);
+    void Construct(const FArguments& InArgs);
 
-	// SWidget interface
-	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
-	virtual FReply OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	// End of SWidget interface
-
-public:
-	void OnScrollBarUserScrolled(float ScrollOffset);
+    // SWidget interface
+    virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+    virtual FReply OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+    virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+    virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+    virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+    // End of SWidget interface
 
 public:
-	// 1.0 = 100%
-	float Zoom() const;
-	void Zoom(float iZoom);
+    void OnScrollBarUserScrolled(float ScrollOffset);
 
-	// Offset of the timeline in frames
-	float Offset() const;
-	void Offset(float iOffset);
+public:
+    // 1.0 = 100%
+    float Zoom() const;
+    void Zoom(float iZoom);
 
-	// ScrubPosition
-	float ScrubPosition() const;
-	void ScrubPosition(float iPosition);
+    // Offset of the timeline in frames
+    float Offset() const;
+    void Offset(float iOffset);
 
-	bool IsScrubbing() const;
-	
-	// Returns the framesize in pixels according to the zoom
-	float FrameSize() const;
+    // ScrubPosition
+    float ScrubPosition() const;
+    void ScrubPosition(float iPosition);
 
-	FOptionalSize GetScrollBoxHWidth() const;
-	FOptionalSize GetScrollBoxVHeight() const;
+    bool IsScrubbing() const;
+
+    // Returns the framesize in pixels according to the zoom
+    float FrameSize() const;
+
+    FOptionalSize GetScrollBoxHWidth() const;
+    FOptionalSize GetScrollBoxVHeight() const;
 
 private:
-	//Zoom
-	float 			mZoom;
-	FOnZoomChanged 	mOnZoomChanged;
+    //Zoom
+    float             mZoom;
+    FOnZoomChanged     mOnZoomChanged;
 
-	//Offset
-	float 				mOffset;
-	FVector2D 			mOffsetMousePosition;
-	bool 				mIsOffsetting;
-	FOnOffsetChanged 	mOnOffsetChanged;
+    //Offset
+    float                 mOffset;
+    FVector2D             mOffsetMousePosition;
+    bool                 mIsOffsetting;
+    FOnOffsetChanged     mOnOffsetChanged;
 
-	//Scrub
-	float 						mScrubPosition;
-    bool 						mIsScrubbing;
-    FOnScrubStarted 			mOnScrubStarted;
-    FOnScrubPositionChanged 	mOnScrubPositionChanged;
-    FOnScrubStopped 			mOnScrubStopped;
+    //Scrub
+    float                         mScrubPosition;
+    bool                         mIsScrubbing;
+    FOnScrubStarted             mOnScrubStarted;
+    FOnScrubPositionChanged     mOnScrubPositionChanged;
+    FOnScrubStopped             mOnScrubStopped;
 
-	TSharedPtr<SWidget> mContent;
-	TSharedPtr<SScrollBar> mScrollBarH;
-	TSharedPtr<SScrollBox> mScrollBoxH;
-	TSharedPtr<SScrollBar> mScrollBarV;
-	TSharedPtr<SScrollBox> mScrollBoxV;
+    TSharedPtr<SWidget> mContent;
+    TSharedPtr<SScrollBar> mScrollBarH;
+    TSharedPtr<SScrollBox> mScrollBoxH;
+    TSharedPtr<SScrollBar> mScrollBarV;
+    TSharedPtr<SScrollBox> mScrollBoxV;
 };

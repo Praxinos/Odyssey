@@ -6,19 +6,19 @@
 #include "Media/OdysseyAnimationMediaTextureSample.h"
 
 FOdysseyAnimationMediaTextureSampleConverter::FOdysseyAnimationMediaTextureSampleConverter(FOdysseyAnimationMediaTextureSample* iSample)
-	: mSample(iSample)
+    : mSample(iSample)
 {
 }
 
 uint32
 FOdysseyAnimationMediaTextureSampleConverter::GetConverterInfoFlags() const
 {
-	return ConverterInfoFlags_WillCreateOutputTexture;
+    return ConverterInfoFlags_WillCreateOutputTexture;
 }
 
 bool
 FOdysseyAnimationMediaTextureSampleConverter::Convert(FTexture2DRHIRef& InDstTexture, const FConversionHints& Hints)
 {
-	InDstTexture = mSample->GetTexture();
-	return true;
+    InDstTexture = mSample->GetTexture();
+    return true;
 }

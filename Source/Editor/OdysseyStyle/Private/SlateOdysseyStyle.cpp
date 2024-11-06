@@ -43,7 +43,7 @@ IncludeOdysseyEditorSpecificStyles()
 
 //---
 
-class FOdysseyStyleDefault 
+class FOdysseyStyleDefault
     : public FSlateStyleSet
 {
 public:
@@ -173,10 +173,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "ClassThumbnail.OdysseyTexture", new IMAGE_BRUSH( "OdysseyTexture/OdysseyTextureDefaultThumbnail_64", mIcon64x64 ) );
     Set( "ClassIcon.Texture2D", new IMAGE_BRUSH( "OdysseyTexture/OdysseyTextureDefaultThumbnail_16", mIcon16x16 ) );
     Set( "ClassThumbnail.Texture2D", new IMAGE_BRUSH( "OdysseyTexture/OdysseyTextureDefaultThumbnail_64", mIcon64x64 ) );
-    
+
     Set( "ClassIcon.OdysseyFlipbook", new IMAGE_BRUSH("OdysseyFlipbook/OdysseyFlipbook_16x", mIcon16x16));
     Set( "ClassThumbnail.OdysseyFlipbook", new IMAGE_BRUSH("OdysseyFlipbook/OdysseyFlipbook_64x", mIcon64x64));
-    
+
     Set( "OdysseyTexture.ExportTexture_16", new IMAGE_BRUSH("OdysseyTexture/ExportTexture_16", mIcon16x16));
     Set( "OdysseyTexture.ExportTexture_64", new IMAGE_BRUSH("OdysseyTexture/ExportTexture_64", mIcon64x64));
 
@@ -483,7 +483,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 
     //OdysseyPainterEditorTools
     Set( "OdysseyPainterEditorTools.Tile", mCoreTableRowStyle
-            
+
     );
 
     //OdysseyLayerStack
@@ -528,7 +528,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/options_displayed_16", mIcon16x16))
         .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/options_displayed_16", mIcon16x16))
         .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/options_displayed_16", mIcon16x16))
-	);
+    );
 
     Set("LayerStack.IsActivatedToggle", FCheckBoxStyle()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
@@ -540,7 +540,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/visible_16", mIcon16x16))
         .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/visible_16", mIcon16x16))
         .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/visible_16", mIcon16x16))
-	);
+    );
 
     Set("LayerStack.IsLockedToggle", FCheckBoxStyle()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
@@ -552,8 +552,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/locked_16", mIcon16x16))
         .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/locked_16", mIcon16x16))
         .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/locked_16", mIcon16x16))
-	);
-    
+    );
+
     //OdysseyViewportDrawingEditor
     Set("OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16",new IMAGE_BRUSH("OdysseyViewportDrawing/viewport_drawing_icon_16",mIcon16x16));
     Set("OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40",new IMAGE_BRUSH("OdysseyViewportDrawing/viewport_drawing_icon_40",mIcon40x40));
@@ -574,11 +574,11 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
                 .SetInactiveHoveredBrush(FSlateColorBrush(selectedInactiveRow))
                 .SetActiveHighlightedBrush(FSlateColorBrush(selectedParentRow)) // This is the parent hightlight
                 .SetInactiveHighlightedBrush(FSlateColorBrush(selectedParentRow))// This is the parent highlight
-				//.SetDropIndicator_Above(const FSlateBrush& InValue)
-				//.SetDropIndicator_Onto(const FSlateBrush& InValue)
-				//.SetDropIndicator_Below(const FSlateBrush& InValue)
-		);
-	}
+                //.SetDropIndicator_Above(const FSlateBrush& InValue)
+                //.SetDropIndicator_Onto(const FSlateBrush& InValue)
+                //.SetDropIndicator_Below(const FSlateBrush& InValue)
+        );
+    }
 
     Set("OdysseySpinBoxStyle.DarkSpinBox",FSpinBoxStyle()
         .SetBackgroundBrush(BOX_BRUSH("SpinBox/Spinbox",FMargin(4.0f/16.0f), FLinearColor( 0.05f, 0.05f, 0.05f )))
@@ -611,88 +611,88 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetPadding(FMargin())
     );
 
-	//For flipbook
-	Set("FlipbookTimeline.TimelineFrameBackground", new BOX_BRUSH("OdysseyFlipbook/TimelineFrameBackground", FMargin(4.f / 16.f)));
-	Set("FlipbookTimeline.TimelineFrameTimingHandle", new IMAGE_BRUSH("OdysseyFlipbook/TimelineFrameTimingHandle", FVector2D(16.f, 16.f)));
-	Set("FlipbookTimeline.TimelineFrameLengthHandle", new IMAGE_BRUSH("OdysseyFlipbook/TimelineFrameLengthHandle", FVector2D(16.f, 16.f)));
+    //For flipbook
+    Set("FlipbookTimeline.TimelineFrameBackground", new BOX_BRUSH("OdysseyFlipbook/TimelineFrameBackground", FMargin(4.f / 16.f)));
+    Set("FlipbookTimeline.TimelineFrameTimingHandle", new IMAGE_BRUSH("OdysseyFlipbook/TimelineFrameTimingHandle", FVector2D(16.f, 16.f)));
+    Set("FlipbookTimeline.TimelineFrameLengthHandle", new IMAGE_BRUSH("OdysseyFlipbook/TimelineFrameLengthHandle", FVector2D(16.f, 16.f)));
     Set("FlipbookTimeline.TimelineFrameWarning", new IMAGE_BRUSH("OdysseyFlipbook/icon_warning_16x", FVector2D(16.f, 16.f)));
     Set("FlipbookTimeline.BackgroundColorEven", FLinearColor(1.0f, 1.0f, 1.0f, 0.05f));
     Set("FlipbookTimeline.BackgroundColorOdd", FLinearColor(0.0f, 0.0f, 0.0f, 0.05f));
-	
 
-	//PlaybackControls
-	Set("PlaybackControls.Play", FButtonStyle(mButton)
-		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Play_OFF_24", mIcon24x24))
-		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Play_OFF_24", mIcon24x24))
-		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Play_ON_24", mIcon24x24))
-	);
 
-	//PlaybackControls
-	Set("PlaybackControls.PlayBackward", FButtonStyle(mButton)
-		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PlayBackward_OFF_24", mIcon24x24))
-		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PlayBackward_OFF_24", mIcon24x24))
-		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PlayBackward_ON_24", mIcon24x24))
-	);
+    //PlaybackControls
+    Set("PlaybackControls.Play", FButtonStyle(mButton)
+        .SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Play_OFF_24", mIcon24x24))
+        .SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Play_OFF_24", mIcon24x24))
+        .SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Play_ON_24", mIcon24x24))
+    );
+
+    //PlaybackControls
+    Set("PlaybackControls.PlayBackward", FButtonStyle(mButton)
+        .SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PlayBackward_OFF_24", mIcon24x24))
+        .SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PlayBackward_OFF_24", mIcon24x24))
+        .SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PlayBackward_ON_24", mIcon24x24))
+    );
 
     Set("PlaybackControls.Pause", FButtonStyle(mButton)
-		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Pause_OFF_24", mIcon24x24))
-		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Pause_OFF_24", mIcon24x24))
-		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Pause_ON_24", mIcon24x24))
-	);
+        .SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Pause_OFF_24", mIcon24x24))
+        .SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Pause_OFF_24", mIcon24x24))
+        .SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Pause_ON_24", mIcon24x24))
+    );
 
     Set("PlaybackControls.Stop", FButtonStyle(mButton)
-		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Stop_OFF_24", mIcon24x24))
-		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Stop_OFF_24", mIcon24x24))
-		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Stop_ON_24", mIcon24x24))
-	);
+        .SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Stop_OFF_24", mIcon24x24))
+        .SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Stop_OFF_24", mIcon24x24))
+        .SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Stop_ON_24", mIcon24x24))
+    );
 
     Set("PlaybackControls.Beginning", FButtonStyle(mButton)
-		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Beginning_OFF_24", mIcon24x24))
-		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Beginning_OFF_24", mIcon24x24))
-		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Beginning_ON_24", mIcon24x24))
-	);
+        .SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Beginning_OFF_24", mIcon24x24))
+        .SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Beginning_OFF_24", mIcon24x24))
+        .SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Beginning_ON_24", mIcon24x24))
+    );
 
     Set("PlaybackControls.End", FButtonStyle(mButton)
-		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_End_OFF_24", mIcon24x24))
-		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_End_OFF_24", mIcon24x24))
-		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_End_ON_24", mIcon24x24))
-	);
+        .SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_End_OFF_24", mIcon24x24))
+        .SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_End_OFF_24", mIcon24x24))
+        .SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_End_ON_24", mIcon24x24))
+    );
 
     Set("PlaybackControls.Previous", FButtonStyle(mButton)
-		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Previous_OFF_24", mIcon24x24))
-		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Previous_OFF_24", mIcon24x24))
-		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Previous_ON_24", mIcon24x24))
-	);
+        .SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Previous_OFF_24", mIcon24x24))
+        .SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Previous_OFF_24", mIcon24x24))
+        .SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Previous_ON_24", mIcon24x24))
+    );
 
     Set("PlaybackControls.PreviousKey", FButtonStyle(mButton)
-		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PreviousKey_OFF_24", mIcon24x24))
-		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PreviousKey_OFF_24", mIcon24x24))
-		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PreviousKey_ON_24", mIcon24x24))
-	);
+        .SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PreviousKey_OFF_24", mIcon24x24))
+        .SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PreviousKey_OFF_24", mIcon24x24))
+        .SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_PreviousKey_ON_24", mIcon24x24))
+    );
 
     Set("PlaybackControls.Next", FButtonStyle(mButton)
-		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Next_OFF_24", mIcon24x24))
-		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Next_OFF_24", mIcon24x24))
-		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Next_ON_24", mIcon24x24))
-	);
+        .SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Next_OFF_24", mIcon24x24))
+        .SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Next_OFF_24", mIcon24x24))
+        .SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Next_ON_24", mIcon24x24))
+    );
 
     Set("PlaybackControls.NextKey", FButtonStyle(mButton)
-		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NextKey_OFF_24", mIcon24x24))
-		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NextKey_OFF_24", mIcon24x24))
-		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NextKey_ON_24", mIcon24x24))
-	);
+        .SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NextKey_OFF_24", mIcon24x24))
+        .SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NextKey_OFF_24", mIcon24x24))
+        .SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NextKey_ON_24", mIcon24x24))
+    );
 
     Set("PlaybackControls.Looping", FButtonStyle(mButton)
-		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Looping_OFF_24", mIcon24x24))
-		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Looping_OFF_24", mIcon24x24))
-		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Looping_ON_24", mIcon24x24))
-	);
+        .SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Looping_OFF_24", mIcon24x24))
+        .SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Looping_OFF_24", mIcon24x24))
+        .SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_Looping_ON_24", mIcon24x24))
+    );
 
     Set("PlaybackControls.NotLooping", FButtonStyle(mButton)
-		.SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NotLooping_OFF_24", mIcon24x24))
-		.SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NotLooping_OFF_24", mIcon24x24))
-		.SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NotLooping_ON_24", mIcon24x24))
-	);
+        .SetNormal(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NotLooping_OFF_24", mIcon24x24))
+        .SetHovered(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NotLooping_OFF_24", mIcon24x24))
+        .SetPressed(IMAGE_BRUSH("OdysseyFlipbook/PlaybackControls_NotLooping_ON_24", mIcon24x24))
+    );
 
     //Animation
     Set("TimelineHeader.backgroundColorEven", FLinearColor(1.0f, 1.0f, 1.0f, 0.05f));
@@ -703,12 +703,12 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "ClassIcon.OdysseyAnimation", new IMAGE_BRUSH( "OdysseyAnimation/OdysseyAnimationDefaultThumbnail_16", mIcon16x16 ) );
     Set( "ClassThumbnail.OdysseyAnimation", new IMAGE_BRUSH( "OdysseyAnimation/OdysseyAnimationDefaultThumbnail_64", mIcon64x64 ) );
 
-	Set("Animation.Timeline.Padding", 40.f);
+    Set("Animation.Timeline.Padding", 40.f);
 
     Set("Animation.Timeline.Tools.Selection", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Selection", mIcon16x16));
     Set("Animation.Timeline.Tools.Move", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Move", mIcon16x16));
     Set("Animation.Timeline.Tools.Cut", new IMAGE_BRUSH_SVG("OdysseyAnimation/Timeline/Tools/Cut", mIcon16x16));
-    
+
     Set("Animation.Timeline.Inbetweening.Forward16", new IMAGE_BRUSH("OdysseyAnimation/Timeline/Inbetweening/forward16", mIcon16x16));
     Set("Animation.Timeline.Inbetweening.Backward16", new IMAGE_BRUSH("OdysseyAnimation/Timeline/Inbetweening/backward16", mIcon16x16));
 
@@ -727,7 +727,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedImage(IMAGE_BRUSH("OdysseyAnimation/LightTableToggle_ON_16", mIcon16x16))
         .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyAnimation/LightTableToggle_ON_16", mIcon16x16))
         .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyAnimation/LightTableToggle_ON_16", mIcon16x16))
-	);
+    );
 
     Set("Animation.AlphaLockedToggle", FCheckBoxStyle()
         //.Padding(FMargin(0,0,0,0))
@@ -740,7 +740,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
         .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
         .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
-	);
+    );
 
     Set("Animation.LightTable.Options", FComboButtonStyle(mComboButton)
         .SetShadowOffset(FVector2D(0))
@@ -751,11 +751,11 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
             .SetHovered(IMAGE_BRUSH_SVG("OdysseyFlipbook/LightTable_Options_OFF", mIcon16x16))
             .SetPressed(IMAGE_BRUSH_SVG("OdysseyFlipbook/LightTable_Options_ON", mIcon16x16))
         )
-	);
+    );
 
     Set("Animation.LightTable.Options.DisplayPosition.AboveLayer", new IMAGE_BRUSH_SVG("OdysseyAnimation/LightTable_Options_DisplayPosition_AboveLayer", mIcon16x16));
     Set("Animation.LightTable.Options.DisplayPosition.UnderLayer", new IMAGE_BRUSH_SVG("OdysseyAnimation/LightTable_Options_DisplayPosition_UnderLayer", mIcon16x16));
-    
+
 
     Set("Animation.AddCellsHandleRight", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleRight_16", mIcon16x16));
     Set("Animation.AddCellsHandleLeft", new IMAGE_BRUSH("OdysseyAnimation/AddCellsHandleLeft_16", mIcon16x16));
@@ -827,7 +827,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
         .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
         .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/alpha_locked_16", mIcon16x16))
-	);
+    );
 
     Set("Texture.ColoredToggle", FCheckBoxStyle()
         //.Padding(FMargin(0,0,0,0))
@@ -840,7 +840,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/colored_16", mIcon16x16))
         .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/colored_16", mIcon16x16))
         .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/colored_16", mIcon16x16))
-	);
+    );
 
     Set("Texture.WireframeToggle", FCheckBoxStyle()
         //.Padding(FMargin(0,0,0,0))
@@ -853,7 +853,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedImage(IMAGE_BRUSH("OdysseyLayerStack/wireframe_on_16", mIcon16x16))
         .SetCheckedHoveredImage(IMAGE_BRUSH("OdysseyLayerStack/wireframe_on_16", mIcon16x16))
         .SetCheckedPressedImage(IMAGE_BRUSH("OdysseyLayerStack/wireframe_on_16", mIcon16x16))
-	);
+    );
 
     Set("CheckBox.BasicOnOff", FCheckBoxStyle()
         //.Padding(FMargin(0,0,0,0))
@@ -867,10 +867,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedHoveredImage(FSlateColorBrush(FLinearColor(1, 1, 1, 0.25)))
         .SetCheckedPressedImage(FSlateColorBrush(FLinearColor::Transparent))
     );
-	
+
     Set("Sequencer.AnimationComponentTrack.DisplayLayersToggle", FCheckBoxStyle()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
-		.SetBorderBackgroundColor(FSlateColor::UseSubduedForeground())
+        .SetBorderBackgroundColor(FSlateColor::UseSubduedForeground())
         .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
         .SetUncheckedImage(*FAppStyle::Get().GetBrush("TreeArrow_Collapsed"))
         .SetUncheckedHoveredImage(*FAppStyle::Get().GetBrush("TreeArrow_Collapsed_Hovered"))
@@ -878,7 +878,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedImage(*FAppStyle::Get().GetBrush("TreeArrow_Expanded"))
         .SetCheckedHoveredImage(*FAppStyle::Get().GetBrush("TreeArrow_Expanded_Hovered"))
         .SetCheckedPressedImage(*FAppStyle::Get().GetBrush("TreeArrow_Expanded_Hovered"))
-	);
+    );
 #endif
 }
 

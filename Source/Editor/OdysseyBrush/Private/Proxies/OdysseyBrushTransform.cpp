@@ -59,9 +59,9 @@ UOdysseyTransformProxyLibrary::MakeShearMatrix( float ShearX, float ShearY )
 
 //static
 FOdysseyMatrix
-UOdysseyTransformProxyLibrary::MakePerspectiveMatrix( 
+UOdysseyTransformProxyLibrary::MakePerspectiveMatrix(
       FVector2D SrcA, FVector2D SrcB, FVector2D SrcC, FVector2D SrcD
-    , FVector2D DstA, FVector2D DstB, FVector2D DstC, FVector2D DstD 
+    , FVector2D DstA, FVector2D DstB, FVector2D DstC, FVector2D DstD
 )
 {
     ::ULIS::FVec2F src[4] = { ::ULIS::FVec2F( SrcA.X, SrcA.Y ), ::ULIS::FVec2F( SrcB.X, SrcB.Y ), ::ULIS::FVec2F( SrcC.X, SrcC.Y ), ::ULIS::FVec2F( SrcD.X, SrcD.Y ) };

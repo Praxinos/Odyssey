@@ -80,7 +80,7 @@ FOdysseyVectorImportV2::ReadObjectsDeclare( uint64 iChunkEnd, FArchive &Ar )
                     // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
-            }    
+            }
         } );
 }
 
@@ -131,7 +131,7 @@ FOdysseyVectorImportV2::ReadObjectTransform( FOdysseyVectorObject& iObject, uint
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
-            }    
+            }
         } );
 }
 
@@ -156,7 +156,7 @@ FOdysseyVectorImportV2::ReadObjectBucket( FOdysseyVectorBucket& iBucket
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
-            }    
+            }
         });
 }
 
@@ -253,7 +253,7 @@ FOdysseyVectorImportV2::ParseObjectChunks( FOdysseyVectorObject& iObject
         // Mandatory
             Ar.Seek( Ar.Tell() + iChunkLen );
         break;
-    }    
+    }
 }
 
 void
@@ -296,7 +296,7 @@ FOdysseyVectorImportV2::ReadObjectsDefine( uint64 iChunkEnd, FArchive &Ar )
                     FOdysseyVectorGroup* group = static_cast<FOdysseyVectorGroup*>(vectorObject);
 
                     FOdysseyVectorImportV2::ReadGroup( *group, Ar.Tell() + iChunkLen, Ar );
- 
+
                     //group->Invalidate();
                 }
                 break;
@@ -330,6 +330,6 @@ FOdysseyVectorImportV2::ReadObjectsDefine( uint64 iChunkEnd, FArchive &Ar )
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
-            }    
+            }
         } );
 }

@@ -29,7 +29,7 @@ SOdysseyPaletteSetTile::Construct(const FArguments& InArgs, const TSharedRef<STa
         .Content()
         [
             SNew(SButton)
-		    .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("Button.TransparentNoPadding"))
+            .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("Button.TransparentNoPadding"))
             .OnClicked(this, &SOdysseyPaletteSetTile::OnClicked)
             .IsEnabled(this, &SOdysseyPaletteSetTile::IsEnabled)
             .Content()

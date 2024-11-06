@@ -4,8 +4,8 @@
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingToolOverrides.h"
 
 UOdysseyPainterEditorRasterDrawingToolOverrides::UOdysseyPainterEditorRasterDrawingToolOverrides()
-    : bOverride_Shape        	( false )
-	, bOverride_SubPixel        ( false )
-	, Shape                  	( EOdysseyShape::kFreehand )
+    : bOverride_Shape            ( false )
+    , bOverride_SubPixel        ( false )
+    , Shape                      ( EOdysseyShape::kFreehand )
     , SubPixel                  ( true )
 {}

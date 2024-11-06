@@ -149,7 +149,7 @@ MapPath( FOdysseyVectorPath* iPath
         }
     }
 }
- 
+
 static void
 MapPoints( FOdysseyVectorObject* iObject
          , const ::ULIS::FRectD& iRect

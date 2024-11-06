@@ -25,7 +25,7 @@ public:
     FOdysseyFlipbookEditorToolkit();
 
 protected:
-	virtual void OpenAsset(UObject* iObject) override;
+    virtual void OpenAsset(UObject* iObject) override;
 
 public:
     // IToolkit interface

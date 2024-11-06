@@ -127,7 +127,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorGroupPai
         mEraserHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
         mEraserHUD->StrokeLine( ::ULIS::FVec2D( iPointInTexture.x - iPointInTexture.deltaPosition.X
                                               , iPointInTexture.y - iPointInTexture.deltaPosition.Y )
-                              , ::ULIS::FVec2D( iPointInTexture.x 
+                              , ::ULIS::FVec2D( iPointInTexture.x
                                               , iPointInTexture.y ) );
     }
 
@@ -161,7 +161,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
           // build the list of impacted paintgroups, no duplicates
           if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
           {
-              if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) ) 
+              if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
               {
                   FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
 
@@ -173,7 +173,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
                   }
               }
 
-              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) ) 
+              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
                   FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
                   FOdysseyVectorObject* parent = path->GetParent();
@@ -227,7 +227,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
     }
 
     // Also here, we remove AFTER the Traverse() has been executed, because traverse is recursive
-    // so we can't alter the hierarchy, unles traverse works on copies of the children list but that 
+    // so we can't alter the hierarchy, unles traverse works on copies of the children list but that
     // would be very inefficient.
     for( int i = 0; i < oRemovedObjectArray.size(); i++ )
     {
@@ -275,7 +275,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
       {
           if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
           {
-              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) ) 
+              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
                   FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
                   ::ULIS::FRectD pathWorldBBox = path->GetBBox( true );
@@ -314,7 +314,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
     }
 
     // Also here, we remove AFTER the Traverse() has been executed, because traverse is recursive
-    // so we can't alter the hierarchy, unless traverse works on copies of the children list but that 
+    // so we can't alter the hierarchy, unless traverse works on copies of the children list but that
     // would be very inefficient.
     for( int i = 0; i < oRemovedObjectArray.size(); i++ )
     {
@@ -402,7 +402,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
                                                                   , notificationFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
             TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();

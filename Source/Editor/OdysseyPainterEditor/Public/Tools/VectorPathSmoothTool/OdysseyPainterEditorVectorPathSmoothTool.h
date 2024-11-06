@@ -61,7 +61,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : publi
 
     public:
         UPROPERTY( EditAnywhere
-                 , Category=PathSmoothTool 
+                 , Category=PathSmoothTool
                  , meta = ( ToolTip  = "Smoothing Mode" ) )
         ePathSmoothingMode SmoothingMode;
         ePathSmoothingMode SmoothingModeAtKeyDown; // when pressing shift

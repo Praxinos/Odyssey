@@ -23,10 +23,10 @@ void SOdysseyTextureLayerImageRasterRow::Construct(const FArguments& InArgs, con
     SOdysseyLayerRow::Construct(
         SOdysseyLayerRow::FArguments(),
         iOwnerTableView,
-		iTextureLayerImageRaster
+        iTextureLayerImageRaster
     );
 
-	SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
+    SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -34,19 +34,19 @@ void SOdysseyTextureLayerImageRasterRow::Construct(const FArguments& InArgs, con
 TArray<TSharedPtr<SWidget>>
 SOdysseyTextureLayerImageRasterRow::GenerateMainRowHeaderOptionWidgets()
 {
-	TArray<TSharedPtr<SWidget>> widgets = SOdysseyLayerRow::GenerateMainRowHeaderOptionWidgets();
-	
-	const FCheckBoxStyle* alphaLockedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.AlphaLockedToggle");
+    TArray<TSharedPtr<SWidget>> widgets = SOdysseyLayerRow::GenerateMainRowHeaderOptionWidgets();
 
-	//AlphaLock
-	widgets.Add(
-		SNew(SCheckBox)
-		.Style(alphaLockedToggleStyle)
-		.OnCheckStateChanged(this, &SOdysseyTextureLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged)
-		.IsChecked(this, &SOdysseyTextureLayerImageRasterRow::GetIsAlphaLockedIsChecked)
-	);
+    const FCheckBoxStyle* alphaLockedToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.AlphaLockedToggle");
 
-	return widgets;
+    //AlphaLock
+    widgets.Add(
+        SNew(SCheckBox)
+        .Style(alphaLockedToggleStyle)
+        .OnCheckStateChanged(this, &SOdysseyTextureLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged)
+        .IsChecked(this, &SOdysseyTextureLayerImageRasterRow::GetIsAlphaLockedIsChecked)
+    );
+
+    return widgets;
 }
 
 void
@@ -58,7 +58,7 @@ SOdysseyTextureLayerImageRasterRow::OnIsAlphaLockedCheckStateChanged(ECheckBoxSt
 ECheckBoxState
 SOdysseyTextureLayerImageRasterRow::GetIsAlphaLockedIsChecked() const
 {
-	return mTextureLayerImageRaster->IsAlphaLocked ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mTextureLayerImageRaster->IsAlphaLocked ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 #undef LOCTEXT_NAMESPACE

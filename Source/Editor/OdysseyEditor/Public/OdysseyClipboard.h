@@ -34,7 +34,7 @@ public:
         static FGuid emptyId;
         return mData ? mData->GetId() : emptyId;
     }
-    
+
     template <class T>
     TSharedPtr<T> GetData()
     {

@@ -38,7 +38,7 @@ public:
     /**
      * @brief Merges this layer over iLayer (modifying its content)
      * Only works with Layer class being a child of classes returned by GetMergeLayerTypes()
-     * 
+     *
      */
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
@@ -63,9 +63,9 @@ public:
     virtual void Serialize(FArchive& Ar) override;
 
 public:
-	//FOdysseyImageRenderingAbility overrides
-	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0) const override;
+    //FOdysseyImageRenderingAbility overrides
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
+    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame = 0) const override;
 
 private:
     TArray<::ULIS::FEvent> RasterBlockPostProcess(const TMap<FIntPoint, TSharedPtr<::ULIS::FBlock>>& iOriginalBlocks, const FULISInvalidTileMap& iInvalidMap, const TArray<::ULIS::FEvent>& iWaitList);
@@ -79,8 +79,8 @@ private:
     TSharedPtr<FOdysseyRasterBlock> RasterBlock;
 
 private:
-	UFUNCTION(BlueprintSetter)
-	void IsAlphaLockedBlueprintSetter(bool Value);
+    UFUNCTION(BlueprintSetter)
+    void IsAlphaLockedBlueprintSetter(bool Value);
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")

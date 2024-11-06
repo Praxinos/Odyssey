@@ -14,5 +14,5 @@
 UCLASS()
 class ODYSSEYTEXTURE_API UOdysseyTexture : public UObject
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 };

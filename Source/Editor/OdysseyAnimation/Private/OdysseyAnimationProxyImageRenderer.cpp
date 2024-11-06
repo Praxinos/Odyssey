@@ -20,7 +20,7 @@ FOdysseyAnimationProxyImageRenderer::FOdysseyAnimationProxyImageRenderer(const U
 void
 FOdysseyAnimationProxyImageRenderer::Init()
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxyImageRenderer::Init);
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxyImageRenderer::Init);
     if ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Editor || GetRenderType() == IOdysseyImageRenderer::eRenderType::RenderOutOfPegs || mForceRender )
         mAnimationRenderer->Init();
 
@@ -36,7 +36,7 @@ FOdysseyAnimationProxyImageRenderer::Init()
 TArray<::ULIS::FEvent>
 FOdysseyAnimationProxyImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxyImageRenderer::Blend);
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxyImageRenderer::Blend);
     if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render || mForceRender)
         return mAnimationRenderer->Blend(iParams, iWaitList);
 
@@ -49,7 +49,7 @@ FOdysseyAnimationProxyImageRenderer::Blend(const FOdysseyImageRendererBlendParam
 TArray<::ULIS::FEvent>
 FOdysseyAnimationProxyImageRenderer::Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxyImageRenderer::Copy);
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationProxyImageRenderer::Copy);
     if (GetRenderType() != IOdysseyImageRenderer::eRenderType::Render || mForceRender)
         return mAnimationRenderer->Copy(iParams, iWaitList);
 

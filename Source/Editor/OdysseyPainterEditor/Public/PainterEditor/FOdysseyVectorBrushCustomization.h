@@ -23,12 +23,12 @@ public:
     }
 
     virtual void CustomizeHeader( TSharedRef<IPropertyHandle> StructPropertyHandle
-	                            , class FDetailWidgetRow& HeaderRow
-	                            , IPropertyTypeCustomizationUtils& StructCustomizationUtils ) override;
+                                , class FDetailWidgetRow& HeaderRow
+                                , IPropertyTypeCustomizationUtils& StructCustomizationUtils ) override;
 
     virtual void CustomizeChildren( TSharedRef<IPropertyHandle> StructPropertyHandle
                                   , class IDetailChildrenBuilder& StructBuilder
-		                          , IPropertyTypeCustomizationUtils& StructCustomizationUtils ) override;
+                                  , IPropertyTypeCustomizationUtils& StructCustomizationUtils ) override;
 
     private:
         void OnAssetSelected( const FAssetData& AssetData

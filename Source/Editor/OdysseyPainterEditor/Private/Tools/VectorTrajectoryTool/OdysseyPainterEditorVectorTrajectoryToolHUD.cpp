@@ -220,7 +220,7 @@ PickStepFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
         {
             ::ULIS::FVec2D* cubicBezier = trajectory.GetCubicBezier();
             BLPoint p0World = ownerWorldMatrix.mapPoint( cubicBezier[0].x, cubicBezier[0].y );
-            BLPoint p3World = ownerWorldMatrix.mapPoint( cubicBezier[3].x, cubicBezier[3].y ); 
+            BLPoint p3World = ownerWorldMatrix.mapPoint( cubicBezier[3].x, cubicBezier[3].y );
 
 
             if( ( ::ULIS::FVec2D( p0World.x, p0World.y )
@@ -358,7 +358,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHoveredQuad( BLContext* iBLCon
         iBLContext->setStrokeStyle( iBgColor );
         iBLContext->setStrokeWidth( 2.0f );
         iBLContext->strokePath( path );
-      
+
         iBLContext->setStrokeStyle( iHcColor );
         iBLContext->setStrokeWidth( 1.0f );
         iBLContext->strokePath( path );
@@ -389,7 +389,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHoveredQuad( BLContext* iBLCon
         iBLContext->setStrokeStyle( iBgColor );
         iBLContext->setStrokeWidth( 2.0f );
         iBLContext->strokePath( path );
-      
+
         iBLContext->setStrokeStyle( iHcColor );
         iBLContext->setStrokeWidth( 1.0f );
         iBLContext->strokePath( path );
@@ -446,7 +446,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLCont
 
         path.moveTo( p0World.x, p0World.y );
         path.cubicTo( p1World.x, p1World.y
-                    , p2World.x, p2World.y 
+                    , p2World.x, p2World.y
                     , p3World.x, p3World.y );
 
         iBLContext->setStrokeStyle( iBgColor );
@@ -545,7 +545,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
                 }
             }
         }
- 
+
         if( mTrajectoryTool->GetPickingMode() == eTrajectoryPickingMode::Add )
         {
             DrawHoveredQuad( iBLContext

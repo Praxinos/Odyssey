@@ -8,15 +8,15 @@
 class FOdysseyAnimationMediaTextureSample;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationMediaTextureSampleConverter
-	: public IMediaTextureSampleConverter
+    : public IMediaTextureSampleConverter
 {
 public:
-	FOdysseyAnimationMediaTextureSampleConverter(FOdysseyAnimationMediaTextureSample* iSample);
-	virtual ~FOdysseyAnimationMediaTextureSampleConverter() {}
+    FOdysseyAnimationMediaTextureSampleConverter(FOdysseyAnimationMediaTextureSample* iSample);
+    virtual ~FOdysseyAnimationMediaTextureSampleConverter() {}
 
-	virtual uint32 GetConverterInfoFlags() const override;
-	virtual bool Convert(FTexture2DRHIRef & InDstTexture, const FConversionHints & Hints) override;
+    virtual uint32 GetConverterInfoFlags() const override;
+    virtual bool Convert(FTexture2DRHIRef & InDstTexture, const FConversionHints & Hints) override;
 
 private:
-	FOdysseyAnimationMediaTextureSample* mSample;
+    FOdysseyAnimationMediaTextureSample* mSample;
 };

@@ -65,10 +65,10 @@ public:
 
     /* Set the viewport client to use */
     void            SetViewportClient(TSharedPtr<class FViewportClient> InViewportClient);
-    
+
     /* Add PanValue to current pan, panning in the widget coordinates system **/
     void            AddPan(FVector2D PanValue);
-    
+
     /* Resets the Pan valule to its defalut value */
     void            ResetPan();
 
@@ -77,7 +77,7 @@ public:
     */
     void            SetZoom(double ZoomValue, const FVector2D& iZoomPosition = FVector2D(0.0f, 0.0f));
 
-    /* Set the rotation value in Radians, rotating according to the given PivotPoint 
+    /* Set the rotation value in Radians, rotating according to the given PivotPoint
         PivotPoint is the offset of the pivot point from the center of the Viewport
     */
     void            SetRotation(double RotationValue, const FVector2D& PivotPoint = FVector2D(0.0f, 0.0f));
@@ -105,13 +105,13 @@ public:
 
 public:
     // Public Shortcuts Methods
-    
+
     /* Zoom in by adding iSliderOffsetToAdd to the zoom slider position */
     void            ZoomExponential(float iBaseZoom, float iSliderOffsetToAdd, const FVector2D& iZoomPosition = FVector2D(0.0f, 0.0f));
 
     /* Rotate the canvas to the Left, the Pivot point for the Rotation being in the middle of the viewport */
     void            RotateLeft();
-    
+
     /* Rotate the canvas to the Right, the Pivot point for the Rotation being in the middle of the viewport */
     void            RotateRight();
 
@@ -229,7 +229,7 @@ private:
     /* The rotation (in radians) applied to the viewport */
     double                              mRotation;
 
-    /* The translation applied to the viewport */ 
+    /* The translation applied to the viewport */
     FVector2D                           mPan;
 
     /* (0,0) if no flip, (1,0) if flip X, (0,1) if flip Y, (1,1) if both axis are flipped */

@@ -39,7 +39,7 @@ FOdysseyVectorUndoVertexAlignment::FOdysseyVectorUndoVertexAlignment( FOdysseyVe
 
     mCubicSegmentSnapshotArray.reserve( segmentArray.size() );
 
-    for( FOdysseyVectorSegment* segment : segmentArray ) 
+    for( FOdysseyVectorSegment* segment : segmentArray )
     {
         if( segment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
         {

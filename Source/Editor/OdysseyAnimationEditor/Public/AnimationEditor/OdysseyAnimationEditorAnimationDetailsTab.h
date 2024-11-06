@@ -9,7 +9,7 @@ class UOdysseyAnimation;
 class FOdysseyAnimationEditorExtension;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorAnimationDetailsTab :
-	public FOdysseyEditorTab
+    public FOdysseyEditorTab
 {
 public:
     static const FName& StaticId();

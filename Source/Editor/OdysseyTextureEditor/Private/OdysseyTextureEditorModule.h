@@ -7,11 +7,11 @@
 #include "IAssetTypeActions.h"
 
 class FOdysseyTextureEditorModule
-	: public IOdysseyTextureEditorModule
+    : public IOdysseyTextureEditorModule
 {
 public:
-	// IOdysseyTextureEditorModule interface
-	virtual void CreateOdysseyTextureEditor( TArray<UTexture2D*> iTextures ) override;
+    // IOdysseyTextureEditorModule interface
+    virtual void CreateOdysseyTextureEditor( TArray<UTexture2D*> iTextures ) override;
 
 public:
     // IModuleInterface interface
@@ -21,25 +21,25 @@ public:
 private:
     //Asset Type Action
     void RegisterAssetTypeActions();
-	void UnregisterAssetTypeActions();
+    void UnregisterAssetTypeActions();
 
-	//Settings
-	void RegisterSettings();
-	void UnregisterSettings();
+    //Settings
+    void RegisterSettings();
+    void UnregisterSettings();
 
-	//Commands
-	void RegisterCommands();
-	void UnregisterCommands();
+    //Commands
+    void RegisterCommands();
+    void UnregisterCommands();
 
     //Level Editor Layout
     void RegisterLevelEditorLayoutExtensions();
     void UnregisterLevelEditorLayoutExtensions();
 
 private:
-	/** All created asset type actions. Cached here so that we can unregister them during shutdown. */
-	TSharedPtr<IAssetTypeActions> mIliadTypeActions;
+    /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
+    TSharedPtr<IAssetTypeActions> mIliadTypeActions;
     FDelegateHandle mExtendLevelEditorLayout;
 
-	/** Holds the menu extensibility manager. */
-	TSharedPtr<FExtensibilityManager> mMenuExtensibilityManager;
+    /** Holds the menu extensibility manager. */
+    TSharedPtr<FExtensibilityManager> mMenuExtensibilityManager;
 };

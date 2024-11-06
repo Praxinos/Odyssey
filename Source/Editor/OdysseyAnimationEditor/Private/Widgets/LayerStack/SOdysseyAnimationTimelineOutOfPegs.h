@@ -11,31 +11,31 @@ class UOdysseyAnimationLayer;
 class UOdysseyAnimation;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineOutOfPegs
-	: public SCompoundWidget
+    : public SCompoundWidget
 {
 public:
-	static inline const float mDesiredHeight = 60.f;
+    static inline const float mDesiredHeight = 60.f;
 
 public:
-	SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineOutOfPegs)
-	{}
-		SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
-		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
-		SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
-		SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
-	SLATE_END_ARGS()
+    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineOutOfPegs)
+    {}
+        SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
+        SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
+        SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
+        SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
+    SLATE_END_ARGS()
 
-	void Construct(
-		const FArguments& InArgs,
-		UOdysseyAnimationLayer* iLayer
-	);
-
-private:
-	void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
-	void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
-	void Update();
+    void Construct(
+        const FArguments& InArgs,
+        UOdysseyAnimationLayer* iLayer
+    );
 
 private:
-	UOdysseyAnimationLayer* mLayer = nullptr;
-	UOdysseyAnimationCell* mCurrentCell = nullptr;
+    void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
+    void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);
+    void Update();
+
+private:
+    UOdysseyAnimationLayer* mLayer = nullptr;
+    UOdysseyAnimationCell* mCurrentCell = nullptr;
 };

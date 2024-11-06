@@ -55,11 +55,11 @@ class FOdysseyViewportDrawingEditorScreenBasedAdapter
     , public FTickableEditorObject //Allows us to react to Tick events
 {
 public:
-	/** destructor */
-	~FOdysseyViewportDrawingEditorScreenBasedAdapter();
+    /** destructor */
+    ~FOdysseyViewportDrawingEditorScreenBasedAdapter();
 
-	/** constructor */
-	FOdysseyViewportDrawingEditorScreenBasedAdapter(FOdysseyViewportDrawingEditorExtension* iExtension);
+    /** constructor */
+    FOdysseyViewportDrawingEditorScreenBasedAdapter(FOdysseyViewportDrawingEditorExtension* iExtension);
 
 public:
     virtual void Initialize() override;
@@ -68,7 +68,7 @@ public:
     virtual void SetTexture(UTexture* iTexture) override;
 
     void InitializeRenderTarget();
-    void FinalizeRenderTarget(); 
+    void FinalizeRenderTarget();
 
     virtual void RenderInteractorWidget(const FSceneView* iView, FViewport* iViewport, FPrimitiveDrawInterface* iPDI) override;
 
@@ -83,8 +83,8 @@ public:
 
 private:
     // FTickableEditorObject implementation
-	virtual void Tick(float DeltaTime) override;
-	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( FOdysseyViewportDrawingEditorScreenBasedAdapter, STATGROUP_Tickables); }
+    virtual void Tick(float DeltaTime) override;
+    virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( FOdysseyViewportDrawingEditorScreenBasedAdapter, STATGROUP_Tickables); }
 
 private:
     float GetStampQuality();

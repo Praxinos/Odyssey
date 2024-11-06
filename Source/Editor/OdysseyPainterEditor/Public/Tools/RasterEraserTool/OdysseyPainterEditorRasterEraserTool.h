@@ -25,7 +25,7 @@ public:
 
     //Constructor
     UOdysseyPainterEditorRasterEraserTool();
-    
+
 public:
     //TOOL
     template<class T> T* CreateShape(FName iName);
@@ -71,7 +71,7 @@ public:
     void OpacityChanged();
 
     virtual void PropertyChanged(const FName& iPropertyName) override;
-    
+
 private:
     // Internal - Callbacks
     void OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints);
@@ -112,7 +112,7 @@ protected:
 
     UPROPERTY( EditInstanceOnly, Category="Interpolation")
     EOdysseyInterpolationType InterpolationType = EOdysseyInterpolationType::kCatmullRom;
-    
+
     UPROPERTY( EditAnywhere, Category="Interpolation")
     bool    AdaptativeStep = false;
 

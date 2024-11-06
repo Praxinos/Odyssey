@@ -8,7 +8,7 @@
 
 /**
  * @brief Should be the base class for all Blueprint based Layers
- * 
+ *
  */
 
 /* UCLASS(Abstract, BlueprintType)
@@ -23,7 +23,7 @@ public:
 
 public:
 #if WITH_EDITOR
-	virtual void GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags) const override;
+    virtual void GetAssetRegistryTags(TArray<FAssetRegistryTag>& OutTags) const override;
 #endif
 
 public:
@@ -35,5 +35,5 @@ public:
     int DisplayOrder = 0;
 
     UPROPERTY(EditDefaultsOnly, Category="Layer")
-	TSet<UClass*> CompatibleLayerStacks;
+    TSet<UClass*> CompatibleLayerStacks;
 }; */

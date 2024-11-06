@@ -26,26 +26,26 @@ UOdysseyPainterEditorRasterBaseTool::UOdysseyPainterEditorRasterBaseTool()
 void
 UOdysseyPainterEditorRasterBaseTool::ExtendMenu(TSharedRef<FExtender> iExtender)
 {
-	TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
-	iExtender->AddMenuExtension(
-		"OdysseyEdit",
-		EExtensionHook::After,
-		commandList,
-		FMenuExtensionDelegate::CreateLambda(
-			[this](FMenuBuilder& iBuilder)
-			{
-				if (!IsActivated())
-					return;
-				
-				iBuilder.BeginSection("ToolOptions", LOCTEXT("raster-base-tool.edit-menu.tool-options", "Tool Options"));
-				{
-					ExtendContextMenu( iBuilder );
-				}
-				iBuilder.EndSection();
-			}
-		)
-	);
-	
+    TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
+    iExtender->AddMenuExtension(
+        "OdysseyEdit",
+        EExtensionHook::After,
+        commandList,
+        FMenuExtensionDelegate::CreateLambda(
+            [this](FMenuBuilder& iBuilder)
+            {
+                if (!IsActivated())
+                    return;
+
+                iBuilder.BeginSection("ToolOptions", LOCTEXT("raster-base-tool.edit-menu.tool-options", "Tool Options"));
+                {
+                    ExtendContextMenu( iBuilder );
+                }
+                iBuilder.EndSection();
+            }
+        )
+    );
+
 }
 
 //static
@@ -157,8 +157,8 @@ void UOdysseyPainterEditorRasterBaseTool::PopupContextMenu()
     TSharedPtr<SWidget> contextMenu = CreateContextMenu();
 
     TSharedPtr<SWindow> window = FSlateApplication::Get().GetActiveTopLevelWindow();
-	if (!window)
-		return;
+    if (!window)
+        return;
 
     FSlateApplication::Get().PushMenu( window.ToSharedRef(),
         FWidgetPath(),

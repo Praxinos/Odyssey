@@ -107,7 +107,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyDownGlobalVector( FOdysseyVector
     // redraw
     iScene->GetEngine()->Invalidate( 0 );
 
-    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( iScene, iKey ) 
+    return UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( iScene, iKey )
          | notificationFlags;
 }
 
@@ -120,7 +120,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyUpGlobalVector( FOdysseyVectorGr
 
     // note, we cannot use FSlateApplication::Get().GetModifierKeys()
     // because the keys are already released. For consistency we do
-    // the same in the KeyDown event even though we could use 
+    // the same in the KeyDown event even though we could use
     // FSlateApplication::Get().GetModifierKeys()
     if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
       || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand )
@@ -364,7 +364,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseHoverVector( FOdysseyVectorGro
 
     // redraw
     iScene->GetEngine()->Invalidate( 0 );
- 
+
     return 0;
 }
 

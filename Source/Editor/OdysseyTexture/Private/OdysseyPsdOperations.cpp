@@ -23,7 +23,7 @@ FOdysseyPsdOperations::~FOdysseyPsdOperations()
         mFileHandle->Flush(true);
         delete mFileHandle;
     }
-    
+
     if( mImageDst )
         delete [] mImageDst;
 
@@ -75,7 +75,7 @@ bool FOdysseyPsdOperations::ReadFileHeader()
         return false;
 
     mFileHandle->Seek(0);
-    
+
     char psdValidator[5] = { 0 }; // 4 characters + null termination
     mFileHandle->Read((uint8*)psdValidator, 4 );
     if( strcmp(psdValidator, "8BPS") != 0 )
@@ -156,7 +156,7 @@ bool FOdysseyPsdOperations::ReadLayerAndMaskInfo()
     //UE_LOG(LogTemp,Display,TEXT("layerAndMaskInfoSize: %d"),layerAndMaskInfoSize);
 
     bool isAnyLayer = true;
-    if( layerAndMaskInfoSize > 0) 
+    if( layerAndMaskInfoSize > 0)
     {
         isAnyLayer = ReadLayerInfo();
 
@@ -183,7 +183,7 @@ bool FOdysseyPsdOperations::ReadLayerInfo()
 
     //UE_LOG(LogTemp, Display, TEXT("layerInfoSize: %d"), layerInfoSize);
 
-    if( mBitDepth >= 16 && layerInfoSize != 0) 
+    if( mBitDepth >= 16 && layerInfoSize != 0)
     {
         UE_LOG(LogTemp, Warning, TEXT("Shouldn't have any info for 16+ bit depth, import failed"))
         return false;
@@ -201,7 +201,7 @@ bool FOdysseyPsdOperations::ReadMaskInfo()
     uint32_t maskInfoSize;
     mFileHandle->Read((uint8*)&maskInfoSize,4);
     FOdysseyMathUtils::ByteSwap(&maskInfoSize,4);
-    
+
     //UE_LOG(LogTemp,Display,TEXT("maskInfoSize: %d"),maskInfoSize);
 
     mFileHandle->Seek( mFileHandle->Tell() + maskInfoSize );
@@ -213,12 +213,12 @@ bool FOdysseyPsdOperations::ReadLayers()
     int16 numLayers;
     mFileHandle->Read( (uint8*)&numLayers, 2);
     FOdysseyMathUtils::ByteSwap( &numLayers, 2);
-    
+
     if( numLayers < 0 )
         numLayers = -numLayers;
 
     //UE_LOG(LogTemp,Display,TEXT("numLayers: %d"),numLayers);
-    for (int currLayer = 0; currLayer < numLayers; currLayer++) 
+    for (int currLayer = 0; currLayer < numLayers; currLayer++)
     {
         mLayersInfo.Add( FPsdLayerInfo() );
 
@@ -240,7 +240,7 @@ bool FOdysseyPsdOperations::ReadLayers()
         UE_LOG(LogTemp,Display,TEXT("t: %d"),mLayersInfo[currLayer].mRight);
         UE_LOG(LogTemp,Display,TEXT("numChannels: %d"),mLayersInfo[currLayer].mNumChannels);*/
 
-        for(int currChannel = 0; currChannel < mLayersInfo[currLayer].mNumChannels; currChannel++) 
+        for(int currChannel = 0; currChannel < mLayersInfo[currLayer].mNumChannels; currChannel++)
         {
             mFileHandle->Read((uint8*)&mLayersInfo[currLayer].mID[currChannel],2);
             FOdysseyMathUtils::ByteSwap(&mLayersInfo[currLayer].mID[currChannel],2);
@@ -280,7 +280,7 @@ bool FOdysseyPsdOperations::ReadLayers()
 
         uint32_t position = mFileHandle->Tell();
 
-        if(mLayersInfo[currLayer].mLayerMaskSize != 0) 
+        if(mLayersInfo[currLayer].mLayerMaskSize != 0)
         {
             mFileHandle->Read((uint8*)&mLayersInfo[currLayer].mYMask,4);
             FOdysseyMathUtils::ByteSwap(&mLayersInfo[currLayer].mYMask,4);
@@ -328,7 +328,7 @@ bool FOdysseyPsdOperations::ReadLayers()
 
         position = mFileHandle->Tell();
 
-        while( mLayersInfo[currLayer].mExtraRead < mLayersInfo[currLayer].mExtraSize ) 
+        while( mLayersInfo[currLayer].mExtraRead < mLayersInfo[currLayer].mExtraSize )
         {
             if(!ReadAdditionalLayerInfoSignature() )
                 break;
@@ -365,9 +365,9 @@ bool FOdysseyPsdOperations::ReadLayers()
                     {
                         FOdysseyMathUtils::ByteSwap(&unicodeName[i * 2], 2);
                     }
-                    
+
                     mLayersInfo[currLayer].mUnicodeName = FName(TCHAR_TO_UTF16(unicodeName));
-                    
+
                     delete[] unicodeName;
                 }
             }
@@ -378,9 +378,9 @@ bool FOdysseyPsdOperations::ReadLayers()
 
 
     uint32_t imgData = mFileHandle->Tell();
-    for(int i = 0; i < numLayers; i++) 
+    for(int i = 0; i < numLayers; i++)
     {
-        for(int c = 0; c < mLayersInfo[i].mNumChannels; c++) 
+        for(int c = 0; c < mLayersInfo[i].mNumChannels; c++)
         {
             mLayersInfo[i].mStartChannelPos[c] = imgData;
             imgData += mLayersInfo[i].mChannelSize[c];
@@ -407,13 +407,13 @@ bool FOdysseyPsdOperations::ReadAdditionalLayerInfoSignature()
 bool FOdysseyPsdOperations::ReadAdditionalLayerInfo(uint32_t sectionEnd)
 {
     uint32_t position = mFileHandle->Tell();
-    if( position > sectionEnd ) 
+    if( position > sectionEnd )
     {
         UE_LOG(LogTemp, Display, TEXT("Error while loading data: out of bounds"));
         return false;
     }
 
-    while( position < sectionEnd ) 
+    while( position < sectionEnd )
     {
         if( !ReadAdditionalLayerInfoSignature() )
             return false;
@@ -432,13 +432,13 @@ bool FOdysseyPsdOperations::ReadAdditionalLayerInfo(uint32_t sectionEnd)
         {
             ReadLayers();
             break;
-        } 
+        }
         else if( strcmp(key,"Mt32") == 0 )
         {
             mFileHandle->Seek(mFileHandle->Tell() + len);
             ReadAdditionalLayerInfo(sectionEnd);
         }
-        else 
+        else
         {
             mFileHandle->Seek( mFileHandle->Tell() + len );
             position += len + 4 + 4 + 4;
@@ -494,7 +494,7 @@ bool FOdysseyPsdOperations::ReadAdditionalLayerInfo(uint32_t sectionEnd)
             return false;
         }
     }
-    else 
+    else
     {
         uint32_t size =  mImageWidth * mImageHeight * srcChannelsNumber;
         mImageDst = new uint8_t[ size ];
@@ -504,7 +504,7 @@ bool FOdysseyPsdOperations::ReadAdditionalLayerInfo(uint32_t sectionEnd)
             CopyUncompressed( mImageDst, size );
             PlanarByteConvert(planarDst,mImageDst,size,mChannelsNumber);
             delete [] planarDst;
-        } 
+        }
         else if(compressionType == 1) //RLE
         {
             uint8_t* planarDst = new uint8_t[size];
@@ -512,8 +512,8 @@ bool FOdysseyPsdOperations::ReadAdditionalLayerInfo(uint32_t sectionEnd)
             DecodeAndCopyRLE( planarDst, size );
             PlanarByteConvert( planarDst, mImageDst, size, mChannelsNumber );
             delete [] planarDst;
-        } 
-        else 
+        }
+        else
         {
             UE_LOG(LogTemp,Warning,TEXT("Compression type unknown, import failed"));
             return false;
@@ -524,7 +524,7 @@ bool FOdysseyPsdOperations::ReadAdditionalLayerInfo(uint32_t sectionEnd)
 
 bool FOdysseyPsdOperations::ReadLayerStackData()
 {
-    for( uint8_t i = 0; i < mLayersInfo.Num(); i++) 
+    for( uint8_t i = 0; i < mLayersInfo.Num(); i++)
     {
         //UE_LOG(LogTemp, Display, TEXT("Layer Number %d"), i)
         uint8_t** channelContents = new uint8_t*[mLayersInfo[i].mNumChannels];
@@ -536,7 +536,7 @@ bool FOdysseyPsdOperations::ReadLayerStackData()
         uint32_t channelSize =  (lw - lx) * (lh - ly);
         //UE_LOG(LogTemp, Display, TEXT("CHannelSize layer %d: %d"), i, channelSize );
 
-        for(uint8_t j = 0; j < mLayersInfo[i].mNumChannels; j++) 
+        for(uint8_t j = 0; j < mLayersInfo[i].mNumChannels; j++)
         {
             //UE_LOG(LogTemp,Display,TEXT("ChannelStart layer %d channel %d: %d"),i, j, mLayersInfo[i].mStartChannelPos[j]);
 
@@ -632,13 +632,13 @@ bool FOdysseyPsdOperations::ReadLayerStackData16()
             {
                 CopyUncompressed(channelContents[j],channelSize);
                 mLayersInfo[i].mSizeLayerImage += channelSize;
-            } 
+            }
             else if(cp == 1) //RLE
             {
                 mFileHandle->Seek(mFileHandle->Tell() + (lb - lt) * 2);
                 DecodeAndCopyRLE(channelContents[j],channelSize);
                 mLayersInfo[i].mSizeLayerImage += channelSize;
-            } 
+            }
             else if( (cp == 2 || cp == 3) )
             {
                 uLongf dstSize = channelSize * sizeof( uint16_t );
@@ -732,13 +732,13 @@ bool FOdysseyPsdOperations::ReadLayerStackData32()
             {
                 CopyUncompressed(channelContents[j],channelSize);
                 mLayersInfo[i].mSizeLayerImage += channelSize;
-            } 
+            }
             else if(cp == 1) //RLE
             {
                 mFileHandle->Seek(mFileHandle->Tell() + (lb - lt) * 2);
                 DecodeAndCopyRLE(channelContents[j],channelSize);
                 mLayersInfo[i].mSizeLayerImage += channelSize;
-            } 
+            }
             else if((cp == 2 || cp == 3))
             {
                 uLongf dstSize = channelSize * sizeof(uint32_t);
@@ -765,7 +765,7 @@ bool FOdysseyPsdOperations::ReadLayerStackData32()
                 //UE_LOG(LogTemp, Display, TEXT("returnErrCode: %d"), zResult);
                 delete[] srcData;
                 delete[] dstData;
-            } 
+            }
             else
             {
                 UE_LOG(LogTemp,Warning,TEXT ("Unknown or unsupported Compression, import failed"))
@@ -874,7 +874,7 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             CopyUncompressed(planar,size);
             PlanarByteConvertBitMapToBGRA8( planar, mImageDst, (mImageWidth * mImageHeight) / 8 + 1 );
             delete[] planar;
-        } 
+        }
         else if(compressionType == 1) //RLE
         {
             uint32_t sizeBitmap = (mImageWidth * mImageHeight) / 8 + 1;
@@ -892,10 +892,10 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
         ctx.Finish();
 
         UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(mLayerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass()));
-		
-		FOdysseyRasterBlockMutator mutator(layer->GetRasterBlock());
-		mutator.Copy(layerBlock, {});
-		mutator.Commit();
+
+        FOdysseyRasterBlockMutator mutator(layer->GetRasterBlock());
+        mutator.Copy(layerBlock, {});
+        mutator.Commit();
 
         delete srcblock;
     }
@@ -1075,11 +1075,11 @@ void FOdysseyPsdOperations::GenerateLayerStackFromLayerStackData()
             imageLayer->IsAlphaLocked = mLayersInfo[i].mFlags & 0x01;
             imageLayer->IsActivated = !(mLayersInfo[i].mFlags & 0x02);
             imageLayer->BlendMode = (EOdysseyBlendingMode)GetBlendingModeFromPSD(mLayersInfo[i].mBlendModeKey);
-			
-			FOdysseyRasterBlockMutator mutator(imageLayer->GetRasterBlock());
-			mutator.Copy(layerBlock, {});
-			mutator.Commit();
-            
+
+            FOdysseyRasterBlockMutator mutator(imageLayer->GetRasterBlock());
+            mutator.Copy(layerBlock, {});
+            mutator.Commit();
+
             //UE_LOG(LogTemp,Display,TEXT("flags: %d"),mLayersInfo[i].mFlags)
             //Todo: Locked
 
@@ -1207,7 +1207,7 @@ void FOdysseyPsdOperations::DecodeAndCopyRLE(uint16_t* dst,uint32_t length)
             FOdysseyMathUtils::ByteSwap( &fileShort, 2 );
 
             for(uint32_t i = 0; i < n; i++)
-                *dst++ = fileShort; 
+                *dst++ = fileShort;
 
             length -= n;
         }
@@ -1222,7 +1222,7 @@ void FOdysseyPsdOperations::DecodeAndCopyRLE(uint8_t* dst, uint32_t length)
         char k;
         mFileHandle->Read( (uint8*) &k, 1 );
 
-        if(k >= 0) 
+        if(k >= 0)
         {
             uint32_t n = k + 1;
             if(n > length)
@@ -1233,8 +1233,8 @@ void FOdysseyPsdOperations::DecodeAndCopyRLE(uint8_t* dst, uint32_t length)
 
             dst += n;
             length -= n;
-        } 
-        else 
+        }
+        else
         {
             uint32_t n = -k + 1;
             if(n > length)
@@ -1512,6 +1512,6 @@ bool FOdysseyPsdOperations::Import()
     }
 
     GenerateLayerStackFromLayerStackData();
-    
+
     return true;
 }

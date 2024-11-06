@@ -160,7 +160,7 @@ FOdysseyVectorUndoTagInbetweenerColor::FOdysseyVectorUndoTagInbetweenerColor( FO
     {
         mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
                                                  , FSnapshotFlags::Tag::Inbetweener::COLOR
-                                                 , 0 
+                                                 , 0
                                                  , 0
                                                  , 0 );
     }
@@ -181,8 +181,8 @@ FOdysseyVectorUndoTagInbetweenerMapAsPolyline::FOdysseyVectorUndoTagInbetweenerM
     {
         mInbetweenerTagSnapshotArray.emplace_back( inbetweenerTag
                                                  , FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE
-                                                 , 0 
-                                                 , 0 
+                                                 , 0
+                                                 , 0
                                                  , 0 );
     }
 }

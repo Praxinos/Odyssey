@@ -38,7 +38,7 @@ private:
 private:
     FOdysseyPoint mTopLeftPoint;
     FOdysseyPoint mBottomRightPoint;
-    
+
     TSharedPtr<FOdysseyHUDRectangle> mRectangleHUD;
     TSharedPtr<FOdysseyHUDHandle> mHandleTopLeftHUD;
     TSharedPtr<FOdysseyHUDHandle> mHandleBottomRightHUD;
@@ -47,6 +47,6 @@ private:
     bool mInvertUniform = false;
 
 public:
-	UPROPERTY(EditAnywhere, Category="Shape")
-	bool Uniform = false;
+    UPROPERTY(EditAnywhere, Category="Shape")
+    bool Uniform = false;
 };

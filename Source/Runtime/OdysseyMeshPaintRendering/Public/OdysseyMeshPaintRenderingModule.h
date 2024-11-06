@@ -1,4 +1,4 @@
-// Copyright © 2018-2019 Praxinos, Inc. All Rights Reserved.
+// Copyright ï¿½ 2018-2019 Praxinos, Inc. All Rights Reserved.
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc
 
 #pragma once
@@ -12,7 +12,7 @@
 class FOdysseyMeshPaintRenderingModule : public IModuleInterface
 {
 public:
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
+    virtual void StartupModule() override;
+    virtual void ShutdownModule() override;
 };
 

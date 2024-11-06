@@ -223,7 +223,7 @@ SOdysseyAdvancedColorWheel::OnPaint( const FPaintArgs& Args
                            , bool bParentEnabled ) const
 {
     CheckResize( AllottedGeometry.GetLocalSize() );
-    
+
     if (bMarkedAsInvalid || mDisplayedColor != mColor.Get())
     {
         UpdateColor();

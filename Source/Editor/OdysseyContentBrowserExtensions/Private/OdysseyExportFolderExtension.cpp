@@ -187,7 +187,7 @@ void FOdysseyExportFolderExtension::PerformExportFolder(TArray<FName> iPackageNa
         }
     }
 
-    // Confirm that there is at least one package to move 
+    // Confirm that there is at least one package to move
     if ( allPackageNamesToMove.Num() == 0 )
     {
         FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("export-folder.error.no-files-found-to-export", "No files were found to export"));
@@ -249,7 +249,7 @@ void FOdysseyExportFolderExtension::ExportFolder_ReportConfirmed( TEnumAsByte<EE
                 }
                 const FString& packageName = packageDataIt->Name;
                 FString srcFilename;
-            
+
                 // Check if the Content Browser file exists
                 if (!FPackageName::DoesPackageExist(packageName, &srcFilename))
                 {
@@ -396,7 +396,7 @@ void FOdysseyExportFolderExtension::RecursiveGetDependencies(const FName& iPacka
     FAssetRegistryModule& assetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
     TArray<FName> dependencies;
     assetRegistryModule.Get().GetDependencies(iPackageName, dependencies);
-    
+
     for ( auto dependsIt = dependencies.CreateConstIterator(); dependsIt; ++dependsIt )
     {
         if ( !ioAllDependencies.Contains(*dependsIt) )

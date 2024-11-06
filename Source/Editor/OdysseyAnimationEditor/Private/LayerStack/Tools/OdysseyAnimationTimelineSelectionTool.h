@@ -55,9 +55,9 @@ private:
     };
 
     TSharedRef<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
-	TSharedRef<FOdysseyAnimationCellSelection> mTimelineCellSelection;
-	bool mIsSelecting = false;
-	bool mIsDragDetected = false;
+    TSharedRef<FOdysseyAnimationCellSelection> mTimelineCellSelection;
+    bool mIsSelecting = false;
+    bool mIsDragDetected = false;
     bool mIsDragnDrop = false;
     ESelectionMode mSelectionMode = ESelectionMode::Default;
     bool mShouldDeselect = false;

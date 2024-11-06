@@ -32,34 +32,34 @@ FOdysseyAssetEditorToolkit::Initialize(UObject* iEditedObject, TSharedPtr<FOdyss
 
     FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->CreateLayout(), true, false, editedObjects);
 
-	//Add Odyssey Specific section to the main menu to add entries at the right place easier
-	UToolMenu* fileMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".File")));
-	fileMenu->FindOrAddSection("OdysseyFile");
+    //Add Odyssey Specific section to the main menu to add entries at the right place easier
+    UToolMenu* fileMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".File")));
+    fileMenu->FindOrAddSection("OdysseyFile");
 
-	UToolMenu* editMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".Edit")));
-	editMenu->FindOrAddSection("OdysseyEdit");
+    UToolMenu* editMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".Edit")));
+    editMenu->FindOrAddSection("OdysseyEdit");
 
-	UToolMenu* assetMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".Asset")));
-	assetMenu->FindOrAddSection("OdysseyAsset");
+    UToolMenu* assetMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".Asset")));
+    assetMenu->FindOrAddSection("OdysseyAsset");
 
-	UToolMenu* windowMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".Window")));
-	windowMenu->FindOrAddSection("OdysseyWindow");
+    UToolMenu* windowMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".Window")));
+    windowMenu->FindOrAddSection("OdysseyWindow");
 
-	UToolMenu* toolsMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".Tools")));
-	toolsMenu->FindOrAddSection("OdysseyTools");
+    UToolMenu* toolsMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".Tools")));
+    toolsMenu->FindOrAddSection("OdysseyTools");
 
-	UToolMenu* helpMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".Help")));
-	helpMenu->FindOrAddSection("OdysseyHelp");
+    UToolMenu* helpMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".Help")));
+    helpMenu->FindOrAddSection("OdysseyHelp");
 
-	TSharedRef<FExtender> extender = MakeShared<FExtender>();
-	mEditor->ExtendMenu( extender );
-	AddMenuExtender(extender);
+    TSharedRef<FExtender> extender = MakeShared<FExtender>();
+    mEditor->ExtendMenu( extender );
+    AddMenuExtender(extender);
 
     mEditor->BindShortcuts( this );
     mEditor->OnAddEditedObjectDelegate().AddRaw(this, &FOdysseyAssetEditorToolkit::OnAddEditedObject);
     mEditor->OnRemoveEditedObjectDelegate().AddRaw(this, &FOdysseyAssetEditorToolkit::OnRemoveEditedObject);
 
-	RegenerateMenusAndToolbars();
+    RegenerateMenusAndToolbars();
 }
 
 //--------------------------------------------------------------------------------------
@@ -77,9 +77,9 @@ FOdysseyAssetEditorToolkit::SaveAssetAs_Execute()
     UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
     FDelegateHandle openAssetHandle = AssetEditorSubsystem->OnAssetEditorRequestedOpen().AddRaw(this, &FOdysseyAssetEditorToolkit::OpenAsset );
 
-	FAssetEditorToolkit::SaveAssetAs_Execute();
+    FAssetEditorToolkit::SaveAssetAs_Execute();
 
-	AssetEditorSubsystem->OnAssetEditorRequestedOpen().Remove(openAssetHandle);
+    AssetEditorSubsystem->OnAssetEditorRequestedOpen().Remove(openAssetHandle);
 }
 
 bool
@@ -106,31 +106,31 @@ void
 FOdysseyAssetEditorToolkit::UnregisterTabSpawners(const TSharedRef<class FTabManager>& iTabManager)
 {
     FAssetEditorToolkit::UnregisterTabSpawners(iTabManager);
-	mEditor->UnregisterTabSpawners(iTabManager);
+    mEditor->UnregisterTabSpawners(iTabManager);
 }
 
 bool
 FOdysseyAssetEditorToolkit::CanReimport() const
 {
-	return false;
+    return false;
 }
 
 bool
 FOdysseyAssetEditorToolkit::CanReimport(UObject* EditingObject) const
 {
-	return false;
+    return false;
 }
 
 FText
 FOdysseyAssetEditorToolkit::GetToolkitName() const
 {
-	return GetLabelForObject(GetEditingObjects()[0]);
+    return GetLabelForObject(GetEditingObjects()[0]);
 }
 
 FText
 FOdysseyAssetEditorToolkit::GetToolkitToolTipText() const
 {
-	return GetToolTipTextForObject(GetEditingObjects()[0]);
+    return GetToolTipTextForObject(GetEditingObjects()[0]);
 }
 
 //--------------------------------------------------------------------------------------

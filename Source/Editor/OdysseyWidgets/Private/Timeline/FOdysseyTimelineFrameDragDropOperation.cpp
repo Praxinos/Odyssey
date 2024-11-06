@@ -6,17 +6,17 @@
 #define LOCTEXT_NAMESPACE "Widgets"
 
 FOdysseyTimelineFrameDragDropOperation::FOdysseyTimelineFrameDragDropOperation(TSharedPtr<SOdysseyTimelineFrame> iFrame, TSharedPtr<SOdysseyTimelineFrameList> iFrameList)
-	: mFrame(iFrame)
-	, mFrameList(iFrameList)
+    : mFrame(iFrame)
+    , mFrameList(iFrameList)
     , mTransaction(LOCTEXT("timeline.drag-drop-operation.moved-frames-in-timeline", "Reorder key frames"))
 {
-	Construct();
-	
-	TSharedPtr<FOdysseyTimelineFrameListFrameMetaData> metadata = iFrame->GetMetaData<FOdysseyTimelineFrameListFrameMetaData>();
-	if (!metadata)
-		return;
+    Construct();
 
-	mFrameList->SetFrameVisibility(metadata->Index(), EVisibility::Collapsed);
+    TSharedPtr<FOdysseyTimelineFrameListFrameMetaData> metadata = iFrame->GetMetaData<FOdysseyTimelineFrameListFrameMetaData>();
+    if (!metadata)
+        return;
+
+    mFrameList->SetFrameVisibility(metadata->Index(), EVisibility::Collapsed);
 }
 
 TSharedPtr<SWidget>
@@ -28,32 +28,32 @@ FOdysseyTimelineFrameDragDropOperation::GetDefaultDecorator() const
 void
 FOdysseyTimelineFrameDragDropOperation::OnDragged(const class FDragDropEvent& DragDropEvent)
 {
-	if (CursorDecoratorWindow.IsValid())
-	{
-		CursorDecoratorWindow->MoveWindowTo(DragDropEvent.GetScreenSpacePosition());
-	}
+    if (CursorDecoratorWindow.IsValid())
+    {
+        CursorDecoratorWindow->MoveWindowTo(DragDropEvent.GetScreenSpacePosition());
+    }
 }
 
 void
 FOdysseyTimelineFrameDragDropOperation::Construct()
 {
-	MouseCursor = EMouseCursor::GrabHandClosed;
-	FDragDropOperation::Construct();
+    MouseCursor = EMouseCursor::GrabHandClosed;
+    FDragDropOperation::Construct();
 }
 
 void
 FOdysseyTimelineFrameDragDropOperation::OnDrop(bool bDropWasHandled, const FPointerEvent& MouseEvent)
 {
-	if (!bDropWasHandled)
-	{
-		TSharedPtr<FOdysseyTimelineFrameListFrameMetaData> metadata = mFrame->GetMetaData<FOdysseyTimelineFrameListFrameMetaData>();
-		if (!metadata)
-			return;
+    if (!bDropWasHandled)
+    {
+        TSharedPtr<FOdysseyTimelineFrameListFrameMetaData> metadata = mFrame->GetMetaData<FOdysseyTimelineFrameListFrameMetaData>();
+        if (!metadata)
+            return;
 
-		mFrameList->SetFrameVisibility(metadata->Index(), EVisibility::Visible);
-		// Add us back to our source, the drop fizzled
-		mTransaction.Cancel();
-	}
+        mFrameList->SetFrameVisibility(metadata->Index(), EVisibility::Visible);
+        // Add us back to our source, the drop fizzled
+        mTransaction.Cancel();
+    }
 }
 
 void
@@ -65,7 +65,7 @@ FOdysseyTimelineFrameDragDropOperation::SetCanDropHere(bool bCanDropHere)
 TSharedPtr<SOdysseyTimelineFrame>&
 FOdysseyTimelineFrameDragDropOperation::Frame()
 {
-	return mFrame;
+    return mFrame;
 }
 
 #undef LOCTEXT_NAMESPACE

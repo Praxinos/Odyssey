@@ -41,16 +41,16 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyAnimationEditorGUI::~FOdysseyAnimationEditorGUI()
 {
-	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll( this );
-	UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll( this );
-	FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll( this );
-	UOdysseyLayer::OnMediaChanged().RemoveAll( this );
+    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll( this );
+    UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll( this );
+    FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll( this );
+    UOdysseyLayer::OnMediaChanged().RemoveAll( this );
 }
 
 FOdysseyAnimationEditorGUI::FOdysseyAnimationEditorGUI(FOdysseyAnimationEditorExtension* iExtension)
-	: mExtension(iExtension)
+    : mExtension(iExtension)
 {
-	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw( this, &FOdysseyAnimationEditorGUI::OnCurrentLayerChanged );
+    UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw( this, &FOdysseyAnimationEditorGUI::OnCurrentLayerChanged );
 
     UOdysseyAnimation::OnCurrentFrameChanged().AddRaw( this, &FOdysseyAnimationEditorGUI::OnCurrentFrameChanged );
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
@@ -67,7 +67,7 @@ FOdysseyAnimationEditorGUI::FOdysseyAnimationEditorGUI(FOdysseyAnimationEditorEx
 void
 FOdysseyAnimationEditorGUI::Initialize()
 {
-	CreateTabs();
+    CreateTabs();
 }
 
 void
@@ -78,52 +78,52 @@ FOdysseyAnimationEditorGUI::Finalize()
 
 void
 FOdysseyAnimationEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
-{	
-	TSharedRef<FTabManager::FSplitter> mainVerticalSplitter = iBuilder.GetSplitter("MainVerticalSplitter");
-	TSharedRef<FTabManager::FStack> animationTimelineStack = iBuilder.CreateStack("AnimationTimelineStack");
-	animationTimelineStack->SetHideTabWell(false);
-	animationTimelineStack->SetSizeCoefficient(0.2f);
-	animationTimelineStack->AddTab(FOdysseyAnimationEditorTimelineTab::StaticId(), ETabState::OpenedTab);
+{
+    TSharedRef<FTabManager::FSplitter> mainVerticalSplitter = iBuilder.GetSplitter("MainVerticalSplitter");
+    TSharedRef<FTabManager::FStack> animationTimelineStack = iBuilder.CreateStack("AnimationTimelineStack");
+    animationTimelineStack->SetHideTabWell(false);
+    animationTimelineStack->SetSizeCoefficient(0.2f);
+    animationTimelineStack->AddTab(FOdysseyAnimationEditorTimelineTab::StaticId(), ETabState::OpenedTab);
 
-	mainVerticalSplitter->Split
-	(
-		animationTimelineStack
-	);
+    mainVerticalSplitter->Split
+    (
+        animationTimelineStack
+    );
 }
 
 void
 FOdysseyAnimationEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
-{   
+{
     Extender.ExtendLayout(FTabId(TEXT("Sequencer")), ELayoutExtensionPosition::Above, FTabManager::FTab(FOdysseyAnimationEditorTimelineTab::StaticId(), ETabState::ClosedTab));
 }
 
 void
 FOdysseyAnimationEditorGUI::CreateTabs()
 {
-	//ADD NEW TABS
-	TSharedRef<FOdysseyAnimationEditorTimelineTab> layerStackTab = MakeShared<FOdysseyAnimationEditorTimelineTab>(mExtension);
-	TSharedRef<FOdysseyAnimationEditorLightTableTab> lightTableTab = MakeShared<FOdysseyAnimationEditorLightTableTab>(mExtension);
+    //ADD NEW TABS
+    TSharedRef<FOdysseyAnimationEditorTimelineTab> layerStackTab = MakeShared<FOdysseyAnimationEditorTimelineTab>(mExtension);
+    TSharedRef<FOdysseyAnimationEditorLightTableTab> lightTableTab = MakeShared<FOdysseyAnimationEditorLightTableTab>(mExtension);
     TSharedRef<FOdysseyAnimationEditorAnimationDetailsTab> animationDetailsTab = MakeShared<FOdysseyAnimationEditorAnimationDetailsTab>(mExtension);
 
-	layerStackTab->ShouldOpenByDefault(true);
+    layerStackTab->ShouldOpenByDefault(true);
 
-	mExtension->GetEditor()->AddTab(layerStackTab);
-	mExtension->GetEditor()->AddTab(lightTableTab);
+    mExtension->GetEditor()->AddTab(layerStackTab);
+    mExtension->GetEditor()->AddTab(lightTableTab);
     mExtension->GetEditor()->AddTab(animationDetailsTab);
 }
 
 /* TSharedRef<FTabManager::FSplitter>
 FOdysseyAnimationEditorGUI::CreateBottomSection()
 {
-	return FOdysseyPainterEditorGUI::CreateBottomSection()
-		// Timeline
-		->Split
-		(
-			FTabManager::NewStack()
-			->AddTab(mLayerStackTab->ID(), ETabState::OpenedTab)
-			->SetHideTabWell(false)
-			->SetSizeCoefficient(0.35f)
-		);
+    return FOdysseyPainterEditorGUI::CreateBottomSection()
+        // Timeline
+        ->Split
+        (
+            FTabManager::NewStack()
+            ->AddTab(mLayerStackTab->ID(), ETabState::OpenedTab)
+            ->SetHideTabWell(false)
+            ->SetSizeCoefficient(0.35f)
+        );
 } */
 
 void
@@ -161,7 +161,7 @@ FOdysseyAnimationEditorGUI::OnMediaChanged()
                                                                                          , returnFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
+
             TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();
@@ -257,7 +257,7 @@ FOdysseyAnimationEditorGUI::ParseVectorNotifications( FOdysseyVectorGroupPaint* 
         TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
 
         vectorSceneTreeViewTab.Get()->UpdateSceneTreeView( iScene );
-            
+
     }
 
     if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS )
@@ -273,7 +273,7 @@ FOdysseyAnimationEditorGUI::ParseVectorNotifications( FOdysseyVectorGroupPaint* 
         TSharedPtr<SWidgetSwitcher> widgetSwitcher = StaticCastSharedPtr<SWidgetSwitcher>(timelineTab.Get()->Widget());
         TSharedPtr<SOdysseyAnimationLayerStack> layerStack = StaticCastSharedPtr<SOdysseyAnimationLayerStack>(widgetSwitcher.Get()->GetWidget(0));
         TSharedPtr<SOdysseyLayerStackTreeView> treeView = layerStack.Get()->GetTreeView();
-		TSharedPtr<SOdysseyAnimationTimelineTreeView> timelineTreeView = layerStack.Get()->GetTimelineTreeView();
+        TSharedPtr<SOdysseyAnimationTimelineTreeView> timelineTreeView = layerStack.Get()->GetTimelineTreeView();
         TArray<UOdysseyLayer*> selectedItemArray;
 
         selectedItemArray = treeView.Get()->GetItems();
@@ -282,7 +282,7 @@ FOdysseyAnimationEditorGUI::ParseVectorNotifications( FOdysseyVectorGroupPaint* 
         {
             //treeView.Get()->GenerateNewWidget( layer );
             TSharedPtr<ITableRow> headerTableRow = treeView.Get()->WidgetFromItem ( layer );
-			TSharedPtr<ITableRow> timelineTableRow = timelineTreeView.Get()->WidgetFromItem ( layer );
+            TSharedPtr<ITableRow> timelineTableRow = timelineTreeView.Get()->WidgetFromItem ( layer );
 
             if( headerTableRow.IsValid() )
             {
@@ -296,13 +296,13 @@ FOdysseyAnimationEditorGUI::ParseVectorNotifications( FOdysseyVectorGroupPaint* 
                 }
             }
 
-			if( timelineTableRow.IsValid() )
+            if( timelineTableRow.IsValid() )
             {
                 TSharedRef<SWidget> rowWidget = timelineTableRow.Get()->AsWidget();
 
                 if( rowWidget.Get().GetType() == "SOdysseyAnimationLayerImageVectorTimeline" )
                 {
-                   	TSharedPtr<SOdysseyAnimationLayerImageVectorTimeline> vectorTimelineWidget = StaticCastSharedRef<SOdysseyAnimationLayerImageVectorTimeline>(rowWidget);
+                       TSharedPtr<SOdysseyAnimationLayerImageVectorTimeline> vectorTimelineWidget = StaticCastSharedRef<SOdysseyAnimationLayerImageVectorTimeline>(rowWidget);
                     vectorTimelineWidget.Get()->GetInbetweeningListView().Get()->Update();
                 }
             }
@@ -331,19 +331,19 @@ FOdysseyAnimationEditorGUI::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScen
         if( currentVectorLayer )
         {
             int frame = mExtension->Animation()->CurrentFrame;
-			UOdysseyAnimationCell* cell = currentVectorLayer->GetCellAtFrame(frame);
-			if (cell && cell->IsA<UOdysseyAnimationCellImageVector>())
-			{	
-				UOdysseyAnimationCellImageVector* cellVector = Cast<UOdysseyAnimationCellImageVector>(cell);
-				FOdysseyVectorEngine* vectorEngine = cellVector->GetEngine();
-				// Note: iScene is ignored. We update the widget according to the current scene if any.
-				FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
-				ParseVectorNotifications( vectorScene, iNotificationFlags );
-				return;
-			}
+            UOdysseyAnimationCell* cell = currentVectorLayer->GetCellAtFrame(frame);
+            if (cell && cell->IsA<UOdysseyAnimationCellImageVector>())
+            {
+                UOdysseyAnimationCellImageVector* cellVector = Cast<UOdysseyAnimationCellImageVector>(cell);
+                FOdysseyVectorEngine* vectorEngine = cellVector->GetEngine();
+                // Note: iScene is ignored. We update the widget according to the current scene if any.
+                FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
+                ParseVectorNotifications( vectorScene, iNotificationFlags );
+                return;
+            }
         }
     }
-    // for some reason when Unreal loads, the layerstack is NULL. But the medias exist. So in that case we use 
+    // for some reason when Unreal loads, the layerstack is NULL. But the medias exist. So in that case we use
     // the media provider.
     else
     {

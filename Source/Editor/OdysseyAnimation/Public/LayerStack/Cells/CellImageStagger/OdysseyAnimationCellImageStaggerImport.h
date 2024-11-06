@@ -9,9 +9,9 @@ class FOdysseyAnimationCellImageStaggerImport
 public:
     /**
      * @brief Imports Data from the given archive into the given object
-     * 
-     * @param iAnimationCellImageStagger 
-     * @param Ar 
+     *
+     * @param iAnimationCellImageStagger
+     * @param Ar
      */
     static bool ODYSSEYANIMATION_API Read( UOdysseyAnimationCellImageStagger* iAnimationCellImageStagger
                                   , FArchive &Ar );

@@ -68,11 +68,11 @@ UOdysseyPainterEditorVectorPathEditTool::LoadVector( FOdysseyVectorGroupPaint* i
 /*
     TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
                                             // Prevents the user from having to click at least once in the viewport.
-    // we need the focus on the viewport for keyboard 
+    // we need the focus on the viewport for keyboard
     TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
     viewportWidget = viewportTab->GetViewport()->GetViewportWidget();
 
-    // we need the focus on the viewport for keyboard 
+    // we need the focus on the viewport for keyboard
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
 */
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
@@ -128,7 +128,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyUpGlobalVector( FOdysseyVectorGrou
 
     // note, we cannot use FSlateApplication::Get().GetModifierKeys()
     // because the keys are already released. For consistency we do
-    // the same in the KeyDown event even though we could use 
+    // the same in the KeyDown event even though we could use
     // FSlateApplication::Get().GetModifierKeys()
     if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
       || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand )
@@ -258,7 +258,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpCutPaths( FOdysseyVectorGroupP
                                                                     , notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
+
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -348,7 +348,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpDeletePoint( FOdysseyVectorGro
                                                                       , notificationFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
             TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();
@@ -423,7 +423,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpAddPoint( FOdysseyVectorGroupP
                                                                   , notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
+
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -451,7 +451,7 @@ UOdysseyPainterEditorVectorPathEditTool::GetPathsFromSelection( FOdysseyVectorGr
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
                   FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
- 
+
                   oPathArray.push_back( path );
               }
 
@@ -532,12 +532,12 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                                                                              , notificationFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
             TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();
         }
-        GEditor->EndTransaction(); 
+        GEditor->EndTransaction();
         //---------- end of undo ------------//
 
         vertex->SetHandleAligned( vertex->IsHandleAligned() ? false : true );
@@ -571,7 +571,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                     }
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
                     TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                     if (source)
                         source->RecordCurrentFrameUndo();
@@ -612,7 +612,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                                                                              , notificationFlags );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
                     TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                     if (source)
                         source->RecordCurrentFrameUndo();
@@ -642,7 +642,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                                                                              , notificationFlags );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
                     TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                     if (source)
                         source->RecordCurrentFrameUndo();
@@ -701,7 +701,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( FOdysseyVectorGroup
     std::vector<FOdysseyVectorPoint*>& hoveredPointArray = mPathEditHUD->GetHoveredPointArray();
     uint64 notificationFlags = 0;
 
-    // we need the focus on the viewport for keyboard 
+    // we need the focus on the viewport for keyboard
     //FSlateApplication::Get().SetKeyboardFocus( mViewportWidget.ToSharedRef() );
 
 /*
@@ -942,7 +942,7 @@ UOdysseyPainterEditorVectorPathEditTool::PickObjects( FOdysseyVectorGroupPaint* 
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( iScene, notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -1025,7 +1025,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
                 }
             }
             break;
-       
+
             default:
             {
                 // If nothing was selected, we pick an object

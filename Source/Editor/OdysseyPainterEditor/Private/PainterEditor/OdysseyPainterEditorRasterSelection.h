@@ -10,7 +10,7 @@
 class FOdysseyHUDElement;
 class FOdysseyHUDLine;
 
-class FOdysseyPainterEditorRasterSelection 
+class FOdysseyPainterEditorRasterSelection
 {
 public:
     // Construction / Destruction

@@ -39,7 +39,7 @@ UOdysseyPainterEditorTool::GetEditor() const
 
 TSharedRef<SWidget>
 UOdysseyPainterEditorTool::GetTopTabWidget() const
-{       
+{
     return mTopTabWidget.ToSharedRef();
 }
 
@@ -52,21 +52,21 @@ UOdysseyPainterEditorTool::PostInitProperties()
 /* void
 UOdysseyPainterEditorTool::OnToolContextChanged()
 {
-	//If not activable => Inactivate
-	if (!IsActivable())
-	{
-		Inactivate(); //close the tool
-		return;
-	}
+    //If not activable => Inactivate
+    if (!IsActivable())
+    {
+        Inactivate(); //close the tool
+        return;
+    }
 
-	//Reload the tool to edit the new layer
-	Unload();
-	Load();
+    //Reload the tool to edit the new layer
+    Unload();
+    Load();
 } */
 
 void
 UOdysseyPainterEditorTool::Activate()
-{    
+{
     // register IInputProcessor interface for handling global key press
     FSlateApplication::Get().RegisterInputPreProcessor(mInputProcessor);
 
@@ -81,7 +81,7 @@ UOdysseyPainterEditorTool::Inactivate()
     // unregister IInputProcessor interface
     FSlateApplication::Get().UnregisterInputPreProcessor(mInputProcessor);
 
-	//mToolContext->OnChanged().RemoveAll(this);
+    //mToolContext->OnChanged().RemoveAll(this);
     Flush(); //Finish everything
     Unload();
     mIsActivated = false;
@@ -249,7 +249,7 @@ void
 UOdysseyPainterEditorTool::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 {
     Super::PostTransacted(iTransactionEvent);
-    
+
     if ( iTransactionEvent.GetEventType() != ETransactionObjectEventType::UndoRedo )
         return;
 

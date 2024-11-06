@@ -34,12 +34,12 @@ protected:
     virtual FText GetToolkitToolTipText() const override;
     virtual FLinearColor GetWorldCentricTabColorScale() const override;
 
-	/** Called to check to see if there's an asset capable of being reimported */
-	virtual bool CanReimport() const;
-	virtual bool CanReimport(UObject* EditingObject) const;
+    /** Called to check to see if there's an asset capable of being reimported */
+    virtual bool CanReimport() const;
+    virtual bool CanReimport(UObject* EditingObject) const;
 
 protected:
-	virtual void OpenAsset(UObject* iObject) = 0;
+    virtual void OpenAsset(UObject* iObject) = 0;
 
 private:
     void OnAddEditedObject(UObject* iObject);

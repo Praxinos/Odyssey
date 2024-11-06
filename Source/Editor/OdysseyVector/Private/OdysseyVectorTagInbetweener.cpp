@@ -515,7 +515,7 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
         // relative inbetween index, i.e within the breakdown
         uint32 inbetweenIndex = iDrawingIndex - curSourceDrawingIndex;
         FChartDivision* inbetween = &curBreakdown->GetChart()->GetDivisionBuffer()[inbetweenIndex];
-        FInbetweenerBreakdown* newBreakdown = iNewBreakdown ? iNewBreakdown 
+        FInbetweenerBreakdown* newBreakdown = iNewBreakdown ? iNewBreakdown
                                                             : new FInbetweenerBreakdown( this );
 
         LockDrawing();
@@ -875,7 +875,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
             || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
             || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST )
-            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY ) 
+            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
             || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
         {
             // map object to the first grid
@@ -901,7 +901,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
 
         // will update grids' center of mass (needed for interpolation).
         // MUST be done after mapping because mapping will elimniate some quads, and this is taken into account
-        // for the center of mass.²
+        // for the center of mass.ï¿½
         for( FInbetweenerBreakdown* breakdown : mBreakdownList )
         {
             breakdown->GetGrid()->UpdateCenterOfMass( iUpdateFlags, mInvalidationFlags );

@@ -53,7 +53,7 @@ public:
     // Commit the changes by blending the paintblock over the original editedblock
     // And resets the PaintBlock
     void Commit(const FOdysseyBlendParameters& iBlendParameters);
-    
+
     // Resets the PaintBlock
     void Abort();
 
@@ -70,7 +70,7 @@ private:
     void OnEditedBlockChanged(const TArray<::ULIS::FRectI>& iRects);
 
     void OnBlockPtrChanged();
-    
+
     FOdysseyBlendParameters AdjustBlendParameters(const FOdysseyBlendParameters& iBlendParameters);
 
     void OnBeforeRedoUndo( const FTransactionContext& TransactionContext );
@@ -90,9 +90,9 @@ private:
 
     // Delegates
     //FOnPreUpdate                        mOnPreUpdateDelegate;
-    
+
     //Internal
     TArray<::ULIS::FRectI>              mInvalidRects;
-	bool mIsBeforeUndoBound;
+    bool mIsBeforeUndoBound;
     //FULISInvalidTileMap                 mInvalidMap;
 };

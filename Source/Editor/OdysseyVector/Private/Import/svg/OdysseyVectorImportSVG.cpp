@@ -530,7 +530,7 @@ static int ReadFloatChar( TCHAR iChar, TCHAR* iPreviousChar )
         break;
 
         case TCHAR(',') :
-            ret = ( iPreviousChar && ( FChar::IsDigit     ( *iPreviousChar ) 
+            ret = ( iPreviousChar && ( FChar::IsDigit     ( *iPreviousChar )
                                            || IsWhiteSpace( *iPreviousChar )  ) ) ? 1 : 2;
         break;
 

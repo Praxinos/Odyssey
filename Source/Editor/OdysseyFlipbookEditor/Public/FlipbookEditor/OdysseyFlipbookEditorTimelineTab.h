@@ -12,7 +12,7 @@ class FOdysseyFlipbookWrapper;
 class UPaperSprite;
 
 class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorTimelineTab :
-	public FOdysseyEditorTab
+    public FOdysseyEditorTab
 {
 public:
     static const FName& StaticId();
@@ -37,7 +37,7 @@ public:
     virtual TSharedPtr<FOdysseyFlipbookWrapper> FlipbookWrapper() const;
 
 protected:
-    // Event Listeners    
+    // Event Listeners
     virtual void OnTimelineCurrentKeyframeChanged(int32 iKeyframe);
     virtual void OnTimelineScrubStarted();
     virtual void OnTimelineScrubStopped();

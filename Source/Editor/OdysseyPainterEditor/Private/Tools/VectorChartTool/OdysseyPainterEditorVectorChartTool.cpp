@@ -97,7 +97,7 @@ UOdysseyPainterEditorVectorChartTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPa
 
     // note, we cannot use FSlateApplication::Get().GetModifierKeys()
     // because the keys are already released. For consistency we do
-    // the same in the KeyDown event even though we could use 
+    // the same in the KeyDown event even though we could use
     // FSlateApplication::Get().GetModifierKeys()
     if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
       || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand )
@@ -148,7 +148,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
                                                                                              , notificationFlags );
 
                     GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
                     TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                     if (source)
                         source->RecordCurrentFrameUndo();
@@ -172,7 +172,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
                                                                                          , notificationFlags );
 
                 GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
                 TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                 if (source)
                     source->RecordCurrentFrameUndo();

@@ -22,7 +22,7 @@ FOdysseyVectorSegment*
 FInterpolatedSegment::GetOriginalSegment()
 {
     return mOriginalSegment;
-} 
+}
 
 std::vector<FInterpolatedPoint*>&
 FInterpolatedSegment::GetInterpolatedPointArray()

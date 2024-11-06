@@ -37,11 +37,11 @@ UOdysseyTextureLayerStack::CreateFromTexture(UTexture2D* iTexture, UObject* iOut
     FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
     rasterBlockMutator.EditTilesFromRects(
         { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-		[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
-		{
-			FillOdysseyBlockFromUTextureData(iBlock.Get(), iTexture, iBlock->Format());
-			return {};
-		}
+        [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
+        {
+            FillOdysseyBlockFromUTextureData(iBlock.Get(), iTexture, iBlock->Format());
+            return {};
+        }
     );
     rasterBlockMutator.Commit();
 
@@ -102,10 +102,10 @@ UOdysseyTextureLayerStack::GetTexture() const
         if (outer->GetClass() == UTexture2D::StaticClass())
             return Cast<UTexture2D>(outer);
 
-		outer = outer->GetOuter();
+        outer = outer->GetOuter();
     }
 
-    return nullptr;    
+    return nullptr;
 }
 
 TArray<::ULIS::FRectI>
@@ -121,7 +121,7 @@ UOdysseyTextureLayerStack::GetImageRenderingRects() const
 void
 UOdysseyTextureLayerStack::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyTextureLayerStack::OnImageRenderingChanged);
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyTextureLayerStack::OnImageRenderingChanged);
     const FGuid& eventId =  iEvent.GetId();
     TArray<FGuid> composition = GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor, 0);
     if (!composition.Contains(eventId))

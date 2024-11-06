@@ -35,11 +35,11 @@ FOdysseyPainterEditorTopTab::~FOdysseyPainterEditorTopTab()
 }
 
 FOdysseyPainterEditorTopTab::FOdysseyPainterEditorTopTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(LOCTEXT( "top-tab.name", "Top Bar" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Spark16" ))
+    : FOdysseyEditorTab(LOCTEXT( "top-tab.name", "Top Bar" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Spark16" ))
     , mEditor( iEditor )
     , mToolWidgetSlot(nullptr)
     , mCurrentTool(nullptr)
-{   
+{
 }
 
 //--------------------------------------------------------------------------------------
@@ -153,7 +153,7 @@ FOdysseyPainterEditorTopTab::CreateWidget()
                 .Image( FOdysseyStyle::GetBrush( "PainterEditor.TopBar.Clear32" ) )
             ]
         ]
-        
+
         + SWrapBox::Slot()
         .FillEmptySpace(true)
         .VAlign(VAlign_Center)
@@ -208,7 +208,7 @@ FOdysseyPainterEditorTopTab::OnSaveButtonClicked()
     }
 
     FEditorFileUtils::PromptForCheckoutAndSave(packages, true, false);
-    
+
     return FReply::Handled();
 }
 
@@ -232,7 +232,7 @@ FOdysseyPainterEditorTopTab::OnClearButtonClicked()
     TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
     if (!source)
         return FReply::Unhandled();
-    
+
     source->Clear();
     return FReply::Handled();
 }

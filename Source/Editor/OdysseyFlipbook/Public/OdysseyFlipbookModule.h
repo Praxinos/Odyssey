@@ -13,13 +13,13 @@ class  FAssetTypeActions_OdysseyFlipbook;
  * The Flipbook Asset module.
  */
 class FOdysseyFlipbookModule :
-	public IModuleInterface
+    public IModuleInterface
 {
 public:
     // IModuleInterface interface
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
-	// End of IModuleInterface interface
+    // End of IModuleInterface interface
 
-	void ShowPluginContentInContentBrowser();
+    void ShowPluginContentInContentBrowser();
 };

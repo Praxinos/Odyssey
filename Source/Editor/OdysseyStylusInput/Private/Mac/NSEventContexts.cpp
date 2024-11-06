@@ -18,12 +18,12 @@ FNSEventTabletContextInfo::Tick()
 {
     PreviousState = CurrentState;
     CurrentState.Empty();
-    
+
     sgMutex.Lock();
     TArray<FNSEventStylusState> tmp( mPacketsBuffer );
     mPacketsBuffer.Empty();
     sgMutex.Unlock();
-    
+
     for( int i = 0; i < tmp.Num(); i++ )
     {
         CurrentState.Push( tmp[i].ToPublicState() );
@@ -48,9 +48,9 @@ bool
 FNSEventContext::OpenContext( FCocoaWindow* iHwnd )
 {
     mTabletContext.mIsInverted = false;
-        
+
     mTabletContext.SetDirty(); // Mandatory! Sometimes may be 0 -_- ?!
-    
+
     //We listen to NSEvents
     if( !mEventMonitor )
     {
@@ -106,11 +106,11 @@ NSEvent* FNSEventContext::HandleNSEvent(NSEvent* Event)
 {
     if( !Event )
         return NULL;
-    
+
     FNSEventStylusState state;
-    
+
     NSPoint cursorPosition = NSEvent.mouseLocation;
-    
+
     //Sometimes, NSEvent.mouseLocation isn't initialized, so we have to make sure it exists before we convert it to cocoaPosition
     if( &cursorPosition != 0 )
     {
@@ -121,19 +121,19 @@ NSEvent* FNSEventContext::HandleNSEvent(NSEvent* Event)
         UE_LOG(LogTemp, Warning, TEXT("Warning: NSEvent cursor position not initialized"));
         return Event;
     }
-    
+
     //Todo: Check if useful
     /*if (state.Position == FVector2D(0, 0))
         UE_LOG(LogTemp, Display, TEXT("Warning: NSEvent cursor state not initialized"));*/
 
     state.Timer = Event.timestamp * 1000;
-        
+
     //Tablet and mouse events are under the same main type of event. To distinguish between them, we can check the subtype of the event received
     if( [Event type] == NSEventTypeLeftMouseDown || [Event type] == NSEventTypeLeftMouseDragged )
     {
         state.NormalPressure = Event.pressure;
         state.IsTouching = true;
-        
+
         if( [Event subtype] == NSEventSubtype::NSEventSubtypeTabletPoint )
         {
             state.TangentPressure = Event.tangentialPressure;
@@ -142,7 +142,7 @@ NSEvent* FNSEventContext::HandleNSEvent(NSEvent* Event)
             state.Tilt = FVector2D( tilt.x, tilt.y );
             //Set Azimuth and Altitude with the content of Tilt
             //state.TiltToOrientation();
-            
+
             state.Z = Event.absoluteZ;
             state.Twist = Event.rotation;
         }
@@ -154,9 +154,9 @@ NSEvent* FNSEventContext::HandleNSEvent(NSEvent* Event)
         else
             mTabletContext.mIsInverted = false;
     }
-            
+
     state.IsInverted = mTabletContext.mIsInverted;
-    
+
     sgMutex.Lock();
     mTabletContext.SetDirty();
     mTabletContext.mPacketsBuffer.Push( state );

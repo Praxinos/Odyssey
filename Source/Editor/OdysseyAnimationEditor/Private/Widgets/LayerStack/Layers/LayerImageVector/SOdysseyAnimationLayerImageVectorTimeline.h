@@ -28,9 +28,9 @@ private:
     EVisibility IsInbetweeningTimelineVisible() const;
 
 protected:
-	virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
-	virtual EVisibility GetRowVisibility(FName iRow) const override;
-	TSharedRef<SWidget> GenerateInbetweeningRowTimelineWidget();
+    virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
+    virtual EVisibility GetRowVisibility(FName iRow) const override;
+    TSharedRef<SWidget> GenerateInbetweeningRowTimelineWidget();
 
 private:
     TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> mInbetweeningListView;

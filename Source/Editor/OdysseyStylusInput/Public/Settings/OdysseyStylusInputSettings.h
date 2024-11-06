@@ -32,7 +32,7 @@ public:
     // Get the current StylusInputDriver
     EOdysseyStylusInputDriver GetStylusDriver() const;
     // Get the localization text of the given StylusInputDriver
-    // (It is used outside of this StylusInput module) 
+    // (It is used outside of this StylusInput module)
     static FText GetFormatText( TSharedPtr<EOdysseyStylusInputDriver> iStylusInputDriver );
 
 public:

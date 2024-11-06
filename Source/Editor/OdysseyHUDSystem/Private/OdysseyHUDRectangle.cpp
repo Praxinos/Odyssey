@@ -32,7 +32,7 @@ FOdysseyHUDRectangle::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
     batchedElements->AddTranslucentLine(FVector(bottomRight, 0.f), FVector(bottomLeft, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
     batchedElements->AddTranslucentLine(FVector(bottomLeft, 0.f), FVector(topLeft, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
 
-    FOdysseyHUDElement::DrawHUD(iParams); 
+    FOdysseyHUDElement::DrawHUD(iParams);
 }
 
 void

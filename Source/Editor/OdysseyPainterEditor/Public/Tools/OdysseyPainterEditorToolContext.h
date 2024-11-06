@@ -16,7 +16,7 @@ public:
     DECLARE_DELEGATE(FOnProvideRasterBlock)
     DECLARE_MULTICAST_DELEGATE(FOnChanged)
 
-public:                         
+public:
     class ODYSSEYPAINTEREDITOR_API FParams
     {
     public:
@@ -51,26 +51,26 @@ public:
 
     /**
      * @brief Returns true if the RasterBlock can be created on demand by the user
-     * 
+     *
      * example : in an animation raster layer, the block can be created on demand.
      * in that case, CanProvideRasterBlockOnDemand() returns true all the time,
      * even if the RasterBlock is not created when we ask for it (Auto Create Instance option turned off).
-     * 
-     * @return true 
-     * @return false 
+     *
+     * @return true
+     * @return false
      */
-    bool CanProvideRasterBlockOnDemand() const; 
-    bool IsRasterBlockReadOnly() const; 
+    bool CanProvideRasterBlockOnDemand() const;
+    bool IsRasterBlockReadOnly() const;
 
     //Vector
     FOdysseyVectorEngine* GetVectorEngine() const;
 
     //Other
-    FOnProvideRasterBlock& OnProvideRasterBlockDelegate(); 
+    FOnProvideRasterBlock& OnProvideRasterBlockDelegate();
     FOnChanged& OnChanged();
 
 private:
-    //TSharedPtr<FOdysseyMediaSet> mMediaSet; 
+    //TSharedPtr<FOdysseyMediaSet> mMediaSet;
 
     FOdysseyPainterEditor* mEditor;
     FParams mParams;

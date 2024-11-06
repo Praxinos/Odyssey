@@ -26,7 +26,7 @@ public:
     // Construction / Destruction
     ~SOdysseyPaletteSetView();
     SOdysseyPaletteSetView();
-    
+
     void Construct(const FArguments& InArgs);
     void OnSelectionChanged( FName iSet, ESelectInfo::Type iType );
     void OnPaletteSetsChanged(UOdysseyPalette* iPalette);
@@ -35,11 +35,11 @@ public:
     //Setters/Getters
     void SelectSet(FName iSet);
 
-protected:    
+protected:
     void DeleteSelectedSet();
-    
+
     bool CanDeleteSelectedSet();
-    
+
     void DuplicateSelectedSet();
 
     bool CanDuplicateSelectedSet();

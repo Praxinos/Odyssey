@@ -15,7 +15,7 @@ struct ODYSSEYVECTOR_API FInbetweenerDrawing
     BLMatrix2D worldMatrix;
     BLMatrix2D inverseMatrix;
     BLMatrix2D inverseWorldMatrix;
- 
+
     FInbetweenerDrawing( FOdysseyVectorTagInbetweener* iInbetweenerTag );
     uint32 GetIndex();
     int32 GetCellIndex();

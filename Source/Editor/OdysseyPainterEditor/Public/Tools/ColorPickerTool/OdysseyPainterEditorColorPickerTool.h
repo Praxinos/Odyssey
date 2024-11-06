@@ -24,7 +24,7 @@ public:
 
     //Constructor
     UOdysseyPainterEditorColorPickerTool();
-    
+
     void Initialize(FOdysseyPaintEngine* iPaintEngine);
 
     //OdysseyPainterEditorTool overrides

@@ -13,7 +13,7 @@ FOdysseyAnimationTimelineShortcuts::FOdysseyAnimationTimelineShortcuts(UOdysseyA
     : mCommandList(MakeShared<FUICommandList>())
     , mCellsShortcuts(MakeShared<FOdysseyAnimationTimelineCellsShortcuts>(iLayerStack))
     , mCellImageRasterShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageRasterShortcuts>(iLayerStack))
-	, mCellImageStaggerShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(iLayerStack))
+    , mCellImageStaggerShortcuts(MakeShared<FOdysseyAnimationTimelineCellImageStaggerShortcuts>(iLayerStack))
 {
     MapActionsToCommandList();
 }
@@ -29,7 +29,7 @@ FOdysseyAnimationTimelineShortcuts::MapActionsToCommandList()
 {
     mCellsShortcuts->MapActionsToCommandList(mCommandList);
     mCellImageRasterShortcuts->MapActionsToCommandList(mCommandList);
-	mCellImageStaggerShortcuts->MapActionsToCommandList(mCommandList);
+    mCellImageStaggerShortcuts->MapActionsToCommandList(mCommandList);
 }
 
 #undef LOCTEXT_NAMESPACE

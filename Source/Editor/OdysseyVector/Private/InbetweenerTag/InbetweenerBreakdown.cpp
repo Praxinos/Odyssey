@@ -475,10 +475,10 @@ FInbetweenerBreakdown::SetTargetDrawingIndex( uint32 iTargetDrawingIndex )
     mInbetweenerTag->ResizeDrawings();
 
     // TODO: put this somewhere else. I put it here so it can geenrate matrices based on
-    // the t value fromthe chart, but I don't think it is the best place. 
+    // the t value fromthe chart, but I don't think it is the best place.
     mInbetweenerTag->UpdateMatrix();
 
-    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING 
+    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
                                 // force deformation of interpolated paths at target
                                 | FOdysseyVectorTagInbetweener::INVALIDATE_RANGE  );
 }
@@ -522,7 +522,7 @@ FInbetweenerBreakdown::GetTargetCellIndex()
 int32
 FInbetweenerBreakdown::GetSourceCellIndex()
 {
-    // we use GetSecene because the Scene is stored as a member varriable in order to be able to 
+    // we use GetSecene because the Scene is stored as a member varriable in order to be able to
     // redraw when the owner object is removed (its scene would be null then)
     uint32 tagCellIndex = mInbetweenerTag->GetScene()->GetEngine()->GetCell()->GetIndex();
     uint32 sourceDrawingIndex = GetSourceDrawingIndex();

@@ -8,14 +8,14 @@
 #include "Misc/OdysseyDuplicateDataReader.h"
 
 namespace Odyssey {
-	/** Duplicates a iSource in iDest */
-	template<class T> void Duplicate(T* iSource, T* iDest)
-	{
-		FPooledLargeMemoryData ObjectData;
-		FOdysseyDuplicateDataWriter writer(ObjectData.Get());
-		iSource->Serialize(writer);
-		FOdysseyDuplicateDataReader reader(ObjectData.Get());
-		iDest->Serialize(reader);
-		iDest->PostDuplicate();
-	}
+    /** Duplicates a iSource in iDest */
+    template<class T> void Duplicate(T* iSource, T* iDest)
+    {
+        FPooledLargeMemoryData ObjectData;
+        FOdysseyDuplicateDataWriter writer(ObjectData.Get());
+        iSource->Serialize(writer);
+        FOdysseyDuplicateDataReader reader(ObjectData.Get());
+        iDest->Serialize(reader);
+        iDest->PostDuplicate();
+    }
 }

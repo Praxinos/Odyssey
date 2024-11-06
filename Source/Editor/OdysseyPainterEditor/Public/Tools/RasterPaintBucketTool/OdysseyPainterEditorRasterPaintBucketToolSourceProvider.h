@@ -11,7 +11,7 @@
 UENUM()
 enum class EOdysseyRasterPaintBucketToolSource : uint8
 {
-    Custom UMETA(Hidden), 
+    Custom UMETA(Hidden),
     CurrentLayer,
     ForegroundLayers,
     BackgroundLayers,
@@ -21,6 +21,6 @@ enum class EOdysseyRasterPaintBucketToolSource : uint8
 class FOdysseyPainterEditorRasterPaintBucketToolSourceProvider
 {
 public:
-	virtual const TArray<FString>& GetSources() const = 0;
-	virtual TSharedPtr<::ULIS::FBlock> GetSourceBlock(EOdysseyRasterPaintBucketToolSource iSource) const = 0;
+    virtual const TArray<FString>& GetSources() const = 0;
+    virtual TSharedPtr<::ULIS::FBlock> GetSourceBlock(EOdysseyRasterPaintBucketToolSource iSource) const = 0;
 };

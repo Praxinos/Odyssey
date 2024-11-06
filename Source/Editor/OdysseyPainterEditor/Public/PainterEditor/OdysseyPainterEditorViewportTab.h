@@ -13,7 +13,7 @@ class SOdysseyViewport;
 class FOdysseyPainterEditorViewportClient;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorViewportTab :
-	public FOdysseyEditorTab
+    public FOdysseyEditorTab
 {
 public:
     static const FName& StaticId();

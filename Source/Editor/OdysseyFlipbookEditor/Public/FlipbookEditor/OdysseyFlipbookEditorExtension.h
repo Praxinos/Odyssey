@@ -13,7 +13,7 @@ class FOdysseyFlipbookEditorGUI;
 
 class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorExtension
     : public FOdysseyPainterEditorExtension
-{   
+{
 public:
     // Construction / Destruction
     virtual ~FOdysseyFlipbookEditorExtension();
@@ -30,7 +30,7 @@ public:
 
 public:
     TSharedPtr<FOdysseyFlipbookWrapper>    FlipbookWrapper();
-    UTexture*			        PreviewTexture();
+    UTexture*                    PreviewTexture();
     void                        PreviewTexture(UTexture2D* iTexture);
 
 protected:
@@ -39,7 +39,7 @@ protected:
 
 private:
     TSharedPtr<FOdysseyFlipbookWrapper> mFlipbookWrapper;
-	FOdysseySurfaceTexture2D mPreviewSurface;
+    FOdysseySurfaceTexture2D mPreviewSurface;
 
-	TSharedPtr<FOdysseyFlipbookEditorGUI> mGUI;
+    TSharedPtr<FOdysseyFlipbookEditorGUI> mGUI;
 };

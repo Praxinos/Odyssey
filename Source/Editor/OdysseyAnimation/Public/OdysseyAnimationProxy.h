@@ -42,16 +42,16 @@ private:
 
 private:
     UOdysseyAnimation* mAnimation;
-    
+
     // Thread to run the worker FRunnable on
     FRunnableThread* mThread;
-    
+
     // Stop this thread? Uses Thread Safe Counter
     FThreadSafeCounter mStopTaskCounter;
 
     // Stop this thread? Uses Thread Safe Counter
     FThreadSafeCounter mPauseTaskCounter;
-    
+
     FCriticalSection mPendingBlockMutex;
 
     TArray<TSharedPtr<FBlockData>> mBlockData;
@@ -63,7 +63,7 @@ private:
 class FBlockData
 {
 public:
-	~FBlockData();
+    ~FBlockData();
     FBlockData(UOdysseyAnimation* iAnimation, const TArray<FGuid>& iComposition);
 
 public:
@@ -95,9 +95,9 @@ private:
     FULISInvalidTileMap mInvalidTileMap;
     TSet<int> mFrameIndexes;
     TSharedPtr<IOdysseyImageRenderer> mRenderer;
-	bool mIsReadyToRender = false;
+    bool mIsReadyToRender = false;
     bool mIsInvalid;
-    
+
     FCriticalSection mEditMutex;
     FCriticalSection mRenderMutex;
 };

@@ -9,9 +9,9 @@ class FOdysseyAnimationLayerImageVectorImport
 public:
     /**
      * @brief Imports Data from the given archive into the given object
-     * 
-     * @param iAnimationLayerImageVector 
-     * @param Ar 
+     *
+     * @param iAnimationLayerImageVector
+     * @param Ar
      */
     static bool ODYSSEYANIMATION_API Read( UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector
                                   , FArchive &Ar );

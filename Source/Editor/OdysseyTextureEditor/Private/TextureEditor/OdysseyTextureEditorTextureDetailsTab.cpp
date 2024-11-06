@@ -26,7 +26,7 @@ FOdysseyTextureEditorTextureDetailsTab::~FOdysseyTextureEditorTextureDetailsTab(
 }
 
 FOdysseyTextureEditorTextureDetailsTab::FOdysseyTextureEditorTextureDetailsTab(FOdysseyTextureEditorExtension* iExtension)
-	: FOdysseyEditorTab( LOCTEXT( "texture-details-tab.name", "Texture Details" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Trombone16" ))
+    : FOdysseyEditorTab( LOCTEXT( "texture-details-tab.name", "Texture Details" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Trombone16" ))
     , mExtension(iExtension)
 {
 }

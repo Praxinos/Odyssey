@@ -26,13 +26,13 @@ public:
     static FOdysseyAnimationTimelineTools& Get();
 
 private:
-	FOdysseyAnimationTimelineTools();
+    FOdysseyAnimationTimelineTools();
 
 public:
-	TSharedPtr<FOdysseyAnimationTimelineTool> CreateTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection) const;
+    TSharedPtr<FOdysseyAnimationTimelineTool> CreateTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection) const;
     EOdysseyTimelineTool GetCurrentTool() const;
-	void SetCurrentTool(EOdysseyTimelineTool iTool);
+    void SetCurrentTool(EOdysseyTimelineTool iTool);
 
 private:
-	EOdysseyTimelineTool mCurrentTool;
+    EOdysseyTimelineTool mCurrentTool;
 };

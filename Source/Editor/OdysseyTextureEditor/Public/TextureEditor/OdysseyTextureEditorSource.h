@@ -19,7 +19,7 @@ public:
     // Construction / Destruction
     virtual ~FOdysseyTextureEditorSource();
     FOdysseyTextureEditorSource(UTexture2D* iTexture);
-    
+
 public:
     static const FGuid& StaticId();
 

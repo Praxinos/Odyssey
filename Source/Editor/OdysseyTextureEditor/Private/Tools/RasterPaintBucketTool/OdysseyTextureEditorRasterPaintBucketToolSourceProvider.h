@@ -11,26 +11,26 @@ class UOdysseyLayer;
 class FOdysseyTextureEditorExtension;
 
 class FOdysseyTextureEditorRasterPaintBucketToolSourceProvider
-	: public FOdysseyPainterEditorRasterPaintBucketToolSourceProvider
+    : public FOdysseyPainterEditorRasterPaintBucketToolSourceProvider
 {
 public:
-	virtual ~FOdysseyTextureEditorRasterPaintBucketToolSourceProvider();
-	FOdysseyTextureEditorRasterPaintBucketToolSourceProvider(FOdysseyTextureEditorExtension* iExtension);
+    virtual ~FOdysseyTextureEditorRasterPaintBucketToolSourceProvider();
+    FOdysseyTextureEditorRasterPaintBucketToolSourceProvider(FOdysseyTextureEditorExtension* iExtension);
 
 public:
-	virtual const TArray<FString>& GetSources() const override;
-	virtual TSharedPtr<::ULIS::FBlock> GetSourceBlock(EOdysseyRasterPaintBucketToolSource iSource) const override;
+    virtual const TArray<FString>& GetSources() const override;
+    virtual TSharedPtr<::ULIS::FBlock> GetSourceBlock(EOdysseyRasterPaintBucketToolSource iSource) const override;
 
 private:
-	TSharedPtr<::ULIS::FBlock> GetCurrentLayerBlock() const;
-	TSharedPtr<::ULIS::FBlock> GetForegroundLayersBlock() const;
-	TSharedPtr<::ULIS::FBlock> GetBackgroundLayersBlock() const;
-	TSharedPtr<::ULIS::FBlock> GetAllLayersBlock() const;
+    TSharedPtr<::ULIS::FBlock> GetCurrentLayerBlock() const;
+    TSharedPtr<::ULIS::FBlock> GetForegroundLayersBlock() const;
+    TSharedPtr<::ULIS::FBlock> GetBackgroundLayersBlock() const;
+    TSharedPtr<::ULIS::FBlock> GetAllLayersBlock() const;
 
-	TArray<FOdysseyImageRenderingAbility*> GetForegroundLayersToExclude(UOdysseyLayer* iLayer) const;
-	TArray<FOdysseyImageRenderingAbility*> GetBackgroundLayersToExclude(UOdysseyLayer* iLayer) const;
+    TArray<FOdysseyImageRenderingAbility*> GetForegroundLayersToExclude(UOdysseyLayer* iLayer) const;
+    TArray<FOdysseyImageRenderingAbility*> GetBackgroundLayersToExclude(UOdysseyLayer* iLayer) const;
 
 private:
-	FOdysseyTextureEditorExtension* mExtension;
-	TArray<FString> mSources;
+    FOdysseyTextureEditorExtension* mExtension;
+    TArray<FString> mSources;
 };

@@ -18,7 +18,7 @@ UOdysseyBrushThumbnailRenderer::Draw( UObject* Object, int32 X, int32 Y, uint32 
 {
     FObjectThumbnail outThumbnail = FObjectThumbnail();
     ThumbnailTools::AssetHasCustomThumbnail( Object->GetFullName(), outThumbnail );
-    
+
     if( !outThumbnail.IsEmpty() )
        DrawCustomThumbnail( Object, X, Y, Width, Height, RenderTarget, Canvas );
     else

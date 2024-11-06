@@ -14,35 +14,35 @@
 void
 FOdysseyAnimationTrackModule::StartupModule()
 {
-	RegisterSequencerTracks();
+    RegisterSequencerTracks();
 }
 
 void
 FOdysseyAnimationTrackModule::ShutdownModule()
 {
-	UnregisterSequencerTracks();
+    UnregisterSequencerTracks();
 }
 
 void
 FOdysseyAnimationTrackModule::RegisterSequencerTracks()
 {
-	ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
-	mAnimationTrackCreateEditorHandle = SequencerModule.RegisterTrackEditor( FOnCreateTrackEditor::CreateStatic( &FOdysseyAnimationTrackEditor::CreateTrackEditor ) );
+    ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
+    mAnimationTrackCreateEditorHandle = SequencerModule.RegisterTrackEditor( FOnCreateTrackEditor::CreateStatic( &FOdysseyAnimationTrackEditor::CreateTrackEditor ) );
 
-	ILevelSequenceModule& LevelSequenceModule = FModuleManager::LoadModuleChecked<ILevelSequenceModule>("LevelSequence");
-	mOnNewActorTrackAddedHandle = LevelSequenceModule.OnNewActorTrackAdded().AddStatic( FOdysseyAnimationTrackEditor::OnNewActorTrackAdded );
+    ILevelSequenceModule& LevelSequenceModule = FModuleManager::LoadModuleChecked<ILevelSequenceModule>("LevelSequence");
+    mOnNewActorTrackAddedHandle = LevelSequenceModule.OnNewActorTrackAdded().AddStatic( FOdysseyAnimationTrackEditor::OnNewActorTrackAdded );
 }
 
 void
 FOdysseyAnimationTrackModule::UnregisterSequencerTracks()
 {
-	ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
-	SequencerModule.UnRegisterTrackEditor( mAnimationTrackCreateEditorHandle );
+    ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
+    SequencerModule.UnRegisterTrackEditor( mAnimationTrackCreateEditorHandle );
 
-	ILevelSequenceModule& LevelSequenceModule = FModuleManager::LoadModuleChecked<ILevelSequenceModule>("LevelSequence");
-	LevelSequenceModule.OnNewActorTrackAdded().Remove( mOnNewActorTrackAddedHandle );
+    ILevelSequenceModule& LevelSequenceModule = FModuleManager::LoadModuleChecked<ILevelSequenceModule>("LevelSequence");
+    LevelSequenceModule.OnNewActorTrackAdded().Remove( mOnNewActorTrackAddedHandle );
 }
-	
+
 
 IMPLEMENT_MODULE( FOdysseyAnimationTrackModule, OdysseyAnimationEditor );
 

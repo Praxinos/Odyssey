@@ -29,7 +29,7 @@ FOdysseyVectorUndoPathExtend::~FOdysseyVectorUndoPathExtend()
 }
 
 FOdysseyVectorUndoPathExtend::FOdysseyVectorUndoPathExtend( FOdysseyVectorGroupPaint* iScene
-                                                          , FOdysseyVectorPath* iPath 
+                                                          , FOdysseyVectorPath* iPath
                                                           , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mPath( iPath )

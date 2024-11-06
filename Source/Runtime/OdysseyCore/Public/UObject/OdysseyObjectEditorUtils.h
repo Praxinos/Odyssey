@@ -5,88 +5,88 @@
 
 #include "CoreMinimal.h"
 #include "ObjectEditorUtils.h"
-	
+
 namespace FOdysseyObjectEditorUtils
 {
-	void ODYSSEYCORE_API PreChangePropertyValue(UObject* Object, FName PropertyName);
-	void ODYSSEYCORE_API PostChangePropertyValue(UObject* Object, FName PropertyName, EPropertyChangeType::Type iChangeType = EPropertyChangeType::Unspecified);
+    void ODYSSEYCORE_API PreChangePropertyValue(UObject* Object, FName PropertyName);
+    void ODYSSEYCORE_API PostChangePropertyValue(UObject* Object, FName PropertyName, EPropertyChangeType::Type iChangeType = EPropertyChangeType::Unspecified);
 
-	/**
-	 * Set the value on an UObject using reflection.
-	 * @param	Object			The object to copy the value into.
-	 * @param	PropertyName	The name of the property to set.
-	 * @param	Value			The value to assign to the property.
-	 *
-	 * @return true if the value was set correctly
-	 */
-	template <typename ValueType>
-	bool SetPropertyValue(UObject* Object, FName PropertyName, ValueType Value, EPropertyChangeType::Type iChangeType = EPropertyChangeType::Unspecified)
-	{
-		// Get the property addresses for the source and destination objects.
-		FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
+    /**
+     * Set the value on an UObject using reflection.
+     * @param    Object            The object to copy the value into.
+     * @param    PropertyName    The name of the property to set.
+     * @param    Value            The value to assign to the property.
+     *
+     * @return true if the value was set correctly
+     */
+    template <typename ValueType>
+    bool SetPropertyValue(UObject* Object, FName PropertyName, ValueType Value, EPropertyChangeType::Type iChangeType = EPropertyChangeType::Unspecified)
+    {
+        // Get the property addresses for the source and destination objects.
+        FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
 
-		// Get the property addresses for the object
-		ValueType* SourceAddr = Property->ContainerPtrToValuePtr<ValueType>(Object);
+        // Get the property addresses for the object
+        ValueType* SourceAddr = Property->ContainerPtrToValuePtr<ValueType>(Object);
 
-		if ( SourceAddr == NULL )
-		{
-			return false;
-		}
+        if ( SourceAddr == NULL )
+        {
+            return false;
+        }
 
-		if ( !Object->HasAnyFlags(RF_ClassDefaultObject) )
-		{
-			FEditPropertyChain PropertyChain;
-			PropertyChain.AddHead(Property);
+        if ( !Object->HasAnyFlags(RF_ClassDefaultObject) )
+        {
+            FEditPropertyChain PropertyChain;
+            PropertyChain.AddHead(Property);
 
-			PropertyChain.SetActivePropertyNode(Property);
-			PropertyChain.SetActiveMemberPropertyNode(Property);
-			
-			Object->Modify();
-			Object->PreEditChange(PropertyChain);
-		}
+            PropertyChain.SetActivePropertyNode(Property);
+            PropertyChain.SetActiveMemberPropertyNode(Property);
 
-		// Set the value on the destination object.
-		*SourceAddr = Value;
+            Object->Modify();
+            Object->PreEditChange(PropertyChain);
+        }
 
-		if ( !Object->HasAnyFlags(RF_ClassDefaultObject) )
-		{
-			FPropertyChangedEvent PropertyEvent(Property, iChangeType);
-			Object->PostEditChangeProperty(PropertyEvent);
-		}
+        // Set the value on the destination object.
+        *SourceAddr = Value;
 
-		return true;
-	}
+        if ( !Object->HasAnyFlags(RF_ClassDefaultObject) )
+        {
+            FPropertyChangedEvent PropertyEvent(Property, iChangeType);
+            Object->PostEditChangeProperty(PropertyEvent);
+        }
 
-	/**
-	 * Get the value on an UObject using reflection.
-	 * @param	Object			The object to copy the value into.
-	 * @param	PropertyName	The name of the property to set.
-	 * @param	Value			The value to assign to the property.
-	 *
-	 * @return true if the value was set correctly
-	 */
-	template <typename ValueType>
-	bool GetPropertyValue(UObject* Object, FName PropertyName, ValueType& oValue)
-	{
-		// Get the property addresses for the source and destination objects.
-		FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
+        return true;
+    }
 
-		// Get the property addresses for the object
-		ValueType* SourceAddr = Property->ContainerPtrToValuePtr<ValueType>(Object);
+    /**
+     * Get the value on an UObject using reflection.
+     * @param    Object            The object to copy the value into.
+     * @param    PropertyName    The name of the property to set.
+     * @param    Value            The value to assign to the property.
+     *
+     * @return true if the value was set correctly
+     */
+    template <typename ValueType>
+    bool GetPropertyValue(UObject* Object, FName PropertyName, ValueType& oValue)
+    {
+        // Get the property addresses for the source and destination objects.
+        FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
 
-		if ( SourceAddr == nullptr )
-			return false;
+        // Get the property addresses for the object
+        ValueType* SourceAddr = Property->ContainerPtrToValuePtr<ValueType>(Object);
 
-		// Set the value on the destination object.
-		oValue = *SourceAddr;
+        if ( SourceAddr == nullptr )
+            return false;
 
-		return true;
-	}
+        // Set the value on the destination object.
+        oValue = *SourceAddr;
 
-	/**
-	 * Returns wether the given object contains the given property
-	 *
-	 * @return true if the poroperty exists within the given object
-	 */
-	bool ODYSSEYCORE_API HasProperty(UObject* Object, FName PropertyName);
+        return true;
+    }
+
+    /**
+     * Returns wether the given object contains the given property
+     *
+     * @return true if the poroperty exists within the given object
+     */
+    bool ODYSSEYCORE_API HasProperty(UObject* Object, FName PropertyName);
 };

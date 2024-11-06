@@ -55,62 +55,62 @@ FOdysseyModeToolkit::Initialize(
 
     mEditor->InitTabs();
 
-	static FString menuName = TEXT("LevelEditor.MainMenu");
+    static FString menuName = TEXT("LevelEditor.MainMenu");
 
-	//Add Odyssey Specific section to the main menu to add entries at the right place easier
-	FToolMenuInsert fileMenuInsert = FToolMenuInsert("FileActors", EToolMenuInsertType::After);
-	UToolMenu* fileMenu = UToolMenus::Get()->ExtendMenu(*(menuName + FString(".File")));
-	fileMenu->FindOrAddSection("OdysseyFile", FText(), fileMenuInsert);
+    //Add Odyssey Specific section to the main menu to add entries at the right place easier
+    FToolMenuInsert fileMenuInsert = FToolMenuInsert("FileActors", EToolMenuInsertType::After);
+    UToolMenu* fileMenu = UToolMenus::Get()->ExtendMenu(*(menuName + FString(".File")));
+    fileMenu->FindOrAddSection("OdysseyFile", FText(), fileMenuInsert);
 
-	UToolMenu* editMenu = UToolMenus::Get()->ExtendMenu(*(menuName + FString(".Edit")));
-	editMenu->FindOrAddSection("OdysseyEdit");
+    UToolMenu* editMenu = UToolMenus::Get()->ExtendMenu(*(menuName + FString(".Edit")));
+    editMenu->FindOrAddSection("OdysseyEdit");
 
-	UToolMenu* windowMenu = UToolMenus::Get()->ExtendMenu(*(menuName + FString(".Window")));
-	windowMenu->FindOrAddSection("OdysseyWindow");
+    UToolMenu* windowMenu = UToolMenus::Get()->ExtendMenu(*(menuName + FString(".Window")));
+    windowMenu->FindOrAddSection("OdysseyWindow");
 
-	UToolMenu* toolsMenu = UToolMenus::Get()->ExtendMenu(*(menuName + FString(".Tools")));
-	toolsMenu->FindOrAddSection("OdysseyTools");
+    UToolMenu* toolsMenu = UToolMenus::Get()->ExtendMenu(*(menuName + FString(".Tools")));
+    toolsMenu->FindOrAddSection("OdysseyTools");
 
-	UToolMenu* buildMenu = UToolMenus::Get()->ExtendMenu(*(menuName + FString(".Build")));
-	buildMenu->FindOrAddSection("OdysseyBuild");
+    UToolMenu* buildMenu = UToolMenus::Get()->ExtendMenu(*(menuName + FString(".Build")));
+    buildMenu->FindOrAddSection("OdysseyBuild");
 
-	UToolMenu* selectMenu = UToolMenus::Get()->ExtendMenu(*(menuName + FString(".Select")));
-	selectMenu->FindOrAddSection("OdysseySelect");
+    UToolMenu* selectMenu = UToolMenus::Get()->ExtendMenu(*(menuName + FString(".Select")));
+    selectMenu->FindOrAddSection("OdysseySelect");
 
-	UToolMenu* actorMenu = UToolMenus::Get()->ExtendMenu(*(menuName + FString(".Actor")));
-	actorMenu->FindOrAddSection("OdysseyActor");
+    UToolMenu* actorMenu = UToolMenus::Get()->ExtendMenu(*(menuName + FString(".Actor")));
+    actorMenu->FindOrAddSection("OdysseyActor");
 
-	UToolMenu* helpMenu = UToolMenus::Get()->ExtendMenu(*(menuName + FString(".Help")));
-	helpMenu->FindOrAddSection("OdysseyHelp");
+    UToolMenu* helpMenu = UToolMenus::Get()->ExtendMenu(*(menuName + FString(".Help")));
+    helpMenu->FindOrAddSection("OdysseyHelp");
 
-	mLevelEditorMenuExtender = MakeShared<FExtender>();
-	mEditor->ExtendMenu( mLevelEditorMenuExtender.ToSharedRef() );
-	LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(mLevelEditorMenuExtender);
+    mLevelEditorMenuExtender = MakeShared<FExtender>();
+    mEditor->ExtendMenu( mLevelEditorMenuExtender.ToSharedRef() );
+    LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(mLevelEditorMenuExtender);
 
     mEditor->BindShortcuts(this);
     mEditor->OnAddEditedObjectDelegate().AddRaw(this, &FOdysseyModeToolkit::OnAddEditedObject);
     mEditor->OnRemoveEditedObjectDelegate().AddRaw(this, &FOdysseyModeToolkit::OnRemoveEditedObject);
 
-	RebuildLevelEditorMenu();
+    RebuildLevelEditorMenu();
 }
 
 void
 FOdysseyModeToolkit::RebuildLevelEditorMenu() const
 {
-	FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
-	TSharedPtr<FExtender> Extenders = LevelEditorModule.GetMenuExtensibilityManager()->GetAllExtenders();
-	TSharedPtr<ILevelEditor> levelEditor= LevelEditorModule.GetLevelEditorInstance().Pin();
-	FToolMenuContext ToolMenuContext(levelEditor->GetLevelEditorActions(), Extenders.ToSharedRef());
+    FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
+    TSharedPtr<FExtender> Extenders = LevelEditorModule.GetMenuExtensibilityManager()->GetAllExtenders();
+    TSharedPtr<ILevelEditor> levelEditor= LevelEditorModule.GetLevelEditorInstance().Pin();
+    FToolMenuContext ToolMenuContext(levelEditor->GetLevelEditorActions(), Extenders.ToSharedRef());
 
-	IMainFrameModule& MainFrameModule = FModuleManager::LoadModuleChecked<IMainFrameModule>( "MainFrame" );
-	TSharedRef< SWidget > MenuBarWidget = MainFrameModule.MakeMainMenu( levelEditor->GetTabManager(), "LevelEditor.MainMenu", ToolMenuContext );
+    IMainFrameModule& MainFrameModule = FModuleManager::LoadModuleChecked<IMainFrameModule>( "MainFrame" );
+    TSharedRef< SWidget > MenuBarWidget = MainFrameModule.MakeMainMenu( levelEditor->GetTabManager(), "LevelEditor.MainMenu", ToolMenuContext );
 }
 
 TSharedPtr<SWidget>
 FOdysseyModeToolkit::GetInlineContent() const
 {
     //TODO: Create the widget in ViewportDrawingEditorToolkit
-	//return mEditor->GetGUI()->GetWidget();
+    //return mEditor->GetGUI()->GetWidget();
     return SNullWidget::NullWidget;
 }
 
@@ -141,7 +141,7 @@ FOdysseyModeToolkit::FocusWindow(UObject* ObjectToFocusOn)
 bool
 FOdysseyModeToolkit::CloseWindow()
 {
-	return mEditor->OnCloseRequested();
+    return mEditor->OnCloseRequested();
 }
 
 bool
@@ -183,8 +183,8 @@ FOdysseyModeToolkit::RemoveEditingAsset(UObject* Asset)
 void
 FOdysseyModeToolkit::RequestModeUITabs()
 {
-	FModeToolkit::RequestModeUITabs();
-	/* if (TSharedPtr<FAssetEditorModeUILayer> modeUILayerPtr = ModeUILayer.Pin())
+    FModeToolkit::RequestModeUITabs();
+    /* if (TSharedPtr<FAssetEditorModeUILayer> modeUILayerPtr = ModeUILayer.Pin())
         mEditor->BuildModeLayout(modeUILayerPtr); */
 }
 
@@ -194,7 +194,7 @@ FOdysseyModeToolkit::InvokeUI()
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
     mEditor->RegisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
 
-	FModeToolkit::InvokeUI();
+    FModeToolkit::InvokeUI();
     //mEditor->InvokeModeLayout();
     LoadOpenedTabs();
 }
@@ -220,10 +220,10 @@ void FOdysseyModeToolkit::OnToolkitHostShutdownUI()
 
     mEditor->CloseAllTabs();
     mEditor->UnregisterTabSpawners(LevelEditorModule.GetLevelEditorTabManager()->AsShared());
-	
-	LevelEditorModule.GetMenuExtensibilityManager()->RemoveExtender(mLevelEditorMenuExtender);
-	mLevelEditorMenuExtender = nullptr;
-	RebuildLevelEditorMenu();
+
+    LevelEditorModule.GetMenuExtensibilityManager()->RemoveExtender(mLevelEditorMenuExtender);
+    mLevelEditorMenuExtender = nullptr;
+    RebuildLevelEditorMenu();
 }
 
 void

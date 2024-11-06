@@ -16,7 +16,7 @@ public:
 
 public:
     FOdysseyTextureEditorExtension* GetTextureEditorExtension() const;
-    
+
     virtual TArray<TSharedPtr<FExtender>> ExtendContextMenu();
 
 private:

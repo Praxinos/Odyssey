@@ -12,7 +12,7 @@ class ODYSSEYANIMATION_API FOdysseyAnimationCellSelection
 {
 public:
     ~FOdysseyAnimationCellSelection();
-	FOdysseyAnimationCellSelection();
+    FOdysseyAnimationCellSelection();
     FOdysseyAnimationCellSelection(UOdysseyAnimationLayerStack* iLayerStack);
 
 public:
@@ -32,8 +32,8 @@ private:
     void UnbindOnCellsChanged();
 
 private:
-	UOdysseyAnimationLayerStack* mLayerStack;
+    UOdysseyAnimationLayerStack* mLayerStack;
     TArray<UOdysseyAnimationCell*> mSelectedCells;
     UOdysseyAnimationCell* mCellSelectionCursor;
-	UOdysseyAnimationLayer* mLayer = nullptr;
+    UOdysseyAnimationLayer* mLayer = nullptr;
 };

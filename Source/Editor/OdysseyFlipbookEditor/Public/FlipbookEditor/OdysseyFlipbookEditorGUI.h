@@ -15,7 +15,7 @@ class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookEditorGUI
 {
 public:
     static void ExtendLevelEditorLayout(FLayoutExtender& Extender);
-    
+
 public:
     // Construction / Destruction
     virtual ~FOdysseyFlipbookEditorGUI();
@@ -24,27 +24,27 @@ public:
 public:
     void Initialize();
     void Finalize();
-	void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
+    void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
 
     void OnFlipbookChanged();
 
 protected:
     //Init
-	void CreateTabs();
+    void CreateTabs();
 
 public:
     // Getters
-	TSharedPtr<FOdysseyFlipbookEditorTimelineTab>& GetTimelineTab();
+    TSharedPtr<FOdysseyFlipbookEditorTimelineTab>& GetTimelineTab();
 
 protected:
-	// Internal widget creation
-	//TSharedRef<FTabManager::FSplitter>	CreateMainSection();
+    // Internal widget creation
+    //TSharedRef<FTabManager::FSplitter>    CreateMainSection();
 
 private:
-	FOdysseyFlipbookEditorExtension*				mExtension;
+    FOdysseyFlipbookEditorExtension*                mExtension;
 
 protected:
     //Tabs
-	TSharedPtr<FOdysseyFlipbookEditorTimelineTab>   mTimelineTab;
+    TSharedPtr<FOdysseyFlipbookEditorTimelineTab>   mTimelineTab;
 };
 

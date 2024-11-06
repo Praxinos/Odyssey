@@ -52,7 +52,7 @@ FOdysseyRasterBlockUndoBuilder::BuildRedoData(const FOdysseyRasterBlockMutator& 
         writer << rect.w;
         writer << rect.h;
     }
-    
+
     //copy the rectangle in the block
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iRasterBlockMutator.GetRasterBlock()->GetFormat());
     int tileSize = invalidTileMap.TileSize();
@@ -91,7 +91,7 @@ FOdysseyRasterBlockUndoBuilder::BuildUndoData(const FOdysseyRasterBlockMutator& 
         writer << rect.w;
         writer << rect.h;
     }
-    
+
     //copy the rectangle in the block
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(iRasterBlockMutator.GetRasterBlock()->GetFormat());
     int tileSize = invalidTileMap.TileSize();
@@ -214,14 +214,14 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
 
     //Load Block from DDC
     FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
-		FOdysseyRasterBlockUndo_CACHE_NAME,
+        FOdysseyRasterBlockUndo_CACHE_NAME,
         FOdysseyRasterBlockUndo_CACHE_VERSION, //a GUID identifying the version of the key
-		iId
-	);
+        iId
+    );
 
     UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Blocking);
     UE::DerivedData::GetCache().GetValue(
-		{
+        {
             UE::DerivedData::FCacheGetValueRequest
             {
                 UE::DerivedData::FSharedString(TEXT("FOdysseyRasterBlock")),
@@ -229,8 +229,8 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
                 UE::DerivedData::ECachePolicy::Local
             }
         },
-		getOwner,
-		[&, this](UE::DerivedData::FCacheGetValueResponse&& iResponse)
+        getOwner,
+        [&, this](UE::DerivedData::FCacheGetValueResponse&& iResponse)
         {
             if (iResponse.Status != UE::DerivedData::EStatus::Ok)
                 return;
@@ -262,7 +262,7 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
             uint8* dataStart = static_cast<uint8*>(dataPtr) + reader.Tell();
             ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
             for (int i = 0; i < numTiles; i++)
-            {   
+            {
                 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToLoad = MakeShared<::ULIS::FBlock>( dataStart, tileSize, tileSize, rasterBlock->GetFormat());
                 const ::ULIS::FRectI& rect = rects[i];
                 ctx.Copy(*blockToLoad, *block, blockToLoad->Rect(), ::ULIS::FVec2I(rect.x, rect.y), ::ULIS::FSchedulePolicy::AsyncCacheEfficient);

@@ -6,7 +6,7 @@
 
 FOdysseyLayerImageRenderer::FOdysseyLayerImageRenderer(const UOdysseyLayer* iLayer, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter)
     : IOdysseyImageRenderer(iRenderType, iDefaultRects)
-{    
+{
     const TArray<UOdysseyLayer*>& children = iLayer->GetChildren();
     for (int i = children.Num() - 1; i >= 0 ; i--)
     {
@@ -24,7 +24,7 @@ FOdysseyLayerImageRenderer::FOdysseyLayerImageRenderer(const UOdysseyLayer* iLay
 
         if (!data.mRenderer)
             continue;
-            
+
         mChildrenData.Add(data);
     }
 }
@@ -94,8 +94,8 @@ bool
 FOdysseyLayerImageRenderer::IsGameThreadOnly()
 {
     for (const FChildData& childData : mChildrenData)
-	{
-		if (childData.mRenderer->IsGameThreadOnly())
+    {
+        if (childData.mRenderer->IsGameThreadOnly())
             return true;
     }
     return false;

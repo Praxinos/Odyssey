@@ -137,7 +137,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonUp( const FGeometry & 
     // request redraw
     mItem.Get()->GetVectorObject()->GetEngine()->Invalidate( 0 );
 
-    FOdysseyVectorEngine::Notify( nullptr, 
+    FOdysseyVectorEngine::Notify( nullptr,
                                   FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                                 //| FOdysseyPainterEditor::UI_UPDATE_TIMELINE
                                 | FOdysseyPainterEditor::UI_UPDATE_HUD );
@@ -250,7 +250,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonDown( const FGeometry 
     // request redraw
     mItem.Get()->GetVectorObject()->GetEngine()->Invalidate( 0 );
 
-    FOdysseyVectorEngine::Notify( nullptr, 
+    FOdysseyVectorEngine::Notify( nullptr,
                                   FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                                 | FOdysseyPainterEditor::UI_UPDATE_HUD );
 
@@ -289,7 +289,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnTextChanged( const FText& InText
 
     mTextBlockWidget.Get()->SetText( FText::FromString( mItem.Get()->GetVectorObject()->GetName() ) );
 
-    FOdysseyVectorEngine::Notify( itemScene, 
+    FOdysseyVectorEngine::Notify( itemScene,
                                   FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                                 | FOdysseyPainterEditor::UI_UPDATE_TIMELINE );
 }
@@ -317,7 +317,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
                                                                                                           , notificationFlags ) );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
         const TSharedPtr< SOdysseyPainterEditorVectorSceneTreeView > treeView = StaticCastSharedPtr<SOdysseyPainterEditorVectorSceneTreeView>(OwnerTablePtr.Pin());
         TSharedPtr<FOdysseyPainterEditorSource> source = treeView->GetEditor()->GetSource();
         if (source)
@@ -330,7 +330,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
         switch( mDropZone )
         {
             //case DROPZONE_ABOVE:
-            // reverse order in order to get the most forward objet on top of the hierarchy 
+            // reverse order in order to get the most forward objet on top of the hierarchy
             case DROPZONE_BELOW:
             {
                 FOdysseyVectorObject* parentObject = itemObject->GetParent();
@@ -358,7 +358,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
             break;
 
             // case DROPZONE_BELOW:
-            // reverse order in order to get the most forward objet on top of the hierarchy 
+            // reverse order in order to get the most forward objet on top of the hierarchy
             case DROPZONE_ABOVE:
             {
                 FOdysseyVectorObject* parentObject = itemObject->GetParent();

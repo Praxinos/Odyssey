@@ -631,7 +631,7 @@ FSnapshotInbetweenerBreakdown::FSnapshotInbetweenerBreakdown( FInbetweenerBreakd
     : mBreakdown( iBreakdown )
     , mSnapshotFlags( iSnapshotFlags )
     , mChartSnapshot( iBreakdown->GetChart()
-                    , ( mSnapshotFlags & FSnapshotFlags::Breakdown::CHART ) ? FSnapshotFlags::ALL 
+                    , ( mSnapshotFlags & FSnapshotFlags::Breakdown::CHART ) ? FSnapshotFlags::ALL
                                                                             : 0  )
 {
     RecordLocalState( &mInitialState );

@@ -122,7 +122,7 @@ TSharedRef<ITableRow> SOdysseyPalette::OnGenerateRow(UOdysseyPaletteEntry* iEntr
     check(iEntry);
 
     UClass* entryClass = iEntry->GetClass();
-    
+
     if (entryClass == UOdysseyPaletteEntryColor::StaticClass())
     {
         return SNew(SOdysseyPaletteColorRow, mPaletteTreeView.ToSharedRef(), Cast<UOdysseyPaletteEntryColor>(iEntry));

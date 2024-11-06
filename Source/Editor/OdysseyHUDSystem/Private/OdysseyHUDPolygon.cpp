@@ -57,7 +57,7 @@ FOdysseyHUDPolygon::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
         );
     }
 
-    FOdysseyHUDElement::DrawHUD(iParams); 
+    FOdysseyHUDElement::DrawHUD(iParams);
 }
 
 

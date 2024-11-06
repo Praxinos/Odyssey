@@ -12,11 +12,11 @@ FOdysseyEditorContextMenu::~FOdysseyEditorContextMenu()
 }
 
 FOdysseyEditorContextMenu::FOdysseyEditorContextMenu(FName iID, FText iDisplayName, FSlateIcon iIcon)
-	: mMenu(true, NULL)
+    : mMenu(true, NULL)
     , mID(iID)
     , mDisplayName(iDisplayName)
     , mIcon(iIcon)
-	, mWidget(nullptr)
+    , mWidget(nullptr)
 {
 }
 
@@ -26,7 +26,7 @@ FOdysseyEditorContextMenu::FOdysseyEditorContextMenu(FName iID, FText iDisplayNa
 void
 FOdysseyEditorContextMenu::Init()
 {
-	mWidget = CreateWidget();
+    mWidget = CreateWidget();
 }
 
 //--------------------------------------------------------------------------------------
@@ -43,23 +43,23 @@ FOdysseyEditorContextMenu::BindShortcuts(FBaseToolkit* iToolkit)
 const FName&
 FOdysseyEditorContextMenu::ID() const
 {
-	return mID;
+    return mID;
 }
 
 const FText&
 FOdysseyEditorContextMenu::DisplayName() const
 {
-	return mDisplayName;
+    return mDisplayName;
 }
 
 const FSlateIcon&
 FOdysseyEditorContextMenu::Icon() const
 {
-	return mIcon;
+    return mIcon;
 }
 
 const TSharedPtr<SWidget>&
 FOdysseyEditorContextMenu::Widget() const
 {
-	return mWidget;
+    return mWidget;
 }

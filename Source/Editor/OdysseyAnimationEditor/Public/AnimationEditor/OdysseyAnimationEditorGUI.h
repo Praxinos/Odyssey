@@ -17,7 +17,7 @@ class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorGUI
 {
 public:
     static void ExtendLevelEditorLayout(FLayoutExtender& Extender);
-    
+
 public:
     // Construction / Destruction
     virtual ~FOdysseyAnimationEditorGUI();
@@ -26,7 +26,7 @@ public:
 public:
     void Initialize();
     void Finalize();
-	void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
+    void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
     void OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iNotificationFlags );
     void OnCurrentFrameChanged( UOdysseyAnimation* iAnimation );
     void ParseVectorNotifications( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
@@ -36,7 +36,7 @@ public:
 
 protected:
     //Init
-	void CreateTabs();
+    void CreateTabs();
 
 private:
     FOdysseyAnimationEditorExtension* mExtension;

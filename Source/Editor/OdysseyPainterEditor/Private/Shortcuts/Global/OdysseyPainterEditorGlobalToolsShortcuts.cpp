@@ -14,7 +14,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::FOdysseyPainterEditorGlobalToolsShort
 
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList)
-{   
+{
     TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
     if (!editor)
         return;

@@ -36,7 +36,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
                              , double iSectionT1
                              , std::vector<FOdysseyVectorSection*>& oShortSectionArray );
 
-        
+
         static void ListToArray( const std::list<FOdysseyVectorSection*>& iSectionList
                                , std::vector<FOdysseyVectorSection*>& oSectionArray );
 
@@ -117,7 +117,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSection
          * @param iVertexIndex index the vertex (0 or 1)
          * @param iStraight
          * @param iNormalize normalize the vector or not
-         * return a vector tangent to this section, starting at this vertex. 
+         * return a vector tangent to this section, starting at this vertex.
          */
         ::ULIS::FVec2D GetVectorFromVertex( uint32 iVertexIndex
                                           , bool iStraight

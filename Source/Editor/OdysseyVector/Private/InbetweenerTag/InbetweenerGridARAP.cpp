@@ -141,8 +141,8 @@ FInbetweenerGridARAP::RegularizeQuads( eInbetweenerPointPositionType iPositionTy
 
 /**
  * Iteratively regularize all quads in the lattice.
- * 
- * @param lattice 
+ *
+ * @param lattice
  * @param sourcePos         The configuration of the lattice that the regularization converges to (up to a translation factor)
  * @param dstPos            Where the result configuration is stored
  * @param maxIterations     Maximum nb of iterations
@@ -442,7 +442,7 @@ FInbetweenerGridARAP::DiscardEmptyQuads( std::vector<FInterpolatedPath>& iPathBu
         BLMatrix2D conversionMatrix = pathWorldMatrix;
 
         FOdysseyVector::MatrixMultiply( tagOwnerInverseWorldMatrix
-                                      , pathWorldMatrix 
+                                      , pathWorldMatrix
                                       , conversionMatrix );
 
         for( FOdysseyVectorSegment* segment : path->GetSegmentList() )

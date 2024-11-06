@@ -28,9 +28,9 @@ void
 SortCategories(const TMap<FName, IDetailCategoryBuilder*>& iAllCategoryMap)
 {
     for (const TPair<FName, IDetailCategoryBuilder*>& Pair : iAllCategoryMap )
-	{
+    {
         int32 SortOrder = Pair.Value->GetSortOrder();
-		const FName& CategoryName = Pair.Key;
+        const FName& CategoryName = Pair.Key;
 
         if (CategoryName == TEXT("Common") )
         {

@@ -9,10 +9,10 @@
 
 // A Drawing Queue
 class FOdysseyPainterEditorRasterDrawingToolWorker
-{ 
+{
 public:
     typedef ::std::function<void()> tFunction;
- 
+
 public:
     //Destructor
     virtual ~FOdysseyPainterEditorRasterDrawingToolWorker();

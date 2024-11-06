@@ -18,7 +18,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoVertexLock : public FOdysseyVectorUndo
                                     , const std::vector<FOdysseyVectorVertex*>& iVertexArray
                                     , uint64 iReturnFlags );
         FOdysseyVectorUndoVertexLock( FOdysseyVectorGroupPaint* iScene
-                                    , FOdysseyVectorVertex* iVertex 
+                                    , FOdysseyVectorVertex* iVertex
                                     , uint64 iReturnFlags );
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

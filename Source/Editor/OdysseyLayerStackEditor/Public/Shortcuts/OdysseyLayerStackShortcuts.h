@@ -39,7 +39,7 @@ public:
 
 private:
     //Shortcuts
-    void MapActionsToCommandList(); 
+    void MapActionsToCommandList();
 
 private:
     TSharedRef<FUICommandList> mCommandList;

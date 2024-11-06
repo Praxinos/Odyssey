@@ -37,108 +37,108 @@ UOdysseyAnimation::OnFramesPerSecondChanged()
 void
 UOdysseyAnimation::CurrentFrameBlueprintSetter(int Value)
 {
-	FObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), Value);
+    FObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), Value);
 }
 
 void
 UOdysseyAnimation::FramesPerSecondBlueprintSetter(float Value)
 {
-	FObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, FramesPerSecond), Value);
+    FObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, FramesPerSecond), Value);
 }
 
 int
 UOdysseyAnimation::GetWidth() const
 {
-	return mWidth;
+    return mWidth;
 }
 
 int
 UOdysseyAnimation::GetHeight() const
 {
-	return mHeight;
+    return mHeight;
 }
 
 ::ULIS::eFormat
 UOdysseyAnimation::GetFormat() const
 {
-	switch(Format)
-	{
-		case EOdysseyAnimationFormat::BGRA8: return ::ULIS::Format_BGRA8;
-		case EOdysseyAnimationFormat::RGBAF: return ::ULIS::Format_RGBAF;
-	}
-	checkf(false, TEXT("Format not found"));
-	return ::ULIS::Format_BGRA8;
+    switch(Format)
+    {
+        case EOdysseyAnimationFormat::BGRA8: return ::ULIS::Format_BGRA8;
+        case EOdysseyAnimationFormat::RGBAF: return ::ULIS::Format_RGBAF;
+    }
+    checkf(false, TEXT("Format not found"));
+    return ::ULIS::Format_BGRA8;
 }
 
 FTimespan
 UOdysseyAnimation::GetDuration() const
 {
-	if (GetFrameCount() == 0)
-	{
-		return FTimespan::FromSeconds(0);
-	}
-	return FTimespan::FromSeconds(GetFrameCount() / GetFramesPerSecond()) - FTimespan(1);
+    if (GetFrameCount() == 0)
+    {
+        return FTimespan::FromSeconds(0);
+    }
+    return FTimespan::FromSeconds(GetFrameCount() / GetFramesPerSecond()) - FTimespan(1);
 }
 
 FInt32Range
 UOdysseyAnimation::GetFrameRange() const
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetFrameRange);
-	//TODO: deduce frame count from :
-	// - startPoint / endPoint
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetFrameRange);
+    //TODO: deduce frame count from :
+    // - startPoint / endPoint
 
-	if ( !mLayerStack )
-		return FInt32Range::Empty();
+    if ( !mLayerStack )
+        return FInt32Range::Empty();
 
-	FInt32Range layerStackFrameRange = mLayerStack->GetFrameRange();
-	return FInt32Range::Inclusive(0, layerStackFrameRange.GetUpperBoundValue()); //Animation starts always at 0 if there is no startPoint
+    FInt32Range layerStackFrameRange = mLayerStack->GetFrameRange();
+    return FInt32Range::Inclusive(0, layerStackFrameRange.GetUpperBoundValue()); //Animation starts always at 0 if there is no startPoint
 }
 
 int
 UOdysseyAnimation::GetFrameCount() const
 {
-	FInt32Range frameRange = GetFrameRange();
-	int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
-	int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
-	return FMath::Max(0, endFrame - startFrame + 1);
+    FInt32Range frameRange = GetFrameRange();
+    int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
+    int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
+    return FMath::Max(0, endFrame - startFrame + 1);
 }
 
 double
 UOdysseyAnimation::GetFramesPerSecond() const
 {
-	return FramesPerSecond;
+    return FramesPerSecond;
 }
 
 int
 UOdysseyAnimation::GetFrameIndexAtTime(FTimespan iTime) const
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetFrameIndexAtTime);
-	//Add 1 tick to be sure to retrieve the right frame in case the frame starts between iTime and iTime + 1 tick
-	FTimespan time = iTime + FTimespan(1); 
-	return int(time.GetTotalSeconds() * GetFramesPerSecond());
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetFrameIndexAtTime);
+    //Add 1 tick to be sure to retrieve the right frame in case the frame starts between iTime and iTime + 1 tick
+    FTimespan time = iTime + FTimespan(1);
+    return int(time.GetTotalSeconds() * GetFramesPerSecond());
 }
 
 TRange<FTimespan>
 UOdysseyAnimation::GetFrameTimeRange(int iFrameIndex) const
 {
-	FTimespan start = FTimespan::FromSeconds(iFrameIndex / GetFramesPerSecond());
+    FTimespan start = FTimespan::FromSeconds(iFrameIndex / GetFramesPerSecond());
 
-	//Remove one tick because end timespan is included in the range
-	//That way we never have two frame with overlapping timeranges
-	FTimespan end = FTimespan::FromSeconds((iFrameIndex + 1) / GetFramesPerSecond()) - FTimespan(1);
-	return TRange<FTimespan>(start, end);
+    //Remove one tick because end timespan is included in the range
+    //That way we never have two frame with overlapping timeranges
+    FTimespan end = FTimespan::FromSeconds((iFrameIndex + 1) / GetFramesPerSecond()) - FTimespan(1);
+    return TRange<FTimespan>(start, end);
 }
 
 UOdysseyAnimationLayerStack*
 UOdysseyAnimation::GetLayerStack() const
 {
-	return mLayerStack;
+    return mLayerStack;
 }
 
 TSharedPtr<FOdysseyAnimationProxy>
 UOdysseyAnimation::GetProxy() const
 {
-	return mProxy;
+    return mProxy;
 }
 
 void
@@ -170,60 +170,60 @@ UOdysseyAnimation::PostTransacted(const FTransactionObjectEvent& iTransactionEve
 void
 UOdysseyAnimation::PostInitProperties()
 {
-	Super::PostInitProperties();
+    Super::PostInitProperties();
 
     if (HasAnyFlags(RF_ClassDefaultObject))
         return;
-	
-	mLayerStack = NewObject<UOdysseyAnimationLayerStack>(this, "LayerStack", RF_Public | RF_Transactional);
-	mProxy = MakeShared<FOdysseyAnimationProxy>(this);
 
-	OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimation::OnImageRenderingChanged);
+    mLayerStack = NewObject<UOdysseyAnimationLayerStack>(this, "LayerStack", RF_Public | RF_Transactional);
+    mProxy = MakeShared<FOdysseyAnimationProxy>(this);
+
+    OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimation::OnImageRenderingChanged);
 }
 
 void
 UOdysseyAnimation::OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent)
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::OnImageRenderingChanged);
-	if (iEvent.IsInteractive())
-		return;
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::OnImageRenderingChanged);
+    if (iEvent.IsInteractive())
+        return;
 
-	const FGuid& eventId = iEvent.GetId();
-	FInt32Range frameRange = GetFrameRange();
-	int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
-	int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
-	for (int i = startFrame; i <= endFrame; i++)
-	{
-		TArray<FGuid> composition = GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor, i);
-		if (composition.Contains(eventId))
-		{
-			MarkPackageDirty();
-			break;
-		}
-	}
+    const FGuid& eventId = iEvent.GetId();
+    FInt32Range frameRange = GetFrameRange();
+    int startFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetLowerBoundValue() : frameRange.GetLowerBoundValue() + 1;
+    int endFrame = frameRange.GetUpperBound().IsInclusive() ? frameRange.GetUpperBoundValue() : frameRange.GetUpperBoundValue() - 1;
+    for (int i = startFrame; i <= endFrame; i++)
+    {
+        TArray<FGuid> composition = GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType::Editor, i);
+        if (composition.Contains(eventId))
+        {
+            MarkPackageDirty();
+            break;
+        }
+    }
 }
 
 void
 UOdysseyAnimation::PostLoad()
 {
-	Super::PostLoad();
+    Super::PostLoad();
 
-	if (mFormat == ::ULIS::Format_BGRA8)
-	{
-		Format = EOdysseyAnimationFormat::BGRA8;
-	}
-	if (mFormat == ::ULIS::Format_RGBAF)
-	{
-		Format = EOdysseyAnimationFormat::RGBAF;
-	}
+    if (mFormat == ::ULIS::Format_BGRA8)
+    {
+        Format = EOdysseyAnimationFormat::BGRA8;
+    }
+    if (mFormat == ::ULIS::Format_RGBAF)
+    {
+        Format = EOdysseyAnimationFormat::RGBAF;
+    }
 
-	mProxy->PostLoad();
+    mProxy->PostLoad();
 }
 
 void
 UOdysseyAnimation::PropertyChanged(const FName& iPropertyName)
 {
-	if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame) )
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame) )
         CurrentFrameChanged();
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, FramesPerSecond) )
         FramesPerSecondChanged();
@@ -232,14 +232,14 @@ UOdysseyAnimation::PropertyChanged(const FName& iPropertyName)
 void
 UOdysseyAnimation::CurrentFrameChanged()
 {
-	CurrentFrame = FMath::Max(0, CurrentFrame);
-	OnCurrentFrameChanged().Broadcast(this);
+    CurrentFrame = FMath::Max(0, CurrentFrame);
+    OnCurrentFrameChanged().Broadcast(this);
 }
 
 void
 UOdysseyAnimation::FramesPerSecondChanged()
 {
-	OnFramesPerSecondChanged().Broadcast(this);
+    OnFramesPerSecondChanged().Broadcast(this);
 }
 
 /* UMediaSource overrides
@@ -247,12 +247,12 @@ UOdysseyAnimation::FramesPerSecondChanged()
 
 FString UOdysseyAnimation::GetUrl() const
 {
-	return FString(TEXT("odysseyanimation://")) + GetPathName();
+    return FString(TEXT("odysseyanimation://")) + GetPathName();
 }
 
 bool UOdysseyAnimation::Validate() const
 {
-	return true;
+    return true;
 }
 
 TSharedPtr<IOdysseyImageRenderer>
@@ -260,15 +260,15 @@ UOdysseyAnimation::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRender
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
-    
-	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::BuildImageRenderer);
+
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::BuildImageRenderer);
     return MakeShared<FOdysseyAnimationProxyImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
 TArray<FGuid>
 UOdysseyAnimation::GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetImageRenderingComposition);
+    TRACE_CPUPROFILER_EVENT_SCOPE(UOdysseyAnimation::GetImageRenderingComposition);
     TArray<FGuid> idComposition = { GetImageRenderingId() };
 
     if (!mLayerStack)

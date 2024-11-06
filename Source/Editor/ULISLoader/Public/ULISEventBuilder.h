@@ -9,7 +9,7 @@
 class ULISLOADER_API FULISEventBuilder
 {
 public:
-	DECLARE_DELEGATE_OneParam( FOnComplete, const ::ULIS::FRectI& );
+    DECLARE_DELEGATE_OneParam( FOnComplete, const ::ULIS::FRectI& );
 
 public:
     ::ULIS::FEvent Build();

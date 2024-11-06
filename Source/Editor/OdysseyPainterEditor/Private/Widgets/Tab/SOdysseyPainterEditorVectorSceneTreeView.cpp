@@ -36,7 +36,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs, F
         // for some reason, SetTreeItemsSource does not work, so we have to use an array that we
         // call mItemsSource and that we will updates with the desired items
         .TreeItemsSource(&mItemsSource)
-        .OnGenerateRow( this, &SOdysseyPainterEditorVectorSceneTreeView::OnGenerateRow ) 
+        .OnGenerateRow( this, &SOdysseyPainterEditorVectorSceneTreeView::OnGenerateRow )
         .OnGetChildren( this, &SOdysseyPainterEditorVectorSceneTreeView::OnGetChildren )
         .OnExpansionChanged( this, &SOdysseyPainterEditorVectorSceneTreeView::OnExpansionChanged )
         //.OnSelectionChanged( this, &SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged )
@@ -71,7 +71,7 @@ SOdysseyPainterEditorVectorSceneTreeView::OnContextMenuOpening()
 FReply
 SOdysseyPainterEditorVectorSceneTreeView::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
 {
-	if (mCommandList->ProcessCommandBindings(iKeyEvent))
+    if (mCommandList->ProcessCommandBindings(iKeyEvent))
         return FReply::Handled();
 
     return STreeView<TSharedPtr<FVectorSceneTreeViewItem>>::OnKeyDown( iGeometry, iKeyEvent );
@@ -80,7 +80,7 @@ SOdysseyPainterEditorVectorSceneTreeView::OnKeyDown( const FGeometry& iGeometry,
 TSharedPtr<FVectorSceneTreeViewItem>
 SOdysseyPainterEditorVectorSceneTreeView::GetRootItem()
 {
-	return mRootItem;
+    return mRootItem;
 }
 
 FOdysseyPainterEditor*
@@ -101,7 +101,7 @@ SOdysseyPainterEditorVectorSceneTreeView::BuildTree( const TSharedPtr<FVectorSce
         TSharedPtr<FVectorSceneTreeViewItem> childItem = MakeShareable(new FVectorSceneTreeViewItem(child, true ));
 
         //iItem.Get()->mChildren.Add( childItem );
-        // reverse order in order to get the most forward objet on top of the hierarchy 
+        // reverse order in order to get the most forward objet on top of the hierarchy
         iItem.Get()->mChildren.Insert( childItem, 0 );
 
         BuildTree( childItem );

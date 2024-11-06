@@ -9,26 +9,26 @@ class FGraphicsPipelineStateInitializer;
 
 namespace OdysseyScreenPaintRendering
 {
-	/** Batched element parameters for mesh paint shaders */
-	struct FOdysseyScreenPaintShaderParameters
-	{
-	public:
+    /** Batched element parameters for mesh paint shaders */
+    struct FOdysseyScreenPaintShaderParameters
+    {
+    public:
         UTexture2D* Stroke2D;
 
-		FMatrix WorldToBrushMatrix;
+        FMatrix WorldToBrushMatrix;
         FVector2D TextureHitPoint;
         float StampQuality;
-		FVector xScreenAxis;
-		FVector yScreenAxis;
-	};
+        FVector xScreenAxis;
+        FVector yScreenAxis;
+    };
 
 
-	/** Binds the mesh paint vertex and pixel shaders to the graphics device */
-	void ODYSSEYMESHPAINTRENDERING_API SetMeshPaintShaders(  FRHICommandList& iRHICmdList,
-											FGraphicsPipelineStateInitializer& iGraphicsPSOInit,
-											ERHIFeatureLevel::Type iFeatureLevel, 
-											const FMatrix& iTransform,
-											const float iGamma,
-											const FOdysseyScreenPaintShaderParameters& iShaderParams );
+    /** Binds the mesh paint vertex and pixel shaders to the graphics device */
+    void ODYSSEYMESHPAINTRENDERING_API SetMeshPaintShaders(  FRHICommandList& iRHICmdList,
+                                            FGraphicsPipelineStateInitializer& iGraphicsPSOInit,
+                                            ERHIFeatureLevel::Type iFeatureLevel,
+                                            const FMatrix& iTransform,
+                                            const float iGamma,
+                                            const FOdysseyScreenPaintShaderParameters& iShaderParams );
 
 }

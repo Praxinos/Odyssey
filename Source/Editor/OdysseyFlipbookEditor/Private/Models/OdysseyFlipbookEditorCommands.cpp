@@ -28,7 +28,7 @@ void
 FOdysseyFlipbookEditorCommands::RegisterCommands()
 {
 // PlayBack Shortcuts Category
-	UI_BUNDLE_COMMAND( PlayForward, PlayBackShortcuts, "Play Forward / Pause", "Plays the Flipbook forward or pauses if already playing forward",                                EUserInterfaceActionType::Button, FInputChord());
+    UI_BUNDLE_COMMAND( PlayForward, PlayBackShortcuts, "Play Forward / Pause", "Plays the Flipbook forward or pauses if already playing forward",                                EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( PlayBackward, PlayBackShortcuts, "Play Backward / Pause", "Plays the Flipbook backward or pauses if already playing backward",                            EUserInterfaceActionType::Button, FInputChord());
     UI_BUNDLE_COMMAND( Pause, PlayBackShortcuts, "Pause", "Pauses the Flipbook playback",                                                                                        EUserInterfaceActionType::Button, FInputChord( EKeys::SpaceBar ));
     UI_BUNDLE_COMMAND( Stop, PlayBackShortcuts, "Stop", "Stops the Flipbook playback",                                                                                           EUserInterfaceActionType::Button, FInputChord());

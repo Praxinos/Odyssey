@@ -24,15 +24,15 @@
 //----------------------------------------------------------- Construction / Destruction
 FOdysseyTextureEditorGUI::~FOdysseyTextureEditorGUI()
 {
-	UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
-	FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll(this);
+    UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll(this);
+    FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll(this);
 }
 
 FOdysseyTextureEditorGUI::FOdysseyTextureEditorGUI(FOdysseyTextureEditorExtension* iExtension) :
-	mExtension( iExtension )
+    mExtension( iExtension )
 {
     // Get sure the binding is set up everytime we add or remove a layer in the layer stack.
-	UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw( this, &FOdysseyTextureEditorGUI::OnCurrentLayerChanged );
+    UOdysseyLayerStack::OnCurrentLayerChanged().AddRaw( this, &FOdysseyTextureEditorGUI::OnCurrentLayerChanged );
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     FOdysseyVectorEngine::OnNotifyDelegate().AddRaw( this, &FOdysseyTextureEditorGUI::OnVectorSceneNotify );
     // bind refresh function to delegates on existing vector scenes when the source changes. Needed to refresh necessary widgets.
@@ -88,7 +88,7 @@ FOdysseyTextureEditorGUI::OnSourceChanged()
 
 void
 FOdysseyTextureEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
-{   
+{
     Extender.ExtendLayout(FTabId(TEXT("LevelEditorSelectionDetails")), ELayoutExtensionPosition::Above, FTabManager::FTab(FOdysseyTextureEditorLayerStackTab::StaticId(), ETabState::ClosedTab));
 }
 
@@ -101,7 +101,7 @@ FOdysseyTextureEditorGUI::Init()
 void
 FOdysseyTextureEditorGUI::CreateTabs()
 {
-	//ADD NEW TABS
+    //ADD NEW TABS
     TSharedRef<FOdysseyTextureEditorLayerStackTab> layerStackTab = MakeShared<FOdysseyTextureEditorLayerStackTab>(mExtension);
     TSharedRef<FOdysseyTextureEditorTextureDetailsTab> textureDetailsTab = MakeShared<FOdysseyTextureEditorTextureDetailsTab>(mExtension);
 
@@ -113,49 +113,49 @@ FOdysseyTextureEditorGUI::CreateTabs()
 
 void
 FOdysseyTextureEditorGUI::BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder)
-{	
-	TSharedRef<FTabManager::FSplitter> rightSplitter = iBuilder.GetSplitter("RightSplitter");
-    
+{
+    TSharedRef<FTabManager::FSplitter> rightSplitter = iBuilder.GetSplitter("RightSplitter");
+
     TSharedRef<FTabManager::FStack> textureLayerStackStack = iBuilder.CreateStack("TextureLayerStackStack");
-	textureLayerStackStack->SetHideTabWell(false);
-	textureLayerStackStack->SetSizeCoefficient(0.35f);
-	textureLayerStackStack->AddTab(FOdysseyTextureEditorLayerStackTab::StaticId(), ETabState::OpenedTab);
+    textureLayerStackStack->SetHideTabWell(false);
+    textureLayerStackStack->SetSizeCoefficient(0.35f);
+    textureLayerStackStack->AddTab(FOdysseyTextureEditorLayerStackTab::StaticId(), ETabState::OpenedTab);
 
     TSharedRef<FTabManager::FStack> textureDetailsStack = iBuilder.CreateStack("TextureDetailsStack");
-	textureDetailsStack->SetHideTabWell(false);
-	textureDetailsStack->SetSizeCoefficient(0.15f);
-	textureDetailsStack->AddTab(FOdysseyTextureEditorLayerStackTab::StaticId(), ETabState::OpenedTab);
-	
-    rightSplitter->Split
-	(
-		textureLayerStackStack
-	);
+    textureDetailsStack->SetHideTabWell(false);
+    textureDetailsStack->SetSizeCoefficient(0.15f);
+    textureDetailsStack->AddTab(FOdysseyTextureEditorLayerStackTab::StaticId(), ETabState::OpenedTab);
 
     rightSplitter->Split
-	(
-		textureDetailsStack
-	);
+    (
+        textureLayerStackStack
+    );
+
+    rightSplitter->Split
+    (
+        textureDetailsStack
+    );
 }
 
 /* TSharedRef<FTabManager::FSplitter>
 FOdysseyTextureEditorGUI::CreateRightSection()
 {
-	return FOdysseyPainterEditorGUI::CreateRightSection()
-		// LayerStack + Notes
-		->Split
-		(
-			FTabManager::NewStack()
-			->AddTab(FOdysseyTextureEditorLayerStackTab::StaticId(), ETabState::OpenedTab)
-			->SetHideTabWell(false)
-			->SetSizeCoefficient(0.35f)
-		)
-		->Split
-		(
-			FTabManager::NewStack()
-			->AddTab(FOdysseyTextureEditorTextureDetailsTab::StaticId(), ETabState::OpenedTab)
-			->SetHideTabWell(false)
-			->SetSizeCoefficient(0.15f)
-		);
+    return FOdysseyPainterEditorGUI::CreateRightSection()
+        // LayerStack + Notes
+        ->Split
+        (
+            FTabManager::NewStack()
+            ->AddTab(FOdysseyTextureEditorLayerStackTab::StaticId(), ETabState::OpenedTab)
+            ->SetHideTabWell(false)
+            ->SetSizeCoefficient(0.35f)
+        )
+        ->Split
+        (
+            FTabManager::NewStack()
+            ->AddTab(FOdysseyTextureEditorTextureDetailsTab::StaticId(), ETabState::OpenedTab)
+            ->SetHideTabWell(false)
+            ->SetSizeCoefficient(0.15f)
+        );
 } */
 
 void
@@ -185,7 +185,7 @@ FOdysseyTextureEditorGUI::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene,
         return;
 
     TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
-    
+
     UOdysseyTextureLayerStack* layerStack = Cast<UOdysseyTextureLayerStack>(source->GetLayerStack());
 
     // layerStack might be NULL when closing the program

@@ -208,7 +208,7 @@ void
 FOdysseyVectorPath::UnselectAllVertices()
 {
      mSelectedVertexList.remove_if( []( FOdysseyVectorVertex* iVertex )
-                                    { 
+                                    {
                                         iVertex->SetSelected( false );
 
                                         return true;
@@ -554,7 +554,7 @@ FOdysseyVectorPath::RemoveAllSegments()
                                 return true;
                             } );
 
-    // DO NOT invalidate the segments here, only the path. Otherwise the segment 
+    // DO NOT invalidate the segments here, only the path. Otherwise the segment
     // would be added to the list of segments to invalidate BUT the segment does
     // not belong to the path anymore, leading to issues if it has been freed.
     Invalidate( INVALIDATE_TOPOLOGY );
@@ -570,7 +570,7 @@ FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
 
     //iSegment->SetPath( nullptr );
 
-    // DO NOT invalidate the segment here, only the path. Otherwise the segment 
+    // DO NOT invalidate the segment here, only the path. Otherwise the segment
     // would be added to the list of segments to invalidate BUT the segment does
     // not belong to the path anymore, leading to issues if it has been freed.
     Invalidate( INVALIDATE_TOPOLOGY );
@@ -1068,7 +1068,7 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
                         segmentPath = vertex1->GetOwnerAsPath();
                     }
 
-                    // if segmentPath is still null, it means segment vertices were 
+                    // if segmentPath is still null, it means segment vertices were
                     // not assigned a path via another neighbour segment. In that
                     // case we create a new path and assign them to it.
                     if( segmentPath == nullptr )
@@ -1122,13 +1122,13 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
             wayPointArray.reserve( 10 );
             wayFragmentArray.reserve( 10 );
 
-            // this will return an array of "way points". they are the original 
+            // this will return an array of "way points". they are the original
             // points + the points at a contrast zone (erasure boundary).
             // it will fill a "way segment" array, which are the segments that
             // should be created between those way points.
             // no vertex or segment is allocated in chain.HitMask(). the allocation differs
             // depending on the spliting mode, so it is the responsibility of EraseNoSplit() and
-            // EraseNoSplit() to allocate new vertices / segments or paths 
+            // EraseNoSplit() to allocate new vertices / segments or paths
             bool hit = iWholeSection ? chain.EraseSections( &imageData
                                                           , wayPointArray
                                                           , wayFragmentArray )
@@ -1195,7 +1195,7 @@ FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
         if( mBBox.HitTest( ::ULIS::FVec2D( pt.x, pt.y ) ) )
         {
             for( FOdysseyVectorSegment* segment : mSegmentList )
-            { 
+            {
                 if( segment->Pick( pt.x, pt.y, 0.0f ) )
                 {
                     return true;
@@ -1573,7 +1573,7 @@ FOdysseyVectorPath::DeleteVertex( FOdysseyVectorPath* iPath
 
         iPath->RemoveVertex( vertex );
         // for undoing
-        iRemovedVertexArray.push_back( vertex );  
+        iRemovedVertexArray.push_back( vertex );
     }
 
     // third step
@@ -1670,7 +1670,7 @@ FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
                                   , iStartU + ( fraction->polygon.U[4] * difU )
                                   , iStartU + ( fraction->polygon.U[5] * difU ) };
     */
-                // We have to divide the hexagon into 2 quads or else it can creates artefacts 
+                // We have to divide the hexagon into 2 quads or else it can creates artefacts
                 // due to UV Mapping when the hexagon is not "a square".
                 ::ULIS::FVec2D quad0P[4] = { fraction->polygon.point[0]
                                            , fraction->polygon.point[1]
@@ -1794,7 +1794,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                              , uint64 iDrawingFlags )
 {
     FColor color = mForegroundBucket.GetColor();
-    BLRgba32 strokeColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? BLRgba32( 0, 0, 0, 255 ) 
+    BLRgba32 strokeColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? BLRgba32( 0, 0, 0, 255 )
                                                                                          : BLRgba32( color.R, color.G, color.B, 255 * iCombinedOpacity /*color.A * iCombinedOpacity*/ );
 
     UTexture2D* texture = mBrush.GetTexture();
@@ -1886,7 +1886,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                     double segmentStartU = ( vertex == segment->GetVertex(0) ) ? startU : endU;
                     double segmentEndU   = ( vertex == segment->GetVertex(0) ) ? endU : startU;
 
-                    // WORKAROUND: in some cases U is < 0.0f, I dont know why yet. 
+                    // WORKAROUND: in some cases U is < 0.0f, I dont know why yet.
                     //if ( segmentStartU < 0.0f ) segmentStartU = 0.0f;
                     //if ( segmentEndU   < 0.0f ) segmentEndU   = 0.0f;
 
@@ -1901,7 +1901,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
 
                         segmentStartU = jointEndU;
 
-                        // WORKAROUND: in some cases U is < 0.0f, I dont know why yet. 
+                        // WORKAROUND: in some cases U is < 0.0f, I dont know why yet.
                         //if ( jointStartU < 0.0f ) jointStartU = 0.0f;
                         //if ( jointEndU   < 0.0f ) jointEndU   = 0.0f;
 
@@ -1934,7 +1934,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                     }
                 }
 
-                // only when mBrush.ExtendOverPath == true 
+                // only when mBrush.ExtendOverPath == true
                 startU = endU;
 
                 return false; // keep iterating
@@ -2491,7 +2491,7 @@ FOdysseyVectorPath::PickSegments( double iWorldX
                     {
                         oDistanceArray->push_back( smallestDistance );
                     }
-                } 
+                }
             }
         }
     }

@@ -36,9 +36,9 @@ UENUM()
 enum class EOdysseyAnimationFlipDirection : uint8
 {
     Horizontal,
-	HorizontalInverted UMETA(DisplayName = "Horizontal (Inverted)"),
+    HorizontalInverted UMETA(DisplayName = "Horizontal (Inverted)"),
     Vertical,
-	VerticalInverted UMETA(DisplayName = "Vertical (Inverted)")
+    VerticalInverted UMETA(DisplayName = "Vertical (Inverted)")
 };
 
 USTRUCT()
@@ -48,13 +48,13 @@ struct FOdysseyAnimationFlipConfiguration
 
     UPROPERTY(  EditAnywhere, Category="Flip Configuration" )
     EOdysseyAnimationFlipLimits Limits = EOdysseyAnimationFlipLimits::None;
-    
-    UPROPERTY(  EditAnywhere, Category="Flip Configuration" 
+
+    UPROPERTY(  EditAnywhere, Category="Flip Configuration"
                 , meta = (EditCondition = "Limits == EOdysseyAnimationFlipLimits::CellMarks"
                 , EditConditionHides) )
     int LimitsCellMark = -2;
 
-    UPROPERTY(  EditAnywhere, Category="Flip Configuration" 
+    UPROPERTY(  EditAnywhere, Category="Flip Configuration"
                 , meta = ( EditCondition = "Limits == EOdysseyAnimationFlipLimits::Custom"
                 , EditConditionHides
                 , UIMin    = "0"
@@ -64,7 +64,7 @@ struct FOdysseyAnimationFlipConfiguration
                 ) )
     int LeftLimit = 0;
 
-    UPROPERTY(  EditAnywhere, Category="Flip Configuration" 
+    UPROPERTY(  EditAnywhere, Category="Flip Configuration"
                 , meta = (EditCondition = "Limits == EOdysseyAnimationFlipLimits::Custom"
                 , EditConditionHides
                 , UIMin    = "0"
@@ -77,7 +77,7 @@ struct FOdysseyAnimationFlipConfiguration
     UPROPERTY(  EditAnywhere, Category="Flip Configuration" )
     EOdysseyAnimationFlipKeys Keys = EOdysseyAnimationFlipKeys::Cells;
 
-    UPROPERTY(  EditAnywhere, Category="Flip Configuration" 
+    UPROPERTY(  EditAnywhere, Category="Flip Configuration"
                 , meta = (EditCondition = "Limits == EOdysseyAnimationFlipKeys::CellMarks"
                 , EditConditionHides) )
     int KeysCellMark = -2;
@@ -94,7 +94,7 @@ struct FOdysseyAnimationFlipConfiguration
     UPROPERTY(  EditAnywhere, Category="Flip Configuration" )
     EOdysseyAnimationFlipDirection Direction = EOdysseyAnimationFlipDirection::Horizontal;
 
-    UPROPERTY(  EditAnywhere, Category="Flip Configuration" 
+    UPROPERTY(  EditAnywhere, Category="Flip Configuration"
                 , meta = ( ClampMin = "0"
                 , UIMin    = "0"
                 , ClampMax = "100"
@@ -119,7 +119,7 @@ public:
     FOdysseyAnimationEditorFlipSystem(FOdysseyAnimationEditorExtension* iExtension);
 
     void StartFlipping(const FOdysseyAnimationFlipConfiguration& iFlipConfiguration);
-	
+
 private:
     void EndFlipping();
     void FlipTo(int iDelta);
@@ -129,13 +129,13 @@ private:
 
 private:
     //needed to compile against IInputProcessor
-	virtual void Tick(const float DeltaTime, FSlateApplication& SlateApp, TSharedRef<ICursor> Cursor) override;
+    virtual void Tick(const float DeltaTime, FSlateApplication& SlateApp, TSharedRef<ICursor> Cursor) override;
 
-	/** Key up input */
-	virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
+    /** Key up input */
+    virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
 
     /** Mouse movement input */
-	virtual bool HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent) override;
+    virtual bool HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent) override;
 
 private:
     FOdysseyAnimationEditorExtension* mExtension;

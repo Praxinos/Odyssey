@@ -853,7 +853,7 @@ FOdysseyVectorObject::SendBackward()
                 }
             }
         }
-    } 
+    }
 }
 
 void
@@ -878,7 +878,7 @@ FOdysseyVectorObject::BringForward()
                 }
             }
         }
-    } 
+    }
 }
 
 FOdysseyVectorObject*
@@ -1146,7 +1146,7 @@ FOdysseyVectorObject::SetBackgroundSolidColor( uint8 iR, uint8 iG, uint8 iB, uin
     mBackgroundBucket.SetSolidColor( iR, iG, iB, iA );
 }
 
-void 
+void
 FOdysseyVectorObject::CopyTransformation( FOdysseyVectorObject& iDestinationObject )
 {
     iDestinationObject.SetTransform( mTranslationX

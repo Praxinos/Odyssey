@@ -9,13 +9,13 @@
 
 UOdysseyAnimationLayerFolder::UOdysseyAnimationLayerFolder()
 {
-	LayerTypeName = LOCTEXT("layer-folder.type", "Folder Layer");
+    LayerTypeName = LOCTEXT("layer-folder.type", "Folder Layer");
     DefaultName = LOCTEXT("layer-folder.default-name", "Folder");
-    
+
     Icon = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetTreeFolderClosed");
     IconExpanded = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetTreeFolderOpen");
     CanHaveChildren = true;
-	HasLighttable = false;
+    HasLighttable = false;
 }
 
 TSet<UClass*>

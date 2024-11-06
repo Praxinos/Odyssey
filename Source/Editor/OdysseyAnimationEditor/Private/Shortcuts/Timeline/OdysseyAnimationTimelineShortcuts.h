@@ -26,5 +26,5 @@ private:
     TSharedRef<FUICommandList> mCommandList;
     TSharedRef<FOdysseyAnimationTimelineCellsShortcuts> mCellsShortcuts;
     TSharedRef<FOdysseyAnimationTimelineCellImageRasterShortcuts> mCellImageRasterShortcuts;
-	TSharedRef<FOdysseyAnimationTimelineCellImageStaggerShortcuts> mCellImageStaggerShortcuts;
+    TSharedRef<FOdysseyAnimationTimelineCellImageStaggerShortcuts> mCellImageStaggerShortcuts;
 };

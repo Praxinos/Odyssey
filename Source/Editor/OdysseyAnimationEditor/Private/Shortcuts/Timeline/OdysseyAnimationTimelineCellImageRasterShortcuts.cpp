@@ -69,7 +69,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
     progressBar.EnterProgressFrame();
 
     //Convert Selected Stagger Cells to ImageRaster Cells
-	FOdysseyAnimationTimelineCellImageStaggerShortcuts staggerShortcuts(mLayerStack);
+    FOdysseyAnimationTimelineCellImageStaggerShortcuts staggerShortcuts(mLayerStack);
     staggerShortcuts.Action_ConvertToReferenceCells();
 
     progressBar.EnterProgressFrame();
@@ -100,7 +100,7 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
         int crossFadelength = selectedCell->Exposure;
 
         //Reduce the original cell to 1 frame Exposure
-		FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), 1);
+        FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), 1);
 
         if (nextCellIndex < layer->GetCells().Num())
         {
@@ -122,41 +122,41 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
             {
                 framesProgress.EnterProgressFrame();
 
-				UOdysseyAnimationCellImageRaster* rasterCell = Cast<UOdysseyAnimationCellImageRaster>(rasterCells[j - 1]);
+                UOdysseyAnimationCellImageRaster* rasterCell = Cast<UOdysseyAnimationCellImageRaster>(rasterCells[j - 1]);
 
-				FOdysseyRasterBlockMutator mutator(rasterCell->GetRasterBlock(), false);
-				mutator.EditTilesFromRects(
-					{ rasterCell->GetRasterBlock()->GetRect() },
-					[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-					{
-						ctx.Clear(*iBlock);
-						ctx.Finish();
+                FOdysseyRasterBlockMutator mutator(rasterCell->GetRasterBlock(), false);
+                mutator.EditTilesFromRects(
+                    { rasterCell->GetRasterBlock()->GetRect() },
+                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                    {
+                        ctx.Clear(*iBlock);
+                        ctx.Finish();
 
-						ctx.Blend(
-							*startBlock
-							, *iBlock
-							, ::ULIS::FRectI::Auto
-							, ::ULIS::FVec2I(0)
-							, ::ULIS::Blend_Add
-							, ::ULIS::Alpha_Add
-							, 1.f - (float(j) / float(crossFadelength))
-						);
-						ctx.Finish();
+                        ctx.Blend(
+                            *startBlock
+                            , *iBlock
+                            , ::ULIS::FRectI::Auto
+                            , ::ULIS::FVec2I(0)
+                            , ::ULIS::Blend_Add
+                            , ::ULIS::Alpha_Add
+                            , 1.f - (float(j) / float(crossFadelength))
+                        );
+                        ctx.Finish();
 
-						ctx.Blend(
-							*endBlock
-							, *iBlock
-							, ::ULIS::FRectI::Auto
-							, ::ULIS::FVec2I(0)
-							, ::ULIS::Blend_Add
-							, ::ULIS::Alpha_Add
-							, float(j) / float(crossFadelength)
-						);
-						ctx.Finish();
-						return {};
-					}
-				);
-				mutator.Commit();
+                        ctx.Blend(
+                            *endBlock
+                            , *iBlock
+                            , ::ULIS::FRectI::Auto
+                            , ::ULIS::FVec2I(0)
+                            , ::ULIS::Blend_Add
+                            , ::ULIS::Alpha_Add
+                            , float(j) / float(crossFadelength)
+                        );
+                        ctx.Finish();
+                        return {};
+                    }
+                );
+                mutator.Commit();
             }
 
             cellsToSelect.Append(rasterCells);
@@ -170,30 +170,30 @@ FOdysseyAnimationTimelineCellImageRasterShortcuts::Action_CrossFade()
             {
                 framesProgress.EnterProgressFrame();
 
-				UOdysseyAnimationCellImageRaster* rasterCell = Cast<UOdysseyAnimationCellImageRaster>(rasterCells[j - 1]);
+                UOdysseyAnimationCellImageRaster* rasterCell = Cast<UOdysseyAnimationCellImageRaster>(rasterCells[j - 1]);
 
-				FOdysseyRasterBlockMutator mutator(rasterCell->GetRasterBlock(), false);
-				mutator.EditTilesFromRects(
-					{ rasterCell->GetRasterBlock()->GetRect() },
-					[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
-					{
-						ctx.Clear(*iBlock);
-						ctx.Finish();
+                FOdysseyRasterBlockMutator mutator(rasterCell->GetRasterBlock(), false);
+                mutator.EditTilesFromRects(
+                    { rasterCell->GetRasterBlock()->GetRect() },
+                    [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<::ULIS::FEvent>
+                    {
+                        ctx.Clear(*iBlock);
+                        ctx.Finish();
 
-						ctx.Blend(
-							*startBlock
-							, *iBlock
-							, ::ULIS::FRectI::Auto
-							, ::ULIS::FVec2I(0)
-							, ::ULIS::Blend_Add
-							, ::ULIS::Alpha_Add
-							, 1.f - (float(j) / float(crossFadelength))
-						);
-						ctx.Finish();
-						return {};
-					}
-				);
-				mutator.Commit();
+                        ctx.Blend(
+                            *startBlock
+                            , *iBlock
+                            , ::ULIS::FRectI::Auto
+                            , ::ULIS::FVec2I(0)
+                            , ::ULIS::Blend_Add
+                            , ::ULIS::Alpha_Add
+                            , 1.f - (float(j) / float(crossFadelength))
+                        );
+                        ctx.Finish();
+                        return {};
+                    }
+                );
+                mutator.Commit();
             }
             cellsToSelect.Append(rasterCells);
         }

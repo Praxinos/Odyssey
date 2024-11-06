@@ -17,7 +17,7 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineScrollBox)
         {}
         SLATE_SLOT_ARGUMENT( FSlot, Slots )
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
 public:
@@ -41,7 +41,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineScrollPanel
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineScrollPanel)
         {}
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
 public:
@@ -61,18 +61,18 @@ public:
 
 public:
     virtual void OnArrangeChildren(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren) const override;
-	virtual FChildren* GetChildren() override;
+    virtual FChildren* GetChildren() override;
 
 protected:
-	// Begin SWidget overrides.
-	virtual FVector2D ComputeDesiredSize(float) const override;
-	// End SWidget overrides.
+    // Begin SWidget overrides.
+    virtual FVector2D ComputeDesiredSize(float) const override;
+    // End SWidget overrides.
 
 private:
     float ArrangeChildHorizontalAndReturnOffset(const FGeometry& AllottedGeometry, FArrangedChildren& ArrangedChildren, const SOdysseyAnimationTimelineScrollBox::FSlot& ThisSlot, float CurChildOffset) const;
 
 private:
-	//State
-	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
-	TPanelChildren<SOdysseyAnimationTimelineScrollBox::FSlot>   mChildren;
+    //State
+    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+    TPanelChildren<SOdysseyAnimationTimelineScrollBox::FSlot>   mChildren;
 };

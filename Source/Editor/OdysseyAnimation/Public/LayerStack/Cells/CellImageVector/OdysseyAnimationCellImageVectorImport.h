@@ -9,9 +9,9 @@ class FOdysseyAnimationCellImageVectorImport
 public:
     /**
      * @brief Imports Data from the given archive into the given object
-     * 
-     * @param iAnimationCellImageVector 
-     * @param Ar 
+     *
+     * @param iAnimationCellImageVector
+     * @param Ar
      */
     static bool ODYSSEYANIMATION_API Read( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
                                   , FArchive &Ar );

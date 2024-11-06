@@ -29,7 +29,7 @@ FOdysseyAnimationCellImageRasterImageRenderer::FOdysseyAnimationCellImageRasterI
             * ::ULIS::FMat3F::MakeTranslationMatrix( animation->GetWidth() / -2.f, animation->GetHeight() / -2.f);
     }
 }
-    
+
 void
 FOdysseyAnimationCellImageRasterImageRenderer::Init()
 {
@@ -58,7 +58,7 @@ FOdysseyAnimationCellImageRasterImageRenderer::IsGameThreadOnly()
 
 TArray<::ULIS::FEvent>
 FOdysseyAnimationCellImageRasterImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
-{   
+{
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyAnimationCellImageRasterImageRenderer::Blend);
     if (!mBlock)
         return iWaitList;
@@ -90,7 +90,7 @@ FOdysseyAnimationCellImageRasterImageRenderer::Copy(const FOdysseyImageRendererC
 void
 FOdysseyAnimationCellImageRasterImageRenderer::AddReferencedObjects(FReferenceCollector& Collector)
 {
-	Collector.AddReferencedObject(mCell);
+    Collector.AddReferencedObject(mCell);
 }
 
 FString

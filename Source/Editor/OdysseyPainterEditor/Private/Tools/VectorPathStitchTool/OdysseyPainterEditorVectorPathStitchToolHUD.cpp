@@ -110,7 +110,7 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext
                    , hudFlags | HUD_PATH_VERTEX_VALENCE1 | HUD_PATH_SEGMENT );
     }
 
-    // draw selection box only if we restrict erasure to the selection 
+    // draw selection box only if we restrict erasure to the selection
 /*
     if( mPathStitchTool->RestrictToSelectedObjects )
     {

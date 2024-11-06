@@ -58,7 +58,7 @@ FOdysseyAnimationCellImport::Read( UOdysseyAnimationCell* iAnimationCell
                 break;
 
                 default:
-				// Mandatory
+                // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
             }

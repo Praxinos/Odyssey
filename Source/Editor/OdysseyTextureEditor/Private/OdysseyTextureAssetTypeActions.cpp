@@ -45,7 +45,7 @@ FOdysseyTextureAssetTypeActions::GetCategories()
     return EAssetTypeCategories::Textures | mMyAssetCategory;
 }
 
-void 
+void
 FOdysseyTextureAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 {
     InFilter.ClassPaths.Add( UTexture2D::StaticClass()->GetClassPathName() );
@@ -53,14 +53,14 @@ FOdysseyTextureAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 
 
 void FOdysseyTextureAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor )
-{    
+{
     EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
 
-	for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
-	{
-		auto odysseyTexture = Cast<UTexture2D>(*ObjIt);
-		if (odysseyTexture != NULL)
-		{
+    for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
+    {
+        auto odysseyTexture = Cast<UTexture2D>(*ObjIt);
+        if (odysseyTexture != NULL)
+        {
             if( UOdysseyTextureEditorSettings::Get()->IliadDefaultEditorEnabled )
             {
                 FOdysseyTextureEditorModule* odysseyTextureModule = &FModuleManager::LoadModuleChecked<FOdysseyTextureEditorModule>("OdysseyTextureEditor");
@@ -71,8 +71,8 @@ void FOdysseyTextureAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& In
                 ITextureEditorModule* TextureEditorModule = &FModuleManager::LoadModuleChecked<ITextureEditorModule>("TextureEditor");
                 TextureEditorModule->CreateTextureEditor(Mode, EditWithinLevelEditor, odysseyTexture);
             }
-		}
-	}
+        }
+    }
 }
 
 const FSlateBrush*

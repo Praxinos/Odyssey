@@ -53,52 +53,52 @@ FOdysseyAnimationLayerImageVectorImport::Read( UOdysseyAnimationLayerImageVector
             {
                 case FOdysseyFile::Animation::CHUNK_LAYERIMAGEVECTOR_CELLSCONTAINER :
                 {
-					//DEPRECATED: Keep for compatibility with Odyssey 2.0 and prior
-					if (!FOdysseyAnimationCellsContainerImport::Read( iAnimationLayerImageVector, Ar ))
-					{
-						//Old Style No Chunk Loading
-						//Load or Save the offset
-						Ar << iAnimationLayerImageVector->CellsOffset;
+                    //DEPRECATED: Keep for compatibility with Odyssey 2.0 and prior
+                    if (!FOdysseyAnimationCellsContainerImport::Read( iAnimationLayerImageVector, Ar ))
+                    {
+                        //Old Style No Chunk Loading
+                        //Load or Save the offset
+                        Ar << iAnimationLayerImageVector->CellsOffset;
 
-						//Empty Cells to prepare for loading
-						iAnimationLayerImageVector->Cells.Empty();
+                        //Empty Cells to prepare for loading
+                        iAnimationLayerImageVector->Cells.Empty();
 
-						//Load or Save number of cells
-						int32 numCells = 0;
-						Ar << numCells;
+                        //Load or Save number of cells
+                        int32 numCells = 0;
+                        Ar << numCells;
 
-						for ( int i = 0; i < numCells; i++ )
-						{
-							//Load the cell type
-							FName cellType;
-							Ar << cellType;
+                        for ( int i = 0; i < numCells; i++ )
+                        {
+                            //Load the cell type
+                            FName cellType;
+                            Ar << cellType;
 
-							if (cellType == TEXT("FOdysseyAnimationCellImageVector"))
-							{
-								UOdysseyAnimationCellImageVector* cell = NewObject<UOdysseyAnimationCellImageVector>(iAnimationLayerImageVector, UOdysseyAnimationCellImageVector::StaticClass(), NAME_None, RF_Public | RF_Transactional);
-								iAnimationLayerImageVector->Cells.Add(cell);
-								cell->OldSerialize(Ar);
-							}
-							else if (cellType == TEXT("FOdysseyAnimationCellImageStagger"))
-							{
-								UOdysseyAnimationCellImageStagger* cell = NewObject<UOdysseyAnimationCellImageStagger>(iAnimationLayerImageVector, UOdysseyAnimationCellImageStagger::StaticClass(), NAME_None, RF_Public | RF_Transactional);
-								iAnimationLayerImageVector->Cells.Add(cell);
-								cell->OldSerialize(Ar);
-							}
-						}
-					}
+                            if (cellType == TEXT("FOdysseyAnimationCellImageVector"))
+                            {
+                                UOdysseyAnimationCellImageVector* cell = NewObject<UOdysseyAnimationCellImageVector>(iAnimationLayerImageVector, UOdysseyAnimationCellImageVector::StaticClass(), NAME_None, RF_Public | RF_Transactional);
+                                iAnimationLayerImageVector->Cells.Add(cell);
+                                cell->OldSerialize(Ar);
+                            }
+                            else if (cellType == TEXT("FOdysseyAnimationCellImageStagger"))
+                            {
+                                UOdysseyAnimationCellImageStagger* cell = NewObject<UOdysseyAnimationCellImageStagger>(iAnimationLayerImageVector, UOdysseyAnimationCellImageStagger::StaticClass(), NAME_None, RF_Public | RF_Transactional);
+                                iAnimationLayerImageVector->Cells.Add(cell);
+                                cell->OldSerialize(Ar);
+                            }
+                        }
+                    }
                 }
                 break;
 
                 case FOdysseyFile::Animation::CHUNK_LAYERIMAGEVECTOR_LIGHTTABLE :
                 {
-					//DEPRECATED: Keep for compatibility with Odyssey 2.0 and prior
-					FOdysseyAnimationLightTableImport::Read( &iAnimationLayerImageVector->Lighttable, Ar );
+                    //DEPRECATED: Keep for compatibility with Odyssey 2.0 and prior
+                    FOdysseyAnimationLightTableImport::Read( &iAnimationLayerImageVector->Lighttable, Ar );
                 }
                 break;
 
                 default:
-				// Mandatory
+                // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
             }

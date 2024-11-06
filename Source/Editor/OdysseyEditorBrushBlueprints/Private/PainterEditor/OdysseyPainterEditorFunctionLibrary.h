@@ -13,22 +13,22 @@ class UOdysseyBrushAssetBase;
 //---
 
 UCLASS(Blueprintable)
-class UOdysseyPainterEditorFunctionLibrary 
+class UOdysseyPainterEditorFunctionLibrary
     : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 
 public:
-    //TODO: make a GetEditorFromBrush() and 
+    //TODO: make a GetEditorFromBrush() and
 
     //Gets zoom value from ILIAD viewport.
     UFUNCTION( BlueprintPure, Category="Odyssey|Canvas", meta = (HidePin="BrushInstance", DefaultToSelf="BrushInstance") )
     static float GetViewportZoom( UOdysseyBrushAssetBase* BrushInstance );
-    
+
     //Gets rotation value from ILIAD viewport.
     UFUNCTION( BlueprintPure, Category="Odyssey|Canvas", meta = (HidePin="BrushInstance", DefaultToSelf="BrushInstance") )
     static float GetViewportRotation( UOdysseyBrushAssetBase* BrushInstance );
-    
+
     //Gets pan value from ILIAD viewport.
     UFUNCTION( BlueprintPure, Category="Odyssey|Canvas", meta = (HidePin="BrushInstance", DefaultToSelf="BrushInstance") )
     static FVector2D GetViewportPan( UOdysseyBrushAssetBase* BrushInstance );

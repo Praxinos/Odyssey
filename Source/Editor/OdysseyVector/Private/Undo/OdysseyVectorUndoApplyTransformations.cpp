@@ -30,7 +30,7 @@ FOdysseyVectorUndoApplyTransformations::FOdysseyVectorUndoApplyTransformations( 
 
             mObjectSnapshotArray.push_back( new FSnapshotPath( path
                                                              , FSnapshotFlags::Object::TRANSFORMATIONS
-                                                             | FSnapshotFlags::Object::Path::VERTICES 
+                                                             | FSnapshotFlags::Object::Path::VERTICES
                                                              | FSnapshotFlags::Object::Path::SEGMENTS ) );
         }
         else

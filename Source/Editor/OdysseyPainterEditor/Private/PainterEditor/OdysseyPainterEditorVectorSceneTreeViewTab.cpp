@@ -114,7 +114,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::CreateObjectPropertiesPanel()
     DetailsViewArgs.bLockable = false;
     DetailsViewArgs.bAllowSearch = false;
     DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
-    
+
     detailsView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
 
     detailsView->SetObject(nullptr);
@@ -149,7 +149,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::CreateWidget()
                 mDetailsView.ToSharedRef()
             ]
         ];
-        
+
 }
 
 void
@@ -184,11 +184,11 @@ void
 FOdysseyPainterEditorVectorSceneTreeViewTab::AddReferencedObjects(FReferenceCollector& Collector)
 {
     // Prevent these UObjects from being destroyed by garbage collection
-	Collector.AddReferencedObject(mObjectView);
-	Collector.AddReferencedObject(mPathView);
-	Collector.AddReferencedObject(mGroupPaintView);
-	Collector.AddReferencedObject(mTagInbetweenerView);
-	//Collector.AddReferencedObject(mDetailsView);
+    Collector.AddReferencedObject(mObjectView);
+    Collector.AddReferencedObject(mPathView);
+    Collector.AddReferencedObject(mGroupPaintView);
+    Collector.AddReferencedObject(mTagInbetweenerView);
+    //Collector.AddReferencedObject(mDetailsView);
 }
 
 //--------------------------------------------------------------------------------------

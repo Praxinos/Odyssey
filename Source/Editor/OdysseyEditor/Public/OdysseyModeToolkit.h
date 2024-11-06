@@ -10,7 +10,7 @@
 class FOdysseyEditor;
 
 class ODYSSEYEDITOR_API FOdysseyModeToolkit
-	: public FModeToolkit,
+    : public FModeToolkit,
       public IAssetEditorInstance
 {
 public:
@@ -20,41 +20,41 @@ public:
 
 public:
     void Initialize(
-		FEdMode* iEditorMode,
-		const TSharedPtr<IToolkitHost>& iInitToolkitHost
-	);
+        FEdMode* iEditorMode,
+        const TSharedPtr<IToolkitHost>& iInitToolkitHost
+    );
 
-	/** IToolkit interface */
-	virtual TSharedPtr<class SWidget> GetInlineContent() const override;
+    /** IToolkit interface */
+    virtual TSharedPtr<class SWidget> GetInlineContent() const override;
 
     void OnAddEditedObject(UObject* iObject);
     void OnRemoveEditedObject(UObject* iObject);
 
 public:
     //from IAssetEditorInstance
-	virtual FName GetEditorName() const override;
-	virtual void FocusWindow(UObject* ObjectToFocusOn = nullptr) override;
-	virtual bool CloseWindow() override;
-	virtual bool IsPrimaryEditor() const override;
-	virtual void InvokeTab(const struct FTabId& TabId) override;
-	virtual FName GetToolbarTabId() const override;
-	virtual TSharedPtr<class FTabManager> GetAssociatedTabManager() override;
-	virtual double GetLastActivationTime() override;
-	virtual void RemoveEditingAsset(UObject* Asset) override;
-	virtual void RequestModeUITabs() override;
-	virtual void InvokeUI() override;
-	virtual void SetModeUILayer(const TSharedPtr<FAssetEditorModeUILayer> InLayer) override;
-	
-	void RebuildLevelEditorMenu() const;
+    virtual FName GetEditorName() const override;
+    virtual void FocusWindow(UObject* ObjectToFocusOn = nullptr) override;
+    virtual bool CloseWindow() override;
+    virtual bool IsPrimaryEditor() const override;
+    virtual void InvokeTab(const struct FTabId& TabId) override;
+    virtual FName GetToolbarTabId() const override;
+    virtual TSharedPtr<class FTabManager> GetAssociatedTabManager() override;
+    virtual double GetLastActivationTime() override;
+    virtual void RemoveEditingAsset(UObject* Asset) override;
+    virtual void RequestModeUITabs() override;
+    virtual void InvokeUI() override;
+    virtual void SetModeUILayer(const TSharedPtr<FAssetEditorModeUILayer> InLayer) override;
 
-	void OnToolkitHostReadyForUI();
-	void OnToolkitHostShutdownUI();
+    void RebuildLevelEditorMenu() const;
 
-	void SaveOpenedTabs();
-	void LoadOpenedTabs();
+    void OnToolkitHostReadyForUI();
+    void OnToolkitHostShutdownUI();
+
+    void SaveOpenedTabs();
+    void LoadOpenedTabs();
 
 public:
-	TSharedPtr<FOdysseyEditor> mEditor;
-	bool mTabSaved;
-	TSharedPtr<FExtender> mLevelEditorMenuExtender;
+    TSharedPtr<FOdysseyEditor> mEditor;
+    bool mTabSaved;
+    TSharedPtr<FExtender> mLevelEditorMenuExtender;
 };

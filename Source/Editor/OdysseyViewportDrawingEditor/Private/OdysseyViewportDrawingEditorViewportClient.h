@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "LevelEditorViewport.h" 
+#include "LevelEditorViewport.h"
 #include "SLevelViewport.h"
 
 class FOdysseyViewportDrawingEditorViewportClient

@@ -12,32 +12,32 @@
 FOdysseyAnimationTimelineTools&
 FOdysseyAnimationTimelineTools::Get()
 {
-	static FOdysseyAnimationTimelineTools tools;
-	return tools;
+    static FOdysseyAnimationTimelineTools tools;
+    return tools;
 }
 
 FOdysseyAnimationTimelineTools::FOdysseyAnimationTimelineTools()
-	: mCurrentTool(EOdysseyTimelineTool::Selection)
+    : mCurrentTool(EOdysseyTimelineTool::Selection)
 {
 }
 
 TSharedPtr<FOdysseyAnimationTimelineTool>
 FOdysseyAnimationTimelineTools::CreateTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection) const
 {
-	switch(mCurrentTool)
-	{
-		case EOdysseyTimelineTool::Selection: return MakeShared<FOdysseyAnimationTimelineSelectionTool>(iTimelinePosition, iTimelineCellSelection);
-		case EOdysseyTimelineTool::Move: return MakeShared<FOdysseyAnimationTimelineMoveTool>(iTimelinePosition);
-		case EOdysseyTimelineTool::Cut: return MakeShared<FOdysseyAnimationTimelineCutTool>(iTimelinePosition);
-	}
+    switch(mCurrentTool)
+    {
+        case EOdysseyTimelineTool::Selection: return MakeShared<FOdysseyAnimationTimelineSelectionTool>(iTimelinePosition, iTimelineCellSelection);
+        case EOdysseyTimelineTool::Move: return MakeShared<FOdysseyAnimationTimelineMoveTool>(iTimelinePosition);
+        case EOdysseyTimelineTool::Cut: return MakeShared<FOdysseyAnimationTimelineCutTool>(iTimelinePosition);
+    }
 
-	return nullptr;
+    return nullptr;
 }
 
 EOdysseyTimelineTool
 FOdysseyAnimationTimelineTools::GetCurrentTool() const
 {
-	
+
     FKey pressedKey = FOdysseyKeyState::GetLastKey();
     if (pressedKey == FKey())
         return mCurrentTool;
@@ -71,5 +71,5 @@ FOdysseyAnimationTimelineTools::GetCurrentTool() const
 void
 FOdysseyAnimationTimelineTools::SetCurrentTool(EOdysseyTimelineTool iTool)
 {
-	mCurrentTool = iTool;
+    mCurrentTool = iTool;
 }

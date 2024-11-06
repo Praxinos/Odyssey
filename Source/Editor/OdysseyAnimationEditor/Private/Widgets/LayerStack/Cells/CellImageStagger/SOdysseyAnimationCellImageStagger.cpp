@@ -13,11 +13,11 @@
 void
 SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyAnimationCellImageStagger* iCell)
 {
-	mSetReachTransactionName = (LOCTEXT("cell-image-stagger.set-reach", "Set Stagger Cell Reach"));
+    mSetReachTransactionName = (LOCTEXT("cell-image-stagger.set-reach", "Set Stagger Cell Reach"));
     mCell = iCell;
     mShowContent = iArgs._ShowContent;
-	mTimelinePosition = iArgs._TimelinePosition;
-        
+    mTimelinePosition = iArgs._TimelinePosition;
+
     FSlateColor behaviourColor( FOdysseyStyle::GetColor( "Animation.CellImageStagger.BehaviourColor" ) );
 
     ChildSlot
@@ -46,7 +46,7 @@ SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyAn
         .AutoWidth()
         [
             SAssignNew( mReachSpinBox, SSpinBox<int> )
-			.Style(&FOdysseyStyle::GetWidgetStyle< FSpinBoxStyle >( "Animation.CellImageStagger.Reach.SpinBoxStyle" ))
+            .Style(&FOdysseyStyle::GetWidgetStyle< FSpinBoxStyle >( "Animation.CellImageStagger.Reach.SpinBoxStyle" ))
             .Value(this, &SOdysseyAnimationCellImageStagger::GetReach )
             .OnValueChanged( this, &SOdysseyAnimationCellImageStagger::OnReachValueChanged )
             .OnValueCommitted( this, &SOdysseyAnimationCellImageStagger::OnReachValueCommited )
@@ -63,16 +63,16 @@ SOdysseyAnimationCellImageStagger::Construct(const FArguments& iArgs, UOdysseyAn
 int32
 SOdysseyAnimationCellImageStagger::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
-	// Draw a current frame
-    
-	LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+    // Draw a current frame
 
-	const FSlateBrush* ArrowBrushTop = FOdysseyStyle::GetBrush("Animation.CellImageStagger.ArrowTop");
+    LayerId = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+
+    const FSlateBrush* ArrowBrushTop = FOdysseyStyle::GetBrush("Animation.CellImageStagger.ArrowTop");
     const FSlateBrush* ArrowBrushBottom = FOdysseyStyle::GetBrush("Animation.CellImageStagger.ArrowBottom");
     const FSlateBrush* GenericBrush = FCoreStyle::Get().GetBrush( "GenericWhiteBox" );
-	const float height = AllottedGeometry.GetLocalSize().Y;  
-	const float width = AllottedGeometry.GetLocalSize().X;
-	const float frameSize = mTimelinePosition->GetFrameSize();
+    const float height = AllottedGeometry.GetLocalSize().Y;
+    const float width = AllottedGeometry.GetLocalSize().X;
+    const float frameSize = mTimelinePosition->GetFrameSize();
 
     int reach = GetClampedReach();
     int staggerLength = GetStaggerLength();
@@ -135,7 +135,7 @@ SOdysseyAnimationCellImageStagger::OnPaint(const FPaintArgs& Args, const FGeomet
         );
     }
 
-	return LayerId;
+    return LayerId;
 }
 
 const FSlateBrush*
@@ -172,7 +172,7 @@ SOdysseyAnimationCellImageStagger::OnReachValueCommited(int iReach, ETextCommit:
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(mSetReachTransactionName);
 #endif
-	FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Reach), FMath::Max(0, iReach), EPropertyChangeType::ValueSet);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Reach), FMath::Max(0, iReach), EPropertyChangeType::ValueSet);
 
     FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mCell->GetAnimation());
     currentFrameMutator.Set(mCell->GetFrameRange().GetLowerBoundValue());
@@ -216,7 +216,7 @@ SOdysseyAnimationCellImageStagger::MapActions(TSharedPtr<FUICommandList> iComman
 
 void
 SOdysseyAnimationCellImageStagger::BuildContextMenu(FMenuBuilder& iMenuBuilder)
-{  
+{
     iMenuBuilder.BeginSection("Behaviour", LOCTEXT("cell-image-stagger.behaviour-menu.behaviour-section.name", "Behaviour"));
         iMenuBuilder.AddMenuEntry(
             LOCTEXT("cell-image-stagger.behaviour-menu.loop", "Loop"),
@@ -253,7 +253,7 @@ SOdysseyAnimationCellImageStagger::SetBehaviour(EOdysseyAnimationCellImageStagge
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("cell-image-stagger.transaction.set-behaviour", "Set Stagger Cell Behaviour"));
 #endif
-	FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Behaviour), iBehaviour);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Behaviour), iBehaviour);
 
     FOdysseyAnimationCurrentFrameMutator currentFrameMutator(mCell->GetAnimation());
     currentFrameMutator.Set(mCell->GetFrameRange().GetLowerBoundValue());

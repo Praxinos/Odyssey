@@ -11,75 +11,75 @@
  *****************************************************************************/
 
 struct FOdysseyAnimationComponentSectionExecutionToken
-	: IMovieSceneExecutionToken
+    : IMovieSceneExecutionToken
 {
-	FOdysseyAnimationComponentSectionExecutionToken(double iStartTime, double iDuration)
-		: mStartTime(iStartTime)
-		, mDuration(iDuration)
-	{ }
+    FOdysseyAnimationComponentSectionExecutionToken(double iStartTime, double iDuration)
+        : mStartTime(iStartTime)
+        , mDuration(iDuration)
+    { }
 
-	virtual void Execute(const FMovieSceneContext& Context, const FMovieSceneEvaluationOperand& Operand, FPersistentEvaluationData& PersistentData, IMovieScenePlayer& Player) override
-	{
-		// Nope... do we have an object binding?
-		UOdysseyAnimationComponent* component = nullptr;
-		if (Operand.ObjectBindingID.IsValid())
-		{
-			// Yes. Get the media player from the object.
-			for (TWeakObjectPtr<> WeakObject : Player.FindBoundObjects(Operand))
-			{
-				UObject* BoundObject = WeakObject.Get();
-				if (!BoundObject || !BoundObject->IsA<UOdysseyAnimationComponent>())
-					continue;
+    virtual void Execute(const FMovieSceneContext& Context, const FMovieSceneEvaluationOperand& Operand, FPersistentEvaluationData& PersistentData, IMovieScenePlayer& Player) override
+    {
+        // Nope... do we have an object binding?
+        UOdysseyAnimationComponent* component = nullptr;
+        if (Operand.ObjectBindingID.IsValid())
+        {
+            // Yes. Get the media player from the object.
+            for (TWeakObjectPtr<> WeakObject : Player.FindBoundObjects(Operand))
+            {
+                UObject* BoundObject = WeakObject.Get();
+                if (!BoundObject || !BoundObject->IsA<UOdysseyAnimationComponent>())
+                    continue;
 
-				component = Cast<UOdysseyAnimationComponent>(BoundObject);
-					break;
-			}
-		}
+                component = Cast<UOdysseyAnimationComponent>(BoundObject);
+                    break;
+            }
+        }
 
-		Execute(component, mStartTime, mDuration);
-	}
+        Execute(component, mStartTime, mDuration);
+    }
 
-	__declspec(noinline) static void Execute(UOdysseyAnimationComponent* iComponent, double iStartTime, double iDuration)
-	{
-		if (!iComponent)
-			return;
+    __declspec(noinline) static void Execute(UOdysseyAnimationComponent* iComponent, double iStartTime, double iDuration)
+    {
+        if (!iComponent)
+            return;
 
-		UOdysseyAnimation* animation = iComponent->GetActiveAnimation();
-		if (!animation)
-			return;
+        UOdysseyAnimation* animation = iComponent->GetActiveAnimation();
+        if (!animation)
+            return;
 
-		UOdysseyAnimationPlayer* player = iComponent->GetActivePlayer();
-		if (!player)
-			return;
+        UOdysseyAnimationPlayer* player = iComponent->GetActivePlayer();
+        if (!player)
+            return;
 
-		double startFrame = animation->GetFramesPerSecond() * iStartTime;
-		double endFrame = animation->GetFramesPerSecond() * (iStartTime + iDuration);
+        double startFrame = animation->GetFramesPerSecond() * iStartTime;
+        double endFrame = animation->GetFramesPerSecond() * (iStartTime + iDuration);
 
-		int startFrameInt = FMath::Floor(startFrame);
-		int endFrameInt = FMath::Floor(endFrame);
+        int startFrameInt = FMath::Floor(startFrame);
+        int endFrameInt = FMath::Floor(endFrame);
 
-		int frame = startFrameInt;
-		if (endFrameInt == startFrameInt + 1)
-		{
-			double startOverlap = 1.0f - (startFrame - startFrameInt);
-			double endOverlap = endFrame - endFrameInt;
+        int frame = startFrameInt;
+        if (endFrameInt == startFrameInt + 1)
+        {
+            double startOverlap = 1.0f - (startFrame - startFrameInt);
+            double endOverlap = endFrame - endFrameInt;
 
-			frame = startOverlap > endOverlap ? startFrameInt : endFrameInt;
-		}
-		else if (endFrameInt > startFrameInt + 1)
-		{
-			double startOverlap = 1.0f - (startFrame - startFrameInt);
-			frame = startOverlap > 1.f - UE_SMALL_NUMBER ? startFrameInt : startFrameInt + 1;
-		}
+            frame = startOverlap > endOverlap ? startFrameInt : endFrameInt;
+        }
+        else if (endFrameInt > startFrameInt + 1)
+        {
+            double startOverlap = 1.0f - (startFrame - startFrameInt);
+            frame = startOverlap > 1.f - UE_SMALL_NUMBER ? startFrameInt : startFrameInt + 1;
+        }
 
-		player->SeekToFrame(frame);
-		if (frame != animation->CurrentFrame)
-			FObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
-	}
+        player->SeekToFrame(frame);
+        if (frame != animation->CurrentFrame)
+            FObjectEditorUtils::SetPropertyValue(animation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
+    }
 
 private:
-	double mStartTime;
-	double mDuration;
+    double mStartTime;
+    double mDuration;
 };
 
 
@@ -87,18 +87,18 @@ private:
  *****************************************************************************/
 
 FOdysseyAnimationComponentTemplate::FOdysseyAnimationComponentTemplate(const UOdysseyAnimationComponentSection& InSection, const UOdysseyAnimationComponentTrack& InTrack)
-	: mSection(&InSection)
+    : mSection(&InSection)
 {
-	if (InSection.HasStartFrame())
-	{
-		mParams.SectionStartFrame = InSection.GetRange().GetLowerBoundValue();
-	}
-	if (InSection.HasEndFrame())
-	{
-		mParams.SectionEndFrame = InSection.GetRange().GetUpperBoundValue();
-	}
-	mParams.bLooping = 0.f; //InSection.bLooping;
-	mParams.StartFrameOffset = InSection.StartFrameOffset;
+    if (InSection.HasStartFrame())
+    {
+        mParams.SectionStartFrame = InSection.GetRange().GetLowerBoundValue();
+    }
+    if (InSection.HasEndFrame())
+    {
+        mParams.SectionEndFrame = InSection.GetRange().GetUpperBoundValue();
+    }
+    mParams.bLooping = 0.f; //InSection.bLooping;
+    mParams.StartFrameOffset = InSection.StartFrameOffset;
 }
 
 
@@ -108,44 +108,44 @@ FOdysseyAnimationComponentTemplate::FOdysseyAnimationComponentTemplate(const UOd
 void
 FOdysseyAnimationComponentTemplate::Evaluate(const FMovieSceneEvaluationOperand& Operand, const FMovieSceneContext& Context, const FPersistentEvaluationData& PersistentData, FMovieSceneExecutionTokens& ExecutionTokens) const
 {
-	if (Context.IsPreRoll())
-		return;
+    if (Context.IsPreRoll())
+        return;
 
-	if (Context.IsPostRoll())
-		return;
-	
-	if (Context.GetTime().FrameNumber > mParams.SectionEndFrame || Context.GetTime().FrameNumber < mParams.SectionStartFrame)
-		return;
-	
-	double startTime = 0.f;
-	double duration = 0.f;
-	GetStartTimeAndDuration(Context.GetRange(), mParams, Context.GetFrameRate(), startTime, duration);
-	ExecutionTokens.Add(FOdysseyAnimationComponentSectionExecutionToken(startTime, duration));
+    if (Context.IsPostRoll())
+        return;
+
+    if (Context.GetTime().FrameNumber > mParams.SectionEndFrame || Context.GetTime().FrameNumber < mParams.SectionStartFrame)
+        return;
+
+    double startTime = 0.f;
+    double duration = 0.f;
+    GetStartTimeAndDuration(Context.GetRange(), mParams, Context.GetFrameRate(), startTime, duration);
+    ExecutionTokens.Add(FOdysseyAnimationComponentSectionExecutionToken(startTime, duration));
 }
 
 void
 FOdysseyAnimationComponentTemplate::GetStartTimeAndDuration(const TRange<FFrameTime>& iRange, const FOdysseyAnimationComponentSectionParams& iParams, const FFrameRate& iFrameRate, double& oStartTime, double& oDuration)
 {
-	const FFrameTime FrameTime(iRange.GetLowerBoundValue() - iParams.SectionStartFrame + iParams.StartFrameOffset);
-	oStartTime = iFrameRate.AsSeconds(FrameTime);
+    const FFrameTime FrameTime(iRange.GetLowerBoundValue() - iParams.SectionStartFrame + iParams.StartFrameOffset);
+    oStartTime = iFrameRate.AsSeconds(FrameTime);
 
-	// With zero-length frames (which can occur occasionally), we use the fixed frame time, matching previous behavior.
-	oDuration = FMath::Clamp( (iRange.Size<FFrameTime>()) / iFrameRate, iFrameRate.AsSeconds(FFrameTime(1)), iFrameRate.AsSeconds((iParams.SectionEndFrame - iParams.SectionStartFrame) - FrameTime));
+    // With zero-length frames (which can occur occasionally), we use the fixed frame time, matching previous behavior.
+    oDuration = FMath::Clamp( (iRange.Size<FFrameTime>()) / iFrameRate, iFrameRate.AsSeconds(FFrameTime(1)), iFrameRate.AsSeconds((iParams.SectionEndFrame - iParams.SectionStartFrame) - FrameTime));
 }
 
 void
 FOdysseyAnimationComponentTemplate::EvaluateImmediate(UOdysseyAnimationComponent* iComponent, const TRange<FFrameTime>& iRange, const FOdysseyAnimationComponentSectionParams& iParams, const FFrameRate& iFrameRate )
 {
-	double startTime = 0.f;
-	double duration = 0.f;
-	GetStartTimeAndDuration(iRange, iParams, iFrameRate, startTime, duration);
-	FOdysseyAnimationComponentSectionExecutionToken::Execute(iComponent, startTime, duration);
+    double startTime = 0.f;
+    double duration = 0.f;
+    GetStartTimeAndDuration(iRange, iParams, iFrameRate, startTime, duration);
+    FOdysseyAnimationComponentSectionExecutionToken::Execute(iComponent, startTime, duration);
 }
 
 UScriptStruct&
 FOdysseyAnimationComponentTemplate::GetScriptStructImpl() const
 {
-	return *StaticStruct();
+    return *StaticStruct();
 }
 
 
@@ -158,7 +158,7 @@ FOdysseyAnimationComponentTemplate::Initialize(const FMovieSceneEvaluationOperan
 void
 FOdysseyAnimationComponentTemplate::SetupOverrides()
 {
-	EnableOverrides(RequiresInitializeFlag | RequiresTearDownFlag);
+    EnableOverrides(RequiresInitializeFlag | RequiresTearDownFlag);
 }
 
 

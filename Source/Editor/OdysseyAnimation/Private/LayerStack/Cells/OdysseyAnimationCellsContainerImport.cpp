@@ -36,7 +36,7 @@ FOdysseyAnimationCellsContainerImport::Read( UOdysseyAnimationLayer* iAnimationL
             Ar.Seek( start );
             return false;
     }
-	iAnimationLayer->UpdateCellsIndexInLayer();
+    iAnimationLayer->UpdateCellsIndexInLayer();
     return true;
 }
 
@@ -68,24 +68,24 @@ FOdysseyAnimationCellsContainerImport::Read( UOdysseyAnimationLayer* iAnimationL
                     FName cellType;
                     Ar << cellType;
 
-					if (cellType == TEXT("FOdysseyAnimationCellImageRaster"))
-					{
-						UOdysseyAnimationCellImageRaster* cell = NewObject<UOdysseyAnimationCellImageRaster>(iAnimationLayer, UOdysseyAnimationCellImageRaster::StaticClass(), NAME_None, RF_Public | RF_Transactional);
-                    	iAnimationLayer->Cells.Add(cell);
-					}
-					else if (cellType == TEXT("FOdysseyAnimationCellImageVector"))
-					{
-						UOdysseyAnimationCellImageVector* cell = NewObject<UOdysseyAnimationCellImageVector>(iAnimationLayer, UOdysseyAnimationCellImageVector::StaticClass(), NAME_None, RF_Public | RF_Transactional);
-						iAnimationLayer->Cells.Add(cell);
-					}
-					else if (cellType == TEXT("FOdysseyAnimationCellImageStagger"))
-					{
-						UOdysseyAnimationCellImageStagger* cell = NewObject<UOdysseyAnimationCellImageStagger>(iAnimationLayer, UOdysseyAnimationCellImageStagger::StaticClass(), NAME_None, RF_Public | RF_Transactional);
-						iAnimationLayer->Cells.Add(cell);
-					}
+                    if (cellType == TEXT("FOdysseyAnimationCellImageRaster"))
+                    {
+                        UOdysseyAnimationCellImageRaster* cell = NewObject<UOdysseyAnimationCellImageRaster>(iAnimationLayer, UOdysseyAnimationCellImageRaster::StaticClass(), NAME_None, RF_Public | RF_Transactional);
+                        iAnimationLayer->Cells.Add(cell);
+                    }
+                    else if (cellType == TEXT("FOdysseyAnimationCellImageVector"))
+                    {
+                        UOdysseyAnimationCellImageVector* cell = NewObject<UOdysseyAnimationCellImageVector>(iAnimationLayer, UOdysseyAnimationCellImageVector::StaticClass(), NAME_None, RF_Public | RF_Transactional);
+                        iAnimationLayer->Cells.Add(cell);
+                    }
+                    else if (cellType == TEXT("FOdysseyAnimationCellImageStagger"))
+                    {
+                        UOdysseyAnimationCellImageStagger* cell = NewObject<UOdysseyAnimationCellImageStagger>(iAnimationLayer, UOdysseyAnimationCellImageStagger::StaticClass(), NAME_None, RF_Public | RF_Transactional);
+                        iAnimationLayer->Cells.Add(cell);
+                    }
                 }
                 break;
-                
+
                 case FOdysseyFile::Animation::CHUNK_CELLSCONTAINER_CELL :
                 {
                     iAnimationLayer->Cells.Last()->OldSerialize(Ar);
@@ -93,7 +93,7 @@ FOdysseyAnimationCellsContainerImport::Read( UOdysseyAnimationLayer* iAnimationL
                 break;
 
                 default:
-				// Mandatory
+                // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
             }

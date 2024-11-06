@@ -34,7 +34,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSharedEnv : public FOdysseyVectorObject
                                       , std::list<FOdysseyVectorTag*>& oSelectedTagList );
 
         std::list<FOdysseyVectorTag*>& GetSharedTagList();
-		const std::list<FOdysseyVectorTag*>& GetSharedTagList() const;
+        const std::list<FOdysseyVectorTag*>& GetSharedTagList() const;
 
 
     private:

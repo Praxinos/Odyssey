@@ -28,39 +28,39 @@ UOdysseyAnimationCellImageVector::~UOdysseyAnimationCellImageVector()
 void
 UOdysseyAnimationCellImageVector::PostInitProperties()
 {
-	Super::PostInitProperties();
-	
-	if (GetFlags() & RF_ClassDefaultObject)
-		return;
+    Super::PostInitProperties();
+
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
 
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     UOdysseyAnimationLayerImageVector::OnIsColoredChanged().AddUObject( this, &UOdysseyAnimationCellImageVector::OnIsColoredChanged );
     UOdysseyAnimationLayerImageVector::OnIsWireframeChanged().AddUObject( this, &UOdysseyAnimationCellImageVector::OnIsWireframeChanged );
 
-	mVectorBlockId = FGuid::NewGuid();
+    mVectorBlockId = FGuid::NewGuid();
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
-    mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated);	
+    mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated);
 
-	UOdysseyAnimation* animation = GetAnimation();
-	if (animation->GetWidth() < 0 || animation->GetHeight() < 0)
-		return;
+    UOdysseyAnimation* animation = GetAnimation();
+    if (animation->GetWidth() < 0 || animation->GetHeight() < 0)
+        return;
 
     mRoot = new FOdysseyVectorRoot( Cast<UOdysseyAnimationLayerImageVector>(GetLayer())
                                   , this
                                   , new FOdysseyVectorGroupPaint( "Scene" )
                                   , (double)animation->GetWidth()
                                   , (double)animation->GetHeight() );
-    
+
     mVectorBlock->Init(mVectorBlockId, mRoot->GetEngine(), animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
 }
 
 void
 UOdysseyAnimationCellImageVector::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
 {
-	Super::PostDuplicate(iDuplicateMode);
-	UOdysseyAnimation* animation = GetAnimation();
-	mVectorBlockId = FGuid::NewGuid();
-	mVectorBlock->Init(mVectorBlockId, mRoot->GetEngine(), animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
+    Super::PostDuplicate(iDuplicateMode);
+    UOdysseyAnimation* animation = GetAnimation();
+    mVectorBlockId = FGuid::NewGuid();
+    mVectorBlock->Init(mVectorBlockId, mRoot->GetEngine(), animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
 }
 
 FOdysseyVectorEngine*
@@ -97,9 +97,9 @@ void
 UOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 {
     Super::Serialize(Ar);
-	
-	if (GetFlags() & RF_ClassDefaultObject)
-		return;
+
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
 
     if( Ar.IsSaving() )
     {
@@ -108,15 +108,15 @@ UOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 
     if( Ar.IsLoading() )
     {
-		if ( !mRoot )
-		{
-			UOdysseyAnimation* animation = GetAnimation();
-			mRoot = new FOdysseyVectorRoot( Cast<UOdysseyAnimationLayerImageVector>(GetLayer())
-										, this
-										, new FOdysseyVectorGroupPaint( "Scene" )
-										, (double)animation->GetWidth()
-										, (double)animation->GetHeight() );
-		}
+        if ( !mRoot )
+        {
+            UOdysseyAnimation* animation = GetAnimation();
+            mRoot = new FOdysseyVectorRoot( Cast<UOdysseyAnimationLayerImageVector>(GetLayer())
+                                        , this
+                                        , new FOdysseyVectorGroupPaint( "Scene" )
+                                        , (double)animation->GetWidth()
+                                        , (double)animation->GetHeight() );
+        }
 
         if (!FOdysseyAnimationCellImageVectorImport::Read( this, Ar ))
         {
@@ -138,15 +138,15 @@ UOdysseyAnimationCellImageVector::OldSerialize(FArchive& Ar)
 
     if( Ar.IsLoading() )
     {
-		if ( !mRoot )
-		{
-			UOdysseyAnimation* animation = GetAnimation();
-			mRoot = new FOdysseyVectorRoot( Cast<UOdysseyAnimationLayerImageVector>(GetLayer())
-										, this
-										, new FOdysseyVectorGroupPaint( "Scene" )
-										, (double)animation->GetWidth()
-										, (double)animation->GetHeight() );
-		}
+        if ( !mRoot )
+        {
+            UOdysseyAnimation* animation = GetAnimation();
+            mRoot = new FOdysseyVectorRoot( Cast<UOdysseyAnimationLayerImageVector>(GetLayer())
+                                        , this
+                                        , new FOdysseyVectorGroupPaint( "Scene" )
+                                        , (double)animation->GetWidth()
+                                        , (double)animation->GetHeight() );
+        }
 
         if (!FOdysseyAnimationCellImageVectorImport::Read( this, Ar ))
         {
@@ -159,12 +159,12 @@ UOdysseyAnimationCellImageVector::OldSerialize(FArchive& Ar)
 void
 UOdysseyAnimationCellImageVector::PostLoad()
 {
-	Super::PostLoad();
-	
-	if (GetFlags() & RF_ClassDefaultObject)
-		return;
-		
-	UOdysseyAnimation* animation = GetAnimation();
+    Super::PostLoad();
+
+    if (GetFlags() & RF_ClassDefaultObject)
+        return;
+
+    UOdysseyAnimation* animation = GetAnimation();
     mVectorBlock->Init(mVectorBlockId, mRoot->GetEngine(), animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
     mRoot->GetEngine()->Invalidate( 0 );
     FOdysseyVectorEngine::Notify( mRoot->GetScene(), FOdysseyVectorEngine::NOTIFY_ALL );
@@ -200,7 +200,7 @@ UOdysseyAnimationCellImageVector::BuildImageRenderer(IOdysseyImageRenderer::eRen
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
-    
+
     return MakeShared<FOdysseyAnimationCellImageVectorImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
@@ -213,9 +213,9 @@ UOdysseyAnimationCellImageVector::GetImageRenderingComposition(IOdysseyImageRend
 TArray<::ULIS::FRectI>
 UOdysseyAnimationCellImageVector::GetImageRenderingRects() const
 {
-	UOdysseyAnimation* animation = GetAnimation();
-	if (!animation)
-		return {};
+    UOdysseyAnimation* animation = GetAnimation();
+    if (!animation)
+        return {};
 
     return { ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight()) };
 }
@@ -244,19 +244,19 @@ UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated( const TArray<::ULIS:
 {
     ImageRenderingChanged( iRects, iIsInteractive);
 
-	if (!iIsInteractive)
-		DirtyThumbnail();
+    if (!iIsInteractive)
+        DirtyThumbnail();
 }
 
 // Implements Interface IOdysseyVectorAnimationCell::GetEngine
-FOdysseyVectorEngine* 
+FOdysseyVectorEngine*
 UOdysseyAnimationCellImageVector::GetEngine()
 {
     return mRoot->GetEngine();
 }
 
 // Implements Interface IOdysseyVectorAnimationCell::GetIndex
-int32 
+int32
 UOdysseyAnimationCellImageVector::GetIndex()
 {
     return IndexInLayer;

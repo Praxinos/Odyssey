@@ -19,47 +19,47 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
     : public SListView<TSharedPtr<FInbetweeningListViewItem>>
 {
 public:
-	SOdysseyAnimationLayerImageVectorTimelineInbetweening();
+    SOdysseyAnimationLayerImageVectorTimelineInbetweening();
 
 public:
-	SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageVectorTimelineInbetweening)
-		: _PainterEditor(nullptr)
-		{}
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
-		SLATE_ATTRIBUTE(TSharedPtr<FOdysseyPainterEditor>, PainterEditor)
-	SLATE_END_ARGS()
+    SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageVectorTimelineInbetweening)
+        : _PainterEditor(nullptr)
+        {}
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ATTRIBUTE(TSharedPtr<FOdysseyPainterEditor>, PainterEditor)
+    SLATE_END_ARGS()
 
-	void Construct( const FArguments& InArgs
-					, UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector );
+    void Construct( const FArguments& InArgs
+                    , UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector );
 
-	void Update();
-	UOdysseyAnimationLayerImageVector* GetAnimationLayerImageVector();
-	void SetCursorPos( FVector2D iCursorPos );
-	const FSlateBrush *GetForwardArrowBrush();
-	const FSlateBrush *GetBackwardArrowBrush();
+    void Update();
+    UOdysseyAnimationLayerImageVector* GetAnimationLayerImageVector();
+    void SetCursorPos( FVector2D iCursorPos );
+    const FSlateBrush *GetForwardArrowBrush();
+    const FSlateBrush *GetBackwardArrowBrush();
 
-	TSharedPtr<FOdysseyPainterEditor> GetEditor() const;
-	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> GetTimelinePosition() const;
+    TSharedPtr<FOdysseyPainterEditor> GetEditor() const;
+    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> GetTimelinePosition() const;
 
 protected:
-	TSharedRef<ITableRow> OnGenerateRow( TSharedPtr<FInbetweeningListViewItem> iItem
-										, const TSharedRef<STableViewBase>& iOwnerTable );
-	TSharedPtr<SWidget> OnContextMenuOpening();
-	void AddBreakdown();
-	void RemoveBreakdown();
-	void ChangeDirection();
-	void GetSelectedInbetweenerTags( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList
-									, std::list<FOdysseyVectorEngine*>& oEngineList );
+    TSharedRef<ITableRow> OnGenerateRow( TSharedPtr<FInbetweeningListViewItem> iItem
+                                        , const TSharedRef<STableViewBase>& iOwnerTable );
+    TSharedPtr<SWidget> OnContextMenuOpening();
+    void AddBreakdown();
+    void RemoveBreakdown();
+    void ChangeDirection();
+    void GetSelectedInbetweenerTags( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList
+                                    , std::list<FOdysseyVectorEngine*>& oEngineList );
 
 private :
-	virtual bool Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const override;
+    virtual bool Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const override;
 
 protected:
-	UOdysseyAnimationLayerImageVector* mAnimationLayerImageVector;
-	TArray<TSharedPtr<FInbetweeningListViewItem>> mItemsSource;
-	FVector2D mCursorPos;
-	const FSlateBrush *mForwardArrowBrush;
-	const FSlateBrush *mBackwardArrowBrush;
-	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
-	TAttribute<TSharedPtr<FOdysseyPainterEditor>> mEditor;
+    UOdysseyAnimationLayerImageVector* mAnimationLayerImageVector;
+    TArray<TSharedPtr<FInbetweeningListViewItem>> mItemsSource;
+    FVector2D mCursorPos;
+    const FSlateBrush *mForwardArrowBrush;
+    const FSlateBrush *mBackwardArrowBrush;
+    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+    TAttribute<TSharedPtr<FOdysseyPainterEditor>> mEditor;
 };

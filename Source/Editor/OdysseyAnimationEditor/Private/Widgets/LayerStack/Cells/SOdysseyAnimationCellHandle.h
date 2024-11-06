@@ -8,33 +8,33 @@
 class SOdysseyAnimationCellHandle : public SCompoundWidget
 {
 public:
-	DECLARE_DELEGATE_TwoParams(FOnDragEvent, const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
+    DECLARE_DELEGATE_TwoParams(FOnDragEvent, const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 
 public:
-	SLATE_BEGIN_ARGS(SOdysseyAnimationCellHandle)
-	{}
-		SLATE_DEFAULT_SLOT(FArguments, Content)
-		SLATE_EVENT(FOnDragEvent, OnDragStarted)
-		SLATE_EVENT(FOnDragEvent, OnDragged)
-		SLATE_EVENT(FOnDragEvent, OnDragStopped)
-	SLATE_END_ARGS()
+    SLATE_BEGIN_ARGS(SOdysseyAnimationCellHandle)
+    {}
+        SLATE_DEFAULT_SLOT(FArguments, Content)
+        SLATE_EVENT(FOnDragEvent, OnDragStarted)
+        SLATE_EVENT(FOnDragEvent, OnDragged)
+        SLATE_EVENT(FOnDragEvent, OnDragStopped)
+    SLATE_END_ARGS()
 
 public:
-	// Construct the widget
-	void Construct(const FArguments& InArgs);
+    // Construct the widget
+    void Construct(const FArguments& InArgs);
 
 public:
-	//SWidget overrides
-	virtual FReply OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
-	virtual FReply OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
-	virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
+    //SWidget overrides
+    virtual FReply OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
+    virtual FReply OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
+    virtual FReply OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent) override;
 
 protected:
-	virtual TOptional<EMouseCursor::Type> GetCursor() const override;
+    virtual TOptional<EMouseCursor::Type> GetCursor() const override;
 
 private:
-	bool mIsDragging;
-	FOnDragEvent mOnDragStarted;
-	FOnDragEvent mOnDragged;
-	FOnDragEvent mOnDragStopped;
+    bool mIsDragging;
+    FOnDragEvent mOnDragStarted;
+    FOnDragEvent mOnDragged;
+    FOnDragEvent mOnDragStopped;
 };

@@ -17,7 +17,7 @@ SLATE_IMPLEMENT_WIDGET(SOdysseyTextureLayerStack)
 void
 SOdysseyTextureLayerStack::PrivateRegisterAttributes(FSlateAttributeInitializer& AttributeInitializer)
 {
-	SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, mLayerStack, EInvalidateWidgetReason::Layout)
+    SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, mLayerStack, EInvalidateWidgetReason::Layout)
     .OnValueChanged(FSlateAttributeDescriptor::FAttributeValueChangedDelegate::CreateLambda(
         [](SWidget& Widget)
         {
@@ -39,7 +39,7 @@ SOdysseyTextureLayerStack::SOdysseyTextureLayerStack()
 void
 SOdysseyTextureLayerStack::Construct(const FArguments& InArgs, FOdysseyTextureEditorExtension* iTextureExtension)
 {
-	mExtension = iTextureExtension;
+    mExtension = iTextureExtension;
     mLayerStack.Assign(*this, InArgs._LayerStack);
 
     this->RebuildWidgets();
@@ -49,7 +49,7 @@ void
 SOdysseyTextureLayerStack::RebuildWidgets()
 {
     this->ChildSlot.DetachWidget();
-    
+
     TSharedPtr<SWidget> widget = SNullWidget::NullWidget;
 
     UOdysseyLayerStack* layerstack = mLayerStack.Get();
@@ -74,7 +74,7 @@ SOdysseyTextureLayerStack::RebuildWidgets()
     {
         /**
          * Display a PlaceHolder when no layerstack can be displayed
-         * 
+         *
          */
         widget = SNew(STextBlock)
         .Text(LOCTEXT("texture-layerstack.no-layerstack", "No Layer Stack can be displayed"));

@@ -23,11 +23,11 @@ void SOdysseyTextureDetails::Construct(const FArguments& InArgs)
     mTexture = InArgs._Texture;
 
     FDetailsViewArgs Args;
-	Args.bHideSelectionTip = true;
+    Args.bHideSelectionTip = true;
 
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	mTexturePropertiesWidget = PropertyModule.CreateDetailView(Args);
-	mTexturePropertiesWidget->SetObject(mTexture.Get());
+    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    mTexturePropertiesWidget = PropertyModule.CreateDetailView(Args);
+    mTexturePropertiesWidget->SetObject(mTexture.Get());
 
     ChildSlot
     [
@@ -168,34 +168,34 @@ SOdysseyTextureDetails::GetImportedText() const
         return FText();
 
     UVolumeTexture* VolumeTexture = Cast<UVolumeTexture>(texture);
-	UTextureRenderTargetVolume* VolumeTextureRT = Cast<UTextureRenderTargetVolume>(texture);
+    UTextureRenderTargetVolume* VolumeTextureRT = Cast<UTextureRenderTargetVolume>(texture);
 
-	const uint32 SurfaceWidth = (uint32)texture->GetSurfaceWidth();
-	const uint32 SurfaceHeight = (uint32)texture->GetSurfaceHeight();
-	const uint32 SurfaceDepth =
-		[&]() -> uint32
-		{
-			if (VolumeTexture)
-			{
-				return (uint32)VolumeTexture->GetSizeZ();
-			}
-			else if (VolumeTextureRT)
-			{
-				return (uint32)VolumeTextureRT->SizeZ;
-			}
-			return 1;
-		}();
-    
-	const uint32 ImportedWidth = FMath::Max<uint32>(SurfaceWidth, texture->Source.GetSizeX());
-	const uint32 ImportedHeight =  FMath::Max<uint32>(SurfaceHeight, texture->Source.GetSizeY());
-	const uint32 ImportedDepth = FMath::Max<uint32>(SurfaceDepth, VolumeTexture || VolumeTextureRT ? texture->Source.GetNumSlices() : 1);
+    const uint32 SurfaceWidth = (uint32)texture->GetSurfaceWidth();
+    const uint32 SurfaceHeight = (uint32)texture->GetSurfaceHeight();
+    const uint32 SurfaceDepth =
+        [&]() -> uint32
+        {
+            if (VolumeTexture)
+            {
+                return (uint32)VolumeTexture->GetSizeZ();
+            }
+            else if (VolumeTextureRT)
+            {
+                return (uint32)VolumeTextureRT->SizeZ;
+            }
+            return 1;
+        }();
+
+    const uint32 ImportedWidth = FMath::Max<uint32>(SurfaceWidth, texture->Source.GetSizeX());
+    const uint32 ImportedHeight =  FMath::Max<uint32>(SurfaceHeight, texture->Source.GetSizeY());
+    const uint32 ImportedDepth = FMath::Max<uint32>(SurfaceDepth, VolumeTexture || VolumeTextureRT ? texture->Source.GetNumSlices() : 1);
 
     FNumberFormattingOptions Options;
-	Options.UseGrouping = false;
-    
+    Options.UseGrouping = false;
+
     if (VolumeTexture || VolumeTextureRT)
-		return FText::Format( LOCTEXT("texture-details.quick-info.imported-3-dimensions", "Imported: {0}x{1}x{2}"), FText::AsNumber(ImportedWidth, &Options), FText::AsNumber(ImportedHeight, &Options), FText::AsNumber(ImportedDepth, &Options));
-    
+        return FText::Format( LOCTEXT("texture-details.quick-info.imported-3-dimensions", "Imported: {0}x{1}x{2}"), FText::AsNumber(ImportedWidth, &Options), FText::AsNumber(ImportedHeight, &Options), FText::AsNumber(ImportedDepth, &Options));
+
     return FText::Format( LOCTEXT("texture-details.quick-info.imported-2-dimensions", "Imported: {0}x{1}"), FText::AsNumber(ImportedWidth, &Options), FText::AsNumber(ImportedHeight, &Options));
 }
 
@@ -210,43 +210,43 @@ SOdysseyTextureDetails::GetCurrentText() const
 
     UVolumeTexture* VolumeTexture = Cast<UVolumeTexture>(texture);
     UTextureCube* TextureCube = Cast<UTextureCube>(texture);
-	UTextureRenderTargetVolume* VolumeTextureRT = Cast<UTextureRenderTargetVolume>(texture);
+    UTextureRenderTargetVolume* VolumeTextureRT = Cast<UTextureRenderTargetVolume>(texture);
 
-	const uint32 SurfaceWidth = (uint32)texture->GetSurfaceWidth();
-	const uint32 SurfaceHeight = (uint32)texture->GetSurfaceHeight();
-	const uint32 SurfaceDepth =
-		[&]() -> uint32
-		{
-			if (VolumeTexture)
-			{
-				return (uint32)VolumeTexture->GetSizeZ();
-			}
-			else if (VolumeTextureRT)
-			{
-				return (uint32)VolumeTextureRT->SizeZ;
-			}
-			return 1;
-		}();
-    
-	const FStreamableRenderResourceState SRRState = texture->GetStreamableResourceState();
-	const int32 ActualMipBias = SRRState.IsValid() ? (SRRState.ResidentFirstLODIdx() + SRRState.AssetLODBias) : texture->GetCachedLODBias();
-	const uint32 ActualWidth = FMath::Max<uint32>(SurfaceWidth >> ActualMipBias, 1);
-	const uint32 ActualHeight = FMath::Max<uint32>(SurfaceHeight >> ActualMipBias, 1);
-	const uint32 ActualDepth =  FMath::Max<uint32>(SurfaceDepth >> ActualMipBias, 1);
+    const uint32 SurfaceWidth = (uint32)texture->GetSurfaceWidth();
+    const uint32 SurfaceHeight = (uint32)texture->GetSurfaceHeight();
+    const uint32 SurfaceDepth =
+        [&]() -> uint32
+        {
+            if (VolumeTexture)
+            {
+                return (uint32)VolumeTexture->GetSizeZ();
+            }
+            else if (VolumeTextureRT)
+            {
+                return (uint32)VolumeTextureRT->SizeZ;
+            }
+            return 1;
+        }();
 
-	// Editor dimensions (takes user specified mip setting into account)
-	// const int32 MipLevel = FMath::Max(GetMipLevel(), 0);
-	const int32 MipLevel = 0; //TODO: manage this when we will be able to select the MipLevel to Preview
-	uint32 PreviewEffectiveTextureWidth = FMath::Max<uint32>(ActualWidth >> MipLevel, 1);
-	uint32 PreviewEffectiveTextureHeight = FMath::Max<uint32>(ActualHeight >> MipLevel, 1);;
-	uint32 PreviewEffectiveTextureDepth = FMath::Max<uint32>(ActualDepth >> MipLevel, 1);
+    const FStreamableRenderResourceState SRRState = texture->GetStreamableResourceState();
+    const int32 ActualMipBias = SRRState.IsValid() ? (SRRState.ResidentFirstLODIdx() + SRRState.AssetLODBias) : texture->GetCachedLODBias();
+    const uint32 ActualWidth = FMath::Max<uint32>(SurfaceWidth >> ActualMipBias, 1);
+    const uint32 ActualHeight = FMath::Max<uint32>(SurfaceHeight >> ActualMipBias, 1);
+    const uint32 ActualDepth =  FMath::Max<uint32>(SurfaceDepth >> ActualMipBias, 1);
+
+    // Editor dimensions (takes user specified mip setting into account)
+    // const int32 MipLevel = FMath::Max(GetMipLevel(), 0);
+    const int32 MipLevel = 0; //TODO: manage this when we will be able to select the MipLevel to Preview
+    uint32 PreviewEffectiveTextureWidth = FMath::Max<uint32>(ActualWidth >> MipLevel, 1);
+    uint32 PreviewEffectiveTextureHeight = FMath::Max<uint32>(ActualHeight >> MipLevel, 1);;
+    uint32 PreviewEffectiveTextureDepth = FMath::Max<uint32>(ActualDepth >> MipLevel, 1);
 
     FNumberFormattingOptions Options;
-	Options.UseGrouping = false;
-    
+    Options.UseGrouping = false;
+
     if (VolumeTexture || VolumeTextureRT)
         return FText::Format( LOCTEXT("texture-details.quick-info.displayed-3-dimensions", "Displayed: {0}x{1}x{2}"), FText::AsNumber(PreviewEffectiveTextureWidth, &Options ), FText::AsNumber(PreviewEffectiveTextureHeight, &Options), FText::AsNumber(PreviewEffectiveTextureDepth, &Options));
-    
+
     FText CubemapAdd;
     if(TextureCube)
     {
@@ -265,37 +265,37 @@ SOdysseyTextureDetails::GetMaxInGameText() const
 
     UTexture2D* Texture2D = Cast<UTexture2D>(texture);
     UTextureCube* TextureCube = Cast<UTextureCube>(texture);
-	UVolumeTexture* VolumeTexture = Cast<UVolumeTexture>(texture);
-	UTextureRenderTargetVolume* VolumeTextureRT = Cast<UTextureRenderTargetVolume>(texture);
+    UVolumeTexture* VolumeTexture = Cast<UVolumeTexture>(texture);
+    UTextureRenderTargetVolume* VolumeTextureRT = Cast<UTextureRenderTargetVolume>(texture);
 
-	const uint32 SurfaceWidth = (uint32)texture->GetSurfaceWidth();
-	const uint32 SurfaceHeight = (uint32)texture->GetSurfaceHeight();
-	const uint32 SurfaceDepth =
-		[&]() -> uint32
-		{
-			if (VolumeTexture)
-			{
-				return (uint32)VolumeTexture->GetSizeZ();
-			}
-			else if (VolumeTextureRT)
-			{
-				return (uint32)VolumeTextureRT->SizeZ;
-			}
-			return 1;
-		}();
-    
-	// In game max bias and dimensions
-	const int32 MaxResMipBias = Texture2D ? (Texture2D->GetNumMips() - Texture2D->GetNumMipsAllowed(true)) : texture->GetCachedLODBias();
-	const uint32 MaxInGameWidth = FMath::Max<uint32>(SurfaceWidth >> MaxResMipBias, 1);
-	const uint32 MaxInGameHeight = FMath::Max<uint32>(SurfaceHeight >> MaxResMipBias, 1);
-	const uint32 MaxInGameDepth = FMath::Max<uint32>(SurfaceDepth >> MaxResMipBias, 1);
+    const uint32 SurfaceWidth = (uint32)texture->GetSurfaceWidth();
+    const uint32 SurfaceHeight = (uint32)texture->GetSurfaceHeight();
+    const uint32 SurfaceDepth =
+        [&]() -> uint32
+        {
+            if (VolumeTexture)
+            {
+                return (uint32)VolumeTexture->GetSizeZ();
+            }
+            else if (VolumeTextureRT)
+            {
+                return (uint32)VolumeTextureRT->SizeZ;
+            }
+            return 1;
+        }();
+
+    // In game max bias and dimensions
+    const int32 MaxResMipBias = Texture2D ? (Texture2D->GetNumMips() - Texture2D->GetNumMipsAllowed(true)) : texture->GetCachedLODBias();
+    const uint32 MaxInGameWidth = FMath::Max<uint32>(SurfaceWidth >> MaxResMipBias, 1);
+    const uint32 MaxInGameHeight = FMath::Max<uint32>(SurfaceHeight >> MaxResMipBias, 1);
+    const uint32 MaxInGameDepth = FMath::Max<uint32>(SurfaceDepth >> MaxResMipBias, 1);
 
     FNumberFormattingOptions Options;
-	Options.UseGrouping = false;
-    
+    Options.UseGrouping = false;
+
     if (VolumeTexture || VolumeTextureRT)
-		return FText::Format( LOCTEXT("texture-details.quick-info.max-in-game-3-dimensions", "Max In-Game: {0}x{1}x{2}"), FText::AsNumber(MaxInGameWidth, &Options), FText::AsNumber(MaxInGameHeight, &Options), FText::AsNumber(MaxInGameDepth, &Options));
-    
+        return FText::Format( LOCTEXT("texture-details.quick-info.max-in-game-3-dimensions", "Max In-Game: {0}x{1}x{2}"), FText::AsNumber(MaxInGameWidth, &Options), FText::AsNumber(MaxInGameHeight, &Options), FText::AsNumber(MaxInGameDepth, &Options));
+
 
     FText CubemapAdd;
     if(TextureCube)
@@ -316,9 +316,9 @@ SOdysseyTextureDetails::GetSizeText() const
     // Texture asset size
     const uint32 Size = (texture->GetResourceSizeBytes(EResourceSizeMode::Exclusive) + 512) / 1024;
 
-	FNumberFormattingOptions SizeOptions;
-	SizeOptions.UseGrouping = false;
-	SizeOptions.MaximumFractionalDigits = 0;
+    FNumberFormattingOptions SizeOptions;
+    SizeOptions.UseGrouping = false;
+    SizeOptions.MaximumFractionalDigits = 0;
 
     return FText::Format(LOCTEXT("texture-details.quick-info.resource-size", "Resource Size: {0} Kb"), FText::AsNumber(Size, &SizeOptions));
 }
@@ -345,54 +345,54 @@ SOdysseyTextureDetails::GetFormatText() const
         return FText();
 
     UTexture2D* Texture2D = Cast<UTexture2D>(texture);
-	UTextureRenderTarget2D* Texture2DRT = Cast<UTextureRenderTarget2D>(texture);
-	UTextureCube* TextureCube = Cast<UTextureCube>(texture);
-	UTexture2DArray* Texture2DArray = Cast<UTexture2DArray>(texture);
-	UTextureRenderTarget2DArray* Texture2DArrayRT = Cast<UTextureRenderTarget2DArray>(texture);
-	UTexture2DDynamic* Texture2DDynamic = Cast<UTexture2DDynamic>(texture);
-	UVolumeTexture* VolumeTexture = Cast<UVolumeTexture>(texture);
-	UTextureRenderTargetVolume* VolumeTextureRT = Cast<UTextureRenderTargetVolume>(texture);
+    UTextureRenderTarget2D* Texture2DRT = Cast<UTextureRenderTarget2D>(texture);
+    UTextureCube* TextureCube = Cast<UTextureCube>(texture);
+    UTexture2DArray* Texture2DArray = Cast<UTexture2DArray>(texture);
+    UTextureRenderTarget2DArray* Texture2DArrayRT = Cast<UTextureRenderTarget2DArray>(texture);
+    UTexture2DDynamic* Texture2DDynamic = Cast<UTexture2DDynamic>(texture);
+    UVolumeTexture* VolumeTexture = Cast<UVolumeTexture>(texture);
+    UTextureRenderTargetVolume* VolumeTextureRT = Cast<UTextureRenderTargetVolume>(texture);
 
     int32 TextureFormatIndex = PF_MAX;
-	
-	if (Texture2D)
-	{
-		//TextureFormatIndex = Texture2D->GetPixelFormat(SpecifiedLayer);
-        TextureFormatIndex = Texture2D->GetPixelFormat(0);
-	}
-	else if (TextureCube)
-	{
-		TextureFormatIndex = TextureCube->GetPixelFormat();
-	}
-	else if (Texture2DArray) 
-	{
-		TextureFormatIndex = Texture2DArray->GetPixelFormat();
-	}
-	else if (Texture2DArrayRT)
-	{
-		TextureFormatIndex = Texture2DArrayRT->GetFormat();
-	}
-	else if (Texture2DRT)
-	{
-		TextureFormatIndex = Texture2DRT->GetFormat();
-	}
-	else if (Texture2DDynamic)
-	{
-		TextureFormatIndex = Texture2DDynamic->Format;
-	}
-	else if (VolumeTexture)
-	{
-		TextureFormatIndex = VolumeTexture->GetPixelFormat();
-	}
-	else if (VolumeTextureRT)
-	{
-		TextureFormatIndex = VolumeTextureRT->GetFormat();
-	}
 
-	if (TextureFormatIndex == PF_MAX)
+    if (Texture2D)
+    {
+        //TextureFormatIndex = Texture2D->GetPixelFormat(SpecifiedLayer);
+        TextureFormatIndex = Texture2D->GetPixelFormat(0);
+    }
+    else if (TextureCube)
+    {
+        TextureFormatIndex = TextureCube->GetPixelFormat();
+    }
+    else if (Texture2DArray)
+    {
+        TextureFormatIndex = Texture2DArray->GetPixelFormat();
+    }
+    else if (Texture2DArrayRT)
+    {
+        TextureFormatIndex = Texture2DArrayRT->GetFormat();
+    }
+    else if (Texture2DRT)
+    {
+        TextureFormatIndex = Texture2DRT->GetFormat();
+    }
+    else if (Texture2DDynamic)
+    {
+        TextureFormatIndex = Texture2DDynamic->Format;
+    }
+    else if (VolumeTexture)
+    {
+        TextureFormatIndex = VolumeTexture->GetPixelFormat();
+    }
+    else if (VolumeTextureRT)
+    {
+        TextureFormatIndex = VolumeTextureRT->GetFormat();
+    }
+
+    if (TextureFormatIndex == PF_MAX)
         return FText();
-	
-	return FText::Format(LOCTEXT("texture-details.quick-info.format", "Format: {0}"), FText::FromString(GPixelFormats[TextureFormatIndex].Name));
+
+    return FText::Format(LOCTEXT("texture-details.quick-info.format", "Format: {0}"), FText::FromString(GPixelFormats[TextureFormatIndex].Name));
 }
 
 FText
@@ -416,7 +416,7 @@ SOdysseyTextureDetails::GetHasAlphaChannelText() const
 
     if (!Texture2D)
         return FText();
-        
+
     return FText::Format(LOCTEXT("texture-details.quick-info.has-alpha-channel", "Has Alpha Channel: {0}"),
         Texture2D->HasAlphaChannel() ? LOCTEXT("texture-details.quick-info.has-alpha-channel.true", "True") : LOCTEXT("texture-details.quick-info.has-alpha-channel.false", "False"));
 }
@@ -429,47 +429,47 @@ SOdysseyTextureDetails::GetNumMipsText() const
         return FText();
 
     UTexture2D* Texture2D = Cast<UTexture2D>(texture);
-	UTextureRenderTarget2D* Texture2DRT = Cast<UTextureRenderTarget2D>(texture);
-	UTextureCube* TextureCube = Cast<UTextureCube>(texture);
-	UTexture2DArray* Texture2DArray = Cast<UTexture2DArray>(texture);
-	UTextureRenderTarget2DArray* Texture2DArrayRT = Cast<UTextureRenderTarget2DArray>(texture);
-	UTexture2DDynamic* Texture2DDynamic = Cast<UTexture2DDynamic>(texture);
-	UVolumeTexture* VolumeTexture = Cast<UVolumeTexture>(texture);
-	UTextureRenderTargetVolume* VolumeTextureRT = Cast<UTextureRenderTargetVolume>(texture);
+    UTextureRenderTarget2D* Texture2DRT = Cast<UTextureRenderTarget2D>(texture);
+    UTextureCube* TextureCube = Cast<UTextureCube>(texture);
+    UTexture2DArray* Texture2DArray = Cast<UTexture2DArray>(texture);
+    UTextureRenderTarget2DArray* Texture2DArrayRT = Cast<UTextureRenderTarget2DArray>(texture);
+    UTexture2DDynamic* Texture2DDynamic = Cast<UTexture2DDynamic>(texture);
+    UVolumeTexture* VolumeTexture = Cast<UVolumeTexture>(texture);
+    UTextureRenderTargetVolume* VolumeTextureRT = Cast<UTextureRenderTargetVolume>(texture);
 
     int32 NumMips = 1;
-	if (Texture2D)
-	{
-		NumMips = Texture2D->GetNumMips();
-	}
-	else if (TextureCube)
-	{
-		NumMips = TextureCube->GetNumMips();
-	}
-	else if (Texture2DArray) 
-	{
-		NumMips = Texture2DArray->GetNumMips();
-	}
-	else if (Texture2DArrayRT)
-	{
-		NumMips = Texture2DArrayRT->GetNumMips();
-	}
-	else if (Texture2DRT)
-	{
-		NumMips = Texture2DRT->GetNumMips();
-	}
-	else if (Texture2DDynamic)
-	{
-		NumMips = Texture2DDynamic->NumMips;
-	}
-	else if (VolumeTexture)
-	{
-		NumMips = VolumeTexture->GetNumMips();
-	}
-	else if (VolumeTextureRT)
-	{
-		NumMips = VolumeTextureRT->GetNumMips();
-	}
+    if (Texture2D)
+    {
+        NumMips = Texture2D->GetNumMips();
+    }
+    else if (TextureCube)
+    {
+        NumMips = TextureCube->GetNumMips();
+    }
+    else if (Texture2DArray)
+    {
+        NumMips = Texture2DArray->GetNumMips();
+    }
+    else if (Texture2DArrayRT)
+    {
+        NumMips = Texture2DArrayRT->GetNumMips();
+    }
+    else if (Texture2DRT)
+    {
+        NumMips = Texture2DRT->GetNumMips();
+    }
+    else if (Texture2DDynamic)
+    {
+        NumMips = Texture2DDynamic->NumMips;
+    }
+    else if (VolumeTexture)
+    {
+        NumMips = VolumeTexture->GetNumMips();
+    }
+    else if (VolumeTextureRT)
+    {
+        NumMips = VolumeTextureRT->GetNumMips();
+    }
 
     return FText::Format(LOCTEXT("texture-details.quick-info.numl-mips", "Number of Mips: {0}"), FText::AsNumber(NumMips));
 }
@@ -477,7 +477,7 @@ SOdysseyTextureDetails::GetNumMipsText() const
 EVisibility
 SOdysseyTextureDetails::GetHasAlphaChannelVisibility() const
 {
-	UTexture2D* Texture2D = Cast<UTexture2D>(mTexture.Get());
+    UTexture2D* Texture2D = Cast<UTexture2D>(mTexture.Get());
     return Texture2D ? EVisibility::Visible : EVisibility::Collapsed;
 }
 

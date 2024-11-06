@@ -58,7 +58,7 @@ FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext
     // -> inbetweens in inbetween mode.
     FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
 
-    // draw selection box only if we restrict erasure to the selection 
+    // draw selection box only if we restrict erasure to the selection
     if( iScene->GetEngine()->GetSelectedObjectList().size() )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );

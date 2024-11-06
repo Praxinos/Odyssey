@@ -23,7 +23,7 @@ class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageVector
 public:
     /**
      * @brief Delegate called when something changed the result of RenderImage()
-     * 
+     *
      */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsColoredChanged, UOdysseyAnimationLayerImageVector*)
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnIsWireframeChanged, UOdysseyAnimationLayerImageVector*)
@@ -34,10 +34,10 @@ public:
 
 public:
     // UObject overrides
-	virtual void PostInitProperties() override;
-	virtual void PostLoad() override;
-	virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
-	virtual void Serialize(FArchive& Ar) override;
+    virtual void PostInitProperties() override;
+    virtual void PostLoad() override;
+    virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
+    virtual void Serialize(FArchive& Ar) override;
 
 public:
     //UOdysseyLayer overrides
@@ -47,12 +47,12 @@ public:
 public:
     // vector data shared between all cells
     FOdysseyVectorSharedEnv* GetSharedEnv();
-	void UpdateSharedEnv();
+    void UpdateSharedEnv();
 
 public:
-	//FOdysseyImageRenderingAbility overrides
-	virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
-	virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
+    //FOdysseyImageRenderingAbility overrides
+    virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
+    virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
 
 public:
     // Implements Interface IOdysseyVectorAnimationLayer
@@ -63,11 +63,11 @@ public:
 protected:
     void IsColoredChanged();
     void IsWireframeChanged();
-	virtual void CellsChanged(bool iIsInteractive) override;
+    virtual void CellsChanged(bool iIsInteractive) override;
     virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
 
 public:
-	
+
 #ifdef WITH_EDITOR
 
 virtual TArray<FName> GetRows() const override;

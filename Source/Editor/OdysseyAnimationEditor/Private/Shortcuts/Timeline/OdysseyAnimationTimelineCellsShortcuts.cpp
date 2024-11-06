@@ -114,7 +114,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Cut()
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.shortcuts.cut-frame", "Cut Frames"));
 #endif
-    
+
     FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
     TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = MakeShared<FOdysseyAnimationCellClipboardData>(selectedCells);
     odysseyEditorModule.GetClipboard()->SetData(clipboardData);
@@ -135,7 +135,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Paste()
     TSharedPtr<FOdysseyAnimationCellClipboardData> clipboardData = odysseyEditorModule.GetClipboard()->GetData<FOdysseyAnimationCellClipboardData>();
     if (!clipboardData)
         return;
-    
+
     if (!clipboardData->CanPaste(layer))
         return;
 
@@ -145,7 +145,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Paste()
 
     UOdysseyAnimation* animation = layer->GetAnimation();
     clipboardData->Paste(layer, animation->CurrentFrame);
-    
+
     FOdysseyAnimationCurrentFrameMutator currentFrameMutator(animation);
     currentFrameMutator.Set(animation->CurrentFrame);
     currentFrameMutator.Commit();
@@ -187,8 +187,8 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_Delete()
 
     layer->RemoveCells(selectedCells);
 
-	if (layer->GetCells().IsEmpty())
-		layer->AddCell(layer->DefaultCellClass);
+    if (layer->GetCells().IsEmpty())
+        layer->AddCell(layer->DefaultCellClass);
 }
 
 
@@ -213,7 +213,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
         if (!cell)
             return;
-            
+
         selectedCells.Add(cell);
     }
 
@@ -236,9 +236,9 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_ConvertToStaggerCell()
 
     for (UOdysseyAnimationCell* cell : selectedCells)
     {
-		UOdysseyAnimationCell* staggerCell = layer->AddCell(UOdysseyAnimationCellImageStagger::StaticClass(), cell->IndexInLayer);
-		FOdysseyObjectEditorUtils::SetPropertyValue(staggerCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cell->Exposure);
-		layer->RemoveCell(cell);
+        UOdysseyAnimationCell* staggerCell = layer->AddCell(UOdysseyAnimationCellImageStagger::StaticClass(), cell->IndexInLayer);
+        FOdysseyObjectEditorUtils::SetPropertyValue(staggerCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cell->Exposure);
+        layer->RemoveCell(cell);
     }
 }
 
@@ -262,10 +262,10 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellExposure()
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
         if (!cell)
             return;
-            
+
         selectedCells.Add(cell);
     }
-        
+
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.increase-selected-cells-exposure", "Increase Selected Cells Exposure"));
 #endif
@@ -275,7 +275,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_IncreaseCellExposure()
 
     for (UOdysseyAnimationCell* selectedCell : selectedCells)
     {
-		FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), selectedCell->Exposure + 1);
+        FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), selectedCell->Exposure + 1);
     }
 }
 
@@ -299,10 +299,10 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellExposure()
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
         if (!cell)
             return;
-            
+
         selectedCells.Add(cell);
     }
-        
+
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline-cells.transaction.decrease-selected-cells-exposure", "Decrease Selected Cells Exposure"));
 #endif
@@ -312,7 +312,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_DecreaseCellExposure()
 
     for (UOdysseyAnimationCell* selectedCell : selectedCells)
     {
-		FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), FMath::Max(1, selectedCell->Exposure - 1));
+        FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), FMath::Max(1, selectedCell->Exposure - 1));
     }
 }
 
@@ -336,14 +336,14 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure()
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
         if (!cell)
             return;
-            
+
         selectedCells.Add(cell);
     }
 
     int value = 1;
     SGenericDialogWidget::OpenDialog(
         LOCTEXT("timeline-cells.dialog.set-selected-cells-exposure.title", "Set Selected Cells Exposure"),
-        
+
         SNew(SNumericEntryBox<int>)
         .Value_Lambda([&value]() { return value; })
         .AllowSpin(true)
@@ -379,7 +379,7 @@ FOdysseyAnimationTimelineCellsShortcuts::Action_SetCellExposure()
 
                 for (UOdysseyAnimationCell* selectedCell : selectedCells)
                 {
-					FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), FMath::Max(1, value));
+                    FOdysseyObjectEditorUtils::SetPropertyValue(selectedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), FMath::Max(1, value));
                 }
             }
         ),
@@ -443,7 +443,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_SelectAll()
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
         return false;
-        
+
     //Authorize SelectAll only if there is already an active selection
     const TArray<UOdysseyAnimationCell*> selectedCells = mLayerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
@@ -472,7 +472,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_Delete()
 bool
 FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell()
 {
-    
+
     UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(mLayerStack->CurrentLayer.Get());
     if (!layer)
         return false;
@@ -490,7 +490,7 @@ FOdysseyAnimationTimelineCellsShortcuts::CanAction_ConvertToStaggerCell()
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
         if (!cell)
             return false;
-            
+
         selectedCells.Add(cell);
     }
     selectedCells = selectedCells.FilterByPredicate(

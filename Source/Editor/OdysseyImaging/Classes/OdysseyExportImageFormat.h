@@ -10,15 +10,15 @@
 UENUM(BlueprintType)
 enum class EOdysseyExportImageFormat : uint8
 {
-	PNG,
-	BMP,
-	TGA,
-	Jpeg
+    PNG,
+    BMP,
+    TGA,
+    Jpeg
 };
 
 class ODYSSEYIMAGING_API FOdysseyExportImageFormat
 {
 public:
-	static ::ULIS::eFileFormat GetFileFormat(EOdysseyExportImageFormat iFormat);
-	static FString GetFileFormatExtension(EOdysseyExportImageFormat iFormat);
+    static ::ULIS::eFileFormat GetFileFormat(EOdysseyExportImageFormat iFormat);
+    static FString GetFileFormatExtension(EOdysseyExportImageFormat iFormat);
 };

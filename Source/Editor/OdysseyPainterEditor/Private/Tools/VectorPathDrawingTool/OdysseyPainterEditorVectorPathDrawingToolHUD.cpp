@@ -44,7 +44,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::GetStitchedPointArray()
     return mStitchedPointArray;
 }
 
-void 
+void
 FOdysseyPainterEditorVectorPathDrawingToolHUD::DrawEdge( BLContext* iBLContext
                                                        , FTracerEdge* iPrevEdge
                                                        , FTracerEdge* iCurrEdge

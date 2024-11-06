@@ -14,7 +14,7 @@ class UOdysseyViewportDrawingEditorBlueprintLibrary :
     /** Starts an analytics session without any custom attributes specified */
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static void ActivateViewportEditorMode(const FName& EditorMode);
-    
+
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetIliadViewportDrawingEditorMode();
 

@@ -95,7 +95,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPathTracer
     public:
         ~FOdysseyVectorPathTracer();
         FOdysseyVectorPathTracer();
-  
+
         FTracerBezier& GetBestBezier();
         FTracerBezier& GetRawBezier();
         void AttachPath( FOdysseyVectorPath* iCubicPath );

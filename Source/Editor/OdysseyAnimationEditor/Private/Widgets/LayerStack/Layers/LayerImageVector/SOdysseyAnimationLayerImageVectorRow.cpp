@@ -31,16 +31,16 @@ void SOdysseyAnimationLayerImageVectorRow::Construct(
 {
     ensure(iAnimationLayerImageVector);
     mAnimationLayerImageVector = iAnimationLayerImageVector;
-	mEditor = InArgs._PainterEditor;
+    mEditor = InArgs._PainterEditor;
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments()
-			.TimelinePosition(InArgs._TimelinePosition),
+            .TimelinePosition(InArgs._TimelinePosition),
         iOwnerTableView,
-		iAnimationLayerImageVector
+        iAnimationLayerImageVector
     );
 
-	SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
+    SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -48,65 +48,65 @@ void SOdysseyAnimationLayerImageVectorRow::Construct(
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorRow::GenerateWidget( const FName& iRow, const FName& iColumn )
 {
-	if (iRow == "Inbetweening")
-	{
-		if (iColumn == "Header")
-		{
-			return GenerateInbetweeningRowHeaderWidget();
-		}
-	}
+    if (iRow == "Inbetweening")
+    {
+        if (iColumn == "Header")
+        {
+            return GenerateInbetweeningRowHeaderWidget();
+        }
+    }
 
-	return SOdysseyAnimationLayerRow::GenerateWidget(iRow, iColumn);
+    return SOdysseyAnimationLayerRow::GenerateWidget(iRow, iColumn);
 }
 
 TArray<TSharedPtr<SWidget>>
 SOdysseyAnimationLayerImageVectorRow::GenerateMainRowHeaderOptionWidgets()
 {
-	TArray<TSharedPtr<SWidget>> widgets = SOdysseyAnimationLayerRow::GenerateMainRowHeaderOptionWidgets();
+    TArray<TSharedPtr<SWidget>> widgets = SOdysseyAnimationLayerRow::GenerateMainRowHeaderOptionWidgets();
 
     const FCheckBoxStyle* coloredToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.ColoredToggle");
     const FCheckBoxStyle* wireframeToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Texture.WireframeToggle");
 
-	//AlphaLock
-	widgets.Add(
-		//WireframeLock
-		SNew(SCheckBox)
-		.Style(wireframeToggleStyle)
-		.OnCheckStateChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnIsWireframeCheckStateChanged)
-		.IsChecked(this, &SOdysseyAnimationLayerImageVectorRow::GetIsWireframeIsChecked)
-	);
+    //AlphaLock
+    widgets.Add(
+        //WireframeLock
+        SNew(SCheckBox)
+        .Style(wireframeToggleStyle)
+        .OnCheckStateChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnIsWireframeCheckStateChanged)
+        .IsChecked(this, &SOdysseyAnimationLayerImageVectorRow::GetIsWireframeIsChecked)
+    );
 
-	widgets.Add(
-		//ColoredLock
-		SNew(SCheckBox)
-		.Style(coloredToggleStyle)
-		.OnCheckStateChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnIsColoredCheckStateChanged)
-		.IsChecked(this, &SOdysseyAnimationLayerImageVectorRow::GetIsColoredIsChecked)
-	);
+    widgets.Add(
+        //ColoredLock
+        SNew(SCheckBox)
+        .Style(coloredToggleStyle)
+        .OnCheckStateChanged(this, &SOdysseyAnimationLayerImageVectorRow::OnIsColoredCheckStateChanged)
+        .IsChecked(this, &SOdysseyAnimationLayerImageVectorRow::GetIsColoredIsChecked)
+    );
 
-	return widgets;
+    return widgets;
 }
 
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorRow::GenerateInbetweeningRowHeaderWidget()
 {
-	return SAssignNew( mInbetweeningHeader, SOdysseyAnimationTimelineInbetweeningHeader, mAnimationLayerImageVector)
-		.PainterEditor(mEditor);
+    return SAssignNew( mInbetweeningHeader, SOdysseyAnimationTimelineInbetweeningHeader, mAnimationLayerImageVector)
+        .PainterEditor(mEditor);
 }
 
 EVisibility
 SOdysseyAnimationLayerImageVectorRow::GetRowVisibility(FName iRow) const
 {
-	if (iRow == "Inbetweening")
-	{
-		TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
-		if (!editor)
-			return EVisibility::Collapsed;
+    if (iRow == "Inbetweening")
+    {
+        TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
+        if (!editor)
+            return EVisibility::Collapsed;
 
-		return ( editor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) ? EVisibility::Visible : EVisibility::Collapsed;
-	}
+        return ( editor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) ? EVisibility::Visible : EVisibility::Collapsed;
+    }
 
-	return SOdysseyAnimationLayerRow::GetRowVisibility(iRow);
+    return SOdysseyAnimationLayerRow::GetRowVisibility(iRow);
 }
 
 TSharedPtr<SOdysseyAnimationTimelineInbetweeningHeader>
@@ -132,13 +132,13 @@ SOdysseyAnimationLayerImageVectorRow::OnIsColoredCheckStateChanged( ECheckBoxSta
 ECheckBoxState
 SOdysseyAnimationLayerImageVectorRow::GetIsWireframeIsChecked() const
 {
-	return mAnimationLayerImageVector->IsWireframe ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mAnimationLayerImageVector->IsWireframe ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 ECheckBoxState
 SOdysseyAnimationLayerImageVectorRow::GetIsColoredIsChecked() const
 {
-	return mAnimationLayerImageVector->IsColored ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mAnimationLayerImageVector->IsColored ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -44,7 +44,7 @@ ToNonOverlappingRects(const TArray< ::ULIS::FRectI >& iRects)
         rectsToExclude.PushBack(iRects.Last());
     }
 
-        
+
     for (int j = 0; j < rectsToExclude.Size(); j++)
     {
         if ( rectsToExclude[j].Area() > 0 )

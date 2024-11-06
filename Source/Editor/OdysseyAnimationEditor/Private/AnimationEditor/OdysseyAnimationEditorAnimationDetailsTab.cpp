@@ -27,7 +27,7 @@ FOdysseyAnimationEditorAnimationDetailsTab::~FOdysseyAnimationEditorAnimationDet
 }
 
 FOdysseyAnimationEditorAnimationDetailsTab::FOdysseyAnimationEditorAnimationDetailsTab(FOdysseyAnimationEditorExtension* iExtension)
-	: FOdysseyEditorTab( LOCTEXT( "animation-details-tab.name", "Animation Details" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Trombone16" ))
+    : FOdysseyEditorTab( LOCTEXT( "animation-details-tab.name", "Animation Details" ), FSlateIcon( "OdysseyStyle", "PainterEditor.Trombone16" ))
     , mExtension(iExtension)
 {
 }

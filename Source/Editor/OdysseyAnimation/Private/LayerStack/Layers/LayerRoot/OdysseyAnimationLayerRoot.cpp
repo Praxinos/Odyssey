@@ -6,5 +6,5 @@
 UOdysseyAnimationLayerRoot::UOdysseyAnimationLayerRoot()
 {
     CanHaveChildren = true;
-	HasLighttable = false;
+    HasLighttable = false;
 }

@@ -44,7 +44,7 @@ public:
 
     //Constructor
     UOdysseyPainterEditorRasterPaintBucketTool();
-    
+
     void Initialize(FOdysseyPaintEngine* iPaintEngine);
 
     virtual bool OnKeyDown( const FKey& iKey ) override;
@@ -79,7 +79,7 @@ private:
 
     TSharedPtr<SWidget> CreateContextMenu(TSharedPtr<::ULIS::FBlock> iBlock, const FOdysseyPoint& iPointInTexture);
     void IncludeColor( ::ULIS::FColor iColor );
-    
+
     void OnRasterSelectionChanged();
 
 public:
@@ -95,7 +95,7 @@ public:
     float GapTolerance = 2; //pixels positive only
     UPROPERTY( EditAnywhere, Category=RasterPaintBucketTool)
     TArray<FLinearColor> IncludeColors;
-    
+
     UPROPERTY(EditInstanceOnly, Category="Blending", meta=(ShowOnlyInnerProperties))
     FOdysseyBlendParameters BlendParameters;
 

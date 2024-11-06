@@ -62,21 +62,21 @@ FOdysseyViewportDrawingEditorScreenBasedAdapter::SetTexture(UTexture* iTexture)
 
 void
 FOdysseyViewportDrawingEditorScreenBasedAdapter::InitializeRenderTarget()
-{	
-	UTexture* texture = GetTexture();
+{
+    UTexture* texture = GetTexture();
     if (!texture)
         return;
 
     const int32 textureWidth = texture->GetSurfaceWidth();
     const int32 textureHeight = texture->GetSurfaceHeight();
-    
+
     mPaintingTexture2DRenderTarget = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
     mPaintingTexture2DRenderTarget->ClearColor = FLinearColor(0, 0, 0, 0);
     mPaintingTexture2DRenderTarget->bNeedsTwoCopies = false;
     mPaintingTexture2DRenderTarget->InitAutoFormat(textureWidth, textureHeight);
     mPaintingTexture2DRenderTarget->UpdateResourceImmediate();
     mPaintingTexture2DRenderTarget->AddToRoot();
-    
+
     mStrokeBufferRenderTarget2D = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
     mStrokeBufferRenderTarget2D->ClearColor = FLinearColor(0, 0, 0, 0);
     mStrokeBufferRenderTarget2D->bNeedsTwoCopies = false;
@@ -92,17 +92,17 @@ FOdysseyViewportDrawingEditorScreenBasedAdapter::InitializeRenderTarget()
     mSeamRenderTarget2D->AddToRoot();
 
     FOdysseyViewportDrawingEditorUtils::GenerateSeamMask(mExtension->Component(), mExtension->GetUVIndexUsedByCurrentTexture(), mSeamRenderTarget2D, texture, mPaintingTexture2DRenderTarget);
-	FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(texture, mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->GetFeatureLevel());
+    FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(texture, mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->GetFeatureLevel());
 }
 
 void
 FOdysseyViewportDrawingEditorScreenBasedAdapter::FinalizeRenderTarget()
 {
-	//Destroy the render target
-	if (mPaintingTexture2DRenderTarget && mPaintingTexture2DRenderTarget->IsValidLowLevel())
+    //Destroy the render target
+    if (mPaintingTexture2DRenderTarget && mPaintingTexture2DRenderTarget->IsValidLowLevel())
     {
-		mPaintingTexture2DRenderTarget->ConditionalBeginDestroy();
-    	mPaintingTexture2DRenderTarget = nullptr;
+        mPaintingTexture2DRenderTarget->ConditionalBeginDestroy();
+        mPaintingTexture2DRenderTarget = nullptr;
     }
 
     if ( mStrokeBufferRenderTarget2D && mStrokeBufferRenderTarget2D->IsValidLowLevel())
@@ -151,7 +151,7 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::RenderInteractorWidget(con
 
         xScreenAxis = xDeproj - originDeproj;
         yScreenAxis = yDeproj - originDeproj;
-        
+
         mousePosInWorld += zScreenAxis;
 
         const FLinearColor brushCueColor = FLinearColor(1.0f, 1.0f, 0.3f);
@@ -225,7 +225,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
                                               FMath::Min( FMath::Max3(iTriangles[i].TrianglePoints[0].X, iTriangles[i].TrianglePoints[1].X, iTriangles[i].TrianglePoints[2].X) + 1, iMaxWidth ),
                                               FMath::Min( FMath::Max3(iTriangles[i].TrianglePoints[0].Y, iTriangles[i].TrianglePoints[1].Y, iTriangles[i].TrianglePoints[2].Y) + 1, iMaxHeight ) ));
     }
-    
+
     TArray< ::ULIS::FRectI > finalRects;
     ::ULIS::TArray<::ULIS::FRectI> rectsToExclude;
     if( rects.Num() != 0 )
@@ -259,7 +259,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
         rectsToExclude.PushBack(rects.Last());
     }
 
-        
+
     for (int j = 0; j < rectsToExclude.Size(); j++)
     {
         if ( rectsToExclude[j].Area() > 0 )
@@ -268,7 +268,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorScreenBasedAdapter::GetMinim
         }
     }
 
-    
+
     return finalRects;
 }
 
@@ -472,12 +472,12 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
             [this, strokeRenderTargetResource](FRHICommandListImmediate& RHICmdList)
             {
                 // Copy (resolve) the rendered image from the frame buffer to its render target texture
-				TransitionAndCopyTexture(
-					RHICmdList,
-                    strokeRenderTargetResource->GetRenderTargetTexture(),		// Source texture
+                TransitionAndCopyTexture(
+                    RHICmdList,
+                    strokeRenderTargetResource->GetRenderTargetTexture(),        // Source texture
                     strokeRenderTargetResource->TextureRHI,
-					{}
-				);									// Resolve parameters
+                    {}
+                );                                    // Resolve parameters
             });
     }
 
@@ -501,7 +501,7 @@ float FOdysseyViewportDrawingEditorScreenBasedAdapter::GetStampQuality()
     }
 
     // Draw a quad to copy the texture over to the render target
-    TArray< FCanvasUVTri >	TriangleList;
+    TArray< FCanvasUVTri >    TriangleList;
     FCanvasUVTri SingleTri;
     SingleTri.V0_Pos = FVector2D(MinX, MinY);
     SingleTri.V0_UV = FVector2D(MinU, MinV);
@@ -647,7 +647,7 @@ void FOdysseyViewportDrawingEditorScreenBasedAdapter::Tick(float iDelta)
 
     if ( mPaintingTexture2DRenderTarget )
         FOdysseyViewportDrawingEditorUtils::CopyTextureToRenderTargetTexture(mTexture, mPaintingTexture2DRenderTarget, GEditor->GetEditorWorldContext().World()->GetFeatureLevel());
-        
+
     if (!mLastKnownViewport)
         return;
 

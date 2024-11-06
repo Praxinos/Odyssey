@@ -89,7 +89,7 @@ UOdysseyPainterEditorColorPickerTool::PickColorUp( const FOdysseyPoint& iPointIn
 void
 UOdysseyPainterEditorColorPickerTool::Commit()
 {
-	mPaintEngine.Commit(FOdysseyBlendParameters());
+    mPaintEngine.Commit(FOdysseyBlendParameters());
 }
 
 FText

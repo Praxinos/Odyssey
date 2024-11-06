@@ -28,7 +28,7 @@ FOdysseyPainterEditorToolOptionsTab::~FOdysseyPainterEditorToolOptionsTab()
 }
 
 FOdysseyPainterEditorToolOptionsTab::FOdysseyPainterEditorToolOptionsTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(LOCTEXT( "tool-options-tab.name", "Tool Options" ), FSlateIcon( "OdysseyStyle", "PainterEditor.ToolOptions" ))
+    : FOdysseyEditorTab(LOCTEXT( "tool-options-tab.name", "Tool Options" ), FSlateIcon( "OdysseyStyle", "PainterEditor.ToolOptions" ))
     , mEditor(iEditor)
 {
 }
@@ -119,7 +119,7 @@ FOdysseyPainterEditorToolOptionsTab::SetWidgetForTool(UOdysseyPainterEditorTool*
         widgetSlotForTool = &mWidgetSlotForTool.Last();
         mWidgetSwitcher->AddSlot().Expose(widgetSlotForTool->mSlot);
     }
-    
+
     widgetSlotForTool->mSlot->DetachWidget();
     widgetSlotForTool->mSlot->AttachWidget(iWidget.ToSharedRef());
 }

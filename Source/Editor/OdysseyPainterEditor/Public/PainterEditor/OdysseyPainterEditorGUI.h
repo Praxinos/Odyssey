@@ -27,7 +27,7 @@ public:
 public:
     void Initialize();
     void Finalize();
-	void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
+    void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
 
 public:
     // Tabs
@@ -35,10 +35,10 @@ public:
     void BindShortcuts(FBaseToolkit* iToolkit);
 
 protected:
-	// Layout
-	void	CreateLeftSection(FOdysseyEditorLayoutBuilder& iBuilder);
-	void	CreateRightSection(FOdysseyEditorLayoutBuilder& iBuilder);
-	void	CreateCenterSection(FOdysseyEditorLayoutBuilder& iBuilder);
+    // Layout
+    void    CreateLeftSection(FOdysseyEditorLayoutBuilder& iBuilder);
+    void    CreateRightSection(FOdysseyEditorLayoutBuilder& iBuilder);
+    void    CreateCenterSection(FOdysseyEditorLayoutBuilder& iBuilder);
 
 protected:
     // Shortcuts
@@ -57,7 +57,7 @@ protected:
 
 private:
     FOdysseyPainterEditor*                          mEditor;
-	TSharedPtr<FTabManager::FLayout>                mLayout;
+    TSharedPtr<FTabManager::FLayout>                mLayout;
     TSharedPtr<SWidget>                             mWidget;
 };
 

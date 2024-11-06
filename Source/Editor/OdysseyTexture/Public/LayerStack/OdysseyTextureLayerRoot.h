@@ -9,7 +9,7 @@
 
 UCLASS(NotBlueprintType, HideDropdown)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerRoot
-	: public UOdysseyTextureLayer
+    : public UOdysseyTextureLayer
 {
     GENERATED_BODY()
 

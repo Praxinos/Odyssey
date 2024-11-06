@@ -15,24 +15,24 @@ class FEdMode;
 class ODYSSEYVIEWPORTDRAWINGEDITOR_API FOdysseyViewportDrawingEditorToolkit : public FOdysseyModeToolkit
 {
 public:
-	FOdysseyViewportDrawingEditorToolkit(TSharedRef<FOdysseyPainterEditor> iEditor, FEdMode* iEdMode);
+    FOdysseyViewportDrawingEditorToolkit(TSharedRef<FOdysseyPainterEditor> iEditor, FEdMode* iEdMode);
 
-	virtual TSharedPtr<SWidget> GetInlineContent() const override;
-	virtual FEdMode* GetEditorMode() const override;
+    virtual TSharedPtr<SWidget> GetInlineContent() const override;
+    virtual FEdMode* GetEditorMode() const override;
 
-	/** IToolkit interface */
-	virtual FName GetToolkitFName() const override;
-	virtual FText GetBaseToolkitName() const override;
+    /** IToolkit interface */
+    virtual FName GetToolkitFName() const override;
+    virtual FText GetBaseToolkitName() const override;
 
     //If we fill the array with names, a mode toolbar will pop in our edMode
     virtual void GetToolPaletteNames( TArray<FName>& ioPaletteNames ) const override;
     virtual void BuildToolPalette( FName iPalette, class FToolBarBuilder& ioToolbarBuilder ) override;
 
-	TSharedPtr<FOdysseyViewportDrawingEditorExtension> GetViewportDrawingExtension() const;
-	TSharedPtr<FOdysseyAnimationEditorExtension> GetAnimationExtension() const;
+    TSharedPtr<FOdysseyViewportDrawingEditorExtension> GetViewportDrawingExtension() const;
+    TSharedPtr<FOdysseyAnimationEditorExtension> GetAnimationExtension() const;
 
 private:
-	TSharedPtr<FOdysseyViewportDrawingEditorExtension> mViewportDrawingExtension;
-	TSharedPtr<FOdysseyAnimationEditorExtension> mAnimationExtension;
-	FEdMode* mEdMode;
+    TSharedPtr<FOdysseyViewportDrawingEditorExtension> mViewportDrawingExtension;
+    TSharedPtr<FOdysseyAnimationEditorExtension> mAnimationExtension;
+    FEdMode* mEdMode;
 };

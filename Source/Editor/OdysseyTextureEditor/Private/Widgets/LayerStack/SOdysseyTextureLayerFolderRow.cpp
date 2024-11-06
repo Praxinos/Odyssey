@@ -23,10 +23,10 @@ void SOdysseyTextureLayerFolderRow::Construct(const FArguments& InArgs, const TS
     SOdysseyLayerRow::Construct(
         SOdysseyLayerRow::FArguments(),
         iOwnerTableView,
-		iTextureLayerFolder
+        iTextureLayerFolder
     );
 
-	SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
+    SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
 }
 
 #undef LOCTEXT_NAMESPACE

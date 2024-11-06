@@ -6,40 +6,40 @@
 void
 FOdysseyObjectEditorUtils::PreChangePropertyValue(UObject* Object, FName PropertyName)
 {
-	// Get the property addresses for the source and destination objects.
-	FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
+    // Get the property addresses for the source and destination objects.
+    FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
 
-	if ( !Object->HasAnyFlags(RF_ClassDefaultObject) )
-	{
-		FEditPropertyChain PropertyChain;
-		PropertyChain.AddHead(Property);
+    if ( !Object->HasAnyFlags(RF_ClassDefaultObject) )
+    {
+        FEditPropertyChain PropertyChain;
+        PropertyChain.AddHead(Property);
 
         Object->Modify();
-		Object->PreEditChange(PropertyChain);
-	}
+        Object->PreEditChange(PropertyChain);
+    }
 }
 
 void
 FOdysseyObjectEditorUtils::PostChangePropertyValue(UObject* Object, FName PropertyName, EPropertyChangeType::Type iChangeType)
 {
-	// Get the property addresses for the source and destination objects.
-	FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
+    // Get the property addresses for the source and destination objects.
+    FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
 
-	if ( !Object->HasAnyFlags(RF_ClassDefaultObject) )
-	{
-		FPropertyChangedEvent PropertyEvent(Property, iChangeType);
-		Object->PostEditChangeProperty(PropertyEvent);
-	}
+    if ( !Object->HasAnyFlags(RF_ClassDefaultObject) )
+    {
+        FPropertyChangedEvent PropertyEvent(Property, iChangeType);
+        Object->PostEditChangeProperty(PropertyEvent);
+    }
 }
 
 bool
 FOdysseyObjectEditorUtils::HasProperty(UObject* Object, FName PropertyName)
 {
-	// Get the property addresses for the source and destination objects.
-	FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
+    // Get the property addresses for the source and destination objects.
+    FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
 
-	if ( !Property )
-		return false;
+    if ( !Property )
+        return false;
 
-	return true;
+    return true;
 }

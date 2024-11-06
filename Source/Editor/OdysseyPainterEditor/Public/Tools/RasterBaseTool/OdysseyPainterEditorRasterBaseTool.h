@@ -26,8 +26,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterBaseTool : public UOdy
         virtual TSharedRef<SWidget> CreateTopTabWidget() override;
         TSharedPtr<SWidget> CreatePropertyWidget( TSharedPtr<class IPropertyHandle> iPropertyHandle
                                                 , const TSharedPtr<ISinglePropertyView> iView );
-		
-		virtual void ExtendMenu(TSharedRef<FExtender> iExtender);
+
+        virtual void ExtendMenu(TSharedRef<FExtender> iExtender);
         virtual bool OnKeyDown( const FKey& iKey ) override;
         virtual bool OnKeyUp( const FKey& iKey ) override;
         virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;

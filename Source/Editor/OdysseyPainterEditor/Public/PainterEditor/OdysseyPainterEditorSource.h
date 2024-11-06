@@ -17,7 +17,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorSource
 public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnAddEditedObject, UObject*);
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnRemoveEditedObject, UObject*);
-    
+
 public:
     // Construction / Destruction
     virtual ~FOdysseyPainterEditorSource();
@@ -47,7 +47,7 @@ public:
     FOnAddEditedObject& OnAddEditedObjectDelegate();
     FOnRemoveEditedObject& OnRemoveEditedObjectDelegate();
     const TArray<UObject*>& GetEditedObjects() const;
-    
+
     virtual void AddReferencedObjects(FReferenceCollector& Collector);
     virtual FString GetReferencerName() const;
 

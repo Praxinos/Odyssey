@@ -17,7 +17,7 @@ public:
     void Set(int iFrame);
 
 private:
-	UOdysseyAnimation* mAnimation;
+    UOdysseyAnimation* mAnimation;
 };
 
 class  FOdysseySetCurrentFrameMutation

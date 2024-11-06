@@ -95,7 +95,7 @@ FOdysseyAnimationEditorCommands::RegisterCommands()
         )
         .UserInterfaceType( EUserInterfaceActionType::Button )
         .DefaultChord( FInputChord() );
-        
+
         SetCellMark.Add(commandInfo);
     }
 
@@ -114,7 +114,7 @@ FOdysseyAnimationEditorCommands::RegisterCommands()
         )
         .UserInterfaceType( EUserInterfaceActionType::Button )
         .DefaultChord( FInputChord() );
-        
+
         Flip.Add(commandInfo);
     }
 }

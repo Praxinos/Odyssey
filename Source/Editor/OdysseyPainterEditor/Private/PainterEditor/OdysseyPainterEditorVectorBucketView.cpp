@@ -35,7 +35,7 @@ UOdysseyPainterEditorVectorBucketView::ImportParam()
     RadialRadius = mBucket->GetRadialRadius();
 }
 
-void 
+void
 UOdysseyPainterEditorVectorBucketView::Update( FOdysseyPainterEditor* iEditor, FOdysseyVectorBucket* iBucket )
 {
     mEditor = iEditor;
@@ -57,7 +57,7 @@ UOdysseyPainterEditorVectorBucketView::PropertyChanged( const FName& iPropertyNa
         if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, SpreadingPolicy) )
             mBucket->SetSpreadingPolicy( SpreadingPolicy );
 
-        // note: iMemberPropertyName because FColor is a struct 
+        // note: iMemberPropertyName because FColor is a struct
         // and we can edit individual struct members RGBA
         if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, SolidColor) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, SolidColor) ) )
             mBucket->SetSolidColor( SolidColor );
@@ -68,12 +68,12 @@ UOdysseyPainterEditorVectorBucketView::PropertyChanged( const FName& iPropertyNa
         if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, Propagated) )
             mBucket->SetPropagated( Propagated );
 
-        // note: iMemberPropertyName because FColor is a struct 
+        // note: iMemberPropertyName because FColor is a struct
         // and we can edit individual struct members RGBA
         if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, GradientColor0) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, GradientColor0) ) )
             mBucket->SetGradientColor0( GradientColor0 );
 
-        // note: iMemberPropertyName because FColor is a struct 
+        // note: iMemberPropertyName because FColor is a struct
         // and we can edit individual struct members RGBA
         if( ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, GradientColor1) ) || ( iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorBucketView, GradientColor1) ) )
             mBucket->SetGradientColor1( GradientColor1 );
@@ -108,7 +108,7 @@ UOdysseyPainterEditorVectorBucketView::PostEditChangeProperty( FPropertyChangedE
             // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
             // of a call to GEditor::PostEditChangeProperty()
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
             TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();

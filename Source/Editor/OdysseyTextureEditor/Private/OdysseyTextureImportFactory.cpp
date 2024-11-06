@@ -37,9 +37,9 @@ UObject* UOdysseyTextureImportFactory::FactoryCreateBinary(UClass* Class,UObject
 
     if( !psdReader.Import() )
         return nullptr;
-    
+
     /* UTexture2D* object = NewObject<UTexture2D>(InParent,Name,Flags | RF_Transactional);
-    
+
     if(psdReader.GetLayerStack())
     {
         ::ULIS::FBlock* srcblock = new ::ULIS::FBlock( psdReader.GetLayerStack()->Width(), psdReader.GetLayerStack()->Height(), psdReader.GetLayerStack()->Format() );
@@ -96,7 +96,7 @@ UObject* UOdysseyTextureImportFactory::FactoryCreateBinary(UClass* Class,UObject
     */
 
     texture->PostEditChange();
-        
+
     return texture;
 }
 

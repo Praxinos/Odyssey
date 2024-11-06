@@ -29,9 +29,9 @@ void SOdysseyMeshSelector::Construct(const FArguments& InArgs)
     ChildSlot
     [
         SNew(SScrollBox)
-			.Orientation(Orient_Vertical)
-			.ScrollBarAlwaysVisible(false)
-			+SScrollBox::Slot()
+            .Orientation(Orient_Vertical)
+            .ScrollBarAlwaysVisible(false)
+            +SScrollBox::Slot()
             [
                 SNew( SVerticalBox )
                     + SVerticalBox::Slot()

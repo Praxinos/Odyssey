@@ -14,19 +14,19 @@ public:
     FOdysseyAnimationCellsDragDropOperation(UOdysseyAnimationLayer* iLayer, const TArray<UOdysseyAnimationCell*>& iCells);
 
 public:
-	DRAG_DROP_OPERATOR_TYPE(FOdysseyAnimationCellsDragDropOperation, FDragDropOperation)
-	using FDragDropOperation::Construct;
+    DRAG_DROP_OPERATOR_TYPE(FOdysseyAnimationCellsDragDropOperation, FDragDropOperation)
+    using FDragDropOperation::Construct;
 
 public:
-	/**
-	 * Gets the widget that will serve as the decorator unless overridden. 
-	 * If you do not override, you will have no decorator
-	 */
-	virtual TSharedPtr<SWidget> GetDefaultDecorator() const override;
+    /**
+     * Gets the widget that will serve as the decorator unless overridden.
+     * If you do not override, you will have no decorator
+     */
+    virtual TSharedPtr<SWidget> GetDefaultDecorator() const override;
 
 public:
-	const FOdysseyAnimationCellClipboardData& GetData() const;
-	UOdysseyAnimationLayer* GetLayer() const;
+    const FOdysseyAnimationCellClipboardData& GetData() const;
+    UOdysseyAnimationLayer* GetLayer() const;
 
 private:
     FText GetText() const;
@@ -34,5 +34,5 @@ private:
 
 private:
     FOdysseyAnimationCellClipboardData mData;
-	UOdysseyAnimationLayer* mLayer;
+    UOdysseyAnimationLayer* mLayer;
 };

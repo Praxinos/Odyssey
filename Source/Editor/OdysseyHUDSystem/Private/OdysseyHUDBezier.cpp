@@ -23,7 +23,7 @@ FOdysseyHUDBezier::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 {
     const FLinearColor bezierLineColor(0.f, 1.f, 0.f, 1.f);
     const FLinearColor controlLineColor(0.f, 1.f, 0.f, 0.4f);
-    
+
     FVector2D startPoint = iParams.mTextureToHUD.Execute(mStartPoint);
     FVector2D controlPoint = iParams.mTextureToHUD.Execute(mControlPoint);
     FVector2D endPoint = iParams.mTextureToHUD.Execute(mEndPoint);
@@ -41,20 +41,20 @@ FOdysseyHUDBezier::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
 
     if (pointsArray.Size() < 2)
         return;
-        
+
     for (int i = 1; i < pointsArray.Size(); i++)
     {
-        
+
         FVector2D startBezierPoint = iParams.mTextureToHUD.Execute(FVector2D(pointsArray[i - 1].x, pointsArray[i - 1].y));
         FVector2D endBezierPoint = iParams.mTextureToHUD.Execute(FVector2D(pointsArray[i].x, pointsArray[i].y));
-        
+
         batchedElements->AddTranslucentLine(FVector(startBezierPoint, 0.f), FVector(endBezierPoint, 0.f), bezierLineColor, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
     }
 
     batchedElements->AddTranslucentLine(FVector(startPoint, 0.f), FVector(controlPoint, 0.f), controlLineColor, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
     batchedElements->AddTranslucentLine(FVector(controlPoint, 0.f), FVector(endPoint, 0.f), controlLineColor, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
 
-    FOdysseyHUDElement::DrawHUD(iParams); 
+    FOdysseyHUDElement::DrawHUD(iParams);
 }
 
 void

@@ -22,11 +22,11 @@ FOdysseySmoothingPull::FOdysseySmoothingPull(FOdysseySmoothingOptions* iSmoothin
 bool
 FOdysseySmoothingPull::IsReady() const
 {
-	if (mPoints.Num() <= 0)
-		return false;
+    if (mPoints.Num() <= 0)
+        return false;
 
-	if (mPoints.Num() == 1)
-		return true;
+    if (mPoints.Num() == 1)
+        return true;
 
     FOdysseyPoint point = mPoints[mPoints.Num() - 1];
     float x = point.x - mPoints[0].x;
@@ -60,8 +60,8 @@ FOdysseySmoothingPull::ComputePoint()
 
     point.x = mPoints[0].x + x * ratio;
     point.y = mPoints[0].y + y * ratio;
-	mPoints.Empty();
-	mPoints.Add(point);
+    mPoints.Empty();
+    mPoints.Add(point);
 
     return point;
 }

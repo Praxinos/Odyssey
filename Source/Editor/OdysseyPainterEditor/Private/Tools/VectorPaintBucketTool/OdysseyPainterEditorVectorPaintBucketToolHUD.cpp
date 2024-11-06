@@ -24,7 +24,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Reset( FOdysseyVectorGroupPaint* 
 
     mAnyPaintGroupSelected = false;
 
-    // check if any paint group is selected. this allows us to determinate when we can draw 
+    // check if any paint group is selected. this allows us to determinate when we can draw
     // the hud for the whole scene
     for( FOdysseyVectorObject* object : iScene->GetEngine()->GetSelectedObjectList() )
     {
@@ -132,7 +132,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickCycles( FOdysseyVectorGroupPa
       , iScene
       , vectorEngine
       , &iWorldX
-      , &iWorldY 
+      , &iWorldY
       , &oPickedCycleArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
         {
             if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
@@ -241,7 +241,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
                    | viewBucketHandleFlag );
     }
 
-    // draw selection box only if we restrict erasure to the selection 
+    // draw selection box only if we restrict erasure to the selection
     if( iScene->GetEngine()->GetSelectedObjectList().size() )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );

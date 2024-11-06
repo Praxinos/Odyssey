@@ -51,7 +51,7 @@ TSharedRef<SWidget> SOdysseyLayerStackAddLayerButton::MakeMenu()
             UOdysseyLayer* layerCDO = layerClass->GetDefaultObject<UOdysseyLayer>();
             if (!layerCDO)
                 continue;
-                
+
             menuBuilder.AddMenuEntry(
                 layerCDO->LayerTypeName,
                 layerCDO->Description,
@@ -95,15 +95,15 @@ SOdysseyLayerStackAddLayerButton::AddLayerFromClass(FAssetData iAssetData)
         return;
 
     UObject* loadedAsset = iAssetData.FastGetAsset(true);
-	if ( !loadedAsset )
-		return;
+    if ( !loadedAsset )
+        return;
 
-	UClass* layerClass = Cast<UClass>(loadedAsset);
-	if ( UBlueprint* blueprint = Cast<UBlueprint>(loadedAsset) )
-		layerClass = blueprint->GeneratedClass;
+    UClass* layerClass = Cast<UClass>(loadedAsset);
+    if ( UBlueprint* blueprint = Cast<UBlueprint>(loadedAsset) )
+        layerClass = blueprint->GeneratedClass;
 
-	if ( !layerClass )
-		return;  
+    if ( !layerClass )
+        return;
 
 #ifdef WITH_EDITOR
     //Allows to have a single undo if there is side effects (auto adding frames in animation layer) in mOnAdded callback
@@ -115,20 +115,20 @@ SOdysseyLayerStackAddLayerButton::AddLayerFromClass(FAssetData iAssetData)
     {
         if (currentLayer->CanHaveChildren && currentLayer->DisplayChildren)
         {
-			currentLayer = layerStack->AddLayer(layerClass, currentLayer);
+            currentLayer = layerStack->AddLayer(layerClass, currentLayer);
         }
         else
         {
-			UOdysseyLayer* parent = currentLayer->GetParent();
-			int index = currentLayer->GetIndexInParent();
-			currentLayer = layerStack->AddLayer(layerClass, parent, index);
+            UOdysseyLayer* parent = currentLayer->GetParent();
+            int index = currentLayer->GetIndexInParent();
+            currentLayer = layerStack->AddLayer(layerClass, parent, index);
         }
     }
     else
     {
-		currentLayer = layerStack->AddLayer(layerClass);
+        currentLayer = layerStack->AddLayer(layerClass);
     }
-    
+
     mOnAdded.ExecuteIfBound(currentLayer);
     FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), currentLayer);
 }

@@ -76,7 +76,7 @@ FOdysseyVectorBlock::GetRenderFlags() const
 void
 FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags )
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render);
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render);
     //Render in a BLImage (also resets the internal invalidation rectangle)
     ::ULIS::FRectD invalidatedRectD = mEngine->Render( mBlockData->mBLContext.Get(), iDrawingFlags );
     ::ULIS::FRectI invalidatedRectI = invalidatedRectD;
@@ -105,7 +105,7 @@ FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags )
 void
 FOdysseyVectorBlock::RenderHUD(::ULIS::FBlock& ioBlock)
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::RenderHUD);
+    TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::RenderHUD);
     mEngine->RenderHUD( mHUDBlockData->mBLContext.Get() );
 
     {
@@ -171,9 +171,9 @@ FOdysseyVectorBlock::CleanupBlock(uint8* iData, void* iInfo)
     else
     {
         //Data is owned by the block
-        ::ULIS::OnCleanup_FreeMemory(iData, iInfo); 
+        ::ULIS::OnCleanup_FreeMemory(iData, iInfo);
     }
-    
+
     delete blockData;
 }
 
@@ -188,19 +188,19 @@ FOdysseyVectorBlock::CleanupHUDBlock(uint8* iData, void* iInfo)
     blockData->mBLContext.Get()->end();
 
     //Data is owned by the block
-    ::ULIS::OnCleanup_FreeMemory(iData, iInfo); 
-    
+    ::ULIS::OnCleanup_FreeMemory(iData, iInfo);
+
     delete blockData; //will also delete the associated BLImage
 }
 
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 FOdysseyVectorBlock::GetHUDBlock()
 {
-	FScopeLock Lock(&mMutex);
+    FScopeLock Lock(&mMutex);
 
     if ( mWidth <= 0 || mHeight <= 0 )
         return nullptr;
-        
+
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block;
     block = mHUDBlock.Pin();
     if ( block )
@@ -225,11 +225,11 @@ FOdysseyVectorBlock::GetHUDBlock()
 TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 FOdysseyVectorBlock::GetBlock(uint64 iDrawingFlags)
 {
-	FScopeLock Lock(&mMutex);
+    FScopeLock Lock(&mMutex);
 
     if ( mWidth <= 0 || mHeight <= 0 )
         return nullptr;
-    
+
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block;
     block = mBlock.Pin();
     if ( block )
@@ -265,7 +265,7 @@ FOdysseyVectorBlock::GetBlock(uint64 iDrawingFlags)
     }
 
     block->OnCleanup(::ULIS::FOnCleanupData(&FOdysseyVectorBlock::CleanupBlock, mBlockData));
-    
+
     mBlock = block;
 
     return block; //return the currently loaded block, the receiver can release it whenever he wants

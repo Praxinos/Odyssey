@@ -18,7 +18,7 @@ class UOdysseyPainterEditorTool;
 /** Painting adapter for the painter. Describes the method of painting in the viewport*/
 class IOdysseyViewportDrawingEditorAdapter
     : public IStylusMessageHandler
-    
+
 {
 public:
     enum class eState
@@ -70,7 +70,7 @@ private:
     void ReadStylusInput();
     void GetRayParamsFromViewportPosition(FEditorViewportClient* iViewportClient, float iX, float iY, FVector* oOrigin, FVector* oDirection);
 
-protected: 
+protected:
     virtual ::ULIS::FEvent StampOverride(UOdysseyBrushAssetBase::FStampParams iStampParams) = 0;
     void OnCurrentToolChanged();
     virtual void SetTool(UOdysseyPainterEditorTool* iTool);

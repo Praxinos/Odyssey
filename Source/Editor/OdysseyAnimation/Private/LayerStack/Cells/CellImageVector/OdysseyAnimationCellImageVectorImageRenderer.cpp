@@ -30,15 +30,15 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
         if (animation)
         {
             UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
-			if (cell)
-			{
-        		UOdysseyLayerStack* layerStack = layer->GetLayerStack();
-            	int frame = animation->CurrentFrame - cell->GetFrameRange().GetLowerBoundValue();
-				mRenderHUD = ( cell == mCell )
-						&& ( frame == iFrame )
-						&& ( layerStack->CurrentLayer.Get() == layer )
-						&& ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Editor );
-			}
+            if (cell)
+            {
+                UOdysseyLayerStack* layerStack = layer->GetLayerStack();
+                int frame = animation->CurrentFrame - cell->GetFrameRange().GetLowerBoundValue();
+                mRenderHUD = ( cell == mCell )
+                        && ( frame == iFrame )
+                        && ( layerStack->CurrentLayer.Get() == layer )
+                        && ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Editor );
+            }
         }
 
         // this is per-layer
@@ -61,7 +61,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
             * ::ULIS::FMat3F::MakeTranslationMatrix( animation->GetWidth() / -2.f, animation->GetHeight() / -2.f);
     }
 }
-    
+
 void
 FOdysseyAnimationCellImageVectorImageRenderer::Init()
 {
@@ -83,7 +83,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::Init()
 
 TArray<::ULIS::FEvent>
 FOdysseyAnimationCellImageVectorImageRenderer::Blend(const FOdysseyImageRendererBlendParams& iParams, const TArray<::ULIS::FEvent>& iWaitList)
-{   
+{
     if (!mBlock)
         return iWaitList;
 
@@ -92,7 +92,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::Blend(const FOdysseyImageRenderer
         params.mTransform = mOutOfPegsTransform;
 
     TArray<::ULIS::FEvent> events = ConvertAndBlend(mBlock, ::ULIS::FVec2I(0), params, iWaitList);
-    
+
     if (!mHUDBlock)
         return events;
 
@@ -140,7 +140,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::IsGameThreadOnly()
 void
 FOdysseyAnimationCellImageVectorImageRenderer::AddReferencedObjects(FReferenceCollector& Collector)
 {
-	Collector.AddReferencedObject(mCell);
+    Collector.AddReferencedObject(mCell);
 }
 
 FString

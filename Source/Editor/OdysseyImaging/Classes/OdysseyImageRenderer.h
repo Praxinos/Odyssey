@@ -16,13 +16,13 @@ struct FOdysseyImageRendererCopyParams
         : mBlock(iBlock)
         , mRects(iRects)
         , mPos(iPos)
-    {    
+    {
     }
 
     TSharedPtr<::ULIS::FBlock> mBlock;
     TArray<::ULIS::FRectI> mRects; //The rects to render, in destination block coordinates
     ::ULIS::FVec2I mPos; //The offset of the destination block compared to the full size block (used when partially rendering in a small block)
-    
+
     ::ULIS::FMat3F mTransform; //Transform to apply to the pixels before rendering them in the destination block
 };
 
@@ -30,14 +30,14 @@ struct FOdysseyImageRendererBlendParams : public FOdysseyImageRendererCopyParams
 {
     FOdysseyImageRendererBlendParams(TSharedPtr<::ULIS::FBlock> iBlock, const TArray<::ULIS::FRectI>& iRects, ::ULIS::FVec2I iPos = ::ULIS::FVec2I(0))
         : FOdysseyImageRendererCopyParams(iBlock, iRects, iPos)
-    {    
+    {
     }
 
     FOdysseyImageRendererBlendParams(const FOdysseyImageRendererCopyParams& iParams)
         : FOdysseyImageRendererCopyParams(iParams)
     {
     }
-    
+
     ::ULIS::eBlendMode mBlendMode = ::ULIS::Blend_Normal;
     float mOpacity = 1.f;
 };
@@ -62,10 +62,10 @@ public:
     virtual void Init() = 0;
 
     /**
-     * @brief 
-     * 
-     * @return true 
-     * @return false 
+     * @brief
+     *
+     * @return true
+     * @return false
      */
     virtual bool IsGameThreadOnly() = 0;
 

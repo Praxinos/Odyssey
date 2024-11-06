@@ -84,7 +84,7 @@ FOdysseyVectorImportV1::ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 i
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
-            }    
+            }
         } );
 }
 
@@ -183,6 +183,6 @@ FOdysseyVectorImportV1::ReadGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, u
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
-            }    
+            }
         } );
 }

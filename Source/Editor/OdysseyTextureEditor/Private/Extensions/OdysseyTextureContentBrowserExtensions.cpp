@@ -67,7 +67,7 @@ protected:
 
 //////////////////////////////////////////////////////////////////////////
 // FEditTextureExtension
-class FEditTextureExtension 
+class FEditTextureExtension
     : public FContentBrowserSelectedAssetExtensionBase
 {
 public:
@@ -88,7 +88,7 @@ public:
 //////////////////////////////////////////////////////////////////////////
 // FExportTextureExtension
 
-class FExportTextureExtension 
+class FExportTextureExtension
     : public FContentBrowserSelectedAssetExtensionBase
 {
 public:
@@ -121,7 +121,7 @@ public:
             {
                 EAppReturnType::Type answer = FMessageDialog::Open(EAppMsgType::YesNo, LOCTEXT("content-browser-extension.export-texture.cancel-dialog.message", "Continue the remaing files export ?"), LOCTEXT("content-browser-extension.export-texture.cancel-dialog.title", "Save cancelled"));
                 if( answer == EAppReturnType::Yes )
-                { 
+                {
                     continue;
                 }
                 else

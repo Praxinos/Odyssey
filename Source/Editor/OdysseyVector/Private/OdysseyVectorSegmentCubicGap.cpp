@@ -36,7 +36,7 @@ FOdysseyVectorSegmentCubicGap::Update( uint32 iUpdateFlags )
     BLMatrix2D& vertex1PathWorldMatrix = vertex1Path->GetWorldMatrix();
     BLMatrix2D& paingroupInverseworldMatrix = mPaintgroup->GetInverseWorldMatrix();
     BLMatrix2D conversionMatrix;
-    BLPoint pt; 
+    BLPoint pt;
 
     // sets mBezier[4]
     FOdysseyVectorSegmentCubic::Update( iUpdateFlags );

@@ -6,7 +6,7 @@
 #include "Modules/ModuleInterface.h"
 
 class FOdysseyContentBrowserExtensionsModule
-	: public IModuleInterface
+    : public IModuleInterface
 {
 public:
     // IModuleInterface interface

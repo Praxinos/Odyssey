@@ -56,25 +56,25 @@ private:
 
 struct ODYSSEYHUDSYSTEM_API HOdysseyHUDElementHitProxy : public HHitProxy
 {
-	DECLARE_HIT_PROXY();
+    DECLARE_HIT_PROXY();
 
     TSharedPtr<FOdysseyHUDElement> mHUDElement;
-	TOptional<EMouseCursor::Type> mMouseCursor;
+    TOptional<EMouseCursor::Type> mMouseCursor;
 
     HOdysseyHUDElementHitProxy(TSharedPtr<FOdysseyHUDElement> iHUDElement, TOptional<EMouseCursor::Type> iMouseCursor)
         : HHitProxy(HPP_Foreground)
         , mHUDElement(iHUDElement)
-		, mMouseCursor(iMouseCursor)
-	{
-	}
+        , mMouseCursor(iMouseCursor)
+    {
+    }
 
-	virtual EMouseCursor::Type GetMouseCursor() override
-	{
+    virtual EMouseCursor::Type GetMouseCursor() override
+    {
         if (!mMouseCursor.IsSet())
             return HHitProxy::GetMouseCursor();
 
         return mMouseCursor.GetValue();
-	}
+    }
 
     virtual TSharedPtr<FOdysseyHUDElement> HUDElement()
     {

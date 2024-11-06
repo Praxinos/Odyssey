@@ -15,22 +15,22 @@ class SEnumComboBox;
 UENUM()
 enum class EOdysseyAnimationBackgroundColor : uint8
 {
-	Transparent,
-	White,
-	Normal UMETA(DisplayName = "Purple (127, 127, 255)")
+    Transparent,
+    White,
+    Normal UMETA(DisplayName = "Purple (127, 127, 255)")
 };
 
 UENUM()
 enum class EOdysseyAnimationDefaultLayerType : uint8
 {
-	Raster,
-	Vector
+    Raster,
+    Vector
 };
 
 USTRUCT()
 struct ODYSSEYANIMATION_API FOdysseyAnimationConfiguration
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
     ::ULIS::eFormat ULISFormat() const;
@@ -53,21 +53,21 @@ public:
     float                   FramesPerSecond = 24.f;
 
     UPROPERTY(EditAnywhere, Category="OdysseyAnimationConfiguration")
-	EOdysseyAnimationBackgroundColor BackgroundColor = EOdysseyAnimationBackgroundColor::Transparent;
+    EOdysseyAnimationBackgroundColor BackgroundColor = EOdysseyAnimationBackgroundColor::Transparent;
 
     UPROPERTY(EditAnywhere, Category="OdysseyAnimationConfiguration")
-	EOdysseyAnimationDefaultLayerType LayerType = EOdysseyAnimationDefaultLayerType::Raster;
+    EOdysseyAnimationDefaultLayerType LayerType = EOdysseyAnimationDefaultLayerType::Raster;
 };
 
 class ODYSSEYANIMATION_API SOdysseyAnimationConfigureWindow
     : public SWindow
 {
 public:
-	SLATE_BEGIN_ARGS(SOdysseyAnimationConfigureWindow)
-	{
+    SLATE_BEGIN_ARGS(SOdysseyAnimationConfigureWindow)
+    {
 
-	}
-	SLATE_END_ARGS()
+    }
+    SLATE_END_ARGS()
 
 public:
     void Construct(const FArguments& iArgs);

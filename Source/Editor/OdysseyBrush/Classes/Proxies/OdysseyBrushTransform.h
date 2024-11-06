@@ -49,7 +49,7 @@ public:
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Matrix")
     static FOdysseyMatrix MakeTranslationMatrix( float DeltaX, float DeltaY );
-    
+
     //Requires an angle (float) to generate a rotation.
     UFUNCTION(BlueprintPure, Category="Odyssey|Matrix")
     static FOdysseyMatrix MakeRotationMatrix( float Angle );
@@ -61,18 +61,18 @@ public:
     //Requires a normalized float (0.5 = 50% | 1 = 100%) to shear a Matrix on X and Y axis.
     UFUNCTION(BlueprintPure, Category="Odyssey|Matrix")
     static FOdysseyMatrix MakeShearMatrix( float ShearX, float ShearY );
-    
+
     //Require the 4 source and destination points to be a non-concave quadrilateral
     UFUNCTION(BlueprintPure, Category="Odyssey|Matrix")
-    static FOdysseyMatrix MakePerspectiveMatrix( 
+    static FOdysseyMatrix MakePerspectiveMatrix(
           FVector2D SrcA, FVector2D SrcB, FVector2D SrcC, FVector2D SrcD
-        , FVector2D DstA, FVector2D DstB, FVector2D DstC, FVector2D DstD 
+        , FVector2D DstA, FVector2D DstB, FVector2D DstC, FVector2D DstD
     );
 
     //Composes a Matrix with several Matrices.
     UFUNCTION(BlueprintPure, Category="Odyssey|Matrix")
     static FOdysseyMatrix ComposeMatrix( const FOdysseyMatrix& First, const FOdysseyMatrix& Second );
-    
+
     //Returns the resulting rectangle of a matrix as if it were applied on the given Rectangle with the given ResamplingMethod
     UFUNCTION(BlueprintPure, Category="Odyssey|Matrix")
     static FOdysseyBrushRect GetMatrixResultRect( const FOdysseyMatrix& Matrix, const FOdysseyBrushRect& Rectangle, EResamplingMethod ResamplingMethod );
@@ -86,7 +86,7 @@ public:
     //Waiting for Epic debug.
     //UFUNCTION(BlueprintPure, meta=(CommutativeAssociativeBinaryOperator = "true"), Category="Odyssey|Matrix")
     //static FOdysseyMatrix ComposeMatrixMatrix2( const FOdysseyMatrix& A, const FOdysseyMatrix& B ) { return ComposeMatrix( A, B ); }
-    
+
     //Requires an Odyssey Matrix input and an Odyssey Block Reference to transform.
     UFUNCTION(BlueprintPure, meta = ( KeyWords = "Matrix"), Category="Odyssey|Transform")
     static FOdysseyBlockProxy Transform( UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample, FOdysseyMatrix Transform, int OutputWidth, int OutputHeight, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour );
@@ -114,19 +114,19 @@ public:
              , Category="Odyssey|Transform"
              , meta = ( KeyWords = "Matrix") )
     static FOdysseyBlockProxy Shear( UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample, float ShearX, float ShearY, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour );
-    
+
     //Requires a Float in pixels to resize an Odyssey Block Reference uniformly.
     UFUNCTION(BlueprintPure
              , Category="Odyssey|Transform"
              , meta = ( KeyWords = "Matrix") )
     static FOdysseyBlockProxy ResizeUniform( UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample, float Size, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour );
-    
+
     //Requires a Float in pixels to resize an Odyssey Block Reference on X and Y axis.
     UFUNCTION(BlueprintPure
              , Category="Odyssey|Transform"
              , meta = ( KeyWords = "Matrix") )
     static FOdysseyBlockProxy Resize( UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample, float SizeX, float SizeY, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour );
-    
+
     //Flips an Odyssey Block Reference on horizontal axis.
     UFUNCTION(BlueprintPure
              , Category="Odyssey|Transform"
@@ -138,7 +138,7 @@ public:
              , Category="Odyssey|Transform"
              , meta = ( KeyWords = "Matrix") )
     static FOdysseyBlockProxy FlipY( UPARAM(DisplayName="Block") FOdysseyBlockProxy Sample, EResamplingMethod ResamplingMethod = EResamplingMethod::kNearestNeighbour );
-    
+
     //Flips an Odyssey Block Reference on horizontal and vertical axis.
     UFUNCTION(BlueprintPure
              , Category="Odyssey|Transform"

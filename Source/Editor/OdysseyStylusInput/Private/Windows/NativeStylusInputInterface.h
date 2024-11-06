@@ -9,22 +9,22 @@ class FNativeStylusInputInterfaceImpl;
 
 // Implementation of the Native driver
 class FNativeStylusInputInterface
-	: public IStylusInputInterfaceInternal
+    : public IStylusInputInterfaceInternal
 {
 public:
-	FNativeStylusInputInterface(TUniquePtr<FNativeStylusInputInterfaceImpl> InImpl);
-	virtual ~FNativeStylusInputInterface();
+    FNativeStylusInputInterface(TUniquePtr<FNativeStylusInputInterfaceImpl> InImpl);
+    virtual ~FNativeStylusInputInterface();
 
-	virtual void Tick() override;
-	virtual int32 NumInputDevices() const override;
-	virtual IStylusInputDevice* GetInputDevice(int32 Index) const override;
+    virtual void Tick() override;
+    virtual int32 NumInputDevices() const override;
+    virtual IStylusInputDevice* GetInputDevice(int32 Index) const override;
 
     virtual TWeakPtr<SWindow> Window() const override;
     virtual TWeakPtr<SWidget> Widget() const override;
 
 private:
-	// Impl to avoid including Native headers.
-	TUniquePtr<FNativeStylusInputInterfaceImpl> Impl;
+    // Impl to avoid including Native headers.
+    TUniquePtr<FNativeStylusInputInterfaceImpl> Impl;
 };
 
 TSharedPtr<IStylusInputInterfaceInternal> CreateStylusInputInterfaceNative();

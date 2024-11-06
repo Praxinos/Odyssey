@@ -16,7 +16,7 @@ UCLASS(meta=(DisplayName="Blend Parameters"))
 class ODYSSEYPAINTEREDITOR_API UOdysseyBlendParametersOverrides : public UObject
 {
     GENERATED_BODY()
-    
+
 public:
     UOdysseyBlendParametersOverrides();
 

@@ -36,8 +36,8 @@ UOdysseyPaletteEntry* UOdysseyPalette::AddEntry(TSubclassOf<UOdysseyPaletteEntry
     UClass* entryType = iEntryType.Get();
 
     //No entryType
-	if ( !entryType )
-		return nullptr;
+    if ( !entryType )
+        return nullptr;
 
     //If the given parent can't have children or isn't contained in this palette
     if (!iParentEntry)
@@ -134,7 +134,7 @@ TArray<UOdysseyPaletteEntry*> UOdysseyPalette::DuplicateEntries(TArray<UOdysseyP
         }
     );
 
-    //No entry    
+    //No entry
     if (iEntries.Num()<= 0)
         return entriesDuplicates;
 
@@ -182,7 +182,7 @@ UOdysseyPaletteEntry* UOdysseyPalette::CopyEntry(UOdysseyPaletteEntry* iEntry, U
 
     if (!iParentEntry)
         iParentEntry = PaletteRoot;
-    
+
     //If the given parent can't have children or isn't contained in this Palette
     if (iParentEntry && (!iParentEntry->CanHaveChildren || !ContainsEntry(iParentEntry)) )
         return nullptr;
@@ -194,7 +194,7 @@ UOdysseyPaletteEntry* UOdysseyPalette::CopyEntry(UOdysseyPaletteEntry* iEntry, U
 
 TArray<UOdysseyPaletteEntry*> UOdysseyPalette::CopyEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdysseyPaletteEntry* iParentEntry /*= nullptr*/, int iIndexInParent /*= 0*/)
 {
-	TArray<UOdysseyPaletteEntry*> entryCopies;
+    TArray<UOdysseyPaletteEntry*> entryCopies;
     if (!iParentEntry)
         iParentEntry = PaletteRoot;
 
@@ -237,7 +237,7 @@ TArray<UOdysseyPaletteEntry*> UOdysseyPalette::CopyEntries(TArray<UOdysseyPalett
     );
 
     for (UOdysseyPaletteEntry* entry : iEntries)
-    {   
+    {
         //Duplicate the entry
         UOdysseyPaletteEntry* entryCopy = CopyEntryInternal(entry, iParentEntry, iIndexInParent);
         entryCopies.Add(entryCopy);
@@ -299,8 +299,8 @@ bool UOdysseyPalette::CanMoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOd
 
 void UOdysseyPalette::MoveEntry(UOdysseyPaletteEntry* iEntry, UOdysseyPaletteEntry* iParentEntry /*= nullptr*/, int iIndexInParent /*= 0*/)
 {
-	if ( !CanMoveEntry(iEntry, iParentEntry) )
-		return;
+    if ( !CanMoveEntry(iEntry, iParentEntry) )
+        return;
 
     if ( !iParentEntry )
         iParentEntry = PaletteRoot;
@@ -310,7 +310,7 @@ void UOdysseyPalette::MoveEntry(UOdysseyPaletteEntry* iEntry, UOdysseyPaletteEnt
         return;
 
     bool bChangeParent = iEntry->Parent != iParentEntry;
-    
+
     if (bChangeParent)
     {
         FOdysseyObjectEditorUtils::PreChangePropertyValue(iEntry, "Parent");
@@ -336,23 +336,23 @@ void UOdysseyPalette::MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdyss
     if ( !iParentEntry )
         iParentEntry = PaletteRoot;
 
-	//If the given parent can't have children or isn't contained in this palette
+    //If the given parent can't have children or isn't contained in this palette
     if ( !iParentEntry->CanHaveChildren || !ContainsEntry(iParentEntry))
         return;
 
-	//Sanitize Entries array
+    //Sanitize Entries array
     iEntries.RemoveAll(
         [this, iParentEntry](UOdysseyPaletteEntry* iEntry)
         {
-			if ( !iEntry || !ContainsEntry(iEntry) )
-				return true;
+            if ( !iEntry || !ContainsEntry(iEntry) )
+                return true;
 
-			if ( iEntry == iParentEntry || iParentEntry->IsChildOf(iEntry) )
-				return true;
+            if ( iEntry == iParentEntry || iParentEntry->IsChildOf(iEntry) )
+                return true;
 
-			return false;
-		}
-	);
+            return false;
+        }
+    );
 
     iEntries.Sort(
         [this](UOdysseyPaletteEntry& iEntryA, UOdysseyPaletteEntry& iEntryB)
@@ -376,15 +376,15 @@ void UOdysseyPalette::MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdyss
         }
     );
 
-	//No Entries
-	if ( iEntries.Num() <= 0 )
-		return;
+    //No Entries
+    if ( iEntries.Num() <= 0 )
+        return;
 
     int index = FMath::Clamp(iIndexInParent, 0, iParentEntry->Children.Num());
     for (UOdysseyPaletteEntry* entry : iEntries)
     {
         bool bChangeParent = entry->Parent != iParentEntry;
-        
+
         if (bChangeParent)
         {
             FOdysseyObjectEditorUtils::PreChangePropertyValue(entry, "Parent");
@@ -537,7 +537,7 @@ UOdysseyPaletteEntry* UOdysseyPalette::CreateEntry(UClass* iEntryType)
     UOdysseyPaletteEntry* entry = NewObject<UOdysseyPaletteEntry>(this, iEntryType, NAME_None, RF_Public | RF_Transactional);
     if (!entry)
         return nullptr;
-        
+
     //Name the layer
     FString name = entry->DefaultName.ToString() + TEXT(" ") + FString::FromInt(GetEntries().Num() + 1);
     entry->EntryName = FText::FromString(name);
@@ -561,7 +561,7 @@ void UOdysseyPalette::AddEntriesToHierarchy(TArray<UOdysseyPaletteEntry*> iEntri
     {
         entry->Children.Empty();
     }
-    
+
     //Add entries to parent's children
     iParent->Children.Insert(iEntries, FMath::Clamp(iIndexInParent, 0, iParent->Children.Num()));
 

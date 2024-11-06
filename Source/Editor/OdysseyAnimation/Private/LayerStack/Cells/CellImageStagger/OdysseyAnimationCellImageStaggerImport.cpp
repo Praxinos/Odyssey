@@ -47,11 +47,11 @@ FOdysseyAnimationCellImageStaggerImport::Read( UOdysseyAnimationCellImageStagger
             {
                 case FOdysseyFile::Animation::CHUNK_CELLIMAGESTAGGER_BEHAVIOUR :
                 {
-					uint32 behaviour;
+                    uint32 behaviour;
                     Ar << behaviour;
 
-					behaviour = FMath::Max(uint32(0), behaviour - 1); //first value was "Invalid" which does not exist anymore
-					iAnimationCellImageStagger->Behaviour = (EOdysseyAnimationCellImageStaggerBehaviour)behaviour;
+                    behaviour = FMath::Max(uint32(0), behaviour - 1); //first value was "Invalid" which does not exist anymore
+                    iAnimationCellImageStagger->Behaviour = (EOdysseyAnimationCellImageStaggerBehaviour)behaviour;
                 }
                 break;
 
@@ -62,7 +62,7 @@ FOdysseyAnimationCellImageStaggerImport::Read( UOdysseyAnimationCellImageStagger
                 break;
 
                 default:
-				// Mandatory
+                // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
             }

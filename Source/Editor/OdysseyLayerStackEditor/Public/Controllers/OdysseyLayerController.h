@@ -9,7 +9,7 @@ class ODYSSEYLAYERSTACKEDITOR_API TOdysseyLayerController
 public:
     TOdysseyLayerController(T* iLayer)
         : mLayer(iLayer)
-    {  
+    {
     }
 
 public:

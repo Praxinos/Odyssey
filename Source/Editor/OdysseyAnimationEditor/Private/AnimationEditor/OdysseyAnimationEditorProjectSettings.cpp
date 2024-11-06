@@ -15,7 +15,7 @@ UOdysseyAnimationEditorProjectSettings::PostInitProperties()
     LoadConfig();
 
     TArray<FAnimationCellMarkSettings> defaultCellMarks;
-    
+
     defaultCellMarks.Add(
         {
             TEXT("Key 1"),
@@ -110,7 +110,7 @@ UOdysseyAnimationEditorProjectSettings::PostInitProperties()
             FLinearColor( 0.f, 0.5f, 0.3f ),
             EOdysseyAnimationCellMarkSymbol::Star
         }
-    );   
+    );
 
     for (int i = AnimationCellsMarks.Num(); i < 12; i++)
     {

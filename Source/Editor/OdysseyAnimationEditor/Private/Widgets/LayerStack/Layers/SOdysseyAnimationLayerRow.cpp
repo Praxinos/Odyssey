@@ -16,85 +16,85 @@ SOdysseyAnimationLayerRow::Construct(
     UOdysseyAnimationLayer* iLayer
 )
 {
-	mTimelinePosition = iArgs._TimelinePosition;
-	mLayer = iLayer;
+    mTimelinePosition = iArgs._TimelinePosition;
+    mLayer = iLayer;
 
     SOdysseyLayerRow::Construct(
         SOdysseyLayerRow::FArguments(),
         iOwnerTableView,
-		iLayer
+        iLayer
     );
 }
 
 TSharedRef<SWidget>
 SOdysseyAnimationLayerRow::GenerateWidget( const FName& iRow, const FName& iColumn )
 {
-	if (iRow == "LightTable")
-	{
-		if (iColumn == "Header")
-		{
-			return GenerateLightTableRowHeaderWidget();
-		}
-	}
+    if (iRow == "LightTable")
+    {
+        if (iColumn == "Header")
+        {
+            return GenerateLightTableRowHeaderWidget();
+        }
+    }
 
-	if (iRow == "OutOfPegs")
-	{
-		if (iColumn == "Header")
-		{
-			return GenerateOutOfPegsRowHeaderWidget();
-		}
-	}
+    if (iRow == "OutOfPegs")
+    {
+        if (iColumn == "Header")
+        {
+            return GenerateOutOfPegsRowHeaderWidget();
+        }
+    }
 
-	return SOdysseyLayerRow::GenerateWidget( iRow, iColumn );
+    return SOdysseyLayerRow::GenerateWidget( iRow, iColumn );
 }
 
 TSharedRef<SWidget>
 SOdysseyAnimationLayerRow::GenerateLightTableRowHeaderWidget()
 {
-	return SNew(SOdysseyAnimationTimelineLightTableHeader)
-		.Layer(mLayer);
+    return SNew(SOdysseyAnimationTimelineLightTableHeader)
+        .Layer(mLayer);
 }
 
 TSharedRef<SWidget>
 SOdysseyAnimationLayerRow::GenerateOutOfPegsRowHeaderWidget()
 {
-	return SNew(STextBlock)
-		.Text(LOCTEXT("lighttable.timeline-header.out-of-pegs.name", "Out Of Pegs"));
-}	
+    return SNew(STextBlock)
+        .Text(LOCTEXT("lighttable.timeline-header.out-of-pegs.name", "Out Of Pegs"));
+}
 
 TArray<TSharedPtr<SWidget>>
 SOdysseyAnimationLayerRow::GenerateMainRowHeaderOptionWidgets()
 {
-	TArray<TSharedPtr<SWidget>> widgets;
+    TArray<TSharedPtr<SWidget>> widgets;
 
-	if (mLayer->HasLighttable)
-	{
-		const FCheckBoxStyle* lightTableToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Animation.LightTableToggle");
+    if (mLayer->HasLighttable)
+    {
+        const FCheckBoxStyle* lightTableToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Animation.LightTableToggle");
 
-		widgets.Add(
-			SNew(SCheckBox)
-			.Style(lightTableToggleStyle)
-			.OnCheckStateChanged(this, &SOdysseyAnimationLayerRow::OnLightTableCheckStateChanged)
-			.IsChecked(this, &SOdysseyAnimationLayerRow::GetLightTableIsChecked)
-		);
-	}
+        widgets.Add(
+            SNew(SCheckBox)
+            .Style(lightTableToggleStyle)
+            .OnCheckStateChanged(this, &SOdysseyAnimationLayerRow::OnLightTableCheckStateChanged)
+            .IsChecked(this, &SOdysseyAnimationLayerRow::GetLightTableIsChecked)
+        );
+    }
 
-	widgets.Append(SOdysseyLayerRow::GenerateMainRowHeaderOptionWidgets());
+    widgets.Append(SOdysseyLayerRow::GenerateMainRowHeaderOptionWidgets());
 
-	return widgets;
+    return widgets;
 }
 
 ECheckBoxState
 SOdysseyAnimationLayerRow::GetLightTableIsChecked() const
 {
-	return mLayer->Lighttable.bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+    return mLayer->Lighttable.bIsActivated ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 void
 SOdysseyAnimationLayerRow::OnLightTableCheckStateChanged(ECheckBoxState iState)
 {
-	FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
-	lighttable.bIsActivated = iState == ECheckBoxState::Checked;
+    FOdysseyAnimationLightTable lighttable = mLayer->Lighttable;
+    lighttable.bIsActivated = iState == ECheckBoxState::Checked;
     FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable);
     GetTreeView()->RequestTreeRefresh(); //needed to display layers previously hidden
 }

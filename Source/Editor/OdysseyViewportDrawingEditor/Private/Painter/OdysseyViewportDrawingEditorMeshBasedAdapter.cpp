@@ -66,21 +66,21 @@ FOdysseyViewportDrawingEditorMeshBasedAdapter::SetTexture(UTexture* iTexture)
 
 void
 FOdysseyViewportDrawingEditorMeshBasedAdapter::InitializeRenderTarget()
-{	
-	UTexture* texture = GetTexture();
+{
+    UTexture* texture = GetTexture();
     if (!texture)
         return;
 
     const int32 textureWidth = texture->GetSurfaceWidth();
     const int32 textureHeight = texture->GetSurfaceHeight();
-    
+
     mPaintingTexture2DRenderTarget = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
     mPaintingTexture2DRenderTarget->ClearColor = FLinearColor(0, 0, 0, 0);
     mPaintingTexture2DRenderTarget->bNeedsTwoCopies = false;
     mPaintingTexture2DRenderTarget->InitAutoFormat(textureWidth, textureHeight);
     mPaintingTexture2DRenderTarget->UpdateResourceImmediate();
     mPaintingTexture2DRenderTarget->AddToRoot();
-    
+
     mStrokeBufferRenderTarget2D = NewObject<UTextureRenderTarget2D>(GetTransientPackage(), NAME_None, RF_Transient);
     mStrokeBufferRenderTarget2D->ClearColor = FLinearColor(0, 0, 0, 0);
     mStrokeBufferRenderTarget2D->bNeedsTwoCopies = false;
@@ -110,11 +110,11 @@ FOdysseyViewportDrawingEditorMeshBasedAdapter::InitializeRenderTarget()
 void
 FOdysseyViewportDrawingEditorMeshBasedAdapter::FinalizeRenderTarget()
 {
-	//Destroy the render target
-	if (mPaintingTexture2DRenderTarget && mPaintingTexture2DRenderTarget->IsValidLowLevel())
+    //Destroy the render target
+    if (mPaintingTexture2DRenderTarget && mPaintingTexture2DRenderTarget->IsValidLowLevel())
     {
-		mPaintingTexture2DRenderTarget->ConditionalBeginDestroy();
-    	mPaintingTexture2DRenderTarget = nullptr;
+        mPaintingTexture2DRenderTarget->ConditionalBeginDestroy();
+        mPaintingTexture2DRenderTarget = nullptr;
     }
 
     if ( mStrokeBufferRenderTarget2D && mStrokeBufferRenderTarget2D->IsValidLowLevel())
@@ -177,7 +177,7 @@ void FOdysseyViewportDrawingEditorMeshBasedAdapter::RenderInteractorWidget(const
         const FVector rayEnd(paintRay.CameraLocation + paintRay.RayDirection * HALF_WORLD_MAX);
 
         meshAdapter->LineTraceComponent(traceHitResult, paintRay.CameraLocation, rayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(Paint), true));
-        
+
         FPlane plan = iView->Project(traceHitResult.Location);
 
         // Display settings
@@ -261,7 +261,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorMeshBasedAdapter::GetMinimal
                                               FMath::Min( FMath::Max3(iTriangles[i].TrianglePoints[0].X, iTriangles[i].TrianglePoints[1].X, iTriangles[i].TrianglePoints[2].X) + 1, iMaxWidth ),
                                               FMath::Min( FMath::Max3(iTriangles[i].TrianglePoints[0].Y, iTriangles[i].TrianglePoints[1].Y, iTriangles[i].TrianglePoints[2].Y) + 1, iMaxHeight ) ));
     }
-    
+
     TArray< ::ULIS::FRectI > finalRects;
     ::ULIS::TArray<::ULIS::FRectI> rectsToExclude;
     if( rects.Num() != 0 )
@@ -295,7 +295,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorMeshBasedAdapter::GetMinimal
         rectsToExclude.PushBack(rects.Last());
     }
 
-        
+
     for (int j = 0; j < rectsToExclude.Size(); j++)
     {
         if ( rectsToExclude[j].Area() > 0 )
@@ -304,7 +304,7 @@ TArray<::ULIS::FRectI> FOdysseyViewportDrawingEditorMeshBasedAdapter::GetMinimal
         }
     }
 
-    
+
     return finalRects;*/
 }
 
@@ -496,12 +496,12 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
             [this, strokeRenderTargetResource](FRHICommandListImmediate& RHICmdList)
             {
                 // Copy (resolve) the rendered image from the frame buffer to its render target texture
-				TransitionAndCopyTexture(
-					RHICmdList,
-                    strokeRenderTargetResource->GetRenderTargetTexture(),		// Source texture
+                TransitionAndCopyTexture(
+                    RHICmdList,
+                    strokeRenderTargetResource->GetRenderTargetTexture(),        // Source texture
                     strokeRenderTargetResource->TextureRHI,
-					{}
-				);									// Resolve parameters
+                    {}
+                );                                    // Resolve parameters
             });
     }
 
@@ -526,7 +526,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
     }
 
     // Draw a quad to copy the texture over to the render target
-    TArray< FCanvasUVTri >	TriangleList;
+    TArray< FCanvasUVTri >    TriangleList;
     FCanvasUVTri SingleTri;
     SingleTri.V0_Pos = FVector2D(MinX, MinY);
     SingleTri.V0_UV = FVector2D(MinU, MinV);
@@ -576,9 +576,9 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
             {
                 // Copy (resolve) the rendered image from the frame buffer to its render target texture*/
                 /*RHICmdList.CopyToResolveTarget(
-                    brushRenderTargetResource->GetRenderTargetTexture(),		// Source texture
+                    brushRenderTargetResource->GetRenderTargetTexture(),        // Source texture
                     brushRenderTargetResource->TextureRHI,
-                    FResolveParams());									// Resolve parameters
+                    FResolveParams());                                    // Resolve parameters
 
                 TArray<FRHIGPUTextureReadback> readbufferArray;
 
@@ -620,7 +620,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
     TArray<::ULIS::FEvent> eventBlend;
     ::ULIS::eFormat target_format = ::ULIS::eFormat::Format_RGBAF;
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(target_format);
-    
+
     for (int i = 0; i < rects.Num(); i++)
     {
         TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> blockToStamp = MakeShared<::ULIS::FBlock>(static_cast<uint8*>(static_cast<void*>(mColorData[i].GetData())), rects[i].w, rects[i].h, ::ULIS::eFormat::Format_RGBAF);

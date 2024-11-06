@@ -77,7 +77,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
     }
 }
 
-bool 
+bool
 UOdysseyPainterEditorVectorTagInbetweenerView::Update( FOdysseyPainterEditor* iEditor
                                                      , FOdysseyVectorGroupPaint* iScene )
 {
@@ -186,7 +186,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
         {
             selectedInbetweenerTag->SetMapAsPolyline( MapAsPolyline );
 
-            // regularize the groid at least once after remapping or else some grid points that were not moved before 
+            // regularize the groid at least once after remapping or else some grid points that were not moved before
             // will stay at there position
             if( selectedInbetweenerTag->GetGridType() == eInbetweenerGridType::ARAP )
             {
@@ -309,7 +309,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PostEditChangeProperty( FProperty
             // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
             // of a call to GEditor::PostEditChangeProperty()
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
             TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();

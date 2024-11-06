@@ -81,7 +81,7 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
             mBilinearTexture.SamplerStateRHI = RHICreateSamplerState(SamplerStateInitializerB);
         }
     );
-    
+
     FRenderCommandFence fence;
     fence.BeginFence();
     fence.Wait();
@@ -94,8 +94,8 @@ FOdysseyPainterEditorViewportClient::FOdysseyPainterEditorViewportClient( FOdyss
 void
 FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanvas )
 {
-	const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
-	ioCanvas->Clear(settings.BackgroundColor);
+    const UOdysseyPainterEditorSettings& settings = *GetDefault<UOdysseyPainterEditorSettings>();
+    ioCanvas->Clear(settings.BackgroundColor);
 
     UTexture* texture       = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
     if (!texture)
@@ -179,7 +179,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
         tileItem.Rotation.Add( 0, rotation, 0 );
         tileItem.UV0 = topLeft;
         tileItem.UV1 = bottomRight;
-        
+
         if (texture->IsCurrentlyVirtualTextured() && texture->Source.GetNumBlocks() > 1)
         {
             // Adjust UVs to display entire UDIM range, accounting for UE inverted V-axis
@@ -188,7 +188,7 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
             tileItem.UV1 = FVector2D((float)BlockSize.X, 1.0f);
         }
 
-        ioCanvas->DrawItem( tileItem ); 
+        ioCanvas->DrawItem( tileItem );
 
         // if we are presenting a virtual texture, make the appropriate tiles resident
         if (texture->IsCurrentlyVirtualTextured())
@@ -235,11 +235,11 @@ FOdysseyPainterEditorViewportClient::Draw( FViewport* iViewport, FCanvas* ioCanv
 
     TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
     params.mTextureToHUD = FOdysseyHUDSystem::FDrawHUDParams::FTextureToHUD::CreateLambda(
-		[viewportWidget, w = params.mTextureWidth, h = params.mTextureHeight](const FVector2D& iPosition)
-		{
+        [viewportWidget, w = params.mTextureWidth, h = params.mTextureHeight](const FVector2D& iPosition)
+        {
             return viewportWidget->ToWorld(iPosition - FVector2D(w / 2.f, h / 2.f));
-		}
-	);
+        }
+    );
 
     mOdysseyPainterEditor->HUDSystem()->DrawHUD(params);
 }
@@ -291,14 +291,14 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
         //Can happen on windows with some touch options
         if (mKeysPressed.Contains(iKey))
             return true;
-            
+
         mKeysPressed.Add( iKey );
     }
-    else if( iEvent == EInputEvent::IE_Released ) 
+    else if( iEvent == EInputEvent::IE_Released )
     {
         //key already released, don't send a KeyUp or MouseUp twice
         //Can happen on windows with some touch options
-        if (!mKeysPressed.Contains(iKey)) 
+        if (!mKeysPressed.Contains(iKey))
             return true;
 
         mKeysPressed.Remove(iKey);
@@ -313,10 +313,10 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
         bool ignoreDown = mOnMouseDoubleClick.IsBound() && mOnMouseDoubleClick.Execute(mCurrentPointInViewport, iKey);
         if (ignoreDown)
             return true;
-        
+
         if (mKeysPressed.Contains(iKey))
             return true;
-        
+
         mKeysPressed.Add( iKey );
     }
 
@@ -397,7 +397,7 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
             {
                 MouseUp(point_in_viewport);
             }
-            
+
             if (mIsMouseDown && !mKeysPressed.Contains(mMouseButton))
                 mMouseButton = FKey();
         }
@@ -523,7 +523,7 @@ FOdysseyPainterEditorViewportClient::MouseMove(FViewport* iViewport, int32 iX, i
     FOdysseyPoint pointInTexture = GetLocalMousePosition(mCurrentPointInViewport);
     pointInTexture.keysDown = pressedKeys;
     pointInTexture.ComputeRelativeParameters(mCurrentPointInTexture);
-	bool hasMoved = !FMath::IsNearlyEqual(mCurrentPointInTexture.x - pointInTexture.x, 0.f) || !FMath::IsNearlyEqual(mCurrentPointInTexture.y - pointInTexture.y, 0.f);
+    bool hasMoved = !FMath::IsNearlyEqual(mCurrentPointInTexture.x - pointInTexture.x, 0.f) || !FMath::IsNearlyEqual(mCurrentPointInTexture.y - pointInTexture.y, 0.f);
     mCurrentPointInTexture = pointInTexture;
 
     if (mCurrentToolState == eState::kIdle)
@@ -543,7 +543,7 @@ FOdysseyPainterEditorViewportClient::MouseDown(const FOdysseyPoint& iPoint)
 {
     if (mIsMouseDown)
         return;
-        
+
     mIsMouseDown = true;
 
     //If we don't have a surface, then we don't interact with anything
@@ -638,7 +638,7 @@ FOdysseyPainterEditorViewportClient::MouseUp(const FOdysseyPoint& iPoint)
     mCurrentPointInTexture = pointInTexture;
 
     if( mCurrentToolState == eState::kIdle)
-    {    
+    {
         if (mOnMouseUp.IsBound())
             mOnMouseUp.Execute(mCurrentPointInTexture, mMouseButton);
     }
@@ -689,8 +689,8 @@ FOdysseyPainterEditorViewportClient::MouseDrag(const FOdysseyPoint& iPoint)
 
     if( mCurrentToolState == eState::kIdle )
     {
-		if (!hasMoved)
-			return;
+        if (!hasMoved)
+            return;
 
         mOnMouseDrag.ExecuteIfBound(mCurrentPointInTexture);
     }
@@ -716,7 +716,7 @@ FOdysseyPainterEditorViewportClient::MouseDrag(const FOdysseyPoint& iPoint)
         mRotationReference = newRotation;
     }
     else if (mCurrentToolState == eState::kZoom)
-    {   
+    {
         TSharedPtr<SOdysseyViewport> viewportWidget = mOdysseyPainterEditorViewportPtr.Pin();
 
         FVector2D viewportMousePosition(iPoint.x, iPoint.y);
@@ -734,14 +734,14 @@ FOdysseyPainterEditorViewportClient::MouseDrag(const FOdysseyPoint& iPoint)
     {
         FOdysseyPoint strokePoint_in_texture = GetLocalMousePosition(iPoint);
         FVector2D position_in_texture(strokePoint_in_texture.x, strokePoint_in_texture.y);
-    
+
         uint32 textureFullWidth = texture->Source.IsValid() ? texture->Source.GetSizeX() : texture->GetSurfaceWidth();
         uint32 textureFullHeight = texture->Source.IsValid() ? texture->Source.GetSizeY() : texture->GetSurfaceHeight();
 
         if( position_in_texture.X >= 0 && position_in_texture.X < textureFullWidth &&
             position_in_texture.Y >= 0 && position_in_texture.Y < textureFullHeight)
         {
-			mOnPickColor.ExecuteIfBound(eOdysseyEventState::kAdjust, position_in_texture);
+            mOnPickColor.ExecuteIfBound(eOdysseyEventState::kAdjust, position_in_texture);
         }
     }
 }
@@ -819,7 +819,7 @@ FOdysseyPainterEditorViewportClient::StylusStateToPoint(const FStylusState& iSta
 
     TSharedPtr< SViewport > viewportWidget = odysseyViewportWidget->GetViewportWidget();
     TSharedPtr<FOdysseySceneViewport> viewport = odysseyViewportWidget->GetViewport();
-    
+
     float scale_dpi = viewport->GetCachedGeometry().GetAccumulatedLayoutTransform().GetScale();
     FVector2D position_in_viewport = viewportWidget->GetCachedGeometry().AbsoluteToLocal( iState.GetPosition() ) * scale_dpi;
 
@@ -853,7 +853,7 @@ FOdysseyPainterEditorViewportClient::ReadStylusInput()
         const FStylusState& state = mStylusStates[i];
 
         FOdysseyPoint point = StylusStateToPoint(state);
-        
+
         //Force MouseDown when using the Right Mouse Button to allow hovered mouse clicks
         if (!mStylusIsDown && (state.IsStylusDown() || mMouseButton == EKeys::RightMouseButton ))
         {
@@ -1043,7 +1043,7 @@ FOdysseyPainterEditorViewportClient::GetLocalMousePosition( const FOdysseyPoint&
     return point_in_texture;
 }
 
-void 
+void
 FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iViewport, FCanvas* ioCanvas, int32 iUVChannel, const FStaticMeshVertexBuffer& iVertexBuffer, const FIndexArrayView& iIndices )
 {
     UTexture* texture = mOdysseyPainterEditorViewportPtr.Pin()->GetTexture();
@@ -1060,7 +1060,7 @@ FOdysseyPainterEditorViewportClient::DrawUVsOntoViewport( const FViewport* iView
         FVector vp1(0.f, 0.f, 0.f);
         FVector vp2(iViewport->GetSizeXY().X, 0.f, 0.f);
         FVector vp3(iViewport->GetSizeXY().X, iViewport->GetSizeXY().Y, 0.f);
-        FVector vp4(0.f, iViewport->GetSizeXY().Y, 0.f);        
+        FVector vp4(0.f, iViewport->GetSizeXY().Y, 0.f);
 
         FVector2D textureSurfaceSize(texture->GetSurfaceWidth(), texture->GetSurfaceHeight());
         FTransform2D transform = mOdysseyPainterEditorViewportPtr.Pin()->GetTransformToDisplayedTexture();
@@ -1152,7 +1152,7 @@ FOdysseyPainterEditorViewportClient::GetHUDElement(FViewport* iViewport, int32 i
     HOdysseyHUDElementHitProxy* hitproxy = HitProxyCast<HOdysseyHUDElementHitProxy>(iViewport->GetHitProxy(iX, iY));
     if (!hitproxy)
         return nullptr;
-    
+
     return hitproxy->HUDElement();
 }
 

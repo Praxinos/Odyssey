@@ -15,7 +15,7 @@ public:
         , TextureMipGenSettings iBackupTextureMipGenSettings
     );
 
-    FOdysseyScopedTextureSettings& operator=( const FOdysseyScopedTextureSettings& ) = delete; // Copy Assignement 
+    FOdysseyScopedTextureSettings& operator=( const FOdysseyScopedTextureSettings& ) = delete; // Copy Assignement
 
     static
     FOdysseyScopedTextureSettings

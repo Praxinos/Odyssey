@@ -210,7 +210,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     breakdown = iInbetweenerTag.GetBreakdownByTargetIndex( targetIndex );
 
                     // fix for misdesign of breakdown layout chunk. Should be removed on the long term.
-                    if( breakdown == nullptr ) 
+                    if( breakdown == nullptr )
                     {
                         breakdown = new FInbetweenerBreakdown( &iInbetweenerTag );
 
@@ -244,7 +244,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                         breakdown = ( master ) ? masterBreakdown
                                                : new FInbetweenerBreakdown( &iInbetweenerTag );
 
-                        if( master == 0 ) 
+                        if( master == 0 )
                         {
                             iInbetweenerTag.AddBreakdown( breakdown, targetDrawingIndex, false );
                         }
@@ -320,6 +320,6 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
-            }    
+            }
         } );
 }

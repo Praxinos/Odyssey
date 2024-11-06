@@ -53,7 +53,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToNextLayer()
     int index = layers.Find(currentLayer);
     if (index == INDEX_NONE || index == layers.Num() - 1)
         return;
-    
+
     UOdysseyLayer* layer = nullptr;
     bool isHidden = true;
     while(isHidden)
@@ -63,7 +63,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToNextLayer()
             return;
 
         layer = layers[index];
-        
+
         TArray<UOdysseyLayer*> parents = layer->GetParents();
         isHidden = parents.ContainsByPredicate(
             [](UOdysseyLayer* iLayer)
@@ -72,14 +72,14 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToNextLayer()
             }
         );
     }
-    
+
     FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), layer);
 }
 
 void
 FOdysseyLayerStackGlobalShortcuts::Action_NavigateToPreviousLayer()
 {
-    
+
     UOdysseyLayerStack* layerStack = mLayerStack.Get();
     if (!layerStack)
         return;
@@ -92,7 +92,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToPreviousLayer()
     int index = layers.Find(currentLayer);
     if (index == INDEX_NONE || index == 0)
         return;
-    
+
     UOdysseyLayer* layer = nullptr;
     bool isHidden = true;
     while(isHidden)
@@ -102,7 +102,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToPreviousLayer()
             return;
 
         layer = layers[index];
-        
+
         TArray<UOdysseyLayer*> parents = layer->GetParents();
         isHidden = parents.ContainsByPredicate(
             [](UOdysseyLayer* iLayer)
@@ -111,7 +111,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_NavigateToPreviousLayer()
             }
         );
     }
-    
+
     FOdysseyObjectEditorUtils::SetPropertyValue(layerStack, GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer), layer);
 }
 
@@ -128,7 +128,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_OpenFolderLayer()
 
     if (currentLayer->GetChildren().Num() <= 0)
         return;
-    
+
     FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren), true);
 }
 
@@ -145,7 +145,7 @@ FOdysseyLayerStackGlobalShortcuts::Action_CloseFolderLayer()
 
     if (currentLayer->GetChildren().Num() <= 0)
         return;
-    
+
     FOdysseyObjectEditorUtils::SetPropertyValue(currentLayer, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren), false);
 }
 

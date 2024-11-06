@@ -24,41 +24,41 @@ IMPLEMENT_MODULE(FOdysseyViewportDrawingEditorModule, OdysseyViewportDrawingEdit
 void
 FOdysseyViewportDrawingEditorModule::StartupModule()
 {
-	RegisterEditorMode();
+    RegisterEditorMode();
 
-	RegisterCommands();
+    RegisterCommands();
 
     RegisterShaders();
 
-	RegisterPropertyModuleCustomizations();
+    RegisterPropertyModuleCustomizations();
 }
 
 void
 FOdysseyViewportDrawingEditorModule::ShutdownModule()
 {
-	UnregisterEditorMode();
+    UnregisterEditorMode();
 
-	UnregisterCommands();
+    UnregisterCommands();
 
     UnregisterShaders();
 
-	UnregisterPropertyModuleCustomizations();
+    UnregisterPropertyModuleCustomizations();
 }
 
 void
 FOdysseyViewportDrawingEditorModule::RegisterEditorMode()
 {
-	FEditorModeRegistry::Get().RegisterMode<FOdysseyViewportDrawingEditorEdMode>(
-		FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId,
-		LOCTEXT("editor-mode.name", "Iliad"),
-		FSlateIcon(FOdysseyStyle::GetStyleSetName(), "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40", "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16"),
-		true, 200 );
+    FEditorModeRegistry::Get().RegisterMode<FOdysseyViewportDrawingEditorEdMode>(
+        FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId,
+        LOCTEXT("editor-mode.name", "Iliad"),
+        FSlateIcon(FOdysseyStyle::GetStyleSetName(), "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40", "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16"),
+        true, 200 );
 }
 
 void
 FOdysseyViewportDrawingEditorModule::UnregisterEditorMode()
 {
-	FEditorModeRegistry::Get().UnregisterMode(FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId);
+    FEditorModeRegistry::Get().UnregisterMode(FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId);
 }
 
 void
@@ -83,27 +83,27 @@ FOdysseyViewportDrawingEditorModule::RegisterShaders()
 void
 FOdysseyViewportDrawingEditorModule::UnregisterShaders()
 {
-	//No method available to unregister Shaders directories
+    //No method available to unregister Shaders directories
 }
 
 void
 FOdysseyViewportDrawingEditorModule::RegisterPropertyModuleCustomizations()
 {
-	/** Register detail/property customization */
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	FModuleManager::Get().LoadModule("MeshPaint");
+    /** Register detail/property customization */
+    FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    FModuleManager::Get().LoadModule("MeshPaint");
 }
 
 void
 FOdysseyViewportDrawingEditorModule::UnregisterPropertyModuleCustomizations()
 {
-	/** De-register detail/property customization */
-	FPropertyEditorModule* PropertyModule = FModuleManager::GetModulePtr<FPropertyEditorModule>("PropertyEditor");
-	if (PropertyModule)
-	{
-		PropertyModule->UnregisterCustomClassLayout("OdysseyViewportDrawingEditorSettings");
-		PropertyModule->UnregisterCustomPropertyTypeLayout("OdysseyViewportDrawingEditorTexturePaintSettings");
-	}
+    /** De-register detail/property customization */
+    FPropertyEditorModule* PropertyModule = FModuleManager::GetModulePtr<FPropertyEditorModule>("PropertyEditor");
+    if (PropertyModule)
+    {
+        PropertyModule->UnregisterCustomClassLayout("OdysseyViewportDrawingEditorSettings");
+        PropertyModule->UnregisterCustomPropertyTypeLayout("OdysseyViewportDrawingEditorTexturePaintSettings");
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

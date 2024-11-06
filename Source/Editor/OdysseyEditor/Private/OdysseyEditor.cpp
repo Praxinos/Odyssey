@@ -59,7 +59,7 @@ void
 FOdysseyEditor::BindShortcuts(FBaseToolkit* iToolkit)
 {
     const TSharedRef<FUICommandList>& toolkitCommands = iToolkit->GetToolkitCommands();
-	mShortcuts.MapActionsToCommandList(toolkitCommands);
+    mShortcuts.MapActionsToCommandList(toolkitCommands);
 
     //TODO: Use only mShortcuts instead of BindShortcuts (better coding style)
     for (TSharedPtr<FOdysseyEditorTab> tab : mTabs)
@@ -118,7 +118,7 @@ void
 FOdysseyEditor::CloseAllTabs()
 {
     for (TSharedPtr<FOdysseyEditorTab> tab : mTabs)
-	{
+    {
         if (tab->IsOpened())
             tab->Close();
     }
@@ -129,29 +129,29 @@ FOdysseyEditor::RegisterTabSpawners( const TSharedRef< FTabManager >& iTabManage
 {
     TSharedPtr<FWorkspaceItem> workspaceMenuCategory = iTabManager->AddLocalWorkspaceMenuCategory(mName);
     TSharedRef<FWorkspaceItem> workspaceMenuCategoryRef = workspaceMenuCategory.ToSharedRef();
-	for (TSharedPtr<FOdysseyEditorTab> tab : mTabs)
-	{
+    for (TSharedPtr<FOdysseyEditorTab> tab : mTabs)
+    {
         tab->SetTabManager(iTabManager);
         tab->Register(workspaceMenuCategoryRef);
-	}
+    }
 }
 
 void
 FOdysseyEditor::UnregisterTabSpawners( const TSharedRef< FTabManager >& iTabManager )
 {
     for (TSharedPtr<FOdysseyEditorTab> tab : mTabs)
-	{
+    {
         tab->Unregister();
-	}
+    }
 }
 
 void
 FOdysseyEditor::BuildModeLayout(TSharedPtr<FAssetEditorModeUILayer> iModeUILayerPtr)
 {
     for (TSharedPtr<FOdysseyEditorTab> tab : mTabs)
-	{
+    {
         iModeUILayerPtr->SetModePanelInfo(tab->GetId(), tab->GetMinorTabConfig());
-	}
+    }
 }
 
 const FName&
@@ -186,7 +186,7 @@ FOdysseyEditor::RemoveEditedObject(UObject* iObject)
 void
 FOdysseyEditor::AddReferencedObjects(FReferenceCollector& Collector)
 {
-    
+
 }
 
 FString
@@ -201,5 +201,5 @@ FOdysseyEditor::GetReferencerName() const
 void
 FOdysseyEditor::Tick(float DeltaTime)
 {
-    
+
 }

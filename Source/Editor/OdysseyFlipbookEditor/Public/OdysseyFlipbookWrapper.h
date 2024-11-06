@@ -18,7 +18,7 @@ class UPaperFlipbook;
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSpriteTextureChanged, UPaperSprite*, UTexture2D*)
 
 /** High level wrapper class to modify or read a UPaperFlipbook
- * 
+ *
  * A Flipbook contains an array of KeyFrames
  * Each Keyframe has a length
  * Therefore, each Keyframe has a Start and an End Position
@@ -29,13 +29,13 @@ class ODYSSEYFLIPBOOKEDITOR_API FOdysseyFlipbookWrapper : public TSharedFromThis
 {
 public:
     /** The destructor */
-	~FOdysseyFlipbookWrapper();
+    ~FOdysseyFlipbookWrapper();
 
     /** The constructor */
-	FOdysseyFlipbookWrapper();
+    FOdysseyFlipbookWrapper();
 
 public:
-    // 
+    //
     // Keyframes
     //
     int32 GetKeyframeIndexAtPosition(float iPosition);
@@ -48,15 +48,15 @@ public:
     void RemoveKeyFrame(int32 iIndex);
     void SetKeyFrameLength(int32 iIndex, int32 iLength);
 
-    // 
+    //
     // Sprites
     //
     UPaperSprite* GetKeyframeSprite(int32 iIndex);
     void SetKeyframeSprite(int32 iIndex, UPaperSprite* iSprite);
-	void ShowKeyFrameSpriteInContentBrowser(int32 iIndex);
-	void OpenKeyFrameSpriteEditor(int32 iIndex);
+    void ShowKeyFrameSpriteInContentBrowser(int32 iIndex);
+    void OpenKeyFrameSpriteEditor(int32 iIndex);
 
-    // 
+    //
     // Textures
     //
     UTexture2D* GetKeyframeTexture(int32 iIndex);
@@ -91,7 +91,7 @@ private:
 
 
 private:
-	UPaperFlipbook* mFlipbook;
+    UPaperFlipbook* mFlipbook;
 
     UTexture2D* mSpritePreviousTexture; //
 
@@ -104,6 +104,6 @@ private:
     FOnSpriteTextureChanged mOnSpriteTextureChanged;
     FSimpleMulticastDelegate mOnFlipbookChanged;
 
-	FDelegateHandle mOnPrePropertyChangedDelegateHandle;
+    FDelegateHandle mOnPrePropertyChangedDelegateHandle;
     FDelegateHandle mOnPropertyChangedDelegateHandle;
 };

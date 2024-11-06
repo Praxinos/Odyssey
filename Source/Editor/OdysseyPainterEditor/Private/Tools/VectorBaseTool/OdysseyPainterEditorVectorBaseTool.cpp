@@ -45,26 +45,26 @@ UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool( FOdyss
 void
 UOdysseyPainterEditorVectorBaseTool::ExtendMenu(TSharedRef<FExtender> iExtender)
 {
-	TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
-	iExtender->AddMenuExtension(
-		"OdysseyEdit",
-		EExtensionHook::After,
-		commandList,
-		FMenuExtensionDelegate::CreateLambda(
-			[this](FMenuBuilder& iBuilder)
-			{
-				if (!IsActivated())
-					return;
-				
-				iBuilder.BeginSection("ToolOptions", LOCTEXT("vector-base-tool.edit-menu.tool-options", "Tool Options"));
-				{
-					ExtendContextMenu( iBuilder );
-				}
-				iBuilder.EndSection();
-			}
-		)
-	);
-	
+    TSharedPtr<FUICommandList> commandList = MakeShared<FUICommandList>();
+    iExtender->AddMenuExtension(
+        "OdysseyEdit",
+        EExtensionHook::After,
+        commandList,
+        FMenuExtensionDelegate::CreateLambda(
+            [this](FMenuBuilder& iBuilder)
+            {
+                if (!IsActivated())
+                    return;
+
+                iBuilder.BeginSection("ToolOptions", LOCTEXT("vector-base-tool.edit-menu.tool-options", "Tool Options"));
+                {
+                    ExtendContextMenu( iBuilder );
+                }
+                iBuilder.EndSection();
+            }
+        )
+    );
+
 }
 
 //static
@@ -209,7 +209,7 @@ UOdysseyPainterEditorVectorBaseTool::GetSelectedVertices( FOdysseyVectorGroupPai
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
                   FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
- 
+
                   path->GetSelectedVertices( oSelectedVertexArray );
               }
 
@@ -277,7 +277,7 @@ void
 UOdysseyPainterEditorVectorBaseTool::Load()
 {
     UOdysseyPainterEditorTool::Load();
-    // we need the focus on the viewport for keyboard 
+    // we need the focus on the viewport for keyboard
     TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 
@@ -509,7 +509,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
     mDragging = false;
 
     // workaround for buggy stylus drivers
-    if( FilterMouseEvent( eMouseEventName::MouseDown ) == false ) 
+    if( FilterMouseEvent( eMouseEventName::MouseDown ) == false )
         return false;
 
     if( hasVector )
@@ -547,7 +547,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseHover( const FOdysseyPoint& iPointIn
     if( FilterMouseEvent( eMouseEventName::MouseHover ) == false )
         return;
 
-    // we need the focus on the viewport for keyboard 
+    // we need the focus on the viewport for keyboard
     //FSlateApplication::Get().SetKeyboardFocus( mViewportWidget );
 
     if( hasVector )
@@ -957,9 +957,9 @@ UOdysseyPainterEditorVectorBaseTool::PopupContextMenu()
 {
     TSharedPtr<SWidget> contextMenu = CreateContextMenu();
 
-	TSharedPtr<SWindow> window = FSlateApplication::Get().GetActiveTopLevelWindow();
-	if (!window)
-		return;
+    TSharedPtr<SWindow> window = FSlateApplication::Get().GetActiveTopLevelWindow();
+    if (!window)
+        return;
 
     FSlateApplication::Get().PushMenu( window.ToSharedRef(),
                                        FWidgetPath(),

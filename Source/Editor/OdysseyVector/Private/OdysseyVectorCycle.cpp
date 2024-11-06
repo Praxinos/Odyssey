@@ -68,7 +68,7 @@ FOdysseyVectorCycle::ToBucketArray( std::vector<FOdysseyVectorCycle*>& iCyleArra
 {
     oBucketArray.clear();
 
-    if( iCyleArray.size() ) 
+    if( iCyleArray.size() )
     {
         oBucketArray.reserve( iCyleArray.size() );
 
@@ -173,7 +173,7 @@ FOdysseyVectorCycle::Build( /*std::vector<FOdysseyVectorVertex*>& iVertexArray
     int seg = 0;
     BLBox bbox;
 
-    if ( mContourSectionArray.size() ) 
+    if ( mContourSectionArray.size() )
     {
         FOdysseyVectorSection* firstSection = mContourSectionArray[0];
         FOdysseyVectorVertex* firstVertex = firstSection->GetVertex( mContourVertexIndexArray[0] );
@@ -516,7 +516,7 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext
     iBLContext->resetMatrix();
     iBLContext->setStrokeWidth( 1.0f );
 
-    // stroke borders or else there will be a small 1 pixel gap. We draw it only once: the cycle responsible for drawing the 
+    // stroke borders or else there will be a small 1 pixel gap. We draw it only once: the cycle responsible for drawing the
     // section is the cycle that was first attached to the section. That way we don't draw it twice. The paint group could be
     // responsible for drawing the sections as well, but then we have to retrieve the bucket color, if any. this would be to
     // complicated. We draw in world coordinates to be sure to get 1 pixel-width strokes.

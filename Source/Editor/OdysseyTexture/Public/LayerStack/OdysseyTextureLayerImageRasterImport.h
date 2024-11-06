@@ -9,9 +9,9 @@ class FOdysseyTextureLayerImageRasterImport
 public:
     /**
      * @brief Imports Data from the given archive into the given object
-     * 
-     * @param iTextureLayerImageRaster 
-     * @param Ar 
+     *
+     * @param iTextureLayerImageRaster
+     * @param Ar
      */
     static bool ODYSSEYTEXTURE_API Read( UOdysseyTextureLayerImageRaster* iTextureLayerImageRaster
                                   , FArchive &Ar );

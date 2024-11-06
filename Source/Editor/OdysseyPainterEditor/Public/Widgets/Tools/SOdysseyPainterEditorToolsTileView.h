@@ -25,9 +25,9 @@ public:
     // Construction / Destruction
     ~SOdysseyPainterEditorToolsTileView();
     SOdysseyPainterEditorToolsTileView();
-    
+
     void Construct(const FArguments& InArgs);
-    
+
 private:
     void OnToolCheckStateChanged(ECheckBoxState InValue, UOdysseyPainterEditorTool* iTool);
     EVisibility ToolVisibility(UOdysseyPainterEditorTool* iTool) const;

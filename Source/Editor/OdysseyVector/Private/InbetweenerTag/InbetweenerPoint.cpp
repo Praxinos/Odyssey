@@ -200,7 +200,7 @@ FInbetweenerPoint::GetID()
     return mID;
 }
 
-double 
+double
 FInbetweenerPoint::GetU()
 {
     return mU;
@@ -217,7 +217,7 @@ FInbetweenerPoint::GetPosition( eInbetweenerPointPositionType iPositionType )
 {
     switch( iPositionType )
     {
-        case eInbetweenerPointPositionType::SourcePosition : 
+        case eInbetweenerPointPositionType::SourcePosition :
         {
             FInbetweenerBreakdown* prevBreakdown = mGrid->GetBreakdown()->GetPrevBreakdown();
 
@@ -230,10 +230,10 @@ FInbetweenerPoint::GetPosition( eInbetweenerPointPositionType iPositionType )
         }
         return mSourcePosition;
 
-        case eInbetweenerPointPositionType::InterpPosition : 
+        case eInbetweenerPointPositionType::InterpPosition :
         return mInterpPosition;
 
-        case eInbetweenerPointPositionType::DeformPosition : 
+        case eInbetweenerPointPositionType::DeformPosition :
         return mDeformPosition;
 
         case eInbetweenerPointPositionType::TargetPosition :
@@ -254,19 +254,19 @@ FInbetweenerPoint::SetPosition( eInbetweenerPointPositionType iPositionType
 {
     switch( iPositionType )
     {
-        case eInbetweenerPointPositionType::SourcePosition : 
+        case eInbetweenerPointPositionType::SourcePosition :
             SetSourcePosition( iX, iY, iInvalidate );
         break;
 
-        case eInbetweenerPointPositionType::InterpPosition : 
+        case eInbetweenerPointPositionType::InterpPosition :
             mInterpPosition = ::ULIS::FVec2D( iX, iY );
         break;
 
-        case eInbetweenerPointPositionType::DeformPosition : 
+        case eInbetweenerPointPositionType::DeformPosition :
             mDeformPosition = ::ULIS::FVec2D( iX, iY );
         break;
 
-        case eInbetweenerPointPositionType::TargetPosition : 
+        case eInbetweenerPointPositionType::TargetPosition :
             SetTargetPosition( iX, iY, iInvalidate );
         break;
 

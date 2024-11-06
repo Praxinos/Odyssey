@@ -108,7 +108,7 @@ TArray<UOdysseyPaletteEntry*> UOdysseyPaletteEntry::GetParents() const
 
 void UOdysseyPaletteEntry::AddSet()
 {
-    
+
 }
 
 void UOdysseyPaletteEntry::DuplicateSetAt(int iIndex /*= -1 */)

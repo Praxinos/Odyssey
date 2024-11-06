@@ -29,7 +29,7 @@ USTRUCT(BlueprintType, meta = (DisplayName = "Odyssey Block Reference"))
 struct ODYSSEYBRUSH_API FOdysseyBlockProxy
 {
     GENERATED_BODY()
-    
+
     ~FOdysseyBlockProxy();
 
     FOdysseyBlockProxy();
@@ -119,17 +119,17 @@ public:
                                                 , FOdysseyBrushColor Color );
 
     //Blends a color on the whole given Sample. Requires an Odyssey Brush Color input.
-	UFUNCTION(BlueprintPure
-		, Category="Odyssey|Block"
-		, meta = (DisplayName = "Blend Block With Color"))
-	static FOdysseyBlockProxy BlendColor( FOdysseyBrushColor Color
-			, FOdysseyBlockProxy Back
-			, FOdysseyBrushRect Area
-			, float Opacity = 1.f
-			, EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA
-			, EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8
-			, EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal
-			, EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal);
+    UFUNCTION(BlueprintPure
+        , Category="Odyssey|Block"
+        , meta = (DisplayName = "Blend Block With Color"))
+    static FOdysseyBlockProxy BlendColor( FOdysseyBrushColor Color
+            , FOdysseyBlockProxy Back
+            , FOdysseyBrushRect Area
+            , float Opacity = 1.f
+            , EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA
+            , EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8
+            , EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal
+            , EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal);
 
     //Fills the given Sample with thge given Color. Requires an Odyssey Brush Color input.
     UFUNCTION( BlueprintPure
@@ -149,7 +149,7 @@ public:
     static FOdysseyBlockProxy CreateBlock( int Width = 256
                                          , int Height = 256
                                          , EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA
-										 , EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8
+                                         , EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8
                                          , bool InitializeData = true );
 
     //Crops the Odyssey Block Reference according to the given Rect.
@@ -171,8 +171,8 @@ public:
                                    , UPARAM(DisplayName="Top Offset X") int X = 0
                                    , UPARAM(DisplayName="Top Offset Y") int Y = 0
                                    , float Opacity = 1.f
-								   , EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA
-								   , EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8
+                                   , EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA
+                                   , EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8
                                    , EOdysseyBlendingMode BlendingMode = EOdysseyBlendingMode::kNormal
                                    , EOdysseyAlphaMode AlphaMode = EOdysseyAlphaMode::kNormal);
 
@@ -186,84 +186,84 @@ public:
                                          , UCurveFloat* Curve
                                          , bool PreserveNullAlpha = true);
 
-	//Adjust the RGBA components of each pixel in the given Block according to the given curves
-	//Abscissa represents the actual component value.
-	//Ordinate represents the adjusted component value.
-	UFUNCTION(BlueprintPure
-			, Category="Odyssey|Block"
-			, meta = (DisplayName = "Adjust Block RGBA"))
-	static FOdysseyBlockProxy AdjustRGBA(FOdysseyBlockProxy Block
-		, UCurveFloat* CurveR
-		, UCurveFloat* CurveG
-		, UCurveFloat* CurveB
-		, UCurveFloat* CurveAlpha
-		, bool PreserveNullAlpha = true);
+    //Adjust the RGBA components of each pixel in the given Block according to the given curves
+    //Abscissa represents the actual component value.
+    //Ordinate represents the adjusted component value.
+    UFUNCTION(BlueprintPure
+            , Category="Odyssey|Block"
+            , meta = (DisplayName = "Adjust Block RGBA"))
+    static FOdysseyBlockProxy AdjustRGBA(FOdysseyBlockProxy Block
+        , UCurveFloat* CurveR
+        , UCurveFloat* CurveG
+        , UCurveFloat* CurveB
+        , UCurveFloat* CurveAlpha
+        , bool PreserveNullAlpha = true);
 
 
-	//Adjust the GreyA components of each pixel in the given Block according to the given curves
-	//Abscissa represents the actual component value.
-	//Ordinate represents the adjusted component value.
-	UFUNCTION(BlueprintPure
-		, Category="Odyssey|Block"
-		, meta = (DisplayName = "Adjust Block GreyA"))
-		static FOdysseyBlockProxy AdjustGreyA(FOdysseyBlockProxy Block
-			, UCurveFloat* CurveGrey
-			, UCurveFloat* CurveAlpha
-			, bool PreserveNullAlpha = true);
+    //Adjust the GreyA components of each pixel in the given Block according to the given curves
+    //Abscissa represents the actual component value.
+    //Ordinate represents the adjusted component value.
+    UFUNCTION(BlueprintPure
+        , Category="Odyssey|Block"
+        , meta = (DisplayName = "Adjust Block GreyA"))
+        static FOdysseyBlockProxy AdjustGreyA(FOdysseyBlockProxy Block
+            , UCurveFloat* CurveGrey
+            , UCurveFloat* CurveAlpha
+            , bool PreserveNullAlpha = true);
 
 
-	//Adjust the HSVA components of each pixel in the given Block according to the given curves
-	//Abscissa represents the actual component value.
-	//Ordinate represents the adjusted component value.
-	UFUNCTION(BlueprintPure
-		, Category="Odyssey|Block"
-		, meta = (DisplayName = "Adjust Block HSVA"))
-		static FOdysseyBlockProxy AdjustHSVA(FOdysseyBlockProxy Block
-			, UCurveFloat* CurveH
-			, UCurveFloat* CurveS
-			, UCurveFloat* CurveV
-			, UCurveFloat* CurveAlpha
-			, bool PreserveNullAlpha = true);
+    //Adjust the HSVA components of each pixel in the given Block according to the given curves
+    //Abscissa represents the actual component value.
+    //Ordinate represents the adjusted component value.
+    UFUNCTION(BlueprintPure
+        , Category="Odyssey|Block"
+        , meta = (DisplayName = "Adjust Block HSVA"))
+        static FOdysseyBlockProxy AdjustHSVA(FOdysseyBlockProxy Block
+            , UCurveFloat* CurveH
+            , UCurveFloat* CurveS
+            , UCurveFloat* CurveV
+            , UCurveFloat* CurveAlpha
+            , bool PreserveNullAlpha = true);
 
-	//Adjust the HSLA components of each pixel in the given Block according to the given curves
-	//Abscissa represents the actual component value.
-	//Ordinate represents the adjusted component value.
-	UFUNCTION(BlueprintPure
-		, Category="Odyssey|Block"
-		, meta = (DisplayName = "Adjust Block HSLA"))
-		static FOdysseyBlockProxy AdjustHSLA(FOdysseyBlockProxy Block
-			, UCurveFloat* CurveH
-			, UCurveFloat* CurveS
-			, UCurveFloat* CurveL
-			, UCurveFloat* CurveAlpha
-			, bool PreserveNullAlpha = true);
+    //Adjust the HSLA components of each pixel in the given Block according to the given curves
+    //Abscissa represents the actual component value.
+    //Ordinate represents the adjusted component value.
+    UFUNCTION(BlueprintPure
+        , Category="Odyssey|Block"
+        , meta = (DisplayName = "Adjust Block HSLA"))
+        static FOdysseyBlockProxy AdjustHSLA(FOdysseyBlockProxy Block
+            , UCurveFloat* CurveH
+            , UCurveFloat* CurveS
+            , UCurveFloat* CurveL
+            , UCurveFloat* CurveAlpha
+            , bool PreserveNullAlpha = true);
 
-	//Adjust the CMYKA components of each pixel in the given Block according to the given curves
-	//Abscissa represents the actual component value.
-	//Ordinate represents the adjusted component value.
-	UFUNCTION(BlueprintPure
-		, Category="Odyssey|Block"
-		, meta = (DisplayName = "Adjust Block CMYKA"))
-		static FOdysseyBlockProxy AdjustCMYKA(FOdysseyBlockProxy Block
-			, UCurveFloat* CurveC
-			, UCurveFloat* CurveM
-			, UCurveFloat* CurveY
-			, UCurveFloat* CurveK
-			, UCurveFloat* CurveAlpha
-			, bool PreserveNullAlpha = true);
+    //Adjust the CMYKA components of each pixel in the given Block according to the given curves
+    //Abscissa represents the actual component value.
+    //Ordinate represents the adjusted component value.
+    UFUNCTION(BlueprintPure
+        , Category="Odyssey|Block"
+        , meta = (DisplayName = "Adjust Block CMYKA"))
+        static FOdysseyBlockProxy AdjustCMYKA(FOdysseyBlockProxy Block
+            , UCurveFloat* CurveC
+            , UCurveFloat* CurveM
+            , UCurveFloat* CurveY
+            , UCurveFloat* CurveK
+            , UCurveFloat* CurveAlpha
+            , bool PreserveNullAlpha = true);
 
-	//Adjust the LabA components of each pixel in the given Block according to the given curves
-	//Abscissa represents the actual component value.
-	//Ordinate represents the adjusted component value.
-	UFUNCTION(BlueprintPure
-		, Category="Odyssey|Block"
-		, meta = (DisplayName = "Adjust Block LabA"))
-		static FOdysseyBlockProxy AdjustLabA(FOdysseyBlockProxy Block
-			, UCurveFloat* CurveL
-			, UCurveFloat* CurveA
-			, UCurveFloat* CurveB
-			, UCurveFloat* CurveAlpha
-			, bool PreserveNullAlpha = true);
+    //Adjust the LabA components of each pixel in the given Block according to the given curves
+    //Abscissa represents the actual component value.
+    //Ordinate represents the adjusted component value.
+    UFUNCTION(BlueprintPure
+        , Category="Odyssey|Block"
+        , meta = (DisplayName = "Adjust Block LabA"))
+        static FOdysseyBlockProxy AdjustLabA(FOdysseyBlockProxy Block
+            , UCurveFloat* CurveL
+            , UCurveFloat* CurveA
+            , UCurveFloat* CurveB
+            , UCurveFloat* CurveAlpha
+            , bool PreserveNullAlpha = true);
 
     //---
 
@@ -282,7 +282,7 @@ public:
     UFUNCTION( BlueprintPure
              , Category="Odyssey|Block" )
     static TArray< FOdysseyBlockProxy > GetFontBlocks( const UFont* Font, EOdysseyColorModel ColorModel = EOdysseyColorModel::kRGBA, EOdysseyChannelDepth ChannelDepth = EOdysseyChannelDepth::k8 );
-    
+
     //Requires a Font and a String to return an Array of Odyssey Block Reference.
     //This node find the correspondance between letters from the String and characters from the Font.
     UFUNCTION( BlueprintPure
@@ -296,8 +296,8 @@ public:
     static void GetCharactersSize( const UFont* Font, const FString& String, TArray<float>& Width, TArray<float>& Height );
 
     //---
-    
-    //This node automatically picks the color up at position on the canvas. 
+
+    //This node automatically picks the color up at position on the canvas.
     UFUNCTION(BlueprintPure, Category="Odyssey|Block")
     static bool GetColorAtPosition( FOdysseyBlockProxy Block, float X, float Y, FOdysseyBrushColor& Color );
 

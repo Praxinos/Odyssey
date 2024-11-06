@@ -20,17 +20,17 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeader
         SOdysseyAnimationTimelineInbetweeningHeader();
 
     public:
-	    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineInbetweeningHeader)
-			: _PainterEditor(nullptr)
+        SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineInbetweeningHeader)
+            : _PainterEditor(nullptr)
             {}
-			SLATE_ATTRIBUTE(TSharedPtr<FOdysseyPainterEditor>, PainterEditor)
+            SLATE_ATTRIBUTE(TSharedPtr<FOdysseyPainterEditor>, PainterEditor)
         SLATE_END_ARGS()
 
-	    void Construct( const FArguments& InArgs, UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector );
+        void Construct( const FArguments& InArgs, UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector );
         UOdysseyAnimationLayerImageVector* GetAnimationLayerImageVector();
         virtual FReply OnKeyUp ( const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent ) override;
         void Update();
-		TSharedPtr<FOdysseyPainterEditor> GetEditor() const;
+        TSharedPtr<FOdysseyPainterEditor> GetEditor() const;
 
     protected:
         TSharedRef<ITableRow> OnGenerateRow( TSharedPtr<FInbetweeningListViewItem> iItem
@@ -46,5 +46,5 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeader
     protected:
         UOdysseyAnimationLayerImageVector* mAnimationLayerImageVector;
         TArray<TSharedPtr<FInbetweeningListViewItem>> mItemsSource;
-		TAttribute<TSharedPtr<FOdysseyPainterEditor>> mEditor;
+        TAttribute<TSharedPtr<FOdysseyPainterEditor>> mEditor;
 };

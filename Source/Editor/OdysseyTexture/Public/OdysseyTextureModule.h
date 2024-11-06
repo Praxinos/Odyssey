@@ -13,14 +13,14 @@ class  FAssetTypeActions_OdysseyTexture;
  * The Texture Asset module.
  */
 class FOdysseyTextureModule :
-	public IModuleInterface
+    public IModuleInterface
 {
 public:
     // IModuleInterface interface
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
-	
-	// End of IModuleInterface interface
 
-	void ShowPluginContentInContentBrowser();
+    // End of IModuleInterface interface
+
+    void ShowPluginContentInContentBrowser();
 };

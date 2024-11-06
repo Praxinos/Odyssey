@@ -47,7 +47,7 @@ class ODYSSEYANIMATIONEDITOR_API UOdysseyAnimationEditorProjectSettings
 public:
     UOdysseyAnimationEditorProjectSettings();
     static UOdysseyAnimationEditorProjectSettings* Get();
- 
+
 
     virtual void PostInitProperties() override;
     virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

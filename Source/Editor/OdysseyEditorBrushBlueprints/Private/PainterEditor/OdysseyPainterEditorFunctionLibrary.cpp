@@ -47,7 +47,7 @@ UOdysseyPainterEditorFunctionLibrary::GetViewportPan( UOdysseyBrushAssetBase* Br
 {
     if (!BrushInstance)
         return FVector2D::ZeroVector;
-        
+
     FOdysseyPainterEditorBrushContext* context = BrushInstance->GetContext<FOdysseyPainterEditorBrushContext>("FOdysseyPainterEditorBrushContext");
     if (!context)
         return FVector2D::ZeroVector;

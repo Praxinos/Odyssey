@@ -30,7 +30,7 @@ public:
     FText GetCellMarkName(int iMarkId) const;
     const FSlateBrush* GetCellMarkSymbolIcon(int iMarkId) const;
     FSlateColor GetCellMarkColor(int iMarkId) const;
-    
+
     TSharedRef<SWidget> GetLimitsCellMarkMenuContent();
     TSharedRef<SWidget> GetKeysCellMarkMenuContent();
     TSharedRef<SWidget> CreateLimitsCellMarkButtonWidget();
@@ -369,9 +369,9 @@ void
 FOdysseyAnimationEditorFlipSystem::RegisterDetailCustomization()
 {
     FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    PropertyModule.RegisterCustomPropertyTypeLayout( 
+    PropertyModule.RegisterCustomPropertyTypeLayout(
         FOdysseyAnimationFlipConfiguration::StaticStruct()->GetFName(),
-        FOnGetPropertyTypeCustomizationInstance::CreateLambda( 
+        FOnGetPropertyTypeCustomizationInstance::CreateLambda(
             []()
             {
                 return MakeShareable( new FOdysseyAnimationEditorFlipDetailCustomization() );
@@ -395,7 +395,7 @@ FOdysseyAnimationEditorFlipSystem::~FOdysseyAnimationEditorFlipSystem()
 FOdysseyAnimationEditorFlipSystem::FOdysseyAnimationEditorFlipSystem(FOdysseyAnimationEditorExtension* iExtension)
     : mExtension(iExtension)
 {
-    
+
 }
 
 void
@@ -447,7 +447,7 @@ FOdysseyAnimationEditorFlipSystem::FlipTo(int iDelta)
 
     if (frame == INDEX_NONE)
         return;
-        
+
     if (frame == mStartFrame)
     {
         mExtension->Player()->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
@@ -474,24 +474,24 @@ FOdysseyAnimationEditorFlipSystem::HandleMouseMoveEvent(FSlateApplication& Slate
         FVector2D mousePosition = MouseEvent.GetScreenSpacePosition();
         FVector2D mouseDelta = mousePosition - mMousePositionReference;
         float directiondelta = mouseDelta.X;
-		switch (mFlipConfiguration.Direction)
-		{
-			case EOdysseyAnimationFlipDirection::Horizontal:
-				directiondelta = mouseDelta.X;
-			break;
+        switch (mFlipConfiguration.Direction)
+        {
+            case EOdysseyAnimationFlipDirection::Horizontal:
+                directiondelta = mouseDelta.X;
+            break;
 
-			case EOdysseyAnimationFlipDirection::HorizontalInverted:
-				directiondelta = -mouseDelta.X;
-			break;
+            case EOdysseyAnimationFlipDirection::HorizontalInverted:
+                directiondelta = -mouseDelta.X;
+            break;
 
-			case EOdysseyAnimationFlipDirection::Vertical:
-				directiondelta = mouseDelta.Y;
-			break;
+            case EOdysseyAnimationFlipDirection::Vertical:
+                directiondelta = mouseDelta.Y;
+            break;
 
-			case EOdysseyAnimationFlipDirection::VerticalInverted:
-				directiondelta = -mouseDelta.Y;
-			break;
-		}
+            case EOdysseyAnimationFlipDirection::VerticalInverted:
+                directiondelta = -mouseDelta.Y;
+            break;
+        }
 
         const float minStep = 1;
         const float maxStep = 100;
@@ -502,7 +502,7 @@ FOdysseyAnimationEditorFlipSystem::HandleMouseMoveEvent(FSlateApplication& Slate
 
         return true;
     }
-    
+
     mMousePositionReference = MouseEvent.GetScreenSpacePosition();
     return false;
 }
@@ -513,7 +513,7 @@ FOdysseyAnimationEditorFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
     int leftLimit;
     int rightLimit;
     GetLimits(mFlipConfiguration.Limits, leftLimit, rightLimit);
-    
+
     switch(mFlipConfiguration.Keys)
     {
         case EOdysseyAnimationFlipKeys::AllFrames:
@@ -577,7 +577,7 @@ FOdysseyAnimationEditorFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
                 do
                 {
                     oFrame++;
-                    
+
                     if(rightLimit != INDEX_NONE)
                     {
                         if (oFrame > rightLimit)
@@ -601,7 +601,7 @@ FOdysseyAnimationEditorFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
                 lastFrameComposition = frameComposition;
                 int frame = oFrame;
 
-				//detect if we cross the start frame or not before the next cell
+                //detect if we cross the start frame or not before the next cell
                 while(frame < mStartFrame)
                 {
                     if (frame == mStartFrame)
@@ -642,7 +642,7 @@ FOdysseyAnimationEditorFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
                 }
                 while(oFrame != initialFrame && frameComposition == lastFrameComposition);
 
-				//Detect if we cross the start frame or not before the next cell
+                //Detect if we cross the start frame or not before the next cell
                 //And navigate to the start of the cell
                 lastFrameComposition = frameComposition;
                 while(oFrame > leftLimit)
@@ -680,10 +680,10 @@ FOdysseyAnimationEditorFlipSystem::GetKeyFrame(int iDelta, int& oFrame)
             if (leftLimit > frameRange.GetUpperBoundValue() || rightLimit < frameRange.GetLowerBoundValue())
                 return;
 
-			int startCellIndex = INDEX_NONE;
+            int startCellIndex = INDEX_NONE;
             UOdysseyAnimationCell* cell = layer->GetCellAtFrame(mStartFrame);
-			if (cell)
-				startCellIndex = cell->IndexInLayer;
+            if (cell)
+                startCellIndex = cell->IndexInLayer;
 
             TArray<int> keyFrames;
             int currentKeyFrame = INDEX_NONE;
@@ -795,15 +795,15 @@ FOdysseyAnimationEditorFlipSystem::GetLimits(EOdysseyAnimationFlipLimits iLimits
         }
         break;
 
-        case EOdysseyAnimationFlipLimits::CellMarks: 
+        case EOdysseyAnimationFlipLimits::CellMarks:
         {
             UOdysseyAnimationLayerStack* layerStack = mAnimation->GetLayerStack();
             UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>(layerStack->CurrentLayer.Get());
 
             int startCellIndex = INDEX_NONE;
-			UOdysseyAnimationCell* startCell = layer->GetCellAtFrame(mStartFrame);
-			if (startCell)
-				startCellIndex = startCell->IndexInLayer;
+            UOdysseyAnimationCell* startCell = layer->GetCellAtFrame(mStartFrame);
+            if (startCell)
+                startCellIndex = startCell->IndexInLayer;
 
             if (startCellIndex == INDEX_NONE)
             {
@@ -859,7 +859,7 @@ FOdysseyAnimationEditorFlipSystem::GetLimits(EOdysseyAnimationFlipLimits iLimits
 void
 FOdysseyAnimationEditorFlipSystem::Tick(const float DeltaTime, FSlateApplication& SlateApp, TSharedRef<ICursor> Cursor)
 {
-    
+
 }
 
 #undef LOCTEXT_NAMESPACE

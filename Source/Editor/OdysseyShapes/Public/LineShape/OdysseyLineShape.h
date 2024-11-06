@@ -27,7 +27,7 @@ public:
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
     virtual bool OnKeyDown(const FKey& iKey);
     virtual bool OnKeyUp(const FKey& iKey);
-    
+
     virtual void Abort() override;
 
 private:
@@ -47,6 +47,6 @@ private:
     bool mInvertSnapAngles = false;
 
 public:
-	UPROPERTY(EditAnywhere, Category="Shape")
-	bool SnapAngles = false;
+    UPROPERTY(EditAnywhere, Category="Shape")
+    bool SnapAngles = false;
 };

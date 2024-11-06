@@ -11,7 +11,7 @@
 #include "OdysseyPaletteFactory.generated.h"
 
 UCLASS()
-class UOdysseyPaletteFactory 
+class UOdysseyPaletteFactory
     : public UFactory
 {
     GENERATED_UCLASS_BODY()

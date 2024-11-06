@@ -12,13 +12,13 @@
 #include "OdysseyTextureFactory.generated.h"
 
 UCLASS()
-class UOdysseyTextureFactory 
+class UOdysseyTextureFactory
     : public UFactory
 {
     GENERATED_UCLASS_BODY()
 
 public:
-	void SetConfiguration(const FOdysseyTextureConfiguration& iConfiguration);
+    void SetConfiguration(const FOdysseyTextureConfiguration& iConfiguration);
 
 private:
     virtual UObject* FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn ) override;
@@ -26,7 +26,7 @@ private:
     virtual bool ConfigureProperties() override;
 
     virtual FString GetDefaultNewAssetName() const;
-    
+
     virtual FName GetNewAssetThumbnailOverride() const override;
 
 private:

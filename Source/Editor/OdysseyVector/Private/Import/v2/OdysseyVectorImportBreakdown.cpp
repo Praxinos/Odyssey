@@ -129,6 +129,6 @@ FOdysseyVectorImportV2::ReadBreakdown( FInbetweenerBreakdown& iBreakdown
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
-            }    
+            }
         } );
 }

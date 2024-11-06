@@ -15,7 +15,7 @@ public:
         : _ShowContent(true)
         {}
         SLATE_ATTRIBUTE(bool, ShowContent)
-		SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
 public:
@@ -27,7 +27,7 @@ private:
     EVisibility GetContentVisibility() const;
 
     int GetReach() const;
-    
+
     int GetClampedReach() const;
     int GetStaggerLength() const;
     void OnReachValueChanged(int iReach);
@@ -47,7 +47,7 @@ private:
 private:
     UOdysseyAnimationCellImageStagger* mCell;
     TAttribute<bool> mShowContent;
-	TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
     FText mSetReachTransactionName;
 
     bool mIsEditingReach;

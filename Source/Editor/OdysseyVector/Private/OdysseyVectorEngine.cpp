@@ -196,7 +196,7 @@ FOdysseyVectorEngine::GetInvalidatedRect( double iScreenWidth, double iScreenHei
     if( retRect.y < 0.0f )
     {
         retRect.y = 0.0f;
-    } 
+    }
 
     return retRect;
 }
@@ -304,7 +304,7 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 
     // we need to get a sanitized version of the rendering region because when we tell the
     //  engine to redraw the whole screen, the region W and H values are set to DBL_MAX
-    // via a call to FOdysseyVectorEngine::Invalidate(void). This is because in some 
+    // via a call to FOdysseyVectorEngine::Invalidate(void). This is because in some
     // portion of the code (the mouse tools, namely) we can't really know the size of the
     // recipient image because we deal with FOdysseyMediaVector which are not supposed to
     // know the size of the recipient image. Only FOdysseyVectorEngine::Render() know that
@@ -561,7 +561,7 @@ FOdysseyVectorEngine::TraceLine ( int32 iX0
           dd  = ( ddx > ddy ) ? ddx : ddy;
     double du  = iU1  - iU0, pu = ( dd ) ? ( du / dd ) : 0.0f;
     double dv  = iV1  - iV0, pv = ( dd ) ? ( dv / dd ) : 0.0f;
-    int px = ( dx > 0 ) ? 1 : -1, 
+    int px = ( dx > 0 ) ? 1 : -1,
         py = ( dy > 0 ) ? 1 : -1;
     int32 x = iX0,
           y = iY0;
@@ -795,7 +795,7 @@ static inline void TraceHorizontalLine ( const FHorizontalLine *hline
                                        , uint32 iImageHeight
                                        , int32  iImageBitsPerPixel
                                        , const  FColor& iColor
-                                       // 
+                                       //
                                        , const int8*  iBrushPixelData
                                        , uint32 iBrushWidth
                                        , uint32 iBrushHeight
@@ -1106,42 +1106,42 @@ FOdysseyVectorEngine::TracePolygon( const ::ULIS::FVec2I* iPoint
     }
 }
 
-// swaps two numbers 
-static inline void swap(int* a , int*b) 
-{ 
-    int temp = *a; 
-    *a = *b; 
-    *b = temp; 
-}
-
-//returns integer part of a floating point number 
-static inline int iPartOfNumber(float x) 
-{ 
-    return (int)x; 
-}
-  
-//rounds off a number 
-static inline int roundNumber(float x)
-{ 
-    return iPartOfNumber(x + 0.5) ; 
-}
-  
-//returns fractional part of a number 
-static inline float fPartOfNumber(float x)
-{ 
-    if (x>0) return x - iPartOfNumber(x); 
-    else return x - (iPartOfNumber(x)+1); 
-}
-  
-//returns 1 - fractional part of number 
-static inline float rfPartOfNumber(float x) 
+// swaps two numbers
+static inline void swap(int* a , int*b)
 {
-    return 1.0f - fPartOfNumber(x); 
+    int temp = *a;
+    *a = *b;
+    *b = temp;
 }
 
-// draws a pixel on screen of given brightness 
-// 0<=brightness<=1. We can use your own library 
-// to draw on screen 
+//returns integer part of a floating point number
+static inline int iPartOfNumber(float x)
+{
+    return (int)x;
+}
+
+//rounds off a number
+static inline int roundNumber(float x)
+{
+    return iPartOfNumber(x + 0.5) ;
+}
+
+//returns fractional part of a number
+static inline float fPartOfNumber(float x)
+{
+    if (x>0) return x - iPartOfNumber(x);
+    else return x - (iPartOfNumber(x)+1);
+}
+
+//returns 1 - fractional part of number
+static inline float rfPartOfNumber(float x)
+{
+    return 1.0f - fPartOfNumber(x);
+}
+
+// draws a pixel on screen of given brightness
+// 0<=brightness<=1. We can use your own library
+// to draw on screen
 static inline void PlotPixel( int32 x
                             , int32 y
                             , double brightness
@@ -1174,7 +1174,7 @@ static inline void PlotPixel( int32 x
         default :
         break;
     }
-} 
+}
 
 // https://www.geeksforgeeks.org/anti-aliased-line-xiaolin-wus-algorithm/
 void
@@ -1187,31 +1187,31 @@ FOdysseyVectorEngine::DrawLineAA( int32 x0
                                 , uint32 iImageHeight
                                 , int32  iImageBitsPerPixel
                                 , const FColor& iColor )
-{ 
+{
     int steep = fabs( y1 - y0 ) > fabs( x1 - x0 );
-  
-    // swap the co-ordinates if slope > 1 or we 
-    // draw backwards 
+
+    // swap the co-ordinates if slope > 1 or we
+    // draw backwards
     if ( steep )
-    { 
+    {
         swap( &x0, &y0 );
         swap( &x1, &y1 );
-    } 
+    }
     if ( x0 > x1 )
-    { 
+    {
         swap( &x0, &x1 );
         swap( &y0, &y1 );
-    } 
-  
-    //compute the slope 
+    }
+
+    //compute the slope
     float dx = x1 - x0;
     float dy = y1 - y0;
     float gradient = ( dx == 0.0 ) ? 1.0f : ( dy / dx );
-    int xpxl1 = x0; 
-    int xpxl2 = x1; 
-    float intersectY = y0; 
+    int xpxl1 = x0;
+    int xpxl2 = x1;
+    float intersectY = y0;
 
-    // main loop 
+    // main loop
     if ( steep )
     {
         int x;
@@ -1381,7 +1381,7 @@ FOdysseyVectorEngine::PickPathPoints( FOdysseyVectorGroupPaint* iScene
                                     , std::vector<FOdysseyVectorHandleSegment*>& oPickedHandleArray )
 {
     FOdysseyVectorGroupPaint* scene = GetScene();
-                                   
+
     Traverse
     ( scene
     , 0
@@ -1521,7 +1521,7 @@ FOdysseyVectorEngine::MakePaintGroupFromObjects( FOdysseyVectorObject* iParent
                 ::ULIS::FVec2D& bucketCoords = bucket->GetCoords();
                 BLPoint bucketWorldCoords = parentWorldMatrix.mapPoint( bucketCoords.x, bucketCoords.y );
 
-                // TODO: that's a lot of conversion, kowing that both PickCycle 
+                // TODO: that's a lot of conversion, kowing that both PickCycle
                 // and FOdysseyVectorBucket() convert to their own space.
                 // We can optimize by creating a PickCycle
                 // with local coordinates as parameter. Same for FOdysseyVectorBucket()
@@ -1545,7 +1545,7 @@ FOdysseyVectorEngine::MakePaintGroupFromObjects( FOdysseyVectorObject* iParent
             if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
             {
                 FOdysseyVectorGroupPaint* parentPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
-            
+
                 parentPaintGroup->RemoveBucket( oRemovedBucketArray[i] );
             }
         }
@@ -1616,7 +1616,7 @@ FOdysseyVectorEngine::FlipObjects( const std::list<FOdysseyVectorObject*>& iObje
     {
         BLMatrix2D& objectWorldMatrix = object->GetWorldMatrix();
         BLPoint objectWorldCenter = objectWorldMatrix.mapPoint( 0.0f, 0.0f );
-        BLPoint objectLocalCenter = inverseAxisMatrix.mapPoint( objectWorldCenter ); 
+        BLPoint objectLocalCenter = inverseAxisMatrix.mapPoint( objectWorldCenter );
         BLPoint objectLocalFlippedCenter = flippingMatrix.mapPoint( objectLocalCenter );
         BLPoint objectWorldFlippedCenter = axisMatrix.mapPoint( objectLocalFlippedCenter );
 

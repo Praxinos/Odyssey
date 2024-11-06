@@ -41,7 +41,7 @@ UOdysseyFreehandShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const F
         case EOdysseySmoothingMethod::kPull : mSmoother = MakeShared<FOdysseySmoothingPull>(&SmoothingOptions) ; break;
         default: break;
     }
-    
+
     CreateHUD();
 
     //Force first point to be drawn
@@ -60,7 +60,7 @@ UOdysseyFreehandShape::OnMouseDown(const FOdysseyPoint& iPointInTexture, const F
         if ( mPathHUD )
             mPathHUD->GetPoints().Append(mRawStroke);
     }
-    
+
     return true;
 }
 
@@ -69,7 +69,7 @@ UOdysseyFreehandShape::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     if (!mIsDrawing)
         return;
-    
+
     StrokeTo(iPointInTexture);
 }
 
@@ -96,7 +96,7 @@ UOdysseyFreehandShape::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKe
     mRawStroke.Empty();
     mSmoothedStroke.Empty();
     mSmoother = nullptr;
-    
+
     RemoveHUD();
 
     return true;
@@ -150,7 +150,7 @@ UOdysseyFreehandShape::StrokeTo( const FOdysseyPoint& iPoint )
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------- Tick API
-    
+
 void
 UOdysseyFreehandShape::Tick(float iDeltaTime)
 {
@@ -173,7 +173,7 @@ UOdysseyFreehandShape::ApplyOverrides(const TMap<TObjectPtr<UClass>, TObjectPtr<
             smoothingOptions.SmoothingRealTime = freehandShapeOverrides->SmoothingRealTime;
         if(freehandShapeOverrides->bOverride_SmoothingCatchUp)
             smoothingOptions.SmoothingCatchUp = freehandShapeOverrides->SmoothingCatchUp;
-        
+
         FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyFreehandShape, SmoothingOptions), smoothingOptions);
 
         if(freehandShapeOverrides->bOverride_SmoothingEnabled)
@@ -247,11 +247,11 @@ void
 UOdysseyFreehandShape::Abort()
 {
     mIsDrawing = false;
-    
+
     mRawStroke.Empty();
     mSmoothedStroke.Empty();
     mSmoother = nullptr;
-    
+
     RemoveHUD();
 
     mOnAbort.Broadcast();

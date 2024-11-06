@@ -28,7 +28,7 @@ FOdysseyVectorUndoGroup::~FOdysseyVectorUndoGroup()
 FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iScene
                                                 , FOdysseyVectorGroup* iAddedGroup
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
-                                                , std::vector<FOdysseyVectorBucket*>& iRemovedBucketArray 
+                                                , std::vector<FOdysseyVectorBucket*>& iRemovedBucketArray
                                                 , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mAddedGroup( iAddedGroup )

@@ -66,7 +66,7 @@ private:
     void UpdateTransformHUD(); // Update the HUD of the transform based on current selection
     void UpdateTransformBlock(); // Update the pixel block of the transform based on current selection
     ::ULIS::FRectI GetTransformAreaBoundingRect();
-    
+
     void BlendTransformAreaToPaintBlock();
 
     void CommitTransform();
@@ -82,7 +82,7 @@ private:
     void OnBottomRightHandleDragged();
     void OnBottomLeftHandleDragged();
     void OnPivotHandleDragged();
-    
+
     void OnRasterSelectionChanged();
 
     void UpdateRasterSelection( bool iCreateNewIfEmpty = false );
@@ -95,12 +95,12 @@ public:
     UPROPERTY(EditAnywhere, Category="Transform options")
     bool Uniform = false;
 
-private: 
+private:
     FOdysseyPaintEngine mPaintEngine;
     FOdysseyRasterBlockMutator mRasterMutator;
 
     EOdysseyTransformCapture mTransformCaptureMode;
-    TSharedPtr<FOdysseyHUDElement> mTransformToolHUD; // The whole HUD displayed by the tool, selection + transform 
+    TSharedPtr<FOdysseyHUDElement> mTransformToolHUD; // The whole HUD displayed by the tool, selection + transform
     TSharedPtr<FOdysseyHUDPolygon> mTransformAreaHUD; // The "rectangle" HUD with four handles used for the transformation
     TArray<TSharedPtr<FOdysseyHUDHandle>> mHandles;
 

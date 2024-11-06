@@ -24,12 +24,12 @@
 // - find chordless cycles by exploring sections :
 //    -> To find chordless cycles, we have to always go the same way, either
 //       always left or always right, it does not matter but we always go the same way.
-//       This is the basic principle of the method. To find the correct way, we simply compute 
+//       This is the basic principle of the method. To find the correct way, we simply compute
 //       the cross product, which will be either positive or negative relative to the direction.
 //       The only case when we take the negative-direction is when there is no positive-direction.
-//         
+//
 //         Let's say we only take the first section going to the right :
-//         
+//
 //             /              Sections B and A are both at the right side of section S
 //            /               This can be determined by computing the cross products SxA and SxB
 //           B                However, the closest section to segment S is section A. This can be
@@ -66,12 +66,12 @@
 // Another important technique is blocking the sections once they were explored in one way.
 // Indeed, a set of connected cycles always face the same direction because their vertices "turn"
 // in the same direction. It is the same as face orientation on a 3D-Mesh.
-// 
+//
 //      o______________o______________o
 //      |   ------->   |   ------->   |     What do we notice here ? Although cycles have the same
 //      |  ^        |  |  ^        |  |     orientation (cross product facing in the same direction),
 //      |  |        |  A  |        |  |     sections A, B, C, D are never "explored" twice in the same
-//      |  |        v  |  |        v  |     direction (look at the arrows above and below). We use 
+//      |  |        v  |  |        v  |     direction (look at the arrows above and below). We use
 //      |   <-------   |   <-------   |     this as an advantage to prevent double detection of the
 //      o_______C______o_______D______o     same cycle, which will speed up things. Each time a cycle
 //      |   ------->   |   ------->   |     is detected, its sections are blocked one-way, guaranteing
@@ -161,13 +161,13 @@
 // process, as we can have such cases :
 //
 //              o
-//              |       <--- deletion at first pass 
+//              |       <--- deletion at first pass
 //              |
 //              o
-//              |       <--- deletion at second pass 
+//              |       <--- deletion at second pass
 //              |
 //       o______o______o
-//       |      |      |  
+//       |      |      |
 //       |      |      |      <--- keep those sections.
 //       o____  o______o
 //
@@ -418,7 +418,7 @@ void cubicRoots( const double iPoly[4], double oRoots[3] )
         double Q = ( 3 * B     - A * A ) / 9;
         double R = ( 9 * A * B - 27 * C - 2 * A * A * A ) / 54;
         double D = Q * Q * Q + R * R; // polynomial discriminant
- 
+
         if( D >= 0 ) // complex or duplicate roots
         {
             double sqrtD = sqrt(D);
@@ -429,7 +429,7 @@ void cubicRoots( const double iPoly[4], double oRoots[3] )
             oRoots[0] = -A / 3 + ( S + T );     // real root
             oRoots[1] = -A / 3 - ( S + T ) / 2; // real part of complex root
             oRoots[2] = -A / 3 - ( S + T ) / 2; // real part of complex root
- 
+
             /*discard complex roots*/
             if ( Im != 0 )
             {
@@ -558,7 +558,7 @@ IntersectGapSection( FOdysseyVectorSection* iGapSection
 // as it would be too complicated to do maths using the parametric bezier and I'm not that smart.
 // Actual intersections vertices are created in this method. We create 2 vertices per intersection.
 // This is required because a segment can intersect itself, in that case we need to be able to create
-// a section that has 2 different vertices as endpoints and not the same one. 
+// a section that has 2 different vertices as endpoints and not the same one.
 // A Tolerance value is accepted to test for near-intersections, that will be created later in the
 // process.
 void
@@ -1119,7 +1119,7 @@ FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext
                                          , invalidationAreaMax );
 
     // do not draw if outside screen
-    if( ( bIntersectsCanvas == true )  
+    if( ( bIntersectsCanvas == true )
      || ( ( ( worldBBoxMin.x ) < invalidationAreaMax.x )
        && ( ( worldBBoxMax.x ) > invalidationAreaMin.x )
        && ( ( worldBBoxMin.y ) < invalidationAreaMax.y )
@@ -1423,10 +1423,10 @@ FOdysseyVectorGroupPaint::FindPath( FOdysseyVectorSection* iReturnSection
     {
         double normalVector = GetCycleNormalVector( oVertexIndexArray, oSectionArray );
 
-//UE_LOG(LogTemp, Warning, TEXT("Cycle detected %f size %d"), GetCycleNormalVector( oVertexIndexArray, oSectionArray ), oSectionArray.size() ); 
+//UE_LOG(LogTemp, Warning, TEXT("Cycle detected %f size %d"), GetCycleNormalVector( oVertexIndexArray, oSectionArray ), oSectionArray.size() );
         if (normalVector > 0.0f)
         {
-//UE_LOG(LogTemp, Warning, TEXT("Cycle committed") ); 
+//UE_LOG(LogTemp, Warning, TEXT("Cycle committed") );
             mCycleList.push_back( new FOdysseyVectorCycle( this, oVertexIndexArray, oSectionArray ) );
         }
 
@@ -1500,7 +1500,7 @@ GetCycleNormalVector( std::vector<uint32>& iVertexIndexArray
             double stepT = deltaT / subdiv;
             double t0 = vertexIndex;
 
-            // By relying only on start and end points of a section, we lack precision. 
+            // By relying only on start and end points of a section, we lack precision.
             // Here we rely on more acurate computation by getting intermediate points.
             for( int j = 0; j < subdiv; j++ )
             {
@@ -1608,7 +1608,7 @@ FOdysseyVectorGroupPaint::FindCycles()
             FOdysseyVectorVertex* vertex0 = mGapSectionBuffer[i].GetVertex(0);
             FOdysseyVectorVertex* vertex1 = mGapSectionBuffer[i].GetVertex(1);
 
-            // exploration pairs only needed for vertex-vertex gaps because 
+            // exploration pairs only needed for vertex-vertex gaps because
             // for vertex-segment gaps, there is an intersection that have created
             // the exploration pairs in the previous loop.
             if( ( vertex0->GetClass() == FOdysseyVectorVertex::StaticClass() )
@@ -1625,8 +1625,8 @@ FOdysseyVectorGroupPaint::FindCycles()
     }
 
     // sort exploration pairs in order to always have a propagation that starts from
-    // the same vertex/section between sessions. This is needed in monothread and 
-    // multihread modes because the exploration pairs won't be in the same order 
+    // the same vertex/section between sessions. This is needed in monothread and
+    // multihread modes because the exploration pairs won't be in the same order
     // and we may switch from one to the other.
     std::sort( explorationPairsBuffer.begin()
              , explorationPairsBuffer.end()
@@ -1679,7 +1679,7 @@ FOdysseyVectorGroupPaint::CreateNearIntersection( FOdysseyVectorVertex *iVertex 
     {
         double nearestSegmentT = iVertex->GetNearestSegmentT();
         bool nearsetVertexIsOnNearestSegment = nearestVertex && nearestVertex->HasSegment( nearestSegment ) ? true : false;
- 
+
         // when the nearest intersection is too close from the segment endpoint, it can create
         // issues with the geometry so we need to do this check.
         if( ( ( nearestSegmentT > 0.0001f ) && ( nearestSegmentT < 0.9999f ) && ( nearsetVertexIsOnNearestSegment == true  ) )
@@ -2059,7 +2059,7 @@ FOdysseyVectorGroupPaint::BuildGraph()
     {
         mIntersectionVertexArray.emplace_back( this
                                              , XintersectionRecord.x
-                                             , XintersectionRecord.y 
+                                             , XintersectionRecord.y
                                              , XintersectionRecord.segment0
                                              , XintersectionRecord.segment0T
                                              , XintersectionRecord.segment1
@@ -2069,10 +2069,10 @@ FOdysseyVectorGroupPaint::BuildGraph()
     // then init T-Junction intersection vertices (gaps).
     for( FTIntersectionRecord& TintersectionRecord : mTIntersectionRecordArray )
     {
-        FOdysseyVectorVertexIntersection* intersectionVertex = 
+        FOdysseyVectorVertexIntersection* intersectionVertex =
         &mIntersectionVertexArray.emplace_back( this
                                               , TintersectionRecord.x
-                                              , TintersectionRecord.y 
+                                              , TintersectionRecord.y
                                               , TintersectionRecord.segment
                                               , TintersectionRecord.segmentT
                                               , TintersectionRecord.vertex );
@@ -2422,7 +2422,7 @@ FOdysseyVectorGroupPaint::CopyBuckets( FOdysseyVectorGroupPaint* iDestination, b
         bucketCopy->Set( destinationBucketPosition.x, destinationBucketPosition.y );
 
         iDestination->AddBucket( bucketCopy );
-     }   
+     }
 }
 
 FOdysseyVectorObject*

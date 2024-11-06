@@ -104,7 +104,7 @@ UOdysseyBrushAssetBase::PostLoad()
         for (const TObjectPtr<UObject>& oldOverride : oldOverrides)
         {
             UClass* overrideClass = oldOverride->GetClass();
-            
+
             //EditorOverrides already contains the right classes, but does not contain the right values
             if (EditorOverrides.Contains(overrideClass))
                 EditorOverrides[overrideClass] = oldOverride;
@@ -242,7 +242,7 @@ UOdysseyBrushAssetBase::StrokeStep(const FStep& iStep)
         OnSubStrokeBegin();
     }
 
-    //Always call OnStep node 
+    //Always call OnStep node
     {
         FEditorScriptExecutionGuard ScriptGuard;
         OnStep();
@@ -290,7 +290,7 @@ UOdysseyBrushAssetBase::StrokeAbort()
         UE_LOG(LogTemp, Warning, TEXT("Cannot call UOdysseyBrushAssetBase::Abort() before UOdysseyBrushAssetBase::Begin()") );
         return false;
     }
-    
+
     mIsDrawing = false;
 
     return true;
@@ -305,11 +305,11 @@ UOdysseyBrushAssetBase::StrokeReset()
 
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------- Tick
-    
+
 void
 UOdysseyBrushAssetBase::Tick(float DeltaTime, bool iShouldFlush)
 {
-    //Execute a the brush tick node before executing anything else 
+    //Execute a the brush tick node before executing anything else
     ExecuteTick();
 
     if (iShouldFlush)
@@ -361,7 +361,7 @@ UOdysseyBrushAssetBase::SetBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
-    
+
 UOdysseyBrushOptions*
 UOdysseyBrushAssetBase::GetBrushOptions()
 {

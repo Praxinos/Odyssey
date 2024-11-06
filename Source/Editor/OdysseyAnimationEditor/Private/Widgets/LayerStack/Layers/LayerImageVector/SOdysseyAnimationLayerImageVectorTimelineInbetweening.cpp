@@ -41,15 +41,15 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Construct( const FArgumen
                                                                 , UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector )
 {
     mAnimationLayerImageVector = iAnimationLayerImageVector;
-	mTimelinePosition = InArgs._TimelinePosition;
-	mEditor = InArgs._PainterEditor;
+    mTimelinePosition = InArgs._TimelinePosition;
+    mEditor = InArgs._PainterEditor;
 
     SListView<TSharedPtr<FInbetweeningListViewItem>>::Construct(
         SListView<TSharedPtr<FInbetweeningListViewItem>>::FArguments()
         // for some reason, SetItemsSource does not work, so we have to use an array that we
         // call mItemsSource and that we will updates with the desired items
         .ListItemsSource(&mItemsSource)
-        .OnGenerateRow( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnGenerateRow ) 
+        .OnGenerateRow( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnGenerateRow )
         //.OnGetChildren( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnGetChildren )
         //.OnSelectionChanged( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged )
         //.OnItemScrolledIntoView(this, &SOdysseyLayerStackTreeView::OnItemScrolledIntoView)
@@ -64,13 +64,13 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Construct( const FArgumen
 TSharedPtr<FOdysseyPainterEditor>
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetEditor() const
 {
-	return mEditor.Get();
+    return mEditor.Get();
 }
 
 TSharedPtr<FOdysseyAnimationEditorTimelinePosition>
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetTimelinePosition() const
 {
-	return mTimelinePosition;
+    return mTimelinePosition;
 }
 
 void
@@ -185,9 +185,9 @@ void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
 {
     int breakdownFrameIndex = mTimelinePosition->MousePositionToFrame( mCursorPos.X );
-	UOdysseyAnimationCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
-	if (!cell)
-		return;
+    UOdysseyAnimationCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
+    if (!cell)
+        return;
 
     int breakdownCellIndex = cell->IndexInLayer;
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
@@ -208,14 +208,14 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
                                                                                        , notificationFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
-			TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
-			if (editor)
-            {	
-				TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
-				if (source)
-					source->RecordCurrentFrameUndo();
-			}
+
+            TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
+            if (editor)
+            {
+                TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
+                if (source)
+                    source->RecordCurrentFrameUndo();
+            }
         }
         GEditor->EndTransaction();
         //--------------------------------------//
@@ -260,8 +260,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
 {
     int breakdownFrameIndex = mTimelinePosition->MousePositionToFrame( mCursorPos.X );
     UOdysseyAnimationCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
-	if (!cell)
-		return;
+    if (!cell)
+        return;
 
     int breakdownCellIndex = cell->IndexInLayer;
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
@@ -282,14 +282,14 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
                                                                                           , notificationFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
-			TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
-			if (editor)
-            {	
-				TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
-				if (source)
-					source->RecordCurrentFrameUndo();
-			}
+
+            TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
+            if (editor)
+            {
+                TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
+                if (source)
+                    source->RecordCurrentFrameUndo();
+            }
         }
         GEditor->EndTransaction();
         //--------------------------------------//
@@ -365,14 +365,14 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection()
                                                                                       , notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
-		TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
-		if (editor)
-		{	
-			TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
-			if (source)
-				source->RecordCurrentFrameUndo();
-		}
+
+        TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
+        if (editor)
+        {
+            TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
+        }
     }
     GEditor->EndTransaction();
 */

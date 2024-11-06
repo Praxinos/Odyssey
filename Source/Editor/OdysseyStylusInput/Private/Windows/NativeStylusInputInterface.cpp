@@ -25,45 +25,45 @@ public:
     // IWindowsMessageHandler interface
 
     /**
-	 * Processes a Windows message.
-	 *
-	 * @param hwnd Handle to the window that received the message.
-	 * @param msg The message.
-	 * @param wParam Additional message information.
-	 * @param lParam Additional message information.
-	 * @param OutResult Will contain the result if the message was handled.
-	 * @return true if the message was handled, false otherwise.
-	 */
-	virtual bool ProcessMessage(HWND hwnd, uint32 msg, WPARAM wParam, LPARAM lParam, int32& OutResult) override;
+     * Processes a Windows message.
+     *
+     * @param hwnd Handle to the window that received the message.
+     * @param msg The message.
+     * @param wParam Additional message information.
+     * @param lParam Additional message information.
+     * @param OutResult Will contain the result if the message was handled.
+     * @return true if the message was handled, false otherwise.
+     */
+    virtual bool ProcessMessage(HWND hwnd, uint32 msg, WPARAM wParam, LPARAM lParam, int32& OutResult) override;
 
 public:
     HWND mHwnd{ 0 };
     TWeakPtr<SWindow> Window;
     TWeakPtr<SWidget> Widget;
 
-	FNativeStylusInputDevice mDevice;
+    FNativeStylusInputDevice mDevice;
 };
 
 FNativeStylusInputInterfaceImpl::~FNativeStylusInputInterfaceImpl()
 {
-	//needed because slate is not present in some phases of Odyssey DDC building process
-	//while we are building a new release version through Odyssey's scripts
-	if ( FSlateApplication::IsInitialized() )
-	{
-		FWindowsApplication* WindowsApplication = (FWindowsApplication*)FSlateApplication::Get().GetPlatformApplication().Get();
-		WindowsApplication->RemoveMessageHandler(*this);
-	}
+    //needed because slate is not present in some phases of Odyssey DDC building process
+    //while we are building a new release version through Odyssey's scripts
+    if ( FSlateApplication::IsInitialized() )
+    {
+        FWindowsApplication* WindowsApplication = (FWindowsApplication*)FSlateApplication::Get().GetPlatformApplication().Get();
+        WindowsApplication->RemoveMessageHandler(*this);
+    }
 }
 
 FNativeStylusInputInterfaceImpl::FNativeStylusInputInterfaceImpl()
 {
-	//needed because slate is not present in some phases of Odyssey DDC building process
-	//while we are building a new release version through Odyssey's scripts
-	if ( FSlateApplication::IsInitialized() )
-	{
-		FWindowsApplication* WindowsApplication = (FWindowsApplication*)FSlateApplication::Get().GetPlatformApplication().Get();
-		WindowsApplication->AddMessageHandler(*this);
-	}
+    //needed because slate is not present in some phases of Odyssey DDC building process
+    //while we are building a new release version through Odyssey's scripts
+    if ( FSlateApplication::IsInitialized() )
+    {
+        FWindowsApplication* WindowsApplication = (FWindowsApplication*)FSlateApplication::Get().GetPlatformApplication().Get();
+        WindowsApplication->AddMessageHandler(*this);
+    }
 }
 
 bool
@@ -72,7 +72,7 @@ FNativeStylusInputInterfaceImpl::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wP
     switch(msg)
     {
         case WM_TABLET_QUERYSYSTEMGESTURESTATUS:
-        {   
+        {
             OutResult = TABLET_DISABLE_FLICKS //remove lag between stylus down and WM_LMOUSEBUTTONDOWN (was a 500ms lag)
                 | TABLET_DISABLE_PENTAPFEEDBACK //remove Windows circle around the pen when right click button is down
                 | TABLET_DISABLE_PENBARRELFEEDBACK;  //remove Windows waves when clicking with the stylus
@@ -93,10 +93,10 @@ FNativeStylusInputInterfaceImpl::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wP
             POINTER_INPUT_TYPE pointerType = PT_POINTER;
             if (!GetPointerType(pointerId, &pointerType))
                 return false;
-            
+
             if (pointerType != PT_PEN)
                 return false;
-    
+
             //GetPointerInfoHistory allows us to get all subpointer messages (coalesced messages)
             uint32 entries_count = 0;
             if (!GetPointerInfoHistory(pointerId, &entries_count, nullptr))
@@ -120,7 +120,7 @@ FNativeStylusInputInterfaceImpl::ProcessMessage(HWND hwnd, uint32 msg, WPARAM wP
             //return true;
         }
         break;
-        
+
         default:
             return false;
     }
@@ -147,7 +147,7 @@ FNativeStylusInputInterface::Tick()
 {
     /*
     // If the stylus is down (= drawing), don't change the focused window (and current widget) of the plugin
-    // When we draw on a zoomed viewport and the mouse go over the limits of the viewport, 
+    // When we draw on a zoomed viewport and the mouse go over the limits of the viewport,
     // we want to continue drawing on the right window and widget and not start "drawing" on the new hovered window and widget
     for( const FNativeTabletContextInfo& Context : Impl->mContexts->mTabletContexts )
     {
@@ -160,8 +160,8 @@ FNativeStylusInputInterface::Tick()
 
     FSlateApplication& Application = FSlateApplication::Get();
 
-	if (Application.GetMouseCaptureWindow() != nullptr)
-		return;
+    if (Application.GetMouseCaptureWindow() != nullptr)
+        return;
 
     // Get the widget hovered by the stylus/mouse
     FWidgetPath WidgetPath = Application.LocateWindowUnderMouse( Application.GetCursorPos(), Application.GetInteractiveTopLevelWindows() );

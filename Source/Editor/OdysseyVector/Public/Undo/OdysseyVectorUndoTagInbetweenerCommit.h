@@ -16,7 +16,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerCommit : public FOdyssey
     public:
         ~FOdysseyVectorUndoTagInbetweenerCommit();
         FOdysseyVectorUndoTagInbetweenerCommit( FOdysseyVectorSharedEnv* iSharedEnv
-                                              , const std::list<FOdysseyVectorTag*>& iRemovedTagList 
+                                              , const std::list<FOdysseyVectorTag*>& iRemovedTagList
                                               , const std::list<FOdysseyVectorObject*>& iAddedObjectList
                                               , const std::list<FOdysseyVectorGroupPaint*>& iCommittedSceneList
                                               , uint64 iReturnFlags );

@@ -33,7 +33,7 @@ FOdysseyDiskCache::Save(const FString& iId, const FSharedBuffer& iBuffer)
 
     //Store the tile in cache
     UE::DerivedData::FRequestOwner putOwner(UE::DerivedData::EPriority::Highest);
-    
+
     UE::DerivedData::GetCache().PutValue(
         {
             UE::DerivedData::FCachePutValueRequest
@@ -62,12 +62,12 @@ FOdysseyDiskCache::Load(const FString& iId, FUniqueBuffer& oBuffer)
     FString CacheKey = FDerivedDataCacheInterface::BuildCacheKey(
         *mCacheName,
         *mCacheVersion, //a GUID identifying the version of the key
-		iId
-	);
+        iId
+    );
 
     UE::DerivedData::FRequestOwner getOwner(UE::DerivedData::EPriority::Blocking);
     UE::DerivedData::GetCache().GetValue(
-		{
+        {
             UE::DerivedData::FCacheGetValueRequest
             {
                 UE::DerivedData::FSharedString(TEXT("FOdysseyDiskCache")),
@@ -75,17 +75,17 @@ FOdysseyDiskCache::Load(const FString& iId, FUniqueBuffer& oBuffer)
                 UE::DerivedData::ECachePolicy::Local
             }
         },
-		getOwner,
-		[&, this](UE::DerivedData::FCacheGetValueResponse&& iResponse)
+        getOwner,
+        [&, this](UE::DerivedData::FCacheGetValueResponse&& iResponse)
         {
             if (iResponse.Status != UE::DerivedData::EStatus::Ok)
                 return;
-    
+
             if ( !iResponse.Value.HasData() || iResponse.Value.GetRawSize() == 1) //assume the block is empty, see RemoveValueFromCache()
                 return;
 
             //FUniqueBuffer uniqueBuffer = FUniqueBuffer::MakeView(oBlock->Bits(), oBlock->BytesTotal());
-            
+
             oBuffer = FUniqueBuffer::Alloc(iResponse.Value.GetRawSize());
             if ( !iResponse.Value.GetData().TryDecompressTo(oBuffer) )
                 return;

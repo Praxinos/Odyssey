@@ -13,16 +13,16 @@ public:
 
 private:
     //Settings
-	void RegisterSettings();
-	void UnregisterSettings();
+    void RegisterSettings();
+    void UnregisterSettings();
 
     //Commands
-	void RegisterCommands();
-	void UnregisterCommands();
+    void RegisterCommands();
+    void UnregisterCommands();
 
     //BrushOverrides
-	void RegisterBrushOverrides();
-	void UnregisterBrushOverrides();
+    void RegisterBrushOverrides();
+    void UnregisterBrushOverrides();
 
     //Level Editor Layout
     void RegisterLevelEditorLayoutExtensions();

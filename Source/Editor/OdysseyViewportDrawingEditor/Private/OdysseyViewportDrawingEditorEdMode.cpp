@@ -9,7 +9,7 @@
 #include "EdMode.h"
 #include "EditorModeManager.h"
 #include "LevelEditor.h"
-#include "Interfaces/IMainFrameModule.h" 
+#include "Interfaces/IMainFrameModule.h"
 #include "PhysicsEngine/PhysicsSettings.h"
 #include "Toolkits/ToolkitManager.h"
 #include "AssetRegistry/AssetRegistryModule.h"
@@ -73,7 +73,7 @@ void FOdysseyViewportDrawingEditorEdMode::Render(const FSceneView* View,FViewpor
     IOdysseyViewportDrawingEditorAdapter* adapter = mViewportDrawingEditorExtension->GetOdysseyViewportDrawingEditorAdapter();
     if (!adapter)
         return;
-    
+
     adapter->RenderInteractorWidget(View, Viewport, PDI);
 }
 
@@ -82,10 +82,10 @@ FOdysseyViewportDrawingEditorEdMode::DrawHUD(FEditorViewportClient* ViewportClie
 {
     if (!mViewportDrawingEditorExtension || !mViewportDrawingEditorExtension->IsPlaneComponent())
         return;
-    
+
     FOdysseyHUDSystem::FDrawHUDParams params;
-	if (!mViewportDrawingEditorExtension->GetDrawHUDParams(View, Canvas, params))
-		return;
+    if (!mViewportDrawingEditorExtension->GetDrawHUDParams(View, Canvas, params))
+        return;
 
     mEditor->HUDSystem()->DrawHUD(params);
 }
@@ -143,7 +143,7 @@ FOdysseyViewportDrawingEditorEdMode::GetCursor(EMouseCursor::Type& OutCursor) co
 
 bool FOdysseyViewportDrawingEditorEdMode::IsEditingEnabled() const
 {
-	return GetWorld() ? GetWorld()->GetFeatureLevel() >= ERHIFeatureLevel::SM5 : false;
+    return GetWorld() ? GetWorld()->GetFeatureLevel() >= ERHIFeatureLevel::SM5 : false;
 }
 
 void FOdysseyViewportDrawingEditorEdMode::OnResetViewMode()
@@ -167,11 +167,11 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
     //checkf(mViewportDrawingEditorPainter != nullptr, TEXT("ViewportDrawingEditorPainter was not created"));
 
     mEditor = MakeShared<FOdysseyPainterEditor>(
-		TEXT("OdysseyViewportDrawingEditor"),
-		LOCTEXT("main-menu.category", "Odyssey Viewport Drawing Editor"),
-		nullptr,
-		"OdysseyViewportDrawingEditor_Layout"
-	);
+        TEXT("OdysseyViewportDrawingEditor"),
+        LOCTEXT("main-menu.category", "Odyssey Viewport Drawing Editor"),
+        nullptr,
+        "OdysseyViewportDrawingEditor_Layout"
+    );
 
     if (UsesToolkits() && !Toolkit.IsValid())
     {
@@ -180,7 +180,7 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
         mViewportDrawingEditorToolkit->Initialize(this, Owner->GetToolkitHost());
 
         mViewportDrawingEditorExtension = mViewportDrawingEditorToolkit->GetViewportDrawingExtension();
-        
+
         TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor").GetFirstLevelEditor();
         levelEditor->AppendCommands( Toolkit->GetToolkitCommands() );
     }
@@ -237,7 +237,7 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
     }
 
     mViewportDrawingEditorExtension = nullptr;
-	mViewportDrawingEditorToolkit = nullptr;
+    mViewportDrawingEditorToolkit = nullptr;
 
     //mViewportDrawingEditorPainter->Finalize();
     //delete mViewportDrawingEditorPainter;
@@ -253,13 +253,13 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
 TSharedPtr<FOdysseyPainterEditor>
 FOdysseyViewportDrawingEditorEdMode::GetEditor() const
 {
-	return mEditor;
+    return mEditor;
 }
 
 TSharedPtr<FOdysseyViewportDrawingEditorToolkit>
 FOdysseyViewportDrawingEditorEdMode::GetViewportDrawingEditorToolkit() const
 {
-	return mViewportDrawingEditorToolkit;
+    return mViewportDrawingEditorToolkit;
 }
 
 #undef LOCTEXT_NAMESPACE

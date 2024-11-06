@@ -168,7 +168,7 @@ FOdysseyVectorPathTracer::GetEdgeChainLength()
  *    /               \
  *   A                 B
  *
- * we compare this position with an interpolated sample point "s" located at 0.33f and 0.66f as well. 
+ * we compare this position with an interpolated sample point "s" located at 0.33f and 0.66f as well.
  *      _____________
  *     P1           P2
  *    /   s1     s2   \
@@ -286,7 +286,7 @@ FOdysseyVectorPathTracer::TestBezier( ::ULIS::FVec2D iBezier[4] )
         {
             uint32 offset = ( y * mWidth ) + x;
 
-            if ( mPixelData[offset] == 0 ) 
+            if ( mPixelData[offset] == 0 )
             {
                 return false;
             }
@@ -373,7 +373,7 @@ FOdysseyVectorPathTracer::MakeBezier( bool iForce )
     FTracerEdge* firstEdge = &mEdgeArray.front();
     FTracerEdge* lastEdge = &mEdgeArray.back();
     double edgeChainLength = GetEdgeChainLength();
-    ::ULIS::FVec2D firstEdgeVector = firstRecord->smooth ? mSmoothVector * edgeChainLength * 0.33f 
+    ::ULIS::FVec2D firstEdgeVector = firstRecord->smooth ? mSmoothVector * edgeChainLength * 0.33f
                                                          : firstEdge->vector * edgeChainLength * 0.33f;
     ::ULIS::FVec2D lastEdgeVector = lastEdge->vector * edgeChainLength * 0.33f;
 
@@ -673,7 +673,7 @@ FOdysseyVectorPathTracer::GetBLImage()
     return mBLImage;
 }
 
-void 
+void
 FOdysseyVectorPathTracer::AttachPath( FOdysseyVectorPath* iCubicPath )
 {
     mCubicPath = iCubicPath;

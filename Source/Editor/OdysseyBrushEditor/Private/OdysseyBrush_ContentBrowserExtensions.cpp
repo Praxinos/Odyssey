@@ -44,7 +44,7 @@ public:
     FReply OnCancel();
     FString ObjectPath() const;
     void OnObjectChanged(const FAssetData& AssetData);
-    
+
     UTexture* GetCurrentTexture();
 
 private:
@@ -62,7 +62,7 @@ void
 SOdysseyThumbnailSelectWindow::Construct( const FArguments& iArgs )
 {
     mWindowAnswer = false;
-    
+
     mAssetThumbnailPool = MakeShareable( new FAssetThumbnailPool( 1024 ) );
 
     SWindow::Construct( SWindow::FArguments()
@@ -185,7 +185,7 @@ FContentBrowserSelectedAssetExtensionBase::~FContentBrowserSelectedAssetExtensio
 {
 }
 
-void 
+void
 FContentBrowserSelectedAssetExtensionBase::Execute()
 {
 }
@@ -232,7 +232,7 @@ FEditThumbnailExtension::EditThumbnails( TArray<UOdysseyBrush*>& iBrushes )
 {
     TSharedPtr<SOdysseyThumbnailSelectWindow> thumbnailSelectionWindow = SNew( SOdysseyThumbnailSelectWindow );
     GEditor->EditorAddModalWindow( thumbnailSelectionWindow.ToSharedRef() );
-    
+
     if( thumbnailSelectionWindow->GetWindowAnswer() )
     {
         for( int i = 0; i < iBrushes.Num(); i++ )
@@ -242,17 +242,17 @@ FEditThumbnailExtension::EditThumbnails( TArray<UOdysseyBrush*>& iBrushes )
             {
                 FObjectThumbnail thumbnail;
                 ThumbnailTools::AssetHasCustomThumbnail( object->GetFullName(), thumbnail );
-                
+
                 if( thumbnail.GetImageWidth() != 0 && thumbnail.GetImageHeight() != 0 )
                 {
                     FObjectThumbnail* newThumbnail = ThumbnailTools::CacheThumbnail( iBrushes[i]->GetFullName(), &thumbnail, iBrushes[i]->GetOutermost() );
-                    
+
                     UPackage* package = iBrushes[i]->GetOutermost();
-                    
+
                     newThumbnail->MarkAsDirty();
                     package->MarkPackageDirty();
                     iBrushes[i]->PostEditChange();
-            
+
                     newThumbnail->SetCreatedAfterCustomThumbsEnabled();
                 }
             }
@@ -266,7 +266,7 @@ FEditThumbnailExtension::EditThumbnails( TArray<UOdysseyBrush*>& iBrushes )
                 FSavePackageArgs packageArgs;
                 packageArgs.SaveFlags = iBrushes[i]->GetFlags();
                 UPackage::Save(iBrushes[i]->GetOutermost(), iBrushes[i], *(iBrushes[i]->GetName()), packageArgs);
-            
+
                 package->SetDirtyFlag( true );
             }
         }
@@ -320,7 +320,7 @@ TSharedRef<FExtender>
 FOdysseyBrushContentBrowserExtensions_Impl::OnExtendContentBrowserAssetSelectionMenu( const TArray<FAssetData>& iSelectedAssets )
 {
     TSharedRef<FExtender> extender( new FExtender() );
-    
+
     bool isAnyBrushs = false;
     for( auto assetIt = iSelectedAssets.CreateConstIterator(); assetIt; ++assetIt )
     {

@@ -56,11 +56,11 @@ class FOdysseyViewportDrawingEditorMeshBasedAdapter
     , public FTickableEditorObject //Allows us to react to Tick events
 {
 public:
-	/** destructor */
-	~FOdysseyViewportDrawingEditorMeshBasedAdapter();
+    /** destructor */
+    ~FOdysseyViewportDrawingEditorMeshBasedAdapter();
 
-	/** constructor */
-	FOdysseyViewportDrawingEditorMeshBasedAdapter(FOdysseyViewportDrawingEditorExtension* iExtension);
+    /** constructor */
+    FOdysseyViewportDrawingEditorMeshBasedAdapter(FOdysseyViewportDrawingEditorExtension* iExtension);
 
 public:
     virtual void Initialize() override;
@@ -84,8 +84,8 @@ public:
 
 private:
     // FTickableEditorObject implementation
-	virtual void Tick(float DeltaTime) override;
-	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( FOdysseyViewportDrawingEditorMeshBasedAdapter, STATGROUP_Tickables); }
+    virtual void Tick(float DeltaTime) override;
+    virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( FOdysseyViewportDrawingEditorMeshBasedAdapter, STATGROUP_Tickables); }
 
 private:
     //A multiplier to the size of the brush so that we keep a good resolution for the stamp in cases where the size of the texture and the size of the mesh are pretty different

@@ -15,7 +15,7 @@ public:
 
 public:
     TSharedRef<FTabManager::FLayout> GetLayout() const;
-    
+
     TSharedRef<FTabManager::FArea> CreateArea(const FName& iName);
     TSharedRef<FTabManager::FArea> GetArea(const FName& iName) const;
 

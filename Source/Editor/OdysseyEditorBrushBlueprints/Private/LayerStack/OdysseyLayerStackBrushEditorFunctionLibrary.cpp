@@ -42,7 +42,7 @@ namespace
             UTexture2D* texture = Cast<UOdysseyTextureLayerStack>(textureLayer->GetLayerStack())->GetTexture();
             if (!texture)
                 return FOdysseyBlockProxy::MakeNullProxy();
-            
+
             ::ULIS::FRectI textureRect = ::ULIS::FRectI::FromXYWH(0, 0, texture->GetSizeX(), texture->GetSizeY());
             ::ULIS::FRectI given_rect = Area.IsInitialized() ? Area.GetValue() : textureRect;
             //be sure we copy only the needed part //TODO: Should be done directly in ULIS
@@ -72,7 +72,7 @@ namespace
             UOdysseyAnimation* animation = animationLayer->GetAnimation();
             if (!animation)
                 return FOdysseyBlockProxy::MakeNullProxy();
-            
+
             ::ULIS::FRectI animationRect = ::ULIS::FRectI::FromXYWH(0, 0, animation->GetWidth(), animation->GetHeight());
             ::ULIS::FRectI given_rect = Area.IsInitialized() ? Area.GetValue() : animationRect;
             //be sure we copy only the needed part //TODO: Should be done directly in ULIS
@@ -86,7 +86,7 @@ namespace
 
             TSharedPtr<IOdysseyImageRenderer> imageRenderer = animationLayer->BuildImageRenderer(IOdysseyImageRenderer::eRenderType::Render, animation->CurrentFrame);
             imageRenderer->Init();
-            
+
             ::ULIS::FRectI dstRect = ::ULIS::FRectI::FromXYWH(dst_pos.x, dst_pos.y, given_rect.w - dst_pos.x, given_rect.h - dst_pos.y);
             FOdysseyImageRendererCopyParams params(dst, { dstRect }, src_rect.Position() - dst_pos);
             TArray<::ULIS::FEvent> eventCopy = imageRenderer->Copy(params, { eventClear });
@@ -157,7 +157,7 @@ UOdysseyLayerStackBrushEditorFunctionLibrary::GetBlockOfLayerByName( UOdysseyBru
 FOdysseyBlockProxy
 UOdysseyLayerStackBrushEditorFunctionLibrary::GetBlockOfCurrentLayer( UOdysseyBrushAssetBase* BrushInstance, FOdysseyBrushRect Area )
 {
-    
+
     if( !BrushInstance )
         return FOdysseyBlockProxy::MakeNullProxy();
 
@@ -173,6 +173,6 @@ UOdysseyLayerStackBrushEditorFunctionLibrary::GetBlockOfCurrentLayer( UOdysseyBr
     UOdysseyLayer* layer = layerstack->CurrentLayer.Get();
     if (!layer)
         return FOdysseyBlockProxy::MakeNullProxy();
-    
+
     return GetBlockOfLayer(layer, Area);
 }

@@ -24,7 +24,7 @@ void
 SOdysseyTextureLayerStackTreeView::Construct(const FArguments& InArgs, FOdysseyTextureEditorExtension* iTextureExtension)
 {
     mExtension = iTextureExtension;
-	
+
     SOdysseyLayerStackTreeView::Construct(InArgs);
 }
 
@@ -52,7 +52,7 @@ SOdysseyTextureLayerStackTreeView::ExtendContextMenuLayerSection(FMenuBuilder& i
     UOdysseyTextureLayerStack* layerStack = mExtension->GetLayerStack();
     if ( !layerStack )
         return;
-    
+
     TArray<UOdysseyLayer*> selectedLayers = GetSelectedItems();
     if (selectedLayers.Num() <= 0)
         return;
@@ -86,7 +86,7 @@ SOdysseyTextureLayerStackTreeView::Action_ConvertLayerToRasterLayer()
     UOdysseyTextureLayerStack* layerStack = mExtension->GetLayerStack();
     if ( !layerStack )
         return;
-    
+
     TArray<UOdysseyLayer*> selectedLayers = GetSelectedItems();
     if (selectedLayers.Num() <= 0)
         return;
@@ -100,7 +100,7 @@ SOdysseyTextureLayerStackTreeView::Action_ConvertLayerToRasterLayer()
 
     if (!canConvert)
         return;
-    
+
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("texture.layer.transaction.convert-to-raster", "Convert Layer To Raster Layer"));
 #endif

@@ -69,8 +69,8 @@ protected:
     virtual FString GetReferencerName() const override;
 
     // FTickableEditorObject implementation
-	virtual void Tick(float DeltaTime) override;
-	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( FOdysseyEditor, STATGROUP_Tickables); }
+    virtual void Tick(float DeltaTime) override;
+    virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT( FOdysseyEditor, STATGROUP_Tickables); }
 
 public:
     FName mId;

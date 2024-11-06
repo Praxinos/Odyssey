@@ -204,7 +204,7 @@ FOdysseyVector::IntersectSegment( const ::ULIS::FVec2D& line0p0
     return !(r < 0 || r > 1 || s < 0 || s > 1);
 }
 
-double 
+double
 FOdysseyVector::CubicBezierHitTest( const ::ULIS::FVec2D& iPt
                                   , const ::ULIS::FVec2D& iBezier0
                                   , const ::ULIS::FVec2D& iBezier1
@@ -247,7 +247,7 @@ FOdysseyVector::CubicBezierHitTest( const ::ULIS::FVec2D& iPt
     return absoluteT;
 }
 
-double 
+double
 FOdysseyVector::QuadraticBezierHitTest( const ::ULIS::FVec2D& iPt
                                       , const ::ULIS::FVec2D& iBezier0
                                       , const ::ULIS::FVec2D& iBezier1
@@ -299,7 +299,7 @@ FOdysseyVector::ProjectPoint( const ::ULIS::FVec2D& iPt
     double sqLength = p0p1.DistanceSquared();  // i.e. |w-v|^2 -  avoid a sqrt
 
     // Consider the line extending the segment, parameterized as v + t (w - v).
-    // We find projection of point p onto the line. 
+    // We find projection of point p onto the line.
     // It falls where t = [(p-v) . (w-v)] / |w-v|^2
     // We clamp t from [0,1] to handle points outside the segment vw.
     ::ULIS::FVec2D p0pt = ( iPt - iSegmentP0 );
@@ -327,7 +327,7 @@ FOdysseyVector::DistanceToSegment( const ::ULIS::FVec2D& iPt
     double sqLength = p0p1.DistanceSquared();  // i.e. |w-v|^2 -  avoid a sqrt
 
     // Consider the line extending the segment, parameterized as v + t (w - v).
-    // We find projection of point p onto the line. 
+    // We find projection of point p onto the line.
     // It falls where t = [(p-v) . (w-v)] / |w-v|^2
     // We clamp t from [0,1] to handle points outside the segment vw.
     ::ULIS::FVec2D p0pt = ( iPt - iSegmentP0 );
@@ -447,7 +447,7 @@ FOdysseyVector::PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
             {
                 uint32 offset = ( y * iMaskRect.w ) + x;
 
-                if ( iPixelData[offset] != 0 ) 
+                if ( iPixelData[offset] != 0 )
                 {
                     return true;
                 }
@@ -523,7 +523,7 @@ FOdysseyVector::GetBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
 
 /*
  *  B0, B1, B2, B3 :
- *	Bezier multipliers
+ *    Bezier multipliers
  */
 static double B0( double u )
 {
@@ -553,18 +553,18 @@ static double B3( double u )
 
 /*
  *  Bezier :
- *  	Evaluate a Bezier curve at a particular parameter value
-*     int		degree; // The degree of the bezier curve
-    Point2 	*V; // Array of control points
-    double 	t; // Parametric value to find point for
- * 
+ *      Evaluate a Bezier curve at a particular parameter value
+*     int        degree; // The degree of the bezier curve
+    Point2     *V; // Array of control points
+    double     t; // Parametric value to find point for
+ *
  */
 static ::ULIS::FVec2D BezierII( uint32 degree
                               , const std::vector<::ULIS::FVec2D>& V
                               , double t )
 {
-    //::ULIS::FVec2D 	Q;	        /* Point on curve at parameter t	*/
-    //std::vector<::ULIS::FVec2D> Vtemp;/* Local copy of control points		*/
+    //::ULIS::FVec2D     Q;            /* Point on curve at parameter t    */
+    //std::vector<::ULIS::FVec2D> Vtemp;/* Local copy of control points        */
 
     return ::ULIS::CubicBezierPointAtParameter( V[0], V[1], V[2], V[3], t );
 /*
@@ -572,13 +572,13 @@ static ::ULIS::FVec2D BezierII( uint32 degree
 
     for ( uint32 i = 0; i <= degree; i++ )
     {
-		Vtemp[i] = V[i];
+        Vtemp[i] = V[i];
     }
 
-    // Triangle computation	
+    // Triangle computation
     for ( uint32 i = 1; i <= degree; i++ )
     {
-		for ( uint32 j = 0; j <= ( degree - i ); j++ )
+        for ( uint32 j = 0; j <= ( degree - i ); j++ )
         {
             Vtemp[j].x = ( 1.0f - t ) * Vtemp[j].x + t * Vtemp[j+1].x;
             Vtemp[j].y = ( 1.0f - t ) * Vtemp[j].y + t * Vtemp[j+1].y;
@@ -593,13 +593,13 @@ static ::ULIS::FVec2D BezierII( uint32 degree
 
 /*
  *  ComputeMaxError :
- *	Find the maximum squared distance of digitized points
- *	to fitted curve.
-*     Point2	*d;       // Array of digitized points
-    int		first, last;  // Indices defining region
-    BezierCurve	bezCurve; // Fitted Bezier curve
-    double	*u;           // Parameterization of points
-    int		*splitPoint;  // Point of maximum error
+ *    Find the maximum squared distance of digitized points
+ *    to fitted curve.
+*     Point2    *d;       // Array of digitized points
+    int        first, last;  // Indices defining region
+    BezierCurve    bezCurve; // Fitted Bezier curve
+    double    *u;           // Parameterization of points
+    int        *splitPoint;  // Point of maximum error
 */
 static double
 ComputeMaxError( const std::vector<::ULIS::FVec2D>& iPointBuffer
@@ -612,10 +612,10 @@ ComputeMaxError( const std::vector<::ULIS::FVec2D>& iPointBuffer
 {
     uint32 firstRecordIndex = iFirstRecord - &iPointBuffer[0];
     uint32 lastRecordIndex  = iLastRecord  - &iPointBuffer[0];
-    double	maxDist; // Maximum error
-    double	dist; // Current error
-    ::ULIS::FVec2D	P; // Point on curve
-    ::ULIS::FVec2D	v; // Vector from point to curve
+    double    maxDist; // Maximum error
+    double    dist; // Current error
+    ::ULIS::FVec2D    P; // Point on curve
+    ::ULIS::FVec2D    v; // Vector from point to curve
 
     *splitPoint = (::ULIS::FVec2D*) &iPointBuffer[ ( iLastRecord - iFirstRecord + 1 ) / 2];
 
@@ -623,17 +623,17 @@ ComputeMaxError( const std::vector<::ULIS::FVec2D>& iPointBuffer
 
     for ( uint32 i = firstRecordIndex + 1, j = 1; i < lastRecordIndex; i++, j++ )
     {
-		P = BezierII( 3, iBezierCurve, u[j] );
-		v = P - iPointBuffer[i];
+        P = BezierII( 3, iBezierCurve, u[j] );
+        v = P - iPointBuffer[i];
 
-		dist = v.DistanceSquared();
+        dist = v.DistanceSquared();
 
-		if ( dist >= maxDist )
+        if ( dist >= maxDist )
         {
-	    	maxDist = dist;
+            maxDist = dist;
 
-	    	*splitPoint = (::ULIS::FVec2D*) &iPointBuffer[i];
-		}
+            *splitPoint = (::ULIS::FVec2D*) &iPointBuffer[i];
+        }
     }
     return (maxDist);
 }
@@ -642,7 +642,7 @@ static ::ULIS::FVec2D
 ComputeCenterTangent( const std::vector<::ULIS::FVec2D>& iPointBuffer
                     , const ::ULIS::FVec2D* iCenter )
 {
-    ::ULIS::FVec2D	V1, V2, tHatCenter;
+    ::ULIS::FVec2D    V1, V2, tHatCenter;
 
     V1 = (*(iCenter - 1)) - (*iCenter);
     V2 = (*iCenter)       - (*(iCenter + 1));
@@ -657,10 +657,10 @@ ComputeCenterTangent( const std::vector<::ULIS::FVec2D>& iPointBuffer
 
 /*
  *  ChordLengthParameterize :
- *	Assign parameter values to digitized points 
- *	using relative distances between points.
-*     Point2	*d; /* Array of digitized points
-    int		first, last; // Indices defining region
+ *    Assign parameter values to digitized points
+ *    using relative distances between points.
+*     Point2    *d; /* Array of digitized points
+    int        first, last; // Indices defining region
  */
 static void
 ChordLengthParameterize( const std::vector<::ULIS::FVec2D>& iPointBuffer
@@ -691,7 +691,7 @@ ChordLengthParameterize( const std::vector<::ULIS::FVec2D>& iPointBuffer
 
 /*
  *  NewtonRaphsonRootFind :
- *	Use Newton-Raphson iteration to find better root.
+ *    Use Newton-Raphson iteration to find better root.
 *   BezierCurve Q; // Current fitted curve
     Point2 P; //  Digitized point
     double u; //  Parameter value for "P"
@@ -701,23 +701,23 @@ static double NewtonRaphsonRootFind( const std::vector<::ULIS::FVec2D>& Q
                                    , double u )
 {
     double numerator, denominator;
-    std::vector<::ULIS::FVec2D> Q1, Q2;	// Q' and Q''
+    std::vector<::ULIS::FVec2D> Q1, Q2;    // Q' and Q''
     ::ULIS::FVec2D Q_u, Q1_u, Q2_u; // u evaluated at Q, Q', & Q''
     double uPrime;    // Improved u
 
     Q1.resize( 3 );
     Q2.resize( 2 );
 
-    /* Compute Q(u)	*/
+    /* Compute Q(u)    */
     Q_u = BezierII( 3, Q, u );
 
-    /* Generate control vertices for Q'	*/
+    /* Generate control vertices for Q'    */
     for ( uint32 i = 0; i <= 2; i++ )
     {
         Q1[i].x = ( Q[i+1].x - Q[i].x ) * 3.0f;
         Q1[i].y = ( Q[i+1].y - Q[i].y ) * 3.0f;
     }
-    
+
     /* Generate control vertices for Q'' */
     for ( uint32 i = 0; i <= 1; i++)
     {
@@ -725,14 +725,14 @@ static double NewtonRaphsonRootFind( const std::vector<::ULIS::FVec2D>& Q
         Q2[i].y = ( Q1[i+1].y - Q1[i].y ) * 2.0;
     }
 
-    /* Compute Q'(u) and Q''(u)	*/
+    /* Compute Q'(u) and Q''(u)    */
     Q1_u = BezierII( 2, Q1, u );
     Q2_u = BezierII( 1, Q2, u );
-    
+
     /* Compute f(u)/f'(u) */
     numerator = ( Q_u.x - P.x ) * ( Q1_u.x ) + ( Q_u.y - P.y ) * ( Q1_u.y );
     denominator = ( Q1_u.x ) * ( Q1_u.x ) + ( Q1_u.y ) * ( Q1_u.y ) +
-		      	  ( Q_u.x - P.x ) * ( Q2_u.x ) + ( Q_u.y - P.y ) * ( Q2_u.y );
+                    ( Q_u.x - P.x ) * ( Q2_u.x ) + ( Q_u.y - P.y ) * ( Q2_u.y );
 
     if ( denominator == 0.0f ) return u;
 
@@ -744,12 +744,12 @@ static double NewtonRaphsonRootFind( const std::vector<::ULIS::FVec2D>& Q
 
 /*
  *  Reparameterize:
- *	Given set of points and their parameterization, try to find
+ *    Given set of points and their parameterization, try to find
  *   a better parameterization.
- *  Point2	*d;       // Array of digitized points
-    int		first, last;  //  Indices defining region
-    double	*u;           //  Current parameter values
-    BezierCurve	bezCurve; //  Current fitted curve
+ *  Point2    *d;       // Array of digitized points
+    int        first, last;  //  Indices defining region
+    double    *u;           //  Current parameter values
+    BezierCurve    bezCurve; //  Current fitted curve
  */
 static void
 Reparameterize( const std::vector<::ULIS::FVec2D>& iPointBuffer
@@ -776,10 +776,10 @@ Reparameterize( const std::vector<::ULIS::FVec2D>& iPointBuffer
 /*
  *  GenerateBezier :
  *  Use least-squares method to find Bezier control points for region.
-*     Point2	*d;			//  Array of digitized points
-    int		first, last;		//  Indices defining region
-    double	*uPrime;		//  Parameter values for region
-    Vector2	tHat1, tHat2;	//  Unit tangents at endpoints
+*     Point2    *d;            //  Array of digitized points
+    int        first, last;        //  Indices defining region
+    double    *uPrime;        //  Parameter values for region
+    Vector2    tHat1, tHat2;    //  Unit tangents at endpoints
  *
  */
 void GenerateBezier( const std::vector<::ULIS::FVec2D>& iPointBuffer
@@ -790,7 +790,7 @@ void GenerateBezier( const std::vector<::ULIS::FVec2D>& iPointBuffer
                    , const ::ULIS::FVec2D& iRightTangent
                    , std::vector<::ULIS::FVec2D>& oBezierOut )
 {
-    ::ULIS::FVec2D 	A[MAXPOINTS][2]; // Precomputed rhs for eqn
+    ::ULIS::FVec2D     A[MAXPOINTS][2]; // Precomputed rhs for eqn
     uint32  nPts; // Number of pts in sub-curve
     double  C[2][2]; // Matrix C
     double  X[2]; //Matrix X
@@ -799,7 +799,7 @@ void GenerateBezier( const std::vector<::ULIS::FVec2D>& iPointBuffer
             det_X_C1;
     double  alpha_l, // Alpha values, left and right
             alpha_r;
-    ::ULIS::FVec2D 	tmp; // Utility variable
+    ::ULIS::FVec2D     tmp; // Utility variable
     double  segLength;
     double  epsilon;
 
@@ -808,20 +808,20 @@ void GenerateBezier( const std::vector<::ULIS::FVec2D>& iPointBuffer
     oBezierOut.clear();
     oBezierOut.resize( 4 );
 
-    /* Compute the A's	*/
+    /* Compute the A's    */
     for ( uint32 i = 0; i < nPts; i++)
     {
-		::ULIS::FVec2D v1 = iLeftTangent
+        ::ULIS::FVec2D v1 = iLeftTangent
                      , v2 = iRightTangent;
 
-		v1 *=  B1( uPrime[i] );
-		v2 *=  B2( uPrime[i] );
+        v1 *=  B1( uPrime[i] );
+        v2 *=  B2( uPrime[i] );
 
-		A[i][0] = v1;
-		A[i][1] = v2;
+        A[i][0] = v1;
+        A[i][1] = v2;
     }
 
-    /* Create the C and X matrices	*/
+    /* Create the C and X matrices    */
     C[0][0] = 0.0;
     C[0][1] = 0.0;
     C[1][0] = 0.0;
@@ -832,27 +832,27 @@ void GenerateBezier( const std::vector<::ULIS::FVec2D>& iPointBuffer
     for ( uint32 i = 0; i < nPts; i++)
     {
         C[0][0] += A[i][0].DotProduct( A[i][0] );
-		C[0][1] += A[i][0].DotProduct( A[i][1] );
-		C[1][0] = C[0][1];
-		C[1][1] += A[i][1].DotProduct( A[i][1] );
+        C[0][1] += A[i][0].DotProduct( A[i][1] );
+        C[1][0] = C[0][1];
+        C[1][1] += A[i][1].DotProduct( A[i][1] );
 
-		tmp = ( (*(iFirstRecord+i))
+        tmp = ( (*(iFirstRecord+i))
                - ( ( (*iFirstRecord) * B0(uPrime[i]) )
                  + ( ( (*iFirstRecord) * B1(uPrime[i]) )
                    + ( ( (*iLastRecord) * B2(uPrime[i]) )
                      + ( (*iLastRecord) * B3(uPrime[i]) ) ) ) ) );
-	
+
 
         X[0] += A[i][0].DotProduct( tmp );
         X[1] += A[i][1].DotProduct( tmp );
     }
 
-    /* Compute the determinants of C and X	*/
+    /* Compute the determinants of C and X    */
     det_C0_C1 = C[0][0] * C[1][1] - C[1][0] * C[0][1];
     det_C0_X  = C[0][0] * X[1]    - C[1][0] * X[0];
     det_X_C1  = X[0]    * C[1][1] - X[1]    * C[0][1];
 
-    /* Finally, derive alpha values	*/
+    /* Finally, derive alpha values    */
     alpha_l = (det_C0_C1 == 0) ? 0.0 : det_X_C1 / det_C0_C1;
     alpha_r = (det_C0_C1 == 0) ? 0.0 : det_C0_X / det_C0_C1;
 
@@ -864,14 +864,14 @@ void GenerateBezier( const std::vector<::ULIS::FVec2D>& iPointBuffer
 
     if ( alpha_l < epsilon || alpha_r < epsilon )
     {
-		/* fall back on standard (probably inaccurate) formula, and subdivide further if needed. */
-		double dist = segLength / 3.0f;
+        /* fall back on standard (probably inaccurate) formula, and subdivide further if needed. */
+        double dist = segLength / 3.0f;
 
-		oBezierOut[0] = (*iFirstRecord);
-		oBezierOut[3] = (*iLastRecord);
+        oBezierOut[0] = (*iFirstRecord);
+        oBezierOut[3] = (*iLastRecord);
 
-		oBezierOut[1] = oBezierOut[0] + ( iLeftTangent  * dist );
-		oBezierOut[2] = oBezierOut[3] + ( iRightTangent * dist );
+        oBezierOut[1] = oBezierOut[0] + ( iLeftTangent  * dist );
+        oBezierOut[2] = oBezierOut[3] + ( iRightTangent * dist );
 
         return;
     }
@@ -889,11 +889,11 @@ void GenerateBezier( const std::vector<::ULIS::FVec2D>& iPointBuffer
 
 /*
  *  FitCubic :
- *  	Fit a Bezier curve to a (sub)set of digitized points
-*   Point2	*d;			//  Array of digitized points
-    int		first, last;	// Indices of first and last pts in region
-    Vector2	tHat1, tHat2;	// Unit tangent vectors at endpoints
-    double	error;		//  User-defined error squared
+ *      Fit a Bezier curve to a (sub)set of digitized points
+*   Point2    *d;            //  Array of digitized points
+    int        first, last;    // Indices of first and last pts in region
+    Vector2    tHat1, tHat2;    // Unit tangent vectors at endpoints
+    double    error;        //  User-defined error squared
  */
 static void
 FitCubic( const std::vector<::ULIS::FVec2D>& iPointBuffer
@@ -912,33 +912,33 @@ FitCubic( const std::vector<::ULIS::FVec2D>& iPointBuffer
     std::vector<::ULIS::FVec2D> bezierCurve; // Control points of fitted Bezier curve
     std::vector<double> uBuffer; // Parameter values for point
     std::vector<double> uPrimeBuffer; // Improved parameter values
-    double	maxError; // Maximum fitting error
+    double    maxError; // Maximum fitting error
     ::ULIS::FVec2D* splitPoint; // Point to split point set at
     double iterationError; // Error below which you try iterating
     uint32 maxIterations = 4; // Max times to try iterating
     ::ULIS::FVec2D tHatCenter; // Unit tangent vector at splitPoint
     int nPts; // Number of points in subset
 
-    iterationError = iError * 4.0;	/* fixed issue 23 */
+    iterationError = iError * 4.0;    /* fixed issue 23 */
     nPts = ( iLastRecord - iFirstRecord ) + 1;
 
     bezierCurve.clear();
     bezierCurve.resize(4);
 
-    //  Use heuristic if region only has two points in it 
+    //  Use heuristic if region only has two points in it
     if ( nPts == 2 )
     {
-	    double dist = ((*iLastRecord) - (*iFirstRecord)).Distance() / 3.0f;
+        double dist = ((*iLastRecord) - (*iFirstRecord)).Distance() / 3.0f;
 
-		bezierCurve[0] = (*iFirstRecord);
-		bezierCurve[3] = (*iLastRecord);
+        bezierCurve[0] = (*iFirstRecord);
+        bezierCurve[3] = (*iLastRecord);
 
-		bezierCurve[1] = bezierCurve[0] + ( iLeftTangent * dist );
-		bezierCurve[2] = bezierCurve[3] + ( iRightTangent * dist );
+        bezierCurve[1] = bezierCurve[0] + ( iLeftTangent * dist );
+        bezierCurve[2] = bezierCurve[3] + ( iRightTangent * dist );
 
         iFunction( bezierCurve, iFirstRecordT, iLastRecordT );
 
-		return;
+        return;
     }
 
     /*  Parameterize points, and attempt to fit curve */
@@ -965,9 +965,9 @@ FitCubic( const std::vector<::ULIS::FVec2D>& iPointBuffer
 
     if ( maxError < iError )
     {
-		iFunction( bezierCurve, iFirstRecordT, iLastRecordT );
+        iFunction( bezierCurve, iFirstRecordT, iLastRecordT );
 
-		return;
+        return;
     }
 
     /*  If error not too large, try some reparameterization  */
@@ -975,9 +975,9 @@ FitCubic( const std::vector<::ULIS::FVec2D>& iPointBuffer
 /* commented out for now: reparametrization gives strange values.
     if ( maxError < iterationError )
     {
-		for ( uint32 i = 0; i < maxIterations; i++ )
+        for ( uint32 i = 0; i < maxIterations; i++ )
         {
-	    	Reparameterize( iPointBuffer
+            Reparameterize( iPointBuffer
                           , iFirstRecord
                           , iLastRecord
                           , bezierCurve
@@ -998,7 +998,7 @@ FitCubic( const std::vector<::ULIS::FVec2D>& iPointBuffer
                                       , bezierCurve
                                       , uPrimeBuffer
                                       , &splitPoint );
-	    	if ( maxError < iError )
+            if ( maxError < iError )
             {
                 iFunction( bezierCurve, iFirstRecordT, iLastRecordT );
 
@@ -1038,11 +1038,11 @@ FitCubic( const std::vector<::ULIS::FVec2D>& iPointBuffer
 
 /*
  *  FitCurve :
- *  	Fit a Bezier curve to a set of digitized points 
- * 
- *   Point2	*d;			//  Array of digitized points
-    int		nPts;		//  Number of digitized points
-    double	error;		//  User-defined error squared
+ *      Fit a Bezier curve to a set of digitized points
+ *
+ *   Point2    *d;            //  Array of digitized points
+    int        nPts;        //  Number of digitized points
+    double    error;        //  User-defined error squared
  */
 void
 FOdysseyVector::FitCurve( const std::vector<::ULIS::FVec2D>& iPointBuffer

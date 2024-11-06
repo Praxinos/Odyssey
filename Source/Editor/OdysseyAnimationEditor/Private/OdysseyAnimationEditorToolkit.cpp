@@ -19,7 +19,7 @@ FOdysseyAnimationEditorToolkit::~FOdysseyAnimationEditorToolkit()
 }
 
 FOdysseyAnimationEditorToolkit::FOdysseyAnimationEditorToolkit() :
-	FOdysseyAssetEditorToolkit( TEXT( "OdysseyAnimationEditorApp" ) )
+    FOdysseyAssetEditorToolkit( TEXT( "OdysseyAnimationEditorApp" ) )
 {
 }
 
@@ -29,9 +29,9 @@ FOdysseyAnimationEditorToolkit::FOdysseyAnimationEditorToolkit() :
 void
 FOdysseyAnimationEditorToolkit::OpenAsset(UObject* iObject)
 {
-	UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(iObject);
-	IOdysseyAnimationEditorModule* OdysseyAnimationEditorModule = &FModuleManager::GetModuleChecked<IOdysseyAnimationEditorModule>("OdysseyAnimationEditor");
-	OdysseyAnimationEditorModule->CreateOdysseyAnimationEditor(animation);
+    UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(iObject);
+    IOdysseyAnimationEditorModule* OdysseyAnimationEditorModule = &FModuleManager::GetModuleChecked<IOdysseyAnimationEditorModule>("OdysseyAnimationEditor");
+    OdysseyAnimationEditorModule->CreateOdysseyAnimationEditor(animation);
 }
 
 FText

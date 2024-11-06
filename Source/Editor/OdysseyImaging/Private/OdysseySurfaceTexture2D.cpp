@@ -11,7 +11,7 @@ FOdysseySurfaceTexture2D::~FOdysseySurfaceTexture2D()
 }
 
 FOdysseySurfaceTexture2D::FOdysseySurfaceTexture2D(UTexture2D* iTexture)
-	: mTexture(iTexture)
+    : mTexture(iTexture)
 {
 }
 
@@ -33,7 +33,7 @@ FOdysseySurfaceTexture2D::Texture() const
 void
 FOdysseySurfaceTexture2D::Texture(UTexture2D* iTexture)
 {
-	mTexture = TStrongObjectPtr<UTexture2D>(iTexture);
+    mTexture = TStrongObjectPtr<UTexture2D>(iTexture);
 }
 
 //--------------------------------------------------------------------------------------
@@ -41,15 +41,15 @@ FOdysseySurfaceTexture2D::Texture(UTexture2D* iTexture)
 int
 FOdysseySurfaceTexture2D::Width()
 {
-	if (!mTexture)
-		return 0;
+    if (!mTexture)
+        return 0;
     return mTexture->Source.GetSizeX();
 }
 
 int
 FOdysseySurfaceTexture2D::Height()
 {
-	if (!mTexture)
-		return 0;
+    if (!mTexture)
+        return 0;
     return mTexture->Source.GetSizeY();
 }

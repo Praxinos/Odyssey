@@ -27,7 +27,7 @@ public:
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture);
     virtual bool OnKeyDown(const FKey& iKey);
     virtual bool OnKeyUp(const FKey& iKey);
-    
+
     virtual void Abort() override;
 
 private:
@@ -46,6 +46,6 @@ private:
     bool mIsDrawing = false;
 
 public:
-	UPROPERTY(EditAnywhere, Category="Shape")
-	bool Uniform = false;
+    UPROPERTY(EditAnywhere, Category="Shape")
+    bool Uniform = false;
 };

@@ -37,7 +37,7 @@ FOdysseyVectorImportV2::ReadRoute( FInbetweenerRoute& iRoute
                 case FOdysseyFile::VectorV2::CHUNK_ROUTE_TRAJECTORIES:
                 {
                     // Note: there are as many trajectories as breakdowns
-                    for( FInbetweenerTrajectory& trajectory : iRoute.GetTrajectoryBuffer() )     
+                    for( FInbetweenerTrajectory& trajectory : iRoute.GetTrajectoryBuffer() )
                     {
                         double handle0DirX;
                         double handle0DirY;
@@ -62,7 +62,7 @@ FOdysseyVectorImportV2::ReadRoute( FInbetweenerRoute& iRoute
                 case FOdysseyFile::VectorV2::CHUNK_ROUTE_TRAJECTORIES_WAYPOINTS:
                 {
                     // Note: there are as many trajectories as breakdowns
-                    for( FInbetweenerTrajectory& trajectory : iRoute.GetTrajectoryBuffer() )     
+                    for( FInbetweenerTrajectory& trajectory : iRoute.GetTrajectoryBuffer() )
                     {
                         std::vector<FInbetweenerWaypoint>& waypointBuffer = trajectory.GetWaypointBuffer();
 
@@ -82,6 +82,6 @@ FOdysseyVectorImportV2::ReadRoute( FInbetweenerRoute& iRoute
                 // Mandatory
                     Ar.Seek( Ar.Tell() + iChunkLen );
                 break;
-            }    
+            }
         } );
 }

@@ -162,14 +162,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
         /**
          * @brief Get a pointer to a section connected to this vertex AND located on the same segment
-         * as the section passed as an argument AND different from that section. 
+         * as the section passed as an argument AND different from that section.
          * @param iSection a pointer to a section.
          * @return a pointer to the other section.
          */
         FOdysseyVectorSection* GetOtherSection( FOdysseyVectorSection* iSection, bool iSameSegment );
 
         /**
-         * @brief Get a pointer to a segment connected to this vertex AND different from that segment. 
+         * @brief Get a pointer to a segment connected to this vertex AND different from that segment.
          * @param iSegment a pointer to a segment.
          * @return a pointer to the other segment.
          */
@@ -274,13 +274,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         void InvalidateSegments();
 
         /**
-         * @brief Is vertex selected ? 
+         * @brief Is vertex selected ?
          * @return true if selected, false otherwise
          */
         bool IsSelected();
 
         /**
-         * @brief Is vertex "handle aligned" ? 
+         * @brief Is vertex "handle aligned" ?
          * @return true if handles must be aligned, false otherwise
          */
         bool IsHandleAligned();

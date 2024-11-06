@@ -24,7 +24,7 @@ FOdysseyPainterEditorPaletteTab::~FOdysseyPainterEditorPaletteTab()
 }
 
 FOdysseyPainterEditorPaletteTab::FOdysseyPainterEditorPaletteTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(LOCTEXT( "palette-tab.name", "Palette" ), FSlateIcon( "OdysseyStyle", "OdysseyPalette.PaletteTab" ))
+    : FOdysseyEditorTab(LOCTEXT( "palette-tab.name", "Palette" ), FSlateIcon( "OdysseyStyle", "OdysseyPalette.PaletteTab" ))
     , mEditor(iEditor)
     , mPaletteWidget(nullptr)
 {
@@ -42,7 +42,7 @@ FOdysseyPainterEditorPaletteTab::GetId() const
 TSharedPtr<SWidget>
 FOdysseyPainterEditorPaletteTab::CreateWidget()
 {
-	mPaletteWidget = SNew( SOdysseyPalette );
+    mPaletteWidget = SNew( SOdysseyPalette );
 
     return mPaletteWidget;
 }

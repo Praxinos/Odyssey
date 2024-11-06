@@ -44,7 +44,7 @@ private:
     void HexBoxOnTextCommited( const FText&, ETextCommit::Type );
     FText GetColorHex() const;
 
-    
+
     FText GetHexText() const;
     void OnHexTextChanged( const FText& iText );
     void OnHexTextCommitted(const FText& Text, ETextCommit::Type CommitType);

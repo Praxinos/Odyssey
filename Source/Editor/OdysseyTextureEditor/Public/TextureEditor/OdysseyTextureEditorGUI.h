@@ -17,7 +17,7 @@ class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorGUI
 {
 public:
     static void ExtendLevelEditorLayout(FLayoutExtender& Extender);
-    
+
 public:
     // Construction / Destruction
     ~FOdysseyTextureEditorGUI();
@@ -27,14 +27,14 @@ public:
     void Init();
     void BindShortcuts( FBaseToolkit* iToolkit );
     void ExtendMenu( TSharedRef<FExtender> iExtender );
-	void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
+    void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder);
 
 private:
     //Init
-	void CreateTabs();
+    void CreateTabs();
 
 protected:
-	TSharedRef<FTabManager::FSplitter>	CreateRightSection();
+    TSharedRef<FTabManager::FSplitter>    CreateRightSection();
 
 public:
     void BindVectorScene( FOdysseyVectorGroupPaint* iScene );
@@ -45,5 +45,5 @@ protected:
     void OnSourceChanged();
 
 private:
-	FOdysseyTextureEditorExtension* mExtension;
+    FOdysseyTextureEditorExtension* mExtension;
 };

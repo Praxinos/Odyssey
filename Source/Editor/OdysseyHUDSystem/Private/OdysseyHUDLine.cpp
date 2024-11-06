@@ -15,7 +15,7 @@ FOdysseyHUDLine::FOdysseyHUDLine(const FVector2D& iStartPoint, const FVector2D& 
     : mStartPoint(iStartPoint)
     , mEndPoint(iEndPoint)
 {
-    
+
 }
 
 void
@@ -29,7 +29,7 @@ FOdysseyHUDLine::DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams)
     FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
     batchedElements->AddTranslucentLine(FVector(startPoint, 0.f), FVector(endPoint, 0.f), color, iParams.mCanvas->GetHitProxyId(), 1.f, 0.f, true);
 
-    FOdysseyHUDElement::DrawHUD(iParams); 
+    FOdysseyHUDElement::DrawHUD(iParams);
 }
 
 void

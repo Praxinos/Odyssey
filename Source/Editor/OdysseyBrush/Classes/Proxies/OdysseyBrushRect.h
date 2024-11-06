@@ -19,7 +19,7 @@ public:
     FOdysseyBrushRect();
     FOdysseyBrushRect( int X, int Y, int Width, int Height );
     FOdysseyBrushRect( const ::ULIS::FRectI& Rect );
-	FOdysseyBrushRect( ::ULIS::FRectI&& iVal );
+    FOdysseyBrushRect( ::ULIS::FRectI&& iVal );
     FOdysseyBrushRect( const FOdysseyBrushRect& iOther );
     FOdysseyBrushRect( FOdysseyBrushRect&& iOther );
     FOdysseyBrushRect& operator=( const FOdysseyBrushRect& iOther );
@@ -28,16 +28,16 @@ public:
     void SetValue(const ::ULIS::FRectI&);
     void SetValue(int iX, int iY, int iW, int iH);
     bool IsInitialized() const;
-    
-	int X() const;
-	int Y() const;
-	int Width() const;
-	int Height() const;
+
+    int X() const;
+    int Y() const;
+    int Width() const;
+    int Height() const;
 
     static  FOdysseyBrushRect FromTemp( ::ULIS::FRectI&& iVal );
 private:
     ::ULIS::FRectI m;
-	bool mIsInitialized;
+    bool mIsInitialized;
 };
 
 /////////////////////////////////////////////////////

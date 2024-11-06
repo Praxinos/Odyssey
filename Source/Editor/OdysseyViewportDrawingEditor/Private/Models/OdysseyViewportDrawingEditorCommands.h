@@ -10,12 +10,12 @@
 class FOdysseyViewportDrawingEditorCommands : public TCommands<FOdysseyViewportDrawingEditorCommands>
 {
 public:
-	FOdysseyViewportDrawingEditorCommands();
+    FOdysseyViewportDrawingEditorCommands();
 
-	/**
-	* Initialize commands
-	*/
-	virtual void RegisterCommands() override;
+    /**
+    * Initialize commands
+    */
+    virtual void RegisterCommands() override;
 
 public:
 };

@@ -24,13 +24,13 @@ void SOdysseyAnimationLayerFolderRow::Construct(
 {
     ensure(iAnimationLayerFolder);
     mAnimationLayerFolder = iAnimationLayerFolder;
-	mEditor = iArgs._PainterEditor;
+    mEditor = iArgs._PainterEditor;
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments()
-			.TimelinePosition(iArgs._TimelinePosition),
+            .TimelinePosition(iArgs._TimelinePosition),
         iOwnerTableView,
-		iAnimationLayerFolder
+        iAnimationLayerFolder
     );
 }
 

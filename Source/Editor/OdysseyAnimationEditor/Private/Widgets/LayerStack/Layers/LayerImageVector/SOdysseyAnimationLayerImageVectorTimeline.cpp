@@ -25,24 +25,24 @@ SOdysseyAnimationLayerImageVectorTimeline::SOdysseyAnimationLayerImageVectorTime
 EVisibility
 SOdysseyAnimationLayerImageVectorTimeline::GetRowVisibility(FName iRow) const
 {
-	if (iRow == "Inbetweening")
-	{
-		TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
-		if (!editor)
-			return EVisibility::Collapsed;
+    if (iRow == "Inbetweening")
+    {
+        TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
+        if (!editor)
+            return EVisibility::Collapsed;
 
-		return ( editor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) ? EVisibility::Visible : EVisibility::Collapsed;
-	}
+        return ( editor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) ? EVisibility::Visible : EVisibility::Collapsed;
+    }
 
-	return SOdysseyAnimationLayerImageTimeline::GetRowVisibility(iRow);
+    return SOdysseyAnimationLayerImageTimeline::GetRowVisibility(iRow);
 }
 
 EVisibility
 SOdysseyAnimationLayerImageVectorTimeline::IsInbetweeningTimelineVisible() const
 {
-	TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
-	if (!editor)
-		return EVisibility::Collapsed;
+    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
+    if (!editor)
+        return EVisibility::Collapsed;
 
     return ( editor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) ? EVisibility::Visible : EVisibility::Collapsed;
 }
@@ -57,20 +57,20 @@ TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorTimeline::OnGenerateCellWidget(UOdysseyAnimationCell* iCell)
 {
     if (!iCell)
-	{
+    {
         return SNew(SOdysseyAnimationCellImageVector, Cast<UOdysseyAnimationCellImageVector>(iCell))
-			.Clipping(EWidgetClipping::ClipToBoundsAlways);
-	}
+            .Clipping(EWidgetClipping::ClipToBoundsAlways);
+    }
     if (iCell->IsA<UOdysseyAnimationCellImageVector>())
-	{
+    {
         return SNew(SOdysseyAnimationCellImageVector, Cast<UOdysseyAnimationCellImageVector>(iCell))
-			.Clipping(EWidgetClipping::ClipToBoundsAlways);
-	}
+            .Clipping(EWidgetClipping::ClipToBoundsAlways);
+    }
     else if (iCell->IsA<UOdysseyAnimationCellImageStagger>())
-	{
+    {
         return SNew(SOdysseyAnimationCellImageStagger, Cast<UOdysseyAnimationCellImageStagger>(iCell))
-			.TimelinePosition(mTimelinePosition);
-	}
+            .TimelinePosition(mTimelinePosition);
+    }
 
     return SNullWidget::NullWidget;
 }
@@ -93,21 +93,21 @@ SOdysseyAnimationLayerImageVectorTimeline::OnPreviewMouseButtonDown(const FGeome
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorTimeline::GenerateWidget( const FName& iRow, const FName& iColumn )
 {
-	ensure(iColumn == "Timeline");
+    ensure(iColumn == "Timeline");
 
-	if (iRow == "Inbetweening")
-	{
-		return GenerateInbetweeningRowTimelineWidget();
-	}
+    if (iRow == "Inbetweening")
+    {
+        return GenerateInbetweeningRowTimelineWidget();
+    }
 
-	return SOdysseyAnimationLayerImageTimeline::GenerateWidget( iRow, iColumn );
+    return SOdysseyAnimationLayerImageTimeline::GenerateWidget( iRow, iColumn );
 }
 
 TSharedRef<SWidget>
 SOdysseyAnimationLayerImageVectorTimeline::GenerateInbetweeningRowTimelineWidget()
 {
-	return SAssignNew( mInbetweeningListView, SOdysseyAnimationLayerImageVectorTimelineInbetweening
+    return SAssignNew( mInbetweeningListView, SOdysseyAnimationLayerImageVectorTimelineInbetweening
                                 , Cast<UOdysseyAnimationLayerImageVector>(mLayer) )
-							.TimelinePosition(mTimelinePosition)
+                            .TimelinePosition(mTimelinePosition)
                             .Visibility( this, &SOdysseyAnimationLayerImageVectorTimeline::IsInbetweeningTimelineVisible );
 }

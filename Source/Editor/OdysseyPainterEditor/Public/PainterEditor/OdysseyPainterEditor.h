@@ -110,7 +110,7 @@ public:
      * And activates the first activable tool available if needed
      */
     void SanitizeCurrentTool();
-    
+
     virtual UOdysseyPainterEditorRasterDrawingTool*                  GetRasterDrawingTool() const;
     virtual UOdysseyPainterEditorRasterEraserTool*                   GetRasterEraserTool() const;
     virtual UOdysseyPainterEditorRasterSelectionTool*                GetRasterSelectionTool() const;
@@ -140,18 +140,18 @@ public:
     FSimpleMulticastDelegate& OnCurrentToolChanged();
     FSimpleMulticastDelegate& OnCurrentMainToolChanged();
     FSimpleMulticastDelegate& OnCurrentTemporaryToolChanged();
-    
+
     TSharedPtr<FOdysseyPainterEditorSource>              GetSource() const;
     virtual FOdysseyPainterEditorGUI*                    GetGUI();
 
     virtual FOdysseyHUDSystem*                               HUDSystem() const;
-	virtual const FOdysseyBrushColor&                        PaintColor() const;
+    virtual const FOdysseyBrushColor&                        PaintColor() const;
     virtual FOdysseyMediaProvider                            GetCurrentMediaProvider();
     virtual UOdysseyLayerStack*                              LayerStack() const;
     virtual TSharedPtr<FOdysseyPainterEditorRasterSelection> RasterSelection();
 
     TSharedPtr<FOdysseyMeshSelector>                        GetMeshSelector() const;
-    
+
     TArray<FOdysseyBrushContext*>& GetBrushContexts();
 
     void SetVectorHUDFlags( uint64 iVectorHUDFlags );
@@ -160,7 +160,7 @@ public:
     void SetVectorDrawingFlags(uint64 iVectorDrawingFlags);
     uint64 GetVectorDrawingFlags();
 
-    // generic reusable vector methods. 
+    // generic reusable vector methods.
     static void BringForward( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void SendBackward( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void ApplyTransformations( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
@@ -242,9 +242,9 @@ protected:
     //Callbacks
     virtual void OnApplyOverrides(const TMap<FName, UObject*>& iOverrides);
     void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
-    
+
     // FTickableEditorObject implementation
-	virtual void Tick(float DeltaTime) override;
+    virtual void Tick(float DeltaTime) override;
 
 protected:
     // FGCObject implementation
@@ -285,7 +285,7 @@ protected:
     FSimpleMulticastDelegate        mOnCurrentMainToolChanged;
     FSimpleMulticastDelegate        mOnCurrentTemporaryToolChanged;
     FSimpleMulticastDelegate        mOnSourceChanged;
-    
+
     TObjectPtr<UOdysseyPainterEditorRasterDrawingTool> mRasterDrawingTool;
     TObjectPtr<UOdysseyPainterEditorRasterEraserTool> mRasterEraserTool;
     TObjectPtr<UOdysseyPainterEditorRasterSelectionTool> mRasterSelectionTool;

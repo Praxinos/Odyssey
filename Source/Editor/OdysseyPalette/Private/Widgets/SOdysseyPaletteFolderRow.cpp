@@ -20,7 +20,7 @@ void SOdysseyPaletteFolderRow::Construct(const FArguments& InArgs, const TShared
         iFolderEntry
     );
 
-	SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
+    SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -28,12 +28,12 @@ void SOdysseyPaletteFolderRow::Construct(const FArguments& InArgs, const TShared
 TSharedRef<SWidget>
 SOdysseyPaletteFolderRow::GenerateHeaderWidget()
 {
-	TSharedRef<SWidget> defaultWidget = SOdysseyPaletteEntryRow::GenerateHeaderWidget();
-	return SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot()
+    TSharedRef<SWidget> defaultWidget = SOdysseyPaletteEntryRow::GenerateHeaderWidget();
+    return SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
         .VAlign(VAlign_Center)
-		[
-			//LayerName
+        [
+            //LayerName
             SOdysseyPaletteEntryRow::GenerateHeaderWidget()
-		];
+        ];
 }

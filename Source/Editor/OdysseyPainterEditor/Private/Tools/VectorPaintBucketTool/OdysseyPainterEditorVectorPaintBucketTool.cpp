@@ -73,11 +73,11 @@ UOdysseyPainterEditorVectorPaintBucketTool::LoadVector( FOdysseyVectorGroupPaint
 {
     TSharedPtr< SViewport > viewportWidget; // to force keyboard focus on mouse hover.
                                             // Prevents the user from having to click at least once in the viewport.
-    // we need the focus on the viewport for keyboard 
+    // we need the focus on the viewport for keyboard
     TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
     viewportWidget = viewportTab->GetViewport()->GetViewportWidget();
 
-    // we need the focus on the viewport for keyboard 
+    // we need the focus on the viewport for keyboard
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
@@ -173,7 +173,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                                                                                           , retFlags );
 
                             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
                             TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                             if (source)
                                 source->RecordCurrentFrameUndo();
@@ -194,7 +194,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                                                                                         , retFlags );
 
                             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
                             TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                             if (source)
                                 source->RecordCurrentFrameUndo();
@@ -216,7 +216,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                                                                                         , retFlags );
 
                             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                                
+
                             TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
                             if (source)
                                 source->RecordCurrentFrameUndo();
@@ -410,7 +410,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
 
     mBucketHUD->PickCycles( iScene
                           , iPointInTexture.x
-                          , iPointInTexture.y 
+                          , iPointInTexture.y
                           , pickedCycleArray );
 
     if( pickedCycleArray.size() )
@@ -489,7 +489,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
                                                                     , notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -525,7 +525,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorRemoveBucket( FOdysse
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketRemove( iScene, iBucket, notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -549,7 +549,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorPropagateBucket( FOdy
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket, notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -574,7 +574,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorColorBucket( FOdyssey
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket, notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -599,7 +599,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorClearBucket( FOdyssey
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( iScene, iBucket, notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();
@@ -799,7 +799,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam( FOdysseyVectorBuck
         FOdysseyVectorUndo* undo = new FOdysseyVectorUndoBucketParam( scene, iDestinationBucket, notificationFlags );
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-                
+
         TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
         if (source)
             source->RecordCurrentFrameUndo();

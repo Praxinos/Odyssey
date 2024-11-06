@@ -5,59 +5,59 @@
 
 void
 SOdysseyAnimationCellHandle::Construct( const SOdysseyAnimationCellHandle::FArguments& InArgs)
-{	
-	mOnDragStarted = InArgs._OnDragStarted;
-	mOnDragged = InArgs._OnDragged;
-	mOnDragStopped = InArgs._OnDragStopped;
+{
+    mOnDragStarted = InArgs._OnDragStarted;
+    mOnDragged = InArgs._OnDragged;
+    mOnDragStopped = InArgs._OnDragStopped;
 
-	ChildSlot
-	.HAlign(HAlign_Fill)
-	.VAlign(VAlign_Fill)
-	[
-		InArgs._Content.Widget
-	];
+    ChildSlot
+    .HAlign(HAlign_Fill)
+    .VAlign(VAlign_Fill)
+    [
+        InArgs._Content.Widget
+    ];
 }
 
 FReply
 SOdysseyAnimationCellHandle::OnMouseButtonDown(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
-	if (iMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
-	{
-		mIsDragging = true;
-		mOnDragStarted.ExecuteIfBound(iGeometry, iMouseEvent);
-		return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();	
-	}
-	return FReply::Unhandled();
+    if (iMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+    {
+        mIsDragging = true;
+        mOnDragStarted.ExecuteIfBound(iGeometry, iMouseEvent);
+        return FReply::Handled().CaptureMouse(AsShared()).PreventThrottling();
+    }
+    return FReply::Unhandled();
 }
 
 FReply
 SOdysseyAnimationCellHandle::OnMouseMove(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
-	if (mIsDragging)
-	{
-		mOnDragged.ExecuteIfBound(iGeometry, iMouseEvent);
-		return FReply::Handled();	
-	}
-	return FReply::Unhandled();
+    if (mIsDragging)
+    {
+        mOnDragged.ExecuteIfBound(iGeometry, iMouseEvent);
+        return FReply::Handled();
+    }
+    return FReply::Unhandled();
 }
 
 FReply
 SOdysseyAnimationCellHandle::OnMouseButtonUp(const FGeometry& iGeometry, const FPointerEvent& iMouseEvent)
 {
-	if (mIsDragging)
-	{
-		mIsDragging = false;
-		mOnDragStopped.ExecuteIfBound(iGeometry, iMouseEvent);
-		return FReply::Handled().ReleaseMouseCapture();	
-	}
-	return FReply::Unhandled();
+    if (mIsDragging)
+    {
+        mIsDragging = false;
+        mOnDragStopped.ExecuteIfBound(iGeometry, iMouseEvent);
+        return FReply::Handled().ReleaseMouseCapture();
+    }
+    return FReply::Unhandled();
 }
 
 TOptional<EMouseCursor::Type>
 SOdysseyAnimationCellHandle::GetCursor() const
 {
-	if (!IsEnabled())
-		return TOptional<EMouseCursor::Type>();
-		
-	return EMouseCursor::ResizeLeftRight;
+    if (!IsEnabled())
+        return TOptional<EMouseCursor::Type>();
+
+    return EMouseCursor::ResizeLeftRight;
 }

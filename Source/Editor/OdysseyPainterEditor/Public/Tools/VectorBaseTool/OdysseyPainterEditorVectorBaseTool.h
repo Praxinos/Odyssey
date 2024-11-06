@@ -43,8 +43,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         TSharedPtr<SWidget> CreatePropertyWidget( TSharedPtr<class IPropertyHandle> iPropertyHandle
                                                 , const TSharedPtr<ISinglePropertyView> iView );
 
-	    //virtual bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
-	    //virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
+        //virtual bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
+        //virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
 
         virtual void Load();
         virtual void Unload();
@@ -58,7 +58,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey );
         virtual void Commit();
         virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
-    	virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
+        virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
         virtual void ExtendContextMenu( FMenuBuilder& menu );
         virtual void BindShortcuts( FBaseToolkit* iToolkit );
         virtual EMouseCursor::Type GetMouseCursor() const override;
@@ -133,7 +133,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
                           , FOdysseyVectorGroupPaint* vectorScene );
 
     protected:
-        // to store the top tab widget in order to create it only once. this will prevent sizing 
+        // to store the top tab widget in order to create it only once. this will prevent sizing
         // issues in the top bar.
         // to force keyboard focus on mouse hover.
         // Prevents the user from having to click at least once in the viewport.
@@ -145,7 +145,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         // to prevent a double mouse down bug detected in
         // FOdysseyPainterEditorViewportClient::InputKey
         // FOdysseyPainterEditorViewportClient::OnStylusStateChanged
-        // they sometimes are both called and both trigger 
+        // they sometimes are both called and both trigger
         // FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint
         eMouseEventName mPreviousMouseEvent; // filter faulty stylus events
 

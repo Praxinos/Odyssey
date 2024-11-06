@@ -10,7 +10,7 @@ class UOdysseyAnimationCellImageRaster;
 
 class ODYSSEYANIMATION_API FOdysseyAnimationCellImageRasterImageRenderer
     : public IOdysseyImageRenderer
-	, public FGCObject
+    , public FGCObject
 {
 public:
     FOdysseyAnimationCellImageRasterImageRenderer(const UOdysseyAnimationCellImageRaster* iCell, int iFrame, IOdysseyImageRenderer::eRenderType iRenderType, const TArray<::ULIS::FRectI>& iDefaultRects, FImageRendererFilter iFilter);
@@ -26,7 +26,7 @@ public:
     virtual TArray<::ULIS::FEvent> Copy(const FOdysseyImageRendererCopyParams& iParams, const TArray<::ULIS::FEvent>& iWaitList) override;
 
 public:
-	// FGCObject implementation
+    // FGCObject implementation
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
     virtual FString GetReferencerName() const override;
 

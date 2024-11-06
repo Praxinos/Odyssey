@@ -24,13 +24,13 @@ void
 UOdysseyAnimationCell::OldSerialize(FArchive& Ar)
 {
     if( !Ar.IsLoading() )
-		return;
-	
-	if (!FOdysseyAnimationCellImport::Read( this, Ar ))
-	{
-		//Old Style No Chunk Loading
-		Ar << Exposure;
-	}
+        return;
+
+    if (!FOdysseyAnimationCellImport::Read( this, Ar ))
+    {
+        //Old Style No Chunk Loading
+        Ar << Exposure;
+    }
 }
 
 UOdysseyAnimationLayerStack*
@@ -48,10 +48,10 @@ UOdysseyAnimationCell::GetMediaProvider(uint32 iFrameIndex) const
 FInt32Range
 UOdysseyAnimationCell::GetFrameRange() const
 {
-	if (!GetLayer())
-		return FInt32Range::Empty();
+    if (!GetLayer())
+        return FInt32Range::Empty();
 
-	return GetLayer()->GetCellsFrameRanges()[IndexInLayer];
+    return GetLayer()->GetCellsFrameRanges()[IndexInLayer];
 }
 
 bool
@@ -83,55 +83,55 @@ UOdysseyAnimationCell::OnOutOfPegsChanged()
 FSimpleMulticastDelegate&
 UOdysseyAnimationCell::OnThumbnailChanged()
 {
-	return mOnThumbnailChanged;
+    return mOnThumbnailChanged;
 }
 
 FSimpleMulticastDelegate&
 UOdysseyAnimationCell::OnThumbnailDirtied()
 {
-	return mOnThumbnailDirtied;
+    return mOnThumbnailDirtied;
 }
 
 void
 UOdysseyAnimationCell::OutOfPegsChanged(bool iIsInteractive)
 {
-	mOnOutOfPegsChanged.Broadcast(iIsInteractive);
+    mOnOutOfPegsChanged.Broadcast(iIsInteractive);
     ImageRenderingChanged(iIsInteractive);
 }
 
 void
 UOdysseyAnimationCell::ExposureChanged(bool iIsInteractive)
 {
-	if (GetLayer())
-		GetLayer()->InvalidateCellsFrameRanges();
+    if (GetLayer())
+        GetLayer()->InvalidateCellsFrameRanges();
     ImageRenderingCompositionChanged(iIsInteractive);
 }
 
 void
 UOdysseyAnimationCell::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
 {
-	if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs))
-	{
-		OutOfPegsChanged(iIsInteractive);
-	}
+    if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs))
+    {
+        OutOfPegsChanged(iIsInteractive);
+    }
 
-	if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure))
-	{
-		ExposureChanged(iIsInteractive);
-	}
+    if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure))
+    {
+        ExposureChanged(iIsInteractive);
+    }
 }
 
 void
 UOdysseyAnimationCell::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
-	Super::PostEditChangeProperty(PropertyChangedEvent);
+    Super::PostEditChangeProperty(PropertyChangedEvent);
     PropertyChanged(PropertyChangedEvent.GetPropertyName(), PropertyChangedEvent.GetMemberPropertyName(), PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive);
 }
 
 void
 UOdysseyAnimationCell::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
 {
-	Super::PostTransacted(iTransactionEvent);
+    Super::PostTransacted(iTransactionEvent);
 
     if ( iTransactionEvent.GetEventType() != ETransactionObjectEventType::UndoRedo )
         return;
@@ -146,52 +146,52 @@ UOdysseyAnimationCell::PostTransacted(const FTransactionObjectEvent& iTransactio
 UOdysseyAnimationCell*
 UOdysseyAnimationCell::Break(int Frame)
 {
-	if (Frame <= 0 || Frame >= Exposure)
-		return nullptr;
+    if (Frame <= 0 || Frame >= Exposure)
+        return nullptr;
 
-	UOdysseyAnimationCell* copiedCell = GetLayer()->CopyCell(this, IndexInLayer + 1);
-	FOdysseyObjectEditorUtils::SetPropertyValue(copiedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Exposure - Frame);
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Frame);
-	
-	return copiedCell;
+    UOdysseyAnimationCell* copiedCell = GetLayer()->CopyCell(this, IndexInLayer + 1);
+    FOdysseyObjectEditorUtils::SetPropertyValue(copiedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Exposure - Frame);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Frame);
+
+    return copiedCell;
 }
 
 void
 UOdysseyAnimationCell::DirtyThumbnail()
 {
-	if (ThumbnailIsDirty)
-		return;
+    if (ThumbnailIsDirty)
+        return;
 
-	ThumbnailIsDirty = true;
-	mOnThumbnailDirtied.Broadcast();
+    ThumbnailIsDirty = true;
+    mOnThumbnailDirtied.Broadcast();
 }
 
 void
 UOdysseyAnimationCell::UndirtyThumbnail()
 {
-	ThumbnailIsDirty = false;
+    ThumbnailIsDirty = false;
 }
 
 bool
 UOdysseyAnimationCell::IsThumbnailDirty() const
 {
-	return ThumbnailIsDirty;
+    return ThumbnailIsDirty;
 }
 
 void
 UOdysseyAnimationCell::ExposureBlueprintSetter(int Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Value);
 }
 
 void
 UOdysseyAnimationCell::MarkBlueprintSetter(int Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), Value);
 }
 
 void
 UOdysseyAnimationCell::OutOfPegsBlueprintSetter(FOdysseyAnimationCellOutOfPegs Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs), Value);
 }

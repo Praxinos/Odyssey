@@ -48,7 +48,7 @@ FOdysseyAnimationMediaTextureSample::GetDim() const
 FTimespan
 FOdysseyAnimationMediaTextureSample::GetDuration() const
 {
-    return mDuration; 
+    return mDuration;
 }
 
 EMediaTextureSampleFormat

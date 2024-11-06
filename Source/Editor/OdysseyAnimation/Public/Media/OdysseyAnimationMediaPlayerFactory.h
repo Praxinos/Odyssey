@@ -7,7 +7,7 @@
 #include "IMediaPlayerFactory.h"
 
 class ODYSSEYANIMATION_API FOdysseyAnimationMediaPlayerFactory
-	: public IMediaPlayerFactory
+    : public IMediaPlayerFactory
 {
 public:
     FOdysseyAnimationMediaPlayerFactory();
@@ -22,9 +22,9 @@ public:
     virtual bool SupportsFeature(EMediaFeature Feature) const override;
 
 private:
-	/** List of platforms that the media player support. */
-	TArray<FString> mSupportedPlatforms;
+    /** List of platforms that the media player support. */
+    TArray<FString> mSupportedPlatforms;
 
-	/** List of supported URI schemes. */
-	TArray<FString> mSupportedUriSchemes;
+    /** List of supported URI schemes. */
+    TArray<FString> mSupportedUriSchemes;
 };

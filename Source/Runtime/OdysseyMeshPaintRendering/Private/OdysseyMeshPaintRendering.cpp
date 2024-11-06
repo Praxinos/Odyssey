@@ -129,7 +129,7 @@ namespace OdysseyMeshPaintRendering
         SetGraphicsPipelineState(iRHICmdList, iGraphicsPSOInit, 0, EApplyRendertargetOption::ForceApply);
 
         SetShaderParametersLegacyVS(iRHICmdList, VertexShader, FMatrix44f(iTransform));
-        SetShaderParametersLegacyPS(iRHICmdList, PixelShader, iGamma, iShaderParams);    
+        SetShaderParametersLegacyPS(iRHICmdList, PixelShader, iGamma, iShaderParams);
     }
 }
 

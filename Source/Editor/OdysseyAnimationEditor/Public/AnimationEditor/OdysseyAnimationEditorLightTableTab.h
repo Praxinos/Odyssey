@@ -9,7 +9,7 @@ class FOdysseyAnimationEditorExtension;
 class UOdysseyAnimationLayerStack;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationEditorLightTableTab :
-	public FOdysseyEditorTab
+    public FOdysseyEditorTab
 {
 public:
     static const FName& StaticId();
@@ -29,7 +29,7 @@ protected:
     UOdysseyAnimationLayerStack* LayerStack() const;
 
 protected:
-    // Event 
+    // Event
 
 private:
     //Methods

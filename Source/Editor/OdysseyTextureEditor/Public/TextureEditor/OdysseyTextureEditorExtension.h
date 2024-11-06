@@ -15,7 +15,7 @@ class UOdysseyTextureLayerStack;
 
 class ODYSSEYTEXTUREEDITOR_API FOdysseyTextureEditorExtension
     : public FOdysseyPainterEditorExtension
-{   
+{
 public:
     // Construction / Destruction
     virtual ~FOdysseyTextureEditorExtension();
@@ -31,16 +31,16 @@ public:
 public:
     UTexture2D* Texture() const;
     TSharedPtr<FOdysseyTextureEditorSource> GetTextureSource() const;
-	UOdysseyTextureLayerStack* GetLayerStack() const;
+    UOdysseyTextureLayerStack* GetLayerStack() const;
 
 private:
     void OnSourceChanged();
     void OnCurrentLayerChanged(UOdysseyLayerStack* iLayerStack);
-    
+
     void ConfigureTools();
 
 private:
     TSharedPtr<FOdysseyTextureEditorSource> mTextureSource;
-	TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
+    TSharedPtr<FOdysseyTextureEditorGUI> mGUI;
     TSharedPtr<FOdysseyLayerStackEditorBrushContext> mLayerStackBrushEditorContext;
 };

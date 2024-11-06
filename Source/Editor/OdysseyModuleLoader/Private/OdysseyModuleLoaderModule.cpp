@@ -7,34 +7,34 @@
 void
 FOdysseyModuleLoaderModule::StartupModule()
 {
-	ActivateModules();
+    ActivateModules();
 }
 
 void
 FOdysseyModuleLoaderModule::ActivateModules()
 {
-	#define OUT_MODULES(iCond) (iCond ? activeModules : inactiveModules)
+    #define OUT_MODULES(iCond) (iCond ? activeModules : inactiveModules)
 
-	TMap<FName, ELoadingPhase::Type> activeModules;
-	TMap<FName, ELoadingPhase::Type> inactiveModules;
+    TMap<FName, ELoadingPhase::Type> activeModules;
+    TMap<FName, ELoadingPhase::Type> inactiveModules;
 
-	FModuleManager& moduleManager = FModuleManager::Get();
-	bool bPaper2DExists = moduleManager.ModuleExists(TEXT("Paper2D"));
-	OUT_MODULES( bPaper2DExists ).Add("OdysseyFlipbook", ELoadingPhase::PostDefault);
-	OUT_MODULES( bPaper2DExists ).Add("OdysseyFlipbookEditor", ELoadingPhase::PostDefault);
+    FModuleManager& moduleManager = FModuleManager::Get();
+    bool bPaper2DExists = moduleManager.ModuleExists(TEXT("Paper2D"));
+    OUT_MODULES( bPaper2DExists ).Add("OdysseyFlipbook", ELoadingPhase::PostDefault);
+    OUT_MODULES( bPaper2DExists ).Add("OdysseyFlipbookEditor", ELoadingPhase::PostDefault);
 
-	IPluginManager& pluginManager = IPluginManager::Get();
-	TSharedPtr<IPlugin> iliad = pluginManager.FindPlugin("Iliad");
-	FPluginDescriptor& iliadDescriptor = const_cast<FPluginDescriptor&>(iliad->GetDescriptor());
-	
-	for ( FModuleDescriptor& iliadModule : iliadDescriptor.Modules )
-	{
-		if ( activeModules.Contains( iliadModule.Name) )
-			iliadModule.LoadingPhase = activeModules[iliadModule.Name];
+    IPluginManager& pluginManager = IPluginManager::Get();
+    TSharedPtr<IPlugin> iliad = pluginManager.FindPlugin("Iliad");
+    FPluginDescriptor& iliadDescriptor = const_cast<FPluginDescriptor&>(iliad->GetDescriptor());
 
-		if ( inactiveModules.Contains( iliadModule.Name ) )
-			iliadModule.LoadingPhase = ELoadingPhase::None;
-	}
+    for ( FModuleDescriptor& iliadModule : iliadDescriptor.Modules )
+    {
+        if ( activeModules.Contains( iliadModule.Name) )
+            iliadModule.LoadingPhase = activeModules[iliadModule.Name];
+
+        if ( inactiveModules.Contains( iliadModule.Name ) )
+            iliadModule.LoadingPhase = ELoadingPhase::None;
+    }
 }
 
 void FOdysseyModuleLoaderModule::ShutdownModule()

@@ -8,32 +8,32 @@
 
 void FOdysseyAnimationModule::StartupModule()
 {
-	RegisterMedia();
+    RegisterMedia();
 }
 
 void FOdysseyAnimationModule::ShutdownModule()
 {
-	UnregisterMedia();
+    UnregisterMedia();
 }
 
 void
 FOdysseyAnimationModule::RegisterMedia()
 {
-	// register player factory
-	auto MediaModule = FModuleManager::LoadModulePtr<IMediaModule>("Media");
+    // register player factory
+    auto MediaModule = FModuleManager::LoadModulePtr<IMediaModule>("Media");
 
-	if (MediaModule != nullptr)
-		MediaModule->RegisterPlayerFactory(mAnimationMediaPlayerFactory);
+    if (MediaModule != nullptr)
+        MediaModule->RegisterPlayerFactory(mAnimationMediaPlayerFactory);
 }
 
 void
 FOdysseyAnimationModule::UnregisterMedia()
 {
-	// unregister player factory
-	auto MediaModule = FModuleManager::GetModulePtr<IMediaModule>("Media");
+    // unregister player factory
+    auto MediaModule = FModuleManager::GetModulePtr<IMediaModule>("Media");
 
-	if (MediaModule != nullptr)
-		MediaModule->UnregisterPlayerFactory(mAnimationMediaPlayerFactory);
+    if (MediaModule != nullptr)
+        MediaModule->UnregisterPlayerFactory(mAnimationMediaPlayerFactory);
 }
 
 IMPLEMENT_MODULE(FOdysseyAnimationModule, OdysseyAnimation);

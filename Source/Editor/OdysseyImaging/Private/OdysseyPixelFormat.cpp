@@ -72,7 +72,7 @@ ConvertTextureSourceFormatToULISFormat( const uint8* iSrc, uint8* oDst, int iWid
             }
         }
         break;
-        
+
         default:
         break;
     }
@@ -113,7 +113,7 @@ ConvertULISFormatToTextureSourceFormat( const uint8* iSrc, uint8* oDst, int iWid
             }
         }
         break;
-        
+
         default:
         break;
     }

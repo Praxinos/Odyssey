@@ -10,7 +10,7 @@ class UOdysseyAnimationLayer;
 
 class FOdysseyAnimationCellClipboardData
     : public IOdysseyClipboardData
-	, public FGCObject //Allows us to register External UObject in Garbage Collector
+    , public FGCObject //Allows us to register External UObject in Garbage Collector
 {
 public:
     virtual ~FOdysseyAnimationCellClipboardData() {};
@@ -27,7 +27,7 @@ public:
     int GetCellCount() const;
 
 public:
-	// FGCObject implementation
+    // FGCObject implementation
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
     virtual FString GetReferencerName() const override;
 

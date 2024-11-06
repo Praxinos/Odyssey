@@ -52,7 +52,7 @@ FOdysseyTextureConfiguration::GetBackgroundColor() const
         case EOdysseyTextureBackgroundColor::kTransparent:  return FLinearColor( 0.f, 0.f, 0.f, 0.f );
         case EOdysseyTextureBackgroundColor::kWhite:        return FLinearColor( 1.f, 1.f, 1.f );
         case EOdysseyTextureBackgroundColor::kNormal:       return FLinearColor( .5f, .5f, 1.f );
-		default: break;
+        default: break;
     }
 
     check(false); //should not be called
@@ -79,54 +79,54 @@ FOdysseyTextureConfiguration::CreateTexture(UObject* iParent, FName iName, EObje
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(block.Format());
     ctx.Fill(block, color );
     ctx.Finish();
-    
+
     UTexture2D* texture = NewObject<UTexture2D>( iParent, iName, iFlags );
     texture->SRGB = useSRGB;
     InitTextureWithBlockData(&block, texture, textureFormat);
-	
-	//Init user data
+
+    //Init user data
     UOdysseyTextureLayerStackUserData* userData = NewObject<UOdysseyTextureLayerStackUserData>(texture, NAME_None, RF_Public);
 
-	if (defaultLayerType == EOdysseyTextureDefaultLayerType::kRaster)
-	{
+    if (defaultLayerType == EOdysseyTextureDefaultLayerType::kRaster)
+    {
         userData->InitWithDefaultLayerStack();
-	}
+    }
     else if (defaultLayerType == EOdysseyTextureDefaultLayerType::kVector)
     {
         userData->InitWithEmptyVectorLayer();
     }
-	else if (defaultLayerType == EOdysseyTextureDefaultLayerType::kNone)
-	{
+    else if (defaultLayerType == EOdysseyTextureDefaultLayerType::kNone)
+    {
         userData->InitWithEmptyLayerStack();
-	}
-	
-	// Notify for changes
-	texture->AddAssetUserData( userData );
+    }
 
-	if (BackgroundColor != EOdysseyTextureBackgroundColor::kTransparent)
-	{
-		UOdysseyLayerStack* layerStack = userData->GetLayerStack();
-		
-		//Add first layer image
-		
+    // Notify for changes
+    texture->AddAssetUserData( userData );
 
-		//Set the layer as Current Layer
-		UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), nullptr, 1));
-		layer->Name = LOCTEXT("texture.default-background-layer.name", "Background");
+    if (BackgroundColor != EOdysseyTextureBackgroundColor::kTransparent)
+    {
+        UOdysseyLayerStack* layerStack = userData->GetLayerStack();
 
-		//Fill LayerImage with content of Texture
-		TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock();
-		FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
-		rasterBlockMutator.EditTilesFromRects(
-			{ ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
-			[&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
-			{
-				FillOdysseyBlockFromUTextureData(iBlock.Get(), texture, iBlock->Format());
-				return {};
-			}
-		);
-		rasterBlockMutator.Commit();
-	}
+        //Add first layer image
+
+
+        //Set the layer as Current Layer
+        UOdysseyTextureLayerImageRaster* layer = Cast<UOdysseyTextureLayerImageRaster>(layerStack->AddLayer(UOdysseyTextureLayerImageRaster::StaticClass(), nullptr, 1));
+        layer->Name = LOCTEXT("texture.default-background-layer.name", "Background");
+
+        //Fill LayerImage with content of Texture
+        TSharedPtr<FOdysseyRasterBlock> rasterBlock = layer->GetRasterBlock();
+        FOdysseyRasterBlockMutator rasterBlockMutator(rasterBlock, false);
+        rasterBlockMutator.EditTilesFromRects(
+            { ::ULIS::FRectI::FromXYWH(0, 0, rasterBlock->GetWidth(), rasterBlock->GetHeight()) },
+            [&](TSharedPtr<::ULIS::FBlock> iBlock, const FULISInvalidTileMap& iTileMap) -> TArray<ULIS::FEvent>
+            {
+                FillOdysseyBlockFromUTextureData(iBlock.Get(), texture, iBlock->Format());
+                return {};
+            }
+        );
+        rasterBlockMutator.Commit();
+    }
 
     texture->PostEditChange();
 
@@ -147,8 +147,8 @@ SOdysseyTextureConfigureWindow::Construct( const FArguments& iArgs)
 
     FStructureDetailsViewArgs structureDetailsViewArgs;
     FDetailsViewArgs detailsViewArgs;
-	detailsViewArgs.bAllowSearch = false;
-	detailsViewArgs.bShowScrollBar = false;
+    detailsViewArgs.bAllowSearch = false;
+    detailsViewArgs.bShowScrollBar = false;
 
     FPropertyEditorModule& propertyEditor = FModuleManager::Get().LoadModuleChecked<FPropertyEditorModule>(TEXT("PropertyEditor"));
     TSharedRef<FStructOnScope> structOnScope = MakeShared<FStructOnScope>(FOdysseyTextureConfiguration::StaticStruct(), reinterpret_cast<uint8*>(&mConfiguration));

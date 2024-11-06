@@ -141,7 +141,7 @@ UOdysseyBrushColorFunctionLibrary::MakeOdysseyBrushColorFromGrey( int Grey, int 
 {
     return  FOdysseyBrushColor::FromTemp( ::ULIS::FColor::FromGreyA8( Grey, A ) );
 }
- 
+
 
 //static
 FOdysseyBrushColor

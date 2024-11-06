@@ -9,15 +9,15 @@
 class FOdysseyViewportDrawingEditorExtension;
 
 class ODYSSEYVIEWPORTDRAWINGEDITOR_API SOdysseyViewportDrawingEditorMasterTab
-	: public SCompoundWidget
+    : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SOdysseyViewportDrawingEditorMasterTab)
-		{}
-	SLATE_END_ARGS()
+    SLATE_BEGIN_ARGS(SOdysseyViewportDrawingEditorMasterTab)
+        {}
+    SLATE_END_ARGS()
 
-	// Construct the widget
-	void Construct(const FArguments& InArgs, FOdysseyViewportDrawingEditorExtension* iExtension);
+    // Construct the widget
+    void Construct(const FArguments& InArgs, FOdysseyViewportDrawingEditorExtension* iExtension);
 
 protected:
     // FOdysseyEditorTab interface
@@ -25,7 +25,7 @@ protected:
     void OnMenuClosed( bool iOpen );
     FText CreateTextMeshSelector() const;
     TSharedRef<SWidget> CreateMeshComponentMenuWidget();
-    
+
     TSharedRef<SWidget> GeneratePaintingMethodComboBoxItem(TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod> iItem);
     void ChangeSelectionPaintingMethodComboBoxItem(TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod> iNewSelection, ESelectInfo::Type iSelectInfo);
     static FText GetMethodAsText(EOdysseyViewportDrawingPaintingAdapterMethod iMethod);

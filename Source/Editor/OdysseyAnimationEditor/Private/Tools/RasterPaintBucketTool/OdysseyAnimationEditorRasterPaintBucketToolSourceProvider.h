@@ -10,26 +10,26 @@ class FOdysseyImageRenderingAbility;
 class UOdysseyLayer;
 
 class FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider
-	: public FOdysseyPainterEditorRasterPaintBucketToolSourceProvider
+    : public FOdysseyPainterEditorRasterPaintBucketToolSourceProvider
 {
 public:
-	virtual ~FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider();
-	FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider(FOdysseyAnimationEditorExtension* iExtension);
+    virtual ~FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider();
+    FOdysseyAnimationEditorRasterPaintBucketToolSourceProvider(FOdysseyAnimationEditorExtension* iExtension);
 
 public:
-	virtual const TArray<FString>& GetSources() const override;
-	virtual TSharedPtr<::ULIS::FBlock> GetSourceBlock(EOdysseyRasterPaintBucketToolSource iSource) const override;
+    virtual const TArray<FString>& GetSources() const override;
+    virtual TSharedPtr<::ULIS::FBlock> GetSourceBlock(EOdysseyRasterPaintBucketToolSource iSource) const override;
 
 private:
-	TSharedPtr<::ULIS::FBlock> GetCurrentLayerBlock() const;
-	TSharedPtr<::ULIS::FBlock> GetForegroundLayersBlock() const;
-	TSharedPtr<::ULIS::FBlock> GetBackgroundLayersBlock() const;
-	TSharedPtr<::ULIS::FBlock> GetAllLayersBlock() const;
+    TSharedPtr<::ULIS::FBlock> GetCurrentLayerBlock() const;
+    TSharedPtr<::ULIS::FBlock> GetForegroundLayersBlock() const;
+    TSharedPtr<::ULIS::FBlock> GetBackgroundLayersBlock() const;
+    TSharedPtr<::ULIS::FBlock> GetAllLayersBlock() const;
 
-	TArray<FOdysseyImageRenderingAbility*> GetForegroundLayersToExclude(UOdysseyLayer* iLayer) const;
-	TArray<FOdysseyImageRenderingAbility*> GetBackgroundLayersToExclude(UOdysseyLayer* iLayer) const;
+    TArray<FOdysseyImageRenderingAbility*> GetForegroundLayersToExclude(UOdysseyLayer* iLayer) const;
+    TArray<FOdysseyImageRenderingAbility*> GetBackgroundLayersToExclude(UOdysseyLayer* iLayer) const;
 
 private:
-	FOdysseyAnimationEditorExtension* mExtension;
-	TArray<FString> mSources;
+    FOdysseyAnimationEditorExtension* mExtension;
+    TArray<FString> mSources;
 };

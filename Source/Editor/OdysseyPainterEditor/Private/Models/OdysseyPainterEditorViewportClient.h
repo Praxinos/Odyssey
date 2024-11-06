@@ -43,17 +43,17 @@ class FOdysseyHUDElement;
 //      ╚═══════╤══╤════════╝         │           ╚═══════╤══╤════════╝       │          ╚═══════╤══╤════════╝       │             ╚════╤═════════╤════╝
 //              │  │                  │                   │  │                │                  │  │                │                  │         │
 //  LMB pressed ▼  ▲ LMB released     │       LMB pressed ▼  ▲ LMB released   │      LMB pressed ▼  ▲ LMB released   │                  └────►────┘
-//              │  │                  │                   │  │                │                  │  │                │                   LMB move  
+//              │  │                  │                   │  │                │                  │  │                │                   LMB move
 //      ╔═══════╧══╧════════╗         │           ╔═══════╧══╧════════╗       │          ╔═══════╧══╧════════╗       │
 //      ║     kPanning      ╟─────────┘           ║     kRotating     ╟───────┘          ║     kPicking      ╟───────┘
 //      ╚════╤═════════╤════╝                     ╚════╤═════════╤════╝                  ╚════╤═════════╤════╝
 //           │         │                               │         │                            │         │
 //           └────►────┘                               └────►────┘                            └────►────┘
 //            LMB move                                  LMB move                               LMB move
-//  
-//  
+//
+//
 //  https://unicode-table.com/fr/#2500 ──◄──
-//                         
+//
 
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditorViewportClient
@@ -63,7 +63,7 @@ class FOdysseyPainterEditorViewportClient
     , public IStylusMessageHandler
 {
 public:
-	DECLARE_DELEGATE_TwoParams(FOnPickColor, eOdysseyEventState::Type, const FVector2D&)
+    DECLARE_DELEGATE_TwoParams(FOnPickColor, eOdysseyEventState::Type, const FVector2D&)
     DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseDown, const FOdysseyPoint&, const FKey&)
     DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseUp, const FOdysseyPoint&, const FKey&)
     DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseDoubleClick, const FOdysseyPoint&, const FKey&)
@@ -108,7 +108,7 @@ public:
     void ReadStylusInput();
 
     virtual EMouseCaptureMode GetMouseCaptureMode() const override;
-    
+
 public:
     // FGCObject API
     virtual void AddReferencedObjects( FReferenceCollector& ioCollector ) override;
@@ -116,7 +116,7 @@ public:
 
 public:
     // Public API
-	FOnPickColor&	OnPickColor() { return mOnPickColor; }
+    FOnPickColor&    OnPickColor() { return mOnPickColor; }
     FOnMouseDown&   OnMouseDown()   { return mOnMouseDown; }
     FOnMouseDoubleClick&   OnMouseDoubleClick()   { return mOnMouseDoubleClick; }
     FOnMouseUp&     OnMouseUp()     { return mOnMouseUp; }
@@ -153,7 +153,7 @@ private:
 private:
     // Private Data Members
     UOdysseyStylusInputSubsystem*           InputSubsystem;
-    FOdysseyPainterEditor*		            mOdysseyPainterEditor;
+    FOdysseyPainterEditor*                    mOdysseyPainterEditor;
     TWeakPtr<SOdysseyViewport>              mOdysseyPainterEditorViewportPtr;
     FOdysseyMeshSelector*                   mMeshSelector;
     TObjectPtr<UTexture2D>                  mCheckerboardTexture;
@@ -166,7 +166,7 @@ private:
 
     eState                                  mCurrentToolState;
 
-	FOnPickColor							mOnPickColor;
+    FOnPickColor                            mOnPickColor;
     FOnMouseDown                            mOnMouseDown;
     FOnMouseUp                              mOnMouseUp;
     FOnMouseDoubleClick                     mOnMouseDoubleClick;
@@ -175,8 +175,8 @@ private:
     FOnKeyDown                              mOnKeyDown;
     FOnKeyUp                                mOnKeyUp;
 
-	FOdysseyPoint						    mCurrentPointInViewport;
-    FOdysseyPoint						    mCurrentPointInTexture;
+    FOdysseyPoint                            mCurrentPointInViewport;
+    FOdysseyPoint                            mCurrentPointInTexture;
     std::chrono::steady_clock::time_point   mStylusLastEventTime;
 
     TArray<FKey>                            mKeysPressed;
@@ -187,7 +187,7 @@ private:
     bool                                    mIsMouseDown = false;
     FKey                                    mMouseButton;
 
-    
+
     TArray<FStylusState> mStylusStates;
     bool mIsRecordingStylus = false;
     int mLastStylusEventIndex = 0;

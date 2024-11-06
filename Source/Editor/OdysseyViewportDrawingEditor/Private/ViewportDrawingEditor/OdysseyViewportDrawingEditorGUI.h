@@ -12,7 +12,7 @@ class FOdysseyViewportDrawingEditorGUI
 {
 public:
     static void ExtendLevelEditorLayout(FLayoutExtender& Extender);
-    
+
 public:
     // Construction / Destruction
     virtual ~FOdysseyViewportDrawingEditorGUI();

@@ -11,18 +11,18 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationDetails : public SCompoundWidg
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationDetails)
-	{}
-		SLATE_ATTRIBUTE(UOdysseyAnimation*, Animation)
-	SLATE_END_ARGS()
-    
+    {}
+        SLATE_ATTRIBUTE(UOdysseyAnimation*, Animation)
+    SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs);
+
+    void Construct(const FArguments& InArgs);
 
 private:
-	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
+    virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 
 private:
     TAttribute<UOdysseyAnimation*> mAnimation;
-	UOdysseyAnimation* mCurrentAnimation;
+    UOdysseyAnimation* mCurrentAnimation;
     TSharedPtr<class IDetailsView> mAnimationPropertiesWidget;
 };

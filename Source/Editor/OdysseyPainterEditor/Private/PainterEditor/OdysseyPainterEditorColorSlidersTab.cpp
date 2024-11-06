@@ -26,7 +26,7 @@ FOdysseyPainterEditorColorSlidersTab::~FOdysseyPainterEditorColorSlidersTab()
 }
 
 FOdysseyPainterEditorColorSlidersTab::FOdysseyPainterEditorColorSlidersTab(FOdysseyPainterEditor* iEditor)
-	: FOdysseyEditorTab(LOCTEXT( "color-sliders-tab.name", "Color Sliders" ), FSlateIcon( "OdysseyStyle", "PainterEditor.ColorSliders_2_16" ))
+    : FOdysseyEditorTab(LOCTEXT( "color-sliders-tab.name", "Color Sliders" ), FSlateIcon( "OdysseyStyle", "PainterEditor.ColorSliders_2_16" ))
     , mEditor(iEditor)
 {
 }
@@ -43,8 +43,8 @@ FOdysseyPainterEditorColorSlidersTab::GetId() const
 TSharedPtr<SWidget>
 FOdysseyPainterEditorColorSlidersTab::CreateWidget()
 {
-	return SNew( SOdysseyColorSliders )
-		.Color_Raw(this, &FOdysseyPainterEditorColorSlidersTab::Color)
+    return SNew( SOdysseyColorSliders )
+        .Color_Raw(this, &FOdysseyPainterEditorColorSlidersTab::Color)
         .OnColorChange_Raw(this, &FOdysseyPainterEditorColorSlidersTab::OnColorChange);
 }
 

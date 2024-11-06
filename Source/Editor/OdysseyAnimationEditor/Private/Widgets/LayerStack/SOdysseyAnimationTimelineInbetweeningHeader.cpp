@@ -36,14 +36,14 @@ SOdysseyAnimationTimelineInbetweeningHeader::Construct( const FArguments& InArgs
                                                       , UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector )
 {
     mAnimationLayerImageVector = iAnimationLayerImageVector;
-	mEditor = InArgs._PainterEditor;
+    mEditor = InArgs._PainterEditor;
 
     SListView<TSharedPtr<FInbetweeningListViewItem>>::Construct(
         SListView<TSharedPtr<FInbetweeningListViewItem>>::FArguments()
         // for some reason, SetItemsSource does not work, so we have to use an array that we
         // call mItemsSource and that we will updates with the desired items
         .ListItemsSource(&mItemsSource)
-        .OnGenerateRow( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnGenerateRow ) 
+        .OnGenerateRow( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnGenerateRow )
         //.OnGetChildren( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnGetChildren )
         //.OnSelectionChanged( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnSelectionChanged )
         //.OnItemScrolledIntoView(this, &SOdysseyLayerStackTreeView::OnItemScrolledIntoView)
@@ -94,7 +94,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Update()
 bool
 SOdysseyAnimationTimelineInbetweeningHeader::Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const
 {
-	UOdysseyLayerStack* layerStack = mAnimationLayerImageVector->GetLayerStack();
+    UOdysseyLayerStack* layerStack = mAnimationLayerImageVector->GetLayerStack();
     return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected() && ( layerStack->CurrentLayer == mAnimationLayerImageVector );
 }
 
@@ -131,9 +131,9 @@ SOdysseyAnimationTimelineInbetweeningHeader::OnContextMenuOpening()
 void
 SOdysseyAnimationTimelineInbetweeningHeader::Commit()
 {
-	TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
-	if (!editor)
-		return;
+    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
+    if (!editor)
+        return;
 
     FOdysseyPainterEditor::CommitSelectedInbetweenerTag( editor.Get(), mAnimationLayerImageVector->GetSharedEnv() );
 }
@@ -141,9 +141,9 @@ SOdysseyAnimationTimelineInbetweeningHeader::Commit()
 void
 SOdysseyAnimationTimelineInbetweeningHeader::ResetSpacingCharts()
 {
-	TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
-	if (!editor)
-		return;
+    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
+    if (!editor)
+        return;
 
     FOdysseyPainterEditor::ResetInbetweenerTagSpacingChart( editor.Get(), mAnimationLayerImageVector->GetSharedEnv() );
 }
@@ -171,15 +171,15 @@ SOdysseyAnimationTimelineInbetweeningHeader::RemoveInbetweenerTag()
                                                                       , notificationFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-        
-			
-			TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
-			if (editor)
-			{
-				TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
-				if (source)
-					source->RecordCurrentFrameUndo();
-			}
+
+
+            TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
+            if (editor)
+            {
+                TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
+                if (source)
+                    source->RecordCurrentFrameUndo();
+            }
         }
         GEditor->EndTransaction();
 
@@ -205,7 +205,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::GetAnimationLayerImageVector()
 TSharedPtr<FOdysseyPainterEditor>
 SOdysseyAnimationTimelineInbetweeningHeader::GetEditor() const
 {
-	return mEditor.Get();
+    return mEditor.Get();
 }
 
 

@@ -19,12 +19,12 @@ public:
         SLATE_ARGUMENT(FName, UsedSet )
         SLATE_EVENT( FSimpleDelegate, OnSelected )
     SLATE_END_ARGS()
-    
+
 public:
     // Construction / Destruction
     ~SOdysseyPaletteSetTile();
     SOdysseyPaletteSetTile();
-    
+
     void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTableView);
 
 public:

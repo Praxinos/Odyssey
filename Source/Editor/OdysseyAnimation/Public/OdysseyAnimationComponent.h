@@ -10,8 +10,8 @@ class UOdysseyAnimationPlayer;
 UENUM()
 enum class EOdysseyAnimationComponentMode
 {
-	Animation,
-	Player
+    Animation,
+    Player
 };
 
 /**
@@ -20,27 +20,27 @@ enum class EOdysseyAnimationComponentMode
 UCLASS(Blueprintable, ClassGroup=(Animation), editinlinenew, meta=(BlueprintSpawnableComponent, PrioritizeCategories="Actions"))
 class ODYSSEYANIMATION_API UOdysseyAnimationComponent : public UStaticMeshComponent
 {
-	GENERATED_UCLASS_BODY()
+    GENERATED_UCLASS_BODY()
 
 public:
-	UFUNCTION(Category="Actions", CallInEditor)
-	void Play();
+    UFUNCTION(Category="Actions", CallInEditor)
+    void Play();
 
-	UFUNCTION(Category="Actions", CallInEditor)
-	void Stop();
-
-public:
-	UOdysseyAnimation* GetActiveAnimation() const;
-	UOdysseyAnimationPlayer* GetActivePlayer() const;
-
-	FSimpleMulticastDelegate& OnAnimationChanged();
-	FSimpleMulticastDelegate& OnPlayerChanged();
-	FSimpleMulticastDelegate& OnModeChanged();
+    UFUNCTION(Category="Actions", CallInEditor)
+    void Stop();
 
 public:
-	virtual void PostInitProperties() override;
-	virtual void PostLoad() override;
-	virtual void PostDuplicate(bool bDuplicateForPIE) override;
+    UOdysseyAnimation* GetActiveAnimation() const;
+    UOdysseyAnimationPlayer* GetActivePlayer() const;
+
+    FSimpleMulticastDelegate& OnAnimationChanged();
+    FSimpleMulticastDelegate& OnPlayerChanged();
+    FSimpleMulticastDelegate& OnModeChanged();
+
+public:
+    virtual void PostInitProperties() override;
+    virtual void PostLoad() override;
+    virtual void PostDuplicate(bool bDuplicateForPIE) override;
 
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
@@ -48,35 +48,35 @@ public:
 protected:
     //Property changed methods
     virtual void PropertyChanged(const FName& iPropertyName);
-	
-	virtual void ModeChanged();
+
+    virtual void ModeChanged();
     virtual void AnimationChanged();
-	virtual void PlayerChanged();
+    virtual void PlayerChanged();
 
 private:
-	void RefreshMaterialTexture();
+    void RefreshMaterialTexture();
 
-	void OnDefaultPlayerTextureChanged();
-	void OnPlayerTextureChanged();
+    void OnDefaultPlayerTextureChanged();
+    void OnPlayerTextureChanged();
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
-	EOdysseyAnimationComponentMode Mode = EOdysseyAnimationComponentMode::Animation;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Animation")
+    EOdysseyAnimationComponentMode Mode = EOdysseyAnimationComponentMode::Animation;
 
-	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation", meta=(EditCondition = "Mode==EOdysseyAnimationComponentMode::Animation", EditConditionHides))
-	TObjectPtr<UOdysseyAnimation> Animation;
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation", meta=(EditCondition = "Mode==EOdysseyAnimationComponentMode::Animation", EditConditionHides))
+    TObjectPtr<UOdysseyAnimation> Animation;
 
-	UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation", meta=(EditCondition = "Mode==EOdysseyAnimationComponentMode::Player", EditConditionHides))
-	TObjectPtr<UOdysseyAnimationPlayer> Player;
+    UPROPERTY( EditAnywhere, BlueprintReadWrite, Category="Animation", meta=(EditCondition = "Mode==EOdysseyAnimationComponentMode::Player", EditConditionHides))
+    TObjectPtr<UOdysseyAnimationPlayer> Player;
 
 private:
-	UPROPERTY(Transient)
-	TObjectPtr<UOdysseyAnimationPlayer> DefaultPlayer;
+    UPROPERTY(Transient)
+    TObjectPtr<UOdysseyAnimationPlayer> DefaultPlayer;
 
-	UPROPERTY()
-	TObjectPtr<UOdysseyAnimationPlayer> PreviousPlayer;
+    UPROPERTY()
+    TObjectPtr<UOdysseyAnimationPlayer> PreviousPlayer;
 
-	FSimpleMulticastDelegate mOnAnimationChanged;
-	FSimpleMulticastDelegate mOnPlayerChanged;
-	FSimpleMulticastDelegate mOnModeChanged;
+    FSimpleMulticastDelegate mOnAnimationChanged;
+    FSimpleMulticastDelegate mOnPlayerChanged;
+    FSimpleMulticastDelegate mOnModeChanged;
 };

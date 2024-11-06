@@ -81,7 +81,7 @@ FOdysseyVectorJoint::Draw( BLContext* iBLContext
                                       , polygon->V
                                       , iCombinedOpacity
                                       , foregroundColor
-                                      , (int8*) brush.pixels 
+                                      , (int8*) brush.pixels
                                       , brush.width
                                       , brush.height
                                       , brush.bitsPerPixel
@@ -149,20 +149,20 @@ in mind a segment could be oriented differently from the other
 Regular:
 
       segment0       vertex        segment1
-----------------------° °------------------------
+----------------------ï¿½ ï¿½------------------------
      v0 -----> v1      *       v0 -----> v1
 ----------------------. .------------------------
 
 here, for segment0
 
 for example, we could have the vertex being the ending vertex for each segment
- 
+
       segment0       vertex        segment1
-----------------------° °------------------------
+----------------------ï¿½ ï¿½------------------------
      v0 -----> v1      *       v1 <----- v0
 ----------------------. .------------------------
 
-so we have to find the correct "edge point" (either "°" or "." on the figure above)
+so we have to find the correct "edge point" (either "ï¿½" or "." on the figure above)
 and this is performed by this part of the code :
 
     double cross = FOdysseyVector::Cross2D( -parallelVec0, parallelVec1 );

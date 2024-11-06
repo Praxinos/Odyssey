@@ -14,17 +14,17 @@ SOdysseyAnimationLayerTimeline::Construct(
     UOdysseyAnimationLayer* iLayer
 )
 {
-	ensure(iLayer);
+    ensure(iLayer);
 
     SOdysseyLayerRowBase::Construct(
         SOdysseyLayerRowBase::FArguments(),
         iOwnerTableView,
-		iLayer
+        iLayer
     );
 }
 
 const FSlateBrush*
-SOdysseyAnimationLayerTimeline::GetBorder() const 
+SOdysseyAnimationLayerTimeline::GetBorder() const
 {
     const FSlateBrush* borderBrush = SMultiColumnTableRow<UOdysseyLayer*>::GetBorder();
 
@@ -32,8 +32,8 @@ SOdysseyAnimationLayerTimeline::GetBorder() const
         return borderBrush;
 
     UOdysseyLayerStack* layerStack = GetLayer()->GetLayerStack();
-	if ( !layerStack || layerStack->CurrentLayer != GetLayer())
-		return borderBrush;
+    if ( !layerStack || layerStack->CurrentLayer != GetLayer())
+        return borderBrush;
 
     return FOdysseyStyle::GetBrush("OdysseyLayerStack.CurrentLayerInactiveBackgroundBrush");
 }

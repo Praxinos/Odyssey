@@ -12,7 +12,7 @@ class FOdysseyVectorVertex;
 class ODYSSEYVECTOR_API FOdysseyVectorHandleSegment : public FOdysseyVectorPoint
 {
     private:
-        static const uint32 mStaticClass = 0x22364e08; // value is crc32 FOdysseyVectorHandleSegment 
+        static const uint32 mStaticClass = 0x22364e08; // value is crc32 FOdysseyVectorHandleSegment
 
     public:
         static uint32 StaticClass() { return mStaticClass; };

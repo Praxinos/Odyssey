@@ -7,7 +7,7 @@
 #include "UObject/Object.h"
 #include "UObject/ObjectMacros.h"
 #include "UObject/ScriptMacros.h"
-#include "InputCoreTypes.h" 
+#include "InputCoreTypes.h"
 #include "Math/Color.h"
 #include "Input/OdysseyPoint.h"
 #include "OdysseyBrushContext.h"
@@ -90,7 +90,7 @@ public:
 
     virtual void PostInitProperties() override;
     virtual void PostLoad() override;
-    
+
 public:
     // Paint Engine Stroke API
 
@@ -149,12 +149,12 @@ public:
     //Context Management
     void SetContexts(TArray<FOdysseyBrushContext*>* iContext);
     template<class T> T* GetContext(FString iName);
-    
+
 public:
     // Tick
 
     // Called once for each engine tick
-	void Tick(float DeltaTime, bool iShouldFlush);
+    void Tick(float DeltaTime, bool iShouldFlush);
 
 private:
     // Internal - Tick API
@@ -384,14 +384,14 @@ public:
     /*********************************/
     /** Odyssey Brush Native Events **/
     /*********************************/
-    
+
     //Event is triggered when the brush is loaded.
     UFUNCTION(BlueprintNativeEvent)
     void OnSelected(); //OnInit
 
     UFUNCTION(BlueprintNativeEvent)
     void OnTick();
-    
+
     //Event is triggered at each step of the stroke.
     UFUNCTION(BlueprintNativeEvent)
     void OnStep();

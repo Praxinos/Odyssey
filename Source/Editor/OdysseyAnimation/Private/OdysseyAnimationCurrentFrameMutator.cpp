@@ -7,34 +7,34 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 FOdysseySetCurrentFrameMutation::FOdysseySetCurrentFrameMutation(UOdysseyAnimation* iAnimation, int iFrame)
-	: mAnimation(iAnimation)
-	, mFrame(iFrame)
+    : mAnimation(iAnimation)
+    , mFrame(iFrame)
 {
 }
 
 void
 FOdysseySetCurrentFrameMutation::Apply()
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED( UOdysseyAnimation, CurrentFrame), mFrame);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED( UOdysseyAnimation, CurrentFrame), mFrame);
 }
 
 void
 FOdysseySetCurrentFrameMutation::Revert()
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED( UOdysseyAnimation, CurrentFrame), mFrame);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED( UOdysseyAnimation, CurrentFrame), mFrame);
 }
 
 FOdysseyAnimationCurrentFrameMutator::FOdysseyAnimationCurrentFrameMutator(UOdysseyAnimation* iAnimation)
-	: FOdysseyMutator(iAnimation, "FOdysseyAnimationCurrentFrameMutator")
-	, mAnimation(iAnimation)
+    : FOdysseyMutator(iAnimation, "FOdysseyAnimationCurrentFrameMutator")
+    , mAnimation(iAnimation)
 {
 }
 
 void
 FOdysseyAnimationCurrentFrameMutator::Set(int iFrame)
 {
-	TSharedRef<FOdysseySetCurrentFrameMutation> mutation = MakeShared<FOdysseySetCurrentFrameMutation>(mAnimation, iFrame);
-	AddMutation(mutation);
-	if (iFrame != mAnimation->CurrentFrame)
-		ApplyMutation(mutation);
+    TSharedRef<FOdysseySetCurrentFrameMutation> mutation = MakeShared<FOdysseySetCurrentFrameMutation>(mAnimation, iFrame);
+    AddMutation(mutation);
+    if (iFrame != mAnimation->CurrentFrame)
+        ApplyMutation(mutation);
 }

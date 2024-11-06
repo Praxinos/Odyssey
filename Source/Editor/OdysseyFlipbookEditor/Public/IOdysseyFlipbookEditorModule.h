@@ -11,7 +11,7 @@ class FOdysseyFlipbookEditorToolkit;
 class UPaperFlipbook;
 
 class IOdysseyFlipbookEditorModule
-	: public IModuleInterface
+    : public IModuleInterface
 {
 public:
     virtual void CreateOdysseyFlipbookEditor( TArray<UPaperFlipbook*> iFlipbook ) = 0;

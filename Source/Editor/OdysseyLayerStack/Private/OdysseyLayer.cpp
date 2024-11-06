@@ -170,8 +170,8 @@ UOdysseyLayer::NameChanged()
 void
 UOdysseyLayer::IsActivatedChanged()
 {
-	if (Parent)
-		Parent->ImageRenderingCompositionChanged();
+    if (Parent)
+        Parent->ImageRenderingCompositionChanged();
     OnIsActivatedChanged().Broadcast(this);
 }
 
@@ -211,7 +211,7 @@ UOdysseyLayer::ChildrenChanged()
     if ( !layerStack )
         return;
 
-	ImageRenderingCompositionChanged();
+    ImageRenderingCompositionChanged();
     OnChildrenChanged().Broadcast(this);
     layerStack->HierarchyChanged();
 }
@@ -341,50 +341,50 @@ UOdysseyLayer::BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType
 {
     if (iFilter.IsBound() && !iFilter.Execute(this))
         return nullptr;
-    
+
     return MakeShared<FOdysseyLayerImageRenderer>(this, iFrame, iRenderType, GetImageRenderingRects(), iFilter);
 }
 
 void
 UOdysseyLayer::NameBlueprintSetter(FText Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Name), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Name), Value);
 }
 
 void
 UOdysseyLayer::IsActivatedBlueprintSetter(bool Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsActivated), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsActivated), Value);
 }
 
 void
 UOdysseyLayer::IsLockedBlueprintSetter(bool Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsLocked), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsLocked), Value);
 }
 
 void
 UOdysseyLayer::DisplayChildrenBlueprintSetter(bool Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren), Value);
 }
 
 void
 UOdysseyLayer::DisplayOptionsBlueprintSetter(bool Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayOptions), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayOptions), Value);
 }
 
 void
 UOdysseyLayer::BlendModeBlueprintSetter(EOdysseyBlendingMode Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode), Value);
 }
 
 void
 UOdysseyLayer::OpacityBlueprintSetter(float Value)
 {
-	FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), Value);
+    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), Value);
 }
 
 #ifdef WITH_EDITOR
@@ -392,40 +392,40 @@ UOdysseyLayer::OpacityBlueprintSetter(float Value)
 TArray<FName>
 UOdysseyLayer::GetRows() const
 {
-	return {
-		"Main",
-		"Blend"
-	};
+    return {
+        "Main",
+        "Blend"
+    };
 }
 
 int
 UOdysseyLayer::GetRowHeight(FName iSubRowName) const
 {
-	if (iSubRowName == "Main")
-		return 20;
+    if (iSubRowName == "Main")
+        return 20;
 
-	if (iSubRowName == "Blend")
-		return 20;
-		
-	return 0;
+    if (iSubRowName == "Blend")
+        return 20;
+
+    return 0;
 }
 
 bool
 UOdysseyLayer::IsRowVisible(FName iSubRowName) const
 {
-	if (iSubRowName == "Main")
-		return true;
+    if (iSubRowName == "Main")
+        return true;
 
-	if (iSubRowName == "Blend")
-		return DisplayOptions;
-		
-	return 0;
+    if (iSubRowName == "Blend")
+        return DisplayOptions;
+
+    return 0;
 }
 
 FMargin
 UOdysseyLayer::GetRowPadding(FName iSubRowName) const
 {
-	return FMargin(0.f, 0.f, 0.f, 2.f);
+    return FMargin(0.f, 0.f, 0.f, 2.f);
 }
 
 #endif

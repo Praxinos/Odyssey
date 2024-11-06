@@ -9,12 +9,12 @@ class ODYSSEYTEXTUREEDITOR_API SOdysseyTextureDetails : public SCompoundWidget
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyTextureDetails)
-	{}
-		SLATE_ATTRIBUTE(UTexture*, Texture)
-	SLATE_END_ARGS()
-    
+    {}
+        SLATE_ATTRIBUTE(UTexture*, Texture)
+    SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs);
+
+    void Construct(const FArguments& InArgs);
 
 private:
     void PopulateQuickInfo();
@@ -22,20 +22,20 @@ private:
     FText GetImportedText() const;
     FText GetCurrentText() const;
     FText GetMaxInGameText() const;
-	FText GetSizeText() const;
-	FText GetMethodText() const;
-	FText GetFormatText() const;
-	FText GetLODBiasText() const;
-	FText GetHasAlphaChannelText() const;
-	FText GetNumMipsText() const;
+    FText GetSizeText() const;
+    FText GetMethodText() const;
+    FText GetFormatText() const;
+    FText GetLODBiasText() const;
+    FText GetHasAlphaChannelText() const;
+    FText GetNumMipsText() const;
 
     EVisibility GetHasAlphaChannelVisibility() const;
 
 private:
-	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
+    virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 
 private:
     TAttribute<UTexture*> mTexture;
-	UTexture* mCurrentTexture;
+    UTexture* mCurrentTexture;
     TSharedPtr<class IDetailsView> mTexturePropertiesWidget;
 };

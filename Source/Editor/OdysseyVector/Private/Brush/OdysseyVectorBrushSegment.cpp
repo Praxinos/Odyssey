@@ -22,7 +22,7 @@ FOdysseyVectorBrushSegment::FOdysseyVectorBrushSegment( FOdysseyVectorSegment* i
         mBLPath.moveTo( ( worldFirstPoint.x - iBoundingBox.x ) / iBoundingBox.w
                       , ( worldFirstPoint.y - iBoundingBox.y ) / iBoundingBox.h );
 
-        for( std::vector<FOdysseyVectorFraction>::iterator it = fractionCache.begin(); it != fractionCache.end(); ++it )    
+        for( std::vector<FOdysseyVectorFraction>::iterator it = fractionCache.begin(); it != fractionCache.end(); ++it )
         {
             FOdysseyVectorFraction& fraction = (*it);
             BLPoint worldPoint = worldMatrix.mapPoint( fraction.polygon.point[2].x
@@ -33,7 +33,7 @@ FOdysseyVectorBrushSegment::FOdysseyVectorBrushSegment( FOdysseyVectorSegment* i
                           , ( worldPoint.y - iBoundingBox.y ) / iBoundingBox.h );
         }
 
-        for( std::vector<FOdysseyVectorFraction>::reverse_iterator it = fractionCache.rbegin(); it != fractionCache.rend(); ++it )    
+        for( std::vector<FOdysseyVectorFraction>::reverse_iterator it = fractionCache.rbegin(); it != fractionCache.rend(); ++it )
         {
             FOdysseyVectorFraction& fraction = (*it);
             BLPoint worldPoint = worldMatrix.mapPoint( fraction.polygon.point[4].x

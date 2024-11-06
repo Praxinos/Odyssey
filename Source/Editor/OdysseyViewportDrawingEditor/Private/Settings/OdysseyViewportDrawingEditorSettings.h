@@ -12,25 +12,25 @@
 USTRUCT()
 struct FOdysseyViewportDrawingEditorTexturePaintSettings
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 public:
-	FOdysseyViewportDrawingEditorTexturePaintSettings()
-		: mPaintTexture(nullptr) {}
+    FOdysseyViewportDrawingEditorTexturePaintSettings()
+        : mPaintTexture(nullptr) {}
 
-	/** Texture to which Painting should be Applied */
-	UPROPERTY(EditAnywhere, Category="Odyssey Viewport Drawing Editor", meta=(DisplayThumbnail="true"))
-	UTexture2D* mPaintTexture;
+    /** Texture to which Painting should be Applied */
+    UPROPERTY(EditAnywhere, Category="Odyssey Viewport Drawing Editor", meta=(DisplayThumbnail="true"))
+    UTexture2D* mPaintTexture;
 };
 
 /** Paint mode settings class derives from base mesh painting settings */
 UCLASS(Config=EditorPerProjectUserSettings)
 class UOdysseyViewportDrawingEditorSettings : public UMeshPaintSettings
 {
-	GENERATED_UCLASS_BODY()
+    GENERATED_UCLASS_BODY()
 public:
 
-	static UOdysseyViewportDrawingEditorSettings* Get();
+    static UOdysseyViewportDrawingEditorSettings* Get();
 
-	UPROPERTY(EditAnywhere, Category="Odyssey Viewport Drawing Editor", Config, meta=(ShowOnlyInnerProperties))
-	FOdysseyViewportDrawingEditorTexturePaintSettings mTexturePaintSettings;
+    UPROPERTY(EditAnywhere, Category="Odyssey Viewport Drawing Editor", Config, meta=(ShowOnlyInnerProperties))
+    FOdysseyViewportDrawingEditorTexturePaintSettings mTexturePaintSettings;
 };
