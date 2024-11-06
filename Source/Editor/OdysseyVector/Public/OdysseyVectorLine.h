@@ -55,7 +55,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorLine : public FOdysseyVectorPrimitive
                               , const ::ULIS::FRectD& iInvalidationArea
                               , double iAncestorsOpacity
                               , uint64 iFlags ) override;
-        virtual FOdysseyVectorObject* CopyShape() override;
+        virtual FOdysseyVectorObject* CopyShape( uint64 iCopyFlags ) override;
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
 
     protected:

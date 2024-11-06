@@ -11,6 +11,7 @@
 #include "OdysseyLayerStack.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "TextureEditor/OdysseyTextureEditorSource.h"
+#include "HUD/OdysseyVectorHUD.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -32,6 +33,10 @@ FOdysseyTextureEditorExtension::Initialize()
 {
     mGUI = MakeShared<FOdysseyTextureEditorGUI>(this);
     mGUI->Init();
+
+    mEditor->SetVectorHUDFlags( FOdysseyVectorHUD::HUD_MODE_OBJECT
+                              | FOdysseyVectorHUD::HUD_MODE_OBJECT_ALLOWED
+                              | FOdysseyVectorHUD::HUD_MODE_VERTEX_ALLOWED );
 
     GetEditor()->OnSourceChanged().AddRaw(this, &FOdysseyTextureEditorExtension::OnSourceChanged);
 }

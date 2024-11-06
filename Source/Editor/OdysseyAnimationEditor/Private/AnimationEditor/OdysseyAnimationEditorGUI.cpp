@@ -11,9 +11,29 @@
 #include "PainterEditor/OdysseyPainterEditorVectorSceneTreeViewTab.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorSource.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyAnimation.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+// Vector engine
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorTag.h"
+#include "OdysseyVectorTagInbetweener.h"
+#include "InbetweenerTag/InbetweenerBreakdown.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAlter.h"
+
+#include "Widgets/Layout/SWidgetSwitcher.h"
+#include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeader.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeaderRow.h"
+#include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.h"
+#include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimeline.h"
+#include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimelineInbetweening.h"
+
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineTreeView.h"
+
+#define LOCTEXT_NAMESPACE "AnimationEditorGUI"
 
 /////////////////////////////////////////////////////
 // FOdysseyAnimationEditorGUI
@@ -23,7 +43,8 @@ FOdysseyAnimationEditorGUI::~FOdysseyAnimationEditorGUI()
 {
     UOdysseyLayerStack::OnCurrentLayerChanged().RemoveAll( this );
     UOdysseyAnimation::OnCurrentFrameChanged().RemoveAll( this );
-    FOdysseyVectorEngine::OnSignalDelegate().RemoveAll( this );
+    FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll( this );
+    UOdysseyLayer::OnMediaChanged().RemoveAll( this );
 }
 
 FOdysseyAnimationEditorGUI::FOdysseyAnimationEditorGUI(FOdysseyAnimationEditorExtension* iExtension)
@@ -33,9 +54,11 @@ FOdysseyAnimationEditorGUI::FOdysseyAnimationEditorGUI(FOdysseyAnimationEditorEx
 
     UOdysseyAnimation::OnCurrentFrameChanged().AddRaw( this, &FOdysseyAnimationEditorGUI::OnCurrentFrameChanged );
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
-    FOdysseyVectorEngine::OnSignalDelegate().AddRaw( this, &FOdysseyAnimationEditorGUI::OnVectorSceneSignal );
+    FOdysseyVectorEngine::OnNotifyDelegate().AddRaw( this, &FOdysseyAnimationEditorGUI::OnVectorSceneNotify );
     // bind refresh function to delegates on existing vector scenes when the source changes. Needed to refresh necessary widgets.
     mExtension->GetEditor()->OnSourceChanged().AddRaw( this, &FOdysseyAnimationEditorGUI::OnSourceChanged );
+
+    UOdysseyLayer::OnMediaChanged().AddRaw( this, &FOdysseyAnimationEditorGUI::OnMediaChanged );
 }
 
 //--------------------------------------------------------------------------------------
@@ -103,8 +126,59 @@ FOdysseyAnimationEditorGUI::CreateBottomSection()
         );
 } */
 
-//--------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------ Getters
+void
+FOdysseyAnimationEditorGUI::OnMediaChanged()
+{
+    UOdysseyAnimationLayerImageVector* currentVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(mExtension->GetEditor()->LayerStack()->CurrentLayer.Get());
+    uint64 returnFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                       | FOdysseyPainterEditor::UI_UPDATE_HUD;
+    std::list<FOdysseyVectorTagInbetweener*> inbetweenerTagList;
+
+    if( currentVectorLayer )
+    {
+
+        // check the validity of inbetweener tags and prepare a list for processing
+        for( FOdysseyVectorTag* tag : currentVectorLayer->GetSharedEnv()->GetSharedTagList() )
+        {
+            if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+            {
+                FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+                int32 targetCellIndex = inbetweenerTag->GetDrawingBuffer().back().GetCellIndex();
+
+                if( currentVectorLayer->GetCellByIndex( targetCellIndex ) == nullptr )
+                {
+                    inbetweenerTagList.push_back( inbetweenerTag );
+                }
+            }
+        }
+/*
+        //------------- undo ----------------//
+        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.reset-breakdown-layout","Reset Breakdown Layout"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( currentVectorLayer->GetSharedEnv()
+                                                                                         , inbetweenerTagList
+                                                                                         , returnFlags );
+
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+            TSharedPtr<FOdysseyPainterEditorSource> source = mExtension->GetEditor()->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
+        }
+        GEditor->EndTransaction();
+        //---------- end of undo ------------//
+*/
+        // proceed
+        for( FOdysseyVectorTagInbetweener* inbetweenerTag : inbetweenerTagList )
+        {
+            inbetweenerTag->ResetLayout( false );
+            inbetweenerTag->GetBreakdownList().back()->SetTargetDrawingIndex( 1 );
+        }
+    }
+
+    ParseVectorNotifications( nullptr, FOdysseyPainterEditor::UI_UPDATE_TIMELINE );
+}
 
 void
 FOdysseyAnimationEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack )
@@ -117,7 +191,7 @@ FOdysseyAnimationEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerSta
     }
     else
     {
-        ParseVectorSignal( nullptr, FOdysseyVectorEngine::SIGNAL_ALL );
+        ParseVectorNotifications( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
     }
 }
 
@@ -134,11 +208,11 @@ FOdysseyAnimationEditorGUI::OnSourceChanged()
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
-            OnVectorSceneSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
+            OnVectorSceneNotify( vectorScene, FOdysseyVectorEngine::NOTIFY_ALL );
         }
         else
         {
-            ParseVectorSignal( nullptr, FOdysseyVectorEngine::SIGNAL_ALL );
+            ParseVectorNotifications( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
         }
     }
 }
@@ -146,6 +220,10 @@ FOdysseyAnimationEditorGUI::OnSourceChanged()
 void
 FOdysseyAnimationEditorGUI::OnCurrentFrameChanged( UOdysseyAnimation* iAnimation )
 {
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+
     if( mExtension->GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>() )
     {
         TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mExtension->GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
@@ -154,25 +232,27 @@ FOdysseyAnimationEditorGUI::OnCurrentFrameChanged( UOdysseyAnimation* iAnimation
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
 
-            ParseVectorSignal( vectorScene, FOdysseyVectorEngine::SIGNAL_ALL );
+            ParseVectorNotifications( vectorScene, notificationFlags );
+
+            // force redraw after snudging the timeline
+            vectorScene->GetEngine()->Invalidate( 0 );
         }
         else
         {
-            ParseVectorSignal( nullptr, FOdysseyVectorEngine::SIGNAL_ALL );
+            ParseVectorNotifications( nullptr, notificationFlags );
         }
     }
     else
     {
-        ParseVectorSignal( nullptr, FOdysseyVectorEngine::SIGNAL_ALL );
+        ParseVectorNotifications( nullptr, notificationFlags );
     }
 }
 
 void
-FOdysseyAnimationEditorGUI::ParseVectorSignal( FOdysseyVectorGroupPaint* iScene
-                                             , uint64 iSignalFlags )
+FOdysseyAnimationEditorGUI::ParseVectorNotifications( FOdysseyVectorGroupPaint* iScene
+                                                    , uint64 iSignalFlags )
 {
-    if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY )
-     || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED ) )
+    if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW )
     {
         TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
 
@@ -180,32 +260,109 @@ FOdysseyAnimationEditorGUI::ParseVectorSignal( FOdysseyVectorGroupPaint* iScene
 
     }
 
-    if( ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED )
-     || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED    )
-     || ( iSignalFlags & FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED    ) )
+    if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS )
     {
         TSharedPtr<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = mExtension->GetEditor()->FindTab<FOdysseyPainterEditorVectorSceneTreeViewTab>();
 
         vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( iScene );
     }
-}
 
-void
-FOdysseyAnimationEditorGUI::OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags )
-{
-    // layerStack might be NULL when closing the program
-    if( mExtension->GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>() )
+    if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_TIMELINE )
     {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mExtension->GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+        TSharedPtr<FOdysseyAnimationEditorTimelineTab> timelineTab = mExtension->GetEditor()->FindTab<FOdysseyAnimationEditorTimelineTab>();
+        TSharedPtr<SWidgetSwitcher> widgetSwitcher = StaticCastSharedPtr<SWidgetSwitcher>(timelineTab.Get()->Widget());
+        TSharedPtr<SOdysseyAnimationLayerStack> layerStack = StaticCastSharedPtr<SOdysseyAnimationLayerStack>(widgetSwitcher.Get()->GetWidget(0));
+        TSharedPtr<SOdysseyLayerStackTreeView> treeView = layerStack.Get()->GetTreeView();
+        TSharedPtr<SOdysseyAnimationTimelineTreeView> timelineTreeView = layerStack.Get()->GetTimelineTreeView();
+        TArray<UOdysseyLayer*> selectedItemArray;
 
-        if( mediaVectors.Num() )
+        selectedItemArray = treeView.Get()->GetItems();
+
+        for( UOdysseyLayer* layer : selectedItemArray )
         {
-            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+            //treeView.Get()->GenerateNewWidget( layer );
+            TSharedPtr<ITableRow> headerTableRow = treeView.Get()->WidgetFromItem ( layer );
+            TSharedPtr<ITableRow> timelineTableRow = timelineTreeView.Get()->WidgetFromItem ( layer );
 
-            if( iScene == vectorScene )
+            if( headerTableRow.IsValid() )
             {
-                ParseVectorSignal( vectorScene, iSignalFlags );
+                TSharedRef<SWidget> rowWidget = headerTableRow.Get()->AsWidget();
+
+                if( rowWidget.Get().GetType() == "SOdysseyAnimationLayerImageVectorRow" )
+                {
+                    // Update the left part of the timeline
+                    TSharedRef<SOdysseyAnimationLayerImageVectorRow> vectorRowWidget = StaticCastSharedRef<SOdysseyAnimationLayerImageVectorRow>(rowWidget);
+                    vectorRowWidget->GetInbetweeningHeader()->Update();
+                }
+            }
+
+            if( timelineTableRow.IsValid() )
+            {
+                TSharedRef<SWidget> rowWidget = timelineTableRow.Get()->AsWidget();
+
+                if( rowWidget.Get().GetType() == "SOdysseyAnimationLayerImageVectorTimeline" )
+                {
+                       TSharedPtr<SOdysseyAnimationLayerImageVectorTimeline> vectorTimelineWidget = StaticCastSharedRef<SOdysseyAnimationLayerImageVectorTimeline>(rowWidget);
+                    vectorTimelineWidget.Get()->GetInbetweeningListView().Get()->Update();
+                }
             }
         }
     }
+
+    if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_HUD )
+    {
+        if( iScene )
+        {
+            iScene->GetEngine()->ResetHUD();
+        }
+    }
 }
+
+void
+FOdysseyAnimationEditorGUI::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iNotificationFlags )
+{
+    UOdysseyAnimationLayerStack* layerStack = mExtension->LayerStack();
+
+    // layerStack might be NULL when closing the program
+    if( layerStack )
+    {
+        UOdysseyAnimationLayerImageVector* currentVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(layerStack->CurrentLayer.Get());
+
+        if( currentVectorLayer )
+        {
+            int frame = mExtension->Animation()->CurrentFrame;
+            UOdysseyAnimationCell* cell = currentVectorLayer->GetCellAtFrame(frame);
+            if (cell && cell->IsA<UOdysseyAnimationCellImageVector>())
+            {
+                UOdysseyAnimationCellImageVector* cellVector = Cast<UOdysseyAnimationCellImageVector>(cell);
+                FOdysseyVectorEngine* vectorEngine = cellVector->GetEngine();
+                // Note: iScene is ignored. We update the widget according to the current scene if any.
+                FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
+                ParseVectorNotifications( vectorScene, iNotificationFlags );
+                return;
+            }
+        }
+    }
+    // for some reason when Unreal loads, the layerstack is NULL. But the medias exist. So in that case we use
+    // the media provider.
+    else
+    {
+        if( mExtension->GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>() )
+        {
+            TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mExtension->GetEditor()->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+            if( mediaVectors.Num() )
+            {
+                FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+
+                ParseVectorNotifications( vectorScene, iNotificationFlags );
+
+                return;
+            }
+        }
+    }
+
+    ParseVectorNotifications( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
+}
+
+#undef LOCTEXT_NAMESPACE

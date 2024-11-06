@@ -514,7 +514,7 @@ FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iPreviousVertex
 
         mCubicPath->AddSegment( newCubicSegment );
 
-        newCubicSegment->Update();
+        newCubicSegment->Update( 0 );
 
         ClearTo( mBestBezier.lastRecordID, mBestBezier.lastEdgeID );
 

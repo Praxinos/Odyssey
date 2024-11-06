@@ -36,27 +36,53 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBucketView : public UO
         FOdysseyVectorBucket* mBucket;
 
     public:
-        UPROPERTY(EditAnywhere, Category="Bucket")
+        UPROPERTY( EditAnywhere
+                 , Category = "Bucket"
+                 , meta = ( ToolTip  = "Color Mode" ) )
         eBucketColorMode ColorMode;
 
-        UPROPERTY(EditAnywhere,Category="Bucket")
+        UPROPERTY( EditAnywhere
+                 , Category = "Bucket"
+                 , meta = ( ToolTip  = "Spreading Policy" ) )
         eBucketSpreadingPolicy SpreadingPolicy;
 
-        UPROPERTY(EditAnywhere,Category="Bucket", meta = (EditCondition = "(ColorMode == eBucketColorMode::SolidColor)", EditConditionHides))
+        UPROPERTY( EditAnywhere
+                 , Category = "Bucket"
+                 , meta = ( ToolTip  = "Solid Color"
+                          , EditCondition = "(ColorMode == eBucketColorMode::SolidColor)"
+                          , EditConditionHides ) )
         FColor SolidColor;
 
-        UPROPERTY(EditAnywhere,Category="Bucket")
+        UPROPERTY( EditAnywhere
+                 , Category = "Bucket"
+                 , meta = ( ToolTip  = "Rotation"
+                          , EditCondition = "(ColorMode == eBucketColorMode::LinearGradient)"
+                          , EditConditionHides ) )
         double Rotation;
 
-        UPROPERTY(EditAnywhere,Category="Bucket")
+        UPROPERTY( EditAnywhere
+                 , Category = "Bucket"
+                 , meta = ( ToolTip  = "Propagated" ) )
         bool Propagated;
 
-        UPROPERTY(EditAnywhere,Category="Bucket", meta = (EditCondition = "(ColorMode == eBucketColorMode::LinearGradient) || (ColorMode == eBucketColorMode::RadialGradient)", EditConditionHides))
+        UPROPERTY( EditAnywhere
+                 , Category = "Bucket"
+                 , meta = ( ToolTip  = "Gradient Color 0"
+                          , EditCondition = "(ColorMode == eBucketColorMode::LinearGradient) || (ColorMode == eBucketColorMode::RadialGradient)"
+                          , EditConditionHides ) )
         FColor GradientColor0;
 
-        UPROPERTY(EditAnywhere,Category="Bucket", meta = (EditCondition = "(ColorMode == eBucketColorMode::LinearGradient) || (ColorMode == eBucketColorMode::RadialGradient)", EditConditionHides))
+        UPROPERTY( EditAnywhere
+                 , Category = "Bucket"
+                 , meta = ( ToolTip  = "Gradient Color 1"
+                          , EditCondition = "(ColorMode == eBucketColorMode::LinearGradient) || (ColorMode == eBucketColorMode::RadialGradient)"
+                          , EditConditionHides ) )
         FColor GradientColor1;
 
-        UPROPERTY(EditAnywhere,Category="Bucket")
+        UPROPERTY( EditAnywhere
+                 , Category = "Bucket"
+                 , meta = ( ToolTip  = "Radial Radius"
+                          , EditCondition = "(ColorMode == eBucketColorMode::RadialGradient)"
+                          , EditConditionHides ) )
         double RadialRadius; // radius in radial mode
 };

@@ -8,8 +8,6 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineSection.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
-#include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "OdysseyPainterEditor.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
@@ -226,12 +224,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
 
     ChildSlot
     [
-        SNew(SOdysseyAnimationTimelineScrollBox)
-        .TimelinePosition(InArgs._TimelinePosition)
-        + SOdysseyAnimationTimelineScrollBox::Slot()
-        [
-            horizontalBox
-        ]
+        horizontalBox
     ];
 
     Update();

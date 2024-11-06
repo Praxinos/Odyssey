@@ -11,12 +11,15 @@
 
 #include "OdysseyVectorBrush.h"
 #include "OdysseyVectorPath.h"
+#include "OdysseyVectorTagInbetweener.h"
 
 class FOdysseyVectorPoint;
 class FOdysseyVectorObject;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorVertex;
 class FOdysseyVectorSegmentCubic;
+class FOdysseyVectorTagInbetweener;
+class FOdysseyVectorSharedEnv;
 
 namespace FSnapshotFlags
 {
@@ -67,6 +70,56 @@ namespace FSnapshotFlags
         }
 
         //static const uint32 SNAPSHOT_ALL = 0xFFFFFFFFFFFFFFFFULL;
+    }
+
+    namespace Trajectory
+    {
+        static const uint64 BEZIER    = ( 1ULL <<  0 );
+        static const uint64 WAYPOINTS = ( 1ULL <<  1 );
+    }
+
+    namespace Route
+    {
+        static const uint64 TRAJECTORIES = ( 1ULL <<  0 );
+        static const uint64 STEPS        = ( 1ULL <<  1 );
+    }
+
+    namespace Breakdown
+    {
+        static const uint64 GRIDGEOMETRY    = ( 1ULL <<  0 );
+        static const uint64 TRANSFORMATIONS = ( 1ULL <<  1 );
+        static const uint64 CHART           = ( 1ULL <<  2 );
+    }
+
+    namespace Chart
+    {
+        static const uint64 SPACING = ( 1ULL <<  1 );
+        static const uint64 BEZIER  = ( 1ULL <<  2 );
+    }
+
+    namespace Tag
+    {
+        namespace Inbetweener
+        {
+            static const uint64 GRIDSIZE          = ( 1ULL <<  0 );
+            static const uint64 GRIDTYPE          = ( 1ULL <<  1 );
+            static const uint64 BREAKDOWNS        = ( 1ULL <<  2 );
+            static const uint64 ROUTES            = ( 1ULL <<  3 );
+            static const uint64 INTERPOLATIONTYPE = ( 1ULL <<  4 );
+            static const uint64 ARAPRIGIDITY      = ( 1ULL <<  5 );
+            static const uint64 COLOR             = ( 1ULL <<  6 );
+            static const uint64 MAPASPOLYLINE     = ( 1ULL <<  7 );
+            static const uint64 SQUARE            = ( 1ULL <<  8 );
+            static const uint64 WITHTHICKNESS     = ( 1ULL <<  9 );
+            static const uint64 PARAM             = ( GRIDSIZE
+                                                    | GRIDTYPE
+                                                    | INTERPOLATIONTYPE
+                                                    | ARAPRIGIDITY
+                                                    | COLOR
+                                                    | MAPASPOLYLINE
+                                                    | SQUARE
+                                                    | WITHTHICKNESS );
+        }
     }
 
     namespace Object
@@ -186,6 +239,267 @@ class ODYSSEYVECTOR_API FSnapshotSegmentCubic
         ULIS::FVec2D mHandleCoords[2];
 };
 
+class ODYSSEYVECTOR_API FSnapshotTrajectory
+{
+    struct State
+    {
+        bool inited;
+        ::ULIS::FVec2D handleDirection[2];
+        double handleLengthRatio[2];
+        std::vector<float> waypointSpacingBuffer;
+
+        State() { inited = false; }
+    };
+
+    public:
+        virtual ~FSnapshotTrajectory();
+        FSnapshotTrajectory( FInbetweenerTrajectory* iTrajectory, uint64 iSnapshotFlags );
+
+        void RecordAlteredState();
+        bool LoadInitialState();
+        bool LoadAlteredState();
+
+    protected:
+        void RecordLocalState( State* iState );
+        bool LoadState( State* iState );
+
+        static void WaypointSpacingToArray( FInbetweenerTrajectory* iTrajectory
+                                          , std::vector<float>& oSpacingBuffer );
+
+    protected:
+        uint64 mSnapshotFlags;
+        FInbetweenerRoute* mRoute;
+        uint32 mIndex;
+        State mInitialState;
+        State mAlteredState;
+};
+
+class ODYSSEYVECTOR_API FSnapshotStep
+{
+    struct State
+    {
+        bool inited;
+        bool aligned;
+
+        State() { inited = false; }
+    };
+
+    public:
+        virtual ~FSnapshotStep();
+        FSnapshotStep( FInbetweenerStep* iStep );
+
+        void RecordAlteredState();
+        bool LoadInitialState();
+        bool LoadAlteredState();
+
+    protected:
+        void RecordLocalState( State* iState );
+        bool LoadState( State* iState );
+
+    protected:
+        FInbetweenerRoute* mRoute;
+        uint32 mIndex;
+        State mInitialState;
+        State mAlteredState;
+};
+
+class ODYSSEYVECTOR_API FSnapshotRoute
+{
+    public:
+        virtual ~FSnapshotRoute();
+        FSnapshotRoute( FInbetweenerRoute* iRoute
+                      , uint64 iSnapshotflags
+                      , uint64 iTrajectorySnapshotflags );
+
+        void RecordAlteredState();
+        bool LoadInitialState();
+        bool LoadAlteredState();
+
+    protected:
+        FInbetweenerRoute* mRoute;
+        uint64 mSnapshotFlags;
+        std::vector<FSnapshotTrajectory> mTrajectorySnapshotBuffer;
+        std::vector<FSnapshotStep> mStepSnapshotBuffer;
+};
+
+class ODYSSEYVECTOR_API FSnapshotLayout
+{
+    struct State
+    {
+        bool inited;
+        std::vector<FInbetweenerBreakdown*> breakdownArray;
+        std::vector<uint32> targetBuffer;
+
+        State() { inited = false; }
+    };
+
+    public:
+        ~FSnapshotLayout();
+        FSnapshotLayout();
+        FSnapshotLayout( FOdysseyVectorTagInbetweener* iInbetweenerTag );
+
+        void RecordAlteredState();
+        bool LoadInitialState();
+        bool LoadAlteredState();
+
+    protected:
+        void RecordLocalState( State* iState );
+        bool LoadState( State* iState );
+
+    protected:
+        FOdysseyVectorTagInbetweener* mInbetweenerTag;
+        State mInitialState;
+        State mAlteredState;
+};
+
+class ODYSSEYVECTOR_API FSnapshotDynamics
+{
+    struct State
+    {
+        bool inited;
+        std::vector<FInbetweenerRoute*> routeArray;
+
+        State() { inited = false; }
+    };
+
+    public:
+        ~FSnapshotDynamics();
+        FSnapshotDynamics();
+        FSnapshotDynamics( FOdysseyVectorTagInbetweener* iInbetweenerTag );
+
+        void RecordAlteredState();
+        bool LoadInitialState();
+        bool LoadAlteredState();
+
+    protected:
+        void RecordLocalState( State* iState );
+        bool LoadState( State* iState );
+
+    protected:
+        bool bApplied;
+        FOdysseyVectorTagInbetweener* mInbetweenerTag;
+        State mInitialState;
+        State mAlteredState;
+};
+
+class ODYSSEYVECTOR_API FSnapshotInbetweenerChart
+{
+    struct State
+    {
+        bool inited;
+        std::vector<float> spacing;
+        ::ULIS::FVec2D HUDBezier[3];
+
+        State() { inited = false; }
+    };
+
+    public:
+        ~FSnapshotInbetweenerChart();
+        FSnapshotInbetweenerChart();
+        FSnapshotInbetweenerChart( FInbetweenerChart* iChart
+                                 , uint64 iSnapshotFlags );
+
+        void RecordAlteredState();
+        bool LoadInitialState();
+        bool LoadAlteredState();
+
+    protected:
+        void RecordLocalState( State* iState );
+        bool LoadState( State* iState );
+
+    protected:
+        uint64 mSnapshotFlags;
+        FInbetweenerChart* mChart;
+        State mInitialState;
+        State mAlteredState;
+};
+
+class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
+{
+    struct State
+    {
+        bool inited;
+        std::vector<::ULIS::FVec2D> gridGeometry;
+        double translationX;
+        double translationY;
+        double rotation;
+        double scalingX;
+        double scalingY;
+
+        State() { inited = false; }
+    };
+
+    public:
+        virtual ~FSnapshotInbetweenerBreakdown();
+        FSnapshotInbetweenerBreakdown( FInbetweenerBreakdown* iBreakdown
+                                     , uint64 iSnapshotFlags );
+
+        void RecordAlteredState();
+        bool LoadInitialState();
+        bool LoadAlteredState();
+
+    protected:
+        void RecordLocalState( State* iState );
+        bool LoadState( State* iState );
+
+    protected:
+        uint64 mSnapshotFlags;
+        FInbetweenerBreakdown* mBreakdown;
+        FSnapshotInbetweenerChart mChartSnapshot;
+        State mInitialState;
+        State mAlteredState;
+};
+
+class ODYSSEYVECTOR_API FSnapshotTagInbetweener
+{
+    struct State
+    {
+        bool inited;
+        uint32 drawingCount;
+        eInbetweenerGridType gridType;
+        eInbetweenerInterpolationType interpolationType;
+        eInbetweenerInterpolationDirection interpolationDirection;
+        uint32 gridSizeX;
+        uint32 gridSizeY;
+        uint32 ARAPRigidity;
+        FColor inbetweenColor;
+        FColor chartColor;
+        FColor gridColor;
+        FColor trajectoryColor;
+        bool mapAsPolyline;
+        bool square;
+        bool withThickness;
+
+        State() { inited = false; }
+    };
+
+    public:
+        virtual ~FSnapshotTagInbetweener();
+        FSnapshotTagInbetweener( FOdysseyVectorTagInbetweener* iObject
+                               , uint64 iSnapshotFlags
+                               , uint64 iBreakdownSnapshotFlags
+                               , uint64 iRouteSnapshotFlags
+                               , uint64 iTrajectorySnapshotFlags );
+
+        void RecordAlteredState();
+        bool LoadInitialState();
+        bool LoadAlteredState();
+
+    protected:
+        void RecordLocalState( State* iState );
+        bool LoadLocalState( State* iState );
+
+    protected:
+        uint64 mSnapshotFlags;
+        FOdysseyVectorTagInbetweener* mInbetweenerTag;
+        FSnapshotLayout mLayoutSnapshot;
+        FSnapshotDynamics mDynamicsSnapshot;
+        std::vector<FSnapshotInbetweenerBreakdown> mInbetweenerBreakdownSnapshotBuffer;
+        std::vector<FSnapshotRoute> mRouteSnapshotBuffer;
+        State mInitialState;
+        State mAlteredState;
+};
+
 class ODYSSEYVECTOR_API FSnapshotObject
 {
     public:
@@ -255,8 +569,17 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
 {
     public:
         ~FOdysseyVectorUndo();
-        FOdysseyVectorUndo( FOdysseyVectorGroupPaint* iScene );
+        FOdysseyVectorUndo( FOdysseyVectorSharedEnv* iSharedEnv, uint64 iReturnFlags );
 
+    protected:
+        static void GetEngineListFromObjectList( const std::list<FOdysseyVectorObject*>& iObjectList
+                                               , std::list<FOdysseyVectorEngine*>& oEngineList );
+        static void GetEngineListFromInbetweenerTagList( const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                       , std::list<FOdysseyVectorEngine*>& oEngineList );
+        static void GetEngineListFromInbetweenerTagArray( const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
+                                                        , std::list<FOdysseyVectorEngine*>& oEngineList );
+        static void GetEngineListFromTagList( const std::list<FOdysseyVectorTag*>& iTagList
+                                            , std::list<FOdysseyVectorEngine*>& oEngineList );
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
 
@@ -266,7 +589,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
         /** Describes this change (for debugging) */
         //virtual FString ToString() const override;
 
+        void InvalidateEngineList( uint64 iInvalidationFlags );
+
     protected:
         bool mApplied;
-        FOdysseyVectorGroupPaint* mScene;
+        std::list<FOdysseyVectorEngine*> mEngineList; // list of engines that need to be redrawn
+        FOdysseyVectorSharedEnv* mSharedEnv;
+        uint64 mReturnFlags;
 };

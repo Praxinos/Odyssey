@@ -4,8 +4,20 @@
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
-#include "OdysseyVector.h"
+
 #include "Export/v2/OdysseyVectorExport.h"
+
+class FOdysseyVectorObject;
+class FOdysseyVectorGroup;
+class FOdysseyVectorGroupPaint;
+class FOdysseyVectorTagInbetweener;
+class FInbetweenerRoute;
+class FInbetweenerBreakdown;
+class FInbetweenerTrajectory;
+class FOdysseyVectorBucket;
+struct FOdysseyVectorBrush;
+class FOdysseyVectorVertex;
+class FOdysseyVectorPath;
 
 class ODYSSEYVECTOR_API FOdysseyVectorImportV2
 {
@@ -53,7 +65,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorImportV2
                                       , FArchive &Ar );
     void ReadObjectBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar );
     void ReadObjectTransform( FOdysseyVectorObject& iObject, uint64 iChunkEnd, FArchive &Ar );
-    void ReadScene( FOdysseyVectorGroupPaint& iScene, uint64 iChunkEnd, FArchive &Ar );
+    void ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                           , uint64 iChunkEnd
+                           , FArchive &Ar );
+
+    void ReadRoute( FInbetweenerRoute& iRoute
+                  , uint64 iChunkEnd
+                  , FArchive &Ar );
+
+    void ReadTrajectory( FInbetweenerTrajectory& iTrajectory
+                       , uint64 iChunkEnd
+                       , FArchive &Ar );
+    void ReadBreakdown( FInbetweenerBreakdown& iBreakdown
+                      , uint64 iChunkEnd
+                      , FArchive &Ar );
 
     private:
         std::vector<FOdysseyVectorObject*> mObjectArray;

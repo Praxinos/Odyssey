@@ -5,19 +5,12 @@
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
 
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorVertex.h"
+#include "OdysseyVectorSegmentCubic.h"
+
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathDrawingToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
-    private:
-        double mX;
-        double mY;
-        std::vector<FOdysseyVectorPoint*> mStitchedPointArray;
-        UOdysseyPainterEditorVectorPathDrawingTool* mPathDrawingTool;
-
-        void DrawEdge( BLContext* iBLContext
-                     , FTracerEdge* iPrevEdge
-                     , FTracerEdge* iCurrEdge
-                     , FTracerEdge* iNextEdge );
-
     public:
         virtual ~FOdysseyPainterEditorVectorPathDrawingToolHUD();
 
@@ -30,4 +23,19 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathDrawingToolHUD : p
 
         bool SetCursorPosition( double iX, double iY );
         std::vector<FOdysseyVectorPoint*>& GetStitchedPointArray();
+
+    private:
+        void DrawEdge( BLContext* iBLContext
+                     , FTracerEdge* iPrevEdge
+                     , FTracerEdge* iCurrEdge
+                     , FTracerEdge* iNextEdge );
+
+    private:
+        double mX;
+        double mY;
+        std::vector<FOdysseyVectorPoint*> mStitchedPointArray;
+        UOdysseyPainterEditorVectorPathDrawingTool* mPathDrawingTool;
+        FOdysseyVectorObject mOwnerObject;
+        FOdysseyVectorVertex mVertex[2];
+        FOdysseyVectorSegmentCubic mCubicSegment;
 };

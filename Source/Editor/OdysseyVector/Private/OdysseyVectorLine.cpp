@@ -53,7 +53,7 @@ FOdysseyVectorLine::UpdateShape( uint32 iUpdateFlags )
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorLine::CopyShape()
+FOdysseyVectorLine::CopyShape( uint64 iCopyFlags )
 {
     FOdysseyVectorLine* lineCopy = new FOdysseyVectorLine( mName
                                                          , mWidth
@@ -86,7 +86,7 @@ FOdysseyVectorLine::SetSize( double iWidth, double iHeight )
     mBBox.w = mWidth  + mStrokeWidth;
     mBBox.h = mHeight + mStrokeWidth;
 
-    Invalidate();
+    Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
 }
 
 double FOdysseyVectorLine::GetWidth()

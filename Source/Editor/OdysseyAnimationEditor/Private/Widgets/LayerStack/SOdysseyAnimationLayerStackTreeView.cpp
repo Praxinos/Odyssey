@@ -25,6 +25,7 @@ SOdysseyAnimationLayerStackTreeView::Construct(const FArguments& InArgs)
     mTimelinePosition = InArgs._TimelinePosition;
 
     mLayerStack = InArgs._LayerStack;
+    mEditor = InArgs._PainterEditor;
 
     mTimelineShortcuts = MakeShared<FOdysseyAnimationTimelineShortcuts>(mLayerStack);
 
@@ -78,6 +79,7 @@ SOdysseyAnimationLayerStackTreeView::OnGenerateRow(UOdysseyLayer* iLayer, const 
     else if (layerClass == UOdysseyAnimationLayerImageVector::StaticClass())
     {
         return SNew(SOdysseyAnimationLayerImageVectorRow, SharedThis(this), Cast<UOdysseyAnimationLayerImageVector>(iLayer))
+            .PainterEditor(mEditor)
             .TimelinePosition(mTimelinePosition);
     }
 

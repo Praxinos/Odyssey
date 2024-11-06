@@ -5,12 +5,11 @@
 
 #include "CoreMinimal.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
-#include "OdysseyVector.h"
-#include "Undo/OdysseyVectorUndoSegmentReshape.h"
 
 #include "OdysseyPainterEditorVectorPathSmoothTool.generated.h"
 
 class FOdysseyPainterEditorVectorPathSmoothToolHUD;
+class FOdysseyVectorUndoSegmentReshape;
 
 UENUM()
 enum class ePathSmoothingMode : uint8

@@ -1,5 +1,6 @@
 #include "Undo/OdysseyVectorUndoPathStitch.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoPathStitch::~FOdysseyVectorUndoPathStitch()
 {
@@ -33,14 +34,16 @@ FOdysseyVectorUndoPathStitch::FOdysseyVectorUndoPathStitch( FOdysseyVectorGroupP
                                                           , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                                           , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
                                                           , std::vector<FOdysseyVectorVertex*>& iMergedVertexArray
-                                                          , std::vector<FOdysseyVectorSegment*>& iMergedSegmentArray )
+                                                          , std::vector<FOdysseyVectorSegment*>& iMergedSegmentArray
+                                                          , uint64 iReturnFlags )
     : FOdysseyVectorUndoPathAlter( iScene
                                  , iRemovedPathArray
                                  , iRemovedVertexArray
                                  , iRemovedSegmentArray
                                  , iAddedPathArray
                                  , iAddedVertexArray
-                                 , iAddedSegmentArray )
+                                 , iAddedSegmentArray
+                                 , iReturnFlags )
 {
     mMergedVertexArray = iMergedVertexArray;
     mMergedSegmentArray = iMergedSegmentArray;
@@ -63,15 +66,12 @@ FOdysseyVectorUndoPathStitch::Apply( UObject* iIgnored )
 
     FOdysseyVectorUndoPathAlter::Apply( iIgnored );
 
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 void
@@ -90,15 +90,12 @@ FOdysseyVectorUndoPathStitch::Revert( UObject* iIgnored )
     }
 
     // Update the bbox
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

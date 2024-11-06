@@ -55,6 +55,7 @@ SOdysseyAnimationLayerStack::Construct(const FArguments& InArgs)
     mOnInactivateOutOfPegs = InArgs._OnInactivateOutOfPegs;
     mOnIsOutOfPegsChecked = InArgs._OnIsOutOfPegsChecked;
     mCustomValidRange = InArgs._CustomValidRange;
+    mEditor = InArgs._PainterEditor;
 
     RebuildWidgets();
 }
@@ -115,6 +116,7 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
         )
         [
             SAssignNew(mTreeView, SOdysseyAnimationLayerStackTreeView)
+            .PainterEditor(mEditor)
             .LayerStack(layerStack)
             .TimelinePosition(mTimelinePosition.Get())
             .ExternalScrollbar(mTimelineScrollBarV)
@@ -132,6 +134,7 @@ SOdysseyAnimationLayerStack::RebuildWidgets()
                 .CustomValidRange(mCustomValidRange)
                 [
                     SAssignNew(mTimelineTreeView, SOdysseyAnimationTimelineTreeView)
+                    .PainterEditor(mEditor)
                     .LayerStack(layerStack)
                     .Player(mPlayer.Get())
                     .TimelinePosition(mTimelinePosition.Get())
@@ -208,6 +211,12 @@ TSharedPtr<SOdysseyLayerStackTreeView>
 SOdysseyAnimationLayerStack::GetTreeView() const
 {
     return mTreeView;
+}
+
+TSharedPtr<SOdysseyAnimationTimelineTreeView>
+SOdysseyAnimationLayerStack::GetTimelineTreeView() const
+{
+    return mTimelineTreeView;
 }
 
 void

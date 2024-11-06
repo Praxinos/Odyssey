@@ -28,7 +28,7 @@ FOdysseyVectorSegmentCubicGap::HasBaseClass( uint32 iBaseClassID )
 }
 
 void
-FOdysseyVectorSegmentCubicGap::Update()
+FOdysseyVectorSegmentCubicGap::Update( uint32 iUpdateFlags )
 {
     FOdysseyVectorPath* vertex0Path = static_cast<FOdysseyVectorVertex*>(mPoint[0])->GetOwnerAsPath();
     FOdysseyVectorPath* vertex1Path = static_cast<FOdysseyVectorVertex*>(mPoint[1])->GetOwnerAsPath();
@@ -39,7 +39,7 @@ FOdysseyVectorSegmentCubicGap::Update()
     BLPoint pt;
 
     // sets mBezier[4]
-    FOdysseyVectorSegmentCubic::Update();
+    FOdysseyVectorSegmentCubic::Update( iUpdateFlags );
 
     FOdysseyVector::MatrixMultiply( paingroupInverseworldMatrix
                                   , vertex0PathWorldMatrix

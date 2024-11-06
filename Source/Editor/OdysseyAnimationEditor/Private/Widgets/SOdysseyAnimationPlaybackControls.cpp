@@ -8,6 +8,7 @@
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
 
 void
 SOdysseyAnimationPlaybackControls::Construct(const FArguments& InArgs)
