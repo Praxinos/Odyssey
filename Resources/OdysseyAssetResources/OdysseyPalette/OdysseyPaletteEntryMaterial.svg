@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 128 128">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+        isolation: isolate;
+      }
+
+      .cls-1, .cls-2 {
+        opacity: .5;
+      }
+
+      .cls-3 {
+        fill: none;
+        stroke: #c4c4c4;
+        stroke-miterlimit: 10;
+        stroke-width: 9px;
+      }
+    </style>
+  </defs>
+  <!-- Generator: Adobe Illustrator 28.7.1, SVG Export Plug-In . SVG Version: 1.2.0 Build 142)  -->
+  <g>
+    <g id="Calque_1">
+      <g id="Calque_1-2" data-name="Calque_1">
+        <g id="Calque_1-2">
+          <g class="cls-2">
+            <path class="cls-1" d="M25,33.4h8.5v-8.5c-3.1,2.3-6.2,5.4-8.5,8.5Z"/>
+            <path class="cls-1" d="M14.2,64.1c0,11.6,3.8,22.3,10.7,30.8h8.5v-30.8s-19.2,0-19.2,0Z"/>
+            <path class="cls-1" d="M33.4,103.3c8.5,6.9,19.2,10.7,30.8,10.7v-19.2h-30.8v8.5Z"/>
+            <path class="cls-1" d="M94.8,25c-8.5-6.9-19.2-10.7-30.8-10.7v19.2h30.8v-8.5Z"/>
+            <rect class="cls-1" x="33.4" y="33.4" width="30.8" height="30.8"/>
+            <path class="cls-1" d="M103.3,33.4h-8.5v30.8h19.2c0-11.6-3.8-22.3-10.7-30.8Z"/>
+            <rect class="cls-1" x="64.1" y="64.1" width="30.8" height="30.8"/>
+            <rect class="cls-1" x="94.8" y="94.8" width="9.6" height="9.6"/>
+          </g>
+          <circle class="cls-3" cx="64.1" cy="64.1" r="54"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

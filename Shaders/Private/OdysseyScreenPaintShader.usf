@@ -1,0 +1,61 @@
+#include "/Engine/Private/common.ush"
+
+Texture2D s_Stroke2D;
+SamplerState s_TextureSampler;
+
+float4x4 c_WorldToBrushMatrix;
+float2 c_TextureHitPoint;
+float c_StampQuality;
+
+float3 c_xScreenAxis;
+float3 c_yScreenAxis;
+
+void MainPS( float4 InPosition : SV_POSITION,
+		   float2 InCloneTextureCoordinates : TEXCOORD0,
+		   float3 InWorldSpaceVertexPosition : TEXCOORD1,
+		   out float4 OutColor : SV_Target0)
+{
+    float heightStroke = 0;
+    float widthStroke = 0;
+    float numberLODsStroke = 0;
+    s_Stroke2D.GetDimensions(0, widthStroke, heightStroke, numberLODsStroke);
+	widthStroke = widthStroke / c_StampQuality;
+	heightStroke = heightStroke / c_StampQuality;
+	
+	float4x4 WorldToBrushMatrix = c_WorldToBrushMatrix;
+
+	// Project the pixel into the plane of the brush
+	float3 WorldSpaceVertexPosition = InWorldSpaceVertexPosition;
+    
+    // BrushSpaceVertexPosition = (x,y,z) on all points on mesh, where x, y and z equal to the difference in world between impact point and point on mesh
+	float3 BrushSpaceVertexPosition = mul(float4( WorldSpaceVertexPosition, 1.0f ), WorldToBrushMatrix).xyz;
+    
+	float stampPosX = 0.5 + (c_xScreenAxis.x * BrushSpaceVertexPosition.x + c_xScreenAxis.y * BrushSpaceVertexPosition.y + c_xScreenAxis.z * BrushSpaceVertexPosition.z) / widthStroke;
+	float stampPosY = 0.5 + (c_yScreenAxis.x * BrushSpaceVertexPosition.x + c_yScreenAxis.y * BrushSpaceVertexPosition.y + c_yScreenAxis.z * BrushSpaceVertexPosition.z) / heightStroke;
+
+	OutColor = float4( 0.f, 0.f, 0.f, 0.f);
+	if( stampPosX >= 0 && stampPosX <= 1 && stampPosY >= 0 && stampPosY <= 1 )
+	{
+		OutColor = Texture2DSample(s_Stroke2D, s_TextureSampler, float2(stampPosX, stampPosY));
+	}
+}
+
+
+float4x4 c_Transform;
+
+void MainVS( float4 InPosition : ATTRIBUTE0,
+		   float2 InCloneTextureCoordinates : ATTRIBUTE2,
+		   float3 InWorldSpaceVertexPosition : ATTRIBUTE3,
+		   out float4 OutPosition : SV_POSITION,
+		   out float2 OutCloneTextureCoordinates: TEXCOORD0,
+		   out float3 OutWorldSpaceVertexPosition : TEXCOORD1 )
+{
+	// Position (on texture map, derived from the UVs of the original mesh)
+	OutPosition = mul( InPosition, c_Transform );
+
+	// Pass clone texture coordinates through to the pixel shader
+	OutCloneTextureCoordinates = InCloneTextureCoordinates;
+
+	// Position of this vertex in world space (original mesh)
+	OutWorldSpaceVertexPosition = InWorldSpaceVertexPosition;
+}

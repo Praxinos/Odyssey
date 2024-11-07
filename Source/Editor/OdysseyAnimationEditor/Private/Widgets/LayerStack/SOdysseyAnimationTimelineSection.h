@@ -1,0 +1,39 @@
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Widgets/LayerStack/SOdysseyAnimationLayerStack.h"
+
+class FOdysseyAnimationEditorExtension;
+class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineSection
+    : public SCompoundWidget
+{
+public:
+    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineSection)
+        : _HAlign(HAlign_Fill)
+        , _VAlign(VAlign_Fill)
+    {}
+        SLATE_DEFAULT_SLOT( FArguments, Content )
+        SLATE_ATTRIBUTE(float, WidthInFrames)
+        SLATE_ARGUMENT(EHorizontalAlignment, HAlign)
+        SLATE_ARGUMENT(EVerticalAlignment, VAlign)
+    SLATE_END_ARGS()
+
+public:
+    void Construct(const FArguments& iArgs, FOdysseyAnimationEditorExtension* iExtension );
+
+public:
+    FOdysseyAnimationEditorExtension* GetExtension() const;
+    void SetContent(TSharedPtr<SWidget> iContent);
+
+private:
+    virtual FOptionalSize GetSectionWidth() const;
+
+private:
+    FOdysseyAnimationEditorExtension* mExtension;
+    TAttribute<float> mWidthInFrames;
+    TAttribute<float> mHeightInScreenUnits;
+    TSharedPtr<SBox> mBox;
+};

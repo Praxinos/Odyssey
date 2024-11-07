@@ -1,0 +1,132 @@
+#include "Undo/OdysseyVectorUndoPathEdit.h"
+
+#include "OdysseyVectorEngine.h"
+
+FOdysseyVectorUndoPathEdit::~FOdysseyVectorUndoPathEdit()
+{
+    if( mApplied )
+    {
+        // nothing to do
+    }
+    else
+    {
+        // nothing to do
+    }
+}
+
+bool
+FOdysseyVectorUndoPathEdit::HasRecordedVertex( FOdysseyVectorVertex* iVertex )
+{
+    for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
+    {
+        if( mVertexSnapshotArray[i].GetVertex() == iVertex )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool
+FOdysseyVectorUndoPathEdit::HasRecordedSegment( FOdysseyVectorSegment* iSegment )
+{
+    if( iSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+    {
+        for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
+        {
+            if( mCubicSegmentSnapshotArray[i].GetCubicSegment() == iSegment )
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+FOdysseyVectorUndoPathEdit::FOdysseyVectorUndoPathEdit( FOdysseyVectorGroupPaint* iScene
+                                                      , const std::vector<FOdysseyVectorVertex*>& iEditedVertexArray
+                                                      , const std::vector<FOdysseyVectorSegment*>& iEditedSegmentArray )
+    : FOdysseyVectorUndo( iScene )
+{
+    mVertexSnapshotArray.reserve( iEditedVertexArray.size() );
+    mCubicSegmentSnapshotArray.reserve( iEditedSegmentArray.size() );
+
+    for( FOdysseyVectorVertex* vertex : iEditedVertexArray )
+    {
+        mVertexSnapshotArray.push_back( FSnapshotVertex( vertex
+                                                        , FSnapshotFlags::Point::POSITION
+                                                        | FSnapshotFlags::Point::Vertex::RADIUS
+                                                        | FSnapshotFlags::Point::Vertex::ALIGNMENT ) );
+    }
+
+    for( FOdysseyVectorSegment* segment : iEditedSegmentArray )
+    {
+        if( segment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
+        {
+            FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
+
+            mCubicSegmentSnapshotArray.push_back( FSnapshotSegmentCubic( cubicSegment, FSnapshotFlags::Segment::Cubic::HANDLES ));
+        }
+    }
+}
+
+void
+FOdysseyVectorUndoPathEdit::Apply( UObject* iIgnored )
+{
+    // call method from base class
+    FOdysseyVectorUndo::Apply( iIgnored );
+
+    for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
+    {
+        mVertexSnapshotArray[i].Restore();
+    }
+
+    for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
+    {
+        mCubicSegmentSnapshotArray[i].Restore();
+    }
+
+    // update invalidated objects
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+    mScene->GetEngine()->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
+                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+}
+
+void
+FOdysseyVectorUndoPathEdit::Revert( UObject* iIgnored )
+{
+    // call method from base class
+    FOdysseyVectorUndo::Revert( iIgnored );
+
+    for( int i = 0; i < mVertexSnapshotArray.size(); i++ )
+    {
+        mVertexSnapshotArray[i].Restore();
+    }
+
+    for( int i = 0; i < mCubicSegmentSnapshotArray.size(); i++ )
+    {
+        mCubicSegmentSnapshotArray[i].Restore();
+    }
+
+    // update invalidated objects
+    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+
+    mScene->GetEngine()->ResetHUD();
+    // call callbacks if any (for refreshing GUI e.g)
+    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
+                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
+                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+}
+
+/** Describes this change (for debugging) */
+FString
+FOdysseyVectorUndoPathEdit::ToString() const
+{
+    return FString("FOdysseyVectorUndoPathEdit");
+}

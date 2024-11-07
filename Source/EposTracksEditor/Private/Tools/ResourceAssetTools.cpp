@@ -44,7 +44,7 @@
 //        return;
 //
 //    TArray<FName> sources;
-//    sources.Add( "/Epos/BP_Plane" );
+//    sources.Add( "/Odyssey/BP_Plane" );
 //    //for( auto source : sources )
 //    //{
 //    //    FString SrcFilename;
@@ -335,7 +335,7 @@ MasterAssetTools::CreateMasterTexture2D( const IMovieScenePlayer& iPlayer, UMovi
     if( texture_master )
         return texture_master;
 
-    UTexture2D* texture_root = LoadObject<UTexture2D>( nullptr, TEXT( "/Epos/T_Transparent" ) );
+    UTexture2D* texture_root = LoadObject<UTexture2D>( nullptr, TEXT( "/Odyssey/T_Transparent" ) );
     if( !texture_root )
         return nullptr;
 
@@ -400,7 +400,7 @@ MasterAssetTools::CreateMasterMaterial( const IMovieScenePlayer& iPlayer, UMovie
     if( material_master )
         return material_master;
 
-    UMaterial* material_root = LoadObject<UMaterial>( nullptr, TEXT( "/Epos/M_Plane.M_Plane" ) );
+    UMaterial* material_root = LoadObject<UMaterial>( nullptr, TEXT( "/Odyssey/M_Plane.M_Plane" ) );
     if( !material_root )
         return nullptr;
 

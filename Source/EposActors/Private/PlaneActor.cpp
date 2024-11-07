@@ -18,7 +18,7 @@ APlaneActor::APlaneActor( const FObjectInitializer& ObjectInitializer )
     GetStaticMeshComponent()->Mobility = EComponentMobility::Movable;
     SetActorHiddenInGame( true );
 
-    UStaticMesh* plane_mesh = LoadObject<UStaticMesh>( nullptr, TEXT( "/Epos/S_1_Unit_Plane.S_1_Unit_Plane" ) );
+    UStaticMesh* plane_mesh = LoadObject<UStaticMesh>( nullptr, TEXT( "/Odyssey/S_1_Unit_Plane.S_1_Unit_Plane" ) );
     check( plane_mesh );
     GetStaticMeshComponent()->SetStaticMesh( plane_mesh );
 }

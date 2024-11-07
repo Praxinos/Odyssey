@@ -63,7 +63,7 @@ SAboutWindow::OnClose()
 void
 SAboutWindow::Construct( const FArguments& iArgs )
 {
-    TSharedPtr<IPlugin> plugin = IPluginManager::Get().FindPlugin( FString( "Epos" ) );
+    TSharedPtr<IPlugin> plugin = IPluginManager::Get().FindPlugin( FString( "Odyssey" ) );
     const FPluginDescriptor& pluginDescriptor = plugin->GetDescriptor();
     FString version = pluginDescriptor.VersionName;
     if( pluginDescriptor.bIsBetaVersion )

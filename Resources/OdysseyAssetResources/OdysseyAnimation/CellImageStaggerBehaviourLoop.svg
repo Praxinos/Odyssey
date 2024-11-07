@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 256 256">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <!-- Generator: Adobe Illustrator 28.7.0, SVG Export Plug-In . SVG Version: 1.2.0 Build 136)  -->
+  <g>
+    <g id="Calque_1">
+      <g id="Calque_1-2" data-name="Calque_1">
+        <rect class="cls-1" x="184.2" y="60.6" width="50" height="21.4"/>
+        <rect class="cls-1" x="211.1" y="60.6" width="23.2" height="142.4"/>
+        <rect class="cls-1" x="21.8" y="60.6" width="23.2" height="142.4"/>
+        <rect class="cls-1" x="21.7" y="179" width="212.6" height="24"/>
+        <rect class="cls-1" x="21.7" y="60.5" width="90.1" height="24"/>
+        <polygon class="cls-1" points="96.8 24.6 159.2 72.6 96.8 120.6 96.8 24.6"/>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,75 @@
+// IDDN FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "OdysseyShape.h"
+#include "Tools/RasterBaseTool/OdysseyPainterEditorRasterBaseTool.h"
+#include "OdysseyPainterEditorRasterSelectionTool.generated.h"
+
+class UOdysseyShape;
+
+UENUM()
+enum class EOdysseySelectionState : uint8
+{
+    Normal,
+    Add,
+    Substract
+};
+
+//This is already a tool to prepare for the moment we'll separate transform and selection. When we'll have a "mask" feature in Odyssey
+UCLASS()
+class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorRasterSelectionTool : public UOdysseyPainterEditorRasterBaseTool
+{
+public:
+    GENERATED_BODY()
+
+public:
+    // Destructor
+    virtual ~UOdysseyPainterEditorRasterSelectionTool();
+
+    //Constructor
+    UOdysseyPainterEditorRasterSelectionTool();
+
+
+public:
+    //TOOL
+    template<class T> T* CreateShape(FName iName);
+
+public:
+    virtual bool IsActivable() const override;
+
+    virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
+    virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
+    virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
+    virtual bool OnKeyDown(const FKey& iKey) override;
+    virtual bool OnKeyUp(const FKey& iKey) override;
+
+    virtual void Load() override;
+    virtual void Unload() override;
+
+    virtual void Tick(float iDeltaTime) override;
+
+private:
+    // Internal - Callbacks
+    void SelectedShapeChanged();
+    void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
+
+public:
+    virtual void PropertyChanged(const FName& iPropertyName) override;
+
+protected:
+    UPROPERTY(EditAnywhere, Category="Shape")
+    EOdysseyFillShape SelectedShape;
+
+    UPROPERTY(VisibleInstanceOnly, Category="Shape", Instanced, meta = (ShowInnerProperties))
+    UOdysseyShape* SelectedShapeInstance;
+
+    UPROPERTY()
+    TMap<EOdysseyFillShape, UOdysseyShape*> AvailableShapes;
+
+    EOdysseySelectionState mSelectionState;
+    TSharedPtr<FOdysseyHUDElement> mShapeHUD;
+};

@@ -243,7 +243,7 @@ FExportPDFExporter::Export()
 
         ////DEBUG
         //FString file_name = TEXT( "samples-c3-" ) + FString::FromInt( i ) + TEXT( ".png" );
-        //FString pathfile = TEXT( "C:/Users/Mike/Documents/Unreal Projects/dev_50_epos/Plugins/Epos/samples/export/" ) + file_name;
+        //FString pathfile = TEXT( "C:/Users/Mike/Documents/Unreal Projects/dev_50_epos/Plugins/Odyssey/samples/export/" ) + file_name;
         //{
         //    TUniquePtr<FArchive> PNGFileAr( IFileManager::Get().CreateFileWriter( *pathfile ) );
         //    if( !PNGFileAr )

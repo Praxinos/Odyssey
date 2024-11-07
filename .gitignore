@@ -220,6 +220,8 @@ cython_debug/
 
 # Visual Studio 2015 user specific files
 .vs/
+# Prerequisites
+*.d
 
 # Compiled Object files
 *.slo
@@ -238,6 +240,7 @@ cython_debug/
 
 # Fortran module files
 *.mod
+*.smod
 
 # Compiled Static libraries
 *.lai
@@ -317,3 +320,12 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Iliad
+Binaries/
+Content/*.uasset
+Intermediate/
+.DS_Store
+
+#VScode
+.vscode/

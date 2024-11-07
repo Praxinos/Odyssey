@@ -178,7 +178,7 @@ FEposSequenceEditorModule::RegisterSettings()
     mSequencerSettings = USequencerSettingsContainer::GetOrCreate<USequencerSettings>( TEXT( "EposSequencerEditor" ) ); // May be initialized via Config directory.
 
     //PATCH: Should be done AUTOMATICALLY via EditorPerProjectUserSettings.ini config file, but doesn't work in 5.0
-    TSharedPtr<IPlugin> epos_plugin = IPluginManager::Get().FindPlugin( "Epos" );
+    TSharedPtr<IPlugin> epos_plugin = IPluginManager::Get().FindPlugin( "Odyssey" );
     FString PluginConfigDir = epos_plugin->GetBaseDir() / TEXT( "Config/" );
     // 5.1: With the warning of EditorPerProjectUserSettings.ini file which shouldn't be overrided in the plugin
     //mSequencerSettings->LoadConfig( USequencerSettings::StaticClass(), *FPaths::Combine( PluginConfigDir, TEXT( "EditorPerProjectUserSettings.ini" ) ) );

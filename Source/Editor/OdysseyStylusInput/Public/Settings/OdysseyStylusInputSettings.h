@@ -1,0 +1,42 @@
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "InputCoreTypes.h"
+#include "UObject/Object.h"
+#include "UObject/ObjectMacros.h"
+
+#include "OdysseyStylusInputDriver.h"
+
+#include "OdysseyStylusInputSettings.generated.h"
+
+/**
+ * Implements the StylusInput settings.
+ */
+UCLASS(config=EditorSettings)
+class ODYSSEYSTYLUSINPUT_API UOdysseyStylusInputSettings
+    : public UObject
+{
+    GENERATED_UCLASS_BODY()
+
+public:
+    virtual void PostEditChangeProperty( struct FPropertyChangedEvent& iPropertyChangedEvent ) override;
+
+public:
+    // Update the stylus input subsystem to use the current StylusInputDriver
+    void RefreshStylusInputDriver();
+
+public:
+    // Get the current StylusInputDriver
+    EOdysseyStylusInputDriver GetStylusDriver() const;
+    // Get the localization text of the given StylusInputDriver
+    // (It is used outside of this StylusInput module) 
+    static FText GetFormatText( TSharedPtr<EOdysseyStylusInputDriver> iStylusInputDriver );
+
+public:
+    /** Driver to use to interpret Stylus inputs. */
+    UPROPERTY(config, EditAnywhere, Category=StylusDriver, meta = (ConfigRestartRequired = true) )
+    TEnumAsByte<EOdysseyStylusInputDriver> StylusInputDriver;
+};

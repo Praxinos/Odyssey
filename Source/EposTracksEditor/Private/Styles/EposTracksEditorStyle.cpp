@@ -66,7 +66,7 @@ FEposTracksEditorStyle::FEposTracksEditorStyle()
 void
 FEposTracksEditorStyle::InitSequencer()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Epos" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
 
     //---
 
@@ -78,7 +78,7 @@ FEposTracksEditorStyle::InitSequencer()
 void
 FEposTracksEditorStyle::InitTracks()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Epos" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
 
     //---
 
@@ -113,7 +113,7 @@ FEposTracksEditorStyle::InitTracks()
 void
 FEposTracksEditorStyle::InitCommands()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Epos" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
 
     //---
 
@@ -128,7 +128,7 @@ FEposTracksEditorStyle::InitCommands()
 void
 FEposTracksEditorStyle::InitToolbar()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Epos" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
 
     //---
 
@@ -164,7 +164,7 @@ FEposTracksEditorStyle::InitToolbar()
 void
 FEposTracksEditorStyle::InitNotes()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Epos" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
 
     //---
 

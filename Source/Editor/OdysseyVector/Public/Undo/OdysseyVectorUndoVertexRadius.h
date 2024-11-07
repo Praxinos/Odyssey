@@ -1,0 +1,34 @@
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include <blend2d.h>
+#include <Core/Core.h>
+#include <Image/Block.h>
+#include "Undo/OdysseyVectorUndo.h"
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorVertex.h"
+#include "OdysseyVectorPath.h"
+
+class ODYSSEYVECTOR_API FOdysseyVectorUndoVertexRadius : public FOdysseyVectorUndo
+{
+    public:
+        ~FOdysseyVectorUndoVertexRadius();
+        FOdysseyVectorUndoVertexRadius( FOdysseyVectorGroupPaint* iScene
+                                      , std::vector<FOdysseyVectorPath*>& iPathArray );
+        FOdysseyVectorUndoVertexRadius( FOdysseyVectorGroupPaint* iScene
+                                      , std::vector<FOdysseyVectorVertex*>& iVertexArray );
+
+        /** Called when redoing */
+        virtual void Apply( UObject* iIgnored ) override;
+
+        /** called when undoing */
+        virtual void Revert( UObject* iIgnored ) override;
+
+        /** Describes this change (for debugging) */
+        virtual FString ToString() const override;
+
+    private:
+        std::vector<FSnapshotPath> mPathSnapshotArray;
+        std::vector<FSnapshotVertex> mVertexSnapshotArray;
+};

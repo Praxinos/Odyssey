@@ -1,0 +1,294 @@
+{
+    "FileVersion": 3,
+    "Version": 9,
+    "VersionName": "0.9.54",
+    "FriendlyName": "Odyssey",
+    "Description": "2D Animation, Storyboard & Animatic plugin for Unreal Engine",
+    "Category": "2D",
+    "CreatedBy": "Praxinos",
+    "CreatedByURL": "https://praxinos.coop",
+    "DocsURL": "https://praxinos.coop/Documentation/Odyssey/v2.1/",
+    "MarketplaceURL": "",
+    "SupportURL": "https://praxinos.coop/contact",
+    "CanContainContent": true,
+    "IsBetaVersion": false,
+    "IsExperimentalVersion": false,
+    "Installed": false,
+    "LocalizationTargets": [
+        {
+        "Name": "Epos",
+        "LoadingPolicy": "Editor"
+        },
+        {
+            "Name": "Iliad",
+            "LoadingPolicy": "Editor"
+        }
+    ],
+    "Plugins": [
+        {
+            "Enabled": true,
+            "Name": "LevelSequenceEditor"
+        },
+        {
+            "Enabled": true,
+            "Name": "EditorScriptingUtilities"
+        },
+        {
+            "Enabled": true,
+            "Name": "MovieRenderPipeline"
+        },
+        {
+            "Enabled": true,
+            "Name": "SequencerScripting"
+        },
+        {
+            "Enabled": true,
+            "Name": "AppleProResMedia",
+            "SupportedTargetPlatforms": [
+                "Win64"
+            ]
+        },
+        {
+            "Enabled": true,
+            "Name": "AvidDNxMedia",
+            "SupportedTargetPlatforms": [
+                "Win64"
+            ]
+        },
+        {
+            "Enabled": true,
+            "Name": "MediaCompositing"
+        },
+        {
+            "Enabled": true,
+            "Name": "MediaPlate"
+        },
+        {
+            "Enabled": true,
+            "Name": "Niagara"
+        },
+        {
+            "Enabled": true,
+            "Name": "Paper2D"
+        }
+    ],
+    "Modules": [
+        {
+            "Name": "EposMovieScene",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        },
+        {
+            "Name": "EposActors",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        },
+        {
+            "Name": "EposSequence",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        },
+        {
+            "Name": "EposNote",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        },
+        {
+            "Name": "EposTracks",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        },
+        {
+            "Name": "EposPattern",
+            "Type": "Editor",
+            "LoadingPhase": "Default"
+        },
+        {
+            "Name": "EposNamingConvention",
+            "Type": "Editor",
+            "LoadingPhase": "Default"
+        },
+        {
+            "Name": "EposSequenceEditor",
+            "Type": "Editor",
+            "LoadingPhase": "Default"
+        },
+        {
+            "Name": "EposTracksEditor",
+            "Type": "Editor",
+            "LoadingPhase": "Default"
+        },
+        {
+			"Name": "OdysseyCore",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyMaths",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyMeshPaintRendering",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "PostConfigInit",
+			"Comment": "OdysseyMeshPaintRendering is UncookedOnly because it needs PostConfigInit as LoadingPhase (to register shaders), and it is only available in UncookedOnly"
+		},
+		{
+			"Name": "ULISLoader",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyBrush",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "Default",
+			"Comment": "OdysseyBrush is UncookedOnly so that its nodes can be used in FunctionLibraries"
+		},
+		{
+			"Name": "OdysseyStyle",
+			"Type": "Editor",
+			"LoadingPhase": "PreDefault"
+		},
+		{
+			"Name": "OdysseyHUDSystem",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyLayerStack",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyLayerStackEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyPaintEngine",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyBrushEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyImaging",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyShapes",
+			"Type": "Editor",
+			"LoadingPhase": "PreDefault"
+		},
+		{
+			"Name": "OdysseyStylusInput",
+			"Type": "Editor"
+		},
+		{
+			"Name": "OdysseyPalette",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyWidgets",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyModuleLoader",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyFile",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyVector",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyTexture",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyTextureEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyViewportDrawingEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyAnimation",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyAnimationEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyAnimationPlayer",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyAnimationTexture",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyPainterEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyEditorBrushBlueprints",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "PostDefault",
+			"Comment": "OdysseyBrush is UncookedOnly so that its nodes can be used in FunctionLibraries. And having this module avoids switching main editor modules to UncookedOnly"
+		},
+		{
+			"Name": "OdysseyMedia",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OdysseyFlipbook",
+			"Type": "Editor",
+			"LoadingPhase": "None",
+			"Comment": "Loaded by OdysseyModulesLoader at the PostDefault LoadingPhase if Paper2D is activated"
+		},
+		{
+			"Name": "OdysseyFlipbookEditor",
+			"Type": "Editor",
+			"LoadingPhase": "None",
+			"Comment": "Loaded by OdysseyModulesLoader at the PostDefault LoadingPhase if Paper2D is activated"
+		}
+    ],
+    "PreBuildSteps": {
+        "Win64": [
+            "copy /Y \"$(PluginDir)\\Config\\BaseEpos.ini\" \"$(PluginDir)\\Config\\DefaultEpos.ini\""
+        ],
+        "Mac": [
+            "cp \"$(PluginDir)/Config/BaseEpos.ini\" \"$(PluginDir)/Config/DefaultEpos.ini\""
+        ]
+    }
+}

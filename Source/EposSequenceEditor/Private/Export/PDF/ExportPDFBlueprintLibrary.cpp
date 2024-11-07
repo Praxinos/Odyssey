@@ -176,7 +176,7 @@ UExportPDFBlueprintLibrary::GetPanelTexture2D( const FExportStruct& iExportStruc
     //TUniquePtr<FImageWriteTask> ImageTask = MakeUnique<FImageWriteTask>();
     //ImageTask->Format = EImageFormat::PNG;
     //ImageTask->CompressionQuality = 100;
-    //ImageTask->Filename = TEXT( "C:/Users/Mike/Documents/Unreal Projects/dev_50_epos/Plugins/Epos/samples/export-" ) + name;
+    //ImageTask->Filename = TEXT( "C:/Users/Mike/Documents/Unreal Projects/dev_50_epos/Plugins/Odyssey/samples/export-" ) + name;
     //ImageTask->PixelData = MakeUnique<TImagePixelData<FColor>>( image_size, TArray64<FColor>( samples ) );
     //ImageTask->PixelPreProcessors.Add( TAsyncAlphaWrite<FColor>( 255 ) );
 

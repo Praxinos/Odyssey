@@ -30,7 +30,7 @@ public:
     FString ExportFile;
 
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportPDF )
-    TSoftClassPtr<UPDFDocExportWidget> PDFDocWidgetSoftClass { FSoftObjectPath( TEXT( "/Epos/PDF/Thumbnails/WBP_PDFDoc_Thumbnails_Landscape.WBP_PDFDoc_Thumbnails_Landscape_C" ) ) };
+    TSoftClassPtr<UPDFDocExportWidget> PDFDocWidgetSoftClass { FSoftObjectPath( TEXT( "/Odyssey/PDF/Thumbnails/WBP_PDFDoc_Thumbnails_Landscape.WBP_PDFDoc_Thumbnails_Landscape_C" ) ) };
 
     UPROPERTY( EditAnywhere, BlueprintReadWrite, Category=ExportPDF )
     FExportMarkSettings MarkSettings;

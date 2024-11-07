@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 128 128">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #a3a2a2;
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke: #d0d0d0;
+        stroke-miterlimit: 10;
+        stroke-width: 4px;
+      }
+
+      .cls-3 {
+        isolation: isolate;
+        opacity: .2;
+      }
+
+      .cls-3, .cls-4 {
+        fill: #d0d0d0;
+      }
+
+      .cls-5 {
+        fill: #8bc24a;
+      }
+    </style>
+  </defs>
+  <!-- Generator: Adobe Illustrator 28.7.1, SVG Export Plug-In . SVG Version: 1.2.0 Build 142)  -->
+  <g>
+    <g id="Calque_1">
+      <g>
+        <g id="Calque_1-2" data-name="Calque_1">
+          <g id="Calque_1-2">
+            <g id="Calque_1-2-2" data-name="Calque_1-2">
+              <polygon class="cls-3" points="81 93.9 97 93.9 97 30.4 23.1 30.4 23.1 110.7 81 110.7 81 93.9"/>
+              <rect class="cls-5" x="95.5" y="98.2" width="8" height="30"/>
+              <rect class="cls-5" x="84.7" y="109.3" width="30" height="8"/>
+              <g>
+                <rect class="cls-4" x="22.8" y="25.5" width="9.8" height="5"/>
+                <rect class="cls-4" x="85" y="25.5" width="11.7" height="5"/>
+                <rect class="cls-4" x="37.1" y="25.5" width="43.3" height="5"/>
+                <rect class="cls-4" x="17.4" y="25.5" width="5.4" height="90.4"/>
+                <circle class="cls-2" cx="58.8" cy="11.2" r="8.5"/>
+                <path class="cls-4" d="M67.3,11.2v.2c0,4.7-3.8,8.5-8.5,8.5s-8.5-3.8-8.5-8.5,0-.2,0-.2h-13.2v10.8h43.3v-10.8h-13.2,0Z"/>
+                <rect class="cls-4" x="96.7" y="25.5" width="5.6" height="68.5"/>
+                <rect class="cls-4" x="22.8" y="110.8" width="57.9" height="5"/>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g id="Calque_2">
+          <rect x="29.8" y="45.6" width="22.6" height="5.8"/>
+          <rect x="29.8" y="62" width="22.6" height="5.8"/>
+          <rect x="29.9" y="78.2" width="22.6" height="5.8"/>
+          <rect x="29.9" y="93.9" width="22.6" height="5.8"/>
+          <rect x="62.4" y="45.6" width="22.6" height="5.8"/>
+          <rect x="62" y="62" width="22.6" height="5.8"/>
+          <rect x="62.4" y="78.2" width="22.6" height="5.8"/>
+          <rect x="62.4" y="93.9" width="22.6" height="5.8"/>
+          <rect class="cls-1" x="32.5" y="42.7" width="22.6" height="5.8"/>
+          <rect class="cls-1" x="32.5" y="59.1" width="22.6" height="5.8"/>
+          <rect class="cls-1" x="32.6" y="75.3" width="22.6" height="5.8"/>
+          <rect class="cls-1" x="32.6" y="91" width="22.6" height="5.8"/>
+          <rect class="cls-1" x="65.1" y="42.7" width="22.6" height="5.8"/>
+          <rect class="cls-1" x="64.7" y="59.1" width="22.6" height="5.8"/>
+          <rect class="cls-1" x="65.1" y="75.3" width="22.6" height="5.8"/>
+          <rect class="cls-1" x="65.1" y="91" width="22.6" height="5.8"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

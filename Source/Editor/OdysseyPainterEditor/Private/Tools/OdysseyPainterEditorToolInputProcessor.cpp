@@ -1,0 +1,42 @@
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#include "OdysseyPainterEditorToolInputProcessor.h"
+#include "OdysseyPainterEditorTool.h"
+#include "OdysseyPainterEditor.h"
+
+//--------------------------------------------------------------------------------------
+//----------------------------------------------------------- Construction / Destruction
+FOdysseyPainterEditorToolInputProcessor::~FOdysseyPainterEditorToolInputProcessor()
+{
+
+}
+
+FOdysseyPainterEditorToolInputProcessor::FOdysseyPainterEditorToolInputProcessor( UOdysseyPainterEditorTool* iPainterEditorTool )
+    : mPainterEditorTool (iPainterEditorTool)
+{
+
+}
+
+void
+FOdysseyPainterEditorToolInputProcessor::Tick( const float DeltaTime
+                                             , FSlateApplication& SlateApp
+                                             , TSharedRef<ICursor> Cursor )
+{
+}
+
+bool
+FOdysseyPainterEditorToolInputProcessor::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
+{
+    //false means Unreal will continue as if we did nothing
+
+    return mPainterEditorTool->OnKeyDownGlobal( InKeyEvent.GetKey() ); 
+}
+
+bool
+FOdysseyPainterEditorToolInputProcessor::HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
+{
+    //false means Unreal will continue as if we did nothing
+
+    return mPainterEditorTool->OnKeyUpGlobal( InKeyEvent.GetKey() ); 
+}

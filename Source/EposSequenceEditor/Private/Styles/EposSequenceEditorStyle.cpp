@@ -62,7 +62,7 @@ FEposSequenceEditorStyle::FEposSequenceEditorStyle()
 void
 FEposSequenceEditorStyle::InitSequencer()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Epos" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
 
     //---
 
@@ -95,7 +95,7 @@ FEposSequenceEditorStyle::InitSequencer()
 void
 FEposSequenceEditorStyle::InitCommands()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Epos" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
 
     //---
 
@@ -146,7 +146,7 @@ FEposSequenceEditorStyle::InitCommands()
 void
 FEposSequenceEditorStyle::InitAbout()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Epos" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
 
     //---
 
@@ -192,7 +192,7 @@ FEposSequenceEditorStyle::InitAbout()
 void
 FEposSequenceEditorStyle::InitViewport()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Epos" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
 
     //---
 
@@ -266,7 +266,7 @@ FEposSequenceEditorStyle::InitViewport()
 void
 FEposSequenceEditorStyle::InitImportExport()
 {
-    SetContentRoot( IPluginManager::Get().FindPlugin( "Epos" )->GetBaseDir() / TEXT( "Resources" ) );
+    SetContentRoot( IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources" ) );
 
     //---
 
