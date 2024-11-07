@@ -1,4 +1,5 @@
-// Copyright 2018-2019 Praxinos, Inc. All Rights Reserved.
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 using System;
 using System.IO;
@@ -19,9 +20,9 @@ public class WinTab : ModuleRules
         //    );
         //}
 
-        // It's more 'safe/readable' to have 
-        // #include "Windows/wintab.h" 
-        // inside calling modules than only 
+        // It's more 'safe/readable' to have
+        // #include "Windows/wintab.h"
+        // inside calling modules than only
         // #include "wintab.h"
         // in case there are files with same name for windows/macosx/linux/...
         PublicIncludePaths.AddRange(

@@ -233,20 +233,20 @@ cython_debug/
 *.gch
 *.pch
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+# Compiled Dynamic libraries (libharu)
+*/libharu/*.so
+*/libharu/*.dylib
+*/libharu/*.dll
 
 # Fortran module files
 *.mod
 *.smod
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+# Compiled Static libraries (libharu)
+*/libharu/*.lai
+*/libharu/*.la
+*/libharu/*.a
+*/libharu/*.lib
 
 # Executables
 *.exe
