@@ -1,0 +1,41 @@
+// IDDN.FR.001.060015.008.S.X.2019.000.00000
+// EPOS is subject to copyright © laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include "Modules/ModuleManager.h"
+
+#include "INamingFormatter.h" // Because if template
+
+class FEposSequenceModule
+    : public IModuleInterface
+{
+public:
+    /** IModuleInterface implementation */
+    virtual void StartupModule() override;
+    virtual void ShutdownModule() override;
+
+public:
+    EPOSSEQUENCE_API void RegisterNamingFormatter( UNamingFormatter* iFormatter );
+    EPOSSEQUENCE_API void UnregisterNamingFormatter( UNamingFormatter* iFormatter );
+
+public:
+    template<typename Formatter>
+    UNamingFormatter* GetNamingFormatter()
+    {
+        for( auto formatter : mNamingFormatters )
+        {
+            if( formatter->IsA<Formatter>() )
+            {
+                return formatter;
+            }
+        }
+
+        return nullptr;
+    }
+
+private:
+    TArray<UNamingFormatter*> mNamingFormatters;
+};

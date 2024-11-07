@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="Layer_1" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 125 125">
+
+<!-- Left -->
+<!-- Middle -->
+<!-- Right -->
+<path stroke="white" stroke-width="8" d="
+    M-30,30h60v30h-60z
+
+    M40,70h60v30h-60
+    z
+    M110,70h60v30h-60
+    z"/>
+
+</svg>

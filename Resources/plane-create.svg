@@ -1,0 +1,38 @@
+<svg id="Layer_1" data-name="Layer 1" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+
+<g>
+<!-- Camera -->
+<path fill="gray" transform="scale(.8) translate(-60 18)" d="
+    M14.76,47.89H71.34a9.56,9.56,0,0,1,9.54,9.53V93a9.58,9.58,0,0,1-9.54,9.54H14.76A9.57,9.57,0,0,1,5.22,93V57.42a9.56,9.56,0,0,1,9.54-9.53
+    Z
+    m.24-38a15,15,0,1,1-15,15,15,15,0,0,1,15-15
+    Z
+    M61.06,0A19.89,19.89,0,1,1,41.17,19.89,19.88,19.88,0,0,1,61.06,0
+    Z
+    M86.3,91V60.38l25.86-15.24v61.51L86.3,91
+    Z"/>
+
+<g transform="scale(.8) translate(35 34)">
+<!-- Plane borders -->
+<path stroke="white" stroke-width="8" d="
+    M50,30L110,10v100L50,90
+    z"/>
+    
+<!-- Inner plane plus -->
+<path stroke="white" stroke-width="8" d="
+    M65,60h30
+    z
+    M80,40v40
+    z"/>
+</g>
+
+<!-- Plus -->
+<path stroke="white" stroke-width="8" d="
+    M55,25h-15
+    m15,0h15
+    m-15,0v15
+    m0,-15v-15
+    "/>
+</g>
+
+</svg>

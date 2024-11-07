@@ -1,0 +1,22 @@
+<svg id="Layer_1" data-name="Layer 1" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+
+<!-- Circle -->
+<circle stroke="white" stroke-width="4" cx="60" cy="60" r="20" />
+
+<!-- target -->
+<path stroke="white" stroke-width="4" d="
+    M60,30v20
+    M60,90v-20
+    M30,60h20
+    M90,60h-20
+    "/>
+    
+<!-- 4 corners -->
+<path stroke="white" stroke-width="4" d="
+    M30,15h-25v25
+    M5,80v25h25
+    M90,105h25v-25
+    M90,15h25v25
+    "/>
+
+</svg>
