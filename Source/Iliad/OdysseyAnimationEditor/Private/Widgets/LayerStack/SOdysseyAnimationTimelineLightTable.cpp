@@ -4,31 +4,29 @@
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTable.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
-#include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
 #include "OdysseyAnimation.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineSection.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyPainterEditor.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 void
-SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysseyAnimationLayer* iLayer, FOdysseyAnimationEditorExtension* iExtension)
+SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysseyAnimationLayer* iLayer)
 {
     UOdysseyAnimation::OnCurrentFrameChanged().AddSP(SharedThis(this), &SOdysseyAnimationTimelineLightTable::OnCurrentFrameChanged);
     FOdysseyImageRenderingAbility::OnImageRenderingChangedDelegate().AddSP(this, &SOdysseyAnimationTimelineLightTable::OnImageRenderingChanged);
 
     mLayer = iLayer;
-    mExtension = iExtension;
 
     TSharedRef<SHorizontalBox> horizontalBox = SNew(SHorizontalBox)
         + SHorizontalBox::Slot()
         .AutoWidth()
         [
-            SNew(SOdysseyAnimationTimelineSection, mExtension)
+            SNew(SOdysseyAnimationTimelineSection)
+            .TimelinePosition(InArgs._TimelinePosition)
             .WidthInFrames_Lambda(
                 [this]()
                 {
@@ -53,7 +51,8 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
         horizontalBox->AddSlot()
         .AutoWidth()
         [
-            SNew(SOdysseyAnimationTimelineSection, mExtension)
+            SNew(SOdysseyAnimationTimelineSection)
+            .TimelinePosition(InArgs._TimelinePosition)
             .HAlign(HAlign_Left)
             .WidthInFrames_Lambda(
                 [this, i]()
@@ -71,7 +70,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
             )
             [
 
-                SNew(SOdysseyAnimationTimelineLightTableKey, mExtension)
+                SNew(SOdysseyAnimationTimelineLightTableKey)
                 .Visibility_Lambda(
                     [this, i]()
                     {
@@ -116,6 +115,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
                         FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
                     }
                 )
+                .TimelinePosition(InArgs._TimelinePosition)
             ]
         ];
     }
@@ -124,7 +124,8 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
     horizontalBox->AddSlot()
     .AutoWidth()
     [
-        SNew(SOdysseyAnimationTimelineSection, mExtension)
+        SNew(SOdysseyAnimationTimelineSection)
+        .TimelinePosition(InArgs._TimelinePosition)
         .Visibility_Lambda(
             [this]()
             {
@@ -154,7 +155,8 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
         horizontalBox->AddSlot()
         .AutoWidth()
         [
-            SNew(SOdysseyAnimationTimelineSection, mExtension)
+            SNew(SOdysseyAnimationTimelineSection)
+            .TimelinePosition(InArgs._TimelinePosition)
             .HAlign(HAlign_Left)
             .WidthInFrames_Lambda(
                 [this, i]()
@@ -172,7 +174,7 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
             )
             [
 
-                SNew(SOdysseyAnimationTimelineLightTableKey, mExtension)
+                SNew(SOdysseyAnimationTimelineLightTableKey)
                 .Visibility_Lambda(
                     [this, i]()
                     {
@@ -217,20 +219,18 @@ SOdysseyAnimationTimelineLightTable::Construct(const FArguments& InArgs, UOdysse
                         FOdysseyObjectEditorUtils::SetPropertyValue(mLayer, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), lighttable, EPropertyChangeType::ValueSet);
                     }
                 )
+                .TimelinePosition(InArgs._TimelinePosition)
             ]
         ];
     }
 
     ChildSlot
     [
-        SNew(SBox)
-        .HeightOverride(FOptionalSize(mDesiredHeight))
+        SNew(SOdysseyAnimationTimelineScrollBox)
+        .TimelinePosition(InArgs._TimelinePosition)
+        + SOdysseyAnimationTimelineScrollBox::Slot()
         [
-            SNew(SOdysseyAnimationTimelineScrollBox, mExtension)
-            + SOdysseyAnimationTimelineScrollBox::Slot()
-            [
-                horizontalBox
-            ]
+            horizontalBox
         ]
     ];
 

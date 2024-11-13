@@ -10,6 +10,7 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
 
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
@@ -114,7 +115,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_RemoveCellMark()
     if (currentLayer->IsLockedRecursively())
         return;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = extension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(animation->CurrentFrame);
@@ -159,7 +160,7 @@ FOdysseyAnimationGlobalCellsShortcuts::Action_SetCellMark(int iMarkId)
     if (currentLayer->IsLockedRecursively())
         return;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = extension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         UOdysseyAnimationCell* cell = currentLayer->GetCellAtFrame(animation->CurrentFrame);
@@ -210,7 +211,7 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_RemoveCellMark()
     if (layer->IsLockedRecursively())
         return false;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = extension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
@@ -243,7 +244,7 @@ FOdysseyAnimationGlobalCellsShortcuts::CanAction_SetCellMark(int iMarkId)
     if (layer->IsLockedRecursively())
         return false;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = extension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = layerStack->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);

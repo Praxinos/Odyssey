@@ -67,6 +67,7 @@ public:
     DECLARE_DELEGATE_TwoParams(FOnPickColor, eOdysseyEventState::Type, const FVector2D&)
     DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseDown, const FOdysseyPoint&, const FKey&)
     DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseUp, const FOdysseyPoint&, const FKey&)
+	DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseClick, const FOdysseyPoint&, const FKey&)
     DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseDoubleClick, const FOdysseyPoint&, const FKey&)
     DECLARE_DELEGATE_OneParam(FOnMouseHover, const FOdysseyPoint&)
     DECLARE_DELEGATE_OneParam(FOnMouseDrag, const FOdysseyPoint&)
@@ -123,6 +124,7 @@ public:
     FOnMouseUp&     OnMouseUp()     { return mOnMouseUp; }
     FOnMouseHover&  OnMouseHover()  { return mOnMouseHover; }
     FOnMouseDrag&   OnMouseDrag()   { return mOnMouseDrag; }
+	FOnMouseClick&  OnMouseClick()   { return mOnMouseClick; }
     FOnKeyDown&     OnKeyDown()     { return mOnKeyDown; }
     FOnKeyUp&       OnKeyUp()       { return mOnKeyUp; }
 
@@ -173,6 +175,7 @@ private:
     FOnMouseDoubleClick                     mOnMouseDoubleClick;
     FOnMouseHover                           mOnMouseHover;
     FOnMouseDrag                            mOnMouseDrag;
+	FOnMouseClick                            mOnMouseClick;
     FOnKeyDown                              mOnKeyDown;
     FOnKeyUp                                mOnKeyUp;
 
@@ -187,6 +190,8 @@ private:
 
     bool                                    mIsMouseDown = false;
     FKey                                    mMouseButton;
+	FOdysseyPoint                           mMouseDownReference;
+	FVector2D                           mHUDMouseDownReference;
 
 
     TArray<FStylusState> mStylusStates;

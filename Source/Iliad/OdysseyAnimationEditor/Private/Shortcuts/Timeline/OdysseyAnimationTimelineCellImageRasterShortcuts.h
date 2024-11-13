@@ -6,12 +6,11 @@
 #include "Framework/Commands/UICommandList.h"
 
 class UOdysseyLayerStack;
-class FOdysseyAnimationEditorExtension;
 
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineCellImageRasterShortcuts
 {
 public:
-    FOdysseyAnimationTimelineCellImageRasterShortcuts(UOdysseyLayerStack* iLayerStack, FOdysseyAnimationEditorExtension* iAnimationExtension);
+    FOdysseyAnimationTimelineCellImageRasterShortcuts(UOdysseyLayerStack* iLayerStack);
 
 public:
     //Shortcuts
@@ -24,5 +23,4 @@ public:
 
 private:
     UOdysseyLayerStack* mLayerStack;
-    FOdysseyAnimationEditorExtension* mAnimationExtension;
 };

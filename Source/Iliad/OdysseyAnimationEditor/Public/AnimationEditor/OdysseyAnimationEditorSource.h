@@ -6,7 +6,7 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 
-class UOdysseyAnimationTexture;
+//class UOdysseyAnimationTexture;
 class UOdysseyAnimationPlayer;
 
 /**
@@ -41,21 +41,28 @@ public:
     virtual void RecordCurrentFrameUndo() const override;
 
 public:
+
+    void SetExternalPlayer(UOdysseyAnimationPlayer* iPlayer);
+
     UOdysseyAnimation* GetAnimation() const;
     virtual UOdysseyAnimationLayerStack* GetLayerStack() const override;
-    UOdysseyAnimationTexture* GetAnimationTexture() const;
+    //UOdysseyAnimationTexture* GetAnimationTexture() const;
     UOdysseyAnimationPlayer* GetAnimationPlayer() const;
 
 public:
     virtual void AddReferencedObjects(FReferenceCollector& Collector);
 
 private:
+    void ActivatePlayer( UOdysseyAnimationPlayer* iPlayer );
+    void InactivatePlayer( UOdysseyAnimationPlayer* iPlayer );
+
     void OnCurrentFrameChanged(UOdysseyAnimation* iAnimation);
     void OnPlayerPlay();
     void OnPlayerStop();
 
 public:
     UOdysseyAnimation* mAnimation;
-    TObjectPtr<UOdysseyAnimationTexture> mTexture;
+    //TObjectPtr<UOdysseyAnimationTexture> mTexture;
     TObjectPtr<UOdysseyAnimationPlayer> mPlayer;
+    TObjectPtr<UOdysseyAnimationPlayer> mExternalPlayer;
 };

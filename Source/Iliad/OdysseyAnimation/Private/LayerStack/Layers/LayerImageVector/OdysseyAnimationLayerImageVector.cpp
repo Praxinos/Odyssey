@@ -19,6 +19,8 @@
 #include "ScopedTransaction.h"
 #include "UObject/DevObjectVersion.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorObject.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 

@@ -5,7 +5,7 @@
 
 #include "LayerStack/Tools/OdysseyAnimationTimelineTool.h"
 
-class FOdysseyAnimationEditorTimeline;
+class FOdysseyAnimationEditorTimelinePosition;
 class FOdysseyAnimationCellsMutator;
 
 class FOdysseyAnimationTimelineMoveTool
@@ -13,7 +13,7 @@ class FOdysseyAnimationTimelineMoveTool
 {
 public:
     virtual ~FOdysseyAnimationTimelineMoveTool();
-    FOdysseyAnimationTimelineMoveTool(FOdysseyAnimationEditorTimeline* iTimelineParams);
+    FOdysseyAnimationTimelineMoveTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition);
 
 public:
     virtual FReply OnMouseButtonDown(const FMouseEventParams& iParams) override;
@@ -22,7 +22,7 @@ public:
     virtual FReply OnDragDetected(const FMouseEventParams& iParams) override;
 
 private:
-    FOdysseyAnimationEditorTimeline* mTimelineParams;
+    TSharedRef<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
     bool mOffsettingLayer;
     struct
     {

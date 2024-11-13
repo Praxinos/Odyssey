@@ -15,6 +15,7 @@ UOdysseyAnimationLayerFolder::UOdysseyAnimationLayerFolder()
     Icon = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetTreeFolderClosed");
     IconExpanded = FSlateIcon(FAppStyle::GetAppStyleSetName(), "ContentBrowser.AssetTreeFolderOpen");
     CanHaveChildren = true;
+    HasLighttable = false;
 }
 
 TSet<UClass*>

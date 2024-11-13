@@ -15,20 +15,9 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageRasterTimeline
     : public SOdysseyAnimationLayerImageTimeline
 {
 public:
-    SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageRasterTimeline)
-        {}
-        SLATE_ATTRIBUTE(bool, DisplayOptions)
-    SLATE_END_ARGS()
-
-public:
     // Construction / Destruction
     virtual ~SOdysseyAnimationLayerImageRasterTimeline();
     SOdysseyAnimationLayerImageRasterTimeline();
-    void Construct(
-        const FArguments& iArgs,
-        FOdysseyAnimationEditorExtension* iExtension,
-        UOdysseyAnimationLayerImageRaster* iAnimationLayerImageRaster
-    );
 
 protected:
     //Context Menu
@@ -37,9 +26,6 @@ protected:
 private:
     virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyAnimationCell* iCell) override;
     virtual FReply OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-
-private:
-    bool GetShowCellContent() const;
 
 private:
     TSharedPtr<FOdysseyAnimationTimelineCellImageRasterShortcuts> mAnimationTimelineCellImageRasterShortcuts;

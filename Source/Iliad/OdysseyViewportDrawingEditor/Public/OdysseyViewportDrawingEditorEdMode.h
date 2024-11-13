@@ -57,12 +57,15 @@ public:
 
     virtual bool GetCursor(EMouseCursor::Type& OutCursor) const override;
 
+    TSharedPtr<FOdysseyPainterEditor> GetEditor() const;
+    TSharedPtr<FOdysseyViewportDrawingEditorToolkit> GetViewportDrawingEditorToolkit() const;
+
 private:
     void OnResetViewMode();
 
 private:
     TSharedPtr<FOdysseyPainterEditor> mEditor;
-    //TSharedPtr<FOdysseyViewportDrawingEditorToolkit> mToolkit;
+    TSharedPtr<FOdysseyViewportDrawingEditorToolkit> mViewportDrawingEditorToolkit;
     FOdysseyViewportDrawingEditorPainter* mViewportDrawingEditorPainter;
     TSharedPtr<FOdysseyViewportDrawingEditorExtension> mViewportDrawingEditorExtension;
 };

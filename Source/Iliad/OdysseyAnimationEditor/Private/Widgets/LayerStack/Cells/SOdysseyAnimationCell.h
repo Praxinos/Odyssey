@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 
 struct FSlateBrush;
-class FOdysseyAnimationEditorExtension;
 class UOdysseyAnimationLayer;
 class UOdysseyAnimationCell;
 
@@ -23,7 +22,6 @@ public:
     // Construction / Destruction
     void Construct(
         const FArguments& iArgs,
-        FOdysseyAnimationEditorExtension* iExtension,
         UOdysseyAnimationLayer* iAnimationLayer,
         UOdysseyAnimationCell* iCell
     );
@@ -37,18 +35,13 @@ private:
     bool IsSelected() const;
     bool IsSelectionCursor() const;
 
-    //int GetMarkWidgetIndex() const;
     const FSlateBrush* GetMarkBrush() const;
     FLinearColor GetMarkColor() const;
     float GetMarkOpacity() const;
-    //FSlateColor GetMarkColorAndOpacity() const;
-    //FText GetMarkTooltipText() const;
     bool IsMarkSymbol() const;
     bool IsMarkFill() const;
-    //bool IsMarkInvalid() const;
 
 private:
-    FOdysseyAnimationEditorExtension* mExtension;
     UOdysseyAnimationLayer* mAnimationLayer;
     UOdysseyAnimationCell* mCell;
 };

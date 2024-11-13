@@ -7,16 +7,15 @@
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyLayerStack.h"
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyAnimation.h"
 #include "ULISLoaderModule.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
-FOdysseyAnimationTimelineCellImageStaggerShortcuts::FOdysseyAnimationTimelineCellImageStaggerShortcuts(UOdysseyLayerStack* iLayerStack, FOdysseyAnimationEditorExtension* iAnimationExtension)
+FOdysseyAnimationTimelineCellImageStaggerShortcuts::FOdysseyAnimationTimelineCellImageStaggerShortcuts(UOdysseyLayerStack* iLayerStack)
     : mLayerStack(iLayerStack)
-    , mAnimationExtension(iAnimationExtension)
 {
 }
 
@@ -44,7 +43,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
     if (!animation)
         return;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = layer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);
@@ -142,7 +141,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::Action_ConvertToReferenceCel
         selectedCells.Append(newCells);
     }
 
-    mAnimationExtension->Timeline()->SetSelectedCells(selectedCells);
+    layer->GetLayerStack()->GetCellSelection()->SetSelectedCells(selectedCells);
 }
 
 bool
@@ -159,7 +158,7 @@ FOdysseyAnimationTimelineCellImageStaggerShortcuts::CanAction_ConvertToReference
     if (!animation)
         return false;
 
-    TArray<UOdysseyAnimationCell*> selectedCells = mAnimationExtension->Timeline()->GetSelectedCells();
+    TArray<UOdysseyAnimationCell*> selectedCells = layer->GetLayerStack()->GetCellSelection()->GetSelectedCells();
     if (selectedCells.IsEmpty())
     {
         UOdysseyAnimationCell* cell = layer->GetCellAtFrame(animation->CurrentFrame);

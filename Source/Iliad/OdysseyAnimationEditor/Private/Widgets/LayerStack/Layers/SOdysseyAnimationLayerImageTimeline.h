@@ -5,17 +5,21 @@
 
 #include "CoreMinimal.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineOutOfPegsKey.h"
+#include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerTimeline.h"
 
-class FOdysseyAnimationEditorExtension;
 class UOdysseyAnimationLayer;
 class FOdysseyAnimationTimelineCellsShortcuts;
 class FOdysseyAnimationTimelineCellImageStaggerShortcuts;
+class SOdysseyLayerStackTreeView;
+class FOdysseyAnimationEditorTimelinePosition;
+class FOdysseyAnimationTimelineTool;
 
 /**
  * Implements a layer row widget
  */
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageTimeline
-    : public SCompoundWidget
+    : public SOdysseyAnimationLayerTimeline
 {
 public:
     // Construction / Destruction
@@ -23,17 +27,29 @@ public:
     SOdysseyAnimationLayerImageTimeline();
 
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageTimeline)
-        : _DisplayOptions(false)
         {}
-        SLATE_ATTRIBUTE(bool, DisplayOptions)
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs, OnActivateOutOfPegs)
+        SLATE_EVENT(FSimpleDelegate, OnInactivateOutOfPegs)
+        SLATE_EVENT(SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
     SLATE_END_ARGS()
 
-protected:
+public:
     void Construct(
         const FArguments& iArgs,
-        FOdysseyAnimationEditorExtension* iExtension,
+        const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
         UOdysseyAnimationLayer* iLayer
     );
+
+protected:
+    virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
+    virtual FOptionalSize GetRowHeight(FName iRow) const override;
+    virtual EVisibility GetRowVisibility(FName iRow) const override;
+    virtual FMargin GetRowPadding(FName iRow) const override;
+
+    TSharedRef<SWidget> GenerateMainRowTimelineWidget();
+    TSharedRef<SWidget> GenerateLightTableRowTimelineWidget();
+    TSharedRef<SWidget> GenerateOutOfPegsRowTimelineWidget();
 
 public:
     virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
@@ -84,8 +100,13 @@ private:
     FReply OnContextMenuPlusButtonClicked();
 
 protected:
-    FOdysseyAnimationEditorExtension* mExtension;
     UOdysseyAnimationLayer* mLayer;
+    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+    SOdysseyAnimationTimelineOutOfPegsKey::FOnActivateOutOfPegs mOnActivateOutOfPegs;
+    FSimpleDelegate mOnInactivateOutOfPegs;
+    SOdysseyAnimationTimelineOutOfPegsKey::FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
+
+    TSharedPtr<FOdysseyAnimationTimelineTool> mTool;
 
     enum eDragState
     {

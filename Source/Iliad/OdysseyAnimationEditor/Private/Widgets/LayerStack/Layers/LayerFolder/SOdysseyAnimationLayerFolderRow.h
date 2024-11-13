@@ -6,8 +6,9 @@
 #include "CoreMinimal.h"
 #include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerRow.h"
 
-class FOdysseyAnimationEditorExtension;
 
+class FOdysseyAnimationEditorTimelinePosition;
+class UOdysseyAnimationLayerFolder;
 /**
  * Implements a layer row widget
  */
@@ -17,31 +18,17 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerFolderRow
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerFolderRow)
         {}
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
 public:
-    SOdysseyAnimationLayerFolderRow();
     // Construction / Destruction
     void Construct(
         const FArguments& iArgs,
         const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
-        FOdysseyAnimationEditorExtension* iExtension,
-        class UOdysseyAnimationLayerFolder* iAnimationLayerFolder
+        UOdysseyAnimationLayerFolder* iAnimationLayerFolder
     );
 
 private:
-    virtual TSharedRef<SWidget> GenerateHeaderWidget() override;
-    virtual TSharedRef<SWidget> GenerateOptionsWidget() override;
-    EVisibility GetCollapsedOpacityVisibility() const;
-
-private:
-    void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);
-    void OnOpacityValueChanged(int iValue);
-    void OnOpacityValueCommitted(int iValue, ETextCommit::Type iType);
-    void OnOpacityBeginSliderMovement();
-    void OnOpacityEndSliderMovement(int iValue);
-
-private:
-    class UOdysseyAnimationLayerFolder* mAnimationLayerFolder;
-    FText mSetOpacityTransactionName;
+    UOdysseyAnimationLayerFolder* mAnimationLayerFolder;
 };

@@ -581,6 +581,21 @@ IOdysseyViewportDrawingEditorAdapter::HandleClick(FEditorViewportClient* iViewpo
     if(!IsReadyToDraw())
         return false;
 
+	mCurrentHUDElement = GetHUDElement(iViewportClient->Viewport, iViewportClient->Viewport->GetMouseX(), iViewportClient->Viewport->GetMouseY());
+	if (mCurrentHUDElement)
+	{
+		FVector2D viewportPoint(iClick.GetClickPos().X, iClick.GetClickPos().Y);
+		FVector2D hudPoint;
+		if (mExtension->ViewportToHUD(iViewportClient, viewportPoint, hudPoint))
+		{
+			mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
+			if (mCurrentHUDElement->OnMouseClick(mCurrentHUDPoint, iClick.GetKey()))
+			{
+				return true;
+			}
+		}
+	}
+
     FOdysseyRay strokeRay;
     GetRayParamsFromViewportPosition(iViewportClient, iClick.GetClickPos().X, iClick.GetClickPos().Y, &strokeRay.mRayOrigin, &strokeRay.mRayDirection);
     strokeRay.mPoint = FOdysseyPoint::DefaultPoint();

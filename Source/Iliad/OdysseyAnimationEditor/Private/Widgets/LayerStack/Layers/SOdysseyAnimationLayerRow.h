@@ -7,36 +7,39 @@
 #include "Widgets/SOdysseyLayerRow.h"
 
 class SOdysseyAnimationLayerStack;
-class FOdysseyAnimationEditorExtension;
+class FOdysseyAnimationEditorTimelinePosition;
 
 /**
  * Implements a layer row widget
  */
-class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerRow
+class SOdysseyAnimationLayerRow
     : public SOdysseyLayerRow
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerRow)
         {}
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
 public:
     void Construct(
         const FArguments& iArgs,
         const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView,
-        FOdysseyAnimationEditorExtension* iExtension,
         class UOdysseyAnimationLayer* iLayer
     );
 
-public:
-    FOdysseyAnimationEditorExtension* GetExtension();
-
-public:
-    virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
-
 protected:
-    virtual TSharedRef<SWidget> GenerateTimelineWidget();
+    virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
+    virtual TArray<TSharedPtr<SWidget>> GenerateMainRowHeaderOptionWidgets() override;
 
 private:
-    FOdysseyAnimationEditorExtension* mExtension;
+    TSharedRef<SWidget> GenerateLightTableRowHeaderWidget();
+    TSharedRef<SWidget> GenerateOutOfPegsRowHeaderWidget();
+    void OnLightTableCheckStateChanged(ECheckBoxState iState);
+    ECheckBoxState GetLightTableIsChecked() const;
+
+protected:
+    UOdysseyAnimationLayer* mLayer;
+    TAttribute<int> mCurrentFrame;
+    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
 };
