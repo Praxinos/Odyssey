@@ -285,10 +285,10 @@
     ],
     "PreBuildSteps": {
         "Win64": [
-            "copy /Y \"$(PluginDir)\\Config\\BaseEpos.ini\" \"$(PluginDir)\\Config\\DefaultEpos.ini\""
+            "copy /Y \"$(PluginDir)\\Config\\BaseOdyssey.ini\" \"$(PluginDir)\\Config\\DefaultEpos.ini\""
         ],
         "Mac": [
-            "cp \"$(PluginDir)/Config/BaseEpos.ini\" \"$(PluginDir)/Config/DefaultEpos.ini\""
+            "cp \"$(PluginDir)/Config/BaseOdyssey.ini\" \"$(PluginDir)/Config/DefaultEpos.ini\""
         ]
     }
 }

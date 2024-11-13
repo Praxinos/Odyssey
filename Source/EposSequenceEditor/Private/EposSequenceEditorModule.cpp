@@ -182,11 +182,11 @@ FEposSequenceEditorModule::RegisterSettings()
     FString PluginConfigDir = epos_plugin->GetBaseDir() / TEXT( "Config/" );
     // 5.1: With the warning of EditorPerProjectUserSettings.ini file which shouldn't be overrided in the plugin
     //mSequencerSettings->LoadConfig( USequencerSettings::StaticClass(), *FPaths::Combine( PluginConfigDir, TEXT( "EditorPerProjectUserSettings.ini" ) ) );
-    // Move its content to BaseEpos.ini
+    // Move its content to BaseOdyssey.ini
     // This line will override the user config values
-    mSequencerSettings->LoadConfig( USequencerSettings::StaticClass(), *FPaths::Combine( PluginConfigDir, TEXT( "BaseEpos.ini" ) ) );
+    mSequencerSettings->LoadConfig( USequencerSettings::StaticClass(), *FPaths::Combine( PluginConfigDir, TEXT( "BaseOdyssey.ini" ) ) );
     // This line is to load again the user config values
-    // Otherwise, the values will always be the ones inside BaseEpos.ini (like ZeroPaddedFrame which will always be 4)
+    // Otherwise, the values will always be the ones inside BaseOdyssey.ini (like ZeroPaddedFrame which will always be 4)
     mSequencerSettings->LoadConfig();
     //~
 
