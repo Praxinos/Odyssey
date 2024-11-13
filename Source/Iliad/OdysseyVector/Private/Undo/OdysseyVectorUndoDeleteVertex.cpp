@@ -1,15 +1,20 @@
 #include "Undo/OdysseyVectorUndoDeleteVertex.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoDeleteVertex::~FOdysseyVectorUndoDeleteVertex()
 {
 }
 
 FOdysseyVectorUndoDeleteVertex::FOdysseyVectorUndoDeleteVertex( FOdysseyVectorGroupPaint* iScene
-                                                              , const std::list<FOdysseyVectorObject*>& iObjectList )
-    : FOdysseyVectorUndo( iScene )
+                                                              , const std::list<FOdysseyVectorObject*>& iObjectList
+                                                              , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mPathSnapshotArray.reserve( iObjectList.size() );
 
     for( FOdysseyVectorObject* object : iObjectList )
@@ -35,13 +40,12 @@ FOdysseyVectorUndoDeleteVertex::Apply( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 void
@@ -56,13 +60,12 @@ FOdysseyVectorUndoDeleteVertex::Revert( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

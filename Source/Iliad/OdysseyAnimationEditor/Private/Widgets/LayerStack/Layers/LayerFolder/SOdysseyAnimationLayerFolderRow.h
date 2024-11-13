@@ -9,6 +9,7 @@
 
 class FOdysseyAnimationEditorTimelinePosition;
 class UOdysseyAnimationLayerFolder;
+class FOdysseyPainterEditor;
 /**
  * Implements a layer row widget
  */
@@ -17,8 +18,10 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerFolderRow
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerFolderRow)
+        : _PainterEditor(nullptr)
         {}
         SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ATTRIBUTE(TSharedPtr<FOdysseyPainterEditor>, PainterEditor)
     SLATE_END_ARGS()
 
 public:
@@ -31,4 +34,5 @@ public:
 
 private:
     UOdysseyAnimationLayerFolder* mAnimationLayerFolder;
+    TAttribute<TSharedPtr<FOdysseyPainterEditor>> mEditor;
 };

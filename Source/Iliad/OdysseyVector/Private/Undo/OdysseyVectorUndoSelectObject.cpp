@@ -1,71 +1,73 @@
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoSelectObject::~FOdysseyVectorUndoSelectObject()
 {
     mSelectedObjectList.clear();
 }
 
-FOdysseyVectorUndoSelectObject::FOdysseyVectorUndoSelectObject( FOdysseyVectorGroupPaint* iScene )
-    : FOdysseyVectorUndo( iScene )
+FOdysseyVectorUndoSelectObject::FOdysseyVectorUndoSelectObject( FOdysseyVectorGroupPaint* iScene
+                                                              , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    mSelectedObjectList = mScene->GetEngine()->GetSelectedObjectList();
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
+    mSelectedObjectList = mEngineList.front()->GetSelectedObjectList();
 }
 
 void
 FOdysseyVectorUndoSelectObject::Apply( UObject* iIgnored )
 {
     // save former selection
-    std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetEngine()->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*> selectedObjectList = mEngineList.front()->GetSelectedObjectList();
 
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mScene->GetEngine()->ClearObjectSelection();
+    mEngineList.front()->ClearObjectSelection();
 
     for( FOdysseyVectorObject* object : mSelectedObjectList )
     {
-        mScene->GetEngine()->SelectObject( object );
+        mEngineList.front()->SelectObject( object );
     }
 
     // prepare former selection for Revert()
     mSelectedObjectList = selectedObjectList;
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 void
 FOdysseyVectorUndoSelectObject::Revert( UObject* iIgnored )
 {
     // save former selection
-    std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetEngine()->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*> selectedObjectList = mEngineList.front()->GetSelectedObjectList();
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mScene->GetEngine()->ClearObjectSelection();
+    mEngineList.front()->ClearObjectSelection();
 
     for( FOdysseyVectorObject* object : mSelectedObjectList )
     {
-        mScene->GetEngine()->SelectObject( object );
+        mEngineList.front()->SelectObject( object );
     }
 
     // prepare former selection for Apply()
     mSelectedObjectList = selectedObjectList;
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

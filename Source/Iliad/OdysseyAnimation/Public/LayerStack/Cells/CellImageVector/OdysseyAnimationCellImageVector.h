@@ -4,6 +4,7 @@
 #pragma once
 
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "OdysseyVectorCell.h"
 
 #include "OdysseyAnimationCellImageVector.generated.h"
 
@@ -12,10 +13,11 @@ class FOdysseyMediaVector;
 class FOdysseyVectorEngine;
 class FOdysseyVectorGroupPaint;
 class UOdysseyAnimationLayerImageVector;
+class FOdysseyVectorRoot;
 
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationCellImageVector
-    : public UOdysseyAnimationCell
+    : public UOdysseyAnimationCell, public IOdysseyVectorCell
 {
     GENERATED_BODY()
 
@@ -33,6 +35,7 @@ public:
     virtual void OldSerialize(FArchive& Ar) override; //DEPRECATED: Keep that for compatibility with early versions of Odyssey
 
     FOdysseyVectorEngine* GetEngine() const;
+    FOdysseyVectorRoot* GetRoot() const;
     TSharedPtr<FOdysseyVectorBlock> GetVectorBlock() const;
     FGuid GetVectorBlockId();
     void SetVectorBlockId( FGuid iVectorBlockID );
@@ -51,6 +54,13 @@ public:
     FCriticalSection* GetImageRenderingMutex() const;
     bool IsImageRenderingGameThreadOnly() const;
 
+public:
+    // Implements Interface IOdysseyVectorAnimationCell
+    virtual FOdysseyVectorEngine* GetEngine() override;
+    virtual int32 GetIndex() override;
+    virtual uint32 GetLength() override;
+    virtual uint32 GetFrame() override;
+
 private:
     void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
 
@@ -60,7 +70,7 @@ private:
     friend class FOdysseyAnimationCellImageVectorImport;
 
 private:
-    FOdysseyVectorEngine* mEngine = nullptr;
+    FOdysseyVectorRoot* mRoot = nullptr;
     FGuid mVectorBlockId;
     TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
     mutable FCriticalSection mImageRenderingMutex;

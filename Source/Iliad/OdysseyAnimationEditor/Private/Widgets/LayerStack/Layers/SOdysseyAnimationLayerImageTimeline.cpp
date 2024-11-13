@@ -16,6 +16,7 @@
 #include "Shortcuts/Timeline/OdysseyAnimationTimelineCellImageStaggerShortcuts.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
 #include "LayerStack/Tools/OdysseyAnimationTimelineTools.h"
 #include "OdysseyAnimationEditorTimelinePosition.h"
 #include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
@@ -47,8 +48,21 @@ SOdysseyAnimationLayerImageTimeline::Construct(
     mOnActivateOutOfPegs = iArgs._OnActivateOutOfPegs;
     mOnInactivateOutOfPegs = iArgs._OnInactivateOutOfPegs;
     mOnIsOutOfPegsChecked = iArgs._OnIsOutOfPegsChecked;
+    mEditor = iArgs._PainterEditor;
 
     SOdysseyAnimationLayerTimeline::Construct(SOdysseyAnimationLayerTimeline::FArguments(), iOwnerTableView, iLayer);
+}
+
+TSharedRef<SWidget>
+SOdysseyAnimationLayerImageTimeline::GenerateWidgetForColumn( const FName& InColumnName )
+{
+    TSharedPtr<SWidget> widget = SOdysseyLayerRowBase::GenerateWidgetForColumn( InColumnName );
+    return SNew(SOdysseyAnimationTimelineScrollBox)
+        .TimelinePosition(mTimelinePosition)
+        + SOdysseyAnimationTimelineScrollBox::Slot()
+        [
+            widget.ToSharedRef()
+        ];
 }
 
 TSharedRef<SWidget>
@@ -689,6 +703,12 @@ SOdysseyAnimationLayerImageTimeline::IsCellMarkChecked(int iMarkId) const
     }
 
     return true;
+}
+
+UOdysseyAnimationLayer*
+SOdysseyAnimationLayerImageTimeline::GetLayer() const
+{
+    return mLayer;
 }
 
 #undef LOCTEXT_NAMESPACE

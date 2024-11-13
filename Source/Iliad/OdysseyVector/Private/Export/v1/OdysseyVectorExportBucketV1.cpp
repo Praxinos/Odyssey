@@ -2,6 +2,7 @@
 #include "Palette/OdysseyPaletteEntry.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorBucket.h"
 
 void
 FOdysseyVectorExportV1::WriteBucketPaletteEntry( FOdysseyVectorBucket& iBucket, FArchive& Ar)

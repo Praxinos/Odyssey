@@ -1,6 +1,10 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVector.h"
+#include "OdysseyVectorTag.h"
+#include "OdysseyVectorGroup.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorRoot.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 
 #ifndef M_PI
@@ -9,16 +13,26 @@
 
 FOdysseyVectorObject::~FOdysseyVectorObject()
 {
-    for( FOdysseyVectorObject *obj : mChildrenList )
-    {
-        delete obj;
-    }
+    mTagList.remove_if( []( FOdysseyVectorTag *tag ) -> bool
+                          {
+                              delete tag;
+
+                              return true;
+                          } );
+
+    mChildrenList.remove_if( []( FOdysseyVectorObject *obj )
+                                {
+                                    delete obj;
+
+                                    return true;
+                                } );
 }
 
 FOdysseyVectorObject::FOdysseyVectorObject( const FString& iName )
     : mParent( nullptr )
     , bSelected( false )
     , bExpanded( false )
+    , bIsSystem( false )
     , mBackgroundBucket( this, 0.0f, 0.0f, false )
     , mForegroundBucket( this, 0.0f, 0.0f, false )
     , mInvalidationFlags ( 0 )
@@ -68,6 +82,26 @@ void
 FOdysseyVectorObject::SetOpacity( double iOpacity )
 {
     mOpacity = iOpacity;
+}
+
+void
+FOdysseyVectorObject::AddTag( FOdysseyVectorTag* iTag )
+{
+    mTagList.push_back( iTag );
+
+    iTag->Added();
+
+    Invalidate( FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST );
+}
+
+void
+FOdysseyVectorObject::RemoveTag( FOdysseyVectorTag* iTag )
+{
+    mTagList.remove( iTag );
+
+    iTag->Removed();
+
+    Invalidate( FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST );
 }
 
 void
@@ -144,21 +178,51 @@ FOdysseyVectorObject::HasBaseClass( uint32 iBaseClassID )
     return false;
 }
 
+void
+FOdysseyVectorObject::Added()
+{
+    for( FOdysseyVectorTag* tag : mTagList )
+    {
+        tag->ObjectAdded();
+    }
+}
+
+bool
+FOdysseyVectorObject::IsSystem()
+{
+    return bIsSystem;
+}
+
+void
+FOdysseyVectorObject::Removed()
+{
+    for( FOdysseyVectorTag* tag : mTagList )
+    {
+        tag->ObjectRemoved();
+    }
+}
 
 void
 FOdysseyVectorObject::UpdateShape( uint32 iUpdateFlags )
 {
+/*
     if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
     {
         mInvalidationFlags = 0;
     }
+*/
 }
 
 void
 FOdysseyVectorObject::Update( uint32 iUpdateFlags )
 {
+
     if( mInvalidationFlags )
     {
+        // prevents DrawShape() to be called while the object has'nt been updated
+        // Indeed, it could be called by the animation proxy
+        mDrawingMutex.lock();
+
         // update children first by recursively calling the Update function and, if needed,
         // removing the object from the invalidated object list, in the same call.
         mInvalidatedChildrenList.remove_if( [iUpdateFlags] ( FOdysseyVectorObject* child )
@@ -167,8 +231,20 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
 
                                                 return child->IsInvalidated() == false;
                                             } );
-
         UpdateShape( iUpdateFlags );
+
+        // update tags
+        for( FOdysseyVectorTag* tag : mTagList )
+        {
+            tag->Update( iUpdateFlags, mInvalidationFlags );
+        }
+
+        if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
+        {
+            mInvalidationFlags = 0;
+        }
+
+        mDrawingMutex.unlock();
     }
 }
 
@@ -314,10 +390,40 @@ FOdysseyVectorObject::ResetTransform()
     Rotate( 0.0f );
 }
 
-FOdysseyVectorObject*
-FOdysseyVectorObject::Copy()
+void
+FOdysseyVectorObject::RecursiveRemoveTagByType( uint32 iTagType
+                                              , std::list<FOdysseyVectorTag*>& oRemovedTagList )
 {
-    FOdysseyVectorObject* objectCopy = CopyShape();
+    FOdysseyVectorTag* tag = GetTagByType( iTagType );
+
+    if( tag )
+    {
+        oRemovedTagList.push_back( tag );
+
+        RemoveTag( tag );
+    }
+
+    for( FOdysseyVectorObject* child : mChildrenList )
+    {
+        child->RecursiveRemoveTagByType( iTagType, oRemovedTagList );
+    }
+}
+
+FOdysseyVectorObject*
+FOdysseyVectorObject::CopyShape( uint64 iCopyFlags )
+{
+    return new FOdysseyVectorObject( mName );
+}
+
+FOdysseyVectorObject*
+FOdysseyVectorObject::Copy( uint64 iCopyFlags
+                          , std::function<uint64(FOdysseyVectorObject*,uint64)> iPreCallback
+                          , std::function<uint64(FOdysseyVectorObject*
+                                               , FOdysseyVectorObject*,uint64)> iPostCallback )
+{
+    uint64 copyFlags = iPreCallback( this, iCopyFlags );
+
+    FOdysseyVectorObject* objectCopy = CopyShape( copyFlags );
 
     if( objectCopy )
     {
@@ -326,13 +432,35 @@ FOdysseyVectorObject::Copy()
         // recurse
         for( FOdysseyVectorObject *child : mChildrenList )
         {
-            FOdysseyVectorObject *childCopy = child->Copy() ;
+            FOdysseyVectorObject *childCopy = child->Copy( copyFlags, iPreCallback, iPostCallback );
 
             objectCopy->AppendChild( childCopy );
         }
+
+        // copy tags
+        if( ( iCopyFlags & COPY_NOTAG ) == 0 )
+        {
+            for( FOdysseyVectorTag* tag : mTagList )
+            {
+                FOdysseyVectorTag* tagCopy = tag->Copy( objectCopy );
+
+                objectCopy->AddTag( tagCopy );
+            }
+        }
     }
 
+    iPostCallback( this, objectCopy, copyFlags );
+
     return objectCopy;
+}
+
+FOdysseyVectorObject*
+FOdysseyVectorObject::Copy()
+{
+    return Copy( 0
+               , []( FOdysseyVectorObject* object, uint64 ){ return 0; }
+               , []( FOdysseyVectorObject* sourceObject
+                   , FOdysseyVectorObject* objectCopy, uint64 ){ return 0; } );
 }
 
 // TODO: export flags
@@ -355,7 +483,7 @@ FOdysseyVectorObject::ExportParam( FOdysseyVectorObject* iDestinationObject, boo
 
     if( iInvalidate )
     {
-        iDestinationObject->Invalidate();
+        iDestinationObject->Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR  );
     }
 }
 
@@ -390,7 +518,6 @@ FOdysseyVectorObject::UpdateMatrix()
 {
     FOdysseyVectorGroupPaint* scene = GetScene();
 
-    // TODO: I believe this check can be removed
     if( scene )
     {
         mLocalMatrix.reset();
@@ -417,6 +544,12 @@ FOdysseyVectorObject::UpdateMatrix()
         for( FOdysseyVectorObject *child : mChildrenList )
         {
             child->UpdateMatrix();
+        }
+
+        //update tags
+        for( FOdysseyVectorTag* tag : mTagList )
+        {
+            tag->UpdateMatrix();
         }
 
         mInvalidationFlags &= (~INVALIDATE_MATRIX);
@@ -517,6 +650,18 @@ FOdysseyVectorObject::DrawChildren( BLContext* iBLContext
 }
 
 void
+FOdysseyVectorObject::DrawTags( BLContext* iBLContext
+                              , const ::ULIS::FRectD& iInvalidationArea
+                              , double iCombinedOpacity
+                              , uint64 iFlags )
+{
+    for( FOdysseyVectorTag *tag : mTagList )
+    {
+        tag->Draw( iBLContext, iInvalidationArea, iCombinedOpacity, iFlags );
+    }
+}
+
+void
 FOdysseyVectorObject::Draw( BLContext* iBLContext
                           , const ::ULIS::FRectD& iInvalidationArea
                           , double iAncestorsOpacity
@@ -531,11 +676,18 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext
     //Get sure everything is drawn before we draw in the BLend2D buffer.
     iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
 
+    mDrawingMutex.lock();
+
     DrawShape( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
+
+    mDrawingMutex.unlock();
+
     // get sure the parent has finished drawing before drawing its children
     iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
 
     DrawChildren( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
+
+    DrawTags( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
 
     iBLContext->restore();
 }
@@ -552,9 +704,29 @@ FOdysseyVectorObject::IsSelected()
     return bSelected;
 }
 
+FOdysseyVectorTag*
+FOdysseyVectorObject::GetTagByType( uint32 iTagClass )
+{
+    for( FOdysseyVectorTag* tag : mTagList )
+    {
+        if( tag->GetClass() == iTagClass )
+        {
+            return tag;
+        }
+    }
+
+    return nullptr;
+}
+
+uint64
+FOdysseyVectorObject::GetInvalidationFlags()
+{
+    return mInvalidationFlags;
+}
+
 void
 FOdysseyVectorObject::InvalidateChild( FOdysseyVectorObject* iChild
-                                     , uint32 iChildInvalidationFlags )
+                                     , uint64 iChildInvalidationFlags )
 {
     // this is temporary and should be optimized somehow
     if( std::find( mInvalidatedChildrenList.begin(), mInvalidatedChildrenList.end(), iChild ) == mInvalidatedChildrenList.end() )
@@ -567,44 +739,76 @@ FOdysseyVectorObject::InvalidateChild( FOdysseyVectorObject* iChild
               | ( ( iChildInvalidationFlags & INVALIDATE_SHAPE     ) << INVALIDATE_CHILD_SHIFT )
               | ( ( iChildInvalidationFlags & INVALIDATE_COLOR     ) << INVALIDATE_CHILD_SHIFT )
               | ( ( iChildInvalidationFlags & INVALIDATE_TOPOLOGY  ) << INVALIDATE_CHILD_SHIFT )
+              | ( ( iChildInvalidationFlags & INVALIDATE_TAG       ) << INVALIDATE_CHILD_SHIFT )
+              | ( ( iChildInvalidationFlags & INVALIDATE_TAG_LIST  ) << INVALIDATE_CHILD_SHIFT )
               | ( ( iChildInvalidationFlags & INVALIDATE_MATRIX    ) << INVALIDATE_CHILD_SHIFT )
               |   ( iChildInvalidationFlags & INVALIDATE_CHILD_SHAPE    )
               |   ( iChildInvalidationFlags & INVALIDATE_CHILD_COLOR    )
+              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_TAG      )
+              |   ( iChildInvalidationFlags & INVALIDATE_CHILD_TAG_LIST )
               |   ( iChildInvalidationFlags & INVALIDATE_CHILD_TOPOLOGY )
               |   ( iChildInvalidationFlags & INVALIDATE_CHILD_MATRIX   ) );
 }
 
 void
-FOdysseyVectorObject::Invalidate()
+FOdysseyVectorObject::InvalidateTag( FOdysseyVectorTag* iTag )
 {
-    Invalidate( FOdysseyVectorObject::INVALIDATE_ALL );
+    Invalidate( FOdysseyVectorObject::INVALIDATE_TAG );
 }
 
 void
-FOdysseyVectorObject::Invalidate( uint32 iInvalidationFlags )
+FOdysseyVectorObject::Invalidate( uint64 iInvalidationFlags )
 {
     if ( mParent )
     {
         mParent->InvalidateChild( this, iInvalidationFlags );
     }
 
-    mInvalidationFlags |= iInvalidationFlags;
+    mInvalidationFlags |= ( INVALIDATE_DEFAULT | iInvalidationFlags );
 }
 
 FOdysseyVectorEngine*
 FOdysseyVectorObject::GetEngine()
 {
-    FOdysseyVectorObject* parent = mParent;
-    FOdysseyVectorObject* root = this;
+    FOdysseyVectorRoot* root = GetRoot();
 
-    while ( parent )
+    return root ? root->GetEngine() : nullptr;
+}
+
+FOdysseyVectorRoot*
+FOdysseyVectorObject::GetRoot()
+{
+    FOdysseyVectorObject* candidate = this;
+
+    while ( candidate )
     {
-        root = parent;
+        if( candidate->GetClass() == FOdysseyVectorRoot::StaticClass() )
+        {
+            return static_cast<FOdysseyVectorRoot*>(candidate);
+        }
 
-        parent = parent->GetParent();
+        candidate = candidate->GetParent();
     }
 
-    return ( root->GetClass() == FOdysseyVectorEngine::StaticClass() ) ? static_cast<FOdysseyVectorEngine*>(root) : nullptr;
+    return nullptr;
+}
+
+FOdysseyVectorSharedEnv*
+FOdysseyVectorObject::GetSharedEnv()
+{
+    FOdysseyVectorObject* candidate = this;
+
+    while ( candidate )
+    {
+        if( candidate->GetClass() == FOdysseyVectorSharedEnv::StaticClass() )
+        {
+            return static_cast<FOdysseyVectorSharedEnv*>(candidate);
+        }
+
+        candidate = candidate->GetParent();
+    }
+
+    return nullptr;
 }
 
 FOdysseyVectorGroupPaint*
@@ -720,6 +924,17 @@ FOdysseyVectorObject::Pick( FOdysseyVectorGroup* iSelectionSpace, const ::ULIS::
     return nullptr;
 }
 
+void
+FOdysseyVectorObject::Recurse( void (FOdysseyVectorObject::*Func)() )
+{
+    (this->*Func)();
+
+    for( FOdysseyVectorObject* child : mChildrenList )
+    {
+        child->Recurse( Func );
+    }
+}
+
 uint32
 FOdysseyVectorObject::AppendChild( FOdysseyVectorObject* iChild )
 {
@@ -779,13 +994,24 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
         iChild->Invalidate( INVALIDATE_HIERARCHY );
     }
 
+    if( ret == HIERARCHY_CHANGE_SUCCESS )
+    {
+        iChild->Recurse( &FOdysseyVectorObject::Added );
+    }
+
     return ret;
+}
+
+FOdysseyVectorObject*
+FOdysseyVectorObject::GetOldParent()
+{
+    return mOldParent;
 }
 
 uint32
 FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 {
-    //iChild->mParent = nullptr;
+    uint32 ret = HIERARCHY_CHANGE_ERROR;
 
     if( iChild->mParent == this )
     {
@@ -793,11 +1019,49 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
         mInvalidatedChildrenList.remove( iChild );
 
         Invalidate( INVALIDATE_HIERARCHY );
+        // needed for undoing
+        iChild->mOldParent = this;
+        iChild->mParent = nullptr;
 
-        return HIERARCHY_CHANGE_SUCCESS; // removal succeeded
+        // update now
+        iChild->mInvalidationFlags |= INVALIDATE_HIERARCHY;
+        iChild->Update( 0 );
+
+        ret = HIERARCHY_CHANGE_SUCCESS; // removal succeeded
     }
 
-    return HIERARCHY_CHANGE_ERROR;
+    if( ret == HIERARCHY_CHANGE_SUCCESS )
+    {
+        iChild->Recurse( &FOdysseyVectorObject::Removed );
+    }
+
+    return ret;
+}
+
+uint32
+FOdysseyVectorObject::RemoveAllChildren()
+{
+    uint32 ret = HIERARCHY_CHANGE_ERROR;
+
+    Invalidate( INVALIDATE_HIERARCHY );
+
+    for( FOdysseyVectorObject* child : mChildrenList )
+    {
+        // needed for undoing
+        child->mOldParent = this;
+        child->mParent = nullptr;
+
+        // update now
+        child->mInvalidationFlags |= INVALIDATE_HIERARCHY;
+        child->Update( 0 );
+
+        child->Recurse( &FOdysseyVectorObject::Removed );
+    }
+
+    mChildrenList.clear();
+    mInvalidatedChildrenList.clear();
+
+    return HIERARCHY_CHANGE_SUCCESS;
 }
 
 uint32
@@ -927,6 +1191,12 @@ FOdysseyVectorObject::TreeToList( FOdysseyVectorObject* iObject, std::list<FOdys
     }
 
     return iOutList.size();
+}
+
+std::list<FOdysseyVectorTag*>&
+FOdysseyVectorObject::GetTagList()
+{
+    return mTagList;
 }
 
 //static

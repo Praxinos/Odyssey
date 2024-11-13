@@ -2,6 +2,7 @@
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
 #include "Export/v2/OdysseyVectorExport.h"
 #include "OdysseyFile.h"
+#include "OdysseyVectorEngine.h"
 
 void
 FOdysseyTextureLayerImageVectorExport::Write( UOdysseyTextureLayerImageVector* iTextureLayerImageVector

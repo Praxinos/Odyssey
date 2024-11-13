@@ -40,7 +40,7 @@ public:
     void BindVectorScene( FOdysseyVectorGroupPaint* iScene );
 
 protected:
-    void OnVectorSceneSignal( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
+    void OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
     void OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack );
     void OnSourceChanged();
 

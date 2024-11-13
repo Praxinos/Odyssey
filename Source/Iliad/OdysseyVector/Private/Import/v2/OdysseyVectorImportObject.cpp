@@ -2,6 +2,11 @@
 #include "OdysseyVectorPath.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorPath.h"
+#include "OdysseyVectorGroup.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorObject*
 FOdysseyVectorImportV2::CreateObject( uint32 iObjectType )
@@ -188,7 +193,7 @@ FOdysseyVectorImportV2::ParseObjectChunks( FOdysseyVectorObject& iObject
         }
         break;
 
-        case FOdysseyFile::VectorV2::CHUNK_OBJECT_TRANSFORM:
+        case FOdysseyFile::VectorV2::CHUNK_OBJECT_TRANSFORM:  // container
             ReadObjectTransform( iObject, Ar.Tell() + iChunkLen, Ar );
         break;
 
@@ -212,7 +217,7 @@ FOdysseyVectorImportV2::ParseObjectChunks( FOdysseyVectorObject& iObject
         }
         break;
 
-        case FOdysseyFile::VectorV2::CHUNK_OBJECT_FOREGROUNDBUCKET:
+        case FOdysseyFile::VectorV2::CHUNK_OBJECT_FOREGROUNDBUCKET: // container
         {
             FOdysseyVectorBucket& foregroundBucket = iObject.GetForegroundBucket();
 
@@ -220,11 +225,27 @@ FOdysseyVectorImportV2::ParseObjectChunks( FOdysseyVectorObject& iObject
         }
         break;
 
-        case FOdysseyFile::VectorV2::CHUNK_OBJECT_BACKGROUNDBUCKET:
+        case FOdysseyFile::VectorV2::CHUNK_OBJECT_BACKGROUNDBUCKET: // container
         {
             FOdysseyVectorBucket& backgroundBucket = iObject.GetBackgroundBucket();
 
             ReadObjectBucket( backgroundBucket, Ar.Tell() + iChunkLen, Ar);
+        }
+        break;
+
+        case FOdysseyFile::VectorV2::CHUNK_OBJECT_TAGS: // container
+        break;
+
+        case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER:
+        {
+            FOdysseyVectorTagInbetweener* inbetweenerTag = new FOdysseyVectorTagInbetweener( &iObject
+                                                                                           , 0
+                                                                                           , 0
+                                                                                           , eInbetweenerGridType::ARAP );
+
+            iObject.AddTag( inbetweenerTag );
+
+            ReadTagInbetweener( *inbetweenerTag, Ar.Tell() + iChunkLen, Ar );
         }
         break;
 
@@ -276,7 +297,7 @@ FOdysseyVectorImportV2::ReadObjectsDefine( uint64 iChunkEnd, FArchive &Ar )
 
                     FOdysseyVectorImportV2::ReadGroup( *group, Ar.Tell() + iChunkLen, Ar );
 
-                    group->Invalidate();
+                    //group->Invalidate();
                 }
                 break;
 
@@ -286,7 +307,7 @@ FOdysseyVectorImportV2::ReadObjectsDefine( uint64 iChunkEnd, FArchive &Ar )
 
                     FOdysseyVectorImportV2::ReadPath( *path, Ar.Tell() + iChunkLen, Ar );
                     // immediately update invalidated segments and updates the path's BBox
-                    path->Update( 0 );
+                    path->Update( FOdysseyVectorObject::UPDATE_FROMFILE );
                 }
                 break;
 
@@ -297,7 +318,7 @@ FOdysseyVectorImportV2::ReadObjectsDefine( uint64 iChunkEnd, FArchive &Ar )
 
                     FOdysseyVectorImportV2::ReadGroupPaint( *paintGroup, Ar.Tell() + iChunkLen, Ar );
 
-                    paintGroup->Invalidate();
+                    //paintGroup->Invalidate();
                 }
                 break;
 

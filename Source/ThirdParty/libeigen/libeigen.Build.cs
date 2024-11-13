@@ -1,0 +1,76 @@
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+/*
+*   libeigen
+*__________________
+* @file         libeigen.Build.cs
+* @author       Gary GABRIEL
+* @brief        Module description file for UnrealEngine4
+* @copyright    Copyright 2018-2024 Praxinos, Inc. All Rights Reserved.
+* @license      Please refer to LICENSE.md
+*/
+using System;
+using System.IO;
+using UnrealBuildTool;
+
+public class libeigen : ModuleRules
+{
+    public string GetRootPath()
+    {
+        //Assuming Source/ThirdParty/libeigen/
+        return Path.GetFullPath( Path.Combine( ModuleDirectory, "../../.." ) );
+    }
+
+    private string CopyToBinaries( string iSrcFilepath, ReadOnlyTargetRules iTarget )
+    {
+        string binariesDir  = Path.GetFullPath( Path.Combine( GetRootPath(), "Binaries", iTarget.Platform.ToString() ) );
+        string filename     = Path.GetFileName( iSrcFilepath );
+        string dstFilepath = Path.Combine( binariesDir, filename );
+
+        if( !Directory.Exists( binariesDir ) )
+            Directory.CreateDirectory( binariesDir );
+
+        if( !File.Exists( dstFilepath ) )
+            File.Copy( iSrcFilepath, dstFilepath, true);
+
+        return dstFilepath;
+    }
+
+    public libeigen( ReadOnlyTargetRules iTarget ) : base( iTarget )
+    {
+        Type = ModuleType.External;
+
+        string includePath  = Path.GetFullPath( Path.Combine( ModuleDirectory, "include/eigen3" ) );
+//        string libPath      = Path.GetFullPath( Path.Combine( ModuleDirectory, "lib" ) );
+//        string binPath      = Path.GetFullPath( Path.Combine( ModuleDirectory, "bin" ) );
+//        string baseName = "libeigen";
+
+        if( iTarget.Platform == UnrealTargetPlatform.Win64 /*||
+            iTarget.Platform == UnrealTargetPlatform.Win32*/ )
+        {
+//            string libName = baseName + ".lib";
+//            string binName = baseName + ".dll";
+
+            PublicSystemIncludePaths.Add( includePath );
+//            PublicAdditionalLibraries.Add( Path.Combine( libPath, libName ) );
+
+//            string binariesPath = CopyToBinaries( Path.Combine( binPath, binName ), iTarget );
+//            RuntimeDependencies.Add( "$(BinaryOutputDir)/" + binName, "$(ModuleDir)/bin/" + binName );
+
+//            System.Console.WriteLine( "Using " + baseName +" DLL: " + binariesPath );
+        }
+        else if ( iTarget.Platform == UnrealTargetPlatform.Mac )
+        {
+//            baseName = "libeigen";
+//            string binName = baseName + ".dylib";;
+
+            PublicSystemIncludePaths.Add( includePath );
+//            PublicAdditionalLibraries.Add( Path.Combine( binPath, binName ) );
+
+//            string binariesPath = CopyToBinaries( Path.Combine( binPath, binName ), iTarget );
+ //           RuntimeDependencies.Add( "$(BinaryOutputDir)/" + binName, ModuleDirectory + "/bin/" + binName );
+
+ //           System.Console.WriteLine( "Using " + baseName +" DYLIB: " + binariesPath );
+        }
+    }
+}

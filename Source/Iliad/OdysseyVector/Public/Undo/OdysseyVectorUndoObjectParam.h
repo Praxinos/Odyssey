@@ -14,11 +14,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectParam : public FOdysseyVectorUnd
     public:
         ~FOdysseyVectorUndoObjectParam();
          FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
-                                      , FOdysseyVectorObject* iObject );
+                                      , FOdysseyVectorObject* iObject
+                                      , uint64 iReturnFlags );
          FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
-                                      , const std::vector<FOdysseyVectorObject*>& iObjectArray );
+                                      , const std::vector<FOdysseyVectorObject*>& iObjectArray
+                                      , uint64 iReturnFlags );
          FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
-                                      , const std::list<FOdysseyVectorObject*>& iObjectList );
+                                      , const std::list<FOdysseyVectorObject*>& iObjectList
+                                      , uint64 iReturnFlags );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

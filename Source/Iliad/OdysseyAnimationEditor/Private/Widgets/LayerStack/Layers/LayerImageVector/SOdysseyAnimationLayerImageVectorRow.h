@@ -5,9 +5,11 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/LayerStack/Layers/SOdysseyAnimationLayerRow.h"
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableKey.h"
+
+class SOdysseyAnimationTimelineInbetweeningHeader;
 
 class FOdysseyAnimationEditorTimelinePosition;
+class FOdysseyPainterEditor;
 /**
  * Implements a layer row widget
  */
@@ -16,9 +18,11 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorRow
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageVectorRow)
+        : _PainterEditor(nullptr)
         {}
         SLATE_ATTRIBUTE(int, CurrentFrame)
         SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
+        SLATE_ATTRIBUTE(TSharedPtr<FOdysseyPainterEditor>, PainterEditor)
     SLATE_END_ARGS()
 
 public:
@@ -29,8 +33,14 @@ public:
         class UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector
     );
 
+public:
+    TSharedPtr<SOdysseyAnimationTimelineInbetweeningHeader> GetInbetweeningHeader();
+
 protected:
+    virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
+    virtual EVisibility GetRowVisibility(FName iRow) const;
     virtual TArray<TSharedPtr<SWidget>> GenerateMainRowHeaderOptionWidgets() override;
+    TSharedRef<SWidget> GenerateInbetweeningRowHeaderWidget();
 
 private:
     void OnIsColoredCheckStateChanged( ECheckBoxState iState );
@@ -39,5 +49,7 @@ private:
     ECheckBoxState GetIsWireframeIsChecked() const;
 
 private:
+    TSharedPtr<SOdysseyAnimationTimelineInbetweeningHeader> mInbetweeningHeader;
     class UOdysseyAnimationLayerImageVector* mAnimationLayerImageVector;
+    TAttribute<TSharedPtr<FOdysseyPainterEditor>> mEditor;
 };

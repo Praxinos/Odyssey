@@ -5,7 +5,6 @@
 #include "Widgets/LayerStack/Cells/SOdysseyAnimationCell.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineSection.h"
 #include "Widgets/Layout/SMissingWidget.h"
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
 #include "OdysseyStyleSet.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "Widgets/LayerStack/Cells/SOdysseyAnimationCellHandle.h"
@@ -63,92 +62,87 @@ SOdysseyAnimationCells::Construct(
     ChildSlot
     .Padding(FMargin(0, 4.f, 0, 4.f))
     [
-        SNew(SOdysseyAnimationTimelineScrollBox)
-        .TimelinePosition(mTimelinePosition)
-        + SOdysseyAnimationTimelineScrollBox::Slot()
+        SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
+        .AutoWidth()
         [
-            SNew(SHorizontalBox)
-            + SHorizontalBox::Slot()
-            .AutoWidth()
+            //Timeline Section for Layer Offset
+            SNew(SOdysseyAnimationTimelineSection)
+            .TimelinePosition(mTimelinePosition)
+            .WidthInFrames(this, &SOdysseyAnimationCells::GetOffset)
+            .Content()
             [
-                //Timeline Section for Layer Offset
-                SNew(SOdysseyAnimationTimelineSection)
-                .TimelinePosition(mTimelinePosition)
-                .WidthInFrames(this, &SOdysseyAnimationCells::GetOffset)
-                .Content()
-                [
-                    SNullWidget::NullWidget
-                ]
+                SNullWidget::NullWidget
             ]
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            .Padding(FMargin(-preBehaviourPadding, 0, 0, 0))
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .Padding(FMargin(-preBehaviourPadding, 0, 0, 0))
+        [
+            SNew(SBox)
+            .WidthOverride(preBehaviourPadding)
             [
-                SNew(SBox)
-                .WidthOverride(preBehaviourPadding)
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .HAlign(HAlign_Right)
+                .VAlign(VAlign_Center)
                 [
-                    SNew(SHorizontalBox)
-                    + SHorizontalBox::Slot()
-                    .HAlign(HAlign_Right)
-                    .VAlign(VAlign_Center)
+                    SNew(SComboButton)
+                    .ButtonStyle(&FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "SimpleButton" ))
+                    .HasDownArrow(false)
+                    .OnGetMenuContent(this, &SOdysseyAnimationCells::GetPreBehaviourMenuContent)
+                    .ButtonContent()
                     [
-                        SNew(SComboButton)
-                        .ButtonStyle(&FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "SimpleButton" ))
-                        .HasDownArrow(false)
-                        .OnGetMenuContent(this, &SOdysseyAnimationCells::GetPreBehaviourMenuContent)
-                        .ButtonContent()
-                        [
-                            SNew(SImage)
-                            .Image(this, &SOdysseyAnimationCells::GetPreBehaviourBrush)
-                            .ColorAndOpacity(preBehaviourColor)
-                        ]
-                    ]
-                    + SHorizontalBox::Slot()
-                    .AutoWidth()
-                    [
-                        //Add Cells Handle
-                        CreateAddCellsHandleLeftWidget()
+                        SNew(SImage)
+                        .Image(this, &SOdysseyAnimationCells::GetPreBehaviourBrush)
+                        .ColorAndOpacity(preBehaviourColor)
                     ]
                 ]
-            ]
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            [
-                SAssignNew(mTempPreCellsBox, SHorizontalBox)
-            ]
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            [
-                SAssignNew(mCellsBox, SHorizontalBox)
-            ]
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            [
-                SAssignNew(mTempPostCellsBox, SHorizontalBox)
-            ]
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            .HAlign(HAlign_Left)
-            .VAlign(VAlign_Top)
-            [
-                //Add Cells Handle
-                CreateAddCellsHandleRightWidget()
-            ]
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            .HAlign(HAlign_Left)
-            .VAlign(VAlign_Center)
-            [
-                SNew(SComboButton)
-                .ButtonStyle(&FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "SimpleButton" ))
-                .HasDownArrow(false)
-                .OnGetMenuContent(this, &SOdysseyAnimationCells::GetPostBehaviourMenuContent)
-                .ButtonContent()
+                + SHorizontalBox::Slot()
+                .AutoWidth()
                 [
-                    SNew(SImage)
-                    .Image(this, &SOdysseyAnimationCells::GetPostBehaviourBrush)
-                    .ColorAndOpacity(postBehaviourColor)
+                    //Add Cells Handle
+                    CreateAddCellsHandleLeftWidget()
                 ]
+            ]
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+            SAssignNew(mTempPreCellsBox, SHorizontalBox)
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+            SAssignNew(mCellsBox, SHorizontalBox)
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+            SAssignNew(mTempPostCellsBox, SHorizontalBox)
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Top)
+        [
+            //Add Cells Handle
+            CreateAddCellsHandleRightWidget()
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Center)
+        [
+            SNew(SComboButton)
+            .ButtonStyle(&FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "SimpleButton" ))
+            .HasDownArrow(false)
+            .OnGetMenuContent(this, &SOdysseyAnimationCells::GetPostBehaviourMenuContent)
+            .ButtonContent()
+            [
+                SNew(SImage)
+                .Image(this, &SOdysseyAnimationCells::GetPostBehaviourBrush)
+                .ColorAndOpacity(postBehaviourColor)
             ]
         ]
     ];

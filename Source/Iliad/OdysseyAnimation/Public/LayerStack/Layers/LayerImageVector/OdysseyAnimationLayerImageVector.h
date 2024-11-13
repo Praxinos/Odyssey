@@ -8,11 +8,15 @@
 
 #include <ULIS>
 
+#include "OdysseyVector.h"
+#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h" // interface
+
 #include "OdysseyAnimationLayerImageVector.generated.h"
 
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageVector
-    : public UOdysseyAnimationLayer
+    : public UOdysseyAnimationLayer, public IOdysseyVectorLayer
 {
     GENERATED_BODY()
 
@@ -31,6 +35,8 @@ public:
 public:
     // UObject overrides
     virtual void PostInitProperties() override;
+    virtual void PostLoad() override;
+    virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual void Serialize(FArchive& Ar) override;
 
 public:
@@ -39,14 +45,36 @@ public:
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
 public:
+    // vector data shared between all cells
+    FOdysseyVectorSharedEnv* GetSharedEnv();
+    void UpdateSharedEnv();
+
+public:
     //FOdysseyImageRenderingAbility overrides
     virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
     virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
 
+public:
+    // Implements Interface IOdysseyVectorAnimationLayer
+    virtual IOdysseyVectorCell* GetCellByIndex( uint32 iIndex ) override;
+    virtual IOdysseyVectorCell* GetFirstCell() override;
+    virtual IOdysseyVectorCell* GetLastCell() override;
+
 protected:
     void IsColoredChanged();
     void IsWireframeChanged();
+    virtual void CellsChanged(bool iIsInteractive) override;
     virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
+
+public:
+
+#ifdef WITH_EDITOR
+
+virtual TArray<FName> GetRows() const override;
+virtual int GetRowHeight(FName iSubRowName) const override;
+virtual bool IsRowVisible(FName iSubRowName) const override;
+
+#endif //WITH_EDITOR
 
 private:
     TSharedPtr<IOdysseyMedia> CreateMediaVector(int iFrameIndex);
@@ -66,4 +94,8 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Odyssey|Layer", BlueprintSetter=IsColoredBlueprintSetter, NonTransactional)
     bool IsColored = true;
+
+private:
+    // mSharedEnv MUST be before mCellsContainer because of the destruction order
+    FOdysseyVectorSharedEnv mSharedEnv;
 };

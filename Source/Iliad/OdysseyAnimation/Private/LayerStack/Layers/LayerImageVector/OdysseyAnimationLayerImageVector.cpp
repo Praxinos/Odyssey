@@ -22,6 +22,13 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorObject.h"
 
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
+
+#include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorRoot.h"
+
 #define LOCTEXT_NAMESPACE "Animation"
 
 UOdysseyAnimationLayerImageVector::FOnIsColoredChanged&
@@ -49,6 +56,34 @@ UOdysseyAnimationLayerImageVector::PostInitProperties()
 
     SupportedCellTypes.Add(UOdysseyAnimationCellImageVector::StaticClass());
     SupportedCellTypes.Add(UOdysseyAnimationCellImageStagger::StaticClass());
+}
+
+void
+UOdysseyAnimationLayerImageVector::PostLoad()
+{
+    Super::PostLoad();
+    UpdateSharedEnv();
+}
+
+void
+UOdysseyAnimationLayerImageVector::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
+{
+    Super::PostDuplicate(iDuplicateMode);
+    UpdateSharedEnv();
+}
+
+void
+UOdysseyAnimationLayerImageVector::UpdateSharedEnv()
+{
+    GetSharedEnv()->RemoveAllChildren();
+    for (UOdysseyAnimationCell* cell : Cells)
+    {
+        if (!cell->IsA<UOdysseyAnimationCellImageVector>())
+            continue;
+
+        UOdysseyAnimationCellImageVector* cellVector = Cast<UOdysseyAnimationCellImageVector>(cell);
+        GetSharedEnv()->AppendChild( cellVector->GetRoot() );
+    }
 }
 
 struct FOdysseyAnimationLayerImageVectorObjectVersion
@@ -397,9 +432,64 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
         FOdysseyVectorEngine* engine = vectorCell->GetEngine();
         FOdysseyVectorGroupPaint* scene = engine->GetScene();
         scene->UpdateMatrix();
-        scene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-        engine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
+        scene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+        engine->Invalidate( 0 );
     }
+
+    FOdysseyVectorEngine::Notify( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
+}
+
+FOdysseyVectorSharedEnv*
+UOdysseyAnimationLayerImageVector::GetSharedEnv()
+{
+    return &mSharedEnv;
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetCellByIndex
+IOdysseyVectorCell*
+UOdysseyAnimationLayerImageVector::GetCellByIndex( uint32 iIndex )
+{
+    uint32 cellCount = Cells.Num();
+
+    if( ( iIndex >= 0 ) && ( iIndex < cellCount ) )
+    {
+        UOdysseyAnimationCell* cell = Cells[iIndex];
+        if (!cell->IsA<UOdysseyAnimationCellImageVector>())
+            return nullptr;
+
+        return Cast<UOdysseyAnimationCellImageVector>(cell);
+    }
+
+    return nullptr;
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetLastCell
+IOdysseyVectorCell*
+UOdysseyAnimationLayerImageVector::GetLastCell()
+{
+    if (Cells.IsEmpty())
+        return nullptr;
+
+    UOdysseyAnimationCell* lastCell = Cells.Last();
+    if (!lastCell->IsA<UOdysseyAnimationCellImageVector>())
+        return nullptr;
+
+    return Cast<UOdysseyAnimationCellImageVector>(lastCell);
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetLastCell
+IOdysseyVectorCell*
+UOdysseyAnimationLayerImageVector::GetFirstCell()
+{
+    if (Cells.IsEmpty())
+        return nullptr;
+
+    UOdysseyAnimationCell* firstCell = Cells[0];
+    if (!firstCell->IsA<UOdysseyAnimationCellImageVector>())
+        return nullptr;
+
+    return Cast<UOdysseyAnimationCellImageVector>(firstCell);
 }
 
 void
@@ -412,6 +502,55 @@ void
 UOdysseyAnimationLayerImageVector::IsColoredBlueprintSetter(bool Value)
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsColored), Value);
+}
+
+#ifdef WITH_EDITOR
+
+TArray<FName>
+UOdysseyAnimationLayerImageVector::GetRows() const
+{
+    TArray<FName> rows = Super::GetRows();
+    rows.Add("Inbetweening");
+
+    return rows;
+}
+
+int
+UOdysseyAnimationLayerImageVector::GetRowHeight(FName iSubRowName) const
+{
+    if (iSubRowName == "Inbetweening")
+    {
+        const std::list<FOdysseyVectorTag*>& tagList = mSharedEnv.GetSharedTagList();
+        int numTags = 0;
+        for (FOdysseyVectorTag* tag : tagList)
+        {
+            if (tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass())
+                numTags++;
+        }
+        return 20 * numTags;
+    }
+
+    return Super::GetRowHeight(iSubRowName);
+}
+
+bool
+UOdysseyAnimationLayerImageVector::IsRowVisible(FName iSubRowName) const
+{
+    if (iSubRowName == "Inbetweening")
+        return false; //managed by the editor (see SOdysseyAnimationLayerImageVectorTimeline)
+
+    return Super::IsRowVisible(iSubRowName);
+}
+
+#endif //WITH_EDITOR
+
+void
+UOdysseyAnimationLayerImageVector::CellsChanged(bool iIsInteractive)
+{
+    Super::CellsChanged(iIsInteractive);
+
+    if (!iIsInteractive)
+        UpdateSharedEnv();
 }
 
 #undef LOCTEXT_NAMESPACE

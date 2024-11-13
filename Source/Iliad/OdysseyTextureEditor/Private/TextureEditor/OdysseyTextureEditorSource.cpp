@@ -15,6 +15,9 @@
 #include "ScopedTransaction.h"
 #include "TextureCompiler.h"
 
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
+
 #define LOCTEXT_NAMESPACE "TextureEditor"
 
 const FGuid&
@@ -201,20 +204,25 @@ FOdysseyTextureEditorSource::Clear()
     else if (mediaProvider.HasMedia<FOdysseyMediaVector>())
     {
         TArray<TSharedPtr<FOdysseyMediaVector>> mediasVector = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
+        uint64 notificationFlags = FOdysseyVectorEngine::NOTIFY_ALL;
+
         for (TSharedPtr<FOdysseyMediaVector> mediaVector : mediasVector)
         {
             FOdysseyVectorEngine* vectorEngine = mediaVector->GetScene()->GetEngine();
+
             // needed for undos
             if (GUndo)
             {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear(vectorEngine);
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear( vectorEngine, notificationFlags );
                 GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
                 RecordCurrentFrameUndo();
             }
 
-            vectorEngine->SetScene(new FOdysseyVectorGroupPaint("Scene"));
-            vectorEngine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
+            vectorEngine->GetRoot()->SetScene(new FOdysseyVectorGroupPaint("Scene"));
+            vectorEngine->Invalidate( 0 );
         }
+
+        FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
     }
 }
 

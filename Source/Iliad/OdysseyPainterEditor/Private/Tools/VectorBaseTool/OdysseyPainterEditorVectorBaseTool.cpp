@@ -14,6 +14,9 @@
 #include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
 #include "ISinglePropertyView.h"
 #include "Toolkits/BaseToolkit.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEllipse.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -256,11 +259,11 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            uint64 signalFlags;
+            uint64 notificationFlags;
 
-            signalFlags = UnloadVector( vectorScene );
+            notificationFlags = UnloadVector( vectorScene );
 
-            vectorEngine->Signal( signalFlags );
+            FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
 
             if( mBaseHUD )
             {
@@ -292,7 +295,7 @@ UOdysseyPainterEditorVectorBaseTool::Load()
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            uint64 signalFlags;
+            uint64 notificationFlags;
 
             vectorEngine->ClearHUD();
 
@@ -304,9 +307,9 @@ UOdysseyPainterEditorVectorBaseTool::Load()
                 vectorEngine->ResetHUD();
             }
 
-            signalFlags = LoadVector( vectorScene );
+            notificationFlags = LoadVector( vectorScene );
 
-            vectorEngine->Signal( signalFlags );
+            FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
         }
     }
 }
@@ -336,9 +339,9 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobal( const FKey& iKey )
 
     FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
     FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    uint64 signalFlags = 0;
-    bool handled = OnKeyDownGlobalVector(vectorScene,iKey, signalFlags);
-    vectorEngine->Signal( signalFlags );
+    uint64 notificationFlags = 0;
+    bool handled = OnKeyDownGlobalVector(vectorScene, iKey, notificationFlags);
+    FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
     return handled;
 }
 
@@ -350,7 +353,9 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* 
     if( iKey == EKeys::Delete )
     {
         Delete();
-        oSignalFlags = FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+		// force redraw
+        iScene->GetEngine()->Invalidate( 0 );
+        oSignalFlags = 0;
         return true;
     }
 
@@ -399,10 +404,10 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
 
     FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
     FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    uint64 signalFlags = 0;
+    uint64 notificationFlags = 0;
 
-    bool handled = OnKeyDownVector( vectorScene, iKey, signalFlags );
-    vectorEngine->Signal( signalFlags );
+    bool handled = OnKeyDownVector( vectorScene, iKey, notificationFlags );
+    FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
     return handled;
 }
 
@@ -431,9 +436,9 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobal( const FKey& iKey )
 
     FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
     FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    uint64 signalFlags = 0;
-    bool handled = OnKeyUpGlobalVector(vectorScene,iKey, signalFlags);
-    vectorEngine->Signal( signalFlags );
+    uint64 notificationFlags = 0;
+    bool handled = OnKeyUpGlobalVector(vectorScene,iKey, notificationFlags);
+    FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
     return handled;
 }
 
@@ -462,10 +467,10 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUp( const FKey& iKey )
 
     FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
     FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    uint64 signalFlags = 0;
+    uint64 notificationFlags = 0;
 
-    bool handled = OnKeyUpVector(vectorScene,iKey, signalFlags);
-    vectorEngine->Signal( signalFlags );
+    bool handled = OnKeyUpVector(vectorScene,iKey, notificationFlags);
+    FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
     return handled;
 }
 
@@ -493,10 +498,10 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDown( const FOdysseyPoint& iPointInT
 
     FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
     FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    uint64 signalFlags = 0;
+    uint64 notificationFlags = 0;
 
-    bool handled = OnMouseDownVector( vectorScene, iPointInTexture, iKey, signalFlags );
-    vectorEngine->Signal( signalFlags );
+    bool handled = OnMouseDownVector( vectorScene, iPointInTexture, iKey, notificationFlags );
+    FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
     return handled;
 }
 
@@ -523,10 +528,10 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseHover( const FOdysseyPoint& iPointIn
 
     FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
     FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    uint64 signalFlags = 0;
+    uint64 notificationFlags = 0;
 
-    OnMouseHoverVector( vectorScene, iPointInTexture, signalFlags );
-    vectorEngine->Signal( signalFlags );
+    OnMouseHoverVector( vectorScene, iPointInTexture, notificationFlags );
+    FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
 }
 
 // WorkAround for faulty stylus drivers
@@ -593,10 +598,10 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDrag( const FOdysseyPoint& iPointInT
 
     FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
     FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    uint64 signalFlags = 0;
+    uint64 notificationFlags = 0;
 
-    OnMouseDragVector( vectorScene, iPointInTexture, signalFlags );
-    vectorEngine->Signal( signalFlags );
+    OnMouseDragVector( vectorScene, iPointInTexture, notificationFlags );
+    FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
 }
 
 bool
@@ -615,10 +620,12 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseClick(const FOdysseyPoint& iPointInT
 
     FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
     FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    uint64 signalFlags = 0;
 
-    bool handled = OnMouseClickVector( vectorScene, iPointInTexture, iKey, signalFlags );
-    vectorEngine->Signal( signalFlags );
+    uint64 notificationFlags = 0;
+
+	bool handled = OnMouseClickVector( vectorScene, iPointInTexture, iKey, notificationFlags );
+    FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
+
     if (!handled)
     {
         if( iKey == EKeys::RightMouseButton )
@@ -666,10 +673,10 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseUp( const FOdysseyPoint& iPointInTex
 
     FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
     FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-    uint64 signalFlags = 0;
+    uint64 notificationFlags = 0;
 
-    bool handled = OnMouseUpVector( vectorScene, iPointInTexture, iKey, signalFlags );
-    vectorEngine->Signal( signalFlags );
+    bool handled = OnMouseUpVector( vectorScene, iPointInTexture, iKey, notificationFlags );
+    FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
     return handled;
 }
 
@@ -683,7 +690,7 @@ UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( FOdysseyVectorGroupP
         iScene->GetEngine()->ResetHUD();
     } */
 
-    return FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW;
+    return 0;
 }
 
 void
@@ -703,11 +710,11 @@ UOdysseyPainterEditorVectorBaseTool::PostEditChangeProperty( FPropertyChangedEve
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
             FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-            uint64 signalFlags;
+            uint64 notificationFlags;
 
-            signalFlags = PropertyChangedVector( vectorScene, PropertyChangedEvent.GetPropertyName() );
+            notificationFlags = PropertyChangedVector( vectorScene, PropertyChangedEvent.GetPropertyName() );
 
-            vectorEngine->Signal( signalFlags );
+            FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
         }
     }
 }
@@ -976,6 +983,11 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenu( FMenuBuilder& menu )
     {
         ExtendContextMenuVertex( menu );
     }
+
+    if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+    {
+        ExtendContextMenuInbetween( menu );
+    }
 }
 
 void
@@ -1140,6 +1152,126 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuVertex( FMenuBuilder& menu
     //return menu.MakeWidget();
 }
 
+void
+UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FMenuBuilder& menu )
+{
+    //FMenuBuilder menu( true, nullptr );
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return;
+
+    bool hasVector = mediaProvider.HasMedia<FOdysseyMediaVector>();
+
+    if( hasVector )
+    {
+        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
+
+        if( mediaVectors.Num() )
+        {
+            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+
+        // Commented-out: sections are not needed here as they would conflict with the section
+        // just created by the Edit Menu when this tool's menu appears in the Edit Menu
+        // See FOdysseyPainterEditor::AddEditMenuEntry() for details
+        //     menu.BeginSection("Context");
+        //     {
+            if( vectorScene->GetEngine()->GetSelectedObjectList().size() > 1 )
+            {
+                menu.AddMenuEntry(
+                      LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-tag.name", "Group and Add Inbetweener Grid")
+                    , LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-tag.tooltip", "Group and Add Inbetweener Grid")
+                    , FSlateIcon()
+                    , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::GroupAndAddInbetweenerTag, GetEditor(), vectorScene )));
+            }
+
+            menu.AddMenuEntry(
+                    LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-tag.name", "Add Inbetweener Tag")
+                  , LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-tag.tooltip", "Add Inbetweener Tag")
+                  , FSlateIcon()
+                  , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::AddInbetweenerTag, GetEditor(), vectorScene )));
+
+            menu.AddMenuEntry(
+                    LOCTEXT("vector-tool.inbetween-context-menu.remove-inbetweener-tag.name", "Remove Inbetweener Tag")
+                  , LOCTEXT("vector-tool.inbetween-context-menu.remove-inbetweener-tag.tooltip", "Remove Inbetweener Tag")
+                  , FSlateIcon()
+                  , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::RemoveInbetweenerTag, GetEditor(), vectorScene )));
+
+            menu.AddMenuEntry(
+                    LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.name", "Commit Inbetweener Tag")
+                  , LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.tooltip", "Commit Inbetweener Tag")
+                  , FSlateIcon()
+                  , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CommitSelectedInbetweenerTag, GetEditor(), vectorScene->GetSharedEnv() )));
+/*
+            menu.AddMenuEntry(
+                  LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.name", "Reset Grid")
+                , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.tooltip", "Reset Grid")
+                , FSlateIcon()
+                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetInbetweenerGrid, GetEditor(), vectorScene )));
+*/
+            menu.AddSubMenu(
+                  LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.name", "Reset Grid")
+                , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.tooltip", "Reset Grid")
+                , FNewMenuDelegate::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::ResetGridMenu, vectorScene ) );
+
+            menu.AddMenuEntry(
+                  LOCTEXT("vector-tool.inbetween-context-menu.reset-breakdown-spacing-chart.name", "Reset Spacing" )
+                , LOCTEXT("vector-tool.inbetween-context-menu.reset-breakdown-spacing-chart.tooltip", "Reset Spacing" )
+                , FSlateIcon()
+                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetBreakdownSpacingChart, GetEditor(), vectorScene, false )));
+
+            menu.AddMenuEntry(
+                  LOCTEXT("vector-tool.inbetween-context-menu.reset-breakdown-spacing-chart.name", "Reset Chart" )
+                , LOCTEXT("vector-tool.inbetween-context-menu.reset-breakdown-spacing-chart.tooltip", "Reset Chart" )
+                , FSlateIcon()
+                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetBreakdownSpacingChart, GetEditor(), vectorScene, true )));
+
+            menu.AddMenuEntry(
+                  LOCTEXT("vector-tool.object-context-menu.delete-selection.name","Delete Selection")
+                , LOCTEXT("vector-tool.object-context-menu.delete-selection.tooltip","Delete Selection")
+                , FSlateIcon()
+                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::DeleteObjects, GetEditor(), vectorScene )));
+/*
+            menu.AddMenuEntry(
+                  LOCTEXT("vector-tool.inbetween-context-menu.copy-spacing-chart.name", "Copy Spacing Chart")
+                , LOCTEXT("vector-tool.inbetween-context-menu.copy-spacing-chart.tooltip", "Copy Spacing Chart")
+                , FSlateIcon()
+                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CopySpacingChart, GetEditor(), vectorScene )));
+
+            menu.AddMenuEntry(
+                  LOCTEXT("vector-tool.inbetween-context-menu.paste-spacing-chart.name", "Paste Spacing Chart")
+                , LOCTEXT("vector-tool.inbetween-context-menu.paste-spacing-chart.tooltip", "Paste Spacing Chart")
+                , FSlateIcon()
+                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::PasteSpacingChart, GetEditor(), vectorScene )));
+*/
+        }
+    }
+
+    //return menu.MakeWidget();
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ResetGridMenu( FMenuBuilder& menu
+                                                  , FOdysseyVectorGroupPaint* iScene )
+{
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.inbetween-context-menu.reset-grid-transformation.name", "Transformation")
+        , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid-transformation.tooltip", "Transformation")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetInbetweenerGrid, GetEditor(), iScene, true, false )));
+
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.inbetween-context-menu.reset-grid-deformation.name", "Deformation")
+        , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid-deformation.tooltip", "Deformation")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetInbetweenerGrid, GetEditor(), iScene, false, true )));
+
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.inbetween-context-menu.reset-grid-both.name", "Both")
+        , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid-both.tooltip", "Both")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetInbetweenerGrid, GetEditor(), iScene, true, true )));
+}
+
 #ifndef M_PI
 #define M_PI 3.14159265359f
 #endif
@@ -1185,7 +1317,7 @@ UOdysseyPainterEditorVectorBaseTool::MakeTest( FOdysseyVectorGroupPaint* iScene 
     iScene->AppendChild( ellipse->Convert() );
 
     iScene->UpdateMatrix();
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 }
 
 EMouseCursor::Type

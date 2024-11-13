@@ -34,11 +34,21 @@ FOdysseyVectorGroup::DrawShape( BLContext* iBLContext
 bool
 FOdysseyVectorGroup::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
+    if( iSelectionFlags & PICK_MATH_BASED )
+    {
+        BLPoint pt = mInverseWorldMatrix.mapPoint( iRoi.x, iRoi.y );
+
+        if( mBBox.HitTest( ::ULIS::FVec2D( pt.x, pt.y ) ) )
+        {
+            return true;
+        }
+    }
+
     return false;
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorGroup::CopyShape()
+FOdysseyVectorGroup::CopyShape( uint64 iCopyFlags )
 {
     return new FOdysseyVectorGroup( mName );
 }

@@ -12,6 +12,7 @@ class FOdysseyAnimationTimelineShortcuts;
 class FOdysseyAnimationEditorTimelinePosition;
 class UOdysseyAnimationCell;
 class ITableRow;
+class FOdysseyPainterEditor;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineTreeView
     : public SOdysseyLayerStackTreeView
@@ -24,6 +25,7 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineTreeView)
         : _Player(nullptr)
         , _ExternalScrollbar(nullptr)
+        , _PainterEditor(nullptr)
         {}
         SLATE_ARGUMENT( UOdysseyAnimationLayerStack*, LayerStack )
         SLATE_ARGUMENT( UOdysseyAnimationPlayer*, Player )
@@ -33,6 +35,7 @@ public:
         SLATE_EVENT(FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
         SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
         SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )
+        SLATE_ATTRIBUTE(TSharedPtr<FOdysseyPainterEditor>, PainterEditor)
     SLATE_END_ARGS()
 
 public:
@@ -55,4 +58,5 @@ private:
     FOnActivateOutOfPegs mOnActivateOutOfPegs;
     FSimpleDelegate mOnInactivateOutOfPegs;
     FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
+    TAttribute<TSharedPtr<FOdysseyPainterEditor>> mEditor;
 };

@@ -45,7 +45,8 @@ public class OdysseyVector : ModuleRules
                 "XmlParser",
                 "ULIS",
                 "ULISLoader",
-                "blend2d"
+                "blend2d",
+                "libeigen"
             }
         );
 

@@ -1,7 +1,8 @@
 #include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanToolHUD.h"
-
-#include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
+// Vector engine
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
 
 FOdysseyPainterEditorVectorScenePanToolHUD::~FOdysseyPainterEditorVectorScenePanToolHUD()
 {
@@ -36,46 +37,10 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Unload( FOdysseyVectorGroupPaint* iS
 }
 
 void
-FOdysseyPainterEditorVectorScenePanToolHUD::DrawText( BLContext* iBLContext
-                                                    , FOdysseyVectorGroupPaint* iScene
-                                                    , ::ULIS::FRectD& iFrame )
-{
-    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
-    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
-
-    char str[255];
-
-    iBLContext->setCompOp( BL_COMP_OP_SRC_OVER  );
-    iBLContext->setFillStyle( fgColor );
-
-    // Zoom
-    snprintf( str
-            , 255
-            , "Zoom[x:%.2f y:%.2f]"
-            , iScene->GetScalingX()
-            , iScene->GetScalingY() );
-
-    iBLContext->fillUtf8Text( BLPoint( iFrame.x + 10, iFrame.y + iFrame.h - 10 ), mFont, str );
-
-    // Pan
-    snprintf( str
-            , 255
-            , "Pan[x:%.2f y:%.2f]"
-            , iScene->GetTranslationX()
-            , iScene->GetTranslationY() );
-
-    iBLContext->fillUtf8Text( BLPoint( iFrame.x + 10, iFrame.y + iFrame.h - 28 ), mFont, str );
-
-//    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
-//    blctx->setStrokeWidth( 1.0f );
-//    blctx->strokeUtf8Text( BLPoint( iFrame.x + 10, iFrame.y + iFrame.h - 10 ), mFont, str );
-}
-
-void
 FOdysseyPainterEditorVectorScenePanToolHUD::DrawFrame( BLContext* iBLContext
                                                      , FOdysseyVectorGroupPaint* iScene
-                                                     , ::ULIS::FRectD& iFrame
-                                                     , ::ULIS::FVec2D& iFrameLength )
+                                                     , ::ULIS::FRectI& iFrame
+                                                     , ::ULIS::FVec2I& iFrameLength )
 {
     BLPoint pt[4] = { BLPoint( iFrame.x           , iFrame.y            )
                     , BLPoint( iFrame.x + iFrame.w, iFrame.y            )
@@ -107,9 +72,11 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     BLImage* image = iBLContext->targetImage();
-    ::ULIS::FVec2D frameLength;
-    ::ULIS::FRectD frame;
+    ::ULIS::FVec2I frameLength;
+    ::ULIS::FRectI frame;
     uint64 hudFlags = mScenePanTool->GetEditor()->GetVectorHUDFlags();
+    char panText[255];
+    char zoomText[255];
 
     frame.x = image->width()  * 0.05f;
     frame.y = image->height() * 0.05f;
@@ -119,16 +86,11 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
     frameLength.x = frame.w * 0.125f;
     frameLength.y = frame.h * 0.125f;
 
-    // Draw object details only in vertex mode
-    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
-    {
-        DrawObjects( iBLContext
-                   , iScene
-                   , fgColor
-                   , bgColor
-                   , hcColor
-                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
-    }
+    // Draw default
+    // -> nothing in object mode.
+    // -> vertices and segments in vertex mode.
+    // -> inbetweens in inbetween mode.
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
 
     iBLContext->save();
     iBLContext->resetMatrix();
@@ -142,7 +104,25 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
     iBLContext->setStrokeStyle( fgColor );
     DrawFrame( iBLContext, iScene, frame, frameLength );
 
-    DrawText( iBLContext, iScene, frame );
+    // Zoom Text
+    snprintf( zoomText
+            , 255
+            , "Zoom[x:%.2f y:%.2f]"
+            , iScene->GetScalingX()
+            , iScene->GetScalingY() );
+
+    iBLContext->setFillStyle( fgColor );
+    iBLContext->fillUtf8Text( BLPoint( frame.x + 10, frame.y + frame.h - 28 ), mFont, zoomText );
+
+    // Pan Text
+    snprintf( panText
+            , 255
+            , "Pan[x:%.2f y:%.2f]"
+            , iScene->GetTranslationX()
+            , iScene->GetTranslationY() );
+
+    iBLContext->setFillStyle( fgColor );
+    iBLContext->fillUtf8Text( BLPoint( frame.x + 10, frame.y + frame.h - 10 ), mFont, panText );
 
     iBLContext->restore();
 }

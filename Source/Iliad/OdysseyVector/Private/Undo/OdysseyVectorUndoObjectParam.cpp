@@ -2,6 +2,7 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoObjectParam::~FOdysseyVectorUndoObjectParam()
 {
@@ -47,17 +48,23 @@ FOdysseyVectorUndoObjectParam::CreateObjectSnapshot( FOdysseyVectorObject* iObje
 
 // Backup bucket params in the constructor
 FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
-                                                            , FOdysseyVectorObject* iObject )
-    : FOdysseyVectorUndo( iScene )
+                                                            , FOdysseyVectorObject* iObject
+                                                            , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mObjectSnapshotArray.push_back( CreateObjectSnapshot( iObject ) );
 }
 
 // Backup bucket params in the constructor
 FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
-                                                            , const std::vector<FOdysseyVectorObject*>& iObjectArray )
-    : FOdysseyVectorUndo( iScene )
+                                                            , const std::vector<FOdysseyVectorObject*>& iObjectArray
+                                                            , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mObjectSnapshotArray.reserve( iObjectArray.size() );
 
     for( FOdysseyVectorObject* vectorObject : iObjectArray )
@@ -70,9 +77,12 @@ FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorGrou
 
 // Backup bucket params in the constructor
 FOdysseyVectorUndoObjectParam::FOdysseyVectorUndoObjectParam( FOdysseyVectorGroupPaint* iScene
-                                                            , const std::list<FOdysseyVectorObject*>& iObjectList )
-    : FOdysseyVectorUndo( iScene )
+                                                            , const std::list<FOdysseyVectorObject*>& iObjectList
+                                                            , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mObjectSnapshotArray.reserve( iObjectList.size() );
 
     for( FOdysseyVectorObject* vectorObject : iObjectList )
@@ -95,13 +105,12 @@ FOdysseyVectorUndoObjectParam::Apply( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 void
@@ -116,13 +125,12 @@ FOdysseyVectorUndoObjectParam::Revert( UObject* iIgnored )
     }
 
     // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // request redraw
+    InvalidateEngineList( 0 );
 
-    mScene->GetEngine()->ResetHUD();
     // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
 }
 
 /** Describes this change (for debugging) */

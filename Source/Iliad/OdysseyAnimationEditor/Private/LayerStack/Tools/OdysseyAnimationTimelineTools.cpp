@@ -6,6 +6,7 @@
 #include "LayerStack/Tools/OdysseyAnimationTimelineSelectionTool.h"
 #include "LayerStack/Tools/OdysseyAnimationTimelineMoveTool.h"
 #include "LayerStack/Tools/OdysseyAnimationTimelineCutTool.h"
+#include "AnimationEditor/OdysseyAnimationEditorCommands.h"
 #include "OdysseyKeyState.h"
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
 
