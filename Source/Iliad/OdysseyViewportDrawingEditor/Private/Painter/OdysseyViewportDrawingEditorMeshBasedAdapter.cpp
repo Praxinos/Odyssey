@@ -588,7 +588,7 @@ float FOdysseyViewportDrawingEditorMeshBasedAdapter::GetStampQuality()
                 for (int i = 0; i < rects.Num(); i++)
                 {
                     mColorDataPtr.Add(nullptr);
-                    readbufferArray.Add(FRHIGPUTextureReadback(TEXT("ReadMeshPaintTextureIliad" + i)));
+                    readbufferArray.Add(FRHIGPUTextureReadback(TEXT("ReadMeshPaintTextureOdyssey" + i)));
 
                     //for (int y = rects[i].y; y < rects[i].y + rects[i].h; y++)
                     //{

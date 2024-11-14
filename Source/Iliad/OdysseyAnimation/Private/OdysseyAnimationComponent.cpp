@@ -109,7 +109,7 @@ UOdysseyAnimationComponent::UOdysseyAnimationComponent(const FObjectInitializer&
     bCastDynamicShadow = false;
     bSelectable = true;
 
-    UMaterial* material = LoadObject<UMaterial>(this, TEXT("/Iliad/Animation2D/DefaultAnimationMaterial.DefaultAnimationMaterial"));
+    UMaterial* material = LoadObject<UMaterial>(this, TEXT("/Odyssey/Animation2D/DefaultAnimationMaterial.DefaultAnimationMaterial"));
     UMaterialInstanceConstant* materialInstance = CreateDefaultSubobject<UMaterialInstanceConstant>(TEXT("DefaultAnimationMaterialInstance"));
     materialInstance->SetParentEditorOnly(material);
     SetMaterial(0, materialInstance);

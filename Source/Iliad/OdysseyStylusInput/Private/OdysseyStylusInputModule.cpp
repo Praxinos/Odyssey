@@ -39,9 +39,9 @@ public:
         ISettingsModule* settingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings");
         if (settingsModule)
         {
-            settingsModule->RegisterSettings("Editor", "Plugins", "ILIADStylusInput"
-                , LOCTEXT("settings.name", "ILIAD Stylus Input")
-                , LOCTEXT("settings.tooltip", "Configure the behaviour of stylus inputs in ILIAD.")
+            settingsModule->RegisterSettings("Editor", "Plugins", "OdysseyStylusInput"
+                , LOCTEXT("settings.name", "Odyssey Stylus Input")
+                , LOCTEXT("settings.tooltip", "Configure the behaviour of stylus inputs in Odyssey.")
                 , GetMutableDefault<UOdysseyStylusInputSettings>());
         }
     }
@@ -53,7 +53,7 @@ public:
 
         if (settingsModule)
         {
-            settingsModule->UnregisterSettings("Editor", "Plugins", "ILIADStylusInput");
+            settingsModule->UnregisterSettings("Editor", "Plugins", "OdysseyStylusInput");
         }
     }
 };

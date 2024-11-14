@@ -17,8 +17,11 @@ class UOdysseyViewportDrawingEditorBlueprintLibrary :
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static void ActivateViewportEditorMode(const FName& EditorMode);
 
-    UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Editor", meta = (DeprecatedFunction, DeprecationMessage = "Use GetOdysseyViewportDrawingEditorMode"))
     static FName GetIliadViewportDrawingEditorMode();
+
+    UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
+    static FName GetOdysseyViewportDrawingEditorMode();
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Editor")
     static FName GetModelingEditorMode();

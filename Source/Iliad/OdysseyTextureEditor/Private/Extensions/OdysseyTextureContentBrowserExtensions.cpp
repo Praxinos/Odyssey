@@ -243,11 +243,11 @@ void
 FOdysseyTextureContentBrowserExtensions_Impl::PopulateTextureActionsMenu( FMenuBuilder& ioMenuBuilder, TArray<FAssetData> iSelectedAssets )
 {
     ioMenuBuilder.AddSubMenu(
-          LOCTEXT( "content-browser-extension.texture-action-menu.iliad-submenu.name", "ILIAD Actions" )
-        , LOCTEXT( "content-browser-extension.texture-action-menu.iliad-submenu.tooltip", "All actions related to ILIAD" )
+          LOCTEXT( "content-browser-extension.texture-action-menu.odyssey-submenu.name", "Odyssey Actions" )
+        , LOCTEXT( "content-browser-extension.texture-action-menu.odyssey-submenu.tooltip", "All actions related to Odyssey" )
         , FNewMenuDelegate::CreateStatic( &FOdysseyTextureContentBrowserExtensions_Impl::PopulateTextureActionsSubMenu, iSelectedAssets )
         , false
-        , FSlateIcon( "OdysseyStyle", "OdysseyLogo.Iliad16" )
+        , FSlateIcon( "OdysseyStyle", "OdysseyLogo.Odyssey16" )
     );
 }
 
@@ -264,16 +264,16 @@ FOdysseyTextureContentBrowserExtensions_Impl::PopulateTextureActionsSubMenu( FMe
         FExecuteAction::CreateStatic( &FOdysseyTextureContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>( exportTextureFunctor ) ) );
 
     ioMenuBuilder.AddMenuEntry(
-          LOCTEXT( "content-browser-extension.texture-action-menu.iliad.edit-texture.name", "Edit Texture" )
-        , LOCTEXT( "content-browser-extension.texture-action-menu.iliad.edit-texture.tooltip", "Open ILIAD paint editor for the selected Texture" )
+          LOCTEXT( "content-browser-extension.texture-action-menu.odyssey.edit-texture.name", "Edit Texture" )
+        , LOCTEXT( "content-browser-extension.texture-action-menu.odyssey.edit-texture.tooltip", "Open Odyssey paint editor for the selected Texture" )
         , FSlateIcon( "OdysseyStyle", "PainterEditor.OpenPaintEditor16" )
         , action_EditTexture
         , NAME_None
         , EUserInterfaceActionType::Button );
 
     ioMenuBuilder.AddMenuEntry(
-          LOCTEXT( "content-browser-extension.texture-action-menu.iliad.export-texture.name", "Export Texture" )
-        , LOCTEXT( "content-browser-extension.texture-action-menu.iliad.export-texture.tooltip", "Export Texture with ILIAD" )
+          LOCTEXT( "content-browser-extension.texture-action-menu.odyssey.export-texture.name", "Export Texture" )
+        , LOCTEXT( "content-browser-extension.texture-action-menu.odyssey.export-texture.tooltip", "Export Texture with Odyssey" )
         , FSlateIcon( "OdysseyStyle", "OdysseyTexture.ExportTexture_16" )
         , action_ExportTexture
         , NAME_None

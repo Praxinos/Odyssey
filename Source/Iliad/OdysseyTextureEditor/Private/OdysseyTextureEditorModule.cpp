@@ -37,13 +37,13 @@ FOdysseyTextureEditorModule::CreateOdysseyTextureEditor( TArray<UTexture2D*> iTe
     bool warningDisplayed = false;
     for( UTexture2D* texture : iTextures )
     {
-        //PATCH: To avoid opening ILIAD when another editor for this asset is opened
-        // To make it right, we should use AssetEditorSubsystem->OpenEditorForAsset, but for now it would call the default editor instead of ILIAD
+        //PATCH: To avoid opening Odyssey when another editor for this asset is opened
+        // To make it right, we should use AssetEditorSubsystem->OpenEditorForAsset, but for now it would call the default editor instead of Odyssey
         if (AssetEditorSubsystem->FindEditorForAsset(texture, true) != nullptr)
         {
             if (!warningDisplayed)
             {
-                FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("content-browser-extension.texture-already-opened-dialog.message", "The texture is already opened in an other editor. Please close the editor before opening the texture with ILIAD."), LOCTEXT("content-browser-extension.edit-texture.texture-already-opened-dialog.title", "Texture Already Opened"));
+                FMessageDialog::Open(EAppMsgType::Ok, LOCTEXT("content-browser-extension.texture-already-opened-dialog.message", "The texture is already opened in an other editor. Please close the editor before opening the texture with Odyssey."), LOCTEXT("content-browser-extension.edit-texture.texture-already-opened-dialog.title", "Texture Already Opened"));
                 warningDisplayed = true;
             }
             continue;
@@ -119,13 +119,13 @@ FOdysseyTextureEditorModule::RegisterAssetTypeActions()
     IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 
     // Create Asset Categories
-    EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("asset-category.name", "ILIAD"));
+    EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("Odyssey")), LOCTEXT("asset-category.name", "Odyssey"));
 
     //Create Asset Types Actions
-    mIliadTypeActions = MakeShareable(new FOdysseyTextureAssetTypeActions(category));
+    mOdysseyTypeActions = MakeShareable(new FOdysseyTextureAssetTypeActions(category));
 
     //Register created Asset Type Actions
-    assetTools.RegisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
+    assetTools.RegisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
 }
 
 void
@@ -135,7 +135,7 @@ FOdysseyTextureEditorModule::UnregisterAssetTypeActions()
         return;
 
     IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-    assetTools.UnregisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
+    assetTools.UnregisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
 }
 
 void
@@ -145,9 +145,9 @@ FOdysseyTextureEditorModule::RegisterSettings()
     if( !settingsModule )
         return;
 
-    settingsModule->RegisterSettings( "Editor", "Plugins", "ILIADTexture2DEditor"
-                                        , LOCTEXT( "settings.name", "ILIAD Texture2D Editor" )
-                                        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the ILIAD Editor." )
+    settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyTexture2DEditor"
+                                        , LOCTEXT( "settings.name", "Odyssey Texture2D Editor" )
+                                        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the Odyssey Editor." )
                                         , GetMutableDefault<UOdysseyTextureEditorSettings>() );
 }
 
@@ -159,7 +159,7 @@ FOdysseyTextureEditorModule::UnregisterSettings()
     if( !settingsModule )
         return;
 
-    settingsModule->UnregisterSettings( "Editor", "Plugins", "ILIADTexture2DEditor" );
+    settingsModule->UnregisterSettings( "Editor", "Plugins", "OdysseyTexture2DEditor" );
 }
 
 void

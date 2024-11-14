@@ -9,7 +9,7 @@
 
 UOdysseyTextureEditorSettings::UOdysseyTextureEditorSettings( const FObjectInitializer& iObjectInitializer )
     : Super( iObjectInitializer )
-    , IliadDefaultEditorEnabled( true )
+    , OdysseyDefaultEditorEnabled( true )
 {
 }
 

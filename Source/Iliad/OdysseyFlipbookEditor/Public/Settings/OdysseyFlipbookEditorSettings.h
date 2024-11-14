@@ -28,9 +28,9 @@ public:
     static UOdysseyFlipbookEditorSettings* Get();
 
 public:
-    /** If checked, set Iliad as default editor when double-click on a FlipBook. If unchecked, removes the Flipbook creation icon from the Iliad menu */
-    UPROPERTY(config, EditAnywhere, Category=Defaults, DisplayName = "Set Iliad as default editor for Flipbooks")
-    bool IliadDefaultEditorEnabled;
+    /** If checked, set Odyssey as default editor when double-click on a FlipBook. If unchecked, removes the Flipbook creation icon from the Odyssey menu */
+    UPROPERTY(config, EditAnywhere, Category=Defaults, DisplayName = "Set Odyssey as default editor for Flipbooks")
+    bool OdysseyDefaultEditorEnabled;
 
     /* UPROPERTY(config, EditAnywhere, Category=Shortcuts )
     FInputChord PreviousFrame;

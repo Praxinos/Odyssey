@@ -41,11 +41,11 @@ FOdysseyTextureExportFolderExtension::Register( FContentBrowserModule& iContentB
             FMenuExtensionDelegate::CreateLambda( [iSelectedPaths] ( FMenuBuilder& ioMenuBuilder )
             {
                 ioMenuBuilder.AddSubMenu(
-                  LOCTEXT( "context-menu.export-folder-submenu.name", "ILIAD Actions" )
-                , LOCTEXT( "context-menu.export-folder-submenu.tooltip", "All actions related to ILIAD" )
-                , FNewMenuDelegate::CreateStatic( &FOdysseyTextureExportFolderExtension::PopulateIliadActionsSubMenu, iSelectedPaths )
+                  LOCTEXT( "context-menu.export-folder-submenu.name", "Odyssey Actions" )
+                , LOCTEXT( "context-menu.export-folder-submenu.tooltip", "All actions related to Odyssey" )
+                , FNewMenuDelegate::CreateStatic( &FOdysseyTextureExportFolderExtension::PopulateOdysseyActionsSubMenu, iSelectedPaths )
                 , false
-                , FSlateIcon( "OdysseyStyle", "OdysseyLogo.Iliad16" )
+                , FSlateIcon( "OdysseyStyle", "OdysseyLogo.Odyssey16" )
                 );
             }));
         return extender;
@@ -53,7 +53,7 @@ FOdysseyTextureExportFolderExtension::Register( FContentBrowserModule& iContentB
 }
 
 void
-FOdysseyTextureExportFolderExtension::PopulateIliadActionsSubMenu( FMenuBuilder& ioMenuBuilder, const TArray<FString> iSelectedPaths )
+FOdysseyTextureExportFolderExtension::PopulateOdysseyActionsSubMenu( FMenuBuilder& ioMenuBuilder, const TArray<FString> iSelectedPaths )
 {
     ioMenuBuilder.AddMenuEntry(
         LOCTEXT( "context-menu.export-folder.export-all-textures.name", "Export all Textures" ),

@@ -62,7 +62,7 @@ FString
 FOdysseyEditorModule::GetOpenedTabIdsSavedPath() const
 {
     FString filename = FApp::GetProjectName() + FString("OdysseyLayout.ini");
-    return FPaths::Combine(FPlatformProcess::UserSettingsDir(), FApp::GetEpicProductIdentifier(), TEXT("Editor"), TEXT("Iliad"), filename);
+    return FPaths::Combine(FPlatformProcess::UserSettingsDir(), FApp::GetEpicProductIdentifier(), TEXT("Editor"), TEXT("Odyssey"), filename);
 }
 
 FString
