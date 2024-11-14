@@ -1092,6 +1092,35 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
     }
 }
 
+void
+FOdysseyVectorPath::Subdivide( std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                             , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                             , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
+{
+    oRemovedSegmentArray.reserve( oRemovedSegmentArray.capacity() + mSegmentList.size() );
+
+    for( FOdysseyVectorSegment* segment : mSegmentList )
+    {
+        ::ULIS::FVec2D point = segment->GetPointAt( 0.5f );
+
+        segment->Split( point, 0.5f, oAddedVertexArray, oAddedSegmentArray );
+
+        oRemovedSegmentArray.push_back( segment );
+    }
+
+    RemoveAllSegments();
+
+    for( FOdysseyVectorVertex* newVertex : oAddedVertexArray )
+    {
+        AddVertex( newVertex );
+    }
+
+    for( FOdysseyVectorSegment* newSegment : oAddedSegmentArray )
+    {
+        AddSegment( newSegment );
+    }
+}
+
 bool
 FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
                          , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray

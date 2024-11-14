@@ -452,6 +452,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
 
         FOdysseyVectorVertex* GetVertexByID( uint32 iID );
         FOdysseyVectorSegment* GetSegmentByID( uint32 iID );
+        void Subdivide( std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                      , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                      , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
 
     protected:
         void DrawJoint( BLContext* iBLContext, FOdysseyVectorVertex* iVertex, uint64 iFlags );

@@ -122,6 +122,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::PickTargetPoints( FInbetweenerBreakd
                                                             , double iWorldY
                                                             , double iRadius
                                                             , std::vector<FInbetweenerPoint*>& oPointArray
+                                                            , std::vector<float>& oWorldDistanceArray
                                                             , std::vector<FInbetweenerGrid*>& oGridArray )
 {
     BLMatrix2D worldMatrix = iBreakdown->GetInbetweenerTag()->GetOwner()->GetWorldMatrix();
@@ -133,13 +134,14 @@ FOdysseyPainterEditorVectorMatchingToolHUD::PickTargetPoints( FInbetweenerBreakd
     for( FInbetweenerPoint& point : iBreakdown->GetGrid()->GetPointBuffer() )
     {
         BLPoint pt = worldMatrix.mapPoint( point.GetTargetPosition().x
-                                            , point.GetTargetPosition().y );
+                                         , point.GetTargetPosition().y );
         ::ULIS::FVec2D vec = ::ULIS::FVec2D( pt.x - iWorldX, pt.y - iWorldY );
         double distance = vec.Distance();
 
         if( distance <= iRadius )
         {
             oPointArray.push_back( &point );
+            oWorldDistanceArray.push_back( distance );
 
             anyPointPicked = true;
         }

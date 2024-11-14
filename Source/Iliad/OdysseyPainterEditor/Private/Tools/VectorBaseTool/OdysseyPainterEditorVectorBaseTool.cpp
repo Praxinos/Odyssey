@@ -1013,6 +1013,16 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FMenuBuilder& menu
         // See FOdysseyPainterEditor::AddEditMenuEntry() for details
         //    menu.BeginSection("Context");
         //    {
+/*
+FText text = FText(LOCTEXT("vector-tool.object-context-menu.reset-view.name"   , "Reset View"));
+FText ttip = FText(LOCTEXT("vector-tool.object-context-menu.reset-view.tooltip", "Reset View"));
+
+                menu.AddMenuEntry( FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::ResetView, GetEditor(), vectorScene ))
+                                 , SNew(STextBlock)
+                                   .IsEnabled ( false )
+                                   .Text(text)
+                                   .ToolTip(ttip) );
+*/
                 menu.AddMenuEntry(
                       LOCTEXT("vector-tool.object-context-menu.reset-view.name", "Reset View")
                     , LOCTEXT("vector-tool.object-context-menu.reset-view.tooltip", "Reset View")

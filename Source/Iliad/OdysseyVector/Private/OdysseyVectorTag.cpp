@@ -57,6 +57,8 @@ FOdysseyVectorTag::Removed()
 void
 FOdysseyVectorTag::LockDrawing()
 {
+    //UE_LOG(LogTemp, Warning, TEXT("LockDrawing"));
+
     mDrawingMutex.lock();
 }
 
@@ -64,4 +66,6 @@ void
 FOdysseyVectorTag::UnlockDrawing()
 {
     mDrawingMutex.unlock();
+
+    //UE_LOG(LogTemp, Warning, TEXT("UnlockDrawing"));
 }

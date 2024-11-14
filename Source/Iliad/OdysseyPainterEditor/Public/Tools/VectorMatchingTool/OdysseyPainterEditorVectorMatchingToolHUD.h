@@ -27,6 +27,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorMatchingToolHUD : publ
                              , double iWorldY
                              , double iRadius
                              , std::vector<FInbetweenerPoint*>& oPointArray
+                             , std::vector<float>& oDistanceArray
                              , std::vector<FInbetweenerGrid*>& oGridArray );
         void SetCursorPosition( double iX, double iY );
 

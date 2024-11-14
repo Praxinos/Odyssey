@@ -24,6 +24,7 @@ UOdysseyPainterEditorVectorMatchingTool::~UOdysseyPainterEditorVectorMatchingToo
 UOdysseyPainterEditorVectorMatchingTool::UOdysseyPainterEditorVectorMatchingTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorMatchingToolHUD( this ), false )
     , PickingRadius( 75 )
+    , MatchingInfluence( eMatchingInfluence::Radial )
     , Rigidity( 5 )
     , RigidifySelectionOnly( false )
     , ShowInbetweens ( false )
@@ -81,6 +82,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
     uint64 notificationFlags = 0;
 
     mPickedPointArray.clear();
+    mWorldDistanceArray.clear();
     mPickedGridArray.clear();
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
@@ -110,6 +112,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
                                           , iPointInTexture.y
                                           , PickingRadius
                                           , mPickedPointArray
+                                          , mWorldDistanceArray
                                           , mPickedGridArray );
         }
 
@@ -162,14 +165,16 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
 
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        for( FInbetweenerPoint* gridPoint : mPickedPointArray )
+        for( uint32 i = 0; i < mPickedPointArray.size(); i++ )
         {
+            FInbetweenerPoint* gridPoint = mPickedPointArray[i];
+            float ratio = ( PickingRadius && MatchingInfluence == eMatchingInfluence::Radial ) ? 1.0f - ( float ) ( mWorldDistanceArray[i] / PickingRadius ) : 1.0f;
             ::ULIS::FVec2D targetPosition = gridPoint->GetTargetPosition();
             BLPoint localDiff = gridPoint->GetGrid()->GetBreakdown()->GetTargetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
                                                                                                              , iPointInTexture.deltaPosition.Y );
 
-            targetPosition.x += localDiff.x;
-            targetPosition.y += localDiff.y;
+            targetPosition.x += ( localDiff.x * ratio );
+            targetPosition.y += ( localDiff.y * ratio );
 
             gridPoint->SetTargetPosition( targetPosition.x, targetPosition.y, true );
 

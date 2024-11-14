@@ -54,10 +54,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
                  , meta = ( ToolTip  = "Interpolation Type" ) )
         eInbetweenerInterpolationType InterpolationType;
 
-        UPROPERTY( EditAnywhere
-                 , Category = "Inbetweener"
-                 , meta = ( ToolTip  = "Grid Type" ) )
+
+        //UPROPERTY( EditAnywhere
+        //         , Category = "Inbetweener"
+        //         , meta = ( ToolTip  = "Grid Type" ) )
         eInbetweenerGridType GridType;
+
 
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"

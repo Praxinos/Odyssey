@@ -48,6 +48,7 @@
 #include "Undo/OdysseyVectorUndoTagInbetweenerChartAlter.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerCommit.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerMatching.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerReset.h"
 
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
@@ -1203,6 +1204,62 @@ FOdysseyPainterEditor::_Group( FOdysseyPainterEditor* iEditor
 
 // static
 void
+FOdysseyPainterEditor::Subdivide( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    std::list<FOdysseyVectorObject*> objectList;
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+    std::vector<FOdysseyVectorPath*> addedPathArray;
+    std::vector<FOdysseyVectorVertex*> addedVertexArray;
+    std::vector<FOdysseyVectorSegment*> addedSegmentArray;
+    std::vector<FOdysseyVectorPath*> removedPathArray;
+    std::vector<FOdysseyVectorVertex*> removedVertexArray;
+    std::vector<FOdysseyVectorSegment*> removedSegmentArray;
+
+    // concerns all selected objects of a branch including implicit selection
+    vectorEngine->GetFocusedObjectList( objectList );
+
+    for( FOdysseyVectorObject* focusedObject : objectList )
+    {
+        if( focusedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+        {
+            FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(focusedObject);
+
+            path->Subdivide( addedVertexArray, addedSegmentArray, removedSegmentArray );
+        }
+    }
+
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.subdivide","Subdivide"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoPathAlter( iScene
+                                                                  , removedPathArray
+                                                                  , removedVertexArray
+                                                                  , removedSegmentArray
+                                                                  , addedPathArray
+                                                                  , addedVertexArray
+                                                                  , addedSegmentArray
+                                                                  , notificationFlags );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+        TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
+    }
+    GEditor->EndTransaction();
+
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+    // request redraw
+    vectorEngine->Invalidate( 0 );
+}
+
+// static
+void
 FOdysseyPainterEditor::SelectAllPoints( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
@@ -1823,9 +1880,11 @@ FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor
         GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.reset-chart","Reset Spacing Chart"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerMatching( iScene
-                                                                                    , selectedInbetweenerTagList
-                                                                                    , notificationFlags );
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerReset( iScene
+                                                                                , selectedInbetweenerTagList
+                                                                                , iResetDeformation
+                                                                                , iResetTransformation
+                                                                                , notificationFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 

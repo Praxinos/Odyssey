@@ -14,6 +14,7 @@ class FOdysseyVectorTagInbetweener;
 class FOdysseyVectorEngine;
 class FOdysseyAnimationEditorTimelinePosition;
 class FOdysseyPainterEditor;
+class FOdysseyVectorGroupPaint;
 
 //////////////////////////////////////////////////////////////////////////
 // SOdysseyAnimationLayerImageVectorTimelineInbetweening

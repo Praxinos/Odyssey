@@ -215,6 +215,7 @@ public:
                                     , FOdysseyVectorGroupPaint* iScene
                                     , bool iResetTransformation
                                     , bool iResetDeformation );
+    static void Subdivide( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
 
 public:
     static const uint64 UI_UPDATE_SCENETREEVIEW = ( 1ULL << ( FOdysseyVectorEngine::NOTIFY_RESERVED_SHIFT + 0 ) );

@@ -15,6 +15,13 @@ struct FInbetweenerInbetween;
 class  FInbetweenerPoint;
 class  FInbetweenerGrid;
 
+UENUM()
+enum class eMatchingInfluence : uint8
+{
+    Uniform = 0,
+    Radial  = 1
+};
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public UOdysseyPainterEditorVectorBaseTool
 {
@@ -62,6 +69,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public 
     private:
         FOdysseyPainterEditorVectorMatchingToolHUD* mMatchingHUD;
         std::vector<FInbetweenerPoint*> mPickedPointArray;
+        std::vector<float> mWorldDistanceArray;
         std::vector<FInbetweenerGrid*> mPickedGridArray;
 
     public:
@@ -71,6 +79,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public 
                           , ClampMin = "0"
                           , UIMin    = "0" ) )
         uint32 PickingRadius;
+
+        UPROPERTY( EditAnywhere
+                 , Category = MatchingTool
+                 , meta = ( ToolTip  = "Matching Influence" ) )
+        eMatchingInfluence MatchingInfluence;
 
         UPROPERTY( EditAnywhere
                  , Category = MatchingTool

@@ -319,9 +319,6 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
                       , iScene->GetEngine()->GetCell()->GetIndex() );
         }
     }
-
-    iBLContext->save();
-    iBLContext->resetMatrix();
 }
 
 FChartDivision*

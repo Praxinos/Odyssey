@@ -96,6 +96,8 @@ UOdysseyAnimationCellImageVector::SetVectorBlockId( FGuid iVectorBlockId )
 void
 UOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 {
+    UOdysseyAnimationLayerImageVector* layerImageVector = Cast<UOdysseyAnimationLayerImageVector>(GetLayer());
+
     Super::Serialize(Ar);
 
     if (GetFlags() & RF_ClassDefaultObject)
@@ -111,11 +113,13 @@ UOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
         if ( !mRoot )
         {
             UOdysseyAnimation* animation = GetAnimation();
-            mRoot = new FOdysseyVectorRoot( Cast<UOdysseyAnimationLayerImageVector>(GetLayer())
-                                        , this
-                                        , new FOdysseyVectorGroupPaint( "Scene" )
-                                        , (double)animation->GetWidth()
-                                        , (double)animation->GetHeight() );
+            mRoot = new FOdysseyVectorRoot( layerImageVector
+                                          , this
+                                          , new FOdysseyVectorGroupPaint( "Scene" )
+                                          , (double)animation->GetWidth()
+                                          , (double)animation->GetHeight() );
+            // The reading process needs a valid sharedenv as the top object.
+            layerImageVector->GetSharedEnv()->AppendChild( mRoot );
         }
 
         if (!FOdysseyAnimationCellImageVectorImport::Read( this, Ar ))
@@ -129,6 +133,8 @@ UOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 void
 UOdysseyAnimationCellImageVector::OldSerialize(FArchive& Ar)
 {
+    UOdysseyAnimationLayerImageVector* layerImageVector = Cast<UOdysseyAnimationLayerImageVector>(GetLayer());
+
     Super::OldSerialize(Ar);
 
     if( Ar.IsSaving() )
@@ -141,11 +147,13 @@ UOdysseyAnimationCellImageVector::OldSerialize(FArchive& Ar)
         if ( !mRoot )
         {
             UOdysseyAnimation* animation = GetAnimation();
-            mRoot = new FOdysseyVectorRoot( Cast<UOdysseyAnimationLayerImageVector>(GetLayer())
-                                        , this
-                                        , new FOdysseyVectorGroupPaint( "Scene" )
-                                        , (double)animation->GetWidth()
-                                        , (double)animation->GetHeight() );
+            mRoot = new FOdysseyVectorRoot( layerImageVector
+                                          , this
+                                          , new FOdysseyVectorGroupPaint( "Scene" )
+                                          , (double)animation->GetWidth()
+                                          , (double)animation->GetHeight() );
+            // The reading process needs a valid sharedenv as the top object.
+            layerImageVector->GetSharedEnv()->AppendChild( mRoot );
         }
 
         if (!FOdysseyAnimationCellImageVectorImport::Read( this, Ar ))

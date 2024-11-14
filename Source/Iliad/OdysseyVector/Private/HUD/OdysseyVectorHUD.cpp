@@ -472,11 +472,11 @@ FOdysseyVectorHUD::DrawBreakdown( BLContext* iBLContext
                                 , const BLRgba32& iTargetDrawingColor
                                 , uint64 iHUDFlags )
 {
-    iBreakdown->GetInbetweenerTag()->LockDrawing();
-
     FOdysseyVectorTagInbetweener* inbetweenerTag = iBreakdown->GetInbetweenerTag();
     BLMatrix2D worldMatrix = inbetweenerTag->GetOwner()->GetWorldMatrix();
     FColor color = inbetweenerTag->GetInbetweenColor();
+
+    iBreakdown->GetInbetweenerTag()->LockDrawing();
 
     if( iHUDFlags & HUD_BREAKDOWN_INBETWEEN )
     {
