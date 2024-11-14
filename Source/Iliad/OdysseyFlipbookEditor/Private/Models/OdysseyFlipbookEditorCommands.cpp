@@ -16,7 +16,7 @@ namespace
 }
 
 FOdysseyFlipbookEditorCommands::FOdysseyFlipbookEditorCommands()
-    : TCommands<FOdysseyFlipbookEditorCommands>( "IliadFlipbookEditor", LOCTEXT( "editor-commands.name", "Iliad Flipbook Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
+    : TCommands<FOdysseyFlipbookEditorCommands>( "OdysseyFlipbookEditor", LOCTEXT( "editor-commands.name", "Odyssey Flipbook Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
 {
     AddBundle(PlayBackShortcuts, LOCTEXT("editor-commands.category.playback-shortcuts", "PlayBack Shortcuts"));
     AddBundle(FrameShortcuts, LOCTEXT("editor-commands.category.frame-shortcuts", "Frame Shortcuts"));

@@ -98,13 +98,13 @@ FOdysseyAnimationEditorModule::RegisterAssetTypeActions()
     IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 
     // Create Asset Categories
-    EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("asset-category.name", "ILIAD"));
+    EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("Odyssey")), LOCTEXT("asset-category.name", "Odyssey"));
 
     //Create Asset Types Actions
-    mIliadTypeActions = MakeShareable(new FOdysseyAnimationAssetTypeActions(category));
+    mOdysseyTypeActions = MakeShareable(new FOdysseyAnimationAssetTypeActions(category));
 
     //Register created Asset Type Actions
-    assetTools.RegisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
+    assetTools.RegisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
 }
 
 void
@@ -114,7 +114,7 @@ FOdysseyAnimationEditorModule::UnregisterAssetTypeActions()
         return;
 
     IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-    assetTools.UnregisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
+    assetTools.UnregisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
 }
 
 void

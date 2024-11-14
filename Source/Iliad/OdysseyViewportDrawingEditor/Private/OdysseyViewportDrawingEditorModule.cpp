@@ -50,7 +50,7 @@ FOdysseyViewportDrawingEditorModule::RegisterEditorMode()
 {
     FEditorModeRegistry::Get().RegisterMode<FOdysseyViewportDrawingEditorEdMode>(
         FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId,
-        LOCTEXT("editor-mode.name", "Iliad"),
+        LOCTEXT("editor-mode.name", "Odyssey"),
         FSlateIcon(FOdysseyStyle::GetStyleSetName(), "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon40", "OdysseyViewportDrawingEditMode.OdysseyViewportDrawingIcon16"),
         true, 200 );
 }

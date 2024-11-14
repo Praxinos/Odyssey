@@ -27,7 +27,7 @@
 void
 FOdysseyFlipbookEditorModule::StartupModule()
 {
-    mIliadTypeActions = nullptr;
+    mOdysseyTypeActions = nullptr;
     mUETypeActions = nullptr;
 
     // Register Assets Types Actions once the main loop is initialized
@@ -75,26 +75,26 @@ FOdysseyFlipbookEditorModule::RegisterAssetTypeActions()
 {
     IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
     // Create Asset Categories
-    EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("asset-category.name", "ILIAD"));
+    EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("Odyssey")), LOCTEXT("asset-category.name", "Odyssey"));
 
     if( !mUETypeActions )
         mUETypeActions = assetTools.GetAssetTypeActionsForClass(UPaperFlipbook::StaticClass() ).Pin();
-    if( !mIliadTypeActions )
-        mIliadTypeActions = MakeShareable(new FOdysseyFlipbookAssetTypeActions(category));
+    if( !mOdysseyTypeActions )
+        mOdysseyTypeActions = MakeShareable(new FOdysseyFlipbookAssetTypeActions(category));
 
-    if( UOdysseyFlipbookEditorSettings::Get()->IliadDefaultEditorEnabled )
+    if( UOdysseyFlipbookEditorSettings::Get()->OdysseyDefaultEditorEnabled )
     {
         // Remove old AssetTypeAction from UE
         assetTools.UnregisterAssetTypeActions(mUETypeActions.ToSharedRef());
 
         //Register created Asset Type Actions
-        assetTools.RegisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
+        assetTools.RegisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
 
     }
     else
     {
         // Remove old AssetTypeAction
-        assetTools.UnregisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
+        assetTools.UnregisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
 
         //Register created Asset Type Actions from UE
         assetTools.RegisterAssetTypeActions(mUETypeActions.ToSharedRef());
@@ -108,7 +108,7 @@ FOdysseyFlipbookEditorModule::UnregisterAssetTypeActions()
         return;
 
     IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-    assetTools.UnregisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
+    assetTools.UnregisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
     assetTools.UnregisterAssetTypeActions(mUETypeActions.ToSharedRef());
 }
 
@@ -119,9 +119,9 @@ FOdysseyFlipbookEditorModule::RegisterSettings()
     if( !settingsModule )
         return;
 
-    settingsModule->RegisterSettings( "Editor", "Plugins", "ILIADFlipbookEditor"
-                                        , LOCTEXT( "settings.name", "ILIAD Flipbook Editor" )
-                                        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the ILIAD Editor." )
+    settingsModule->RegisterSettings( "Editor", "Plugins", "OdysseyFlipbookEditor"
+                                        , LOCTEXT( "settings.name", "Odyssey Flipbook Editor" )
+                                        , LOCTEXT( "settings.tooltip", "Configure the look and feel of the Odyssey Editor." )
                                         , GetMutableDefault<UOdysseyFlipbookEditorSettings>() );
 }
 
@@ -145,8 +145,8 @@ FOdysseyFlipbookEditorModule::CreateOdysseyFlipbookEditor( TArray<UPaperFlipbook
     {
         UPaperFlipbook* Flipbook = *FlipbookIt;
 
-        //PATCH: To avoid opening ILIAD when another editor for this asset is opened
-        // To make it right, we should use AssetEditorSubsystem->OpenEditorForAsset, but for now it would call the default editor instead of ILIAD
+        //PATCH: To avoid opening Odyssey when another editor for this asset is opened
+        // To make it right, we should use AssetEditorSubsystem->OpenEditorForAsset, but for now it would call the default editor instead of Odyssey
         if (AssetEditorSubsystem->FindEditorForAsset(Flipbook, true) != nullptr)
             continue;
 

@@ -181,7 +181,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "OdysseyTexture.ExportTexture_64", new IMAGE_BRUSH("OdysseyTexture/ExportTexture_64", mIcon64x64));
 
     // OdysseyLogo
-    Set( "OdysseyLogo.Iliad16", new IMAGE_BRUSH("OdysseyTexture/Iliad16", mIcon16x16));
+    Set( "OdysseyLogo.Odyssey16", new IMAGE_BRUSH("OdysseyTexture/Odyssey16", mIcon16x16));
     Set( "OdysseyLogo.PraxinosLogo16", new IMAGE_BRUSH("Logo/Praxinos_Logo_16", mIcon16x16));
 
     // OdysseyBrush
@@ -234,7 +234,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "About.UserDoc", new IMAGE_BRUSH( "About/userDoc", FVector2D( 30, 30 ) ) );
     Set( "About.Git", new IMAGE_BRUSH( "About/git", FVector2D( 30, 30 ) ) );
     Set( "About.Praxinos", new IMAGE_BRUSH( "About/praxinos", FVector2D( 128, 128 ) ) );
-    Set( "About.Iliad", new IMAGE_BRUSH( "About/iliad", FVector2D( 128, 128 ) ) );
+    Set( "About.Odyssey", new IMAGE_BRUSH( "About/Odyssey", FVector2D( 128, 128 ) ) );
     Set( "About.Manual16", new IMAGE_BRUSH("About/Manual_16", mIcon16x16));
     Set( "About.MorePencils16", new IMAGE_BRUSH("About/More_Pencils_16", mIcon16x16));
     Set( "About.Discord2_16", new IMAGE_BRUSH("About/Discord2_16", mIcon16x16));
@@ -262,11 +262,6 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
          .SetFontSize( 15 )
          .SetColorAndOpacity( FLinearColor( FColor( 128, 128, 128 ) ) )
     );
-
-    //IliadPainterEditor Commands
-    // Example of how to define icons for Actions / Commands
-    /* Set( "IliadPainterEditor.ZoomIn", new IMAGE_BRUSH( "PainterEditor/arrow_down_64", mIcon64x64 ) );
-    Set( "IliadPainterEditor.ZoomOut", new IMAGE_BRUSH( "PainterEditor/arrow_up_64", mIcon64x64 ) ); */
 
     //PainterEditor
     Set( "PainterEditor.OpenPaintEditor64", new IMAGE_BRUSH( "PainterEditor/open_paint_editor_64", mIcon64x64 ) );

@@ -35,7 +35,7 @@ SOdysseyAboutWindow::Open(TSharedPtr<SWindow> iParentWindow)
 {
     TSharedRef<SWindow> window =
         SNew( SWindow )
-        .Title( LOCTEXT( "about-window.title", "About Iliad" ) )
+        .Title( LOCTEXT( "about-window.title", "About Odyssey" ) )
         .SupportsMaximize( false )
         .SupportsMinimize( false )
         .SizingRule( ESizingRule::Autosized )
@@ -74,7 +74,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
     //---
 
     mLogos.Add( ELogo::kPraxinos,    { TEXT( "About.Praxinos" ),    LOCTEXT( "about-window.praxinos.tooltip", "Go to Praxinos website" ),                LOCTEXT( "about-window.praxinos.url", "https://praxinos.coop/" ) } );
-    mLogos.Add( ELogo::kIliad,        { TEXT( "About.Iliad" ),        LOCTEXT( "about-window.iliad.tooltip", "Go to Iliad webpage" ),                        LOCTEXT( "about-window.iliad.url", "https://praxinos.coop/iliad.php" ) } );
+    mLogos.Add( ELogo::kOdyssey,        { TEXT( "About.Odyssey" ),        LOCTEXT( "about-window.odyssey.tooltip", "Go to Odyssey webpage" ),                        LOCTEXT( "about-window.odyssey.url", "https://praxinos.coop/odyssey.php" ) } );
 
     mLogos.Add( ELogo::kTwitter,     { TEXT( "About.Twitter" ),     LOCTEXT( "about-window.twitter.tooltip", "Praxinos on Twitter" ),             LOCTEXT( "about-window.twitter.url", "https://twitter.com/praxinos" ) } );
     mLogos.Add( ELogo::kFacebook,    { TEXT( "About.Facebook" ),    LOCTEXT( "about-window.facebook.tooltip", "Praxinos on Facebook" ),           LOCTEXT( "about-window.facebook.url", "https://www.facebook.com/Praxinos" ) } );
@@ -82,8 +82,8 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
     mLogos.Add( ELogo::kInstagram,   { TEXT( "About.Instagram" ),   LOCTEXT( "about-window.instagram.tooltip", "Praxinos on Instagram" ),         LOCTEXT( "about-window.instagram.url", "https://www.instagram.com/praxinos/" ) } );
     mLogos.Add( ELogo::kYoutube,     { TEXT( "About.Youtube" ),     LOCTEXT( "about-window.youtube.tooltip", "Praxinos on Youtube" ),             LOCTEXT( "about-window.youtube.url", "https://www.youtube.com/channel/UCdSBI-_VlBRRRjY_tDz73xQ" ) } );
     mLogos.Add( ELogo::kDiscord,     { TEXT( "About.Discord" ),     LOCTEXT( "about-window.discord.tooltip", "Praxinos on Discord" ),             LOCTEXT( "about-window.discord.url", "https://discord.gg/gEd6pj7" ) } );
-    mLogos.Add( ELogo::kIliadUserDoc, { TEXT( "About.UserDoc" ),     LOCTEXT( "about-window.userDoc.tooltip", "Go to Iliad User Documentation" ),   LOCTEXT( "about-window.userDoc.url", "https://praxinos.coop/Documentation/Iliad/User/html/" ) } );
-    mLogos.Add( ELogo::kIliadGithub,     { TEXT( "About.Github" ),         LOCTEXT( "about-window.github.tooltip", "Praxinos on Github" ),                     LOCTEXT( "about-window.git.url", "https://github.com/Praxinos/Iliad" ) } );
+    mLogos.Add( ELogo::kOdysseyUserDoc, { TEXT( "About.UserDoc" ),     LOCTEXT( "about-window.userDoc.tooltip", "Go to Odyssey User Documentation" ),   LOCTEXT( "about-window.userDoc.url", "https://praxinos.coop/Documentation/Odyssey/User/html/" ) } );
+    mLogos.Add( ELogo::kOdysseyGithub,     { TEXT( "About.Github" ),         LOCTEXT( "about-window.github.tooltip", "Praxinos on Github" ),                     LOCTEXT( "about-window.git.url", "https://github.com/Praxinos/Odyssey" ) } );
 
     ChildSlot
     [
@@ -111,7 +111,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                     +SVerticalBox::Slot()
                     .AutoHeight()
                     [
-                        NewButtonImage( ELogo::kIliad )
+                        NewButtonImage( ELogo::kOdyssey )
                     ]
                     +SVerticalBox::Slot()
                     .AutoHeight()
@@ -133,7 +133,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f, 2.f, 0.f, 12.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "about-window.copyright.iliad", "ILIAD" ) )
+                    .Text( LOCTEXT( "about-window.copyright.Odyssey", "Odyssey" ) )
                     .TextStyle( &FOdysseyStyle::Get(), "About.BigText" )
                 ]
                 +SVerticalBox::Slot()
@@ -141,7 +141,7 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                 .Padding( FMargin( 0.f ) )
                 [
                     SNew( STextBlock )
-                    .Text( LOCTEXT( "about-window.copyright.copyright", "ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc" ) )
+                    .Text( LOCTEXT( "about-window.copyright.copyright", "Odyssey is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc" ) )
                     .TextStyle( FOdysseyStyle::Get(), "About.SmallText" )
                 ]
                 +SVerticalBox::Slot()
@@ -292,13 +292,13 @@ SOdysseyAboutWindow::Construct( const FArguments& iArgs )
                     .HAlign( HAlign_Left )
                     .Padding( FMargin( 5.f, 0.f, 5.f, 5.f ) )
                     [
-                        NewButtonImage( ELogo::kIliadUserDoc )
+                        NewButtonImage( ELogo::kOdysseyUserDoc )
                     ]
                     +SHorizontalBox::Slot()
                     .HAlign( HAlign_Left )
                     .Padding( FMargin( 5.f, 0.f, 5.f, 5.f ) )
                     [
-                        NewButtonImage( ELogo::kIliadGithub )
+                        NewButtonImage( ELogo::kOdysseyGithub )
                     ]
                 ]
                 +SHorizontalBox::Slot()
@@ -333,7 +333,7 @@ SOdysseyAboutWindow::NewButtonImage( ELogo iLogo )
 
     TSharedRef<SButton> button = SNew( SButton )
         .ButtonStyle( FAppStyle::Get(), "NoBorder" )
-        .IsEnabled( iLogo != ELogo::kIliadUserDoc ) // Remove this line once everything's ok
+        .IsEnabled( iLogo != ELogo::kOdysseyUserDoc ) // Remove this line once everything's ok
         .Cursor( EMouseCursor::Hand )
         .ToolTipText( tooltip_with_url )
         .OnClicked_Lambda( [&]() { FPlatformProcess::LaunchURL( *logo.mUrl.ToString(), nullptr, nullptr ); return FReply::Handled(); } )

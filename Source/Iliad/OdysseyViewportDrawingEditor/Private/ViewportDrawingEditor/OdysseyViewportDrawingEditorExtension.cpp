@@ -123,7 +123,7 @@ FOdysseyViewportDrawingEditorExtension::OnSourceChanged()
             texture->UpdateResource();
             FTextureCompilingManager::Get().FinishCompilation({ texture });
             texture->MarkPackageDirty();
-            //TODO: if user quits Unreal without quitting Iliad mode first, the texture stays in NoMipMaps.
+            //TODO: if user quits Unreal without quitting Odyssey mode first, the texture stays in NoMipMaps.
             //Not the end of the world, but if users notice it, we may want to dig deeper into this issue.
             //This is a better alternative than forcing the save of the texture though (which was the previous version of this code)
         }

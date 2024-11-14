@@ -22,13 +22,13 @@ FOdysseyPaletteModule::RegisterAssetTypeActions()
     IAssetTools& assetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 
     // Create Asset Categories
-    EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("ILIAD")), LOCTEXT("asset-category.name", "ILIAD"));
+    EAssetTypeCategories::Type category = assetTools.RegisterAdvancedAssetCategory(FName(TEXT("Odyssey")), LOCTEXT("asset-category.name", "Odyssey"));
 
     //Create Asset Types Actions
-    mIliadTypeActions = MakeShareable(new FOdysseyPaletteAssetTypeActions(category));
+    mOdysseyTypeActions = MakeShareable(new FOdysseyPaletteAssetTypeActions(category));
 
     //Register created Asset Type Actions
-    assetTools.RegisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
+    assetTools.RegisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
 }
 
 void
@@ -38,7 +38,7 @@ FOdysseyPaletteModule::UnregisterAssetTypeActions()
         return;
 
     IAssetTools& assetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
-    assetTools.UnregisterAssetTypeActions(mIliadTypeActions.ToSharedRef());
+    assetTools.UnregisterAssetTypeActions(mOdysseyTypeActions.ToSharedRef());
 }
 
 IMPLEMENT_MODULE(FOdysseyPaletteModule, OdysseyTexture);
