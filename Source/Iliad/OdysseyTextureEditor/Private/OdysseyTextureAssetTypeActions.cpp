@@ -61,7 +61,7 @@ void FOdysseyTextureAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& In
         auto odysseyTexture = Cast<UTexture2D>(*ObjIt);
         if (odysseyTexture != NULL)
         {
-            if( UOdysseyTextureEditorSettings::Get()->IliadDefaultEditorEnabled )
+            if( UOdysseyTextureEditorSettings::Get()->OdysseyDefaultEditorEnabled )
             {
                 FOdysseyTextureEditorModule* odysseyTextureModule = &FModuleManager::LoadModuleChecked<FOdysseyTextureEditorModule>("OdysseyTextureEditor");
                 odysseyTextureModule->CreateOdysseyTextureEditor( { odysseyTexture } );

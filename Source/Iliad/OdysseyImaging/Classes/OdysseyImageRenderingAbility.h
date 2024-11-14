@@ -41,7 +41,7 @@ class ODYSSEYIMAGING_API FOdysseyImageRenderingAbility
 public:
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnChanged, const FOdysseyImageRenderingChangedEvent&);
 
-    //Called before OnChanged() is called, so that some part of ILIAD can react prior to other parts (ex: animation Proxy invalidation)
+    //Called before OnChanged() is called, so that some part of Odyssey can react prior to other parts (ex: animation Proxy invalidation)
     static FOnChanged& OnImageRenderingPreChangedDelegate();
 
     //Called when some data of this object, related with image rendering changed interactively

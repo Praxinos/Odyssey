@@ -14,7 +14,7 @@ namespace
 }
 
 FOdysseyTextureEditorCommands::FOdysseyTextureEditorCommands()
-    : TCommands<FOdysseyTextureEditorCommands>( "IliadTextureEditor", LOCTEXT( "editor-commands.name", "Iliad Texture Editor" ), NAME_None, FAppStyle::GetAppStyleSetName() )
+    : TCommands<FOdysseyTextureEditorCommands>( "OdysseyTextureEditor", LOCTEXT( "editor-commands.name", "Odyssey Texture Editor" ), NAME_None, FAppStyle::GetAppStyleSetName() )
 {
     AddBundle(ImportExportShortcuts, LOCTEXT("editor-commands.category.import-export-shortcuts", "Import & Export Shortcuts"));
     AddBundle(LayerStackShortcuts, LOCTEXT("editor-commands.category.layerstack-shortcuts-category", "LayerStack Shortcuts"));

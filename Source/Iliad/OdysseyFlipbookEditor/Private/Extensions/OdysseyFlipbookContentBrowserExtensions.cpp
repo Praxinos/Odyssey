@@ -94,7 +94,7 @@ FOdysseyFlipbookContentBrowserExtensions::EditFlipbooksWarning()
 {
     FMessageDialog::Open(
         EAppMsgType::Ok,
-        LOCTEXT("content-browser-extension.flipbook-already-opened.message", "The flipbook or one of its sprite or textures is already opened in an other editor. Please close the editor before opening the flipbook with ILIAD."),
+        LOCTEXT("content-browser-extension.flipbook-already-opened.message", "The flipbook or one of its sprite or textures is already opened in an other editor. Please close the editor before opening the flipbook with Odyssey."),
         LOCTEXT("content-browser-extension.flipbook-already-opened.title", "Flipbook Already Opened"));
 }
 
@@ -139,8 +139,8 @@ FOdysseyFlipbookContentBrowserExtensions_Impl::PopulateFlipbookActionsMenu( FMen
         FExecuteAction::CreateStatic( &FOdysseyFlipbookContentBrowserExtensions_Impl::ExecuteSelectedContentFunctor, StaticCastSharedPtr<FContentBrowserSelectedAssetExtensionBase>( editFlipbookFunctor ) ) );
 
     ioMenuBuilder.AddMenuEntry(
-          LOCTEXT( "content-browser-extension.action-menu.edit-flipbook.name", "Edit Flipbook with ILIAD" )
-        , LOCTEXT( "content-browser-extension.action-menu.edit-flipbook.tooltip", "Open ILIAD paint editor for the selected Flipbook" )
+          LOCTEXT( "content-browser-extension.action-menu.edit-flipbook.name", "Edit Flipbook with Odyssey" )
+        , LOCTEXT( "content-browser-extension.action-menu.edit-flipbook.tooltip", "Open Odyssey paint editor for the selected Flipbook" )
         , FSlateIcon( "OdysseyStyle", "PainterEditor.OpenPaintEditor16" )
         , action_EditFlipbook
         , NAME_None

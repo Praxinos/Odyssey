@@ -25,16 +25,16 @@ FOdysseyModuleLoaderModule::ActivateModules()
     OUT_MODULES( bPaper2DExists ).Add("OdysseyFlipbookEditor", ELoadingPhase::PostDefault);
 
     IPluginManager& pluginManager = IPluginManager::Get();
-    TSharedPtr<IPlugin> iliad = pluginManager.FindPlugin("Odyssey");
-    FPluginDescriptor& iliadDescriptor = const_cast<FPluginDescriptor&>(iliad->GetDescriptor());
+    TSharedPtr<IPlugin> Odyssey = pluginManager.FindPlugin("Odyssey");
+    FPluginDescriptor& OdysseyDescriptor = const_cast<FPluginDescriptor&>(Odyssey->GetDescriptor());
 
-    for ( FModuleDescriptor& iliadModule : iliadDescriptor.Modules )
+    for ( FModuleDescriptor& OdysseyModule : OdysseyDescriptor.Modules )
     {
-        if ( activeModules.Contains( iliadModule.Name) )
-            iliadModule.LoadingPhase = activeModules[iliadModule.Name];
+        if ( activeModules.Contains( OdysseyModule.Name) )
+            OdysseyModule.LoadingPhase = activeModules[OdysseyModule.Name];
 
-        if ( inactiveModules.Contains( iliadModule.Name ) )
-            iliadModule.LoadingPhase = ELoadingPhase::None;
+        if ( inactiveModules.Contains( OdysseyModule.Name ) )
+            OdysseyModule.LoadingPhase = ELoadingPhase::None;
     }
 }
 

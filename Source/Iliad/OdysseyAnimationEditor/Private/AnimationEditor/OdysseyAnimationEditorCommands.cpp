@@ -17,7 +17,7 @@ namespace
 }
 
 FOdysseyAnimationEditorCommands::FOdysseyAnimationEditorCommands()
-    : TCommands<FOdysseyAnimationEditorCommands>( "OdysseyAnimationEditorCommands", LOCTEXT( "editor-commands.name", "Iliad Animation Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
+    : TCommands<FOdysseyAnimationEditorCommands>( "OdysseyAnimationEditorCommands", LOCTEXT( "editor-commands.name", "Odyssey Animation Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
 {
     AddBundle(ImportExportShortcuts, LOCTEXT("editor-commands.category.import-export-shortcuts", "Import & Export Shortcuts"));
     AddBundle(TimelineShortcuts, LOCTEXT("editor-commands.category.timeline-shortcuts", "Timeline Shortcuts"));

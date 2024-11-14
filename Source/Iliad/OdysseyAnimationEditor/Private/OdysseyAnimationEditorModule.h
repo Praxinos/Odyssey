@@ -43,6 +43,6 @@ private:
 
 private:
     /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
-    TSharedPtr<IAssetTypeActions> mIliadTypeActions;
+    TSharedPtr<IAssetTypeActions> mOdysseyTypeActions;
     FDelegateHandle mExtendLevelEditorLayout;
 };
