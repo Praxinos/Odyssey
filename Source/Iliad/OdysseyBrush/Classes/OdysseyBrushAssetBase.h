@@ -181,11 +181,11 @@ public:
     /** State Stroke Point Getters */
     /*******************************/
 
-    //Gets the X axis of the stylus or mouse on ILIAD canvas.
+    //Gets the X axis of the stylus or mouse on canvas.
     UFUNCTION( BlueprintPure, Category="Odyssey|Canvas" )
     float  GetX();
 
-    //Gets the Y axis of the stylus or mouse on ILIAD canvas.
+    //Gets the Y axis of the stylus or mouse on canvas.
     UFUNCTION( BlueprintPure, Category="Odyssey|Canvas" )
     float  GetY();
 
@@ -194,38 +194,38 @@ public:
     //UFUNCTION( BlueprintPure, Category="Odyssey|Canvas" )
     //float  GetZ();
 
-    //Gets stylus pressure on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
+    //Gets stylus pressure on the tablet (make sure Tablet drivers are activated in Preferences > Stylus Input).
     //Returns normalized Float (0 = no pressure | 1 = max pressure).
     UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Pressure", KeyWords = "Tablet") )
     float  GetPressure();
 
-    //Gets stylus altitude on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
+    //Gets stylus altitude on the tablet (make sure Tablet drivers are activated in Preferences > Stylus Input).
     //Returns Float (angle).
     UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Altitude", KeyWords = "Tablet Tilt") )
     float  GetAltitude();
 
-    //Gets stylus altitude on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
+    //Gets stylus altitude on the tablet (make sure Tablet drivers are activated in Preferences > Stylus Input).
     //Returns normalized Float (0.5 = 45° | 1 = 90°).
     UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Altitude Normalized", KeyWords = "Tablet") )
     float  GetAltitudeNormalized();
 
-    //Gets stylus azimtuh on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
+    //Gets stylus azimtuh on the tablet (make sure Tablet drivers are activated in Preferences > Stylus Input).
     //Returns Float (angle).
     UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Azimuth", KeyWords = "Tablet") )
     float  GetAzimuth();
 
-    //Gets stylus azimuth on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
+    //Gets stylus azimuth on the tablet (make sure Tablet drivers are activated in Preferences > Stylus Input).
     //Returns normalized Float (0.5 = 180° | 1 = 360°).
     UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Azimuth Normalized", KeyWords = "Tablet" ) )
     float  GetAzimuthNormalized();
 
-    //Gets stylus twist on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
+    //Gets stylus twist on the tablet (make sure Tablet drivers are activated in Preferences > Stylus Input).
     //Only works with specific stylus !
     //Returns Float (angle).
     UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Twist", KeyWords = "Tablet" ) )
     float  GetTwist();
 
-    //Gets stylus twist on the tablet (make sure Tablet drivers are activated in Preferences > ILIAD Stylus Input).
+    //Gets stylus twist on the tablet (make sure Tablet drivers are activated in Preferences > Stylus Input).
     //Only works with specific stylus !
     //Returns normalize Float (0.5 = 180° | 1 = 360°).
     UFUNCTION( BlueprintPure, Category="Odyssey|Input", meta = ( DisplayName = "Get Stylus Twist Normalized", KeyWords = "Tablet" ) )
@@ -396,7 +396,7 @@ public:
     UFUNCTION(BlueprintNativeEvent)
     void OnStep();
 
-    //Event is triggered when anything is changed in ILIAD interface (variables or modifiers).
+    //Event is triggered when anything is changed in interface (variables or modifiers).
     UFUNCTION(BlueprintNativeEvent)
     void OnStateChanged(); //OnContextChanged
 

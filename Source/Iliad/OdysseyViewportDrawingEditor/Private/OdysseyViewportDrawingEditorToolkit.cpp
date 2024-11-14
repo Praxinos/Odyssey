@@ -39,7 +39,7 @@ FOdysseyViewportDrawingEditorToolkit::GetBaseToolkitName() const
 void
 FOdysseyViewportDrawingEditorToolkit::GetToolPaletteNames( TArray<FName>& ioPaletteNames ) const
 {
-    ioPaletteNames.Add( FName( "Iliad Panels Manager" ));
+    ioPaletteNames.Add( FName( "Odyssey Panels Manager" ));
 }
 
 TSharedPtr<SWidget>

@@ -14,7 +14,7 @@ public:
 
 private:
     static void ExecuteExportFolder( TArray<FString> iSelectedPaths );
-    static void PopulateIliadActionsSubMenu( FMenuBuilder& ioMenuBuilder, const TArray<FString> iSelectedPaths );
+    static void PopulateOdysseyActionsSubMenu( FMenuBuilder& ioMenuBuilder, const TArray<FString> iSelectedPaths );
     static void ExportFolderTextures( const TArray<FName>& iPackageNamesToExport );
     static void PerformExportFolder( TArray<FName> iPackageNamesToExport );
     static void ExportFolder_ReportConfirmed( TEnumAsByte<EExportImageFormat> iExportImageFormat, TSharedPtr<TArray<ReportPackageData>> iPackageDataToExport, FString iDestinationFolder );

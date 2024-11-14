@@ -1036,7 +1036,7 @@ FText ttip = FText(LOCTEXT("vector-tool.object-context-menu.reset-view.tooltip",
                 /*menu.AddMenuEntry(
                       LOCTEXT("vector-tool.object-context-menu.trim.name", "Trim")
                     , LOCTEXT("vector-tool.object-context-menu.trim.tooltip", "Trim")
-                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Iliad16")
+                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Odyssey16")
                     , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::Trim, vectorScene)));*/
                 menu.AddMenuEntry(
                       LOCTEXT("vector-tool.object-context-menu.group.name", "Group")

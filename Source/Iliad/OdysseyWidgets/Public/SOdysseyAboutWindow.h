@@ -39,7 +39,7 @@ private:
 private:
     enum class ELogo
     {
-        kIliad,
+        kOdyssey,
         kPraxinos,
         kTwitter,
         kFacebook,
@@ -47,8 +47,8 @@ private:
         kInstagram,
         kYoutube,
         kDiscord,
-        kIliadUserDoc,
-        kIliadGithub,
+        kOdysseyUserDoc,
+        kOdysseyGithub,
     };
 
     struct FLogo

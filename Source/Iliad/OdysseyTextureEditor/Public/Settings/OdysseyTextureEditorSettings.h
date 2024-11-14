@@ -22,8 +22,8 @@ public:
     static UOdysseyTextureEditorSettings* Get();
 
 public:
-    /** If true, set Iliad as default editor when double-click on a Texture. */
-    UPROPERTY(config, EditAnywhere, Category=Defaults, DisplayName = "Set Iliad as default editor for textures")
-    bool IliadDefaultEditorEnabled;
+    /** If true, set Odyssey as default editor when double-click on a Texture. */
+    UPROPERTY(config, EditAnywhere, Category=Defaults, DisplayName = "Set Odyssey as default editor for textures")
+    bool OdysseyDefaultEditorEnabled;
 };
 

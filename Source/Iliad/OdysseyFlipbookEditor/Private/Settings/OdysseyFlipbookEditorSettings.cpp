@@ -9,7 +9,7 @@
 
 UOdysseyFlipbookEditorSettings::UOdysseyFlipbookEditorSettings( const FObjectInitializer& iObjectInitializer )
     : Super( iObjectInitializer )
-    , IliadDefaultEditorEnabled( true )
+    , OdysseyDefaultEditorEnabled( true )
     /* , PreviousFrame( EKeys::Left )
     , NextFrame( EKeys::Right )
     , PreviousKeyFrame( EKeys::A )
@@ -39,7 +39,7 @@ void
 UOdysseyFlipbookEditorSettings::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
 {
     const FName propertyName = PropertyChangedEvent.GetPropertyName();
-    if( propertyName == GET_MEMBER_NAME_CHECKED( UOdysseyFlipbookEditorSettings, IliadDefaultEditorEnabled ) )
+    if( propertyName == GET_MEMBER_NAME_CHECKED( UOdysseyFlipbookEditorSettings, OdysseyDefaultEditorEnabled ) )
     {
         FOdysseyFlipbookEditorModule* odysseyFlipbookModule = &FModuleManager::LoadModuleChecked<FOdysseyFlipbookEditorModule>("OdysseyFlipbookEditor");
         odysseyFlipbookModule->UnregisterAssetTypeActions();

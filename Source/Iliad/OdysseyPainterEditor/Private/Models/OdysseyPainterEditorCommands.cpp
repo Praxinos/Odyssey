@@ -19,7 +19,7 @@ namespace
 }
 
 FOdysseyPainterEditorCommands::FOdysseyPainterEditorCommands()
-    : TCommands<FOdysseyPainterEditorCommands>( "IliadPainterEditor", LOCTEXT( "editor-commands.name", "Iliad Painter Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
+    : TCommands<FOdysseyPainterEditorCommands>( "OdysseyPainterEditor", LOCTEXT( "editor-commands.name", "Odyssey Painter Editor" ), NAME_None, FOdysseyStyle::GetStyleSetName() )
 {
     AddBundle(BrushBlendingModeShortcuts, LOCTEXT("editor-commands.category.brush-blending-mode-shortcuts", "Brush Blending Mode Shortcuts"));
     AddBundle(BrushAlphaModeShortcuts, LOCTEXT("editor-commands.category.brush-alpha-mode-shortcuts", "Brush Alpha Mode Shortcuts"));
@@ -34,7 +34,7 @@ void
 FOdysseyPainterEditorCommands::RegisterCommands()
 {
 // Help Shortcuts Category
-    UI_BUNDLE_COMMAND( AboutIliad, HelpShortcuts, "About ILIAD", "About ILIAD",                                                                             EUserInterfaceActionType::Button, FInputChord() );
+    UI_BUNDLE_COMMAND( AboutOdyssey, HelpShortcuts, "About Odyssey", "About Odyssey",                                                                             EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( VisitPraxinosWebsite, HelpShortcuts, "Praxinos Website...", "Praxinos Website...",                                                   EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( ManualAndReleaseNotes, HelpShortcuts, "Manual and Release Notes ...", "Manual and Release Notes ...",                                EUserInterfaceActionType::Button, FInputChord() );
     UI_BUNDLE_COMMAND( Discord, HelpShortcuts, "Talk with the developpers ...", "Talk with the developpers ...",                                            EUserInterfaceActionType::Button, FInputChord() );

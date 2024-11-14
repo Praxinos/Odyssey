@@ -15,6 +15,12 @@ UOdysseyViewportDrawingEditorBlueprintLibrary::ActivateViewportEditorMode(const 
 FName
 UOdysseyViewportDrawingEditorBlueprintLibrary::GetIliadViewportDrawingEditorMode()
 {
+    return GetOdysseyViewportDrawingEditorMode();
+}
+
+FName
+UOdysseyViewportDrawingEditorBlueprintLibrary::GetOdysseyViewportDrawingEditorMode()
+{
     return FOdysseyViewportDrawingEditorEdMode::EM_OdysseyViewportDrawingEditorEdModeId;
 }
 

@@ -26,8 +26,8 @@ public:
 public:
     //About actions
 
-    /** Action to see the team and links to ILIAD resources */
-    TSharedPtr<FUICommandInfo> AboutIliad;
+    /** Action to see the team and links to Odyssey resources */
+    TSharedPtr<FUICommandInfo> AboutOdyssey;
 
     /** Action to go to praxinos' website */
     TSharedPtr<FUICommandInfo> VisitPraxinosWebsite;
