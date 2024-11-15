@@ -76,7 +76,6 @@ FOdysseyAnimationCellImageVectorImageRenderer::Init()
     }
 
     {
-        FScopeLock renderLock(&mEngineMutex);
         vectorBlock->Render( mDrawingFlags );
     }
 }

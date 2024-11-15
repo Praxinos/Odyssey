@@ -517,6 +517,11 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
         FChartDivision* inbetween = &curBreakdown->GetChart()->GetDivisionBuffer()[inbetweenIndex];
         FInbetweenerBreakdown* newBreakdown = iNewBreakdown ? iNewBreakdown
                                                             : new FInbetweenerBreakdown( this );
+        FInbetweenerChart* curChart = curBreakdown->GetChart();
+        FInbetweenerChart* newChart = newBreakdown->GetChart();
+        std::vector<float> curChartSpacingBuffer;
+
+        curChart->GetSpacing( curChartSpacingBuffer );
 
         LockDrawing();
 
@@ -539,6 +544,22 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
         ChainBreakdowns();
 
         newBreakdown->SetTargetDrawingIndex( newTargetDrawingIndex );
+
+        // adapt the new spacings for the new breakdown
+        for( uint32 i = 1; i < inbetweenIndex; i++ )
+        {
+            float newSpacing = curChartSpacingBuffer[i] * ( float ) ( curTargetDrawingIndex / inbetweenIndex );
+            // Note: inbetweenIndex cannot be 0
+            newChart->GetDivisionBuffer()[i].spacing = newSpacing;
+        }
+
+        // adapt the new spacings foir the current breakdown
+        for( uint32 i = inbetweenIndex + 1, j = 1; i < (uint32) curTargetDrawingIndex; i++, j++ )
+        {
+            float newSpacing = ( curChartSpacingBuffer[i] - curChartSpacingBuffer[inbetweenIndex] ) / ( 1.0f - curChartSpacingBuffer[inbetweenIndex] );
+            // Note: inbetweenIndex cannot be 0
+            curChart->GetDivisionBuffer()[j].spacing = newSpacing;
+        }
 
         /*ResizeRoutes();*/
 
@@ -1394,6 +1415,7 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FInterpolatedPath* iInterpolatedPath
                                                            , localPointPositionn->y - ( perpn.y * radiusn ) )
                                     , iWorldMatrix.mapPoint( localPointPositioni->x - ( perpi.x * radiusi )
                                                            , localPointPositioni->y - ( perpi.y * radiusi ) ) };
+                    
 
                     iBLContext->fillPolygon( pt, 6 );
                 }

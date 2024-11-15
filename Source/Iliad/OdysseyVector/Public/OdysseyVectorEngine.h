@@ -329,6 +329,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         uint64 GetInvalidationFlags();
         FOdysseyVectorRoot* GetRoot();
 
+        std::mutex& GetDrawingMutex();
+
 /*
        uint64 GetDrawingFlags();
        void SetDrawingFlags( uint64 iDrawingFlags );
@@ -393,4 +395,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         ::ULIS::FRectD mInvalidatedRect;
         BLImageData mRenderData; // for direct drawing via our own drawing routines.
         //uint64 mDrawingFlags; // temporary, until we find a way to pass the drawing flags as arg
+        // mutex to prevent drawing whil update isn't complete. this is necessary due to the Proxy renderer
+        // which runs in a different thread
+        std::mutex mDrawingMutex;
 };

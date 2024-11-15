@@ -227,6 +227,8 @@ FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext )
 
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::RenderHUD);
 
+    mDrawingMutex.lock();
+
     iBLContext->save();
     iBLContext->resetMatrix();
     //mBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
@@ -241,6 +243,8 @@ FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext )
     iBLContext->restore();
 
     iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
+
+    mDrawingMutex.unlock();
 }
 
 void
@@ -290,6 +294,12 @@ FOdysseyVectorEngine::GetSelectedVerticesFromFocusedObjects( std::vector<FOdysse
         } );
 }
 
+std::mutex&
+FOdysseyVectorEngine::GetDrawingMutex()
+{
+    return mDrawingMutex;
+}
+
 ::ULIS::FRectD
 FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 {
@@ -298,6 +308,8 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
     ::ULIS::FRectD sanitizedRect;
     ::ULIS::FRectD screen;
     FOdysseyVectorGroupPaint* scene = GetScene();
+
+    mDrawingMutex.lock();
 
     // retrieves buffer specs and allows us to draw directly in the buffer
     image->makeMutable( &mRenderData );
@@ -372,6 +384,8 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
     mInvalidationFlags = 0;
 
     mRenderData.reset();
+
+    mDrawingMutex.unlock();
 
     return sanitizedRect;
 }

@@ -1705,11 +1705,11 @@ FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
                                            , fraction->polygon.point[1]
                                            , fraction->polygon.point[2]
                                            , fraction->polygon.point[3] };
-                double quad0U[6] = { iStartU + ( fraction->polygon.U[0] * difU )
+                double quad0U[4] = { iStartU + ( fraction->polygon.U[0] * difU )
                                    , iStartU + ( fraction->polygon.U[1] * difU )
                                    , iStartU + ( fraction->polygon.U[2] * difU )
                                    , iStartU + ( fraction->polygon.U[3] * difU ) };
-                double quad0V[6] = { fraction->polygon.V[0]
+                double quad0V[4] = { fraction->polygon.V[0]
                                    , fraction->polygon.V[1]
                                    , fraction->polygon.V[2]
                                    , fraction->polygon.V[3] };
@@ -1717,11 +1717,11 @@ FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
                                            , fraction->polygon.point[4]
                                            , fraction->polygon.point[5]
                                            , fraction->polygon.point[0] };
-                double quad1U[6] = { iStartU + ( fraction->polygon.U[3] * difU )
+                double quad1U[4] = { iStartU + ( fraction->polygon.U[3] * difU )
                                    , iStartU + ( fraction->polygon.U[4] * difU )
                                    , iStartU + ( fraction->polygon.U[5] * difU )
                                    , iStartU + ( fraction->polygon.U[0] * difU ) };
-                double quad1V[6] = { fraction->polygon.V[3]
+                double quad1V[4] = { fraction->polygon.V[3]
                                    , fraction->polygon.V[4]
                                    , fraction->polygon.V[5]
                                    , fraction->polygon.V[0] };

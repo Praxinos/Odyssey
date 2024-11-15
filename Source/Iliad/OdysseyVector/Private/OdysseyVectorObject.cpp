@@ -216,22 +216,35 @@ FOdysseyVectorObject::UpdateShape( uint32 iUpdateFlags )
 void
 FOdysseyVectorObject::Update( uint32 iUpdateFlags )
 {
+    FOdysseyVectorEngine* engine = GetEngine();
+    uint32 childUpdateFlags = iUpdateFlags;
 
     if( mInvalidationFlags )
     {
         // prevents DrawShape() to be called while the object has'nt been updated
         // Indeed, it could be called by the animation proxy
-        mDrawingMutex.lock();
+        // Note: engine can be NULL when Update is called by a SharedEnv object
+        if( ( ( iUpdateFlags & UPDATE_NODRAWINGLOCK ) == 0 ) && engine )
+        {
+            engine->GetDrawingMutex().lock();
+
+            childUpdateFlags |= UPDATE_NODRAWINGLOCK;
+        }
 
         // update children first by recursively calling the Update function and, if needed,
         // removing the object from the invalidated object list, in the same call.
-        mInvalidatedChildrenList.remove_if( [iUpdateFlags] ( FOdysseyVectorObject* child )
+        mInvalidatedChildrenList.remove_if( [childUpdateFlags] ( FOdysseyVectorObject* child )
                                             {
-                                                child->Update( iUpdateFlags );
+                                                child->Update( childUpdateFlags );
 
                                                 return child->IsInvalidated() == false;
                                             } );
         UpdateShape( iUpdateFlags );
+
+        if( ( ( iUpdateFlags & UPDATE_NODRAWINGLOCK ) == 0 ) && engine )
+        {
+            engine->GetDrawingMutex().unlock();
+        }
 
         // update tags
         for( FOdysseyVectorTag* tag : mTagList )
@@ -243,8 +256,6 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
         {
             mInvalidationFlags = 0;
         }
-
-        mDrawingMutex.unlock();
     }
 }
 
@@ -676,11 +687,11 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext
     //Get sure everything is drawn before we draw in the BLend2D buffer.
     iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
 
-    mDrawingMutex.lock();
+    //mDrawingMutex.lock();
 
     DrawShape( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
 
-    mDrawingMutex.unlock();
+    //mDrawingMutex.unlock();
 
     // get sure the parent has finished drawing before drawing its children
     iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );

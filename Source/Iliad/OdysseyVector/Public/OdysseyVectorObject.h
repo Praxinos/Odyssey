@@ -45,6 +45,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 UPDATE_NEEDPOLYLINE   = ( 1 << 5 );
         static const uint32 UPDATE_NOINBETWEENING = ( 1 << 6 );
         static const uint32 UPDATE_FORCE          = ( 1 << 7 ); // request force updating everything, not only invalidated items
+        static const uint32 UPDATE_NODRAWINGLOCK  = ( 1 << 8 );
 
         // invalidation flags
         static const uint64 INVALIDATE_DEFAULT        = ( 1ULL << 0 );
@@ -591,7 +592,4 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         double mRotation;
         double mScalingX;
         double mScalingY;
-        // mutex to prevent drawing whil update isn't complete. this is necessary due to the Proxy renderer
-        // which runs in a different thread
-        std::mutex mDrawingMutex;
 };

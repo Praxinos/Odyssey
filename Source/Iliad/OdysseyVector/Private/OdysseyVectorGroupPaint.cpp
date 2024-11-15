@@ -963,7 +963,7 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 
     if( bPainted )
     {
-        mCanvasPath.Update( 0 );
+        mCanvasPath.Update( 0 | UPDATE_NODRAWINGLOCK );
 
         if( ( bRealtime == true  )
        || ( ( bRealtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATE_PAINTGROUPS ) ) )
