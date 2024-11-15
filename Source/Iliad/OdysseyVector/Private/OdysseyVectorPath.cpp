@@ -1826,7 +1826,6 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
     BLRgba32 strokeColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? BLRgba32( 0, 0, 0, 255 )
                                                                                          : BLRgba32( color.R, color.G, color.B, 255 * iCombinedOpacity /*color.A * iCombinedOpacity*/ );
 
-    UTexture2D* texture = mBrush.GetTexture();
     BLImage* image = iBLContext->targetImage();
     BLImageData& imageData = iVectorEngine->GetRenderData();
     ::ULIS::FRectD screen;
@@ -1842,7 +1841,9 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
     }
     else
     {
-        if( mBrush.GetTexture() )
+        UTexture2D* texture = mBrush.GetTexture();
+
+        if( texture )
         {
             double startU = mBrush.Revert ? 1.0f : 0.0f;
             double remainingSegmentLength = 0.0f;
@@ -1868,53 +1869,8 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                 double segmentAndJointLength = segmentLength + jointLength;
                 double endU = 0.0f;
 
-                if( mBrush.ExtensionMode == eBrushExtensionMode::Path )
-                {
-                    if( mBrush.Revert )
-                    {
-                        endU = startU - ( iChain.mLength ? ( segmentAndJointLength / iChain.mLength ) : 0.0f );
-                    }
-                    else
-                    {
-                        endU = startU + ( iChain.mLength ? ( segmentAndJointLength / iChain.mLength ) : 0.0f );
-                    }
-                }
-
-                if( mBrush.ExtensionMode == eBrushExtensionMode::Segment )
-                {
-                    if( mBrush.Revert )
-                    {
-                        startU = 1.0f;
-                        endU   = 0.0f;
-                    }
-                    else
-                    {
-                        startU = 0.0f;
-                        endU   = 1.0f;
-                    }
-                }
-
-                if( mBrush.ExtensionMode == eBrushExtensionMode::Adapt )
-                {
-                    double brushRatio = mBrush.height ? (double) mBrush.width  / mBrush.height : 0.0f;
-                    double averageSegmentRadius = ( vertex->GetRadius() + otherVertex->GetRadius() ) * 0.5f;
-                    double adaptedSegmentLength = averageSegmentRadius * brushRatio;
-
-                    if( mBrush.Revert )
-                    {
-                        endU   = startU - ( adaptedSegmentLength ? ( segmentAndJointLength / adaptedSegmentLength ) : 0.0f );
-                    }
-                    else
-                    {
-                        endU   = startU + ( adaptedSegmentLength ? ( segmentAndJointLength / adaptedSegmentLength ) : 0.0f );
-                    }
-                }
-
                 if( segmentLength )
                 {
-                    double segmentStartU = ( vertex == segment->GetVertex(0) ) ? startU : endU;
-                    double segmentEndU   = ( vertex == segment->GetVertex(0) ) ? endU : startU;
-
                     // WORKAROUND: in some cases U is < 0.0f, I dont know why yet.
                     //if ( segmentStartU < 0.0f ) segmentStartU = 0.0f;
                     //if ( segmentEndU   < 0.0f ) segmentEndU   = 0.0f;
@@ -1924,12 +1880,6 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                     if( ( vertex->IsHandleAligned() == false )
                     && ( mBrush.ExtensionMode != eBrushExtensionMode::Segment ) )
                     {
-                        double segmentJointRatio = jointLength / ( segmentAndJointLength );
-                        double jointStartU = segmentStartU;
-                        double jointEndU = segmentStartU + ( ( segmentEndU - segmentStartU ) * segmentJointRatio );
-
-                        segmentStartU = jointEndU;
-
                         // WORKAROUND: in some cases U is < 0.0f, I dont know why yet.
                         //if ( jointStartU < 0.0f ) jointStartU = 0.0f;
                         //if ( jointEndU   < 0.0f ) jointEndU   = 0.0f;
@@ -1941,8 +1891,6 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                          && ( ( jointBBox.y + jointBBox.h ) > 0        ) )
                         {
                             vertex->DrawJoint( iBLContext
-                                             , jointStartU
-                                             , jointEndU
                                              , iCombinedOpacity
                                              , iDrawingFlags );
                         }
@@ -1956,8 +1904,8 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                     {
                         DrawSegment( iBLContext
                                    , segment
-                                   , segmentStartU
-                                   , segmentEndU
+                                   , segment->GetTextureStartU()
+                                   , segment->GetTextureEndU()
                                    , iCombinedOpacity
                                    , iDrawingFlags );
                     }
@@ -2008,7 +1956,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                  && ( ( jointBBox.y               ) < screen.h )
                  && ( ( jointBBox.y + jointBBox.h ) > 0        ) )
                 {
-                    vertex->DrawJoint( iBLContext, 0.0f, 0.0f, iCombinedOpacity, iDrawingFlags );
+                    vertex->DrawJoint( iBLContext, iCombinedOpacity, iDrawingFlags );
                 }
 
                 return false; // keep iterating
@@ -2574,6 +2522,8 @@ FOdysseyVectorPath::UpdateChain( FOdysseyVectorChain* iChain )
 
         hasBBox = true;
 
+        segment->SetTextureU( 0.0f, 0.0f );
+
         if ( rx1 < xmin ) xmin = rx1;
         if ( ry1 < ymin ) ymin = ry1;
         if ( rx2 > xmax ) xmax = rx2;
@@ -2586,6 +2536,105 @@ FOdysseyVectorPath::UpdateChain( FOdysseyVectorChain* iChain )
 
         return false; // keep iterating
     } );
+
+    // Update texture coords
+    if( mBrush.GetTexture() )
+    {
+        double startU = mBrush.Revert ? 1.0f : 0.0f;
+        double remainingSegmentLength = 0.0f;
+
+        mBrush.Lock();
+
+        iChain->IterateSegments( [ this
+                                 , &startU
+                                 , &remainingSegmentLength
+                                 , &iChain ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
+        {
+            FOdysseyVectorVertex* otherVertex = segment->GetOtherVertex( vertex );
+            ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( true );
+            ::ULIS::FRectD jointBBox = vertex->GetJoint().GetBBox( true );
+            FOdysseyVectorJoint& joint = vertex->GetJoint();
+            double segmentLength = segment->GetLength();
+            double jointLength = joint.GetLength();
+            double segmentAndJointLength = segmentLength + jointLength;
+            double endU = 0.0f;
+
+            if( mBrush.ExtensionMode == eBrushExtensionMode::Path )
+            {
+                if( mBrush.Revert )
+                {
+                    endU = startU - ( iChain->mLength ? ( segmentAndJointLength / iChain->mLength ) : 0.0f );
+                }
+                else
+                {
+                    endU = startU + ( iChain->mLength ? ( segmentAndJointLength / iChain->mLength ) : 0.0f );
+                }
+            }
+
+            if( mBrush.ExtensionMode == eBrushExtensionMode::Segment )
+            {
+                if( mBrush.Revert )
+                {
+                    startU = 1.0f;
+                    endU   = 0.0f;
+                }
+                else
+                {
+                    startU = 0.0f;
+                    endU   = 1.0f;
+                }
+            }
+
+            if( mBrush.ExtensionMode == eBrushExtensionMode::Adapt )
+            {
+                double brushRatio = mBrush.height ? (double) mBrush.width  / mBrush.height : 0.0f;
+                double averageSegmentRadius = ( vertex->GetRadius() + otherVertex->GetRadius() ) * 0.5f;
+                double adaptedSegmentLength = averageSegmentRadius * brushRatio;
+
+                if( mBrush.Revert )
+                {
+                    endU   = startU - ( adaptedSegmentLength ? ( segmentAndJointLength / adaptedSegmentLength ) : 0.0f );
+                }
+                else
+                {
+                    endU   = startU + ( adaptedSegmentLength ? ( segmentAndJointLength / adaptedSegmentLength ) : 0.0f );
+                }
+            }
+
+            if( segmentLength )
+            {
+                double segmentStartU = ( vertex == segment->GetVertex(0) ) ? startU : endU;
+                double segmentEndU   = ( vertex == segment->GetVertex(0) ) ? endU : startU;
+
+                // WORKAROUND: in some cases U is < 0.0f, I dont know why yet.
+                //if ( segmentStartU < 0.0f ) segmentStartU = 0.0f;
+                //if ( segmentEndU   < 0.0f ) segmentEndU   = 0.0f;
+
+                // Textured joints are drawn only in texture mode (obviously) and if the texture
+                // goes all over the path.
+                if( ( vertex->IsHandleAligned() == false )
+                && ( mBrush.ExtensionMode != eBrushExtensionMode::Segment ) )
+                {
+                    double segmentJointRatio = jointLength / ( segmentAndJointLength );
+                    double jointStartU = segmentStartU;
+                    double jointEndU = segmentStartU + ( ( segmentEndU - segmentStartU ) * segmentJointRatio );
+
+                    segmentStartU = jointEndU;
+
+                    vertex->GetJoint().SetTextureU( jointStartU, jointEndU );
+                }
+
+                segment->SetTextureU( segmentStartU, segmentEndU );
+            }
+
+            // only when mBrush.ExtendOverPath == true
+            startU = endU;
+
+            return false; // keep iterating
+        } );
+
+        mBrush.Unlock();
+    }
 
     iChain->mBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax )
                                 : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );

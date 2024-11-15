@@ -231,6 +231,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
                           , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
                           , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray );
         std::vector<FOdysseyVectorPoint>& GetFractionPointBuffer();
+        void   SetTextureU( double iTextureStartU, double iTextureEndU );
+        double GetTextureStartU();
+        double GetTextureEndU();
 
     protected:
         void DrawFractionCache( BLContext* iBLContext );
@@ -251,4 +254,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         uint32 mPaintingCode; // used by group paint as a boolean without needing to reinitialize its value
         double mLength;
         uint32 mIntersectionSlotCount;
+        double mTextureStartU;
+        double mTextureEndU;
 };

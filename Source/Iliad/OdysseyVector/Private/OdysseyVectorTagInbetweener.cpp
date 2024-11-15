@@ -1415,7 +1415,7 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FInterpolatedPath* iInterpolatedPath
                                                            , localPointPositionn->y - ( perpn.y * radiusn ) )
                                     , iWorldMatrix.mapPoint( localPointPositioni->x - ( perpi.x * radiusi )
                                                            , localPointPositioni->y - ( perpi.y * radiusi ) ) };
-                    
+ 
 
                     iBLContext->fillPolygon( pt, 6 );
                 }

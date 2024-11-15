@@ -17,6 +17,8 @@ FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorObject* iOwner
     , mPaintingCode( 0 )
     , mLength( 0.0f )
     , mIntersectionSlotCount( 0 )
+    , mTextureStartU ( 0.0f )
+    , mTextureEndU ( 0.0f )
 {
 }
 
@@ -115,6 +117,25 @@ FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
     }
     iBLContext->restore();
 
+}
+
+void
+FOdysseyVectorSegment::SetTextureU( double iTextureStartU, double iTextureEndU )
+{
+    mTextureStartU = iTextureStartU;
+    mTextureEndU = iTextureEndU;
+}
+
+double
+FOdysseyVectorSegment::GetTextureStartU()
+{
+    return mTextureStartU;
+}
+
+double
+FOdysseyVectorSegment::GetTextureEndU()
+{
+    return mTextureEndU;
 }
 
 FOdysseyVectorHandleSegment*

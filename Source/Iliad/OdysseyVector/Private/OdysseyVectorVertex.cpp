@@ -1065,8 +1065,6 @@ FOdysseyVectorVertex::GetJointLength()
 
 void
 FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext
-                               , double iStartU
-                               , double iEndU
                                , double iCombinedOpacity
                                , uint64 iDrawingFlags )
 {
@@ -1090,7 +1088,11 @@ FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext
         }
         else
         {
-            mJoint.Draw( iBLContext, iStartU, iEndU, iCombinedOpacity, iDrawingFlags );
+            mJoint.Draw( iBLContext
+                       , mJoint.GetTextureStartU()
+                       , mJoint.GetTextureEndU()
+                       , iCombinedOpacity
+                       , iDrawingFlags );
         }
     }
 }
