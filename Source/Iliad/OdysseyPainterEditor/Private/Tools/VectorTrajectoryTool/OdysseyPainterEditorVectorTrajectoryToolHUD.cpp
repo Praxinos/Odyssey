@@ -522,7 +522,8 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
         {
             for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
             {
-                FOdysseyVectorHUD::DrawBreakdown( iBLContext
+                FOdysseyVectorHUD::DrawBreakdown( iScene
+                                                , iBLContext
                                                 , breakdown
                                                 , BLRgba32( 127, 127, 127, 255 )
                                                 , BLRgba32( 255, 127, 127, 255 )

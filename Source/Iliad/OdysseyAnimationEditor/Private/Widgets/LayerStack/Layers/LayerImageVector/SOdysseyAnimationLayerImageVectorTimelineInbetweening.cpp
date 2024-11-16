@@ -32,11 +32,15 @@
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::~SOdysseyAnimationLayerImageVectorTimelineInbetweening()
+{
+    FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll( this );
+}
+
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::SOdysseyAnimationLayerImageVectorTimelineInbetweening()
     : mForwardArrowBrush( FOdysseyStyle::GetBrush( "Animation.Timeline.Inbetweening.Forward16") )
     , mBackwardArrowBrush( FOdysseyStyle::GetBrush( "Animation.Timeline.Inbetweening.Backward16") )
 {
-    FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll( this );
 }
 
 void

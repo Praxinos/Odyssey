@@ -1845,7 +1845,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
 
         if( texture )
         {
-            double startU = mBrush.Revert ? 1.0f : 0.0f;
+            //double startU = mBrush.Revert ? 1.0f : 0.0f;
             double remainingSegmentLength = 0.0f;
 
             mBrush.Lock();
@@ -1855,7 +1855,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                                     , iBLContext
                                     , &iCombinedOpacity
                                     , &iDrawingFlags
-                                    , &startU
+                                    //, &startU
                                     , &remainingSegmentLength
                                     , &screen
                                     , &iChain ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
@@ -1867,7 +1867,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                 double segmentLength = segment->GetLength();
                 double jointLength = joint.GetLength();
                 double segmentAndJointLength = segmentLength + jointLength;
-                double endU = 0.0f;
+                //double endU = 0.0f;
 
                 if( segmentLength )
                 {
@@ -1912,7 +1912,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                 }
 
                 // only when mBrush.ExtendOverPath == true
-                startU = endU;
+                //startU = endU;
 
                 return false; // keep iterating
             } );
@@ -2523,6 +2523,7 @@ FOdysseyVectorPath::UpdateChain( FOdysseyVectorChain* iChain )
         hasBBox = true;
 
         segment->SetTextureU( 0.0f, 0.0f );
+        vertex->GetJoint().SetTextureU( 0.0f, 0.0f );
 
         if ( rx1 < xmin ) xmin = rx1;
         if ( ry1 < ymin ) ymin = ry1;
@@ -2543,7 +2544,7 @@ FOdysseyVectorPath::UpdateChain( FOdysseyVectorChain* iChain )
         double startU = mBrush.Revert ? 1.0f : 0.0f;
         double remainingSegmentLength = 0.0f;
 
-        mBrush.Lock();
+        mBrush.Lock(); // needed to retrieve texture width and height
 
         iChain->IterateSegments( [ this
                                  , &startU

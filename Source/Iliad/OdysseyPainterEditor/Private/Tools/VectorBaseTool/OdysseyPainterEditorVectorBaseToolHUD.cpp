@@ -383,7 +383,8 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawObjects( BLContext* iBLContext
                   {
                       FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
 
-                      FOdysseyVectorHUD::DrawInbetweens( iBLContext
+                      FOdysseyVectorHUD::DrawInbetweens( iScene
+                                                       , iBLContext
                                                        , inbetweenerTag
                                                        , iForegroundColor
                                                        , iBackgroundColor

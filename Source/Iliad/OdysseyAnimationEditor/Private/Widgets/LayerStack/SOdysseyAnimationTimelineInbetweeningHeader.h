@@ -19,6 +19,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeader
     : public SListView<TSharedPtr<FInbetweeningListViewItem>>
 {
     public:
+        ~SOdysseyAnimationTimelineInbetweeningHeader();
         SOdysseyAnimationTimelineInbetweeningHeader();
 
     public:

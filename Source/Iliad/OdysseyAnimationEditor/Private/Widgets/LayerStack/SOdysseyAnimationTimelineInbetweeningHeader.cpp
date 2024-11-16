@@ -27,11 +27,13 @@
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
-
+SOdysseyAnimationTimelineInbetweeningHeader::~SOdysseyAnimationTimelineInbetweeningHeader()
+{
+    FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll( this );
+}
 
 SOdysseyAnimationTimelineInbetweeningHeader::SOdysseyAnimationTimelineInbetweeningHeader()
 {
-    FOdysseyVectorEngine::OnNotifyDelegate().RemoveAll( this );
 }
 
 void

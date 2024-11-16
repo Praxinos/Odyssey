@@ -72,14 +72,16 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
                     {
                         if( mMatchingTool->ShowInbetweens )
                         {
-                            DrawBreakdown( iBLContext
+                            DrawBreakdown( iScene
+                                         , iBLContext
                                          , breakdown
                                          , BLRgba32( 127, 127, 127, 255 )
                                          , BLRgba32( 255, 127, 127, 255 )
                                          , /*HUD_BREAKDOWN_SOURCE | HUD_BREAKDOWN_TARGET |*/ HUD_BREAKDOWN_INBETWEEN );
                         }
 
-                        DrawBreakdown( iBLContext
+                        DrawBreakdown( iScene
+                                      , iBLContext
                                       , breakdown
                                       , BLRgba32( 127, 127, 127, 255 )
                                       , BLRgba32( 255, 127, 127, 255 )

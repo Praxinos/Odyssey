@@ -305,18 +305,19 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
     {
         if( mBreakdown )
         {
-            DrawBreakdown( iBLContext
+            DrawBreakdown( iScene
+                         , iBLContext
                          , mBreakdown
                          , BLRgba32( 127, 127, 127, 255 )
                          , BLRgba32( 255, 127, 127, 255 )
                          , HUD_BREAKDOWN_SOURCE | HUD_BREAKDOWN_TARGET | HUD_BREAKDOWN_INBETWEEN );
 
             DrawChart( iBLContext
-                      , fgColor
-                      , bgColor
-                      , hcColor
-                      , mBreakdown
-                      , iScene->GetEngine()->GetCell()->GetIndex() );
+                     , fgColor
+                     , bgColor
+                     , hcColor
+                     , mBreakdown
+                     , iScene->GetEngine()->GetCell()->GetIndex() );
         }
     }
 }

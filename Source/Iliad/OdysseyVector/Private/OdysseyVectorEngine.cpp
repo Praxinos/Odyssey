@@ -224,10 +224,14 @@ void
 FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext )
 {
     FOdysseyVectorGroupPaint* scene = GetScene();
+    BLImage* image = iBLContext->targetImage();
 
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::RenderHUD);
 
     mDrawingMutex.lock();
+
+    // retrieves buffer specs and allows us to draw directly in the buffer
+    image->makeMutable( &mRenderData );
 
     iBLContext->save();
     iBLContext->resetMatrix();
@@ -243,6 +247,8 @@ FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext )
     iBLContext->restore();
 
     iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
+
+    mRenderData.reset();
 
     mDrawingMutex.unlock();
 }

@@ -367,11 +367,39 @@ FOdysseyVectorTagInbetweener::GetWithThickness()
 {
     return bWithThickness;
 }
+/*
+double
+FOdysseyVectorTagInbetweener::GetEaseOutSpacing( double iT, double iFraction )
+{
+    double t = iT;
+    double u = 1.0f - iT;
 
+    ::ULIS::FVec2D p0 = ::ULIS::FVec2D( 0.0f, 0.0f );
+    ::ULIS::FVec2D p2 = ::ULIS::FVec2D( 1.0f, 1.0f );
+    ::ULIS::FVec2D p1 = ::ULIS::FVec2D( 0.0f + ( u * 0.5f ), 0.5f + ( t * 0.5f ) );
+
+    return ::ULIS::QuadraticBezierPointAtParameter( p0, p1, p2, iFraction / u ).y;
+}
+
+double
+FOdysseyVectorTagInbetweener::GetEaseInSpacing( double iT, double iFraction )
+{
+    double t = iT;
+    double u = 1.0f - iT;
+
+    ::ULIS::FVec2D p0 = ::ULIS::FVec2D( 1.0f, 1.0f );
+    ::ULIS::FVec2D p2 = ::ULIS::FVec2D( 0.0f, 0.0f );
+    ::ULIS::FVec2D p1 = ::ULIS::FVec2D( 0.5f + ( t * 0.5f ), 0.0f + ( u * 0.5f ) );
+
+    return ::ULIS::QuadraticBezierPointAtParameter( p0, p1, p2, iFraction / u ).y;
+}
+*/
 void
 FOdysseyVectorTagInbetweener::SetWithThickness( bool iWithThickness )
 {
     bWithThickness = iWithThickness;
+
+    Invalidate( INVALIDATE_CELLS );
 }
 
 bool
@@ -975,7 +1003,10 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         UnlockDrawing();
     }
 
-    RedrawCells();
+    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) == 0 )
+    {
+        RedrawCells();
+    }
 }
 
 FOdysseyVectorGroupPaint*
@@ -1317,7 +1348,10 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
                     uint32 inbetweenIndex = drawingIndex - breakdown->GetSourceDrawingIndex();
                     FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionBuffer()[inbetweenIndex];
 
-                    DrawPathsInbetween( inbetween, iBLContext, false );
+                    DrawPathsInbetween( iDisplayedScene
+                                      , inbetween
+                                      , iBLContext
+                                      , false );
                 }
             }
         }
@@ -1360,19 +1394,27 @@ GetPerpendicularVector( const ::ULIS::FVec2D* iP0
 }
 
 void
-FOdysseyVectorTagInbetweener::DrawPathAt( FInterpolatedPath* iInterpolatedPath
+FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedScene
+                                        , FInterpolatedPath* iInterpolatedPath
                                         , ::ULIS::FVec2D* iPointPositionBuffer
                                         , const BLMatrix2D& iWorldMatrix
                                         , BLContext* iBLContext
                                         , bool iLock )
 {
+    FOdysseyVectorEngine* displayedSceneEngine = iDisplayedScene ? iDisplayedScene->GetEngine() : nullptr;
+    FOdysseyVectorBrush& brush = iInterpolatedPath->GetOriginalPath()->GetBrush();
+
     if( iLock )
         LockDrawing();
+
+    brush.Lock();
 
     for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->mInterpolatedSegmentBuffer )
     {
         if( bMapAsPolyline )
         {
+            FOdysseyVectorSegment* segment = interpolatedSegment.GetOriginalSegment();
+            std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
             uint32 pointCount = interpolatedSegment.mInterpolatedPointArray.size();
             ::ULIS::FVec2D perpi;
             ::ULIS::FVec2D perpn;
@@ -1415,9 +1457,79 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FInterpolatedPath* iInterpolatedPath
                                                            , localPointPositionn->y - ( perpn.y * radiusn ) )
                                     , iWorldMatrix.mapPoint( localPointPositioni->x - ( perpi.x * radiusi )
                                                            , localPointPositioni->y - ( perpi.y * radiusi ) ) };
- 
 
-                    iBLContext->fillPolygon( pt, 6 );
+                                        // HUDs pass nullptr as the displayedScene
+                    if( brush.pixels && displayedSceneEngine )
+                    {
+                        FOdysseyVectorFraction* fraction = &fractionCache[i];
+                        double startU = segment->GetTextureStartU();
+                        double endU = segment->GetTextureEndU();
+                        double difU = endU - startU;
+
+                         // We have to divide the hexagon into 2 quads or else it can creates artefacts
+                        // due to UV Mapping when the hexagon is not "a square".
+                        ::ULIS::FVec2D quad0P[4] = { { pt[0].x, pt[0].y }
+                                                   , { pt[1].x, pt[1].y }
+                                                   , { pt[2].x, pt[2].y }
+                                                   , { pt[3].x, pt[3].y } };
+                        double quad0U[4] = { startU + ( fraction->polygon.U[0] * difU )
+                                           , startU + ( fraction->polygon.U[1] * difU )
+                                           , startU + ( fraction->polygon.U[2] * difU )
+                                           , startU + ( fraction->polygon.U[3] * difU ) };
+                        double quad0V[4] = { fraction->polygon.V[0]
+                                           , fraction->polygon.V[1]
+                                           , fraction->polygon.V[2]
+                                           , fraction->polygon.V[3] };
+                        ::ULIS::FVec2D quad1P[4] = { { pt[3].x, pt[3].y }
+                                                   , { pt[4].x, pt[4].y }
+                                                   , { pt[5].x, pt[5].y }
+                                                   , { pt[0].x, pt[0].y } };
+                        double quad1U[4] = { startU + ( fraction->polygon.U[3] * difU )
+                                           , startU + ( fraction->polygon.U[4] * difU )
+                                           , startU + ( fraction->polygon.U[5] * difU )
+                                           , startU + ( fraction->polygon.U[0] * difU ) };
+                        double quad1V[4] = { fraction->polygon.V[3]
+                                           , fraction->polygon.V[4]
+                                           , fraction->polygon.V[5]
+                                           , fraction->polygon.V[0] };
+                        BLVarCore fg;
+
+                        iBLContext->getFillStyle( fg );
+
+                        uint64 polygonDrawingFlags = 0;
+
+                        polygonDrawingFlags |= brush.ColorFromBrush    ? 0 : FPolygonDrawingFlags::BRUSHALPHAONLY;
+                        polygonDrawingFlags |= brush.BilinearFiltering ? FPolygonDrawingFlags::BILINEARFILTERING : 0;
+
+                        // should be a static function
+                        displayedSceneEngine->FillQuad( iBLContext
+                                                      , quad0P
+                                                      , quad0U
+                                                      , quad0V
+                                                      , 1.0f /*iCombinedOpacity*/
+                                                      , FColor( 0, 0, 0, 255 )/*foregroundColor*/
+                                                      , (int8*) brush.pixels // will be nullptr if no texture is loaded
+                                                      , brush.width
+                                                      , brush.height
+                                                      , brush.bitsPerPixel
+                                                      , polygonDrawingFlags );
+
+                        displayedSceneEngine->FillQuad( iBLContext
+                                                      , quad1P
+                                                      , quad1U
+                                                      , quad1V
+                                                      , 1.0f /*iCombinedOpacity*/
+                                                      , FColor( 0, 0, 0, 255 )/*foregroundColor*/
+                                                      , (int8*) brush.pixels // will be nullptr if no texture is loaded
+                                                      , brush.width
+                                                      , brush.height
+                                                      , brush.bitsPerPixel
+                                                      , polygonDrawingFlags );
+                    }
+                    else
+                    {
+                        iBLContext->fillPolygon( pt, 6 );
+                    }
                 }
                 else
                 {
@@ -1458,6 +1570,8 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FInterpolatedPath* iInterpolatedPath
         }
     }
 
+    brush.Unlock();
+
     if( iLock )
         UnlockDrawing();
 }
@@ -1469,7 +1583,8 @@ FOdysseyVectorTagInbetweener::GetInterpolatedPathBuffer()
 }
 
 void
-FOdysseyVectorTagInbetweener::DrawPathsInbetween( FChartDivision* inbetween
+FOdysseyVectorTagInbetweener::DrawPathsInbetween( FOdysseyVectorGroupPaint* iDisplayedScene
+                                                , FChartDivision* inbetween
                                                 , BLContext* iBLContext
                                                 , bool iLock )
 {
@@ -1490,7 +1605,8 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( FChartDivision* inbetween
         uint32 inbetweenAbsoluteIndex = inbetween->GetAbsoluteIndex();
         ::ULIS::FVec2D* pointPositionBuffer = &interpolatedPath.mInterpolatedPointPositionBuffer[pointCount * inbetweenAbsoluteIndex];
 
-        DrawPathAt( &interpolatedPath
+        DrawPathAt( iDisplayedScene
+                  , &interpolatedPath
                   , pointPositionBuffer
                   , worldMatrix
                   , iBLContext

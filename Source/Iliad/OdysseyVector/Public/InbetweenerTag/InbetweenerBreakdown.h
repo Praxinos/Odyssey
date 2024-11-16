@@ -9,6 +9,7 @@
 #include "InbetweenerTag/InbetweenerGrid.h"
 
 class FOdysseyVectorTagInbetweener;
+class FOdysseyVectorGroupPaint;
 enum class eInbetweenerGridType : uint8;
 
 class ODYSSEYVECTOR_API FInbetweenerBreakdown
@@ -30,8 +31,8 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         BLMatrix2D& GetTargetInverseWorldMatrix();
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
         FInbetweenerBreakdown* GetMasterBreakdown();
-        void DrawPathsAtTarget( BLContext* iBLContext, bool iLock );
-        void DrawPathsAtSource( BLContext* iBLContext, bool iLock );
+        void DrawPathsAtTarget( FOdysseyVectorGroupPaint* iDisplayedScene, BLContext* iBLContext, bool iLock );
+        void DrawPathsAtSource( FOdysseyVectorGroupPaint* iDisplayedScene, BLContext* iBLContext, bool iLock );
         void SetPrevBreakdown( FInbetweenerBreakdown* iPrevBreakdown );
         void SetNextBreakdown( FInbetweenerBreakdown* iNextBreakdown );
 

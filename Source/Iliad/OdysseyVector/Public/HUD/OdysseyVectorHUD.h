@@ -108,14 +108,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                             , bool iWorld
                             , uint64 iHUDFlags );
 
-        static void DrawInbetweens( BLContext* iBLContext
+        static void DrawInbetweens( FOdysseyVectorGroupPaint* iDisplayedScene
+                                  , BLContext* iBLContext
                                   , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                   , const BLRgba32& fgColor
                                   , const BLRgba32& bgColor
                                   , const BLRgba32& hcColo
                                   , uint64 iHUDFlags  );
 
-        static void DrawBreakdown( BLContext* iBLContext
+        static void DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
+                                 , BLContext* iBLContext
                                  , FInbetweenerBreakdown* iBreakdown
                                  , const BLRgba32& fgColor
                                  , const BLRgba32& bgColor
@@ -123,7 +125,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                                  , bool iWorld
                                  , uint64 iHUDFlags  );
 
-        static void DrawBreakdown( BLContext* iBLContext
+        static void DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
+                                 , BLContext* iBLContext
                                  , FInbetweenerBreakdown* iBreakdown
                                  , const BLRgba32& iSourceDrawingColor
                                  , const BLRgba32& iTargetDrawingColor

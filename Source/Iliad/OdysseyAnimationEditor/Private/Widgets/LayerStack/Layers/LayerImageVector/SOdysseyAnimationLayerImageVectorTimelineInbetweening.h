@@ -22,6 +22,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
     : public SListView<TSharedPtr<FInbetweeningListViewItem>>
 {
 public:
+    ~SOdysseyAnimationLayerImageVectorTimelineInbetweening();
     SOdysseyAnimationLayerImageVectorTimelineInbetweening();
 
 public:

@@ -278,7 +278,9 @@ FInbetweenerBreakdown::DrawGrid( BLContext* iBLContext
 }
 
 void
-FInbetweenerBreakdown::DrawPathsAtTarget( BLContext* iBLContext, bool iLock )
+FInbetweenerBreakdown::DrawPathsAtTarget( FOdysseyVectorGroupPaint* iDisplayedScene
+                                        , BLContext* iBLContext
+                                        , bool iLock )
 {
     BLMatrix2D worldMatrix = mInbetweenerTag->GetOwner()->GetWorldMatrix();
 
@@ -297,7 +299,8 @@ FInbetweenerBreakdown::DrawPathsAtTarget( BLContext* iBLContext, bool iLock )
         uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
         ::ULIS::FVec2D* pointPositionBuffer = &interpolatedPath.GetInterpolatedPointPositionBuffer()[pointCount * mTargetDrawingIndex];
 
-        mInbetweenerTag->DrawPathAt( &interpolatedPath
+        mInbetweenerTag->DrawPathAt( iDisplayedScene
+                                   , &interpolatedPath
                                    , pointPositionBuffer
                                    , worldMatrix
                                    , iBLContext
@@ -311,7 +314,9 @@ FInbetweenerBreakdown::DrawPathsAtTarget( BLContext* iBLContext, bool iLock )
 }
 
 void
-FInbetweenerBreakdown::DrawPathsAtSource( BLContext* iBLContext, bool iLock )
+FInbetweenerBreakdown::DrawPathsAtSource( FOdysseyVectorGroupPaint* iDisplayedScene
+                                        , BLContext* iBLContext
+                                        , bool iLock )
 {
     BLMatrix2D worldMatrix = mInbetweenerTag->GetOwner()->GetWorldMatrix();
     uint32 sourceDrawingIndex = GetSourceDrawingIndex();
@@ -331,7 +336,8 @@ FInbetweenerBreakdown::DrawPathsAtSource( BLContext* iBLContext, bool iLock )
         uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
         ::ULIS::FVec2D* pointPositionBuffer = &interpolatedPath.GetInterpolatedPointPositionBuffer()[pointCount * sourceDrawingIndex];
 
-        mInbetweenerTag->DrawPathAt( &interpolatedPath
+        mInbetweenerTag->DrawPathAt( iDisplayedScene
+                                   , &interpolatedPath
                                    , pointPositionBuffer
                                    , worldMatrix
                                    , iBLContext

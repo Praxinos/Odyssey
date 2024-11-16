@@ -254,7 +254,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                                                  , FSlateApplication::Get().GetModifierKeys().IsShiftDown() );
 
                      // update ALL impacted scenes
-                    iScene->GetSharedEnv()->Update( /*| FOdysseyVectorObject::UPDATE_INTERACTIVE*/0 );
+                    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
                 }
             }
 

@@ -195,7 +195,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
         }
 
         // update
-        iScene->GetSharedEnv()->Update( /*FOdysseyVectorObject::UPDATE_INTERACTIVE*/0 );
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
     }
 
     // redraw

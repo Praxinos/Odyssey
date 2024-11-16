@@ -412,7 +412,8 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
                     {
                         FInbetweenerBreakdown* nextBreakdown = breakdown->GetNextBreakdown();
 
-                        DrawBreakdown( iBLContext
+                        DrawBreakdown( iScene
+                                      , iBLContext
                                       , breakdown
                                       , BLRgba32( 127, 127, 127, 255 )
                                       , BLRgba32( 255, 127, 127, 255 )
@@ -420,7 +421,8 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
 
                         if( nextBreakdown )
                         {
-                            DrawBreakdown( iBLContext
+                            DrawBreakdown( iScene
+                                          , iBLContext
                                           , nextBreakdown
                                           , BLRgba32( 127, 127, 127, 255 )
                                           , BLRgba32( 255, 127, 127, 255 )
@@ -430,7 +432,8 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
 
                     //if( breakdown->GetTargetAnimationCellIndex() == frameIndex )
                     {
-                       DrawBreakdown( iBLContext
+                       DrawBreakdown( iScene
+                                    , iBLContext
                                     , breakdown
                                     , fgColor
                                     , bgColor

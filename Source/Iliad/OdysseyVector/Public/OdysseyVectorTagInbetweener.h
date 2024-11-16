@@ -197,7 +197,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         bool GetMapAsPolyline();
         void SetWithThickness( bool iWithThickness );
         bool GetWithThickness();
-        void DrawPathsInbetween( FChartDivision* inbetween
+        void DrawPathsInbetween( FOdysseyVectorGroupPaint* iDisplayedScene
+                               , FChartDivision* inbetween
                                , BLContext* iBLContext
                                , bool iLock );
         void DrawPathsTarget( BLContext* iBLContext );
@@ -213,7 +214,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void SetUsedPointCount( uint32 );
         uint32 GetUsedQuadCount();
         uint32 GetUsedPointCount();
-        void DrawPathAt( FInterpolatedPath* iInterpolatedPath
+        void DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedScene
+                       , FInterpolatedPath* iInterpolatedPath
                        , ::ULIS::FVec2D* iPointPositionBuffer
                        , const BLMatrix2D& iWorldMatrix
                        , BLContext* iBLContext
@@ -252,6 +254,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         std::vector<uint32>& GetUsedQuadIndexBuffer();
         std::vector<uint32>& GetUsedPointIndexBuffer();
         FOdysseyVectorGroupPaint* GetScene();
+        double GetEaseOutSpacing( double iT, double iFraction );
+        double GetEaseInSpacing( double iT, double iFraction );
 
     protected:
         /**
