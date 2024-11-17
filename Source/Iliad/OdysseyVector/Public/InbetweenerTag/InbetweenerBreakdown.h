@@ -68,6 +68,11 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         FInbetweenerChart* GetChart();
         void DrawSourceGrid( BLContext* iBLContext, bool iLock );
         void DrawTargetGrid( BLContext* iBLContext, bool iLock );
+        void EaseIn( float iEasing );
+        void EaseOut( float iEasing );
+        void EaseIn( float iEasing, uint32 iFrom, uint32 iTo );
+        void EaseOut( float iEasing, uint32 iFrom, uint32 iTo );
+        void EaseInAndOut( float iEasing, FChartDivision* iInbetween );
 
     protected:
         void DrawGrid( BLContext* iBLContext

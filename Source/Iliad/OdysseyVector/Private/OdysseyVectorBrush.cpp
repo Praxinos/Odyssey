@@ -3,6 +3,7 @@
 #include "OdysseyVectorPath.h"
 #include "Brush/OdysseyVectorBrushPath.h"
 #include "TextureResource.h"
+#include "TextureCompiler.h"
 
 FOdysseyVectorBrush* demoBrush;
 
@@ -77,13 +78,27 @@ FOdysseyVectorBrush::SetTexture( UTexture2D* iTexture )
         iTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
         iTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
         iTexture->SRGB = false;
+        //iTexture->MipLoadOptions = ETextureMipLoadOptions::OnlyFirstMip;
+        //iTexture->LODGroup = TextureGroup::TEXTUREGROUP_UI;
         iTexture->UpdateResource();
+
+        width  = 1024;
+        height = 64;
+        bitsPerPixel = 32;
+
+        //FTextureCompilingManager::Get().FinishCompilation( { iTexture } );
     }
 
     texture = iTexture;
 
-    Lock();
-    Unlock();
+    //FTexturePlatformData* pdata = texture->GetPlatformData();
+
+    //pdata->Reset
+
+    //UE_LOG(LogTemp, Warning, TEXT("%d %d"), texture->Source.GetLogicalSize().X, texture->Source.GetLogicalSize().Y );
+
+    //Lock();
+    //Unlock();
 }
 
 UTexture2D*

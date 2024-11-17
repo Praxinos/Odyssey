@@ -20,6 +20,15 @@ enum class eChartPickingMode : uint8
     Shift   = 2
 };
 
+UENUM()
+enum class eChartShiftingOp : uint8
+{
+    Relative     = 0,
+    EaseIn       = 1,
+    EaseOut      = 2,
+    EaseInAndOut = 3
+};
+
 UCLASS( HideCategories = (SelectionTool) )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOdysseyPainterEditorVectorBaseTool
 {
@@ -78,6 +87,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
         FChartDivision* mHoveredInbetween;
         ::ULIS::FVec2D* mPickedBezierPoint;
         eChartPickingMode mPickingMode;
+        float mEasing;
 
     public:
         UPROPERTY( EditAnywhere
@@ -86,4 +96,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
                           , ClampMin = "0.0"
                           , UIMin    = "0.0" ) )
         double PickingRadius;
+
+        UPROPERTY( EditAnywhere
+                 , Category = ChartTool
+                 , meta = ( ToolTip  = "Shifting Mode" ) )
+        eChartShiftingOp ShiftingOp;
 };

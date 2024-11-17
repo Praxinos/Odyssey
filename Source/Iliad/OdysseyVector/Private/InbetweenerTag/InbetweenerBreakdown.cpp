@@ -277,6 +277,105 @@ FInbetweenerBreakdown::DrawGrid( BLContext* iBLContext
         mInbetweenerTag->mDrawingMutex.unlock();
 }
 
+static double
+GetEaseOutSpacing( double iT, double iFraction )
+{
+    double t = iT;
+    double u = 1.0f - iT;
+
+//UE_LOG(LogTemp, Warning, TEXT("%f %f"), t, u );
+
+    ::ULIS::FVec2D p0 = ::ULIS::FVec2D( 0.0f, 0.0f );
+    ::ULIS::FVec2D p2 = ::ULIS::FVec2D( 1.0f, 1.0f );
+    ::ULIS::FVec2D p1 = ::ULIS::FVec2D( 0.0f + ( u * 0.5f ), 0.5f + ( t * 0.5f ) );
+
+    return ::ULIS::QuadraticBezierPointAtParameter( p0, p1, p2, iFraction ).y;
+}
+
+static double
+GetEaseInSpacing( double iT, double iFraction )
+{
+    double t = iT;
+    double u = 1.0f - iT;
+
+//UE_LOG(LogTemp, Warning, TEXT("%f %f"), t, u );
+
+    ::ULIS::FVec2D p0 = ::ULIS::FVec2D( 0.0f, 0.0f );
+    ::ULIS::FVec2D p2 = ::ULIS::FVec2D( 1.0f, 1.0f );
+    ::ULIS::FVec2D p1 = ::ULIS::FVec2D( 0.5f + ( t * 0.5f ), 0.0f + ( u * 0.5f ) );
+
+    return ::ULIS::QuadraticBezierPointAtParameter( p0, p1, p2, iFraction ).y;
+}
+
+void
+FInbetweenerBreakdown::EaseOut( float iEasing, uint32 iFrom, uint32 iTo )
+{
+    uint32 divisionCount = iTo - iFrom + 1;
+    float fromSpacing = mChart.GetDivisionBuffer()[iFrom].spacing;
+    float toSpacing = mChart.GetDivisionBuffer()[iTo].spacing;
+
+    for( uint32 i = iFrom + 1, j = 1; j < iTo; i++, j++ )
+    {
+        double fraction = ( double ) j / ( divisionCount - 1 );
+        double spacing = GetEaseOutSpacing( iEasing, fraction );
+//UE_LOG(LogTemp, Warning, TEXT("Spacing:%f"), spacing );
+        mChart.GetDivisionBuffer()[i].spacing = fromSpacing + ( spacing * ( toSpacing - fromSpacing ) );
+    }
+
+    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
+}
+
+void
+FInbetweenerBreakdown::EaseOut( float iEasing )
+{
+    EaseOut( fabs(iEasing)
+           , mChart.GetDivisionBuffer().front().GetIndex()
+           , mChart.GetDivisionBuffer().back().GetIndex() );
+}
+
+void
+FInbetweenerBreakdown::EaseIn( float iEasing, uint32 iFrom, uint32 iTo )
+{
+    uint32 divisionCount = iTo - iFrom + 1;
+    float fromSpacing = mChart.GetDivisionBuffer()[iFrom].spacing;
+    float toSpacing = mChart.GetDivisionBuffer()[iTo].spacing;
+
+    for( uint32 i = iFrom + 1, j = 1; i < iTo; i++, j++ )
+    {
+        double fraction = ( double ) j / ( divisionCount - 1 );
+        double spacing = GetEaseInSpacing( iEasing, fraction );
+//UE_LOG(LogTemp, Warning, TEXT("Spacing:%f"), spacing );
+        mChart.GetDivisionBuffer()[i].spacing = fromSpacing + ( spacing * ( toSpacing - fromSpacing ) );
+    }
+
+    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
+}
+
+void
+FInbetweenerBreakdown::EaseIn( float iEasing )
+{
+    EaseIn( fabs(iEasing)
+           , mChart.GetDivisionBuffer().front().GetIndex()
+           , mChart.GetDivisionBuffer().back().GetIndex() );
+}
+
+void
+FInbetweenerBreakdown::EaseInAndOut( float iEasing, FChartDivision* iInbetween )
+{
+    if( iEasing > 0.0f )
+    {
+        EaseIn ( fabs(iEasing), mChart.GetDivisionBuffer().front().GetIndex(), iInbetween->GetIndex() );
+        EaseOut( fabs(iEasing), iInbetween->GetIndex(), mChart.GetDivisionBuffer().back().GetIndex() );
+    }
+    else
+    {
+        EaseOut( fabs(iEasing), mChart.GetDivisionBuffer().front().GetIndex(), iInbetween->GetIndex() );
+        EaseIn ( fabs(iEasing), iInbetween->GetIndex(), mChart.GetDivisionBuffer().back().GetIndex() );
+    }
+}
+
 void
 FInbetweenerBreakdown::DrawPathsAtTarget( FOdysseyVectorGroupPaint* iDisplayedScene
                                         , BLContext* iBLContext

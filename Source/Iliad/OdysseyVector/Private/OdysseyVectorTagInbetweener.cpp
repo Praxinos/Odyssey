@@ -367,33 +367,7 @@ FOdysseyVectorTagInbetweener::GetWithThickness()
 {
     return bWithThickness;
 }
-/*
-double
-FOdysseyVectorTagInbetweener::GetEaseOutSpacing( double iT, double iFraction )
-{
-    double t = iT;
-    double u = 1.0f - iT;
 
-    ::ULIS::FVec2D p0 = ::ULIS::FVec2D( 0.0f, 0.0f );
-    ::ULIS::FVec2D p2 = ::ULIS::FVec2D( 1.0f, 1.0f );
-    ::ULIS::FVec2D p1 = ::ULIS::FVec2D( 0.0f + ( u * 0.5f ), 0.5f + ( t * 0.5f ) );
-
-    return ::ULIS::QuadraticBezierPointAtParameter( p0, p1, p2, iFraction / u ).y;
-}
-
-double
-FOdysseyVectorTagInbetweener::GetEaseInSpacing( double iT, double iFraction )
-{
-    double t = iT;
-    double u = 1.0f - iT;
-
-    ::ULIS::FVec2D p0 = ::ULIS::FVec2D( 1.0f, 1.0f );
-    ::ULIS::FVec2D p2 = ::ULIS::FVec2D( 0.0f, 0.0f );
-    ::ULIS::FVec2D p1 = ::ULIS::FVec2D( 0.5f + ( t * 0.5f ), 0.0f + ( u * 0.5f ) );
-
-    return ::ULIS::QuadraticBezierPointAtParameter( p0, p1, p2, iFraction / u ).y;
-}
-*/
 void
 FOdysseyVectorTagInbetweener::SetWithThickness( bool iWithThickness )
 {

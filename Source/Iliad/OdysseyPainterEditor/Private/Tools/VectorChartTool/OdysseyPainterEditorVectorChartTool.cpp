@@ -24,6 +24,7 @@ UOdysseyPainterEditorVectorChartTool::UOdysseyPainterEditorVectorChartTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorChartToolHUD( this ), false )
     , PickingRadius( 10.0f )
     , mPickingMode( eChartPickingMode::Default )
+    , ShiftingOp ( eChartShiftingOp::Relative )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart64");
 
@@ -79,7 +80,7 @@ UOdysseyPainterEditorVectorChartTool::OnKeyDownGlobalVector( FOdysseyVectorGroup
 
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
     // with the events processing in the OnKeyUpGlobalVector(), we do like that.
-    if ( ( iKey == EKeys::LeftAlt ) || ( iKey == EKeys::RightAlt ) )
+    if ( ( iKey == EKeys::LeftShift ) || ( iKey == EKeys::RightShift ) )
     {
         mPickingMode  = eChartPickingMode::Shift;
     }
@@ -130,13 +131,15 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
 
     mPickedInbetween = nullptr;
     mPickedBezierPoint = nullptr;
+    mEasing = 0.0f;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
         FOdysseyVectorTagInbetweener* inbetweenerTag = mChartHUD->GetBreakdown()->GetInbetweenerTag();
 
-        if( mPickingMode == eChartPickingMode::Default )
+        if( ( mPickingMode == eChartPickingMode::Default )
+          ||( mPickingMode == eChartPickingMode::Shift ) )
         {
             mPickedInbetween = mChartHUD->PickInbetween( iPointInTexture.x
                                                        , iPointInTexture.y );
@@ -236,7 +239,8 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
     {
         if( mChartHUD->GetBreakdown() )
         {
-            ::ULIS::FVec2D* HUDBezier = mChartHUD->GetBreakdown()->GetChart()->GetHUDBezier();
+            FInbetweenerBreakdown* currentBreakdown = mChartHUD->GetBreakdown();
+            ::ULIS::FVec2D* HUDBezier = currentBreakdown->GetChart()->GetHUDBezier();
 
             if( mPickingMode == eChartPickingMode::Default )
             {
@@ -251,11 +255,61 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
 
                     inbetweenerTag->MoveInbetween( mPickedInbetween
                                                  , newT
-                                                 , FSlateApplication::Get().GetModifierKeys().IsShiftDown() );
+                                                 , false );
 
                      // update ALL impacted scenes
                     iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
                 }
+            }
+
+            if( mPickingMode == eChartPickingMode::Shift )
+            {
+                if( ShiftingOp == eChartShiftingOp::Relative )
+                {
+                    FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->chart->GetBreakdown()->GetInbetweenerTag();
+                    double newT = FOdysseyVector::QuadraticBezierHitTest( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y )
+                                                                        , HUDBezier[0]
+                                                                        , HUDBezier[1]
+                                                                        , HUDBezier[2]
+                                                                        , 16 );
+
+                    if ( mPickedInbetween )
+                    {
+                        inbetweenerTag->MoveInbetween( mPickedInbetween
+                                                     , newT
+                                                     , true );
+                    }
+                }
+
+                if( ShiftingOp == eChartShiftingOp::EaseIn )
+                {
+                    currentBreakdown->EaseIn( mEasing );
+
+                    mEasing = std::clamp( ( iPointInTexture.deltaPosition.X < 0.0f ) ? mEasing + 0.2f
+                                                                                     : mEasing - 0.2f, 0.0f, 1.0f );
+                }
+
+                if( ShiftingOp == eChartShiftingOp::EaseOut )
+                {
+                    currentBreakdown->EaseOut( mEasing );
+
+                    mEasing = std::clamp( ( iPointInTexture.deltaPosition.X > 0.0f ) ? mEasing + 0.2f
+                                                                                     : mEasing - 0.2f, 0.0f, 1.0f );
+                }
+
+                if( ShiftingOp == eChartShiftingOp::EaseInAndOut )
+                {
+                    if( mPickedInbetween )
+                    {
+                        currentBreakdown->EaseInAndOut( mEasing, mPickedInbetween );
+
+                        mEasing = std::clamp( ( iPointInTexture.deltaPosition.X > 0.0f ) ? mEasing + 0.2f
+                                                                                         : mEasing - 0.2f, -1.0f, 1.0f );
+                    }
+                }
+
+                // update ALL impacted scenes
+                iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
             }
 
             if( mPickingMode == eChartPickingMode::Control )
@@ -335,12 +389,12 @@ UOdysseyPainterEditorVectorChartTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FSinglePropertyParams defaultPropertyParams;
-/*
-    const TSharedPtr<ISinglePropertyView> XDivPropertyView = propertyEditorModule.CreateSingleProperty(this, "DivisionsX", defaultPropertyParams);
-    const TSharedPtr<ISinglePropertyView> YDivPropertyView = propertyEditorModule.CreateSingleProperty(this, "DivisionsY", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> XDivHandle = XDivPropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> YDivHandle = YDivPropertyView->GetPropertyHandle();
-*/
+
+    const TSharedPtr<ISinglePropertyView> ShiftingOpView = propertyEditorModule.CreateSingleProperty(this, "ShiftingOp", defaultPropertyParams);
+    //const TSharedPtr<ISinglePropertyView> YDivPropertyView = propertyEditorModule.CreateSingleProperty(this, "DivisionsY", defaultPropertyParams);
+    TSharedPtr<class IPropertyHandle> ShiftingOpHandle = ShiftingOpView->GetPropertyHandle();
+    //TSharedPtr<class IPropertyHandle> YDivHandle = YDivPropertyView->GetPropertyHandle();
+
     return SNew(SUniformWrapPanel)
         .SlotPadding(FVector2D(3.f, 0.f))
         .EvenRowDistribution(true)
@@ -349,11 +403,12 @@ UOdysseyPainterEditorVectorChartTool::CreateTopTabWidget()
         [
             SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
         ]
-/*
+
         + SUniformWrapPanel::Slot()
         [
-            CreatePropertyWidget(XDivHandle, XDivPropertyView).ToSharedRef()
+            CreatePropertyWidget(ShiftingOpHandle, ShiftingOpView).ToSharedRef()
         ]
+/*
         + SUniformWrapPanel::Slot()
         [
             CreatePropertyWidget(YDivHandle, YDivPropertyView).ToSharedRef()
