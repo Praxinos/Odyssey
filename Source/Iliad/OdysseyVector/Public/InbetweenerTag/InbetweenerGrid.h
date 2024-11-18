@@ -113,6 +113,8 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         void ResetDeformation( bool iInvalidate );
 
         friend class FOdysseyVectorTagInbetweener;
+        bool ComputeARAPInterpolation( FChartDivision* iInbetween
+                                     , bool useRigidTransform );
 
     protected:
         ::ULIS::FVec2D GetCenterOfMass( eInbetweenerPointPositionType iPositionType );
@@ -126,8 +128,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
     // applies to all types of grid.
     protected:
         bool PrecomputeARAPInterpolation();
-        bool ComputeARAPInterpolation( FChartDivision* iInbetween
-                                     , bool useRigidTransform );
+
         void ComputePStar( FInbetweenerPoint* iTriangle[3]
                          , int triRow
                          , eInbetweenerPointPositionType iPositionType

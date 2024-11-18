@@ -13,6 +13,14 @@ class FInbetweenerBreakdown;
 class FOdysseyVectorTagInbetweener;
 class FInbetweenerStep;
 
+struct FTrajectoryFraction
+{
+    float linearT0;
+    float linearT1;
+    float cubicT0;
+    float cubicT1;
+};
+
 class ODYSSEYVECTOR_API FInbetweenerTrajectory
 {
     public:
@@ -35,6 +43,9 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
         FInbetweenerBreakdown* GetBreakdown();
         FInbetweenerTrajectory* GetNext();
         FInbetweenerTrajectory* GetPrev();
+        void FitBezier( const std::vector<::ULIS::FVec2D> &data
+                      , const std::vector<float> &u );
+        ::ULIS::FVec2D GetPoint( float iSpacingT );
 
     private:
         std::vector<FInbetweenerWaypoint> mWaypointBuffer;
@@ -43,4 +54,6 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
         FInbetweenerHandleTrajectory mHandle[2];
         ::ULIS::FVec2D mCubicBezier[4];
         FInbetweenerBreakdown* mBreakdown;
+        std::vector<::ULIS::FVec2D> mFractionPointBuffer;
+        std::vector<FTrajectoryFraction> mFractionBuffer;
 };

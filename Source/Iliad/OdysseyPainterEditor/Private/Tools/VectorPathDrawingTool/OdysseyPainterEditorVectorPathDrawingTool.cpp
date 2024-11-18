@@ -40,6 +40,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     , Debug( false )
     , mStitchedVertex( nullptr )
     , mPathNumber( 0 )
+    , Brush ( nullptr )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathDrawing64");
 

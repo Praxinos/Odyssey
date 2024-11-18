@@ -490,20 +490,38 @@ double
 FOdysseyVector::GetBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
                                           , uint32 iDivisions )
 {
+    return GetBezierApproximateLength( iBezier, iDivisions, nullptr );
+}
+
+double
+FOdysseyVector::GetBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
+                                          , uint32 iDivisions
+                                          , std::vector<double>* oDivisionLengthBuffer )
+{
     ::ULIS::FVec2D p0 = iBezier[0];
     double step = 1.0f / iDivisions;
     double length = 0.0f;
     double t0 = 0.0f;
 
+    if( oDivisionLengthBuffer )
+        oDivisionLengthBuffer->resize( iDivisions );
+
     for( uint32 i = 0; i < iDivisions; i++ )
     {
         double t1 = t0 + step;
-        ::ULIS::FVec2D p1 = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( iBezier[0]
-                                                                                 , iBezier[1]
-                                                                                 , iBezier[2]
-                                                                                 , iBezier[3]
-                                                                                 , t1 );
-        length += ::ULIS::FVec2D( p1 - p0 ).Distance();
+        ::ULIS::FVec2D p1 = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( iBezier[0]
+                                                                               , iBezier[1]
+                                                                               , iBezier[2]
+                                                                               , iBezier[3]
+                                                                               , t1 );
+        double fractionLength = ::ULIS::FVec2D( p1 - p0 ).Distance();
+
+        if( oDivisionLengthBuffer )
+        {
+            (*oDivisionLengthBuffer)[i] = fractionLength;
+        }
+
+        length += fractionLength;
 
         t0 = t1;
         p0 = p1;

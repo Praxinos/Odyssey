@@ -32,7 +32,7 @@ namespace FOdysseyVector
     // It means that if the projection of the point on the segment is beyond limits,
     // it will remain within limits (0.0f) or (1.0f). On the figure below, x would be at t=0.0
     //
-    //                    ° (point)
+    //                    Â° (point)
     //     segment        |
     // 1______________0   x (proj. point will also be at t = 0.0,
     //                       even though it is outside the segment)
@@ -70,6 +70,10 @@ namespace FOdysseyVector
 
     double ODYSSEYVECTOR_API GetBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
                                                        , uint32 iDivisions );
+
+    double ODYSSEYVECTOR_API GetBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
+                                                       , uint32 iDivisions
+                                                       , std::vector<double>* oDivisionLengthBuffer );
 
     ::ULIS::FVec2D ODYSSEYVECTOR_API MapPoint( const BLMatrix2D& iMatrix
                                              , const ::ULIS::FVec2D& iPoint );

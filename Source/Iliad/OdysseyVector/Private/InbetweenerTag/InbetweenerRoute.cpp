@@ -30,6 +30,34 @@ FInbetweenerRoute::Init( uint32 iQuadIndex
     mQuadV = iQuadV;
 
     Resize();
+
+/*
+    for( FInbetweenerTrajectory& trajectory : mTrajectoryBuffer )
+    {
+        std::vector<float> spacingBuffer;
+        std::vector<::ULIS::FVec2D> pointBuffer;
+
+        trajectory.GetBreakdown()->GetChart()->GetSpacing( spacingBuffer );
+
+        pointBuffer.reserve( spacingBuffer.size() );
+
+        for( FChartDivision& inbetween : trajectory.GetBreakdown()->GetChart()->GetDivisionBuffer() )
+        {
+            FInbetweenerGrid* grid = trajectory.GetBreakdown()->GetGrid();
+            ::ULIS::FVec2D gridPoint;
+
+            grid->ComputeARAPInterpolation( &inbetween, false );
+
+            gridPoint = grid->GetQuadBuffer()[GetQuadIndex()].GetPoint( eInbetweenerPointPositionType::InterpPosition
+                                                                      , mQuadU
+                                                                      , mQuadV );
+
+            pointBuffer.push_back( FOdysseyVector::MapPoint( inbetween.drawing->localMatrix, gridPoint ) );
+        }
+
+        trajectory.FitBezier(  pointBuffer, spacingBuffer );
+    }
+*/
 }
 
 void

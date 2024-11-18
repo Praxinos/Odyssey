@@ -24,6 +24,7 @@ FOdysseyVectorPath::~FOdysseyVectorPath()
 FOdysseyVectorPath::FOdysseyVectorPath( const FString& iName )
     : FOdysseyVectorObject( iName )
     , mPaintingCode( 0 )
+    , mBrush( this )
 {
     SetJointType( eJointType::Miter, false );
 

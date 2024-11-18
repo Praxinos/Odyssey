@@ -12,7 +12,7 @@ void
 FOdysseyVectorBrush::MakeDemoBrush( const std::list<FOdysseyVectorObject*>& iObjectList
                                   , const ::ULIS::FRectD& iBoundingBox )
 {
-    demoBrush = new FOdysseyVectorBrush( iObjectList, iBoundingBox );
+    demoBrush = new FOdysseyVectorBrush( nullptr, iObjectList, iBoundingBox );
 }
 
 FOdysseyVectorBrush*
@@ -38,8 +38,10 @@ FOdysseyVectorBrush::Draw( BLContext* iBLContext
     }
 }
 
-FOdysseyVectorBrush::FOdysseyVectorBrush( const std::list<FOdysseyVectorObject*>& iObjectList
+FOdysseyVectorBrush::FOdysseyVectorBrush( FOdysseyVectorObject* iOwner // can be NULL
+                                        , const std::list<FOdysseyVectorObject*>& iObjectList
                                         , const ::ULIS::FRectD& iBoundingBox  )
+    : FOdysseyVectorBrush( iOwner )
 {
     width  = 0;
     height = 0;
@@ -90,6 +92,9 @@ FOdysseyVectorBrush::SetTexture( UTexture2D* iTexture )
     }
 
     texture = iTexture;
+
+    if( owner )
+        owner->Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
 
     //FTexturePlatformData* pdata = texture->GetPlatformData();
 

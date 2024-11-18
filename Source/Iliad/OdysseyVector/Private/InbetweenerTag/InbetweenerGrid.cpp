@@ -744,11 +744,8 @@ FInbetweenerGrid::ComputeARAPInterpolation( FChartDivision* iInbetween
         ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
         uint32 waypointIndex = iInbetween->GetIndex() ;
         double waypointT = trajectory->GetWaypointBuffer()[waypointIndex].GetT();
-        ::ULIS::FVec2D coords = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( cubicBezier[0]
-                                                                                   , cubicBezier[1]
-                                                                                   , cubicBezier[2]
-                                                                                   , cubicBezier[3]
-                                                                                   , waypointT );
+        ::ULIS::FVec2D coords = trajectory->GetPoint( waypointT );
+
         BLPoint inbetweenCoords = iInbetween->drawing->inverseMatrix.mapPoint( coords.x, coords.y );
 
         PTAD( idx, 0 ) = inbetweenCoords.x;

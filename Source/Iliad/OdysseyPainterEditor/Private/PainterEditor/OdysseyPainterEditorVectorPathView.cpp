@@ -6,6 +6,7 @@ UOdysseyPainterEditorVectorPathView::~UOdysseyPainterEditorVectorPathView()
 
 UOdysseyPainterEditorVectorPathView::UOdysseyPainterEditorVectorPathView()
     : UOdysseyPainterEditorVectorObjectView()
+    , Brush ( nullptr )
 {
 }
 

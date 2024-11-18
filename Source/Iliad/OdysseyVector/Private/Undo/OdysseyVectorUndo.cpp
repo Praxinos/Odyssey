@@ -1398,6 +1398,7 @@ FSnapshotPath::~FSnapshotPath()
 
 FSnapshotPath::FSnapshotPath( FOdysseyVectorPath* iPath, uint64 iSnapshotFlags )
     : FSnapshotObject( iPath, iSnapshotFlags )
+    , mBrush( nullptr )
 {
     // snapshot vertex and segment list
     if( iSnapshotFlags & FSnapshotFlags::Object::Path::TOPOLOGY )

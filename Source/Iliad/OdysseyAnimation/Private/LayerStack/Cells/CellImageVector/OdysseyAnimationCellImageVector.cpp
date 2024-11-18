@@ -22,7 +22,15 @@
 UOdysseyAnimationCellImageVector::~UOdysseyAnimationCellImageVector()
 {
     if (mRoot)
+    {
+        if( mRoot->GetParent() )
+        {
+            mRoot->GetParent()->RemoveChild( mRoot );
+        }
+
         delete mRoot;
+    }
+
     mRoot = nullptr;
 }
 

@@ -42,6 +42,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrim
     , mRectangleNumber ( 0 )
     , mLineNumber ( 0 )
     , mEllipseNumber ( 0 )
+    , Brush ( nullptr )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Shapes64");
 }
