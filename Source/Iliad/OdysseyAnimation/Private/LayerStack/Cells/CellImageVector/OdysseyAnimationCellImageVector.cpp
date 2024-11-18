@@ -21,7 +21,8 @@
 
 UOdysseyAnimationCellImageVector::~UOdysseyAnimationCellImageVector()
 {
-    delete mRoot;
+    if (mRoot)
+        delete mRoot;
     mRoot = nullptr;
 }
 
