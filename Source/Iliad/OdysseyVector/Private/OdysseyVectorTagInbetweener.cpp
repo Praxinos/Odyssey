@@ -550,7 +550,7 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
         // adapt the new spacings for the new breakdown
         for( uint32 i = 1; i < inbetweenIndex; i++ )
         {
-            float newSpacing = curChartSpacingBuffer[i] * ( float ) ( curTargetDrawingIndex / inbetweenIndex );
+            float newSpacing = curChartSpacingBuffer[i] * ( float ) ( curTargetDrawingIndex / ( inbetweenIndex - 1 ) );
             // Note: inbetweenIndex cannot be 0
             newChart->GetDivisionBuffer()[i].spacing = newSpacing;
         }
