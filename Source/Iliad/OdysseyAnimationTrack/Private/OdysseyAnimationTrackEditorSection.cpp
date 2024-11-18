@@ -157,7 +157,7 @@ FOdysseyAnimationTrackEditorSection::RebuildSectionWidget()
         [
             SNew( SOdysseyAnimationTimelineTreeView )
             .PainterEditor_Lambda(
-                [animation]() ->TSharedPtr<FOdysseyPainterEditor>
+                [animation]() ->FOdysseyPainterEditor*
                 {
                     if (!animation)
                         return nullptr;
@@ -182,7 +182,7 @@ FOdysseyAnimationTrackEditorSection::RebuildSectionWidget()
                     if (animationExtension->Animation() != animation)
                         return nullptr;
 
-                    TSharedPtr<FOdysseyPainterEditor> editor = odysseyEdMode->GetEditor();
+                    FOdysseyPainterEditor* editor = odysseyEdMode->GetEditor();
                     if (!editor)
                         return nullptr;
 
@@ -203,7 +203,7 @@ FOdysseyAnimationTrackEditorSection::RebuildSectionWidget()
                         return;
 
                     FOdysseyViewportDrawingEditorEdMode* odysseyEdMode = static_cast<FOdysseyViewportDrawingEditorEdMode*>(edMode);
-                    TSharedPtr<FOdysseyPainterEditor> editor = odysseyEdMode->GetEditor();
+                    FOdysseyPainterEditor* editor = odysseyEdMode->GetEditor();
                     if (!editor)
                         return;
 
@@ -237,7 +237,7 @@ FOdysseyAnimationTrackEditorSection::RebuildSectionWidget()
                         return;
 
                     FOdysseyViewportDrawingEditorEdMode* odysseyEdMode = static_cast<FOdysseyViewportDrawingEditorEdMode*>(edMode);
-                    TSharedPtr<FOdysseyPainterEditor> editor = odysseyEdMode->GetEditor();
+                    FOdysseyPainterEditor* editor = odysseyEdMode->GetEditor();
                     if (!editor)
                         return;
 
@@ -263,7 +263,7 @@ FOdysseyAnimationTrackEditorSection::RebuildSectionWidget()
                         return ECheckBoxState::Unchecked;
 
                     FOdysseyViewportDrawingEditorEdMode* odysseyEdMode = static_cast<FOdysseyViewportDrawingEditorEdMode*>(edMode);
-                    TSharedPtr<FOdysseyPainterEditor> editor = odysseyEdMode->GetEditor();
+                    FOdysseyPainterEditor* editor = odysseyEdMode->GetEditor();
                     if (!editor)
                         return ECheckBoxState::Unchecked;
 

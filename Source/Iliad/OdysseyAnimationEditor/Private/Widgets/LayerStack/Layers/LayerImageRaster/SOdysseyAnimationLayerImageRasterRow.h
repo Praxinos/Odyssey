@@ -20,7 +20,7 @@ public:
         : _PainterEditor(nullptr)
         {}
         SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
-        SLATE_ATTRIBUTE(TSharedPtr<FOdysseyPainterEditor>, PainterEditor)
+        SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
     SLATE_END_ARGS()
 
 public:
@@ -40,5 +40,5 @@ private:
 
 private:
     class UOdysseyAnimationLayerImageRaster* mAnimationLayerImageRaster;
-    TAttribute<TSharedPtr<FOdysseyPainterEditor>> mEditor;
+    TAttribute<FOdysseyPainterEditor*> mEditor;
 };

@@ -80,7 +80,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnVectorSceneNotify( FOdy
     }
 }
 
-TSharedPtr<FOdysseyPainterEditor>
+FOdysseyPainterEditor*
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetEditor() const
 {
     return mEditor.Get();
@@ -228,7 +228,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
-            TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
+            FOdysseyPainterEditor* editor = mEditor.Get();
             if (editor)
             {
                 TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
@@ -302,7 +302,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
-            TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
+            FOdysseyPainterEditor* editor = mEditor.Get();
             if (editor)
             {
                 TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
@@ -385,10 +385,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection()
 
         GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
-        TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
-        if (editor)
+        if (mEditor)
         {
-            TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
+            TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
             if (source)
                 source->RecordCurrentFrameUndo();
         }

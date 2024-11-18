@@ -80,7 +80,7 @@ SOdysseyAnimationComponentTrack::RebuildWidgets()
             [ */
                 SNew(SOdysseyAnimationLayerStackTreeView)
                 .PainterEditor_Lambda(
-                    [animation]() ->TSharedPtr<FOdysseyPainterEditor>
+                    [animation]() -> FOdysseyPainterEditor*
                     {
                         if (!animation)
                             return nullptr;
@@ -105,7 +105,7 @@ SOdysseyAnimationComponentTrack::RebuildWidgets()
                         if (animationExtension->Animation() != animation)
                             return nullptr;
 
-                        TSharedPtr<FOdysseyPainterEditor> editor = odysseyEdMode->GetEditor();
+                        FOdysseyPainterEditor* editor = odysseyEdMode->GetEditor();
                         if (!editor)
                             return nullptr;
 

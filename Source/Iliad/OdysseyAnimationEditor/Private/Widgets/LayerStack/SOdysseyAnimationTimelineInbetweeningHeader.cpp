@@ -148,21 +148,21 @@ SOdysseyAnimationTimelineInbetweeningHeader::OnContextMenuOpening()
 void
 SOdysseyAnimationTimelineInbetweeningHeader::Commit()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
+    FOdysseyPainterEditor* editor = mEditor.Get();
     if (!editor)
         return;
 
-    FOdysseyPainterEditor::CommitSelectedInbetweenerTag( editor.Get(), mAnimationLayerImageVector->GetSharedEnv() );
+    FOdysseyPainterEditor::CommitSelectedInbetweenerTag( editor, mAnimationLayerImageVector->GetSharedEnv() );
 }
 
 void
 SOdysseyAnimationTimelineInbetweeningHeader::ResetSpacingCharts()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
+    FOdysseyPainterEditor* editor = mEditor.Get();
     if (!editor)
         return;
 
-    FOdysseyPainterEditor::ResetInbetweenerTagSpacingChart( editor.Get(), mAnimationLayerImageVector->GetSharedEnv() );
+    FOdysseyPainterEditor::ResetInbetweenerTagSpacingChart( editor, mAnimationLayerImageVector->GetSharedEnv() );
 }
 
 void
@@ -189,8 +189,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::RemoveInbetweenerTag()
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
 
-
-            TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
+            FOdysseyPainterEditor* editor = mEditor.Get();
             if (editor)
             {
                 TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
@@ -219,7 +218,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::GetAnimationLayerImageVector()
     return mAnimationLayerImageVector;
 }
 
-TSharedPtr<FOdysseyPainterEditor>
+FOdysseyPainterEditor*
 SOdysseyAnimationTimelineInbetweeningHeader::GetEditor() const
 {
     return mEditor.Get();

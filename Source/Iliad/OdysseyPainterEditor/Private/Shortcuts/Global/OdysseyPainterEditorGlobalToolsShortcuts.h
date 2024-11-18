@@ -13,7 +13,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorGlobalToolsShortcuts
 {
 public:
     virtual ~FOdysseyPainterEditorGlobalToolsShortcuts() {};
-    FOdysseyPainterEditorGlobalToolsShortcuts(TSharedPtr<FOdysseyPainterEditor> iEditor);
+    FOdysseyPainterEditorGlobalToolsShortcuts(FOdysseyPainterEditor* iEditor);
 
 public:
     //Common Shortcuts
@@ -42,5 +42,5 @@ public:
     virtual void MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList) override;
 
 private:
-    TWeakPtr<FOdysseyPainterEditor> mEditor;
+    FOdysseyPainterEditor* mEditor;
 };

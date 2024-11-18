@@ -27,7 +27,7 @@ SOdysseyAnimationLayerImageVectorTimeline::GetRowVisibility(FName iRow) const
 {
     if (iRow == "Inbetweening")
     {
-        TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
+        FOdysseyPainterEditor* editor = mEditor.Get();
         if (!editor)
             return EVisibility::Collapsed;
 
@@ -40,7 +40,7 @@ SOdysseyAnimationLayerImageVectorTimeline::GetRowVisibility(FName iRow) const
 EVisibility
 SOdysseyAnimationLayerImageVectorTimeline::IsInbetweeningTimelineVisible() const
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
+    FOdysseyPainterEditor* editor = mEditor.Get();
     if (!editor)
         return EVisibility::Collapsed;
 

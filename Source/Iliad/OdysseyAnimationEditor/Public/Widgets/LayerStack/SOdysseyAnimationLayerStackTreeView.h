@@ -24,7 +24,7 @@ public:
         SLATE_EVENT( FOnGenerateRow, OnGenerateRow )
         SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
         SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )
-        SLATE_ATTRIBUTE(TSharedPtr<FOdysseyPainterEditor>, PainterEditor)
+        SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
     SLATE_END_ARGS()
 
 public:
@@ -49,5 +49,5 @@ private:
     TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
 
     UOdysseyAnimationLayerStack* mLayerStack;
-    TAttribute<TSharedPtr<FOdysseyPainterEditor>> mEditor;
+    TAttribute<FOdysseyPainterEditor*> mEditor;
 };

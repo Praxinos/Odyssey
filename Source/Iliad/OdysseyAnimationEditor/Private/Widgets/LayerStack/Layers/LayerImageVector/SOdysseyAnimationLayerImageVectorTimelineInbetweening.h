@@ -30,7 +30,7 @@ public:
         : _PainterEditor(nullptr)
         {}
         SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
-        SLATE_ATTRIBUTE(TSharedPtr<FOdysseyPainterEditor>, PainterEditor)
+        SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
     SLATE_END_ARGS()
 
     void Construct( const FArguments& InArgs
@@ -42,7 +42,7 @@ public:
     const FSlateBrush *GetForwardArrowBrush();
     const FSlateBrush *GetBackwardArrowBrush();
 
-    TSharedPtr<FOdysseyPainterEditor> GetEditor() const;
+    FOdysseyPainterEditor* GetEditor() const;
     TSharedPtr<FOdysseyAnimationEditorTimelinePosition> GetTimelinePosition() const;
 
 protected:
@@ -67,5 +67,5 @@ protected:
     const FSlateBrush *mForwardArrowBrush;
     const FSlateBrush *mBackwardArrowBrush;
     TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
-    TAttribute<TSharedPtr<FOdysseyPainterEditor>> mEditor;
+    TAttribute<FOdysseyPainterEditor*> mEditor;
 };

@@ -99,7 +99,7 @@ SOdysseyAnimationLayerImageVectorRow::GetRowVisibility(FName iRow) const
 {
     if (iRow == "Inbetweening")
     {
-        TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Get();
+        FOdysseyPainterEditor* editor = mEditor.Get();
         if (!editor)
             return EVisibility::Collapsed;
 

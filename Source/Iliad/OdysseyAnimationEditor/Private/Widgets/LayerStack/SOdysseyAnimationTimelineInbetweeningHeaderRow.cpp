@@ -93,7 +93,7 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonDown( const FGeomet
 {
     TSharedPtr<SOdysseyAnimationTimelineInbetweeningHeader> treeView = StaticCastSharedPtr<SOdysseyAnimationTimelineInbetweeningHeader>(OwnerTablePtr.Pin());
     UOdysseyAnimationLayerImageVector* layer = treeView.Get()->GetAnimationLayerImageVector();
-    TSharedPtr<FOdysseyPainterEditor> editor = treeView->GetEditor();
+    FOdysseyPainterEditor* editor = treeView->GetEditor();
     UOdysseyLayerStack* layerStack = editor->LayerStack();
     FOdysseyVectorObject* ownerObject = mInbetweenerTag->GetOwner();
     FOdysseyVectorEngine* vectorEngine = ownerObject->GetEngine();

@@ -35,7 +35,7 @@ public:
         SLATE_EVENT(FOnIsOutOfPegsChecked, OnIsOutOfPegsChecked)
         SLATE_ARGUMENT( TSharedPtr<SScrollBar>, ExternalScrollbar )
         SLATE_EVENT( FOnTableViewScrolled, OnTreeViewScrolled )
-        SLATE_ATTRIBUTE(TSharedPtr<FOdysseyPainterEditor>, PainterEditor)
+        SLATE_ATTRIBUTE(FOdysseyPainterEditor*, PainterEditor)
     SLATE_END_ARGS()
 
 public:
@@ -58,5 +58,5 @@ private:
     FOnActivateOutOfPegs mOnActivateOutOfPegs;
     FSimpleDelegate mOnInactivateOutOfPegs;
     FOnIsOutOfPegsChecked mOnIsOutOfPegsChecked;
-    TAttribute<TSharedPtr<FOdysseyPainterEditor>> mEditor;
+    TAttribute<FOdysseyPainterEditor*> mEditor;
 };

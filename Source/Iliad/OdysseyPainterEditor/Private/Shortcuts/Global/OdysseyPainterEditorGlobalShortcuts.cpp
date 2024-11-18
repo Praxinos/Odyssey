@@ -4,7 +4,7 @@
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalToolsShortcuts.h"
 
-FOdysseyPainterEditorGlobalShortcuts::FOdysseyPainterEditorGlobalShortcuts(TSharedPtr<FOdysseyPainterEditor> iEditor)
+FOdysseyPainterEditorGlobalShortcuts::FOdysseyPainterEditorGlobalShortcuts(FOdysseyPainterEditor* iEditor)
 {
     Add(MakeShared<FOdysseyPainterEditorGlobalToolsShortcuts>(iEditor));
 }

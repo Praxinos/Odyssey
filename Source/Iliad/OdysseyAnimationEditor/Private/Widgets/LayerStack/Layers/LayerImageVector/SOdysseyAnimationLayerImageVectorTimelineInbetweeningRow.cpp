@@ -71,7 +71,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
     const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() );
     UOdysseyAnimationLayerImageVector* layer = treeView.Get()->GetAnimationLayerImageVector();
-    TSharedPtr<FOdysseyPainterEditor> editor = treeView->GetEditor();
+    FOdysseyPainterEditor* editor = treeView->GetEditor();
     UOdysseyLayerStack* layerStack = layer->GetLayerStack();
     FOdysseyVectorObject* ownerObject = mInbetweenerTag->GetOwner();
     FOdysseyVectorEngine* vectorEngine = ownerObject->GetEngine();

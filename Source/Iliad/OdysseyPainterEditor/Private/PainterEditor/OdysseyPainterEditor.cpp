@@ -143,7 +143,7 @@ FOdysseyPainterEditor::Initialize()
     //Init the shortcuts
     TAttribute<UOdysseyLayerStack*> layerStackAttr = TAttribute<UOdysseyLayerStack*>::CreateRaw(this, &FOdysseyPainterEditor::LayerStack);
     GetShortcuts().Add(MakeShared<FOdysseyLayerStackGlobalShortcuts>(layerStackAttr));
-    GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalShortcuts>(SharedThis(this)));
+    GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalShortcuts>(this));
 
     //Init the extensions
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
