@@ -33,7 +33,7 @@ def CheckEOL( iLines ):
             eol['unix'] += 1
         elif line.endswith( '\r' ):
             eol['mac'] += 1
-    
+
     return sum( [ bool(count) for count in eol.values() ] ) <= 1
 
 ## The Tabs checker (= no tabs)
@@ -44,7 +44,7 @@ def CheckTabs( iLines ):
     for i, line in enumerate( iLines ):
         if '\t' in line:
             return False, i + 1, line
-    
+
     return True, None, None
 
 ## The Trailing Spaces checker (= no trailing spaces)
@@ -58,7 +58,7 @@ def CheckTrailingSpaces( iLines ):
                                         # check if trailing spaces
         if line_without_eol.lstrip( ' ' ).endswith( ' ' ):
             return False, i + 1, line
-    
+
     return True, None, None
 
 ## The Only Spaces checker (= no line with only spaces)
@@ -71,7 +71,7 @@ def CheckOnlySpaces( iLines ):
 
         if len( line_without_eol ) and all( c == ' ' for c in line_without_eol ):
             return False, i + 1, line
-    
+
     return True, None, None
 
 ## The EOF checker (= only one last empty line)
@@ -81,7 +81,7 @@ def CheckOnlySpaces( iLines ):
 def CheckEOF( iLines ):
     if len( iLines ) == 0:
         return True
-    
+
     return iLines[-1].endswith( '\n' ) and len( iLines[-1] ) > 1
 
 ## The IDDN checker (= exist and correct format)
@@ -94,7 +94,7 @@ def CheckIDDN( iLines ):
 
     if len( iLines ) == 1:
         return False
-    
+
     py_file_ok_2= iLines[0].startswith( '#!/usr/bin/env py' ) and iLines[1].startswith(  '# IDDN.FR.' ) and ( iLines[2].startswith(  '# ' ) and 'copyright' in iLines[2] and 'Praxinos' in iLines[2] and 'publishing' in iLines[2] )
     py_file_ok  =                                                 iLines[0].startswith(  '# IDDN.FR.' ) and ( iLines[1].startswith(  '# ' ) and 'copyright' in iLines[1] and 'Praxinos' in iLines[1] and 'publishing' in iLines[1] )
     cpp_file_ok =                                                 iLines[0].startswith( '// IDDN.FR.' ) and ( iLines[1].startswith( '// ' ) and 'copyright' in iLines[1] and 'Praxinos' in iLines[1] and 'publishing' in iLines[1] )
@@ -122,7 +122,7 @@ def CheckFile( iPathFile, iOptions ):
             except UnicodeDecodeError:
                 print( f'Error: UTF8 decoding: {iPathFile}' )
                 ok = False
-        
+
     if eOptions.kEOL in iOptions:
         with iPathFile.open( 'r', newline='' ) as f:
             lines = f.readlines()
@@ -132,11 +132,11 @@ def CheckFile( iPathFile, iOptions ):
                 ok = False
 
     #---
-    
+
     # To open as utf-8 and with universal line ending (ie. '\n')
     with iPathFile.open( 'r' ) as f:
         lines = f.readlines()
-        
+
         if eOptions.kIDDN in iOptions and not CheckIDDN( lines ):
             print( f'Error: wrong iddn: {iPathFile}' )
             ok = False
@@ -147,25 +147,25 @@ def CheckFile( iPathFile, iOptions ):
             print( f'\t#{no_line:<4} : {iPathFile}' )
             print( f'\t[' + line.rstrip( '\n' ) + ']' )
             ok = False
-    
+
         check, no_line, line = CheckTrailingSpaces( lines )
         if eOptions.kTrailingSpaces in iOptions and not check:
             print( f'Error: trailing spaces:' )
             print( f'\t#{no_line:<4} : {iPathFile}' )
             print( f'\t[' + line.rstrip( '\n' ) + ']' )
             ok = False
-        
+
         check, no_line, line = CheckOnlySpaces( lines )
         if eOptions.kOnlySpaces in iOptions and not check:
             print( f'Error: only spaces:' )
             print( f'\t#{no_line:<4} : {iPathFile}' )
             print( f'\t[' + line.rstrip( '\n' ) + ']' )
             ok = False
-        
+
         if eOptions.kEOF in iOptions and not CheckEOF( lines ):
             print( f'Error: no (or multiple) empty EOF line: {iPathFile}' )
             ok = False
-    
+
     return ok
 
 ## The files checker
@@ -186,7 +186,7 @@ def main():
     root = Path( '.' ).resolve()
     source = root / 'Source'
     ok = []
-    
+
     # .git*
     options = [ eOptions.kUTF8, eOptions.kTabs, eOptions.kTrailingSpaces, eOptions.kOnlySpaces, eOptions.kEOL, eOptions.kEOF ]
     pathfiles = [ entry for entry in root.glob( '.*' ) if entry.is_file() ]
@@ -205,6 +205,11 @@ def main():
     # source/Epos*/** (recursive)
     options = [ eOptions.kUTF8, eOptions.kTabs, eOptions.kTrailingSpaces, eOptions.kOnlySpaces, eOptions.kEOL, eOptions.kEOF, eOptions.kIDDN ]
     pathfiles = [ entry for entry in source.glob( 'Epos*/**/*' ) if entry.is_file() and entry.suffix in ['.h', '.cpp', '.cs'] ]
+    ok.append( Check( pathfiles, options ) )
+
+    # source/Epos*/** (recursive)
+    options = [ eOptions.kUTF8, eOptions.kTabs, eOptions.kTrailingSpaces, eOptions.kOnlySpaces, eOptions.kEOL, eOptions.kEOF, eOptions.kIDDN ]
+    pathfiles = [ entry for entry in source.glob( 'Iliad*/**/*' ) if entry.is_file() and entry.suffix in ['.h', '.cpp', '.cs'] ]
     ok.append( Check( pathfiles, options ) )
 
     # source/third party/*/* (not recursive)

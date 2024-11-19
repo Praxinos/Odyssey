@@ -94,4 +94,3 @@ FOdysseyMediaProvider::GetMediaCount() const
     const TArray<FMediaFactory>& factories = mMediaFactories[T::StaticId()];
     return factories.Num();
 }
-

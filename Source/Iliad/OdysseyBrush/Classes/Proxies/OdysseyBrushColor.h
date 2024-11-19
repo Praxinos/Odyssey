@@ -1,5 +1,5 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 #pragma once
 #include "CoreTypes.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
@@ -173,4 +173,3 @@ class ODYSSEYBRUSH_API UOdysseyBrushColorFunctionLibrary : public UBlueprintFunc
     UFUNCTION(BlueprintPure, Category="Odyssey|Color")
     static void BreakOdysseyBrushColorIntoLabF( const  FOdysseyBrushColor& Color, float& L, float& A, float& B, float& Alpha );
 };
-

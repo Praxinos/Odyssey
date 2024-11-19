@@ -1,5 +1,5 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 using System;
 using System.IO;
@@ -41,7 +41,7 @@ public class OdysseyViewportDrawingEditor : ModuleRules
         PrivateDependencyModuleNames.AddRange(
             new string[] {
                 "AppFramework",
-				"ContentBrowser",
+                "ContentBrowser",
                 "Core",
                 "CoreUObject",
                 "DesktopPlatform",
@@ -66,7 +66,7 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 "MeshPaint",
                 "MediaAssets",
                 "MediaPlate",
-				"MovieScene",
+                "MovieScene",
                 "OdysseyAnimation",
                 "OdysseyAnimationEditor",
                 "OdysseyCore",
