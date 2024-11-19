@@ -1,3 +1,6 @@
+// IDDN.FR.001.250001.005.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+
 #pragma once
 
 #include <ULIS>
@@ -32,7 +35,7 @@ namespace FOdysseyVector
     // It means that if the projection of the point on the segment is beyond limits,
     // it will remain within limits (0.0f) or (1.0f). On the figure below, x would be at t=0.0
     //
-    //                    ° (point)
+    //                    ï¿½ (point)
     //     segment        |
     // 1______________0   x (proj. point will also be at t = 0.0,
     //                       even though it is outside the segment)

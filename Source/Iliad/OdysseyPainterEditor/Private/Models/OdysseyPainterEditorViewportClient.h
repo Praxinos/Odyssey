@@ -1,5 +1,5 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #pragma once
 
@@ -28,33 +28,6 @@ class IStylusInputInterfaceInternal;
 class SOdysseyViewport;
 class FOdysseyPainterEditor;
 class FOdysseyHUDElement;
-
-//
-//                                                                                                         MouseWheelUp/Down
-//                                                                                                            ┌────►────┐
-//                                                                                                            │         │
-//                                  ╔═════════════════════════════════════════════════════════════════════════╧═════════╧══════════════════╗
-//              ┌───────────────────╢                                             kIdle                                                    ╟───────┐
-//              │                   ╚═╤═══════════════════╤═══════════════════╤══════════════════╤═══════════════════╤════════════════╤════╝       │
-//              │                     │                   │                   │                  │                   │                │            │
-//  'P' pressed ▼        'P' released ▲       'R' pressed ▼      'R' released ▲    'Alt' pressed ▼    'Alt' released ▲    LMB pressed ▼            ▲ LMB released
-//              │                     │                   │                   │                  │                   │                │            │
-//      ╔═══════╧═══════════╗         │           ╔═══════╧═══════════╗       │          ╔═══════╧═══════════╗       │             ╔══╧════════════╧═══╗
-//      ║       kPan        ╟─────────┤           ║     kRotate       ╟───────┤          ║      kPick        ╟───────┤             ║     kDrawing      ║
-//      ╚═══════╤══╤════════╝         │           ╚═══════╤══╤════════╝       │          ╚═══════╤══╤════════╝       │             ╚════╤═════════╤════╝
-//              │  │                  │                   │  │                │                  │  │                │                  │         │
-//  LMB pressed ▼  ▲ LMB released     │       LMB pressed ▼  ▲ LMB released   │      LMB pressed ▼  ▲ LMB released   │                  └────►────┘
-//              │  │                  │                   │  │                │                  │  │                │                   LMB move
-//      ╔═══════╧══╧════════╗         │           ╔═══════╧══╧════════╗       │          ╔═══════╧══╧════════╗       │
-//      ║     kPanning      ╟─────────┘           ║     kRotating     ╟───────┘          ║     kPicking      ╟───────┘
-//      ╚════╤═════════╤════╝                     ╚════╤═════════╤════╝                  ╚════╤═════════╤════╝
-//           │         │                               │         │                            │         │
-//           └────►────┘                               └────►────┘                            └────►────┘
-//            LMB move                                  LMB move                               LMB move
-//
-//
-//  https://unicode-table.com/fr/#2500 ──◄──
-//
 
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditorViewportClient

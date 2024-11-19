@@ -27,4 +27,3 @@ public:
 private:
     TSharedPtr<FOdysseyRasterBlock> mRasterBlock;
 };
-

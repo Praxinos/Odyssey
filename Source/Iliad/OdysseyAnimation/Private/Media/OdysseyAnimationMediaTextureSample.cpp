@@ -113,4 +113,3 @@ FOdysseyAnimationMediaTextureSample::IsOutputSrgb() const
 {
     return false;
 }
-

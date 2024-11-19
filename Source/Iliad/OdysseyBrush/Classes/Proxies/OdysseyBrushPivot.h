@@ -1,5 +1,5 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #pragma once
 
@@ -71,4 +71,3 @@ struct FRectF    //PATCH: until ::ulis3::FRectF
 
 FRectF ComputeRectWithPivot(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPivot& iPivot, float iX, float iY );    //PATCH: until ::ulis3::FRectF
 //::ULIS::FRectI ComputeRectWithPivot( FOdysseyBlock* iBlock, const FOdysseyPivot& iPivot, float iX, float iY );
-
