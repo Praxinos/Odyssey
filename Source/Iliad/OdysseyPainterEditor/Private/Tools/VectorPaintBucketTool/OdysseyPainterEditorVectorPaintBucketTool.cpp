@@ -119,7 +119,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnKeyUpGlobalVector( FOdysseyVectorG
         return true;
     }
 
-	mShowControls = false;
+    mShowControls = false;
 
     return false;
 }
@@ -652,7 +652,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroup
         iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
-	iScene->GetEngine()->Invalidate( 0 );
+    iScene->GetEngine()->Invalidate( 0 );
     oSignalFlags = notificationFlags;
 
     return true;

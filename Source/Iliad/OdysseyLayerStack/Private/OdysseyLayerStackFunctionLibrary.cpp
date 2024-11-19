@@ -79,5 +79,3 @@ UOdysseyLayerStackFunctionLibrary::SortLayers(TArray<UOdysseyLayer*> iLayers, bo
 
     return iLayers;
 }
-
-

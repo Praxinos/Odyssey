@@ -1,5 +1,5 @@
-// IDDN FR.001.250001.005.S.P.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingTool.h"
 #include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingToolHUD.h"
@@ -71,12 +71,12 @@ UOdysseyPainterEditorVectorMatchingTool::LoadVector( FOdysseyVectorGroupPaint* i
 
 bool
 UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
-                                                          	, const FOdysseyPoint& iPointInTexture
-                                                          	, const FKey& iKey
-                                            				, uint64& oSignalFlags )
+                                                              , const FOdysseyPoint& iPointInTexture
+                                                              , const FKey& iKey
+                                                            , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     FOdysseyVectorEngine* engine = iScene->GetEngine();
     uint64 notificationFlags = 0;
@@ -129,13 +129,13 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
     iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
 
     oSignalFlags = notificationFlags;
-	return true;
+    return true;
 }
 
 void
 UOdysseyPainterEditorVectorMatchingTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                           	, const FOdysseyPoint& iPointInTexture
-                                            				, uint64& oSignalFlags )
+                                                               , const FOdysseyPoint& iPointInTexture
+                                                            , uint64& oSignalFlags )
 {
     // TODO: highlight grid handles ?
 
@@ -147,8 +147,8 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseHoverVector( FOdysseyVectorGroup
 
 void
 UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                          	, const FOdysseyPoint& iPointInTexture
-                                            				, uint64& oSignalFlags )
+                                                              , const FOdysseyPoint& iPointInTexture
+                                                            , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* engine = iScene->GetEngine();
     uint64 notificationFlags = 0;
@@ -208,10 +208,10 @@ bool
 UOdysseyPainterEditorVectorMatchingTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , const FKey& iKey
-                                            			, uint64& oSignalFlags )
+                                                        , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     FOdysseyVectorEngine* engine = iScene->GetEngine();
     uint64 notificationFlags = 0;
@@ -226,7 +226,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseUpVector( FOdysseyVectorGroupPai
     iScene->GetEngine()->Invalidate( 0 );
 
     oSignalFlags =notificationFlags;
-	return true;
+    return true;
 }
 
 uint64

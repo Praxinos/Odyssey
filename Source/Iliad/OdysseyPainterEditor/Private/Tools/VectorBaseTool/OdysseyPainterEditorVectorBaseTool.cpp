@@ -353,7 +353,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* 
     if( iKey == EKeys::Delete )
     {
         Delete();
-		// force redraw
+        // force redraw
         iScene->GetEngine()->Invalidate( 0 );
         oSignalFlags = 0;
         return true;
@@ -623,7 +623,7 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseClick(const FOdysseyPoint& iPointInT
 
     uint64 notificationFlags = 0;
 
-	bool handled = OnMouseClickVector( vectorScene, iPointInTexture, iKey, notificationFlags );
+    bool handled = OnMouseClickVector( vectorScene, iPointInTexture, iKey, notificationFlags );
     FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
 
     if (!handled)

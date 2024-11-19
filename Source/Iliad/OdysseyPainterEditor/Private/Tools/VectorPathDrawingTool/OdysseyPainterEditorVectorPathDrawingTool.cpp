@@ -350,10 +350,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
         vectorEngine->ResetHUD(); // re-creates the quadtree;
     }
 
-	iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
     oSignalFlags = retFlags;
 
-	return true;
+    return true;
 }
 
 void
@@ -380,7 +380,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGr
 
     if( Stitch )
     {
-		iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+        iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
         oSignalFlags = notificationFlags;
     }
 }
@@ -465,7 +465,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
                       | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated path after segment insertion
     }
 
-	iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
     oSignalFlags = notificationFlags;
 }
 
@@ -606,7 +606,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
     // this means the Invalidation Rectangle is not resetted, so we force it.
     vectorEngine->InvalidateRect();
 
-	iScene->GetEngine()->Invalidate( 0 );
+    iScene->GetEngine()->Invalidate( 0 );
     oSignalFlags = notificationFlags;
 
     return true;

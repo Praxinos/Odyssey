@@ -1,5 +1,5 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #pragma once
 
@@ -47,7 +47,7 @@ protected:
     virtual void HandleViewportColorPicked(eOdysseyEventState::Type iEventState, const FVector2D& iPositionInTexture);
 
     virtual bool OnViewportMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
-	virtual bool OnViewportMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    virtual bool OnViewportMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
     virtual bool OnViewportMouseDoubleClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
     virtual bool OnViewportMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
     virtual void OnViewportMouseHover(const FOdysseyPoint& iPointInTexture);
@@ -78,4 +78,3 @@ private:
     TSharedPtr<SOdysseyViewport> mViewport;
     TSharedPtr<FOdysseyPainterEditorViewportClient> mViewportClient;
 };
-

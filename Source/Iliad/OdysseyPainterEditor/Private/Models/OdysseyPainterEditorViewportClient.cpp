@@ -1,5 +1,5 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #include "Models/OdysseyPainterEditorViewportClient.h"
 
@@ -346,7 +346,7 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
                 uint32 textureFullWidth = texture->Source.IsValid() ? texture->Source.GetSizeX() : texture->GetSurfaceWidth();
                 uint32 textureFullHeight = texture->Source.IsValid() ? texture->Source.GetSizeY() : texture->GetSurfaceHeight();
                 FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
-				mHUDMouseDownReference = viewportPoint;
+                mHUDMouseDownReference = viewportPoint;
                 FVector2D hudPoint = viewportWidget->ToLocal(viewportPoint) +  FVector2D(textureFullWidth / 2.f, textureFullHeight / 2.f);
                 mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
                 if (mCurrentHUDElement->OnMouseDown(mCurrentHUDPoint, iKey))
@@ -361,17 +361,17 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
                 uint32 textureFullHeight = texture->Source.IsValid() ? texture->Source.GetSizeY() : texture->GetSurfaceHeight();
                 FVector2D viewportPoint(iViewport->GetMouseX(), iViewport->GetMouseY());
 
-				float deltaX = viewportPoint.X - mHUDMouseDownReference.X;
-				float deltaY = viewportPoint.Y - mHUDMouseDownReference.Y;
-				float deltaSquared = deltaX * deltaX + deltaY * deltaY;
-				bool bNoMouseMovement = deltaSquared < MOUSE_CLICK_DRAG_DELTA;
+                float deltaX = viewportPoint.X - mHUDMouseDownReference.X;
+                float deltaY = viewportPoint.Y - mHUDMouseDownReference.Y;
+                float deltaSquared = deltaX * deltaX + deltaY * deltaY;
+                bool bNoMouseMovement = deltaSquared < MOUSE_CLICK_DRAG_DELTA;
 
                 FVector2D hudPoint = viewportWidget->ToLocal(viewportPoint) +  FVector2D(textureFullWidth / 2.f, textureFullHeight / 2.f);
                 mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
                 mCurrentHUDPoint = FOdysseyPoint(hudPoint.X, hudPoint.Y);
 
-				if (bNoMouseMovement)
-					mCurrentHUDElement->OnMouseClick(mCurrentHUDPoint, iKey);
+                if (bNoMouseMovement)
+                    mCurrentHUDElement->OnMouseClick(mCurrentHUDPoint, iKey);
                 mCurrentHUDElement->OnMouseUp(mCurrentHUDPoint, iKey);
                 mCurrentHUDElement = nullptr;
                 return true;
@@ -583,7 +583,7 @@ FOdysseyPainterEditorViewportClient::MouseDown(const FOdysseyPoint& iPoint)
 
     if( mCurrentToolState == eState::kIdle )
     {
-		mMouseDownReference = mCurrentPointInViewport;
+        mMouseDownReference = mCurrentPointInViewport;
         if (mOnMouseDown.IsBound())
             mOnMouseDown.Execute(mCurrentPointInTexture, mMouseButton);
     }
@@ -640,10 +640,10 @@ FOdysseyPainterEditorViewportClient::MouseUp(const FOdysseyPoint& iPoint)
     if (FOdysseyKeyState::GetLastKey() != FKey())
         pressedKeys.AddUnique(FOdysseyKeyState::GetLastKey());
 
-	float deltaX = iPoint.x - mMouseDownReference.x;
-	float deltaY = iPoint.y - mMouseDownReference.y;
-	float deltaSquared = deltaX * deltaX + deltaY * deltaY;
-	bool bNoMouseMovement = deltaSquared < MOUSE_CLICK_DRAG_DELTA;
+    float deltaX = iPoint.x - mMouseDownReference.x;
+    float deltaY = iPoint.y - mMouseDownReference.y;
+    float deltaSquared = deltaX * deltaX + deltaY * deltaY;
+    bool bNoMouseMovement = deltaSquared < MOUSE_CLICK_DRAG_DELTA;
 
     //Point In Viewport
     FOdysseyPoint pointInViewport = iPoint;
@@ -659,8 +659,8 @@ FOdysseyPainterEditorViewportClient::MouseUp(const FOdysseyPoint& iPoint)
 
     if( mCurrentToolState == eState::kIdle)
     {
-		if (bNoMouseMovement && mOnMouseClick.IsBound())
-			mOnMouseClick.Execute(mCurrentPointInTexture, mMouseButton);
+        if (bNoMouseMovement && mOnMouseClick.IsBound())
+            mOnMouseClick.Execute(mCurrentPointInTexture, mMouseButton);
 
         if (mOnMouseUp.IsBound())
             mOnMouseUp.Execute(mCurrentPointInTexture, mMouseButton);

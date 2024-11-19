@@ -146,7 +146,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorGrou
     if( redrawRegion.Area() )
     {
         iEngine->GetInvalidTileMap().Invalidate(redrawRegion);
-		// redraw
+        // redraw
         iScene->GetEngine()->Invalidate( 0 );
     }
 }

@@ -1,5 +1,5 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 #pragma once
 #include "CoreTypes.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
@@ -55,4 +55,3 @@ class ODYSSEYBRUSH_API UOdysseyBrushRectFunctionLibrary : public UBlueprintFunct
     UFUNCTION(BlueprintPure, Category="Odyssey|Math", meta = (DisplayName="Break Odyssey Rectangle"))
     static void BreakToXYWH(FOdysseyBrushRect Rectangle, int& X, int& Y, int& Width, int& Height);
 };
-

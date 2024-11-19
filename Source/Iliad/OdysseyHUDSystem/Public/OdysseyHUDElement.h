@@ -1,5 +1,5 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #pragma once
 
@@ -29,7 +29,7 @@ public:
 public:
     //HitProxy version
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
-	virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    virtual bool OnMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
     virtual bool OnMouseDoubleClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
     virtual bool OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
     virtual void OnMouseEnter();

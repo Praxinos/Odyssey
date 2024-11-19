@@ -1,5 +1,5 @@
-// IDDN FR.001.250001.005.S.P.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #pragma once
 
@@ -56,7 +56,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
         virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ) override;
 
         virtual bool OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                          	, const FKey& iKey
+                                            , const FKey& iKey
                                             , uint64& oSignalFlags ) override;
         virtual bool OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
                                             , const FKey& iKey
@@ -75,9 +75,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
                                         , const FOdysseyPoint& iPointInTexture
                                         , uint64& oSignalFlags ) override;
         virtual bool OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
-                                      	, const FOdysseyPoint& iPointInTexture
-                                      	, const FKey& iKey
-                                    	, uint64& oSignalFlags ) override;
+                                        , const FOdysseyPoint& iPointInTexture
+                                        , const FKey& iKey
+                                        , uint64& oSignalFlags ) override;
         virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName ) override;
 

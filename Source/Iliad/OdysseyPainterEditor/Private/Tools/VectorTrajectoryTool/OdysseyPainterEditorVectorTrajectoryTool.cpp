@@ -1,5 +1,5 @@
-// IDDN FR.001.250001.005.S.P.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #include "Tools/VectorTrajectoryTool/OdysseyPainterEditorVectorTrajectoryTool.h"
 #include "Tools/VectorTrajectoryTool/OdysseyPainterEditorVectorTrajectoryToolHUD.h"
@@ -76,7 +76,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::LoadVector( FOdysseyVectorGroupPaint*
 bool
 UOdysseyPainterEditorVectorTrajectoryTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
                                                                 , const FKey& iKey
-                                            					, uint64& oSignalFlags )
+                                                                , uint64& oSignalFlags )
 {
     uint64 notificationFlags = 0;
 
@@ -109,13 +109,13 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyDownGlobalVector( FOdysseyVector
     iScene->GetEngine()->Invalidate( 0 );
 
     oSignalFlags = notificationFlags;
-	return false;
+    return false;
 }
 
 bool
 UOdysseyPainterEditorVectorTrajectoryTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                              	, const FKey& iKey
-                                            					, uint64& oSignalFlags )
+                                                                  , const FKey& iKey
+                                                                , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     uint64 notificationFlags = 0;
@@ -137,7 +137,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyUpGlobalVector( FOdysseyVectorGr
     mPickingMode = eTrajectoryPickingMode::Add;
 
     oSignalFlags = notificationFlags;
-	return false;
+    return false;
 }
 
 EMouseCursor::Type
@@ -160,10 +160,10 @@ bool
 UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , const FKey& iKey
-                                            				, uint64& oSignalFlags )
+                                                            , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     uint64 notificationFlags = 0;
 
@@ -321,7 +321,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
     iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
 
     oSignalFlags = notificationFlags;
-	return true;
+    return true;
 }
 
 FInbetweenerQuad*
@@ -344,8 +344,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::GetPickingMode()
 
 void
 UOdysseyPainterEditorVectorTrajectoryTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                       		, const FOdysseyPoint& iPointInTexture
-                                            				, uint64& oSignalFlags )
+                                                               , const FOdysseyPoint& iPointInTexture
+                                                            , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
@@ -375,8 +375,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseHoverVector( FOdysseyVectorGro
 
 void
 UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                          	, const FOdysseyPoint& iPointInTexture
-                                            				, uint64& oSignalFlags )
+                                                              , const FOdysseyPoint& iPointInTexture
+                                                            , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* engine = iScene->GetEngine();
 
@@ -454,12 +454,12 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
 
 bool
 UOdysseyPainterEditorVectorTrajectoryTool::OnMouseUpVector( FOdysseyVectorGroupPaint* iScene
-                                                          	, const FOdysseyPoint& iPointInTexture
-                                                          	, const FKey& iKey
-                                            				, uint64& oSignalFlags )
+                                                              , const FOdysseyPoint& iPointInTexture
+                                                              , const FKey& iKey
+                                                            , uint64& oSignalFlags )
 {
-	if (iKey != EKeys::LeftMouseButton)
-		return false;
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
 
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     uint64 notificationFlags = 0;
@@ -500,7 +500,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseUpVector( FOdysseyVectorGroupP
     iScene->GetEngine()->Invalidate( 0 );
 
     oSignalFlags = notificationFlags;
-	return true;
+    return true;
 }
 
 uint64
