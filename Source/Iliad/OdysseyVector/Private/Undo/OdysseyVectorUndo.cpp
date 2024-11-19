@@ -407,6 +407,7 @@ FSnapshotLayout::LoadState( FSnapshotLayout::State* iState )
         {
             mInbetweenerTag->AddBreakdown( iState->breakdownArray[i]
                                          , iState->targetBuffer[i]
+                                         , false
                                          , false );
         }
         else
@@ -714,6 +715,11 @@ FSnapshotTagInbetweener::RecordLocalState( FSnapshotTagInbetweener::State* iStat
             iState->withThickness = mInbetweenerTag->GetWithThickness();
         }
 
+        if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::CONSTANTWIDTH )
+        {
+            iState->constantWidth = mInbetweenerTag->HasConstantWidth();
+        }
+
         if( ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDSIZE )
          || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::GRIDTYPE )
          || ( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::SQUARE   ) )
@@ -832,6 +838,11 @@ FSnapshotTagInbetweener::LoadLocalState( FSnapshotTagInbetweener::State* iState 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::WITHTHICKNESS )
     {
         mInbetweenerTag->SetWithThickness( iState->withThickness );
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::CONSTANTWIDTH )
+    {
+        mInbetweenerTag->SetConstantWidth( iState->constantWidth );
     }
 
     if( mSnapshotFlags & FSnapshotFlags::Tag::Inbetweener::MAPASPOLYLINE )

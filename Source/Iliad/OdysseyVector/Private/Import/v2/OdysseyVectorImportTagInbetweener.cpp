@@ -97,6 +97,26 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                 }
                 break;
 
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_WITHTHICKNESS:
+                {
+                    uint32 withThickness;
+
+                    Ar << withThickness;
+
+                    iInbetweenerTag.SetWithThickness( withThickness ? true : false );
+                }
+                break;
+
+                case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_CONSTANTWIDTH:
+                {
+                    uint32 constantWidth;
+
+                    Ar << constantWidth;
+
+                    iInbetweenerTag.SetConstantWidth( constantWidth ? true : false );
+                }
+                break;
+
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM:  // container
                 break;
 
@@ -217,7 +237,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     {
                         breakdown = new FInbetweenerBreakdown( &iInbetweenerTag );
 
-                        iInbetweenerTag.AddBreakdown( breakdown, targetIndex, false );
+                        iInbetweenerTag.AddBreakdown( breakdown, targetIndex, false, false );
                     }
 
                     ReadBreakdown( *breakdown
@@ -249,7 +269,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
 
                         if( master == 0 )
                         {
-                            iInbetweenerTag.AddBreakdown( breakdown, targetDrawingIndex, false );
+                            iInbetweenerTag.AddBreakdown( breakdown, targetDrawingIndex, false, false );
                         }
                         else
                         {

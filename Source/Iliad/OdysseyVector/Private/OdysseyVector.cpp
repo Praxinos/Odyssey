@@ -490,16 +490,16 @@ FOdysseyVector::PickBezier( const ::ULIS::FVec2D iWorldBezier[4]
 }
 
 double
-FOdysseyVector::GetBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
-                                          , uint32 iDivisions )
+FOdysseyVector::GetCubicBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
+                                               , uint32 iDivisions )
 {
-    return GetBezierApproximateLength( iBezier, iDivisions, nullptr );
+    return GetCubicBezierApproximateLength( iBezier, iDivisions, nullptr );
 }
 
 double
-FOdysseyVector::GetBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
-                                          , uint32 iDivisions
-                                          , std::vector<double>* oDivisionLengthBuffer )
+FOdysseyVector::GetCubicBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
+                                               , uint32 iDivisions
+                                               , std::vector<double>* oDivisionLengthBuffer )
 {
     ::ULIS::FVec2D p0 = iBezier[0];
     double step = 1.0f / iDivisions;
@@ -517,6 +517,49 @@ FOdysseyVector::GetBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
                                                                                , iBezier[2]
                                                                                , iBezier[3]
                                                                                , t1 );
+        double fractionLength = ::ULIS::FVec2D( p1 - p0 ).Distance();
+
+        if( oDivisionLengthBuffer )
+        {
+            (*oDivisionLengthBuffer)[i] = fractionLength;
+        }
+
+        length += fractionLength;
+
+        t0 = t1;
+        p0 = p1;
+    }
+
+    return length;
+}
+
+double
+FOdysseyVector::GetQuadraticBezierApproximateLength( const ::ULIS::FVec2D iBezier[3]
+                                                   , uint32 iDivisions )
+{
+    return GetQuadraticBezierApproximateLength( iBezier, iDivisions, nullptr );
+}
+
+double
+FOdysseyVector::GetQuadraticBezierApproximateLength( const ::ULIS::FVec2D iBezier[3]
+                                                   , uint32 iDivisions
+                                                   , std::vector<double>* oDivisionLengthBuffer )
+{
+    ::ULIS::FVec2D p0 = iBezier[0];
+    double step = 1.0f / iDivisions;
+    double length = 0.0f;
+    double t0 = 0.0f;
+
+    if( oDivisionLengthBuffer )
+        oDivisionLengthBuffer->resize( iDivisions );
+
+    for( uint32 i = 0; i < iDivisions; i++ )
+    {
+        double t1 = t0 + step;
+        ::ULIS::FVec2D p1 = ::ULIS::QuadraticBezierPointAtParameter<::ULIS::FVec2D>( iBezier[0]
+                                                                                   , iBezier[1]
+                                                                                   , iBezier[2]
+                                                                                   , t1 );
         double fractionLength = ::ULIS::FVec2D( p1 - p0 ).Distance();
 
         if( oDivisionLengthBuffer )
@@ -683,11 +726,11 @@ ComputeCenterTangent( const std::vector<::ULIS::FVec2D>& iPointBuffer
 *     Point2    *d; /* Array of digitized points
     int        first, last; // Indices defining region
  */
-static void
-ChordLengthParameterize( const std::vector<::ULIS::FVec2D>& iPointBuffer
-                       , const ::ULIS::FVec2D* iFirstRecord
-                       , const ::ULIS::FVec2D* iLastRecord
-                       , std::vector<double>& oUBuffer )
+void
+FOdysseyVector::ChordLengthParameterize( const std::vector<::ULIS::FVec2D>& iPointBuffer
+                                       , const ::ULIS::FVec2D* iFirstRecord
+                                       , const ::ULIS::FVec2D* iLastRecord
+                                       , std::vector<double>& oUBuffer )
 
 {
     uint32 firstRecordIndex = iFirstRecord - &iPointBuffer[0];
@@ -803,13 +846,14 @@ Reparameterize( const std::vector<::ULIS::FVec2D>& iPointBuffer
     Vector2    tHat1, tHat2;    //  Unit tangents at endpoints
  *
  */
-void GenerateBezier( const std::vector<::ULIS::FVec2D>& iPointBuffer
-                   , const ::ULIS::FVec2D* iFirstRecord
-                   , const ::ULIS::FVec2D* iLastRecord
-                   , const std::vector<double>& uPrime
-                   , const ::ULIS::FVec2D& iLeftTangent
-                   , const ::ULIS::FVec2D& iRightTangent
-                   , std::vector<::ULIS::FVec2D>& oBezierOut )
+void
+FOdysseyVector::GenerateBezier( const std::vector<::ULIS::FVec2D>& iPointBuffer
+                              , const ::ULIS::FVec2D* iFirstRecord
+                              , const ::ULIS::FVec2D* iLastRecord
+                              , const std::vector<double>& uPrime
+                              , const ::ULIS::FVec2D& iLeftTangent
+                              , const ::ULIS::FVec2D& iRightTangent
+                              , ::ULIS::FVec2D oBezierOut[4] )
 {
     ::ULIS::FVec2D     A[MAXPOINTS][2]; // Precomputed rhs for eqn
     uint32  nPts; // Number of pts in sub-curve
@@ -825,9 +869,6 @@ void GenerateBezier( const std::vector<::ULIS::FVec2D>& iPointBuffer
     double  epsilon;
 
     nPts = ( iLastRecord - iFirstRecord ) + 1;
-
-    oBezierOut.clear();
-    oBezierOut.resize( 4 );
 
     /* Compute the A's    */
     for ( uint32 i = 0; i < nPts; i++)
@@ -963,18 +1004,18 @@ FitCubic( const std::vector<::ULIS::FVec2D>& iPointBuffer
     }
 
     /*  Parameterize points, and attempt to fit curve */
-    ChordLengthParameterize( iPointBuffer
-                           , iFirstRecord
-                           , iLastRecord
-                           , uBuffer );
+    FOdysseyVector::ChordLengthParameterize( iPointBuffer
+                                           , iFirstRecord
+                                           , iLastRecord
+                                           , uBuffer );
 
-    GenerateBezier( iPointBuffer
-                  , iFirstRecord
-                  , iLastRecord
-                  , uBuffer
-                  , iLeftTangent
-                  , iRightTangent
-                  , bezierCurve );
+    FOdysseyVector::GenerateBezier( iPointBuffer
+                                  , iFirstRecord
+                                  , iLastRecord
+                                  , uBuffer
+                                  , iLeftTangent
+                                  , iRightTangent
+                                  , &bezierCurve[0] );
 
     /*  Find max deviation of points to fitted curve */
     maxError = ComputeMaxError( iPointBuffer

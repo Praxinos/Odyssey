@@ -93,6 +93,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject
                       , TRAJECTORY_DEFAULT_GREEN_UINT8
                       , TRAJECTORY_DEFAULT_BLUE_UINT8
                       , TRAJECTORY_DEFAULT_ALPHA_UINT8 )
+    , bConstantWidth ( false )
 {
     // the default breakdown (has range 0 <-> 1 )
     mBreakdownList.emplace_back( &mMasterBreakdown );
@@ -134,7 +135,7 @@ FOdysseyVectorTagInbetweener::Copy( FOdysseyVectorObject* iDestOwnerObject )
 
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
-        newTag->AddBreakdown( breakdown->GetTargetDrawingIndex(), false );
+        newTag->AddBreakdown( breakdown->GetTargetDrawingIndex(), false, false );
     }
 /*
     for( FInbetweenerRoute* route : mRouteList )
@@ -335,7 +336,7 @@ FOdysseyVectorTagInbetweener::RemoveAllRoutes()
 }
 
 FInbetweenerRoute*
-FOdysseyVectorTagInbetweener::AddRoute( const ::ULIS::FVec2D& iLocalCoords )
+FOdysseyVectorTagInbetweener::AddRoute( const ::ULIS::FVec2D& iLocalCoords, bool iFit )
 {
     FInbetweenerGrid* referenceGrid = mBreakdownList.front()->GetGrid();
     int quadIndex = referenceGrid->GetQuadIndex( iLocalCoords );
@@ -358,6 +359,11 @@ FOdysseyVectorTagInbetweener::AddRoute( const ::ULIS::FVec2D& iLocalCoords )
                                                         , quadV );
 
         AddRoute( route );
+
+        if( iFit )
+        {
+            route->Fit( 0 );
+        }
 
         return route;
     }
@@ -436,9 +442,11 @@ FOdysseyVectorTagInbetweener::SetTrajectoryColor( const FColor& iColor )
 }
 
 FInbetweenerBreakdown*
-FOdysseyVectorTagInbetweener::AddBreakdown( uint32 iDrawingIndex, bool iCopyGeometry )
+FOdysseyVectorTagInbetweener::AddBreakdown( uint32 iDrawingIndex
+                                          , bool   iCopyGeometry
+                                          , bool   iFitNewTrajectories )
 {
-    return AddBreakdown( nullptr, iDrawingIndex, iCopyGeometry );
+    return AddBreakdown( nullptr, iDrawingIndex, iCopyGeometry, iFitNewTrajectories );
 }
 
 // Removes all breakdowns but the default one
@@ -503,7 +511,8 @@ FOdysseyVectorTagInbetweener::ChainBreakdowns()
 FInbetweenerBreakdown*
 FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
                                           , uint32 iDrawingIndex
-                                          , bool iCopyGeometry )
+                                          , bool iCopyGeometry
+                                          , bool iFitNewTrajectories )
 {
     std::vector<::ULIS::FVec2D> curBreakdownSourceGeometry;
     std::vector<::ULIS::FVec2D> curBreakdownInterpGeometry;
@@ -550,10 +559,15 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
 
         newBreakdown->SetTargetDrawingIndex( newTargetDrawingIndex );
 
+        if( iFitNewTrajectories )
+        {
+            FitRoutes( iDrawingIndex );
+        }
+
         // adapt the new spacings for the new breakdown
         for( uint32 i = 1; i < inbetweenIndex; i++ )
         {
-            float newSpacing = curChartSpacingBuffer[i] * ( float ) ( curTargetDrawingIndex / ( inbetweenIndex - 1 ) );
+            float newSpacing = ( curChartSpacingBuffer[inbetweenIndex] - curChartSpacingBuffer[i] ) / curChartSpacingBuffer[inbetweenIndex];
             // Note: inbetweenIndex cannot be 0
             newChart->GetDivisionBuffer()[i].spacing = newSpacing;
         }
@@ -692,12 +706,12 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
 
         ChainBreakdowns();
 
-        // This will force reallocation of the chart and dispatching of drawings
-        nextBreakdown->SetTargetDrawingIndex( nextBreakdown->GetTargetDrawingIndex() );
-
         if( nextBreakdown )
         {
             std::vector<::ULIS::FVec2D> breakdownSourceGeometry;
+
+            // This will force reallocation of the chart and dispatching of drawings
+            nextBreakdown->SetTargetDrawingIndex( nextBreakdown->GetTargetDrawingIndex() );
 
             iBreakdown->GetGrid()->GetGeometry( breakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
 
@@ -721,6 +735,15 @@ FOdysseyVectorTagInbetweener::ResizeRoutes()
     for( FInbetweenerRoute* route : mRouteList )
     {
         route->Resize();
+    }
+}
+
+void
+FOdysseyVectorTagInbetweener::FitRoutes( uint32 iFitFrom )
+{
+    for( FInbetweenerRoute* route : mRouteList )
+    {
+        route->Fit( iFitFrom );
     }
 }
 
@@ -1025,6 +1048,11 @@ void
 FOdysseyVectorTagInbetweener::ResizeDrawings()
 {
     mDrawingBuffer.resize( GetLength(), this );
+
+    mDrawingBuffer.front().localMatrix   = 
+    mDrawingBuffer.front().inverseMatrix =
+    mDrawingBuffer.front().worldMatrix   =
+    mDrawingBuffer.front().inverseWorldMatrix = BLMatrix2D::makeIdentity();
 
     DispatchDrawings();
 
@@ -1376,7 +1404,8 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                                         , ::ULIS::FVec2D* iPointPositionBuffer
                                         , const BLMatrix2D& iWorldMatrix
                                         , BLContext* iBLContext
-                                        , bool iLock )
+                                        , bool iLock
+                                        , float iScaling )
 {
     FOdysseyVectorEngine* displayedSceneEngine = iDisplayedScene ? iDisplayedScene->GetEngine() : nullptr;
     FOdysseyVectorBrush& brush = iInterpolatedPath->GetOriginalPath()->GetBrush();
@@ -1420,8 +1449,8 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                     perpn = GetPerpendicularVector(  localPointPositioni
                                                   , *localPointPositionn
                                                   ,  localPointPositionq );
-                    double radiusi = pointi->GetRadius();
-                    double radiusn = pointn->GetRadius();
+                    double radiusi = pointi->GetRadius() * iScaling;
+                    double radiusn = pointn->GetRadius() * iScaling;
                     BLPoint pt[6] = { iWorldMatrix.mapPoint( localPointPositioni->x
                                                            , localPointPositioni->y )
                                     , iWorldMatrix.mapPoint( localPointPositioni->x + ( perpi.x * radiusi )
@@ -1505,6 +1534,13 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                     }
                     else
                     {
+                        // we draw lines between the polygons to correct the artefacts,
+                        // otherwise there is a thin line between the polygons
+                        // line stroking is done in world coordinates because we need a 1 pixel width
+                        iBLContext->setStrokeWidth( 1.2f * iScaling );
+                        iBLContext->strokeLine( pt[0], pt[1] );
+                        iBLContext->strokeLine( pt[5], pt[0] );
+
                         iBLContext->fillPolygon( pt, 6 );
                     }
                 }
@@ -1560,6 +1596,20 @@ FOdysseyVectorTagInbetweener::GetInterpolatedPathBuffer()
 }
 
 void
+FOdysseyVectorTagInbetweener::SetConstantWidth( bool iConstantWidth )
+{
+    bConstantWidth = iConstantWidth;
+
+    Invalidate( INVALIDATE_CELLS );
+}
+
+bool
+FOdysseyVectorTagInbetweener::HasConstantWidth()
+{
+    return bConstantWidth;
+}
+
+void
 FOdysseyVectorTagInbetweener::DrawPathsInbetween( FOdysseyVectorGroupPaint* iDisplayedScene
                                                 , FChartDivision* inbetween
                                                 , BLContext* iBLContext
@@ -1581,13 +1631,18 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( FOdysseyVectorGroupPaint* iDis
         uint32 pointCount = interpolatedPath.mInterpolatedPointBuffer.size();
         uint32 inbetweenAbsoluteIndex = inbetween->GetAbsoluteIndex();
         ::ULIS::FVec2D* pointPositionBuffer = &interpolatedPath.mInterpolatedPointPositionBuffer[pointCount * inbetweenAbsoluteIndex];
+        float scaling = bConstantWidth ? 1.0f / ( inbetween->drawing->scalingX
+                                                * inbetween->drawing->scalingY ) : 1.0f;
 
         DrawPathAt( iDisplayedScene
                   , &interpolatedPath
                   , pointPositionBuffer
                   , worldMatrix
                   , iBLContext
-                  , false );
+                  , false
+                  // note: a surface grows or shrink at the square of the scaling factor.
+                  // That's why we use sqrt to get the actual scaling factor from the surface ratio.
+                  , sqrt(scaling) );
     }
 
     iBLContext->restore();
@@ -1862,6 +1917,8 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                     {
                         uint32 pointCount = interpolatedPath.mInterpolatedPointBuffer.size();
                         uint32 skippedOffset = ( drawingIndex * pointCount );
+
+
 
                         for( uint32 i = 0; i < interpolatedPath.mInterpolatedPointBuffer.size(); i++ )
                         {

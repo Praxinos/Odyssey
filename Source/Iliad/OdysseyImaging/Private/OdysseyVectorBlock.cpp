@@ -22,6 +22,7 @@ FOdysseyVectorBlock::~FOdysseyVectorBlock()
 
 FOdysseyVectorBlock::FOdysseyVectorBlock()
     : mBlockData(nullptr)
+    , mEngine ( nullptr )
 {
 
 }
@@ -77,27 +78,32 @@ void
 FOdysseyVectorBlock::Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render);
-    //Render in a BLImage (also resets the internal invalidation rectangle)
-    ::ULIS::FRectD invalidatedRectD = mEngine->Render( mBlockData->mBLContext.Get(), iDrawingFlags );
-    ::ULIS::FRectI invalidatedRectI = invalidatedRectD;
 
-    if( invalidatedRectD.Area() )
+    // sometimes the animation Proxy runs very early, before mEngine gets initialized. This ensures it won't crash.
+    if( mEngine )
     {
+        //Render in a BLImage (also resets the internal invalidation rectangle)
+        ::ULIS::FRectD invalidatedRectD = mEngine->Render( mBlockData->mBLContext.Get(), iDrawingFlags );
+        ::ULIS::FRectI invalidatedRectI = invalidatedRectD;
+
+        if( invalidatedRectD.Area() )
         {
-            TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertBlock);
-            //Get a ULIS block pointing to the BLImage
-            BLImageData imgData;
-            mBlockData->mBLImage->getData(&imgData);
-            ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
+            {
+                TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertBlock);
+                //Get a ULIS block pointing to the BLImage
+                BLImageData imgData;
+                mBlockData->mBLImage->getData(&imgData);
+                ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
 
-            //Unpremultiply the render block
-            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
-            ctx.Unpremultiply(renderBlock, invalidatedRectI );
-            ctx.Finish();
+                //Unpremultiply the render block
+                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
+                ctx.Unpremultiply(renderBlock, invalidatedRectI );
+                ctx.Finish();
 
-            //Convert the right ULIS block in the expected ULIS Format
-            ctx.ConvertFormat(renderBlock, ioBlock, invalidatedRectI, ::ULIS::FVec2I( invalidatedRectI.x, invalidatedRectI.y ) );
-            ctx.Finish();
+                //Convert the right ULIS block in the expected ULIS Format
+                ctx.ConvertFormat(renderBlock, ioBlock, invalidatedRectI, ::ULIS::FVec2I( invalidatedRectI.x, invalidatedRectI.y ) );
+                ctx.Finish();
+            }
         }
     }
 }
@@ -106,23 +112,28 @@ void
 FOdysseyVectorBlock::RenderHUD(::ULIS::FBlock& ioBlock)
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::RenderHUD);
-    mEngine->RenderHUD( mHUDBlockData->mBLContext.Get() );
 
+    // sometimes the animation Proxy runs very early, before mEngine gets initialized. This ensures it won't crash.
+    if( mEngine )
     {
-        TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertHUDBlock);
-        //Get a ULIS block pointing to the BLImage
-        BLImageData imgData;
-        mHUDBlockData->mBLImage->getData(&imgData);
-        ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
+        mEngine->RenderHUD( mHUDBlockData->mBLContext.Get() );
 
-        //Unpremultiply the render block
-        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
-        ctx.Unpremultiply(renderBlock);
-        ctx.Finish();
+        {
+            TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertHUDBlock);
+            //Get a ULIS block pointing to the BLImage
+            BLImageData imgData;
+            mHUDBlockData->mBLImage->getData(&imgData);
+            ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
 
-        //Convert the right ULIS block in the expected ULIS Format
-        ctx.ConvertFormat(renderBlock, ioBlock);
-        ctx.Finish();
+            //Unpremultiply the render block
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
+            ctx.Unpremultiply(renderBlock);
+            ctx.Finish();
+
+            //Convert the right ULIS block in the expected ULIS Format
+            ctx.ConvertFormat(renderBlock, ioBlock);
+            ctx.Finish();
+        }
     }
 }
 

@@ -66,6 +66,13 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         double GetTargetRotation();
         double GetTargetScalingX();
         double GetTargetScalingY();
+
+        double GetSourceTranslationX();
+        double GetSourceTranslationY();
+        double GetSourceRotation();
+        double GetSourceScalingX();
+        double GetSourceScalingY();
+
         bool  IsMaster();
         uint32 GetDrawingCount();
         FInbetweenerChart* GetChart();

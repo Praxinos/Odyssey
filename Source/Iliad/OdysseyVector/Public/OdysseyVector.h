@@ -31,6 +31,19 @@ namespace FOdysseyVector
                                               , const ::ULIS::FVec2D& iSegmentP1
                                               , double& oDistance );
 
+    void ODYSSEYVECTOR_API ChordLengthParameterize( const std::vector<::ULIS::FVec2D>& iPointBuffer
+                                                  , const ::ULIS::FVec2D* iFirstRecord
+                                                  , const ::ULIS::FVec2D* iLastRecord
+                                                  , std::vector<double>& oUBuffer );
+
+    void ODYSSEYVECTOR_API GenerateBezier( const std::vector<::ULIS::FVec2D>& iPointBuffer
+                                         , const ::ULIS::FVec2D* iFirstRecord
+                                         , const ::ULIS::FVec2D* iLastRecord
+                                         , const std::vector<double>& uPrime
+                                         , const ::ULIS::FVec2D& iLeftTangent
+                                         , const ::ULIS::FVec2D& iRightTangent
+                                         , ::ULIS::FVec2D oBezierOut[4] );
+
     // This is a constrained version of a segment-to-point proximity test.
     // It means that if the projection of the point on the segment is beyond limits,
     // it will remain within limits (0.0f) or (1.0f). On the figure below, x would be at t=0.0
@@ -71,12 +84,18 @@ namespace FOdysseyVector
                                      , const ::ULIS::FRectD& iMaskRect
                                      , const uint8* iPixelData );
 
-    double ODYSSEYVECTOR_API GetBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
+    double ODYSSEYVECTOR_API GetCubicBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
                                                        , uint32 iDivisions );
 
-    double ODYSSEYVECTOR_API GetBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
-                                                       , uint32 iDivisions
-                                                       , std::vector<double>* oDivisionLengthBuffer );
+    double ODYSSEYVECTOR_API GetCubicBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
+                                                            , uint32 iDivisions
+                                                            , std::vector<double>* oDivisionLengthBuffer );
+    double ODYSSEYVECTOR_API GetQuadraticBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
+                                                                , uint32 iDivisions );
+
+    double ODYSSEYVECTOR_API GetQuadraticBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
+                                                                , uint32 iDivisions
+                                                                , std::vector<double>* oDivisionLengthBuffer );
 
     ::ULIS::FVec2D ODYSSEYVECTOR_API MapPoint( const BLMatrix2D& iMatrix
                                              , const ::ULIS::FVec2D& iPoint );

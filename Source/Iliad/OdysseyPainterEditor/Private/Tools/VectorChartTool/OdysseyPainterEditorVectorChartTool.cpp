@@ -328,6 +328,8 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                     HUDBezier[2].x += iPointInTexture.deltaPosition.X;
                     HUDBezier[2].y += iPointInTexture.deltaPosition.Y;
                 }
+
+                mChartHUD->UpdateBezier();
             }
         }
     }

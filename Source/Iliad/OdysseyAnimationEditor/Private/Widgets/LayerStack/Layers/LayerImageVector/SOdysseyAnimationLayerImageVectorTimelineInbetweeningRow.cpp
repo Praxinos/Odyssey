@@ -242,7 +242,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
 
                         mInbetweenerTag->GetOwner()->GetScene()->Update( 0 );
 
-                        CacheDesiredSize( mLayoutScaleMultiplier );
+                        CacheDesiredSize( 1.0f /* mLayoutScaleMultiplier */);
                     }
                 }
 
@@ -256,9 +256,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
                 {
                     mCandidateTargetCellBox = FInbetweeningRowCellBox( FInbetweeningRowCellBox::TYPE_TARGET
                                                                      , drawingIndex
-                                                                     , cursorCell->GetFrame() * frameWidth * mLayoutScaleMultiplier
+                                                                     , cursorCell->GetFrame() * frameWidth /* * mLayoutScaleMultiplier */
                                                                      , 0.0f
-                                                                     , cursorCell->GetLength() * frameWidth * mLayoutScaleMultiplier
+                                                                     , cursorCell->GetLength() * frameWidth /* * mLayoutScaleMultiplier */
                                                                      , mBoxSize.Y );
 
                     //MarkPrepassAsDirty();
@@ -338,20 +338,20 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
     // call from base class
     STableRow<TSharedPtr<FInbetweeningListViewItem>>::CacheDesiredSize( LayoutScaleMultiplier );
 
-    mLayoutScaleMultiplier = LayoutScaleMultiplier;
+    //mLayoutScaleMultiplier = LayoutScaleMultiplier;
 
     // total vertical pos & size of the widget
     mBoxPos.Y  = 0.0f;
-    mBoxSize.Y = 20.0f * LayoutScaleMultiplier;
+    mBoxSize.Y = 20.0f /* * LayoutScaleMultiplier */;
 
     mCellBoxBuffer.Reset();
     mCellBoxBuffer.Reserve( mInbetweenerTag->GetLength() );
 
     mCellBoxBuffer.Emplace( FInbetweeningRowCellBox::TYPE_SOURCE
                           , 0
-                          , sourceFrame * frameWidth * LayoutScaleMultiplier
+                          , sourceFrame * frameWidth /* * LayoutScaleMultiplier */
                           , 0.0f
-                          , sourceCell->GetLength() * frameWidth * LayoutScaleMultiplier
+                          , sourceCell->GetLength() * frameWidth /* * LayoutScaleMultiplier */
                           , mBoxSize.Y );
 
     for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
@@ -378,9 +378,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
 
                     mCellBoxBuffer.Emplace( FInbetweeningRowCellBox::TYPE_INBETWEEN
                                           , i
-                                          , inbetweenFrame * frameWidth * LayoutScaleMultiplier
+                                          , inbetweenFrame * frameWidth /* * LayoutScaleMultiplier */
                                           , 0.0f
-                                          , inbetweenCell->GetLength() * frameWidth * LayoutScaleMultiplier
+                                          , inbetweenCell->GetLength() * frameWidth /* * LayoutScaleMultiplier */
                                           , mBoxSize.Y );
                 }
             }
@@ -389,9 +389,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
                                                                     | FInbetweeningRowCellBox::TYPE_SOURCE )
                                                                   : FInbetweeningRowCellBox::TYPE_TARGET
                                   , targetIndex
-                                  , targetFrame * frameWidth * LayoutScaleMultiplier
+                                  , targetFrame * frameWidth /* * LayoutScaleMultiplier */
                                   , 0.0f
-                                  , targetCell->GetLength() * frameWidth * LayoutScaleMultiplier
+                                  , targetCell->GetLength() * frameWidth /* * LayoutScaleMultiplier */
                                   , mBoxSize.Y );
         }
     }
@@ -462,7 +462,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
     TSharedPtr<FOdysseyAnimationEditorTimelinePosition> timelinePosition = treeView->GetTimelinePosition();
     float offset = timelinePosition->GetOffset();
     float frameSize = timelinePosition->GetFrameSize();
-    float scrollByPixels = offset * frameSize * mLayoutScaleMultiplier;
+    float scrollByPixels = offset * frameSize /* * mLayoutScaleMultiplier */;
     static FSlateBrush defaultBrush;
 
     LayerId = STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnPaint( Args

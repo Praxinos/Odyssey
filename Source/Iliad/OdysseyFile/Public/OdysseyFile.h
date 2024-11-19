@@ -125,6 +125,8 @@ namespace FOdysseyFile
                                 static const uint32 CHUNK_TAGINBETWEENER_TRAJECTORYCOLOR = 0xdb4cb02a; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
                                 static const uint32 CHUNK_TAGINBETWEENER_LENGTH = 0x73d1119d; // uint32(count)
                                 static const uint32 CHUNK_TAGINBETWEENER_MAPASPOLYLINE = 0x12201950; // uint32(bool)
+                                static const uint32 CHUNK_TAGINBETWEENER_WITHTHICKNESS = 0x3d8a1be2; // uint32(bool)
+                                static const uint32 CHUNK_TAGINBETWEENER_CONSTANTWIDTH = 0xd04f4be; // uint32(bool)
              /* Deprecated */   static const uint32 CHUNK_TAGINBETWEENER_CHART = 0x953d8893; // array[float]
              /* Deprecated */   static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM = 0xdc0fe227; // container
              /* Deprecated */       static const uint32 CHUNK_TAGINBETWEENER_TRANSFORM_TRANSLATION = 0xaf8ba83b; // double(X)-double(Y)

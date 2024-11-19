@@ -109,9 +109,9 @@ FInbetweenerTrajectory::Update()
     mCubicBezier[1] = mCubicBezier[0] + ( mHandle[0].GetDirection() * mHandle[0].GetLengthRatio() * bezierLength );
     mCubicBezier[2] = mCubicBezier[3] + ( mHandle[1].GetDirection() * mHandle[1].GetLengthRatio() * bezierLength );
 
-    cubicBezierLength = FOdysseyVector::GetBezierApproximateLength( mCubicBezier
-                                                                  , FRACTIONCOUNT
-                                                                  , &fractionLengthBuffer );
+    cubicBezierLength = FOdysseyVector::GetCubicBezierApproximateLength( mCubicBezier
+                                                                       , FRACTIONCOUNT
+                                                                       , &fractionLengthBuffer );
 
     // build a lookup table for getting linear values for t
     for( uint32 i = 0; i < FRACTIONCOUNT; i++ )
@@ -221,6 +221,76 @@ FInbetweenerTrajectory::GetRoute()
 }
 
 void
+FInbetweenerTrajectory::FitBezier( const std::vector<::ULIS::FVec2D> &iPointBuffer )
+{
+    const BLMatrix2D& sourceLocalMatrix = mBreakdown->GetSourceLocalMatrix();
+    const BLMatrix2D& targetLocalMatrix = mBreakdown->GetTargetLocalMatrix();
+    BLMatrix2D sourceLocalInverseMatrix;
+    BLMatrix2D targetLocalInverseMatrix;
+    double bezierLength;
+    double handleRatio[2] = { 0.0f, 0.0f };
+    ::ULIS::FVec2D cubicBezier[4];
+    ::ULIS::FVec2D handleVector[2];
+    const ::ULIS::FVec2D* firstRecord = &iPointBuffer.front();
+    const ::ULIS::FVec2D* lastRecord  = &iPointBuffer.back();
+    // Unit tangent vectors at endpoints
+    ::ULIS::FVec2D leftTangent  = (*(firstRecord + 1 )) - (*firstRecord);
+    ::ULIS::FVec2D rightTangent = (*(lastRecord  - 1 )) - (*lastRecord );
+
+    BLMatrix2D::invert( sourceLocalInverseMatrix, sourceLocalMatrix );
+    BLMatrix2D::invert( targetLocalInverseMatrix, targetLocalMatrix );
+
+    if( leftTangent.DistanceSquared() && rightTangent.DistanceSquared() )
+    {
+        std::vector<double> uPrime;
+
+        leftTangent.Normalize();
+        rightTangent.Normalize();
+
+
+        FOdysseyVector::ChordLengthParameterize( iPointBuffer
+                                               , firstRecord
+                                               , lastRecord
+                                               , uPrime );
+
+        if( iPointBuffer.size() > 1 )
+        {
+            FOdysseyVector::GenerateBezier( iPointBuffer
+                                          , firstRecord
+                                          , lastRecord
+                                          , uPrime
+                                          , leftTangent
+                                          , rightTangent
+                                          , cubicBezier );
+        }
+
+        handleVector[0] = cubicBezier[1] - cubicBezier[0];
+        handleVector[1] = cubicBezier[2] - cubicBezier[3];
+
+        double handleLength[2] = { handleVector[0].Distance()
+                                 , handleVector[1].Distance() };
+
+        bezierLength = FOdysseyVector::GetCubicBezierApproximateLength( cubicBezier, 16 );
+
+        if( bezierLength )
+        {
+            handleRatio[0] = std::clamp<double>( handleLength[0] / bezierLength, 0.0f, 1.0f );
+            handleRatio[1] = std::clamp<double>( handleLength[1] / bezierLength, 0.0f, 1.0f );
+        }
+
+        if( handleLength[0] ) handleVector[0].Normalize();
+        if( handleLength[1] ) handleVector[1].Normalize();
+
+        BLPoint vec0 = sourceLocalInverseMatrix.mapVector( handleVector[0].x, handleVector[0].y );
+        BLPoint vec1 = targetLocalInverseMatrix.mapVector( handleVector[1].x, handleVector[1].y );
+
+        mHandle[0].Set( ::ULIS::FVec2D( vec0.x, vec0.y ), handleRatio[0] );
+        mHandle[1].Set( ::ULIS::FVec2D( vec1.x, vec1.y ), handleRatio[1] );
+    }
+}
+
+
+void
 FInbetweenerTrajectory::FitBezier( const std::vector<::ULIS::FVec2D> &data
                                  , const std::vector<float> &u )
 {
@@ -258,17 +328,17 @@ FInbetweenerTrajectory::FitBezier( const std::vector<::ULIS::FVec2D> &data
     P = Eigen::MatrixXd(4, 2);
     P = (T * M).colPivHouseholderQr().solve(D);
 
-    cubicBezier[0].x = P.row(0)(0,0);
-    cubicBezier[0].y = P.row(0)(1,0);
+    cubicBezier[0].x = P.row(0).x();
+    cubicBezier[0].y = P.row(0).y();
 
-    cubicBezier[1].x = P.row(1)(0,0);
-    cubicBezier[1].y = P.row(1)(1,0);
+    cubicBezier[1].x = P.row(1).x();
+    cubicBezier[1].y = P.row(1).y();
 
-    cubicBezier[2].x = P.row(2)(0,0);
-    cubicBezier[2].y = P.row(2)(1,0);
+    cubicBezier[2].x = P.row(2).x();
+    cubicBezier[2].y = P.row(2).y();
 
-    cubicBezier[3].x = P.row(3)(0,0);
-    cubicBezier[3].y = P.row(3)(1,0);
+    cubicBezier[3].x = P.row(3).x();
+    cubicBezier[3].y = P.row(3).y();
 
     handleVector[0] = cubicBezier[1] - cubicBezier[0];
     handleVector[1] = cubicBezier[2] - cubicBezier[3];
@@ -276,7 +346,7 @@ FInbetweenerTrajectory::FitBezier( const std::vector<::ULIS::FVec2D> &data
     double handleLength[2] = { handleVector[0].Distance()
                              , handleVector[1].Distance() };
 
-    bezierLength = FOdysseyVector::GetBezierApproximateLength( cubicBezier, 16 );
+    bezierLength = FOdysseyVector::GetCubicBezierApproximateLength( cubicBezier, 16 );
 
     if( bezierLength )
     {

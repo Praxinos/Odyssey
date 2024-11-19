@@ -34,6 +34,13 @@ class ODYSSEYVECTOR_API FInbetweenerRoute
         std::vector<FInbetweenerStep>& GetStepBuffer();
         void Resize();
         void SetInbetweenerTag( FOdysseyVectorTagInbetweener* iInbetweenerTag );
+        void Fit( uint32 iFitFrom );
+
+        bool IsEnabled();
+
+    protected:
+        void Disable();
+        void Enable();
 
     private:
         std::vector<FInbetweenerStep> mStepBuffer;
@@ -42,4 +49,5 @@ class ODYSSEYVECTOR_API FInbetweenerRoute
         uint32 mQuadIndex;
         double mQuadU;
         double mQuadV;
+        bool bEnabled;
 };

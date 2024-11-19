@@ -422,9 +422,12 @@ FInbetweenerGrid::GetValidRouteArray( std::vector<FInbetweenerRoute*>& oValidRou
 
     for( FInbetweenerRoute* route : routeList )
     {
-        if( mQuadBuffer[route->GetQuadIndex()].IsLinked() )
+        if ( route->IsEnabled() )
         {
-            oValidRouteArray.emplace_back( route );
+            if( mQuadBuffer[route->GetQuadIndex()].IsLinked() )
+            {
+                oValidRouteArray.emplace_back( route );
+            }
         }
     }
 }

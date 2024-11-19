@@ -74,5 +74,5 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
         FInbetweenerBreakdown* mPickedBreakdown;
         //Box containing the cells widgets
         //TSharedPtr<SHorizontalBox> mCellsBox;
-        float mLayoutScaleMultiplier;
+        //float mLayoutScaleMultiplier;
 };

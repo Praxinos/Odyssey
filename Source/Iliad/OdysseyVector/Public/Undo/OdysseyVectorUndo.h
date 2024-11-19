@@ -114,6 +114,7 @@ namespace FSnapshotFlags
             static const uint64 MAPASPOLYLINE     = ( 1ULL <<  7 );
             static const uint64 SQUARE            = ( 1ULL <<  8 );
             static const uint64 WITHTHICKNESS     = ( 1ULL <<  9 );
+            static const uint64 CONSTANTWIDTH     = ( 1ULL << 10 );
             static const uint64 PARAM             = ( GRIDSIZE
                                                     | GRIDTYPE
                                                     | INTERPOLATIONTYPE
@@ -472,6 +473,7 @@ class ODYSSEYVECTOR_API FSnapshotTagInbetweener
         bool mapAsPolyline;
         bool square;
         bool withThickness;
+        bool constantWidth;
 
         State() { inited = false; }
     };

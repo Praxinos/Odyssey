@@ -27,6 +27,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::UOdysseyPainterEditorVectorTagInb
     //, Rigidity ( 10 )
     , MapAsPolyline( true )
     , WithThickness( true )
+    , ConstantWidth( false )
     , Square( true )
     , InbetweenColor( FOdysseyVectorTagInbetweener::INBETWEEN_DEFAULT_RED_UINT8
                     , FOdysseyVectorTagInbetweener::INBETWEEN_DEFAULT_GREEN_UINT8
@@ -71,6 +72,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
         TrajectoryColor = selectedInbetweenerTag->GetTrajectoryColor();
         MapAsPolyline = selectedInbetweenerTag->GetMapAsPolyline();
         WithThickness = selectedInbetweenerTag->GetWithThickness();
+        ConstantWidth = selectedInbetweenerTag->HasConstantWidth();
         Square = selectedInbetweenerTag->IsSquare();
 
         DivisionX = selectedInbetweenerTag->GetGridNumQuadX();
@@ -207,6 +209,11 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
             selectedInbetweenerTag->SetWithThickness( WithThickness );
         }
 
+        if( iPropertyName == "ConstantWidth" )
+        {
+            selectedInbetweenerTag->SetConstantWidth( ConstantWidth );
+        }
+
         if( iPropertyName == "Square" )
         {
             selectedInbetweenerTag->SetGrid( GridType, DivisionX, DivisionY, Square );
@@ -279,6 +286,11 @@ UOdysseyPainterEditorVectorTagInbetweenerView::MakeUndo( const FName& iPropertyN
 
     if( iPropertyName == "WithThickness" )
         return new FOdysseyVectorUndoTagInbetweenerWithThickness( mScene
+                                                                , mSelectedInbetweenerTagArray
+                                                                , notificationFlags );
+
+    if( iPropertyName == "ConstantWidth" )
+        return new FOdysseyVectorUndoTagInbetweenerConstantWidth( mScene
                                                                 , mSelectedInbetweenerTagArray
                                                                 , notificationFlags );
 

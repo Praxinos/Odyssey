@@ -45,6 +45,16 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerWithThickness : public F
 
 };
 
+class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerConstantWidth : public FOdysseyVectorUndoTagInbetweenerParam
+{
+    public:
+        ~FOdysseyVectorUndoTagInbetweenerConstantWidth();
+        FOdysseyVectorUndoTagInbetweenerConstantWidth( FOdysseyVectorGroupPaint* iScene
+                                                     , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
+                                                     , uint64 iReturnFlags  );
+
+};
+
 class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerGridSize : public FOdysseyVectorUndoTagInbetweenerParam
 {
     public:

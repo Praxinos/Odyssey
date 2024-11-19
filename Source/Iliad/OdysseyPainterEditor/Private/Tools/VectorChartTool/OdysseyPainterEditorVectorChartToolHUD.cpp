@@ -14,6 +14,7 @@
 #define INDICATOR_RADIUS 20.0f
 #define FONT_SIZE        28.0f
 #define DEFAULT_SURFACE  (1920*1080)
+#define FRACTIONCOUNT    24
 
 FOdysseyPainterEditorVectorChartToolHUD::~FOdysseyPainterEditorVectorChartToolHUD()
 {
@@ -34,6 +35,8 @@ FOdysseyPainterEditorVectorChartToolHUD::FOdysseyPainterEditorVectorChartToolHUD
     mFont.createFromFace( face, FONT_SIZE );
     // reserve enough bounding box for at least 20 numbers. That way we don't recompute them each time.
     mGlyphBuffer.reserve( 20 );
+
+    mFractionBuffer.resize( FRACTIONCOUNT );
 }
 
 const FOdysseyPainterEditorVectorChartToolHUD::FGlyph*
@@ -113,12 +116,77 @@ FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdown( FOdysseyVectorGroupPai
                     {
                         mBreakdown = breakdown;
 
+                        UpdateBezier();
+
                         return;
                     }
                 }
             }
         }
     }
+}
+
+double
+FOdysseyPainterEditorVectorChartToolHUD::GetQuadraticT( float iSpacingT )
+{
+    ::ULIS::FVec2D* quadraticBezier = mBreakdown->GetChart()->GetHUDBezier();
+
+    float quadraticT = 0.0f;
+
+    for( uint32 i = 0; i < FRACTIONCOUNT; i++ )
+    {
+        FChartFraction* fraction = &mFractionBuffer[i];
+
+        if( ( iSpacingT >= fraction->linearT0 ) && ( iSpacingT <= fraction->linearT1 ) )
+        {
+            float diffLinear = fraction->linearT1 - fraction->linearT0;
+
+            if( diffLinear )
+            {
+                float diffCubic = fraction->quadraticT1 - fraction->quadraticT0;
+                float ratio = ( iSpacingT - fraction->linearT0 ) / diffLinear;
+
+                quadraticT = fraction->quadraticT0 + ( diffCubic * ratio );
+
+                break;
+            }
+        }
+    }
+
+    return quadraticT;
+}
+
+void
+FOdysseyPainterEditorVectorChartToolHUD::UpdateBezier()
+{
+    std::vector<double> fractionLengthBuffer;
+    double quadraticT0 = 0.0f;
+    double linearT0 = 0.0f;
+    double stepT = 1.0f / FRACTIONCOUNT;
+    ::ULIS::FVec2D p0;
+    double totalFractionLength = 0.0f;
+    double quadraticBezierLength = FOdysseyVector::GetQuadraticBezierApproximateLength( mBreakdown->GetChart()->GetHUDBezier()
+                                                                                      , FRACTIONCOUNT
+                                                                                      , &fractionLengthBuffer );
+
+    // build a lookup table for getting linear values for t
+    for( uint32 i = 0; i < FRACTIONCOUNT; i++ )
+    {
+        double quadraticT1 = quadraticT0 + stepT;
+        double linearT1 = linearT0 + ( fractionLengthBuffer[i] / quadraticBezierLength );
+
+        totalFractionLength += fractionLengthBuffer[i];
+
+        mFractionBuffer[i].linearT0 = linearT0;
+        mFractionBuffer[i].linearT1 = linearT1;
+        mFractionBuffer[i].quadraticT0  = quadraticT0;
+        mFractionBuffer[i].quadraticT1  = quadraticT1;
+
+        quadraticT0 = quadraticT1;
+        linearT0 = linearT1;
+    }
+    mFractionBuffer.back().linearT1 = 1.0f;
+    mFractionBuffer.back().quadraticT1 = 1.0f;
 }
 
 void
@@ -182,14 +250,15 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
     {
         FChartDivision* inbetween = &iBreakdown->GetChart()->GetDivisionBuffer()[i];
         float indicatorX = mChartRect.x + ( inbetween->spacing * mChartRect.w );
+        double quadraticT = GetQuadraticT( inbetween->spacing );
         ::ULIS::FVec2D indicatorPosition = ::ULIS::QuadraticBezierPointAtParameter( HUDBezier[0],
                                                                                     HUDBezier[1],
                                                                                     HUDBezier[2],
-                                                                                    inbetween->spacing );
+                                                                                    quadraticT );
         ::ULIS::FVec2D indicatorTangent = ::ULIS::QuadraticBezierTangentAtParameter( HUDBezier[0],
                                                                                      HUDBezier[1],
                                                                                      HUDBezier[2],
-                                                                                     inbetween->spacing );
+                                                                                     quadraticT );
         ::ULIS::FVec2D indicatorPerpendicular = ::ULIS::FVec2D( -indicatorTangent.y, indicatorTangent.x );
         bool hovered = ( inbetween == mChartTool->GetHoveredInbetween() );
         bool current = ( inbetween->GetCellIndex() == iRenderedCellIndex );

@@ -46,10 +46,10 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
         FInbetweenerBreakdown* GetBreakdown();
         FInbetweenerTrajectory* GetNext();
         FInbetweenerTrajectory* GetPrev();
+        void FitBezier( const std::vector<::ULIS::FVec2D> &data );
+        ::ULIS::FVec2D GetPoint( float iSpacingT );
         void FitBezier( const std::vector<::ULIS::FVec2D> &data
                       , const std::vector<float> &u );
-        ::ULIS::FVec2D GetPoint( float iSpacingT );
-
     private:
         std::vector<FInbetweenerWaypoint> mWaypointBuffer;
         FInbetweenerRoute* mRoute;
@@ -57,6 +57,5 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
         FInbetweenerHandleTrajectory mHandle[2];
         ::ULIS::FVec2D mCubicBezier[4];
         FInbetweenerBreakdown* mBreakdown;
-        std::vector<::ULIS::FVec2D> mFractionPointBuffer;
         std::vector<FTrajectoryFraction> mFractionBuffer;
 };

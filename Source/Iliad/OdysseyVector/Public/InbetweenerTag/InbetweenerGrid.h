@@ -118,6 +118,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         friend class FOdysseyVectorTagInbetweener;
         bool ComputeARAPInterpolation( FChartDivision* iInbetween
                                      , bool useRigidTransform );
+        bool PrecomputeARAPInterpolation();
 
     protected:
         ::ULIS::FVec2D GetCenterOfMass( eInbetweenerPointPositionType iPositionType );
@@ -130,8 +131,6 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
     // ARAP interpolation (do not confuse with ARAP deformation)
     // applies to all types of grid.
     protected:
-        bool PrecomputeARAPInterpolation();
-
         void ComputePStar( FInbetweenerPoint* iTriangle[3]
                          , int triRow
                          , eInbetweenerPointPositionType iPositionType

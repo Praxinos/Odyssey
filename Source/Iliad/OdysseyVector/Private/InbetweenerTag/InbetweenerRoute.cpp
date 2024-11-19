@@ -31,43 +31,18 @@ FInbetweenerRoute::Init( uint32 iQuadIndex
     mQuadIndex = iQuadIndex;
     mQuadU = iQuadU;
     mQuadV = iQuadV;
+    bEnabled = true;
 
     Resize();
-
-/*
-    for( FInbetweenerTrajectory& trajectory : mTrajectoryBuffer )
-    {
-        std::vector<float> spacingBuffer;
-        std::vector<::ULIS::FVec2D> pointBuffer;
-
-        trajectory.GetBreakdown()->GetChart()->GetSpacing( spacingBuffer );
-
-        pointBuffer.reserve( spacingBuffer.size() );
-
-        for( FChartDivision& inbetween : trajectory.GetBreakdown()->GetChart()->GetDivisionBuffer() )
-        {
-            FInbetweenerGrid* grid = trajectory.GetBreakdown()->GetGrid();
-            ::ULIS::FVec2D gridPoint;
-
-            grid->ComputeARAPInterpolation( &inbetween, false );
-
-            gridPoint = grid->GetQuadBuffer()[GetQuadIndex()].GetPoint( eInbetweenerPointPositionType::InterpPosition
-                                                                      , mQuadU
-                                                                      , mQuadV );
-
-            pointBuffer.push_back( FOdysseyVector::MapPoint( inbetween.drawing->localMatrix, gridPoint ) );
-        }
-
-        trajectory.FitBezier(  pointBuffer, spacingBuffer );
-    }
-*/
 }
 
 void
 FInbetweenerRoute::Resize()
 {
     uint32 breakdownCount = mInbetweenerTag->GetBreakdownCount();
+    uint32 trajectoryCount = mTrajectoryBuffer.size();
     std::vector<FInbetweenerTrajectory> saveTrajectoryBuffer = mTrajectoryBuffer;
+    uint32 initFrom = breakdownCount > trajectoryCount ? trajectoryCount : UINT_MAX;
     uint32 i = 0;
 
     mStepBuffer.clear();
@@ -85,12 +60,73 @@ FInbetweenerRoute::Resize()
     {
         uint32 n = ( i + 1 );
 
-        mTrajectoryBuffer.emplace_back( this, &mStepBuffer[i], &mStepBuffer[n], breakdown );
+        FInbetweenerTrajectory& trajectory = mTrajectoryBuffer.emplace_back( this
+                                                                           , &mStepBuffer[i]
+                                                                           , &mStepBuffer[n]
+                                                                           , breakdown );
 
-        if( i < saveTrajectoryBuffer.size() )
+        if( i < initFrom )
         {
             // restore values for trajectories that are kept
-            mTrajectoryBuffer[i].Import( saveTrajectoryBuffer[i] );
+            trajectory.Import( saveTrajectoryBuffer[i] );
+        }
+
+        i++;
+    }
+}
+
+void
+FInbetweenerRoute::Fit( uint32 iFitFrom )
+{
+    uint32 i = 0;
+
+    for( FInbetweenerBreakdown* breakdown : mInbetweenerTag->GetBreakdownList() )
+    {
+        if( i >= iFitFrom )
+        {
+            std::vector<FChartDivision>& divisionBuffer = breakdown->GetChart()->GetDivisionBuffer();
+            int32 divisionCount = divisionBuffer.size();
+            FInbetweenerGrid* grid = breakdown->GetGrid();
+            std::vector<::ULIS::FVec2D> pointBuffer;
+            std::vector<float> spacingBuffer;
+            ::ULIS::FVec2D gridPoint;
+
+            breakdown->GetChart()->GetSpacing( spacingBuffer );
+
+            pointBuffer.reserve( divisionCount );
+
+            gridPoint = grid->GetQuadBuffer()[GetQuadIndex()].GetPoint( eInbetweenerPointPositionType::SourcePosition
+                                                                      , mQuadU
+                                                                      , mQuadV );
+            pointBuffer.push_back( FOdysseyVector::MapPoint( divisionBuffer.front().drawing->localMatrix, gridPoint ) );
+
+            // route must be disable before ARAP Precompute or else ARAP will try to use it.
+            // but the route is not ready yet (not all trajectories are set )
+            Disable();
+            if( divisionCount - 2 > 0 )
+            {
+                grid->PrecomputeARAPInterpolation();
+
+                for( int32 j = 1; j < ( divisionCount - 1 ); j++ )
+                {
+                    FChartDivision& inbetween = divisionBuffer[j];
+
+                    grid->ComputeARAPInterpolation( &inbetween, false );
+
+                    gridPoint = grid->GetQuadBuffer()[GetQuadIndex()].GetPoint( eInbetweenerPointPositionType::InterpPosition
+                                                                              , mQuadU
+                                                                              , mQuadV );
+                    pointBuffer.push_back( FOdysseyVector::MapPoint( inbetween.drawing->localMatrix, gridPoint ) );
+                }
+            }
+            Enable();
+
+            gridPoint = grid->GetQuadBuffer()[GetQuadIndex()].GetPoint( eInbetweenerPointPositionType::TargetPosition
+                                                                      , mQuadU
+                                                                      , mQuadV );
+            pointBuffer.push_back( FOdysseyVector::MapPoint( divisionBuffer.back().drawing->localMatrix, gridPoint ) );
+
+            mTrajectoryBuffer[i].FitBezier(  pointBuffer, spacingBuffer );
         }
 
         i++;
@@ -101,6 +137,24 @@ std::vector<FInbetweenerTrajectory>&
 FInbetweenerRoute::GetTrajectoryBuffer()
 {
     return mTrajectoryBuffer;
+}
+
+bool
+FInbetweenerRoute::IsEnabled()
+{
+    return bEnabled;
+}
+
+void
+FInbetweenerRoute::Disable()
+{
+    bEnabled = false;
+}
+
+void
+FInbetweenerRoute::Enable()
+{
+    bEnabled = true;
 }
 
 std::vector<FInbetweenerStep>&

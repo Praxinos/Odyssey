@@ -132,6 +132,36 @@ FInbetweenerBreakdown::GetTargetScalingY()
     return mTargetScalingY;
 }
 
+double
+FInbetweenerBreakdown::GetSourceTranslationX()
+{
+    return mPrevBreakdown ? mPrevBreakdown->GetTargetTranslationX() : 0.0f;
+}
+
+double
+FInbetweenerBreakdown::GetSourceTranslationY()
+{
+    return mPrevBreakdown ? mPrevBreakdown->GetTargetTranslationY() : 0.0f;
+}
+
+double
+FInbetweenerBreakdown::GetSourceRotation()
+{
+    return mPrevBreakdown ? mPrevBreakdown->GetTargetRotation() : 0.0f;
+}
+
+double
+FInbetweenerBreakdown::GetSourceScalingX()
+{
+    return mPrevBreakdown ? mPrevBreakdown->GetTargetScalingX() : 1.0f;
+}
+
+double
+FInbetweenerBreakdown::GetSourceScalingY()
+{
+    return mPrevBreakdown ? mPrevBreakdown->GetTargetScalingY() : 1.0f;
+}
+
 void
 FInbetweenerBreakdown::InterpolateTransform()
 {
@@ -145,19 +175,21 @@ FInbetweenerBreakdown::InterpolateTransform()
     for( uint32 i = 1; i < GetDrawingCount() - 1; i++ )
     {
         FChartDivision* inbetween = &mChart.GetDivisionBuffer()[i];
-        double translationX, translationY, rotation, scalingX, scalingY;
+        //double translationX, translationY, rotation, scalingX, scalingY;
         double t = inbetween->spacing;
 
-        translationX = sourceTranslationX + ( ( mTargetTranslationX - sourceTranslationX ) * t );
-        translationY = sourceTranslationY + ( ( mTargetTranslationY - sourceTranslationY ) * t );
-        rotation = sourceRotation + ( ( mTargetRotation - sourceRotation ) * t );
-        scalingX = sourceScalingX + ( ( mTargetScalingX - sourceScalingX ) * t );
-        scalingY = sourceScalingY + ( ( mTargetScalingY - sourceScalingY ) * t );
+        inbetween->drawing->translationX = sourceTranslationX + ( ( mTargetTranslationX - sourceTranslationX ) * t );
+        inbetween->drawing->translationY = sourceTranslationY + ( ( mTargetTranslationY - sourceTranslationY ) * t );
+        inbetween->drawing->rotation = sourceRotation + ( ( mTargetRotation - sourceRotation ) * t );
+        inbetween->drawing->scalingX = sourceScalingX + ( ( mTargetScalingX - sourceScalingX ) * t );
+        inbetween->drawing->scalingY = sourceScalingY + ( ( mTargetScalingY - sourceScalingY ) * t );
 
         inbetween->drawing->localMatrix.reset();
-        inbetween->drawing->localMatrix.translate( translationX, translationY );
-        inbetween->drawing->localMatrix.rotate( rotation * M_PI / 180.0f ); // convert to radians
-        inbetween->drawing->localMatrix.scale( scalingX, scalingY );
+        inbetween->drawing->localMatrix.translate( inbetween->drawing->translationX
+                                                 , inbetween->drawing->translationY );
+        inbetween->drawing->localMatrix.rotate( inbetween->drawing->rotation * M_PI / 180.0f ); // convert to radians
+        inbetween->drawing->localMatrix.scale( inbetween->drawing->scalingX
+                                             , inbetween->drawing->scalingY );
 
         BLMatrix2D::invert( inbetween->drawing->inverseMatrix, inbetween->drawing->localMatrix );
     }
@@ -400,13 +432,18 @@ FInbetweenerBreakdown::DrawPathsAtTarget( FOdysseyVectorGroupPaint* iDisplayedSc
     {
         uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
         ::ULIS::FVec2D* pointPositionBuffer = &interpolatedPath.GetInterpolatedPointPositionBuffer()[pointCount * mTargetDrawingIndex];
+        float scaling = mInbetweenerTag->HasConstantWidth() ? 1.0f / ( GetTargetScalingX()
+                                                                     * GetTargetScalingY() ) : 1.0f;
 
         mInbetweenerTag->DrawPathAt( iDisplayedScene
                                    , &interpolatedPath
                                    , pointPositionBuffer
                                    , worldMatrix
                                    , iBLContext
-                                   , false );
+                                   , false
+                                   // note: a surface grows or shrink at the square of the scaling factor.
+                                   // That's why we use sqrt to get the actual scaling factor from the surface ratio.
+                                   , sqrt(scaling) );
     }
 
     iBLContext->restore();
@@ -437,13 +474,18 @@ FInbetweenerBreakdown::DrawPathsAtSource( FOdysseyVectorGroupPaint* iDisplayedSc
     {
         uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
         ::ULIS::FVec2D* pointPositionBuffer = &interpolatedPath.GetInterpolatedPointPositionBuffer()[pointCount * sourceDrawingIndex];
+        float scaling = mInbetweenerTag->HasConstantWidth() ? 1.0f / ( GetSourceScalingX()
+                                                                     * GetSourceScalingY() ) : 1.0f;
 
         mInbetweenerTag->DrawPathAt( iDisplayedScene
                                    , &interpolatedPath
                                    , pointPositionBuffer
                                    , worldMatrix
                                    , iBLContext
-                                   , false );
+                                   , false
+                                   // note: a surface grows or shrink at the square of the scaling factor.
+                                   // That's why we use sqrt to get the actual scaling factor from the surface ratio.
+                                   , sqrt(scaling) );
     }
 
     iBLContext->restore();

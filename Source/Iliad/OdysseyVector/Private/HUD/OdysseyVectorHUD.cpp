@@ -626,7 +626,8 @@ FOdysseyVectorHUD::DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
                                   , pointPositionBuffer
                                   , worldMatrix
                                   , iBLContext
-                                  , true );
+                                  , true
+                                  , 1.0f );
     }
 
     iBLContext->restore();

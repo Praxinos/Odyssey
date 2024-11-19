@@ -333,6 +333,34 @@ FOdysseyVectorExportV2::WriteTagInbetweenerMapAsPolyline( FOdysseyVectorTagInbet
 }
 
 void
+FOdysseyVectorExportV2::WriteTagInbetweenerWithThickness( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                        , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_WITHTHICKNESS
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        uint32 withThickness = iInbetweenerTag.GetWithThickness() ? 1 : 0;
+
+        Ar << withThickness;
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteTagInbetweenerConstantWidth( FOdysseyVectorTagInbetweener& iInbetweenerTag
+                                                        , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_CONSTANTWIDTH
+                            , Ar
+                            , [&iInbetweenerTag](FArchive &Ar) -> void
+    {
+        uint32 constantWidth = iInbetweenerTag.HasConstantWidth() ? 1 : 0;
+
+        Ar << constantWidth;
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar )
 {
     FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER
@@ -344,6 +372,8 @@ FOdysseyVectorExportV2::WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbe
         WriteTagInbetweenerGridColor( iInbetweenerTag, Ar );
         WriteTagInbetweenerDrawingCount( iInbetweenerTag, Ar );
         WriteTagInbetweenerMapAsPolyline( iInbetweenerTag, Ar );
+        WriteTagInbetweenerWithThickness( iInbetweenerTag, Ar );
+        WriteTagInbetweenerConstantWidth( iInbetweenerTag, Ar );
         WriteTagInbetweenerTransform( iInbetweenerTag, Ar );
         WriteTagInbetweenerDeformation( iInbetweenerTag, Ar );
         WriteTagInbetweenerInterpolation( iInbetweenerTag, Ar );

@@ -251,7 +251,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
             {
                 FInbetweenerBreakdown* newbreakdown = new FInbetweenerBreakdown( inbetweenerTag );
 
-                inbetweenerTag->AddBreakdown( newbreakdown, drawingIndex, true );
+                inbetweenerTag->AddBreakdown( newbreakdown, drawingIndex, true, true );
             }
         }
 

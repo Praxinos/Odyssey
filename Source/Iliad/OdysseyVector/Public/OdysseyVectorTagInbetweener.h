@@ -175,7 +175,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         uint32 GetGridNumQuadX();
         uint32 GetGridNumQuadY();
         void AddRoute( FInbetweenerRoute* iRoute );
-        FInbetweenerRoute* AddRoute( const ::ULIS::FVec2D& iLocalCoords );
+        FInbetweenerRoute* AddRoute( const ::ULIS::FVec2D& iLocalCoords, bool iFit );
         std::list<FInbetweenerRoute*>& GetRouteList();
         void RemoveRoute( FInbetweenerRoute* iRoute );
         void RemoveAllRoutes();
@@ -210,8 +210,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void DeformPathsAtSource();
 
         std::list<FInbetweenerBreakdown*>& GetBreakdownList();
-        FInbetweenerBreakdown* AddBreakdown( uint32 iDrawingIndex, bool iCopyGeometry );
-        FInbetweenerBreakdown* AddBreakdown( FInbetweenerBreakdown* iNewBreakdown, uint32 iDrawingIndex, bool iCopyGeometry );
+        FInbetweenerBreakdown* AddBreakdown( uint32 iDrawingIndex
+                                           , bool iCopyGeometry
+                                           , bool iFitNewTrajectories );
+        FInbetweenerBreakdown* AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
+                                           , uint32 iDrawingIndex
+                                           , bool iCopyGeometry
+                                           , bool iFitNewTrajectories );
 
         void SetUsedQuadCount( uint32 );
         void SetUsedPointCount( uint32 );
@@ -222,13 +227,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                        , ::ULIS::FVec2D* iPointPositionBuffer
                        , const BLMatrix2D& iWorldMatrix
                        , BLContext* iBLContext
-                       , bool iLock );
+                       , bool iLock
+                       , float iScaling );
         uint32 GetBreakdownCount();
         FInbetweenerBreakdown* GetMasterBreakdown();
         void RemoveBreakdown( FInbetweenerBreakdown* iBreakdown, bool iFreeMemNow );
         FInbetweenerBreakdown* GetBreakdown( uint32 iDrawingIndex, bool iStrict );
         std::list<FInbetweenerBreakdown*>::iterator GetBreakdownItem( uint32 iDrawingIndex, bool iStrict  );
         void ResizeRoutes();
+        void FitRoutes( uint32 iFitFrom );
         //void SetChart( const FInbetweenerChart& iChart );
         void ResetLayout( bool iFreeMemNow );
         FInbetweenerDrawing* GetDrawing( uint32 iIndex );
@@ -259,6 +266,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         FOdysseyVectorGroupPaint* GetScene();
         double GetEaseOutSpacing( double iT, double iFraction );
         double GetEaseInSpacing( double iT, double iFraction );
+        bool HasConstantWidth();
+        void SetConstantWidth( bool iConstantWidth );
 
     protected:
         /**
@@ -295,8 +304,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
 
     public:
         static const uint8 INBETWEEN_DEFAULT_RED_UINT8   = 0;
-        static const uint8 INBETWEEN_DEFAULT_GREEN_UINT8 = 0;
-        static const uint8 INBETWEEN_DEFAULT_BLUE_UINT8  = 128;
+        static const uint8 INBETWEEN_DEFAULT_GREEN_UINT8 = 128;
+        static const uint8 INBETWEEN_DEFAULT_BLUE_UINT8  = 255;
         static const uint8 INBETWEEN_DEFAULT_ALPHA_UINT8 = 255;
         static const uint8 CHART_DEFAULT_RED_UINT8   = 64;
         static const uint8 CHART_DEFAULT_GREEN_UINT8 = 64;
@@ -365,4 +374,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         std::vector<uint32> mUsedQuadIndexBuffer;
         // arrays for accessing only useful grid points (for faster processing or ARAP interpolation)
         std::vector<uint32> mUsedPointIndexBuffer;
+        bool bConstantWidth;
 };

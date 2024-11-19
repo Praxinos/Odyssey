@@ -14,6 +14,14 @@ class FInbetweenerBreakdown;
 struct FInbetweenerDrawing;
 struct FChartDivision;
 
+struct FChartFraction
+{
+    float linearT0;
+    float linearT1;
+    float quadraticT0;
+    float quadraticT1;
+};
+
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
     struct FGlyph
@@ -49,6 +57,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
                                        , double iWorldY
                                        , double iRadius );
         const FGlyph* GetGlyph( uint32 iNum );
+        void UpdateBezier();
 
     private:
         void DrawChart( BLContext* iBLContext
@@ -57,6 +66,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
                       , BLRgba32& iHcColor
                       , FInbetweenerBreakdown* iBreakdown
                       , uint32 iRenderedCellIndex );
+        double GetQuadraticT( float iSpacingT );
 
     private:
         UOdysseyPainterEditorVectorChartTool* mChartTool;
@@ -64,4 +74,5 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
         ::ULIS::FRectD mChartRect;
         BLFont mFont;
         std::vector<FGlyph> mGlyphBuffer;
+        std::vector<FChartFraction> mFractionBuffer;
 };
