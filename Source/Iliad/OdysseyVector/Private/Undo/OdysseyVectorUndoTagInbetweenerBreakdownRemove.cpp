@@ -46,11 +46,12 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweene
 
         mInbetweenerTagSnapshotBuffer.emplace_back( inbetweenerTag
                                                   , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
-                                                  , FSnapshotFlags::Breakdown::TRANSFORMATIONS
-                                                  , FSnapshotFlags::Route::TRAJECTORIES
-                                                  | FSnapshotFlags::Route::STEPS
-                                                  , FSnapshotFlags::Trajectory::BEZIER
-                                                  | FSnapshotFlags::Trajectory::WAYPOINTS );
+                                                  , ( FSnapshotFlags::Breakdown::TRANSFORMATIONS
+                                                    | FSnapshotFlags::Breakdown::CHART )
+                                                  , ( FSnapshotFlags::Route::TRAJECTORIES
+                                                    | FSnapshotFlags::Route::STEPS )
+                                                  , ( FSnapshotFlags::Trajectory::BEZIER
+                                                    | FSnapshotFlags::Trajectory::WAYPOINTS ) );
     }
 }
 

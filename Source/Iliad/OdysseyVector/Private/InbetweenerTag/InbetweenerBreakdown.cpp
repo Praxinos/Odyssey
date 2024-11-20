@@ -411,6 +411,7 @@ FInbetweenerBreakdown::EaseInAndOut( float iEasing, FChartDivision* iInbetween )
     }
 }
 
+/*
 void
 FInbetweenerBreakdown::DrawPathsAtTarget( FOdysseyVectorGroupPaint* iDisplayedScene
                                         , BLContext* iBLContext
@@ -451,7 +452,8 @@ FInbetweenerBreakdown::DrawPathsAtTarget( FOdysseyVectorGroupPaint* iDisplayedSc
     if( iLock )
         mInbetweenerTag->mDrawingMutex.unlock();
 }
-
+*/
+/*
 void
 FInbetweenerBreakdown::DrawPathsAtSource( FOdysseyVectorGroupPaint* iDisplayedScene
                                         , BLContext* iBLContext
@@ -493,6 +495,7 @@ FInbetweenerBreakdown::DrawPathsAtSource( FOdysseyVectorGroupPaint* iDisplayedSc
     if( iLock )
         mInbetweenerTag->mDrawingMutex.unlock();
 }
+*/
 
 void
 FInbetweenerBreakdown::GetTargetTransform( double& oTranslationX

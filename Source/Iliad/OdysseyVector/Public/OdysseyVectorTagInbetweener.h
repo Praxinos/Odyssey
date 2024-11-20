@@ -223,12 +223,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         uint32 GetUsedQuadCount();
         uint32 GetUsedPointCount();
         void DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedScene
+                       , FChartDivision* iInbetween
                        , FInterpolatedPath* iInterpolatedPath
-                       , ::ULIS::FVec2D* iPointPositionBuffer
-                       , const BLMatrix2D& iWorldMatrix
+                       //, ::ULIS::FVec2D* iPointPositionBuffer
+                       //, const BLMatrix2D& iWorldMatrix
                        , BLContext* iBLContext
-                       , bool iLock
-                       , float iScaling );
+                       , bool iLock );
         uint32 GetBreakdownCount();
         FInbetweenerBreakdown* GetMasterBreakdown();
         void RemoveBreakdown( FInbetweenerBreakdown* iBreakdown, bool iFreeMemNow );

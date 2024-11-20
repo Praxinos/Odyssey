@@ -567,15 +567,16 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
         // adapt the new spacings for the new breakdown
         for( uint32 i = 1; i < inbetweenIndex; i++ )
         {
-            float newSpacing = ( curChartSpacingBuffer[inbetweenIndex] - curChartSpacingBuffer[i] ) / curChartSpacingBuffer[inbetweenIndex];
+            float newSpacing = ( curChartSpacingBuffer[i] ) / ( curChartSpacingBuffer[inbetweenIndex] );
             // Note: inbetweenIndex cannot be 0
             newChart->GetDivisionBuffer()[i].spacing = newSpacing;
         }
 
-        // adapt the new spacings foir the current breakdown
-        for( uint32 i = inbetweenIndex + 1, j = 1; i < (uint32) curTargetDrawingIndex; i++, j++ )
+        // adapt the new spacings for the current breakdown
+        for( uint32 i = inbetweenIndex + 1, j = 1; i < (uint32) curChartSpacingBuffer.size() - 1; i++, j++ )
         {
-            float newSpacing = ( curChartSpacingBuffer[i] - curChartSpacingBuffer[inbetweenIndex] ) / ( 1.0f - curChartSpacingBuffer[inbetweenIndex] );
+            float newSpacing = ( curChartSpacingBuffer[i] - curChartSpacingBuffer[inbetweenIndex] )
+                             / ( 1.0f - curChartSpacingBuffer[inbetweenIndex] );
             // Note: inbetweenIndex cannot be 0
             curChart->GetDivisionBuffer()[j].spacing = newSpacing;
         }
@@ -699,19 +700,44 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
     {
         FInbetweenerBreakdown* nextBreakdown = iBreakdown->GetNextBreakdown();
 
-        mBreakdownList.remove_if( [iBreakdown]( FInbetweenerBreakdown* listedBreakdown )
-                                  {
-                                      return ( iBreakdown == listedBreakdown ) ? true : false;
-                                  } );
-
-        ChainBreakdowns();
-
         if( nextBreakdown )
         {
+            uint32 removedBreakdownDrawingCount = iBreakdown->GetDrawingCount();
+            uint32 nextBreakdownDrawingCount = nextBreakdown ? nextBreakdown->GetDrawingCount() : 0;
+            uint32 totalDrawingCount = ( removedBreakdownDrawingCount + nextBreakdownDrawingCount );
+            float leftRatio = ( float ) removedBreakdownDrawingCount / totalDrawingCount;
+            float rightRatio = ( float ) nextBreakdownDrawingCount / totalDrawingCount;
             std::vector<::ULIS::FVec2D> breakdownSourceGeometry;
+            std::vector<float> removedBreakdownSpacing;
+            std::vector<float> nextBreakdownSpacing;
+            uint32 newInbetweenIndex, i;
+
+            mBreakdownList.remove_if( [iBreakdown]( FInbetweenerBreakdown* listedBreakdown )
+                                      {
+                                          return ( iBreakdown == listedBreakdown ) ? true : false;
+                                      } );
+
+            iBreakdown->GetChart()->GetSpacing( removedBreakdownSpacing );
+            nextBreakdown->GetChart()->GetSpacing( nextBreakdownSpacing );
+
+            ChainBreakdowns();
 
             // This will force reallocation of the chart and dispatching of drawings
             nextBreakdown->SetTargetDrawingIndex( nextBreakdown->GetTargetDrawingIndex() );
+
+            // Adapt the spacings
+            for( i = 1, newInbetweenIndex = 1; i < removedBreakdownDrawingCount - 1; i++, newInbetweenIndex++ )
+            {
+                nextBreakdown->GetChart()->GetDivisionBuffer()[newInbetweenIndex].spacing = removedBreakdownSpacing[i] * leftRatio;
+            }
+
+            nextBreakdown->GetChart()->GetDivisionBuffer()[newInbetweenIndex++].spacing = leftRatio;
+
+            for( i = 1                       ; i < nextBreakdownDrawingCount    - 1; i++, newInbetweenIndex++ )
+            {
+                nextBreakdown->GetChart()->GetDivisionBuffer()[newInbetweenIndex].spacing = leftRatio + ( nextBreakdownSpacing[i] * rightRatio );
+            }
+            // ------------------
 
             iBreakdown->GetGrid()->GetGeometry( breakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition );
 
@@ -1048,6 +1074,13 @@ void
 FOdysseyVectorTagInbetweener::ResizeDrawings()
 {
     mDrawingBuffer.resize( GetLength(), this );
+
+    // TODO: reset these transformations in a function
+    mDrawingBuffer.front().translationX = 0.0f;
+    mDrawingBuffer.front().translationY = 0.0f;
+    mDrawingBuffer.front().rotation = 0.0f;
+    mDrawingBuffer.front().scalingX = 1.0f;
+    mDrawingBuffer.front().scalingY = 1.0f;
 
     mDrawingBuffer.front().localMatrix   =
     mDrawingBuffer.front().inverseMatrix =
@@ -1397,22 +1430,32 @@ GetPerpendicularVector( const ::ULIS::FVec2D* iP0
 
 void
 FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedScene
+                                        , FChartDivision* iInbetween
                                         , FInterpolatedPath* iInterpolatedPath
-                                        , ::ULIS::FVec2D* iPointPositionBuffer
-                                        , const BLMatrix2D& iWorldMatrix
                                         , BLContext* iBLContext
-                                        , bool iLock
-                                        , float iScaling )
+                                        , bool iLock )
 {
-    FOdysseyVectorEngine* displayedSceneEngine = iDisplayedScene ? iDisplayedScene->GetEngine() : nullptr;
+    if( iLock )
+        LockDrawing();
+
+    uint32 pointCount = iInterpolatedPath->mInterpolatedPointBuffer.size();
+    uint32 inbetweenAbsoluteIndex = iInbetween->GetAbsoluteIndex();
+    ::ULIS::FVec2D* pointPositionBuffer = &iInterpolatedPath->mInterpolatedPointPositionBuffer[pointCount * inbetweenAbsoluteIndex];
+    float scalingSq = bConstantWidth ? 1.0f / ( iInbetween->drawing->scalingX
+                                              * iInbetween->drawing->scalingY ) : 1.0f;
+    // note: a surface grows or shrink at the square of the scaling factor.
+    // That's why we use sqrt to get the actual scaling factor from the surface ratio.
+    float scaling = sqrt( scalingSq );
     FOdysseyVectorBrush& brush = iInterpolatedPath->GetOriginalPath()->GetBrush();
     FColor pathColor = iInterpolatedPath->GetOriginalPath()->GetForegroundColor();
+    BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
+    FOdysseyVectorEngine* displayedSceneEngine = iDisplayedScene->GetEngine();
+
+    // passed to DrawPathAt()
+    worldMatrix.transform( iInbetween->drawing->localMatrix );
 
     iBLContext->setStrokeStyle( BLRgba32( pathColor.R, pathColor.G, pathColor.B, pathColor.A ) );
     iBLContext->setFillStyle( BLRgba32( pathColor.R, pathColor.G, pathColor.B, pathColor.A ) );
-
-    if( iLock )
-        LockDrawing();
 
     brush.Lock();
 
@@ -1422,25 +1465,25 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
         {
             FOdysseyVectorSegment* segment = interpolatedSegment.GetOriginalSegment();
             std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
-            uint32 pointCount = interpolatedSegment.mInterpolatedPointArray.size();
+            uint32 segmentPointCount = interpolatedSegment.mInterpolatedPointArray.size();
             ::ULIS::FVec2D perpi;
             ::ULIS::FVec2D perpn;
 
-            for( uint32 i = 0; i < pointCount - 1; i++ )
+            for( uint32 i = 0; i < segmentPointCount - 1; i++ )
             {
                 uint32 p = i - 1;
                 uint32 n = i + 1;
                 uint32 q = i + 2;
-                FInterpolatedPoint* pointp = ( i == 0          ) ? nullptr : interpolatedSegment.mInterpolatedPointArray[p];
+                FInterpolatedPoint* pointp = ( i == 0                 ) ? nullptr : interpolatedSegment.mInterpolatedPointArray[p];
                 FInterpolatedPoint* pointi = interpolatedSegment.mInterpolatedPointArray[i];
                 FInterpolatedPoint* pointn = interpolatedSegment.mInterpolatedPointArray[n];
-                FInterpolatedPoint* pointq = ( q == pointCount ) ? nullptr : interpolatedSegment.mInterpolatedPointArray[q];
-                ::ULIS::FVec2D* localPointPositionp = pointp ? &iPointPositionBuffer[pointp->mIndex] : nullptr;
-                ::ULIS::FVec2D* localPointPositioni = &iPointPositionBuffer[pointi->mIndex];
-                ::ULIS::FVec2D* localPointPositionn = &iPointPositionBuffer[pointn->mIndex];
-                ::ULIS::FVec2D* localPointPositionq = pointq ? &iPointPositionBuffer[pointq->mIndex] : nullptr;
+                FInterpolatedPoint* pointq = ( q == segmentPointCount ) ? nullptr : interpolatedSegment.mInterpolatedPointArray[q];
+                ::ULIS::FVec2D* localPointPositionp = pointp ? &pointPositionBuffer[pointp->mIndex] : nullptr;
+                ::ULIS::FVec2D* localPointPositioni = &pointPositionBuffer[pointi->mIndex];
+                ::ULIS::FVec2D* localPointPositionn = &pointPositionBuffer[pointn->mIndex];
+                ::ULIS::FVec2D* localPointPositionq = pointq ? &pointPositionBuffer[pointq->mIndex] : nullptr;
 
-                if( bWithThickness )
+                if( 1/*bWithThickness*/ )
                 {
                     perpi = i == 0 ? GetPerpendicularVector(  localPointPositionp
                                                            , *localPointPositioni
@@ -1450,23 +1493,23 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                     perpn = GetPerpendicularVector(  localPointPositioni
                                                   , *localPointPositionn
                                                   ,  localPointPositionq );
-                    double radiusi = pointi->GetRadius() * iScaling;
-                    double radiusn = pointn->GetRadius() * iScaling;
-                    BLPoint pt[6] = { iWorldMatrix.mapPoint( localPointPositioni->x
-                                                           , localPointPositioni->y )
-                                    , iWorldMatrix.mapPoint( localPointPositioni->x + ( perpi.x * radiusi )
-                                                           , localPointPositioni->y + ( perpi.y * radiusi ) )
-                                    , iWorldMatrix.mapPoint( localPointPositionn->x + ( perpn.x * radiusn )
-                                                           , localPointPositionn->y + ( perpn.y * radiusn ) )
-                                    , iWorldMatrix.mapPoint( localPointPositionn->x
-                                                           , localPointPositionn->y )
-                                    , iWorldMatrix.mapPoint( localPointPositionn->x - ( perpn.x * radiusn )
-                                                           , localPointPositionn->y - ( perpn.y * radiusn ) )
-                                    , iWorldMatrix.mapPoint( localPointPositioni->x - ( perpi.x * radiusi )
-                                                           , localPointPositioni->y - ( perpi.y * radiusi ) ) };
+                    double radiusi = pointi->GetRadius() * scaling;
+                    double radiusn = pointn->GetRadius() * scaling;
+                    BLPoint pt[6] = { worldMatrix.mapPoint( localPointPositioni->x
+                                                          , localPointPositioni->y )
+                                    , worldMatrix.mapPoint( localPointPositioni->x + ( perpi.x * radiusi )
+                                                          , localPointPositioni->y + ( perpi.y * radiusi ) )
+                                    , worldMatrix.mapPoint( localPointPositionn->x + ( perpn.x * radiusn )
+                                                          , localPointPositionn->y + ( perpn.y * radiusn ) )
+                                    , worldMatrix.mapPoint( localPointPositionn->x
+                                                          , localPointPositionn->y )
+                                    , worldMatrix.mapPoint( localPointPositionn->x - ( perpn.x * radiusn )
+                                                          , localPointPositionn->y - ( perpn.y * radiusn ) )
+                                    , worldMatrix.mapPoint( localPointPositioni->x - ( perpi.x * radiusi )
+                                                          , localPointPositioni->y - ( perpi.y * radiusi ) ) };
 
                                         // HUDs pass nullptr as the displayedScene
-                    if( brush.pixels && displayedSceneEngine )
+                    if( brush.pixels )
                     {
                         FOdysseyVectorFraction* fraction = &fractionCache[i];
                         double startU = segment->GetTextureStartU();
@@ -1534,7 +1577,7 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                         // we draw lines between the polygons to correct the artefacts,
                         // otherwise there is a thin line between the polygons
                         // line stroking is done in world coordinates because we need a 1 pixel width
-                        iBLContext->setStrokeWidth( 1.2f * iScaling );
+                        iBLContext->setStrokeWidth( 1.2f * scaling );
                         iBLContext->strokeLine( pt[0], pt[1] );
                         iBLContext->strokeLine( pt[5], pt[0] );
 
@@ -1543,10 +1586,10 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                 }
                 else
                 {
-                    BLPoint pt[2] = { iWorldMatrix.mapPoint( localPointPositioni->x
-                                                           , localPointPositioni->y )
-                                    , iWorldMatrix.mapPoint( localPointPositionn->x
-                                                           , localPointPositionn->y ) };
+                    BLPoint pt[2] = { worldMatrix.mapPoint( localPointPositioni->x
+                                                          , localPointPositioni->y )
+                                    , worldMatrix.mapPoint( localPointPositionn->x
+                                                          , localPointPositionn->y ) };
 
                     iBLContext->strokeLine( pt[0].x, pt[0].y, pt[1].x, pt[1].y );
                 }
@@ -1560,14 +1603,14 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                                                            , interpolatedSegment.mInterpolatedPointArray[1]
                                                            , interpolatedSegment.mInterpolatedPointArray[2]
                                                            , interpolatedSegment.mInterpolatedPointArray[3] };
-                BLPoint pt[4] = { iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[0]->mIndex].x
-                                                       , iPointPositionBuffer[interpolatedPoint[0]->mIndex].y )
-                                , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[1]->mIndex].x
-                                                       , iPointPositionBuffer[interpolatedPoint[1]->mIndex].y )
-                                , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[2]->mIndex].x
-                                                       , iPointPositionBuffer[interpolatedPoint[2]->mIndex].y )
-                                , iWorldMatrix.mapPoint( iPointPositionBuffer[interpolatedPoint[3]->mIndex].x
-                                                       , iPointPositionBuffer[interpolatedPoint[3]->mIndex].y ) };
+                BLPoint pt[4] = { worldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[0]->mIndex].x
+                                                      , pointPositionBuffer[interpolatedPoint[0]->mIndex].y )
+                                , worldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[1]->mIndex].x
+                                                      , pointPositionBuffer[interpolatedPoint[1]->mIndex].y )
+                                , worldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[2]->mIndex].x
+                                                      , pointPositionBuffer[interpolatedPoint[2]->mIndex].y )
+                                , worldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[3]->mIndex].x
+                                                      , pointPositionBuffer[interpolatedPoint[3]->mIndex].y ) };
                 BLPath path;
 
                 path.moveTo ( pt[0].x, pt[0].y );
@@ -1614,35 +1657,21 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( FOdysseyVectorGroupPaint* iDis
                                                 , BLContext* iBLContext
                                                 , bool iLock )
 {
-    BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
-
     if( iLock )
         LockDrawing();
 
     iBLContext->save();
     iBLContext->resetMatrix();
 
-    // passed to DrawPathAt()
-    worldMatrix.transform( inbetween->drawing->localMatrix );
-
     for( FInterpolatedPath& interpolatedPath : mInterpolatedPathBuffer )
     {
-        uint32 pointCount = interpolatedPath.mInterpolatedPointBuffer.size();
-        uint32 inbetweenAbsoluteIndex = inbetween->GetAbsoluteIndex();
-        ::ULIS::FVec2D* pointPositionBuffer = &interpolatedPath.mInterpolatedPointPositionBuffer[pointCount * inbetweenAbsoluteIndex];
-        float scaling = bConstantWidth ? 1.0f / ( inbetween->drawing->scalingX
-                                                * inbetween->drawing->scalingY ) : 1.0f;
-
         DrawPathAt( iDisplayedScene
-                  //, inbetween
+                  , inbetween
                   , &interpolatedPath
-                  , pointPositionBuffer
-                  , worldMatrix
+                  //, pointPositionBuffer
+                  //, worldMatrix
                   , iBLContext
-                  , false
-                  // note: a surface grows or shrink at the square of the scaling factor.
-                  // That's why we use sqrt to get the actual scaling factor from the surface ratio.
-                  , sqrt(scaling) );
+                  , false );
     }
 
     iBLContext->restore();

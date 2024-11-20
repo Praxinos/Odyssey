@@ -435,14 +435,21 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
 
                     //if( breakdown->GetTargetAnimationCellIndex() == frameIndex )
                     {
+                            DrawBreakdown( iScene
+                                          , iBLContext
+                                          , breakdown
+                                    , BLRgba32( 0, 0, 0, 255 )
+                                    , BLRgba32( 0, 0, 0, 255 )
+                                          , HUD_BREAKDOWN_TARGET );
+/*
                        DrawBreakdown( iScene
                                     , iBLContext
                                     , breakdown
-                                    , fgColor
-                                    , bgColor
-                                    , hcColor
+                                    , BLRgba32( 0, 0, 0, 255 )
+                                    , BLRgba32( 0, 0, 0, 255 )
                                     , true
                                     , HUD_BREAKDOWN_TARGET );
+*/
                     }
                 }
             }

@@ -46,7 +46,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::FOdysseyVectorUndoTagInbetweenerBr
 
         mInbetweenerTagSnapshotBuffer.emplace_back( inbetweenerTag
                                                   , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
-                                                  , 0
+                                                  , FSnapshotFlags::Breakdown::CHART
                                                   , FSnapshotFlags::Route::TRAJECTORIES
                                                   | FSnapshotFlags::Route::STEPS
                                                   , FSnapshotFlags::Trajectory::BEZIER

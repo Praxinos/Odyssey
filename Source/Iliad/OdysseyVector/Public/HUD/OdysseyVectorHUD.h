@@ -17,6 +17,8 @@ class FOdysseyVectorGroupPaint;
 class FOdysseyVectorEngine;
 class FOdysseyVectorTagInbetweener;
 class FInbetweenerBreakdown;
+class FInterpolatedPath;
+struct FChartDivision;
 
 typedef struct _FPointQuadTreeEntry
 {
@@ -110,7 +112,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                             , const BLRgba32& hcColor
                             , bool iWorld
                             , uint64 iHUDFlags );
-
+/*
         static void DrawInbetweens( FOdysseyVectorGroupPaint* iDisplayedScene
                                   , BLContext* iBLContext
                                   , FOdysseyVectorTagInbetweener* iInbetweenerTag
@@ -118,7 +120,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                                   , const BLRgba32& bgColor
                                   , const BLRgba32& hcColo
                                   , uint64 iHUDFlags  );
-
+*/
+        static void DrawInbetweenerInterpolatedPathAt( FOdysseyVectorGroupPaint* iDisplayedScene
+                                                     , BLContext* iBLContext
+                                                     , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                     , FInterpolatedPath* iInterpolatedPath
+                                                     , FChartDivision* iInbetween );
+/*
         static void DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
                                  , BLContext* iBLContext
                                  , FInbetweenerBreakdown* iBreakdown
@@ -127,7 +135,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                                  , const BLRgba32& hcColor
                                  , bool iWorld
                                  , uint64 iHUDFlags  );
-
+*/
         static void DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
                                  , BLContext* iBLContext
                                  , FInbetweenerBreakdown* iBreakdown
