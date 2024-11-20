@@ -14,6 +14,7 @@ class FOdysseyPainterEditorVectorTrajectoryToolHUD;
 class FInbetweenerQuad;
 class FInbetweenerWaypoint;
 class FInbetweenerStep;
+class FInbetweenerRoute;
 
 UENUM()
 enum class eTrajectoryPickingMode : uint8
@@ -76,12 +77,18 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
         virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName ) override;
         virtual EMouseCursor::Type GetMouseCursor() const override;
+        virtual void ExtendContextMenuInbetween( FOdysseyVectorGroupPaint* iScene
+                                               , FMenuBuilder& menu
+                                               , uint64 iInbetweenMenuFlags ) override;
+        void ResetRoute();
+        void DeleteRoute();
 
     private:
         FOdysseyPainterEditorVectorTrajectoryToolHUD* mTrajectoryHUD;
         FInbetweenerHandleTrajectory* mPickedHandle;
         FInbetweenerStep* mPickedStep;
         FInbetweenerWaypoint* mPickedWaypoint;
+        FInbetweenerRoute* mPickedRoute;
         eTrajectoryPickingMode mPickingMode;
         FInbetweenerQuad* mHoveredQuad;
 

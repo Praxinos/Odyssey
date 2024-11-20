@@ -669,40 +669,36 @@ UOdysseyPainterEditorVectorPaintBucketTool::ExtendContextMenu( FMenuBuilder& iMe
 {
     if( mPickedBucket )
     {
-        iMenu.BeginSection("Context");
-        {
-            iMenu.AddMenuEntry(
-                LOCTEXT("vector-paint-bucket-tool.context-menu.delete-bucket.name", "Delete Bucket")
-              , LOCTEXT("vector-paint-bucket-tool.context-menu.delete-bucket.tooltip", "Delete Bucket")
-              , FSlateIcon()
-              , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteBucket, GetEditor(), mPickedBucket )));
-            iMenu.AddMenuEntry(
-                LOCTEXT("vector-paint-bucket-tool.context-menu.propagate-bucket.name", "Propagate Bucket")
-              , LOCTEXT("vector-paint-bucket-tool.context-menu.propagate-bucket.tooltip", "Propagate Bucket")
-              , FSlateIcon()
-              , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PropagateBucket, GetEditor(), mPickedBucket )));
-            iMenu.AddMenuEntry(
-                LOCTEXT("vector-paint-bucket-tool.context-menu.unpropagate-bucket.name", "Unpropagate Bucket")
-              , LOCTEXT("vector-paint-bucket-tool.context-menu.unpropagate-bucket.tooltip", "Unpropagate Bucket")
-              , FSlateIcon()
-              , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::UnpropagateBucket, GetEditor(), mPickedBucket )));
-            iMenu.AddMenuEntry(
-                LOCTEXT("vector-paint-bucket-tool.context-menu.copy-bucket-param.name", "Copy Bucket Param")
-              , LOCTEXT("vector-paint-bucket-tool.context-menu.copy-bucket-param.tooltip", "Copy Bucket Param")
-              , FSlateIcon()
-              , FUIAction(FExecuteAction::CreateStatic(&UOdysseyPainterEditorVectorPaintBucketTool::CopyBucketParam, mPickedBucket )));
-            iMenu.AddMenuEntry(
+        iMenu.AddMenuEntry(
+              LOCTEXT("vector-paint-bucket-tool.context-menu.delete-bucket.name", "Delete Bucket")
+            , LOCTEXT("vector-paint-bucket-tool.context-menu.delete-bucket.tooltip", "Delete Bucket")
+            , FSlateIcon()
+            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteBucket, GetEditor(), mPickedBucket )));
+        iMenu.AddMenuEntry(
+              LOCTEXT("vector-paint-bucket-tool.context-menu.propagate-bucket.name", "Propagate Bucket")
+            , LOCTEXT("vector-paint-bucket-tool.context-menu.propagate-bucket.tooltip", "Propagate Bucket")
+            , FSlateIcon()
+            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::PropagateBucket, GetEditor(), mPickedBucket )));
+        iMenu.AddMenuEntry(
+              LOCTEXT("vector-paint-bucket-tool.context-menu.unpropagate-bucket.name", "Unpropagate Bucket")
+            , LOCTEXT("vector-paint-bucket-tool.context-menu.unpropagate-bucket.tooltip", "Unpropagate Bucket")
+            , FSlateIcon()
+            , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::UnpropagateBucket, GetEditor(), mPickedBucket )));
+        iMenu.AddMenuEntry(
+              LOCTEXT("vector-paint-bucket-tool.context-menu.copy-bucket-param.name", "Copy Bucket Param")
+            , LOCTEXT("vector-paint-bucket-tool.context-menu.copy-bucket-param.tooltip", "Copy Bucket Param")
+            , FSlateIcon()
+            , FUIAction(FExecuteAction::CreateStatic(&UOdysseyPainterEditorVectorPaintBucketTool::CopyBucketParam, mPickedBucket )));
+        iMenu.AddMenuEntry(
               LOCTEXT("vector-paint-bucket-tool.context-menu.paste-bucket-param.name", "Paste Bucket Param")
-              , LOCTEXT("vector-paint-bucket-tool.context-menu.paste-bucket-param.tooltip", "Paste Bucket Param")
-              , FSlateIcon()
-              , FUIAction(FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam, mPickedBucket )));
-            iMenu.AddMenuEntry(
-                LOCTEXT("vector-paint-bucket-tool.context-menu.bucket-properties.name", "Bucket properties")
-              , LOCTEXT("vector-paint-bucket-tool.context-menu.bucket-properties.tooltip", "Bucket Properties")
-              , FSlateIcon()
-              , FUIAction(FExecuteAction::CreateStatic(&UOdysseyPainterEditorVectorPaintBucketTool::BucketProperties, GetEditor(), mPickedBucket )));
-        }
-        iMenu.EndSection();
+            , LOCTEXT("vector-paint-bucket-tool.context-menu.paste-bucket-param.tooltip", "Paste Bucket Param")
+            , FSlateIcon()
+            , FUIAction(FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam, mPickedBucket )));
+        iMenu.AddMenuEntry(
+              LOCTEXT("vector-paint-bucket-tool.context-menu.bucket-properties.name", "Bucket properties")
+            , LOCTEXT("vector-paint-bucket-tool.context-menu.bucket-properties.tooltip", "Bucket Properties")
+            , FSlateIcon()
+            , FUIAction(FExecuteAction::CreateStatic(&UOdysseyPainterEditorVectorPaintBucketTool::BucketProperties, GetEditor(), mPickedBucket )));
 
         mPickedBucket = nullptr;
     }

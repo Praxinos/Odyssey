@@ -966,32 +966,17 @@ UOdysseyPainterEditorVectorBaseTool::CreateContextMenu()
 {
     FMenuBuilder menu( true, nullptr );
 
+    menu.BeginSection("Context Menu");
+
     ExtendContextMenu( menu );
+
+    menu.EndSection();
 
     return menu.MakeWidget();
 }
 
 void
 UOdysseyPainterEditorVectorBaseTool::ExtendContextMenu( FMenuBuilder& menu )
-{
-    if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_OBJECT )
-    {
-        ExtendContextMenuObject( menu );
-    }
-
-    if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_VERTEX )
-    {
-        ExtendContextMenuVertex( menu );
-    }
-
-    if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
-    {
-        ExtendContextMenuInbetween( menu );
-    }
-}
-
-void
-UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FMenuBuilder& menu )
 {
     //FMenuBuilder menu( true, nullptr );
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
@@ -1008,92 +993,97 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FMenuBuilder& menu
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
 
-        // Commented-out: sections are not needed here as they would conflict with the section
-        // just created by the Edit Menu when this tool's menu appears in the Edit Menu
-        // See FOdysseyPainterEditor::AddEditMenuEntry() for details
-        //    menu.BeginSection("Context");
-        //    {
-/*
-FText text = LOCTEXT("vector-tool.object-context-menu.reset-view.name"   , "Reset View");
-FText ttip = LOCTEXT("vector-tool.object-context-menu.reset-view.tooltip", "Reset View");
+            if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_OBJECT )
+            {
+                ExtendContextMenuObject( vectorScene, menu, 0 );
+            }
 
-                menu.AddMenuEntry( FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::ResetView, GetEditor(), vectorScene ))
-                                 , SNew(STextBlock)
-                                   .Is
-                                   .Text(text)
-                                   .ToolTipText(ttip) );
-*/
-                menu.AddMenuEntry(
-                      LOCTEXT("vector-tool.object-context-menu.reset-view.name", "Reset View")
-                    , LOCTEXT("vector-tool.object-context-menu.reset-view.tooltip", "Reset View")
-                    , FSlateIcon()
-                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::ResetView, GetEditor(), vectorScene )));
-                menu.AddMenuEntry(
-                      LOCTEXT("vector-tool.object-context-menu.group-paint.name", "Make Paint Group")
-                    , LOCTEXT("vector-tool.object-context-menu.group-paint.tooltip", "Make Paint Group")
-                    , FSlateIcon()
-                    , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::MakePaintGroup, GetEditor(), vectorScene )));
-                /*menu.AddMenuEntry(
-                      LOCTEXT("vector-tool.object-context-menu.trim.name", "Trim")
-                    , LOCTEXT("vector-tool.object-context-menu.trim.tooltip", "Trim")
-                    , FSlateIcon("OdysseyStyle", "OdysseyLogo.Odyssey16")
-                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::Trim, vectorScene)));*/
-                menu.AddMenuEntry(
-                      LOCTEXT("vector-tool.object-context-menu.group.name", "Group")
-                    , LOCTEXT("vector-tool.object-context-menu.group.tooltip", "Group")
-                    , FSlateIcon()
-                    , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Group, GetEditor(), vectorScene )));
-                menu.AddMenuEntry(
-                      LOCTEXT("vector-tool.object-context-menu.ungroup.name", "Ungroup")
-                    , LOCTEXT("vector-tool.object-context-menu.ungroup.tooltip", "Ungroup")
-                    , FSlateIcon()
-                    , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Ungroup, GetEditor(), vectorScene )));
-                menu.AddMenuEntry(
-                      LOCTEXT("vector-tool.object-context-menu.bring-forward.name", "Bring forward")
-                    , LOCTEXT("vector-tool.object-context-menu.bring-forward.tooltip", "Bring forward")
-                    , FSlateIcon()
-                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::BringForward, GetEditor(), vectorScene )));
-                menu.AddMenuEntry(
-                      LOCTEXT("vector-tool.object-context-menu.send-backward.name", "Send backward")
-                    , LOCTEXT("vector-tool.object-context-menu.send-backward.tooltip", "Send backward")
-                    , FSlateIcon()
-                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::SendBackward, GetEditor(), vectorScene )));
-                menu.AddMenuEntry(
-                      LOCTEXT("vector-tool.object-context-menu.delete-selection.name","Delete Selection")
-                    , LOCTEXT("vector-tool.object-context-menu.delete-selection.tooltip","Delete Selection")
-                    , FSlateIcon()
-                    , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteObjects, GetEditor(), vectorScene )));
-                menu.AddMenuEntry(
-                      LOCTEXT("vector-tool.object-context-menu.flip-horizontal.name","Flip Horizontal")
-                    , LOCTEXT("vector-tool.object-context-menu.flip-horizontal.tooltip","Flip Horizontal")
-                    , FSlateIcon()
-                    , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::FlipHorizontal, GetEditor(), vectorScene )));
-                menu.AddMenuEntry(
-                      LOCTEXT("vector-tool.object-context-menu.flip-vertical.name","Flip Vertical")
-                    , LOCTEXT("vector-tool.object-context-menu.flip-vertical.tooltip","Flip Vertical")
-                    , FSlateIcon()
-                    , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::FlipVertical, GetEditor(), vectorScene )));
-                menu.AddMenuEntry(
-                    LOCTEXT("vector-tool.object-context-menu.clear-coloring.name", "Clear Coloring")
-                    , LOCTEXT("vector-tool.object-context-menu.clear-coloring.tooltip", "Clear Coloring")
-                    , FSlateIcon()
-                    , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ClearColoring, GetEditor(), vectorScene )));
-                menu.AddMenuEntry(
-                    LOCTEXT("vector-tool.object-context-menu.apply-transformations.name", "Apply Transformations")
-                    , LOCTEXT("vector-tool.object-context-menu.apply-transformations.tooltip", "Apply Transformations")
-                    , FSlateIcon()
-                    , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ApplyTransformations, GetEditor(), vectorScene )));
-                //menu.AddMenuEntry(
-                //    LOCTEXT("vector-tool.object-context-menu.apply-transformations.name", "Make DemoBrush")
-                //    , LOCTEXT("vector-tool.object-context-menu.apply-transformations.tooltip", "Make DemoBrush")
-                //    , FSlateIcon()
-                //    , FUIAction(FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::MakeDemoBrush, vectorScene )));
-        //    }
-        //    menu.EndSection();
+            if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_VERTEX )
+            {
+                ExtendContextMenuVertex( vectorScene, menu, 0 );
+            }
+
+            if( GetEditor()->GetVectorHUDFlags() &  FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+            {
+                ExtendContextMenuInbetween( vectorScene, menu, 0 );
+            }
         }
     }
+}
 
-    //return menu.MakeWidget();
+void
+UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FOdysseyVectorGroupPaint* iScene
+                                                            , FMenuBuilder& menu
+                                                            , uint64 iObjectMenuFlags )
+{
+
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.object-context-menu.reset-view.name", "Reset View")
+        , LOCTEXT("vector-tool.object-context-menu.reset-view.tooltip", "Reset View")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::ResetView, GetEditor(), iScene )));
+    menu.AddMenuEntry(
+            LOCTEXT("vector-tool.object-context-menu.group-paint.name", "Make Paint Group")
+        , LOCTEXT("vector-tool.object-context-menu.group-paint.tooltip", "Make Paint Group")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::MakePaintGroup, GetEditor(), iScene )));
+    /*menu.AddMenuEntry(
+          LOCTEXT("vector-tool.object-context-menu.trim.name", "Trim")
+        , LOCTEXT("vector-tool.object-context-menu.trim.tooltip", "Trim")
+        , FSlateIcon("OdysseyStyle", "OdysseyLogo.Odyssey16")
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::Trim, iScene)));*/
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.object-context-menu.group.name", "Group")
+        , LOCTEXT("vector-tool.object-context-menu.group.tooltip", "Group")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Group, GetEditor(), iScene )));
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.object-context-menu.ungroup.name", "Ungroup")
+        , LOCTEXT("vector-tool.object-context-menu.ungroup.tooltip", "Ungroup")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Ungroup, GetEditor(), iScene )));
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.object-context-menu.bring-forward.name", "Bring forward")
+        , LOCTEXT("vector-tool.object-context-menu.bring-forward.tooltip", "Bring forward")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::BringForward, GetEditor(), iScene )));
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.object-context-menu.send-backward.name", "Send backward")
+        , LOCTEXT("vector-tool.object-context-menu.send-backward.tooltip", "Send backward")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::SendBackward, GetEditor(), iScene )));
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.object-context-menu.delete-selection.name","Delete Selection")
+        , LOCTEXT("vector-tool.object-context-menu.delete-selection.tooltip","Delete Selection")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::DeleteObjects, GetEditor(), iScene )));
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.object-context-menu.flip-horizontal.name","Flip Horizontal")
+        , LOCTEXT("vector-tool.object-context-menu.flip-horizontal.tooltip","Flip Horizontal")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::FlipHorizontal, GetEditor(), iScene )));
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.object-context-menu.flip-vertical.name","Flip Vertical")
+        , LOCTEXT("vector-tool.object-context-menu.flip-vertical.tooltip","Flip Vertical")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::FlipVertical, GetEditor(), iScene )));
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.object-context-menu.clear-coloring.name", "Clear Coloring")
+        , LOCTEXT("vector-tool.object-context-menu.clear-coloring.tooltip", "Clear Coloring")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ClearColoring, GetEditor(), iScene )));
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.object-context-menu.apply-transformations.name", "Apply Transformations")
+        , LOCTEXT("vector-tool.object-context-menu.apply-transformations.tooltip", "Apply Transformations")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ApplyTransformations, GetEditor(), iScene )));
+    //menu.AddMenuEntry(
+    //    LOCTEXT("vector-tool.object-context-menu.apply-transformations.name", "Make DemoBrush")
+    //    , LOCTEXT("vector-tool.object-context-menu.apply-transformations.tooltip", "Make DemoBrush")
+    //    , FSlateIcon()
+    //    , FUIAction(FExecuteAction::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::MakeDemoBrush, iScene )));
+//    }
+//    menu.EndSection();
 }
 
 // for testing purpose.
@@ -1107,156 +1097,123 @@ UOdysseyPainterEditorVectorBaseTool::MakeDemoBrush( FOdysseyVectorGroupPaint* iS
 }
 
 void
-UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuVertex( FMenuBuilder& menu )
+UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuVertex( FOdysseyVectorGroupPaint* iScene
+                                                            , FMenuBuilder& menu
+                                                            , uint64 iVertexMenuFlags )
 {
-    //FMenuBuilder menu( true, nullptr );
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return;
-
-    bool hasVector = mediaProvider.HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
-    {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() )
-        {
-            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-
-        // Commented-out: sections are not needed here as they would conflict with the section
-        // just created by the Edit Menu when this tool's menu appears in the Edit Menu
-        // See FOdysseyPainterEditor::AddEditMenuEntry() for details
-        //     menu.BeginSection("Context");
-        //     {
-            menu.AddMenuEntry(
-                  LOCTEXT("vector-tool.vertex-context-menu.delete-selection.name", "Delete Selection")
-                , LOCTEXT("vector-tool.vertex-context-menu.delete-selection.tooltip", "Delete Selection")
-                , FSlateIcon()
-                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::DeletePointSelection, GetEditor(), vectorScene )));
-            menu.AddMenuEntry(
-                  LOCTEXT("vector-tool.vertex-context-menu.align-point-selection.name", "Align Point Selection")
-                , LOCTEXT("vector-tool.vertex-context-menu.align-point-selection.tooltip", "Align Point Selection")
-                , FSlateIcon()
-                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::AlignPointSelection, GetEditor(), vectorScene )));
-            menu.AddMenuEntry(
-                  LOCTEXT("vector-tool.vertex-context-menu.unalign-point-selection.name", "Unalign Point Selection")
-                , LOCTEXT("vector-tool.vertex-context-menu.unalign-point-selection.tooltip", "Unalign Point Selection")
-                , FSlateIcon()
-                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::UnalignPointSelection, GetEditor(), vectorScene )));
-            menu.AddMenuEntry(
-                  LOCTEXT("vector-tool.vertex-context-menu.lock-point-selection.name", "Lock Point Selection")
-                , LOCTEXT("vector-tool.vertex-context-menu.lock-point-selection.tooltip", "Lock Point Selection")
-                , FSlateIcon()
-                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::LockPointSelection, GetEditor(), vectorScene )));
-            menu.AddMenuEntry(
-                  LOCTEXT("vector-tool.vertex-context-menu.unlock-point-selection.name", "Unlock Point Selection")
-                , LOCTEXT("vector-tool.vertex-context-menu.unlock-point-selection.tooltip", "Unlock Point Selection")
-                , FSlateIcon()
-                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::UnlockPointSelection, GetEditor(), vectorScene )));
-        //    }
-        //    menu.EndSection();
-        }
-    }
-
-    //return menu.MakeWidget();
+// Commented-out: sections are not needed here as they would conflict with the section
+// just created by the Edit Menu when this tool's menu appears in the Edit Menu
+// See FOdysseyPainterEditor::AddEditMenuEntry() for details
+//     menu.BeginSection("Context");
+//     {
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.vertex-context-menu.delete-selection.name", "Subdivide segments")
+        , LOCTEXT("vector-tool.vertex-context-menu.delete-selection.tooltip", "Subdivide segments")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::Subdivide, GetEditor(), iScene )));
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.vertex-context-menu.delete-selection.name", "Delete Selection")
+        , LOCTEXT("vector-tool.vertex-context-menu.delete-selection.tooltip", "Delete Selection")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::DeletePointSelection, GetEditor(), iScene )));
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.vertex-context-menu.align-point-selection.name", "Align Point Selection")
+        , LOCTEXT("vector-tool.vertex-context-menu.align-point-selection.tooltip", "Align Point Selection")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::AlignPointSelection, GetEditor(), iScene )));
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.vertex-context-menu.unalign-point-selection.name", "Unalign Point Selection")
+        , LOCTEXT("vector-tool.vertex-context-menu.unalign-point-selection.tooltip", "Unalign Point Selection")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::UnalignPointSelection, GetEditor(), iScene )));
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.vertex-context-menu.lock-point-selection.name", "Lock Point Selection")
+        , LOCTEXT("vector-tool.vertex-context-menu.lock-point-selection.tooltip", "Lock Point Selection")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::LockPointSelection, GetEditor(), iScene )));
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.vertex-context-menu.unlock-point-selection.name", "Unlock Point Selection")
+        , LOCTEXT("vector-tool.vertex-context-menu.unlock-point-selection.tooltip", "Unlock Point Selection")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::UnlockPointSelection, GetEditor(), iScene )));
+//    }
+//    menu.EndSection();
 }
 
 void
-UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FMenuBuilder& menu )
+UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FOdysseyVectorGroupPaint* iScene
+                                                               , FMenuBuilder& menu
+                                                               , uint64 iInbetweenMenuFlags )
 {
-    //FMenuBuilder menu( true, nullptr );
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return;
-
-    bool hasVector = mediaProvider.HasMedia<FOdysseyMediaVector>();
-
-    if( hasVector )
+// Commented-out: sections are not needed here as they would conflict with the section
+// just created by the Edit Menu when this tool's menu appears in the Edit Menu
+// See FOdysseyPainterEditor::AddEditMenuEntry() for details
+//     menu.BeginSection("Context");
+//     {
+    if( iScene->GetEngine()->GetSelectedObjectList().size() > 1 )
     {
-        TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mediaProvider.GetOrCreateMedias<FOdysseyMediaVector>();
-
-        if( mediaVectors.Num() )
-        {
-            FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-
-        // Commented-out: sections are not needed here as they would conflict with the section
-        // just created by the Edit Menu when this tool's menu appears in the Edit Menu
-        // See FOdysseyPainterEditor::AddEditMenuEntry() for details
-        //     menu.BeginSection("Context");
-        //     {
-            if( vectorScene->GetEngine()->GetSelectedObjectList().size() > 1 )
-            {
-                menu.AddMenuEntry(
-                      LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-tag.name", "Group and Add Inbetweener Grid")
-                    , LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-tag.tooltip", "Group and Add Inbetweener Grid")
-                    , FSlateIcon()
-                    , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::GroupAndAddInbetweenerTag, GetEditor(), vectorScene )));
-            }
-
-            menu.AddMenuEntry(
-                    LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-tag.name", "Add Inbetweener Tag")
-                  , LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-tag.tooltip", "Add Inbetweener Tag")
-                  , FSlateIcon()
-                  , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::AddInbetweenerTag, GetEditor(), vectorScene )));
-
-            menu.AddMenuEntry(
-                    LOCTEXT("vector-tool.inbetween-context-menu.remove-inbetweener-tag.name", "Remove Inbetweener Tag")
-                  , LOCTEXT("vector-tool.inbetween-context-menu.remove-inbetweener-tag.tooltip", "Remove Inbetweener Tag")
-                  , FSlateIcon()
-                  , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::RemoveInbetweenerTag, GetEditor(), vectorScene )));
-
-            menu.AddMenuEntry(
-                    LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.name", "Commit Inbetweener Tag")
-                  , LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.tooltip", "Commit Inbetweener Tag")
-                  , FSlateIcon()
-                  , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CommitSelectedInbetweenerTag, GetEditor(), vectorScene->GetSharedEnv() )));
-/*
-            menu.AddMenuEntry(
-                  LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.name", "Reset Grid")
-                , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.tooltip", "Reset Grid")
+        menu.AddMenuEntry(
+                  LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-tag.name", "Group and Add Inbetweener Grid")
+                , LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-tag.tooltip", "Group and Add Inbetweener Grid")
                 , FSlateIcon()
-                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetInbetweenerGrid, GetEditor(), vectorScene )));
-*/
-            menu.AddSubMenu(
-                  LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.name", "Reset Grid")
-                , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.tooltip", "Reset Grid")
-                , FNewMenuDelegate::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::ResetGridMenu, vectorScene ) );
-
-            menu.AddMenuEntry(
-                  LOCTEXT("vector-tool.inbetween-context-menu.reset-breakdown-spacing-chart.name", "Reset Spacing" )
-                , LOCTEXT("vector-tool.inbetween-context-menu.reset-breakdown-spacing-chart.tooltip", "Reset Spacing" )
-                , FSlateIcon()
-                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetBreakdownSpacingChart, GetEditor(), vectorScene, false )));
-
-            menu.AddMenuEntry(
-                  LOCTEXT("vector-tool.inbetween-context-menu.reset-breakdown-spacing-chart.name", "Reset Chart" )
-                , LOCTEXT("vector-tool.inbetween-context-menu.reset-breakdown-spacing-chart.tooltip", "Reset Chart" )
-                , FSlateIcon()
-                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetBreakdownSpacingChart, GetEditor(), vectorScene, true )));
-
-            menu.AddMenuEntry(
-                  LOCTEXT("vector-tool.object-context-menu.delete-selection.name","Delete Selection")
-                , LOCTEXT("vector-tool.object-context-menu.delete-selection.tooltip","Delete Selection")
-                , FSlateIcon()
-                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::DeleteObjects, GetEditor(), vectorScene )));
-/*
-            menu.AddMenuEntry(
-                  LOCTEXT("vector-tool.inbetween-context-menu.copy-spacing-chart.name", "Copy Spacing Chart")
-                , LOCTEXT("vector-tool.inbetween-context-menu.copy-spacing-chart.tooltip", "Copy Spacing Chart")
-                , FSlateIcon()
-                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CopySpacingChart, GetEditor(), vectorScene )));
-
-            menu.AddMenuEntry(
-                  LOCTEXT("vector-tool.inbetween-context-menu.paste-spacing-chart.name", "Paste Spacing Chart")
-                , LOCTEXT("vector-tool.inbetween-context-menu.paste-spacing-chart.tooltip", "Paste Spacing Chart")
-                , FSlateIcon()
-                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::PasteSpacingChart, GetEditor(), vectorScene )));
-*/
-        }
+                , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::GroupAndAddInbetweenerTag, GetEditor(), iScene )));
     }
 
-    //return menu.MakeWidget();
+    menu.AddMenuEntry(
+              LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-tag.name", "Add Inbetweener Tag")
+            , LOCTEXT("vector-tool.inbetween-context-menu.add-inbetweener-tag.tooltip", "Add Inbetweener Tag")
+            , FSlateIcon()
+            , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::AddInbetweenerTag, GetEditor(), iScene )));
+
+    menu.AddMenuEntry(
+              LOCTEXT("vector-tool.inbetween-context-menu.remove-inbetweener-tag.name", "Remove Inbetweener Tag")
+            , LOCTEXT("vector-tool.inbetween-context-menu.remove-inbetweener-tag.tooltip", "Remove Inbetweener Tag")
+            , FSlateIcon()
+            , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::RemoveInbetweenerTag, GetEditor(), iScene )));
+
+    menu.AddMenuEntry(
+            LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.name", "Commit Inbetweener Tag")
+            , LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.tooltip", "Commit Inbetweener Tag")
+            , FSlateIcon()
+            , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CommitSelectedInbetweenerTag, GetEditor(), iScene->GetSharedEnv() )));
+
+    menu.AddSubMenu(
+            LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.name", "Reset Grid")
+        , LOCTEXT("vector-tool.inbetween-context-menu.reset-grid.tooltip", "Reset Grid")
+        , FNewMenuDelegate::CreateUObject( this, &UOdysseyPainterEditorVectorBaseTool::ResetGridMenu, iScene ) );
+
+    menu.AddMenuEntry(
+            LOCTEXT("vector-tool.inbetween-context-menu.reset-breakdown-spacing-chart.name", "Reset Spacing" )
+        , LOCTEXT("vector-tool.inbetween-context-menu.reset-breakdown-spacing-chart.tooltip", "Reset Spacing" )
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetBreakdownSpacingChart, GetEditor(), iScene, false )));
+
+    menu.AddMenuEntry(
+            LOCTEXT("vector-tool.inbetween-context-menu.reset-breakdown-spacing-chart.name", "Reset Chart" )
+        , LOCTEXT("vector-tool.inbetween-context-menu.reset-breakdown-spacing-chart.tooltip", "Reset Chart" )
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::ResetBreakdownSpacingChart, GetEditor(), iScene, true )));
+
+    menu.AddMenuEntry(
+            LOCTEXT("vector-tool.object-context-menu.delete-selection.name","Delete Selection")
+        , LOCTEXT("vector-tool.object-context-menu.delete-selection.tooltip","Delete Selection")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::DeleteObjects, GetEditor(), iScene )));
+/*
+    menu.AddMenuEntry(
+            LOCTEXT("vector-tool.inbetween-context-menu.copy-spacing-chart.name", "Copy Spacing Chart")
+        , LOCTEXT("vector-tool.inbetween-context-menu.copy-spacing-chart.tooltip", "Copy Spacing Chart")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CopySpacingChart, GetEditor(), iScene )));
+
+    menu.AddMenuEntry(
+            LOCTEXT("vector-tool.inbetween-context-menu.paste-spacing-chart.name", "Paste Spacing Chart")
+        , LOCTEXT("vector-tool.inbetween-context-menu.paste-spacing-chart.tooltip", "Paste Spacing Chart")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::PasteSpacingChart, GetEditor(), iScene )));
+*/
+//    }
+//    menu.EndSection();
 }
 
 void

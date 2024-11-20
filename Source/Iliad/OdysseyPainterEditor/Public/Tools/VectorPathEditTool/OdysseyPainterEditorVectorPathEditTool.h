@@ -151,6 +151,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
 
         void GetPathsFromSelection( FOdysseyVectorGroupPaint* iScene
                                   , std::vector<FOdysseyVectorPath*>& oPathArray );
+        virtual void ExtendContextMenuObject( FOdysseyVectorGroupPaint* iScene
+                                            , FMenuBuilder& menu
+                                            , uint64 iObjectMenuFlags ) override;
 
         static void BuildSegmentAdjustments( const std::vector<FOdysseyVectorSegment*>& iSegmentArray
                                            , std::vector<FSegmentAdjustment>& oSegmentAdjustmentArray );

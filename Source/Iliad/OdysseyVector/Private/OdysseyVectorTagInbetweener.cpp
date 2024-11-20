@@ -1049,7 +1049,7 @@ FOdysseyVectorTagInbetweener::ResizeDrawings()
 {
     mDrawingBuffer.resize( GetLength(), this );
 
-    mDrawingBuffer.front().localMatrix   = 
+    mDrawingBuffer.front().localMatrix   =
     mDrawingBuffer.front().inverseMatrix =
     mDrawingBuffer.front().worldMatrix   =
     mDrawingBuffer.front().inverseWorldMatrix = BLMatrix2D::makeIdentity();
@@ -1329,9 +1329,6 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
         iBLContext->save();
         iBLContext->resetMatrix();
 
-        iBLContext->setStrokeStyle( BLRgba32( 0, 0, 0, 255 ) );
-        iBLContext->setStrokeWidth( 3.0f );
-
         // if th eobject hasn't been removed from the scene
         if( displayedCell && tagCell )
         {
@@ -1409,6 +1406,10 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
 {
     FOdysseyVectorEngine* displayedSceneEngine = iDisplayedScene ? iDisplayedScene->GetEngine() : nullptr;
     FOdysseyVectorBrush& brush = iInterpolatedPath->GetOriginalPath()->GetBrush();
+    FColor pathColor = iInterpolatedPath->GetOriginalPath()->GetForegroundColor();
+
+    iBLContext->setStrokeStyle( BLRgba32( pathColor.R, pathColor.G, pathColor.B, pathColor.A ) );
+    iBLContext->setFillStyle( BLRgba32( pathColor.R, pathColor.G, pathColor.B, pathColor.A ) );
 
     if( iLock )
         LockDrawing();
@@ -1498,10 +1499,6 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                                            , fraction->polygon.V[4]
                                            , fraction->polygon.V[5]
                                            , fraction->polygon.V[0] };
-                        BLVarCore fg;
-
-                        iBLContext->getFillStyle( fg );
-
                         uint64 polygonDrawingFlags = 0;
 
                         polygonDrawingFlags |= brush.ColorFromBrush    ? 0 : FPolygonDrawingFlags::BRUSHALPHAONLY;
@@ -1513,7 +1510,7 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                                                       , quad0U
                                                       , quad0V
                                                       , 1.0f /*iCombinedOpacity*/
-                                                      , FColor( 0, 0, 0, 255 )/*foregroundColor*/
+                                                      , pathColor
                                                       , (int8*) brush.pixels // will be nullptr if no texture is loaded
                                                       , brush.width
                                                       , brush.height
@@ -1525,7 +1522,7 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                                                       , quad1U
                                                       , quad1V
                                                       , 1.0f /*iCombinedOpacity*/
-                                                      , FColor( 0, 0, 0, 255 )/*foregroundColor*/
+                                                      , pathColor
                                                       , (int8*) brush.pixels // will be nullptr if no texture is loaded
                                                       , brush.width
                                                       , brush.height
@@ -1577,6 +1574,8 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                 path.cubicTo( pt[1].x, pt[1].y
                             , pt[2].x, pt[2].y
                             , pt[3].x, pt[3].y );
+
+                iBLContext->setStrokeWidth( 3.0f );
 
                 iBLContext->strokePath( path );
             }
@@ -1635,6 +1634,7 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( FOdysseyVectorGroupPaint* iDis
                                                 * inbetween->drawing->scalingY ) : 1.0f;
 
         DrawPathAt( iDisplayedScene
+                  //, inbetween
                   , &interpolatedPath
                   , pointPositionBuffer
                   , worldMatrix

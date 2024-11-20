@@ -175,6 +175,8 @@ FOdysseyVectorBucket::SetGradientColor0( uint8 iR0, uint8 iG0, uint8 iB0, uint8 
     mGradientColor0.G = iG0;
     mGradientColor0.B = iB0;
     mGradientColor0.A = iA0;
+
+    Invalidate();
 }
 
 void
@@ -184,18 +186,24 @@ FOdysseyVectorBucket::SetGradientColor1( uint8 iR1, uint8 iG1, uint8 iB1, uint8 
     mGradientColor1.G = iG1;
     mGradientColor1.B = iB1;
     mGradientColor1.A = iA1;
+
+    Invalidate();
 }
 
 void
 FOdysseyVectorBucket::SetGradientColor0( FColor& iColor )
 {
     mGradientColor0 = iColor;
+
+    Invalidate();
 }
 
 void
 FOdysseyVectorBucket::SetGradientColor1( FColor& iColor )
 {
     mGradientColor1 = iColor;
+
+    Invalidate();
 }
 
 void
@@ -205,12 +213,16 @@ FOdysseyVectorBucket::SetSolidColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA )
     mSolidColor.G = iG;
     mSolidColor.B = iB;
     mSolidColor.A = iA;
+
+    Invalidate();
 }
 
 void
 FOdysseyVectorBucket::SetSolidColor( FColor& iSolidColor )
 {
     mSolidColor = iSolidColor;
+
+    Invalidate();
 }
 
 FColor&

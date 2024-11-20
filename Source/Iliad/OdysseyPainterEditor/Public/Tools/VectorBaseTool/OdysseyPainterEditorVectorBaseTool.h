@@ -142,12 +142,20 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         // for testing purpose
         void MakeDemoBrush( FOdysseyVectorGroupPaint* iScene );
 
-    private:
-        void ExtendContextMenuObject( FMenuBuilder& menu );
-        void ExtendContextMenuVertex( FMenuBuilder& menu );
-        void ExtendContextMenuInbetween( FMenuBuilder& menu );
-        void ResetGridMenu( FMenuBuilder& menu
-                          , FOdysseyVectorGroupPaint* vectorScene );
+    protected:
+        virtual void ExtendContextMenuObject( FOdysseyVectorGroupPaint* iScene
+                                            , FMenuBuilder& menu
+                                            , uint64 iObjectMenuFlags );
+        virtual void ExtendContextMenuVertex( FOdysseyVectorGroupPaint* iScene
+                                            , FMenuBuilder& menu
+                                            , uint64 iVertexMenuFlags );
+        virtual void ExtendContextMenuInbetween( FOdysseyVectorGroupPaint* iScene
+                                               , FMenuBuilder& menu
+                                               , uint64 iInbetweenMenuFlags );
+        void ResetGridMenu( FMenuBuilder& menu, FOdysseyVectorGroupPaint* vectorScene );
+
+    protected:
+        static const uint64 OBJECTMENU_HASSUBDIVIDE = ( 1ULL << 0 );
 
     protected:
         // to store the top tab widget in order to create it only once. this will prevent sizing

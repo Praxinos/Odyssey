@@ -1072,6 +1072,27 @@ UOdysseyPainterEditorVectorPathEditTool::GetPickingFlags()
     return mPickingFlags;
 }
 
+void
+UOdysseyPainterEditorVectorPathEditTool::ExtendContextMenuObject( FOdysseyVectorGroupPaint* iScene
+                                                                , FMenuBuilder& menu
+                                                                , uint64 iObjectMenuFlags )
+{
+    UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( iScene, menu, iObjectMenuFlags );
+
+// We must first end the section that might be created by the caller function
+// See FOdysseyPainterEditor::AddEditMenuEntry() for details
+    menu.EndSection();
+    menu.BeginSection("Tool specific", TAttribute(FText::FromString("Tool/Specific")));
+    {
+    menu.AddMenuEntry(
+          LOCTEXT("vector-tool.object-context-menu.reset-view.name", "Subdivide segments")
+        , LOCTEXT("vector-tool.object-context-menu.reset-view.tooltip", "Subdivide segments")
+        , FSlateIcon()
+        , FUIAction(FExecuteAction::CreateStatic(&FOdysseyPainterEditor::Subdivide, GetEditor(), iScene )));
+    }
+// the caller will call menu.EndSection()
+}
+
 TSharedRef<SWidget>
 UOdysseyPainterEditorVectorPathEditTool::CreateTopTabWidget()
 {

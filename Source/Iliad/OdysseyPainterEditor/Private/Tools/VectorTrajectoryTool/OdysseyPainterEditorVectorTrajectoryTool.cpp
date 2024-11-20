@@ -162,8 +162,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                                                             , const FKey& iKey
                                                             , uint64& oSignalFlags )
 {
-    if (iKey != EKeys::LeftMouseButton)
-        return false;
+    //if (iKey != EKeys::LeftMouseButton)
+    //    return false;
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     uint64 notificationFlags = 0;
 
@@ -171,6 +171,16 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
     mPickedHandle = nullptr;
     mHoveredQuad = nullptr;
     mPickedWaypoint = nullptr;
+    mPickedRoute = nullptr;
+
+    // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
+    if( iKey == EKeys::RightMouseButton )
+    {
+        mPickedRoute = mTrajectoryHUD->PickRoute( iScene
+                                                , iPointInTexture.x
+                                                , iPointInTexture.y
+                                                , PickingRadius );
+    }
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -283,7 +293,6 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
 
         if( mPickingMode == eTrajectoryPickingMode::Remove )
         {
-            std::list<FInbetweenerRoute*> pickedRouteList;
             FInbetweenerRoute* pickedRoute = mTrajectoryHUD->PickRoute( iScene
                                                                       , iPointInTexture.x
                                                                       , iPointInTexture.y
@@ -291,8 +300,6 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
 
             if( pickedRoute )
             {
-                pickedRoute->GetInbetweenerTag()->RemoveRoute( pickedRoute );
-
                 // needed for valid GUndo pointer
                 GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.remove","Vector Trajectory Tool"));
                 if( GUndo )
@@ -309,6 +316,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                         source->RecordCurrentFrameUndo();
                 }
                 GEditor->EndTransaction();
+
+                pickedRoute->GetInbetweenerTag()->RemoveRoute( pickedRoute );
             }
         }
     }
@@ -321,6 +330,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
     iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
 
     oSignalFlags = notificationFlags;
+
     return true;
 }
 
@@ -375,7 +385,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseHoverVector( FOdysseyVectorGro
 
 void
 UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                              , const FOdysseyPoint& iPointInTexture
+                                                            , const FOdysseyPoint& iPointInTexture
                                                             , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* engine = iScene->GetEngine();
@@ -515,6 +525,69 @@ UOdysseyPainterEditorVectorTrajectoryTool::PropertyChangedVector( FOdysseyVector
     iScene->GetEngine()->Invalidate( 0 );
 
     return 0;
+}
+
+void
+UOdysseyPainterEditorVectorTrajectoryTool::ExtendContextMenuInbetween( FOdysseyVectorGroupPaint* iScene
+                                                                     , FMenuBuilder& iMenu
+                                                                     , uint64 iInbetweenMenuFlags )
+{
+    if( mPickedRoute )
+    {
+        iMenu.AddMenuEntry(
+              LOCTEXT("vector-trajectory-tool.context-menu.reset-trajectory.name", "Reset Trajectory")
+            , LOCTEXT("vector-trajectory-tool.context-menu.reset-trajectory.tooltip", "Reset Trajectory")
+            , FSlateIcon()
+            , FUIAction(FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorTrajectoryTool::ResetRoute )));
+        iMenu.AddMenuEntry(
+              LOCTEXT("vector-paint-bucket-tool.context-menu.delete-bucket.name", "Delete Trajectory")
+            , LOCTEXT("vector-paint-bucket-tool.context-menu.delete-bucket.tooltip", "Delete Trajectory")
+            , FSlateIcon()
+            , FUIAction(FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorVectorTrajectoryTool::DeleteRoute )));
+    }
+    else
+    {
+        UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( iScene, iMenu, iInbetweenMenuFlags );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorTrajectoryTool::ResetRoute()
+{
+
+}
+
+void
+UOdysseyPainterEditorVectorTrajectoryTool::DeleteRoute()
+{
+    FOdysseyVectorGroupPaint* scene = mPickedRoute->GetInbetweenerTag()->GetOwner()->GetScene();
+    uint64 notificationFlags = 0;
+
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.remove","Vector Trajectory Tool"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerRouteRemove( scene
+                                                                                  , mPickedRoute->GetInbetweenerTag()
+                                                                                  , mPickedRoute
+                                                                                  , notificationFlags );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
+    }
+    GEditor->EndTransaction();
+
+    mPickedRoute->GetInbetweenerTag()->RemoveRoute( mPickedRoute );
+
+    // Updating via the Shared env allow multiple cells to be updated which is paramount
+    // here because we may be on a cell different from the tag's starting cell
+    scene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+    // redraw
+    scene->GetEngine()->Invalidate( 0 );
 }
 
 TSharedRef<SWidget>
