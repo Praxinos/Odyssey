@@ -388,8 +388,16 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
     mShapeHUD->EmptyElements();
 }
 
-void UOdysseyPainterEditorRasterPrimitiveDrawingTool::PropertyChanged(const FName& iPropertyName)
+void UOdysseyPainterEditorRasterPrimitiveDrawingTool::ActiveShapeChanged()
 {
+    Shapes.GetActiveShape()->Abort();
+}
+
+void UOdysseyPainterEditorRasterPrimitiveDrawingTool::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
+{
+    if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPrimitiveDrawingTool, Shapes)
+        && iPropertyName == GET_MEMBER_NAME_CHECKED(FOdysseyShapes, ActiveShapeType))
+        ActiveShapeChanged();
 }
 
 EMouseCursor::Type

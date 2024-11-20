@@ -26,6 +26,7 @@ private:
 
 private:
     FOdysseyShapes* mShapes = nullptr;
+    TWeakPtr<IPropertyHandle> mShapesPropertyHandle;
 };
 
 void
@@ -37,6 +38,7 @@ FOdysseyShapesDetailCustomization::CustomizeHeader( TSharedRef<IPropertyHandle> 
 void
 FOdysseyShapesDetailCustomization::CustomizeChildren( TSharedRef<IPropertyHandle> iStructPropertyHandle, IDetailChildrenBuilder& ioChildBuilder, IPropertyTypeCustomizationUtils& ioStructCustomizationUtils )
 {
+    mShapesPropertyHandle = iStructPropertyHandle;
     mShapes = GetEditStruct( iStructPropertyHandle );
 
     TSharedPtr<SSegmentedControl<EOdysseyShapeType>> segmentedControl = SNew(SSegmentedControl<EOdysseyShapeType>)
@@ -123,7 +125,15 @@ FOdysseyShapesDetailCustomization::OnShapeSelected(EOdysseyShapeType iShape, ECh
     if (iState != ECheckBoxState::Checked)
         return;
 
-    mShapes->SetActiveShapeType(iShape);
+    TSharedPtr<IPropertyHandle> shapesPropertyHandle = mShapesPropertyHandle.Pin();
+    if (!shapesPropertyHandle)
+        return;
+
+    TSharedPtr<IPropertyHandle> activeShapeTypeHandle = shapesPropertyHandle->GetChildHandle( GET_MEMBER_NAME_CHECKED(FOdysseyShapes, ActiveShapeType) );
+    if (!activeShapeTypeHandle)
+        return;
+
+    activeShapeTypeHandle->SetValue((uint8)iShape, EPropertyValueSetFlags::NotTransactable);
 }
 
 void

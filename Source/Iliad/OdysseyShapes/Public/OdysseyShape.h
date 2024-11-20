@@ -45,10 +45,11 @@ public:
     void AddShapeType(EOdysseyShapeType iType, UOdysseyShape* iShape);
     void RemoveShapeType(EOdysseyShapeType iType);
 
-private:
-    UPROPERTY()
+public:
+    UPROPERTY(EditAnywhere, Category="Shapes")
     EOdysseyShapeType ActiveShapeType;
 
+private:
     UPROPERTY()
     TMap<EOdysseyShapeType, UOdysseyShape*> Shapes;
 };

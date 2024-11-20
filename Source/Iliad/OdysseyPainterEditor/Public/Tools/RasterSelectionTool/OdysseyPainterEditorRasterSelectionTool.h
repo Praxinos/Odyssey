@@ -57,7 +57,8 @@ private:
     void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
 
 public:
-    virtual void PropertyChanged(const FName& iPropertyName) override;
+    void ActiveShapeChanged();
+    virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
 
 protected:
     UPROPERTY(EditAnywhere, Category="Shape")

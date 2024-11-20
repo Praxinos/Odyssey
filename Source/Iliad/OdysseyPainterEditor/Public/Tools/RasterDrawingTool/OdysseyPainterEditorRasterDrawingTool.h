@@ -113,8 +113,9 @@ public:
 public:
     //Properties changes
     void BrushChanged();
+    void ActiveShapeChanged();
 
-    virtual void PropertyChanged(const FName& iPropertyName) override;
+    virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
 
 public:
     // Paint Engine Stroke API

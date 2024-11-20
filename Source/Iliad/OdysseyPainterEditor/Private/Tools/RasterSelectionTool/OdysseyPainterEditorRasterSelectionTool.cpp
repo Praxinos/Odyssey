@@ -144,11 +144,6 @@ void UOdysseyPainterEditorRasterSelectionTool::Tick(float iDeltaTime)
     Shapes.GetActiveShape()->Tick(iDeltaTime);
 }
 
-/* void UOdysseyPainterEditorRasterSelectionTool::SelectedShapeChanged()
-{
-    SelectedShapeInstance->Abort();
-} */
-
 void
 UOdysseyPainterEditorRasterSelectionTool::OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset)
 {
@@ -169,10 +164,17 @@ UOdysseyPainterEditorRasterSelectionTool::OnShapeCommit(const TArray<FOdysseyPoi
     }
 }
 
-void UOdysseyPainterEditorRasterSelectionTool::PropertyChanged(const FName& iPropertyName)
+void UOdysseyPainterEditorRasterSelectionTool::ActiveShapeChanged()
 {
-    /* if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterSelectionTool, SelectedShape))
-        SelectedShapeChanged(); */
+    Shapes.GetActiveShape()->Abort();
+}
+
+void
+UOdysseyPainterEditorRasterSelectionTool::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
+{
+    if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterSelectionTool, Shapes)
+        && iPropertyName == GET_MEMBER_NAME_CHECKED(FOdysseyShapes, ActiveShapeType))
+        ActiveShapeChanged();
 }
 
 #undef LOCTEXT_NAMESPACE

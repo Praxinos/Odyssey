@@ -63,7 +63,8 @@ private:
     void OnRasterSelectionChanged();
 
 public:
-    virtual void PropertyChanged(const FName& iPropertyName) override;
+    void ActiveShapeChanged();
+    virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
 
 protected:
     FOdysseyPaintEngine mPaintEngine;

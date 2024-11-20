@@ -88,6 +88,7 @@ protected:
 
 protected:
     virtual void PropertyChanged(const FName& iPropertyName);
+    virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive);
 
 protected:
     // UObject overrides

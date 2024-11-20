@@ -236,19 +236,24 @@ UOdysseyPainterEditorTool::GetTooltip() const
 }
 
 void
-UOdysseyPainterEditorTool::PropertyChanged(const FName& iPropertyName)
-{
-}
-
-void
 UOdysseyPainterEditorTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
+    PropertyChanged(PropertyChangedEvent.GetPropertyName(), PropertyChangedEvent.GetMemberPropertyName(), PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive);
+}
 
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+void
+UOdysseyPainterEditorTool::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
+{
+    if (iIsInteractive)
         return;
 
-    PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    PropertyChanged(iPropertyName);
+}
+
+void
+UOdysseyPainterEditorTool::PropertyChanged(const FName& iPropertyName)
+{
 }
 
 void
@@ -262,6 +267,6 @@ UOdysseyPainterEditorTool::PostTransacted(const FTransactionObjectEvent& iTransa
     const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
     for ( const FName& propertyName : changedPropertyNames )
     {
-        PropertyChanged(propertyName);
+        PropertyChanged(propertyName, propertyName, false);
     }
 }
