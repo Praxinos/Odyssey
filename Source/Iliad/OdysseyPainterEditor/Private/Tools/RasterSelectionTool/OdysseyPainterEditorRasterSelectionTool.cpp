@@ -25,8 +25,7 @@ UOdysseyPainterEditorRasterSelectionTool::~UOdysseyPainterEditorRasterSelectionT
 }
 
 UOdysseyPainterEditorRasterSelectionTool::UOdysseyPainterEditorRasterSelectionTool()
-    : SelectedShape( EOdysseyFillShape::kFreehand )
-    , mSelectionState( EOdysseySelectionState::Normal )
+    : mSelectionState( EOdysseySelectionState::Normal )
     , mShapeHUD(MakeShared<FOdysseyHUDElement>())
 {
     Icon = *FOdysseyStyle::GetBrush("PainterEditor.ToolsTab.Lasso32");
@@ -34,13 +33,13 @@ UOdysseyPainterEditorRasterSelectionTool::UOdysseyPainterEditorRasterSelectionTo
     UOdysseyFreehandShape* freehandShape = CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterSelectionTool::FreehandShape");
     freehandShape->DisplayHUD(true);
 
-    AvailableShapes.Add(EOdysseyFillShape::kFreehand, freehandShape);
-    AvailableShapes.Add(EOdysseyFillShape::kRectangle, CreateShape<UOdysseyRectangleShape>("UOdysseyPainterEditorRasterSelectionTool::RectangleShape"));
-    AvailableShapes.Add(EOdysseyFillShape::kPolygon, CreateShape<UOdysseyPolygonShape>("UOdysseyPainterEditorRasterSelectionTool::PolygonShape"));
-    AvailableShapes.Add(EOdysseyFillShape::kEllipse, CreateShape<UOdysseyEllipseShape>("UOdysseyPainterEditorRasterSelectionTool::EllipseShape"));
-    AvailableShapes.Add(EOdysseyFillShape::kBezier, CreateShape<UOdysseyBezierShape>("UOdysseyPainterEditorRasterSelectionTool::BezierShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kFreehand, freehandShape);
+    Shapes.AddShapeType(EOdysseyShapeType::kRectangle, CreateShape<UOdysseyRectangleShape>("UOdysseyPainterEditorRasterDrawingTool::RectangleShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kPolygon, CreateShape<UOdysseyPolygonShape>("UOdysseyPainterEditorRasterDrawingTool::PolygonShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kEllipse, CreateShape<UOdysseyEllipseShape>("UOdysseyPainterEditorRasterDrawingTool::EllipseShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kBezier, CreateShape<UOdysseyBezierShape>("UOdysseyPainterEditorRasterDrawingTool::BezierShape"));
 
-    SelectedShapeInstance = AvailableShapes[SelectedShape];
+    Shapes.SetActiveShapeType(EOdysseyShapeType::kFreehand);
 }
 
 template<class T>
@@ -67,19 +66,19 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnMouseDown(const FOdysseyPoint& 
         return false;
 
     FOdysseyPoint point = iPointInTexture;
-    return SelectedShapeInstance->OnMouseDown(point, iKey);
+    return Shapes.GetActiveShape()->OnMouseDown(point, iKey);
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::OnMouseHover(const FOdysseyPoint& iPointInTexture)
 {
     FOdysseyPoint point = iPointInTexture;
-    SelectedShapeInstance->OnMouseHover( point );
+    Shapes.GetActiveShape()->OnMouseHover( point );
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::OnMouseDrag(const FOdysseyPoint& iPointInTexture)
 {
     FOdysseyPoint point = iPointInTexture;
-    SelectedShapeInstance->OnMouseDrag(point);
+    Shapes.GetActiveShape()->OnMouseDrag(point);
 }
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
@@ -88,7 +87,7 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnMouseUp(const FOdysseyPoint& iP
         return false;
 
     FOdysseyPoint point = iPointInTexture;
-    return SelectedShapeInstance->OnMouseUp(point, iKey);
+    return Shapes.GetActiveShape()->OnMouseUp(point, iKey);
 }
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnKeyDown(const FKey& iKey)
@@ -103,7 +102,7 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnKeyDown(const FKey& iKey)
         mSelectionState = EOdysseySelectionState::Substract;
         return true;
     }
-    return SelectedShapeInstance->OnKeyDown(iKey);
+    return Shapes.GetActiveShape()->OnKeyDown(iKey);
 }
 
 bool UOdysseyPainterEditorRasterSelectionTool::OnKeyUp(const FKey& iKey)
@@ -118,7 +117,7 @@ bool UOdysseyPainterEditorRasterSelectionTool::OnKeyUp(const FKey& iKey)
         mSelectionState = EOdysseySelectionState::Normal;
         return true;
     }
-    return SelectedShapeInstance->OnKeyUp(iKey);
+    return Shapes.GetActiveShape()->OnKeyUp(iKey);
 }
 
 void UOdysseyPainterEditorRasterSelectionTool::Load()
@@ -142,14 +141,13 @@ void UOdysseyPainterEditorRasterSelectionTool::Unload()
 void UOdysseyPainterEditorRasterSelectionTool::Tick(float iDeltaTime)
 {
     //Tick the shape
-    SelectedShapeInstance->Tick(iDeltaTime);
+    Shapes.GetActiveShape()->Tick(iDeltaTime);
 }
 
-void UOdysseyPainterEditorRasterSelectionTool::SelectedShapeChanged()
+/* void UOdysseyPainterEditorRasterSelectionTool::SelectedShapeChanged()
 {
     SelectedShapeInstance->Abort();
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterSelectionTool, SelectedShapeInstance), AvailableShapes[SelectedShape]);
-}
+} */
 
 void
 UOdysseyPainterEditorRasterSelectionTool::OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset)
@@ -173,8 +171,8 @@ UOdysseyPainterEditorRasterSelectionTool::OnShapeCommit(const TArray<FOdysseyPoi
 
 void UOdysseyPainterEditorRasterSelectionTool::PropertyChanged(const FName& iPropertyName)
 {
-    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterSelectionTool, SelectedShape))
-        SelectedShapeChanged();
+    /* if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterSelectionTool, SelectedShape))
+        SelectedShapeChanged(); */
 }
 
 #undef LOCTEXT_NAMESPACE

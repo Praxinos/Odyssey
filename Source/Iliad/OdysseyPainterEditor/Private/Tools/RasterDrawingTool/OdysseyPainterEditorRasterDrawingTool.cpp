@@ -45,8 +45,6 @@ UOdysseyPainterEditorRasterDrawingTool::UOdysseyPainterEditorRasterDrawingTool()
     , Brush(nullptr)
     , BrushInstance(nullptr)
     , BrushOptions(CreateDefaultSubobject<UOdysseyBrushOptions>("UOdysseyPainterEditorRasterDrawingTool::BrushOptions", true))
-    , SelectedShape(EOdysseyShape::kFreehand)
-    , SelectedShapeInstance(nullptr)
     //Internal
     , mPaintEngine()
     , mBrushContexts(nullptr)
@@ -55,14 +53,14 @@ UOdysseyPainterEditorRasterDrawingTool::UOdysseyPainterEditorRasterDrawingTool()
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.DrawingTool64");
 
-    AvailableShapes.Add(EOdysseyShape::kFreehand, CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterDrawingTool::FreehandShape"));
-    AvailableShapes.Add(EOdysseyShape::kLine, CreateShape<UOdysseyLineShape>("UOdysseyPainterEditorRasterDrawingTool::LineShape"));
-    AvailableShapes.Add(EOdysseyShape::kRectangle, CreateShape<UOdysseyRectangleShape>("UOdysseyPainterEditorRasterDrawingTool::RectangleShape"));
-    AvailableShapes.Add(EOdysseyShape::kPolygon, CreateShape<UOdysseyPolygonShape>("UOdysseyPainterEditorRasterDrawingTool::PolygonShape"));
-    AvailableShapes.Add(EOdysseyShape::kEllipse, CreateShape<UOdysseyEllipseShape>("UOdysseyPainterEditorRasterDrawingTool::EllipseShape"));
-    AvailableShapes.Add(EOdysseyShape::kBezier, CreateShape<UOdysseyBezierShape>("UOdysseyPainterEditorRasterDrawingTool::BezierShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kFreehand, CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterDrawingTool::FreehandShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kLine, CreateShape<UOdysseyLineShape>("UOdysseyPainterEditorRasterDrawingTool::LineShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kRectangle, CreateShape<UOdysseyRectangleShape>("UOdysseyPainterEditorRasterDrawingTool::RectangleShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kPolygon, CreateShape<UOdysseyPolygonShape>("UOdysseyPainterEditorRasterDrawingTool::PolygonShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kEllipse, CreateShape<UOdysseyEllipseShape>("UOdysseyPainterEditorRasterDrawingTool::EllipseShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kBezier, CreateShape<UOdysseyBezierShape>("UOdysseyPainterEditorRasterDrawingTool::BezierShape"));
 
-    SelectedShapeInstance = AvailableShapes[SelectedShape];
+    Shapes.SetActiveShapeType(EOdysseyShapeType::kFreehand);
 }
 
 template<class T>
@@ -175,7 +173,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseDown(const FOdysseyPoint& iPointI
         mSubPixelPoint.y = FMath::Floor(mSubPixelPoint.y) + 0.5f;
     }
 
-    return SelectedShapeInstance->OnMouseDown(mSubPixelPoint, iKey);
+    return Shapes.GetActiveShape()->OnMouseDown(mSubPixelPoint, iKey);
 }
 
 bool
@@ -204,7 +202,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseUp(const FOdysseyPoint& iPointInT
         mSubPixelPoint.y = FMath::Floor(mSubPixelPoint.y) + 0.5f;
     }
 
-    return SelectedShapeInstance->OnMouseUp(mSubPixelPoint, iKey);
+    return Shapes.GetActiveShape()->OnMouseUp(mSubPixelPoint, iKey);
 }
 
 void
@@ -233,7 +231,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseHover(const FOdysseyPoint& iPoint
         mSubPixelPoint.y = FMath::Floor(mSubPixelPoint.y) + 0.5f;
     }
 
-    SelectedShapeInstance->OnMouseHover(mSubPixelPoint);
+    Shapes.GetActiveShape()->OnMouseHover(mSubPixelPoint);
 }
 
 void
@@ -264,7 +262,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnMouseDrag(const FOdysseyPoint& iPointI
 
     mSubPixelPoint = point;
 
-    SelectedShapeInstance->OnMouseDrag(point);
+    Shapes.GetActiveShape()->OnMouseDrag(point);
 }
 
 bool
@@ -283,7 +281,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnKeyDown(const FKey& iKey)
     if( mediaRasters.Num() <= 0 )
         return false;
 
-    return SelectedShapeInstance->OnKeyDown(iKey);
+    return Shapes.GetActiveShape()->OnKeyDown(iKey);
 }
 
 bool
@@ -302,7 +300,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnKeyUp(const FKey& iKey)
     if( mediaRasters.Num() <= 0 )
         return false;
 
-    return SelectedShapeInstance->OnKeyUp(iKey);
+    return Shapes.GetActiveShape()->OnKeyUp(iKey);
 }
 
 void
@@ -328,7 +326,7 @@ UOdysseyPainterEditorRasterDrawingTool::Tick(float iDeltaTime)
     });
 
     //Ticke the shape
-    SelectedShapeInstance->Tick(iDeltaTime);
+    Shapes.GetActiveShape()->Tick(iDeltaTime);
 
     mWorker.ExecuteFor(1000/60); //60fps
 
@@ -624,18 +622,6 @@ UOdysseyPainterEditorRasterDrawingTool::GetBrushOptions() const
     return BrushOptions;
 }
 
-EOdysseyShape
-UOdysseyPainterEditorRasterDrawingTool::GetSelectedShape() const
-{
-    return SelectedShape;
-}
-
-UOdysseyShape*
-UOdysseyPainterEditorRasterDrawingTool::GetSelectedShapeInstance() const
-{
-    return SelectedShapeInstance;
-}
-
 UOdysseyPainterEditorRasterDrawingTool::FOnApplyOverrides&
 UOdysseyPainterEditorRasterDrawingTool::OnApplyOverridesDelegate()
 {
@@ -664,12 +650,6 @@ FSimpleMulticastDelegate&
 UOdysseyPainterEditorRasterDrawingTool::OnBrushChanged()
 {
     return mOnBrushChanged;
-}
-
-FSimpleMulticastDelegate&
-UOdysseyPainterEditorRasterDrawingTool::OnShapeChanged()
-{
-    return mOnShapeChanged;
 }
 
 //--------------------------------------------------------------------------------------
@@ -701,16 +681,6 @@ UOdysseyPainterEditorRasterDrawingTool::CreateBrushInstance(bool iApplyOverrides
 
     mOnCreatedBrushInstance.Broadcast(BrushInstance);
 }
-
-/* void
-UOdysseyPainterEditorRasterDrawingTool::OnBlueprintCompiled(UBlueprint* iBlueprint)
-{
-    if (iBlueprint == Brush)
-    {
-        DestroyBrushInstance();
-        CreateBrushInstance(false);
-    }
-} */
 
 void
 UOdysseyPainterEditorRasterDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* iBrushInstance)
@@ -747,7 +717,9 @@ UOdysseyPainterEditorRasterDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* i
     if (toolOverrides)
     {
         if (toolOverrides->bOverride_Shape)
-            FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, SelectedShape), toolOverrides->Shape);
+        {
+            Shapes.SetActiveShapeType(toolOverrides->Shape);
+        }
 
         if (toolOverrides->bOverride_SubPixel)
             FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, SubPixel), toolOverrides->SubPixel);
@@ -766,7 +738,7 @@ UOdysseyPainterEditorRasterDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* i
             FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, InterpolationType), freehandShapeOverrides->InterpolationType);
     }
 
-    SelectedShapeInstance->ApplyOverrides(iBrushInstance->EditorOverrides);
+    Shapes.GetActiveShape()->ApplyOverrides(iBrushInstance->EditorOverrides);
 
     mOnApplyOverridesDelegate.Broadcast(iBrushInstance->EditorOverrides);
 }
@@ -813,14 +785,6 @@ UOdysseyPainterEditorRasterDrawingTool::OnBlueprintReinstanced(const FCoreUObjec
 }
 
 void
-UOdysseyPainterEditorRasterDrawingTool::SelectedShapeChanged()
-{
-    SelectedShapeInstance->Abort();
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, SelectedShapeInstance), AvailableShapes[SelectedShape]);
-    mOnShapeChanged.Broadcast();
-}
-
-void
 UOdysseyPainterEditorRasterDrawingTool::PropertyChanged(const FName& iPropertyName)
 {
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, Brush))
@@ -828,10 +792,6 @@ UOdysseyPainterEditorRasterDrawingTool::PropertyChanged(const FName& iPropertyNa
 
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BrushInstance))
         return;
-        //BrushInstanceChanged();
-
-    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, SelectedShape))
-        SelectedShapeChanged();
 
     if ( BrushInstance )
         BrushInstance->ExecuteStateChanged();
@@ -870,7 +830,7 @@ UOdysseyPainterEditorRasterDrawingTool::OnRasterSelectionChanged()
 void
 UOdysseyPainterEditorRasterDrawingTool::OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints)
 {
-    if ( !SelectedShapeInstance->IsProgressive() )
+    if ( !Shapes.GetActiveShape()->IsProgressive() )
         return;
 
     for (const FOdysseyPoint& point : iPoints)
@@ -948,7 +908,7 @@ UOdysseyPainterEditorRasterDrawingTool::InterpolateTo(const FOdysseyPoint& iPoin
 {
     if (!mInterpolator)
     {
-        if (SelectedShape == EOdysseyShape::kFreehand )
+        if (Shapes.GetActiveShapeType() == EOdysseyShapeType::kFreehand )
         {
             switch(InterpolationType)
             {

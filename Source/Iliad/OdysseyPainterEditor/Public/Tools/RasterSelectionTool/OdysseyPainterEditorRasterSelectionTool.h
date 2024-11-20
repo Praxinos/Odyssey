@@ -54,7 +54,6 @@ public:
 
 private:
     // Internal - Callbacks
-    void SelectedShapeChanged();
     void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
 
 public:
@@ -62,13 +61,7 @@ public:
 
 protected:
     UPROPERTY(EditAnywhere, Category="Shape")
-    EOdysseyFillShape SelectedShape;
-
-    UPROPERTY(VisibleInstanceOnly, Category="Shape", Instanced, meta = (ShowInnerProperties))
-    UOdysseyShape* SelectedShapeInstance;
-
-    UPROPERTY()
-    TMap<EOdysseyFillShape, UOdysseyShape*> AvailableShapes;
+    FOdysseyShapes Shapes;
 
     EOdysseySelectionState mSelectionState;
     TSharedPtr<FOdysseyHUDElement> mShapeHUD;

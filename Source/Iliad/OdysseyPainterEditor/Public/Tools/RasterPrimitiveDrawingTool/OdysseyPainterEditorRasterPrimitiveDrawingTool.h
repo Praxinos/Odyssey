@@ -51,7 +51,6 @@ public:
 
 private:
     // Internal - Callbacks
-    void SelectedShapeChanged();
 
     //void OnShapePathBegin(const FOdysseyPoint& iPoint);
     //void OnShapePathTo(const TArray<FOdysseyPoint>& iPoints);
@@ -65,25 +64,17 @@ private:
 
 public:
     virtual void PropertyChanged(const FName& iPropertyName) override;
-    FSimpleMulticastDelegate& OnShapeChanged();
 
 protected:
     FOdysseyPaintEngine mPaintEngine;
 
-    FSimpleMulticastDelegate            mOnShapeChanged;
     TArray<FOdysseyPoint> mPath;
 
     TSharedPtr<FOdysseyHUDElement> mShapeHUD;
 
 public:
     UPROPERTY(EditAnywhere, Category="Shape")
-    EOdysseyShape SelectedShape;
-
-    UPROPERTY(VisibleInstanceOnly, Category="Shape", Instanced, meta = (ShowInnerProperties))
-    class UOdysseyShape* SelectedShapeInstance;
-
-    UPROPERTY()
-    TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
+    FOdysseyShapes Shapes;
 
     UPROPERTY(EditAnywhere, Category="Parameters", meta=(UIMin=0, ClampMin=0, LinearDeltaSensitivity=1))
     float StrokeWidth = 1.0f;

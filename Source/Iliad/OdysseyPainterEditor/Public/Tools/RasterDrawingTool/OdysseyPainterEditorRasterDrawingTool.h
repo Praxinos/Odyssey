@@ -98,12 +98,6 @@ public:
     // Returns the BrushOptions
     UOdysseyBrushOptions* GetBrushOptions() const;
 
-    // Returns the Selected Shape
-    EOdysseyShape GetSelectedShape() const;
-
-    // Retuns the instance of the selected Shape
-    UOdysseyShape* GetSelectedShapeInstance() const;
-
     // Returns the OnDestroyBrushInstance delegate
     FOnDestroyBrushInstance& OnDestroyBrushInstance();
 
@@ -115,12 +109,10 @@ public:
     FAdaptShapePoints& AdaptShapePointsDelegate();
 
     FSimpleMulticastDelegate& OnBrushChanged();
-    FSimpleMulticastDelegate& OnShapeChanged();
 
 public:
     //Properties changes
     void BrushChanged();
-    void SelectedShapeChanged();
 
     virtual void PropertyChanged(const FName& iPropertyName) override;
 
@@ -198,22 +190,13 @@ protected:
     UPROPERTY()
     UOdysseyBrushOptions* BrushOptions;
 
-    // Hidden properties
-    UPROPERTY()
-    TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
-
-
-
 private:
     UFUNCTION(BlueprintSetter)
     void SubPixelBlueprintSetter(bool Value);
 
 public:
     UPROPERTY(EditAnywhere, Category="Shape")
-    EOdysseyShape SelectedShape;
-
-    UPROPERTY(VisibleInstanceOnly, Category="Shape", Instanced, meta=(ShowInnerProperties))
-    class UOdysseyShape* SelectedShapeInstance;
+    FOdysseyShapes Shapes;
 
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Shape", BlueprintSetter=SubPixelBlueprintSetter)
     bool SubPixel = true;
@@ -248,7 +231,6 @@ protected:
     FOnCreatedBrushInstance             mOnCreatedBrushInstance;
     FAdaptShapePoints                   mAdaptShapePointsDelegate;
     FSimpleMulticastDelegate            mOnBrushChanged;
-    FSimpleMulticastDelegate            mOnShapeChanged;
 
     TSharedPtr<FOdysseyHUDElement> mShapeHUD;
 

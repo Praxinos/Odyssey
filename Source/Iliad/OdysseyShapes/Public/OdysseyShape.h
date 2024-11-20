@@ -12,8 +12,9 @@
 class FOdysseyHUDElement;
 
 UENUM()
-enum class EOdysseyShape : uint8
+enum class EOdysseyShapeType : uint8
 {
+    kNone,
     kFreehand       UMETA(DisplayName = "Freehand"),
     kLine           UMETA(DisplayName = "Line"),
     kRectangle      UMETA(DisplayName = "Rectangle"),
@@ -22,14 +23,34 @@ enum class EOdysseyShape : uint8
     kBezier         UMETA(DisplayName = "Bezier"),
 };
 
-UENUM()
-enum class EOdysseyFillShape : uint8
+USTRUCT()
+struct ODYSSEYSHAPES_API FOdysseyShapes
 {
-    kFreehand       UMETA(DisplayName = "Freehand"),
-    kRectangle      UMETA(DisplayName = "Rectangle"),
-    kPolygon        UMETA(DisplayName = "Polygon"),
-    kEllipse        UMETA(DisplayName = "Ellipse"),
-    kBezier         UMETA(DisplayName = "Bezier"),
+    GENERATED_BODY()
+
+public:
+    static void RegisterDetailCustomization();
+    static void UnregisterDetailCustomization();
+
+public:
+    FOdysseyShapes();
+
+public:
+    UOdysseyShape* GetActiveShape() const;
+    const TMap<EOdysseyShapeType, UOdysseyShape*>& GetShapes() const;
+    EOdysseyShapeType GetActiveShapeType() const;
+    void SetActiveShapeType(EOdysseyShapeType iType);
+
+    TArray<EOdysseyShapeType> GetActiveShapeTypes() const;
+    void AddShapeType(EOdysseyShapeType iType, UOdysseyShape* iShape);
+    void RemoveShapeType(EOdysseyShapeType iType);
+
+private:
+    UPROPERTY()
+    EOdysseyShapeType ActiveShapeType;
+
+    UPROPERTY()
+    TMap<EOdysseyShapeType, UOdysseyShape*> Shapes;
 };
 
 UCLASS(Abstract)
