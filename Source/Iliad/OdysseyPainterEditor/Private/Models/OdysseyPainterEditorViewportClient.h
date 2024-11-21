@@ -40,6 +40,7 @@ public:
     DECLARE_DELEGATE_TwoParams(FOnPickColor, eOdysseyEventState::Type, const FVector2D&)
     DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseDown, const FOdysseyPoint&, const FKey&)
     DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseUp, const FOdysseyPoint&, const FKey&)
+    DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseClick, const FOdysseyPoint&, const FKey&)
     DECLARE_DELEGATE_RetVal_TwoParams(bool, FOnMouseDoubleClick, const FOdysseyPoint&, const FKey&)
     DECLARE_DELEGATE_OneParam(FOnMouseHover, const FOdysseyPoint&)
     DECLARE_DELEGATE_OneParam(FOnMouseDrag, const FOdysseyPoint&)
@@ -92,6 +93,7 @@ public:
     // Public API
     FOnPickColor&    OnPickColor() { return mOnPickColor; }
     FOnMouseDown&   OnMouseDown()   { return mOnMouseDown; }
+    FOnMouseClick& OnMouseClick() { return mOnMouseClick; }
     FOnMouseDoubleClick&   OnMouseDoubleClick()   { return mOnMouseDoubleClick; }
     FOnMouseUp&     OnMouseUp()     { return mOnMouseUp; }
     FOnMouseHover&  OnMouseHover()  { return mOnMouseHover; }
@@ -143,6 +145,7 @@ private:
     FOnPickColor                            mOnPickColor;
     FOnMouseDown                            mOnMouseDown;
     FOnMouseUp                              mOnMouseUp;
+    FOnMouseClick                           mOnMouseClick;
     FOnMouseDoubleClick                     mOnMouseDoubleClick;
     FOnMouseHover                           mOnMouseHover;
     FOnMouseDrag                            mOnMouseDrag;

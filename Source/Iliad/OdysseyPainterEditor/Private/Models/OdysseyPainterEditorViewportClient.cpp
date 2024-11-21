@@ -290,6 +290,9 @@ FOdysseyPainterEditorViewportClient::InputKey( FViewport* iViewport, int32 iCont
 
     if( iEvent == EInputEvent::IE_Pressed )
     {
+        if (iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton)
+            mOnMouseClick.IsBound() && mOnMouseClick.Execute(mCurrentPointInViewport, iKey);
+
         //key already pressed, don't send a KeyDown or MouseDown twice
         //Can happen on windows with some touch options
         if (mKeysPressed.Contains(iKey))

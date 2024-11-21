@@ -47,6 +47,7 @@ protected:
     virtual void HandleViewportColorPicked(eOdysseyEventState::Type iEventState, const FVector2D& iPositionInTexture);
 
     virtual bool OnViewportMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
+    virtual bool OnViewportMouseClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
     virtual bool OnViewportMouseDoubleClick(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
     virtual bool OnViewportMouseUp(const FOdysseyPoint& iPointInTexture, const FKey& iKey);
     virtual void OnViewportMouseHover(const FOdysseyPoint& iPointInTexture);
