@@ -935,9 +935,9 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
                 }
 
                 breakdown->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
+                // Note: we cannot call Invalidate in Make() (hence the "false" arg), so we set the flags manually.
                 breakdown->GetGrid()->Make( sourceGeometry, targetGeometry, false );
 
-                // Note: we cannot call Invalidate in Make() (hence the "false" arg), so we set the flags manually.
                 // calling Invalidate make trigger a call to draw and this would block due to the mutexes.
                 mInvalidationFlags |= ( INVALIDATE_SOURCEGRID | INVALIDATE_TARGETGRID | INVALIDATE_MAP );
             }

@@ -35,7 +35,7 @@ class ODYSSEYVECTOR_API FInbetweenerRoute
         void Resize();
         void SetInbetweenerTag( FOdysseyVectorTagInbetweener* iInbetweenerTag );
         void Fit( uint32 iFitFrom );
-
+        void Reset();
         bool IsEnabled();
 
     protected:

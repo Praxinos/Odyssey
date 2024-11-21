@@ -65,9 +65,6 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
                                                           , const FKey& iKey
                                                           , uint64& oSignalFlags )
 {
-    if (iKey != EKeys::LeftMouseButton)
-        return false;
-
     BLPoint localCoords = iScene->GetInverseWorldMatrix().mapPoint(iPointInTexture.x,iPointInTexture.y);
     uint64 notificationFlags = 0;
 
@@ -189,9 +186,6 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorGroupPai
                                                         , const FKey& iKey
                                                         , uint64& oSignalFlags )
 {
-    if (iKey != EKeys::LeftMouseButton)
-        return false;
-
     iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     // redraw

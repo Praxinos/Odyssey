@@ -22,6 +22,8 @@ void
 FInbetweenerWaypoint::SetRatio( float iRatio )
 {
     mRatio = iRatio;
+
+    //mTrajectory->GetRoute()->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
 }
 
 float

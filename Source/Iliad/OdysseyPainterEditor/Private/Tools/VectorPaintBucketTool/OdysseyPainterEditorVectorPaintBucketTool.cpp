@@ -130,9 +130,6 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
                                                              , const FKey& iKey
                                                              , uint64& oSignalFlags )
 {
-    if (iKey != EKeys::LeftMouseButton)
-        return false;
-
     uint64 retFlags = 0;
 
     // valid for boith right and left clicks
@@ -608,9 +605,6 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroup
                                                            , const FKey& iKey
                                                            , uint64& oSignalFlags )
 {
-    if( iKey != EKeys::LeftMouseButton )
-        return false;
-
     uint64 notificationFlags = 0;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)

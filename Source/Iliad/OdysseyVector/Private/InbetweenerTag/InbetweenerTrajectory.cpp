@@ -221,6 +221,18 @@ FInbetweenerTrajectory::GetRoute()
 }
 
 void
+FInbetweenerTrajectory::Reset()
+{
+    mHandle[0].Set( ::ULIS::FVec2D( 0.0f, 0.0f ), 0.0f );
+    mHandle[1].Set( ::ULIS::FVec2D( 0.0f, 0.0f ), 0.0f );
+
+    for( FInbetweenerWaypoint& waypoint : mWaypointBuffer )
+    {
+        waypoint.SetRatio( 0.0f );
+    }
+}
+
+void
 FInbetweenerTrajectory::FitBezier( const std::vector<::ULIS::FVec2D> &iPointBuffer )
 {
     const BLMatrix2D& sourceLocalMatrix = mBreakdown->GetSourceLocalMatrix();
@@ -289,7 +301,7 @@ FInbetweenerTrajectory::FitBezier( const std::vector<::ULIS::FVec2D> &iPointBuff
     }
 }
 
-
+// INRIA Style
 void
 FInbetweenerTrajectory::FitBezier( const std::vector<::ULIS::FVec2D> &data
                                  , const std::vector<float> &u )

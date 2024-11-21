@@ -532,6 +532,12 @@ FInbetweenerBreakdown::UpdateMatrix()
 {
     FInbetweenerDrawing* drawing = mInbetweenerTag->GetDrawing( mTargetDrawingIndex );
 
+    drawing->translationX = mTargetTranslationX;
+    drawing->translationY = mTargetTranslationY;
+    drawing->rotation = mTargetRotation;
+    drawing->scalingX = mTargetScalingX;
+    drawing->scalingY = mTargetScalingY;
+
     drawing->localMatrix.reset();
     drawing->localMatrix.translate( mTargetTranslationX, mTargetTranslationY );
     drawing->localMatrix.rotate( mTargetRotation * M_PI / 180.0f );

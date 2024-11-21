@@ -50,6 +50,8 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
         ::ULIS::FVec2D GetPoint( float iSpacingT );
         void FitBezier( const std::vector<::ULIS::FVec2D> &data
                       , const std::vector<float> &u );
+        void Reset();
+
     private:
         std::vector<FInbetweenerWaypoint> mWaypointBuffer;
         FInbetweenerRoute* mRoute;

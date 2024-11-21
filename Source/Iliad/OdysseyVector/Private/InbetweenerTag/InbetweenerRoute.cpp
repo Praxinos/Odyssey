@@ -36,6 +36,16 @@ FInbetweenerRoute::Init( uint32 iQuadIndex
     Resize();
 }
 
+
+void
+FInbetweenerRoute::Reset()
+{
+    for( FInbetweenerTrajectory& trajectory : mTrajectoryBuffer )
+    {
+        trajectory.Reset();
+    }
+}
+
 void
 FInbetweenerRoute::Resize()
 {

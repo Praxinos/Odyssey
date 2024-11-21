@@ -12,6 +12,7 @@
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "InbetweenerTag/InbetweenerRoute.h"
+#include "undo/OdysseyVectorUndoTagInbetweenerRouteAlter.h"
 #include "undo/OdysseyVectorUndoTagInbetweenerTrajectoryAlter.h"
 #include "undo/OdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint.h"
 #include "undo/OdysseyVectorUndoTagInbetweenerRouteAdd.h"
@@ -554,7 +555,34 @@ UOdysseyPainterEditorVectorTrajectoryTool::ExtendContextMenuInbetween( FOdysseyV
 void
 UOdysseyPainterEditorVectorTrajectoryTool::ResetRoute()
 {
+    FOdysseyVectorGroupPaint* scene = mPickedRoute->GetInbetweenerTag()->GetOwner()->GetScene();
+    uint64 notificationFlags = 0;
 
+    // needed for valid GUndo pointer
+    GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.remove","Vector Trajectory Tool"));
+    if( GUndo )
+    {
+        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerRouteAlter( scene
+                                                                                 , mPickedRoute->GetInbetweenerTag()
+                                                                                 , mPickedRoute
+                                                                                 , notificationFlags );
+
+        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+        if (source)
+            source->RecordCurrentFrameUndo();
+    }
+    GEditor->EndTransaction();
+
+    mPickedRoute->Reset();
+
+    // Updating via the Shared env allow multiple cells to be updated which is paramount
+    // here because we may be on a cell different from the tag's starting cell
+    scene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+    // redraw
+    scene->GetEngine()->Invalidate( 0 );
 }
 
 void
