@@ -107,7 +107,7 @@ UOdysseyAnimationComponent::UOdysseyAnimationComponent(const FObjectInitializer&
 #endif
 
     bCastStaticShadow = false;
-    bCastDynamicShadow = false;
+    bCastDynamicShadow = true;
     bSelectable = true;
 
     UMaterial* material = LoadObject<UMaterial>(this, TEXT("/Odyssey/Animation2D/DefaultAnimationMaterial.DefaultAnimationMaterial"));
