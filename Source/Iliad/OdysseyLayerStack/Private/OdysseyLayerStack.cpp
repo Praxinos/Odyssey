@@ -23,6 +23,20 @@ UOdysseyLayerStack::PostInitProperties()
         LayerRoot = NewObject<UOdysseyLayer>(this, LayerRootClass, NAME_None, RF_Public | RF_Transactional);
 }
 
+void
+UOdysseyLayerStack::PostLoad()
+{
+    Super::PostLoad();
+
+    const TArray<UOdysseyLayer*>& rootLayers = GetRootLayers();
+    bool hasLayers = !rootLayers.IsEmpty();
+    bool currentLayerIsInvalid = !CurrentLayer || !GetLayers().Contains(CurrentLayer);
+    if (hasLayers && currentLayerIsInvalid)
+    {
+        CurrentLayer = rootLayers[0];
+    }
+}
+
 //--- Delegates
 
 UOdysseyLayerStack::FOnHierarchyChanged&
