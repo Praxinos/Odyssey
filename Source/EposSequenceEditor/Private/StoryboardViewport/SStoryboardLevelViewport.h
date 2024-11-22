@@ -33,6 +33,7 @@ class SLevelViewport;
 class SNotesInViewport;
 class SNotesAsOverlay;
 class UStoryNote;
+class SStoryboardViewportSettings;
 
 struct FQualifiedFrameTime;
 struct FTypeInterfaceProxy;
@@ -229,11 +230,23 @@ private:
     TSharedRef<SWidget> NoteSettingsGetMenuContent();
 
 private:
+    FText GetRotationLabel();
+    FText GetRotationTooltip();
+    TSharedRef<SWidget> CreateRotationWidget();
+    FText GetZoomLabel();
+    FText GetZoomTooltip();
+    TSharedRef<SWidget> CreateZoomWidget();
+
+private:
 
     /** Widget where the scene viewport is drawn in */
     TSharedPtr<SStoryboardPreviewViewport> ViewportWidget;
     /** Widget where the grid option are and which contains the widget where grid is drawn in */
     TSharedPtr<SFilmOverlayOptions> FilmOverlayOptions;
+
+    /** Widget where the story board viewport settings lies */
+    TSharedPtr<SStoryboardViewportSettings> StoryboardViewportSettings;
+
 
     /** The sequencer we're currently editing */
     TWeakPtr<ISequencer> mCurrentSquencer;
