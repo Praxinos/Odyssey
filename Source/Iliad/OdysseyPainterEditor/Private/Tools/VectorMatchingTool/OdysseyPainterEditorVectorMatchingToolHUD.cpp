@@ -69,6 +69,8 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
                 FOdysseyVectorGroupPaint* inbetweenerTagScene = inbetweenerTag->GetOwner()->GetScene();
                 uint32 currentCellIndex = iScene->GetEngine()->GetCell()->GetIndex();
 
+                inbetweenerTag->LockDrawing();
+
                 for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
                 {
                     if( breakdown->GetTargetCellIndex() == currentCellIndex )
@@ -97,6 +99,8 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
                                        , hcColor );*/
                     }
                 }
+
+                inbetweenerTag->UnlockDrawing();
             }
         }
     }

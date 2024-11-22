@@ -268,6 +268,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         double GetEaseInSpacing( double iT, double iFraction );
         bool HasConstantWidth();
         void SetConstantWidth( bool iConstantWidth );
+        static void EvalSize( ::ULIS::FRectD& iWorldBBox, uint32& iGridNumQuadX, uint32& iGridNumQuadY );
+        IOdysseyVectorCell* GetSourceCell();
+        IOdysseyVectorCell* GetTargetCell();
+        IOdysseyVectorCell* GetExpectedTargetCell();
 
     protected:
         /**
@@ -321,28 +325,20 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         static const uint8 TRAJECTORY_DEFAULT_ALPHA_UINT8 = 255;
 
         static const uint64 INVALIDATE_MAP               = ( 1LL <<  0 );
-        static const uint64 INVALIDATE_RANGE             = ( 1LL <<  1 );
         static const uint64 INVALIDATE_BUFFERS           = ( 1LL <<  2 );
         static const uint64 INVALIDATE_SPACING           = ( 1LL <<  3 );
         static const uint64 INVALIDATE_GRIDTYPE          = ( 1LL <<  4 );
         static const uint64 INVALIDATE_INTERPOLATIONTYPE = ( 1LL <<  5 );
         static const uint64 INVALIDATE_CELLS             = ( 1LL <<  6 );
-        static const uint64 INVALIDATE_SOURCEGRID        = ( 1LL <<  7 );
-        static const uint64 INVALIDATE_TARGETGRID        = ( 1LL <<  8 );
         static const uint64 INVALIDATE_ROUTES            = ( 1LL <<  9 );
-        static const uint64 INVALIDATE_ROUTE_LIST        = ( 1LL << 10 );
         static const uint64 INVALIDATE_BREAKDOWN_LIST    = ( 1LL << 11 );
         static const uint64 INVALIDATE_ALL               = ( INVALIDATE_MAP
-                                                           | INVALIDATE_RANGE
                                                            | INVALIDATE_BUFFERS
                                                            | INVALIDATE_SPACING
                                                            | INVALIDATE_GRIDTYPE
                                                            | INVALIDATE_INTERPOLATIONTYPE
                                                            | INVALIDATE_CELLS
-                                                           | INVALIDATE_SOURCEGRID
-                                                           | INVALIDATE_TARGETGRID
                                                            | INVALIDATE_ROUTES
-                                                           | INVALIDATE_ROUTE_LIST
                                                            | INVALIDATE_BREAKDOWN_LIST );
 
     protected:
@@ -375,4 +371,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         // arrays for accessing only useful grid points (for faster processing or ARAP interpolation)
         std::vector<uint32> mUsedPointIndexBuffer;
         bool bConstantWidth;
+        IOdysseyVectorCell* mExpectedTargetCell;
 };

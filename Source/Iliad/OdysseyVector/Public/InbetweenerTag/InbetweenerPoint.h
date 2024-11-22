@@ -34,9 +34,12 @@ class ODYSSEYVECTOR_API FInbetweenerPoint
         typedef Eigen::Transform<double, 2, Eigen::Affine> Affine;
 
         virtual ~FInbetweenerPoint(){};
-        FInbetweenerPoint( );
+        FInbetweenerPoint( FInbetweenerGrid* iGrid
+                         , double iSourcePositionX
+                         , double iSourcePositionY
+                         , double iU
+                         , double iV );
 
-        void SetSourcePosition( double iX, double iY, bool iInvalidate );
         void SetTargetPosition( double iX, double iY, bool iInvalidate );
         void SetInterpPosition( double iX, double iY );
         void SetDeformPosition( double iX, double iY );

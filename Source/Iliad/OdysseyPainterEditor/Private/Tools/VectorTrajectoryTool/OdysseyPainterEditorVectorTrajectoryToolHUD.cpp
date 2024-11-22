@@ -289,6 +289,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::SetCursorPosition( double iX, doub
     mCursorPosition.y = iY;
 }
 
+/*
 void
 FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawSourceGrid( BLContext* iBLContext
                                                             , BLRgba32& iFgColor
@@ -329,6 +330,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawSourceGrid( BLContext* iBLCont
 
     iBLContext->restore();
 }
+*/
 
 void
 FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHoveredQuad( BLContext* iBLContext
@@ -342,32 +344,6 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHoveredQuad( BLContext* iBLCon
     {
         ::ULIS::FRectD quadBBox = hoveredQuad->GetBBox( eInbetweenerPointPositionType::SourcePosition );
         FOdysseyVectorTagInbetweener* iInbetweenerTag = hoveredQuad->GetGrid()->GetBreakdown()->GetInbetweenerTag();
-/*
-        BLPoint localCursor = iInbetweenerTag->GetOwner()->GetInverseWorldMatrix().mapPoint( mCursorPosition.x
-                                                                                     , mCursorPosition.y );
-        double u = quadBBox.w ? ( localCursor.x - quadBBox.x ) / quadBBox.w : 0.0f;
-        double v = quadBBox.h ? ( localCursor.y - quadBBox.y ) / quadBBox.h : 0.0f;
-        ::ULIS::FVec2D targetPosition = hoveredQuad->GetPoint( eInbetweenerPointPositionType::TargetPosition, u, v  );
-        BLPoint targetWorldPosition = iInbetweenerTag->GetTargetWorldMatrix().mapPoint( targetPosition.x
-                                                                                      , targetPosition.y );
-        BLPath path;
-
-        path.moveTo( mCursorPosition.x, mCursorPosition.y );
-        path.lineTo( targetWorldPosition.x, targetWorldPosition.y );
-
-        iBLContext->save();
-        iBLContext->resetMatrix();
-
-        iBLContext->setStrokeStyle( iBgColor );
-        iBLContext->setStrokeWidth( 2.0f );
-        iBLContext->strokePath( path );
-
-        iBLContext->setStrokeStyle( iHcColor );
-        iBLContext->setStrokeWidth( 1.0f );
-        iBLContext->strokePath( path );
-
-        iBLContext->restore();
-*/
         FInbetweenerPoint** points = hoveredQuad->GetPoints();
         ::ULIS::FVec2D position[4] = { points[0]->GetSourcePosition()
                                      , points[1]->GetSourcePosition()
@@ -523,6 +499,8 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
     {
         for( FOdysseyVectorTagInbetweener* inbetweenerTag : mSelectedInbetweenerTagList )
         {
+            inbetweenerTag->LockDrawing();
+
             for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
             {
                 FOdysseyVectorHUD::DrawBreakdown( iScene
@@ -548,6 +526,8 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
                                   , &trajectory );
                 }
             }
+
+            inbetweenerTag->UnlockDrawing();
         }
 
         if( mTrajectoryTool->GetPickingMode() == eTrajectoryPickingMode::Add )
@@ -559,46 +539,3 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
         }
     }
 }
-
-/*
-FInbetweenerInbetween*
-FOdysseyPainterEditorVectorTrajectoryToolHUD::PickInbetween( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                         , double iWorldX
-                                                         , double iWorldY
-                                                         , double iRadius )
-{
-    FInbetweenerTrajectory& chart = iInbetweenerTag->GetTrajectory();
-    double cursorRadius = mTrajectoryRect.h *.5f;
-    double cursorY = mTrajectoryRect.y + cursorRadius;
-
-    if( mTrajectoryRect.HitTest( ::ULIS::FVec2D( iWorldX, iWorldY ) ) )
-    {
-        for( FInbetweenerInbetween& inbetween : chart.inbetweenBuffer )
-        {
-            float cursorX = mTrajectoryRect.x + ( inbetween.spacing * mTrajectoryRect.w );
-
-            if( ( iWorldX >= ( cursorX - iRadius ) )
-             && ( iWorldX <= ( cursorX + iRadius ) ) )
-            {
-                return &inbetween;
-            }
-        }
-    }
-
-    return nullptr;
-}
-*/
-
-/*
-void
-FOdysseyPainterEditorVectorTrajectoryToolHUD::MoveInbetween( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                         , FInbetweenerInbetween* iInbetween
-                                                         , double iWorldX
-                                                         , double iWorldY
-                                                         , bool iRelative )
-{
-    double newSpacing = ( iWorldX - mTrajectoryRect.x ) / mTrajectoryRect.w;
-
-    iInbetweenerTag->MoveInbetween( iInbetween, newSpacing, iRelative );
-}
-*/

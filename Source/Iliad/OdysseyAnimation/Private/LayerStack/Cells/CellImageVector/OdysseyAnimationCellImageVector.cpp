@@ -18,6 +18,7 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorTagInbetweener.h"
 
 UOdysseyAnimationCellImageVector::~UOdysseyAnimationCellImageVector()
 {
@@ -45,6 +46,8 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     UOdysseyAnimationLayerImageVector::OnIsColoredChanged().AddUObject( this, &UOdysseyAnimationCellImageVector::OnIsColoredChanged );
     UOdysseyAnimationLayerImageVector::OnIsWireframeChanged().AddUObject( this, &UOdysseyAnimationCellImageVector::OnIsWireframeChanged );
+
+    GetLayer()->OnCellsChanged().AddUObject( this, &UOdysseyAnimationCellImageVector::OnCellsChanged );
 
     mVectorBlockId = FGuid::NewGuid();
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
@@ -185,6 +188,35 @@ UOdysseyAnimationCellImageVector::PostLoad()
     mVectorBlock->Init(mVectorBlockId, mRoot->GetEngine(), animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
     mRoot->GetEngine()->Invalidate( 0 );
     FOdysseyVectorEngine::Notify( mRoot->GetScene(), FOdysseyVectorEngine::NOTIFY_ALL );
+}
+
+void
+UOdysseyAnimationCellImageVector::OnCellsChanged()
+{
+    UOdysseyAnimationLayerImageVector* vectorLayer = Cast<UOdysseyAnimationLayerImageVector>(GetLayer());
+
+    for( FOdysseyVectorTag* sharedTag : vectorLayer->GetSharedEnv()->GetSharedTagList() )
+    {
+        if( sharedTag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+        {
+            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>( sharedTag );
+            IOdysseyVectorCell* sourceCell = inbetweenerTag->GetSourceCell();
+
+            if( inbetweenerTag->GetSourceCellIndex() == IndexInLayer )
+            {
+                IOdysseyVectorCell* expectedTargetCell = inbetweenerTag->GetExpectedTargetCell();
+                IOdysseyVectorCell* targetCell = inbetweenerTag->GetTargetCell();
+
+                if( expectedTargetCell && targetCell )
+                {
+                    int32 expectedTargetCellIndex = expectedTargetCell->GetIndex();
+                    int32 sourceCellIndex = sourceCell->GetIndex();
+
+                    inbetweenerTag->GetBreakdownList().back()->SetTargetDrawingIndex( abs( expectedTargetCellIndex - sourceCellIndex ) );
+                }
+            }
+        }
+    }
 }
 
 void

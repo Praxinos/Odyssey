@@ -638,8 +638,7 @@ FInbetweenerBreakdown::SetTargetDrawingIndex( uint32 iTargetDrawingIndex )
     mInbetweenerTag->UpdateMatrix();
 
     mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
-                                // force deformation of interpolated paths at target
-                                | FOdysseyVectorTagInbetweener::INVALIDATE_RANGE  );
+                               | FOdysseyVectorTagInbetweener::INVALIDATE_BUFFERS  );
 }
 
 FInbetweenerChart*

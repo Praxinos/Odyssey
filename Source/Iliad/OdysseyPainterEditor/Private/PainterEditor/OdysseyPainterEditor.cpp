@@ -1123,9 +1123,12 @@ FOdysseyPainterEditor::GroupAndAddInbetweenerTag( FOdysseyPainterEditor* iEditor
 
     if( group )
     {
+        ::ULIS::FRectD groupWorldBBox = group->GetBBox( true );
+        uint32 numQuadX, numquadY;
+        FOdysseyVectorTagInbetweener::EvalSize( groupWorldBBox, numQuadX, numquadY );
         FOdysseyVectorTagInbetweener *inbetweenerTag = new FOdysseyVectorTagInbetweener( group
-                                                                                       , 32
-                                                                                       , 32
+                                                                                       , numQuadX
+                                                                                       , numquadY
                                                                                        , eInbetweenerGridType::ARAP );
 
         //inbetweenerTag->SetInterpolationDirection( eInbetweenerInterpolationDirection::Backward );
@@ -1816,9 +1819,12 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
 
         if( tag == nullptr )
         {
+            ::ULIS::FRectD selectedObjectWorldBBox = selectedObject->GetBBox( true );
+            uint32 numQuadX, numquadY;
+            FOdysseyVectorTagInbetweener::EvalSize( selectedObjectWorldBBox, numQuadX, numquadY );
             FOdysseyVectorTagInbetweener* inbetweenerTag = new FOdysseyVectorTagInbetweener( selectedObject
-                                                                                           , 32
-                                                                                           , 32
+                                                                                           , numQuadX
+                                                                                           , numquadY
                                                                                            , eInbetweenerGridType::ARAP );
 
             selectedObject->AddTag( inbetweenerTag );

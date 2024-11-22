@@ -59,6 +59,7 @@ public:
     virtual IOdysseyVectorCell* GetCellByIndex( uint32 iIndex ) override;
     virtual IOdysseyVectorCell* GetFirstCell() override;
     virtual IOdysseyVectorCell* GetLastCell() override;
+    virtual bool Contains( IOdysseyVectorCell* iCandidateCell )override;
 
 protected:
     void IsColoredChanged();

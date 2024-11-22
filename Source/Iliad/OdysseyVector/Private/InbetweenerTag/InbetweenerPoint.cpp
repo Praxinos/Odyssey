@@ -5,9 +5,22 @@
 #include "InbetweenerTag/InbetweenerBreakdown.h"
 #include "OdysseyVectorTagInbetweener.h"
 
-FInbetweenerPoint::FInbetweenerPoint()
+FInbetweenerPoint::FInbetweenerPoint( FInbetweenerGrid* iGrid
+                                    , double iSourcePositionX
+                                    , double iSourcePositionY
+                                    , double iU
+                                    , double iV )
     : mFlags ( 0 )
+    , mU ( iU )
+    , mV ( iV )
 {
+    mGrid = iGrid;
+
+    // Note: this will be ignored for breakdowns that are not the first breakdown
+    mSourcePosition.x = iSourcePositionX;
+    mSourcePosition.y = iSourcePositionY;
+
+    mGrid->Invalidate( FInbetweenerGrid::INVALIDATE_SOURCE );
 }
 
 void
@@ -20,12 +33,6 @@ void
 FInbetweenerPoint::SetV( double iV )
 {
     mV = iV;
-}
-
-void
-FInbetweenerPoint::Init( FInbetweenerGrid* iGrid )
-{
-    mGrid = iGrid;
 }
 
 uint32
@@ -62,6 +69,7 @@ FInbetweenerPoint::IsDeformable()
     return ( mFlags & DEFORMABLE ) ? true : false;
 }
 
+// this is only called for the leading breakdown
 void
 FInbetweenerPoint::SetNeeded( bool iIsNeeded )
 {
@@ -75,6 +83,7 @@ FInbetweenerPoint::SetNeeded( bool iIsNeeded )
     }
 }
 
+// this is only called for the leading breakdown
 bool
 FInbetweenerPoint::IsNeeded()
 {
@@ -82,52 +91,27 @@ FInbetweenerPoint::IsNeeded()
 }
 
 void
-FInbetweenerPoint::SetSourcePosition( double iX, double iY, bool iInvalidate )
-{
-    FInbetweenerBreakdown* prevBreakdown = mGrid->GetBreakdown()->GetPrevBreakdown();
-    uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEGRID
-                             | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
-                             | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING;
-    uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
-
-    mSourcePosition.x = iX;
-    mSourcePosition.y = iY;
-
-// commented-out: target impacts source but source does not impact target. this makes file loading much easier.
-// We don't manipulate the source grid anyways.
-/*
-    if( prevBreakdown )
-    {
-        prevBreakdown->GetGrid()->GetPointBuffer()[pointIndex].mTargetPosition.x = mSourcePosition.x;
-        prevBreakdown->GetGrid()->GetPointBuffer()[pointIndex].mTargetPosition.y = mSourcePosition.y;
-
-        invalidationFlags |= FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID;
-    }
-*/
-    if( iInvalidate )
-        mGrid->GetBreakdown()->GetInbetweenerTag()->Invalidate( invalidationFlags );
-}
-
-void
 FInbetweenerPoint::SetTargetPosition( double iX, double iY, bool iInvalidate )
 {
-    //FInbetweenerBreakdown* nextBreakdown = mGrid->GetBreakdown()->GetNextBreakdown();
-    uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID
-                             | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
+    FInbetweenerBreakdown* nextBreakdown = mGrid->GetBreakdown()->GetNextBreakdown();
+    uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
                              | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING;
     uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
 
     mTargetPosition.x = iX;
     mTargetPosition.y = iY;
-/*
+
+    // this invalidation is not hierarchical.
+    mGrid->Invalidate( FInbetweenerGrid::INVALIDATE_TARGET );
+
     if( nextBreakdown )
     {
-        nextBreakdown->GetGrid()->GetPointBuffer()[pointIndex].mSourcePosition.x = mTargetPosition.x;
-        nextBreakdown->GetGrid()->GetPointBuffer()[pointIndex].mSourcePosition.y = mTargetPosition.y;
-
-        invalidationFlags |= FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEGRID;
+    // this invalidation is not hierarchical.
+        nextBreakdown->GetGrid()->Invalidate( FInbetweenerGrid::INVALIDATE_SOURCE );
     }
-*/
+
+    // this might be called in the Update function, that's why there are cases when we don't want to invalidate.
+    // Indeed, it is not wise to call invalidate() during the update.
     if( iInvalidate )
         mGrid->GetBreakdown()->GetInbetweenerTag()->Invalidate( invalidationFlags );
 }
@@ -185,6 +169,17 @@ FInbetweenerPoint::GetQuadList()
 void
 FInbetweenerPoint::SetID( uint32 iID )
 {
+    FInbetweenerBreakdown* firstBreakdown = mGrid->GetBreakdown()->GetInbetweenerTag()->GetBreakdownList().front();
+
+    if( firstBreakdown != mGrid->GetBreakdown() )
+    {
+        uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
+
+        firstBreakdown->GetGrid()->GetPointBuffer()[pointIndex].SetID( iID );
+
+        return;
+    }
+
     mID = iID;
 }
 
@@ -257,10 +252,11 @@ FInbetweenerPoint::SetPosition( eInbetweenerPointPositionType iPositionType
 {
     switch( iPositionType )
     {
+/* commented-out : set in constructor
         case eInbetweenerPointPositionType::SourcePosition :
             SetSourcePosition( iX, iY, iInvalidate );
         break;
-
+*/
         case eInbetweenerPointPositionType::InterpPosition :
             mInterpPosition = ::ULIS::FVec2D( iX, iY );
         break;

@@ -115,10 +115,10 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
                                , uint64 iTagInvalidationFlags );
         void ResetDeformation( bool iInvalidate );
 
-        friend class FOdysseyVectorTagInbetweener;
         bool ComputeARAPInterpolation( FChartDivision* iInbetween
                                      , bool useRigidTransform );
         bool PrecomputeARAPInterpolation();
+        void Invalidate( uint32 iInvalidationFlags );
 
     protected:
         ::ULIS::FVec2D GetCenterOfMass( eInbetweenerPointPositionType iPositionType );
@@ -146,6 +146,14 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
         double PolarDecomp( Eigen::Matrix2d &A, Eigen::Matrix2d &S );
         void GetValidRouteArray( std::vector<FInbetweenerRoute*>& oValidRouteArray );
 
+    public:
+        static const uint32 INVALIDATE_SOURCECENTEROFMASS = ( 1LL <<  0 );
+        static const uint32 INVALIDATE_TARGETCENTEROFMASS = ( 1LL <<  1 );
+        static const uint32 INVALIDATE_SOURCEBBOX         = ( 1LL <<  2 );
+        static const uint32 INVALIDATE_TARGETBBOX         = ( 1LL <<  3 );
+        static const uint32 INVALIDATE_SOURCE             = ( INVALIDATE_SOURCECENTEROFMASS | INVALIDATE_SOURCEBBOX );
+        static const uint32 INVALIDATE_TARGET             = ( INVALIDATE_TARGETCENTEROFMASS | INVALIDATE_TARGETBBOX );
+
     protected:
         FInbetweenerBreakdown* mBreakdown;
         std::vector<FInbetweenerPoint> mPointBuffer;
@@ -154,6 +162,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
     // ARAP interpolation (do not confuse with ARAP deformation)
     protected:
         uint32 mFlags;
+        uint32 mInvalidationFlags;
         // center of mass of the lattice in its reference and target positions
         ::ULIS::FVec2D mSourceCenterOfMass;
         ::ULIS::FVec2D mTargetCenterOfMass;

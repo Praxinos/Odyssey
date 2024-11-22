@@ -65,8 +65,6 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject
     , mGridNumQuadY( iNumQuadY )
     , mInterpolationType( eInbetweenerInterpolationType::ARAP )
     , mInvalidationFlags( INVALIDATE_MAP
-                        | INVALIDATE_SOURCEGRID
-                        | INVALIDATE_TARGETGRID
                         | INVALIDATE_ROUTES
                         | INVALIDATE_SPACING
                         | INVALIDATE_CELLS )
@@ -94,6 +92,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject
                       , TRAJECTORY_DEFAULT_BLUE_UINT8
                       , TRAJECTORY_DEFAULT_ALPHA_UINT8 )
     , bConstantWidth ( false )
+    , mExpectedTargetCell ( nullptr )
 {
     // the default breakdown (has range 0 <-> 1 )
     mBreakdownList.emplace_back( &mMasterBreakdown );
@@ -308,7 +307,6 @@ FOdysseyVectorTagInbetweener::AddRoute( FInbetweenerRoute* iRoute )
     iRoute->SetInbetweenerTag( this );
 
     Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_ROUTES
-              | FOdysseyVectorTagInbetweener::INVALIDATE_ROUTE_LIST
               | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
               | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
 }
@@ -320,8 +318,7 @@ FOdysseyVectorTagInbetweener::RemoveRoute( FInbetweenerRoute* iRoute )
 
     iRoute->SetInbetweenerTag( nullptr );
 
-    Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_ROUTE_LIST
-              | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
+    Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
               | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
 }
 
@@ -330,8 +327,7 @@ FOdysseyVectorTagInbetweener::RemoveAllRoutes()
 {
     mRouteList.clear();
 
-    Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_ROUTE_LIST
-              | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
+    Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING
               | FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
 }
 
@@ -396,7 +392,7 @@ FOdysseyVectorTagInbetweener::SetMapAsPolyline( bool iMapAsPolyline )
 {
     bMapAsPolyline = iMapAsPolyline;
 
-    Invalidate( INVALIDATE_MAP | INVALIDATE_CELLS | INVALIDATE_TARGETGRID );
+    Invalidate( INVALIDATE_MAP | INVALIDATE_CELLS );
 }
 
 const FColor&
@@ -891,12 +887,12 @@ FOdysseyVectorTagInbetweener::Added()
     {
         Share( mSharedEnv );
     }
-
+/* will be remade by Update()
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
         breakdown->GetGrid()->Make( true );
     }
-
+*/
     RedrawCells();
 }
 
@@ -927,19 +923,19 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             {
                 std::vector<::ULIS::FVec2D> sourceGeometry;
                 std::vector<::ULIS::FVec2D> targetGeometry;
-
+/*
                 // save positions for restoring when calling Make()
                 if( iUpdateFlags & FOdysseyVectorObject::UPDATE_FROMFILE )
                 {
                     breakdown->GetGrid()->GetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition );
                 }
-
+*/
                 breakdown->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
                 // Note: we cannot call Invalidate in Make() (hence the "false" arg), so we set the flags manually.
                 breakdown->GetGrid()->Make( sourceGeometry, targetGeometry, false );
 
                 // calling Invalidate make trigger a call to draw and this would block due to the mutexes.
-                mInvalidationFlags |= ( INVALIDATE_SOURCEGRID | INVALIDATE_TARGETGRID | INVALIDATE_MAP );
+                mInvalidationFlags |= ( INVALIDATE_MAP );
             }
         }
 
@@ -965,8 +961,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             breakdown->GetGrid()->UpdateBBox( iUpdateFlags, mInvalidationFlags );
         }
 
-        if( ( mInvalidationFlags & INVALIDATE_RANGE   )
-         || ( mInvalidationFlags & INVALIDATE_BUFFERS ) )
+        if( mInvalidationFlags & INVALIDATE_BUFFERS )
         {
             // alloc position for points at each interpolation step
             AllocBuffers();
@@ -979,22 +974,18 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         // for the center of mass.�
         for( FInbetweenerBreakdown* breakdown : mBreakdownList )
         {
-            breakdown->GetGrid()->UpdateCenterOfMass( iUpdateFlags, mInvalidationFlags );
-        }
+            FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionBuffer().back();
 
-        // Precompute ARAP interpolation after the grid and routes have been updated
-        if( ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEGRID          )
-         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID          )
-         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_INTERPOLATIONTYPE   )
-         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE            )
-        // || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SPACING    )
-         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_ROUTE_LIST          )
-         || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_MAP                 ) )
-        {
-            for( FInbetweenerBreakdown* breakdown : mBreakdownList )
+            // Precompute ARAP interpolation after the grid and routes have been updated
+            if( ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_INTERPOLATIONTYPE )
+             || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE          )
+             || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SPACING           )
+             || ( mInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_MAP               ) )
             {
                 if( breakdown->GetInbetweenerTag()->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
                 {
+                     breakdown->GetGrid()->UpdateCenterOfMass( iUpdateFlags, mInvalidationFlags );
+
                     bARAPPrecomputeSucceded = breakdown->GetGrid()->PrecomputeARAPInterpolation();
 
                     if( bARAPPrecomputeSucceded  == false )
@@ -1002,14 +993,13 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
                         UE_LOG( LogTemp, Error, TEXT("ERROR DURING ARAP PRECOMPUTE"));
                     }
                 }
-            }
-        }
 
-        // altering breakdown range alters buffers. We then have to deform target anew.
-        if( ( mInvalidationFlags & INVALIDATE_TARGETGRID )
-         || ( mInvalidationFlags & INVALIDATE_RANGE      ) )
-        {
-            DeformPathsAtTarget( );
+                // altering breakdown range alters buffers. We then have to deform target anew.
+                // deform the path according to grid geometry
+                breakdown->GetGrid()->DeformPaths( mInterpolatedPathBuffer
+                                                 , inbetween
+                                                 , eInbetweenerPointPositionType::TargetPosition );
+            }
         }
 
         for( FInbetweenerRoute* route : mRouteList )
@@ -1035,6 +1025,12 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
     }
 }
 
+IOdysseyVectorCell*
+FOdysseyVectorTagInbetweener::GetExpectedTargetCell()
+{
+    return mOwner->GetEngine()->GetLayer()->Contains( mExpectedTargetCell ) ? mExpectedTargetCell : nullptr;
+}
+
 FOdysseyVectorGroupPaint*
 FOdysseyVectorTagInbetweener::GetScene()
 {
@@ -1047,10 +1043,26 @@ FOdysseyVectorTagInbetweener::GetCell()
     return mOwner->GetEngine()->GetCell();
 }
 
+IOdysseyVectorCell*
+FOdysseyVectorTagInbetweener::GetSourceCell()
+{
+    uint32 sourceCellIndex = GetSourceCellIndex();
+
+    return GetOwner()->GetEngine()->GetLayer()->GetCellByIndex( sourceCellIndex );
+}
+
 int32
 FOdysseyVectorTagInbetweener::GetSourceCellIndex()
 {
     return mBreakdownList.front()->GetSourceCellIndex();
+}
+
+IOdysseyVectorCell*
+FOdysseyVectorTagInbetweener::GetTargetCell()
+{
+    uint32 targetCellIndex = GetTargetCellIndex();
+
+    return GetOwner()->GetEngine()->GetLayer()->GetCellByIndex( targetCellIndex );
 }
 
 int32
@@ -1090,6 +1102,8 @@ FOdysseyVectorTagInbetweener::ResizeDrawings()
     DispatchDrawings();
 
     ResizeRoutes();
+
+    mExpectedTargetCell = GetTargetCell();
 }
 
 void
@@ -1803,6 +1817,16 @@ FInbetweenerBreakdown*
 FOdysseyVectorTagInbetweener::GetMasterBreakdown()
 {
     return &mMasterBreakdown;
+}
+
+// static
+void
+FOdysseyVectorTagInbetweener::EvalSize( ::ULIS::FRectD& iWorldBBox
+                                       , uint32& oGridNumQuadX
+                                       , uint32& oGridNumQuadY )
+{
+    oGridNumQuadX = std::clamp<uint32>( iWorldBBox.w / 32, 1, 32 );
+    oGridNumQuadY = std::clamp<uint32>( iWorldBBox.h / 32, 1, 32 );
 }
 
 void

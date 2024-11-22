@@ -377,6 +377,8 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
     {
         if( mBreakdown )
         {
+           mBreakdown->GetInbetweenerTag()->LockDrawing();
+
             DrawBreakdown( iScene
                          , iBLContext
                          , mBreakdown
@@ -390,6 +392,8 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
                      , hcColor
                      , mBreakdown
                      , iScene->GetEngine()->GetCell()->GetIndex() );
+
+           mBreakdown->GetInbetweenerTag()->UnlockDrawing();
         }
     }
 }

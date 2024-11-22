@@ -19,6 +19,7 @@ FInbetweenerGrid::~FInbetweenerGrid()
 
 FInbetweenerGrid::FInbetweenerGrid( FInbetweenerBreakdown* iBreakdown )
     : mFlags( 0 )
+    , mInvalidationFlags ( 0 )
     , mBreakdown( iBreakdown )
 {
     //Make();
@@ -60,6 +61,7 @@ FInbetweenerGrid::GetCenterOfMass( eInbetweenerPointPositionType iPositionType )
 {
     ::ULIS::FVec2D center = ::ULIS::FVec2D( 0.0f, 0.0f );
     uint32 pointCount = 0;
+
     for ( FInbetweenerPoint& point : mPointBuffer )
     {
         ::ULIS::FVec2D pointPosition = point.GetPosition( iPositionType );
@@ -76,19 +78,33 @@ FInbetweenerGrid::GetCenterOfMass( eInbetweenerPointPositionType iPositionType )
 }
 
 void
+FInbetweenerGrid::Invalidate( uint32 iInvalidationFlags )
+{
+    mInvalidationFlags |= iInvalidationFlags;
+}
+
+void
 FInbetweenerGrid::UpdateBBox( uint32 iUpdateFlags
                             , uint64 iTagInvalidationFlags )
 {
-    if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEGRID )
-     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE   ) )
+    if( ( mInvalidationFlags    & INVALIDATE_SOURCEBBOX                             )
+     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE ) )
     {
-        mSourceBBox = GetBBox( eInbetweenerPointPositionType::SourcePosition, true );
+        FInbetweenerBreakdown* prevBreakdown = mBreakdown->GetPrevBreakdown();
+
+        // note: we could also use prevBreakdown->GetGrid()->mTargetBBox for faster but less safe if not updated
+        mSourceBBox = prevBreakdown ? prevBreakdown->GetGrid()->GetBBox( eInbetweenerPointPositionType::TargetPosition, true )
+                                    : GetBBox( eInbetweenerPointPositionType::SourcePosition, true );
+
+        mInvalidationFlags &= ~(INVALIDATE_SOURCEBBOX);
     }
 
-    if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID )
-     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE   ) )
+    if( ( mInvalidationFlags    & INVALIDATE_TARGETBBOX                             )
+     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE ) )
     {
         mTargetBBox = GetBBox( eInbetweenerPointPositionType::TargetPosition, true );
+
+        mInvalidationFlags &= ~(INVALIDATE_TARGETBBOX);
     }
 }
 
@@ -96,16 +112,24 @@ void
 FInbetweenerGrid::UpdateCenterOfMass( uint32 iUpdateFlags
                                     , uint64 iTagInvalidationFlags )
 {
-    if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEGRID )
-     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE   ) )
+    if( ( mInvalidationFlags    & INVALIDATE_SOURCECENTEROFMASS                     )
+     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE ) )
     {
-        mSourceCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::SourcePosition );
+        FInbetweenerBreakdown* prevBreakdown = mBreakdown->GetPrevBreakdown();
+
+        // note: we could also use prevBreakdown->GetGrid()->mTargetCenterOfMass for faster but less safe if not updated
+        mSourceCenterOfMass = prevBreakdown ? prevBreakdown->GetGrid()->GetCenterOfMass( eInbetweenerPointPositionType::TargetPosition )
+                                            : GetCenterOfMass( eInbetweenerPointPositionType::SourcePosition );
+
+        mInvalidationFlags &= ~(INVALIDATE_SOURCECENTEROFMASS);
     }
 
-    if( ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID )
-     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE   ) )
+    if( ( mInvalidationFlags    & INVALIDATE_TARGETCENTEROFMASS                     )
+     || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE ) )
     {
         mTargetCenterOfMass = GetCenterOfMass( eInbetweenerPointPositionType::TargetPosition );
+
+        mInvalidationFlags &= ~(INVALIDATE_TARGETCENTEROFMASS);
     }
 }
 
@@ -191,7 +215,7 @@ FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
         uint32 numVertexY = numQuadY + 1;
         uint32 pointID = 0;
 
-        mPointBuffer.resize( numVertexX * numVertexY );
+        mPointBuffer.reserve( numVertexX * numVertexY );
         mQuadBuffer.resize( numQuadX * numQuadY );
 
         // position vertices
@@ -200,29 +224,18 @@ FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
             for( uint32 j = 0; j < numVertexX; j++ )
             {
                 uint32 offset = ( i * numVertexX ) + j;
+                double u = std::clamp<double>( ( x - mGridBBox.x ) / mGridBBox.w, 0.0f, 1.0f );
+                double v = std::clamp<double>( ( y - mGridBBox.y ) / mGridBBox.h, 0.0f, 1.0f );
 
-                mPointBuffer[offset].Init( this );
-                mPointBuffer[offset].SetSourcePosition( x, y, iInvalidate );
-                mPointBuffer[offset].SetTargetPosition( x, y, iInvalidate );
+                FInbetweenerPoint& point = mPointBuffer.emplace_back( this, x, y, u, v );
 
-                mPointBuffer[offset].SetU( std::clamp<double>( ( x - mGridBBox.x ) / mGridBBox.w, 0.0f, 1.0f ) );
-                mPointBuffer[offset].SetV( std::clamp<double>( ( y - mGridBBox.y ) / mGridBBox.h, 0.0f, 1.0f ) );
+                point.SetTargetPosition( x, y, iInvalidate );
 
                 x += stepx;
             }
 
             y += stepy;
             x = mGridBBox.x;
-        }
-
-        if( iSourcePositionBuffer.size() /*== mPointBuffer.size()*/ )
-        {
-            for( uint32 i = 0; i < mPointBuffer.size(); i++ )
-            {
-                mPointBuffer[i].SetSourcePosition( iSourcePositionBuffer[i].x
-                                                 , iSourcePositionBuffer[i].y
-                                                 , iInvalidate  );
-            }
         }
 
         if( iTargetPositionBuffer.size() /*== mPointBuffer.size()*/ )
@@ -257,11 +270,13 @@ FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
 
         mQuadArea = ( mGridBBox.w * mGridBBox.h ) / mQuadBuffer.size();
 
+/*
         if( iInvalidate )
         {
             mBreakdown->GetInbetweenerTag()->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SOURCEGRID
                                                        | FOdysseyVectorTagInbetweener::INVALIDATE_TARGETGRID );
         }
+*/
     }
 }
 
@@ -777,7 +792,8 @@ FInbetweenerGrid::ComputeARAPInterpolation( FChartDivision* iInbetween
 
         //if( point.GetQuadCount() )
         {
-            FInbetweenerPoint::VectorType coords = V.row( point.GetID() );
+            uint32 pointID = point.GetID();
+            FInbetweenerPoint::VectorType coords = V.row( pointID );
 
             point.SetInterpPosition( coords.x(), coords.y() );
         }

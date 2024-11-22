@@ -464,6 +464,18 @@ UOdysseyAnimationLayerImageVector::GetCellByIndex( uint32 iIndex )
     return nullptr;
 }
 
+// Implements Interface IOdysseyVectorAnimationCell::Contains
+bool
+UOdysseyAnimationLayerImageVector::Contains( IOdysseyVectorCell* iCandidateCell )
+{
+    return GetCells().ContainsByPredicate( [ iCandidateCell ] ( UOdysseyAnimationCell* cell )
+                                           {
+                                               UOdysseyAnimationCellImageVector* vectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
+
+                                               return ( vectorCell == iCandidateCell ) ? true : false;
+                                           } );
+}
+
 // Implements Interface IOdysseyVectorAnimationCell::GetLastCell
 IOdysseyVectorCell*
 UOdysseyAnimationLayerImageVector::GetLastCell()
