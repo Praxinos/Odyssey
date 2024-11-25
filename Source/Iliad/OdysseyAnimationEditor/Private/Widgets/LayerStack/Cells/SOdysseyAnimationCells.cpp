@@ -525,7 +525,8 @@ SOdysseyAnimationCells::OnDragDetected(const FGeometry& iGeometry, const FPointe
 float
 SOdysseyAnimationCells::GetCellBreakIndicatorOffset(UOdysseyAnimationCell* iCell) const
 {
-    if (FOdysseyAnimationTimelineTools::Get().GetCurrentTool() != EOdysseyTimelineTool::Cut)
+    if (FOdysseyAnimationTimelineTools::Get().GetCurrentTool() != EOdysseyTimelineTool::Cut
+        && FOdysseyAnimationTimelineTools::Get().GetCurrentTool() != EOdysseyTimelineTool::CutAndClear)
         return 0.f;
 
     if (GetCellBreakIndicatorVisibility(iCell) != EVisibility::Visible)
@@ -547,7 +548,8 @@ SOdysseyAnimationCells::GetCellBreakIndicatorVisibility(UOdysseyAnimationCell* i
     if (mAnimationLayer->IsLockedRecursively())
         return EVisibility::Hidden;
 
-    if (FOdysseyAnimationTimelineTools::Get().GetCurrentTool() != EOdysseyTimelineTool::Cut)
+    if (FOdysseyAnimationTimelineTools::Get().GetCurrentTool() != EOdysseyTimelineTool::Cut
+        && FOdysseyAnimationTimelineTools::Get().GetCurrentTool() != EOdysseyTimelineTool::CutAndClear)
         return EVisibility::Hidden;
 
     if (!IsHovered() || iCell != mHoveredCell)

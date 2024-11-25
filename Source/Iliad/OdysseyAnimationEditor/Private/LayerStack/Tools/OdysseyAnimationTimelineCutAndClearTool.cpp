@@ -1,7 +1,7 @@
 // IDDN.FR.001.250001.005.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "LayerStack/Tools/OdysseyAnimationTimelineCutTool.h"
+#include "LayerStack/Tools/OdysseyAnimationTimelineCutAndClearTool.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "OdysseyAnimationEditorTimelinePosition.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -9,17 +9,17 @@
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
-FOdysseyAnimationTimelineCutTool::~FOdysseyAnimationTimelineCutTool()
+FOdysseyAnimationTimelineCutAndClearTool::~FOdysseyAnimationTimelineCutAndClearTool()
 {
 }
 
-FOdysseyAnimationTimelineCutTool::FOdysseyAnimationTimelineCutTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition)
+FOdysseyAnimationTimelineCutAndClearTool::FOdysseyAnimationTimelineCutAndClearTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition)
     : mTimelinePosition(iTimelinePosition)
 {
 }
 
 FReply
-FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iParams)
+FOdysseyAnimationTimelineCutAndClearTool::OnMouseButtonUp(const FMouseEventParams& iParams)
 {
     if (iParams.mMouseEvent.GetEffectingButton() != EKeys::LeftMouseButton)
         return FReply::Unhandled();
@@ -38,15 +38,11 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
         return FReply::Unhandled();
 
 #ifdef WITH_EDITOR
-    FScopedTransaction ScopedTransaction(LOCTEXT("timeline.cut-tool.transaction.break-cell", "Break Cell"));
+    FScopedTransaction ScopedTransaction(LOCTEXT("timeline.cut-and-clear-tool.transaction.break-cell", "Break Cell And Clear"));
 #endif
-    UOdysseyAnimationCell* newCell = cell->Break(frame - cell->GetFrameRange().GetLowerBoundValue(), false);
+    UOdysseyAnimationCell* newCell = cell->Break(frame - cell->GetFrameRange().GetLowerBoundValue(), true);
     if (!newCell)
         return FReply::Unhandled();
-
-    //Remove mark from the new cell, because we consider the new cell will be modified by the user and will not represent the original cell anymore
-    //This is an arbitrary choice, you are free to change this behaviour whenever you want without any side effect
-    FOdysseyObjectEditorUtils::SetPropertyValue(newCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Mark), INDEX_NONE);
 
     return FReply::Handled();
 }

@@ -37,7 +37,7 @@ public:
     UOdysseyAnimationCell* GetReferenceCellAtFrame(int Frame, bool Recursive = true) const;
 
 public:
-    virtual UOdysseyAnimationCell* Break(int Frame) override;
+    virtual UOdysseyAnimationCell* Break(int Frame, bool bClear) override;
 
 protected:
     void BehaviourChanged();

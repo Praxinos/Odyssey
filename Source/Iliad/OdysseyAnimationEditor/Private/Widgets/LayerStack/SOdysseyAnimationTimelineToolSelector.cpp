@@ -29,6 +29,11 @@ SOdysseyAnimationTimelineToolSelector::Construct(const FArguments& iArgs)
         + SSegmentedControl<EOdysseyTimelineTool>::Slot(EOdysseyTimelineTool::Cut)
         .Icon(FOdysseyStyle::GetBrush( "Animation.Timeline.Tools.Cut" ))
         .ToolTip(LOCTEXT("timeline.cut-tool.tooltip", "Cut Tool"))
+
+        //Cut Tool
+        + SSegmentedControl<EOdysseyTimelineTool>::Slot(EOdysseyTimelineTool::CutAndClear)
+        .Icon(FOdysseyStyle::GetBrush( "Animation.Timeline.Tools.CutAndClear" ))
+        .ToolTip(LOCTEXT("timeline.cut-and-clear-tool.tooltip", "Cut & Clear Tool"))
     ];
 }
 

@@ -82,10 +82,13 @@ public:
     TSharedPtr<FUICommandInfo> ActivateTimelineSelectionTool;
     TSharedPtr<FUICommandInfo> ActivateTimelineMoveTool;
     TSharedPtr<FUICommandInfo> ActivateTimelineCutTool;
+    TSharedPtr<FUICommandInfo> ActivateTimelineCutAndClearTool;
     TSharedPtr<FUICommandInfo> HoldActivateTimelineSelectionTool;
     TSharedPtr<FUICommandInfo> HoldActivateTimelineMoveTool;
     TSharedPtr<FUICommandInfo> HoldActivateTimelineCutTool;
+    TSharedPtr<FUICommandInfo> HoldActivateTimelineCutAndClearTool;
     TSharedPtr<FUICommandInfo> BreakCell;
+    TSharedPtr<FUICommandInfo> BreakAndClearCell;
     TSharedPtr<FUICommandInfo> RemoveCellMark;
     TArray<TSharedPtr<FUICommandInfo>> SetCellMark;
 
