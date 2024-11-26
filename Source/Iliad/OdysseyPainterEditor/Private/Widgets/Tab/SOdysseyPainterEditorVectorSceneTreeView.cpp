@@ -236,8 +236,11 @@ SOdysseyPainterEditorVectorSceneTreeView::Update( FOdysseyVectorGroupPaint* iSce
         //if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
         {
             int32 sceneCellIndex = iScene->GetEngine()->GetCell()->GetIndex();
+            FOdysseyVectorSharedEnv* sharedEnv = iScene->GetSharedEnv();
+            if (!sharedEnv)
+                return;
 
-            for( FOdysseyVectorTag* tag : iScene->GetSharedEnv()->GetSharedTagList() )
+            for( FOdysseyVectorTag* tag : sharedEnv->GetSharedTagList() )
             {
                 if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
                 {

@@ -51,6 +51,10 @@ UOdysseyAnimationCell::GetFrameRange() const
     if (!GetLayer())
         return FInt32Range::Empty();
 
+    const TArray<FInt32Range>& frameRanges = GetLayer()->GetCellsFrameRanges();
+    if (IndexInLayer < 0 || IndexInLayer >= frameRanges.Num())
+        return FInt32Range::Empty();
+
     return GetLayer()->GetCellsFrameRanges()[IndexInLayer];
 }
 
