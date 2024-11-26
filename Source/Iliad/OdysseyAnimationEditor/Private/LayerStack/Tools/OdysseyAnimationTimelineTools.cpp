@@ -5,7 +5,6 @@
 #include "LayerStack/Tools/OdysseyAnimationTimelineSelectionTool.h"
 #include "LayerStack/Tools/OdysseyAnimationTimelineMoveTool.h"
 #include "LayerStack/Tools/OdysseyAnimationTimelineCutTool.h"
-#include "LayerStack/Tools/OdysseyAnimationTimelineCutAndClearTool.h"
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
 #include "OdysseyKeyState.h"
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
@@ -30,7 +29,6 @@ FOdysseyAnimationTimelineTools::CreateTool(TSharedRef<FOdysseyAnimationEditorTim
         case EOdysseyTimelineTool::Selection: return MakeShared<FOdysseyAnimationTimelineSelectionTool>(iTimelinePosition, iTimelineCellSelection);
         case EOdysseyTimelineTool::Move: return MakeShared<FOdysseyAnimationTimelineMoveTool>(iTimelinePosition);
         case EOdysseyTimelineTool::Cut: return MakeShared<FOdysseyAnimationTimelineCutTool>(iTimelinePosition);
-        case EOdysseyTimelineTool::CutAndClear: return MakeShared<FOdysseyAnimationTimelineCutAndClearTool>(iTimelinePosition);
     }
 
     return nullptr;
@@ -65,10 +63,6 @@ FOdysseyAnimationTimelineTools::GetCurrentTool() const
     else if (FOdysseyAnimationEditorCommands::Get().HoldActivateTimelineCutTool->HasActiveChord(activeChord))
     {
         return EOdysseyTimelineTool::Cut;
-    }
-    else if (FOdysseyAnimationEditorCommands::Get().HoldActivateTimelineCutAndClearTool->HasActiveChord(activeChord))
-    {
-        return EOdysseyTimelineTool::CutAndClear;
     }
 
     return mCurrentTool;

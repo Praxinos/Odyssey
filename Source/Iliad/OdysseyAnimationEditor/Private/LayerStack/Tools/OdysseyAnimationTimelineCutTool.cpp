@@ -40,7 +40,7 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
 #ifdef WITH_EDITOR
     FScopedTransaction ScopedTransaction(LOCTEXT("timeline.cut-tool.transaction.break-cell", "Break Cell"));
 #endif
-    UOdysseyAnimationCell* newCell = cell->Break(frame - cell->GetFrameRange().GetLowerBoundValue(), false);
+    UOdysseyAnimationCell* newCell = cell->Break(frame - cell->GetFrameRange().GetLowerBoundValue(), !iParams.mMouseEvent.IsControlDown());
     if (!newCell)
         return FReply::Unhandled();
 

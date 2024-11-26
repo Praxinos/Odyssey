@@ -9,8 +9,7 @@ enum class EOdysseyTimelineTool
     None,
     Selection,
     Move,
-    Cut,
-    CutAndClear
+    Cut
 };
 
 class FOdysseyAnimationTimelineSelectionTool;

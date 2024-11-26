@@ -28,11 +28,6 @@ FOdysseyAnimationGlobalTimelineToolsShortcuts::MapActionsToCommandList(TSharedRe
         FOdysseyAnimationEditorCommands::Get().ActivateTimelineCutTool,
         FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineToolsShortcuts::Action_ActivateTimelineCutTool)
     );
-
-    iCommandList->MapAction(
-        FOdysseyAnimationEditorCommands::Get().ActivateTimelineCutAndClearTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyAnimationGlobalTimelineToolsShortcuts::Action_ActivateTimelineCutAndClearTool)
-    );
 }
 
 void
@@ -51,12 +46,6 @@ void
 FOdysseyAnimationGlobalTimelineToolsShortcuts::Action_ActivateTimelineCutTool()
 {
     FOdysseyAnimationTimelineTools::Get().SetCurrentTool(EOdysseyTimelineTool::Cut);
-}
-
-void
-FOdysseyAnimationGlobalTimelineToolsShortcuts::Action_ActivateTimelineCutAndClearTool()
-{
-    FOdysseyAnimationTimelineTools::Get().SetCurrentTool(EOdysseyTimelineTool::CutAndClear);
 }
 
 #undef LOCTEXT_NAMESPACE

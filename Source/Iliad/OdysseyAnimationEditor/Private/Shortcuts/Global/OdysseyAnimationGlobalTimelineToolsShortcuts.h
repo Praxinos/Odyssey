@@ -16,7 +16,6 @@ public:
     void Action_ActivateTimelineSelectionTool();
     void Action_ActivateTimelineMoveTool();
     void Action_ActivateTimelineCutTool();
-    void Action_ActivateTimelineCutAndClearTool();
 
 public:
     //Shortcuts
