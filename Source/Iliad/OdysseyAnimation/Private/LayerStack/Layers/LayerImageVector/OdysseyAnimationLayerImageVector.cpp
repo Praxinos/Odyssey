@@ -614,7 +614,7 @@ UOdysseyAnimationLayerImageVector::CheckBreakdownTargetMap()
         IOdysseyVectorCell* targetCell = breakdown->GetTargetCell();
         IOdysseyVectorLayer* layer = inbetweenerTag->GetOwner()->GetEngine()->GetLayer();
 
-        if( targetCell )
+        if( targetCell && sourceCell )
         {
             int32 targetCellIndex = targetCell->GetIndex();
             int32 expectedTargetCellIndex = layer->Contains(  expectedTargetCell ) ? expectedTargetCell->GetIndex()

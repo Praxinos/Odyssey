@@ -462,7 +462,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
     TSharedPtr<FOdysseyAnimationEditorTimelinePosition> timelinePosition = treeView->GetTimelinePosition();
     float offset = timelinePosition->GetOffset();
     float frameSize = timelinePosition->GetFrameSize();
-    float scrollByPixels = offset * frameSize /* * mLayoutScaleMultiplier */;
+    //float scrollByPixels = offset * frameSize /* * mLayoutScaleMultiplier */;
     static FSlateBrush defaultBrush;
 
     LayerId = STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnPaint( Args
@@ -502,7 +502,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 
         FSlateDrawElement::MakeBox( OutDrawElements
                                   , LayerId
-                                  , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x - ( scrollByPixels )
+                                  , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x
                                                                                , cellBox.y )
                                                                     , FVector2D( cellBox.w
                                                                                , cellBox.h ) )
@@ -520,7 +520,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 
             FSlateDrawElement::MakeLines( OutDrawElements
                                         , LayerId
-                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x - ( scrollByPixels )
+                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x
                                                                                      , cellBox.y )
                                                                           , FVector2D( cellBox.w
                                                                                      , cellBox.h ) )
@@ -580,7 +580,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
             {
                 FSlateDrawElement::MakeLines( OutDrawElements
                                             , LayerId
-                                            , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x - ( scrollByPixels )
+                                            , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x
                                                                                          , cellBox.y )
                                                                               , FVector2D( cellBox.w
                                                                                          , cellBox.h ) )
@@ -593,7 +593,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 
             FSlateDrawElement::MakeLines( OutDrawElements
                                         , LayerId
-                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x - ( scrollByPixels )
+                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x
                                                                                      , cellBox.y )
                                                                           , FVector2D( cellBox.w
                                                                                      , cellBox.h ) )
@@ -636,7 +636,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 
             FSlateDrawElement::MakeLines( OutDrawElements
                                         , LayerId
-                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x - ( scrollByPixels )
+                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x
                                                                                      , cellBox.y )
                                                                           , FVector2D( cellBox.w
                                                                                      , cellBox.h ) )
@@ -648,7 +648,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 
             FSlateDrawElement::MakeLines( OutDrawElements
                                         , LayerId
-                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x - ( scrollByPixels )
+                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x
                                                                                      , cellBox.y )
                                                                           , FVector2D( cellBox.w
                                                                                      , cellBox.h ) )
@@ -665,7 +665,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
         // draw candidate target (when resizing breakdown)
         FSlateDrawElement::MakeBox( OutDrawElements
                                   , LayerId
-                                  , AllottedGeometry.ToPaintGeometry( FVector2D( mCandidateTargetCellBox.x - ( scrollByPixels )
+                                  , AllottedGeometry.ToPaintGeometry( FVector2D( mCandidateTargetCellBox.x
                                                                                , mCandidateTargetCellBox.y )
                                                                     , FVector2D( mCandidateTargetCellBox.w
                                                                                , mCandidateTargetCellBox.h ) )
@@ -682,7 +682,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
 
     FSlateDrawElement::MakeLines( OutDrawElements
                                 , LayerId
-                                , AllottedGeometry.ToPaintGeometry( FVector2D( mBoxPos.X - ( scrollByPixels )
+                                , AllottedGeometry.ToPaintGeometry( FVector2D( mBoxPos.X
                                                                              , mBoxPos.Y )
                                                                   , FVector2D( mBoxSize.X
                                                                              , mBoxSize.Y ) )
