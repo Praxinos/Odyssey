@@ -41,11 +41,11 @@ FOdysseyVectorExportV2::WriteTagInbetweenerBreakdownsLayout( FOdysseyVectorTagIn
 
         for( FInbetweenerBreakdown* breakdown : iInbetweenerTag.GetBreakdownList() )
         {
-            uint32 master = breakdown->GetMasterBreakdown() ? 0 : 1;
+            uint32 ignored = 0;
             uint32 sourceDrawingIndex = breakdown->GetSourceDrawingIndex();
             uint32 targetDrawingIndex = breakdown->GetTargetDrawingIndex();
 
-            Ar << master;
+            Ar << ignored;
             Ar << sourceDrawingIndex;
             Ar << targetDrawingIndex;
         }
@@ -157,66 +157,6 @@ FOdysseyVectorExportV2::WriteTagInbetweenerDeformation( FOdysseyVectorTagInbetwe
         uint32 gridType = static_cast<uint32>(iInbetweenerTag.GetGridType());
 
         Ar << gridType;
-    } );
-}
-
-void
-FOdysseyVectorExportV2::WriteTagInbetweenerTransformScaling( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                                           , FArchive &Ar )
-{
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM_SCALING
-                            , Ar
-                            , [&iInbetweenerTag](FArchive &Ar) -> void
-    {
-        double scalingX = iInbetweenerTag.GetMasterBreakdown()->GetTargetScalingX();
-        double scalingY = iInbetweenerTag.GetMasterBreakdown()->GetTargetScalingY();
-
-        Ar << scalingX;
-        Ar << scalingY;
-    } );
-}
-
-void
-FOdysseyVectorExportV2::WriteTagInbetweenerTransformRotation( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                                            , FArchive &Ar )
-{
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM_ROTATION
-                            , Ar
-                            , [&iInbetweenerTag](FArchive &Ar) -> void
-    {
-        double rotation = iInbetweenerTag.GetMasterBreakdown()->GetTargetRotation();
-
-        Ar << rotation;
-    } );
-}
-
-void
-FOdysseyVectorExportV2::WriteTagInbetweenerTransformTranslation( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                                               , FArchive &Ar )
-{
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM_TRANSLATION
-                            , Ar
-                            , [&iInbetweenerTag](FArchive &Ar) -> void
-    {
-        double translationX = iInbetweenerTag.GetMasterBreakdown()->GetTargetTranslationX();
-        double translationY = iInbetweenerTag.GetMasterBreakdown()->GetTargetTranslationY();
-
-        Ar << translationX;
-        Ar << translationY;
-    } );
-}
-
-void
-FOdysseyVectorExportV2::WriteTagInbetweenerTransform( FOdysseyVectorTagInbetweener& iInbetweenerTag
-                                                    , FArchive &Ar )
-{
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_TRANSFORM
-                            , Ar
-                            , [&iInbetweenerTag](FArchive &Ar) -> void
-    {
-        WriteTagInbetweenerTransformTranslation( iInbetweenerTag, Ar );
-        WriteTagInbetweenerTransformRotation( iInbetweenerTag, Ar );
-        WriteTagInbetweenerTransformScaling( iInbetweenerTag, Ar );
     } );
 }
 
@@ -374,7 +314,7 @@ FOdysseyVectorExportV2::WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbe
         WriteTagInbetweenerMapAsPolyline( iInbetweenerTag, Ar );
         WriteTagInbetweenerWithThickness( iInbetweenerTag, Ar );
         WriteTagInbetweenerConstantWidth( iInbetweenerTag, Ar );
-        WriteTagInbetweenerTransform( iInbetweenerTag, Ar );
+        //WriteTagInbetweenerTransform( iInbetweenerTag, Ar );
         WriteTagInbetweenerDeformation( iInbetweenerTag, Ar );
         WriteTagInbetweenerInterpolation( iInbetweenerTag, Ar );
         WriteTagInbetweenerDirection( iInbetweenerTag, Ar );

@@ -83,7 +83,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
 
                     Ar << drawingCount;
 
-                    iInbetweenerTag.GetMasterBreakdown()->SetTargetDrawingIndex( drawingCount - 1 );
+                    iInbetweenerTag.GetBreakdownList().front()->SetTargetDrawingIndex( drawingCount - 1 );
                 }
                 break;
 
@@ -127,7 +127,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     Ar << translationX;
                     Ar << translationY;
 
-                    iInbetweenerTag.GetMasterBreakdown()->Translate( translationX, translationY );
+                    iInbetweenerTag.GetBreakdownList().front()->Translate( translationX, translationY );
                     //iInbetweenerTag.UpdateMatrix();
                 break;
 
@@ -136,7 +136,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
 
                     Ar << rotation;
 
-                    iInbetweenerTag.GetMasterBreakdown()->Rotate( rotation );
+                    iInbetweenerTag.GetBreakdownList().front()->Rotate( rotation );
                     //iInbetweenerTag.UpdateMatrix();
                 break;
 
@@ -147,7 +147,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     Ar << scalingX;
                     Ar << scalingY;
 
-                    iInbetweenerTag.GetMasterBreakdown()->Scale( scalingX, scalingY );
+                    iInbetweenerTag.GetBreakdownList().front()->Scale( scalingX, scalingY );
                     //iInbetweenerTag.UpdateMatrix();
                 break;
 
@@ -248,7 +248,7 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
 
                 case FOdysseyFile::VectorV2::CHUNK_TAGINBETWEENER_BREAKDOWNS_LAYOUT: // container
                 {
-                    FInbetweenerBreakdown* masterBreakdown = iInbetweenerTag.GetMasterBreakdown();
+                    FInbetweenerBreakdown* defaultBreakdown = iInbetweenerTag.GetBreakdownList().front();
                     uint32 breakdownCount;
 
                     Ar << breakdownCount;
@@ -256,24 +256,19 @@ FOdysseyVectorImportV2::ReadTagInbetweener( FOdysseyVectorTagInbetweener& iInbet
                     for( uint32 i = 0; i < breakdownCount; i++ )
                     {
                         FInbetweenerBreakdown* breakdown;
-                        uint32 master;
+                        uint32 ignored;
                         uint32 sourceDrawingIndex;
                         uint32 targetDrawingIndex;
 
-                        Ar << master;
-                        Ar << sourceDrawingIndex; // actually unneeded
+                        Ar << ignored;
+                        Ar << sourceDrawingIndex; // ignored
                         Ar << targetDrawingIndex;
 
-                        breakdown = ( master ) ? masterBreakdown
-                                               : new FInbetweenerBreakdown( &iInbetweenerTag );
+                        breakdown = new FInbetweenerBreakdown( &iInbetweenerTag );
 
-                        if( master == 0 )
+                        if( targetDrawingIndex != defaultBreakdown->GetTargetDrawingIndex() )
                         {
                             iInbetweenerTag.AddBreakdown( breakdown, targetDrawingIndex, false, false );
-                        }
-                        else
-                        {
-                            breakdown->SetTargetDrawingIndex( targetDrawingIndex );
                         }
                     }
                 }

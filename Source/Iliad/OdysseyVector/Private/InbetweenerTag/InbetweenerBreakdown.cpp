@@ -10,6 +10,7 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCell.h"
+#include "OdysseyVectorLayer.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846L
@@ -64,12 +65,6 @@ FInbetweenerBreakdown::GetSourceBBox( bool iWorld )
     }
 
     return bbox;
-}
-
-bool
-FInbetweenerBreakdown::IsMaster()
-{
-    return ( this == mInbetweenerTag->GetMasterBreakdown() ) ? true : false;
 }
 
 ::ULIS::FRectD
@@ -193,12 +188,6 @@ FInbetweenerBreakdown::InterpolateTransform()
 
         BLMatrix2D::invert( inbetween->drawing->inverseMatrix, inbetween->drawing->localMatrix );
     }
-}
-
-FInbetweenerBreakdown*
-FInbetweenerBreakdown::GetMasterBreakdown()
-{
-    return mInbetweenerTag->GetMasterBreakdown();
 }
 
 void
@@ -668,6 +657,23 @@ FInbetweenerBreakdown::GetDrawingCount()
 
     return mTargetDrawingIndex - sourceDrawingIndex + 1;
 }
+
+IOdysseyVectorCell*
+FInbetweenerBreakdown::GetSourceCell()
+{
+    uint32 sourceCellIndex = GetSourceCellIndex();
+
+    return mInbetweenerTag->GetOwner()->GetEngine()->GetLayer()->GetCellByIndex( sourceCellIndex );
+}
+
+IOdysseyVectorCell*
+FInbetweenerBreakdown::GetTargetCell()
+{
+    uint32 targetCellIndex = GetTargetCellIndex();
+
+    return mInbetweenerTag->GetOwner()->GetEngine()->GetLayer()->GetCellByIndex( targetCellIndex );
+}
+
 
 int32
 FInbetweenerBreakdown::GetTargetCellIndex()

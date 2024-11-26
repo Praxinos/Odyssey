@@ -14,6 +14,9 @@
 
 #include "OdysseyAnimationLayerImageVector.generated.h"
 
+class IOdysseyVectorCell;
+class FInbetweenerBreakdown;
+
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationLayerImageVector
     : public UOdysseyAnimationLayer, public IOdysseyVectorLayer
@@ -38,6 +41,8 @@ public:
     virtual void PostLoad() override;
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual void Serialize(FArchive& Ar) override;
+    virtual void PreEditChange( FProperty* PropertyAboutToChange ) override;
+    virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
 public:
     //UOdysseyLayer overrides
@@ -66,6 +71,8 @@ protected:
     void IsWireframeChanged();
     virtual void CellsChanged(bool iIsInteractive) override;
     virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
+    void MakeBreakdownTargetMap();
+    void CheckBreakdownTargetMap();
 
 public:
 
@@ -99,4 +106,5 @@ public:
 private:
     // mSharedEnv MUST be before mCellsContainer because of the destruction order
     FOdysseyVectorSharedEnv mSharedEnv;
+    TMap<FInbetweenerBreakdown*, IOdysseyVectorCell*> mBreakdownTargetMap;
 };

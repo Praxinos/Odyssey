@@ -132,6 +132,8 @@ FOdysseyAnimationEditorGUI::OnMediaChanged()
     UOdysseyAnimationLayerImageVector* currentVectorLayer = Cast<UOdysseyAnimationLayerImageVector>(mExtension->GetEditor()->LayerStack()->CurrentLayer.Get());
     uint64 returnFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
                        | FOdysseyPainterEditor::UI_UPDATE_HUD;
+
+#ifdef unused
     std::list<FOdysseyVectorTagInbetweener*> inbetweenerTagList;
 
     if( currentVectorLayer )
@@ -176,6 +178,7 @@ FOdysseyAnimationEditorGUI::OnMediaChanged()
             inbetweenerTag->GetBreakdownList().back()->SetTargetDrawingIndex( 1 );
         }
     }
+#endif
 
     ParseVectorNotifications( nullptr, FOdysseyPainterEditor::UI_UPDATE_TIMELINE );
 }

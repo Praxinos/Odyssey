@@ -25,9 +25,9 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
-
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorRoot.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAlter.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 
@@ -557,12 +557,133 @@ UOdysseyAnimationLayerImageVector::IsRowVisible(FName iSubRowName) const
 #endif //WITH_EDITOR
 
 void
+UOdysseyAnimationLayerImageVector::MakeBreakdownTargetMap()
+{
+    std::list<FOdysseyVectorTagInbetweener*> inbetweenerTagList;
+    uint64 notificationFlags = 0xFFFFFFFFFFFFFFFF;
+
+    // Make breakdown lookup for adapting the length of the inbetweener tags
+    for( FOdysseyVectorTag* sharedTag : mSharedEnv.GetSharedTagList() )
+    {
+        if( sharedTag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+        {
+            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>( sharedTag );
+            // we copy the list because we may alter it.
+            std::list<FInbetweenerBreakdown*> breakdownList = inbetweenerTag->GetBreakdownList();
+
+            inbetweenerTagList.push_back( inbetweenerTag );
+
+            for( FInbetweenerBreakdown* breakdown : breakdownList )
+            {
+                mBreakdownTargetMap.Add( breakdown, breakdown->GetTargetCell() );
+            }
+        }
+    }
+
+    if( inbetweenerTagList.size() )
+    {
+        // needed for valid GUndo pointer
+        if( GUndo )
+        {
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( &mSharedEnv
+                                                                                         , inbetweenerTagList
+                                                                                         , notificationFlags );
+
+            // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
+            // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
+            // of a call to GEditor::PostEditChangeProperty()
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+/*
+            TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
+*/
+        }
+    }
+}
+
+void
+UOdysseyAnimationLayerImageVector::CheckBreakdownTargetMap()
+{
+    for ( const auto& pair : mBreakdownTargetMap )
+    {
+        FInbetweenerBreakdown* breakdown = pair.Key;
+        IOdysseyVectorCell* expectedTargetCell = pair.Value;
+        FOdysseyVectorTagInbetweener* inbetweenerTag = breakdown->GetInbetweenerTag();
+        IOdysseyVectorCell* sourceCell = inbetweenerTag->GetSourceCell();
+        IOdysseyVectorCell* targetCell = breakdown->GetTargetCell();
+        IOdysseyVectorLayer* layer = inbetweenerTag->GetOwner()->GetEngine()->GetLayer();
+
+        if( targetCell )
+        {
+            int32 targetCellIndex = targetCell->GetIndex();
+            int32 expectedTargetCellIndex = layer->Contains(  expectedTargetCell ) ? expectedTargetCell->GetIndex()
+                                                                                   : targetCellIndex;
+
+            if( expectedTargetCell != targetCell )
+            {
+                int32 sourceCellIndex = sourceCell->GetIndex();
+
+                int32 relativeIndex = ( expectedTargetCellIndex - sourceCellIndex ) * (int32) inbetweenerTag->GetInterpolationDirection();
+
+                if( relativeIndex > 0 )
+                {
+                    breakdown->SetTargetDrawingIndex( relativeIndex );
+                }
+            }
+        }
+        else
+        {
+            if( inbetweenerTag->GetBreakdownCount() > 1 )
+            {
+                inbetweenerTag->RemoveBreakdown( breakdown, false );
+            }
+            else
+            {
+                breakdown->SetTargetDrawingIndex( 1 );
+            }
+        }
+    }
+
+    mSharedEnv.Update( 0 );
+
+    FOdysseyVectorEngine::Notify( nullptr, 0xFFFFFFFFFFFFFFFF );
+
+
+    mBreakdownTargetMap.Empty();
+}
+
+void
+UOdysseyAnimationLayerImageVector::PreEditChange( FProperty* PropertyAboutToChange )
+{
+    Super::PreEditChange( PropertyAboutToChange );
+
+    if( PropertyAboutToChange->GetName() == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, Cells ) )
+    {
+        MakeBreakdownTargetMap();
+    }
+}
+
+void
+UOdysseyAnimationLayerImageVector::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
+{
+    Super::PostEditChangeProperty( PropertyChangedEvent );
+
+    if( PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, Cells ) )
+    {
+        CheckBreakdownTargetMap();
+    }
+}
+
+void
 UOdysseyAnimationLayerImageVector::CellsChanged(bool iIsInteractive)
 {
     Super::CellsChanged(iIsInteractive);
 
     if (!iIsInteractive)
         UpdateSharedEnv();
+
+    //CheckInbetweens();
 }
 
 #undef LOCTEXT_NAMESPACE

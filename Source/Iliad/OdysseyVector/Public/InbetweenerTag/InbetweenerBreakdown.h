@@ -14,6 +14,7 @@
 class FOdysseyVectorTagInbetweener;
 class FOdysseyVectorGroupPaint;
 enum class eInbetweenerGridType : uint8;
+class IOdysseyVectorCell;
 
 class ODYSSEYVECTOR_API FInbetweenerBreakdown
 {
@@ -33,9 +34,7 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         BLMatrix2D& GetTargetWorldMatrix();
         BLMatrix2D& GetTargetInverseWorldMatrix();
         FOdysseyVectorTagInbetweener* GetInbetweenerTag();
-        FInbetweenerBreakdown* GetMasterBreakdown();
-        void DrawPathsAtTarget( FOdysseyVectorGroupPaint* iDisplayedScene, BLContext* iBLContext, bool iLock );
-        void DrawPathsAtSource( FOdysseyVectorGroupPaint* iDisplayedScene, BLContext* iBLContext, bool iLock );
+        //FInbetweenerBreakdown* GetMasterBreakdown();
         void SetPrevBreakdown( FInbetweenerBreakdown* iPrevBreakdown );
         void SetNextBreakdown( FInbetweenerBreakdown* iNextBreakdown );
 
@@ -73,7 +72,7 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         double GetSourceScalingX();
         double GetSourceScalingY();
 
-        bool  IsMaster();
+        //bool  IsMaster();
         uint32 GetDrawingCount();
         FInbetweenerChart* GetChart();
         void DrawSourceGrid( BLContext* iBLContext, bool iLock );
@@ -83,6 +82,8 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         void EaseIn( float iEasing, uint32 iFrom, uint32 iTo );
         void EaseOut( float iEasing, uint32 iFrom, uint32 iTo );
         void EaseInAndOut( float iEasing, FChartDivision* iInbetween );
+        IOdysseyVectorCell* GetTargetCell();
+        IOdysseyVectorCell* GetSourceCell();
 
     protected:
         void DrawGrid( BLContext* iBLContext

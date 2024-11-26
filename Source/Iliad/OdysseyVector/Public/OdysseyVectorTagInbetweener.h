@@ -230,14 +230,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                        , BLContext* iBLContext
                        , bool iLock );
         uint32 GetBreakdownCount();
-        FInbetweenerBreakdown* GetMasterBreakdown();
         void RemoveBreakdown( FInbetweenerBreakdown* iBreakdown, bool iFreeMemNow );
         FInbetweenerBreakdown* GetBreakdown( uint32 iDrawingIndex, bool iStrict );
         std::list<FInbetweenerBreakdown*>::iterator GetBreakdownItem( uint32 iDrawingIndex, bool iStrict  );
         void ResizeRoutes();
         void FitRoutes( uint32 iFitFrom );
         //void SetChart( const FInbetweenerChart& iChart );
-        void ResetLayout( bool iFreeMemNow );
+        void ResetLayout( bool iFreeMemNow, FInbetweenerBreakdown* iNewDefaultBreakdown );
         FInbetweenerDrawing* GetDrawing( uint32 iIndex );
         virtual void UpdateMatrix() override;
         virtual void ObjectAdded() override;
@@ -271,7 +270,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         static void EvalSize( ::ULIS::FRectD& iWorldBBox, uint32& iGridNumQuadX, uint32& iGridNumQuadY );
         IOdysseyVectorCell* GetSourceCell();
         IOdysseyVectorCell* GetTargetCell();
-        IOdysseyVectorCell* GetExpectedTargetCell();
 
     protected:
         /**
@@ -356,7 +354,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         bool bMapAsPolyline;
         bool bWithThickness;
         bool bContiguous;
-        FInbetweenerBreakdown mMasterBreakdown;
         uint32 mUsedQuadCount;
         uint32 mUsedPointCount;
         bool bARAPPrecomputeSucceded;
@@ -371,5 +368,4 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         // arrays for accessing only useful grid points (for faster processing or ARAP interpolation)
         std::vector<uint32> mUsedPointIndexBuffer;
         bool bConstantWidth;
-        IOdysseyVectorCell* mExpectedTargetCell;
 };

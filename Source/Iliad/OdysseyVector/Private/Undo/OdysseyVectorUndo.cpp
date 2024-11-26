@@ -397,13 +397,13 @@ bool
 FSnapshotLayout::LoadState( FSnapshotLayout::State* iState )
 {
     // erase all breakdowns except the default one
-    mInbetweenerTag->ResetLayout( false );
+    mInbetweenerTag->ResetLayout( false, iState->breakdownArray.back() );
 
     for( uint32 i = 0; i < iState->breakdownArray.size(); i++ )
     {
         FInbetweenerBreakdown* breakdown =  iState->breakdownArray[i];
 
-        if( breakdown != mInbetweenerTag->GetMasterBreakdown() )
+        if( breakdown != iState->breakdownArray.back() )
         {
             mInbetweenerTag->AddBreakdown( iState->breakdownArray[i]
                                          , iState->targetBuffer[i]
@@ -412,7 +412,7 @@ FSnapshotLayout::LoadState( FSnapshotLayout::State* iState )
         }
         else
         {
-            breakdown->SetTargetDrawingIndex(  iState->targetBuffer[i] );
+            breakdown->SetTargetDrawingIndex( iState->targetBuffer[i] );
         }
     }
 

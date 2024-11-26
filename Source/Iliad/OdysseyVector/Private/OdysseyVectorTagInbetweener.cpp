@@ -37,13 +37,9 @@ FOdysseyVectorTagInbetweener::~FOdysseyVectorTagInbetweener()
                                   return true;
                               } );
 
-    //delete mGrid;
     mBreakdownList.remove_if( []( FInbetweenerBreakdown* breakdown )
                               {
-                                  if( breakdown != breakdown->GetMasterBreakdown() )
-                                  {
-                                      delete breakdown;
-                                  }
+                                  delete breakdown;
 
                                   return true;
                               } );
@@ -71,7 +67,6 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject
     , bMapAsPolyline( true )
     , bWithThickness( true )
     , bContiguous( true )
-    , mMasterBreakdown( this )
     , bARAPPrecomputeSucceded( false )
     , mInterpolationDirection( eInbetweenerInterpolationDirection::Forward )
     , bSquare ( true )
@@ -92,21 +87,14 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject
                       , TRAJECTORY_DEFAULT_BLUE_UINT8
                       , TRAJECTORY_DEFAULT_ALPHA_UINT8 )
     , bConstantWidth ( false )
-    , mExpectedTargetCell ( nullptr )
 {
+    FInbetweenerBreakdown* defaultBreakdown = new FInbetweenerBreakdown( this );
+
     // the default breakdown (has range 0 <-> 1 )
-    mBreakdownList.emplace_back( &mMasterBreakdown );
+    mBreakdownList.emplace_back( defaultBreakdown );
 
-    // Note: Grid building needs the bbox to be set.
-    //SetGrid( mGridType, iNumQuadX, iNumQuadY );
-
-    // match drawing with the number of inbetween in the breakdown's chart at first.
-    mDrawingBuffer.reserve( mMasterBreakdown.GetDrawingCount() );
-    for( uint32 i = 0; i < mMasterBreakdown.GetDrawingCount(); i++ )
-    {
-        mDrawingBuffer.emplace_back( this );
-    }
-    //ResizeChart( true );
+    // force initial dispatching of the drawings
+    defaultBreakdown->SetTargetDrawingIndex( 1 );
 
     // Note: Matrix needs chart to be allocated first.
     UpdateMatrix();
@@ -119,6 +107,7 @@ FOdysseyVectorTagInbetweener::Copy( FOdysseyVectorObject* iDestOwnerObject )
                                                                             , mGridNumQuadX
                                                                             , mGridNumQuadY
                                                                             , mGridType );
+    FInbetweenerBreakdown* newTagDefaultBreakdown = newTag->GetBreakdownList().front();
 
     newTag->mInterpolationType = mInterpolationType;
     newTag->mInbetweenColor = mInbetweenColor;
@@ -130,11 +119,17 @@ FOdysseyVectorTagInbetweener::Copy( FOdysseyVectorObject* iDestOwnerObject )
     newTag->mChartColor = mChartColor;
     newTag->mGridColor = mGridColor;
 
-    newTag->GetMasterBreakdown()->SetTargetDrawingIndex( GetLength() - 1 );
+    newTagDefaultBreakdown->SetTargetDrawingIndex( GetLength() - 1 );
 
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
-        newTag->AddBreakdown( breakdown->GetTargetDrawingIndex(), false, false );
+        uint32 breakdownTargetDrawingIndex = breakdown->GetTargetDrawingIndex();
+
+        if( ( breakdownTargetDrawingIndex > newTagDefaultBreakdown->GetSourceDrawingIndex() )
+         && ( breakdownTargetDrawingIndex < newTagDefaultBreakdown->GetTargetDrawingIndex() ) )
+        {
+            newTag->AddBreakdown( breakdown->GetTargetDrawingIndex(), false, false );
+        }
     }
 /*
     for( FInbetweenerRoute* route : mRouteList )
@@ -358,7 +353,7 @@ FOdysseyVectorTagInbetweener::AddRoute( const ::ULIS::FVec2D& iLocalCoords, bool
 
         if( iFit )
         {
-            route->Fit( 0 );
+            //route->Fit( 0 );
         }
 
         return route;
@@ -447,8 +442,11 @@ FOdysseyVectorTagInbetweener::AddBreakdown( uint32 iDrawingIndex
 
 // Removes all breakdowns but the default one
 void
-FOdysseyVectorTagInbetweener::ResetLayout( bool iFreeMemNow )
+FOdysseyVectorTagInbetweener::ResetLayout( bool iFreeMemNow, FInbetweenerBreakdown* iNewDefaultBreakdown )
 {
+    //FInbetweenerBreakdown* newDefaultBreakdown = new FInbetweenerBreakdown( this );
+    uint32 currentTargetDrawingIndex = mBreakdownList.back()->GetTargetDrawingIndex();
+
     std::vector<::ULIS::FVec2D> sourceGeometry;
     std::vector<::ULIS::FVec2D> targetGeometry;
 
@@ -456,9 +454,10 @@ FOdysseyVectorTagInbetweener::ResetLayout( bool iFreeMemNow )
     mBreakdownList.back() ->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
 
     mBreakdownList.remove_if( [ this
+                              , iNewDefaultBreakdown
                               , iFreeMemNow ]( FInbetweenerBreakdown* breakdown )
                               {
-                                  if( iFreeMemNow && ( breakdown != breakdown->GetMasterBreakdown() ) )
+                                  if( ( iFreeMemNow ) && ( breakdown != iNewDefaultBreakdown ) )
                                   {
                                       delete breakdown;
                                   }
@@ -466,12 +465,19 @@ FOdysseyVectorTagInbetweener::ResetLayout( bool iFreeMemNow )
                                   return true;
                               } );
 
-    mBreakdownList.push_back( &mMasterBreakdown );
+    if( iNewDefaultBreakdown )
+    {
+        mBreakdownList.push_back( iNewDefaultBreakdown );
+
+        iNewDefaultBreakdown->SetInbetweenerTag( this );
+
+        iNewDefaultBreakdown->SetTargetDrawingIndex( currentTargetDrawingIndex );
+
+        iNewDefaultBreakdown->GetGrid()->SetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition, true );
+        iNewDefaultBreakdown->GetGrid()->SetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition, true );
+    }
 
     ChainBreakdowns();
-
-    mMasterBreakdown.GetGrid()->SetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition, true );
-    mMasterBreakdown.GetGrid()->SetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition, true );
 
     Invalidate( INVALIDATE_BREAKDOWN_LIST );
 }
@@ -492,16 +498,6 @@ FOdysseyVectorTagInbetweener::ChainBreakdowns()
         breakdown->SetPrevBreakdown( (     it != mBreakdownList.begin() ) ? *prevIt : nullptr );
         breakdown->SetNextBreakdown( ( nextIt != mBreakdownList.end()   ) ? *nextIt : nullptr );
     }
-
-    // Reset grid at source position for first the breakdown (must always be squared)
-    std::vector<::ULIS::FVec2D> sourceGeometry;
-    std::vector<::ULIS::FVec2D> targetGeometry;
-
-    // save positions for restoring when calling Make()
-/*
-    mBreakdownList.front()->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
-    mBreakdownList.front()->GetGrid()->Make( sourceGeometry, targetGeometry );
-*/
 }
 
 FInbetweenerBreakdown*
@@ -692,9 +688,18 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
 {
     LockDrawing();
 
-    if( iBreakdown != &mMasterBreakdown )
+    if( mBreakdownList.size() > 1 )
     {
         FInbetweenerBreakdown* nextBreakdown = iBreakdown->GetNextBreakdown();
+
+        mBreakdownList.remove_if( [iBreakdown]( FInbetweenerBreakdown* listedBreakdown )
+                                    {
+                                        return ( iBreakdown == listedBreakdown ) ? true : false;
+                                    } );
+
+        iBreakdown->SetInbetweenerTag( nullptr );
+
+        ChainBreakdowns();
 
         if( nextBreakdown )
         {
@@ -708,15 +713,8 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
             std::vector<float> nextBreakdownSpacing;
             uint32 newInbetweenIndex, i;
 
-            mBreakdownList.remove_if( [iBreakdown]( FInbetweenerBreakdown* listedBreakdown )
-                                      {
-                                          return ( iBreakdown == listedBreakdown ) ? true : false;
-                                      } );
-
             iBreakdown->GetChart()->GetSpacing( removedBreakdownSpacing );
             nextBreakdown->GetChart()->GetSpacing( nextBreakdownSpacing );
-
-            ChainBreakdowns();
 
             // This will force reallocation of the chart and dispatching of drawings
             nextBreakdown->SetTargetDrawingIndex( nextBreakdown->GetTargetDrawingIndex() );
@@ -740,8 +738,6 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
             // nextBreakdown source grid gets its shape from this removed breakdown source grid.
             nextBreakdown->GetGrid()->SetGeometry( breakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition, true );
         }
-
-        iBreakdown->SetInbetweenerTag( nullptr );
     }
 
     UnlockDrawing();
@@ -1025,12 +1021,6 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
     }
 }
 
-IOdysseyVectorCell*
-FOdysseyVectorTagInbetweener::GetExpectedTargetCell()
-{
-    return mOwner->GetEngine()->GetLayer()->Contains( mExpectedTargetCell ) ? mExpectedTargetCell : nullptr;
-}
-
 FOdysseyVectorGroupPaint*
 FOdysseyVectorTagInbetweener::GetScene()
 {
@@ -1102,8 +1092,6 @@ FOdysseyVectorTagInbetweener::ResizeDrawings()
     DispatchDrawings();
 
     ResizeRoutes();
-
-    mExpectedTargetCell = GetTargetCell();
 }
 
 void
@@ -1813,20 +1801,14 @@ FOdysseyVectorTagInbetweener::GetGridNumQuadY()
     return mGridNumQuadY;
 }
 
-FInbetweenerBreakdown*
-FOdysseyVectorTagInbetweener::GetMasterBreakdown()
-{
-    return &mMasterBreakdown;
-}
-
 // static
 void
 FOdysseyVectorTagInbetweener::EvalSize( ::ULIS::FRectD& iWorldBBox
                                        , uint32& oGridNumQuadX
                                        , uint32& oGridNumQuadY )
 {
-    oGridNumQuadX = std::clamp<uint32>( iWorldBBox.w / 32, 1, 32 );
-    oGridNumQuadY = std::clamp<uint32>( iWorldBBox.h / 32, 1, 32 );
+    oGridNumQuadX = std::clamp<uint32>( iWorldBBox.w / 24, 1, 32 );
+    oGridNumQuadY = std::clamp<uint32>( iWorldBBox.h / 24, 1, 32 );
 }
 
 void

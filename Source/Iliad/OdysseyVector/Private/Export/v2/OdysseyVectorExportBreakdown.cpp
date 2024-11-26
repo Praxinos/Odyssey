@@ -152,9 +152,9 @@ FOdysseyVectorExportV2::WriteBreakdown( FInbetweenerBreakdown& iBreakdown
                             , [&iBreakdown](FArchive &Ar) -> void
     {
         uint32 targetIndex = iBreakdown.GetTargetDrawingIndex();
-        uint32 master = iBreakdown.IsMaster() ? 1 : 0;
+        uint32 ignored = 0;
 
-        Ar << master;
+        Ar << ignored;
         Ar << targetIndex;
 
         WriteBreakdownTransform( iBreakdown, Ar );

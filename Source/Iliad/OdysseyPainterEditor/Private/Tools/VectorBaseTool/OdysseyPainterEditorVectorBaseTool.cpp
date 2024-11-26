@@ -34,6 +34,7 @@ UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool()
     : mBaseHUD( nullptr )
     , mHasContextMenu( true )
 {
+
 }
 
 UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool( FOdysseyPainterEditorVectorBaseToolHUD* iBaseHUD, bool iAutoCreateMedia )

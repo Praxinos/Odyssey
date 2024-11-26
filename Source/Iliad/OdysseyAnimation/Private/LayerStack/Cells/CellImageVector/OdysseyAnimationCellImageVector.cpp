@@ -47,8 +47,6 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
     UOdysseyAnimationLayerImageVector::OnIsColoredChanged().AddUObject( this, &UOdysseyAnimationCellImageVector::OnIsColoredChanged );
     UOdysseyAnimationLayerImageVector::OnIsWireframeChanged().AddUObject( this, &UOdysseyAnimationCellImageVector::OnIsWireframeChanged );
 
-    GetLayer()->OnCellsChanged().AddUObject( this, &UOdysseyAnimationCellImageVector::OnCellsChanged );
-
     mVectorBlockId = FGuid::NewGuid();
     mVectorBlock = MakeShared<FOdysseyVectorBlock>();
     mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated);
@@ -115,12 +113,12 @@ UOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    if( Ar.IsSaving() )
+    if( Ar.IsSaving() && !Ar.IsTransacting() )
     {
         FOdysseyAnimationCellImageVectorExport::Write( this, Ar );
     }
 
-    if( Ar.IsLoading() )
+    if( Ar.IsLoading() && !Ar.IsTransacting() )
     {
         if ( !mRoot )
         {
@@ -188,35 +186,6 @@ UOdysseyAnimationCellImageVector::PostLoad()
     mVectorBlock->Init(mVectorBlockId, mRoot->GetEngine(), animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
     mRoot->GetEngine()->Invalidate( 0 );
     FOdysseyVectorEngine::Notify( mRoot->GetScene(), FOdysseyVectorEngine::NOTIFY_ALL );
-}
-
-void
-UOdysseyAnimationCellImageVector::OnCellsChanged()
-{
-    UOdysseyAnimationLayerImageVector* vectorLayer = Cast<UOdysseyAnimationLayerImageVector>(GetLayer());
-
-    for( FOdysseyVectorTag* sharedTag : vectorLayer->GetSharedEnv()->GetSharedTagList() )
-    {
-        if( sharedTag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
-        {
-            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>( sharedTag );
-            IOdysseyVectorCell* sourceCell = inbetweenerTag->GetSourceCell();
-
-            if( inbetweenerTag->GetSourceCellIndex() == IndexInLayer )
-            {
-                IOdysseyVectorCell* expectedTargetCell = inbetweenerTag->GetExpectedTargetCell();
-                IOdysseyVectorCell* targetCell = inbetweenerTag->GetTargetCell();
-
-                if( expectedTargetCell && targetCell )
-                {
-                    int32 expectedTargetCellIndex = expectedTargetCell->GetIndex();
-                    int32 sourceCellIndex = sourceCell->GetIndex();
-
-                    inbetweenerTag->GetBreakdownList().back()->SetTargetDrawingIndex( abs( expectedTargetCellIndex - sourceCellIndex ) );
-                }
-            }
-        }
-    }
 }
 
 void

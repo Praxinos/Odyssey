@@ -320,12 +320,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
             int32 drawingIndex = inbetweenerTag->GetDrawingIndexFromCellIndex( breakdownCellIndex );
             FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdown( drawingIndex, false );
 
-            if( breakdown )
+            if( inbetweenerTag->GetBreakdownList().size() > 1 )
             {
-                //FOdysseyVectorGroupPaint* scene = inbetweenerTag->GetOwner()->GetScene();
-
-                // we delete the breakdown only if it is not the master breakdown ( the default one)
-                if( breakdown && breakdown->GetMasterBreakdown() )
+                if( breakdown )
                 {
                     inbetweenerTag->RemoveBreakdown( breakdown, false );
                 }
