@@ -127,6 +127,44 @@ FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdown( FOdysseyVectorGroupPai
 }
 
 double
+FOdysseyPainterEditorVectorChartToolHUD::QuadraticHitTest( const ::ULIS::FVec2D& iPt, uint32 iRadius )
+{
+    ::ULIS::FVec2D* quadraticBezier = mBreakdown->GetChart()->GetHUDBezier();
+    float quadraticT = 0.0f;
+    double minDistance = DBL_MAX;
+    FChartFraction* closestFraction = nullptr;
+    double closestFractionT = 0.0f;
+
+    for( uint32 i = 0; i < FRACTIONCOUNT; i++ )
+    {
+        uint32 n = i + 1;
+        ::ULIS::FVec2D* segPoint0 = &mFractionPointBuffer[i];
+        ::ULIS::FVec2D* segPoint1 = &mFractionPointBuffer[n];
+        double distanceToSegment;
+        double t = FOdysseyVector::DistanceToSegmentConstrained( iPt
+                                                               , *segPoint0
+                                                               , *segPoint1
+                                                               , distanceToSegment );
+
+        if( distanceToSegment < minDistance )
+        {
+            minDistance = distanceToSegment;
+
+            closestFraction = &mFractionBuffer[i];
+            closestFractionT = closestFraction->linearT0 + ( ( closestFraction->linearT1
+                                                             - closestFraction->linearT0 ) * t );
+        }
+    }
+
+    if( minDistance <= iRadius )
+    {
+        return closestFractionT;
+    }
+
+    return -1.0f;
+}
+
+double
 FOdysseyPainterEditorVectorChartToolHUD::GetQuadraticT( float iSpacingT )
 {
     ::ULIS::FVec2D* quadraticBezier = mBreakdown->GetChart()->GetHUDBezier();
@@ -167,7 +205,8 @@ FOdysseyPainterEditorVectorChartToolHUD::UpdateBezier()
     double totalFractionLength = 0.0f;
     double quadraticBezierLength = FOdysseyVector::GetQuadraticBezierApproximateLength( mBreakdown->GetChart()->GetHUDBezier()
                                                                                       , FRACTIONCOUNT
-                                                                                      , &fractionLengthBuffer );
+                                                                                      , &fractionLengthBuffer
+                                                                                      , &mFractionPointBuffer );
 
     // build a lookup table for getting linear values for t
     for( uint32 i = 0; i < FRACTIONCOUNT; i++ )
@@ -377,14 +416,19 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
     {
         if( mBreakdown )
         {
-           mBreakdown->GetInbetweenerTag()->LockDrawing();
+            FInbetweenerBreakdown* nextBreakdown = mBreakdown->GetNextBreakdown();
+
+            mBreakdown->GetInbetweenerTag()->LockDrawing();
 
             DrawBreakdown( iScene
                          , iBLContext
                          , mBreakdown
                          , BLRgba32( 127, 127, 127, 255 )
                          , BLRgba32( 255, 127, 127, 255 )
-                         , HUD_BREAKDOWN_SOURCE | HUD_BREAKDOWN_TARGET | HUD_BREAKDOWN_INBETWEEN );
+                         , HUD_BREAKDOWN_SOURCE
+                         | HUD_BREAKDOWN_INBETWEEN
+                         | HUD_INBETWEEN_FADEFROMTARGET
+                         | HUD_BREAKDOWN_TARGET );
 
             DrawChart( iBLContext
                      , fgColor
@@ -414,7 +458,7 @@ FOdysseyPainterEditorVectorChartToolHUD::PickInbetween( double iWorldX
             ::ULIS::FVec2D indicatorPosition = ::ULIS::QuadraticBezierPointAtParameter( HUDBezier[0],
                                                                                         HUDBezier[1],
                                                                                         HUDBezier[2],
-                                                                                        inbetween->spacing );
+                                                                                        GetQuadraticT( inbetween->spacing ) );
 
             if( ::ULIS::FVec2D( iWorldX - indicatorPosition.x
                               , iWorldY - indicatorPosition.y ).Distance() < INDICATOR_RADIUS )

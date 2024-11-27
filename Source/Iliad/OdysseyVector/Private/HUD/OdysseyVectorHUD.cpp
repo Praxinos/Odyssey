@@ -492,12 +492,19 @@ FOdysseyVectorHUD::DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
         for( uint32 i = 1; i < iBreakdown->GetDrawingCount() - 1; i++ )
         {
             FChartDivision* inbetween = &iBreakdown->GetChart()->GetDivisionBuffer()[i];
+            uint8 alpha = inbetweenColor.A;
+
+            if( iHUDFlags & HUD_INBETWEEN_FADEFROMTARGET )
+                alpha = ( 255 * 0.25f ) + ( ( alpha * 0.75f ) *          inbetween->spacing );
+
+            if( iHUDFlags & HUD_INBETWEEN_FADEFROMSOURCE )
+                alpha = ( 255 * 0.25f ) + ( ( alpha * 0.75f ) * ( 1.0f - inbetween->spacing )  );
 
             iBLContext->setStrokeWidth( 4.0f );
             iBLContext->setStrokeStyle( BLRgba32( inbetweenColor.R
                                                 , inbetweenColor.G
                                                 , inbetweenColor.B
-                                                , 127 + ( inbetweenColor.A * 0.5f * inbetween->spacing ) ) );
+                                                , alpha ) );
 
 
             for( FInterpolatedPath& interpolatedPath : inbetweenerTag->GetInterpolatedPathBuffer() )

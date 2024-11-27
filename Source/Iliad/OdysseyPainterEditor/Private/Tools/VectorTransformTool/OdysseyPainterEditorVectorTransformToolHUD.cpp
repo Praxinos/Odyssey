@@ -413,6 +413,13 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
 
                 for( FInbetweenerBreakdown* breakdown : mSelectedBreakdownList )
                 {
+                    DrawBreakdown( iScene
+                                 , iBLContext
+                                 , breakdown
+                                 , BLRgba32( 127, 127, 127, 255 )
+                                 , BLRgba32( 255, 127, 127, 255 )
+                                 , HUD_BREAKDOWN_SOURCE );
+
                     if( mTransformTool->ShowInbetweens )
                     {
                         FInbetweenerBreakdown* nextBreakdown = breakdown->GetNextBreakdown();
@@ -422,7 +429,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
                                       , breakdown
                                       , BLRgba32( 127, 127, 127, 255 )
                                       , BLRgba32( 255, 127, 127, 255 )
-                                      , HUD_BREAKDOWN_SOURCE /*| HUD_BREAKDOWN_TARGET*/ | HUD_BREAKDOWN_INBETWEEN );
+                                      , HUD_BREAKDOWN_INBETWEEN | HUD_INBETWEEN_FADEFROMTARGET );
 
                         if( nextBreakdown )
                         {
@@ -431,28 +438,16 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
                                           , nextBreakdown
                                           , BLRgba32( 127, 127, 127, 255 )
                                           , BLRgba32( 255, 127, 127, 255 )
-                                          , HUD_BREAKDOWN_SOURCE /*| HUD_BREAKDOWN_TARGET*/ | HUD_BREAKDOWN_INBETWEEN );
+                                          , HUD_BREAKDOWN_INBETWEEN | HUD_INBETWEEN_FADEFROMSOURCE );
                         }
                     }
 
-                    //if( breakdown->GetTargetAnimationCellIndex() == frameIndex )
-                    {
-                            DrawBreakdown( iScene
-                                          , iBLContext
-                                          , breakdown
-                                          , BLRgba32( 127, 127, 127, 255 )
-                                          , BLRgba32( 255, 127, 127, 255 )
-                                          , HUD_BREAKDOWN_TARGET );
-/*
-                       DrawBreakdown( iScene
-                                    , iBLContext
-                                    , breakdown
-                                    , BLRgba32( 0, 0, 0, 255 )
-                                    , BLRgba32( 0, 0, 0, 255 )
-                                    , true
-                                    , HUD_BREAKDOWN_TARGET );
-*/
-                    }
+                    DrawBreakdown( iScene
+                                 , iBLContext
+                                 , breakdown
+                                 , BLRgba32( 127, 127, 127, 255 )
+                                 , BLRgba32( 255, 127, 127, 255 )
+                                 , HUD_BREAKDOWN_TARGET );
                 }
 
                 inbetweenerTag->UnlockDrawing();

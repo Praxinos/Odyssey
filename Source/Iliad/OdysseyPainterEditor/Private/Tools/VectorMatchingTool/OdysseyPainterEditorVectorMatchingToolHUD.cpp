@@ -75,14 +75,34 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
                 {
                     if( breakdown->GetTargetCellIndex() == currentCellIndex )
                     {
+/*
+                        DrawBreakdown( iScene
+                                      , iBLContext
+                                      , breakdown
+                                      , BLRgba32( 127, 127, 127, 255 )
+                                      , BLRgba32( 255, 127, 127, 255 )
+                                      , HUD_BREAKDOWN_SOURCE );
+*/
                         if( mMatchingTool->ShowInbetweens )
                         {
+                            FInbetweenerBreakdown* nextBreakdown = breakdown->GetNextBreakdown();
+
                             DrawBreakdown( iScene
-                                         , iBLContext
-                                         , breakdown
-                                         , BLRgba32( 127, 127, 127, 255 )
-                                         , BLRgba32( 255, 127, 127, 255 )
-                                         , /*HUD_BREAKDOWN_SOURCE | HUD_BREAKDOWN_TARGET |*/ HUD_BREAKDOWN_INBETWEEN );
+                                          , iBLContext
+                                          , breakdown
+                                          , BLRgba32( 127, 127, 127, 255 )
+                                          , BLRgba32( 255, 127, 127, 255 )
+                                          , HUD_BREAKDOWN_INBETWEEN | HUD_INBETWEEN_FADEFROMTARGET );
+
+                            if( nextBreakdown )
+                            {
+                                DrawBreakdown( iScene
+                                              , iBLContext
+                                              , nextBreakdown
+                                              , BLRgba32( 127, 127, 127, 255 )
+                                              , BLRgba32( 255, 127, 127, 255 )
+                                              , HUD_BREAKDOWN_INBETWEEN | HUD_INBETWEEN_FADEFROMSOURCE );
+                            }
                         }
 
                         DrawBreakdown( iScene
@@ -90,7 +110,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
                                       , breakdown
                                       , BLRgba32( 127, 127, 127, 255 )
                                       , BLRgba32( 255, 127, 127, 255 )
-                                      , HUD_BREAKDOWN_SOURCE | HUD_BREAKDOWN_TARGET_GRID | HUD_BREAKDOWN_TARGET );
+                                      , HUD_BREAKDOWN_TARGET_GRID | HUD_BREAKDOWN_TARGET );
 
                         /*DrawTargetGrid ( iBLContext
                                        , breakdown

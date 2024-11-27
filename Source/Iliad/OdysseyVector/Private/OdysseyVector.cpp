@@ -537,13 +537,14 @@ double
 FOdysseyVector::GetQuadraticBezierApproximateLength( const ::ULIS::FVec2D iBezier[3]
                                                    , uint32 iDivisions )
 {
-    return GetQuadraticBezierApproximateLength( iBezier, iDivisions, nullptr );
+    return GetQuadraticBezierApproximateLength( iBezier, iDivisions, nullptr, nullptr );
 }
 
 double
 FOdysseyVector::GetQuadraticBezierApproximateLength( const ::ULIS::FVec2D iBezier[3]
                                                    , uint32 iDivisions
-                                                   , std::vector<double>* oDivisionLengthBuffer )
+                                                   , std::vector<double>* oDivisionLengthBuffer
+                                                   , std::vector<::ULIS::FVec2D>* oDivisionPointBuffer )
 {
     ::ULIS::FVec2D p0 = iBezier[0];
     double step = 1.0f / iDivisions;
@@ -551,10 +552,20 @@ FOdysseyVector::GetQuadraticBezierApproximateLength( const ::ULIS::FVec2D iBezie
     double t0 = 0.0f;
 
     if( oDivisionLengthBuffer )
+    {
         oDivisionLengthBuffer->resize( iDivisions );
+    }
+
+    if( oDivisionPointBuffer )
+    {
+        oDivisionPointBuffer->resize( iDivisions + 1 );
+
+        (*oDivisionPointBuffer)[0] = p0;
+    }
 
     for( uint32 i = 0; i < iDivisions; i++ )
     {
+        uint32 n = i + 1;
         double t1 = t0 + step;
         ::ULIS::FVec2D p1 = ::ULIS::QuadraticBezierPointAtParameter<::ULIS::FVec2D>( iBezier[0]
                                                                                    , iBezier[1]
@@ -565,6 +576,11 @@ FOdysseyVector::GetQuadraticBezierApproximateLength( const ::ULIS::FVec2D iBezie
         if( oDivisionLengthBuffer )
         {
             (*oDivisionLengthBuffer)[i] = fractionLength;
+        }
+
+        if( oDivisionPointBuffer )
+        {
+            (*oDivisionPointBuffer)[n] = p1;
         }
 
         length += fractionLength;

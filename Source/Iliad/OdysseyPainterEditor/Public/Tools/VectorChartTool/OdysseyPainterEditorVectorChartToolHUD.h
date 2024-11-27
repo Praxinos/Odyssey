@@ -14,14 +14,6 @@ class FInbetweenerBreakdown;
 struct FInbetweenerDrawing;
 struct FChartDivision;
 
-struct FChartFraction
-{
-    float linearT0;
-    float linearT1;
-    float quadraticT0;
-    float quadraticT1;
-};
-
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
     struct FGlyph
@@ -33,6 +25,14 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
             : bbox ( 0, 0, 0, 0 )
         {
         }
+    };
+
+    struct FChartFraction
+    {
+        float linearT0;
+        float linearT1;
+        float quadraticT0;
+        float quadraticT1;
     };
 
     public:
@@ -58,6 +58,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
                                        , double iRadius );
         const FGlyph* GetGlyph( uint32 iNum );
         void UpdateBezier();
+        // returns spacing T
+        double QuadraticHitTest( const ::ULIS::FVec2D& iPt, uint32 iRadius );
 
     private:
         void DrawChart( BLContext* iBLContext
@@ -68,6 +70,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
                       , uint32 iRenderedCellIndex );
         double GetQuadraticT( float iSpacingT );
 
+
     private:
         UOdysseyPainterEditorVectorChartTool* mChartTool;
         FInbetweenerBreakdown* mBreakdown;
@@ -75,4 +78,5 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
         BLFont mFont;
         std::vector<FGlyph> mGlyphBuffer;
         std::vector<FChartFraction> mFractionBuffer;
+        std::vector<::ULIS::FVec2D> mFractionPointBuffer;
 };

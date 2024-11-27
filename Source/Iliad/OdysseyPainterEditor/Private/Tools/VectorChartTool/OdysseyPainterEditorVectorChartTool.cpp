@@ -247,11 +247,14 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                 if( mPickedInbetween )
                 {
                     FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->chart->GetBreakdown()->GetInbetweenerTag();
-                    double newT = FOdysseyVector::QuadraticBezierHitTest( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y )
+                    /*double newT = FOdysseyVector::QuadraticBezierHitTest( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y )
                                                                         , HUDBezier[0]
                                                                         , HUDBezier[1]
                                                                         , HUDBezier[2]
-                                                                        , 16 );
+                                                                        , 16 );*/
+                    double newT = mChartHUD->QuadraticHitTest( ::ULIS::FVec2D( iPointInTexture.x
+                                                                             , iPointInTexture.y )
+                                                              , INT_MAX );
 
                     inbetweenerTag->MoveInbetween( mPickedInbetween
                                                  , newT
@@ -267,11 +270,14 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                 if( ShiftingOp == eChartShiftingOp::Relative )
                 {
                     FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->chart->GetBreakdown()->GetInbetweenerTag();
-                    double newT = FOdysseyVector::QuadraticBezierHitTest( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y )
+                    /*double newT = FOdysseyVector::QuadraticBezierHitTest( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y )
                                                                         , HUDBezier[0]
                                                                         , HUDBezier[1]
                                                                         , HUDBezier[2]
-                                                                        , 16 );
+                                                                        , 16 );*/
+                    double newT = mChartHUD->QuadraticHitTest( ::ULIS::FVec2D( iPointInTexture.x
+                                                                             , iPointInTexture.y )
+                                                              , INT_MAX );
 
                     if ( mPickedInbetween )
                     {

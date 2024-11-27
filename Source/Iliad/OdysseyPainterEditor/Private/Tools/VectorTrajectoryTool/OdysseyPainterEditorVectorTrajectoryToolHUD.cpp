@@ -503,15 +503,40 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
 
             for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
             {
+                FInbetweenerBreakdown* nextBreakdown = breakdown->GetNextBreakdown();
+                FInbetweenerBreakdown* prevBreakdown = breakdown->GetPrevBreakdown();
+
                 FOdysseyVectorHUD::DrawBreakdown( iScene
                                                 , iBLContext
                                                 , breakdown
                                                 , BLRgba32( 127, 127, 127, 255 )
                                                 , BLRgba32( 255, 127, 127, 255 )
                                                 , ( HUD_BREAKDOWN_SOURCE
-                                                  | HUD_BREAKDOWN_TARGET
-                                                  | ( ( breakdown->GetPrevBreakdown() == nullptr ) ? HUD_BREAKDOWN_SOURCE_GRID : 0 )
-                                                  | HUD_BREAKDOWN_INBETWEEN ) );
+                                                  | (( prevBreakdown == nullptr ) ? HUD_BREAKDOWN_SOURCE_GRID : 0) ) );
+
+                FOdysseyVectorHUD::DrawBreakdown( iScene
+                                                , iBLContext
+                                                , breakdown
+                                                , BLRgba32( 127, 127, 127, 255 )
+                                                , BLRgba32( 255, 127, 127, 255 )
+                                                , HUD_BREAKDOWN_INBETWEEN | HUD_INBETWEEN_FADEFROMTARGET );
+
+                if( nextBreakdown )
+                {
+                    FOdysseyVectorHUD::DrawBreakdown( iScene
+                                                    , iBLContext
+                                                    , nextBreakdown
+                                                    , BLRgba32( 127, 127, 127, 255 )
+                                                    , BLRgba32( 255, 127, 127, 255 )
+                                                    , HUD_BREAKDOWN_INBETWEEN | HUD_INBETWEEN_FADEFROMSOURCE );
+                }
+
+                FOdysseyVectorHUD::DrawBreakdown( iScene
+                                                , iBLContext
+                                                , breakdown
+                                                , BLRgba32( 127, 127, 127, 255 )
+                                                , BLRgba32( 255, 127, 127, 255 )
+                                                , HUD_BREAKDOWN_TARGET );
             }
 
             for( FInbetweenerRoute* route : inbetweenerTag->GetRouteList() )

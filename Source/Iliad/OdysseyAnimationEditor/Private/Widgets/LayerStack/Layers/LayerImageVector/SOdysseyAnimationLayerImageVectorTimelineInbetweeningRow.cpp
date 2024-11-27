@@ -397,7 +397,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
     }
 
     // the whole bounding box
-    xmin = xmax = mBoxPos.X;
+    xmin =  DBL_MAX;
+    xmax = -DBL_MAX;
 
     for( int32 i = 0; i < mCellBoxBuffer.Num(); i++ )
     {

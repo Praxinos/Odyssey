@@ -95,7 +95,8 @@ namespace FOdysseyVector
 
     double ODYSSEYVECTOR_API GetQuadraticBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
                                                                 , uint32 iDivisions
-                                                                , std::vector<double>* oDivisionLengthBuffer );
+                                                                , std::vector<double>* oDivisionLengthBuffer
+                                                                , std::vector<::ULIS::FVec2D>* oDivisionPointBuffer );
 
     ::ULIS::FVec2D ODYSSEYVECTOR_API MapPoint( const BLMatrix2D& iMatrix
                                              , const ::ULIS::FVec2D& iPoint );
