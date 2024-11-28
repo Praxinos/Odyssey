@@ -76,6 +76,7 @@ void
 UOdysseyAnimationLayerImageVector::UpdateSharedEnv()
 {
     GetSharedEnv()->RemoveAllChildren();
+
     for (UOdysseyAnimationCell* cell : Cells)
     {
         if (!cell->IsA<UOdysseyAnimationCellImageVector>())
@@ -678,12 +679,12 @@ UOdysseyAnimationLayerImageVector::PostEditChangeProperty( FPropertyChangedEvent
 void
 UOdysseyAnimationLayerImageVector::CellsChanged(bool iIsInteractive)
 {
-    Super::CellsChanged(iIsInteractive);
-
+    // Put this before calling Super::CellsChanged because the HUD might be refreshed by Super::CellsChanged
+    // When reloading the current tool and it needs the vector object hierarchy to be correctly set.
     if (!iIsInteractive)
         UpdateSharedEnv();
 
-    //CheckInbetweens();
+    Super::CellsChanged(iIsInteractive);
 }
 
 #undef LOCTEXT_NAMESPACE
