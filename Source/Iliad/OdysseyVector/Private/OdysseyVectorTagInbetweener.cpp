@@ -1374,21 +1374,25 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
             uint32   toCellIndex = std::max( sourceCellIndex, targetCellIndex );
 
             if ( ( displayedCellIndex > fromCellIndex )
-                && ( displayedCellIndex < toCellIndex   ) )
+              && ( displayedCellIndex < toCellIndex   ) )
             {
                 uint32 drawingIndex = abs( (int) (displayedCellIndex - sourceCellIndex) );
 
                 // don't draw the object at the source position, it's already drawn
                 if( drawingIndex > 0 )
                 {
-                    FInbetweenerBreakdown* breakdown = GetBreakdown( drawingIndex, false );
-                    uint32 inbetweenIndex = drawingIndex - breakdown->GetSourceDrawingIndex();
-                    FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionBuffer()[inbetweenIndex];
+                    FInbetweenerBreakdown* breakdown = GetBreakdown( drawingIndex, true );
 
-                    DrawPathsInbetween( iDisplayedScene
-                                      , inbetween
-                                      , iBLContext
-                                      , false );
+                    if( breakdown )
+                    {
+                        uint32 inbetweenIndex = drawingIndex - breakdown->GetSourceDrawingIndex();
+                        FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionBuffer()[inbetweenIndex];
+
+                        DrawPathsInbetween( iDisplayedScene
+                                          , inbetween
+                                          , iBLContext
+                                          , false );
+                    }
                 }
             }
         }
