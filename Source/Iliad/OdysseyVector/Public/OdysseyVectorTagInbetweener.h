@@ -303,7 +303,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void DeformPathsAtInbetween( FChartDivision *iInbetween );
         void DispatchDrawings();
 
-
     public:
         static const uint8 INBETWEEN_DEFAULT_RED_UINT8   = 0;
         static const uint8 INBETWEEN_DEFAULT_GREEN_UINT8 = 128;

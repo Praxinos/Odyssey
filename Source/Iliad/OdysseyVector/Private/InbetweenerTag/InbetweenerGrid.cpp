@@ -157,18 +157,20 @@ void FInbetweenerGrid::Make( bool iInvalidate )
 void
 SquareGridBBox( ::ULIS::FRectD& iBBox )
 {
+    ::ULIS::FRectD tmpBox = iBBox;
     double difw, difh;
 
     if ( iBBox.h > iBBox.w )
     {
-        difw = iBBox.h - iBBox.w;
         iBBox.w = iBBox.h;
     }
     else
     {
-        difh = iBBox.w - iBBox.h;
         iBBox.h = iBBox.w;
     }
+
+    difw = iBBox.w - tmpBox.w;
+    difh = iBBox.h - tmpBox.h;
 
     iBBox.x -= ( difw * 0.5f );
     iBBox.y -= ( difh * 0.5f );
@@ -186,7 +188,7 @@ FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
     mGridBBox = mBreakdown->GetInbetweenerTag()->GetOwner()->GetBBox( false );
 
 
-    //---- make it square ---//
+    //---- make the grid it square ---//
     if( square )
     {
         SquareGridBBox( mGridBBox );

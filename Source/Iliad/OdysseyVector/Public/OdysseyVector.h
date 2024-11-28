@@ -98,6 +98,7 @@ namespace FOdysseyVector
                                                                 , std::vector<double>* oDivisionLengthBuffer
                                                                 , std::vector<::ULIS::FVec2D>* oDivisionPointBuffer );
 
+
     ::ULIS::FVec2D ODYSSEYVECTOR_API MapPoint( const BLMatrix2D& iMatrix
                                              , const ::ULIS::FVec2D& iPoint );
     ::ULIS::FVec2D ODYSSEYVECTOR_API MapVector( BLMatrix2D& iMatrix

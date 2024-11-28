@@ -179,13 +179,19 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
     for( FOdysseyVectorTagInbetweener* selectedInbetweenerTag : mSelectedInbetweenerTagArray )
     {
         if( iPropertyName == "InterpolationType" )
+        {
             selectedInbetweenerTag->SetInterpolationType( InterpolationType );
+        }
 
         if( iPropertyName == "DivisionX" )
+        {
             selectedInbetweenerTag->SetGridNumQuad( DivisionX, selectedInbetweenerTag->GetGridNumQuadY(), Square );
+        }
 
         if( iPropertyName == "DivisionY" )
+        {
             selectedInbetweenerTag->SetGridNumQuad( selectedInbetweenerTag->GetGridNumQuadX(), DivisionY, Square );
+        }
 
         if( iPropertyName == "MapAsPolyline" )
         {

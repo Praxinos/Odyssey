@@ -269,7 +269,6 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
             {
                 if( ShiftingOp == eChartShiftingOp::Relative )
                 {
-                    FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->chart->GetBreakdown()->GetInbetweenerTag();
                     /*double newT = FOdysseyVector::QuadraticBezierHitTest( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y )
                                                                         , HUDBezier[0]
                                                                         , HUDBezier[1]
@@ -281,6 +280,8 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
 
                     if ( mPickedInbetween )
                     {
+                        FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->chart->GetBreakdown()->GetInbetweenerTag();
+
                         inbetweenerTag->MoveInbetween( mPickedInbetween
                                                      , newT
                                                      , true );
