@@ -13,33 +13,34 @@ class FOdysseyVectorTagInbetweener;
 class FInbetweeningListViewItem;
 class FInbetweenerBreakdown;
 
-struct FInbetweeningRowCellBox
-{
-    FInbetweeningRowCellBox( uint32 iType, uint32 iIndex, double iX, double iY, double iW, double iH )
-        : type ( iType )
-        , index( iIndex )
-        , x ( iX )
-        , y ( iY )
-        , w ( iW )
-        , h ( iH )
-    {
-    }
-
-    static const uint32 TYPE_SOURCE    = ( 1UL << 0 );
-    static const uint32 TYPE_INBETWEEN = ( 1UL << 1 );
-    static const uint32 TYPE_TARGET    = ( 1UL << 2 );
-
-    uint32 type;
-    double x, y, w, h;
-    uint32 index;
-};
-
 /**
  * Implements the List View Widget
  */
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow
     : public STableRow<TSharedPtr<FInbetweeningListViewItem>>
 {
+    struct CellBox
+    {
+        CellBox( uint32 iType, uint32 iIndex, double iX, double iY, double iW, double iH )
+            : type ( iType )
+            , index( iIndex )
+            , x ( iX )
+            , y ( iY )
+            , w ( iW )
+            , h ( iH )
+        {
+        }
+
+        static const uint32 TYPE_SOURCE    = ( 1UL << 0 );
+        static const uint32 TYPE_INBETWEEN = ( 1UL << 1 );
+        static const uint32 TYPE_TARGET    = ( 1UL << 2 );
+        static const uint32 TYPE_VISIBLE   = ( 1UL << 3 );
+
+        uint32 type;
+        double x, y, w, h;
+        uint32 index;
+    };
+
     public:
         ~SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow();
         SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow();
@@ -67,10 +68,10 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
 
     protected:
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
-        TArray<FInbetweeningRowCellBox> mCellBoxBuffer;
+        TArray<CellBox> mCellBoxBuffer;
         FVector2D mBoxPos;
         FVector2D mBoxSize;
-        FInbetweeningRowCellBox mCandidateTargetCellBox;
+        CellBox mCandidateTargetCellBox;
         FInbetweenerBreakdown* mPickedBreakdown;
         //Box containing the cells widgets
         //TSharedPtr<SHorizontalBox> mCellsBox;

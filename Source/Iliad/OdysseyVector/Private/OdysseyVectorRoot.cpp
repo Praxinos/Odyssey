@@ -45,7 +45,14 @@ void
 FOdysseyVectorRoot::Invalidate( uint64 iInvalidationFlags )
 {
     FOdysseyVectorObject::Invalidate( iInvalidationFlags );
+}
 
+void
+FOdysseyVectorRoot::Update( uint32 iUpdateFlags )
+{
+    FOdysseyVectorObject::Update( iUpdateFlags );
+
+    // request redraw
     mEngine.Invalidate( 0 );
 }
 

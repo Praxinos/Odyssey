@@ -34,6 +34,7 @@ FInbetweenerBreakdown::FInbetweenerBreakdown( FOdysseyVectorTagInbetweener* iInb
     , mTargetScalingY    ( 1.0f )
     , mTargetRotation    ( 0.0f )
     , mChart( this )
+    , bTargetVisibility ( false )
 {
     SetGrid( iInbetweenerTag->GetGridType() );
 }
@@ -692,6 +693,20 @@ FInbetweenerBreakdown::GetSourceCellIndex()
     uint32 sourceDrawingIndex = GetSourceDrawingIndex();
 
     return (int32)tagCellIndex + (int32)( sourceDrawingIndex * (int)mInbetweenerTag->GetInterpolationDirection());
+}
+
+bool
+FInbetweenerBreakdown::IsTargetVisible()
+{
+    return bTargetVisibility;
+}
+
+void
+FInbetweenerBreakdown::SetTargetVisibility( bool iTargetVisibility )
+{
+    bTargetVisibility = iTargetVisibility;
+
+    mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_CELLS );
 }
 
 void

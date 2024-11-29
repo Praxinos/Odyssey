@@ -27,6 +27,7 @@
 #include "OdysseyVectorTagInbetweener.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAdd.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownRemove.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility.h"
 #include "OdysseyAnimationEditorTimelinePosition.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 
@@ -154,6 +155,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnContextMenuOpening()
                      , FSlateIcon()
                      , FUIAction(FExecuteAction::CreateSP( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown )));
 
+    menu.AddMenuEntry( LOCTEXT("vector-tool.inbetweening-context-menu.show-hide-target.name", "Show/Hide Target")
+                     , LOCTEXT("vector-tool.inbetweening-context-menu.show-hide-target.tooltip", "Show/Hide Target")
+                     , FSlateIcon()
+                     , FUIAction(FExecuteAction::CreateSP( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget )));
+
     menu.AddMenuEntry( LOCTEXT("vector-tool.inbetweening-context-menu.remove-breakdown.name", "Change direction")
                      , LOCTEXT("vector-tool.inbetweening-context-menu.remove-breakdown.tooltip", "Change direction")
                      , FSlateIcon()
@@ -164,13 +170,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnContextMenuOpening()
 }
 
 void
-SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetSelectedInbetweenerTags( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList
-                                                                                 , std::list<FOdysseyVectorEngine*>& oEngineList )
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetSelectedInbetweenerTags( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList )
 {
     FOdysseyVectorSharedEnv* sharedEnv = mAnimationLayerImageVector->GetSharedEnv();
 
     oSelectedInbetweenerTagList.clear();
-    oEngineList.clear();
 
     // I could not make it work using SListView SelectedItems methods, for some reason. So I use the SharedEnv
     for( FOdysseyVectorTag* tag : sharedEnv->GetSharedTagList() )
@@ -184,17 +188,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetSelectedInbetweenerTag
                 FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
 
                 oSelectedInbetweenerTagList.push_back( inbetweenerTag );
-
-                // find which engine/scene to update/redraw
-                if( std::find_if( oEngineList.begin()
-                                , oEngineList.end()
-                                , [ inbetweenerTagEngine ]( FOdysseyVectorEngine* engine ) -> bool
-                                  {
-                                      return ( inbetweenerTagEngine == engine ) ? true : false;
-                                  } ) == oEngineList.end() )
-                {
-                    oEngineList.push_back( inbetweenerTagEngine );
-                }
             }
         }
     }
@@ -213,7 +206,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
     std::list<FOdysseyVectorEngine*> engineList;
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
 
-    GetSelectedInbetweenerTags( selectedInbetweenerTagList, engineList );
+    GetSelectedInbetweenerTags( selectedInbetweenerTagList );
 
     if( selectedInbetweenerTagList.size() )
     {
@@ -221,9 +214,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
         GEditor->BeginTransaction(LOCTEXT("vector-timeline.transaction.add-breakdown", "Add Breakdown"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAdd( engineList.front()->GetScene()
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAdd( mAnimationLayerImageVector->GetSharedEnv()
                                                                                        , selectedInbetweenerTagList
-                                                                                       , engineList
                                                                                        , notificationFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
@@ -255,20 +247,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
             }
         }
 
-        // force recompute internal geometry of the attached widget
-/*
-        for( TSharedPtr<FInbetweeningListViewItem> item : GetItems() )
-        {
-            WidgetFromItem ( item ).Get()->AsWidget()->MarkPrepassAsDirty();
-        }
-*/
-        // update first
-
-        for( FOdysseyVectorEngine* engine : engineList )
-        {
-            engine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-            engine->Invalidate( 0 );
-        }
+        // Updates and request redraw
+        mAnimationLayerImageVector->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
     FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
@@ -284,10 +264,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
 
     int breakdownCellIndex = cell->IndexInLayer;
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
-    std::list<FOdysseyVectorEngine*> engineList;
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
 
-    GetSelectedInbetweenerTags( selectedInbetweenerTagList, engineList );
+    GetSelectedInbetweenerTags( selectedInbetweenerTagList );
 
     if( selectedInbetweenerTagList.size() )
     {
@@ -295,9 +274,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
         GEditor->BeginTransaction(LOCTEXT("vector-timeline.transaction.remove-breakdown", "Remove Breakdown"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownRemove( engineList.front()->GetScene()
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownRemove( mAnimationLayerImageVector->GetSharedEnv()
                                                                                           , selectedInbetweenerTagList
-                                                                                          , engineList
                                                                                           , notificationFlags );
 
             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
@@ -328,20 +306,73 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
                 }
             }
         }
+        // Updates and request redraw
+        mAnimationLayerImageVector->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    }
 
-        for( FOdysseyVectorEngine* engine : engineList )
-        {
-            engine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-            engine->Invalidate( 0 );
-        }
+    // static call
+    FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
+}
 
-        // force recompute internal geometry of the attached widget
-/*
-        for( TSharedPtr<FInbetweeningListViewItem> item : GetItems() )
+void
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
+{
+    int breakdownFrameIndex = mTimelinePosition->MousePositionToFrame( mCursorPos.X );
+    UOdysseyAnimationCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
+    if (!cell)
+        return;
+
+    int breakdownCellIndex = cell->IndexInLayer;
+    std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
+    std::list<FInbetweenerBreakdown*> breakdownList;
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+
+    GetSelectedInbetweenerTags( selectedInbetweenerTagList );
+
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
+    {
+        uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetEngine()->GetCell()->GetIndex();
+        FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
+        int32 drawingIndex = inbetweenerTag->GetDrawingIndexFromCellIndex( breakdownCellIndex );
+        FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdown( drawingIndex, false );
+
+        if( breakdown )
         {
-            WidgetFromItem ( item ).Get()->AsWidget()->MarkPrepassAsDirty();
+            breakdownList.push_back( breakdown );
         }
-*/
+    }
+
+    if( breakdownList.size() )
+    {
+        //---------- needed for undos-----------//
+        GEditor->BeginTransaction(LOCTEXT("vector-timeline.transaction.remove-breakdown", "Remove Breakdown"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( mAnimationLayerImageVector->GetSharedEnv()
+                                                                                                    , breakdownList
+                                                                                                    , notificationFlags );
+
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+            FOdysseyPainterEditor* editor = mEditor.Get();
+            if (editor)
+            {
+                TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
+                if (source)
+                    source->RecordCurrentFrameUndo();
+            }
+        }
+        GEditor->EndTransaction();
+        //--------------------------------------//
+
+        for( FInbetweenerBreakdown* breakdown : breakdownList )
+        {
+            breakdown->SetTargetVisibility( !breakdown->IsTargetVisible() );
+            // request redraw
+            //breakdown->GetTargetCell()->GetEngine()->Invalidate(0);
+        }
+        // Updates and request redraw
+        mAnimationLayerImageVector->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
     // static call
@@ -364,11 +395,10 @@ void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection()
 {
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
-    std::list<FOdysseyVectorEngine*> engineList;
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
                              | FOdysseyPainterEditor::UI_UPDATE_HUD;
 
-    GetSelectedInbetweenerTags( selectedInbetweenerTagList, engineList );
+    GetSelectedInbetweenerTags( selectedInbetweenerTagList );
 
     //---------- needed for undos-----------//
 /*
@@ -407,18 +437,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection()
         }
     }
 
-    // force recompute internal geometry of the attached widget
-/*
-    for( TSharedPtr<FInbetweeningListViewItem> item : GetItems() )
-    {
-        WidgetFromItem ( item ).Get()->AsWidget()->MarkPrepassAsDirty();
-    }
-*/
-    for( FOdysseyVectorEngine* engine : engineList )
-    {
-        engine->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        engine->Invalidate( 0 );
-    }
+    // Updates and request redraw
+    mAnimationLayerImageVector->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     // static call
     FOdysseyVectorEngine::Notify( nullptr, notificationFlags );

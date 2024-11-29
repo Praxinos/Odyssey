@@ -144,6 +144,20 @@ FOdysseyVectorExportV2::WriteBreakdownTransform( FInbetweenerBreakdown& iBreakdo
 }
 
 void
+FOdysseyVectorExportV2::WriteBreakdownTargetVisibility( FInbetweenerBreakdown& iBreakdown
+                                                      , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_BREAKDOWN_TARGETVISIBILITY
+                            , Ar
+                            , [&iBreakdown](FArchive &Ar) -> void
+    {
+        uint32 visibility = static_cast<uint32>(iBreakdown.IsTargetVisible());
+
+        Ar << visibility;
+    } );
+}
+
+void
 FOdysseyVectorExportV2::WriteBreakdown( FInbetweenerBreakdown& iBreakdown
                                       , FArchive &Ar )
 {
@@ -157,6 +171,7 @@ FOdysseyVectorExportV2::WriteBreakdown( FInbetweenerBreakdown& iBreakdown
         Ar << ignored;
         Ar << targetIndex;
 
+        WriteBreakdownTargetVisibility( iBreakdown, Ar );
         WriteBreakdownTransform( iBreakdown, Ar );
         WriteBreakdownGridGeometry( iBreakdown, Ar );
         WriteBreakdownChart( iBreakdown, Ar );

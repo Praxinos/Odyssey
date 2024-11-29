@@ -27,6 +27,14 @@ FOdysseyVectorImportV2::ReadBreakdown( FInbetweenerBreakdown& iBreakdown
         {
             switch( iChunkID )
             {
+                case FOdysseyFile::VectorV2::CHUNK_BREAKDOWN_TARGETVISIBILITY:
+                    uint32 visibility;
+
+                    Ar << visibility;
+
+                    iBreakdown.SetTargetVisibility( visibility ? true : false );
+                break;
+
                 case FOdysseyFile::VectorV2::CHUNK_BREAKDOWN_TRANSFORM:  // container
                 break;
 

@@ -254,7 +254,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
 
                 if( ( (uint32)drawingIndex > prevDrawingIndex ) && ( (uint32)drawingIndex < nextDrawingIndex ) )
                 {
-                    mCandidateTargetCellBox = FInbetweeningRowCellBox( FInbetweeningRowCellBox::TYPE_TARGET
+                    mCandidateTargetCellBox = CellBox( CellBox::TYPE_TARGET
                                                                      , drawingIndex
                                                                      , cursorCell->GetFrame() * frameWidth /* * mLayoutScaleMultiplier */
                                                                      , 0.0f
@@ -293,7 +293,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
         {
             if( mPickedBreakdown )
             {
-                if( mCandidateTargetCellBox.type & FInbetweeningRowCellBox::TYPE_TARGET )
+                if( mCandidateTargetCellBox.type & CellBox::TYPE_TARGET )
                 {
                     mPickedBreakdown->SetTargetDrawingIndex( mCandidateTargetCellBox.index );
                 }
@@ -347,7 +347,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
     mCellBoxBuffer.Reset();
     mCellBoxBuffer.Reserve( mInbetweenerTag->GetLength() );
 
-    mCellBoxBuffer.Emplace( FInbetweeningRowCellBox::TYPE_SOURCE
+    mCellBoxBuffer.Emplace( CellBox::TYPE_SOURCE
                           , 0
                           , sourceFrame * frameWidth /* * LayoutScaleMultiplier */
                           , 0.0f
@@ -376,7 +376,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
                 {
                     uint32 inbetweenFrame = inbetweenCell->GetFrame();
 
-                    mCellBoxBuffer.Emplace( FInbetweeningRowCellBox::TYPE_INBETWEEN
+                    mCellBoxBuffer.Emplace( CellBox::TYPE_INBETWEEN
                                           , i
                                           , inbetweenFrame * frameWidth /* * LayoutScaleMultiplier */
                                           , 0.0f
@@ -385,9 +385,10 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
                 }
             }
 
-            mCellBoxBuffer.Emplace( breakdown->GetNextBreakdown() ? ( FInbetweeningRowCellBox::TYPE_TARGET
-                                                                    | FInbetweeningRowCellBox::TYPE_SOURCE )
-                                                                  : FInbetweeningRowCellBox::TYPE_TARGET
+            mCellBoxBuffer.Emplace( ( breakdown->GetNextBreakdown() ? ( CellBox::TYPE_TARGET
+                                                                      | CellBox::TYPE_SOURCE )
+                                                                    : CellBox::TYPE_TARGET )
+                                  | ( breakdown->IsTargetVisible()  ? CellBox::TYPE_VISIBLE : 0 )
                                   , targetIndex
                                   , targetFrame * frameWidth /* * LayoutScaleMultiplier */
                                   , 0.0f
@@ -429,7 +430,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnCursorQuery ( const 
 
     for( int i = 0; i < (int) mCellBoxBuffer.Num(); i++ )
     {
-        if( mCellBoxBuffer[i].type & FInbetweeningRowCellBox::TYPE_TARGET )
+        if( mCellBoxBuffer[i].type & CellBox::TYPE_TARGET )
         {
             if( ( cursorPos.X >   mCellBoxBuffer[i].x )
              && ( cursorPos.Y >   mCellBoxBuffer[i].y )
@@ -465,6 +466,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
     float frameSize = timelinePosition->GetFrameSize();
     //float scrollByPixels = offset * frameSize /* * mLayoutScaleMultiplier */;
     static FSlateBrush defaultBrush;
+    const FSlateBrush* visibilityBrush = FOdysseyStyle::GetBrush( TEXT( "OdysseyLayerStack.Visible16" ) );
 
     LayerId = STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnPaint( Args
                                                                        , AllottedGeometry
@@ -488,17 +490,18 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
     for( int i = 0; ( i < (int) mCellBoxBuffer.Num() ); i++ )
     {
         FLinearColor color = FLinearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-        const FInbetweeningRowCellBox& cellBox = mCellBoxBuffer[i];
+        const CellBox& cellBox = mCellBoxBuffer[i];
         double midY = mBoxSize.Y * 0.5f;
         double midX = cellBox.w * 0.5f;
+        uint32 visibilityGap = 0;
 
-        if ( cellBox.type & FInbetweeningRowCellBox::TYPE_SOURCE    )
+        if ( cellBox.type & CellBox::TYPE_SOURCE    )
             color = sourceColor;
 
-        if ( cellBox.type & FInbetweeningRowCellBox::TYPE_INBETWEEN )
+        if ( cellBox.type & CellBox::TYPE_INBETWEEN )
             color = interpColor;
 
-        if ( cellBox.type & FInbetweeningRowCellBox::TYPE_TARGET    )
+        if ( cellBox.type & CellBox::TYPE_TARGET    )
             color = sourceColor;
 
         FSlateDrawElement::MakeBox( OutDrawElements
@@ -511,7 +514,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                                   , ESlateDrawEffect::None
                                   , color );
 
-        if( cellBox.type & FInbetweeningRowCellBox::TYPE_INBETWEEN )
+        if( cellBox.type & CellBox::TYPE_INBETWEEN )
         {
             TArray< FVector2D > line;
 
@@ -532,7 +535,20 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                                         , 2.0f );
         }
 
-        if( cellBox.type & FInbetweeningRowCellBox::TYPE_SOURCE )
+        if( cellBox.type & CellBox::TYPE_VISIBLE )
+        {
+            FSlateDrawElement::MakeBox( OutDrawElements
+                                        , LayerId
+                                        , AllottedGeometry.ToPaintGeometry( FVector2D( cellBox.x + midX - 8
+                                                                                     , cellBox.y + midY - 9 )
+                                                                          , FVector2D( 16
+                                                                                     , 16 ) )
+                                        , visibilityBrush );
+
+            visibilityGap = 8;
+        }
+
+        if( cellBox.type & CellBox::TYPE_SOURCE )
         {
             TArray< FVector2D > line;
             TArray< FVector2D > arrow;
@@ -543,38 +559,28 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
             // draw forward arrow
             if( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Forward )
             {
-                line.Push( FVector2D( midX + 6 , midY ) );
+                line.Push( FVector2D( midX + visibilityGap + 6 , midY ) );
                 line.Push( FVector2D( cellBox.w, midY ) );
 
-                if( cellBox.type & FInbetweeningRowCellBox::TYPE_TARGET )
+                if( cellBox.type & CellBox::TYPE_TARGET )
                 {
-                    arrow.Push( FVector2D( midX + 2, midY - 5 ) );
-                    arrow.Push( FVector2D( midX + 6, midY     ) );
-                    arrow.Push( FVector2D( midX + 2, midY + 5 ) );
+                    arrow.Push( FVector2D( midX + visibilityGap + 2, midY - 5 ) );
+                    arrow.Push( FVector2D( midX + visibilityGap + 6, midY     ) );
+                    arrow.Push( FVector2D( midX + visibilityGap + 2, midY + 5 ) );
                 }
-                /*else
-                {
-                    arrow.Push( FVector2D( midX + 2, midY - 4 ) );
-                    arrow.Push( FVector2D( midX + 2, midY + 4 ) );
-                }*/
             }
 
             if( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Backward )
             {
-                line.Push( FVector2D( midX - 6 , midY ) );
+                line.Push( FVector2D( midX - visibilityGap - 6 , midY ) );
                 line.Push( FVector2D( 0.0f     , midY ) );
 
-                if( cellBox.type & FInbetweeningRowCellBox::TYPE_TARGET )
+                if( cellBox.type & CellBox::TYPE_TARGET )
                 {
-                    arrow.Push( FVector2D( midX - 2, midY - 5 ) );
-                    arrow.Push( FVector2D( midX - 6, midY     ) );
-                    arrow.Push( FVector2D( midX - 2, midY + 5 ) );
+                    arrow.Push( FVector2D( midX - visibilityGap - 2, midY - 5 ) );
+                    arrow.Push( FVector2D( midX - visibilityGap - 6, midY     ) );
+                    arrow.Push( FVector2D( midX - visibilityGap - 2, midY + 5 ) );
                 }
-                /*else
-                {
-                    arrow.Push( FVector2D( midX - 2, midY - 4 ) );
-                    arrow.Push( FVector2D( midX - 2, midY + 4 ) );
-                }*/
             }
 
             if( arrow.Num() )
@@ -605,7 +611,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                                         , 2.0f );
         }
 
-        if( cellBox.type & FInbetweeningRowCellBox::TYPE_TARGET )
+        if( cellBox.type & CellBox::TYPE_TARGET )
         {
             TArray< FVector2D > line;
             TArray< FVector2D > arrow;
@@ -617,22 +623,22 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
             if( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Forward )
             {
                 line.Push( FVector2D( 0.0f    , midY ) );
-                line.Push( FVector2D( midX - 2, midY ) );
+                line.Push( FVector2D( midX - visibilityGap - 2, midY ) );
 
-                arrow.Push( FVector2D( midX - 6, midY - 5 ) );
-                arrow.Push( FVector2D( midX - 2, midY     ) );
-                arrow.Push( FVector2D( midX - 6, midY + 5 ) );
+                arrow.Push( FVector2D( midX - visibilityGap - 6, midY - 5 ) );
+                arrow.Push( FVector2D( midX - visibilityGap - 2, midY     ) );
+                arrow.Push( FVector2D( midX - visibilityGap - 6, midY + 5 ) );
             }
 
             // draw backward arrow
             if( mInbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Backward )
             {
                 line.Push( FVector2D( cellBox.w, midY ) );
-                line.Push( FVector2D( midX + 2 , midY ) );
+                line.Push( FVector2D( midX + visibilityGap + 2 , midY ) );
 
-                arrow.Push( FVector2D( midX + 6, midY - 5 ) );
-                arrow.Push( FVector2D( midX + 2, midY     ) );
-                arrow.Push( FVector2D( midX + 6, midY + 5 ) );
+                arrow.Push( FVector2D( midX + visibilityGap + 6, midY - 5 ) );
+                arrow.Push( FVector2D( midX + visibilityGap + 2, midY     ) );
+                arrow.Push( FVector2D( midX + visibilityGap + 6, midY + 5 ) );
             }
 
             FSlateDrawElement::MakeLines( OutDrawElements
@@ -661,7 +667,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
         }
     }
 
-    if( mCandidateTargetCellBox.type & FInbetweeningRowCellBox::TYPE_TARGET )
+    if( mCandidateTargetCellBox.type & CellBox::TYPE_TARGET )
     {
         // draw candidate target (when resizing breakdown)
         FSlateDrawElement::MakeBox( OutDrawElements

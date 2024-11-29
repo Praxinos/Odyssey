@@ -626,6 +626,11 @@ FSnapshotInbetweenerBreakdown::RecordLocalState( FSnapshotInbetweenerBreakdown::
                                           , iState->scalingY );
         }
 
+        if( mSnapshotFlags & FSnapshotFlags::Breakdown::TARGETVISIBILITY )
+        {
+            iState->targetVisibility  = mBreakdown->IsTargetVisible();
+        }
+
         iState->inited = true;
     }
 }
@@ -668,6 +673,11 @@ FSnapshotInbetweenerBreakdown::LoadState( FSnapshotInbetweenerBreakdown::State* 
                                       , iState->scalingY );
 
         mBreakdown->UpdateMatrix();
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Breakdown::TARGETVISIBILITY )
+    {
+        mBreakdown->SetTargetVisibility( iState->targetVisibility );
     }
 
     return true; // restore succeeded

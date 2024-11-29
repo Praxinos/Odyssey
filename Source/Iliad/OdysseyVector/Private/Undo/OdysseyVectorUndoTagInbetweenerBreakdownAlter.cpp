@@ -41,8 +41,6 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweener
                                                                                               , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
 {
-    GetEngineListFromInbetweenerTagArray( iInbetweenerTagArray, mEngineList );
-
     mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagArray.size() );
 
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagArray )
@@ -63,8 +61,6 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweener
                                                                                               , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
 {
-    GetEngineListFromInbetweenerTagList( iInbetweenerTagList, mEngineList );
-
     mInbetweenerTagSnapshotArray.reserve( iInbetweenerTagList.size() );
 
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
@@ -91,10 +87,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Apply( UObject* iIgnored )
         inbetweenerTagsnapshot.LoadAlteredState();
     }
 
-    // update invalidated objects
+    // update invalidated objects. Note: will request redraw
     mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    // request redraw
-    InvalidateEngineList( 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
@@ -112,10 +106,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Revert( UObject* iIgnored )
         inbetweenerTagsnapshot.LoadInitialState();
     }
 
-    // update invalidated objects
+    // update invalidated objects. Note: will request redraw
     mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    // request redraw
-    InvalidateEngineList( 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );

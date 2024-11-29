@@ -147,6 +147,7 @@ namespace FOdysseyVectorExportV2
     void WriteBreakdownChart( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );
     void WriteBreakdownChartSpacing( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );
     void WriteBreakdownChartHUBBezier( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );
+    void WriteBreakdownTargetVisibility( FInbetweenerBreakdown& iBreakdown, FArchive &Ar );
 
     void ODYSSEYVECTOR_API WriteRoute( FInbetweenerRoute& iRoute, FArchive &Ar );
     void WriteRouteCoords( FInbetweenerRoute& iRoute, FArchive &Ar );

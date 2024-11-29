@@ -1064,6 +1064,7 @@ FOdysseyVectorTagInbetweener::GetTargetCellIndex()
 void
 FOdysseyVectorTagInbetweener::Invalidate( uint64 iInvalidationFlags )
 {
+    // do not reinvalidate
     if( mInvalidationFlags == 0 )
     {
         mOwner->InvalidateTag( this );
@@ -1374,16 +1375,16 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
             uint32   toCellIndex = std::max( sourceCellIndex, targetCellIndex );
 
             if ( ( displayedCellIndex > fromCellIndex )
-              && ( displayedCellIndex < toCellIndex   ) )
+              && ( displayedCellIndex <= toCellIndex   ) )
             {
                 uint32 drawingIndex = abs( (int) (displayedCellIndex - sourceCellIndex) );
 
                 // don't draw the object at the source position, it's already drawn
                 if( drawingIndex > 0 )
                 {
-                    FInbetweenerBreakdown* breakdown = GetBreakdown( drawingIndex, true );
+                    FInbetweenerBreakdown* breakdown = GetBreakdown( drawingIndex, false );
 
-                    if( breakdown )
+                    if( ( drawingIndex != breakdown->GetTargetDrawingIndex() ) || breakdown->IsTargetVisible() )
                     {
                         uint32 inbetweenIndex = drawingIndex - breakdown->GetSourceDrawingIndex();
                         FChartDivision* inbetween = &breakdown->GetChart()->GetDivisionBuffer()[inbetweenIndex];
@@ -1924,162 +1925,171 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
     IOdysseyVectorLayer* layer = mOwner->GetScene()->GetEngine()->GetLayer();
     int32 animationCellIndex = cell->GetIndex();
 
-    for( uint32 drawingIndex = 1; drawingIndex < ( GetLength() - 1 ); drawingIndex++ )
+    for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
-        IOdysseyVectorCell* inbetweenCell = layer->GetCellByIndex( animationCellIndex + ( drawingIndex * (int)mInterpolationDirection ) );
+        uint32 breakdownSourceDrawingIndex = breakdown->GetSourceDrawingIndex();
+        uint32 breakdownTargetDrawingIndex = breakdown->GetTargetDrawingIndex();
 
-        if( inbetweenCell )
+        for( uint32 drawingIndex = breakdownSourceDrawingIndex + 1; drawingIndex <= breakdownTargetDrawingIndex; drawingIndex++ )
         {
-            std::list<FOdysseyVectorObject*> newObjectList;
+            IOdysseyVectorCell* inbetweenCell = layer->GetCellByIndex( animationCellIndex + ( drawingIndex * (int)mInterpolationDirection ) );
 
-            // change vertices coords before copying the object
-            std::function<uint64(FOdysseyVectorObject*,uint64)> preProcess = [ drawingIndex ]( FOdysseyVectorObject* vectorObject, uint64 copyFlags ) -> uint64
+            if( ( drawingIndex != breakdownTargetDrawingIndex ) || breakdown->IsTargetVisible() )
             {
-                BLMatrix2D& ownerWorldMatrix = vectorObject->GetWorldMatrix();
-                FOdysseyVectorTag* tag = vectorObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
-
-                if( tag )
+                if( inbetweenCell )
                 {
-                    FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-                    FInbetweenerDrawing* drawing = inbetweenerTag->GetDrawing( drawingIndex );
+                    std::list<FOdysseyVectorObject*> newObjectList;
 
-                    if( inbetweenerTag->GetMapAsPolyline() )
+                    // change vertices coords before copying the object
+                    std::function<uint64(FOdysseyVectorObject*,uint64)> preProcess = [ drawingIndex ]( FOdysseyVectorObject* vectorObject, uint64 copyFlags ) -> uint64
                     {
-                        copyFlags |= FOdysseyVectorObject::COPY_RETOPOLOGY;
-                    }
-                    else
-                    {
-                        copyFlags &= (~FOdysseyVectorObject::COPY_RETOPOLOGY);
-                    }
+                        BLMatrix2D& ownerWorldMatrix = vectorObject->GetWorldMatrix();
+                        FOdysseyVectorTag* tag = vectorObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
 
-                    for( FInterpolatedPath& interpolatedPath : inbetweenerTag->mInterpolatedPathBuffer )
-                    {
-                        uint32 pointCount = interpolatedPath.mInterpolatedPointBuffer.size();
-                        uint32 skippedOffset = ( drawingIndex * pointCount );
-
-
-
-                        for( uint32 i = 0; i < interpolatedPath.mInterpolatedPointBuffer.size(); i++ )
+                        if( tag )
                         {
-                            FInterpolatedPoint* interpolatedPoint = &interpolatedPath.mInterpolatedPointBuffer[i];
-                            ::ULIS::FVec2D* commitPosition = &interpolatedPath.mInterpolatedPointPositionBuffer[skippedOffset + i];
-                            ::ULIS::FVec2D swapPosition = interpolatedPoint->mOriginalPoint->GetCoords();
-                            ::ULIS::FVec2D transformedLocalPosition;
-                            //double transformedLocalRadius;
-                            //BLPoint transformedWorldPosition;
+                            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+                            FInbetweenerDrawing* drawing = inbetweenerTag->GetDrawing( drawingIndex );
 
-                            transformedLocalPosition = FOdysseyVector::MapPoint( drawing->localMatrix, ::ULIS::FVec2D( commitPosition->x
-                                                                                                                     , commitPosition->y ) );
+                            if( inbetweenerTag->GetMapAsPolyline() )
+                            {
+                                copyFlags |= FOdysseyVectorObject::COPY_RETOPOLOGY;
+                            }
+                            else
+                            {
+                                copyFlags &= (~FOdysseyVectorObject::COPY_RETOPOLOGY);
+                            }
+
+                            for( FInterpolatedPath& interpolatedPath : inbetweenerTag->mInterpolatedPathBuffer )
+                            {
+                                uint32 pointCount = interpolatedPath.mInterpolatedPointBuffer.size();
+                                uint32 skippedOffset = ( drawingIndex * pointCount );
 
 
-                            interpolatedPoint->mOriginalPoint->Set( transformedLocalPosition.x
-                                                                  , transformedLocalPosition.y );
 
-                            *commitPosition = swapPosition;
+                                for( uint32 i = 0; i < interpolatedPath.mInterpolatedPointBuffer.size(); i++ )
+                                {
+                                    FInterpolatedPoint* interpolatedPoint = &interpolatedPath.mInterpolatedPointBuffer[i];
+                                    ::ULIS::FVec2D* commitPosition = &interpolatedPath.mInterpolatedPointPositionBuffer[skippedOffset + i];
+                                    ::ULIS::FVec2D swapPosition = interpolatedPoint->mOriginalPoint->GetCoords();
+                                    ::ULIS::FVec2D transformedLocalPosition;
+                                    //double transformedLocalRadius;
+                                    //BLPoint transformedWorldPosition;
+
+                                    transformedLocalPosition = FOdysseyVector::MapPoint( drawing->localMatrix, ::ULIS::FVec2D( commitPosition->x
+                                                                                                                             , commitPosition->y ) );
+
+
+                                    interpolatedPoint->mOriginalPoint->Set( transformedLocalPosition.x
+                                                                          , transformedLocalPosition.y );
+
+                                    *commitPosition = swapPosition;
+                                }
+                            }
+                        }
+
+                        return copyFlags;
+                    };
+
+                    std::function<uint64(FOdysseyVectorObject*,FOdysseyVectorObject*,uint64)> postProcess = [ drawingIndex
+                                                                                                            , preProcess
+                                                                                                            , &newObjectList ]( FOdysseyVectorObject* sourceObject
+                                                                                                                              , FOdysseyVectorObject* objectCopy
+                                                                                                                              , uint64 copyFlags ) -> uint64
+                    {
+                        FOdysseyVectorTag* tag = sourceObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+                        newObjectList.push_back( objectCopy );
+
+                        if( tag )
+                        {
+                            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+                            FInbetweenerDrawing* drawing = inbetweenerTag->GetDrawing( drawingIndex );
+
+                            drawing->localMatrix.reset();
+
+                            // revert vertices coords after having copied the object.
+                            // Coords were saved in the point position buffer
+                            for( FInterpolatedPath& interpolatedPath : inbetweenerTag->mInterpolatedPathBuffer )
+                            {
+                                uint32 pointCount = interpolatedPath.mInterpolatedPointBuffer.size();
+                                uint32 skippedOffset = ( drawingIndex * pointCount );
+
+                                for( uint32 i = 0; i < interpolatedPath.mInterpolatedPointBuffer.size(); i++ )
+                                {
+                                    FInterpolatedPoint* interpolatedPoint = &interpolatedPath.mInterpolatedPointBuffer[i];
+                                    ::ULIS::FVec2D* commitPosition = &interpolatedPath.mInterpolatedPointPositionBuffer[skippedOffset + i];
+
+                                    interpolatedPoint->mOriginalPoint->Set( commitPosition->x
+                                                                          , commitPosition->y );
+                                }
+                            }
+                        }
+
+                        return 0;
+                    };
+
+                    FOdysseyVectorGroupPaint* inbetweenScene = inbetweenCell->GetEngine()->GetScene();
+
+                    FOdysseyVectorObject* copiedObject = mOwner->Copy( FOdysseyVectorObject::COPY_WORLDCOORDS
+                                                                     | FOdysseyVectorObject::COPY_NOTAG
+                                                                     , preProcess
+                                                                     , postProcess );
+
+                    oAddedObjectList.push_back( copiedObject );
+
+                    if( std::find( oCommittedSceneList.begin()
+                                 , oCommittedSceneList.end()
+                                 , inbetweenScene ) == oCommittedSceneList.end() )
+                    {
+                        oCommittedSceneList.push_back( inbetweenScene );
+                    }
+
+                    inbetweenScene->AppendChild( copiedObject );
+
+                    inbetweenScene->UpdateMatrix();
+
+                    // convert vertices from world to local coordinates (for consistency with what is seen on the screen)
+                    for( FOdysseyVectorObject* newObject : newObjectList )
+                    {
+                        if( newObject->GetClass() == FOdysseyVectorPath::StaticClass() )
+                        {
+                            FOdysseyVectorPath* newPath = static_cast<FOdysseyVectorPath*>(newObject);
+                            BLMatrix2D& inverseWorldMatrix = newPath->GetInverseWorldMatrix();
+
+                            for( FOdysseyVectorVertex* vertex : newPath->GetVertexList() )
+                            {
+                                BLPoint vertexLocalPosition = inverseWorldMatrix.mapPoint( vertex->GetX()
+                                                                                         , vertex->GetY() );
+                                double vertexLocalRadius = FOdysseyVector::MapVector( inverseWorldMatrix
+                                                                                    , ::ULIS::FVec2D( vertex->GetRadius() * 0.7071f
+                                                                                                    , vertex->GetRadius() * 0.7071f ) ).Distance();
+
+                                vertex->Set( vertexLocalPosition.x, vertexLocalPosition.y );
+                                vertex->SetRadius( vertexLocalRadius );
+                            }
+
+                            for( FOdysseyVectorSegment* segment : newPath->GetSegmentList() )
+                            {
+                                if( segment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
+                                {
+                                    FOdysseyVectorHandleSegment* handle0 = segment->GetHandle(0);
+                                    FOdysseyVectorHandleSegment* handle1 = segment->GetHandle(1);
+                                    BLPoint handle0localPosition = inverseWorldMatrix.mapPoint( handle0->GetX()
+                                                                                              , handle0->GetY() );
+                                    BLPoint handle1localPosition = inverseWorldMatrix.mapPoint( handle1->GetX()
+                                                                                              , handle1->GetY() );
+
+                                    handle0->Set( handle0localPosition.x, handle0localPosition.y );
+                                    handle1->Set( handle1localPosition.x, handle1localPosition.y );
+                                }
+                            }
                         }
                     }
+
+                    inbetweenScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
                 }
-
-                return copyFlags;
-            };
-
-            std::function<uint64(FOdysseyVectorObject*,FOdysseyVectorObject*,uint64)> postProcess = [ drawingIndex
-                                                                                                    , preProcess
-                                                                                                    , &newObjectList ]( FOdysseyVectorObject* sourceObject
-                                                                                                                      , FOdysseyVectorObject* objectCopy
-                                                                                                                      , uint64 copyFlags ) -> uint64
-            {
-                FOdysseyVectorTag* tag = sourceObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
-
-                newObjectList.push_back( objectCopy );
-
-                if( tag )
-                {
-                    FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-                    FInbetweenerDrawing* drawing = inbetweenerTag->GetDrawing( drawingIndex );
-
-                    drawing->localMatrix.reset();
-
-                    // revert vertices coords after having copied the object.
-                    // Coords were saved in the point position buffer
-                    for( FInterpolatedPath& interpolatedPath : inbetweenerTag->mInterpolatedPathBuffer )
-                    {
-                        uint32 pointCount = interpolatedPath.mInterpolatedPointBuffer.size();
-                        uint32 skippedOffset = ( drawingIndex * pointCount );
-
-                        for( uint32 i = 0; i < interpolatedPath.mInterpolatedPointBuffer.size(); i++ )
-                        {
-                            FInterpolatedPoint* interpolatedPoint = &interpolatedPath.mInterpolatedPointBuffer[i];
-                            ::ULIS::FVec2D* commitPosition = &interpolatedPath.mInterpolatedPointPositionBuffer[skippedOffset + i];
-
-                            interpolatedPoint->mOriginalPoint->Set( commitPosition->x
-                                                                  , commitPosition->y );
-                        }
-                    }
-                }
-
-                return 0;
-            };
-
-            FOdysseyVectorGroupPaint* inbetweenScene = inbetweenCell->GetEngine()->GetScene();
-
-            FOdysseyVectorObject* copiedObject = mOwner->Copy( FOdysseyVectorObject::COPY_WORLDCOORDS
-                                                             | FOdysseyVectorObject::COPY_NOTAG
-                                                             , preProcess
-                                                             , postProcess );
-
-            oAddedObjectList.push_back( copiedObject );
-
-            if( std::find( oCommittedSceneList.begin()
-                         , oCommittedSceneList.end()
-                         , inbetweenScene ) == oCommittedSceneList.end() )
-            {
-                oCommittedSceneList.push_back( inbetweenScene );
             }
-
-            inbetweenScene->AppendChild( copiedObject );
-
-            inbetweenScene->UpdateMatrix();
-
-            // convert vertices from world to local coordinates (for consistency with what is seen on the screen)
-            for( FOdysseyVectorObject* newObject : newObjectList )
-            {
-                if( newObject->GetClass() == FOdysseyVectorPath::StaticClass() )
-                {
-                    FOdysseyVectorPath* newPath = static_cast<FOdysseyVectorPath*>(newObject);
-                    BLMatrix2D& inverseWorldMatrix = newPath->GetInverseWorldMatrix();
-
-                    for( FOdysseyVectorVertex* vertex : newPath->GetVertexList() )
-                    {
-                        BLPoint vertexLocalPosition = inverseWorldMatrix.mapPoint( vertex->GetX()
-                                                                                 , vertex->GetY() );
-                        double vertexLocalRadius = FOdysseyVector::MapVector( inverseWorldMatrix
-                                                                            , ::ULIS::FVec2D( vertex->GetRadius() * 0.7071f
-                                                                                            , vertex->GetRadius() * 0.7071f ) ).Distance();
-
-                        vertex->Set( vertexLocalPosition.x, vertexLocalPosition.y );
-                        vertex->SetRadius( vertexLocalRadius );
-                    }
-
-                    for( FOdysseyVectorSegment* segment : newPath->GetSegmentList() )
-                    {
-                        if( segment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
-                        {
-                            FOdysseyVectorHandleSegment* handle0 = segment->GetHandle(0);
-                            FOdysseyVectorHandleSegment* handle1 = segment->GetHandle(1);
-                            BLPoint handle0localPosition = inverseWorldMatrix.mapPoint( handle0->GetX()
-                                                                                      , handle0->GetY() );
-                            BLPoint handle1localPosition = inverseWorldMatrix.mapPoint( handle1->GetX()
-                                                                                      , handle1->GetY() );
-
-                            handle0->Set( handle0localPosition.x, handle0localPosition.y );
-                            handle1->Set( handle1localPosition.x, handle1localPosition.y );
-                        }
-                    }
-                }
-            }
-
-            inbetweenScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
         }
     }
 

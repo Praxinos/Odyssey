@@ -19,25 +19,21 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::~FOdysseyVectorUndoTagInbetween
     }
 }
 
-FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorGroupPaint* iScene
+FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorSharedEnv* iSharedEnv
                                                                                                 , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                                                                 , uint64 iReturnFlags )
-    : FOdysseyVectorUndoTagInbetweenerBreakdownRemove( iScene
-                                                   , { iInbetweenerTag }
-                                                   , { iInbetweenerTag->GetOwner()->GetEngine() }
-                                                   , iReturnFlags )
+    : FOdysseyVectorUndoTagInbetweenerBreakdownRemove( iSharedEnv
+                                                     , std::list<FOdysseyVectorTagInbetweener*> ({ iInbetweenerTag })
+                                                     , iReturnFlags )
 {
 
 }
 
-FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorGroupPaint* iScene
+FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorSharedEnv* iSharedEnv
                                                                                                 , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
-                                                                                                , const std::list<FOdysseyVectorEngine*>& iEngineList
                                                                                                 , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
 {
-    mEngineList = iEngineList;
-
     mInbetweenerTagSnapshotBuffer.reserve( iInbetweenerTagList.size() );
 
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
@@ -66,10 +62,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::Apply( UObject* iIgnored )
         inbetweenerTagSnapshot.LoadAlteredState();
     }
 
-    // update invalidated objects
+    // update invalidated objects. Note: will request redraw
     mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    // request redraw
-    InvalidateEngineList( 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
@@ -87,10 +81,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::Revert( UObject* iIgnored )
         inbetweenerTagSnapshot.LoadInitialState();
     }
 
-    // update invalidated objects
+    // update invalidated objects. Note: will request redraw
     mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    // request redraw
-    InvalidateEngineList( 0 );
 
     // call callbacks if any (for refreshing GUI e.g)
     FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );

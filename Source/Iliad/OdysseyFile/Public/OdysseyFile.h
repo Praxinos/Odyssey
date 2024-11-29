@@ -158,6 +158,7 @@ namespace FOdysseyFile
                                     static const uint32 CHUNK_TAGINBETWEENER_BREAKDOWNS_LAYOUT =  0x1f69cf20; // uint32(count) array[uint32(bool)-uint32(sourceDrawingIndex)-uint32(targetDrawingIndex)]
              /* Deprecated */       static const uint32 CHUNK_TAGINBETWEENER_BREAKDOWNS_GRIDGEOMETRY = 0x7e734517; // array[double(sourcex)-double(sourcey)-double(targetx)-double(targety)]
                                     static const uint32 CHUNK_BREAKDOWN =  0xfcd64f4f; // container, uint32(bool)-uint32(targetIndex)
+                                        static const uint32 CHUNK_BREAKDOWN_TARGETVISIBILITY = 0x23154e83; // uint32(bool)
                                         static const uint32 CHUNK_BREAKDOWN_TRANSFORM = 0x8fda6a1; // container
                                             static const uint32 CHUNK_BREAKDOWN_TRANSFORM_TRANSLATION = 0xc3264834; // double(translationX)-double(translationY)
                                             static const uint32 CHUNK_BREAKDOWN_TRANSFORM_ROTATION = 0xb788e00d; // double(rotation)

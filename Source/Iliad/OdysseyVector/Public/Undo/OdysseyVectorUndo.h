@@ -89,9 +89,10 @@ namespace FSnapshotFlags
 
     namespace Breakdown
     {
-        static const uint64 GRIDGEOMETRY    = ( 1ULL <<  0 );
-        static const uint64 TRANSFORMATIONS = ( 1ULL <<  1 );
-        static const uint64 CHART           = ( 1ULL <<  2 );
+        static const uint64 GRIDGEOMETRY     = ( 1ULL <<  0 );
+        static const uint64 TRANSFORMATIONS  = ( 1ULL <<  1 );
+        static const uint64 CHART            = ( 1ULL <<  2 );
+        static const uint64 TARGETVISIBILITY = ( 1ULL <<  3 );
     }
 
     namespace Chart
@@ -429,6 +430,7 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
         double rotation;
         double scalingX;
         double scalingY;
+        bool targetVisibility;
 
         State() { inited = false; }
     };

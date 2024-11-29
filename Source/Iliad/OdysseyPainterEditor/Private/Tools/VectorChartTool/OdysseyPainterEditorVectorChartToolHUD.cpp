@@ -229,12 +229,58 @@ FOdysseyPainterEditorVectorChartToolHUD::UpdateBezier()
 }
 
 void
-FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
-                                                  , BLRgba32& iFgColor
-                                                  , BLRgba32& iBgColor
-                                                  , BLRgba32& iHcColor
-                                                  , FInbetweenerBreakdown* iBreakdown
-                                                  , uint32 iRenderedCellIndex )
+FOdysseyPainterEditorVectorChartToolHUD::DrawInbetweenerChart( BLContext* iBLContext
+                                                             , FOdysseyVectorTagInbetweener* iInbetweenerTag )
+{
+    uint32 chartLength = 600;
+    ::ULIS::FVec2I chartStartPoint = ::ULIS::FVec2D( 40, 40 );
+    ::ULIS::FVec2I breakdownChartStartPoint = chartStartPoint;
+    static const BLRgba32 greyColor  = BLRgba32( 127, 127, 127, 255 );
+    float displayRatio = ( float ) sqrt( ( iBLContext->targetWidth() * iBLContext->targetHeight() ) / DEFAULT_SURFACE );
+     // On my colleague's request, the width of the stroke varies relative to the size of the image
+    displayRatio = std::max( 1.0f, 1.0f + ( ( displayRatio - 1.0f ) * 0.25f ) );
+
+    iBLContext->save();
+    iBLContext->resetMatrix();
+
+    iBLContext->setCompOp( BL_COMP_OP_SRC_OVER  );
+
+    iBLContext->setStrokeStyle( greyColor );
+    iBLContext->setStrokeWidth( 2.0f * displayRatio );
+
+    iBLContext->strokeLine( chartStartPoint.x
+                          , chartStartPoint.y
+                          , chartStartPoint.x + chartLength
+                          , chartStartPoint.y );
+
+    for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
+    {
+        uint32 breakdownChartLength = chartLength * ( ( double ) breakdown->GetDrawingCount() / iInbetweenerTag->GetLength() );
+        ::ULIS::FVec2I breakdownChartEndPoint = ::ULIS::FVec2D( breakdownChartStartPoint.x + breakdownChartLength, 40 );
+
+        for( FChartDivision& inbetween : breakdown->GetChart()->GetDivisionBuffer() )
+        {
+            ::ULIS::FVec2I at = breakdownChartStartPoint + ( ( breakdownChartEndPoint - breakdownChartStartPoint ) * inbetween.spacing );
+
+            iBLContext->strokeLine( at.x
+                                  , at.y - INDICATOR_RADIUS
+                                  , at.x
+                                  , at.y + INDICATOR_RADIUS );
+        }
+
+        breakdownChartStartPoint = breakdownChartEndPoint;
+    }
+
+    iBLContext->restore();
+}
+
+void
+FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( BLContext* iBLContext
+                                                           , BLRgba32& iFgColor
+                                                           , BLRgba32& iBgColor
+                                                           , BLRgba32& iHcColor
+                                                           , FInbetweenerBreakdown* iBreakdown
+                                                           , uint32 iRenderedCellIndex )
 {
     FOdysseyVectorTagInbetweener* inbetweenerTag = iBreakdown->GetInbetweenerTag();
     FInbetweenerChart* chart = iBreakdown->GetChart();
@@ -257,7 +303,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawChart( BLContext* iBLContext
     FInbetweenerDrawing* sourceDrawing = inbetweenerTag->GetDrawing( sourceDrawingIndex );
     FInbetweenerDrawing* targetDrawing = inbetweenerTag->GetDrawing( targetDrawingIndex );
     ::ULIS::FVec2D* HUDBezier = chart->GetHUDBezier();
-    float displayRatio = ( float ) ( iBLContext->targetWidth() * iBLContext->targetHeight() ) / DEFAULT_SURFACE;
+    float displayRatio = ( float ) sqrt( ( iBLContext->targetWidth() * iBLContext->targetHeight() ) / DEFAULT_SURFACE );
 
      // On my colleague's request, the width of the stroke varies relative to the size of the image
     displayRatio = std::max( 1.0f, 1.0f + ( ( displayRatio - 1.0f ) * 0.25f ) );
@@ -416,9 +462,11 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
     {
         if( mBreakdown )
         {
-            FInbetweenerBreakdown* nextBreakdown = mBreakdown->GetNextBreakdown();
+            //FInbetweenerBreakdown* nextBreakdown = mBreakdown->GetNextBreakdown();
 
             mBreakdown->GetInbetweenerTag()->LockDrawing();
+
+            DrawInbetweenerChart( iBLContext, mBreakdown->GetInbetweenerTag() );
 
             DrawBreakdown( iScene
                          , iBLContext
@@ -430,12 +478,12 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
                          | HUD_INBETWEEN_FADEFROMTARGET
                          | HUD_BREAKDOWN_TARGET );
 
-            DrawChart( iBLContext
-                     , fgColor
-                     , bgColor
-                     , hcColor
-                     , mBreakdown
-                     , iScene->GetEngine()->GetCell()->GetIndex() );
+            DrawBreakdownChart( iBLContext
+                              , fgColor
+                              , bgColor
+                              , hcColor
+                              , mBreakdown
+                              , iScene->GetEngine()->GetCell()->GetIndex() );
 
            mBreakdown->GetInbetweenerTag()->UnlockDrawing();
         }
@@ -446,6 +494,9 @@ FChartDivision*
 FOdysseyPainterEditorVectorChartToolHUD::PickInbetween( double iWorldX
                                                       , double iWorldY )
 {
+    FChartDivision* closestInbetween = nullptr;
+    double minDistance = DBL_MAX;
+
     if( mBreakdown )
     {
         FOdysseyVectorTagInbetweener* inbetweenerTag = mBreakdown->GetInbetweenerTag();
@@ -459,16 +510,22 @@ FOdysseyPainterEditorVectorChartToolHUD::PickInbetween( double iWorldX
                                                                                         HUDBezier[1],
                                                                                         HUDBezier[2],
                                                                                         GetQuadraticT( inbetween->spacing ) );
+            double distance = ::ULIS::FVec2D( iWorldX - indicatorPosition.x
+                                            , iWorldY - indicatorPosition.y ).Distance();
 
-            if( ::ULIS::FVec2D( iWorldX - indicatorPosition.x
-                              , iWorldY - indicatorPosition.y ).Distance() < INDICATOR_RADIUS )
+            if( distance < ( INDICATOR_RADIUS + ( FONT_SIZE * 0.5f ) ) )
             {
-                return inbetween;
+                if( distance < minDistance )
+                {
+                    closestInbetween = inbetween;
+
+                    minDistance = distance;
+                }
             }
         }
     }
 
-    return nullptr;
+    return closestInbetween;
 }
 
 ::ULIS::FVec2D*

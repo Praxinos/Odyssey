@@ -46,6 +46,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorRoot : public FOdysseyVectorObject
         FOdysseyVectorGroupPaint* GetScene();
         virtual void Invalidate( uint64 iInvalidationFlags ) override;
         FOdysseyVectorEngine* GetEngine();
+        virtual void Update( uint32 iUpdateFlags ) override;
 
     protected:
         FOdysseyVectorEngine mEngine;

@@ -52,8 +52,8 @@ protected:
     void AddBreakdown();
     void RemoveBreakdown();
     void ChangeDirection();
-    void GetSelectedInbetweenerTags( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList
-                                    , std::list<FOdysseyVectorEngine*>& oEngineList );
+    void ShowHideTarget();
+    void GetSelectedInbetweenerTags( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList );
 
     void OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iNotificationFlags );
 

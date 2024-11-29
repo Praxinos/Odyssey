@@ -62,12 +62,14 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
         double QuadraticHitTest( const ::ULIS::FVec2D& iPt, uint32 iRadius );
 
     private:
-        void DrawChart( BLContext* iBLContext
-                      , BLRgba32& iFgColor
-                      , BLRgba32& iBgColor
-                      , BLRgba32& iHcColor
-                      , FInbetweenerBreakdown* iBreakdown
-                      , uint32 iRenderedCellIndex );
+        void DrawBreakdownChart( BLContext* iBLContext
+                               , BLRgba32& iFgColor
+                               , BLRgba32& iBgColor
+                               , BLRgba32& iHcColor
+                               , FInbetweenerBreakdown* iBreakdown
+                               , uint32 iRenderedCellIndex );
+        void DrawInbetweenerChart( BLContext* iBLContext
+                                 , FOdysseyVectorTagInbetweener* iInbetweenerTag );
         double GetQuadraticT( float iSpacingT );
 
 

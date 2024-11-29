@@ -84,6 +84,8 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         void EaseInAndOut( float iEasing, FChartDivision* iInbetween );
         IOdysseyVectorCell* GetTargetCell();
         IOdysseyVectorCell* GetSourceCell();
+        void SetTargetVisibility( bool iTargetVisibility );
+        bool IsTargetVisible();
 
     protected:
         void DrawGrid( BLContext* iBLContext
@@ -109,4 +111,5 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         uint32 mTargetDrawingIndex;
         uint32 mIndex;
         FInbetweenerChart mChart;
+        bool bTargetVisibility;
 };
