@@ -11,10 +11,11 @@
 #include "OdysseyVectorSharedEnv.h"
 #include "Interfaces/IPluginManager.h"
 
-#define INDICATOR_RADIUS 20.0f
-#define FONT_SIZE        28.0f
-#define DEFAULT_SURFACE  (1920*1080)
-#define FRACTIONCOUNT    24
+#define INBETWEENER_INDICATOR_RADIUS 10.0f
+#define BREAKDOWN_INDICATOR_RADIUS   20.0f
+#define FONT_SIZE                    28.0f
+#define DEFAULT_SURFACE              (1920*1080)
+#define FRACTIONCOUNT                24
 
 FOdysseyPainterEditorVectorChartToolHUD::~FOdysseyPainterEditorVectorChartToolHUD()
 {
@@ -233,10 +234,13 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawInbetweenerChart( BLContext* iBLCon
                                                              , FOdysseyVectorTagInbetweener* iInbetweenerTag )
 {
     uint32 chartLength = 600;
-    ::ULIS::FVec2I chartStartPoint = ::ULIS::FVec2D( 40, 40 );
+    ::ULIS::FVec2I chartStartPoint = ::ULIS::FVec2D( 800, 40 );
     ::ULIS::FVec2I breakdownChartStartPoint = chartStartPoint;
-    static const BLRgba32 greyColor  = BLRgba32( 127, 127, 127, 255 );
+    static const BLRgba32 greyColor  = BLRgba32( 127, 127, 127, 127 );
     float displayRatio = ( float ) sqrt( ( iBLContext->targetWidth() * iBLContext->targetHeight() ) / DEFAULT_SURFACE );
+    uint32 totalBreakdownDrawingCount = 0;
+    float fontSize = mFont.size();
+
      // On my colleague's request, the width of the stroke varies relative to the size of the image
     displayRatio = std::max( 1.0f, 1.0f + ( ( displayRatio - 1.0f ) * 0.25f ) );
 
@@ -246,7 +250,8 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawInbetweenerChart( BLContext* iBLCon
     iBLContext->setCompOp( BL_COMP_OP_SRC_OVER  );
 
     iBLContext->setStrokeStyle( greyColor );
-    iBLContext->setStrokeWidth( 2.0f * displayRatio );
+    iBLContext->setFillStyle( greyColor );
+    //iBLContext->setStrokeWidth( 3.0f * displayRatio );
 
     iBLContext->strokeLine( chartStartPoint.x
                           , chartStartPoint.y
@@ -255,17 +260,68 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawInbetweenerChart( BLContext* iBLCon
 
     for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
     {
-        uint32 breakdownChartLength = chartLength * ( ( double ) breakdown->GetDrawingCount() / iInbetweenerTag->GetLength() );
+        totalBreakdownDrawingCount += breakdown->GetDrawingCount();
+    }
+
+    for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
+    {
+        uint32 breakdownChartLength = chartLength * ( ( double ) breakdown->GetDrawingCount() / totalBreakdownDrawingCount );
         ::ULIS::FVec2I breakdownChartEndPoint = ::ULIS::FVec2D( breakdownChartStartPoint.x + breakdownChartLength, 40 );
+        FInbetweenerBreakdown* prevBreakdown = breakdown->GetPrevBreakdown();
+        FInbetweenerBreakdown* nextBreakdown = breakdown->GetNextBreakdown();
 
         for( FChartDivision& inbetween : breakdown->GetChart()->GetDivisionBuffer() )
         {
-            ::ULIS::FVec2I at = breakdownChartStartPoint + ( ( breakdownChartEndPoint - breakdownChartStartPoint ) * inbetween.spacing );
+            float lengthFactor = ( ( inbetween.spacing == 0.0f ) || ( inbetween.spacing == 1.0f ) ) ? 1.0f : 0.6f;
+            ::ULIS::FVec2I indicatorPosition = breakdownChartStartPoint + ( ( breakdownChartEndPoint - breakdownChartStartPoint ) * inbetween.spacing );
+            const FGlyph* glyph = GetGlyph( inbetween.drawing->GetIndex() + 1 );
+            ::ULIS::FVec2D frameInfoPosition = ::ULIS::FVec2D( indicatorPosition.x
+                                                             , indicatorPosition.y + ( INBETWEENER_INDICATOR_RADIUS * lengthFactor ) + FONT_SIZE );
+            ::ULIS::FVec2D frameNumberPosition = ::ULIS::FVec2D( frameInfoPosition.x - ( glyph->bbox.w * 0.5f )
+                                                               , frameInfoPosition.y + ( glyph->bbox.h * 0.5f ) );
 
-            iBLContext->strokeLine( at.x
-                                  , at.y - INDICATOR_RADIUS
-                                  , at.x
-                                  , at.y + INDICATOR_RADIUS );
+            if( inbetween.spacing == 0.0f )
+            {
+                iBLContext->setStrokeWidth( 2.0f * displayRatio );
+
+                if( prevBreakdown == nullptr )
+                {
+                    iBLContext->strokeCircle( frameInfoPosition.x, frameInfoPosition.y, fontSize );
+                }
+                else
+                {
+                    iBLContext->strokeLine( frameNumberPosition.x
+                                          , frameNumberPosition.y + glyph->bbox.h
+                                          , frameNumberPosition.x + glyph->bbox.w
+                                          , frameNumberPosition.y + glyph->bbox.h );
+                }
+            }
+
+            if( inbetween.spacing == 1.0f )
+            {
+                iBLContext->setStrokeWidth( 2.0f * displayRatio );
+
+                if( nextBreakdown == nullptr )
+                {
+                    iBLContext->strokeCircle( frameInfoPosition.x, frameInfoPosition.y, fontSize );
+                }
+                else
+                {
+                    iBLContext->strokeLine( frameNumberPosition.x
+                                          , frameNumberPosition.y + glyph->bbox.h
+                                          , frameNumberPosition.x + glyph->bbox.w
+                                          , frameNumberPosition.y + glyph->bbox.h );
+                }
+            }
+
+            iBLContext->setStrokeWidth( 3.0f * displayRatio );
+            iBLContext->strokeLine( indicatorPosition.x
+                                  , indicatorPosition.y - ( INBETWEENER_INDICATOR_RADIUS * lengthFactor )
+                                  , indicatorPosition.x
+                                  , indicatorPosition.y + ( INBETWEENER_INDICATOR_RADIUS * lengthFactor ) );
+
+            iBLContext->fillUtf8Text( BLPoint( frameNumberPosition.x
+                                             , frameNumberPosition.y ), mFont, glyph->str );
         }
 
         breakdownChartStartPoint = breakdownChartEndPoint;
@@ -353,8 +409,8 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( BLContext* iBLConte
             float lengthFactor = ( ( inbetween->spacing == 0.0f ) || ( inbetween->spacing == 1.0f ) ) ? 1.0f : 0.6f;
             ::ULIS::FVec2D normalizedPerpendicular = indicatorPerpendicular.Normalize() * lengthFactor;
              // Note: "* 0.1f" helps positionning the circle surrounding the numbers a bit away from the indicator
-            ::ULIS::FVec2D frameInfoPosition = ::ULIS::FVec2D( indicatorPosition.x + ( normalizedPerpendicular.x * 1.1f * ( FONT_SIZE + ( INDICATOR_RADIUS ) ) )
-                                                             , indicatorPosition.y + ( normalizedPerpendicular.y * 1.1f * ( FONT_SIZE + ( INDICATOR_RADIUS ) ) ) );
+            ::ULIS::FVec2D frameInfoPosition = ::ULIS::FVec2D( indicatorPosition.x + ( normalizedPerpendicular.x * 1.1f * ( FONT_SIZE + ( BREAKDOWN_INDICATOR_RADIUS ) ) )
+                                                             , indicatorPosition.y + ( normalizedPerpendicular.y * 1.1f * ( FONT_SIZE + ( BREAKDOWN_INDICATOR_RADIUS ) ) ) );
             // calculate inbetween number position
             const FGlyph* glyph = GetGlyph( iBreakdown->GetSourceDrawingIndex() + i + 1 );
             ::ULIS::FVec2D frameNumberPosition = ::ULIS::FVec2D( frameInfoPosition.x - ( glyph->bbox.w * 0.5f )
@@ -366,10 +422,10 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( BLContext* iBLConte
                 iBLContext->setStrokeStyle( chartColor );
                 iBLContext->strokeCircle( frameInfoPosition.x, frameInfoPosition.y, fontSize );
                 // draw indicator
-                iBLContext->strokeLine( indicatorPosition.x + ( normalizedPerpendicular.x * INDICATOR_RADIUS )
-                                      , indicatorPosition.y + ( normalizedPerpendicular.y * INDICATOR_RADIUS )
-                                      , indicatorPosition.x - ( normalizedPerpendicular.x * INDICATOR_RADIUS )
-                                      , indicatorPosition.y - ( normalizedPerpendicular.y * INDICATOR_RADIUS ) );
+                iBLContext->strokeLine( indicatorPosition.x + ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
+                                      , indicatorPosition.y + ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS )
+                                      , indicatorPosition.x - ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
+                                      , indicatorPosition.y - ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) );
 
                 iBLContext->strokeUtf8Text( BLPoint( frameNumberPosition.x
                                                    , frameNumberPosition.y ), mFont, glyph->str );
@@ -383,10 +439,10 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( BLContext* iBLConte
                 iBLContext->setStrokeWidth( hovered ? 3.0f * displayRatio: 2.0f * displayRatio );
                 iBLContext->setStrokeStyle( hovered ? iHcColor : inbetweenColor );
                 // draw indicator
-                iBLContext->strokeLine( indicatorPosition.x + ( normalizedPerpendicular.x * INDICATOR_RADIUS )
-                                      , indicatorPosition.y + ( normalizedPerpendicular.y * INDICATOR_RADIUS )
-                                      , indicatorPosition.x - ( normalizedPerpendicular.x * INDICATOR_RADIUS )
-                                      , indicatorPosition.y - ( normalizedPerpendicular.y * INDICATOR_RADIUS ) );
+                iBLContext->strokeLine( indicatorPosition.x + ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
+                                      , indicatorPosition.y + ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS )
+                                      , indicatorPosition.x - ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
+                                      , indicatorPosition.y - ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) );
 
                 iBLContext->strokeUtf8Text( BLPoint( frameNumberPosition.x
                                                    , frameNumberPosition.y ), mFont, glyph->str );
@@ -466,7 +522,10 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
 
             mBreakdown->GetInbetweenerTag()->LockDrawing();
 
-            DrawInbetweenerChart( iBLContext, mBreakdown->GetInbetweenerTag() );
+            if( mBreakdown->GetInbetweenerTag()->GetBreakdownCount() > 1 )
+            {
+                DrawInbetweenerChart( iBLContext, mBreakdown->GetInbetweenerTag() );
+            }
 
             DrawBreakdown( iScene
                          , iBLContext
@@ -513,7 +572,7 @@ FOdysseyPainterEditorVectorChartToolHUD::PickInbetween( double iWorldX
             double distance = ::ULIS::FVec2D( iWorldX - indicatorPosition.x
                                             , iWorldY - indicatorPosition.y ).Distance();
 
-            if( distance < ( INDICATOR_RADIUS + ( FONT_SIZE * 0.5f ) ) )
+            if( distance < ( BREAKDOWN_INDICATOR_RADIUS + ( FONT_SIZE * 0.5f ) ) )
             {
                 if( distance < minDistance )
                 {

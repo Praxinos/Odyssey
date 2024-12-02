@@ -213,12 +213,13 @@ FOdysseyVector::CubicBezierHitTest( const ::ULIS::FVec2D& iPt
                                   , const ::ULIS::FVec2D& iBezier1
                                   , const ::ULIS::FVec2D& iBezier2
                                   , const ::ULIS::FVec2D& iBezier3
-                                  , uint32 iDivisions )
+                                  , uint32 iDivisions
+                                  , double iMinDistance )
 {
     double t = 0.0f;
     double step = 1.0f / ( iDivisions + 1 );
-    double minDistance = DBL_MAX;
-    double absoluteT = 0.0f;
+    double minDistance = iMinDistance;
+    double absoluteT = -1.0f;
 
     for( uint32 i = 0; i <= iDivisions; i++ )
     {
@@ -255,12 +256,13 @@ FOdysseyVector::QuadraticBezierHitTest( const ::ULIS::FVec2D& iPt
                                       , const ::ULIS::FVec2D& iBezier0
                                       , const ::ULIS::FVec2D& iBezier1
                                       , const ::ULIS::FVec2D& iBezier2
-                                      , uint32 iDivisions )
+                                      , uint32 iDivisions
+                                      , double iMinDistance )
 {
     double t = 0.0f;
     double step = 1.0f / ( iDivisions + 1 );
-    double minDistance = DBL_MAX;
-    double absoluteT = 0.0f;
+    double minDistance = iMinDistance;
+    double absoluteT = -1.0f;
 
     for( uint32 i = 0; i <= iDivisions; i++ )
     {

@@ -62,12 +62,14 @@ namespace FOdysseyVector
                                                , const ::ULIS::FVec2D& iBezier1
                                                , const ::ULIS::FVec2D& iBezier2
                                                , const ::ULIS::FVec2D& iBezier3
-                                               , uint32 iDivisions );
+                                               , uint32 iDivisions
+                                               , double iMinDistance );
     double ODYSSEYVECTOR_API QuadraticBezierHitTest( const ::ULIS::FVec2D& iPt
                                                    , const ::ULIS::FVec2D& iBezier0
                                                    , const ::ULIS::FVec2D& iBezier1
                                                    , const ::ULIS::FVec2D& iBezier2
-                                                   , uint32 iDivisions );
+                                                   , uint32 iDivisions
+                                                   , double iMinDistance );
 
     void ODYSSEYVECTOR_API BezierExtract( const ::ULIS::FVec2D& iP0
                                         , const ::ULIS::FVec2D& iP1

@@ -2006,7 +2006,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                             FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
                             FInbetweenerDrawing* drawing = inbetweenerTag->GetDrawing( drawingIndex );
 
-                            drawing->localMatrix.reset();
+                            //drawing->localMatrix.reset();
 
                             // revert vertices coords after having copied the object.
                             // Coords were saved in the point position buffer

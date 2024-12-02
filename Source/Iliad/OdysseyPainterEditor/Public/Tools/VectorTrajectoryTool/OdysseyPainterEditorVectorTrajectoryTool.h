@@ -99,4 +99,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
                           , ClampMin = "0.0"
                           , UIMin    = "0.0" ) )
         double PickingRadius;
+
+        UPROPERTY( EditAnywhere
+                 , Category = MatchingTool
+                 , meta = ( ToolTip  = "Show Inbetweens" ) )
+        bool ShowInbetweens;
 };

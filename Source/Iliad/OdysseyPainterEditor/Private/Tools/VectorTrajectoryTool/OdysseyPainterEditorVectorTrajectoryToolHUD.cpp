@@ -95,8 +95,8 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickSourceQuad( FInbetweenerGrid* 
 
 static FInbetweenerRoute*
 PickRouteFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                , double iWorldX
-                , double iWorldY
+                , double iWorldPointX
+                , double iWorldPointY
                 , double iPickingRadius )
 {
     std::list<FInbetweenerRoute*>& routeList = iInbetweenerTag->GetRouteList();
@@ -104,16 +104,26 @@ PickRouteFromTag( FOdysseyVectorTagInbetweener* iInbetweenerTag
 
     for( FInbetweenerRoute* route : routeList )
     {
-        FInbetweenerQuad* quad = &iInbetweenerTag->GetBreakdownList().front()->GetGrid()->GetQuadBuffer()[route->GetQuadIndex()];
-        ::ULIS::FVec2D routeLocalPosition = quad->GetPoint( eInbetweenerPointPositionType::SourcePosition
-                                                          , route->GetQuadU()
-                                                          , route->GetQuadV() );
-        ::ULIS::FVec2D routeWorldPosition = FOdysseyVector::MapPoint( ownerWorldMatrix, routeLocalPosition );
-
-        if( ( ::ULIS::FVec2D( routeWorldPosition.x, routeWorldPosition.y )
-            - ::ULIS::FVec2D( iWorldX             , iWorldY              ) ).Distance() <= iPickingRadius )
+        for( FInbetweenerTrajectory& trajectory : route->GetTrajectoryBuffer() )
         {
-            return route;
+            ::ULIS::FVec2D* localBezier = trajectory.GetCubicBezier();
+            ::ULIS::FVec2D worldBezier[4] = { FOdysseyVector::MapPoint( ownerWorldMatrix, localBezier[0] )
+                                            , FOdysseyVector::MapPoint( ownerWorldMatrix, localBezier[1] )
+                                            , FOdysseyVector::MapPoint( ownerWorldMatrix, localBezier[2] )
+                                            , FOdysseyVector::MapPoint( ownerWorldMatrix, localBezier[3] ) };
+
+            double absoluteT = FOdysseyVector::CubicBezierHitTest( ::ULIS::FVec2D( iWorldPointX
+                                                                                 , iWorldPointY )
+                                                                 , worldBezier[0]
+                                                                 , worldBezier[1]
+                                                                 , worldBezier[2]
+                                                                 , worldBezier[3]
+                                                                 , 16
+                                                                 , iPickingRadius );
+            if( absoluteT >= 0.0f )
+            {
+                return route;
+            }
         }
     }
 
@@ -514,21 +524,24 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
                                                 , ( HUD_BREAKDOWN_SOURCE
                                                   | (( prevBreakdown == nullptr ) ? HUD_BREAKDOWN_SOURCE_GRID : 0) ) );
 
-                FOdysseyVectorHUD::DrawBreakdown( iScene
-                                                , iBLContext
-                                                , breakdown
-                                                , BLRgba32( 127, 127, 127, 255 )
-                                                , BLRgba32( 255, 127, 127, 255 )
-                                                , HUD_BREAKDOWN_INBETWEEN | HUD_INBETWEEN_FADEFROMTARGET );
-
-                if( nextBreakdown )
+                if( mTrajectoryTool->ShowInbetweens )
                 {
                     FOdysseyVectorHUD::DrawBreakdown( iScene
                                                     , iBLContext
-                                                    , nextBreakdown
+                                                    , breakdown
                                                     , BLRgba32( 127, 127, 127, 255 )
                                                     , BLRgba32( 255, 127, 127, 255 )
-                                                    , HUD_BREAKDOWN_INBETWEEN | HUD_INBETWEEN_FADEFROMSOURCE );
+                                                    , HUD_BREAKDOWN_INBETWEEN | HUD_INBETWEEN_FADEFROMTARGET );
+
+                    if( nextBreakdown )
+                    {
+                        FOdysseyVectorHUD::DrawBreakdown( iScene
+                                                        , iBLContext
+                                                        , nextBreakdown
+                                                        , BLRgba32( 127, 127, 127, 255 )
+                                                        , BLRgba32( 255, 127, 127, 255 )
+                                                        , HUD_BREAKDOWN_INBETWEEN | HUD_INBETWEEN_FADEFROMSOURCE );
+                    }
                 }
 
                 FOdysseyVectorHUD::DrawBreakdown( iScene

@@ -30,9 +30,10 @@ UOdysseyPainterEditorVectorTrajectoryTool::~UOdysseyPainterEditorVectorTrajector
 
 UOdysseyPainterEditorVectorTrajectoryTool::UOdysseyPainterEditorVectorTrajectoryTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorTrajectoryToolHUD( this ), false )
-    , PickingRadius( 10.0f )
     , mPickingMode( eTrajectoryPickingMode::Add )
     , mHoveredQuad( nullptr )
+    , PickingRadius( 10.0f )
+    , ShowInbetweens( true )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory64");
 
@@ -327,9 +328,6 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
     // here because we may be on a cell different from the tag's starting cell
     iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
-
     oSignalFlags = notificationFlags;
 
     return true;
@@ -380,7 +378,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseHoverVector( FOdysseyVectorGro
         }
     }
 
-    // redraw
+    // force redraw HUD
     iScene->GetEngine()->Invalidate( 0 );
 }
 
@@ -417,9 +415,10 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
                                                                   , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[1] )
                                                                   , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[2] )
                                                                   , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[3] )
-                                                                  , 16 );
+                                                                  , 16
+                                                                  , DBL_MAX );
 
-                //if( ( newT > prevT ) && ( newT < nextT ) )
+                if( newT >= 0.0f )
                 {
                     mPickedWaypoint->SetT( newT );
                 }
@@ -457,10 +456,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
 
     // Updating via the Shared env allow multiple cells to be updated which is paramount
     // here because we may be on a cell different from the tag's starting cell
-    iScene->GetSharedEnv()->Update( /*FOdysseyVectorObject::UPDATE_INTERACTIVE*/0 );
-
-    // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    // Note: will also redraw the image
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 }
 
 bool
@@ -507,10 +504,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseUpVector( FOdysseyVectorGroupP
     // here because we may be on a cell different from the tag's starting cell
     iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    // redraw
-    iScene->GetEngine()->Invalidate( 0 );
-
     oSignalFlags = notificationFlags;
+
     return true;
 }
 
@@ -623,6 +618,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FSinglePropertyParams defaultPropertyParams;
+    const TSharedPtr<ISinglePropertyView> showInbetweensPropertyView = propertyEditorModule.CreateSingleProperty(this, "ShowInbetweens", defaultPropertyParams);
+    TSharedPtr<class IPropertyHandle> showInbetweensOnlyHandle = showInbetweensPropertyView->GetPropertyHandle();
 /*
     const TSharedPtr<ISinglePropertyView> XDivPropertyView = propertyEditorModule.CreateSingleProperty(this, "DivisionsX", defaultPropertyParams);
     const TSharedPtr<ISinglePropertyView> YDivPropertyView = propertyEditorModule.CreateSingleProperty(this, "DivisionsY", defaultPropertyParams);
@@ -637,16 +634,10 @@ UOdysseyPainterEditorVectorTrajectoryTool::CreateTopTabWidget()
         [
             SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
         ]
-/*
         + SUniformWrapPanel::Slot()
         [
-            CreatePropertyWidget(XDivHandle, XDivPropertyView).ToSharedRef()
-        ]
-        + SUniformWrapPanel::Slot()
-        [
-            CreatePropertyWidget(YDivHandle, YDivPropertyView).ToSharedRef()
-        ]
-*/;
+            CreatePropertyWidget(showInbetweensOnlyHandle, showInbetweensPropertyView).ToSharedRef()
+        ];
 }
 
 FText
