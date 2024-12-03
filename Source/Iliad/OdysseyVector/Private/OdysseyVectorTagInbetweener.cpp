@@ -551,6 +551,7 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
 
         newBreakdown->SetTargetDrawingIndex( newTargetDrawingIndex );
 
+        //Unstable because route are not up-to-date at that point. commented-out.
         if( iFitNewTrajectories )
         {
             FitRoutes( iDrawingIndex );

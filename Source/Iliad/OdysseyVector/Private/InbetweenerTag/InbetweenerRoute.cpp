@@ -108,35 +108,37 @@ FInbetweenerRoute::Fit( uint32 iFitFrom )
             gridPoint = grid->GetQuadBuffer()[GetQuadIndex()].GetPoint( eInbetweenerPointPositionType::SourcePosition
                                                                       , mQuadU
                                                                       , mQuadV );
-            pointBuffer.push_back( FOdysseyVector::MapPoint( divisionBuffer.front().drawing->localMatrix, gridPoint ) );
 
-            // route must be disable before ARAP Precompute or else ARAP will try to use it.
-            // but the route is not ready yet (not all trajectories are set )
-            Disable();
-            if( divisionCount - 2 > 0 )
-            {
-                grid->PrecomputeARAPInterpolation();
+            //// curve fitting is buggy when a breakdown is added. commented-out.
+            ////pointBuffer.push_back( FOdysseyVector::MapPoint( divisionBuffer.front().drawing->localMatrix, gridPoint ) );
 
-                for( int32 j = 1; j < ( divisionCount - 1 ); j++ )
-                {
-                    FChartDivision& inbetween = divisionBuffer[j];
+            //// route must be disable before ARAP Precompute or else ARAP will try to use it.
+            //// but the route is not ready yet (not all trajectories are set )
+            ////Disable();
+            ////if( divisionCount - 2 > 0 )
+            ////{
+            ////    grid->PrecomputeARAPInterpolation();
 
-                    grid->ComputeARAPInterpolation( &inbetween, false );
+            ////    for( int32 j = 1; j < ( divisionCount - 1 ); j++ )
+            ////    {
+            ////        FChartDivision& inbetween = divisionBuffer[j];
 
-                    gridPoint = grid->GetQuadBuffer()[GetQuadIndex()].GetPoint( eInbetweenerPointPositionType::InterpPosition
-                                                                              , mQuadU
-                                                                              , mQuadV );
-                    pointBuffer.push_back( FOdysseyVector::MapPoint( inbetween.drawing->localMatrix, gridPoint ) );
-                }
-            }
-            Enable();
+            ////        grid->ComputeARAPInterpolation( &inbetween, false );
+
+            ////        gridPoint = grid->GetQuadBuffer()[GetQuadIndex()].GetPoint( eInbetweenerPointPositionType::InterpPosition
+            ////                                                                  , mQuadU
+            ////                                                                  , mQuadV );
+            ////        pointBuffer.push_back( FOdysseyVector::MapPoint( inbetween.drawing->localMatrix, gridPoint ) );
+            ////    }
+            ////}
+            ////Enable();
 
             gridPoint = grid->GetQuadBuffer()[GetQuadIndex()].GetPoint( eInbetweenerPointPositionType::TargetPosition
                                                                       , mQuadU
                                                                       , mQuadV );
-            pointBuffer.push_back( FOdysseyVector::MapPoint( divisionBuffer.back().drawing->localMatrix, gridPoint ) );
+            ////pointBuffer.push_back( FOdysseyVector::MapPoint( divisionBuffer.back().drawing->localMatrix, gridPoint ) );
 
-            mTrajectoryBuffer[i].FitBezier(  pointBuffer, spacingBuffer );
+            ////mTrajectoryBuffer[i].FitBezier(  pointBuffer, spacingBuffer );
         }
 
         i++;
