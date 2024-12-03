@@ -551,7 +551,6 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
 
         newBreakdown->SetTargetDrawingIndex( newTargetDrawingIndex );
 
-        //Unstable because route are not up-to-date at that point. commented-out.
         if( iFitNewTrajectories )
         {
             FitRoutes( iDrawingIndex );
@@ -691,7 +690,9 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
 
     if( mBreakdownList.size() > 1 )
     {
+        // note: it is guaranteed that we wil have at least a previous or next breakdown
         FInbetweenerBreakdown* nextBreakdown = iBreakdown->GetNextBreakdown();
+        FInbetweenerBreakdown* prevBreakdown = iBreakdown->GetPrevBreakdown();
 
         mBreakdownList.remove_if( [iBreakdown]( FInbetweenerBreakdown* listedBreakdown )
                                     {
@@ -718,6 +719,7 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
             nextBreakdown->GetChart()->GetSpacing( nextBreakdownSpacing );
 
             // This will force reallocation of the chart and dispatching of drawings
+            // and resizing of the routes
             nextBreakdown->SetTargetDrawingIndex( nextBreakdown->GetTargetDrawingIndex() );
 
             // Adapt the spacings
@@ -738,6 +740,12 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
 
             // nextBreakdown source grid gets its shape from this removed breakdown source grid.
             nextBreakdown->GetGrid()->SetGeometry( breakdownSourceGeometry, eInbetweenerPointPositionType::SourcePosition, true );
+        }
+        else
+        {
+            // This will force reallocation of the chart and dispatching of drawings
+            // and resizing of the routes
+            prevBreakdown->SetTargetDrawingIndex( prevBreakdown->GetTargetDrawingIndex() );
         }
     }
 
@@ -1101,7 +1109,6 @@ FOdysseyVectorTagInbetweener::UpdateMatrix()
 {
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
-        // deform the path according to grid geometry
         breakdown->UpdateMatrix();
     }
 }

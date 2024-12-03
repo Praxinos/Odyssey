@@ -119,9 +119,9 @@ UOdysseyPainterEditorVectorChartTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPa
 
 bool
 UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
-                                                              , const FOdysseyPoint& iPointInTexture
-                                                              , const FKey& iKey
-                                                            , uint64& oSignalFlags )
+                                                       , const FOdysseyPoint& iPointInTexture
+                                                       , const FKey& iKey
+                                                       , uint64& oSignalFlags )
 {
     if (iKey != EKeys::LeftMouseButton)
         return false;
@@ -132,6 +132,9 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
     mPickedInbetween = nullptr;
     mPickedBezierPoint = nullptr;
     mEasing = 0.0f;
+
+    mMouseAtDown.x = iPointInTexture.x;
+    mMouseAtDown.y = iPointInTexture.y;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -289,20 +292,23 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                     }
                 }
 
-                if( ShiftingOp == eChartShiftingOp::EaseIn )
+                if( ShiftingOp == eChartShiftingOp::EaseInOrOut )
                 {
-                    currentBreakdown->EaseIn( mEasing );
+                    if( iPointInTexture.x < mMouseAtDown.x )
+                    {
+                        currentBreakdown->EaseIn( mEasing );
 
-                    mEasing = std::clamp( ( iPointInTexture.deltaPosition.X < 0.0f ) ? mEasing + 0.2f
-                                                                                     : mEasing - 0.2f, 0.0f, 1.0f );
-                }
+                        mEasing = std::clamp( ( iPointInTexture.deltaPosition.X < 0.0f ) ? mEasing + 0.2f
+                                                                                         : mEasing - 0.2f, 0.0f, 1.0f );
+                    }
 
-                if( ShiftingOp == eChartShiftingOp::EaseOut )
-                {
-                    currentBreakdown->EaseOut( mEasing );
+                    if( iPointInTexture.x > mMouseAtDown.x )
+                    {
+                        currentBreakdown->EaseOut( mEasing );
 
-                    mEasing = std::clamp( ( iPointInTexture.deltaPosition.X > 0.0f ) ? mEasing + 0.2f
-                                                                                     : mEasing - 0.2f, 0.0f, 1.0f );
+                        mEasing = std::clamp( ( iPointInTexture.deltaPosition.X > 0.0f ) ? mEasing + 0.2f
+                                                                                         : mEasing - 0.2f, 0.0f, 1.0f );
+                    }
                 }
 
                 if( ShiftingOp == eChartShiftingOp::EaseInAndOut )

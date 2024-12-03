@@ -24,9 +24,8 @@ UENUM()
 enum class eChartShiftingOp : uint8
 {
     Relative     = 0,
-    EaseIn       = 1,
-    EaseOut      = 2,
-    EaseInAndOut = 3
+    EaseInOrOut  = 1,
+    EaseInAndOut = 2
 };
 
 UCLASS( HideCategories = (SelectionTool) )
@@ -87,6 +86,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
         FChartDivision* mHoveredInbetween;
         ::ULIS::FVec2D* mPickedBezierPoint;
         eChartPickingMode mPickingMode;
+        ::ULIS::FVec2D mMouseAtDown;
         float mEasing;
 
     public:
