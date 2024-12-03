@@ -12,11 +12,10 @@ public class OdysseyMaths : ModuleRules
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
         //Inactivate Unity builds to force devs to include all the necessary include files overywhere it is needed
-        //Inactivate Code Optimization in Debug and DebugGame configurations
+        //Inactivate Code Optimization in Debug configurations
         //Because Engine modules and Engine Plugin Modules are always optimized by default
         //and we don't want that
-        if (Target.Configuration == UnrealTargetConfiguration.Debug
-            || Target.Configuration == UnrealTargetConfiguration.DebugGame)
+        if (Target.Configuration == UnrealTargetConfiguration.Debug)
         {
             bMergeUnityFiles = false;
             bUseUnity = false;

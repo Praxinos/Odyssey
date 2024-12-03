@@ -372,7 +372,7 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
         mLastKnownViewport->SetViewportClient(viewportClient);
     }
 #endif
-    
+
     if( iEvent == EInputEvent::IE_Pressed )
     {
         //key already pressed, don't send a KeyDown or MouseDown twice
