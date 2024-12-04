@@ -1,0 +1,4 @@
+../../../Templates/TPO_FoliageTools/manifest.json
+../../../Templates/TPO_FoliageTools/Config/config.ini
+../../../Templates/TPO_FoliageTools/Media/TPO_FoliageTools.png
+../../../Templates/TPO_FoliageTools/Media/TPO_FoliageTools_Preview.png

@@ -1,0 +1,4 @@
+../../../Templates/TPO_Texture_64/manifest.json
+../../../Templates/TPO_Texture_64/Config/config.ini
+../../../Templates/TPO_Texture_64/Media/TPO_Texture_64.png
+../../../Templates/TPO_Texture_64/Media/TPO_Texture_64_Preview.png

@@ -1,0 +1,4 @@
+../../../Templates/TPO_SB2D_FullHD/manifest.json
+../../../Templates/TPO_SB2D_FullHD/Config/config.ini
+../../../Templates/TPO_SB2D_FullHD/Media/TPO_SB2D_FullHD.png
+../../../Templates/TPO_SB2D_FullHD/Media/TPO_SB2D_FullHD_Preview.png

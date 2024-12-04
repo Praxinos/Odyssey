@@ -1,0 +1,4 @@
+../../../Templates/TPO_LandscapeTools/manifest.json
+../../../Templates/TPO_LandscapeTools/Config/config.ini
+../../../Templates/TPO_LandscapeTools/Media/TPO_LandscapeTools.png
+../../../Templates/TPO_LandscapeTools/Media/TPO_LandscapeTools_Preview.png
