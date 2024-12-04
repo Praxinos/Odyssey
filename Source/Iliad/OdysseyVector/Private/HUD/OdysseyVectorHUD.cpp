@@ -572,9 +572,11 @@ FOdysseyVectorHUD::DrawInbetweenerInterpolatedPathAt( FOdysseyVectorGroupPaint* 
     ::ULIS::FVec2D* pointPositionBuffer = &iInterpolatedPath->GetInterpolatedPointPositionBuffer()[pathPointCount * inbetweenAbsoluteIndex];
     BLMatrix2D worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
     bool mapAsPolyline = iInbetweenerTag->GetMapAsPolyline();
+    FOdysseyVectorPath* originalPath = iInterpolatedPath->GetOriginalPath();
 
     // passed to DrawPathAt()
     worldMatrix.transform( iInbetween->drawing->localMatrix );
+    worldMatrix.transform( originalPath->GetLocalMatrix() );
 /*
     iBLContext->setStrokeWidth( 4.0f );
     iBLContext->setStrokeStyle( BLRgba32( inbetweeneColor.R

@@ -289,11 +289,12 @@ void FOdysseyVectorObject::ApplyTransformations()
                                               , &translationY
                                               , &rotation
                                               , &scalingX
-                                              , &scalingY );
+                                              , &scalingY
+                                              , true ); // in Degrees
 
         child->SetTransform( translationX
                            , translationY
-                           , rotation / M_PI * 180.0f
+                           , rotation
                            , scalingX
                            , scalingY );
     }
@@ -317,7 +318,8 @@ FOdysseyVectorObject::Transfer( const BLMatrix2D& iMatrix )
                                           , &mTranslationY
                                           , &mRotation
                                           , &mScalingX
-                                          , &mScalingY );
+                                          , &mScalingY
+                                          , true );
 
     //UpdateMatrix();
 }
@@ -441,7 +443,7 @@ FOdysseyVectorObject::Copy( uint64 iCopyFlags
 
     if( objectCopy )
     {
-        CopySettings( objectCopy );
+        CopySettings( objectCopy, iCopyFlags );
 
         // recurse
         for( FOdysseyVectorObject *child : mChildrenList )
@@ -502,7 +504,7 @@ FOdysseyVectorObject::ExportParam( FOdysseyVectorObject* iDestinationObject, boo
 }
 
 void
-FOdysseyVectorObject::CopySettings( FOdysseyVectorObject* iDestinationObject )
+FOdysseyVectorObject::CopySettings( FOdysseyVectorObject* iDestinationObject, uint64 iCopyFlags )
 {
     CopyTransformation( *iDestinationObject );
 
@@ -966,8 +968,12 @@ FOdysseyVectorObject::PrependChild( FOdysseyVectorObject* iChild )
 uint32
 FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter )
 {
+    FOdysseyVectorEngine* engine = GetEngine();
     FOdysseyVectorObject* lastItem = GetLastChild();
     uint32 ret = HIERARCHY_CHANGE_ERROR;
+
+    if( engine )
+        engine->GetDrawingMutex().lock();
 
     if( HasAncestor( iChild ) == false )
     {
@@ -1013,6 +1019,9 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
         iChild->Recurse( &FOdysseyVectorObject::Added );
     }
 
+    if( engine )
+        engine->GetDrawingMutex().unlock();
+
     return ret;
 }
 
@@ -1025,7 +1034,11 @@ FOdysseyVectorObject::GetOldParent()
 uint32
 FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 {
+    FOdysseyVectorEngine* engine = GetEngine();
     uint32 ret = HIERARCHY_CHANGE_ERROR;
+
+    if( engine )
+        engine->GetDrawingMutex().lock();
 
     if( iChild->mParent == this )
     {
@@ -1049,13 +1062,20 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
         iChild->Recurse( &FOdysseyVectorObject::Removed );
     }
 
+    if( engine )
+        engine->GetDrawingMutex().unlock();
+
     return ret;
 }
 
 uint32
 FOdysseyVectorObject::RemoveAllChildren()
 {
+    FOdysseyVectorEngine* engine = GetEngine();
     uint32 ret = HIERARCHY_CHANGE_ERROR;
+
+    if( engine )
+        engine->GetDrawingMutex().lock();
 
     Invalidate( INVALIDATE_HIERARCHY );
 
@@ -1074,6 +1094,9 @@ FOdysseyVectorObject::RemoveAllChildren()
 
     mChildrenList.clear();
     mInvalidatedChildrenList.clear();
+
+    if( engine )
+        engine->GetDrawingMutex().unlock();
 
     return HIERARCHY_CHANGE_SUCCESS;
 }
@@ -1101,11 +1124,17 @@ FOdysseyVectorObject::TransferChild( FOdysseyVectorObject* iFosterChild
                 BLMatrix2D localMatrix;
 
                 FOdysseyVector::MatrixMultiply( mInverseWorldMatrix, childFormerWorldMatrix, localMatrix );
-                FOdysseyVector::ExtractTransformations( localMatrix, &translationX, &translationY, &rotation, &scalingX, &scalingY );
+                FOdysseyVector::ExtractTransformations( localMatrix
+                                                      , &translationX
+                                                      , &translationY
+                                                      , &rotation
+                                                      , &scalingX
+                                                      , &scalingY
+                                                      , true ); // in degrees
 
                 iFosterChild->SetTransform( translationX
                                           , translationY
-                                          , rotation / M_PI * 180.0f
+                                          , rotation
                                           , scalingX
                                           , scalingY );
 
@@ -1186,6 +1215,12 @@ BLMatrix2D&
 FOdysseyVectorObject::GetWorldMatrix()
 {
     return mWorldMatrix;
+}
+
+BLMatrix2D&
+FOdysseyVectorObject::GetInverseLocalMatrix()
+{
+    return mInverseLocalMatrix;
 }
 
 BLMatrix2D&

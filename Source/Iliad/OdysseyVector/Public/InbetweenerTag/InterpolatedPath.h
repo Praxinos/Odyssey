@@ -31,6 +31,14 @@ class FInterpolatedPath
     protected:
         void Alloc( bool iPolyline );
 
+    // for temporarily saving transform values at commit.
+    public:
+        double commitTranslationX;
+        double commitTranslationY;
+        double commitRotation;
+        double commitScalingX;
+        double commitScalingY;
+
     protected:
         FOdysseyVectorPath* mOriginalPath;
         std::vector<FInterpolatedPoint> mInterpolatedPointBuffer;

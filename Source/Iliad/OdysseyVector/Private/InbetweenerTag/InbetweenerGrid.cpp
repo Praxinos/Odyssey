@@ -8,6 +8,7 @@
 #include "InbetweenerTag/InterpolatedPath.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVector.h"
+#include "OdysseyVectorPath.h"
 #include "OdysseyVectorObject.h"
 
 // for pow()
@@ -320,12 +321,16 @@ FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPath
         uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
         uint32 inbetweenAbsoluteIndex = iInbetween->GetAbsoluteIndex();
         uint32 skippedOffset = ( inbetweenAbsoluteIndex * pointCount );
+        FOdysseyVectorPath* path = interpolatedPath.GetOriginalPath();
+        BLMatrix2D pathInverseLocalMatrix = path->GetInverseLocalMatrix();
 
         for( uint32 i = 0; i < pointCount; i++ )
         {
             FInterpolatedPoint* interpolatedPoint = &interpolatedPath.GetInterpolatedPointBuffer()[i];
 
-            interpolatedPointPositionBuffer[skippedOffset + i] = DeformPoint( interpolatedPoint, iPositionType );
+            // Point will be in owner coords. convert it in path coords
+            // note: owner and path could be the same, in which case coords remain the same
+            interpolatedPointPositionBuffer[skippedOffset + i] = FOdysseyVector::MapPoint( pathInverseLocalMatrix, DeformPoint( interpolatedPoint, iPositionType ) );
         }
     }
 }

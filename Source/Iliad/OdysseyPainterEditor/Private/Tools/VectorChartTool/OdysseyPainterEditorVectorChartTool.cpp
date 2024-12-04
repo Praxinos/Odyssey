@@ -263,9 +263,6 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                     inbetweenerTag->MoveInbetween( mPickedInbetween
                                                  , newT
                                                  , false );
-
-                     // update ALL impacted scenes
-                    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
                 }
             }
 
@@ -321,9 +318,6 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                                                                                          : mEasing - 0.2f, -1.0f, 1.0f );
                     }
                 }
-
-                // update ALL impacted scenes
-                iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
             }
 
             if( mPickingMode == eChartPickingMode::Control )
@@ -348,7 +342,11 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
         }
     }
 
+    // update ALL impacted scenes.
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+    // redraw the current scene as it might not be modified
     iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
     oSignalFlags = notificationFlags;
 }
 

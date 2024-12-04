@@ -353,7 +353,8 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
                           , translateMatrix );
         }
 
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
 
         // update the selection box with the newly modified matrices
         iEngine->ResetHUD();
@@ -412,7 +413,8 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
                                                             , &translationY
                                                             , &rotation // in radians
                                                             , &scalingX
-                                                            , &scalingY );
+                                                            , &scalingY
+                                                            , false );
 
                       // Apply the local transformations
                       object->Translate( translationX, translationY );
@@ -431,7 +433,8 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         // Update the matrix for all objects
         //iScene->UpdateMatrix();
 
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
 
         // update the selection box with the newly modified matrices
         iEngine->ResetHUD();
@@ -478,7 +481,8 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
                                                  , &translationY
                                                  , &rotation // in radians
                                                  , &scalingX
-                                                 , &scalingY );
+                                                 , &scalingY
+                                                 , false );
 
             // Apply the local transformations
             breakdown->Translate( translationX, translationY );
@@ -569,6 +573,9 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
                           , inverseSpaceMatrix
                           , rotateMatrix );
         }
+
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
     }
 
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
@@ -617,7 +624,8 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
                                                             , &translationY
                                                             , &rotation // in radians
                                                             , &scalingX
-                                                            , &scalingY );
+                                                            , &scalingY
+                                                            , false );
 
                       // Apply the local transformations
                       object->Translate( translationX, translationY );
@@ -632,6 +640,9 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
 
               return 0;
           } );
+
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
     }
 
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
@@ -670,7 +681,8 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
                                                   , &translationY
                                                   , &rotation // in radians
                                                   , &scalingX
-                                                  , &scalingY );
+                                                  , &scalingY
+                                                  , false );
 
             // Apply the local transformations
             breakdown->Translate( translationX, translationY );
@@ -679,12 +691,9 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
 
             breakdown->UpdateMatrix();
         }
+
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
     }
-
-    // Update the matrix for all objects
-    //iScene->UpdateMatrix();
-
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
     // update the selection box with the newly modified matrices
     iEngine->ResetHUD();
@@ -810,6 +819,9 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
                               , inverseSpaceMatrix
                               , scalingMatrix );
             }
+
+            iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                          | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
         }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
@@ -858,7 +870,8 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
                                                                 , &translationY
                                                                 , &rotation // in radians
                                                                 , &scalingX
-                                                                , &scalingY );
+                                                                , &scalingY
+                                                                , false );
 
                           // Apply the local transformations
                           object->Translate( translationX, translationY );
@@ -874,6 +887,9 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
 
                   return 0;
               } );
+
+            iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                          | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
         }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
@@ -912,7 +928,8 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
                                                       , &translationY
                                                       , &rotation // in radians
                                                       , &scalingX
-                                                      , &scalingY );
+                                                      , &scalingY
+                                                      , false );
 
                 // Apply the local transformations
                 breakdown->Translate( translationX, translationY );
@@ -922,13 +939,10 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
 
                 breakdown->UpdateMatrix();
             }
+
+            iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
         }
     }
-
-    // Update the matrix for all objects
-    //iScene->UpdateMatrix();
-
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
     // update the selection box with the newly modified matrices
     iEngine->ResetHUD();
@@ -998,8 +1012,13 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
                 }
             }
 
-            // redraw
-            iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+            // in inbetween mode, the scene we modifiy might not be the one we draw, so we force redrawing
+            // of the current scene
+            if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+            {
+                // redraw
+                iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+            }
         }
     }
 }
@@ -1076,7 +1095,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
     mTransformHUD->SetCenterGizmo( true );
 
     // redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    //iScene->GetEngine()->Invalidate( 0 );
 
     oSignalFlags = notificationFlags;
 

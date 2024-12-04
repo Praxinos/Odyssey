@@ -15,7 +15,8 @@ namespace FOdysseyVector
                                                  , double* iTranslationY
                                                  , double* iRotation
                                                  , double* iScalingX
-                                                 , double* iScalingY );
+                                                 , double* iScalingY
+                                                 , bool iDegree );
 
     bool ODYSSEYVECTOR_API IntersectSegment( const ::ULIS::FVec2D& line0p0
                                                    , const ::ULIS::FVec2D& line0p1

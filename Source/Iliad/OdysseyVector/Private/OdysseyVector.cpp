@@ -65,7 +65,8 @@ FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
                                       , double* iTranslationY
                                       , double* iRotation
                                       , double* iScalingX
-                                      , double* iScalingY )
+                                      , double* iScalingY
+                                      , bool iDegree )
 {
     double row0x = iMatrix.m00;
     double row0y = iMatrix.m01;
@@ -115,7 +116,7 @@ FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
 
     if( iTranslationX ) *iTranslationX = translation[0];
     if( iTranslationY ) *iTranslationY = translation[1];
-    if( iRotation     ) *iRotation = angle;
+    if( iRotation     ) *iRotation = iDegree ? angle * 180.0f / M_PI : angle;
     if( iScalingX     ) *iScalingX = scale[0];
     if( iScalingY     ) *iScalingY = scale[1];
 }

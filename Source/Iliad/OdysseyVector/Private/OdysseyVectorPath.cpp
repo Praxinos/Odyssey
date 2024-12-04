@@ -2023,14 +2023,6 @@ FOdysseyVectorPath::CopyShape( uint64 iCopyFlags )
         double originalVertexRadius = originalVertex->GetRadius();
         FOdysseyVectorVertex* newVertex;
 
-        if( iCopyFlags & COPY_WORLDCOORDS )
-        {
-            originalVertexCoords = FOdysseyVector::MapPoint( mWorldMatrix, originalVertexCoords );
-            originalVertexRadius = FOdysseyVector::MapVector( mWorldMatrix
-                                                            , ::ULIS::FVec2D( originalVertexRadius * 0.7071f
-                                                                            , originalVertexRadius * 0.7071f ) ).Distance();
-        }
-
         newVertex = new FOdysseyVectorVertex( originalVertexCoords.x
                                             , originalVertexCoords.y
                                             , originalVertexRadius );
@@ -2055,24 +2047,17 @@ FOdysseyVectorPath::CopyShape( uint64 iCopyFlags )
                 FOdysseyVectorVertex* vertex1 = nullptr;
 
                 pointBuffer.reserve( originalSegment->GetFractionPointBuffer().size() + 2 );
-                pointBuffer.push_back( FOdysseyVector::MapPoint( mWorldMatrix
-                                                               , originalSegment->GetVertex(0)->GetCoords() ) );
+                pointBuffer.push_back( originalSegment->GetVertex(0)->GetCoords() );
 
                 for( uint32 i = 0; i < fractionCount - 1; i++ )
                 {
                     FOdysseyVectorFraction& fraction = fractionCache[i];
                     ::ULIS::FVec2D fractionPointCoords = fraction.point[1]->GetCoords();
 
-                    if( iCopyFlags & COPY_WORLDCOORDS )
-                    {
-                        fractionPointCoords = FOdysseyVector::MapPoint( mWorldMatrix, fractionPointCoords );
-                    }
-
                     pointBuffer.push_back( fractionPointCoords );
                 }
 
-                pointBuffer.push_back( FOdysseyVector::MapPoint( mWorldMatrix
-                                                               , originalSegment->GetVertex(1)->GetCoords() ) );
+                pointBuffer.push_back( originalSegment->GetVertex(1)->GetCoords() );
 
                 FOdysseyVector::FitCurve( pointBuffer
                                         , 4.0f
@@ -2126,12 +2111,6 @@ FOdysseyVectorPath::CopyShape( uint64 iCopyFlags )
                 FOdysseyVectorHandleSegment* originalHandle1 = originalSegment->GetHandle(1);
                 ::ULIS::FVec2D originalHandle0Coords = originalHandle0->GetCoords();
                 ::ULIS::FVec2D originalHandle1Coords = originalHandle1->GetCoords();
-
-                if( iCopyFlags & COPY_WORLDCOORDS )
-                {
-                    originalHandle0Coords = FOdysseyVector::MapPoint( mWorldMatrix, originalHandle0Coords );
-                    originalHandle1Coords = FOdysseyVector::MapPoint( mWorldMatrix, originalHandle1Coords );
-                }
 
                 FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( cubicPathCopy
                                                                                             , lookupTable[vertex0]

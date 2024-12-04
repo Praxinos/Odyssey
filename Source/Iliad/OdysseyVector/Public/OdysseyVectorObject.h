@@ -36,7 +36,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         // copy flags
         static const uint32 COPY_RETOPOLOGY          = ( 1 << 0 );
-        static const uint32 COPY_WORLDCOORDS         = ( 1 << 1 );
         static const uint32 COPY_NOTAG               = ( 1 << 2 );
 
         // update flags
@@ -86,7 +85,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual ~FOdysseyVectorObject();
         FOdysseyVectorObject( const FString& iName );
         void SetName( const FString& iName );
-        void CopySettings( FOdysseyVectorObject* iDestinationObject );
+        void CopySettings( FOdysseyVectorObject* iDestinationObject, uint64 iCopyFlags );
 
         /**
          * @brief Add a child object.
