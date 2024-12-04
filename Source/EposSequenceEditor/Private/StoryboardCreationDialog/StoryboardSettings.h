@@ -41,7 +41,7 @@ public:
 
     /** Storyboard path. */
     UPROPERTY( config, EditAnywhere, Category="Root Board", DisplayName="Path", meta=(ContentDir) )
-    FDirectoryPath StoryboardPath = FDirectoryPath{ TEXT( "/Game" ) };
+    FDirectoryPath StoryboardPath = { TEXT( "/Game" ) };
 
     /** New level destination. */
     UPROPERTY( config, EditAnywhere, Category = "Level", DisplayName = "Destination" )
@@ -53,5 +53,5 @@ public:
 
     /** New level path. */
     UPROPERTY( config, EditAnywhere, Category="Level", DisplayName="Path", meta=(ContentDir) )
-    FDirectoryPath LevelPath = FDirectoryPath{ TEXT( "/Game" ) };
+    FDirectoryPath LevelPath = { TEXT( "/Game" ) };
 };
