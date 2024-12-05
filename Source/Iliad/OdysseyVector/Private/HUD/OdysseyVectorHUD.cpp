@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "HUD/OdysseyVectorHUD.h"
+#include "OdysseyVector.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorSegmentCubic.h"
@@ -568,8 +569,8 @@ FOdysseyVectorHUD::DrawInbetweenerInterpolatedPathAt( FOdysseyVectorGroupPaint* 
                                                     , FChartDivision* iInbetween )
 {
     uint32 pathPointCount = iInterpolatedPath->GetInterpolatedPointBuffer().size();
-    uint32 inbetweenAbsoluteIndex = iInbetween->GetAbsoluteIndex();
-    ::ULIS::FVec2D* pointPositionBuffer = &iInterpolatedPath->GetInterpolatedPointPositionBuffer()[pathPointCount * inbetweenAbsoluteIndex];
+    uint32 inbetweenAbsoluteIndex = iInbetween->GetIndexInInbetweener();
+    FInterpolatedPath::PointGeometry* interpolatedPointGeometryBuffer = &iInterpolatedPath->GetInterpolatedPointGeometryBuffer()[pathPointCount * inbetweenAbsoluteIndex];
     BLMatrix2D worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
     bool mapAsPolyline = iInbetweenerTag->GetMapAsPolyline();
     FOdysseyVectorPath* originalPath = iInterpolatedPath->GetOriginalPath();
@@ -602,8 +603,8 @@ FOdysseyVectorHUD::DrawInbetweenerInterpolatedPathAt( FOdysseyVectorGroupPaint* 
                 uint32 n = i + 1;
                 FInterpolatedPoint* pointi = interpolatedPointArray[i];
                 FInterpolatedPoint* pointn = interpolatedPointArray[n];
-                ::ULIS::FVec2D* localPointPositioni = &pointPositionBuffer[pointi->GetIndex()];
-                ::ULIS::FVec2D* localPointPositionn = &pointPositionBuffer[pointn->GetIndex()];
+                ::ULIS::FVec2D* localPointPositioni = &interpolatedPointGeometryBuffer[pointi->GetIndex()].position;
+                ::ULIS::FVec2D* localPointPositionn = &interpolatedPointGeometryBuffer[pointn->GetIndex()].position;
 
                 BLPoint pt[2] = { worldMatrix.mapPoint( localPointPositioni->x
                                                       , localPointPositioni->y )
@@ -621,14 +622,10 @@ FOdysseyVectorHUD::DrawInbetweenerInterpolatedPathAt( FOdysseyVectorGroupPaint* 
                                                            , interpolatedPointArray[1]
                                                            , interpolatedPointArray[2]
                                                            , interpolatedPointArray[3] };
-                BLPoint pt[4] = { worldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[0]->GetIndex()].x
-                                                      , pointPositionBuffer[interpolatedPoint[0]->GetIndex()].y )
-                                , worldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[1]->GetIndex()].x
-                                                      , pointPositionBuffer[interpolatedPoint[1]->GetIndex()].y )
-                                , worldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[2]->GetIndex()].x
-                                                      , pointPositionBuffer[interpolatedPoint[2]->GetIndex()].y )
-                                , worldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[3]->GetIndex()].x
-                                                      , pointPositionBuffer[interpolatedPoint[3]->GetIndex()].y ) };
+                ::ULIS::FVec2D pt[4] = { FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[0]->GetIndex()].position )
+                                       , FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[1]->GetIndex()].position )
+                                       , FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[2]->GetIndex()].position )
+                                       , FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[3]->GetIndex()].position ) };
                 BLPath path;
 
                 path.moveTo ( pt[0].x, pt[0].y );

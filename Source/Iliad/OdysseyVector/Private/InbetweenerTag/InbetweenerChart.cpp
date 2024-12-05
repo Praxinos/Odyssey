@@ -27,7 +27,7 @@ FChartDivision::GetIndex()
 }
 
 uint32
-FChartDivision::GetAbsoluteIndex()
+FChartDivision::GetIndexInInbetweener()
 {
     return GetIndex() + chart->GetBreakdown()->GetSourceDrawingIndex();
 }

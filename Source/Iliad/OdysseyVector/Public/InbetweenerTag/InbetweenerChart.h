@@ -21,7 +21,7 @@ struct ODYSSEYVECTOR_API FChartDivision
 
     FChartDivision( FInbetweenerChart* iChart );
     uint32 GetIndex();
-    uint32 GetAbsoluteIndex();
+    uint32 GetIndexInInbetweener();
     int32 GetCellIndex();
     void SetSpacing( float iSpacing );
 };

@@ -17,13 +17,20 @@ class FOdysseyVectorPath;
 class FInterpolatedPath
 {
     public:
+        struct PointGeometry
+        {
+            ::ULIS::FVec2D position;
+            double radius;
+        };
+
+    public:
         virtual ~FInterpolatedPath();
         FInterpolatedPath( FOdysseyVectorPath* iPath
                          , uint32 iInbetweenCount
                          , bool iPolyline );
         std::vector<FInterpolatedPoint>& GetInterpolatedPointBuffer();
         std::vector<FInterpolatedSegment>& GetInterpolatedSegmentBuffer();
-        std::vector<::ULIS::FVec2D>& GetInterpolatedPointPositionBuffer();
+        std::vector<FInterpolatedPath::PointGeometry>& GetInterpolatedPointGeometryBuffer();
         FOdysseyVectorPath* GetOriginalPath();
 
         friend class FOdysseyVectorTagInbetweener;
@@ -44,5 +51,5 @@ class FInterpolatedPath
         std::vector<FInterpolatedPoint> mInterpolatedPointBuffer;
         std::vector<FInterpolatedSegment> mInterpolatedSegmentBuffer;
         // we alloc point position in one single big array.
-        std::vector<::ULIS::FVec2D> mInterpolatedPointPositionBuffer;
+        std::vector<PointGeometry> mInterpolatedPointGeometryBuffer;
 };

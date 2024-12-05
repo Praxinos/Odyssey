@@ -129,10 +129,10 @@ FInterpolatedPath::GetInterpolatedSegmentBuffer()
     return mInterpolatedSegmentBuffer;
 }
 
-std::vector<::ULIS::FVec2D>&
-FInterpolatedPath::GetInterpolatedPointPositionBuffer()
+std::vector<FInterpolatedPath::PointGeometry>&
+FInterpolatedPath::GetInterpolatedPointGeometryBuffer()
 {
-    return mInterpolatedPointPositionBuffer;
+    return mInterpolatedPointGeometryBuffer;
 }
 
 FOdysseyVectorPath*

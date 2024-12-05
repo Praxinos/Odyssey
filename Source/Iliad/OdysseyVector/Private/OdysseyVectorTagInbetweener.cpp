@@ -1455,8 +1455,8 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
         LockDrawing();
 
     uint32 pointCount = iInterpolatedPath->mInterpolatedPointBuffer.size();
-    uint32 inbetweenAbsoluteIndex = iInbetween->GetAbsoluteIndex();
-    ::ULIS::FVec2D* pointPositionBuffer = &iInterpolatedPath->mInterpolatedPointPositionBuffer[pointCount * inbetweenAbsoluteIndex];
+    uint32 inbetweenAbsoluteIndex = iInbetween->GetIndexInInbetweener();
+    FInterpolatedPath::PointGeometry* interpolatedPointGeometryBuffer = &iInterpolatedPath->mInterpolatedPointGeometryBuffer[pointCount * inbetweenAbsoluteIndex];
     float scalingSq = bConstantWidth ? 1.0f / ( iInbetween->drawing->scalingX
                                               * iInbetween->drawing->scalingY ) : 1.0f;
     // note: a surface grows or shrink at the square of the scaling factor.
@@ -1496,10 +1496,10 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                 FInterpolatedPoint* pointi = interpolatedSegment.mInterpolatedPointArray[i];
                 FInterpolatedPoint* pointn = interpolatedSegment.mInterpolatedPointArray[n];
                 FInterpolatedPoint* pointq = ( q == segmentPointCount ) ? nullptr : interpolatedSegment.mInterpolatedPointArray[q];
-                ::ULIS::FVec2D* localPointPositionp = pointp ? &pointPositionBuffer[pointp->mIndex] : nullptr;
-                ::ULIS::FVec2D* localPointPositioni = &pointPositionBuffer[pointi->mIndex];
-                ::ULIS::FVec2D* localPointPositionn = &pointPositionBuffer[pointn->mIndex];
-                ::ULIS::FVec2D* localPointPositionq = pointq ? &pointPositionBuffer[pointq->mIndex] : nullptr;
+                ::ULIS::FVec2D* localPointPositionp = pointp ? &interpolatedPointGeometryBuffer[pointp->mIndex].position : nullptr;
+                ::ULIS::FVec2D* localPointPositioni = &interpolatedPointGeometryBuffer[pointi->mIndex].position;
+                ::ULIS::FVec2D* localPointPositionn = &interpolatedPointGeometryBuffer[pointn->mIndex].position;
+                ::ULIS::FVec2D* localPointPositionq = pointq ? &interpolatedPointGeometryBuffer[pointq->mIndex].position : nullptr;
 
                 if( 1/*bWithThickness*/ )
                 {
@@ -1621,14 +1621,10 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                                                            , interpolatedSegment.mInterpolatedPointArray[1]
                                                            , interpolatedSegment.mInterpolatedPointArray[2]
                                                            , interpolatedSegment.mInterpolatedPointArray[3] };
-                BLPoint pt[4] = { worldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[0]->mIndex].x
-                                                      , pointPositionBuffer[interpolatedPoint[0]->mIndex].y )
-                                , worldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[1]->mIndex].x
-                                                      , pointPositionBuffer[interpolatedPoint[1]->mIndex].y )
-                                , worldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[2]->mIndex].x
-                                                      , pointPositionBuffer[interpolatedPoint[2]->mIndex].y )
-                                , worldMatrix.mapPoint( pointPositionBuffer[interpolatedPoint[3]->mIndex].x
-                                                      , pointPositionBuffer[interpolatedPoint[3]->mIndex].y ) };
+                ::ULIS::FVec2D pt[4] = { FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[0]->mIndex].position )
+                                       , FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[1]->mIndex].position )
+                                       , FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[2]->mIndex].position )
+                                       , FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[3]->mIndex].position ) };
                 BLPath path;
 
                 path.moveTo ( pt[0].x, pt[0].y );
@@ -1784,7 +1780,7 @@ FOdysseyVectorTagInbetweener::AllocBuffers()
         uint32 pointCount = interpolatedPath.mInterpolatedPointBuffer.size();
 
         // Note: the position at the first drawing will not be used
-        interpolatedPath.mInterpolatedPointPositionBuffer.resize( GetLength() * pointCount );
+        interpolatedPath.mInterpolatedPointGeometryBuffer.resize( GetLength() * pointCount );
     }
 }
 
@@ -1960,6 +1956,11 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                         {
                             FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
                             FInbetweenerDrawing* drawing = inbetweenerTag->GetDrawing( drawingIndex );
+                            float scalingSq = inbetweenerTag->HasConstantWidth() ? 1.0f / ( drawing->scalingX
+                                                                                          * drawing->scalingY ) : 1.0f;
+                            // note: a surface grows or shrink at the square of the scaling factor.
+                            // That's why we use sqrt to get the actual scaling factor from the surface ratio.
+                            float scaling = sqrt( scalingSq );
 
                             if( inbetweenerTag->GetMapAsPolyline() )
                             {
@@ -1999,17 +2000,21 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                 for( uint32 i = 0; i < interpolatedPath.mInterpolatedPointBuffer.size(); i++ )
                                 {
                                     FInterpolatedPoint* interpolatedPoint = &interpolatedPath.mInterpolatedPointBuffer[i];
-                                    ::ULIS::FVec2D* commitPosition = &interpolatedPath.mInterpolatedPointPositionBuffer[skippedOffset + i];
+                                    FOdysseyVectorPoint* originalPoint = interpolatedPoint->GetOriginalPoint();
+                                    ::ULIS::FVec2D* commitPosition = &interpolatedPath.mInterpolatedPointGeometryBuffer[skippedOffset + i].position;
                                     ::ULIS::FVec2D swapPosition = interpolatedPoint->mOriginalPoint->GetCoords();
-                                    ::ULIS::FVec2D transformedLocalPosition;
-/*
-                                    // point position in path
-                                    transformedLocalPosition = FOdysseyVector::MapPoint( path->GetInverseLocalMatrix(), ::ULIS::FVec2D( commitPosition->x
-                                                                                                                                      , commitPosition->y ) );
 
-                                    interpolatedPoint->mOriginalPoint->Set( transformedLocalPosition.x
-                                                                          , transformedLocalPosition.y );
-*/
+                                    if( originalPoint->GetClass() == FOdysseyVectorVertex::StaticClass() )
+                                    {
+                                        FOdysseyVectorVertex* originalVertex = static_cast<FOdysseyVectorVertex*>(originalPoint);
+                                        double* commitRadius = &interpolatedPath.mInterpolatedPointGeometryBuffer[skippedOffset + i].radius;
+                                        double swapRadius = originalVertex->GetRadius();
+
+                                        originalVertex->SetRadius( originalVertex->GetRadius() * scaling );
+
+                                        *commitRadius = swapRadius;
+                                    }
+
                                     interpolatedPoint->mOriginalPoint->Set( commitPosition->x
                                                                           , commitPosition->y );
 
@@ -2058,8 +2063,19 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                 for( uint32 i = 0; i < interpolatedPath.mInterpolatedPointBuffer.size(); i++ )
                                 {
                                     FInterpolatedPoint* interpolatedPoint = &interpolatedPath.mInterpolatedPointBuffer[i];
-                                    ::ULIS::FVec2D* commitPosition = &interpolatedPath.mInterpolatedPointPositionBuffer[skippedOffset + i];
+                                    FOdysseyVectorPoint* originalPoint = interpolatedPoint->GetOriginalPoint();
+                                    ::ULIS::FVec2D* commitPosition = &interpolatedPath.mInterpolatedPointGeometryBuffer[skippedOffset + i].position;
 
+                                    if( originalPoint->GetClass() == FOdysseyVectorVertex::StaticClass() )
+                                    {
+                                        FOdysseyVectorVertex* originalVertex = static_cast<FOdysseyVectorVertex*>(originalPoint);
+                                        double* commitRadius = &interpolatedPath.mInterpolatedPointGeometryBuffer[skippedOffset + i].radius;
+
+                                        // restore radius that was saved in pre-process
+                                        originalVertex->SetRadius( *commitRadius );
+                                    }
+
+                                    // restore position that was saved in pre-process
                                     interpolatedPoint->mOriginalPoint->Set( commitPosition->x
                                                                           , commitPosition->y );
                                 }

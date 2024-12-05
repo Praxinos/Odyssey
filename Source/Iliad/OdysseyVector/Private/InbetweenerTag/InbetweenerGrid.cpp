@@ -317,9 +317,9 @@ FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPath
 {
     for( FInterpolatedPath& interpolatedPath : iInterpolatedPathBuffer )
     {
-        std::vector<::ULIS::FVec2D>& interpolatedPointPositionBuffer = interpolatedPath.GetInterpolatedPointPositionBuffer();
+        std::vector<FInterpolatedPath::PointGeometry>& interpolatedPointPositionBuffer = interpolatedPath.GetInterpolatedPointGeometryBuffer();
         uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
-        uint32 inbetweenAbsoluteIndex = iInbetween->GetAbsoluteIndex();
+        uint32 inbetweenAbsoluteIndex = iInbetween->GetIndexInInbetweener();
         uint32 skippedOffset = ( inbetweenAbsoluteIndex * pointCount );
         FOdysseyVectorPath* path = interpolatedPath.GetOriginalPath();
         BLMatrix2D pathInverseLocalMatrix = path->GetInverseLocalMatrix();
@@ -330,7 +330,7 @@ FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPath
 
             // Point will be in owner coords. convert it in path coords
             // note: owner and path could be the same, in which case coords remain the same
-            interpolatedPointPositionBuffer[skippedOffset + i] = FOdysseyVector::MapPoint( pathInverseLocalMatrix, DeformPoint( interpolatedPoint, iPositionType ) );
+            interpolatedPointPositionBuffer[skippedOffset + i].position = FOdysseyVector::MapPoint( pathInverseLocalMatrix, DeformPoint( interpolatedPoint, iPositionType ) );
         }
     }
 }
