@@ -12,6 +12,8 @@ class FOdysseyPainterEditorVectorBaseToolHUD;
 class ISinglePropertyView;
 class SViewport;
 
+class FOdysseyVectorGroupPaint;
+
 enum class eMouseEventName : uint8
 {
     MouseHover = 0,
@@ -153,6 +155,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
                                                , FMenuBuilder& menu
                                                , uint64 iInbetweenMenuFlags );
         void ResetGridMenu( FMenuBuilder& menu, FOdysseyVectorGroupPaint* vectorScene );
+        bool CanAddTag( FOdysseyVectorGroupPaint* iScene );
+        bool CanAlterTag( FOdysseyVectorGroupPaint* iScene );
 
     protected:
         static const uint64 OBJECTMENU_HASSUBDIVIDE = ( 1ULL << 0 );

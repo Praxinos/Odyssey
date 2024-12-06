@@ -39,7 +39,8 @@ FInterpolatedPath::Alloc( bool iPolyline )
     mInterpolatedPointBuffer.reserve( pointCount );
 }
 
-FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
+FInterpolatedPath::FInterpolatedPath( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                    , FOdysseyVectorPath* iPath
                                     , uint32 iInbetweenCount
                                     , bool iPolyline )
     : mOriginalPath( iPath )
@@ -48,6 +49,9 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
     uint32 segmentID = 0;
 
     Alloc( iPolyline );
+
+    mRelativeMatrix = iPath->GetInverseWorldMatrix();
+    mRelativeMatrix.transform( iInbetweenerTag->GetOwner()->GetWorldMatrix() );
 
     for( FOdysseyVectorVertex* vertex : iPath->GetVertexList() )
     {
@@ -121,6 +125,12 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorPath* iPath
             segment->SetID( segmentID++ );
         }
     }
+}
+
+BLMatrix2D&
+FInterpolatedPath::GetRelativeMatrix()
+{
+    return mRelativeMatrix;
 }
 
 std::vector<FInterpolatedSegment>&

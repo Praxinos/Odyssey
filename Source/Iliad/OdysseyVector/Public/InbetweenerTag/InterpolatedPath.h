@@ -13,6 +13,7 @@
 #include <InbetweenerTag/InterpolatedSegment.h>
 
 class FOdysseyVectorPath;
+class FOdysseyVectorTagInbetweener;
 
 class FInterpolatedPath
 {
@@ -25,13 +26,15 @@ class FInterpolatedPath
 
     public:
         virtual ~FInterpolatedPath();
-        FInterpolatedPath( FOdysseyVectorPath* iPath
+        FInterpolatedPath( FOdysseyVectorTagInbetweener* iInbetweenerTag
+                         , FOdysseyVectorPath* iPath
                          , uint32 iInbetweenCount
                          , bool iPolyline );
         std::vector<FInterpolatedPoint>& GetInterpolatedPointBuffer();
         std::vector<FInterpolatedSegment>& GetInterpolatedSegmentBuffer();
         std::vector<FInterpolatedPath::PointGeometry>& GetInterpolatedPointGeometryBuffer();
         FOdysseyVectorPath* GetOriginalPath();
+        BLMatrix2D& GetRelativeMatrix();
 
         friend class FOdysseyVectorTagInbetweener;
 
@@ -52,4 +55,5 @@ class FInterpolatedPath
         std::vector<FInterpolatedSegment> mInterpolatedSegmentBuffer;
         // we alloc point position in one single big array.
         std::vector<PointGeometry> mInterpolatedPointGeometryBuffer;
+        BLMatrix2D mRelativeMatrix; // matrix relative to the inbetweener tag's owner
 };

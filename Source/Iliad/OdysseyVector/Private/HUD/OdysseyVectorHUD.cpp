@@ -577,7 +577,7 @@ FOdysseyVectorHUD::DrawInbetweenerInterpolatedPathAt( FOdysseyVectorGroupPaint* 
 
     // passed to DrawPathAt()
     worldMatrix.transform( iInbetween->drawing->localMatrix );
-    worldMatrix.transform( originalPath->GetLocalMatrix() );
+    worldMatrix.transform( iInterpolatedPath->GetRelativeMatrix() );
 /*
     iBLContext->setStrokeWidth( 4.0f );
     iBLContext->setStrokeStyle( BLRgba32( inbetweeneColor.R

@@ -198,7 +198,8 @@ FOdysseyVectorTagInbetweener::Map()
                                      // because this is an Update process and it should not call an Invalidate process.
                                    | FOdysseyVectorObject::UPDATE_FORCE );
 
-                  mInterpolatedPathBuffer.emplace_back( path
+                  mInterpolatedPathBuffer.emplace_back( this
+                                                      , path
                                                       , GetLength()
                                                       , bMapAsPolyline );
 
@@ -1470,7 +1471,7 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
 
     // passed to DrawPathAt()
     worldMatrix.transform( iInbetween->drawing->localMatrix );
-    worldMatrix.transform( originalPath->GetLocalMatrix() );
+    worldMatrix.transform( iInterpolatedPath->mRelativeMatrix );
 
     iBLContext->setStrokeStyle( BLRgba32( pathColor.R, pathColor.G, pathColor.B, pathColor.A ) );
     iBLContext->setFillStyle( BLRgba32( pathColor.R, pathColor.G, pathColor.B, pathColor.A ) );
@@ -1943,19 +1944,20 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
 
             if( ( drawingIndex != breakdownTargetDrawingIndex ) || breakdown->IsTargetVisible() )
             {
+                FInbetweenerDrawing* drawing = GetDrawing( drawingIndex );
+
                 if( inbetweenCell )
                 {
                     std::list<FOdysseyVectorObject*> newObjectList;
 
                     // change vertices coords before copying the object
-                    std::function<uint64(FOdysseyVectorObject*,uint64)> preProcess = [ drawingIndex ]( FOdysseyVectorObject* vectorObject, uint64 copyFlags ) -> uint64
+                    std::function<uint64(FOdysseyVectorObject*,uint64)> preProcess = [ this, drawing ]( FOdysseyVectorObject* vectorObject, uint64 copyFlags ) -> uint64
                     {
                         FOdysseyVectorTag* tag = vectorObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
 
                         if( tag )
                         {
                             FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-                            FInbetweenerDrawing* drawing = inbetweenerTag->GetDrawing( drawingIndex );
                             float scalingSq = inbetweenerTag->HasConstantWidth() ? 1.0f / ( drawing->scalingX
                                                                                           * drawing->scalingY ) : 1.0f;
                             // note: a surface grows or shrink at the square of the scaling factor.
@@ -1973,11 +1975,12 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
 
                             for( FInterpolatedPath& interpolatedPath : inbetweenerTag->mInterpolatedPathBuffer )
                             {
-                                BLMatrix2D pathTransformedLocalMatrix = drawing->localMatrix;
+                                BLMatrix2D pathWorldMatrix = mOwner->GetWorldMatrix();
                                 uint32 pointCount = interpolatedPath.mInterpolatedPointBuffer.size();
-                                uint32 skippedOffset = ( drawingIndex * pointCount );
+                                uint32 skippedOffset = ( drawing->GetIndex() * pointCount );
                                 FOdysseyVectorPath* path = interpolatedPath.GetOriginalPath();
                                 double translationX, translationY, rotation, scalingX, scalingY;
+                                BLMatrix2D pathLocalMatrix = path->GetParent()->GetInverseWorldMatrix();
 
                                 // save transformations. Will be restored in post-processing
                                 path->GetTransform( interpolatedPath.commitTranslationX
@@ -1986,8 +1989,12 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                                   , interpolatedPath.commitScalingX
                                                   , interpolatedPath.commitScalingY );
 
-                                pathTransformedLocalMatrix.transform( path->GetLocalMatrix() );
-                                FOdysseyVector::ExtractTransformations( pathTransformedLocalMatrix
+                                pathWorldMatrix.transform( drawing->localMatrix );
+                                pathWorldMatrix.transform( interpolatedPath.GetRelativeMatrix() );
+
+                                pathLocalMatrix.transform( pathWorldMatrix );
+
+                                FOdysseyVector::ExtractTransformations( pathLocalMatrix
                                                                       , &translationX
                                                                       , &translationY
                                                                       , &rotation
@@ -1995,7 +2002,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                                                       , &scalingY
                                                                       , true );
                                 path->SetTransform( translationX, translationY, rotation, scalingX, scalingY );
-                                path->UpdateMatrix();
+                                //path->UpdateMatrix();
 
                                 for( uint32 i = 0; i < interpolatedPath.mInterpolatedPointBuffer.size(); i++ )
                                 {
@@ -2090,6 +2097,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                                                      , preProcess
                                                                      , postProcess );
                     BLMatrix2D conversionMatrix = inbetweenScene->GetInverseWorldMatrix();
+                    BLMatrix2D copiedObjectWorldMatrix = mOwner->GetWorldMatrix();
                     double translationX, translationY, rotation, scalingX, scalingY;
 
                     oAddedObjectList.push_back( copiedObject );
@@ -2101,7 +2109,12 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                         oCommittedSceneList.push_back( inbetweenScene );
                     }
 
-                    conversionMatrix.transform( mOwner->GetWorldMatrix() );
+                    // the scene that receives the commited objects might be zoomed-in/out or paned.
+                    // Thus we have to get sure the committed object will keep the look it had in the preview
+                    // by adapting is transformations to the receiving scene.
+                    //copiedObjectWorldMatrix.transform( drawing->localMatrix );
+
+                    conversionMatrix.transform( copiedObjectWorldMatrix );
 
                     FOdysseyVector::ExtractTransformations( conversionMatrix
                                                           , &translationX

@@ -11,6 +11,7 @@
 #define LOCTEXT_NAMESPACE "PainterEditor"
 #define WARNING_INTERP_ROUTE_REMOVAL "Trajectories are only valid with ARAP interpolation. Existing trajectories will be removed. Proceed ?"
 #define WARNING_GRIDSIZE_ROUTE_REMOVAL "Changing grid size will remove existing trajectories. Proceed ?"
+#define WARNING_GRID_DEFORMATION_RESET "Changing the grid's size will reset its deformation. Proceed ?"
 #define WARNING_SQUARE_ROUTE_REMOVAL "Changing grid shape will remove existing trajectories. Proceed ?"
 
 UOdysseyPainterEditorVectorTagInbetweenerView::~UOdysseyPainterEditorVectorTagInbetweenerView()
@@ -130,9 +131,11 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
                                                               , const FName& iMemberPropertyName
                                                               , const FName& iCategory)
 {
+    static bool warningGridDeformationResetShown = false;
+
     if( SelectionHasRoutes() )
     {
-        if( iPropertyName == "InterpolationType" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, InterpolationType ) )
         {
             if( InterpolationType == eInbetweenerInterpolationType::Linear )
             {
@@ -148,8 +151,8 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
             }
         }
 
-        if( ( iPropertyName == "DivisionX" )
-          ||( iPropertyName == "DivisionY" ) )
+        if( ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionX ) )
+          ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionY ) ) )
         {
             FText dialogText = FText::FromString( TEXT ( WARNING_GRIDSIZE_ROUTE_REMOVAL ) );
 
@@ -162,7 +165,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
             }
         }
 
-        if( iPropertyName == "Square" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, Square ) )
         {
             FText dialogText = FText::FromString( TEXT ( WARNING_SQUARE_ROUTE_REMOVAL ) );
 
@@ -176,24 +179,45 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
         }
     }
 
+    // popup will display only once
+    if( warningGridDeformationResetShown == false )
+    {
+        if( ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionX ) )
+          ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionY ) )
+          ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, Square    ) ) )
+        {
+            FText dialogText = FText::FromString( TEXT ( WARNING_GRID_DEFORMATION_RESET ) );
+
+            if( FMessageDialog::Open( EAppMsgType::OkCancel, dialogText ) == EAppReturnType::Cancel )
+            {
+                // restore displayed values
+                ImportParam();
+
+                return;
+            }
+        }
+
+        warningGridDeformationResetShown = true;
+    }
+
     for( FOdysseyVectorTagInbetweener* selectedInbetweenerTag : mSelectedInbetweenerTagArray )
     {
-        if( iPropertyName == "InterpolationType" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, InterpolationType ) )
         {
             selectedInbetweenerTag->SetInterpolationType( InterpolationType );
         }
 
-        if( iPropertyName == "DivisionX" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionX ) )
         {
             selectedInbetweenerTag->SetGridNumQuad( DivisionX, selectedInbetweenerTag->GetGridNumQuadY(), Square );
         }
 
-        if( iPropertyName == "DivisionY" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionY ) )
         {
             selectedInbetweenerTag->SetGridNumQuad( selectedInbetweenerTag->GetGridNumQuadX(), DivisionY, Square );
         }
 
-        if( iPropertyName == "MapAsPolyline" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, MapAsPolyline ) )
         {
             selectedInbetweenerTag->SetMapAsPolyline( MapAsPolyline );
 
@@ -210,35 +234,35 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
             }
         }
 
-        if( iPropertyName == "WithThickness" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, WithThickness ) )
         {
             selectedInbetweenerTag->SetWithThickness( WithThickness );
         }
 
-        if( iPropertyName == "ConstantWidth" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, ConstantWidth ) )
         {
             selectedInbetweenerTag->SetConstantWidth( ConstantWidth );
         }
 
-        if( iPropertyName == "Square" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, Square ) )
         {
             selectedInbetweenerTag->SetGrid( GridType, DivisionX, DivisionY, Square );
         }
 
-        if( iPropertyName == "InbetweenColor" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, InbetweenColor ) )
             selectedInbetweenerTag->SetInbetweenColor( InbetweenColor );
 
-        if( iPropertyName == "ChartColor" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, ChartColor ) )
             selectedInbetweenerTag->SetChartColor( ChartColor );
 
-        if( iPropertyName == "GridColor" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, GridColor ) )
             selectedInbetweenerTag->SetGridColor( GridColor );
 
-        if( iPropertyName == "TrajectoryColor" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, TrajectoryColor ) )
             selectedInbetweenerTag->SetTrajectoryColor( TrajectoryColor );
 
         // must be last to be able to update correctly grid type-dependent fields
-        if( iPropertyName == "GridType" )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, GridType ) )
         {
             selectedInbetweenerTag->SetGrid( GridType, DivisionX, DivisionY, Square );
 
@@ -257,50 +281,50 @@ UOdysseyPainterEditorVectorTagInbetweenerView::MakeUndo( const FName& iPropertyN
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
                              | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS;
 
-    if( iPropertyName == "InterpolationType" )
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, InterpolationType ) )
         return new FOdysseyVectorUndoTagInbetweenerInterpolationType( mScene
                                                                     , mSelectedInbetweenerTagArray
                                                                     , notificationFlags );
 
-    if( iPropertyName == "DivisionX" )
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionX ) )
         return new FOdysseyVectorUndoTagInbetweenerGridSize( mScene
                                                            , mSelectedInbetweenerTagArray
                                                            , notificationFlags );
 
-    if( iPropertyName == "DivisionY" )
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionY ) )
         return new FOdysseyVectorUndoTagInbetweenerGridSize( mScene
                                                            , mSelectedInbetweenerTagArray
                                                            , notificationFlags );
 
-    if( iPropertyName == "GridType" )
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, GridType ) )
         return new FOdysseyVectorUndoTagInbetweenerGridType( mScene
                                                            , mSelectedInbetweenerTagArray
                                                            , notificationFlags );
 
-    if( ( iPropertyName == "Color"      )
-      ||( iPropertyName == "ChartColor" )
-      ||( iPropertyName == "GridColor"  )
-      ||( iPropertyName == "TrajectoryColor"  ) )
+    if( ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, InbetweenColor  ) )
+      ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, ChartColor      ) )
+      ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, GridColor       ) )
+      ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, TrajectoryColor ) ) )
         return new FOdysseyVectorUndoTagInbetweenerColor( mScene
                                                         , mSelectedInbetweenerTagArray
                                                         , notificationFlags );
 
-    if( iPropertyName == "MapAsPolyline" )
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, MapAsPolyline ) )
         return new FOdysseyVectorUndoTagInbetweenerMapAsPolyline( mScene
                                                                 , mSelectedInbetweenerTagArray
                                                                 , notificationFlags );
 
-    if( iPropertyName == "WithThickness" )
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, WithThickness ) )
         return new FOdysseyVectorUndoTagInbetweenerWithThickness( mScene
                                                                 , mSelectedInbetweenerTagArray
                                                                 , notificationFlags );
 
-    if( iPropertyName == "ConstantWidth" )
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, ConstantWidth ) )
         return new FOdysseyVectorUndoTagInbetweenerConstantWidth( mScene
                                                                 , mSelectedInbetweenerTagArray
                                                                 , notificationFlags );
 
-    if( iPropertyName == "Square" )
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, Square ) )
         return new FOdysseyVectorUndoTagInbetweenerSquare( mScene
                                                          , mSelectedInbetweenerTagArray
                                                          , notificationFlags );
