@@ -8,6 +8,8 @@
 #include "RHITypes.h"
 #include "Engine/Texture2D.h"
 #include "TextureCompiler.h"
+#include "Misc/TransactionObjectEvent.h"
+#include "Misc/OdysseyUndoDelegates.h"
 
 #include "ULISLoaderModule.h"
 
@@ -395,8 +397,6 @@ UOdysseyAnimationPlayer::AnimationChanged()
     if (!Animation)
     {
         Texture = nullptr;
-        mOnAnimationChanged.Broadcast();
-        mOnTextureChanged.Broadcast();
         return;
     }
 
@@ -415,33 +415,26 @@ UOdysseyAnimationPlayer::AnimationChanged()
     mInvalidTileMap = FULISInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
 
     UOdysseyAnimation::OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
-
-    mOnAnimationChanged.Broadcast();
-    mOnTextureChanged.Broadcast();
 }
 
 void
 UOdysseyAnimationPlayer::TextureChanged()
 {
-    mOnTextureChanged.Broadcast();
 }
 
 void
 UOdysseyAnimationPlayer::StatusChanged()
 {
-    mOnStatusChanged.Broadcast();
 }
 
 void
 UOdysseyAnimationPlayer::FrameRateChanged()
 {
-    mOnFrameRateChanged.Broadcast();
 }
 
 void
 UOdysseyAnimationPlayer::IsLoopingChanged()
 {
-    mOnIsLoopingChanged.Broadcast();
 }
 
 
@@ -465,6 +458,36 @@ UOdysseyAnimationPlayer::PropertyChanged(const FName& iPropertyName)
 }
 
 void
+UOdysseyAnimationPlayer::PostPropertyChanged(const FName& iPropertyName)
+{
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Animation) )
+    {
+        mOnAnimationChanged.Broadcast();
+        mOnTextureChanged.Broadcast();
+    }
+
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Texture) )
+    {
+        mOnTextureChanged.Broadcast();
+    }
+
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, Status) )
+    {
+        mOnStatusChanged.Broadcast();
+    }
+
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, FrameRate) )
+    {
+        mOnFrameRateChanged.Broadcast();
+    }
+
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationPlayer, IsLooping) )
+    {
+        mOnIsLoopingChanged.Broadcast();
+    }
+}
+
+void
 UOdysseyAnimationPlayer::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -475,7 +498,29 @@ UOdysseyAnimationPlayer::PostEditChangeProperty( FPropertyChangedEvent& Property
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
 
-    PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    PropertyChanged(PropertyChangedEvent.GetMemberPropertyName());
+    PostPropertyChanged(PropertyChangedEvent.GetMemberPropertyName());
+}
+
+void
+UOdysseyAnimationPlayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
+{
+    Super::PostTransacted(iTransactionEvent);
+
+    if ( iTransactionEvent.GetEventType() != ETransactionObjectEventType::UndoRedo )
+        return;
+
+    const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
+    for ( const FName& propertyName : changedPropertyNames )
+    {
+        PropertyChanged(propertyName);
+        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
+            [this, propertyName](bool iIsRedo)
+            {
+                PostPropertyChanged(propertyName);
+            }
+        );
+    }
 }
 
 void

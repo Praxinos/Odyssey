@@ -757,8 +757,6 @@ UOdysseyPainterEditorRasterDrawingTool::BrushChanged()
 
     //Create the BrushInstance to use for drawing
     CreateBrushInstance(true);
-
-    mOnBrushChanged.Broadcast();
 }
 
 void
@@ -797,12 +795,25 @@ void UOdysseyPainterEditorRasterDrawingTool::PropertyChanged(const FName& iPrope
 
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, Brush))
         BrushChanged();
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive)
+{
+    Super::PostPropertyChanged(iPropertyName, iIsInteractive);
 
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BrushInstance))
         return;
 
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, Brush))
+    {
+        mOnBrushChanged.Broadcast();
+    }
+
     if ( BrushInstance )
+    {
         BrushInstance->ExecuteStateChanged();
+    }
 }
 
 EMouseCursor::Type

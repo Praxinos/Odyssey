@@ -348,17 +348,13 @@ void
 UOdysseyPainterEditorRasterEraserTool::SizeChanged()
 {
     mStampBlockMask = CreateStampBlockMask();
-    mOnSizeChanged.Broadcast();
 }
 
 void
 UOdysseyPainterEditorRasterEraserTool::OpacityChanged()
 {
     mBlendParameters.Opacity = Opacity;
-    mOnOpacityChanged.Broadcast();
 }
-
-
 
 void UOdysseyPainterEditorRasterEraserTool::ActiveShapeChanged()
 {
@@ -379,6 +375,18 @@ void UOdysseyPainterEditorRasterEraserTool::PropertyChanged(const FName& iProper
 
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Opacity))
         OpacityChanged();
+}
+
+void
+UOdysseyPainterEditorRasterEraserTool::PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive)
+{
+    Super::PostPropertyChanged(iPropertyName, iIsInteractive);
+
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Size))
+        mOnSizeChanged.Broadcast();
+
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Opacity))
+        mOnOpacityChanged.Broadcast();
 }
 
 EMouseCursor::Type

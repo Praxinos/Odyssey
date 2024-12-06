@@ -5,6 +5,7 @@
 
 #include "OdysseyAnimation.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "Misc/OdysseyUndoDelegates.h"
 
 FOdysseySetCurrentFrameMutation::FOdysseySetCurrentFrameMutation(UOdysseyAnimation* iAnimation, int iFrame)
     : mAnimation(iAnimation)
@@ -15,13 +16,27 @@ FOdysseySetCurrentFrameMutation::FOdysseySetCurrentFrameMutation(UOdysseyAnimati
 void
 FOdysseySetCurrentFrameMutation::Apply()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED( UOdysseyAnimation, CurrentFrame), mFrame);
+    mAnimation->CurrentFrame = mFrame;
+    mAnimation->PropertyChanged(GET_MEMBER_NAME_CHECKED( UOdysseyAnimation, CurrentFrame));
+    FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
+        [animation = mAnimation](bool iIsRedo)
+        {
+            animation->PostPropertyChanged(GET_MEMBER_NAME_CHECKED( UOdysseyAnimation, CurrentFrame));
+        }
+    );
 }
 
 void
 FOdysseySetCurrentFrameMutation::Revert()
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED( UOdysseyAnimation, CurrentFrame), mFrame);
+    mAnimation->CurrentFrame = mFrame;
+    mAnimation->PropertyChanged(GET_MEMBER_NAME_CHECKED( UOdysseyAnimation, CurrentFrame));
+    FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
+        [animation = mAnimation](bool iIsRedo)
+        {
+            animation->PostPropertyChanged(GET_MEMBER_NAME_CHECKED( UOdysseyAnimation, CurrentFrame));
+        }
+    );
 }
 
 FOdysseyAnimationCurrentFrameMutator::FOdysseyAnimationCurrentFrameMutator(UOdysseyAnimation* iAnimation)

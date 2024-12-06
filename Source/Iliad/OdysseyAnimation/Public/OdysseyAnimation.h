@@ -99,12 +99,9 @@ public:
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
     virtual void PostLoad() override;
 
-protected:
     //Property changed methods
     virtual void PropertyChanged(const FName& iPropertyName);
-
-    virtual void CurrentFrameChanged();
-    virtual void FramesPerSecondChanged();
+    virtual void PostPropertyChanged(const FName& iPropertyName);
 
 private:
     void OnImageRenderingChanged(const FOdysseyImageRenderingChangedEvent& iEvent);

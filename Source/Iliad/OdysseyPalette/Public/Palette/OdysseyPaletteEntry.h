@@ -152,6 +152,7 @@ protected:
     virtual void ChildrenChanged();
 
     virtual void PropertyChanged(const FName& iPropertyName);
+    virtual void PostPropertyChanged(const FName& iPropertyName);
 
 public:
     // UObject overrides

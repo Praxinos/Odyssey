@@ -8,6 +8,7 @@
 #include "Subsystems/UnrealEditorSubsystem.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Misc/TransactionObjectEvent.h"
+#include "Misc/OdysseyUndoDelegates.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationComponent)
 
@@ -159,10 +160,20 @@ UOdysseyAnimationComponent::PropertyChanged(const FName& iPropertyName)
 }
 
 void
+UOdysseyAnimationComponent::PostPropertyChanged(const FName& iPropertyName)
+{
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Mode) )
+        mOnModeChanged.Broadcast();
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Animation) )
+        mOnAnimationChanged.Broadcast();
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponent, Player) )
+        mOnPlayerChanged.Broadcast();
+}
+
+void
 UOdysseyAnimationComponent::ModeChanged()
 {
     RefreshMaterialTexture();
-    mOnModeChanged.Broadcast();
 }
 
 void
@@ -178,8 +189,6 @@ UOdysseyAnimationComponent::AnimationChanged()
             MarkRenderStateDirty();
         }
     }
-
-    mOnAnimationChanged.Broadcast();
 }
 
 void
@@ -206,8 +215,6 @@ UOdysseyAnimationComponent::PlayerChanged()
 
         RefreshMaterialTexture();
     }
-
-    mOnPlayerChanged.Broadcast();
 }
 
 void
@@ -231,6 +238,7 @@ UOdysseyAnimationComponent::PostEditChangeProperty( FPropertyChangedEvent& Prope
         return;
 
     PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    PostPropertyChanged(PropertyChangedEvent.GetPropertyName());
 }
 
 void
@@ -245,6 +253,12 @@ UOdysseyAnimationComponent::PostTransacted(const FTransactionObjectEvent& iTrans
     for ( const FName& propertyName : changedPropertyNames )
     {
         PropertyChanged(propertyName);
+        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
+            [this, propertyName](bool iIsRedo)
+            {
+                PostPropertyChanged(propertyName);
+            }
+        );
     }
 }
 

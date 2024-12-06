@@ -214,23 +214,27 @@ UOdysseyTextureLayerImageVector::PropertyChanged(const FName& iPropertyName, con
 }
 
 void
+UOdysseyTextureLayerImageVector::PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive)
+{
+    Super::PostPropertyChanged(iPropertyName, iIsInteractive);
+    if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsWireframe))
+        ImageRenderingChanged();
+    if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsColored))
+        ImageRenderingChanged();
+}
+
+void
 UOdysseyTextureLayerImageVector::IsWireframeChanged()
 {
     mEngine->Invalidate(); //Force engine invalidation here, because IsColored is not a part of the engine, but still needs the engine to redraw itself
-
     mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
-
-    ImageRenderingChanged();
 }
 
 void
 UOdysseyTextureLayerImageVector::IsColoredChanged()
 {
     mEngine->Invalidate(); //Force engine invalidation here, because IsColored is not a part of the engine, but still needs the engine to redraw itself
-
     mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
-
-    ImageRenderingChanged();
 }
 
 TSharedPtr<IOdysseyImageRenderer>
