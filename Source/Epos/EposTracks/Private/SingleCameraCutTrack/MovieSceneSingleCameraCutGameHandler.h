@@ -41,7 +41,7 @@ struct FPreAnimatedCameraCutTraits : FPreAnimatedStateTraits
     using StorageType = FPreAnimatedCameraCutState;
 
     static bool ShouldHandleWorldCameraCuts(UWorld* World);
-    static StorageType CachePreAnimatedValue(IMovieScenePlayer* Player, uint8 InKey);
+    static StorageType CachePreAnimatedValue( UObject* PlaybackContext, uint8 InKey );
 
     void RestorePreAnimatedValue(uint8 InKey, const StorageType& CachedValue, const FRestoreStateParams& Params);
 };
@@ -70,10 +70,14 @@ struct FCameraCutGameHandler
     static void CachePreAnimatedValue(
             UMovieSceneEntitySystemLinker* Linker,
             const FSequenceInstance& SequenceInstance);
+    static void ForcePreAnimatedValueRestore(
+            UMovieSceneEntitySystemLinker* Linker,
+            const FSequenceInstance& SequenceInstance );
 
 private:
     UMovieSceneEntitySystemLinker* Linker;
     const FSequenceInstance& SequenceInstance;
 };
 
+const APlayerController* GetPlaybackController( const UObject* PlaybackContext );
 }  // namespace UE::MovieScene
