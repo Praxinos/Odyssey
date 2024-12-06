@@ -170,7 +170,7 @@ void UBoardSequence::UnbindInvalidObjects(const FGuid& ObjectId, UObject* Contex
 #if WITH_EDITOR
 
 ETrackSupport
-UBoardSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const
+UBoardSequence::IsTrackSupportedImpl( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const
 {
     if( !UMovieScene::IsTrackClassAllowed( InTrackClass ) )
     {

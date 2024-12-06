@@ -4,6 +4,7 @@
 #include "SingleCameraCutTrack/SingleCameraCutTrackEditor.h"
 
 #include "DragAndDrop/ActorDragDropGraphEdOp.h"
+#include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "MovieSceneCommonHelpers.h"
 #include "MovieSceneObjectBindingIDPicker.h"
 #include "MovieSceneToolHelpers.h"

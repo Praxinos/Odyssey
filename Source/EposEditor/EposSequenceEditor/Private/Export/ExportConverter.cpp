@@ -5,6 +5,9 @@
 
 #include "AssetToolsModule.h"
 #include "Channels/MovieSceneObjectPathChannel.h"
+#include "Compilation/MovieSceneCompiledDataManager.h"
+#include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
+#include "Evaluation/MovieSceneRootOverridePath.h"
 #include "ISequencer.h"
 #include "MovieSceneSequenceVisitor.h"
 #include "Sections/MovieSceneSubSection.h"
@@ -37,7 +40,12 @@ FExportConverter::ProcessSequencerMarks( UShotSequence& iShotSequence, FMovieSce
     TArray<FMovieSceneMarkedFrame> marks = iShotSequence.GetMovieScene()->GetMarkedFrames();
     for( auto mark : marks )
     {
-        FFrameNumber frame_in_root = ( mark.FrameNumber * iRootToSequenceTransform.InverseNoLooping() ).GetFrame();
+        FMovieSceneInverseSequenceTransform localToRootTransform = iRootToSequenceTransform.Inverse();
+        TOptional<FFrameTime> time_in_root = localToRootTransform.TryTransformTime( mark.FrameNumber );
+        if( !time_in_root )
+            continue;
+
+        FFrameNumber frame_in_root = time_in_root->GetFrame();
 
         FExportPanel* existing_panel = ioPanels.FindByPredicate( [frame_in_root]( const FExportPanel& iElement )
                                                                 {
@@ -77,7 +85,12 @@ FExportConverter::ProcessDrawings( UShotSequence& iShotSequence, FMovieSceneSequ
             FFrameNumber frame;
             drawing.mChannel->GetKeyTimes( TArrayView<const FKeyHandle>( &drawing.mKeyHandle, 1 ), TArrayView<FFrameNumber>( &frame, 1 ) );
 
-            FFrameNumber frame_in_root = ( frame * iRootToSequenceTransform.InverseNoLooping() ).GetFrame();
+            FMovieSceneInverseSequenceTransform localToRootTransform = iRootToSequenceTransform.Inverse();
+            TOptional<FFrameTime> time_in_root = localToRootTransform.TryTransformTime( frame );
+            if( !time_in_root )
+                continue;
+
+            FFrameNumber frame_in_root = time_in_root->GetFrame();
 
             FExportPanel* existing_panel = ioPanels.FindByPredicate( [frame_in_root]( const FExportPanel& iElement )
                                                                     {
@@ -114,7 +127,12 @@ FExportConverter::ProcessFirstShotFrame( UShotSequence& iShotSequence, FMovieSce
 {
     TRange<FFrameNumber> playback_range = iShotSequence.GetMovieScene()->GetPlaybackRange();
 
-    FFrameNumber frame_in_root = ( playback_range.GetLowerBoundValue() * iRootToSequenceTransform.InverseNoLooping() ).GetFrame();
+    FMovieSceneInverseSequenceTransform localToRootTransform = iRootToSequenceTransform.Inverse();
+    TOptional<FFrameTime> time_in_root = localToRootTransform.TryTransformTime( playback_range.GetLowerBoundValue() );
+    if( !time_in_root )
+        return;
+
+    FFrameNumber frame_in_root = time_in_root->GetFrame();
 
     FExportPanel* existing_panel = ioPanels.FindByPredicate( [frame_in_root]( const FExportPanel& iElement )
                                                             {
@@ -152,7 +170,7 @@ FExportConverter::Convert()
             if( !shot_sequence )
                 return;
 
-            UE::MovieScene::FSubSequencePath subsequencepath( iLocalSpace.SequenceID, *mSequencer );
+            UE::MovieScene::FSubSequencePath subsequencepath( iLocalSpace.SequenceID, mSequencer->FindSharedPlaybackState().ToSharedRef() );
 
             if( !subsequencepath.Contains( mSequenceId ) )
                 return;

@@ -1323,11 +1323,14 @@ InnerToOuter( const UMovieSceneSubSection* iOuterSection, TArray<FFrameTime> iIn
 {
     TArray<FFrameTime> converted_keys;
 
-    const FMovieSceneSequenceTransform InnerToOuterTransform = iOuterSection->OuterToInnerTransform().InverseNoLooping();
+    FMovieSceneInverseSequenceTransform localToRootTransform = iOuterSection->OuterToInnerTransform().Inverse();
     for( auto key : iInnerKeys )
     {
-        const FFrameTime converted_key = key * InnerToOuterTransform;
-        converted_keys.Add( converted_key );
+        TOptional<FFrameTime> converted_key = localToRootTransform.TryTransformTime( key );
+        if( !converted_key )
+            continue;
+
+        converted_keys.Add( *converted_key );
     }
 
     return converted_keys;

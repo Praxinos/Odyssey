@@ -365,11 +365,19 @@ FBoardSequenceCustomization::CreateInfoText() const
         // convert to display rate -> substract 1 to get the (inclusive) last frame -> convert back to tick resolution
         stop_sequence_in_sequence = FFrameRate::TransformTime( FFrameRate::TransformTime( stop_sequence_in_sequence, sequence_tick_resolution, sequence_display_rate ).FloorToFrame() - 1, sequence_display_rate, sequence_tick_resolution ).FloorToFrame();
 
-        FFrameNumber start_sequence_in_storyboard = ( start_sequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseNoLooping() ).GetFrame();
-        FFrameNumber stop_sequence_in_storyboard = ( stop_sequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseNoLooping() ).GetFrame();
+        FMovieSceneInverseSequenceTransform localToRootTransform = mSequencer->GetFocusedMovieSceneSequenceTransform().Inverse();
 
-        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSequence_InStoryboard, start_sequence_in_storyboard );
-        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSequence_InStoryboard, stop_sequence_in_storyboard );
+        TOptional<FFrameTime> start_sequence_in_storyboard = localToRootTransform.TryTransformTime( start_sequence_in_sequence );
+        if( start_sequence_in_storyboard )
+            parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSequence_InStoryboard, start_sequence_in_storyboard->GetFrame() );
+        else
+            parsed_string = ReplaceKeywordString( EInfoBarPatternKeyword::StartFrameOfSequence_InStoryboard, TEXT( "xxx" ) );
+
+        TOptional<FFrameTime> stop_sequence_in_storyboard = localToRootTransform.TryTransformTime( stop_sequence_in_sequence );
+        if( stop_sequence_in_storyboard )
+            parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSequence_InStoryboard, stop_sequence_in_storyboard->GetFrame() );
+        else
+            parsed_string = ReplaceKeywordString( EInfoBarPatternKeyword::StopFrameOfSequence_InStoryboard, TEXT( "xxx" ) );
 
         parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSequence_InSequence, start_sequence_in_sequence );
         parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSequence_InSequence, stop_sequence_in_sequence );
@@ -389,11 +397,19 @@ FBoardSequenceCustomization::CreateInfoText() const
         FFrameNumber start_subsequence_in_subsequence = board_subsection ? start_subsequence_in_sequence - board_subsection->GetInclusiveStartFrame() : FFrameNumber();
         FFrameNumber stop_subsequence_in_subsequence = board_subsection ? stop_subsequence_in_sequence - board_subsection->GetInclusiveStartFrame() : FFrameNumber();
 
-        FFrameNumber start_subsequence_in_storyboard = ( start_subsequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseNoLooping() ).GetFrame();
-        FFrameNumber stop_subsequence_in_storyboard = ( stop_subsequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseNoLooping() ).GetFrame();
+        FMovieSceneInverseSequenceTransform localToRootTransform = mSequencer->GetFocusedMovieSceneSequenceTransform().Inverse();
 
-        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSubsequence_InStoryboard, start_subsequence_in_storyboard );
-        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSubsequence_InStoryboard, stop_subsequence_in_storyboard );
+        TOptional<FFrameTime> start_subsequence_in_storyboard = localToRootTransform.TryTransformTime( start_subsequence_in_sequence );
+        if( start_subsequence_in_storyboard )
+            parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSubsequence_InStoryboard, start_subsequence_in_storyboard->GetFrame() );
+        else
+            parsed_string = ReplaceKeywordString( EInfoBarPatternKeyword::StartFrameOfSubsequence_InStoryboard, TEXT( "xxx" ) );
+
+        TOptional<FFrameTime> stop_subsequence_in_storyboard = localToRootTransform.TryTransformTime( stop_subsequence_in_sequence );
+        if( stop_subsequence_in_storyboard )
+            parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSubsequence_InStoryboard, stop_subsequence_in_storyboard->GetFrame() );
+        else
+            parsed_string = ReplaceKeywordString( EInfoBarPatternKeyword::StopFrameOfSubsequence_InStoryboard, TEXT( "xxx" ) );
 
         parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSubsequence_InSequence, start_subsequence_in_sequence );
         parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSubsequence_InSequence, stop_subsequence_in_sequence );

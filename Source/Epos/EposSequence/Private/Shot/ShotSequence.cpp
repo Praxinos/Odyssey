@@ -297,7 +297,7 @@ void UShotSequence::UnbindInvalidObjects( const FGuid& ObjectId, UObject* Contex
 #if WITH_EDITOR
 
 ETrackSupport
-UShotSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const
+UShotSequence::IsTrackSupportedImpl( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const
 {
     if( !UMovieScene::IsTrackClassAllowed( InTrackClass ) )
     {

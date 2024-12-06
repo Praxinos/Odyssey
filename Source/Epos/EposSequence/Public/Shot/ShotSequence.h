@@ -45,7 +45,7 @@ public:
     virtual void PostLoad() override;
 
 #if WITH_EDITOR
-    virtual ETrackSupport IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const override;
+    virtual ETrackSupport IsTrackSupportedImpl( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const override;
     virtual FText GetDisplayName() const override;
 //
     virtual void GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const override;
