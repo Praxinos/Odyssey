@@ -166,17 +166,11 @@ UOdysseyAnimationLayerImageVector::Serialize(FArchive& Ar)
 void
 UOdysseyAnimationLayerImageVector::IsColoredChanged()
 {
-    OnIsColoredChanged().Broadcast(this);
-
-    ImageRenderingChanged();
 }
 
 void
 UOdysseyAnimationLayerImageVector::IsWireframeChanged()
 {
-    OnIsWireframeChanged().Broadcast(this);
-
-    ImageRenderingChanged();
 }
 
 void
@@ -188,6 +182,23 @@ UOdysseyAnimationLayerImageVector::PropertyChanged(const FName& iPropertyName, c
         IsColoredChanged();
     if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsWireframe))
         IsWireframeChanged();
+}
+
+void
+UOdysseyAnimationLayerImageVector::PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive)
+{
+    Super::PostPropertyChanged(iPropertyName, iIsInteractive);
+
+    if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsColored))
+    {
+        OnIsColoredChanged().Broadcast(this);
+        ImageRenderingChanged();
+    }
+    if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsWireframe))
+    {
+        OnIsWireframeChanged().Broadcast(this);
+        ImageRenderingChanged();
+    }
 }
 
 TSharedPtr<IOdysseyImageRenderer>

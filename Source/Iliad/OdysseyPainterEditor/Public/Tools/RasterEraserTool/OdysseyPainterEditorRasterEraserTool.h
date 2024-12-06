@@ -71,6 +71,7 @@ public:
     void OpacityChanged();
 
     virtual void PropertyChanged(const FName& iPropertyName) override;
+    virtual void PostPropertyChanged(const FName& iPropertyName) override;
 
 private:
     // Internal - Callbacks

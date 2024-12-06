@@ -7,6 +7,7 @@
 #include "Misc/TransactionObjectEvent.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "ScopedTransaction.h"
+#include "Misc/OdysseyUndoDelegates.h"
 
 #define LOCTEXT_NAMESPACE "Palette"
 
@@ -87,6 +88,7 @@ void UOdysseyPaletteEntryColor::PostEditChangeProperty(FPropertyChangedEvent& Pr
         return;
 
     PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    PostPropertyChanged(PropertyChangedEvent.GetPropertyName());
 }
 
 void UOdysseyPaletteEntryColor::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
@@ -100,18 +102,29 @@ void UOdysseyPaletteEntryColor::PostTransacted(const FTransactionObjectEvent& iT
     for (const FName& propertyName : changedPropertyNames)
     {
         PropertyChanged(propertyName);
+        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
+            [this, propertyName](bool iIsRedo)
+            {
+                PostPropertyChanged(propertyName);
+            }
+        );
     }
 }
 
 void UOdysseyPaletteEntryColor::EntryColorChanged()
 {
-    OnEntryColorChanged().Broadcast(this);
 }
 
 void UOdysseyPaletteEntryColor::PropertyChanged(const FName& iPropertyName)
 {
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntryColor, EntryColors))
         EntryColorChanged();
+}
+
+void UOdysseyPaletteEntryColor::PostPropertyChanged(const FName& iPropertyName)
+{
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntryColor, EntryColors))
+        OnEntryColorChanged().Broadcast(this);
 }
 
 #undef LOCTEXT_NAMESPACE

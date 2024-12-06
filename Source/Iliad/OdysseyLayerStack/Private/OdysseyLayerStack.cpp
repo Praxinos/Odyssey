@@ -10,6 +10,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyLayerStackFunctionLibrary.h"
 #include "Misc/TransactionObjectEvent.h"
+#include "Misc/OdysseyUndoDelegates.h"
 
 void
 UOdysseyLayerStack::PostInitProperties()
@@ -674,7 +675,6 @@ UOdysseyLayerStack::HierarchyChanged()
 void
 UOdysseyLayerStack::CurrentLayerChanged()
 {
-    OnCurrentLayerChanged().Broadcast(this);
 }
 
 void
@@ -685,12 +685,20 @@ UOdysseyLayerStack::PropertyChanged(const FName& iPropertyName)
 }
 
 void
+UOdysseyLayerStack::PostPropertyChanged(const FName& iPropertyName)
+{
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayerStack, CurrentLayer) )
+        OnCurrentLayerChanged().Broadcast(this);
+}
+
+void
 UOdysseyLayerStack::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
 
     PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    PostPropertyChanged(PropertyChangedEvent.GetPropertyName());
 }
 
 void
@@ -705,6 +713,12 @@ UOdysseyLayerStack::PostTransacted(const FTransactionObjectEvent& iTransactionEv
     for (const FName& propertyName : changedPropertyNames)
     {
         PropertyChanged(propertyName);
+        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
+            [this, propertyName](bool iIsRedo)
+            {
+                PostPropertyChanged(propertyName);
+            }
+        );
     }
 }
 

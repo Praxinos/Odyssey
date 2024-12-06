@@ -785,8 +785,6 @@ UOdysseyPainterEditorRasterDrawingTool::BrushChanged()
 
     //Create the BrushInstance to use for drawing
     CreateBrushInstance(true);
-
-    mOnBrushChanged.Broadcast();
 }
 
 void
@@ -817,24 +815,42 @@ UOdysseyPainterEditorRasterDrawingTool::SelectedShapeChanged()
 {
     SelectedShapeInstance->Abort();
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, SelectedShapeInstance), AvailableShapes[SelectedShape]);
-    mOnShapeChanged.Broadcast();
 }
 
 void
 UOdysseyPainterEditorRasterDrawingTool::PropertyChanged(const FName& iPropertyName)
 {
+    Super::PropertyChanged(iPropertyName);
+
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, Brush))
         BrushChanged();
 
-    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BrushInstance))
-        return;
-        //BrushInstanceChanged();
-
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, SelectedShape))
         SelectedShapeChanged();
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::PostPropertyChanged(const FName& iPropertyName)
+{
+    Super::PostPropertyChanged(iPropertyName);
+
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BrushInstance))
+        return;
+
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, Brush))
+    {
+        mOnBrushChanged.Broadcast();
+    }
+
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, SelectedShape))
+    {
+        mOnShapeChanged.Broadcast();
+    }
 
     if ( BrushInstance )
+    {
         BrushInstance->ExecuteStateChanged();
+    }
 }
 
 EMouseCursor::Type

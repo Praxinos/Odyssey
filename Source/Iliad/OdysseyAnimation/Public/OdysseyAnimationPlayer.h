@@ -52,7 +52,9 @@ public:
     virtual void PostLoad() override;
     virtual void PostDuplicate(EDuplicateMode::Type iDuplicateMode) override;
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent) override;
+    virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
     void PropertyChanged(const FName& iPropertyName);
+    void PostPropertyChanged(const FName& iPropertyName);
 
     void AnimationChanged();
     void TextureChanged();

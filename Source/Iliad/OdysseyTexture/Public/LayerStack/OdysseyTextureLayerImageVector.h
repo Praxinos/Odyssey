@@ -59,6 +59,7 @@ public:
     void IsColoredChanged();
     void Serialize(FArchive& Ar);
     virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
+    virtual void PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive) override;
 
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const override;
 
