@@ -94,9 +94,6 @@ private:
     ESequencerDropResult OnSequencerActorsDrop( const TArray<TWeakObjectPtr<AActor>>& iActors, const FActorDragDropOp& iDragDropOp );
 
 private:
-    void OnSequencerClosed( TSharedRef<ISequencer> iSequencer );
-
-private:
     TWeakPtr<ISequencer> mWeakSequencer;
     FDelegateHandle mSequencerActorAddedDelegates;
     FDelegateHandle mSequencerActivatedDelegates;

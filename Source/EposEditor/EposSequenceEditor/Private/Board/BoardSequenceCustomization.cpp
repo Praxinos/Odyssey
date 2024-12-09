@@ -58,8 +58,6 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
 
     //---
 
-    mWeakSequencer.Pin()->OnCloseEvent().AddRaw( this, &FBoardSequenceCustomization::OnSequencerClosed );
-
     // Listen for actor/component movement
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw( this, &FBoardSequenceCustomization::OnPrePropertyChanged );
     FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw( this, &FBoardSequenceCustomization::OnPostPropertyChanged );
@@ -128,17 +126,6 @@ FBoardSequenceCustomization::UnregisterSequencerCustomization()
 
     mWeakSequencer = nullptr;
     mBoardSequence = nullptr;
-}
-
-void
-FBoardSequenceCustomization::OnSequencerClosed( TSharedRef<ISequencer> iSequencer )
-{
-    if( iSequencer == mWeakSequencer.Pin().ToSharedRef() )
-    {
-        mWeakSequencer.Pin()->OnCloseEvent().RemoveAll( this );
-
-        mWeakSequencer = nullptr;
-    }
 }
 
 //---

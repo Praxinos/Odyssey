@@ -44,8 +44,6 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
 
     //---
 
-    mWeakSequencer.Pin()->OnCloseEvent().AddRaw( this, &FShotSequenceCustomization::OnSequencerClosed );
-
     // Listen for actor/component movement
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw( this, &FShotSequenceCustomization::OnPrePropertyChanged );
     FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw( this, &FShotSequenceCustomization::OnPostPropertyChanged );
@@ -112,17 +110,6 @@ FShotSequenceCustomization::UnregisterSequencerCustomization()
 
     mWeakSequencer = nullptr;
     mShotSequence = nullptr;
-}
-
-void
-FShotSequenceCustomization::OnSequencerClosed( TSharedRef<ISequencer> iSequencer )
-{
-    if( iSequencer == mWeakSequencer.Pin().ToSharedRef() )
-    {
-        mWeakSequencer.Pin()->OnCloseEvent().RemoveAll( this );
-
-        mWeakSequencer = nullptr;
-    }
 }
 
 void

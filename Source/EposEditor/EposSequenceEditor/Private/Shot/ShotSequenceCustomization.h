@@ -83,9 +83,6 @@ private:
     void MovieSceneDataChanged( EMovieSceneDataChangeType iType );
 
 private:
-    void OnSequencerClosed( TSharedRef<ISequencer> iSequencer );
-
-private:
     TWeakPtr<ISequencer> mWeakSequencer;
     FDelegateHandle mSequencerActorAddedDelegates;
     FDelegateHandle mSequencerActivatedDelegates;
