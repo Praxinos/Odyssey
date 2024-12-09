@@ -7,6 +7,7 @@
 #include "OdysseyPaletteEntryFolder.h"
 #include "ScopedTransaction.h"
 #include "Widgets/Colors/SColorBlock.h"
+#include "Misc/OdysseyUndoDelegates.h"
 
 UOdysseyPalette::UOdysseyPalette()
 {
@@ -481,12 +482,10 @@ void UOdysseyPalette::HierarchyChanged()
 
 void UOdysseyPalette::CurrentEntryChanged()
 {
-    OnCurrentEntryChanged().Broadcast(this);
 }
 
 void UOdysseyPalette::SetsChanged()
 {
-    OnSetsChanged().Broadcast(this);
 }
 
 void UOdysseyPalette::PropertyChanged(const FName& iPropertyName)
@@ -497,12 +496,21 @@ void UOdysseyPalette::PropertyChanged(const FName& iPropertyName)
         SetsChanged();
 }
 
+void UOdysseyPalette::PostPropertyChanged(const FName& iPropertyName)
+{
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPalette, CurrentEntry))
+        OnCurrentEntryChanged().Broadcast(this);
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPalette, Sets))
+        OnSetsChanged().Broadcast(this);
+}
+
 void UOdysseyPalette::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
     if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
         return;
 
     PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    PostPropertyChanged(PropertyChangedEvent.GetPropertyName());
 }
 
 void UOdysseyPalette::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
@@ -516,6 +524,12 @@ void UOdysseyPalette::PostTransacted(const FTransactionObjectEvent& iTransaction
     for (const FName& propertyName : changedPropertyNames)
     {
         PropertyChanged(propertyName);
+        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
+            [this, propertyName](bool iIsRedo)
+            {
+                PostPropertyChanged(propertyName);
+            }
+        );
     }
 }
 

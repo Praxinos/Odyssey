@@ -49,6 +49,7 @@ public:
 protected:
     //Property changed methods
     virtual void PropertyChanged(const FName& iPropertyName);
+    virtual void PostPropertyChanged(const FName& iPropertyName);
 
     virtual void ModeChanged();
     virtual void AnimationChanged();

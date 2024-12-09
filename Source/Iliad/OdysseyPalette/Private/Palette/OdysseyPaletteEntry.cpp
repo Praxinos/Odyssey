@@ -4,6 +4,7 @@
 #include "OdysseyPaletteEntry.h"
 #include "OdysseyPalette.h"
 #include "Misc/TransactionObjectEvent.h"
+#include "Misc/OdysseyUndoDelegates.h"
 
 UOdysseyPaletteEntry::FOnNameChanged&
 UOdysseyPaletteEntry::OnNameChanged()
@@ -128,40 +129,59 @@ const TArray<UOdysseyPaletteEntry*>& UOdysseyPaletteEntry::GetChildren() const
 
 void UOdysseyPaletteEntry::NameChanged()
 {
-    OnNameChanged().Broadcast(this);
 }
 
 void UOdysseyPaletteEntry::IsActivatedChanged()
 {
-    OnIsActivatedChanged().Broadcast(this);
 }
 
 void UOdysseyPaletteEntry::IsExpandedChanged()
 {
-    OnIsExpandedChanged().Broadcast(this);
 }
 
 void UOdysseyPaletteEntry::ParentChanged()
 {
-    UOdysseyPalette* palette = GetPalette();
-    if (!palette)
-        return;
-
-    OnParentChanged().Broadcast(this);
-    palette->HierarchyChanged();
 }
 
 void UOdysseyPaletteEntry::ChildrenChanged()
 {
-    UOdysseyPalette* palette = GetPalette();
-    if (!palette)
-        return;
-
-    OnChildrenChanged().Broadcast(this);
-    palette->HierarchyChanged();
 }
 
 void UOdysseyPaletteEntry::PropertyChanged(const FName& iPropertyName)
+{
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntry, EntryName))
+    {
+        OnNameChanged().Broadcast(this);
+    }
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntry, IsActivated))
+    {
+        OnIsActivatedChanged().Broadcast(this);
+    }
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntry, IsExpanded))
+    {
+        OnIsExpandedChanged().Broadcast(this);
+    }
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntry, Parent))
+    {
+        UOdysseyPalette* palette = GetPalette();
+        if (!palette)
+            return;
+
+        OnParentChanged().Broadcast(this);
+        palette->HierarchyChanged();
+    }
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntry, Children))
+    {
+        UOdysseyPalette* palette = GetPalette();
+        if (!palette)
+            return;
+
+        OnChildrenChanged().Broadcast(this);
+        palette->HierarchyChanged();
+    }
+}
+
+void UOdysseyPaletteEntry::PostPropertyChanged(const FName& iPropertyName)
 {
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntry, EntryName))
         NameChanged();
@@ -183,6 +203,7 @@ void UOdysseyPaletteEntry::PostEditChangeProperty(FPropertyChangedEvent& Propert
         return;
 
     PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    PostPropertyChanged(PropertyChangedEvent.GetPropertyName());
 }
 
 void UOdysseyPaletteEntry::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
@@ -196,5 +217,11 @@ void UOdysseyPaletteEntry::PostTransacted(const FTransactionObjectEvent& iTransa
     for (const FName& propertyName : changedPropertyNames)
     {
         PropertyChanged(propertyName);
+        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
+            [this, propertyName](bool iIsRedo)
+            {
+                PostPropertyChanged(propertyName);
+            }
+        );
     }
 }

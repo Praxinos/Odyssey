@@ -270,7 +270,6 @@ void UOdysseyPainterEditorRasterPrimitiveDrawingTool::SelectedShapeChanged()
 {
     SelectedShapeInstance->Abort();
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPrimitiveDrawingTool, SelectedShapeInstance), AvailableShapes[SelectedShape]);
-    mOnShapeChanged.Broadcast();
 }
 
 void
@@ -403,8 +402,16 @@ UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeCommit(const TArray<FOdy
 
 void UOdysseyPainterEditorRasterPrimitiveDrawingTool::PropertyChanged(const FName& iPropertyName)
 {
+    Super::PropertyChanged(iPropertyName);
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPrimitiveDrawingTool, SelectedShape))
         SelectedShapeChanged();
+}
+
+void UOdysseyPainterEditorRasterPrimitiveDrawingTool::PostPropertyChanged(const FName& iPropertyName)
+{
+    Super::PostPropertyChanged(iPropertyName);
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPrimitiveDrawingTool, SelectedShape))
+        mOnShapeChanged.Broadcast();
 }
 
 FSimpleMulticastDelegate& UOdysseyPainterEditorRasterPrimitiveDrawingTool::OnShapeChanged()

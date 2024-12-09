@@ -44,6 +44,7 @@ protected:
     void ReachChanged(bool iIsInteractive);
 
     virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
+    virtual void PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive) override;
 
 private:
     UFUNCTION(BlueprintSetter)

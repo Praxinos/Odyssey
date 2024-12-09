@@ -160,13 +160,11 @@ UOdysseyAnimationCellImageStagger::Break(int Frame, bool bClear)
 void
 UOdysseyAnimationCellImageStagger::BehaviourChanged()
 {
-    ImageRenderingCompositionChanged();
 }
 
 void
 UOdysseyAnimationCellImageStagger::ReachChanged(bool iIsInteractive)
 {
-    ImageRenderingCompositionChanged(iIsInteractive);
 }
 
 void
@@ -182,6 +180,22 @@ UOdysseyAnimationCellImageStagger::PropertyChanged(const FName& iPropertyName, c
     if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Reach))
     {
         ReachChanged(iIsInteractive);
+    }
+}
+
+void
+UOdysseyAnimationCellImageStagger::PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive)
+{
+    Super::PostPropertyChanged(iPropertyName, iIsInteractive);
+
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Behaviour))
+    {
+        ImageRenderingCompositionChanged();
+    }
+
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCellImageStagger, Reach))
+    {
+        ImageRenderingCompositionChanged(iIsInteractive);
     }
 }
 

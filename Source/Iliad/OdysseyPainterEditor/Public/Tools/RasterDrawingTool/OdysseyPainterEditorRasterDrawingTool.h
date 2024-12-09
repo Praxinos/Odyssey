@@ -123,6 +123,7 @@ public:
     void SelectedShapeChanged();
 
     virtual void PropertyChanged(const FName& iPropertyName) override;
+    virtual void PostPropertyChanged(const FName& iPropertyName) override;
 
 public:
     // Paint Engine Stroke API

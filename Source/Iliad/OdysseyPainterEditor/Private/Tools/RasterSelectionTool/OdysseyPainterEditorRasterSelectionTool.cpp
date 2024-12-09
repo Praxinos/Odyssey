@@ -173,6 +173,7 @@ UOdysseyPainterEditorRasterSelectionTool::OnShapeCommit(const TArray<FOdysseyPoi
 
 void UOdysseyPainterEditorRasterSelectionTool::PropertyChanged(const FName& iPropertyName)
 {
+    Super::PropertyChanged(iPropertyName);
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterSelectionTool, SelectedShape))
         SelectedShapeChanged();
 }

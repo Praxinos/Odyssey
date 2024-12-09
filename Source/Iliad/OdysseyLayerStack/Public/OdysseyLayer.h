@@ -219,6 +219,7 @@ protected:
     virtual void BlendModeChanged();
 
     virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive);
+    virtual void PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive);
 
 public:
     // UObject overrides

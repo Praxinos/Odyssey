@@ -48,6 +48,7 @@ protected:
     virtual void EntryColorChanged();
 
     virtual void PropertyChanged(const FName& iPropertyName);
+    virtual void PostPropertyChanged(const FName& iPropertyName);
 
 public:
     UPROPERTY(EditAnywhere, Category=Palette)

@@ -103,6 +103,7 @@ protected:
     virtual void CellsChanged(bool iIsInteractive);
     virtual void CellsOffsetChanged(bool iIsInteractive);
     virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
+    virtual void PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive) override;
 
 protected:
     TArray<FGuid> GetLighttableImageRenderingComposition(int iFrameIndex) const;

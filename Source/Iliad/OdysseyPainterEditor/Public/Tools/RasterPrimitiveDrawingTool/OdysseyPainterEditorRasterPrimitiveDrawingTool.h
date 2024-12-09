@@ -65,6 +65,7 @@ private:
 
 public:
     virtual void PropertyChanged(const FName& iPropertyName) override;
+    virtual void PostPropertyChanged(const FName& iPropertyName) override;
     FSimpleMulticastDelegate& OnShapeChanged();
 
 protected:

@@ -7,6 +7,7 @@
 #include "Misc/TransactionObjectEvent.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyHUDSystem.h"
+#include "Misc/OdysseyUndoDelegates.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -241,6 +242,11 @@ UOdysseyPainterEditorTool::PropertyChanged(const FName& iPropertyName)
 }
 
 void
+UOdysseyPainterEditorTool::PostPropertyChanged(const FName& iPropertyName)
+{
+}
+
+void
 UOdysseyPainterEditorTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -249,6 +255,7 @@ UOdysseyPainterEditorTool::PostEditChangeProperty( FPropertyChangedEvent& Proper
         return;
 
     PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    PostPropertyChanged(PropertyChangedEvent.GetPropertyName());
 }
 
 void
@@ -263,5 +270,11 @@ UOdysseyPainterEditorTool::PostTransacted(const FTransactionObjectEvent& iTransa
     for ( const FName& propertyName : changedPropertyNames )
     {
         PropertyChanged(propertyName);
+        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
+            [this, propertyName](bool iIsRedo)
+            {
+                PostPropertyChanged(propertyName);
+            }
+        );
     }
 }
