@@ -244,6 +244,7 @@ public:
     virtual void PostTransacted(const FTransactionObjectEvent& TransactionEvent) override;
 
     virtual void PostInitProperties() override;
+    virtual void PostLoad() override;
 
 public:
     //FOdysseyImageRenderingAbility overrides

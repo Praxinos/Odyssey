@@ -23,6 +23,8 @@ SOdysseyAnimationTimelineControl::Construct(const FArguments& iArgs)
     mCurrentFrame = iArgs._CurrentFrame;
     mCustomValidRange = iArgs._CustomValidRange;
 
+    SetClipping(EWidgetClipping::ClipToBoundsAlways);
+
     ChildSlot
     [
         iArgs._Content.Widget

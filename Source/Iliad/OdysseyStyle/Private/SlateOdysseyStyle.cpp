@@ -877,6 +877,14 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedHoveredImage(*FAppStyle::Get().GetBrush("TreeArrow_Expanded_Hovered"))
         .SetCheckedPressedImage(*FAppStyle::Get().GetBrush("TreeArrow_Expanded_Hovered"))
     );
+
+    Set("Shapes.None", new IMAGE_BRUSH_SVG("OdysseyShapes/none", mIcon16x16));
+    Set("Shapes.Freehand", new IMAGE_BRUSH_SVG("OdysseyShapes/freehand", mIcon16x16));
+    Set("Shapes.Line", new IMAGE_BRUSH_SVG("OdysseyShapes/line", mIcon16x16));
+    Set("Shapes.Rectangle", new IMAGE_BRUSH_SVG("OdysseyShapes/rectangle", mIcon16x16));
+    Set("Shapes.Polygon", new IMAGE_BRUSH_SVG("OdysseyShapes/polygon", mIcon16x16));
+    Set("Shapes.Ellipse", new IMAGE_BRUSH_SVG("OdysseyShapes/ellipse", mIcon16x16));
+    Set("Shapes.Bezier", new IMAGE_BRUSH_SVG("OdysseyShapes/bezier", mIcon16x16));
 #endif
 }
 
