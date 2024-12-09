@@ -19,6 +19,8 @@
 #include "EngineUtils.h"
 #include "Camera/CameraComponent.h"
 #include "Tracks/MovieScene3DTransformTrack.h"
+#include "MovieSceneBindingReferences.h"
+#include "Bindings/MovieSceneSpawnableActorBinding.h"
 
 #include "EposSequenceHelpers.h"
 #include "Helpers/SectionHelpersConvert.h"
@@ -190,10 +192,9 @@ AActor* FSingleCameraCutSection::GetCameraForFrame(FFrameNumber Time) const
             return CameraComponent->GetOwner();
         }
 
-        FMovieSceneSpawnable* Spawnable = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->FindSpawnable(CameraCutSection->GetCameraBindingID().GetGuid());
-        if (Spawnable)
+        if( AActor* ActorTemplate = Cast<AActor>( MovieSceneHelpers::GetObjectTemplate( Sequencer->GetFocusedMovieSceneSequence(), CameraCutSection->GetCameraBindingID().GetGuid(), Sequencer->GetSharedPlaybackState() ) ) )
         {
-            return Cast<AActor>(Spawnable->GetObjectTemplate());
+            return ActorTemplate;
         }
     }
 
