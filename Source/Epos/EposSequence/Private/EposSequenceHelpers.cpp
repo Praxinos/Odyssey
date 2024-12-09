@@ -92,7 +92,7 @@ BoardSequenceHelpers::GetInnerSequence( IMovieScenePlayer& iPlayer, const UMovie
 
     const FMovieSceneSequenceID             thisSequenceID = iSequenceId;
     const FMovieSceneSequenceID             targetSequenceID = iSubSection.GetSequenceID();
-    const FMovieSceneSequenceHierarchy*     hierarchy = iPlayer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iPlayer.GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSequenceHierarchy*     hierarchy = iPlayer.GetSharedPlaybackState()->GetHierarchy();
 
     if( !hierarchy )
         return result;
@@ -408,7 +408,7 @@ EposSequenceHelpers::GetRootEposSequence( IMovieScenePlayer& iPlayer, FMovieScen
         return Cast<UEposMovieSceneSequence>( iPlayer.GetEvaluationTemplate().GetRootSequence() );
     }
 
-    const FMovieSceneSequenceHierarchy* hierarchy = iPlayer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iPlayer.GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSequenceHierarchy* hierarchy = iPlayer.GetSharedPlaybackState()->GetHierarchy();
     if( !hierarchy )
         return nullptr;
 

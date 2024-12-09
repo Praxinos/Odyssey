@@ -547,7 +547,7 @@ FBoardSequenceCustomization::CreateInfoText() const
     {
         int32 storyboard_duration_in_tick = UE::MovieScene::DiscreteSize( root_playback_range );
 
-        const FMovieSceneSequenceHierarchy* hierarchy = sequencer->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( sequencer->GetEvaluationTemplate().GetCompiledDataID() );
+        const FMovieSceneSequenceHierarchy* hierarchy = sequencer->GetSharedPlaybackState()->GetHierarchy();
         int32 storyboard_total_sequences = hierarchy ? hierarchy->AllSubSequenceData().Num() : 0;
 
         parsed_string = ReplaceKeywordIntAsFrame( EInfoBarPatternKeyword::Storyboard_Duration, storyboard_duration_in_tick );

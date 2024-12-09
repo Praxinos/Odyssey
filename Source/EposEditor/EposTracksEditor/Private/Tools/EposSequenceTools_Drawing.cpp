@@ -466,7 +466,7 @@ ShotSequenceTools::GotoPreviousDrawing( ISequencer& iSequencer, UMovieSceneSeque
 
     FFrameNumber previous_time = times[index];
 
-    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iSequencer.GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetSharedPlaybackState()->GetHierarchy();
     const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
 
     FMovieSceneInverseSequenceTransform localToRootTransform = subdata->RootToSequenceTransform.Inverse();
@@ -531,7 +531,7 @@ ShotSequenceTools::GotoNextDrawing( ISequencer& iSequencer, UMovieSceneSequence*
     if( !next_time )
         return;
 
-    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iSequencer.GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetSharedPlaybackState()->GetHierarchy();
     const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
 
     FMovieSceneInverseSequenceTransform localToRootTransform = subdata->RootToSequenceTransform.Inverse();

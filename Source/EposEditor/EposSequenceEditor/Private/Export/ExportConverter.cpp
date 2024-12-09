@@ -170,7 +170,7 @@ FExportConverter::Convert()
             if( !shot_sequence )
                 return;
 
-            UE::MovieScene::FSubSequencePath subsequencepath( iLocalSpace.SequenceID, mSequencer->FindSharedPlaybackState().ToSharedRef() );
+            UE::MovieScene::FSubSequencePath subsequencepath( iLocalSpace.SequenceID, mSequencer->GetSharedPlaybackState() );
 
             if( !subsequencepath.Contains( mSequenceId ) )
                 return;

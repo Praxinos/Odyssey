@@ -425,7 +425,7 @@ FCinematicBoardSection::GetViewCamera()
     const UMovieSceneCinematicBoardSection& SectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
     const FMovieSceneSequenceID             ThisSequenceID = sequencer->GetFocusedTemplateID();
     const FMovieSceneSequenceID             TargetSequenceID = SectionObject.GetSequenceID();
-    const FMovieSceneSequenceHierarchy*     Hierarchy = sequencer->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( sequencer->GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSequenceHierarchy*     Hierarchy = sequencer->GetSharedPlaybackState()->GetHierarchy();
 
     if( !Hierarchy )
         return nullptr;
