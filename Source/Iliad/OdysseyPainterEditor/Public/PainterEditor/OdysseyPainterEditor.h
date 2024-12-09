@@ -215,6 +215,8 @@ public:
                                     , FOdysseyVectorGroupPaint* iScene
                                     , bool iResetTransformation
                                     , bool iResetDeformation );
+    static void RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
+                                    , FOdysseyVectorSharedEnv* iSharedEnv );
     static void Subdivide( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
 
 public:

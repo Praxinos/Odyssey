@@ -108,6 +108,7 @@ SOdysseyAnimationLayerImageVectorTimeline::GenerateInbetweeningRowTimelineWidget
 {
     return SAssignNew( mInbetweeningListView, SOdysseyAnimationLayerImageVectorTimelineInbetweening
                                 , Cast<UOdysseyAnimationLayerImageVector>(mLayer) )
+                            .PainterEditor(mEditor)
                             .TimelinePosition(mTimelinePosition)
                             .Visibility( this, &SOdysseyAnimationLayerImageVectorTimeline::IsInbetweeningTimelineVisible );
 }

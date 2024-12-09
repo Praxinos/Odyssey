@@ -406,6 +406,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLCont
     static BLRgba32 whiteColor = BLRgba32( 0xFF, 0xFF, 0xFF, 0xFF );
     static BLRgba32 blackColor = BLRgba32( 0x00, 0x00, 0x00, 0xFF );
     static BLRgba32 greenColor = BLRgba32( 0x00, 0xFF, 0x00, 0xFF );
+    FColor trajectoryColor = iInbetweenerTag->GetTrajectoryColor();
     BLPath path;
 
     iBLContext->save();
@@ -419,13 +420,16 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLCont
         path.moveTo( p0World.x, p0World.y );
         path.lineTo( p3World.x, p3World.y );
 
-        iBLContext->setStrokeStyle( iBgColor );
+        iBLContext->setStrokeStyle( BLRgba32( trajectoryColor.R
+                                            , trajectoryColor.G
+                                            , trajectoryColor.B
+                                            , 255 ) );
         iBLContext->setStrokeWidth( 2.0f );
         iBLContext->strokePath( path );
 
-        iBLContext->setStrokeStyle( iHcColor );
+        /*iBLContext->setStrokeStyle( iHcColor );
         iBLContext->setStrokeWidth( 1.0f );
-        iBLContext->strokePath( path );
+        iBLContext->strokePath( path );*/
     }
 
     if( iInbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
@@ -438,13 +442,16 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLCont
                     , p2World.x, p2World.y
                     , p3World.x, p3World.y );
 
-        iBLContext->setStrokeStyle( iBgColor );
+        iBLContext->setStrokeStyle( BLRgba32( trajectoryColor.R
+                                            , trajectoryColor.G
+                                            , trajectoryColor.B
+                                            , 255 ) );
         iBLContext->setStrokeWidth( 2.0f );
         iBLContext->strokePath( path );
 
-        iBLContext->setStrokeStyle( iHcColor );
+        /*iBLContext->setStrokeStyle( iHcColor );
         iBLContext->setStrokeWidth( 1.0f );
-        iBLContext->strokePath( path );
+        iBLContext->strokePath( path );*/
 
         if( mTrajectoryTool->GetPickingMode() == eTrajectoryPickingMode::Alter )
         {

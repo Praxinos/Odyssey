@@ -41,7 +41,7 @@ public:
     void SetCursorPos( FVector2D iCursorPos );
     const FSlateBrush *GetForwardArrowBrush();
     const FSlateBrush *GetBackwardArrowBrush();
-
+    virtual FReply OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent ) override;
     FOdysseyPainterEditor* GetEditor() const;
     TSharedPtr<FOdysseyAnimationEditorTimelinePosition> GetTimelinePosition() const;
 
@@ -54,8 +54,9 @@ protected:
     void ChangeDirection();
     void ShowHideTarget();
     void GetSelectedInbetweenerTags( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList );
-
+    void MapActionsToCommandList();
     void OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iNotificationFlags );
+    void RemoveInbetweenerTag();
 
 private :
     virtual bool Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const override;
@@ -68,4 +69,5 @@ protected:
     const FSlateBrush *mBackwardArrowBrush;
     TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
     TAttribute<FOdysseyPainterEditor*> mEditor;
+    TSharedRef<FUICommandList> mCommandList;
 };

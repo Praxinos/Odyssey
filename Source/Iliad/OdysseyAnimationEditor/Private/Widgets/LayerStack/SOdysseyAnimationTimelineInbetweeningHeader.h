@@ -31,6 +31,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeader
 
         void Construct( const FArguments& InArgs, UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector );
         UOdysseyAnimationLayerImageVector* GetAnimationLayerImageVector();
+        virtual FReply OnKeyDown ( const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent ) override;
         virtual FReply OnKeyUp ( const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent ) override;
         void Update();
         FOdysseyPainterEditor* GetEditor() const;
@@ -43,6 +44,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeader
         void ResetSpacingCharts();
         void Commit();
         void OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iNotificationFlags );
+        void MapActionsToCommandList();
 
     private :
         virtual bool Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const override;
@@ -51,4 +53,5 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeader
         UOdysseyAnimationLayerImageVector* mAnimationLayerImageVector;
         TArray<TSharedPtr<FInbetweeningListViewItem>> mItemsSource;
         TAttribute<FOdysseyPainterEditor*> mEditor;
+        TSharedRef<FUICommandList> mCommandList;
 };

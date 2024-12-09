@@ -31,6 +31,8 @@
 #include "OdysseyAnimationEditorTimelinePosition.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 
+#include "Framework/Commands/GenericCommands.h"
+
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::~SOdysseyAnimationLayerImageVectorTimelineInbetweening()
@@ -41,7 +43,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::~SOdysseyAnimationLayerIm
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::SOdysseyAnimationLayerImageVectorTimelineInbetweening()
     : mForwardArrowBrush( FOdysseyStyle::GetBrush( "Animation.Timeline.Inbetweening.Forward16") )
     , mBackwardArrowBrush( FOdysseyStyle::GetBrush( "Animation.Timeline.Inbetweening.Backward16") )
+    , mCommandList(MakeShared<FUICommandList>())
 {
+    MapActionsToCommandList();
 }
 
 void
@@ -91,6 +95,16 @@ TSharedPtr<FOdysseyAnimationEditorTimelinePosition>
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetTimelinePosition() const
 {
     return mTimelinePosition;
+}
+
+FReply
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnKeyDown( const FGeometry& iGeometry
+                                                                , const FKeyEvent& iKeyEvent )
+{
+    if (mCommandList->ProcessCommandBindings(iKeyEvent))
+        return FReply::Handled();
+
+    return SListView<TSharedPtr<FInbetweeningListViewItem>>::OnKeyDown( iGeometry, iKeyEvent );
 }
 
 void
@@ -442,6 +456,24 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection()
 
     // static call
     FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
+}
+
+void
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::MapActionsToCommandList()
+{
+    mCommandList->MapAction(
+        FGenericCommands::Get().Delete,
+        FExecuteAction::CreateRaw( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveInbetweenerTag )
+    );
+}
+
+void
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveInbetweenerTag()
+{
+    FOdysseyPainterEditor* editor = mEditor.Get();
+
+    // note: editor is NULL in the Sequencer
+    FOdysseyPainterEditor::RemoveInbetweenerTag( editor, mAnimationLayerImageVector->GetSharedEnv() );
 }
 
 #undef LOCTEXT_NAMESPACE

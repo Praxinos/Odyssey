@@ -2733,6 +2733,52 @@ FOdysseyPainterEditor::MergeScenes( FOdysseyVectorGroupPaint* iDestinationScene
     FOdysseyVectorEngine::Notify( iDestinationScene, notificationFlags );
 }
 
+// static
+void
+FOdysseyPainterEditor::RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
+                                           , FOdysseyVectorSharedEnv* iSharedEnv )
+{
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
+    std::list<FOdysseyVectorTag*> tagList;
+
+    iSharedEnv->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
+                                         , tagList );
+
+    if( tagList.size() )
+    {
+        // needed for undos
+        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.delete-tags", "Remove Tags"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagRemove( tagList.front()->GetOwner()->GetScene()
+                                                                      , tagList
+                                                                      , notificationFlags );
+
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+            if (iEditor)
+            {
+                TSharedPtr<FOdysseyPainterEditorSource> source = iEditor->GetSource();
+                if (source)
+                    source->RecordCurrentFrameUndo();
+            }
+        }
+        GEditor->EndTransaction();
+
+        for( FOdysseyVectorTag* tag : tagList )
+        {
+            tag->GetOwner()->RemoveTag( tag );
+            tag->GetOwner()->GetEngine()->UnselectObject( tag->GetOwner() );
+        }
+    }
+
+    // update UI
+    FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
+}
+
 void
 FOdysseyPainterEditor::StitchVertices( FOdysseyPainterEditor* iEditor
                                      , FOdysseyVectorGroupPaint* iScene

@@ -25,6 +25,8 @@
 #include "OdysseyVectorEngine.h"
 #include "Undo/OdysseyVectorUndoTagRemove.h"
 
+#include "Framework/Commands/GenericCommands.h"
+
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
 SOdysseyAnimationTimelineInbetweeningHeader::~SOdysseyAnimationTimelineInbetweeningHeader()
@@ -33,7 +35,9 @@ SOdysseyAnimationTimelineInbetweeningHeader::~SOdysseyAnimationTimelineInbetween
 }
 
 SOdysseyAnimationTimelineInbetweeningHeader::SOdysseyAnimationTimelineInbetweeningHeader()
+    : mCommandList(MakeShared<FUICommandList>())
 {
+    MapActionsToCommandList();
 }
 
 void
@@ -73,18 +77,19 @@ SOdysseyAnimationTimelineInbetweeningHeader::OnVectorSceneNotify( FOdysseyVector
 }
 
 FReply
+SOdysseyAnimationTimelineInbetweeningHeader::OnKeyDown( const FGeometry& iGeometry
+                                                      , const FKeyEvent& iKeyEvent )
+{
+    if (mCommandList->ProcessCommandBindings(iKeyEvent))
+        return FReply::Handled();
+
+    return SListView<TSharedPtr<FInbetweeningListViewItem>>::OnKeyDown( iGeometry, iKeyEvent );
+}
+
+FReply
 SOdysseyAnimationTimelineInbetweeningHeader::OnKeyUp ( const FGeometry& MyGeometry
                                                         , const FKeyEvent& InKeyEvent )
 {
-// Commented-out. Pressing delete would delete the whole Cell due to the way events are managed in Odyssey.
-/*
-    if( InKeyEvent.GetKey() == EKeys::Delete )
-    {
-        RemoveInbetweenerTags();
-
-        return FReply::Handled();
-    }
-*/
     return FReply::Unhandled();
 }
 
@@ -149,9 +154,8 @@ void
 SOdysseyAnimationTimelineInbetweeningHeader::Commit()
 {
     FOdysseyPainterEditor* editor = mEditor.Get();
-    if (!editor)
-        return;
 
+    // note: editor is NULL in the Sequencer
     FOdysseyPainterEditor::CommitSelectedInbetweenerTag( editor, mAnimationLayerImageVector->GetSharedEnv() );
 }
 
@@ -159,57 +163,18 @@ void
 SOdysseyAnimationTimelineInbetweeningHeader::ResetSpacingCharts()
 {
     FOdysseyPainterEditor* editor = mEditor.Get();
-    if (!editor)
-        return;
 
+    // note: editor is NULL in the Sequencer
     FOdysseyPainterEditor::ResetInbetweenerTagSpacingChart( editor, mAnimationLayerImageVector->GetSharedEnv() );
 }
 
 void
 SOdysseyAnimationTimelineInbetweeningHeader::RemoveInbetweenerTag()
 {
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_TIMELINE
-                             | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
-    std::list<FOdysseyVectorTag*> tagList;
+    FOdysseyPainterEditor* editor = mEditor.Get();
 
-    mAnimationLayerImageVector->GetSharedEnv()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
-                                                                         , tagList );
-
-    if( tagList.size() )
-    {
-        // needed for undos
-        GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.delete-tags", "Remove Tags"));
-        if( GUndo )
-        {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagRemove( tagList.front()->GetOwner()->GetScene()
-                                                                      , tagList
-                                                                      , notificationFlags );
-
-            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
-
-            FOdysseyPainterEditor* editor = mEditor.Get();
-            if (editor)
-            {
-                TSharedPtr<FOdysseyPainterEditorSource> source = editor->GetSource();
-                if (source)
-                    source->RecordCurrentFrameUndo();
-            }
-        }
-        GEditor->EndTransaction();
-
-        for( FOdysseyVectorTag* tag : tagList )
-        {
-            tag->GetOwner()->RemoveTag( tag );
-            tag->GetOwner()->GetEngine()->UnselectObject( tag->GetOwner() );
-
-            tag->GetOwner()->GetEngine()->Invalidate( 0 );
-        }
-    }
-
-    // update UI
-    FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
+    // note: editor is NULL in the Sequencer
+    FOdysseyPainterEditor::RemoveInbetweenerTag( editor, mAnimationLayerImageVector->GetSharedEnv() );
 }
 
 UOdysseyAnimationLayerImageVector*
@@ -224,5 +189,13 @@ SOdysseyAnimationTimelineInbetweeningHeader::GetEditor() const
     return mEditor.Get();
 }
 
+void
+SOdysseyAnimationTimelineInbetweeningHeader::MapActionsToCommandList()
+{
+    mCommandList->MapAction(
+        FGenericCommands::Get().Delete,
+        FExecuteAction::CreateRaw( this, &SOdysseyAnimationTimelineInbetweeningHeader::RemoveInbetweenerTag )
+    );
+}
 
 #undef LOCTEXT_NAMESPACE
