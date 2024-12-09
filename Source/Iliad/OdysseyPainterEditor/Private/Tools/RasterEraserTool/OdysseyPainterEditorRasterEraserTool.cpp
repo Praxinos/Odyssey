@@ -36,9 +36,6 @@ UOdysseyPainterEditorRasterEraserTool::~UOdysseyPainterEditorRasterEraserTool()
 
 UOdysseyPainterEditorRasterEraserTool::UOdysseyPainterEditorRasterEraserTool()
     : Super()
-    //Properties
-    , SelectedShape(EOdysseyShape::kFreehand)
-    , SelectedShapeInstance(nullptr)
     //Internal
     , mPaintEngine()
     , mStampBlock(nullptr)
@@ -48,14 +45,16 @@ UOdysseyPainterEditorRasterEraserTool::UOdysseyPainterEditorRasterEraserTool()
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser64");
 
-    AvailableShapes.Add(EOdysseyShape::kFreehand, CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterEraserTool::FreehandShape"));
-    AvailableShapes.Add(EOdysseyShape::kLine, CreateShape<UOdysseyLineShape>("UOdysseyPainterEditorRasterEraserTool::LineShape"));
-    AvailableShapes.Add(EOdysseyShape::kRectangle, CreateShape<UOdysseyRectangleShape>("UOdysseyPainterEditorRasterEraserTool::RectangleShape"));
-    AvailableShapes.Add(EOdysseyShape::kPolygon, CreateShape<UOdysseyPolygonShape>("UOdysseyPainterEditorRasterEraserTool::PolygonShape"));
-    AvailableShapes.Add(EOdysseyShape::kEllipse, CreateShape<UOdysseyEllipseShape>("UOdysseyPainterEditorRasterEraserTool::EllipseShape"));
-    AvailableShapes.Add(EOdysseyShape::kBezier, CreateShape<UOdysseyBezierShape>("UOdysseyPainterEditorRasterEraserTool::BezierShape"));
 
-    SelectedShapeInstance = AvailableShapes[SelectedShape];
+    Shapes.AddShapeType(EOdysseyShapeType::kFreehand, CreateShape<UOdysseyFreehandShape>("UOdysseyPainterEditorRasterDrawingTool::FreehandShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kLine, CreateShape<UOdysseyLineShape>("UOdysseyPainterEditorRasterDrawingTool::LineShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kRectangle, CreateShape<UOdysseyRectangleShape>("UOdysseyPainterEditorRasterDrawingTool::RectangleShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kPolygon, CreateShape<UOdysseyPolygonShape>("UOdysseyPainterEditorRasterDrawingTool::PolygonShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kEllipse, CreateShape<UOdysseyEllipseShape>("UOdysseyPainterEditorRasterDrawingTool::EllipseShape"));
+    Shapes.AddShapeType(EOdysseyShapeType::kBezier, CreateShape<UOdysseyBezierShape>("UOdysseyPainterEditorRasterDrawingTool::BezierShape"));
+
+    Shapes.SetActiveShapeType(EOdysseyShapeType::kFreehand);
+
     mStampBlockMask = CreateStampBlockMask();
 }
 
@@ -172,7 +171,7 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseDown(const FOdysseyPoint& iPointIn
 
     TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
     mPaintEngine.RasterBlock(rasterBlock);
-    return SelectedShapeInstance->OnMouseDown(iPointInTexture, iKey);
+    return Shapes.GetActiveShape()->OnMouseDown(iPointInTexture, iKey);
 }
 
 bool
@@ -194,7 +193,7 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseUp(const FOdysseyPoint& iPointInTe
     if( mediaRasters.Num() <= 0 )
         return false;
 
-    return SelectedShapeInstance->OnMouseUp(iPointInTexture, iKey);
+    return Shapes.GetActiveShape()->OnMouseUp(iPointInTexture, iKey);
 }
 
 void
@@ -213,7 +212,7 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseHover(const FOdysseyPoint& iPointI
     if( mediaRasters.Num() <= 0 )
         return;
 
-    SelectedShapeInstance->OnMouseHover(iPointInTexture);
+    Shapes.GetActiveShape()->OnMouseHover(iPointInTexture);
 }
 
 void
@@ -232,7 +231,7 @@ UOdysseyPainterEditorRasterEraserTool::OnMouseDrag(const FOdysseyPoint& iPointIn
     if( mediaRasters.Num() <= 0 )
         return;
 
-    SelectedShapeInstance->OnMouseDrag(iPointInTexture);
+    Shapes.GetActiveShape()->OnMouseDrag(iPointInTexture);
 }
 
 bool
@@ -251,7 +250,7 @@ UOdysseyPainterEditorRasterEraserTool::OnKeyDown(const FKey& iKey)
     if( mediaRasters.Num() <= 0 )
         return false;
 
-    return SelectedShapeInstance->OnKeyDown(iKey);
+    return Shapes.GetActiveShape()->OnKeyDown(iKey);
 }
 
 bool
@@ -270,7 +269,7 @@ UOdysseyPainterEditorRasterEraserTool::OnKeyUp(const FKey& iKey)
     if( mediaRasters.Num() <= 0 )
         return false;
 
-    return SelectedShapeInstance->OnKeyUp(iKey);
+    return Shapes.GetActiveShape()->OnKeyUp(iKey);
 }
 
 void
@@ -334,24 +333,6 @@ UOdysseyPainterEditorRasterEraserTool::Stamp(const FOdysseyPoint& iPoint)
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------ Getters
 
-EOdysseyShape
-UOdysseyPainterEditorRasterEraserTool::GetSelectedShape() const
-{
-    return SelectedShape;
-}
-
-UOdysseyShape*
-UOdysseyPainterEditorRasterEraserTool::GetSelectedShapeInstance() const
-{
-    return SelectedShapeInstance;
-}
-
-FSimpleMulticastDelegate&
-UOdysseyPainterEditorRasterEraserTool::OnShapeChanged()
-{
-    return mOnShapeChanged;
-}
-
 FSimpleMulticastDelegate&
 UOdysseyPainterEditorRasterEraserTool::OnSizeChanged()
 {
@@ -368,13 +349,6 @@ UOdysseyPainterEditorRasterEraserTool::OnOpacityChanged()
 //-------------------------------------------------------------------- UObject Overrides
 
 void
-UOdysseyPainterEditorRasterEraserTool::SelectedShapeChanged()
-{
-    SelectedShapeInstance->Abort();
-    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, SelectedShapeInstance), AvailableShapes[SelectedShape]);
-}
-
-void
 UOdysseyPainterEditorRasterEraserTool::SizeChanged()
 {
     mStampBlockMask = CreateStampBlockMask();
@@ -386,13 +360,21 @@ UOdysseyPainterEditorRasterEraserTool::OpacityChanged()
     mBlendParameters.Opacity = Opacity;
 }
 
-void
-UOdysseyPainterEditorRasterEraserTool::PropertyChanged(const FName& iPropertyName)
+void UOdysseyPainterEditorRasterEraserTool::ActiveShapeChanged()
 {
-    Super::PropertyChanged(iPropertyName);
+    Shapes.GetActiveShape()->Abort();
+}
 
-    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, SelectedShape))
-        SelectedShapeChanged();
+void UOdysseyPainterEditorRasterEraserTool::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
+{
+    Super::PropertyChanged(iPropertyName, iMemberPropertyName, iIsInteractive);
+
+    if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Shapes)
+        && iPropertyName == GET_MEMBER_NAME_CHECKED(FOdysseyShapes, ActiveShapeType))
+        ActiveShapeChanged();
+
+    if (iIsInteractive)
+        return;
 
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Size))
         SizeChanged();
@@ -402,12 +384,9 @@ UOdysseyPainterEditorRasterEraserTool::PropertyChanged(const FName& iPropertyNam
 }
 
 void
-UOdysseyPainterEditorRasterEraserTool::PostPropertyChanged(const FName& iPropertyName)
+UOdysseyPainterEditorRasterEraserTool::PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive)
 {
-    Super::PostPropertyChanged(iPropertyName);
-
-    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, SelectedShape))
-        mOnShapeChanged.Broadcast();
+    Super::PostPropertyChanged(iPropertyName, iIsInteractive);
 
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Size))
         mOnSizeChanged.Broadcast();
@@ -449,7 +428,7 @@ UOdysseyPainterEditorRasterEraserTool::OnRasterSelectionChanged()
 void
 UOdysseyPainterEditorRasterEraserTool::OnShapeInteractive(const TArray<FOdysseyPoint>& iPoints)
 {
-    if ( !SelectedShapeInstance->IsProgressive() )
+    if ( !Shapes.GetActiveShape()->IsProgressive() )
         return;
 
     for ( const FOdysseyPoint& point : iPoints )
@@ -508,7 +487,7 @@ UOdysseyPainterEditorRasterEraserTool::InterpolateTo(const FOdysseyPoint& iPoint
 {
     if (!mInterpolator)
     {
-        if (SelectedShape == EOdysseyShape::kFreehand )
+        if (Shapes.GetActiveShapeType() == EOdysseyShapeType::kFreehand )
         {
             switch(InterpolationType)
             {

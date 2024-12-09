@@ -33,7 +33,7 @@ public:
 
     /** Modifier SubPixel Override Value. */
     UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_Shape" ) )
-    EOdysseyShape Shape;
+    EOdysseyShapeType Shape;
 
     /** Modifier SubPixel Override Value. */
     UPROPERTY( EditAnywhere, Category="Modifiers", meta = ( editcondition = "bOverride_SubPixel" ) )

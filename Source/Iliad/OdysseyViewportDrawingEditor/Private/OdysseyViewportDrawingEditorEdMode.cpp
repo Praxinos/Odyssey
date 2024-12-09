@@ -31,6 +31,7 @@
 #include "UObject/UObjectGlobals.h"
 #include "Editor/EditorPerProjectUserSettings.h"
 #include "MediaPlate.h"
+#include "SEditorViewport.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
@@ -84,8 +85,13 @@ FOdysseyViewportDrawingEditorEdMode::DrawHUD(FEditorViewportClient* ViewportClie
     if (!mViewportDrawingEditorExtension || !mViewportDrawingEditorExtension->IsPlaneComponent())
         return;
 
+    TSharedPtr<SWidget> viewportWidget = ViewportClient->GetEditorViewportWidget();
+    TSharedPtr<SWindow> window = FSlateApplication::Get().FindWidgetWindow(viewportWidget.ToSharedRef());
+
+    float scaleFactor = FSlateApplication::Get().GetApplicationScale() * window->GetNativeWindow()->GetDPIScaleFactor();
+
     FOdysseyHUDSystem::FDrawHUDParams params;
-    if (!mViewportDrawingEditorExtension->GetDrawHUDParams(View, Canvas, params))
+    if (!mViewportDrawingEditorExtension->GetDrawHUDParams(View, Canvas, scaleFactor, params))
         return;
 
     mEditor->HUDSystem()->DrawHUD(params);

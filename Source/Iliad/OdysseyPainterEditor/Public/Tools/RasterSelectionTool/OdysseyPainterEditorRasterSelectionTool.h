@@ -54,21 +54,15 @@ public:
 
 private:
     // Internal - Callbacks
-    void SelectedShapeChanged();
     void OnShapeCommit(const TArray<FOdysseyPoint>& iPoints, bool iReset);
 
 public:
-    virtual void PropertyChanged(const FName& iPropertyName) override;
+    void ActiveShapeChanged();
+    virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
 
 protected:
     UPROPERTY(EditAnywhere, Category="Shape")
-    EOdysseyFillShape SelectedShape;
-
-    UPROPERTY(VisibleInstanceOnly, Category="Shape", Instanced, meta = (ShowInnerProperties))
-    UOdysseyShape* SelectedShapeInstance;
-
-    UPROPERTY()
-    TMap<EOdysseyFillShape, UOdysseyShape*> AvailableShapes;
+    FOdysseyShapes Shapes;
 
     EOdysseySelectionState mSelectionState;
     TSharedPtr<FOdysseyHUDElement> mShapeHUD;
