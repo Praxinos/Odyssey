@@ -100,6 +100,16 @@ FEposSequenceEditorPlaybackContext::ComputePlaybackContextAndClient( const UEpos
 
     if( ensure( EditorWorld ) )
     {
+        //// First search selected actors. If one is selected, use that as the client.
+        //for( FSelectionIterator It( GEditor->GetSelectedActorIterator() ); It; ++It )
+        //{
+        //    if( ALevelSequenceActor* LSA = Cast<ALevelSequenceActor>( *It ) )
+        //    {
+        //        return FContextAndClient( EditorWorld, LSA );
+        //    }
+        //}
+
+        // Otherwise, attempt to find one in the world.
         //TArray<ALevelSequenceActor*> LevelSequenceActors;
         //UE::MovieScene::FindLevelSequenceActors( EditorWorld, iEposSequence, LevelSequenceActors );
         //return FContextAndClient( EditorWorld, ( LevelSequenceActors.Num() > 0 ? LevelSequenceActors[0] : nullptr ) );

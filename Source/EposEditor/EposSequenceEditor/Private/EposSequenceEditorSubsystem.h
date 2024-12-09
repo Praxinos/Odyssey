@@ -36,16 +36,7 @@ class USequencerModuleScriptingLayer;
 class IStructureDetailsView;
 class USequencerCurveEditorObject;
 
-//USTRUCT(BlueprintType)
-//struct FMovieSceneScriptingParams
-//{
-//    GENERATED_BODY()
-//
-//    FMovieSceneScriptingParams() {}
-//
-//    UPROPERTY(BlueprintReadWrite, Category = "Movie Scene")
-//    ESequenceTimeUnit TimeUnit = ESequenceTimeUnit::DisplayRate;
-//};
+//...
 
 /**
 * UEposSequenceEditorSubsystem
@@ -64,29 +55,9 @@ public:
 
     void OnSequencerCreated(TSharedRef<ISequencer> InSequencer);
 
-    ///** Retrieve the outliner */
-    //UFUNCTION(BlueprintPure, Category = "Level Sequence Editor")
-    //USequencerScriptingLayer* GetScriptingLayer();
+    void OnSequencerClosed(TSharedRef<ISequencer> InSequencer);
 
-    ///** Retrieve the curve editor */
-    //UFUNCTION( BlueprintPure, Category = "Level Sequence Editor" )
-    //USequencerCurveEditorObject* GetCurveEditor();
-
-    ///** Add existing actors to Sequencer. Tracks will be automatically added based on default track settings. */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //TArray<FMovieSceneBindingProxy> AddActors(const TArray<AActor*>& Actors);
-
-    ///** Create a cine camera actor and add it to Sequencer */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //FMovieSceneBindingProxy CreateCamera(bool bSpawnable, ACineCameraActor*& OutActor);
-
-    ///** Convert to spawnable. If there are multiple objects assigned to the possessable, multiple spawnables will be created. */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //TArray<FMovieSceneBindingProxy> ConvertToSpawnable(const FMovieSceneBindingProxy& ObjectBinding);
-
-    ///** Convert to possessable */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //FMovieSceneBindingProxy ConvertToPossessable(const FMovieSceneBindingProxy& ObjectBinding);
+    //...
 
     /**
      * Copy folders
@@ -156,116 +127,48 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
     bool PasteBindings(const FString& TextToImport, FMovieScenePasteBindingsParams PasteBindingsParams, TArray<FMovieSceneBindingProxy>& OutObjectBindings);
 
-    ///** Snap sections to timeline using source timecode */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //void SnapSectionsToTimelineUsingSourceTimecode(const TArray<UMovieSceneSection*>& Sections);
-
-    ///** Sync section using source timecode */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //void SyncSectionsUsingSourceTimecode(const TArray<UMovieSceneSection*>& Sections);
-
-    ///** Bake transform */
-    //UE_DEPRECATED(5.3, "Use ULevelSequenceEditorSubsystem::BakeTransformWithSettings instead")
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //void BakeTransform(const TArray<FMovieSceneBindingProxy>& ObjectBindings, const FFrameTime& BakeInTime, const FFrameTime& BakeOutTime, const FFrameTime& BakeInterval, const FMovieSceneScriptingParams& Params = FMovieSceneScriptingParams());
-
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //bool BakeTransformWithSettings(const TArray<FMovieSceneBindingProxy>& ObjectBindings, const FBakingAnimationKeySettings& InSettings, const FMovieSceneScriptingParams& Params = FMovieSceneScriptingParams());
+    //...
 
     /** Attempts to automatically fix up broken actor references in the current scene */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
     void FixActorReferences();
 
-    ///** Assigns the given actors to the binding */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //void AddActorsToBinding(const TArray<AActor*>& Actors, const FMovieSceneBindingProxy& ObjectBinding);
-
-    ///** Replaces the binding with the given actors */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //void ReplaceBindingWithActors(const TArray<AActor*>& Actors, const FMovieSceneBindingProxy& ObjectBinding);
-
-    ///** Removes the given actors from the binding */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //void RemoveActorsFromBinding(const TArray<AActor*>& Actors, const FMovieSceneBindingProxy& ObjectBinding);
-
-    ///** Remove all bound actors from this track */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //void RemoveAllBindings(const FMovieSceneBindingProxy& ObjectBinding);
-
-    ///** Remove missing objects bound to this track */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //void RemoveInvalidBindings(const FMovieSceneBindingProxy& ObjectBinding);
-
-    ///** Rebind the component binding to the requested component */
-    //UFUNCTION(BlueprintCallable, Category = "Level Sequence Editor")
-    //void RebindComponent(const TArray<FMovieSceneBindingProxy>& ComponentBindings, const FName& ComponentName);
-
-//private:
-//    /** Used by Baking transforms*/
-//    struct FBakeData
-//    {
-//        TArray<FVector> Locations;
-//        TArray<FRotator> Rotations;
-//        TArray<FVector> Scales;
-//        TSortedMap<FFrameNumber,FFrameNumber> KeyTimes;
-//    };
-//    void CalculateFramesPerGuid(TSharedPtr<ISequencer>& Sequencer, const FBakingAnimationKeySettings& InSettings, TMap<FGuid, FBakeData>& OutBakeDataMa,
-//        TSortedMap<FFrameNumber, FFrameNumber>&  OutFrameMap);
-
-    //// Used by binding properties menu
-    //struct FBindingPropertiesNotifyHook: FNotifyHook
-    //{
-    //    UMovieSceneSequence* ObjectToModify = nullptr;
-    //    FBindingPropertiesNotifyHook() {}
-
-    //    FBindingPropertiesNotifyHook( UMovieSceneSequence* InObjectToModify ): ObjectToModify( InObjectToModify ) {}
-
-    //    virtual void NotifyPreChange( FProperty* PropertyAboutToChange ) override;
-    //    virtual void NotifyPostChange( const FPropertyChangedEvent& PropertyChangedEvent, FProperty* PropertyThatChanged ) override;
-    //};
-
-    //FBindingPropertiesNotifyHook NotifyHook;
+    //...
 
 private:
 
+    //...
+
+private:
+
+    //...
+
     TSharedPtr<ISequencer> GetActiveSequencer();
 
-    //void SnapSectionsToTimelineUsingSourceTimecodeInternal();
-    //void SyncSectionsUsingSourceTimecodeInternal();
-    //void BakeTransformInternal();
-    //void AddActorsToBindingInternal();
-    //void ReplaceBindingWithActorsInternal();
-    //void RemoveActorsFromBindingInternal();
-    //void RemoveAllBindingsInternal();
-    //void RemoveInvalidBindingsInternal();
-    //void RebindComponentInternal(const FName& ComponentName);
+    //...
 
-    //void AddAssignActorMenu(FMenuBuilder& MenuBuilder);
-    //void AddBindingPropertiesMenu( FMenuBuilder& MenuBuilder );
-    //void OnFinishedChangingLocators( const FPropertyChangedEvent& PropertyChangedEvent, TSharedRef<IStructureDetailsView> StructDetailsView, TSharedRef<FStructOnScope> LocatorsStruct, FGuid ObjectBindingID );
+public:
 
-    //void GetRebindComponentNames(TArray<FName>& OutComponentNames);
-    //void RebindComponentMenu(FMenuBuilder& MenuBuilder);
+    //...
+
+private:
+
+    //...
 
     FDelegateHandle OnSequencerCreatedHandle;
 
     /* List of sequencers that have been created */
     TArray<TWeakPtr<ISequencer>> Sequencers;
 
-    ///* Map of curve editors with their sequencers*/
-    //TMap<TWeakPtr<ISequencer>, TObjectPtr<USequencerCurveEditorObject>> CurveEditorObjects;
-    ///* property array of the curve editors*/
-    //UPROPERTY()
-    //TArray<TObjectPtr<USequencerCurveEditorObject>> CurveEditorArray;
+    //...
 
     TSharedPtr<FUICommandList> CommandList;
 
     //TSharedPtr<FExtender> TransformMenuExtender;
     TSharedPtr<FExtender> FixActorReferencesMenuExtender;
 
-    //TSharedPtr<FExtender> AssignActorMenuExtender;
-    //TSharedPtr<FExtender> BindingPropertiesMenuExtender;
-    //TSharedPtr<FExtender> RebindComponentMenuExtender;
+    //...
+
 };
 
 #if UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_2

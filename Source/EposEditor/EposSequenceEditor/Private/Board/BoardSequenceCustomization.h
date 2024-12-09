@@ -44,6 +44,10 @@ private:
     TSharedPtr<FExtender> CreateObjectBindingContextMenuExtender(UE::Sequencer::FViewModelPtr InViewModel);
     void ExtendObjectBindingContextMenu(FMenuBuilder& MenuBuilder, TSharedPtr<UE::Sequencer::FObjectBindingModel> ObjectBindingModel);
 
+    //// Object binding sidebar menu extensions
+    //TSharedPtr<FExtender> CreateObjectBindingSidebarMenuExtender( FViewModelPtr InViewModel );
+    //void ExtendObjectBindingSidebarMenu( FMenuBuilder& MenuBuilder, TSharedPtr<FObjectBindingModel> ObjectBindingModel );
+
     FText CreateInfoText() const;
 
 private:

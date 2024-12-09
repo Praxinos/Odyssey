@@ -80,6 +80,7 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
     customization.ToolbarExtender = ToolbarExtender;
 
     customization.OnBuildObjectBindingContextMenu = FOnGetSequencerMenuExtender::CreateRaw(this, &FBoardSequenceCustomization::CreateObjectBindingContextMenuExtender);
+    //customization.OnBuildSidebarMenu = FOnGetSequencerMenuExtender::CreateRaw( this, &FBoardSequenceCustomization::CreateObjectBindingSidebarMenuExtender );
 
     //customization.OnReceivedDragOver.BindRaw( this, &FBoardSequenceCustomization::OnSequencerReceiveDragOver );
     //customization.OnReceivedDrop.BindRaw( this, &FBoardSequenceCustomization::OnSequencerReceiveDrop );
@@ -1074,32 +1075,15 @@ FBoardSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBu
     TSharedPtr<UE::Sequencer::FSequencerEditorViewModel> EditorViewModel = Sequencer->GetViewModel();
 
     FGuid ObjectBindingID = ObjectBindingModel->GetObjectGuid();
-    UMovieScene* MovieScene = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene();
+    UMovieSceneSequence* Sequence = Sequencer->GetFocusedMovieSceneSequence();
+    UMovieScene* MovieScene = Sequence->GetMovieScene();
 
     if (!MovieScene || !ObjectBindingID.IsValid())
     {
         return;
     }
 
-    FMovieSceneSpawnable* Spawnable = MovieScene->FindSpawnable(ObjectBindingID);
-
-    if (Spawnable)
-    {
-        check(!"todo: from FLevelSequenceCustomization in Plugins")
-    }
-    else
-    {
-        //MenuBuilder.BeginSection("Possessable");
-
-        //MenuBuilder.AddMenuEntry(FSequencerCommands::Get().ConvertToSpawnable);
-
-        //MenuBuilder.AddSubMenu(
-        //    LOCTEXT("DynamicPossession", "Dynamic Possession"),
-        //    LOCTEXT("DynamicPossessionTooltip", "Specify a Blueprint method that will find a compatible actor for this binding"),
-        //    FNewMenuDelegate::CreateRaw(this, &FLevelSequenceCustomization::AddDynamicPossessionMenu, ObjectBindingModel));
-
-        //MenuBuilder.EndSection();
-    }
+    //...
 
     MenuBuilder.BeginSection("Import/Export", LOCTEXT("ImportExportMenuSectionName", "Import/Export"));
 
@@ -1141,6 +1125,23 @@ FBoardSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBu
 
     MenuBuilder.EndSection();
 }
+
+//TSharedPtr<FExtender> FBoardSequenceCustomization::CreateObjectBindingSidebarMenuExtender( FViewModelPtr InViewModel )
+//{
+//    TSharedRef<FExtender> Extender = MakeShared<FExtender>();
+//
+//    TSharedPtr<FObjectBindingModel> ObjectBindingModel = InViewModel->CastThisShared<FObjectBindingModel>();
+//
+//    Extender->AddMenuExtension( TEXT( "ObjectBindingActions" ), EExtensionHook::Before, nullptr,
+//                                FMenuExtensionDelegate::CreateRaw( this, &FBoardSequenceCustomization::ExtendObjectBindingSidebarMenu, ObjectBindingModel ) );
+//
+//    return Extender.ToSharedPtr();
+//}
+//
+//void FBoardSequenceCustomization::ExtendObjectBindingSidebarMenu( FMenuBuilder& MenuBuilder, TSharedPtr<FObjectBindingModel> ObjectBindingModel )
+//{
+//    ExtendObjectBindingContextMenu( MenuBuilder, ObjectBindingModel );
+//}
 
 //---
 

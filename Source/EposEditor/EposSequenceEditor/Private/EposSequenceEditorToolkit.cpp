@@ -145,6 +145,9 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
         sequencerInitParams.HostCapabilities.bSupportsSaveMovieSceneAsset = true;
         //sequencerInitParams.HostCapabilities.bSupportsRecording = true;
         sequencerInitParams.HostCapabilities.bSupportsRenderMovie = true;
+        sequencerInitParams.HostCapabilities.bSupportsAddFromContentBrowser = true;
+        sequencerInitParams.HostCapabilities.bSupportsSidebar = true;
+        sequencerInitParams.HostCapabilities.bSupportsViewportSelectability = true;
 
         //sequencerInitParams.EventContexts.Bind( PlaybackContext.ToSharedRef(), &FLevelSequencePlaybackContext::GetEventContexts );
         sequencerInitParams.PlaybackContext.Bind( mPlaybackContext.ToSharedRef(), &FEposSequenceEditorPlaybackContext::GetPlaybackContextAsObject );
@@ -175,16 +178,6 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
     options.bRequiresLevelEvents = true;
     options.bRequiresActorEvents = true;
     FLevelEditorSequencerIntegration::Get().AddSequencer( mSequencer.ToSharedRef(), options );
-
-    // Reopen the scene outliner so that is refreshed with the sequencer columns
-    {
-        TSharedPtr<FTabManager> levelEditorTabManager = levelEditorModule.GetLevelEditorTabManager();
-        if( levelEditorTabManager->FindExistingLiveTab( FName( "LevelEditorSceneOutliner" ) ).IsValid() ) // SceneOutliner == WorldOutliner ...
-        {
-            levelEditorTabManager->TryInvokeTab( FName( "LevelEditorSceneOutliner" ) )->RequestCloseTab();
-            levelEditorTabManager->TryInvokeTab( FName( "LevelEditorSceneOutliner" ) );
-        }
-    }
 
     TSharedPtr<SDockTab> dockTab = levelEditorModule.AttachSequencer( mSequencer->GetSequencerWidget(), SharedThis( this ) );
     if( dockTab.IsValid() )

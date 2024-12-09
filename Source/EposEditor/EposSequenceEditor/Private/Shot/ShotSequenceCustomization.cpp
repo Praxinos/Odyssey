@@ -68,6 +68,7 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
     customization.ToolbarExtender = ToolbarExtender;
 
     customization.OnBuildObjectBindingContextMenu = FOnGetSequencerMenuExtender::CreateRaw(this, &FShotSequenceCustomization::CreateObjectBindingContextMenuExtender);
+    //customization.OnBuildSidebarMenu = FOnGetSequencerMenuExtender::CreateRaw( this, &FShotSequenceCustomization::CreateObjectBindingSidebarMenuExtender );
 
     // customization.OnReceivedDragOver ...
     // customization.OnReceivedDrop ...
@@ -822,25 +823,7 @@ FShotSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBui
         return;
     }
 
-    FMovieSceneSpawnable* Spawnable = MovieScene->FindSpawnable(ObjectBindingID);
-
-    if (Spawnable)
-    {
-        check(!"todo: from FLevelSequenceCustomization in Plugins")
-    }
-    else
-    {
-        //MenuBuilder.BeginSection("Possessable");
-
-        //MenuBuilder.AddMenuEntry(FSequencerCommands::Get().ConvertToSpawnable);
-
-        //MenuBuilder.AddSubMenu(
-        //    LOCTEXT("DynamicPossession", "Dynamic Possession"),
-        //    LOCTEXT("DynamicPossessionTooltip", "Specify a Blueprint method that will find a compatible actor for this binding"),
-        //    FNewMenuDelegate::CreateRaw(this, &FLevelSequenceCustomization::AddDynamicPossessionMenu, ObjectBindingModel));
-
-        //MenuBuilder.EndSection();
-    }
+    //...
 
     MenuBuilder.BeginSection("Import/Export", LOCTEXT("ImportExportMenuSectionName", "Import/Export"));
 
@@ -882,6 +865,23 @@ FShotSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBui
 
     MenuBuilder.EndSection();
 }
+
+//TSharedPtr<FExtender> FShotSequenceCustomization::CreateObjectBindingSidebarMenuExtender( FViewModelPtr InViewModel )
+//{
+//    TSharedRef<FExtender> Extender = MakeShared<FExtender>();
+//
+//    TSharedPtr<FObjectBindingModel> ObjectBindingModel = InViewModel->CastThisShared<FObjectBindingModel>();
+//
+//    Extender->AddMenuExtension( TEXT( "ObjectBindingActions" ), EExtensionHook::Before, nullptr,
+//                                FMenuExtensionDelegate::CreateRaw( this, &FShotSequenceCustomization::ExtendObjectBindingSidebarMenu, ObjectBindingModel ) );
+//
+//    return Extender.ToSharedPtr();
+//}
+//
+//void FShotSequenceCustomization::ExtendObjectBindingSidebarMenu( FMenuBuilder& MenuBuilder, TSharedPtr<FObjectBindingModel> ObjectBindingModel )
+//{
+//    ExtendObjectBindingContextMenu( MenuBuilder, ObjectBindingModel );
+//}
 
 //---
 
