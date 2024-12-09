@@ -97,7 +97,7 @@ private:
     void OnSequencerClosed( TSharedRef<ISequencer> iSequencer );
 
 private:
-    ISequencer*     mSequencer;
+    TWeakPtr<ISequencer> mWeakSequencer;
     FDelegateHandle mSequencerActorAddedDelegates;
     FDelegateHandle mSequencerActivatedDelegates;
     FDelegateHandle mSequencerSelectionSectionChangedDelegates;

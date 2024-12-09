@@ -125,7 +125,7 @@ FExportImageSequenceNamingFormatter::GetShot() const
     {
         virtual void VisitSection( UMovieSceneTrack* iTrack, UMovieSceneSection* iSection, const FGuid& iGuid, const UE::MovieScene::FSubSequenceSpace& iLocalSpace )
         {
-            UE::MovieScene::FSubSequencePath subsequencepath( iLocalSpace.SequenceID, *mSequencer );
+            UE::MovieScene::FSubSequencePath subsequencepath( iLocalSpace.SequenceID, mSequencer->FindSharedPlaybackState().ToSharedRef() );
 
             if( !subsequencepath.Contains( mRootEposSequenceId ) )
                 return;

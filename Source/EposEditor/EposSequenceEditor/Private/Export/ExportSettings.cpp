@@ -25,7 +25,7 @@ GetMostRelevantCameraAspectRatio( ISequencer* iSequencer, FMovieSceneSequenceIDR
     {
         virtual void VisitSection( UMovieSceneTrack* iTrack, UMovieSceneSection* iSection, const FGuid& iGuid, const UE::MovieScene::FSubSequenceSpace& iLocalSpace ) override
         {
-            UE::MovieScene::FSubSequencePath subsequencepath( iLocalSpace.SequenceID, *mSequencer );
+            UE::MovieScene::FSubSequencePath subsequencepath( iLocalSpace.SequenceID, mSequencer->FindSharedPlaybackState().ToSharedRef() );
 
             if( !subsequencepath.Contains( mSequenceId ) )
                 return;

@@ -587,9 +587,13 @@ public:
 
 public:
 
-    /** Refresh Sequencer UI. */
+    /** Refresh Sequencer UI on next tick */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
     static void RefreshCurrentEposSequence();
+
+    /** Force sequencer evaluation and UI update immediately */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    static void ForceUpdate();
 
     /** Get the object bound to the given binding ID with the current Epos Sequence Editor */
     UFUNCTION(BlueprintPure, Category="Epos Sequence Editor")
@@ -624,12 +628,22 @@ public:
 public:
 
     /** Gets whether the specified track filter is on/off */
+    UE_DEPRECATED( 5.5, "Use IsTrackFilterActive" )
     UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
     static bool IsTrackFilterEnabled(const FText& TrackFilterName);
 
+    /** Gets whether the specified track filter is on/off */
+    UFUNCTION( BlueprintPure, Category = "Epos Sequence Editor" )
+    static bool IsTrackFilterActive( const FText& TrackFilterName );
+
     /** Sets the specified track filter to be on or off */
+    UE_DEPRECATED( 5.5, "Use SetTrackFilterActive" )
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
     static void SetTrackFilterEnabled(const FText& TrackFilterName, bool bEnabled);
+
+    /** Sets the specified track filter to be on or off */
+    UFUNCTION( BlueprintCallable, Category = "Epos Sequence Editor" )
+    static void SetTrackFilterActive( const FText& TrackFilterName, bool bActive );
 
     /** Gets all the available track filter names */
     UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
