@@ -14,25 +14,11 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimeline
     : public SOdysseyAnimationLayerImageTimeline
 {
 public:
-    SLATE_BEGIN_ARGS(SOdysseyAnimationLayerImageVectorTimeline)
-        {}
-        SLATE_ATTRIBUTE(bool, DisplayOptions)
-    SLATE_END_ARGS()
-
-public:
     // Construction / Destruction
     virtual ~SOdysseyAnimationLayerImageVectorTimeline();
     SOdysseyAnimationLayerImageVectorTimeline();
-    void Construct(
-        const FArguments& iArgs,
-        FOdysseyAnimationEditorExtension* iExtension,
-        UOdysseyAnimationLayerImageVector* iAnimationLayerImageVector
-    );
 
 private:
     virtual TSharedRef<SWidget> OnGenerateCellWidget(UOdysseyAnimationCell* iCell) override;
     virtual FReply OnPreviewMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-
-private:
-    bool GetShowCellContent() const;
 };

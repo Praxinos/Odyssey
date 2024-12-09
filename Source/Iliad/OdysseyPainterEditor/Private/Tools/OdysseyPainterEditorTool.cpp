@@ -7,6 +7,7 @@
 #include "Misc/TransactionObjectEvent.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyHUDSystem.h"
+#include "Misc/OdysseyUndoDelegates.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -241,14 +242,25 @@ UOdysseyPainterEditorTool::PropertyChanged(const FName& iPropertyName)
 }
 
 void
+UOdysseyPainterEditorTool::PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive)
+{
+}
+
+void
 UOdysseyPainterEditorTool::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
+    PropertyChanged(PropertyChangedEvent.GetPropertyName(), PropertyChangedEvent.GetMemberPropertyName(), PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive);
+    PostPropertyChanged(PropertyChangedEvent.GetMemberPropertyName(), PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive);
+}
 
-    if (PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive)
+void
+UOdysseyPainterEditorTool::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
+{
+    if (iIsInteractive)
         return;
 
-    PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    PropertyChanged(iPropertyName);
 }
 
 void
@@ -262,6 +274,12 @@ UOdysseyPainterEditorTool::PostTransacted(const FTransactionObjectEvent& iTransa
     const TArray<FName>& changedPropertyNames = iTransactionEvent.GetChangedProperties();
     for ( const FName& propertyName : changedPropertyNames )
     {
-        PropertyChanged(propertyName);
+        PropertyChanged(propertyName, propertyName, false);
+        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
+            [this, propertyName](bool iIsRedo)
+            {
+                PostPropertyChanged(propertyName, false);
+            }
+        );
     }
 }

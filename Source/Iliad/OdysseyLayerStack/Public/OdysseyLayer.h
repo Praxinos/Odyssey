@@ -184,7 +184,7 @@ public:
      *
      */
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
-    UOdysseyLayerStack* GetLayerStack() const;
+    virtual UOdysseyLayerStack* GetLayerStack() const;
 
     UFUNCTION(BlueprintPure, Category="Odyssey|Layer")
     bool IsActivatedRecursively() const;
@@ -197,6 +197,14 @@ public:
     virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
     virtual TSharedPtr<IOdysseyImageRenderer> BuildImageRenderer(IOdysseyImageRenderer::eRenderType iRenderType, int iFrame, FImageRendererFilter iFilter = FImageRendererFilter()) const override;
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;
+
+    public:
+    #ifdef WITH_EDITOR
+        virtual TArray<FName> GetRows() const;
+        virtual int GetRowHeight(FName iSubRowName) const;
+        virtual bool IsRowVisible(FName iSubRowName) const;
+        virtual FMargin GetRowPadding(FName iSubRowName) const;
+    #endif
 
 protected:
     //Property changed methods
@@ -211,6 +219,7 @@ protected:
     virtual void BlendModeChanged();
 
     virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive);
+    virtual void PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive);
 
 public:
     // UObject overrides

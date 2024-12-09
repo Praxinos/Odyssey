@@ -7,6 +7,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyLayerImageRenderer.h"
 #include "Misc/TransactionObjectEvent.h"
+#include "Misc/OdysseyUndoDelegates.h"
 
 UOdysseyLayer::FOnNameChanged&
 UOdysseyLayer::OnNameChanged()
@@ -164,70 +165,46 @@ UOdysseyLayer::Merge(const TArray<UOdysseyLayer*>& Layers)
 void
 UOdysseyLayer::NameChanged()
 {
-    OnNameChanged().Broadcast(this);
 }
 
 void
 UOdysseyLayer::IsActivatedChanged()
 {
-    if (Parent)
-        Parent->ImageRenderingCompositionChanged();
-    OnIsActivatedChanged().Broadcast(this);
 }
 
 void
 UOdysseyLayer::IsLockedChanged()
 {
-    OnIsLockedChanged().Broadcast(this);
 }
 
 void
 UOdysseyLayer::DisplayChildrenChanged()
 {
-    OnDisplayChildrenChanged().Broadcast(this);
 }
 
 void
 UOdysseyLayer::DisplayOptionsChanged()
 {
-    OnDisplayOptionsChanged().Broadcast(this);
 }
 
 void
 UOdysseyLayer::ParentChanged()
 {
-    UOdysseyLayerStack* layerStack = GetLayerStack();
-    if ( !layerStack )
-        return;
-
-    OnParentChanged().Broadcast(this);
-    layerStack->HierarchyChanged();
 }
 
 void
 UOdysseyLayer::ChildrenChanged()
 {
-    UOdysseyLayerStack* layerStack = GetLayerStack();
-    if ( !layerStack )
-        return;
-
-    ImageRenderingCompositionChanged();
-    OnChildrenChanged().Broadcast(this);
-    layerStack->HierarchyChanged();
 }
 
 void
 UOdysseyLayer::OpacityChanged(bool iIsInteractive)
 {
-    OnOpacityChanged().Broadcast(this);
-    ImageRenderingChanged(iIsInteractive);
 }
 
 void
 UOdysseyLayer::BlendModeChanged()
 {
-    OnBlendModeChanged().Broadcast(this);
-    ImageRenderingChanged();
 }
 
 void
@@ -254,10 +231,67 @@ UOdysseyLayer::PropertyChanged(const FName& iPropertyName, const FName& iMemberP
 }
 
 void
+UOdysseyLayer::PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive)
+{
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Name) )
+    {
+        if (Parent)
+            Parent->ImageRenderingCompositionChanged();
+        OnNameChanged().Broadcast(this);
+    }
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsActivated) )
+    {
+        OnIsActivatedChanged().Broadcast(this);
+    }
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsLocked) )
+    {
+        OnIsLockedChanged().Broadcast(this);
+    }
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayChildren) )
+    {
+        OnDisplayChildrenChanged().Broadcast(this);
+    }
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, DisplayOptions) )
+    {
+        OnDisplayOptionsChanged().Broadcast(this);
+    }
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Parent) )
+    {
+        UOdysseyLayerStack* layerStack = GetLayerStack();
+        if ( !layerStack )
+            return;
+
+        OnParentChanged().Broadcast(this);
+        layerStack->HierarchyChanged();
+    }
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Children) )
+    {
+        UOdysseyLayerStack* layerStack = GetLayerStack();
+        if ( !layerStack )
+            return;
+
+        ImageRenderingCompositionChanged();
+        OnChildrenChanged().Broadcast(this);
+        layerStack->HierarchyChanged();
+    }
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode) )
+    {
+        OnBlendModeChanged().Broadcast(this);
+        ImageRenderingChanged();
+    }
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity) )
+    {
+        OnOpacityChanged().Broadcast(this);
+        ImageRenderingChanged(iIsInteractive);
+    }
+}
+
+void
 UOdysseyLayer::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
     PropertyChanged(PropertyChangedEvent.GetPropertyName(), PropertyChangedEvent.GetMemberPropertyName(), PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive );
+    PostPropertyChanged(PropertyChangedEvent.GetMemberPropertyName(), PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive);
 }
 
 void
@@ -272,6 +306,12 @@ UOdysseyLayer::PostTransacted(const FTransactionObjectEvent& iTransactionEvent)
     for ( const FName& propertyName : changedPropertyNames )
     {
         PropertyChanged(propertyName, propertyName, false);
+        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
+            [this, propertyName](bool iIsRedo)
+            {
+                PostPropertyChanged(propertyName, false);
+            }
+        );
     }
 }
 
@@ -386,3 +426,46 @@ UOdysseyLayer::OpacityBlueprintSetter(float Value)
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity), Value);
 }
+
+#ifdef WITH_EDITOR
+
+TArray<FName>
+UOdysseyLayer::GetRows() const
+{
+    return {
+        "Main",
+        "Blend"
+    };
+}
+
+int
+UOdysseyLayer::GetRowHeight(FName iSubRowName) const
+{
+    if (iSubRowName == "Main")
+        return 20;
+
+    if (iSubRowName == "Blend")
+        return 20;
+
+    return 0;
+}
+
+bool
+UOdysseyLayer::IsRowVisible(FName iSubRowName) const
+{
+    if (iSubRowName == "Main")
+        return true;
+
+    if (iSubRowName == "Blend")
+        return DisplayOptions;
+
+    return 0;
+}
+
+FMargin
+UOdysseyLayer::GetRowPadding(FName iSubRowName) const
+{
+    return FMargin(0.f, 0.f, 0.f, 2.f);
+}
+
+#endif

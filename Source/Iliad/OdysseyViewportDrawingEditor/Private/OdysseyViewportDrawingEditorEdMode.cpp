@@ -31,6 +31,7 @@
 #include "UObject/UObjectGlobals.h"
 #include "Editor/EditorPerProjectUserSettings.h"
 #include "MediaPlate.h"
+#include "SEditorViewport.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
@@ -84,8 +85,13 @@ FOdysseyViewportDrawingEditorEdMode::DrawHUD(FEditorViewportClient* ViewportClie
     if (!mViewportDrawingEditorExtension || !mViewportDrawingEditorExtension->IsPlaneComponent())
         return;
 
+    TSharedPtr<SWidget> viewportWidget = ViewportClient->GetEditorViewportWidget();
+    TSharedPtr<SWindow> window = FSlateApplication::Get().FindWidgetWindow(viewportWidget.ToSharedRef());
+
+    float scaleFactor = FSlateApplication::Get().GetApplicationScale() * window->GetNativeWindow()->GetDPIScaleFactor();
+
     FOdysseyHUDSystem::FDrawHUDParams params;
-    if (!mViewportDrawingEditorExtension->GetDrawHUDParams(View, Canvas, params))
+    if (!mViewportDrawingEditorExtension->GetDrawHUDParams(View, Canvas, scaleFactor, params))
         return;
 
     mEditor->HUDSystem()->DrawHUD(params);
@@ -186,18 +192,15 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
 
     if (UsesToolkits() && !Toolkit.IsValid())
     {
-        TSharedPtr<FOdysseyViewportDrawingEditorToolkit> viewportToolkit = MakeShared<FOdysseyViewportDrawingEditorToolkit>(mEditor.ToSharedRef(), this);
-        Toolkit = viewportToolkit;
-        viewportToolkit->Initialize(this, Owner->GetToolkitHost());
+        mViewportDrawingEditorToolkit = MakeShared<FOdysseyViewportDrawingEditorToolkit>(mEditor.ToSharedRef(), this);
+        Toolkit = mViewportDrawingEditorToolkit;
+        mViewportDrawingEditorToolkit->Initialize(this, Owner->GetToolkitHost());
 
-        mViewportDrawingEditorExtension = viewportToolkit->GetViewportDrawingExtension();
+        mViewportDrawingEditorExtension = mViewportDrawingEditorToolkit->GetViewportDrawingExtension();
 
         TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor").GetFirstLevelEditor();
         levelEditor->AppendCommands( Toolkit->GetToolkitCommands() );
     }
-
-    /* if (Toolkit)
-        StaticCastSharedPtr<FOdysseyModeToolkit>(Toolkit)->ExtendMenu(); */
 
     // Change the engine to draw selected objects without a color boost, but unselected objects will
     // be darkened slightly.  This just makes it easier to paint on selected objects without the
@@ -240,12 +243,6 @@ void FOdysseyViewportDrawingEditorEdMode::Enter()
 
 void FOdysseyViewportDrawingEditorEdMode::Exit()
 {
-    /** Finish up painting if we still are */
-    /*if (mViewportDrawingEditorPainter->GetOdysseyViewportDrawingEditorAdapter()->GetState() == eState::kIdleReady)
-    {
-        mViewportDrawingEditorPainter->FinishPainting();
-    }*/
-
     // Restore selection color
     GEngine->RestoreSelectedMaterialColor();
 
@@ -257,6 +254,7 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
     }
 
     mViewportDrawingEditorExtension = nullptr;
+    mViewportDrawingEditorToolkit = nullptr;
 
     //mViewportDrawingEditorPainter->Finalize();
     //delete mViewportDrawingEditorPainter;
@@ -267,6 +265,18 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
 
     // Call parent implementation
     FEdMode::Exit();
+}
+
+TSharedPtr<FOdysseyPainterEditor>
+FOdysseyViewportDrawingEditorEdMode::GetEditor() const
+{
+    return mEditor;
+}
+
+TSharedPtr<FOdysseyViewportDrawingEditorToolkit>
+FOdysseyViewportDrawingEditorEdMode::GetViewportDrawingEditorToolkit() const
+{
+    return mViewportDrawingEditorToolkit;
 }
 
 #undef LOCTEXT_NAMESPACE

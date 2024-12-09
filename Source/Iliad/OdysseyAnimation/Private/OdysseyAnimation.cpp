@@ -10,6 +10,8 @@
 #include "LayerStack/Layers/LayerImageRaster/OdysseyAnimationLayerImageRaster.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "OdysseyRasterBlockMutator.h"
+#include "OdysseyAnimationProxy.h"
+#include "Misc/OdysseyUndoDelegates.h"
 
 #include "Misc/TransactionObjectEvent.h"
 
@@ -149,6 +151,7 @@ UOdysseyAnimation::PostEditChangeProperty( FPropertyChangedEvent& PropertyChange
         return;
 
     PropertyChanged(PropertyChangedEvent.GetPropertyName());
+    PostPropertyChanged(PropertyChangedEvent.GetPropertyName());
 }
 
 void
@@ -163,6 +166,12 @@ UOdysseyAnimation::PostTransacted(const FTransactionObjectEvent& iTransactionEve
     for ( const FName& propertyName : changedPropertyNames )
     {
         PropertyChanged(propertyName);
+        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
+            [this, propertyName](bool iIsRedo)
+            {
+                PostPropertyChanged(propertyName);
+            }
+        );
     }
 }
 
@@ -223,22 +232,16 @@ void
 UOdysseyAnimation::PropertyChanged(const FName& iPropertyName)
 {
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame) )
-        CurrentFrameChanged();
+        CurrentFrame = FMath::Max(0, CurrentFrame);
+}
+
+void
+UOdysseyAnimation::PostPropertyChanged(const FName& iPropertyName)
+{
+    if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame) )
+        OnCurrentFrameChanged().Broadcast(this);
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, FramesPerSecond) )
-        FramesPerSecondChanged();
-}
-
-void
-UOdysseyAnimation::CurrentFrameChanged()
-{
-    CurrentFrame = FMath::Max(0, CurrentFrame);
-    OnCurrentFrameChanged().Broadcast(this);
-}
-
-void
-UOdysseyAnimation::FramesPerSecondChanged()
-{
-    OnFramesPerSecondChanged().Broadcast(this);
+        OnFramesPerSecondChanged().Broadcast(this);
 }
 
 /* UMediaSource overrides

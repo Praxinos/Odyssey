@@ -7,6 +7,7 @@
 #include "Widgets/SOdysseyViewportDrawingEditorMasterTab.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "TextureEditor/OdysseyTextureEditorExtension.h"
+#include "ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
@@ -15,11 +16,11 @@ FOdysseyViewportDrawingEditorToolkit::FOdysseyViewportDrawingEditorToolkit(TShar
     , mEdMode(iEdMode)
 {
     TSharedRef<FOdysseyTextureEditorExtension> textureExtension = MakeShared<FOdysseyTextureEditorExtension>(&iEditor.Get());
-    TSharedRef<FOdysseyAnimationEditorExtension> animationExtension = MakeShared<FOdysseyAnimationEditorExtension>(&iEditor.Get());
+    mAnimationExtension = MakeShared<FOdysseyAnimationEditorExtension>(&iEditor.Get());
     mViewportDrawingExtension = MakeShared<FOdysseyViewportDrawingEditorExtension>(&iEditor.Get());
 
     iEditor->AddExtension(textureExtension);
-    iEditor->AddExtension(animationExtension);
+    iEditor->AddExtension(mAnimationExtension.ToSharedRef());
     iEditor->AddExtension(mViewportDrawingExtension.ToSharedRef());
 }
 
@@ -56,10 +57,16 @@ FOdysseyViewportDrawingEditorToolkit::GetEditorMode() const
     return mEdMode;
 }
 
-TSharedRef<FOdysseyViewportDrawingEditorExtension>
+TSharedPtr<FOdysseyViewportDrawingEditorExtension>
 FOdysseyViewportDrawingEditorToolkit::GetViewportDrawingExtension() const
 {
-    return mViewportDrawingExtension.ToSharedRef();
+    return mViewportDrawingExtension;
+}
+
+TSharedPtr<FOdysseyAnimationEditorExtension>
+FOdysseyViewportDrawingEditorToolkit::GetAnimationExtension() const
+{
+    return mAnimationExtension;
 }
 
 void

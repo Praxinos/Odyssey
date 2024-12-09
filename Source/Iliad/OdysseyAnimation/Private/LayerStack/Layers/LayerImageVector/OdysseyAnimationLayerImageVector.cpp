@@ -19,6 +19,8 @@
 #include "ScopedTransaction.h"
 #include "UObject/DevObjectVersion.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorObject.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 
@@ -128,17 +130,11 @@ UOdysseyAnimationLayerImageVector::Serialize(FArchive& Ar)
 void
 UOdysseyAnimationLayerImageVector::IsColoredChanged()
 {
-    OnIsColoredChanged().Broadcast(this);
-
-    ImageRenderingChanged();
 }
 
 void
 UOdysseyAnimationLayerImageVector::IsWireframeChanged()
 {
-    OnIsWireframeChanged().Broadcast(this);
-
-    ImageRenderingChanged();
 }
 
 void
@@ -150,6 +146,23 @@ UOdysseyAnimationLayerImageVector::PropertyChanged(const FName& iPropertyName, c
         IsColoredChanged();
     if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsWireframe))
         IsWireframeChanged();
+}
+
+void
+UOdysseyAnimationLayerImageVector::PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive)
+{
+    Super::PostPropertyChanged(iPropertyName, iIsInteractive);
+
+    if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsColored))
+    {
+        OnIsColoredChanged().Broadcast(this);
+        ImageRenderingChanged();
+    }
+    if(iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsWireframe))
+    {
+        OnIsWireframeChanged().Broadcast(this);
+        ImageRenderingChanged();
+    }
 }
 
 TSharedPtr<IOdysseyImageRenderer>

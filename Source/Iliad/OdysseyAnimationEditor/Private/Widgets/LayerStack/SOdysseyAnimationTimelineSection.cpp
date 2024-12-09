@@ -2,16 +2,14 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineSection.h"
-#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+
+#include "OdysseyAnimationEditorTimelinePosition.h"
 
 void
-SOdysseyAnimationTimelineSection::Construct(
-    const FArguments& iArgs,
-    FOdysseyAnimationEditorExtension* iExtension
-)
+SOdysseyAnimationTimelineSection::Construct(const FArguments& iArgs)
 {
-    mExtension = iExtension;
     mWidthInFrames = iArgs._WidthInFrames;
+    mTimelinePosition = iArgs._TimelinePosition;
 
     ChildSlot
     [
@@ -27,16 +25,10 @@ SOdysseyAnimationTimelineSection::Construct(
     ];
 }
 
-FOdysseyAnimationEditorExtension*
-SOdysseyAnimationTimelineSection::GetExtension() const
-{
-    return mExtension;
-}
-
 FOptionalSize
 SOdysseyAnimationTimelineSection::GetSectionWidth() const
 {
-    return mWidthInFrames.Get() * mExtension->Timeline()->GetFrameWidth();
+    return mWidthInFrames.Get() * mTimelinePosition->GetFrameSize();
 }
 
 void

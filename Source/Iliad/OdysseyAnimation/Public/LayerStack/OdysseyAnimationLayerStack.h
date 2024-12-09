@@ -5,6 +5,7 @@
 
 #include "OdysseyLayerStack.h"
 #include "Misc/OdysseyHandle.h"
+#include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
 
 #include <ULIS>
 
@@ -37,4 +38,8 @@ public:
 
 public:
     virtual TArray<::ULIS::FRectI> GetImageRenderingRects() const override;
+    TSharedRef<FOdysseyAnimationCellSelection> GetCellSelection() const;
+
+private:
+    TSharedRef<FOdysseyAnimationCellSelection> mCellSelection;
 };

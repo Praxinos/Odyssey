@@ -9,6 +9,7 @@
 #include "OdysseyAnimationCell.generated.h"
 
 class UOdysseyAnimationLayer;
+class FOdysseyRasterBlock;
 
 USTRUCT(BlueprintType)
 struct FOdysseyAnimationCellOutOfPegs
@@ -83,6 +84,7 @@ protected:
     void ExposureChanged(bool iIsInteractive);
 
     virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive);
+    virtual void PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive);
 
 private:
     UFUNCTION(BlueprintSetter)

@@ -27,6 +27,7 @@ public class OdysseyLayerStackEditor : ModuleRules
                 "Core",
                 "CoreUObject",
                 "EditorStyle",
+                "EditorWidgets",
                 "Engine",
                 "InputCore",
                 "Slate",

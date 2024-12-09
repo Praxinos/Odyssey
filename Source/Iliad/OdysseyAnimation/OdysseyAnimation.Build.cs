@@ -59,6 +59,7 @@ namespace UnrealBuildTool.Rules
                     "InputCore",
                     "Media",
                     "MediaAssets",
+                    "MovieScene",
                     "OdysseyCore",
                     "OdysseyImaging",
                     "OdysseyLayerStack",

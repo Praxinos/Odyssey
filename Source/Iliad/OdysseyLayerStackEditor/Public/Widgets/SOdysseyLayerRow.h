@@ -7,6 +7,7 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/Views/STableRow.h"
+#include "Widgets/SOdysseyLayerRowBase.h"
 
 class SOdysseyLayerStackTreeView;
 
@@ -14,38 +15,31 @@ class SOdysseyLayerStackTreeView;
  * Implements a layer row widget
  */
 class ODYSSEYLAYERSTACKEDITOR_API SOdysseyLayerRow
-    : public SMultiColumnTableRow<UOdysseyLayer*>
+    : public SOdysseyLayerRowBase
 {
 public:
-    SLATE_BEGIN_ARGS(SOdysseyLayerRow)
-        {}
-    SLATE_END_ARGS()
+    SOdysseyLayerRow();
 
-public:
     // Construction / Destruction
     void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyLayerStackTreeView>& iOwnerTableView, UOdysseyLayer* iLayer);
 
 public:
-    //Getters
-    UOdysseyLayer* GetLayer();
-
     //Commands
     void Rename();
 
-    TSharedPtr<SOdysseyLayerStackTreeView> GetTreeView() const;
-
 protected:
-    //SMultiColumnTableRow overrides
-    virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
-    virtual const FSlateBrush* GetBorder() const override;
+    virtual TSharedRef<SWidget> GenerateWidget( const FName& iRow, const FName& iColumn ) override;
+    virtual FMargin GetColumnPadding( FName iColumn ) const override;
 
-protected:
-    virtual TSharedRef<SWidget> GenerateHeaderWidget();
-    virtual TSharedRef<SWidget> GenerateOptionsWidget();
-    TSharedRef<SWidget> GenerateExpandableHeaderWidget();
-    TSharedRef<SWidget> GenerateDisplayOptionsWidget();
-    TSharedRef<SWidget> GenerateIsActivatedWidget();
-    TSharedRef<SWidget> GenerateIsLockedWidget();
+    TSharedRef<SWidget> GenerateMainRowIsActivatedWidget();
+    TSharedRef<SWidget> GenerateMainRowIsLockedWidget();
+    TSharedRef<SWidget> GenerateMainRowDisplayOptionsWidget();
+
+    TSharedRef<SWidget> GenerateMainRowHeaderWidget();
+    TSharedRef<SWidget> GenerateLayerNameWidget();
+    virtual TArray<TSharedPtr<SWidget>> GenerateMainRowHeaderOptionWidgets();
+
+    TSharedRef<SWidget> GenerateBlendRowHeaderWidget();
 
     void OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState);
     ECheckBoxState GetIsActivatedCheckBoxState() const;
@@ -55,52 +49,23 @@ protected:
     void OnLayerNameCommited(const FText& iText, ETextCommit::Type iType);
     FText GetLayerName() const;
     FSlateFontInfo GetLayerNameFont() const;
-    bool DisplayOptions() const;
 
-    EVisibility OptionsWidgetVisibility() const;
+    virtual FReply OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<SOdysseyLayerStackTreeView> iTreeView) override;
 
+private:
+    void OnBlendModeComboBoxChanged(int32 iValue, ESelectInfo::Type iSelectInfo);
+    void OnOpacityValueChanged(int iValue);
+    void OnOpacityValueCommitted(int iValue, ETextCommit::Type iType);
+    void OnOpacityBeginSliderMovement();
+    void OnOpacityEndSliderMovement(int iValue);
 
-
-
-
-    /**
-     * @brief Called when an Item is dragged over the row
-     * Returns the dropzone or nothing
-     *
-     * @param iEvent
-     * @param iDropZone
-     * @param iLayer
-     * @return TOptional<EItemDropZone>
-     */
-    TOptional<EItemDropZone> OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iDropZone, UOdysseyLayer* iLayer);
-
-    /**
-     * @brief Called when an Item is drop over the row
-     *
-     * @param iEvent
-     * @param iDropZone
-     * @param iLayer
-     * @return TOptional<EItemDropZone>
-     */
-    FReply OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iDropZone, UOdysseyLayer* iLayer);
-
-    /**
-     * @brief Called when this row begins to be draged
-     *
-     * @param iGeometry
-     * @param iEvent
-     * @return FReply
-     */
-    FReply OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<SOdysseyLayerStackTreeView> iTreeView);
-
+    EVisibility GetCollapsedOpacityVisibility() const;
 
 private:
     void OnDisplayOptionsCheckBoxStateChanged(ECheckBoxState iState);
     ECheckBoxState GetDisplayOptionsCheckBoxState() const;
-    EItemDropZone ComputeItemDropZoneForLeaf(FVector2D iLocalPointerPos, FVector2D iLocalSize, bool iCanHaveChildren, bool iIsExpanded);
 
 private:
-    UOdysseyLayer* mLayer = nullptr;
     TSharedPtr<SInlineEditableTextBlock> mNameWidget = nullptr;
-    TWeakPtr<SOdysseyLayerStackTreeView> mTreeView;
+    FText mSetOpacityTransactionName;
 };

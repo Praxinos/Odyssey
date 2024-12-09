@@ -7,6 +7,7 @@
 #include "Misc/TransactionObjectEvent.h"
 #include "OdysseyAnimation.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "Misc/OdysseyUndoDelegates.h"
 
 UOdysseyAnimationLayer*
 UOdysseyAnimationCell::GetLayer() const
@@ -95,8 +96,6 @@ UOdysseyAnimationCell::OnThumbnailDirtied()
 void
 UOdysseyAnimationCell::OutOfPegsChanged(bool iIsInteractive)
 {
-    mOnOutOfPegsChanged.Broadcast(iIsInteractive);
-    ImageRenderingChanged(iIsInteractive);
 }
 
 void
@@ -104,7 +103,6 @@ UOdysseyAnimationCell::ExposureChanged(bool iIsInteractive)
 {
     if (GetLayer())
         GetLayer()->InvalidateCellsFrameRanges();
-    ImageRenderingCompositionChanged(iIsInteractive);
 }
 
 void
@@ -122,10 +120,26 @@ UOdysseyAnimationCell::PropertyChanged(const FName& iPropertyName, const FName& 
 }
 
 void
+UOdysseyAnimationCell::PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive)
+{
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, OutOfPegs))
+    {
+        mOnOutOfPegsChanged.Broadcast(iIsInteractive);
+        ImageRenderingChanged(iIsInteractive);
+    }
+
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure))
+    {
+        ImageRenderingCompositionChanged(iIsInteractive);
+    }
+}
+
+void
 UOdysseyAnimationCell::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
     PropertyChanged(PropertyChangedEvent.GetPropertyName(), PropertyChangedEvent.GetMemberPropertyName(), PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive);
+    PostPropertyChanged(PropertyChangedEvent.GetMemberPropertyName(), PropertyChangedEvent.ChangeType & EPropertyChangeType::Interactive);
 }
 
 void
@@ -140,6 +154,12 @@ UOdysseyAnimationCell::PostTransacted(const FTransactionObjectEvent& iTransactio
     for ( const FName& propertyName : changedPropertyNames )
     {
         PropertyChanged(propertyName, propertyName, false);
+        FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
+            [this, propertyName](bool iIsRedo)
+            {
+                PostPropertyChanged(propertyName, false);
+            }
+        );
     }
 }
 

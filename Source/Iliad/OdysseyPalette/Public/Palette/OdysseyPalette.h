@@ -198,6 +198,7 @@ protected:
     void CurrentEntryChanged();
     void SetsChanged();
     virtual void PropertyChanged(const FName& iPropertyName);
+    virtual void PostPropertyChanged(const FName& iPropertyName);
 
 public:
     // UObject overrides

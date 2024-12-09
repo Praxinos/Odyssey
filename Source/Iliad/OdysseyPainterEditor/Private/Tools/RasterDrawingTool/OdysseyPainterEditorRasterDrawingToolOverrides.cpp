@@ -6,6 +6,6 @@
 UOdysseyPainterEditorRasterDrawingToolOverrides::UOdysseyPainterEditorRasterDrawingToolOverrides()
     : bOverride_Shape            ( false )
     , bOverride_SubPixel        ( false )
-    , Shape                      ( EOdysseyShape::kFreehand )
+    , Shape                      ( EOdysseyShapeType::kFreehand )
     , SubPixel                  ( true )
 {}

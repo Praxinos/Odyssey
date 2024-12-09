@@ -90,10 +90,37 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnKeyUp( const FKey& iKey )
 }
 
 bool
-UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUpRaster( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock
-                                                             , const FOdysseyPoint& iPointInTexture
-                                                             , const FKey& iKey )
+UOdysseyPainterEditorRasterPaintBucketTool::OnMouseDown( const FOdysseyPoint& iPointInTexture
+                                                       , const FKey& iKey )
 {
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
+
+    return true; //prevent any level viewport actions if we get a left mouse down, because we apply the paint bucket on the following mouse up
+}
+
+bool
+UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
+                                                       , const FKey& iKey )
+{
+    if (iKey != EKeys::LeftMouseButton)
+        return false;
+
+    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
+    if (mediaProvider.IsLocked())
+        return false;
+
+    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
+    if( !hasRaster )
+        return false;
+
+    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
+    if( mediaRasters.IsEmpty() )
+        return false;
+
+    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
+    mPaintEngine.RasterBlock(rasterBlock);
+
     TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> paintBlock = mPaintEngine.PaintBlock();
     ::ULIS::eFormat format = paintBlock->Format();
     if (!paintBlock)
@@ -110,12 +137,12 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUpRaster( TSharedPtr<::ULIS::
     if (!sourceBlock)
         return false;
 
+    TSharedPtr<::ULIS::FBlock> block = rasterBlock->GetBlock();
     ::ULIS::FPixel sourceColor = sourceBlock->Pixel(iPointInTexture.x, iPointInTexture.y);
     ::ULIS::FColor dstColor = GetEditor()->PaintColor().GetValue();
     dstColor.SetAlphaF(BlendParameters.Opacity / 100.f);
     TSharedPtr<::ULIS::FBlock> sourceMaskBlock = CreateSourceMaskBlock(sourceBlock, sourceColor);
-    TSharedPtr<::ULIS::FBlock> maskBlock = MakeShared<::ULIS::FBlock>(iBlock->Width(), iBlock->Height(), ::ULIS::Format_G8);
-
+    TSharedPtr<::ULIS::FBlock> maskBlock = MakeShared<::ULIS::FBlock>(block->Width(), block->Height(), ::ULIS::Format_G8);
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(::ULIS::Format_G8);
 
@@ -159,7 +186,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUpRaster( TSharedPtr<::ULIS::
 
     if (IncludeColors.Num() > 0)
     {
-        TSharedPtr<::ULIS::FBlock> tmpMaskBlock = MakeShared<::ULIS::FBlock>(iBlock->Width(), iBlock->Height(), ::ULIS::Format_G8);
+        TSharedPtr<::ULIS::FBlock> tmpMaskBlock = MakeShared<::ULIS::FBlock>(block->Width(), block->Height(), ::ULIS::Format_G8);
         ctx.Clear(*tmpMaskBlock);
         ctx.Finish();
 
@@ -197,30 +224,6 @@ UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUpRaster( TSharedPtr<::ULIS::
     GEditor->EndTransaction();
 
     return true;
-}
-
-bool
-UOdysseyPainterEditorRasterPaintBucketTool::OnMouseUp( const FOdysseyPoint& iPointInTexture
-                                                       , const FKey& iKey )
-{
-    if (iKey != EKeys::LeftMouseButton)
-        return false;
-
-    FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
-    if (mediaProvider.IsLocked())
-        return false;
-
-    bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
-    if( !hasRaster )
-        return false;
-
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = mediaProvider.GetOrCreateMedias<FOdysseyMediaRaster>();
-    if( mediaRasters.IsEmpty() )
-        return false;
-
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
-    mPaintEngine.RasterBlock(rasterBlock);
-    return OnMouseUpRaster( rasterBlock->GetBlock(), iPointInTexture, iKey );
 }
 
 void UOdysseyPainterEditorRasterPaintBucketTool::ExtendContextMenu(FMenuBuilder& iBuilder, const FOdysseyPoint& iPointInTexture, const FKey& iKey)

@@ -560,6 +560,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
                 .SetInactiveHoveredBrush(FSlateColorBrush(selectedInactiveRow))
                 .SetActiveHighlightedBrush(FSlateColorBrush(selectedParentRow)) // This is the parent hightlight
                 .SetInactiveHighlightedBrush(FSlateColorBrush(selectedParentRow))// This is the parent highlight
+                //.SetDropIndicator_Above(const FSlateBrush& InValue)
+                //.SetDropIndicator_Onto(const FSlateBrush& InValue)
+                //.SetDropIndicator_Below(const FSlateBrush& InValue)
         );
     }
 
@@ -849,6 +852,26 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedHoveredImage(FSlateColorBrush(FLinearColor(1, 1, 1, 0.25)))
         .SetCheckedPressedImage(FSlateColorBrush(FLinearColor::Transparent))
     );
+
+    Set("Sequencer.AnimationComponentTrack.DisplayLayersToggle", FCheckBoxStyle()
+        .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
+        .SetBorderBackgroundColor(FSlateColor::UseSubduedForeground())
+        .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)
+        .SetUncheckedImage(*FAppStyle::Get().GetBrush("TreeArrow_Collapsed"))
+        .SetUncheckedHoveredImage(*FAppStyle::Get().GetBrush("TreeArrow_Collapsed_Hovered"))
+        .SetUncheckedPressedImage(*FAppStyle::Get().GetBrush("TreeArrow_Collapsed_Hovered"))
+        .SetCheckedImage(*FAppStyle::Get().GetBrush("TreeArrow_Expanded"))
+        .SetCheckedHoveredImage(*FAppStyle::Get().GetBrush("TreeArrow_Expanded_Hovered"))
+        .SetCheckedPressedImage(*FAppStyle::Get().GetBrush("TreeArrow_Expanded_Hovered"))
+    );
+
+    Set("Shapes.None", new IMAGE_BRUSH_SVG("OdysseyShapes/none", mIcon16x16));
+    Set("Shapes.Freehand", new IMAGE_BRUSH_SVG("OdysseyShapes/freehand", mIcon16x16));
+    Set("Shapes.Line", new IMAGE_BRUSH_SVG("OdysseyShapes/line", mIcon16x16));
+    Set("Shapes.Rectangle", new IMAGE_BRUSH_SVG("OdysseyShapes/rectangle", mIcon16x16));
+    Set("Shapes.Polygon", new IMAGE_BRUSH_SVG("OdysseyShapes/polygon", mIcon16x16));
+    Set("Shapes.Ellipse", new IMAGE_BRUSH_SVG("OdysseyShapes/ellipse", mIcon16x16));
+    Set("Shapes.Bezier", new IMAGE_BRUSH_SVG("OdysseyShapes/bezier", mIcon16x16));
 #endif
 }
 

@@ -5,18 +5,24 @@
 
 #include "CoreMinimal.h"
 
-class FOdysseyAnimationEditorExtension;
+class UOdysseyAnimation;
+class UOdysseyAnimationPlayer;
+class FOdysseyAnimationEditorTimelinePosition;
+
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineHeader
     : public SCompoundWidget
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineHeader)
+        : _Animation(nullptr)
+        , _Player(nullptr)
     {}
+        SLATE_ARGUMENT( UOdysseyAnimation*, Animation )
+        SLATE_ARGUMENT( UOdysseyAnimationPlayer*, Player )
+        SLATE_ARGUMENT( TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition )
     SLATE_END_ARGS()
 
-    void Construct(
-        const FArguments& InArgs,
-        FOdysseyAnimationEditorExtension* iExtension);
+    void Construct(const FArguments& InArgs);
 
     // SWidget interface
     virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
@@ -26,6 +32,9 @@ public:
     // End of SWidget interfacepublic:
 
 private:
+    UOdysseyAnimation* mAnimation;
+    UOdysseyAnimationPlayer* mPlayer;
+    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
+
     bool mIsScrubbing = false;
-    FOdysseyAnimationEditorExtension* mExtension;
 };

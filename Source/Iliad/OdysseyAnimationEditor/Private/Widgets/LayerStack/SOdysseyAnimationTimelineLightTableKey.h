@@ -9,6 +9,7 @@
 class UOdysseyAnimationLayer;
 class UOdysseyAnimationCell;
 class FOdysseyAnimationEditorExtension;
+class FOdysseyAnimationEditorTimelinePosition;
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineLightTableKey
     : public SCompoundWidget
@@ -19,22 +20,16 @@ public:
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineLightTableKey)
     {}
+        SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
         SLATE_ATTRIBUTE(UOdysseyAnimationCell*, Cell)
         SLATE_ATTRIBUTE(FOdysseyAnimationLightTableKey, Key)
         SLATE_EVENT(FOnKeyChanged, OnChanged)
         SLATE_EVENT(FOnKeyChanged, OnCommited)
     SLATE_END_ARGS()
 
-    void Construct(const FArguments& InArgs, FOdysseyAnimationEditorExtension* iExtension);
+    void Construct(const FArguments& InArgs);
 
 private:
-    bool IsOutOfPegsEnabled() const;
-    const FSlateBrush* GetOutOfPegsButtonImage() const;
-    void OnOutOfPegsCheckStateChanged(ECheckBoxState iValue);
-    ECheckBoxState IsOutOfPegsChecked() const;
-
-private:
-    FOdysseyAnimationEditorExtension* mExtension = nullptr;
     TAttribute<UOdysseyAnimationCell*> mCell;
     TAttribute<FOdysseyAnimationLightTableKey> mKey;
 };

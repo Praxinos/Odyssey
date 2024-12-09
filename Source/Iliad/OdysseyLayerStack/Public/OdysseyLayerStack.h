@@ -218,7 +218,8 @@ public:
 protected:
     //Property changed methods
     void CurrentLayerChanged();
-    virtual void PropertyChanged(const FName& iPropertyName);public:
+    virtual void PropertyChanged(const FName& iPropertyName);
+    virtual void PostPropertyChanged(const FName& iPropertyName);
 
 public:
     //Called by layers when there Parent or Children changed
@@ -243,6 +244,7 @@ public:
     virtual void PostTransacted(const FTransactionObjectEvent& TransactionEvent) override;
 
     virtual void PostInitProperties() override;
+    virtual void PostLoad() override;
 
 public:
     //FOdysseyImageRenderingAbility overrides

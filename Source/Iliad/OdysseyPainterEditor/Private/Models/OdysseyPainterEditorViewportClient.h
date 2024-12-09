@@ -163,6 +163,8 @@ private:
 
     bool                                    mIsMouseDown = false;
     FKey                                    mMouseButton;
+    FOdysseyPoint                           mMouseDownReference;
+    FVector2D                           mHUDMouseDownReference;
 
 
     TArray<FStylusState> mStylusStates;

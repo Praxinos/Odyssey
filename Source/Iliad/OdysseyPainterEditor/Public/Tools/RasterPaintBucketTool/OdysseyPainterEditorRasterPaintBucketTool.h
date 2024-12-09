@@ -49,14 +49,12 @@ public:
 
     virtual bool OnKeyDown( const FKey& iKey ) override;
     virtual bool OnKeyUp( const FKey& iKey ) override;
+    virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
     virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
     virtual void ExtendContextMenu(FMenuBuilder& iBuilder, const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent ) override;
 
     virtual EMouseCursor::Type GetMouseCursor() const override;
-
-    // Raster Mouse Up
-    bool OnMouseUpRaster( TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock, const FOdysseyPoint& iPointInTexture, const FKey& iKey );
 
     virtual void Commit() override;
     virtual TSharedRef<SWidget> CreateTopTabWidget() override;

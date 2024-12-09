@@ -6,8 +6,9 @@
 #include "CoreMinimal.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 
-class FOdysseyAnimationEditorExtension;
 class FOdysseyAnimationCellsMutator;
+class FOdysseyAnimationTimelineTool;
+class FOdysseyAnimationEditorTimelinePosition;
 /**
  * Implements a layer row widget
  */
@@ -20,6 +21,7 @@ public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationCells)
         : _ShowHandles(false)
         {}
+        SLATE_ARGUMENT(TSharedPtr<FOdysseyAnimationEditorTimelinePosition>, TimelinePosition)
         SLATE_EVENT(FOnCreateCellWidget, OnCreateCellWidget)
         SLATE_ATTRIBUTE(bool, ShowHandles)
     SLATE_END_ARGS()
@@ -30,7 +32,6 @@ public:
     SOdysseyAnimationCells();
     void Construct(
         const FArguments& iArgs,
-        FOdysseyAnimationEditorExtension* iExtension,
         class UOdysseyAnimationLayer* iLayer
     );
 
@@ -107,8 +108,9 @@ private:
     bool IsPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
 
 private:
-    FOdysseyAnimationEditorExtension* mExtension;
+    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
     class UOdysseyAnimationLayer* mAnimationLayer;
+    TSharedPtr<FOdysseyAnimationTimelineTool> mTool;
 
     //Cells creation management (add cells handles)
     FOnCreateCellWidget mOnCreateCellWidget;

@@ -4,7 +4,7 @@
 #pragma once
 
 class FOdysseyAnimationEditorExtension;
-class UOdysseyLayerStack;
+class UOdysseyAnimationLayerStack;
 class FUICommandList;
 class FOdysseyAnimationTimelineCellsShortcuts;
 class FOdysseyAnimationTimelineCellImageRasterShortcuts;
@@ -13,7 +13,7 @@ class FOdysseyAnimationTimelineCellImageStaggerShortcuts;
 class ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationTimelineShortcuts
 {
 public:
-    FOdysseyAnimationTimelineShortcuts(UOdysseyLayerStack* iLayerStack, FOdysseyAnimationEditorExtension* iAnimationExtension);
+    FOdysseyAnimationTimelineShortcuts(UOdysseyAnimationLayerStack* iLayerStack);
 
 public:
     TSharedRef<FUICommandList> GetCommandList() const;

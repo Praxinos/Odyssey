@@ -40,6 +40,7 @@ public class OdysseyViewportDrawingEditor : ModuleRules
         PrivateDependencyModuleNames.AddRange(
             new string[] {
                 "AppFramework",
+                "ContentBrowser",
                 "Core",
                 "CoreUObject",
                 "DesktopPlatform",
@@ -64,9 +65,9 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 "MeshPaint",
                 "MediaAssets",
                 "MediaPlate",
+                "MovieScene",
                 "OdysseyAnimation",
                 "OdysseyAnimationEditor",
-                "OdysseyAnimationPlayer",
                 "OdysseyCore",
                 "OdysseyBrush",
                 "OdysseyMeshPaintRendering",

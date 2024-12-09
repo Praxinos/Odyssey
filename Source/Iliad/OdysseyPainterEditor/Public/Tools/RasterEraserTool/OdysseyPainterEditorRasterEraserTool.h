@@ -54,23 +54,17 @@ public:
 
 public:
     // Getters
-    // Returns the Selected Shape
-    EOdysseyShape GetSelectedShape() const;
-
-    // Retuns the instance of the selected Shape
-    UOdysseyShape* GetSelectedShapeInstance() const;
-
-    FSimpleMulticastDelegate& OnShapeChanged();
     FSimpleMulticastDelegate& OnSizeChanged();
     FSimpleMulticastDelegate& OnOpacityChanged();
 
 public:
     //Properties changes
-    void SelectedShapeChanged();
     void SizeChanged();
     void OpacityChanged();
+    void ActiveShapeChanged();
 
-    virtual void PropertyChanged(const FName& iPropertyName) override;
+    virtual void PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive) override;
+    virtual void PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive) override;
 
 private:
     // Internal - Callbacks
@@ -93,13 +87,7 @@ private:
 protected:
     //Visible properties
     UPROPERTY(EditAnywhere, Category="Shape")
-    EOdysseyShape SelectedShape;
-
-    UPROPERTY(VisibleInstanceOnly, Category="Shape", Instanced, meta=(ShowInnerProperties))
-    class UOdysseyShape* SelectedShapeInstance;
-    // Hidden properties
-    UPROPERTY()
-    TMap<EOdysseyShape, class UOdysseyShape*> AvailableShapes;
+    FOdysseyShapes Shapes;
 
     UPROPERTY( EditAnywhere, Category="Parameters", meta = ( ClampMin = "1", UIMin = "1", LinearDeltaSensitivity = "15", Delta = "1", Multiple="1", DisplayPriority="1" ) )
     float   Size = 20.f;
@@ -132,7 +120,6 @@ protected:
     //---
 
     //Internal
-    FSimpleMulticastDelegate            mOnShapeChanged;
     FSimpleMulticastDelegate            mOnSizeChanged;
     FSimpleMulticastDelegate            mOnOpacityChanged;
 

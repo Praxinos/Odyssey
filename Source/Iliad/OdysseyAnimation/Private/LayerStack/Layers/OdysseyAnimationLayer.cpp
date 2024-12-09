@@ -42,6 +42,12 @@ UOdysseyAnimationLayer::GetAnimation() const
     return layerStack->GetAnimation();
 }
 
+UOdysseyAnimationLayerStack*
+UOdysseyAnimationLayer::GetLayerStack() const
+{
+    return Cast<UOdysseyAnimationLayerStack>(UOdysseyLayer::GetLayerStack());
+}
+
 FInt32Range
 UOdysseyAnimationLayer::GetFrameRange() const
 {
@@ -78,9 +84,6 @@ UOdysseyAnimationLayer::OnLightTableChanged()
 void
 UOdysseyAnimationLayer::LightTableChanged(bool iIsInteractive)
 {
-    ImageRenderingCompositionChanged(iIsInteractive); //Composition could change if lighttable or a key is activated/inactivated
-    ImageRenderingChanged(iIsInteractive); //ImageRendering changes without a composition change when any other param is changed
-    OnLightTableChanged().Broadcast();
 }
 
 void
@@ -88,31 +91,22 @@ UOdysseyAnimationLayer::CellsChanged(bool iIsInteractive)
 {
     UpdateCellsIndexInLayer();
     InvalidateCellsFrameRanges();
-
-    mOnCellsChanged.Broadcast();
-
-    ImageRenderingCompositionChanged(iIsInteractive);
-    UOdysseyLayer::OnMediaChanged().Broadcast();
 }
 
 void
 UOdysseyAnimationLayer::CellsOffsetChanged(bool iIsInteractive)
 {
     InvalidateCellsFrameRanges();
-    ImageRenderingCompositionChanged(iIsInteractive);
-    UOdysseyLayer::OnMediaChanged().Broadcast();
 }
 
 void
 UOdysseyAnimationLayer::PreBehaviourChanged()
 {
-    ImageRenderingCompositionChanged();
 }
 
 void
 UOdysseyAnimationLayer::PostBehaviourChanged()
 {
-    ImageRenderingCompositionChanged();
 }
 
 void
@@ -130,6 +124,38 @@ UOdysseyAnimationLayer::PropertyChanged(const FName& iPropertyName, const FName&
         CellsChanged(iIsInteractive);
     if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset))
         CellsOffsetChanged(iIsInteractive);
+}
+
+void
+UOdysseyAnimationLayer::PostPropertyChanged(const FName& iPropertyName, bool iIsInteractive)
+{
+    Super::PostPropertyChanged(iPropertyName, iIsInteractive);
+
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, PreBehaviour))
+    {
+        ImageRenderingCompositionChanged();
+    }
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, PostBehaviour))
+    {
+        ImageRenderingCompositionChanged();
+    }
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable))
+    {
+        ImageRenderingCompositionChanged(iIsInteractive); //Composition could change if lighttable or a key is activated/inactivated
+        ImageRenderingChanged(iIsInteractive); //ImageRendering changes without a composition change when any other param is changed
+        OnLightTableChanged().Broadcast();
+    }
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Cells))
+    {
+        mOnCellsChanged.Broadcast();
+        ImageRenderingCompositionChanged(iIsInteractive);
+        UOdysseyLayer::OnMediaChanged().Broadcast();
+    }
+    if (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, CellsOffset))
+    {
+        ImageRenderingCompositionChanged(iIsInteractive);
+        UOdysseyLayer::OnMediaChanged().Broadcast();
+    }
 }
 
 int
@@ -507,3 +533,41 @@ UOdysseyAnimationLayer::LighttableBlueprintSetter(FOdysseyAnimationLightTable Va
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayer, Lighttable), Value);
 }
+
+#ifdef WITH_EDITOR
+
+TArray<FName>
+UOdysseyAnimationLayer::GetRows() const
+{
+    TArray<FName> rows = UOdysseyLayer::GetRows();
+    rows.Add("Lighttable");
+    rows.Add("OutOfPegs");
+
+    return rows;
+}
+
+int
+UOdysseyAnimationLayer::GetRowHeight(FName iSubRowName) const
+{
+    if (iSubRowName == "Lighttable")
+        return 40;
+
+    if (iSubRowName == "OutOfPegs")
+        return 20;
+
+    return Super::GetRowHeight(iSubRowName);
+}
+
+bool
+UOdysseyAnimationLayer::IsRowVisible(FName iSubRowName) const
+{
+    if (iSubRowName == "Lighttable")
+        return DisplayOptions && HasLighttable && Lighttable.bIsActivated;
+
+    if (iSubRowName == "OutOfPegs")
+        return DisplayOptions && HasLighttable && Lighttable.bIsActivated;
+
+    return Super::IsRowVisible(iSubRowName);
+}
+
+#endif
