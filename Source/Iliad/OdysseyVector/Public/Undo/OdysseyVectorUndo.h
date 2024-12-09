@@ -598,6 +598,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
 
         void InvalidateEngineList( uint64 iInvalidationFlags );
 
+        void Update();
+
     protected:
         bool mApplied;
         std::list<FOdysseyVectorEngine*> mEngineList; // list of engines that need to be redrawn

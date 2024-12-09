@@ -1944,20 +1944,21 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
 
             if( ( drawingIndex != breakdownTargetDrawingIndex ) || breakdown->IsTargetVisible() )
             {
-                FInbetweenerDrawing* drawing = GetDrawing( drawingIndex );
+                //FInbetweenerDrawing* drawing = GetDrawing( drawingIndex );
 
                 if( inbetweenCell )
                 {
                     std::list<FOdysseyVectorObject*> newObjectList;
 
                     // change vertices coords before copying the object
-                    std::function<uint64(FOdysseyVectorObject*,uint64)> preProcess = [ this, drawing ]( FOdysseyVectorObject* vectorObject, uint64 copyFlags ) -> uint64
+                    std::function<uint64(FOdysseyVectorObject*,uint64)> preProcess = [ drawingIndex ]( FOdysseyVectorObject* vectorObject, uint64 copyFlags ) -> uint64
                     {
                         FOdysseyVectorTag* tag = vectorObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
 
                         if( tag )
                         {
                             FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+                            FInbetweenerDrawing* drawing = inbetweenerTag->GetDrawing( drawingIndex );
                             float scalingSq = inbetweenerTag->HasConstantWidth() ? 1.0f / ( drawing->scalingX
                                                                                           * drawing->scalingY ) : 1.0f;
                             // note: a surface grows or shrink at the square of the scaling factor.
@@ -1975,7 +1976,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
 
                             for( FInterpolatedPath& interpolatedPath : inbetweenerTag->mInterpolatedPathBuffer )
                             {
-                                BLMatrix2D pathWorldMatrix = mOwner->GetWorldMatrix();
+                                BLMatrix2D pathWorldMatrix = inbetweenerTag->GetOwner()->GetWorldMatrix();
                                 uint32 pointCount = interpolatedPath.mInterpolatedPointBuffer.size();
                                 uint32 skippedOffset = ( drawing->GetIndex() * pointCount );
                                 FOdysseyVectorPath* path = interpolatedPath.GetOriginalPath();

@@ -4,6 +4,7 @@
 #include "Undo/OdysseyVectorUndoBucketAdd.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorSharedEnv.h"
+#include "Misc/OdysseyUndoDelegates.h"
 
 FOdysseyVectorUndoBucketAdd::~FOdysseyVectorUndoBucketAdd()
 {
@@ -43,13 +44,8 @@ FOdysseyVectorUndoBucketAdd::Apply( UObject* iIgnored )
         paintGroup->AddBucket( mBucketArray[i] );
     }
 
-    // update invalidated objects
-    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    // request redraw
-    InvalidateEngineList( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -65,13 +61,8 @@ FOdysseyVectorUndoBucketAdd::Revert( UObject* iIgnored )
         paintGroup->RemoveBucket( mBucketArray[i] );
     }
 
-    // update invalidated objects
-    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    // request redraw
-    InvalidateEngineList( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

@@ -40,13 +40,8 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::Apply( UObject* iIgnore
         trajectorySnapshot.LoadAlteredState();
     }
 
-    // update invalidated objects
-    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    // request redraw
-    InvalidateEngineList( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -61,13 +56,8 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryShiftWaypoint::Revert( UObject* iIgnor
         trajectorySnapshot.LoadInitialState();
     }
 
-    // update invalidated objects
-    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    // request redraw
-    InvalidateEngineList( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

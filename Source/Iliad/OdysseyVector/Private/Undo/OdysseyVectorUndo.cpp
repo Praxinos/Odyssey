@@ -9,6 +9,8 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
+#include "Misc/OdysseyUndoDelegates.h"
 
 FOdysseyVectorUndo::~FOdysseyVectorUndo()
 {
@@ -31,6 +33,21 @@ void
 FOdysseyVectorUndo::Revert( UObject* iIgnored )
 {
     mApplied = false;
+}
+
+void
+FOdysseyVectorUndo::Update()
+{
+    // call callbacks if any (for refreshing GUI e.g)
+    FOdysseyUndoDelegates::Get().OnAfterUndoRedo().AddLambda(
+        [this]( bool iIsRedo )
+        {
+            // update invalidated objects
+            mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+            FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
+        }
+    );
 }
 
 void

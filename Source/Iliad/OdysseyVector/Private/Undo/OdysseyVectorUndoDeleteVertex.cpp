@@ -42,13 +42,8 @@ FOdysseyVectorUndoDeleteVertex::Apply( UObject* iIgnored )
         pathSnapshot.Restore();
     }
 
-    // update invalidated objects
-    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    // request redraw
-    InvalidateEngineList( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -62,13 +57,8 @@ FOdysseyVectorUndoDeleteVertex::Revert( UObject* iIgnored )
         pathSnapshot.Restore();
     }
 
-    // update invalidated objects
-    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    // request redraw
-    InvalidateEngineList( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

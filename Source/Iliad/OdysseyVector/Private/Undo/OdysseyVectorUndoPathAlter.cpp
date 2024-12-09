@@ -145,13 +145,8 @@ FOdysseyVectorUndoPathAlter::Apply( UObject* iIgnored )
         mAddedSegmentArray[i]->GetOwnerAsPath()->AddSegment( mAddedSegmentArray[i] );
     }
 
-    // update invalidated objects
-    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    // request redraw
-    InvalidateEngineList( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -191,13 +186,8 @@ FOdysseyVectorUndoPathAlter::Revert( UObject* iIgnored )
         mAddedPathArray[i]->GetParent()->RemoveChild( mAddedPathArray[i] );
     }
 
-    // update invalidated objects
-    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    // request redraw
-    InvalidateEngineList( 0 );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

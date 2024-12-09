@@ -87,11 +87,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Apply( UObject* iIgnored )
         inbetweenerTagsnapshot.LoadAlteredState();
     }
 
-    // update invalidated objects. Note: will request redraw
-    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -106,11 +103,8 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::Revert( UObject* iIgnored )
         inbetweenerTagsnapshot.LoadInitialState();
     }
 
-    // update invalidated objects. Note: will request redraw
-    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-    // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

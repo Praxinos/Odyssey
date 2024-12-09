@@ -59,11 +59,9 @@ FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::Apply( UObject* iIgno
     {
         breakdownSnapshot.LoadAlteredState();
     }
-    // update invalidated objects. Note: will request redraw
-    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -77,11 +75,9 @@ FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::Revert( UObject* iIgn
         breakdownSnapshot.RecordAlteredState(); // will run once
         breakdownSnapshot.LoadInitialState();
     }
-    // update invalidated objects. Note: will request redraw
-    mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    // call callbacks if any (for refreshing GUI e.g)
-    FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */
