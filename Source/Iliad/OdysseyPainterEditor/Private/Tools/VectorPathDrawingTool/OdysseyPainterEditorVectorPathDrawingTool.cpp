@@ -6,6 +6,7 @@
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "Undo/OdysseyVectorUndoPathAlter.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
@@ -362,8 +363,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGr
                                                               , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint32 width = vectorEngine->GetPreferredWidth();
-    uint32 height = vectorEngine->GetPreferredHeight();
+    uint32 width = vectorEngine->GetLayer()->GetWidth();
+    uint32 height = vectorEngine->GetLayer()->GetHeight();
     ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
     ::ULIS::FRectI imageRegion;
     uint64 notificationFlags = 0;
@@ -480,8 +481,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
 
     ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint32 imgW = vectorEngine->GetPreferredWidth(),
-           imgH = vectorEngine->GetPreferredHeight();
+    uint32 imgW = vectorEngine->GetLayer()->GetWidth();
+    uint32 imgH = vectorEngine->GetLayer()->GetHeight();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW;
 

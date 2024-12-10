@@ -9,6 +9,7 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorLayer.h"
 #include "Undo/OdysseyVectorUndoObjectTransform.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -124,8 +125,8 @@ UOdysseyPainterEditorVectorScenePanTool::Scale( FOdysseyVectorEngine* iEngine
 {
     BLPoint worldMouseCoordsBefore = iScene->GetWorldMatrix().mapPoint( mDownLocalMouseX, mDownLocalMouseY );
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint32 imageWidth = vectorEngine->GetPreferredWidth();
-    uint32 imageHeight = vectorEngine->GetPreferredHeight();
+    uint32 imageWidth = vectorEngine->GetLayer()->GetWidth();
+    uint32 imageHeight = vectorEngine->GetLayer()->GetHeight();
     double factor;
 
     factor = (double) iPointInTexture.deltaPosition.X / imageWidth;

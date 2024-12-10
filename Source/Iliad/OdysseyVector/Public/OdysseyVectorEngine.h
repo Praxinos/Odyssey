@@ -106,9 +106,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          */
         FOdysseyVectorEngine( IOdysseyVectorLayer* iLayer
                             , IOdysseyVectorCell* iCell
-                            , FOdysseyVectorRoot* iRoot
-                            , uint32 iPreferredWidth
-                            , uint32 iPreferredHeight );
+                            , FOdysseyVectorRoot* iRoot );
 
         /**
          * @brief Pick an object
@@ -213,8 +211,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                           , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                           , bool iSelectedOnly );
 
-        uint32 GetPreferredWidth();
-        uint32 GetPreferredHeight();
         IOdysseyVectorLayer* GetLayer();
         IOdysseyVectorCell* GetCell();
 
@@ -390,9 +386,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         BLImage* mBLMask;
         std::list<FOdysseyVectorHUD*> mHUDList;
         FOdysseyVectorGroup* mSelectionSpace;
-        FULISInvalidTileMap mInvalidTileMap;
-        uint32 mPreferredWidth;
-        uint32 mPreferredHeight;
+        //FULISInvalidTileMap mInvalidTileMap;
         std::vector<FHorizontalLine> mHorizontalLineBuffer;
         uint32 mProcessorCount;
         ::ULIS::FRectD mInvalidatedRect;

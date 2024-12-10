@@ -38,9 +38,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorSharedEnv : public FOdysseyVectorObject
 
         std::list<FOdysseyVectorTag*>& GetSharedTagList();
         const std::list<FOdysseyVectorTag*>& GetSharedTagList() const;
-
+        std::mutex& GetSharedTagMutex();
 
     private:
         std::list<FOdysseyVectorObject*> mSharedObjectList;
         std::list<FOdysseyVectorTag*> mSharedTagList;
+        std::mutex mSharedTagMutex;
 };

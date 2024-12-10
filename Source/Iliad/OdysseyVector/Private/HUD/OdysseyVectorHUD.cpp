@@ -11,6 +11,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorLayer.h"
 
 FPointQuadTree::~FPointQuadTree()
 {
@@ -174,8 +175,8 @@ FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorGroupPaint *iScene
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FPointQuadTreeEntry> pointQuadTreeEntryArray;
-    uint32 width = vectorEngine->GetPreferredWidth()
-         , height = vectorEngine->GetPreferredHeight();
+    uint32 width = vectorEngine->GetLayer()->GetWidth();
+    uint32 height = vectorEngine->GetLayer()->GetHeight();
     ::ULIS::FRectD screenRect;
 
     screenRect = ::ULIS::FRectD::FromXYWH( 0, 0, width, height );

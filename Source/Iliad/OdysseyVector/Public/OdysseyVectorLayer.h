@@ -19,4 +19,6 @@ class IOdysseyVectorLayer
         virtual IOdysseyVectorCell* GetLastCell() = 0;
         virtual IOdysseyVectorCell* GetFirstCell() = 0;
         virtual bool Contains( IOdysseyVectorCell* iCell ) = 0;
+        virtual uint32 GetWidth() = 0;
+        virtual uint32 GetHeight() = 0;
 };

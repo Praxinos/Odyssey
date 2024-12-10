@@ -7,6 +7,8 @@
 #include "HUD/OdysseyVectorHUD.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorTag.h"
+#include "OdysseyVectorLayer.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorRoot.h"
@@ -19,18 +21,14 @@ FOdysseyVectorEngine::~FOdysseyVectorEngine()
 
 FOdysseyVectorEngine::FOdysseyVectorEngine( IOdysseyVectorLayer* iLayer
                                           , IOdysseyVectorCell* iCell
-                                          , FOdysseyVectorRoot* iRoot
-                                          , uint32 iPreferredWidth
-                                          , uint32 iPreferredHeight )
+                                          , FOdysseyVectorRoot* iRoot )
     : mInvalidationFlags( 0 )
     , mRoot( iRoot )
     , mLayer( iLayer )
     , mCell( iCell )
     , mSelectionSpace( nullptr )
-    , mInvalidTileMap( 64, iPreferredWidth, iPreferredHeight )
-    , mPreferredWidth( iPreferredWidth )
-    , mPreferredHeight( iPreferredHeight )
-    , mInvalidatedRect( 0, 0, iPreferredWidth, iPreferredHeight )
+    //, mInvalidTileMap( 64, iCell->GetWidth(), iCell->GetHeight() )
+    , mInvalidatedRect( 0, 0, iLayer->GetWidth(), iLayer->GetHeight() )
 {
     // Configure the number of threads to use.
     mProcessorCount = FPlatformMisc::NumberOfCoresIncludingHyperthreads();
@@ -80,11 +78,13 @@ FOdysseyVectorEngine::GetSelectionSpace()
     return mSelectionSpace;
 }
 
+/*
 FULISInvalidTileMap&
 FOdysseyVectorEngine::GetInvalidTileMap()
 {
     return mInvalidTileMap;
 }
+*/
 
 BLImage*
 FOdysseyVectorEngine::GetBLMask()
@@ -96,18 +96,6 @@ void
 FOdysseyVectorEngine::SetBLMask( BLImage* iBLMask )
 {
     mBLMask = iBLMask;
-}
-
-uint32
-FOdysseyVectorEngine::GetPreferredWidth()
-{
-    return mPreferredWidth;
-}
-
-uint32
-FOdysseyVectorEngine::GetPreferredHeight()
-{
-    return mPreferredHeight;
 }
 
 BLImageData&
@@ -371,6 +359,10 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 
         if( scene->GetSharedEnv() )
         {
+            // Because the Proxy can run this function at anytime, we must also protect the access
+            // to the list of shared tags
+            scene->GetSharedEnv()->GetSharedTagMutex().lock();
+
             for ( FOdysseyVectorTag* tag : scene->GetSharedEnv()->GetSharedTagList() )
             {
                 FOdysseyVectorObject* tagOwner = tag->GetOwner();
@@ -381,6 +373,8 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
                     tag->Draw( scene, iBLContext, sanitizedRect, 1.0f, iDrawingFlags );
                 }
             }
+
+            scene->GetSharedEnv()->GetSharedTagMutex().unlock();
         }
 
         iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);

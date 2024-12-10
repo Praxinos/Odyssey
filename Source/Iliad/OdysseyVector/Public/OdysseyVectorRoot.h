@@ -38,9 +38,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorRoot : public FOdysseyVectorObject
          */
         FOdysseyVectorRoot( IOdysseyVectorLayer* iLayer
                           , IOdysseyVectorCell* iCell
-                          , FOdysseyVectorGroupPaint* iScene
-                          , uint32 iPreferredWidth
-                          , uint32 iPreferredHeight );
+                          , FOdysseyVectorGroupPaint* iScene );
 
         void SetScene( FOdysseyVectorGroupPaint* iScene );
         FOdysseyVectorGroupPaint* GetScene();

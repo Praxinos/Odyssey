@@ -5,6 +5,7 @@
 #include "OdysseyVector.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorVertex.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorIntersection.h"
@@ -359,8 +360,8 @@ FOdysseyVectorGroupPaint::MakeCanvasPath()
     if( vectorScene )
     {
         FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-        uint32 width  = vectorEngine->GetPreferredWidth();
-        uint32 height = vectorEngine->GetPreferredHeight();
+        uint32 width = vectorEngine->GetLayer()->GetWidth();
+        uint32 height = vectorEngine->GetLayer()->GetHeight();
         // Note: mCanvasPath has identity matrix
         BLPoint pt[4] = { BLPoint( 0    , 0      )
                         , BLPoint( width, 0      )

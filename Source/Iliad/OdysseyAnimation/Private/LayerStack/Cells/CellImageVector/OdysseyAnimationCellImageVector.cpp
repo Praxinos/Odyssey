@@ -57,9 +57,7 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
 
     mRoot = new FOdysseyVectorRoot( Cast<UOdysseyAnimationLayerImageVector>(GetLayer())
                                   , this
-                                  , new FOdysseyVectorGroupPaint( "Scene" )
-                                  , (double)animation->GetWidth()
-                                  , (double)animation->GetHeight() );
+                                  , new FOdysseyVectorGroupPaint( "Scene" ) );
 
     mVectorBlock->Init(mVectorBlockId, mRoot->GetEngine(), animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
 }
@@ -125,9 +123,7 @@ UOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
             UOdysseyAnimation* animation = GetAnimation();
             mRoot = new FOdysseyVectorRoot( layerImageVector
                                           , this
-                                          , new FOdysseyVectorGroupPaint( "Scene" )
-                                          , (double)animation->GetWidth()
-                                          , (double)animation->GetHeight() );
+                                          , new FOdysseyVectorGroupPaint( "Scene" ) );
             // The reading process needs a valid sharedenv as the top object.
             layerImageVector->GetSharedEnv()->AppendChild( mRoot );
         }
@@ -159,9 +155,7 @@ UOdysseyAnimationCellImageVector::OldSerialize(FArchive& Ar)
             UOdysseyAnimation* animation = GetAnimation();
             mRoot = new FOdysseyVectorRoot( layerImageVector
                                           , this
-                                          , new FOdysseyVectorGroupPaint( "Scene" )
-                                          , (double)animation->GetWidth()
-                                          , (double)animation->GetHeight() );
+                                          , new FOdysseyVectorGroupPaint( "Scene" ) );
             // The reading process needs a valid sharedenv as the top object.
             layerImageVector->GetSharedEnv()->AppendChild( mRoot );
         }

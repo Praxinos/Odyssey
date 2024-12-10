@@ -65,6 +65,8 @@ public:
     virtual IOdysseyVectorCell* GetFirstCell() override;
     virtual IOdysseyVectorCell* GetLastCell() override;
     virtual bool Contains( IOdysseyVectorCell* iCandidateCell )override;
+    virtual uint32 GetWidth() override;
+    virtual uint32 GetHeight() override;
 
 protected:
     void IsColoredChanged();

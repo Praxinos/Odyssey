@@ -13,6 +13,7 @@
 #include "OdysseyVectorTag.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorCell.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorObject.h"
 #include "Undo/OdysseyVectorUndoPointPosition.h"
@@ -123,13 +124,13 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorGrou
                                                             , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-    ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
-    ::ULIS::FRectI imageRegion;
+    ::ULIS::FRectD redrawRegion = { 0, 0, 0, 0 };
+    ::ULIS::FRectD imageRegion;
 
     if( mDragging == false )
     {
-        uint32 width = iEngine->GetPreferredWidth();
-        uint32 height = iEngine->GetPreferredHeight();
+        uint32 width = iEngine->GetLayer()->GetWidth();
+        uint32 height = iEngine->GetLayer()->GetHeight();
 
         imageRegion.x = 0;
         imageRegion.y = 0;
@@ -145,7 +146,9 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorGrou
 
     if( redrawRegion.Area() )
     {
-        iEngine->GetInvalidTileMap().Invalidate(redrawRegion);
+        iEngine->InvalidateRect( redrawRegion );
+
+        //iEngine->GetInvalidTileMap().Invalidate(redrawRegion);
         // redraw
         iScene->GetEngine()->Invalidate( 0 );
     }

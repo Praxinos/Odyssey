@@ -41,13 +41,25 @@ FOdysseyVectorSharedEnv::RemoveSharedObject( FOdysseyVectorObject* iVectorObject
 void
 FOdysseyVectorSharedEnv::AddSharedTag( FOdysseyVectorTag* iVectorTag )
 {
+    // Because the Proxy can run this function at anytime, we must alos protect the access
+    // to the list of shared tags
+    mSharedTagMutex.lock();
+
     mSharedTagList.push_back( iVectorTag );
+
+    mSharedTagMutex.unlock();
 }
 
 void
 FOdysseyVectorSharedEnv::RemoveSharedTag( FOdysseyVectorTag* iVectorTag )
 {
+    // Because the Proxy can run this function at anytime, we must alos protect the access
+    // to the list of shared tags
+    mSharedTagMutex.lock();
+
     mSharedTagList.remove( iVectorTag );
+
+    mSharedTagMutex.unlock();
 }
 
 std::list<FOdysseyVectorTag*>&
@@ -60,6 +72,12 @@ const std::list<FOdysseyVectorTag*>&
 FOdysseyVectorSharedEnv::GetSharedTagList() const
 {
     return mSharedTagList;
+}
+
+std::mutex&
+FOdysseyVectorSharedEnv::GetSharedTagMutex()
+{
+    return mSharedTagMutex;
 }
 
 FOdysseyVectorTag*

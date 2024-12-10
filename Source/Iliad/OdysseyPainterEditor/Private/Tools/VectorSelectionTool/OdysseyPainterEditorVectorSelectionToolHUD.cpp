@@ -6,6 +6,7 @@
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyPainterEditorVectorSelectionToolHUD::~FOdysseyPainterEditorVectorSelectionToolHUD()
 {
@@ -23,8 +24,8 @@ void
 FOdysseyPainterEditorVectorSelectionToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint32 width = vectorEngine->GetPreferredWidth();
-    uint32 height = vectorEngine->GetPreferredHeight();
+    uint32 width = vectorEngine->GetLayer()->GetWidth();
+    uint32 height = vectorEngine->GetLayer()->GetHeight();
 
     mBLSelectionMask.create( width, height, BL_FORMAT_A8 );
 

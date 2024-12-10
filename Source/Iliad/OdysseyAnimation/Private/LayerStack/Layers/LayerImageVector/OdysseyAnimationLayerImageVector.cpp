@@ -458,6 +458,20 @@ UOdysseyAnimationLayerImageVector::GetSharedEnv()
     return &mSharedEnv;
 }
 
+// Implements Interface IOdysseyVectorAnimationCell::GetWidth
+uint32
+UOdysseyAnimationLayerImageVector::GetWidth()
+{
+    return ( uint32 ) GetAnimation()->GetWidth();
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetHeight
+uint32
+UOdysseyAnimationLayerImageVector::GetHeight()
+{
+    return ( uint32 ) GetAnimation()->GetHeight();
+}
+
 // Implements Interface IOdysseyVectorAnimationCell::GetCellByIndex
 IOdysseyVectorCell*
 UOdysseyAnimationLayerImageVector::GetCellByIndex( uint32 iIndex )

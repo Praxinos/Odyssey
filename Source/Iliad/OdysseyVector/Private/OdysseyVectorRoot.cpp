@@ -6,11 +6,9 @@
 
 FOdysseyVectorRoot::FOdysseyVectorRoot( IOdysseyVectorLayer* iLayer
                                       , IOdysseyVectorCell* iCell
-                                      , FOdysseyVectorGroupPaint* iScene
-                                      , uint32 iPreferredWidth
-                                      , uint32 iPreferredHeight )
+                                      , FOdysseyVectorGroupPaint* iScene )
     : FOdysseyVectorObject("ROOT")
-    , mEngine ( iLayer, iCell, this, iPreferredWidth, iPreferredHeight )
+    , mEngine ( iLayer, iCell, this )
     , mScene ( nullptr )
 {
     bIsSystem = true;

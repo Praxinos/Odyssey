@@ -5,6 +5,7 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyPainterEditorVectorEraserToolHUD::~FOdysseyPainterEditorVectorEraserToolHUD()
 {
@@ -21,8 +22,8 @@ void
 FOdysseyPainterEditorVectorEraserToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint32 width = vectorEngine->GetPreferredWidth();
-    uint32 height = vectorEngine->GetPreferredHeight();
+    uint32 width = vectorEngine->GetLayer()->GetWidth();
+    uint32 height = vectorEngine->GetLayer()->GetHeight();
 
     mBLEraserMask.create( width, height, BL_FORMAT_A8 );
 
