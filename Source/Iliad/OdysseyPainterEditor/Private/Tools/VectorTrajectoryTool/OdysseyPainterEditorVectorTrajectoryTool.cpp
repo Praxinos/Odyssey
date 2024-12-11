@@ -388,8 +388,12 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
                                                             , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* engine = iScene->GetEngine();
+    static FVector2D deltaPositionCumul = FVector2D( 0.0f, 0.0f );
 
     mTrajectoryHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
+
+    // because we ignore some events, we need to accumulate the delta
+    deltaPositionCumul += iPointInTexture.deltaPosition;
 
     // For some reason we receive quite a lot of mouse events between 2 screen refresh, I don't know why
     // The issue is absent with the Ink driver. It is present with the Wintab and Native drivers. The simpliest
@@ -433,8 +437,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
                 BLMatrix2D ownerInverseWorldMatrix = trajectory->GetRoute()->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
                 uint32 endpointIndex = ( mPickedHandle == trajectory->GetHandle(0) ) ? 0 : 3;
                 uint32 handleIndex   = ( mPickedHandle == trajectory->GetHandle(0) ) ? 1 : 2;
-                BLPoint diff = ownerInverseWorldMatrix.mapVector( iPointInTexture.deltaPosition.X
-                                                                , iPointInTexture.deltaPosition.Y );
+                BLPoint diff = ownerInverseWorldMatrix.mapVector( deltaPositionCumul.X
+                                                                , deltaPositionCumul.Y );
                 ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
                 ::ULIS::FVec2D controlPosition = cubicBezier[endpointIndex];
                 ::ULIS::FVec2D handlePosition = cubicBezier[handleIndex];
@@ -453,6 +457,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
             }
         }
     }
+
+    deltaPositionCumul = FVector2D( 0.0f, 0.0f );
 
     // Updating via the Shared env allow multiple cells to be updated which is paramount
     // here because we may be on a cell different from the tag's starting cell

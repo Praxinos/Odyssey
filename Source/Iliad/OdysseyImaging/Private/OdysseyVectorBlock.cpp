@@ -35,13 +35,7 @@ FOdysseyVectorBlock::Init(const FGuid& iId, FOdysseyVectorEngine* iEngine, int i
     mWidth = iWidth;
     mHeight = iHeight;
     mFormat = iFormat;
-    mNeedsRender = true;
-
-    //Loading from cache could be wrong at this moment
-    //because it can store a state that was not saved
-    //so we clear the cache here to ensure the block renders from saved data first
-    FOdysseyDiskCache cache(FOdysseyVectorBlock_CACHE_NAME, FOdysseyVectorBlock_CACHE_VERSION);
-    cache.Remove(mId.ToString());
+    mNeedsRender = false;
 
     mEngine->OnInvalidateDelegate().AddRaw( this, &FOdysseyVectorBlock::OnVectorEngineInvalidate );
 }

@@ -62,7 +62,7 @@ FOdysseyVectorEngine::Invalidate( uint64 iExtraInvalidationFlags )
             mInvalidatedRect = ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
         }
 
-        mOnInvalidateDelegate.Broadcast( scene, mInvalidationFlags );
+        mOnInvalidateDelegate.Broadcast( scene, iExtraInvalidationFlags );
     }
 }
 

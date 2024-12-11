@@ -7,6 +7,7 @@
 #include "Undo/OdysseyVectorUndoPathAlter.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorLayer.h"
+#include "OdysseyVectorSharedEnv.h"
 #include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
@@ -261,11 +262,14 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
     uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW;
+                    | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                    | FOdysseyPainterEditor::UI_UPDATE_HUD; // re-creates the quadtree
 
     mPathTracer.Reset();
     mStitchedVertex = nullptr;
     mPathDrawingMode = ePathDrawingMode::Create;
+
+//UE_LOG(LogTemp, Warning, TEXT("Hello %f"), iPointInTexture.pressure );
 
     mTimeAtDown = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
@@ -344,14 +348,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
         //iScene->ClearSelection();
         //iScene->Select( path );
 
-        // update invalidated objects
-        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
-                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
-
-        vectorEngine->ResetHUD(); // re-creates the quadtree;
+        // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
     }
 
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
     oSignalFlags = retFlags;
 
     return true;
@@ -381,7 +382,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGr
 
     if( Stitch )
     {
+        // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
         iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
         oSignalFlags = notificationFlags;
     }
 }
@@ -395,12 +398,15 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
 
     uint64 notificationFlags = 0;
 
+//UE_LOG(LogTemp, Warning, TEXT("Hello %f"), iPointInTexture.pressure );
+
     // Left mouse button clicked
     // For some reason, iPointInTexture.keysDown.Find does not find the left button click for the first few events
     // when using the stylus so we use mPathTracer.GetPath instead
     //if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     if( mPathTracer.GetPath() )
     {
+        FOdysseyVectorPath* path = mPathTracer.GetPath();
         double pointRadius = PressureSensitive ? ( iPointInTexture.pressure * Radius ) : Radius;
         FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
         FOdysseyVectorSegment* newSegment;
@@ -408,11 +414,17 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
         // mandatory for stitching vertices
         mPathDrawingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-/*
-        if( mSnappedVertexCoords )
+        if( mPathTracer.GetPointArray().size() == 1 )
         {
+            BLMatrix2D& pathInverseWorldMatrix = path->GetInverseWorldMatrix();
+            BLPoint localVector = pathInverseWorldMatrix.mapVector( pointRadius * 0.7071f
+                                                                  , pointRadius * 0.7071f );
+            double localRadius = ::ULIS::FVec2D( localVector.x, localVector.y ).Distance();
+
+            mPathTracer.GetPointArray()[0].radius = pointRadius;
+            mStitchedVertex->SetRadius( localRadius );
         }
-*/
+
 
         newSegment = mPathTracer.Trace( mStitchedVertex
                                       , iPointInTexture.x
@@ -462,11 +474,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
             vectorEngine->InvalidateRect();
         }
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
-                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated path after segment insertion
+        // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated path after segment insertion
     }
 
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
     oSignalFlags = notificationFlags;
 }
 
@@ -484,7 +496,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
     uint32 imgW = vectorEngine->GetLayer()->GetWidth();
     uint32 imgH = vectorEngine->GetLayer()->GetHeight();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW;
+                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                             | FOdysseyPainterEditor::UI_UPDATE_HUD; // re-creates the quadtree;
 
     mTimeAtUp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
@@ -596,10 +609,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                                      , mAddedSegmentArray );
                 }
             }
-
-            iScene->Update( UpdatePaintGroups ? FOdysseyVectorObject::UPDATE_PAINTGROUPS : 0 ); // update invalidated objects
-
-            vectorEngine->ResetHUD(); // re-creates the quadtree;
         }
     }
 
@@ -607,7 +616,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
     // this means the Invalidation Rectangle is not resetted, so we force it.
     vectorEngine->InvalidateRect();
 
-    iScene->GetEngine()->Invalidate( 0 );
+    // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
+    iScene->GetSharedEnv()->Update( UpdatePaintGroups ? FOdysseyVectorObject::UPDATE_PAINTGROUPS : 0 );
+
     oSignalFlags = notificationFlags;
 
     return true;
@@ -641,10 +652,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::PropertyChangedVector( FOdysseyVecto
         mPathTracer.SetTracingWidth( (double) TracingFidelity );
     }
 
-    vectorEngine->ResetHUD(); // rebuilds quadtree if stitch mode changes
+    //vectorEngine->ResetHUD(); // rebuilds quadtree if stitch mode changes
 
     // redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    //iScene->GetEngine()->Invalidate( 0 );
 
     return UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName );
 }

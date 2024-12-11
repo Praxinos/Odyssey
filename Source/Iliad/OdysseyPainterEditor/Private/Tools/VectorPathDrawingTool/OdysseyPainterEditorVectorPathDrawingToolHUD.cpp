@@ -180,12 +180,14 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
         iBLContext->resetMatrix();
 
         iBLContext->setStrokeStyle( BLRgba32( pathcolor.R, pathcolor.G, pathcolor.B, pathcolor.A ) );
+        iBLContext->setStrokeStartCap(BL_STROKE_CAP_BUTT);
+        iBLContext->setStrokeEndCap(BL_STROKE_CAP_BUTT);
 
         for( int n = 1; n < pointArray.size(); n++)
         {
             int i = n - 1;
 
-            iBLContext->setStrokeWidth( pointArray[i].radius );
+            iBLContext->setStrokeWidth( pointArray[i].radius * 2.0f );
             iBLContext->strokeLine( pointArray[i].coords.x, pointArray[i].coords.y
                                   , pointArray[n].coords.x, pointArray[n].coords.y );
         }
