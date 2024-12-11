@@ -28,7 +28,7 @@ enum class ELevelDestination: uint8
     CurrentLevel    UMETA( DisplayName = "In the current level" ),
 };
 
-UCLASS( config=Epos )
+UCLASS( config=Odyssey )
 class UStoryboardSettings
     : public UObject
 {
