@@ -46,7 +46,7 @@ public:
 //---
 
 // https://udn.unrealengine.com/s/question/0D54z00007eBzPfCAK/makeinstance-of-ipropertytypecustomization-of-my-structure-is-not-called
-UCLASS( config=Epos )
+UCLASS( config=Odyssey )
 class UImportImageSequenceSettings
     : public UObject
 {
@@ -59,7 +59,7 @@ public:
 
 //---
 
-UCLASS( config=Epos )
+UCLASS( config=Odyssey )
 class UImportImageSequenceUISettings
     : public UObject
 {

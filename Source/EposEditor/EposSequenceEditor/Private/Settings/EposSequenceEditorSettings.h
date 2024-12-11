@@ -154,7 +154,7 @@ public:
 /**
  * Epos Sequence Editor settings.
  */
-UCLASS(BlueprintType, config=Epos, meta=(DisplayName="Epos Sequence Editor"))
+UCLASS(BlueprintType, config=Odyssey, meta=(DisplayName="Epos Sequence Editor"))
 class UEposSequenceEditorSettings
     : public UDeveloperSettings
 {

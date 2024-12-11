@@ -242,7 +242,7 @@ public:
 //---
 
 // Settings for the naming convention
-UCLASS(BlueprintType, config=Epos, meta=(DisplayName="Epos Naming Convention"))
+UCLASS(BlueprintType, config=Odyssey, meta=(DisplayName="Epos Naming Convention"))
 class EPOSNAMINGCONVENTION_API UNamingConventionSettings
     : public UDeveloperSettings
 {
