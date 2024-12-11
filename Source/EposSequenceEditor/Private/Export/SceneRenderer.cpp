@@ -228,8 +228,7 @@ CalculateConstraintSize( const FMinimalViewInfo& iViewInfo, const FIntPoint& iUs
 void
 FSceneRenderer::RenderToTexture( TArray<FColor>& oSamples, FTextureRenderTargetResource* oRenderTarget )
 {
-    checkf( mCameraComponent, TEXT( "No camera found at frame %d (in tick global time" ), mSequencer.Pin()->GetGlobalTime().Time.GetFrame().Value );
-    if( !mCameraComponent )
+    if( !ensureMsgf( mCameraComponent, TEXT( "No camera found at frame %d (in tick global time" ), mSequencer.Pin()->GetGlobalTime().Time.GetFrame().Value ) )
         return;
 
     FMinimalViewInfo ViewInfo;
