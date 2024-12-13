@@ -1,5 +1,0 @@
-==================
-OdysseyPaintEngine
-==================
-
-Module Example

@@ -1,5 +1,0 @@
-============
-OdysseyStyle
-============
-
-Module Example

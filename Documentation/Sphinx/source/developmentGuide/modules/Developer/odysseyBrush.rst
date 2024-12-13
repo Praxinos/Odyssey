@@ -1,5 +1,0 @@
-============
-OdysseyBrush
-============
-
-Module Example

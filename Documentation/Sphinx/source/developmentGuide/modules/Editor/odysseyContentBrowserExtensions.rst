@@ -1,5 +1,0 @@
-===============================
-OdysseyContentBrowserExtensions
-===============================
-
-Module Example

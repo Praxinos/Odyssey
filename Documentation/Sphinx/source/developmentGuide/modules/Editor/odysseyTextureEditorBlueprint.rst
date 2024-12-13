@@ -1,5 +1,0 @@
-=============================
-OdysseyTextureEditorBlueprint
-=============================
-
-Module Example
