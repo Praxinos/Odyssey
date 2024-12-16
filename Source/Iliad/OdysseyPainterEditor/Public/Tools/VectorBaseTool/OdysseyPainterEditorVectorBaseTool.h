@@ -155,6 +155,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
                                                , FMenuBuilder& menu
                                                , uint64 iInbetweenMenuFlags );
         void ResetGridMenu( FMenuBuilder& menu, FOdysseyVectorGroupPaint* vectorScene );
+        void ResetSpacingMenu( FMenuBuilder& menu, FOdysseyVectorGroupPaint* iScene );
         bool CanAddTag( FOdysseyVectorGroupPaint* iScene );
         bool CanAlterTag( FOdysseyVectorGroupPaint* iScene );
 

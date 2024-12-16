@@ -493,14 +493,14 @@ FOdysseyVectorHUD::DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
 
         for( uint32 i = 1; i < iBreakdown->GetDrawingCount() - 1; i++ )
         {
-            FChartDivision* inbetween = &iBreakdown->GetChart()->GetDivisionBuffer()[i];
+            FInbetweenerChart::Inbetween* inbetween = &iBreakdown->GetChart()->GetInbetweenBuffer()[i];
             uint8 alpha = inbetweenColor.A;
 
             if( iHUDFlags & HUD_INBETWEEN_FADEFROMTARGET )
-                alpha = ( 255 * 0.25f ) + ( ( alpha * 0.75f ) *          inbetween->spacing );
+                alpha = ( 255 * 0.25f ) + ( ( alpha * 0.75f ) *          inbetween->GetSpacing() );
 
             if( iHUDFlags & HUD_INBETWEEN_FADEFROMSOURCE )
-                alpha = ( 255 * 0.25f ) + ( ( alpha * 0.75f ) * ( 1.0f - inbetween->spacing )  );
+                alpha = ( 255 * 0.25f ) + ( ( alpha * 0.75f ) * ( 1.0f - inbetween->GetSpacing() )  );
 
             iBLContext->setStrokeWidth( 4.0f );
             iBLContext->setStrokeStyle( BLRgba32( inbetweenColor.R
@@ -530,7 +530,7 @@ FOdysseyVectorHUD::DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
                                              , iBLContext
                                              , inbetweenerTag
                                              , &interpolatedPath
-                                             , &iBreakdown->GetChart()->GetDivisionBuffer().front() );
+                                             , &iBreakdown->GetChart()->GetInbetweenBuffer().front() );
         }
     }
 
@@ -545,7 +545,7 @@ FOdysseyVectorHUD::DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
                                              , iBLContext
                                              , inbetweenerTag
                                              , &interpolatedPath
-                                             , &iBreakdown->GetChart()->GetDivisionBuffer().back() );
+                                             , &iBreakdown->GetChart()->GetInbetweenBuffer().back() );
         }
     }
 
@@ -567,7 +567,7 @@ FOdysseyVectorHUD::DrawInbetweenerInterpolatedPathAt( FOdysseyVectorGroupPaint* 
                                                     , BLContext* iBLContext
                                                     , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                     , FInterpolatedPath* iInterpolatedPath
-                                                    , FChartDivision* iInbetween )
+                                                    , FInbetweenerChart::Inbetween* iInbetween )
 {
     uint32 pathPointCount = iInterpolatedPath->GetInterpolatedPointBuffer().size();
     uint32 inbetweenAbsoluteIndex = iInbetween->GetIndexInInbetweener();
@@ -577,7 +577,7 @@ FOdysseyVectorHUD::DrawInbetweenerInterpolatedPathAt( FOdysseyVectorGroupPaint* 
     FOdysseyVectorPath* originalPath = iInterpolatedPath->GetOriginalPath();
 
     // passed to DrawPathAt()
-    worldMatrix.transform( iInbetween->drawing->localMatrix );
+    worldMatrix.transform( iInbetween->GetDrawing()->localMatrix );
     worldMatrix.transform( iInterpolatedPath->GetRelativeMatrix() );
 /*
     iBLContext->setStrokeWidth( 4.0f );

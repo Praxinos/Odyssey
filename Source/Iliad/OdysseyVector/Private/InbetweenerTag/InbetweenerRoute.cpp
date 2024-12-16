@@ -94,7 +94,7 @@ FInbetweenerRoute::Fit( uint32 iFitFrom )
     {
         if( i >= iFitFrom )
         {
-            std::vector<FChartDivision>& divisionBuffer = breakdown->GetChart()->GetDivisionBuffer();
+            std::vector<FInbetweenerChart::Inbetween>& divisionBuffer = breakdown->GetChart()->GetInbetweenBuffer();
             int32 divisionCount = divisionBuffer.size();
             FInbetweenerGrid* grid = breakdown->GetGrid();
             std::vector<::ULIS::FVec2D> pointBuffer;
@@ -121,7 +121,7 @@ FInbetweenerRoute::Fit( uint32 iFitFrom )
 
             ////    for( int32 j = 1; j < ( divisionCount - 1 ); j++ )
             ////    {
-            ////        FChartDivision& inbetween = divisionBuffer[j];
+            ////        FInbetweenerChart::Inbetween& inbetween = divisionBuffer[j];
 
             ////        grid->ComputeARAPInterpolation( &inbetween, false );
 

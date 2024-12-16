@@ -97,9 +97,6 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDownVector( FOdysseyVectorGroup
         mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
     }
 
-    // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
-
     iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
     return true;
@@ -138,8 +135,9 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDragVector( FOdysseyVectorGroup
         }
     }
 
-    // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    // TEMP until separate HUD
+    // force invalidation for redrawal because selection does not modify anything
+    iScene->Invalidate( 0 );
 
     iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
@@ -453,10 +451,8 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPa
         mPointArray.clear();
     }
 
-    // redraw
-    iScene->GetEngine()->Invalidate( 0 );
-
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidated objects
+    // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     oSignalFlags = notificationFlags;
 

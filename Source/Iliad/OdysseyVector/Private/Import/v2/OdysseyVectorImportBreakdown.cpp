@@ -112,20 +112,26 @@ FOdysseyVectorImportV2::ReadBreakdown( FInbetweenerBreakdown& iBreakdown
 
                 case FOdysseyFile::VectorV2::CHUNK_BREAKDOWN_CHART_HUDBEZIER:
                 {
-                    ::ULIS::FVec2D* quadraticBezier = iBreakdown.GetChart()->GetHUDBezier();
+                    FInbetweenerChart::HUDBezier* quadraticBezier = iBreakdown.GetChart()->GetHUDBezier();
+                    double x, y;
 
-                    Ar << quadraticBezier[0].x;
-                    Ar << quadraticBezier[0].y;
-                    Ar << quadraticBezier[1].x;
-                    Ar << quadraticBezier[1].y;
-                    Ar << quadraticBezier[2].x;
-                    Ar << quadraticBezier[2].y;
+                    Ar << x;
+                    Ar << y;
+                    quadraticBezier->GetPoints()[0].SetPosition( x, y );
+
+                    Ar << x;
+                    Ar << y;
+                    quadraticBezier->GetPoints()[1].SetPosition( x, y );
+
+                    Ar << x;
+                    Ar << y;
+                    quadraticBezier->GetPoints()[2].SetPosition( x, y );
                 }
                 break;
 
                 case FOdysseyFile::VectorV2::CHUNK_BREAKDOWN_CHART_SPACING:
                 {
-                    for( FChartDivision& division : iBreakdown.GetChart()->GetDivisionBuffer() )
+                    for( FInbetweenerChart::Inbetween& division : iBreakdown.GetChart()->GetInbetweenBuffer() )
                     {
                         float spacing;
 

@@ -491,6 +491,8 @@ FOdysseyVectorPath::AddVertex( FOdysseyVectorVertex* iVertex )
     mVertexList.push_back( iVertex );
 
     iVertex->SetOwner( this );
+
+    Invalidate( INVALIDATE_SHAPE );
 }
 
 void
@@ -511,6 +513,7 @@ FOdysseyVectorPath::RemoveVertex( FOdysseyVectorVertex* iVertex )
         UnselectVertex( iVertex );
     }
 
+    Invalidate( INVALIDATE_SHAPE );
     //iVertex->SetPath( nullptr );
 }
 

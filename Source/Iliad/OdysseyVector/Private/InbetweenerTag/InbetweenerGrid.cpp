@@ -312,7 +312,7 @@ FInbetweenerGrid::DeformPoint( FInterpolatedPoint* iInterpolatedPoint, eInbetwee
 
 void
 FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
-                             , FChartDivision *iInbetween
+                             , FInbetweenerChart::Inbetween *iInbetween
                              , eInbetweenerPointPositionType iPositionType )
 {
     FOdysseyVectorObject* owner = mBreakdown->GetInbetweenerTag()->GetOwner();
@@ -704,7 +704,7 @@ FInbetweenerGrid::ComputeQuadA( FInbetweenerQuad* iQuad
  * @param useRigidTransform If true the global rigid transformation is applied.
  */
 bool
-FInbetweenerGrid::ComputeARAPInterpolation( FChartDivision* iInbetween
+FInbetweenerGrid::ComputeARAPInterpolation( FInbetweenerChart::Inbetween* iInbetween
                                           , bool useRigidTransform )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FInbetweenerGrid::ComputeARAPInterpolation);
@@ -719,7 +719,7 @@ FInbetweenerGrid::ComputeARAPInterpolation( FChartDivision* iInbetween
     auto startTotal = std::chrono::high_resolution_clock::now();
 */
     Eigen::MatrixXd A( 2, 8 * usedQuadCount  );
-    double t = iInbetween->spacing;
+    double t = iInbetween->GetSpacing();
     // Compute A(t)
     int i = 0;
 
@@ -763,8 +763,8 @@ FInbetweenerGrid::ComputeARAPInterpolation( FChartDivision* iInbetween
         BLPoint targetCenterOfMass = mBreakdown->GetTargetLocalMatrix().mapPoint( mTargetCenterOfMass.x
                                                                                 , mTargetCenterOfMass.y );
         // convert to inbetween space
-        BLPoint inbetweenSourceCenterOfMass = iInbetween->drawing->inverseMatrix.mapPoint( sourceCenterOfMass.x, sourceCenterOfMass.y );
-        BLPoint inbetweenTargetCenterOfMass = iInbetween->drawing->inverseMatrix.mapPoint( targetCenterOfMass.x, targetCenterOfMass.y );
+        BLPoint inbetweenSourceCenterOfMass = iInbetween->GetDrawing()->inverseMatrix.mapPoint( sourceCenterOfMass.x, sourceCenterOfMass.y );
+        BLPoint inbetweenTargetCenterOfMass = iInbetween->GetDrawing()->inverseMatrix.mapPoint( targetCenterOfMass.x, targetCenterOfMass.y );
 
         PTAD( idx, 0 ) = inbetweenSourceCenterOfMass.x + ( ( inbetweenTargetCenterOfMass.x - inbetweenSourceCenterOfMass.x ) * t );
         PTAD( idx, 1 ) = inbetweenSourceCenterOfMass.y + ( ( inbetweenTargetCenterOfMass.y - inbetweenSourceCenterOfMass.y ) * t );
@@ -780,7 +780,7 @@ FInbetweenerGrid::ComputeARAPInterpolation( FChartDivision* iInbetween
         double waypointT = trajectory->GetWaypointBuffer()[waypointIndex].GetT();
         ::ULIS::FVec2D coords = trajectory->GetPoint( waypointT );
 
-        BLPoint inbetweenCoords = iInbetween->drawing->inverseMatrix.mapPoint( coords.x, coords.y );
+        BLPoint inbetweenCoords = iInbetween->GetDrawing()->inverseMatrix.mapPoint( coords.x, coords.y );
 
         PTAD( idx, 0 ) = inbetweenCoords.x;
         PTAD( idx, 1 ) = inbetweenCoords.y;

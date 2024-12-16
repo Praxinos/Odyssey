@@ -558,9 +558,9 @@ FSnapshotInbetweenerChart::RecordLocalState( FSnapshotInbetweenerChart::State* i
         // save bezier
         if( mSnapshotFlags & FSnapshotFlags::Chart::BEZIER )
         {
-            iState->HUDBezier[0] = mChart->GetHUDBezier()[0];
-            iState->HUDBezier[1] = mChart->GetHUDBezier()[1];
-            iState->HUDBezier[2] = mChart->GetHUDBezier()[2];
+            iState->HUDBezier[0] = mChart->GetHUDBezier()->GetPoints()[0].GetPosition();
+            iState->HUDBezier[1] = mChart->GetHUDBezier()->GetPoints()[1].GetPosition();
+            iState->HUDBezier[2] = mChart->GetHUDBezier()->GetPoints()[2].GetPosition();
         }
 
         // save spacing
@@ -570,7 +570,7 @@ FSnapshotInbetweenerChart::RecordLocalState( FSnapshotInbetweenerChart::State* i
 
             for( uint32 i = 0; i < drawingCount; i++ )
             {
-                 iState->spacing[i] = mChart->GetDivisionBuffer()[i].spacing;
+                 iState->spacing[i] = mChart->GetInbetweenBuffer()[i].GetSpacing();
             }
         }
 
@@ -590,9 +590,9 @@ FSnapshotInbetweenerChart::LoadState( FSnapshotInbetweenerChart::State* iState )
     // restore bezier
     if( mSnapshotFlags & FSnapshotFlags::Chart::BEZIER )
     {
-        mChart->GetHUDBezier()[0] = iState->HUDBezier[0];
-        mChart->GetHUDBezier()[1] = iState->HUDBezier[1];
-        mChart->GetHUDBezier()[2] = iState->HUDBezier[2];
+        mChart->GetHUDBezier()->GetPoints()[0].SetPosition( iState->HUDBezier[0].x, iState->HUDBezier[0].y );
+        mChart->GetHUDBezier()->GetPoints()[1].SetPosition( iState->HUDBezier[1].x, iState->HUDBezier[1].y );
+        mChart->GetHUDBezier()->GetPoints()[2].SetPosition( iState->HUDBezier[2].x, iState->HUDBezier[2].y );
     }
 
     // restore spacing
@@ -600,7 +600,7 @@ FSnapshotInbetweenerChart::LoadState( FSnapshotInbetweenerChart::State* iState )
     {
         for( uint32 i = 0; i < iState->spacing.size(); i++ )
         {
-            mChart->GetDivisionBuffer()[i].SetSpacing( iState->spacing[i] );
+            mChart->GetInbetweenBuffer()[i].SetSpacing( iState->spacing[i] );
         }
     }
 

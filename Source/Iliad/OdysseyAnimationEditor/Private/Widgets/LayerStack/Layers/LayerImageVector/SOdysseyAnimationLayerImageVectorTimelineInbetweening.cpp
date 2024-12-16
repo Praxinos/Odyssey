@@ -255,9 +255,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
 
             if( curBreakdown )
             {
-                FInbetweenerBreakdown* newbreakdown = new FInbetweenerBreakdown( inbetweenerTag );
+                //FInbetweenerBreakdown* newbreakdown = new FInbetweenerBreakdown( inbetweenerTag );
 
-                inbetweenerTag->AddBreakdown( newbreakdown, drawingIndex, true, true );
+                inbetweenerTag->AddBreakdown( nullptr/*newbreakdown*/, drawingIndex, true, true );
             }
         }
 

@@ -17,14 +17,17 @@ FOdysseyVectorExportV2::WriteBreakdownChartHUBBezier( FInbetweenerBreakdown& iBr
                             , Ar
                             , [&iBreakdown](FArchive &Ar) -> void
     {
-        ::ULIS::FVec2D *quadraticBezier = iBreakdown.GetChart()->GetHUDBezier();
+        FInbetweenerChart::HUDBezier* quadraticBezier = iBreakdown.GetChart()->GetHUDBezier();
+        ::ULIS::FVec2D pt[3] = { quadraticBezier->GetPoints()[0].GetPosition()
+                               , quadraticBezier->GetPoints()[1].GetPosition()
+                               , quadraticBezier->GetPoints()[2].GetPosition() };
 
-        Ar << quadraticBezier[0].x;
-        Ar << quadraticBezier[0].y;
-        Ar << quadraticBezier[1].x;
-        Ar << quadraticBezier[1].y;
-        Ar << quadraticBezier[2].x;
-        Ar << quadraticBezier[2].y;
+        Ar << pt[0].x;
+        Ar << pt[0].y;
+        Ar << pt[1].x;
+        Ar << pt[1].y;
+        Ar << pt[2].x;
+        Ar << pt[2].y;
     } );
 }
 
@@ -36,9 +39,9 @@ FOdysseyVectorExportV2::WriteBreakdownChartSpacing( FInbetweenerBreakdown& iBrea
                             , Ar
                             , [&iBreakdown](FArchive &Ar) -> void
     {
-        for( FChartDivision& division : iBreakdown.GetChart()->GetDivisionBuffer() )
+        for( FInbetweenerChart::Inbetween& division : iBreakdown.GetChart()->GetInbetweenBuffer() )
         {
-            float spacing = division.spacing;
+            float spacing = division.GetSpacing();
 
             Ar << spacing;
         }

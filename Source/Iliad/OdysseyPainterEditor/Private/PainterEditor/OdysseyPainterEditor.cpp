@@ -1931,9 +1931,10 @@ FOdysseyPainterEditor::ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor
 
 // static
 void
-FOdysseyPainterEditor::ResetBreakdownSpacingChart( FOdysseyPainterEditor* iEditor
-                                                 , FOdysseyVectorGroupPaint* iScene
-                                                 , bool iResetPositionning )
+FOdysseyPainterEditor::ResetSpacingChart( FOdysseyPainterEditor* iEditor
+                                        , FOdysseyVectorGroupPaint* iScene
+                                        , bool iResetPositionning
+                                        , bool iCurrentBreakdownOnly )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
@@ -1964,11 +1965,22 @@ FOdysseyPainterEditor::ResetBreakdownSpacingChart( FOdysseyPainterEditor* iEdito
         for( FOdysseyVectorTag* tag : selectedTagList )
         {
             FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-            FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdownByCellIndex( cellIndex );
 
-            if( breakdown )
+            if( iCurrentBreakdownOnly )
             {
-                breakdown->GetChart()->Reset( iResetPositionning );
+                FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdownByCellIndex( cellIndex );
+
+                if( breakdown )
+                {
+                    breakdown->GetChart()->Reset( iResetPositionning );
+                }
+            }
+            else
+            {
+                for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
+                {
+                    breakdown->GetChart()->Reset( iResetPositionning );
+                }
             }
         }
     }
@@ -2453,12 +2465,12 @@ FOdysseyPainterEditor::UnpropagateBucket( FOdysseyPainterEditor* iEditor, FOdyss
     SetBucketPropagation( iEditor, iBucket, false );
 }
 
-static FInbetweenerChart*
+static std::list<std::vector<float>>&
 GetCopiedChart()
 {
-    static FInbetweenerChart copiedChart( nullptr );
+    static std::list<std::vector<float>> spacingList;
 
-    return &copiedChart;
+    return spacingList;
 }
 
 // static
@@ -2466,18 +2478,13 @@ void
 FOdysseyPainterEditor::PasteSpacingChart( FOdysseyPainterEditor* iEditor
                                         , FOdysseyVectorGroupPaint* iScene )
 {
-/*-----
     std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    FInbetweenerChart* copiedChart = GetCopiedChart();
-    uint64 notificationFlags = 0;
+    std::list<std::vector<float>>& spacingList = GetCopiedChart();
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
 
-    if( copiedChart->GetInbetweenArray().size() > 0 )
+    if( spacingList.size() > 0 )
     {
-        // we substract 1 because the buffer also holds the final position
-        // which is not an inbetween per-se.
-        uint32 drawingCount = copiedChart->GetInbetweenArray().size();
-
         vectorEngine->GetSelectedInbetweenerTagList( selectedInbetweenerTagList );
 
         if( selectedInbetweenerTagList.size() )
@@ -2500,25 +2507,35 @@ FOdysseyPainterEditor::PasteSpacingChart( FOdysseyPainterEditor* iEditor
 
             for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
             {
-                if( inbetweenerTag->GetDrawingCount() == drawingCount )
+                std::vector<FInbetweenerBreakdown*> breakdownArray;
+                uint32 i = 0;
+
+                inbetweenerTag->GetBreakdownArray( breakdownArray );
+
+                for( std::vector<float>& spacingBuffer : spacingList )
                 {
-                    for( uint32 i = 0; i < drawingCount; i++ )
+                    if( i < breakdownArray.size() )
                     {
-                        inbetweenerTag->GetChart().GetDrawing( i )->spacing = copiedChart->GetDrawing( i )->spacing;
+                        FInbetweenerBreakdown* breakdown = breakdownArray[i];
+
+                        if( breakdown->GetDrawingCount() == spacingBuffer.size() )
+                        {
+                            for( uint32 j = 0; j < spacingBuffer.size(); j++ )
+                            {
+                                breakdown->GetChart()->GetInbetweenBuffer()[j].SetSpacing( spacingBuffer[j] );
+                            }
+                        }
                     }
 
-                    inbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_SPACING );
+                    i++;
                 }
             }
         }
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    vectorEngine->ResetHUD();
-    vectorEngine->Invalidate( 0 );
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
-*/
 }
 
 // static
@@ -2526,7 +2543,8 @@ void
 FOdysseyPainterEditor::CopySpacingChart( FOdysseyPainterEditor* iEditor
                                        , FOdysseyVectorGroupPaint* iScene )
 {
-/*-------
+    std::list<std::vector<float>>& spacingList = GetCopiedChart();
+
     FOdysseyVectorObject* selectedObject = iScene->GetEngine()->GetLastSelectedObject();
 
     if( selectedObject )
@@ -2536,12 +2554,19 @@ FOdysseyPainterEditor::CopySpacingChart( FOdysseyPainterEditor* iEditor
         if( tag )
         {
             FOdysseyVectorTagInbetweener* tagInbetweener = static_cast<FOdysseyVectorTagInbetweener*>(tag);
-            FInbetweenerChart* copiedChart = GetCopiedChart();
 
-            (*copiedChart) = tagInbetweener->GetChart();
+            spacingList.clear();
+
+            for ( FInbetweenerBreakdown* breakdown : tagInbetweener->GetBreakdownList() )
+            {
+                std::vector<float> spacingBuffer;
+
+                breakdown->GetChart()->GetSpacing( spacingBuffer );
+
+                spacingList.push_back( spacingBuffer );
+            }
         }
     }
-*/
 }
 
 static std::list<FOdysseyVectorObject*>&

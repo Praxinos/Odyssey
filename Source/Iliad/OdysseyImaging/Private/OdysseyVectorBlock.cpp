@@ -140,9 +140,13 @@ FOdysseyVectorBlock::RenderHUD(::ULIS::FBlock& ioBlock)
 TSharedPtr<::ULIS::FBlock>
 FOdysseyVectorBlock::Render( uint64 iDrawingFlags )
 {
-     TSharedPtr<::ULIS::FBlock> block = GetBlock( iDrawingFlags );
+    TSharedPtr<::ULIS::FBlock> block = GetBlock( iDrawingFlags );
+
     if ( !block )
         return nullptr;
+
+     // Only one render at a time
+    FScopeLock Lock(&mMutex);
 
     if (mNeedsRender)
     {

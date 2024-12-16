@@ -24,13 +24,13 @@
 #include "InbetweenerTrajectory.h"
 #include "InbetweenerPoint.h"
 #include "InbetweenerQuad.h"
+#include "InbetweenerChart.h"
 
 class FOdysseyVectorTagInbetweener;
 class FInterpolatedPoint;
 class FInterpolatedPath;
 struct FInbetweenerDrawing;
 class FInbetweenerBreakdown;
-struct FChartDivision;
 
 typedef Eigen::Triplet<double> TripletD;
 
@@ -60,7 +60,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
          * @param iInbetweenIndex Inbetween index
          */
         virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
-                                , FChartDivision *iInbetween
+                                , FInbetweenerChart::Inbetween *iInbetween
                                 , eInbetweenerPointPositionType iPositionType );
 
         /**
@@ -115,7 +115,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
                                , uint64 iTagInvalidationFlags );
         void ResetDeformation( bool iInvalidate );
 
-        bool ComputeARAPInterpolation( FChartDivision* iInbetween
+        bool ComputeARAPInterpolation( FInbetweenerChart::Inbetween* iInbetween
                                      , bool useRigidTransform );
         bool PrecomputeARAPInterpolation();
         void Invalidate( uint32 iInvalidationFlags );

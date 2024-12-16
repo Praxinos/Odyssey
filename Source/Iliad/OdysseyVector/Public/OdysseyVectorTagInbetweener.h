@@ -148,7 +148,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
          * @param iNewSpacing
          * @param iRelative move all inbetweens relative to the one passed as parameter
          */
-        void MoveInbetween( FChartDivision* iInbetween
+        void MoveInbetween( FInbetweenerChart::Inbetween* iInbetween
                           , float iNewSpacing
                           , bool iRelative );
 
@@ -201,7 +201,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void SetWithThickness( bool iWithThickness );
         bool GetWithThickness();
         void DrawPathsInbetween( FOdysseyVectorGroupPaint* iDisplayedScene
-                               , FChartDivision* inbetween
+                               , FInbetweenerChart::Inbetween* inbetween
                                , BLContext* iBLContext
                                , bool iLock );
         void DrawPathsTarget( BLContext* iBLContext );
@@ -210,6 +210,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void DeformPathsAtSource();
 
         std::list<FInbetweenerBreakdown*>& GetBreakdownList();
+        void GetBreakdownArray( std::vector<FInbetweenerBreakdown*>& oBreakdownArray );
         FInbetweenerBreakdown* AddBreakdown( uint32 iDrawingIndex
                                            , bool iCopyGeometry
                                            , bool iFitNewTrajectories );
@@ -223,7 +224,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         uint32 GetUsedQuadCount();
         uint32 GetUsedPointCount();
         void DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedScene
-                       , FChartDivision* iInbetween
+                       , FInbetweenerChart::Inbetween* iInbetween
                        , FInterpolatedPath* iInterpolatedPath
                        //, ::ULIS::FVec2D* iPointPositionBuffer
                        //, const BLMatrix2D& iWorldMatrix
@@ -270,6 +271,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         static void EvalSize( ::ULIS::FRectD& iWorldBBox, uint32& iGridNumQuadX, uint32& iGridNumQuadY );
         IOdysseyVectorCell* GetSourceCell();
         IOdysseyVectorCell* GetTargetCell();
+        void ResizeFullChartHUD();
 
     protected:
         /**
@@ -299,8 +301,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                                        , double iInbetweenOldSpacing
                                        , double iInbetweenNewSpacing );
         void ChainBreakdowns();
-        void DeformGridAtInbetween( FChartDivision *iInbetween );
-        void DeformPathsAtInbetween( FChartDivision *iInbetween );
+        void DeformGridAtInbetween( FInbetweenerChart::Inbetween *iInbetween );
+        void DeformPathsAtInbetween( FInbetweenerChart::Inbetween *iInbetween );
         void DispatchDrawings();
 
     public:
@@ -329,6 +331,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         static const uint64 INVALIDATE_CELLS             = ( 1LL <<  6 );
         static const uint64 INVALIDATE_ROUTES            = ( 1LL <<  9 );
         static const uint64 INVALIDATE_BREAKDOWN_LIST    = ( 1LL << 11 );
+        static const uint64 INVALIDATE_CHARTHUD          = ( 1LL << 12 );
         static const uint64 INVALIDATE_ALL               = ( INVALIDATE_MAP
                                                            | INVALIDATE_BUFFERS
                                                            | INVALIDATE_SPACING

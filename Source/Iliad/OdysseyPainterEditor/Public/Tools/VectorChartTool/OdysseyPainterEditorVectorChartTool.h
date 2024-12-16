@@ -6,11 +6,19 @@
 #include "CoreMinimal.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 
+#include "InbetweenerTag/InbetweenerChart.h"
+
 #include "OdysseyPainterEditorVectorChartTool.generated.h"
 
 struct FInbetweenerDrawing;
-struct FChartDivision;
 class FOdysseyPainterEditorVectorChartToolHUD;
+
+UENUM()
+enum class eChartType : uint8
+{
+    Full    = 0,
+    Partial = 1
+};
 
 UENUM()
 enum class eChartPickingMode : uint8
@@ -47,7 +55,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
         virtual FText GetTooltip() const override;
 
         eChartPickingMode GetPickingMode();
-        FChartDivision* GetHoveredInbetween();
+        FInbetweenerChart::Inbetween* GetHoveredInbetween();
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
@@ -82,9 +90,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
 
     private:
         FOdysseyPainterEditorVectorChartToolHUD* mChartHUD;
-        FChartDivision* mPickedInbetween;
-        FChartDivision* mHoveredInbetween;
-        ::ULIS::FVec2D* mPickedBezierPoint;
+        FInbetweenerChart::Inbetween* mPickedInbetween;
+        FInbetweenerChart::Inbetween* mHoveredInbetween;
+        FInbetweenerChart::HUDBezier::Point* mPickedBezierPoint;
         eChartPickingMode mPickingMode;
         ::ULIS::FVec2D mMouseAtDown;
         float mEasing;
@@ -101,4 +109,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
                  , Category = ChartTool
                  , meta = ( ToolTip  = "Shifting Mode" ) )
         eChartShiftingOp ShiftingOp;
+
+        UPROPERTY( EditAnywhere
+                 , Category = ChartTool
+                 , meta = ( ToolTip  = "Chart Type" ) )
+        eChartType ChartType;
 };

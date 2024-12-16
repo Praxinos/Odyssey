@@ -170,24 +170,24 @@ FInbetweenerBreakdown::InterpolateTransform()
 
     for( uint32 i = 1; i < GetDrawingCount() - 1; i++ )
     {
-        FChartDivision* inbetween = &mChart.GetDivisionBuffer()[i];
+        FInbetweenerChart::Inbetween* inbetween = &mChart.GetInbetweenBuffer()[i];
         //double translationX, translationY, rotation, scalingX, scalingY;
-        double t = inbetween->spacing;
+        double t = inbetween->GetSpacing();
 
-        inbetween->drawing->translationX = sourceTranslationX + ( ( mTargetTranslationX - sourceTranslationX ) * t );
-        inbetween->drawing->translationY = sourceTranslationY + ( ( mTargetTranslationY - sourceTranslationY ) * t );
-        inbetween->drawing->rotation = sourceRotation + ( ( mTargetRotation - sourceRotation ) * t );
-        inbetween->drawing->scalingX = sourceScalingX + ( ( mTargetScalingX - sourceScalingX ) * t );
-        inbetween->drawing->scalingY = sourceScalingY + ( ( mTargetScalingY - sourceScalingY ) * t );
+        inbetween->GetDrawing()->translationX = sourceTranslationX + ( ( mTargetTranslationX - sourceTranslationX ) * t );
+        inbetween->GetDrawing()->translationY = sourceTranslationY + ( ( mTargetTranslationY - sourceTranslationY ) * t );
+        inbetween->GetDrawing()->rotation = sourceRotation + ( ( mTargetRotation - sourceRotation ) * t );
+        inbetween->GetDrawing()->scalingX = sourceScalingX + ( ( mTargetScalingX - sourceScalingX ) * t );
+        inbetween->GetDrawing()->scalingY = sourceScalingY + ( ( mTargetScalingY - sourceScalingY ) * t );
 
-        inbetween->drawing->localMatrix.reset();
-        inbetween->drawing->localMatrix.translate( inbetween->drawing->translationX
-                                                 , inbetween->drawing->translationY );
-        inbetween->drawing->localMatrix.rotate( inbetween->drawing->rotation * M_PI / 180.0f ); // convert to radians
-        inbetween->drawing->localMatrix.scale( inbetween->drawing->scalingX
-                                             , inbetween->drawing->scalingY );
+        inbetween->GetDrawing()->localMatrix.reset();
+        inbetween->GetDrawing()->localMatrix.translate( inbetween->GetDrawing()->translationX
+                                                      , inbetween->GetDrawing()->translationY );
+        inbetween->GetDrawing()->localMatrix.rotate( inbetween->GetDrawing()->rotation * M_PI / 180.0f ); // convert to radians
+        inbetween->GetDrawing()->localMatrix.scale( inbetween->GetDrawing()->scalingX
+                                                  , inbetween->GetDrawing()->scalingY );
 
-        BLMatrix2D::invert( inbetween->drawing->inverseMatrix, inbetween->drawing->localMatrix );
+        BLMatrix2D::invert( inbetween->GetDrawing()->inverseMatrix, inbetween->GetDrawing()->localMatrix );
     }
 }
 
@@ -336,15 +336,15 @@ void
 FInbetweenerBreakdown::EaseOut( float iEasing, uint32 iFrom, uint32 iTo )
 {
     uint32 divisionCount = iTo - iFrom + 1;
-    float fromSpacing = mChart.GetDivisionBuffer()[iFrom].spacing;
-    float toSpacing = mChart.GetDivisionBuffer()[iTo].spacing;
+    float fromSpacing = mChart.GetInbetweenBuffer()[iFrom].GetSpacing();
+    float toSpacing = mChart.GetInbetweenBuffer()[iTo].GetSpacing();
 
     for( uint32 i = iFrom + 1, j = 1; j < iTo; i++, j++ )
     {
         double fraction = ( double ) j / ( divisionCount - 1 );
         double spacing = GetEaseOutSpacing( iEasing, fraction );
 //UE_LOG(LogTemp, Warning, TEXT("Spacing:%f"), spacing );
-        mChart.GetDivisionBuffer()[i].spacing = fromSpacing + ( spacing * ( toSpacing - fromSpacing ) );
+        mChart.GetInbetweenBuffer()[i].SetSpacing( fromSpacing + ( spacing * ( toSpacing - fromSpacing ) ) );
     }
 
     mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
@@ -355,23 +355,23 @@ void
 FInbetweenerBreakdown::EaseOut( float iEasing )
 {
     EaseOut( fabs(iEasing)
-           , mChart.GetDivisionBuffer().front().GetIndex()
-           , mChart.GetDivisionBuffer().back().GetIndex() );
+           , mChart.GetInbetweenBuffer().front().GetIndex()
+           , mChart.GetInbetweenBuffer().back().GetIndex() );
 }
 
 void
 FInbetweenerBreakdown::EaseIn( float iEasing, uint32 iFrom, uint32 iTo )
 {
     uint32 divisionCount = iTo - iFrom + 1;
-    float fromSpacing = mChart.GetDivisionBuffer()[iFrom].spacing;
-    float toSpacing = mChart.GetDivisionBuffer()[iTo].spacing;
+    float fromSpacing = mChart.GetInbetweenBuffer()[iFrom].GetSpacing();
+    float toSpacing = mChart.GetInbetweenBuffer()[iTo].GetSpacing();
 
     for( uint32 i = iFrom + 1, j = 1; i < iTo; i++, j++ )
     {
         double fraction = ( double ) j / ( divisionCount - 1 );
         double spacing = GetEaseInSpacing( iEasing, fraction );
 //UE_LOG(LogTemp, Warning, TEXT("Spacing:%f"), spacing );
-        mChart.GetDivisionBuffer()[i].spacing = fromSpacing + ( spacing * ( toSpacing - fromSpacing ) );
+        mChart.GetInbetweenBuffer()[i].SetSpacing ( fromSpacing + ( spacing * ( toSpacing - fromSpacing ) ) );
     }
 
     mInbetweenerTag->Invalidate( FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
@@ -382,22 +382,22 @@ void
 FInbetweenerBreakdown::EaseIn( float iEasing )
 {
     EaseIn( fabs(iEasing)
-           , mChart.GetDivisionBuffer().front().GetIndex()
-           , mChart.GetDivisionBuffer().back().GetIndex() );
+           , mChart.GetInbetweenBuffer().front().GetIndex()
+           , mChart.GetInbetweenBuffer().back().GetIndex() );
 }
 
 void
-FInbetweenerBreakdown::EaseInAndOut( float iEasing, FChartDivision* iInbetween )
+FInbetweenerBreakdown::EaseInAndOut( float iEasing, FInbetweenerChart::Inbetween* iInbetween )
 {
     if( iEasing > 0.0f )
     {
-        EaseIn ( fabs(iEasing), mChart.GetDivisionBuffer().front().GetIndex(), iInbetween->GetIndex() );
-        EaseOut( fabs(iEasing), iInbetween->GetIndex(), mChart.GetDivisionBuffer().back().GetIndex() );
+        EaseIn ( fabs(iEasing), mChart.GetInbetweenBuffer().front().GetIndex(), iInbetween->GetIndex() );
+        EaseOut( fabs(iEasing), iInbetween->GetIndex(), mChart.GetInbetweenBuffer().back().GetIndex() );
     }
     else
     {
-        EaseOut( fabs(iEasing), mChart.GetDivisionBuffer().front().GetIndex(), iInbetween->GetIndex() );
-        EaseIn ( fabs(iEasing), iInbetween->GetIndex(), mChart.GetDivisionBuffer().back().GetIndex() );
+        EaseOut( fabs(iEasing), mChart.GetInbetweenBuffer().front().GetIndex(), iInbetween->GetIndex() );
+        EaseIn ( fabs(iEasing), iInbetween->GetIndex(), mChart.GetInbetweenBuffer().back().GetIndex() );
     }
 }
 

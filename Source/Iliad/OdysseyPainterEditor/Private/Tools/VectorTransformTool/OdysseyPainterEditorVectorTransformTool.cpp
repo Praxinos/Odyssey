@@ -957,6 +957,11 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
                                                            , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* engine = iScene->GetEngine();
+    static FVector2D deltaPositionCumul = FVector2D( 0.0f, 0.0f );
+    FOdysseyPoint pointInTexture = iPointInTexture;
+
+    // because we ignore some events, we need to accumulate the delta
+    deltaPositionCumul += iPointInTexture.deltaPosition;
 
     // For some reason we receive quite a lot of mouse events between 2 screen refresh, I don't know why
     // The issue is absent with the Ink driver. It is present with the Wintab and Native drivers. The simpliest
@@ -964,8 +969,10 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
     if( engine->GetInvalidationFlags()  )
         return;
 
+    pointInTexture.deltaPosition = deltaPositionCumul;
+
     // Left mouse button clicked
-    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
+    if( pointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
         FVector2D currCursorPos = FSlateApplication::Get().GetCursorPos();
         FVector2D deltaPos = currCursorPos - mScreenMouseAtDown;
@@ -987,7 +994,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
                 if ( mPickedPivot )
                 {
                     BLMatrix2D& inverseWorldMatrix = selectionBox.inverseWorldMatrix;
-                    BLPoint localCoords = inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+                    BLPoint localCoords = inverseWorldMatrix.mapPoint( pointInTexture.x, pointInTexture.y );
 
                     mTransformHUD->SetGizmo( localCoords.x, localCoords.y );
                 }
@@ -997,12 +1004,12 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
                      || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_YAXIS     )
                      || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_TRANSLATE ) )
                     {
-                        TranslateObjectSelection( engine, iScene, iPointInTexture );
+                        TranslateObjectSelection( engine, iScene, pointInTexture );
                     }
                     else
                     if( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_ROTATE )
                     {
-                        RotateObjectSelection( engine, iScene, iPointInTexture );
+                        RotateObjectSelection( engine, iScene, pointInTexture );
                     }
                     else
                     if( ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_TOPLEFT     )
@@ -1010,7 +1017,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
                      || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMRIGHT )
                      || ( hudFlags & FOdysseyPainterEditorVectorTransformToolHUD::PICK_SCALER_BOTTOMLEFT  ) )
                     {
-                        ScaleObjectSelection( engine, iScene, iPointInTexture );
+                        ScaleObjectSelection( engine, iScene, pointInTexture );
                     }
                 }
             }
@@ -1024,6 +1031,12 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
             }
         }
     }
+
+     // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+
+
+    deltaPositionCumul = FVector2D( 0.0f, 0.0f );
 }
 
 bool
@@ -1074,6 +1087,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
                 GEditor->EndTransaction();
             }
 
+            // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
             iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
             // quick fix to place the gizmo at the right place
@@ -1096,9 +1110,6 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
     }
 
     mTransformHUD->SetCenterGizmo( true );
-
-    // redraw
-    //iScene->GetEngine()->Invalidate( 0 );
 
     oSignalFlags = notificationFlags;
 

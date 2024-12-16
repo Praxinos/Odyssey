@@ -201,7 +201,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
     return true;
 }
 
-FChartDivision*
+FInbetweenerChart::Inbetween*
 UOdysseyPainterEditorVectorChartTool::GetHoveredInbetween()
 {
     return mHoveredInbetween;
@@ -231,7 +231,12 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                                                         , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* engine = iScene->GetEngine();
+    static FVector2D deltaPositionCumul = FVector2D( 0.0f, 0.0f );
+    FOdysseyPoint pointInTexture = iPointInTexture;
     uint64 notificationFlags = 0;
+
+    // because we ignore some events, we need to accumulate the delta
+    deltaPositionCumul += iPointInTexture.deltaPosition;
 
     // For some reason we receive quite a lot of mouse events between 2 screen refresh, I don't know why
     // The issue is absent with the Ink driver. It is present with the Wintab and Native drivers. The simpliest
@@ -239,26 +244,23 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
     if( engine->GetInvalidationFlags()  )
         return;
 
-    if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
+    pointInTexture.deltaPosition = deltaPositionCumul;
+
+    if( pointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
         if( mChartHUD->GetBreakdown() )
         {
             FInbetweenerBreakdown* currentBreakdown = mChartHUD->GetBreakdown();
-            ::ULIS::FVec2D* HUDBezier = currentBreakdown->GetChart()->GetHUDBezier();
+            FInbetweenerChart::HUDBezier* HUDBezier = currentBreakdown->GetChart()->GetHUDBezier();
 
             if( mPickingMode == eChartPickingMode::Default )
             {
                 if( mPickedInbetween )
                 {
-                    FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->chart->GetBreakdown()->GetInbetweenerTag();
-                    /*double newT = FOdysseyVector::QuadraticBezierHitTest( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y )
-                                                                        , HUDBezier[0]
-                                                                        , HUDBezier[1]
-                                                                        , HUDBezier[2]
-                                                                        , 16 );*/
-                    double newT = mChartHUD->QuadraticHitTest( ::ULIS::FVec2D( iPointInTexture.x
-                                                                             , iPointInTexture.y )
-                                                              , INT_MAX );
+                    FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->GetChart()->GetBreakdown()->GetInbetweenerTag();
+                    double newT = currentBreakdown->GetChart()->GetHUDBezier()->HitTest( ::ULIS::FVec2D( pointInTexture.x
+                                                                                                       , pointInTexture.y )
+                                                                                       , INT_MAX );
 
                     inbetweenerTag->MoveInbetween( mPickedInbetween
                                                  , newT
@@ -270,18 +272,13 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
             {
                 if( ShiftingOp == eChartShiftingOp::Relative )
                 {
-                    /*double newT = FOdysseyVector::QuadraticBezierHitTest( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y )
-                                                                        , HUDBezier[0]
-                                                                        , HUDBezier[1]
-                                                                        , HUDBezier[2]
-                                                                        , 16 );*/
-                    double newT = mChartHUD->QuadraticHitTest( ::ULIS::FVec2D( iPointInTexture.x
-                                                                             , iPointInTexture.y )
-                                                              , INT_MAX );
+                    double newT = currentBreakdown->GetChart()->GetHUDBezier()->HitTest( ::ULIS::FVec2D( pointInTexture.x
+                                                                                                       , pointInTexture.y )
+                                                                                       , INT_MAX );
 
                     if ( mPickedInbetween )
                     {
-                        FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->chart->GetBreakdown()->GetInbetweenerTag();
+                        FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->GetChart()->GetBreakdown()->GetInbetweenerTag();
 
                         inbetweenerTag->MoveInbetween( mPickedInbetween
                                                      , newT
@@ -291,19 +288,19 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
 
                 if( ShiftingOp == eChartShiftingOp::EaseInOrOut )
                 {
-                    if( iPointInTexture.x < mMouseAtDown.x )
+                    if( pointInTexture.x < mMouseAtDown.x )
                     {
                         currentBreakdown->EaseIn( mEasing );
 
-                        mEasing = std::clamp( ( iPointInTexture.deltaPosition.X < 0.0f ) ? mEasing + 0.2f
+                        mEasing = std::clamp( ( pointInTexture.deltaPosition.X < 0.0f ) ? mEasing + 0.2f
                                                                                          : mEasing - 0.2f, 0.0f, 1.0f );
                     }
 
-                    if( iPointInTexture.x > mMouseAtDown.x )
+                    if( pointInTexture.x > mMouseAtDown.x )
                     {
                         currentBreakdown->EaseOut( mEasing );
 
-                        mEasing = std::clamp( ( iPointInTexture.deltaPosition.X > 0.0f ) ? mEasing + 0.2f
+                        mEasing = std::clamp( ( pointInTexture.deltaPosition.X > 0.0f ) ? mEasing + 0.2f
                                                                                          : mEasing - 0.2f, 0.0f, 1.0f );
                     }
                 }
@@ -314,30 +311,35 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                     {
                         currentBreakdown->EaseInAndOut( mEasing, mPickedInbetween );
 
-                        mEasing = std::clamp( ( iPointInTexture.deltaPosition.X > 0.0f ) ? mEasing + 0.2f
-                                                                                         : mEasing - 0.2f, -1.0f, 1.0f );
+                        mEasing = std::clamp( ( pointInTexture.deltaPosition.X > 0.0f ) ? mEasing + 0.2f
+                                                                                        : mEasing - 0.2f, -1.0f, 1.0f );
                     }
                 }
             }
 
             if( mPickingMode == eChartPickingMode::Control )
             {
+                ::ULIS::FVec2D deltaPosition = ::ULIS::FVec2D( pointInTexture.deltaPosition.X
+                                                             , pointInTexture.deltaPosition.Y );
+
                 if( mPickedBezierPoint )
                 {
-                    mPickedBezierPoint->x += iPointInTexture.deltaPosition.X;
-                    mPickedBezierPoint->y += iPointInTexture.deltaPosition.Y;
+                    ::ULIS::FVec2D newPos = mPickedBezierPoint->GetPosition() + deltaPosition;
+
+                    mPickedBezierPoint->SetPosition( newPos.x, newPos.y );
                 }
                 else
                 {
-                    HUDBezier[0].x += iPointInTexture.deltaPosition.X;
-                    HUDBezier[0].y += iPointInTexture.deltaPosition.Y;
-                    HUDBezier[1].x += iPointInTexture.deltaPosition.X;
-                    HUDBezier[1].y += iPointInTexture.deltaPosition.Y;
-                    HUDBezier[2].x += iPointInTexture.deltaPosition.X;
-                    HUDBezier[2].y += iPointInTexture.deltaPosition.Y;
+                    ::ULIS::FVec2D pointPosition[3] = { HUDBezier->GetPoints()[0].GetPosition() + deltaPosition
+                                                      , HUDBezier->GetPoints()[1].GetPosition() + deltaPosition
+                                                      , HUDBezier->GetPoints()[2].GetPosition() + deltaPosition };
+
+                    HUDBezier->GetPoints()[0].SetPosition( pointPosition[0].x, pointPosition[0].y );
+                    HUDBezier->GetPoints()[1].SetPosition( pointPosition[1].x, pointPosition[1].y );
+                    HUDBezier->GetPoints()[2].SetPosition( pointPosition[2].x, pointPosition[2].y );
                 }
 
-                mChartHUD->UpdateBezier();
+                //currentBreakdown->GetChart()->GetHUDBezier()->Update();
             }
         }
     }
@@ -346,6 +348,8 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
     iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
     // redraw the current scene as it might not be modified
     iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    deltaPositionCumul = FVector2D( 0.0f, 0.0f );
 
     oSignalFlags = notificationFlags;
 }
@@ -367,7 +371,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseUpVector( FOdysseyVectorGroupPaint*
     {
         if( mPickedInbetween )
         {
-            FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->chart->GetBreakdown()->GetInbetweenerTag();
+            FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->GetChart()->GetBreakdown()->GetInbetweenerTag();
 
             // we need to manually redraw because no object is modified
             inbetweenerTag->RedrawCells();

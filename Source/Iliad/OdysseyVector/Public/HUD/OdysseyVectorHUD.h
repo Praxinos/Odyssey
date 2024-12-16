@@ -6,6 +6,8 @@
 #include <blend2d.h>
 #include <ULIS>
 
+#include "InbetweenerTag/InbetweenerChart.h"
+
 class FOdysseyVectorBucket;
 class FOdysseyVectorObject;
 class FOdysseyVectorVertex;
@@ -18,7 +20,6 @@ class FOdysseyVectorEngine;
 class FOdysseyVectorTagInbetweener;
 class FInbetweenerBreakdown;
 class FInterpolatedPath;
-struct FChartDivision;
 
 typedef struct _FPointQuadTreeEntry
 {
@@ -125,7 +126,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                                                      , BLContext* iBLContext
                                                      , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                      , FInterpolatedPath* iInterpolatedPath
-                                                     , FChartDivision* iInbetween );
+                                                     , FInbetweenerChart::Inbetween* iInbetween );
 /*
         static void DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
                                  , BLContext* iBLContext

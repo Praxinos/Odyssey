@@ -12,7 +12,7 @@
 class FOdysseyVectorTagInbetweener;
 class FInbetweenerBreakdown;
 struct FInbetweenerDrawing;
-struct FChartDivision;
+class FInbetweenerChart::Inbetween;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
@@ -27,14 +27,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
         }
     };
 
-    struct FChartFraction
-    {
-        float linearT0;
-        float linearT1;
-        float quadraticT0;
-        float quadraticT1;
-    };
-
     public:
         //static const uint32 HANDLE_RADIUS = 5;
 
@@ -43,23 +35,20 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) override;
         virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
-        FChartDivision* PickInbetween( double iWorldX
+        FInbetweenerChart::Inbetween* PickInbetween( double iWorldX
                                       , double iWorldY );
         void MoveInbetween( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                          , FChartDivision* iInbetween
+                          , FInbetweenerChart::Inbetween* iInbetween
                           , double iWorldX
                           , double iWorldY
                           , bool iRelative );
 
         void UpdateBreakdown( FOdysseyVectorGroupPaint* iScene );
         FInbetweenerBreakdown* GetBreakdown();
-        ::ULIS::FVec2D* PickBezierPoint( double iWorldX
-                                       , double iWorldY
-                                       , double iRadius );
+        FInbetweenerChart::HUDBezier::Point* PickBezierPoint( double iWorldX
+                                                            , double iWorldY
+                                                            , double iRadius );
         const FGlyph* GetGlyph( uint32 iNum );
-        void UpdateBezier();
-        // returns spacing T
-        double QuadraticHitTest( const ::ULIS::FVec2D& iPt, uint32 iRadius );
 
     private:
         void DrawBreakdownChart( BLContext* iBLContext
@@ -67,11 +56,15 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
                                , BLRgba32& iBgColor
                                , BLRgba32& iHcColor
                                , FInbetweenerBreakdown* iBreakdown
-                               , uint32 iRenderedCellIndex );
+                               , FInbetweenerChart::HUDBezier* iHUDBezier
+                               , uint32 iRenderedCellIndex
+                               , bool iDrawSourceIndicator );
         void DrawInbetweenerChart( BLContext* iBLContext
-                                 , FOdysseyVectorTagInbetweener* iInbetweenerTag );
-        double GetQuadraticT( float iSpacingT );
-
+                                 , BLRgba32& iFgColor
+                                 , BLRgba32& iBgColor
+                                 , BLRgba32& iHcColor
+                                 , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                 , uint32 iRenderedCellIndex );
 
     private:
         UOdysseyPainterEditorVectorChartTool* mChartTool;
@@ -79,6 +72,4 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
         ::ULIS::FRectD mChartRect;
         BLFont mFont;
         std::vector<FGlyph> mGlyphBuffer;
-        std::vector<FChartFraction> mFractionBuffer;
-        std::vector<::ULIS::FVec2D> mFractionPointBuffer;
 };

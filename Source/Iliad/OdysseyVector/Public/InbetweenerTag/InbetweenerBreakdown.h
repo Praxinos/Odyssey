@@ -81,7 +81,7 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         void EaseOut( float iEasing );
         void EaseIn( float iEasing, uint32 iFrom, uint32 iTo );
         void EaseOut( float iEasing, uint32 iFrom, uint32 iTo );
-        void EaseInAndOut( float iEasing, FChartDivision* iInbetween );
+        void EaseInAndOut( float iEasing, FInbetweenerChart::Inbetween* iInbetween );
         IOdysseyVectorCell* GetTargetCell();
         IOdysseyVectorCell* GetSourceCell();
         void SetTargetVisibility( bool iTargetVisibility );

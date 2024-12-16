@@ -38,7 +38,7 @@ FInbetweenerWaypoint::SetT( float iT )
     FOdysseyVectorTagInbetweener* inbetweenerTag = mTrajectory->GetRoute()->GetInbetweenerTag();
     FInbetweenerBreakdown* breakdown = mTrajectory->GetBreakdown();
     uint32 inbetweenIndex = ( this - &mTrajectory->GetWaypointBuffer()[0] );
-    double inbetweenT = breakdown->GetChart()->GetDivisionBuffer()[inbetweenIndex].spacing;
+    double inbetweenT = breakdown->GetChart()->GetInbetweenBuffer()[inbetweenIndex].GetSpacing();
 
     // waypoint is precisely on inbetween
     mRatio = 0.0f;
@@ -64,7 +64,7 @@ FInbetweenerWaypoint::GetT()
     FOdysseyVectorTagInbetweener* inbetweenerTag = mTrajectory->GetRoute()->GetInbetweenerTag();
     FInbetweenerBreakdown* breakdown = mTrajectory->GetBreakdown();
     uint32 inbetweenIndex = ( this - &mTrajectory->GetWaypointBuffer()[0] );
-    double inbetweenT = breakdown->GetChart()->GetDivisionBuffer()[inbetweenIndex].spacing;
+    double inbetweenT = breakdown->GetChart()->GetInbetweenBuffer()[inbetweenIndex].GetSpacing();
 
     if( mRatio > 0.0f )
     {
