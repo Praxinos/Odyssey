@@ -1,5 +1,0 @@
-===================
-OdysseySerializable
-===================
-
-Module Example

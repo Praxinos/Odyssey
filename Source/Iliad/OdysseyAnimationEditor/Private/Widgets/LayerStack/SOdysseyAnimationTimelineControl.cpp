@@ -47,7 +47,7 @@ SOdysseyAnimationTimelineControl::OnPaint(const FPaintArgs& Args, const FGeometr
     lineColor.A = 0.3f;
 
     int currentFrame = mCurrentFrame.Get();
-    float currentFramePos = mTimelinePosition->FrameToMousePosition(currentFrame);
+    float currentFramePos = mTimelinePosition->FrameToMousePosition(currentFrame) + mTimelinePosition->GetPadding();
 
     FSlateDrawElement::MakeBox(
         OutDrawElements,
@@ -64,8 +64,8 @@ SOdysseyAnimationTimelineControl::OnPaint(const FPaintArgs& Args, const FGeometr
         FLinearColor outOfRangeColor = FLinearColor::Black;
         outOfRangeColor.A = 0.3f;
 
-        float leftRangeX = FMath::Min(width, mTimelinePosition->FrameToMousePosition(validRange.GetLowerBoundValue()));
-        float rightRangeX = FMath::Max(0, mTimelinePosition->FrameToMousePosition(validRange.GetUpperBoundValue() + 1));
+        float leftRangeX = FMath::Min(width, mTimelinePosition->FrameToMousePosition(validRange.GetLowerBoundValue()) + mTimelinePosition->GetPadding());
+        float rightRangeX = FMath::Max(0, mTimelinePosition->FrameToMousePosition(validRange.GetUpperBoundValue() + 1 + mTimelinePosition->GetPadding()));
 
         if (leftRangeX > 0.f)
         {

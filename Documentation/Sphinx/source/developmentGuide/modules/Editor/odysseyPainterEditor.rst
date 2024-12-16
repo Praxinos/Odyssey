@@ -1,5 +1,0 @@
-====================
-OdysseyPainterEditor
-====================
-
-Module Example

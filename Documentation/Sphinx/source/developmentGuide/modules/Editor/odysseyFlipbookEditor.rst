@@ -1,5 +1,0 @@
-=====================
-OdysseyFlipbookEditor
-=====================
-
-Module Example

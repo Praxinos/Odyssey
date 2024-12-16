@@ -1,5 +1,0 @@
-===============
-Flipbook Editor
-===============
-
-Module Example

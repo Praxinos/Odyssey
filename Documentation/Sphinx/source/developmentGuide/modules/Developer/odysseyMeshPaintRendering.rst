@@ -1,5 +1,0 @@
-=========================
-OdysseyMashPaintRendering
-=========================
-
-Module Example
