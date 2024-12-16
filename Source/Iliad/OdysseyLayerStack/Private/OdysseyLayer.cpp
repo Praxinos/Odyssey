@@ -235,12 +235,13 @@ UOdysseyLayer::PostPropertyChanged(const FName& iPropertyName, bool iIsInteracti
 {
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Name) )
     {
-        if (Parent)
-            Parent->ImageRenderingCompositionChanged();
         OnNameChanged().Broadcast(this);
     }
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsActivated) )
     {
+        if (Parent)
+            Parent->ImageRenderingCompositionChanged();
+
         OnIsActivatedChanged().Broadcast(this);
     }
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, IsLocked) )
@@ -276,13 +277,13 @@ UOdysseyLayer::PostPropertyChanged(const FName& iPropertyName, bool iIsInteracti
     }
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, BlendMode) )
     {
-        OnBlendModeChanged().Broadcast(this);
         ImageRenderingChanged();
+        OnBlendModeChanged().Broadcast(this);
     }
     if ( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyLayer, Opacity) )
     {
-        OnOpacityChanged().Broadcast(this);
         ImageRenderingChanged(iIsInteractive);
+        OnOpacityChanged().Broadcast(this);
     }
 }
 
