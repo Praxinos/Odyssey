@@ -9,6 +9,7 @@
 #include "ISinglePropertyView.h"
 #include "OdysseyMediaRaster.h"
 #include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
+#include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
 #include "PropertyHandle.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -242,7 +243,7 @@ UOdysseyPainterEditorRasterBaseTool::BuildSelectionMenu(FMenuBuilder& iMenu)
         , FSlateIcon()
         , FUIAction(
             FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::PasteSelection)
-            , FCanExecuteAction::CreateLambda([this]() { return (mEditor && mEditor->HasCopyBlock()); }))
+            , FCanExecuteAction::CreateLambda([this]() { return (mEditor && mEditor->HasCopyBlockClipboard()); }))
     );
 
 
@@ -252,7 +253,7 @@ UOdysseyPainterEditorRasterBaseTool::BuildSelectionMenu(FMenuBuilder& iMenu)
         , FSlateIcon()
         , FUIAction(
             FExecuteAction::CreateUObject(this, &UOdysseyPainterEditorRasterBaseTool::PasteSelectionInNewLayer)
-            , FCanExecuteAction::CreateLambda([this]() { return (mEditor && mEditor->HasCopyBlock()); }))
+            , FCanExecuteAction::CreateLambda([this]() { return (mEditor && mEditor->HasCopyBlockClipboard()); }))
     );
 
     iMenu.AddMenuEntry(
@@ -299,26 +300,30 @@ void UOdysseyPainterEditorRasterBaseTool::SelectAll()
 
 void UOdysseyPainterEditorRasterBaseTool::CopySelection()
 {
-    if (mEditor)
-        mEditor->CopyCurrentSelectionToCopyBlock();
+    TSharedPtr<FOdysseyPainterEditorGlobalShortcuts> shortcuts = MakeShared<FOdysseyPainterEditorGlobalShortcuts>(mEditor);
+    if (shortcuts->CanAction_CopyCurrentSelection())
+        shortcuts->Action_CopyCurrentSelection();
 }
 
 void UOdysseyPainterEditorRasterBaseTool::CutSelection()
 {
-    if (mEditor)
-        mEditor->CutCurrentSelectionToCopyBlock();
+    TSharedPtr<FOdysseyPainterEditorGlobalShortcuts> shortcuts = MakeShared<FOdysseyPainterEditorGlobalShortcuts>(mEditor);
+    if (shortcuts->CanAction_CutCurrentSelection())
+        shortcuts->Action_CutCurrentSelection();
 }
 
 void UOdysseyPainterEditorRasterBaseTool::PasteSelection()
 {
-    if (mEditor)
-        mEditor->PasteCopiedBlock();
+    TSharedPtr<FOdysseyPainterEditorGlobalShortcuts> shortcuts = MakeShared<FOdysseyPainterEditorGlobalShortcuts>(mEditor);
+    if (shortcuts->CanAction_PasteCurrentSelection())
+        shortcuts->Action_PasteCurrentSelection();
 }
 
 void UOdysseyPainterEditorRasterBaseTool::PasteSelectionInNewLayer()
 {
-    if (mEditor)
-        mEditor->PasteCopiedBlockToNewLayer();
+    TSharedPtr<FOdysseyPainterEditorGlobalShortcuts> shortcuts = MakeShared<FOdysseyPainterEditorGlobalShortcuts>(mEditor);
+    if (shortcuts->CanAction_PasteCurrentSelectionInNewLayer())
+        shortcuts->Action_PasteCurrentSelectionInNewLayer();
 }
 
 void UOdysseyPainterEditorRasterBaseTool::ClearSelection()

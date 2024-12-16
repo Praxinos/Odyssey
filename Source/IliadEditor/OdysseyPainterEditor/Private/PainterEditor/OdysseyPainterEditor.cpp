@@ -7,6 +7,8 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "ObjectEditorUtils.h"
 
+#include "OdysseyBlockClipboardData.h"
+#include "OdysseyEditorModule.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyHUDSystem.h"
 #include "OdysseyHUDElement.h"
@@ -71,6 +73,7 @@
 
 #include "Shortcuts/OdysseyLayerStackGlobalShortcuts.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalShortcuts.h"
+#include "Shortcuts/Global/OdysseyPainterEditorGlobalToolsShortcuts.h"
 #include "Mesh/FOdysseyMeshSelector.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
@@ -150,6 +153,7 @@ FOdysseyPainterEditor::Initialize()
     //Init the shortcuts
     TAttribute<UOdysseyLayerStack*> layerStackAttr = TAttribute<UOdysseyLayerStack*>::CreateRaw(this, &FOdysseyPainterEditor::LayerStack);
     GetShortcuts().Add(MakeShared<FOdysseyLayerStackGlobalShortcuts>(layerStackAttr));
+    GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalToolsShortcuts>(this));
     GetShortcuts().Add(MakeShared<FOdysseyPainterEditorGlobalShortcuts>(this));
 
     //Init the extensions
@@ -2287,159 +2291,11 @@ FOdysseyPainterEditor::AlterContourWidth( FOdysseyVectorGroupPaint* iScene
     FOdysseyVectorEngine::Notify( iScene, notificationFlags );
 }
 
-bool FOdysseyPainterEditor::HasCopyBlock()
+bool FOdysseyPainterEditor::HasCopyBlockClipboard()
 {
-    return mCopyBlock != nullptr;
-}
+    FOdysseyEditorModule& odysseyEditorModule = FModuleManager::Get().LoadModuleChecked<FOdysseyEditorModule>(TEXT("OdysseyEditor"));
 
-bool FOdysseyPainterEditor::CopyCurrentSelectionToCopyBlock()
-{
-    if (GetCurrentMediaProvider().IsLocked())
-        return false;
-
-    if( !GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>() )
-        return false;
-
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetCurrentMediaProvider().GetMedias<FOdysseyMediaRaster>();
-    if (mediaRasters.Num() <= 0)
-        return false;
-
-    if (RasterSelection()->IsEmpty())
-    {
-        return false;
-    }
-
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = rasterBlock->GetBlock();
-
-    ::ULIS::FRectI boundingBox = rasterBlock->GetRect();
-
-    mCopyBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, rasterBlock->GetFormat());
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-    ::ULIS::FEvent clearEvent, copyEvent;
-    ctx.Clear(*mCopyBlock);
-    ctx.Finish();
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = RasterSelection()->GetBlock();
-
-    if (maskBlock)
-    {
-        ctx.Copy(
-            *block,
-            *mCopyBlock,
-            boundingBox,
-            ::ULIS::FVec2I(0, 0),
-            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-            0,
-            nullptr,
-            &copyEvent
-        );
-
-        ctx.FilterInto(
-            [](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
-            {
-                for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
-                {
-                    iDstPixel.SetAlphaF(iDstPixel.AlphaF() * iSrcPixel.GreyF());
-                }
-            }
-                , *maskBlock
-                , *mCopyBlock
-                , boundingBox
-                , ::ULIS::FVec2I(0, 0)
-                , ::ULIS::FSchedulePolicy::MultiScanlines
-                , 1
-                , &copyEvent
-                , nullptr
-                );
-
-        ctx.Finish();
-    }
-
-    return true;
-}
-
-bool FOdysseyPainterEditor::CutCurrentSelectionToCopyBlock()
-{
-    if (GetCurrentMediaProvider().IsLocked())
-        return false;
-
-    if (!GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>())
-        return false;
-
-    TArray<TSharedPtr<FOdysseyMediaRaster>> mediaRasters = GetCurrentMediaProvider().GetOrCreateMedias<FOdysseyMediaRaster>();
-    if (mediaRasters.Num() <= 0)
-        return false;
-
-    if (RasterSelection()->IsEmpty())
-    {
-        return false;
-    }
-
-    TSharedPtr<FOdysseyRasterBlock> rasterBlock = mediaRasters[0]->GetRasterBlock();
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> block = rasterBlock->GetBlock();
-
-    ::ULIS::FRectI boundingBox = rasterBlock->GetRect();
-
-    mCopyBlock = MakeShared<::ULIS::FBlock>(boundingBox.w, boundingBox.h, rasterBlock->GetFormat());
-
-    ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(rasterBlock->GetFormat());
-    ::ULIS::FEvent clearEvent, copyEvent;
-    ctx.Clear(*mCopyBlock);
-    ctx.Finish();
-
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> maskBlock = RasterSelection()->GetBlock();
-
-    if (maskBlock)
-    {
-        ctx.Copy(
-            *block,
-            *mCopyBlock,
-            boundingBox,
-            ::ULIS::FVec2I(0, 0),
-            ::ULIS::FSchedulePolicy::AsyncCacheEfficient,
-            0,
-            nullptr,
-            &copyEvent
-        );
-
-        ctx.FilterInto(
-            [](const ::ULIS::FPixel& iSrcPixel, ::ULIS::FPixel& iDstPixel, uint64 iNumPixels)
-            {
-                for (int i = 0; i < iNumPixels; i++, iSrcPixel.Next(), iDstPixel.Next())
-                {
-                    iDstPixel.SetAlphaF(iDstPixel.AlphaF() * iSrcPixel.GreyF());
-                }
-            }
-            , *maskBlock
-                , *mCopyBlock
-                , boundingBox
-                , ::ULIS::FVec2I(0, 0)
-                , ::ULIS::FSchedulePolicy::MultiScanlines
-                , 1
-                , &copyEvent
-                , nullptr
-                );
-
-        ctx.Finish();
-    }
-
-    mSource->ClearFromCopyBlock(mCopyBlock);
-
-    return true;
-}
-
-void FOdysseyPainterEditor::PasteCopiedBlock()
-{
-    if (mSource)
-        mSource->PasteBlockToCurrentLayer( mCopyBlock );
-}
-
-void FOdysseyPainterEditor::PasteCopiedBlockToNewLayer()
-{
-    if( mSource )
-        mSource->PasteBlockToNewLayer( mCopyBlock );
+    return odysseyEditorModule.GetClipboard()->GetId() == FOdysseyBlockClipboardData::StaticId();
 }
 
 static void

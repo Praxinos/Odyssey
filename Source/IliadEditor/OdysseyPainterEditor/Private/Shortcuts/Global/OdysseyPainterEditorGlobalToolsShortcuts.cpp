@@ -15,8 +15,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::FOdysseyPainterEditorGlobalToolsShort
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList)
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return;
 
     //Generic tool shortcuts
@@ -65,119 +64,117 @@ FOdysseyPainterEditorGlobalToolsShortcuts::MapActionsToCommandList(TSharedRef<FU
     //Specific tool shortcuts
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateRasterDrawingTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterDrawingTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterDrawingTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetRasterDrawingTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetRasterDrawingTool()))
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateRasterEraserTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterEraserTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterEraserTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetRasterEraserTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetRasterEraserTool()))
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateRasterPaintBucketTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterPaintBucketTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterPaintBucketTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetRasterPaintBucketTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetRasterPaintBucketTool()))
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateRasterPrimitiveDrawingTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterPrimitiveDrawingTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterPrimitiveDrawingTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetRasterPrimitiveDrawingTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetRasterPrimitiveDrawingTool()))
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateRasterTransformTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterSelectionTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterSelectionTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetRasterSelectionTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetRasterSelectionTool()))
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateRasterTransformTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterTransformTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetRasterTransformTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetRasterTransformTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetRasterTransformTool()))
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateVectorEraserTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorEraserTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorEraserTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorEraserTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorEraserTool()))
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateVectorGridTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorGridTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorGridTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorGridTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorGridTool()))
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateVectorPaintBucketTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPaintBucketTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPaintBucketTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorPaintBucketTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorPaintBucketTool()))
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateVectorPathDrawingTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPathDrawingTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPathDrawingTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorPathDrawingTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorPathDrawingTool()))
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateVectorPathEditTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPathEditTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPathEditTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorPathEditTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorPathEditTool()))
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateVectorPathPushTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPathPushTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPathPushTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorPathPushTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorPathPushTool()))
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateVectorPathSmoothTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPathSmoothTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPathSmoothTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorPathSmoothTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorPathSmoothTool()))
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateVectorPathStitchTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPathStitchTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPathStitchTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorPathStitchTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorPathStitchTool()))
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateVectorPrimitiveDrawingTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPrimitiveDrawingTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorPrimitiveDrawingTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorPrimitiveDrawingTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorPrimitiveDrawingTool()))
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateVectorScenePanTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorScenePanTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorScenePanTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorScenePanTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorScenePanTool()))
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateVectorSelectionTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorSelectionTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorSelectionTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorSelectionTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorSelectionTool()))
     );
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().ActivateVectorTransformTool,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorTransformTool())),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(editor->GetVectorTransformTool()))
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorTransformTool())),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool, Cast<UOdysseyPainterEditorTool>(mEditor->GetVectorTransformTool()))
     );
 }
 
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool(UOdysseyPainterEditorTool* iTool)
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return;
 
     if (!iTool->IsActivable() || iTool->IsActivated() )
         return;
 
-    editor->ActivateMainTool(iTool);
+    mEditor->ActivateMainTool(iTool);
 }
 
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateColorPickerTool()
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return;
 
-    if (CanAction_ActivateTool(editor->GetColorPickerTool()))
+    if (CanAction_ActivateTool(mEditor->GetColorPickerTool()))
     {
-        Action_ActivateTool(editor->GetColorPickerTool());
+        Action_ActivateTool(mEditor->GetColorPickerTool());
         return;
     }
 }
@@ -185,19 +182,18 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateColorPickerTool()
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateDrawingTool()
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return;
 
-    if (CanAction_ActivateTool(editor->GetRasterDrawingTool()))
+    if (CanAction_ActivateTool(mEditor->GetRasterDrawingTool()))
     {
-        Action_ActivateTool(editor->GetRasterDrawingTool());
+        Action_ActivateTool(mEditor->GetRasterDrawingTool());
         return;
     }
 
-    if (CanAction_ActivateTool(editor->GetVectorPathDrawingTool()))
+    if (CanAction_ActivateTool(mEditor->GetVectorPathDrawingTool()))
     {
-        Action_ActivateTool(editor->GetVectorPathDrawingTool());
+        Action_ActivateTool(mEditor->GetVectorPathDrawingTool());
         return;
     }
 }
@@ -205,19 +201,18 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateDrawingTool()
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateSelectionTool()
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return;
 
-    if (CanAction_ActivateTool(editor->GetRasterSelectionTool()))
+    if (CanAction_ActivateTool(mEditor->GetRasterSelectionTool()))
     {
-        Action_ActivateTool(editor->GetRasterSelectionTool());
+        Action_ActivateTool(mEditor->GetRasterSelectionTool());
         return;
     }
 
-    if (CanAction_ActivateTool(editor->GetVectorSelectionTool()))
+    if (CanAction_ActivateTool(mEditor->GetVectorSelectionTool()))
     {
-        Action_ActivateTool(editor->GetVectorSelectionTool());
+        Action_ActivateTool(mEditor->GetVectorSelectionTool());
         return;
     }
 }
@@ -225,19 +220,18 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateSelectionTool()
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivatePaintBucketTool()
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return;
 
-    if (CanAction_ActivateTool(editor->GetRasterPaintBucketTool()))
+    if (CanAction_ActivateTool(mEditor->GetRasterPaintBucketTool()))
     {
-        Action_ActivateTool(editor->GetRasterPaintBucketTool());
+        Action_ActivateTool(mEditor->GetRasterPaintBucketTool());
         return;
     }
 
-    if (CanAction_ActivateTool(editor->GetVectorPaintBucketTool()))
+    if (CanAction_ActivateTool(mEditor->GetVectorPaintBucketTool()))
     {
-        Action_ActivateTool(editor->GetVectorPaintBucketTool());
+        Action_ActivateTool(mEditor->GetVectorPaintBucketTool());
         return;
     }
 }
@@ -245,19 +239,18 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivatePaintBucketTool()
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTransformTool()
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return;
 
-    if (CanAction_ActivateTool(editor->GetRasterTransformTool()))
+    if (CanAction_ActivateTool(mEditor->GetRasterTransformTool()))
     {
-        Action_ActivateTool(editor->GetRasterTransformTool());
+        Action_ActivateTool(mEditor->GetRasterTransformTool());
         return;
     }
 
-    if (CanAction_ActivateTool(editor->GetVectorTransformTool()))
+    if (CanAction_ActivateTool(mEditor->GetVectorTransformTool()))
     {
-        Action_ActivateTool(editor->GetVectorTransformTool());
+        Action_ActivateTool(mEditor->GetVectorTransformTool());
         return;
     }
 }
@@ -265,19 +258,18 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTransformTool()
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivatePrimitiveDrawingTool()
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return;
 
-    if (CanAction_ActivateTool(editor->GetRasterPrimitiveDrawingTool()))
+    if (CanAction_ActivateTool(mEditor->GetRasterPrimitiveDrawingTool()))
     {
-        Action_ActivateTool(editor->GetRasterPrimitiveDrawingTool());
+        Action_ActivateTool(mEditor->GetRasterPrimitiveDrawingTool());
         return;
     }
 
-    if (CanAction_ActivateTool(editor->GetVectorPrimitiveDrawingTool()))
+    if (CanAction_ActivateTool(mEditor->GetVectorPrimitiveDrawingTool()))
     {
-        Action_ActivateTool(editor->GetVectorPrimitiveDrawingTool());
+        Action_ActivateTool(mEditor->GetVectorPrimitiveDrawingTool());
         return;
     }
 }
@@ -285,19 +277,18 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivatePrimitiveDrawingTool()
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateEraserTool()
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return;
 
-    if (CanAction_ActivateTool(editor->GetRasterEraserTool()))
+    if (CanAction_ActivateTool(mEditor->GetRasterEraserTool()))
     {
-        Action_ActivateTool(editor->GetRasterEraserTool());
+        Action_ActivateTool(mEditor->GetRasterEraserTool());
         return;
     }
 
-    if (CanAction_ActivateTool(editor->GetVectorEraserTool()))
+    if (CanAction_ActivateTool(mEditor->GetVectorEraserTool()))
     {
-        Action_ActivateTool(editor->GetVectorEraserTool());
+        Action_ActivateTool(mEditor->GetVectorEraserTool());
         return;
     }
 }
@@ -305,21 +296,20 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateEraserTool()
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateWarpTool()
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return;
 
     /* TODO:
-    if (CanAction_ActivateTool(editor->GetRasterWarpTool()))
+    if (CanAction_ActivateTool(mEditor->GetRasterWarpTool()))
     {
-        Action_ActivateTool(editor->GetRasterWarpTool());
+        Action_ActivateTool(mEditor->GetRasterWarpTool());
         return;
     }
     */
 
-    if (CanAction_ActivateTool(editor->GetVectorGridTool()))
+    if (CanAction_ActivateTool(mEditor->GetVectorGridTool()))
     {
-        Action_ActivateTool(editor->GetVectorGridTool());
+        Action_ActivateTool(mEditor->GetVectorGridTool());
         return;
     }
 }
@@ -328,8 +318,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateWarpTool()
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool(UOdysseyPainterEditorTool* iTool)
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return false;
 
     if (!iTool->IsActivable() || iTool->IsActivated() )
@@ -341,11 +330,10 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool(UOdysseyPainte
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateColorPickerTool()
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return false;
 
-    if (CanAction_ActivateTool(editor->GetColorPickerTool()))
+    if (CanAction_ActivateTool(mEditor->GetColorPickerTool()))
         return true;
 
     return false;
@@ -354,14 +342,13 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateColorPickerTool()
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateDrawingTool()
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return false;
 
-    if (CanAction_ActivateTool(editor->GetRasterDrawingTool()))
+    if (CanAction_ActivateTool(mEditor->GetRasterDrawingTool()))
         return true;
 
-    if (CanAction_ActivateTool(editor->GetVectorPathDrawingTool()))
+    if (CanAction_ActivateTool(mEditor->GetVectorPathDrawingTool()))
         return true;
 
     return false;
@@ -370,14 +357,13 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateDrawingTool()
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateSelectionTool()
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return false;
 
-    if (CanAction_ActivateTool(editor->GetRasterSelectionTool()))
+    if (CanAction_ActivateTool(mEditor->GetRasterSelectionTool()))
         return true;
 
-    if (CanAction_ActivateTool(editor->GetVectorSelectionTool()))
+    if (CanAction_ActivateTool(mEditor->GetVectorSelectionTool()))
         return true;
 
     return false;
@@ -386,14 +372,13 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateSelectionTool()
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivatePaintBucketTool()
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return false;
 
-    if (CanAction_ActivateTool(editor->GetRasterPaintBucketTool()))
+    if (CanAction_ActivateTool(mEditor->GetRasterPaintBucketTool()))
         return true;
 
-    if (CanAction_ActivateTool(editor->GetVectorPaintBucketTool()))
+    if (CanAction_ActivateTool(mEditor->GetVectorPaintBucketTool()))
         return true;
 
     return false;
@@ -402,14 +387,13 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivatePaintBucketTool()
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTransformTool()
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return false;
 
-    if (CanAction_ActivateTool(editor->GetRasterTransformTool()))
+    if (CanAction_ActivateTool(mEditor->GetRasterTransformTool()))
         return true;
 
-    if (CanAction_ActivateTool(editor->GetVectorTransformTool()))
+    if (CanAction_ActivateTool(mEditor->GetVectorTransformTool()))
         return true;
 
     return false;
@@ -418,14 +402,13 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTransformTool()
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivatePrimitiveDrawingTool()
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return false;
 
-    if (CanAction_ActivateTool(editor->GetRasterPrimitiveDrawingTool()))
+    if (CanAction_ActivateTool(mEditor->GetRasterPrimitiveDrawingTool()))
         return true;
 
-    if (CanAction_ActivateTool(editor->GetVectorPrimitiveDrawingTool()))
+    if (CanAction_ActivateTool(mEditor->GetVectorPrimitiveDrawingTool()))
         return true;
 
     return false;
@@ -434,14 +417,13 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivatePrimitiveDrawingToo
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateEraserTool()
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return false;
 
-    if (CanAction_ActivateTool(editor->GetRasterEraserTool()))
+    if (CanAction_ActivateTool(mEditor->GetRasterEraserTool()))
         return true;
 
-    if (CanAction_ActivateTool(editor->GetVectorEraserTool()))
+    if (CanAction_ActivateTool(mEditor->GetVectorEraserTool()))
         return true;
 
     return false;
@@ -450,16 +432,15 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateEraserTool()
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateWarpTool()
 {
-    FOdysseyPainterEditor* editor = mEditor;
-    if (!editor)
+    if (!mEditor)
         return false;
 
     /* TODO:
-    if (CanAction_ActivateTool(editor->GetRasterWarpTool()))
+    if (CanAction_ActivateTool(mEditor->GetRasterWarpTool()))
         return true;
     */
 
-    if (CanAction_ActivateTool(editor->GetVectorGridTool()))
+    if (CanAction_ActivateTool(mEditor->GetVectorGridTool()))
         return true;
 
     return false;

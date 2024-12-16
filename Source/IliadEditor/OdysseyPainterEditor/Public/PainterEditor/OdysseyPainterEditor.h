@@ -251,11 +251,7 @@ public:
     static const uint64 UI_UPDATE_HUD           = ( 1ULL << ( FOdysseyVectorEngine::NOTIFY_RESERVED_SHIFT + 3 ) );
 
     // Utility functions
-    bool HasCopyBlock(); //Did we copied a selection inside a block ? (Ctrl + C)
-    bool CopyCurrentSelectionToCopyBlock();
-    bool CutCurrentSelectionToCopyBlock();
-    void PasteCopiedBlock(); //In current layer
-    void PasteCopiedBlockToNewLayer();
+    bool HasCopyBlockClipboard(); //Did we copied a selection inside a block ? (Ctrl + C)
 
     // Populates the Edit Menu everytime it is displayed
     void AddEditMenuEntry( FMenuBuilder& iMenuBuilder );
