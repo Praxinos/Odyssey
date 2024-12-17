@@ -40,8 +40,8 @@ void FOdysseyPainterEditorGlobalShortcuts::MapActionsToCommandList(TSharedRef<FU
 
     iCommandList->MapAction(
         FOdysseyPainterEditorCommands::Get().PasteCurrentSelectionInNewLayer,
-        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalShortcuts::Action_PasteCurrentSelection),
-        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalShortcuts::CanAction_PasteCurrentSelection)
+        FExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalShortcuts::Action_PasteCurrentSelectionInNewLayer),
+        FCanExecuteAction::CreateRaw(this, &FOdysseyPainterEditorGlobalShortcuts::CanAction_PasteCurrentSelectionInNewLayer)
     );
 }
 
