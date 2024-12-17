@@ -30,10 +30,10 @@ UOdysseyPainterEditorVectorTrajectoryTool::~UOdysseyPainterEditorVectorTrajector
 
 UOdysseyPainterEditorVectorTrajectoryTool::UOdysseyPainterEditorVectorTrajectoryTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorTrajectoryToolHUD( this ), false )
-    , mPickingMode( eTrajectoryPickingMode::Add )
     , mHoveredQuad( nullptr )
     , PickingRadius( 10.0f )
     , ShowInbetweens( true )
+    , EditionMode( eTrajectoryEditionMode::Add )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory64");
 
@@ -82,29 +82,30 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyDownGlobalVector( FOdysseyVector
 {
     uint64 notificationFlags = 0;
 
-    mPickingMode = eTrajectoryPickingMode::Add;
+    EditionMode = eTrajectoryEditionMode::Add;
 
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
     // with the events processing in the OnKeyUpGlobalVector(), we do like that.
     if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
       || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand ) )
     {
-        mPickingMode = eTrajectoryPickingMode::Alter;
+        EditionMode = ( EditionMode == eTrajectoryEditionMode::Curve    ) ? eTrajectoryEditionMode::Add
+                                                                          : eTrajectoryEditionMode::Curve;
     }
 
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
     // with the events processing in the OnKeyUpGlobalVector(), we do like that.
     if ( ( iKey == EKeys::LeftShift ) || ( iKey == EKeys::RightShift ) )
     {
-        mPickingMode  = eTrajectoryPickingMode::Shift;
-        //mPickingFlags = FOdysseyVectorPath::PICK_HANDLE_VERTEX;
+        EditionMode  = ( EditionMode == eTrajectoryEditionMode::Spacing ) ? eTrajectoryEditionMode::Add
+                                                                          : eTrajectoryEditionMode::Spacing;
     }
 
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
     // with the events processing in the OnKeyUpGlobalVector(), we do like that.
     if ( ( iKey == EKeys::LeftAlt ) || ( iKey == EKeys::RightAlt ) )
     {
-        mPickingMode = eTrajectoryPickingMode::Remove;
+        EditionMode = eTrajectoryEditionMode::Remove;
     }
 
     // redraw
@@ -136,7 +137,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyUpGlobalVector( FOdysseyVectorGr
     }
 
     // first reset display mode
-    mPickingMode = eTrajectoryPickingMode::Add;
+    EditionMode = eTrajectoryEditionMode::Add;
 
     oSignalFlags = notificationFlags;
     return false;
@@ -187,7 +188,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        if( mPickingMode == eTrajectoryPickingMode::Add )
+        if( EditionMode == eTrajectoryEditionMode::Add )
         {
             if( mTrajectoryHUD->GetSelectedInbetweenerTagList().size() )
             {
@@ -227,7 +228,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
             }
         }
 
-        if( mPickingMode == eTrajectoryPickingMode::Alter )
+        if( EditionMode == eTrajectoryEditionMode::Curve )
         {
             mPickedHandle = mTrajectoryHUD->PickHandle( iScene
                                                       , iPointInTexture.x
@@ -262,7 +263,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
             }
         }
 
-        if( mPickingMode == eTrajectoryPickingMode::Shift )
+        if( EditionMode == eTrajectoryEditionMode::Spacing )
         {
             if( mTrajectoryHUD->GetSelectedInbetweenerTagList().size() )
             {
@@ -293,7 +294,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
             }
         }
 
-        if( mPickingMode == eTrajectoryPickingMode::Remove )
+        if( EditionMode == eTrajectoryEditionMode::Remove )
         {
             FInbetweenerRoute* pickedRoute = mTrajectoryHUD->PickRoute( iScene
                                                                       , iPointInTexture.x
@@ -345,12 +346,6 @@ UOdysseyPainterEditorVectorTrajectoryTool::ResetHoveredQuad()
     mHoveredQuad = nullptr;
 }
 
-eTrajectoryPickingMode
-UOdysseyPainterEditorVectorTrajectoryTool::GetPickingMode()
-{
-    return mPickingMode;
-}
-
 void
 UOdysseyPainterEditorVectorTrajectoryTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
                                                                , const FOdysseyPoint& iPointInTexture
@@ -362,7 +357,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseHoverVector( FOdysseyVectorGro
 
     mTrajectoryHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    if( mPickingMode == eTrajectoryPickingMode::Add )
+    if( EditionMode == eTrajectoryEditionMode::Add )
     {
         if( mTrajectoryHUD->GetSelectedInbetweenerTagList().size() )
         {
@@ -403,18 +398,18 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
 
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        if( mPickingMode == eTrajectoryPickingMode::Add )
+        if( EditionMode == eTrajectoryEditionMode::Add )
         {
         }
 
-        if( mPickingMode == eTrajectoryPickingMode::Shift )
+        if( EditionMode == eTrajectoryEditionMode::Spacing )
         {
             if( mPickedWaypoint )
             {
                 FInbetweenerTrajectory* trajectory = mPickedWaypoint->GetTrajectory();
                 FOdysseyVectorTagInbetweener* inbetweenerTag = trajectory->GetRoute()->GetInbetweenerTag();
                 ::ULIS::FVec2D* cubicBezier = trajectory->GetCubicBezier();
-                double newT = FOdysseyVector::CubicBezierHitTest( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y )
+                double cubicT = FOdysseyVector::CubicBezierHitTest( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y )
                                                                   , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[0] )
                                                                   , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[1] )
                                                                   , FOdysseyVector::MapPoint( inbetweenerTag->GetOwner()->GetWorldMatrix(), cubicBezier[2] )
@@ -422,14 +417,17 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
                                                                   , 16
                                                                   , DBL_MAX );
 
-                if( newT >= 0.0f )
+                if( cubicT >= 0.0f )
                 {
-                    mPickedWaypoint->SetT( newT );
+                    // Convert to linear t, as t value for cubic bezier is not linear but spacings are.
+                    double linearT = trajectory->GetLinearT( cubicT );
+
+                    mPickedWaypoint->SetT( linearT );
                 }
             }
         }
 
-        if( mPickingMode == eTrajectoryPickingMode::Alter )
+        if( EditionMode == eTrajectoryEditionMode::Curve )
         {
             if( mPickedHandle )
             {
@@ -459,6 +457,11 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
     }
 
     deltaPositionCumul = FVector2D( 0.0f, 0.0f );
+
+    // mPickedHandle->Set will invalidate the handle owner's scene, which might not be this one. Plus, when we drag
+    // we pass the UPDATE_INTERACTIVE flags that will prevent inbetweens to be refreshed. Hence, will invalidate only
+    // this inbetween so that it gets refreshed.
+    iScene->Invalidate( 0 );
 
     // Updating via the Shared env allow multiple cells to be updated which is paramount
     // here because we may be on a cell different from the tag's starting cell
@@ -625,7 +628,9 @@ UOdysseyPainterEditorVectorTrajectoryTool::CreateTopTabWidget()
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FSinglePropertyParams defaultPropertyParams;
     const TSharedPtr<ISinglePropertyView> showInbetweensPropertyView = propertyEditorModule.CreateSingleProperty(this, "ShowInbetweens", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> showInbetweensOnlyHandle = showInbetweensPropertyView->GetPropertyHandle();
+    TSharedPtr<class IPropertyHandle> showInbetweensHandle = showInbetweensPropertyView->GetPropertyHandle();
+    const TSharedPtr<ISinglePropertyView> editionModePropertyView = propertyEditorModule.CreateSingleProperty(this, "EditionMode", defaultPropertyParams);
+    TSharedPtr<class IPropertyHandle> editionModeHandle = editionModePropertyView->GetPropertyHandle();
 /*
     const TSharedPtr<ISinglePropertyView> XDivPropertyView = propertyEditorModule.CreateSingleProperty(this, "DivisionsX", defaultPropertyParams);
     const TSharedPtr<ISinglePropertyView> YDivPropertyView = propertyEditorModule.CreateSingleProperty(this, "DivisionsY", defaultPropertyParams);
@@ -642,7 +647,11 @@ UOdysseyPainterEditorVectorTrajectoryTool::CreateTopTabWidget()
         ]
         + SUniformWrapPanel::Slot()
         [
-            CreatePropertyWidget(showInbetweensOnlyHandle, showInbetweensPropertyView).ToSharedRef()
+            CreatePropertyWidget(showInbetweensHandle, showInbetweensPropertyView).ToSharedRef()
+        ]
+        + SUniformWrapPanel::Slot()
+        [
+            CreatePropertyWidget(editionModeHandle, editionModePropertyView).ToSharedRef()
         ];
 }
 

@@ -272,11 +272,13 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickWaypoint( FOdysseyVectorTagInb
                 for( uint32 i = 1; i < trajectory.GetWaypointBuffer().size() - 1; i++ )
                 {
                     FInbetweenerWaypoint& waypoint = trajectory.GetWaypointBuffer()[i];
+                    // spacing is linear, unlike cubic t value. We have to find the correct t value for a given spacing
+                    double cubicT = trajectory.GetCubicT( waypoint.GetT() );
                     ::ULIS::FVec2D waypointAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( cubicBezier[0]
                                                                                                    , cubicBezier[1]
                                                                                                    , cubicBezier[2]
                                                                                                    , cubicBezier[3]
-                                                                                                   , waypoint.GetT() );
+                                                                                                   , cubicT );
                     BLPoint waypointWorld = ownerWorldMatrix.mapPoint( waypointAt.x, waypointAt.y );
 
                     if( ( ::ULIS::FVec2D( waypointWorld.x, waypointWorld.y )
@@ -343,51 +345,44 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawSourceGrid( BLContext* iBLCont
 */
 
 void
-FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawHoveredQuad( BLContext* iBLContext
-                                                             , BLRgba32& iFgColor
-                                                             , BLRgba32& iBgColor
-                                                             , BLRgba32& iHcColor )
+FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawQuad( BLContext* iBLContext
+                                                      , BLRgba32& iFgColor
+                                                      , BLRgba32& iBgColor
+                                                      , BLRgba32& iHcColor
+                                                      , FInbetweenerQuad* iQuad )
 {
-    FInbetweenerQuad* hoveredQuad = mTrajectoryTool->GetHoveredQuad();
+    ::ULIS::FRectD quadBBox = iQuad->GetBBox( eInbetweenerPointPositionType::SourcePosition );
+    FOdysseyVectorTagInbetweener* iInbetweenerTag = iQuad->GetGrid()->GetBreakdown()->GetInbetweenerTag();
+    FInbetweenerPoint** points = iQuad->GetPoints();
+    ::ULIS::FVec2D position[4] = { points[0]->GetSourcePosition()
+                                 , points[1]->GetSourcePosition()
+                                 , points[2]->GetSourcePosition()
+                                 , points[3]->GetSourcePosition() };
+    BLMatrix2D& worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
+    BLPoint pt[4] = { worldMatrix.mapPoint( position[0].x, position[0].y )
+                    , worldMatrix.mapPoint( position[1].x, position[1].y )
+                    , worldMatrix.mapPoint( position[2].x, position[2].y )
+                    , worldMatrix.mapPoint( position[3].x, position[3].y ) };
+    BLPath path;
 
-    if( hoveredQuad )
-    {
-        ::ULIS::FRectD quadBBox = hoveredQuad->GetBBox( eInbetweenerPointPositionType::SourcePosition );
-        FOdysseyVectorTagInbetweener* iInbetweenerTag = hoveredQuad->GetGrid()->GetBreakdown()->GetInbetweenerTag();
-        FInbetweenerPoint** points = hoveredQuad->GetPoints();
-        ::ULIS::FVec2D position[4] = { points[0]->GetSourcePosition()
-                                     , points[1]->GetSourcePosition()
-                                     , points[2]->GetSourcePosition()
-                                     , points[3]->GetSourcePosition() };
-        BLMatrix2D& worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
-        BLPoint pt[4] = { worldMatrix.mapPoint( position[0].x, position[0].y )
-                        , worldMatrix.mapPoint( position[1].x, position[1].y )
-                        , worldMatrix.mapPoint( position[2].x, position[2].y )
-                        , worldMatrix.mapPoint( position[3].x, position[3].y ) };
-        BLPath path;
+    path.moveTo( pt[0].x, pt[0].y );
+    path.lineTo( pt[1].x, pt[1].y );
+    path.lineTo( pt[2].x, pt[2].y );
+    path.lineTo( pt[3].x, pt[3].y );
+    path.close();
 
-        path.moveTo( pt[0].x, pt[0].y );
-        path.lineTo( pt[1].x, pt[1].y );
-        path.lineTo( pt[2].x, pt[2].y );
-        path.lineTo( pt[3].x, pt[3].y );
-        path.close();
+    iBLContext->save();
+    iBLContext->resetMatrix();
 
-        iBLContext->save();
-        iBLContext->resetMatrix();
+    iBLContext->setStrokeStyle( iBgColor );
+    iBLContext->setStrokeWidth( 2.0f );
+    iBLContext->strokePath( path );
 
-        iBLContext->setStrokeStyle( iBgColor );
-        iBLContext->setStrokeWidth( 2.0f );
-        iBLContext->strokePath( path );
+    iBLContext->setStrokeStyle( iHcColor );
+    iBLContext->setStrokeWidth( 1.0f );
+    iBLContext->strokePath( path );
 
-        iBLContext->setStrokeStyle( iHcColor );
-        iBLContext->setStrokeWidth( 1.0f );
-        iBLContext->strokePath( path );
-
-        iBLContext->restore();
-
-        // prevent a crash in case the grid is rebuilt by reset the pointer to null each time.
-        mTrajectoryTool->ResetHoveredQuad();
-    }
+    iBLContext->restore();
 }
 
 void
@@ -437,6 +432,8 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLCont
         BLPoint p1World = ownerWorldMatrix.mapPoint( cubicBezier[1].x, cubicBezier[1].y );
         BLPoint p2World = ownerWorldMatrix.mapPoint( cubicBezier[2].x, cubicBezier[2].y );
 
+        DrawQuad( iBLContext, iFgColor, iBgColor, iHcColor, quad );
+
         path.moveTo( p0World.x, p0World.y );
         path.cubicTo( p1World.x, p1World.y
                     , p2World.x, p2World.y
@@ -453,7 +450,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLCont
         iBLContext->setStrokeWidth( 1.0f );
         iBLContext->strokePath( path );*/
 
-        if( mTrajectoryTool->GetPickingMode() == eTrajectoryPickingMode::Alter )
+        if( mTrajectoryTool->EditionMode == eTrajectoryEditionMode::Curve )
         {
             DrawLine  ( iBLContext
                       , p0World.x
@@ -474,16 +471,18 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLCont
             DrawCircle( iBLContext, p2World.x, p2World.y, VERTEXRADIUS, iFgColor, iBgColor );
         }
 
-        if( mTrajectoryTool->GetPickingMode() == eTrajectoryPickingMode::Shift )
+        if( mTrajectoryTool->EditionMode == eTrajectoryEditionMode::Spacing )
         {
             for( uint32 i = 1; i < iTrajectory->GetWaypointBuffer().size() - 1; i++ )
             {
                 FInbetweenerWaypoint& waypoint = iTrajectory->GetWaypointBuffer()[i];
+                // spacing is linear, unlike cubic t value. We have to find the correct t value for a given spacing
+                double cubicT = iTrajectory->GetCubicT( waypoint.GetT() );
                 ::ULIS::FVec2D waypointAt = ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( cubicBezier[0]
                                                                                                , cubicBezier[1]
                                                                                                , cubicBezier[2]
                                                                                                , cubicBezier[3]
-                                                                                               , waypoint.GetT() );
+                                                                                               , cubicT );
                 BLPoint waypointWorld = ownerWorldMatrix.mapPoint( waypointAt.x, waypointAt.y );
 
                 DrawCircle( iBLContext, waypointWorld.x, waypointWorld.y, WAYPOINTRADIUS, iFgColor, iBgColor );
@@ -575,12 +574,21 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
             inbetweenerTag->UnlockDrawing();
         }
 
-        if( mTrajectoryTool->GetPickingMode() == eTrajectoryPickingMode::Add )
+        if( mTrajectoryTool->EditionMode == eTrajectoryEditionMode::Add )
         {
-            DrawHoveredQuad( iBLContext
-                           , fgColor
-                           , bgColor
-                           , hcColor );
+            FInbetweenerQuad* hoveredQuad = mTrajectoryTool->GetHoveredQuad();
+
+            if( hoveredQuad )
+            {
+                DrawQuad( iBLContext
+                        , fgColor
+                        , bgColor
+                        , hcColor
+                        , hoveredQuad );
+            }
+
+            // prevent a crash in case the grid is rebuilt by reset the pointer to null each time.
+            mTrajectoryTool->ResetHoveredQuad();
         }
     }
 }

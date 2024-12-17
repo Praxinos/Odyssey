@@ -2476,25 +2476,27 @@ GetCopiedChart()
 // static
 void
 FOdysseyPainterEditor::PasteSpacingChart( FOdysseyPainterEditor* iEditor
-                                        , FOdysseyVectorGroupPaint* iScene )
+                                        , FOdysseyVectorGroupPaint* iScene
+                                        , bool iCurrentBreakdownOnly )
 {
-    std::list<FOdysseyVectorTagInbetweener*> selectedInbetweenerTagList;
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::list<std::vector<float>>& spacingList = GetCopiedChart();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+    uint32 cellIndex = iScene->GetEngine()->GetCell()->GetIndex();
+    std::list<FOdysseyVectorTag*> selectedTagList;
+
+    iScene->GetSharedEnv()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
+                                                     , selectedTagList );
 
     if( spacingList.size() > 0 )
     {
-        vectorEngine->GetSelectedInbetweenerTagList( selectedInbetweenerTagList );
-
-        if( selectedInbetweenerTagList.size() )
+        if( selectedTagList.size() )
         {
             // needed for valid GUndo pointer
             GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.paste-chart","Paste Spacing Chart"));
             if( GUndo )
             {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene
-                                                                                         , selectedInbetweenerTagList
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene->GetSharedEnv()
+                                                                                         , selectedTagList
                                                                                          , notificationFlags );
 
                 GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
@@ -2505,29 +2507,52 @@ FOdysseyPainterEditor::PasteSpacingChart( FOdysseyPainterEditor* iEditor
             }
             GEditor->EndTransaction();
 
-            for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
+            for( FOdysseyVectorTag* tag : selectedTagList )
             {
-                std::vector<FInbetweenerBreakdown*> breakdownArray;
-                uint32 i = 0;
+                FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
 
-                inbetweenerTag->GetBreakdownArray( breakdownArray );
-
-                for( std::vector<float>& spacingBuffer : spacingList )
+                if( iCurrentBreakdownOnly )
                 {
-                    if( i < breakdownArray.size() )
-                    {
-                        FInbetweenerBreakdown* breakdown = breakdownArray[i];
+                    FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdownByCellIndex( cellIndex );
 
-                        if( breakdown->GetDrawingCount() == spacingBuffer.size() )
+                    if( breakdown )
+                    {
+                        for( std::vector<float>& spacingBuffer : spacingList )
                         {
-                            for( uint32 j = 0; j < spacingBuffer.size(); j++ )
+                            if( breakdown->GetDrawingCount() == spacingBuffer.size() )
                             {
-                                breakdown->GetChart()->GetInbetweenBuffer()[j].SetSpacing( spacingBuffer[j] );
+                                for( uint32 j = 0; j < spacingBuffer.size(); j++ )
+                                {
+                                    breakdown->GetChart()->GetInbetweenBuffer()[j].SetSpacing( spacingBuffer[j] );
+                                }
                             }
                         }
                     }
+                }
+                else
+                {
+                    std::vector<FInbetweenerBreakdown*> breakdownArray;
+                    uint32 i = 0;
 
-                    i++;
+                    inbetweenerTag->GetBreakdownArray( breakdownArray );
+
+                    for( std::vector<float>& spacingBuffer : spacingList )
+                    {
+                        if( i < breakdownArray.size() )
+                        {
+                            FInbetweenerBreakdown* breakdown = breakdownArray[i];
+
+                            if( breakdown->GetDrawingCount() == spacingBuffer.size() )
+                            {
+                                for( uint32 j = 0; j < spacingBuffer.size(); j++ )
+                                {
+                                    breakdown->GetChart()->GetInbetweenBuffer()[j].SetSpacing( spacingBuffer[j] );
+                                }
+                            }
+                        }
+
+                        i++;
+                    }
                 }
             }
         }
@@ -2535,29 +2560,44 @@ FOdysseyPainterEditor::PasteSpacingChart( FOdysseyPainterEditor* iEditor
 
     iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    FOdysseyVectorEngine::Notify( iScene, notificationFlags );
+    FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
 }
 
 // static
 void
 FOdysseyPainterEditor::CopySpacingChart( FOdysseyPainterEditor* iEditor
-                                       , FOdysseyVectorGroupPaint* iScene )
+                                       , FOdysseyVectorGroupPaint* iScene
+                                       , bool iCurrentBreakdownOnly )
 {
     std::list<std::vector<float>>& spacingList = GetCopiedChart();
+    std::list<FOdysseyVectorTag*> selectedTagList;
+    uint32 cellIndex = iScene->GetEngine()->GetCell()->GetIndex();
 
-    FOdysseyVectorObject* selectedObject = iScene->GetEngine()->GetLastSelectedObject();
+    iScene->GetSharedEnv()->GetSelectedTagByClassType( FOdysseyVectorTagInbetweener::StaticClass()
+                                                     , selectedTagList );
 
-    if( selectedObject )
+    if( selectedTagList.size() )
     {
-        FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+        FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(selectedTagList.front());
 
-        if( tag )
+        spacingList.clear();
+
+        if( iCurrentBreakdownOnly )
         {
-            FOdysseyVectorTagInbetweener* tagInbetweener = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+            FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdownByCellIndex( cellIndex );
 
-            spacingList.clear();
+            if( breakdown )
+            {
+                std::vector<float> spacingBuffer;
 
-            for ( FInbetweenerBreakdown* breakdown : tagInbetweener->GetBreakdownList() )
+                breakdown->GetChart()->GetSpacing( spacingBuffer );
+
+                spacingList.push_back( spacingBuffer );
+            }
+        }
+        else
+        {
+            for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
             {
                 std::vector<float> spacingBuffer;
 

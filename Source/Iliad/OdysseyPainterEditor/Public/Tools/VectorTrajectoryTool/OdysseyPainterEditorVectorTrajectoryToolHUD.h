@@ -13,6 +13,7 @@ class FOdysseyVectorTagInbetweener;
 class FInbetweenerTrajectory;
 class FInbetweenerRoute;
 class FInbetweenerGrid;
+class FInbetweenerQuad;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
@@ -71,10 +72,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
                            , BLRgba32& iHcColor
                            , FOdysseyVectorTagInbetweener* iInbetweenerTag
                            , FInbetweenerTrajectory* iTrajectory );
-        void DrawHoveredQuad( BLContext* iBLContext
-                            , BLRgba32& iFgColor
-                            , BLRgba32& iBgColor
-                            , BLRgba32& iHcColor );
+        void DrawQuad( BLContext* iBLContext
+                     , BLRgba32& iFgColor
+                     , BLRgba32& iBgColor
+                     , BLRgba32& iHcColor
+                     , FInbetweenerQuad* iQuad );
         void DrawSourceGrid( BLContext* iBLContext
                            , BLRgba32& iFgColor
                            , BLRgba32& iBgColor

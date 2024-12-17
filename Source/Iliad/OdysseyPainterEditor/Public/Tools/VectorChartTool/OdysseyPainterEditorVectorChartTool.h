@@ -91,6 +91,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
     private:
         FOdysseyPainterEditorVectorChartToolHUD* mChartHUD;
         FInbetweenerChart::Inbetween* mPickedInbetween;
+        FInbetweenerBreakdown* mPickedBreakdown;
         FInbetweenerChart::Inbetween* mHoveredInbetween;
         FInbetweenerChart::HUDBezier::Point* mPickedBezierPoint;
         eChartPickingMode mPickingMode;

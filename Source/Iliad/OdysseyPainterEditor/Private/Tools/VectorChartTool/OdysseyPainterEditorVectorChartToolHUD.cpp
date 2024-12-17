@@ -80,10 +80,10 @@ FOdysseyPainterEditorVectorChartToolHUD::Reset( FOdysseyVectorGroupPaint* iScene
     }
 }
 
-FInbetweenerBreakdown*
-FOdysseyPainterEditorVectorChartToolHUD::GetBreakdown()
+std::list<FInbetweenerBreakdown*>&
+FOdysseyPainterEditorVectorChartToolHUD::GetBreakdownList()
 {
-    return mBreakdown;
+    return mBreakdownList;
 }
 
 void
@@ -91,7 +91,7 @@ FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdown( FOdysseyVectorGroupPai
 {
     uint32 cellIndex = iScene->GetEngine()->GetCell()->GetIndex();
 
-    mBreakdown = nullptr;
+    mBreakdownList.clear();
 
     for( FOdysseyVectorTag* tag : iScene->GetSharedEnv()->GetSharedTagList() )
     {
@@ -108,143 +108,26 @@ FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdown( FOdysseyVectorGroupPai
                     uint32 targetDrawingIndex = breakdown->GetTargetDrawingIndex();
                     int32 relativeDrawingIndex = ( inbetweenerTag->GetInterpolationDirection() == eInbetweenerInterpolationDirection::Forward ) ? ( cellIndex - sourceCellIndex )
                                                                                                                                                 : ( sourceCellIndex - cellIndex );
-
-                    if( ( relativeDrawingIndex >= (int32)sourceDrawingIndex )
-                     && ( relativeDrawingIndex <= (int32)targetDrawingIndex ) )
+                    if( mChartTool->ChartType == eChartType::Partial )
                     {
-                        mBreakdown = breakdown;
+                        if( ( relativeDrawingIndex >= (int32)sourceDrawingIndex )
+                         && ( relativeDrawingIndex <= (int32)targetDrawingIndex ) )
+                        {
+                            mBreakdownList.push_back( breakdown );
 
-                        return;
+                            return; // display chart only for a single breakdown
+                        }
+                    }
+
+                    if( mChartTool->ChartType == eChartType::Full )
+                    {
+                        mBreakdownList.push_back( breakdown );
                     }
                 }
             }
+
+            return; // display charts only for a single tag
         }
-    }
-}
-
-/*
-void
-FOdysseyPainterEditorVectorChartToolHUD::DrawInbetweenerChart( BLContext* iBLContext
-                                                             , FOdysseyVectorTagInbetweener* iInbetweenerTag )
-{
-    uint32 chartLength = 600;
-    ::ULIS::FVec2I chartStartPoint = ::ULIS::FVec2D( 800, 40 );
-    ::ULIS::FVec2I breakdownChartStartPoint = chartStartPoint;
-    static const BLRgba32 greyColor  = BLRgba32( 127, 127, 127, 127 );
-    float displayRatio = ( float ) sqrt( ( iBLContext->targetWidth() * iBLContext->targetHeight() ) / DEFAULT_SURFACE );
-    uint32 totalBreakdownDrawingCount = 0;
-    float fontSize = mFont.size();
-
-     // On my colleague's request, the width of the stroke varies relative to the size of the image
-    displayRatio = std::max( 1.0f, 1.0f + ( ( displayRatio - 1.0f ) * 0.25f ) );
-
-    iBLContext->save();
-    iBLContext->resetMatrix();
-
-    iBLContext->setCompOp( BL_COMP_OP_SRC_OVER  );
-
-    iBLContext->setStrokeStyle( greyColor );
-    iBLContext->setFillStyle( greyColor );
-    //iBLContext->setStrokeWidth( 3.0f * displayRatio );
-
-    iBLContext->strokeLine( chartStartPoint.x
-                          , chartStartPoint.y
-                          , chartStartPoint.x + chartLength
-                          , chartStartPoint.y );
-
-    for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
-    {
-        totalBreakdownDrawingCount += breakdown->GetDrawingCount();
-    }
-
-    for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
-    {
-        uint32 breakdownChartLength = chartLength * ( ( double ) breakdown->GetDrawingCount() / totalBreakdownDrawingCount );
-        ::ULIS::FVec2I breakdownChartEndPoint = ::ULIS::FVec2D( breakdownChartStartPoint.x + breakdownChartLength, 40 );
-        FInbetweenerBreakdown* prevBreakdown = breakdown->GetPrevBreakdown();
-        FInbetweenerBreakdown* nextBreakdown = breakdown->GetNextBreakdown();
-
-        for( FInbetweenerChart::Inbetween& inbetween : breakdown->GetChart()->GetInbetweenBuffer() )
-        {
-            float lengthFactor = ( ( inbetween.spacing == 0.0f ) || ( inbetween.spacing == 1.0f ) ) ? 1.0f : 0.6f;
-            ::ULIS::FVec2I indicatorPosition = breakdownChartStartPoint + ( ( breakdownChartEndPoint - breakdownChartStartPoint ) * inbetween.spacing );
-            const FGlyph* glyph = GetGlyph( inbetween.drawing->GetIndex() + 1 );
-            ::ULIS::FVec2D frameInfoPosition = ::ULIS::FVec2D( indicatorPosition.x
-                                                             , indicatorPosition.y + ( INBETWEENER_INDICATOR_RADIUS * lengthFactor ) + FONT_SIZE );
-            ::ULIS::FVec2D frameNumberPosition = ::ULIS::FVec2D( frameInfoPosition.x - ( glyph->bbox.w * 0.5f )
-                                                               , frameInfoPosition.y + ( glyph->bbox.h * 0.5f ) );
-
-            if( inbetween.spacing == 0.0f )
-            {
-                iBLContext->setStrokeWidth( 2.0f * displayRatio );
-
-                if( prevBreakdown == nullptr )
-                {
-                    iBLContext->strokeCircle( frameInfoPosition.x, frameInfoPosition.y, fontSize );
-                }
-                else
-                {
-                    iBLContext->strokeLine( frameNumberPosition.x
-                                          , frameNumberPosition.y + glyph->bbox.h
-                                          , frameNumberPosition.x + glyph->bbox.w
-                                          , frameNumberPosition.y + glyph->bbox.h );
-                }
-            }
-
-            if( inbetween.spacing == 1.0f )
-            {
-                iBLContext->setStrokeWidth( 2.0f * displayRatio );
-
-                if( nextBreakdown == nullptr )
-                {
-                    iBLContext->strokeCircle( frameInfoPosition.x, frameInfoPosition.y, fontSize );
-                }
-                else
-                {
-                    iBLContext->strokeLine( frameNumberPosition.x
-                                          , frameNumberPosition.y + glyph->bbox.h
-                                          , frameNumberPosition.x + glyph->bbox.w
-                                          , frameNumberPosition.y + glyph->bbox.h );
-                }
-            }
-
-            iBLContext->setStrokeWidth( 3.0f * displayRatio );
-            iBLContext->strokeLine( indicatorPosition.x
-                                  , indicatorPosition.y - ( INBETWEENER_INDICATOR_RADIUS * lengthFactor )
-                                  , indicatorPosition.x
-                                  , indicatorPosition.y + ( INBETWEENER_INDICATOR_RADIUS * lengthFactor ) );
-
-            iBLContext->fillUtf8Text( BLPoint( frameNumberPosition.x
-                                             , frameNumberPosition.y ), mFont, glyph->str );
-        }
-
-        breakdownChartStartPoint = breakdownChartEndPoint;
-    }
-
-    iBLContext->restore();
-}
-*/
-
-void
-FOdysseyPainterEditorVectorChartToolHUD::DrawInbetweenerChart( BLContext* iBLContext
-                                                             , BLRgba32& iFgColor
-                                                             , BLRgba32& iBgColor
-                                                             , BLRgba32& iHcColor
-                                                             , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                             , uint32 iRenderedCellIndex )
-{
-    for( FInbetweenerBreakdown* breakdown : iInbetweenerTag->GetBreakdownList() )
-    {
-        FInbetweenerBreakdown* prevBreakdown = breakdown->GetPrevBreakdown();
-
-        DrawBreakdownChart( iBLContext
-                          , iFgColor
-                          , iBgColor
-                          , iHcColor
-                          , breakdown
-                          , breakdown->GetChart()->GetFullHUDBezier()
-                          , iRenderedCellIndex
-                          , prevBreakdown ? false : true );
     }
 }
 
@@ -451,15 +334,15 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
-        if( mBreakdown )
+        for( FInbetweenerBreakdown* breakdown : mBreakdownList )
         {
-            //FInbetweenerBreakdown* nextBreakdown = mBreakdown->GetNextBreakdown();
+            FInbetweenerBreakdown* prevBreakdown = breakdown->GetPrevBreakdown();
 
-            mBreakdown->GetInbetweenerTag()->LockDrawing();
+            breakdown->GetInbetweenerTag()->LockDrawing();
 
             DrawBreakdown( iScene
                          , iBLContext
-                         , mBreakdown
+                         , breakdown
                          , BLRgba32( 127, 127, 127, 255 )
                          , BLRgba32( 255, 127, 127, 255 )
                          , HUD_BREAKDOWN_SOURCE
@@ -469,12 +352,14 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
 
             if( mChartTool->ChartType == eChartType::Full )
             {
-                DrawInbetweenerChart( iBLContext
-                                    , fgColor
-                                    , bgColor
-                                    , hcColor
-                                    , mBreakdown->GetInbetweenerTag()
-                                    , iScene->GetEngine()->GetCell()->GetIndex() );
+                DrawBreakdownChart( iBLContext
+                                  , fgColor
+                                  , bgColor
+                                  , hcColor
+                                  , breakdown
+                                  , breakdown->GetChart()->GetHUDBezier()
+                                  , iScene->GetEngine()->GetCell()->GetIndex()
+                                  , prevBreakdown ? false : true );
             }
 
             if( mChartTool->ChartType == eChartType::Partial )
@@ -483,13 +368,13 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
                                   , fgColor
                                   , bgColor
                                   , hcColor
-                                  , mBreakdown
-                                  , mBreakdown->GetChart()->GetHUDBezier()
+                                  , breakdown
+                                  , breakdown->GetChart()->GetHUDBezier()
                                   , iScene->GetEngine()->GetCell()->GetIndex()
                                   , true );
             }
 
-           mBreakdown->GetInbetweenerTag()->UnlockDrawing();
+           breakdown->GetInbetweenerTag()->UnlockDrawing();
         }
     }
 }
@@ -501,15 +386,15 @@ FOdysseyPainterEditorVectorChartToolHUD::PickInbetween( double iWorldX
     FInbetweenerChart::Inbetween* closestInbetween = nullptr;
     double minDistance = DBL_MAX;
 
-    if( mBreakdown )
+    for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
-        FOdysseyVectorTagInbetweener* inbetweenerTag = mBreakdown->GetInbetweenerTag();
-        FInbetweenerChart* chart = mBreakdown->GetChart();
+        FOdysseyVectorTagInbetweener* inbetweenerTag = breakdown->GetInbetweenerTag();
+        FInbetweenerChart* chart = breakdown->GetChart();
         FInbetweenerChart::HUDBezier* HUDBezier = chart->GetHUDBezier();
 
-        for( uint32 i = 1; i < mBreakdown->GetDrawingCount() - 1; i++ )
+        for( uint32 i = 1; i < breakdown->GetDrawingCount() - 1; i++ )
         {
-            FInbetweenerChart::Inbetween* inbetween = &mBreakdown->GetChart()->GetInbetweenBuffer()[i];
+            FInbetweenerChart::Inbetween* inbetween = &breakdown->GetChart()->GetInbetweenBuffer()[i];
             ::ULIS::FVec2D indicatorPosition = ::ULIS::QuadraticBezierPointAtParameter( HUDBezier->GetPoints()[0].GetPosition(),
                                                                                         HUDBezier->GetPoints()[1].GetPosition(),
                                                                                         HUDBezier->GetPoints()[2].GetPosition(),
@@ -537,49 +422,46 @@ FOdysseyPainterEditorVectorChartToolHUD::PickBezierPoint( double iWorldX
                                                         , double iWorldY
                                                         , double iRadius )
 {
-    if( mBreakdown )
+    for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
-        FOdysseyVectorTagInbetweener* inbetweenerTag = mBreakdown->GetInbetweenerTag();
+        FOdysseyVectorTagInbetweener* inbetweenerTag = breakdown->GetInbetweenerTag();
+        FInbetweenerChart* chart = breakdown->GetChart();
+        FInbetweenerChart::HUDBezier* HUDBezier = chart->GetHUDBezier();
 
-        switch( mChartTool->ChartType )
+        for( uint32 i = 0; i < 3; i++ )
         {
-            case eChartType::Partial :
+            if( ::ULIS::FVec2D( iWorldX - HUDBezier->GetPoints()[i].GetPosition().x
+                              , iWorldY - HUDBezier->GetPoints()[i].GetPosition().y ).Distance() < iRadius )
             {
-                FInbetweenerChart* chart = mBreakdown->GetChart();
-                FInbetweenerChart::HUDBezier* HUDBezier = chart->GetHUDBezier();
-
-                for( uint32 i = 0; i < 3; i++ )
-                {
-                    if( ::ULIS::FVec2D( iWorldX - HUDBezier->GetPoints()[i].GetPosition().x
-                                      , iWorldY - HUDBezier->GetPoints()[i].GetPosition().y ).Distance() < iRadius )
-                    {
-                        return &HUDBezier->GetPoints()[i];
-                    }
-                }
+                return &HUDBezier->GetPoints()[i];
             }
-            break;
+        }
+    }
 
-            case eChartType::Full :
-            {
-                for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
-                {
-                    FInbetweenerChart* chart = breakdown->GetChart();
-                    FInbetweenerChart::HUDBezier* HUDBezier = chart->GetFullHUDBezier();
+    return nullptr;
+}
 
-                    for( uint32 i = 0; i < 3; i++ )
-                    {
-                        if( ::ULIS::FVec2D( iWorldX - HUDBezier->GetPoints()[i].GetPosition().x
-                                          , iWorldY - HUDBezier->GetPoints()[i].GetPosition().y ).Distance() < iRadius )
-                        {
-                            return &HUDBezier->GetPoints()[i];
-                        }
-                    }
-                }
-            }
-            break;
+FInbetweenerBreakdown*
+FOdysseyPainterEditorVectorChartToolHUD::PickBreakdown( double iWorldX
+                                                      , double iWorldY
+                                                      , double iRadius )
+{
+    for( FInbetweenerBreakdown* breakdown : mBreakdownList )
+    {
+        FOdysseyVectorTagInbetweener* inbetweenerTag = breakdown->GetInbetweenerTag();
+        FInbetweenerChart* chart = breakdown->GetChart();
+        FInbetweenerChart::HUDBezier* HUDBezier = chart->GetHUDBezier();
 
-            default :
-            break;
+        double t = FOdysseyVector::QuadraticBezierHitTest( ::ULIS::FVec2D ( iWorldX, iWorldY )
+                                                         , HUDBezier->GetPoints()[0].GetPosition()
+                                                         , HUDBezier->GetPoints()[1].GetPosition()
+                                                         , HUDBezier->GetPoints()[2].GetPosition()
+                                                         , 24
+                                                         , iRadius );
+
+        if( ( t > 0.0f ) && ( t < 1.0f ) )
+        {
+            return breakdown;
         }
     }
 

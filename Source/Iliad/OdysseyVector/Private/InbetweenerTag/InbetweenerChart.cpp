@@ -166,39 +166,41 @@ FInbetweenerChart::HUDBezier::Point::Point( FInbetweenerChart::HUDBezier* iHUDBe
 
 }
 
+FInbetweenerChart::HUDBezier*
+FInbetweenerChart::HUDBezier::Point::GetHUDBezier()
+{
+    return mHUDBezier;
+}
+
 void
 FInbetweenerChart::HUDBezier::Point::SetPosition( double iX, double iY )
 {
     mPosition.x = iX;
     mPosition.y = iY;
 
-    // link with previous/next chart only if it's the full HUD bezier
-    if( mHUDBezier == mHUDBezier->GetChart()->GetFullHUDBezier() )
+    if( this == &mHUDBezier->GetPoints()[0] )
     {
-        if( this == &mHUDBezier->GetPoints()[0] )
+        FInbetweenerBreakdown* prevBreakdown = mHUDBezier->GetChart()->GetBreakdown()->GetPrevBreakdown();
+
+        if( prevBreakdown )
         {
-            FInbetweenerBreakdown* prevBreakdown = mHUDBezier->GetChart()->GetBreakdown()->GetPrevBreakdown();
+            // set coords directly or else expect an infinite loop
+            prevBreakdown->GetChart()->GetHUDBezier()->GetPoints()[2].mPosition = ::ULIS::FVec2D( iX, iY );
 
-            if( prevBreakdown )
-            {
-                // set coords directly or else expect an infinite loop
-                prevBreakdown->GetChart()->GetFullHUDBezier()->GetPoints()[2].mPosition = ::ULIS::FVec2D( iX, iY );
-
-                prevBreakdown->GetChart()->GetFullHUDBezier()->Invalidate();
-            }
+            prevBreakdown->GetChart()->GetHUDBezier()->Invalidate();
         }
+    }
 
-        if( this == &mHUDBezier->GetPoints()[2] )
+    if( this == &mHUDBezier->GetPoints()[2] )
+    {
+        FInbetweenerBreakdown* nextBreakdown = mHUDBezier->GetChart()->GetBreakdown()->GetNextBreakdown();
+
+        if( nextBreakdown )
         {
-            FInbetweenerBreakdown* nextBreakdown = mHUDBezier->GetChart()->GetBreakdown()->GetNextBreakdown();
+            // set coords directly or else expect an infinite loop
+            nextBreakdown->GetChart()->GetHUDBezier()->GetPoints()[0].mPosition = ::ULIS::FVec2D( iX, iY );
 
-            if( nextBreakdown )
-            {
-                // set coords directly or else expect an infinite loop
-                nextBreakdown->GetChart()->GetFullHUDBezier()->GetPoints()[0].mPosition = ::ULIS::FVec2D( iX, iY );
-
-                nextBreakdown->GetChart()->GetFullHUDBezier()->Invalidate();
-            }
+            nextBreakdown->GetChart()->GetHUDBezier()->Invalidate();
         }
     }
 
@@ -307,7 +309,6 @@ FInbetweenerChart::FInbetweenerChart()
 FInbetweenerChart::FInbetweenerChart( FInbetweenerBreakdown* iBreakdown )
     : mBreakdown( iBreakdown )
     , mHUDBezier ( this  )
-    , mFullHUDBezier( this )
 {
     mHUDBezier.GetPoints()[0].SetPosition( DEFAULT_POSITION_P0_X, DEFAULT_POSITION_P0_Y );
     mHUDBezier.GetPoints()[1].SetPosition( DEFAULT_POSITION_P1_X, DEFAULT_POSITION_P1_Y );
@@ -413,10 +414,4 @@ FInbetweenerChart::HUDBezier*
 FInbetweenerChart::GetHUDBezier()
 {
     return &mHUDBezier;
-}
-
-FInbetweenerChart::HUDBezier*
-FInbetweenerChart::GetFullHUDBezier()
-{
-    return &mFullHUDBezier;
 }

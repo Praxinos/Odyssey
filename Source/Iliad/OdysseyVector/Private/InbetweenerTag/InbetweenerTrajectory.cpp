@@ -133,23 +133,51 @@ FInbetweenerTrajectory::Update()
     mFractionBuffer.back().cubicT1 = 1.0f;
 }
 
-::ULIS::FVec2D
-FInbetweenerTrajectory::GetPoint( float iSpacingT )
+double
+FInbetweenerTrajectory::GetLinearT( float iCubicT )
+{
+    float linearT = 0.0f;
+
+    for( uint32 i = 0; i < FRACTIONCOUNT; i++ )
+    {
+        Fraction* fraction = &mFractionBuffer[i];
+
+        if( ( iCubicT >= fraction->cubicT0 ) && ( iCubicT <= fraction->cubicT1 ) )
+        {
+            float diffCubic = fraction->cubicT1 - fraction->cubicT0;
+
+            if( diffCubic )
+            {
+                float diffLinear = fraction->linearT1 - fraction->linearT0;
+                float ratio = ( iCubicT - fraction->cubicT0 ) / diffCubic;
+
+                linearT = fraction->linearT0 + ( diffLinear * ratio );
+
+                break;
+            }
+        }
+    }
+
+    return linearT;
+}
+
+double
+FInbetweenerTrajectory::GetCubicT( float iLinearT )
 {
     float cubicT = 0.0f;
 
     for( uint32 i = 0; i < FRACTIONCOUNT; i++ )
     {
-        FTrajectoryFraction* fraction = &mFractionBuffer[i];
+        Fraction* fraction = &mFractionBuffer[i];
 
-        if( ( iSpacingT >= fraction->linearT0 ) && ( iSpacingT <= fraction->linearT1 ) )
+        if( ( iLinearT >= fraction->linearT0 ) && ( iLinearT <= fraction->linearT1 ) )
         {
             float diffLinear = fraction->linearT1 - fraction->linearT0;
 
             if( diffLinear )
             {
                 float diffCubic = fraction->cubicT1 - fraction->cubicT0;
-                float ratio = ( iSpacingT - fraction->linearT0 ) / diffLinear;
+                float ratio = ( iLinearT - fraction->linearT0 ) / diffLinear;
 
                 cubicT = fraction->cubicT0 + ( diffCubic * ratio );
 
@@ -157,6 +185,14 @@ FInbetweenerTrajectory::GetPoint( float iSpacingT )
             }
         }
     }
+
+    return cubicT;
+}
+
+::ULIS::FVec2D
+FInbetweenerTrajectory::GetPoint( float iLinearT )
+{
+    float cubicT = GetCubicT( iLinearT );
 
     return ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( mCubicBezier[0]
                                                               , mCubicBezier[1]

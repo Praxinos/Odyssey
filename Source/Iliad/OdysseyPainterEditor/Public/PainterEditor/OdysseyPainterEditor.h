@@ -210,8 +210,12 @@ public:
                                  , bool iCurrentBreakdownOnly );
     static void ResetInbetweenerTagSpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorSharedEnv* iSharedEnv );
     static void CommitSelectedInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorSharedEnv* iSharedEnv );
-    static void CopySpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
-    static void PasteSpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void CopySpacingChart( FOdysseyPainterEditor* iEditor
+                                , FOdysseyVectorGroupPaint* iScene
+                                , bool iCurrentBreakdownOnly );
+    static void PasteSpacingChart( FOdysseyPainterEditor* iEditor
+                                 , FOdysseyVectorGroupPaint* iScene
+                                 , bool iCurrentBreakdownOnly );
     static void ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor
                                     , FOdysseyVectorGroupPaint* iScene
                                     , bool iResetTransformation

@@ -9,6 +9,7 @@
 #include "ISinglePropertyView.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorTagInbetweener.h"
 
@@ -129,6 +130,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     uint64 notificationFlags = 0;
 
+    mPickedBreakdown = nullptr;
     mPickedInbetween = nullptr;
     mPickedBezierPoint = nullptr;
     mEasing = 0.0f;
@@ -139,10 +141,8 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        if( mChartHUD->GetBreakdown() )
+        if( mChartHUD->GetBreakdownList().size() )
         {
-            FOdysseyVectorTagInbetweener* inbetweenerTag = mChartHUD->GetBreakdown()->GetInbetweenerTag();
-
             if( ( mPickingMode == eChartPickingMode::Default )
               ||( mPickingMode == eChartPickingMode::Shift ) )
             {
@@ -151,6 +151,8 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
 
                 if( mPickedInbetween )
                 {
+                    FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->GetChart()->GetBreakdown()->GetInbetweenerTag();
+
                     // needed for valid GUndo pointer
                     GEditor->BeginTransaction(LOCTEXT("vector-chart-tool.transaction.edit-chart","Vector Chart Tool"));
                     if( GUndo )
@@ -167,29 +169,40 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
                     }
                     GEditor->EndTransaction();
                 }
+                else
+                {
+                    mPickedBreakdown = mChartHUD->PickBreakdown( iPointInTexture.x
+                                                               , iPointInTexture.y
+                                                               , PickingRadius );
+                }
             }
 
             if( mPickingMode == eChartPickingMode::Control )
             {
                 mPickedBezierPoint = mChartHUD->PickBezierPoint( iPointInTexture.x
                                                                , iPointInTexture.y
-                                                               , 10 );
+                                                               , PickingRadius );
 
-                // needed for valid GUndo pointer
-                GEditor->BeginTransaction(LOCTEXT("vector-chart-tool.transaction.edit-chart","Vector Chart Tool"));
-                if( GUndo )
+                if( mPickedBezierPoint )
                 {
-                    FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene
-                                                                                             , inbetweenerTag
-                                                                                             , notificationFlags );
+                    FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedBezierPoint->GetHUDBezier()->GetChart()->GetBreakdown()->GetInbetweenerTag();
 
-                    GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+                    // needed for valid GUndo pointer
+                    GEditor->BeginTransaction(LOCTEXT("vector-chart-tool.transaction.edit-chart","Vector Chart Tool"));
+                    if( GUndo )
+                    {
+                        FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerChartAlter( iScene
+                                                                                                 , inbetweenerTag
+                                                                                                 , notificationFlags );
 
-                    TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
-                    if (source)
-                        source->RecordCurrentFrameUndo();
+                        GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+                        TSharedPtr<FOdysseyPainterEditorSource> source = GetEditor()->GetSource();
+                        if (source)
+                            source->RecordCurrentFrameUndo();
+                    }
+                    GEditor->EndTransaction();
                 }
-                GEditor->EndTransaction();
             }
         }
     }
@@ -227,7 +240,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseHoverVector( FOdysseyVectorGroupPai
 
 void
 UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                           , const FOdysseyPoint& iPointInTexture
+                                                        , const FOdysseyPoint& iPointInTexture
                                                         , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* engine = iScene->GetEngine();
@@ -248,17 +261,17 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
 
     if( pointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
     {
-        if( mChartHUD->GetBreakdown() )
+        if( mChartHUD->GetBreakdownList().size() )
         {
-            FInbetweenerBreakdown* currentBreakdown = mChartHUD->GetBreakdown();
-            FInbetweenerChart::HUDBezier* HUDBezier = currentBreakdown->GetChart()->GetHUDBezier();
+            //FInbetweenerBreakdown* currentBreakdown = mChartHUD->GetBreakdown();
+            //FInbetweenerChart::HUDBezier* HUDBezier = currentBreakdown->GetChart()->GetHUDBezier();
 
             if( mPickingMode == eChartPickingMode::Default )
             {
                 if( mPickedInbetween )
                 {
                     FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->GetChart()->GetBreakdown()->GetInbetweenerTag();
-                    double newT = currentBreakdown->GetChart()->GetHUDBezier()->HitTest( ::ULIS::FVec2D( pointInTexture.x
+                    double newT = mPickedInbetween->GetChart()->GetHUDBezier()->HitTest( ::ULIS::FVec2D( pointInTexture.x
                                                                                                        , pointInTexture.y )
                                                                                        , INT_MAX );
 
@@ -272,7 +285,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
             {
                 if( ShiftingOp == eChartShiftingOp::Relative )
                 {
-                    double newT = currentBreakdown->GetChart()->GetHUDBezier()->HitTest( ::ULIS::FVec2D( pointInTexture.x
+                    double newT = mPickedInbetween->GetChart()->GetHUDBezier()->HitTest( ::ULIS::FVec2D( pointInTexture.x
                                                                                                        , pointInTexture.y )
                                                                                        , INT_MAX );
 
@@ -286,33 +299,36 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                     }
                 }
 
-                if( ShiftingOp == eChartShiftingOp::EaseInOrOut )
+                if( mPickedBreakdown )
                 {
-                    if( pointInTexture.x < mMouseAtDown.x )
+                    if( ShiftingOp == eChartShiftingOp::EaseInOrOut )
                     {
-                        currentBreakdown->EaseIn( mEasing );
+                        if( pointInTexture.x < mMouseAtDown.x )
+                        {
+                            mPickedBreakdown->EaseIn( mEasing );
 
-                        mEasing = std::clamp( ( pointInTexture.deltaPosition.X < 0.0f ) ? mEasing + 0.2f
-                                                                                         : mEasing - 0.2f, 0.0f, 1.0f );
+                            mEasing = std::clamp( ( pointInTexture.deltaPosition.X < 0.0f ) ? mEasing + 0.2f
+                                                                                            : mEasing - 0.2f, 0.0f, 1.0f );
+                        }
+
+                        if( pointInTexture.x > mMouseAtDown.x )
+                        {
+                            mPickedBreakdown->EaseOut( mEasing );
+
+                            mEasing = std::clamp( ( pointInTexture.deltaPosition.X > 0.0f ) ? mEasing + 0.2f
+                                                                                            : mEasing - 0.2f, 0.0f, 1.0f );
+                        }
                     }
 
-                    if( pointInTexture.x > mMouseAtDown.x )
+                    if( ShiftingOp == eChartShiftingOp::EaseInAndOut )
                     {
-                        currentBreakdown->EaseOut( mEasing );
+                        if( mPickedInbetween )
+                        {
+                            mPickedBreakdown->EaseInAndOut( mEasing, mPickedInbetween );
 
-                        mEasing = std::clamp( ( pointInTexture.deltaPosition.X > 0.0f ) ? mEasing + 0.2f
-                                                                                         : mEasing - 0.2f, 0.0f, 1.0f );
-                    }
-                }
-
-                if( ShiftingOp == eChartShiftingOp::EaseInAndOut )
-                {
-                    if( mPickedInbetween )
-                    {
-                        currentBreakdown->EaseInAndOut( mEasing, mPickedInbetween );
-
-                        mEasing = std::clamp( ( pointInTexture.deltaPosition.X > 0.0f ) ? mEasing + 0.2f
-                                                                                        : mEasing - 0.2f, -1.0f, 1.0f );
+                            mEasing = std::clamp( ( pointInTexture.deltaPosition.X > 0.0f ) ? mEasing + 0.2f
+                                                                                            : mEasing - 0.2f, -1.0f, 1.0f );
+                        }
                     }
                 }
             }
@@ -330,6 +346,8 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                 }
                 else
                 {
+// TODO: move all points for all breakdowns
+/*
                     ::ULIS::FVec2D pointPosition[3] = { HUDBezier->GetPoints()[0].GetPosition() + deltaPosition
                                                       , HUDBezier->GetPoints()[1].GetPosition() + deltaPosition
                                                       , HUDBezier->GetPoints()[2].GetPosition() + deltaPosition };
@@ -337,6 +355,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                     HUDBezier->GetPoints()[0].SetPosition( pointPosition[0].x, pointPosition[0].y );
                     HUDBezier->GetPoints()[1].SetPosition( pointPosition[1].x, pointPosition[1].y );
                     HUDBezier->GetPoints()[2].SetPosition( pointPosition[2].x, pointPosition[2].y );
+*/
                 }
 
                 //currentBreakdown->GetChart()->GetHUDBezier()->Update();
@@ -382,6 +401,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseUpVector( FOdysseyVectorGroupPaint*
     }
 
     oSignalFlags = retFlags;
+
     return true;
 }
 
@@ -393,11 +413,15 @@ UOdysseyPainterEditorVectorChartTool::GetPickingMode()
 
 uint64
 UOdysseyPainterEditorVectorChartTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
-                                                              , const FName& iPropertyName )
+                                                           , const FName& iPropertyName )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
     iEngine->ResetHUD();
+
+    // force redraw for this scene
+    iScene->Invalidate( 0 );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;
 }

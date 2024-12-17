@@ -44,10 +44,13 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
                           , bool iRelative );
 
         void UpdateBreakdown( FOdysseyVectorGroupPaint* iScene );
-        FInbetweenerBreakdown* GetBreakdown();
+        std::list<FInbetweenerBreakdown*>& GetBreakdownList();
         FInbetweenerChart::HUDBezier::Point* PickBezierPoint( double iWorldX
                                                             , double iWorldY
                                                             , double iRadius );
+        FInbetweenerBreakdown* PickBreakdown( double iWorldX
+                                            , double iWorldY
+                                            , double iRadius );
         const FGlyph* GetGlyph( uint32 iNum );
 
     private:
@@ -59,16 +62,10 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public 
                                , FInbetweenerChart::HUDBezier* iHUDBezier
                                , uint32 iRenderedCellIndex
                                , bool iDrawSourceIndicator );
-        void DrawInbetweenerChart( BLContext* iBLContext
-                                 , BLRgba32& iFgColor
-                                 , BLRgba32& iBgColor
-                                 , BLRgba32& iHcColor
-                                 , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                 , uint32 iRenderedCellIndex );
 
     private:
         UOdysseyPainterEditorVectorChartTool* mChartTool;
-        FInbetweenerBreakdown* mBreakdown;
+        std::list<FInbetweenerBreakdown*> mBreakdownList;
         ::ULIS::FRectD mChartRect;
         BLFont mFont;
         std::vector<FGlyph> mGlyphBuffer;

@@ -16,16 +16,17 @@ class FInbetweenerBreakdown;
 class FOdysseyVectorTagInbetweener;
 class FInbetweenerStep;
 
-struct FTrajectoryFraction
-{
-    float linearT0;
-    float linearT1;
-    float cubicT0;
-    float cubicT1;
-};
-
 class ODYSSEYVECTOR_API FInbetweenerTrajectory
 {
+    public:
+        struct Fraction
+        {
+            float linearT0;
+            float linearT1;
+            float cubicT0;
+            float cubicT1;
+        };
+
     public:
         virtual ~FInbetweenerTrajectory();
         FInbetweenerTrajectory( FInbetweenerRoute* iRoute
@@ -51,6 +52,8 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
         void FitBezier( const std::vector<::ULIS::FVec2D> &data
                       , const std::vector<float> &u );
         void Reset();
+        double GetCubicT( float iLinearT );
+        double GetLinearT( float iCubicT );
 
     private:
         std::vector<FInbetweenerWaypoint> mWaypointBuffer;
@@ -59,5 +62,5 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
         FInbetweenerHandleTrajectory mHandle[2];
         ::ULIS::FVec2D mCubicBezier[4];
         FInbetweenerBreakdown* mBreakdown;
-        std::vector<FTrajectoryFraction> mFractionBuffer;
+        std::vector<Fraction> mFractionBuffer;
 };

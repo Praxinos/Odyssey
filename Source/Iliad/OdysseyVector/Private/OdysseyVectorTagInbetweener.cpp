@@ -96,13 +96,6 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject
     // force initial dispatching of the drawings
     defaultBreakdown->SetTargetDrawingIndex( 1 );
 
-
-    defaultBreakdown->GetChart()->GetFullHUDBezier()->GetPoints()[0].SetPosition( FInbetweenerChart::DEFAULT_POSITION_P0_X
-                                                                                , FInbetweenerChart::DEFAULT_POSITION_P0_Y );
-    defaultBreakdown->GetChart()->GetFullHUDBezier()->GetPoints()[1].SetPosition( FInbetweenerChart::DEFAULT_POSITION_P1_X
-                                                                                , FInbetweenerChart::DEFAULT_POSITION_P1_Y );
-    defaultBreakdown->GetChart()->GetFullHUDBezier()->GetPoints()[2].SetPosition( FInbetweenerChart::DEFAULT_POSITION_P2_X
-                                                                                , FInbetweenerChart::DEFAULT_POSITION_P2_Y );
     //ResizeFullChartHUD();
 
     // Note: Matrix needs chart to be allocated first.
@@ -342,6 +335,15 @@ FOdysseyVectorTagInbetweener::AddRoute( const ::ULIS::FVec2D& iLocalCoords, bool
     FInbetweenerGrid* referenceGrid = mBreakdownList.front()->GetGrid();
     int quadIndex = referenceGrid->GetQuadIndex( iLocalCoords );
 
+    // check this quad does not already have a route in this quad
+    for( FInbetweenerRoute* route : mRouteList )
+    {
+        if( route->GetQuadIndex() == quadIndex )
+        {
+            return nullptr;
+        }
+    }
+
     if( quadIndex >= 0 )
     {
         FInbetweenerQuad* quad = &referenceGrid->GetQuadBuffer()[quadIndex];
@@ -541,36 +543,6 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
 
         LockDrawing();
 
-        // fit chart Full HUD by fitting splitting the quadratic bezier
-        if( iNewBreakdown == nullptr )
-        {
-            double quadraticT = curChart->GetFullHUDBezier()->GetQuadraticT( inbetween->GetSpacing() );
-            ::ULIS::FVec2D quadratic[2][3] = { { curChart->GetFullHUDBezier()->GetPoints()[0].GetPosition()
-                                               , curChart->GetFullHUDBezier()->GetPoints()[1].GetPosition()
-                                               , curChart->GetFullHUDBezier()->GetPoints()[2].GetPosition() }
-                                             , { curChart->GetFullHUDBezier()->GetPoints()[0].GetPosition()
-                                               , curChart->GetFullHUDBezier()->GetPoints()[1].GetPosition()
-                                               , curChart->GetFullHUDBezier()->GetPoints()[2].GetPosition() } };
-
-            ::ULIS::QuadraticBezierSplitAtParameter       ( &quadratic[0][0]
-                                                          , &quadratic[0][1]
-                                                          , &quadratic[0][2]
-                                                          , quadraticT );
-
-            ::ULIS::QuadraticBezierInverseSplitAtParameter( &quadratic[1][0]
-                                                          , &quadratic[1][1]
-                                                          , &quadratic[1][2]
-                                                          , quadraticT );
-
-            newChart->GetFullHUDBezier()->GetPoints()[0].SetPosition( quadratic[0][0].x, quadratic[0][0].y );
-            newChart->GetFullHUDBezier()->GetPoints()[1].SetPosition( quadratic[0][1].x, quadratic[0][1].y );
-            newChart->GetFullHUDBezier()->GetPoints()[2].SetPosition( quadratic[0][2].x, quadratic[0][2].y );
-
-            curChart->GetFullHUDBezier()->GetPoints()[0].SetPosition( quadratic[1][0].x, quadratic[1][0].y );
-            curChart->GetFullHUDBezier()->GetPoints()[1].SetPosition( quadratic[1][1].x, quadratic[1][1].y );
-            curChart->GetFullHUDBezier()->GetPoints()[2].SetPosition( quadratic[1][2].x, quadratic[1][2].y );
-        }
-
         // This is for an already existing breakdown if it had been removed before
         // (then its pointer to the tag would be null)
         newBreakdown->SetInbetweenerTag( this );
@@ -588,6 +560,36 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
         mBreakdownList.insert( curBreakdownIterator, newBreakdown );
 
         ChainBreakdowns();
+
+        // fit chart Full HUD by fitting splitting the quadratic bezier. Must be after the above call to ChainBreakdowns()
+        if( iNewBreakdown == nullptr )
+        {
+            double quadraticT = curChart->GetHUDBezier()->GetQuadraticT( inbetween->GetSpacing() );
+            ::ULIS::FVec2D quadratic[2][3] = { { curChart->GetHUDBezier()->GetPoints()[0].GetPosition()
+                                               , curChart->GetHUDBezier()->GetPoints()[1].GetPosition()
+                                               , curChart->GetHUDBezier()->GetPoints()[2].GetPosition() }
+                                             , { curChart->GetHUDBezier()->GetPoints()[0].GetPosition()
+                                               , curChart->GetHUDBezier()->GetPoints()[1].GetPosition()
+                                               , curChart->GetHUDBezier()->GetPoints()[2].GetPosition() } };
+
+            ::ULIS::QuadraticBezierSplitAtParameter       ( &quadratic[0][0]
+                                                          , &quadratic[0][1]
+                                                          , &quadratic[0][2]
+                                                          , quadraticT );
+
+            ::ULIS::QuadraticBezierInverseSplitAtParameter( &quadratic[1][0]
+                                                          , &quadratic[1][1]
+                                                          , &quadratic[1][2]
+                                                          , quadraticT );
+
+            newChart->GetHUDBezier()->GetPoints()[0].SetPosition( quadratic[0][0].x, quadratic[0][0].y );
+            newChart->GetHUDBezier()->GetPoints()[1].SetPosition( quadratic[0][1].x, quadratic[0][1].y );
+            newChart->GetHUDBezier()->GetPoints()[2].SetPosition( quadratic[0][2].x, quadratic[0][2].y );
+
+            curChart->GetHUDBezier()->GetPoints()[0].SetPosition( quadratic[1][0].x, quadratic[1][0].y );
+            curChart->GetHUDBezier()->GetPoints()[1].SetPosition( quadratic[1][1].x, quadratic[1][1].y );
+            curChart->GetHUDBezier()->GetPoints()[2].SetPosition( quadratic[1][2].x, quadratic[1][2].y );
+        }
 
         newBreakdown->SetTargetDrawingIndex( newTargetDrawingIndex );
 
@@ -1068,11 +1070,6 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
                 if( breakdown->GetChart()->GetHUDBezier()->IsInvalidated() )
                 {
                     breakdown->GetChart()->GetHUDBezier()->Update();
-                }
-
-                if( breakdown->GetChart()->GetFullHUDBezier()->IsInvalidated() )
-                {
-                    breakdown->GetChart()->GetFullHUDBezier()->Update();
                 }
             }
         }

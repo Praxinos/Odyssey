@@ -53,6 +53,7 @@ class ODYSSEYVECTOR_API FInbetweenerChart
                         Point( HUDBezier* iHUDBezier );
                         void SetPosition( double iX, double iY );
                         ::ULIS::FVec2D GetPosition();
+                        HUDBezier* GetHUDBezier();
 
                     private:
                         HUDBezier* mHUDBezier;
@@ -87,7 +88,6 @@ class ODYSSEYVECTOR_API FInbetweenerChart
         void Resize();
         void Reset( bool iResetPositionning );
         HUDBezier* GetHUDBezier();
-        HUDBezier* GetFullHUDBezier();
 
         FInbetweenerBreakdown* GetBreakdown();
         std::vector<FInbetweenerChart::Inbetween>& GetInbetweenBuffer();
@@ -105,5 +105,4 @@ class ODYSSEYVECTOR_API FInbetweenerChart
         FInbetweenerBreakdown* mBreakdown;
         std::vector<FInbetweenerChart::Inbetween> mInbetweenBuffer;
         HUDBezier mHUDBezier;
-        HUDBezier mFullHUDBezier;
 };

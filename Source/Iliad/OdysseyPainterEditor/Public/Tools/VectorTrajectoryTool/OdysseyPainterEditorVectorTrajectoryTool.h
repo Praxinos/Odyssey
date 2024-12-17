@@ -16,13 +16,14 @@ class FInbetweenerWaypoint;
 class FInbetweenerStep;
 class FInbetweenerRoute;
 
+
 UENUM()
-enum class eTrajectoryPickingMode : uint8
+enum class eTrajectoryEditionMode : uint8
 {
-    Add = 0,
-    Alter = 1,
-    Shift = 2,
-    Remove = 3
+    Add     = 0 UMETA( ToolTip = "Add (default)" ),
+    Curve   = 1 UMETA( ToolTip = "Curve (Ctrl/Cmd)" ),
+    Spacing = 2 UMETA( ToolTip = "Spacing (Shift)" ),
+    Remove  = 3 UMETA( ToolTip = "Remove (Alt)" )
 };
 
 UCLASS( HideCategories = (SelectionTool) )
@@ -41,7 +42,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
 
         FInbetweenerQuad* GetHoveredQuad();
         void ResetHoveredQuad();
-        eTrajectoryPickingMode GetPickingMode();
 
         virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
@@ -89,7 +89,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
         FInbetweenerStep* mPickedStep;
         FInbetweenerWaypoint* mPickedWaypoint;
         FInbetweenerRoute* mPickedRoute;
-        eTrajectoryPickingMode mPickingMode;
         FInbetweenerQuad* mHoveredQuad;
 
     public:
@@ -104,4 +103,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
                  , Category = MatchingTool
                  , meta = ( ToolTip  = "Show Inbetweens" ) )
         bool ShowInbetweens;
+
+        UPROPERTY( EditAnywhere
+                 , Category = MatchingTool
+                 , meta = ( ToolTip  = "Edition Mode" ) )
+        eTrajectoryEditionMode EditionMode;
 };
