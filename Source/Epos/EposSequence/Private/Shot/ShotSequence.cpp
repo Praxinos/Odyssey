@@ -31,6 +31,7 @@
 #include "EposSequenceModule.h"
 #include "INamingFormatter.h"
 #include "PlaneActor.h"
+//#include "OdysseyAnimationActor.h" // See comment in UShotSequence::CanPossessObject()
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "NoteTrack/MovieSceneNoteTrack.h"
 
@@ -244,6 +245,14 @@ bool UShotSequence::CanPossessObject( UObject& Object, UObject* InPlaybackContex
         || Object.IsA<ANiagaraActor>()
         || Object.IsA<APaperFlipbookActor>()
         || Object.IsA<AMediaPlate>()
+        //TODO: this must be temporary until OdysseyAnimation will be a runtime module
+        // Otherwise (for now), as it is an editor module, it must be included in .cs
+        // and a runtime module should avoid include editor module
+        // but once OdysseyAnimation will be an runtime module (containing asset and actor),
+        // it can be included in this epos module to be able to use the IsA<>() function
+        // (keep also in mind, in this case, there will be a dependency between EposSequence module and OdysseyAnimation module)
+        || Object.GetClass()->GetName() == TEXT( "OdysseyAnimationActor" )
+        //|| Object.IsA<AOdysseyAnimationActor>()
         || ExactCast<AActor>( &Object ); // Empty Actor
 }
 

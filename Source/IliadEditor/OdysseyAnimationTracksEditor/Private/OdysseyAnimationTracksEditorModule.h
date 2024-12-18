@@ -20,4 +20,5 @@ private:
 private:
     FDelegateHandle mAnimationTrackCreateEditorHandle;
     FDelegateHandle mOnNewActorTrackAddedHandle;
+    FDelegateHandle mOnNewActorTrackAddedOnEposHandle;
 };

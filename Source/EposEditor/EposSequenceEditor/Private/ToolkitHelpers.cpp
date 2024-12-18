@@ -33,6 +33,7 @@
 
 #include "EposSequenceEditorCommands.h"
 #include "EposSequenceHelpers.h"
+#include "EposSequenceModule.h"
 #include "PlaneActor.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
@@ -451,6 +452,10 @@ ToolkitHelpers::CreateDefaultTracksForActor( ISequencer* iSequencer, AActor* iAc
     else if( ExactCast<AActor>( iActor ) )
     {
     }
+
+    // callback to set up default tracks via code
+    FEposSequenceModule& eposSequenceModule = FModuleManager::LoadModuleChecked<FEposSequenceModule>( "EposSequence" );
+    eposSequenceModule.OnNewActorTrackAdded().Broadcast( *iActor, iBinding, iSequencer->AsShared() );
 }
 
 void

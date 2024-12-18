@@ -9,6 +9,8 @@
 
 #include "INamingFormatter.h" // Because if template
 
+class ISequencer;
+
 class FEposSequenceModule
     : public IModuleInterface
 {
@@ -16,6 +18,11 @@ public:
     /** IModuleInterface implementation */
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
+
+public:
+    DECLARE_MULTICAST_DELEGATE_ThreeParams( FOnNewActorTrackAdded, const AActor& /*SourceActor*/, const FGuid& /*Binding*/, TSharedPtr<ISequencer> /*Sequencer*/ );
+    /** Callback to set up defaults for new actor tracks */
+    virtual FOnNewActorTrackAdded& OnNewActorTrackAdded();
 
 public:
     EPOSSEQUENCE_API void RegisterNamingFormatter( UNamingFormatter* iFormatter );
@@ -37,5 +44,7 @@ public:
     }
 
 private:
+    FOnNewActorTrackAdded mNewActorTrackAdded;
+
     TArray<UNamingFormatter*> mNamingFormatters;
 };
