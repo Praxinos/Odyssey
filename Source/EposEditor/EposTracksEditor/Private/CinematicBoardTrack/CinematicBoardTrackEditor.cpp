@@ -68,32 +68,13 @@ FCinematicBoardTrackEditor::CreateTrackEditor( TSharedRef<ISequencer> iSequencer
 TWeakObjectPtr<AActor>
 FCinematicBoardTrackEditor::GetBoardCamera() const
 {
-    return mBoardCamera;
+    const UCameraComponent* Camera = GetSequencer()->GetLastEvaluatedCameraCut().Get();
+    return Camera ? Camera->GetOwner() : nullptr;
 }
-
-
-void
-FCinematicBoardTrackEditor::OnInitialize() //override
-{
-    mOnCameraCutHandle = GetSequencer()->OnCameraCut().AddSP( this, &FCinematicBoardTrackEditor::OnUpdateCameraCut );
-}
-
-void
-FCinematicBoardTrackEditor::OnUpdateCameraCut( UObject* iCameraObject, bool iJumpCut )
-{
-    // Keep track of the camera when it switches so that the thumbnail can be drawn with the correct camera
-    mBoardCamera = Cast<AActor>( iCameraObject );
-}
-
 
 void
 FCinematicBoardTrackEditor::OnRelease() //override
 {
-    if( mOnCameraCutHandle.IsValid() && GetSequencer().IsValid() )
-    {
-        GetSequencer()->OnCameraCut().Remove( mOnCameraCutHandle );
-    }
-
     TSharedPtr<FUICommandList> command_list = GetSequencer().IsValid() ? GetSequencer()->GetCommandBindings() : nullptr;
     if( command_list )
     {
@@ -203,7 +184,7 @@ FCinematicBoardTrackEditor::BuildOutlinerColumnWidget( const FBuildColumnWidgetP
     {
         return UE::Sequencer::MakeAddButton(
             LOCTEXT( "CreateBoardShotText", "Shot/Board" ),
-            FOnGetContent::CreateSP( this, &FCinematicBoardTrackEditor::HandleAddSubSequenceComboButtonGetMenuContent, Params.TrackModel->GetTrack() ),
+            FOnGetContent::CreateSP( this, &FCinematicBoardTrackEditor::HandleAddSubSequenceComboButtonGetMenuContent, Params.TrackModel.AsWeak() ),
             Params.ViewModel );
     }
 
@@ -261,7 +242,7 @@ FCinematicBoardTrackEditor::BuildOutlinerColumnWidget( const FBuildColumnWidgetP
 }
 
 TSharedRef<SWidget>
-FCinematicBoardTrackEditor::HandleAddSubSequenceComboButtonGetMenuContent( UMovieSceneTrack* InTrack )
+FCinematicBoardTrackEditor::HandleAddSubSequenceComboButtonGetMenuContent( UE::Sequencer::TWeakViewModelPtr<UE::Sequencer::ITrackExtension> WeakTrackModel )
 {
     FMenuBuilder menuBuilder( true, GetSequencer()->GetCommandBindings() );
 

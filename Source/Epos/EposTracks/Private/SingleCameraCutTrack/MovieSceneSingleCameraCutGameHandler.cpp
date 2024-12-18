@@ -17,29 +17,59 @@
 #include "Systems/MovieSceneMotionVectorSimulationSystem.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrackInstance.h"
 
+#if WITH_EDITOR
+#include "Editor.h"
+#endif
+
 namespace UE::EposMovieScene
 {
 
 using namespace UE::MovieScene;
 
+const APlayerController* GetPlaybackController( const UObject* PlaybackContext )
+{
+    UWorld* World = PlaybackContext ? PlaybackContext->GetWorld() : nullptr;
+    if( World == nullptr || World->GetGameInstance() == nullptr )
+    {
+        return nullptr;
+    }
+
+    if( const AActor* PlaybackContextActor = Cast<AActor>( PlaybackContext ) )
+    {
+        if( const APlayerController* OwnerController = Cast<APlayerController>( PlaybackContextActor->GetOwner() ) )
+        {
+            return OwnerController;
+        }
+    }
+
+    return World->GetGameInstance()->GetFirstLocalPlayerController();
+}
+
 bool FPreAnimatedCameraCutTraits::ShouldHandleWorldCameraCuts(UWorld* World)
 {
     return World &&
+        // We can handle any ongoing game worlds. We just don't handle worlds where there is
+        // no active player controller/pawn, such as PIE/SIE where the user has "ejected" out
+        // of the player controller.
         World->GetGameInstance() != nullptr &&
         World->WorldType != EWorldType::Editor &&
-        World->WorldType != EWorldType::EditorPreview;
+        World->WorldType != EWorldType::EditorPreview
+#if WITH_EDITOR
+        &&
+        ( !GEditor || !GEditor->bIsSimulatingInEditor )
+#endif
+        ;
 }
 
 FPreAnimatedCameraCutState FPreAnimatedCameraCutTraits::CachePreAnimatedValue(
-        IMovieScenePlayer* Player,
+        UObject* PlaybackContext,
         uint8 InKey)
 {
-    UObject* PlaybackContext = Player->GetPlaybackContext();
     UWorld* World = PlaybackContext ? PlaybackContext->GetWorld() : nullptr;
     if (ShouldHandleWorldCameraCuts(World))
     {
         CA_SUPPRESS(6011);
-        APlayerController* PC = World->GetGameInstance()->GetFirstLocalPlayerController();
+        const APlayerController* PC = GetPlaybackController( PlaybackContext );
 
         // Save previous view target.
         APlayerCameraManager* CameraManager = (PC != nullptr) ? PC->PlayerCameraManager : nullptr;
@@ -69,7 +99,15 @@ void FPreAnimatedCameraCutTraits::RestorePreAnimatedValue(
         return;
     }
 
-    APlayerController* PC = World->GetGameInstance()->GetFirstLocalPlayerController();
+    APlayerController* PC = nullptr;
+    if( ULocalPlayer* PreviousViewTarget = Cast<ULocalPlayer>( CachedValue.LastLocalPlayer.ResolveObjectPtr() ) )
+    {
+        if( APlayerController* OwnerController = Cast<APlayerController>( PreviousViewTarget->GetPlayerController( World ) ) )
+        {
+            PC = OwnerController;
+        }
+    }
+
     APlayerCameraManager* CameraManager = (PC != nullptr) ? PC->PlayerCameraManager : nullptr;
 
     // Restore previous view target.
@@ -79,6 +117,8 @@ void FPreAnimatedCameraCutTraits::RestorePreAnimatedValue(
     {
         AActor* PreviousViewTarget = Cast<AActor>(CachedValue.LastViewTarget.ResolveObjectPtr());
         CameraManager->SetViewTarget(PreviousViewTarget);
+        // TODO james.fleming ideally we would cache this before, just in case it had been set true (which is not usual, but could be possible)
+        CameraManager->bClientSimulatingViewTarget = false;
     }
 
     // Restore previous aspect ratio axis constraint. Use the cached local player if there's no local player
@@ -151,16 +191,37 @@ static TTuple<EViewTargetBlendFunction, float> BuiltInEasingTypeToBlendFunction(
     return Return(EViewTargetBlendFunction::VTBlend_Linear, 1.f);
 }
 
+void FCameraCutGameHandler::ForcePreAnimatedValueRestore(
+    UMovieSceneEntitySystemLinker* Linker,
+    const FSequenceInstance& SequenceInstance )
+{
+    TSharedPtr<FPreAnimatedCameraCutStorage> PreAnimatedStorage = Linker->PreAnimatedState.GetOrCreateStorage<FPreAnimatedCameraCutStorage>();
+
+    FRestoreStateParams Params;
+    Params.Linker = Linker;
+    Params.TerminalInstanceHandle = SequenceInstance.GetRootInstanceHandle();
+
+    FPreAnimatedStorageIndex StorageIndex = PreAnimatedStorage->FindStorageIndex( 0 );
+    if( StorageIndex.IsValid() )
+    {
+        PreAnimatedStorage->RestorePreAnimatedStateStorage(
+            (uint8)0,  // See comment below
+            EPreAnimatedStorageRequirement::Transient,
+            EPreAnimatedStorageRequirement::Persistent,
+            Params );
+    }
+}
+
 void FCameraCutGameHandler::CachePreAnimatedValue(
         UMovieSceneEntitySystemLinker* Linker,
         const FSequenceInstance& SequenceInstance)
 {
     TSharedPtr<FPreAnimatedCameraCutStorage> PreAnimatedStorage = Linker->PreAnimatedState.GetOrCreateStorage<FPreAnimatedCameraCutStorage>();
 
-    IMovieScenePlayer* Player = SequenceInstance.GetPlayer();
+    UObject* PlaybackContext = SequenceInstance.GetSharedPlaybackState()->GetPlaybackContext();
     PreAnimatedStorage->CachePreAnimatedValue(
             (uint8)0,  // Later this can be an index for split-screen player
-            [Player](uint8 InKey) { return FPreAnimatedCameraCutTraits::CachePreAnimatedValue(Player, InKey); },
+            [PlaybackContext](uint8 InKey) { return FPreAnimatedCameraCutTraits::CachePreAnimatedValue(PlaybackContext, InKey); },
             EPreAnimatedCaptureSourceTracking::AlwaysCache);
 }
 
@@ -184,8 +245,7 @@ void FCameraCutGameHandler::SetCameraCut(
         return;
     }
 
-    IMovieScenePlayer* Player = SequenceInstance.GetPlayer();
-    UObject* PlaybackContext = Player->GetPlaybackContext();
+    UObject* PlaybackContext = SequenceInstance.GetSharedPlaybackState()->GetPlaybackContext();
     UWorld* World = PlaybackContext ? PlaybackContext->GetWorld() : nullptr;
 
     // Also bail out if we don't have a world running any sort of game.
@@ -195,7 +255,7 @@ void FCameraCutGameHandler::SetCameraCut(
     }
 
     CA_SUPPRESS(6011);
-    APlayerController* PC = World->GetGameInstance()->GetFirstLocalPlayerController();
+    const APlayerController* PC = GetPlaybackController( PlaybackContext );
     APlayerCameraManager* CameraManager = (PC != nullptr) ? PC->PlayerCameraManager : nullptr;
 
     // If the player controller is missing, there is no camera manager for us to manage the view target

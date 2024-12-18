@@ -154,10 +154,16 @@ BoardHelpers::ResizeParentSequenceRecursively( UEposMovieSceneSequence* iSequenc
         {
             auto child_full_range = TRange<FFrameNumber>( child_track->GetAllSections()[0]->GetInclusiveStartFrame(), child_track->GetAllSections().Last()->GetExclusiveEndFrame() );
 
-            const FMovieSceneSequenceTransform InnerToOuterTransform = parent_section->OuterToInnerTransform().InverseNoLooping();
-            TRange<FFrameNumber> child_full_range_in_outer( ( child_full_range.GetLowerBoundValue() * InnerToOuterTransform ).FloorToFrame(), ( child_full_range.GetUpperBoundValue() * InnerToOuterTransform ).FloorToFrame() );
+            FMovieSceneInverseSequenceTransform localToRootTransform = parent_section->OuterToInnerTransform().Inverse();
 
-            child_full_duration = UE::MovieScene::DiscreteSize( child_full_range_in_outer );
+            TOptional<FFrameTime> child_lower_in_outer = localToRootTransform.TryTransformTime( child_full_range.GetLowerBoundValue() );
+            TOptional<FFrameTime> child_upper_in_outer = localToRootTransform.TryTransformTime( child_full_range.GetUpperBoundValue() );
+            if( child_lower_in_outer && child_upper_in_outer )
+            {
+                TRange<FFrameNumber> child_full_range_in_outer( child_lower_in_outer->FloorToFrame(), child_upper_in_outer->FloorToFrame() );
+
+                child_full_duration = UE::MovieScene::DiscreteSize( child_full_range_in_outer );
+            }
         }
 
         auto range = parent_section->GetTrueRange();

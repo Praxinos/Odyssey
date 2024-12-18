@@ -124,9 +124,12 @@ ShotSequenceTools::StepToNextShot( ISequencer& iSequencer, UMovieSceneSequence* 
     UMovieSceneSequence* parent_sequence = subsection->GetTypedOuter<UMovieSceneSequence>();
     check( parent_sequence );
 
-    FFrameTime time_in_parent = iSequence->GetMovieScene()->GetPlaybackRange().GetLowerBoundValue() * subsection->OuterToInnerTransform().InverseNoLooping();
+    FMovieSceneInverseSequenceTransform localToRootTransform = subsection->OuterToInnerTransform().Inverse();
+    TOptional<FFrameTime> time_in_parent = localToRootTransform.TryTransformTime( iSequence->GetMovieScene()->GetPlaybackRange().GetLowerBoundValue() );
+    if( !time_in_parent )
+        return;
 
-    UMovieSceneSubSection* next_subsection = FindNextOrPreviousShot( parent_sequence, time_in_parent.FloorToFrame(), true /* iNextShot */ );
+    UMovieSceneSubSection* next_subsection = FindNextOrPreviousShot( parent_sequence, time_in_parent->FloorToFrame(), true /* iNextShot */ );
     if( !next_subsection )
         return;
 
@@ -148,9 +151,12 @@ ShotSequenceTools::StepToPreviousShot( ISequencer& iSequencer, UMovieSceneSequen
     UMovieSceneSequence* parent_sequence = subsection->GetTypedOuter<UMovieSceneSequence>();
     check( parent_sequence );
 
-    FFrameTime time_in_parent = iSequence->GetMovieScene()->GetPlaybackRange().GetLowerBoundValue() * subsection->OuterToInnerTransform().InverseNoLooping();
+    FMovieSceneInverseSequenceTransform localToRootTransform = subsection->OuterToInnerTransform().Inverse();
+    TOptional<FFrameTime> time_in_parent = localToRootTransform.TryTransformTime( iSequence->GetMovieScene()->GetPlaybackRange().GetLowerBoundValue() );
+    if( !time_in_parent )
+        return;
 
-    UMovieSceneSubSection* previous_subsection = FindNextOrPreviousShot( parent_sequence, time_in_parent.FloorToFrame(), false /* iNextShot */ );
+    UMovieSceneSubSection* previous_subsection = FindNextOrPreviousShot( parent_sequence, time_in_parent->FloorToFrame(), false /* iNextShot */ );
     if( !previous_subsection )
         return;
 

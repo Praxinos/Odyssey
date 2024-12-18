@@ -216,14 +216,16 @@ SMetaKeysArea::OnMouseButtonUp( const FGeometry& MyGeometry, const FPointerEvent
             FCinematicBoardSection* board_section = mBoardSection.Pin().Get();
             const UMovieSceneSubSection* subsection_object = &board_section->GetSubSectionObject();
             ISequencer* sequencer = board_section->GetSequencer().Get();
-            const FMovieSceneSequenceTransform OuterToInnerTransform = subsection_object->OuterToInnerTransform();
+
+            FMovieSceneInverseSequenceTransform localToRootTransform = subsection_object->OuterToInnerTransform().Inverse();
 
             TArray<FFrameNumber> keys;
             mDraggedKeys->GetMetaKeys().GenerateKeyArray( keys ); // Or get the inner time of the first subkey ?
-            FFrameTime local_time = keys[0] * OuterToInnerTransform.InverseNoLooping();
 
+            TOptional<FFrameTime> local_time = localToRootTransform.TryTransformTime( keys[0] );
             // Update the current frame in the sequencer
-            sequencer->SetLocalTime( local_time, ESnapTimeMode::STM_Interval );
+            if( local_time )
+                sequencer->SetLocalTime( *local_time, ESnapTimeMode::STM_Interval );
 
             //-
 
@@ -302,7 +304,8 @@ SMetaKeysArea::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& Mo
         TRange<FFrameNumber> inner_clamp_range( ( subsection_range.GetLowerBoundValue() * OuterToInnerTransform ).FloorToFrame(), ( subsection_range.GetUpperBoundValue() * OuterToInnerTransform ).FloorToFrame() ); // Let's see if FloorToFrame() of the upper bound value is ok, as (as a true range) it is exclusive
 
         FFrameTime local_inner_time = mDraggedKeys->Move( inner_moved_frame, snap, inner_tick_resolution, inner_display_rate, inner_clamp_range );
-        FFrameTime local_time = local_inner_time * OuterToInnerTransform.InverseNoLooping();
+        FMovieSceneInverseSequenceTransform localToRootTransform = OuterToInnerTransform.Inverse();
+        TOptional<FFrameTime> local_time = localToRootTransform.TryTransformTime( local_inner_time );
 
         //---
 
@@ -326,7 +329,8 @@ SMetaKeysArea::OnMouseMove( const FGeometry& MyGeometry, const FPointerEvent& Mo
         }
 
         // Update the current frame in the sequencer
-        sequencer->SetLocalTime( local_time, ESnapTimeMode::STM_Interval );
+        if( local_time )
+            sequencer->SetLocalTime( *local_time, ESnapTimeMode::STM_Interval );
 
         return FReply::Handled();
     }
@@ -390,7 +394,7 @@ SMetaKeysArea::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometr
 
     FVector2D localSectionSize = AllottedGeometry.GetLocalSize();
     FTimeToPixel converter = board_section->ConstructConverterForSection( AllottedGeometry );
-    const FMovieSceneSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().InverseNoLooping();
+    FMovieSceneInverseSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().Inverse();
     const UMovieScene* movie_scene = subsection_object->GetTypedOuter<UMovieScene>();
     check( movie_scene );
 
@@ -400,8 +404,11 @@ SMetaKeysArea::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometr
         FMetaKey meta_key = pair.Value;
         FKeyDrawParams key_draw_param = meta_key.mMetaKeyDrawParam;
 
-        FFrameTime outer_time = time * inner_to_outer_transform;
-        double outer_second = FQualifiedFrameTime( outer_time, movie_scene->GetTickResolution() ).AsSeconds();
+        TOptional<FFrameTime> outer_time = inner_to_outer_transform.TryTransformTime( time );
+        if( !outer_time )
+            continue;
+
+        double outer_second = FQualifiedFrameTime( *outer_time, movie_scene->GetTickResolution() ).AsSeconds();
 
         const FVector2D KeySize = SequencerSectionConstants::KeySize;
 

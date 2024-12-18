@@ -1253,10 +1253,15 @@ ShotSequenceTools::GotoPreviousCameraPosition( ISequencer& iSequencer, UMovieSce
 
     FFrameNumber previous_time = times[index];
 
-    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iSequencer.GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetSharedPlaybackState()->GetHierarchy();
     const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
 
-    iSequencer.SetGlobalTime( previous_time * subdata->RootToSequenceTransform.InverseNoLooping() );
+    FMovieSceneInverseSequenceTransform localToRootTransform = subdata->RootToSequenceTransform.Inverse();
+    TOptional<FFrameTime> previous_time_in_root = localToRootTransform.TryTransformTime( previous_time );
+    if( !previous_time_in_root )
+        return;
+
+    iSequencer.SetGlobalTime( *previous_time_in_root );
 }
 
 //-
@@ -1327,10 +1332,15 @@ ShotSequenceTools::GotoNextCameraPosition( ISequencer& iSequencer, UMovieSceneSe
     if( !next_time )
         return;
 
-    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iSequencer.GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetSharedPlaybackState()->GetHierarchy();
     const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
 
-    iSequencer.SetGlobalTime( *next_time * subdata->RootToSequenceTransform.InverseNoLooping() );
+    FMovieSceneInverseSequenceTransform localToRootTransform = subdata->RootToSequenceTransform.Inverse();
+    TOptional<FFrameTime> next_time_in_root = localToRootTransform.TryTransformTime( *next_time );
+    if( !next_time_in_root )
+        return;
+
+    iSequencer.SetGlobalTime( *next_time_in_root );
 }
 
 //---

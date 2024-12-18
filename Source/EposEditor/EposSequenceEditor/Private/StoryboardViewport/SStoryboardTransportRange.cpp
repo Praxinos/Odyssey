@@ -90,7 +90,7 @@ void SStoryboardTransportRange::SetTime(const FGeometry& MyGeometry, const FPoin
         // Clamp first, snap to frame last
         if (Sequencer->GetSequencerSettings()->ShouldKeepCursorInPlayRangeWhileScrubbing())
         {
-            TRange<FFrameNumber> PlaybackRange = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene()->GetPlaybackRange();
+            TRange<FFrameNumber> PlaybackRange = Sequencer->GetSubSequenceRange().Get( Sequencer->GetRootMovieSceneSequence()->GetMovieScene()->GetPlaybackRange() );
             ScrubTime = UE::MovieScene::ClampToDiscreteRange(ScrubTime, PlaybackRange);
         }
 
@@ -265,6 +265,7 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
 
     // Draw the marked frames
     TArray<FMovieSceneMarkedFrame> MarkedFrames = Sequencer->GetMarkedFrames();
+    const FLinearColor DefaultMarkedFrameColor = Sequencer->GetSequencerSettings()->GetMarkedFrameColor();
     if (MarkedFrames.Num())
     {
         int64 TotalMaxSeconds = static_cast<int64>(TNumericLimits<int32>::Max() / TickResolution.AsDecimal());
@@ -288,9 +289,10 @@ int32 SStoryboardTransportRange::OnPaint(const FPaintArgs& Args, const FGeometry
         while ( Index < MarkedFrames.Num() )
         {
             FFrameNumber PredicateTime = MarkedFrames[Index].FrameNumber;
-            GroupedTimes.Add(PredicateTime);
-            KeyColors.Add(MarkedFrames[Index].Color);
-            KeyColors[KeyColors.Num()-1].A = 0.8f; // make the alpha consistent across all markers
+            FLinearColor MarkedFrameColor = MarkedFrames[Index].bUseCustomColor ? MarkedFrames[Index].CustomColor : DefaultMarkedFrameColor;
+            GroupedTimes.Add( PredicateTime );
+            KeyColors.Add( MarkedFrameColor );
+            KeyColors[KeyColors.Num() - 1].A = 0.8f; // make the alpha consistent across all markers
 
             while (Index < MarkedFrames.Num() && FMath::Abs(MarkedFrames[Index].FrameNumber - PredicateTime) <= ThresholdFrames)
             {

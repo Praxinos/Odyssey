@@ -21,7 +21,12 @@ using namespace UE::MovieScene;
 bool FPreAnimatedCameraCutEditorTraits::ShouldHandleViewportCameraCuts(UWorld* ViewportWorld)
 {
     return ViewportWorld &&
-        (ViewportWorld->WorldType == EWorldType::Editor || ViewportWorld->WorldType == EWorldType::EditorPreview);
+        // We can handle editor worlds, and game worlds that don't have an active player controller/pawn,
+        // such as PIE/SIE where the user has "ejected" out of the player controller.
+        ( ViewportWorld->WorldType == EWorldType::Editor ||
+          ViewportWorld->WorldType == EWorldType::EditorPreview ||
+          ( ViewportWorld->WorldType == EWorldType::PIE &&
+            GEditor && GEditor->bIsSimulatingInEditor ) );
 }
 
 FPreAnimatedCameraCutEditorState FPreAnimatedCameraCutEditorTraits::CachePreAnimatedValue(
@@ -93,8 +98,7 @@ void FCameraCutEditorHandler::CachePreAnimatedValue(
         return;
     }
 
-    IMovieScenePlayer* Player = SequenceInstance.GetPlayer();
-    UObject* PlaybackContext = Player->GetPlaybackContext();
+    UObject* PlaybackContext = SequenceInstance.GetSharedPlaybackState()->GetPlaybackContext();
     UWorld* ContextWorld = PlaybackContext ? PlaybackContext->GetWorld() : nullptr;
 
     // Only handle editor world/viewports.
@@ -132,8 +136,7 @@ void FCameraCutEditorHandler::ForcePreAnimatedValueOperation(
 
     TGuardValue<FEntityManager*> EntityManagerForDebugging(GEntityManagerForDebuggingVisualizers, &Linker->EntityManager);
 
-    IMovieScenePlayer* Player = SequenceInstance.GetPlayer();
-    UObject* PlaybackContext = Player->GetPlaybackContext();
+    UObject* PlaybackContext = SequenceInstance.GetSharedPlaybackState()->GetPlaybackContext();
     UWorld* ContextWorld = PlaybackContext ? PlaybackContext->GetWorld() : nullptr;
 
     // Only handle editor world/viewports.
@@ -160,6 +163,7 @@ void FCameraCutEditorHandler::ForcePreAnimatedValueOperation(
                 case EForcedCameraCutPreAnimatedStorageOperation::Cache:
                     {
                         PreAnimatedStorage->DiscardPreAnimatedStateStorage(StorageIndex, EPreAnimatedStorageRequirement::Transient);
+                        PreAnimatedStorage->DiscardPreAnimatedStateStorage( StorageIndex, EPreAnimatedStorageRequirement::Persistent );
                         PreAnimatedStorage->CachePreAnimatedValue(
                                 LevelVC,
                                 [](FLevelEditorViewportClient* InKey) { return FPreAnimatedCameraCutEditorTraits::CachePreAnimatedValue(InKey); },
@@ -203,8 +207,7 @@ void FCameraCutEditorHandler::SetCameraCut(
         return;
     }
 
-    IMovieScenePlayer* Player = SequenceInstance.GetPlayer();
-    UObject* PlaybackContext = Player->GetPlaybackContext();
+    UObject* PlaybackContext = SequenceInstance.GetSharedPlaybackState()->GetPlaybackContext();
     UWorld* ContextWorld = PlaybackContext ? PlaybackContext->GetWorld() : nullptr;
 
     // Only handle editor world/viewports.

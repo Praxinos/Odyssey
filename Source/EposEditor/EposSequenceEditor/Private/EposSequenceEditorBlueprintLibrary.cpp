@@ -6,6 +6,7 @@
 #include "Channels/MovieSceneChannel.h"
 //For custom colors on channels, stored in editor pref's
 #include "CurveEditorSettings.h"
+#include "Filters/ISequencerTrackFilters.h"
 #include "IKeyArea.h"
 #include "ISequencer.h"
 #include "Modules/ModuleManager.h"
@@ -1303,6 +1304,14 @@ void UEposSequenceEditorBlueprintLibrary::RefreshCurrentEposSequence()
     }
 }
 
+void UEposSequenceEditorBlueprintLibrary::ForceUpdate()
+{
+    if( CurrentSequencer.IsValid() )
+    {
+        CurrentSequencer.Pin()->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::RefreshAllImmediately );
+    }
+}
+
 TArray<UObject*> UEposSequenceEditorBlueprintLibrary::GetBoundObjects(FMovieSceneObjectBindingID ObjectBinding)
 {
     TArray<UObject*> BoundObjects;
@@ -1386,35 +1395,38 @@ void UEposSequenceEditorBlueprintLibrary::SetLockEposSequence(bool bLock)
 
 bool UEposSequenceEditorBlueprintLibrary::IsTrackFilterEnabled(const FText& TrackFilterName)
 {
-    if (CurrentSequencer.IsValid())
-    {
-        TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin();
+    return IsTrackFilterActive( TrackFilterName );
+}
 
-        return Sequencer->IsTrackFilterEnabled(TrackFilterName);
+bool UEposSequenceEditorBlueprintLibrary::IsTrackFilterActive( const FText& TrackFilterName )
+{
+    if( const TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin() )
+    {
+        return Sequencer->GetFilterInterface()->IsFilterActiveByDisplayName( TrackFilterName.ToString() );
     }
     return false;
 }
 
 void UEposSequenceEditorBlueprintLibrary::SetTrackFilterEnabled(const FText& TrackFilterName, bool bEnabled)
 {
-    if (CurrentSequencer.IsValid())
-    {
-        TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin();
+    return SetTrackFilterActive( TrackFilterName, bEnabled );
+}
 
-        Sequencer->SetTrackFilterEnabled(TrackFilterName, bEnabled);
+void UEposSequenceEditorBlueprintLibrary::SetTrackFilterActive( const FText& TrackFilterName, bool bActive )
+{
+    if( const TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin() )
+    {
+        Sequencer->GetFilterInterface()->SetFilterActiveByDisplayName( TrackFilterName.ToString(), bActive );
     }
 }
 
 TArray<FText> UEposSequenceEditorBlueprintLibrary::GetTrackFilterNames()
 {
-    if (CurrentSequencer.IsValid())
+    if( const TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin() )
     {
-        TSharedPtr<ISequencer> Sequencer = CurrentSequencer.Pin();
-
-        return Sequencer->GetTrackFilterNames();
+        return Sequencer->GetFilterInterface()->GetFilterDisplayNames();
     }
-
-    return TArray<FText>();
+    return {};
 }
 
 bool UEposSequenceEditorBlueprintLibrary::HasCustomColorForChannel(UClass* Class, const FString& Identifier)

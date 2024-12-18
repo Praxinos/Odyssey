@@ -277,10 +277,11 @@ ToolkitHelpers::CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor, con
         break;
     }
 
+    //FGuid ComponentBinding = iSequencer->GetHandleToObject( PropertyOwner );
+
     //TODO: added in 5.2
     //if( bReplaceWithTransformTrack )
     //{
-    //    FGuid ComponentBinding = iSequencer->GetHandleToObject( PropertyOwner );
     //    UClass* TrackClass = UMovieScene3DTransformTrack::StaticClass();
     //    UMovieSceneTrack* NewTrack = MovieScene->FindTrack( TrackClass, ComponentBinding );
     //    if( !NewTrack )
@@ -289,6 +290,30 @@ ToolkitHelpers::CreatePropertyTrack( ISequencer* iSequencer, AActor* iActor, con
     //        CreateDefaultTrackSection( NewTrack, PropertyOwner );
     //    }
     //    return;
+    //}
+
+    //TODO: added in 5.5
+    //bool bFoundPropertyTrack = false;
+    //if( ComponentBinding.IsValid() )
+    //{
+    //    TArray<UMovieSceneTrack*> Tracks = MovieScene->FindTracks( UMovieScenePropertyTrack::StaticClass(), ComponentBinding, NAME_None );
+    //    for( UMovieSceneTrack* Track : Tracks )
+    //    {
+    //        UMovieScenePropertyTrack* PropertyTrack = Cast<UMovieScenePropertyTrack>( Track );
+    //        if( PropertyTrack )
+    //        {
+    //            if( PropertyTrack->GetPropertyPath() == PropertyTrackSettings.PropertyPath )
+    //            {
+    //                bFoundPropertyTrack = true;
+    //                break;
+    //            }
+    //        }
+    //    }
+    //}
+
+    //if( bFoundPropertyTrack )
+    //{
+    //    continue;
     //}
 
     if( !iSequencer->CanKeyProperty( FCanKeyPropertyParams( PropertyOwner->GetClass(), *PropertyPath ) ) )
