@@ -23,7 +23,7 @@ enum class eTrajectoryEditionMode : uint8
     Add     = 0 UMETA( ToolTip = "Add (default)" ),
     Curve   = 1 UMETA( ToolTip = "Curve (Ctrl/Cmd)" ),
     Spacing = 2 UMETA( ToolTip = "Spacing (Shift)" ),
-    Remove  = 3 UMETA( ToolTip = "Remove (Alt)" )
+    //Remove  = 3 UMETA( ToolTip = "Remove (Alt)" )
 };
 
 UCLASS( HideCategories = (SelectionTool) )
@@ -108,4 +108,5 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
                  , Category = MatchingTool
                  , meta = ( ToolTip  = "Edition Mode" ) )
         eTrajectoryEditionMode EditionMode;
+        eTrajectoryEditionMode EditionModeAtKeyDown;
 };

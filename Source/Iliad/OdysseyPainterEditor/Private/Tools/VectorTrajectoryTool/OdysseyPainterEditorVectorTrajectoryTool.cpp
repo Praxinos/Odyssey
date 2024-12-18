@@ -82,31 +82,33 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyDownGlobalVector( FOdysseyVector
 {
     uint64 notificationFlags = 0;
 
-    EditionMode = eTrajectoryEditionMode::Add;
+    EditionModeAtKeyDown = EditionMode;
+
+    //EditionMode = eTrajectoryEditionMode::Add;
 
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
     // with the events processing in the OnKeyUpGlobalVector(), we do like that.
     if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
       || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand ) )
     {
-        EditionMode = ( EditionMode == eTrajectoryEditionMode::Curve    ) ? eTrajectoryEditionMode::Add
-                                                                          : eTrajectoryEditionMode::Curve;
+        EditionMode = ( EditionModeAtKeyDown == eTrajectoryEditionMode::Curve    ) ? eTrajectoryEditionMode::Add
+                                                                                   : eTrajectoryEditionMode::Curve;
     }
 
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
     // with the events processing in the OnKeyUpGlobalVector(), we do like that.
     if ( ( iKey == EKeys::LeftShift ) || ( iKey == EKeys::RightShift ) )
     {
-        EditionMode  = ( EditionMode == eTrajectoryEditionMode::Spacing ) ? eTrajectoryEditionMode::Add
-                                                                          : eTrajectoryEditionMode::Spacing;
+        EditionMode  = ( EditionModeAtKeyDown == eTrajectoryEditionMode::Spacing ) ? eTrajectoryEditionMode::Add
+                                                                                   : eTrajectoryEditionMode::Spacing;
     }
 
     // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
     // with the events processing in the OnKeyUpGlobalVector(), we do like that.
-    if ( ( iKey == EKeys::LeftAlt ) || ( iKey == EKeys::RightAlt ) )
-    {
-        EditionMode = eTrajectoryEditionMode::Remove;
-    }
+    //if ( ( iKey == EKeys::LeftAlt ) || ( iKey == EKeys::RightAlt ) )
+    //{
+    //    EditionMode = eTrajectoryEditionMode::Remove;
+    //}
 
     // redraw
     iScene->GetEngine()->Invalidate( 0 );
@@ -137,7 +139,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyUpGlobalVector( FOdysseyVectorGr
     }
 
     // first reset display mode
-    EditionMode = eTrajectoryEditionMode::Add;
+    EditionMode = EditionModeAtKeyDown;
 
     oSignalFlags = notificationFlags;
     return false;
@@ -293,7 +295,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                 }
             }
         }
-
+/*
         if( EditionMode == eTrajectoryEditionMode::Remove )
         {
             FInbetweenerRoute* pickedRoute = mTrajectoryHUD->PickRoute( iScene
@@ -323,6 +325,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                 pickedRoute->GetInbetweenerTag()->RemoveRoute( pickedRoute );
             }
         }
+*/
     }
 
     // Updating via the Shared env allow multiple cells to be updated which is paramount
