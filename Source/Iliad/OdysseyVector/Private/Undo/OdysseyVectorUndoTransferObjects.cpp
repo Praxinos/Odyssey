@@ -4,6 +4,7 @@
 #include "Undo/OdysseyVectorUndoTransferObjects.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoTransferObjects::~FOdysseyVectorUndoTransferObjects()
 {
@@ -19,16 +20,22 @@ FOdysseyVectorUndoTransferObjects::~FOdysseyVectorUndoTransferObjects()
 }
 
 FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVectorGroupPaint* iScene
-                                                                    , FOdysseyVectorObject* iTransferredObject )
-    : FOdysseyVectorUndo( iScene )
+                                                                    , FOdysseyVectorObject* iTransferredObject
+                                                                    , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mTransferredObjectSnapshotArray.emplace_back( iTransferredObject, FSnapshotFlags::Object::HIERARCHY );
 }
 
 FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVectorGroupPaint* iScene
-                                                                    , const std::list<FOdysseyVectorObject*>& iTransferredObjectList )
-    : FOdysseyVectorUndo( iScene )
+                                                                    , const std::list<FOdysseyVectorObject*>& iTransferredObjectList
+                                                                    , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     for( FOdysseyVectorObject* transferredObject : iTransferredObjectList )
     {
         mTransferredObjectSnapshotArray.emplace_back( transferredObject, FSnapshotFlags::Object::HIERARCHY );
@@ -43,7 +50,7 @@ FOdysseyVectorUndoTransferObjects::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mScene->GetEngine()->ClearObjectSelection();
+    mEngineList.front()->ClearObjectSelection();
 
     while( allRestored == false )
     {
@@ -59,14 +66,8 @@ FOdysseyVectorUndoTransferObjects::Apply( UObject* iIgnored )
         }
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -77,7 +78,7 @@ FOdysseyVectorUndoTransferObjects::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mScene->GetEngine()->ClearObjectSelection();
+    mEngineList.front()->ClearObjectSelection();
 
     while( allRestored == false )
     {
@@ -93,14 +94,8 @@ FOdysseyVectorUndoTransferObjects::Revert( UObject* iIgnored )
         }
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

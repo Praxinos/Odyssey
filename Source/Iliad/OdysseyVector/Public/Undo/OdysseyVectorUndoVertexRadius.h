@@ -18,9 +18,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoVertexRadius : public FOdysseyVectorUn
     public:
         ~FOdysseyVectorUndoVertexRadius();
         FOdysseyVectorUndoVertexRadius( FOdysseyVectorGroupPaint* iScene
-                                      , std::vector<FOdysseyVectorPath*>& iPathArray );
+                                      , std::vector<FOdysseyVectorPath*>& iPathArray
+                                      , uint64 iReturnFlags );
         FOdysseyVectorUndoVertexRadius( FOdysseyVectorGroupPaint* iScene
-                                      , std::vector<FOdysseyVectorVertex*>& iVertexArray );
+                                      , std::vector<FOdysseyVectorVertex*>& iVertexArray
+                                      , uint64 iReturnFlags );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

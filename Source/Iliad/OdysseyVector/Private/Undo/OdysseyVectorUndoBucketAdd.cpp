@@ -2,8 +2,9 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Undo/OdysseyVectorUndoBucketAdd.h"
-
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
+#include "Misc/OdysseyUndoDelegates.h"
 
 FOdysseyVectorUndoBucketAdd::~FOdysseyVectorUndoBucketAdd()
 {
@@ -21,9 +22,12 @@ FOdysseyVectorUndoBucketAdd::~FOdysseyVectorUndoBucketAdd()
 }
 
 FOdysseyVectorUndoBucketAdd::FOdysseyVectorUndoBucketAdd( FOdysseyVectorGroupPaint* iScene
-                                                        , std::vector<FOdysseyVectorBucket*>& iBucketArray )
-    : FOdysseyVectorUndo( iScene )
+                                                        , std::vector<FOdysseyVectorBucket*>& iBucketArray
+                                                        , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mBucketArray = iBucketArray;
 }
 
@@ -40,13 +44,8 @@ FOdysseyVectorUndoBucketAdd::Apply( UObject* iIgnored )
         paintGroup->AddBucket( mBucketArray[i] );
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -62,13 +61,8 @@ FOdysseyVectorUndoBucketAdd::Revert( UObject* iIgnored )
         paintGroup->RemoveBucket( mBucketArray[i] );
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

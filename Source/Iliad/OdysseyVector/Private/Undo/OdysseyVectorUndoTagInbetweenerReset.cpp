@@ -1,0 +1,125 @@
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
+
+#include "Undo/OdysseyVectorUndoTagInbetweenerReset.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorTag.h"
+#include "OdysseyVectorSharedEnv.h"
+
+FOdysseyVectorUndoTagInbetweenerReset::~FOdysseyVectorUndoTagInbetweenerReset()
+{
+    if( mApplied )
+    {
+        // nothing to do
+    }
+    else
+    {
+
+    }
+}
+
+FOdysseyVectorUndoTagInbetweenerReset::FOdysseyVectorUndoTagInbetweenerReset( FOdysseyVectorGroupPaint* iScene
+                                                                            , const std::list<FInbetweenerBreakdown*>& iBreakdownList
+                                                                            , bool iResetGridGeometry
+                                                                            , bool iResetTransformations
+                                                                            , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+{
+    // we build a list of engines we will need to redraw
+    for( FInbetweenerBreakdown* breakdown : iBreakdownList )
+    {
+        FOdysseyVectorEngine* engine = breakdown->GetInbetweenerTag()->GetOwner()->GetEngine();
+
+        if( std::find( mEngineList.begin(), mEngineList.end(), engine ) == mEngineList.end() )
+        {
+            mEngineList.push_back( engine );
+        }
+    }
+
+    mBreakdownSnapshotBuffer.reserve( iBreakdownList.size() );
+
+    for( FInbetweenerBreakdown* breakdown : iBreakdownList )
+    {
+        mBreakdownSnapshotBuffer.emplace_back( breakdown
+                                             , ( iResetGridGeometry    ? FSnapshotFlags::Breakdown::GRIDGEOMETRY    : 0 )
+                                             | ( iResetTransformations ? FSnapshotFlags::Breakdown::TRANSFORMATIONS : 0 ) );
+    }
+}
+
+FOdysseyVectorUndoTagInbetweenerReset::FOdysseyVectorUndoTagInbetweenerReset( FOdysseyVectorGroupPaint* iScene
+                                                                            , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                                            , bool iResetGridGeometry
+                                                                            , bool iResetTransformations
+                                                                            , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+{
+    uint32 breakdownCount = 0;
+
+    // we build a list of engines we will need to redraw
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
+    {
+        FOdysseyVectorEngine* engine = inbetweenerTag->GetOwner()->GetEngine();
+
+        if( std::find( mEngineList.begin(), mEngineList.end(), engine ) == mEngineList.end() )
+        {
+            mEngineList.push_back( engine );
+        }
+    }
+
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
+    {
+        breakdownCount += inbetweenerTag->GetBreakdownCount();
+    }
+
+    mBreakdownSnapshotBuffer.reserve( breakdownCount );
+
+    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
+    {
+        for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
+        {
+            mBreakdownSnapshotBuffer.emplace_back( breakdown
+                                                 , ( iResetGridGeometry    ? FSnapshotFlags::Breakdown::GRIDGEOMETRY    : 0 )
+                                                 | ( iResetTransformations ? FSnapshotFlags::Breakdown::TRANSFORMATIONS : 0 ) );
+        }
+    }
+}
+
+void
+FOdysseyVectorUndoTagInbetweenerReset::Apply( UObject* iIgnored )
+{
+    // call method from base class
+    FOdysseyVectorUndo::Apply( iIgnored );
+
+    for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
+    {
+        breakdownSnapshot.LoadAlteredState();
+    }
+
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
+}
+
+void
+FOdysseyVectorUndoTagInbetweenerReset::Revert( UObject* iIgnored )
+{
+    // call method from base class
+    FOdysseyVectorUndo::Revert( iIgnored );
+
+    for( FSnapshotInbetweenerBreakdown& breakdownSnapshot : mBreakdownSnapshotBuffer )
+    {
+        breakdownSnapshot.RecordAlteredState();
+        breakdownSnapshot.LoadInitialState();
+    }
+
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
+}
+
+/** Describes this change (for debugging) */
+FString
+FOdysseyVectorUndoTagInbetweenerReset::ToString() const
+{
+    return FString("FOdysseyVectorUndoTagInbetweenerReset");
+}

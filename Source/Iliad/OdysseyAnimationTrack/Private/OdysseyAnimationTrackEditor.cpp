@@ -237,7 +237,7 @@ FOdysseyAnimationTrackEditor::BuildOutlinerColumnWidget(const FBuildColumnWidget
     if (iColumnName == ::UE::Sequencer::FCommonOutlinerNames::Add)
     {
         FGuid objectBinding = track->FindObjectBindingGuid();
-        return SNew(SBox)
+        return /*SNew(SBox)
             .HeightOverride(FOdysseyAnimationTrackEditorSection::GetUncollapsedSectionHeight(component))
             .VAlign(VAlign_Top)
             [
@@ -245,10 +245,10 @@ FOdysseyAnimationTrackEditor::BuildOutlinerColumnWidget(const FBuildColumnWidget
                 .HeightOverride(FOdysseyAnimationTrackEditorSection::GetCollapsedSectionHeight())
                 .VAlign(VAlign_Center)
                 .HAlign(HAlign_Center)
-                [
-                    UE::Sequencer::MakeAddButton(LOCTEXT("sequencer.animation-timeline-track.add-button.tooltip", "Add Section"), FOnClicked::CreateRaw(this, &FOdysseyAnimationTrackEditor::OnAddButtonClicked, objectBinding), iParams.ViewModel)
-                ]
-            ];
+                [*/
+                    UE::Sequencer::MakeAddButton(LOCTEXT("sequencer.animation-timeline-track.add-button.tooltip", "Add Section"), FOnClicked::CreateRaw(this, &FOdysseyAnimationTrackEditor::OnAddButtonClicked, objectBinding), iParams.ViewModel);
+                /*]
+            ];*/
     }
 
     if (iColumnName == ::UE::Sequencer::FCommonOutlinerNames::Label)

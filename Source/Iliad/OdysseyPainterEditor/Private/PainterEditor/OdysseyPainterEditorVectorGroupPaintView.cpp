@@ -32,21 +32,21 @@ UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
             //Wireframe       = selectedPaintGroup->IsWireframe();
             WireframeColor    = selectedPaintGroup->GetWireframeColor();
             Multithreaded     = selectedPaintGroup->IsMultithreaded();
-            IntersectsCanevas = selectedPaintGroup->IntersectsCanevas();
+            IntersectsCanvas = selectedPaintGroup->IntersectsCanvas();
 
             break; // only one for now
         }
     }
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iPropertyName
                                                           , const FName& iMemberPropertyName
                                                           , const FName& iCategory)
 {
-    uint64 signalFlags = UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName
-                                                                               , iMemberPropertyName
-                                                                               , iCategory );
+    UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName
+                                                          , iMemberPropertyName
+                                                          , iCategory );
 
     for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
     {
@@ -71,8 +71,8 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
             if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, GapTolerance) )
                 selectedPaintGroup->SetGapTolerance( GapTolerance );
 
-            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, IntersectsCanevas) )
-                selectedPaintGroup->SetIntersectsCanevas( IntersectsCanevas );
+            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, IntersectsCanvas) )
+                selectedPaintGroup->SetIntersectsCanvas( IntersectsCanvas );
 
             //if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Wireframe) )
             //    selectedPaintGroup->SetWireframe( Wireframe );
@@ -86,6 +86,4 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
                 selectedPaintGroup->SetMultithreaded( Multithreaded );
         }
     }
-
-    return signalFlags;
 }

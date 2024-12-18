@@ -10,11 +10,22 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 
-#include "OdysseyVectorVertex.h"
-#include "OdysseyVectorSegment.h"
-#include "OdysseyVectorGroupPaint.h"
-#include "HUD/OdysseyVectorHUD.h"
+#include "OdysseyVectorObject.h"
+
 #include "ULISInvalidTileMap.h"
+
+class FOdysseyVectorHUD;
+class FOdysseyVectorVertex;
+class FOdysseyVectorSegment;
+class FOdysseyVectorPath;
+class FOdysseyVectorGroup;
+class FOdysseyVectorGroupPaint;
+class FOdysseyVectorSharedEnv;
+class FOdysseyVectorHandleSegment;
+class IOdysseyVectorLayer;
+class IOdysseyVectorCell;
+class FOdysseyVectorTagInbetweener;
+class FOdysseyVectorRoot;
 
 //#include "OdysseyVectorGroupPaint.generated.h"
 
@@ -51,45 +62,27 @@ typedef struct _FHorizontalLine
 }
 FHorizontalLine;
 
-class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
+class ODYSSEYVECTOR_API FOdysseyVectorEngine
 {
     public:
-        DECLARE_MULTICAST_DELEGATE_TwoParams( FSignalDelegate, FOdysseyVectorGroupPaint*, uint64 iDelegateFlags )
-
-    private:
-        static const uint32 mStaticClass = 0xC4C88C77; // value is crc32 FOdysseyVectorEngine
+        DECLARE_MULTICAST_DELEGATE_TwoParams( FNotifyDelegate, FOdysseyVectorGroupPaint*, uint64 iDelegateFlags )
+        DECLARE_MULTICAST_DELEGATE_TwoParams( FInvalidateDelegate, FOdysseyVectorGroupPaint*, uint64 iDelegateFlags )
 
     public:
-        static uint32 StaticClass() { return mStaticClass; };
-        virtual uint32 GetClass() { return mStaticClass; };
-        virtual bool HasBaseClass( uint32 iBaseClassID );
-
         // drawing flags
         static const uint64 DRAWING_WIREFRAME         = ( 1ULL <<  2 );
         static const uint64 DRAWING_IGNORECOLOR       = ( 1ULL <<  3 );
 
-        // signal flags
-        static const uint64 SIGNAL_SCENE_REDRAW       = ( 1ULL << 0 );
-        static const uint64 SIGNAL_SCENE_HIERARCHY    = ( 1ULL << 1 );
-        static const uint64 SIGNAL_OBJECT_TRANSFORMED = ( 1ULL << 2 );
-        static const uint64 SIGNAL_OBJECT_MODIFIED    = ( 1ULL << 3 );
-        static const uint64 SIGNAL_OBJECT_SELECTED    = ( 1ULL << 4 );
-        static const uint64 SIGNAL_INTERACTIVE        = ( 1ULL << 5 );
-        static const uint64 SIGNAL_SCENE_CLEAR_ALL    = ( 1ULL << 6 );
-        static const uint64 SIGNAL_ALL                = 0x0FFFFFFFFFFFFFFF & (~SIGNAL_INTERACTIVE);
-        static const uint64 SIGNAL_SCENE_FORCE_REDRAW = ( SIGNAL_SCENE_REDRAW
-                                                        | SIGNAL_SCENE_CLEAR_ALL );
+        // Invalidation flags
+        static const uint64 INVALIDATE_DEFAULT        = ( 1ULL << 0 );
+        static const uint64 INVALIDATE_INTERACTIVE    = ( 1ULL << 1 );
+        static const uint64 INVALIDATE_CLEAR_ALL      = ( 1ULL << 2 );
+        // Notifications flags
+        static const uint64 NOTIFY_ALL                = 0x0FFFFFFFFFFFFFFF;
+        static const uint64 NOTIFY_RESERVED_SHIFT     = ( 15 );
 
-        static const uint64 SIGNAL_USER0_RESERVED = ( 1ULL << 56 );
-        static const uint64 SIGNAL_USER1_RESERVED = ( 1ULL << 57 );
-        static const uint64 SIGNAL_USER2_RESERVED = ( 1ULL << 58 );
-        static const uint64 SIGNAL_USER3_RESERVED = ( 1ULL << 59 );
-        static const uint64 SIGNAL_USER4_RESERVED = ( 1ULL << 60 );
-        static const uint64 SIGNAL_USER5_RESERVED = ( 1ULL << 61 );
-        static const uint64 SIGNAL_USER6_RESERVED = ( 1ULL << 62 );
-        static const uint64 SIGNAL_USER7_RESERVED = ( 1ULL << 63 );
-
-        static FSignalDelegate& OnSignalDelegate();
+        static FNotifyDelegate& OnNotifyDelegate();
+               FInvalidateDelegate& OnInvalidateDelegate();
 
         std::list<FOdysseyVectorHUD*>& GetHUDList();
         void AddHUD( FOdysseyVectorHUD* iHUDObject );
@@ -111,9 +104,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
         /**
          * @brief Constructor
          */
-        FOdysseyVectorEngine( FOdysseyVectorGroupPaint* iScene
-                            , uint32 iPreferredWidth
-                            , uint32 iPreferredHeight );
+        FOdysseyVectorEngine( IOdysseyVectorLayer* iLayer
+                            , IOdysseyVectorCell* iCell
+                            , FOdysseyVectorRoot* iRoot );
 
         /**
          * @brief Pick an object
@@ -189,13 +182,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
          * @brief Send a signal to methods registered to this delegate.
          * @param iSignalFlags SIGNAL_* flags that can be interpreted by the receiver of the signal.
          */
-        void Signal( uint64 iSignalFlags );
-
-        /**
-         * @brief Set the attached scene
-         * @param iScene the attached scene
-         */
-        void SetScene( FOdysseyVectorGroupPaint* iScene );
+        static void Notify( FOdysseyVectorGroupPaint* iScene, uint64 iNotifyFlags );
 
         /**
          * @brief Get the attached scene
@@ -208,6 +195,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
          */
         void SelectAllInSelectionSpace();
 
+        void Invalidate( uint64 iInvalidationFlags );
+        void RemoveObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                          , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray );
         static void GetVertexSelection( std::list<FOdysseyVectorObject*>& iVectorObjectList
                                       , std::vector<FOdysseyVectorPoint*>& iSelectedPointArray );
 
@@ -221,8 +211,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                           , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
                           , bool iSelectedOnly );
 
-        uint32 GetPreferredWidth();
-        uint32 GetPreferredHeight();
+        IOdysseyVectorLayer* GetLayer();
+        IOdysseyVectorCell* GetCell();
 
         void TraceLine ( int32 iX0
                        , int32 iY0
@@ -306,24 +296,22 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
 
         static FOdysseyVectorGroup* GroupObjects( FOdysseyVectorObject* iParent
                                                 , const std::list<FOdysseyVectorObject*>& iObjectList
-                                                , std::vector<FOdysseyVectorObject*>& oObjectArray
-                                                , std::vector<FOdysseyVectorObject*>& oObjectOldParentArray );
+                                                , std::vector<FOdysseyVectorObject*>& oObjectArray );
 
         static FOdysseyVectorGroupPaint* MakePaintGroupFromObjects( FOdysseyVectorObject* iParent
                                                                   , const std::list<FOdysseyVectorObject*>& iObjectList
                                                                   , std::vector<FOdysseyVectorObject*>& oCubicPathArray
-                                                                  , std::vector<FOdysseyVectorObject*>& oCubicPathOldParentArray
                                                                   , std::vector<FOdysseyVectorBucket*>& oRemovedBucketArray );
 
         static ::ULIS::FVec2D GetPositionFromObjects( const std::list<FOdysseyVectorObject*>& iObjectList );
-
+/*
         void RemoveObjects( const std::list<FOdysseyVectorObject*>& iObjectList
                           , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray);
 
         virtual uint32 RemoveChild ( FOdysseyVectorObject* iChild ) override;
         virtual uint32 AddChild( FOdysseyVectorObject* iChild
                                , FOdysseyVectorObject* iInsertAfter ) override;
-
+*/
         void DrawLineAA( int32 x0
                        , int32 y0
                        , int32 x1
@@ -333,6 +321,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                        , uint32 iImageHeight
                        , int32  iImageBitsPerPixel
                        , const FColor& iColor );
+
+        void GetFocusedInbetweenerTagList( std::list<FOdysseyVectorTagInbetweener*>& oTransformedInbetweenerTagList );
+        void GetSelectedInbetweenerTagList( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList );
+
+        uint64 GetInvalidationFlags();
+        FOdysseyVectorRoot* GetRoot();
+
+        std::mutex& GetDrawingMutex();
 
 /*
        uint64 GetDrawingFlags();
@@ -380,18 +376,23 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine : public FOdysseyVectorObject
                          , uint64 iPolygonDrawingFlags );
 
     protected:
+        uint64 mInvalidationFlags;
+        FOdysseyVectorRoot* mRoot = nullptr;
+        FInvalidateDelegate mOnInvalidateDelegate;
+        IOdysseyVectorLayer* mLayer;
+        IOdysseyVectorCell* mCell;
         std::list<FOdysseyVectorObject*> mSelectedObjectList;
         BLContextCreateInfo mCreateInfo;
         BLImage* mBLMask;
         std::list<FOdysseyVectorHUD*> mHUDList;
         FOdysseyVectorGroup* mSelectionSpace;
-        FOdysseyVectorGroupPaint* mScene;
-        FULISInvalidTileMap mInvalidTileMap;
-        uint32 mPreferredWidth;
-        uint32 mPreferredHeight;
+        //FULISInvalidTileMap mInvalidTileMap;
         std::vector<FHorizontalLine> mHorizontalLineBuffer;
         uint32 mProcessorCount;
         ::ULIS::FRectD mInvalidatedRect;
         BLImageData mRenderData; // for direct drawing via our own drawing routines.
         //uint64 mDrawingFlags; // temporary, until we find a way to pass the drawing flags as arg
+        // mutex to prevent drawing whil update isn't complete. this is necessary due to the Proxy renderer
+        // which runs in a different thread
+        std::mutex mDrawingMutex;
 };

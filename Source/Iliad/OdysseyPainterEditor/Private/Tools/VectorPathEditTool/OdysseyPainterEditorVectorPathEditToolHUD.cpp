@@ -2,8 +2,10 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditToolHUD.h"
-#include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyPainterEditorVectorPathEditToolHUD::~FOdysseyPainterEditorVectorPathEditToolHUD()
 {
@@ -33,8 +35,8 @@ void
 FOdysseyPainterEditorVectorPathEditToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint32 width = vectorEngine->GetPreferredWidth();
-    uint32 height = vectorEngine->GetPreferredHeight();
+    uint32 width = vectorEngine->GetLayer()->GetWidth();
+    uint32 height = vectorEngine->GetLayer()->GetHeight();
 
     mBLSelectionMask.create( width, height, BL_FORMAT_A8 );
 
@@ -158,8 +160,16 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
                                                                                   | HUD_PATH_VERTEX_ALIGNMENT : 0;
     uint64 hudFlags = mPathEditTool->GetEditor()->GetVectorHUDFlags();
 
+    // Draw default
+    // -> nothing in object mode.
+    // -> vertices and segments in vertex mode.
+    // -> inbetweens in inbetween mode.
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
+
     // draw object details in any mode (if statement is useles per-se but here for clarity)
-    if( ( hudFlags & HUD_MODE_VERTEX ) || ( hudFlags & HUD_MODE_OBJECT ) )
+    if( ( hudFlags & HUD_MODE_OBJECT    )
+     || ( hudFlags & HUD_MODE_VERTEX    )
+     || ( hudFlags & HUD_MODE_INBETWEEN ) )
     {
         DrawObjects( iBLContext
                    , iScene

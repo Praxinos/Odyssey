@@ -4,6 +4,7 @@
 #include "Import/v2/OdysseyVectorImport.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorGroup.h"
 
 void
 FOdysseyVectorImportV2::ParseGroupChunks( FOdysseyVectorGroup& iGroup

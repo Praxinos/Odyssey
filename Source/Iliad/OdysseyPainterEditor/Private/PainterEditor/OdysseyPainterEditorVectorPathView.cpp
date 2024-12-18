@@ -9,6 +9,7 @@ UOdysseyPainterEditorVectorPathView::~UOdysseyPainterEditorVectorPathView()
 
 UOdysseyPainterEditorVectorPathView::UOdysseyPainterEditorVectorPathView()
     : UOdysseyPainterEditorVectorObjectView()
+    , Brush ( nullptr )
 {
 }
 
@@ -32,14 +33,14 @@ UOdysseyPainterEditorVectorPathView::ImportParam()
     }
 }
 
-uint64
+void
 UOdysseyPainterEditorVectorPathView::PropertyChanged( const FName& iPropertyName
                                                     , const FName& iMemberPropertyName
                                                     , const FName& iCategory)
 {
-    uint64 signalFlags = UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName
-                                                                               , iMemberPropertyName
-                                                                               , iCategory );
+    UOdysseyPainterEditorVectorObjectView::PropertyChanged( iPropertyName
+                                                          , iMemberPropertyName
+                                                          , iCategory );
 
     for( FOdysseyVectorObject* selectedObject : mFocusedObjectList )
     {
@@ -57,6 +58,4 @@ UOdysseyPainterEditorVectorPathView::PropertyChanged( const FName& iPropertyName
                 selectedPath->SetMiterLimit( MiterLimit, true );
         }
     }
-
-    return signalFlags;
 }

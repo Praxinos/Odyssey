@@ -2,8 +2,10 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothToolHUD.h"
-#include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
+// Vector engine
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
 
 FOdysseyPainterEditorVectorPathSmoothToolHUD::~FOdysseyPainterEditorVectorPathSmoothToolHUD()
 {
@@ -52,16 +54,11 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( BLContext* iBLContext
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint64 hudFlags = mPathSmoothTool->GetEditor()->GetVectorHUDFlags();
 
-    // Draw object details only in vertex mode
-    if( hudFlags & HUD_MODE_VERTEX )
-    {
-        DrawObjects( iBLContext
-                   , iScene
-                   , fgColor
-                   , bgColor
-                   , hcColor
-                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
-    }
+    // Draw default
+    // -> nothing in object mode.
+    // -> vertices and segments in vertex mode.
+    // -> inbetweens in inbetween mode.
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
 
     // draw selection box only if we restrict erasure to the selection
     if( mPathSmoothTool->RestrictToSelectedObjects  && iScene->GetEngine()->GetSelectedObjectList().size() )

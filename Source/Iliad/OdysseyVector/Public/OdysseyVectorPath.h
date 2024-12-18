@@ -95,9 +95,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                               , uint64 iFlags ) override;
         virtual bool PickShape( const ::ULIS::FRectD &iRoi
                               , uint32 iSelectionFlags ) override;
-        virtual FOdysseyVectorObject* CopyShape() override;
-        virtual void Invalidate() override;
-        virtual void Invalidate( uint32 iInvalidationFlags ) override;
+        virtual FOdysseyVectorObject* CopyShape( uint64 iCopyFlags ) override;
+        virtual void Invalidate( uint64 iInvalidationFlags ) override;
         virtual void ExportParam( FOdysseyVectorObject* iDestinationObject
                                 , bool iInvalidate ) override;
 
@@ -453,6 +452,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @param iVertex the vertex to unselect
          */
         void UnselectVertex( FOdysseyVectorVertex* iVertex );
+
+        FOdysseyVectorVertex* GetVertexByID( uint32 iID );
+        FOdysseyVectorSegment* GetSegmentByID( uint32 iID );
+        void Subdivide( std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                      , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                      , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
 
     protected:
         void DrawJoint( BLContext* iBLContext, FOdysseyVectorVertex* iVertex, uint64 iFlags );

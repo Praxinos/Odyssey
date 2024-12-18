@@ -5,6 +5,7 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
 
+
 FOdysseyPainterEditorVectorPathDrawingToolHUD::~FOdysseyPainterEditorVectorPathDrawingToolHUD()
 {
 }
@@ -12,6 +13,10 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::~FOdysseyPainterEditorVectorPathD
 FOdysseyPainterEditorVectorPathDrawingToolHUD::FOdysseyPainterEditorVectorPathDrawingToolHUD( UOdysseyPainterEditorVectorPathDrawingTool* iPathDrawingTool )
     : FOdysseyPainterEditorVectorBaseToolHUD( iPathDrawingTool )
     , mPathDrawingTool( iPathDrawingTool )
+    , mOwnerObject ( "DummyOwnerObject" ) // unused . testing
+    , mVertex { FOdysseyVectorVertex( 0.0f, 0.0f, 0.0f ) // unused . testing
+              , FOdysseyVectorVertex( 0.0f, 0.0f, 0.0f ) } // unused . testing
+    , mCubicSegment ( &mOwnerObject, &mVertex[0], &mVertex[1], true ) // unused . testing
 {
 }
 
@@ -115,16 +120,11 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
     FTracerBezier& rawBezier = pathTracer.GetRawBezier();
     uint64 hudFlags = mPathDrawingTool->GetEditor()->GetVectorHUDFlags();
 
-    // Draw object details only in vertex mode
-    if( hudFlags & HUD_MODE_VERTEX )
-    {
-        DrawObjects( iBLContext
-                   , iScene
-                   , fgColor
-                   , bgColor
-                   , hcColor
-                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
-    }
+    // Draw default
+    // -> nothing in object mode.
+    // -> vertices and segments in vertex mode.
+    // -> inbetweens in inbetween mode.
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
 
     //DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
 
@@ -164,7 +164,14 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
             }
         }
     }
+/*
+    iBLContext->save();
+    iBLContext->resetMatrix();
 
+    mCubicSegment.Draw( iBLContext );
+
+    iBLContext->restore();
+*/
     if( path )
     {
         FColor pathcolor = path->GetForegroundColor();
@@ -173,12 +180,14 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
         iBLContext->resetMatrix();
 
         iBLContext->setStrokeStyle( BLRgba32( pathcolor.R, pathcolor.G, pathcolor.B, pathcolor.A ) );
+        iBLContext->setStrokeStartCap(BL_STROKE_CAP_BUTT);
+        iBLContext->setStrokeEndCap(BL_STROKE_CAP_BUTT);
 
         for( int n = 1; n < pointArray.size(); n++)
         {
             int i = n - 1;
 
-            iBLContext->setStrokeWidth( pointArray[i].radius );
+            iBLContext->setStrokeWidth( pointArray[i].radius * 2.0f );
             iBLContext->strokeLine( pointArray[i].coords.x, pointArray[i].coords.y
                                   , pointArray[n].coords.x, pointArray[n].coords.y );
         }
@@ -227,6 +236,8 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
 bool
 FOdysseyPainterEditorVectorPathDrawingToolHUD::SetCursorPosition( double iX, double iY )
 {
+    FOdysseyVectorPathTracer& pathTracer = mPathDrawingTool->GetPathTracer();
+    FTracerBezier& bestBezier = pathTracer.GetBestBezier();
     bool needsFullRedrawing = false;
 
     mX = iX;
@@ -249,6 +260,18 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::SetCursorPosition( double iX, dou
             needsFullRedrawing = true; // tells to redraw the whole buffer
         }
     }
+
+/*
+    mVertex[0].Set( bestBezier.pt[0] );
+    mVertex[0].SetRadius( bestBezier.firstRecordRadius );
+UE_LOG(LogTemp, Warning, TEXT("Hello World %f"), bestBezier.firstRecordRadius );
+    mVertex[1].Set( bestBezier.pt[3] );
+    mVertex[1].SetRadius( bestBezier.lastRecordRadius );
+UE_LOG(LogTemp, Warning, TEXT("Hello World %f"), bestBezier.lastRecordRadius );
+    mCubicSegment.GetHandle(0)->Set( bestBezier.pt[1] );
+    mCubicSegment.GetHandle(1)->Set( bestBezier.pt[2] );
+    mCubicSegment.Update( 0 );
+*/
 
     return needsFullRedrawing;
 }

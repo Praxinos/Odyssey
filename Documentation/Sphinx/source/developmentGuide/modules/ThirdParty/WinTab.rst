@@ -1,5 +1,0 @@
-======
-WinTab
-======
-
-Module Example

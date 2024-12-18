@@ -14,6 +14,10 @@
 #include "Math/UnitConversion.h"
 #include "SEnumCombo.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineLightTableHeader.h"
+#include "Widgets/LayerStack/SOdysseyAnimationTimelineInbetweeningHeader.h"
+#include "AnimationEditor/OdysseyAnimationEditorExtension.h"
+#include "OdysseyPainterEditor.h"
+#include "HUD/OdysseyVectorHUD.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
@@ -27,6 +31,7 @@ void SOdysseyAnimationLayerImageVectorRow::Construct(
 {
     ensure(iAnimationLayerImageVector);
     mAnimationLayerImageVector = iAnimationLayerImageVector;
+    mEditor = InArgs._PainterEditor;
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments()
@@ -39,6 +44,20 @@ void SOdysseyAnimationLayerImageVectorRow::Construct(
 }
 
 //PRIVATE API-----------------------------------------------------------
+
+TSharedRef<SWidget>
+SOdysseyAnimationLayerImageVectorRow::GenerateWidget( const FName& iRow, const FName& iColumn )
+{
+    if (iRow == "Inbetweening")
+    {
+        if (iColumn == "Header")
+        {
+            return GenerateInbetweeningRowHeaderWidget();
+        }
+    }
+
+    return SOdysseyAnimationLayerRow::GenerateWidget(iRow, iColumn);
+}
 
 TArray<TSharedPtr<SWidget>>
 SOdysseyAnimationLayerImageVectorRow::GenerateMainRowHeaderOptionWidgets()
@@ -66,6 +85,34 @@ SOdysseyAnimationLayerImageVectorRow::GenerateMainRowHeaderOptionWidgets()
     );
 
     return widgets;
+}
+
+TSharedRef<SWidget>
+SOdysseyAnimationLayerImageVectorRow::GenerateInbetweeningRowHeaderWidget()
+{
+    return SAssignNew( mInbetweeningHeader, SOdysseyAnimationTimelineInbetweeningHeader, mAnimationLayerImageVector)
+        .PainterEditor(mEditor);
+}
+
+EVisibility
+SOdysseyAnimationLayerImageVectorRow::GetRowVisibility(FName iRow) const
+{
+    if (iRow == "Inbetweening")
+    {
+        FOdysseyPainterEditor* editor = mEditor.Get();
+        if (!editor)
+            return EVisibility::Collapsed;
+
+        return ( editor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) ? EVisibility::Visible : EVisibility::Collapsed;
+    }
+
+    return SOdysseyAnimationLayerRow::GetRowVisibility(iRow);
+}
+
+TSharedPtr<SOdysseyAnimationTimelineInbetweeningHeader>
+SOdysseyAnimationLayerImageVectorRow::GetInbetweeningHeader()
+{
+    return mInbetweeningHeader;
 }
 
 void

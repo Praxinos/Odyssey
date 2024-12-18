@@ -52,6 +52,10 @@ UOdysseyAnimationCell::GetFrameRange() const
     if (!GetLayer())
         return FInt32Range::Empty();
 
+    const TArray<FInt32Range>& frameRanges = GetLayer()->GetCellsFrameRanges();
+    if (IndexInLayer < 0 || IndexInLayer >= frameRanges.Num())
+        return FInt32Range::Empty();
+
     return GetLayer()->GetCellsFrameRanges()[IndexInLayer];
 }
 
@@ -164,16 +168,25 @@ UOdysseyAnimationCell::PostTransacted(const FTransactionObjectEvent& iTransactio
 }
 
 UOdysseyAnimationCell*
-UOdysseyAnimationCell::Break(int Frame)
+UOdysseyAnimationCell::Break(int Frame, bool bClear)
 {
     if (Frame <= 0 || Frame >= Exposure)
         return nullptr;
 
-    UOdysseyAnimationCell* copiedCell = GetLayer()->CopyCell(this, IndexInLayer + 1);
-    FOdysseyObjectEditorUtils::SetPropertyValue(copiedCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Exposure - Frame);
+    UOdysseyAnimationCell* newCell = nullptr;
+    if (bClear)
+    {
+        newCell = GetLayer()->AddCell(GetClass(), IndexInLayer + 1);
+    }
+    else
+    {
+        newCell = GetLayer()->CopyCell(this, IndexInLayer + 1);
+    }
+
+    FOdysseyObjectEditorUtils::SetPropertyValue(newCell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Exposure - Frame);
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), Frame);
 
-    return copiedCell;
+    return newCell;
 }
 
 void

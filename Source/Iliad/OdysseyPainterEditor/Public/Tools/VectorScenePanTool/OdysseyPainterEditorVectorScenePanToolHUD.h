@@ -27,9 +27,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorScenePanToolHUD : publ
     private:
         void DrawFrame( BLContext* iBLContext
                       , FOdysseyVectorGroupPaint* iScene
-                      , ::ULIS::FRectD& iFrame
-                      , ::ULIS::FVec2D& iFrameLength );
-        void DrawText( BLContext* iBLContext
-                     , FOdysseyVectorGroupPaint* iScene
-                     , ::ULIS::FRectD& iFrame );
+                      , ::ULIS::FRectI& iFrame
+                      , ::ULIS::FVec2I& iFrameLength );
 };

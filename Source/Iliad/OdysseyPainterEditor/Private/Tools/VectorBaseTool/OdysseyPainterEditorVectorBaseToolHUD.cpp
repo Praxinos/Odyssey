@@ -3,7 +3,11 @@
 
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorGroupPaint.h"
 
 FOdysseyPainterEditorVectorBaseToolHUD::~FOdysseyPainterEditorVectorBaseToolHUD()
 {
@@ -28,13 +32,86 @@ FOdysseyPainterEditorVectorBaseToolHUD::Unload( FOdysseyVectorGroupPaint* iScene
 void
 FOdysseyPainterEditorVectorBaseToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
+    uint64 hudFlags = mBaseTool->GetEditor()->GetVectorHUDFlags();
 
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+    {
+        UpdateSelectionInbetweenMode( iScene );
+    }
 }
 
 FSelectionBox&
 FOdysseyPainterEditorVectorBaseToolHUD::GetSelectionBox()
 {
     return mSelectionBox;
+}
+
+void
+FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    FOdysseyVectorSharedEnv* sharedEnv = iScene->GetSharedEnv();
+    uint32 cellIndex = vectorEngine->GetCell()->GetIndex();
+
+    mSelectedInbetweenerTagList.clear();
+    mSelectedBreakdownList.clear();
+
+    for( FOdysseyVectorTag* tag : sharedEnv->GetSharedTagList() )
+    {
+        if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+        {
+            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+            uint32 tagCellIndex = inbetweenerTag->GetSourceCellIndex();
+
+            if( tag->GetOwner()->IsSelected() )
+            {
+                mSelectedInbetweenerTagList.push_back( inbetweenerTag );
+
+                for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
+                {
+
+                    if( breakdown->GetTargetCellIndex() == cellIndex )
+                    {
+                        mSelectedBreakdownList.push_back( breakdown );
+                    }
+                }
+            }
+        }
+    }
+}
+
+std::list<FInbetweenerBreakdown*>&
+FOdysseyPainterEditorVectorBaseToolHUD::GetSelectedBreakdownList()
+{
+    return mSelectedBreakdownList;
+}
+
+std::list<FOdysseyVectorTagInbetweener*>&
+FOdysseyPainterEditorVectorBaseToolHUD::GetSelectedInbetweenerTagList()
+{
+    return mSelectedInbetweenerTagList;
+}
+
+void
+FOdysseyPainterEditorVectorBaseToolHUD::DrawText( BLContext* iBLContext
+                                                , const BLFont& iBLFont
+                                                , const BLRgba32& iForegroundColor
+                                                , const BLRgba32& iBackgroundColor
+                                                , const BLRgba32& iHighlightColor
+                                                , char* iText
+                                                , uint32 iX
+                                                , uint32 iY )
+{
+    iBLContext->setCompOp( BL_COMP_OP_SRC_OVER  );
+    iBLContext->setFillStyle( iForegroundColor );
+    iBLContext->setStrokeWidth( 10.0f );
+
+    iBLContext->strokeUtf8Text( BLPoint( iX, iY ), iBLFont, iText );
+    iBLContext->fillUtf8Text( BLPoint( iX, iY ), iBLFont, iText );
+
+//    blctx->setStrokeStyle( BLRgba32( 0xFF000000 ) );
+//    blctx->setStrokeWidth( 1.0f );
+//    blctx->strokeUtf8Text( BLPoint( iFrame.x + 10, iFrame.y + iFrame.h - 10 ), mFont, str );
 }
 
 void
@@ -160,6 +237,54 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVe
 }
 
 void
+FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxInbetweenMode( FOdysseyVectorGroupPaint* iScene
+                                                                       , bool iForceWorld )
+{
+    if( mSelectedBreakdownList.size() == 1 )
+    {
+        FInbetweenerBreakdown* breakdown = mSelectedBreakdownList.front();
+
+        mSelectionBox.inited = true;
+        mSelectionBox.rect = breakdown->GetTargetBBox( false );
+        mSelectionBox.worldMatrix = breakdown->GetTargetWorldMatrix();
+        mSelectionBox.inverseWorldMatrix = breakdown->GetTargetInverseWorldMatrix();
+    }
+    else
+    {
+        mSelectionBox.inited = false;
+        mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
+        mSelectionBox.worldMatrix = iScene->GetWorldMatrix();
+        mSelectionBox.inverseWorldMatrix = iScene->GetInverseWorldMatrix();
+
+        for( FInbetweenerBreakdown* breakdown : mSelectedBreakdownList )
+        {
+            ::ULIS::FRectD breakdownBBox = breakdown->GetTargetBBox( true );
+
+             mSelectionBox.rect = mSelectionBox.inited ? mSelectionBox.rect | breakdownBBox
+                                                       : breakdownBBox;
+
+            mSelectionBox.inited = true;
+        }
+
+        if( mSelectionBox.inited )
+        {
+            ::ULIS::FRectD rect = mSelectionBox.rect;
+            BLPoint p0, p1, p2, p3;
+
+            p0 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x         , rect.y          );
+            p1 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x + rect.w, rect.y          );
+            p2 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x + rect.w, rect.y + rect.h );
+            p3 = mSelectionBox.inverseWorldMatrix.mapPoint( rect.x         , rect.y + rect.h );
+
+            mSelectionBox.rect = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
+                                                           , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                                           , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                                           , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
+        }
+    }
+}
+
+void
 FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBox( FOdysseyVectorGroupPaint* iScene
                                                           , bool iForceWorld
                                                           , uint64 iHUDFlags )
@@ -174,6 +299,12 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBox( FOdysseyVectorGroupP
     {
         //case eVectorEditionMode::Vertex:
         UpdateSelectionBoxVertexMode( iScene );
+    }
+
+    if( iHUDFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+    {
+        //case eVectorEditionMode::Vertex:
+        UpdateSelectionBoxInbetweenMode( iScene, iForceWorld );
     }
 }
 
@@ -247,6 +378,25 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawObjects( BLContext* iBLContext
       {
           if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) || ( iHUDFlags & HUD_DRAW_ALL ) )
           {
+              if( iHUDFlags & HUD_TAGINBETWEENER_ALL )
+              {
+                  FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+                  if( tag )
+                  {
+                      FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+/*
+                      FOdysseyVectorHUD::DrawInbetweens( iScene
+                                                       , iBLContext
+                                                       , inbetweenerTag
+                                                       , iForegroundColor
+                                                       , iBackgroundColor
+                                                       , iHighlightColor
+                                                       , iHUDFlags );
+*/
+                  }
+              }
+
               if( iHUDFlags & HUD_PATH_ALL )
               {
                   if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
@@ -292,13 +442,13 @@ void
 FOdysseyPainterEditorVectorBaseToolHUD::Draw( BLContext* iBLContext
                                             , FOdysseyVectorGroupPaint* iScene )
 {
+    uint64 hudFlags = mBaseTool->GetEditor()->GetVectorHUDFlags();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    uint64 hudFlags = mBaseTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw object details only in vertex mode
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
@@ -309,5 +459,15 @@ FOdysseyPainterEditorVectorBaseToolHUD::Draw( BLContext* iBLContext
                    , bgColor
                    , hcColor
                    , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
+    }
+
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+    {
+        DrawObjects( iBLContext
+                   , iScene
+                   , fgColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | HUD_TAGINBETWEENER_ALL );
     }
 }

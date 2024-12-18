@@ -4,6 +4,7 @@
 #include "Undo/OdysseyVectorUndoSegmentReshape.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoSegmentReshape::~FOdysseyVectorUndoSegmentReshape()
 {
@@ -17,15 +18,21 @@ FOdysseyVectorUndoSegmentReshape::~FOdysseyVectorUndoSegmentReshape()
     }
 }
 
-FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene )
-    : FOdysseyVectorUndo( iScene )
+FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene
+                                                                  , uint64 iReturnFlags
+ )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
 }
 
 FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene
-                                                                  , const std::vector<FOdysseyVectorVertex*>& iVertexArray )
-    : FOdysseyVectorUndo( iScene )
+                                                                  , const std::vector<FOdysseyVectorVertex*>& iVertexArray
+                                                                  , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     std::vector<FOdysseyVectorSegment*> segmentArray;
 
     FOdysseyVectorVertex::ArrayToSegmentArray( iVertexArray, segmentArray );
@@ -42,9 +49,12 @@ FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVect
 }
 
 FOdysseyVectorUndoSegmentReshape::FOdysseyVectorUndoSegmentReshape( FOdysseyVectorGroupPaint* iScene
-                                                                  , const std::vector<FOdysseyVectorSegment*>& iSegmentArray )
-    : FOdysseyVectorUndo( iScene )
+                                                                  , const std::vector<FOdysseyVectorSegment*>& iSegmentArray
+                                                                  , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     RecordSegment( iSegmentArray );
 }
 
@@ -140,13 +150,8 @@ FOdysseyVectorUndoSegmentReshape::Apply( UObject* iIgnored )
         mCubicSegmentSnapshotArray[i].Restore();
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -165,13 +170,8 @@ FOdysseyVectorUndoSegmentReshape::Revert( UObject* iIgnored )
         mCubicSegmentSnapshotArray[i].Restore();
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

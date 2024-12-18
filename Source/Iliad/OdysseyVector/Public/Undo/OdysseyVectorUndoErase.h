@@ -22,7 +22,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoErase : public FOdysseyVectorUndo
                                , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
                                , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
                                , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
-                               , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray );
+                               , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                               , uint64 iReturnFlags );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

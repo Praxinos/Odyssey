@@ -3,6 +3,10 @@
 
 #include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
 #include "OdysseyMediaRaster.h"
+#include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorSource.h"
+#include "OdysseyHUDElement.h"
+#include "OdysseyHUDSystem.h"
 #include "Tools/RasterEraserTool/Widgets/SOdysseyPainterEditorRasterEraserToolTopTab.h"
 
 #include "FreehandShape/OdysseyFreehandShape.h"
@@ -363,6 +367,8 @@ void UOdysseyPainterEditorRasterEraserTool::ActiveShapeChanged()
 
 void UOdysseyPainterEditorRasterEraserTool::PropertyChanged(const FName& iPropertyName, const FName& iMemberPropertyName, bool iIsInteractive)
 {
+    Super::PropertyChanged(iPropertyName, iMemberPropertyName, iIsInteractive);
+
     if (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Shapes)
         && iPropertyName == GET_MEMBER_NAME_CHECKED(FOdysseyShapes, ActiveShapeType))
         ActiveShapeChanged();

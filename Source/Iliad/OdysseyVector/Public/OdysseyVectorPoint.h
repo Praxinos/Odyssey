@@ -67,8 +67,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorPoint
          */
         void Set( double iX, double iY );
 
-        void SetID( uint32 iID );
-
         /**
          * @brief Set the point's coordinate on X axis
          * @param iX the desired coordinate on X axis

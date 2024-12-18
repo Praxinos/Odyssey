@@ -38,7 +38,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubicGap : public FOdysseyVectorSeg
        /**
          * @brief Update cached data for this segment.
          */
-        virtual void Update() override;
+        virtual void Update( uint32 iUpdateFlags ) override;
 
 
     private:

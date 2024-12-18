@@ -5,13 +5,14 @@
 
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
-#include "OdysseyVector.h"
 #include "Widgets/Tools/SOdysseyPainterEditorVectorEditionMode.h"
 #include "OdysseyPainterEditorVectorBaseTool.generated.h"
 
 class FOdysseyPainterEditorVectorBaseToolHUD;
 class ISinglePropertyView;
 class SViewport;
+
+class FOdysseyVectorGroupPaint;
 
 enum class eMouseEventName : uint8
 {
@@ -143,10 +144,25 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         // for testing purpose
         void MakeDemoBrush( FOdysseyVectorGroupPaint* iScene );
 
-    private:
-        void ExtendContextMenuObject( FMenuBuilder& menu );
-        void ExtendContextMenuVertex( FMenuBuilder& menu );
+    protected:
+        virtual void ExtendContextMenuObject( FOdysseyVectorGroupPaint* iScene
+                                            , FMenuBuilder& menu
+                                            , uint64 iObjectMenuFlags );
+        virtual void ExtendContextMenuVertex( FOdysseyVectorGroupPaint* iScene
+                                            , FMenuBuilder& menu
+                                            , uint64 iVertexMenuFlags );
+        virtual void ExtendContextMenuInbetween( FOdysseyVectorGroupPaint* iScene
+                                               , FMenuBuilder& menu
+                                               , uint64 iInbetweenMenuFlags );
+        void ResetGridMenu( FMenuBuilder& menu, FOdysseyVectorGroupPaint* vectorScene );
+        void ResetSpacingMenu( FMenuBuilder& menu, FOdysseyVectorGroupPaint* iScene );
+        void CopySpacingMenu( FMenuBuilder& menu, FOdysseyVectorGroupPaint* iScene );
+        void PasteSpacingMenu( FMenuBuilder& menu, FOdysseyVectorGroupPaint* iScene );
+        bool CanAddTag( FOdysseyVectorGroupPaint* iScene );
+        bool CanAlterTag( FOdysseyVectorGroupPaint* iScene );
 
+    protected:
+        static const uint64 OBJECTMENU_HASSUBDIVIDE = ( 1ULL << 0 );
 
     protected:
         // to store the top tab widget in order to create it only once. this will prevent sizing

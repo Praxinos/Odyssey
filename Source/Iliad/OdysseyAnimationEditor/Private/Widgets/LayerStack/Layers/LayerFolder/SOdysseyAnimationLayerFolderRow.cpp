@@ -24,6 +24,7 @@ void SOdysseyAnimationLayerFolderRow::Construct(
 {
     ensure(iAnimationLayerFolder);
     mAnimationLayerFolder = iAnimationLayerFolder;
+    mEditor = iArgs._PainterEditor;
 
     SOdysseyAnimationLayerRow::Construct(
         SOdysseyAnimationLayerRow::FArguments()

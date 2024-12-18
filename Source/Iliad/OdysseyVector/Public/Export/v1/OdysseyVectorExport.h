@@ -4,12 +4,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Serialization/Archive.h"
 
 #include <ULIS>
 #include <blend2d.h>
 #include <Core/Core.h>
 #include <Image/Block.h>
+
 #include "OdysseyVector.h"
+
+class  FOdysseyVectorObject;
+class  FOdysseyVectorBucket;
+class  FOdysseyVectorPath;
+struct FOdysseyVectorBrush;
+class  FOdysseyVectorGroupPaint;
 
 namespace FOdysseyVectorExportV1
 {

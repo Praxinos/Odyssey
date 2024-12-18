@@ -15,7 +15,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoEngineClear : public FOdysseyVectorUnd
 {
     public:
         ~FOdysseyVectorUndoEngineClear();
-        FOdysseyVectorUndoEngineClear( FOdysseyVectorEngine* iEngine );
+        FOdysseyVectorUndoEngineClear( FOdysseyVectorEngine* iEngine
+                                     , uint64 iReturnFlags );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -27,5 +28,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoEngineClear : public FOdysseyVectorUnd
         virtual FString ToString() const override;
 
     private:
-        FOdysseyVectorEngine* mEngine;
+        FOdysseyVectorGroupPaint* mScene;
 };

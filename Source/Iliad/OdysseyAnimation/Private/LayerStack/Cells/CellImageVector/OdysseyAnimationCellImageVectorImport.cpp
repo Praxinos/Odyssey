@@ -5,6 +5,7 @@
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
 #include "Import/v2/OdysseyVectorImport.h"
 #include "OdysseyFile.h"
+#include "OdysseyVectorEngine.h"
 
 bool
 FOdysseyAnimationCellImageVectorImport::Read( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
@@ -56,14 +57,6 @@ FOdysseyAnimationCellImageVectorImport::Read( UOdysseyAnimationCellImageVector* 
 
                     Ar << width;
                     Ar << height;
-
-                    //DEPRECATED: No need to use those values, but we still need to read them
-                    if( iAnimationCellImageVector->GetEngine() == nullptr )
-                    {
-                        iAnimationCellImageVector->mEngine = new FOdysseyVectorEngine( new FOdysseyVectorGroupPaint( "Scene" )
-                                       , (double)width
-                                       , (double)height );
-                    }
                 }
                 break;
 

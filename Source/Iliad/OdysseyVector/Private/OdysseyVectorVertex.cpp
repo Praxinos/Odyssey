@@ -636,7 +636,9 @@ FOdysseyVectorVertex::SetRadius( double iRadius )
 {
     if( ( mFlags & LOCKED ) == 0 )
     {
-        mRadius = iRadius;
+        // quickfix. sometimes intbetweenerTag functions pass a negative radius
+        // when the shape is committed but I don't know why.
+        mRadius = fabs( iRadius );
 
         InvalidateSegments();
     }
@@ -1066,8 +1068,6 @@ FOdysseyVectorVertex::GetJointLength()
 
 void
 FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext
-                               , double iStartU
-                               , double iEndU
                                , double iCombinedOpacity
                                , uint64 iDrawingFlags )
 {
@@ -1091,7 +1091,11 @@ FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext
         }
         else
         {
-            mJoint.Draw( iBLContext, iStartU, iEndU, iCombinedOpacity, iDrawingFlags );
+            mJoint.Draw( iBLContext
+                       , mJoint.GetTextureStartU()
+                       , mJoint.GetTextureEndU()
+                       , iCombinedOpacity
+                       , iDrawingFlags );
         }
     }
 }

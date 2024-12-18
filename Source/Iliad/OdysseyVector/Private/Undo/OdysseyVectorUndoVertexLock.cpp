@@ -4,6 +4,7 @@
 #include "Undo/OdysseyVectorUndoVertexLock.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoVertexLock::~FOdysseyVectorUndoVertexLock()
 {
@@ -18,9 +19,12 @@ FOdysseyVectorUndoVertexLock::~FOdysseyVectorUndoVertexLock()
 }
 
 FOdysseyVectorUndoVertexLock::FOdysseyVectorUndoVertexLock( FOdysseyVectorGroupPaint* iScene
-                                                          , const std::vector<FOdysseyVectorVertex*>& iAlignedVertexArray )
-    : FOdysseyVectorUndo( iScene )
+                                                          , const std::vector<FOdysseyVectorVertex*>& iAlignedVertexArray
+                                                          , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     //------ Backup vertex lock flag part ---------//
 
     mVertexSnapshotArray.reserve( iAlignedVertexArray.size() );
@@ -42,13 +46,8 @@ FOdysseyVectorUndoVertexLock::Apply( UObject* iIgnored )
         vertexSnapshot.Restore();
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -62,13 +61,8 @@ FOdysseyVectorUndoVertexLock::Revert( UObject* iIgnored )
         vertexSnapshot.Restore();
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

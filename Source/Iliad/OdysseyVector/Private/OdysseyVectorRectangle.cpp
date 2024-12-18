@@ -88,7 +88,7 @@ FOdysseyVectorRectangle::UpdateShape( uint32 iUpdateFlags )
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorRectangle::CopyShape()
+FOdysseyVectorRectangle::CopyShape( uint64 iCopyFlags )
 {
     FOdysseyVectorRectangle* rectangleCopy = new FOdysseyVectorRectangle( mName
                                                                         , mWidth
@@ -119,7 +119,7 @@ FOdysseyVectorRectangle::SetSize( double iWidth, double iHeight )
     mWidth  = iWidth;
     mHeight = iHeight;
 
-    Invalidate();
+    Invalidate( INVALIDATE_SHAPE );
 }
 
 double FOdysseyVectorRectangle::GetWidth()

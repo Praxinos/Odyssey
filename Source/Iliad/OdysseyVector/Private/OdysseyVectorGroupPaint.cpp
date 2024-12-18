@@ -3,7 +3,10 @@
 
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVector.h"
+#include "OdysseyVectorEngine.h"
 #include "OdysseyVectorVertex.h"
+#include "OdysseyVectorLayer.h"
+#include "OdysseyVectorVertexIntersection.h"
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorIntersection.h"
 #include "OdysseyVectorSegment.h"
@@ -240,16 +243,16 @@ FOdysseyVectorGroupPaint::~FOdysseyVectorGroupPaint()
     Clear();
 
     // remove because segmrnts will be freed by path's dtor
-    mCanevasPath.RemoveSegment( &mCanevasSegment[0] );
-    mCanevasPath.RemoveSegment( &mCanevasSegment[1] );
-    mCanevasPath.RemoveSegment( &mCanevasSegment[2] );
-    mCanevasPath.RemoveSegment( &mCanevasSegment[3] );
+    mCanvasPath.RemoveSegment( &mCanvasSegment[0] );
+    mCanvasPath.RemoveSegment( &mCanvasSegment[1] );
+    mCanvasPath.RemoveSegment( &mCanvasSegment[2] );
+    mCanvasPath.RemoveSegment( &mCanvasSegment[3] );
 
     // remove because vertices will be freed by path's dtor
-    mCanevasPath.RemoveVertex( &mCanevasVertex[0] );
-    mCanevasPath.RemoveVertex( &mCanevasVertex[1] );
-    mCanevasPath.RemoveVertex( &mCanevasVertex[2] );
-    mCanevasPath.RemoveVertex( &mCanevasVertex[3] );
+    mCanvasPath.RemoveVertex( &mCanvasVertex[0] );
+    mCanvasPath.RemoveVertex( &mCanvasVertex[1] );
+    mCanvasPath.RemoveVertex( &mCanvasVertex[2] );
+    mCanvasPath.RemoveVertex( &mCanvasVertex[3] );
 
     for( FOdysseyVectorBucket* bucket : mBucketList )
     {
@@ -261,26 +264,26 @@ FOdysseyVectorGroupPaint::~FOdysseyVectorGroupPaint()
 
 FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
     : FOdysseyVectorGroup( iName )
-    , mCanevasPath ( "CanevasPath" )
-    , mCanevasVertex { FOdysseyVectorVertex( 0, 0, 0 )
+    , mCanvasPath ( "CanvasPath" )
+    , mCanvasVertex { FOdysseyVectorVertex( 0, 0, 0 )
                      , FOdysseyVectorVertex( 0, 0, 0 )
                      , FOdysseyVectorVertex( 0, 0, 0 )
                      , FOdysseyVectorVertex( 0, 0, 0 ) }
-    , mCanevasSegment { FOdysseyVectorSegmentCubic( &mCanevasPath
-                                                  , &mCanevasVertex[0]
-                                                  , &mCanevasVertex[1]
+    , mCanvasSegment { FOdysseyVectorSegmentCubic( &mCanvasPath
+                                                  , &mCanvasVertex[0]
+                                                  , &mCanvasVertex[1]
                                                   , true )
-                      , FOdysseyVectorSegmentCubic( &mCanevasPath
-                                                  , &mCanevasVertex[1]
-                                                  , &mCanevasVertex[2]
+                      , FOdysseyVectorSegmentCubic( &mCanvasPath
+                                                  , &mCanvasVertex[1]
+                                                  , &mCanvasVertex[2]
                                                   , true )
-                      , FOdysseyVectorSegmentCubic( &mCanevasPath
-                                                  , &mCanevasVertex[2]
-                                                  , &mCanevasVertex[3]
+                      , FOdysseyVectorSegmentCubic( &mCanvasPath
+                                                  , &mCanvasVertex[2]
+                                                  , &mCanvasVertex[3]
                                                   , true )
-                      , FOdysseyVectorSegmentCubic( &mCanevasPath
-                                                  , &mCanevasVertex[3]
-                                                  , &mCanevasVertex[0]
+                      , FOdysseyVectorSegmentCubic( &mCanvasPath
+                                                  , &mCanvasVertex[3]
+                                                  , &mCanvasVertex[0]
                                                   , true ) }
 
 {
@@ -309,17 +312,17 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
     //mGapSegmentBuffer.reserve( 200 );
     //mSectionBuffer.reserve( 200 );
 
-    SetIntersectsCanevas( false ); // also sets hierarchy invalidation flag
+    SetIntersectsCanvas( false ); // also sets hierarchy invalidation flag
 
-    mCanevasPath.AddVertex( &mCanevasVertex[0] );
-    mCanevasPath.AddVertex( &mCanevasVertex[1] );
-    mCanevasPath.AddVertex( &mCanevasVertex[2] );
-    mCanevasPath.AddVertex( &mCanevasVertex[3] );
+    mCanvasPath.AddVertex( &mCanvasVertex[0] );
+    mCanvasPath.AddVertex( &mCanvasVertex[1] );
+    mCanvasPath.AddVertex( &mCanvasVertex[2] );
+    mCanvasPath.AddVertex( &mCanvasVertex[3] );
 
-    mCanevasPath.AddSegment( &mCanevasSegment[0] );
-    mCanevasPath.AddSegment( &mCanevasSegment[1] );
-    mCanevasPath.AddSegment( &mCanevasSegment[2] );
-    mCanevasPath.AddSegment( &mCanevasSegment[3] );
+    mCanvasPath.AddSegment( &mCanvasSegment[0] );
+    mCanvasPath.AddSegment( &mCanvasSegment[1] );
+    mCanvasPath.AddSegment( &mCanvasSegment[2] );
+    mCanvasPath.AddSegment( &mCanvasSegment[3] );
 }
 
 std::vector<FOdysseyVectorVertexIntersection>&
@@ -335,21 +338,21 @@ FOdysseyVectorGroupPaint::SetRealtime( bool iRealtime )
 }
 
 void
-FOdysseyVectorGroupPaint::SetIntersectsCanevas( bool iIntersectsCanevas )
+FOdysseyVectorGroupPaint::SetIntersectsCanvas( bool iIntersectsCanvas )
 {
-    bIntersectsCanevas = iIntersectsCanevas;
+    bIntersectsCanvas = iIntersectsCanvas;
 
     Invalidate( INVALIDATE_SHAPE | INVALIDATE_HIERARCHY );
 }
 
 bool
-FOdysseyVectorGroupPaint::IntersectsCanevas()
+FOdysseyVectorGroupPaint::IntersectsCanvas()
 {
-    return bIntersectsCanevas;
+    return bIntersectsCanvas;
 }
 
 void
-FOdysseyVectorGroupPaint::MakeCanevasPath()
+FOdysseyVectorGroupPaint::MakeCanvasPath()
 {
     FOdysseyVectorGroupPaint* vectorScene = GetScene();
 
@@ -357,30 +360,30 @@ FOdysseyVectorGroupPaint::MakeCanevasPath()
     if( vectorScene )
     {
         FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-        uint32 width  = vectorEngine->GetPreferredWidth();
-        uint32 height = vectorEngine->GetPreferredHeight();
-        // Note: mCanevasPath has identity matrix
+        uint32 width = vectorEngine->GetLayer()->GetWidth();
+        uint32 height = vectorEngine->GetLayer()->GetHeight();
+        // Note: mCanvasPath has identity matrix
         BLPoint pt[4] = { BLPoint( 0    , 0      )
                         , BLPoint( width, 0      )
                         , BLPoint( width, height )
                         , BLPoint( 0    , height ) };
 
-        mCanevasVertex[0].Set( pt[0].x, pt[0].y );
-        mCanevasVertex[1].Set( pt[1].x, pt[1].y );
-        mCanevasVertex[2].Set( pt[2].x, pt[2].y );
-        mCanevasVertex[3].Set( pt[3].x, pt[3].y );
+        mCanvasVertex[0].Set( pt[0].x, pt[0].y );
+        mCanvasVertex[1].Set( pt[1].x, pt[1].y );
+        mCanvasVertex[2].Set( pt[2].x, pt[2].y );
+        mCanvasVertex[3].Set( pt[3].x, pt[3].y );
 
-        mCanevasSegment[0].GetHandle(0)->Set( pt[0].x, pt[0].y );
-        mCanevasSegment[0].GetHandle(1)->Set( pt[1].x, pt[1].y );
+        mCanvasSegment[0].GetHandle(0)->Set( pt[0].x, pt[0].y );
+        mCanvasSegment[0].GetHandle(1)->Set( pt[1].x, pt[1].y );
 
-        mCanevasSegment[1].GetHandle(0)->Set( pt[1].x, pt[1].y );
-        mCanevasSegment[1].GetHandle(1)->Set( pt[2].x, pt[2].y );
+        mCanvasSegment[1].GetHandle(0)->Set( pt[1].x, pt[1].y );
+        mCanvasSegment[1].GetHandle(1)->Set( pt[2].x, pt[2].y );
 
-        mCanevasSegment[2].GetHandle(0)->Set( pt[2].x, pt[2].y );
-        mCanevasSegment[2].GetHandle(1)->Set( pt[3].x, pt[3].y );
+        mCanvasSegment[2].GetHandle(0)->Set( pt[2].x, pt[2].y );
+        mCanvasSegment[2].GetHandle(1)->Set( pt[3].x, pt[3].y );
 
-        mCanevasSegment[3].GetHandle(0)->Set( pt[3].x, pt[3].y );
-        mCanevasSegment[3].GetHandle(1)->Set( pt[0].x, pt[0].y );
+        mCanvasSegment[3].GetHandle(0)->Set( pt[3].x, pt[3].y );
+        mCanvasSegment[3].GetHandle(1)->Set( pt[0].x, pt[0].y );
     }
 }
 
@@ -389,7 +392,7 @@ FOdysseyVectorGroupPaint::UpdateMatrix()
 {
     FOdysseyVectorObject::UpdateMatrix();
 
-    if( bIntersectsCanevas )
+    if( bIntersectsCanvas )
     {
         Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
     }
@@ -956,18 +959,18 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 
     if( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE )
     {
-        if( bIntersectsCanevas )
+        if( bIntersectsCanvas )
         {
-            MakeCanevasPath();
+            MakeCanvasPath();
         }
     }
 
     if( bPainted )
     {
-        mCanevasPath.Update( 0 );
+        mCanvasPath.Update( 0 | UPDATE_NODRAWINGLOCK );
 
         if( ( bRealtime == true  )
-       || ( ( bRealtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
+       || ( ( bRealtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATE_PAINTGROUPS ) ) )
         {
             /*std::for_each( std::execution::par_unseq
                           , mPathList.begin()
@@ -1042,7 +1045,7 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
     if( bPainted )
     {
         if( ( bRealtime == true  )
-       || ( ( bRealtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATEPAINTGROUPS ) ) )
+       || ( ( bRealtime == false ) && ( iUpdateFlags & FOdysseyVectorObject::UPDATE_PAINTGROUPS ) ) )
         {
             if( ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
              || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    )
@@ -1054,38 +1057,11 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
             }
 
             Colorize();
-/*
-            if( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE )
-            {
-                if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
-                {
-                    mInvalidationFlags &= (~INVALIDATE_SHAPE);
-                }
-            }
-
-            if( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD )
-            {
-                if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
-                {
-                    mInvalidationFlags &= (~INVALIDATE_CHILD);
-                }
-            }
-
-            if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
-            {
-                mInvalidationFlags &= (~INVALIDATE_COLOR);
-            }
-*/
         }
     }
     else
     {
         Clear();
-    }
-
-    if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
-    {
-        mInvalidationFlags = 0;
     }
 }
 
@@ -1147,7 +1123,7 @@ FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext
                                          , invalidationAreaMax );
 
     // do not draw if outside screen
-    if( ( bIntersectsCanevas == true )
+    if( ( bIntersectsCanvas == true )
      || ( ( ( worldBBoxMin.x ) < invalidationAreaMax.x )
        && ( ( worldBBoxMax.x ) > invalidationAreaMin.x )
        && ( ( worldBBoxMin.y ) < invalidationAreaMax.y )
@@ -1221,6 +1197,8 @@ FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext
 bool
 FOdysseyVectorGroupPaint::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {
+    return FOdysseyVectorGroup::PickShape( iRoi, iSelectionFlags );
+/*
     if( iSelectionFlags & PICK_MATH_BASED )
     {
         BLPoint pt = mInverseWorldMatrix.mapPoint( iRoi.x, iRoi.y );
@@ -1235,6 +1213,7 @@ FOdysseyVectorGroupPaint::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelecti
     }
 
     return false;
+*/
 }
 
 void
@@ -1252,7 +1231,7 @@ FOdysseyVectorGroupPaint::CreateVertexGapSegment( FOdysseyVectorVertex* iVertex 
         {
             FOdysseyVectorSegmentCubicGap& newGapSegment = mGapSegmentBuffer.emplace_back( this, nearestVertex, iVertex );
             //iGapSegmentBuffer[gapCount].Link(); // not necessary. saves us some cpu cycles
-            newGapSegment.Update();
+            newGapSegment.Update( 0 );
 
             FOdysseyVectorSection& newGapSection = mGapSectionBuffer.emplace_back( this, &newGapSegment, nearestVertex, iVertex, 0.0f, 1.0f, mShortSectionArray );
             //newGapSection.Link();
@@ -1740,7 +1719,7 @@ FOdysseyVectorGroupPaint::SetGapTolerance( double iGapTolerance )
 {
     mGapTolerance = iGapTolerance;
 
-    Invalidate();
+    Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
 }
 
 bool
@@ -1838,7 +1817,7 @@ FOdysseyVectorGroupPaint::SetPainted( bool iPainted )
 {
     bPainted = iPainted;
 
-    Invalidate();
+    Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
 }
 
 bool
@@ -1853,16 +1832,44 @@ FOdysseyVectorGroupPaint::SetMultithreaded( bool iMultithreaded )
     bMultithreaded = iMultithreaded;
 }
 
+// static
+void
+FOdysseyVectorGroupPaint::RecursiveUpdatePathList( FOdysseyVectorObject* iCandidateObject
+                                                 , std::list<FOdysseyVectorPath*>& iPathList )
+{
+    if( iCandidateObject->GetClass() == FOdysseyVectorPath::StaticClass() )
+    {
+        FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(iCandidateObject);
+
+        iPathList.push_back( path );
+    }
+
+    // recurse if simple group
+    if( iCandidateObject->GetClass() == FOdysseyVectorGroup::StaticClass() )
+    {
+        for( FOdysseyVectorObject* child : iCandidateObject->GetChildrenList() )
+        {
+            RecursiveUpdatePathList( child, iPathList );
+        }
+    }
+}
+
 void
 FOdysseyVectorGroupPaint::UpdatePathList()
 {
     mPathList.clear();
 
-    if( bIntersectsCanevas )
+    if( bIntersectsCanvas )
     {
-        mPathList.push_back( &mCanevasPath );
+        mPathList.push_back( &mCanvasPath );
     }
 
+    for( FOdysseyVectorObject* child : mChildrenList )
+    {
+        RecursiveUpdatePathList( child, mPathList );
+    }
+
+/*
     for( FOdysseyVectorObject* child : mChildrenList )
     {
         if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
@@ -1872,7 +1879,23 @@ FOdysseyVectorGroupPaint::UpdatePathList()
             mPathList.push_back( path );
         }
     }
+*/
 }
+/*
+void
+FOdysseyVectorGroupPaint::AddChild( FOdysseyVectorObject* iChild
+                                  , FOdysseyVectorObject* iInsertAfter )
+{
+    FOdysseyVectorGroup::AddChild( iChild, iInsertAfter );
+
+    UpdatePathList();
+}
+
+void
+FOdysseyVectorGroupPaint::RemoveChild()
+{
+}
+*/
 
 void
 FOdysseyVectorGroupPaint::BuildGraph()
@@ -2407,7 +2430,7 @@ FOdysseyVectorGroupPaint::CopyBuckets( FOdysseyVectorGroupPaint* iDestination, b
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorGroupPaint::CopyShape()
+FOdysseyVectorGroupPaint::CopyShape( uint64 iCopyFlags )
 {
     FOdysseyVectorGroupPaint* groupPaintCopy = new FOdysseyVectorGroupPaint( "Paint Group Copy" );
 
@@ -2418,7 +2441,7 @@ FOdysseyVectorGroupPaint::CopyShape()
     groupPaintCopy->SetGapTolerance( mGapTolerance );
     groupPaintCopy->SetWireframe( bWireframe );
     groupPaintCopy->SetWireframeColor( mWireframeColor );
-    groupPaintCopy->SetIntersectsCanevas( bIntersectsCanevas );
+    groupPaintCopy->SetIntersectsCanvas( bIntersectsCanvas );
 
     CopyBuckets( groupPaintCopy, false );
 
@@ -2430,14 +2453,14 @@ FOdysseyVectorGroupPaint::AlterContourWidth( double iValue, bool iAbsolute )
 {
     std::vector<FOdysseyVectorVertex*> vertexArray;
     uint32_t vertexCount = 0;
-    bool intersectsCanevas = IntersectsCanevas();
+    bool intersectsCanvas = IntersectsCanvas();
 
-    // rebuild without intersecting the canevas if necessary
-    if( intersectsCanevas == true )
+    // rebuild without intersecting the canvas if necessary
+    if( intersectsCanvas == true )
     {
-        SetIntersectsCanevas( false );
+        SetIntersectsCanvas( false );
 
-        Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+        Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
     // set indexes for later fill the array
@@ -2478,11 +2501,11 @@ FOdysseyVectorGroupPaint::AlterContourWidth( double iValue, bool iAbsolute )
         }
     }
 
-    if( intersectsCanevas == true )
+    if( intersectsCanvas == true )
     {
-        SetIntersectsCanevas( true );
+        SetIntersectsCanvas( true );
 
-        Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+        Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 }
 /*
@@ -2712,7 +2735,7 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
         FOdysseyVectorChain::ExtendErasedSection( section->GetVertex(1), section );
     }
 
-    // do not use mPathList because it may contains the canevas path
+    // do not use mPathList because it may contains the canvas path
     for( FOdysseyVectorObject* child : mChildrenList )
     {
         if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
@@ -2745,7 +2768,7 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
 //    }
 
     // also check paths that were not intersected. If they hit, delete the whole thing.
-    // do not use mPathList because it may contains the canevas path
+    // do not use mPathList because it may contains the canvas path
     for( FOdysseyVectorObject* child : mChildrenList )
     {
         if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
@@ -2796,7 +2819,7 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
 void
 FOdysseyVectorGroupPaint::GetChildrenPaths( std::vector<FOdysseyVectorPath*>& oPathArray )
 {
-    // do not use mPathList because it may contains the canevas path
+    // do not use mPathList because it may contains the canvas path
     for( FOdysseyVectorObject* child : mChildrenList )
     {
         if( child->GetClass() == FOdysseyVectorPath::StaticClass() )
@@ -2811,7 +2834,7 @@ FOdysseyVectorGroupPaint::GetChildrenPaths( std::vector<FOdysseyVectorPath*>& oP
 void
 FOdysseyVectorGroupPaint::PickSectionLessPaths( std::vector<FOdysseyVectorObject*>& oObjectArray )
 {
-    // do not use mPathList because it may contains the canevas path
+    // do not use mPathList because it may contains the canvas path
     for( FOdysseyVectorObject* child : mChildrenList )
     {
         if( child->GetClass() == FOdysseyVectorPath::StaticClass() )

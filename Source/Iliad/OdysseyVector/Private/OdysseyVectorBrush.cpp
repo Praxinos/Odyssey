@@ -6,6 +6,7 @@
 #include "OdysseyVectorPath.h"
 #include "Brush/OdysseyVectorBrushPath.h"
 #include "TextureResource.h"
+#include "TextureCompiler.h"
 
 FOdysseyVectorBrush* demoBrush;
 
@@ -14,7 +15,7 @@ void
 FOdysseyVectorBrush::MakeDemoBrush( const std::list<FOdysseyVectorObject*>& iObjectList
                                   , const ::ULIS::FRectD& iBoundingBox )
 {
-    demoBrush = new FOdysseyVectorBrush( iObjectList, iBoundingBox );
+    demoBrush = new FOdysseyVectorBrush( nullptr, iObjectList, iBoundingBox );
 }
 
 FOdysseyVectorBrush*
@@ -40,8 +41,10 @@ FOdysseyVectorBrush::Draw( BLContext* iBLContext
     }
 }
 
-FOdysseyVectorBrush::FOdysseyVectorBrush( const std::list<FOdysseyVectorObject*>& iObjectList
+FOdysseyVectorBrush::FOdysseyVectorBrush( FOdysseyVectorObject* iOwner // can be NULL
+                                        , const std::list<FOdysseyVectorObject*>& iObjectList
                                         , const ::ULIS::FRectD& iBoundingBox  )
+    : FOdysseyVectorBrush( iOwner )
 {
     width  = 0;
     height = 0;
@@ -67,6 +70,11 @@ FOdysseyVectorBrush::FOdysseyVectorBrush( const std::list<FOdysseyVectorObject*>
 void
 FOdysseyVectorBrush::SetTexture( UTexture2D* iTexture )
 {
+    width  = 0;
+    height = 0;
+    pixels = nullptr;
+    bitsPerPixel = 0;
+
     if( iTexture )
     {
         // We have to change the texture settings or else we won't be able to read the pixels.
@@ -75,10 +83,30 @@ FOdysseyVectorBrush::SetTexture( UTexture2D* iTexture )
         iTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
         iTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
         iTexture->SRGB = false;
+        //iTexture->MipLoadOptions = ETextureMipLoadOptions::OnlyFirstMip;
+        //iTexture->LODGroup = TextureGroup::TEXTUREGROUP_UI;
         iTexture->UpdateResource();
+
+        width  = 1024;
+        height = 64;
+        bitsPerPixel = 32;
+
+        //FTextureCompilingManager::Get().FinishCompilation( { iTexture } );
     }
 
     texture = iTexture;
+
+    if( owner )
+        owner->Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
+
+    //FTexturePlatformData* pdata = texture->GetPlatformData();
+
+    //pdata->Reset
+
+    //UE_LOG(LogTemp, Warning, TEXT("%d %d"), texture->Source.GetLogicalSize().X, texture->Source.GetLogicalSize().Y );
+
+    //Lock();
+    //Unlock();
 }
 
 UTexture2D*
@@ -92,31 +120,45 @@ FOdysseyVectorBrush::Lock()
 {
     if( texture )
     {
-        FTexture2DMipMap *mip = &texture->GetPlatformData()->Mips[0];
-        const FColor* colors = static_cast<const FColor*>(mip->BulkData.LockReadOnly());
-        EPixelFormat pixelFormat = texture->GetPixelFormat(0);
-
-        pixels = const_cast<FColor*>(colors);
-        // Commented-out: do not use these methods. They return a wrong
-        // value when the texture is first loaded. then the right value
-        // but it means that at first, the texture does not display correctly.
-        //width  = texture->GetSurfaceWidth();
-        //height = texture->GetSurfaceHeight();
-        width  = mip->SizeX;
-        height = mip->SizeY;
-
-        switch( pixelFormat )
+        if( texture->GetPlatformData()->Mips.Num() && pixels == nullptr )
         {
-            case PF_B8G8R8A8:
-                bitsPerPixel = 32;
-            break;
+            FTexture2DMipMap *mip = &texture->GetPlatformData()->Mips[0];
+            const FColor* colors = static_cast<const FColor*>(mip->BulkData.LockReadOnly());
+            EPixelFormat pixelFormat = texture->GetPixelFormat(0);
+            uint32 bufferSize;
 
-            default : // other formats are unsupported
-                width  = 0;
-                height = 0;
-                pixels = nullptr;
-                bitsPerPixel = 0;
-            break;
+            pixels = const_cast<FColor*>(colors);
+            // Commented-out: do not use these methods. They return a wrong
+            // value when the texture is first loaded. then the right value
+            // but it means that at first, the texture does not display correctly.
+            //width  = texture->GetSurfaceWidth();
+            //height = texture->GetSurfaceHeight();
+            width  = mip->SizeX;
+            height = mip->SizeY;
+
+            bufferSize = width * height * sizeof FColor;
+
+
+
+            switch( pixelFormat )
+            {
+                case PF_B8G8R8A8:
+                    bitsPerPixel = 32;
+
+                    pixels = ( FColor* ) malloc ( bufferSize );
+
+                    memcpy ( pixels, colors, bufferSize );
+                break;
+
+                default : // other formats are unsupported
+                    width  = 0;
+                    height = 0;
+                    pixels = nullptr;
+                    bitsPerPixel = 0;
+                break;
+            }
+
+            texture->GetPlatformData()->Mips[0].BulkData.Unlock();
         }
     }
 }
@@ -124,13 +166,19 @@ FOdysseyVectorBrush::Lock()
 void
 FOdysseyVectorBrush::Unlock()
 {
-    if( texture )
-    {
-        texture->GetPlatformData()->Mips[0].BulkData.Unlock();
-    }
-
+/*
     width  = 0;
     height = 0;
     pixels = nullptr;
     bitsPerPixel = 0;
+*/
+/*
+    if( texture )
+    {
+        if( texture->GetPlatformData()->Mips.Num() )
+        {
+            texture->GetPlatformData()->Mips[0].BulkData.Unlock();
+        }
+    }
+*/
 }

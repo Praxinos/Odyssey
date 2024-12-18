@@ -3,8 +3,12 @@
 
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVectorExport.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
+#include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
+#include "OdysseyAnimation.h"
 #include "Export/v2/OdysseyVectorExport.h"
 #include "OdysseyFile.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorLayer.h"
 
 void
 FOdysseyAnimationCellImageVectorExport::WriteResolution( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
@@ -14,8 +18,8 @@ FOdysseyAnimationCellImageVectorExport::WriteResolution( UOdysseyAnimationCellIm
                             , Ar
                             , [iAnimationCellImageVector](FArchive &Ar) -> void
     {
-        uint32 width = iAnimationCellImageVector->GetEngine()->GetPreferredWidth();
-        uint32 height = iAnimationCellImageVector->GetEngine()->GetPreferredHeight();
+        uint32 width = iAnimationCellImageVector->GetLayer()->GetAnimation()->GetWidth();
+        uint32 height = iAnimationCellImageVector->GetLayer()->GetAnimation()->GetHeight();
 
         Ar << width;
         Ar << height;

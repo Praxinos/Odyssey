@@ -64,7 +64,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorEllipse : public FOdysseyVectorPrimitive
          * @brief Copy this ellipse (for copy-paste operations).
          * @return a newly allocated ellipse that looks the same as this ellipse.
          */
-        virtual FOdysseyVectorObject* CopyShape() override;
+        virtual FOdysseyVectorObject* CopyShape( uint64 iCopyFlags ) override;
 
        /**
          * @brief Draw this ellipse.

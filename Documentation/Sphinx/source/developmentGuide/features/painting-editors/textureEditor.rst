@@ -1,5 +1,0 @@
-==============
-Texture Editor
-==============
-
-Module Example

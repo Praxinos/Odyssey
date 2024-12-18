@@ -17,8 +17,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectTransform : public FOdysseyVecto
 {
     public:
         ~FOdysseyVectorUndoObjectTransform();
-        FOdysseyVectorUndoObjectTransform( FOdysseyVectorGroupPaint* iScene, FOdysseyVectorObject* iObject );
-        FOdysseyVectorUndoObjectTransform( FOdysseyVectorGroupPaint* iScene, std::list<FOdysseyVectorObject*>& iObjectList );
+        FOdysseyVectorUndoObjectTransform( FOdysseyVectorGroupPaint* iScene
+                                         , FOdysseyVectorObject* iObject
+                                         , uint64 iReturnFlags );
+        FOdysseyVectorUndoObjectTransform( FOdysseyVectorGroupPaint* iScene
+                                         , std::list<FOdysseyVectorObject*>& iObjectList
+                                         , uint64 iReturnFlags );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;

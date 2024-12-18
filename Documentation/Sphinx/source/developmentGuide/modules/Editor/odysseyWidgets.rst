@@ -1,5 +1,0 @@
-==============
-OdysseyWidgets
-==============
-
-Module Example

@@ -1,5 +1,0 @@
-===============
-OdysseyFlipbook
-===============
-
-Module Example

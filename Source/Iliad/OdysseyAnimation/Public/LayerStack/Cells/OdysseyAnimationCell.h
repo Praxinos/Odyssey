@@ -53,7 +53,7 @@ public:
     FInt32Range GetFrameRange() const;
 
     UFUNCTION(BlueprintCallable, Category="Odyssey|Cell")
-    virtual UOdysseyAnimationCell* Break(int Frame);
+    virtual UOdysseyAnimationCell* Break(int Frame, bool bClear);
 
 public:
     virtual FOdysseyMediaProvider GetMediaProvider(uint32 iFrameIndex) const;

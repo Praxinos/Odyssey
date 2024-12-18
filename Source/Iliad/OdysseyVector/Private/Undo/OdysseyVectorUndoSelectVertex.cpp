@@ -5,15 +5,19 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoSelectVertex::~FOdysseyVectorUndoSelectVertex()
 {
 }
 
 FOdysseyVectorUndoSelectVertex::FOdysseyVectorUndoSelectVertex( FOdysseyVectorGroupPaint* iScene
-                                                              , const std::list<FOdysseyVectorObject*>& iObjectList )
-    : FOdysseyVectorUndo( iScene )
+                                                              , const std::list<FOdysseyVectorObject*>& iObjectList
+                                                              , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mPathSnapshotArray.reserve( iObjectList.size() );
 
     for( FOdysseyVectorObject* object : iObjectList )
@@ -50,14 +54,8 @@ FOdysseyVectorUndoSelectVertex::Apply( UObject* iIgnored )
         paintgroupSnapshot.Restore();
     }
 
-    // update invalidated objects
-    mScene->Update( 0 );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -76,14 +74,8 @@ FOdysseyVectorUndoSelectVertex::Revert( UObject* iIgnored )
         paintgroupSnapshot.Restore();
     }
 
-    // update invalidated objects
-    mScene->Update( 0 );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

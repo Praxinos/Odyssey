@@ -1,5 +1,0 @@
-===================
-OdysseyStylusEditor
-===================
-
-Module Example

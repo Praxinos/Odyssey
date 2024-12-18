@@ -12,5 +12,5 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorGlobalShortcuts
 {
 public:
     virtual ~FOdysseyPainterEditorGlobalShortcuts() {};
-    FOdysseyPainterEditorGlobalShortcuts(TSharedPtr<FOdysseyPainterEditor> iEditor);
+    FOdysseyPainterEditorGlobalShortcuts(FOdysseyPainterEditor* iEditor);
 };

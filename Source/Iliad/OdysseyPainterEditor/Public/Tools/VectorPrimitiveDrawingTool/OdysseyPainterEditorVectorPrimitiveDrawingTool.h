@@ -5,9 +5,11 @@
 
 #include "CoreMinimal.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
-#include "OdysseyVector.h"
-#include "Undo/OdysseyVectorUndo.h"
+#include "OdysseyVectorBrush.h"
 #include "OdysseyPainterEditorVectorPrimitiveDrawingTool.generated.h"
+
+class FOdysseyVectorLine;
+class FOdysseyVectorPrimitive;
 
 UENUM()
 enum class ePrimitiveDrawingToolColorSource : uint8

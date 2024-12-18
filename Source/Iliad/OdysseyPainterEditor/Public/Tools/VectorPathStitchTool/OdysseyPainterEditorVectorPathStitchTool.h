@@ -5,8 +5,6 @@
 
 #include "CoreMinimal.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
-#include "OdysseyVector.h"
-#include "Undo/OdysseyVectorUndoPathStitch.h"
 
 #include "OdysseyPainterEditorVectorPathStitchTool.generated.h"
 

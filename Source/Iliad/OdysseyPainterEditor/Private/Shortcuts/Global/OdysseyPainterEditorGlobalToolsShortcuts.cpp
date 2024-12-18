@@ -7,7 +7,7 @@
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
-FOdysseyPainterEditorGlobalToolsShortcuts::FOdysseyPainterEditorGlobalToolsShortcuts(TSharedPtr<FOdysseyPainterEditor> iEditor)
+FOdysseyPainterEditorGlobalToolsShortcuts::FOdysseyPainterEditorGlobalToolsShortcuts(FOdysseyPainterEditor* iEditor)
     : mEditor(iEditor)
 {
 }
@@ -15,7 +15,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::FOdysseyPainterEditorGlobalToolsShort
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::MapActionsToCommandList(TSharedRef<FUICommandList> iCommandList)
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return;
 
@@ -158,7 +158,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::MapActionsToCommandList(TSharedRef<FU
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool(UOdysseyPainterEditorTool* iTool)
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return;
 
@@ -171,7 +171,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTool(UOdysseyPainterEd
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateColorPickerTool()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return;
 
@@ -185,7 +185,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateColorPickerTool()
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateDrawingTool()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return;
 
@@ -205,7 +205,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateDrawingTool()
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateSelectionTool()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return;
 
@@ -225,7 +225,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateSelectionTool()
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivatePaintBucketTool()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return;
 
@@ -245,7 +245,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivatePaintBucketTool()
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTransformTool()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return;
 
@@ -265,7 +265,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateTransformTool()
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivatePrimitiveDrawingTool()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return;
 
@@ -285,7 +285,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivatePrimitiveDrawingTool()
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateEraserTool()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return;
 
@@ -305,7 +305,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateEraserTool()
 void
 FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateWarpTool()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return;
 
@@ -328,7 +328,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::Action_ActivateWarpTool()
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool(UOdysseyPainterEditorTool* iTool)
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return false;
 
@@ -341,7 +341,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTool(UOdysseyPainte
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateColorPickerTool()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return false;
 
@@ -354,7 +354,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateColorPickerTool()
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateDrawingTool()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return false;
 
@@ -370,7 +370,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateDrawingTool()
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateSelectionTool()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return false;
 
@@ -386,7 +386,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateSelectionTool()
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivatePaintBucketTool()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return false;
 
@@ -402,7 +402,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivatePaintBucketTool()
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTransformTool()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return false;
 
@@ -418,7 +418,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateTransformTool()
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivatePrimitiveDrawingTool()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return false;
 
@@ -434,7 +434,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivatePrimitiveDrawingToo
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateEraserTool()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return false;
 
@@ -450,7 +450,7 @@ FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateEraserTool()
 bool
 FOdysseyPainterEditorGlobalToolsShortcuts::CanAction_ActivateWarpTool()
 {
-    TSharedPtr<FOdysseyPainterEditor> editor = mEditor.Pin();
+    FOdysseyPainterEditor* editor = mEditor;
     if (!editor)
         return false;
 

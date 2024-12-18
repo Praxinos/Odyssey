@@ -59,7 +59,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroup : public FOdysseyVectorObject
          * @brief Copy this group (for copy-paste operations).
          * @return a newly allocated group.
          */
-        virtual FOdysseyVectorObject* CopyShape() override;
+        virtual FOdysseyVectorObject* CopyShape( uint64 iCopyFlags ) override;
 
        /**
          * @brief Update this ellipse (update cached data if any).

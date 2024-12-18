@@ -5,6 +5,7 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoVertexRadius::~FOdysseyVectorUndoVertexRadius()
 {
@@ -19,9 +20,12 @@ FOdysseyVectorUndoVertexRadius::~FOdysseyVectorUndoVertexRadius()
 }
 
 FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGroupPaint* iScene
-                                                              , std::vector<FOdysseyVectorPath*>& iPathArray )
-    : FOdysseyVectorUndo( iScene )
+                                                              , std::vector<FOdysseyVectorPath*>& iPathArray
+                                                              , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mPathSnapshotArray.reserve( iPathArray.size() );
 
     for( int i = 0; i < iPathArray.size(); i++ )
@@ -31,9 +35,12 @@ FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGr
 }
 
 FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGroupPaint* iScene
-                                                              , std::vector<FOdysseyVectorVertex*>& iVertexArray )
-    : FOdysseyVectorUndo( iScene )
+                                                              , std::vector<FOdysseyVectorVertex*>& iVertexArray
+                                                              , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mVertexSnapshotArray.reserve( iVertexArray.size() );
 
     for( FOdysseyVectorVertex* vertex : iVertexArray )
@@ -58,13 +65,8 @@ FOdysseyVectorUndoVertexRadius::Apply( UObject* iIgnored )
         mPathSnapshotArray[i].Restore();
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -83,13 +85,8 @@ FOdysseyVectorUndoVertexRadius::Revert( UObject* iIgnored )
         mPathSnapshotArray[i].Restore();
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

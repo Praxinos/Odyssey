@@ -2,8 +2,11 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionToolHUD.h"
-#include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
+// Vector engine
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyPainterEditorVectorSelectionToolHUD::~FOdysseyPainterEditorVectorSelectionToolHUD()
 {
@@ -21,8 +24,8 @@ void
 FOdysseyPainterEditorVectorSelectionToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint32 width = vectorEngine->GetPreferredWidth();
-    uint32 height = vectorEngine->GetPreferredHeight();
+    uint32 width = vectorEngine->GetLayer()->GetWidth();
+    uint32 height = vectorEngine->GetLayer()->GetHeight();
 
     mBLSelectionMask.create( width, height, BL_FORMAT_A8 );
 
@@ -38,7 +41,16 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Unload( FOdysseyVectorGroupPaint* i
 void
 FOdysseyPainterEditorVectorSelectionToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
-    UpdateSelectionBox( iScene, false, mSelectionTool->GetEditor()->GetVectorHUDFlags() );
+    uint64 hudFlags = mSelectionTool->GetEditor()->GetVectorHUDFlags();
+
+    if( hudFlags & HUD_MODE_INBETWEEN )
+    {
+        hudFlags &= (~HUD_MODE_INBETWEEN);
+
+        hudFlags |= HUD_MODE_OBJECT;
+    }
+
+    UpdateSelectionBox( iScene, false, hudFlags );
 }
 
 BLImage*
@@ -166,7 +178,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
     uint64 hudFlags = mSelectionTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw object details only in vertex mode
-    if( hudFlags & HUD_MODE_VERTEX )
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
         DrawObjects( iBLContext
                    , iScene
@@ -176,7 +188,8 @@ FOdysseyPainterEditorVectorSelectionToolHUD::Draw( BLContext* iBLContext
                    , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
     }
 
-    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT )
+    if( ( hudFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT    )
+     || ( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) )
     {
         if( iScene->GetEngine()->GetSelectedObjectList().size() )
         {

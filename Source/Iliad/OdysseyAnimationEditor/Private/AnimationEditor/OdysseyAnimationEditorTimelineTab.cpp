@@ -82,6 +82,7 @@ FOdysseyAnimationEditorTimelineTab::CreateWidget()
         +SWidgetSwitcher::Slot()
         [
             SNew(SOdysseyAnimationLayerStack)
+            .PainterEditor(mExtension->GetEditor())
             .Animation(this, &FOdysseyAnimationEditorTimelineTab::Animation)
             .Player(this, &FOdysseyAnimationEditorTimelineTab::Player)
             .PlaybackFramesPerSecond(this, &FOdysseyAnimationEditorTimelineTab::PlaybackFramesPerSecond)
@@ -311,10 +312,10 @@ FOdysseyAnimationEditorTimelineTab::ImportImageSequence()
         return;
 
     filenames.Sort(
-       [](const FString& iA, const FString& iB)
-       {
-           return iA < iB;
-       }
+        [](const FString& iA, const FString& iB)
+        {
+            return iA < iB;
+        }
     );
 
     UOdysseyAnimationEditorAnimationFunctionLibrary::ImportImageSequence(animation, filenames);

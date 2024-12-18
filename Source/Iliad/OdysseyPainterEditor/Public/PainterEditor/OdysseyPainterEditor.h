@@ -25,7 +25,11 @@
 #include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
+#include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingTool.h"
+#include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.h"
+#include "Tools/VectorTrajectoryTool/OdysseyPainterEditorVectorTrajectoryTool.h"
 #include "OdysseyMediaProvider.h"
+#include "OdysseyVectorEngine.h"
 #include <ULIS>
 
 class IOdysseySurfaceEditable;
@@ -36,6 +40,7 @@ class FOdysseyPainterEditorExtension;
 class UOdysseyLayerStack;
 class FOdysseyMeshSelector;
 class FOdysseyPainterEditorRasterSelection;
+class FOdysseyVectorGroupPaint;
 
 /**
  * Base class for a Painting Editor
@@ -118,6 +123,9 @@ public:
     virtual UOdysseyPainterEditorVectorSelectionTool*                GetVectorSelectionTool() const;
     virtual UOdysseyPainterEditorVectorGridTool*                     GetVectorGridTool() const;
     virtual UOdysseyPainterEditorVectorTransformTool*                GetVectorTransformTool() const;
+    virtual UOdysseyPainterEditorVectorMatchingTool*                 GetVectorMatchingTool() const;
+    virtual UOdysseyPainterEditorVectorChartTool*                    GetVectorChartTool() const;
+    virtual UOdysseyPainterEditorVectorTrajectoryTool*               GetVectorTrajectoryTool() const;
     virtual UOdysseyPainterEditorVectorScenePanTool*                 GetVectorScenePanTool() const;
     virtual UOdysseyPainterEditorVectorEraserTool*                   GetVectorEraserTool() const;
     virtual UOdysseyPainterEditorVectorPathPushTool*                 GetVectorPathPushTool() const;
@@ -158,7 +166,9 @@ public:
     static void ApplyTransformations( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void MakePaintGroup( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void Ungroup( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void GroupAndAddInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void Group( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static FOdysseyVectorGroup* _Group( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void SelectAllPoints( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void SelectAllObjects( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
     static void ResetView( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
@@ -192,6 +202,33 @@ public:
     static void AlterContourWidth( FOdysseyVectorGroupPaint* iScene
                                  , double iValue
                                  , bool   iAbsolute );
+    static void AddInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+    static void ResetSpacingChart( FOdysseyPainterEditor* iEditor
+                                 , FOdysseyVectorGroupPaint* iScene
+                                 , bool iResetPositionning
+                                 , bool iCurrentBreakdownOnly );
+    static void ResetInbetweenerTagSpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorSharedEnv* iSharedEnv );
+    static void CommitSelectedInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorSharedEnv* iSharedEnv );
+    static void CopySpacingChart( FOdysseyPainterEditor* iEditor
+                                , FOdysseyVectorGroupPaint* iScene
+                                , bool iCurrentBreakdownOnly );
+    static void PasteSpacingChart( FOdysseyPainterEditor* iEditor
+                                 , FOdysseyVectorGroupPaint* iScene
+                                 , bool iCurrentBreakdownOnly );
+    static void ResetInbetweenerGrid( FOdysseyPainterEditor* iEditor
+                                    , FOdysseyVectorGroupPaint* iScene
+                                    , bool iResetTransformation
+                                    , bool iResetDeformation );
+    static void RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
+                                    , FOdysseyVectorSharedEnv* iSharedEnv );
+    static void Subdivide( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
+
+public:
+    static const uint64 UI_UPDATE_SCENETREEVIEW = ( 1ULL << ( FOdysseyVectorEngine::NOTIFY_RESERVED_SHIFT + 0 ) );
+    static const uint64 UI_UPDATE_TIMELINE      = ( 1ULL << ( FOdysseyVectorEngine::NOTIFY_RESERVED_SHIFT + 1 ) );
+    static const uint64 UI_UPDATE_OBJECTDETAILS = ( 1ULL << ( FOdysseyVectorEngine::NOTIFY_RESERVED_SHIFT + 2 ) );
+    static const uint64 UI_UPDATE_HUD           = ( 1ULL << ( FOdysseyVectorEngine::NOTIFY_RESERVED_SHIFT + 3 ) );
 
     // Utility functions
     bool HasCopyBlock(); //Did we copied a selection inside a block ? (Ctrl + C)
@@ -276,6 +313,9 @@ protected:
     TObjectPtr<UOdysseyPainterEditorColorPickerTool> mColorPickerTool;
     TObjectPtr<UOdysseyPainterEditorVectorGridTool> mVectorGridTool;
     TObjectPtr<UOdysseyPainterEditorVectorTransformTool> mVectorTransformTool;
+    TObjectPtr<UOdysseyPainterEditorVectorMatchingTool> mVectorMatchingTool;
+    TObjectPtr<UOdysseyPainterEditorVectorChartTool> mVectorChartTool;
+    TObjectPtr<UOdysseyPainterEditorVectorTrajectoryTool> mVectorTrajectoryTool;
 
     TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentMainToolPerLayerClass;
 };

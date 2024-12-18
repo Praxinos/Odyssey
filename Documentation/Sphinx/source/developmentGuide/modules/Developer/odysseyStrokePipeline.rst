@@ -1,5 +1,0 @@
-=====================
-OdysseyStrokePipeline
-=====================
-
-Module Example

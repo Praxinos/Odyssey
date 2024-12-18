@@ -2,8 +2,8 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Undo/OdysseyVectorUndoPathEdit.h"
-
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoPathEdit::~FOdysseyVectorUndoPathEdit()
 {
@@ -50,9 +50,12 @@ FOdysseyVectorUndoPathEdit::HasRecordedSegment( FOdysseyVectorSegment* iSegment 
 
 FOdysseyVectorUndoPathEdit::FOdysseyVectorUndoPathEdit( FOdysseyVectorGroupPaint* iScene
                                                       , const std::vector<FOdysseyVectorVertex*>& iEditedVertexArray
-                                                      , const std::vector<FOdysseyVectorSegment*>& iEditedSegmentArray )
-    : FOdysseyVectorUndo( iScene )
+                                                      , const std::vector<FOdysseyVectorSegment*>& iEditedSegmentArray
+                                                      , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mVertexSnapshotArray.reserve( iEditedVertexArray.size() );
     mCubicSegmentSnapshotArray.reserve( iEditedSegmentArray.size() );
 
@@ -91,14 +94,8 @@ FOdysseyVectorUndoPathEdit::Apply( UObject* iIgnored )
         mCubicSegmentSnapshotArray[i].Restore();
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -117,14 +114,8 @@ FOdysseyVectorUndoPathEdit::Revert( UObject* iIgnored )
         mCubicSegmentSnapshotArray[i].Restore();
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

@@ -8,7 +8,6 @@
 #include "OdysseyAnimation.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineSection.h"
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "OdysseyPainterEditor.h"
 
@@ -202,12 +201,7 @@ SOdysseyAnimationTimelineOutOfPegs::Construct(const FArguments& InArgs, UOdyssey
         SNew(SBox)
         .HeightOverride(FOptionalSize(mDesiredHeight))
         [
-            SNew(SOdysseyAnimationTimelineScrollBox)
-            .TimelinePosition(InArgs._TimelinePosition)
-            + SOdysseyAnimationTimelineScrollBox::Slot()
-            [
-                horizontalBox
-            ]
+            horizontalBox
         ]
     ];
 

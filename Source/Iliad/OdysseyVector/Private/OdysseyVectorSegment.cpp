@@ -20,6 +20,8 @@ FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorObject* iOwner
     , mPaintingCode( 0 )
     , mLength( 0.0f )
     , mIntersectionSlotCount( 0 )
+    , mTextureStartU ( 0.0f )
+    , mTextureEndU ( 0.0f )
 {
 }
 
@@ -118,6 +120,25 @@ FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
     }
     iBLContext->restore();
 
+}
+
+void
+FOdysseyVectorSegment::SetTextureU( double iTextureStartU, double iTextureEndU )
+{
+    mTextureStartU = iTextureStartU;
+    mTextureEndU = iTextureEndU;
+}
+
+double
+FOdysseyVectorSegment::GetTextureStartU()
+{
+    return mTextureStartU;
+}
+
+double
+FOdysseyVectorSegment::GetTextureEndU()
+{
+    return mTextureEndU;
 }
 
 FOdysseyVectorHandleSegment*
@@ -345,7 +366,7 @@ FOdysseyVectorSegment::Invalidate()
 }
 
 void
-FOdysseyVectorSegment::Update()
+FOdysseyVectorSegment::Update( uint32 iUpdateFlags )
 {
     mIsInvalidated = false;
 
@@ -446,6 +467,12 @@ FOdysseyVectorSegment::SetBBoxInParent( const ::ULIS::FRectD& iBBoxInParent )
 FOdysseyVectorSegment::GetBBoxInParent()
 {
     return mBBoxInParent;
+}
+
+std::vector<FOdysseyVectorPoint>&
+FOdysseyVectorSegment::GetFractionPointBuffer()
+{
+    return mFractionPointBuffer;
 }
 
 /*

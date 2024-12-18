@@ -139,7 +139,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
        /**
          * @brief Update cached data for this segment.
          */
-        virtual void Update();
+        virtual void Update( uint32 iUpdateFlags );
 
        /**
          * @brief Mark this segment for later update. This invalidates the path as well.
@@ -233,11 +233,19 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
                           , double iPoinT
                           , std::vector<FOdysseyVectorVertex*>& oNewVertexArray
                           , std::vector<FOdysseyVectorSegment*>& oNewSegmentArray );
+        std::vector<FOdysseyVectorPoint>& GetFractionPointBuffer();
+        void   SetTextureU( double iTextureStartU, double iTextureEndU );
+        double GetTextureStartU();
+        double GetTextureEndU();
 
     protected:
         void DrawFractionCache( BLContext* iBLContext );
 
     protected:
+        // here we use C-style allocation to avoir unnecessary constructor calls
+        // that a std::vector would perform. Moreover, we don't need to iterate
+        // among the items, thus we don't need to know the size of it afterwards.
+        std::vector<FOdysseyVectorPoint> mFractionPointBuffer;
         std::vector<FOdysseyVectorFraction> mFractionCache;
         std::list<FOdysseyVectorIntersection*> mIntersectionList;
         FOdysseyVectorObject* mOwner;
@@ -249,4 +257,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         uint32 mPaintingCode; // used by group paint as a boolean without needing to reinitialize its value
         double mLength;
         uint32 mIntersectionSlotCount;
+        double mTextureStartU;
+        double mTextureEndU;
 };

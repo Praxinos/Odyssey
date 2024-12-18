@@ -39,7 +39,7 @@ FOdysseyVectorImportSVG::FOdysseyVectorImportSVG( FOdysseyVectorGroupPaint* iSce
                            , outErrorLineNumber );
 
     iScene->SetPainted( false );
-    iScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
+    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 }
 
 static bool IsComma( TCHAR iChar )

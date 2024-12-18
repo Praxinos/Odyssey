@@ -4,55 +4,49 @@
 #include "Undo/OdysseyVectorUndoEngineClear.h"
 
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 
 FOdysseyVectorUndoEngineClear::~FOdysseyVectorUndoEngineClear()
 {
     delete mScene;
 }
 
-FOdysseyVectorUndoEngineClear::FOdysseyVectorUndoEngineClear( FOdysseyVectorEngine* iEngine )
-    : FOdysseyVectorUndo( iEngine->GetScene() )
-    , mEngine ( iEngine )
+FOdysseyVectorUndoEngineClear::FOdysseyVectorUndoEngineClear( FOdysseyVectorEngine* iEngine
+                                                            , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iEngine->GetScene()->GetSharedEnv(), iReturnFlags )
+    , mScene ( iEngine->GetScene() )
 {
+    mEngineList.push_back( iEngine );
 }
 
 void
 FOdysseyVectorUndoEngineClear::Apply( UObject* iIgnored )
 {
-    FOdysseyVectorGroupPaint* savedScene = mEngine->GetScene();
+    FOdysseyVectorGroupPaint* savedScene = mEngineList.front()->GetScene();
 
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mEngine->SetScene( mScene );
-
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+    mEngineList.front()->GetRoot()->SetScene( mScene );
 
     mScene = savedScene;
+
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
 FOdysseyVectorUndoEngineClear::Revert( UObject* iIgnored )
 {
-    FOdysseyVectorGroupPaint* savedScene = mEngine->GetScene();
+    FOdysseyVectorGroupPaint* savedScene = mEngineList.front()->GetScene();
 
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mEngine->SetScene( mScene );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+    mEngineList.front()->GetRoot()->SetScene( mScene );
 
     mScene = savedScene;
+
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

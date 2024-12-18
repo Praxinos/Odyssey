@@ -5,6 +5,7 @@
 #include "OdysseyVectorSegmentCubic.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorPath.h"
 
 void
 FOdysseyVectorExportV1::WritePathCubicGeometrySegments( FOdysseyVectorPath& iPath, FArchive &Ar )

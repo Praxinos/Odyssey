@@ -3,7 +3,11 @@
 
 #include "OdysseyVectorSection.h"
 #include "OdysseyVector.h"
+#include "OdysseyVectorVertex.h"
+#include "OdysseyVectorVertexIntersection.h"
+#include "OdysseyVectorSection.h"
 #include "OdysseyVectorSegmentCubic.h"
+#include "OdysseyVectorSegmentCubicGap.h"
 #include "OdysseyVectorObject.h"
 
 FOdysseyVectorSection::~FOdysseyVectorSection()

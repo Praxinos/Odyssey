@@ -5,6 +5,7 @@
 #include "Palette/OdysseyPaletteEntry.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorBrush.h"
 
 void
 FOdysseyVectorExportV2::WriteBrushColorFromBrush( const FOdysseyVectorBrush& iBrush, FArchive &Ar )

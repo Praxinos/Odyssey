@@ -93,7 +93,10 @@ private:
     void OnAddCellsHandleDragStopped(const FGeometry& iGeometry, const FPointerEvent& iEvent);
 
     EVisibility GetCellBreakIndicatorVisibility(UOdysseyAnimationCell* iCell) const;
+    EVisibility GetCellBreakIndicatorCopyVisibility(UOdysseyAnimationCell* iCell) const;
+    EVisibility GetCellBreakIndicatorBlankVisibility(UOdysseyAnimationCell* iCell) const;
     float GetCellBreakIndicatorOffset(UOdysseyAnimationCell* iCell) const;
+    float GetCellBreakIndicatorWidth(UOdysseyAnimationCell* iCell) const;
 
     const FSlateBrush* GetPreBehaviourBrush() const;
     TSharedRef<SWidget> GetPreBehaviourMenuContent();
@@ -133,6 +136,7 @@ private:
     const FSlateBrush* mAddCellsHandleRightBrush;
     const FSlateBrush* mAddCellsHandleLeftBrush;
     const FSlateBrush* mCellBreakIndicatorBrush;
+    const FSlateBrush* mCellBreakIndicatorExtendedBrush;
 
 private:
     //Events structures

@@ -4,6 +4,7 @@
 #include "Export/v2/OdysseyVectorExport.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorGroupPaint.h"
 
 void
 FOdysseyVectorExportV2::WriteGroupPaintBuckets( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
@@ -124,11 +125,11 @@ FOdysseyVectorExportV2::WriteGroupPaintPainted( FOdysseyVectorGroupPaint& iPaint
 void
 FOdysseyVectorExportV2::WriteGroupPaintIntersectsCanevas( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar )
 {
-    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_GROUPPAINT_INTERSECTSCANEVAS
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_GROUPPAINT_INTERSECTSCANVAS
                             , Ar
                             , [&iPaintGroup](FArchive &Ar) -> void
     {
-        uint32 intersectsCanevas = static_cast<uint32>(iPaintGroup.IntersectsCanevas());
+        uint32 intersectsCanevas = static_cast<uint32>(iPaintGroup.IntersectsCanvas());
 
         Ar << intersectsCanevas;
     } );

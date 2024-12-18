@@ -22,6 +22,13 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorObject.h"
 
+#include "OdysseyVectorObject.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorRoot.h"
+#include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAlter.h"
+
 #define LOCTEXT_NAMESPACE "Animation"
 
 UOdysseyAnimationLayerImageVector::FOnIsColoredChanged&
@@ -49,6 +56,35 @@ UOdysseyAnimationLayerImageVector::PostInitProperties()
 
     SupportedCellTypes.Add(UOdysseyAnimationCellImageVector::StaticClass());
     SupportedCellTypes.Add(UOdysseyAnimationCellImageStagger::StaticClass());
+}
+
+void
+UOdysseyAnimationLayerImageVector::PostLoad()
+{
+    Super::PostLoad();
+    UpdateSharedEnv();
+}
+
+void
+UOdysseyAnimationLayerImageVector::PostDuplicate(EDuplicateMode::Type iDuplicateMode)
+{
+    Super::PostDuplicate(iDuplicateMode);
+    UpdateSharedEnv();
+}
+
+void
+UOdysseyAnimationLayerImageVector::UpdateSharedEnv()
+{
+    GetSharedEnv()->RemoveAllChildren();
+
+    for (UOdysseyAnimationCell* cell : Cells)
+    {
+        if (!cell->IsA<UOdysseyAnimationCellImageVector>())
+            continue;
+
+        UOdysseyAnimationCellImageVector* cellVector = Cast<UOdysseyAnimationCellImageVector>(cell);
+        GetSharedEnv()->AppendChild( cellVector->GetRoot() );
+    }
 }
 
 struct FOdysseyAnimationLayerImageVectorObjectVersion
@@ -408,9 +444,90 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
         FOdysseyVectorEngine* engine = vectorCell->GetEngine();
         FOdysseyVectorGroupPaint* scene = engine->GetScene();
         scene->UpdateMatrix();
-        scene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-        engine->Signal( FOdysseyVectorEngine::SIGNAL_ALL );
+        scene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+        engine->Invalidate( 0 );
     }
+
+    FOdysseyVectorEngine::Notify( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
+}
+
+FOdysseyVectorSharedEnv*
+UOdysseyAnimationLayerImageVector::GetSharedEnv()
+{
+    return &mSharedEnv;
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetWidth
+uint32
+UOdysseyAnimationLayerImageVector::GetWidth()
+{
+    return ( uint32 ) GetAnimation()->GetWidth();
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetHeight
+uint32
+UOdysseyAnimationLayerImageVector::GetHeight()
+{
+    return ( uint32 ) GetAnimation()->GetHeight();
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetCellByIndex
+IOdysseyVectorCell*
+UOdysseyAnimationLayerImageVector::GetCellByIndex( uint32 iIndex )
+{
+    uint32 cellCount = Cells.Num();
+
+    if( ( iIndex >= 0 ) && ( iIndex < cellCount ) )
+    {
+        UOdysseyAnimationCell* cell = Cells[iIndex];
+        if (!cell->IsA<UOdysseyAnimationCellImageVector>())
+            return nullptr;
+
+        return Cast<UOdysseyAnimationCellImageVector>(cell);
+    }
+
+    return nullptr;
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::Contains
+bool
+UOdysseyAnimationLayerImageVector::Contains( IOdysseyVectorCell* iCandidateCell )
+{
+    return GetCells().ContainsByPredicate( [ iCandidateCell ] ( UOdysseyAnimationCell* cell )
+                                           {
+                                               UOdysseyAnimationCellImageVector* vectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
+
+                                               return ( vectorCell == iCandidateCell ) ? true : false;
+                                           } );
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetLastCell
+IOdysseyVectorCell*
+UOdysseyAnimationLayerImageVector::GetLastCell()
+{
+    if (Cells.IsEmpty())
+        return nullptr;
+
+    UOdysseyAnimationCell* lastCell = Cells.Last();
+    if (!lastCell->IsA<UOdysseyAnimationCellImageVector>())
+        return nullptr;
+
+    return Cast<UOdysseyAnimationCellImageVector>(lastCell);
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetLastCell
+IOdysseyVectorCell*
+UOdysseyAnimationLayerImageVector::GetFirstCell()
+{
+    if (Cells.IsEmpty())
+        return nullptr;
+
+    UOdysseyAnimationCell* firstCell = Cells[0];
+    if (!firstCell->IsA<UOdysseyAnimationCellImageVector>())
+        return nullptr;
+
+    return Cast<UOdysseyAnimationCellImageVector>(firstCell);
 }
 
 void
@@ -423,6 +540,176 @@ void
 UOdysseyAnimationLayerImageVector::IsColoredBlueprintSetter(bool Value)
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, IsColored), Value);
+}
+
+#ifdef WITH_EDITOR
+
+TArray<FName>
+UOdysseyAnimationLayerImageVector::GetRows() const
+{
+    TArray<FName> rows = Super::GetRows();
+    rows.Add("Inbetweening");
+
+    return rows;
+}
+
+int
+UOdysseyAnimationLayerImageVector::GetRowHeight(FName iSubRowName) const
+{
+    if (iSubRowName == "Inbetweening")
+    {
+        const std::list<FOdysseyVectorTag*>& tagList = mSharedEnv.GetSharedTagList();
+        int numTags = 0;
+        for (FOdysseyVectorTag* tag : tagList)
+        {
+            if (tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass())
+                numTags++;
+        }
+        return 20 * numTags;
+    }
+
+    return Super::GetRowHeight(iSubRowName);
+}
+
+bool
+UOdysseyAnimationLayerImageVector::IsRowVisible(FName iSubRowName) const
+{
+    if (iSubRowName == "Inbetweening")
+        return false; //managed by the editor (see SOdysseyAnimationLayerImageVectorTimeline)
+
+    return Super::IsRowVisible(iSubRowName);
+}
+
+#endif //WITH_EDITOR
+
+void
+UOdysseyAnimationLayerImageVector::MakeBreakdownTargetMap()
+{
+    std::list<FOdysseyVectorTagInbetweener*> inbetweenerTagList;
+    uint64 notificationFlags = 0xFFFFFFFFFFFFFFFF;
+
+    // Make breakdown lookup for adapting the length of the inbetweener tags
+    for( FOdysseyVectorTag* sharedTag : mSharedEnv.GetSharedTagList() )
+    {
+        if( sharedTag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+        {
+            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>( sharedTag );
+            // we copy the list because we may alter it.
+            std::list<FInbetweenerBreakdown*> breakdownList = inbetweenerTag->GetBreakdownList();
+
+            inbetweenerTagList.push_back( inbetweenerTag );
+
+            for( FInbetweenerBreakdown* breakdown : breakdownList )
+            {
+                mBreakdownTargetMap.Add( breakdown, breakdown->GetTargetCell() );
+            }
+        }
+    }
+
+    if( inbetweenerTagList.size() )
+    {
+        // needed for valid GUndo pointer
+        if( GUndo )
+        {
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( &mSharedEnv
+                                                                                         , inbetweenerTagList
+                                                                                         , notificationFlags );
+
+            // We use GEditor as the UObject, otherwise if we use "this", at each UNDO, PostEditChangeProperty() will be called
+            // which will again call StoreUndo + this will lead to a crash. I don't know however what will be the consequences
+            // of a call to GEditor::PostEditChangeProperty()
+            GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
+/*
+            TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+            if (source)
+                source->RecordCurrentFrameUndo();
+*/
+        }
+    }
+}
+
+void
+UOdysseyAnimationLayerImageVector::CheckBreakdownTargetMap()
+{
+    for ( const auto& pair : mBreakdownTargetMap )
+    {
+        FInbetweenerBreakdown* breakdown = pair.Key;
+        IOdysseyVectorCell* expectedTargetCell = pair.Value;
+        FOdysseyVectorTagInbetweener* inbetweenerTag = breakdown->GetInbetweenerTag();
+        IOdysseyVectorCell* sourceCell = inbetweenerTag->GetSourceCell();
+        IOdysseyVectorCell* targetCell = breakdown->GetTargetCell();
+        IOdysseyVectorLayer* layer = inbetweenerTag->GetOwner()->GetEngine()->GetLayer();
+
+        if( targetCell && sourceCell )
+        {
+            int32 targetCellIndex = targetCell->GetIndex();
+            int32 expectedTargetCellIndex = layer->Contains(  expectedTargetCell ) ? expectedTargetCell->GetIndex()
+                                                                                   : targetCellIndex;
+
+            if( expectedTargetCell != targetCell )
+            {
+                int32 sourceCellIndex = sourceCell->GetIndex();
+
+                int32 relativeIndex = ( expectedTargetCellIndex - sourceCellIndex ) * (int32) inbetweenerTag->GetInterpolationDirection();
+
+                if( relativeIndex > 0 )
+                {
+                    breakdown->SetTargetDrawingIndex( relativeIndex );
+                }
+            }
+        }
+        else
+        {
+            if( inbetweenerTag->GetBreakdownCount() > 1 )
+            {
+                inbetweenerTag->RemoveBreakdown( breakdown, false );
+            }
+            else
+            {
+                breakdown->SetTargetDrawingIndex( 1 );
+            }
+        }
+    }
+
+    mSharedEnv.Update( 0 );
+
+    FOdysseyVectorEngine::Notify( nullptr, 0xFFFFFFFFFFFFFFFF );
+
+
+    mBreakdownTargetMap.Empty();
+}
+
+void
+UOdysseyAnimationLayerImageVector::PreEditChange( FProperty* PropertyAboutToChange )
+{
+    Super::PreEditChange( PropertyAboutToChange );
+
+    if( PropertyAboutToChange->GetName() == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, Cells ) )
+    {
+        MakeBreakdownTargetMap();
+    }
+}
+
+void
+UOdysseyAnimationLayerImageVector::PostEditChangeProperty( FPropertyChangedEvent& PropertyChangedEvent )
+{
+    Super::PostEditChangeProperty( PropertyChangedEvent );
+
+    if( PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(UOdysseyAnimationLayerImageVector, Cells ) )
+    {
+        CheckBreakdownTargetMap();
+    }
+}
+
+void
+UOdysseyAnimationLayerImageVector::CellsChanged(bool iIsInteractive)
+{
+    // Put this before calling Super::CellsChanged because the HUD might be refreshed by Super::CellsChanged
+    // When reloading the current tool and it needs the vector object hierarchy to be correctly set.
+    if (!iIsInteractive)
+        UpdateSharedEnv();
+
+    Super::CellsChanged(iIsInteractive);
 }
 
 #undef LOCTEXT_NAMESPACE

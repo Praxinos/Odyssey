@@ -27,6 +27,7 @@ FOdysseyVectorPath::~FOdysseyVectorPath()
 FOdysseyVectorPath::FOdysseyVectorPath( const FString& iName )
     : FOdysseyVectorObject( iName )
     , mPaintingCode( 0 )
+    , mBrush( this )
 {
     SetJointType( eJointType::Miter, false );
 
@@ -35,7 +36,7 @@ FOdysseyVectorPath::FOdysseyVectorPath( const FString& iName )
 
     mChainArray.reserve( 10 );
 
-    Invalidate();
+    //Invalidate();
 /*
     mBrush = new BLImage();
     if( mBrush )
@@ -159,7 +160,7 @@ FOdysseyVectorPath::SetJointType( eJointType iJointType, bool iInvalidate )
 
     if( iInvalidate )
     {
-        Invalidate();
+        Invalidate( INVALIDATE_SHAPE );
     }
 }
 
@@ -176,7 +177,7 @@ FOdysseyVectorPath::SetMiterLimit( double iMiterLimit, bool iInvalidate )
 
     if( iInvalidate )
     {
-        Invalidate();
+        Invalidate( INVALIDATE_SHAPE );
     }
 }
 
@@ -197,7 +198,7 @@ FOdysseyVectorPath::ExportParam( FOdysseyVectorObject* iDestinationObject, bool 
 
     if( iInvalidate )
     {
-        iDestinationObject->Invalidate();
+        iDestinationObject->Invalidate( INVALIDATE_SHAPE | INVALIDATE_COLOR | INVALIDATE_TOPOLOGY );
     }
 }
 
@@ -319,13 +320,26 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
                  , mInvalidatedSegmentList.begin()
                  , mInvalidatedSegmentList.end()
                  , [ this ]( FOdysseyVectorSegment *segment )*/
-    for ( FOdysseyVectorSegment* segment : mInvalidatedSegmentList )
-    {
-        segment->Update();
-    }
-    /*);*/
 
+    if( iUpdateFlags & UPDATE_FORCE )
+    {
+        for ( FOdysseyVectorSegment* segment : mSegmentList )
+        {
+            segment->Update( iUpdateFlags );
+        }
+    }
+    else
+    {
+        for ( FOdysseyVectorSegment* segment : mInvalidatedSegmentList )
+        {
+            segment->Update( iUpdateFlags );
+        }
+    }
+
+    // clear this anyway
     mInvalidatedSegmentList.clear();
+
+    /*);*/
 
     if( mInvalidationFlags & INVALIDATE_TOPOLOGY )
     {
@@ -361,11 +375,6 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
                            , point1.x
                            , point1.y );
         }
-    }
-
-    if( ( iUpdateFlags & FOdysseyVectorObject::KEEPINVALIDATED ) == 0 )
-    {
-        mInvalidationFlags = 0;
     }
 }
 
@@ -471,9 +480,9 @@ FOdysseyVectorPath::InvalidateSegment( FOdysseyVectorSegment* iSegment )
     if( iSegment->IsInvalidated() == false )
     {
         mInvalidatedSegmentList.push_back( iSegment );
-
-        Invalidate();
     }
+
+    Invalidate( INVALIDATE_SHAPE );
 }
 
 void
@@ -482,6 +491,8 @@ FOdysseyVectorPath::AddVertex( FOdysseyVectorVertex* iVertex )
     mVertexList.push_back( iVertex );
 
     iVertex->SetOwner( this );
+
+    Invalidate( INVALIDATE_SHAPE );
 }
 
 void
@@ -502,6 +513,7 @@ FOdysseyVectorPath::RemoveVertex( FOdysseyVectorVertex* iVertex )
         UnselectVertex( iVertex );
     }
 
+    Invalidate( INVALIDATE_SHAPE );
     //iVertex->SetPath( nullptr );
 }
 
@@ -571,15 +583,8 @@ FOdysseyVectorPath::RemoveSegment( FOdysseyVectorSegment* iSegment )
     Invalidate( INVALIDATE_TOPOLOGY );
 }
 
-
 void
-FOdysseyVectorPath::Invalidate()
-{
-    Invalidate( INVALIDATE_ALL );
-}
-
-void
-FOdysseyVectorPath::Invalidate( uint32 iInvalidationFlags )
+FOdysseyVectorPath::Invalidate( uint64 iInvalidationFlags )
 {
     //if( iInvalidationFlags & INVALIDATE_MATRIX )
     //{
@@ -1094,6 +1099,35 @@ FOdysseyVectorPath::ParseWayPoints( std::vector<FWayPoint>& iWayPointArray
     }
 }
 
+void
+FOdysseyVectorPath::Subdivide( std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
+                             , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                             , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
+{
+    oRemovedSegmentArray.reserve( oRemovedSegmentArray.capacity() + mSegmentList.size() );
+
+    for( FOdysseyVectorSegment* segment : mSegmentList )
+    {
+        ::ULIS::FVec2D point = segment->GetPointAt( 0.5f );
+
+        segment->Split( point, 0.5f, oAddedVertexArray, oAddedSegmentArray );
+
+        oRemovedSegmentArray.push_back( segment );
+    }
+
+    RemoveAllSegments();
+
+    for( FOdysseyVectorVertex* newVertex : oAddedVertexArray )
+    {
+        AddVertex( newVertex );
+    }
+
+    for( FOdysseyVectorSegment* newSegment : oAddedSegmentArray )
+    {
+        AddSegment( newSegment );
+    }
+}
+
 bool
 FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
                          , std::vector<FOdysseyVectorVertex*>& oAddedVertexArray
@@ -1181,7 +1215,7 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
     //UE_LOG(LogTemp, Warning, TEXT("Added Segments: %d"), oAddedVertexArray.size() );
     //UE_LOG(LogTemp, Warning, TEXT("Added Vertices: %d"), oAddedSegmentArray.size() );
 
-    Invalidate();
+    Invalidate( INVALIDATE_SHAPE | INVALIDATE_COLOR | INVALIDATE_TOPOLOGY );
 
     // return true if path is empty
     return ( mVertexList.size() == 0 ) && ( mSegmentList.size() == 0 );
@@ -1441,6 +1475,34 @@ typedef struct FStitchingPair
     }
 } FStitchingPair;
 
+FOdysseyVectorSegment*
+FOdysseyVectorPath::GetSegmentByID( uint32 iID )
+{
+    for( FOdysseyVectorSegment* segment : mSegmentList )
+    {
+        if( segment->GetID() == iID )
+        {
+            return segment;
+        }
+    }
+
+    return nullptr;
+}
+
+FOdysseyVectorVertex*
+FOdysseyVectorPath::GetVertexByID( uint32 iID )
+{
+    for( FOdysseyVectorVertex* vertex : mVertexList )
+    {
+        if( vertex->GetID() == iID )
+        {
+            return vertex;
+        }
+    }
+
+    return nullptr;
+}
+
 //static
 void
 FOdysseyVectorPath::DeleteVertex( FOdysseyVectorPath* iPath
@@ -1650,11 +1712,11 @@ FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
                                            , fraction->polygon.point[1]
                                            , fraction->polygon.point[2]
                                            , fraction->polygon.point[3] };
-                double quad0U[6] = { iStartU + ( fraction->polygon.U[0] * difU )
+                double quad0U[4] = { iStartU + ( fraction->polygon.U[0] * difU )
                                    , iStartU + ( fraction->polygon.U[1] * difU )
                                    , iStartU + ( fraction->polygon.U[2] * difU )
                                    , iStartU + ( fraction->polygon.U[3] * difU ) };
-                double quad0V[6] = { fraction->polygon.V[0]
+                double quad0V[4] = { fraction->polygon.V[0]
                                    , fraction->polygon.V[1]
                                    , fraction->polygon.V[2]
                                    , fraction->polygon.V[3] };
@@ -1662,11 +1724,11 @@ FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
                                            , fraction->polygon.point[4]
                                            , fraction->polygon.point[5]
                                            , fraction->polygon.point[0] };
-                double quad1U[6] = { iStartU + ( fraction->polygon.U[3] * difU )
+                double quad1U[4] = { iStartU + ( fraction->polygon.U[3] * difU )
                                    , iStartU + ( fraction->polygon.U[4] * difU )
                                    , iStartU + ( fraction->polygon.U[5] * difU )
                                    , iStartU + ( fraction->polygon.U[0] * difU ) };
-                double quad1V[6] = { fraction->polygon.V[3]
+                double quad1V[4] = { fraction->polygon.V[3]
                                    , fraction->polygon.V[4]
                                    , fraction->polygon.V[5]
                                    , fraction->polygon.V[0] };
@@ -1771,7 +1833,6 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
     BLRgba32 strokeColor = ( iDrawingFlags & FOdysseyVectorEngine::DRAWING_IGNORECOLOR ) ? BLRgba32( 0, 0, 0, 255 )
                                                                                          : BLRgba32( color.R, color.G, color.B, 255 * iCombinedOpacity /*color.A * iCombinedOpacity*/ );
 
-    UTexture2D* texture = mBrush.GetTexture();
     BLImage* image = iBLContext->targetImage();
     BLImageData& imageData = iVectorEngine->GetRenderData();
     ::ULIS::FRectD screen;
@@ -1787,9 +1848,11 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
     }
     else
     {
-        if( mBrush.GetTexture() )
+        UTexture2D* texture = mBrush.GetTexture();
+
+        if( texture )
         {
-            double startU = mBrush.Revert ? 1.0f : 0.0f;
+            //double startU = mBrush.Revert ? 1.0f : 0.0f;
             double remainingSegmentLength = 0.0f;
 
             mBrush.Lock();
@@ -1799,7 +1862,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                                     , iBLContext
                                     , &iCombinedOpacity
                                     , &iDrawingFlags
-                                    , &startU
+                                    //, &startU
                                     , &remainingSegmentLength
                                     , &screen
                                     , &iChain ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
@@ -1811,55 +1874,10 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                 double segmentLength = segment->GetLength();
                 double jointLength = joint.GetLength();
                 double segmentAndJointLength = segmentLength + jointLength;
-                double endU = 0.0f;
-
-                if( mBrush.ExtensionMode == eBrushExtensionMode::Path )
-                {
-                    if( mBrush.Revert )
-                    {
-                        endU = startU - ( iChain.mLength ? ( segmentAndJointLength / iChain.mLength ) : 0.0f );
-                    }
-                    else
-                    {
-                        endU = startU + ( iChain.mLength ? ( segmentAndJointLength / iChain.mLength ) : 0.0f );
-                    }
-                }
-
-                if( mBrush.ExtensionMode == eBrushExtensionMode::Segment )
-                {
-                    if( mBrush.Revert )
-                    {
-                        startU = 1.0f;
-                        endU   = 0.0f;
-                    }
-                    else
-                    {
-                        startU = 0.0f;
-                        endU   = 1.0f;
-                    }
-                }
-
-                if( mBrush.ExtensionMode == eBrushExtensionMode::Adapt )
-                {
-                    double brushRatio = mBrush.height ? (double) mBrush.width  / mBrush.height : 0.0f;
-                    double averageSegmentRadius = ( vertex->GetRadius() + otherVertex->GetRadius() ) * 0.5f;
-                    double adaptedSegmentLength = averageSegmentRadius * brushRatio;
-
-                    if( mBrush.Revert )
-                    {
-                        endU   = startU - ( adaptedSegmentLength ? ( segmentAndJointLength / adaptedSegmentLength ) : 0.0f );
-                    }
-                    else
-                    {
-                        endU   = startU + ( adaptedSegmentLength ? ( segmentAndJointLength / adaptedSegmentLength ) : 0.0f );
-                    }
-                }
+                //double endU = 0.0f;
 
                 if( segmentLength )
                 {
-                    double segmentStartU = ( vertex == segment->GetVertex(0) ) ? startU : endU;
-                    double segmentEndU   = ( vertex == segment->GetVertex(0) ) ? endU : startU;
-
                     // WORKAROUND: in some cases U is < 0.0f, I dont know why yet.
                     //if ( segmentStartU < 0.0f ) segmentStartU = 0.0f;
                     //if ( segmentEndU   < 0.0f ) segmentEndU   = 0.0f;
@@ -1869,12 +1887,6 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                     if( ( vertex->IsHandleAligned() == false )
                     && ( mBrush.ExtensionMode != eBrushExtensionMode::Segment ) )
                     {
-                        double segmentJointRatio = jointLength / ( segmentAndJointLength );
-                        double jointStartU = segmentStartU;
-                        double jointEndU = segmentStartU + ( ( segmentEndU - segmentStartU ) * segmentJointRatio );
-
-                        segmentStartU = jointEndU;
-
                         // WORKAROUND: in some cases U is < 0.0f, I dont know why yet.
                         //if ( jointStartU < 0.0f ) jointStartU = 0.0f;
                         //if ( jointEndU   < 0.0f ) jointEndU   = 0.0f;
@@ -1886,8 +1898,6 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                          && ( ( jointBBox.y + jointBBox.h ) > 0        ) )
                         {
                             vertex->DrawJoint( iBLContext
-                                             , jointStartU
-                                             , jointEndU
                                              , iCombinedOpacity
                                              , iDrawingFlags );
                         }
@@ -1901,15 +1911,15 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                     {
                         DrawSegment( iBLContext
                                    , segment
-                                   , segmentStartU
-                                   , segmentEndU
+                                   , segment->GetTextureStartU()
+                                   , segment->GetTextureEndU()
                                    , iCombinedOpacity
                                    , iDrawingFlags );
                     }
                 }
 
                 // only when mBrush.ExtendOverPath == true
-                startU = endU;
+                //startU = endU;
 
                 return false; // keep iterating
             } );
@@ -1953,7 +1963,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                  && ( ( jointBBox.y               ) < screen.h )
                  && ( ( jointBBox.y + jointBBox.h ) > 0        ) )
                 {
-                    vertex->DrawJoint( iBLContext, 0.0f, 0.0f, iCombinedOpacity, iDrawingFlags );
+                    vertex->DrawJoint( iBLContext, iCombinedOpacity, iDrawingFlags );
                 }
 
                 return false; // keep iterating
@@ -2000,7 +2010,7 @@ FOdysseyVectorPath::GetInvalidatedSegmentList()
 }
 
 FOdysseyVectorObject*
-FOdysseyVectorPath::CopyShape()
+FOdysseyVectorPath::CopyShape( uint64 iCopyFlags )
 {
     FOdysseyVectorPath* cubicPathCopy = new FOdysseyVectorPath( FString("Cubic Path") );
     std::map<FOdysseyVectorVertex*, FOdysseyVectorVertex*> lookupTable;
@@ -2012,9 +2022,13 @@ FOdysseyVectorPath::CopyShape()
 
     for( FOdysseyVectorVertex* originalVertex : mVertexList )
     {
-        FOdysseyVectorVertex* newVertex = new FOdysseyVectorVertex( originalVertex->GetX()
-                                                                  , originalVertex->GetY()
-                                                                  , originalVertex->GetRadius() );
+        ::ULIS::FVec2D originalVertexCoords = originalVertex->GetCoords();
+        double originalVertexRadius = originalVertex->GetRadius();
+        FOdysseyVectorVertex* newVertex;
+
+        newVertex = new FOdysseyVectorVertex( originalVertexCoords.x
+                                            , originalVertexCoords.y
+                                            , originalVertexRadius );
 
         newVertex->SetHandleAligned( originalVertex->IsHandleAligned() );
 
@@ -2027,21 +2041,93 @@ FOdysseyVectorPath::CopyShape()
     {
         if( originalSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
         {
-            FOdysseyVectorSegmentCubic* originalCubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(originalSegment);
-            FOdysseyVectorVertex* vertex0 = static_cast<FOdysseyVectorVertex*>( originalCubicSegment->GetPoint(0) );
-            FOdysseyVectorVertex* vertex1 = static_cast<FOdysseyVectorVertex*>( originalCubicSegment->GetPoint(1) );
-            FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( cubicPathCopy
-                                                                                        , lookupTable[vertex0]
-                                                                                        , originalCubicSegment->GetHandle(0)->GetX()
-                                                                                        , originalCubicSegment->GetHandle(0)->GetY()
-                                                                                        , originalCubicSegment->GetHandle(1)->GetX()
-                                                                                        , originalCubicSegment->GetHandle(1)->GetY()
-                                                                                        , lookupTable[vertex1]
-                                                                                        , true );
+            if( iCopyFlags & COPY_RETOPOLOGY )
+            {
+                std::vector<FOdysseyVectorFraction>& fractionCache = originalSegment->GetFractionCache();
+                uint32 fractionCount = originalSegment->GetFractionCount();
+                std::vector<::ULIS::FVec2D> pointBuffer;
+                FOdysseyVectorVertex* vertex0 = originalSegment->GetVertex(0);
+                FOdysseyVectorVertex* vertex1 = nullptr;
 
-            cubicPathCopy->AddSegment( newCubicSegment );
+                pointBuffer.reserve( originalSegment->GetFractionPointBuffer().size() + 2 );
+                pointBuffer.push_back( originalSegment->GetVertex(0)->GetCoords() );
+
+                for( uint32 i = 0; i < fractionCount - 1; i++ )
+                {
+                    FOdysseyVectorFraction& fraction = fractionCache[i];
+                    ::ULIS::FVec2D fractionPointCoords = fraction.point[1]->GetCoords();
+
+                    pointBuffer.push_back( fractionPointCoords );
+                }
+
+                pointBuffer.push_back( originalSegment->GetVertex(1)->GetCoords() );
+
+                FOdysseyVector::FitCurve( pointBuffer
+                                        , 4.0f
+                                        , [ &lookupTable
+                                          , cubicPathCopy
+                                          , originalSegment
+                                          , &vertex0
+                                          , &vertex1 ]( const std::vector<::ULIS::FVec2D>& bezierCurve
+                                                      , double firstT
+                                                      , double lastRecordT )
+                {
+                    if( lastRecordT == 1.0f )
+                    {
+                        vertex1 = originalSegment->GetVertex(1);
+                    }
+                    else
+                    {
+                        double radius = ( lookupTable[originalSegment->GetVertex(0)]->GetRadius() * ( 1.0f - lastRecordT ) )
+                                      + ( lookupTable[originalSegment->GetVertex(1)]->GetRadius() * ( lastRecordT        ) );
+
+                        vertex1 = new FOdysseyVectorVertex( bezierCurve[3].x
+                                                          , bezierCurve[3].y
+                                                          , radius );
+
+                        cubicPathCopy->AddVertex( vertex1 );
+                    }
+
+                    if( lookupTable[vertex0] ) vertex0 = lookupTable[vertex0];
+                    if( lookupTable[vertex1] ) vertex1 = lookupTable[vertex1];
+
+                    FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( cubicPathCopy
+                                                                                                , vertex0
+                                                                                                , bezierCurve[1].x
+                                                                                                , bezierCurve[1].y
+                                                                                                , bezierCurve[2].x
+                                                                                                , bezierCurve[2].y
+                                                                                                , vertex1
+                                                                                                , true );
+
+                    cubicPathCopy->AddSegment( newCubicSegment );
+
+                    vertex0 = vertex1;
+                } );
+            }
+            else
+            {
+                FOdysseyVectorSegmentCubic* originalCubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(originalSegment);
+                FOdysseyVectorVertex* vertex0 = static_cast<FOdysseyVectorVertex*>( originalCubicSegment->GetPoint(0) );
+                FOdysseyVectorVertex* vertex1 = static_cast<FOdysseyVectorVertex*>( originalCubicSegment->GetPoint(1) );
+                FOdysseyVectorHandleSegment* originalHandle0 = originalSegment->GetHandle(0);
+                FOdysseyVectorHandleSegment* originalHandle1 = originalSegment->GetHandle(1);
+                ::ULIS::FVec2D originalHandle0Coords = originalHandle0->GetCoords();
+                ::ULIS::FVec2D originalHandle1Coords = originalHandle1->GetCoords();
+
+                FOdysseyVectorSegmentCubic* newCubicSegment = new FOdysseyVectorSegmentCubic( cubicPathCopy
+                                                                                            , lookupTable[vertex0]
+                                                                                            , originalHandle0Coords.x
+                                                                                            , originalHandle0Coords.y
+                                                                                            , originalHandle1Coords.x
+                                                                                            , originalHandle1Coords.y
+                                                                                            , lookupTable[vertex1]
+                                                                                            , true );
+
+                cubicPathCopy->AddSegment( newCubicSegment );
+            }
+            //newSegment->BuildVariable();
         }
-        //newSegment->BuildVariable();
     }
 
     //cubicPathCopy->Update( 0 );
@@ -2422,6 +2508,9 @@ FOdysseyVectorPath::UpdateChain( FOdysseyVectorChain* iChain )
 
         hasBBox = true;
 
+        segment->SetTextureU( 0.0f, 0.0f );
+        vertex->GetJoint().SetTextureU( 0.0f, 0.0f );
+
         if ( rx1 < xmin ) xmin = rx1;
         if ( ry1 < ymin ) ymin = ry1;
         if ( rx2 > xmax ) xmax = rx2;
@@ -2434,6 +2523,105 @@ FOdysseyVectorPath::UpdateChain( FOdysseyVectorChain* iChain )
 
         return false; // keep iterating
     } );
+
+    // Update texture coords
+    if( mBrush.GetTexture() )
+    {
+        double startU = mBrush.Revert ? 1.0f : 0.0f;
+        double remainingSegmentLength = 0.0f;
+
+        mBrush.Lock(); // needed to retrieve texture width and height
+
+        iChain->IterateSegments( [ this
+                                 , &startU
+                                 , &remainingSegmentLength
+                                 , &iChain ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
+        {
+            FOdysseyVectorVertex* otherVertex = segment->GetOtherVertex( vertex );
+            ::ULIS::FRectD segmentBBox = segment->GetBoundingBox( true );
+            ::ULIS::FRectD jointBBox = vertex->GetJoint().GetBBox( true );
+            FOdysseyVectorJoint& joint = vertex->GetJoint();
+            double segmentLength = segment->GetLength();
+            double jointLength = joint.GetLength();
+            double segmentAndJointLength = segmentLength + jointLength;
+            double endU = 0.0f;
+
+            if( mBrush.ExtensionMode == eBrushExtensionMode::Path )
+            {
+                if( mBrush.Revert )
+                {
+                    endU = startU - ( iChain->mLength ? ( segmentAndJointLength / iChain->mLength ) : 0.0f );
+                }
+                else
+                {
+                    endU = startU + ( iChain->mLength ? ( segmentAndJointLength / iChain->mLength ) : 0.0f );
+                }
+            }
+
+            if( mBrush.ExtensionMode == eBrushExtensionMode::Segment )
+            {
+                if( mBrush.Revert )
+                {
+                    startU = 1.0f;
+                    endU   = 0.0f;
+                }
+                else
+                {
+                    startU = 0.0f;
+                    endU   = 1.0f;
+                }
+            }
+
+            if( mBrush.ExtensionMode == eBrushExtensionMode::Adapt )
+            {
+                double brushRatio = mBrush.height ? (double) mBrush.width  / mBrush.height : 0.0f;
+                double averageSegmentRadius = ( vertex->GetRadius() + otherVertex->GetRadius() ) * 0.5f;
+                double adaptedSegmentLength = averageSegmentRadius * brushRatio;
+
+                if( mBrush.Revert )
+                {
+                    endU   = startU - ( adaptedSegmentLength ? ( segmentAndJointLength / adaptedSegmentLength ) : 0.0f );
+                }
+                else
+                {
+                    endU   = startU + ( adaptedSegmentLength ? ( segmentAndJointLength / adaptedSegmentLength ) : 0.0f );
+                }
+            }
+
+            if( segmentLength )
+            {
+                double segmentStartU = ( vertex == segment->GetVertex(0) ) ? startU : endU;
+                double segmentEndU   = ( vertex == segment->GetVertex(0) ) ? endU : startU;
+
+                // WORKAROUND: in some cases U is < 0.0f, I dont know why yet.
+                //if ( segmentStartU < 0.0f ) segmentStartU = 0.0f;
+                //if ( segmentEndU   < 0.0f ) segmentEndU   = 0.0f;
+
+                // Textured joints are drawn only in texture mode (obviously) and if the texture
+                // goes all over the path.
+                if( ( vertex->IsHandleAligned() == false )
+                && ( mBrush.ExtensionMode != eBrushExtensionMode::Segment ) )
+                {
+                    double segmentJointRatio = jointLength / ( segmentAndJointLength );
+                    double jointStartU = segmentStartU;
+                    double jointEndU = segmentStartU + ( ( segmentEndU - segmentStartU ) * segmentJointRatio );
+
+                    segmentStartU = jointEndU;
+
+                    vertex->GetJoint().SetTextureU( jointStartU, jointEndU );
+                }
+
+                segment->SetTextureU( segmentStartU, segmentEndU );
+            }
+
+            // only when mBrush.ExtendOverPath == true
+            startU = endU;
+
+            return false; // keep iterating
+        } );
+
+        mBrush.Unlock();
+    }
 
     iChain->mBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax )
                                 : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );

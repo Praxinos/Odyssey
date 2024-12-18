@@ -59,7 +59,7 @@ FOdysseyAnimationCellClipboardData::Paste(UOdysseyAnimationLayer* iLayer, int iF
         int cellFrame = iFrame - cell->GetFrameRange().GetLowerBoundValue();
         if (cellFrame != 0)
         {
-            cell->Break(cellFrame);
+            cell->Break(cellFrame, false);
             cellIndex++;
         }
     }

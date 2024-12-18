@@ -10,10 +10,13 @@
 #include "OdysseyVector.h"
 #include "Export/v1/OdysseyVectorExport.h"
 
+class OdysseyVectorObject;
+class FOdysseyVectorVertex;
+class FOdysseyVectorPath;
+class FOdysseyVectorBucket;
+
 namespace FOdysseyVectorImportV1
 {
-    void ODYSSEYVECTOR_API ReadChunks( uint64 iChunkEnd, FArchive &Ar, std::function<void(uint32, uint64, FArchive&)> iCallback );
-
     void ODYSSEYVECTOR_API Read( FOdysseyVectorGroupPaint* iScene, FArchive &Ar, uint64 iChunkEnd );
     void ODYSSEYVECTOR_API ReadObjectsDeclare( std::vector<FOdysseyVectorObject*>& vectorObjectArray, uint64 iChunkEnd, FArchive &Ar );
     void ODYSSEYVECTOR_API ReadObjectsDefine( std::vector<FOdysseyVectorObject*>& vectorObjectArray, uint64 iChunkEnd, FArchive &Ar );

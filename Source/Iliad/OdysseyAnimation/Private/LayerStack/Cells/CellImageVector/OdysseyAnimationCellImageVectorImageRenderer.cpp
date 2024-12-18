@@ -34,7 +34,10 @@ FOdysseyAnimationCellImageVectorImageRenderer::FOdysseyAnimationCellImageVectorI
             {
                 UOdysseyLayerStack* layerStack = layer->GetLayerStack();
                 int frame = animation->CurrentFrame - cell->GetFrameRange().GetLowerBoundValue();
-                mRenderHUD = cell == mCell && frame == iFrame && layerStack->CurrentLayer.Get() == layer;
+                mRenderHUD = ( cell == mCell )
+                        && ( frame == iFrame )
+                        && ( layerStack->CurrentLayer.Get() == layer )
+                        && ( GetRenderType() == IOdysseyImageRenderer::eRenderType::Editor );
             }
         }
 
@@ -73,7 +76,6 @@ FOdysseyAnimationCellImageVectorImageRenderer::Init()
     }
 
     {
-        FScopeLock renderLock(&mEngineMutex);
         vectorBlock->Render( mDrawingFlags );
     }
 }

@@ -5,6 +5,7 @@
 #include "Palette/OdysseyPaletteEntry.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorBucket.h"
 
 void
 FOdysseyVectorExportV2::WriteBucketColorMode( FOdysseyVectorBucket& iBucket, FArchive &Ar )
@@ -13,7 +14,7 @@ FOdysseyVectorExportV2::WriteBucketColorMode( FOdysseyVectorBucket& iBucket, FAr
                             , Ar
                             , [&iBucket](FArchive &Ar) -> void
     {
-        uint32 colorMode = static_cast<uint32>(iBucket.GetColorMode());
+        uint32 colorMode = static_cast<uint32>( iBucket.GetColorMode());
 
         Ar << colorMode;
     } );

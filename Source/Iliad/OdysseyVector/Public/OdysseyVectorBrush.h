@@ -63,7 +63,13 @@ struct ODYSSEYVECTOR_API FOdysseyVectorBrush
              , uint64 iDrawingFlags );
 
     FOdysseyVectorBrush()
+        : FOdysseyVectorBrush( nullptr )
     {
+    }
+
+    FOdysseyVectorBrush( FOdysseyVectorObject* iOwner  /* can be NULL*/ )
+    {
+        owner = iOwner;
         width  = 0;
         height = 0;
         bitsPerPixel = 0;
@@ -75,21 +81,15 @@ struct ODYSSEYVECTOR_API FOdysseyVectorBrush
         BilinearFiltering = false;
     }
 
-    FOdysseyVectorBrush( UTexture2D* iTexture )
+    FOdysseyVectorBrush( FOdysseyVectorObject* iOwner // can be NULL
+                       , UTexture2D* iTexture )
+        : FOdysseyVectorBrush( iOwner )
     {
-        width  = 0;
-        height = 0;
-        bitsPerPixel = 0;
-        pixels = nullptr;
-        ColorFromBrush = false;
-        ExtensionMode = eBrushExtensionMode::Adapt;
-        Revert = false;
-        BilinearFiltering = false;
-
         SetTexture( iTexture );
     }
 
-    FOdysseyVectorBrush( const std::list<FOdysseyVectorObject*>& iObjectList
+    FOdysseyVectorBrush( FOdysseyVectorObject* iOwner // can be NULL
+                       , const std::list<FOdysseyVectorObject*>& iObjectList
                        , const ::ULIS::FRectD& iBoundingBox );
 
     void SetTexture( UTexture2D* iTexture );
@@ -104,7 +104,7 @@ struct ODYSSEYVECTOR_API FOdysseyVectorBrush
 
     private:
         UTexture2D* texture;
-
+        FOdysseyVectorObject* owner;
         // Experimental. Vector brush
         std::vector<FOdysseyVectorBrushObject*> brushObjectArray;
 };

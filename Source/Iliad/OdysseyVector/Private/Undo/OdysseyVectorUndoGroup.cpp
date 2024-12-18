@@ -2,10 +2,9 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Undo/OdysseyVectorUndoGroup.h"
-
-#include "OdysseyVectorGroup.h"
-#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoGroup::~FOdysseyVectorUndoGroup()
 {
@@ -32,25 +31,41 @@ FOdysseyVectorUndoGroup::~FOdysseyVectorUndoGroup()
 FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iScene
                                                 , FOdysseyVectorGroup* iAddedGroup
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
-                                                , std::vector<FOdysseyVectorObject*>& iAddedObjectOldParentArray
-                                                , std::vector<FOdysseyVectorBucket*>& iRemovedBucketArray  )
-    : FOdysseyVectorUndo( iScene )
+                                                , std::vector<FOdysseyVectorBucket*>& iRemovedBucketArray
+                                                , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mAddedGroup( iAddedGroup )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mRemovedBucketArray = iRemovedBucketArray;
-    mAddedObjectOldParentArray = iAddedObjectOldParentArray;
     mAddedObjectArray = iAddedObjectArray;
+
+    mAddedObjectOldParentArray.reserve( iAddedObjectArray.size() );
+
+    for( FOdysseyVectorObject* vectorObject : iAddedObjectArray )
+    {
+        mAddedObjectOldParentArray.push_back( vectorObject->GetOldParent() );
+    }
 }
 
 FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iScene
                                                 , FOdysseyVectorGroup* iAddedGroup
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
-                                                , std::vector<FOdysseyVectorObject*>& iAddedObjectOldParentArray  )
-    : FOdysseyVectorUndo( iScene )
+                                                , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mAddedGroup( iAddedGroup )
 {
-    mAddedObjectOldParentArray = iAddedObjectOldParentArray;
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mAddedObjectArray = iAddedObjectArray;
+
+    mAddedObjectOldParentArray.reserve( iAddedObjectArray.size() );
+
+    for( FOdysseyVectorObject* vectorObject : iAddedObjectArray )
+    {
+        mAddedObjectOldParentArray.push_back( vectorObject->GetOldParent() );
+    }
 }
 
 void
@@ -58,7 +73,7 @@ FOdysseyVectorUndoGroup::Apply( UObject* iIgnored )
 {
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mScene->GetEngine()->ClearObjectSelection();
+    mEngineList.front()->ClearObjectSelection();
 
     // destroy the former hierarchy.
     for( int i = 0; i < mAddedObjectArray.size(); i++ )
@@ -80,7 +95,7 @@ FOdysseyVectorUndoGroup::Apply( UObject* iIgnored )
     }
 
     // Add the created group
-    mAddedGroup->GetParent()->AppendChild( mAddedGroup );
+    mAddedGroup->GetOldParent()->AppendChild( mAddedGroup );
 
     // Add all children to the newly created group
     for( int i = 0; i < mAddedObjectArray.size(); i++ )
@@ -88,19 +103,11 @@ FOdysseyVectorUndoGroup::Apply( UObject* iIgnored )
         mAddedGroup->AppendChild( mAddedObjectArray[i] );
 
         mAddedObjectArray[i]->UpdateMatrix();
-        mAddedObjectArray[i]->Invalidate();
+        //mAddedObjectArray[i]->Invalidate( INVALIDATE_SHAPE | INVALIDATE_COLOR | INVALIDATE_TOPOLOGY );
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -108,7 +115,7 @@ FOdysseyVectorUndoGroup::Revert( UObject* iIgnored )
 {
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mScene->GetEngine()->ClearObjectSelection();
+    mEngineList.front()->ClearObjectSelection();
 
     // Remove all children from the created group
     for( int i = 0; i < mAddedObjectArray.size(); i++ )
@@ -138,19 +145,11 @@ FOdysseyVectorUndoGroup::Revert( UObject* iIgnored )
         mAddedObjectOldParentArray[i]->AppendChild( mAddedObjectArray[i] );
 
         mAddedObjectArray[i]->UpdateMatrix();
-        mAddedObjectArray[i]->Invalidate();
+        //mAddedObjectArray[i]->Invalidate();
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

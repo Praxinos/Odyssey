@@ -1,0 +1,42 @@
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
+
+#pragma once
+
+#include "CoreMinimal.h"
+
+#include <blend2d.h>
+#include <Core/Core.h>
+#include <Image/Block.h>
+#include "Undo/OdysseyVectorUndo.h"
+
+#include "OdysseyVectorTagInbetweener.h"
+
+class FOdysseyVectorGroupPaint;
+class FOdysseyVectorSharedEnv;
+
+class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerChartAlter : public FOdysseyVectorUndo
+{
+    public:
+        ~FOdysseyVectorUndoTagInbetweenerChartAlter();
+        FOdysseyVectorUndoTagInbetweenerChartAlter( FOdysseyVectorGroupPaint* iScene
+                                                  , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                  , uint64 iReturnFlags );
+        FOdysseyVectorUndoTagInbetweenerChartAlter( FOdysseyVectorGroupPaint* iScene
+                                                  , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                  , uint64 iReturnFlags );
+        FOdysseyVectorUndoTagInbetweenerChartAlter( FOdysseyVectorSharedEnv* iSharedEnv
+                                                  , const std::list<FOdysseyVectorTag*>& tagList
+                                                  , uint64 iReturnFlags );
+        /** Called when redoing */
+        virtual void Apply( UObject* iIgnored ) override;
+
+        /** called when undoing */
+        virtual void Revert( UObject* iIgnored ) override;
+
+        /** Describes this change (for debugging) */
+        virtual FString ToString() const override;
+
+    private:
+        std::vector<FSnapshotTagInbetweener> mInbetweenerTagSnapshotBuffer;
+};

@@ -15,11 +15,24 @@
 #include "OdysseyAnimation.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorTagInbetweener.h"
 
 UOdysseyAnimationCellImageVector::~UOdysseyAnimationCellImageVector()
 {
-    delete mEngine;
-    mEngine = nullptr;
+    if (mRoot)
+    {
+        if( mRoot->GetParent() )
+        {
+            mRoot->GetParent()->RemoveChild( mRoot );
+        }
+
+        delete mRoot;
+    }
+
+    mRoot = nullptr;
 }
 
 void
@@ -42,11 +55,11 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
     if (animation->GetWidth() < 0 || animation->GetHeight() < 0)
         return;
 
-    mEngine = new FOdysseyVectorEngine( new FOdysseyVectorGroupPaint( "Scene" )
-                                    , (double)animation->GetWidth()
-                                    , (double)animation->GetHeight() );
+    mRoot = new FOdysseyVectorRoot( Cast<UOdysseyAnimationLayerImageVector>(GetLayer())
+                                  , this
+                                  , new FOdysseyVectorGroupPaint( "Scene" ) );
 
-    mVectorBlock->Init(mVectorBlockId, mEngine, animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
+    mVectorBlock->Init(mVectorBlockId, mRoot->GetEngine(), animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
 }
 
 void
@@ -55,13 +68,19 @@ UOdysseyAnimationCellImageVector::PostDuplicate(EDuplicateMode::Type iDuplicateM
     Super::PostDuplicate(iDuplicateMode);
     UOdysseyAnimation* animation = GetAnimation();
     mVectorBlockId = FGuid::NewGuid();
-    mVectorBlock->Init(mVectorBlockId, mEngine, animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
+    mVectorBlock->Init(mVectorBlockId, mRoot->GetEngine(), animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
 }
 
 FOdysseyVectorEngine*
 UOdysseyAnimationCellImageVector::GetEngine() const
 {
-    return mEngine;
+    return mRoot->GetEngine();
+}
+
+FOdysseyVectorRoot*
+UOdysseyAnimationCellImageVector::GetRoot() const
+{
+    return mRoot;
 }
 
 TSharedPtr<FOdysseyVectorBlock>
@@ -85,18 +104,30 @@ UOdysseyAnimationCellImageVector::SetVectorBlockId( FGuid iVectorBlockId )
 void
 UOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 {
+    UOdysseyAnimationLayerImageVector* layerImageVector = Cast<UOdysseyAnimationLayerImageVector>(GetLayer());
+
     Super::Serialize(Ar);
 
     if (GetFlags() & RF_ClassDefaultObject)
         return;
 
-    if( Ar.IsSaving() )
+    if( Ar.IsSaving() && !Ar.IsTransacting() )
     {
         FOdysseyAnimationCellImageVectorExport::Write( this, Ar );
     }
 
-    if( Ar.IsLoading() )
+    if( Ar.IsLoading() && !Ar.IsTransacting() )
     {
+        if ( !mRoot )
+        {
+            UOdysseyAnimation* animation = GetAnimation();
+            mRoot = new FOdysseyVectorRoot( layerImageVector
+                                          , this
+                                          , new FOdysseyVectorGroupPaint( "Scene" ) );
+            // The reading process needs a valid sharedenv as the top object.
+            layerImageVector->GetSharedEnv()->AppendChild( mRoot );
+        }
+
         if (!FOdysseyAnimationCellImageVectorImport::Read( this, Ar ))
         {
             //Old Style No Chunk Loading
@@ -108,6 +139,8 @@ UOdysseyAnimationCellImageVector::Serialize(FArchive& Ar)
 void
 UOdysseyAnimationCellImageVector::OldSerialize(FArchive& Ar)
 {
+    UOdysseyAnimationLayerImageVector* layerImageVector = Cast<UOdysseyAnimationLayerImageVector>(GetLayer());
+
     Super::OldSerialize(Ar);
 
     if( Ar.IsSaving() )
@@ -117,6 +150,16 @@ UOdysseyAnimationCellImageVector::OldSerialize(FArchive& Ar)
 
     if( Ar.IsLoading() )
     {
+        if ( !mRoot )
+        {
+            UOdysseyAnimation* animation = GetAnimation();
+            mRoot = new FOdysseyVectorRoot( layerImageVector
+                                          , this
+                                          , new FOdysseyVectorGroupPaint( "Scene" ) );
+            // The reading process needs a valid sharedenv as the top object.
+            layerImageVector->GetSharedEnv()->AppendChild( mRoot );
+        }
+
         if (!FOdysseyAnimationCellImageVectorImport::Read( this, Ar ))
         {
             //Old Style No Chunk Loading
@@ -134,8 +177,9 @@ UOdysseyAnimationCellImageVector::PostLoad()
         return;
 
     UOdysseyAnimation* animation = GetAnimation();
-    mVectorBlock->Init(mVectorBlockId, mEngine, animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
-    //mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY );
+    mVectorBlock->Init(mVectorBlockId, mRoot->GetEngine(), animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
+    mRoot->GetEngine()->Invalidate( 0 );
+    FOdysseyVectorEngine::Notify( mRoot->GetScene(), FOdysseyVectorEngine::NOTIFY_ALL );
 }
 
 void
@@ -144,7 +188,7 @@ UOdysseyAnimationCellImageVector::OnIsColoredChanged(UOdysseyAnimationLayerImage
     if (iLayer != GetLayer())
         return;
 
-    mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    mRoot->GetEngine()->Invalidate( 0 );
 }
 
 void
@@ -153,7 +197,7 @@ UOdysseyAnimationCellImageVector::OnIsWireframeChanged(UOdysseyAnimationLayerIma
     if (iLayer != GetLayer())
         return;
 
-    mEngine->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    mRoot->GetEngine()->Invalidate( 0 );
 }
 
 bool
@@ -194,7 +238,7 @@ UOdysseyAnimationCellImageVector::GetMediaProvider(uint32 iFrameIndex) const
     //Don't create a mediaRaster if there is an image render in use
     FScopeLock lock(&mImageRenderingMutex);
 
-    TSharedPtr<FOdysseyMediaVector> mediaVector = MakeShared<FOdysseyMediaVector>(mEngine->GetScene());
+    TSharedPtr<FOdysseyMediaVector> mediaVector = MakeShared<FOdysseyMediaVector>(mRoot->GetScene());
     mMediaVector = mediaVector;
     FOdysseyMediaProvider mediaProvider;
     mediaProvider.Add(mediaVector);
@@ -214,4 +258,32 @@ UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated( const TArray<::ULIS:
 
     if (!iIsInteractive)
         DirtyThumbnail();
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetEngine
+FOdysseyVectorEngine*
+UOdysseyAnimationCellImageVector::GetEngine()
+{
+    return mRoot->GetEngine();
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetIndex
+int32
+UOdysseyAnimationCellImageVector::GetIndex()
+{
+    return IndexInLayer;
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetLength
+uint32
+UOdysseyAnimationCellImageVector::GetLength()
+{
+    return Exposure;
+}
+
+// Implements Interface IOdysseyVectorAnimationCell::GetFrame
+uint32
+UOdysseyAnimationCellImageVector::GetFrame()
+{
+    return GetFrameRange().GetLowerBoundValue();
 }

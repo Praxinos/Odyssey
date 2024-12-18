@@ -5,6 +5,7 @@
 #include "EditorAssetLibrary.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorBrush.h"
 
 void
 FOdysseyVectorImportV2::ReadBrush( FOdysseyVectorBrush& iBrush, uint64 iChunkEnd, FArchive &Ar )
@@ -51,7 +52,7 @@ FOdysseyVectorImportV2::ReadBrush( FOdysseyVectorBrush& iBrush, uint64 iChunkEnd
                     FString assetName;
 
                     Ar << assetName;
-
+                    // using UEditorAssetLibrary will ensure the asset is loaded only once
                     iBrush.SetTexture( Cast<UTexture2D>(UEditorAssetLibrary::LoadAsset( assetName )) );
                 }
                 break;

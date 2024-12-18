@@ -1,5 +1,0 @@
-==============
-OdysseyImaging
-==============
-
-Module Example

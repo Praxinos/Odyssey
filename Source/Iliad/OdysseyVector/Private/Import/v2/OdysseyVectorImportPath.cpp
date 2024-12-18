@@ -4,6 +4,10 @@
 #include "Import/v2/OdysseyVectorImport.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorVertex.h"
+#include "OdysseyVectorSegment.h"
+#include "OdysseyVectorSegmentCubic.h"
+#include "OdysseyVectorPath.h"
 
 void
 FOdysseyVectorImportV2::ReadPathGeometryCubicSegments( FOdysseyVectorPath& iPath
@@ -30,6 +34,13 @@ FOdysseyVectorImportV2::ReadPathGeometryCubicSegments( FOdysseyVectorPath& iPath
         Ar << ctrlPoint0Y;
         Ar << ctrlPoint1X;
         Ar << ctrlPoint1Y;
+
+        //---- eraser bugfix ----//
+        if( std::isnan(ctrlPoint0X) ) ctrlPoint0X = 0.0f;
+        if( std::isnan(ctrlPoint0Y) ) ctrlPoint0Y = 0.0f;
+        if( std::isnan(ctrlPoint1X) ) ctrlPoint1X = 0.0f;
+        if( std::isnan(ctrlPoint1Y) ) ctrlPoint1Y = 0.0f;
+        //-----------------------//
 
         cubicSegment = new FOdysseyVectorSegmentCubic ( &iPath
                                                        , vertexArray[p0ID]
@@ -81,6 +92,11 @@ FOdysseyVectorImportV2::ReadPathGeometryVertexPosition( FOdysseyVectorVertex& iV
     Ar << y;
     Ar << radius;
 
+    //---- eraser bugfix ----//
+    if( std::isnan(x) ) x = 0.0f;
+    if( std::isnan(y) ) y = 0.0f;
+    //-----------------------//
+
     iVertex.Set( x, y );
     iVertex.SetRadius( radius );
 }
@@ -104,6 +120,11 @@ FOdysseyVectorImportV2::ReadPathGeometryVertices( FOdysseyVectorPath& iPath
         Ar << x;
         Ar << y;
         Ar << radius;
+
+        //---- eraser bugfix ----//
+        if( std::isnan(x) ) x = 0.0f;
+        if( std::isnan(y) ) y = 0.0f;
+        //-----------------------//
 
         cubicVertex = new FOdysseyVectorVertex( x, y, radius );
 

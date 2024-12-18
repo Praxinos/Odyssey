@@ -3,6 +3,7 @@
 
 #include "Undo/OdysseyVectorUndoErase.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoErase::~FOdysseyVectorUndoErase()
 {
@@ -61,9 +62,12 @@ FOdysseyVectorUndoErase::FOdysseyVectorUndoErase( FOdysseyVectorGroupPaint* iSce
                                                 , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
                                                 , std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
                                                 , std::vector<FOdysseyVectorVertex*>& iRemovedVertexArray
-                                                , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray )
-    : FOdysseyVectorUndo( iScene )
+                                                , std::vector<FOdysseyVectorSegment*>& iRemovedSegmentArray
+                                                , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mAddedObjectArray = iAddedObjectArray;
     mAddedVertexArray = iAddedVertexArray;
     mAddedSegmentArray = iAddedSegmentArray;
@@ -100,7 +104,7 @@ FOdysseyVectorUndoErase::Apply( UObject* iIgnored )
 
     for( int i = 0; i < mAddedObjectArray.size(); i++ )
     {
-        mAddedObjectArray[i]->GetParent()->AppendChild( mAddedObjectArray[i] );
+        mAddedObjectArray[i]->GetOldParent()->AppendChild( mAddedObjectArray[i] );
         //mAddedObjectArray[i]->Invalidate();
     }
 
@@ -116,15 +120,8 @@ FOdysseyVectorUndoErase::Apply( UObject* iIgnored )
         //mAddedSegmentArray[i]->Invalidate();
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -155,7 +152,7 @@ FOdysseyVectorUndoErase::Revert( UObject* iIgnored )
 
     for( int i = 0; i < mRemovedObjectArray.size(); i++ )
     {
-        mRemovedObjectArray[i]->GetParent()->AppendChild( mRemovedObjectArray[i] );
+        mRemovedObjectArray[i]->GetOldParent()->AppendChild( mRemovedObjectArray[i] );
         //mRemovedObjectArray[i]->Invalidate();
     }
 
@@ -171,15 +168,8 @@ FOdysseyVectorUndoErase::Revert( UObject* iIgnored )
         //mRemovedSegmentArray[i]->Invalidate();
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

@@ -7,6 +7,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorBucket.h"
 
 void
 FOdysseyVectorImportV1::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar )

@@ -19,6 +19,9 @@ public:
     void Action_BreakCell();
     bool CanAction_BreakCell();
 
+    void Action_BreakAndClearCell();
+    bool CanAction_BreakAndClearCell();
+
     void Action_RemoveCellMark();
     bool CanAction_RemoveCellMark();
 

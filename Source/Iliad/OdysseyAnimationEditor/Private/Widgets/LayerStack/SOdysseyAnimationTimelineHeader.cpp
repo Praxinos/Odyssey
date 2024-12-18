@@ -65,7 +65,7 @@ int32 SOdysseyAnimationTimelineHeader::OnPaint(const FPaintArgs& Args, const FGe
 
     for(int32 keyNum = startKey; keyNum <= endKey; keyNum++)
     {
-        float x = (keyNum - offset + padding ) * frameSize;
+        float x = (keyNum - offset ) * frameSize + mTimelinePosition->GetPadding();
 
         //Draw background
         const FColor backgroundColor = (keyNum & 1) ? backgroundColorOdd.ToFColor(true) : backgroundColorEven.ToFColor(true);
@@ -132,7 +132,7 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeometry, 
 
         const float minScrub = 0.0f;
         float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
-        float frame = mTimelinePosition->MousePositionToFrame(posX);
+        float frame = mTimelinePosition->MousePositionToFrame(posX - mTimelinePosition->GetPadding());
         FTimespan time = FTimespan::FromSeconds(FMath::Max(0.f, frame) / mAnimation->GetFramesPerSecond());
         mPlayer->Stop();
         mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
@@ -152,7 +152,7 @@ SOdysseyAnimationTimelineHeader::OnMouseMove(const FGeometry& MyGeometry, const 
     {
         const float minScrub = 0.0f;
         float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
-        float frame = mTimelinePosition->MousePositionToFrame(posX);
+        float frame = mTimelinePosition->MousePositionToFrame(posX - mTimelinePosition->GetPadding());
         FTimespan time = FTimespan::FromSeconds(FMath::Max(0.f, frame) / mAnimation->GetFramesPerSecond());
         mPlayer->SeekToTime(time);
         return FReply::Handled();
@@ -168,7 +168,7 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonUp(const FGeometry& MyGeometry, co
     {
         const float minScrub = 0.0f;
         float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
-        float frame = mTimelinePosition->MousePositionToFrame(posX);
+        float frame = mTimelinePosition->MousePositionToFrame(posX - mTimelinePosition->GetPadding());
         FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), FMath::Max(0, (int)frame));
         mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
         mIsScrubbing = false;

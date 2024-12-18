@@ -3,6 +3,7 @@
 
 #include "Undo/OdysseyVectorUndoBucketParam.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoBucketParam::~FOdysseyVectorUndoBucketParam()
 {
@@ -21,18 +22,24 @@ FOdysseyVectorUndoBucketParam::~FOdysseyVectorUndoBucketParam()
 
 // Backup bucket params in the constructor
 FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorGroupPaint* iScene
-                                                            , FOdysseyVectorBucket* iBucket )
-    : FOdysseyVectorUndo( iScene )
+                                                            , FOdysseyVectorBucket* iBucket
+                                                            , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mBucketSnapshotArray.push_back( FSnapshotBucket( iBucket, FSnapshotFlags::Point::Bucket::PARAM ));
 }
 
 // Backup bucket params in the constructor
 FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorGroupPaint* iScene
                                                             , std::vector<FOdysseyVectorBucket*>& iAddedBucketArray
-                                                            , std::vector<FOdysseyVectorBucket*>& iBucketArray )
-    : FOdysseyVectorUndo( iScene )
+                                                            , std::vector<FOdysseyVectorBucket*>& iBucketArray
+                                                            , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mAddedBucketArray = iAddedBucketArray;
 
     mBucketSnapshotArray.reserve( iBucketArray.size() );
@@ -68,12 +75,8 @@ FOdysseyVectorUndoBucketParam::Apply( UObject* iIgnored )
         }
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -99,12 +102,8 @@ FOdysseyVectorUndoBucketParam::Revert( UObject* iIgnored )
         }
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

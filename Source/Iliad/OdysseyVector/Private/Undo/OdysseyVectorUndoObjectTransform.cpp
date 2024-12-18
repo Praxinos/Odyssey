@@ -5,22 +5,29 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoObjectTransform::~FOdysseyVectorUndoObjectTransform()
 {
 }
 
 FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorGroupPaint* iScene
-                                                                    , FOdysseyVectorObject* iObject )
-    : FOdysseyVectorUndo( iScene )
+                                                                    , FOdysseyVectorObject* iObject
+                                                                    , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mObjectSnapshotArray.push_back( FSnapshotObject( iObject, FSnapshotFlags::Object::TRANSFORMATIONS ) );
 }
 
 FOdysseyVectorUndoObjectTransform::FOdysseyVectorUndoObjectTransform( FOdysseyVectorGroupPaint* iScene
-                                                                    , std::list<FOdysseyVectorObject*>& iObjectList )
-    : FOdysseyVectorUndo( iScene )
+                                                                    , std::list<FOdysseyVectorObject*>& iObjectList
+                                                                    , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mObjectSnapshotArray.reserve( iObjectList.size() );
 
     for( FOdysseyVectorObject* vectorObject : iObjectList )
@@ -40,14 +47,8 @@ FOdysseyVectorUndoObjectTransform::Apply( UObject* iIgnored )
         objectSnapshot.Restore();
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -61,14 +62,8 @@ FOdysseyVectorUndoObjectTransform::Revert( UObject* iIgnored )
         objectSnapshot.Restore();
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_TRANSFORMED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

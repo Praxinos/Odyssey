@@ -2,8 +2,13 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformToolHUD.h"
-#include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
+// Vector engine
+#include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorCell.h"
 
 FOdysseyPainterEditorVectorTransformToolHUD::~FOdysseyPainterEditorVectorTransformToolHUD()
 {
@@ -336,8 +341,15 @@ FOdysseyPainterEditorVectorTransformToolHUD::CenterGizmo()
 }
 
 void
-FOdysseyPainterEditorVectorTransformToolHUD::Reset(FOdysseyVectorGroupPaint* iScene)
+FOdysseyPainterEditorVectorTransformToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
 {
+    uint64 hudFlags = mTransformTool->GetEditor()->GetVectorHUDFlags();
+
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
+    {
+        UpdateSelectionInbetweenMode( iScene );
+    }
+
     UpdateSelectionBox( iScene, mTransformTool->World, mTransformTool->GetEditor()->GetVectorHUDFlags() );
 
     if( mCenterGizmo )
@@ -356,18 +368,91 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
     BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    static BLRgba32 greyColor = BLRgba32( 128, 128, 128, 128 );
     uint32 selectedObjectCount = iScene->GetEngine()->GetSelectedObjectList().size();
     uint64 hudFlags = mTransformTool->GetEditor()->GetVectorHUDFlags();
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
-    // Draw object details only in vertex mode
-    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
+    // Draw default
+    // -> nothing in object mode.
+    // -> vertices and segments in vertex mode.
+    // -> inbetweens in inbetween mode.
+    if( hudFlags & HUD_MODE_VERTEX )
     {
+        FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene);
+    }
+
+    if( hudFlags & HUD_MODE_INBETWEEN )
+    {
+/*
+        DrawObjects( iBLContext
+                   , iScene
+                   , greyColor
+                   , bgColor
+                   , hcColor
+                   , hudFlags | HUD_TAGINBETWEENER_TARGET | HUD_DRAW_ALL );
+
         DrawObjects( iBLContext
                    , iScene
                    , fgColor
                    , bgColor
                    , hcColor
-                   , hudFlags | HUD_PATH_VERTEX | HUD_PATH_SEGMENT );
+                   , hudFlags | HUD_TAGINBETWEENER_TARGET );
+*/
+        for( FOdysseyVectorTag* tag : iScene->GetSharedEnv()->GetSharedTagList() )
+        {
+            if( ( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
+             && ( tag->GetOwner()->IsSelected() ) )
+            {
+                FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+                FOdysseyVectorGroupPaint* inbetweenerTagScene = inbetweenerTag->GetOwner()->GetScene();
+                uint32 frameIndex = iScene->GetEngine()->GetCell()->GetIndex()
+                                  - inbetweenerTagScene->GetEngine()->GetCell()->GetIndex();
+
+                inbetweenerTag->LockDrawing();
+
+                for( FInbetweenerBreakdown* breakdown : mSelectedBreakdownList )
+                {
+                    DrawBreakdown( iScene
+                                 , iBLContext
+                                 , breakdown
+                                 , BLRgba32( 127, 127, 127, 255 )
+                                 , BLRgba32( 255, 127, 127, 255 )
+                                 , HUD_BREAKDOWN_SOURCE );
+
+                    if( mTransformTool->ShowInbetweens )
+                    {
+                        FInbetweenerBreakdown* nextBreakdown = breakdown->GetNextBreakdown();
+
+                        DrawBreakdown( iScene
+                                      , iBLContext
+                                      , breakdown
+                                      , BLRgba32( 127, 127, 127, 255 )
+                                      , BLRgba32( 255, 127, 127, 255 )
+                                      , HUD_BREAKDOWN_INBETWEEN | HUD_INBETWEEN_FADEFROMTARGET );
+
+                        if( nextBreakdown )
+                        {
+                            DrawBreakdown( iScene
+                                          , iBLContext
+                                          , nextBreakdown
+                                          , BLRgba32( 127, 127, 127, 255 )
+                                          , BLRgba32( 255, 127, 127, 255 )
+                                          , HUD_BREAKDOWN_INBETWEEN | HUD_INBETWEEN_FADEFROMSOURCE );
+                        }
+                    }
+
+                    DrawBreakdown( iScene
+                                 , iBLContext
+                                 , breakdown
+                                 , BLRgba32( 127, 127, 127, 255 )
+                                 , BLRgba32( 255, 127, 127, 255 )
+                                 , HUD_BREAKDOWN_TARGET );
+                }
+
+                inbetweenerTag->UnlockDrawing();
+            }
+        }
     }
 
     iBLContext->save();

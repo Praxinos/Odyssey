@@ -5,7 +5,6 @@
 #include "Widgets/LayerStack/Cells/SOdysseyAnimationCell.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineSection.h"
 #include "Widgets/Layout/SMissingWidget.h"
-#include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
 #include "OdysseyStyleSet.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "Widgets/LayerStack/Cells/SOdysseyAnimationCellHandle.h"
@@ -31,6 +30,7 @@ SOdysseyAnimationCells::SOdysseyAnimationCells()
     , mAddCellsHandleRightBrush(nullptr)
     , mAddCellsHandleLeftBrush(nullptr)
     , mCellBreakIndicatorBrush(nullptr)
+    , mCellBreakIndicatorExtendedBrush(nullptr)
     , mNumTempCellsToPrepend(0)
     , mNumTempCellsToAppend(0)
 
@@ -52,6 +52,7 @@ SOdysseyAnimationCells::Construct(
     mAddCellsHandleLeftBrush = FOdysseyStyle::GetBrush("Animation.AddCellsHandleLeft");
     mAddCellsHandleRightBrush = FOdysseyStyle::GetBrush("Animation.AddCellsHandleRight");
     mCellBreakIndicatorBrush = FOdysseyStyle::GetBrush("Animation.CellBreakIndicator");
+    mCellBreakIndicatorExtendedBrush = FOdysseyStyle::GetBrush("Animation.CellBreakIndicatorExtended");
     FSlateColor preBehaviourColor( FOdysseyStyle::GetColor( "Animation.Layer.PreBehaviourColor" ) );
     FSlateColor postBehaviourColor( FOdysseyStyle::GetColor( "Animation.Layer.PostBehaviourColor" ) );
     float preBehaviourPadding = mTimelinePosition->GetPadding();
@@ -63,92 +64,87 @@ SOdysseyAnimationCells::Construct(
     ChildSlot
     .Padding(FMargin(0, 4.f, 0, 4.f))
     [
-        SNew(SOdysseyAnimationTimelineScrollBox)
-        .TimelinePosition(mTimelinePosition)
-        + SOdysseyAnimationTimelineScrollBox::Slot()
+        SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
+        .AutoWidth()
         [
-            SNew(SHorizontalBox)
-            + SHorizontalBox::Slot()
-            .AutoWidth()
+            //Timeline Section for Layer Offset
+            SNew(SOdysseyAnimationTimelineSection)
+            .TimelinePosition(mTimelinePosition)
+            .WidthInFrames(this, &SOdysseyAnimationCells::GetOffset)
+            .Content()
             [
-                //Timeline Section for Layer Offset
-                SNew(SOdysseyAnimationTimelineSection)
-                .TimelinePosition(mTimelinePosition)
-                .WidthInFrames(this, &SOdysseyAnimationCells::GetOffset)
-                .Content()
-                [
-                    SNullWidget::NullWidget
-                ]
+                SNullWidget::NullWidget
             ]
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            .Padding(FMargin(-preBehaviourPadding, 0, 0, 0))
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .Padding(FMargin(-preBehaviourPadding, 0, 0, 0))
+        [
+            SNew(SBox)
+            .WidthOverride(preBehaviourPadding)
             [
-                SNew(SBox)
-                .WidthOverride(preBehaviourPadding)
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot()
+                .HAlign(HAlign_Right)
+                .VAlign(VAlign_Center)
                 [
-                    SNew(SHorizontalBox)
-                    + SHorizontalBox::Slot()
-                    .HAlign(HAlign_Right)
-                    .VAlign(VAlign_Center)
+                    SNew(SComboButton)
+                    .ButtonStyle(&FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "SimpleButton" ))
+                    .HasDownArrow(false)
+                    .OnGetMenuContent(this, &SOdysseyAnimationCells::GetPreBehaviourMenuContent)
+                    .ButtonContent()
                     [
-                        SNew(SComboButton)
-                        .ButtonStyle(&FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "SimpleButton" ))
-                        .HasDownArrow(false)
-                        .OnGetMenuContent(this, &SOdysseyAnimationCells::GetPreBehaviourMenuContent)
-                        .ButtonContent()
-                        [
-                            SNew(SImage)
-                            .Image(this, &SOdysseyAnimationCells::GetPreBehaviourBrush)
-                            .ColorAndOpacity(preBehaviourColor)
-                        ]
-                    ]
-                    + SHorizontalBox::Slot()
-                    .AutoWidth()
-                    [
-                        //Add Cells Handle
-                        CreateAddCellsHandleLeftWidget()
+                        SNew(SImage)
+                        .Image(this, &SOdysseyAnimationCells::GetPreBehaviourBrush)
+                        .ColorAndOpacity(preBehaviourColor)
                     ]
                 ]
-            ]
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            [
-                SAssignNew(mTempPreCellsBox, SHorizontalBox)
-            ]
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            [
-                SAssignNew(mCellsBox, SHorizontalBox)
-            ]
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            [
-                SAssignNew(mTempPostCellsBox, SHorizontalBox)
-            ]
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            .HAlign(HAlign_Left)
-            .VAlign(VAlign_Top)
-            [
-                //Add Cells Handle
-                CreateAddCellsHandleRightWidget()
-            ]
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            .HAlign(HAlign_Left)
-            .VAlign(VAlign_Center)
-            [
-                SNew(SComboButton)
-                .ButtonStyle(&FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "SimpleButton" ))
-                .HasDownArrow(false)
-                .OnGetMenuContent(this, &SOdysseyAnimationCells::GetPostBehaviourMenuContent)
-                .ButtonContent()
+                + SHorizontalBox::Slot()
+                .AutoWidth()
                 [
-                    SNew(SImage)
-                    .Image(this, &SOdysseyAnimationCells::GetPostBehaviourBrush)
-                    .ColorAndOpacity(postBehaviourColor)
+                    //Add Cells Handle
+                    CreateAddCellsHandleLeftWidget()
                 ]
+            ]
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+            SAssignNew(mTempPreCellsBox, SHorizontalBox)
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+            SAssignNew(mCellsBox, SHorizontalBox)
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+            SAssignNew(mTempPostCellsBox, SHorizontalBox)
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Top)
+        [
+            //Add Cells Handle
+            CreateAddCellsHandleRightWidget()
+        ]
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        .HAlign(HAlign_Left)
+        .VAlign(VAlign_Center)
+        [
+            SNew(SComboButton)
+            .ButtonStyle(&FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "SimpleButton" ))
+            .HasDownArrow(false)
+            .OnGetMenuContent(this, &SOdysseyAnimationCells::GetPostBehaviourMenuContent)
+            .ButtonContent()
+            [
+                SNew(SImage)
+                .Image(this, &SOdysseyAnimationCells::GetPostBehaviourBrush)
+                .ColorAndOpacity(postBehaviourColor)
             ]
         ]
     ];
@@ -325,14 +321,38 @@ TSharedRef<SWidget>
 SOdysseyAnimationCells::CreateCellBreakIndicatorWidget(int iCellIndex)
 {
     UOdysseyAnimationCell* cell = mAnimationLayer->GetCells()[iCellIndex];
-    return SNew(SOdysseyAnimationTimelineSection)
-        .TimelinePosition(mTimelinePosition)
-        .WidthInFrames(this, &SOdysseyAnimationCells::GetCellBreakIndicatorOffset, cell)
-        .Visibility(this, &SOdysseyAnimationCells::GetCellBreakIndicatorVisibility, cell)
-        .HAlign(HAlign_Right)
+    return SNew(SHorizontalBox)
+        +SHorizontalBox::Slot()
+        .AutoWidth()
         [
-            SNew(SImage)
-            .Image(mCellBreakIndicatorBrush)
+            SNew(SOdysseyAnimationTimelineSection)
+            .TimelinePosition(mTimelinePosition)
+            .WidthInFrames(this, &SOdysseyAnimationCells::GetCellBreakIndicatorOffset, cell)
+        ]
+        +SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+            SNew(SOdysseyAnimationTimelineSection)
+            .TimelinePosition(mTimelinePosition)
+            .WidthInFrames(this, &SOdysseyAnimationCells::GetCellBreakIndicatorWidth, cell)
+            .Visibility(this, &SOdysseyAnimationCells::GetCellBreakIndicatorVisibility, cell)
+            .HAlign(HAlign_Fill)
+            [
+                SNew(SHorizontalBox)
+                +SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SNew(SImage)
+                    //.Visibility(this, &SOdysseyAnimationCells::GetCellBreakIndicatorCopyVisibility, cell)
+                    .Image(mCellBreakIndicatorBrush)
+                ]
+                +SHorizontalBox::Slot()
+                [
+                    SNew(SImage)
+                    .Visibility(this, &SOdysseyAnimationCells::GetCellBreakIndicatorBlankVisibility, cell)
+                    .Image(mCellBreakIndicatorExtendedBrush)
+                ]
+            ]
         ];
 }
 
@@ -539,12 +559,21 @@ SOdysseyAnimationCells::GetCellBreakIndicatorOffset(UOdysseyAnimationCell* iCell
 
     //Find frame
     float frame = mTimelinePosition->MousePositionToFrame(mMousePosition.X) + 0.5f;
+    return (int)frame - iCell->GetFrameRange().GetLowerBoundValue();
+}
 
-    UOdysseyAnimationCell* cell = mAnimationLayer->GetCellAtFrame(frame);
-    if (!cell)
+float
+SOdysseyAnimationCells::GetCellBreakIndicatorWidth(UOdysseyAnimationCell* iCell) const
+{
+    if (FOdysseyAnimationTimelineTools::Get().GetCurrentTool() != EOdysseyTimelineTool::Cut)
         return 0.f;
 
-    return (int)frame - cell->GetFrameRange().GetLowerBoundValue();
+    if (GetCellBreakIndicatorVisibility(iCell) != EVisibility::Visible)
+        return 0.f;
+
+    //Find frame
+    float frame = mTimelinePosition->MousePositionToFrame(mMousePosition.X) + 0.5f;
+    return iCell->GetFrameRange().GetUpperBoundValue() - (int)frame + 1;
 }
 
 EVisibility
@@ -566,10 +595,28 @@ SOdysseyAnimationCells::GetCellBreakIndicatorVisibility(UOdysseyAnimationCell* i
     if (!cell)
         return EVisibility::Hidden;
 
-    if (frame == cell->GetFrameRange().GetLowerBoundValue())
+    if ((int)frame == cell->GetFrameRange().GetLowerBoundValue())
         return EVisibility::Hidden;
 
     return EVisibility::Visible;
+}
+
+EVisibility
+SOdysseyAnimationCells::GetCellBreakIndicatorCopyVisibility(UOdysseyAnimationCell* iCell) const
+{
+    if (FOdysseyAnimationTimelineTools::Get().GetCurrentTool() != EOdysseyTimelineTool::Cut)
+        return EVisibility::Collapsed;
+
+    return FSlateApplication::Get().GetModifierKeys().IsControlDown() ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+EVisibility
+SOdysseyAnimationCells::GetCellBreakIndicatorBlankVisibility(UOdysseyAnimationCell* iCell) const
+{
+    if (FOdysseyAnimationTimelineTools::Get().GetCurrentTool() != EOdysseyTimelineTool::Cut)
+        return EVisibility::Collapsed;
+
+    return FSlateApplication::Get().GetModifierKeys().IsControlDown() ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 EVisibility

@@ -6,6 +6,8 @@
 #include <blend2d.h>
 #include <ULIS>
 
+#include "InbetweenerTag/InbetweenerChart.h"
+
 class FOdysseyVectorBucket;
 class FOdysseyVectorObject;
 class FOdysseyVectorVertex;
@@ -15,6 +17,9 @@ class FOdysseyVectorPath;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorEngine;
+class FOdysseyVectorTagInbetweener;
+class FInbetweenerBreakdown;
+class FInterpolatedPath;
 
 typedef struct _FPointQuadTreeEntry
 {
@@ -108,6 +113,36 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                             , const BLRgba32& hcColor
                             , bool iWorld
                             , uint64 iHUDFlags );
+/*
+        static void DrawInbetweens( FOdysseyVectorGroupPaint* iDisplayedScene
+                                  , BLContext* iBLContext
+                                  , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                  , const BLRgba32& fgColor
+                                  , const BLRgba32& bgColor
+                                  , const BLRgba32& hcColo
+                                  , uint64 iHUDFlags  );
+*/
+        static void DrawInbetweenerInterpolatedPathAt( FOdysseyVectorGroupPaint* iDisplayedScene
+                                                     , BLContext* iBLContext
+                                                     , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                     , FInterpolatedPath* iInterpolatedPath
+                                                     , FInbetweenerChart::Inbetween* iInbetween );
+/*
+        static void DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
+                                 , BLContext* iBLContext
+                                 , FInbetweenerBreakdown* iBreakdown
+                                 , const BLRgba32& fgColor
+                                 , const BLRgba32& bgColor
+                                 , const BLRgba32& hcColor
+                                 , bool iWorld
+                                 , uint64 iHUDFlags  );
+*/
+        static void DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
+                                 , BLContext* iBLContext
+                                 , FInbetweenerBreakdown* iBreakdown
+                                 , const BLRgba32& iSourceDrawingColor
+                                 , const BLRgba32& iTargetDrawingColor
+                                 , uint64 iHUDFlags );
 
         static ::ULIS::FVec2D GetBucketPosition( FOdysseyVectorBucket* iBucket, bool iWorld );
         static ::ULIS::FVec2D GetBucketRadialHandlePosition( FOdysseyVectorBucket* iBucket, bool iWorld );
@@ -154,29 +189,46 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         // HUD Drawing Flags
         static const uint64 HUD_MODE_OBJECT              = ( 1ULL <<  0 );
         static const uint64 HUD_MODE_VERTEX              = ( 1ULL <<  1 );
+        static const uint64 HUD_MODE_INBETWEEN           = ( 1ULL <<  2 );
+        static const uint64 HUD_MODE_OBJECT_ALLOWED      = ( 1ULL <<  3 );
+        static const uint64 HUD_MODE_VERTEX_ALLOWED      = ( 1ULL <<  4 );
+        static const uint64 HUD_MODE_INBETWEEN_ALLOWED   = ( 1ULL <<  5 );
         static const uint64 HUD_MODE_ALL                 = HUD_MODE_OBJECT
-                                                         | HUD_MODE_VERTEX;
-        static const uint64 HUD_PATH_VERTEX_VALENCE0     = ( 1ULL <<  2 );
-        static const uint64 HUD_PATH_VERTEX_VALENCE1     = ( 1ULL <<  3 );
-        static const uint64 HUD_PATH_VERTEX_VALENCE2     = ( 1ULL <<  4 );
+                                                         | HUD_MODE_VERTEX
+                                                         | HUD_MODE_INBETWEEN;
+        static const uint64 HUD_PATH_VERTEX_VALENCE0     = ( 1ULL <<  6 );
+        static const uint64 HUD_PATH_VERTEX_VALENCE1     = ( 1ULL <<  7 );
+        static const uint64 HUD_PATH_VERTEX_VALENCE2     = ( 1ULL <<  8 );
         static const uint64 HUD_PATH_VERTEX              = HUD_PATH_VERTEX_VALENCE0
                                                          | HUD_PATH_VERTEX_VALENCE1
                                                          | HUD_PATH_VERTEX_VALENCE2;
-        static const uint64 HUD_PATH_VERTEX_HANDLE       = ( 1ULL <<  5 );
-        static const uint64 HUD_PATH_VERTEX_ALIGNMENT    = ( 1ULL <<  6 );
-        static const uint64 HUD_PATH_SEGMENT             = ( 1ULL <<  7 );
-        static const uint64 HUD_PATH_SEGMENT_HANDLE      = ( 1ULL <<  8 );
+        static const uint64 HUD_PATH_VERTEX_HANDLE       = ( 1ULL <<  9 );
+        static const uint64 HUD_PATH_VERTEX_ALIGNMENT    = ( 1ULL << 10 );
+        static const uint64 HUD_PATH_SEGMENT             = ( 1ULL << 11 );
+        static const uint64 HUD_PATH_SEGMENT_HANDLE      = ( 1ULL << 12 );
         static const uint64 HUD_PATH_ALL                 = HUD_PATH_VERTEX
                                                          | HUD_PATH_VERTEX_HANDLE
                                                          | HUD_PATH_SEGMENT
                                                          | HUD_PATH_SEGMENT_HANDLE;
-        static const uint64 HUD_GROUPPAINT_BUCKET        = ( 1ULL <<  9 );
-        static const uint64 HUD_GROUPPAINT_BUCKET_HANDLE = ( 1ULL << 10 );
+        static const uint64 HUD_GROUPPAINT_BUCKET        = ( 1ULL << 13 );
+        static const uint64 HUD_GROUPPAINT_BUCKET_HANDLE = ( 1ULL << 14 );
         static const uint64 HUD_GROUPPAINT_ALL           = HUD_GROUPPAINT_BUCKET
                                                          | HUD_GROUPPAINT_BUCKET_HANDLE;
-        static const uint64 HUD_SELECTIONBOX             = ( 1ULL << 11 );
-        static const uint64 HUD_SIZE_SMALL               = ( 1ULL << 12 );
-        static const uint64 HUD_DRAW_ALL                 = ( 1ULL << 13 );
+        static const uint64 HUD_BREAKDOWN_SOURCE         = ( 1ULL << 15 );
+        static const uint64 HUD_BREAKDOWN_TARGET         = ( 1ULL << 16 );
+        static const uint64 HUD_BREAKDOWN_INBETWEEN      = ( 1ULL << 17 );
+        static const uint64 HUD_INBETWEEN_FADEFROMTARGET = ( 1ULL << 18 );
+        static const uint64 HUD_INBETWEEN_FADEFROMSOURCE = ( 1ULL << 19 );
+        static const uint64 HUD_BREAKDOWN_SOURCE_GRID    = ( 1ULL << 20 );
+        static const uint64 HUD_BREAKDOWN_TARGET_GRID    = ( 1ULL << 21 );
+        static const uint64 HUD_TAGINBETWEENER_ALL       = HUD_BREAKDOWN_SOURCE
+                                                         | HUD_BREAKDOWN_TARGET
+                                                         | HUD_BREAKDOWN_SOURCE_GRID
+                                                         | HUD_BREAKDOWN_TARGET_GRID
+                                                         | HUD_BREAKDOWN_INBETWEEN;
+        static const uint64 HUD_SELECTIONBOX             = ( 1ULL << 22 );
+        static const uint64 HUD_SIZE_SMALL               = ( 1ULL << 23 );
+        static const uint64 HUD_DRAW_ALL                 = ( 1ULL << 24 );
         //static const uint64 VIEW_ALL              = 0xFFFFFFFFFFFFFFFFULL;
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) = 0;

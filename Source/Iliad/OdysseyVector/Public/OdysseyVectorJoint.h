@@ -35,6 +35,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorJoint
                  , FOdysseyVectorSegment* iNextSegment );
         void ResetBBox();
 
+        void   SetTextureU( double iTextureStartU, double iTextureEndU );
+        double GetTextureStartU();
+        double GetTextureEndU();
+
 
     private:
         void MakeNone();
@@ -65,4 +69,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorJoint
         FOdysseyVectorVertex* mVertex;
         ::ULIS::FRectD mBBox;
         double mLength;
+        double mTextureStartU;
+        double mTextureEndU;
 };

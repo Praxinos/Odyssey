@@ -4,6 +4,7 @@
 #include "Undo/OdysseyVectorUndoVertexAlignment.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoVertexAlignment::~FOdysseyVectorUndoVertexAlignment()
 {
@@ -18,10 +19,13 @@ FOdysseyVectorUndoVertexAlignment::~FOdysseyVectorUndoVertexAlignment()
 }
 
 FOdysseyVectorUndoVertexAlignment::FOdysseyVectorUndoVertexAlignment( FOdysseyVectorGroupPaint* iScene
-                                                                    , const std::vector<FOdysseyVectorVertex*>& iAlignedVertexArray )
-    : FOdysseyVectorUndo( iScene )
+                                                                    , const std::vector<FOdysseyVectorVertex*>& iAlignedVertexArray
+                                                                    , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
     std::vector<FOdysseyVectorSegment*> segmentArray;
+
+    GetEngineListFromObjectList( { iScene }, mEngineList );
 
     //------ Backup vertex alignment flag part ---------//
 
@@ -65,13 +69,8 @@ FOdysseyVectorUndoVertexAlignment::Apply( UObject* iIgnored )
         cubicSegmentsnapshot.Restore();
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -90,13 +89,8 @@ FOdysseyVectorUndoVertexAlignment::Revert( UObject* iIgnored )
         cubicSegmentSnapshot.Restore();
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_MODIFIED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

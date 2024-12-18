@@ -8,6 +8,7 @@
 
 // from module OdysseyFile
 #include "OdysseyFile.h"
+#include "OdysseyVectorBucket.h"
 
 void
 FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar )

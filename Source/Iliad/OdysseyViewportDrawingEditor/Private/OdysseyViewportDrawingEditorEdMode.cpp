@@ -267,10 +267,10 @@ void FOdysseyViewportDrawingEditorEdMode::Exit()
     FEdMode::Exit();
 }
 
-TSharedPtr<FOdysseyPainterEditor>
+FOdysseyPainterEditor*
 FOdysseyViewportDrawingEditorEdMode::GetEditor() const
 {
-    return mEditor;
+    return mEditor.Get();
 }
 
 TSharedPtr<FOdysseyViewportDrawingEditorToolkit>

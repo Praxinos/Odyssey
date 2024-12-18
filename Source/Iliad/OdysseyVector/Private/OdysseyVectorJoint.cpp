@@ -15,6 +15,8 @@ FOdysseyVectorJoint::~FOdysseyVectorJoint()
 FOdysseyVectorJoint::FOdysseyVectorJoint( FOdysseyVectorVertex* iVertex )
     : mVertex( iVertex )
     , mLength( 0.0f )
+    , mTextureStartU ( 0.0f )
+    , mTextureEndU ( 0.0f )
 {
 }
 
@@ -37,6 +39,25 @@ static bool intersectLine( const ::ULIS::FVec2D& iOrigin0
     }
 
     return false;
+}
+
+void
+FOdysseyVectorJoint::SetTextureU( double iTextureStartU, double iTextureEndU )
+{
+    mTextureStartU = iTextureStartU;
+    mTextureEndU = iTextureEndU;
+}
+
+double
+FOdysseyVectorJoint::GetTextureStartU()
+{
+    return mTextureStartU;
+}
+
+double
+FOdysseyVectorJoint::GetTextureEndU()
+{
+    return mTextureEndU;
 }
 
 double

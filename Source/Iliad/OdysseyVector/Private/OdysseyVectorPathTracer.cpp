@@ -5,6 +5,7 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorPathTracer::~FOdysseyVectorPathTracer()
 {
@@ -49,8 +50,8 @@ FOdysseyVectorPathTracer::Init( FOdysseyVectorGroupPaint* iScene )
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     BLImageData imageData;
 
-    mWidth = vectorEngine->GetPreferredWidth();
-    mHeight = vectorEngine->GetPreferredHeight();
+    mWidth = vectorEngine->GetLayer()->GetWidth();
+    mHeight = vectorEngine->GetLayer()->GetHeight();
 
     if( mBLImage )
     {
@@ -517,7 +518,7 @@ FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iPreviousVertex
 
         mCubicPath->AddSegment( newCubicSegment );
 
-        newCubicSegment->Update();
+        newCubicSegment->Update( 0 );
 
         ClearTo( mBestBezier.lastRecordID, mBestBezier.lastEdgeID );
 

@@ -4,6 +4,7 @@
 #include "Undo/OdysseyVectorUndoUngroup.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoUngroup::~FOdysseyVectorUndoUngroup()
 {
@@ -20,10 +21,14 @@ FOdysseyVectorUndoUngroup::~FOdysseyVectorUndoUngroup()
     mUngroupedObjectList.clear();
 }
 
-FOdysseyVectorUndoUngroup::FOdysseyVectorUndoUngroup( FOdysseyVectorGroupPaint* iScene, FOdysseyVectorGroup* iGroup )
-    : FOdysseyVectorUndo(iScene)
+FOdysseyVectorUndoUngroup::FOdysseyVectorUndoUngroup( FOdysseyVectorGroupPaint* iScene
+                                                    , FOdysseyVectorGroup* iGroup
+                                                    , uint64 iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mGroup( iGroup )
 {
+    GetEngineListFromObjectList( { iScene }, mEngineList );
+
     mUngroupedObjectList = iGroup->GetChildrenList();
 }
 
@@ -34,7 +39,7 @@ FOdysseyVectorUndoUngroup::Apply( UObject* iIgnored )
 
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mScene->GetEngine()->ClearObjectSelection();
+    mEngineList.front()->ClearObjectSelection();
 
     for( FOdysseyVectorObject *child : mUngroupedObjectList )
     {
@@ -44,14 +49,8 @@ FOdysseyVectorUndoUngroup::Apply( UObject* iIgnored )
 
     //mGroup->GetParent()->RemoveChild( mGroup );
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 void
@@ -59,7 +58,7 @@ FOdysseyVectorUndoUngroup::Revert( UObject* iIgnored )
 {
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mScene->GetEngine()->ClearObjectSelection();
+    mEngineList.front()->ClearObjectSelection();
 
     // Note: GetParent() stills holds a valid pointer to the former parent.
     //mGroup->GetParent()->AppendChild( mGroup );
@@ -69,14 +68,8 @@ FOdysseyVectorUndoUngroup::Revert( UObject* iIgnored )
         mGroup->TransferChild( child, mGroup->GetLastChild() );
     }
 
-    // update invalidated objects
-    mScene->Update( FOdysseyVectorObject::UPDATEPAINTGROUPS );
-
-    mScene->GetEngine()->ResetHUD();
-    // call callbacks if any (for refreshing GUI e.g)
-    mScene->GetEngine()->Signal( FOdysseyVectorEngine::SIGNAL_SCENE_REDRAW
-                               | FOdysseyVectorEngine::SIGNAL_SCENE_HIERARCHY
-                               | FOdysseyVectorEngine::SIGNAL_OBJECT_SELECTED );
+    // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
+    Update();
 }
 
 /** Describes this change (for debugging) */

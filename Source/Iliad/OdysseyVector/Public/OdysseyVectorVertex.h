@@ -379,8 +379,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         void MakeJoint( FOdysseyVectorSegment* iPrevSegment
                       , FOdysseyVectorSegment* iNextSegment );
         void DrawJoint( BLContext* iBLContext
-                      , double iStartU
-                      , double iEndU
                       , double iCombinedOpacity
                       , uint64 iDrawingFlags );
         FOdysseyVectorJoint& GetJoint();

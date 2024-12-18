@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "HUD/OdysseyVectorHUD.h"
+#include "OdysseyVector.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorPoint.h"
 #include "OdysseyVectorSegmentCubic.h"
@@ -9,6 +10,8 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorLayer.h"
 
 FPointQuadTree::~FPointQuadTree()
 {
@@ -172,8 +175,8 @@ FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorGroupPaint *iScene
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FPointQuadTreeEntry> pointQuadTreeEntryArray;
-    uint32 width = vectorEngine->GetPreferredWidth()
-         , height = vectorEngine->GetPreferredHeight();
+    uint32 width = vectorEngine->GetLayer()->GetWidth();
+    uint32 height = vectorEngine->GetLayer()->GetHeight();
     ::ULIS::FRectD screenRect;
 
     screenRect = ::ULIS::FRectD::FromXYWH( 0, 0, width, height );
@@ -462,6 +465,177 @@ FOdysseyVectorHUD::DrawCubicSegment( BLContext* iBLContext
                                          , HANDLERADIUS
                                          , whiteColor
                                          , blackColor );
+        }
+    }
+}
+
+// static
+void
+FOdysseyVectorHUD::DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
+                                , BLContext* iBLContext
+                                , FInbetweenerBreakdown* iBreakdown
+                                , const BLRgba32& iSourceDrawingColor
+                                , const BLRgba32& iTargetDrawingColor
+                                , uint64 iHUDFlags )
+{
+    FOdysseyVectorTagInbetweener* inbetweenerTag = iBreakdown->GetInbetweenerTag();
+    BLMatrix2D worldMatrix = inbetweenerTag->GetOwner()->GetWorldMatrix();
+    FColor inbetweenColor = inbetweenerTag->GetInbetweenColor();
+
+    iBLContext->save();
+    iBLContext->resetMatrix();
+
+    if( iHUDFlags & HUD_BREAKDOWN_INBETWEEN )
+    {
+        iBLContext->setStrokeWidth( 2.0f );
+        int32 sourceInbetweenIndex = iBreakdown->GetSourceDrawingIndex();
+        int32 targetInbetweenIndex = iBreakdown->GetTargetDrawingIndex();
+
+        for( uint32 i = 1; i < iBreakdown->GetDrawingCount() - 1; i++ )
+        {
+            FInbetweenerChart::Inbetween* inbetween = &iBreakdown->GetChart()->GetInbetweenBuffer()[i];
+            uint8 alpha = inbetweenColor.A;
+
+            if( iHUDFlags & HUD_INBETWEEN_FADEFROMTARGET )
+                alpha = ( 255 * 0.25f ) + ( ( alpha * 0.75f ) *          inbetween->GetSpacing() );
+
+            if( iHUDFlags & HUD_INBETWEEN_FADEFROMSOURCE )
+                alpha = ( 255 * 0.25f ) + ( ( alpha * 0.75f ) * ( 1.0f - inbetween->GetSpacing() )  );
+
+            iBLContext->setStrokeWidth( 4.0f );
+            iBLContext->setStrokeStyle( BLRgba32( inbetweenColor.R
+                                                , inbetweenColor.G
+                                                , inbetweenColor.B
+                                                , alpha ) );
+
+            for( FInterpolatedPath& interpolatedPath : inbetweenerTag->GetInterpolatedPathBuffer() )
+            {
+                DrawInbetweenerInterpolatedPathAt( iDisplayedScene
+                                                  , iBLContext
+                                                  , inbetweenerTag
+                                                  , &interpolatedPath
+                                                  , inbetween );
+            }
+        }
+    }
+
+    if( iHUDFlags & HUD_BREAKDOWN_SOURCE )
+    {
+        iBLContext->setStrokeWidth( 4.0f );
+        iBLContext->setStrokeStyle( iSourceDrawingColor );
+
+        for( FInterpolatedPath& interpolatedPath : inbetweenerTag->GetInterpolatedPathBuffer() )
+        {
+            DrawInbetweenerInterpolatedPathAt( iDisplayedScene
+                                             , iBLContext
+                                             , inbetweenerTag
+                                             , &interpolatedPath
+                                             , &iBreakdown->GetChart()->GetInbetweenBuffer().front() );
+        }
+    }
+
+    if( iHUDFlags & HUD_BREAKDOWN_TARGET )
+    {
+        iBLContext->setStrokeWidth( 4.0f );
+        iBLContext->setStrokeStyle( iTargetDrawingColor );
+
+        for( FInterpolatedPath& interpolatedPath : inbetweenerTag->GetInterpolatedPathBuffer() )
+        {
+            DrawInbetweenerInterpolatedPathAt( iDisplayedScene
+                                             , iBLContext
+                                             , inbetweenerTag
+                                             , &interpolatedPath
+                                             , &iBreakdown->GetChart()->GetInbetweenBuffer().back() );
+        }
+    }
+
+    iBLContext->restore();
+
+    if( iHUDFlags & HUD_BREAKDOWN_SOURCE_GRID )
+    {
+        iBreakdown->DrawSourceGrid( iBLContext, false );
+    }
+
+    if( iHUDFlags & HUD_BREAKDOWN_TARGET_GRID )
+    {
+        iBreakdown->DrawTargetGrid( iBLContext, false );
+    }
+}
+
+void
+FOdysseyVectorHUD::DrawInbetweenerInterpolatedPathAt( FOdysseyVectorGroupPaint* iDisplayedScene
+                                                    , BLContext* iBLContext
+                                                    , FOdysseyVectorTagInbetweener* iInbetweenerTag
+                                                    , FInterpolatedPath* iInterpolatedPath
+                                                    , FInbetweenerChart::Inbetween* iInbetween )
+{
+    uint32 pathPointCount = iInterpolatedPath->GetInterpolatedPointBuffer().size();
+    uint32 inbetweenAbsoluteIndex = iInbetween->GetIndexInInbetweener();
+    FInterpolatedPath::PointGeometry* interpolatedPointGeometryBuffer = &iInterpolatedPath->GetInterpolatedPointGeometryBuffer()[pathPointCount * inbetweenAbsoluteIndex];
+    BLMatrix2D worldMatrix = iInbetweenerTag->GetOwner()->GetWorldMatrix();
+    bool mapAsPolyline = iInbetweenerTag->GetMapAsPolyline();
+    FOdysseyVectorPath* originalPath = iInterpolatedPath->GetOriginalPath();
+
+    // passed to DrawPathAt()
+    worldMatrix.transform( iInbetween->GetDrawing()->localMatrix );
+    worldMatrix.transform( iInterpolatedPath->GetRelativeMatrix() );
+/*
+    iBLContext->setStrokeWidth( 4.0f );
+    iBLContext->setStrokeStyle( BLRgba32( inbetweeneColor.R
+                                        , inbetweeneColor.G
+                                        , inbetweeneColor.B
+                                        , inbetweeneColor.A ) );
+*/
+    for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->GetInterpolatedSegmentBuffer() )
+    {
+        std::vector<FInterpolatedPoint*>& interpolatedPointArray = interpolatedSegment.GetInterpolatedPointArray();
+        FOdysseyVectorSegment* segment = interpolatedSegment.GetOriginalSegment();
+
+        if( mapAsPolyline )
+        {
+            std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
+
+            uint32 segmentPointCount = interpolatedPointArray.size();
+            ::ULIS::FVec2D perpi;
+            ::ULIS::FVec2D perpn;
+
+            for( uint32 i = 0; i < segmentPointCount - 1; i++ )
+            {
+                uint32 n = i + 1;
+                FInterpolatedPoint* pointi = interpolatedPointArray[i];
+                FInterpolatedPoint* pointn = interpolatedPointArray[n];
+                ::ULIS::FVec2D* localPointPositioni = &interpolatedPointGeometryBuffer[pointi->GetIndex()].position;
+                ::ULIS::FVec2D* localPointPositionn = &interpolatedPointGeometryBuffer[pointn->GetIndex()].position;
+
+                BLPoint pt[2] = { worldMatrix.mapPoint( localPointPositioni->x
+                                                      , localPointPositioni->y )
+                                , worldMatrix.mapPoint( localPointPositionn->x
+                                                      , localPointPositionn->y ) };
+
+                iBLContext->strokeLine( pt[0].x, pt[0].y, pt[1].x, pt[1].y );
+            }
+        }
+        else
+        {
+            if( interpolatedSegment.GetOriginalSegment()->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+            {
+                FInterpolatedPoint* interpolatedPoint[4] = { interpolatedPointArray[0]
+                                                           , interpolatedPointArray[1]
+                                                           , interpolatedPointArray[2]
+                                                           , interpolatedPointArray[3] };
+                ::ULIS::FVec2D pt[4] = { FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[0]->GetIndex()].position )
+                                       , FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[1]->GetIndex()].position )
+                                       , FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[2]->GetIndex()].position )
+                                       , FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[3]->GetIndex()].position ) };
+                BLPath path;
+
+                path.moveTo ( pt[0].x, pt[0].y );
+                path.cubicTo( pt[1].x, pt[1].y
+                            , pt[2].x, pt[2].y
+                            , pt[3].x, pt[3].y );
+
+                iBLContext->strokePath( path );
+            }
         }
     }
 }

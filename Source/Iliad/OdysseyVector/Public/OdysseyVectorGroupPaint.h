@@ -130,7 +130,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          * @brief Copy the shape to a new object.
          * @return a pointer to  copy of the object
          */
-        virtual FOdysseyVectorObject* CopyShape() override;
+        virtual FOdysseyVectorObject* CopyShape( uint64 iCopyFlags ) override;
 
         /**
          * @brief Copy buckets from this PaintGroup to a destination PaintGroup.
@@ -189,8 +189,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void GetChildrenPaths( std::vector<FOdysseyVectorPath*>& oPathArray );
         void PickSectionLessPaths( std::vector<FOdysseyVectorObject*>& oObjectArray );
         void SetRealtime( bool iRealtime );
-        void SetIntersectsCanevas( bool iIntersectCanevas );
-        bool IntersectsCanevas();
+        void SetIntersectsCanvas( bool iIntersectCanvas );
+        bool IntersectsCanvas();
 
         bool IsRealtime();
         void SetWireframeColor( const FColor& iWireframeColor );
@@ -207,7 +207,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         bool IsMultithreaded();
         std::vector<FOdysseyVectorVertexIntersection>& GetIntersectionVertexArray();
 
-        virtual void UpdateMatrix() override; // updates the canevas path
+        virtual void UpdateMatrix() override; // updates the canvas path
 
         void AlterContourWidth( double iValue, bool iAbsolute );
         bool PickSection( FOdysseyVectorSection* iSection
@@ -216,6 +216,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         void PickErasedSections( std::vector<FOdysseyVectorSection*>& oErasedSectionArray );
 
     protected:
+        // static
+        void RecursiveUpdatePathList( FOdysseyVectorObject* iCandidateObject
+                                    , std::list<FOdysseyVectorPath*>& iPathList );
+
         /**
          * @brief Intersect a cubic segment. It creates the intersection vertices and the section (sub-segments).
          * @param iSegment the segment.
@@ -293,7 +297,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                                 , FOdysseyVectorSegmentCubic* iSegment );
         void CreateNearIntersection( FOdysseyVectorVertex *iVertex );
 
-        void MakeCanevasPath();
+        void MakeCanvasPath();
 
         void UpdatePathList();
 
@@ -327,10 +331,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         bool bRealtime; // relatime updates
         double mGapTolerance;
         bool bWireframe;
-        bool bIntersectsCanevas;
+        bool bIntersectsCanvas;
         FColor mWireframeColor;
-        // the frame canevas path intersects with the canvas
-        FOdysseyVectorPath mCanevasPath;
-        FOdysseyVectorVertex mCanevasVertex[4];
-        FOdysseyVectorSegmentCubic mCanevasSegment[4];
+        // the frame canvas path intersects with the canvas
+        FOdysseyVectorPath mCanvasPath;
+        FOdysseyVectorVertex mCanvasVertex[4];
+        FOdysseyVectorSegmentCubic mCanvasSegment[4];
 };
