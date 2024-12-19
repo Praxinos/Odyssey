@@ -19,9 +19,9 @@ FInbetweenerGrid::~FInbetweenerGrid()
 }
 
 FInbetweenerGrid::FInbetweenerGrid( FInbetweenerBreakdown* iBreakdown )
-    : mFlags( 0 )
+    : mBreakdown( iBreakdown )
+    , mFlags( 0 )
     , mInvalidationFlags ( 0 )
-    , mBreakdown( iBreakdown )
 {
     //Make();
 }

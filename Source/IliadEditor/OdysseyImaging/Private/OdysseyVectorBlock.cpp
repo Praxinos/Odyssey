@@ -21,8 +21,8 @@ FOdysseyVectorBlock::~FOdysseyVectorBlock()
 }
 
 FOdysseyVectorBlock::FOdysseyVectorBlock()
-    : mBlockData(nullptr)
-    , mEngine ( nullptr )
+    :  mEngine ( nullptr )
+    , mBlockData(nullptr)
 {
 
 }

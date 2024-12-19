@@ -30,8 +30,8 @@ class ODYSSEYVECTOR_API FInbetweenerChart
                 FInbetweenerChart* GetChart();
 
             public:
-                float mSpacing;
                 FInbetweenerChart* mChart;
+                float mSpacing;
                 FInbetweenerDrawing *mDrawing;
         };
 

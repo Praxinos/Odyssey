@@ -58,9 +58,9 @@ class ODYSSEYVECTOR_API FInbetweenerTrajectory
     private:
         std::vector<FInbetweenerWaypoint> mWaypointBuffer;
         FInbetweenerRoute* mRoute;
+        FInbetweenerBreakdown* mBreakdown;
         FInbetweenerStep* mStep[2];
         FInbetweenerHandleTrajectory mHandle[2];
         ::ULIS::FVec2D mCubicBezier[4];
-        FInbetweenerBreakdown* mBreakdown;
         std::vector<Fraction> mFractionBuffer;
 };

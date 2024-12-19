@@ -10,10 +10,10 @@ FInterpolatedPoint::~FInterpolatedPoint()
 }
 
 FInterpolatedPoint::FInterpolatedPoint( FOdysseyVectorPoint* iPoint, double iRadius, uint32 iIndex  )
-    : mOriginalPoint( iPoint )
+    : mMappedQuadIndex ( 0 )
+    , mOriginalPoint( iPoint )
     , mRadius ( iRadius )
     , mIndex ( iIndex )
-    , mMappedQuadIndex ( 0 )
     , mU ( 0.0f )
     , mV ( 0.0f )
 {
