@@ -21,6 +21,7 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #include "blend2d.h"
 

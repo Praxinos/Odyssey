@@ -2,7 +2,9 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #include "Misc/OdysseyUndoDelegates.h"
+#if WITH_EDITOR
 #include "Editor/TransBuffer.h"
+#endif
 
 FOdysseyUndoDelegates&
 FOdysseyUndoDelegates::Get()
@@ -13,6 +15,7 @@ FOdysseyUndoDelegates::Get()
 
 FOdysseyUndoDelegates::FOdysseyUndoDelegates()
 {
+#if WITH_EDITOR
     if (GEditor)
     {
         if (UTransBuffer* Transactor = Cast<UTransBuffer>(GEditor->Trans))
@@ -25,6 +28,7 @@ FOdysseyUndoDelegates::FOdysseyUndoDelegates()
     }
 
     FCoreUObjectDelegates::OnObjectTransacted.AddRaw(this, &FOdysseyUndoDelegates::HandleObjectPostTransacted);
+#endif
 }
 
 void

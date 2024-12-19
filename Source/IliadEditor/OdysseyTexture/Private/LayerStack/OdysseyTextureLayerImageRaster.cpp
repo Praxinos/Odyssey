@@ -17,6 +17,7 @@
 #include "OdysseyTextureLayerImageRasterImport.h"
 #include "OdysseyTextureLayerImageRasterExport.h"
 #include "OdysseyTextureLayerStack.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "Texture"
 

@@ -3,7 +3,6 @@
 
 #include "Mutations/OdysseyMutator.h"
 
-#include "Editor.h"
 #include "Misc/Change.h"
 #include "Misc/ITransaction.h"
 
@@ -110,8 +109,10 @@ FOdysseyMutator::Commit()
 
     mRootMutation->OnChanged().ExecuteIfBound();
 
+#if WITH_EDITOR
     if ( mGenerateUndo && GEditor->IsTransactionActive() )
         GUndo->StoreUndo(mObject, MakeUnique<FOdysseyMutationsUndo>(mRootMutation));
+#endif
 
     mRootMutation->OnCommited().ExecuteIfBound();
     Reset();

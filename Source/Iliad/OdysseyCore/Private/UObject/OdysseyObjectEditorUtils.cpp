@@ -6,6 +6,7 @@
 void
 FOdysseyObjectEditorUtils::PreChangePropertyValue(UObject* Object, FName PropertyName)
 {
+#if WITH_EDITOR
     // Get the property addresses for the source and destination objects.
     FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
 
@@ -17,11 +18,13 @@ FOdysseyObjectEditorUtils::PreChangePropertyValue(UObject* Object, FName Propert
         Object->Modify();
         Object->PreEditChange(PropertyChain);
     }
+#endif
 }
 
 void
 FOdysseyObjectEditorUtils::PostChangePropertyValue(UObject* Object, FName PropertyName, EPropertyChangeType::Type iChangeType)
 {
+#if WITH_EDITOR
     // Get the property addresses for the source and destination objects.
     FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
 
@@ -30,6 +33,7 @@ FOdysseyObjectEditorUtils::PostChangePropertyValue(UObject* Object, FName Proper
         FPropertyChangedEvent PropertyEvent(Property, iChangeType);
         Object->PostEditChangeProperty(PropertyEvent);
     }
+#endif
 }
 
 bool
