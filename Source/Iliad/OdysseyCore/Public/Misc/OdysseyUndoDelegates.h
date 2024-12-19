@@ -5,6 +5,8 @@
 
 #include "CoreMinimal.h"
 
+#include "Misc/ITransaction.h"
+
 class FTransactionObjectEvent;
 
 class ODYSSEYCORE_API FOdysseyUndoDelegates

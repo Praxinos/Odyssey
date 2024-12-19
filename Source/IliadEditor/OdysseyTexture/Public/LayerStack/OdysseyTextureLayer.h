@@ -5,7 +5,6 @@
 
 #include "OdysseyLayer.h"
 
-#include "UObject/OdysseyObjectPropertyTracker.h"
 #include "Misc/OdysseyHandle.h"
 #include "OdysseyMediaProvider.h"
 #include <ULIS>

@@ -120,12 +120,12 @@
         },
         {
             "Name": "OdysseyCore",
-            "Type": "UncookedOnly",
+            "Type": "Runtime",
             "LoadingPhase": "Default"
         },
         {
             "Name": "OdysseyMaths",
-            "Type": "UncookedOnly",
+            "Type": "Runtime",
             "LoadingPhase": "Default"
         },
         {
@@ -136,7 +136,7 @@
         },
         {
             "Name": "ULISLoader",
-            "Type": "Editor",
+            "Type": "Runtime",
             "LoadingPhase": "Default"
         },
         {

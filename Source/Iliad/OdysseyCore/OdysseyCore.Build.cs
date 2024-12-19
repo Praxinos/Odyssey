@@ -28,11 +28,36 @@ public class OdysseyCore : ModuleRules
                 "CoreUObject",
                 "Engine",
                 "InputCore",
-                "UnrealEd",
                 "SlateCore",
                 "Slate"
              }
         );
+
+        //TODO: this should be only temporary (or maybe not)
+        //
+        // Needed for OdysseyMutator:
+        // - as it uses GEditor->IsTransactionActive() (inside #if WITH_EDITOR)
+        // - so UnrealEd module must be linked (to not have unresolved symbol error)
+        // - but OdysseyCore module must be a runtime module
+        // Something must be done to OdysseyMutator, maybe move it to an editor module,
+        // but it must wait that OdysseyAnimation will be split into 2 runtime and editor modules
+        // and also UOdysseyAnimationLayerImageRaster::AutoCreateCell() will be moved in an editor module
+        //
+        // Needed for FOdysseyUndoDelegates:
+        // - as it uses GEditor and UTransBuffer (inside #if WITH_EDITOR)
+        // - so UnrealEd module must be linked (to not have unresolved symbol error)
+        // - but OdysseyCore module must be a runtime module
+        // Something should be done to maybe split FOdysseyUndoDelegates into 2 classes: 1 interface (runtime) and 1 implementation (editor)
+        // but the problem is with the static Get() which creates the singleton which can't be overrided in the implementation
+        if (Target.bBuildEditor == true)
+        {
+            PrivateDependencyModuleNames.AddRange(
+                 new string[] {
+                     "UnrealEd",
+                 }
+            );
+
+        }
 
         //--- WIBU
 

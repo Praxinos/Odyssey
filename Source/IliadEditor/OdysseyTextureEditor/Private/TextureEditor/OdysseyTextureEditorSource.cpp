@@ -17,6 +17,7 @@
 
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorRoot.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 

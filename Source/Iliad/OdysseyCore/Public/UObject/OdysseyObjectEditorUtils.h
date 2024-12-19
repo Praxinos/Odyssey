@@ -22,6 +22,7 @@ namespace FOdysseyObjectEditorUtils
     template <typename ValueType>
     bool SetPropertyValue(UObject* Object, FName PropertyName, ValueType Value, EPropertyChangeType::Type iChangeType = EPropertyChangeType::Unspecified)
     {
+#if WITH_EDITOR
         // Get the property addresses for the source and destination objects.
         FProperty* Property = FindFieldChecked<FProperty>(Object->GetClass(), PropertyName);
 
@@ -55,6 +56,9 @@ namespace FOdysseyObjectEditorUtils
         }
 
         return true;
+#else
+        return false;
+#endif
     }
 
     /**
