@@ -54,8 +54,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual void Unload();
         virtual bool OnKeyDown( const FKey& iKey ) override;
         virtual bool OnKeyUp( const FKey& iKey ) override;
-        virtual bool OnKeyDownGlobal( const FKey& iKey ) override;
-        virtual bool OnKeyUpGlobal( const FKey& iKey ) override;
+        virtual bool OnKeyDownGlobal( const FKeyEvent& InKeyEvent ) override;
+        virtual bool OnKeyUpGlobal( const FKeyEvent& InKeyEvent ) override;
         virtual bool OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey );
         virtual void OnMouseHover( const FOdysseyPoint& iPointInTexture );
         virtual void OnMouseDrag( const FOdysseyPoint& iPointInTexture );
@@ -74,11 +74,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ){ return 0; };
         virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ){ return 0; };
         virtual bool OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                            , const FKey& iKey
-                                            , uint64& oSignalFlags );
-        virtual bool OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                          , const FKey& iKey
+                                          , const FKeyEvent& InKeyEvent
                                           , uint64& oSignalFlags );
+        virtual bool OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
+                                        , const FKeyEvent& InKeyEvent
+                                        , uint64& oSignalFlags );
         virtual bool OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FKey& iKey
                                         , uint64& oSignalFlags );

@@ -23,10 +23,10 @@ UOdysseyPainterEditorVectorTagInbetweenerView::UOdysseyPainterEditorVectorTagInb
     , mScene( nullptr )
     , InterpolationType ( eInbetweenerInterpolationType::ARAP )
     , GridType ( eInbetweenerGridType::ARAP )
-    , DivisionX ( 8 )
-    , DivisionY ( 8 )
+    , DivisionX ( 24 )
+    , DivisionY ( 24 )
     //, Rigidity ( 10 )
-    , MapAsPolyline( true )
+    , MappingMode( eInbetweenerMappingMode::Polyline )
     , WithThickness( true )
     , ConstantWidth( false )
     , Square( true )
@@ -71,7 +71,8 @@ UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
         ChartColor = selectedInbetweenerTag->GetChartColor();
         GridColor = selectedInbetweenerTag->GetGridColor();
         TrajectoryColor = selectedInbetweenerTag->GetTrajectoryColor();
-        MapAsPolyline = selectedInbetweenerTag->GetMapAsPolyline();
+        MappingMode = selectedInbetweenerTag->GetMapAsPolyline() ? eInbetweenerMappingMode::Polyline
+                                                                 : eInbetweenerMappingMode::Bezier ;
         WithThickness = selectedInbetweenerTag->GetWithThickness();
         ConstantWidth = selectedInbetweenerTag->HasConstantWidth();
         Square = selectedInbetweenerTag->IsSquare();
@@ -217,9 +218,9 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
             selectedInbetweenerTag->SetGridNumQuad( selectedInbetweenerTag->GetGridNumQuadX(), DivisionY, Square );
         }
 
-        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, MapAsPolyline ) )
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, MappingMode ) )
         {
-            selectedInbetweenerTag->SetMapAsPolyline( MapAsPolyline );
+            selectedInbetweenerTag->SetMapAsPolyline( ( MappingMode == eInbetweenerMappingMode::Polyline ) ? true : false );
 
             // regularize the groid at least once after remapping or else some grid points that were not moved before
             // will stay at there position
@@ -309,7 +310,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::MakeUndo( const FName& iPropertyN
                                                         , mSelectedInbetweenerTagArray
                                                         , notificationFlags );
 
-    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, MapAsPolyline ) )
+    if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, MappingMode ) )
         return new FOdysseyVectorUndoTagInbetweenerMapAsPolyline( mScene
                                                                 , mSelectedInbetweenerTagArray
                                                                 , notificationFlags );

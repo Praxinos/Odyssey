@@ -26,6 +26,13 @@ enum class eTrajectoryEditionMode : uint8
     //Remove  = 3 UMETA( ToolTip = "Remove (Alt)" )
 };
 
+UENUM()
+enum class eTrajectoryGridDisplayMode : uint8
+{
+    AsQuads  = 0 UMETA( ToolTip = "Show grid as quads" ),
+    AsPoints = 1 UMETA( ToolTip = "Show grid as points" )
+};
+
 UCLASS( HideCategories = (SelectionTool) )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : public UOdysseyPainterEditorVectorBaseTool
 {
@@ -52,11 +59,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;
         virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ) override;
         virtual bool OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                            , const FKey& iKey
-                                            , uint64& oSignalFlags ) override;
+                                          , const FKeyEvent& InKeyEvent
+                                          , uint64& oSignalFlags ) override;
         virtual bool OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                            , const FKey& iKey
-                                            , uint64& oSignalFlags ) override;
+                                        , const FKeyEvent& InKeyEvent
+                                        , uint64& oSignalFlags ) override;
         //virtual bool OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
         //                            , const FKey& iKey ) override;
         //virtual bool OnKeyUpVector( FOdysseyVectorGroupPaint* iScene, const FKey& iKey ) override;
@@ -109,4 +116,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
                  , meta = ( ToolTip  = "Edition Mode" ) )
         eTrajectoryEditionMode EditionMode;
         eTrajectoryEditionMode EditionModeAtKeyDown;
+
+        UPROPERTY( EditAnywhere
+                 , Category = MatchingTool
+                 , meta = ( ToolTip  = "Grid Display Mode" ) )
+        eTrajectoryGridDisplayMode GridDisplayMode;
 };

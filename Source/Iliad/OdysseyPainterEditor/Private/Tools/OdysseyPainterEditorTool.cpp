@@ -219,13 +219,13 @@ EMouseCursor::Type UOdysseyPainterEditorTool::GetMouseCursor() const
 }
 
 bool
-UOdysseyPainterEditorTool::OnKeyDownGlobal(const FKey& iKey)
+UOdysseyPainterEditorTool::OnKeyDownGlobal(const FKeyEvent& InKeyEvent)
 {
     return false; //false means Unreal will continue as if we did nothing
 }
 
 bool
-UOdysseyPainterEditorTool::OnKeyUpGlobal(const FKey& iKey)
+UOdysseyPainterEditorTool::OnKeyUpGlobal(const FKeyEvent& InKeyEvent)
 {
     return false; //false means Unreal will continue as if we did nothing
 }

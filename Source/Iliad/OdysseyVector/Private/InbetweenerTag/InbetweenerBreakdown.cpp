@@ -239,69 +239,6 @@ FInbetweenerBreakdown::GetIndex()
     return mIndex;
 }
 
-void
-FInbetweenerBreakdown::DrawTargetGrid( BLContext* iBLContext, bool iLock )
-{
-    DrawGrid( iBLContext
-            , eInbetweenerPointPositionType::TargetPosition
-            , mInbetweenerTag->GetGridColor()
-            , iLock );
-}
-
-void
-FInbetweenerBreakdown::DrawSourceGrid( BLContext* iBLContext, bool iLock )
-{
-    DrawGrid( iBLContext
-            , eInbetweenerPointPositionType::SourcePosition
-            , FColor( 127, 127, 127, 127 )
-            , iLock );
-}
-
-void
-FInbetweenerBreakdown::DrawGrid( BLContext* iBLContext
-                               , eInbetweenerPointPositionType iPositionType
-                               , const FColor& iColor
-                               , bool iLock )
-{
-    BLMatrix2D worldMatrix = mInbetweenerTag->GetOwner()->GetWorldMatrix();
-    BLRgba32 gridColor = BLRgba32( iColor.R
-                                 , iColor.G
-                                 , iColor.B
-                                 , iColor.A );
-    std::vector<FInbetweenerPoint>& pointBuffer = mGrid->GetPointBuffer();
-
-    // lock because the proxy could call the draw function at anytime even though inbetweenerTag isn't up-to-date.
-    // This mutex is then also locked in by Update function.
-    if( iLock )
-        mInbetweenerTag->mDrawingMutex.lock();
-
-    iBLContext->save();
-    iBLContext->resetMatrix();
-
-    iBLContext->setFillStyle( gridColor );
-    iBLContext->setStrokeStyle( gridColor );
-    iBLContext->setStrokeWidth( 1.0f );
-
-    if( iPositionType == eInbetweenerPointPositionType::TargetPosition )
-    {
-        worldMatrix.transform( GetTargetLocalMatrix() );
-    }
-
-    for( uint32 pointIndex : mInbetweenerTag->GetUsedPointIndexBuffer() )
-    {
-        FInbetweenerPoint& point = pointBuffer[pointIndex];
-        ::ULIS::FVec2D position = point.GetPosition( iPositionType );
-        BLPoint pt = worldMatrix.mapPoint( position.x, position.y );
-
-        iBLContext->fillCircle( pt.x, pt.y, 2 );
-    }
-
-    iBLContext->restore();
-
-    if( iLock )
-        mInbetweenerTag->mDrawingMutex.unlock();
-}
-
 static double
 GetEaseOutSpacing( double iT, double iFraction )
 {
@@ -339,7 +276,7 @@ FInbetweenerBreakdown::EaseOut( float iEasing, uint32 iFrom, uint32 iTo )
     float fromSpacing = mChart.GetInbetweenBuffer()[iFrom].GetSpacing();
     float toSpacing = mChart.GetInbetweenBuffer()[iTo].GetSpacing();
 
-    for( uint32 i = iFrom + 1, j = 1; j < iTo; i++, j++ )
+    for( uint32 i = iFrom + 1, j = 1; i < iTo; i++, j++ )
     {
         double fraction = ( double ) j / ( divisionCount - 1 );
         double spacing = GetEaseOutSpacing( iEasing, fraction );

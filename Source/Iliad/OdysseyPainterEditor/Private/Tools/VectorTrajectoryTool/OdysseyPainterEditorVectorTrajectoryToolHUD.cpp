@@ -418,7 +418,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLCont
         iBLContext->setStrokeStyle( BLRgba32( trajectoryColor.R
                                             , trajectoryColor.G
                                             , trajectoryColor.B
-                                            , 255 ) );
+                                            , trajectoryColor.A ) );
         iBLContext->setStrokeWidth( 2.0f );
         iBLContext->strokePath( path );
 
@@ -442,7 +442,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLCont
         iBLContext->setStrokeStyle( BLRgba32( trajectoryColor.R
                                             , trajectoryColor.G
                                             , trajectoryColor.B
-                                            , 255 ) );
+                                            , trajectoryColor.A ) );
         iBLContext->setStrokeWidth( 2.0f );
         iBLContext->strokePath( path );
 
@@ -504,6 +504,10 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint64 hudFlags = mTrajectoryTool->GetEditor()->GetVectorHUDFlags();
+    uint64 gridFlags = 0;
+
+    gridFlags |= ( mTrajectoryTool->GridDisplayMode == eTrajectoryGridDisplayMode::AsPoints ) ?  HUD_BREAKDOWN_GRID_DOTTED : 0;
+    gridFlags |= ( mTrajectoryTool->EditionMode == eTrajectoryEditionMode::Add ) ? HUD_BREAKDOWN_SOURCE_GRID : 0;
 
     // Draw default
     // -> nothing in object mode.
@@ -528,7 +532,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
                                                 , BLRgba32( 127, 127, 127, 255 )
                                                 , BLRgba32( 255, 127, 127, 255 )
                                                 , ( HUD_BREAKDOWN_SOURCE
-                                                  | (( prevBreakdown == nullptr ) ? HUD_BREAKDOWN_SOURCE_GRID : 0) ) );
+                                                  | ( ( prevBreakdown == nullptr ) ? gridFlags : 0 ) ) );
 
                 if( mTrajectoryTool->ShowInbetweens )
                 {

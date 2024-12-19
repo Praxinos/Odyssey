@@ -469,6 +469,90 @@ FOdysseyVectorHUD::DrawCubicSegment( BLContext* iBLContext
     }
 }
 
+/*
+void
+FOdysseyVectorHUD::DrawTargetGrid( BLContext* iBLContext
+                                 , FInbetweenerGrid* iGrid )
+{
+    FOdysseyVectorTagInbetweener* inbetweenerTag = iGrid->GetBreakdown()->GetInbetweenerTag();
+
+    DrawGrid( iBLContext
+            , eInbetweenerPointPositionType::TargetPosition
+            , inbetweenerTag->GetGridColor() );
+}
+
+void
+FOdysseyVectorHUD::DrawSourceGrid( BLContext* iBLContext )
+{
+    DrawGrid( iBLContext
+            , eInbetweenerPointPositionType::SourcePosition
+            , FColor( 127, 127, 127, 127 ) );
+}
+*/
+
+void
+FOdysseyVectorHUD::DrawGrid( BLContext* iBLContext
+                           , FInbetweenerGrid* iGrid
+                           , eInbetweenerPointPositionType iPositionType
+                           , const FColor& iColor
+                           , uint64 iHUDFlags )
+{
+    FOdysseyVectorTagInbetweener* inbetweenerTag = iGrid->GetBreakdown()->GetInbetweenerTag();
+    BLMatrix2D worldMatrix = inbetweenerTag->GetOwner()->GetWorldMatrix();
+    BLRgba32 gridColor = BLRgba32( iColor.R
+                                 , iColor.G
+                                 , iColor.B
+                                 , iColor.A );
+    std::vector<FInbetweenerPoint>& pointBuffer = iGrid->GetPointBuffer();
+    std::vector<FInbetweenerQuad>& quadBuffer = iGrid->GetQuadBuffer();
+
+    iBLContext->save();
+    iBLContext->resetMatrix();
+
+    iBLContext->setFillStyle( gridColor );
+    iBLContext->setStrokeStyle( gridColor );
+    iBLContext->setStrokeWidth( 1.0f );
+
+    if( iPositionType == eInbetweenerPointPositionType::TargetPosition )
+    {
+        worldMatrix.transform( iGrid->GetBreakdown()->GetTargetLocalMatrix() );
+    }
+
+    if( iHUDFlags & HUD_BREAKDOWN_GRID_DOTTED )
+    {
+        for( uint32 pointIndex : inbetweenerTag->GetUsedPointIndexBuffer() )
+        {
+            FInbetweenerPoint& point = pointBuffer[pointIndex];
+            ::ULIS::FVec2D position = point.GetPosition( iPositionType );
+            BLPoint pt = worldMatrix.mapPoint( position.x, position.y );
+
+            iBLContext->fillCircle( pt.x, pt.y, 2 );
+        }
+    }
+    else
+    {
+        for( uint32 quadIndex : inbetweenerTag->GetUsedQuadIndexBuffer() )
+        {
+            FInbetweenerQuad& quad = quadBuffer[quadIndex];
+            ::ULIS::FVec2D position[4] = { quad.GetPoints()[0]->GetPosition( iPositionType )
+                                         , quad.GetPoints()[1]->GetPosition( iPositionType )
+                                         , quad.GetPoints()[2]->GetPosition( iPositionType )
+                                         , quad.GetPoints()[3]->GetPosition( iPositionType ) };
+            BLPoint pt[4] = { worldMatrix.mapPoint( position[0].x, position[0].y )
+                            , worldMatrix.mapPoint( position[1].x, position[1].y )
+                            , worldMatrix.mapPoint( position[2].x, position[2].y )
+                            , worldMatrix.mapPoint( position[3].x, position[3].y ) };
+
+            iBLContext->strokeLine( pt[0].x, pt[0].y, pt[1].x, pt[1].y );
+            iBLContext->strokeLine( pt[1].x, pt[1].y, pt[2].x, pt[2].y );
+            iBLContext->strokeLine( pt[2].x, pt[2].y, pt[3].x, pt[3].y );
+            iBLContext->strokeLine( pt[3].x, pt[3].y, pt[0].x, pt[0].y );
+        }
+    }
+
+    iBLContext->restore();
+}
+
 // static
 void
 FOdysseyVectorHUD::DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
@@ -494,13 +578,14 @@ FOdysseyVectorHUD::DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
         for( uint32 i = 1; i < iBreakdown->GetDrawingCount() - 1; i++ )
         {
             FInbetweenerChart::Inbetween* inbetween = &iBreakdown->GetChart()->GetInbetweenBuffer()[i];
-            uint8 alpha = inbetweenColor.A;
+            double opacity = ( double ) inbetweenColor.A / 255;
+            uint8 alpha = 255;
 
             if( iHUDFlags & HUD_INBETWEEN_FADEFROMTARGET )
-                alpha = ( 255 * 0.25f ) + ( ( alpha * 0.75f ) *          inbetween->GetSpacing() );
+                alpha = (       ( inbetween->GetSpacing() * 255 ) ) * opacity;
 
             if( iHUDFlags & HUD_INBETWEEN_FADEFROMSOURCE )
-                alpha = ( 255 * 0.25f ) + ( ( alpha * 0.75f ) * ( 1.0f - inbetween->GetSpacing() )  );
+                alpha = ( 255 - ( inbetween->GetSpacing() * 255 ) ) * opacity;
 
             iBLContext->setStrokeWidth( 4.0f );
             iBLContext->setStrokeStyle( BLRgba32( inbetweenColor.R
@@ -553,12 +638,20 @@ FOdysseyVectorHUD::DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
 
     if( iHUDFlags & HUD_BREAKDOWN_SOURCE_GRID )
     {
-        iBreakdown->DrawSourceGrid( iBLContext, false );
+        DrawGrid( iBLContext
+                , iBreakdown->GetGrid()
+                , eInbetweenerPointPositionType::SourcePosition
+                , inbetweenerTag->GetGridColor()
+                , iHUDFlags );
     }
 
     if( iHUDFlags & HUD_BREAKDOWN_TARGET_GRID )
     {
-        iBreakdown->DrawTargetGrid( iBLContext, false );
+        DrawGrid( iBLContext
+                , iBreakdown->GetGrid()
+                , eInbetweenerPointPositionType::TargetPosition
+                , inbetweenerTag->GetGridColor()
+                , iHUDFlags );
     }
 }
 

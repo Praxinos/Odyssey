@@ -91,17 +91,25 @@ UOdysseyPainterEditorVectorPaintBucketTool::LoadVector( FOdysseyVectorGroupPaint
 
 bool
 UOdysseyPainterEditorVectorPaintBucketTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                                 , const FKey& iKey
+                                                                 , const FKeyEvent& InKeyEvent
                                                                  , uint64& oSignalFlags )
 {
-    // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
-    // with the events processing in the OnKeyUpGlobalVector(), we do like that.
-    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
-      || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand ) )
+    if( InKeyEvent.IsRepeat() == false )
     {
-        mShowControls = true;
-        iScene->GetEngine()->Invalidate( 0 );
-        return true;
+        FKey key = InKeyEvent.GetKey();
+
+        // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
+        // with the events processing in the OnKeyUpGlobalVector(), we do like that.
+        if ( ( key == EKeys::LeftControl ) || ( key == EKeys::RightControl )
+          || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand ) )
+        {
+            mShowControls = true;
+
+            // force redraw
+            iScene->GetEngine()->Invalidate( 0 );
+
+            return true;
+        }
     }
 
     return false;
@@ -109,13 +117,17 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnKeyDownGlobalVector( FOdysseyVecto
 
 bool
 UOdysseyPainterEditorVectorPaintBucketTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                               , const FKey& iKey
+                                                               , const FKeyEvent& InKeyEvent
                                                                , uint64& oSignalFlags )
 {
-    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
-      || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand ) )
+    FKey key = InKeyEvent.GetKey();
+
+    if ( ( key == EKeys::LeftControl ) || ( key == EKeys::RightControl )
+      || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand ) )
     {
+        // force redraw
         iScene->GetEngine()->Invalidate( 0 );
+
         return true;
     }
 

@@ -34,6 +34,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::UOdysseyPainterEditorVectorTrajectory
     , PickingRadius( 10.0f )
     , ShowInbetweens( true )
     , EditionMode( eTrajectoryEditionMode::Add )
+    , GridDisplayMode( eTrajectoryGridDisplayMode::AsPoints )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory64");
 
@@ -77,62 +78,64 @@ UOdysseyPainterEditorVectorTrajectoryTool::LoadVector( FOdysseyVectorGroupPaint*
 
 bool
 UOdysseyPainterEditorVectorTrajectoryTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                                , const FKey& iKey
+                                                                , const FKeyEvent& InKeyEvent
                                                                 , uint64& oSignalFlags )
 {
-    uint64 notificationFlags = 0;
-
-    EditionModeAtKeyDown = EditionMode;
-
-    //EditionMode = eTrajectoryEditionMode::Add;
-
-    // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
-    // with the events processing in the OnKeyUpGlobalVector(), we do like that.
-    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
-      || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand ) )
+    if( InKeyEvent.IsRepeat() == false )
     {
-        EditionMode = ( EditionModeAtKeyDown == eTrajectoryEditionMode::Curve    ) ? eTrajectoryEditionMode::Add
-                                                                                   : eTrajectoryEditionMode::Curve;
+        FKey key = InKeyEvent.GetKey();
+        uint64 notificationFlags = 0;
+
+        EditionModeAtKeyDown = EditionMode;
+
+        //EditionMode = eTrajectoryEditionMode::Add;
+
+        // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
+        // with the events processing in the OnKeyUpGlobalVector(), we do like that.
+        if ( ( key == EKeys::LeftControl ) || ( key == EKeys::RightControl )
+          || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand ) )
+        {
+            ///EditionMode = eTrajectoryEditionMode::Curve;
+            EditionMode = ( EditionMode == eTrajectoryEditionMode::Curve    ) ? eTrajectoryEditionMode::Add
+                                                                              : eTrajectoryEditionMode::Curve;
+
+        }
+
+        // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
+        // with the events processing in the OnKeyUpGlobalVector(), we do like that.
+        if ( ( key == EKeys::LeftShift ) || ( key == EKeys::RightShift ) )
+        {
+            //EditionMode = eTrajectoryEditionMode::Spacing;
+            EditionMode  = ( EditionMode == eTrajectoryEditionMode::Spacing ) ? eTrajectoryEditionMode::Add
+                                                                              : eTrajectoryEditionMode::Spacing;
+        }
+
+        // force redraw
+        iScene->GetEngine()->Invalidate( 0 );
+
+        oSignalFlags = notificationFlags;
     }
 
-    // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
-    // with the events processing in the OnKeyUpGlobalVector(), we do like that.
-    if ( ( iKey == EKeys::LeftShift ) || ( iKey == EKeys::RightShift ) )
-    {
-        EditionMode  = ( EditionModeAtKeyDown == eTrajectoryEditionMode::Spacing ) ? eTrajectoryEditionMode::Add
-                                                                                   : eTrajectoryEditionMode::Spacing;
-    }
-
-    // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
-    // with the events processing in the OnKeyUpGlobalVector(), we do like that.
-    //if ( ( iKey == EKeys::LeftAlt ) || ( iKey == EKeys::RightAlt ) )
-    //{
-    //    EditionMode = eTrajectoryEditionMode::Remove;
-    //}
-
-    // redraw
-    iScene->GetEngine()->Invalidate( 0 );
-
-    oSignalFlags = notificationFlags;
     return false;
 }
 
 bool
 UOdysseyPainterEditorVectorTrajectoryTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                                  , const FKey& iKey
-                                                                , uint64& oSignalFlags )
+                                                              , const FKeyEvent& InKeyEvent
+                                                              , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+    FKey key = InKeyEvent.GetKey();
     uint64 notificationFlags = 0;
 
     // note, we cannot use FSlateApplication::Get().GetModifierKeys()
     // because the keys are already released. For consistency we do
     // the same in the KeyDown event even though we could use
     // FSlateApplication::Get().GetModifierKeys()
-    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
-      || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand )
-      || ( iKey == EKeys::LeftShift   ) || ( iKey == EKeys::RightShift   )
-      || ( iKey == EKeys::LeftAlt     ) || ( iKey == EKeys::RightAlt     ) )
+    if ( ( key == EKeys::LeftControl ) || ( key == EKeys::RightControl )
+      || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand )
+      || ( key == EKeys::LeftShift   ) || ( key == EKeys::RightShift   )
+      || ( key == EKeys::LeftAlt     ) || ( key == EKeys::RightAlt     ) )
     {
         // redraw
         iScene->GetEngine()->Invalidate( 0 );

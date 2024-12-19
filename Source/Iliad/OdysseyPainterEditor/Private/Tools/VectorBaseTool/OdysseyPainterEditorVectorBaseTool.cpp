@@ -319,7 +319,7 @@ UOdysseyPainterEditorVectorBaseTool::Load()
 
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                          , const FKey& iKey
+                                                          , const FKeyEvent& InKeyEvent
                                                           , uint64& oSignalFlags )
 {
     oSignalFlags = 0;
@@ -327,7 +327,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobalVector( FOdysseyVectorGroupP
 }
 
 bool
-UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobal( const FKey& iKey )
+UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobal( const FKeyEvent& InKeyEvent )
 {
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
     if (mediaProvider.IsLocked())
@@ -343,7 +343,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownGlobal( const FKey& iKey )
     FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
     FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
     uint64 notificationFlags = 0;
-    bool handled = OnKeyDownGlobalVector(vectorScene, iKey, notificationFlags);
+    bool handled = OnKeyDownGlobalVector(vectorScene, InKeyEvent, notificationFlags);
     FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
     return handled;
 }
@@ -416,7 +416,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDown( const FKey& iKey )
 
 bool
 UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                        , const FKey& iKey
+                                                        , const FKeyEvent& InKeyEvent
                                                         , uint64& oSignalFlags )
 {
     oSignalFlags = 0;
@@ -424,7 +424,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPai
 }
 
 bool
-UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobal( const FKey& iKey )
+UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobal( const FKeyEvent& InKeyEvent )
 {
     FOdysseyMediaProvider mediaProvider = GetEditor()->GetCurrentMediaProvider();
     if (mediaProvider.IsLocked())
@@ -440,7 +440,7 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyUpGlobal( const FKey& iKey )
     FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
     FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
     uint64 notificationFlags = 0;
-    bool handled = OnKeyUpGlobalVector(vectorScene,iKey, notificationFlags);
+    bool handled = OnKeyUpGlobalVector(vectorScene, InKeyEvent, notificationFlags);
     FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
     return handled;
 }

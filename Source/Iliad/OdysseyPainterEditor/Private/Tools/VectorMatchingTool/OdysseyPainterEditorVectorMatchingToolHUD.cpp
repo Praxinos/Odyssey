@@ -49,6 +49,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
     uint64 hudFlags = mMatchingTool->GetEditor()->GetVectorHUDFlags();
     FOdysseyVectorEngine *engine = iScene->GetEngine();
     FOdysseyVectorSharedEnv *sharedEnv = iScene->GetSharedEnv();
+    uint64 gridDotted = mMatchingTool->GridDisplayMode == eMatchingGridDisplayMode::AsPoints ?  HUD_BREAKDOWN_GRID_DOTTED : 0;
 
     // Draw default
     // -> nothing in object mode.
@@ -110,7 +111,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
                                       , breakdown
                                       , BLRgba32( 127, 127, 127, 255 )
                                       , BLRgba32( 255, 127, 127, 255 )
-                                      , HUD_BREAKDOWN_TARGET_GRID | HUD_BREAKDOWN_TARGET );
+                                      , HUD_BREAKDOWN_TARGET_GRID | gridDotted | HUD_BREAKDOWN_TARGET );
 
                         /*DrawTargetGrid ( iBLContext
                                        , breakdown

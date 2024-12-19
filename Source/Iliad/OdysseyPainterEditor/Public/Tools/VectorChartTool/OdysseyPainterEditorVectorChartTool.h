@@ -21,19 +21,13 @@ enum class eChartType : uint8
 };
 
 UENUM()
-enum class eChartPickingMode : uint8
+enum class eChartEditionMode : uint8
 {
-    Default = 0,
-    Control = 1,
-    Shift   = 2
-};
-
-UENUM()
-enum class eChartShiftingOp : uint8
-{
-    Relative     = 0,
-    EaseInOrOut  = 1,
-    EaseInAndOut = 2
+    OneByOne     = 0 UMETA( ToolTip = "One by one (default)" ),
+    Relative     = 1 UMETA( ToolTip = "Relative (Ctrl/Cmd)" ),
+    EaseInOrOut  = 2 UMETA( ToolTip = "Shift" ),
+    Magnet       = 3 UMETA( ToolTip = "Alt" ),
+    Reshape      = 4,
 };
 
 UCLASS( HideCategories = (SelectionTool) )
@@ -54,7 +48,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
 
         virtual FText GetTooltip() const override;
 
-        eChartPickingMode GetPickingMode();
         FInbetweenerChart::Inbetween* GetHoveredInbetween();
 
     protected:
@@ -63,11 +56,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
         virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ) override;
 
         virtual bool OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                            , const FKey& iKey
-                                            , uint64& oSignalFlags ) override;
+                                        , const FKeyEvent& InKeyEvent
+                                        , uint64& oSignalFlags ) override;
         virtual bool OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                            , const FKey& iKey
-                                            , uint64& oSignalFlags ) override;
+                                          , const FKeyEvent& InKeyEvent
+                                          , uint64& oSignalFlags ) override;
         //virtual bool OnKeyDownVector( FOdysseyVectorGroupPaint* iScene
         //                            , const FKey& iKey ) override;
         //virtual bool OnKeyUpVector( FOdysseyVectorGroupPaint* iScene, const FKey& iKey ) override;
@@ -94,7 +87,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
         FInbetweenerBreakdown* mPickedBreakdown;
         FInbetweenerChart::Inbetween* mHoveredInbetween;
         FInbetweenerChart::HUDBezier::Point* mPickedBezierPoint;
-        eChartPickingMode mPickingMode;
         ::ULIS::FVec2D mMouseAtDown;
         float mEasing;
 
@@ -108,8 +100,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
 
         UPROPERTY( EditAnywhere
                  , Category = ChartTool
-                 , meta = ( ToolTip  = "Shifting Mode" ) )
-        eChartShiftingOp ShiftingOp;
+                 , meta = ( ToolTip  = "Edition Mode" ) )
+        eChartEditionMode EditionMode;
+        eChartEditionMode EditionModeAtKeyDown;
 
         UPROPERTY( EditAnywhere
                  , Category = ChartTool

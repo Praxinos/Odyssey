@@ -735,6 +735,8 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
         // note: it is guaranteed that we wil have at least a previous or next breakdown
         FInbetweenerBreakdown* nextBreakdown = iBreakdown->GetNextBreakdown();
         FInbetweenerBreakdown* prevBreakdown = iBreakdown->GetPrevBreakdown();
+        uint32 removedBreakdownDrawingCount = iBreakdown->GetDrawingCount();
+        uint32 nextBreakdownDrawingCount = nextBreakdown ? nextBreakdown->GetDrawingCount() : 0;
 
         mBreakdownList.remove_if( [iBreakdown]( FInbetweenerBreakdown* listedBreakdown )
                                     {
@@ -747,8 +749,6 @@ FOdysseyVectorTagInbetweener::RemoveBreakdown( FInbetweenerBreakdown* iBreakdown
 
         if( nextBreakdown )
         {
-            uint32 removedBreakdownDrawingCount = iBreakdown->GetDrawingCount();
-            uint32 nextBreakdownDrawingCount = nextBreakdown ? nextBreakdown->GetDrawingCount() : 0;
             uint32 totalDrawingCount = ( removedBreakdownDrawingCount + nextBreakdownDrawingCount );
             float leftRatio = ( float ) removedBreakdownDrawingCount / totalDrawingCount;
             float rightRatio = ( float ) nextBreakdownDrawingCount / totalDrawingCount;
@@ -1350,7 +1350,7 @@ FOdysseyVectorTagInbetweener::RedrawCells( uint32 iDrawingCount )
 {
     // scene could be non existent when the tag's owner is removed, as it would still trigger call to Update()
     // right after the removal of an object in the hierarchy.
-    if( mSharedEnv )
+    if( mScene->GetSharedEnv() )
     {
         IOdysseyVectorCell* cell = mScene->GetEngine()->GetCell();
         IOdysseyVectorLayer* layer = mScene->GetEngine()->GetLayer();

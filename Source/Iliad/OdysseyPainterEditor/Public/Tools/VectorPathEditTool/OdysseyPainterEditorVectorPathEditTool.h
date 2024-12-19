@@ -95,9 +95,11 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;
         virtual uint64 UnloadVector( FOdysseyVectorGroupPaint* iScene ) override;
         virtual bool OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                          , const FKey& iKey, uint64& oSignalFlags ) override;
+                                        , const FKeyEvent& InKeyEvent
+                                        , uint64& oSignalFlags ) override;
         virtual bool OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                            , const FKey& iKey, uint64& oSignalFlags ) override;
+                                          , const FKeyEvent& InKeyEvent
+                                          , uint64& oSignalFlags ) override;
         virtual bool OnMouseDownVector( FOdysseyVectorGroupPaint* iScene
                                         , const FOdysseyPoint& iPointInTexture
                                         , const FKey& iKey

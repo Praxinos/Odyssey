@@ -22,6 +22,13 @@ enum class eMatchingInfluence : uint8
     Radial  = 1
 };
 
+UENUM()
+enum class eMatchingGridDisplayMode : uint8
+{
+    AsQuads  = 0 UMETA( ToolTip = "Show grid as quads" ),
+    AsPoints = 1 UMETA( ToolTip = "Show grid as points" )
+};
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public UOdysseyPainterEditorVectorBaseTool
 {
@@ -82,12 +89,14 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public 
 
         UPROPERTY( EditAnywhere
                  , Category = MatchingTool
-                 , meta = ( ToolTip  = "Matching Influence" ) )
+                 , meta = ( DisplayName = "Picking Influence"
+                          , ToolTip  = "Picking Influence" ) )
         eMatchingInfluence MatchingInfluence;
 
         UPROPERTY( EditAnywhere
                  , Category = MatchingTool
-                 , meta = ( ToolTip  = "Rigidity"
+                 , meta = ( DisplayName = "Grid Rigidity"
+                          , ToolTip  = "Grid Rigidity"
                           , ClampMin = "0"
                           , UIMin    = "0"
                           , ClampMax = "20"
@@ -96,11 +105,19 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public 
 
         UPROPERTY( EditAnywhere
                  , Category = MatchingTool
-                 , meta = ( ToolTip  = "Rigidify Selection Only" ) )
+                 , meta = ( DisplayName = "Move picked area only"
+                          , ToolTip  = "Move picked area only" ) )
         bool RigidifySelectionOnly;
 
         UPROPERTY( EditAnywhere
                  , Category = MatchingTool
-                 , meta = ( ToolTip  = "Show Inbetweens" ) )
+                 , meta = ( DisplayName = "Show Inbetweens"
+                          , ToolTip  = "Show Inbetweens" ) )
         bool ShowInbetweens;
+
+        UPROPERTY( EditAnywhere
+                 , Category = MatchingTool
+                 , meta = ( DisplayName = "Grid Display Mode"
+                          , ToolTip  = "Grid Display Mode" ) )
+        eMatchingGridDisplayMode GridDisplayMode;
 };

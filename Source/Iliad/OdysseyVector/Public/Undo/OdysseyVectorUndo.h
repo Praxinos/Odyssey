@@ -16,6 +16,7 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorTagInbetweener.h"
 
+
 class FOdysseyVectorPoint;
 class FOdysseyVectorObject;
 class FOdysseyVectorGroupPaint;
@@ -381,8 +382,8 @@ class ODYSSEYVECTOR_API FSnapshotDynamics
         bool LoadState( State* iState );
 
     protected:
-        bool bApplied;
         FOdysseyVectorTagInbetweener* mInbetweenerTag;
+        bool bApplied;
         State mInitialState;
         State mAlteredState;
 };
@@ -413,8 +414,8 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerChart
         bool LoadState( State* iState );
 
     protected:
-        uint64 mSnapshotFlags;
         FInbetweenerChart* mChart;
+        uint64 mSnapshotFlags;
         State mInitialState;
         State mAlteredState;
 };
@@ -449,8 +450,8 @@ class ODYSSEYVECTOR_API FSnapshotInbetweenerBreakdown
         bool LoadState( State* iState );
 
     protected:
-        uint64 mSnapshotFlags;
         FInbetweenerBreakdown* mBreakdown;
+        uint64 mSnapshotFlags;
         FSnapshotInbetweenerChart mChartSnapshot;
         State mInitialState;
         State mAlteredState;

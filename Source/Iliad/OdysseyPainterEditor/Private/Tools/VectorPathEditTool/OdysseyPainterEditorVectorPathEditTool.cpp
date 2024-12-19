@@ -85,39 +85,53 @@ UOdysseyPainterEditorVectorPathEditTool::LoadVector( FOdysseyVectorGroupPaint* i
 
 bool
 UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                              , const FKey& iKey
+                                                              , const FKeyEvent& InKeyEvent
                                                               , uint64& oSignalFlags )
 {
-    // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
-    // with the events processing in the OnKeyUpGlobalVector(), we do like that.
-    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
-      || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand ) )
+    if( InKeyEvent.IsRepeat() == false )
     {
-        mPickingMode   = ePathPickingMode::SegmentHandle;
-        mPickingFlags  = FOdysseyVectorPath::PICK_HANDLE_SEGMENT
-                       | FOdysseyVectorPath::PICK_VERTEX ;
-        iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
-        return true;
-    }
+        FKey key = InKeyEvent.GetKey();
 
-    // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
-    // with the events processing in the OnKeyUpGlobalVector(), we do like that.
-    if ( ( iKey == EKeys::LeftShift ) || ( iKey == EKeys::RightShift ) )
-    {
-        mPickingMode  = ePathPickingMode::VertexHandle;
-        mPickingFlags = FOdysseyVectorPath::PICK_HANDLE_VERTEX;
-        iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
-        return true;
-    }
+        // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
+        // with the events processing in the OnKeyUpGlobalVector(), we do like that.
+        if ( ( key == EKeys::LeftControl ) || ( key == EKeys::RightControl )
+          || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand ) )
+        {
+            mPickingMode   = ePathPickingMode::SegmentHandle;
+            mPickingFlags  = FOdysseyVectorPath::PICK_HANDLE_SEGMENT
+                           | FOdysseyVectorPath::PICK_VERTEX ;
 
-    // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
-    // with the events processing in the OnKeyUpGlobalVector(), we do like that.
-    if ( ( iKey == EKeys::LeftAlt ) || ( iKey == EKeys::RightAlt ) )
-    {
-        mPickingMode  = ePathPickingMode::Alter;
-        mPickingFlags = FOdysseyVectorPath::PICK_VERTEX;
-        iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
-        return true;
+            // force redraw
+            iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+            return true;
+        }
+
+        // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
+        // with the events processing in the OnKeyUpGlobalVector(), we do like that.
+        if ( ( key == EKeys::LeftShift ) || ( key == EKeys::RightShift ) )
+        {
+            mPickingMode  = ePathPickingMode::VertexHandle;
+            mPickingFlags = FOdysseyVectorPath::PICK_HANDLE_VERTEX;
+
+            // force redraw
+            iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+            return true;
+        }
+
+        // Note, we could FSlateApplication::Get().GetModifierKeys() as well, but for consistency
+        // with the events processing in the OnKeyUpGlobalVector(), we do like that.
+        if ( ( key == EKeys::LeftAlt ) || ( key == EKeys::RightAlt ) )
+        {
+            mPickingMode  = ePathPickingMode::Alter;
+            mPickingFlags = FOdysseyVectorPath::PICK_VERTEX;
+
+            // force redraw
+            iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+            return true;
+        }
     }
 
     return false;
@@ -125,21 +139,22 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
 
 bool
 UOdysseyPainterEditorVectorPathEditTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPaint* iScene
-                                                            , const FKey& iKey
+                                                            , const FKeyEvent& InKeyEvent
                                                             , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+    FKey key = InKeyEvent.GetKey();
 
     // note, we cannot use FSlateApplication::Get().GetModifierKeys()
     // because the keys are already released. For consistency we do
     // the same in the KeyDown event even though we could use
     // FSlateApplication::Get().GetModifierKeys()
-    if ( ( iKey == EKeys::LeftControl ) || ( iKey == EKeys::RightControl )
-      || ( iKey == EKeys::LeftCommand ) || ( iKey == EKeys::RightCommand )
-      || ( iKey == EKeys::LeftShift   ) || ( iKey == EKeys::RightShift   )
-      || ( iKey == EKeys::LeftAlt     ) || ( iKey == EKeys::RightAlt     ) )
+    if ( ( key == EKeys::LeftControl ) || ( key == EKeys::RightControl )
+      || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand )
+      || ( key == EKeys::LeftShift   ) || ( key == EKeys::RightShift   )
+      || ( key == EKeys::LeftAlt     ) || ( key == EKeys::RightAlt     ) )
     {
-        // redraw
+        // force redraw
         iScene->GetEngine()->Invalidate( 0 );
     }
 

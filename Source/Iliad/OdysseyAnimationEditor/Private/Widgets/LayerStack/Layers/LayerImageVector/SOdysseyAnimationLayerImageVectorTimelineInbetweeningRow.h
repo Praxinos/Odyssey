@@ -37,8 +37,8 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
         static const uint32 TYPE_VISIBLE   = ( 1UL << 3 );
 
         uint32 type;
-        double x, y, w, h;
         uint32 index;
+        double x, y, w, h;
     };
 
     public:
@@ -71,8 +71,8 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
         TArray<CellBox> mCellBoxBuffer;
         FVector2D mBoxPos;
         FVector2D mBoxSize;
-        CellBox mCandidateTargetCellBox;
         FInbetweenerBreakdown* mPickedBreakdown;
+        CellBox mCandidateTargetCellBox;
         //Box containing the cells widgets
         //TSharedPtr<SHorizontalBox> mCellsBox;
         //float mLayoutScaleMultiplier;

@@ -7,6 +7,7 @@
 #include <ULIS>
 
 #include "InbetweenerTag/InbetweenerChart.h"
+#include "InbetweenerTag/InbetweenerGrid.h"
 
 class FOdysseyVectorBucket;
 class FOdysseyVectorObject;
@@ -143,6 +144,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                                  , const BLRgba32& iSourceDrawingColor
                                  , const BLRgba32& iTargetDrawingColor
                                  , uint64 iHUDFlags );
+        static void DrawGrid( BLContext* iBLContext
+                            , FInbetweenerGrid* iGrid
+                            , eInbetweenerPointPositionType iPositionType
+                            , const FColor& iColor
+                            , uint64 iHUDFlags );
 
         static ::ULIS::FVec2D GetBucketPosition( FOdysseyVectorBucket* iBucket, bool iWorld );
         static ::ULIS::FVec2D GetBucketRadialHandlePosition( FOdysseyVectorBucket* iBucket, bool iWorld );
@@ -221,14 +227,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         static const uint64 HUD_INBETWEEN_FADEFROMSOURCE = ( 1ULL << 19 );
         static const uint64 HUD_BREAKDOWN_SOURCE_GRID    = ( 1ULL << 20 );
         static const uint64 HUD_BREAKDOWN_TARGET_GRID    = ( 1ULL << 21 );
+        static const uint64 HUD_BREAKDOWN_GRID_DOTTED    = ( 1ULL << 22 );
         static const uint64 HUD_TAGINBETWEENER_ALL       = HUD_BREAKDOWN_SOURCE
                                                          | HUD_BREAKDOWN_TARGET
                                                          | HUD_BREAKDOWN_SOURCE_GRID
                                                          | HUD_BREAKDOWN_TARGET_GRID
                                                          | HUD_BREAKDOWN_INBETWEEN;
-        static const uint64 HUD_SELECTIONBOX             = ( 1ULL << 22 );
-        static const uint64 HUD_SIZE_SMALL               = ( 1ULL << 23 );
-        static const uint64 HUD_DRAW_ALL                 = ( 1ULL << 24 );
+        static const uint64 HUD_SELECTIONBOX             = ( 1ULL << 23 );
+        static const uint64 HUD_SIZE_SMALL               = ( 1ULL << 24 );
+        static const uint64 HUD_DRAW_ALL                 = ( 1ULL << 25 );
         //static const uint64 VIEW_ALL              = 0xFFFFFFFFFFFFFFFFULL;
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) = 0;

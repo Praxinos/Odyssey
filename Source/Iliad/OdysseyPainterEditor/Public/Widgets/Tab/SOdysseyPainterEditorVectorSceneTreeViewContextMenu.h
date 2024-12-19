@@ -8,10 +8,16 @@
 #include "Widgets/SWidget.h"
 
 class SOdysseyPainterEditorVectorSceneTreeView;
+class FOdysseyVectorGroupPaint;
 
 class ODYSSEYPAINTEREDITOR_API SOdysseyPainterEditorVectorSceneTreeViewContextMenu
 {
     public:
         // FOdysseyEditorTab interface
         static TSharedPtr<SWidget> CreateWidget( SOdysseyPainterEditorVectorSceneTreeView* iTreeView );
+
+    protected:
+        static bool CanAddInbetweener( FOdysseyVectorGroupPaint* iScene );
+        static bool CanAlterInbetweener( FOdysseyVectorGroupPaint* iScene );
+
 };

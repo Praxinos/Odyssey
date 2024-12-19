@@ -22,8 +22,8 @@ FOdysseyPainterEditorVectorChartToolHUD::~FOdysseyPainterEditorVectorChartToolHU
 
 FOdysseyPainterEditorVectorChartToolHUD::FOdysseyPainterEditorVectorChartToolHUD( UOdysseyPainterEditorVectorChartTool* iChartTool )
     : FOdysseyPainterEditorVectorBaseToolHUD( iChartTool )
-    , mChartRect( 200.0f, 40, 400.0f, 40 )
     , mChartTool( iChartTool )
+    , mChartRect( 200.0f, 40, 400.0f, 40 )
 {
     BLFontFace face;
    // TODO: do something depending on to the O.S
@@ -281,7 +281,7 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( BLContext* iBLConte
         }
     }
 
-    if( mChartTool->GetPickingMode() == eChartPickingMode::Control )
+    if( mChartTool->EditionMode == eChartEditionMode::Reshape )
     {
         DrawLine( iBLContext
                 , iHUDBezier->GetPoints()[0].GetPosition().x

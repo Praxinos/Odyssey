@@ -61,8 +61,8 @@ public:
     virtual bool OnKeyDown(const FKey& iKey);
     virtual bool OnKeyUp(const FKey& iKey);
     // For global key press events
-    virtual bool OnKeyUpGlobal(const FKey& iKey);
-    virtual bool OnKeyDownGlobal(const FKey& iKey);
+    virtual bool OnKeyUpGlobal(const FKeyEvent& InKeyEvent);
+    virtual bool OnKeyDownGlobal(const FKeyEvent& InKeyEvent);
 
     // Tick
     virtual void Tick(float iDeltaTime);

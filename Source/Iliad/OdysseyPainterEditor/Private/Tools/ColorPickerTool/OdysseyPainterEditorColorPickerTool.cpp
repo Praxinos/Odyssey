@@ -4,8 +4,10 @@
 #include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaVector.h"
+#include "OdysseyMediaRaster.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
+#include "HUD/OdysseyVectorHUD.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -22,6 +24,18 @@ UOdysseyPainterEditorColorPickerTool::UOdysseyPainterEditorColorPickerTool()
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------- OdysseyPainterEditorTool overrides
+
+bool
+UOdysseyPainterEditorColorPickerTool::IsActivable() const
+{
+    uint64 HUDFlags = GetEditor()->GetVectorHUDFlags();
+
+    return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>()
+           ||
+           ( GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>()
+            && ( HUDFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT
+              || HUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX ) );
+}
 
 bool
 UOdysseyPainterEditorColorPickerTool::OnMouseDown( const FOdysseyPoint& iPointInTexture, const FKey& iKey )

@@ -315,9 +315,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         static const uint8 CHART_DEFAULT_BLUE_UINT8  = 64;
         static const uint8 CHART_DEFAULT_ALPHA_UINT8 = 255;
         static const uint8 GRID_DEFAULT_RED_UINT8   = 0;
-        static const uint8 GRID_DEFAULT_GREEN_UINT8 = 128;
+        static const uint8 GRID_DEFAULT_GREEN_UINT8 = 127;
         static const uint8 GRID_DEFAULT_BLUE_UINT8  = 0;
-        static const uint8 GRID_DEFAULT_ALPHA_UINT8 = 255;
+        static const uint8 GRID_DEFAULT_ALPHA_UINT8 = 127;
         static const uint8 TRAJECTORY_DEFAULT_RED_UINT8   = 0;
         static const uint8 TRAJECTORY_DEFAULT_GREEN_UINT8 = 128;
         static const uint8 TRAJECTORY_DEFAULT_BLUE_UINT8  = 0;

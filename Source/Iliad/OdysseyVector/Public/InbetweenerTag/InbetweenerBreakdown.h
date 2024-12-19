@@ -75,8 +75,6 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         //bool  IsMaster();
         uint32 GetDrawingCount();
         FInbetweenerChart* GetChart();
-        void DrawSourceGrid( BLContext* iBLContext, bool iLock );
-        void DrawTargetGrid( BLContext* iBLContext, bool iLock );
         void EaseIn( float iEasing );
         void EaseOut( float iEasing );
         void EaseIn( float iEasing, uint32 iFrom, uint32 iTo );
@@ -86,12 +84,6 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         IOdysseyVectorCell* GetSourceCell();
         void SetTargetVisibility( bool iTargetVisibility );
         bool IsTargetVisible();
-
-    protected:
-        void DrawGrid( BLContext* iBLContext
-                     , eInbetweenerPointPositionType iPositionType
-                     , const FColor& iGridColor
-                     , bool iLock );
 
     private:
         double mTargetTranslationX;

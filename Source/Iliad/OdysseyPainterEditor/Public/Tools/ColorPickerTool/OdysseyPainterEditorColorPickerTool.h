@@ -33,6 +33,7 @@ public:
     virtual bool OnMouseUp( const FOdysseyPoint& iPointInTexture, const FKey& iKey ) override;
 
     virtual void Commit() override;
+    virtual bool IsActivable() const override;
 
     virtual FText GetTooltip() const override;
 

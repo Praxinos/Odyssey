@@ -16,6 +16,14 @@
 class FOdysseyPainterEditor;
 class FOdysseyVectorUndo;
 
+
+UENUM()
+enum class eInbetweenerMappingMode : uint8
+{
+    Bezier   = 0 UMETA( ToolTip = "Keep topology" ),
+    Polyline = 1 UMETA( ToolTip = "As polyline" ),
+};
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : public UObject
 {
@@ -63,7 +71,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
         //         , meta = ( ToolTip  = "Grid Type" ) )
         eInbetweenerGridType GridType;
 
-
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"
                  , meta = ( ToolTip  = "Divisions X"
@@ -87,7 +94,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"
                  , meta = ( ToolTip  = "Map As Polyline" ) )
-        bool MapAsPolyline;
+        eInbetweenerMappingMode MappingMode;
 
         //UPROPERTY( EditAnywhere
         //         , Category = "Inbetweener"

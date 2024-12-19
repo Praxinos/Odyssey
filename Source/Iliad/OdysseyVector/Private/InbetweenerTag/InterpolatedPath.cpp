@@ -50,8 +50,8 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorTagInbetweener* iInbetweener
 
     Alloc( iPolyline );
 
-    mRelativeMatrix = iPath->GetInverseWorldMatrix();
-    mRelativeMatrix.transform( iInbetweenerTag->GetOwner()->GetWorldMatrix() );
+    mRelativeMatrix = iInbetweenerTag->GetOwner()->GetInverseWorldMatrix();
+    mRelativeMatrix.transform( iPath->GetWorldMatrix() );
 
     for( FOdysseyVectorVertex* vertex : iPath->GetVertexList() )
     {

@@ -217,6 +217,11 @@ FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext )
     FOdysseyVectorGroupPaint* scene = GetScene();
     BLImage* image = iBLContext->targetImage();
 
+    // for some unknown reason there was a case where the proxy, at the loading of the file, called this func
+    // and image was nullptr. check it.
+    if( image == nullptr )
+        return;
+
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorEngine::RenderHUD);
 
     mDrawingMutex.lock();
@@ -305,6 +310,11 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
     ::ULIS::FRectD sanitizedRect;
     ::ULIS::FRectD screen;
     FOdysseyVectorGroupPaint* scene = GetScene();
+
+    // for some unknown reason there was a case where the proxy, at the loading of the file, called this func
+    // and image was nullptr. check it.
+    if( image == nullptr )
+        return ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0F );
 
     mDrawingMutex.lock();
 

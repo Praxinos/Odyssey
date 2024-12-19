@@ -29,6 +29,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathDrawingToolHUD( this ), true )
     , ColorMode( eForegroundColorMode::SolidColor )
     , Opacity( 1.0f )
+    , Brush ( nullptr )
     , TracingType( eTracingType::Organic )
     , TracingFidelity( eTracingFidelity::Highest )
     , Radius( 5.0f )
@@ -42,7 +43,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     , Debug( false )
     , mStitchedVertex( nullptr )
     , mPathNumber( 0 )
-    , Brush ( nullptr )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathDrawing64");
 

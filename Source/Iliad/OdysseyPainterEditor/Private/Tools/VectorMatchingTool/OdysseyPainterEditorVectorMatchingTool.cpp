@@ -28,6 +28,7 @@ UOdysseyPainterEditorVectorMatchingTool::UOdysseyPainterEditorVectorMatchingTool
     , Rigidity( 5 )
     , RigidifySelectionOnly( false )
     , ShowInbetweens ( false )
+    , GridDisplayMode ( eMatchingGridDisplayMode::AsQuads )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching64");
 
