@@ -3,7 +3,7 @@
 
 #include "StoryboardViewport/StoryboardVisibleArea.h"
 
-FStoryboardVisibleArea::FStoryboardVisibleArea()
+/* FStoryboardVisibleArea::FStoryboardVisibleArea()
     : FStoryboardVisibleArea(FVector2D::ZeroVector, FVector2D::ZeroVector, FVector2D::ZeroVector, 1.f)
 {
 }
@@ -34,22 +34,13 @@ bool IsValidViewportSize(const FVector2D& InViewportSize)
         && !FMath::IsNaN(InViewportSize.X) && !FMath::IsNaN(InViewportSize.Y)
 #endif
     ;
-}
+} */
 
 bool FStoryboardVisibleArea::IsValid() const
 {
-    return IsValidViewportSize(AbsoluteSize)
-        && IsValidViewportSize(VisibleSize)
-#if ENABLE_NAN_DIAGNOSTIC
-        && !FMath::IsNaN(Offset.X) && !FMath::IsNaN(Offset.Y)
-#endif
-        && DPIScale > 0 && !FMath::IsNearlyZero(DPIScale)
-#if ENABLE_NAN_DIAGNOSTIC
-        && !FMath::IsNaN(DPIScale)
-#endif
-        ;
+    return true;
 }
-
+/*
 bool FStoryboardVisibleArea::IsAbsoluteView() const
 {
     return IsAbsoluteSize() && IsCentered();
@@ -176,4 +167,4 @@ FVector2D FStoryboardVisibleArea::GetAbsoluteAreaCenter() const
 FVector2D FStoryboardVisibleArea::GetInvisibleSize() const
 {
     return AbsoluteSize - VisibleSize;
-}
+} */

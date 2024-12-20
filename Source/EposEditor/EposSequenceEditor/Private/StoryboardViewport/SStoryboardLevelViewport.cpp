@@ -165,24 +165,24 @@ void FStoryboardLevelViewportClient::UpdateCameraBounds()
 
     if (FMath::IsNearlyZero(CachedViewportSize.X) || FMath::IsNearlyZero(CachedViewportSize.Y))
     {
-        CachedVisibleArea = FStoryboardVisibleArea(CachedViewportSize);
+        CachedVisibleArea = FStoryboardVisibleArea();
         CachedZoomedVisibleArea = CachedVisibleArea;
     }
 
-    CachedVisibleArea.VisibleSize = CachedViewportSize;
-    CachedVisibleArea.AbsoluteSize = CachedViewportSize;
-    CachedVisibleArea.DPIScale = ViewportGeometry.WidgetDPIScale;
-
-    const float VisibleScale = FMath::Tan(FMath::DegreesToRadians(GetFOV() / 2.0))
-        / FMath::Tan(FMath::DegreesToRadians(GetDefaultFOV() / 2.0));
-
-    const FVector2D VisibleSize = CachedViewportSize * VisibleScale;
+    FSlateRenderTransform transform = GetZoomController().GetTransform();
+    CachedVisibleArea.TopLeft = transform.TransformPoint(FVector2D(-CachedViewportSize.X / 2.f, -CachedViewportSize.Y / 2.f));
+    CachedVisibleArea.TopRight = transform.TransformPoint(FVector2D(CachedViewportSize.X / 2.f, -CachedViewportSize.Y / 2.f));
+    CachedVisibleArea.BottomLeft = transform.TransformPoint(FVector2D(-CachedViewportSize.X / 2.f, CachedViewportSize.Y / 2.f));
+    CachedVisibleArea.BottomRight = transform.TransformPoint(FVector2D(CachedViewportSize.X / 2.f, CachedViewportSize.Y / 2.f));
 
     CachedZoomedVisibleArea = CachedVisibleArea;
-    CachedZoomedVisibleArea.VisibleSize = VisibleSize;
 
-    const FVector2D Center = CachedVisibleArea.AbsoluteSize * (FVector2D(0.5f, 0.5f) + FVector2D(mZoomController.GetPan()));
-    CachedZoomedVisibleArea.Offset = Center - (VisibleSize * 0.5f);
+    /* CachedVisibleArea.VisibleSize = CachedViewportSize;
+    CachedVisibleArea.AbsoluteSize = CachedViewportSize;
+    CachedVisibleArea.DPIScale = ViewportGeometry.WidgetDPIScale;*/
+
+    /*const FVector2D Center = CachedVisibleArea.AbsoluteSize * (FVector2D(0.5f, 0.5f) + FVector2D(mZoomController.GetPan()));
+    CachedZoomedVisibleArea.Offset = Center - (VisibleSize * 0.5f);*/
 }
 
 void
@@ -226,6 +226,8 @@ FStoryboardLevelViewportClient::DrawCanvas(FViewport& InViewport, FSceneView& Vi
             }
         }
     }
+
+    UpdateCameraBounds();
 
     FLevelEditorViewportClient::DrawCanvas(InViewport, View, Canvas);
 }
@@ -1950,8 +1952,13 @@ SStoryboardLevelViewport::OnGetViewportZoomMenuContent() const
 void
 SStoryboardLevelViewport::UpdateScrollBars()
 {
-    float width = 4.f;
-    float height = 4.f;
+    /* const FStoryboardVisibleArea& visibleArea = ViewportClient->GetZoomedVisibleArea();
+    float visibleAreaFraction = visibleArea.GetVisibleAreaFraction();
+
+    mHorizontalScrollBar->SetState((1.0 - pos.X) * ScrollbarSpaceRatio, visibleArea);
+    mVerticalScrollBar->SetState((1.0 - pos.Y) * ScrollbarSpaceRatio, ScrollbarThumbRatio);
+
+    FVector2D size = ViewportClient->GetViewportGeometry().WidgetSize;
 
     //Get the BoundingBox
 
@@ -1959,24 +1966,24 @@ SStoryboardLevelViewport::UpdateScrollBars()
     //So (0,0) is bottom left
     TArray<FVector2D> points;
     FSlateRenderTransform transform = ViewportClient->GetZoomController().GetTransform();
-    points.Add(transform.TransformPoint(FVector2D(width / 2.f, height / 2.f)));
-    points.Add(transform.TransformPoint(FVector2D(-width / 2.f, height / 2.f)));
-    points.Add(transform.TransformPoint(FVector2D(width / 2.f, -height / 2.f)));
-    points.Add(transform.TransformPoint(FVector2D(-width / 2.f, -height / 2.f)));
+    points.Add(transform.TransformPoint(FVector2D(size.X / 2.f, size.Y / 2.f)));
+    points.Add(transform.TransformPoint(FVector2D(-size.X / 2.f, size.Y / 2.f)));
+    points.Add(transform.TransformPoint(FVector2D(size.X / 2.f, -size.Y / 2.f)));
+    points.Add(transform.TransformPoint(FVector2D(-size.X / 2.f, -size.Y / 2.f)));
 
     FBox2D bbox(points);
 
     FVector2D minPos( -bbox.GetSize().X / 2.f, -bbox.GetSize().Y / 2.f);
-    FVector2D maxPos( width + bbox.GetSize().X / 2.f, height + bbox.GetSize().Y / 2.f);
+    FVector2D maxPos( size.X + bbox.GetSize().X / 2.f, size.Y + bbox.GetSize().Y / 2.f);
 
     FVector2D dist = maxPos - minPos;
-    FVector2D center = bbox.GetCenter() + FVector2D(width / 2.f, height / 2.f);
+    FVector2D center = bbox.GetCenter() + FVector2D(size.X / 2.f, size.Y / 2.f);
 
     FVector2D pos = (center - minPos) / dist;
     pos = pos.ClampAxes(0.f, 1.f) ;
 
     mHorizontalScrollBar->SetState((1.0 - pos.X) * ScrollbarSpaceRatio, ScrollbarThumbRatio);
-    mVerticalScrollBar->SetState((1.0 - pos.Y) * ScrollbarSpaceRatio, ScrollbarThumbRatio);
+    mVerticalScrollBar->SetState((1.0 - pos.Y) * ScrollbarSpaceRatio, ScrollbarThumbRatio); */
 }
 
 
@@ -1984,8 +1991,7 @@ SStoryboardLevelViewport::UpdateScrollBars()
 FVector2D
 SStoryboardLevelViewport::GetTranslationFromSlidersOffsets( float InScrollOffsetFractionX, float InScrollOffsetFractionY )
 {
-    float width = 4.f;
-    float height = 4.f;
+    /* FVector2D size = ViewportClient->GetViewportGeometry().WidgetSize;
 
     //Get the BoundingBox
 
@@ -1993,24 +1999,26 @@ SStoryboardLevelViewport::GetTranslationFromSlidersOffsets( float InScrollOffset
     //So (0,0) is bottom left
     TArray<FVector2D> points;
     FSlateRenderTransform transform = ViewportClient->GetZoomController().GetTransform();
-    points.Add(transform.TransformPoint(FVector2D(width / 2.f, height / 2.f)));
-    points.Add(transform.TransformPoint(FVector2D(-width / 2.f, height / 2.f)));
-    points.Add(transform.TransformPoint(FVector2D(width / 2.f, -height / 2.f)));
-    points.Add(transform.TransformPoint(FVector2D(-width / 2.f, -height / 2.f)));
+    points.Add(transform.TransformPoint(FVector2D(size.X / 2.f, size.Y / 2.f)));
+    points.Add(transform.TransformPoint(FVector2D(-size.X / 2.f, size.Y / 2.f)));
+    points.Add(transform.TransformPoint(FVector2D(size.X / 2.f, -size.Y / 2.f)));
+    points.Add(transform.TransformPoint(FVector2D(-size.X / 2.f, -size.Y / 2.f)));
 
     FBox2D bbox(points);
 
     FVector2D minPos(-bbox.GetSize().X / 2.f, -bbox.GetSize().Y / 2.f);
-    FVector2D maxPos(width + bbox.GetSize().X / 2.f, height + bbox.GetSize().Y / 2.f);
+    FVector2D maxPos(size.X + bbox.GetSize().X / 2.f, size.Y + bbox.GetSize().Y / 2.f);
 
     FVector2D dist = maxPos - minPos;
 
     FVector2D pos = FVector2D( 1.f - (InScrollOffsetFractionX / (ScrollbarSpaceRatio)), 1.f - (InScrollOffsetFractionY / (ScrollbarSpaceRatio)));
     pos *= dist;
     pos += minPos;
-    pos -= FVector2D(width / 2.f, height / 2.f);
+    pos -= FVector2D(size.X / 2.f, size.Y / 2.f);
 
-    return pos;
+    return ViewportClient->GetZoomController().WidgetToOffset(pos); */
+
+    return FVector2D(0.f, 0.f);
 }
 
 void

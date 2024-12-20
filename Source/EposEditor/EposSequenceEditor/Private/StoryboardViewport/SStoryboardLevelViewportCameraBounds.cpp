@@ -44,15 +44,15 @@ void SStoryboardLevelViewportCameraBounds::DrawCameraBounds(const FPaintArgs& In
 
     ++InOutLayerId;
 
-    const FVector2D Offset = StoryboardLevelViewportClient->GetZoomController().GetPan();
     const FStoryboardVisibleArea& VisibleArea = StoryboardLevelViewportClient->GetZoomedVisibleArea();
+    //const FVector2D Offset = VisibleArea.Offset;
 
     if (!VisibleArea.IsValid())
     {
         return;
     }
 
-    const FVector2D QuadTopTopLeft = VisibleArea.GetVisiblePosition(-VisibleArea.AbsoluteSize) - Offset;
+    /*const FVector2D QuadTopTopLeft = VisibleArea.GetVisiblePosition(-VisibleArea.AbsoluteSize) - Offset;
     const FVector2D QuadTopBottomRight = VisibleArea.GetVisiblePosition({VisibleArea.AbsoluteSize.X * 2.f, 0.f}) + FVector2D(Offset.X, 0.f);
 
     const FVector2D QuadLeftTopLeft = VisibleArea.GetVisiblePosition({-VisibleArea.AbsoluteSize.X, 0.f}) - FVector2D(Offset.X, 0.f);
@@ -82,11 +82,43 @@ void SStoryboardLevelViewportCameraBounds::DrawCameraBounds(const FPaintArgs& In
     const FPaintGeometry BottomRect = InAllottedGeometry.ToPaintGeometry(
         QuadBottomBottomRight - QuadBottomTopLeft,
         FSlateLayoutTransform(QuadBottomTopLeft + Offset)
-    );
+    ); */
 
     static const FSlateBrush* White = FAppStyle::Get().GetBrush("Brushes.White");
 
-    FSlateDrawElement::MakeBox(
+    /*FSlateDrawElement::MakeBox(
+        OutDrawElements,
+        InOutLayerId,
+        InAllottedGeometry.ToPaintGeometry(),
+        White,
+        ESlateDrawEffect::NoPixelSnapping,
+        InQuadColor
+    ); */
+
+    const FVector2D CachedViewportSize = StoryboardLevelViewportClient->GetViewportGeometry().WidgetSize;
+    if (FMath::IsNearlyZero(CachedViewportSize.X) || FMath::IsNearlyZero(CachedViewportSize.Y))
+    {
+        return;
+    }
+
+    FSlateDrawElement::MakeLines(
+        OutDrawElements,
+        InOutLayerId,
+        InAllottedGeometry.ToPaintGeometry(),
+        {
+            FVector2f(VisibleArea.TopLeft + FVector2D(CachedViewportSize.X / 2.f, CachedViewportSize.Y / 2.f)),
+            FVector2f(VisibleArea.TopRight + FVector2D(CachedViewportSize.X / 2.f, CachedViewportSize.Y / 2.f)),
+            FVector2f(VisibleArea.BottomRight + FVector2D(CachedViewportSize.X / 2.f, CachedViewportSize.Y / 2.f)),
+            FVector2f(VisibleArea.BottomLeft + FVector2D(CachedViewportSize.X / 2.f, CachedViewportSize.Y / 2.f)),
+            FVector2f(VisibleArea.TopLeft + FVector2D(CachedViewportSize.X / 2.f, CachedViewportSize.Y / 2.f))
+        },
+        ESlateDrawEffect::NoPixelSnapping,
+        FLinearColor::Red,
+        true,
+        2.f
+    );
+
+    /*FSlateDrawElement::MakeBox(
         OutDrawElements,
         InOutLayerId,
         TopRect,
@@ -120,5 +152,5 @@ void SStoryboardLevelViewportCameraBounds::DrawCameraBounds(const FPaintArgs& In
         White,
         ESlateDrawEffect::NoPixelSnapping,
         InQuadColor
-    );
+    );*/
 }

@@ -7,6 +7,15 @@
 
 struct FStoryboardVisibleArea
 {
+    FVector2D TopLeft = FVector2D(0.f, 0.f);
+    FVector2D TopRight = FVector2D(0.f, 0.f);
+    FVector2D BottomLeft = FVector2D(0.f, 0.f);
+    FVector2D BottomRight = FVector2D(0.f, 0.f);
+
+    //Return false if the area is not displayable (example: having a null area )
+    bool IsValid() const;
+
+    /*
     FVector2D Offset;
     FVector2D VisibleSize;
     FVector2D AbsoluteSize;
@@ -36,5 +45,5 @@ struct FStoryboardVisibleArea
     FVector2D GetVisibleAreaCenter() const;
     FVector2D GetAbsoluteVisibleAreaCenter() const;
     FVector2D GetAbsoluteAreaCenter() const;
-    FVector2D GetInvisibleSize() const;
+    FVector2D GetInvisibleSize() const; */
 };

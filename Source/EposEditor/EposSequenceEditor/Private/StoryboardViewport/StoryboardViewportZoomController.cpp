@@ -118,8 +118,11 @@ FStoryboardViewportZoomController::GetTransform() const
     FVector2D viewportPan = OffsetToWidget(mPan);
 
     float radian = FUnitConversion::Convert( mRotation, EUnit::Degrees, EUnit::Radians );
-    FSlateRenderTransform transform = FSlateRenderTransform( FQuat2D( radian ) );
+    FSlateRenderTransform transform = FSlateRenderTransform();
+
+    transform = transform.Concatenate(FSlateRenderTransform( FQuat2D( radian ) ));
     transform = transform.Concatenate(FSlateRenderTransform( mZoom ));
     transform = transform.Concatenate(FSlateRenderTransform( viewportPan ));
+
     return transform;
 }
