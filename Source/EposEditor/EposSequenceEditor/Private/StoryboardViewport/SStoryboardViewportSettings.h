@@ -26,4 +26,7 @@ public:
 public:
     /** Generate menu content for the combo button */
     static TSharedRef<SWidget> GetMenuContent();
+
+private:
+    static FReply OnCameraBoundsColorBlockMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent, TSharedPtr<SBox> iWidget);
 };

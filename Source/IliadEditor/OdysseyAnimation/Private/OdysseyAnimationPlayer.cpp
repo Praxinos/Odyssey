@@ -331,6 +331,8 @@ UOdysseyAnimationPlayer::CopyBlocksToTexture(const TArray<TSharedPtr<::ULIS::FBl
     if ( iBlocks.IsEmpty() )
         return;
 
+    FTextureCompilingManager::Get().FinishCompilation({ Texture });
+
     ::ULIS::eFormat format = iBlocks[0]->Format();
 
     //convert block to BGRA8 if needed*
@@ -532,7 +534,11 @@ UOdysseyAnimationPlayer::PostLoad()
         return;
 
     //will create the texture if needed
-    AnimationChanged();
+    if (Animation)
+    {
+        mInvalidTileMap = FULISInvalidTileMap(64, Animation->GetWidth(), Animation->GetHeight());
+        UOdysseyAnimation::OnImageRenderingChangedDelegate().AddUObject(this, &UOdysseyAnimationPlayer::OnImageRenderingChanged);
+    }
 }
 
 void

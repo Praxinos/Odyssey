@@ -13,6 +13,8 @@
 #include "Misc/FrameRate.h"
 #include "Framework/Application/IInputProcessor.h"
 
+#include "StoryboardViewport/StoryboardVisibleArea.h"
+#include "StoryboardViewport/StoryboardViewportZoomController.h"
 #include "Tools/EposSequenceTools.h"
 
 class ACineCameraActor;
@@ -38,14 +40,47 @@ class SStoryboardViewportSettings;
 struct FQualifiedFrameTime;
 struct FTypeInterfaceProxy;
 
-/** Overridden level viewport client for this viewport */
-struct FStoryboardViewportClient : FLevelEditorViewportClient
+struct FStoryboardViewportGeometry
 {
-    FStoryboardViewportClient();
-
-    void SetViewportWidget(const TSharedPtr<SEditorViewport>& InViewportWidget) { EditorViewportWidget = InViewportWidget; }
+    FBox2D CameraBounds = FBox2D(FVector2D::ZeroVector, FVector2D::ZeroVector);
+    FVector2D WidgetSize = FVector2D::ZeroVector;
+    float WidgetDPIScale = 1.f;
+    FIntPoint VirtualSize = FIntPoint::ZeroValue;
 };
 
+/** Overridden level viewport client for this viewport */
+class FStoryboardLevelViewportClient : public FLevelEditorViewportClient
+{
+public:
+    ~FStoryboardLevelViewportClient();
+    FStoryboardLevelViewportClient();
+
+public:
+    virtual FSceneView* CalcSceneView(FSceneViewFamily* ViewFamily, const int32 StereoViewIndex) override;
+    virtual void DrawCanvas(FViewport& InViewport, FSceneView& View, FCanvas& Canvas) override;
+
+public:
+    const FStoryboardViewportGeometry& GetViewportGeometry() const;
+
+    void SetViewportWidget(const TSharedPtr<SEditorViewport>& InViewportWidget) { EditorViewportWidget = InViewportWidget; }
+    void SetStoryboardLevelViewport(TSharedPtr<class SStoryboardLevelViewport> iStoryboardViewport) { StoryboardViewportWidget = iStoryboardViewport; };
+
+    FVector2D GetNormalizedOffset() const;
+    void UpdateCameraBounds();
+    const FStoryboardVisibleArea& GetZoomedVisibleArea() const;
+    float GetDefaultFOV() const;
+    float GetFOV() const;
+
+    FStoryboardViewportZoomController& GetZoomController();
+
+private:
+    TWeakPtr<class SStoryboardLevelViewport> StoryboardViewportWidget;
+    FStoryboardViewportGeometry ViewportGeometry;
+
+    FStoryboardVisibleArea CachedVisibleArea;
+    FStoryboardVisibleArea CachedZoomedVisibleArea;
+    FStoryboardViewportZoomController mZoomController;
+};
 
 /** struct containing UI data - populated once per frame */
 struct FUIData
@@ -110,7 +145,7 @@ public:
     SLATE_END_ARGS()
 
     /** Access this viewport's viewport client */
-    TSharedPtr<FStoryboardViewportClient> GetViewportClient() const { return ViewportClient; }
+    TSharedPtr<FStoryboardLevelViewportClient> GetViewportClient() const { return ViewportClient; }
 
     TSharedPtr<SLevelViewport> GetLevelViewport() const;
 
@@ -165,7 +200,7 @@ private:
 
     float GetPlayTimeMinDesiredWidth() const;
 
-private:
+public:
     int32 GetScaleVisibleWidgetIndex() const;
 
     EVisibility GetMoveAndScalePlaneVisibility() const;
@@ -192,28 +227,16 @@ private:
     float GetCameraFocalLength() const;
     void SetCameraFocalLength( float iFocalLength );
 
-    float GetViewportRotation() const; // in degrees
-    void SetViewportRotation( float iRotation ); // in degrees
-
     void AddViewportRotation( float iDeltaRotation ); // in degrees
 
     bool IsViewportRotationChecked( float iRotation ); // in degrees
     TSharedRef<SWidget> OnGetViewportRotationMenuContent() const;
 
-    float GetViewportZoom() const;
-    void SetViewportZoom( float iZoom, FVector2D iZoomPosition = FVector2D(0.0f, 0.0f) );
     void AddViewportZoom( float iDeltaZoom );
-    void FitToScreen();
     TSharedRef<SWidget> OnGetViewportZoomMenuContent() const;
     bool IsViewportZoomChecked( float iZoom );
 
-    FVector2D GetViewportPan() const;
-    void SetViewportPan( FVector2D iPan );
-
-    FSlateRenderTransform GetViewportTransform() const;
-    void UpdateViewportWidgetTransform();
     FReply OnViewportResetTransformButtonClicked();
-    void ResetViewportTransform();
 
     FVector2D GetTranslationFromSlidersOffsets(float InScrollOffsetFractionX, float InScrollOffsetFractionY);
     void UpdateScrollBars();
@@ -284,11 +307,7 @@ private:
     TSharedPtr<FTypeInterfaceProxy> TypeInterfaceProxy;
 
     /** The level editor viewport client for this viewport */
-    TSharedPtr<FStoryboardViewportClient> ViewportClient;
-
-    float mViewportRotation { 0.f };
-    FVector2D mViewportPan { 0.f, 0.f };
-    float mViewportZoom { 1.f };
+    TSharedPtr<FStoryboardLevelViewportClient> ViewportClient;
 
     TSharedPtr<SSplitter> mNoteSplitter;
 
