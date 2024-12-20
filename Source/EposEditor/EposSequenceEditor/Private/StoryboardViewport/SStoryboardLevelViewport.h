@@ -233,7 +233,6 @@ public:
     TSharedRef<SWidget> OnGetViewportRotationMenuContent() const;
 
     void AddViewportZoom( float iDeltaZoom );
-    //void FitToScreen();
     TSharedRef<SWidget> OnGetViewportZoomMenuContent() const;
     bool IsViewportZoomChecked( float iZoom );
 

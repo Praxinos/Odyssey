@@ -39,7 +39,6 @@ FEposSequenceEditorCommands::RegisterCommands()
 
     UI_COMMAND( StoryboardViewportAdd10Zoom,      "Storyboard Viewport Zoom +10%", "+10% to the viewport Zoom", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( StoryboardViewportSubstract10Zoom,"Storyboard Viewport Zoom -10%", "-10% to the viewport Zoom", EUserInterfaceActionType::Button, FInputChord() );
-    UI_COMMAND( StoryboardViewportFitToScreen, "Storyboard Viewport Fit To Screen", "Zoom the the viewport to fit its content in the available space", EUserInterfaceActionType::Button, FInputChord() );
     UI_COMMAND( StoryboardViewportResetPanZoomRotate, "Storyboard Viewport Reset Pan, Zoom and Rotation ", "Resets the viewport Pan, Zoom and Rotation values", EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control | EModifierKey::Shift, EKeys::M) );
 
     FTextFormat rotation_label_format( LOCTEXT( "storyboard-viewport-rotation-label", "Set Storyboard Viewport to {0}°" ) );

@@ -502,7 +502,6 @@ class SStoryboardPreviewViewport : public SLevelViewport
 public:
     ~SStoryboardPreviewViewport()
     {
-        //GetMutableDefault<UEposSequenceEditorSettings>()->OnChange.RemoveAll(this);
     }
 
     void Construct(const FArguments& InArgs, const FAssetEditorViewportConstructionArgs& InConstructionArguments, TSharedPtr<SStoryboardLevelViewport> iViewport)
@@ -607,7 +606,6 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
     ViewportWidget = SNew( SStoryboardPreviewViewport, ViewportConstructionArgs, SharedThis(this) )
         .LevelEditorViewportClient(ViewportClient)
         .ParentLevelEditor(InArgs._ParentLevelEditor);
-    //ViewportWidget->SetRenderTransformPivot( FVector2D( .5f, .5f ) );
     ViewportClient->SetViewportWidget(ViewportWidget);
     ViewportClient->SetStoryboardLevelViewport(SharedThis(this));
 
@@ -624,7 +622,6 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
 
     FilmOverlayOptions = SNew(SFilmOverlayOptions);
     StoryboardViewportSettings = SNew(SStoryboardViewportSettings);
-    //FilmOverlayOptions->GetFilmOverlayWidget()->SetRenderTransformPivot( FVector2D( .5f, .5f ) );
 
     ViewportClient->GetModeTools()->OnEditorModeIDChanged().AddSP( this, &SStoryboardLevelViewport::OnToggleAllPlanes );
 
@@ -681,11 +678,6 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
         ];
 
     //---
-
-    //mActorInteractivePickerWidget = PropertyCustomizationHelpers::MakeInteractiveActorPicker(
-    //    FOnGetAllowedClasses::CreateSP( this, &SStoryboardLevelViewport::OnGetAllowedClassesForPlaneDistance ),
-    //    FOnShouldFilterActor::CreateSP( this, &SStoryboardLevelViewport::OnShouldFilterActorForPlaneDistance ),
-    //    FOnActorSelected::CreateSP( this, &SStoryboardLevelViewport::OnActorSelectedForPlaneDistance ) );
 
     mActorInteractivePickerWidget = SNew( SStoryboardInteractiveActorPicker )
         .ToolTipText( LOCTEXT( "PickButtonLabel", "Pick Actor from scene" ) )
@@ -774,43 +766,26 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
             [
                 SNew(SVerticalBox)
 
-                /* + SVerticalBox::Slot()
-                [
-                    SNew(SSpacer)
-                ] */
-
                 + SVerticalBox::Slot()
-                //.AutoHeight()
                 [
-                    /* SNew(SBox)
-                    .Clipping( EWidgetClipping::ClipToBoundsAlways )
-                    .HAlign(HAlign_Center)
-                    [*/
-                        /*SAssignNew(mViewportTransformBox, SBox)
-                        .HeightOverride(this, &SStoryboardLevelViewport::GetDesiredViewportHeight)
-                        .WidthOverride(this, &SStoryboardLevelViewport::GetDesiredViewportWidth)
-                        [*/
-                            SNew(SOverlay)
-                            //.Clipping( EWidgetClipping::ClipToBoundsAlways )
+                    SNew(SOverlay)
 
-                            + SOverlay::Slot()
-                            [
-                                ViewportWidget.ToSharedRef()
-                            ]
+                    + SOverlay::Slot()
+                    [
+                        ViewportWidget.ToSharedRef()
+                    ]
 
-                            + SOverlay::Slot()
-                            [
-                                FilmOverlayOptions->GetFilmOverlayWidget()
-                            ]
+                    + SOverlay::Slot()
+                    [
+                        FilmOverlayOptions->GetFilmOverlayWidget()
+                    ]
 
-                            + SOverlay::Slot()
-                            [
-                                SAssignNew( mWidgetNotesAsOverlay, SNotesAsOverlay )
-                                .Visibility_Lambda( [=]() { return ( GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay /*&& SStoryboardLevelViewport::GetVisibleWidgetIndex() == 0*/ ) ? EVisibility::HitTestInvisible : EVisibility::Collapsed; } )
-                                .ListItemsSource( &mNotes )
-                            ]
-                        //]
-                    //]
+                    + SOverlay::Slot()
+                    [
+                        SAssignNew( mWidgetNotesAsOverlay, SNotesAsOverlay )
+                        .Visibility_Lambda( [=]() { return ( GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay /*&& SStoryboardLevelViewport::GetVisibleWidgetIndex() == 0*/ ) ? EVisibility::HitTestInvisible : EVisibility::Collapsed; } )
+                        .ListItemsSource( &mNotes )
+                    ]
                 ]
 
                 + SVerticalBox::Slot()
@@ -1026,11 +1001,6 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
                         ]
                     ]
                 ]
-
-                /*+ SVerticalBox::Slot()
-                [
-                    SNew(SSpacer)
-                ]*/
             ]
         ]
 
@@ -1205,8 +1175,6 @@ void SStoryboardLevelViewport::Construct(const FArguments& InArgs)
         ]
     ];
 
-    //mViewportTransformBox->SetRenderTransformPivot( FVector2D( .5f, .5f ) );
-
     ViewportClient->UpdateCameraBounds();
 
     OnSequencerChanged();
@@ -1257,10 +1225,6 @@ SStoryboardLevelViewport::CreateCommandList()
         FEposSequenceEditorCommands::Get().StoryboardViewportSubstract10Zoom,
         FUIAction( FExecuteAction::CreateSP( this, &SStoryboardLevelViewport::AddViewportZoom, -0.1f ) )
     );
-    /* CommandList->MapAction(
-        FEposSequenceEditorCommands::Get().StoryboardViewportFitToScreen,
-        FUIAction( FExecuteAction::CreateSP( this, &SStoryboardLevelViewport::FitToScreen ) )
-    ); */
     CommandList->MapAction(
         FEposSequenceEditorCommands::Get().StoryboardViewportResetPanZoomRotate,
         FUIAction(
@@ -1763,44 +1727,6 @@ SStoryboardLevelViewport::AddViewportZoom( float iDeltaZoom )
     ViewportClient->GetZoomController().SetZoom(ViewportClient->GetZoomController().GetZoom() + iDeltaZoom);
 }
 
-/* void
-SStoryboardLevelViewport::FitToScreen()
-{
-    float width = ViewportWidget->GetCachedGeometry().GetLocalSize().X;
-    float height = ViewportWidget->GetCachedGeometry().GetLocalSize().Y;
-
-    //Get the BoundingBox
-
-    //All calculations are done in the Transform Coodinate system
-    //So (0,0) is bottom left
-    TArray<FVector2D> points;
-    FSlateRenderTransform transform = GetViewportTransform();
-    points.Add(transform.TransformPoint(FVector2D(width / 2.f, height / 2.f)));
-    points.Add(transform.TransformPoint(FVector2D(-width / 2.f, height / 2.f)));
-    points.Add(transform.TransformPoint(FVector2D(width / 2.f, -height / 2.f)));
-    points.Add(transform.TransformPoint(FVector2D(-width / 2.f, -height / 2.f)));
-
-    FBox2D bbox(points);
-
-    float selfRatio = (float)width / height;
-    float ratio = bbox.GetSize().X / bbox.GetSize().Y;
-
-    float zoom = GetViewportZoom();
-    if (ratio > selfRatio)
-    {
-        //width
-        zoom *= width / bbox.GetSize().X;
-    }
-    else
-    {
-        //height
-        zoom *= height / bbox.GetSize().Y;
-    }
-
-    SetViewportZoom(zoom);
-    SetViewportPan(FVector2D(0.0f, 0.0f));
-} */
-
 bool
 SStoryboardLevelViewport::IsViewportZoomChecked( float iZoom )
 {
@@ -1826,9 +1752,6 @@ SStoryboardLevelViewport::OnGetViewportZoomMenuContent() const
             ViewportZoomMenuBuilder.AddMenuEntry( command.Value, NAME_None, FText::FromString( percentage.ToString( FMath::RoundToInt32(command.Key * 100.f) ) ) );
         }
         ViewportZoomMenuBuilder.EndSection();
-
-        //ViewportZoomMenuBuilder.AddSeparator();
-        //ViewportZoomMenuBuilder.AddMenuEntry( FEposSequenceEditorCommands::Get().StoryboardViewportFitToScreen, NAME_None, LOCTEXT( "storyboard-viewport-fit-to-screen", "Fit To Screen" ) );
     }
 
     return ViewportZoomMenuBuilder.MakeWidget();
@@ -1913,7 +1836,6 @@ void
 SStoryboardLevelViewport::OnHorizontalScrollBarScrolled(float InScrollOffsetFraction)
 {
     FVector2D translation = GetTranslationFromSlidersOffsets(InScrollOffsetFraction, mVerticalScrollBar->DistanceFromTop());
-    //FSlateRenderTransform transform = ViewportClient->GetZoomController().GetTransform();
     ViewportClient->GetZoomController().SetPan(FVector2D(translation.X, ViewportClient->GetZoomController().GetPan().Y));
 }
 
@@ -1922,7 +1844,6 @@ void
 SStoryboardLevelViewport::OnVerticalScrollBarScrolled( float InScrollOffsetFraction )
 {
     FVector2D translation = GetTranslationFromSlidersOffsets(mHorizontalScrollBar->DistanceFromTop(), InScrollOffsetFraction);
-    //FSlateRenderTransform transform = ViewportClient->GetZoomController().GetTransform();
     ViewportClient->GetZoomController().SetPan(FVector2D(ViewportClient->GetZoomController().GetPan().X, translation.Y));
 }
 

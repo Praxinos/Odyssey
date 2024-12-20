@@ -48,11 +48,6 @@ void SStoryboardLevelViewportCameraBounds::DrawCameraBounds(const FPaintArgs& In
 
     const FStoryboardVisibleArea& VisibleArea = StoryboardLevelViewportClient->GetZoomedVisibleArea();
 
-    if (!VisibleArea.IsValid())
-    {
-        return;
-    }
-
     static const FSlateBrush* White = FAppStyle::Get().GetBrush("Brushes.White");
 
     const FVector2D CachedViewportSize = StoryboardLevelViewportClient->GetViewportGeometry().WidgetSize;
