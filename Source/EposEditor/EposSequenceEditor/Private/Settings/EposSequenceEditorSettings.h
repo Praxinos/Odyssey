@@ -81,6 +81,12 @@ public:
 
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
     bool DisplayActorControls { true };
+
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
+    bool bDisplayCameraBounds { true };
+
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
+    FLinearColor CameraBoundsShadeColor = FLinearColor(0.0, 0.0, 0.0, 0.8);
 };
 
 //---
