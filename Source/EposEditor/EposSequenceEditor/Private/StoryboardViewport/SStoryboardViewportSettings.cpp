@@ -12,6 +12,7 @@
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SComboButton.h"
 #include "Widgets/Colors/SColorBlock.h"
+#include "Widgets/Colors/SColorPicker.h"
 #include "Widgets/Input/SCheckBox.h"
 #include "EditorStyleSet.h"
 
@@ -155,51 +156,129 @@ SStoryboardViewportSettings::GetMenuContent()
                             NAME_None,
                             EUserInterfaceActionType::ToggleButton );
 
-    //menuBuilder.BeginSection( TEXT("NoteSettings"), LOCTEXT( "storyboard-viewport-settings.note-settings-section.label", "Note Settings" ) );
+    auto ExecuteDisplayNoteInViewport = [=]()
     {
-        auto ExecuteDisplayNoteInViewport = [=]()
-        {
-            GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport = !GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport;
-        };
+        GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport = !GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport;
+    };
 
-        auto IsDisplayNoteInViewport = [=]() -> bool
-        {
-            return GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport;
-        };
+    auto IsDisplayNoteInViewport = [=]() -> bool
+    {
+        return GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteInViewport;
+    };
 
-        menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-in-viewport-label", "Display notes in viewport" ),
-                                LOCTEXT( "storyboard-viewport-settings.display-in-viewport-tooltip", "Display the notes at the current frame under the 3D scene." ),
-                                FSlateIcon(),
-                                FUIAction( FExecuteAction::CreateLambda( ExecuteDisplayNoteInViewport ),
-                                            FCanExecuteAction(),
-                                            FIsActionChecked::CreateLambda( IsDisplayNoteInViewport ) ),
-                                NAME_None,
-                                EUserInterfaceActionType::ToggleButton );
+    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-in-viewport-label", "Display notes in viewport" ),
+                            LOCTEXT( "storyboard-viewport-settings.display-in-viewport-tooltip", "Display the notes at the current frame under the 3D scene." ),
+                            FSlateIcon(),
+                            FUIAction( FExecuteAction::CreateLambda( ExecuteDisplayNoteInViewport ),
+                                        FCanExecuteAction(),
+                                        FIsActionChecked::CreateLambda( IsDisplayNoteInViewport ) ),
+                            NAME_None,
+                            EUserInterfaceActionType::ToggleButton );
 
-        //
+    //
 
-        auto ExecuteDisplayNoteAsOverlay = [=]()
-        {
-            GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay = !GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay;
-        };
+    auto ExecuteDisplayNoteAsOverlay = [=]()
+    {
+        GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay = !GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay;
+    };
 
-        auto IsDisplayNoteAsOverlay = [=]() -> bool
-        {
-            return GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay;
-        };
+    auto IsDisplayNoteAsOverlay = [=]() -> bool
+    {
+        return GetMutableDefault<UEposSequenceEditorSettings>()->NoteSettings.DisplayNoteAsOverlay;
+    };
 
-        menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-as-overlay-label", "Display notes as overlay" ),
-                                LOCTEXT( "storyboard-viewport-settings.display-as-overlay-tooltip", "Display the notes at the current frame on the 3D scene." ),
-                                FSlateIcon(),
-                                FUIAction( FExecuteAction::CreateLambda( ExecuteDisplayNoteAsOverlay ),
-                                            FCanExecuteAction(),
-                                            FIsActionChecked::CreateLambda( IsDisplayNoteAsOverlay ) ),
-                                NAME_None,
-                                EUserInterfaceActionType::ToggleButton );
-    }
-    //menuBuilder.EndSection();
+    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-as-overlay-label", "Display notes as overlay" ),
+                            LOCTEXT( "storyboard-viewport-settings.display-as-overlay-tooltip", "Display the notes at the current frame on the 3D scene." ),
+                            FSlateIcon(),
+                            FUIAction( FExecuteAction::CreateLambda( ExecuteDisplayNoteAsOverlay ),
+                                        FCanExecuteAction(),
+                                        FIsActionChecked::CreateLambda( IsDisplayNoteAsOverlay ) ),
+                            NAME_None,
+                            EUserInterfaceActionType::ToggleButton );
+
+
+
+
+    /* bool bDisplayCameraBounds { true };
+    FLinearColor CameraBoundsShadeColor = FLinearColor(0.0, 0.0, 0.0, 0.8);*/
+
+    auto ExecuteDisplayCameraBounds = [=]()
+    {
+        GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.bDisplayCameraBounds = !GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.bDisplayCameraBounds;
+    };
+
+    auto IsDisplayCameraBounds = [=]() -> bool
+    {
+        return GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.bDisplayCameraBounds;
+    };
+
+    menuBuilder.AddMenuEntry( LOCTEXT( "storyboard-viewport-settings.display-camera-bounds-label", "Display Camera Bounds" ),
+                            LOCTEXT( "storyboard-viewport-settings.display-camera-bounds-tooltip", "Display current camera bounds on the 3D scene." ),
+                            FSlateIcon(),
+                            FUIAction( FExecuteAction::CreateLambda( ExecuteDisplayCameraBounds ),
+                                        FCanExecuteAction(),
+                                        FIsActionChecked::CreateLambda( IsDisplayCameraBounds ) ),
+                            NAME_None,
+                            EUserInterfaceActionType::ToggleButton );
+
+    /*UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Storyboard Viewport")
+    FLinearColor CameraBoundsShadeColor = FLinearColor(0.0, 0.0, 0.0, 0.8);*/
+
+
+    TSharedPtr<SBox> boxWidget = SNew(SBox);
+
+    boxWidget->SetContent(
+        SNew(SColorBlock)
+        .AlphaBackgroundBrush(FAppStyle::Get().GetBrush("ColorPicker.RoundedAlphaBackground"))
+        .ShowBackgroundForAlpha(true)
+        .AlphaDisplayMode(EColorBlockAlphaDisplayMode::Separate)
+        .OnMouseButtonDown_Static(&SStoryboardViewportSettings::OnCameraBoundsColorBlockMouseButtonDown, boxWidget)
+        .Size(FVector2D(70.0f, 20.0f))
+        .CornerRadius(FVector4(4.0f,4.0f,4.0f,4.0f))
+        .Color_Lambda(
+            []()
+            {
+                return GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.CameraBoundsShadeColor;
+            }
+        )
+    );
+
+    menuBuilder.AddWidget(
+        boxWidget.ToSharedRef(),
+        LOCTEXT( "storyboard-viewport-settings.camera-bounds-color-label", "Display Camera Bounds" ),
+        false,
+        true,
+        LOCTEXT( "storyboard-viewport-settings.camera-bounds-color-tooltip", "Display current camera bounds on the 3D scene." )
+    );
 
     return menuBuilder.MakeWidget();
+}
+
+FReply
+SStoryboardViewportSettings::OnCameraBoundsColorBlockMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent, TSharedPtr<SBox> iWidget)
+{
+    if (MouseEvent.GetEffectingButton() != EKeys::LeftMouseButton)
+    {
+        return FReply::Unhandled();
+    }
+
+    FColorPickerArgs PickerArgs;
+    {
+        PickerArgs.bUseAlpha = true;
+        PickerArgs.OnColorCommitted = FOnLinearColorValueChanged::CreateLambda(
+            [](FLinearColor iColor)
+            {
+                GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.CameraBoundsShadeColor = iColor;
+            }
+        );
+        PickerArgs.ParentWidget = iWidget;
+        PickerArgs.bOpenAsMenu = true;
+        PickerArgs.InitialColor = GetMutableDefault<UEposSequenceEditorSettings>()->ViewportSettings.CameraBoundsShadeColor;
+    }
+
+    OpenColorPicker(PickerArgs);
+
+    return FReply::Handled();
 }
 
 #undef LOCTEXT_NAMESPACE
