@@ -128,30 +128,23 @@ struct FTypeInterfaceProxy : INumericTypeInterface<double>
 
 FStoryboardLevelViewportClient::~FStoryboardLevelViewportClient()
 {
-    mZoomController.OnChanged().RemoveAll(this);
 }
 
 FStoryboardLevelViewportClient::FStoryboardLevelViewportClient()
     : FLevelEditorViewportClient(nullptr)
+    , mZoomController(this)
 {
     bDrawAxes = false;
     bIsRealtime = true;
     SetAllowCinematicControl(true);
     bDisableInput = false;
 
-    mZoomController.OnChanged().AddRaw(this, &FStoryboardLevelViewportClient::OnZoomControllerChanged);
 }
 
 FStoryboardViewportZoomController&
 FStoryboardLevelViewportClient::GetZoomController()
 {
     return mZoomController;
-}
-
-void
-FStoryboardLevelViewportClient::OnZoomControllerChanged()
-{
-    UpdateCameraBounds();
 }
 
 const FStoryboardViewportGeometry&
@@ -2499,13 +2492,25 @@ SStoryboardLevelViewport::OnMouseMove(const FGeometry& MyGeometry, const FPointe
         FVector2D mousePosition = MyGeometry.AbsoluteToLocal(iMouseEvent.GetScreenSpacePosition());
         float delta = mousePosition.X - mZoomMouseInitialPosition.X;
         float smoothness = 200.f; //TODO: do a Setting to let the user change it at will
-        FVector2D size = MyGeometry.GetLocalSize();
+        FVector2D size = ViewportClient->GetViewportGeometry().WidgetSize;
         FVector2D center = FVector2D( size.X / 2.f, size.Y / 2.f );
 
         if (delta > KINDA_SMALL_NUMBER || delta < KINDA_SMALL_NUMBER)
         {
             float zoom = FMath::Exp(mZoomInitialZoom + (delta / smoothness));
-            ViewportClient->GetZoomController().SetZoom(zoom, mZoomMouseInitialPosition - center);
+
+            FVector2D zoomPosition = mZoomMouseInitialPosition - center;
+            //delta is expressed in percentage
+            zoomPosition /= ViewportClient->GetViewportGeometry().WidgetSize;
+
+            //a movement from center of the screen to a extremity of the screen is a movement of 1.f
+            //so we must multiply by 2 to match the pan amount with the mouse
+            zoomPosition *= 2.f;
+
+            //Viewport offset is expressed with inverted X values
+            //so we must invert mouse movement on X too
+            zoomPosition *= FVector2D(-1.f, 1.0f);
+            ViewportClient->GetZoomController().SetZoom(zoom, zoomPosition);
         }
 
         return FReply::Handled();

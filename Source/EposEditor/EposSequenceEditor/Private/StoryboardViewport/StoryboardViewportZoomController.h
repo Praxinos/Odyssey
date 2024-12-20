@@ -5,11 +5,11 @@
 
 #include "Math/MathFwd.h"
 
+class FStoryboardLevelViewportClient;
 class FStoryboardViewportZoomController
 {
 public:
-    FSimpleMulticastDelegate& OnChanged();
-    FStoryboardViewportZoomController();
+    FStoryboardViewportZoomController(FStoryboardLevelViewportClient* iViewportClient);
 
 public:
     float GetRotation() const; // in degrees
@@ -25,10 +25,13 @@ public:
 
     FSlateRenderTransform GetTransform() const;
 
+    FVector2D WidgetToOffset(const FVector2D& iPosition) const;
+    FVector2D OffsetToWidget(const FVector2D& iPosition) const;
+
 private:
+    FStoryboardLevelViewportClient* mViewportClient;
+
     float mRotation = 0.f;
     FVector2D mPan = FVector2D( 0.f, 0.f );
     float mZoom = 1.f;
-
-    FSimpleMulticastDelegate mOnChanged;
 };

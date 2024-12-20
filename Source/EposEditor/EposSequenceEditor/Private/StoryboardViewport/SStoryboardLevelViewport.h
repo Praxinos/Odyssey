@@ -80,9 +80,6 @@ public:
     FStoryboardViewportZoomController& GetZoomController();
 
 private:
-    void OnZoomControllerChanged();
-
-private:
     TWeakPtr<class SStoryboardLevelViewport> StoryboardViewportWidget;
     FStoryboardViewportGeometry ViewportGeometry;
     TWeakObjectPtr<UCameraComponent> ActiveCameraComponentWeak;

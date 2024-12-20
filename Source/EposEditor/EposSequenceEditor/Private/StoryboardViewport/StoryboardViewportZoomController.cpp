@@ -5,17 +5,14 @@
 
 #include "Math/UnitConversion.h"
 
+#include "StoryboardViewport/SStoryboardLevelViewport.h"
+
 #define MinZoom 0.01
 #define MaxZoom 200.0
 
-FStoryboardViewportZoomController::FStoryboardViewportZoomController()
+FStoryboardViewportZoomController::FStoryboardViewportZoomController(FStoryboardLevelViewportClient* iViewportClient)
+    : mViewportClient(iViewportClient)
 {
-}
-
-FSimpleMulticastDelegate&
-FStoryboardViewportZoomController::OnChanged()
-{
-    return mOnChanged;
 }
 
 float FStoryboardViewportZoomController::GetRotation() const
@@ -45,8 +42,8 @@ FStoryboardViewportZoomController::SetRotation( float iRotation )
     transform = transform.Concatenate(FSlateRenderTransform(FQuat2D(newRotationRadians - oldRotationRadians)));
 
     mRotation = newRotationDegrees;
-    mPan = transform.GetTranslation();
-    mOnChanged.Broadcast();
+    mPan = WidgetToOffset(transform.GetTranslation());
+    mViewportClient->UpdateCameraBounds();
 }
 
 float
@@ -68,8 +65,8 @@ FStoryboardViewportZoomController::SetZoom( float iZoom, FVector2D iZoomPosition
     transform = transform.Concatenate(FTransform2D(iZoomPosition));
 
     mZoom = newZoom;
-    mPan = transform.GetTranslation();
-    mOnChanged.Broadcast();
+    mPan = WidgetToOffset(transform.GetTranslation());
+    mViewportClient->UpdateCameraBounds();
 }
 
 FVector2D
@@ -82,7 +79,7 @@ void
 FStoryboardViewportZoomController::SetPan( FVector2D iPan )
 {
     mPan = iPan;
-    mOnChanged.Broadcast();
+    mViewportClient->UpdateCameraBounds();
 }
 
 void
@@ -93,12 +90,36 @@ FStoryboardViewportZoomController::Reset()
     SetRotation(0.f);
 }
 
+FVector2D
+FStoryboardViewportZoomController::WidgetToOffset(const FVector2D& iPosition) const
+{
+    FVector2D position = iPosition;
+    position *= FVector2D(-1.f, 1.0f);
+    position *= 2.f;
+    position /= mViewportClient->GetViewportGeometry().WidgetSize;
+
+    return position;
+}
+
+FVector2D
+FStoryboardViewportZoomController::OffsetToWidget(const FVector2D& iPosition) const
+{
+    FVector2D position = iPosition;
+    position *= FVector2D(-1.f, 1.0f);
+    position /= 2.f;
+    position *= mViewportClient->GetViewportGeometry().WidgetSize;
+
+    return position;
+}
+
 FSlateRenderTransform
 FStoryboardViewportZoomController::GetTransform() const
 {
+    FVector2D viewportPan = OffsetToWidget(mPan);
+
     float radian = FUnitConversion::Convert( mRotation, EUnit::Degrees, EUnit::Radians );
     FSlateRenderTransform transform = FSlateRenderTransform( FQuat2D( radian ) );
     transform = transform.Concatenate(FSlateRenderTransform( mZoom ));
-    transform = transform.Concatenate(FSlateRenderTransform( mPan ));
+    transform = transform.Concatenate(FSlateRenderTransform( viewportPan ));
     return transform;
 }
