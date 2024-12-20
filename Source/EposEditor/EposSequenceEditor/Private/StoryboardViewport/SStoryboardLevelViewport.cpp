@@ -342,7 +342,10 @@ float FStoryboardLevelViewportClient::GetFOV() const
         if (CameraComponent)
             fov = CameraComponent->FieldOfView;
     }
-    fov = fov / mZoomController.GetZoom();
+    float initialZoom = FMath::Tan( FMath::DegreesToRadians((180.f - fov) / 2.f));
+    initialZoom *= mZoomController.GetZoom();
+    fov = ( FMath::RadiansToDegrees(FMath::Atan(initialZoom)) * 2 - 180 ) * -1.f;
+    //fov = fov / mZoomController.GetZoom();
 
     return fov;
 }

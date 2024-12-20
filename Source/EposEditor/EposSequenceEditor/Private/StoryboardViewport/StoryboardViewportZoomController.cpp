@@ -60,9 +60,9 @@ FStoryboardViewportZoomController::SetZoom( float iZoom, FVector2D iZoomPosition
     FTransform2D zoomTransform = FTransform2D(newZoom / oldZoom, FVector2D(0,0));
 
     FSlateRenderTransform transform = GetTransform();
-    transform = transform.Concatenate(FTransform2D(-iZoomPosition));
+    transform = transform.Concatenate(FTransform2D(OffsetToWidget(-iZoomPosition)));
     transform = FTransform2D( Concatenate(transform, zoomTransform.GetMatrix()));
-    transform = transform.Concatenate(FTransform2D(iZoomPosition));
+    transform = transform.Concatenate(FTransform2D(OffsetToWidget(iZoomPosition)));
 
     mZoom = newZoom;
     mPan = WidgetToOffset(transform.GetTranslation());
