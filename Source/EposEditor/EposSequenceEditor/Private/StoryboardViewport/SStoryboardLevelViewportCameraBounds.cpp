@@ -21,7 +21,7 @@ int32 SStoryboardLevelViewportCameraBounds::OnPaint(const FPaintArgs& InPaintArg
 {
     InLayerId = SCompoundWidget::OnPaint(InPaintArgs, InAllottedGeometry, InMyCullingRect, OutDrawElements, InLayerId, InWidgetStyle, bInParentEnabled);
     UEposSequenceEditorSettings* settings = GetMutableDefault<UEposSequenceEditorSettings>();
-    if (settings)
+    if (settings && settings->ViewportSettings.bDisplayCameraBounds)
     {
         DrawCameraBounds(InPaintArgs, InAllottedGeometry, InMyCullingRect, OutDrawElements, InLayerId, settings->ViewportSettings.CameraBoundsShadeColor);
     }
