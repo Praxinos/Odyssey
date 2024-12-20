@@ -64,12 +64,6 @@ public:
 
     void SetViewportWidget(const TSharedPtr<SEditorViewport>& InViewportWidget) { EditorViewportWidget = InViewportWidget; }
     void SetStoryboardLevelViewport(TSharedPtr<class SStoryboardLevelViewport> iStoryboardViewport) { StoryboardViewportWidget = iStoryboardViewport; };
-    void SetViewTarget(TWeakObjectPtr<AActor> InViewTarget);
-    void SetCinematicViewTarget(AActor* InCinematicViewTarget);
-    void SetActiveCameraComponent(UCameraComponent* InCameraComponent);
-    UCameraComponent* UpdateActiveCameraComponent(AActor* InViewTarget);
-    AActor* GetCinematicViewTarget() const;
-    AActor* GetViewTarget() const;
 
     FVector2D GetNormalizedOffset() const;
     void UpdateCameraBounds();
@@ -82,7 +76,6 @@ public:
 private:
     TWeakPtr<class SStoryboardLevelViewport> StoryboardViewportWidget;
     FStoryboardViewportGeometry ViewportGeometry;
-    TWeakObjectPtr<UCameraComponent> ActiveCameraComponentWeak;
 
     FStoryboardVisibleArea CachedVisibleArea;
     FStoryboardVisibleArea CachedZoomedVisibleArea;

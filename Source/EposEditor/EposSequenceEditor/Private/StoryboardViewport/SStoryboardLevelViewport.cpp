@@ -169,11 +169,16 @@ void FStoryboardLevelViewportClient::UpdateCameraBounds()
         CachedZoomedVisibleArea = CachedVisibleArea;
     }
 
+    FVector2D topLeft(ViewportGeometry.CameraBounds.Min.X, ViewportGeometry.CameraBounds.Min.Y);
+    FVector2D topRight(ViewportGeometry.CameraBounds.Max.X, ViewportGeometry.CameraBounds.Min.Y);
+    FVector2D bottomLeft(ViewportGeometry.CameraBounds.Min.X, ViewportGeometry.CameraBounds.Max.Y);
+    FVector2D bottomRight(ViewportGeometry.CameraBounds.Max.X, ViewportGeometry.CameraBounds.Max.Y);
+
     FSlateRenderTransform transform = GetZoomController().GetTransform();
-    CachedVisibleArea.TopLeft = transform.TransformPoint(FVector2D(-CachedViewportSize.X / 2.f, -CachedViewportSize.Y / 2.f));
-    CachedVisibleArea.TopRight = transform.TransformPoint(FVector2D(CachedViewportSize.X / 2.f, -CachedViewportSize.Y / 2.f));
-    CachedVisibleArea.BottomLeft = transform.TransformPoint(FVector2D(-CachedViewportSize.X / 2.f, CachedViewportSize.Y / 2.f));
-    CachedVisibleArea.BottomRight = transform.TransformPoint(FVector2D(CachedViewportSize.X / 2.f, CachedViewportSize.Y / 2.f));
+    CachedVisibleArea.TopLeft = transform.TransformPoint(topLeft - CachedViewportSize / 2.f) + CachedViewportSize / 2.f;
+    CachedVisibleArea.TopRight = transform.TransformPoint(topRight - CachedViewportSize / 2.f) + CachedViewportSize / 2.f;
+    CachedVisibleArea.BottomLeft = transform.TransformPoint(bottomLeft - CachedViewportSize / 2.f) + CachedViewportSize / 2.f;
+    CachedVisibleArea.BottomRight = transform.TransformPoint(bottomRight - CachedViewportSize / 2.f) + CachedViewportSize / 2.f;
 
     CachedZoomedVisibleArea = CachedVisibleArea;
 
@@ -203,25 +208,29 @@ FStoryboardLevelViewportClient::DrawCanvas(FViewport& InViewport, FSceneView& Vi
 
         AspectRatio = ViewportGeometry.WidgetSize.X / ViewportGeometry.WidgetSize.Y;
 
-        if (UCameraComponent* CachedCameraComponent = ActiveCameraComponentWeak.Get())
+        if (IsAnyActorLocked())
         {
-            const float DesiredAspectRatio = CachedCameraComponent->AspectRatio;
-
-            if (!FMath::IsNearlyEqual(AspectRatio, DesiredAspectRatio))
+            UCameraComponent* cameraComponent = GetCameraComponentForView();
+            if (cameraComponent)
             {
-                if (AspectRatio > DesiredAspectRatio)
+                const float DesiredAspectRatio = cameraComponent->AspectRatio;
+
+                if (!FMath::IsNearlyEqual(AspectRatio, DesiredAspectRatio))
                 {
-                    const float DesiredWidth = ViewportGeometry.WidgetSize.Y * DesiredAspectRatio;
-                    const float Slack = (ViewportGeometry.WidgetSize.X - DesiredWidth) * 0.5f;
-                    ViewportGeometry.CameraBounds.Min.X += Slack;
-                    ViewportGeometry.CameraBounds.Max.X -= Slack;
-                }
-                else
-                {
-                    const float DesiredHeight = ViewportGeometry.WidgetSize.X / DesiredAspectRatio;
-                    const float Slack = (ViewportGeometry.WidgetSize.Y - DesiredHeight) * 0.5f;
-                    ViewportGeometry.CameraBounds.Min.Y += Slack;
-                    ViewportGeometry.CameraBounds.Max.Y -= Slack;
+                    if (AspectRatio > DesiredAspectRatio)
+                    {
+                        const float DesiredWidth = ViewportGeometry.WidgetSize.Y * DesiredAspectRatio;
+                        const float Slack = (ViewportGeometry.WidgetSize.X - DesiredWidth) * 0.5f;
+                        ViewportGeometry.CameraBounds.Min.X += Slack;
+                        ViewportGeometry.CameraBounds.Max.X -= Slack;
+                    }
+                    else
+                    {
+                        const float DesiredHeight = ViewportGeometry.WidgetSize.X / DesiredAspectRatio;
+                        const float Slack = (ViewportGeometry.WidgetSize.Y - DesiredHeight) * 0.5f;
+                        ViewportGeometry.CameraBounds.Min.Y += Slack;
+                        ViewportGeometry.CameraBounds.Max.Y -= Slack;
+                    }
                 }
             }
         }
@@ -230,100 +239,6 @@ FStoryboardLevelViewportClient::DrawCanvas(FViewport& InViewport, FSceneView& Vi
     UpdateCameraBounds();
 
     FLevelEditorViewportClient::DrawCanvas(InViewport, View, Canvas);
-}
-
-void FStoryboardLevelViewportClient::SetViewTarget(TWeakObjectPtr<AActor> InViewTarget)
-{
-    UpdateActiveCameraComponent(InViewTarget.Get());
-    SetCinematicActorLock(nullptr);
-
-    UCameraComponent* CameraComponent = ActiveCameraComponentWeak.Get();
-    AActor* ViewTarget = CameraComponent ? CameraComponent->GetOwner() : nullptr;
-
-    SetActorLock(ViewTarget);
-}
-
-void
-FStoryboardLevelViewportClient::SetActiveCameraComponent(UCameraComponent* InCameraComponent)
-{
-    AActor* Actor = IsValid(InCameraComponent) ? InCameraComponent->GetOwner() : nullptr;
-
-    if (IsValid(Actor))
-    {
-        bLockedCameraView = true;
-        ActiveCameraComponentWeak = InCameraComponent;
-    }
-    else
-    {
-        bLockedCameraView = false;
-        ActiveCameraComponentWeak.Reset();
-    }
-}
-
-UCameraComponent*
-FStoryboardLevelViewportClient::UpdateActiveCameraComponent(AActor* InViewTarget)
-{
-    if (!IsValid(InViewTarget))
-    {
-        SetActiveCameraComponent(nullptr);
-        return nullptr;
-    }
-
-    if (UCameraComponent* ActiveCameraComponent = ActiveCameraComponentWeak.Get())
-    {
-        if (ActiveCameraComponent->GetOwner() == InViewTarget && ActiveCameraComponent->IsActive())
-        {
-            SetActiveCameraComponent(ActiveCameraComponent);
-            return ActiveCameraComponent;
-        }
-
-        ActiveCameraComponentWeak.Reset();
-    }
-
-    TArray<UCameraComponent*> CameraComponents;
-    InViewTarget->GetComponents<UCameraComponent>(CameraComponents, false);
-
-    for (UCameraComponent* CameraComponent : CameraComponents)
-    {
-        if (IsValid(CameraComponent) && CameraComponent->IsActive())
-        {
-            SetActiveCameraComponent(CameraComponent);
-            return CameraComponent;
-        }
-    }
-
-    SetActiveCameraComponent(nullptr);
-    return nullptr;
-}
-
-void FStoryboardLevelViewportClient::SetCinematicViewTarget(AActor* InCinematicViewTarget)
-{
-    UpdateActiveCameraComponent(InCinematicViewTarget);
-    SetActorLock(nullptr);
-
-    AActor* ViewTarget = ActiveCameraComponentWeak.IsValid() ? ActiveCameraComponentWeak->GetOwner() : nullptr;
-
-    SetCinematicActorLock(ViewTarget);
-}
-
-AActor* FStoryboardLevelViewportClient::GetCinematicViewTarget() const
-{
-    if (bLockedCameraView)
-    {
-        return GetCinematicActorLock().GetLockedActor();
-    }
-
-    return nullptr;
-}
-
-AActor* FStoryboardLevelViewportClient::GetViewTarget() const
-{
-    if (bLockedCameraView)
-    {
-        return GetActorLock().GetLockedActor();
-    }
-
-    return nullptr;
 }
 
 float FStoryboardLevelViewportClient::GetDefaultFOV() const
@@ -338,11 +253,13 @@ float FStoryboardLevelViewportClient::GetFOV() const
         return GetDefaultFOV();
 
     float fov = FOVAngle;
-    if (GetViewTarget() || GetCinematicViewTarget())
+    if (IsAnyActorLocked())
     {
-        UCameraComponent* CameraComponent = ActiveCameraComponentWeak.Get();
-        if (CameraComponent)
-            fov = CameraComponent->FieldOfView;
+        UCameraComponent* cameraComponent = GetCameraComponentForView();
+        if (cameraComponent)
+        {
+            fov = cameraComponent->FieldOfView;
+        }
     }
     float initialZoom = FMath::Tan( FMath::DegreesToRadians((180.f - fov) / 2.f));
     initialZoom *= mZoomController.GetZoom();
@@ -363,47 +280,13 @@ FStoryboardLevelViewportClient::CalcSceneView(FSceneViewFamily* ViewFamily, cons
         return SceneView;
     }
 
-    UCameraComponent* CachedCameraComponent = nullptr;
-    bool bHasViewTarget = false;
-
-    if (bLockedCameraView)
+    if (IsAnyActorLocked())
     {
-        CachedCameraComponent = ActiveCameraComponentWeak.Get();
-
-        if (CachedCameraComponent)
+        UCameraComponent* cameraComponent = GetCameraComponentForView();
+        if (cameraComponent)
         {
-            if (AActor* LockedCinematicViewTarget = GetCinematicViewTarget())
-            {
-                if (CachedCameraComponent->GetOwner() == LockedCinematicViewTarget)
-                {
-                    bHasViewTarget = true;
-                }
-                else
-                {
-                    SetCinematicViewTarget(LockedCinematicViewTarget);
-                    CachedCameraComponent = ActiveCameraComponentWeak.Get();
-                    bHasViewTarget = !!CachedCameraComponent;
-                }
-            }
-            else if (AActor* LockedViewTarget = GetViewTarget())
-            {
-                if (CachedCameraComponent->GetOwner() == LockedViewTarget)
-                {
-                    bHasViewTarget = true;
-                }
-                else
-                {
-                    SetViewTarget(LockedViewTarget);
-                    CachedCameraComponent = ActiveCameraComponentWeak.Get();
-                    bHasViewTarget = !!CachedCameraComponent;
-                }
-            }
-
-            if (bHasViewTarget)
-            {
-                ControllingActorViewInfo.Location = CachedCameraComponent->GetComponentLocation();
-                ControllingActorViewInfo.Rotation = CachedCameraComponent->GetComponentRotation();
-            }
+            ControllingActorViewInfo.Location = cameraComponent->GetComponentLocation();
+            ControllingActorViewInfo.Rotation = cameraComponent->GetComponentRotation();
         }
     }
 

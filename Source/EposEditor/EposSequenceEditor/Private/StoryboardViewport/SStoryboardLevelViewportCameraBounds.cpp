@@ -6,6 +6,8 @@
 #include "Settings/EposSequenceEditorSettings.h"
 #include "StoryboardViewport/SStoryboardLevelViewport.h"
 #include "StoryboardViewport/StoryboardVisibleArea.h"
+#include "BoxTypes.h"
+#include "Polygon2.h"
 
 void SStoryboardLevelViewportCameraBounds::Construct(const FArguments& InArgs, TSharedPtr<SStoryboardLevelViewport> InStoryboardLevelViewport)
 {
@@ -45,55 +47,13 @@ void SStoryboardLevelViewportCameraBounds::DrawCameraBounds(const FPaintArgs& In
     ++InOutLayerId;
 
     const FStoryboardVisibleArea& VisibleArea = StoryboardLevelViewportClient->GetZoomedVisibleArea();
-    //const FVector2D Offset = VisibleArea.Offset;
 
     if (!VisibleArea.IsValid())
     {
         return;
     }
 
-    /*const FVector2D QuadTopTopLeft = VisibleArea.GetVisiblePosition(-VisibleArea.AbsoluteSize) - Offset;
-    const FVector2D QuadTopBottomRight = VisibleArea.GetVisiblePosition({VisibleArea.AbsoluteSize.X * 2.f, 0.f}) + FVector2D(Offset.X, 0.f);
-
-    const FVector2D QuadLeftTopLeft = VisibleArea.GetVisiblePosition({-VisibleArea.AbsoluteSize.X, 0.f}) - FVector2D(Offset.X, 0.f);
-    const FVector2D QuadLeftBottomRight = VisibleArea.GetVisiblePosition({0.f, VisibleArea.AbsoluteSize.Y});
-
-    const FVector2D QuadRightTopLeft = VisibleArea.GetVisiblePosition({VisibleArea.AbsoluteSize.X, 0.f});
-    const FVector2D QuadRightBottomRight = VisibleArea.GetVisiblePosition({VisibleArea.AbsoluteSize.X * 2.f, VisibleArea.AbsoluteSize.Y}) + FVector2D(Offset.X, 0.f);
-
-    const FVector2D QuadBottomTopLeft = VisibleArea.GetVisiblePosition({-VisibleArea.AbsoluteSize.X, VisibleArea.AbsoluteSize.Y}) - FVector2D(Offset.X, 0.f);
-    const FVector2D QuadBottomBottomRight = VisibleArea.GetVisiblePosition({VisibleArea.AbsoluteSize.X * 2.f, VisibleArea.AbsoluteSize.Y * 2.f}) + Offset;
-
-    const FPaintGeometry TopRect = InAllottedGeometry.ToPaintGeometry(
-        QuadTopBottomRight - QuadTopTopLeft,
-        FSlateLayoutTransform(QuadTopTopLeft + Offset)
-    );
-
-    const FPaintGeometry LeftRect = InAllottedGeometry.ToPaintGeometry(
-        QuadLeftBottomRight - QuadLeftTopLeft,
-        FSlateLayoutTransform(QuadLeftTopLeft + Offset)
-    );
-
-    const FPaintGeometry RightRect = InAllottedGeometry.ToPaintGeometry(
-        QuadRightBottomRight - QuadRightTopLeft,
-        FSlateLayoutTransform(QuadRightTopLeft + Offset)
-    );
-
-    const FPaintGeometry BottomRect = InAllottedGeometry.ToPaintGeometry(
-        QuadBottomBottomRight - QuadBottomTopLeft,
-        FSlateLayoutTransform(QuadBottomTopLeft + Offset)
-    ); */
-
     static const FSlateBrush* White = FAppStyle::Get().GetBrush("Brushes.White");
-
-    /*FSlateDrawElement::MakeBox(
-        OutDrawElements,
-        InOutLayerId,
-        InAllottedGeometry.ToPaintGeometry(),
-        White,
-        ESlateDrawEffect::NoPixelSnapping,
-        InQuadColor
-    ); */
 
     const FVector2D CachedViewportSize = StoryboardLevelViewportClient->GetViewportGeometry().WidgetSize;
     if (FMath::IsNearlyZero(CachedViewportSize.X) || FMath::IsNearlyZero(CachedViewportSize.Y))
@@ -101,56 +61,292 @@ void SStoryboardLevelViewportCameraBounds::DrawCameraBounds(const FPaintArgs& In
         return;
     }
 
-    FSlateDrawElement::MakeLines(
+    FVector2D topLeft = VisibleArea.TopLeft;
+    FVector2D topRight = VisibleArea.TopRight;
+    FVector2D bottomLeft = VisibleArea.BottomLeft;
+    FVector2D bottomRight = VisibleArea.BottomRight;
+
+    /* USE for DEBUGGING
+        FSlateDrawElement::MakeLines(
         OutDrawElements,
-        InOutLayerId,
+        InOutLayerId++,
         InAllottedGeometry.ToPaintGeometry(),
         {
-            FVector2f(VisibleArea.TopLeft + FVector2D(CachedViewportSize.X / 2.f, CachedViewportSize.Y / 2.f)),
-            FVector2f(VisibleArea.TopRight + FVector2D(CachedViewportSize.X / 2.f, CachedViewportSize.Y / 2.f)),
-            FVector2f(VisibleArea.BottomRight + FVector2D(CachedViewportSize.X / 2.f, CachedViewportSize.Y / 2.f)),
-            FVector2f(VisibleArea.BottomLeft + FVector2D(CachedViewportSize.X / 2.f, CachedViewportSize.Y / 2.f)),
-            FVector2f(VisibleArea.TopLeft + FVector2D(CachedViewportSize.X / 2.f, CachedViewportSize.Y / 2.f))
+            FVector2f(topLeft),
+            FVector2f(topRight),
+            FVector2f(bottomRight),
+            FVector2f(bottomLeft),
+            FVector2f(topLeft)
         },
         ESlateDrawEffect::NoPixelSnapping,
         FLinearColor::Red,
         true,
         2.f
+    ); */
+
+    ::UE::Geometry::FPolygon2d polygon(
+        {
+            topLeft,
+            topRight,
+            bottomRight,
+            bottomLeft,
+        }
     );
 
-    /*FSlateDrawElement::MakeBox(
-        OutDrawElements,
-        InOutLayerId,
-        TopRect,
-        White,
-        ESlateDrawEffect::NoPixelSnapping,
-        InQuadColor
+    ::UE::Geometry::FAxisAlignedBox2d bounds = polygon.Bounds();
+
+    FVector2D topBoxPosition(0.f, 0.f);
+    FVector2D topBoxSize(CachedViewportSize.X, FMath::Min(bounds.Min.Y, CachedViewportSize.Y));
+    FVector2D bottomBoxPosition(0.f, bounds.Max.Y);
+    FVector2D bottomBoxSize(CachedViewportSize.X, FMath::Max(CachedViewportSize.Y - bounds.Max.Y, 0.f));
+    FVector2D leftBoxPosition(0.f, topBoxSize.Y);
+    FVector2D leftBoxSize(FMath::Min(bounds.Min.X, CachedViewportSize.X), CachedViewportSize.Y - topBoxSize.Y - bottomBoxSize.Y);
+    FVector2D rightBoxPosition(bounds.Max.X, topBoxSize.Y);
+    FVector2D rightBoxSize(FMath::Max(CachedViewportSize.X - bounds.Max.X, 0.f), CachedViewportSize.Y - topBoxSize.Y - bottomBoxSize.Y);
+
+    FVector2D topmostPoint = polygon[0];
+    FVector2D bottommostPoint = polygon[0];
+    FVector2D leftmostPoint = polygon[0];
+    FVector2D rightmostPoint = polygon[0];
+    for (int i = 1; i <= 3; i++)
+    {
+        if (polygon[i].Y < topmostPoint.Y || (polygon[i].Y == topmostPoint.Y && polygon[i].X < topmostPoint.X) )
+        {
+            topmostPoint = polygon[i];
+        }
+        if (polygon[i].Y > bottommostPoint.Y || (polygon[i].Y == bottommostPoint.Y && polygon[i].X > bottommostPoint.X) )
+        {
+            bottommostPoint = polygon[i];
+        }
+        if (polygon[i].X < leftmostPoint.X || (polygon[i].X == leftmostPoint.X && polygon[i].Y > leftmostPoint.Y) )
+        {
+            leftmostPoint = polygon[i];
+        }
+        if (polygon[i].X > rightmostPoint.X || (polygon[i].X == rightmostPoint.X && polygon[i].Y < rightmostPoint.Y) )
+        {
+            rightmostPoint = polygon[i];
+        }
+    }
+
+    ::UE::Geometry::FPolygon2d topLeftTriangle(
+        {
+            FVector2D(leftBoxSize.X, topBoxSize.Y),
+            topmostPoint,
+            leftmostPoint,
+        }
     );
 
-    FSlateDrawElement::MakeBox(
-        OutDrawElements,
-        InOutLayerId,
-        LeftRect,
-        White,
-        ESlateDrawEffect::NoPixelSnapping,
-        InQuadColor
+    ::UE::Geometry::FPolygon2d topRightTriangle(
+        {
+            FVector2D(rightBoxPosition.X, topBoxSize.Y),
+            rightmostPoint,
+            topmostPoint,
+        }
     );
 
-    FSlateDrawElement::MakeBox(
-        OutDrawElements,
-        InOutLayerId,
-        RightRect,
-        White,
-        ESlateDrawEffect::NoPixelSnapping,
-        InQuadColor
+    ::UE::Geometry::FPolygon2d bottomRightTriangle(
+        {
+            FVector2D(rightBoxPosition.X, bottomBoxPosition.Y),
+            bottommostPoint,
+            rightmostPoint,
+        }
     );
 
-    FSlateDrawElement::MakeBox(
-        OutDrawElements,
-        InOutLayerId,
-        BottomRect,
-        White,
-        ESlateDrawEffect::NoPixelSnapping,
-        InQuadColor
-    );*/
+    ::UE::Geometry::FPolygon2d bottomLeftTriangle(
+        {
+            FVector2D(leftBoxSize.X, bottomBoxPosition.Y),
+            leftmostPoint,
+            bottommostPoint,
+        }
+    );
+
+    ::UE::Geometry::FAxisAlignedBox2d viewportBox(FVector2D(0.f, 0.f), CachedViewportSize);
+
+    topLeftTriangle.ClipConvex(viewportBox);
+    topRightTriangle.ClipConvex(viewportBox);
+    bottomRightTriangle.ClipConvex(viewportBox);
+    bottomLeftTriangle.ClipConvex(viewportBox);
+
+    if (bounds.Min.Y >= 0.f)
+    {
+
+        FSlateDrawElement::MakeBox(
+            OutDrawElements,
+            InOutLayerId,
+            InAllottedGeometry.ToPaintGeometry(topBoxSize, FSlateLayoutTransform(topBoxPosition)),
+            White,
+            ESlateDrawEffect::NoPixelSnapping,
+            InQuadColor
+        );
+    }
+
+    if (bounds.Max.Y < CachedViewportSize.Y)
+    {
+
+        FSlateDrawElement::MakeBox(
+            OutDrawElements,
+            InOutLayerId,
+            InAllottedGeometry.ToPaintGeometry(bottomBoxSize, FSlateLayoutTransform(bottomBoxPosition)),
+            White,
+            ESlateDrawEffect::NoPixelSnapping,
+            InQuadColor
+        );
+    }
+
+    if (bounds.Min.X >= 0.f)
+    {
+
+        FSlateDrawElement::MakeBox(
+            OutDrawElements,
+            InOutLayerId,
+            InAllottedGeometry.ToPaintGeometry(leftBoxSize, FSlateLayoutTransform(leftBoxPosition)),
+            White,
+            ESlateDrawEffect::NoPixelSnapping,
+            InQuadColor
+        );
+    }
+
+    if (bounds.Max.X < CachedViewportSize.X)
+    {
+
+        FSlateDrawElement::MakeBox(
+            OutDrawElements,
+            InOutLayerId,
+            InAllottedGeometry.ToPaintGeometry(rightBoxSize, FSlateLayoutTransform(rightBoxPosition)),
+            White,
+            ESlateDrawEffect::NoPixelSnapping,
+            InQuadColor
+        );
+    }
+
+    if (topLeftTriangle.Area() > 0.f)
+    {
+        TArray<FSlateVertex> Vertices;
+        TArray<SlateIndex> VertexIndices = {0, 1, 2};
+        Vertices.AddUninitialized(topLeftTriangle.VertexCount());
+
+        for (int i = 0; i < topLeftTriangle.VertexCount(); ++i)
+        {
+            Vertices[i].Position = FVector2f(InAllottedGeometry.LocalToAbsolute(topLeftTriangle[i]));
+            Vertices[i].Color = InQuadColor.ToFColor(false);
+        }
+
+        for (int i = 3; i < topLeftTriangle.VertexCount(); ++i)
+        {
+            VertexIndices.Add(0);
+            VertexIndices.Add(i - 1);
+            VertexIndices.Add(i);
+        }
+
+        FSlateDrawElement::MakeCustomVerts(
+            OutDrawElements,
+            InOutLayerId,
+            White->GetRenderingResource(),
+            Vertices,
+            VertexIndices,
+            nullptr,
+            0,
+            0,
+            ESlateDrawEffect::NoPixelSnapping
+        );
+    }
+
+    if (topRightTriangle.Area() > 0.f)
+    {
+        TArray<FSlateVertex> Vertices;
+        TArray<SlateIndex> VertexIndices = {0, 1, 2};
+        Vertices.AddUninitialized(topRightTriangle.VertexCount());
+
+        for (int i = 0; i < topRightTriangle.VertexCount(); ++i)
+        {
+            Vertices[i].Position = FVector2f(InAllottedGeometry.LocalToAbsolute(topRightTriangle[i]));
+            Vertices[i].Color = InQuadColor.ToFColor(false);
+        }
+
+        for (int i = 3; i < topRightTriangle.VertexCount(); ++i)
+        {
+            VertexIndices.Add(0);
+            VertexIndices.Add(i - 1);
+            VertexIndices.Add(i);
+        }
+
+        FSlateDrawElement::MakeCustomVerts(
+            OutDrawElements,
+            InOutLayerId,
+            White->GetRenderingResource(),
+            Vertices,
+            VertexIndices,
+            nullptr,
+            0,
+            0,
+            ESlateDrawEffect::NoPixelSnapping
+        );
+    }
+
+    if (bottomRightTriangle.Area() > 0.f)
+    {
+        TArray<FSlateVertex> Vertices;
+        TArray<SlateIndex> VertexIndices = {0, 1, 2};
+        Vertices.AddUninitialized(bottomRightTriangle.VertexCount());
+
+        for (int i = 0; i < bottomRightTriangle.VertexCount(); ++i)
+        {
+            Vertices[i].Position = FVector2f(InAllottedGeometry.LocalToAbsolute(bottomRightTriangle[i]));
+            Vertices[i].Color = InQuadColor.ToFColor(false);
+        }
+
+        for (int i = 3; i < bottomRightTriangle.VertexCount(); ++i)
+        {
+            VertexIndices.Add(0);
+            VertexIndices.Add(i - 1);
+            VertexIndices.Add(i);
+        }
+
+        FSlateDrawElement::MakeCustomVerts(
+            OutDrawElements,
+            InOutLayerId,
+            White->GetRenderingResource(),
+            Vertices,
+            VertexIndices,
+            nullptr,
+            0,
+            0,
+            ESlateDrawEffect::NoPixelSnapping
+        );
+
+    }
+
+    if (bottomLeftTriangle.Area() > 0.f)
+    {
+        TArray<FSlateVertex> Vertices;
+        TArray<SlateIndex> VertexIndices = {0, 1, 2};
+        Vertices.AddUninitialized(bottomLeftTriangle.VertexCount());
+
+        for (int i = 0; i < bottomLeftTriangle.VertexCount(); ++i)
+        {
+            Vertices[i].Position = FVector2f(InAllottedGeometry.LocalToAbsolute(bottomLeftTriangle[i]));
+            Vertices[i].Color = InQuadColor.ToFColor(false);
+        }
+
+        for (int i = 3; i < bottomLeftTriangle.VertexCount(); ++i)
+        {
+            VertexIndices.Add(0);
+            VertexIndices.Add(i - 1);
+            VertexIndices.Add(i);
+        }
+
+        FSlateDrawElement::MakeCustomVerts(
+            OutDrawElements,
+            InOutLayerId,
+            White->GetRenderingResource(),
+            Vertices,
+            VertexIndices,
+            nullptr,
+            0,
+            0,
+            ESlateDrawEffect::NoPixelSnapping
+        );
+
+    }
+
 }
