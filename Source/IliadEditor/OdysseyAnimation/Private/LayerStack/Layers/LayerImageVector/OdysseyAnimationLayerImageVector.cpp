@@ -83,7 +83,11 @@ UOdysseyAnimationLayerImageVector::UpdateSharedEnv()
             continue;
 
         UOdysseyAnimationCellImageVector* cellVector = Cast<UOdysseyAnimationCellImageVector>(cell);
-        GetSharedEnv()->AppendChild( cellVector->GetRoot() );
+
+        if( cellVector )
+        {
+            GetSharedEnv()->AppendChild( cellVector->GetRoot() );
+        }
     }
 }
 

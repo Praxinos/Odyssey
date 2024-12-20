@@ -367,16 +367,25 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                 }
                 else
                 {
-// TODO: move all points for all breakdowns
-/*
-                    ::ULIS::FVec2D pointPosition[3] = { HUDBezier->GetPoints()[0].GetPosition() + deltaPosition
-                                                      , HUDBezier->GetPoints()[1].GetPosition() + deltaPosition
-                                                      , HUDBezier->GetPoints()[2].GetPosition() + deltaPosition };
+                    // we will move all breakdowns chart if no point is picked.
+                    FOdysseyVectorTagInbetweener* inbetweenerTag = mChartHUD->GetBreakdownList().size() ? mChartHUD->GetBreakdownList().front()->GetInbetweenerTag()
+                                                                                                        : nullptr;
 
-                    HUDBezier->GetPoints()[0].SetPosition( pointPosition[0].x, pointPosition[0].y );
-                    HUDBezier->GetPoints()[1].SetPosition( pointPosition[1].x, pointPosition[1].y );
-                    HUDBezier->GetPoints()[2].SetPosition( pointPosition[2].x, pointPosition[2].y );
-*/
+                    for( FInbetweenerBreakdown* breakdown : inbetweenerTag->GetBreakdownList() )
+                    {
+                        FInbetweenerChart::HUDBezier* HUDBezier = breakdown->GetChart()->GetHUDBezier();
+                        ::ULIS::FVec2D pointPosition[3] = { HUDBezier->GetPoints()[0].GetPosition() + deltaPosition
+                                                          , HUDBezier->GetPoints()[1].GetPosition() + deltaPosition
+                                                          , HUDBezier->GetPoints()[2].GetPosition() + deltaPosition };
+
+                        if( breakdown->GetIndex() == 0 )
+                        {
+                            HUDBezier->GetPoints()[0].SetPosition( pointPosition[0].x, pointPosition[0].y );
+                        }
+
+                        HUDBezier->GetPoints()[1].SetPosition( pointPosition[1].x, pointPosition[1].y );
+                        HUDBezier->GetPoints()[2].SetPosition( pointPosition[2].x, pointPosition[2].y );
+                    }
                 }
 
                 //currentBreakdown->GetChart()->GetHUDBezier()->Update();

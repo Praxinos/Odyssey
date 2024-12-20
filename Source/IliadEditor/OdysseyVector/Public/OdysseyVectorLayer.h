@@ -10,10 +10,22 @@
 #include <Image/Block.h>
 #include <ULIS>
 
+#include "OdysseyVectorLayer.generated.h"
+
 class IOdysseyVectorCell;
+
+// Recommended for the unreal reflection system + Garbage collection
+// (however it seems to work fine with IOdysseyVectorLayer declared only)
+UINTERFACE(MinimalAPI, Blueprintable)
+class UOdysseyVectorLayer : public UInterface
+{
+    GENERATED_BODY()
+};
 
 class IOdysseyVectorLayer
 {
+    GENERATED_BODY()
+
     public:
         virtual IOdysseyVectorCell* GetCellByIndex( uint32 iIndex ) = 0;
         virtual IOdysseyVectorCell* GetLastCell() = 0;

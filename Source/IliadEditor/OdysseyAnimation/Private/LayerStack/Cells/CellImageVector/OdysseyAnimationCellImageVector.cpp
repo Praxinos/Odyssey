@@ -29,6 +29,10 @@ UOdysseyAnimationCellImageVector::~UOdysseyAnimationCellImageVector()
             mRoot->GetParent()->RemoveChild( mRoot );
         }
 
+        // Delegate was registered in mVectorBlock->Init(), must be removed or else
+        // reloading the uasset freezes
+        mRoot->GetEngine()->OnInvalidateDelegate().RemoveAll( mVectorBlock.Get() );
+
         delete mRoot;
     }
 

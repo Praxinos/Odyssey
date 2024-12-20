@@ -225,17 +225,18 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         static const uint64 HUD_BREAKDOWN_INBETWEEN      = ( 1ULL << 17 );
         static const uint64 HUD_INBETWEEN_FADEFROMTARGET = ( 1ULL << 18 );
         static const uint64 HUD_INBETWEEN_FADEFROMSOURCE = ( 1ULL << 19 );
-        static const uint64 HUD_BREAKDOWN_SOURCE_GRID    = ( 1ULL << 20 );
-        static const uint64 HUD_BREAKDOWN_TARGET_GRID    = ( 1ULL << 21 );
-        static const uint64 HUD_BREAKDOWN_GRID_DOTTED    = ( 1ULL << 22 );
+        static const uint64 HUD_INBETWEEN_FADERELATIVE   = ( 1ULL << 20 );
+        static const uint64 HUD_BREAKDOWN_SOURCE_GRID    = ( 1ULL << 21 );
+        static const uint64 HUD_BREAKDOWN_TARGET_GRID    = ( 1ULL << 22 );
+        static const uint64 HUD_BREAKDOWN_GRID_DOTTED    = ( 1ULL << 23 );
         static const uint64 HUD_TAGINBETWEENER_ALL       = HUD_BREAKDOWN_SOURCE
                                                          | HUD_BREAKDOWN_TARGET
                                                          | HUD_BREAKDOWN_SOURCE_GRID
                                                          | HUD_BREAKDOWN_TARGET_GRID
                                                          | HUD_BREAKDOWN_INBETWEEN;
-        static const uint64 HUD_SELECTIONBOX             = ( 1ULL << 23 );
-        static const uint64 HUD_SIZE_SMALL               = ( 1ULL << 24 );
-        static const uint64 HUD_DRAW_ALL                 = ( 1ULL << 25 );
+        static const uint64 HUD_SELECTIONBOX             = ( 1ULL << 24 );
+        static const uint64 HUD_SIZE_SMALL               = ( 1ULL << 25 );
+        static const uint64 HUD_DRAW_ALL                 = ( 1ULL << 26 );
         //static const uint64 VIEW_ALL              = 0xFFFFFFFFFFFFFFFFULL;
 
         virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) = 0;
