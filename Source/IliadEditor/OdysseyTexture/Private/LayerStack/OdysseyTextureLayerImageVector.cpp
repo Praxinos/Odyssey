@@ -47,8 +47,8 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
     Width  = iWidth;
     Height = iHeight;
 
-    mRoot = new FOdysseyVectorRoot( nullptr
-                                  , nullptr
+    mRoot = new FOdysseyVectorRoot( this
+                                  , this
                                   , new FOdysseyVectorGroupPaint( "Scene" ) );
 
     mSharedEnv.AppendChild( mRoot );
@@ -307,6 +307,69 @@ void
 UOdysseyTextureLayerImageVector::IsColoredBlueprintSetter(bool Value)
 {
     FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyTextureLayerImageVector, IsColored), Value);
+}
+
+// Implements Interface IOdysseyVectorLayer::GetWidth
+uint32
+UOdysseyTextureLayerImageVector::GetWidth()
+{
+    return ( uint32 ) Width;
+}
+
+// Implements Interface IOdysseyVectorLayer::GetHeight
+uint32
+UOdysseyTextureLayerImageVector::GetHeight()
+{
+    return ( uint32 ) Height;
+}
+
+// Implements Interface IOdysseyVectorLayer::GetCellByIndex
+IOdysseyVectorCell*
+UOdysseyTextureLayerImageVector::GetCellByIndex( uint32 iIndex )
+{
+    return this;
+}
+
+// Implements Interface IOdysseyVectorLayer::Contains
+bool
+UOdysseyTextureLayerImageVector::Contains( IOdysseyVectorCell* iCandidateCell )
+{
+    return ( this == iCandidateCell ) ? true : false;
+}
+
+// Implements Interface IOdysseyVectorLayer::GetLastCell
+IOdysseyVectorCell*
+UOdysseyTextureLayerImageVector::GetLastCell()
+{
+    return this;
+}
+
+// Implements Interface IOdysseyVectorLayer::GetLastCell
+IOdysseyVectorCell*
+UOdysseyTextureLayerImageVector::GetFirstCell()
+{
+    return this;
+}
+
+// Implements Interface IOdysseyVectorCell::GetIndex
+int32
+UOdysseyTextureLayerImageVector::GetIndex()
+{
+    return 0;
+}
+
+// Implements Interface IOdysseyVectorCell::GetLength
+uint32
+UOdysseyTextureLayerImageVector::GetLength()
+{
+    return 1;
+}
+
+// Implements Interface IOdysseyVectorCell::GetFrame
+uint32
+UOdysseyTextureLayerImageVector::GetFrame()
+{
+    return 0;
 }
 
 #undef LOCTEXT_NAMESPACE

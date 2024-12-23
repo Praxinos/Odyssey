@@ -430,7 +430,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
             mStitchedVertex->SetRadius( localRadius );
         }
 
-
         newSegment = mPathTracer.Trace( mStitchedVertex
                                       , iPointInTexture.x
                                       , iPointInTexture.y

@@ -462,21 +462,21 @@ UOdysseyAnimationLayerImageVector::GetSharedEnv()
     return &mSharedEnv;
 }
 
-// Implements Interface IOdysseyVectorAnimationCell::GetWidth
+// Implements Interface IOdysseyVectorLayer::GetWidth
 uint32
 UOdysseyAnimationLayerImageVector::GetWidth()
 {
     return ( uint32 ) GetAnimation()->GetWidth();
 }
 
-// Implements Interface IOdysseyVectorAnimationCell::GetHeight
+// Implements Interface IOdysseyVectorLayer::GetHeight
 uint32
 UOdysseyAnimationLayerImageVector::GetHeight()
 {
     return ( uint32 ) GetAnimation()->GetHeight();
 }
 
-// Implements Interface IOdysseyVectorAnimationCell::GetCellByIndex
+// Implements Interface IOdysseyVectorLayer::GetCellByIndex
 IOdysseyVectorCell*
 UOdysseyAnimationLayerImageVector::GetCellByIndex( uint32 iIndex )
 {
@@ -494,7 +494,7 @@ UOdysseyAnimationLayerImageVector::GetCellByIndex( uint32 iIndex )
     return nullptr;
 }
 
-// Implements Interface IOdysseyVectorAnimationCell::Contains
+// Implements Interface IOdysseyVectorLayer::Contains
 bool
 UOdysseyAnimationLayerImageVector::Contains( IOdysseyVectorCell* iCandidateCell )
 {
@@ -506,7 +506,7 @@ UOdysseyAnimationLayerImageVector::Contains( IOdysseyVectorCell* iCandidateCell 
                                            } );
 }
 
-// Implements Interface IOdysseyVectorAnimationCell::GetLastCell
+// Implements Interface IOdysseyVectorLayer::GetLastCell
 IOdysseyVectorCell*
 UOdysseyAnimationLayerImageVector::GetLastCell()
 {
@@ -520,7 +520,7 @@ UOdysseyAnimationLayerImageVector::GetLastCell()
     return Cast<UOdysseyAnimationCellImageVector>(lastCell);
 }
 
-// Implements Interface IOdysseyVectorAnimationCell::GetLastCell
+// Implements Interface IOdysseyVectorLayer::GetLastCell
 IOdysseyVectorCell*
 UOdysseyAnimationLayerImageVector::GetFirstCell()
 {

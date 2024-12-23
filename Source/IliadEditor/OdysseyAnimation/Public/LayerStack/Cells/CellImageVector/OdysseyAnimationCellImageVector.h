@@ -55,7 +55,7 @@ public:
     bool IsImageRenderingGameThreadOnly() const;
 
 public:
-    // Implements Interface IOdysseyVectorAnimationCell
+    // Implements Interface IOdysseyVectorCell
     virtual FOdysseyVectorEngine* GetEngine() override;
     virtual int32 GetIndex() override;
     virtual uint32 GetLength() override;

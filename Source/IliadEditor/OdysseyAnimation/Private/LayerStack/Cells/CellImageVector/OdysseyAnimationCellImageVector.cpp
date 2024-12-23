@@ -264,28 +264,28 @@ UOdysseyAnimationCellImageVector::OnVectorBlockInvalidated( const TArray<::ULIS:
         DirtyThumbnail();
 }
 
-// Implements Interface IOdysseyVectorAnimationCell::GetEngine
+// Implements Interface IOdysseyVectorCell::GetEngine
 FOdysseyVectorEngine*
 UOdysseyAnimationCellImageVector::GetEngine()
 {
     return mRoot->GetEngine();
 }
 
-// Implements Interface IOdysseyVectorAnimationCell::GetIndex
+// Implements Interface IOdysseyVectorCell::GetIndex
 int32
 UOdysseyAnimationCellImageVector::GetIndex()
 {
     return IndexInLayer;
 }
 
-// Implements Interface IOdysseyVectorAnimationCell::GetLength
+// Implements Interface IOdysseyVectorCell::GetLength
 uint32
 UOdysseyAnimationCellImageVector::GetLength()
 {
     return Exposure;
 }
 
-// Implements Interface IOdysseyVectorAnimationCell::GetFrame
+// Implements Interface IOdysseyVectorCell::GetFrame
 uint32
 UOdysseyAnimationCellImageVector::GetFrame()
 {

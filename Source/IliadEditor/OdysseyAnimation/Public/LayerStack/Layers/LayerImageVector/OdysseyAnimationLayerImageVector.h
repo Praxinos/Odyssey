@@ -60,7 +60,7 @@ public:
     virtual TArray<FGuid> GetImageRenderingComposition(IOdysseyImageRenderer::eRenderType iRenderType, int iFrameIndex) const override;
 
 public:
-    // Implements Interface IOdysseyVectorAnimationLayer
+    // Implements Interface IOdysseyVectorLayer
     virtual IOdysseyVectorCell* GetCellByIndex( uint32 iIndex ) override;
     virtual IOdysseyVectorCell* GetFirstCell() override;
     virtual IOdysseyVectorCell* GetLastCell() override;

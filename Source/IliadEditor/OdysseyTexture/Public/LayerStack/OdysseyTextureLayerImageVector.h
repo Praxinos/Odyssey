@@ -10,6 +10,8 @@
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorRoot.h"
+#include "OdysseyVectorLayer.h"
+#include "OdysseyVectorCell.h"
 
 #include "OdysseyTextureLayerImageVector.generated.h"
 
@@ -19,7 +21,7 @@ class FOdysseyVectorEngine;
 
 UCLASS(BlueprintType)
 class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
-    : public UOdysseyTextureLayer
+    : public UOdysseyTextureLayer , public IOdysseyVectorLayer, public IOdysseyVectorCell
 {
     GENERATED_BODY()
 
@@ -70,6 +72,21 @@ public:
 
 private:
     void OnVectorBlockInvalidated(const TArray<::ULIS::FRectI>& iRects, bool iIsInteractive);
+
+public:
+    // Implements Interface IOdysseyVectorLayer
+    virtual IOdysseyVectorCell* GetCellByIndex( uint32 iIndex ) override;
+    virtual IOdysseyVectorCell* GetFirstCell() override;
+    virtual IOdysseyVectorCell* GetLastCell() override;
+    virtual bool Contains( IOdysseyVectorCell* iCandidateCell )override;
+    virtual uint32 GetWidth() override;
+    virtual uint32 GetHeight() override;
+
+    // Implements Interface IOdysseyVectorCell
+    //virtual FOdysseyVectorEngine* GetEngine() override; // commented-out. This is already existing.
+    virtual int32 GetIndex() override;
+    virtual uint32 GetLength() override;
+    virtual uint32 GetFrame() override;
 
 private:
     //Import/Export
