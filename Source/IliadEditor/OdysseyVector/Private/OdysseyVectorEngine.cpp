@@ -193,12 +193,6 @@ FOdysseyVectorEngine::GetInvalidatedRect( double iScreenWidth, double iScreenHei
 }
 
 void
-FOdysseyVectorEngine::InvalidateRect()
-{
-    mInvalidatedRect = ::ULIS::FRectD( 0, 0, DBL_MAX, DBL_MAX );
-}
-
-void
 FOdysseyVectorEngine::InvalidateRect( const ::ULIS::FRectD& iRect )
 {
     if( mInvalidatedRect.Area() == 0.0f )
@@ -355,6 +349,10 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
 
         iBLContext->setFillStyle( blFillColor );
 
+        iBLContext->clipToRect( BLRect( sanitizedRect.x - 1
+                                      , sanitizedRect.y - 1
+                                      , sanitizedRect.w + 2
+                                      , sanitizedRect.h + 2 ) );
         // Note: we enlarge the block 1 pixel because when FOdysseyVectorBlock renders,
         // the rect seems to be 1 pixel larger. If we don't do this, then the block
         // isn't filled fully and this creates an artefact on the screen.
@@ -364,6 +362,15 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )
                                     , sanitizedRect.h + 2 ) );
 
         scene->Draw( iBLContext, sanitizedRect, 1.0f, iDrawingFlags );
+
+        //--- uncomment to view the invalidation rectangle --- //
+        //iBLContext->setStrokeWidth( 2.0f );
+        //iBLContext->setStrokeStyle( BLRgba32( 0, 255, 0, 255 ) );
+        //iBLContext->strokeRect( BLRect( sanitizedRect.x
+        //                              , sanitizedRect.y
+        //                              , sanitizedRect.w - 1
+        //                              , sanitizedRect.h - 1 ) );
+        //------------------------------------------------------//
 
         iBLContext->restore();
 

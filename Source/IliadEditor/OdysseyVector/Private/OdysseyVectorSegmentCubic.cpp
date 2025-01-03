@@ -4,6 +4,7 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVector.h"
+#include "OdysseyVectorEngine.h"
 
 #include <algorithm> // for std::clamp
 
@@ -485,33 +486,6 @@ FOdysseyVectorSegmentCubic::Sample( double iFromT
     return sampleSegment;
 }
 
-void
-FOdysseyVectorSegmentCubic::UpdateBoundingBox ()
-{
-    FOdysseyVectorVertex* vertex0 = GetVertex(0);
-    FOdysseyVectorVertex* vertex1 = GetVertex(1);
-
-    mBBox.x = ULIS::FMath::Min4<double>( mPoint[0]->GetX() - vertex0->GetRadius()
-                                       , mCtrlPoint[0].GetX()
-                                       , mPoint[1]->GetX() - vertex1->GetRadius()
-                                       , mCtrlPoint[1].GetX() );
-
-    mBBox.y = ULIS::FMath::Min4<double>( mPoint[0]->GetY() - vertex0->GetRadius()
-                                       , mCtrlPoint[0].GetY()
-                                       , mPoint[1]->GetY() - vertex1->GetRadius()
-                                       , mCtrlPoint[1].GetY() );
-
-    mBBox.w = ULIS::FMath::Max4<double>( mPoint[0]->GetX() + vertex0->GetRadius()
-                                       , mCtrlPoint[0].GetX()
-                                       , mPoint[1]->GetX() + vertex1->GetRadius()
-                                       , mCtrlPoint[1].GetX() ) - mBBox.x;
-
-    mBBox.h = ULIS::FMath::Max4<double>( mPoint[0]->GetY() + vertex0->GetRadius()
-                                       , mCtrlPoint[0].GetY()
-                                       , mPoint[1]->GetY() + vertex1->GetRadius()
-                                       , mCtrlPoint[1].GetY() ) - mBBox.y;
-}
-
 FOdysseyVectorHandleSegment*
 FOdysseyVectorSegmentCubic::GetHandle( int iCtrlPointNum )
 {
@@ -522,27 +496,6 @@ FOdysseyVectorHandleSegment*
 FOdysseyVectorSegmentCubic::GetHandle( FOdysseyVectorVertex* iAssociatedVertex )
 {
     return ( static_cast<FOdysseyVectorPoint*>(iAssociatedVertex) == mPoint[0] ) ? &mCtrlPoint[0] : &mCtrlPoint[1];
-}
-
-::ULIS::FRectD
-FOdysseyVectorSegmentCubic::GetBoundingBox( bool iWorld )
-{
-    if( iWorld == true )
-    {
-        BLMatrix2D& worldMatrix = GetOwner()->GetWorldMatrix();
-        BLPoint p0 = worldMatrix.mapPoint( mBBox.x          , mBBox.y           );
-        BLPoint p1 = worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y           );
-        BLPoint p2 = worldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y + mBBox.h );
-        BLPoint p3 = worldMatrix.mapPoint( mBBox.x          , mBBox.y + mBBox.h );
-        ::ULIS::FRectD bbox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
-                                                        , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
-                                                        , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
-                                                        , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
-
-        return bbox;
-    }
-
-    return mBBox;
 }
 
 void
@@ -801,7 +754,11 @@ FOdysseyVectorSegmentCubic::Draw( BLContext* iBLContext )
 
 double
 FOdysseyVectorSegmentCubic::ThickenFraction( FOdysseyVectorFraction* iFraction
-                                           , double iStartU )
+                                           , double iStartU
+                                           , double& oXmin
+                                           , double& oYmin
+                                           , double& oXmax
+                                           , double& oYmax )
 {
     ::ULIS::FVec2D point[6] = { GetPointAt( iFraction->fromT )
                               , mOffsetCurve[0].GetPointAt( iFraction->fromT )
@@ -813,7 +770,8 @@ FOdysseyVectorSegmentCubic::ThickenFraction( FOdysseyVectorFraction* iFraction
     double endU = mLength ? ( startU + ( iFraction->length / mLength ) ) : startU;
     //double startU = iFraction->fromT;
     //double endU = iFraction->toT;
-
+    // we only need 4 of the Min Max, the others 2 are computed in BuildVariable()
+    static uint32 idxMinMax[4] = { 1, 2, 4, 5 };
 
     iFraction->polygon.point[0].x = point[0].x;
     iFraction->polygon.point[0].y = point[0].y;
@@ -850,6 +808,18 @@ FOdysseyVectorSegmentCubic::ThickenFraction( FOdysseyVectorFraction* iFraction
 
     iFraction->polygon.U[5] = startU;
     iFraction->polygon.V[5] = 1.0f;
+
+    // --- bounding --- //
+    for( uint32 i = 0; i < 4; i++ )
+    {
+        uint32 idx = idxMinMax[i];
+
+        if( iFraction->polygon.point[idx].x < oXmin ) oXmin = iFraction->polygon.point[idx].x;
+        if( iFraction->polygon.point[idx].y < oYmin ) oYmin = iFraction->polygon.point[idx].y;
+        if( iFraction->polygon.point[idx].x > oXmax ) oXmax = iFraction->polygon.point[idx].x;
+        if( iFraction->polygon.point[idx].y > oYmax ) oYmax = iFraction->polygon.point[idx].y;
+    }
+    //-------------------//
 
     return endU;
 }
@@ -1283,6 +1253,8 @@ FOdysseyVectorSegmentCubic::BuildOffsetCurves()
 void
 FOdysseyVectorSegmentCubic::Update( uint32 iUpdateFlags )
 {
+    double xmin, ymin, xmax, ymax;
+
     FOdysseyVectorSegment::Update( iUpdateFlags );
 
     mBezier[0] = mPoint[0]->GetCoords();
@@ -1290,11 +1262,44 @@ FOdysseyVectorSegmentCubic::Update( uint32 iUpdateFlags )
     mBezier[2] = mCtrlPoint[1].GetCoords();
     mBezier[3] = mPoint[1]->GetCoords();
 
+    xmin = ULIS::FMath::Min4<double>( mBezier[0].x
+                                    , mBezier[1].x
+                                    , mBezier[2].x
+                                    , mBezier[3].x );
+
+    ymin = ULIS::FMath::Min4<double>( mBezier[0].y
+                                    , mBezier[1].y
+                                    , mBezier[2].y
+                                    , mBezier[3].y );
+
+    xmax = ULIS::FMath::Max4<double>( mBezier[0].x
+                                    , mBezier[1].x
+                                    , mBezier[2].x
+                                    , mBezier[3].x );
+
+    ymax = ULIS::FMath::Max4<double>( mBezier[0].y
+                                    , mBezier[1].y
+                                    , mBezier[2].y
+                                    , mBezier[3].y );
+
     if( mNeedWidth )
     {
         BuildVariable( iUpdateFlags & FOdysseyVectorObject::UPDATE_NEEDPOLYLINE ? 5 : MINRECURSE
-                     , MAXRECURSE );
+                     , MAXRECURSE
+                     , xmin
+                     , ymin
+                     , xmax
+                     , ymax );
     }
+
+    mBBox = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
+
+    mBBox = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
+    mBBox = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
+    mBBox = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
+    mBBox = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
+
+//UE_LOG(LogTemp, Warning, TEXT("Hello World %f %f %f %f"), mBBox.x, mBBox.y, mBBox.w, mBBox.h );
 }
 
 static bool IntersectSegment( const ::ULIS::FVec2D& iLine0p0
@@ -1319,7 +1324,12 @@ static bool IntersectSegment( const ::ULIS::FVec2D& iLine0p0
 }
 
 void
-FOdysseyVectorSegmentCubic::BuildVariable( uint32 iMinRecurse, uint32 iMaxRecurse )
+FOdysseyVectorSegmentCubic::BuildVariable( uint32 iMinRecurse
+                                         , uint32 iMaxRecurse
+                                         , double& oXmin
+                                         , double& oYmin
+                                         , double& oXmax
+                                         , double& oYmax )
 {
     std::vector<FOdysseyVectorPoint> subPointBuffer;
     std::vector<FSegmentSubLine> subLineBuffer;
@@ -1334,7 +1344,6 @@ FOdysseyVectorSegmentCubic::BuildVariable( uint32 iMinRecurse, uint32 iMaxRecurs
     mLength = 0.0f; // note: BuildVariableAdaptive will update the length
 
     ResetPolygonCache();
-    UpdateBoundingBox();
 
     //if( mLength )
     {
@@ -1395,6 +1404,22 @@ FOdysseyVectorSegmentCubic::BuildVariable( uint32 iMinRecurse, uint32 iMaxRecurs
         {
             FOdysseyVectorPoint* point0 = subLine.point[0];
             FOdysseyVectorPoint* point1 = subLine.point[1];
+            double x0 = point0->GetX();
+            double y0 = point0->GetY();
+            double x1 = point1->GetX();
+            double y1 = point1->GetY();
+
+            // ------ bounding -------//
+            if( x0 < oXmin ) oXmin = x0;
+            if( y0 < oYmin ) oYmin = y0;
+            if( x0 > oXmax ) oXmax = x0;
+            if( y0 > oYmax ) oYmax = y0;
+
+            if( x1 < oXmin ) oXmin = x1;
+            if( y1 < oYmin ) oYmin = y1;
+            if( x1 > oXmax ) oXmax = x1;
+            if( y1 > oYmax ) oYmax = y1;
+            // ---------------------- //
 
             if( subLine.point[0]->GetClass() == FOdysseyVectorPoint::StaticClass() )
             {
@@ -1418,7 +1443,7 @@ FOdysseyVectorSegmentCubic::BuildVariable( uint32 iMinRecurse, uint32 iMaxRecurs
                                                                           , subLine.t[1]
                                                                           , subLine.length );
 
-            startU = ThickenFraction( &fraction, startU );
+            startU = ThickenFraction( &fraction, startU, oXmin, oYmin, oXmax, oYmax );
         }
     }
 }

@@ -48,6 +48,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 UPDATE_NOINBETWEENING = ( 1 << 6 );
         static const uint32 UPDATE_FORCE          = ( 1 << 7 ); // request force updating everything, not only invalidated items
         static const uint32 UPDATE_NODRAWINGLOCK  = ( 1 << 8 );
+        static const uint32 UPDATE_NORENDER       = ( 1 << 9 );
 
         // invalidation flags
         static const uint64 INVALIDATE_DEFAULT        = ( 1ULL << 0 );

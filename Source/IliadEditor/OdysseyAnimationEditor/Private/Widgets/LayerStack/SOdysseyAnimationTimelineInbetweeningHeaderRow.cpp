@@ -81,13 +81,6 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::Construct( const typename STable
 }
 
 FReply
-SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonUp( const FGeometry & MyGeometry
-                                                               , const FPointerEvent & MouseEvent )
-{
-    return FReply::Unhandled();
-}
-
-FReply
 SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonDown( const FGeometry & MyGeometry
                                                                  , const FPointerEvent & MouseEvent )
 {
@@ -95,14 +88,6 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonDown( const FGeomet
     UOdysseyAnimationLayerImageVector* layer = treeView.Get()->GetAnimationLayerImageVector();
     FOdysseyPainterEditor* editor = treeView->GetEditor();
     UOdysseyLayerStack* layerStack = editor->LayerStack();
-    FOdysseyVectorObject* ownerObject = mInbetweenerTag->GetOwner();
-    FOdysseyVectorEngine* vectorEngine = ownerObject->GetEngine();
-    FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetSharedEnv();
-    std::list<FOdysseyVectorTag*>& sharedTagList = sharedEnv->GetSharedTagList();
-    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                             | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
-    FReply reply = FReply::Unhandled();
 
     if ( layerStack->CurrentLayer.Get() != layer )
     {
@@ -111,72 +96,7 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::OnMouseButtonDown( const FGeomet
                                                     , TSoftObjectPtr<UOdysseyLayer>( layer ) );
     }
 
-    // Note: we don't rely on STreeView::SelectedItems to keep track of the selection.
-    // That way we don't have to update the widget.
-    // We directly rely on the selection from our vector engine. However this implies
-    // that we have to deal with the multiple selection by ourselves.
-
-    if( FSlateApplication::Get().GetModifierKeys().IsShiftDown() == true )
-    {
-        FOdysseyVectorObject* lastSelectedObject = vectorEngine->GetLastSelectedObject();
-
-        if( lastSelectedObject )
-        {
-            bool doSelect = false;
-
-            for( const TSharedPtr<FInbetweeningListViewItem>& item : treeView.Get()->GetItems() )
-            {
-                FOdysseyVectorObject* itemObject = item.Get()->GetInbetweenerTag()->GetOwner();
-
-                if( ( itemObject == ownerObject ) || ( itemObject == lastSelectedObject ) )
-                {
-                    doSelect = !doSelect;
-                }
-
-                if( doSelect )
-                {
-                    if( itemObject->IsSelected() == false )
-                    {
-                        vectorEngine->SelectObject( itemObject );
-                    }
-                }
-            }
-        }
-    }
-    else
-    {
-        if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
-        {
-            for( FOdysseyVectorObject* rootObject : sharedEnv->GetChildrenList() )
-            {
-                rootObject->GetEngine()->ClearObjectSelection();
-            }
-        }
-    }
-
-    if( ownerObject->IsSelected() == false )
-    {
-        vectorEngine->SelectObject( ownerObject );
-    }
-    else
-    {
-        if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
-        {
-            vectorEngine->UnselectObject( ownerObject );
-        }
-    }
-
-    if( MouseEvent.IsMouseButtonDown( EKeys::LeftMouseButton ) )
-    {
-        reply = FReply::Handled();
-    }
-
-    // request redraw
-    mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->Invalidate( 0 );
-    // update UI
-    FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
-
-    return reply;
+    return STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonDown( MyGeometry, MouseEvent );
 }
 
 bool

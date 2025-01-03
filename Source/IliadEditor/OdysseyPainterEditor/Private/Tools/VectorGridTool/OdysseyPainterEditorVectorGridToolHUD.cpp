@@ -49,23 +49,6 @@ FOdysseyPainterEditorVectorGridToolHUD::Deform()
         {
             DeformCell( cell );
         }
-
-        // realign vertices AFTER everything has moved (including handles that may lie on different cells)
-        for( FGridCell& cell : mCellArray )
-        {
-            for( int i = 0; i < cell.mPointArray.size(); i++ )
-            {
-                if( cell.mPointArray[i].mPoint->GetClass() == FOdysseyVectorVertex::StaticClass() )
-                {
-                    FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(cell.mPointArray[i].mPoint);
-
-                    if( vertex->IsHandleAligned() )
-                    {
-                        vertex->AlignHandles();
-                    }
-                }
-            }
-        }
     }
 }
 

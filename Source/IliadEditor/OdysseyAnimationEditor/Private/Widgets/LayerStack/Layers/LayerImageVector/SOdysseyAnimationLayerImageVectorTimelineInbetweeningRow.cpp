@@ -81,7 +81,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_HUD;
-    FReply reply = FReply::Unhandled();
+
+    // Call base method
+    FReply reply = STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonDown( MyGeometry, MouseEvent );
 
     // for AddBreakdown / RemoveBreakdown functions in the context menu
     treeView.Get()->SetCursorPos( cursorPos );
@@ -95,61 +97,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
 
     mPickedBreakdown = nullptr;
     mCandidateTargetCellBox.type = 0;
-
-    // Note: we don't rely on STreeView::SelectedItems to keep track of the selection.
-    // That way we don't have to update the widget.
-    // We directly rely on the selection from our vector engine. However this implies
-    // that we have to deal with the multiple selection by ourselves.
-
-    if( FSlateApplication::Get().GetModifierKeys().IsShiftDown() == true )
-    {
-        FOdysseyVectorObject* lastSelectedObject = vectorEngine->GetLastSelectedObject();
-
-        if( lastSelectedObject )
-        {
-            bool doSelect = false;
-
-            for( const TSharedPtr<FInbetweeningListViewItem>& item : treeView.Get()->GetItems() )
-            {
-                FOdysseyVectorObject* itemObject = item.Get()->GetInbetweenerTag()->GetOwner();
-
-                if( ( itemObject == ownerObject ) || ( itemObject == lastSelectedObject ) )
-                {
-                    doSelect = !doSelect;
-                }
-
-                if( doSelect )
-                {
-                    if( itemObject->IsSelected() == false )
-                    {
-                        vectorEngine->SelectObject( itemObject );
-                    }
-                }
-            }
-        }
-    }
-    else
-    {
-        if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
-        {
-            for( FOdysseyVectorObject* rootObject : sharedEnv->GetChildrenList() )
-            {
-                rootObject->GetEngine()->ClearObjectSelection();
-            }
-        }
-    }
-
-    if( ownerObject->IsSelected() == false )
-    {
-        vectorEngine->SelectObject( ownerObject );
-    }
-    else
-    {
-        if( FSlateApplication::Get().GetModifierKeys().IsControlDown() )
-        {
-            vectorEngine->UnselectObject( ownerObject );
-        }
-    }
 
     if( MouseEvent.IsMouseButtonDown( EKeys::LeftMouseButton ) )
     {
@@ -188,11 +135,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
             }
         }
 
-        reply = FReply::Handled().CaptureMouse( AsShared() );
+        reply.CaptureMouse( AsShared() );
     }
 
-    // request redraw
-    mInbetweenerTag->GetOwner()->GetScene()->GetEngine()->Invalidate( 0 );
     // update UI
     FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
 
@@ -255,11 +200,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
                 if( ( (uint32)drawingIndex > prevDrawingIndex ) && ( (uint32)drawingIndex < nextDrawingIndex ) )
                 {
                     mCandidateTargetCellBox = CellBox( CellBox::TYPE_TARGET
-                                                                     , drawingIndex
-                                                                     , cursorCell->GetFrame() * frameWidth /* * mLayoutScaleMultiplier */
-                                                                     , 0.0f
-                                                                     , cursorCell->GetLength() * frameWidth /* * mLayoutScaleMultiplier */
-                                                                     , mBoxSize.Y );
+                                                     , drawingIndex
+                                                     , cursorCell->GetFrame() * frameWidth /* * mLayoutScaleMultiplier */
+                                                     , 0.0f
+                                                     , cursorCell->GetLength() * frameWidth /* * mLayoutScaleMultiplier */
+                                                     , mBoxSize.Y );
 
                     //MarkPrepassAsDirty();
                 }
@@ -278,10 +223,14 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
     UOdysseyAnimationLayerImageVector* vectorLayer = treeView.Get()->GetAnimationLayerImageVector();
     int currentFrame = vectorLayer->GetAnimation()->CurrentFrame;
     UOdysseyAnimationCell* cell = vectorLayer->GetCellAtFrame( currentFrame );
-    FReply reply = FReply::Unhandled();
 
-    if( cell && cell->IsA<UOdysseyAnimationCellImageVector>())
+    // Call base method
+    FReply reply = STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonUp( MyGeometry, MouseEvent );
+
+    if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
     {
+        if( cell && cell->IsA<UOdysseyAnimationCellImageVector>())
+        {
         UOdysseyAnimationCellImageVector* vectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
         uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                         | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
@@ -289,8 +238,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
 
         //STableRow<TSharedPtr<FInbetweeningListViewItem>>::OnMouseButtonUp( MyGeometry, MouseEvent );
 
-        if ( MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton )
-        {
+
             if( mPickedBreakdown )
             {
                 if( mCandidateTargetCellBox.type & CellBox::TYPE_TARGET )
@@ -303,9 +251,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
             // request for redrawing of the current displayed cell
             vectorCell->GetRoot()->GetEngine()->Invalidate( 0 );
             FOdysseyVectorEngine::Notify( nullptr, retFlags );
-
-            reply = FReply::Handled().ReleaseMouseCapture();
         }
+
+        reply.ReleaseMouseCapture();
     }
 
     mPickedBreakdown = nullptr;

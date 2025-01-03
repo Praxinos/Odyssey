@@ -72,5 +72,28 @@ FOdysseyVectorHandleSegment::SetCoords( double iX, double iY )
         {
             mOwnerSegment->Invalidate();
         }
+
+        if( mAttachedVertex->IsHandleAligned() )
+        {
+            ::ULIS::FVec2D handleVector = mCoords - mAttachedVertex->GetCoords();
+            FOdysseyVectorSegment* otherSegment = mAttachedVertex->GetOtherSegment( mOwnerSegment );
+
+            if( otherSegment )
+            {
+                FOdysseyVectorHandleSegment* otherHandle = otherSegment->GetHandle( mAttachedVertex );
+                ::ULIS::FVec2D otherHandleVector = otherHandle->GetCoords() - mAttachedVertex->GetCoords();
+
+                if( handleVector.DistanceSquared() )
+                {
+                    handleVector.Normalize();
+
+                    ::ULIS::FVec2D alignedCoords = mAttachedVertex->GetCoords() - ( otherHandleVector.Distance() * handleVector );
+
+                    otherHandle->FOdysseyVectorPoint::SetCoords( alignedCoords.x, alignedCoords.y );
+
+                    otherSegment->Invalidate();
+                }
+            }
+        }
     }
 }

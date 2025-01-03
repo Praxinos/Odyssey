@@ -50,9 +50,12 @@ FOdysseyVectorRoot::Update( uint32 iUpdateFlags )
 {
     FOdysseyVectorObject::Update( iUpdateFlags );
 
-    // request redraw
-    mEngine.Invalidate( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) ? FOdysseyVectorEngine::INVALIDATE_INTERACTIVE
-                                                                                    : 0 );
+    if( ( iUpdateFlags & UPDATE_NORENDER ) == 0 )
+    {
+        // request redraw
+        mEngine.Invalidate( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) ? FOdysseyVectorEngine::INVALIDATE_INTERACTIVE
+                                                                                        : 0 );
+    }
 }
 
 void

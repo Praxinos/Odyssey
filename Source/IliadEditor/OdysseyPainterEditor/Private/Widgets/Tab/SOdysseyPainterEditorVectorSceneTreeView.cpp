@@ -108,27 +108,6 @@ SOdysseyPainterEditorVectorSceneTreeView::BuildTree( const TSharedPtr<FVectorSce
     }
 }
 
-/*
-void
-SOdysseyPainterEditorVectorSceneTreeView::SelectTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem )
-{
-    FOdysseyVectorObject* itemObject = iItem.Get()->GetVectorObject();
-
-    if( itemObject->IsSelected() )
-    {
-        if( IsItemSelected( iItem ) == false )
-        {
-            SelectedItems.Add( iItem );
-        }
-    }
-
-    for( int i = 0; i < iItem.Get()->mChildren.Num(); i++ )
-    {
-        SelectTree( iItem.Get()->mChildren[i] );
-    }
-}
-*/
-
 void
 SOdysseyPainterEditorVectorSceneTreeView::ExpandTree( const TSharedPtr<FVectorSceneTreeViewItem> iItem )
 {
@@ -156,15 +135,17 @@ SOdysseyPainterEditorVectorSceneTreeView::Private_SelectRangeFromCurrentTo ( TSh
         FOdysseyVectorEngine* vectorEngine = vectorObject->GetEngine();
         bool doSelect = false;
 
-        for( const TSharedPtr<FVectorSceneTreeViewItem>& item : GetItems() )
+        for( const TSharedPtr<FVectorSceneTreeViewItem>& rangeItem : GetItems() )
         {
-            FOdysseyVectorObject* itemObject = item.Get()->GetVectorObject();
+            FOdysseyVectorObject* rangeItemObject = rangeItem.Get()->GetVectorObject();
 
-            if( ( itemObject == fromObject ) || ( itemObject == toObject ) )
+            if( ( rangeItemObject == fromObject ) || ( rangeItemObject == toObject ) )
             {
-                if( itemObject->IsSelected() == false )
+                if( rangeItemObject->IsSelected() == false )
                 {
-                    vectorEngine->SelectObject( itemObject );
+                    vectorEngine->SelectObject( rangeItemObject );
+                    // Keep internal array consistent for use by other methods
+                    SelectedItems.Add( rangeItem );
                 }
 
                 doSelect = !doSelect;
@@ -173,9 +154,11 @@ SOdysseyPainterEditorVectorSceneTreeView::Private_SelectRangeFromCurrentTo ( TSh
             {
                 if( doSelect )
                 {
-                    if( itemObject->IsSelected() == false )
+                    if( rangeItemObject->IsSelected() == false )
                     {
-                        vectorEngine->SelectObject( itemObject );
+                        vectorEngine->SelectObject( rangeItemObject );
+                        // Keep internal array consistent for use by other methods
+                        SelectedItems.Add( rangeItem );
                     }
                 }
             }
@@ -194,12 +177,16 @@ SOdysseyPainterEditorVectorSceneTreeView::Private_SetItemSelection ( TSharedPtr<
     if( bShouldBeSelected )
     {
         vectorEngine->SelectObject( vectorObject );
+        // Keep internal array consistent for use by other methods
+        SelectedItems.Add( iItem );
 
         RangeSelectionStart = iItem;
     }
     else
     {
         vectorEngine->UnselectObject( vectorObject );
+        // Keep internal array consistent for use by other methods
+        SelectedItems.Remove( iItem );
     }
 }
 
@@ -214,6 +201,9 @@ SOdysseyPainterEditorVectorSceneTreeView::Private_ClearSelection()
 
         vectorEngine->ClearObjectSelection();
     }
+
+    // Keep internal array consistent for use by other methods
+    SelectedItems.Empty();
 }
 
 bool
@@ -428,12 +418,6 @@ SOdysseyPainterEditorVectorSceneTreeView::MapActionsToCommandList()
         FGenericCommands::Get().Paste,
         FExecuteAction::CreateRaw( this, &SOdysseyPainterEditorVectorSceneTreeView::PasteObjects )
     );
-/*
-    mCommandList->MapAction(
-        FGenericCommands::Get().Rename,
-        FExecuteAction::CreateRaw(this, &SOdysseyPainterEditorVectorSceneTreeView::RenameCurrentLayer)
-    );
-*/
 }
 
 #undef LOCTEXT_NAMESPACE

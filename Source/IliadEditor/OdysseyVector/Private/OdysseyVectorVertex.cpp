@@ -820,48 +820,23 @@ FOdysseyVectorVertex::GetHandlePosition( ::ULIS::FVec2D iHandlePosition[2] )
     }
 }
 
-// TODO: rename as AlignSegments
-void
-FOdysseyVectorVertex::AlignHandles()
-{
-    if( mSegmentList.size() )
-    {
-        AlignHandles( mSegmentList.front()->GetHandle( this ) );
-    }
-}
-
-// TODO: rename as AlignSegments
-void
-FOdysseyVectorVertex::AlignHandles( FOdysseyVectorHandleSegment* iHandle )
-{
-    ::ULIS::FVec2D handleVector = iHandle->GetCoords() - mCoords;
-    FOdysseyVectorSegment* segment = iHandle->GetOwner();
-    FOdysseyVectorSegment* otherSegment = GetOtherSegment( segment );
-
-    if( otherSegment )
-    {
-        FOdysseyVectorHandleSegment* otherHandle = otherSegment->GetHandle( this );
-        ::ULIS::FVec2D otherHandleVector = otherHandle->GetCoords() - mCoords;
-
-        // if vectors are already aligned, their cross product equals 0
-        if( FOdysseyVector::Cross2D( otherHandleVector, handleVector ) )
-        {
-            handleVector.Normalize();
-
-            otherHandle->Set( GetCoords() - ( otherHandleVector.Distance() * handleVector ) );
-
-            //SetHandleAligned( true );
-        }
-    }
-}
-
 // TODO: rename as SetSegmentAligned
 void
 FOdysseyVectorVertex::SetHandleAligned( bool iHandleAligned )
 {
     if( iHandleAligned == true )
     {
+        FOdysseyVectorSegment* firstSegment = GetFirstSegment();
+
         mFlags |= HANDLE_ALIGNED;
+
+        if( firstSegment )
+        {
+            FOdysseyVectorHandleSegment* handle = firstSegment->GetHandle( this );
+
+            // force alignment of handles
+            handle->Set( handle->GetCoords() );
+        }
     }
     else
     {

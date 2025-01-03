@@ -560,11 +560,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
         //---------- end of undo ------------//
 
         vertex->SetHandleAligned( vertex->IsHandleAligned() ? false : true );
-
-        if( vertex->IsHandleAligned() )
-        {
-            vertex->AlignHandles( vertex->GetFirstSegment()->GetHandle( vertex ) );
-        }
     }
     // Else, save point coordinates before changing them
     else
@@ -766,14 +761,6 @@ UOdysseyPainterEditorVectorPathEditTool::DragSegmentHandle( FOdysseyVectorHandle
     iHandle->Set( iHandle->GetX() + localVector.x
                 , iHandle->GetY() + localVector.y );
 
-    if( iRealign )
-    {
-        if( vertex->IsHandleAligned() )
-        {
-            vertex->AlignHandles( iHandle );
-        }
-    }
-
     return segment->GetBoundingBox( false );
 }
 
@@ -807,7 +794,7 @@ UOdysseyPainterEditorVectorPathEditTool::DragVertex( FOdysseyVectorVertex *iVert
             iVertex->SetRadius( iVertex->GetRadius() + deltaRadius );
         }
 
-        return iVertex->GetBoundingBox( false );
+        return iVertex->GetBoundingBox( true );
     }
 
     if( mPickingMode == ePathPickingMode::Vertex )
@@ -815,7 +802,7 @@ UOdysseyPainterEditorVectorPathEditTool::DragVertex( FOdysseyVectorVertex *iVert
         iVertex->Set( iVertex->GetX() + localVector.x
                     , iVertex->GetY() + localVector.y );
 
-        return iVertex->GetBoundingBox( false );
+        return iVertex->GetBoundingBox( true );
     }
 
     return { 0, 0, 0, 0 };

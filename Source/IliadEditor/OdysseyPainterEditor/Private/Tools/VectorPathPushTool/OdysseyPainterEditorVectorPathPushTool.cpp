@@ -282,25 +282,6 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorGroupP
             point->SetY( point->GetY() + ( delta.y * ratio ) );
         }
 
-        for( int i = 0; i < mPushedPointArray.size(); i++ )
-        {
-            FPushedPoint* pushedPoint = &mPushedPointArray[i];
-            FOdysseyVectorPoint* point = pushedPoint->point;
-
-            if( point->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
-            {
-                FOdysseyVectorHandleSegment* handle = static_cast<FOdysseyVectorHandleSegment*>(point);
-                FOdysseyVectorSegment* segment = handle->GetOwner();
-                FOdysseyVectorVertex* handleVertex = handle->GetAttachedVertex();
-
-                if( handleVertex->IsHandleAligned() )
-                {
-                    //FOdysseyVectorPath::SmoothSegments( vertex, true );
-                    handleVertex->AlignHandles( handle );
-                }
-            }
-        }
-
         // update vector scene and GUI widgets via delegates.
         iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
                       | FOdysseyVectorObject::UPDATE_NOINBETWEENING );

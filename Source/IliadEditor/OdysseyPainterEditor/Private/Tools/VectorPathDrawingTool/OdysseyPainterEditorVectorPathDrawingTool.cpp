@@ -415,6 +415,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
         double pointRadius = PressureSensitive ? ( iPointInTexture.pressure * Radius ) : Radius;
         FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
         FOdysseyVectorSegment* newSegment;
+        FOdysseyVectorSegment* prevSegment = nullptr;
 
         // mandatory for stitching vertices
         mPathDrawingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
@@ -440,7 +441,11 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
             mAddedVertexArray.push_back( newSegment->GetVertex(1) );
             mAddedSegmentArray.push_back( newSegment );
 
+            prevSegment = mStitchedVertex->GetOtherSegment( newSegment );
+
+            // the newly created vertex is now the stitched vertex
             mStitchedVertex = mAddedVertexArray.back();
+
 
             //mUndoPathExtend->RecordSegment( newSegment, newSegment->GetVertex(1) );
         }
@@ -469,18 +474,31 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
             oldMouseX = iPointInTexture.x;
             oldMouseY = iPointInTexture.y;
         }
-        else
-        {
-            //uint32 imgW = vectorEngine->GetPreferredWidth(),
-            //       imgH = vectorEngine->GetPreferredHeight();
-
-            //vectorEngine->SetInvalidatedRect( ::ULIS::FRectI( 0, 0, imgW, imgH ) );
-            vectorEngine->InvalidateRect();
-        }
 
         // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_NORENDER // we render manually so that we can determine an invalidation rect
+                                      | FOdysseyVectorObject::UPDATE_INTERACTIVE
                                       | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated path after segment insertion
+
+        if( newSegment )
+        {
+            vectorEngine->InvalidateRect( newSegment->GetBoundingBox( true ) );
+            vectorEngine->InvalidateRect( newSegment->GetVertex(0)->GetBoundingBox( true ) );
+            vectorEngine->InvalidateRect( newSegment->GetVertex(1)->GetBoundingBox( true ) );
+
+            if( prevSegment )
+            {
+                vectorEngine->InvalidateRect( prevSegment->GetBoundingBox( true ) );
+            }
+        }
+
+        // Request render after last redraw - commented out
+        //if( vectorEngine->GetInvalidationFlags() == 0 )
+        {
+            // it's important to call invalidate here in any case beacuse the delegate
+            //  will call FOdysseyVectorBlock::Invalidate() and it will retrieve the invalidated rectangle.
+            vectorEngine->Invalidate( 0 );
+        }
     }
 
     oSignalFlags = notificationFlags;
@@ -618,7 +636,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
 
     // in OnMouseDragVector() we are not guaranteed to get a viewport redraw from what I understand.
     // this means the Invalidation Rectangle is not resetted, so we force it.
-    vectorEngine->InvalidateRect();
+    vectorEngine->InvalidateRect( ::ULIS::FRectD( 0
+                                                , 0
+                                                , iScene->GetEngine()->GetLayer()->GetWidth()
+                                                , iScene->GetEngine()->GetLayer()->GetHeight() ) );
 
     // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
     iScene->GetSharedEnv()->Update( UpdatePaintGroups ? FOdysseyVectorObject::UPDATE_PAINTGROUPS : 0 );

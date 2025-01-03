@@ -1543,10 +1543,11 @@ FOdysseyPainterEditor::AlignPointSelection( FOdysseyPainterEditor* iEditor, FOdy
     for( FOdysseyVectorVertex* vertex : selectedVertexArray )
     {
         FOdysseyVectorSegment* segment = vertex->GetFirstSegment();
-        // we don't check the validity of the pointer to the segment because a vertex is suppose
-        // to always belong to at least 1 segment.
-        vertex->AlignHandles( segment->GetHandle( vertex ) );
-        vertex->SetHandleAligned( true );
+
+        if( segment )
+        {
+            vertex->SetHandleAligned( true );
+        }
     }
 
     iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // updated invalidated objects

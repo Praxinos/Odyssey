@@ -526,7 +526,6 @@ FOdysseyVectorPathTracer::CommitSegment( FOdysseyVectorVertex* iPreviousVertex
         // so that the topology exists
         if( iPreviousVertex->IsHandleAligned() )
         {
-            iPreviousVertex->AlignHandles();
             iPreviousVertex->SetHandleAligned( true );
         }
 

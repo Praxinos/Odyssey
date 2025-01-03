@@ -366,8 +366,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
                                      , double& oYMax );
 
         ::ULIS::FVec2D GetWorldCoords();
-        void AlignHandles( FOdysseyVectorHandleSegment* iHandle );
-        void AlignHandles();
 
         void AlterRadius( FOdysseyVectorVertex* iInitiatorVertex
                         , FOdysseyVectorSegment* iFromSegment

@@ -273,7 +273,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                        , uint64 iTraversalFlags
                        , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
         void InvalidateRect( const ::ULIS::FRectD& iRect );
-        void InvalidateRect( );
         ::ULIS::FRectD GetInvalidatedRect( double iScreenWidth, double iScreenHeight );
 
         void GetFocusedObjectList( std::list<FOdysseyVectorObject*>& oObjectList );

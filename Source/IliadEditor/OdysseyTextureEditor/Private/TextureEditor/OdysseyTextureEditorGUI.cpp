@@ -193,16 +193,20 @@ FOdysseyTextureEditorGUI::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene,
     {
         UOdysseyTextureLayerImageVector* currentVectorLayer = Cast<UOdysseyTextureLayerImageVector>(layerStack->CurrentLayer.Get());
 
-        if( currentVectorLayer && ( currentVectorLayer->GetEngine()->GetScene() == iScene ) )
+        if( currentVectorLayer )
         {
+            FOdysseyVectorGroupPaint* currentScene = currentVectorLayer->GetEngine()->GetScene();
+
             if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW )
             {
-                vectorSceneTreeViewTab.Get()->UpdateSceneTreeView( iScene );
+                vectorSceneTreeViewTab.Get()->UpdateSceneTreeView( ( iScene == nullptr ) ? currentScene
+                                                                                         : iScene );
             }
 
             if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS )
             {
-                vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( iScene );
+                vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( ( iScene == nullptr ) ? currentScene
+                                                                                                 : iScene );
             }
         }
     }

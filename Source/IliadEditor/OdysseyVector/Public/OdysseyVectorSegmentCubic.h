@@ -95,12 +95,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
         virtual void DrawStructure( BLContext* iBLContext, FOdysseyVectorObject* iParentObject, bool iWorld ) override;
 
        /**
-         * @brief Get the segment's bounding box.
-         * @return a reference to the segment's bounding box.
-         */
-        virtual ::ULIS::FRectD GetBoundingBox( bool iWorld ) override;
-
-       /**
          * @brief Update cached data for this segment.
          */
         virtual void Update( uint32 iUpdateFlags ) override;
@@ -155,7 +149,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
        /**
          * @brief Builds the variable thickness segment (stores values into polygon cache).
          */
-        void BuildVariable( uint32 iMinRecurse, uint32 iMaxRecurse );
+        void BuildVariable( uint32 iMinRecurse
+                          , uint32 iMaxRecurse
+                          , double& oXmin
+                          , double& oYmin
+                          , double& oXmax
+                          , double& oYmax );
 
         ::ULIS::FVec2D GetVectorAtEnd( bool iNormalize );
         ::ULIS::FVec2D GetVectorAtStart( bool iNormalize );
@@ -270,13 +269,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                        , uint32 iCurrentRecurse
                                        , std::vector<FOdysseyVectorBezierFragment>& oBezierFragmentArray );
         double ThickenFraction( FOdysseyVectorFraction* iFraction
-                              , double iStartU );
+                              , double iStartU
+                              , double& oXmin
+                              , double& oYmin
+                              , double& oXmax
+                              , double& oYmax );
         void SmoothOffsetCurves( std::vector<FOdysseyVectorBezierFragment>& iGuideBezierFragmentArray );
-        static void SmoothOffsetCurvesFragments( FOdysseyVectorVertex* iVertex
-                                               , FOdysseyVectorSegmentCubic* iPrevSegment
-                                               , FOdysseyVectorSegmentCubic* iCurrSegment
-                                               , FOdysseyVectorBezierFragment* iPrevFragment[2]
-                                               , FOdysseyVectorBezierFragment* iCurrFragment[2] );
 
     protected:
         FOdysseyVectorOffsetCurveCubic mOffsetCurve[2];
