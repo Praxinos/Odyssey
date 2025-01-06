@@ -132,7 +132,7 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonDown(const FGeometry& MyGeometry, 
 
         const float minScrub = 0.0f;
         float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
-        float frame = mTimelinePosition->MousePositionToFrame(posX - mTimelinePosition->GetPadding());
+        float frame = mTimelinePosition->MousePositionToFrame(posX - mTimelinePosition->GetPadding() + mTimelinePosition->GetOffset() * mTimelinePosition->GetFrameSize());
         FTimespan time = FTimespan::FromSeconds(FMath::Max(0.f, frame) / mAnimation->GetFramesPerSecond());
         mPlayer->Stop();
         mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Render);
@@ -152,7 +152,7 @@ SOdysseyAnimationTimelineHeader::OnMouseMove(const FGeometry& MyGeometry, const 
     {
         const float minScrub = 0.0f;
         float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
-        float frame = mTimelinePosition->MousePositionToFrame(posX - mTimelinePosition->GetPadding());
+        float frame = mTimelinePosition->MousePositionToFrame(posX - mTimelinePosition->GetPadding() + mTimelinePosition->GetOffset() * mTimelinePosition->GetFrameSize());
         FTimespan time = FTimespan::FromSeconds(FMath::Max(0.f, frame) / mAnimation->GetFramesPerSecond());
         mPlayer->SeekToTime(time);
         return FReply::Handled();
@@ -168,7 +168,7 @@ SOdysseyAnimationTimelineHeader::OnMouseButtonUp(const FGeometry& MyGeometry, co
     {
         const float minScrub = 0.0f;
         float posX = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition()).X;
-        float frame = mTimelinePosition->MousePositionToFrame(posX - mTimelinePosition->GetPadding());
+        float frame = mTimelinePosition->MousePositionToFrame(posX - mTimelinePosition->GetPadding() + mTimelinePosition->GetOffset() * mTimelinePosition->GetFrameSize());
         FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), FMath::Max(0, (int)frame));
         mPlayer->SetRenderType(IOdysseyImageRenderer::eRenderType::Editor);
         mIsScrubbing = false;
