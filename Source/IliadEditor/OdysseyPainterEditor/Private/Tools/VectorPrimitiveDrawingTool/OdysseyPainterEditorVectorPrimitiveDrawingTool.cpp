@@ -36,13 +36,13 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrim
     , PrimitiveType ( EOdysseyVectorPrimitiveType::Ellipse )
     , ColorMode( eForegroundColorMode::SolidColor )
     , Opacity( 1.0f )
-    , Brush ( nullptr )
+    , Brush( nullptr )
     , StrokeWidth( 4.0f )
     , Uniform( false )
     , mPrimitive( nullptr )
     , mRectangleNumber ( 0 )
-    , mLineNumber ( 0 )
-    , mEllipseNumber ( 0 )
+    , mLineNumber( 0 )
+    , mEllipseNumber( 0 )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Shapes64");
 }

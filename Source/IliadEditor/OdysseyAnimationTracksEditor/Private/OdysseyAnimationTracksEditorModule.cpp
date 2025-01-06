@@ -46,6 +46,6 @@ FOdysseyAnimationTracksEditorModule::UnregisterSequencerTracks()
 }
 
 
-IMPLEMENT_MODULE( FOdysseyAnimationTracksEditorModule, OdysseyAnimationTracksEditor );
+IMPLEMENT_MODULE( FOdysseyAnimationTracksEditorModule, OdysseyAnimationTracksEditorModule );
 
 #undef LOCTEXT_NAMESPACE

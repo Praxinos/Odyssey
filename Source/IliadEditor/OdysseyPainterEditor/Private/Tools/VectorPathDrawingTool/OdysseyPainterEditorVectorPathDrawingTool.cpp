@@ -29,7 +29,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathDrawingToolHUD( this ), true )
     , ColorMode( eForegroundColorMode::SolidColor )
     , Opacity( 1.0f )
-    , Brush ( nullptr )
+    , Brush( nullptr )
     , TracingType( eTracingType::Organic )
     , TracingFidelity( eTracingFidelity::Highest )
     , Radius( 5.0f )

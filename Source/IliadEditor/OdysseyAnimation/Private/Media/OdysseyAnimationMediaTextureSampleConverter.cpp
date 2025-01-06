@@ -17,7 +17,7 @@ FOdysseyAnimationMediaTextureSampleConverter::GetConverterInfoFlags() const
 }
 
 bool
-FOdysseyAnimationMediaTextureSampleConverter::Convert(FTexture2DRHIRef& InDstTexture, const FConversionHints& Hints)
+FOdysseyAnimationMediaTextureSampleConverter::Convert(FRHICommandListImmediate& RHICmdList, FTextureRHIRef& InDstTexture, const FConversionHints& Hints)
 {
     InDstTexture = mSample->GetTexture();
     return true;

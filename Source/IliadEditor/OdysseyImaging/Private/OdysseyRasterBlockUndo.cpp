@@ -144,7 +144,7 @@ FOdysseyRasterBlockUndoBuilder::SaveToCache(const FString& iId, const TArray<uin
         {
             UE::DerivedData::FCachePutValueRequest
             {
-                UE::DerivedData::FSharedString(TEXT("FOdysseyRasterBlock")),
+                UE::FSharedString(TEXT("FOdysseyRasterBlock")),
                 UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
                 MoveTemp(derivedDataValue),
                 UE::DerivedData::ECachePolicy::StoreLocal
@@ -224,7 +224,7 @@ FOdysseyRasterBlockUndo::LoadUndoFromCache(const FString& iId)
         {
             UE::DerivedData::FCacheGetValueRequest
             {
-                UE::DerivedData::FSharedString(TEXT("FOdysseyRasterBlock")),
+                UE::FSharedString(TEXT("FOdysseyRasterBlock")),
                 UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
                 UE::DerivedData::ECachePolicy::Local
             }
@@ -296,7 +296,7 @@ FOdysseyRasterBlockUndo::RemoveUndoFromCache(const FString& iId)
     UE::DerivedData::GetCache().PutValue(
         {
             {
-                UE::DerivedData::FSharedString(), //Not needed
+                UE::FSharedString(), //Not needed
                 UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
                 MoveTemp(derivedDataValue),
                 UE::DerivedData::ECachePolicy::StoreLocal //Use "StoreLocal" instead of "Local" to store and override existing value

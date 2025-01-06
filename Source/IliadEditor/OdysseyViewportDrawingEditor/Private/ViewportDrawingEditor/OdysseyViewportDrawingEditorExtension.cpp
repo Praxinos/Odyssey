@@ -382,7 +382,7 @@ FOdysseyViewportDrawingEditorExtension::SetTexture(UTexture* iTexture, bool iWar
                 {
                     bool needsOpen = true;
                     AMediaPlate* mediaPlate = Cast<AMediaPlate>(mActor);
-                    UMediaSource* mediaSource = mediaPlate->MediaPlateComponent->MediaPlaylist->Get(0);
+                    UMediaSource* mediaSource = mediaPlate->MediaPlateComponent->GetMediaPlaylist()->Get(0);
                     if (mediaSource && mediaSource->IsA(UOdysseyAnimation::StaticClass()))
                     {
                         UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(mediaSource);

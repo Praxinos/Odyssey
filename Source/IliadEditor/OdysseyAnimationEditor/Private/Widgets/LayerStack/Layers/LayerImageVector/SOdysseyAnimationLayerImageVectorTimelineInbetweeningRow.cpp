@@ -37,8 +37,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::~SOdysseyAnimationLaye
 }
 
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow()
-    : mPickedBreakdown( nullptr )
-    , mCandidateTargetCellBox( 0, 0, 0.0f, 0.0f, 0.0f, 0.0f )
+    : mCandidateTargetCellBox( 0, 0, 0.0f, 0.0f, 0.0f, 0.0f )
+    , mPickedBreakdown(nullptr)
 {
 }
 
