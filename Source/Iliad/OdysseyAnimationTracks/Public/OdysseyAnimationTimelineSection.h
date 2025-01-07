@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Sections/MovieSceneSubSection.h"
+#include "MovieSceneSection.h"
 
 #include "OdysseyAnimationTimelineSection.generated.h"
 
@@ -14,7 +14,7 @@ enum class EMovieSceneChannelProxyType : uint8;
  */
 UCLASS()
 class ODYSSEYANIMATIONTRACKS_API UOdysseyAnimationTimelineSection
-    : public UMovieSceneSubSection
+    : public UMovieSceneSection
 {
 public:
 
