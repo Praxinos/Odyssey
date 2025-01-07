@@ -26,6 +26,7 @@ SOdysseyPainterEditorRasterDrawingToolBrushSelector::~SOdysseyPainterEditorRaste
 void
 SOdysseyPainterEditorRasterDrawingToolBrushSelector::Construct( const FArguments& InArgs )
 {
+    mIsExpanded = true;
     mTool = InArgs._Tool;
     mTool->OnBrushChanged().AddRaw(this, &SOdysseyPainterEditorRasterDrawingToolBrushSelector::OnToolBrushChanged);
 
@@ -49,22 +50,84 @@ SOdysseyPainterEditorRasterDrawingToolBrushSelector::Construct( const FArguments
 
     this->ChildSlot
     [
-        SNew(SVerticalBox)
-        +SVerticalBox::Slot()
-        .AutoHeight()
+        SNew(SGridPanel)
+        .FillColumn( 1, 1.f )
+        + SGridPanel::Slot(0, 0)
         [
-            /* SNew(SOdysseyBrushSelector)
-            .Brush_UObject(mTool, &UOdysseyPainterEditorRasterDrawingTool::GetBrush)
-            .OnBrushChanged(this, &SOdysseyPainterEditorRasterDrawingToolBrushSelector::OnBrushSelected) */
-
-            PropertyEditorModule.CreateSingleProperty(mTool, "Brush", brushPropertyParams).ToSharedRef()
-
+            SAssignNew(mExpanderArrow, SButton)
+            .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+            .VAlign(VAlign_Center)
+            .HAlign(HAlign_Center)
+            .ClickMethod( EButtonClickMethod::MouseDown )
+            .OnClicked( this, &SOdysseyPainterEditorRasterDrawingToolBrushSelector::OnExpanderArrowClicked )
+            .ContentPadding(0.f)
+            .ForegroundColor( FSlateColor::UseForeground() )
+            .IsFocusable( false )
+            [
+                SNew(SImage)
+                .Image( this, &SOdysseyPainterEditorRasterDrawingToolBrushSelector::GetExpanderArrowImage )
+                .ColorAndOpacity( FSlateColor::UseSubduedForeground() )
+            ]
         ]
-        + SVerticalBox::Slot()
+        + SGridPanel::Slot(1, 0)
         [
-            mDetailsView.ToSharedRef()
+            PropertyEditorModule.CreateSingleProperty(mTool, "Brush", brushPropertyParams).ToSharedRef()
+        ]
+        + SGridPanel::Slot(1, 1)
+        [
+            SNew(SBox)
+            .Visibility_Lambda(
+                [this]()
+                {
+                    return mIsExpanded ? EVisibility::Visible : EVisibility::Collapsed;
+                }
+            )
+            [
+                mDetailsView.ToSharedRef()
+            ]
         ]
     ];
+}
+
+const FSlateBrush*
+SOdysseyPainterEditorRasterDrawingToolBrushSelector::GetExpanderArrowImage() const
+{
+    FName resourceName;
+    if (mIsExpanded)
+    {
+        if ( mExpanderArrow->IsHovered() )
+        {
+            static FName expandedHoveredName = "TreeArrow_Expanded_Hovered";
+            resourceName = expandedHoveredName;
+        }
+        else
+        {
+            static FName expandedName = "TreeArrow_Expanded";
+            resourceName = expandedName;
+        }
+    }
+    else
+    {
+        if ( mExpanderArrow->IsHovered() )
+        {
+            static FName collapsedHoveredName = "TreeArrow_Collapsed_Hovered";
+            resourceName = collapsedHoveredName;
+        }
+        else
+        {
+            static FName collapsedName = "TreeArrow_Collapsed";
+            resourceName = collapsedName;
+        }
+    }
+
+    return FAppStyle::Get().GetBrush(resourceName);
+}
+
+FReply
+SOdysseyPainterEditorRasterDrawingToolBrushSelector::OnExpanderArrowClicked()
+{
+    mIsExpanded = !mIsExpanded;
+    return FReply::Handled();
 }
 
 void

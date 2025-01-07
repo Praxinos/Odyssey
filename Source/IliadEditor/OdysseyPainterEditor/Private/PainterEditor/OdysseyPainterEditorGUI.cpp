@@ -8,14 +8,12 @@
 #include "SOdysseyTabletAPISwitcher.h"
 #include "Models/OdysseyPainterEditorCommands.h"
 
-#include "OdysseyPainterEditorBrushSelectorTab.h"
 #include "OdysseyPainterEditorColorPaletteTab.h"
 #include "OdysseyPainterEditorColorSlidersTab.h"
 #include "OdysseyPainterEditorColorWheelTab.h"
 #include "OdysseyPainterEditorMeshSelectorTab.h"
 #include "OdysseyPainterEditorTopTab.h"
 #include "OdysseyPainterEditorToolsTab.h"
-#include "OdysseyPainterEditorToolOptionsTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
 
@@ -60,8 +58,6 @@ void
 FOdysseyPainterEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
 {
     Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorToolsTab::StaticId(), ETabState::ClosedTab));
-    Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorToolOptionsTab::StaticId(), ETabState::ClosedTab));
-    Extender.ExtendLayout(FTabId(TEXT("PlacementBrowser")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorBrushSelectorTab::StaticId(), ETabState::ClosedTab));
 
 
     //Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorPaletteTab::StaticId(), ETabState::ClosedTab));
@@ -75,26 +71,16 @@ FOdysseyPainterEditorGUI::CreateTabs()
     TSharedRef<FOdysseyPainterEditorMeshSelectorTab> meshSelectorTab = MakeShared<FOdysseyPainterEditorMeshSelectorTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorPaletteTab> paletteTab = MakeShared<FOdysseyPainterEditorPaletteTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorViewportTab> viewportTab = MakeShared<FOdysseyPainterEditorViewportTab>(mEditor);
-    TSharedRef<FOdysseyPainterEditorBrushSelectorTab> brushSelectorTab = MakeShared<FOdysseyPainterEditorBrushSelectorTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorColorWheelTab> colorWheelTab = MakeShared<FOdysseyPainterEditorColorWheelTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorColorSlidersTab> colorSlidersTab = MakeShared<FOdysseyPainterEditorColorSlidersTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorToolsTab> toolsTab = MakeShared<FOdysseyPainterEditorToolsTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorTopTab> topTab = MakeShared<FOdysseyPainterEditorTopTab>(mEditor);
-    TSharedRef<FOdysseyPainterEditorToolOptionsTab> toolOptionsTab = MakeShared<FOdysseyPainterEditorToolOptionsTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = MakeShared<FOdysseyPainterEditorVectorSceneTreeViewTab>(mEditor);
 
     //Used for the viewport drawing editor to know which tab to open by default
-    //paletteTab->ShouldOpenByDefault(true);
-    brushSelectorTab->ShouldOpenByDefault(true);
     colorWheelTab->ShouldOpenByDefault(true);
-    //colorSlidersTab->ShouldOpenByDefault(true);
     toolsTab->ShouldOpenByDefault(true);
-    //selectedVectorObjectTab->ShouldOpenByDefault(true);
-    toolOptionsTab->ShouldOpenByDefault(true);
 
-
-    mEditor->AddTab(brushSelectorTab);
-    mEditor->AddTab(toolOptionsTab);
     mEditor->AddTab(toolsTab);
 
     mEditor->AddTab(meshSelectorTab);
@@ -199,27 +185,15 @@ FOdysseyPainterEditorGUI::CreateLeftSection(FOdysseyEditorLayoutBuilder& iBuilde
 {
     TSharedRef<FTabManager::FSplitter> leftSplitter = iBuilder.GetSplitter("LeftSplitter");
 
-    TSharedRef<FTabManager::FStack> brushStack = iBuilder.CreateStack("BrushStack");
-    brushStack->SetHideTabWell(false);
-    brushStack->SetSizeCoefficient(0.33f);
-    brushStack->AddTab(FOdysseyPainterEditorBrushSelectorTab::StaticId(), ETabState::OpenedTab);
-
     TSharedRef<FTabManager::FStack> currentToolStack = iBuilder.CreateStack("CurrentToolStack");
     currentToolStack->SetHideTabWell(false);
     currentToolStack->SetSizeCoefficient(0.33f);
-    currentToolStack->AddTab(FOdysseyPainterEditorToolOptionsTab::StaticId(), ETabState::OpenedTab);
     currentToolStack->AddTab(FOdysseyPainterEditorVectorSceneTreeViewTab::StaticId(),ETabState::OpenedTab);
-    currentToolStack->SetForegroundTab(FOdysseyPainterEditorToolOptionsTab::StaticId());
 
     TSharedRef<FTabManager::FStack> toolsStack = iBuilder.CreateStack("ToolsStack");
     toolsStack->SetHideTabWell(false);
     toolsStack->SetSizeCoefficient(0.33f);
     toolsStack->AddTab(FOdysseyPainterEditorToolsTab::StaticId(), ETabState::OpenedTab);
-
-    leftSplitter->Split
-    (
-        brushStack
-    );
 
     leftSplitter->Split
     (

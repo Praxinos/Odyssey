@@ -9,18 +9,6 @@
 class FOdysseyPainterEditor;
 class UOdysseyPainterEditorTool;
 
-
-enum eToolType
-{
-    kTool_Drawing,
-    /* kTool_Line,
-    kTool_Rectangle,
-    kTool_Polygon,
-    kTool_Circle,
-    kTool_Ellipse,
-    kTool_Bezier */
-};
-
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorToolsTab :
     public FOdysseyEditorTab
 {
@@ -41,6 +29,11 @@ protected:
 protected:
     // Event Listeners
     void OnToolSelected(UOdysseyPainterEditorTool* iTool);
+
+protected:
+    // Widget Getters
+    int WidgetIndex() const;
+    UOdysseyPainterEditorTool* GetCurrentTool() const;
 
 private:
     FOdysseyPainterEditor* mEditor;

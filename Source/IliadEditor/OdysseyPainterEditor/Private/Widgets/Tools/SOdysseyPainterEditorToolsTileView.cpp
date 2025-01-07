@@ -21,12 +21,11 @@ SOdysseyPainterEditorToolsTileView::Construct(const FArguments& InArgs)
     mOnToolSelected = InArgs._OnToolSelected;
 
     const FCheckBoxStyle* checkboxStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("OdysseyCheckBoxStyle.ToggleButton");
-    TSharedRef<SWrapBox> wrapBox = SNew(SWrapBox)
-        .UseAllottedSize(true)
-        .InnerSlotPadding(FVector2D(2.f, 2.f));
+    TSharedRef<SVerticalBox> verticalBox = SNew(SVerticalBox);
     for (UOdysseyPainterEditorTool* tool : mTools)
     {
-        wrapBox->AddSlot()
+        verticalBox->AddSlot()
+        .AutoHeight()
         [
             SNew(SCheckBox)
             .Style( checkboxStyle )
@@ -47,7 +46,7 @@ SOdysseyPainterEditorToolsTileView::Construct(const FArguments& InArgs)
     .HAlign(HAlign_Fill)
     .VAlign(VAlign_Fill)
     [
-        wrapBox
+        verticalBox
     ];
 }
 
