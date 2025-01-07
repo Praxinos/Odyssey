@@ -6,9 +6,9 @@ using System.IO;
 
 namespace UnrealBuildTool.Rules
 {
-    public class OdysseyAnimationTrack : ModuleRules
+    public class OdysseyAnimationTracksEditor : ModuleRules
     {
-        public OdysseyAnimationTrack(ReadOnlyTargetRules Target) : base(Target)
+        public OdysseyAnimationTracksEditor(ReadOnlyTargetRules Target) : base(Target)
         {
             PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -51,6 +51,7 @@ namespace UnrealBuildTool.Rules
                     "OdysseyPainterEditor",
                     "OdysseyStyle",
                     "OdysseyViewportDrawingEditor",
+                    "OdysseyAnimationTracks",
 
                     "Core",
                     "CoreUObject",

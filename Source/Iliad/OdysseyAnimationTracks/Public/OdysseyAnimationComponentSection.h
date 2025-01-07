@@ -14,7 +14,7 @@ class UOdysseyAnimationComponent;
  * Defines the section for a template sequence track.
  */
 UCLASS()
-class ODYSSEYANIMATION_API UOdysseyAnimationComponentSection
+class ODYSSEYANIMATIONTRACKS_API UOdysseyAnimationComponentSection
     : public UMovieSceneSubSection
 {
 public:

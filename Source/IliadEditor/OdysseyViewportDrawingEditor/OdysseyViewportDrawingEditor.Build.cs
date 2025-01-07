@@ -81,7 +81,8 @@ public class OdysseyViewportDrawingEditor : ModuleRules
                 "OdysseyImaging",
                 "OdysseyPaintEngine",
                 "OdysseyStylusInput",
-                "OdysseyStyle"
+                "OdysseyStyle",
+                "OdysseyAnimationTracks",
             }
         );
 

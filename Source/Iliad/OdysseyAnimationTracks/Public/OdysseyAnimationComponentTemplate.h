@@ -33,7 +33,7 @@ struct FOdysseyAnimationComponentSectionParams
 
 
 USTRUCT()
-struct ODYSSEYANIMATION_API FOdysseyAnimationComponentTemplate
+struct ODYSSEYANIMATIONTRACKS_API FOdysseyAnimationComponentTemplate
     : public FMovieSceneEvalTemplate
 {
     GENERATED_BODY()

@@ -129,6 +129,11 @@
             "LoadingPhase": "Default"
         },
         {
+            "Name": "OdysseyAnimationTracks",
+            "Type": "Runtime",
+            "LoadingPhase": "Default"
+        },
+        {
             "Name": "OdysseyMeshPaintRendering",
             "Type": "UncookedOnly",
             "LoadingPhase": "PostConfigInit",
@@ -245,7 +250,7 @@
             "LoadingPhase": "Default"
         },
         {
-            "Name": "OdysseyAnimationTrack",
+            "Name": "OdysseyAnimationTracksEditor",
             "Type": "Editor",
             "LoadingPhase": "Default"
         },

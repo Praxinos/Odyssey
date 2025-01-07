@@ -8,7 +8,7 @@
 #include "OdysseyAnimationComponentTrack.generated.h"
 
 UCLASS()
-class ODYSSEYANIMATION_API UOdysseyAnimationComponentTrack
+class ODYSSEYANIMATIONTRACKS_API UOdysseyAnimationComponentTrack
     : public UMovieSceneSubTrack
     , public IMovieSceneTrackTemplateProducer
 {
