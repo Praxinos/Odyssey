@@ -1,7 +1,8 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "OdysseyAnimationComponentSection.h"
+#include "OdysseyAnimationTimelineSection.h"
+
 #include "Channels/MovieSceneChannelData.h"
 #include "Channels/MovieSceneChannelProxy.h"
 #include "EntitySystem/BuiltInComponentTypes.h"
@@ -10,24 +11,25 @@
 #include "EntitySystem/MovieSceneEntitySystemLinker.h"
 #include "EntitySystem/MovieSceneInstanceRegistry.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationComponentSection)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationTimelineSection)
 
-#define LOCTEXT_NAMESPACE "UOdysseyAnimationComponentSection"
+#define LOCTEXT_NAMESPACE "UOdysseyAnimationTimelineSection"
 
-UOdysseyAnimationComponentSection::UOdysseyAnimationComponentSection(const FObjectInitializer& ObjInitializer)
+UOdysseyAnimationTimelineSection::UOdysseyAnimationTimelineSection(const FObjectInitializer& ObjInitializer)
     : Super(ObjInitializer)
 {
 }
 
+//---
 
 void
-UOdysseyAnimationComponentSection::PostInitProperties()
+UOdysseyAnimationTimelineSection::PostInitProperties()
 {
     Super::PostInitProperties();
 }
 
 EMovieSceneChannelProxyType
-UOdysseyAnimationComponentSection::CacheChannelProxy()
+UOdysseyAnimationTimelineSection::CacheChannelProxy()
 {
     FMovieSceneChannelProxyData Channels;
     ChannelProxy = MakeShared<FMovieSceneChannelProxy>(MoveTemp(Channels));
@@ -35,7 +37,7 @@ UOdysseyAnimationComponentSection::CacheChannelProxy()
 }
 
 void
-UOdysseyAnimationComponentSection::MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate)
+UOdysseyAnimationTimelineSection::MigrateFrameTimes(FFrameRate SourceRate, FFrameRate DestinationRate)
 {
     if (StartFrameOffset.Value > 0)
     {

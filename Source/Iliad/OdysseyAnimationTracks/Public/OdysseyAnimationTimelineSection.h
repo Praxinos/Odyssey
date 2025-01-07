@@ -4,24 +4,23 @@
 #pragma once
 
 #include "Sections/MovieSceneSubSection.h"
-#include "OdysseyAnimationComponentSection.generated.h"
+
+#include "OdysseyAnimationTimelineSection.generated.h"
 
 enum class EMovieSceneChannelProxyType : uint8;
-
-class UOdysseyAnimationComponent;
 
 /**
  * Defines the section for a template sequence track.
  */
 UCLASS()
-class ODYSSEYANIMATIONTRACKS_API UOdysseyAnimationComponentSection
+class ODYSSEYANIMATIONTRACKS_API UOdysseyAnimationTimelineSection
     : public UMovieSceneSubSection
 {
 public:
 
     GENERATED_BODY()
 
-    UOdysseyAnimationComponentSection(const FObjectInitializer& ObjInitializer);
+    UOdysseyAnimationTimelineSection(const FObjectInitializer& ObjInitializer);
 
 public:
     virtual void PostInitProperties() override;

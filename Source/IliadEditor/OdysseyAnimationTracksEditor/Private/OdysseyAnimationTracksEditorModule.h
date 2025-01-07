@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleInterface.h"
 
-class FOdysseyAnimationTrackModule
+class FOdysseyAnimationTracksEditorModule
     : public IModuleInterface
 {
 public:

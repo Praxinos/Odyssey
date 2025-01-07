@@ -866,7 +866,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         .SetCheckedPressedImage(FSlateColorBrush(FLinearColor::Transparent))
     );
 
-    Set("Sequencer.AnimationComponentTrack.DisplayLayersToggle", FCheckBoxStyle()
+    Set("Sequencer.AnimationTimelineTrack.DisplayLayersToggle", FCheckBoxStyle()
         .SetPadding(FMargin(8)) //8 because left+right = 16 and top+bottom = 16
         .SetBorderBackgroundColor(FSlateColor::UseSubduedForeground())
         .SetCheckBoxType(ESlateCheckBoxType::ToggleButton)

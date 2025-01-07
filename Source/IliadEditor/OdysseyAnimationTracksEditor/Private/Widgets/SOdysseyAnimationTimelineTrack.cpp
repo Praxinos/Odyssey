@@ -1,16 +1,17 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
-#include "Widgets/SOdysseyAnimationComponentTrack.h"
+
+#include "Widgets/SOdysseyAnimationTimelineTrack.h"
 
 #include "Widgets/LayerStack/SOdysseyAnimationLayerStackTreeView.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "TrackEditors/SubTrackEditorBase.h"
-#include "OdysseyAnimationTrackEditorSection.h"
+#include "OdysseyAnimationTimelineSectionEditor.h"
 #include "OdysseyAnimationComponent.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseyAnimation.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "OdysseyAnimationComponentTrack.h"
+#include "OdysseyAnimationTimelineTrack.h"
 #include "OdysseyViewportDrawingEditorEdMode.h"
 #include "EditorModeManager.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
@@ -19,7 +20,7 @@
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
 void
-SOdysseyAnimationComponentTrack::Construct(const FArguments& iArgs, UOdysseyAnimationComponent* iComponent, UOdysseyAnimationComponentTrack* iTrack, const FBuildColumnWidgetParams& iParams)
+SOdysseyAnimationTimelineTrack::Construct(const FArguments& iArgs, UOdysseyAnimationComponent* iComponent, UOdysseyAnimationTimelineTrack* iTrack, const FBuildColumnWidgetParams& iParams)
 {
     ensure(iComponent);
     mComponent = iComponent;
@@ -27,13 +28,13 @@ SOdysseyAnimationComponentTrack::Construct(const FArguments& iArgs, UOdysseyAnim
     mRow = iParams.TreeViewRow;
     RebuildWidgets();
 
-    mComponent->OnAnimationChanged().AddSP(this, &SOdysseyAnimationComponentTrack::OnAnimationChanged);
-    mComponent->OnPlayerChanged().AddSP(this, &SOdysseyAnimationComponentTrack::OnPlayerChanged);
-    mComponent->OnModeChanged().AddSP(this, &SOdysseyAnimationComponentTrack::OnModeChanged);
+    mComponent->OnAnimationChanged().AddSP(this, &SOdysseyAnimationTimelineTrack::OnAnimationChanged);
+    mComponent->OnPlayerChanged().AddSP(this, &SOdysseyAnimationTimelineTrack::OnPlayerChanged);
+    mComponent->OnModeChanged().AddSP(this, &SOdysseyAnimationTimelineTrack::OnModeChanged);
 }
 
 void
-SOdysseyAnimationComponentTrack::RebuildWidgets()
+SOdysseyAnimationTimelineTrack::RebuildWidgets()
 {
     this->ChildSlot.DetachWidget();
 
@@ -41,26 +42,26 @@ SOdysseyAnimationComponentTrack::RebuildWidgets()
     if (!animation)
         return;
 
-    const FCheckBoxStyle* displayLayersToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Sequencer.AnimationComponentTrack.DisplayLayersToggle");
+    const FCheckBoxStyle* displayLayersToggleStyle = &FOdysseyStyle::GetWidgetStyle<FCheckBoxStyle>("Sequencer.AnimationTimelineTrack.DisplayLayersToggle");
 
     TSharedPtr<SWidget> widget = SNew(SVerticalBox)
         + SVerticalBox::Slot()
         .AutoHeight()
         [
             SNew(SBox)
-            .HeightOverride(FOdysseyAnimationTrackEditorSection::GetCollapsedSectionHeight())
+            .HeightOverride(FOdysseyAnimationTimelineSectionEditor::GetCollapsedSectionHeight())
             .VAlign(VAlign_Center)
             [
                 SNew(SHorizontalBox)
                 + SHorizontalBox::Slot()
-                .Padding(TAttribute<FMargin>(this, &SOdysseyAnimationComponentTrack::GetDisplayLayersPadding))
+                .Padding(TAttribute<FMargin>(this, &SOdysseyAnimationTimelineTrack::GetDisplayLayersPadding))
                 .VAlign(VAlign_Center)
                 .AutoWidth()
                 [
                     SNew(SCheckBox)
                     .Style(displayLayersToggleStyle)
-                    .OnCheckStateChanged(this, &SOdysseyAnimationComponentTrack::OnDisplayLayersCheckBoxStateChanged)
-                    .IsChecked(this, &SOdysseyAnimationComponentTrack::GetDisplayLayersCheckBoxState)
+                    .OnCheckStateChanged(this, &SOdysseyAnimationTimelineTrack::OnDisplayLayersCheckBoxStateChanged)
+                    .IsChecked(this, &SOdysseyAnimationTimelineTrack::GetDisplayLayersCheckBoxState)
                 ]
                 + SHorizontalBox::Slot()
                 .VAlign(VAlign_Center)
@@ -75,7 +76,7 @@ SOdysseyAnimationComponentTrack::RebuildWidgets()
         .AutoHeight()
         [
             /* SNew(SBox)
-            .HeightOverride(this, &SOdysseyAnimationComponentTrack::GetTreeViewHeight)
+            .HeightOverride(this, &SOdysseyAnimationTimelineTrack::GetTreeViewHeight)
             [ */
                 SNew(SOdysseyAnimationLayerStackTreeView)
                 .PainterEditor_Lambda(
@@ -111,7 +112,7 @@ SOdysseyAnimationComponentTrack::RebuildWidgets()
                         return editor;
                     }
                 )
-                .Visibility(this, &SOdysseyAnimationComponentTrack::GetLayersVisibility)
+                .Visibility(this, &SOdysseyAnimationTimelineTrack::GetLayersVisibility)
                 .LayerStack(animation->GetLayerStack())
                 .ExternalScrollbar(SNew(SScrollBar))
             //]
@@ -121,31 +122,31 @@ SOdysseyAnimationComponentTrack::RebuildWidgets()
 }
 
 /* FOptionalSize
-SOdysseyAnimationComponentTrack::GetTreeViewHeight() const
+SOdysseyAnimationTimelineTrack::GetTreeViewHeight() const
 {
     return FOdysseyAnimationTrackEditorSection::GetTreeViewHeight(mComponent);
 } */
 
 void
-SOdysseyAnimationComponentTrack::OnDisplayLayersCheckBoxStateChanged(ECheckBoxState iState)
+SOdysseyAnimationTimelineTrack::OnDisplayLayersCheckBoxStateChanged(ECheckBoxState iState)
 {
-    FOdysseyObjectEditorUtils::SetPropertyValue(mTrack, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationComponentTrack, DisplayLayers), iState == ECheckBoxState::Checked);
+    FOdysseyObjectEditorUtils::SetPropertyValue(mTrack, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationTimelineTrack, DisplayLayers), iState == ECheckBoxState::Checked);
 }
 
 ECheckBoxState
-SOdysseyAnimationComponentTrack::GetDisplayLayersCheckBoxState() const
+SOdysseyAnimationTimelineTrack::GetDisplayLayersCheckBoxState() const
 {
     return mTrack->DisplayLayers ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
 }
 
 EVisibility
-SOdysseyAnimationComponentTrack::GetLayersVisibility() const
+SOdysseyAnimationTimelineTrack::GetLayersVisibility() const
 {
     return mTrack->DisplayLayers ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 FMargin
-SOdysseyAnimationComponentTrack::GetDisplayLayersPadding() const
+SOdysseyAnimationTimelineTrack::GetDisplayLayersPadding() const
 {
     TSharedPtr<UE::Sequencer::ISequencerTreeViewRow> row = mRow.Pin();
     if (!row)
@@ -157,19 +158,19 @@ SOdysseyAnimationComponentTrack::GetDisplayLayersPadding() const
 }
 
 void
-SOdysseyAnimationComponentTrack::OnAnimationChanged()
+SOdysseyAnimationTimelineTrack::OnAnimationChanged()
 {
     RebuildWidgets();
 }
 
 void
-SOdysseyAnimationComponentTrack::OnPlayerChanged()
+SOdysseyAnimationTimelineTrack::OnPlayerChanged()
 {
     RebuildWidgets();
 }
 
 void
-SOdysseyAnimationComponentTrack::OnModeChanged()
+SOdysseyAnimationTimelineTrack::OnModeChanged()
 {
     RebuildWidgets();
 }

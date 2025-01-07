@@ -1,26 +1,27 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "OdysseyAnimationTrackEditorSection.h"
+#include "OdysseyAnimationTimelineSectionEditor.h"
+
+#include "ISequencer.h"
+#include "EditorModeManager.h"
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineTreeView.h"
-#include "ISequencer.h"
 #include "OdysseyAnimationEditorTimelinePosition.h"
 #include "LayerStack/OdysseyAnimationLayerStack.h"
 #include "OdysseyViewportDrawingEditorEdMode.h"
-#include "EditorModeManager.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyViewportDrawingEditorToolkit.h"
 #include "Tools/OutOfPegsTool/OdysseyAnimationEditorOutOfPegsTool.h"
 #include "OdysseyAnimationComponent.h"
-#include "OdysseyAnimationComponentTrack.h"
-#include "OdysseyAnimationComponentSection.h"
+#include "OdysseyAnimationTimelineTrack.h"
+#include "OdysseyAnimationTimelineSection.h"
 #include "OdysseyAnimation.h"
 
 #define LOCTEXT_NAMESPACE "AnimationTrack"
 
-FOdysseyAnimationTrackEditorSection::~FOdysseyAnimationTrackEditorSection()
+FOdysseyAnimationTimelineSectionEditor::~FOdysseyAnimationTimelineSectionEditor()
 {
     if (mComponent)
     {
@@ -30,7 +31,7 @@ FOdysseyAnimationTrackEditorSection::~FOdysseyAnimationTrackEditorSection()
     }
 }
 
-FOdysseyAnimationTrackEditorSection::FOdysseyAnimationTrackEditorSection(TSharedPtr<ISequencer> InSequencer, UOdysseyAnimationComponentSection* InSection)
+FOdysseyAnimationTimelineSectionEditor::FOdysseyAnimationTimelineSectionEditor(TSharedPtr<ISequencer> InSequencer, UOdysseyAnimationTimelineSection* InSection)
     : TSubSectionMixin(InSequencer, *InSection)
     , mSection(InSection)
     , mTimelinePosition(MakeShared<FOdysseyAnimationEditorTimelinePosition>())
@@ -42,14 +43,14 @@ FOdysseyAnimationTrackEditorSection::FOdysseyAnimationTrackEditorSection(TShared
     mComponent = GetComponent();
     if (mComponent)
     {
-        mComponent->OnAnimationChanged().AddRaw(this, &FOdysseyAnimationTrackEditorSection::OnAnimationChanged);
-        mComponent->OnPlayerChanged().AddRaw(this, &FOdysseyAnimationTrackEditorSection::OnPlayerChanged);
-        mComponent->OnModeChanged().AddRaw(this, &FOdysseyAnimationTrackEditorSection::OnModeChanged);
+        mComponent->OnAnimationChanged().AddRaw(this, &FOdysseyAnimationTimelineSectionEditor::OnAnimationChanged);
+        mComponent->OnPlayerChanged().AddRaw(this, &FOdysseyAnimationTimelineSectionEditor::OnPlayerChanged);
+        mComponent->OnModeChanged().AddRaw(this, &FOdysseyAnimationTimelineSectionEditor::OnModeChanged);
     }
 }
 
 /* float
-FOdysseyAnimationTrackEditorSection::GetLayerHeight(UOdysseyLayer* iLayer)
+FOdysseyAnimationTimelineSectionEditor::GetLayerHeight(UOdysseyLayer* iLayer)
 {
     float height = 0.f; //line padding
 
@@ -76,24 +77,24 @@ FOdysseyAnimationTrackEditorSection::GetLayerHeight(UOdysseyLayer* iLayer)
 } */
 
 float
-FOdysseyAnimationTrackEditorSection::GetSectionHeight( const UE::Sequencer::FViewDensityInfo& ViewDensity ) const
+FOdysseyAnimationTimelineSectionEditor::GetSectionHeight( const UE::Sequencer::FViewDensityInfo& ViewDensity ) const
 {
     /* int height = GetCollapsedSectionHeight();
 
-    UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
+    UOdysseyAnimationTimelineTrack* track = mSection->GetTypedOuter<UOdysseyAnimationTimelineTrack>();
     if (track && track->DisplayLayers)
         height = GetUncollapsedSectionHeight(GetComponent());
 
     */
-    UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
+    UOdysseyAnimationTimelineTrack* track = mSection->GetTypedOuter<UOdysseyAnimationTimelineTrack>();
     track->SetRowHeight( mSectionWidget ? mSectionWidget->GetDesiredSize().Y : 0.f ); // Arbitrary value which should only be used for one (or some) tick(s) waiting the creation of the layout widget in the section
     return track->GetRowHeight();
 }
 
 float
-FOdysseyAnimationTrackEditorSection::GetSectionGripHeight(float iSectionHeight) const
+FOdysseyAnimationTimelineSectionEditor::GetSectionGripHeight(float iSectionHeight) const
 {
-    UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
+    UOdysseyAnimationTimelineTrack* track = mSection->GetTypedOuter<UOdysseyAnimationTimelineTrack>();
     if (!track)
         return TSubSectionMixin::GetSectionGripHeight(iSectionHeight);
 
@@ -101,19 +102,19 @@ FOdysseyAnimationTrackEditorSection::GetSectionGripHeight(float iSectionHeight) 
 }
 
 FText
-FOdysseyAnimationTrackEditorSection::GetSectionTitle() const
+FOdysseyAnimationTimelineSectionEditor::GetSectionTitle() const
 {
     return FText::GetEmpty();
 }
 
 FText
-FOdysseyAnimationTrackEditorSection::GetSectionToolTip() const
+FOdysseyAnimationTimelineSectionEditor::GetSectionToolTip() const
 {
     return FText::GetEmpty();
 }
 
 TSharedRef<SWidget>
-FOdysseyAnimationTrackEditorSection::GenerateSectionWidget()
+FOdysseyAnimationTimelineSectionEditor::GenerateSectionWidget()
 {
     mSectionWidget = SNew(SBox);
     RebuildSectionWidget();
@@ -121,9 +122,9 @@ FOdysseyAnimationTrackEditorSection::GenerateSectionWidget()
 }
 
 void
-FOdysseyAnimationTrackEditorSection::RebuildSectionWidget()
+FOdysseyAnimationTimelineSectionEditor::RebuildSectionWidget()
 {
-    UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
+    UOdysseyAnimationTimelineTrack* track = mSection->GetTypedOuter<UOdysseyAnimationTimelineTrack>();
     if (!track)
         return;
 
@@ -189,7 +190,7 @@ FOdysseyAnimationTrackEditorSection::RebuildSectionWidget()
                     return editor;
                 }
             )
-            .Visibility(this, &FOdysseyAnimationTrackEditorSection::GetLayersVisibility)
+            .Visibility(this, &FOdysseyAnimationTimelineSectionEditor::GetLayersVisibility)
             .LayerStack(layerStack)
             .TimelinePosition(mTimelinePosition)
             .OnActivateOutOfPegs_Lambda(
@@ -303,9 +304,9 @@ FOdysseyAnimationTrackEditorSection::RebuildSectionWidget()
 }
 
 void
-FOdysseyAnimationTrackEditorSection::Tick( const FGeometry& AllottedGeometry, const FGeometry& ClippedGeometry, const double InCurrentTime, const float InDeltaTime )
+FOdysseyAnimationTimelineSectionEditor::Tick( const FGeometry& AllottedGeometry, const FGeometry& ClippedGeometry, const double InCurrentTime, const float InDeltaTime )
 {
-    UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
+    UOdysseyAnimationTimelineTrack* track = mSection->GetTypedOuter<UOdysseyAnimationTimelineTrack>();
     UMovieScene* movieScene = track->GetTypedOuter<UMovieScene>();
 
     UOdysseyAnimationComponent* component = GetComponent();
@@ -334,9 +335,9 @@ FOdysseyAnimationTrackEditorSection::Tick( const FGeometry& AllottedGeometry, co
 }
 
 UOdysseyAnimationComponent*
-FOdysseyAnimationTrackEditorSection::GetComponent() const
+FOdysseyAnimationTimelineSectionEditor::GetComponent() const
 {
-    UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
+    UOdysseyAnimationTimelineTrack* track = mSection->GetTypedOuter<UOdysseyAnimationTimelineTrack>();
 
     TSharedPtr<ISequencer> sequencer = GetSequencer();
     if (!sequencer)
@@ -363,7 +364,7 @@ FOdysseyAnimationTrackEditorSection::GetComponent() const
 }
 
 void
-FOdysseyAnimationTrackEditorSection::BeginResizeSection()
+FOdysseyAnimationTimelineSectionEditor::BeginResizeSection()
 {
     mInitialStartOffsetDuringResize = mSection->StartFrameOffset;
     mInitialStartTimeDuringResize = mSection->HasStartFrame() ? mSection->GetInclusiveStartFrame() : 0;
@@ -372,7 +373,7 @@ FOdysseyAnimationTrackEditorSection::BeginResizeSection()
 }
 
 void
-FOdysseyAnimationTrackEditorSection::ResizeSection(ESequencerSectionResizeMode iResizeMode, FFrameNumber iResizeTime)
+FOdysseyAnimationTimelineSectionEditor::ResizeSection(ESequencerSectionResizeMode iResizeMode, FFrameNumber iResizeTime)
 {
     if (iResizeMode == SSRM_LeadingEdge)
     {
@@ -393,13 +394,13 @@ FOdysseyAnimationTrackEditorSection::ResizeSection(ESequencerSectionResizeMode i
 }
 
 float
-FOdysseyAnimationTrackEditorSection::GetCollapsedSectionHeight()
+FOdysseyAnimationTimelineSectionEditor::GetCollapsedSectionHeight()
 {
     return 28.f;
 }
 
 /* float
-FOdysseyAnimationTrackEditorSection::GetTreeViewHeight(UOdysseyAnimationComponent* iComponent)
+FOdysseyAnimationTimelineSectionEditor::GetTreeViewHeight(UOdysseyAnimationComponent* iComponent)
 {
     if (!iComponent)
         return 0;
@@ -422,7 +423,7 @@ FOdysseyAnimationTrackEditorSection::GetTreeViewHeight(UOdysseyAnimationComponen
 } */
 
 /* float
-FOdysseyAnimationTrackEditorSection::GetUncollapsedSectionHeight(UOdysseyAnimationComponent* iComponent)
+FOdysseyAnimationTimelineSectionEditor::GetUncollapsedSectionHeight(UOdysseyAnimationComponent* iComponent)
 {
     int height = 0;
     height += GetCollapsedSectionHeight(); //Expander Arrow + Name + Section Add Button
@@ -431,9 +432,9 @@ FOdysseyAnimationTrackEditorSection::GetUncollapsedSectionHeight(UOdysseyAnimati
 } */
 
 EVisibility
-FOdysseyAnimationTrackEditorSection::GetLayersVisibility() const
+FOdysseyAnimationTimelineSectionEditor::GetLayersVisibility() const
 {
-    UOdysseyAnimationComponentTrack* track = mSection->GetTypedOuter<UOdysseyAnimationComponentTrack>();
+    UOdysseyAnimationTimelineTrack* track = mSection->GetTypedOuter<UOdysseyAnimationTimelineTrack>();
     if (!track)
         return EVisibility::Collapsed;
 
@@ -441,19 +442,19 @@ FOdysseyAnimationTrackEditorSection::GetLayersVisibility() const
 }
 
 void
-FOdysseyAnimationTrackEditorSection::OnAnimationChanged()
+FOdysseyAnimationTimelineSectionEditor::OnAnimationChanged()
 {
     RebuildSectionWidget();
 }
 
 void
-FOdysseyAnimationTrackEditorSection::OnPlayerChanged()
+FOdysseyAnimationTimelineSectionEditor::OnPlayerChanged()
 {
     RebuildSectionWidget();
 }
 
 void
-FOdysseyAnimationTrackEditorSection::OnModeChanged()
+FOdysseyAnimationTimelineSectionEditor::OnModeChanged()
 {
     RebuildSectionWidget();
 }

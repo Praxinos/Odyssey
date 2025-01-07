@@ -5,18 +5,18 @@
 
 #include "TrackEditors/SubTrackEditorBase.h"
 
-class UOdysseyAnimationComponentSection;
+class UOdysseyAnimationTimelineSection;
 class FOdysseyAnimationEditorTimelinePosition;
 class UOdysseyAnimationComponent;
 class UOdysseyLayer;
 
-class FOdysseyAnimationTrackEditorSection
+class FOdysseyAnimationTimelineSectionEditor
     : public TSubSectionMixin<>
-    , public TSharedFromThis<FOdysseyAnimationTrackEditorSection>
+    , public TSharedFromThis<FOdysseyAnimationTimelineSectionEditor>
 {
 public:
-    FOdysseyAnimationTrackEditorSection(TSharedPtr<ISequencer> InSequencer, UOdysseyAnimationComponentSection* InSection);
-    virtual ~FOdysseyAnimationTrackEditorSection();
+    FOdysseyAnimationTimelineSectionEditor(TSharedPtr<ISequencer> InSequencer, UOdysseyAnimationTimelineSection* InSection);
+    virtual ~FOdysseyAnimationTimelineSectionEditor();
 
 public:
     virtual float GetSectionHeight( const UE::Sequencer::FViewDensityInfo& ViewDensity ) const override;
@@ -47,7 +47,7 @@ private:
 private:
     UOdysseyAnimationComponent* mComponent; //used to remove callbacks
     TSharedPtr<SBox> mSectionWidget;
-    UOdysseyAnimationComponentSection* mSection;
+    UOdysseyAnimationTimelineSection* mSection;
     TSharedRef<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
 
 

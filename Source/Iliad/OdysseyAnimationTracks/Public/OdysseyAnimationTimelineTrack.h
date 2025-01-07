@@ -5,17 +5,18 @@
 
 #include "Tracks/MovieSceneSubTrack.h"
 #include "Compilation/IMovieSceneTrackTemplateProducer.h"
-#include "OdysseyAnimationComponentTrack.generated.h"
+
+#include "OdysseyAnimationTimelineTrack.generated.h"
 
 UCLASS()
-class ODYSSEYANIMATIONTRACKS_API UOdysseyAnimationComponentTrack
+class ODYSSEYANIMATIONTRACKS_API UOdysseyAnimationTimelineTrack
     : public UMovieSceneSubTrack
     , public IMovieSceneTrackTemplateProducer
 {
 public:
     GENERATED_BODY()
 
-    UOdysseyAnimationComponentTrack(const FObjectInitializer& ObjectInitializer);
+    UOdysseyAnimationTimelineTrack(const FObjectInitializer& ObjectInitializer);
 
     virtual UMovieSceneSection* AddNewSection(FFrameNumber KeyTime, float iDurationInSeconds);
 
