@@ -11,7 +11,7 @@ class UOdysseyAnimationComponent;
 class UOdysseyLayer;
 
 class FOdysseyAnimationTimelineSectionEditor
-    : public TSubSectionMixin<>
+    : public ISequencerSection
     , public TSharedFromThis<FOdysseyAnimationTimelineSectionEditor>
 {
 public:
@@ -19,19 +19,24 @@ public:
     virtual ~FOdysseyAnimationTimelineSectionEditor();
 
 public:
+    virtual UMovieSceneSection* GetSectionObject() override;
     virtual float GetSectionHeight( const UE::Sequencer::FViewDensityInfo& ViewDensity ) const override;
     virtual float GetSectionGripHeight(float iSectionHeight) const override;
     virtual FText GetSectionTitle() const override;
     virtual FText GetSectionToolTip() const override;
     virtual TSharedRef<SWidget> GenerateSectionWidget() override;
+    virtual bool IsReadOnly() const override;
+    virtual int32 OnPaintSection( FSequencerSectionPainter& InPainter ) const override;
+    virtual void Tick( const FGeometry& AllottedGeometry, const FGeometry& ClippedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
     virtual void BeginResizeSection() override;
     virtual void ResizeSection(ESequencerSectionResizeMode ResizeMode, FFrameNumber ResizeTime) override;
-
-    virtual void Tick( const FGeometry& AllottedGeometry, const FGeometry& ClippedGeometry, const double InCurrentTime, const float InDeltaTime ) override;
 
     static float GetCollapsedSectionHeight();
     //static float GetUncollapsedSectionHeight(UOdysseyAnimationComponent* iComponent);
     //static float GetTreeViewHeight(UOdysseyAnimationComponent* iComponent);
+
+public:
+    TSharedPtr<ISequencer> GetSequencer() const;
 
 private:
     //static float GetLayerHeight(UOdysseyLayer* iLayer);
@@ -45,11 +50,11 @@ private:
     void OnModeChanged();
 
 private:
+    TWeakPtr<ISequencer> mSequencer;
     UOdysseyAnimationComponent* mComponent; //used to remove callbacks
     TSharedPtr<SBox> mSectionWidget;
     UOdysseyAnimationTimelineSection* mSection;
     TSharedRef<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
-
 
     FFrameNumber mInitialStartOffsetDuringResize;
     FFrameNumber mInitialStartTimeDuringResize;

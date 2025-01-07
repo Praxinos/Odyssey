@@ -32,7 +32,7 @@ FOdysseyAnimationTimelineSectionEditor::~FOdysseyAnimationTimelineSectionEditor(
 }
 
 FOdysseyAnimationTimelineSectionEditor::FOdysseyAnimationTimelineSectionEditor(TSharedPtr<ISequencer> InSequencer, UOdysseyAnimationTimelineSection* InSection)
-    : TSubSectionMixin(InSequencer, *InSection)
+    : mSequencer( InSequencer )
     , mSection(InSection)
     , mTimelinePosition(MakeShared<FOdysseyAnimationEditorTimelinePosition>())
 {
@@ -47,6 +47,18 @@ FOdysseyAnimationTimelineSectionEditor::FOdysseyAnimationTimelineSectionEditor(T
         mComponent->OnPlayerChanged().AddRaw(this, &FOdysseyAnimationTimelineSectionEditor::OnPlayerChanged);
         mComponent->OnModeChanged().AddRaw(this, &FOdysseyAnimationTimelineSectionEditor::OnModeChanged);
     }
+}
+
+TSharedPtr<ISequencer>
+FOdysseyAnimationTimelineSectionEditor::GetSequencer() const
+{
+    return mSequencer.Pin();
+}
+
+UMovieSceneSection*
+FOdysseyAnimationTimelineSectionEditor::GetSectionObject() //override
+{
+    return mSection;
 }
 
 /* float
@@ -96,7 +108,7 @@ FOdysseyAnimationTimelineSectionEditor::GetSectionGripHeight(float iSectionHeigh
 {
     UOdysseyAnimationTimelineTrack* track = mSection->GetTypedOuter<UOdysseyAnimationTimelineTrack>();
     if (!track)
-        return TSubSectionMixin::GetSectionGripHeight(iSectionHeight);
+        return ISequencerSection::GetSectionGripHeight(iSectionHeight);
 
     return FMath::Min(iSectionHeight, GetCollapsedSectionHeight());
 }
@@ -306,6 +318,8 @@ FOdysseyAnimationTimelineSectionEditor::RebuildSectionWidget()
 void
 FOdysseyAnimationTimelineSectionEditor::Tick( const FGeometry& AllottedGeometry, const FGeometry& ClippedGeometry, const double InCurrentTime, const float InDeltaTime )
 {
+    ISequencerSection::Tick( AllottedGeometry, ClippedGeometry, InCurrentTime, InDeltaTime );
+
     UOdysseyAnimationTimelineTrack* track = mSection->GetTypedOuter<UOdysseyAnimationTimelineTrack>();
     UMovieScene* movieScene = track->GetTypedOuter<UMovieScene>();
 
@@ -329,9 +343,25 @@ FOdysseyAnimationTimelineSectionEditor::Tick( const FGeometry& AllottedGeometry,
     double zoom = sequencerSecondInPixels / animationSecondInPixels;
     mTimelinePosition->SetZoom(zoom);
 
-
     double offset = movieScene->GetTickResolution().AsSeconds(mSection->StartFrameOffset) * animationFramesPerSecond;
     mTimelinePosition->SetOffset(offset);
+}
+
+bool
+FOdysseyAnimationTimelineSectionEditor::IsReadOnly() const //override
+{
+    check( mSection );
+    return mSection->IsReadOnly();
+}
+
+int32
+FOdysseyAnimationTimelineSectionEditor::OnPaintSection( FSequencerSectionPainter& InPainter ) const //override
+{
+    InPainter.LayerId = InPainter.PaintSectionBackground();
+
+    //FSubSectionPainterUtil::PaintSection( this->GetSequencer(), SubSectionObject, InPainter, FSubSectionPainterParams( this->GetContentPadding() ) );
+
+    return InPainter.LayerId;
 }
 
 UOdysseyAnimationComponent*
@@ -369,7 +399,7 @@ FOdysseyAnimationTimelineSectionEditor::BeginResizeSection()
     mInitialStartOffsetDuringResize = mSection->StartFrameOffset;
     mInitialStartTimeDuringResize = mSection->HasStartFrame() ? mSection->GetInclusiveStartFrame() : 0;
 
-    TSubSectionMixin::BeginResizeSection();
+    ISequencerSection::BeginResizeSection();
 }
 
 void
@@ -390,7 +420,7 @@ FOdysseyAnimationTimelineSectionEditor::ResizeSection(ESequencerSectionResizeMod
         mSection->StartFrameOffset = mStartOffset;
     }
 
-    TSubSectionMixin::ResizeSection(iResizeMode, iResizeTime);
+    ISequencerSection::ResizeSection(iResizeMode, iResizeTime);
 }
 
 float
