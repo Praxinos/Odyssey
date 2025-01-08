@@ -1,42 +1,42 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
-#include "OdysseyAnimationTrackModule.h"
+#include "OdysseyAnimationTracksEditorModule.h"
 
 #include "ILevelSequenceModule.h"
 #include "ISequencerModule.h"
-#include "OdysseyAnimationTrackEditor.h"
+#include "OdysseyAnimationTimelineTrackEditor.h"
 
 #define LOCTEXT_NAMESPACE "AnimationTrack"
 
 /*-----------------------------------------------------------------------------
-   FOdysseyAnimationTrackModule
+   FOdysseyAnimationTracksEditorModule
 -----------------------------------------------------------------------------*/
 
 void
-FOdysseyAnimationTrackModule::StartupModule()
+FOdysseyAnimationTracksEditorModule::StartupModule()
 {
     RegisterSequencerTracks();
 }
 
 void
-FOdysseyAnimationTrackModule::ShutdownModule()
+FOdysseyAnimationTracksEditorModule::ShutdownModule()
 {
     UnregisterSequencerTracks();
 }
 
 void
-FOdysseyAnimationTrackModule::RegisterSequencerTracks()
+FOdysseyAnimationTracksEditorModule::RegisterSequencerTracks()
 {
     ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
-    mAnimationTrackCreateEditorHandle = SequencerModule.RegisterTrackEditor( FOnCreateTrackEditor::CreateStatic( &FOdysseyAnimationTrackEditor::CreateTrackEditor ) );
+    mAnimationTrackCreateEditorHandle = SequencerModule.RegisterTrackEditor( FOnCreateTrackEditor::CreateStatic( &FOdysseyAnimationTimelineTrackEditor::CreateTrackEditor ) );
 
     ILevelSequenceModule& LevelSequenceModule = FModuleManager::LoadModuleChecked<ILevelSequenceModule>("LevelSequence");
-    mOnNewActorTrackAddedHandle = LevelSequenceModule.OnNewActorTrackAdded().AddStatic( FOdysseyAnimationTrackEditor::OnNewActorTrackAdded );
+    mOnNewActorTrackAddedHandle = LevelSequenceModule.OnNewActorTrackAdded().AddStatic( FOdysseyAnimationTimelineTrackEditor::OnNewActorTrackAdded );
 }
 
 void
-FOdysseyAnimationTrackModule::UnregisterSequencerTracks()
+FOdysseyAnimationTracksEditorModule::UnregisterSequencerTracks()
 {
     ISequencerModule& SequencerModule = FModuleManager::Get().LoadModuleChecked<ISequencerModule>( "Sequencer" );
     SequencerModule.UnRegisterTrackEditor( mAnimationTrackCreateEditorHandle );
@@ -46,6 +46,6 @@ FOdysseyAnimationTrackModule::UnregisterSequencerTracks()
 }
 
 
-IMPLEMENT_MODULE( FOdysseyAnimationTrackModule, OdysseyAnimationEditor );
+IMPLEMENT_MODULE( FOdysseyAnimationTracksEditorModule, OdysseyAnimationTracksEditor );
 
 #undef LOCTEXT_NAMESPACE

@@ -4,13 +4,13 @@
 #pragma once
 
 #include "Evaluation/MovieSceneEvalTemplate.h"
-#include "OdysseyAnimationComponentSection.h"
-#include "OdysseyAnimationComponentTrack.h"
+#include "OdysseyAnimationTimelineSection.h"
+#include "OdysseyAnimationTimelineTrack.h"
 
-#include "OdysseyAnimationComponentTemplate.generated.h"
+#include "OdysseyAnimationTimelineTemplate.generated.h"
 
 USTRUCT()
-struct FOdysseyAnimationComponentSectionParams
+struct FOdysseyAnimationTimelineSectionParams
 {
     GENERATED_BODY()
 
@@ -26,20 +26,23 @@ struct FOdysseyAnimationComponentSectionParams
     UPROPERTY()
     bool bLooping;
 
-    FOdysseyAnimationComponentSectionParams()
+    FOdysseyAnimationTimelineSectionParams()
         : bLooping(false)
     {}
 };
 
+//---
+
+class UOdysseyAnimationComponent;
 
 USTRUCT()
-struct ODYSSEYANIMATION_API FOdysseyAnimationComponentTemplate
+struct ODYSSEYANIMATIONTRACKS_API FOdysseyAnimationTimelineTemplate
     : public FMovieSceneEvalTemplate
 {
     GENERATED_BODY()
 
     /** Default constructor. */
-    FOdysseyAnimationComponentTemplate() { }
+    FOdysseyAnimationTimelineTemplate() { }
 
     /**
      * Create and initialize a new instance.
@@ -47,12 +50,10 @@ struct ODYSSEYANIMATION_API FOdysseyAnimationComponentTemplate
      * @param InSection
      * @param InTrack
      */
-    FOdysseyAnimationComponentTemplate(const UOdysseyAnimationComponentSection& InSection, const UOdysseyAnimationComponentTrack& InTrack);
+    FOdysseyAnimationTimelineTemplate(const UOdysseyAnimationTimelineSection& InSection, const UOdysseyAnimationTimelineTrack& InTrack);
 
 public:
-
     //~ FMovieSceneEvalTemplate interface
-
     virtual void Evaluate(const FMovieSceneEvaluationOperand& Operand, const FMovieSceneContext& Context, const FPersistentEvaluationData& PersistentData, FMovieSceneExecutionTokens& ExecutionTokens) const override;
     virtual UScriptStruct& GetScriptStructImpl() const override;
     virtual void Initialize(const FMovieSceneEvaluationOperand& Operand, const FMovieSceneContext& Context, FPersistentEvaluationData& PersistentData, IMovieScenePlayer& Player) const override;
@@ -60,13 +61,13 @@ public:
     virtual void TearDown(FPersistentEvaluationData& PersistentData, IMovieScenePlayer& Player) const override;
 
 public:
-    static void GetStartTimeAndDuration(const TRange<FFrameTime>& iRange, const FOdysseyAnimationComponentSectionParams& iParams, const FFrameRate& iFrameRate, double& oStartTime, double& oDuration);
-    static void EvaluateImmediate(UOdysseyAnimationComponent* iComponent, const TRange<FFrameTime>& iRange, const FOdysseyAnimationComponentSectionParams& iParams, const FFrameRate& iFrameRate );
+    static void GetStartTimeAndDuration(const TRange<FFrameTime>& iRange, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate, double& oStartTime, double& oDuration);
+    static void EvaluateImmediate(UOdysseyAnimationComponent* iComponent, const TRange<FFrameTime>& iRange, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate );
 
 private:
     UPROPERTY()
-    FOdysseyAnimationComponentSectionParams mParams;
+    FOdysseyAnimationTimelineSectionParams mParams;
 
     UPROPERTY()
-    TObjectPtr<const UOdysseyAnimationComponentSection> mSection;
+    TObjectPtr<const UOdysseyAnimationTimelineSection> mSection;
 };

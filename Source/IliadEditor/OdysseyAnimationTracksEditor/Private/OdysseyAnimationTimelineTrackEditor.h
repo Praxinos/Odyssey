@@ -5,19 +5,18 @@
 
 #include "MovieSceneTrackEditor.h"
 
-class UOdysseyAnimationLayerStack;
 class UOdysseyAnimationComponent;
 
-class FOdysseyAnimationTrackEditor
+class FOdysseyAnimationTimelineTrackEditor
     : public FMovieSceneTrackEditor
 {
 public:
 
     /** Constructor. */
-    FOdysseyAnimationTrackEditor( TSharedRef<ISequencer> InSequencer );
+    FOdysseyAnimationTimelineTrackEditor( TSharedRef<ISequencer> InSequencer );
 
     /** Virtual destructor. */
-    virtual ~FOdysseyAnimationTrackEditor();
+    virtual ~FOdysseyAnimationTimelineTrackEditor();
 
     static TSharedRef<ISequencerTrackEditor> CreateTrackEditor( TSharedRef<ISequencer> OwningSequencer );
     static void OnNewActorTrackAdded(const AActor& iActor, const FGuid& iBinding, TSharedPtr< ISequencer > iSequencer);

@@ -34,9 +34,9 @@
 #include "OdysseyViewportDrawingEditorUtils.h"
 #include "OdysseyAnimationActor.h"
 #include "OdysseyAnimationComponent.h"
-#include "OdysseyAnimationComponentTrack.h"
-#include "OdysseyAnimationComponentSection.h"
-#include "OdysseyAnimationComponentTemplate.h"
+#include "OdysseyAnimationTimelineTrack.h"
+#include "OdysseyAnimationTimelineSection.h"
+#include "OdysseyAnimationTimelineTemplate.h"
 #include "MovieScene.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
@@ -538,7 +538,7 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
         if (!movieScene)
             continue;
 
-        UOdysseyAnimationComponentTrack* track =  movieScene->FindTrack<UOdysseyAnimationComponentTrack>(binding);
+        UOdysseyAnimationTimelineTrack* track =  movieScene->FindTrack<UOdysseyAnimationTimelineTrack>(binding);
         if (!track)
             continue;
 
@@ -562,7 +562,7 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
         if (sectionIndex == INDEX_NONE)
             continue;
 
-        UOdysseyAnimationComponentSection* section = Cast<UOdysseyAnimationComponentSection>(sections[sectionIndex]);
+        UOdysseyAnimationTimelineSection* section = Cast<UOdysseyAnimationTimelineSection>(sections[sectionIndex]);
         if (!section)
             continue;
 
@@ -587,22 +587,22 @@ FOdysseyViewportDrawingEditorExtension::SyncSequencerWithAnimationPlayer()
 
         if (frame < sectionStartFrame)
         {
-            FOdysseyAnimationComponentSectionParams params;
+            FOdysseyAnimationTimelineSectionParams params;
             params.SectionStartFrame = sectionStartFrame;
             params.SectionEndFrame = sectionEndFrame;
             params.StartFrameOffset = section->StartFrameOffset;
             TRange<FFrameTime> range = TRange<FFrameTime>::Inclusive(sectionStartFrame, sectionStartFrame);
-            FOdysseyAnimationComponentTemplate::EvaluateImmediate(animationComponent, range, params, tickResolution);
+            FOdysseyAnimationTimelineTemplate::EvaluateImmediate(animationComponent, range, params, tickResolution);
             return;
         }
         if (frame > sectionEndFrame)
         {
-            FOdysseyAnimationComponentSectionParams params;
+            FOdysseyAnimationTimelineSectionParams params;
             params.SectionStartFrame = sectionStartFrame;
             params.SectionEndFrame = sectionEndFrame;
             params.StartFrameOffset = section->StartFrameOffset;
             TRange<FFrameTime> range = TRange<FFrameTime>::Inclusive(sectionEndFrame, sectionEndFrame);
-            FOdysseyAnimationComponentTemplate::EvaluateImmediate(animationComponent, range, params, tickResolution);
+            FOdysseyAnimationTimelineTemplate::EvaluateImmediate(animationComponent, range, params, tickResolution);
             return;
         }
 

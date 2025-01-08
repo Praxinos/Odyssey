@@ -5,8 +5,8 @@
 #include "AnimationEditor/OdysseyAnimationEditorTimelineTab.h"
 #include "OdysseyPainterEditor.h"
 #include "ViewportDrawingEditor/OdysseyViewportDrawingEditorExtension.h"
-#include "OdysseyAnimationComponentTrack.h"
-#include "OdysseyAnimationComponentSection.h"
+#include "OdysseyAnimationTimelineTrack.h"
+#include "OdysseyAnimationTimelineSection.h"
 #include "MovieScene.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationComponent.h"
@@ -118,7 +118,7 @@ FOdysseyViewportDrawingEditorGUI::CustomizeAnimationEditorTimeline()
                 if (!movieScene)
                     continue;
 
-                UOdysseyAnimationComponentTrack* track =  movieScene->FindTrack<UOdysseyAnimationComponentTrack>(binding);
+                UOdysseyAnimationTimelineTrack* track =  movieScene->FindTrack<UOdysseyAnimationTimelineTrack>(binding);
                 if (!track)
                     continue;
 
@@ -140,7 +140,7 @@ FOdysseyViewportDrawingEditorGUI::CustomizeAnimationEditorTimeline()
                 if (!sectionPtr)
                     continue;
 
-                UOdysseyAnimationComponentSection* section = Cast<UOdysseyAnimationComponentSection>(*sectionPtr);
+                UOdysseyAnimationTimelineSection* section = Cast<UOdysseyAnimationTimelineSection>(*sectionPtr);
                 if (!section)
                     continue;
 

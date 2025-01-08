@@ -6,22 +6,24 @@
 #include "SequencerCoreFwd.h"
 #include "MVVM/Extensions/IOutlinerExtension.h"
 #include "ISequencerTrackEditor.h"
+#include "Styling/SlateTypes.h"
+#include "Widgets/SCompoundWidget.h"
 
 class UOdysseyLayer;
 class UOdysseyAnimationComponent;
-class UOdysseyAnimationComponentTrack;
-class ISequencerTreeViewRow;
+class UOdysseyAnimationTimelineTrack;
+namespace UE::Sequencer { class ISequencerTreeViewRow; }
 
-class SOdysseyAnimationComponentTrack
+class SOdysseyAnimationTimelineTrack
     : public SCompoundWidget
 {
 public:
-    SLATE_BEGIN_ARGS(SOdysseyAnimationComponentTrack)
+    SLATE_BEGIN_ARGS(SOdysseyAnimationTimelineTrack)
     {}
     SLATE_END_ARGS()
 
 public:
-    void Construct(const FArguments& iArgs, UOdysseyAnimationComponent* iComponent, UOdysseyAnimationComponentTrack* iTrack, const FBuildColumnWidgetParams& iParams);
+    void Construct(const FArguments& iArgs, UOdysseyAnimationComponent* iComponent, UOdysseyAnimationTimelineTrack* iTrack, const FBuildColumnWidgetParams& iParams);
 
 private:
     void RebuildWidgets();
@@ -39,6 +41,6 @@ private:
 
 private:
     UOdysseyAnimationComponent* mComponent;
-    UOdysseyAnimationComponentTrack* mTrack;
+    UOdysseyAnimationTimelineTrack* mTrack;
     TWeakPtr<UE::Sequencer::ISequencerTreeViewRow> mRow; //Must be a WeakPtr, otherwise the row is never killed and is still displayed when it should be hidden
 };

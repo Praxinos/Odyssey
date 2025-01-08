@@ -1,24 +1,24 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "OdysseyAnimationComponentTemplate.h"
+#include "OdysseyAnimationTimelineTemplate.h"
+
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationPlayer.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyAnimationComponent.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationComponentTemplate)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationTimelineTemplate)
 
 #define MOVIESCENEMEDIATEMPLATE_TRACE_EVALUATION 0
-
 
 /* Local helpers
  *****************************************************************************/
 
-struct FOdysseyAnimationComponentSectionExecutionToken
+struct FOdysseyAnimationTimelineSectionExecutionToken
     : IMovieSceneExecutionToken
 {
-    FOdysseyAnimationComponentSectionExecutionToken(double iStartTime, double iDuration)
+    FOdysseyAnimationTimelineSectionExecutionToken(double iStartTime, double iDuration)
         : mStartTime(iStartTime)
         , mDuration(iDuration)
     { }
@@ -88,10 +88,10 @@ private:
 };
 
 
-/* FOdysseyAnimationComponentTemplate structors
+/* FOdysseyAnimationTimelineTemplate structors
  *****************************************************************************/
 
-FOdysseyAnimationComponentTemplate::FOdysseyAnimationComponentTemplate(const UOdysseyAnimationComponentSection& InSection, const UOdysseyAnimationComponentTrack& InTrack)
+FOdysseyAnimationTimelineTemplate::FOdysseyAnimationTimelineTemplate(const UOdysseyAnimationTimelineSection& InSection, const UOdysseyAnimationTimelineTrack& InTrack)
     : mSection(&InSection)
 {
     if (InSection.HasStartFrame())
@@ -111,7 +111,7 @@ FOdysseyAnimationComponentTemplate::FOdysseyAnimationComponentTemplate(const UOd
  *****************************************************************************/
 
 void
-FOdysseyAnimationComponentTemplate::Evaluate(const FMovieSceneEvaluationOperand& Operand, const FMovieSceneContext& Context, const FPersistentEvaluationData& PersistentData, FMovieSceneExecutionTokens& ExecutionTokens) const
+FOdysseyAnimationTimelineTemplate::Evaluate(const FMovieSceneEvaluationOperand& Operand, const FMovieSceneContext& Context, const FPersistentEvaluationData& PersistentData, FMovieSceneExecutionTokens& ExecutionTokens) const
 {
     if (Context.IsPreRoll())
         return;
@@ -125,11 +125,11 @@ FOdysseyAnimationComponentTemplate::Evaluate(const FMovieSceneEvaluationOperand&
     double startTime = 0.f;
     double duration = 0.f;
     GetStartTimeAndDuration(Context.GetRange(), mParams, Context.GetFrameRate(), startTime, duration);
-    ExecutionTokens.Add(FOdysseyAnimationComponentSectionExecutionToken(startTime, duration));
+    ExecutionTokens.Add(FOdysseyAnimationTimelineSectionExecutionToken(startTime, duration));
 }
 
 void
-FOdysseyAnimationComponentTemplate::GetStartTimeAndDuration(const TRange<FFrameTime>& iRange, const FOdysseyAnimationComponentSectionParams& iParams, const FFrameRate& iFrameRate, double& oStartTime, double& oDuration)
+FOdysseyAnimationTimelineTemplate::GetStartTimeAndDuration(const TRange<FFrameTime>& iRange, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate, double& oStartTime, double& oDuration)
 {
     const FFrameTime FrameTime(iRange.GetLowerBoundValue() - iParams.SectionStartFrame + iParams.StartFrameOffset);
     oStartTime = iFrameRate.AsSeconds(FrameTime);
@@ -139,35 +139,32 @@ FOdysseyAnimationComponentTemplate::GetStartTimeAndDuration(const TRange<FFrameT
 }
 
 void
-FOdysseyAnimationComponentTemplate::EvaluateImmediate(UOdysseyAnimationComponent* iComponent, const TRange<FFrameTime>& iRange, const FOdysseyAnimationComponentSectionParams& iParams, const FFrameRate& iFrameRate )
+FOdysseyAnimationTimelineTemplate::EvaluateImmediate(UOdysseyAnimationComponent* iComponent, const TRange<FFrameTime>& iRange, const FOdysseyAnimationTimelineSectionParams& iParams, const FFrameRate& iFrameRate )
 {
     double startTime = 0.f;
     double duration = 0.f;
     GetStartTimeAndDuration(iRange, iParams, iFrameRate, startTime, duration);
-    FOdysseyAnimationComponentSectionExecutionToken::Execute(iComponent, startTime, duration);
+    FOdysseyAnimationTimelineSectionExecutionToken::Execute(iComponent, startTime, duration);
 }
 
 UScriptStruct&
-FOdysseyAnimationComponentTemplate::GetScriptStructImpl() const
+FOdysseyAnimationTimelineTemplate::GetScriptStructImpl() const
 {
     return *StaticStruct();
 }
 
-
 void
-FOdysseyAnimationComponentTemplate::Initialize(const FMovieSceneEvaluationOperand& Operand, const FMovieSceneContext& Context, FPersistentEvaluationData& PersistentData, IMovieScenePlayer& Player) const
+FOdysseyAnimationTimelineTemplate::Initialize(const FMovieSceneEvaluationOperand& Operand, const FMovieSceneContext& Context, FPersistentEvaluationData& PersistentData, IMovieScenePlayer& Player) const
 {
 }
 
-
 void
-FOdysseyAnimationComponentTemplate::SetupOverrides()
+FOdysseyAnimationTimelineTemplate::SetupOverrides()
 {
     EnableOverrides(RequiresInitializeFlag | RequiresTearDownFlag);
 }
 
-
 void
-FOdysseyAnimationComponentTemplate::TearDown(FPersistentEvaluationData& PersistentData, IMovieScenePlayer& Player) const
+FOdysseyAnimationTimelineTemplate::TearDown(FPersistentEvaluationData& PersistentData, IMovieScenePlayer& Player) const
 {
 }
