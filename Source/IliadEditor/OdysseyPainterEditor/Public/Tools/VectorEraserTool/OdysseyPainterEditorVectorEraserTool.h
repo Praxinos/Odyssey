@@ -77,9 +77,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
         UPROPERTY( EditAnywhere
                  , Category=EraserTool
                  , meta = ( Tooltip  = "Radius"
-                          , ClampMin = "0.0"
-                          , UIMin    = "0.0") )
-        double Radius;
+                          , ClampMin = "0"
+                          , UIMin    = "0") )
+        uint32 Radius;
 
     private:
         FOdysseyPainterEditorVectorEraserToolHUD* mEraserHUD;

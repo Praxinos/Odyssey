@@ -20,7 +20,11 @@
 #include "undo/OdysseyVectorUndoTagInbetweenerStepAlign.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
+
 #define WARNING_LINEAR_ROUTE_FORBIDDEN "Trajectories are only allowed when interpolation type is set to ARAP"
+#define WARNING_MODE_DEFAULT           "Use CTRL to alter the curve of the trajectory. Use SHIFT to alter spacing."
+#define WARNING_MODE_CTRL              "Use CTRL to add a trajectory. Use SHIFT to alter spacing."
+#define WARNING_MODE_SHIFT             "Use CTRL to alter the curve of the trajectory. Use SHIFT to add a trajectory."
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
@@ -174,6 +178,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
     //    return false;
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     uint64 notificationFlags = 0;
+    FInbetweenerRoute* addedRoute = nullptr;
 
     mPickedStep = nullptr;
     mPickedHandle = nullptr;
@@ -203,9 +208,10 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                 {
                     BLMatrix2D& ownerInverseWorldMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
                     BLPoint pt = ownerInverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
-                    FInbetweenerRoute* route = inbetweenerTag->AddRoute( ::ULIS::FVec2D( pt.x, pt.y ), true );
 
-                    if( route )
+                    addedRoute = inbetweenerTag->AddRoute( ::ULIS::FVec2D( pt.x, pt.y ), true );
+
+                    if( addedRoute )
                     {
                         // needed for valid GUndo pointer
                         GEditor->BeginTransaction(LOCTEXT("vector-trajectory-tool.transaction.add","Vector Trajectory Tool"));
@@ -213,7 +219,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                         {
                             FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerRouteAdd( iScene
                                                                                                     , inbetweenerTag
-                                                                                                    , route
+                                                                                                    , addedRoute
                                                                                                     , notificationFlags );
 
                             GUndo->StoreUndo( GEditor, TUniquePtr<FOdysseyVectorUndo>(undo) );
@@ -298,6 +304,34 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
                 }
             }
         }
+
+        if( ( EditionMode == eTrajectoryEditionMode::Add     ) && ( FSlateApplication::Get().GetModifierKeys().AnyModifiersDown() == false ) )
+        {
+            if( addedRoute == nullptr )
+            {
+                FMessageDialog::Open( EAppMsgType::Ok
+                                    , FText::FromString( TEXT ( WARNING_MODE_DEFAULT ) ) );
+            }
+        }
+
+        if( ( EditionMode == eTrajectoryEditionMode::Curve   ) && ( FSlateApplication::Get().GetModifierKeys().AnyModifiersDown() == false ) )
+        {
+            if((  mPickedHandle == nullptr ) && ( mPickedStep == nullptr ) )
+            {
+                FMessageDialog::Open( EAppMsgType::Ok
+                                    , FText::FromString( TEXT ( WARNING_MODE_CTRL ) ) );
+            }
+        }
+
+        if( ( EditionMode == eTrajectoryEditionMode::Spacing ) && ( FSlateApplication::Get().GetModifierKeys().AnyModifiersDown() == false ) )
+        {
+           if( mPickedWaypoint == nullptr )
+           {
+               FMessageDialog::Open( EAppMsgType::Ok
+                                   , FText::FromString( TEXT ( WARNING_MODE_SHIFT ) ) );
+           }
+        }
+
 /*
         if( EditionMode == eTrajectoryEditionMode::Remove )
         {

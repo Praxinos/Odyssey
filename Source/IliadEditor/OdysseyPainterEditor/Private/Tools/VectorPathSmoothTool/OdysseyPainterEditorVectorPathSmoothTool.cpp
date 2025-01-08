@@ -6,6 +6,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
+#include "ISinglePropertyView.h"
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 #include "Undo/OdysseyVectorUndoSegmentReshape.h"
@@ -221,6 +222,30 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupP
     // redraw
     iScene->GetEngine()->Invalidate( 0 );
     return true;
+}
+
+TSharedRef<SWidget>
+UOdysseyPainterEditorVectorPathSmoothTool::CreateTopTabWidget()
+{
+    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    FSinglePropertyParams defaultPropertyParams;
+
+    const TSharedPtr<ISinglePropertyView> PickingRadiusView = propertyEditorModule.CreateSingleProperty( this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorChartTool, PickingRadius ), defaultPropertyParams);
+    TSharedPtr<class IPropertyHandle> PickingRadiusHandle = PickingRadiusView->GetPropertyHandle();
+
+    return SNew(SUniformWrapPanel)
+        .SlotPadding(FVector2D(3.f, 0.f))
+        .EvenRowDistribution(true)
+        .HAlign(HAlign_Left)
+        + SUniformWrapPanel::Slot()
+        [
+            SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+        ]
+
+        + SUniformWrapPanel::Slot()
+        [
+            CreatePropertyWidget(PickingRadiusHandle, PickingRadiusView).ToSharedRef()
+        ];
 }
 
 FText

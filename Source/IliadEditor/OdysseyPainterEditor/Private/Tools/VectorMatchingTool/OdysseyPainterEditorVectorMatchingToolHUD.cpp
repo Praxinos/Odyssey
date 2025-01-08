@@ -51,6 +51,10 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
     FOdysseyVectorSharedEnv *sharedEnv = iScene->GetSharedEnv();
     uint64 gridDotted = mMatchingTool->GridDisplayMode == eMatchingGridDisplayMode::AsPoints ?  HUD_BREAKDOWN_GRID_DOTTED : 0;
 
+    iBLContext->save();
+    // do not add-up colors
+    iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
+
     // Draw default
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.
@@ -93,7 +97,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
                                           , breakdown
                                           , BLRgba32( 127, 127, 127, 255 )
                                           , BLRgba32( 255, 127, 127, 255 )
-                                          , HUD_BREAKDOWN_INBETWEEN | HUD_INBETWEEN_FADEFROMTARGET );
+                                          , HUD_BREAKDOWN_INBETWEEN /*| HUD_INBETWEEN_FADEFROMTARGET*/ );
 
                             if( nextBreakdown )
                             {
@@ -102,7 +106,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
                                               , nextBreakdown
                                               , BLRgba32( 127, 127, 127, 255 )
                                               , BLRgba32( 255, 127, 127, 255 )
-                                              , HUD_BREAKDOWN_INBETWEEN | HUD_INBETWEEN_FADEFROMSOURCE );
+                                              , HUD_BREAKDOWN_INBETWEEN /*| HUD_INBETWEEN_FADEFROMSOURCE*/ );
                             }
                         }
 
@@ -126,7 +130,6 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
         }
     }
 
-    iBLContext->save();
     iBLContext->resetMatrix();
 
     iBLContext->setStrokeStyle( hcColor );

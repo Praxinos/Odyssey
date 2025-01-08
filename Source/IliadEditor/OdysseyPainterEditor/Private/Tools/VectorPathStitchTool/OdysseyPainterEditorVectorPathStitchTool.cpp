@@ -84,7 +84,6 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
     if( iKey == EKeys::LeftMouseButton )
     {
         FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-        ::ULIS::FRectD roi = { iPointInTexture.x - PickingRadius, iPointInTexture.y - PickingRadius, PickingRadius * 2, PickingRadius * 2 };
         FOdysseyVectorVertex* knotVertex;
         // for undos
         std::vector<FOdysseyVectorPath*> addedPathArray; // stays empty

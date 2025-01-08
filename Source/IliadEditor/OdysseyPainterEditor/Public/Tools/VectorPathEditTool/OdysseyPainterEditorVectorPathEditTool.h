@@ -137,19 +137,22 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
                                   , double iSelectionRadius
                                   , const FOdysseyPoint& iPointInTexture );
 */
-        ::ULIS::FRectD DragSegmentHandle( FOdysseyVectorHandleSegment *iHandle
-                                        , double iWorldX
-                                        , double iWorldY
-                                        , double iDeltaX
-                                        , double iDeltaY
-                                        , bool iRealign );
+        void DragSegmentHandle( FOdysseyVectorHandleSegment *iHandle
+                              , double iWorldX
+                              , double iWorldY
+                              , double iDeltaX
+                              , double iDeltaY );
 
-        ::ULIS::FRectD DragVertex( FOdysseyVectorVertex *iVertex
-                                 , double iWorldX
-                                 , double iWorldY
-                                 , double iDeltaX
-                                 , double iDeltaY
-                                 , bool iWidenAllAlong );
+        void DragVertex( FOdysseyVectorVertex *iVertex
+                       , double iWorldX
+                       , double iWorldY
+                       , double iDeltaX
+                       , double iDeltaY );
+
+        void DragVertexHandle( FOdysseyVectorVertex *iVertex
+                             , double iOriginalRadius
+                             , const ::ULIS::FVec2D& iMouse
+                             , bool iWidenAllAlong );
 
         void GetPathsFromSelection( FOdysseyVectorGroupPaint* iScene
                                   , std::vector<FOdysseyVectorPath*>& oPathArray );
@@ -163,20 +166,23 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathEditTool : public 
     private:
         FOdysseyPainterEditorVectorPathEditToolHUD *mPathEditHUD;
         std::vector<FOdysseyVectorVertex*> mPickedVertexArray;
+        std::vector<::ULIS::FVec2D> mPickedVertexPositionArray;
+        std::vector<double> mPickedVertexRadiusArray;
         std::vector<FOdysseyVectorHandleSegment*> mPickedHandleArray;
+        std::vector<::ULIS::FVec2D> mPickedHandlePositionArray;
         std::vector<FSegmentAdjustment> mSegmentAdjustmentArray;
         std::vector<FOdysseyVectorPath*> mSelectedPathArray;
         uint64 mPickingFlags;
         ePathPickingMode mPickingMode;
-        ::ULIS::FVec2D mOldPointInTexture;
+        ::ULIS::FVec2D mPointInTextureAtDown;
 
     public:
         UPROPERTY( EditAnywhere
                  , Category=PathEditTool
-                 , meta = ( ToolTip = "Picking Radius"
-                          , ClampMin = "0.0"
-                          , UIMin = "0.0" ) )
-        double PickingRadius;
+                 , meta = ( ToolTip  = "Picking Radius"
+                          , ClampMin = "0"
+                          , UIMin    = "0" ) )
+        uint32 PickingRadius;
 
         UPROPERTY( EditAnywhere
                  , Category=PathEditTool

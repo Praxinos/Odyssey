@@ -172,6 +172,7 @@ void
 FOdysseyVectorCycle::Build( /*std::vector<FOdysseyVectorVertex*>& iVertexArray
                           , std::vector<FOdysseyVectorSection*>& iSectionArray*/ )
 {
+    FOdysseyVectorEngine* engine = mOwner->GetEngine();
     int32 arraySize = mContourSectionArray.size();
     int seg = 0;
     BLBox bbox;
@@ -219,6 +220,12 @@ FOdysseyVectorCycle::Build( /*std::vector<FOdysseyVectorVertex*>& iVertexArray
     mContourPath.getBoundingBox( &bbox );
 
     mBBox = ::ULIS::FRectD::FromMinMax( bbox.x0, bbox.y0, bbox.x1, bbox.y1 );
+
+    // auto invalidation of the region that needs to be redrawn
+    if( engine )
+    {
+        engine->InvalidateRect( mBBox );
+    }
 }
 
 void

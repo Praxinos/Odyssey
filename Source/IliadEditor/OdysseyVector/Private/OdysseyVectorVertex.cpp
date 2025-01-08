@@ -640,8 +640,31 @@ FOdysseyVectorVertex::SetRadius( double iRadius )
         // when the shape is committed but I don't know why.
         mRadius = fabs( iRadius );
 
-        InvalidateSegments();
+        Invalidate();
     }
+}
+
+void
+FOdysseyVectorVertex::Update( FOdysseyVectorSegment* iPrevSegment, FOdysseyVectorSegment* iSegment )
+{
+    // update joint
+    MakeJoint( iPrevSegment, iSegment );
+
+    mFlags &= (~INVALIDATED);
+}
+
+void
+FOdysseyVectorVertex::Invalidate()
+{
+    mFlags |= INVALIDATED;
+
+    InvalidateSegments();
+}
+
+bool
+FOdysseyVectorVertex::IsInvalidated()
+{
+    return ( mFlags & INVALIDATED ) ? true : false;
 }
 
 bool
@@ -672,8 +695,10 @@ FOdysseyVectorVertex::SetCoords( double iX, double iY )
 
         mJoint.ResetBBox();
 
-        InvalidateSegments();
+        Invalidate();
     }
+
+
 }
 
 void
@@ -843,7 +868,7 @@ FOdysseyVectorVertex::SetHandleAligned( bool iHandleAligned )
         mFlags &= (~HANDLE_ALIGNED);
     }
 
-    InvalidateSegments();
+    Invalidate();
 }
 
 // TODO: rename as IsSegmentAligned

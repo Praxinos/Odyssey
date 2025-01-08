@@ -193,6 +193,12 @@ FOdysseyVectorEngine::GetInvalidatedRect( double iScreenWidth, double iScreenHei
 }
 
 void
+FOdysseyVectorEngine::InvalidateRect()
+{
+    mInvalidatedRect = ::ULIS::FRectD( 0.0f, 0.0f, DBL_MAX, DBL_MAX );
+}
+
+void
 FOdysseyVectorEngine::InvalidateRect( const ::ULIS::FRectD& iRect )
 {
     if( mInvalidatedRect.Area() == 0.0f )

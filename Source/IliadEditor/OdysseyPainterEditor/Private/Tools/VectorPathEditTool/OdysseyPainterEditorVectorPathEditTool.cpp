@@ -6,6 +6,7 @@
 #include "OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
+#include "OdysseyVectorSharedEnv.h"
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "Undo/OdysseyVectorUndoPointPosition.h"
 #include "Undo/OdysseyVectorUndoVertexRadius.h"
@@ -506,7 +507,10 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
 
     mSelectedPathArray.clear();
     mPickedVertexArray.clear();
+    mPickedVertexPositionArray.clear();
+    mPickedVertexRadiusArray.clear();
     mPickedHandleArray.clear();
+    mPickedHandlePositionArray.clear();
     mSegmentAdjustmentArray.clear();
 
     vectorEngine->Traverse
@@ -671,6 +675,26 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
         }
     }
 
+
+    // remember vertex position at mouse down
+    mPickedVertexPositionArray.reserve( mPickedVertexArray.size() );
+    mPickedVertexRadiusArray.reserve( mPickedVertexArray.size() );
+    for( FOdysseyVectorVertex* vertex : mPickedVertexArray )
+    {
+        mPickedVertexPositionArray.emplace_back( vertex->GetX(), vertex->GetY() );
+        mPickedVertexRadiusArray.emplace_back( vertex->GetRadius() );
+    }
+
+    // remember handle position at mouse down
+    mPickedHandlePositionArray.reserve( mPickedHandleArray.size() );
+    for( FOdysseyVectorHandleSegment* handle : mPickedHandleArray )
+    {
+        mPickedHandlePositionArray.emplace_back( handle->GetX(), handle->GetY() );
+    }
+
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                  | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
+
     return notificationFlags;
 }
 
@@ -688,7 +712,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorGroupP
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        mOldPointInTexture = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
+        mPointInTextureAtDown = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
 
         mPathEditHUD->SetCutLineP0( iPointInTexture.x, iPointInTexture.y );
         mPathEditHUD->SetCutLineP1( iPointInTexture.x, iPointInTexture.y );
@@ -744,68 +768,63 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( FOdysseyVectorGroup
     oSignalFlags = notificationFlags;
 }
 
-::ULIS::FRectD
+void
+UOdysseyPainterEditorVectorPathEditTool::DragVertexHandle( FOdysseyVectorVertex *iVertex
+                                                         , double iOriginalRadius
+                                                         , const ::ULIS::FVec2D& iPointInTexture
+                                                         , bool iWidenAllAlong )
+{
+    FOdysseyVectorPath* path = iVertex->GetOwnerAsPath();
+    ::ULIS::FVec2D localMouseAtDown = FOdysseyVector::MapVector( path->GetInverseWorldMatrix(), mPointInTextureAtDown );
+    ::ULIS::FVec2D localMouse = FOdysseyVector::MapVector( path->GetInverseWorldMatrix(), iPointInTexture );
+    double ratio = ::ULIS::FVec2D( iVertex->GetX() - localMouse.x
+                                 , iVertex->GetY() - localMouse.y ).Distance() /
+                   ::ULIS::FVec2D( iVertex->GetX() - localMouseAtDown.x
+                                 , iVertex->GetY() - localMouseAtDown.y ).Distance();
+
+    if( iWidenAllAlong )
+    {
+        for( int i = 0; i < mSelectedPathArray.size(); i++ )
+        {
+            mSelectedPathArray[i]->AlterRadius( ratio  );
+        }
+    }
+    else
+    {
+        iVertex->SetRadius( iVertex->GetRadius() * ratio );
+    }
+
+    mPointInTextureAtDown = iPointInTexture;
+}
+
+void
 UOdysseyPainterEditorVectorPathEditTool::DragSegmentHandle( FOdysseyVectorHandleSegment *iHandle
-                                                          , double iWorldX
-                                                          , double iWorldY
+                                                          , double iHandleX
+                                                          , double iHandleY
                                                           , double iDeltaX
-                                                          , double iDeltaY
-                                                          , bool iRealign )
+                                                          , double iDeltaY )
 {
     FOdysseyVectorSegment* segment = iHandle->GetOwner();
     FOdysseyVectorPath* path = segment->GetOwnerAsPath();
     FOdysseyVectorVertex* vertex = iHandle->GetAttachedVertex();
-    BLPoint localCoords = path->GetInverseWorldMatrix().mapPoint( iWorldX, iWorldY );
     BLPoint localVector = path->GetInverseWorldMatrix().mapVector( iDeltaX, iDeltaY );
 
-    iHandle->Set( iHandle->GetX() + localVector.x
-                , iHandle->GetY() + localVector.y );
-
-    return segment->GetBoundingBox( false );
+    iHandle->Set( iHandleX + localVector.x
+                , iHandleY + localVector.y );
 }
 
-::ULIS::FRectD
+void
 UOdysseyPainterEditorVectorPathEditTool::DragVertex( FOdysseyVectorVertex *iVertex
-                                                   , double iWorldX
-                                                   , double iWorldY
+                                                   , double iVertexX
+                                                   , double iVertexY
                                                    , double iDeltaX
-                                                   , double iDeltaY
-                                                   , bool iWidenAllAlong )
+                                                   , double iDeltaY )
 {
     FOdysseyVectorPath* path = iVertex->GetOwnerAsPath();
-    BLPoint localCoords = path->GetInverseWorldMatrix().mapPoint( iWorldX, iWorldY );
     BLPoint localVector = path->GetInverseWorldMatrix().mapVector( iDeltaX, iDeltaY );
 
-    if( mPickingMode == ePathPickingMode::VertexHandle  )
-    {
-        ::ULIS::FVec2D dif = { iVertex->GetX() - localCoords.x
-                             , iVertex->GetY() - localCoords.y };
-        double deltaRadius = dif.Distance() - iVertex->GetRadius();
-
-        if( iWidenAllAlong )
-        {
-            for( int i = 0; i < mSelectedPathArray.size(); i++ )
-            {
-                mSelectedPathArray[i]->AlterRadius( deltaRadius );
-            }
-        }
-        else
-        {
-            iVertex->SetRadius( iVertex->GetRadius() + deltaRadius );
-        }
-
-        return iVertex->GetBoundingBox( true );
-    }
-
-    if( mPickingMode == ePathPickingMode::Vertex )
-    {
-        iVertex->Set( iVertex->GetX() + localVector.x
-                    , iVertex->GetY() + localVector.y );
-
-        return iVertex->GetBoundingBox( true );
-    }
-
-    return { 0, 0, 0, 0 };
+    iVertex->Set( iVertexX + localVector.x
+                , iVertexY + localVector.y );
 }
 
 void
@@ -814,8 +833,9 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
                                                           , uint64& oSignalFlags )
 {
     uint64 notificationFlags = 0;
-    double pointInTextureX = iPointInTexture.x;
-    double pointInTextureY = iPointInTexture.y;
+    double deltaX = iPointInTexture.x - mPointInTextureAtDown.x;
+    double deltaY = iPointInTexture.y - mPointInTextureAtDown.y;
+
 /*
     static ::ULIS::FRectI oldInvalidatedArea = { 0, 0, 0, 0 };
     ::ULIS::FRectD localInvalidatedArea = { 0, 0, 0, 0 };
@@ -854,26 +874,32 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
         }
         */
 
-        if( ( mPickingMode == ePathPickingMode::Vertex        )
-         || ( mPickingMode == ePathPickingMode::VertexHandle  ) )
+        if( mPickingMode == ePathPickingMode::VertexHandle  )
         {
             for( int i = 0; i < mPickedVertexArray.size(); i++ )
             {
                 FOdysseyVectorVertex *vertex = mPickedVertexArray[i];
-                ::ULIS::FRectD rect;
 
-                rect = DragVertex( vertex
-                                 , pointInTextureX
-                                 , pointInTextureY
-                                 // we don't use iPointInTexture.deltaPosition because for some reason,
-                                 // the readings are not good when a key is pressed.
-                                 , pointInTextureX - mOldPointInTexture.x
-                                 , pointInTextureY - mOldPointInTexture.y
-                                 , WidenAllAlong && ( mPickedVertexArray.size() == 1 ) );
+                DragVertexHandle( vertex
+                                , mPickedVertexRadiusArray[i]
+                                , ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y )
+                                , WidenAllAlong && ( mPickedVertexArray.size() == 1 ) );
+            }
+        }
 
-                //localInvalidatedArea = ( inited == false ) ? rect : localInvalidatedArea | rect;
+        if( mPickingMode == ePathPickingMode::Vertex        )
+        {
+            for( int i = 0; i < mPickedVertexArray.size(); i++ )
+            {
+                FOdysseyVectorVertex *vertex = mPickedVertexArray[i];
 
-                //inited = true;
+                DragVertex( vertex
+                          , mPickedVertexPositionArray[i].x
+                          , mPickedVertexPositionArray[i].y
+                          // we don't use iPointInTexture.deltaPosition because for some reason,
+                          // the readings are not good when a key is pressed.
+                          , deltaX
+                          , deltaY );
             }
         }
 
@@ -883,16 +909,14 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
             for( int i = 0; i < mPickedHandleArray.size(); i++ )
             {
                 FOdysseyVectorHandleSegment *handle = mPickedHandleArray[i];
-                ::ULIS::FRectD rect;
 
-                rect = DragSegmentHandle( handle
-                                        , pointInTextureX
-                                        , pointInTextureY
-                                        // we don't use iPointInTexture.deltaPosition because for some reason,
-                                        // the readings are not good when a key is pressed.
-                                        , pointInTextureX - mOldPointInTexture.x
-                                        , pointInTextureY - mOldPointInTexture.y
-                                        , ( mPickingMode == ePathPickingMode::SegmentHandle ) ? true : false );
+                DragSegmentHandle( handle
+                                 , mPickedHandlePositionArray[i].x
+                                 , mPickedHandlePositionArray[i].y
+                                 // we don't use iPointInTexture.deltaPosition because for some reason,
+                                 // the readings are not good when a key is pressed.
+                                 , deltaX
+                                 , deltaY );
 
                 //localInvalidatedArea = ( inited == false ) ? rect : localInvalidatedArea | rect;
 
@@ -908,22 +932,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
                 segmentAdjustment.Adjust();
             }
         }
-
-    /*
-        worldAreaP1 = cubicPath->GetWorldMatrix().mapPoint( localInvalidatedArea.x, localInvalidatedArea.y );
-        worldAreaP2 = cubicPath->GetWorldMatrix().mapPoint( localInvalidatedArea.x + localInvalidatedArea.w
-                                                          , localInvalidatedArea.y + localInvalidatedArea.h );
-
-        invalidatedArea = ::ULIS::FRectI::FromMinMax( ::ULIS::FMath::Min(worldAreaP1.x,worldAreaP2.x)
-                                                    , ::ULIS::FMath::Min(worldAreaP1.y,worldAreaP2.y)
-                                                    , ::ULIS::FMath::Max(worldAreaP1.x,worldAreaP2.x)
-                                                    , ::ULIS::FMath::Max(worldAreaP1.y,worldAreaP2.y) );
-
-        totalInvalidatedArea = invalidatedArea | oldInvalidatedArea;
-
-        oldInvalidatedArea = invalidatedArea;
-    */
-        mOldPointInTexture = ::ULIS::FVec2D( pointInTextureX, pointInTextureY );
 
         iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
                       | FOdysseyVectorObject::UPDATE_NOINBETWEENING );

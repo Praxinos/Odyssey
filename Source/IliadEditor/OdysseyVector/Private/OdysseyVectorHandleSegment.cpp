@@ -64,6 +64,9 @@ FOdysseyVectorHandleSegment::GetOwner()
 void
 FOdysseyVectorHandleSegment::SetCoords( double iX, double iY )
 {
+    // invalidate the attached vertex in order to update the joint
+    mAttachedVertex->Invalidate();
+
     if( mAttachedVertex->IsLocked() == false )
     {
         FOdysseyVectorPoint::SetCoords( iX, iY );

@@ -138,13 +138,29 @@ FOdysseyVectorPath::GetBrush()
 void
 FOdysseyVectorPath::SetBrush( const FOdysseyVectorBrush& iBrush )
 {
+    FOdysseyVectorEngine* engine = GetEngine();
+
     mBrush = iBrush;
+
+    // auto invalidation of the region that needs to be redrawn
+    if( engine )
+    {
+        engine->InvalidateRect( GetBBox( true ) );
+    }
 }
 
 void
 FOdysseyVectorPath::SetFilled( bool iIsFilled )
 {
+    FOdysseyVectorEngine* engine = GetEngine();
+
     bFilled = iIsFilled;
+
+    // auto invalidation of the region that needs to be redrawn
+    if( engine )
+    {
+        engine->InvalidateRect( GetBBox( true ) );
+    }
 }
 
 eJointType
@@ -160,6 +176,7 @@ FOdysseyVectorPath::SetJointType( eJointType iJointType, bool iInvalidate )
 
     if( iInvalidate )
     {
+        InvalidateAllVertices();
         Invalidate( INVALIDATE_SHAPE );
     }
 }
@@ -177,6 +194,7 @@ FOdysseyVectorPath::SetMiterLimit( double iMiterLimit, bool iInvalidate )
 
     if( iInvalidate )
     {
+        InvalidateAllVertices();
         Invalidate( INVALIDATE_SHAPE );
     }
 }
@@ -333,6 +351,23 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
         for ( FOdysseyVectorSegment* segment : mInvalidatedSegmentList )
         {
             segment->Update( iUpdateFlags );
+        }
+
+        // update vertices joints AFTER all segments are up to date
+        for ( FOdysseyVectorSegment* segment : mInvalidatedSegmentList )
+        {
+            FOdysseyVectorVertex* vertex0 = segment->GetVertex(0);
+            FOdysseyVectorVertex* vertex1 = segment->GetVertex(1);
+
+            if( vertex0->IsInvalidated() )
+            {
+                vertex0->Update( vertex0->GetOtherSegment( segment ), segment );
+            }
+
+            if( vertex1->IsInvalidated() )
+            {
+                vertex1->Update( segment, vertex1->GetOtherSegment( segment ) );
+            }
         }
     }
 
@@ -545,6 +580,10 @@ FOdysseyVectorPath::AddSegment( FOdysseyVectorSegment* iSegment )
 
     InvalidateSegment( iSegment );
 
+    // Invalidate vertices as well (for handle alignement e.g
+    iSegment->GetVertex(0)->Invalidate();
+    iSegment->GetVertex(1)->Invalidate();
+
     Invalidate( INVALIDATE_TOPOLOGY );
 }
 
@@ -641,6 +680,15 @@ FOdysseyVectorPath::GetFirstVertex()
     if( mVertexList.size() == 0 ) return nullptr;
 
     return mVertexList.front();
+}
+
+void
+FOdysseyVectorPath::InvalidateAllVertices()
+{
+    for( FOdysseyVectorVertex* vertex : mVertexList )
+    {
+        vertex->Invalidate();
+    }
 }
 
 void
@@ -1104,6 +1152,9 @@ FOdysseyVectorPath::Subdivide( std::vector<FOdysseyVectorVertex*>& oAddedVertexA
                              , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                              , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray )
 {
+    uint32 addedVertexArrayCount = oAddedVertexArray.size();
+    uint32 addedSegmentArrayCount = oAddedSegmentArray.size();
+
     oRemovedSegmentArray.reserve( oRemovedSegmentArray.capacity() + mSegmentList.size() );
 
     for( FOdysseyVectorSegment* segment : mSegmentList )
@@ -1117,14 +1168,14 @@ FOdysseyVectorPath::Subdivide( std::vector<FOdysseyVectorVertex*>& oAddedVertexA
 
     RemoveAllSegments();
 
-    for( FOdysseyVectorVertex* newVertex : oAddedVertexArray )
+    for( uint32 i = addedVertexArrayCount; i < oAddedVertexArray.size(); i++ )
     {
-        AddVertex( newVertex );
+        AddVertex( oAddedVertexArray[i] );
     }
 
-    for( FOdysseyVectorSegment* newSegment : oAddedSegmentArray )
+    for( uint32 i = addedSegmentArrayCount; i < oAddedSegmentArray.size(); i++  )
     {
-        AddSegment( newSegment );
+        AddSegment( oAddedSegmentArray[i] );
     }
 }
 
@@ -1646,11 +1697,11 @@ FOdysseyVectorPath::DeleteVertex( FOdysseyVectorPath* iPath
 }
 
 void
-FOdysseyVectorPath::AlterRadius( double iDeltaRadius )
+FOdysseyVectorPath::AlterRadius( double iRatioRadius )
 {
     for( FOdysseyVectorVertex* vertex : mVertexList )
     {
-        vertex->SetRadius( vertex->GetRadius() + iDeltaRadius );
+        vertex->SetRadius( vertex->GetRadius() * iRatioRadius );
     }
 }
 
@@ -2515,9 +2566,6 @@ FOdysseyVectorPath::UpdateChain( FOdysseyVectorChain* iChain )
         if ( ry1 < ymin ) ymin = ry1;
         if ( rx2 > xmax ) xmax = rx2;
         if ( ry2 > ymax ) ymax = ry2;
-
-        // update joint
-        vertex->MakeJoint( prevSegment, segment );
 
         iChain->mLength += segment->GetLength() + vertex->GetJointLength();
 

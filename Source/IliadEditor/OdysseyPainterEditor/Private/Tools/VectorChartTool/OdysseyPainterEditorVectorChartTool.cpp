@@ -457,9 +457,9 @@ UOdysseyPainterEditorVectorChartTool::CreateTopTabWidget()
     FSinglePropertyParams defaultPropertyParams;
 
     const TSharedPtr<ISinglePropertyView> EditionModeView = propertyEditorModule.CreateSingleProperty( this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorChartTool, EditionMode ), defaultPropertyParams);
-    //const TSharedPtr<ISinglePropertyView> YDivPropertyView = propertyEditorModule.CreateSingleProperty(this, "DivisionsY", defaultPropertyParams);
+    const TSharedPtr<ISinglePropertyView> ChartTypePropertyView = propertyEditorModule.CreateSingleProperty(this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorChartTool, ChartType ), defaultPropertyParams);
     TSharedPtr<class IPropertyHandle> EditionModeHandle = EditionModeView->GetPropertyHandle();
-    //TSharedPtr<class IPropertyHandle> YDivHandle = YDivPropertyView->GetPropertyHandle();
+    TSharedPtr<class IPropertyHandle> ChartTypeHandle = ChartTypePropertyView->GetPropertyHandle();
 
     return SNew(SUniformWrapPanel)
         .SlotPadding(FVector2D(3.f, 0.f))
@@ -474,12 +474,11 @@ UOdysseyPainterEditorVectorChartTool::CreateTopTabWidget()
         [
             CreatePropertyWidget(EditionModeHandle, EditionModeView).ToSharedRef()
         ]
-/*
+
         + SUniformWrapPanel::Slot()
         [
-            CreatePropertyWidget(YDivHandle, YDivPropertyView).ToSharedRef()
-        ]
-*/;
+            CreatePropertyWidget(ChartTypeHandle, ChartTypePropertyView).ToSharedRef()
+        ];
 }
 
 FText

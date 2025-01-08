@@ -326,6 +326,10 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
     uint64 hudFlags = mChartTool->GetEditor()->GetVectorHUDFlags();
     uint32 cellIndex = iScene->GetEngine()->GetCell()->GetIndex();
 
+    iBLContext->save();
+    // do not add-up colors
+    iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
+
     // Draw default
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.
@@ -347,7 +351,7 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
                          , BLRgba32( 255, 127, 127, 255 )
                          , HUD_BREAKDOWN_SOURCE
                          | HUD_BREAKDOWN_INBETWEEN
-                         | HUD_INBETWEEN_FADEFROMTARGET
+                         //| HUD_INBETWEEN_FADEFROMTARGET
                          | HUD_BREAKDOWN_TARGET );
 
             if( mChartTool->ChartType == eChartType::Full )
@@ -377,6 +381,8 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
            breakdown->GetInbetweenerTag()->UnlockDrawing();
         }
     }
+
+    iBLContext->restore();
 }
 
 FInbetweenerChart::Inbetween*

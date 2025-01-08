@@ -78,9 +78,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdy
         UPROPERTY( EditAnywhere
                  , Category=GridTool
                  , meta = ( ToolTip  = "Picking Radius"
-                          , ClampMin = "0.0"
-                          , UIMin    = "0.0" ) )
-        double PickingRadius;
+                          , ClampMin = "0"
+                          , UIMin    = "0" ) )
+        uint32 PickingRadius;
 
         UPROPERTY( EditAnywhere
                  , Category=GridTool

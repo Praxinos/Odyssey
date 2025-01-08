@@ -34,6 +34,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : publi
         virtual bool IsActivable() const override;
 
         virtual FText GetTooltip() const override;
+        virtual TSharedRef<SWidget> CreateTopTabWidget();
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
@@ -70,9 +71,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : publi
         UPROPERTY( EditAnywhere
                  , Category=PathSmoothTool
                  , meta = ( ToolTip  = "Picking Radius"
-                          , ClampMin = "0.0"
-                          , UIMin    = "0.0" ) )
-        double PickingRadius;
+                          , ClampMin = "0"
+                          , UIMin    = "0" ) )
+        uint32 PickingRadius;
 
         UPROPERTY( EditAnywhere
                  , Category=PathSmoothTool

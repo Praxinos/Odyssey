@@ -100,6 +100,11 @@ FOdysseyVectorSegmentCubic::Init( FOdysseyVectorVertex* iPoint0
     iPoint0->SetLocked( lockStatus[0] );
     iPoint1->SetLocked( lockStatus[1] );
 
+    mBBox.x = ::ULIS::FMath::Min4( iPoint0->GetX(), iCtrlPoint0x, iCtrlPoint1x, iPoint1->GetX() );
+    mBBox.y = ::ULIS::FMath::Min4( iPoint0->GetY(), iCtrlPoint0y, iCtrlPoint1y, iPoint1->GetY() );
+    mBBox.w = ::ULIS::FMath::Max4( iPoint0->GetX(), iCtrlPoint0x, iCtrlPoint1x, iPoint1->GetX() ) - mBBox.x;
+    mBBox.h = ::ULIS::FMath::Max4( iPoint0->GetY(), iCtrlPoint0y, iCtrlPoint1y, iPoint1->GetY() ) - mBBox.y;
+
     Invalidate();
 }
 
@@ -1253,7 +1258,10 @@ FOdysseyVectorSegmentCubic::BuildOffsetCurves()
 void
 FOdysseyVectorSegmentCubic::Update( uint32 iUpdateFlags )
 {
+    FOdysseyVectorEngine* engine = mOwner->GetEngine();
+    ::ULIS::FRectD previousBBox = mBBox;
     double xmin, ymin, xmax, ymax;
+
 
     FOdysseyVectorSegment::Update( iUpdateFlags );
 
@@ -1294,12 +1302,11 @@ FOdysseyVectorSegmentCubic::Update( uint32 iUpdateFlags )
 
     mBBox = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
 
-    mBBox = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
-    mBBox = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
-    mBBox = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
-    mBBox = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
-
-//UE_LOG(LogTemp, Warning, TEXT("Hello World %f %f %f %f"), mBBox.x, mBBox.y, mBBox.w, mBBox.h );
+    // auto invalidation of the region that needs to be redrawn
+    if( engine )
+    {
+        engine->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), ( previousBBox | mBBox ) ) );
+    }
 }
 
 static bool IntersectSegment( const ::ULIS::FVec2D& iLine0p0

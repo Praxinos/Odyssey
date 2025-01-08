@@ -480,6 +480,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
                                       | FOdysseyVectorObject::UPDATE_INTERACTIVE
                                       | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated path after segment insertion
 
+/*
         if( newSegment )
         {
             vectorEngine->InvalidateRect( newSegment->GetBoundingBox( true ) );
@@ -491,6 +492,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
                 vectorEngine->InvalidateRect( prevSegment->GetBoundingBox( true ) );
             }
         }
+*/
 
         // Request render after last redraw - commented out
         //if( vectorEngine->GetInvalidationFlags() == 0 )

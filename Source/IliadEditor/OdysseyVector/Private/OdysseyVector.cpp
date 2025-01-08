@@ -58,6 +58,22 @@ FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix
 }
 */
 
+::ULIS::FRectD
+FOdysseyVector::MapRect( const BLMatrix2D& iMatrix
+                       , const ::ULIS::FRectD& iRect )
+{
+    BLPoint p0 = iMatrix.mapPoint( iRect.x          , iRect.y           );
+    BLPoint p1 = iMatrix.mapPoint( iRect.x + iRect.w, iRect.y           );
+    BLPoint p2 = iMatrix.mapPoint( iRect.x + iRect.w, iRect.y + iRect.h );
+    BLPoint p3 = iMatrix.mapPoint( iRect.x          , iRect.y + iRect.h );
+    ::ULIS::FRectD bbox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
+                                                    , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                                    , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                                    , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
+
+    return bbox;
+}
+
 // https://drafts.csswg.org/css-transforms/#decomposing-a-2d-matrix
 void
 FOdysseyVector::ExtractTransformations( BLMatrix2D &iMatrix

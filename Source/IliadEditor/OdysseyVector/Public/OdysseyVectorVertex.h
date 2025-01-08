@@ -272,11 +272,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
                                             , uint32 iSectionVertexIndex );
 
         /**
-         * @brief Mark all connected segments for update.
-         */
-        void InvalidateSegments();
-
-        /**
          * @brief Is vertex selected ?
          * @return true if selected, false otherwise
          */
@@ -408,6 +403,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         FOdysseyVectorSection* GetFirstSection();
         FSectionLinkInfo* GetSectionLinkInfo( FOdysseyVectorSegment* iSegment );
 
+        bool IsInvalidated();
+        void Invalidate();
+        void Update( FOdysseyVectorSegment* iPrevSegment, FOdysseyVectorSegment* iSegment );
+
     protected:
         /**
          * @brief Set the vertex coordinate in the X-Axis and Y-axis. It invalidates the attached segments.
@@ -415,6 +414,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @param iY the desired coordinate in the Y-axis.
          */
         virtual void SetCoords( double iX, double iY ) override;
+
+        /**
+         * @brief Mark all connected segments for update.
+         */
+        void InvalidateSegments();
 
     protected:
         FOdysseyVectorJoint mJoint;
@@ -442,4 +446,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
         static const uint32 SELECTED       = ( 1 << 3 );
         static const uint32 HANDLE_ALIGNED = ( 1 << 4 );
         static const uint32 LOCKED         = ( 1 << 5 );
+        static const uint32 INVALIDATED    = ( 1 << 6 );
 };

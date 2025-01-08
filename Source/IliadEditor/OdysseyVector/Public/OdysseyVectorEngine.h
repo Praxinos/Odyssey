@@ -328,6 +328,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
         FOdysseyVectorRoot* GetRoot();
 
         std::mutex& GetDrawingMutex();
+        void InvalidateRect();
+
 
 /*
        uint64 GetDrawingFlags();

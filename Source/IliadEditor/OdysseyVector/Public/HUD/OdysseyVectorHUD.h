@@ -128,22 +128,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                                                      , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                      , FInterpolatedPath* iInterpolatedPath
                                                      , FInbetweenerChart::Inbetween* iInbetween );
-/*
-        static void DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
-                                 , BLContext* iBLContext
-                                 , FInbetweenerBreakdown* iBreakdown
-                                 , const BLRgba32& fgColor
-                                 , const BLRgba32& bgColor
-                                 , const BLRgba32& hcColor
-                                 , bool iWorld
-                                 , uint64 iHUDFlags  );
-*/
+
         static void DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
                                  , BLContext* iBLContext
                                  , FInbetweenerBreakdown* iBreakdown
                                  , const BLRgba32& iSourceDrawingColor
                                  , const BLRgba32& iTargetDrawingColor
                                  , uint64 iHUDFlags );
+
         static void DrawGrid( BLContext* iBLContext
                             , FInbetweenerGrid* iGrid
                             , eInbetweenerPointPositionType iPositionType

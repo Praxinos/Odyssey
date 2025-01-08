@@ -452,6 +452,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
          * @param iVertex the vertex to unselect
          */
         void UnselectVertex( FOdysseyVectorVertex* iVertex );
+        void InvalidateAllVertices();
 
         FOdysseyVectorVertex* GetVertexByID( uint32 iID );
         FOdysseyVectorSegment* GetSegmentByID( uint32 iID );

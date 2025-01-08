@@ -572,26 +572,31 @@ FOdysseyVectorHUD::DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
     if( iHUDFlags & HUD_BREAKDOWN_INBETWEEN )
     {
         iBLContext->setStrokeWidth( 2.0f );
-        int32 sourceInbetweenIndex = iBreakdown->GetSourceDrawingIndex();
-        int32 targetInbetweenIndex = iBreakdown->GetTargetDrawingIndex();
+        int32 sourceDrawingIndex = iBreakdown->GetSourceDrawingIndex();
+        int32 targetDrawingIndex = iBreakdown->GetTargetDrawingIndex();
+        double sourceDrawingSpacing = (double) sourceDrawingIndex / inbetweenerTag->GetDrawingBuffer().size();
+        double targetDrawingSpacing = (double) targetDrawingIndex / inbetweenerTag->GetDrawingBuffer().size();
 
         for( uint32 i = 1; i < iBreakdown->GetDrawingCount() - 1; i++ )
         {
             FInbetweenerChart::Inbetween* inbetween = &iBreakdown->GetChart()->GetInbetweenBuffer()[i];
+            uint32 drawingIndex = inbetween->GetDrawing()->GetIndex();
             double opacity = ( double ) inbetweenColor.A / 255;
+            double spacing = ( iHUDFlags & HUD_INBETWEEN_FADERELATIVE ) ? inbetween->GetSpacing()
+                                                                        : sourceDrawingSpacing + ( ( targetDrawingSpacing - sourceDrawingSpacing ) * inbetween->GetSpacing() );
             uint8 alpha = 255;
 
-            if( iHUDFlags & HUD_INBETWEEN_FADEFROMTARGET )
-                alpha = (       ( inbetween->GetSpacing() * 255 ) ) * opacity;
+            //if( iHUDFlags & HUD_INBETWEEN_FADEFROMTARGET )
+                alpha = (       ( spacing * 255 ) ) * opacity;
 
-            if( iHUDFlags & HUD_INBETWEEN_FADEFROMSOURCE )
-                alpha = ( 255 - ( inbetween->GetSpacing() * 255 ) ) * opacity;
+            //if( iHUDFlags & HUD_INBETWEEN_FADEFROMSOURCE )
+            //    alpha = ( 255 - ( spacing * 255 ) ) * opacity;
 
             iBLContext->setStrokeWidth( 4.0f );
             iBLContext->setStrokeStyle( BLRgba32( inbetweenColor.R
                                                 , inbetweenColor.G
                                                 , inbetweenColor.B
-                                                , alpha ) );
+                                                , 0.25f + ( 0.75f * alpha ) ) ); // minimum alpha is 0.25f
 
             for( FInterpolatedPath& interpolatedPath : inbetweenerTag->GetInterpolatedPathBuffer() )
             {

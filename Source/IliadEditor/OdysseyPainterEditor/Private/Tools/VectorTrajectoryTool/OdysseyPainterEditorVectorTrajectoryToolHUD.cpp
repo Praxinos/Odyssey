@@ -432,7 +432,10 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::DrawTrajectory( BLContext* iBLCont
         BLPoint p1World = ownerWorldMatrix.mapPoint( cubicBezier[1].x, cubicBezier[1].y );
         BLPoint p2World = ownerWorldMatrix.mapPoint( cubicBezier[2].x, cubicBezier[2].y );
 
-        DrawQuad( iBLContext, iFgColor, iBgColor, iHcColor, quad );
+        if( iTrajectory->GetBreakdown()->GetIndex() == 0 )
+        {
+            DrawQuad( iBLContext, iFgColor, iBgColor, iHcColor, quad );
+        }
 
         path.moveTo( p0World.x, p0World.y );
         path.cubicTo( p1World.x, p1World.y
@@ -509,6 +512,10 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
     gridFlags |= ( mTrajectoryTool->GridDisplayMode == eTrajectoryGridDisplayMode::AsPoints ) ?  HUD_BREAKDOWN_GRID_DOTTED : 0;
     gridFlags |= ( mTrajectoryTool->EditionMode == eTrajectoryEditionMode::Add ) ? HUD_BREAKDOWN_SOURCE_GRID : 0;
 
+    iBLContext->save();
+    // do not add-up colors
+    iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
+
     // Draw default
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.
@@ -541,7 +548,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
                                                     , breakdown
                                                     , BLRgba32( 127, 127, 127, 255 )
                                                     , BLRgba32( 255, 127, 127, 255 )
-                                                    , HUD_BREAKDOWN_INBETWEEN | HUD_INBETWEEN_FADEFROMTARGET );
+                                                    , HUD_BREAKDOWN_INBETWEEN /*| HUD_INBETWEEN_FADEFROMTARGET*/ );
 
                     if( nextBreakdown )
                     {
@@ -550,7 +557,7 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
                                                         , nextBreakdown
                                                         , BLRgba32( 127, 127, 127, 255 )
                                                         , BLRgba32( 255, 127, 127, 255 )
-                                                        , HUD_BREAKDOWN_INBETWEEN | HUD_INBETWEEN_FADEFROMSOURCE );
+                                                        , HUD_BREAKDOWN_INBETWEEN /*| HUD_INBETWEEN_FADEFROMSOURCE*/ );
                     }
                 }
 
@@ -595,4 +602,6 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::Draw( BLContext* iBLContext
             mTrajectoryTool->ResetHoveredQuad();
         }
     }
+
+    iBLContext->restore();
 }

@@ -1022,6 +1022,12 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
     if( engine )
         engine->GetDrawingMutex().unlock();
 
+    // auto invalidation of the whole region that needs to be redrawn
+    if( engine )
+    {
+        engine->InvalidateRect();
+    }
+
     return ret;
 }
 
@@ -1064,6 +1070,12 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 
     if( engine )
         engine->GetDrawingMutex().unlock();
+
+    // auto invalidation of the whole region that needs to be redrawn
+    if( engine )
+    {
+        engine->InvalidateRect();
+    }
 
     return ret;
 }
