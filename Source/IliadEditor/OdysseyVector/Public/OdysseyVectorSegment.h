@@ -205,8 +205,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         virtual FOdysseyVectorHandleSegment* GetHandle( FOdysseyVectorVertex* iVertex );
         virtual FOdysseyVectorHandleSegment* GetHandle( int iCtrlPointNum );
 
-        void SetPaintingReady( bool iIsPaintingReady );
-        bool IsPaintingReady();
+        //void SetPaintingReady( bool iIsPaintingReady );
+        //bool IsPaintingReady();
 
         virtual bool Pick( const ::ULIS::FRectD& iMaskRect, uint8* iPixelData ) = 0;
         virtual bool Pick( double iX, double iY, double iRadius ) = 0;
@@ -252,7 +252,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         ::ULIS::FRectD mBBox;
         ::ULIS::FRectD mBBoxInParent;
         bool mIsInvalidated;
-        bool mIsPaintingReady;
+        //bool mIsPaintingReady;
         uint32 mID;
         uint32 mPaintingCode; // used by group paint as a boolean without needing to reinitialize its value
         double mLength;

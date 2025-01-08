@@ -142,25 +142,15 @@ FOdysseyVectorPath::SetBrush( const FOdysseyVectorBrush& iBrush )
 
     mBrush = iBrush;
 
-    // auto invalidation of the region that needs to be redrawn
-    if( engine )
-    {
-        engine->InvalidateRect( GetBBox( true ) );
-    }
+    Invalidate( INVALIDATE_COLOR );
 }
 
 void
 FOdysseyVectorPath::SetFilled( bool iIsFilled )
 {
-    FOdysseyVectorEngine* engine = GetEngine();
-
     bFilled = iIsFilled;
 
-    // auto invalidation of the region that needs to be redrawn
-    if( engine )
-    {
-        engine->InvalidateRect( GetBBox( true ) );
-    }
+    Invalidate( INVALIDATE_COLOR );
 }
 
 eJointType
@@ -629,10 +619,11 @@ FOdysseyVectorPath::Invalidate( uint64 iInvalidationFlags )
     //{
         // Mark all segment as NOT painting ready to force recalculation of cached subsegments
         // use by the parent paint group
-        for( FOdysseyVectorSegment* segment : mSegmentList )
-        {
-            segment->SetPaintingReady( false );
-        }
+        // commented-out: causes issues when the path dores not directly belong to a paintgroup (belongs to a subgroup e.g)
+        //for( FOdysseyVectorSegment* segment : mSegmentList )
+        //{
+        //    segment->SetPaintingReady( false );
+        //}
     //}
 
     FOdysseyVectorObject::Invalidate( iInvalidationFlags );

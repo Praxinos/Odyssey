@@ -122,6 +122,8 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnKeyUpGlobalVector( FOdysseyVectorG
 {
     FKey key = InKeyEvent.GetKey();
 
+    mShowControls = false;
+
     if ( ( key == EKeys::LeftControl ) || ( key == EKeys::RightControl )
       || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand ) )
     {
@@ -130,8 +132,6 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnKeyUpGlobalVector( FOdysseyVectorG
 
         return true;
     }
-
-    mShowControls = false;
 
     return false;
 }

@@ -201,13 +201,21 @@ FOdysseyVectorEngine::InvalidateRect()
 void
 FOdysseyVectorEngine::InvalidateRect( const ::ULIS::FRectD& iRect )
 {
+    ::ULIS::FRectD extendedRect = iRect;
+
+    // extended the rectangle a bit in order to be sure to invalidate the borders
+    extendedRect.x -= 2;
+    extendedRect.y -= 2;
+    extendedRect.w += 4;
+    extendedRect.h += 4;
+
     if( mInvalidatedRect.Area() == 0.0f )
     {
-        mInvalidatedRect = iRect;
+        mInvalidatedRect = extendedRect;
     }
     else // combine the rectangles
     {
-        mInvalidatedRect = mInvalidatedRect | iRect;
+        mInvalidatedRect = mInvalidatedRect | extendedRect;
     }
 }
 

@@ -16,7 +16,7 @@ FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorObject* iOwner
     : FOdysseyVectorLink( iVertex0, iVertex1 )
     , mOwner( iOwner )
     , mIsInvalidated( false )
-    , mIsPaintingReady( false )
+    //, mIsPaintingReady( false )
     , mPaintingCode( 0 )
     , mLength( 0.0f )
     , mIntersectionSlotCount( 0 )
@@ -361,7 +361,7 @@ FOdysseyVectorSegment::Invalidate()
 
         mIsInvalidated = true;
 
-        mIsPaintingReady = false;
+        //mIsPaintingReady = false;
     }
 }
 
@@ -406,6 +406,7 @@ FOdysseyVectorSegment::HasBaseClass( uint32 iBaseClassID )
     return false;
 }
 
+/*
 void
 FOdysseyVectorSegment::SetPaintingReady( bool iIsPaintingReady )
 {
@@ -417,6 +418,7 @@ FOdysseyVectorSegment::IsPaintingReady()
 {
     return mIsPaintingReady;
 }
+*/
 
 ::ULIS::FVec2D
 FOdysseyVectorSegment::GetOffsetPoint( uint32 iSide, double iT )

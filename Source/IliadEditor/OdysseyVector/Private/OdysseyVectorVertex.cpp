@@ -693,7 +693,8 @@ FOdysseyVectorVertex::SetCoords( double iX, double iY )
     {
         FOdysseyVectorPoint::SetCoords( iX, iY );
 
-        mJoint.ResetBBox();
+        // commented-out: untouched former bbox is needed to update the correct region of the screen
+        //mJoint.ResetBBox();
 
         Invalidate();
     }

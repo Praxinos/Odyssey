@@ -138,8 +138,6 @@ FOdysseyVectorBrush::Lock()
 
             bufferSize = width * height * sizeof FColor;
 
-
-
             switch( pixelFormat )
             {
                 case PF_B8G8R8A8:

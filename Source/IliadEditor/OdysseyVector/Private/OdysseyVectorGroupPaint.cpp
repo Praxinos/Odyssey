@@ -950,6 +950,7 @@ FOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
 void
 FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 {
+    FOdysseyVectorEngine* engine = GetEngine();
     BLMatrix2D identityMatrix = BLMatrix2D( BLMatrix2D::makeIdentity() );
 
     if( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY )
@@ -996,7 +997,7 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 
                     for( FOdysseyVectorSegment* segment : segmentList )
                     {
-                        if( segment->IsPaintingReady() == false )
+                        //if( segment->IsPaintingReady() == false )
                         {
                             if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
                             {
@@ -1030,7 +1031,7 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
                                 // Note: bbox could be computed from the above polygon processing thing
                                 SetSegmentBBox( segment, conversionMatrix );
 
-                                segment->SetPaintingReady( true );
+                                //segment->SetPaintingReady( true );
                             }
                         }
                     } //);

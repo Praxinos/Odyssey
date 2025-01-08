@@ -6,6 +6,7 @@
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorIntersection.h"
 #include "OdysseyVectorPath.h"
+#include "OdysseyVector.h"
 #include "OdysseyVectorBucket.h"
 #include "OdysseyVectorEngine.h"
 // for measurements
@@ -17,6 +18,13 @@
 
 FOdysseyVectorCycle::~FOdysseyVectorCycle()
 {
+    FOdysseyVectorEngine* engine = mOwner->GetEngine();
+
+    // auto invalidation of the region that needs to be redrawn
+    if( engine )
+    {
+        engine->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), mBBox ) );
+    }
 }
 
 //static
@@ -31,7 +39,15 @@ FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject* iOwner
     , mParentCycle( nullptr )
     , mPropagated( false )
 {
+    FOdysseyVectorEngine* engine = mOwner->GetEngine();
+
     Build( );
+
+    // auto invalidation of the region that needs to be redrawn
+    if( engine )
+    {
+        engine->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), mBBox ) );
+    }
 }
 
 void
@@ -172,7 +188,6 @@ void
 FOdysseyVectorCycle::Build( /*std::vector<FOdysseyVectorVertex*>& iVertexArray
                           , std::vector<FOdysseyVectorSection*>& iSectionArray*/ )
 {
-    FOdysseyVectorEngine* engine = mOwner->GetEngine();
     int32 arraySize = mContourSectionArray.size();
     int seg = 0;
     BLBox bbox;
@@ -220,12 +235,6 @@ FOdysseyVectorCycle::Build( /*std::vector<FOdysseyVectorVertex*>& iVertexArray
     mContourPath.getBoundingBox( &bbox );
 
     mBBox = ::ULIS::FRectD::FromMinMax( bbox.x0, bbox.y0, bbox.x1, bbox.y1 );
-
-    // auto invalidation of the region that needs to be redrawn
-    if( engine )
-    {
-        engine->InvalidateRect( mBBox );
-    }
 }
 
 void
