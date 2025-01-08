@@ -181,8 +181,11 @@ private:
 public:
     friend class SOdysseyPainterEditorRasterDrawingToolBrushSelector;
 
-protected:
-    //Visible properties
+private:
+    UFUNCTION(BlueprintSetter)
+    void SubPixelBlueprintSetter(bool Value);
+
+public:
     UPROPERTY(meta=(ForceShowEngineContent, ForceShowPluginContent))
     UOdysseyBrush* Brush;
 
@@ -192,11 +195,6 @@ protected:
     UPROPERTY()
     UOdysseyBrushOptions* BrushOptions;
 
-private:
-    UFUNCTION(BlueprintSetter)
-    void SubPixelBlueprintSetter(bool Value);
-
-public:
     UPROPERTY(EditAnywhere, Category="Shape")
     FOdysseyShapes Shapes;
 

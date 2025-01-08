@@ -8,7 +8,9 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "Widgets/Tools/SOdysseyPainterEditorToolsTileView.h"
 #include "Widgets/Views/STileView.h"
+#include "Widgets/Tools/SOdysseyPainterEditorToolOptions.h"
 #include "Models/OdysseyPainterEditorCommands.h"
+#include "Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolBrushSelector.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -72,9 +74,36 @@ FOdysseyPainterEditorToolsTab::CreateWidget()
 
     tools = tools.FilterByPredicate([](UOdysseyPainterEditorTool* iTool){return !!iTool;});
 
-    return SNew( SOdysseyPainterEditorToolsTileView )
-        .Tools(tools)
-        .OnToolSelected(this, &FOdysseyPainterEditorToolsTab::OnToolSelected);
+    return SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
+        [
+            SNew(SVerticalBox)
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            [
+                SNew(SOdysseyPainterEditorRasterDrawingToolBrushSelector)
+                .Visibility_Lambda(
+                    [this]()
+                    {
+                        return mEditor->GetCurrentTool() == mEditor->GetRasterDrawingTool() ? EVisibility::Visible : EVisibility::Collapsed;
+                    }
+                )
+                .Tool(mEditor->GetRasterDrawingTool())
+            ]
+            + SVerticalBox::Slot()
+            [
+                SNew(SOdysseyPainterEditorToolOptions)
+                .Tool_Raw(this, &FOdysseyPainterEditorToolsTab::GetCurrentTool)
+            ]
+        ]
+
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+            SNew( SOdysseyPainterEditorToolsTileView )
+            .Tools(tools)
+            .OnToolSelected(this, &FOdysseyPainterEditorToolsTab::OnToolSelected)
+        ];
 }
 
 void
@@ -90,6 +119,12 @@ FOdysseyPainterEditorToolsTab::BindShortcuts(FBaseToolkit* iToolkit)
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------------------- Widget Getters
+
+UOdysseyPainterEditorTool*
+FOdysseyPainterEditorToolsTab::GetCurrentTool() const
+{
+    return mEditor->GetCurrentTool();
+}
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners

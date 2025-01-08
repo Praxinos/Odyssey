@@ -34,8 +34,13 @@ private:
     void OnBrushSelected(UOdysseyBrush* iBrush);
     void OnToolBrushChanged();
 
+    FReply OnExpanderArrowClicked();
+    const FSlateBrush* GetExpanderArrowImage() const;
+
 private:
     // Private data members
     UOdysseyPainterEditorRasterDrawingTool*                mTool;
     TSharedPtr<IDetailsView> mDetailsView;
+    TSharedPtr<SButton> mExpanderArrow;
+    bool mIsExpanded;
 };
