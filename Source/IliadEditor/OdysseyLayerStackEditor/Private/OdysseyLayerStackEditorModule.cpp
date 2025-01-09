@@ -26,4 +26,4 @@ void FOdysseyLayerStackEditorModule::UnregisterCommands()
     FOdysseyLayerStackEditorCommands::Unregister();
 }
 
-IMPLEMENT_MODULE(FOdysseyLayerStackEditorModule, OdysseyLayerStackEditorModule);
+IMPLEMENT_MODULE(FOdysseyLayerStackEditorModule, OdysseyLayerStackEditor);
