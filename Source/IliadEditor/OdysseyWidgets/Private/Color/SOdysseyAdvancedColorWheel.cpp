@@ -155,6 +155,35 @@ void SOdysseyAdvancedColorWheel::Construct(const FArguments& InArgs)
     // SetColor( start_color );
 }
 
+FVector2D
+SOdysseyAdvancedColorWheel::ComputeDesiredSize( float iScale ) const
+{
+    FVector2D result = SOdysseyLeafWidget::ComputeDesiredSize( iScale );
+
+    result.X = FMath::Max(ExternalSize.X, result.X);
+
+    const FOptionalSize CurrentMinDesiredWidth = MinDesiredWidth.Get();
+    const FOptionalSize CurrentMaxDesiredWidth = MaxDesiredWidth.Get();
+
+    if( CurrentMinDesiredWidth.IsSet() )
+        result.X = FMath::Max( result.X, CurrentMinDesiredWidth.Get() );
+
+    if( CurrentMaxDesiredWidth.IsSet() )
+        result.X = FMath::Min( result.X, CurrentMaxDesiredWidth.Get() );
+
+    result.Y = result.X;
+
+    const FOptionalSize CurrentMinDesiredHeight = MinDesiredHeight.Get();
+    const FOptionalSize CurrentMaxDesiredHeight = MaxDesiredHeight.Get();
+
+    if( CurrentMinDesiredHeight.IsSet() )
+        result.Y = FMath::Max( result.Y, CurrentMinDesiredHeight.Get() );
+
+    if( CurrentMaxDesiredHeight.IsSet() )
+        result.Y = FMath::Min( result.Y, CurrentMaxDesiredHeight.Get() );
+
+    return result;
+}
 
 //--------------------------------------------------------------------------------------
 //------------------------------------------------------------------ Public Callback API
@@ -348,8 +377,8 @@ SOdysseyAdvancedColorWheel::OnResizeEvent( const FVector2D& iNewSize ) const
     tSuperClass::OnResizeEvent( iNewSize );
     // Ensure aspect ratio on minimal size
     float minsize = FMath::Min( InternalSize.X, InternalSize.Y );
-    InternalSize.X = minsize;
-    InternalSize.Y = minsize;
+    InternalSize.X = FMath::Max(1.f, minsize);
+    InternalSize.Y = FMath::Max(1.f, minsize);
     UpdateGeometry();
 }
 

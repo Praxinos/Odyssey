@@ -27,6 +27,7 @@ void
 SOdysseyPainterEditorRasterDrawingToolBrushSelector::Construct( const FArguments& InArgs )
 {
     mIsExpanded = true;
+
     mTool = InArgs._Tool;
     mTool->OnBrushChanged().AddRaw(this, &SOdysseyPainterEditorRasterDrawingToolBrushSelector::OnToolBrushChanged);
 

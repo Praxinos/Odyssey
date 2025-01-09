@@ -11,6 +11,7 @@
 #include "OdysseyPainterEditorColorPaletteTab.h"
 #include "OdysseyPainterEditorColorSlidersTab.h"
 #include "OdysseyPainterEditorColorWheelTab.h"
+#include "OdysseyPainterEditorColorSelectorTab.h"
 #include "OdysseyPainterEditorMeshSelectorTab.h"
 #include "OdysseyPainterEditorTopTab.h"
 #include "OdysseyPainterEditorToolsTab.h"
@@ -62,7 +63,7 @@ FOdysseyPainterEditorGUI::ExtendLevelEditorLayout(FLayoutExtender& Extender)
 
     //Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorPaletteTab::StaticId(), ETabState::ClosedTab));
     //Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorColorSlidersTab::StaticId(), ETabState::ClosedTab));
-    Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorColorWheelTab::StaticId(), ETabState::ClosedTab));
+    Extender.ExtendLayout(FTabId(TEXT("LevelEditorSceneOutliner")), ELayoutExtensionPosition::Below, FTabManager::FTab(FOdysseyPainterEditorColorSelectorTab::StaticId(), ETabState::ClosedTab));
 }
 
 void
@@ -72,13 +73,14 @@ FOdysseyPainterEditorGUI::CreateTabs()
     TSharedRef<FOdysseyPainterEditorPaletteTab> paletteTab = MakeShared<FOdysseyPainterEditorPaletteTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorViewportTab> viewportTab = MakeShared<FOdysseyPainterEditorViewportTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorColorWheelTab> colorWheelTab = MakeShared<FOdysseyPainterEditorColorWheelTab>(mEditor);
+    TSharedRef<FOdysseyPainterEditorColorSelectorTab> colorSelectorTab = MakeShared<FOdysseyPainterEditorColorSelectorTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorColorSlidersTab> colorSlidersTab = MakeShared<FOdysseyPainterEditorColorSlidersTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorToolsTab> toolsTab = MakeShared<FOdysseyPainterEditorToolsTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorTopTab> topTab = MakeShared<FOdysseyPainterEditorTopTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = MakeShared<FOdysseyPainterEditorVectorSceneTreeViewTab>(mEditor);
 
     //Used for the viewport drawing editor to know which tab to open by default
-    colorWheelTab->ShouldOpenByDefault(true);
+    colorSelectorTab->ShouldOpenByDefault(true);
     toolsTab->ShouldOpenByDefault(true);
 
     mEditor->AddTab(toolsTab);
@@ -87,6 +89,7 @@ FOdysseyPainterEditorGUI::CreateTabs()
     mEditor->AddTab(paletteTab);
     mEditor->AddTab(viewportTab);
     mEditor->AddTab(colorWheelTab);
+    mEditor->AddTab(colorSelectorTab);
     mEditor->AddTab(colorSlidersTab);
     mEditor->AddTab(topTab);
     mEditor->AddTab(vectorSceneTreeViewTab);
@@ -211,15 +214,10 @@ FOdysseyPainterEditorGUI::CreateRightSection(FOdysseyEditorLayoutBuilder& iBuild
 {
     TSharedRef<FTabManager::FSplitter> rightSplitter = iBuilder.GetSplitter("RightSplitter");
 
-    TSharedRef<FTabManager::FStack> colorWheelStack = iBuilder.CreateStack("ColorWheelStack");
-    colorWheelStack->SetHideTabWell(false);
-    colorWheelStack->SetSizeCoefficient(0.3f);
-    colorWheelStack->AddTab(FOdysseyPainterEditorColorWheelTab::StaticId(), ETabState::OpenedTab);
-
-    TSharedRef<FTabManager::FStack> colorSliderStack = iBuilder.CreateStack("ColorSliderStack");
-    colorSliderStack->SetHideTabWell(false);
-    colorSliderStack->SetSizeCoefficient(0.3f);
-    colorSliderStack->AddTab(FOdysseyPainterEditorColorSlidersTab::StaticId(), ETabState::OpenedTab);
+    TSharedRef<FTabManager::FStack> colorSelectorStack = iBuilder.CreateStack("ColorSelectorStack");
+    colorSelectorStack->SetHideTabWell(false);
+    colorSelectorStack->SetSizeCoefficient(0.3f);
+    colorSelectorStack->AddTab(FOdysseyPainterEditorColorSelectorTab::StaticId(), ETabState::OpenedTab);
 
     TSharedRef<FTabManager::FStack> colorPaletteStack = iBuilder.CreateStack("ColorPaletteStack");
     colorPaletteStack->SetHideTabWell(false);
@@ -228,12 +226,7 @@ FOdysseyPainterEditorGUI::CreateRightSection(FOdysseyEditorLayoutBuilder& iBuild
 
     rightSplitter->Split
     (
-        colorWheelStack
-    );
-
-    rightSplitter->Split
-    (
-        colorSliderStack
+        colorSelectorStack
     );
 
     rightSplitter->Split

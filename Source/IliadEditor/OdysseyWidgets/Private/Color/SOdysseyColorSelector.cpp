@@ -8,6 +8,7 @@
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Brushes/SlateColorBrush.h"
+#include "Color/SOdysseyColorSliders.h"
 
 #define LOCTEXT_NAMESPACE "Widgets"
 
@@ -71,36 +72,140 @@ SOdysseyColorSelector::Construct( const FArguments& InArgs )
 
     ChildSlot
     [
-        SNew( SOverlay )
-        +SOverlay::Slot()
+        SNew( SVerticalBox )
+        +SVerticalBox::Slot()
+        .AutoHeight()
         [
-            SAssignNew( mAdvancedColorWheel, SOdysseyAdvancedColorWheel )
-            .MinDesiredWidth(   150 )
-            .MinDesiredHeight(  150 )
-            .MaxDesiredWidth(   800 )
-            .MaxDesiredHeight(  800 )
-            .Color(mColor)
-            .OnColorChange( mOnColorChangeCallback )
-        ]
-        +SOverlay::Slot()
-        .HAlign( HAlign_Right )
-        .VAlign( VAlign_Bottom )
-        [
-            SNew(SHorizontalBox)
+            SNew( SHorizontalBox )
             + SHorizontalBox::Slot()
+            .AutoWidth()
             [
-                SNullWidget::NullWidget //spacer
+                SAssignNew(mColorWheelExpanderArrow, SButton)
+                .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+                .VAlign(VAlign_Center)
+                .HAlign(HAlign_Center)
+                .ClickMethod( EButtonClickMethod::MouseDown )
+                .OnClicked( this, &SOdysseyColorSelector::OnColorWheelExpanderArrowClicked )
+                .ContentPadding(0.f)
+                .ForegroundColor( FSlateColor::UseForeground() )
+                .IsFocusable( false )
+                [
+                    SNew(SImage)
+                    .Image( this, &SOdysseyColorSelector::GetColorWheelExpanderArrowImage )
+                    .ColorAndOpacity( FSlateColor::UseSubduedForeground() )
+                ]
             ]
             + SHorizontalBox::Slot()
             .AutoWidth()
-            .MaxWidth(90.0f)
             [
-                SNew(SEditableTextBox)
-                .MinDesiredWidth(90.0f)
-                .Text(this, &SOdysseyColorSelector::GetHexText)
-                .OnTextChanged( this, &SOdysseyColorSelector::OnHexTextChanged )
-                .OnTextCommitted( this, &SOdysseyColorSelector::OnHexTextCommitted )
+                SNew(STextBlock)
+                .Text(LOCTEXT( "color-selector.color-wheel.name", "Color Wheel" ))
             ]
+        ]
+        +SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew( SOdysseyAdvancedColorWheel )
+            .Visibility_Lambda(
+                [this]()
+                {
+                    return mIsColorWheelExpanded ? EVisibility::Visible : EVisibility::Collapsed;
+                }
+            )
+            .MinDesiredWidth(   150 )
+            .MinDesiredHeight(  150 )
+            .MaxDesiredWidth(   300 )
+            .MaxDesiredHeight(  300 )
+            .DesiredWidth(   150 )
+            .DesiredHeight(  150 )
+            .Color(mColor)
+            .OnColorChange( mOnColorChangeCallback )
+        ]
+        +SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew( SHorizontalBox )
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                SAssignNew(mColorSlidersExpanderArrow, SButton)
+                .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+                .VAlign(VAlign_Center)
+                .HAlign(HAlign_Center)
+                .ClickMethod( EButtonClickMethod::MouseDown )
+                .OnClicked( this, &SOdysseyColorSelector::OnColorSlidersExpanderArrowClicked )
+                .ContentPadding(0.f)
+                .ForegroundColor( FSlateColor::UseForeground() )
+                .IsFocusable( false )
+                [
+                    SNew(SImage)
+                    .Image( this, &SOdysseyColorSelector::GetColorSlidersExpanderArrowImage )
+                    .ColorAndOpacity( FSlateColor::UseSubduedForeground() )
+                ]
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                SNew(STextBlock)
+                .Text(LOCTEXT( "color-selector.color-sliders.name", "Color Sliders" ))
+            ]
+        ]
+        +SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew( SOdysseyColorSliders )
+            .Visibility_Lambda(
+                [this]()
+                {
+                    return mIsColorSlidersExpanded ? EVisibility::Visible : EVisibility::Collapsed;
+                }
+            )
+            .Color(InArgs._Color)
+            .OnColorChange(InArgs._OnColorChange)
+        ]
+        +SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew( SHorizontalBox )
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                SAssignNew(mHexadecimalExpanderArrow, SButton)
+                .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+                .VAlign(VAlign_Center)
+                .HAlign(HAlign_Center)
+                .ClickMethod( EButtonClickMethod::MouseDown )
+                .OnClicked( this, &SOdysseyColorSelector::OnHexadecimalExpanderArrowClicked )
+                .ContentPadding(0.f)
+                .ForegroundColor( FSlateColor::UseForeground() )
+                .IsFocusable( false )
+                [
+                    SNew(SImage)
+                    .Image( this, &SOdysseyColorSelector::GetHexadecimalExpanderArrowImage )
+                    .ColorAndOpacity( FSlateColor::UseSubduedForeground() )
+                ]
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                SNew(STextBlock)
+                .Text(LOCTEXT( "color-selector.hexadecimal.name", "Hexadecimal" ))
+            ]
+        ]
+        +SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(SEditableTextBox)
+            .Visibility_Lambda(
+                [this]()
+                {
+                    return mIsHexadecimalExpanded ? EVisibility::Visible : EVisibility::Collapsed;
+                }
+            )
+            .MinDesiredWidth(90.0f)
+            .Text(this, &SOdysseyColorSelector::GetHexText)
+            .OnTextChanged( this, &SOdysseyColorSelector::OnHexTextChanged )
+            .OnTextCommitted( this, &SOdysseyColorSelector::OnHexTextCommitted )
         ]
     ];
 }
@@ -166,8 +271,6 @@ SOdysseyColorSelector::HexBoxOnTextCommited( const FText& iText, ETextCommit::Ty
     int b = HexStringToDecimal( str_b );
     ::ULIS::FColor newColor = ::ULIS::FColor::FromRGBA8( r, g, b );
 
-    //mAdvancedColorWheel->SetColor( newColor );
-
     //Set or Abort + start / adjust if needed
 }
 
@@ -219,5 +322,79 @@ void SOdysseyColorSelector::OnHexTextCommitted(const FText& Text, ETextCommit::T
         mOnColorChangeCallback.ExecuteIfBound(eOdysseyEventState::kSet, ulisColor );
     }
 }
+
+const FSlateBrush*
+SOdysseyColorSelector::GetExpanderArrowImage(TSharedPtr<SButton> iExpander, bool iIsExpanded) const
+{
+    FName resourceName;
+    if (iIsExpanded)
+    {
+        if ( iExpander->IsHovered() )
+        {
+            static FName expandedHoveredName = "TreeArrow_Expanded_Hovered";
+            resourceName = expandedHoveredName;
+        }
+        else
+        {
+            static FName expandedName = "TreeArrow_Expanded";
+            resourceName = expandedName;
+        }
+    }
+    else
+    {
+        if ( iExpander->IsHovered() )
+        {
+            static FName collapsedHoveredName = "TreeArrow_Collapsed_Hovered";
+            resourceName = collapsedHoveredName;
+        }
+        else
+        {
+            static FName collapsedName = "TreeArrow_Collapsed";
+            resourceName = collapsedName;
+        }
+    }
+
+    return FAppStyle::Get().GetBrush(resourceName);
+}
+
+const FSlateBrush*
+SOdysseyColorSelector::GetColorWheelExpanderArrowImage() const
+{
+    return GetExpanderArrowImage(mColorWheelExpanderArrow, mIsColorWheelExpanded);
+}
+
+FReply
+SOdysseyColorSelector::OnColorWheelExpanderArrowClicked()
+{
+    mIsColorWheelExpanded = !mIsColorWheelExpanded;
+    return FReply::Handled();
+}
+
+const FSlateBrush*
+SOdysseyColorSelector::GetColorSlidersExpanderArrowImage() const
+{
+    return GetExpanderArrowImage(mColorSlidersExpanderArrow, mIsColorSlidersExpanded);
+}
+
+FReply
+SOdysseyColorSelector::OnColorSlidersExpanderArrowClicked()
+{
+    mIsColorSlidersExpanded = !mIsColorSlidersExpanded;
+    return FReply::Handled();
+}
+
+const FSlateBrush*
+SOdysseyColorSelector::GetHexadecimalExpanderArrowImage() const
+{
+    return GetExpanderArrowImage(mHexadecimalExpanderArrow, mIsHexadecimalExpanded);
+}
+
+FReply
+SOdysseyColorSelector::OnHexadecimalExpanderArrowClicked()
+{
+    mIsHexadecimalExpanded = !mIsHexadecimalExpanded;
+    return FReply::Handled();
+}
+
 
 #undef LOCTEXT_NAMESPACE

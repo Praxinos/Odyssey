@@ -66,6 +66,8 @@ private:
                          , const FWidgetStyle& InWidgetStyle
                          , bool bParentEnabled ) const override;
 
+    virtual FVector2D ComputeDesiredSize(float) const override;
+
 protected:
     // Buffer Utilities
     virtual void OnResizeEvent( const FVector2D& iNewSize ) const override;

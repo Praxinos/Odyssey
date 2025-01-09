@@ -44,16 +44,29 @@ private:
     void HexBoxOnTextCommited( const FText&, ETextCommit::Type );
     FText GetColorHex() const;
 
-
     FText GetHexText() const;
     void OnHexTextChanged( const FText& iText );
     void OnHexTextCommitted(const FText& Text, ETextCommit::Type CommitType);
 
+    const FSlateBrush* GetExpanderArrowImage(TSharedPtr<SButton> iExpander, bool iIsExpanded) const;
+    const FSlateBrush* GetColorWheelExpanderArrowImage() const;
+    FReply OnColorWheelExpanderArrowClicked();
+    const FSlateBrush* GetColorSlidersExpanderArrowImage() const;
+    FReply OnColorSlidersExpanderArrowClicked();
+    const FSlateBrush* GetHexadecimalExpanderArrowImage() const;
+    FReply OnHexadecimalExpanderArrowClicked();
+
 private:
     // Private data members
-    TSharedPtr< SOdysseyAdvancedColorWheel > mAdvancedColorWheel;
     TSharedPtr< SEditableTextBox > mHexTextBox;
 
     TAttribute<::ULIS::FColor> mColor;
     FOnColorChange mOnColorChangeCallback;
+
+    TSharedPtr<SButton> mColorWheelExpanderArrow;
+    TSharedPtr<SButton> mColorSlidersExpanderArrow;
+    TSharedPtr<SButton> mHexadecimalExpanderArrow;
+    bool mIsColorWheelExpanded = true;
+    bool mIsColorSlidersExpanded = true;
+    bool mIsHexadecimalExpanded = true;
 };

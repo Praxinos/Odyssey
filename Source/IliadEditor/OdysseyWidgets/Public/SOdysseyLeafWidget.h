@@ -77,7 +77,7 @@ private:
                          , const FWidgetStyle& InWidgetStyle
                          , bool bParentEnabled ) const override;
 
-private:
+protected:
     // Private sWidget overrides
     virtual FVector2D ComputeDesiredSize(float) const override;
 

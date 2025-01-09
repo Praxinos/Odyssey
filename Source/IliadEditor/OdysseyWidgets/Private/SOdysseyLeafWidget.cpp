@@ -59,8 +59,27 @@ SOdysseyLeafWidget::ComputeDesiredSize( float ) const
     FVector2D result = ExternalSize;
     const FOptionalSize CurrentDesiredWidth = DesiredWidth.Get();
     const FOptionalSize CurrentDesiredHeight = DesiredHeight.Get();
+
     result.X = CurrentDesiredWidth.IsSet() ? CurrentDesiredWidth.Get() : ExternalSize.X;
     result.Y = CurrentDesiredHeight.IsSet() ? CurrentDesiredHeight.Get() : ExternalSize.Y;
+
+    const FOptionalSize CurrentMinDesiredWidth = MinDesiredWidth.Get();
+    const FOptionalSize CurrentMaxDesiredWidth = MaxDesiredWidth.Get();
+    const FOptionalSize CurrentMinDesiredHeight = MinDesiredHeight.Get();
+    const FOptionalSize CurrentMaxDesiredHeight = MaxDesiredHeight.Get();
+
+    if( CurrentMinDesiredWidth.IsSet() )
+        result.X = FMath::Max( result.X, CurrentMinDesiredWidth.Get() );
+
+    if( CurrentMaxDesiredWidth.IsSet() )
+        result.X = FMath::Min( result.X, CurrentMaxDesiredWidth.Get() );
+
+    if( CurrentMinDesiredHeight.IsSet() )
+        result.Y = FMath::Max( result.Y, CurrentMinDesiredHeight.Get() );
+
+    if( CurrentMaxDesiredHeight.IsSet() )
+        result.Y = FMath::Min( result.Y, CurrentMaxDesiredHeight.Get() );
+
     return result;
 }
 
@@ -157,10 +176,8 @@ SOdysseyLeafWidget::CheckResize( const FVector2D& iNewSize ) const
 void
 SOdysseyLeafWidget::OnResizeEvent( const FVector2D& iNewSize ) const
 {
-    const FOptionalSize CurrentDesiredWidth = DesiredWidth.Get();
-    const FOptionalSize CurrentDesiredHeight = DesiredHeight.Get();
-    InternalSize.X = CurrentDesiredWidth.IsSet() ? CurrentDesiredWidth.Get() : ExternalSize.X;
-    InternalSize.Y = CurrentDesiredHeight.IsSet() ? CurrentDesiredHeight.Get() : ExternalSize.Y;
+    InternalSize.X = FMath::Max(1.f, ExternalSize.X);
+    InternalSize.Y = FMath::Max(1.f, ExternalSize.Y);
 
     const FOptionalSize CurrentMinDesiredWidth = MinDesiredWidth.Get();
     const FOptionalSize CurrentMaxDesiredWidth = MaxDesiredWidth.Get();
