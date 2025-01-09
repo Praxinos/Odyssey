@@ -44,7 +44,10 @@ struct FOdysseyAnimationTimelineSectionExecutionToken
         Execute(component, mStartTime, mDuration);
     }
 
-    __declspec(noinline) static void Execute(UOdysseyAnimationComponent* iComponent, double iStartTime, double iDuration)
+#if PLATFORM_WINDOWS
+    __declspec(noinline)
+#endif
+    static void Execute(UOdysseyAnimationComponent* iComponent, double iStartTime, double iDuration)
     {
         if (!iComponent)
             return;

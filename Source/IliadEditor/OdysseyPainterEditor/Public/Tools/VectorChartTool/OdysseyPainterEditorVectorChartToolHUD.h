@@ -12,7 +12,7 @@
 class FOdysseyVectorTagInbetweener;
 class FInbetweenerBreakdown;
 struct FInbetweenerDrawing;
-class FInbetweenerChart::Inbetween;
+class Inbetween;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorChartToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
