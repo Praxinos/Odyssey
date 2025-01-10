@@ -58,6 +58,9 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
         void OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene, uint64 iNotificationFlags );
         void RemoveInbetweenerTag();
 
+        float MousePositionToFrame(float iX) const;
+        float FrameToMousePosition(float iFrame) const;
+
     private :
         virtual void Private_SelectRangeFromCurrentTo ( TSharedPtr<FInbetweeningListViewItem> iItem ) override;
         virtual void Private_SetItemSelection ( TSharedPtr<FInbetweeningListViewItem> iItem

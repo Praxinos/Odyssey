@@ -129,20 +129,6 @@ FOdysseyAnimationEditorTimelinePosition::GetOffset() const
     return mOffset;
 }
 
-float
-FOdysseyAnimationEditorTimelinePosition::MousePositionToFrame(float iX) const
-{
-    float frame = iX / GetFrameSize();
-    return frame;
-}
-
-float
-FOdysseyAnimationEditorTimelinePosition::FrameToMousePosition(float iFrame) const
-{
-    float pos = iFrame * GetFrameSize();
-    return pos;
-}
-
 void
 FOdysseyAnimationEditorTimelinePosition::SetPadding(float iPadding)
 {

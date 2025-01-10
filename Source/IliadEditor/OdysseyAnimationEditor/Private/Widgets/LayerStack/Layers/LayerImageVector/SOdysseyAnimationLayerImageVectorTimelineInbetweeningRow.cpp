@@ -158,7 +158,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
         {
             const TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> listView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
             const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() );
-            uint32 frameIndex = timelinePosition->MousePositionToFrame( cursorPos.X );
+            uint32 frameIndex = MousePositionToFrame( cursorPos.X );
             IOdysseyVectorCell* tagCell = mInbetweenerTag->GetOwner()->GetEngine()->GetCell();
             float frameWidth = timelinePosition->GetFrameSize();
 
@@ -648,6 +648,22 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnPaint( const FPaintA
                                 , 2.0f );
 
     return LayerId;
+}
+
+float
+SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::MousePositionToFrame(float iX) const
+{
+    TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
+    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> timelinePosition = treeView->GetTimelinePosition();
+    return iX / timelinePosition->GetFrameSize();
+}
+
+float
+SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::FrameToMousePosition(float iFrame) const
+{
+    TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> treeView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
+    TSharedPtr<FOdysseyAnimationEditorTimelinePosition> timelinePosition = treeView->GetTimelinePosition();
+    return iFrame * timelinePosition->GetFrameSize();
 }
 
 #undef LOCTEXT_NAMESPACE

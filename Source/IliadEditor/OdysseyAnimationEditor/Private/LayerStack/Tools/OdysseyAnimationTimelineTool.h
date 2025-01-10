@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyAnimationEditorTimelinePosition.h"
 
 class FOdysseyAnimationTimelineTool
 {
@@ -23,6 +24,8 @@ public:
 public:
     virtual ~FOdysseyAnimationTimelineTool();
 
+    FOdysseyAnimationTimelineTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition);
+
 public:
     struct FMouseEventParams
     {
@@ -40,4 +43,11 @@ public:
 
     virtual FReply OnKeyDown(const FKeyEvent& iKeyEvent);
     virtual FReply OnKeyUp(const FKeyEvent& iKeyEvent);
+
+public:
+    float MousePositionToFrame(float iX) const;
+    float FrameToMousePosition(float iFrame) const;
+
+protected:
+    TSharedRef<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
 };

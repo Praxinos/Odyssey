@@ -13,7 +13,7 @@ FOdysseyAnimationTimelineSelectionTool::~FOdysseyAnimationTimelineSelectionTool(
 }
 
 FOdysseyAnimationTimelineSelectionTool::FOdysseyAnimationTimelineSelectionTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition, TSharedRef<FOdysseyAnimationCellSelection> iTimelineCellSelection)
-    : mTimelinePosition(iTimelinePosition)
+    : FOdysseyAnimationTimelineTool(iTimelinePosition)
     , mTimelineCellSelection(iTimelineCellSelection)
 {
 }
@@ -357,7 +357,7 @@ int
 FOdysseyAnimationTimelineSelectionTool::GetFrameUnderCursor(const FMouseEventParams& iParams)
 {
     float posX = iParams.mGeometry.AbsoluteToLocal(iParams.mMouseEvent.GetScreenSpacePosition()).X;
-    int frame = (int)mTimelinePosition->MousePositionToFrame(posX);
+    int frame = (int)MousePositionToFrame(posX);
 
     return frame;
 }

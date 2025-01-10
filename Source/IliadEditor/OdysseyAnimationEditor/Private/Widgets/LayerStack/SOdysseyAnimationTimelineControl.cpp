@@ -47,7 +47,7 @@ SOdysseyAnimationTimelineControl::OnPaint(const FPaintArgs& Args, const FGeometr
     lineColor.A = 0.3f;
 
     int currentFrame = mCurrentFrame.Get();
-    float currentFramePos = mTimelinePosition->FrameToMousePosition(currentFrame) + mTimelinePosition->GetPadding() - mTimelinePosition->GetOffset() * mTimelinePosition->GetFrameSize();
+    float currentFramePos = FrameToMousePosition(currentFrame);
 
     FSlateDrawElement::MakeBox(
         OutDrawElements,
@@ -64,8 +64,8 @@ SOdysseyAnimationTimelineControl::OnPaint(const FPaintArgs& Args, const FGeometr
         FLinearColor outOfRangeColor = FLinearColor::Black;
         outOfRangeColor.A = 0.3f;
 
-        float leftRangeX = FMath::Min(width, mTimelinePosition->FrameToMousePosition(validRange.GetLowerBoundValue()) + mTimelinePosition->GetPadding() + mTimelinePosition->GetOffset() * mTimelinePosition->GetFrameSize());
-        float rightRangeX = FMath::Max(0, mTimelinePosition->FrameToMousePosition(validRange.GetUpperBoundValue() + 1 + mTimelinePosition->GetPadding() + mTimelinePosition->GetOffset() * mTimelinePosition->GetFrameSize()));
+        float leftRangeX = FMath::Min(width, FrameToMousePosition(validRange.GetLowerBoundValue()));
+        float rightRangeX = FMath::Max(0, FrameToMousePosition(validRange.GetUpperBoundValue() + 1));
 
         if (leftRangeX > 0.f)
         {
@@ -225,4 +225,16 @@ SOdysseyAnimationTimelineControl::OnNavigation(const FGeometry& MyGeometry, cons
         FOdysseyObjectEditorUtils::SetPropertyValue(mAnimation, GET_MEMBER_NAME_CHECKED(UOdysseyAnimation, CurrentFrame), frame);
     }
     return FNavigationReply::Stop();
+}
+
+float
+SOdysseyAnimationTimelineControl::MousePositionToFrame(float iX) const
+{
+    return (iX - mTimelinePosition->GetPadding() + mTimelinePosition->GetOffset() * mTimelinePosition->GetFrameSize()) / mTimelinePosition->GetFrameSize();
+}
+
+float
+SOdysseyAnimationTimelineControl::FrameToMousePosition(float iFrame) const
+{
+    return iFrame * mTimelinePosition->GetFrameSize() + mTimelinePosition->GetPadding() - mTimelinePosition->GetOffset() * mTimelinePosition->GetFrameSize();
 }

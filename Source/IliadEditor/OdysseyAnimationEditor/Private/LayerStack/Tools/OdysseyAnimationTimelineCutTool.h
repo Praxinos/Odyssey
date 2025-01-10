@@ -16,7 +16,4 @@ public:
 
 public:
     virtual FReply OnMouseButtonUp(const FMouseEventParams& iParams) override;
-
-private:
-    TSharedRef<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
 };

@@ -32,6 +32,10 @@ public:
     // End of SWidget interfacepublic:
 
 private:
+    float MousePositionToFrame(float iX) const;
+    float FrameToMousePosition(float iFrame) const;
+
+private:
     UOdysseyAnimation* mAnimation;
     UOdysseyAnimationPlayer* mPlayer;
     TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;

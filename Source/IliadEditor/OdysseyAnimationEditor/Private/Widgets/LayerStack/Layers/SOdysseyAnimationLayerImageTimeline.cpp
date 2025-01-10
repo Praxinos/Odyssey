@@ -216,7 +216,7 @@ SOdysseyAnimationLayerImageTimeline::OnMouseButtonUp(const FGeometry& iGeometry,
 {
     if (iEvent.GetEffectingButton() == EKeys::RightMouseButton)
     {
-        int frame = (int)mTimelinePosition->MousePositionToFrame(iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X);
+        int frame = (int)MousePositionToFrame(iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X);
         if (frame < 0)
             return FReply::Unhandled();
 
@@ -289,7 +289,7 @@ SOdysseyAnimationLayerImageTimeline::OnPaint(const FPaintArgs& Args, const FGeom
     {
         //Dragging Zone
         FLinearColor lineColor(0.2f, 0.2f, 1.f);
-        float dragPos = mTimelinePosition->FrameToMousePosition(mDragPosition);
+        float dragPos = FrameToMousePosition(mDragPosition);
 
         //Dragging Bar
         FSlateDrawElement::MakeBox(
@@ -367,7 +367,7 @@ SOdysseyAnimationLayerImageTimeline::OnDragOver(const FGeometry& iGeometry, cons
         return FReply::Unhandled();
 
     float posX = iGeometry.AbsoluteToLocal(iEvent.GetScreenSpacePosition()).X;
-    float frame = mTimelinePosition->MousePositionToFrame(posX);
+    float frame = MousePositionToFrame(posX);
 
     UOdysseyAnimationCell* cell = mLayer->GetCellAtFrame((int)frame);
     if (!cell)
@@ -709,6 +709,18 @@ UOdysseyAnimationLayer*
 SOdysseyAnimationLayerImageTimeline::GetLayer() const
 {
     return mLayer;
+}
+
+float
+SOdysseyAnimationLayerImageTimeline::MousePositionToFrame(float iX) const
+{
+    return (iX - mTimelinePosition->GetPadding() + mTimelinePosition->GetOffset() * mTimelinePosition->GetFrameSize()) / mTimelinePosition->GetFrameSize();
+}
+
+float
+SOdysseyAnimationLayerImageTimeline::FrameToMousePosition(float iFrame) const
+{
+    return iFrame * mTimelinePosition->GetFrameSize() + mTimelinePosition->GetPadding() - mTimelinePosition->GetOffset() * mTimelinePosition->GetFrameSize();
 }
 
 #undef LOCTEXT_NAMESPACE

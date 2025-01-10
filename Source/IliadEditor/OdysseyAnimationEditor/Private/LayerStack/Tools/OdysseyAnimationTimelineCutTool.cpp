@@ -14,7 +14,7 @@ FOdysseyAnimationTimelineCutTool::~FOdysseyAnimationTimelineCutTool()
 }
 
 FOdysseyAnimationTimelineCutTool::FOdysseyAnimationTimelineCutTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition)
-    : mTimelinePosition(iTimelinePosition)
+    : FOdysseyAnimationTimelineTool(iTimelinePosition)
 {
 }
 
@@ -31,7 +31,7 @@ FOdysseyAnimationTimelineCutTool::OnMouseButtonUp(const FMouseEventParams& iPara
         return FReply::Unhandled();
 
     float posX = iParams.mGeometry.AbsoluteToLocal(iParams.mMouseEvent.GetScreenSpacePosition()).X;
-    int frame = (int)(mTimelinePosition->MousePositionToFrame(posX) + 0.5f);
+    int frame = (int)(MousePositionToFrame(posX) + 0.5f);
 
     UOdysseyAnimationCell* cell = iParams.mLayer->GetCellAtFrame(frame);
     if (!cell || cell->GetFrameRange().GetLowerBoundValue() == frame)

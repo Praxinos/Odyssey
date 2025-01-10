@@ -13,7 +13,7 @@ FOdysseyAnimationTimelineMoveTool::~FOdysseyAnimationTimelineMoveTool()
 }
 
 FOdysseyAnimationTimelineMoveTool::FOdysseyAnimationTimelineMoveTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition)
-    : mTimelinePosition(iTimelinePosition)
+    : FOdysseyAnimationTimelineTool(iTimelinePosition)
 {
 }
 

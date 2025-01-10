@@ -54,7 +54,6 @@ private:
         NonContiguous
     };
 
-    TSharedRef<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
     TSharedRef<FOdysseyAnimationCellSelection> mTimelineCellSelection;
     bool mIsSelecting = false;
     bool mIsDragDetected = false;

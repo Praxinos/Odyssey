@@ -87,6 +87,9 @@ protected:
 
     bool GetShowCellsHandles() const;
 
+    float MousePositionToFrame(float iX) const;
+    float FrameToMousePosition(float iFrame) const;
+
 protected:
     //Context Menu
     virtual void BuildContextMenu(FMenuBuilder& iMenuBuilder);

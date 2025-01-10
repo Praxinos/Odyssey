@@ -39,6 +39,10 @@ public:
     virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 
 private:
+    float MousePositionToFrame(float iX) const;
+    float FrameToMousePosition(float iFrame) const;
+
+private:
     UOdysseyAnimation* mAnimation;
     TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
     TAttribute<int> mCurrentFrame;

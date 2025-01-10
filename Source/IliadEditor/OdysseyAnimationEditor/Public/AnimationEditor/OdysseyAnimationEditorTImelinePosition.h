@@ -32,9 +32,6 @@ public:
     void SetPadding(float iPadding);
     float GetPadding() const;
 
-    float MousePositionToFrame(float iPos) const;
-    float FrameToMousePosition(float iFrame) const;
-
     bool HasMinZoom() const;
     void HasMinZoom(bool iHasMinZoom);
     bool HasMaxZoom() const;

@@ -292,7 +292,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetSelectedInbetweenerTag
 void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
 {
-    int breakdownFrameIndex = mTimelinePosition->MousePositionToFrame( mCursorPos.X );
+    int breakdownFrameIndex = MousePositionToFrame( mCursorPos.X );
     UOdysseyAnimationCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
     if (!cell)
         return;
@@ -353,7 +353,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
 void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
 {
-    int breakdownFrameIndex = mTimelinePosition->MousePositionToFrame( mCursorPos.X );
+    int breakdownFrameIndex = MousePositionToFrame( mCursorPos.X );
     UOdysseyAnimationCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
     if (!cell)
         return;
@@ -413,7 +413,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
 void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
 {
-    int breakdownFrameIndex = mTimelinePosition->MousePositionToFrame( mCursorPos.X );
+    int breakdownFrameIndex = MousePositionToFrame( mCursorPos.X );
     UOdysseyAnimationCell* cell = mAnimationLayerImageVector->GetCellAtFrame( breakdownFrameIndex );
     if (!cell)
         return;
@@ -556,6 +556,18 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveInbetweenerTag()
 
     // note: editor is NULL in the Sequencer
     FOdysseyPainterEditor::RemoveInbetweenerTag( editor, mAnimationLayerImageVector->GetSharedEnv() );
+}
+
+float
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::MousePositionToFrame(float iX) const
+{
+    return iX / mTimelinePosition->GetFrameSize();
+}
+
+float
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::FrameToMousePosition(float iFrame) const
+{
+    return iFrame * mTimelinePosition->GetFrameSize();
 }
 
 #undef LOCTEXT_NAMESPACE

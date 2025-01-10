@@ -22,7 +22,6 @@ public:
     virtual FReply OnDragDetected(const FMouseEventParams& iParams) override;
 
 private:
-    TSharedRef<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
     bool mOffsettingLayer;
     struct
     {

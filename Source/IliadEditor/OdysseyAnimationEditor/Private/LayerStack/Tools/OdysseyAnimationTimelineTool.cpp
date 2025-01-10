@@ -8,6 +8,12 @@ FOdysseyAnimationTimelineTool::~FOdysseyAnimationTimelineTool()
 
 }
 
+FOdysseyAnimationTimelineTool::FOdysseyAnimationTimelineTool(TSharedRef<FOdysseyAnimationEditorTimelinePosition> iTimelinePosition)
+    : mTimelinePosition(iTimelinePosition)
+{
+
+}
+
 FReply
 FOdysseyAnimationTimelineTool::OnMouseButtonDown(const FMouseEventParams& iParams)
 {
@@ -42,4 +48,16 @@ FReply
 FOdysseyAnimationTimelineTool::OnKeyUp(const FKeyEvent& iKeyEvent)
 {
     return FReply::Unhandled();
+}
+
+float
+FOdysseyAnimationTimelineTool::MousePositionToFrame(float iX) const
+{
+    return iX / mTimelinePosition->GetFrameSize();
+}
+
+float
+FOdysseyAnimationTimelineTool::FrameToMousePosition(float iFrame) const
+{
+    return iFrame * mTimelinePosition->GetFrameSize();
 }

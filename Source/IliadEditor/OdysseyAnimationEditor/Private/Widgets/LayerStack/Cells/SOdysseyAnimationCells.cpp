@@ -469,7 +469,7 @@ SOdysseyAnimationCells::UpdateHandlesVisibility()
         return;
 
     //Find frame
-    float frame = mTimelinePosition->MousePositionToFrame(mMousePosition.X);
+    float frame = MousePositionToFrame(mMousePosition.X);
 
     //Find Cell
     UOdysseyAnimationCell* cell = mAnimationLayer->GetCellAtFrame(frame);
@@ -558,7 +558,7 @@ SOdysseyAnimationCells::GetCellBreakIndicatorOffset(UOdysseyAnimationCell* iCell
         return 0.f;
 
     //Find frame
-    float frame = mTimelinePosition->MousePositionToFrame(mMousePosition.X) + 0.5f;
+    float frame = MousePositionToFrame(mMousePosition.X) + 0.5f;
     return (int)frame - iCell->GetFrameRange().GetLowerBoundValue();
 }
 
@@ -572,7 +572,7 @@ SOdysseyAnimationCells::GetCellBreakIndicatorWidth(UOdysseyAnimationCell* iCell)
         return 0.f;
 
     //Find frame
-    float frame = mTimelinePosition->MousePositionToFrame(mMousePosition.X) + 0.5f;
+    float frame = MousePositionToFrame(mMousePosition.X) + 0.5f;
     return iCell->GetFrameRange().GetUpperBoundValue() - (int)frame + 1;
 }
 
@@ -589,7 +589,7 @@ SOdysseyAnimationCells::GetCellBreakIndicatorVisibility(UOdysseyAnimationCell* i
         return EVisibility::Hidden;
 
     //Find frame
-    float frame = mTimelinePosition->MousePositionToFrame(mMousePosition.X) + 0.5f;
+    float frame = MousePositionToFrame(mMousePosition.X) + 0.5f;
 
     UOdysseyAnimationCell* cell = mAnimationLayer->GetCellAtFrame(frame);
     if (!cell)
@@ -1246,6 +1246,18 @@ bool
 SOdysseyAnimationCells::IsPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const
 {
     return mAnimationLayer->PostBehaviour == iBehaviour;
+}
+
+float
+SOdysseyAnimationCells::MousePositionToFrame(float iX) const
+{
+    return iX / mTimelinePosition->GetFrameSize();
+}
+
+float
+SOdysseyAnimationCells::FrameToMousePosition(float iFrame) const
+{
+    return iFrame * mTimelinePosition->GetFrameSize();
 }
 
 #undef LOCTEXT_NAMESPACE

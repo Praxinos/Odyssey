@@ -110,6 +110,9 @@ private:
     bool CanSetPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
     bool IsPostBehaviour(EOdysseyAnimationLayerImagePostBehaviour iBehaviour) const;
 
+    float MousePositionToFrame(float iX) const;
+    float FrameToMousePosition(float iFrame) const;
+
 private:
     TSharedPtr<FOdysseyAnimationEditorTimelinePosition> mTimelinePosition;
     class UOdysseyAnimationLayer* mAnimationLayer;
