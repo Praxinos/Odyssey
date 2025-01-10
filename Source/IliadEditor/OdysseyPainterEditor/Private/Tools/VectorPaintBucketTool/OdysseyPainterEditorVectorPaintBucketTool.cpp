@@ -444,39 +444,20 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
     // No cycles picked, we create an orphan bucket
     else
     {
-        vectorEngine->Traverse
-        ( iScene
-        , 0
-        , [ this
-          , iScene
-          , vectorEngine
-          , &iPointInTexture
-          , &addedBucketArray
-          , &paramBucketArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
-          {
-              if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
-              {
-                  if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-                  {
-                      FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
-                      BLMatrix2D& inverseWorldMatrix = paintGroup->GetInverseWorldMatrix();
-                      BLPoint localCoords = inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
-                      FOdysseyVectorBucket* bucket = new FOdysseyVectorBucket( paintGroup
-                                                                             , localCoords.x
-                                                                             , localCoords.y
-                                                                             , Propagate );
+        for( FOdysseyVectorGroupPaint* paintGroup : mBucketHUD->GetWorkingPaintgroupList() )
+        {
+            BLMatrix2D& inverseWorldMatrix = paintGroup->GetInverseWorldMatrix();
+            BLPoint localCoords = inverseWorldMatrix.mapPoint( iPointInTexture.x, iPointInTexture.y );
+            FOdysseyVectorBucket* bucket = new FOdysseyVectorBucket( paintGroup
+                                                                   , localCoords.x
+                                                                   , localCoords.y
+                                                                   , Propagate );
 
-                      paintGroup->AddBucket( bucket );
+            paintGroup->AddBucket( bucket );
 
-                      addedBucketArray.push_back( bucket );
-                      paramBucketArray.push_back( bucket );
-                  }
-
-                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
-              }
-
-              return 0;
-          } );
+            addedBucketArray.push_back( bucket );
+            paramBucketArray.push_back( bucket );
+        }
     }
 
     // needed for valid GUndo pointer
@@ -617,7 +598,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroup
                                                            , const FKey& iKey
                                                            , uint64& oSignalFlags )
 {
-    uint64 notificationFlags = 0;
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )

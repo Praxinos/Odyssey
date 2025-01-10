@@ -12,6 +12,7 @@
 #include "OdysseyVectorRoot.h"
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorCell.h"
+#include "Import/v2/OdysseyVectorImport.h"
 
 #include "OdysseyTextureLayerImageVector.generated.h"
 
@@ -56,6 +57,7 @@ public:
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
     FOdysseyVectorEngine* GetEngine();
+    FOdysseyVectorImportV2* GetImporterV2();
 
     void IsWireframeChanged();
     void IsColoredChanged();
@@ -106,4 +108,7 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, NonTransactional, Category="Odyssey|Layer")
     bool IsColored = true;
+
+private:
+    FOdysseyVectorImportV2 mImporterV2;
 };

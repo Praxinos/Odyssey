@@ -16,6 +16,7 @@ FInterpolatedPoint::FInterpolatedPoint( FOdysseyVectorPoint* iPoint, double iRad
     , mIndex ( iIndex )
     , mU ( 0.0f )
     , mV ( 0.0f )
+    , mOriginalCoords( iPoint->GetCoords() )
 {
 }
 
@@ -52,6 +53,12 @@ FInterpolatedPoint::GetV()
 uint32 FInterpolatedPoint::GetMappedQuadIndex()
 {
     return mMappedQuadIndex;
+}
+
+void
+FInterpolatedPoint::RestoreOriginalCoords()
+{
+    mOriginalPoint->Set( mOriginalCoords );
 }
 
 FOdysseyVectorPoint*

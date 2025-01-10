@@ -609,6 +609,24 @@ FOdysseyVectorObject::HasAncestor( FOdysseyVectorObject* iCandidateAncestor )
     return false;
 }
 
+FOdysseyVectorObject*
+FOdysseyVectorObject::GetAncestorByClass( uint32 iClass  )
+{
+    FOdysseyVectorObject* parent = mParent;
+
+    while ( parent )
+    {
+        if( parent->GetClass() == iClass )
+        {
+            return parent;
+        }
+
+        parent = parent->GetParent();
+    }
+
+    return nullptr;
+}
+
 ::ULIS::FRectD
 FOdysseyVectorObject::GetBBox( bool iWorld )
 {

@@ -23,6 +23,7 @@ class FInterpolatedPoint
         double GetV();
         uint32 GetIndex();
         double GetRadius();
+        void RestoreOriginalCoords();
 
         friend class FOdysseyVectorTagInbetweener;
 
@@ -33,4 +34,6 @@ class FInterpolatedPoint
         uint32 mIndex;
         double mU;
         double mV;
+        // save coords because we'll need to modifiy original vertices when not mapped as polyline
+        ::ULIS::FVec2D mOriginalCoords;
 };

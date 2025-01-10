@@ -16,7 +16,6 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::~FOdysseyPainterEditorVectorPaint
 FOdysseyPainterEditorVectorPaintBucketToolHUD::FOdysseyPainterEditorVectorPaintBucketToolHUD( UOdysseyPainterEditorVectorPaintBucketTool* iPaintBucketTool )
     : FOdysseyPainterEditorVectorBaseToolHUD( iPaintBucketTool )
     , mPaintBucketTool( iPaintBucketTool )
-    , mAnyPaintGroupSelected( false )
 {
 }
 
@@ -25,19 +24,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Reset( FOdysseyVectorGroupPaint* 
 {
     UpdateSelectionBox( iScene, false, mPaintBucketTool->GetEditor()->GetVectorHUDFlags() );
 
-    mAnyPaintGroupSelected = false;
-
-    // check if any paint group is selected. this allows us to determinate when we can draw
-    // the hud for the whole scene
-    for( FOdysseyVectorObject* object : iScene->GetEngine()->GetSelectedObjectList() )
-    {
-        if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-        {
-            mAnyPaintGroupSelected = true;
-
-            break;
-        }
-    }
+    UpdateWorkingPaintgroupList( iScene );
 }
 
 void
@@ -49,6 +36,56 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Load( FOdysseyVectorGroupPaint* i
 void
 FOdysseyPainterEditorVectorPaintBucketToolHUD::Unload(FOdysseyVectorGroupPaint* iScene)
 {
+}
+
+std::list<FOdysseyVectorGroupPaint*>&
+FOdysseyPainterEditorVectorPaintBucketToolHUD::GetWorkingPaintgroupList()
+{
+    return mWorkingPaintgroupList;
+}
+
+void
+FOdysseyPainterEditorVectorPaintBucketToolHUD::UpdateWorkingPaintgroupList( FOdysseyVectorGroupPaint* iScene )
+{
+    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+
+    mWorkingPaintgroupList.clear();
+
+    vectorEngine->Traverse
+    ( iScene
+    , 0
+    , [ this
+      , iScene
+      , vectorEngine ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+        {
+            if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
+            {
+                if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+                {
+                    FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
+
+                    mWorkingPaintgroupList.push_back( paintGroup );
+                }
+                else
+                {
+                    FOdysseyVectorGroupPaint* ancestor = static_cast<FOdysseyVectorGroupPaint*>(object->GetAncestorByClass( FOdysseyVectorGroupPaint::StaticClass() ));
+
+                    if( ancestor )
+                    {
+                        if( std::find( mWorkingPaintgroupList.begin()
+                                     , mWorkingPaintgroupList.end()
+                                     , ancestor ) == mWorkingPaintgroupList.end() )
+                        {
+                            mWorkingPaintgroupList.push_back( ancestor );
+                        }
+                    }
+                }
+
+                return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+            }
+
+            return 0;
+        } );
 }
 
 uint32
@@ -128,34 +165,15 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickCycles( FOdysseyVectorGroupPa
 
     oPickedCycleArray.clear();
 
-    vectorEngine->Traverse
-    ( iScene
-    , 0
-    , [ this
-      , iScene
-      , vectorEngine
-      , &iWorldX
-      , &iWorldY
-      , &oPickedCycleArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+    for( FOdysseyVectorGroupPaint* paintgroup : mWorkingPaintgroupList )
+    {
+        FOdysseyVectorCycle* pickedCycle = paintgroup->PickCycle( iWorldX, iWorldY );
+
+        if( pickedCycle )
         {
-            if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
-            {
-                if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-                {
-                    FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
-                    FOdysseyVectorCycle* pickedCycle = paintGroup->PickCycle( iWorldX, iWorldY );
-
-                    if( pickedCycle )
-                    {
-                        oPickedCycleArray.push_back( pickedCycle );
-                    }
-                }
-
-                return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
-            }
-
-            return 0;
-        } );
+            oPickedCycleArray.push_back( pickedCycle );
+        }
+    }
 }
 
 FOdysseyVectorBucket*
@@ -166,41 +184,22 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucket( FOdysseyVectorGroupPa
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     FOdysseyVectorBucket* pickedBucket = nullptr;
 
-    vectorEngine->Traverse
-    ( iScene
-    , mPaintBucketTool->GetEditor()->GetVectorHUDFlags()
-    , [ this
-      , iScene
-      , vectorEngine
-      , &iWorldX
-      , &iWorldY
-      , &pickedBucket ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
-      {
-          if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
-          {
-              if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
-              {
-                  FOdysseyVectorGroupPaint* paintGroup = static_cast<FOdysseyVectorGroupPaint*>(object);
-                  std::list<FOdysseyVectorBucket*>& bucketList = paintGroup->GetBucketList();
+    for( FOdysseyVectorGroupPaint* paintgroup : mWorkingPaintgroupList )
+    {
+        std::list<FOdysseyVectorBucket*>& bucketList = paintgroup->GetBucketList();
 
-                  for( FOdysseyVectorBucket *bucket : bucketList )
-                  {
-                      if( PickBucketArea( bucket, iWorldX, iWorldY ) )
-                      {
-                          pickedBucket = bucket;
+        for( FOdysseyVectorBucket *bucket : bucketList )
+        {
+            if( PickBucketArea( bucket, iWorldX, iWorldY ) )
+            {
+                pickedBucket = bucket;
 
-                          return true; // stop traversing
-                      }
-                  }
-              }
+                return pickedBucket; // return now;
+            }
+        }
+    }
 
-              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
-          }
-
-          return 0;
-      } );
-
-    return pickedBucket;
+    return nullptr;
 }
 
 void

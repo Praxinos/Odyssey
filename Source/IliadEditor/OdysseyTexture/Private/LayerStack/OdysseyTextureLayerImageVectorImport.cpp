@@ -53,11 +53,11 @@ FOdysseyTextureLayerImageVectorImport::Read( UOdysseyTextureLayerImageVector* iT
                 case FOdysseyFile::VectorV2::CHUNK_VECTOR_MAGIC_V2:
                 {
                     FOdysseyVectorEngine* vectorEngine = iTextureLayerImageVector->GetEngine();
-                    FOdysseyVectorImportV2 importerV2 = FOdysseyVectorImportV2();
+                    FOdysseyVectorImportV2* importerV2 = iTextureLayerImageVector->GetImporterV2();
 
                     //UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V2") );
 
-                    importerV2.Read( vectorEngine->GetScene(), Ar, Ar.Tell() + iChunkLen );
+                    importerV2->Read( vectorEngine->GetScene(), Ar, Ar.Tell() + iChunkLen );
                 }
                 break;
 

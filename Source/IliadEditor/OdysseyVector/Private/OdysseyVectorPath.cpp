@@ -1698,6 +1698,9 @@ FOdysseyVectorPath::AlterRadius( double iRatioRadius )
 
 void
 FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
+                                // the engine that draws may not be the parent engine
+                                // so we use the on epassed as parameter
+                               , FOdysseyVectorEngine* iVectorEngine
                                , FOdysseyVectorSegment* iSegment
                                , double iStartU
                                , double iEndU
@@ -1713,7 +1716,6 @@ FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
         {
             std::vector<FOdysseyVectorFraction>& fractionCache = iSegment->GetFractionCache();
             FColor foregroundColor = GetForegroundColor();
-            FOdysseyVectorEngine* vectorEngine = GetEngine();
             double difU = iEndU - iStartU;
 
             // for testing
@@ -1781,29 +1783,29 @@ FOdysseyVectorPath::DrawSegment( BLContext* iBLContext
                 polygonDrawingFlags |= mBrush.BilinearFiltering ? FPolygonDrawingFlags::BILINEARFILTERING : 0;
 
                 // should be a static function
-                vectorEngine->FillQuad( iBLContext
-                                      , quad0P
-                                      , quad0U
-                                      , quad0V
-                                      , iCombinedOpacity
-                                      , foregroundColor
-                                      , (int8*) mBrush.pixels // will be nullptr if no texture is loaded
-                                      , mBrush.width
-                                      , mBrush.height
-                                      , mBrush.bitsPerPixel
-                                      , polygonDrawingFlags );
+                iVectorEngine->FillQuad( iBLContext
+                                       , quad0P
+                                       , quad0U
+                                       , quad0V
+                                       , iCombinedOpacity
+                                       , foregroundColor
+                                       , (int8*) mBrush.pixels // will be nullptr if no texture is loaded
+                                       , mBrush.width
+                                       , mBrush.height
+                                       , mBrush.bitsPerPixel
+                                       , polygonDrawingFlags );
 
-                vectorEngine->FillQuad( iBLContext
-                                      , quad1P
-                                      , quad1U
-                                      , quad1V
-                                      , iCombinedOpacity
-                                      , foregroundColor
-                                      , (int8*) mBrush.pixels // will be nullptr if no texture is loaded
-                                      , mBrush.width
-                                      , mBrush.height
-                                      , mBrush.bitsPerPixel
-                                      , polygonDrawingFlags );
+                iVectorEngine->FillQuad( iBLContext
+                                       , quad1P
+                                       , quad1U
+                                       , quad1V
+                                       , iCombinedOpacity
+                                       , foregroundColor
+                                       , (int8*) mBrush.pixels // will be nullptr if no texture is loaded
+                                       , mBrush.width
+                                       , mBrush.height
+                                       , mBrush.bitsPerPixel
+                                       , polygonDrawingFlags );
                 // for testing
                 // iBLContext->strokePolygon( pt, 6 );
             }
@@ -1902,6 +1904,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
             iChain.IterateSegments( [ this
                                     , texture
                                     , iBLContext
+                                    , iVectorEngine
                                     , &iCombinedOpacity
                                     , &iDrawingFlags
                                     //, &startU
@@ -1952,6 +1955,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                      && ( ( segmentBBox.y + segmentBBox.h ) > 0        ) )
                     {
                         DrawSegment( iBLContext
+                                   , iVectorEngine
                                    , segment
                                    , segment->GetTextureStartU()
                                    , segment->GetTextureEndU()
@@ -1978,6 +1982,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
 
             iChain.IterateSegments( [ this
                                     , iBLContext
+                                    , iVectorEngine
                                     , &iCombinedOpacity
                                     , &iDrawingFlags
                                     , &screen ]( FOdysseyVectorVertex* vertex, FOdysseyVectorSegment* segment ) -> bool
@@ -1992,6 +1997,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                  && ( ( segmentBBox.y + segmentBBox.h ) > 0        ) )
                 {
                     DrawSegment( iBLContext
+                               , iVectorEngine
                                , segment
                                , 0.0f
                                , 0.0f

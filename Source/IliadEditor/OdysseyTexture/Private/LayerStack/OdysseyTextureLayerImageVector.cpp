@@ -125,6 +125,10 @@ UOdysseyTextureLayerImageVector::PostLoad()
         mVectorBlock->Init(mVectorBlockId, mRoot->GetEngine(), Width, Height, format);
         mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
     }
+
+    // textures must be assigned to brushes in PostLoad and not in Serialize(), because the UAsset won't be fully loaded
+    // and there dimensions would be 0 at that point.
+    mImporterV2.PostLoadTextures();
 }
 
 void
@@ -140,6 +144,12 @@ UOdysseyTextureLayerImageVector::PostDuplicate(bool bDuplicateForPIE)
         Height = texture->Source.GetSizeY();
         mVectorBlockId = FGuid::NewGuid();
     }
+}
+
+FOdysseyVectorImportV2*
+UOdysseyTextureLayerImageVector::GetImporterV2()
+{
+    return &mImporterV2;
 }
 
 void
@@ -194,11 +204,9 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
 
                 case FOdysseyFile::VectorV2::CHUNK_VECTOR_MAGIC_V2 :
                 {
-                    FOdysseyVectorImportV2 importerV2 = FOdysseyVectorImportV2();
-
                     //UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V2") );
 
-                    importerV2.Read( mRoot->GetScene(), Ar, chunkEnd );
+                    mImporterV2.Read( mRoot->GetScene(), Ar, chunkEnd );
                 }
                 break;
 

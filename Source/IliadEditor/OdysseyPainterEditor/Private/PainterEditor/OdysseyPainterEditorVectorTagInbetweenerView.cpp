@@ -72,7 +72,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
         GridColor = selectedInbetweenerTag->GetGridColor();
         TrajectoryColor = selectedInbetweenerTag->GetTrajectoryColor();
         MappingMode = selectedInbetweenerTag->GetMapAsPolyline() ? eInbetweenerMappingMode::Polyline
-                                                                 : eInbetweenerMappingMode::Bezier ;
+                                                                 : eInbetweenerMappingMode::KeepTopology ;
         WithThickness = selectedInbetweenerTag->GetWithThickness();
         ConstantWidth = selectedInbetweenerTag->HasConstantWidth();
         Square = selectedInbetweenerTag->IsSquare();

@@ -83,30 +83,19 @@ FOdysseyVectorBrush::SetTexture( UTexture2D* iTexture )
         iTexture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
         iTexture->MipGenSettings = TextureMipGenSettings::TMGS_NoMipmaps;
         iTexture->SRGB = false;
+        //iTexture->DeferCompression = false;
         //iTexture->MipLoadOptions = ETextureMipLoadOptions::OnlyFirstMip;
         //iTexture->LODGroup = TextureGroup::TEXTUREGROUP_UI;
         iTexture->UpdateResource();
 
-        width  = 1024;
-        height = 64;
-        bitsPerPixel = 32;
-
-        //FTextureCompilingManager::Get().FinishCompilation( { iTexture } );
+        width  = iTexture->GetSizeX();
+        height = iTexture->GetSizeY();
     }
 
     texture = iTexture;
 
     if( owner )
         owner->Invalidate( FOdysseyVectorObject::INVALIDATE_COLOR );
-
-    //FTexturePlatformData* pdata = texture->GetPlatformData();
-
-    //pdata->Reset
-
-    //UE_LOG(LogTemp, Warning, TEXT("%d %d"), texture->Source.GetLogicalSize().X, texture->Source.GetLogicalSize().Y );
-
-    //Lock();
-    //Unlock();
 }
 
 UTexture2D*
@@ -120,7 +109,7 @@ FOdysseyVectorBrush::Lock()
 {
     if( texture )
     {
-        if( texture->GetPlatformData()->Mips.Num() && pixels == nullptr )
+        if( texture->GetPlatformData()->Mips.Num() && ( pixels == nullptr ) )
         {
             FTexture2DMipMap *mip = &texture->GetPlatformData()->Mips[0];
             const FColor* colors = static_cast<const FColor*>(mip->BulkData.LockReadOnly());
@@ -133,6 +122,10 @@ FOdysseyVectorBrush::Lock()
             // but it means that at first, the texture does not display correctly.
             //width  = texture->GetSurfaceWidth();
             //height = texture->GetSurfaceHeight();
+
+            // Note: this is now useless as we now have the correct width and height values when loading textures
+            // because SetTexture is now called in the UOdysseyTextureLayerImageVector::PostLoad, after texture are
+            // actually really loaded. We can leave it here just in case, it won't hurt anyways.
             width  = mip->SizeX;
             height = mip->SizeY;
 
@@ -143,9 +136,9 @@ FOdysseyVectorBrush::Lock()
                 case PF_B8G8R8A8:
                     bitsPerPixel = 32;
 
-                    pixels = ( FColor* ) malloc ( bufferSize );
+                    //pixels = ( FColor* ) malloc ( bufferSize );
 
-                    memcpy ( pixels, colors, bufferSize );
+                    //memcpy ( pixels, colors, bufferSize );
                 break;
 
                 default : // other formats are unsupported

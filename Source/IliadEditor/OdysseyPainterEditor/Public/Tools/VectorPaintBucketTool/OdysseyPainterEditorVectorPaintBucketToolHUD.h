@@ -11,6 +11,7 @@
 class FOdysseyVectorCycle;
 class FOdysseyVectorBucket;
 class FOdysseyVectorObject;
+class FOdysseyVectorGroupPaint;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
@@ -22,6 +23,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : p
         virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
         virtual void Load( FOdysseyVectorGroupPaint* iScene ) override;
         virtual void Unload( FOdysseyVectorGroupPaint* iScene ) override;
+        void UpdateWorkingPaintgroupList( FOdysseyVectorGroupPaint* iScene );
 
         void SetCycle( FOdysseyVectorCycle* iCycle );
 
@@ -39,6 +41,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : p
         uint32 PickBucketArea( FOdysseyVectorBucket* iBucket
                              , double iWorldX
                              , double iWorldY );
+        std::list<FOdysseyVectorGroupPaint*>& GetWorkingPaintgroupList();
 
     private:
         FOdysseyVectorBucket* RecursivePickBucket( FOdysseyVectorObject* iObject
@@ -52,6 +55,6 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : p
 
     private:
         UOdysseyPainterEditorVectorPaintBucketTool* mPaintBucketTool;
-        bool mAnyPaintGroupSelected;
+        std::list<FOdysseyVectorGroupPaint*> mWorkingPaintgroupList;
         ::ULIS::FVec2D mCursorAt;
 };

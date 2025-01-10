@@ -5,6 +5,7 @@
 
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
 #include "OdysseyVectorCell.h"
+#include "Import/v2/OdysseyVectorImport.h"
 
 #include "OdysseyAnimationCellImageVector.generated.h"
 
@@ -36,6 +37,7 @@ public:
 
     FOdysseyVectorEngine* GetEngine() const;
     FOdysseyVectorRoot* GetRoot() const;
+    FOdysseyVectorImportV2* GetImporterV2();
     TSharedPtr<FOdysseyVectorBlock> GetVectorBlock() const;
     FGuid GetVectorBlockId();
     void SetVectorBlockId( FGuid iVectorBlockID );
@@ -75,4 +77,5 @@ private:
     TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
     mutable FCriticalSection mImageRenderingMutex;
     mutable TWeakPtr<FOdysseyMediaVector> mMediaVector;
+    FOdysseyVectorImportV2 mImporterV2;
 };

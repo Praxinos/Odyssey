@@ -18,8 +18,27 @@ FOdysseyVectorImportV2::FOdysseyVectorImportV2()
 }
 
 void
+FOdysseyVectorImportV2::Reset()
+{
+    mScene = nullptr;
+    mObjectArray.clear();
+    mBrushTextureMultiMap.clear();
+}
+
+void
+FOdysseyVectorImportV2::PostLoadTextures()
+{
+    for( std::pair<UTexture2D*,FOdysseyVectorBrush*> pair : mBrushTextureMultiMap )
+    {
+        pair.second->SetTexture( pair.first );
+    }
+}
+
+void
 FOdysseyVectorImportV2::Read( FOdysseyVectorGroupPaint* iScene, FArchive &Ar, uint64 iChunkEnd )
 {
+    Reset();
+
     // prevent reloading when the scene already exists.
     // This happens when undoing layer deletion for example.
     // Emptying the scene would create inconsistencies in the undo layer stack.

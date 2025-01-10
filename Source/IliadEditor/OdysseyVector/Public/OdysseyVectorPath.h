@@ -460,6 +460,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
                       , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
                       , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray );
 
+        void DrawChain( BLContext* iBLContext
+                      , FOdysseyVectorEngine* iVectorEngine
+                      , double iCombinedOpacity
+                      , FOdysseyVectorChain& iChain
+                      , uint64 iDrawingFlags );
+
     protected:
         void DrawJoint( BLContext* iBLContext, FOdysseyVectorVertex* iVertex, uint64 iFlags );
         void UpdateBBox();
@@ -467,12 +473,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         void ExploreChain( FOdysseyVectorChain* iChain );
         void UpdateChain( FOdysseyVectorChain* iChain );
         void FindChains();
-        void DrawChain( BLContext* iBLContext
-                      , FOdysseyVectorEngine* iVectorEngine
-                      , double iCombinedOpacity
-                      , FOdysseyVectorChain& iChain
-                      , uint64 iDrawingFlags );
         void DrawSegment( BLContext* iBLContext
+                        , FOdysseyVectorEngine* iVectorEngine
                         , FOdysseyVectorSegment* iSegment
                         , double iStartU
                         , double iEndU

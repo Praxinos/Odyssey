@@ -28,6 +28,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorImportV2
         ~FOdysseyVectorImportV2();
         FOdysseyVectorImportV2();
 
+    void Reset();
+    void PostLoadTextures();
+
     void ParseObjectChunks( FOdysseyVectorObject& iObject
                           , uint32 iChunkID
                           , uint64 iChunkLen
@@ -84,6 +87,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorImportV2
                       , FArchive &Ar );
 
     private:
-        std::vector<FOdysseyVectorObject*> mObjectArray;
         FOdysseyVectorGroupPaint* mScene;
+        std::vector<FOdysseyVectorObject*> mObjectArray;
+        std::multimap<UTexture2D*,FOdysseyVectorBrush*> mBrushTextureMultiMap;
 };

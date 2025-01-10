@@ -12,7 +12,7 @@ FOdysseyVectorImportV2::ReadBrush( FOdysseyVectorBrush& iBrush, uint64 iChunkEnd
 {
     FOdysseyFile::ReadChunks( iChunkEnd
                             , Ar
-                            , [&iBrush](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
+                            , [this, &iBrush](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
         {
             switch( iChunkID )
             {
@@ -49,11 +49,17 @@ FOdysseyVectorImportV2::ReadBrush( FOdysseyVectorBrush& iBrush, uint64 iChunkEnd
 
                 case FOdysseyFile::VectorV2::CHUNK_BRUSH_TEXTURE:
                 {
+                    UTexture2D* texture;
                     FString assetName;
 
                     Ar << assetName;
-                    // using UEditorAssetLibrary will ensure the asset is loaded only once
-                    iBrush.SetTexture( Cast<UTexture2D>(UEditorAssetLibrary::LoadAsset( assetName )) );
+
+                    texture = Cast<UTexture2D>(UEditorAssetLibrary::LoadAsset( assetName ));
+
+                    if( texture )
+                    {
+                        mBrushTextureMultiMap.insert( std::pair<UTexture2D*,FOdysseyVectorBrush*>( texture, &iBrush ) );
+                    }
                 }
                 break;
 

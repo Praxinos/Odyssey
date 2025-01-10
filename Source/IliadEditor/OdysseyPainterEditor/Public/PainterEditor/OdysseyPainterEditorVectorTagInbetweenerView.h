@@ -20,8 +20,8 @@ class FOdysseyVectorUndo;
 UENUM()
 enum class eInbetweenerMappingMode : uint8
 {
-    Bezier   = 0 UMETA( ToolTip = "Keep topology" ),
-    Polyline = 1 UMETA( ToolTip = "As polyline" ),
+    KeepTopology = 0 UMETA( ToolTip = "Keep topology" ),
+    Polyline     = 1 UMETA( ToolTip = "As polyline"   ),
 };
 
 UCLASS()

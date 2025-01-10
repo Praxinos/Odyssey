@@ -557,6 +557,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual void Added();
         virtual void Removed();
         bool IsSystem();
+        FOdysseyVectorObject* GetAncestorByClass( uint32 iClass  );
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags );

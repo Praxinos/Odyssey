@@ -209,12 +209,28 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX )
         {
             mTransformedVertexArray.clear();
+            mTransformedVertexPositionArray.clear();
             mTransformedHandleArray.clear();
+            mTransformedHandlePositionArray.clear();
 
             GetSelectedVertices( iScene, mTransformedVertexArray );
             // static call
             UOdysseyPainterEditorVectorBaseTool::GetSegmentHandlesFromVertices( mTransformedVertexArray
                                                                               , mTransformedHandleArray );
+
+            // Get vertices'original position
+            mTransformedVertexPositionArray.reserve( mTransformedVertexArray.size() );
+            for( FOdysseyVectorVertex* vertex : mTransformedVertexArray )
+            {
+                mTransformedVertexPositionArray.push_back( vertex->GetCoords() );
+            }
+
+            // Get handles'original position
+            mTransformedHandlePositionArray.reserve( mTransformedVertexArray.size() );
+            for( FOdysseyVectorHandleSegment* handle : mTransformedHandleArray )
+            {
+                mTransformedHandlePositionArray.push_back( handle->GetCoords() );
+            }
 
             // remember for undos. we don't register the undo in the mouse down event yet because
             // it could conflict with the undo created by the mouse up event in the case of a no-drag
@@ -260,6 +276,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
 
 static void
 TransformPoint( FOdysseyVectorPoint* iPoint
+              , ::ULIS::FVec2D& iOriginalPosition
               , BLMatrix2D& iSpaceMatrix
               , BLMatrix2D& iInverseSpaceMatrix
               , BLMatrix2D& iTransformationMatrix )
@@ -290,8 +307,7 @@ TransformPoint( FOdysseyVectorPoint* iPoint
 
     if( ownerObject )
     {
-        ::ULIS::FVec2D& localCoords = iPoint->GetCoords();
-        BLPoint worldCoords = ownerObject->GetWorldMatrix().mapPoint( localCoords.x, localCoords.y );
+        BLPoint worldCoords = ownerObject->GetWorldMatrix().mapPoint( iOriginalPosition.x, iOriginalPosition.y );
         BLPoint spaceCoords = iInverseSpaceMatrix.mapPoint( worldCoords.x, worldCoords.y );
         BLPoint transCoords = iTransformationMatrix.mapPoint( spaceCoords.x, spaceCoords.y );
         BLPoint newWorldCoords = iSpaceMatrix.mapPoint( transCoords.x, transCoords.y );
@@ -299,6 +315,9 @@ TransformPoint( FOdysseyVectorPoint* iPoint
 
         iPoint->Set( newLocalCoords.x, newLocalCoords.y );
     }
+
+    // Update original position because modification is incremental
+    iOriginalPosition = iPoint->GetCoords();
 }
 
 void
@@ -343,6 +362,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         for( int i = 0; i < mTransformedVertexArray.size(); i++ )
         {
             TransformPoint( mTransformedVertexArray[i]
+                          , mTransformedVertexPositionArray[i]
                           , spaceMatrix
                           , inverseSpaceMatrix
                           , translateMatrix );
@@ -351,6 +371,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         for( int i = 0; i < mTransformedHandleArray.size(); i++ )
         {
             TransformPoint( mTransformedHandleArray[i]
+                          , mTransformedHandlePositionArray[i]
                           , spaceMatrix
                           , inverseSpaceMatrix
                           , translateMatrix );
@@ -564,6 +585,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
         for( int i = 0; i < mTransformedVertexArray.size(); i++ )
         {
             TransformPoint( mTransformedVertexArray[i]
+                          , mTransformedVertexPositionArray[i]
                           , spaceMatrix
                           , inverseSpaceMatrix
                           , rotateMatrix );
@@ -572,6 +594,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorE
         for( int i = 0; i < mTransformedHandleArray.size(); i++ )
         {
             TransformPoint( mTransformedHandleArray[i]
+                          , mTransformedHandlePositionArray[i]
                           , spaceMatrix
                           , inverseSpaceMatrix
                           , rotateMatrix );
@@ -808,6 +831,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
             for( int i = 0; i < mTransformedVertexArray.size(); i++ )
             {
                 TransformPoint( mTransformedVertexArray[i]
+                              , mTransformedVertexPositionArray[i]
                               , spaceMatrix
                               , inverseSpaceMatrix
                               , scalingMatrix );
@@ -818,6 +842,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorEn
             for( int i = 0; i < mTransformedHandleArray.size(); i++ )
             {
                 TransformPoint( mTransformedHandleArray[i]
+                              , mTransformedHandlePositionArray[i]
                               , spaceMatrix
                               , inverseSpaceMatrix
                               , scalingMatrix );

@@ -80,7 +80,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
         std::list<FInbetweenerBreakdown*> mTransformedBreakdownList;
         FOdysseyPainterEditorVectorTransformToolHUD* mTransformHUD;
         std::vector<FOdysseyVectorVertex*> mTransformedVertexArray;
+        std::vector<::ULIS::FVec2D> mTransformedVertexPositionArray;
         std::vector<FOdysseyVectorHandleSegment*> mTransformedHandleArray;
+        std::vector<::ULIS::FVec2D> mTransformedHandlePositionArray;
         FOdysseyVectorUndo* mUndo;
 
         ::ULIS::FVec2D* mPickedPivot;

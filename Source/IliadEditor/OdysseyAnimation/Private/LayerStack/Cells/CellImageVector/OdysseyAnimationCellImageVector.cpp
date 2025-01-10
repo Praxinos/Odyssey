@@ -81,6 +81,12 @@ UOdysseyAnimationCellImageVector::GetEngine() const
     return mRoot->GetEngine();
 }
 
+FOdysseyVectorImportV2*
+UOdysseyAnimationCellImageVector::GetImporterV2()
+{
+    return &mImporterV2;
+}
+
 FOdysseyVectorRoot*
 UOdysseyAnimationCellImageVector::GetRoot() const
 {
@@ -184,6 +190,10 @@ UOdysseyAnimationCellImageVector::PostLoad()
     mVectorBlock->Init(mVectorBlockId, mRoot->GetEngine(), animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
     mRoot->GetEngine()->Invalidate( 0 );
     FOdysseyVectorEngine::Notify( mRoot->GetScene(), FOdysseyVectorEngine::NOTIFY_ALL );
+
+    // textures must be assigned to brushes in PostLoad and not in Serialize(), because the UAsset won't be fully loaded
+    // and there dimensions would be 0 at that point.
+    mImporterV2.PostLoadTextures();
 }
 
 void

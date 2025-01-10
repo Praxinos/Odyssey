@@ -1574,9 +1574,9 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
 
     brush.Lock();
 
-    for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->mInterpolatedSegmentBuffer )
+    if( bMapAsPolyline )
     {
-        if( bMapAsPolyline )
+        for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->mInterpolatedSegmentBuffer )
         {
             FOdysseyVectorSegment* segment = interpolatedSegment.GetOriginalSegment();
             std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
@@ -1710,7 +1710,11 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                 }
             }
         }
-        else
+    }
+
+    if( bMapAsPolyline == false )
+    {
+        for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->mInterpolatedSegmentBuffer )
         {
             if( interpolatedSegment.GetOriginalSegment()->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
             {
@@ -1718,20 +1722,44 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                                                            , interpolatedSegment.mInterpolatedPointArray[1]
                                                            , interpolatedSegment.mInterpolatedPointArray[2]
                                                            , interpolatedSegment.mInterpolatedPointArray[3] };
-                ::ULIS::FVec2D pt[4] = { FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[0]->mIndex].position )
-                                       , FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[1]->mIndex].position )
-                                       , FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[2]->mIndex].position )
-                                       , FOdysseyVector::MapPoint( worldMatrix, interpolatedPointGeometryBuffer[interpolatedPoint[3]->mIndex].position ) };
-                BLPath path;
 
-                path.moveTo ( pt[0].x, pt[0].y );
-                path.cubicTo( pt[1].x, pt[1].y
-                            , pt[2].x, pt[2].y
-                            , pt[3].x, pt[3].y );
+                interpolatedPoint[0]->GetOriginalPoint()->Set( interpolatedPointGeometryBuffer[interpolatedPoint[0]->mIndex].position );
+                interpolatedPoint[1]->GetOriginalPoint()->Set( interpolatedPointGeometryBuffer[interpolatedPoint[1]->mIndex].position );
+                interpolatedPoint[2]->GetOriginalPoint()->Set( interpolatedPointGeometryBuffer[interpolatedPoint[2]->mIndex].position );
+                interpolatedPoint[3]->GetOriginalPoint()->Set( interpolatedPointGeometryBuffer[interpolatedPoint[3]->mIndex].position );
 
-                iBLContext->setStrokeWidth( 3.0f );
+                interpolatedSegment.GetOriginalSegment()->Update(0);
+            }
+        }
 
-                iBLContext->strokePath( path );
+        iBLContext->save();
+        iBLContext->setMatrix( worldMatrix );
+        for( FOdysseyVectorChain& chain : iInterpolatedPath->GetOriginalPath()->GetChainArray() )
+        {
+            iInterpolatedPath->GetOriginalPath()->DrawChain( iBLContext
+                                                           , iDisplayedScene->GetEngine()
+                                                           , 1.0f/*double iCombinedOpacity*/
+                                                           , chain
+                                                           , 0 );
+        }
+        iBLContext->restore();
+
+        // restore
+        for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->mInterpolatedSegmentBuffer )
+        {
+            if( interpolatedSegment.GetOriginalSegment()->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+            {
+                FInterpolatedPoint* interpolatedPoint[4] = { interpolatedSegment.mInterpolatedPointArray[0]
+                                                           , interpolatedSegment.mInterpolatedPointArray[1]
+                                                           , interpolatedSegment.mInterpolatedPointArray[2]
+                                                           , interpolatedSegment.mInterpolatedPointArray[3] };
+
+                interpolatedPoint[0]->RestoreOriginalCoords();
+                interpolatedPoint[1]->RestoreOriginalCoords();
+                interpolatedPoint[2]->RestoreOriginalCoords();
+                interpolatedPoint[3]->RestoreOriginalCoords();
+
+                interpolatedSegment.GetOriginalSegment()->Update(0);
             }
         }
     }
