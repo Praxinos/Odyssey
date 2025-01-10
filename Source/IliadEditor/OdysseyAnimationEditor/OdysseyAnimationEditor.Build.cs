@@ -89,6 +89,7 @@ namespace UnrealBuildTool.Rules
                     "SequencerCore",
                     "ToolWidgets",
                     "UnrealEd",
+                    "EditorFramework",
                 }
                 );
 

@@ -41,6 +41,11 @@ private:
     void RegisterThumbnailRenderers();
     void UnregisterThumbnailRenderers();
 
+    void RegisterFactoryDelayed();
+    void RegisterPlacementFactories();
+    void UnregisterPlacementFactories();
+    void ReorderFactories();
+
 private:
     /** All created asset type actions. Cached here so that we can unregister them during shutdown. */
     TSharedPtr<IAssetTypeActions> mOdysseyTypeActions;

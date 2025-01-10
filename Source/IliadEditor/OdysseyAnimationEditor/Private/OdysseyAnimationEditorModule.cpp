@@ -10,8 +10,10 @@
 #include "Modules/ModuleManager.h"
 #include "PropertyEditorModule.h"
 #include "Settings/ContentBrowserSettings.h"
+#include "Subsystems/PlacementSubsystem.h"
 #include "Toolkits/AssetEditorToolkit.h"
 
+#include "OdysseyAnimationActorFactory.h"
 #include "OdysseyAnimationEditorToolkit.h"
 #include "OdysseyAnimationAssetTypeActions.h"
 #include "OdysseyAnimationAssetTypeActions.h"
@@ -75,6 +77,8 @@ FOdysseyAnimationEditorModule::StartupModule()
     RegisterDetailCustomizations();
 
     RegisterThumbnailRenderers();
+
+    RegisterPlacementFactories();
 }
 
 void
@@ -93,6 +97,8 @@ FOdysseyAnimationEditorModule::ShutdownModule()
     UnregisterDetailCustomization();
 
     UnregisterThumbnailRenderers();
+
+    UnregisterPlacementFactories();
 }
 
 void
@@ -202,6 +208,69 @@ void
 FOdysseyAnimationEditorModule::UnregisterThumbnailRenderers()
 {
     //UThumbnailManager::Get().UnregisterCustomRenderer(UOdysseyAnimationCellImageRaster::StaticClass());
+}
+
+void
+FOdysseyAnimationEditorModule::RegisterPlacementFactories()
+{
+    // This assumes that this delegate is called AFTER the one registered in UPlacementSubsystem::Initialize()
+    FCoreDelegates::OnPostEngineInit.AddRaw( this, &FOdysseyAnimationEditorModule::RegisterFactoryDelayed );
+}
+
+void
+FOdysseyAnimationEditorModule::UnregisterPlacementFactories()
+{
+    FCoreDelegates::OnPostEngineInit.RemoveAll( this );
+
+    //check( GEditor );
+    //UPlacementSubsystem* placementSubsystem = GEditor->GetEditorSubsystem<UPlacementSubsystem>();
+    //placementSubsystem->OnPlacementFactoriesRegistered().RemoveAll( this );
+}
+
+void
+FOdysseyAnimationEditorModule::RegisterFactoryDelayed()
+{
+    // It's not possible to use the first delegate FCoreDelegates::OnPostEngineInit and then add a new delegate on placementSubsystem->OnPlacementFactoriesRegistered()
+    // because PlacementFactoriesRegistered is called during OnPostEngineInit ( UPlacementSubsystem::Initialize() -> OnPostEngineInit -> UPlacementSubsystem::RegisterPlacementFactories() -> PlacementFactoriesRegistered.Broadcast() )
+    // so placementSubsystem->OnPlacementFactoriesRegistered() is always called BEFORE our own further registration
+    // ( furthermore, GEditor is not available in FOdysseyAnimationEditorModule::StartupModule in case we want to direclty called FOdysseyAnimationEditorModule::RegisterFactoryDelayed() (without indirectly attach to FCoreDelegates::OnPostEngineInit )
+    //check( GEditor );
+    //UPlacementSubsystem* placementSubsystem = GEditor->GetEditorSubsystem<UPlacementSubsystem>();
+    //placementSubsystem->OnPlacementFactoriesRegistered().AddRaw( this, &FOdysseyAnimationEditorModule::ReorderFactories );
+
+    // So we call directly ReorderFactories() and still assume that our delegate in FCoreDelegates::OnPostEngineInit() is called after the one in UPlacementSubsystem::Initialize()
+    ReorderFactories();
+}
+
+void
+FOdysseyAnimationEditorModule::ReorderFactories()
+{
+    UPlacementSubsystem* placementSubsystem = GEditor->GetEditorSubsystem<UPlacementSubsystem>();
+    TArray<TScriptInterface<IAssetFactoryInterface>> factories_to_move;
+
+    UOdysseyAnimation* animation = NewObject<UOdysseyAnimation>( GetTransientPackage(), UOdysseyAnimation::StaticClass(), FName( TEXT( "Transient_Animation" ) ), RF_Transient );
+    FAssetData asset_data( animation, false );
+
+    // Find all the factories which can create UOdysseyAnimationActor
+    // Unregister all the ones which are not UOdysseyAnimationActorFactory
+    // Then register them again but at the end
+    // So the first registered factory which can create UOdysseyAnimationActor is the UOdysseyAnimationActorFactory
+    while( true )
+    {
+        TScriptInterface<IAssetFactoryInterface> factory = placementSubsystem->FindAssetFactoryFromAssetData( asset_data );
+        UActorFactory* actorFactory = Cast<UActorFactory>( factory.GetObject() );
+        if( !actorFactory )
+            break;
+
+        if( actorFactory->IsA<UOdysseyAnimationActorFactory>() )
+            break;
+
+        factories_to_move.Add( factory );
+        placementSubsystem->UnregisterAssetFactory( factory );
+    }
+
+    for( TScriptInterface<IAssetFactoryInterface> factory_to_move : factories_to_move )
+        placementSubsystem->RegisterAssetFactory( factory_to_move );
 }
 
 IMPLEMENT_MODULE( FOdysseyAnimationEditorModule, OdysseyAnimationEditor );
