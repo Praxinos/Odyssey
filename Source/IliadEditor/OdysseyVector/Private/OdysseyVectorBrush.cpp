@@ -109,7 +109,7 @@ FOdysseyVectorBrush::Lock()
 {
     if( texture )
     {
-        if( texture->GetPlatformData()->Mips.Num() && ( pixels == nullptr ) )
+        if( texture->GetPlatformData() && texture->GetPlatformData()->Mips.Num() && ( pixels == nullptr ) )
         {
             FTexture2DMipMap *mip = &texture->GetPlatformData()->Mips[0];
             const FColor* colors = static_cast<const FColor*>(mip->BulkData.LockReadOnly());

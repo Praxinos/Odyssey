@@ -351,12 +351,12 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 
             if( vertex0->IsInvalidated() )
             {
-                vertex0->Update( vertex0->GetOtherSegment( segment ), segment );
+                vertex0->Update( vertex0->GetOtherSegment( segment ), segment, iUpdateFlags );
             }
 
             if( vertex1->IsInvalidated() )
             {
-                vertex1->Update( segment, vertex1->GetOtherSegment( segment ) );
+                vertex1->Update( segment, vertex1->GetOtherSegment( segment ), iUpdateFlags );
             }
         }
     }

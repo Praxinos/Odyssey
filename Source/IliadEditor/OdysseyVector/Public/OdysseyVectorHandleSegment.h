@@ -50,6 +50,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorHandleSegment : public FOdysseyVectorPoint
         void SetID( uint32 iHandleID );
         FOdysseyVectorVertex* GetAttachedVertex();
 
+        // a version that does not invalidate the owner
+        void SetCoordsSilent( ::ULIS::FVec2D& iCoords );
+
     protected:
         virtual void SetCoords( double iX, double iY ) override;
 

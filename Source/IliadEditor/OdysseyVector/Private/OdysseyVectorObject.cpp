@@ -222,18 +222,10 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
     FOdysseyVectorEngine* engine = GetEngine();
     uint32 childUpdateFlags = iUpdateFlags;
 
+    LockDrawing();
+
     if( mInvalidationFlags )
     {
-        // prevents DrawShape() to be called while the object has'nt been updated
-        // Indeed, it could be called by the animation proxy
-        // Note: engine can be NULL when Update is called by a SharedEnv object
-        if( ( ( iUpdateFlags & UPDATE_NODRAWINGLOCK ) == 0 ) && engine )
-        {
-            engine->GetDrawingMutex().lock();
-
-            childUpdateFlags |= UPDATE_NODRAWINGLOCK;
-        }
-
         // update children first by recursively calling the Update function and, if needed,
         // removing the object from the invalidated object list, in the same call.
         mInvalidatedChildrenList.remove_if( [childUpdateFlags] ( FOdysseyVectorObject* child )
@@ -243,11 +235,6 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
                                                 return child->IsInvalidated() == false;
                                             } );
         UpdateShape( iUpdateFlags );
-
-        if( ( ( iUpdateFlags & UPDATE_NODRAWINGLOCK ) == 0 ) && engine )
-        {
-            engine->GetDrawingMutex().unlock();
-        }
 
         // update tags
         for( FOdysseyVectorTag* tag : mTagList )
@@ -260,6 +247,8 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
             mInvalidationFlags = 0;
         }
     }
+
+    UnlockDrawing();
 }
 
 void
@@ -609,6 +598,18 @@ FOdysseyVectorObject::HasAncestor( FOdysseyVectorObject* iCandidateAncestor )
     return false;
 }
 
+void
+FOdysseyVectorObject::LockDrawing()
+{
+    mDrawingMutex.lock();
+}
+
+void
+FOdysseyVectorObject::UnlockDrawing()
+{
+    mDrawingMutex.unlock();
+}
+
 FOdysseyVectorObject*
 FOdysseyVectorObject::GetAncestorByClass( uint32 iClass  )
 {
@@ -703,6 +704,8 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext
 {
     double combinedOpacity = iAncestorsOpacity *= mOpacity;
 
+    LockDrawing();
+
     iBLContext->save();
     iBLContext->transform( mLocalMatrix );
 
@@ -710,11 +713,7 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext
     //Get sure everything is drawn before we draw in the BLend2D buffer.
     iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
 
-    //mDrawingMutex.lock();
-
     DrawShape( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
-
-    //mDrawingMutex.unlock();
 
     // get sure the parent has finished drawing before drawing its children
     iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
@@ -724,6 +723,8 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext
     DrawTags( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
 
     iBLContext->restore();
+
+    UnlockDrawing();
 }
 
 bool
@@ -990,8 +991,7 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
     FOdysseyVectorObject* lastItem = GetLastChild();
     uint32 ret = HIERARCHY_CHANGE_ERROR;
 
-    if( engine )
-        engine->GetDrawingMutex().lock();
+    LockDrawing();
 
     if( HasAncestor( iChild ) == false )
     {
@@ -1037,8 +1037,7 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
         iChild->Recurse( &FOdysseyVectorObject::Added );
     }
 
-    if( engine )
-        engine->GetDrawingMutex().unlock();
+    UnlockDrawing();
 
     // auto invalidation of the whole region that needs to be redrawn
     if( engine )
@@ -1061,8 +1060,7 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
     FOdysseyVectorEngine* engine = GetEngine();
     uint32 ret = HIERARCHY_CHANGE_ERROR;
 
-    if( engine )
-        engine->GetDrawingMutex().lock();
+    LockDrawing();
 
     if( iChild->mParent == this )
     {
@@ -1086,8 +1084,7 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
         iChild->Recurse( &FOdysseyVectorObject::Removed );
     }
 
-    if( engine )
-        engine->GetDrawingMutex().unlock();
+    UnlockDrawing();
 
     // auto invalidation of the whole region that needs to be redrawn
     if( engine )
@@ -1104,8 +1101,7 @@ FOdysseyVectorObject::RemoveAllChildren()
     FOdysseyVectorEngine* engine = GetEngine();
     uint32 ret = HIERARCHY_CHANGE_ERROR;
 
-    if( engine )
-        engine->GetDrawingMutex().lock();
+    LockDrawing();
 
     Invalidate( INVALIDATE_HIERARCHY );
 
@@ -1125,8 +1121,7 @@ FOdysseyVectorObject::RemoveAllChildren()
     mChildrenList.clear();
     mInvalidatedChildrenList.clear();
 
-    if( engine )
-        engine->GetDrawingMutex().unlock();
+    UnlockDrawing();
 
     return HIERARCHY_CHANGE_SUCCESS;
 }

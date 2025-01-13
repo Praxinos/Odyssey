@@ -304,11 +304,13 @@ FOdysseyVectorEngine::GetSelectedVerticesFromFocusedObjects( std::vector<FOdysse
         } );
 }
 
+/*
 std::mutex&
 FOdysseyVectorEngine::GetDrawingMutex()
 {
     return mDrawingMutex;
 }
+*/
 
 ::ULIS::FRectD
 FOdysseyVectorEngine::Render( BLContext* iBLContext, uint64 iDrawingFlags )

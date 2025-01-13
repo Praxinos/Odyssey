@@ -1302,10 +1302,13 @@ FOdysseyVectorSegmentCubic::Update( uint32 iUpdateFlags )
 
     mBBox = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
 
-    // auto invalidation of the region that needs to be redrawn
-    if( engine )
+    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_NOINVALIDATERECT ) == 0 )
     {
-        engine->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), ( previousBBox | mBBox ) ) );
+        // auto invalidation of the region that needs to be redrawn
+        if( engine )
+        {
+            engine->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), ( previousBBox | mBBox ) ) );
+        }
     }
 }
 

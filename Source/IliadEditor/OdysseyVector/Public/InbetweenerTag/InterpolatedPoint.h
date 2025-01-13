@@ -23,7 +23,7 @@ class FInterpolatedPoint
         double GetV();
         uint32 GetIndex();
         double GetRadius();
-        void RestoreOriginalCoords();
+        ::ULIS::FVec2D& GetOriginalCoords();
 
         friend class FOdysseyVectorTagInbetweener;
 

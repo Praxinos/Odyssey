@@ -748,6 +748,8 @@ FOdysseyVectorHUD::DrawPath( BLContext* iBLContext
                            , bool iWorld
                            , uint64 iHUDFlags )
 {
+    iPath->LockDrawing();
+
     std::list<FOdysseyVectorSegment*>& segmentList = iPath->GetSegmentList();
     std::list<FOdysseyVectorVertex*>& vertexList = iPath->GetVertexList();
 
@@ -796,6 +798,8 @@ FOdysseyVectorHUD::DrawPath( BLContext* iBLContext
     }
 
     iBLContext->restore();
+
+    iPath->UnlockDrawing();
 }
 
 // static

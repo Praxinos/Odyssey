@@ -74,7 +74,7 @@ FOdysseyVectorJoint::Draw( BLContext* iBLContext
                          , uint64 iDrawingFlags )
 {
     FOdysseyVectorPath* path = mVertex->GetOwnerAsPath();
-    BLMatrix2D& worldMatrix = path->GetWorldMatrix();
+    const BLMatrix2D worldMatrix = iBLContext->userMatrix();
     FOdysseyVectorEngine* vectorEngine = path->GetEngine();
     FOdysseyVectorBrush& brush = path->GetBrush();
     FColor foregroundColor = path->GetForegroundColor();
@@ -557,13 +557,11 @@ FOdysseyVectorJoint::UpdateBBox()
 {
     ::ULIS::FVec2D& vertexCoords = mVertex->GetCoords();
     FOdysseyVectorPath* path = mVertex->GetOwnerAsPath();
-    FOdysseyVectorEngine* engine = mVertex->GetOwner()->GetEngine();
     double radius = mVertex->GetRadius();
     double xmin = vertexCoords.x - radius
          , ymin = vertexCoords.y - radius
          , xmax = vertexCoords.x + radius
          , ymax = vertexCoords.y + radius;
-    ::ULIS::FRectD previousBBox = mBBox;
 
     switch( path->GetJointType() )
     {
@@ -587,12 +585,6 @@ FOdysseyVectorJoint::UpdateBBox()
     }
 
     mBBox = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
-
-    // auto invalidation of the region that needs to be redrawn
-    if( engine )
-    {
-        engine->InvalidateRect( FOdysseyVector::MapRect( mVertex->GetOwner()->GetWorldMatrix(), ( previousBBox | mBBox ) ) );
-    }
 }
 
 ::ULIS::FRectD

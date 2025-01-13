@@ -41,14 +41,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         // update flags
         //static const uint32 FREQUENTUPDATES = ( 1 << 0 );
         //static const uint32 UPDATE_KEEPINVALIDATED   = ( 1 << 1 );
-        static const uint32 UPDATE_PAINTGROUPS    = ( 1 << 2 );
-        static const uint32 UPDATE_FROMFILE       = ( 1 << 3 );
-        static const uint32 UPDATE_INTERACTIVE    = ( 1 << 4 );
-        static const uint32 UPDATE_NEEDPOLYLINE   = ( 1 << 5 );
-        static const uint32 UPDATE_NOINBETWEENING = ( 1 << 6 );
-        static const uint32 UPDATE_FORCE          = ( 1 << 7 ); // request force updating everything, not only invalidated items
-        static const uint32 UPDATE_NODRAWINGLOCK  = ( 1 << 8 );
-        static const uint32 UPDATE_NORENDER       = ( 1 << 9 );
+        static const uint32 UPDATE_PAINTGROUPS      = ( 1 <<  2 );
+        static const uint32 UPDATE_FROMFILE         = ( 1 <<  3 );
+        static const uint32 UPDATE_INTERACTIVE      = ( 1 <<  4 );
+        static const uint32 UPDATE_NEEDPOLYLINE     = ( 1 <<  5 );
+        static const uint32 UPDATE_NOINBETWEENING   = ( 1 <<  6 );
+        static const uint32 UPDATE_FORCE            = ( 1 <<  7 ); // request force updating everything, not only invalidated items
+        static const uint32 UPDATE_NODRAWINGLOCK    = ( 1 <<  8 );
+        static const uint32 UPDATE_NORENDER         = ( 1 <<  9 );
+        static const uint32 UPDATE_NOINVALIDATERECT = ( 1 << 10 );
 
         // invalidation flags
         static const uint64 INVALIDATE_DEFAULT        = ( 1ULL << 0 );
@@ -558,6 +559,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual void Removed();
         bool IsSystem();
         FOdysseyVectorObject* GetAncestorByClass( uint32 iClass  );
+        void LockDrawing();
+        void UnlockDrawing();
 
     protected:
         virtual void UpdateShape( uint32 iUpdateFlags );
@@ -596,4 +599,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         double mRotation;
         double mScalingX;
         double mScalingY;
+        std::mutex mDrawingMutex;
 };

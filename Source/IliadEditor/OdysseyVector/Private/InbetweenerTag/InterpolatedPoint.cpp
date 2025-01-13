@@ -55,10 +55,10 @@ uint32 FInterpolatedPoint::GetMappedQuadIndex()
     return mMappedQuadIndex;
 }
 
-void
-FInterpolatedPoint::RestoreOriginalCoords()
+::ULIS::FVec2D&
+FInterpolatedPoint::GetOriginalCoords()
 {
-    mOriginalPoint->Set( mOriginalCoords );
+    return mOriginalCoords;
 }
 
 FOdysseyVectorPoint*

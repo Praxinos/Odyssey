@@ -405,7 +405,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
 
         bool IsInvalidated();
         void Invalidate();
-        void Update( FOdysseyVectorSegment* iPrevSegment, FOdysseyVectorSegment* iSegment );
+        void Update( FOdysseyVectorSegment* iPrevSegment, FOdysseyVectorSegment* iSegment, uint32 iUpdateFlags );
+
+        // a version that does not invalidate the owner
+        void SetCoordsSilent( ::ULIS::FVec2D& iCoords );
 
     protected:
         /**

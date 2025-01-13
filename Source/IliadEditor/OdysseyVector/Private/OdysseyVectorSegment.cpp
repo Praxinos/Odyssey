@@ -80,7 +80,7 @@ FOdysseyVectorSegment::GetClosestIntersection( FOdysseyVectorVertex* iVertex )
 void
 FOdysseyVectorSegment::DrawFractionCache( BLContext* iBLContext )
 {
-    BLMatrix2D& worldMatrix = mOwner->GetWorldMatrix();
+    const BLMatrix2D worldMatrix = iBLContext->userMatrix();
 
     iBLContext->setStrokeWidth( 1.0f );
 

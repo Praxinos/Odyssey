@@ -62,6 +62,12 @@ FOdysseyVectorHandleSegment::GetOwner()
 }
 
 void
+FOdysseyVectorHandleSegment::SetCoordsSilent( ::ULIS::FVec2D& iCoords )
+{
+    mCoords = iCoords;
+}
+
+void
 FOdysseyVectorHandleSegment::SetCoords( double iX, double iY )
 {
     // invalidate the attached vertex in order to update the joint

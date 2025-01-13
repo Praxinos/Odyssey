@@ -1551,6 +1551,8 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
     if( iLock )
         LockDrawing();
 
+    iInterpolatedPath->GetOriginalPath()->LockDrawing();
+
     uint32 pointCount = iInterpolatedPath->mInterpolatedPointBuffer.size();
     uint32 inbetweenAbsoluteIndex = iInbetween->GetIndexInInbetweener();
     FInterpolatedPath::PointGeometry* interpolatedPointGeometryBuffer = &iInterpolatedPath->mInterpolatedPointGeometryBuffer[pointCount * inbetweenAbsoluteIndex];
@@ -1722,13 +1724,23 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                                                            , interpolatedSegment.mInterpolatedPointArray[1]
                                                            , interpolatedSegment.mInterpolatedPointArray[2]
                                                            , interpolatedSegment.mInterpolatedPointArray[3] };
+                FOdysseyVectorVertex* vertex0 = static_cast<FOdysseyVectorVertex*>(interpolatedPoint[0]->GetOriginalPoint());
+                FOdysseyVectorVertex* vertex1 = static_cast<FOdysseyVectorVertex*>(interpolatedPoint[3]->GetOriginalPoint());
+                FOdysseyVectorHandleSegment* handle0 = static_cast<FOdysseyVectorHandleSegment*>(interpolatedPoint[1]->GetOriginalPoint());
+                FOdysseyVectorHandleSegment* handle1 = static_cast<FOdysseyVectorHandleSegment*>(interpolatedPoint[2]->GetOriginalPoint());
+                FOdysseyVectorSegment* segment = interpolatedSegment.GetOriginalSegment();
+                FOdysseyVectorSegment* prevSegment = vertex0->GetOtherSegment( segment );
+                FOdysseyVectorSegment* nextSegment = vertex1->GetOtherSegment( segment );
 
-                interpolatedPoint[0]->GetOriginalPoint()->Set( interpolatedPointGeometryBuffer[interpolatedPoint[0]->mIndex].position );
-                interpolatedPoint[1]->GetOriginalPoint()->Set( interpolatedPointGeometryBuffer[interpolatedPoint[1]->mIndex].position );
-                interpolatedPoint[2]->GetOriginalPoint()->Set( interpolatedPointGeometryBuffer[interpolatedPoint[2]->mIndex].position );
-                interpolatedPoint[3]->GetOriginalPoint()->Set( interpolatedPointGeometryBuffer[interpolatedPoint[3]->mIndex].position );
+                vertex0->SetCoordsSilent( interpolatedPointGeometryBuffer[interpolatedPoint[0]->mIndex].position );
+                handle0->SetCoordsSilent( interpolatedPointGeometryBuffer[interpolatedPoint[1]->mIndex].position );
+                handle1->SetCoordsSilent( interpolatedPointGeometryBuffer[interpolatedPoint[2]->mIndex].position );
+                vertex1->SetCoordsSilent( interpolatedPointGeometryBuffer[interpolatedPoint[3]->mIndex].position );
 
-                interpolatedSegment.GetOriginalSegment()->Update(0);
+                interpolatedSegment.GetOriginalSegment()->Update( FOdysseyVectorObject::UPDATE_NOINVALIDATERECT );
+
+                vertex0->Update( prevSegment, segment, FOdysseyVectorObject::UPDATE_NOINVALIDATERECT );
+                vertex1->Update( segment, nextSegment, FOdysseyVectorObject::UPDATE_NOINVALIDATERECT );
             }
         }
 
@@ -1753,18 +1765,30 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                                                            , interpolatedSegment.mInterpolatedPointArray[1]
                                                            , interpolatedSegment.mInterpolatedPointArray[2]
                                                            , interpolatedSegment.mInterpolatedPointArray[3] };
+                FOdysseyVectorVertex* vertex0 = static_cast<FOdysseyVectorVertex*>(interpolatedPoint[0]->GetOriginalPoint());
+                FOdysseyVectorVertex* vertex1 = static_cast<FOdysseyVectorVertex*>(interpolatedPoint[3]->GetOriginalPoint());
+                FOdysseyVectorHandleSegment* handle0 = static_cast<FOdysseyVectorHandleSegment*>(interpolatedPoint[1]->GetOriginalPoint());
+                FOdysseyVectorHandleSegment* handle1 = static_cast<FOdysseyVectorHandleSegment*>(interpolatedPoint[2]->GetOriginalPoint());
+                FOdysseyVectorSegment* segment = interpolatedSegment.GetOriginalSegment();
+                FOdysseyVectorSegment* prevSegment = vertex0->GetOtherSegment( segment );
+                FOdysseyVectorSegment* nextSegment = vertex1->GetOtherSegment( segment );
 
-                interpolatedPoint[0]->RestoreOriginalCoords();
-                interpolatedPoint[1]->RestoreOriginalCoords();
-                interpolatedPoint[2]->RestoreOriginalCoords();
-                interpolatedPoint[3]->RestoreOriginalCoords();
+                vertex0->SetCoordsSilent( interpolatedPoint[0]->GetOriginalCoords() );
+                handle0->SetCoordsSilent( interpolatedPoint[1]->GetOriginalCoords());
+                handle1->SetCoordsSilent( interpolatedPoint[2]->GetOriginalCoords() );
+                vertex1->SetCoordsSilent( interpolatedPoint[3]->GetOriginalCoords() );
 
-                interpolatedSegment.GetOriginalSegment()->Update(0);
+                interpolatedSegment.GetOriginalSegment()->Update( FOdysseyVectorObject::UPDATE_NOINVALIDATERECT );
+
+                vertex0->Update( prevSegment, segment, FOdysseyVectorObject::UPDATE_NOINVALIDATERECT );
+                vertex1->Update( segment, nextSegment, FOdysseyVectorObject::UPDATE_NOINVALIDATERECT );
             }
         }
     }
 
     brush.Unlock();
+
+    iInterpolatedPath->GetOriginalPath()->UnlockDrawing();
 
     if( iLock )
         UnlockDrawing();

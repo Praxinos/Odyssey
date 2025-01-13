@@ -3,6 +3,7 @@
 
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSegment.h"
+#include "OdysseyVectorEngine.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorIntersection.h"
@@ -645,12 +646,26 @@ FOdysseyVectorVertex::SetRadius( double iRadius )
 }
 
 void
-FOdysseyVectorVertex::Update( FOdysseyVectorSegment* iPrevSegment, FOdysseyVectorSegment* iSegment )
+FOdysseyVectorVertex::Update( FOdysseyVectorSegment* iPrevSegment
+                            , FOdysseyVectorSegment* iSegment
+                            , uint32 iUpdateFlags )
 {
+    FOdysseyVectorEngine* engine = mOwner->GetEngine();
+    ::ULIS::FRectD previousBBox = mJoint.GetBBox( false );
+
     // update joint
     MakeJoint( iPrevSegment, iSegment );
 
     mFlags &= (~INVALIDATED);
+
+    if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_NOINVALIDATERECT ) == 0 )
+    {
+        // auto invalidation of the region that needs to be redrawn
+        if( engine )
+        {
+            engine->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), ( previousBBox | mJoint.GetBBox( false ) ) ) );
+        }
+    }
 }
 
 void
@@ -905,6 +920,12 @@ FOdysseyVectorVertex::GetFlags()
 }
 
 void
+FOdysseyVectorVertex::SetCoordsSilent( ::ULIS::FVec2D& iCoords )
+{
+    mCoords = iCoords;
+}
+
+void
 FOdysseyVectorVertex::AddSection( FOdysseyVectorSection* iSection
                                 , uint32 iSectionVertexIndex )
 {
@@ -1076,7 +1097,7 @@ FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext
     {
         if( IsHandleAligned() == true )
         {
-            BLMatrix2D& worldMatrix = mOwner->GetWorldMatrix();
+            const BLMatrix2D worldMatrix = iBLContext->userMatrix();
             ::ULIS::FVec2D localHandlePosition[2];
             BLPoint worldHandlePosition[2];
 
