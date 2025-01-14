@@ -38,6 +38,7 @@ public:
     void RemoveEditedObject(UObject* iObject);
 
     void AddTab(TSharedRef<FOdysseyEditorTab> iTab);
+    template<class T> void RemoveTab();
     template<class T> TSharedPtr<T> FindTab() const;
     const TArray<TSharedPtr<FOdysseyEditorTab>>& GetTabs() const;
     void InitTabs();
@@ -87,6 +88,17 @@ public:
 
     FOdysseyEditorShortcuts mShortcuts;
 };
+
+template<class T>
+void
+FOdysseyEditor::RemoveTab()
+{
+    TSharedPtr<FOdysseyEditorTab> tab = FindTab<T>();
+    if (!tab)
+        return;
+
+    mTabs.RemoveSingle(tab);
+}
 
 template<class T>
 TSharedPtr<T>

@@ -24,9 +24,11 @@ public:
     virtual FName GetToolkitFName() const override;
     virtual FText GetBaseToolkitName() const override;
 
+    virtual void InvokeUI() override;
+
     //If we fill the array with names, a mode toolbar will pop in our edMode
-    virtual void GetToolPaletteNames( TArray<FName>& ioPaletteNames ) const override;
-    virtual void BuildToolPalette( FName iPalette, class FToolBarBuilder& ioToolbarBuilder ) override;
+    //virtual void GetToolPaletteNames( TArray<FName>& ioPaletteNames ) const override;
+    //virtual void BuildToolPalette( FName iPalette, class FToolBarBuilder& ioToolbarBuilder ) override;
 
     TSharedPtr<FOdysseyViewportDrawingEditorExtension> GetViewportDrawingExtension() const;
     TSharedPtr<FOdysseyAnimationEditorExtension> GetAnimationExtension() const;

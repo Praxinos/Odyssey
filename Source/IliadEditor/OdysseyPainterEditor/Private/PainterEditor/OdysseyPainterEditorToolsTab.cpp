@@ -6,11 +6,12 @@
 #include "OdysseyPainterEditor.h"
 #include "Models/OdysseyPainterEditorCommands.h"
 #include "Tools/OdysseyPainterEditorTool.h"
-#include "Widgets/Tools/SOdysseyPainterEditorToolsTileView.h"
 #include "Widgets/Views/STileView.h"
+#include "Widgets/Tools/SOdysseyPainterEditorToolsTileView.h"
 #include "Widgets/Tools/SOdysseyPainterEditorToolOptions.h"
-#include "Models/OdysseyPainterEditorCommands.h"
 #include "Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolBrushSelector.h"
+#include "Models/OdysseyPainterEditorCommands.h"
+#include "Widgets/Tab/SOdysseyPainterEditorTools.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -47,63 +48,8 @@ FOdysseyPainterEditorToolsTab::GetId() const
 TSharedPtr<SWidget>
 FOdysseyPainterEditorToolsTab::CreateWidget()
 {
-    TArray<UOdysseyPainterEditorTool*> tools = {
-        mEditor->GetRasterDrawingTool(),
-        mEditor->GetRasterEraserTool(),
-        mEditor->GetRasterSelectionTool(),
-        mEditor->GetRasterTransformTool(),
-        mEditor->GetRasterPrimitiveDrawingTool(),
-        mEditor->GetRasterPaintBucketTool(),
-        mEditor->GetVectorPathDrawingTool(),
-        mEditor->GetVectorPathEditTool(),
-        mEditor->GetVectorPrimitiveDrawingTool(),
-        mEditor->GetVectorSelectionTool(),
-        mEditor->GetVectorTransformTool(),
-        mEditor->GetVectorScenePanTool(),
-        mEditor->GetVectorPathPushTool(),
-        mEditor->GetVectorPathSmoothTool(),
-        mEditor->GetVectorPathStitchTool(),
-        mEditor->GetVectorEraserTool(),
-        mEditor->GetVectorPaintBucketTool(),
-        mEditor->GetColorPickerTool(),
-        mEditor->GetVectorGridTool(),
-        mEditor->GetVectorMatchingTool(),
-        mEditor->GetVectorChartTool(),
-        mEditor->GetVectorTrajectoryTool()
-    };
-
-    tools = tools.FilterByPredicate([](UOdysseyPainterEditorTool* iTool){return !!iTool;});
-
-    return SNew(SHorizontalBox)
-        + SHorizontalBox::Slot()
-        [
-            SNew(SVerticalBox)
-            + SVerticalBox::Slot()
-            .AutoHeight()
-            [
-                SNew(SOdysseyPainterEditorRasterDrawingToolBrushSelector)
-                .Visibility_Lambda(
-                    [this]()
-                    {
-                        return mEditor->GetCurrentTool() == mEditor->GetRasterDrawingTool() ? EVisibility::Visible : EVisibility::Collapsed;
-                    }
-                )
-                .Tool(mEditor->GetRasterDrawingTool())
-            ]
-            + SVerticalBox::Slot()
-            [
-                SNew(SOdysseyPainterEditorToolOptions)
-                .Tool_Raw(this, &FOdysseyPainterEditorToolsTab::GetCurrentTool)
-            ]
-        ]
-
-        + SHorizontalBox::Slot()
-        .AutoWidth()
-        [
-            SNew( SOdysseyPainterEditorToolsTileView )
-            .Tools(tools)
-            .OnToolSelected(this, &FOdysseyPainterEditorToolsTab::OnToolSelected)
-        ];
+    return SNew(SOdysseyPainterEditorTools)
+        .Editor(mEditor);
 }
 
 void
@@ -115,24 +61,6 @@ FOdysseyPainterEditorToolsTab::BindShortcuts(FBaseToolkit* iToolkit)
     #define MAP_ACTION(action, ...) toolkitCommands->MapAction( action, FExecuteAction::CreateSP( this, &FOdysseyPainterEditorToolsTab::__VA_ARGS__ ), FCanExecuteAction() );
 
     #undef MAP_ACTION
-}
-
-//--------------------------------------------------------------------------------------
-//----------------------------------------------------------------------- Widget Getters
-
-UOdysseyPainterEditorTool*
-FOdysseyPainterEditorToolsTab::GetCurrentTool() const
-{
-    return mEditor->GetCurrentTool();
-}
-
-//--------------------------------------------------------------------------------------
-//---------------------------------------------------------------------- Event Listeners
-
-void
-FOdysseyPainterEditorToolsTab::OnToolSelected(UOdysseyPainterEditorTool* iTool)
-{
-    mEditor->ActivateMainTool(iTool);
 }
 
 #undef LOCTEXT_NAMESPACE

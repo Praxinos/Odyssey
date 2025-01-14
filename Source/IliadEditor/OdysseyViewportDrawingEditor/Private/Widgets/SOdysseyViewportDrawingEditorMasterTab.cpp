@@ -13,6 +13,9 @@
 #include "SAssetView.h"
 #include "OdysseyAnimationActor.h"
 #include "OdysseyAnimationComponent.h"
+#include "Widgets/Input/SSegmentedControl.h"
+#include "Widgets/Layout/SWidgetSwitcher.h"
+#include "Widgets/Tab/SOdysseyPainterEditorTools.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
 
@@ -36,215 +39,158 @@ SOdysseyViewportDrawingEditorMasterTab::Construct(const FArguments& InArgs, FOdy
 
     ChildSlot
     [
-        SNew( SScrollBox )
-        .Orientation( Orient_Vertical )
-        .ScrollBarAlwaysVisible( false )
-        + SScrollBox::Slot()
+        SNew(SVerticalBox)
+        +SVerticalBox::Slot()
+        .AutoHeight()
         [
-            SNew( SVerticalBox )
-            +SVerticalBox::Slot()
-            .Padding(2)
-            .AutoHeight()
-            [
-                SNew(STextBlock)
-                .Text(FText::FromString("Select Actor"))
-            ]
-            + SVerticalBox::Slot()
-            .Padding(2)
-            .AutoHeight()
-            [
-                SNew(SObjectPropertyEntryBox)
-                .AllowedClass(AActor::StaticClass())
-                .ObjectPath(this, &SOdysseyViewportDrawingEditorMasterTab::PaintActorPath)
-                .OnObjectChanged(FOnSetObject::CreateRaw(this, &SOdysseyViewportDrawingEditorMasterTab::OnActorChanged))
-                .EnableContentPicker(true)
-                .DisplayCompactSize(true)
-                .DisplayThumbnail(true)
-                .ThumbnailSizeOverride(FIntPoint(30, 30))
-            ]
-            +SVerticalBox::Slot()
-            .Padding(2)
-            .AutoHeight()
-            [
-                CreateMeshComponentMenuWidget()
-            ]
-            +SVerticalBox::Slot()
-            [
-                SNew( SVerticalBox )
-                .Visibility_Lambda(
-                    [this]()
-                    {
-                        if ( !mExtension->Component() || !mExtension->Component()->IsA<UOdysseyAnimationComponent>() )
-                            return EVisibility::Visible;
+            SNew(SSegmentedControl<EOdysseyViewportModeTool>)
+            .Value(this, &SOdysseyViewportDrawingEditorMasterTab::GetCurrentModeTool)
+            .OnValueChecked(this, &SOdysseyViewportDrawingEditorMasterTab::OnModeToolChecked)
 
-                        return EVisibility::Collapsed;
-                    }
-                )
-                +SVerticalBox::Slot()
-                .Padding(2)
-                .AutoHeight()
+            //Selection Tool
+            + SSegmentedControl<EOdysseyViewportModeTool>::Slot(EOdysseyViewportModeTool::Selection)
+            .Icon(FOdysseyStyle::GetBrush( "ViewportDrawingEditor.MainTab.ModeTool.Selection" ))
+            .ToolTip(LOCTEXT("master-tab.mode-tool.selection.tooltip", "Selection Tool"))
+
+            //Move Tool
+            + SSegmentedControl<EOdysseyViewportModeTool>::Slot(EOdysseyViewportModeTool::Paint)
+            .Icon(FOdysseyStyle::GetBrush( "ViewportDrawingEditor.MainTab.ModeTool.Paint" ))
+            .ToolTip(LOCTEXT("master-tab.mode-tool.paint.tooltip", "Move Tool"))
+        ]
+        +SVerticalBox::Slot()
+        [
+            SNew(SWidgetSwitcher)
+            .WidgetIndex(this, &SOdysseyViewportDrawingEditorMasterTab::GetWidgetIndex)
+            +SWidgetSwitcher::Slot()
+            [
+
+                SNew( SScrollBox )
+                .Orientation( Orient_Vertical )
+                .ScrollBarAlwaysVisible( false )
+                + SScrollBox::Slot()
                 [
-                    SNew(STextBlock)
-                    .Text(FText::FromString("Select Material"))
-                ]
-                + SVerticalBox::Slot()
-                .Padding(2)
-                .AutoHeight()
-                [
-                    SNew(SObjectPropertyEntryBox)
-                    .AllowedClass(UMaterialInterface::StaticClass())
-                    .ObjectPath(this, &SOdysseyViewportDrawingEditorMasterTab::PaintMaterialPath)
-                    .OnObjectChanged(FOnSetObject::CreateRaw(this, &SOdysseyViewportDrawingEditorMasterTab::OnMaterialChanged))
-                    .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(this, &SOdysseyViewportDrawingEditorMasterTab::ShouldFilterMaterialAsset))
-                    .DisplayBrowse(true)
-                    .EnableContentPicker(true)
-                    .DisplayCompactSize(true)
-                    //.DisplayThumbnail(true)
-                    //.ThumbnailSizeOverride(FIntPoint(30, 30))
-                    //.ThumbnailPool( mThumbnailPool )
-                ]
-                + SVerticalBox::Slot()
-                .Padding(2)
-                .AutoHeight()
-                [
-                    SNew(STextBlock)
-                    .Text(FText::FromString("Select Texture"))
-                ]
-                + SVerticalBox::Slot()
-                .Padding(2)
-                .AutoHeight()
-                [
-                    SNew(SObjectPropertyEntryBox)
-                        .AllowedClass(UTexture::StaticClass())
-                        .ObjectPath(this, &SOdysseyViewportDrawingEditorMasterTab::PaintTexturePath)
-                        .OnObjectChanged(FOnSetObject::CreateRaw(this, &SOdysseyViewportDrawingEditorMasterTab::OnTextureChanged))
-                        .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(this, &SOdysseyViewportDrawingEditorMasterTab::ShouldFilterTextureAsset))
-                        .DisplayBrowse(true)
+                    SNew( SVerticalBox )
+                    +SVerticalBox::Slot()
+                    .Padding(2)
+                    .AutoHeight()
+                    [
+                        SNew(STextBlock)
+                        .Text(FText::FromString("Select Actor"))
+                    ]
+                    + SVerticalBox::Slot()
+                    .Padding(2)
+                    .AutoHeight()
+                    [
+                        SNew(SObjectPropertyEntryBox)
+                        .AllowedClass(AActor::StaticClass())
+                        .ObjectPath(this, &SOdysseyViewportDrawingEditorMasterTab::PaintActorPath)
+                        .OnObjectChanged(FOnSetObject::CreateRaw(this, &SOdysseyViewportDrawingEditorMasterTab::OnActorChanged))
                         .EnableContentPicker(true)
                         .DisplayCompactSize(true)
                         .DisplayThumbnail(true)
-                        .ThumbnailSizeOverride(FIntPoint(70, 70))
-                        .ThumbnailPool( mThumbnailPool )
-                ]
-
-                //Here is an interesting way to show selected assets using a content browser like view
-                /* + SVerticalBox::Slot()
-                .Padding(2)
-                .AutoHeight()
-                [
-                    SNew(SAssetView)
-                        .OnShouldFilterAsset_Lambda(
-                            [this](const FAssetData& iAssetData)
-                            {
-                                UObject* object = iAssetData.FastGetAsset();
-                                return !mExtension->SelectableTextures().ContainsByPredicate(
-                                    [object](const FPaintableTexture& iTexture)
-                                    {
-                                        return object == iTexture.Texture;
-                                    }
-                                );
-                            }
-                        )
-                        //SLATE_EVENT( FOnShouldFilterItem, OnShouldFilterItem)
-                        //SLATE_EVENT( FOnGetContentBrowserItemContextMenu, OnGetItemContextMenu )
-                        //SLATE_EVENT(FOnIsAssetValidForCustomToolTip, OnIsAssetValidForCustomToolTip)
-                        //SLATE_EVENT( FOnGetCustomAssetToolTip, OnGetCustomAssetToolTip )
-                        //SLATE_EVENT(FOnExtendAssetViewOptionsMenuContext, OnExtendAssetViewOptionsMenuContext)
-                        //SLATE_ARGUMENT( EContentBrowserItemCategoryFilter, InitialCategoryFilter )
-                        //SLATE_ARGUMENT( TSharedPtr<FAssetFilterCollectionType>, FrontendFilters )
-                        //SLATE_ARGUMENT( FARFilter, InitialBackendFilter )
-                        //SLATE_ARGUMENT( FAssetData, InitialAssetSelection )
-                        //SLATE_ARGUMENT( bool, FilterRecursivelyWithBackendFilter ) //???
-                        .OnItemSelectionChanged_Lambda(
-                            [](const FContentBrowserItem& SelectedItem, ESelectInfo::Type SelectInfo)
-                            {
-                                UE_LOG(LogTemp, Warning, TEXT("Item Selected"));
-                            }
-                        )
-                        .OnItemsActivated_Lambda(
-                            [](TArrayView<const FContentBrowserItem> ActivatedItems, EAssetTypeActivationMethod::Type ActivationMethod)
-                            {
-                                UE_LOG(LogTemp, Warning, TEXT("Item Activated"));
-                            }
-                        )
-                        .AssetShowWarningText(LOCTEXT("master-tab.asset-show-warning-text", "No Editable Asset To Show"))
-                        .ThumbnailLabel( EThumbnailLabel::NoLabel )
-                        .AllowThumbnailHintLabel( false )
-                        .bShowPathViewFilters( false )
-                        .InitialSourcesData(FSourcesData())
-                        .InitialViewType( EAssetViewType::Tile)
-                        .InitialThumbnailSize( EThumbnailSize::Medium )
-                        .ShowBottomToolbar( false)
-                        .ShowViewOptions( false)
-                        .AllowThumbnailEditMode( false)
-                        .CanShowClasses( false)
-                        .CanShowFolders( false)
-                        .CanShowReadOnlyFolders( true )
-                        .CanShowRealTimeThumbnails( true )
-                        .CanShowDevelopersFolder( false )
-                        .CanShowFavorites( false )
-                        .CanDockCollections( false )
-                        .SelectionMode( ESelectionMode::Single)
-                        .AllowDragging( false)
-                        .AllowFocusOnSync( false)
-                        //SLATE_ARGUMENT( bool, FillEmptySpaceInTileView ) //???
-                        .ShowPathInColumnView(false)
-                        .ShowTypeInColumnView(true)
-                        .SortByPathInColumnView(false) //false
-                        .ShowTypeInTileView(true)
-                        .ForceShowEngineContent(false)
-                        .ForceShowPluginContent(false)
-                        .ForceHideScrollbar(false)
-                        .ShowDisallowedAssetClassAsUnsupportedItems(false)
-                        .OnGetCustomSourceAssets_Lambda(
-                            [this](const FARFilter& SourceFilter, TArray<FAssetData>& AddedAssets)
-                            {
-                                for (int i = 0; i < mExtension->SelectableTextures().Num(); i++)
-                                {
-                                    const FPaintableTexture& paintableTexture = mExtension->SelectableTextures()[i];
-                                    UTexture* texture = paintableTexture.Texture;
-                                    if (!texture)
-                                        return;
-
-                                    AddedAssets.Add(FAssetData(texture));
-                                }
-                            }
-                        )
-                ]*/
-
-
-                + SVerticalBox::Slot()
-                .Padding(2)
-                .AutoHeight()
-                [
-                    SNew(SSeparator)
-                ]
-                //Select painting method (texture based, mesh based...) ----
-                + SVerticalBox::Slot()
-                .Padding(2)
-                .AutoHeight()
-                [
-                    SNew(STextBlock)
-                    .Text(FText::FromString("Stamp alignment"))
-                ]
-                + SVerticalBox::Slot()
-                .Padding(2)
-                .AutoHeight()
-                [
-                    SNew(SComboBox<TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod>>)
-                    .ButtonStyle(FAppStyle::Get(), "PropertyEditor.AssetComboStyle")
-                    .ForegroundColor(FAppStyle::GetColor("PropertyEditor.AssetName.ColorAndOpacity"))
-                    .ContentPadding(2.0f)
-                    .OptionsSource(&mOptions)
-                    .OnGenerateWidget(this, &SOdysseyViewportDrawingEditorMasterTab::GeneratePaintingMethodComboBoxItem)
-                    .OnSelectionChanged(this, &SOdysseyViewportDrawingEditorMasterTab::ChangeSelectionPaintingMethodComboBoxItem)
+                        .ThumbnailSizeOverride(FIntPoint(30, 30))
+                    ]
+                    +SVerticalBox::Slot()
+                    .Padding(2)
+                    .AutoHeight()
                     [
-                        SNew(STextBlock)
-                        .TextStyle(FAppStyle::Get(), "PropertyEditor.AssetClass")
-                        .Font(FAppStyle::GetFontStyle("PropertyWindow.NormalFont"))
-                        .Text_Lambda([this] { return SOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(mExtension->PaintingAdapterMethod());})
+                        CreateMeshComponentMenuWidget()
+                    ]
+                    +SVerticalBox::Slot()
+                    [
+                        SNew( SVerticalBox )
+                        .Visibility_Lambda(
+                            [this]()
+                            {
+                                if ( !mExtension->Component() || !mExtension->Component()->IsA<UOdysseyAnimationComponent>() )
+                                    return EVisibility::Visible;
+
+                                return EVisibility::Collapsed;
+                            }
+                        )
+                        +SVerticalBox::Slot()
+                        .Padding(2)
+                        .AutoHeight()
+                        [
+                            SNew(STextBlock)
+                            .Text(FText::FromString("Select Material"))
+                        ]
+                        + SVerticalBox::Slot()
+                        .Padding(2)
+                        .AutoHeight()
+                        [
+                            SNew(SObjectPropertyEntryBox)
+                            .AllowedClass(UMaterialInterface::StaticClass())
+                            .ObjectPath(this, &SOdysseyViewportDrawingEditorMasterTab::PaintMaterialPath)
+                            .OnObjectChanged(FOnSetObject::CreateRaw(this, &SOdysseyViewportDrawingEditorMasterTab::OnMaterialChanged))
+                            .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(this, &SOdysseyViewportDrawingEditorMasterTab::ShouldFilterMaterialAsset))
+                            .DisplayBrowse(true)
+                            .EnableContentPicker(true)
+                            .DisplayCompactSize(true)
+                        ]
+                        + SVerticalBox::Slot()
+                        .Padding(2)
+                        .AutoHeight()
+                        [
+                            SNew(STextBlock)
+                            .Text(FText::FromString("Select Texture"))
+                        ]
+                        + SVerticalBox::Slot()
+                        .Padding(2)
+                        .AutoHeight()
+                        [
+                            SNew(SObjectPropertyEntryBox)
+                                .AllowedClass(UTexture::StaticClass())
+                                .ObjectPath(this, &SOdysseyViewportDrawingEditorMasterTab::PaintTexturePath)
+                                .OnObjectChanged(FOnSetObject::CreateRaw(this, &SOdysseyViewportDrawingEditorMasterTab::OnTextureChanged))
+                                .OnShouldFilterAsset(FOnShouldFilterAsset::CreateRaw(this, &SOdysseyViewportDrawingEditorMasterTab::ShouldFilterTextureAsset))
+                                .DisplayBrowse(true)
+                                .EnableContentPicker(true)
+                                .DisplayCompactSize(true)
+                                .DisplayThumbnail(true)
+                                .ThumbnailSizeOverride(FIntPoint(70, 70))
+                                .ThumbnailPool( mThumbnailPool )
+                        ]
+
+                        + SVerticalBox::Slot()
+                        .Padding(2)
+                        .AutoHeight()
+                        [
+                            SNew(SSeparator)
+                        ]
+                        //Select painting method (texture based, mesh based...) ----
+                        + SVerticalBox::Slot()
+                        .Padding(2)
+                        .AutoHeight()
+                        [
+                            SNew(STextBlock)
+                            .Text(FText::FromString("Stamp alignment"))
+                        ]
+                        + SVerticalBox::Slot()
+                        .Padding(2)
+                        .AutoHeight()
+                        [
+                            SNew(SComboBox<TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod>>)
+                            .ButtonStyle(FAppStyle::Get(), "PropertyEditor.AssetComboStyle")
+                            .ForegroundColor(FAppStyle::GetColor("PropertyEditor.AssetName.ColorAndOpacity"))
+                            .ContentPadding(2.0f)
+                            .OptionsSource(&mOptions)
+                            .OnGenerateWidget(this, &SOdysseyViewportDrawingEditorMasterTab::GeneratePaintingMethodComboBoxItem)
+                            .OnSelectionChanged(this, &SOdysseyViewportDrawingEditorMasterTab::ChangeSelectionPaintingMethodComboBoxItem)
+                            [
+                                SNew(STextBlock)
+                                .TextStyle(FAppStyle::Get(), "PropertyEditor.AssetClass")
+                                .Font(FAppStyle::GetFontStyle("PropertyWindow.NormalFont"))
+                                .Text_Lambda([this] { return SOdysseyViewportDrawingEditorMasterTab::GetMethodAsText(mExtension->PaintingAdapterMethod());})
+                            ]
+                        ]
                     ]
                 ]
+            ]
+            +SWidgetSwitcher::Slot()
+            [
+                SNew(SOdysseyPainterEditorTools)
+                .Editor(mExtension->GetEditor())
             ]
         ]
     ];
@@ -470,6 +416,37 @@ SOdysseyViewportDrawingEditorMasterTab::OnTextureChanged(const FAssetData& iAsse
     {
         mExtension->SetTexture( texture, true );
     }
+}
+
+EOdysseyViewportModeTool
+SOdysseyViewportDrawingEditorMasterTab::GetCurrentModeTool() const
+{
+    return mModeTool;
+}
+
+void
+SOdysseyViewportDrawingEditorMasterTab::OnModeToolChecked(EOdysseyViewportModeTool iTool, ECheckBoxState iState)
+{
+    if (iState == ECheckBoxState::Checked)
+        mModeTool = iTool;
+}
+
+int32
+SOdysseyViewportDrawingEditorMasterTab::GetWidgetIndex() const
+{
+    return int32( mModeTool );
+}
+
+UOdysseyPainterEditorTool*
+SOdysseyViewportDrawingEditorMasterTab::GetCurrentTool() const
+{
+    return mExtension->GetEditor()->GetCurrentTool();
+}
+
+void
+SOdysseyViewportDrawingEditorMasterTab::OnToolSelected(UOdysseyPainterEditorTool* iTool)
+{
+    mExtension->GetEditor()->ActivateMainTool(iTool);
 }
 
 #undef LOCTEXT_NAMESPACE

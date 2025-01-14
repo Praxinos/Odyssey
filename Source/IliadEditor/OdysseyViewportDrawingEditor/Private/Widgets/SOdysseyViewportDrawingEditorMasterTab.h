@@ -8,6 +8,13 @@
 
 class FOdysseyViewportDrawingEditorExtension;
 class SComboButton;
+class UOdysseyPainterEditorTool;
+
+enum class EOdysseyViewportModeTool
+{
+    Selection = 0,
+    Paint,
+};
 
 class ODYSSEYVIEWPORTDRAWINGEDITOR_API SOdysseyViewportDrawingEditorMasterTab
     : public SCompoundWidget
@@ -48,6 +55,14 @@ protected:
     void OnMaterialChanged(const FAssetData& iAssetData);
     void OnTextureChanged(const FAssetData& iAssetData);
 
+    EOdysseyViewportModeTool GetCurrentModeTool() const;
+    void OnModeToolChecked(EOdysseyViewportModeTool iTool, ECheckBoxState iState);
+
+    int32 GetWidgetIndex() const;
+
+    UOdysseyPainterEditorTool* GetCurrentTool() const;
+    void OnToolSelected(UOdysseyPainterEditorTool* iTool);
+
 private:
     FOdysseyViewportDrawingEditorExtension* mExtension;
     TSharedPtr<SVerticalBox> mMeshSelectorVerticalBox;
@@ -55,4 +70,5 @@ private:
     TArray<TSharedPtr<EOdysseyViewportDrawingPaintingAdapterMethod>> mOptions;
 
     TSharedPtr<FAssetThumbnailPool> mThumbnailPool;
+    EOdysseyViewportModeTool mModeTool = EOdysseyViewportModeTool::Paint;
 };

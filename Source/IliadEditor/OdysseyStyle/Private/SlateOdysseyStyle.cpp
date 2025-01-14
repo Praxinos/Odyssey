@@ -885,6 +885,10 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("Shapes.Polygon", new IMAGE_BRUSH_SVG("OdysseyShapes/polygon", mIcon16x16));
     Set("Shapes.Ellipse", new IMAGE_BRUSH_SVG("OdysseyShapes/ellipse", mIcon16x16));
     Set("Shapes.Bezier", new IMAGE_BRUSH_SVG("OdysseyShapes/bezier", mIcon16x16));
+
+    Set("ViewportDrawingEditor.MainTab.ModeTool.Selection", new IMAGE_BRUSH_SVG("OdysseyViewportDrawing/SelectionModeTool", mIcon16x16));
+    Set("ViewportDrawingEditor.MainTab.ModeTool.Paint", new IMAGE_BRUSH_SVG("OdysseyViewportDrawing/PaintModeTool", mIcon16x16));
+
 #endif
 }
 

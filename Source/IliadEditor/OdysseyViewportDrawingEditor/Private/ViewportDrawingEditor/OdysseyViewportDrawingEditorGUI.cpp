@@ -10,6 +10,7 @@
 #include "MovieScene.h"
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationComponent.h"
+#include "OdysseyPainterEditorToolsTab.h"
 #include "ISequencer.h"
 
 #define LOCTEXT_NAMESPACE "ViewportDrawingEditor"
@@ -34,6 +35,8 @@ void
 FOdysseyViewportDrawingEditorGUI::Initialize()
 {
     CustomizeAnimationEditorTimeline();
+
+    mExtension->GetEditor()->RemoveTab<FOdysseyPainterEditorToolsTab>();
 }
 
 void

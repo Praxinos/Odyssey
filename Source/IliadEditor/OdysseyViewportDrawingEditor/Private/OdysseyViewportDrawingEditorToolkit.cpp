@@ -37,10 +37,20 @@ FOdysseyViewportDrawingEditorToolkit::GetBaseToolkitName() const
 }
 
 void
+FOdysseyViewportDrawingEditorToolkit::InvokeUI()
+{
+    FOdysseyModeToolkit::InvokeUI();
+    //FIX: remove the default scrollbar of the main panel
+    const TSharedPtr<SWidget> Content = GetInlineContent() ;
+    if ( Content && InlineContentHolder.IsValid() )
+        InlineContentHolder->SetContent( Content.ToSharedRef() );
+}
+
+/* void
 FOdysseyViewportDrawingEditorToolkit::GetToolPaletteNames( TArray<FName>& ioPaletteNames ) const
 {
     ioPaletteNames.Add( FName( "Odyssey Panels Manager" ));
-}
+} */
 
 TSharedPtr<SWidget>
 FOdysseyViewportDrawingEditorToolkit::GetInlineContent() const
@@ -69,7 +79,7 @@ FOdysseyViewportDrawingEditorToolkit::GetAnimationExtension() const
     return mAnimationExtension;
 }
 
-void
+/* void
 FOdysseyViewportDrawingEditorToolkit::BuildToolPalette( FName iPalette, class FToolBarBuilder& ioToolbarBuilder )
 {
     const TArray<TSharedPtr<FOdysseyEditorTab>>& tabs = mEditor->GetTabs();
@@ -91,6 +101,6 @@ FOdysseyViewportDrawingEditorToolkit::BuildToolPalette( FName iPalette, class FT
             tab->GetIcon()
         );
     }
-}
+} */
 
 #undef LOCTEXT_NAMESPACE
