@@ -8,6 +8,7 @@
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
 #include "OdysseyKeyState.h"
 #include "AnimationEditor/OdysseyAnimationEditorCommands.h"
+#include "Framework/Application/SlateApplication.h"
 
 FOdysseyAnimationTimelineTools&
 FOdysseyAnimationTimelineTools::Get()

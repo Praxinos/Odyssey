@@ -8,6 +8,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
 #include "HUD/OdysseyVectorHUD.h"
+#include "TextureResource.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

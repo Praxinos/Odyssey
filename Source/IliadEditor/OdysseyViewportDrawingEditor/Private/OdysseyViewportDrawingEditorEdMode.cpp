@@ -13,6 +13,7 @@
 #include "PhysicsEngine/PhysicsSettings.h"
 #include "Toolkits/ToolkitManager.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Framework/Application/SlateApplication.h"
 #include "EditorReimportHandler.h"
 #include "MeshPaintHelpers.h"
 #include "MeshPaintSettings.h"

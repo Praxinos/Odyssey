@@ -7,6 +7,7 @@
 #include "OdysseyAnimationPlayer.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "Subsystems/UnrealEditorSubsystem.h"
+#include "Editor.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationActor)
 

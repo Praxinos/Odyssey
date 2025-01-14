@@ -28,6 +28,7 @@
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorRoot.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAlter.h"
+#include "Editor.h"
 
 #define LOCTEXT_NAMESPACE "Animation"
 

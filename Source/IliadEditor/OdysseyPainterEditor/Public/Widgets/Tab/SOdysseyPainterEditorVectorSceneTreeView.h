@@ -9,6 +9,7 @@
 #include "Widgets/Views/STreeView.h"
 #include "Widgets/Tab/SOdysseyPainterEditorVectorSceneTreeViewRow.h"
 #include "OdysseyVectorGroupPaint.h"
+#include "Framework/Commands/UICommandList.h"
 
 class FOdysseyPainterEditor;
 

@@ -4,6 +4,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Layout/Geometry.h"
+#include "Input/Events.h"
+#include "Input/Reply.h"
 #include "OdysseyAnimationEditorTimelinePosition.h"
 
 class FOdysseyAnimationTimelineTool

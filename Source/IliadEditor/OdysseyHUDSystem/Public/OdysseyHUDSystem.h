@@ -6,6 +6,8 @@
 #include "CoreMinimal.h"
 
 class FOdysseyHUDElement;
+class FCanvas;
+
 class ODYSSEYHUDSYSTEM_API FOdysseyHUDSystem
 {
 public:

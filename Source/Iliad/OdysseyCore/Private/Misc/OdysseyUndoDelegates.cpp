@@ -4,6 +4,7 @@
 #include "Misc/OdysseyUndoDelegates.h"
 #if WITH_EDITOR
 #include "Editor/TransBuffer.h"
+#include "Editor.h"
 #endif
 
 FOdysseyUndoDelegates&

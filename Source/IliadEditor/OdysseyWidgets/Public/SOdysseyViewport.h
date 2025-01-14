@@ -14,6 +14,7 @@ class FOdysseySceneViewport;
 class SScrollBar;
 class SViewport;
 class UTexture2D;
+class UTexture;
 
 
 /////////////////////////////////////////////////////

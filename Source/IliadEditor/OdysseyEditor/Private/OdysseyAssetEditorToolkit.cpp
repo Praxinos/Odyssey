@@ -4,6 +4,7 @@
 #include "OdysseyAssetEditorToolkit.h"
 
 #include "OdysseyEditor.h"
+#include "ToolMenus.h"
 
 /////////////////////////////////////////////////////
 // FOdysseyAssetEditorToolkit

@@ -20,6 +20,8 @@
 #include "LayerStack/Tools/OdysseyAnimationTimelineTools.h"
 #include "OdysseyAnimationEditorTimelinePosition.h"
 #include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
+#include "ScopedTransaction.h"
+#include "Widgets/Input/SButton.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

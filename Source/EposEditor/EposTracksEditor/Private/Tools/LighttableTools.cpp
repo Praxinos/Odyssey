@@ -7,6 +7,7 @@
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "Compilation/MovieSceneCompiledDataManager.h"
 #include "EditorSupportDelegates.h"
+#include "Engine/Texture2D.h"
 #include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "MaterialEditingLibrary.h"
 #include "Materials/MaterialInstanceConstant.h"

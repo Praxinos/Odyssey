@@ -12,6 +12,7 @@
 #include "LevelEditorViewport.h"
 #include "Misc/FrameRate.h"
 #include "Framework/Application/IInputProcessor.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
 
 #include "StoryboardViewport/StoryboardVisibleArea.h"
 #include "StoryboardViewport/StoryboardViewportZoomController.h"

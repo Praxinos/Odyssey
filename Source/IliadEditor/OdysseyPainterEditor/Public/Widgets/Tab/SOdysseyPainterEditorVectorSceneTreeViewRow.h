@@ -8,6 +8,7 @@
 #include "Widgets/Views/STableViewBase.h"
 #include "Widgets/Views/STableRow.h"
 #include "Widgets/Views/STreeView.h"
+#include "Widgets/Text/SInlineEditableTextBlock.h"
 
 class FOdysseyVectorObject;
 

@@ -16,6 +16,7 @@
 #include "EditorModeManager.h"
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyViewportDrawingEditorToolkit.h"
+#include "Widgets/Input/SCheckBox.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

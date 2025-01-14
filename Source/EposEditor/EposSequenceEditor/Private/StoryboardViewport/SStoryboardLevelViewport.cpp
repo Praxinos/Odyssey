@@ -41,6 +41,7 @@
 #include "CanvasTypes.h"
 #include "BoxTypes.h"
 #include "Polygon2.h"
+#include "Modules/ModuleManager.h"
 
 
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"

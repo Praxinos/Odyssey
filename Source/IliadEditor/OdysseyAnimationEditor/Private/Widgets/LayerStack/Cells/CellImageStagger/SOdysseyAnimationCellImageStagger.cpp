@@ -8,6 +8,8 @@
 #include "OdysseyAnimationCurrentFrameMutator.h"
 #include "OdysseyAnimationEditorTimelinePosition.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "ScopedTransaction.h"
+#include "Widgets/Input/SComboButton.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

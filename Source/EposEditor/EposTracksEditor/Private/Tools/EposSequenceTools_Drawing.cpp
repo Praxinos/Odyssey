@@ -8,6 +8,7 @@
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "Compilation/MovieSceneCompiledDataManager.h"
 #include "EditorAssetLibrary.h"
+#include "Engine/Texture2D.h"
 #include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "ISequencer.h"
 #include "Materials/MaterialInstanceConstant.h"
@@ -16,6 +17,7 @@
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
+#include "Subsystems/AssetEditorSubsystem.h"
 
 #include "Board/BoardSequence.h"
 #include "EposSequenceHelpers.h"

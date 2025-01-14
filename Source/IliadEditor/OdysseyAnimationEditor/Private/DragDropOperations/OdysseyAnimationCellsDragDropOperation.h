@@ -4,6 +4,9 @@
 #pragma once
 
 #include "LayerStack/Cells/OdysseyAnimationCellClipboardData.h"
+#include "Input/DragAndDrop.h"
+
+struct FSlateBrush;
 
 class FOdysseyAnimationCellsDragDropOperation : public FDragDropOperation
 {

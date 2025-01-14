@@ -9,6 +9,7 @@
 #include "OdysseyMediaProvider.h"
 #include "OdysseyImageRenderingAbility.h"
 #include "Textures/SlateIcon.h"
+#include "Layout/Margin.h"
 
 #include "OdysseyLayer.generated.h"
 

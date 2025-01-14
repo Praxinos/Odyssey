@@ -5,6 +5,7 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationPlayer.h"
 #include "Materials/MaterialInstanceConstant.h"
+#include "Materials/Material.h"
 #include "Subsystems/UnrealEditorSubsystem.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "Misc/TransactionObjectEvent.h"

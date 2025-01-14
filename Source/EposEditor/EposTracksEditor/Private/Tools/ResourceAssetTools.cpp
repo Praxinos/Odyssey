@@ -8,6 +8,7 @@
 #include "CineCameraActor.h"
 #include "CineCameraComponent.h"
 #include "EditorAssetLibrary.h"
+#include "Engine/Texture2D.h"
 #include "Factories/MaterialInstanceConstantFactoryNew.h"
 #include "Factories/Texture2dFactoryNew.h"
 #include "IMovieScenePlayer.h"

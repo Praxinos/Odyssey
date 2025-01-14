@@ -11,6 +11,7 @@
 #include "Models/OdysseyPainterEditorCommands.h"
 #include "OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "Toolkits/BaseToolkit.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

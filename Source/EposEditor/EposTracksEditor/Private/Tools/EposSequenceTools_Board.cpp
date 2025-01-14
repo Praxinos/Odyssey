@@ -8,11 +8,13 @@
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "CineCameraActor.h"
 #include "Components/StaticMeshComponent.h"
+#include "Factories/Factory.h"
 #include "IAssetTools.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieSceneTimeHelpers.h"
 #include "MovieSceneToolHelpers.h"
 #include "MovieSceneToolsProjectSettings.h"
+#include "UObject/UObjectIterator.h"
 
 #include "Board/BoardSequence.h"
 #include "CinematicBoardTrack/MovieSceneCinematicBoardSection.h"
