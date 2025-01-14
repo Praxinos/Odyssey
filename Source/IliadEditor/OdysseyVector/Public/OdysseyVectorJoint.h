@@ -11,6 +11,7 @@
 
 class FOdysseyVectorVertex;
 class FOdysseyVectorSegment;
+class FOdysseyVectorEngine;
 
 class ODYSSEYVECTOR_API FOdysseyVectorJoint
 {
@@ -23,6 +24,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorJoint
 
         void
         Draw( BLContext* iBLContext
+            , FOdysseyVectorEngine* iVectorEngine
             , double iStartU
             , double iEndU
             , double iCombinedOpacity

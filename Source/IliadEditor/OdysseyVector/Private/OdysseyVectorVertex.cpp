@@ -1090,6 +1090,7 @@ FOdysseyVectorVertex::GetJointLength()
 
 void
 FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext
+                               , FOdysseyVectorEngine* iVectorEngine
                                , double iCombinedOpacity
                                , uint64 iDrawingFlags )
 {
@@ -1114,6 +1115,7 @@ FOdysseyVectorVertex::DrawJoint( BLContext* iBLContext
         else
         {
             mJoint.Draw( iBLContext
+                       , iVectorEngine
                        , mJoint.GetTextureStartU()
                        , mJoint.GetTextureEndU()
                        , iCombinedOpacity

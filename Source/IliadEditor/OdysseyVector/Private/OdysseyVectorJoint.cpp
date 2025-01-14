@@ -68,6 +68,7 @@ FOdysseyVectorJoint::GetLength()
 
 void
 FOdysseyVectorJoint::Draw( BLContext* iBLContext
+                         , FOdysseyVectorEngine* iVectorEngine
                          , double iStartU
                          , double iEndU
                          , double iCombinedOpacity
@@ -75,7 +76,6 @@ FOdysseyVectorJoint::Draw( BLContext* iBLContext
 {
     FOdysseyVectorPath* path = mVertex->GetOwnerAsPath();
     const BLMatrix2D worldMatrix = iBLContext->userMatrix();
-    FOdysseyVectorEngine* vectorEngine = path->GetEngine();
     FOdysseyVectorBrush& brush = path->GetBrush();
     FColor foregroundColor = path->GetForegroundColor();
     double difU = iEndU - iStartU;
@@ -99,17 +99,17 @@ FOdysseyVectorJoint::Draw( BLContext* iBLContext
                 polyU[j] = iStartU + ( polygon->U[j] * difU );
             }
 
-            vectorEngine->FillTriangle( iBLContext
-                                      , polygon->point
-                                      , polyU
-                                      , polygon->V
-                                      , iCombinedOpacity
-                                      , foregroundColor
-                                      , (int8*) brush.pixels
-                                      , brush.width
-                                      , brush.height
-                                      , brush.bitsPerPixel
-                                      , polygonDrawingFlags );
+            iVectorEngine->FillTriangle( iBLContext
+                                       , polygon->point
+                                       , polyU
+                                       , polygon->V
+                                       , iCombinedOpacity
+                                       , foregroundColor
+                                       , (int8*) brush.pixels
+                                       , brush.width
+                                       , brush.height
+                                       , brush.bitsPerPixel
+                                       , polygonDrawingFlags );
         }
     }
     else //otherwise use Blend2D's

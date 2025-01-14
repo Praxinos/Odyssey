@@ -1059,14 +1059,16 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
             break;
         }
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
         vectorEngine->ResetHUD();
     }
 
     // redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    //iScene->GetEngine()->Invalidate( 0 );
+
     oSignalFlags = notificationFlags;
+
     return true;
 }
 

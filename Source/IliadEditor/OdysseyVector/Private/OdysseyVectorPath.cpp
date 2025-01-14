@@ -1943,6 +1943,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                          && ( ( jointBBox.y + jointBBox.h ) > 0        ) )
                         {
                             vertex->DrawJoint( iBLContext
+                                             , iVectorEngine
                                              , iCombinedOpacity
                                              , iDrawingFlags );
                         }
@@ -2011,7 +2012,7 @@ FOdysseyVectorPath::DrawChain( BLContext* iBLContext
                  && ( ( jointBBox.y               ) < screen.h )
                  && ( ( jointBBox.y + jointBBox.h ) > 0        ) )
                 {
-                    vertex->DrawJoint( iBLContext, iCombinedOpacity, iDrawingFlags );
+                    vertex->DrawJoint( iBLContext, iVectorEngine, iCombinedOpacity, iDrawingFlags );
                 }
 
                 return false; // keep iterating
