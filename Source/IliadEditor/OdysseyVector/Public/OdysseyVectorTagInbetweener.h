@@ -237,7 +237,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void ResizeRoutes();
         void FitRoutes( uint32 iFitFrom );
         //void SetChart( const FInbetweenerChart& iChart );
-        void ResetLayout( bool iFreeMemNow, FInbetweenerBreakdown* iNewDefaultBreakdown );
+        void ResetLayout( bool iFreeMemNow );
         FInbetweenerDrawing* GetDrawing( uint32 iIndex );
         virtual void UpdateMatrix() override;
         virtual void ObjectAdded() override;

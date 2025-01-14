@@ -329,6 +329,17 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
                  , mInvalidatedSegmentList.end()
                  , [ this ]( FOdysseyVectorSegment *segment )*/
 
+    // invalidate the whole bounding box to force redraw textured segments that are interdependent
+    if( mBrush.GetTexture() && ( mBrush.ExtensionMode != eBrushExtensionMode::Segment ) )
+    {
+        FOdysseyVectorEngine* engine = GetEngine();
+
+        if( engine )
+        {
+            engine->InvalidateRect( GetBBox( true ) );
+        }
+    }
+
     if( iUpdateFlags & UPDATE_FORCE )
     {
         for ( FOdysseyVectorSegment* segment : mSegmentList )
@@ -2622,7 +2633,7 @@ FOdysseyVectorPath::UpdateChain( FOdysseyVectorChain* iChain )
             {
                 double brushRatio = mBrush.height ? (double) mBrush.width  / mBrush.height : 0.0f;
                 double averageSegmentRadius = ( vertex->GetRadius() + otherVertex->GetRadius() ) * 0.5f;
-                double adaptedSegmentLength = averageSegmentRadius * brushRatio;
+                double adaptedSegmentLength = ( averageSegmentRadius * 2.0f ) * brushRatio;
 
                 if( mBrush.Revert )
                 {

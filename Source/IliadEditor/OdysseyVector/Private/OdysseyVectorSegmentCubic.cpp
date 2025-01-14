@@ -838,8 +838,6 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( FOdysseyVectorPoint* iFromPoi
                                                  , double iRadiusFrom
                                                  , double iRadiusTo
                                                  , ::ULIS::FVec2D iBezier[4]
-                                                 , const ::ULIS::FVec2D& iNormalizedTangentFrom
-                                                 , const ::ULIS::FVec2D& iNormalizedTangentTo
                                                  , uint32 iRecurseDepth
                                                  , uint32 iMinRecurse
                                                  , uint32 iMaxRecurse
@@ -880,70 +878,56 @@ FOdysseyVectorSegmentCubic::BuildVariableAdaptive( FOdysseyVectorPoint* iFromPoi
        && ( ( ctrlVector[0].DotProduct(  straightVector ) < dotLimit )
          || ( ctrlVector[1].DotProduct( -straightVector ) < dotLimit ) ) ) )
     {
-        ::ULIS::FVec2D tangent = ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( iBezier[0]
-                                                                                      , iBezier[1]
-                                                                                      , iBezier[2]
-                                                                                      , iBezier[3]
-                                                                                      , 0.5f );
-        if( tangent.DistanceSquared() )
-        {
-            FOdysseyVectorPoint* splitPoint;
-            double radiusAt = ( iRadiusFrom + iRadiusTo ) * 0.5f;
-            double splitsAt = ( iToT + iFromT ) * 0.5f;
+        FOdysseyVectorPoint* splitPoint;
+        double radiusAt = ( iRadiusFrom + iRadiusTo ) * 0.5f;
+        double splitsAt = ( iToT + iFromT ) * 0.5f;
 
-            tangent.Normalize();
+        memcpy( childBezier[0], iBezier, sizeof( childBezier[0] ) );
+        memcpy( childBezier[1], iBezier, sizeof( childBezier[1] ) );
 
-            memcpy( childBezier[0], iBezier, sizeof( childBezier[0] ) );
-            memcpy( childBezier[1], iBezier, sizeof( childBezier[1] ) );
+        // First sub-bezier from the divided parent bezier
+        // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
+        ::ULIS::CubicBezierSplitAtParameter       <::ULIS::FVec2D>( &childBezier[0][0]
+                                                                  , &childBezier[0][1]
+                                                                  , &childBezier[0][2]
+                                                                  , &childBezier[0][3]
+                                                                  , 0.5f );
 
-            // First sub-bezier from the divided parent bezier
-            // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
-            ::ULIS::CubicBezierSplitAtParameter       <::ULIS::FVec2D>( &childBezier[0][0]
-                                                                      , &childBezier[0][1]
-                                                                      , &childBezier[0][2]
-                                                                      , &childBezier[0][3]
-                                                                      , 0.5f );
+        splitPoint = &iSubPointBuffer.emplace_back( childBezier[0][3].x
+                                                    , childBezier[0][3].y );
 
-            splitPoint = &iSubPointBuffer.emplace_back( childBezier[0][3].x
-                                                      , childBezier[0][3].y );
+        BuildVariableAdaptive( iFromPoint
+                              , splitPoint
+                              , iFromT
+                              , splitsAt
+                              , iRadiusFrom
+                              , radiusAt
+                              , childBezier[0]
+                              , iRecurseDepth + 1
+                              , iMinRecurse
+                              , iMaxRecurse
+                              , iSubPointBuffer
+                              , iSubLineBuffer );
 
-            BuildVariableAdaptive( iFromPoint
-                                 , splitPoint
-                                 , iFromT
-                                 , splitsAt
-                                 , iRadiusFrom
-                                 , radiusAt
-                                 , childBezier[0]
-                                 , iNormalizedTangentFrom
-                                 , tangent
-                                 , iRecurseDepth + 1
-                                 , iMinRecurse
-                                 , iMaxRecurse
-                                 , iSubPointBuffer
-                                 , iSubLineBuffer );
-
-            // Second sub-bezier from the divided parent bezier
-            // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
-            ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &childBezier[1][0]
-                                                                      , &childBezier[1][1]
-                                                                      , &childBezier[1][2]
-                                                                      , &childBezier[1][3]
-                                                                      , 0.5f );
-            BuildVariableAdaptive( splitPoint
-                                 , iToPoint
-                                 , splitsAt
-                                 , iToT
-                                 , radiusAt
-                                 , iRadiusTo
-                                 , childBezier[1]
-                                 , tangent
-                                 , iNormalizedTangentTo
-                                 , iRecurseDepth + 1
-                                 , iMinRecurse
-                                 , iMaxRecurse
-                                 , iSubPointBuffer
-                                 , iSubLineBuffer );
-        }
+        // Second sub-bezier from the divided parent bezier
+        // Note: we always split at 0.5f. The splitsAt variable just helps setting the fromT and toT variables of the polygon cache.
+        ::ULIS::CubicBezierInverseSplitAtParameter<::ULIS::FVec2D>( &childBezier[1][0]
+                                                                  , &childBezier[1][1]
+                                                                  , &childBezier[1][2]
+                                                                  , &childBezier[1][3]
+                                                                  , 0.5f );
+        BuildVariableAdaptive( splitPoint
+                              , iToPoint
+                              , splitsAt
+                              , iToT
+                              , radiusAt
+                              , iRadiusTo
+                              , childBezier[1]
+                              , iRecurseDepth + 1
+                              , iMinRecurse
+                              , iMaxRecurse
+                              , iSubPointBuffer
+                              , iSubLineBuffer );
     }
     else
     {
@@ -1359,29 +1343,7 @@ FOdysseyVectorSegmentCubic::BuildVariable( uint32 iMinRecurse
     {
         double segmentStartRadius = static_cast<FOdysseyVectorVertex*>(mPoint[0])->GetRadius();
         double segmentEndRadius = static_cast<FOdysseyVectorVertex*>(mPoint[1])->GetRadius();
-        ::ULIS::FVec2D tangent[2] = { ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( mBezier[0]
-                                                                                           , mBezier[1]
-                                                                                           , mBezier[2]
-                                                                                           , mBezier[3]
-                                                                                           , 0.0f )
-                                    , ::ULIS::CubicBezierTangentAtParameter<::ULIS::FVec2D>( mBezier[0]
-                                                                                           , mBezier[1]
-                                                                                           , mBezier[2]
-                                                                                           , mBezier[3]
-                                                                                           , 1.0f ) };
         double startU = 0.0f;
-        double tangent0Length = tangent[0].Distance();
-        double tangent1Length = tangent[1].Distance();
-
-        if( tangent0Length )
-        {
-            tangent[0] /= tangent0Length;
-        }
-
-        if( tangent1Length )
-        {
-            tangent[1] /= tangent1Length;
-        }
 
         BuildOffsetCurves();
         // offset curves must be built before the polygon cache is built, as the builidng process
@@ -1394,8 +1356,6 @@ FOdysseyVectorSegmentCubic::BuildVariable( uint32 iMinRecurse
                               , segmentStartRadius
                               , segmentEndRadius
                               , mBezier
-                              , tangent[0]
-                              , tangent[1]
                               , 0
                               , iMinRecurse
                               , iMaxRecurse

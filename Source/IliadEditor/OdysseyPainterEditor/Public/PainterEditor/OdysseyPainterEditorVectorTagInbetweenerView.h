@@ -78,7 +78,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
                           , ClampMin = "1"
                           , ClampMax = "64"
                           , UIMin    = "1"
-                          , UIMax    = "64" ) )
+                          , UIMax    = "64"
+                          // the second condition  "|| ( DivisionX != DivisionY )" is for legacy support
+                          , EditCondition = "( Square == false ) || ( DivisionX != DivisionY )"
+                          , EditConditionHides ) )
         uint32 DivisionX;
 
         UPROPERTY( EditAnywhere
@@ -88,8 +91,24 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTagInbetweenerView : p
                           , ClampMin = "1"
                           , ClampMax = "64"
                           , UIMin    = "1"
-                          , UIMax    = "64" ) )
+                          , UIMax    = "64"
+                          // the second condition  "|| ( DivisionX != DivisionY )" is for legacy support
+                          , EditCondition = "( Square == false ) || ( DivisionX != DivisionY )"
+                          , EditConditionHides ) )
         uint32 DivisionY;
+
+        UPROPERTY( EditAnywhere
+                 , Category = "Inbetweener"
+                 , meta = ( ToolTip  = "Divisions"
+                          , DisplayName = "Divisions"
+                          , ClampMin = "1"
+                          , ClampMax = "64"
+                          , UIMin    = "1"
+                          , UIMax    = "64"
+                          // the second condition  "&& ( DivisionX == DivisionY ) " is for legacy support
+                          , EditCondition = "( Square == true ) && ( DivisionX == DivisionY )"
+                          , EditConditionHides ) )
+        uint32 Divisions;
 
         UPROPERTY( EditAnywhere
                  , Category = "Inbetweener"

@@ -247,8 +247,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                   , double  iRadiusFrom
                                   , double  iRadiusTo
                                   , ::ULIS::FVec2D iBezier[4]
-                                  , const ::ULIS::FVec2D& iNormalizedTangentFrom
-                                  , const ::ULIS::FVec2D& iNormalizedTangentTo
                                   , uint32 iRecurseDepth
                                   , uint32 iMinRecurse
                                   , uint32 iMaxRecurse

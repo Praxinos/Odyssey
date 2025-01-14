@@ -25,6 +25,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::UOdysseyPainterEditorVectorTagInb
     , GridType ( eInbetweenerGridType::ARAP )
     , DivisionX ( 24 )
     , DivisionY ( 24 )
+    , Divisions ( 24 )
     //, Rigidity ( 10 )
     , MappingMode( eInbetweenerMappingMode::Polyline )
     , WithThickness( true )
@@ -79,6 +80,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::ImportParam()
 
         DivisionX = selectedInbetweenerTag->GetGridNumQuadX();
         DivisionY = selectedInbetweenerTag->GetGridNumQuadY();
+        Divisions = selectedInbetweenerTag->GetGridNumQuadX();
 
         //Rigidity = selectedInbetweenerTag->GetARAPRigidity();
     }
@@ -153,7 +155,8 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
         }
 
         if( ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionX ) )
-          ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionY ) ) )
+          ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionY ) )
+          ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, Divisions ) ) )
         {
             FText dialogText = FText::FromString( TEXT ( WARNING_GRIDSIZE_ROUTE_REMOVAL ) );
 
@@ -185,6 +188,7 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
     {
         if( ( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionX ) )
           ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, DivisionY ) )
+          ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, Divisions ) )
           ||( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, Square    ) ) )
         {
             FText dialogText = FText::FromString( TEXT ( WARNING_GRID_DEFORMATION_RESET ) );
@@ -218,6 +222,11 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
             selectedInbetweenerTag->SetGridNumQuad( selectedInbetweenerTag->GetGridNumQuadX(), DivisionY, Square );
         }
 
+        if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, Divisions ) )
+        {
+            selectedInbetweenerTag->SetGridNumQuad( Divisions, Divisions, Square );
+        }
+
         if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, MappingMode ) )
         {
             selectedInbetweenerTag->SetMapAsPolyline( ( MappingMode == eInbetweenerMappingMode::Polyline ) ? true : false );
@@ -247,6 +256,17 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PropertyChanged( const FName& iPr
 
         if( iPropertyName == GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTagInbetweenerView, Square ) )
         {
+            if( Square == true )
+            {
+                Divisions = DivisionX;
+                DivisionY = DivisionX;
+            }
+            else
+            {
+                DivisionX = Divisions;
+                DivisionY = Divisions;
+            }
+
             selectedInbetweenerTag->SetGrid( GridType, DivisionX, DivisionY, Square );
         }
 

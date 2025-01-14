@@ -69,7 +69,7 @@ FOdysseyVectorTagInbetweener::FOdysseyVectorTagInbetweener( FOdysseyVectorObject
     , bContiguous( true )
     , bARAPPrecomputeSucceded( false )
     , mInterpolationDirection( eInbetweenerInterpolationDirection::Forward )
-    , bSquare ( true )
+    , bSquare ( iNumQuadX == iNumQuadY )
     , mInbetweenColor ( INBETWEEN_DEFAULT_RED_UINT8
                       , INBETWEEN_DEFAULT_GREEN_UINT8
                       , INBETWEEN_DEFAULT_BLUE_UINT8
@@ -454,7 +454,7 @@ FOdysseyVectorTagInbetweener::AddBreakdown( uint32 iDrawingIndex
 
 // Removes all breakdowns but the default one
 void
-FOdysseyVectorTagInbetweener::ResetLayout( bool iFreeMemNow, FInbetweenerBreakdown* iNewDefaultBreakdown )
+FOdysseyVectorTagInbetweener::ResetLayout( bool iFreeMemNow )
 {
     //FInbetweenerBreakdown* newDefaultBreakdown = new FInbetweenerBreakdown( this );
     uint32 currentTargetDrawingIndex = mBreakdownList.back()->GetTargetDrawingIndex();
@@ -466,28 +466,15 @@ FOdysseyVectorTagInbetweener::ResetLayout( bool iFreeMemNow, FInbetweenerBreakdo
     mBreakdownList.back() ->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
 
     mBreakdownList.remove_if( [ this
-                              , iNewDefaultBreakdown
                               , iFreeMemNow ]( FInbetweenerBreakdown* breakdown )
                               {
-                                  if( ( iFreeMemNow ) && ( breakdown != iNewDefaultBreakdown ) )
+                                  if( iFreeMemNow )
                                   {
                                       delete breakdown;
                                   }
 
                                   return true;
                               } );
-
-    if( iNewDefaultBreakdown )
-    {
-        mBreakdownList.push_back( iNewDefaultBreakdown );
-
-        iNewDefaultBreakdown->SetInbetweenerTag( this );
-
-        iNewDefaultBreakdown->SetTargetDrawingIndex( currentTargetDrawingIndex );
-
-        iNewDefaultBreakdown->GetGrid()->SetGeometry( sourceGeometry, eInbetweenerPointPositionType::SourcePosition, true );
-        iNewDefaultBreakdown->GetGrid()->SetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition, true );
-    }
 
     ChainBreakdowns();
 
@@ -591,6 +578,7 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
             curChart->GetHUDBezier()->GetPoints()[2].SetPosition( quadratic[1][2].x, quadratic[1][2].y );
         }
 
+        // Note: this will also alloc memory for trajectories etc...
         newBreakdown->SetTargetDrawingIndex( newTargetDrawingIndex );
 
         if( iFitNewTrajectories )
@@ -649,6 +637,30 @@ FOdysseyVectorTagInbetweener::AddBreakdown( FInbetweenerBreakdown* iNewBreakdown
         // Invalidation might trigger a redrawing. It must be done outside the mutex locking mechanism
         // because redrawing will also lock the mutex.
         Invalidate( INVALIDATE_BREAKDOWN_LIST );
+
+        return newBreakdown;
+    }
+    else
+    {
+        FInbetweenerBreakdown* newBreakdown = iNewBreakdown ? iNewBreakdown
+                                                            : new FInbetweenerBreakdown( this );
+
+        LockDrawing();
+
+        newBreakdown->SetInbetweenerTag( this );
+
+        mBreakdownList.push_back( newBreakdown );
+
+        ChainBreakdowns();
+
+        // Note: this will also alloc memory for trajectories etc...
+        newBreakdown->SetTargetDrawingIndex( iDrawingIndex );
+
+        // Invalidation might trigger a redrawing. It must be done outside the mutex locking mechanism
+        // because redrawing will also lock the mutex.
+        Invalidate( INVALIDATE_BREAKDOWN_LIST );
+
+        UnlockDrawing();
 
         return newBreakdown;
     }
@@ -1978,6 +1990,8 @@ FOdysseyVectorTagInbetweener::SetGrid( eInbetweenerGridType iGridType
                                      , uint32 iGridNumQuadY
                                      , bool iSquare )
 {
+    iGridNumQuadY = iSquare ? iGridNumQuadX : iGridNumQuadY;
+
     if( ( mGridNumQuadX != iGridNumQuadX )
      || ( mGridNumQuadY != iGridNumQuadY )
      || ( iSquare != bSquare ) )
@@ -1986,20 +2000,20 @@ FOdysseyVectorTagInbetweener::SetGrid( eInbetweenerGridType iGridType
     }
 
     mGridType = iGridType;
-    mGridNumQuadX = iGridNumQuadX ? iGridNumQuadX : 1;
-    mGridNumQuadY = iGridNumQuadY ? iGridNumQuadY : 1;
+    mGridNumQuadX = iGridNumQuadX;
+    mGridNumQuadY = iGridNumQuadY;
     bSquare = iSquare;
-
-    Invalidate( INVALIDATE_MAP
-              | INVALIDATE_SPACING
-              | INVALIDATE_GRIDTYPE
-              | INVALIDATE_CELLS );
 
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
         breakdown->SetGrid( iGridType );
         breakdown->GetGrid()->Make( true );
     }
+
+    Invalidate( INVALIDATE_MAP
+              | INVALIDATE_SPACING
+              | INVALIDATE_GRIDTYPE
+              | INVALIDATE_CELLS );
 }
 
 void
@@ -2009,9 +2023,7 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
                                             , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
                                             , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer )
 {
-    Invalidate( INVALIDATE_MAP
-              | INVALIDATE_SPACING
-              | INVALIDATE_CELLS );
+    iGridNumQuadY = iSquare ? iGridNumQuadX : iGridNumQuadY;
 
     if( ( mGridNumQuadX != iGridNumQuadX ) || ( mGridNumQuadY != iGridNumQuadY ) )
     {
@@ -2028,6 +2040,10 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
                                   , iTargetPositionBuffer
                                   , true );
     }
+
+    Invalidate( INVALIDATE_MAP
+              | INVALIDATE_SPACING
+              | INVALIDATE_CELLS );
 }
 
 void
@@ -2035,9 +2051,7 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
                                             , uint32 iGridNumQuadY
                                             , bool iSquare )
 {
-    Invalidate( INVALIDATE_MAP
-              | INVALIDATE_SPACING
-              | INVALIDATE_CELLS );
+    iGridNumQuadY = iSquare ? iGridNumQuadX : iGridNumQuadY;
 
     if( ( mGridNumQuadX != iGridNumQuadX ) || ( mGridNumQuadY != iGridNumQuadY ) )
     {
@@ -2052,6 +2066,10 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
     {
         breakdown->GetGrid()->Make( true );
     }
+
+    Invalidate( INVALIDATE_MAP
+              | INVALIDATE_SPACING
+              | INVALIDATE_CELLS );
 }
 
 bool
