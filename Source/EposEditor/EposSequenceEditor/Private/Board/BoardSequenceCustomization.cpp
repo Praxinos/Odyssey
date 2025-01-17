@@ -412,7 +412,7 @@ FBoardSequenceCustomization::CreateInfoText() const
     if( !sequencer )
         return FText::GetEmpty();
 
-    TSharedRef<INumericTypeInterface<double>> type_interface = sequencer->GetNumericTypeInterface();
+    TSharedRef<INumericTypeInterface<double>> type_interface = sequencer->GetNumericTypeInterface().ToSharedRef();
 
     FMovieSceneSequenceID epos_root_sequence_id;
     const UMovieSceneSequence* root_board = EposSequenceHelpers::GetRootEposSequence( *sequencer, sequencer->GetFocusedTemplateID(), epos_root_sequence_id );

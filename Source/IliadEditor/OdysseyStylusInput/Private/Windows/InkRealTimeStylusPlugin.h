@@ -7,7 +7,7 @@
 #include "Windows/WindowsHWrapper.h"
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "Windows/PreWindowsApi.h"
-#include "Windows/COMPointer.h"
+#include "Microsoft/COMPointer.h"
     #include <guiddef.h>
     #include <RTSCom.h>
 #include "Windows/PostWindowsApi.h"

@@ -64,7 +64,7 @@ FExportImageSequenceNamingFormatter::FormatName( const FString& iPatternToFormat
     if( mRootEposSequenceId == MovieSceneSequenceID::Invalid )
         return false;
 
-    TSharedRef<INumericTypeInterface<double>> type_interface = mSequencer.Pin()->GetNumericTypeInterface();
+    TSharedRef<INumericTypeInterface<double>> type_interface = mSequencer.Pin()->GetNumericTypeInterface().ToSharedRef();
 
     //---
 

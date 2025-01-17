@@ -8,7 +8,6 @@
 #include "Framework/Application/SlateApplication.h"
 #include "Interfaces/IPluginManager.h"
 #include "Misc/Paths.h"
-#include "Misc/OdysseyVersion.h"
 #include "Styling/CoreStyle.h"
 #include "UnrealEdMisc.h"
 #include "Widgets/Images/SImage.h"
@@ -62,21 +61,27 @@ SAboutWindow::OnClose()
 void
 SAboutWindow::Construct( const FArguments& iArgs )
 {
-    FText VersionFull = FText::Format( LOCTEXT( "VersionLabel", "Version: {0}" ), FText::FromString(FOdysseyVersion::Current().ToString()) );
+    TSharedPtr<IPlugin> plugin = IPluginManager::Get().FindPlugin( FString( "Epos" ) );
+    const FPluginDescriptor& pluginDescriptor = plugin->GetDescriptor();
+    FString version = pluginDescriptor.VersionName;
+    if( pluginDescriptor.bIsBetaVersion )
+        version += "-beta";
+
+    FText VersionFull = FText::Format( LOCTEXT( "VersionLabel", "Version: {0}" ), FText::FromString( version ) );
 
     //---
 
-    mLogos.Add( ELogo::kPraxinos,    { TEXT( "Odyssey.About.Praxinos" ),    LOCTEXT( "tooltip.praxinos", "Go to Praxinos website" ),                LOCTEXT( "url.praxinos", "https://praxinos.coop/" ) } );
-    mLogos.Add( ELogo::kOdyssey,        { TEXT( "Odyssey.About.Odyssey" ),        LOCTEXT( "tooltip.odyssey", "Go to Odyssey webpage" ),                        LOCTEXT( "url.odyssey", "https://praxinos.coop/odyssey.php" ) } );
+    mLogos.Add( ELogo::kPraxinos,       { TEXT( "Odyssey.About.Praxinos" ),     LOCTEXT( "tooltip.praxinos", "Go to Praxinos website" ),                    LOCTEXT( "url.praxinos", "https://praxinos.coop/" ) } );
+    mLogos.Add( ELogo::kOdyssey,        { TEXT( "Odyssey.About.Odyssey" ),      LOCTEXT( "tooltip.odyssey", "Go to Odyssey webpage" ),                      LOCTEXT( "url.odyssey", "https://praxinos.coop/odyssey.php" ) } );
 
-    mLogos.Add( ELogo::kTwitter,     { TEXT( "Odyssey.About.Twitter" ),     LOCTEXT( "tooltip.social.twitter", "Praxinos on Twitter" ),             LOCTEXT( "url.social.twitter", "https://twitter.com/praxinos" ) } );
-    mLogos.Add( ELogo::kFacebook,    { TEXT( "Odyssey.About.Facebook" ),    LOCTEXT( "tooltip.social.facebook", "Praxinos on Facebook" ),           LOCTEXT( "url.social.facebook", "https://www.facebook.com/Praxinos" ) } );
-    mLogos.Add( ELogo::kLinkedin,    { TEXT( "Odyssey.About.LinkedIn" ),    LOCTEXT( "tooltip.social.linkedin", "Praxinos on LinkedIn" ),           LOCTEXT( "url.social.linkedin", "https://www.linkedin.com/company/praxinos" ) } );
-    mLogos.Add( ELogo::kInstagram,   { TEXT( "Odyssey.About.Instagram" ),   LOCTEXT( "tooltip.social.instagram", "Praxinos on Instagram" ),         LOCTEXT( "url.social.instagram", "https://www.instagram.com/praxinos/" ) } );
-    mLogos.Add( ELogo::kYoutube,     { TEXT( "Odyssey.About.Youtube" ),     LOCTEXT( "tooltip.social.youtube", "Praxinos on Youtube" ),             LOCTEXT( "url.social.youtube", "https://www.youtube.com/channel/UCdSBI-_VlBRRRjY_tDz73xQ" ) } );
-    mLogos.Add( ELogo::kDiscord,     { TEXT( "Odyssey.About.Discord" ),     LOCTEXT( "tooltip.social.discord", "Praxinos on Discord" ),             LOCTEXT( "url.social.discord", "https://discord.gg/gEd6pj7" ) } );
-    mLogos.Add( ELogo::kOdysseyUserDoc, { TEXT( "Odyssey.About.UserDoc" ),     LOCTEXT( "tooltip.social.userDoc", "Go to Odyssey User Documentation" ),   LOCTEXT( "url.social.userDoc", "https://praxinos.coop/odyssey-user-doc" ) } );
-    mLogos.Add( ELogo::kOdysseyGit,     { TEXT( "Odyssey.About.Git" ),         LOCTEXT( "tooltip.social.git", "Praxinos on Git" ),                     LOCTEXT( "url.social.git", "https://github.com/Praxinos" ) } );
+    mLogos.Add( ELogo::kTwitter,        { TEXT( "Odyssey.About.Twitter" ),      LOCTEXT( "tooltip.social.twitter", "Praxinos on Twitter" ),                 LOCTEXT( "url.social.twitter", "https://twitter.com/praxinos" ) } );
+    mLogos.Add( ELogo::kFacebook,       { TEXT( "Odyssey.About.Facebook" ),     LOCTEXT( "tooltip.social.facebook", "Praxinos on Facebook" ),               LOCTEXT( "url.social.facebook", "https://www.facebook.com/Praxinos" ) } );
+    mLogos.Add( ELogo::kLinkedin,       { TEXT( "Odyssey.About.LinkedIn" ),     LOCTEXT( "tooltip.social.linkedin", "Praxinos on LinkedIn" ),               LOCTEXT( "url.social.linkedin", "https://www.linkedin.com/company/praxinos" ) } );
+    mLogos.Add( ELogo::kInstagram,      { TEXT( "Odyssey.About.Instagram" ),    LOCTEXT( "tooltip.social.instagram", "Praxinos on Instagram" ),             LOCTEXT( "url.social.instagram", "https://www.instagram.com/praxinos/" ) } );
+    mLogos.Add( ELogo::kYoutube,        { TEXT( "Odyssey.About.Youtube" ),      LOCTEXT( "tooltip.social.youtube", "Praxinos on Youtube" ),                 LOCTEXT( "url.social.youtube", "https://www.youtube.com/channel/UCdSBI-_VlBRRRjY_tDz73xQ" ) } );
+    mLogos.Add( ELogo::kDiscord,        { TEXT( "Odyssey.About.Discord" ),      LOCTEXT( "tooltip.social.discord", "Praxinos on Discord" ),                 LOCTEXT( "url.social.discord", "https://discord.gg/gEd6pj7" ) } );
+    mLogos.Add( ELogo::kOdysseyUserDoc, { TEXT( "Odyssey.About.UserDoc" ),      LOCTEXT( "tooltip.social.userDoc", "Go to Odyssey User Documentation" ),    LOCTEXT( "url.social.userDoc", "https://praxinos.coop/odyssey-user-doc" ) } );
+    mLogos.Add( ELogo::kOdysseyGit,     { TEXT( "Odyssey.About.Git" ),          LOCTEXT( "tooltip.social.git", "Praxinos on Git" ),                         LOCTEXT( "url.social.git", "https://github.com/Praxinos" ) } );
 
     ChildSlot
     [
