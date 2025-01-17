@@ -29,6 +29,7 @@
 class FOdysseyVectorTagInbetweener;
 class FInterpolatedPoint;
 class FInterpolatedPath;
+class FInterpolatedObject;
 struct FInbetweenerDrawing;
 class FInbetweenerBreakdown;
 
@@ -50,18 +51,19 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
          * @param iSourcePositionBuffer source position of the points in the grid. Can be empty.
          * @param iTargetPositionBuffer target position of the points in the grid. Can be empty.
          */
-        virtual void Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
-                         , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer
+        virtual void Make( const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer
                          , bool iInvalidate );
 
         /**
          * @brief Deform the paths passed as parameter.
-         * @param iInterpolatedPathBuffer deform the paths according to the shape of the grid
          * @param iInbetweenIndex Inbetween index
          */
-        virtual void DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
-                                , FInbetweenerChart::Inbetween *iInbetween
-                                , eInbetweenerPointPositionType iPositionType );
+        void DeformObjects( FInbetweenerChart::Inbetween *iInbetween
+                          , eInbetweenerPointPositionType iPositionType );
+
+        void DeformPoints( FInterpolatedObject* iInterpolatedObject
+                         , FInbetweenerChart::Inbetween *iInbetween
+                         , eInbetweenerPointPositionType iPositionType );
 
         /**
          * @brief Get the quad the coords passed as parameter fit within.
@@ -72,9 +74,8 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
 
         /**
          * @brief Map paths to the grid according to the needs of the grid
-         * @param iPathBuffer the paths to map
          */
-        virtual void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer );
+        virtual void MapInterpolatedObjects();
 
         /**
          * @brief Get the quad buffer
@@ -122,7 +123,7 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
 
     protected:
         ::ULIS::FVec2D GetCenterOfMass( eInbetweenerPointPositionType iPositionType );
-        ::ULIS::FRectD GetBBox( eInbetweenerPointPositionType iPositionType, bool iLinkedOnly );
+        ::ULIS::FRectD GetBBox( eInbetweenerPointPositionType iPositionType );
         virtual ::ULIS::FVec2D DeformPoint( FInterpolatedPoint* iInterpolatedPoint
                                           , eInbetweenerPointPositionType iPositionType );
         static void SquareBBox( ::ULIS::FRectD& iBBox );

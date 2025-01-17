@@ -16,18 +16,18 @@ FInterpolatedPath::~FInterpolatedPath()
 void
 FInterpolatedPath::Alloc( bool iPolyline )
 {
-    uint32 pointCount = mOriginalPath->GetVertexList().size();
+    uint32 pointCount = GetOriginalPath()->GetVertexList().size();
 
     if( iPolyline )
     {
-        for( FOdysseyVectorSegment* segment : mOriginalPath->GetSegmentList() )
+        for( FOdysseyVectorSegment* segment : GetOriginalPath()->GetSegmentList() )
         {
             pointCount += segment->GetFractionPointBuffer().size();
         }
     }
     else
     {
-        for( FOdysseyVectorSegment* segment : mOriginalPath->GetSegmentList() )
+        for( FOdysseyVectorSegment* segment : GetOriginalPath()->GetSegmentList() )
         {
             if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
             {
@@ -41,17 +41,13 @@ FInterpolatedPath::Alloc( bool iPolyline )
 
 FInterpolatedPath::FInterpolatedPath( FOdysseyVectorTagInbetweener* iInbetweenerTag
                                     , FOdysseyVectorPath* iPath
-                                    , uint32 iInbetweenCount
                                     , bool iPolyline )
-    : mOriginalPath( iPath )
+    : FInterpolatedObject( iInbetweenerTag, iPath )
 {
     uint32 pointID = 0;
     uint32 segmentID = 0;
 
     Alloc( iPolyline );
-
-    mRelativeMatrix = iInbetweenerTag->GetOwner()->GetInverseWorldMatrix();
-    mRelativeMatrix.transform( iPath->GetWorldMatrix() );
 
     for( FOdysseyVectorVertex* vertex : iPath->GetVertexList() )
     {
@@ -127,32 +123,14 @@ FInterpolatedPath::FInterpolatedPath( FOdysseyVectorTagInbetweener* iInbetweener
     }
 }
 
-BLMatrix2D&
-FInterpolatedPath::GetRelativeMatrix()
-{
-    return mRelativeMatrix;
-}
-
 std::vector<FInterpolatedSegment>&
 FInterpolatedPath::GetInterpolatedSegmentBuffer()
 {
     return mInterpolatedSegmentBuffer;
 }
 
-std::vector<FInterpolatedPath::PointGeometry>&
-FInterpolatedPath::GetInterpolatedPointGeometryBuffer()
-{
-    return mInterpolatedPointGeometryBuffer;
-}
-
 FOdysseyVectorPath*
 FInterpolatedPath::GetOriginalPath()
 {
-    return mOriginalPath;
-}
-
-std::vector<FInterpolatedPoint>&
-FInterpolatedPath::GetInterpolatedPointBuffer()
-{
-    return mInterpolatedPointBuffer;
+    return static_cast<FOdysseyVectorPath*>(mOriginalObject);
 }

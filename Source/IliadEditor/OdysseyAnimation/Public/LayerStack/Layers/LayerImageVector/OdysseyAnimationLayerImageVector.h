@@ -50,6 +50,8 @@ public:
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
 public:
+    static uint32 GetInbetweeningRowHeight();
+
     // vector data shared between all cells
     FOdysseyVectorSharedEnv* GetSharedEnv();
     void UpdateSharedEnv();

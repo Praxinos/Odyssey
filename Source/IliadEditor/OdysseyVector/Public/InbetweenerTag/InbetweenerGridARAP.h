@@ -22,7 +22,9 @@ class ODYSSEYVECTOR_API FInbetweenerGridARAP : public FInbetweenerGrid
          * @brief Map paths to the grid according to the needs of the grid
          * @param iPathBuffer the paths to map
          */
-        virtual void MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer ) override;
+        virtual void MapInterpolatedObjects() override;
+
+        void MapInterpolatedPoints( FInterpolatedObject* iInterplatedObject );
 
         friend class FOdysseyVectorTagInbetweener;
 

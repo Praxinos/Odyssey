@@ -312,10 +312,52 @@ FInbetweenerGridARAP::IsContiguous( uint32 iUsedQuadCount )
 }
 
 void
-FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer )
+FInbetweenerGridARAP::MapInterpolatedPoints( FInterpolatedObject* iInterplatedObject )
 {
-    BLMatrix2D& ownerInverseWorldMatrix = mBreakdown->GetInbetweenerTag()->GetOwner()->GetInverseWorldMatrix();
+    std::vector<FInterpolatedPoint>& interpolatedPointBuffer = iInterplatedObject->GetInterpolatedPointBuffer();
+    FOdysseyVectorTagInbetweener* inbetweenerTag = mBreakdown->GetInbetweenerTag();
+    BLMatrix2D& ownerInverseWorldMatrix = inbetweenerTag->GetOwner()->GetInverseWorldMatrix();
     BLMatrix2D conversionMatrix;
+
+    FOdysseyVector::MatrixMultiply( ownerInverseWorldMatrix
+                                  , iInterplatedObject->GetOriginalObject()->GetWorldMatrix()
+                                  , conversionMatrix );
+
+    for( FInterpolatedPoint& interpolatedPoint : interpolatedPointBuffer )
+    {
+        FOdysseyVectorPoint* originalPoint = interpolatedPoint.GetOriginalPoint();
+        BLPoint pt = conversionMatrix.mapPoint( originalPoint->GetX()
+                                                , originalPoint->GetY() );
+
+        int quadIndex = GetQuadIndex( ::ULIS::FVec2D( pt.x, pt.y ) );
+
+        if( quadIndex >= 0 )
+        {
+            FInbetweenerQuad* matchedQuad = &mQuadBuffer[quadIndex];
+            ::ULIS::FRectD quadBBox = matchedQuad->GetBBox( eInbetweenerPointPositionType::SourcePosition );
+            double quadX = pt.x - quadBBox.x;
+            double quadY = pt.y - quadBBox.y;
+            //double u = std::clamp<double>( spaceX / iSpaceBBox.w, 0.0f, 1.0f );
+            //double v = std::clamp<double>( spaceY / iSpaceBBox.h, 0.0f, 1.0f );
+            double u = std::clamp<double>( quadX / quadBBox.w, 0.0f, 1.0f );
+            double v = std::clamp<double>( quadY / quadBBox.h, 0.0f, 1.0f );
+
+            // Note: we add +1 for the target position
+            interpolatedPoint.SetUV( quadIndex, u, v );
+
+            matchedQuad->GetPoints()[0]->SetNeeded( true );
+            matchedQuad->GetPoints()[1]->SetNeeded( true );
+            matchedQuad->GetPoints()[2]->SetNeeded( true );
+            matchedQuad->GetPoints()[3]->SetNeeded( true );
+        }
+    }
+}
+
+void
+FInbetweenerGridARAP::MapInterpolatedObjects()
+{
+    FOdysseyVectorTagInbetweener* inbetweenerTag = mBreakdown->GetInbetweenerTag();
+
     uint32 pointID = 0;
     uint32 segmentID = 0;
 
@@ -337,37 +379,9 @@ FInbetweenerGridARAP::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPat
         }
     }
 
-    for( FInterpolatedPath& interpolatedPath : iPathBuffer )
+    for( FInterpolatedObject* interpolatedObject : inbetweenerTag->GetInterpolatedObjectArray() )
     {
-        std::vector<FInterpolatedPoint>& interpolatedPointBuffer = interpolatedPath.GetInterpolatedPointBuffer();
-
-        FOdysseyVector::MatrixMultiply( ownerInverseWorldMatrix
-                                      , interpolatedPath.GetOriginalPath()->GetWorldMatrix()
-                                      , conversionMatrix );
-
-        for( FInterpolatedPoint& interpolatedPoint : interpolatedPointBuffer )
-        {
-            FOdysseyVectorPoint* originalPoint = interpolatedPoint.GetOriginalPoint();
-            BLPoint pt = conversionMatrix.mapPoint( originalPoint->GetX()
-                                                  , originalPoint->GetY() );
-
-            int quadIndex = GetQuadIndex( ::ULIS::FVec2D( pt.x, pt.y ) );
-
-            if( quadIndex >= 0 )
-            {
-                FInbetweenerQuad* matchedQuad = &mQuadBuffer[quadIndex];
-                ::ULIS::FRectD quadBBox = matchedQuad->GetBBox( eInbetweenerPointPositionType::SourcePosition );
-                double quadX = pt.x - quadBBox.x;
-                double quadY = pt.y - quadBBox.y;
-                //double u = std::clamp<double>( spaceX / iSpaceBBox.w, 0.0f, 1.0f );
-                //double v = std::clamp<double>( spaceY / iSpaceBBox.h, 0.0f, 1.0f );
-                double u = std::clamp<double>( quadX / quadBBox.w, 0.0f, 1.0f );
-                double v = std::clamp<double>( quadY / quadBBox.h, 0.0f, 1.0f );
-
-                // Note: we add +1 for the target position
-                interpolatedPoint.SetUV( quadIndex, u, v );
-            }
-        }
+        MapInterpolatedPoints( interpolatedObject );
     }
 
     DiscardEmptyQuads( mBreakdown->GetInbetweenerTag()->GetInterpolatedPathBuffer() );

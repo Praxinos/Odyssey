@@ -146,14 +146,19 @@ void
 FOdysseyVectorTagInbetweener::Map()
 {
     FOdysseyVectorEngine* vectorEngine = mOwner->GetEngine();
+    FInbetweenerGrid* firstGrid = mBreakdownList.front()->GetGrid();
+    uint32 paintgroupCount = 0;
     uint32 pathCount = 0;
 
     mInterpolatedPathBuffer.clear();
+    mInterpolatedGroupPaintBuffer.clear();
+    mInterpolatedObjectArray.clear();
 
     vectorEngine->Traverse
     ( mOwner
     , 0
     , [ this
+      , &paintgroupCount
       , &pathCount ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
       {
           FOdysseyVectorTag* objectInbetweenerTag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
@@ -163,6 +168,13 @@ FOdysseyVectorTagInbetweener::Map()
               if( object->GetClass() == FOdysseyVectorPath::StaticClass() )
               {
                   pathCount++;
+
+                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+              }
+
+              if( object->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+              {
+                  paintgroupCount++;
 
                   return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
               }
@@ -176,6 +188,8 @@ FOdysseyVectorTagInbetweener::Map()
       } );
 
     mInterpolatedPathBuffer.reserve( pathCount );
+    mInterpolatedGroupPaintBuffer.reserve( paintgroupCount );
+    mInterpolatedObjectArray.reserve ( pathCount + paintgroupCount );
 
     vectorEngine->Traverse
     ( mOwner
@@ -202,8 +216,21 @@ FOdysseyVectorTagInbetweener::Map()
 
                   mInterpolatedPathBuffer.emplace_back( this
                                                       , path
-                                                      , GetLength()
                                                       , bMapAsPolyline );
+
+                  mInterpolatedObjectArray.push_back( &mInterpolatedPathBuffer.back() );
+
+                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+              }
+
+              if( object->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
+              {
+                  FOdysseyVectorGroupPaint* paintgroup = static_cast<FOdysseyVectorGroupPaint*>(object);
+
+                  mInterpolatedGroupPaintBuffer.emplace_back( this
+                                                            , paintgroup );
+
+                  mInterpolatedObjectArray.push_back( &mInterpolatedGroupPaintBuffer.back() );
 
                   return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
               }
@@ -217,7 +244,13 @@ FOdysseyVectorTagInbetweener::Map()
       } );
 
     /* Map on first grid */
-    mBreakdownList.front()->GetGrid()->MapInterpolatedPaths( mInterpolatedPathBuffer );
+    firstGrid->MapInterpolatedObjects();
+}
+
+std::vector<FInterpolatedObject*>&
+FOdysseyVectorTagInbetweener::GetInterpolatedObjectArray()
+{
+    return mInterpolatedObjectArray;
 }
 
 const FColor&
@@ -992,7 +1025,6 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
         {
             for( FInbetweenerBreakdown* breakdown : mBreakdownList )
             {
-                std::vector<::ULIS::FVec2D> sourceGeometry;
                 std::vector<::ULIS::FVec2D> targetGeometry;
 /*
                 // save positions for restoring when calling Make()
@@ -1003,7 +1035,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
 */
                 breakdown->GetGrid()->GetGeometry( targetGeometry, eInbetweenerPointPositionType::TargetPosition );
                 // Note: we cannot call Invalidate in Make() (hence the "false" arg), so we set the flags manually.
-                breakdown->GetGrid()->Make( sourceGeometry, targetGeometry, false );
+                breakdown->GetGrid()->Make( targetGeometry, false );
 
                 // calling Invalidate make trigger a call to draw and this would block due to the mutexes.
                 mInvalidationFlags |= ( INVALIDATE_MAP );
@@ -1037,7 +1069,7 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             // alloc position for points at each interpolation step
             AllocBuffers();
 
-            DeformPathsAtSource();
+            DeformObjectsAtSource();
         }
 
         // will update grids' center of mass (needed for interpolation).
@@ -1067,9 +1099,8 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
 
                 // altering breakdown range alters buffers. We then have to deform target anew.
                 // deform the path according to grid geometry
-                breakdown->GetGrid()->DeformPaths( mInterpolatedPathBuffer
-                                                 , inbetween
-                                                 , eInbetweenerPointPositionType::TargetPosition );
+                breakdown->GetGrid()->DeformObjects( inbetween
+                                                   , eInbetweenerPointPositionType::TargetPosition );
             }
         }
 
@@ -1224,36 +1255,34 @@ FOdysseyVectorTagInbetweener::UpdateMatrix()
 }
 
 void
-FOdysseyVectorTagInbetweener::DeformPathsAtSource()
+FOdysseyVectorTagInbetweener::DeformObjectsAtSource()
 {
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
         FInbetweenerChart::Inbetween* inbetween = &breakdown->GetChart()->GetInbetweenBuffer().front();
 
         // deform the path according to grid geometry
-        breakdown->GetGrid()->DeformPaths( mInterpolatedPathBuffer
-                                         , inbetween
+        breakdown->GetGrid()->DeformObjects( inbetween
                                          , eInbetweenerPointPositionType::SourcePosition );
 
         // we do it only for the first breakdown
         break;
     }
 }
-
+/*
 void
-FOdysseyVectorTagInbetweener::DeformPathsAtTarget()
+FOdysseyVectorTagInbetweener::DeformObjectsAtTarget()
 {
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
         FInbetweenerChart::Inbetween* inbetween = &breakdown->GetChart()->GetInbetweenBuffer().back();
 
         // deform the path according to grid geometry
-        breakdown->GetGrid()->DeformPaths( mInterpolatedPathBuffer
-                                         , inbetween
+        breakdown->GetGrid()->DeformObjects( inbetween
                                          , eInbetweenerPointPositionType::TargetPosition );
     }
 }
-
+*/
 std::vector<FInbetweenerDrawing>&
 FOdysseyVectorTagInbetweener::GetDrawingBuffer()
 {
@@ -1314,16 +1343,15 @@ FOdysseyVectorTagInbetweener::DeformGridAtInbetween( FInbetweenerChart::Inbetwee
 }
 
 void
-FOdysseyVectorTagInbetweener::DeformPathsAtInbetween( FInbetweenerChart::Inbetween *iInbetween )
+FOdysseyVectorTagInbetweener::DeformObjectsAtInbetween( FInbetweenerChart::Inbetween *iInbetween )
 {
     double t = iInbetween->GetSpacing();
 
     DeformGridAtInbetween( iInbetween );
 
     // deform the path according to grid geometry
-    iInbetween->GetChart()->GetBreakdown()->GetGrid()->DeformPaths( mInterpolatedPathBuffer
-                                                                  , iInbetween
-                                                                  , eInbetweenerPointPositionType::InterpPosition );
+    iInbetween->GetChart()->GetBreakdown()->GetGrid()->DeformObjects( iInbetween
+                                                                    , eInbetweenerPointPositionType::InterpPosition );
 }
 
 uint32
@@ -1408,7 +1436,7 @@ FOdysseyVectorTagInbetweener::Interpolate()
         {
             FInbetweenerChart::Inbetween* inbetween = &breakdown->GetChart()->GetInbetweenBuffer()[i];
 
-            DeformPathsAtInbetween( inbetween );
+            DeformObjectsAtInbetween( inbetween );
         }
     }
 }
@@ -1565,9 +1593,9 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
 
     iInterpolatedPath->GetOriginalPath()->LockDrawing();
 
-    uint32 pointCount = iInterpolatedPath->mInterpolatedPointBuffer.size();
+    uint32 pointCount = iInterpolatedPath->GetInterpolatedPointBuffer().size();
     uint32 inbetweenAbsoluteIndex = iInbetween->GetIndexInInbetweener();
-    FInterpolatedPath::PointGeometry* interpolatedPointGeometryBuffer = &iInterpolatedPath->mInterpolatedPointGeometryBuffer[pointCount * inbetweenAbsoluteIndex];
+    FInterpolatedPath::PointGeometry* interpolatedPointGeometryBuffer = &iInterpolatedPath->GetInterpolatedPointGeometryBuffer()[pointCount * inbetweenAbsoluteIndex];
     float scalingSq = bConstantWidth ? 1.0f / ( iInbetween->GetDrawing()->scalingX
                                               * iInbetween->GetDrawing()->scalingY ) : 1.0f;
     // note: a surface grows or shrink at the square of the scaling factor.
@@ -1590,7 +1618,7 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
 
     if( bMapAsPolyline )
     {
-        for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->mInterpolatedSegmentBuffer )
+        for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->GetInterpolatedSegmentBuffer() )
         {
             FOdysseyVectorSegment* segment = interpolatedSegment.GetOriginalSegment();
             std::vector<FOdysseyVectorFraction>& fractionCache = segment->GetFractionCache();
@@ -1728,7 +1756,7 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
 
     if( bMapAsPolyline == false )
     {
-        for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->mInterpolatedSegmentBuffer )
+        for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->GetInterpolatedSegmentBuffer() )
         {
             if( interpolatedSegment.GetOriginalSegment()->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
             {
@@ -1769,7 +1797,7 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
         iBLContext->restore();
 
         // restore
-        for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->mInterpolatedSegmentBuffer )
+        for( FInterpolatedSegment& interpolatedSegment : iInterpolatedPath->GetInterpolatedSegmentBuffer() )
         {
             if( interpolatedSegment.GetOriginalSegment()->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
             {
@@ -1810,6 +1838,12 @@ std::vector<FInterpolatedPath>&
 FOdysseyVectorTagInbetweener::GetInterpolatedPathBuffer()
 {
     return mInterpolatedPathBuffer;
+}
+
+std::vector<FInterpolatedGroupPaint>&
+FOdysseyVectorTagInbetweener::GetInterpolatedGroupPaintBuffer()
+{
+    return mInterpolatedGroupPaintBuffer;
 }
 
 void
@@ -1938,10 +1972,10 @@ FOdysseyVectorTagInbetweener::AllocBuffers()
 {
     for( FInterpolatedPath& interpolatedPath : mInterpolatedPathBuffer )
     {
-        uint32 pointCount = interpolatedPath.mInterpolatedPointBuffer.size();
+        uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
 
         // Note: the position at the first drawing will not be used
-        interpolatedPath.mInterpolatedPointGeometryBuffer.resize( GetLength() * pointCount );
+        interpolatedPath.GetInterpolatedPointGeometryBuffer().resize( GetLength() * pointCount );
     }
 }
 
@@ -2020,7 +2054,6 @@ void
 FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
                                             , uint32 iGridNumQuadY
                                             , bool iSquare
-                                            , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
                                             , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer )
 {
     iGridNumQuadY = iSquare ? iGridNumQuadX : iGridNumQuadY;
@@ -2036,8 +2069,7 @@ FOdysseyVectorTagInbetweener::SetGridNumQuad( uint32 iGridNumQuadX
 
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
-        breakdown->GetGrid()->Make( iSourcePositionBuffer
-                                  , iTargetPositionBuffer
+        breakdown->GetGrid()->Make( iTargetPositionBuffer
                                   , true );
     }
 
@@ -2139,11 +2171,17 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                             {
                                 copyFlags &= (~FOdysseyVectorObject::COPY_RETOPOLOGY);
                             }
-
+/*
+                            for( FInterpolatedGroupPaint& interpolatedGroupPaint : inbetweenerTag->mInterpolatedGroupPaintBuffer )
+                            {
+                                uint32 pointCount = interpolatedGroupPaint.GetInterpolatedPointBuffer().size();
+                                uint32 skippedOffset = ( drawing->GetIndex() * pointCount );
+                            }
+*/
                             for( FInterpolatedPath& interpolatedPath : inbetweenerTag->mInterpolatedPathBuffer )
                             {
                                 BLMatrix2D pathWorldMatrix = inbetweenerTag->GetOwner()->GetWorldMatrix();
-                                uint32 pointCount = interpolatedPath.mInterpolatedPointBuffer.size();
+                                uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
                                 uint32 skippedOffset = ( drawing->GetIndex() * pointCount );
                                 FOdysseyVectorPath* path = interpolatedPath.GetOriginalPath();
                                 double translationX, translationY, rotation, scalingX, scalingY;
@@ -2171,17 +2209,17 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                 path->SetTransform( translationX, translationY, rotation, scalingX, scalingY );
                                 //path->UpdateMatrix();
 
-                                for( uint32 i = 0; i < interpolatedPath.mInterpolatedPointBuffer.size(); i++ )
+                                for( uint32 i = 0; i < interpolatedPath.GetInterpolatedPointBuffer().size(); i++ )
                                 {
-                                    FInterpolatedPoint* interpolatedPoint = &interpolatedPath.mInterpolatedPointBuffer[i];
+                                    FInterpolatedPoint* interpolatedPoint = &interpolatedPath.GetInterpolatedPointBuffer()[i];
                                     FOdysseyVectorPoint* originalPoint = interpolatedPoint->GetOriginalPoint();
-                                    ::ULIS::FVec2D* commitPosition = &interpolatedPath.mInterpolatedPointGeometryBuffer[skippedOffset + i].position;
+                                    ::ULIS::FVec2D* commitPosition = &interpolatedPath.GetInterpolatedPointGeometryBuffer()[skippedOffset + i].position;
                                     ::ULIS::FVec2D swapPosition = interpolatedPoint->mOriginalPoint->GetCoords();
 
                                     if( originalPoint->GetClass() == FOdysseyVectorVertex::StaticClass() )
                                     {
                                         FOdysseyVectorVertex* originalVertex = static_cast<FOdysseyVectorVertex*>(originalPoint);
-                                        double* commitRadius = &interpolatedPath.mInterpolatedPointGeometryBuffer[skippedOffset + i].radius;
+                                        double* commitRadius = &interpolatedPath.GetInterpolatedPointGeometryBuffer()[skippedOffset + i].radius;
                                         double swapRadius = originalVertex->GetRadius();
 
                                         originalVertex->SetRadius( originalVertex->GetRadius() * scaling );
@@ -2221,7 +2259,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                             // Coords were saved in the point position buffer
                             for( FInterpolatedPath& interpolatedPath : inbetweenerTag->mInterpolatedPathBuffer )
                             {
-                                uint32 pointCount = interpolatedPath.mInterpolatedPointBuffer.size();
+                                uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
                                 uint32 skippedOffset = ( drawingIndex * pointCount );
                                 FOdysseyVectorPath* path = interpolatedPath.GetOriginalPath();
 
@@ -2234,16 +2272,16 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                 path->UpdateMatrix();
 
                                 // restore point coords that were changed in the pre-process
-                                for( uint32 i = 0; i < interpolatedPath.mInterpolatedPointBuffer.size(); i++ )
+                                for( uint32 i = 0; i < interpolatedPath.GetInterpolatedPointBuffer().size(); i++ )
                                 {
-                                    FInterpolatedPoint* interpolatedPoint = &interpolatedPath.mInterpolatedPointBuffer[i];
+                                    FInterpolatedPoint* interpolatedPoint = &interpolatedPath.GetInterpolatedPointBuffer()[i];
                                     FOdysseyVectorPoint* originalPoint = interpolatedPoint->GetOriginalPoint();
-                                    ::ULIS::FVec2D* commitPosition = &interpolatedPath.mInterpolatedPointGeometryBuffer[skippedOffset + i].position;
+                                    ::ULIS::FVec2D* commitPosition = &interpolatedPath.GetInterpolatedPointGeometryBuffer()[skippedOffset + i].position;
 
                                     if( originalPoint->GetClass() == FOdysseyVectorVertex::StaticClass() )
                                     {
                                         FOdysseyVectorVertex* originalVertex = static_cast<FOdysseyVectorVertex*>(originalPoint);
-                                        double* commitRadius = &interpolatedPath.mInterpolatedPointGeometryBuffer[skippedOffset + i].radius;
+                                        double* commitRadius = &interpolatedPath.GetInterpolatedPointGeometryBuffer()[skippedOffset + i].radius;
 
                                         // restore radius that was saved in pre-process
                                         originalVertex->SetRadius( *commitRadius );

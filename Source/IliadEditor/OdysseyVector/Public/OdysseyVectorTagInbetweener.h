@@ -25,6 +25,7 @@
 #include "InbetweenerTag/InterpolatedPoint.h"
 #include "InbetweenerTag/InterpolatedSegment.h"
 #include "InbetweenerTag/InterpolatedPath.h"
+#include "InbetweenerTag/InterpolatedGroupPaint.h"
 
 #include "OdysseyVectorTagInbetweener.generated.h"
 
@@ -165,7 +166,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void SetGridNumQuad( uint32 iNumQuadX
                            , uint32 iNumQuadY
                            , bool iSquare
-                           , const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
                            , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer );
 
         eInbetweenerInterpolationType GetInterpolationType();
@@ -187,7 +187,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                    , std::list<FOdysseyVectorGroupPaint*>& oCommittedSceneList );
         void Invalidate( uint64 iInvalidationFlags );
         std::vector<FInterpolatedPath>& GetInterpolatedPathBuffer();
-
+        std::vector<FInterpolatedGroupPaint>& GetInterpolatedGroupPaintBuffer();
+        std::vector<FInterpolatedObject*>& GetInterpolatedObjectArray();
         const FColor& GetInbetweenColor();
         void SetInbetweenColor( uint8 iR, uint8 iG, uint8 iB, uint8 iA );
         void SetInbetweenColor( const FColor& iColor );
@@ -204,10 +205,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                                , FInbetweenerChart::Inbetween* inbetween
                                , BLContext* iBLContext
                                , bool iLock );
-        void DrawPathsTarget( BLContext* iBLContext );
 
-        void DeformPathsAtTarget();
-        void DeformPathsAtSource();
+        //void DeformObjectsAtTarget();
+        void DeformObjectsAtSource();
 
         std::list<FInbetweenerBreakdown*>& GetBreakdownList();
         void GetBreakdownArray( std::vector<FInbetweenerBreakdown*>& oBreakdownArray );
@@ -302,7 +302,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                                        , double iInbetweenNewSpacing );
         void ChainBreakdowns();
         void DeformGridAtInbetween( FInbetweenerChart::Inbetween *iInbetween );
-        void DeformPathsAtInbetween( FInbetweenerChart::Inbetween *iInbetween );
+        void DeformObjectsAtInbetween( FInbetweenerChart::Inbetween *iInbetween );
         void DispatchDrawings();
 
     public:
@@ -345,6 +345,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         FOdysseyVectorGroupPaint* mScene;
         FOdysseyVectorSharedEnv* mSharedEnv;
         std::vector<FInterpolatedPath> mInterpolatedPathBuffer;
+        std::vector<FInterpolatedGroupPaint> mInterpolatedGroupPaintBuffer;
+        std::vector<FInterpolatedObject*> mInterpolatedObjectArray;
         std::list<FInbetweenerRoute*> mRouteList;
         std::list<FInbetweenerBreakdown*> mBreakdownList;
         eInbetweenerGridType mGridType;

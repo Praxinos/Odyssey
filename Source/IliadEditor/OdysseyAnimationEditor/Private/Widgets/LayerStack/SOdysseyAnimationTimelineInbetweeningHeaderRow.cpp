@@ -108,7 +108,8 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::IsItemSelected() const
 FVector2D
 SOdysseyAnimationTimelineInbetweeningHeaderRow::ComputeDesiredSize ( float LayoutScaleMultiplier ) const
 {
-    return FVector2D( 20.0f /* * LayoutScaleMultiplier*/, 20.0f /* * LayoutScaleMultiplier*/ );
+    return FVector2D( 64
+                    , UOdysseyAnimationLayerImageVector::GetInbetweeningRowHeight() );
 }
 
 #undef LOCTEXT_NAMESPACE
