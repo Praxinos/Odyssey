@@ -828,8 +828,6 @@ SOdysseyFlipbookTimelineView::FrameRateDropDownValues() const
     FText nameFormat = LOCTEXT("timeline.framerate.n-fps.name", "{0} FPS");
     FText tooltipFormat = LOCTEXT("timeline.framerate.n-fps.tooltip", "{0} frame(s) per second");
 
-    FText::Format(nameFormat, FText::FromString("1"));
-    FText::Format(tooltipFormat, FText::FromString("1"));
     values.Add(SNumericDropDown<float>::FNamedValue(1.0f, FText::Format(nameFormat, FText::FromString("1")), FText::Format(tooltipFormat, FText::FromString("1"))));
     values.Add(SNumericDropDown<float>::FNamedValue(2.0f, FText::Format(nameFormat, FText::FromString("2")), FText::Format(tooltipFormat, FText::FromString("2"))));
     values.Add(SNumericDropDown<float>::FNamedValue(3.0f, FText::Format(nameFormat, FText::FromString("3")), FText::Format(tooltipFormat, FText::FromString("3"))));

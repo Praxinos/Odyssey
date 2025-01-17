@@ -114,7 +114,7 @@ void LogPenInfo(POINTER_PEN_INFO& iPenInfo)
     UE_LOG(LogTemp, Warning, TEXT("Input Data : %d"), iPenInfo.pointerInfo.InputData);
     UE_LOG(LogTemp, Warning, TEXT("Key States : %d"), iPenInfo.pointerInfo.dwKeyStates);
     UE_LOG(LogTemp, Warning, TEXT("Performance Count : %d"), iPenInfo.pointerInfo.PerformanceCount);
-    UE_LOG(LogTemp, Warning, TEXT("ButtonChangeType : %d"), *buttonChangeType);
+    UE_LOG(LogTemp, Warning, TEXT("ButtonChangeType : %s"), *buttonChangeType);
 }
 
 void
