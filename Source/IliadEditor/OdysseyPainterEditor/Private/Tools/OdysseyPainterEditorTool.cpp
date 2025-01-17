@@ -4,6 +4,7 @@
 #include "Tools/OdysseyPainterEditorTool.h"
 #include "OdysseyHUDElement.h"
 
+#include "Framework/Application/SlateApplication.h"
 #include "Misc/TransactionObjectEvent.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyHUDSystem.h"

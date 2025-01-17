@@ -605,13 +605,13 @@ void FInbetweenerGrid::ComputeJAM( FInbetweenerPoint* iTriangle[3]
                        , &qj = iTriangle[1]->GetTargetPosition()
                        , &qk = iTriangle[2]->GetTargetPosition();
     // reference pose
-    const ::ULIS::FVec2D &pi = iTriangle[0]->GetSourcePosition()
-                       , &pj = iTriangle[1]->GetSourcePosition()
-                       , &pk = iTriangle[2]->GetSourcePosition();
+    const ::ULIS::FVec2D &pti = iTriangle[0]->GetSourcePosition()
+                       , &ptj = iTriangle[1]->GetSourcePosition()
+                       , &ptk = iTriangle[2]->GetSourcePosition();
     Eigen::Matrix2d P, Q;
 
     Q << qi.x - qk.x, qi.y - qk.y, qj.x - qk.x, qj.y - qk.y;
-    P << pi.x - pk.x, pi.y - pk.y, pj.x - pk.x, pj.y - pk.y;
+    P << pti.x - ptk.x, pti.y - ptk.y, ptj.x - ptk.x, ptj.y - ptk.y;
 
     if ( iInverseOrientation )
     {
