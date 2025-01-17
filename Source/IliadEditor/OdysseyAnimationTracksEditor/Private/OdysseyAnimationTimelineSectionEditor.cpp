@@ -106,10 +106,6 @@ FOdysseyAnimationTimelineSectionEditor::GetSectionHeight( const UE::Sequencer::F
 float
 FOdysseyAnimationTimelineSectionEditor::GetSectionGripHeight(float iSectionHeight) const
 {
-    UOdysseyAnimationTimelineTrack* track = mSection->GetTypedOuter<UOdysseyAnimationTimelineTrack>();
-    if (!track)
-        return ISequencerSection::GetSectionGripHeight(iSectionHeight);
-
     return FMath::Min(iSectionHeight, GetCollapsedSectionHeight());
 }
 
