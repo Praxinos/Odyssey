@@ -10,6 +10,7 @@
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "GenericPlatform/GenericPlatformTime.h"
@@ -29,7 +30,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathDrawingToolHUD( this ), true )
     , ColorMode( eForegroundColorMode::SolidColor )
     , Opacity( 1.0f )
-    , Brush ( nullptr )
+    , Brush( nullptr )
     , TracingType( eTracingType::Organic )
     , TracingFidelity( eTracingFidelity::Highest )
     , Radius( 5.0f )

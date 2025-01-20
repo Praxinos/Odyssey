@@ -3,6 +3,7 @@
 
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineScrollBox.h"
 #include "OdysseyAnimationEditorTimelinePosition.h"
+#include "Layout/LayoutUtils.h"
 
 SOdysseyAnimationTimelineScrollBox::FSlot::FSlotArguments
 SOdysseyAnimationTimelineScrollBox::Slot()

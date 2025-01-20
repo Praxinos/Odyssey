@@ -8,6 +8,8 @@
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "Compilation/MovieSceneCompiledDataManager.h"
 #include "EditorAssetLibrary.h"
+#include "Engine/Texture2D.h"
+#include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "ISequencer.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "MovieScene.h"
@@ -15,6 +17,7 @@
 #include "MovieSceneSequence.h"
 #include "MovieSceneToolHelpers.h"
 #include "Sections/MovieScenePrimitiveMaterialSection.h"
+#include "Subsystems/AssetEditorSubsystem.h"
 
 #include "Board/BoardSequence.h"
 #include "EposSequenceHelpers.h"
@@ -465,10 +468,15 @@ ShotSequenceTools::GotoPreviousDrawing( ISequencer& iSequencer, UMovieSceneSeque
 
     FFrameNumber previous_time = times[index];
 
-    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iSequencer.GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetSharedPlaybackState()->GetHierarchy();
     const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
 
-    iSequencer.SetGlobalTime( previous_time * subdata->RootToSequenceTransform.InverseNoLooping() );
+    FMovieSceneInverseSequenceTransform localToRootTransform = subdata->RootToSequenceTransform.Inverse();
+    TOptional<FFrameTime> previous_time_in_root = localToRootTransform.TryTransformTime( previous_time );
+    if( !previous_time_in_root )
+        return;
+
+    iSequencer.SetGlobalTime( *previous_time_in_root );
 }
 
 //---
@@ -525,10 +533,15 @@ ShotSequenceTools::GotoNextDrawing( ISequencer& iSequencer, UMovieSceneSequence*
     if( !next_time )
         return;
 
-    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( iSequencer.GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSequenceHierarchy* hierarchy = iSequencer.GetSharedPlaybackState()->GetHierarchy();
     const FMovieSceneSubSequenceData* subdata = hierarchy->FindSubData( iSequenceID );
 
-    iSequencer.SetGlobalTime( *next_time * subdata->RootToSequenceTransform.InverseNoLooping() );
+    FMovieSceneInverseSequenceTransform localToRootTransform = subdata->RootToSequenceTransform.Inverse();
+    TOptional<FFrameTime> next_time_in_root = localToRootTransform.TryTransformTime( *next_time );
+    if( !next_time_in_root )
+        return;
+
+    iSequencer.SetGlobalTime( *next_time_in_root );
 }
 
 #undef LOCTEXT_NAMESPACE

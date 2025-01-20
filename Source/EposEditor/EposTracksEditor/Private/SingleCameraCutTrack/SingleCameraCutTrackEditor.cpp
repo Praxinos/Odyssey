@@ -4,6 +4,7 @@
 #include "SingleCameraCutTrack/SingleCameraCutTrackEditor.h"
 
 #include "DragAndDrop/ActorDragDropGraphEdOp.h"
+#include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "MovieSceneCommonHelpers.h"
 #include "MovieSceneObjectBindingIDPicker.h"
 #include "MovieSceneToolHelpers.h"
@@ -504,6 +505,10 @@ TSharedRef<SWidget> FSingleCameraCutTrackEditor::HandleAddSingleCameraCutComboBu
             // Actor selector to allow the user to choose a parent actor
             FSceneOutlinerModule& SceneOutlinerModule = FModuleManager::LoadModuleChecked<FSceneOutlinerModule>( "SceneOutliner" );
 
+            TSharedPtr<ISequencer> Sequencer = GetSequencer();
+            const float WidthOverride = Sequencer.IsValid() ? Sequencer->GetSequencerSettings()->GetAssetBrowserWidth() : 500.f;
+            const float HeightOverride = Sequencer.IsValid() ? Sequencer->GetSequencerSettings()->GetAssetBrowserHeight() : 400.f;
+
             TSharedRef< SWidget > MenuWidget =
                 SNew( SHorizontalBox )
 
@@ -511,8 +516,8 @@ TSharedRef<SWidget> FSingleCameraCutTrackEditor::HandleAddSingleCameraCutComboBu
                 .AutoWidth()
                 [
                     SNew( SBox )
-                    .MaxDesiredHeight( 400.0f )
-                    .WidthOverride( 300.0f )
+                    .WidthOverride( WidthOverride )
+                    .HeightOverride( HeightOverride )
                     [
                         SceneOutlinerModule.CreateActorPicker(
                             InitOptions,

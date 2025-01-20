@@ -186,7 +186,7 @@ UMovieSceneCinematicBoardTrack::GetRowSegmentBlender() const
             int32 numToRemove = ioBlendData.Num() - removeAtIndex;
             if( numToRemove > 0 )
             {
-                ioBlendData.RemoveAt( removeAtIndex, numToRemove, true );
+                ioBlendData.RemoveAt( removeAtIndex, numToRemove, EAllowShrinking::Yes );
             }
         }
 

@@ -170,13 +170,8 @@ void UBoardSequence::UnbindInvalidObjects(const FGuid& ObjectId, UObject* Contex
 #if WITH_EDITOR
 
 ETrackSupport
-UBoardSequence::IsTrackSupported( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const
+UBoardSequence::IsTrackSupportedImpl( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const
 {
-    if( !UMovieScene::IsTrackClassAllowed( InTrackClass ) )
-    {
-        return ETrackSupport::NotSupported;
-    }
-
     if( InTrackClass == UMovieSceneCinematicBoardTrack::StaticClass() ||
         InTrackClass == UMovieSceneSingleCameraCutTrack::StaticClass() || // The board sequence needs to support this track type, otherwise when opening a board sequence, inner shot sequence won't have this track available (even if supported in this class), because during opening the toolkit, all the track editors are not called
         InTrackClass == UMovieSceneNoteTrack::StaticClass() ||

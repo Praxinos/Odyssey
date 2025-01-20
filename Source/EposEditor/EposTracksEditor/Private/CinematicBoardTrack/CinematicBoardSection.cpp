@@ -59,7 +59,6 @@ FCinematicBoardSection::FCinematicSectionCacheForThumbnail::FCinematicSectionCac
     : mInnerFrameRate( 1, 1 )
     , mInnerFrameOffset( 0 )
     , mSectionStartFrame( 0 )
-    , mTimeScale( 1.f )
 {
     if( iSection )
     {
@@ -426,7 +425,7 @@ FCinematicBoardSection::GetViewCamera()
     const UMovieSceneCinematicBoardSection& SectionObject = GetSectionObjectAs<UMovieSceneCinematicBoardSection>();
     const FMovieSceneSequenceID             ThisSequenceID = sequencer->GetFocusedTemplateID();
     const FMovieSceneSequenceID             TargetSequenceID = SectionObject.GetSequenceID();
-    const FMovieSceneSequenceHierarchy*     Hierarchy = sequencer->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( sequencer->GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSequenceHierarchy*     Hierarchy = sequencer->GetSharedPlaybackState()->GetHierarchy();
 
     if( !Hierarchy )
         return nullptr;
@@ -1003,6 +1002,92 @@ FCinematicBoardSection::BuildSectionContextMenu( FMenuBuilder& ioMenuBuilder, co
         }
         ioMenuBuilder.EndSection();
     }
+
+    //---
+
+    auto MakeUIAction = [this]( EMovieSceneTransformChannel ChannelsToToggle, const TSharedPtr<ISequencer>& Sequencer )
+        {
+
+            UMovieSceneSubSection* SubSection = Cast<UMovieSceneSubSection>( Section );
+            if( !SubSection )
+            {
+                return FUIAction();
+            }
+            return FUIAction(
+                FExecuteAction::CreateLambda( [SubSection, ChannelsToToggle, Sequencer]
+                                              {
+                                                  FScopedTransaction Transaction( LOCTEXT( "SetActiveChannelsTransaction", "Set Active Channels" ) );
+                                                  SubSection->Modify();
+                                                  EMovieSceneTransformChannel Channels = SubSection->GetMask().GetChannels();
+
+                                                  if( EnumHasAllFlags( Channels, ChannelsToToggle ) || ( Channels & ChannelsToToggle ) == EMovieSceneTransformChannel::None )
+                                                  {
+                                                      SubSection->SetMask( SubSection->GetMask().GetChannels() ^ ChannelsToToggle );
+                                                  }
+                                                  else
+                                                  {
+                                                      SubSection->SetMask( SubSection->GetMask().GetChannels() | ChannelsToToggle );
+                                                  }
+
+                                                  Sequencer->NotifyMovieSceneDataChanged( EMovieSceneDataChangeType::MovieSceneStructureItemsChanged );
+                                              }
+                ),
+                FCanExecuteAction(),
+                FGetActionCheckState::CreateLambda( [SubSection, ChannelsToToggle]
+                                                    {
+                                                        EMovieSceneTransformChannel Channels = SubSection->GetMask().GetChannels();
+                                                        if( EnumHasAllFlags( Channels, ChannelsToToggle ) )
+                                                        {
+                                                            return ECheckBoxState::Checked;
+                                                        }
+                                                        else if( EnumHasAnyFlags( Channels, ChannelsToToggle ) )
+                                                        {
+                                                            return ECheckBoxState::Undetermined;
+                                                        }
+                                                        return ECheckBoxState::Unchecked;
+                                                    } )
+            );
+        };
+
+    TSharedPtr<ISequencer> Sequencer = GetSequencer();
+
+    ioMenuBuilder.BeginSection( NAME_None, LOCTEXT( "OriginChannelsText", "Active Channels" ) );
+    ioMenuBuilder.AddSubMenu(
+        LOCTEXT( "AllTranslation", "Translation" ), LOCTEXT( "AllTranslation_ToolTip", "Causes this section to affect the translation of the transform" ),
+        FNewMenuDelegate::CreateLambda( [Sequencer, MakeUIAction]( FMenuBuilder& SubMenuBuilder )
+                                        {
+                                            SubMenuBuilder.AddMenuEntry(
+                                                LOCTEXT( "TranslationX", "X" ), LOCTEXT( "TranslationX_ToolTip", "Causes this section to affect the X channel of the transform's translation" ),
+                                                FSlateIcon(), MakeUIAction( EMovieSceneTransformChannel::TranslationX, Sequencer ), NAME_None, EUserInterfaceActionType::ToggleButton );
+                                            SubMenuBuilder.AddMenuEntry(
+                                                LOCTEXT( "TranslationY", "Y" ), LOCTEXT( "TranslationY_ToolTip", "Causes this section to affect the Y channel of the transform's translation" ),
+                                                FSlateIcon(), MakeUIAction( EMovieSceneTransformChannel::TranslationY, Sequencer ), NAME_None, EUserInterfaceActionType::ToggleButton );
+                                            SubMenuBuilder.AddMenuEntry(
+                                                LOCTEXT( "TranslationZ", "Z" ), LOCTEXT( "TranslationZ_ToolTip", "Causes this section to affect the Z channel of the transform's translation" ),
+                                                FSlateIcon(), MakeUIAction( EMovieSceneTransformChannel::TranslationZ, Sequencer ), NAME_None, EUserInterfaceActionType::ToggleButton );
+                                        } ),
+        MakeUIAction( EMovieSceneTransformChannel::Translation, Sequencer ),
+        NAME_None,
+        EUserInterfaceActionType::ToggleButton );
+
+    ioMenuBuilder.AddSubMenu(
+        LOCTEXT( "AllRotation", "Rotation" ), LOCTEXT( "AllRotation_ToolTip", "Causes this section to affect the rotation of the transform" ),
+        FNewMenuDelegate::CreateLambda( [Sequencer, MakeUIAction]( FMenuBuilder& SubMenuBuilder )
+                                        {
+                                            SubMenuBuilder.AddMenuEntry(
+                                                LOCTEXT( "RotationX", "Roll (X)" ), LOCTEXT( "RotationX_ToolTip", "Causes this section to affect the roll (X) channel the transform's rotation" ),
+                                                FSlateIcon(), MakeUIAction( EMovieSceneTransformChannel::RotationX, Sequencer ), NAME_None, EUserInterfaceActionType::ToggleButton );
+                                            SubMenuBuilder.AddMenuEntry(
+                                                LOCTEXT( "RotationY", "Pitch (Y)" ), LOCTEXT( "RotationY_ToolTip", "Causes this section to affect the pitch (Y) channel the transform's rotation" ),
+                                                FSlateIcon(), MakeUIAction( EMovieSceneTransformChannel::RotationY, Sequencer ), NAME_None, EUserInterfaceActionType::ToggleButton );
+                                            SubMenuBuilder.AddMenuEntry(
+                                                LOCTEXT( "RotationZ", "Yaw (Z)" ), LOCTEXT( "RotationZ_ToolTip", "Causes this section to affect the yaw (Z) channel the transform's rotation" ),
+                                                FSlateIcon(), MakeUIAction( EMovieSceneTransformChannel::RotationZ, Sequencer ), NAME_None, EUserInterfaceActionType::ToggleButton );
+                                        } ),
+        MakeUIAction( EMovieSceneTransformChannel::Rotation, Sequencer ),
+        NAME_None,
+        EUserInterfaceActionType::ToggleButton );
+    ioMenuBuilder.EndSection();
 }
 
 void

@@ -108,7 +108,8 @@ SKeysOverviewBox::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeom
 
     FVector2D localSectionSize = AllottedGeometry.GetLocalSize();
     FTimeToPixel converter = board_section->ConstructConverterForSection( AllottedGeometry );
-    const FMovieSceneSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().InverseNoLooping();
+    FMovieSceneInverseSequenceTransform inner_to_outer_transform = subsection_object->OuterToInnerTransform().Inverse();
+
     const UMovieScene* movie_scene = subsection_object->GetTypedOuter<UMovieScene>();
     check( movie_scene );
 
@@ -123,8 +124,11 @@ SKeysOverviewBox::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeom
             FFrameNumber time = pair.Key;
             //FMetaKey meta_key = pair.Value;
 
-            FFrameTime outer_time = time * inner_to_outer_transform;
-            double outer_second = FQualifiedFrameTime( outer_time, movie_scene->GetTickResolution() ).AsSeconds();
+            TOptional<FFrameTime> outer_time = inner_to_outer_transform.TryTransformTime( time );
+            if( !outer_time )
+                continue;
+
+            double outer_second = FQualifiedFrameTime( *outer_time, movie_scene->GetTickResolution() ).AsSeconds();
 
             iKeyPositions.AddUnique( converter.SecondsToPixel( outer_second ) );
         }

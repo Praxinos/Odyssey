@@ -44,6 +44,10 @@ private:
     TSharedPtr<FExtender> CreateObjectBindingContextMenuExtender(UE::Sequencer::FViewModelPtr InViewModel);
     void ExtendObjectBindingContextMenu(FMenuBuilder& MenuBuilder, TSharedPtr<UE::Sequencer::FObjectBindingModel> ObjectBindingModel);
 
+    //// Object binding sidebar menu extensions
+    //TSharedPtr<FExtender> CreateObjectBindingSidebarMenuExtender( FViewModelPtr InViewModel );
+    //void ExtendObjectBindingSidebarMenu( FMenuBuilder& MenuBuilder, TSharedPtr<FObjectBindingModel> ObjectBindingModel );
+
     FText CreateInfoText() const;
 
 private:
@@ -94,10 +98,7 @@ private:
     ESequencerDropResult OnSequencerActorsDrop( const TArray<TWeakObjectPtr<AActor>>& iActors, const FActorDragDropOp& iDragDropOp );
 
 private:
-    void OnSequencerClosed( TSharedRef<ISequencer> iSequencer );
-
-private:
-    ISequencer*     mSequencer;
+    TWeakPtr<ISequencer> mWeakSequencer;
     FDelegateHandle mSequencerActorAddedDelegates;
     FDelegateHandle mSequencerActivatedDelegates;
     FDelegateHandle mSequencerSelectionSectionChangedDelegates;

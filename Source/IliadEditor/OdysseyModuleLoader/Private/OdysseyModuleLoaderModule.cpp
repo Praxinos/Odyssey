@@ -42,4 +42,4 @@ void FOdysseyModuleLoaderModule::ShutdownModule()
 {
 }
 
-IMPLEMENT_MODULE(FOdysseyModuleLoaderModule, OdysseyModuleLoaderModule );
+IMPLEMENT_MODULE(FOdysseyModuleLoaderModule, OdysseyModuleLoader );

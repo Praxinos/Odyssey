@@ -7,6 +7,7 @@
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
+#include "Misc/MessageDialog.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 #define WARNING_INTERP_ROUTE_REMOVAL "Trajectories are only valid with ARAP interpolation. Existing trajectories will be removed. Proceed ?"

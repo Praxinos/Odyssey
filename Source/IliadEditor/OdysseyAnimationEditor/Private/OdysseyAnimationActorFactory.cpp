@@ -8,6 +8,7 @@
 #include "OdysseyAnimation.h"
 #include "Subsystems/UnrealEditorSubsystem.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "Editor.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(OdysseyAnimationActorFactory)
 

@@ -79,7 +79,7 @@ FindAllSequencePaths( const IMovieScenePlayer& iPlayer )
     // Don't get the root sequence because it is the only one which must not be inside the root folder
     //map_sequences.Add( MovieSceneSequenceID::Root, player.GetEvaluationTemplate().GetSequence( MovieSceneSequenceID::Root ) );
 
-    const FMovieSceneSequenceHierarchy* hierarchy = player.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player.GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSequenceHierarchy* hierarchy = player.GetSharedPlaybackState()->GetHierarchy();
     if( hierarchy )
     {
         const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& subsequences = hierarchy->AllSubSequenceData();
@@ -127,7 +127,7 @@ FindAllNotePaths( const IMovieScenePlayer& iPlayer )
     TArray<UMovieSceneSequence*> sequences;
     sequences.Add( player.GetEvaluationTemplate().GetSequence( MovieSceneSequenceID::Root ) );
 
-    const FMovieSceneSequenceHierarchy* hierarchy = player.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player.GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSequenceHierarchy* hierarchy = player.GetSharedPlaybackState()->GetHierarchy();
     if( hierarchy )
     {
         const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& subsequences = hierarchy->AllSubSequenceData();
@@ -211,7 +211,7 @@ FindAllMaterialPaths( const IMovieScenePlayer& iPlayer, FRelevantPathMap& oParen
     TMap<FMovieSceneSequenceID, UMovieSceneSequence*> map_sequences;
     map_sequences.Add( MovieSceneSequenceID::Root, player.GetEvaluationTemplate().GetSequence( MovieSceneSequenceID::Root ) );
 
-    const FMovieSceneSequenceHierarchy* hierarchy = player.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player.GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSequenceHierarchy* hierarchy = player.GetSharedPlaybackState()->GetHierarchy();
     if( hierarchy )
     {
         const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& subsequences = hierarchy->AllSubSequenceData();
@@ -423,7 +423,7 @@ NamingConvention::GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer,
 
     TArray<FString> camera_names;
 
-    const FMovieSceneSequenceHierarchy* hierarchy = player->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player->GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSequenceHierarchy* hierarchy = player->GetSharedPlaybackState()->GetHierarchy();
     if( hierarchy )
     {
         const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& map = hierarchy->AllSubSequenceData();
@@ -889,7 +889,7 @@ FindOneNameElements( const IMovieScenePlayer& iPlayer, FFrameNumber iFrameNumber
     TMap<FMovieSceneSequenceID, UMovieSceneSequence*> map_sequences;
     map_sequences.Add( MovieSceneSequenceID::Root, player.GetEvaluationTemplate().GetSequence( MovieSceneSequenceID::Root ) );
 
-    const FMovieSceneSequenceHierarchy* hierarchy = player.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player.GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSequenceHierarchy* hierarchy = player.GetSharedPlaybackState()->GetHierarchy();
     if( hierarchy )
     {
         const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& subsequences = hierarchy->AllSubSequenceData();
@@ -1015,7 +1015,7 @@ NamingConvention::GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, 
 
     TArray<UBoardSequence*> board_sequences;
 
-    const FMovieSceneSequenceHierarchy* hierarchy = player->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( player->GetEvaluationTemplate().GetCompiledDataID() );
+    const FMovieSceneSequenceHierarchy* hierarchy = player->GetSharedPlaybackState()->GetHierarchy();
     if( hierarchy )
     {
         const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& map = hierarchy->AllSubSequenceData();

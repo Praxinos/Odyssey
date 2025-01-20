@@ -4,8 +4,11 @@
 #include "NoteTrack/SNoteSectionContent.h"
 
 #include "Brushes/SlateColorBrush.h"
+#include "Editor.h"
+#include "Subsystems/AssetEditorSubsystem.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 
+#include "NoteSection.h"
 #include "NoteTrack/NoteSection.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "StoryNote.h"

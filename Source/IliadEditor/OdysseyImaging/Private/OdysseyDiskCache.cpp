@@ -38,7 +38,7 @@ FOdysseyDiskCache::Save(const FString& iId, const FSharedBuffer& iBuffer)
         {
             UE::DerivedData::FCachePutValueRequest
             {
-                UE::DerivedData::FSharedString(TEXT("FOdysseyDiskCache")),
+                UE::FSharedString(TEXT("FOdysseyDiskCache")),
                 UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
                 MoveTemp(derivedDataValue),
                 UE::DerivedData::ECachePolicy::StoreLocal //Use "StoreLocal" instead of "Local" to store and override existing value
@@ -70,7 +70,7 @@ FOdysseyDiskCache::Load(const FString& iId, FUniqueBuffer& oBuffer)
         {
             UE::DerivedData::FCacheGetValueRequest
             {
-                UE::DerivedData::FSharedString(TEXT("FOdysseyDiskCache")),
+                UE::FSharedString(TEXT("FOdysseyDiskCache")),
                 UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
                 UE::DerivedData::ECachePolicy::Local
             }
@@ -116,7 +116,7 @@ FOdysseyDiskCache::Remove(const FString& iId)
     UE::DerivedData::GetCache().PutValue(
         {
             {
-                UE::DerivedData::FSharedString(), //Not needed
+                UE::FSharedString(), //Not needed
                 UE::DerivedData::ConvertLegacyCacheKey(CacheKey),
                 MoveTemp(derivedDataValue),
                 UE::DerivedData::ECachePolicy::StoreLocal //Use "StoreLocal" instead of "Local" to store and override existing value

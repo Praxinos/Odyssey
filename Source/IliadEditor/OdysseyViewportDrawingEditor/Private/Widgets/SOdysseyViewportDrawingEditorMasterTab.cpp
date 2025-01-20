@@ -5,9 +5,11 @@
 
 #include "PropertyCustomizationHelpers.h"
 #include "Widgets/Layout/SSeparator.h"
+#include "Widgets/Input/SComboBox.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
 #include "Widgets/Layout/SScrollBox.h"
+#include "Widgets/Input/SButton.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyViewportDrawingEditorUtils.h"
 #include "SAssetView.h"

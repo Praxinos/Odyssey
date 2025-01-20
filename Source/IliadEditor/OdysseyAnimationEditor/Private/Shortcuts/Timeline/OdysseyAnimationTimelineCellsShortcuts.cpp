@@ -16,9 +16,10 @@
 #include "OdysseyAnimation.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
 #include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
+#include "UObject/OdysseyObjectEditorUtils.h"
+#include "ScopedTransaction.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
-#include "UObject/OdysseyObjectEditorUtils.h"
 
 FOdysseyAnimationTimelineCellsShortcuts::FOdysseyAnimationTimelineCellsShortcuts(UOdysseyAnimationLayerStack* iLayerStack)
     : mLayerStack(iLayerStack)

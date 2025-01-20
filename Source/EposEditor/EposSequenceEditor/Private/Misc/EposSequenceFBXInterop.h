@@ -21,7 +21,7 @@ class FEposSequenceFBXInterop
 {
 public:
 
-    FEposSequenceFBXInterop(TSharedPtr<ISequencer> InSequencer);
+    FEposSequenceFBXInterop(TSharedRef<ISequencer> InSequencer);
 
     /** Imports the animation from an fbx file. */
     void ImportFBX();
@@ -37,5 +37,5 @@ private:
 
 private:
 
-    TSharedPtr<ISequencer> Sequencer;
+    TWeakPtr<ISequencer> WeakSequencer;
 };

@@ -553,14 +553,14 @@ FOdysseyVector::GetCubicBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
 }
 
 double
-FOdysseyVector::GetQuadraticBezierApproximateLength( const ::ULIS::FVec2D iBezier[3]
+FOdysseyVector::GetQuadraticBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
                                                    , uint32 iDivisions )
 {
     return GetQuadraticBezierApproximateLength( iBezier, iDivisions, nullptr, nullptr );
 }
 
 double
-FOdysseyVector::GetQuadraticBezierApproximateLength( const ::ULIS::FVec2D iBezier[3]
+FOdysseyVector::GetQuadraticBezierApproximateLength( const ::ULIS::FVec2D iBezier[4]
                                                    , uint32 iDivisions
                                                    , std::vector<double>* oDivisionLengthBuffer
                                                    , std::vector<::ULIS::FVec2D>* oDivisionPointBuffer )
@@ -758,7 +758,7 @@ ComputeCenterTangent( const std::vector<::ULIS::FVec2D>& iPointBuffer
  *  ChordLengthParameterize :
  *    Assign parameter values to digitized points
  *    using relative distances between points.
-*     Point2    *d; /* Array of digitized points
+ *     Point2    *d; // Array of digitized points
     int        first, last; // Indices defining region
  */
 void

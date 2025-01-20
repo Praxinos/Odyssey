@@ -15,6 +15,7 @@
 #include "Widgets/SPanel.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SComboBox.h"
+#include "Widgets/Input/SButton.h"
 
 #include "SOdysseyLeafWidget.h"
 

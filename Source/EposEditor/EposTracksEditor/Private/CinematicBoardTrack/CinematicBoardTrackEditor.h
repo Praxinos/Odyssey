@@ -51,12 +51,12 @@ public:
      */
     static TSharedRef<ISequencerTrackEditor> CreateTrackEditor( TSharedRef<ISequencer> iOwningSequencer );
 
+    UE_DEPRECATED( 5.5, "Use FCameraCutPlaybackCapability::LastViewTargetCamera instead." )
     TWeakObjectPtr<AActor> GetBoardCamera() const;
 
 public:
 
     // ISequencerTrackEditor interface
-    virtual void OnInitialize() override;
     virtual void OnRelease() override;
     virtual void BindCommands( TSharedRef<FUICommandList> SequencerCommandBindings ) override;
     virtual void BuildAddTrackMenu( FMenuBuilder& ioMenuBuilder ) override;
@@ -156,7 +156,7 @@ protected:
     UMovieSceneSubTrack* FindOrCreateSubTrack( UMovieScene* MovieScene, UMovieSceneTrack* Track ) const;
 
     /** Callback for generating the menu of the "Add Sequence" combo button. */
-    TSharedRef<SWidget> HandleAddSubSequenceComboButtonGetMenuContent( UMovieSceneTrack* InTrack );
+    TSharedRef<SWidget> HandleAddSubSequenceComboButtonGetMenuContent( UE::Sequencer::TWeakViewModelPtr<UE::Sequencer::ITrackExtension> WeakTrackModel );
 
 private:
 
@@ -185,17 +185,8 @@ private:
     /** Delegate for boards button lock tooltip */
     FText GetLockBoardsToolTip() const;
 
-    /** Called when our sequencer wants to switch cameras */
-    void OnUpdateCameraCut( UObject* iCameraObject, bool iJumpCut );
-
 private:
 
     /** The Thumbnail pool which draws all the viewport thumbnails for the board track. */
     TSharedPtr<FTrackEditorThumbnailPool> mThumbnailPool;
-
-    /** The camera actor for the current cut. */
-    TWeakObjectPtr<AActor> mBoardCamera;
-
-    /** Delegate binding handle for ISequencer::OnCameraCut */
-    FDelegateHandle mOnCameraCutHandle;
 };

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "TrackEditors/SubTrackEditorBase.h"
+#include "Widgets/Layout/SBox.h"
 
 class UOdysseyAnimationTimelineSection;
 class FOdysseyAnimationEditorTimelinePosition;

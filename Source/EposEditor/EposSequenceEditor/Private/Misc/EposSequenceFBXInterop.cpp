@@ -28,13 +28,19 @@
 
 #define LOCTEXT_NAMESPACE "EposSequenceFBXInterop"
 
-FEposSequenceFBXInterop::FEposSequenceFBXInterop(TSharedPtr<ISequencer> InSequencer)
-    : Sequencer(InSequencer)
+FEposSequenceFBXInterop::FEposSequenceFBXInterop(TSharedRef<ISequencer> InSequencer)
+    : WeakSequencer(InSequencer)
 {
 }
 
 void FEposSequenceFBXInterop::ImportFBX()
 {
+    const TSharedPtr<ISequencer> Sequencer = WeakSequencer.Pin();
+    if( !Sequencer )
+    {
+        return;
+    }
+
     using namespace UE::Sequencer;
 
     TMap<FGuid, FString> ObjectBindingNameMap;
@@ -58,6 +64,12 @@ void FEposSequenceFBXInterop::ImportFBX()
 
 void FEposSequenceFBXInterop::ImportFBXOntoSelectedNodes()
 {
+    const TSharedPtr<ISequencer> Sequencer = WeakSequencer.Pin();
+    if( !Sequencer )
+    {
+        return;
+    }
+
     using namespace UE::Sequencer;
 
     // The object binding and names to match when importing from fbx
@@ -75,6 +87,12 @@ void FEposSequenceFBXInterop::ImportFBXOntoSelectedNodes()
 
 void FEposSequenceFBXInterop::ExportFBX()
 {
+    const TSharedPtr<ISequencer> Sequencer = WeakSequencer.Pin();
+    if( !Sequencer )
+    {
+        return;
+    }
+
     using namespace UE::Sequencer;
 
     TArray<UExporter*> Exporters;
@@ -83,7 +101,7 @@ void FEposSequenceFBXInterop::ExportFBX()
     bool bExportFileNamePicked = false;
     if ( DesktopPlatform != NULL )
     {
-        FString FileTypes = "FBX document|*.fbx";
+        FString FileTypes = "FBX document (*.fbx)|*.fbx";
         UMovieSceneSequence* Sequence = Sequencer->GetFocusedMovieSceneSequence();
         for (TObjectIterator<UClass> It; It; ++It)
         {
@@ -100,16 +118,16 @@ void FEposSequenceFBXInterop::ExportFBX()
 
             for (int32 i = 0; i < Default->FormatExtension.Num(); ++i)
             {
-                const FString& FormatExtension = Default->FormatExtension[i];
+                // We use force-lowercase here to be consistent with "File > Export Selected..."
+                const FString& FormatExtension = Default->FormatExtension[i].ToLower();
                 const FString& FormatDescription = Default->FormatDescription[i];
 
                 if (FileTypes.Len() > 0)
                 {
                     FileTypes += TEXT("|");
                 }
-                FileTypes += FormatDescription;
-                FileTypes += TEXT("|*.");
-                FileTypes += FormatExtension;
+
+                FileTypes += FString::Printf( TEXT( "%s (*.%s)|*.%s" ), *FormatDescription, *FormatExtension, *FormatExtension );
             }
 
             Exporters.Add(Default);
@@ -204,6 +222,12 @@ void FEposSequenceFBXInterop::ExportFBX()
 
 void FEposSequenceFBXInterop::ExportFBXInternal(const FString& ExportFilename, const TArray<FGuid>& Bindings, const TArray<UMovieSceneTrack*>& Tracks)
 {
+    const TSharedPtr<ISequencer> Sequencer = WeakSequencer.Pin();
+    if( !Sequencer )
+    {
+        return;
+    }
+
     UnFbx::FFbxExporter* Exporter = UnFbx::FFbxExporter::GetInstance();
     //Show the fbx export dialog options
     bool ExportCancel = false;
@@ -211,13 +235,15 @@ void FEposSequenceFBXInterop::ExportFBXInternal(const FString& ExportFilename, c
     Exporter->FillExportOptions(false, true, ExportFilename, ExportCancel, ExportAll);
     if (!ExportCancel)
     {
-        UMovieScene* MovieScene = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene();
+        UMovieSceneSequence* MovieSceneSequence = Sequencer->GetFocusedMovieSceneSequence();
+        UMovieSceneSequence* RootMovieSceneSequence = Sequencer->GetRootMovieSceneSequence();
+        UMovieScene* MovieScene = MovieSceneSequence->GetMovieScene();
         UWorld* World = Sequencer->GetPlaybackContext()->GetWorld();
         FMovieSceneSequenceIDRef Template = Sequencer->GetFocusedTemplateID();
         UnFbx::FFbxExporter::FLevelSequenceNodeNameAdapter NodeNameAdapter(MovieScene, Sequencer.Get(), Template);
 
         {
-            FSpawnableRestoreState SpawnableRestoreState(MovieScene);
+            FSpawnableRestoreState SpawnableRestoreState( MovieScene, Sequencer->GetSharedPlaybackState().ToSharedPtr() );
             if (SpawnableRestoreState.bWasChanged)
             {
                 // Evaluate at the beginning of the subscene time to ensure that spawnables are created before export
@@ -225,7 +251,12 @@ void FEposSequenceFBXInterop::ExportFBXInternal(const FString& ExportFilename, c
             }
 
             FMovieSceneSequenceTransform RootToLocalTransform = Sequencer->GetFocusedMovieSceneSequenceTransform();
-            if (MovieSceneToolHelpers::ExportFBX(World, MovieScene, Sequencer.Get(), Bindings, Tracks, NodeNameAdapter, Template, ExportFilename, RootToLocalTransform))
+            FAnimExportSequenceParameters AESP;
+            AESP.Player = Sequencer.Get();
+            AESP.RootToLocalTransform = RootToLocalTransform;
+            AESP.MovieSceneSequence = MovieSceneSequence;
+            AESP.RootMovieSceneSequence = RootMovieSceneSequence;
+            if( MovieSceneToolHelpers::ExportFBX( World, AESP, Bindings, Tracks, NodeNameAdapter, Template, ExportFilename ) )
             {
                 FNotificationInfo Info(NSLOCTEXT("Sequencer", "ExportFBXSucceeded", "FBX Export Succeeded."));
                 Info.Hyperlink = FSimpleDelegate::CreateStatic([](FString InFilename) { FPlatformProcess::ExploreFolder(*InFilename); }, ExportFilename);

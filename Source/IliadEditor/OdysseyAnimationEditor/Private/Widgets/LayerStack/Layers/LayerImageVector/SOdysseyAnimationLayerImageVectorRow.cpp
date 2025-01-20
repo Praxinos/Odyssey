@@ -18,6 +18,7 @@
 #include "AnimationEditor/OdysseyAnimationEditorExtension.h"
 #include "OdysseyPainterEditor.h"
 #include "HUD/OdysseyVectorHUD.h"
+#include "ScopedTransaction.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

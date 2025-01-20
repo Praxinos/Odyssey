@@ -434,6 +434,7 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
     ////////////////////////////
     // Apply the texture parameters to retrieve the data to send to the graphics card
     TArray< TArray< TArray< FCompressedImage2D > > > compressedMips;
+    TArray< FImage > images;
     compressedMips.Reserve( ioSrcRects.Num() );
     {
         uint32 unusedNumMipsInTail, unusedExtData;
@@ -443,7 +444,7 @@ InvalidateTextureFromSourceDataUsingSortedRects( const ::ULIS::FBlock* iData, UT
             for( int32 j = 0; j < ioSrcRects[i].Num(); ++j ) {
                 compressedMips[i].Emplace( TArray< FCompressedImage2D >() );
                 // Non MT mode
-                if( !ensure( Compressor->BuildTexture( tileImages[i][j], TArray< FImage >(), buildSettings[i][0], FStringView(), compressedMips[i][j], unusedNumMipsInTail, unusedExtData, nullptr )))
+                if( !ensure( Compressor->BuildTexture( tileImages[i][j], images, buildSettings[i][0], FStringView(), compressedMips[i][j], unusedNumMipsInTail, unusedExtData, nullptr )))
                     return;
             }
         }

@@ -5,6 +5,7 @@
 
 #include "Misc/Change.h"
 #include "Misc/ITransaction.h"
+#include "Editor.h"
 
 class FOdysseyMutationsUndo : public FCommandChange
 {

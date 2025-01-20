@@ -132,7 +132,7 @@ BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& i
     //---
 
     // Pre/Post are required (I don't know really why), otherwise the section doesn't 'recognize' the new take.
-    // It seems that the sequence id of the subsection, won't match the one inside the hierarchy (iPlayer.GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy())
+    // It seems that the sequence id of the subsection, won't match the one inside the hierarchy (iPlayer.GetSharedPlaybackState()->GetHierarchy())
     // And adding Pre/Post seems to solve the problem
 
     FProperty* ChangedProperty = FindFProperty<FProperty>( UMovieSceneCinematicBoardSection::StaticClass(), "SubSequence" );

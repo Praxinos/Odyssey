@@ -15,7 +15,7 @@ public:
     virtual ~FOdysseyAnimationMediaTextureSampleConverter() {}
 
     virtual uint32 GetConverterInfoFlags() const override;
-    virtual bool Convert(FTexture2DRHIRef & InDstTexture, const FConversionHints & Hints) override;
+    virtual bool Convert(FRHICommandListImmediate& RHICmdList, FTextureRHIRef& InDstTexture, const FConversionHints& Hints) override;
 
 private:
     FOdysseyAnimationMediaTextureSample* mSample;

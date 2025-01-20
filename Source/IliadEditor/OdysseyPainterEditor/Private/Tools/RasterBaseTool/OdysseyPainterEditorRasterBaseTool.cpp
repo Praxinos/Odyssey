@@ -9,6 +9,7 @@
 #include "ISinglePropertyView.h"
 #include "OdysseyMediaRaster.h"
 #include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
+#include "PropertyHandle.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

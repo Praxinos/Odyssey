@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
+#include "Widgets/SCompoundWidget.h"
 
 class UOdysseyAnimationLayer;
 class UOdysseyAnimationCell;

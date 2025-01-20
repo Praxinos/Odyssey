@@ -11,6 +11,7 @@
 #include "Widgets/Layout/SGridPanel.h"
 #include "DesktopPlatformModule.h"
 #include "ULISLoaderModule.h"
+#include "Misc/ScopedSlowTask.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

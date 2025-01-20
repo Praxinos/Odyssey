@@ -7,6 +7,7 @@
 #include "LayerStack/Layers/OdysseyAnimationLayer.h"
 #include "Widgets/LayerStack/SOdysseyAnimationTimelineSection.h"
 #include "LayerStack/Cells/OdysseyAnimationCell.h"
+#include "Widgets/Input/SCheckBox.h"
 
 void
 SOdysseyAnimationTimelineOutOfPegsKey::Construct(const FArguments& InArgs)

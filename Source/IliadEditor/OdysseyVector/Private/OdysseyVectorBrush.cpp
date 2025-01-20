@@ -129,7 +129,7 @@ FOdysseyVectorBrush::Lock()
             width  = mip->SizeX;
             height = mip->SizeY;
 
-            bufferSize = width * height * sizeof FColor;
+            bufferSize = width * height * sizeof(FColor);
 
             switch( pixelFormat )
             {

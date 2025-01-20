@@ -23,7 +23,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationLayerImageVectorTimelineInbetw
     {
         CellBox( uint32 iType, uint32 iIndex, double iX, double iY, double iW, double iH )
             : type ( iType )
-            , index( iIndex )
+            , index(iIndex)
             , x ( iX )
             , y ( iY )
             , w ( iW )

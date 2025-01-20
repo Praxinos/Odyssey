@@ -28,6 +28,7 @@
 #include "StoryNote.h"
 #include "Styles/EposTracksEditorStyle.h"
 #include "Tools/ResourceAssetTools.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
 
 #define LOCTEXT_NAMESPACE "FNoteTrackEditor"
 

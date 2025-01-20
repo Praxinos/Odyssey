@@ -42,6 +42,10 @@ private:
     TSharedPtr<FExtender> CreateObjectBindingContextMenuExtender(UE::Sequencer::FViewModelPtr InViewModel);
     void ExtendObjectBindingContextMenu(FMenuBuilder& MenuBuilder, TSharedPtr<UE::Sequencer::FObjectBindingModel> ObjectBindingModel);
 
+    //// Object binding sidebar menu extensions
+    //TSharedPtr<FExtender> CreateObjectBindingSidebarMenuExtender( FViewModelPtr InViewModel );
+    //void ExtendObjectBindingSidebarMenu( FMenuBuilder& MenuBuilder, TSharedPtr<FObjectBindingModel> ObjectBindingModel );
+
 private:
     /**
      * Called before an actor or component transform changes
@@ -83,10 +87,7 @@ private:
     void MovieSceneDataChanged( EMovieSceneDataChangeType iType );
 
 private:
-    void OnSequencerClosed( TSharedRef<ISequencer> iSequencer );
-
-private:
-    ISequencer*     mSequencer;
+    TWeakPtr<ISequencer> mWeakSequencer;
     FDelegateHandle mSequencerActorAddedDelegates;
     FDelegateHandle mSequencerActivatedDelegates;
     FDelegateHandle mSequencerSelectionSectionChangedDelegates;

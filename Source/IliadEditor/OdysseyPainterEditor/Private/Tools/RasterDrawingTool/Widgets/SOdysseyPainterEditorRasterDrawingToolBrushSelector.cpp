@@ -13,6 +13,8 @@
 #include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyBrushAssetBase.h"
+#include "Widgets/Layout/SGridPanel.h"
+#include "Widgets/Input/SButton.h"
 
 /////////////////////////////////////////////////////
 // SOdysseyPainterEditorRasterDrawingToolBrushSelector

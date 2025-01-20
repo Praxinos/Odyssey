@@ -99,7 +99,7 @@ public:
 /**
  * Epos Tracks Editor settings.
  */
-UCLASS(BlueprintType, config=Epos, meta=(DisplayName="Epos Tracks Editor"))
+UCLASS(BlueprintType, config=Odyssey, meta=(DisplayName="Epos Tracks Editor"))
 class EPOSTRACKSEDITOR_API UEposTracksEditorSettings
     : public UDeveloperSettings
 {

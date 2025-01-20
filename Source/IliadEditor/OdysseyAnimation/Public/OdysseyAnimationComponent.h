@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Components/StaticMeshComponent.h"
 #include "OdysseyAnimationComponent.generated.h"
 
 class UOdysseyAnimation;

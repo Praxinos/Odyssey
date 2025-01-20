@@ -34,7 +34,7 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
 {
     sgRegistrationCountDebug++;
 
-    mSequencer = &ioBuilder.GetSequencer();
+    mWeakSequencer = ioBuilder.GetSequencer().AsShared();
     // From 5.3, the registration is only done if the new focused sequence is NOT the same type than the previous one
     // It means that:
     // - going from board to inner board, NOT called
@@ -44,8 +44,6 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
 
     //---
 
-    mSequencer->OnCloseEvent().AddRaw( this, &FShotSequenceCustomization::OnSequencerClosed );
-
     // Listen for actor/component movement
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw( this, &FShotSequenceCustomization::OnPrePropertyChanged );
     FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw( this, &FShotSequenceCustomization::OnPostPropertyChanged );
@@ -54,7 +52,7 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
 
     BindCommands( mShotCommandList );
 
-    mSequencer->GetCommandBindings()->Append( mShotCommandList.ToSharedRef() );
+    mWeakSequencer.Pin()->GetCommandBindings()->Append( mShotCommandList.ToSharedRef() );
 
     TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>( "LevelEditor" ).GetFirstLevelEditor();
     levelEditor->AppendCommands( mShotCommandList.ToSharedRef() );
@@ -70,6 +68,7 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
     customization.ToolbarExtender = ToolbarExtender;
 
     customization.OnBuildObjectBindingContextMenu = FOnGetSequencerMenuExtender::CreateRaw(this, &FShotSequenceCustomization::CreateObjectBindingContextMenuExtender);
+    //customization.OnBuildSidebarMenu = FOnGetSequencerMenuExtender::CreateRaw( this, &FShotSequenceCustomization::CreateObjectBindingSidebarMenuExtender );
 
     // customization.OnReceivedDragOver ...
     // customization.OnReceivedDrop ...
@@ -80,14 +79,14 @@ FShotSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomizat
 
     ioBuilder.AddCustomization( customization );
 
-    UEposSequenceEditorBlueprintLibrary::SetSequencer( mSequencer->AsShared() );
-    UEposNamingConventionBlueprintLibrary::SetSequencer( mSequencer->AsShared() );
+    UEposSequenceEditorBlueprintLibrary::SetSequencer( mWeakSequencer.Pin().ToSharedRef() );
+    UEposNamingConventionBlueprintLibrary::SetSequencer( mWeakSequencer.Pin().ToSharedRef() );
 
-    mSequencerActorAddedDelegates = mSequencer->OnActorAddedToSequencer().AddStatic( &ToolkitHelpers::HandleActorAddedToSequencer, mSequencer );
-    mSequencerActivatedDelegates = mSequencer->OnActivateSequence().AddStatic( &ToolkitHelpers::HandleOnActivateSequence, mSequencer );
-    mSequencerSelectionSectionChangedDelegates = mSequencer->GetSelectionChangedSections().AddStatic( &ToolkitHelpers::HandleOnSelectionChangedSections, mSequencer );
+    mSequencerActorAddedDelegates = mWeakSequencer.Pin()->OnActorAddedToSequencer().AddStatic( &ToolkitHelpers::HandleActorAddedToSequencer, mWeakSequencer.Pin().Get() );
+    mSequencerActivatedDelegates = mWeakSequencer.Pin()->OnActivateSequence().AddStatic( &ToolkitHelpers::HandleOnActivateSequence, mWeakSequencer.Pin().Get() );
+    mSequencerSelectionSectionChangedDelegates = mWeakSequencer.Pin()->GetSelectionChangedSections().AddStatic( &ToolkitHelpers::HandleOnSelectionChangedSections, mWeakSequencer.Pin().Get() );
 
-    mMovieSceneDataChangedHandle = mSequencer->OnMovieSceneDataChanged().AddRaw( this, &FShotSequenceCustomization::MovieSceneDataChanged );
+    mMovieSceneDataChangedHandle = mWeakSequencer.Pin()->OnMovieSceneDataChanged().AddRaw( this, &FShotSequenceCustomization::MovieSceneDataChanged );
 }
 
 void
@@ -101,39 +100,32 @@ FShotSequenceCustomization::UnregisterSequencerCustomization()
 
     mShotCommandList = nullptr;
 
-    if( mSequencer )
+    if( mWeakSequencer.IsValid() )
     {
-        mSequencer->OnActorAddedToSequencer().Remove( mSequencerActorAddedDelegates );
-        mSequencer->OnActivateSequence().Remove( mSequencerActivatedDelegates );
-        mSequencer->GetSelectionChangedSections().Remove( mSequencerSelectionSectionChangedDelegates );
+        mWeakSequencer.Pin()->OnActorAddedToSequencer().Remove( mSequencerActorAddedDelegates );
+        mWeakSequencer.Pin()->OnActivateSequence().Remove( mSequencerActivatedDelegates );
+        mWeakSequencer.Pin()->GetSelectionChangedSections().Remove( mSequencerSelectionSectionChangedDelegates );
 
-        mSequencer->OnMovieSceneDataChanged().Remove( mMovieSceneDataChangedHandle );
+        mWeakSequencer.Pin()->OnMovieSceneDataChanged().Remove( mMovieSceneDataChangedHandle );
     }
 
-    mSequencer = nullptr;
+    mWeakSequencer = nullptr;
     mShotSequence = nullptr;
-}
-
-void
-FShotSequenceCustomization::OnSequencerClosed( TSharedRef<ISequencer> iSequencer )
-{
-    if( &iSequencer.Get() == mSequencer )
-    {
-        mSequencer->OnCloseEvent().RemoveAll( this );
-
-        mSequencer = nullptr;
-    }
 }
 
 void
 FShotSequenceCustomization::MovieSceneDataChanged( EMovieSceneDataChangeType iType )
 {
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+    if( !sequencer )
+        return;
+
     TArray<FDrawing> cached_drawings;
     TArray<FGuid> plane_bindings;
-    int32 plane_count = ShotSequenceHelpers::GetAllPlanes( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), EGetPlane::kAll, nullptr, &plane_bindings );
+    int32 plane_count = ShotSequenceHelpers::GetAllPlanes( *sequencer.Get(), sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), EGetPlane::kAll, nullptr, &plane_bindings );
     for( FGuid plane_binding : plane_bindings )
     {
-        cached_drawings.Append( ShotSequenceHelpers::GetAllDrawings( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_binding ) );
+        cached_drawings.Append( ShotSequenceHelpers::GetAllDrawings( *sequencer.Get(), sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), plane_binding ) );
     }
 
     static TArray<FDrawing> sCachedDrawings;
@@ -145,7 +137,7 @@ FShotSequenceCustomization::MovieSceneDataChanged( EMovieSceneDataChangeType iTy
         // Mainly to update lighttable when creating new drawing
         for( FGuid plane_binding : plane_bindings )
         {
-            LighttableTools::Update( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_binding );
+            LighttableTools::Update( *sequencer.Get(), sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), plane_binding );
         }
     }
 }
@@ -159,75 +151,174 @@ FShotSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandLi
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().StepToNextShot,
-        FExecuteAction::CreateStatic( &ShotSequenceTools::StepToNextShot, mSequencer )
+        FExecuteAction::CreateStatic( &ShotSequenceTools::StepToNextShot, mWeakSequencer.Pin().Get() )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().StepToPreviousShot,
-        FExecuteAction::CreateStatic( &ShotSequenceTools::StepToPreviousShot, mSequencer )
+        FExecuteAction::CreateStatic( &ShotSequenceTools::StepToPreviousShot, mWeakSequencer.Pin().Get() )
     );
 
     //---
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().CreateCameraAtCurrentTime,
-        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::CreateCamera( mSequencer ); } ),
-        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanCreateCamera( mSequencer ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          ShotSequenceTools::CreateCamera( sequencer.Get() );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return ShotSequenceTools::CanCreateCamera( sequencer.Get() );
+                                         } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().SnapCameraToViewportAtCurrentTime,
-        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          ShotSequenceTools::SnapCameraToViewport( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
         // It doesn't work due to strange stuff between FMovieSceneSequenceID and FMovieSceneSequenceIDRef ...
         //FExecuteAction::CreateStatic( &ShotSequenceTools::SnapCameraToViewport, mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID() ),
-        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanSnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return ShotSequenceTools::CanSnapCameraToViewport( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().PilotCameraAtCurrentTime,
-        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::PilotCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanPilotCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          ShotSequenceTools::PilotCamera( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return ShotSequenceTools::CanPilotCamera( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().EjectCameraAtCurrentTime,
-        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::EjectCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanEjectCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          ShotSequenceTools::EjectCamera( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return ShotSequenceTools::CanEjectCamera( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition,
-        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::GotoPreviousCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::HasPreviousCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          ShotSequenceTools::GotoPreviousCameraPosition( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return ShotSequenceTools::HasPreviousCameraPosition( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().GotoNextCameraPosition,
-        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::GotoNextCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::HasNextCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          ShotSequenceTools::GotoNextCameraPosition( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return ShotSequenceTools::HasNextCameraPosition( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
     );
 
     //---
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().CreatePlaneAtCurrentTime,
-        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::CanCreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          ShotSequenceTools::CreatePlane( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return ShotSequenceTools::CanCreatePlane( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime,
         FExecuteAction::CreateLambda( [this]()
-                                        {
-                                            TArray<FGuid> plane_bindings;
-                                            int32 plane_count = ShotSequenceTools::GetAttachedPlanes( mSequencer, nullptr, &plane_bindings );
-                                            if( plane_count != 1 )
-                                                return;
-                                            ShotSequenceTools::DetachPlane( mSequencer, plane_bindings[0] );
-                                        } ),
-        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::GetAttachedPlanes( mSequencer ) == 1; } ),
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          TArray<FGuid> plane_bindings;
+                                          int32 plane_count = ShotSequenceTools::GetAttachedPlanes( sequencer.Get(), nullptr, &plane_bindings );
+                                          if( plane_count != 1 )
+                                              return;
+                                          ShotSequenceTools::DetachPlane( sequencer.Get(), plane_bindings[0] );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return ShotSequenceTools::GetAttachedPlanes( sequencer.Get() ) == 1;
+                                         } ),
         FIsActionChecked(),
-        FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceTools::GetAttachedPlanes( mSequencer ) <= 1; } )
+        FIsActionButtonVisible::CreateLambda( [this]()
+                                              {
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return false;
+                                                  return ShotSequenceTools::GetAttachedPlanes( sequencer.Get() ) <= 1;
+                                              } )
     );
 
     //---
@@ -235,40 +326,82 @@ FShotSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandLi
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime,
         FExecuteAction::CreateLambda( [this]()
-                                        {
-                                            TArray<FGuid> plane_bindings;
-                                            int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
-                                            if( plane_count != 1 )
-                                                return;
-                                            ShotSequenceTools::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
-                                        } ),
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          TArray<FGuid> plane_bindings;
+                                          int32 plane_count = ShotSequenceTools::GetAllPlanes( sequencer.Get(), nullptr, &plane_bindings );
+                                          if( plane_count != 1 )
+                                              return;
+                                          ShotSequenceTools::CreateDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                                      } ),
         FCanExecuteAction::CreateLambda( [this]()
-                                            {
-                                                TArray<FGuid> plane_bindings;
-                                                int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
-                                                if( plane_count != 1 )
-                                                    return false;
-                                                return ShotSequenceTools::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
-                                            } ),
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             TArray<FGuid> plane_bindings;
+                                             int32 plane_count = ShotSequenceTools::GetAllPlanes( sequencer.Get(), nullptr, &plane_bindings );
+                                             if( plane_count != 1 )
+                                                 return false;
+                                             return ShotSequenceTools::CanCreateDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                                         } ),
         FIsActionChecked(),
-        FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceTools::GetAllPlanes( mSequencer ) <= 1; } )
+        FIsActionButtonVisible::CreateLambda( [this]()
+                                              {
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return false;
+                                                  return ShotSequenceTools::GetAllPlanes( sequencer.Get() ) <= 1;
+                                              } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().GotoPreviousDrawing,
-        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::GotoPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::HasPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          ShotSequenceTools::GotoPreviousDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return ShotSequenceTools::HasPreviousDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().GotoNextDrawing,
-        FExecuteAction::CreateLambda( [this](){ ShotSequenceTools::GotoNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-        FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::HasNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          ShotSequenceTools::GotoNextDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return ShotSequenceTools::HasNextDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().DeactivateAllLighttables,
-        FExecuteAction::CreateLambda( [this](){ LighttableTools::Deactivate( mSequencer ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          LighttableTools::Deactivate( sequencer.Get() );
+                                      } )
     );
 }
 
@@ -312,7 +445,13 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
             FExecuteAction(),
             FCanExecuteAction(),
             FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceTools::GetAttachedPlanes( mSequencer ) > 1; } )
+            FIsActionButtonVisible::CreateLambda( [this]()
+                                                  {
+                                                      TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                      if( !sequencer )
+                                                          return false;
+                                                      return ShotSequenceTools::GetAttachedPlanes( sequencer.Get() ) > 1;
+                                                  } )
         ),
         FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakePlaneMenu ),
         FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime->GetLabel(),
@@ -321,13 +460,17 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
 
     auto GetLighttableTooltip = [this]() -> FText
     {
+        TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+        if( !sequencer )
+            return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
+
         TArray<FGuid> plane_bindings;
-        int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
+        int32 plane_count = ShotSequenceTools::GetAllPlanes( sequencer.Get(), nullptr, &plane_bindings );
         //check( plane_count == 1 );
         if( plane_count != 1 )
             return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
 
-        if( LighttableTools::IsOn( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_bindings[0] ) )
+        if( LighttableTools::IsOn( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), plane_bindings[0] ) )
             return LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable" );
         else
             return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
@@ -335,13 +478,17 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
 
     auto GetLighttableIcon = [this]() -> FSlateIcon
     {
+        TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+        if( !sequencer )
+            return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
+
         TArray<FGuid> plane_bindings;
-        int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
+        int32 plane_count = ShotSequenceTools::GetAllPlanes( sequencer.Get(), nullptr, &plane_bindings );
         //check( plane_count == 1 );
         if( plane_count != 1 )
             return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
 
-        if( LighttableTools::IsOn( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_bindings[0] ) )
+        if( LighttableTools::IsOn( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), plane_bindings[0] ) )
             return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOn" );
         else
             return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
@@ -351,32 +498,57 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
     // - the first button is displayed when there is only 1 plane (or 0) available
     // - the second button is displayed when there are more than 2 planes available
     ToolbarBuilder.AddToolBarButton( FUIAction(
-                                         FExecuteAction::CreateLambda( [this]()
-                                                                       {
-                                                                           TArray<FGuid> plane_bindings;
-                                                                           int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, nullptr, &plane_bindings );
-                                                                           if( plane_count != 1 )
-                                                                               return;
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
 
-                                                                           if( LighttableTools::IsOn( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_bindings[0] ) )
-                                                                               LighttableTools::Deactivate( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_bindings[0] );
-                                                                           else
-                                                                               LighttableTools::Activate( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_bindings[0] );
-                                                                       } ),
-                                         FCanExecuteAction::CreateLambda( [this](){ return ShotSequenceTools::GetAllPlanes( mSequencer ) == 1; } ),
-                                         FIsActionChecked(),
-                                         FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceTools::GetAllPlanes( mSequencer ) <= 1; } ) ),
-                                     NAME_None,
-                                     FText::GetEmpty(),
-                                     MakeAttributeLambda( GetLighttableTooltip ),
-                                     MakeAttributeLambda( GetLighttableIcon )
-                                     );
+                                          TArray<FGuid> plane_bindings;
+                                          int32 plane_count = ShotSequenceTools::GetAllPlanes( sequencer.Get(), nullptr, &plane_bindings );
+                                          if( plane_count != 1 )
+                                              return;
+
+                                          if( LighttableTools::IsOn( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), plane_bindings[0] ) )
+                                              LighttableTools::Deactivate( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), plane_bindings[0] );
+                                          else
+                                              LighttableTools::Activate( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), plane_bindings[0] );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+
+                                             return ShotSequenceTools::GetAllPlanes( sequencer.Get() ) == 1;
+                                         } ),
+        FIsActionChecked(),
+        FIsActionButtonVisible::CreateLambda( [this]()
+                                              {
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return false;
+
+                                                  return ShotSequenceTools::GetAllPlanes( sequencer.Get() ) <= 1;
+                                              } ) ),
+        NAME_None,
+        FText::GetEmpty(),
+        MakeAttributeLambda( GetLighttableTooltip ),
+        MakeAttributeLambda( GetLighttableIcon )
+    );
     ToolbarBuilder.AddComboButton(
         FUIAction(
             FExecuteAction(),
             FCanExecuteAction(),
             FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceTools::GetAllPlanes( mSequencer ) > 1; } )
+            FIsActionButtonVisible::CreateLambda( [this]()
+                                                  {
+                                                      TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                      if( !sequencer )
+                                                          return false;
+
+                                                      return ShotSequenceTools::GetAllPlanes( sequencer.Get() ) > 1;
+                                                  } )
         ),
         FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeLighttableMenu ),
         FText::GetEmpty(),
@@ -398,7 +570,14 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
             FExecuteAction(),
             FCanExecuteAction(),
             FGetActionCheckState(),
-            FIsActionButtonVisible::CreateLambda( [this](){ return ShotSequenceTools::GetAllPlanes( mSequencer ) > 1; } )
+            FIsActionButtonVisible::CreateLambda( [this]()
+                                                  {
+                                                      TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                      if( !sequencer )
+                                                          return false;
+
+                                                      return ShotSequenceTools::GetAllPlanes( sequencer.Get() ) > 1;
+                                                  } )
         ),
         FOnGetContent::CreateRaw( this, &FShotSequenceCustomization::MakeDrawingMenu ),
         FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime->GetLabel(),
@@ -430,7 +609,9 @@ FShotSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBuil
 TSharedRef<SWidget>
 FShotSequenceCustomization::MakeCameraMenu()
 {
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     EposSequenceToolbarHelpers::MakeCameraSettingsEntries( MenuBuilder );
 
@@ -440,11 +621,13 @@ FShotSequenceCustomization::MakeCameraMenu()
 TSharedRef<SWidget>
 FShotSequenceCustomization::MakePlaneMenu()
 {
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     TArray<APlaneActor*> planes;
     TArray<FGuid> plane_bindings;
-    int32 plane_count = ShotSequenceTools::GetAttachedPlanes( mSequencer, &planes, &plane_bindings );
+    int32 plane_count = ShotSequenceTools::GetAttachedPlanes( sequencer.Get(), &planes, &plane_bindings );
     if( !plane_count )
         return SNullWidget::NullWidget;
 
@@ -458,7 +641,14 @@ FShotSequenceCustomization::MakePlaneMenu()
             FText::GetEmpty(),
             FSlateIcon(),
             FUIAction(
-                FExecuteAction::CreateLambda( [this, plane_binding](){ ShotSequenceTools::DetachPlane( mSequencer, plane_binding ); } )
+                FExecuteAction::CreateLambda( [this, plane_binding]()
+                                              {
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return;
+
+                                                  ShotSequenceTools::DetachPlane( sequencer.Get(), plane_binding );
+                                              } )
             )
         );
     }
@@ -469,11 +659,13 @@ FShotSequenceCustomization::MakePlaneMenu()
 TSharedRef<SWidget>
 FShotSequenceCustomization::MakeLighttableMenu()
 {
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     TArray<APlaneActor*> planes;
     TArray<FGuid> plane_bindings;
-    int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, &planes, &plane_bindings );
+    int32 plane_count = ShotSequenceTools::GetAllPlanes( sequencer.Get(), &planes, &plane_bindings );
     if( !plane_count )
         return SNullWidget::NullWidget;
 
@@ -483,13 +675,13 @@ FShotSequenceCustomization::MakeLighttableMenu()
         FGuid plane_binding = plane_bindings[i];
 
         FText tooltip;
-        if( LighttableTools::IsOn( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_binding ) )
+        if( LighttableTools::IsOn( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), plane_binding ) )
             tooltip = LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable" );
         else
             tooltip = LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
 
         FSlateIcon icon;
-        if( LighttableTools::IsOn( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_binding ) )
+        if( LighttableTools::IsOn( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), plane_binding ) )
             icon = FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOn" );
         else
             icon = FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
@@ -501,10 +693,14 @@ FShotSequenceCustomization::MakeLighttableMenu()
             FUIAction(
                 FExecuteAction::CreateLambda( [this, plane_binding]()
                                               {
-                                                  if( LighttableTools::IsOn( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_binding ) )
-                                                      LighttableTools::Deactivate( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_binding );
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return;
+
+                                                  if( LighttableTools::IsOn( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), plane_binding ) )
+                                                      LighttableTools::Deactivate( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), plane_binding );
                                                   else
-                                                      LighttableTools::Activate( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), plane_binding );
+                                                      LighttableTools::Activate( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), plane_binding );
                                               } )
             )
         );
@@ -516,11 +712,13 @@ FShotSequenceCustomization::MakeLighttableMenu()
 TSharedRef<SWidget>
 FShotSequenceCustomization::MakeDrawingMenu()
 {
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     TArray<APlaneActor*> planes;
     TArray<FGuid> plane_bindings;
-    int32 plane_count = ShotSequenceTools::GetAllPlanes( mSequencer, &planes, &plane_bindings );
+    int32 plane_count = ShotSequenceTools::GetAllPlanes( sequencer.Get(), &planes, &plane_bindings );
     if( !plane_count )
         return SNullWidget::NullWidget;
 
@@ -536,8 +734,22 @@ FShotSequenceCustomization::MakeDrawingMenu()
             //LOCTEXT( "LockPlayback_Description", "When enabled, causes all runtime evaluation and the engine FPS to be locked to the current display frame rate" ),
             FSlateIcon(),
             FUIAction(
-                FExecuteAction::CreateLambda( [this, plane_binding](){ ShotSequenceTools::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_binding ); } ),
-                FCanExecuteAction::CreateLambda( [this, plane_binding](){ return ShotSequenceTools::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_binding ); } )
+                FExecuteAction::CreateLambda( [this, plane_binding]()
+                                              {
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return;
+
+                                                  ShotSequenceTools::CreateDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, plane_binding );
+                                              } ),
+                FCanExecuteAction::CreateLambda( [this, plane_binding]()
+                                                 {
+                                                     TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                     if( !sequencer )
+                                                         return false;
+
+                                                     return ShotSequenceTools::CanCreateDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, plane_binding );
+                                                 } )
             )/*,
             NAME_None,
             EUserInterfaceActionType::ToggleButton*/ //TODO: I don't know how, but there should be something to multi-select planes and create plane on them
@@ -550,9 +762,11 @@ FShotSequenceCustomization::MakeDrawingMenu()
 TSharedRef<SWidget>
 FShotSequenceCustomization::MakeSettingsMenu()
 {
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
 
-    EposSequenceToolbarHelpers::MakeSettingsEntries( MenuBuilder, mSequencer );
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
+
+    EposSequenceToolbarHelpers::MakeSettingsEntries( MenuBuilder, sequencer.Get() );
 
     return MenuBuilder.MakeWidget();
 }
@@ -560,7 +774,9 @@ FShotSequenceCustomization::MakeSettingsMenu()
 TSharedRef<SWidget>
 FShotSequenceCustomization::MakeTextureMenu()
 {
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     EposSequenceToolbarHelpers::MakeTextureSettingsEntries( MenuBuilder );
 
@@ -570,7 +786,9 @@ FShotSequenceCustomization::MakeTextureMenu()
 TSharedRef<SWidget>
 FShotSequenceCustomization::MakeHelpMenu()
 {
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     EposSequenceToolbarHelpers::MakeHelpEntries( MenuBuilder );
 
@@ -593,37 +811,19 @@ FShotSequenceCustomization::CreateObjectBindingContextMenuExtender( UE::Sequence
 void
 FShotSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBuilder, TSharedPtr<UE::Sequencer::FObjectBindingModel> ObjectBindingModel)
 {
-    ISequencer* Sequencer = mSequencer;
-    //TSharedPtr<ISequencer> Sequencer = WeakSequencer.Pin();
+    TSharedPtr<ISequencer> Sequencer = mWeakSequencer.Pin();
     TSharedPtr<UE::Sequencer::FSequencerEditorViewModel> EditorViewModel = Sequencer->GetViewModel();
 
     FGuid ObjectBindingID = ObjectBindingModel->GetObjectGuid();
-    UMovieScene* MovieScene = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene();
+    UMovieSceneSequence* Sequence = Sequencer->GetFocusedMovieSceneSequence();
+    UMovieScene* MovieScene = Sequence->GetMovieScene();
 
     if (!MovieScene || !ObjectBindingID.IsValid())
     {
         return;
     }
 
-    FMovieSceneSpawnable* Spawnable = MovieScene->FindSpawnable(ObjectBindingID);
-
-    if (Spawnable)
-    {
-        check(!"todo: from FLevelSequenceCustomization in Plugins")
-    }
-    else
-    {
-        //MenuBuilder.BeginSection("Possessable");
-
-        //MenuBuilder.AddMenuEntry(FSequencerCommands::Get().ConvertToSpawnable);
-
-        //MenuBuilder.AddSubMenu(
-        //    LOCTEXT("DynamicPossession", "Dynamic Possession"),
-        //    LOCTEXT("DynamicPossessionTooltip", "Specify a Blueprint method that will find a compatible actor for this binding"),
-        //    FNewMenuDelegate::CreateRaw(this, &FLevelSequenceCustomization::AddDynamicPossessionMenu, ObjectBindingModel));
-
-        //MenuBuilder.EndSection();
-    }
+    //...
 
     MenuBuilder.BeginSection("Import/Export", LOCTEXT("ImportExportMenuSectionName", "Import/Export"));
 
@@ -632,10 +832,17 @@ FShotSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBui
         LOCTEXT("ImportFBXTooltip", "Import FBX animation to this object"),
         FSlateIcon(),
         FUIAction(
-            FExecuteAction::CreateLambda([=] {
-                FEposSequenceFBXInterop Interop(EditorViewModel->GetSequencer());
-                Interop.ImportFBXOntoSelectedNodes();
-                })
+            FExecuteAction::CreateLambda( [this]
+                                          {
+                                              const TSharedPtr<ISequencer> Sequencer = mWeakSequencer.Pin();
+                                              if( !Sequencer.IsValid() )
+                                              {
+                                                  return;
+                                              }
+
+                                              FEposSequenceFBXInterop Interop( Sequencer.ToSharedRef() );
+                                              Interop.ImportFBXOntoSelectedNodes();
+                                          } )
         ));
 
     MenuBuilder.AddMenuEntry(
@@ -643,21 +850,47 @@ FShotSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBui
         LOCTEXT("ExportFBXTooltip", "Export FBX animation from this object"),
         FSlateIcon(),
         FUIAction(
-            FExecuteAction::CreateLambda([=] {
-                FEposSequenceFBXInterop Interop(EditorViewModel->GetSequencer());
-                Interop.ExportFBX();
-                })
+            FExecuteAction::CreateLambda( [this]
+                                          {
+                                              const TSharedPtr<ISequencer> Sequencer = mWeakSequencer.Pin();
+                                              if( !Sequencer.IsValid() )
+                                              {
+                                                  return;
+                                              }
+
+                                              FEposSequenceFBXInterop Interop( Sequencer.ToSharedRef() );
+                                              Interop.ExportFBX();
+                                          } )
         ));
 
     MenuBuilder.EndSection();
 }
+
+//TSharedPtr<FExtender> FShotSequenceCustomization::CreateObjectBindingSidebarMenuExtender( FViewModelPtr InViewModel )
+//{
+//    TSharedRef<FExtender> Extender = MakeShared<FExtender>();
+//
+//    TSharedPtr<FObjectBindingModel> ObjectBindingModel = InViewModel->CastThisShared<FObjectBindingModel>();
+//
+//    Extender->AddMenuExtension( TEXT( "ObjectBindingActions" ), EExtensionHook::Before, nullptr,
+//                                FMenuExtensionDelegate::CreateRaw( this, &FShotSequenceCustomization::ExtendObjectBindingSidebarMenu, ObjectBindingModel ) );
+//
+//    return Extender.ToSharedPtr();
+//}
+//
+//void FShotSequenceCustomization::ExtendObjectBindingSidebarMenu( FMenuBuilder& MenuBuilder, TSharedPtr<FObjectBindingModel> ObjectBindingModel )
+//{
+//    ExtendObjectBindingContextMenu( MenuBuilder, ObjectBindingModel );
+//}
 
 //---
 
 void
 FShotSequenceCustomization::OnPreTransformChanged( UObject& InObject )
 {
-    if( !mSequencer->IsAllowedToChange() )
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    if( !sequencer || !sequencer->IsAllowedToChange() )
         return;
 
     ACineCameraActor* Actor = Cast<ACineCameraActor>( &InObject );
@@ -680,7 +913,9 @@ FShotSequenceCustomization::OnPreTransformChanged( UObject& InObject )
 void
 FShotSequenceCustomization::OnTransformChanged( UObject& InObject )
 {
-    if( !mSequencer->IsAllowedToChange() )
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    if( !sequencer || !sequencer->IsAllowedToChange() )
         return;
 
     ACineCameraActor* Actor = Cast<ACineCameraActor>( &InObject );
@@ -707,7 +942,7 @@ FShotSequenceCustomization::OnTransformChanged( UObject& InObject )
 
     //---
 
-    ShotSequenceTools::StopPilotingCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, Actor, ExistingTransform, NewTransformData );
+    ShotSequenceTools::StopPilotingCamera( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, Actor, ExistingTransform, NewTransformData );
 }
 
 void

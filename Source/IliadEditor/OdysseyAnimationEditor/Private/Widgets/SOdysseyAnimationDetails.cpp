@@ -3,6 +3,10 @@
 
 #include "Widgets/SOdysseyAnimationDetails.h"
 #include "OdysseyAnimation.h"
+#include "DetailsViewArgs.h"
+#include "IDetailsView.h"
+#include "PropertyEditorModule.h"
+#include "Modules/ModuleManager.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

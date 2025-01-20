@@ -7,6 +7,7 @@
 #include "Channels/MovieSceneObjectPathChannel.h"
 #include "Compilation/MovieSceneCompiledDataManager.h"
 #include "EditorSupportDelegates.h"
+#include "Engine/Texture2D.h"
 #include "Evaluation/MovieSceneEvaluationTemplateInstance.h"
 #include "MaterialEditingLibrary.h"
 #include "Materials/MaterialInstanceConstant.h"
@@ -95,7 +96,7 @@ LighttableTools::Deactivate( ISequencer* iSequencer )
     {
         virtual void VisitObjectBinding( const FMovieSceneBinding& iBinding, const UE::MovieScene::FSubSequenceSpace& iLocalSpace ) override
         {
-            const FMovieSceneSequenceHierarchy* Hierarchy = mSequencer->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( mSequencer->GetEvaluationTemplate().GetCompiledDataID() );
+            const FMovieSceneSequenceHierarchy* Hierarchy = mSequencer->GetSharedPlaybackState()->GetHierarchy();
             UMovieSceneSequence* subsequence = Hierarchy->FindSubSequence( iLocalSpace.SequenceID );
 
             if( iLocalSpace.SequenceID == MovieSceneSequenceID::Root )

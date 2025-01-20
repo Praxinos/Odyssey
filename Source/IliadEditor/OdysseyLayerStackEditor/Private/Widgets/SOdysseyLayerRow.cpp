@@ -16,6 +16,7 @@
 #include "Math/UnitConversion.h"
 #include "SEnumCombo.h"
 #include "Widgets/Input/NumericUnitTypeInterface.inl"
+#include "Editor.h"
 
 #define LOCTEXT_NAMESPACE "LayerStackEditor"
 

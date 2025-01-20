@@ -64,7 +64,7 @@ SOdysseyAnimationTimelineLightTableHeader::Construct(const FArguments& iArgs)
                 .Color(this, &SOdysseyAnimationTimelineLightTableHeader::GetLightTablePreviousKeysColor)
                 .UseSRGB(true)
                 .OnMouseButtonDown(this, &SOdysseyAnimationTimelineLightTableHeader::OnLightTablePreviousKeysColorMouseButtonDown)
-                .IgnoreAlpha(true)
+                .AlphaDisplayMode(EColorBlockAlphaDisplayMode::Ignore)
             ]
             + SHorizontalBox::Slot()
             .Padding(1.f, 0.f, 0.f, 0.f)
@@ -74,7 +74,7 @@ SOdysseyAnimationTimelineLightTableHeader::Construct(const FArguments& iArgs)
                 .Color(this, &SOdysseyAnimationTimelineLightTableHeader::GetLightTableNextKeysColor)
                 .UseSRGB(true)
                 .OnMouseButtonDown(this, &SOdysseyAnimationTimelineLightTableHeader::OnLightTableNextKeysColorMouseButtonDown)
-                .IgnoreAlpha(true)
+                .AlphaDisplayMode(EColorBlockAlphaDisplayMode::Ignore)
             ]
         ]
     ];

@@ -48,7 +48,7 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
 {
     sgRegistrationCountDebug++;
 
-    mSequencer = &ioBuilder.GetSequencer();
+    mWeakSequencer = ioBuilder.GetSequencer().AsShared();
     // From 5.3, the registration is only done if the new focused sequence is NOT the same type than the previous one
     // It means that:
     // - going from board to inner board, NOT called
@@ -58,8 +58,6 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
 
     //---
 
-    mSequencer->OnCloseEvent().AddRaw( this, &FBoardSequenceCustomization::OnSequencerClosed );
-
     // Listen for actor/component movement
     FCoreUObjectDelegates::OnPreObjectPropertyChanged.AddRaw( this, &FBoardSequenceCustomization::OnPrePropertyChanged );
     FCoreUObjectDelegates::OnObjectPropertyChanged.AddRaw( this, &FBoardSequenceCustomization::OnPostPropertyChanged );
@@ -68,7 +66,7 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
 
     BindCommands( mBoardCommandList );
 
-    mSequencer->GetCommandBindings()->Append( mBoardCommandList.ToSharedRef() );
+    mWeakSequencer.Pin()->GetCommandBindings()->Append( mBoardCommandList.ToSharedRef() );
 
     TSharedPtr< ILevelEditor > levelEditor = FModuleManager::GetModuleChecked<FLevelEditorModule>( "LevelEditor" ).GetFirstLevelEditor();
     levelEditor->AppendCommands( mBoardCommandList.ToSharedRef() );
@@ -82,6 +80,7 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
     customization.ToolbarExtender = ToolbarExtender;
 
     customization.OnBuildObjectBindingContextMenu = FOnGetSequencerMenuExtender::CreateRaw(this, &FBoardSequenceCustomization::CreateObjectBindingContextMenuExtender);
+    //customization.OnBuildSidebarMenu = FOnGetSequencerMenuExtender::CreateRaw( this, &FBoardSequenceCustomization::CreateObjectBindingSidebarMenuExtender );
 
     //customization.OnReceivedDragOver.BindRaw( this, &FBoardSequenceCustomization::OnSequencerReceiveDragOver );
     //customization.OnReceivedDrop.BindRaw( this, &FBoardSequenceCustomization::OnSequencerReceiveDrop );
@@ -92,16 +91,16 @@ FBoardSequenceCustomization::RegisterSequencerCustomization( FSequencerCustomiza
 
     ioBuilder.AddCustomization( customization );
 
-    UEposSequenceEditorBlueprintLibrary::SetSequencer( mSequencer->AsShared() );
-    UEposNamingConventionBlueprintLibrary::SetSequencer( mSequencer->AsShared() );
+    UEposSequenceEditorBlueprintLibrary::SetSequencer( mWeakSequencer.Pin()->AsShared() );
+    UEposNamingConventionBlueprintLibrary::SetSequencer( mWeakSequencer.Pin()->AsShared() );
 
-    mSequencerActorAddedDelegates = mSequencer->OnActorAddedToSequencer().AddStatic( &ToolkitHelpers::HandleActorAddedToSequencer, mSequencer );
-    mSequencerActivatedDelegates = mSequencer->OnActivateSequence().AddStatic( &ToolkitHelpers::HandleOnActivateSequence, mSequencer );
-    mSequencerSelectionSectionChangedDelegates = mSequencer->GetSelectionChangedSections().AddStatic( &ToolkitHelpers::HandleOnSelectionChangedSections, mSequencer );
+    mSequencerActorAddedDelegates = mWeakSequencer.Pin()->OnActorAddedToSequencer().AddStatic( &ToolkitHelpers::HandleActorAddedToSequencer, mWeakSequencer.Pin().Get() );
+    mSequencerActivatedDelegates = mWeakSequencer.Pin()->OnActivateSequence().AddStatic( &ToolkitHelpers::HandleOnActivateSequence, mWeakSequencer.Pin().Get() );
+    mSequencerSelectionSectionChangedDelegates = mWeakSequencer.Pin()->GetSelectionChangedSections().AddStatic( &ToolkitHelpers::HandleOnSelectionChangedSections, mWeakSequencer.Pin().Get() );
 
-    mSequencerBeginScrubbingDelegates = mSequencer->OnBeginScrubbingEvent().AddRaw( this, &FBoardSequenceCustomization::OnBeginScrubbing );
-    mSequencerEndScrubbingDelegates = mSequencer->OnEndScrubbingEvent().AddRaw( this, &FBoardSequenceCustomization::OnEndScrubbing );
-    mSequencerGlobalTimeChangedDelegates = mSequencer->OnGlobalTimeChanged().AddRaw( this, &FBoardSequenceCustomization::OnGlobalTimeChanged );
+    mSequencerBeginScrubbingDelegates = mWeakSequencer.Pin()->OnBeginScrubbingEvent().AddRaw( this, &FBoardSequenceCustomization::OnBeginScrubbing );
+    mSequencerEndScrubbingDelegates = mWeakSequencer.Pin()->OnEndScrubbingEvent().AddRaw( this, &FBoardSequenceCustomization::OnEndScrubbing );
+    mSequencerGlobalTimeChangedDelegates = mWeakSequencer.Pin()->OnGlobalTimeChanged().AddRaw( this, &FBoardSequenceCustomization::OnGlobalTimeChanged );
 }
 
 void
@@ -115,30 +114,19 @@ FBoardSequenceCustomization::UnregisterSequencerCustomization()
 
     mBoardCommandList = nullptr;
 
-    if( mSequencer )
+    if( mWeakSequencer.IsValid() )
     {
-        mSequencer->OnActorAddedToSequencer().Remove( mSequencerActorAddedDelegates );
-        mSequencer->OnActivateSequence().Remove( mSequencerActivatedDelegates );
-        mSequencer->GetSelectionChangedSections().Remove( mSequencerSelectionSectionChangedDelegates );
+        mWeakSequencer.Pin()->OnActorAddedToSequencer().Remove( mSequencerActorAddedDelegates );
+        mWeakSequencer.Pin()->OnActivateSequence().Remove( mSequencerActivatedDelegates );
+        mWeakSequencer.Pin()->GetSelectionChangedSections().Remove( mSequencerSelectionSectionChangedDelegates );
 
-        mSequencer->OnBeginScrubbingEvent().Remove( mSequencerBeginScrubbingDelegates );
-        mSequencer->OnBeginScrubbingEvent().Remove( mSequencerEndScrubbingDelegates );
-        mSequencer->OnGlobalTimeChanged().Remove( mSequencerGlobalTimeChangedDelegates );
+        mWeakSequencer.Pin()->OnBeginScrubbingEvent().Remove( mSequencerBeginScrubbingDelegates );
+        mWeakSequencer.Pin()->OnBeginScrubbingEvent().Remove( mSequencerEndScrubbingDelegates );
+        mWeakSequencer.Pin()->OnGlobalTimeChanged().Remove( mSequencerGlobalTimeChangedDelegates );
     }
 
-    mSequencer = nullptr;
+    mWeakSequencer = nullptr;
     mBoardSequence = nullptr;
-}
-
-void
-FBoardSequenceCustomization::OnSequencerClosed( TSharedRef<ISequencer> iSequencer )
-{
-    if( &iSequencer.Get() == mSequencer )
-    {
-        mSequencer->OnCloseEvent().RemoveAll( this );
-
-        mSequencer = nullptr;
-    }
 }
 
 //---
@@ -160,61 +148,151 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().CreateCameraAtCurrentTime,
-        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::CreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanCreateCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          BoardSequenceTools::CreateCamera( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return BoardSequenceTools::CanCreateCamera( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().SnapCameraToViewportAtCurrentTime,
-        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::SnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanSnapCameraToViewport( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          BoardSequenceTools::SnapCameraToViewport( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return BoardSequenceTools::CanSnapCameraToViewport( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().PilotCameraAtCurrentTime,
-        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::PilotCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanPilotCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          BoardSequenceTools::PilotCamera( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return BoardSequenceTools::CanPilotCamera( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().EjectCameraAtCurrentTime,
-        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::EjectCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanEjectCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          BoardSequenceTools::EjectCamera( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return BoardSequenceTools::CanEjectCamera( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().GotoPreviousCameraPosition,
-        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::GotoPreviousCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::HasPreviousCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          BoardSequenceTools::GotoPreviousCameraPosition( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return BoardSequenceTools::HasPreviousCameraPosition( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().GotoNextCameraPosition,
-        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::GotoNextCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::HasNextCameraPosition( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          BoardSequenceTools::GotoNextCameraPosition( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return BoardSequenceTools::HasNextCameraPosition( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
     );
 
     //---
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().CreatePlaneAtCurrentTime,
-        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::CreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::CanCreatePlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          BoardSequenceTools::CreatePlane( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return BoardSequenceTools::CanCreatePlane( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().DetachPlaneAtCurrentTime,
         FExecuteAction::CreateLambda( [this]()
                                       {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
                                           TArray<FGuid> plane_bindings;
-                                          int32 plane_count = BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
+                                          int32 plane_count = BoardSequenceTools::GetAttachedPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
                                           if( plane_count != 1 )
                                               return;
-                                          BoardSequenceTools::DetachPlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                                          BoardSequenceTools::DetachPlane( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
                                       } ),
         FCanExecuteAction::CreateLambda( [this]()
                                          {
-                                             int32 plane_count = BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber );
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             int32 plane_count = BoardSequenceTools::GetAttachedPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
                                              if( plane_count > 1 )
                                              {
                                                  FNotificationInfo Info( LOCTEXT( "multiple-planes", "There are multiple planes. Select one of them." ) );
@@ -228,7 +306,10 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
         FIsActionChecked(),
         FIsActionButtonVisible::CreateLambda( [this]()
                                               {
-                                                  return BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) <= 1;
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return false;
+                                                  return BoardSequenceTools::GetAttachedPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) <= 1;
                                               } )
     );
 
@@ -237,49 +318,88 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().CreateDrawingAtCurrentTime,
         FExecuteAction::CreateLambda( [this]()
-                                        {
-                                            TArray<FGuid> plane_bindings;
-                                            int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
-                                            if( plane_count != 1 )
-                                                return;
-                                            BoardSequenceTools::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
-                                        } ),
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          TArray<FGuid> plane_bindings;
+                                          int32 plane_count = BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
+                                          if( plane_count != 1 )
+                                              return;
+                                          BoardSequenceTools::CreateDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                                      } ),
         FCanExecuteAction::CreateLambda( [this]()
-                                            {
-                                                TArray<FGuid> plane_bindings;
-                                                int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
-                                                if( plane_count > 1 )
-                                                {
-                                                    FNotificationInfo Info( LOCTEXT( "multiple-planes", "There are multiple planes. Select one of them." ) );
-                                                    Info.ExpireDuration = 5.0f;
-                                                    FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
-                                                }
-                                                if( plane_count != 1 )
-                                                    return false;
-                                                return BoardSequenceTools::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             TArray<FGuid> plane_bindings;
+                                             int32 plane_count = BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
+                                             if( plane_count > 1 )
+                                             {
+                                                 FNotificationInfo Info( LOCTEXT( "multiple-planes", "There are multiple planes. Select one of them." ) );
+                                                 Info.ExpireDuration = 5.0f;
+                                                 FSlateNotificationManager::Get().AddNotification( Info )->SetCompletionState( SNotificationItem::CS_Fail );
+                                             }
+                                             if( plane_count != 1 )
+                                                 return false;
+                                             return BoardSequenceTools::CanCreateDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, plane_bindings[0] );
                                          } ),
         FIsActionChecked(),
         FIsActionButtonVisible::CreateLambda( [this]()
                                               {
-                                                  return BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) <= 1;
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return false;
+                                                  return BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) <= 1;
                                               } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().GotoPreviousDrawing,
-        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::GotoPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::HasPreviousDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          BoardSequenceTools::GotoPreviousDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return BoardSequenceTools::HasPreviousDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().GotoNextDrawing,
-        FExecuteAction::CreateLambda( [this](){ BoardSequenceTools::GotoNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } ),
-        FCanExecuteAction::CreateLambda( [this](){ return BoardSequenceTools::HasNextDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          BoardSequenceTools::GotoNextDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                      } ),
+        FCanExecuteAction::CreateLambda( [this]()
+                                         {
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+                                             return BoardSequenceTools::HasNextDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber );
+                                         } )
     );
 
     ioCommandList->MapAction(
         FEposSequenceEditorCommands::Get().DeactivateAllLighttables,
-        FExecuteAction::CreateLambda( [this](){ LighttableTools::Deactivate( mSequencer ); } )
+        FExecuteAction::CreateLambda( [this]()
+                                      {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+                                          LighttableTools::Deactivate( sequencer.Get() );
+                                      } )
     );
 }
 
@@ -288,19 +408,23 @@ FBoardSequenceCustomization::BindCommands( TSharedPtr<FUICommandList> ioCommandL
 FText
 FBoardSequenceCustomization::CreateInfoText() const
 {
-    TSharedRef<INumericTypeInterface<double>> type_interface = mSequencer->GetNumericTypeInterface();
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+    if( !sequencer )
+        return FText::GetEmpty();
+
+    TSharedRef<INumericTypeInterface<double>> type_interface = sequencer->GetNumericTypeInterface();
 
     FMovieSceneSequenceID epos_root_sequence_id;
-    const UMovieSceneSequence* root_board = EposSequenceHelpers::GetRootEposSequence( *mSequencer, mSequencer->GetFocusedTemplateID(), epos_root_sequence_id );
+    const UMovieSceneSequence* root_board = EposSequenceHelpers::GetRootEposSequence( *sequencer, sequencer->GetFocusedTemplateID(), epos_root_sequence_id );
     // This should always be valid as we are inside the board customization
     check( root_board && root_board->IsA<UBoardSequence>() );
     const UMovieScene* root_moviescene = root_board ? root_board->GetMovieScene() : nullptr;
 
-    const UBoardSequence* current_board = CastChecked<UBoardSequence>( mSequencer->GetFocusedMovieSceneSequence() );
+    const UBoardSequence* current_board = CastChecked<UBoardSequence>( sequencer->GetFocusedMovieSceneSequence() );
     const UMovieScene* current_moviescene = current_board ? current_board->GetMovieScene() : nullptr;
 
     UMovieSceneCinematicBoardTrack* board_track = current_moviescene ? current_moviescene->FindTrack<UMovieSceneCinematicBoardTrack>() : nullptr;
-    UMovieSceneSection* board_section = board_track ? MovieSceneHelpers::FindSectionAtTime( board_track->GetAllSections(), mSequencer->GetLocalTime().Time.FrameNumber ) : nullptr;
+    UMovieSceneSection* board_section = board_track ? MovieSceneHelpers::FindSectionAtTime( board_track->GetAllSections(), sequencer->GetLocalTime().Time.FrameNumber ) : nullptr;
     UMovieSceneSubSection* board_subsection = Cast<UMovieSceneSubSection>( board_section );
 
     const UMovieSceneSequence* current_subsequence = board_subsection ? board_subsection->GetSequence() : nullptr;
@@ -314,8 +438,8 @@ FBoardSequenceCustomization::CreateInfoText() const
 
     FFrameRate root_tick_resolution = root_moviescene->GetTickResolution();
     FFrameRate root_display_rate = root_moviescene->GetDisplayRate();
-    FFrameRate sequence_tick_resolution = mSequencer->GetFocusedTickResolution();
-    FFrameRate sequence_display_rate = mSequencer->GetFocusedDisplayRate();
+    FFrameRate sequence_tick_resolution = sequencer->GetFocusedTickResolution();
+    FFrameRate sequence_display_rate = sequencer->GetFocusedDisplayRate();
 
     //-
 
@@ -333,9 +457,9 @@ FBoardSequenceCustomization::CreateInfoText() const
     //--- CurrentFrame_InSequence
     //--- CurrentFrame_InSubsequence
     {
-        FFrameNumber current_frame_in_storyboard = EposSequenceHelpers::GetIntermediateTime( *mSequencer, mSequencer->GetGlobalTime(), epos_root_sequence_id ).Time.GetFrame();
-        //FFrameNumber current_frame_in_storyboard = mSequencer->GetGlobalTime().Time.GetFrame();
-        FFrameNumber current_frame_in_sequence = mSequencer->GetLocalTime().Time.GetFrame();
+        FFrameNumber current_frame_in_storyboard = EposSequenceHelpers::GetIntermediateTime( *sequencer, sequencer->GetGlobalTime(), epos_root_sequence_id ).Time.GetFrame();
+        //FFrameNumber current_frame_in_storyboard = sequencer->GetGlobalTime().Time.GetFrame();
+        FFrameNumber current_frame_in_sequence = sequencer->GetLocalTime().Time.GetFrame();
         FFrameNumber current_frame_in_subsequence = board_subsection ? current_frame_in_sequence - board_subsection->GetInclusiveStartFrame() : FFrameNumber();
 
         parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::CurrentFrame_InStoryboard, current_frame_in_storyboard );
@@ -365,11 +489,19 @@ FBoardSequenceCustomization::CreateInfoText() const
         // convert to display rate -> substract 1 to get the (inclusive) last frame -> convert back to tick resolution
         stop_sequence_in_sequence = FFrameRate::TransformTime( FFrameRate::TransformTime( stop_sequence_in_sequence, sequence_tick_resolution, sequence_display_rate ).FloorToFrame() - 1, sequence_display_rate, sequence_tick_resolution ).FloorToFrame();
 
-        FFrameNumber start_sequence_in_storyboard = ( start_sequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseNoLooping() ).GetFrame();
-        FFrameNumber stop_sequence_in_storyboard = ( stop_sequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseNoLooping() ).GetFrame();
+        FMovieSceneInverseSequenceTransform localToRootTransform = sequencer->GetFocusedMovieSceneSequenceTransform().Inverse();
 
-        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSequence_InStoryboard, start_sequence_in_storyboard );
-        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSequence_InStoryboard, stop_sequence_in_storyboard );
+        TOptional<FFrameTime> start_sequence_in_storyboard = localToRootTransform.TryTransformTime( start_sequence_in_sequence );
+        if( start_sequence_in_storyboard )
+            parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSequence_InStoryboard, start_sequence_in_storyboard->GetFrame() );
+        else
+            parsed_string = ReplaceKeywordString( EInfoBarPatternKeyword::StartFrameOfSequence_InStoryboard, TEXT( "xxx" ) );
+
+        TOptional<FFrameTime> stop_sequence_in_storyboard = localToRootTransform.TryTransformTime( stop_sequence_in_sequence );
+        if( stop_sequence_in_storyboard )
+            parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSequence_InStoryboard, stop_sequence_in_storyboard->GetFrame() );
+        else
+            parsed_string = ReplaceKeywordString( EInfoBarPatternKeyword::StopFrameOfSequence_InStoryboard, TEXT( "xxx" ) );
 
         parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSequence_InSequence, start_sequence_in_sequence );
         parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSequence_InSequence, stop_sequence_in_sequence );
@@ -389,11 +521,19 @@ FBoardSequenceCustomization::CreateInfoText() const
         FFrameNumber start_subsequence_in_subsequence = board_subsection ? start_subsequence_in_sequence - board_subsection->GetInclusiveStartFrame() : FFrameNumber();
         FFrameNumber stop_subsequence_in_subsequence = board_subsection ? stop_subsequence_in_sequence - board_subsection->GetInclusiveStartFrame() : FFrameNumber();
 
-        FFrameNumber start_subsequence_in_storyboard = ( start_subsequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseNoLooping() ).GetFrame();
-        FFrameNumber stop_subsequence_in_storyboard = ( stop_subsequence_in_sequence * mSequencer->GetFocusedMovieSceneSequenceTransform().InverseNoLooping() ).GetFrame();
+        FMovieSceneInverseSequenceTransform localToRootTransform = sequencer->GetFocusedMovieSceneSequenceTransform().Inverse();
 
-        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSubsequence_InStoryboard, start_subsequence_in_storyboard );
-        parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSubsequence_InStoryboard, stop_subsequence_in_storyboard );
+        TOptional<FFrameTime> start_subsequence_in_storyboard = localToRootTransform.TryTransformTime( start_subsequence_in_sequence );
+        if( start_subsequence_in_storyboard )
+            parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSubsequence_InStoryboard, start_subsequence_in_storyboard->GetFrame() );
+        else
+            parsed_string = ReplaceKeywordString( EInfoBarPatternKeyword::StartFrameOfSubsequence_InStoryboard, TEXT( "xxx" ) );
+
+        TOptional<FFrameTime> stop_subsequence_in_storyboard = localToRootTransform.TryTransformTime( stop_subsequence_in_sequence );
+        if( stop_subsequence_in_storyboard )
+            parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSubsequence_InStoryboard, stop_subsequence_in_storyboard->GetFrame() );
+        else
+            parsed_string = ReplaceKeywordString( EInfoBarPatternKeyword::StopFrameOfSubsequence_InStoryboard, TEXT( "xxx" ) );
 
         parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StartFrameOfSubsequence_InSequence, start_subsequence_in_sequence );
         parsed_string = ReplaceKeywordFrame( EInfoBarPatternKeyword::StopFrameOfSubsequence_InSequence, stop_subsequence_in_sequence );
@@ -407,7 +547,7 @@ FBoardSequenceCustomization::CreateInfoText() const
     {
         int32 storyboard_duration_in_tick = UE::MovieScene::DiscreteSize( root_playback_range );
 
-        const FMovieSceneSequenceHierarchy* hierarchy = mSequencer->GetEvaluationTemplate().GetCompiledDataManager()->FindHierarchy( mSequencer->GetEvaluationTemplate().GetCompiledDataID() );
+        const FMovieSceneSequenceHierarchy* hierarchy = sequencer->GetSharedPlaybackState()->GetHierarchy();
         int32 storyboard_total_sequences = hierarchy ? hierarchy->AllSubSequenceData().Num() : 0;
 
         parsed_string = ReplaceKeywordIntAsFrame( EInfoBarPatternKeyword::Storyboard_Duration, storyboard_duration_in_tick );
@@ -519,7 +659,10 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
             FGetActionCheckState(),
             FIsActionButtonVisible::CreateLambda( [this]()
                                                   {
-                                                      return BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) > 1;
+                                                      TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                      if( !sequencer )
+                                                          return false;
+                                                      return BoardSequenceTools::GetAttachedPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) > 1;
                                                   } )
         ),
         FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakePlaneMenu ),
@@ -529,21 +672,25 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
 
     auto GetLighttableTooltip = [this]() -> FText
         {
+            TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+            if( !sequencer )
+                return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
+
             TArray<FGuid> plane_bindings;
-            int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
+            int32 plane_count = BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
             //check( plane_count == 1 );
             if( plane_count != 1 )
                 return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
 
-            BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), mSequencer->GetLocalTime().Time.FrameNumber );
+            BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber );
             if( !result.mInnerSequence )
                 return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
 
-            UMovieSceneSubSection* subsection = mSequencer->FindSubSection( result.mInnerSequenceId );
+            UMovieSceneSubSection* subsection = sequencer->FindSubSection( result.mInnerSequenceId );
             if( !subsection )
                 return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
 
-            if( LighttableTools::GetState( mSequencer, *subsection, plane_bindings[0] ) != 0 )
+            if( LighttableTools::GetState( sequencer.Get(), *subsection, plane_bindings[0] ) != 0 )
                 return LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable" );
             else
                 return LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
@@ -551,21 +698,25 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
 
     auto GetLighttableIcon = [this]() -> FSlateIcon
         {
+            TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+            if( !sequencer )
+                return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
+
             TArray<FGuid> plane_bindings;
-            int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
+            int32 plane_count = BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
             //check( plane_count == 1 );
             if( plane_count != 1 )
                 return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
 
-            BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), mSequencer->GetLocalTime().Time.FrameNumber );
+            BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber );
             if( !result.mInnerSequence )
                 return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
 
-            UMovieSceneSubSection* subsection = mSequencer->FindSubSection( result.mInnerSequenceId );
+            UMovieSceneSubSection* subsection = sequencer->FindSubSection( result.mInnerSequenceId );
             if( !subsection )
                 return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
 
-            if( LighttableTools::GetState( mSequencer, *subsection, plane_bindings[0] ) != 0 )
+            if( LighttableTools::GetState( sequencer.Get(), *subsection, plane_bindings[0] ) != 0 )
                 return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOn" );
             else
                 return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
@@ -577,32 +728,44 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
     ToolbarBuilder.AddToolBarButton( FUIAction(
         FExecuteAction::CreateLambda( [this]()
                                       {
+                                          TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                          if( !sequencer )
+                                              return;
+
                                           TArray<FGuid> plane_bindings;
-                                          int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
+                                          int32 plane_count = BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, nullptr, &plane_bindings );
                                           if( plane_count != 1 )
                                               return;
 
-                                          BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), mSequencer->GetLocalTime().Time.FrameNumber );
+                                          BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber );
                                           if( !result.mInnerSequence )
                                               return;
 
-                                          UMovieSceneSubSection* subsection = mSequencer->FindSubSection( result.mInnerSequenceId );
+                                          UMovieSceneSubSection* subsection = sequencer->FindSubSection( result.mInnerSequenceId );
                                           if( !subsection )
                                               return;
 
-                                          if( LighttableTools::GetState( mSequencer, *subsection, plane_bindings[0] ) != 0 )
-                                              LighttableTools::Deactivate( mSequencer, *subsection, plane_bindings[0] );
+                                          if( LighttableTools::GetState( sequencer.Get(), *subsection, plane_bindings[0] ) != 0 )
+                                              LighttableTools::Deactivate( sequencer.Get(), *subsection, plane_bindings[0] );
                                           else
-                                              LighttableTools::Activate( mSequencer, *subsection, plane_bindings[0] );
+                                              LighttableTools::Activate( sequencer.Get(), *subsection, plane_bindings[0] );
                                       } ),
         FCanExecuteAction::CreateLambda( [this]()
                                          {
-                                             return BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) == 1;
+                                             TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                             if( !sequencer )
+                                                 return false;
+
+                                             return BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) == 1;
                                          } ),
         FIsActionChecked(),
         FIsActionButtonVisible::CreateLambda( [this]()
                                               {
-                                                  return BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) <= 1;
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return false;
+
+                                                  return BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) <= 1;
                                               } ) ),
         NAME_None,
         FText::GetEmpty(),
@@ -616,7 +779,11 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
             FGetActionCheckState(),
             FIsActionButtonVisible::CreateLambda( [this]()
                                                   {
-                                                      return BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) > 1;
+                                                      TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                      if( !sequencer )
+                                                          return false;
+
+                                                      return BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) > 1;
                                                   } )
         ),
         FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeLighttableMenu ),
@@ -641,7 +808,11 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
             FGetActionCheckState(),
             FIsActionButtonVisible::CreateLambda( [this]()
                                                   {
-                                                      return BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber ) > 1;
+                                                      TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                      if( !sequencer )
+                                                          return false;
+
+                                                      return BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber ) > 1;
                                                   } )
         ),
         FOnGetContent::CreateRaw( this, &FBoardSequenceCustomization::MakeDrawingMenu ),
@@ -683,7 +854,9 @@ FBoardSequenceCustomization::ExtendSequencerToolbar( FToolBarBuilder& ToolbarBui
 TSharedRef<SWidget>
 FBoardSequenceCustomization::MakeCameraMenu()
 {
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     EposSequenceToolbarHelpers::MakeCameraSettingsEntries( MenuBuilder );
 
@@ -693,11 +866,13 @@ FBoardSequenceCustomization::MakeCameraMenu()
 TSharedRef<SWidget>
 FBoardSequenceCustomization::MakePlaneMenu()
 {
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     TArray<APlaneActor*> planes;
     TArray<FGuid> plane_bindings;
-    int32 plane_count = BoardSequenceTools::GetAttachedPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, &planes, &plane_bindings );
+    int32 plane_count = BoardSequenceTools::GetAttachedPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, &planes, &plane_bindings );
     if( !plane_count )
         return SNullWidget::NullWidget;
 
@@ -713,7 +888,11 @@ FBoardSequenceCustomization::MakePlaneMenu()
             FUIAction(
                 FExecuteAction::CreateLambda( [this, plane_binding]()
                                               {
-                                                  BoardSequenceTools::DetachPlane( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_binding );
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return;
+
+                                                  BoardSequenceTools::DetachPlane( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, plane_binding );
                                               } )
             )
         );
@@ -725,11 +904,13 @@ FBoardSequenceCustomization::MakePlaneMenu()
 TSharedRef<SWidget>
 FBoardSequenceCustomization::MakeLighttableMenu()
 {
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     TArray<APlaneActor*> planes;
     TArray<FGuid> plane_bindings;
-    int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, &planes, &plane_bindings );
+    int32 plane_count = BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, &planes, &plane_bindings );
     if( !plane_count )
         return SNullWidget::NullWidget;
 
@@ -738,22 +919,22 @@ FBoardSequenceCustomization::MakeLighttableMenu()
         APlaneActor* plane = planes[i];
         FGuid plane_binding = plane_bindings[i];
 
-        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), mSequencer->GetLocalTime().Time.FrameNumber );
+        BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber );
         if( !result.mInnerSequence )
             continue;
 
-        UMovieSceneSubSection* subsection = mSequencer->FindSubSection( result.mInnerSequenceId );
+        UMovieSceneSubSection* subsection = sequencer->FindSubSection( result.mInnerSequenceId );
         if( !subsection )
             continue;
 
         FText tooltip;
-        if( LighttableTools::GetState( mSequencer, *subsection, plane_binding ) != 0 )
+        if( LighttableTools::GetState( sequencer.Get(), *subsection, plane_binding ) != 0 )
             tooltip = LOCTEXT( "disable-lighttable-tooltip", "Disable the lighttable" );
         else
             tooltip = LOCTEXT( "enable-lighttable-tooltip", "Enable the lighttable" );
 
         FSlateIcon icon;
-        if( LighttableTools::GetState( mSequencer, *subsection, plane_binding ) != 0 )
+        if( LighttableTools::GetState( sequencer.Get(), *subsection, plane_binding ) != 0 )
             icon = FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOn" );
         else
             icon = FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), "LighttableOff" );
@@ -765,18 +946,22 @@ FBoardSequenceCustomization::MakeLighttableMenu()
             FUIAction(
                 FExecuteAction::CreateLambda( [this, plane_binding]()
                                               {
-                                                  BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *mSequencer, mSequencer->GetFocusedMovieSceneSequence(), mSequencer->GetFocusedTemplateID(), mSequencer->GetLocalTime().Time.FrameNumber );
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return;
+
+                                                  BoardSequenceHelpers::FInnerSequenceResult result = BoardSequenceHelpers::GetInnerSequence( *sequencer, sequencer->GetFocusedMovieSceneSequence(), sequencer->GetFocusedTemplateID(), sequencer->GetLocalTime().Time.FrameNumber );
                                                   if( !result.mInnerSequence )
                                                       return;
 
-                                                  UMovieSceneSubSection* subsection = mSequencer->FindSubSection( result.mInnerSequenceId );
+                                                  UMovieSceneSubSection* subsection = sequencer->FindSubSection( result.mInnerSequenceId );
                                                   if( !subsection )
                                                       return;
 
-                                                  if( LighttableTools::GetState( mSequencer, *subsection, plane_binding ) != 0 )
-                                                      LighttableTools::Deactivate( mSequencer, *subsection, plane_binding );
+                                                  if( LighttableTools::GetState( sequencer.Get(), *subsection, plane_binding ) != 0 )
+                                                      LighttableTools::Deactivate( sequencer.Get(), *subsection, plane_binding );
                                                   else
-                                                      LighttableTools::Activate( mSequencer, *subsection, plane_binding );
+                                                      LighttableTools::Activate( sequencer.Get(), *subsection, plane_binding );
                                               } )
             )
         );
@@ -788,11 +973,13 @@ FBoardSequenceCustomization::MakeLighttableMenu()
 TSharedRef<SWidget>
 FBoardSequenceCustomization::MakeDrawingMenu()
 {
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     TArray<APlaneActor*> planes;
     TArray<FGuid> plane_bindings;
-    int32 plane_count = BoardSequenceTools::GetAllPlanes( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber , &planes, &plane_bindings );
+    int32 plane_count = BoardSequenceTools::GetAllPlanes( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber , &planes, &plane_bindings );
     if( !plane_count )
         return SNullWidget::NullWidget;
 
@@ -809,11 +996,19 @@ FBoardSequenceCustomization::MakeDrawingMenu()
             FUIAction(
                 FExecuteAction::CreateLambda( [this, plane_binding]()
                                               {
-                                                  BoardSequenceTools::CreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_binding );
+                                                  TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                  if( !sequencer )
+                                                      return;
+
+                                                  BoardSequenceTools::CreateDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, plane_binding );
                                               } ),
                 FCanExecuteAction::CreateLambda( [this, plane_binding]()
                                                  {
-                                                     return BoardSequenceTools::CanCreateDrawing( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, plane_binding );
+                                                     TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+                                                     if( !sequencer )
+                                                         return false;
+
+                                                     return BoardSequenceTools::CanCreateDrawing( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, plane_binding );
                                                  } )
             )/*,
             NAME_None,
@@ -827,9 +1022,11 @@ FBoardSequenceCustomization::MakeDrawingMenu()
 TSharedRef<SWidget>
 FBoardSequenceCustomization::MakeSettingsMenu()
 {
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
 
-    EposSequenceToolbarHelpers::MakeSettingsEntries( MenuBuilder, mSequencer );
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
+
+    EposSequenceToolbarHelpers::MakeSettingsEntries( MenuBuilder, sequencer.Get() );
 
     return MenuBuilder.MakeWidget();
 }
@@ -837,7 +1034,9 @@ FBoardSequenceCustomization::MakeSettingsMenu()
 TSharedRef<SWidget>
 FBoardSequenceCustomization::MakeTextureMenu()
 {
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     EposSequenceToolbarHelpers::MakeTextureSettingsEntries( MenuBuilder );
 
@@ -847,7 +1046,9 @@ FBoardSequenceCustomization::MakeTextureMenu()
 TSharedRef<SWidget>
 FBoardSequenceCustomization::MakeHelpMenu()
 {
-    FMenuBuilder MenuBuilder( true, mSequencer->GetCommandBindings() );
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    FMenuBuilder MenuBuilder( true, sequencer ? sequencer->GetCommandBindings() : nullptr );
 
     EposSequenceToolbarHelpers::MakeHelpEntries( MenuBuilder );
 
@@ -870,64 +1071,77 @@ FBoardSequenceCustomization::CreateObjectBindingContextMenuExtender(UE::Sequence
 void
 FBoardSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBuilder, TSharedPtr<UE::Sequencer::FObjectBindingModel> ObjectBindingModel)
 {
-    ISequencer* Sequencer = mSequencer;
-    //TSharedPtr<ISequencer> Sequencer = WeakSequencer.Pin();
+    TSharedPtr<ISequencer> Sequencer = mWeakSequencer.Pin();
     TSharedPtr<UE::Sequencer::FSequencerEditorViewModel> EditorViewModel = Sequencer->GetViewModel();
 
     FGuid ObjectBindingID = ObjectBindingModel->GetObjectGuid();
-    UMovieScene* MovieScene = Sequencer->GetFocusedMovieSceneSequence()->GetMovieScene();
+    UMovieSceneSequence* Sequence = Sequencer->GetFocusedMovieSceneSequence();
+    UMovieScene* MovieScene = Sequence->GetMovieScene();
 
     if (!MovieScene || !ObjectBindingID.IsValid())
     {
         return;
     }
 
-    FMovieSceneSpawnable* Spawnable = MovieScene->FindSpawnable(ObjectBindingID);
-
-    if (Spawnable)
-    {
-        check(!"todo: from FLevelSequenceCustomization in Plugins")
-    }
-    else
-    {
-        //MenuBuilder.BeginSection("Possessable");
-
-        //MenuBuilder.AddMenuEntry(FSequencerCommands::Get().ConvertToSpawnable);
-
-        //MenuBuilder.AddSubMenu(
-        //    LOCTEXT("DynamicPossession", "Dynamic Possession"),
-        //    LOCTEXT("DynamicPossessionTooltip", "Specify a Blueprint method that will find a compatible actor for this binding"),
-        //    FNewMenuDelegate::CreateRaw(this, &FLevelSequenceCustomization::AddDynamicPossessionMenu, ObjectBindingModel));
-
-        //MenuBuilder.EndSection();
-    }
+    //...
 
     MenuBuilder.BeginSection("Import/Export", LOCTEXT("ImportExportMenuSectionName", "Import/Export"));
 
     MenuBuilder.AddMenuEntry(
-        LOCTEXT("ImportFBX", "Import..."),
-        LOCTEXT("ImportFBXTooltip", "Import FBX animation to this object"),
+        LOCTEXT( "ImportFBX", "Import..." ),
+        LOCTEXT( "ImportFBXTooltip", "Import FBX animation to this object" ),
         FSlateIcon(),
         FUIAction(
-            FExecuteAction::CreateLambda([=] {
-                FEposSequenceFBXInterop Interop(EditorViewModel->GetSequencer());
-                Interop.ImportFBXOntoSelectedNodes();
-                })
-        ));
+            FExecuteAction::CreateLambda( [this]
+                                          {
+                                              const TSharedPtr<ISequencer> Sequencer = mWeakSequencer.Pin();
+                                              if( !Sequencer.IsValid() )
+                                              {
+                                                  return;
+                                              }
+
+                                              FEposSequenceFBXInterop Interop( Sequencer.ToSharedRef() );
+                                              Interop.ImportFBXOntoSelectedNodes();
+                                          } )
+        ) );
 
     MenuBuilder.AddMenuEntry(
-        LOCTEXT("ExportFBX", "Export..."),
-        LOCTEXT("ExportFBXTooltip", "Export FBX animation from this object"),
+        LOCTEXT( "ExportFBX", "Export..." ),
+        LOCTEXT( "ExportFBXTooltip", "Export FBX animation from this object" ),
         FSlateIcon(),
         FUIAction(
-            FExecuteAction::CreateLambda([=] {
-                FEposSequenceFBXInterop Interop(EditorViewModel->GetSequencer());
-                Interop.ExportFBX();
-                })
-        ));
+            FExecuteAction::CreateLambda( [this]
+                                          {
+                                              const TSharedPtr<ISequencer> Sequencer = mWeakSequencer.Pin();
+                                              if( !Sequencer.IsValid() )
+                                              {
+                                                  return;
+                                              }
+
+                                              FEposSequenceFBXInterop Interop( Sequencer.ToSharedRef() );
+                                              Interop.ExportFBX();
+                                          } )
+        ) );
 
     MenuBuilder.EndSection();
 }
+
+//TSharedPtr<FExtender> FBoardSequenceCustomization::CreateObjectBindingSidebarMenuExtender( FViewModelPtr InViewModel )
+//{
+//    TSharedRef<FExtender> Extender = MakeShared<FExtender>();
+//
+//    TSharedPtr<FObjectBindingModel> ObjectBindingModel = InViewModel->CastThisShared<FObjectBindingModel>();
+//
+//    Extender->AddMenuExtension( TEXT( "ObjectBindingActions" ), EExtensionHook::Before, nullptr,
+//                                FMenuExtensionDelegate::CreateRaw( this, &FBoardSequenceCustomization::ExtendObjectBindingSidebarMenu, ObjectBindingModel ) );
+//
+//    return Extender.ToSharedPtr();
+//}
+//
+//void FBoardSequenceCustomization::ExtendObjectBindingSidebarMenu( FMenuBuilder& MenuBuilder, TSharedPtr<FObjectBindingModel> ObjectBindingModel )
+//{
+//    ExtendObjectBindingContextMenu( MenuBuilder, ObjectBindingModel );
+//}
 
 //---
 
@@ -974,6 +1188,8 @@ FBoardSequenceCustomization::ExtendObjectBindingContextMenu(FMenuBuilder& MenuBu
 void
 FBoardSequenceCustomization::OnGlobalTimeChanged()
 {
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
     //FString prefix = TEXT( "global time changed" );
     //FQualifiedFrameTime frame_time = mSequencer->GetLocalTime();
     //EMovieScenePlayerStatus::Type state = mSequencer->GetPlaybackStatus();
@@ -998,9 +1214,9 @@ FBoardSequenceCustomization::OnGlobalTimeChanged()
 
     //---
 
-    FFrameNumber current_frame = mSequencer->GetLocalTime().Time.GetFrame();
+    FFrameNumber current_frame = sequencer->GetLocalTime().Time.GetFrame();
 
-    ACineCameraActor* camera_at_current_frame = BoardSequenceTools::GetCamera( mSequencer, current_frame );
+    ACineCameraActor* camera_at_current_frame = BoardSequenceTools::GetCamera( sequencer.Get(), current_frame );
 
     if( !camera_at_current_frame )
     {
@@ -1016,7 +1232,7 @@ FBoardSequenceCustomization::OnGlobalTimeChanged()
 
     //---
 
-    BoardSequenceTools::PilotCamera( mSequencer, current_frame );
+    BoardSequenceTools::PilotCamera( sequencer.Get(), current_frame );
 }
 
 void
@@ -1044,7 +1260,9 @@ FBoardSequenceCustomization::OnEndScrubbing()
 void
 FBoardSequenceCustomization::OnPreTransformChanged( UObject& InObject )
 {
-    if( !mSequencer->IsAllowedToChange() )
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    if( !sequencer || !sequencer->IsAllowedToChange() )
         return;
 
     ACineCameraActor* Actor = Cast<ACineCameraActor>( &InObject );
@@ -1067,7 +1285,9 @@ FBoardSequenceCustomization::OnPreTransformChanged( UObject& InObject )
 void
 FBoardSequenceCustomization::OnTransformChanged( UObject& InObject )
 {
-    if( !mSequencer->IsAllowedToChange() )
+    TSharedPtr<ISequencer> sequencer = mWeakSequencer.Pin();
+
+    if( !sequencer || !sequencer->IsAllowedToChange() )
         return;
 
     ACineCameraActor* Actor = Cast<ACineCameraActor>( &InObject );
@@ -1094,7 +1314,7 @@ FBoardSequenceCustomization::OnTransformChanged( UObject& InObject )
 
     //---
 
-    BoardSequenceTools::StopPilotingCamera( mSequencer, mSequencer->GetLocalTime().Time.FrameNumber, Actor, ExistingTransform, NewTransformData );
+    BoardSequenceTools::StopPilotingCamera( sequencer.Get(), sequencer->GetLocalTime().Time.FrameNumber, Actor, ExistingTransform, NewTransformData );
 }
 
 void

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "LayerStack/Tools/OdysseyAnimationTimelineTool.h"
+#include "Input/Reply.h"
 
 class FOdysseyAnimationCellSelection;
 class FOdysseyAnimationEditorTimelinePosition;

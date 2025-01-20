@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Modules/ModuleInterface.h"
+#include "Modules/ModuleManager.h"
 
 /**
  * The Animation Asset module.
@@ -17,6 +17,4 @@ public:
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
     //~
-
-public:
 };

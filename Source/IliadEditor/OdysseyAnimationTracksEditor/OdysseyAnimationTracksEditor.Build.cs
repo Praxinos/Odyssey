@@ -36,7 +36,8 @@ namespace UnrealBuildTool.Rules
             PublicDependencyModuleNames.AddRange(
                 new string[]
                 {
-                    // ... add other public dependencies that you statically link with here ...
+                    "ULIS",
+                    "ULISLoader",
                 }
                 );
 

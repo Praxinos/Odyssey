@@ -72,6 +72,7 @@
 #include "Mesh/FOdysseyMeshSelector.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
+#include "Toolkits/BaseToolkit.h"
 
 #define LOCTEXT_NAMESPACE "PainonterEditor"
 

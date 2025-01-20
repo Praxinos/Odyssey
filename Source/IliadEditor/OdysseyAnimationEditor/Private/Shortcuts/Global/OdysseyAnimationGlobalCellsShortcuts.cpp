@@ -11,6 +11,7 @@
 #include "OdysseyAnimationCurrentFrameMutator.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
+#include "ScopedTransaction.h"
 
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"

@@ -12,6 +12,7 @@
 #include "Widgets/LayerStack/Layers/LayerImageRaster/SOdysseyAnimationLayerImageRasterTimeline.h"
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorTimeline.h"
 #include "LayerStack/Layers/LayerFolder/OdysseyAnimationLayerFolder.h"
+#include "Framework/Commands/UICommandList.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 

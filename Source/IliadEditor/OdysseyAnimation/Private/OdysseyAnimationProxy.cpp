@@ -3,6 +3,7 @@
 
 #include "OdysseyAnimationProxy.h"
 
+#include "Async/Async.h"
 #include "HAL/RunnableThread.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "OdysseyAnimation.h"

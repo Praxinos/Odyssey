@@ -17,6 +17,7 @@
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "Widgets/LayerStack/Layers/LayerImageVector/SOdysseyAnimationLayerImageVectorRow.h"
 #include "LayerStack/Cells/OdysseyAnimationCellSelection.h"
+#include "ScopedTransaction.h"
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
