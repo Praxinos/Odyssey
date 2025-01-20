@@ -8,7 +8,7 @@
 #include "EngineUtils.h"
 
 FBrushDefaults::FBrushDefaults()
-    : DefaultBrush(FSoftObjectPath(TEXT("/Odyssey/Brushes/Drawing_Tools/Penbrush1.Penbrush1")))
+    : DefaultBrush(FSoftObjectPath(TEXT("/Odyssey/Brushes/Bitmap_Tools/OB_Penbrush1.OB_Penbrush1")))
 {
 }
 
