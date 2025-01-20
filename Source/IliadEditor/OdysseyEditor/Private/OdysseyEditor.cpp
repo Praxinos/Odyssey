@@ -100,7 +100,13 @@ FOdysseyEditor::ExtendMenu( TSharedRef<FExtender> iExtender )
 }
 
 void
-FOdysseyEditor::ExtendToolbar( UToolMenu* iToolbar )
+FOdysseyEditor::ExtendLevelEditorToolbar( UToolMenu* iToolbar )
+{
+
+}
+
+void
+FOdysseyEditor::ExtendAssetEditorToolbar(UToolMenu* iToolbar)
 {
 
 }

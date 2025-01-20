@@ -58,12 +58,15 @@ public:
     virtual TSharedRef<FTabManager::FLayout> CreateLayout() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
-    virtual void ExtendToolbar( UToolMenu* iToolbar ) override;
+    virtual void ExtendLevelEditorToolbar( UToolMenu* iToolbar ) override;
+    virtual void ExtendAssetEditorToolbar(UToolMenu* iToolbar) override;
     virtual void OnClose() override;
     virtual void InitToolMenuContext(FToolMenuContext& MenuContext) override;
 
 public:
     //Tools
+    void ExtendToolbarSaveAssetButton(FToolBarBuilder& iBuilder);
+    void ExtendToolbarToolParameters(FToolBarBuilder& iBuilder);
 
     /**
      * @brief Returns the current main tool
@@ -321,6 +324,8 @@ protected:
     TObjectPtr<UOdysseyPainterEditorVectorTrajectoryTool> mVectorTrajectoryTool;
 
     TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentMainToolPerLayerClass;
+
+    FName mToolbarMenuName;
 };
 
 template <class T>

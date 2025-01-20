@@ -36,7 +36,7 @@ FOdysseyAssetEditorToolkit::Initialize(UObject* iEditedObject, TSharedPtr<FOdyss
     if (!UToolMenus::Get()->IsMenuRegistered(MenuName))
     {
         UToolMenu* ToolBar = UToolMenus::Get()->RegisterMenu(MenuName, "AssetEditor.DefaultToolBar", EMultiBoxType::ToolBar);
-        mEditor->ExtendToolbar( ToolBar );
+        mEditor->ExtendAssetEditorToolbar( ToolBar );
     }
 
     FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->CreateLayout(), true, true, editedObjects);

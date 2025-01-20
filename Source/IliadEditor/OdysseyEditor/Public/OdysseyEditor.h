@@ -62,7 +62,8 @@ public:
 public:
     // Overridable Methods
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender );
-    virtual void ExtendToolbar(UToolMenu* iToolbar);
+    virtual void ExtendLevelEditorToolbar( UToolMenu* iToolbar );
+    virtual void ExtendAssetEditorToolbar( UToolMenu* iToolbar );
     virtual void BindShortcuts(FBaseToolkit* iToolkit);
     virtual bool OnCloseRequested();
     virtual void OnClose();
