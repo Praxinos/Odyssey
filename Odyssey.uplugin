@@ -1,7 +1,7 @@
 {
     "FileVersion": 3,
     "Version": 1,
-    "VersionName": "1.0.54",
+    "VersionName": "1.0.55",
     "FriendlyName": "Odyssey",
     "Description": "2D Animation, Storyboard & Animatic plugin for Unreal Engine",
     "Category": "2D",
