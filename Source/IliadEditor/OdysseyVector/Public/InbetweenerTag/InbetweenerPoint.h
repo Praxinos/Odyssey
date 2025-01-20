@@ -63,6 +63,7 @@ class ODYSSEYVECTOR_API FInbetweenerPoint
         bool IsNeeded();
         void SetNeeded( bool iNeeded );
         FInbetweenerGrid* GetGrid();
+        uint32 GetIndex();
 
         friend class FOdysseyVectorTagInbetweener;
 

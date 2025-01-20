@@ -290,7 +290,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
 
     // total vertical pos & size of the widget
     mBoxPos.Y  = 0.0f;
-    mBoxSize.Y = 20.0f /* * LayoutScaleMultiplier */;
+    mBoxSize.Y = UOdysseyAnimationLayerImageVector::GetInbetweeningRowHeight();
 
     mCellBoxBuffer.Reset();
     mCellBoxBuffer.Reserve( mInbetweenerTag->GetLength() );

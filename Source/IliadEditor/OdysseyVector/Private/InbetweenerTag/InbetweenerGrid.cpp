@@ -33,7 +33,7 @@ FInbetweenerGrid::GetBreakdown()
 }
 
 ::ULIS::FRectD
-FInbetweenerGrid::GetBBox( eInbetweenerPointPositionType iPositionType, bool iLinkedOnly )
+FInbetweenerGrid::GetBBox( eInbetweenerPointPositionType iPositionType )
 {
     ::ULIS::FVec2D center = ::ULIS::FVec2D( 0.0f, 0.0f );
     uint32 pointCount = 0;
@@ -43,7 +43,7 @@ FInbetweenerGrid::GetBBox( eInbetweenerPointPositionType iPositionType, bool iLi
     {
         ::ULIS::FVec2D pointPosition = point.GetPosition( iPositionType );
 
-        if( ( iLinkedOnly == false ) || point.GetQuadCount() )
+        if( point.IsNeeded() )
         {
             if( pointPosition.x < xmin ) xmin = pointPosition.x;
             if( pointPosition.y < ymin ) ymin = pointPosition.y;
@@ -94,8 +94,8 @@ FInbetweenerGrid::UpdateBBox( uint32 iUpdateFlags
         FInbetweenerBreakdown* prevBreakdown = mBreakdown->GetPrevBreakdown();
 
         // note: we could also use prevBreakdown->GetGrid()->mTargetBBox for faster but less safe if not updated
-        mSourceBBox = prevBreakdown ? prevBreakdown->GetGrid()->GetBBox( eInbetweenerPointPositionType::TargetPosition, true )
-                                    : GetBBox( eInbetweenerPointPositionType::SourcePosition, true );
+        mSourceBBox = prevBreakdown ? prevBreakdown->GetGrid()->GetBBox( eInbetweenerPointPositionType::TargetPosition )
+                                    : GetBBox( eInbetweenerPointPositionType::SourcePosition );
 
         mInvalidationFlags &= ~(INVALIDATE_SOURCEBBOX);
     }
@@ -103,7 +103,7 @@ FInbetweenerGrid::UpdateBBox( uint32 iUpdateFlags
     if( ( mInvalidationFlags    & INVALIDATE_TARGETBBOX                             )
      || ( iTagInvalidationFlags & FOdysseyVectorTagInbetweener::INVALIDATE_GRIDTYPE ) )
     {
-        mTargetBBox = GetBBox( eInbetweenerPointPositionType::TargetPosition, true );
+        mTargetBBox = GetBBox( eInbetweenerPointPositionType::TargetPosition );
 
         mInvalidationFlags &= ~(INVALIDATE_TARGETBBOX);
     }
@@ -148,10 +148,9 @@ void FInbetweenerGrid::ResetDeformation( bool iInvalidate )
 
 void FInbetweenerGrid::Make( bool iInvalidate )
 {
-    std::vector<::ULIS::FVec2D> sourcePositionBuffer;
-    std::vector<::ULIS::FVec2D> targetPositionBuffer;
+    std::vector<::ULIS::FVec2D> targetPositionBuffer; // stays empty
 
-    Make( sourcePositionBuffer, targetPositionBuffer, iInvalidate );
+    Make( targetPositionBuffer, iInvalidate );
 }
 
 //static
@@ -178,8 +177,7 @@ SquareGridBBox( ::ULIS::FRectD& iBBox )
 }
 
 void
-FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iSourcePositionBuffer
-                      , const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer
+FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer
                       , bool iInvalidate )
 {
     uint32 numQuadX = mBreakdown->GetInbetweenerTag()->GetGridNumQuadX();
@@ -311,33 +309,40 @@ FInbetweenerGrid::DeformPoint( FInterpolatedPoint* iInterpolatedPoint, eInbetwee
 }
 
 void
-FInbetweenerGrid::DeformPaths( std::vector<FInterpolatedPath>& iInterpolatedPathBuffer
-                             , FInbetweenerChart::Inbetween *iInbetween
-                             , eInbetweenerPointPositionType iPositionType )
+FInbetweenerGrid::DeformPoints( FInterpolatedObject* iInterpolatedObject
+                              , FInbetweenerChart::Inbetween *iInbetween
+                              , eInbetweenerPointPositionType iPositionType )
 {
+    std::vector<FInterpolatedPath::PointGeometry>& interpolatedPointGeometryBuffer = iInterpolatedObject->GetInterpolatedPointGeometryBuffer();
     FOdysseyVectorObject* owner = mBreakdown->GetInbetweenerTag()->GetOwner();
+    uint32 pointCount = iInterpolatedObject->GetInterpolatedPointBuffer().size();
+    uint32 inbetweenAbsoluteIndex = iInbetween->GetIndexInInbetweener();
+    uint32 skippedOffset = ( inbetweenAbsoluteIndex * pointCount );
+    BLMatrix2D conversionMatrix = iInterpolatedObject->GetOriginalObject()->GetInverseWorldMatrix();
 
-    for( FInterpolatedPath& interpolatedPath : iInterpolatedPathBuffer )
+    conversionMatrix.transform( owner->GetWorldMatrix() );
+
+    for( uint32 i = 0; i < pointCount; i++ )
     {
-        std::vector<FInterpolatedPath::PointGeometry>& interpolatedPointPositionBuffer = interpolatedPath.GetInterpolatedPointGeometryBuffer();
-        uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
-        uint32 inbetweenAbsoluteIndex = iInbetween->GetIndexInInbetweener();
-        uint32 skippedOffset = ( inbetweenAbsoluteIndex * pointCount );
-        FOdysseyVectorPath* path = interpolatedPath.GetOriginalPath();
-        BLMatrix2D conversionMatrix = path->GetInverseWorldMatrix();
+        FInterpolatedPoint* interpolatedPoint = &iInterpolatedObject->GetInterpolatedPointBuffer()[i];
+        ::ULIS::FVec2D deformedPoint = DeformPoint( interpolatedPoint, iPositionType );
 
-        conversionMatrix.transform( owner->GetWorldMatrix() );
+        // Point will be in owner coords. convert it in path coords
+        // note: owner and path could be the same, in which case coords remain the same
+        interpolatedPointGeometryBuffer[skippedOffset + i].position = FOdysseyVector::MapPoint( conversionMatrix
+                                                                                              , deformedPoint );
+    }
+}
 
-        for( uint32 i = 0; i < pointCount; i++ )
-        {
-            FInterpolatedPoint* interpolatedPoint = &interpolatedPath.GetInterpolatedPointBuffer()[i];
-            ::ULIS::FVec2D deformedPoint = DeformPoint( interpolatedPoint, iPositionType );
+void
+FInbetweenerGrid::DeformObjects( FInbetweenerChart::Inbetween *iInbetween
+                               , eInbetweenerPointPositionType iPositionType )
+{
+    std::vector<FInterpolatedObject*>& interpolatedObjectArray = mBreakdown->GetInbetweenerTag()->GetInterpolatedObjectArray();
 
-            // Point will be in owner coords. convert it in path coords
-            // note: owner and path could be the same, in which case coords remain the same
-            interpolatedPointPositionBuffer[skippedOffset + i].position = FOdysseyVector::MapPoint( conversionMatrix
-                                                                                                  , deformedPoint );
-        }
+    for( FInterpolatedObject* interpolatedObject : interpolatedObjectArray )
+    {
+        DeformPoints( interpolatedObject, iInbetween, iPositionType );
     }
 }
 
@@ -389,6 +394,8 @@ FInbetweenerGrid::GetGeometry( std::vector<::ULIS::FVec2D>& oGeometry
 
     for( FInbetweenerPoint& point : mPointBuffer )
     {
+        uint32 pointIndex = point.GetIndex();
+
         oGeometry.emplace_back( point.GetPosition( iPositionType ) );
     }
 }
@@ -822,6 +829,6 @@ FInbetweenerGrid::ComputeARAPInterpolation( FInbetweenerChart::Inbetween* iInbet
 }
 
 void
-FInbetweenerGrid::MapInterpolatedPaths( std::vector<FInterpolatedPath>& iPathBuffer )
+FInbetweenerGrid::MapInterpolatedObjects()
 {
 }

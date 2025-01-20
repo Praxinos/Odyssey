@@ -83,7 +83,7 @@ FInbetweenerPoint::SetNeeded( bool iIsNeeded )
     }
 }
 
-// this is only called for the leading breakdown
+// this is only relevant for the leading breakdown
 bool
 FInbetweenerPoint::IsNeeded()
 {
@@ -96,7 +96,7 @@ FInbetweenerPoint::SetTargetPosition( double iX, double iY, bool iInvalidate )
     FInbetweenerBreakdown* nextBreakdown = mGrid->GetBreakdown()->GetNextBreakdown();
     uint64 invalidationFlags = FOdysseyVectorTagInbetweener::INVALIDATE_CELLS
                              | FOdysseyVectorTagInbetweener::INVALIDATE_SPACING;
-    uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
+    uint32 pointIndex = GetIndex();
 
     mTargetPosition.x = iX;
     mTargetPosition.y = iY;
@@ -166,6 +166,12 @@ FInbetweenerPoint::GetQuadList()
     return mQuadList;
 }
 
+uint32
+FInbetweenerPoint::GetIndex()
+{
+    return this - &mGrid->GetPointBuffer()[0];
+}
+
 void
 FInbetweenerPoint::SetID( uint32 iID )
 {
@@ -173,7 +179,7 @@ FInbetweenerPoint::SetID( uint32 iID )
 
     if( firstBreakdown != mGrid->GetBreakdown() )
     {
-        uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
+        uint32 pointIndex = GetIndex();
 
         firstBreakdown->GetGrid()->GetPointBuffer()[pointIndex].SetID( iID );
 
@@ -190,7 +196,7 @@ FInbetweenerPoint::GetID()
 
     if( firstBreakdown != mGrid->GetBreakdown() )
     {
-        uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
+        uint32 pointIndex = GetIndex();
 
         return firstBreakdown->GetGrid()->GetPointBuffer()[pointIndex].GetID();
     }
@@ -221,7 +227,7 @@ FInbetweenerPoint::GetPosition( eInbetweenerPointPositionType iPositionType )
 
             if( prevBreakdown )
             {
-                uint32 pointIndex = this - &mGrid->GetPointBuffer()[0];
+                uint32 pointIndex = GetIndex();
 
                 return prevBreakdown->GetGrid()->GetPointBuffer()[pointIndex].GetPosition( eInbetweenerPointPositionType::TargetPosition );
             }
@@ -235,6 +241,15 @@ FInbetweenerPoint::GetPosition( eInbetweenerPointPositionType iPositionType )
         return mDeformPosition;
 
         case eInbetweenerPointPositionType::TargetPosition :
+        {
+            if( GetQuadCount() == 0 )
+            {
+                FInbetweenerBreakdown* firstBreakdown = mGrid->GetBreakdown()->GetInbetweenerTag()->GetBreakdownList().front();
+                uint32 pointIndex = GetIndex();
+
+                return firstBreakdown->GetGrid()->GetPointBuffer()[pointIndex].mSourcePosition;
+            }
+        }
         return mTargetPosition;
 
         default:

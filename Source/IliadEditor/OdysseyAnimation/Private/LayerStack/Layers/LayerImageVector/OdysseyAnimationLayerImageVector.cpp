@@ -457,6 +457,13 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
     FOdysseyVectorEngine::Notify( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
 }
 
+//static
+uint32
+UOdysseyAnimationLayerImageVector::GetInbetweeningRowHeight()
+{
+    return 20UL;
+}
+
 FOdysseyVectorSharedEnv*
 UOdysseyAnimationLayerImageVector::GetSharedEnv()
 {
@@ -570,7 +577,7 @@ UOdysseyAnimationLayerImageVector::GetRowHeight(FName iSubRowName) const
             if (tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass())
                 numTags++;
         }
-        return 20 * numTags;
+        return GetInbetweeningRowHeight() * numTags;
     }
 
     return Super::GetRowHeight(iSubRowName);
