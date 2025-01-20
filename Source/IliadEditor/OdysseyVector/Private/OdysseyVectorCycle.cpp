@@ -425,7 +425,7 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext
                 case eBucketColorMode::LinearGradient :
                 {
                     eBucketSpreadingPolicy spreadingPolicy = bucket->GetSpreadingPolicy();
-                    ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox( false );
+                    ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false, false ) : GetBBox( false );
                     double linearMinX = /*bbox.x0*/bbox.x;
                     double linearMinY = /*bbox.y0*/bbox.y;
                     double linearMaxX = /*bbox.x1*/bbox.x + bbox.w;
@@ -470,7 +470,7 @@ FOdysseyVectorCycle::Draw( BLContext* iBLContext
                 case eBucketColorMode::RadialGradient :
                 {
                     eBucketSpreadingPolicy spreadingPolicy = bucket->GetSpreadingPolicy();
-                    ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( false ) : GetBBox( false );
+                    ::ULIS::FRectD bbox = spreadingPolicy == eBucketSpreadingPolicy::Group ? mOwner->GetBBox( true, false ) : GetBBox( false );
                     ::ULIS::FVec2D& radialOffset = bucket->GetRadialOffset();
                     ::ULIS::FVec2D& bucketCoords = bucket->GetCoords();
                     BLGradient radial( BLRadialGradientValues( bucketCoords.x + radialOffset.x

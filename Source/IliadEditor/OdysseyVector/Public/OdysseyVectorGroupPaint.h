@@ -214,6 +214,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                         , const ::ULIS::FRectD& iMaskRect
                         , const uint8* iMaskPixelData );
         void PickErasedSections( std::vector<FOdysseyVectorSection*>& oErasedSectionArray );
+        virtual void UpdateBBox() override;
 
     protected:
         // static

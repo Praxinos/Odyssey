@@ -180,7 +180,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
          * @param iWorld Local or world coordinates.
          * @return the bounding box.
          */
-        ::ULIS::FRectD GetBBox( bool iWorld );
+        ::ULIS::FRectD GetBBox( bool iInDepth, bool iWorld );
 
         /**
          * @brief Get the list of children objects.
@@ -573,6 +573,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         virtual void InvalidateChild( FOdysseyVectorObject* iChild
                                     , uint64 iChildInvalidationFlags );
         void Recurse( void (FOdysseyVectorObject::*Func)() );
+        void MakeInDepthBBox();
+        virtual void UpdateBBox();
 
     protected:
         BLMatrix2D mLocalMatrix;
@@ -588,6 +590,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         bool bExpanded;
         bool bIsSystem;
         ::ULIS::FRectD mBBox;
+        ::ULIS::FRectD mInDepthBBox;
         FOdysseyVectorBucket mBackgroundBucket;
         FOdysseyVectorBucket mForegroundBucket;
         uint32 mID;

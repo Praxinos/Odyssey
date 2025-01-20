@@ -1124,15 +1124,11 @@ FOdysseyPainterEditor::GroupAndAddInbetweenerTag( FOdysseyPainterEditor* iEditor
 
     if( group )
     {
-        ::ULIS::FRectD groupWorldBBox = group->GetBBox( true );
         uint32 numQuadX = 24, numquadY = 24;
-        //FOdysseyVectorTagInbetweener::EvalSize( groupWorldBBox, numQuadX, numquadY );
         FOdysseyVectorTagInbetweener *inbetweenerTag = new FOdysseyVectorTagInbetweener( group
                                                                                        , numQuadX
                                                                                        , numquadY
                                                                                        , eInbetweenerGridType::ARAP );
-
-        //inbetweenerTag->SetInterpolationDirection( eInbetweenerInterpolationDirection::Backward );
 
         group->AddTag( inbetweenerTag );
     }
@@ -1821,9 +1817,7 @@ FOdysseyPainterEditor::AddInbetweenerTag( FOdysseyPainterEditor* iEditor
 
         if( tag == nullptr )
         {
-            ::ULIS::FRectD selectedObjectWorldBBox = selectedObject->GetBBox( true );
             uint32 numQuadX = 24, numquadY = 24;
-            //FOdysseyVectorTagInbetweener::EvalSize( selectedObjectWorldBBox, numQuadX, numquadY );
             FOdysseyVectorTagInbetweener* inbetweenerTag = new FOdysseyVectorTagInbetweener( selectedObject
                                                                                            , numQuadX
                                                                                            , numquadY

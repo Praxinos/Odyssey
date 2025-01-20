@@ -1474,6 +1474,7 @@ FOdysseyVectorEngine::PickPathPoints( FOdysseyVectorGroupPaint* iScene
 }
 
 // Execute callback on object tree
+// static
 uint64
 FOdysseyVectorEngine::Traverse( FOdysseyVectorObject* iObject
                               , uint64 iTraversalFlags
@@ -1615,7 +1616,7 @@ FOdysseyVectorEngine::GetPositionFromObjects( const std::list<FOdysseyVectorObje
     {
         for( FOdysseyVectorObject* obj : iObjectList )
         {
-            ::ULIS::FRectD bbox = obj->GetBBox( true );
+            ::ULIS::FRectD bbox = obj->GetBBox( false, true );
             BLPoint middle = BLPoint( bbox.x + bbox.w * 0.5f
                                     , bbox.y + bbox.h * 0.5f );
 

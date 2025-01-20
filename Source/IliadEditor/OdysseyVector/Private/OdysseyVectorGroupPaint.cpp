@@ -948,6 +948,33 @@ FOdysseyVectorGroupPaint::ApplyBucket( FOdysseyVectorBucket* iBucket )
 }
 
 void
+FOdysseyVectorGroupPaint::UpdateBBox()
+{
+    ::ULIS::FRectD worldBBox = ::ULIS::FRectD( 0, 0, 0, 0 );
+    ::ULIS::FVec2D p0, p1, p2, p3;
+
+    for( FOdysseyVectorPath* path : mPathList )
+    {
+        ::ULIS::FRectD pathBBox = path->GetBBox( false, true );
+
+        if( pathBBox.Area() )
+        {
+            worldBBox = worldBBox.Area() ? ( worldBBox | pathBBox ) : pathBBox;
+        }
+    }
+
+    p0 = FOdysseyVector::MapPoint( mInverseWorldMatrix, ::ULIS::FVec2D( worldBBox.x              , worldBBox.y               ) );
+    p1 = FOdysseyVector::MapPoint( mInverseWorldMatrix, ::ULIS::FVec2D( worldBBox.x + worldBBox.w, worldBBox.y               ) );
+    p2 = FOdysseyVector::MapPoint( mInverseWorldMatrix, ::ULIS::FVec2D( worldBBox.x + worldBBox.w, worldBBox.y + worldBBox.h ) );
+    p3 = FOdysseyVector::MapPoint( mInverseWorldMatrix, ::ULIS::FVec2D( worldBBox.x              , worldBBox.y + worldBBox.h ) );
+
+    mBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
+                                      , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                      , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                      , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
+}
+
+void
 FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 {
     FOdysseyVectorEngine* engine = GetEngine();
@@ -1041,7 +1068,7 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
     } // < execution time measurement : about monoT:200 microsecs over 18000, multiT:175
 
 
-    FOdysseyVectorGroup::UpdateShape( iUpdateFlags ); // updates BBox
+    FOdysseyVectorGroup::UpdateShape( iUpdateFlags );
 
     if( bPainted )
     {
@@ -1111,7 +1138,7 @@ FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext
                                    , uint64 iFlags )
 {
     FOdysseyVectorEngine* vectorEngine = GetEngine();
-    ::ULIS::FRectD worldBBox = GetBBox( true );
+    ::ULIS::FRectD worldBBox = GetBBox( false, true );
     ::ULIS::FVec2D worldBBoxMin;
     ::ULIS::FVec2D worldBBoxMax;
     ::ULIS::FVec2D invalidationAreaMin;

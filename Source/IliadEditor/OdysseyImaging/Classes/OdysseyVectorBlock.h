@@ -75,7 +75,7 @@ public:
      *
      * @return TSharedPtr<::ULIS::FBlock>
      */
-    TSharedPtr<::ULIS::FBlock> Render( uint64 iDrawingFlags );
+    TSharedPtr<::ULIS::FBlock> Render( uint64 iDrawingFlags, bool iRenderHUD );
 
     /**
      * @brief Sets the render flags passed to the vector engine

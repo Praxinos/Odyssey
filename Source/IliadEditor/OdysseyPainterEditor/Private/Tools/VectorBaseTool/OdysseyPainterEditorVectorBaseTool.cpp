@@ -1094,9 +1094,10 @@ void
 UOdysseyPainterEditorVectorBaseTool::MakeDemoBrush( FOdysseyVectorGroupPaint* iScene )
 {
    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetEngine()->GetSelectedObjectList();
-
+/*
    FOdysseyVectorBrush::MakeDemoBrush( selectedObjectList
                                      , FOdysseyVectorObject::GetBoundingBoxFromList( selectedObjectList ) );
+*/
 }
 
 void

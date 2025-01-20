@@ -9,6 +9,8 @@
 #include <ULIS>
 #include <blend2d.h>
 
+#include <InbetweenerTag/InterpolatedPoint.h>
+
 class FOdysseyVectorObject;
 class FOdysseyVectorTagInbetweener;
 
@@ -24,7 +26,7 @@ class FInterpolatedObject
     public:
         virtual ~FInterpolatedObject();
         FInterpolatedObject( FOdysseyVectorTagInbetweener* iInbetweenerTag
-                               , FOdysseyVectorObject* iObject );
+                           , FOdysseyVectorObject* iObject );
         FOdysseyVectorObject* GetOriginalObject();
         BLMatrix2D& GetRelativeMatrix();
         std::vector<FInterpolatedPoint>& GetInterpolatedPointBuffer();

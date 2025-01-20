@@ -200,7 +200,7 @@ CutPath( FOdysseyVectorPath* iPath
     ::ULIS::FRectD rect = ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax );
     ::ULIS::FRectD isxRect;
 
-    if( FOdysseyVector::IntersectRegions<double>( rect, iPath->GetBBox(false), &isxRect ) )
+    if( FOdysseyVector::IntersectRegions<double>( rect, iPath->GetBBox( false, false ), &isxRect ) )
     {
         iPath->Cut( ::ULIS::FVec2D( localP0.x, localP0.y )
                   , ::ULIS::FVec2D( localP1.x, localP1.y )

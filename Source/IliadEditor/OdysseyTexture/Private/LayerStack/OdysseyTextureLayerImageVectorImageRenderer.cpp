@@ -38,7 +38,7 @@ FOdysseyTextureLayerImageVectorImageRenderer::Init()
     if (mRenderHUD)
         mHUDBlock = mVectorBlock->GetHUDBlock();
 
-    mVectorBlock->Render(mDrawingFlags);
+    mVectorBlock->Render(mDrawingFlags, mRenderHUD);
 }
 
 bool

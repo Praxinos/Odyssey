@@ -253,28 +253,12 @@ FOdysseyVectorPath::UpdateBBox()
 
     for( FOdysseyVectorChain& chain : mChainArray )
     {
-        double rx1 = chain.mBBox.x
-             , ry1 = chain.mBBox.y
-             , rx2 = chain.mBBox.x + chain.mBBox.w
-             , ry2 = chain.mBBox.y + chain.mBBox.h;
-
-        hasBBox = true;
-
-        if ( rx1 < xmin ) xmin = rx1;
-        if ( ry1 < ymin ) ymin = ry1;
-        if ( rx2 > xmax ) xmax = rx2;
-        if ( ry2 > ymax ) ymax = ry2;
-    }
-
-    for( FOdysseyVectorVertex* vertex : mVertexList )
-    {
-        if( vertex->GetSegmentCount() )
+        if( chain.mBBox.Area() )
         {
-            ::ULIS::FRectD jointBBox = vertex->GetJoint().GetBBox( false );
-            double rx1 = jointBBox.x
-                 , ry1 = jointBBox.y
-                 , rx2 = jointBBox.x + jointBBox.w
-                 , ry2 = jointBBox.y + jointBBox.h;
+            double rx1 = chain.mBBox.x
+                 , ry1 = chain.mBBox.y
+                 , rx2 = chain.mBBox.x + chain.mBBox.w
+                 , ry2 = chain.mBBox.y + chain.mBBox.h;
 
             hasBBox = true;
 
@@ -285,7 +269,31 @@ FOdysseyVectorPath::UpdateBBox()
         }
     }
 
-    mBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
+    for( FOdysseyVectorVertex* vertex : mVertexList )
+    {
+        if( vertex->GetSegmentCount() )
+        {
+            ::ULIS::FRectD jointBBox = vertex->GetJoint().GetBBox( false );
+
+            if( jointBBox.Area() )
+            {
+                double rx1 = jointBBox.x
+                     , ry1 = jointBBox.y
+                     , rx2 = jointBBox.x + jointBBox.w
+                     , ry2 = jointBBox.y + jointBBox.h;
+
+                hasBBox = true;
+
+                if ( rx1 < xmin ) xmin = rx1;
+                if ( ry1 < ymin ) ymin = ry1;
+                if ( rx2 > xmax ) xmax = rx2;
+                if ( ry2 > ymax ) ymax = ry2;
+            }
+        }
+    }
+
+    mBBox = ( hasBBox ) ? ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax)
+                        : ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
 }
 
 bool
@@ -336,7 +344,7 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
 
         if( engine )
         {
-            engine->InvalidateRect( GetBBox( true ) );
+            engine->InvalidateRect( GetBBox( false, true ) );
         }
     }
 
@@ -389,7 +397,7 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
     }
 
     // TODO::Optimize this can be merged with the for loop above
-    UpdateBBox();
+    //UpdateBBox();
 
     // cache BL Path (for drawing structure for example)
     for ( FOdysseyVectorSegment* segment : mSegmentList )
@@ -1835,7 +1843,7 @@ FOdysseyVectorPath::DrawShape( BLContext* iBLContext
                              , uint64 iDrawingFlags )
 {
     FOdysseyVectorEngine* vectorEngine = GetEngine();
-    ::ULIS::FRectD worldBBox = GetBBox( true );
+    ::ULIS::FRectD worldBBox = GetBBox( false, true );
     ::ULIS::FVec2D worldBBoxMin;
     ::ULIS::FVec2D worldBBoxMax;
     ::ULIS::FVec2D invalidationAreaMin;

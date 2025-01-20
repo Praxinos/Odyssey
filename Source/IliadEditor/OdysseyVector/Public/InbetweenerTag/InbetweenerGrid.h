@@ -162,7 +162,6 @@ class ODYSSEYVECTOR_API FInbetweenerGrid
 
     // ARAP interpolation (do not confuse with ARAP deformation)
     protected:
-        uint32 mFlags;
         uint32 mInvalidationFlags;
         // center of mass of the lattice in its reference and target positions
         ::ULIS::FVec2D mSourceCenterOfMass;

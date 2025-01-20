@@ -2,6 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyVectorGroup.h"
+#include "OdysseyVectorEngine.h"
 
 FOdysseyVectorGroup::FOdysseyVectorGroup( const FString& iName )
     : FOdysseyVectorObject( iName )
@@ -57,48 +58,27 @@ FOdysseyVectorGroup::CopyShape( uint64 iCopyFlags )
 }
 
 void
+FOdysseyVectorGroup::UpdateBBox()
+{
+    mBBox = ::ULIS::FRectD( 0, 0, 0, 0 );
+
+/*
+    FOdysseyVectorEngine::Traverse( this
+                                  , 0
+                                  , [ this ] ( FOdysseyVectorObject* object, uint64 iTraverseFlags )
+    {
+        ::ULIS::FRectD bbox = object->GetBBox( true, true );
+
+        mBBox = mBBox.Area() ? ( mBBox | bbox ) : bbox;
+                                                                                   // Traverse until depth 1 only
+        return ( iTraverseFlags & FOdysseyVectorEngine::TRAVERSE_PARENT_HASFOCUS ) ? FOdysseyVectorEngine::TRAVERSE_OBJECT_IGNORE_CHILDREN
+                                                                                   : FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+    } );
+*/
+}
+
+void
 FOdysseyVectorGroup::UpdateShape( uint32 iUpdateFlags )
 {
-    ::ULIS::FRectD bbox;
-    int init = 0;
 
-    // Update the bounding box
-    if( ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
-     || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    )
-     || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_MATRIX   )
-     || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
-     || ( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          ) )
-    {
-        for( FOdysseyVectorObject *child : mChildrenList )
-        {
-            ::ULIS::FRectD childBBox = child->GetBBox( false );
-
-            if( childBBox.Area() )
-            {
-                BLMatrix2D childLocalMatrix = child->GetLocalMatrix();
-                BLPoint p0 = childLocalMatrix.mapPoint( childBBox.x              , childBBox.y               );
-                BLPoint p1 = childLocalMatrix.mapPoint( childBBox.x + childBBox.w, childBBox.y               );
-                BLPoint p2 = childLocalMatrix.mapPoint( childBBox.x + childBBox.w, childBBox.y + childBBox.h );
-                BLPoint p3 = childLocalMatrix.mapPoint( childBBox.x              , childBBox.y + childBBox.h );
-
-                childBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
-                                                      , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
-                                                      , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
-                                                      , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
-
-                bbox = ( init == 0 ) ? childBBox : bbox | childBBox;
-
-                init = 1;
-            }
-        }
-
-        if( init )
-        {
-            mBBox = bbox;
-        }
-        else
-        {
-            mBBox = ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
-        }
-    }
 }

@@ -78,7 +78,7 @@ FOdysseyPainterEditorVectorSelectionToolHUD::DrawSelectionSpace( BLContext* iBLC
     if( iScene->GetEngine()->GetSelectionSpace() )
     {
         FOdysseyVectorGroup* selectionSpace = iScene->GetEngine()->GetSelectionSpace();
-        ::ULIS::FRectD selectionSpaceBBox = selectionSpace->GetBBox( false );
+        ::ULIS::FRectD selectionSpaceBBox = selectionSpace->GetBBox( false, false );
         BLRgba32 strokeColor = { 0x80, 0x80, 0x80, 0xFF };
         BLMatrix2D& worldMatrix = selectionSpace->GetWorldMatrix();
 

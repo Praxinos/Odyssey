@@ -202,7 +202,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
     // proceed
     for( FOdysseyVectorGroupPaint* paintGroup : oPaintGroupArray )
     {
-        ::ULIS::FRectD paintGroupWorldBBox = paintGroup->GetBBox( true );
+        ::ULIS::FRectD paintGroupWorldBBox = paintGroup->GetBBox( false, true );
 
         if( FOdysseyVector::IntersectRegions<double>( paintGroupWorldBBox
                                                     , iErasureArea
@@ -280,7 +280,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
                   FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
-                  ::ULIS::FRectD pathWorldBBox = path->GetBBox( true );
+                  ::ULIS::FRectD pathWorldBBox = path->GetBBox( false, true );
 
                   if( FOdysseyVector::IntersectRegions<double>( pathWorldBBox
                                                               , iErasureArea

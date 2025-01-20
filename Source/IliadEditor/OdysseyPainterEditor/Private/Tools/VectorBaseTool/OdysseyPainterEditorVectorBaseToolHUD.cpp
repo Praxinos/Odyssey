@@ -183,7 +183,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVe
         FOdysseyVectorObject* selectedObject = selectedObjectList.size() ? selectedObjectList.front() : iScene;
 
         mSelectionBox.inited = true;
-        mSelectionBox.rect = selectedObject->GetBBox( false );
+        mSelectionBox.rect = selectedObject->GetBBox( true, false );
         mSelectionBox.worldMatrix = selectedObject->GetWorldMatrix();
         mSelectionBox.inverseWorldMatrix = selectedObject->GetInverseWorldMatrix();
     }
@@ -205,7 +205,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVe
           {
               if( vectorEngine->ObjectHasFocus( iScene, object, iTraversalFlags ) )
               {
-                  ::ULIS::FRectD selectedObjectBBox = object->GetBBox( true );
+                  ::ULIS::FRectD selectedObjectBBox = object->GetBBox( true, true );
 
                   mSelectionBox.rect = mSelectionBox.inited ? mSelectionBox.rect | selectedObjectBBox
                                                             : selectedObjectBBox;

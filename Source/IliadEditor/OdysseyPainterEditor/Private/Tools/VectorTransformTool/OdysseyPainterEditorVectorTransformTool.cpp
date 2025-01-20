@@ -146,7 +146,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorGrou
 
     if( redrawRegion.Area() )
     {
-        iEngine->InvalidateRect( redrawRegion );
+        //iEngine->InvalidateRect( redrawRegion );
 
         //iEngine->GetInvalidTileMap().Invalidate(redrawRegion);
         // redraw
@@ -1056,10 +1056,6 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
             }
         }
     }
-
-     // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
-
 
     deltaPositionCumul = FVector2D( 0.0f, 0.0f );
 }

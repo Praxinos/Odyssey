@@ -269,9 +269,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                            , FOdysseyVectorObject* iObject
                            , uint64 iTraversalFlags );
 
-        uint64 Traverse( FOdysseyVectorObject* iObject
-                       , uint64 iTraversalFlags
-                       , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
+        static uint64 Traverse( FOdysseyVectorObject* iObject
+                              , uint64 iTraversalFlags
+                              , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
         void InvalidateRect( const ::ULIS::FRectD& iRect );
         ::ULIS::FRectD GetInvalidatedRect( double iScreenWidth, double iScreenHeight );
 

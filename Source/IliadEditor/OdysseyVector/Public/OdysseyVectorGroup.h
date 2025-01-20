@@ -38,6 +38,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroup : public FOdysseyVectorObject
          * @param iName
          */
         void Init( FString& iName );
+        virtual void UpdateBBox();
 
     protected:
        /**

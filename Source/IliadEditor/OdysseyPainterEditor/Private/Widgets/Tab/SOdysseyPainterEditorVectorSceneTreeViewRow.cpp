@@ -134,13 +134,13 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonUp( const FGeometry & 
 
     reply = STableRow::OnMouseButtonUp( MyGeometry, MouseEvent );
 
-    // request redraw
-    mItem.Get()->GetVectorObject()->GetEngine()->Invalidate( 0 );
-
     FOdysseyVectorEngine::Notify( nullptr,
                                   FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                                 //| FOdysseyPainterEditor::UI_UPDATE_TIMELINE
                                 | FOdysseyPainterEditor::UI_UPDATE_HUD );
+
+    // request redraw
+    mItem.Get()->GetVectorObject()->GetEngine()->Invalidate( 0 );
 
     return reply;
 }

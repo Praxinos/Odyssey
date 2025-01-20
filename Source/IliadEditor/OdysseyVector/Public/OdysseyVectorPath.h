@@ -99,6 +99,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         virtual void Invalidate( uint64 iInvalidationFlags ) override;
         virtual void ExportParam( FOdysseyVectorObject* iDestinationObject
                                 , bool iInvalidate ) override;
+        virtual void UpdateBBox() override;
 
         /////////////////// Own Methods ////////////////
 
@@ -468,7 +469,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
 
     protected:
         void DrawJoint( BLContext* iBLContext, FOdysseyVectorVertex* iVertex, uint64 iFlags );
-        void UpdateBBox();
+
         void Fill();
         void ExploreChain( FOdysseyVectorChain* iChain );
         void UpdateChain( FOdysseyVectorChain* iChain );

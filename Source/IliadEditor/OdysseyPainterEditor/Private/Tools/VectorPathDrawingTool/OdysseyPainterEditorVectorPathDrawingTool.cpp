@@ -500,7 +500,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
         {
             // it's important to call invalidate here in any case beacuse the delegate
             //  will call FOdysseyVectorBlock::Invalidate() and it will retrieve the invalidated rectangle.
-            vectorEngine->Invalidate( 0 );
+            vectorEngine->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
         }
     }
 
@@ -637,15 +637,16 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
         }
     }
 
+    // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
+    iScene->GetSharedEnv()->Update( UpdatePaintGroups ? FOdysseyVectorObject::UPDATE_PAINTGROUPS : 0 );
+/*
     // in OnMouseDragVector() we are not guaranteed to get a viewport redraw from what I understand.
     // this means the Invalidation Rectangle is not resetted, so we force it.
     vectorEngine->InvalidateRect( ::ULIS::FRectD( 0
                                                 , 0
                                                 , iScene->GetEngine()->GetLayer()->GetWidth()
                                                 , iScene->GetEngine()->GetLayer()->GetHeight() ) );
-
-    // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
-    iScene->GetSharedEnv()->Update( UpdatePaintGroups ? FOdysseyVectorObject::UPDATE_PAINTGROUPS : 0 );
+*/
 
     oSignalFlags = notificationFlags;
 

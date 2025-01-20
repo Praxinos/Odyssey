@@ -217,6 +217,51 @@ FOdysseyVectorObject::UpdateShape( uint32 iUpdateFlags )
 }
 
 void
+FOdysseyVectorObject::UpdateBBox()
+{
+    mBBox = ::ULIS::FRectD( 0, 0, 0, 0 );
+}
+
+void
+FOdysseyVectorObject::MakeInDepthBBox()
+{
+    ::ULIS::FRectD childrenBBox = ::ULIS::FRectD( 0, 0, 0, 0 );
+    ::ULIS::FVec2D p0, p1, p2, p3;
+
+    mInDepthBBox = ::ULIS::FRectD( 0, 0, 0, 0 );
+
+    for( FOdysseyVectorObject* child : mChildrenList )
+    {
+        ::ULIS::FRectD bbox = child->GetBBox( true, true );
+
+        if( bbox.Area() )
+        {
+            childrenBBox = childrenBBox.Area() ? ( childrenBBox | bbox ) : bbox;
+        }
+    }
+
+    if( childrenBBox.Area() )
+    {
+        p0 = FOdysseyVector::MapPoint( mInverseWorldMatrix, ::ULIS::FVec2D( childrenBBox.x                 , childrenBBox.y                  ) );
+        p1 = FOdysseyVector::MapPoint( mInverseWorldMatrix, ::ULIS::FVec2D( childrenBBox.x + childrenBBox.w, childrenBBox.y                  ) );
+        p2 = FOdysseyVector::MapPoint( mInverseWorldMatrix, ::ULIS::FVec2D( childrenBBox.x + childrenBBox.w, childrenBBox.y + childrenBBox.h ) );
+        p3 = FOdysseyVector::MapPoint( mInverseWorldMatrix, ::ULIS::FVec2D( childrenBBox.x                 , childrenBBox.y + childrenBBox.h ) );
+
+        childrenBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
+                                                 , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
+                                                 , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
+                                                 , ::ULIS::FMath::Max4( p0.y, p1.y, p2.y, p3.y ) );
+
+        mInDepthBBox = childrenBBox;
+    }
+
+    if( mBBox.Area() )
+    {
+        mInDepthBBox = mInDepthBBox.Area() ?  mInDepthBBox | mBBox : mBBox;
+    }
+}
+
+void
 FOdysseyVectorObject::Update( uint32 iUpdateFlags )
 {
     FOdysseyVectorEngine* engine = GetEngine();
@@ -235,6 +280,20 @@ FOdysseyVectorObject::Update( uint32 iUpdateFlags )
                                                 return child->IsInvalidated() == false;
                                             } );
         UpdateShape( iUpdateFlags );
+
+        if( ( mInvalidationFlags & INVALIDATE_SHAPE       )
+         || ( mInvalidationFlags & INVALIDATE_CHILD_SHAPE ) )
+        {
+            UpdateBBox();
+        }
+
+        if( ( mInvalidationFlags & INVALIDATE_SHAPE        )
+         || ( mInvalidationFlags & INVALIDATE_MATRIX       )
+         || ( mInvalidationFlags & INVALIDATE_CHILD_SHAPE  )
+         || ( mInvalidationFlags & INVALIDATE_CHILD_MATRIX ) )
+        {
+            MakeInDepthBBox();
+        }
 
         // update tags
         for( FOdysseyVectorTag* tag : mTagList )
@@ -562,6 +621,7 @@ FOdysseyVectorObject::UpdateMatrix()
 }
 
 //static
+/*
 ::ULIS::FRectD
 FOdysseyVectorObject::GetBoundingBoxFromList( std::list<FOdysseyVectorObject*>& iObjectList )
 {
@@ -579,6 +639,7 @@ FOdysseyVectorObject::GetBoundingBoxFromList( std::list<FOdysseyVectorObject*>& 
 
     return bbox;
 }
+*/
 
 bool
 FOdysseyVectorObject::HasAncestor( FOdysseyVectorObject* iCandidateAncestor )
@@ -629,14 +690,16 @@ FOdysseyVectorObject::GetAncestorByClass( uint32 iClass  )
 }
 
 ::ULIS::FRectD
-FOdysseyVectorObject::GetBBox( bool iWorld )
+FOdysseyVectorObject::GetBBox( bool iInDepth, bool iWorld )
 {
+    ::ULIS::FRectD bbox = iInDepth ? mInDepthBBox : mBBox;
+
     if ( iWorld == true )
     {
-        BLPoint p0 = mWorldMatrix.mapPoint( mBBox.x          , mBBox.y           );
-        BLPoint p1 = mWorldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y           );
-        BLPoint p2 = mWorldMatrix.mapPoint( mBBox.x + mBBox.w, mBBox.y + mBBox.h );
-        BLPoint p3 = mWorldMatrix.mapPoint( mBBox.x          , mBBox.y + mBBox.h );
+        BLPoint p0 = mWorldMatrix.mapPoint( bbox.x         , bbox.y          );
+        BLPoint p1 = mWorldMatrix.mapPoint( bbox.x + bbox.w, bbox.y          );
+        BLPoint p2 = mWorldMatrix.mapPoint( bbox.x + bbox.w, bbox.y + bbox.h );
+        BLPoint p3 = mWorldMatrix.mapPoint( bbox.x         , bbox.y + bbox.h );
         ::ULIS::FRectD worldBBox = ::ULIS::FRectD::FromMinMax( ::ULIS::FMath::Min4( p0.x, p1.x, p2.x, p3.x )
                                                              , ::ULIS::FMath::Min4( p0.y, p1.y, p2.y, p3.y )
                                                              , ::ULIS::FMath::Max4( p0.x, p1.x, p2.x, p3.x )
@@ -645,7 +708,7 @@ FOdysseyVectorObject::GetBBox( bool iWorld )
         return worldBBox;
     }
 
-    return mBBox;
+    return bbox;
 }
 
 FOdysseyVectorObject*

@@ -20,7 +20,6 @@ FInbetweenerGrid::~FInbetweenerGrid()
 
 FInbetweenerGrid::FInbetweenerGrid( FInbetweenerBreakdown* iBreakdown )
     : mBreakdown( iBreakdown )
-    , mFlags( 0 )
     , mInvalidationFlags ( 0 )
 {
     //Make();
@@ -43,7 +42,7 @@ FInbetweenerGrid::GetBBox( eInbetweenerPointPositionType iPositionType )
     {
         ::ULIS::FVec2D pointPosition = point.GetPosition( iPositionType );
 
-        if( point.IsNeeded() )
+        if( point.GetQuadCount() )
         {
             if( pointPosition.x < xmin ) xmin = pointPosition.x;
             if( pointPosition.y < ymin ) ymin = pointPosition.y;
@@ -184,7 +183,7 @@ FInbetweenerGrid::Make( const std::vector<::ULIS::FVec2D>& iTargetPositionBuffer
     uint32 numQuadY = mBreakdown->GetInbetweenerTag()->GetGridNumQuadY();
     bool square = mBreakdown->GetInbetweenerTag()->IsSquare();
 
-    mGridBBox = mBreakdown->GetInbetweenerTag()->GetOwner()->GetBBox( false );
+    mGridBBox = mBreakdown->GetInbetweenerTag()->GetOwner()->GetBBox( true, false );
 
 
     //---- make the grid it square ---//

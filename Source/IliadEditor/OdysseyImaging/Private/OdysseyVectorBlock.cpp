@@ -138,7 +138,7 @@ FOdysseyVectorBlock::RenderHUD(::ULIS::FBlock& ioBlock)
 }
 
 TSharedPtr<::ULIS::FBlock>
-FOdysseyVectorBlock::Render( uint64 iDrawingFlags )
+FOdysseyVectorBlock::Render( uint64 iDrawingFlags, bool iRenderHUD )
 {
     TSharedPtr<::ULIS::FBlock> block = GetBlock( iDrawingFlags );
 
@@ -152,9 +152,12 @@ FOdysseyVectorBlock::Render( uint64 iDrawingFlags )
     {
         Render(*block, iDrawingFlags );
 
-        TSharedPtr<::ULIS::FBlock> hudBlock = mHUDBlock.Pin();
-        if ( hudBlock )
-            RenderHUD(*hudBlock);
+        if( iRenderHUD )
+        {
+            TSharedPtr<::ULIS::FBlock> hudBlock = mHUDBlock.Pin();
+            if ( hudBlock )
+                RenderHUD(*hudBlock);
+        }
 
         mNeedsRender = false;
         mBlockData->mNeedsCache = true;
