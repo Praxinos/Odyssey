@@ -5,7 +5,6 @@
 #include "OdysseyMediaRaster.h"
 #include "Tools/RasterDrawingTool/OdysseyBlendParametersOverrides.h"
 #include "Tools/RasterDrawingTool/OdysseyBrushOptionsOverrides.h"
-#include "Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolTopTab.h"
 #include "Toolkits/BaseToolkit.h"
 
 #include "FreehandShape/OdysseyFreehandShape.h"
@@ -31,6 +30,7 @@
 
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDSystem.h"
+#include "SOdysseySinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -428,10 +428,214 @@ UOdysseyPainterEditorRasterDrawingTool::ExtendMenu( TSharedRef<FExtender> iExten
     Super::ExtendMenu(iExtender);
 }
 
-TSharedRef<SWidget>
-UOdysseyPainterEditorRasterDrawingTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorRasterDrawingTool::AddBlendingModeToolbarMenuEntry(FMenuBuilder& iMenuBuilder, EOdysseyBlendingMode iBlendingMode)
 {
-    return SNew(SOdysseyPainterEditorRasterDrawingToolTopTab, this);
+    auto CanExecuteSetBlendingMode = [this]()
+    {
+        return !BlendParameters.bEraserMode;
+    };
+
+    auto ExecuteSetBlendingMode = [this, mode = iBlendingMode]()
+    {
+        FOdysseyBlendParameters value = BlendParameters;
+        value.BlendingMode = mode;
+        FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), value);
+    };
+
+    auto IsBlendingMode = [this, mode = iBlendingMode]() -> bool
+    {
+        return BlendParameters.BlendingMode == mode;
+    };
+
+    UEnum* blendingModeEnum = StaticEnum<EOdysseyBlendingMode>();
+
+    iMenuBuilder.AddMenuEntry(
+        blendingModeEnum->GetDisplayNameTextByValue((int64)iBlendingMode),
+        FText::GetEmpty(),
+        FSlateIcon(),
+        FUIAction( FExecuteAction::CreateLambda( ExecuteSetBlendingMode ),
+                    FCanExecuteAction::CreateLambda( CanExecuteSetBlendingMode ),
+                    FIsActionChecked::CreateLambda( IsBlendingMode ) ),
+        NAME_None,
+        EUserInterfaceActionType::Check
+    );
+}
+
+void
+UOdysseyPainterEditorRasterDrawingTool::ExtendToolbar( FToolBarBuilder& iBuilder )
+{
+    Super::ExtendToolbar(iBuilder);
+
+    iBuilder.BeginSection( NAME_None );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
+        [
+            SNew(SOdysseySinglePropertyView, BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Size), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
+        ],
+        NAME_None,
+        true,
+        HAlign_Fill,
+        FNewMenuDelegate::CreateLambda(
+            [this](FMenuBuilder& iMenuBuilder)
+            {
+                iMenuBuilder.AddWidget(
+                    SNew(SOdysseySinglePropertyView, BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Size), FSinglePropertyParams())
+                    .InnerPadding(10.f)
+                    .ValueWidthOverride(100.f),
+                    FText(),
+                    false,
+                    false,
+                    FText()
+                );
+            }
+        )
+    );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
+        [
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
+            .OnOverridePropertyHandle_Lambda(
+                [](TSharedPtr<IPropertyHandle> iHandle)
+                {
+                    return iHandle->GetChildHandle("Opacity");
+                }
+            )
+        ],
+        NAME_None,
+        true,
+        HAlign_Fill,
+        FNewMenuDelegate::CreateLambda(
+            [this](FMenuBuilder& iMenuBuilder)
+            {
+                iMenuBuilder.AddWidget(
+                    SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), FSinglePropertyParams())
+                    .InnerPadding(10.f)
+                    .ValueWidthOverride(100.f)
+                    .OnOverridePropertyHandle_Lambda(
+                        [](TSharedPtr<IPropertyHandle> iHandle)
+                        {
+                            return iHandle->GetChildHandle("Opacity");
+                        }
+                    ),
+                    FText(),
+                    false,
+                    false,
+                    FText()
+                );
+            }
+        )
+    );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
+        [
+            SNew(SOdysseySinglePropertyView, BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Flow), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
+        ],
+        NAME_None,
+        true,
+        HAlign_Fill,
+        FNewMenuDelegate::CreateLambda(
+            [this](FMenuBuilder& iMenuBuilder)
+            {
+                iMenuBuilder.AddWidget(
+                    SNew(SOdysseySinglePropertyView, BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Flow), FSinglePropertyParams())
+                    .InnerPadding(10.f)
+                    .ValueWidthOverride(100.f),
+                    FText(),
+                    false,
+                    false,
+                    FText()
+                );
+            }
+        )
+    );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
+        [
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
+            .OnOverridePropertyHandle_Lambda(
+                [](TSharedPtr<IPropertyHandle> iHandle)
+                {
+                    return iHandle->GetChildHandle("BlendingMode");
+                }
+            )
+        ],
+        NAME_None,
+        true,
+        HAlign_Fill,
+        FNewMenuDelegate::CreateLambda(
+            [this](FMenuBuilder& iMenuBuilder)
+            {
+                iMenuBuilder.AddSubMenu(
+                    LOCTEXT("raster-drawing-tool.toolbar.blending-mode.name", "Blending Mode"),
+                    FText::GetEmpty(),
+                    FNewMenuDelegate::CreateLambda(
+                        [this](FMenuBuilder& iMenuBuilder)
+                        {
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kNormal);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kTop);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kBack);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kBehind);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kDissolve);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kBayerDither8x8);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kDarken);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kMultiply);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kColorBurn);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kLinearBurn);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kDarkerColor);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kLighten);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kScreen);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kColorDodge);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kLinearDodge);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kLighterColor);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kOverlay);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kSoftLight);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kHardLight);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kVividLight);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kLinearLight);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kPinLight);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kHardMix);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kPhoenix);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kReflect);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kGlow);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kDifference);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kExclusion);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kAdd);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kSubstract);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kDivide);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kAverage);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kNegation);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kHue);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kSaturation);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kColor);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kLuminosity);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kPartialDerivative);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kWhiteOut);
+                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kAngleCorrected);
+                        }
+                    )
+                );
+            }
+        )
+    );
+
+    iBuilder.EndSection();
 }
 
 //--------------------------------------------------------------------------------------

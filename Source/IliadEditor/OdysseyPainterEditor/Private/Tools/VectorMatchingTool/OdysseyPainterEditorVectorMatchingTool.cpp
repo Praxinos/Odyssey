@@ -244,7 +244,7 @@ UOdysseyPainterEditorVectorMatchingTool::PropertyChangedVector( FOdysseyVectorGr
     return 0;
 }
 
-TSharedRef<SWidget>
+/* TSharedRef<SWidget>
 UOdysseyPainterEditorVectorMatchingTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -283,7 +283,7 @@ UOdysseyPainterEditorVectorMatchingTool::CreateTopTabWidget()
         [
             CreatePropertyWidget(showInbetweensOnlyHandle, showInbetweensPropertyView).ToSharedRef()
         ];
-}
+} */
 
 FText
 UOdysseyPainterEditorVectorMatchingTool::GetTooltip() const

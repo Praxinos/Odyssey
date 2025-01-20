@@ -284,11 +284,11 @@ UOdysseyPainterEditorRasterEraserTool::Commit()
         source->RecordCurrentFrameUndo();
 }
 
-TSharedRef<SWidget>
+/* TSharedRef<SWidget>
 UOdysseyPainterEditorRasterEraserTool::CreateTopTabWidget()
 {
     return SNew(SOdysseyPainterEditorRasterEraserToolTopTab, this);
-}
+} */
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Shape Callbacks

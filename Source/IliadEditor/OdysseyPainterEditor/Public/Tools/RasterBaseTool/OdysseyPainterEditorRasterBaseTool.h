@@ -25,7 +25,6 @@ public:
 
     static bool DoubleClicked();
 
-    virtual TSharedRef<SWidget> CreateTopTabWidget() override;
     TSharedPtr<SWidget> CreatePropertyWidget( TSharedPtr<class IPropertyHandle> iPropertyHandle
                                             , const TSharedPtr<ISinglePropertyView> iView );
     virtual bool OnKeyDown( const FKey& iKey ) override;

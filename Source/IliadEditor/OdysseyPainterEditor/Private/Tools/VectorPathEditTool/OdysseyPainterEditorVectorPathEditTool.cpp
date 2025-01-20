@@ -1105,7 +1105,7 @@ UOdysseyPainterEditorVectorPathEditTool::ExtendContextMenuObject( FOdysseyVector
 // the caller will call menu.EndSection()
 }
 
-TSharedRef<SWidget>
+/* TSharedRef<SWidget>
 UOdysseyPainterEditorVectorPathEditTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -1131,7 +1131,7 @@ UOdysseyPainterEditorVectorPathEditTool::CreateTopTabWidget()
         [
             CreatePropertyWidget(widenHandle, widenPropertyView).ToSharedRef()
         ];
-}
+} */
 
 FText
 UOdysseyPainterEditorVectorPathEditTool::GetTooltip() const

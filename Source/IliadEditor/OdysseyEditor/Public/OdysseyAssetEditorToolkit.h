@@ -33,6 +33,7 @@ protected:
     virtual FText GetToolkitName() const override;
     virtual FText GetToolkitToolTipText() const override;
     virtual FLinearColor GetWorldCentricTabColorScale() const override;
+    virtual void InitToolMenuContext(FToolMenuContext& MenuContext) override;
 
     /** Called to check to see if there's an asset capable of being reimported */
     virtual bool CanReimport() const;

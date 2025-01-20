@@ -8,7 +8,6 @@
 #include "ObjectEditorUtils.h"
 
 #include "OdysseyPainterEditorSource.h"
-#include "OdysseyPainterEditorTopTab.h"
 #include "OdysseyHUDSystem.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyMediaRaster.h"
@@ -73,6 +72,8 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
 #include "Toolkits/BaseToolkit.h"
+#include "Framework/Commands/GenericCommands.h"
+#include "PainterEditor/OdysseyPainterEditorToolMenuContext.h"
 
 #define LOCTEXT_NAMESPACE "PainonterEditor"
 
@@ -149,7 +150,6 @@ FOdysseyPainterEditor::Initialize()
     //Init the extensions
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
         extension->Initialize();
-
 }
 
 TSharedRef<FTabManager::FLayout>
@@ -171,28 +171,10 @@ FOdysseyPainterEditor::BindShortcuts(FBaseToolkit* iToolkit)
 
     GetGUI()->BindShortcuts(iToolkit);
 
-    mRasterDrawingTool->BindShortcuts(iToolkit);
-    mRasterEraserTool->BindShortcuts(iToolkit);
-    mRasterPaintBucketTool->BindShortcuts(iToolkit);
-    mVectorPathDrawingTool->BindShortcuts(iToolkit);
-    mVectorPathEditTool->BindShortcuts(iToolkit);
-    mRasterSelectionTool->BindShortcuts(iToolkit);
-    mRasterTransformTool->BindShortcuts(iToolkit);
-    mRasterPrimitiveDrawingTool->BindShortcuts(iToolkit);
-    mVectorPrimitiveDrawingTool->BindShortcuts(iToolkit);
-    mVectorSelectionTool->BindShortcuts(iToolkit);
-    mVectorScenePanTool->BindShortcuts(iToolkit);
-    mVectorEraserTool->BindShortcuts(iToolkit);
-    mVectorPathPushTool->BindShortcuts(iToolkit);
-    mVectorPathSmoothTool->BindShortcuts(iToolkit);
-    mVectorPathStitchTool->BindShortcuts(iToolkit);
-    mVectorPaintBucketTool->BindShortcuts(iToolkit);
-    mColorPickerTool->BindShortcuts(iToolkit);
-    mVectorGridTool->BindShortcuts(iToolkit);
-    mVectorTransformTool->BindShortcuts(iToolkit);
-    mVectorMatchingTool->BindShortcuts(iToolkit);
-    mVectorChartTool->BindShortcuts(iToolkit);
-    mVectorTrajectoryTool->BindShortcuts(iToolkit);
+    for (UOdysseyPainterEditorTool* tool : mTools)
+    {
+        tool->BindShortcuts(iToolkit);
+    }
 
     //---
 
@@ -211,30 +193,109 @@ FOdysseyPainterEditor::ExtendMenu( TSharedRef<FExtender> iExtender )
 {
     FOdysseyEditor::ExtendMenu(iExtender);
 
-    mRasterDrawingTool->ExtendMenu(iExtender);
-    mRasterEraserTool->ExtendMenu(iExtender);
-    mRasterTransformTool->ExtendMenu(iExtender);
-    mRasterPaintBucketTool->ExtendMenu(iExtender);
-    mVectorPathDrawingTool->ExtendMenu(iExtender);
-    mVectorPathEditTool->ExtendMenu(iExtender);
-    mRasterPrimitiveDrawingTool->ExtendMenu(iExtender);
-    mVectorPrimitiveDrawingTool->ExtendMenu(iExtender);
-    mVectorSelectionTool->ExtendMenu(iExtender);
-    mVectorScenePanTool->ExtendMenu(iExtender);
-    mVectorEraserTool->ExtendMenu(iExtender);
-    mVectorPathPushTool->ExtendMenu(iExtender);
-    mVectorPathSmoothTool->ExtendMenu(iExtender);
-    mVectorPathStitchTool->ExtendMenu(iExtender);
-    mVectorPaintBucketTool->ExtendMenu(iExtender);
-    mColorPickerTool->ExtendMenu(iExtender);
-    mVectorGridTool->ExtendMenu(iExtender);
-    mVectorTransformTool->ExtendMenu(iExtender);
-    mVectorMatchingTool->ExtendMenu(iExtender);
-    mVectorChartTool->ExtendMenu(iExtender);
-    mVectorTrajectoryTool->ExtendMenu(iExtender);
+    for (UOdysseyPainterEditorTool* tool : mTools)
+    {
+        tool->ExtendMenu(iExtender);
+    }
 
     for (TSharedPtr<FOdysseyPainterEditorExtension> extension : mExtensions)
         extension->ExtendMenu(iExtender);
+}
+
+void
+FOdysseyPainterEditor::InitToolMenuContext(FToolMenuContext& MenuContext)
+{
+    UOdysseyPainterEditorToolMenuContext* Context = NewObject<UOdysseyPainterEditorToolMenuContext>();
+    Context->PainterEditor = this;
+    MenuContext.AddObject(Context);
+}
+
+void
+FOdysseyPainterEditor::ExtendToolbar(UToolMenu* iToolbar)
+{
+    FOdysseyEditor::ExtendToolbar(iToolbar);
+
+    FToolMenuInsert InsertAfterAssetSection("Asset", EToolMenuInsertType::After);
+    iToolbar->AddDynamicSection(
+        "ToolParameters",
+        FNewToolBarDelegateLegacy::CreateLambda(
+            [](FToolBarBuilder& iBuilder, UToolMenu* iToolMenu)
+            {
+                const UOdysseyPainterEditorToolMenuContext* Context = iToolMenu->FindContext<UOdysseyPainterEditorToolMenuContext>();
+                if (!Context)
+                    return;
+
+                FOdysseyPainterEditor* painterEditor = Context->PainterEditor;
+                if (!painterEditor)
+                    return;
+
+                FButtonArgs undoButtonArgs;
+                undoButtonArgs.Command = FGenericCommands::Get().Undo;
+                undoButtonArgs.ToolTipOverride = LOCTEXT("top-tab.undo", "Undo the previous action.");
+                undoButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Undo32");
+                undoButtonArgs.ExtensionHook = "Undo";
+                undoButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::Button;
+                undoButtonArgs.Action = FUIAction(
+                    FExecuteAction::CreateLambda(
+                        []()
+                        {
+                            GEditor->UndoTransaction(true);
+                        }
+                    )
+                );
+
+                FButtonArgs redoButtonArgs;
+                redoButtonArgs.Command = FGenericCommands::Get().Redo;
+                redoButtonArgs.ToolTipOverride = LOCTEXT("top-tab.redo", "Redo the next action.");
+                redoButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Redo32");
+                redoButtonArgs.ExtensionHook = "Redo";
+                redoButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::Button;
+                redoButtonArgs.Action = FUIAction(
+                    FExecuteAction::CreateLambda(
+                        []()
+                        {
+                            GEditor->RedoTransaction();
+                        }
+                    )
+                );
+
+                FButtonArgs clearCanvasButtonArgs;
+                clearCanvasButtonArgs.Command = FGenericCommands::Get().Redo;
+                clearCanvasButtonArgs.ToolTipOverride = LOCTEXT("top-tab.clear", "Clear the whole canvas.");
+                clearCanvasButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Clear32");
+                clearCanvasButtonArgs.ExtensionHook = "ClearCanvas";
+                clearCanvasButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::Button;
+                clearCanvasButtonArgs.Action = FUIAction(
+                    FExecuteAction::CreateLambda(
+                        [painterEditor]()
+                        {
+                            TSharedPtr<FOdysseyPainterEditorSource> source = painterEditor->GetSource();
+                            if (!source)
+                                return;
+
+                            source->Clear();
+                        }
+                    )
+                );
+
+                iBuilder.BeginSection("UndoRedo");
+                    iBuilder.AddToolBarButton(undoButtonArgs);
+                    iBuilder.AddToolBarButton(redoButtonArgs);
+                iBuilder.EndSection();
+
+                iBuilder.BeginSection("ClearCanvas");
+                    iBuilder.AddToolBarButton(clearCanvasButtonArgs);
+                iBuilder.EndSection();
+
+                UOdysseyPainterEditorTool* currentTool = painterEditor->GetCurrentTool();
+                if (currentTool)
+                {
+                    currentTool->ExtendToolbar(iBuilder);
+                }
+            }
+        ),
+        InsertAfterAssetSection
+    );
 }
 
 void
@@ -265,87 +326,29 @@ FOdysseyPainterEditor::InitHUD()
 void
 FOdysseyPainterEditor::InitTools()
 {
-    mRasterDrawingTool = NewObject<UOdysseyPainterEditorRasterDrawingTool>();
-    mRasterEraserTool = NewObject<UOdysseyPainterEditorRasterEraserTool>();
-    mRasterSelectionTool = NewObject<UOdysseyPainterEditorRasterSelectionTool>();
-    mRasterTransformTool = NewObject<UOdysseyPainterEditorRasterTransformTool>();
-    mRasterPaintBucketTool = NewObject<UOdysseyPainterEditorRasterPaintBucketTool>();
-    mVectorPathDrawingTool = NewObject<UOdysseyPainterEditorVectorPathDrawingTool>();
-    mVectorPathEditTool = NewObject<UOdysseyPainterEditorVectorPathEditTool>();
-    mRasterPrimitiveDrawingTool = NewObject<UOdysseyPainterEditorRasterPrimitiveDrawingTool>();
-    mVectorPrimitiveDrawingTool = NewObject<UOdysseyPainterEditorVectorPrimitiveDrawingTool>();
-    mVectorSelectionTool = NewObject<UOdysseyPainterEditorVectorSelectionTool>();
-    mVectorScenePanTool = NewObject<UOdysseyPainterEditorVectorScenePanTool>();
-    mVectorEraserTool = NewObject<UOdysseyPainterEditorVectorEraserTool>();
-    mVectorPathPushTool = NewObject<UOdysseyPainterEditorVectorPathPushTool>();
-    mVectorPathSmoothTool = NewObject<UOdysseyPainterEditorVectorPathSmoothTool>();
-    mVectorPathStitchTool = NewObject<UOdysseyPainterEditorVectorPathStitchTool>();
-    mVectorPaintBucketTool = NewObject<UOdysseyPainterEditorVectorPaintBucketTool>();
-    mColorPickerTool = NewObject<UOdysseyPainterEditorColorPickerTool>();
-    mVectorGridTool = NewObject<UOdysseyPainterEditorVectorGridTool>();
-    mVectorTransformTool = NewObject<UOdysseyPainterEditorVectorTransformTool>();
-    mVectorMatchingTool = NewObject<UOdysseyPainterEditorVectorMatchingTool>();
-    mVectorChartTool = NewObject<UOdysseyPainterEditorVectorChartTool>();
-    mVectorTrajectoryTool = NewObject<UOdysseyPainterEditorVectorTrajectoryTool>();
-
-    mRasterDrawingTool->SetEditor(this);
-    mRasterEraserTool->SetEditor(this);
-    mRasterSelectionTool->SetEditor(this);
-    mRasterTransformTool->SetEditor(this);
-    mRasterPaintBucketTool->SetEditor(this);
-    mVectorPathDrawingTool->SetEditor(this);
-    mVectorPathEditTool->SetEditor(this);
-    mRasterPrimitiveDrawingTool->SetEditor(this);
-    mVectorPrimitiveDrawingTool->SetEditor(this);
-    mVectorSelectionTool->SetEditor(this);
-    mVectorScenePanTool->SetEditor(this);
-    mVectorEraserTool->SetEditor(this);
-    mVectorPathPushTool->SetEditor(this);
-    mVectorPathSmoothTool->SetEditor(this);
-    mVectorPathStitchTool->SetEditor(this);
-    mVectorPaintBucketTool->SetEditor(this);
-    mColorPickerTool->SetEditor(this);
-    mVectorGridTool->SetEditor(this);
-    mVectorTransformTool->SetEditor(this);
-    mVectorMatchingTool->SetEditor(this);
-    mVectorChartTool->SetEditor(this);
-    mVectorTrajectoryTool->SetEditor(this);
+    mRasterDrawingTool = AddTool<UOdysseyPainterEditorRasterDrawingTool>();
+    mRasterEraserTool = AddTool<UOdysseyPainterEditorRasterEraserTool>();
+    mRasterSelectionTool = AddTool<UOdysseyPainterEditorRasterSelectionTool>();
+    mRasterTransformTool = AddTool<UOdysseyPainterEditorRasterTransformTool>();
+    mRasterPaintBucketTool = AddTool<UOdysseyPainterEditorRasterPaintBucketTool>();
+    mVectorPathDrawingTool = AddTool<UOdysseyPainterEditorVectorPathDrawingTool>();
+    mVectorPathEditTool = AddTool<UOdysseyPainterEditorVectorPathEditTool>();
+    mRasterPrimitiveDrawingTool = AddTool<UOdysseyPainterEditorRasterPrimitiveDrawingTool>();
+    mVectorPrimitiveDrawingTool = AddTool<UOdysseyPainterEditorVectorPrimitiveDrawingTool>();
+    mVectorSelectionTool = AddTool<UOdysseyPainterEditorVectorSelectionTool>();
+    mVectorScenePanTool = AddTool<UOdysseyPainterEditorVectorScenePanTool>();
+    mVectorEraserTool = AddTool<UOdysseyPainterEditorVectorEraserTool>();
+    mVectorPathPushTool = AddTool<UOdysseyPainterEditorVectorPathPushTool>();
+    mVectorPathSmoothTool = AddTool<UOdysseyPainterEditorVectorPathSmoothTool>();
+    mVectorPathStitchTool = AddTool<UOdysseyPainterEditorVectorPathStitchTool>();
+    mVectorPaintBucketTool = AddTool<UOdysseyPainterEditorVectorPaintBucketTool>();
+    mColorPickerTool = AddTool<UOdysseyPainterEditorColorPickerTool>();
+    mVectorGridTool = AddTool<UOdysseyPainterEditorVectorGridTool>();
+    mVectorTransformTool = AddTool<UOdysseyPainterEditorVectorTransformTool>();
+    mVectorMatchingTool = AddTool<UOdysseyPainterEditorVectorMatchingTool>();
+    mVectorChartTool = AddTool<UOdysseyPainterEditorVectorChartTool>();
+    mVectorTrajectoryTool = AddTool<UOdysseyPainterEditorVectorTrajectoryTool>();
     mRasterDrawingTool->SetBrushContexts(&mBrushContexts);
-
-    //Default Tools a defined by their position in mTools
-    //example: mRasterDrawingTool appears before mRasterTransformTool
-    //so mRasterDrawingTool will be the default tool
-
-    //Default Raster Tool
-    mTools.Add(mRasterDrawingTool);
-
-    //Default Vector Tool
-    mTools.Add(mVectorPathDrawingTool);
-
-    //Other Raster Tools
-    mTools.Add(mRasterEraserTool);
-    mTools.Add(mRasterSelectionTool);
-    mTools.Add(mRasterTransformTool);
-    mTools.Add(mRasterPrimitiveDrawingTool);
-
-    //Other Vector Tools
-    mTools.Add(mRasterPaintBucketTool);
-    mTools.Add(mVectorPrimitiveDrawingTool);
-    mTools.Add(mVectorPathEditTool);
-    mTools.Add(mVectorSelectionTool);
-    mTools.Add(mVectorScenePanTool);
-    mTools.Add(mVectorEraserTool);
-    mTools.Add(mVectorPathPushTool);
-    mTools.Add(mVectorPathSmoothTool);
-    mTools.Add(mVectorPathStitchTool);
-    mTools.Add(mVectorPaintBucketTool);
-    mTools.Add(mVectorGridTool);
-    mTools.Add(mVectorTransformTool);
-    mTools.Add(mVectorMatchingTool);
-    mTools.Add(mVectorChartTool);
-    mTools.Add(mVectorTrajectoryTool);
-    //Generic Tools
-    mTools.Add(mColorPickerTool);
 }
 
 FSimpleMulticastDelegate&
@@ -569,6 +572,7 @@ FOdysseyPainterEditor::InactivateAllTools()
         mOnCurrentMainToolChanged.Broadcast();
     }
     mOnCurrentToolChanged.Broadcast();
+    OnRegenerateToolbarAndMenus().ExecuteIfBound();
 }
 
 void
@@ -581,6 +585,7 @@ FOdysseyPainterEditor::InactivateMainTool()
         mOnCurrentMainToolChanged.Broadcast();
     }
     mOnCurrentToolChanged.Broadcast();
+    OnRegenerateToolbarAndMenus().ExecuteIfBound();
 }
 
 void
@@ -606,6 +611,7 @@ FOdysseyPainterEditor::ActivateMainTool( UOdysseyPainterEditorTool* iTool )
     {
         mOnCurrentMainToolChanged.Broadcast();
         mOnCurrentToolChanged.Broadcast();
+        OnRegenerateToolbarAndMenus().ExecuteIfBound();
         return;
     }
 
@@ -627,6 +633,7 @@ FOdysseyPainterEditor::ActivateMainTool( UOdysseyPainterEditorTool* iTool )
 
     mOnCurrentMainToolChanged.Broadcast();
     mOnCurrentToolChanged.Broadcast();
+    OnRegenerateToolbarAndMenus().ExecuteIfBound();
 }
 
 void
@@ -644,6 +651,7 @@ FOdysseyPainterEditor::InactivateTemporaryTool()
         mCurrentMainTool->Activate();
     }
     mOnCurrentToolChanged.Broadcast();
+    OnRegenerateToolbarAndMenus().ExecuteIfBound();
 }
 
 void
@@ -668,6 +676,7 @@ FOdysseyPainterEditor::ActivateTemporaryTool( UOdysseyPainterEditorTool* iTool )
 
     mOnCurrentTemporaryToolChanged.Broadcast();
     mOnCurrentToolChanged.Broadcast();
+    OnRegenerateToolbarAndMenus().ExecuteIfBound();
 }
 
 void
@@ -2936,28 +2945,10 @@ void
 FOdysseyPainterEditor::AddReferencedObjects(FReferenceCollector& Collector)
 {
     FOdysseyEditor::AddReferencedObjects(Collector);
-    Collector.AddReferencedObject(mRasterDrawingTool);
-    Collector.AddReferencedObject(mRasterEraserTool);
-    Collector.AddReferencedObject(mRasterSelectionTool);
-    Collector.AddReferencedObject(mRasterTransformTool);
-    Collector.AddReferencedObject(mRasterPrimitiveDrawingTool);
-    Collector.AddReferencedObject(mRasterPaintBucketTool);
-    Collector.AddReferencedObject(mVectorPrimitiveDrawingTool);
-    Collector.AddReferencedObject(mVectorPathDrawingTool);
-    Collector.AddReferencedObject(mVectorPathEditTool);
-    Collector.AddReferencedObject(mVectorSelectionTool);
-    Collector.AddReferencedObject(mVectorScenePanTool);
-    Collector.AddReferencedObject(mVectorEraserTool);
-    Collector.AddReferencedObject(mVectorPathPushTool);
-    Collector.AddReferencedObject(mVectorPathSmoothTool);
-    Collector.AddReferencedObject(mVectorPathStitchTool);
-    Collector.AddReferencedObject(mVectorPaintBucketTool);
-    Collector.AddReferencedObject(mColorPickerTool);
-    Collector.AddReferencedObject(mVectorGridTool);
-    Collector.AddReferencedObject(mVectorTransformTool);
-    Collector.AddReferencedObject(mVectorMatchingTool);
-    Collector.AddReferencedObject(mVectorChartTool);
-    Collector.AddReferencedObject(mVectorTrajectoryTool);
+    for (UOdysseyPainterEditorTool* tool : mTools)
+    {
+        Collector.AddReferencedObject(tool);
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

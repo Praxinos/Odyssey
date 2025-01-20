@@ -25,9 +25,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UO
 
         virtual bool IsActivable() const override;
 
-        TSharedRef<SWidget> CreateTopTabWidget() override;
-
-    virtual FText GetTooltip() const override;
+        virtual FText GetTooltip() const override;
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides

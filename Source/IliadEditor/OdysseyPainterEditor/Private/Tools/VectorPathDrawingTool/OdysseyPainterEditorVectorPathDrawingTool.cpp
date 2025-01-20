@@ -688,7 +688,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::PropertyChangedVector( FOdysseyVecto
     return UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName );
 }
 
-TSharedRef<SWidget>
+/* TSharedRef<SWidget>
 UOdysseyPainterEditorVectorPathDrawingTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -716,7 +716,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::CreateTopTabWidget()
         [
             CreatePropertyWidget(fidelityHandle, fidelityPropertyView).ToSharedRef()
         ];
-}
+} */
 
 FText
 UOdysseyPainterEditorVectorPathDrawingTool::GetTooltip() const

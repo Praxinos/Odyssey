@@ -457,11 +457,11 @@ UOdysseyPainterEditorRasterPaintBucketTool::SetSourceProvider(TSharedPtr<FOdysse
     mSourceProvider = iProvider;
 }
 
-TSharedRef<SWidget>
+/* TSharedRef<SWidget>
 UOdysseyPainterEditorRasterPaintBucketTool::CreateTopTabWidget()
 {
     return SNew(SOdysseyPainterEditorRasterPaintBucketToolTopTab, this);
-}
+} */
 
 // Returns the BlendParameters
 FOdysseyBlendParameters

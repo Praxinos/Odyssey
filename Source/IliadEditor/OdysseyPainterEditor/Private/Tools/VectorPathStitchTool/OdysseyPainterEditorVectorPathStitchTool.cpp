@@ -254,7 +254,7 @@ UOdysseyPainterEditorVectorPathStitchTool::PropertyChangedVector( FOdysseyVector
     return UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName );
 }
 
-TSharedRef<SWidget>
+/* TSharedRef<SWidget>
 UOdysseyPainterEditorVectorPathStitchTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -274,7 +274,7 @@ UOdysseyPainterEditorVectorPathStitchTool::CreateTopTabWidget()
         [
             CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
         ];
-}
+} */
 
 FText
 UOdysseyPainterEditorVectorPathStitchTool::GetTooltip() const

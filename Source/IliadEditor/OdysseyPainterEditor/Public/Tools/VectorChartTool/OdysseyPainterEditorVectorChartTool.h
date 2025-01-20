@@ -44,8 +44,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
 
         UOdysseyPainterEditorVectorChartTool();
 
-        virtual TSharedRef<SWidget> CreateTopTabWidget() override;
-
         virtual FText GetTooltip() const override;
 
         FInbetweenerChart::Inbetween* GetHoveredInbetween();

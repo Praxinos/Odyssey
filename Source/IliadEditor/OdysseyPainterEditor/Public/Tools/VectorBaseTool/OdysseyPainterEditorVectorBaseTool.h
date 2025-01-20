@@ -43,7 +43,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         static bool DoubleClicked();
 
-        virtual TSharedRef<SWidget> CreateTopTabWidget() override;
         TSharedPtr<SWidget> CreatePropertyWidget( TSharedPtr<class IPropertyHandle> iPropertyHandle
                                                 , const TSharedPtr<ISinglePropertyView> iView );
 

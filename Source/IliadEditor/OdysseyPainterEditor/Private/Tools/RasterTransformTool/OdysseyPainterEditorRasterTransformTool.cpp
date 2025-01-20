@@ -55,10 +55,10 @@ UOdysseyPainterEditorRasterTransformTool::IsActivable() const
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
 }
 
-TSharedRef<SWidget> UOdysseyPainterEditorRasterTransformTool::CreateTopTabWidget()
+/* TSharedRef<SWidget> UOdysseyPainterEditorRasterTransformTool::CreateTopTabWidget()
 {
     return SNew(SOdysseyPainterEditorRasterTransformToolTopTab, this);
-}
+} */
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)
 {

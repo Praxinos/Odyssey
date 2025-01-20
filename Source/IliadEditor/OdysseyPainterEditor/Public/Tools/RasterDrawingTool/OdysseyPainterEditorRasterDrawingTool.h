@@ -67,7 +67,7 @@ public:
 
     virtual void BindShortcuts(class FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender) override;
-    virtual TSharedRef<SWidget> CreateTopTabWidget() override;
+    virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
 
     virtual EMouseCursor::Type GetMouseCursor() const override;
 
@@ -177,6 +177,8 @@ private:
 
     TArray<FOdysseyPoint> InterpolateTo(const FOdysseyPoint& iPoint);
     void ResetInterpolation();
+
+    void AddBlendingModeToolbarMenuEntry(FMenuBuilder& iMenuBuilder, EOdysseyBlendingMode iBlendingMode);
 
 public:
     friend class SOdysseyPainterEditorRasterDrawingToolBrushSelector;

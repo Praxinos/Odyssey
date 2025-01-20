@@ -450,7 +450,7 @@ UOdysseyPainterEditorVectorChartTool::PropertyChangedVector( FOdysseyVectorGroup
     return 0;
 }
 
-TSharedRef<SWidget>
+/* TSharedRef<SWidget>
 UOdysseyPainterEditorVectorChartTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -479,7 +479,7 @@ UOdysseyPainterEditorVectorChartTool::CreateTopTabWidget()
         [
             CreatePropertyWidget(ChartTypeHandle, ChartTypePropertyView).ToSharedRef()
         ];
-}
+} */
 
 FText
 UOdysseyPainterEditorVectorChartTool::GetTooltip() const

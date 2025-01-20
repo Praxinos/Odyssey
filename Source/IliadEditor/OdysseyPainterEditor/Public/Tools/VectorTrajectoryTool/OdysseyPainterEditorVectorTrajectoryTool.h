@@ -50,8 +50,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
         FInbetweenerQuad* GetHoveredQuad();
         void ResetHoveredQuad();
 
-        virtual TSharedRef<SWidget> CreateTopTabWidget() override;
-
         virtual FText GetTooltip() const override;
 
     protected:

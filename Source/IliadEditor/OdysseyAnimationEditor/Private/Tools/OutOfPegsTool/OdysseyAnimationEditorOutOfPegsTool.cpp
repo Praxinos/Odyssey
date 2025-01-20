@@ -85,7 +85,7 @@ UOdysseyAnimationEditorOutOfPegsTool::~UOdysseyAnimationEditorOutOfPegsTool()
 
 UOdysseyAnimationEditorOutOfPegsTool::UOdysseyAnimationEditorOutOfPegsTool()
 {
-
+    mIsTemporaryTool = true;
 }
 
 void
@@ -147,12 +147,6 @@ EMouseCursor::Type
 UOdysseyAnimationEditorOutOfPegsTool::GetMouseCursor() const
 {
     return UOdysseyPainterEditorTool::GetMouseCursor();
-}
-
-TSharedRef<SWidget>
-UOdysseyAnimationEditorOutOfPegsTool::CreateTopTabWidget()
-{
-    return SNullWidget::NullWidget;
 }
 
 void

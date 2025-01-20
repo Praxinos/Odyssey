@@ -663,7 +663,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::DeleteRoute()
     scene->GetEngine()->Invalidate( 0 );
 }
 
-TSharedRef<SWidget>
+/* TSharedRef<SWidget>
 UOdysseyPainterEditorVectorTrajectoryTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -672,12 +672,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::CreateTopTabWidget()
     TSharedPtr<class IPropertyHandle> showInbetweensHandle = showInbetweensPropertyView->GetPropertyHandle();
     const TSharedPtr<ISinglePropertyView> editionModePropertyView = propertyEditorModule.CreateSingleProperty(this, "EditionMode", defaultPropertyParams);
     TSharedPtr<class IPropertyHandle> editionModeHandle = editionModePropertyView->GetPropertyHandle();
-/*
-    const TSharedPtr<ISinglePropertyView> XDivPropertyView = propertyEditorModule.CreateSingleProperty(this, "DivisionsX", defaultPropertyParams);
-    const TSharedPtr<ISinglePropertyView> YDivPropertyView = propertyEditorModule.CreateSingleProperty(this, "DivisionsY", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> XDivHandle = XDivPropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> YDivHandle = YDivPropertyView->GetPropertyHandle();
-*/
+
     return SNew(SUniformWrapPanel)
         .SlotPadding(FVector2D(3.f, 0.f))
         .EvenRowDistribution(true)
@@ -694,7 +689,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::CreateTopTabWidget()
         [
             CreatePropertyWidget(editionModeHandle, editionModePropertyView).ToSharedRef()
         ];
-}
+} */
 
 FText
 UOdysseyPainterEditorVectorTrajectoryTool::GetTooltip() const

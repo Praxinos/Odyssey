@@ -320,7 +320,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseUpVector( FOdysseyVectorGroupPai
     return true;
 }
 
-TSharedRef<SWidget>
+/* TSharedRef<SWidget>
 UOdysseyPainterEditorVectorPathPushTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -340,7 +340,7 @@ UOdysseyPainterEditorVectorPathPushTool::CreateTopTabWidget()
         [
             CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
         ];
-}
+} */
 
 FText
 UOdysseyPainterEditorVectorPathPushTool::GetTooltip() const

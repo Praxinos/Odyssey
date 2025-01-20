@@ -35,7 +35,6 @@ public:
     UOdysseyPainterEditorRasterTransformTool();
 
     virtual bool IsActivable() const override;
-    virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;

@@ -13,7 +13,6 @@
 #include "OdysseyPainterEditorColorWheelTab.h"
 #include "OdysseyPainterEditorColorSelectorTab.h"
 #include "OdysseyPainterEditorMeshSelectorTab.h"
-#include "OdysseyPainterEditorTopTab.h"
 #include "OdysseyPainterEditorToolsTab.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditorVectorSceneTreeViewTab.h"
@@ -76,7 +75,6 @@ FOdysseyPainterEditorGUI::CreateTabs()
     TSharedRef<FOdysseyPainterEditorColorSelectorTab> colorSelectorTab = MakeShared<FOdysseyPainterEditorColorSelectorTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorColorSlidersTab> colorSlidersTab = MakeShared<FOdysseyPainterEditorColorSlidersTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorToolsTab> toolsTab = MakeShared<FOdysseyPainterEditorToolsTab>(mEditor);
-    TSharedRef<FOdysseyPainterEditorTopTab> topTab = MakeShared<FOdysseyPainterEditorTopTab>(mEditor);
     TSharedRef<FOdysseyPainterEditorVectorSceneTreeViewTab> vectorSceneTreeViewTab = MakeShared<FOdysseyPainterEditorVectorSceneTreeViewTab>(mEditor);
 
     //Used for the viewport drawing editor to know which tab to open by default
@@ -91,7 +89,6 @@ FOdysseyPainterEditorGUI::CreateTabs()
     mEditor->AddTab(colorWheelTab);
     mEditor->AddTab(colorSelectorTab);
     mEditor->AddTab(colorSlidersTab);
-    mEditor->AddTab(topTab);
     mEditor->AddTab(vectorSceneTreeViewTab);
 }
 
@@ -240,20 +237,10 @@ FOdysseyPainterEditorGUI::CreateCenterSection(FOdysseyEditorLayoutBuilder& iBuil
 {
     TSharedRef<FTabManager::FSplitter> centerSplitter = iBuilder.GetSplitter("CenterSplitter");
 
-    TSharedRef<FTabManager::FStack> topTabStack = iBuilder.CreateStack("TopTabStack");
-    topTabStack->SetHideTabWell(true);
-    topTabStack->SetSizeCoefficient(0.025f);
-    topTabStack->AddTab(FOdysseyPainterEditorTopTab::StaticId(), ETabState::OpenedTab);
-
     TSharedRef<FTabManager::FStack> viewportStack = iBuilder.CreateStack("viewportStack");
     viewportStack->SetHideTabWell(false);
     viewportStack->SetSizeCoefficient(0.975f);
     viewportStack->AddTab(FOdysseyPainterEditorViewportTab::StaticId(), ETabState::OpenedTab);
-
-    centerSplitter->Split
-    (
-        topTabStack
-    );
 
     centerSplitter->Split
     (

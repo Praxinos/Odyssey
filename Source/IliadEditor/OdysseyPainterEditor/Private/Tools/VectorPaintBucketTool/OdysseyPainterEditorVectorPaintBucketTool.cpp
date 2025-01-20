@@ -791,7 +791,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam( FOdysseyVectorBuck
     iDestinationBucket->SetCoords( destinationBucketCoords.x, destinationBucketCoords.y );
 }
 
-TSharedRef<SWidget>
+/* TSharedRef<SWidget>
 UOdysseyPainterEditorVectorPaintBucketTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -811,7 +811,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::CreateTopTabWidget()
         [
             CreatePropertyWidget(opacityHandle, opacityPropertyView).ToSharedRef()
         ];
-}
+}*/
 
 FText
 UOdysseyPainterEditorVectorPaintBucketTool::GetTooltip() const

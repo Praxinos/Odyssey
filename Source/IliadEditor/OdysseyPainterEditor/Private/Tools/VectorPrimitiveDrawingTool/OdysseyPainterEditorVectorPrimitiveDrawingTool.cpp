@@ -358,7 +358,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
     return true;
 }
 
-TSharedRef<SWidget>
+/* TSharedRef<SWidget>
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -384,7 +384,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::CreateTopTabWidget()
         [
             CreatePropertyWidget(primitiveTypeHandle, primitiveTypePropertyView).ToSharedRef()
         ];
-}
+} */
 
 FText
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetTooltip() const

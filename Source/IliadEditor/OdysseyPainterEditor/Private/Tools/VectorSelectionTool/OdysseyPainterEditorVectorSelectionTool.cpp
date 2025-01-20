@@ -471,7 +471,7 @@ UOdysseyPainterEditorVectorSelectionTool::GetSelectionShape()
     return SelectionShape;
 }
 
-TSharedRef<SWidget>
+/* TSharedRef<SWidget>
 UOdysseyPainterEditorVectorSelectionTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -491,7 +491,7 @@ UOdysseyPainterEditorVectorSelectionTool::CreateTopTabWidget()
                     [
                         CreatePropertyWidget(selectionShapeHandle, selectionShapePropertyView).ToSharedRef()
                     ];
-}
+} */
 
 FText
 UOdysseyPainterEditorVectorSelectionTool::GetTooltip() const

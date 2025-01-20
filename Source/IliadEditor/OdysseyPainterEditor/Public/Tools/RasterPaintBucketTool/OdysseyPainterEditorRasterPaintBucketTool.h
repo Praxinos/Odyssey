@@ -57,7 +57,6 @@ public:
     virtual EMouseCursor::Type GetMouseCursor() const override;
 
     virtual void Commit() override;
-    virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
     virtual FText GetTooltip() const override;
 

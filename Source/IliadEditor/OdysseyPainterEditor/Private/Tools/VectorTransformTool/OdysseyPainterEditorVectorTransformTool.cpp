@@ -1169,7 +1169,7 @@ UOdysseyPainterEditorVectorTransformTool::IsModeInbetween() const
                                                                  : EVisibility::Collapsed;
 }
 
-TSharedRef<SWidget>
+/* TSharedRef<SWidget>
 UOdysseyPainterEditorVectorTransformTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -1198,7 +1198,7 @@ UOdysseyPainterEditorVectorTransformTool::CreateTopTabWidget()
         [
             showInbetweensWidget
         ];
-}
+} */
 
 FText
 UOdysseyPainterEditorVectorTransformTool::GetTooltip() const

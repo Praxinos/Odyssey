@@ -49,6 +49,7 @@ public:
 
     FOnAddEditedObject& OnAddEditedObjectDelegate();
     FOnRemoveEditedObject& OnRemoveEditedObjectDelegate();
+    FSimpleDelegate& OnRegenerateToolbarAndMenus();
 
     FOdysseyEditorShortcuts& GetShortcuts();
 
@@ -61,10 +62,12 @@ public:
 public:
     // Overridable Methods
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender );
+    virtual void ExtendToolbar(UToolMenu* iToolbar);
     virtual void BindShortcuts(FBaseToolkit* iToolkit);
     virtual bool OnCloseRequested();
     virtual void OnClose();
     virtual TArray<UObject*> GetAdditionalEditedObjects();
+    virtual void InitToolMenuContext(FToolMenuContext& MenuContext);
 
 protected:
     // FGCObject implementation
@@ -85,6 +88,7 @@ public:
 
     FOnAddEditedObject mOnAddEditedObject;
     FOnRemoveEditedObject mOnRemoveEditedObject;
+    FSimpleDelegate mOnRegenerateToolbarAndMenus;
 
     FOdysseyEditorShortcuts mShortcuts;
 };

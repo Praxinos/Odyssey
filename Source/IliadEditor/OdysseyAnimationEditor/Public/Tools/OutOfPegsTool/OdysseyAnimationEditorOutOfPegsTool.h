@@ -39,7 +39,6 @@ public:
     virtual void OnMouseDrag(const FOdysseyPoint& iPointInTexture) override;
 
     virtual EMouseCursor::Type GetMouseCursor() const override;
-    virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
 public:
     virtual void PostEditChangeProperty( FPropertyChangedEvent& iEvent) override;

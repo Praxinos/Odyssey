@@ -236,7 +236,7 @@ UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorGroupP
     return UOdysseyPainterEditorVectorSelectionTool::PropertyChangedVector( iScene, iPropertyName );
 }
 
-TSharedRef<SWidget>
+/* TSharedRef<SWidget>
 UOdysseyPainterEditorVectorGridTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -262,7 +262,7 @@ UOdysseyPainterEditorVectorGridTool::CreateTopTabWidget()
         [
             CreatePropertyWidget(YDivHandle, YDivPropertyView).ToSharedRef()
         ];
-}
+} */
 
 FText
 UOdysseyPainterEditorVectorGridTool::GetTooltip() const

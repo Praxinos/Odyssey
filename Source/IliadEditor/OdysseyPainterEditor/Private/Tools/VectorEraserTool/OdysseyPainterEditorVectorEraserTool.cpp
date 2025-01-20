@@ -424,7 +424,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
     return true;
 }
 
-TSharedRef<SWidget>
+/* TSharedRef<SWidget>
 UOdysseyPainterEditorVectorEraserTool::CreateTopTabWidget()
 {
     FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -450,7 +450,7 @@ UOdysseyPainterEditorVectorEraserTool::CreateTopTabWidget()
         [
             CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
         ];
-}
+} */
 
 FText
 UOdysseyPainterEditorVectorEraserTool::GetTooltip() const

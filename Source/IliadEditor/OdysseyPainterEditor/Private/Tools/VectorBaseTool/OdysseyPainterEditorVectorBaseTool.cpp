@@ -935,7 +935,7 @@ UOdysseyPainterEditorVectorBaseTool::CreatePropertyWidget( TSharedPtr<class IPro
     ];
 }
 
-TSharedRef<SWidget>
+/* TSharedRef<SWidget>
 UOdysseyPainterEditorVectorBaseTool::CreateTopTabWidget()
 {
     return SNew(SUniformWrapPanel)
@@ -946,7 +946,7 @@ UOdysseyPainterEditorVectorBaseTool::CreateTopTabWidget()
            [
                SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
            ];
-}
+} */
 
 void
 UOdysseyPainterEditorVectorBaseTool::PopupContextMenu()

@@ -54,8 +54,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 
         FOdysseyVectorPathTracer& GetPathTracer();
 
-        virtual TSharedRef<SWidget> CreateTopTabWidget() override;
-
         virtual FText GetTooltip() const override;
         virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
