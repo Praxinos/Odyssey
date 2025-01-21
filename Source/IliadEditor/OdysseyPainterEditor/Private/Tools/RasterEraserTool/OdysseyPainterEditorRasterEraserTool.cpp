@@ -7,7 +7,6 @@
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDSystem.h"
-#include "Tools/RasterEraserTool/Widgets/SOdysseyPainterEditorRasterEraserToolTopTab.h"
 
 #include "FreehandShape/OdysseyFreehandShape.h"
 #include "LineShape/OdysseyLineShape.h"
@@ -284,12 +283,6 @@ UOdysseyPainterEditorRasterEraserTool::Commit()
     if (source)
         source->RecordCurrentFrameUndo();
 }
-
-/* TSharedRef<SWidget>
-UOdysseyPainterEditorRasterEraserTool::CreateTopTabWidget()
-{
-    return SNew(SOdysseyPainterEditorRasterEraserToolTopTab, this);
-} */
 
 void
 UOdysseyPainterEditorRasterEraserTool::ExtendToolbar( FToolBarBuilder& iBuilder )

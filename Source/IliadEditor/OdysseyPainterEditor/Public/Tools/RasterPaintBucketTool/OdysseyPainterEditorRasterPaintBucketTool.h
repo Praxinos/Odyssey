@@ -60,6 +60,8 @@ public:
 
     virtual FText GetTooltip() const override;
 
+    virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
+
 public:
     void SetSourceProvider(TSharedPtr<FOdysseyPainterEditorRasterPaintBucketToolSourceProvider> iProvider);
     FOdysseyBlendParameters GetBlendParameters() const;
