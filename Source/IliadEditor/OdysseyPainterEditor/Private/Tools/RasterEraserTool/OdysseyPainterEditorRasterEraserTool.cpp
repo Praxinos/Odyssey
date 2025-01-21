@@ -298,24 +298,7 @@ UOdysseyPainterEditorRasterEraserTool::ExtendToolbar( FToolBarBuilder& iBuilder 
             SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Size), FSinglePropertyParams())
             .InnerPadding(10.f)
             .ValueWidthOverride(100.f)
-        ],
-        NAME_None,
-        true,
-        HAlign_Fill,
-        FNewMenuDelegate::CreateLambda(
-            [this](FMenuBuilder& iMenuBuilder)
-            {
-                iMenuBuilder.AddWidget(
-                    SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Size), FSinglePropertyParams())
-                    .InnerPadding(10.f)
-                    .ValueWidthOverride(100.f),
-                    FText(),
-                    false,
-                    false,
-                    FText()
-                );
-            }
-        )
+        ]
     );
 
     iBuilder.AddWidget(
@@ -325,24 +308,7 @@ UOdysseyPainterEditorRasterEraserTool::ExtendToolbar( FToolBarBuilder& iBuilder 
             SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Opacity), FSinglePropertyParams())
             .InnerPadding(10.f)
             .ValueWidthOverride(100.f)
-        ],
-        NAME_None,
-        true,
-        HAlign_Fill,
-        FNewMenuDelegate::CreateLambda(
-            [this](FMenuBuilder& iMenuBuilder)
-            {
-                iMenuBuilder.AddWidget(
-                    SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Opacity), FSinglePropertyParams())
-                    .InnerPadding(10.f)
-                    .ValueWidthOverride(100.f),
-                    FText(),
-                    false,
-                    false,
-                    FText()
-                );
-            }
-        )
+        ]
     );
 
     iBuilder.AddWidget(
@@ -352,24 +318,7 @@ UOdysseyPainterEditorRasterEraserTool::ExtendToolbar( FToolBarBuilder& iBuilder 
             SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Flow), FSinglePropertyParams())
             .InnerPadding(10.f)
             .ValueWidthOverride(100.f)
-        ],
-        NAME_None,
-        true,
-        HAlign_Fill,
-        FNewMenuDelegate::CreateLambda(
-            [this](FMenuBuilder& iMenuBuilder)
-            {
-                iMenuBuilder.AddWidget(
-                    SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterEraserTool, Flow), FSinglePropertyParams())
-                    .InnerPadding(10.f)
-                    .ValueWidthOverride(100.f),
-                    FText(),
-                    false,
-                    false,
-                    FText()
-                );
-            }
-        )
+        ]
     );
 
     iBuilder.EndSection();

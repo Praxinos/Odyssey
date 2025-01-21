@@ -477,30 +477,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::ExtendToolbar( FToolBarBuilder& iBui
                     return iHandle->GetChildHandle("Opacity");
                 }
             )
-        ],
-        NAME_None,
-        true,
-        HAlign_Fill,
-        FNewMenuDelegate::CreateLambda(
-            [this](FMenuBuilder& iMenuBuilder)
-            {
-                iMenuBuilder.AddWidget(
-                    SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPaintBucketTool, BlendParameters), FSinglePropertyParams())
-                    .InnerPadding(10.f)
-                    .ValueWidthOverride(100.f)
-                    .OnOverridePropertyHandle_Lambda(
-                        [](TSharedPtr<IPropertyHandle> iHandle)
-                        {
-                            return iHandle->GetChildHandle("Opacity");
-                        }
-                    ),
-                    FText(),
-                    false,
-                    false,
-                    FText()
-                );
-            }
-        )
+        ]
     );
 
     iBuilder.AddWidget(
@@ -516,56 +493,7 @@ UOdysseyPainterEditorRasterPaintBucketTool::ExtendToolbar( FToolBarBuilder& iBui
                     return iHandle->GetChildHandle("BlendingMode");
                 }
             )
-        ],
-        NAME_None,
-        true,
-        HAlign_Fill,
-        FNewMenuDelegate::CreateLambda(
-            [this](FMenuBuilder& iMenuBuilder)
-            {
-                iMenuBuilder.AddSubMenu(
-                    LOCTEXT("raster-drawing-tool.toolbar.blending-mode.name", "Blending Mode"),
-                    FText::GetEmpty(),
-                    FNewMenuDelegate::CreateLambda(
-                        [this](FMenuBuilder& iMenuBuilder)
-                        {
-                            for (EOdysseyBlendingMode blendingMode : TEnumRange<EOdysseyBlendingMode>())
-                            {
-                                auto CanExecuteSetBlendingMode = [this]()
-                                {
-                                    return !BlendParameters.bEraserMode;
-                                };
-
-                                auto ExecuteSetBlendingMode = [this, mode = blendingMode]()
-                                {
-                                    FOdysseyBlendParameters value = BlendParameters;
-                                    value.BlendingMode = mode;
-                                    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPaintBucketTool, BlendParameters), value);
-                                };
-
-                                auto IsBlendingMode = [this, mode = blendingMode]() -> bool
-                                {
-                                    return BlendParameters.BlendingMode == mode;
-                                };
-
-                                UEnum* blendingModeEnum = StaticEnum<EOdysseyBlendingMode>();
-
-                                iMenuBuilder.AddMenuEntry(
-                                    blendingModeEnum->GetDisplayNameTextByValue((int64)blendingMode),
-                                    FText::GetEmpty(),
-                                    FSlateIcon(),
-                                    FUIAction( FExecuteAction::CreateLambda( ExecuteSetBlendingMode ),
-                                                FCanExecuteAction::CreateLambda( CanExecuteSetBlendingMode ),
-                                                FIsActionChecked::CreateLambda( IsBlendingMode ) ),
-                                    NAME_None,
-                                    EUserInterfaceActionType::Check
-                                );
-                            }
-                        }
-                    )
-                );
-            }
-        )
+        ]
     );
 
     iBuilder.EndSection();
