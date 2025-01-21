@@ -40,6 +40,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorSelectionTool : public
 
         virtual FText GetTooltip() const override;
 
+        virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
+
         std::vector<::ULIS::FVec2D>& GetPointArray();
 
         EOdysseyVectorSelectionShape GetSelectionShape();

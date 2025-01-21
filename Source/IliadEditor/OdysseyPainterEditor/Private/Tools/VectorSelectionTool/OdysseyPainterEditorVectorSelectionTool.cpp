@@ -11,6 +11,7 @@
 #include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
+#include "SOdysseySinglePropertyView.h"
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorSharedEnv.h"
@@ -471,27 +472,25 @@ UOdysseyPainterEditorVectorSelectionTool::GetSelectionShape()
     return SelectionShape;
 }
 
-/* TSharedRef<SWidget>
-UOdysseyPainterEditorVectorSelectionTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorVectorSelectionTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FSinglePropertyParams defaultPropertyParams;
-    const TSharedPtr<ISinglePropertyView> selectionShapePropertyView = propertyEditorModule.CreateSingleProperty(this, "SelectionShape", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> selectionShapeHandle = selectionShapePropertyView->GetPropertyHandle();
+    Super::ExtendToolbar(iBuilder);
 
-    return SNew(SUniformWrapPanel)
-                    .SlotPadding(FVector2D(3.f, 0.f))
-                    .EvenRowDistribution(true)
-                    .HAlign(HAlign_Left)
-                    + SUniformWrapPanel::Slot()
-                    [
-                        SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
-                    ]
-                    + SUniformWrapPanel::Slot()
-                    [
-                        CreatePropertyWidget(selectionShapeHandle, selectionShapePropertyView).ToSharedRef()
-                    ];
-} */
+    iBuilder.BeginSection( NAME_None );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
+        [
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorSelectionTool, SelectionShape ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
+        ]
+    );
+
+    iBuilder.EndSection();
+}
 
 FText
 UOdysseyPainterEditorVectorSelectionTool::GetTooltip() const
