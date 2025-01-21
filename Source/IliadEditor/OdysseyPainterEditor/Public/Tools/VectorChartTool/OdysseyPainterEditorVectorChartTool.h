@@ -48,6 +48,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
 
         FInbetweenerChart::Inbetween* GetHoveredInbetween();
 
+        virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
+
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;
