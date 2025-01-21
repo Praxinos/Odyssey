@@ -48,8 +48,7 @@ FOdysseyAnimationEditorExtension::Initialize()
                               | FOdysseyVectorHUD::HUD_MODE_VERTEX_ALLOWED
                               | FOdysseyVectorHUD::HUD_MODE_INBETWEEN_ALLOWED );
 
-    mOutOfPegsTool = NewObject<UOdysseyAnimationEditorOutOfPegsTool>();
-    mOutOfPegsTool->SetEditor(GetEditor());
+    mOutOfPegsTool = GetEditor()->AddTool<UOdysseyAnimationEditorOutOfPegsTool>();
 
     FSlateApplication::Get().RegisterInputPreProcessor(mFlipSystem);
 }
@@ -220,28 +219,4 @@ UOdysseyAnimationEditorOutOfPegsTool*
 FOdysseyAnimationEditorExtension::GetOutOfPegsTool() const
 {
     return mOutOfPegsTool;
-}
-
-
-void
-FOdysseyAnimationEditorExtension::AddReferencedObjects(FReferenceCollector& Collector)
-{
-    FOdysseyPainterEditorExtension::AddReferencedObjects(Collector);
-    Collector.AddReferencedObject(mOutOfPegsTool);
-}
-
-void
-FOdysseyAnimationEditorExtension::ExtendMenu( TSharedRef<FExtender> iExtender )
-{
-    FOdysseyPainterEditorExtension::ExtendMenu(iExtender);
-
-    mOutOfPegsTool->ExtendMenu(iExtender);
-}
-
-void
-FOdysseyAnimationEditorExtension::BindShortcuts(FBaseToolkit* iToolkit)
-{
-    FOdysseyPainterEditorExtension::BindShortcuts(iToolkit);
-
-    mOutOfPegsTool->BindShortcuts(iToolkit);
 }

@@ -21,6 +21,7 @@
 #include "Undo/OdysseyVectorUndoBucketAdd.h"
 #include "Undo/OdysseyVectorUndoBucketRemove.h"
 #include "Undo/OdysseyVectorUndoBucketParam.h"
+#include "SOdysseySinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -791,26 +792,24 @@ UOdysseyPainterEditorVectorPaintBucketTool::PasteBucketParam( FOdysseyVectorBuck
     iDestinationBucket->SetCoords( destinationBucketCoords.x, destinationBucketCoords.y );
 }
 
-TSharedRef<SWidget>
-UOdysseyPainterEditorVectorPaintBucketTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorVectorPaintBucketTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FSinglePropertyParams defaultPropertyParams;
-    const TSharedPtr<ISinglePropertyView> opacityPropertyView = propertyEditorModule.CreateSingleProperty(this, "Opacity", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> opacityHandle = opacityPropertyView->GetPropertyHandle();
+    Super::ExtendToolbar(iBuilder);
 
-    return SNew(SUniformWrapPanel)
-        .SlotPadding(FVector2D(3.f, 0.f))
-        .EvenRowDistribution(true)
-        .HAlign(HAlign_Left)
-        + SUniformWrapPanel::Slot()
+    iBuilder.BeginSection( NAME_None );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPaintBucketTool, Opacity ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
         ]
-        + SUniformWrapPanel::Slot()
-        [
-            CreatePropertyWidget(opacityHandle, opacityPropertyView).ToSharedRef()
-        ];
+    );
+
+    iBuilder.EndSection();
 }
 
 FText

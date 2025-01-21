@@ -9,6 +9,7 @@
 #include "OdysseyVector.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "Undo/OdysseyVectorUndoErase.h"
+#include "SOdysseySinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -424,32 +425,33 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
     return true;
 }
 
-TSharedRef<SWidget>
-UOdysseyPainterEditorVectorEraserTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorVectorEraserTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FSinglePropertyParams defaultPropertyParams;
-    const TSharedPtr<ISinglePropertyView> splitPathPropertyView = propertyEditorModule.CreateSingleProperty(this, "SplitPath", defaultPropertyParams);
-    const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "Radius", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> splitPathHandle = splitPathPropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
+    Super::ExtendToolbar(iBuilder);
 
-    return SNew(SUniformWrapPanel)
-        .SlotPadding(FVector2D(3.f, 0.f))
-        .EvenRowDistribution(true)
-        .HAlign(HAlign_Left)
-        + SUniformWrapPanel::Slot()
+    iBuilder.BeginSection( NAME_None );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorEraserTool, Radius ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
         ]
-        + SUniformWrapPanel::Slot()
+    );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            CreatePropertyWidget(splitPathHandle, splitPathPropertyView).ToSharedRef()
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorEraserTool, SplitPath ), FSinglePropertyParams())
+            .InnerPadding(10.f)
         ]
-        + SUniformWrapPanel::Slot()
-        [
-            CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
-        ];
+    );
+
+    iBuilder.EndSection();
 }
 
 FText

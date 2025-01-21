@@ -17,6 +17,7 @@
 #include "Models/OdysseyPainterEditorCommands.h"
 #include "Toolkits/BaseToolkit.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "SOdysseySinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -689,34 +690,34 @@ UOdysseyPainterEditorVectorPathDrawingTool::PropertyChangedVector( FOdysseyVecto
     return UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName );
 }
 
-TSharedRef<SWidget>
-UOdysseyPainterEditorVectorPathDrawingTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorVectorPathDrawingTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FSinglePropertyParams defaultPropertyParams;
-    const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "Radius", defaultPropertyParams);
-//    const TSharedPtr<ISinglePropertyView> opacityPropertyView = propertyEditorModule.CreateSingleProperty(this, "Opacity", defaultPropertyParams);
-    const TSharedPtr<ISinglePropertyView> fidelityPropertyView = propertyEditorModule.CreateSingleProperty(this, "TracingFidelity", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
-//    TSharedPtr<class IPropertyHandle> opacityHandle = opacityPropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> fidelityHandle = fidelityPropertyView->GetPropertyHandle();
+    Super::ExtendToolbar(iBuilder);
 
-    return SNew(SUniformWrapPanel)
-        .SlotPadding(FVector2D(3.f, 0.f))
-        .EvenRowDistribution(true)
-        .HAlign(HAlign_Left)
-        + SUniformWrapPanel::Slot()
+    iBuilder.BeginSection( NAME_None );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPathDrawingTool, Radius ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
         ]
-        + SUniformWrapPanel::Slot()
+    );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPathDrawingTool, TracingFidelity ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
         ]
-        + SUniformWrapPanel::Slot()
-        [
-            CreatePropertyWidget(fidelityHandle, fidelityPropertyView).ToSharedRef()
-        ];
+    );
+
+    iBuilder.EndSection();
 }
 
 FText

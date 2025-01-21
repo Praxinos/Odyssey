@@ -40,6 +40,12 @@ FOdysseyEditor::OnRemoveEditedObjectDelegate()
     return mOnRemoveEditedObject;
 }
 
+FSimpleDelegate&
+FOdysseyEditor::OnRegenerateToolbarAndMenus()
+{
+    return mOnRegenerateToolbarAndMenus;
+}
+
 TArray<UObject*>
 FOdysseyEditor::GetAdditionalEditedObjects()
 {
@@ -91,6 +97,24 @@ FOdysseyEditor::ExtendMenu( TSharedRef<FExtender> iExtender )
     {
         tab->ExtendMenu( iExtender );
     }
+}
+
+void
+FOdysseyEditor::ExtendLevelEditorToolbar( UToolMenu* iToolbar )
+{
+
+}
+
+void
+FOdysseyEditor::ExtendAssetEditorToolbar(UToolMenu* iToolbar)
+{
+
+}
+
+void
+FOdysseyEditor::InitToolMenuContext(FToolMenuContext& MenuContext)
+{
+
 }
 
 void

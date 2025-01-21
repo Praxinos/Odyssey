@@ -8,12 +8,12 @@
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPainterEditor.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
-#include "Widgets/SOdysseyPainterEditorRasterPaintBucketToolTopTab.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "OdysseyPainterEditorViewportTab.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyHUDElement.h"
 #include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
+#include "SOdysseySinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -457,10 +457,46 @@ UOdysseyPainterEditorRasterPaintBucketTool::SetSourceProvider(TSharedPtr<FOdysse
     mSourceProvider = iProvider;
 }
 
-TSharedRef<SWidget>
-UOdysseyPainterEditorRasterPaintBucketTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorRasterPaintBucketTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
-    return SNew(SOdysseyPainterEditorRasterPaintBucketToolTopTab, this);
+    Super::ExtendToolbar(iBuilder);
+
+    iBuilder.BeginSection( NAME_None );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
+        [
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPaintBucketTool, BlendParameters), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
+            .OnOverridePropertyHandle_Lambda(
+                [](TSharedPtr<IPropertyHandle> iHandle)
+                {
+                    return iHandle->GetChildHandle("Opacity");
+                }
+            )
+        ]
+    );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
+        [
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterPaintBucketTool, BlendParameters), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
+            .OnOverridePropertyHandle_Lambda(
+                [](TSharedPtr<IPropertyHandle> iHandle)
+                {
+                    return iHandle->GetChildHandle("BlendingMode");
+                }
+            )
+        ]
+    );
+
+    iBuilder.EndSection();
 }
 
 // Returns the BlendParameters

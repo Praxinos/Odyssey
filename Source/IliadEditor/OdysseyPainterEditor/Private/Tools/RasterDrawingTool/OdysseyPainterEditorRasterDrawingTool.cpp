@@ -5,7 +5,6 @@
 #include "OdysseyMediaRaster.h"
 #include "Tools/RasterDrawingTool/OdysseyBlendParametersOverrides.h"
 #include "Tools/RasterDrawingTool/OdysseyBrushOptionsOverrides.h"
-#include "Tools/RasterDrawingTool/Widgets/SOdysseyPainterEditorRasterDrawingToolTopTab.h"
 #include "Toolkits/BaseToolkit.h"
 
 #include "FreehandShape/OdysseyFreehandShape.h"
@@ -31,6 +30,7 @@
 
 #include "OdysseyHUDElement.h"
 #include "OdysseyHUDSystem.h"
+#include "SOdysseySinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -428,10 +428,98 @@ UOdysseyPainterEditorRasterDrawingTool::ExtendMenu( TSharedRef<FExtender> iExten
     Super::ExtendMenu(iExtender);
 }
 
-TSharedRef<SWidget>
-UOdysseyPainterEditorRasterDrawingTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorRasterDrawingTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
-    return SNew(SOdysseyPainterEditorRasterDrawingToolTopTab, this);
+    Super::ExtendToolbar(iBuilder);
+
+    iBuilder.BeginSection( NAME_None );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
+        [
+            SNew(SOdysseySinglePropertyView, BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Size), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
+        ]
+    );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
+        [
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
+            .OnOverridePropertyHandle_Lambda(
+                [](TSharedPtr<IPropertyHandle> iHandle)
+                {
+                    return iHandle->GetChildHandle("Opacity");
+                }
+            )
+        ]
+    );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
+        [
+            SNew(SOdysseySinglePropertyView, BrushOptions, GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Flow), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
+        ]
+    );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
+        [
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
+            .OnOverridePropertyHandle_Lambda(
+                [](TSharedPtr<IPropertyHandle> iHandle)
+                {
+                    return iHandle->GetChildHandle("BlendingMode");
+                }
+            )
+        ]
+    );
+
+    FButtonArgs eraserModeButtonArgs;
+    eraserModeButtonArgs.ExtensionHook = "EraserMode";
+    eraserModeButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Eraser32");
+    eraserModeButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::ToggleButton;
+    eraserModeButtonArgs.Action = FUIAction(
+        FExecuteAction::CreateLambda(
+            [this]()
+            {
+                FOdysseyBlendParameters value = BlendParameters;
+                value.bEraserMode = !value.bEraserMode;
+                FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), value);
+            }
+        ),
+        FCanExecuteAction::CreateLambda([](){ return true;}),
+        FIsActionChecked::CreateLambda([this](){ return BlendParameters.bEraserMode;})
+    );
+    eraserModeButtonArgs.CustomMenuDelegate = FNewMenuDelegate::CreateLambda(
+        [this, eraserModeButtonArgs](FMenuBuilder& iMenuBuilder)
+        {
+            iMenuBuilder.AddMenuEntry(
+                LOCTEXT("raster-drawing-tool.toolbar.eraser-mode.name", "Eraser Mode"),
+                LOCTEXT("raster-drawing-tool.toolbar.eraser-mode.tooltip", "Toggles the tool Eraser Mode"),
+                FSlateIcon(),
+                eraserModeButtonArgs.Action,
+                NAME_None,
+                EUserInterfaceActionType::ToggleButton
+            );
+        }
+    );
+
+    iBuilder.AddToolBarButton(eraserModeButtonArgs);
+
+    iBuilder.EndSection();
 }
 
 //--------------------------------------------------------------------------------------

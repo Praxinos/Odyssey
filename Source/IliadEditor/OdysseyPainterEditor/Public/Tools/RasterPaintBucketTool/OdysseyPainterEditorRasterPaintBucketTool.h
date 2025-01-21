@@ -57,9 +57,10 @@ public:
     virtual EMouseCursor::Type GetMouseCursor() const override;
 
     virtual void Commit() override;
-    virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
     virtual FText GetTooltip() const override;
+
+    virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
 
 public:
     void SetSourceProvider(TSharedPtr<FOdysseyPainterEditorRasterPaintBucketToolSourceProvider> iProvider);

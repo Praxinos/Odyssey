@@ -8,6 +8,7 @@
 #include "ISinglePropertyView.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "Misc/MessageDialog.h"
+#include "SOdysseySinglePropertyView.h"
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorSharedEnv.h"
@@ -663,37 +664,33 @@ UOdysseyPainterEditorVectorTrajectoryTool::DeleteRoute()
     scene->GetEngine()->Invalidate( 0 );
 }
 
-TSharedRef<SWidget>
-UOdysseyPainterEditorVectorTrajectoryTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorVectorTrajectoryTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FSinglePropertyParams defaultPropertyParams;
-    const TSharedPtr<ISinglePropertyView> showInbetweensPropertyView = propertyEditorModule.CreateSingleProperty(this, "ShowInbetweens", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> showInbetweensHandle = showInbetweensPropertyView->GetPropertyHandle();
-    const TSharedPtr<ISinglePropertyView> editionModePropertyView = propertyEditorModule.CreateSingleProperty(this, "EditionMode", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> editionModeHandle = editionModePropertyView->GetPropertyHandle();
-/*
-    const TSharedPtr<ISinglePropertyView> XDivPropertyView = propertyEditorModule.CreateSingleProperty(this, "DivisionsX", defaultPropertyParams);
-    const TSharedPtr<ISinglePropertyView> YDivPropertyView = propertyEditorModule.CreateSingleProperty(this, "DivisionsY", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> XDivHandle = XDivPropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> YDivHandle = YDivPropertyView->GetPropertyHandle();
-*/
-    return SNew(SUniformWrapPanel)
-        .SlotPadding(FVector2D(3.f, 0.f))
-        .EvenRowDistribution(true)
-        .HAlign(HAlign_Left)
-        + SUniformWrapPanel::Slot()
+    Super::ExtendToolbar(iBuilder);
+
+    iBuilder.BeginSection( NAME_None );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTrajectoryTool, ShowInbetweens ), FSinglePropertyParams())
+            .InnerPadding(10.f)
         ]
-        + SUniformWrapPanel::Slot()
+    );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            CreatePropertyWidget(showInbetweensHandle, showInbetweensPropertyView).ToSharedRef()
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTrajectoryTool, EditionMode ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
         ]
-        + SUniformWrapPanel::Slot()
-        [
-            CreatePropertyWidget(editionModeHandle, editionModePropertyView).ToSharedRef()
-        ];
+    );
+
+    iBuilder.EndSection();
 }
 
 FText

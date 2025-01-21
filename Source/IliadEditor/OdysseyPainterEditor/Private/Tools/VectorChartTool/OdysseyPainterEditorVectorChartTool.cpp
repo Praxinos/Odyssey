@@ -12,6 +12,7 @@
 #include "OdysseyVectorRoot.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "SOdysseySinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -450,35 +451,34 @@ UOdysseyPainterEditorVectorChartTool::PropertyChangedVector( FOdysseyVectorGroup
     return 0;
 }
 
-TSharedRef<SWidget>
-UOdysseyPainterEditorVectorChartTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorVectorChartTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FSinglePropertyParams defaultPropertyParams;
+    Super::ExtendToolbar(iBuilder);
 
-    const TSharedPtr<ISinglePropertyView> EditionModeView = propertyEditorModule.CreateSingleProperty( this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorChartTool, EditionMode ), defaultPropertyParams);
-    const TSharedPtr<ISinglePropertyView> ChartTypePropertyView = propertyEditorModule.CreateSingleProperty(this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorChartTool, ChartType ), defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> EditionModeHandle = EditionModeView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> ChartTypeHandle = ChartTypePropertyView->GetPropertyHandle();
+    iBuilder.BeginSection( NAME_None );
 
-    return SNew(SUniformWrapPanel)
-        .SlotPadding(FVector2D(3.f, 0.f))
-        .EvenRowDistribution(true)
-        .HAlign(HAlign_Left)
-        + SUniformWrapPanel::Slot()
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorChartTool, EditionMode ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
         ]
+    );
 
-        + SUniformWrapPanel::Slot()
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            CreatePropertyWidget(EditionModeHandle, EditionModeView).ToSharedRef()
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorChartTool, ChartType ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
         ]
+    );
 
-        + SUniformWrapPanel::Slot()
-        [
-            CreatePropertyWidget(ChartTypeHandle, ChartTypePropertyView).ToSharedRef()
-        ];
+    iBuilder.EndSection();
 }
 
 FText

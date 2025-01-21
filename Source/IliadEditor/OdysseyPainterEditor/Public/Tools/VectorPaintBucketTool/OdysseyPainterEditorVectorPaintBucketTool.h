@@ -58,9 +58,10 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
                                       , const FKey& iKey, uint64& oSignalFlags ) override;
         //virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
         //                                  , const FName& iPropertyName ) override;
-        virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
         virtual FText GetTooltip() const override;
+
+        virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
 
     protected:
         virtual void ExtendContextMenu( FMenuBuilder& menu );

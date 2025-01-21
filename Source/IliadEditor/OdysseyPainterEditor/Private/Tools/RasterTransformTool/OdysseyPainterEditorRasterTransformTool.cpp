@@ -2,7 +2,6 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
-#include "Widgets/SOdysseyPainterEditorRasterTransformToolTopTab.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyHUDSystem.h"
@@ -55,9 +54,45 @@ UOdysseyPainterEditorRasterTransformTool::IsActivable() const
     return GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaRaster>();
 }
 
-TSharedRef<SWidget> UOdysseyPainterEditorRasterTransformTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorRasterTransformTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
-    return SNew(SOdysseyPainterEditorRasterTransformToolTopTab, this);
+    Super::ExtendToolbar(iBuilder);
+
+    iBuilder.BeginSection( NAME_None );
+
+    FButtonArgs flipHorizontalButtonArgs;
+    flipHorizontalButtonArgs.ToolTipOverride = LOCTEXT("raster-transform-tool.top-tab.flip_horizontal", "Flip the selection horizontally");
+    flipHorizontalButtonArgs.ExtensionHook = "FlipHorizontal";
+    flipHorizontalButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.FlipHorizontal32");
+    flipHorizontalButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::Button;
+    flipHorizontalButtonArgs.Action = FUIAction(
+        FExecuteAction::CreateLambda(
+            [this]()
+            {
+                FlipHorizontal();
+            }
+        )
+    );
+
+    FButtonArgs flipVerticalButtonArgs;
+    flipVerticalButtonArgs.ToolTipOverride = LOCTEXT("raster-transform-tool.top-tab.flip_vertical", "Flip the selection vertically");
+    flipVerticalButtonArgs.ExtensionHook = "FlipVertical";
+    flipVerticalButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.FlipVertical32");
+    flipVerticalButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::Button;
+    flipVerticalButtonArgs.Action = FUIAction(
+        FExecuteAction::CreateLambda(
+            [this]()
+            {
+                FlipVertical();
+            }
+        )
+    );
+
+    iBuilder.AddToolBarButton(flipHorizontalButtonArgs);
+    iBuilder.AddToolBarButton(flipVerticalButtonArgs);
+
+    iBuilder.EndSection();
 }
 
 bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey)

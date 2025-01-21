@@ -41,9 +41,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
 
         virtual bool IsActivable() const override;
 
-        TSharedRef<SWidget> CreateTopTabWidget() override;
-
         virtual FText GetTooltip() const override;
+
+        virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides

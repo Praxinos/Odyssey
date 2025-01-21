@@ -48,6 +48,7 @@ public class OdysseyPainterEditor : ModuleRules
                 "ToolMenus",
                 "EditorStyle",
                 "EditorFramework",
+                "EditorWidgets",
                 "PropertyEditor",
                 "Projects",
                 "OdysseyCore",

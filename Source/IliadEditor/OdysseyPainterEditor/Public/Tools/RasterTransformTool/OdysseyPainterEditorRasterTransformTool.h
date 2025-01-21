@@ -35,7 +35,6 @@ public:
     UOdysseyPainterEditorRasterTransformTool();
 
     virtual bool IsActivable() const override;
-    virtual TSharedRef<SWidget> CreateTopTabWidget() override;
 
     virtual bool OnMouseDown(const FOdysseyPoint& iPointInTexture, const FKey& iKey) override;
     virtual void OnMouseHover(const FOdysseyPoint& iPointInTexture) override;
@@ -52,6 +51,8 @@ public:
     virtual EMouseCursor::Type GetMouseCursor() const override;
 
     virtual FText GetTooltip() const override;
+
+    virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
 
     bool FlipHorizontal();
     bool FlipVertical();

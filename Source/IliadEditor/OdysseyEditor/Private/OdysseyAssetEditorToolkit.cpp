@@ -31,7 +31,15 @@ FOdysseyAssetEditorToolkit::Initialize(UObject* iEditedObject, TSharedPtr<FOdyss
     TArray<UObject*> editedObjects = mEditor->GetAdditionalEditedObjects(); //Editor can add some side edited objects
     editedObjects.Add(iEditedObject);
 
-    FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->CreateLayout(), true, false, editedObjects);
+    const FName MenuName = GetToolMenuToolbarName();
+    //Must be called before InitAssetEditor
+    if (!UToolMenus::Get()->IsMenuRegistered(MenuName))
+    {
+        UToolMenu* ToolBar = UToolMenus::Get()->RegisterMenu(MenuName, "AssetEditor.DefaultToolBar", EMultiBoxType::ToolBar);
+        mEditor->ExtendAssetEditorToolbar( ToolBar );
+    }
+
+    FAssetEditorToolkit::InitAssetEditor( EToolkitMode::Standalone, NULL, mAppIdentifier, mEditor->CreateLayout(), true, true, editedObjects);
 
     //Add Odyssey Specific section to the main menu to add entries at the right place easier
     UToolMenu* fileMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".File")));
@@ -52,14 +60,20 @@ FOdysseyAssetEditorToolkit::Initialize(UObject* iEditedObject, TSharedPtr<FOdyss
     UToolMenu* helpMenu = UToolMenus::Get()->ExtendMenu(*(GetToolMenuName().ToString() + FString(".Help")));
     helpMenu->FindOrAddSection("OdysseyHelp");
 
-    TSharedRef<FExtender> extender = MakeShared<FExtender>();
-    mEditor->ExtendMenu( extender );
-    AddMenuExtender(extender);
+    TSharedRef<FExtender> menuExtender = MakeShared<FExtender>();
+    mEditor->ExtendMenu( menuExtender );
+    AddMenuExtender(menuExtender);
 
     mEditor->BindShortcuts( this );
     mEditor->OnAddEditedObjectDelegate().AddRaw(this, &FOdysseyAssetEditorToolkit::OnAddEditedObject);
     mEditor->OnRemoveEditedObjectDelegate().AddRaw(this, &FOdysseyAssetEditorToolkit::OnRemoveEditedObject);
 
+    mEditor->OnRegenerateToolbarAndMenus().BindLambda(
+        [this]()
+        {
+            RegenerateMenusAndToolbars();
+        }
+    );
     RegenerateMenusAndToolbars();
 }
 
@@ -70,6 +84,13 @@ FLinearColor
 FOdysseyAssetEditorToolkit::GetWorldCentricTabColorScale() const
 {
     return FLinearColor( 0.3f, 0.2f, 0.5f, 0.5f );
+}
+
+void
+FOdysseyAssetEditorToolkit::InitToolMenuContext(FToolMenuContext& MenuContext)
+{
+    FAssetEditorToolkit::InitToolMenuContext(MenuContext);
+    mEditor->InitToolMenuContext(MenuContext);
 }
 
 void

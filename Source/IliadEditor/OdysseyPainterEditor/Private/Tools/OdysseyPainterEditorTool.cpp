@@ -28,21 +28,12 @@ void
 UOdysseyPainterEditorTool::SetEditor(FOdysseyPainterEditor* iEditor)
 {
     mEditor = iEditor;
-
-    //Once the editor is set, we can create the toptab widget
-    mTopTabWidget = CreateTopTabWidget();
 }
 
 FOdysseyPainterEditor*
 UOdysseyPainterEditorTool::GetEditor() const
 {
     return mEditor;
-}
-
-TSharedRef<SWidget>
-UOdysseyPainterEditorTool::GetTopTabWidget() const
-{
-    return mTopTabWidget.ToSharedRef();
 }
 
 void
@@ -195,10 +186,10 @@ UOdysseyPainterEditorTool::ExtendMenu( TSharedRef<FExtender> iExtender )
 
 }
 
-TSharedRef<SWidget>
-UOdysseyPainterEditorTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
-    return SNullWidget::NullWidget;
+
 }
 
 TSharedPtr<FOdysseyHUDElement> UOdysseyPainterEditorTool::GetHUD()

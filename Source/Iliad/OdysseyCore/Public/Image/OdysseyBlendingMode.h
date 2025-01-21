@@ -50,7 +50,11 @@ enum class EOdysseyBlendingMode : uint8
     , kPartialDerivative    UMETA( DisplayName = "PartialDerivative"    )
     , kWhiteOut             UMETA( DisplayName = "WhiteOut"             )
     , kAngleCorrected       UMETA( DisplayName = "AngleCorrected"       )
+
+    , kBlendingMode_Count      UMETA(Hidden)
 };
+
+ENUM_RANGE_BY_COUNT(EOdysseyBlendingMode, EOdysseyBlendingMode::kBlendingMode_Count)
 
 UENUM( BlueprintType )
 enum class EOdysseyAlphaMode : uint8
@@ -64,4 +68,8 @@ enum class EOdysseyAlphaMode : uint8
     , kMul              UMETA( DisplayName = "Mul"      )
     , kMin              UMETA( DisplayName = "Min"      )
     , kMax              UMETA( DisplayName = "Max"      )
+
+    , kAlphaMode_Count      UMETA(Hidden)
 };
+
+ENUM_RANGE_BY_COUNT(EOdysseyAlphaMode, EOdysseyAlphaMode::kAlphaMode_Count)

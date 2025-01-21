@@ -62,12 +62,6 @@ UOdysseyPainterEditorRasterBaseTool::DoubleClicked()
     return doubleClicked;
 }
 
-TSharedRef<SWidget> UOdysseyPainterEditorRasterBaseTool::CreateTopTabWidget()
-{
-    return UOdysseyPainterEditorTool::CreateTopTabWidget();
-}
-
-
 TSharedPtr<SWidget> UOdysseyPainterEditorRasterBaseTool::CreatePropertyWidget(TSharedPtr<class IPropertyHandle> iPropertyHandle, const TSharedPtr<ISinglePropertyView> iView)
 {
     if (!iPropertyHandle)

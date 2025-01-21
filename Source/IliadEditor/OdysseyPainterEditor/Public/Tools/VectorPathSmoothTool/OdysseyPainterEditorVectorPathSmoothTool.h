@@ -34,7 +34,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathSmoothTool : publi
         virtual bool IsActivable() const override;
 
         virtual FText GetTooltip() const override;
-        virtual TSharedRef<SWidget> CreateTopTabWidget();
+
+        virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides

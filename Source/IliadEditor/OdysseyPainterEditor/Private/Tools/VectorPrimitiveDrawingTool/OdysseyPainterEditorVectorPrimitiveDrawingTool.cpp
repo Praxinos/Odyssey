@@ -10,6 +10,7 @@
 #include "ISinglePropertyView.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "SOdysseySinglePropertyView.h"
 
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
@@ -358,32 +359,34 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
     return true;
 }
 
-TSharedRef<SWidget>
-UOdysseyPainterEditorVectorPrimitiveDrawingTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorVectorPrimitiveDrawingTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FSinglePropertyParams defaultPropertyParams;
-    const TSharedPtr<ISinglePropertyView> strokeWidthPropertyView = propertyEditorModule.CreateSingleProperty(this, "StrokeWidth", defaultPropertyParams);
-    const TSharedPtr<ISinglePropertyView> primitiveTypePropertyView = propertyEditorModule.CreateSingleProperty(this, "PrimitiveType", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> strokeWidthHandle = strokeWidthPropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> primitiveTypeHandle = primitiveTypePropertyView->GetPropertyHandle();
+    Super::ExtendToolbar(iBuilder);
 
-    return SNew(SUniformWrapPanel)
-        .SlotPadding(FVector2D(3.f, 0.f))
-        .EvenRowDistribution(true)
-        .HAlign(HAlign_Left)
-        + SUniformWrapPanel::Slot()
+    iBuilder.BeginSection( NAME_None );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPrimitiveDrawingTool, StrokeWidth ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
         ]
-        + SUniformWrapPanel::Slot()
+    );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            CreatePropertyWidget(strokeWidthHandle, strokeWidthPropertyView).ToSharedRef()
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPrimitiveDrawingTool, PrimitiveType ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
         ]
-        + SUniformWrapPanel::Slot()
-        [
-            CreatePropertyWidget(primitiveTypeHandle, primitiveTypePropertyView).ToSharedRef()
-        ];
+    );
+
+    iBuilder.EndSection();
 }
 
 FText

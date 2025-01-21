@@ -58,10 +58,15 @@ public:
     virtual TSharedRef<FTabManager::FLayout> CreateLayout() override;
     virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
+    virtual void ExtendLevelEditorToolbar( UToolMenu* iToolbar ) override;
+    virtual void ExtendAssetEditorToolbar(UToolMenu* iToolbar) override;
     virtual void OnClose() override;
+    virtual void InitToolMenuContext(FToolMenuContext& MenuContext) override;
 
 public:
     //Tools
+    void ExtendToolbarSaveAssetButton(FToolBarBuilder& iBuilder);
+    void ExtendToolbarToolParameters(FToolBarBuilder& iBuilder);
 
     /**
      * @brief Returns the current main tool
@@ -245,6 +250,7 @@ public:
     void  AddExtension(TSharedPtr<FOdysseyPainterEditorExtension> iExtension);
     void  SetSource(TSharedPtr<FOdysseyPainterEditorSource> iSource);
     void  PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit);
+    template <class T> T* AddTool();
 
 protected:
     //Callbacks
@@ -318,4 +324,15 @@ protected:
     TObjectPtr<UOdysseyPainterEditorVectorTrajectoryTool> mVectorTrajectoryTool;
 
     TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentMainToolPerLayerClass;
+
+    FName mToolbarMenuName;
 };
+
+template <class T>
+T* FOdysseyPainterEditor::AddTool()
+{
+    T* tool = NewObject<T>();
+    tool->SetEditor(this);
+    mTools.Add(tool);
+    return tool;
+}

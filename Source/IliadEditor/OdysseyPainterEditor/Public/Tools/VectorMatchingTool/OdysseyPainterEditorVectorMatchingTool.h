@@ -43,9 +43,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorMatchingTool : public 
 
         UOdysseyPainterEditorVectorMatchingTool();
 
-        virtual TSharedRef<SWidget> CreateTopTabWidget() override;
-
         virtual FText GetTooltip() const override;
+
+        virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides

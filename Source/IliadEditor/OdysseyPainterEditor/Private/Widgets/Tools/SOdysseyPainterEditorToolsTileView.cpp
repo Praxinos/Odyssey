@@ -60,7 +60,7 @@ SOdysseyPainterEditorToolsTileView::OnToolCheckStateChanged(ECheckBoxState InVal
 EVisibility
 SOdysseyPainterEditorToolsTileView::ToolVisibility(UOdysseyPainterEditorTool* iTool) const
 {
-    return iTool->IsActivable() ? EVisibility::Visible : EVisibility::Collapsed;
+    return !iTool->mIsTemporaryTool && iTool->IsActivable() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 ECheckBoxState

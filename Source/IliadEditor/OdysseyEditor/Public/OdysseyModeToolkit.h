@@ -30,6 +30,8 @@ public:
     void OnAddEditedObject(UObject* iObject);
     void OnRemoveEditedObject(UObject* iObject);
 
+    virtual void ExtendSecondaryModeToolbar(UToolMenu *InModeToolbarMenu) override;
+
 public:
     //from IAssetEditorInstance
     virtual FName GetEditorName() const override;

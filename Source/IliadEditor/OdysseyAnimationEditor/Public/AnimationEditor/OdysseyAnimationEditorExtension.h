@@ -32,10 +32,6 @@ public:
     virtual void Initialize() override;
     virtual void Finalize() override;
     virtual void BuildLayout(FOdysseyEditorLayoutBuilder& iBuilder) override;
-    virtual void AddReferencedObjects(FReferenceCollector& Collector);
-
-    virtual void ExtendMenu( TSharedRef<FExtender> iExtender ) override;
-    virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
 public:
     UOdysseyAnimation*                    Animation() const;

@@ -95,6 +95,20 @@ FOdysseyModeToolkit::Initialize(
 }
 
 void
+FOdysseyModeToolkit::ExtendSecondaryModeToolbar(UToolMenu* InModeToolbarMenu)
+{
+    mEditor->ExtendLevelEditorToolbar( InModeToolbarMenu );
+
+    FName menuName = InModeToolbarMenu->GetMenuName();
+    mEditor->OnRegenerateToolbarAndMenus().BindLambda(
+        [menuName]()
+        {
+            UToolMenus::Get()->RefreshMenuWidget(menuName);
+        }
+    );
+}
+
+void
 FOdysseyModeToolkit::RebuildLevelEditorMenu() const
 {
     FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));

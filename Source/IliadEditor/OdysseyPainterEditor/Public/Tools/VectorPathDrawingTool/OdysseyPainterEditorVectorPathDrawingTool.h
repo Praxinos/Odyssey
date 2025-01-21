@@ -54,8 +54,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
 
         FOdysseyVectorPathTracer& GetPathTracer();
 
-        virtual TSharedRef<SWidget> CreateTopTabWidget() override;
-
         virtual FText GetTooltip() const override;
         virtual void BindShortcuts(FBaseToolkit* iToolkit) override;
 
@@ -80,6 +78,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
                                       , const FKey& iKey, uint64& oSignalFlags ) override;
         virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName ) override;
+
+        virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
 
         FOdysseyVectorObject* GetParentObject( FOdysseyVectorGroupPaint* iScene );
 

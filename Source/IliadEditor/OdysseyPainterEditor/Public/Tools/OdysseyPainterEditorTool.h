@@ -79,12 +79,10 @@ public:
     // Interface
     virtual void BindShortcuts(class FBaseToolkit* iToolkit);
     virtual void ExtendMenu( TSharedRef<FExtender> iExtender );
+    virtual void ExtendToolbar( FToolBarBuilder& iBuilder );
     virtual TSharedPtr<FOdysseyHUDElement> GetHUD();
     virtual EMouseCursor::Type GetMouseCursor() const;
     virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams);
-
-protected:
-    virtual TSharedRef<SWidget> CreateTopTabWidget();
 
 protected:
     virtual void PropertyChanged(const FName& iPropertyName);
@@ -100,17 +98,16 @@ protected:
 public:
     void SetEditor(class FOdysseyPainterEditor* iEditor);
     FOdysseyPainterEditor* GetEditor() const;
-    TSharedRef<SWidget> GetTopTabWidget() const;
     //template<class T> T* GetEditorAs() const { return static_cast<T*>(mEditor); };
 
 protected:
     TSharedPtr<FOdysseyPainterEditorToolInputProcessor> mInputProcessor;
     FOdysseyPainterEditor*              mEditor;
     TSharedPtr<FOdysseyHUDElement>      mHUD;
-    TSharedPtr<SWidget>                 mTopTabWidget;
 
 public:
     UPROPERTY(EditDefaultsOnly, Category="Tool")
     FSlateBrush Icon;
     bool mIsActivated;
+    bool mIsTemporaryTool = false;
 };

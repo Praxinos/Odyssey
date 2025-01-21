@@ -25,9 +25,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathStitchTool : publi
 
         virtual bool IsActivable() const override;
 
-        virtual TSharedRef<SWidget> CreateTopTabWidget() override;
-
         virtual FText GetTooltip() const override;
+
+        virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
 
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
