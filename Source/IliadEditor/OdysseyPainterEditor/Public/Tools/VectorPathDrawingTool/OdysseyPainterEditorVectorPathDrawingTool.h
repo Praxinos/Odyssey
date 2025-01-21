@@ -79,6 +79,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathDrawingTool : publ
         virtual uint64 PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                             , const FName& iPropertyName ) override;
 
+        virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
+
         FOdysseyVectorObject* GetParentObject( FOdysseyVectorGroupPaint* iScene );
 
     private:
