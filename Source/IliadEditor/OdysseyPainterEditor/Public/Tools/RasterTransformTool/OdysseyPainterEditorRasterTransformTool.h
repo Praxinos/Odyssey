@@ -52,6 +52,8 @@ public:
 
     virtual FText GetTooltip() const override;
 
+    virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
+
     bool FlipHorizontal();
     bool FlipVertical();
 
