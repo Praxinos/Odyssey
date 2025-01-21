@@ -10,6 +10,7 @@
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 #include "Undo/OdysseyVectorUndoSegmentReshape.h"
+#include "SOdysseySinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -224,29 +225,25 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupP
     return true;
 }
 
-/* TSharedRef<SWidget>
-UOdysseyPainterEditorVectorPathSmoothTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorVectorPathSmoothTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FSinglePropertyParams defaultPropertyParams;
+    Super::ExtendToolbar(iBuilder);
 
-    const TSharedPtr<ISinglePropertyView> PickingRadiusView = propertyEditorModule.CreateSingleProperty( this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorChartTool, PickingRadius ), defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> PickingRadiusHandle = PickingRadiusView->GetPropertyHandle();
+    iBuilder.BeginSection( NAME_None );
 
-    return SNew(SUniformWrapPanel)
-        .SlotPadding(FVector2D(3.f, 0.f))
-        .EvenRowDistribution(true)
-        .HAlign(HAlign_Left)
-        + SUniformWrapPanel::Slot()
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPathSmoothTool, PickingRadius ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
         ]
+    );
 
-        + SUniformWrapPanel::Slot()
-        [
-            CreatePropertyWidget(PickingRadiusHandle, PickingRadiusView).ToSharedRef()
-        ];
-} */
+    iBuilder.EndSection();
+}
 
 FText
 UOdysseyPainterEditorVectorPathSmoothTool::GetTooltip() const
