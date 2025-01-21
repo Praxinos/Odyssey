@@ -52,6 +52,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTrajectoryTool : publi
 
         virtual FText GetTooltip() const override;
 
+        virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
+
     protected:
         //OdysseyPainterVectorBaseEditorTool overrides
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ) override;
