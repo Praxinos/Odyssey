@@ -8,6 +8,7 @@
 #include "OdysseyMediaVector.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "ISinglePropertyView.h"
+#include "SOdysseySinglePropertyView.h"
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTag.h"
@@ -1169,36 +1170,27 @@ UOdysseyPainterEditorVectorTransformTool::IsModeInbetween() const
                                                                  : EVisibility::Collapsed;
 }
 
-/* TSharedRef<SWidget>
-UOdysseyPainterEditorVectorTransformTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorVectorTransformTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FSinglePropertyParams defaultPropertyParams;
-    const TSharedPtr<ISinglePropertyView> showInbetweensPropertyView = propertyEditorModule.CreateSingleProperty(this, "ShowInbetweens", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> showInbetweensHandle = showInbetweensPropertyView->GetPropertyHandle();
-    TSharedRef<SWidget> showInbetweensWidget = CreatePropertyWidget( showInbetweensHandle
-                                                                   , showInbetweensPropertyView).ToSharedRef();
+    Super::ExtendToolbar(iBuilder);
 
-
-    // what an awful syntax, damn
+    iBuilder.BeginSection( NAME_None );
 
     TAttribute<EVisibility> value = TAttribute<EVisibility>::Create(TAttribute<EVisibility>::FGetter::CreateUObject (this, &UOdysseyPainterEditorVectorTransformTool::IsModeInbetween) );
 
-    showInbetweensWidget.Get().SetVisibility( value );
-
-    return SNew(SUniformWrapPanel)
-        .SlotPadding(FVector2D(3.f, 0.f))
-        .EvenRowDistribution(true)
-        .HAlign(HAlign_Left)
-        + SUniformWrapPanel::Slot()
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Visibility_UObject(this, &UOdysseyPainterEditorVectorTransformTool::IsModeInbetween)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorTransformTool, ShowInbetweens ), FSinglePropertyParams())
+            .InnerPadding(10.f)
         ]
-        + SUniformWrapPanel::Slot()
-        [
-            showInbetweensWidget
-        ];
-} */
+    );
+
+    iBuilder.EndSection();
+}
 
 FText
 UOdysseyPainterEditorVectorTransformTool::GetTooltip() const

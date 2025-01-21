@@ -693,34 +693,6 @@ UOdysseyPainterEditorVectorTrajectoryTool::ExtendToolbar( FToolBarBuilder& iBuil
     iBuilder.EndSection();
 }
 
-/* TSharedRef<SWidget>
-UOdysseyPainterEditorVectorTrajectoryTool::CreateTopTabWidget()
-{
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FSinglePropertyParams defaultPropertyParams;
-    const TSharedPtr<ISinglePropertyView> showInbetweensPropertyView = propertyEditorModule.CreateSingleProperty(this, "ShowInbetweens", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> showInbetweensHandle = showInbetweensPropertyView->GetPropertyHandle();
-    const TSharedPtr<ISinglePropertyView> editionModePropertyView = propertyEditorModule.CreateSingleProperty(this, "EditionMode", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> editionModeHandle = editionModePropertyView->GetPropertyHandle();
-
-    return SNew(SUniformWrapPanel)
-        .SlotPadding(FVector2D(3.f, 0.f))
-        .EvenRowDistribution(true)
-        .HAlign(HAlign_Left)
-        + SUniformWrapPanel::Slot()
-        [
-            SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
-        ]
-        + SUniformWrapPanel::Slot()
-        [
-            CreatePropertyWidget(showInbetweensHandle, showInbetweensPropertyView).ToSharedRef()
-        ]
-        + SUniformWrapPanel::Slot()
-        [
-            CreatePropertyWidget(editionModeHandle, editionModePropertyView).ToSharedRef()
-        ];
-} */
-
 FText
 UOdysseyPainterEditorVectorTrajectoryTool::GetTooltip() const
 {
