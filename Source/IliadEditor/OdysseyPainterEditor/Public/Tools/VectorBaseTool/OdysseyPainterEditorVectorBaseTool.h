@@ -5,8 +5,8 @@
 
 #include "CoreMinimal.h"
 #include "Tools/OdysseyPainterEditorTool.h"
-#include "Widgets/Tools/SOdysseyPainterEditorVectorEditionMode.h"
 #include "OdysseyPainterEditorVectorBaseTool.generated.h"
+
 
 class FOdysseyPainterEditorVectorBaseToolHUD;
 class ISinglePropertyView;
@@ -66,6 +66,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual void ExtendContextMenu( FMenuBuilder& menu );
         virtual void BindShortcuts( FBaseToolkit* iToolkit );
         virtual EMouseCursor::Type GetMouseCursor() const override;
+        virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
 
         bool IsDragging();
 
@@ -142,6 +143,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         // for testing purpose
         void MakeDemoBrush( FOdysseyVectorGroupPaint* iScene );
+
+        void SetVectorEditionFlags( uint64 iViewMode );
 
     protected:
         virtual void ExtendContextMenuObject( FOdysseyVectorGroupPaint* iScene

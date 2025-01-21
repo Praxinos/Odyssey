@@ -935,18 +935,114 @@ UOdysseyPainterEditorVectorBaseTool::CreatePropertyWidget( TSharedPtr<class IPro
     ];
 }
 
-/* TSharedRef<SWidget>
-UOdysseyPainterEditorVectorBaseTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorVectorBaseTool::SetVectorEditionFlags( uint64 iViewMode )
 {
-    return SNew(SUniformWrapPanel)
-           .SlotPadding(FVector2D(3.f, 0.f))
-           .EvenRowDistribution(true)
-           .HAlign(HAlign_Left)
-           + SUniformWrapPanel::Slot()
-           [
-               SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
-           ];
-} */
+    TArray<TSharedPtr<FOdysseyMediaVector>> mediaVectors = mEditor->GetCurrentMediaProvider().GetMedias<FOdysseyMediaVector>();
+
+    mEditor->SetVectorHUDFlags( ( mEditor->GetVectorHUDFlags() & (~FOdysseyVectorHUD::HUD_MODE_ALL) ) | iViewMode );
+
+    mEditor->SanitizeCurrentTool();
+
+    if( mediaVectors.Num() )
+    {
+        FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
+        FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
+
+        vectorEngine->ResetHUD();
+        vectorEngine->Invalidate( 0 );
+        FOdysseyVectorEngine::Notify( vectorScene, FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                                                 | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
+                                                 | FOdysseyPainterEditor::UI_UPDATE_TIMELINE );
+    }
+}
+
+void
+UOdysseyPainterEditorVectorBaseTool::ExtendToolbar( FToolBarBuilder& iBuilder )
+{
+    Super::ExtendToolbar(iBuilder);
+
+    iBuilder.BeginSection( NAME_None );
+
+    uint64 HUDFlags = mEditor->GetVectorHUDFlags();
+
+    if( HUDFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT_ALLOWED )
+    {
+        FButtonArgs objectModeButtonArgs;
+        objectModeButtonArgs.ToolTipOverride = LOCTEXT("vector-edition-mode.object-mode.tooltip", "Object Mode");
+        objectModeButtonArgs.ExtensionHook = "VectorObjectMode";
+        objectModeButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.VectorModeObject32");
+        objectModeButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::RadioButton;
+        objectModeButtonArgs.Action = FUIAction(
+            FExecuteAction::CreateLambda(
+                [this]()
+                {
+                    SetVectorEditionFlags(static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_OBJECT));
+                }
+            ),
+            FCanExecuteAction(),
+            FIsActionChecked::CreateLambda(
+                [this]() -> bool
+                {
+                    return mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT;
+                }
+            )
+        );
+        iBuilder.AddToolBarButton(objectModeButtonArgs);
+    }
+
+    if( HUDFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX_ALLOWED)
+    {
+        FButtonArgs vertexModeButtonArgs;
+        vertexModeButtonArgs.ToolTipOverride = LOCTEXT("vector-edition-mode.vertex-mode.tooltip", "Vertex Mode");
+        vertexModeButtonArgs.ExtensionHook = "VectorVertexMode";
+        vertexModeButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.VectorModeVertex32");
+        vertexModeButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::RadioButton;
+        vertexModeButtonArgs.Action = FUIAction(
+            FExecuteAction::CreateLambda(
+                [this]()
+                {
+                    SetVectorEditionFlags(static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_VERTEX));
+                }
+            ),
+            FCanExecuteAction(),
+            FIsActionChecked::CreateLambda(
+                [this]() -> bool
+                {
+                    return mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_VERTEX;
+                }
+            )
+        );
+        iBuilder.AddToolBarButton(vertexModeButtonArgs);
+    }
+
+    if( HUDFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN_ALLOWED)
+    {
+        FButtonArgs inbetweenModeButtonArgs;
+        inbetweenModeButtonArgs.ToolTipOverride = LOCTEXT("vector-edition-mode.inbetween-mode.tooltip", "Inbetween Mode");
+        inbetweenModeButtonArgs.ExtensionHook = "VectorVertexMode";
+        inbetweenModeButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.VectorModeInbetween32");
+        inbetweenModeButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::RadioButton;
+        inbetweenModeButtonArgs.Action = FUIAction(
+            FExecuteAction::CreateLambda(
+                [this]()
+                {
+                    SetVectorEditionFlags(static_cast<uint64>(FOdysseyVectorHUD::HUD_MODE_INBETWEEN));
+                }
+            ),
+            FCanExecuteAction(),
+            FIsActionChecked::CreateLambda(
+                [this]() -> bool
+                {
+                    return mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN;
+                }
+            )
+        );
+        iBuilder.AddToolBarButton(inbetweenModeButtonArgs);
+    }
+
+    iBuilder.EndSection();
+}
 
 void
 UOdysseyPainterEditorVectorBaseTool::PopupContextMenu()
