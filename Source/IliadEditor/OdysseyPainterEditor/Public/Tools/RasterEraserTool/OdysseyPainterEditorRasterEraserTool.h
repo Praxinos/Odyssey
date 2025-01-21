@@ -50,6 +50,8 @@ public:
 
     virtual FText GetTooltip() const override;
 
+    virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
+
 public:
     // Getters
     FSimpleMulticastDelegate& OnSizeChanged();

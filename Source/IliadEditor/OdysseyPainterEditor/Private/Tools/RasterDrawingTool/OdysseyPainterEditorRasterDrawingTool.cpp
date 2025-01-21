@@ -429,40 +429,6 @@ UOdysseyPainterEditorRasterDrawingTool::ExtendMenu( TSharedRef<FExtender> iExten
 }
 
 void
-UOdysseyPainterEditorRasterDrawingTool::AddBlendingModeToolbarMenuEntry(FMenuBuilder& iMenuBuilder, EOdysseyBlendingMode iBlendingMode)
-{
-    auto CanExecuteSetBlendingMode = [this]()
-    {
-        return !BlendParameters.bEraserMode;
-    };
-
-    auto ExecuteSetBlendingMode = [this, mode = iBlendingMode]()
-    {
-        FOdysseyBlendParameters value = BlendParameters;
-        value.BlendingMode = mode;
-        FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), value);
-    };
-
-    auto IsBlendingMode = [this, mode = iBlendingMode]() -> bool
-    {
-        return BlendParameters.BlendingMode == mode;
-    };
-
-    UEnum* blendingModeEnum = StaticEnum<EOdysseyBlendingMode>();
-
-    iMenuBuilder.AddMenuEntry(
-        blendingModeEnum->GetDisplayNameTextByValue((int64)iBlendingMode),
-        FText::GetEmpty(),
-        FSlateIcon(),
-        FUIAction( FExecuteAction::CreateLambda( ExecuteSetBlendingMode ),
-                    FCanExecuteAction::CreateLambda( CanExecuteSetBlendingMode ),
-                    FIsActionChecked::CreateLambda( IsBlendingMode ) ),
-        NAME_None,
-        EUserInterfaceActionType::Check
-    );
-}
-
-void
 UOdysseyPainterEditorRasterDrawingTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
     Super::ExtendToolbar(iBuilder);
@@ -588,52 +554,76 @@ UOdysseyPainterEditorRasterDrawingTool::ExtendToolbar( FToolBarBuilder& iBuilder
                     FNewMenuDelegate::CreateLambda(
                         [this](FMenuBuilder& iMenuBuilder)
                         {
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kNormal);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kTop);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kBack);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kBehind);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kDissolve);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kBayerDither8x8);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kDarken);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kMultiply);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kColorBurn);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kLinearBurn);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kDarkerColor);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kLighten);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kScreen);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kColorDodge);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kLinearDodge);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kLighterColor);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kOverlay);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kSoftLight);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kHardLight);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kVividLight);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kLinearLight);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kPinLight);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kHardMix);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kPhoenix);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kReflect);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kGlow);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kDifference);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kExclusion);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kAdd);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kSubstract);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kDivide);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kAverage);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kNegation);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kHue);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kSaturation);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kColor);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kLuminosity);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kPartialDerivative);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kWhiteOut);
-                            AddBlendingModeToolbarMenuEntry( iMenuBuilder, EOdysseyBlendingMode::kAngleCorrected);
+                            for (EOdysseyBlendingMode blendingMode : TEnumRange<EOdysseyBlendingMode>())
+                            {
+                                auto CanExecuteSetBlendingMode = [this]()
+                                {
+                                    return !BlendParameters.bEraserMode;
+                                };
+
+                                auto ExecuteSetBlendingMode = [this, mode = blendingMode]()
+                                {
+                                    FOdysseyBlendParameters value = BlendParameters;
+                                    value.BlendingMode = mode;
+                                    FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), value);
+                                };
+
+                                auto IsBlendingMode = [this, mode = blendingMode]() -> bool
+                                {
+                                    return BlendParameters.BlendingMode == mode;
+                                };
+
+                                UEnum* blendingModeEnum = StaticEnum<EOdysseyBlendingMode>();
+
+                                iMenuBuilder.AddMenuEntry(
+                                    blendingModeEnum->GetDisplayNameTextByValue((int64)blendingMode),
+                                    FText::GetEmpty(),
+                                    FSlateIcon(),
+                                    FUIAction( FExecuteAction::CreateLambda( ExecuteSetBlendingMode ),
+                                                FCanExecuteAction::CreateLambda( CanExecuteSetBlendingMode ),
+                                                FIsActionChecked::CreateLambda( IsBlendingMode ) ),
+                                    NAME_None,
+                                    EUserInterfaceActionType::Check
+                                );
+                            }
                         }
                     )
                 );
             }
         )
     );
+
+    FButtonArgs eraserModeButtonArgs;
+    eraserModeButtonArgs.ExtensionHook = "EraserMode";
+    eraserModeButtonArgs.IconOverride = FSlateIcon("OdysseyStyle", "PainterEditor.TopBar.Eraser32");
+    eraserModeButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::ToggleButton;
+    eraserModeButtonArgs.Action = FUIAction(
+        FExecuteAction::CreateLambda(
+            [this]()
+            {
+                FOdysseyBlendParameters value = BlendParameters;
+                value.bEraserMode = !value.bEraserMode;
+                FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, BlendParameters), value);
+            }
+        ),
+        FCanExecuteAction::CreateLambda([](){ return true;}),
+        FIsActionChecked::CreateLambda([this](){ return BlendParameters.bEraserMode;})
+    );
+    eraserModeButtonArgs.CustomMenuDelegate = FNewMenuDelegate::CreateLambda(
+        [this, eraserModeButtonArgs](FMenuBuilder& iMenuBuilder)
+        {
+            iMenuBuilder.AddMenuEntry(
+                LOCTEXT("raster-drawing-tool.toolbar.eraser-mode.name", "Eraser Mode"),
+                LOCTEXT("raster-drawing-tool.toolbar.eraser-mode.tooltip", "Toggles the tool Eraser Mode"),
+                FSlateIcon(),
+                eraserModeButtonArgs.Action,
+                NAME_None,
+                EUserInterfaceActionType::ToggleButton
+            );
+        }
+    );
+
+    iBuilder.AddToolBarButton(eraserModeButtonArgs);
 
     iBuilder.EndSection();
 }
