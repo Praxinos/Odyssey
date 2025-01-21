@@ -10,6 +10,7 @@
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "Undo/OdysseyVectorUndoPathStitch.h"
+#include "SOdysseySinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -254,27 +255,25 @@ UOdysseyPainterEditorVectorPathStitchTool::PropertyChangedVector( FOdysseyVector
     return UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName );
 }
 
-/* TSharedRef<SWidget>
-UOdysseyPainterEditorVectorPathStitchTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorVectorPathStitchTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FSinglePropertyParams defaultPropertyParams;
-    const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "PickingRadius", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
+    Super::ExtendToolbar(iBuilder);
 
-    return SNew(SUniformWrapPanel)
-        .SlotPadding(FVector2D(3.f, 0.f))
-        .EvenRowDistribution(true)
-        .HAlign(HAlign_Left)
-        + SUniformWrapPanel::Slot()
+    iBuilder.BeginSection( NAME_None );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPathStitchTool, PickingRadius ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
         ]
-        + SUniformWrapPanel::Slot()
-        [
-            CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
-        ];
-} */
+    );
+
+    iBuilder.EndSection();
+}
 
 FText
 UOdysseyPainterEditorVectorPathStitchTool::GetTooltip() const
