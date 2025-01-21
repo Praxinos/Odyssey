@@ -18,6 +18,7 @@
 #include "OdysseyMediaVector.h"
 #include "OdysseyMediaProvider.h"
 #include "OdysseyPainterEditorSource.h"
+#include "SOdysseySinglePropertyView.h"
 
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -1105,33 +1106,34 @@ UOdysseyPainterEditorVectorPathEditTool::ExtendContextMenuObject( FOdysseyVector
 // the caller will call menu.EndSection()
 }
 
-/* TSharedRef<SWidget>
-UOdysseyPainterEditorVectorPathEditTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorVectorPathEditTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FSinglePropertyParams defaultPropertyParams;
-    const TSharedPtr<ISinglePropertyView> radiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "PickingRadius", defaultPropertyParams);
-    const TSharedPtr<ISinglePropertyView> widenPropertyView = propertyEditorModule.CreateSingleProperty(this, "WidenAllAlong", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> radiusHandle = radiusPropertyView->GetPropertyHandle();
-    TSharedPtr<class IPropertyHandle> widenHandle = widenPropertyView->GetPropertyHandle();
+    Super::ExtendToolbar(iBuilder);
 
-    return SNew(SUniformWrapPanel)
-        .SlotPadding(FVector2D(3.f, 0.f))
-        .EvenRowDistribution(true)
-        .HAlign(HAlign_Left)
-        + SUniformWrapPanel::Slot()
+    iBuilder.BeginSection( NAME_None );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPathEditTool, PickingRadius ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
         ]
-        + SUniformWrapPanel::Slot()
+    );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            CreatePropertyWidget(radiusHandle, radiusPropertyView).ToSharedRef()
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorPathEditTool, WidenAllAlong ), FSinglePropertyParams())
+            .InnerPadding(10.f)
         ]
-        + SUniformWrapPanel::Slot()
-        [
-            CreatePropertyWidget(widenHandle, widenPropertyView).ToSharedRef()
-        ];
-} */
+    );
+
+    iBuilder.EndSection();
+}
 
 FText
 UOdysseyPainterEditorVectorPathEditTool::GetTooltip() const
