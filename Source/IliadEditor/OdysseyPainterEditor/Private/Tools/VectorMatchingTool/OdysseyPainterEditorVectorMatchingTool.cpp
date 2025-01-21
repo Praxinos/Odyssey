@@ -12,6 +12,7 @@
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorCell.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerMatching.h"
+#include "SOdysseySinglePropertyView.h"
 #include <chrono>
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -244,46 +245,53 @@ UOdysseyPainterEditorVectorMatchingTool::PropertyChangedVector( FOdysseyVectorGr
     return 0;
 }
 
-/* TSharedRef<SWidget>
-UOdysseyPainterEditorVectorMatchingTool::CreateTopTabWidget()
+void
+UOdysseyPainterEditorVectorMatchingTool::ExtendToolbar( FToolBarBuilder& iBuilder )
 {
-    FPropertyEditorModule& propertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FSinglePropertyParams defaultPropertyParams;
-    const TSharedPtr<ISinglePropertyView> pickingRadiusPropertyView = propertyEditorModule.CreateSingleProperty(this, "PickingRadius", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> pickingRadiusHandle = pickingRadiusPropertyView->GetPropertyHandle();
-    const TSharedPtr<ISinglePropertyView> rigidityPropertyView = propertyEditorModule.CreateSingleProperty(this, "Rigidity", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> rigidityHandle = rigidityPropertyView->GetPropertyHandle();
-    const TSharedPtr<ISinglePropertyView> rigidifySelectionOnlyPropertyView = propertyEditorModule.CreateSingleProperty(this, "RigidifySelectionOnly", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> rigidifySelectionOnlyHandle = rigidifySelectionOnlyPropertyView->GetPropertyHandle();
-    const TSharedPtr<ISinglePropertyView> showInbetweensPropertyView = propertyEditorModule.CreateSingleProperty(this, "ShowInbetweens", defaultPropertyParams);
-    TSharedPtr<class IPropertyHandle> showInbetweensOnlyHandle = showInbetweensPropertyView->GetPropertyHandle();
+    Super::ExtendToolbar(iBuilder);
 
-    return SNew(SUniformWrapPanel)
-        .SlotPadding(FVector2D(3.f, 0.f))
-        .EvenRowDistribution(true)
-        .HAlign(HAlign_Left)
-        + SUniformWrapPanel::Slot()
-        [
-            SNew( SOdysseyPainterEditorVectorEditionMode, GetEditor() )
-        ]
+    iBuilder.BeginSection( NAME_None );
 
-        + SUniformWrapPanel::Slot()
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            CreatePropertyWidget(pickingRadiusHandle, pickingRadiusPropertyView).ToSharedRef()
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorMatchingTool, PickingRadius ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
         ]
-        + SUniformWrapPanel::Slot()
+    );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            CreatePropertyWidget(rigidityHandle, rigidityPropertyView).ToSharedRef()
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorMatchingTool, Rigidity ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+            .ValueWidthOverride(100.f)
         ]
-        + SUniformWrapPanel::Slot()
+    );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            CreatePropertyWidget(rigidifySelectionOnlyHandle, rigidifySelectionOnlyPropertyView).ToSharedRef()
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorMatchingTool, RigidifySelectionOnly ), FSinglePropertyParams())
+            .InnerPadding(10.f)
         ]
-        + SUniformWrapPanel::Slot()
+    );
+
+    iBuilder.AddWidget(
+        SNew(SBox)
+        .Padding(10.f, 0.f, 10.f, 0.f)
         [
-            CreatePropertyWidget(showInbetweensOnlyHandle, showInbetweensPropertyView).ToSharedRef()
-        ];
-} */
+            SNew(SOdysseySinglePropertyView, this, GET_MEMBER_NAME_CHECKED( UOdysseyPainterEditorVectorMatchingTool, ShowInbetweens ), FSinglePropertyParams())
+            .InnerPadding(10.f)
+        ]
+    );
+
+    iBuilder.EndSection();
+}
 
 FText
 UOdysseyPainterEditorVectorMatchingTool::GetTooltip() const
