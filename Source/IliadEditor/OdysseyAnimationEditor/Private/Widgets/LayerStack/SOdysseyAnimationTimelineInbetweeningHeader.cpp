@@ -23,6 +23,7 @@
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 #include "Undo/OdysseyVectorUndoTagRemove.h"
 
 #include "Framework/Commands/GenericCommands.h"
@@ -121,7 +122,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Private_SelectRangeFromCurrentTo ( 
         FOdysseyVectorObject* fromObject = RangeSelectionStart.Get()->GetInbetweenerTag()->GetOwner();
         FOdysseyVectorObject* toObject = iItem.Get()->GetInbetweenerTag()->GetOwner();
         FOdysseyVectorObject* vectorObject = mItemsSource[0].Get()->GetInbetweenerTag()->GetOwner();
-        FOdysseyVectorEngine* vectorEngine = fromObject->GetEngine();
+        FOdysseyVectorRoot* vectorRoot = fromObject->GetRoot();
         bool doSelect = false;
 
         for( const TSharedPtr<FInbetweeningListViewItem>& rangeItem : GetItems() )
@@ -132,7 +133,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Private_SelectRangeFromCurrentTo ( 
             {
                 if( rangeItemObject->IsSelected() == false )
                 {
-                    vectorEngine->SelectObject( rangeItemObject );
+                    vectorRoot->SelectObject( rangeItemObject );
                     // Keep internal array consistent for use by other methods
                     SelectedItems.Add( rangeItem );
                 }
@@ -145,7 +146,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Private_SelectRangeFromCurrentTo ( 
                 {
                     if( rangeItemObject->IsSelected() == false )
                     {
-                        vectorEngine->SelectObject( rangeItemObject );
+                        vectorRoot->SelectObject( rangeItemObject );
                         // Keep internal array consistent for use by other methods
                         SelectedItems.Add( rangeItem );
                     }
@@ -161,11 +162,11 @@ SOdysseyAnimationTimelineInbetweeningHeader::Private_SetItemSelection ( TSharedP
                                                                       , bool bWasUserDirected )
 {
     FOdysseyVectorObject* vectorObject = iItem.Get()->GetInbetweenerTag()->GetOwner();
-    FOdysseyVectorEngine* vectorEngine = vectorObject->GetEngine();
+    FOdysseyVectorRoot* vectorRoot = vectorObject->GetRoot();
 
     if( bShouldBeSelected )
     {
-        vectorEngine->SelectObject( vectorObject );
+        vectorRoot->SelectObject( vectorObject );
         // Keep internal array consistent for use by other methods
         SelectedItems.Add( iItem );
 
@@ -176,7 +177,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Private_SetItemSelection ( TSharedP
         // Keep internal array consistent for use by other methods
         SelectedItems.Remove( iItem );
 
-        vectorEngine->UnselectObject( vectorObject );
+        vectorRoot->UnselectObject( vectorObject );
     }
 }
 
@@ -187,9 +188,9 @@ SOdysseyAnimationTimelineInbetweeningHeader::Private_ClearSelection()
     {
         // the scene
         FOdysseyVectorObject* vectorObject = mItemsSource[0].Get()->GetInbetweenerTag()->GetOwner();
-        FOdysseyVectorEngine* vectorEngine = vectorObject->GetEngine();
+        FOdysseyVectorRoot* vectorRoot = vectorObject->GetRoot();
 
-        vectorEngine->ClearObjectSelection();
+        vectorRoot->ClearObjectSelection();
     }
 
     // Keep internal array consistent for use by other methods

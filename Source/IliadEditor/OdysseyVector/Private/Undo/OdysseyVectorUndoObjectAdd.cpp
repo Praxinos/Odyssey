@@ -4,6 +4,7 @@
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoObjectAdd::~FOdysseyVectorUndoObjectAdd()
@@ -25,9 +26,8 @@ FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorGroupPai
                                                         , FOdysseyVectorObject* iObject
                                                         , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    , mScene ( iScene )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mObjectArray.push_back( iObject );
 }
 
@@ -35,9 +35,8 @@ FOdysseyVectorUndoObjectAdd::FOdysseyVectorUndoObjectAdd( FOdysseyVectorGroupPai
                                                         , std::list<FOdysseyVectorObject*>& iObjectList
                                                         , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    , mScene ( iScene )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     for( FOdysseyVectorObject* object : iObjectList )
     {
         mObjectArray.push_back( object );
@@ -77,7 +76,7 @@ FOdysseyVectorUndoObjectAdd::Revert( UObject* iIgnored )
         }
     }
 
-    mEngineList.front()->ClearObjectSelection();
+    mScene->GetRoot()->ClearObjectSelection();
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
     Update();

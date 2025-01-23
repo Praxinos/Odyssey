@@ -5,6 +5,7 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 
 #include <algorithm> // for std::clamp
 
@@ -1242,7 +1243,7 @@ FOdysseyVectorSegmentCubic::BuildOffsetCurves()
 void
 FOdysseyVectorSegmentCubic::Update( uint32 iUpdateFlags )
 {
-    FOdysseyVectorEngine* engine = mOwner->GetEngine();
+    FOdysseyVectorRoot* root = mOwner->GetRoot();
     ::ULIS::FRectD previousBBox = mBBox;
     double xmin, ymin, xmax, ymax;
 
@@ -1289,9 +1290,9 @@ FOdysseyVectorSegmentCubic::Update( uint32 iUpdateFlags )
     if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_NOINVALIDATERECT ) == 0 )
     {
         // auto invalidation of the region that needs to be redrawn
-        if( engine )
+        if( root )
         {
-            engine->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), ( previousBBox | mBBox ) ) );
+            root->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), ( previousBBox | mBBox ) ) );
         }
     }
 }

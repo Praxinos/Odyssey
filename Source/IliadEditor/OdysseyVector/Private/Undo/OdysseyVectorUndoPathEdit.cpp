@@ -54,8 +54,6 @@ FOdysseyVectorUndoPathEdit::FOdysseyVectorUndoPathEdit( FOdysseyVectorGroupPaint
                                                       , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mVertexSnapshotArray.reserve( iEditedVertexArray.size() );
     mCubicSegmentSnapshotArray.reserve( iEditedSegmentArray.size() );
 

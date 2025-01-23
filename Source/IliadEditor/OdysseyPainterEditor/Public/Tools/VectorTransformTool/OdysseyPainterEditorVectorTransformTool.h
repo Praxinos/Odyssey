@@ -61,15 +61,12 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorTransformTool : public
                                             , const FName& iPropertyName ) override;
 
     private:
-        void TranslateObjectSelection( FOdysseyVectorEngine* iEngine
-                                     , FOdysseyVectorGroupPaint* iScene
+        void TranslateObjectSelection( FOdysseyVectorGroupPaint* iScene
                                      , const FOdysseyPoint& iPointInTexture );
-        void RotateObjectSelection( FOdysseyVectorEngine* iEngine
-                                  , FOdysseyVectorGroupPaint* iScene
+        void RotateObjectSelection( FOdysseyVectorGroupPaint* iScene
                                   , const FOdysseyPoint& iPointInTexture );
         double GetRotationAngle( const FOdysseyPoint& iPointInTexture );
-        void ScaleObjectSelection( FOdysseyVectorEngine* iEngine
-                                 , FOdysseyVectorGroupPaint* iScene
+        void ScaleObjectSelection( FOdysseyVectorGroupPaint* iScene
                                  , const FOdysseyPoint& iPointInTexture );
         void GetTransformedObjectList( FOdysseyVectorGroupPaint* iScene
                                      , std::list<FOdysseyVectorObject*>& oObjectList );

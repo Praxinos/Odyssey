@@ -38,6 +38,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 COPY_RETOPOLOGY          = ( 1 << 0 );
         static const uint32 COPY_NOTAG               = ( 1 << 2 );
 
+        // traversal flags
+        static const uint64 TRAVERSE_STOP                   = ( 1 << 0 );
+        static const uint64 TRAVERSE_OBJECT_ACCEPTED        = ( 1 << 1 );
+        static const uint64 TRAVERSE_PARENT_HASFOCUS        = ( 1 << 2 );
+        static const uint64 TRAVERSE_OBJECT_IGNORE_CHILDREN = ( 1 << 3 );
+
         // update flags
         //static const uint32 FREQUENTUPDATES = ( 1 << 0 );
         //static const uint32 UPDATE_KEEPINVALIDATED   = ( 1 << 1 );
@@ -48,7 +54,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 UPDATE_NOINBETWEENING   = ( 1 <<  6 );
         static const uint32 UPDATE_FORCE            = ( 1 <<  7 ); // request force updating everything, not only invalidated items
         static const uint32 UPDATE_NODRAWINGLOCK    = ( 1 <<  8 );
-        static const uint32 UPDATE_NORENDER         = ( 1 <<  9 );
+        static const uint32 UPDATE_NOREDRAW         = ( 1 <<  9 );
         static const uint32 UPDATE_NOINVALIDATERECT = ( 1 << 10 );
 
         // invalidation flags
@@ -530,12 +536,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         void Translate( double iX, double iY );
 
         /**
-         * @brief Update the object after it was invalidated
-         * @param iUpdateFlags
-         */
-        virtual void Update( uint32 iUpdateFlags );
-
-        /**
          * @brief Recursively updates the object's matrix (world and local)
          */
         virtual void UpdateMatrix();
@@ -562,7 +562,35 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         void LockDrawing();
         void UnlockDrawing();
 
+        static void FlipObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                               , double iXFactor
+                               , double iYFactor );
+
+        static void FlipObjectsHorizontal( const std::list<FOdysseyVectorObject*>& iObjectList );
+
+        static void FlipObjectsVertical( const std::list<FOdysseyVectorObject*>& iObjectList );
+
+
+        static FOdysseyVectorGroup* GroupObjects( FOdysseyVectorObject* iParent
+                                                , const std::list<FOdysseyVectorObject*>& iObjectList
+                                                , std::vector<FOdysseyVectorObject*>& oObjectArray );
+
+        static FOdysseyVectorGroupPaint* MakePaintGroupFromObjects( FOdysseyVectorObject* iParent
+                                                                  , const std::list<FOdysseyVectorObject*>& iObjectList
+                                                                  , std::vector<FOdysseyVectorObject*>& oCubicPathArray
+                                                                  , std::vector<FOdysseyVectorBucket*>& oRemovedBucketArray );
+
+        static ::ULIS::FVec2D GetPositionFromObjects( const std::list<FOdysseyVectorObject*>& iObjectList );
+        static uint64 Traverse( FOdysseyVectorObject* iObject
+                              , uint64 iTraversalFlags
+                              , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
+
     protected:
+        /**
+         * @brief Update the object after it was invalidated
+         * @param iUpdateFlags
+         */
+        virtual void Update( uint32 iUpdateFlags );
         virtual void UpdateShape( uint32 iUpdateFlags );
         virtual FOdysseyVectorObject* CopyShape( uint64 iCopyFlags );
         virtual void DrawShape ( BLContext* iBLContext

@@ -66,8 +66,6 @@ FOdysseyVectorUndoErase::FOdysseyVectorUndoErase( FOdysseyVectorGroupPaint* iSce
                                                 , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mAddedObjectArray = iAddedObjectArray;
     mAddedVertexArray = iAddedVertexArray;
     mAddedSegmentArray = iAddedSegmentArray;

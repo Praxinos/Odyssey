@@ -24,21 +24,10 @@ FOdysseyVectorUndoTagInbetweenerParam::FOdysseyVectorUndoTagInbetweenerParam( FO
                                                                             , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    // we build a list of engines we will need to redraw
-    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagArray )
-    {
-        FOdysseyVectorEngine* engine = inbetweenerTag->GetOwner()->GetEngine();
-
-        if( std::find( mEngineList.begin(), mEngineList.end(), engine ) == mEngineList.end() )
-        {
-            mEngineList.push_back( engine );
-        }
-    }
 }
 
 FOdysseyVectorUndoTagInbetweenerWithThickness::~FOdysseyVectorUndoTagInbetweenerWithThickness()
 {
-
 }
 
 FOdysseyVectorUndoTagInbetweenerWithThickness::FOdysseyVectorUndoTagInbetweenerWithThickness( FOdysseyVectorGroupPaint* iScene

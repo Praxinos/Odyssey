@@ -25,7 +25,6 @@ FOdysseyVectorUndoTagInbetweenerTrajectoryAlter::FOdysseyVectorUndoTagInbetweene
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mTrajectorySnapshot( iTrajectory, FSnapshotFlags::Trajectory::BEZIER )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
 }
 
 void

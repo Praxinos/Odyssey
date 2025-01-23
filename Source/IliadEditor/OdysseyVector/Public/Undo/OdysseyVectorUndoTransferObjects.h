@@ -34,4 +34,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTransferObjects : public FOdysseyVecto
 
     private:
         std::vector<FSnapshotObject> mTransferredObjectSnapshotArray;
+        FOdysseyVectorGroupPaint* mScene;
 };

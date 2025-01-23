@@ -15,6 +15,12 @@ FOdysseyVectorSharedEnv::FOdysseyVectorSharedEnv()
     bIsSystem = true;
 }
 
+void
+FOdysseyVectorSharedEnv::Update( uint32 iUpdateFlags )
+{
+    FOdysseyVectorObject::Update( iUpdateFlags );
+}
+
 bool
 FOdysseyVectorSharedEnv::HasBaseClass( uint32 iBaseClassID )
 {

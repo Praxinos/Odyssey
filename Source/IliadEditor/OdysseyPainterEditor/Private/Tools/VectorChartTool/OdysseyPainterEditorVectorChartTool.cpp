@@ -49,7 +49,7 @@ uint64
 UOdysseyPainterEditorVectorChartTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;
 }
@@ -60,9 +60,7 @@ UOdysseyPainterEditorVectorChartTool::LoadVector( FOdysseyVectorGroupPaint* iSce
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;
 }
@@ -106,8 +104,9 @@ UOdysseyPainterEditorVectorChartTool::OnKeyDownGlobalVector( FOdysseyVectorGroup
                                                                        : eChartEditionMode::Magnet;
         }
 
-        // force redraw
-        iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+        // Calling Update via Root will request a redraw even if root is not invalidated
+        iScene->GetRoot()->Invalidate( 0 );
+        iScene->GetSharedEnv()->Update( 0 );
     }
 
     return false;
@@ -131,7 +130,8 @@ UOdysseyPainterEditorVectorChartTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPa
       || ( key == EKeys::LeftAlt     ) || ( key == EKeys::RightAlt     ) )
     {
         // redraw
-        iScene->GetEngine()->Invalidate( 0 );
+        iScene->GetRoot()->Invalidate( 0 );
+        iScene->GetSharedEnv()->Update( 0 );
     }
 
     // first reset display mode
@@ -231,8 +231,9 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
             }
         }
     }
-    // request redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    // Calling Update via Root will request a redraw even if root is not invalidated
+    //iScene->GetRoot()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
     oSignalFlags = notificationFlags;
 
@@ -261,7 +262,8 @@ UOdysseyPainterEditorVectorChartTool::OnMouseHoverVector( FOdysseyVectorGroupPai
                                                     , iPointInTexture.y );
 
         // redraw
-        iScene->GetEngine()->Invalidate( 0 );
+        iScene->GetRoot()->Invalidate( 0 );
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
     }
 }
 
@@ -395,9 +397,8 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
     }
 
     // update ALL impacted scenes.
+    // It will request a redraw as well
     iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
-    // redraw the current scene as it might not be modified
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
 
     deltaPositionCumul = FVector2D( 0.0f, 0.0f );
 
@@ -440,12 +441,9 @@ uint64
 UOdysseyPainterEditorVectorChartTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FName& iPropertyName )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
+    iScene->GetRoot()->ResetHUD();
 
-    iEngine->ResetHUD();
-
-    // force redraw for this scene
-    iScene->Invalidate( 0 );
+    iScene->GetRoot()->Invalidate( 0 );
     iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;

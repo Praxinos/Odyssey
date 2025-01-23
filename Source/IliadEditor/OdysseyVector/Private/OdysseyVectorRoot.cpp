@@ -3,13 +3,23 @@
 
 #include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorLayer.h"
+#include "OdysseyVectorCell.h"
+#include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
+#include "HUD/OdysseyVectorHUD.h"
 
-FOdysseyVectorRoot::FOdysseyVectorRoot( IOdysseyVectorLayer* iLayer
+FOdysseyVectorCell::FOdysseyVectorCell( IOdysseyVectorLayer* iLayer
                                       , IOdysseyVectorCell* iCell
                                       , FOdysseyVectorGroupPaint* iScene )
     : FOdysseyVectorObject("ROOT")
-    , mEngine ( iLayer, iCell, this )
+    , mLayer ( iLayer )
+    , mCell ( iCell )
     , mScene ( nullptr )
+    , mSelectionSpace( nullptr )
+    //, mInvalidTileMap( 64, iCell->GetWidth(), iCell->GetHeight() )
+    , mInvalidatedRect( 0, 0, iLayer->GetWidth(), iLayer->GetHeight() )
 {
     bIsSystem = true;
 
@@ -17,7 +27,7 @@ FOdysseyVectorRoot::FOdysseyVectorRoot( IOdysseyVectorLayer* iLayer
 }
 
 bool
-FOdysseyVectorRoot::HasBaseClass( uint32 iBaseClassID )
+FOdysseyVectorCell::HasBaseClass( uint32 iBaseClassID )
 {
     if( mStaticClass == iBaseClassID )
     {
@@ -27,39 +37,267 @@ FOdysseyVectorRoot::HasBaseClass( uint32 iBaseClassID )
     return FOdysseyVectorObject::HasBaseClass( iBaseClassID );
 }
 
+std::list<FOdysseyVectorObject*>&
+FOdysseyVectorCell::GetSelectedObjectList()
+{
+    return mSelectedObjectList;
+}
+
+FOdysseyVectorObject*
+FOdysseyVectorCell::GetLastSelectedObject()
+{
+    return ( mSelectedObjectList.empty() == true ) ? nullptr : mSelectedObjectList.back();
+}
+
+void
+FOdysseyVectorCell::ClearObjectSelection()
+{
+    for( FOdysseyVectorObject *obj : mSelectedObjectList )
+    {
+        obj->SetSelected ( false );
+    }
+
+    mSelectedObjectList.clear();
+}
+
+void
+FOdysseyVectorCell::UnselectObject( FOdysseyVectorObject* iVecObj )
+{
+    iVecObj->SetSelected( false );
+
+    mSelectedObjectList.remove( iVecObj );
+}
+
+void
+FOdysseyVectorCell::SelectObject( FOdysseyVectorObject* iVecObj )
+{
+    if( std::find( mSelectedObjectList.begin(), mSelectedObjectList.end(), iVecObj ) == mSelectedObjectList.end() )
+    {
+        iVecObj->SetSelected( true );
+
+        mSelectedObjectList.push_back( iVecObj );
+    }
+}
+
 FOdysseyVectorGroupPaint*
-FOdysseyVectorRoot::GetScene()
+FOdysseyVectorCell::GetScene()
 {
     return static_cast<FOdysseyVectorGroupPaint*>(mChildrenList.front());
 }
 
-FOdysseyVectorEngine*
-FOdysseyVectorRoot::GetEngine()
+IOdysseyVectorLayer*
+FOdysseyVectorCell::GetLayer()
 {
-    return &mEngine;
+    return mLayer;
+}
+
+IOdysseyVectorCell*
+FOdysseyVectorCell::GetCell()
+{
+    return mCell;
+}
+
+BLImage*
+FOdysseyVectorCell::GetBLMask()
+{
+    return mBLMask;
 }
 
 void
-FOdysseyVectorRoot::Invalidate( uint64 iInvalidationFlags )
+FOdysseyVectorCell::SetBLMask( BLImage* iBLMask )
+{
+    mBLMask = iBLMask;
+}
+
+void
+FOdysseyVectorCell::Invalidate( uint64 iInvalidationFlags )
 {
     FOdysseyVectorObject::Invalidate( iInvalidationFlags );
 }
 
 void
-FOdysseyVectorRoot::Update( uint32 iUpdateFlags )
+FOdysseyVectorCell::InvalidateRect()
 {
-    FOdysseyVectorObject::Update( iUpdateFlags );
+    mInvalidatedRect = ::ULIS::FRectD( 0.0f, 0.0f, DBL_MAX, DBL_MAX );
+}
 
-    if( ( iUpdateFlags & UPDATE_NORENDER ) == 0 )
+void
+FOdysseyVectorCell::InvalidateRect( const ::ULIS::FRectD& iRect )
+{
+    ::ULIS::FRectD extendedRect = iRect;
+
+    // extended the rectangle a bit in order to be sure to invalidate the borders
+    extendedRect.x -= 2;
+    extendedRect.y -= 2;
+    extendedRect.w += 4;
+    extendedRect.h += 4;
+
+    if( mInvalidatedRect.Area() == 0.0f )
     {
-        // request redraw
-        mEngine.Invalidate( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) ? FOdysseyVectorEngine::INVALIDATE_INTERACTIVE
-                                                                                        : 0 );
+        mInvalidatedRect = extendedRect;
+    }
+    else // combine the rectangles
+    {
+        mInvalidatedRect = mInvalidatedRect | extendedRect;
+    }
+}
+
+std::list<FOdysseyVectorHUD*>&
+FOdysseyVectorCell::GetHUDList()
+{
+    return mHUDList;
+}
+
+void
+FOdysseyVectorCell::AddHUD( FOdysseyVectorHUD* iHUDObject )
+{
+    GetHUDList().push_back( iHUDObject );
+}
+
+void
+FOdysseyVectorCell::RemoveHUD( FOdysseyVectorHUD* iHUDObject )
+{
+    GetHUDList().remove( iHUDObject );
+}
+
+void
+FOdysseyVectorCell::ClearHUD()
+{
+    GetHUDList().clear();
+}
+
+void
+FOdysseyVectorCell::ResetHUD()
+{
+    FOdysseyVectorGroupPaint* scene = GetScene();
+
+    for( FOdysseyVectorHUD *hud : GetHUDList() )
+    {
+        hud->Reset( scene );
     }
 }
 
 void
-FOdysseyVectorRoot::SetScene( FOdysseyVectorGroupPaint* iScene )
+FOdysseyVectorCell::SetSelectionSpace( FOdysseyVectorGroup* iSelectionSpace )
+{
+   mSelectionSpace = iSelectionSpace;
+}
+
+FOdysseyVectorGroup*
+FOdysseyVectorCell::GetSelectionSpace()
+{
+    return mSelectionSpace;
+}
+
+// static
+void
+FOdysseyVectorCell::RecursivePick( FOdysseyVectorGroup* iSelectionSpace
+                                 , FOdysseyVectorObject* iObj
+                                 , std::vector<FOdysseyVectorObject*>& oSelectedObjectArray
+                                 , const ::ULIS::FRectD& iRoi
+                                 , uint32 iSelectionFlags )
+{
+    FOdysseyVectorObject* pickedObject = ( iObj != iSelectionSpace ) ? iObj->Pick( iSelectionSpace, iRoi, iSelectionFlags ) : nullptr;
+
+    for( FOdysseyVectorObject* child : iObj->GetChildrenList() )
+    {
+        RecursivePick( iSelectionSpace, child, oSelectedObjectArray, iRoi, iSelectionFlags );
+    }
+
+    if( pickedObject )
+    {
+        oSelectedObjectArray.push_back( pickedObject );
+    }
+}
+
+void
+FOdysseyVectorCell::Pick( FOdysseyVectorGroupPaint* iScene
+                          , const ::ULIS::FRectD& iRoi
+                          , std::vector<FOdysseyVectorObject*>& oPickedObjectArray
+                          , uint32 iSelectionFlags )
+{
+    RecursivePick( mSelectionSpace ? mSelectionSpace : iScene, iScene, oPickedObjectArray, iRoi, iSelectionFlags );
+/*
+    if( iSelectionFlags & FOdysseyVectorObject::PICK_MASK_BASED )
+    {
+        UseColorImage();
+    }
+*/
+}
+
+::ULIS::FRectD
+FOdysseyVectorCell::GetInvalidatedRect()
+{
+    return mInvalidatedRect;
+}
+
+void
+FOdysseyVectorCell::SelectAllInSelectionSpace()
+{
+    FOdysseyVectorGroupPaint* scene = GetScene();
+
+    // TODO: set scene as the default selection space
+    FOdysseyVectorGroup* selectionSpace = mSelectionSpace ? mSelectionSpace : scene;
+
+    ClearObjectSelection();
+
+    for( FOdysseyVectorObject *child : selectionSpace->GetChildrenList() )
+    {
+        SelectObject( child );
+    }
+}
+
+void
+FOdysseyVectorCell::GetSelectedVerticesFromFocusedObjects( std::vector<FOdysseyVectorVertex*>& oVertexArray )
+{
+    FOdysseyVectorGroupPaint* scene = GetScene();
+
+    FOdysseyVectorObject::Traverse(
+        scene
+      , 0
+      , [ scene
+        , this
+        , &oVertexArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+        {
+            if( ObjectHasFocus( object, traversalFlags ) )
+            {
+                if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+                {
+                    FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+
+                    for( FOdysseyVectorVertex* vertex : path->GetSelectedVertexList() )
+                    {
+                        oVertexArray.push_back( vertex );
+                    }
+                }
+
+                return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
+            }
+
+            return 0;
+        } );
+}
+
+FOdysseyVectorCell::FRequestRedrawDelegate&
+FOdysseyVectorCell::OnRequestRedrawDelegate()
+{
+    return mOnRequestRedrawDelegate;
+}
+
+void
+FOdysseyVectorCell::Update( uint32 iUpdateFlags )
+{
+    FOdysseyVectorObject::Update( iUpdateFlags );
+
+    if( ( iUpdateFlags & UPDATE_NOREDRAW ) == 0 )
+    {
+        mOnRequestRedrawDelegate.Broadcast( GetScene(), ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) ? FOdysseyVectorCell::REDRAW_INTERACTIVE
+                                                                                                                    : 0 );
+    }
+}
+
+void
+FOdysseyVectorCell::SetScene( FOdysseyVectorGroupPaint* iScene )
 {
     if( mScene )
     {
@@ -68,9 +306,268 @@ FOdysseyVectorRoot::SetScene( FOdysseyVectorGroupPaint* iScene )
 
     AppendChild( iScene );
 
-    mEngine.ResetHUD();
+    //mEngine.ResetHUD();
 
     mScene = iScene;
     mScene->UpdateMatrix();
-    mScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+}
+
+void
+FOdysseyVectorCell::GetSelectedInbetweenerTagList( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList )
+{
+    for( FOdysseyVectorObject* selectedObject : mSelectedObjectList )
+    {
+        FOdysseyVectorTag* tag = selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+        if( tag )
+        {
+            FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+            oSelectedInbetweenerTagList.push_back( inbetweenerTag );
+        }
+    }
+}
+
+void
+FOdysseyVectorCell::GetFocusedInbetweenerTagList( std::list<FOdysseyVectorTagInbetweener*>& oFocusedInbetweenerTagList )
+{
+    FOdysseyVectorGroupPaint* scene = GetScene();
+
+    FOdysseyVectorObject::Traverse
+    ( scene
+    , 0
+    , [ this
+      , scene
+      , &oFocusedInbetweenerTagList ]( FOdysseyVectorObject* object
+                                     , uint64 travesalFlags ) -> uint64
+      {
+          if( ObjectHasFocus( object, travesalFlags ) )
+          {
+              FOdysseyVectorTag* tag = object->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() );
+
+              if( tag )
+              {
+                  FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
+
+                  oFocusedInbetweenerTagList.push_back( inbetweenerTag );
+
+                  return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
+              }
+          }
+
+          return 0;
+      } );
+}
+
+bool
+FOdysseyVectorCell::ObjectHasFocus( FOdysseyVectorObject* iObject
+                                  , uint64 iTraversalFlags )
+{
+    if( iObject->IsSelected() )
+    {
+        return true;
+    }
+
+    if( GetSelectedObjectList().size() == 0 )
+    {
+        return true;
+    }
+
+    if( iTraversalFlags & FOdysseyVectorObject::TRAVERSE_PARENT_HASFOCUS )
+    {
+        return true;
+    }
+
+    return false;
+}
+
+void
+FOdysseyVectorCell::GetFocusedAncestorList( std::list<FOdysseyVectorObject*>& oObjectList )
+{
+    FOdysseyVectorGroupPaint* scene = GetScene();
+
+    FOdysseyVectorObject::Traverse
+    ( scene
+    , 0
+    , [ this
+      , scene
+      , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( ObjectHasFocus( object, traversalFlags ) )
+          {
+              oObjectList.push_back( object );
+
+              return FOdysseyVectorObject::TRAVERSE_OBJECT_IGNORE_CHILDREN;
+          }
+
+          return 0;
+      } );
+}
+
+void
+FOdysseyVectorCell::GetFocusedObjectList( std::list<FOdysseyVectorObject*>& oObjectList )
+{
+    FOdysseyVectorGroupPaint* scene = GetScene();
+
+    FOdysseyVectorObject::Traverse
+    ( scene
+    , 0
+    , [ this
+      , scene
+      , &oObjectList ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( ObjectHasFocus( object, traversalFlags ) )
+          {
+              oObjectList.push_back( object );
+
+              return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
+}
+
+void
+FOdysseyVectorCell::PickPathPoints( FOdysseyVectorGroupPaint* iScene
+                                  , double iWorldX
+                                  , double iWorldY
+                                  , double iWorldRadius
+                                  , uint64 iPickingFlags
+                                  , bool iStopAtFirstSuccess
+                                  , std::vector<FOdysseyVectorVertex*>& oPickedVertexArray
+                                  , std::vector<FOdysseyVectorHandleSegment*>& oPickedHandleArray )
+{
+    FOdysseyVectorGroupPaint* scene = GetScene();
+
+    FOdysseyVectorObject::Traverse
+    ( scene
+    , 0
+    , [ this
+      , scene
+      , iScene
+      , &iWorldX
+      , &iWorldY
+      , &iWorldRadius
+      , &iPickingFlags
+      , &iStopAtFirstSuccess
+      , &oPickedVertexArray
+      , &oPickedHandleArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      {
+          if( ObjectHasFocus( object, traversalFlags ) )
+          {
+              if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+              {
+                  FOdysseyVectorPath* path = static_cast<FOdysseyVectorPath*>(object);
+
+                  if( path->PickPoint( iWorldX
+                                     , iWorldY
+                                     , iWorldRadius
+                                     , oPickedVertexArray
+                                     , oPickedHandleArray
+                                     , iPickingFlags ) )
+                  {
+                      if( iStopAtFirstSuccess )
+                      {
+                          return FOdysseyVectorObject::TRAVERSE_STOP;
+                      }
+                  }
+              }
+
+              return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
+          }
+
+          return 0;
+      } );
+}
+
+// static
+FOdysseyVectorVertex*
+FOdysseyVectorCell::Stitch( FOdysseyVectorVertex* iVertexA
+                          , FOdysseyVectorVertex* iVertexB
+                          , std::vector<FOdysseyVectorSegment*>& oAddedSegmentArray
+                          , std::vector<FOdysseyVectorSegment*>& oRemovedSegmentArray
+                          , bool iSmooth )
+{
+    if( ( iVertexA->GetSegmentCount() == 1 )
+     && ( iVertexB->GetSegmentCount() == 1 )
+     && ( iVertexA->GetOwnerAsPath() == iVertexB->GetOwnerAsPath() ) )
+    {
+        ::ULIS::FVec2D& vertexACoords = iVertexA->GetCoords();
+        ::ULIS::FVec2D& vertexBCoords = iVertexB->GetCoords();
+        ::ULIS::FVec2D averageCoords = ( vertexACoords + vertexBCoords ) * 0.5f;
+        double vertexARadius = iVertexA->GetRadius();
+        double vertexBRadius = iVertexB->GetRadius();
+        double averageRadius = ( vertexARadius + vertexBRadius ) * 0.5f;
+        FOdysseyVectorPath* path = iVertexA->GetOwnerAsPath();
+
+        if( path->GetClass() == FOdysseyVectorPath::StaticClass() )
+        {
+            FOdysseyVectorPath* cubicPath = static_cast<FOdysseyVectorPath*>(path);
+            FOdysseyVectorSegmentCubic* vertexBSegment = static_cast<FOdysseyVectorSegmentCubic*>(iVertexB->GetFirstSegment());
+            FOdysseyVectorSegmentCubic* vertexASegment = static_cast<FOdysseyVectorSegmentCubic*>(iVertexA->GetFirstSegment());
+            FOdysseyVectorVertex* prevVertex = static_cast<FOdysseyVectorVertex*>(vertexASegment->GetOtherVertex( iVertexA ));
+            FOdysseyVectorVertex* nextVertex = static_cast<FOdysseyVectorVertex*>(vertexBSegment->GetOtherVertex( iVertexB ));
+            FOdysseyVectorVertex* knotVertex = new FOdysseyVectorVertex( averageCoords.x, averageCoords.y, averageRadius );
+            FOdysseyVectorSegmentCubic* newCubicSegment[2] = { new FOdysseyVectorSegmentCubic( cubicPath
+                                                                                            ,  prevVertex
+                                                                                            ,  knotVertex
+                                                                                            ,  true ),
+                                                               new FOdysseyVectorSegmentCubic( cubicPath
+                                                                                            ,  knotVertex
+                                                                                            ,  nextVertex
+                                                                                            ,  true ) };
+            ::ULIS::FVec2D vertexAToHandle = vertexASegment->GetHandle( iVertexA  )->GetCoords() - iVertexA->GetCoords();
+            ::ULIS::FVec2D vertexBToHandle = vertexBSegment->GetHandle( iVertexB  )->GetCoords() - iVertexB->GetCoords();
+
+            newCubicSegment[0]->GetHandle(0)->Set( vertexASegment->GetHandle(prevVertex)->GetCoords() );
+            newCubicSegment[0]->GetHandle(1)->Set( knotVertex->GetCoords() + vertexAToHandle );
+            newCubicSegment[1]->GetHandle(0)->Set( knotVertex->GetCoords() + vertexBToHandle );
+            newCubicSegment[1]->GetHandle(1)->Set( vertexBSegment->GetHandle(nextVertex)->GetCoords() );
+
+            path->RemoveSegment( vertexASegment );
+            path->RemoveSegment( vertexBSegment );
+            path->RemoveVertex( iVertexA );
+            path->RemoveVertex( iVertexB );
+
+            oRemovedSegmentArray.push_back( vertexASegment );
+            oRemovedSegmentArray.push_back( vertexBSegment );
+
+            path->AddVertex( knotVertex );
+            path->AddSegment( newCubicSegment[0] );
+            path->AddSegment( newCubicSegment[1] );
+
+            oAddedSegmentArray.push_back( newCubicSegment[0] );
+            oAddedSegmentArray.push_back( newCubicSegment[1] );
+/*
+            if( iSmooth )
+            {
+                FOdysseyVectorPath::SmoothSegments( knotVertex, false, true );
+            }
+*/
+            path->InvalidateAllSegments();
+
+            //mScene->Update( 0 );
+
+            return knotVertex;
+        }
+    }
+
+    return nullptr;
+}
+
+void
+FOdysseyVectorCell::RemoveObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                                 , std::vector<FOdysseyVectorObject*>& oRemovedObjectArray )
+{
+    for( FOdysseyVectorObject* vectorObject : iObjectList )
+    {
+        if( vectorObject != GetScene() )
+        {
+            if( vectorObject->GetParent()->RemoveChild( vectorObject ) == FOdysseyVectorObject::HIERARCHY_CHANGE_SUCCESS )
+            {
+                oRemovedObjectArray.push_back( vectorObject );
+            }
+        }
+    }
 }

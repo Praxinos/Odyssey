@@ -10,6 +10,8 @@
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorLayer.h"
+#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorSharedEnv.h"
 #include "Undo/OdysseyVectorUndoObjectTransform.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -46,8 +48,8 @@ UOdysseyPainterEditorVectorScenePanTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorScenePanTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    // Update and redraw just in case
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;
 }
@@ -56,10 +58,8 @@ uint64
 UOdysseyPainterEditorVectorScenePanTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-    // redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    // side note: updating via root will request a redraw as well
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;
 }
@@ -94,7 +94,8 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
     mDownLocalMouseY = localCoords.y;
 
     // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    //iScene->GetRoot()->GetCellEngine()->Invalidate( iScene, FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
     oSignalFlags = notificationFlags;
 
     return true;
@@ -128,9 +129,8 @@ UOdysseyPainterEditorVectorScenePanTool::Scale( FOdysseyVectorEngine* iEngine
                                               , const FOdysseyPoint& iPointInTexture )
 {
     BLPoint worldMouseCoordsBefore = iScene->GetWorldMatrix().mapPoint( mDownLocalMouseX, mDownLocalMouseY );
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint32 imageWidth = vectorEngine->GetLayer()->GetWidth();
-    uint32 imageHeight = vectorEngine->GetLayer()->GetHeight();
+    uint32 imageWidth = iScene->GetRoot()->GetLayer()->GetWidth();
+    uint32 imageHeight = iScene->GetRoot()->GetLayer()->GetHeight();
     double factor;
 
     factor = (double) iPointInTexture.deltaPosition.X / imageWidth;
@@ -181,7 +181,8 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorGroupP
     }
 
     // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
     oSignalFlags = notificationFlags;
 }
 
@@ -191,10 +192,11 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorGroupPai
                                                         , const FKey& iKey
                                                         , uint64& oSignalFlags )
 {
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetRoot()->Invalidate(0);
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     // redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    //iScene->GetEngine()->Invalidate( 0 );
 
     return true;
 }

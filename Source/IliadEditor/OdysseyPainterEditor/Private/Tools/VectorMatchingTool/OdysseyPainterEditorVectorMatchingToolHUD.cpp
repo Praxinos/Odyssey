@@ -5,6 +5,7 @@
 #include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingTool.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorTagInbetweener.h"
@@ -72,7 +73,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
             {
                 FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
                 FOdysseyVectorGroupPaint* inbetweenerTagScene = inbetweenerTag->GetOwner()->GetScene();
-                uint32 currentCellIndex = iScene->GetEngine()->GetCell()->GetIndex();
+                uint32 currentCellIndex = iScene->GetRoot()->GetCell()->GetIndex();
 
                 inbetweenerTag->LockDrawing();
 

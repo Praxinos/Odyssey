@@ -29,11 +29,6 @@ FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatchi
     for( FInbetweenerBreakdown* breakdown : iBreakdownList )
     {
         FOdysseyVectorEngine* engine = breakdown->GetInbetweenerTag()->GetOwner()->GetEngine();
-
-        if( std::find( mEngineList.begin(), mEngineList.end(), engine ) == mEngineList.end() )
-        {
-            mEngineList.push_back( engine );
-        }
     }
 
     mBreakdownSnapshotBuffer.reserve( iBreakdownList.size() );
@@ -50,17 +45,6 @@ FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatchi
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
     uint32 breakdownCount = 0;
-
-    // we build a list of engines we will need to redraw
-    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
-    {
-        FOdysseyVectorEngine* engine = inbetweenerTag->GetOwner()->GetEngine();
-
-        if( std::find( mEngineList.begin(), mEngineList.end(), engine ) == mEngineList.end() )
-        {
-            mEngineList.push_back( engine );
-        }
-    }
 
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
     {

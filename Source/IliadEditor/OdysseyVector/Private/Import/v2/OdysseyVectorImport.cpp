@@ -7,6 +7,8 @@
 #include "OdysseyFile.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorImportV2::~FOdysseyVectorImportV2()
 {
@@ -72,8 +74,9 @@ FOdysseyVectorImportV2::Read( FOdysseyVectorGroupPaint* iScene, FArchive &Ar, ui
             } );
 
         iScene->UpdateMatrix();
-        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS
-                      | FOdysseyVectorObject::UPDATE_FROMFILE );
+        // Note: updating via Root will request a redraw as well
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS
+                                      | FOdysseyVectorObject::UPDATE_FROMFILE );
     }
 
     // Jump to the end of the junk, regardless of the fact that we've read nested chunks or not.

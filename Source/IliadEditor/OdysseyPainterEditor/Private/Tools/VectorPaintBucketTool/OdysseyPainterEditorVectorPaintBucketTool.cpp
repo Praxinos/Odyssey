@@ -17,6 +17,8 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorBucket.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorSharedEnv.h"
 #include "Undo/OdysseyVectorUndoPointPosition.h"
 #include "Undo/OdysseyVectorUndoBucketAdd.h"
 #include "Undo/OdysseyVectorUndoBucketRemove.h"
@@ -63,8 +65,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorPaintBucketTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    // force invalidation for redrawing
+    iScene->GetRoot()->Invalidate( 0 );
+    // request redraw
+    iScene->GetSharedEnv()->Update( 0 );
 
     return 0;
 }
@@ -82,10 +86,8 @@ UOdysseyPainterEditorVectorPaintBucketTool::LoadVector( FOdysseyVectorGroupPaint
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-    // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    // Note: it will request a redraw as well if necessary
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;
 }
@@ -106,8 +108,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnKeyDownGlobalVector( FOdysseyVecto
         {
             mShowControls = true;
 
-            // force redraw
-            iScene->GetEngine()->Invalidate( 0 );
+            // force invalidation for redrawing
+            iScene->GetRoot()->Invalidate( 0 );
+            // Request redraw
+            iScene->GetSharedEnv()->Update( 0 );
 
             return true;
         }
@@ -128,8 +132,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnKeyUpGlobalVector( FOdysseyVectorG
     if ( ( key == EKeys::LeftControl ) || ( key == EKeys::RightControl )
       || ( key == EKeys::LeftCommand ) || ( key == EKeys::RightCommand ) )
     {
-        // force redraw
-        iScene->GetEngine()->Invalidate( 0 );
+        // force invalidation for redrawing
+        iScene->GetRoot()->Invalidate( 0 );
+        // Request redraw
+        iScene->GetSharedEnv()->Update( 0 );
 
         return true;
     }
@@ -250,7 +256,11 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseHoverVector( FOdysseyVectorGr
                                                               , uint64& oSignalFlags )
 {
     mBucketHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    // force invalidation for redrawing
+    iScene->GetRoot()->Invalidate( 0 );
+    // Calling Update via Root will request a redraw even if root is not invalidated
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 }
 
 double
@@ -344,9 +354,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDragVector( FOdysseyVectorGro
 
     mOldPointInTexture = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
 
-    iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE ); // update vector scene
-
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 }
 
 void
@@ -637,10 +645,10 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroup
 
         mPickedBucket = nullptr;
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        // Side note : Udating via root will request a redraw as well
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
-    iScene->GetEngine()->Invalidate( 0 );
     oSignalFlags = notificationFlags;
 
     return true;

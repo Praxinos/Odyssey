@@ -26,8 +26,6 @@ FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorGrou
                                                             , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mBucketSnapshotArray.push_back( FSnapshotBucket( iBucket, FSnapshotFlags::Point::Bucket::PARAM ));
 }
 
@@ -38,8 +36,6 @@ FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorGrou
                                                             , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mAddedBucketArray = iAddedBucketArray;
 
     mBucketSnapshotArray.reserve( iBucketArray.size() );

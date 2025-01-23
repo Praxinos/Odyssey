@@ -22,6 +22,7 @@
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTag.h"
 #include "OdysseyVectorTagInbetweener.h"
@@ -135,7 +136,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_SelectRangeFromCu
         FOdysseyVectorObject* fromObject = RangeSelectionStart.Get()->GetInbetweenerTag()->GetOwner();
         FOdysseyVectorObject* toObject = iItem.Get()->GetInbetweenerTag()->GetOwner();
         FOdysseyVectorObject* vectorObject = mItemsSource[0].Get()->GetInbetweenerTag()->GetOwner();
-        FOdysseyVectorEngine* vectorEngine = fromObject->GetEngine();
+        FOdysseyVectorRoot* vectorRoot = fromObject->GetRoot();
         bool doSelect = false;
 
         for( const TSharedPtr<FInbetweeningListViewItem>& rangeItem : GetItems() )
@@ -146,7 +147,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_SelectRangeFromCu
             {
                 if( rangeItemObject->IsSelected() == false )
                 {
-                    vectorEngine->SelectObject( rangeItemObject );
+                    vectorRoot->SelectObject( rangeItemObject );
                     // Keep internal array consistent for use by other methods
                     SelectedItems.Add( rangeItem );
                 }
@@ -159,7 +160,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_SelectRangeFromCu
                 {
                     if( rangeItemObject->IsSelected() == false )
                     {
-                        vectorEngine->SelectObject( rangeItemObject );
+                        vectorRoot->SelectObject( rangeItemObject );
                         // Keep internal array consistent for use by other methods
                         SelectedItems.Add( rangeItem );
                     }
@@ -175,11 +176,11 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_SetItemSelection 
                                                                                 , bool bWasUserDirected )
 {
     FOdysseyVectorObject* vectorObject = iItem.Get()->GetInbetweenerTag()->GetOwner();
-    FOdysseyVectorEngine* vectorEngine = vectorObject->GetEngine();
+    FOdysseyVectorRoot* vectorRoot = vectorObject->GetRoot();
 
     if( bShouldBeSelected )
     {
-        vectorEngine->SelectObject( vectorObject );
+        vectorRoot->SelectObject( vectorObject );
         // Keep internal array consistent for use by other methods
         SelectedItems.Add( iItem );
 
@@ -187,7 +188,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_SetItemSelection 
     }
     else
     {
-        vectorEngine->UnselectObject( vectorObject );
+        vectorRoot->UnselectObject( vectorObject );
         // Keep internal array consistent for use by other methods
         SelectedItems.Remove( iItem );
     }
@@ -200,9 +201,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_ClearSelection()
     {
         // the scene
         FOdysseyVectorObject* vectorObject = mItemsSource[0].Get()->GetInbetweenerTag()->GetOwner();
-        FOdysseyVectorEngine* vectorEngine = vectorObject->GetEngine();
+        FOdysseyVectorRoot* vectorRoot = vectorObject->GetRoot();
 
-        vectorEngine->ClearObjectSelection();
+        vectorRoot->ClearObjectSelection();
     }
 
     // Keep internal array consistent for use by other methods
@@ -329,7 +330,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
 
         for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
         {
-            uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetEngine()->GetCell()->GetIndex();
+            uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetRoot()->GetCell()->GetIndex();
             int32 drawingIndex = inbetweenerTag->GetDrawingIndexFromCellIndex( breakdownCellIndex );
             FInbetweenerBreakdown* curBreakdown = inbetweenerTag->GetBreakdown( drawingIndex, true );
 
@@ -389,7 +390,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
 
         for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
         {
-            uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetEngine()->GetCell()->GetIndex();
+            uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetRoot()->GetCell()->GetIndex();
             FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
             int32 drawingIndex = inbetweenerTag->GetDrawingIndexFromCellIndex( breakdownCellIndex );
             FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdown( drawingIndex, false );
@@ -427,7 +428,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
 
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
     {
-        uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetEngine()->GetCell()->GetIndex();
+        uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetRoot()->GetCell()->GetIndex();
         FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
         int32 drawingIndex = inbetweenerTag->GetDrawingIndexFromCellIndex( breakdownCellIndex );
         FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdown( drawingIndex, false );

@@ -15,6 +15,7 @@
 #include "ISinglePropertyView.h"
 #include "Toolkits/BaseToolkit.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorTagInbetweener.h"
@@ -140,7 +141,7 @@ UOdysseyPainterEditorVectorBaseTool::PickSegments( FOdysseyVectorGroupPaint* iSc
 
     oPickedSegmentArray.clear();
 
-    vectorEngine->Traverse
+    FOdysseyVectorObject::Traverse
     ( iScene
     , 0
     , [ iScene
@@ -154,7 +155,7 @@ UOdysseyPainterEditorVectorBaseTool::PickSegments( FOdysseyVectorGroupPaint* iSc
       , &oPickedSegmentArray
       , &distanceArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) || ( iRestrictToSelection == false ) )
+          if( iScene->GetRoot()->ObjectHasFocus( object, traversalFlags ) || ( iRestrictToSelection == false ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
@@ -168,11 +169,11 @@ UOdysseyPainterEditorVectorBaseTool::PickSegments( FOdysseyVectorGroupPaint* iSc
 
                   if( oPickedSegmentArray.size() && iStopImmediately )
                   {
-                      return FOdysseyVectorEngine::TRAVERSE_STOP;
+                      return FOdysseyVectorObject::TRAVERSE_STOP;
                   }
               }
 
-              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+              return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
           }
 
           return 0;
@@ -200,15 +201,14 @@ UOdysseyPainterEditorVectorBaseTool::GetSelectedVertices( FOdysseyVectorGroupPai
 
     oSelectedVertexArray.clear();
 
-    vectorEngine->Traverse
+    FOdysseyVectorObject::Traverse
     ( iScene
     , 0
     , [ this
       , iScene
-      , vectorEngine
       , &oSelectedVertexArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
+          if( iScene->GetRoot()->ObjectHasFocus( object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
@@ -217,7 +217,7 @@ UOdysseyPainterEditorVectorBaseTool::GetSelectedVertices( FOdysseyVectorGroupPai
                   path->GetSelectedVertices( oSelectedVertexArray );
               }
 
-              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+              return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
           }
 
           return 0;
@@ -271,7 +271,8 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
             if( mBaseHUD )
             {
                 mBaseHUD->Unload( vectorScene );
-                vectorEngine->RemoveHUD( mBaseHUD );
+
+                vectorScene->GetRoot()->RemoveHUD( mBaseHUD );
             }
         }
     }
@@ -297,17 +298,16 @@ UOdysseyPainterEditorVectorBaseTool::Load()
         if( mediaVectors.Num() > 0 )
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
             uint64 notificationFlags;
 
-            vectorEngine->ClearHUD();
+            vectorScene->GetRoot()->ClearHUD();
 
             if( mBaseHUD )
             {
                 mBaseHUD->Load( vectorScene );
 
-                vectorEngine->AddHUD( mBaseHUD );
-                vectorEngine->ResetHUD();
+                vectorScene->GetRoot()->AddHUD( mBaseHUD );
+                vectorScene->GetRoot()->ResetHUD();
             }
 
             notificationFlags = LoadVector( vectorScene );
@@ -357,8 +357,11 @@ UOdysseyPainterEditorVectorBaseTool::OnKeyDownVector( FOdysseyVectorGroupPaint* 
     {
         Delete();
         // force redraw
-        iScene->GetEngine()->Invalidate( 0 );
+        iScene->GetRoot()->Invalidate( 0 );
+        iScene->GetSharedEnv()->Update( 0 );
+
         oSignalFlags = 0;
+
         return true;
     }
 
@@ -1189,7 +1192,7 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuObject( FOdysseyVectorGrou
 void
 UOdysseyPainterEditorVectorBaseTool::MakeDemoBrush( FOdysseyVectorGroupPaint* iScene )
 {
-   std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetEngine()->GetSelectedObjectList();
+   std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetRoot()->GetSelectedObjectList();
 /*
    FOdysseyVectorBrush::MakeDemoBrush( selectedObjectList
                                      , FOdysseyVectorObject::GetBoundingBoxFromList( selectedObjectList ) );
@@ -1250,7 +1253,7 @@ UOdysseyPainterEditorVectorBaseTool::ExtendContextMenuInbetween( FOdysseyVectorG
 // See FOdysseyPainterEditor::AddEditMenuEntry() for details
 //     menu.BeginSection("Context");
 //     {
-    if( iScene->GetEngine()->GetSelectedObjectList().size() > 1 )
+    if( iScene->GetRoot()->GetSelectedObjectList().size() > 1 )
     {
         menu.AddMenuEntry(
                   LOCTEXT("vector-tool.inbetween-context-menu.groupadd-inbetweener-tag.name", "Group and Add Inbetweener Grid")
@@ -1324,7 +1327,7 @@ UOdysseyPainterEditorVectorBaseTool::CanAddTag( FOdysseyVectorGroupPaint* iScene
 {
     bool ret = false;
 
-    for( FOdysseyVectorObject* selectedObject : iScene->GetEngine()->GetSelectedObjectList() )
+    for( FOdysseyVectorObject* selectedObject : iScene->GetRoot()->GetSelectedObjectList() )
     {
         if( selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() ) )
         {
@@ -1475,7 +1478,7 @@ UOdysseyPainterEditorVectorBaseTool::MakeTest( FOdysseyVectorGroupPaint* iScene 
     iScene->AppendChild( ellipse->Convert() );
 
     iScene->UpdateMatrix();
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 }
 
 EMouseCursor::Type

@@ -13,6 +13,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyAnimation.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
@@ -238,7 +239,8 @@ FOdysseyAnimationEditorGUI::OnCurrentFrameChanged( UOdysseyAnimation* iAnimation
             ParseVectorNotifications( vectorScene, notificationFlags );
 
             // force redraw after snudging the timeline
-            vectorScene->GetEngine()->Invalidate( 0 );
+            vectorScene->GetRoot()->Invalidate( 0 );
+            vectorScene->GetSharedEnv()->Update( 0 );
         }
         else
         {
@@ -323,7 +325,7 @@ FOdysseyAnimationEditorGUI::ParseVectorNotifications( FOdysseyVectorGroupPaint* 
     {
         if( iScene )
         {
-            iScene->GetEngine()->ResetHUD();
+            iScene->GetRoot()->ResetHUD();
         }
     }
 }
@@ -345,9 +347,8 @@ FOdysseyAnimationEditorGUI::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScen
             if (cell && cell->IsA<UOdysseyAnimationCellImageVector>())
             {
                 UOdysseyAnimationCellImageVector* cellVector = Cast<UOdysseyAnimationCellImageVector>(cell);
-                FOdysseyVectorEngine* vectorEngine = cellVector->GetEngine();
                 // Note: iScene is ignored. We update the widget according to the current scene if any.
-                FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
+                FOdysseyVectorGroupPaint* vectorScene = cellVector->GetScene();
                 ParseVectorNotifications( vectorScene, iNotificationFlags );
                 return;
             }

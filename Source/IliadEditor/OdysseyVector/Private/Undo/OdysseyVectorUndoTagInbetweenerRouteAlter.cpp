@@ -31,7 +31,6 @@ FOdysseyVectorUndoTagInbetweenerRouteAlter::FOdysseyVectorUndoTagInbetweenerRout
                     , ( FSnapshotFlags::Trajectory::BEZIER
                       | FSnapshotFlags::Trajectory::WAYPOINTS ) )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
 }
 
 void

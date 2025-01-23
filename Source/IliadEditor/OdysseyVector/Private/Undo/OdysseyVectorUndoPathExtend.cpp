@@ -37,7 +37,6 @@ FOdysseyVectorUndoPathExtend::FOdysseyVectorUndoPathExtend( FOdysseyVectorGroupP
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mPath( iPath )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
 }
 
 void

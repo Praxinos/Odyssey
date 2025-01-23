@@ -32,6 +32,14 @@ UOdysseyTextureLayerImageVector::~UOdysseyTextureLayerImageVector()
     // bind refresh function to delegates on existing vector scenes at load. Needed to refresh necessary widgets.
     if (mVectorBlock)
         mVectorBlock->OnInvalidated().RemoveAll( this );
+
+    if (mRoot)
+    {
+        if( mRoot->GetParent() )
+        {
+            mRoot->GetParent()->RemoveChild( mRoot.Get() );
+        }
+    }
 }
 
 UOdysseyTextureLayerImageVector::UOdysseyTextureLayerImageVector()
@@ -47,19 +55,17 @@ UOdysseyTextureLayerImageVector::Init( uint32 iWidth, uint32 iHeight )
     Width  = iWidth;
     Height = iHeight;
 
-    mRoot = new FOdysseyVectorRoot( this
-                                  , this
-                                  , new FOdysseyVectorGroupPaint( "Scene" ) );
+    mRoot = MakeShared<FOdysseyVectorRoot>( this
+                                          , this
+                                          , new FOdysseyVectorGroupPaint( "Scene" ) );
 
-    mSharedEnv.AppendChild( mRoot );
+    mSharedEnv.AppendChild( mRoot.Get() );
 }
 
-
-
-FOdysseyVectorEngine*
-UOdysseyTextureLayerImageVector::GetEngine()
+FOdysseyVectorRoot*
+UOdysseyTextureLayerImageVector::GetRoot()
 {
-    return mRoot->GetEngine();
+    return mRoot.Get();
 }
 
 FOdysseyMediaProvider
@@ -99,7 +105,7 @@ UOdysseyTextureLayerImageVector::PostInitProperties()
 
         mVectorBlockId = FGuid::NewGuid();
         mVectorBlock = MakeShared<FOdysseyVectorBlock>();
-        mVectorBlock->Init(mVectorBlockId, mRoot->GetEngine(), Width, Height, format);
+        mVectorBlock->Init(mVectorBlockId, mRoot, Width, Height, format);
         mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
     }
 }
@@ -122,7 +128,7 @@ UOdysseyTextureLayerImageVector::PostLoad()
         format = static_cast< ::ULIS::eFormat >(format | ULIS_W_ALPHA( 1 ) );
 
         mVectorBlock = MakeShared<FOdysseyVectorBlock>();
-        mVectorBlock->Init(mVectorBlockId, mRoot->GetEngine(), Width, Height, format);
+        mVectorBlock->Init(mVectorBlockId, mRoot, Width, Height, format);
         mVectorBlock->OnInvalidated().AddUObject(this, &UOdysseyTextureLayerImageVector::OnVectorBlockInvalidated);
     }
 
@@ -216,7 +222,6 @@ UOdysseyTextureLayerImageVector::Serialize(FArchive& Ar)
             }
         }
 
-        mRoot->GetEngine()->Invalidate( 0 );
         FOdysseyVectorEngine::Notify( mRoot->GetScene(), FOdysseyVectorEngine::NOTIFY_ALL );
     }
 }
@@ -244,13 +249,19 @@ UOdysseyTextureLayerImageVector::PostPropertyChanged(const FName& iPropertyName,
 void
 UOdysseyTextureLayerImageVector::IsWireframeChanged()
 {
-    mRoot->GetEngine()->Invalidate( 0 ); //Force engine invalidation here, because IsColored is not a part of the engine, but still needs the engine to redraw itself
+    //Force redrawing here, because IsColored is not a part of the engine,
+    // but still needs the engine to redraw itself
+    mRoot->Invalidate( 0 );
+    mRoot->GetSharedEnv()->Update( 0 );
 }
 
 void
 UOdysseyTextureLayerImageVector::IsColoredChanged()
 {
-    mRoot->GetEngine()->Invalidate( 0 ); //Force engine invalidation here, because IsColored is not a part of the engine, but still needs the engine to redraw itself
+    //Force redrawing here, because IsColored is not a part of the engine,
+    // but still needs the engine to redraw itself
+    mRoot->Invalidate( 0 );
+    mRoot->GetSharedEnv()->Update( 0 );
 }
 
 TSharedPtr<IOdysseyImageRenderer>
@@ -288,7 +299,8 @@ UOdysseyTextureLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
         if (!vectorLayer)
             continue;
 
-        FOdysseyVectorGroupPaint* scene = vectorLayer->GetEngine()->GetScene();
+        FOdysseyVectorGroupPaint* scene = vectorLayer->GetRoot()->GetScene();
+
         for( FOdysseyVectorObject* child : scene->GetChildrenList() )
         {
             FOdysseyVectorObject* copiedChild = child->Copy();
@@ -299,9 +311,10 @@ UOdysseyTextureLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
     }
 
     destinationScene->UpdateMatrix();
-    destinationScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    mRoot->GetEngine()->Invalidate( 0 );
+    // Note: update will request a redraw as well
+    mRoot->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
     FOdysseyVectorEngine::Notify( mRoot->GetScene(), FOdysseyVectorEngine::NOTIFY_ALL );
 }
 
@@ -378,6 +391,13 @@ uint32
 UOdysseyTextureLayerImageVector::GetFrame()
 {
     return 0;
+}
+
+// Implements Interface IOdysseyVectorCell::GetFrame
+FOdysseyVectorGroupPaint*
+UOdysseyTextureLayerImageVector::GetScene()
+{
+    return mRoot->GetScene();
 }
 
 #undef LOCTEXT_NAMESPACE

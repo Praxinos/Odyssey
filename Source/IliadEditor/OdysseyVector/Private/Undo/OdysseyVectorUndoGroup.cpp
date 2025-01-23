@@ -3,6 +3,7 @@
 
 #include "Undo/OdysseyVectorUndoGroup.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorSharedEnv.h"
 
@@ -35,9 +36,8 @@ FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iSce
                                                 , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mAddedGroup( iAddedGroup )
+    , mScene ( iScene )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mRemovedBucketArray = iRemovedBucketArray;
     mAddedObjectArray = iAddedObjectArray;
 
@@ -55,9 +55,8 @@ FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iSce
                                                 , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mAddedGroup( iAddedGroup )
+    , mScene ( iScene )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mAddedObjectArray = iAddedObjectArray;
 
     mAddedObjectOldParentArray.reserve( iAddedObjectArray.size() );
@@ -73,7 +72,7 @@ FOdysseyVectorUndoGroup::Apply( UObject* iIgnored )
 {
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mEngineList.front()->ClearObjectSelection();
+    mScene->GetRoot()->ClearObjectSelection();
 
     // destroy the former hierarchy.
     for( int i = 0; i < mAddedObjectArray.size(); i++ )
@@ -115,7 +114,7 @@ FOdysseyVectorUndoGroup::Revert( UObject* iIgnored )
 {
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mEngineList.front()->ClearObjectSelection();
+    mScene->GetRoot()->ClearObjectSelection();
 
     // Remove all children from the created group
     for( int i = 0; i < mAddedObjectArray.size(); i++ )

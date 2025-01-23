@@ -27,8 +27,6 @@ FOdysseyVectorUndoTagAdd::FOdysseyVectorUndoTagAdd( FOdysseyVectorGroupPaint* iS
                                                   , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mTagArray.push_back( iTag );
 }
 
@@ -37,8 +35,6 @@ FOdysseyVectorUndoTagAdd::FOdysseyVectorUndoTagAdd( FOdysseyVectorGroupPaint* iS
                                                   , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mTagArray = iTagArray;
 }
 

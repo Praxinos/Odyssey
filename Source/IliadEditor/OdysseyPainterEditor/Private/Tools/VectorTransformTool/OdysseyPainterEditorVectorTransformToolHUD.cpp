@@ -6,6 +6,7 @@
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorCell.h"
@@ -369,7 +370,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     static BLRgba32 greyColor = BLRgba32( 128, 128, 128, 128 );
-    uint32 selectedObjectCount = iScene->GetEngine()->GetSelectedObjectList().size();
+    uint32 selectedObjectCount = iScene->GetRoot()->GetSelectedObjectList().size();
     uint64 hudFlags = mTransformTool->GetEditor()->GetVectorHUDFlags();
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 

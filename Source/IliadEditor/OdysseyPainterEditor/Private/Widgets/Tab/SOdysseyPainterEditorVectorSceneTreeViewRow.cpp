@@ -6,6 +6,8 @@
 #include "OdysseyStyleSet.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyPainterEditor.h"
 #include "Undo/OdysseyVectorUndoTransferObjects.h"
@@ -55,7 +57,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::Construct( const typename STableRow
     TSharedPtr<SHorizontalBox> tagBox;
     const FSlateBrush* objectIcon = nullptr;
     const FSlateBrush* inbetweenerTagIcon = nullptr;
-    uint32 cellIndex = vectorObject->GetEngine()->GetCell()->GetIndex();
+    uint32 cellIndex = vectorObject->GetRoot()->GetCell()->GetIndex();
 
     //inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.VectorSceneTreeView.InbetweenerTag16" );
     inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching16" );
@@ -130,6 +132,7 @@ FReply
 SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonUp( const FGeometry & MyGeometry
                                                             , const FPointerEvent & MouseEvent )
 {
+    FOdysseyVectorGroupPaint* scene = mItem.Get()->GetVectorObject()->GetScene();
     FReply reply = FReply::Handled();
 
     reply = STableRow::OnMouseButtonUp( MyGeometry, MouseEvent );
@@ -139,8 +142,10 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonUp( const FGeometry & 
                                 //| FOdysseyPainterEditor::UI_UPDATE_TIMELINE
                                 | FOdysseyPainterEditor::UI_UPDATE_HUD );
 
+    // force invalidation for redrawing
+    scene->GetRoot()->Invalidate( 0 );
     // request redraw
-    mItem.Get()->GetVectorObject()->GetEngine()->Invalidate( 0 );
+    scene->GetSharedEnv()->Update( 0 );
 
     return reply;
 }
@@ -307,7 +312,7 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
     uint32 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
-    itemScene->GetEngine()->GetFocusedAncestorList( focusedObjectList );
+    itemScene->GetRoot()->GetFocusedAncestorList( focusedObjectList );
 
     GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.drag-drop-object", "Drop Objects"));
     if( GUndo )
@@ -384,8 +389,8 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnDrop( const FGeometry& iGeometry
 
     mDropZone = DROPZONE_NONE;
 
-    itemScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-    itemScene->GetEngine()->Invalidate( 0 );
+    itemScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
     FOdysseyVectorEngine::Notify( itemScene, notificationFlags );
 
     return FReply::Handled();

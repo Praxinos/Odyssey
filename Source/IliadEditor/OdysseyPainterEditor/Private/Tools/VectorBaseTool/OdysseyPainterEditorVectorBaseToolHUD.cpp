@@ -8,6 +8,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorRoot.h"
 
 FOdysseyPainterEditorVectorBaseToolHUD::~FOdysseyPainterEditorVectorBaseToolHUD()
 {
@@ -49,9 +50,8 @@ FOdysseyPainterEditorVectorBaseToolHUD::GetSelectionBox()
 void
 FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( FOdysseyVectorGroupPaint* iScene )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     FOdysseyVectorSharedEnv* sharedEnv = iScene->GetSharedEnv();
-    uint32 cellIndex = vectorEngine->GetCell()->GetIndex();
+    uint32 cellIndex = iScene->GetRoot()->GetCell()->GetIndex();
 
     mSelectedInbetweenerTagList.clear();
     mSelectedBreakdownList.clear();
@@ -125,14 +125,13 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVe
     mSelectionBox.inverseWorldMatrix = iScene->GetInverseWorldMatrix();
 
     // call lambda on each object of the tree
-    vectorEngine->Traverse
+    FOdysseyVectorObject::Traverse
     ( iScene
     , 0
     , [ this
-      , vectorEngine
       , iScene ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
       {
-          if( vectorEngine->ObjectHasFocus( iScene, object, iTraversalFlags ) )
+          if( iScene->GetRoot()->ObjectHasFocus( object, iTraversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
@@ -148,7 +147,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVe
                   }
               }
 
-              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+              return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
           }
 
           return 0;
@@ -175,7 +174,7 @@ void
 FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVectorGroupPaint* iScene
                                                                     , bool iForceWorld )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetEngine()->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetRoot()->GetSelectedObjectList();
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
     if( ( selectedObjectList.size() <= 1 ) && ( iForceWorld == false ) )
@@ -195,15 +194,14 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVe
         mSelectionBox.inverseWorldMatrix = iScene->GetInverseWorldMatrix();
 
         // call lambda on each object of the tree
-        vectorEngine->Traverse
+        FOdysseyVectorObject::Traverse
         ( iScene
         , 0
         , [ this
           , iScene
-          , vectorEngine
           , &selectedObjectList ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
           {
-              if( vectorEngine->ObjectHasFocus( iScene, object, iTraversalFlags ) )
+              if( iScene->GetRoot()->ObjectHasFocus( object, iTraversalFlags ) )
               {
                   ::ULIS::FRectD selectedObjectBBox = object->GetBBox( true, true );
 
@@ -212,7 +210,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVe
 
                   mSelectionBox.inited = true;
 
-                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                  return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
               }
 
               return 0;
@@ -342,7 +340,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawSelectionBox( BLContext* iBLContext
         iBLContext->strokePath( path );
 
         // draw box as white if nothing is selected, colored if something is selected
-        iBLContext->setStrokeStyle( ( iScene->GetEngine()->GetSelectedObjectList().size() == 0 ) ? white : iForegroundColor );
+        iBLContext->setStrokeStyle( ( iScene->GetRoot()->GetSelectedObjectList().size() == 0 ) ? white : iForegroundColor );
         iBLContext->setStrokeWidth( 1.0f );
         iBLContext->strokePath( path );
     }
@@ -364,19 +362,18 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawObjects( BLContext* iBLContext
     iBLContext->resetMatrix();
 
     // Run lambda
-    vectorEngine->Traverse
+    FOdysseyVectorObject::Traverse
     ( iScene
     , 0
     , [ this
       , iScene
-      , vectorEngine
       , &iBLContext
       , &iHUDFlags
       , &iForegroundColor
       , &iBackgroundColor
       , &iHighlightColor ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) || ( iHUDFlags & HUD_DRAW_ALL ) )
+          if( iScene->GetRoot()->ObjectHasFocus( object, traversalFlags ) || ( iHUDFlags & HUD_DRAW_ALL ) )
           {
               if( iHUDFlags & HUD_TAGINBETWEENER_ALL )
               {
@@ -429,7 +426,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawObjects( BLContext* iBLContext
                   }
               }
 
-              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+              return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
           }
 
           return 0;

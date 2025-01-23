@@ -4,6 +4,7 @@
 #include "Undo/OdysseyVectorUndoUngroup.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoUngroup::~FOdysseyVectorUndoUngroup()
@@ -26,9 +27,8 @@ FOdysseyVectorUndoUngroup::FOdysseyVectorUndoUngroup( FOdysseyVectorGroupPaint* 
                                                     , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mGroup( iGroup )
+    , mScene( iScene )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mUngroupedObjectList = iGroup->GetChildrenList();
 }
 
@@ -39,7 +39,7 @@ FOdysseyVectorUndoUngroup::Apply( UObject* iIgnored )
 
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mEngineList.front()->ClearObjectSelection();
+    mScene->GetRoot()->ClearObjectSelection();
 
     for( FOdysseyVectorObject *child : mUngroupedObjectList )
     {
@@ -58,7 +58,7 @@ FOdysseyVectorUndoUngroup::Revert( UObject* iIgnored )
 {
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mEngineList.front()->ClearObjectSelection();
+    mScene->GetRoot()->ClearObjectSelection();
 
     // Note: GetParent() stills holds a valid pointer to the former parent.
     //mGroup->GetParent()->AppendChild( mGroup );

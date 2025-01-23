@@ -9,6 +9,8 @@
 #include "ISinglePropertyView.h"
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorSharedEnv.h"
 #include "Undo/OdysseyVectorUndoSegmentReshape.h"
 #include "SOdysseySinglePropertyView.h"
 
@@ -46,8 +48,8 @@ UOdysseyPainterEditorVectorPathSmoothTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorPathSmoothTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    // side note: updating via root will request a redraw as well
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;
 }
@@ -56,10 +58,9 @@ uint64
 UOdysseyPainterEditorVectorPathSmoothTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // side note: updating via root will request a redraw as well
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    // redraw
-    iScene->GetEngine()->Invalidate( 0 );
 
     return 0;
 }
@@ -123,8 +124,9 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGrou
         GEditor->EndTransaction();
     }
 
-    // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    // Calling Update via Root will request a redraw even if root is not invalidated
+    //iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+
     oSignalFlags = notificationFlags;
 
     return true;
@@ -143,8 +145,10 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorGro
 
     mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    // invalidate for redraw
+    iScene->GetRoot()->Invalidate(0);
+    // Calling Update via Root will request a redraw even if root is not invalidated
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 }
 
 void
@@ -190,12 +194,9 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorGrou
             }
         }
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
-                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
     }
-
-    // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
 }
 
 bool
@@ -204,6 +205,8 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupP
                                                           , const FKey& iKey
                                                           , uint64& oSignalFlags )
 {
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
+
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
@@ -215,13 +218,11 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseUpVector( FOdysseyVectorGroupP
         std::vector<FOdysseyVectorPoint*> pickedPointArray = mPathSmoothHUD->GetPickedPointArray();
         FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidated objects
-
-        vectorEngine->ResetHUD();
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidated objects
     }
 
-    // redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    oSignalFlags = notificationFlags;
+
     return true;
 }
 

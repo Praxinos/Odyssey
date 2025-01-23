@@ -24,8 +24,6 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAlter::FOdysseyVectorUndoTagInbetweener
                                                                                               , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
 {
-    mEngineList.push_back( iInbetweenerTag->GetOwner()->GetEngine() );
-
     mInbetweenerTagSnapshotArray.emplace_back(  iInbetweenerTag
                                               , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
                                               , ( FSnapshotFlags::Breakdown::GRIDGEOMETRY

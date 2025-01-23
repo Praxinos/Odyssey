@@ -8,6 +8,7 @@
 #include <OdysseyVectorSegmentCubic.h>
 #include <OdysseyVectorPath.h>
 #include <OdysseyVectorGroupPaint.h>
+#include <OdysseyVectorSharedEnv.h>
 
 FOdysseyVectorImportSVG::~FOdysseyVectorImportSVG()
 {
@@ -39,7 +40,7 @@ FOdysseyVectorImportSVG::FOdysseyVectorImportSVG( FOdysseyVectorGroupPaint* iSce
                            , outErrorLineNumber );
 
     iScene->SetPainted( false );
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 }
 
 static bool IsComma( TCHAR iChar )

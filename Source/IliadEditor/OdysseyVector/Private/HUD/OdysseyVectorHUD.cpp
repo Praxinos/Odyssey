@@ -10,6 +10,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorLayer.h"
 
@@ -173,29 +174,27 @@ FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorGroupPaint *iScene
                                     , bool iFocusedObjectsOnly
                                     , uint64 iHUDFlags )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     std::vector<FPointQuadTreeEntry> pointQuadTreeEntryArray;
-    uint32 width = vectorEngine->GetLayer()->GetWidth();
-    uint32 height = vectorEngine->GetLayer()->GetHeight();
+    uint32 width = iScene->GetRoot()->GetLayer()->GetWidth();
+    uint32 height = iScene->GetRoot()->GetLayer()->GetHeight();
     ::ULIS::FRectD screenRect;
 
     screenRect = ::ULIS::FRectD::FromXYWH( 0, 0, width, height );
 
     pointQuadTreeEntryArray.reserve( 200 );
 
-    vectorEngine->Traverse( iScene
+    FOdysseyVectorObject::Traverse( iScene
                           , iHUDFlags
-                          , [ vectorEngine
-                          ,   iScene
+                          , [ iScene
                           ,   iFocusedObjectsOnly
                           ,   &screenRect
                           ,   &pointQuadTreeEntryArray ]( FOdysseyVectorObject* object, uint64 traverseFlags ) -> uint64
                             {
-                                if( ( iFocusedObjectsOnly == false ) || vectorEngine->ObjectHasFocus( iScene, object, traverseFlags ) )
+                                if( ( iFocusedObjectsOnly == false ) || iScene->GetRoot()->ObjectHasFocus( object, traverseFlags ) )
                                 {
                                     MapPoints( object, screenRect, pointQuadTreeEntryArray );
 
-                                    return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                                    return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
                                 }
 
                                 return 0;

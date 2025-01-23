@@ -29,7 +29,6 @@ FOdysseyVectorUndoTagInbetweenerStepAlign::FOdysseyVectorUndoTagInbetweenerStepA
                     , FSnapshotFlags::Route::TRAJECTORIES | FSnapshotFlags::Route::STEPS
                     , FSnapshotFlags::Trajectory::BEZIER )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
 }
 
 void

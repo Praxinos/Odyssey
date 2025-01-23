@@ -64,8 +64,6 @@ FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorGroupPai
                                                         , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     if( iRemovedVertex )
         mRemovedVertexArray.push_back( iRemovedVertex );
 
@@ -101,8 +99,6 @@ FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorGroupPai
                                                         , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mAddedPathArray = iAddedPathArray;
     mAddedVertexArray = iAddedVertexArray;
     mAddedSegmentArray = iAddedSegmentArray;

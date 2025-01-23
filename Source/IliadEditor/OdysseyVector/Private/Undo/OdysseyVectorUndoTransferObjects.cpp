@@ -4,6 +4,7 @@
 #include "Undo/OdysseyVectorUndoTransferObjects.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoTransferObjects::~FOdysseyVectorUndoTransferObjects()
@@ -23,9 +24,8 @@ FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVe
                                                                     , FOdysseyVectorObject* iTransferredObject
                                                                     , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    , mScene( iScene )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mTransferredObjectSnapshotArray.emplace_back( iTransferredObject, FSnapshotFlags::Object::HIERARCHY );
 }
 
@@ -33,9 +33,8 @@ FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVe
                                                                     , const std::list<FOdysseyVectorObject*>& iTransferredObjectList
                                                                     , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    , mScene( iScene )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     for( FOdysseyVectorObject* transferredObject : iTransferredObjectList )
     {
         mTransferredObjectSnapshotArray.emplace_back( transferredObject, FSnapshotFlags::Object::HIERARCHY );
@@ -50,7 +49,7 @@ FOdysseyVectorUndoTransferObjects::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mEngineList.front()->ClearObjectSelection();
+    mScene->GetRoot()->ClearObjectSelection();
 
     while( allRestored == false )
     {
@@ -78,7 +77,7 @@ FOdysseyVectorUndoTransferObjects::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mEngineList.front()->ClearObjectSelection();
+    mScene->GetRoot()->ClearObjectSelection();
 
     while( allRestored == false )
     {

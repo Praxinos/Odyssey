@@ -42,7 +42,7 @@ protected:
 
 private:
     // handle to a callback to refresh the layer when a property of an object's details view is changed
-    FOdysseyVectorRoot* mRoot;
+    TSharedPtr<FOdysseyVectorRoot> mRoot;
     FOdysseyVectorSharedEnv mSharedEnv;
     TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
 
@@ -56,7 +56,7 @@ public:
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
-    FOdysseyVectorEngine* GetEngine();
+    FOdysseyVectorRoot* GetRoot();
     FOdysseyVectorImportV2* GetImporterV2();
 
     void IsWireframeChanged();
@@ -85,7 +85,7 @@ public:
     virtual uint32 GetHeight() override;
 
     // Implements Interface IOdysseyVectorCell
-    //virtual FOdysseyVectorEngine* GetEngine() override; // commented-out. This is already existing.
+    virtual FOdysseyVectorGroupPaint* GetScene() override;
     virtual int32 GetIndex() override;
     virtual uint32 GetLength() override;
     virtual uint32 GetFrame() override;

@@ -35,7 +35,6 @@ public:
     virtual void Serialize(FArchive& Ar) override;
     virtual void OldSerialize(FArchive& Ar) override; //DEPRECATED: Keep that for compatibility with early versions of Odyssey
 
-    FOdysseyVectorEngine* GetEngine() const;
     FOdysseyVectorRoot* GetRoot() const;
     FOdysseyVectorImportV2* GetImporterV2();
     TSharedPtr<FOdysseyVectorBlock> GetVectorBlock() const;
@@ -58,7 +57,7 @@ public:
 
 public:
     // Implements Interface IOdysseyVectorCell
-    virtual FOdysseyVectorEngine* GetEngine() override;
+    virtual FOdysseyVectorGroupPaint* GetScene() override;
     virtual int32 GetIndex() override;
     virtual uint32 GetLength() override;
     virtual uint32 GetFrame() override;
@@ -72,7 +71,7 @@ private:
     friend class FOdysseyAnimationCellImageVectorImport;
 
 private:
-    FOdysseyVectorRoot* mRoot = nullptr;
+    TSharedPtr<FOdysseyVectorRoot> mRoot = nullptr;
     FGuid mVectorBlockId;
     TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
     mutable FCriticalSection mImageRenderingMutex;

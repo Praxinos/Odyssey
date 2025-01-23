@@ -8,6 +8,7 @@
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCell.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "Interfaces/IPluginManager.h"
 
@@ -89,7 +90,7 @@ FOdysseyPainterEditorVectorChartToolHUD::GetBreakdownList()
 void
 FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdown( FOdysseyVectorGroupPaint* iScene )
 {
-    uint32 cellIndex = iScene->GetEngine()->GetCell()->GetIndex();
+    uint32 cellIndex = iScene->GetRoot()->GetCell()->GetIndex();
 
     mBreakdownList.clear();
 
@@ -324,7 +325,7 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint64 hudFlags = mChartTool->GetEditor()->GetVectorHUDFlags();
-    uint32 cellIndex = iScene->GetEngine()->GetCell()->GetIndex();
+    uint32 cellIndex = iScene->GetRoot()->GetCell()->GetIndex();
 
     iBLContext->save();
     // do not add-up colors
@@ -362,7 +363,7 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
                                   , hcColor
                                   , breakdown
                                   , breakdown->GetChart()->GetHUDBezier()
-                                  , iScene->GetEngine()->GetCell()->GetIndex()
+                                  , iScene->GetRoot()->GetCell()->GetIndex()
                                   , prevBreakdown ? false : true );
             }
 
@@ -374,7 +375,7 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
                                   , hcColor
                                   , breakdown
                                   , breakdown->GetChart()->GetHUDBezier()
-                                  , iScene->GetEngine()->GetCell()->GetIndex()
+                                  , iScene->GetRoot()->GetCell()->GetIndex()
                                   , true );
             }
 

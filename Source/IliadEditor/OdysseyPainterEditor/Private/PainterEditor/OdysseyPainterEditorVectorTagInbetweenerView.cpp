@@ -4,6 +4,7 @@
 #include "OdysseyPainterEditorVectorTagInbetweenerView.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerParam.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
@@ -387,9 +388,9 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PostEditChangeProperty( FProperty
                        , PropertyChangedEvent.MemberProperty->GetFName()
                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
-        mScene->GetSharedEnv()->Update( 0 );
         // redraw
-        mScene->GetEngine()->Invalidate( 0 );
+        mScene->GetRoot()->Invalidate( 0 );
+        mScene->GetSharedEnv()->Update( 0 );
     }
 }
 

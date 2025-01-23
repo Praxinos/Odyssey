@@ -41,11 +41,6 @@ FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::FOdysseyVectorUndoTag
         FOdysseyVectorEngine* engine = breakdown->GetInbetweenerTag()->GetOwner()->GetEngine();
 
         mBreakdownSnapshotBuffer.emplace_back( breakdown, FSnapshotFlags::Breakdown::TARGETVISIBILITY );
-
-        if( std::find( mEngineList.begin(), mEngineList.end(), engine ) == mEngineList.end() )
-        {
-            mEngineList.push_back( engine );
-        }
     }
 }
 

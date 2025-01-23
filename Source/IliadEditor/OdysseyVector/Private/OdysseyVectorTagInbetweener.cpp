@@ -9,6 +9,7 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorPath.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorCell.h"
@@ -154,7 +155,7 @@ FOdysseyVectorTagInbetweener::Map()
     mInterpolatedGroupPaintBuffer.clear();
     mInterpolatedObjectArray.clear();
 
-    vectorEngine->Traverse
+    FOdysseyVectorObject::Traverse
     ( mOwner
     , 0
     , [ this
@@ -169,19 +170,19 @@ FOdysseyVectorTagInbetweener::Map()
               {
                   pathCount++;
 
-                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                  return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
               }
 
               if( object->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
               {
                   paintgroupCount++;
 
-                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                  return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
               }
           }
           else
           {
-              return FOdysseyVectorEngine::TRAVERSE_OBJECT_IGNORE_CHILDREN;
+              return FOdysseyVectorObject::TRAVERSE_OBJECT_IGNORE_CHILDREN;
           }
 
           return 0;
@@ -191,7 +192,7 @@ FOdysseyVectorTagInbetweener::Map()
     mInterpolatedGroupPaintBuffer.reserve( paintgroupCount );
     mInterpolatedObjectArray.reserve ( pathCount + paintgroupCount );
 
-    vectorEngine->Traverse
+    FOdysseyVectorObject::Traverse
     ( mOwner
     , 0
     , [ this ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
@@ -220,7 +221,7 @@ FOdysseyVectorTagInbetweener::Map()
 
                   mInterpolatedObjectArray.push_back( &mInterpolatedPathBuffer.back() );
 
-                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                  return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
               }
 
               if( object->GetClass() == FOdysseyVectorGroupPaint::StaticClass() )
@@ -232,12 +233,12 @@ FOdysseyVectorTagInbetweener::Map()
 
                   mInterpolatedObjectArray.push_back( &mInterpolatedGroupPaintBuffer.back() );
 
-                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                  return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
               }
           }
           else
           {
-              return FOdysseyVectorEngine::TRAVERSE_OBJECT_IGNORE_CHILDREN;
+              return FOdysseyVectorObject::TRAVERSE_OBJECT_IGNORE_CHILDREN;
           }
 
           return 0;
@@ -718,7 +719,7 @@ FOdysseyVectorTagInbetweener::GetBreakdownByTargetIndex( uint32 iDrawingIndex )
 FInbetweenerBreakdown*
 FOdysseyVectorTagInbetweener::GetBreakdownByCellIndex( uint32 iCellIndex )
 {
-    uint32 tagCellIndex = mScene->GetEngine()->GetCell()->GetIndex();
+    uint32 tagCellIndex = mScene->GetRoot()->GetCell()->GetIndex();
     int32 drawingIndex = ( mInterpolationDirection == eInbetweenerInterpolationDirection::Forward ) ? ( iCellIndex - tagCellIndex )
                                                                                                     : ( tagCellIndex - iCellIndex );
 
@@ -1149,7 +1150,7 @@ FOdysseyVectorTagInbetweener::GetScene()
 IOdysseyVectorCell*
 FOdysseyVectorTagInbetweener::GetCell()
 {
-    return mOwner->GetEngine()->GetCell();
+    return mOwner->GetRoot()->GetCell();
 }
 
 IOdysseyVectorCell*
@@ -1157,7 +1158,7 @@ FOdysseyVectorTagInbetweener::GetSourceCell()
 {
     uint32 sourceCellIndex = GetSourceCellIndex();
 
-    return GetOwner()->GetEngine()->GetLayer()->GetCellByIndex( sourceCellIndex );
+    return GetOwner()->GetRoot()->GetLayer()->GetCellByIndex( sourceCellIndex );
 }
 
 int32
@@ -1171,7 +1172,7 @@ FOdysseyVectorTagInbetweener::GetTargetCell()
 {
     uint32 targetCellIndex = GetTargetCellIndex();
 
-    return GetOwner()->GetEngine()->GetLayer()->GetCellByIndex( targetCellIndex );
+    return GetOwner()->GetRoot()->GetLayer()->GetCellByIndex( targetCellIndex );
 }
 
 int32
@@ -1392,8 +1393,8 @@ FOdysseyVectorTagInbetweener::RedrawCells( uint32 iDrawingCount )
     // right after the removal of an object in the hierarchy.
     if( mScene->GetSharedEnv() )
     {
-        IOdysseyVectorCell* cell = mScene->GetEngine()->GetCell();
-        IOdysseyVectorLayer* layer = mScene->GetEngine()->GetLayer();
+        IOdysseyVectorCell* cell = mScene->GetRoot()->GetCell();
+        IOdysseyVectorLayer* layer = mScene->GetRoot()->GetLayer();
 
         if( cell )
         {
@@ -1410,7 +1411,7 @@ FOdysseyVectorTagInbetweener::RedrawCells( uint32 iDrawingCount )
                 {
                     //nextCell->GetEngine()->Invalidate();
                     // request redraw
-                    nextCell->GetEngine()->Invalidate( 0 );
+                    nextCell->GetScene()->GetRoot()->RequestRedraw( 0 );
                 }
 
                 cell = nextCell;
@@ -1498,7 +1499,7 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
                                   , double iAncestorsOpacity
                                   , uint64 iDrawingFlags )
 {
-    IOdysseyVectorCell* displayedCell = iDisplayedScene->GetEngine()->GetCell();
+    IOdysseyVectorCell* displayedCell = iDisplayedScene->GetRoot()->GetCell();
 
     LockDrawing();
 
@@ -1506,7 +1507,7 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
     if( mOwner->GetScene() )
     {
 
-        IOdysseyVectorCell* tagCell = mOwner->GetScene()->GetEngine()->GetCell();
+        IOdysseyVectorCell* tagCell = mOwner->GetScene()->GetRoot()->GetCell();
 
         iBLContext->save();
         iBLContext->resetMatrix();
@@ -1898,7 +1899,7 @@ FOdysseyVectorTagInbetweener::MoveInbetween( FInbetweenerChart::Inbetween* iInbe
 
     if( ( iNewSpacing > 0.0f ) && ( iNewSpacing < 1.0f ) )
     {
-        IOdysseyVectorCell* animationCell = mOwner->GetScene()->GetEngine()->GetCell();
+        IOdysseyVectorCell* animationCell = mOwner->GetScene()->GetRoot()->GetCell();
         int32  prevIndex  = iInbetween->GetIndex() - 1;
         uint32 nextIndex  = iInbetween->GetIndex() + 1;
         float prevSpacing = iInbetween->GetChart()->GetInbetweenBuffer()[prevIndex].GetSpacing();
@@ -1910,13 +1911,14 @@ FOdysseyVectorTagInbetweener::MoveInbetween( FInbetweenerChart::Inbetween* iInbe
              && ( iNewSpacing < nextSpacing ) )
             {
                 uint32 inbetweenCellIndex = iInbetween->GetCellIndex();
-                IOdysseyVectorCell* inbetweenCell = GetOwner()->GetEngine()->GetLayer()->GetCellByIndex( inbetweenCellIndex );
+                IOdysseyVectorCell* inbetweenCell = GetOwner()->GetRoot()->GetLayer()->GetCellByIndex( inbetweenCellIndex );
 
                 iInbetween->SetSpacing( iNewSpacing );
 
                 if( inbetweenCell )
                 {
-                    inbetweenCell->GetEngine()->Invalidate( 0 );
+                    // Request redraw
+                    inbetweenCell->GetScene()->GetRoot()->Invalidate( 0 );
                 }
 
                 // recompute single inbetweens
@@ -2127,8 +2129,8 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                     , std::list<FOdysseyVectorObject*>& oAddedObjectList
                                     , std::list<FOdysseyVectorGroupPaint*>& oCommittedSceneList )
 {
-    IOdysseyVectorCell* cell = mOwner->GetScene()->GetEngine()->GetCell();
-    IOdysseyVectorLayer* layer = mOwner->GetScene()->GetEngine()->GetLayer();
+    IOdysseyVectorCell* cell = mOwner->GetRoot()->GetCell();
+    IOdysseyVectorLayer* layer = mOwner->GetRoot()->GetLayer();
     int32 animationCellIndex = cell->GetIndex();
 
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
@@ -2297,7 +2299,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                         return 0;
                     };
 
-                    FOdysseyVectorGroupPaint* inbetweenScene = inbetweenCell->GetEngine()->GetScene();
+                    FOdysseyVectorGroupPaint* inbetweenScene = inbetweenCell->GetScene();
                     FOdysseyVectorObject* copiedObject = mOwner->Copy( FOdysseyVectorObject::COPY_NOTAG
                                                                      , preProcess
                                                                      , postProcess );
@@ -2334,7 +2336,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                     inbetweenScene->AppendChild( copiedObject );
                     inbetweenScene->UpdateMatrix();
 
-                    inbetweenScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+                    //inbetweenScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
                 }
             }
         }

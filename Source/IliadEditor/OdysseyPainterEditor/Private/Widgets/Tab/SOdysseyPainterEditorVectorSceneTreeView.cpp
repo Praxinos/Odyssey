@@ -8,6 +8,7 @@
 #include "Framework/Commands/GenericCommands.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorCell.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "HUD/OdysseyVectorHUD.h"
 #include "OdysseyPainterEditor.h"
@@ -132,7 +133,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Private_SelectRangeFromCurrentTo ( TSh
         FOdysseyVectorObject* fromObject = RangeSelectionStart.Get()->GetVectorObject();
         FOdysseyVectorObject* toObject = iItem.Get()->GetVectorObject();
         FOdysseyVectorObject* vectorObject = mRootItem.Get()->GetVectorObject();
-        FOdysseyVectorEngine* vectorEngine = vectorObject->GetEngine();
+        FOdysseyVectorRoot* vectorRoot = vectorObject->GetRoot();
         bool doSelect = false;
 
         for( const TSharedPtr<FVectorSceneTreeViewItem>& rangeItem : GetItems() )
@@ -143,7 +144,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Private_SelectRangeFromCurrentTo ( TSh
             {
                 if( rangeItemObject->IsSelected() == false )
                 {
-                    vectorEngine->SelectObject( rangeItemObject );
+                    vectorRoot->SelectObject( rangeItemObject );
                     // Keep internal array consistent for use by other methods
                     SelectedItems.Add( rangeItem );
                 }
@@ -156,7 +157,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Private_SelectRangeFromCurrentTo ( TSh
                 {
                     if( rangeItemObject->IsSelected() == false )
                     {
-                        vectorEngine->SelectObject( rangeItemObject );
+                        vectorRoot->SelectObject( rangeItemObject );
                         // Keep internal array consistent for use by other methods
                         SelectedItems.Add( rangeItem );
                     }
@@ -172,11 +173,11 @@ SOdysseyPainterEditorVectorSceneTreeView::Private_SetItemSelection ( TSharedPtr<
                                                                    , bool bWasUserDirected )
 {
     FOdysseyVectorObject* vectorObject = iItem.Get()->GetVectorObject();
-    FOdysseyVectorEngine* vectorEngine = vectorObject->GetEngine();
+    FOdysseyVectorRoot* vectorRoot = vectorObject->GetRoot();
 
     if( bShouldBeSelected )
     {
-        vectorEngine->SelectObject( vectorObject );
+        vectorRoot->SelectObject( vectorObject );
         // Keep internal array consistent for use by other methods
         SelectedItems.Add( iItem );
 
@@ -184,7 +185,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Private_SetItemSelection ( TSharedPtr<
     }
     else
     {
-        vectorEngine->UnselectObject( vectorObject );
+        vectorRoot->UnselectObject( vectorObject );
         // Keep internal array consistent for use by other methods
         SelectedItems.Remove( iItem );
     }
@@ -197,9 +198,9 @@ SOdysseyPainterEditorVectorSceneTreeView::Private_ClearSelection()
     {
         // the scene
         FOdysseyVectorObject* vectorObject = mRootItem.Get()->GetVectorObject();
-        FOdysseyVectorEngine* vectorEngine = vectorObject->GetEngine();
+        FOdysseyVectorRoot* vectorRoot = vectorObject->GetRoot();
 
-        vectorEngine->ClearObjectSelection();
+        vectorRoot->ClearObjectSelection();
     }
 
     // Keep internal array consistent for use by other methods
@@ -225,7 +226,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Update( FOdysseyVectorGroupPaint* iSce
     {
         //if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
         {
-            int32 sceneCellIndex = iScene->GetEngine()->GetCell()->GetIndex();
+            int32 sceneCellIndex = iScene->GetRoot()->GetCell()->GetIndex();
             FOdysseyVectorSharedEnv* sharedEnv = iScene->GetSharedEnv();
             if (!sharedEnv)
                 return;
@@ -333,9 +334,12 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
             }
         }
 */
-        scene->GetEngine()->ResetHUD();
+        scene->GetRoot()->ResetHUD();
 
-        scene->GetEngine()->Invalidate( 0 );
+        // Calling Update via Root will request a redraw even if root is not invalidated
+        scene->GetRoot()->Invalidate( 0 );
+        scene->GetSharedEnv()->Update( 0 );
+
         FOdysseyVectorEngine::Notify( scene, retFlags );
     }
 }

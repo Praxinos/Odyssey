@@ -50,75 +50,66 @@ FOdysseyVectorUndo::Update()
     );
 }
 
-void
-FOdysseyVectorUndo::InvalidateEngineList( uint64 iInvalidationFlags )
-{
-    for( FOdysseyVectorEngine* engine : mEngineList )
-    {
-        engine->Invalidate( iInvalidationFlags );
-    }
-}
-
 //static
 void
-FOdysseyVectorUndo::GetEngineListFromObjectList( const std::list<FOdysseyVectorObject*>& iObjectList
-                                               , std::list<FOdysseyVectorEngine*>& oEngineList )
+FOdysseyVectorUndo::GetRootListFromObjectList( const std::list<FOdysseyVectorObject*>& iObjectList
+                                             , std::list<FOdysseyVectorRoot*>& oRootList )
 {
     for( FOdysseyVectorObject* vectorObject : iObjectList )
     {
-        FOdysseyVectorEngine* engine = vectorObject->GetEngine();
+        FOdysseyVectorRoot* root = vectorObject->GetRoot();
 
-        if( std::find( oEngineList.begin(), oEngineList.end(), engine ) == oEngineList.end() )
+        if( std::find( oRootList.begin(), oRootList.end(), root ) == oRootList.end() )
         {
-            oEngineList.push_back( engine );
+            oRootList.push_back( root );
         }
     }
 }
 
 //static
 void
-FOdysseyVectorUndo::GetEngineListFromInbetweenerTagList( const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
-                                                       , std::list<FOdysseyVectorEngine*>& oEngineList )
+FOdysseyVectorUndo::GetRootListFromInbetweenerTagList( const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                     , std::list<FOdysseyVectorRoot*>& oRootList )
 {
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
     {
-        FOdysseyVectorEngine* engine = inbetweenerTag->GetOwner()->GetEngine();
+        FOdysseyVectorRoot* root = inbetweenerTag->GetOwner()->GetRoot();
 
-        if( std::find( oEngineList.begin(), oEngineList.end(), engine ) == oEngineList.end() )
+        if( std::find( oRootList.begin(), oRootList.end(), root ) == oRootList.end() )
         {
-            oEngineList.push_back( engine );
+            oRootList.push_back( root );
         }
     }
 }
 
 //static
 void
-FOdysseyVectorUndo::GetEngineListFromTagList( const std::list<FOdysseyVectorTag*>& iTagList
-                                            , std::list<FOdysseyVectorEngine*>& oEngineList )
+FOdysseyVectorUndo::GetRootListFromTagList( const std::list<FOdysseyVectorTag*>& iTagList
+                                          , std::list<FOdysseyVectorRoot*>& oRootList )
 {
     for( FOdysseyVectorTag* tag : iTagList )
     {
-        FOdysseyVectorEngine* engine = tag->GetOwner()->GetEngine();
+        FOdysseyVectorRoot* root = tag->GetOwner()->GetRoot();
 
-        if( std::find( oEngineList.begin(), oEngineList.end(), engine ) == oEngineList.end() )
+        if( std::find( oRootList.begin(), oRootList.end(), root ) == oRootList.end() )
         {
-            oEngineList.push_back( engine );
+            oRootList.push_back( root );
         }
     }
 }
 
 //static
 void
-FOdysseyVectorUndo::GetEngineListFromInbetweenerTagArray( const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
-                                                        , std::list<FOdysseyVectorEngine*>& oEngineList )
+FOdysseyVectorUndo::GetRootListFromInbetweenerTagArray( const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
+                                                      , std::list<FOdysseyVectorRoot*>& oRootList )
 {
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagArray )
     {
-        FOdysseyVectorEngine* engine = inbetweenerTag->GetOwner()->GetEngine();
+        FOdysseyVectorRoot* root = inbetweenerTag->GetOwner()->GetRoot();
 
-        if( std::find( oEngineList.begin(), oEngineList.end(), engine ) == oEngineList.end() )
+        if( std::find( oRootList.begin(), oRootList.end(), root ) == oRootList.end() )
         {
-            oEngineList.push_back( engine );
+            oRootList.push_back( root );
         }
     }
 }

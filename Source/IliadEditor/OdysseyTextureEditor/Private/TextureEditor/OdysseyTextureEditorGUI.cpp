@@ -46,8 +46,8 @@ FOdysseyTextureEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack
 
     if( currentVectorLayer )
     {
-        FOdysseyVectorEngine* vectorEngine = currentVectorLayer->GetEngine();
-        FOdysseyVectorGroupPaint* vectorScene = vectorEngine->GetScene();
+        FOdysseyVectorRoot* vectorRoot = currentVectorLayer->GetRoot();
+        FOdysseyVectorGroupPaint* vectorScene = vectorRoot->GetScene();
 
         OnVectorSceneNotify( vectorScene, FOdysseyVectorEngine::NOTIFY_ALL );
     }
@@ -195,7 +195,7 @@ FOdysseyTextureEditorGUI::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene,
 
         if( currentVectorLayer )
         {
-            FOdysseyVectorGroupPaint* currentScene = currentVectorLayer->GetEngine()->GetScene();
+            FOdysseyVectorGroupPaint* currentScene = currentVectorLayer->GetRoot()->GetScene();
 
             if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW )
             {

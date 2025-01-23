@@ -14,6 +14,7 @@
 #include "OdysseyVectorCell.generated.h"
 
 class FOdysseyVectorEngine;
+class FOdysseyVectorGroupPaint;
 
 // Recommended for the unreal reflection system + Garbage collection
 // (however it seems to work fine with IOdysseyVectorCell declared only)
@@ -28,7 +29,7 @@ class IOdysseyVectorCell
     GENERATED_BODY()
 
     public:
-        virtual FOdysseyVectorEngine* GetEngine() = 0;
+        virtual FOdysseyVectorGroupPaint* GetScene() = 0;
         virtual int32 GetIndex() = 0;
         virtual uint32 GetLength() = 0;
         virtual uint32 GetFrame() = 0;

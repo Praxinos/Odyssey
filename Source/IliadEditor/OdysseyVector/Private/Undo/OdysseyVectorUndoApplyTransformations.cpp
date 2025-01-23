@@ -22,8 +22,6 @@ FOdysseyVectorUndoApplyTransformations::FOdysseyVectorUndoApplyTransformations( 
                                                                               , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mObjectSnapshotArray.reserve( iObjectList.size() );
 
     for( FOdysseyVectorObject* object : iObjectList )

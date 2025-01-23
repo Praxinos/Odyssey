@@ -5,6 +5,7 @@
 #include "OdysseyVector.h"
 #include "OdysseyVectorTag.h"
 #include "OdysseyVectorGroup.h"
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorRoot.h"
@@ -912,9 +913,9 @@ FOdysseyVectorObject::GetSharedEnv()
 FOdysseyVectorGroupPaint*
 FOdysseyVectorObject::GetScene()
 {
-    FOdysseyVectorEngine* engine = GetEngine();
+    FOdysseyVectorRoot* root = GetRoot();
 
-    return engine ? engine->GetScene() : nullptr;
+    return root ? root->GetScene() : nullptr;
 }
 
 void
@@ -951,6 +952,8 @@ FOdysseyVectorObject::SendBackward()
                 }
             }
         }
+
+        Invalidate( INVALIDATE_HIERARCHY );
     }
 }
 
@@ -976,6 +979,8 @@ FOdysseyVectorObject::BringForward()
                 }
             }
         }
+
+        Invalidate( INVALIDATE_HIERARCHY );
     }
 }
 
@@ -1050,7 +1055,7 @@ FOdysseyVectorObject::PrependChild( FOdysseyVectorObject* iChild )
 uint32
 FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter )
 {
-    FOdysseyVectorEngine* engine = GetEngine();
+    FOdysseyVectorRoot* root = GetRoot();
     FOdysseyVectorObject* lastItem = GetLastChild();
     uint32 ret = HIERARCHY_CHANGE_ERROR;
 
@@ -1103,9 +1108,9 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
     UnlockDrawing();
 
     // auto invalidation of the whole region that needs to be redrawn
-    if( engine )
+    if( root )
     {
-        engine->InvalidateRect();
+        root->InvalidateRect();
     }
 
     return ret;
@@ -1120,7 +1125,7 @@ FOdysseyVectorObject::GetOldParent()
 uint32
 FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 {
-    FOdysseyVectorEngine* engine = GetEngine();
+    FOdysseyVectorRoot* root = GetRoot();
     uint32 ret = HIERARCHY_CHANGE_ERROR;
 
     LockDrawing();
@@ -1150,9 +1155,9 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
     UnlockDrawing();
 
     // auto invalidation of the whole region that needs to be redrawn
-    if( engine )
+    if( root )
     {
-        engine->InvalidateRect();
+        root->InvalidateRect();
     }
 
     return ret;
@@ -1161,7 +1166,7 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 uint32
 FOdysseyVectorObject::RemoveAllChildren()
 {
-    FOdysseyVectorEngine* engine = GetEngine();
+    FOdysseyVectorRoot* root = GetRoot();
     uint32 ret = HIERARCHY_CHANGE_ERROR;
 
     LockDrawing();
@@ -1185,6 +1190,12 @@ FOdysseyVectorObject::RemoveAllChildren()
     mInvalidatedChildrenList.clear();
 
     UnlockDrawing();
+
+    // auto invalidation of the whole region that needs to be redrawn
+    if( root )
+    {
+        root->InvalidateRect();
+    }
 
     return HIERARCHY_CHANGE_SUCCESS;
 }
@@ -1386,4 +1397,251 @@ void
 FOdysseyVectorObject::SetID( uint32 iID )
 {
     mID = iID;
+}
+
+// static
+void
+FOdysseyVectorObject::FlipObjectsHorizontal( const std::list<FOdysseyVectorObject*>& iObjectList )
+{
+    FlipObjects( iObjectList, -1.0f, 1.0f );
+}
+
+// static
+void
+FOdysseyVectorObject::FlipObjectsVertical( const std::list<FOdysseyVectorObject*>& iObjectList )
+{
+    FlipObjects( iObjectList, 1.0f, -1.0f );
+}
+
+// static
+void
+FOdysseyVectorObject::FlipObjects( const std::list<FOdysseyVectorObject*>& iObjectList
+                                 , double iXFactor
+                                 , double iYFactor )
+{
+    ::ULIS::FVec2D axisPosition = GetPositionFromObjects( iObjectList );
+    BLMatrix2D inverseAxisMatrix;
+    BLMatrix2D axisMatrix;
+    BLMatrix2D flippingMatrix;
+
+    axisMatrix.reset();
+    axisMatrix.translate( axisPosition.x, axisPosition.y );
+
+    BLMatrix2D::invert( inverseAxisMatrix, axisMatrix );
+
+    flippingMatrix.resetToScaling( iXFactor, iYFactor );
+
+    for( FOdysseyVectorObject *object : iObjectList )
+    {
+        BLMatrix2D& objectWorldMatrix = object->GetWorldMatrix();
+        BLPoint objectWorldCenter = objectWorldMatrix.mapPoint( 0.0f, 0.0f );
+        BLPoint objectLocalCenter = inverseAxisMatrix.mapPoint( objectWorldCenter );
+        BLPoint objectLocalFlippedCenter = flippingMatrix.mapPoint( objectLocalCenter );
+        BLPoint objectWorldFlippedCenter = axisMatrix.mapPoint( objectLocalFlippedCenter );
+
+        objectLocalCenter = object->GetParent()->GetInverseWorldMatrix().mapPoint( objectWorldFlippedCenter );
+
+        object->Translate( objectLocalCenter.x, objectLocalCenter.y );
+        object->Scale( iXFactor * object->GetScalingX(), iYFactor * object->GetScalingY() );
+        object->Rotate( -object->GetRotation() );
+
+        object->UpdateMatrix();
+    }
+}
+
+// static
+FOdysseyVectorGroup*
+FOdysseyVectorObject::GroupObjects( FOdysseyVectorObject* iParent
+                                  , const std::list<FOdysseyVectorObject*>& iObjectList
+                                  , std::vector<FOdysseyVectorObject*>& oObjectArray )
+{
+    FOdysseyVectorGroupPaint* scene = iParent->GetScene();
+    BLPoint averageTranslation = { 0.0f, 0.0f };
+
+    if ( iObjectList.size() )
+    {
+        FOdysseyVectorGroup* group = new FOdysseyVectorGroup( FString("Group") );
+
+        iParent->AppendChild ( group );
+
+        //group->Translate( averageTranslation.x, averageTranslation.y );
+        group->UpdateMatrix();
+
+        oObjectArray.reserve( iObjectList.size() );
+
+        for( FOdysseyVectorObject *obj : iObjectList )
+        {
+            if( obj != scene )
+            {
+                oObjectArray.push_back( obj );
+
+                group->TransferChild( obj, group->GetLastChild() );
+            }
+        }
+
+        //group->Invalidate();
+
+        return group;
+    }
+
+    return nullptr;
+}
+
+// Execute callback on object tree
+// static
+uint64
+FOdysseyVectorObject::Traverse( FOdysseyVectorObject* iObject
+                              , uint64 iTraversalFlags
+                              , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback )
+{
+    uint64 objectTraversalFlags = iCallback( iObject, iTraversalFlags );
+
+    if( objectTraversalFlags & TRAVERSE_STOP )
+    {
+        return TRAVERSE_STOP;
+    }
+
+    if( objectTraversalFlags & TRAVERSE_OBJECT_ACCEPTED )
+    {
+        iTraversalFlags |= TRAVERSE_PARENT_HASFOCUS;
+    }
+
+    if( ( objectTraversalFlags & TRAVERSE_OBJECT_IGNORE_CHILDREN ) == 0 )
+    {
+        for( FOdysseyVectorObject* childObject : iObject->GetChildrenList() )
+        {
+            uint64 childTraversalFlags = Traverse( childObject, iTraversalFlags, iCallback );
+
+            if( childTraversalFlags & TRAVERSE_STOP )
+            {
+                return TRAVERSE_STOP;
+            }
+        }
+    }
+
+    return 0;
+}
+
+// static
+FOdysseyVectorGroupPaint*
+FOdysseyVectorObject::MakePaintGroupFromObjects( FOdysseyVectorObject* iParent
+                                               , const std::list<FOdysseyVectorObject*>& iObjectList
+                                               , std::vector<FOdysseyVectorObject*>& oCubicPathArray
+                                               , std::vector<FOdysseyVectorBucket*>& oRemovedBucketArray )
+{
+    // this array will help us to transfer buckets as well
+    std::vector<FOdysseyVectorGroupPaint*> parentPaintGroupArray;
+
+    if( iObjectList.size() )
+    {
+        FOdysseyVectorGroupPaint* paintGroup = new FOdysseyVectorGroupPaint( "Paint Group" );
+
+        iParent->AppendChild( paintGroup );
+
+        paintGroup->UpdateMatrix();
+
+        for( FOdysseyVectorObject* selectedObject : iObjectList )
+        {
+            if( selectedObject->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
+            {
+                FOdysseyVectorPath* selectedCubicPath = static_cast<FOdysseyVectorPath*>( selectedObject );
+
+                oCubicPathArray.push_back( selectedCubicPath );
+            }
+        }
+
+        for( int i = 0; i < oCubicPathArray.size(); i++ )
+        {
+            FOdysseyVectorObject* parentObject = oCubicPathArray[i]->GetParent();
+
+            paintGroup->TransferChild( oCubicPathArray[i], paintGroup->GetLastChild() );
+
+            // take andvantge of this loop to also extract buckets if over
+            if( parentObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+            {
+                FOdysseyVectorGroupPaint* parentPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(parentObject);
+
+                if( std::find( parentPaintGroupArray.begin(), parentPaintGroupArray.end(), parentPaintGroup ) == parentPaintGroupArray.end() )
+                {
+                    parentPaintGroupArray.push_back( parentPaintGroup );
+                    // the gap tolerance will be set multiple times
+                    // if there are multiples former parent paintgroups
+                    // but this does not matter.
+                    paintGroup->SetGapTolerance( parentPaintGroup->GetGapTolerance() );
+                }
+            }
+        }
+
+        // update paths and detect cycles for bucket matching
+        paintGroup->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
+        // extract buckets if over
+        for( FOdysseyVectorGroupPaint* parentPaintGroup : parentPaintGroupArray )
+        {
+            std::list<FOdysseyVectorBucket*>& bucketList = parentPaintGroup->GetBucketList();
+            BLMatrix2D& parentWorldMatrix = parentPaintGroup->GetWorldMatrix();
+
+            for( FOdysseyVectorBucket* bucket : bucketList )
+            {
+                ::ULIS::FVec2D& bucketCoords = bucket->GetCoords();
+                BLPoint bucketWorldCoords = parentWorldMatrix.mapPoint( bucketCoords.x, bucketCoords.y );
+
+                // TODO: that's a lot of conversion, kowing that both PickCycle
+                // and FOdysseyVectorBucket() convert to their own space.
+                // We can optimize by creating a PickCycle
+                // with local coordinates as parameter. Same for FOdysseyVectorBucket()
+                if( paintGroup->PickCycle( bucketWorldCoords.x, bucketWorldCoords.y ) )
+                {
+                    FOdysseyVectorBucket* importedBucket = new FOdysseyVectorBucket( paintGroup, bucket );
+
+                    paintGroup->AddBucket( importedBucket );
+
+                    oRemovedBucketArray.push_back( bucket );
+                }
+            }
+        }
+
+        // we can't remove the bucket in the previous loop as it would alter the std:list
+        // we are looping into (unless we copy the list, yes I know).
+        for( int i = 0; i < oRemovedBucketArray.size(); i++ )
+        {
+            FOdysseyVectorObject* ownerObject = oRemovedBucketArray[i]->GetOwner();
+
+            if( ownerObject->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
+            {
+                FOdysseyVectorGroupPaint* parentPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(ownerObject);
+
+                parentPaintGroup->RemoveBucket( oRemovedBucketArray[i] );
+            }
+        }
+
+        return paintGroup;
+    }
+
+    return nullptr;
+}
+
+// static
+::ULIS::FVec2D
+FOdysseyVectorObject::GetPositionFromObjects( const std::list<FOdysseyVectorObject*>& iObjectList )
+{
+    BLPoint averagePosition = BLPoint( 0.0f, 0.0f );
+
+    if ( iObjectList.size() )
+    {
+        for( FOdysseyVectorObject* obj : iObjectList )
+        {
+            ::ULIS::FRectD bbox = obj->GetBBox( false, true );
+            BLPoint middle = BLPoint( bbox.x + bbox.w * 0.5f
+                                    , bbox.y + bbox.h * 0.5f );
+
+            averagePosition.x += middle.x;
+            averagePosition.y += middle.y;
+        }
+
+        averagePosition.x /= iObjectList.size();
+        averagePosition.y /= iObjectList.size();
+    }
+
+    return ::ULIS::FVec2D( averagePosition.x, averagePosition.y );
 }

@@ -11,6 +11,7 @@
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorCell.h"
+#include "OdysseyVectorRoot.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerMatching.h"
 #include "SOdysseySinglePropertyView.h"
 #include <chrono>
@@ -52,7 +53,7 @@ uint64
 UOdysseyPainterEditorVectorMatchingTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;
 }
@@ -60,13 +61,8 @@ UOdysseyPainterEditorVectorMatchingTool::UnloadVector( FOdysseyVectorGroupPaint*
 uint64
 UOdysseyPainterEditorVectorMatchingTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-    // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;
 }
@@ -128,7 +124,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
     }
 
     // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    //iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
 
     oSignalFlags = notificationFlags;
     return true;
@@ -144,7 +140,8 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseHoverVector( FOdysseyVectorGroup
     mMatchingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
     // redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    iScene->GetRoot()->Invalidate( 0 );
+    iScene->GetSharedEnv()->Update( 0 );
 }
 
 void
@@ -201,7 +198,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
     }
 
     // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    //iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
 
     oSignalFlags = notificationFlags;
 }
@@ -225,7 +222,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseUpVector( FOdysseyVectorGroupPai
     }
 
     // redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    //iScene->GetEngine()->Invalidate( 0 );
 
     oSignalFlags =notificationFlags;
     return true;
@@ -237,10 +234,11 @@ UOdysseyPainterEditorVectorMatchingTool::PropertyChangedVector( FOdysseyVectorGr
 {
     FOdysseyVectorEngine* iEngine = iScene->GetEngine();
 
-    iEngine->ResetHUD();
+    iScene->GetRoot()->ResetHUD();
 
     // redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    iScene->GetRoot()->Invalidate( 0 );
+    iScene->GetSharedEnv()->Update( 0 );
 
     return 0;
 }

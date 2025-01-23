@@ -23,8 +23,6 @@ FOdysseyVectorUndoVertexLock::FOdysseyVectorUndoVertexLock( FOdysseyVectorGroupP
                                                           , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     //------ Backup vertex lock flag part ---------//
 
     mVertexSnapshotArray.reserve( iAlignedVertexArray.size() );

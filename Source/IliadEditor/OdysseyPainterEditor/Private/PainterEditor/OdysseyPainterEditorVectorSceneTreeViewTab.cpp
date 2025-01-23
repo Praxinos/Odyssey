@@ -71,7 +71,7 @@ FOdysseyPainterEditorVectorSceneTreeViewTab::UpdateObjectPropertiesPanel( FOdyss
         {
             // defaults to scene
             std::list<FOdysseyVectorObject*>& sceneAsList = iScene->GetRoot()->GetChildrenList();
-            std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetEngine()->GetSelectedObjectList();
+            std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetRoot()->GetSelectedObjectList();
             std::list<FOdysseyVectorObject*>& focusedObjectList = selectedObjectList.size() ? selectedObjectList
                                                                                             : sceneAsList;
             uint32 objectClass = FOdysseyVectorObject::GetCommonClass( focusedObjectList );

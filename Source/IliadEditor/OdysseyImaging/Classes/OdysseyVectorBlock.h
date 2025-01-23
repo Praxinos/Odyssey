@@ -7,7 +7,10 @@
 #include "OdysseyDiskCache.h"
 #include <ULIS>
 #include "blend2d.h"
+// From Module OdysseyVector
+#include "OdysseyVectorEngine.h"
 
+class FOdysseyVectorRoot;
 class FOdysseyVectorEngine;
 class FOdysseyVectorGroupPaint;
 
@@ -33,7 +36,7 @@ public:
      * @param iHeight
      * @param iFormat
      */
-    void Init(const FGuid& iId, FOdysseyVectorEngine* iEngine, int iWidth, int iHeight, ::ULIS::eFormat iFormat);
+    void Init(const FGuid& iId, TSharedPtr<FOdysseyVectorRoot> iRoot, int iWidth, int iHeight, ::ULIS::eFormat iFormat);
 
     /**
      * @brief Get the block Width
@@ -68,14 +71,15 @@ public:
      *
      * @return TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe>
      */
-    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetHUDBlock();
+    TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> GetHUDBlock( );
 
     /**
      * @brief Renders the Scene into the internal block and returns the block
      *
      * @return TSharedPtr<::ULIS::FBlock>
      */
-    TSharedPtr<::ULIS::FBlock> Render( uint64 iDrawingFlags, bool iRenderHUD );
+    TSharedPtr<::ULIS::FBlock> Render( uint64 iDrawingFlags
+                                     , bool iRenderHUD );
 
     /**
      * @brief Sets the render flags passed to the vector engine
@@ -86,6 +90,8 @@ public:
      * @brief Gets the render flags passed to the vector engine
      */
     uint64 GetRenderFlags() const;
+
+    FOdysseyVectorEngine& GetEngine();
 
 private:
     enum eBlockState
@@ -98,9 +104,9 @@ private:
     static void CleanupBlock(uint8* iData, void* iInfo);
     static void CleanupHUDBlock(uint8* iData, void* iInfo);
     void Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags);
-    void RenderHUD(::ULIS::FBlock& ioBlock);
-    void OnVectorEngineInvalidate( FOdysseyVectorGroupPaint* iScene, uint64 iSignalFlags );
-    void Invalidate(bool iIsInteractive);
+    void RenderHUD(::ULIS::FBlock& ioBlock );
+    void OnVectorRootRequestRedraw( uint64 iSignalFlags );
+    void Invalidate( const ::ULIS::FRectD& iRect, bool iIsInteractive );
     void SetState(eBlockState iState);
 
 private:
@@ -108,7 +114,8 @@ private:
     FGuid mId;
     TWeakPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock; //Loaded on demand from cache, can be destroyed at any time if noone keeps a sharedptr on it
     TWeakPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mHUDBlock; //Loaded on demand
-    FOdysseyVectorEngine* mEngine;
+    FOdysseyVectorEngine mEngine;
+    TSharedPtr<FOdysseyVectorRoot> mRoot;
     int mWidth;
     int mHeight;
     ::ULIS::eFormat mFormat;

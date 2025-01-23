@@ -9,6 +9,8 @@
 #include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
 #include "OdysseyVectorGroupPaint.h"
+#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorSharedEnv.h"
 #include "SOdysseySinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -46,10 +48,8 @@ uint64
 UOdysseyPainterEditorVectorPathPushTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-    // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    // side note: updating via root will request a redraw as well
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
      return 0;
 }
@@ -57,8 +57,8 @@ UOdysseyPainterEditorVectorPathPushTool::LoadVector( FOdysseyVectorGroupPaint* i
 uint64
 UOdysseyPainterEditorVectorPathPushTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    // redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    // side note: updating via root will request a redraw as well
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
      return 0;
 }
@@ -103,16 +103,15 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
         mSegmentArray.clear();
         mPushedPointArray.clear();
 
-        iEngine->Traverse
+        FOdysseyVectorObject::Traverse
         ( iScene
         , 0
         , [ this
           , iScene
-          , iEngine
           , &iPointInTexture
           , &pickedSegmentDistanceArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
           {
-              if( iEngine->ObjectHasFocus( iScene, object, traversalFlags ) || ( RestrictToSelectedObjects == false ) )
+              if( iScene->GetRoot()->ObjectHasFocus( object, traversalFlags ) || ( RestrictToSelectedObjects == false ) )
               {
                   if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
                   {
@@ -125,7 +124,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
                                         , &pickedSegmentDistanceArray );
                   }
 
-                  return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                  return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
               }
 
               return 0;
@@ -219,8 +218,6 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
         GEditor->EndTransaction();
     }
 
-    // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
     oSignalFlags = notificationFlags;
 
     return true;
@@ -240,8 +237,11 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseHoverVector( FOdysseyVectorGroup
 
     mPathPushHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    // force invalidation for redrawal
+    iScene->Invalidate(0);
+    // Update and request for redraw
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+
     oSignalFlags = notificationFlags;
 }
 
@@ -283,13 +283,11 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorGroupP
             point->SetY( point->GetY() + ( delta.y * ratio ) );
         }
 
-        // update vector scene and GUI widgets via delegates.
-        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
-                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
+        // update vector scene. It will request a redraw as well
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
     }
 
-    // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
     oSignalFlags = notificationFlags;
 }
 
@@ -302,20 +300,14 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseUpVector( FOdysseyVectorGroupPai
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    uint64 notificationFlags = 0;
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-
-        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidated objects
-
-        vectorEngine->ResetHUD();
+        //iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidated objects
     }
 
-    // redraw
-    iScene->GetEngine()->Invalidate( 0 );
     oSignalFlags = notificationFlags;
 
     return true;

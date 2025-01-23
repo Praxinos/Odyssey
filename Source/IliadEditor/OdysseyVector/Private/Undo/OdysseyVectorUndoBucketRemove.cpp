@@ -25,8 +25,6 @@ FOdysseyVectorUndoBucketRemove::FOdysseyVectorUndoBucketRemove( FOdysseyVectorGr
                                                               , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mBucketArray.push_back( iBucket );
 }
 
@@ -36,7 +34,6 @@ FOdysseyVectorUndoBucketRemove::FOdysseyVectorUndoBucketRemove( FOdysseyVectorGr
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
     , mBucketArray( iBucketArray )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
 }
 
 void

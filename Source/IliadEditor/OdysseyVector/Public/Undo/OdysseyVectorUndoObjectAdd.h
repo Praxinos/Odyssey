@@ -11,6 +11,8 @@
 #include "Undo/OdysseyVectorUndo.h"
 #include "OdysseyVectorObject.h"
 
+class FOdysseyVectorGroupPaint;
+
 class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectAdd : public FOdysseyVectorUndo
 {
     public:
@@ -34,4 +36,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoObjectAdd : public FOdysseyVectorUndo
     private:
         std::vector<FOdysseyVectorObject*> mObjectArray;
         std::vector<FOdysseyVectorObject*> mParentArray;
+        FOdysseyVectorGroupPaint* mScene;
 };

@@ -25,8 +25,6 @@ FOdysseyVectorUndoVertexAlignment::FOdysseyVectorUndoVertexAlignment( FOdysseyVe
 {
     std::vector<FOdysseyVectorSegment*> segmentArray;
 
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     //------ Backup vertex alignment flag part ---------//
 
     mVertexSnapshotArray.reserve( iAlignedVertexArray.size() );

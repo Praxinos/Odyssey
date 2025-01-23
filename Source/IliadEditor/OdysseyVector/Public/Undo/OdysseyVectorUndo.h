@@ -24,6 +24,7 @@ class FOdysseyVectorVertex;
 class FOdysseyVectorSegmentCubic;
 class FOdysseyVectorTagInbetweener;
 class FOdysseyVectorSharedEnv;
+class FOdysseyVectorRoot;
 
 namespace FSnapshotFlags
 {
@@ -580,14 +581,14 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
         FOdysseyVectorUndo( FOdysseyVectorSharedEnv* iSharedEnv, uint64 iReturnFlags );
 
     protected:
-        static void GetEngineListFromObjectList( const std::list<FOdysseyVectorObject*>& iObjectList
-                                               , std::list<FOdysseyVectorEngine*>& oEngineList );
-        static void GetEngineListFromInbetweenerTagList( const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
-                                                       , std::list<FOdysseyVectorEngine*>& oEngineList );
-        static void GetEngineListFromInbetweenerTagArray( const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
-                                                        , std::list<FOdysseyVectorEngine*>& oEngineList );
-        static void GetEngineListFromTagList( const std::list<FOdysseyVectorTag*>& iTagList
-                                            , std::list<FOdysseyVectorEngine*>& oEngineList );
+        static void GetRootListFromObjectList( const std::list<FOdysseyVectorObject*>& iObjectList
+                                             , std::list<FOdysseyVectorRoot*>& oRootList );
+        static void GetRootListFromInbetweenerTagList( const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
+                                                     , std::list<FOdysseyVectorRoot*>& oRootList );
+        static void GetRootListFromInbetweenerTagArray( const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
+                                                      , std::list<FOdysseyVectorRoot*>& oRootList );
+        static void GetRootListFromTagList( const std::list<FOdysseyVectorTag*>& iTagList
+                                          , std::list<FOdysseyVectorRoot*>& oRootList );
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
 
@@ -597,13 +598,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndo : public FCommandChange
         /** Describes this change (for debugging) */
         //virtual FString ToString() const override;
 
-        void InvalidateEngineList( uint64 iInvalidationFlags );
-
         void Update();
 
     protected:
         bool mApplied;
-        std::list<FOdysseyVectorEngine*> mEngineList; // list of engines that need to be redrawn
+        std::list<FOdysseyVectorRoot*> mRootList; // list of engines that need to be redrawn
         FOdysseyVectorSharedEnv* mSharedEnv;
         uint64 mReturnFlags;
 };

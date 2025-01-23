@@ -54,11 +54,13 @@ FOdysseyVectorUndoTagInbetweenerCommit::Apply( UObject* iIgnored )
         object->GetOldParent()->AppendChild( object );
     }
 
+/*
     for( FOdysseyVectorGroupPaint* scene : mCommittedSceneList )
     {
         // request redraw attached cells
         scene->GetEngine()->Invalidate( 0 );
     }
+*/
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
     Update();
@@ -80,10 +82,12 @@ FOdysseyVectorUndoTagInbetweenerCommit::Revert( UObject* iIgnored )
         object->GetParent()->RemoveChild( object );
     }
 
+/*
     for( FOdysseyVectorGroupPaint* scene : mCommittedSceneList )
     {
         scene->GetEngine()->Invalidate( 0 );
     }
+*/
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
     Update();

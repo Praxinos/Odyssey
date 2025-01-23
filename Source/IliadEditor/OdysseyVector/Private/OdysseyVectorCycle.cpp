@@ -9,6 +9,7 @@
 #include "OdysseyVector.h"
 #include "OdysseyVectorBucket.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 // for measurements
 #include <chrono>
 
@@ -18,12 +19,12 @@
 
 FOdysseyVectorCycle::~FOdysseyVectorCycle()
 {
-    FOdysseyVectorEngine* engine = mOwner->GetEngine();
+    FOdysseyVectorRoot* root = mOwner->GetRoot();
 
     // auto invalidation of the region that needs to be redrawn
-    if( engine )
+    if( root )
     {
-        engine->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), mBBox ) );
+        root->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), mBBox ) );
     }
 }
 
@@ -39,14 +40,14 @@ FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject* iOwner
     , mParentCycle( nullptr )
     , mPropagated( false )
 {
-    FOdysseyVectorEngine* engine = mOwner->GetEngine();
+    FOdysseyVectorRoot* root = mOwner->GetRoot();
 
     Build( );
 
     // auto invalidation of the region that needs to be redrawn
-    if( engine )
+    if( root )
     {
-        engine->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), mBBox ) );
+        root->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), mBBox ) );
     }
 }
 

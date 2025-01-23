@@ -164,7 +164,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
             const TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> listView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
             const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() );
             uint32 frameIndex = MousePositionToFrame( cursorPos.X );
-            IOdysseyVectorCell* tagCell = mInbetweenerTag->GetOwner()->GetEngine()->GetCell();
+            IOdysseyVectorCell* tagCell = mInbetweenerTag->GetOwner()->GetRoot()->GetCell();
             float frameWidth = timelinePosition->GetFrameSize();
 
             UOdysseyAnimationCell* cell = listView.Get()->GetAnimationLayerImageVector()->GetCellAtFrame(frameIndex);
@@ -190,7 +190,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
                     {
                         mInbetweenerTag->SetInterpolationDirection( direction );
 
-                        mInbetweenerTag->GetOwner()->GetScene()->Update( 0 );
+                        mInbetweenerTag->GetOwner()->GetSharedEnv()->Update( 0 );
 
                         CacheDesiredSize( 1.0f /* mLayoutScaleMultiplier */);
                     }
@@ -252,9 +252,9 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
                 }
             }
 
-            mInbetweenerTag->GetOwner()->GetScene()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
             // request for redrawing of the current displayed cell
-            vectorCell->GetRoot()->GetEngine()->Invalidate( 0 );
+            vectorCell->GetRoot()->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
             FOdysseyVectorEngine::Notify( nullptr, retFlags );
         }
 
@@ -284,8 +284,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
     uint32 sourceFrame = sourceCell->GetFrame();
     // compute geometry
     float frameWidth = listView->GetTimelinePosition()->GetFrameSize();
-    FOdysseyVectorEngine* vectorEngine = mInbetweenerTag->GetOwner()->GetScene()->GetEngine();
-    IOdysseyVectorLayer* layer = vectorEngine->GetLayer();
+    FOdysseyVectorRoot* vectorRoot = mInbetweenerTag->GetOwner()->GetScene()->GetRoot();
+    IOdysseyVectorLayer* layer = vectorRoot->GetLayer();
     double xmin, xmax;
 
     // call from base class

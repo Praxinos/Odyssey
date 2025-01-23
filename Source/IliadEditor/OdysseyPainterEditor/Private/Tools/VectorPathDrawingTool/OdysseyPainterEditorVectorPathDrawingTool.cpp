@@ -8,6 +8,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
 #include "Framework/Application/SlateApplication.h"
@@ -96,10 +97,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::LoadVector( FOdysseyVectorGroupPaint
     // init pathTracer's raster image
     mPathTracer.Init( iScene );
 
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-    // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    // side note: updating via root will request a redraw as well
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;
 }
@@ -107,8 +106,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::LoadVector( FOdysseyVectorGroupPaint
 uint64
 UOdysseyPainterEditorVectorPathDrawingTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    // side note: updating via root will request a redraw as well
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;
 }
@@ -238,9 +237,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::GetParentObject( FOdysseyVectorGroup
     FOdysseyVectorObject* parentObject = iScene;
 
     // Add the path to the current unique selected group
-    if( vectorEngine->GetSelectedObjectList().size() == 1 )
+    if( iScene->GetRoot()->GetSelectedObjectList().size() == 1 )
     {
-        FOdysseyVectorObject* selectedObject = vectorEngine->GetLastSelectedObject();
+        FOdysseyVectorObject* selectedObject = iScene->GetRoot()->GetLastSelectedObject();
 
         if(  selectedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
         {
@@ -371,8 +370,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGr
                                                               , uint64& oSignalFlags )
 {
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint32 width = vectorEngine->GetLayer()->GetWidth();
-    uint32 height = vectorEngine->GetLayer()->GetHeight();
+    uint32 width = iScene->GetRoot()->GetLayer()->GetWidth();
+    uint32 height = iScene->GetRoot()->GetLayer()->GetHeight();
     ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
     ::ULIS::FRectI imageRegion;
     uint64 notificationFlags = 0;
@@ -389,8 +388,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGr
 
     if( Stitch )
     {
-        // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
-        iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+        // Force redraw
+        // Calling Update via Root will request a redraw even if root is not invalidated
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
         oSignalFlags = notificationFlags;
     }
@@ -468,17 +468,17 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
 
             //vectorEngine->SetInvalidatedRect( mPathTracer.GetRedrawRect() );
 
-            vectorEngine->InvalidateRect( ::ULIS::FRectD::FromMinMax( xmin
-                                                                    , ymin
-                                                                    , xmax
-                                                                    , ymax ) );
+            iScene->GetRoot()->InvalidateRect( ::ULIS::FRectD::FromMinMax( xmin
+                                                                         , ymin
+                                                                         , xmax
+                                                                         , ymax ) );
 
             oldMouseX = iPointInTexture.x;
             oldMouseY = iPointInTexture.y;
         }
 
         // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_NORENDER // we render manually so that we can determine an invalidation rect
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_NOREDRAW // we render manually so that we can determine an invalidation rect
                                       | FOdysseyVectorObject::UPDATE_INTERACTIVE
                                       | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated path after segment insertion
 
@@ -499,9 +499,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
         // Request render after last redraw - commented out
         //if( vectorEngine->GetInvalidationFlags() == 0 )
         {
-            // it's important to call invalidate here in any case beacuse the delegate
-            //  will call FOdysseyVectorBlock::Invalidate() and it will retrieve the invalidated rectangle.
-            vectorEngine->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+            // Calling Update via Root will request a redraw even if root is not invalidated
+            iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
         }
     }
 
@@ -519,8 +518,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
 
     ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
     FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint32 imgW = vectorEngine->GetLayer()->GetWidth();
-    uint32 imgH = vectorEngine->GetLayer()->GetHeight();
+    uint32 imgW = iScene->GetRoot()->GetLayer()->GetWidth();
+    uint32 imgH = iScene->GetRoot()->GetLayer()->GetHeight();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_HUD; // re-creates the quadtree;
@@ -622,7 +621,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                 {
                     // delete any new path with single vertex that was create at mouse down
                     path->GetParent()->RemoveChild( path );
-                    vectorEngine->UnselectObject( path );
+                    iScene->GetRoot()->UnselectObject( path );
+
                     delete path;
                 }
                 else

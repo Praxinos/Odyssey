@@ -6,6 +6,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorLayer.h"
+#include "OdysseyVectorRoot.h"
 
 FOdysseyPainterEditorVectorPathEditToolHUD::~FOdysseyPainterEditorVectorPathEditToolHUD()
 {
@@ -34,9 +35,8 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Reset( FOdysseyVectorGroupPaint* iSc
 void
 FOdysseyPainterEditorVectorPathEditToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint32 width = vectorEngine->GetLayer()->GetWidth();
-    uint32 height = vectorEngine->GetLayer()->GetHeight();
+    uint32 width = iScene->GetRoot()->GetLayer()->GetWidth();
+    uint32 height = iScene->GetRoot()->GetLayer()->GetHeight();
 
     mBLSelectionMask.create( width, height, BL_FORMAT_A8 );
 
@@ -184,7 +184,7 @@ FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict erasure to the selection
-    if( iScene->GetEngine()->GetSelectedObjectList().size() )
+    if( iScene->GetRoot()->GetSelectedObjectList().size() )
 //    {
 //        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
 //    }

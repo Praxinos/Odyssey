@@ -13,6 +13,9 @@ class ISinglePropertyView;
 class SViewport;
 
 class FOdysseyVectorGroupPaint;
+class FOdysseyVectorSegment;
+class FOdysseyVectorPath;
+class FOdysseyVectorHandleSegment;
 
 enum class eMouseEventName : uint8
 {

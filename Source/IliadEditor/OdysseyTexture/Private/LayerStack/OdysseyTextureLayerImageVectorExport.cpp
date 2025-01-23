@@ -15,12 +15,12 @@ FOdysseyTextureLayerImageVectorExport::Write( UOdysseyTextureLayerImageVector* i
                             , Ar
                             , [iTextureLayerImageVector](FArchive &Ar) -> void
     {
-        FOdysseyVectorEngine* vectorEngine = iTextureLayerImageVector->GetEngine();
+        FOdysseyVectorRoot* vectorRoot = iTextureLayerImageVector->GetRoot();
         // engine might be NULL because this function is sometimes called even before loading anything
         // so we have to check the validity of the pointer
-        if( vectorEngine )
+        if( vectorRoot )
         {
-            FOdysseyVectorExportV2::Write( vectorEngine->GetScene(), Ar );
+            FOdysseyVectorExportV2::Write( vectorRoot->GetScene(), Ar );
         }
     } );
 }

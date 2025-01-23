@@ -27,7 +27,6 @@ FOdysseyVectorUndoTagInbetweenerRouteRemove::FOdysseyVectorUndoTagInbetweenerRou
     , mInbetweenerTag( iInbetweenerTag )
     , mRoute( iRoute )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
 }
 
 void

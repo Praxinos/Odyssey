@@ -3,6 +3,7 @@
 
 #include "Undo/OdysseyVectorUndoRemoveObjects.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorSharedEnv.h"
 
@@ -27,7 +28,7 @@ FOdysseyVectorUndoRemoveObjects::FOdysseyVectorUndoRemoveObjects( FOdysseyVector
                                                                 , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
+    GetRootListFromObjectList( { iScene }, mRootList );
 
     mRemovedObjectArray = iRemovedObjectArray;
 }
@@ -43,7 +44,7 @@ FOdysseyVectorUndoRemoveObjects::Apply( UObject* iIgnored )
         object->GetParent()->RemoveChild( object );
     }
 
-    mEngineList.front()->ClearObjectSelection();
+    mRootList.front()->ClearObjectSelection();
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
     Update();
@@ -55,7 +56,7 @@ FOdysseyVectorUndoRemoveObjects::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mEngineList.front()->ClearObjectSelection();
+    mRootList.front()->ClearObjectSelection();
 
     for( FOdysseyVectorObject* object : mRemovedObjectArray )
     {

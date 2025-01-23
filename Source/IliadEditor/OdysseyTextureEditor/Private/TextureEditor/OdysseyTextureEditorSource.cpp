@@ -8,7 +8,7 @@
 #include "LayerStack/OdysseyTextureLayerImageVector.h"
 #include "OdysseyRasterBlockMutator.h"
 #include "ULISLoaderModule.h"
-#include "Undo/OdysseyVectorUndoEngineClear.h"
+#include "Undo/OdysseyVectorUndoSceneClear.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPixelFormat.h"
@@ -16,6 +16,7 @@
 #include "TextureCompiler.h"
 
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorRoot.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
@@ -209,18 +210,17 @@ FOdysseyTextureEditorSource::Clear()
 
         for (TSharedPtr<FOdysseyMediaVector> mediaVector : mediasVector)
         {
-            FOdysseyVectorEngine* vectorEngine = mediaVector->GetScene()->GetEngine();
+            FOdysseyVectorRoot* vectorRoot = mediaVector->GetScene()->GetRoot();
 
             // needed for undos
             if (GUndo)
             {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoEngineClear( vectorEngine, notificationFlags );
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSceneClear( mediaVector->GetScene(), notificationFlags );
                 GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
                 RecordCurrentFrameUndo();
             }
 
-            vectorEngine->GetRoot()->SetScene(new FOdysseyVectorGroupPaint("Scene"));
-            vectorEngine->Invalidate( 0 );
+            vectorRoot->SetScene(new FOdysseyVectorGroupPaint("Scene") );
         }
 
         FOdysseyVectorEngine::Notify( nullptr, notificationFlags );

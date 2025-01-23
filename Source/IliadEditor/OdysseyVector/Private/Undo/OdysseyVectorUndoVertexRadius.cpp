@@ -24,8 +24,6 @@ FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGr
                                                               , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mPathSnapshotArray.reserve( iPathArray.size() );
 
     for( int i = 0; i < iPathArray.size(); i++ )
@@ -39,8 +37,6 @@ FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGr
                                                               , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mVertexSnapshotArray.reserve( iVertexArray.size() );
 
     for( FOdysseyVectorVertex* vertex : iVertexArray )

@@ -7,6 +7,7 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorRoot.h"
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "Undo/OdysseyVectorUndoPointPosition.h"
 #include "Undo/OdysseyVectorUndoVertexRadius.h"
@@ -57,8 +58,8 @@ UOdysseyPainterEditorVectorPathEditTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorPathEditTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    // side note: updating via root will request a redraw as well
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;
 }
@@ -77,10 +78,8 @@ UOdysseyPainterEditorVectorPathEditTool::LoadVector( FOdysseyVectorGroupPaint* i
     FSlateApplication::Get().SetKeyboardFocus( viewportWidget );
 */
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-    // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    // side note: updating via root will request a redraw as well
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;
 }
@@ -103,8 +102,10 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
             mPickingFlags  = FOdysseyVectorPath::PICK_HANDLE_SEGMENT
                            | FOdysseyVectorPath::PICK_VERTEX ;
 
-            // force redraw
-            iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+            // invalidate for redraw
+            iScene->GetRoot()->Invalidate( 0 );
+            // request redraw
+            iScene->GetSharedEnv()->Update( 0 );
 
             return true;
         }
@@ -116,8 +117,10 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
             mPickingMode  = ePathPickingMode::VertexHandle;
             mPickingFlags = FOdysseyVectorPath::PICK_HANDLE_VERTEX;
 
-            // force redraw
-            iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+            // invalidate for redraw
+            iScene->GetRoot()->Invalidate( 0 );
+            // request redraw
+            iScene->GetSharedEnv()->Update( 0 );
 
             return true;
         }
@@ -129,8 +132,10 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyDownGlobalVector( FOdysseyVectorGr
             mPickingMode  = ePathPickingMode::Alter;
             mPickingFlags = FOdysseyVectorPath::PICK_VERTEX;
 
-            // force redraw
-            iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+            // invalidate for redraw
+            iScene->GetRoot()->Invalidate( 0 );
+            // request redraw
+            iScene->GetSharedEnv()->Update( 0 );
 
             return true;
         }
@@ -156,8 +161,10 @@ UOdysseyPainterEditorVectorPathEditTool::OnKeyUpGlobalVector( FOdysseyVectorGrou
       || ( key == EKeys::LeftShift   ) || ( key == EKeys::RightShift   )
       || ( key == EKeys::LeftAlt     ) || ( key == EKeys::RightAlt     ) )
     {
-        // force redraw
-        iScene->GetEngine()->Invalidate( 0 );
+        // invalidate for redraw
+        iScene->GetRoot()->Invalidate( 0 );
+        // request redraw
+        iScene->GetSharedEnv()->Update( 0 );
     }
 
     // first reset display mode
@@ -230,7 +237,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpCutPaths( FOdysseyVectorGroupP
     addedVertexArray.reserve(50);
 
     // traverse recursively on objects determined by the HUD
-    vectorEngine->Traverse
+    FOdysseyVectorObject::Traverse
     ( iScene
     , 0
     , [ this
@@ -241,7 +248,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpCutPaths( FOdysseyVectorGroupP
         , &addedSegmentArray
         , &removedSegmentArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
         {
-            if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags )  )
+            if( iScene->GetRoot()->ObjectHasFocus( object, traversalFlags )  )
             {
                 if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
                 {
@@ -255,7 +262,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpCutPaths( FOdysseyVectorGroupP
                            , removedSegmentArray );
                 }
 
-                return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
             }
 
             return 0;
@@ -286,7 +293,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpCutPaths( FOdysseyVectorGroupP
     }
     GEditor->EndTransaction();
 
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidated objects
+    // update. note: as the scene is invalidated, it will request a redraw as well
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return notificationFlags;
 }
@@ -353,7 +361,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpDeletePoint( FOdysseyVectorGro
             path->GetParent()->RemoveChild( path );
         }
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // updated invalidated objects
+        // Update. note: as the scene is invalidated, it will request a redraw as well
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("vector-path-edit-tool.transaction.delete-point","Vector Path Edit Tool"));
@@ -428,7 +437,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpAddPoint( FOdysseyVectorGroupP
         }
     }
 
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // Update. note: as the scene is invalidated, it will request a redraw as well
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     // needed for valid GUndo pointer
     GEditor->BeginTransaction(LOCTEXT("vector-path-edit-tool.transaction.add-point","Vector Path Edit Tool"));
@@ -458,16 +468,13 @@ void
 UOdysseyPainterEditorVectorPathEditTool::GetPathsFromSelection( FOdysseyVectorGroupPaint* iScene
                                                               , std::vector<FOdysseyVectorPath*>& oPathArray )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-
-    vectorEngine->Traverse
+    FOdysseyVectorObject::Traverse
     ( iScene
     , 0
     , [ iScene
-      , vectorEngine
       , &oPathArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
+          if( iScene->GetRoot()->ObjectHasFocus( object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
@@ -476,7 +483,7 @@ UOdysseyPainterEditorVectorPathEditTool::GetPathsFromSelection( FOdysseyVectorGr
                   oPathArray.push_back( path );
               }
 
-              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+              return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
           }
 
           return 0;
@@ -501,7 +508,6 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , const FKey& iKey )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
@@ -514,15 +520,14 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
     mPickedHandlePositionArray.clear();
     mSegmentAdjustmentArray.clear();
 
-    vectorEngine->Traverse
+    FOdysseyVectorObject::Traverse
     ( iScene
     , 0
     , [ this
       , iScene
-      , vectorEngine
       , &iPointInTexture ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
+          if( iScene->GetRoot()->ObjectHasFocus( object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
@@ -536,7 +541,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                                  , mPickingFlags );
               }
 
-              return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+              return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
           }
 
           return 0;
@@ -731,8 +736,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownVector( FOdysseyVectorGroupP
     }
 
     // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE
-                                   | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
+//    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
     oSignalFlags = notificationFlags;
 
     return true;
@@ -764,8 +769,11 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( FOdysseyVectorGroup
     // This populates mPathEditHUD::mHoveredPointArray
     mPathEditHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
-    // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    // force invalidation for redrawal
+    iScene->GetRoot()->Invalidate( 0 );
+    // request redraw
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+
     oSignalFlags = notificationFlags;
 }
 
@@ -934,11 +942,11 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDragVector( FOdysseyVectorGroupP
             }
         }
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
-                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
+        // Update. Note: as the seen is invalidated, it will request a redraw
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
     }
 
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
     oSignalFlags = notificationFlags;
 }
 
@@ -947,7 +955,7 @@ UOdysseyPainterEditorVectorPathEditTool::PickObjects( FOdysseyVectorGroupPaint* 
                                                     , double iX
                                                     , double iY )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    FOdysseyVectorRoot* vectorRoot = iScene->GetRoot();
     std::vector<FOdysseyVectorObject*> pickedObjectArray;
     ::ULIS::FRectD roi;
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
@@ -971,24 +979,24 @@ UOdysseyPainterEditorVectorPathEditTool::PickObjects( FOdysseyVectorGroupPaint* 
           mPathEditHUD->ClearMask();
     roi = mPathEditHUD->GenerateMask( iX, iY, PickingRadius );
     // TODO: pass the mask image as arg to Pick function
-    vectorEngine->SetBLMask( mPathEditHUD->GetMask() );
+    vectorRoot->SetBLMask( mPathEditHUD->GetMask() );
 
     // deselect all if control key is not pressed
     if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
     {
-        vectorEngine->ClearObjectSelection();
+        vectorRoot->ClearObjectSelection();
     }
 
     // dragging occured
-    vectorEngine->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
+    vectorRoot->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
 
     // when dragging occured, we select all objects lying in the selection area.
     for ( int i = 0; i < pickedObjectArray.size(); i++ )
     {
-        vectorEngine->SelectObject( pickedObjectArray[i] );
+        vectorRoot->SelectObject( pickedObjectArray[i] );
     }
 
-    vectorEngine->SetBLMask( nullptr );
+    vectorRoot->SetBLMask( nullptr );
 
     return notificationFlags;
 }
@@ -1002,7 +1010,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    uint64 notificationFlags = 0;
+    uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_HUD;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -1061,12 +1069,10 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseUpVector( FOdysseyVectorGroupPai
         }
 
         iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-        vectorEngine->ResetHUD();
     }
 
     // redraw
-    //iScene->GetEngine()->Invalidate( 0 );
+    iScene->GetRoot()->Invalidate( 0 );
 
     oSignalFlags = notificationFlags;
 

@@ -18,6 +18,8 @@
 #include "OdysseyVectorEllipse.h"
 #include "OdysseyVectorLine.h"
 #include "OdysseyVectorRectangle.h"
+#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorRoot.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 
 #ifndef M_PI
@@ -64,8 +66,8 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    // Calling Update via Root will request a redraw even if root is not invalidated
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
     return 0;
 }
@@ -74,10 +76,8 @@ uint64
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-    // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    // Calling Update via Root will request a redraw even if root is not invalidated
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
     return 0;
 }
@@ -111,13 +111,12 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnKeyUpVector( FOdysseyVectorGr
 FOdysseyVectorObject*
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetParentObject( FOdysseyVectorGroupPaint* iScene )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     FOdysseyVectorObject* parentObject = iScene;
 
     // Add the path to the current unique selected group
-    if( vectorEngine->GetSelectedObjectList().size() == 1 )
+    if( iScene->GetRoot()->GetSelectedObjectList().size() == 1 )
     {
-        FOdysseyVectorObject* selectedObject = vectorEngine->GetLastSelectedObject();
+        FOdysseyVectorObject* selectedObject = iScene->GetRoot()->GetLastSelectedObject();
 
         if(  selectedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
         {
@@ -185,12 +184,13 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
 
         //mSelectionChanged.Broadcast(iScene);
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
-                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated objects
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated objects
     }
 
     // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    //iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
     oSignalFlags = notificationFlags;
 
     return true;
@@ -293,12 +293,13 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
             }
         }
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
-                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated objects
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated objects
     }
 
     // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    //iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
     oSignalFlags = notificationFlags;
 }
 
@@ -349,11 +350,12 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
             GEditor->EndTransaction();
         }
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidate objects
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidate objects
     }
 
     // redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    //iScene->GetEngine()->Invalidate( 0 );
+
     oSignalFlags = notificationFlags;
 
     return true;

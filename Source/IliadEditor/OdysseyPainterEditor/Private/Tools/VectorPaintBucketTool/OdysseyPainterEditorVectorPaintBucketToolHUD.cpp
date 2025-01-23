@@ -4,7 +4,7 @@
 #include "Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketToolHUD.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
-
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorBucket.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCycle.h"
@@ -51,14 +51,14 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::UpdateWorkingPaintgroupList( FOdy
 
     mWorkingPaintgroupList.clear();
 
-    vectorEngine->Traverse
+    FOdysseyVectorObject::Traverse
     ( iScene
     , 0
     , [ this
       , iScene
       , vectorEngine ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
         {
-            if( vectorEngine->ObjectHasFocus( iScene, object, traversalFlags ) )
+            if( iScene->GetRoot()->ObjectHasFocus( object, traversalFlags ) )
             {
                 if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
                 {
@@ -81,7 +81,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::UpdateWorkingPaintgroupList( FOdy
                     }
                 }
 
-                return FOdysseyVectorEngine::TRAVERSE_OBJECT_ACCEPTED;
+                return FOdysseyVectorObject::TRAVERSE_OBJECT_ACCEPTED;
             }
 
             return 0;
@@ -244,7 +244,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict erasure to the selection
-    if( iScene->GetEngine()->GetSelectedObjectList().size() )
+    if( iScene->GetRoot()->GetSelectedObjectList().size() )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }

@@ -9,6 +9,8 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "Undo/OdysseyVectorUndoPointPosition.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "SOdysseySinglePropertyView.h"
 
@@ -57,7 +59,7 @@ uint64
 UOdysseyPainterEditorVectorGridTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;
 }
@@ -69,20 +71,13 @@ UOdysseyPainterEditorVectorGridTool::LoadVector( FOdysseyVectorGroupPaint* iScen
 
     mGridHUD->Export( mPointArray );
 
-
-
     //MakeTest( iScene );
     //#ifdef _DEBUG
     //FOdysseyVectorImportSVG svgReader( iScene, TEXT("C:\\CODE\\tiger.svg") );
     //#endif
 
-
-
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-    // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;
 }
@@ -141,7 +136,8 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDownVector( FOdysseyVectorGroupPaint
         }
     }
 
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    // Calling Update via Root will request a redraw even if root is not invalidated
+    //iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
     return true;
 }
@@ -185,13 +181,15 @@ UOdysseyPainterEditorVectorGridTool::OnMouseDragVector( FOdysseyVectorGroupPaint
                 mGridHUD->Deform();
 
                 // update invalidated objects
-                iScene->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
-                              | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
+                // Note: will rezquest a redraw as well
+                iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                              | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
             }
         }
     }
 
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    // Calling Update via Root will request a redraw even if root is not invalidated
+    iScene->GetRoot()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 }
 
 bool
@@ -214,12 +212,12 @@ UOdysseyPainterEditorVectorGridTool::OnMouseUpVector( FOdysseyVectorGroupPaint* 
             mGridHUD->EndSelectionRectangle( FSlateApplication::Get().GetModifierKeys().IsControlDown() ? false : true );
         }
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
         mMultipleSelectionMode = false;
     }
 
-    iScene->GetEngine()->Invalidate( 0 );
+    iScene->GetRoot()->Invalidate( 0 );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+
     return true;
 }
 
@@ -227,12 +225,11 @@ uint64
 UOdysseyPainterEditorVectorGridTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                           , const FName& iPropertyName )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    iEngine->ResetHUD();
+    iScene->GetRoot()->ResetHUD();
 
     // redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    iScene->GetRoot()->Invalidate( 0 );
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return UOdysseyPainterEditorVectorSelectionTool::PropertyChangedVector( iScene, iPropertyName );
 }

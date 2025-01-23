@@ -24,8 +24,6 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChar
                                                                                       , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mInbetweenerTagSnapshotBuffer.emplace_back( iInbetweenerTag
                                               , 0
                                               , FSnapshotFlags::Breakdown::CHART
@@ -38,8 +36,6 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChar
                                                                                       , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
     mInbetweenerTagSnapshotBuffer.reserve( iInbetweenerTagList.size() );
 
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
@@ -57,8 +53,6 @@ FOdysseyVectorUndoTagInbetweenerChartAlter::FOdysseyVectorUndoTagInbetweenerChar
                                                                                       , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
 {
-    GetEngineListFromTagList( iTagList, mEngineList );
-
     mInbetweenerTagSnapshotBuffer.reserve( iTagList.size() );
 
     for( FOdysseyVectorTag* tag : iTagList )

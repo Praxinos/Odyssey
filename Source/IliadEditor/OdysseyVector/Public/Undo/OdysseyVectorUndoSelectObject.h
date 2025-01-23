@@ -10,6 +10,8 @@
 #include <Image/Block.h>
 #include "Undo/OdysseyVectorUndo.h"
 
+class FOdysseyVectorGroupPaint;
+
 class ODYSSEYVECTOR_API FOdysseyVectorUndoSelectObject : public FOdysseyVectorUndo
 {
     public:
@@ -28,4 +30,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSelectObject : public FOdysseyVectorUn
 
     private:
         std::list<FOdysseyVectorObject*> mSelectedObjectList;
+       FOdysseyVectorGroupPaint* mScene;
 };

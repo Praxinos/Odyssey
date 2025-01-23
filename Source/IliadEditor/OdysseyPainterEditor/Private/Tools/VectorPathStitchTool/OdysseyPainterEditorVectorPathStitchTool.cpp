@@ -10,6 +10,8 @@
 #include "ISinglePropertyView.h"
 #include "Widgets/Layout/SWrapBox.h"
 #include "Undo/OdysseyVectorUndoPathStitch.h"
+#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorSharedEnv.h"
 #include "SOdysseySinglePropertyView.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -46,13 +48,9 @@ UOdysseyPainterEditorVectorPathStitchTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorPathStitchTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-    // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    // side note: updating via root will request a redraw as well
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;
 }
@@ -60,10 +58,8 @@ UOdysseyPainterEditorVectorPathStitchTool::LoadVector( FOdysseyVectorGroupPaint*
 uint64
 UOdysseyPainterEditorVectorPathStitchTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    // force redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    // side note: updating via root will request a redraw as well
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
     return 0;
 }
@@ -79,7 +75,8 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
 
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -128,15 +125,15 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
 
                 if( mergedPath->IsSelected() )
                 {
-                    iEngine->UnselectObject( mergedPath );
+                    iScene->GetRoot()->UnselectObject( mergedPath );
 
-                    iEngine->SelectObject( vertexA->GetOwnerAsPath() );
+                    iScene->GetRoot()->SelectObject( vertexA->GetOwnerAsPath() );
                 }
 
                 removedPathArray.push_back( mergedPath );
             }
 
-            knotVertex = iEngine->Stitch( vertexA, vertexB, addedSegmentArray, removedSegmentArray, true );
+            knotVertex = FOdysseyVectorRoot::Stitch( vertexA, vertexB, addedSegmentArray, removedSegmentArray, true );
 
             if( knotVertex )
             {
@@ -169,13 +166,9 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDownVector( FOdysseyVectorGrou
             }
         }
 
-        iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-        mPathStitchHUD->Reset( iScene ); // rebuilds QuadTree after path alter.
+        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
-    // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
     oSignalFlags = notificationFlags;
 
     return true;
@@ -204,8 +197,11 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorGro
     if( rect.Area() )
     {*/
     /*}*/
-    // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+
+    // invalidate for redraw
+    iScene->GetRoot()->Invalidate(0);
+    // Calling Update via Root will request a redraw even if root is not invalidated
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 }
 
 void
@@ -219,8 +215,10 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseDragVector( FOdysseyVectorGrou
         mPathStitchHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
     }
 
-    // redraw
-    iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    // invalidate for redraw
+    iScene->GetRoot()->Invalidate(0);
+    // Calling Update via Root will request a redraw even if root is not invalidated
+    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 }
 
 bool
@@ -232,8 +230,9 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseUpVector( FOdysseyVectorGroupP
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    // redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    iScene->GetRoot()->Invalidate(0);
+    // Calling Update via Root will request a redraw even if root is not invalidated
+    iScene->GetSharedEnv()->Update( 0 );
 
     return true;
 }
@@ -242,15 +241,8 @@ uint64
 UOdysseyPainterEditorVectorPathStitchTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                                 , const FName& iPropertyName )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    /* if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathStitchTool, RestrictToSelection) )
-    {
-        iEngine->ResetHUD(); // rebuild the quad tree
-    } */
-
-    // redraw
-    iScene->GetEngine()->Invalidate( 0 );
+    // request a redraw as well
+    iScene->GetSharedEnv()->Update( 0 );
 
     return UOdysseyPainterEditorVectorBaseTool::PropertyChangedVector( iScene, iPropertyName );
 }

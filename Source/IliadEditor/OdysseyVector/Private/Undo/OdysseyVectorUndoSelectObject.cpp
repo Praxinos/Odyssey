@@ -4,6 +4,7 @@
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorSharedEnv.h"
 
 FOdysseyVectorUndoSelectObject::~FOdysseyVectorUndoSelectObject()
@@ -14,25 +15,24 @@ FOdysseyVectorUndoSelectObject::~FOdysseyVectorUndoSelectObject()
 FOdysseyVectorUndoSelectObject::FOdysseyVectorUndoSelectObject( FOdysseyVectorGroupPaint* iScene
                                                               , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    , mScene ( iScene )
 {
-    GetEngineListFromObjectList( { iScene }, mEngineList );
-
-    mSelectedObjectList = mEngineList.front()->GetSelectedObjectList();
+    mSelectedObjectList = iScene->GetRoot()->GetSelectedObjectList();
 }
 
 void
 FOdysseyVectorUndoSelectObject::Apply( UObject* iIgnored )
 {
     // save former selection
-    std::list<FOdysseyVectorObject*> selectedObjectList = mEngineList.front()->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetRoot()->GetSelectedObjectList();
 
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mEngineList.front()->ClearObjectSelection();
+    mScene->GetRoot()->ClearObjectSelection();
 
     for( FOdysseyVectorObject* object : mSelectedObjectList )
     {
-        mEngineList.front()->SelectObject( object );
+        mScene->GetRoot()->SelectObject( object );
     }
 
     // prepare former selection for Revert()
@@ -46,14 +46,14 @@ void
 FOdysseyVectorUndoSelectObject::Revert( UObject* iIgnored )
 {
     // save former selection
-    std::list<FOdysseyVectorObject*> selectedObjectList = mEngineList.front()->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetRoot()->GetSelectedObjectList();
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mEngineList.front()->ClearObjectSelection();
+    mScene->GetRoot()->ClearObjectSelection();
 
     for( FOdysseyVectorObject* object : mSelectedObjectList )
     {
-        mEngineList.front()->SelectObject( object );
+        mScene->GetRoot()->SelectObject( object );
     }
 
     // prepare former selection for Apply()

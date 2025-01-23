@@ -396,14 +396,14 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
     RemoveCells(Cells);
     TArray<UOdysseyAnimationCell*> cells = AddCells(UOdysseyAnimationCellImageVector::StaticClass(), 0, cellRanges.Num());
 
-       for (int i = 0; i < cellRanges.Num(); i++)
+    for (int i = 0; i < cellRanges.Num(); i++)
     {
         const FInt32Range& cellRange = cellRanges[i];
         UOdysseyAnimationCellImageVector* cell = Cast<UOdysseyAnimationCellImageVector>(cells[i]);
         FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cellRange.GetUpperBoundValue() - cellRange.GetLowerBoundValue() + 1);
 
         int frame = cellRange.GetLowerBoundValue();
-        FOdysseyVectorGroupPaint* destinationScene = cell->GetEngine()->GetScene();
+        FOdysseyVectorGroupPaint* destinationScene = cell->GetRoot()->GetScene();
 
         for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
         {
@@ -432,7 +432,7 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
             if (!cellVector)
                 continue;
 
-            FOdysseyVectorGroupPaint* scene = cellVector->GetEngine()->GetScene();
+            FOdysseyVectorGroupPaint* scene = cellVector->GetRoot()->GetScene();
             for( FOdysseyVectorObject* child : scene->GetChildrenList() )
             {
                 FOdysseyVectorObject* copiedChild = child->Copy();
@@ -446,12 +446,11 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
     for ( UOdysseyAnimationCell* cell : Cells)
     {
         UOdysseyAnimationCellImageVector* vectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
-        FOdysseyVectorEngine* engine = vectorCell->GetEngine();
-        FOdysseyVectorGroupPaint* scene = engine->GetScene();
-        scene->UpdateMatrix();
-        scene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        FOdysseyVectorGroupPaint* scene = vectorCell->GetScene();
 
-        engine->Invalidate( 0 );
+        scene->UpdateMatrix();
+
+        scene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
 
     FOdysseyVectorEngine::Notify( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
@@ -650,7 +649,7 @@ UOdysseyAnimationLayerImageVector::CheckBreakdownTargetMap()
         FOdysseyVectorTagInbetweener* inbetweenerTag = breakdown->GetInbetweenerTag();
         IOdysseyVectorCell* sourceCell = inbetweenerTag->GetSourceCell();
         IOdysseyVectorCell* targetCell = breakdown->GetTargetCell();
-        IOdysseyVectorLayer* layer = inbetweenerTag->GetOwner()->GetEngine()->GetLayer();
+        IOdysseyVectorLayer* layer = inbetweenerTag->GetOwner()->GetRoot()->GetLayer();
 
         if( targetCell && sourceCell )
         {

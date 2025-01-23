@@ -4,6 +4,7 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorEngine.h"
+#include "OdysseyVectorRoot.h"
 #include "OdysseyVector.h"
 #include <execution> // for_each
 
@@ -340,11 +341,11 @@ FOdysseyVectorPath::UpdateShape( uint32 iUpdateFlags )
     // invalidate the whole bounding box to force redraw textured segments that are interdependent
     if( mBrush.GetTexture() && ( mBrush.ExtensionMode != eBrushExtensionMode::Segment ) )
     {
-        FOdysseyVectorEngine* engine = GetEngine();
+        FOdysseyVectorRoot* root = GetRoot();
 
-        if( engine )
+        if( root )
         {
-            engine->InvalidateRect( GetBBox( false, true ) );
+            root->InvalidateRect( GetBBox( false, true ) );
         }
     }
 
@@ -862,7 +863,7 @@ TraceLine( int32 iX0, int32 iY0, double iT0
 void
 FOdysseyVectorPath::PickVertex( std::vector<FOdysseyVectorVertex*>& oPickedVertexArray )
 {
-    BLImage* maskImage = GetEngine()->GetBLMask();
+    BLImage* maskImage = GetRoot()->GetBLMask();
     BLImageData imageData;
 
     maskImage->getData( &imageData );
@@ -1198,7 +1199,7 @@ FOdysseyVectorPath::Erase( std::vector<FOdysseyVectorObject*>& oAddedPathArray
                          , bool iWholeSection
                          , bool iSplit )
 {
-    BLImage* blimg = GetEngine()->GetBLMask(); // the mask image must be selected by the vector engine at this point
+    BLImage* blimg = GetRoot()->GetBLMask(); // the mask image must be selected by the vector engine at this point
 
 
     if( blimg )
@@ -1303,7 +1304,7 @@ FOdysseyVectorPath::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlag
 
     if ( iSelectionFlags & PICK_MASK_BASED )
     {
-        BLImage* blimg = GetEngine()->GetBLMask(); // the mask image must be selected by the vector engine at this point
+        BLImage* blimg = GetRoot()->GetBLMask(); // the mask image must be selected by the vector engine at this point
         BLImageData imageData;
 
         if( blimg )
@@ -2532,7 +2533,7 @@ FOdysseyVectorPath::PickSegments( double iWorldX
 void
 FOdysseyVectorPath::PickSegments( std::vector<FOdysseyVectorSegment*>& oPickedSegmentArray )
 {
-    BLImage* maskImage = GetEngine()->GetBLMask();
+    BLImage* maskImage = GetRoot()->GetBLMask();
     BLImageData maskData;
     ::ULIS::FRectD maskRect;
     bool picked = false;

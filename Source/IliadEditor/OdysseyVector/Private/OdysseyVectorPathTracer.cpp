@@ -6,6 +6,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorLayer.h"
+#include "OdysseyVectorRoot.h"
 
 FOdysseyVectorPathTracer::~FOdysseyVectorPathTracer()
 {
@@ -47,11 +48,10 @@ FOdysseyVectorPathTracer::SetDotLimit( double iDotLimit )
 void
 FOdysseyVectorPathTracer::Init( FOdysseyVectorGroupPaint* iScene )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     BLImageData imageData;
 
-    mWidth = vectorEngine->GetLayer()->GetWidth();
-    mHeight = vectorEngine->GetLayer()->GetHeight();
+    mWidth = iScene->GetRoot()->GetLayer()->GetWidth();
+    mHeight = iScene->GetRoot()->GetLayer()->GetHeight();
 
     if( mBLImage )
     {

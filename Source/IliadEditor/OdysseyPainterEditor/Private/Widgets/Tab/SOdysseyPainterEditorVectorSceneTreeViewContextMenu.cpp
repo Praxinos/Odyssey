@@ -8,6 +8,7 @@
 #include "HUD/OdysseyVectorHUD.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorRoot.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -116,7 +117,7 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CanAddInbetweener( FOdyssey
 {
     bool ret = false;
 
-    for( FOdysseyVectorObject* selectedObject : iScene->GetEngine()->GetSelectedObjectList() )
+    for( FOdysseyVectorObject* selectedObject : iScene->GetRoot()->GetSelectedObjectList() )
     {
         if( selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() ) )
         {
@@ -133,7 +134,7 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CanAddInbetweener( FOdyssey
 bool
 SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CanAlterInbetweener( FOdysseyVectorGroupPaint* iScene )
 {
-    for( FOdysseyVectorObject* selectedObject : iScene->GetEngine()->GetSelectedObjectList() )
+    for( FOdysseyVectorObject* selectedObject : iScene->GetRoot()->GetSelectedObjectList() )
     {
         if( selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() ) )
         {
