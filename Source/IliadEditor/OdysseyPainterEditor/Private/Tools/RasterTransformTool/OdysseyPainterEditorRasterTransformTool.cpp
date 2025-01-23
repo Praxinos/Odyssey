@@ -683,6 +683,8 @@ void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
     mTransformAreaHUD = nullptr;
     mTransformCaptureMode = EOdysseyTransformCapture::NoCapture;
     ResetRasterSelection();
+
+    mEditor->ActivateMainTool( mEditor->GetRasterDrawingTool() );
 }
 
 void UOdysseyPainterEditorRasterTransformTool::ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
