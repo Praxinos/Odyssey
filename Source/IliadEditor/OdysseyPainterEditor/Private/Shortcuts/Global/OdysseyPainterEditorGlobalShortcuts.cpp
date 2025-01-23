@@ -6,8 +6,11 @@
 #include "Models/OdysseyPainterEditorCommands.h"
 #include "OdysseyBlockClipboardData.h"
 #include "OdysseyEditorModule.h"
+#include "OdysseyMediaRaster.h"
 #include "OdysseyPainterEditor.h"
 #include "Shortcuts/Global/OdysseyPainterEditorGlobalToolsShortcuts.h"
+#include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
 
 FOdysseyPainterEditorGlobalShortcuts::FOdysseyPainterEditorGlobalShortcuts(FOdysseyPainterEditor* iEditor)
     : mEditor(iEditor)

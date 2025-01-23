@@ -201,6 +201,11 @@ bool UOdysseyPainterEditorRasterTransformTool::OnKeyDown(const FKey& iKey)
         Uniform = !Uniform;
         return true;
     }
+    else if (iKey == EKeys::LeftControl || iKey == EKeys::RightControl)
+    {
+        Perspective = !Perspective;
+        return true;
+    }
 
     return false;
 }
@@ -212,7 +217,12 @@ bool UOdysseyPainterEditorRasterTransformTool::OnKeyUp(const FKey& iKey)
         Uniform = !Uniform;
         return true;
     }
-    else if( iKey == EKeys::Enter || iKey == EKeys::SpaceBar )
+    else if (iKey == EKeys::LeftControl || iKey == EKeys::RightControl)
+    {
+        Perspective = !Perspective;
+        return true;
+    }
+    else if (iKey == EKeys::Enter || iKey == EKeys::SpaceBar)
     {
         CommitTransform();
         return true;
