@@ -91,7 +91,8 @@ UOdysseyPainterEditorRasterDrawingTool::Activate()
     if(!Brush)
     {
         UOdysseyPainterEditorSettings* settings = UOdysseyPainterEditorSettings::Get();
-        FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, Brush), settings->BrushDefaults.DefaultBrush.LoadSynchronous());
+        if( settings->BrushDefaults.DefaultBrush.LoadSynchronous() )
+            FOdysseyObjectEditorUtils::SetPropertyValue(this, GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorRasterDrawingTool, Brush), settings->BrushDefaults.DefaultBrush.LoadSynchronous());
     }
 
     Super::Activate();
@@ -311,6 +312,9 @@ UOdysseyPainterEditorRasterDrawingTool::Tick(float iDeltaTime)
     if (mediaProvider.IsLocked())
         return;
 
+    if( !BrushInstance )
+        return;
+
     bool hasRaster = mediaProvider.HasMedia<FOdysseyMediaRaster>();
     if (!hasRaster)
         return;
@@ -341,7 +345,9 @@ void
 UOdysseyPainterEditorRasterDrawingTool::Flush()
 {
     mWorker.Finish();
-    BrushInstance->StrokeFlush();
+
+    if( BrushInstance )
+        BrushInstance->StrokeFlush();
 }
 
 void
@@ -838,11 +844,11 @@ UOdysseyPainterEditorRasterDrawingTool::ApplyOverrides(UOdysseyBrushAssetBase* i
 void
 UOdysseyPainterEditorRasterDrawingTool::BrushChanged()
 {
-    if (!Brush)
-        return;
-
     //Destroy the brushInstance
     DestroyBrushInstance();
+
+    if (!Brush)
+        return;
 
     //Create the BrushInstance to use for drawing
     CreateBrushInstance(true);
