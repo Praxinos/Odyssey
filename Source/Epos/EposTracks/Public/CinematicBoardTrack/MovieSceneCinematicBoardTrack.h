@@ -60,7 +60,8 @@ public:
 #endif
 
 #if WITH_EDITOR
-    virtual EMovieSceneSectionMovedResult OnSectionMoved( UMovieSceneSection& ioSection, const FMovieSceneSectionMovedParams& iParams ) override;
+    virtual EMovieSceneSectionMovedResult BeginMoveSection( const TArray<UMovieSceneSection*>& ioMovedSections ) override;
+    virtual EMovieSceneSectionMovedResult OnSectionMoved( const TArray<UMovieSceneSection*>& ioMovedSections, const FMovieSceneSectionMovedParams& iParams ) override;
 
 private:
     TMap<UMovieSceneSection*, TRange<FFrameNumber>> mPreviousMove;
