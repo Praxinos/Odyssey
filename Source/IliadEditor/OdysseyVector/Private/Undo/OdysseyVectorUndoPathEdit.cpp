@@ -3,7 +3,8 @@
 
 #include "Undo/OdysseyVectorUndoPathEdit.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoPathEdit::~FOdysseyVectorUndoPathEdit()
 {
@@ -52,7 +53,7 @@ FOdysseyVectorUndoPathEdit::FOdysseyVectorUndoPathEdit( FOdysseyVectorGroupPaint
                                                       , const std::vector<FOdysseyVectorVertex*>& iEditedVertexArray
                                                       , const std::vector<FOdysseyVectorSegment*>& iEditedSegmentArray
                                                       , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
     mVertexSnapshotArray.reserve( iEditedVertexArray.size() );
     mCubicSegmentSnapshotArray.reserve( iEditedSegmentArray.size() );

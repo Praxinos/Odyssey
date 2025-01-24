@@ -3,7 +3,7 @@
 
 #include "Undo/OdysseyVectorUndoPathStitch.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoPathStitch::~FOdysseyVectorUndoPathStitch()
 {

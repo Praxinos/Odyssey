@@ -5,7 +5,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTag.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoTagInbetweenerTransform::~FOdysseyVectorUndoTagInbetweenerTransform()
 {
@@ -22,7 +22,7 @@ FOdysseyVectorUndoTagInbetweenerTransform::~FOdysseyVectorUndoTagInbetweenerTran
 FOdysseyVectorUndoTagInbetweenerTransform::FOdysseyVectorUndoTagInbetweenerTransform( FOdysseyVectorGroupPaint* iScene
                                                                                     , const std::list<FInbetweenerBreakdown*>& iBreakdownList
                                                                                     , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
     mBreakdownSnapshotBuffer.reserve( iBreakdownList.size() );
 

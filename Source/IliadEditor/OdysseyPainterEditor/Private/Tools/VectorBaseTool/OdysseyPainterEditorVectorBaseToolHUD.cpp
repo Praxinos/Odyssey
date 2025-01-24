@@ -3,12 +3,11 @@
 
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorRoot.h"
 
 FOdysseyPainterEditorVectorBaseToolHUD::~FOdysseyPainterEditorVectorBaseToolHUD()
 {
@@ -50,8 +49,8 @@ FOdysseyPainterEditorVectorBaseToolHUD::GetSelectionBox()
 void
 FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionInbetweenMode( FOdysseyVectorGroupPaint* iScene )
 {
-    FOdysseyVectorSharedEnv* sharedEnv = iScene->GetSharedEnv();
-    uint32 cellIndex = iScene->GetRoot()->GetCell()->GetIndex();
+    FOdysseyVectorLayer* sharedEnv = iScene->GetLayer();
+    uint32 cellIndex = iScene->GetCell()->GetIndex();
 
     mSelectedInbetweenerTagList.clear();
     mSelectedBreakdownList.clear();
@@ -117,8 +116,6 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawText( BLContext* iBLContext
 void
 FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVectorGroupPaint* iScene )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-
     mSelectionBox.inited = false;
     mSelectionBox.rect = ::ULIS::FRectD( 0, 0, 0, 0 );
     mSelectionBox.worldMatrix = iScene->GetWorldMatrix();
@@ -131,7 +128,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxVertexMode( FOdysseyVe
     , [ this
       , iScene ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
       {
-          if( iScene->GetRoot()->ObjectHasFocus( object, iTraversalFlags ) )
+          if( iScene->GetCell()->ObjectHasFocus( object, iTraversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
@@ -174,8 +171,7 @@ void
 FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVectorGroupPaint* iScene
                                                                     , bool iForceWorld )
 {
-    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetRoot()->GetSelectedObjectList();
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
+    std::list<FOdysseyVectorObject*>& selectedObjectList = iScene->GetCell()->GetSelectedObjectList();
 
     if( ( selectedObjectList.size() <= 1 ) && ( iForceWorld == false ) )
     {
@@ -201,7 +197,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::UpdateSelectionBoxObjectMode( FOdysseyVe
           , iScene
           , &selectedObjectList ]( FOdysseyVectorObject* object, uint64 iTraversalFlags ) -> uint64
           {
-              if( iScene->GetRoot()->ObjectHasFocus( object, iTraversalFlags ) )
+              if( iScene->GetCell()->ObjectHasFocus( object, iTraversalFlags ) )
               {
                   ::ULIS::FRectD selectedObjectBBox = object->GetBBox( true, true );
 
@@ -340,7 +336,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawSelectionBox( BLContext* iBLContext
         iBLContext->strokePath( path );
 
         // draw box as white if nothing is selected, colored if something is selected
-        iBLContext->setStrokeStyle( ( iScene->GetRoot()->GetSelectedObjectList().size() == 0 ) ? white : iForegroundColor );
+        iBLContext->setStrokeStyle( ( iScene->GetCell()->GetSelectedObjectList().size() == 0 ) ? white : iForegroundColor );
         iBLContext->setStrokeWidth( 1.0f );
         iBLContext->strokePath( path );
     }
@@ -356,8 +352,6 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawObjects( BLContext* iBLContext
                                                    , const BLRgba32& iHighlightColor
                                                    , uint64 iHUDFlags )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-
     iBLContext->save();
     iBLContext->resetMatrix();
 
@@ -373,7 +367,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawObjects( BLContext* iBLContext
       , &iBackgroundColor
       , &iHighlightColor ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( iScene->GetRoot()->ObjectHasFocus( object, traversalFlags ) || ( iHUDFlags & HUD_DRAW_ALL ) )
+          if( iScene->GetCell()->ObjectHasFocus( object, traversalFlags ) || ( iHUDFlags & HUD_DRAW_ALL ) )
           {
               if( iHUDFlags & HUD_TAGINBETWEENER_ALL )
               {

@@ -3,9 +3,9 @@
 
 #include "Undo/OdysseyVectorUndoGroup.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoGroup::~FOdysseyVectorUndoGroup()
 {
@@ -34,7 +34,7 @@ FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iSce
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
                                                 , std::vector<FOdysseyVectorBucket*>& iRemovedBucketArray
                                                 , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
     , mAddedGroup( iAddedGroup )
     , mScene ( iScene )
 {
@@ -53,7 +53,7 @@ FOdysseyVectorUndoGroup::FOdysseyVectorUndoGroup( FOdysseyVectorGroupPaint* iSce
                                                 , FOdysseyVectorGroup* iAddedGroup
                                                 , std::vector<FOdysseyVectorObject*>& iAddedObjectArray
                                                 , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
     , mAddedGroup( iAddedGroup )
     , mScene ( iScene )
 {
@@ -72,7 +72,7 @@ FOdysseyVectorUndoGroup::Apply( UObject* iIgnored )
 {
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mScene->GetRoot()->ClearObjectSelection();
+    mScene->GetCell()->ClearObjectSelection();
 
     // destroy the former hierarchy.
     for( int i = 0; i < mAddedObjectArray.size(); i++ )
@@ -114,7 +114,7 @@ FOdysseyVectorUndoGroup::Revert( UObject* iIgnored )
 {
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mScene->GetRoot()->ClearObjectSelection();
+    mScene->GetCell()->ClearObjectSelection();
 
     // Remove all children from the created group
     for( int i = 0; i < mAddedObjectArray.size(); i++ )

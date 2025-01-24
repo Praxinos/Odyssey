@@ -9,18 +9,17 @@
 #include <Core/Core.h>
 #include <Image/Block.h>
 #include "Undo/OdysseyVectorUndo.h"
-#include "OdysseyVectorObject.h"
-#include "OdysseyVectorGroupPaint.h"
 
+
+class FOdysseyVectorGroupPaint;
 class FOdysseyVectorCell;
 
-class ODYSSEYVECTOR_API FOdysseyVectorUndoRemoveObjects : public FOdysseyVectorUndo
+class ODYSSEYVECTOR_API FOdysseyVectorUndoSceneClear : public FOdysseyVectorUndo
 {
     public:
-        ~FOdysseyVectorUndoRemoveObjects();
-        FOdysseyVectorUndoRemoveObjects( FOdysseyVectorGroupPaint* iScene
-                                       , const std::vector<FOdysseyVectorObject*>& iRemovedObjectArray
-                                       , uint64 iReturnFlags );
+        ~FOdysseyVectorUndoSceneClear();
+        FOdysseyVectorUndoSceneClear( FOdysseyVectorGroupPaint* iScene
+                                    , uint64 iReturnFlags );
 
         /** Called when redoing */
         virtual void Apply( UObject* iIgnored ) override;
@@ -32,6 +31,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoRemoveObjects : public FOdysseyVectorU
         virtual FString ToString() const override;
 
     private:
-        std::vector<FOdysseyVectorObject*> mRemovedObjectArray;
+        FOdysseyVectorGroupPaint* mScene;
         FOdysseyVectorCell* mCell;
 };

@@ -4,9 +4,9 @@
 #include "Undo/OdysseyVectorUndoTagInbetweenerMatching.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyVectorTag.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoTagInbetweenerMatching::~FOdysseyVectorUndoTagInbetweenerMatching()
 {
@@ -23,14 +23,8 @@ FOdysseyVectorUndoTagInbetweenerMatching::~FOdysseyVectorUndoTagInbetweenerMatch
 FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatching( FOdysseyVectorGroupPaint* iScene
                                                                                   , const std::list<FInbetweenerBreakdown*>& iBreakdownList
                                                                                   , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
-    // we build a list of engines we will need to redraw
-    for( FInbetweenerBreakdown* breakdown : iBreakdownList )
-    {
-        FOdysseyVectorEngine* engine = breakdown->GetInbetweenerTag()->GetOwner()->GetEngine();
-    }
-
     mBreakdownSnapshotBuffer.reserve( iBreakdownList.size() );
 
     for( FInbetweenerBreakdown* breakdown : iBreakdownList )
@@ -42,7 +36,7 @@ FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatchi
 FOdysseyVectorUndoTagInbetweenerMatching::FOdysseyVectorUndoTagInbetweenerMatching( FOdysseyVectorGroupPaint* iScene
                                                                                   , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
                                                                                   , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
     uint32 breakdownCount = 0;
 

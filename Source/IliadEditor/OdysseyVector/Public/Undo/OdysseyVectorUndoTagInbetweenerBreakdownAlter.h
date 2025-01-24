@@ -18,13 +18,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerBreakdownAlter : public 
 {
     public:
         ~FOdysseyVectorUndoTagInbetweenerBreakdownAlter();
-        FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorSharedEnv* iSharedEnv
+        FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorLayer* iSharedEnv
                                                       , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                       , uint64 iReturnFlags );
-        FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorSharedEnv* iSharedEnv
+        FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorLayer* iSharedEnv
                                                       , const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
                                                       , uint64 iReturnFlags );
-        FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorSharedEnv* iSharedEnv
+        FOdysseyVectorUndoTagInbetweenerBreakdownAlter( FOdysseyVectorLayer* iSharedEnv
                                                       , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
                                                       , uint64 iReturnFlags );
         /** Called when redoing */

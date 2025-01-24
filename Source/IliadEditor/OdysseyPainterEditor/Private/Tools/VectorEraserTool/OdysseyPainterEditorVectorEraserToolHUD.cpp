@@ -3,7 +3,7 @@
 
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserToolHUD.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorLayer.h"
@@ -22,9 +22,8 @@ FOdysseyPainterEditorVectorEraserToolHUD::FOdysseyPainterEditorVectorEraserToolH
 void
 FOdysseyPainterEditorVectorEraserToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
 {
-    FOdysseyVectorRoot* vectorRoot = iScene->GetRoot();
-    uint32 width = vectorRoot->GetLayer()->GetWidth();
-    uint32 height = vectorRoot->GetLayer()->GetHeight();
+    uint32 width = iScene->GetLayer()->GetWidth();
+    uint32 height = iScene->GetLayer()->GetHeight();
 
     mBLEraserMask.create( width, height, BL_FORMAT_A8 );
 
@@ -64,7 +63,7 @@ FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext
     FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
 
     // draw selection box only if we restrict erasure to the selection
-    if( iScene->GetRoot()->GetSelectedObjectList().size() )
+    if( iScene->GetCell()->GetSelectedObjectList().size() )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }

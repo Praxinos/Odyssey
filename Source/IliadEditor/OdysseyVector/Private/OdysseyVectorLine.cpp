@@ -68,11 +68,13 @@ FOdysseyVectorLine::CopyShape( uint64 iCopyFlags )
 
 void
 FOdysseyVectorLine::DrawShape( BLContext* iBLContext
+                             , FOdysseyVectorEngine* iEngine
                              , const ::ULIS::FRectD& iInvalidationArea
                              , double iHierarchyOpacity
                              , uint64 iFlags )
 {
     FOdysseyVectorPath::DrawShape( iBLContext
+                                 , iEngine
                                  , iInvalidationArea
                                  , iHierarchyOpacity
                                  , iFlags );

@@ -18,10 +18,10 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibilit
 {
     public:
         ~FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility();
-        FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( FOdysseyVectorSharedEnv* iSharedEnv
+        FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( FOdysseyVectorLayer* iSharedEnv
                                                                  , FInbetweenerBreakdown* iBreakdown
                                                                  , uint64 iReturnFlags );
-        FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( FOdysseyVectorSharedEnv* iSharedEnv
+        FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( FOdysseyVectorLayer* iSharedEnv
                                                                  , const std::list<FInbetweenerBreakdown*>& iBreakdownList
                                                                  , uint64 iReturnFlags );
 

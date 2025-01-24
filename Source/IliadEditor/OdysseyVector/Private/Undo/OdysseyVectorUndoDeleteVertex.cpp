@@ -5,7 +5,7 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoDeleteVertex::~FOdysseyVectorUndoDeleteVertex()
 {
@@ -14,7 +14,7 @@ FOdysseyVectorUndoDeleteVertex::~FOdysseyVectorUndoDeleteVertex()
 FOdysseyVectorUndoDeleteVertex::FOdysseyVectorUndoDeleteVertex( FOdysseyVectorGroupPaint* iScene
                                                               , const std::list<FOdysseyVectorObject*>& iObjectList
                                                               , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
     mPathSnapshotArray.reserve( iObjectList.size() );
 

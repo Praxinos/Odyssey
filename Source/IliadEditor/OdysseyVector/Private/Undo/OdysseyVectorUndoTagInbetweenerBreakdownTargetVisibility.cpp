@@ -5,7 +5,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTag.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::~FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility()
 {
@@ -19,7 +19,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::~FOdysseyVectorUndoTa
     }
 }
 
-FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( FOdysseyVectorSharedEnv* iSharedEnv
+FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( FOdysseyVectorLayer* iSharedEnv
                                                                                                                     , FInbetweenerBreakdown* iBreakdown
                                                                                                                     , uint64 iReturnFlags )
     : FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( iSharedEnv
@@ -29,7 +29,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::FOdysseyVectorUndoTag
 
 }
 
-FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( FOdysseyVectorSharedEnv* iSharedEnv
+FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( FOdysseyVectorLayer* iSharedEnv
                                                                                                                     , const std::list<FInbetweenerBreakdown*>& iBreakdownList
                                                                                                                     , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
@@ -38,8 +38,6 @@ FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility::FOdysseyVectorUndoTag
 
     for( FInbetweenerBreakdown* breakdown : iBreakdownList )
     {
-        FOdysseyVectorEngine* engine = breakdown->GetInbetweenerTag()->GetOwner()->GetEngine();
-
         mBreakdownSnapshotBuffer.emplace_back( breakdown, FSnapshotFlags::Breakdown::TARGETVISIBILITY );
     }
 }

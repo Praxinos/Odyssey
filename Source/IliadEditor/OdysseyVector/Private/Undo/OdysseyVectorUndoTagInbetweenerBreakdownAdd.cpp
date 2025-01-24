@@ -5,7 +5,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTag.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoTagInbetweenerBreakdownAdd::~FOdysseyVectorUndoTagInbetweenerBreakdownAdd()
 {
@@ -19,7 +19,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::~FOdysseyVectorUndoTagInbetweenerB
     }
 }
 
-FOdysseyVectorUndoTagInbetweenerBreakdownAdd::FOdysseyVectorUndoTagInbetweenerBreakdownAdd( FOdysseyVectorSharedEnv* iSharedEnv
+FOdysseyVectorUndoTagInbetweenerBreakdownAdd::FOdysseyVectorUndoTagInbetweenerBreakdownAdd( FOdysseyVectorLayer* iSharedEnv
                                                                                           , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                                                           , uint64 iReturnFlags )
     : FOdysseyVectorUndoTagInbetweenerBreakdownAdd( iSharedEnv
@@ -29,7 +29,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::FOdysseyVectorUndoTagInbetweenerBr
 
 }
 
-FOdysseyVectorUndoTagInbetweenerBreakdownAdd::FOdysseyVectorUndoTagInbetweenerBreakdownAdd( FOdysseyVectorSharedEnv* iSharedEnv
+FOdysseyVectorUndoTagInbetweenerBreakdownAdd::FOdysseyVectorUndoTagInbetweenerBreakdownAdd( FOdysseyVectorLayer* iSharedEnv
                                                                                           , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
                                                                                           , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
@@ -38,8 +38,6 @@ FOdysseyVectorUndoTagInbetweenerBreakdownAdd::FOdysseyVectorUndoTagInbetweenerBr
 
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
     {
-        FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
-
         mInbetweenerTagSnapshotBuffer.emplace_back( inbetweenerTag
                                                   , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
                                                   , FSnapshotFlags::Breakdown::CHART

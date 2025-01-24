@@ -4,7 +4,7 @@
 #include "Undo/OdysseyVectorUndoVertexAlignment.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoVertexAlignment::~FOdysseyVectorUndoVertexAlignment()
 {
@@ -21,7 +21,7 @@ FOdysseyVectorUndoVertexAlignment::~FOdysseyVectorUndoVertexAlignment()
 FOdysseyVectorUndoVertexAlignment::FOdysseyVectorUndoVertexAlignment( FOdysseyVectorGroupPaint* iScene
                                                                     , const std::vector<FOdysseyVectorVertex*>& iAlignedVertexArray
                                                                     , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
     std::vector<FOdysseyVectorSegment*> segmentArray;
 

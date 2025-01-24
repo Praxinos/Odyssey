@@ -13,16 +13,16 @@
 #include "OdysseyVectorTagInbetweener.h"
 
 class FOdysseyVectorGroupPaint;
-class FOdysseyVectorSharedEnv;
+class FOdysseyVectorLayer;
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerBreakdownAdd : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoTagInbetweenerBreakdownAdd();
-        FOdysseyVectorUndoTagInbetweenerBreakdownAdd( FOdysseyVectorSharedEnv* iSharedEnv
+        FOdysseyVectorUndoTagInbetweenerBreakdownAdd( FOdysseyVectorLayer* iSharedEnv
                                                     , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                     , uint64 iReturnFlags );
-        FOdysseyVectorUndoTagInbetweenerBreakdownAdd( FOdysseyVectorSharedEnv* iSharedEnv
+        FOdysseyVectorUndoTagInbetweenerBreakdownAdd( FOdysseyVectorLayer* iSharedEnv
                                                     , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
                                                     , uint64 iReturnFlags );
 

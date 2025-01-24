@@ -4,7 +4,7 @@
 #include "Undo/OdysseyVectorUndoPathExtend.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoPathExtend::~FOdysseyVectorUndoPathExtend()
 {
@@ -34,7 +34,7 @@ FOdysseyVectorUndoPathExtend::~FOdysseyVectorUndoPathExtend()
 FOdysseyVectorUndoPathExtend::FOdysseyVectorUndoPathExtend( FOdysseyVectorGroupPaint* iScene
                                                           , FOdysseyVectorPath* iPath
                                                           , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
     , mPath( iPath )
 {
 }

@@ -4,8 +4,8 @@
 #include "OdysseyPainterEditorVectorBucketView.h"
 #include "Undo/OdysseyVectorUndoBucketParam.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorCell.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 
@@ -123,8 +123,8 @@ UOdysseyPainterEditorVectorBucketView::PostEditChangeProperty( FPropertyChangedE
                        , PropertyChangedEvent.MemberProperty->GetFName()
                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
-        // Calling Update via Root will as well request a redraw even if root is not invalidated
-        vectorScene->GetSharedEnv()->Update( 0 );
+        vectorScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        vectorScene->GetLayer()->RequestRedraw( 0 );
     }
 }
 

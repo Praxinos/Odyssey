@@ -12,12 +12,10 @@
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTag.h"
-#include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorObject.h"
-#include "OdysseyVectorRoot.h"
 #include "Undo/OdysseyVectorUndoPointPosition.h"
 #include "Undo/OdysseyVectorUndoObjectTransform.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerTransform.h"
@@ -61,8 +59,10 @@ UOdysseyPainterEditorVectorTransformTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorTransformTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    // force redraw
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -84,8 +84,9 @@ UOdysseyPainterEditorVectorTransformTool::LoadVector( FOdysseyVectorGroupPaint* 
     mTransformHUD->CenterGizmo();
 
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    // It will also request a redraw
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     bInbetweenMode = ( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) ? true : false;
 
@@ -123,14 +124,13 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorGrou
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , uint64& oSignalFlags )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     ::ULIS::FRectD redrawRegion = { 0, 0, 0, 0 };
     ::ULIS::FRectD imageRegion;
 
     if( mDragging == false )
     {
-        uint32 width = iScene->GetRoot()->GetLayer()->GetWidth();
-        uint32 height = iScene->GetRoot()->GetLayer()->GetHeight();
+        uint32 width = iScene->GetCell()->GetLayer()->GetWidth();
+        uint32 height = iScene->GetCell()->GetLayer()->GetHeight();
 
         imageRegion.x = 0;
         imageRegion.y = 0;
@@ -150,8 +150,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseHoverVector( FOdysseyVectorGrou
 
         //iEngine->GetInvalidTileMap().Invalidate(redrawRegion);
         // redraw
-        iScene->GetRoot()->Invalidate(0);
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
     }
 }
 
@@ -159,8 +158,6 @@ void
 UOdysseyPainterEditorVectorTransformTool::GetTransformedObjectList( FOdysseyVectorGroupPaint* iScene
                                                                   , std::list<FOdysseyVectorObject*>& oObjectList )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-
     FOdysseyVectorObject::Traverse
     ( iScene
     , 0
@@ -170,7 +167,7 @@ UOdysseyPainterEditorVectorTransformTool::GetTransformedObjectList( FOdysseyVect
           // transform is recursive per se, do not recurse if the parent was transformed already
           if( ( travesalFlags & FOdysseyVectorObject::TRAVERSE_PARENT_HASFOCUS ) == 0 )
           {
-              if( iScene->GetRoot()->ObjectHasFocus( object, travesalFlags ) )
+              if( iScene->GetCell()->ObjectHasFocus( object, travesalFlags ) )
               {
                   oObjectList.push_back( object );
 
@@ -268,8 +265,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDownVector( FOdysseyVectorGroup
         }
     }
 
-    // Calling Update via Root will request a redraw even if root is not invalidated
-    //iScene->GetRoot()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 
     return true;
 }
@@ -376,11 +372,11 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
                           , translateMatrix );
         }
 
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
-                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
+        iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                  | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
 
         // update the selection box with the newly modified matrices
-        iScene->GetRoot()->ResetHUD();
+        iScene->GetCell()->ResetHUD();
 
         // replace pivot correctly.
         pivot.x += translateBy.x;
@@ -404,7 +400,7 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
               // transform is recursive per se, do not recurse if the parent was transformed already
               if( ( travesalFlags & FOdysseyVectorObject::TRAVERSE_PARENT_HASFOCUS ) == 0 )
               {
-                  if( iScene->GetRoot()->ObjectHasFocus( object, travesalFlags ) )
+                  if( iScene->GetCell()->ObjectHasFocus( object, travesalFlags ) )
                   {
                       double translationX;
                       double translationY;
@@ -455,11 +451,11 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
         // Update the matrix for all objects
         //iScene->UpdateMatrix();
 
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
-                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
+        iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                  | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
 
         // update the selection box with the newly modified matrices
-        iScene->GetRoot()->ResetHUD();
+        iScene->GetCell()->ResetHUD();
 
         // replace pivot correctly.
         pivot.x = selectionBox.rect.x + spacePivot.x;
@@ -514,10 +510,10 @@ UOdysseyPainterEditorVectorTransformTool::TranslateObjectSelection( FOdysseyVect
             breakdown->UpdateMatrix();
         }
 
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+        iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
 
         // update the selection box with the newly modified matrices
-        iScene->GetRoot()->ResetHUD();
+        iScene->GetCell()->ResetHUD();
 
         // replace pivot correctly.
         pivot.x = selectionBox.rect.x + spacePivot.x;
@@ -597,8 +593,8 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorG
                           , rotateMatrix );
         }
 
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
-                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
+        iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                  | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
     }
 
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
@@ -615,7 +611,7 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorG
               // transform is recursive per se, do not recurse if the parent was transformed already
               if( ( travesalFlags & FOdysseyVectorObject::TRAVERSE_PARENT_HASFOCUS ) == 0 )
               {
-                  if( iScene->GetRoot()->ObjectHasFocus( object, travesalFlags ) )
+                  if( iScene->GetCell()->ObjectHasFocus( object, travesalFlags ) )
                   {
                       double translationX;
                       double translationY;
@@ -663,8 +659,8 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorG
               return 0;
           } );
 
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
-                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
+        iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                  | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
     }
 
     if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
@@ -714,11 +710,11 @@ UOdysseyPainterEditorVectorTransformTool::RotateObjectSelection( FOdysseyVectorG
             breakdown->UpdateMatrix();
         }
 
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+        iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
     }
 
     // update the selection box with the newly modified matrices
-    iScene->GetRoot()->ResetHUD();
+    iScene->GetCell()->ResetHUD();
 
     // replace pivot correctly.
     BLPoint spacePivot = selectionBox.inverseWorldMatrix.mapPoint( worldPivot.x, worldPivot.y );
@@ -843,8 +839,8 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
                               , scalingMatrix );
             }
 
-            iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
-                                          | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
+            iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
         }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT )
@@ -861,7 +857,7 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
                   // transform is recursive per se, do not recurse if the parent was transformed already
                   if( ( travesalFlags & FOdysseyVectorObject::TRAVERSE_PARENT_HASFOCUS ) == 0 )
                   {
-                      if( iScene->GetRoot()->ObjectHasFocus( object, travesalFlags ) )
+                      if( iScene->GetCell()->ObjectHasFocus( object, travesalFlags ) )
                       {
                           double translationX;
                           double translationY;
@@ -910,8 +906,8 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
                   return 0;
               } );
 
-            iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
-                                          | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
+            iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
         }
 
         if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
@@ -962,12 +958,12 @@ UOdysseyPainterEditorVectorTransformTool::ScaleObjectSelection( FOdysseyVectorGr
                 breakdown->UpdateMatrix();
             }
 
-            iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+            iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
         }
     }
 
     // update the selection box with the newly modified matrices
-    iScene->GetRoot()->ResetHUD();
+    iScene->GetCell()->ResetHUD();
 }
 
 void
@@ -975,7 +971,6 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , uint64& oSignalFlags )
 {
-    FOdysseyVectorEngine* engine = iScene->GetEngine();
     static FVector2D deltaPositionCumul = FVector2D( 0.0f, 0.0f );
     FOdysseyPoint pointInTexture = iPointInTexture;
 
@@ -985,7 +980,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
     // For some reason we receive quite a lot of mouse events between 2 screen refresh, I don't know why
     // The issue is absent with the Ink driver. It is present with the Wintab and Native drivers. The simpliest
     // solution I've found is to discard events until the screen has been refreshed.
-    if( engine->GetInvalidationFlags()  )
+    if( iScene->GetCell()->PendingRedraw()  )
         return;
 
     pointInTexture.deltaPosition = deltaPositionCumul;
@@ -1046,9 +1041,11 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
             if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
             {
                 // Calling Update via Root will request a redraw even if root is not invalidated
-                iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+                iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
             }
         }
+
+        iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
     }
 
     deltaPositionCumul = FVector2D( 0.0f, 0.0f );
@@ -1063,7 +1060,6 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
@@ -1102,10 +1098,9 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
                 GEditor->EndTransaction();
             }
 
-            iScene->GetRoot()->InvalidateRect();
-            iScene->Invalidate(0);
             // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
-            iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+            iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+            iScene->GetLayer()->RequestRedraw( 0 );
 
             // quick fix to place the gizmo at the right place
             FSelectionBox& selectionBox = mTransformHUD->GetSelectionBox();
@@ -1113,7 +1108,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseUpVector( FOdysseyVectorGroupPa
             BLPoint worldGizmo = selectionBox.worldMatrix.mapPoint( gizmo.x, gizmo.y );
             // endof quickfix
 
-            iScene->GetRoot()->ResetHUD();
+            iScene->GetCell()->ResetHUD();
 
             // quick fix to place the gizmo at the right place
             BLPoint localGizmo = selectionBox.inverseWorldMatrix.mapPoint( worldGizmo );
@@ -1141,14 +1136,12 @@ UOdysseyPainterEditorVectorTransformTool::PropertyChangedVector( FOdysseyVectorG
 
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorTransformTool, World) )
     {
-        iScene->GetRoot()->ResetHUD();
+        iScene->GetCell()->ResetHUD();
 
         mTransformHUD->CenterGizmo();
     }
 
-    // redraw
-    iScene->GetRoot()->Invalidate( 0 );
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return UOdysseyPainterEditorVectorSelectionTool::PropertyChangedVector( iScene, iPropertyName );
 }

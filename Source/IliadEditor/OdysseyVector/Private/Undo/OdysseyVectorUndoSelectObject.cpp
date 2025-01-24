@@ -4,8 +4,8 @@
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorCell.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoSelectObject::~FOdysseyVectorUndoSelectObject()
 {
@@ -14,25 +14,25 @@ FOdysseyVectorUndoSelectObject::~FOdysseyVectorUndoSelectObject()
 
 FOdysseyVectorUndoSelectObject::FOdysseyVectorUndoSelectObject( FOdysseyVectorGroupPaint* iScene
                                                               , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
     , mScene ( iScene )
 {
-    mSelectedObjectList = iScene->GetRoot()->GetSelectedObjectList();
+    mSelectedObjectList = iScene->GetCell()->GetSelectedObjectList();
 }
 
 void
 FOdysseyVectorUndoSelectObject::Apply( UObject* iIgnored )
 {
     // save former selection
-    std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetRoot()->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetCell()->GetSelectedObjectList();
 
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mScene->GetRoot()->ClearObjectSelection();
+    mScene->GetCell()->ClearObjectSelection();
 
     for( FOdysseyVectorObject* object : mSelectedObjectList )
     {
-        mScene->GetRoot()->SelectObject( object );
+        mScene->GetCell()->SelectObject( object );
     }
 
     // prepare former selection for Revert()
@@ -46,14 +46,14 @@ void
 FOdysseyVectorUndoSelectObject::Revert( UObject* iIgnored )
 {
     // save former selection
-    std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetRoot()->GetSelectedObjectList();
+    std::list<FOdysseyVectorObject*> selectedObjectList = mScene->GetCell()->GetSelectedObjectList();
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mScene->GetRoot()->ClearObjectSelection();
+    mScene->GetCell()->ClearObjectSelection();
 
     for( FOdysseyVectorObject* object : mSelectedObjectList )
     {
-        mScene->GetRoot()->SelectObject( object );
+        mScene->GetCell()->SelectObject( object );
     }
 
     // prepare former selection for Apply()

@@ -18,12 +18,12 @@
 #include "OdysseyPainterEditor.h"
 
 // from module OdysseyVector
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyVectorTag.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 #include "Undo/OdysseyVectorUndoTagRemove.h"
 
 #include "Framework/Commands/GenericCommands.h"
@@ -99,7 +99,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Update()
 {
     mItemsSource.Reset();
 
-    for( FOdysseyVectorTag* tag : mAnimationLayerImageVector->GetSharedEnv()->GetSharedTagList() )
+    for( FOdysseyVectorTag* tag : mAnimationLayerImageVector->GetVectorLayer()->GetSharedTagList() )
     {
         if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
         {
@@ -122,7 +122,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Private_SelectRangeFromCurrentTo ( 
         FOdysseyVectorObject* fromObject = RangeSelectionStart.Get()->GetInbetweenerTag()->GetOwner();
         FOdysseyVectorObject* toObject = iItem.Get()->GetInbetweenerTag()->GetOwner();
         FOdysseyVectorObject* vectorObject = mItemsSource[0].Get()->GetInbetweenerTag()->GetOwner();
-        FOdysseyVectorRoot* vectorRoot = fromObject->GetRoot();
+        FOdysseyVectorCell* vectorRoot = fromObject->GetCell();
         bool doSelect = false;
 
         for( const TSharedPtr<FInbetweeningListViewItem>& rangeItem : GetItems() )
@@ -162,7 +162,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Private_SetItemSelection ( TSharedP
                                                                       , bool bWasUserDirected )
 {
     FOdysseyVectorObject* vectorObject = iItem.Get()->GetInbetweenerTag()->GetOwner();
-    FOdysseyVectorRoot* vectorRoot = vectorObject->GetRoot();
+    FOdysseyVectorCell* vectorRoot = vectorObject->GetCell();
 
     if( bShouldBeSelected )
     {
@@ -188,7 +188,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Private_ClearSelection()
     {
         // the scene
         FOdysseyVectorObject* vectorObject = mItemsSource[0].Get()->GetInbetweenerTag()->GetOwner();
-        FOdysseyVectorRoot* vectorRoot = vectorObject->GetRoot();
+        FOdysseyVectorCell* vectorRoot = vectorObject->GetCell();
 
         vectorRoot->ClearObjectSelection();
     }
@@ -240,7 +240,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Commit()
     FOdysseyPainterEditor* editor = mEditor.Get();
 
     // note: editor is NULL in the Sequencer
-    FOdysseyPainterEditor::CommitSelectedInbetweenerTag( editor, mAnimationLayerImageVector->GetSharedEnv() );
+    FOdysseyPainterEditor::CommitSelectedInbetweenerTag( editor, mAnimationLayerImageVector->GetVectorLayer() );
 }
 
 void
@@ -249,7 +249,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::ResetSpacingCharts()
     FOdysseyPainterEditor* editor = mEditor.Get();
 
     // note: editor is NULL in the Sequencer
-    FOdysseyPainterEditor::ResetInbetweenerTagSpacingChart( editor, mAnimationLayerImageVector->GetSharedEnv() );
+    FOdysseyPainterEditor::ResetInbetweenerTagSpacingChart( editor, mAnimationLayerImageVector->GetVectorLayer() );
 }
 
 void
@@ -258,7 +258,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::RemoveInbetweenerTag()
     FOdysseyPainterEditor* editor = mEditor.Get();
 
     // note: editor is NULL in the Sequencer
-    FOdysseyPainterEditor::RemoveInbetweenerTag( editor, mAnimationLayerImageVector->GetSharedEnv() );
+    FOdysseyPainterEditor::RemoveInbetweenerTag( editor, mAnimationLayerImageVector->GetVectorLayer() );
 }
 
 UOdysseyAnimationLayerImageVector*

@@ -14,7 +14,7 @@
 class FOdysseyVectorTagInbetweener;
 class FOdysseyVectorGroupPaint;
 enum class eInbetweenerGridType : uint8;
-class IOdysseyVectorCell;
+class FOdysseyVectorCell;
 
 class ODYSSEYVECTOR_API FInbetweenerBreakdown
 {
@@ -80,8 +80,8 @@ class ODYSSEYVECTOR_API FInbetweenerBreakdown
         void EaseIn( float iEasing, uint32 iFrom, uint32 iTo );
         void EaseOut( float iEasing, uint32 iFrom, uint32 iTo );
         void EaseInAndOut( float iEasing, FInbetweenerChart::Inbetween* iInbetween );
-        IOdysseyVectorCell* GetTargetCell();
-        IOdysseyVectorCell* GetSourceCell();
+        FOdysseyVectorCell* GetTargetCell();
+        FOdysseyVectorCell* GetSourceCell();
         void SetTargetVisibility( bool iTargetVisibility );
         bool IsTargetVisible();
 

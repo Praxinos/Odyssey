@@ -5,7 +5,7 @@
 #include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorGroupPaint.h"
 
@@ -350,8 +350,6 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPoint( FOdysseyVectorObject* iObject
 void
 FOdysseyPainterEditorVectorGridToolHUD::Map( FOdysseyVectorGroupPaint* iScene )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-
     mPointCount = 0;
 
     FOdysseyVectorObject::Traverse
@@ -360,7 +358,7 @@ FOdysseyPainterEditorVectorGridToolHUD::Map( FOdysseyVectorGroupPaint* iScene )
     , [ this
       , iScene ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
       {
-          if( iScene->GetRoot()->ObjectHasFocus( object, travesalFlags ) )
+          if( iScene->GetCell()->ObjectHasFocus( object, travesalFlags ) )
           {
               BLMatrix2D& inverseSpaceMatrix = mSelectionBox.inverseWorldMatrix;
 

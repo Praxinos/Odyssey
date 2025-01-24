@@ -14,16 +14,16 @@
 
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorEngine;
-class FOdysseyVectorSharedEnv;
+class FOdysseyVectorLayer;
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerBreakdownRemove : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoTagInbetweenerBreakdownRemove();
-        FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorSharedEnv* iSharedEnv
+        FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorLayer* iSharedEnv
                                                        , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                        , uint64 iReturnFlags );
-        FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorSharedEnv* iSharedEnv
+        FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorLayer* iSharedEnv
                                                        , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
                                                        , uint64 iReturnFlags );
 

@@ -35,8 +35,9 @@ class FOdysseyVectorPoint;
 class FOdysseyVectorSegment;
 class FOdysseyVectorSegmentCubic;
 class FOdysseyVectorPath;
-class FOdysseyVectorSharedEnv;
+class FOdysseyVectorLayer;
 class IOdysseyVectorCell;
+class FOdysseyVectorEngine;
 
 UENUM()
 enum class eInbetweenerGridType : uint8
@@ -82,6 +83,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
          * @param iDrawingFlags drawing flags
          */
         virtual void Draw( BLContext* iBLContext
+                         , FOdysseyVectorEngine* iEngine
                          , const ::ULIS::FRectD& iInvalidationArea
                          , double iAncestorsOpacity
                          , uint64 iDrawingFlags ) override;
@@ -98,6 +100,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
          */
         virtual void Draw( FOdysseyVectorGroupPaint* iCurrentScene
                          , BLContext* iBLContext
+                         , FOdysseyVectorEngine* iEngine
                          , const ::ULIS::FRectD& iInvalidationArea
                          , double iAncestorsOpacity
                          , uint64 iDrawingFlags ) override;
@@ -204,6 +207,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         void DrawPathsInbetween( FOdysseyVectorGroupPaint* iDisplayedScene
                                , FInbetweenerChart::Inbetween* inbetween
                                , BLContext* iBLContext
+                               , FOdysseyVectorEngine* iEngine
                                , bool iLock );
 
         //void DeformObjectsAtTarget();
@@ -229,6 +233,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
                        //, ::ULIS::FVec2D* iPointPositionBuffer
                        //, const BLMatrix2D& iWorldMatrix
                        , BLContext* iBLContext
+                       , FOdysseyVectorEngine* iEngine
                        , bool iLock );
         uint32 GetBreakdownCount();
         void RemoveBreakdown( FInbetweenerBreakdown* iBreakdown, bool iFreeMemNow );
@@ -244,7 +249,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         virtual void ObjectRemoved() override;
         virtual void Added() override;
         virtual void Removed() override;
-        IOdysseyVectorCell* GetCell();
+        FOdysseyVectorCell* GetCell();
         void SetInterpolationDirection( eInbetweenerInterpolationDirection iDirection );
         eInbetweenerInterpolationDirection GetInterpolationDirection();
         int32 GetDrawingIndexFromCellIndex( uint32 iCellIndex );
@@ -269,8 +274,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
         bool HasConstantWidth();
         void SetConstantWidth( bool iConstantWidth );
         static void EvalSize( ::ULIS::FRectD& iWorldBBox, uint32& iGridNumQuadX, uint32& iGridNumQuadY );
-        IOdysseyVectorCell* GetSourceCell();
-        IOdysseyVectorCell* GetTargetCell();
+        FOdysseyVectorCell* GetSourceCell();
+        FOdysseyVectorCell* GetTargetCell();
         void ResizeFullChartHUD();
 
     protected:
@@ -343,7 +348,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorTagInbetweener : public FOdysseyVectorTag
 
     protected:
         FOdysseyVectorGroupPaint* mScene;
-        FOdysseyVectorSharedEnv* mSharedEnv;
+        FOdysseyVectorLayer* mSharedEnv;
         std::vector<FInterpolatedPath> mInterpolatedPathBuffer;
         std::vector<FInterpolatedGroupPaint> mInterpolatedGroupPaintBuffer;
         std::vector<FInterpolatedObject*> mInterpolatedObjectArray;

@@ -107,6 +107,7 @@ FOdysseyVectorEllipse::CopyShape( uint64 iCopyFlags )
 
 void
 FOdysseyVectorEllipse::DrawShape( BLContext* iBLContext
+                                , FOdysseyVectorEngine* iEngine
                                 , const ::ULIS::FRectD& iInvalidationArea
                                 , double iCombinedOpacity
                                 , uint64 iFlags )
@@ -114,6 +115,7 @@ FOdysseyVectorEllipse::DrawShape( BLContext* iBLContext
     if ( mRadiusX && mRadiusY )
     {
         FOdysseyVectorPath::DrawShape ( iBLContext
+                                      , iEngine
                                       , iInvalidationArea
                                       , iCombinedOpacity
                                       , iFlags );

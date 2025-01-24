@@ -56,8 +56,6 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickRoute( FOdysseyVectorGroupPain
                                                        , double iWorldY
                                                        , double iPickingRadius )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : mSelectedInbetweenerTagList )
     {
         FInbetweenerRoute* route = PickRouteFromTag( inbetweenerTag
@@ -136,8 +134,6 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickHandle( FOdysseyVectorGroupPai
                                                         , double iWorldY
                                                         , double iPickingRadius )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : mSelectedInbetweenerTagList )
     {
         if( inbetweenerTag->GetInterpolationType() == eInbetweenerInterpolationType::ARAP )
@@ -197,7 +193,6 @@ FOdysseyPainterEditorVectorTrajectoryToolHUD::PickStep( FOdysseyVectorGroupPaint
                                                       , double iWorldY
                                                       , double iPickingRadius )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     FInbetweenerStep* retStep = nullptr;
 
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : mSelectedInbetweenerTagList )

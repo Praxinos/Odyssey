@@ -19,10 +19,9 @@
 #include "OdysseyStyleSet.h"
 // From module OdysseyVector
 #include "OdysseyVectorObject.h"
-#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorCell.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAlter.h"
@@ -79,8 +78,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonDown( con
     FOdysseyPainterEditor* editor = treeView->GetEditor();
     UOdysseyLayerStack* layerStack = layer->GetLayerStack();
     FOdysseyVectorObject* ownerObject = mInbetweenerTag->GetOwner();
-    FOdysseyVectorEngine* vectorEngine = ownerObject->GetEngine();
-    FOdysseyVectorSharedEnv* sharedEnv = mInbetweenerTag->GetOwner()->GetSharedEnv();
+    FOdysseyVectorLayer* sharedEnv = mInbetweenerTag->GetOwner()->GetLayer();
     std::list<FOdysseyVectorTag*>& sharedTagList = sharedEnv->GetSharedTagList();
     FOdysseyVectorGroupPaint* scene = mInbetweenerTag->GetOwner()->GetScene();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
@@ -164,7 +162,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
             const TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> listView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
             const FVector2D cursorPos = MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() );
             uint32 frameIndex = MousePositionToFrame( cursorPos.X );
-            IOdysseyVectorCell* tagCell = mInbetweenerTag->GetOwner()->GetRoot()->GetCell();
+            FOdysseyVectorCell* tagCell = mInbetweenerTag->GetOwner()->GetCell();
             float frameWidth = timelinePosition->GetFrameSize();
 
             UOdysseyAnimationCell* cell = listView.Get()->GetAnimationLayerImageVector()->GetCellAtFrame(frameIndex);
@@ -190,7 +188,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseMove ( const FG
                     {
                         mInbetweenerTag->SetInterpolationDirection( direction );
 
-                        mInbetweenerTag->GetOwner()->GetSharedEnv()->Update( 0 );
+                        mInbetweenerTag->GetOwner()->GetLayer()->Update( 0 );
 
                         CacheDesiredSize( 1.0f /* mLayoutScaleMultiplier */);
                     }
@@ -253,7 +251,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::OnMouseButtonUp( const
             }
 
             // request for redrawing of the current displayed cell
-            vectorCell->GetRoot()->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+            vectorCell->GetVectorCell()->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+            vectorCell->GetVectorCell()->GetLayer()->RequestRedraw( vectorCell->GetVectorCell(), 0 );
 
             FOdysseyVectorEngine::Notify( nullptr, retFlags );
         }
@@ -280,12 +279,12 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
     const TSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening> listView = StaticCastSharedPtr<SOdysseyAnimationLayerImageVectorTimelineInbetweening>(OwnerTablePtr.Pin());
     // retrieve timing data
     uint32 tagCellIndex = mInbetweenerTag->GetSourceCellIndex();
-    IOdysseyVectorCell* sourceCell = mInbetweenerTag->GetCell();
+    FOdysseyVectorCell* sourceCell = mInbetweenerTag->GetCell();
     uint32 sourceFrame = sourceCell->GetFrame();
     // compute geometry
     float frameWidth = listView->GetTimelinePosition()->GetFrameSize();
-    FOdysseyVectorRoot* vectorRoot = mInbetweenerTag->GetOwner()->GetScene()->GetRoot();
-    IOdysseyVectorLayer* layer = vectorRoot->GetLayer();
+    FOdysseyVectorCell* vectorRoot = mInbetweenerTag->GetOwner()->GetScene()->GetCell();
+    FOdysseyVectorLayer* layer = vectorRoot->GetLayer();
     double xmin, xmax;
 
     // call from base class
@@ -312,7 +311,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
         uint32 sourceIndex = breakdown->GetSourceDrawingIndex();
         uint32 targetIndex = breakdown->GetTargetDrawingIndex();
         uint32 targetCellIndex = breakdown->GetTargetCellIndex();
-        IOdysseyVectorCell* targetCell = layer->GetCellByIndex( targetCellIndex );
+        FOdysseyVectorCell* targetCell = layer->GetCellByIndex( targetCellIndex );
 
         // targetCell can be NULL if there is no further cell
         if( targetCell )
@@ -323,7 +322,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CacheDesiredSize ( flo
             {
                 FInbetweenerDrawing* drawing = mInbetweenerTag->GetDrawing( i );
                 int32 inbetweenCellIndex = drawing->GetCellIndex();
-                IOdysseyVectorCell* inbetweenCell = layer->GetCellByIndex( inbetweenCellIndex );
+                FOdysseyVectorCell* inbetweenCell = layer->GetCellByIndex( inbetweenCellIndex );
 
                 if( inbetweenCell )
                 {

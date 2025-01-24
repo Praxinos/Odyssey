@@ -55,6 +55,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorLine : public FOdysseyVectorPrimitive
 
     protected:
         virtual void DrawShape( BLContext* iBLContext
+                              , FOdysseyVectorEngine* iEngine
                               , const ::ULIS::FRectD& iInvalidationArea
                               , double iAncestorsOpacity
                               , uint64 iFlags ) override;

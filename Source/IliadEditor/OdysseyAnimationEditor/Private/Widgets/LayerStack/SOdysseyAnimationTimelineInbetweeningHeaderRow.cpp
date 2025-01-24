@@ -16,8 +16,8 @@
 #include "OdysseyVector.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorCell.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -57,7 +57,7 @@ SOdysseyAnimationTimelineInbetweeningHeaderRow::Construct( const typename STable
     const FSlateBrush* objectIcon = nullptr;
     const FSlateBrush* inbetweenerTagIcon = FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching16" );
     FOdysseyVectorTagInbetweener* inbetweenerTag = iTem.Get()->GetInbetweenerTag();
-    uint32 cellIndex = inbetweenerTag->GetOwner()->GetRoot()->GetCell()->GetIndex();
+    uint32 cellIndex = inbetweenerTag->GetOwner()->GetCell()->GetIndex();
 
     mInbetweenerTag = inbetweenerTag;
 

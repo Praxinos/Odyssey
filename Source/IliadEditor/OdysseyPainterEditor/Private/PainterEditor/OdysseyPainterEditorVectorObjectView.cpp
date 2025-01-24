@@ -5,8 +5,8 @@
 //#include "Undo/OdysseyVectorUndoPropertyChanged.h"
 #include "Undo/OdysseyVectorUndoObjectParam.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorCell.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
 
@@ -205,10 +205,10 @@ UOdysseyPainterEditorVectorObjectView::PostEditChangeProperty( FPropertyChangedE
                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
         // force redraw the whole screen
-        mScene->GetRoot()->InvalidateRect();
+        mScene->GetCell()->InvalidateRect();
 
-        // Note: updating via the shared env will redraw the screen as well
-        mScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        mScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        mScene->GetLayer()->RequestRedraw( 0 );
     }
 }
 

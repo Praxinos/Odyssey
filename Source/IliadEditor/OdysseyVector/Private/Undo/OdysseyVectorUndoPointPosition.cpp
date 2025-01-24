@@ -4,7 +4,7 @@
 #include "Undo/OdysseyVectorUndoPointPosition.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoPointPosition::~FOdysseyVectorUndoPointPosition()
 {
@@ -21,7 +21,7 @@ FOdysseyVectorUndoPointPosition::~FOdysseyVectorUndoPointPosition()
 FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorGroupPaint* iScene
                                                                 , std::vector<FOdysseyVectorPoint*>& iPointArray
                                                                 , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
     mPointSnapshotArray.reserve( iPointArray.size() );
 
@@ -35,7 +35,7 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
                                                                 , std::vector<FOdysseyVectorVertex*>& iVertexArray
                                                                 , std::vector<FOdysseyVectorHandleSegment*>& iHandleArray
                                                                 , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
     mPointSnapshotArray.reserve( iVertexArray.size() + iHandleArray.size() );
 
@@ -53,7 +53,7 @@ FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVector
 FOdysseyVectorUndoPointPosition::FOdysseyVectorUndoPointPosition( FOdysseyVectorGroupPaint* iScene
                                                                 , FOdysseyVectorPoint* iPoint
                                                                 , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
     mPointSnapshotArray.push_back( FSnapshotPoint( iPoint, FSnapshotFlags::ALL ) );
 }

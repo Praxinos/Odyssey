@@ -10,8 +10,7 @@
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorLayer.h"
-#include "OdysseyVectorRoot.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorCell.h"
 #include "Undo/OdysseyVectorUndoObjectTransform.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -48,8 +47,10 @@ UOdysseyPainterEditorVectorScenePanTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorScenePanTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    // Update and redraw just in case
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -58,8 +59,9 @@ uint64
 UOdysseyPainterEditorVectorScenePanTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    // side note: updating via root will request a redraw as well
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -94,7 +96,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
     mDownLocalMouseY = localCoords.y;
 
     // redraw
-    //iScene->GetRoot()->GetCellEngine()->Invalidate( iScene, FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 
     oSignalFlags = notificationFlags;
 
@@ -102,8 +104,7 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDownVector( FOdysseyVectorGroupP
 }
 
 void
-UOdysseyPainterEditorVectorScenePanTool::Pan( FOdysseyVectorEngine* iEngine
-                                            , FOdysseyVectorGroupPaint* iScene
+UOdysseyPainterEditorVectorScenePanTool::Pan( FOdysseyVectorGroupPaint* iScene
                                             , const FOdysseyPoint& iPointInTexture )
 {
     double factor = 1.0f;
@@ -124,13 +125,12 @@ UOdysseyPainterEditorVectorScenePanTool::Pan( FOdysseyVectorEngine* iEngine
 }
 
 void
-UOdysseyPainterEditorVectorScenePanTool::Scale( FOdysseyVectorEngine* iEngine
-                                              , FOdysseyVectorGroupPaint* iScene
+UOdysseyPainterEditorVectorScenePanTool::Scale( FOdysseyVectorGroupPaint* iScene
                                               , const FOdysseyPoint& iPointInTexture )
 {
     BLPoint worldMouseCoordsBefore = iScene->GetWorldMatrix().mapPoint( mDownLocalMouseX, mDownLocalMouseY );
-    uint32 imageWidth = iScene->GetRoot()->GetLayer()->GetWidth();
-    uint32 imageHeight = iScene->GetRoot()->GetLayer()->GetHeight();
+    uint32 imageWidth = iScene->GetLayer()->GetWidth();
+    uint32 imageHeight = iScene->GetLayer()->GetHeight();
     double factor;
 
     factor = (double) iPointInTexture.deltaPosition.X / imageWidth;
@@ -163,25 +163,25 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseDragVector( FOdysseyVectorGroupP
                                                           , const FOdysseyPoint& iPointInTexture
                                                           , uint64& oSignalFlags )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     uint64 notificationFlags = 0;
 
     mDragged = true;
 
     if( iPointInTexture.keysDown.Find( EKeys::RightMouseButton ) != INDEX_NONE)
     {
-        Scale( iEngine, iScene, iPointInTexture );
+        Scale( iScene, iPointInTexture );
     }
     else // Right-click has priority over left click
     {
         if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
         {
-            Pan( iEngine, iScene, iPointInTexture );
+            Pan( iScene, iPointInTexture );
         }
     }
 
     // redraw
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    //iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
 
     oSignalFlags = notificationFlags;
 }
@@ -192,11 +192,8 @@ UOdysseyPainterEditorVectorScenePanTool::OnMouseUpVector( FOdysseyVectorGroupPai
                                                         , const FKey& iKey
                                                         , uint64& oSignalFlags )
 {
-    iScene->GetRoot()->Invalidate(0);
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-
-    // redraw
-    //iScene->GetEngine()->Invalidate( 0 );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->RequestRedraw( 0 );
 
     return true;
 }

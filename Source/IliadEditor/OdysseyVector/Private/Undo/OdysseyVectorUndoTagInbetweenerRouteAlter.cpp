@@ -5,7 +5,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTag.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoTagInbetweenerRouteAlter::~FOdysseyVectorUndoTagInbetweenerRouteAlter()
 {
@@ -23,7 +23,7 @@ FOdysseyVectorUndoTagInbetweenerRouteAlter::FOdysseyVectorUndoTagInbetweenerRout
                                                                                       , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                                                       , FInbetweenerRoute* iRoute
                                                                                       , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
     , mInbetweenerTag( iInbetweenerTag )
     , mRouteSnapshot( iRoute
                     , ( FSnapshotFlags::Route::TRAJECTORIES

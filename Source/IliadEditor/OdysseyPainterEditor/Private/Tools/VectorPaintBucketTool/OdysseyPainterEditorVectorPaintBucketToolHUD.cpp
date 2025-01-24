@@ -4,7 +4,7 @@
 #include "Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketToolHUD.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyPainterEditor.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyVectorBucket.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCycle.h"
@@ -47,18 +47,15 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::GetWorkingPaintgroupList()
 void
 FOdysseyPainterEditorVectorPaintBucketToolHUD::UpdateWorkingPaintgroupList( FOdysseyVectorGroupPaint* iScene )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-
     mWorkingPaintgroupList.clear();
 
     FOdysseyVectorObject::Traverse
     ( iScene
     , 0
     , [ this
-      , iScene
-      , vectorEngine ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+      , iScene ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
         {
-            if( iScene->GetRoot()->ObjectHasFocus( object, traversalFlags ) )
+            if( iScene->GetCell()->ObjectHasFocus( object, traversalFlags ) )
             {
                 if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
                 {
@@ -161,8 +158,6 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickCycles( FOdysseyVectorGroupPa
                                                          , double iWorldY
                                                          , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-
     oPickedCycleArray.clear();
 
     for( FOdysseyVectorGroupPaint* paintgroup : mWorkingPaintgroupList )
@@ -181,7 +176,6 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucket( FOdysseyVectorGroupPa
                                                          , double iWorldX
                                                          , double iWorldY )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     FOdysseyVectorBucket* pickedBucket = nullptr;
 
     for( FOdysseyVectorGroupPaint* paintgroup : mWorkingPaintgroupList )
@@ -244,7 +238,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
     }
 
     // draw selection box only if we restrict erasure to the selection
-    if( iScene->GetRoot()->GetSelectedObjectList().size() )
+    if( iScene->GetCell()->GetSelectedObjectList().size() )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }

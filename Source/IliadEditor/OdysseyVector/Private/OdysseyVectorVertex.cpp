@@ -4,7 +4,7 @@
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorHandleSegment.h"
 #include "OdysseyVectorIntersection.h"
@@ -651,7 +651,7 @@ FOdysseyVectorVertex::Update( FOdysseyVectorSegment* iPrevSegment
                             , FOdysseyVectorSegment* iSegment
                             , uint32 iUpdateFlags )
 {
-    FOdysseyVectorRoot* root = mOwner->GetRoot();
+    FOdysseyVectorCell* cell = mOwner->GetCell();
     ::ULIS::FRectD previousBBox = mJoint.GetBBox( false );
 
     // update joint
@@ -662,9 +662,9 @@ FOdysseyVectorVertex::Update( FOdysseyVectorSegment* iPrevSegment
     if( ( iUpdateFlags & FOdysseyVectorObject::UPDATE_NOINVALIDATERECT ) == 0 )
     {
         // auto invalidation of the region that needs to be redrawn
-        if( root )
+        if( cell )
         {
-            root->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), ( previousBBox | mJoint.GetBBox( false ) ) ) );
+            cell->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), ( previousBBox | mJoint.GetBBox( false ) ) ) );
         }
     }
 }

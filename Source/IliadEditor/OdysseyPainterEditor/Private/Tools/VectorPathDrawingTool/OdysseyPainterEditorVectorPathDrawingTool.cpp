@@ -7,8 +7,7 @@
 #include "Undo/OdysseyVectorUndoPathAlter.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorLayer.h"
-#include "OdysseyVectorSharedEnv.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
 #include "Framework/Application/SlateApplication.h"
@@ -97,8 +96,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::LoadVector( FOdysseyVectorGroupPaint
     // init pathTracer's raster image
     mPathTracer.Init( iScene );
 
-    // side note: updating via root will request a redraw as well
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -106,8 +107,10 @@ UOdysseyPainterEditorVectorPathDrawingTool::LoadVector( FOdysseyVectorGroupPaint
 uint64
 UOdysseyPainterEditorVectorPathDrawingTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    // side note: updating via root will request a redraw as well
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -233,13 +236,12 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnKeyUpVector( FOdysseyVectorGroupPa
 FOdysseyVectorObject*
 UOdysseyPainterEditorVectorPathDrawingTool::GetParentObject( FOdysseyVectorGroupPaint* iScene )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     FOdysseyVectorObject* parentObject = iScene;
 
     // Add the path to the current unique selected group
-    if( iScene->GetRoot()->GetSelectedObjectList().size() == 1 )
+    if( iScene->GetCell()->GetSelectedObjectList().size() == 1 )
     {
-        FOdysseyVectorObject* selectedObject = iScene->GetRoot()->GetLastSelectedObject();
+        FOdysseyVectorObject* selectedObject = iScene->GetCell()->GetLastSelectedObject();
 
         if(  selectedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
         {
@@ -260,7 +262,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
         return false;
 
     double pointRadius = PressureSensitive ? ( iPointInTexture.pressure * Radius ) : Radius;
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
     uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                     | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
@@ -354,9 +355,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
         //iScene->ClearSelection();
         //iScene->Select( path );
 
-        // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
-                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
+        iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                  | FOdysseyVectorObject::UPDATE_NOINBETWEENING );
+        iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
     }
 
     oSignalFlags = retFlags;
@@ -369,9 +370,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGr
                                                               , const FOdysseyPoint& iPointInTexture
                                                               , uint64& oSignalFlags )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint32 width = iScene->GetRoot()->GetLayer()->GetWidth();
-    uint32 height = iScene->GetRoot()->GetLayer()->GetHeight();
+    uint32 width = iScene->GetCell()->GetLayer()->GetWidth();
+    uint32 height = iScene->GetCell()->GetLayer()->GetHeight();
     ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
     ::ULIS::FRectI imageRegion;
     uint64 notificationFlags = 0;
@@ -388,9 +388,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGr
 
     if( Stitch )
     {
-        // Force redraw
-        // Calling Update via Root will request a redraw even if root is not invalidated
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 
         oSignalFlags = notificationFlags;
     }
@@ -415,7 +413,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
     {
         FOdysseyVectorPath* path = mPathTracer.GetPath();
         double pointRadius = PressureSensitive ? ( iPointInTexture.pressure * Radius ) : Radius;
-        FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
         FOdysseyVectorSegment* newSegment;
         FOdysseyVectorSegment* prevSegment = nullptr;
 
@@ -468,7 +465,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
 
             //vectorEngine->SetInvalidatedRect( mPathTracer.GetRedrawRect() );
 
-            iScene->GetRoot()->InvalidateRect( ::ULIS::FRectD::FromMinMax( xmin
+            iScene->GetCell()->InvalidateRect( ::ULIS::FRectD::FromMinMax( xmin
                                                                          , ymin
                                                                          , xmax
                                                                          , ymax ) );
@@ -478,30 +475,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDragVector( FOdysseyVectorGro
         }
 
         // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_NOREDRAW // we render manually so that we can determine an invalidation rect
-                                      | FOdysseyVectorObject::UPDATE_INTERACTIVE
-                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated path after segment insertion
-
-/*
-        if( newSegment )
-        {
-            vectorEngine->InvalidateRect( newSegment->GetBoundingBox( true ) );
-            vectorEngine->InvalidateRect( newSegment->GetVertex(0)->GetBoundingBox( true ) );
-            vectorEngine->InvalidateRect( newSegment->GetVertex(1)->GetBoundingBox( true ) );
-
-            if( prevSegment )
-            {
-                vectorEngine->InvalidateRect( prevSegment->GetBoundingBox( true ) );
-            }
-        }
-*/
-
-        // Request render after last redraw - commented out
-        //if( vectorEngine->GetInvalidationFlags() == 0 )
-        {
-            // Calling Update via Root will request a redraw even if root is not invalidated
-            iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
-        }
+        iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                  | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated path after segment insertion
+        iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
     }
 
     oSignalFlags = notificationFlags;
@@ -517,9 +493,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
         return false;
 
     ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-    uint32 imgW = iScene->GetRoot()->GetLayer()->GetWidth();
-    uint32 imgH = iScene->GetRoot()->GetLayer()->GetHeight();
+    uint32 imgW = iScene->GetCell()->GetLayer()->GetWidth();
+    uint32 imgH = iScene->GetCell()->GetLayer()->GetHeight();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_HUD; // re-creates the quadtree;
@@ -621,7 +596,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
                 {
                     // delete any new path with single vertex that was create at mouse down
                     path->GetParent()->RemoveChild( path );
-                    iScene->GetRoot()->UnselectObject( path );
+                    iScene->GetCell()->UnselectObject( path );
 
                     delete path;
                 }
@@ -639,7 +614,9 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
     }
 
     // update invalidated objects. Updating via shared Env will invalidate the engine, thus redrawing the image
-    iScene->GetSharedEnv()->Update( UpdatePaintGroups ? FOdysseyVectorObject::UPDATE_PAINTGROUPS : 0 );
+    iScene->GetLayer()->Update( UpdatePaintGroups ? FOdysseyVectorObject::UPDATE_PAINTGROUPS : 0 );
+    iScene->GetLayer()->RequestRedraw( 0 );
+
 /*
     // in OnMouseDragVector() we are not guaranteed to get a viewport redraw from what I understand.
     // this means the Invalidation Rectangle is not resetted, so we force it.
@@ -658,8 +635,6 @@ uint64
 UOdysseyPainterEditorVectorPathDrawingTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                                  , const FName& iPropertyName )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
-
     if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorPathDrawingTool, TracingType) )
     {
         switch( TracingType )

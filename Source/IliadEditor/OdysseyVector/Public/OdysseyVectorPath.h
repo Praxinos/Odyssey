@@ -90,6 +90,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorPath : public FOdysseyVectorObject
         virtual void ApplyMatrix( BLMatrix2D& iMatrix ) override;
         virtual void UpdateShape( uint32 iUpdateFlags ) override;
         virtual void DrawShape( BLContext* iBLContext
+                              , FOdysseyVectorEngine* iEngine
                               , const ::ULIS::FRectD& iInvalidationArea
                               , double iCombinedOpacity
                               , uint64 iFlags ) override;

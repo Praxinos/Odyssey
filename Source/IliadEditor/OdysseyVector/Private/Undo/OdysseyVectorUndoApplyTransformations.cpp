@@ -6,7 +6,7 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 
 FOdysseyVectorUndoApplyTransformations::~FOdysseyVectorUndoApplyTransformations()
@@ -20,7 +20,7 @@ FOdysseyVectorUndoApplyTransformations::~FOdysseyVectorUndoApplyTransformations(
 FOdysseyVectorUndoApplyTransformations::FOdysseyVectorUndoApplyTransformations( FOdysseyVectorGroupPaint* iScene
                                                                               , std::list<FOdysseyVectorObject*>& iObjectList
                                                                               , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
     mObjectSnapshotArray.reserve( iObjectList.size() );
 

@@ -14,8 +14,8 @@
 #include "SOdysseySinglePropertyView.h"
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorSharedEnv.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorLayer.h"
+#include "OdysseyVectorCell.h"
 #include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "Undo/OdysseyVectorUndoSelectVertex.h"
 
@@ -62,7 +62,9 @@ uint64
 UOdysseyPainterEditorVectorSelectionTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -70,8 +72,10 @@ UOdysseyPainterEditorVectorSelectionTool::LoadVector( FOdysseyVectorGroupPaint* 
 uint64
 UOdysseyPainterEditorVectorSelectionTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    // redraw
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -96,7 +100,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDownVector( FOdysseyVectorGroup
         mPointArray.push_back( ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y ) );
     }
 
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+    //iScene->GetLayer()->RequestRedraw( 0 );
 
     return true;
 }
@@ -135,8 +139,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDragVector( FOdysseyVectorGroup
     }
 
     // force redraw
-    iScene->GetRoot()->Invalidate( 0 );
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 }
 
 ::ULIS::FRectD
@@ -201,7 +204,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
         roi.x = iPointInTexture.x;
         roi.y = iPointInTexture.y;
 
-        iScene->GetRoot()->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MATH_BASED );
+        iScene->GetCell()->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MATH_BASED );
 
         if( pickedObjectArray.size() )
         {
@@ -213,7 +216,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
             }
         }
 
-        iScene->GetRoot()->SetSelectionSpace( pickedGroup );
+        iScene->GetCell()->SetSelectionSpace( pickedGroup );
     }
     else
     {
@@ -234,18 +237,18 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
         // deselect all if control key is not pressed
         if( FSlateApplication::Get().GetModifierKeys().IsControlDown() == false )
         {
-            iScene->GetRoot()->ClearObjectSelection();
+            iScene->GetCell()->ClearObjectSelection();
         }
 
         // dragging occured
         if ( mPointArray.size() > 1 )
         {
-            iScene->GetRoot()->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
+            iScene->GetCell()->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MASK_BASED );
 
             // when dragging occured, we select all objects lying in the selection area.
             for ( int i = 0; i < pickedObjectArray.size(); i++ )
             {
-                iScene->GetRoot()->SelectObject( pickedObjectArray[i] );
+                iScene->GetCell()->SelectObject( pickedObjectArray[i] );
             }
         }
 
@@ -255,17 +258,15 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorObjectMode( FOdysseyVec
             roi.x = mPointArray[0].x;
             roi.y = mPointArray[0].y;
 
-            iScene->GetRoot()->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MATH_BASED );
+            iScene->GetCell()->Pick( iScene, roi, pickedObjectArray, FOdysseyVectorObject::PICK_MATH_BASED );
 
             // if no dragging occured, we only select the object that is the most forward
             if( pickedObjectArray.size() )
             {
-                iScene->GetRoot()->SelectObject( pickedObjectArray.back() );
+                iScene->GetCell()->SelectObject( pickedObjectArray.back() );
             }
         }
     }
-
-    //iEngine->ResetHUD(); // updates the current HUD (in most cases wil be this tool's HUD)
 
     return notificationFlags;
 }
@@ -278,7 +279,6 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
     std::list<FOdysseyVectorObject*> objectList;
     std::vector<FOdysseyVectorVertex*> pickedVertexArray;
     std::vector<FOdysseyVectorBucket*> pickedBucketArray;
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
@@ -294,7 +294,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
       , &pickedVertexArray
       , &pickedBucketArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
     {
-        if( iScene->GetRoot()->ObjectHasFocus( object, traversalFlags ) )
+        if( iScene->GetCell()->ObjectHasFocus( object, traversalFlags ) )
         {
             // all focused object are concerned, as their selection
             // might be cleared in case no vertex is selected.
@@ -383,9 +383,6 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVectorVertexMode( FOdysseyVec
         }
     }
 
-
-    //iEngine->ResetHUD(); // updates the current HUD (in most cases wil be this tool's HUD)
-
     return notificationFlags;
 }
 
@@ -398,7 +395,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPa
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    FOdysseyVectorRoot* vectorRoot = iScene->GetRoot();
+    FOdysseyVectorCell* vectorCell = iScene->GetCell();
     ::ULIS::FRectD roi;
     uint64 notificationFlags = 0;
 
@@ -408,7 +405,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPa
         roi = GenerateMask();
 
         // TODO: pass the mask image as arg to Pick function
-        vectorRoot->SetBLMask( mPickHUD->GetMask() );
+        vectorCell->SetBLMask( mPickHUD->GetMask() );
         if( ( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_OBJECT    )
          || ( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) )
         {
@@ -419,14 +416,14 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPa
         {
             notificationFlags |= OnMouseUpVectorVertexMode( iScene, iPointInTexture, iKey );
         }
-        vectorRoot->SetBLMask( nullptr );
+        vectorCell->SetBLMask( nullptr );
 
         mPointArray.clear();
     }
 
     // force redraw
-    iScene->GetRoot()->Invalidate( 0 );
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     oSignalFlags = notificationFlags;
 

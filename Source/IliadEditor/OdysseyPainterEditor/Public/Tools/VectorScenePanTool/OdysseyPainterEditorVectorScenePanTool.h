@@ -49,11 +49,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorScenePanTool : public 
         //                                  , const FName& iPropertyName ) override;
 
     protected:
-        void Pan( FOdysseyVectorEngine* iEngine
-                , FOdysseyVectorGroupPaint* iScene
+        void Pan( FOdysseyVectorGroupPaint* iScene
                 , const FOdysseyPoint& iPointInTexture );
-        void Scale( FOdysseyVectorEngine* iEngine
-                  , FOdysseyVectorGroupPaint* iScene
+        void Scale( FOdysseyVectorGroupPaint* iScene
                   , const FOdysseyPoint& iPointInTexture );
 
     private:

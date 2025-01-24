@@ -13,8 +13,8 @@ class FOdysseyVectorEngine;
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorGroup;
 class FOdysseyVectorTag;
-class FOdysseyVectorSharedEnv;
-class FOdysseyVectorRoot;
+class FOdysseyVectorLayer;
+class FOdysseyVectorCell;
 
 class ODYSSEYVECTOR_API FOdysseyVectorObject
 {
@@ -54,7 +54,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
         static const uint32 UPDATE_NOINBETWEENING   = ( 1 <<  6 );
         static const uint32 UPDATE_FORCE            = ( 1 <<  7 ); // request force updating everything, not only invalidated items
         static const uint32 UPDATE_NODRAWINGLOCK    = ( 1 <<  8 );
-        static const uint32 UPDATE_NOREDRAW         = ( 1 <<  9 );
         static const uint32 UPDATE_NOINVALIDATERECT = ( 1 << 10 );
 
         // invalidation flags
@@ -145,6 +144,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
          * @param iDrawingFlags drawing flags
          */
         virtual void Draw( BLContext* iBLContext
+                         , FOdysseyVectorEngine* iEngine
                          , const ::ULIS::FRectD& iInvalidationArea
                          , double iAncestorsOpacity
                          , uint64 iDrawingFlags );
@@ -157,6 +157,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
          * @param iDrawingFlags drawing flags
          */
         virtual void DrawChildren( BLContext* iBLContext
+                                 , FOdysseyVectorEngine* iEngine
                                  , const ::ULIS::FRectD& iInvalidationArea
                                  , double iCombinedOpacity
                                  , uint64 iDrawingFlags );
@@ -193,12 +194,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
          * @return a reference to the list of children objects.
          */
         std::list<FOdysseyVectorObject*>& GetChildrenList();
-
-        /**
-         * @brief Retrieves the Vector Engine
-         * @return a pointer to the Vector Engine
-         */
-        FOdysseyVectorEngine* GetEngine();
 
         /**
          * @brief Get the foreground bucket.
@@ -540,11 +535,18 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
          */
         virtual void UpdateMatrix();
 
+        /**
+         * @brief Update the object after it was invalidated
+         * @param iUpdateFlags
+         */
+        virtual void Update( uint32 iUpdateFlags );
+
         virtual void ApplyTransformations();
         virtual void ApplyMatrix( BLMatrix2D& iMatrix );
         void AddTag( FOdysseyVectorTag* iTag );
         void RemoveTag( FOdysseyVectorTag* iTag );
         void DrawTags( BLContext* iBLContext
+                     , FOdysseyVectorEngine* iEngine
                      , const ::ULIS::FRectD& iInvalidationArea
                      , double iCombinedOpacity
                      , uint64 iFlags );
@@ -552,9 +554,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
 
         std::list<FOdysseyVectorTag*>& GetTagList();
         void InvalidateTag( FOdysseyVectorTag* iTag );
-        FOdysseyVectorSharedEnv* GetSharedEnv();
+        FOdysseyVectorLayer* GetLayer();
         uint64 GetInvalidationFlags();
-        FOdysseyVectorRoot* GetRoot();
+        FOdysseyVectorCell* GetCell();
         virtual void Added();
         virtual void Removed();
         bool IsSystem();
@@ -586,14 +588,11 @@ class ODYSSEYVECTOR_API FOdysseyVectorObject
                               , std::function<uint64(FOdysseyVectorObject*,uint64)> iCallback );
 
     protected:
-        /**
-         * @brief Update the object after it was invalidated
-         * @param iUpdateFlags
-         */
-        virtual void Update( uint32 iUpdateFlags );
+
         virtual void UpdateShape( uint32 iUpdateFlags );
         virtual FOdysseyVectorObject* CopyShape( uint64 iCopyFlags );
         virtual void DrawShape ( BLContext* iBLContext
+                               , FOdysseyVectorEngine* iEngine
                                , const ::ULIS::FRectD& iInvalidationArea
                                , double iCombinedOpacity
                                , uint64 iFlags ){};

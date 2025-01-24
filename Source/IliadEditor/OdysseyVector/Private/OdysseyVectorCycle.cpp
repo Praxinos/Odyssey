@@ -9,7 +9,7 @@
 #include "OdysseyVector.h"
 #include "OdysseyVectorBucket.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 // for measurements
 #include <chrono>
 
@@ -19,12 +19,12 @@
 
 FOdysseyVectorCycle::~FOdysseyVectorCycle()
 {
-    FOdysseyVectorRoot* root = mOwner->GetRoot();
+    FOdysseyVectorCell* cell = mOwner->GetCell();
 
     // auto invalidation of the region that needs to be redrawn
-    if( root )
+    if( cell )
     {
-        root->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), mBBox ) );
+        cell->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), mBBox ) );
     }
 }
 
@@ -40,14 +40,14 @@ FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject* iOwner
     , mParentCycle( nullptr )
     , mPropagated( false )
 {
-    FOdysseyVectorRoot* root = mOwner->GetRoot();
+    FOdysseyVectorCell* cell = mOwner->GetCell();
 
     Build( );
 
     // auto invalidation of the region that needs to be redrawn
-    if( root )
+    if( cell )
     {
-        root->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), mBBox ) );
+        cell->InvalidateRect( FOdysseyVector::MapRect( mOwner->GetWorldMatrix(), mBBox ) );
     }
 }
 

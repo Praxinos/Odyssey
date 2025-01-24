@@ -2,14 +2,14 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
 
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyVector.h"
 #include "HUD/OdysseyVectorHUD.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorTag.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 #include <future>
 #include <execution>
 
@@ -64,9 +64,10 @@ FOdysseyVectorEngine::GetRenderData()
     return mRenderData;
 }
 
-static
 ::ULIS::FRectD
-GetInvalidatedRect( const ::ULIS::FRectD& iRenderRect, double iScreenWidth, double iScreenHeight )
+FOdysseyVectorEngine::SanitizeRect( const ::ULIS::FRectD& iRenderRect
+                                  , double iScreenWidth
+                                  , double iScreenHeight )
 {
     ::ULIS::FRectD screen = ::ULIS::FRectD( 0, 0, iScreenWidth, iScreenHeight );
     ::ULIS::FRectD sanitizedRect;
@@ -118,7 +119,7 @@ FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext
     //mBLContext->setFillAlpha( 0.0f );
     iBLContext->clearAll();
 
-    for( FOdysseyVectorHUD *hud : scene->GetRoot()->GetHUDList() )
+    for( FOdysseyVectorHUD *hud : scene->GetCell()->GetHUDList() )
     {
         hud->Draw( iBLContext, scene );
     }
@@ -144,6 +145,7 @@ FOdysseyVectorEngine::GetDrawingMutex()
 
 ::ULIS::FRectD
 FOdysseyVectorEngine::Render( BLContext* iBLContext
+                            , const ::ULIS::FRectD& iRedrawRect
                             , FOdysseyVectorGroupPaint* iScene
                             , uint64 iDrawingFlags )
 {
@@ -172,7 +174,9 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
     // because it gets the BLContext as an argument.
     // So we just set the rectangle to a huge value that basically says "redraw everything"
     // and this is delt with by the Odyssey*ImageRenderers.
-    sanitizedRect = GetInvalidatedRect( iScene->GetRoot()->GetInvalidatedRect(), mRenderData.size.w, mRenderData.size.h );
+    //sanitizedRect = GetInvalidatedRect( iScene->GetCell()->GetInvalidatedRect(), mRenderData.size.w, mRenderData.size.h );
+
+    sanitizedRect = iRedrawRect;
 
     // for drawing polygones (textured)
     if( mHorizontalLineBuffer.size() != mRenderData.size.h )
@@ -209,7 +213,7 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
                                     , sanitizedRect.w + 2
                                     , sanitizedRect.h + 2 ) );
 
-        scene->Draw( iBLContext, sanitizedRect, 1.0f, iDrawingFlags );
+        scene->Draw( iBLContext, this, sanitizedRect, 1.0f, iDrawingFlags );
 
         //--- uncomment to view the invalidation rectangle --- //
         //iBLContext->setStrokeWidth( 2.0f );
@@ -222,24 +226,24 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
 
         iBLContext->restore();
 
-        if( scene->GetSharedEnv() )
+        if( scene->GetLayer() )
         {
             // Because the Proxy can run this function at anytime, we must also protect the access
             // to the list of shared tags
-            scene->GetSharedEnv()->GetSharedTagMutex().lock();
+            scene->GetLayer()->GetSharedTagMutex().lock();
 
-            for ( FOdysseyVectorTag* tag : scene->GetSharedEnv()->GetSharedTagList() )
+            for ( FOdysseyVectorTag* tag : scene->GetLayer()->GetSharedTagList() )
             {
                 FOdysseyVectorObject* tagOwner = tag->GetOwner();
 
                 // only draw tag as a shared tag if it does NOT belong to the scene
                 if( tagOwner->GetScene() != scene )
                 {
-                    tag->Draw( scene, iBLContext, sanitizedRect, 1.0f, iDrawingFlags );
+                    tag->Draw( scene, iBLContext, this, sanitizedRect, 1.0f, iDrawingFlags );
                 }
             }
 
-            scene->GetSharedEnv()->GetSharedTagMutex().unlock();
+            scene->GetLayer()->GetSharedTagMutex().unlock();
         }
 
         iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);
@@ -249,7 +253,8 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
     // ( refresh the whole screen at next iteration unless this is set
     // to some value ).
     //mInvalidatedRect = ::ULIS::FRectD( 0, 0, 0, 0 );
-    scene->GetRoot()->ResetInvalidatedRect();
+    // this resets the rect to its default size
+    scene->GetCell()->SetPendingRedraw( false );
 
     mInvalidationFlags = 0;
 

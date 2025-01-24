@@ -4,8 +4,8 @@
 #include "OdysseyPainterEditorVectorTagInbetweenerView.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerParam.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorCell.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
 #include "Misc/MessageDialog.h"
@@ -97,9 +97,9 @@ UOdysseyPainterEditorVectorTagInbetweenerView::Update( FOdysseyPainterEditor* iE
 
     mSelectedInbetweenerTagArray.clear();
     // note: it may reserve more than needed.
-    mSelectedInbetweenerTagArray.reserve( iScene->GetSharedEnv()->GetSharedTagList().size() );
+    mSelectedInbetweenerTagArray.reserve( iScene->GetLayer()->GetSharedTagList().size() );
 
-    for( FOdysseyVectorTag* tag : iScene->GetSharedEnv()->GetSharedTagList() )
+    for( FOdysseyVectorTag* tag : iScene->GetLayer()->GetSharedTagList() )
     {
         if( tag->GetOwner()->IsSelected() )
         {
@@ -389,8 +389,8 @@ UOdysseyPainterEditorVectorTagInbetweenerView::PostEditChangeProperty( FProperty
                        , FName(PropertyChangedEvent.Property->GetMetaData(TEXT("Category"))) );
 
         // redraw
-        mScene->GetRoot()->Invalidate( 0 );
-        mScene->GetSharedEnv()->Update( 0 );
+        mScene->GetCell()->Invalidate( 0 );
+        mScene->GetLayer()->RequestRedraw( 0 );
     }
 }
 

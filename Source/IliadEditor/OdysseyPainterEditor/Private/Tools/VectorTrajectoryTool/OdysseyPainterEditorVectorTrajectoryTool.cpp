@@ -11,8 +11,8 @@
 #include "SOdysseySinglePropertyView.h"
 // Vector engine
 #include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorSharedEnv.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorLayer.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "InbetweenerTag/InbetweenerRoute.h"
 #include "undo/OdysseyVectorUndoTagInbetweenerRouteAlter.h"
@@ -63,8 +63,10 @@ UOdysseyPainterEditorVectorTrajectoryTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorTrajectoryTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    // redraw
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -73,7 +75,9 @@ uint64
 UOdysseyPainterEditorVectorTrajectoryTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -112,8 +116,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyDownGlobalVector( FOdysseyVector
                                                                               : eTrajectoryEditionMode::Spacing;
         }
 
-        // force redraw
-        iScene->GetEngine()->Invalidate( iScene, 0 );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
         oSignalFlags = notificationFlags;
     }
@@ -126,7 +129,6 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyUpGlobalVector( FOdysseyVectorGr
                                                               , const FKeyEvent& InKeyEvent
                                                               , uint64& oSignalFlags )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     FKey key = InKeyEvent.GetKey();
     uint64 notificationFlags = 0;
 
@@ -139,9 +141,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnKeyUpGlobalVector( FOdysseyVectorGr
       || ( key == EKeys::LeftShift   ) || ( key == EKeys::RightShift   )
       || ( key == EKeys::LeftAlt     ) || ( key == EKeys::RightAlt     ) )
     {
-        // redraw
-        iScene->GetRoot()->Invalidate(0);
-        iScene->GetSharedEnv()->Update( 0 );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
     }
 
     // first reset display mode
@@ -175,7 +175,6 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
 {
     //if (iKey != EKeys::LeftMouseButton)
     //    return false;
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     uint64 notificationFlags = 0;
     FInbetweenerRoute* addedRoute = nullptr;
 
@@ -364,9 +363,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
 */
     }
 
-    // Updating via the Shared env allow multiple cells to be updated which is paramount
-    // here because we may be on a cell different from the tag's starting cell
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->RequestRedraw( 0 );
 
     oSignalFlags = notificationFlags;
 
@@ -387,11 +385,9 @@ UOdysseyPainterEditorVectorTrajectoryTool::ResetHoveredQuad()
 
 void
 UOdysseyPainterEditorVectorTrajectoryTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                               , const FOdysseyPoint& iPointInTexture
-                                                            , uint64& oSignalFlags )
+                                                             , const FOdysseyPoint& iPointInTexture
+                                                             , uint64& oSignalFlags )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
     mHoveredQuad = nullptr;
 
     mTrajectoryHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
@@ -413,8 +409,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseHoverVector( FOdysseyVectorGro
     }
 
     // force redraw HUD
-    iScene->GetRoot()->Invalidate( 0 );
-    iScene->GetSharedEnv()->Update( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 }
 
 void
@@ -422,7 +417,6 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
                                                             , const FOdysseyPoint& iPointInTexture
                                                             , uint64& oSignalFlags )
 {
-    FOdysseyVectorEngine* engine = iScene->GetEngine();
     static FVector2D deltaPositionCumul = FVector2D( 0.0f, 0.0f );
 
     mTrajectoryHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
@@ -433,7 +427,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
     // For some reason we receive quite a lot of mouse events between 2 screen refresh, I don't know why
     // The issue is absent with the Ink driver. It is present with the Wintab and Native drivers. The simpliest
     // solution I've found is to discard events until the screen has been refreshed.
-    if( engine->GetInvalidationFlags()  )
+    if( iScene->GetCell()->PendingRedraw()  )
         return;
 
     if( iPointInTexture.keysDown.Find( EKeys::LeftMouseButton ) != INDEX_NONE )
@@ -501,12 +495,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDragVector( FOdysseyVectorGrou
     // mPickedHandle->Set will invalidate the handle owner's scene, which might not be this one. Plus, when we drag
     // we pass the UPDATE_INTERACTIVE flags that will prevent inbetweens to be refreshed. Hence, will invalidate only
     // this inbetween so that it gets refreshed.
-    iScene->Invalidate( 0 );
-
-    // Updating via the Shared env allow multiple cells to be updated which is paramount
-    // here because we may be on a cell different from the tag's starting cell
-    // Note: will also redraw the image
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 }
 
 bool
@@ -518,7 +508,6 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseUpVector( FOdysseyVectorGroupP
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     uint64 notificationFlags = 0;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
@@ -549,9 +538,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseUpVector( FOdysseyVectorGroupP
         }
     }
 
-    // Updating via the Shared env allow multiple cells to be updated which is paramount
-    // here because we may be on a cell different from the tag's starting cell
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->RequestRedraw( 0 );
 
     oSignalFlags = notificationFlags;
 
@@ -562,11 +550,11 @@ uint64
 UOdysseyPainterEditorVectorTrajectoryTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                                 , const FName& iPropertyName )
 {
-    iScene->GetRoot()->ResetHUD();
+    iScene->GetCell()->ResetHUD();
 
     // redraw
-    iScene->GetRoot()->Invalidate(0);
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->RequestRedraw( 0 );
 
     return 0;
 }
@@ -620,9 +608,8 @@ UOdysseyPainterEditorVectorTrajectoryTool::ResetRoute()
 
     mPickedRoute->Reset();
 
-    // Updating via the Shared env allow multiple cells to be updated which is paramount
-    // here because we may be on a cell different from the tag's starting cell
-    scene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    scene->GetLayer()->RequestRedraw( 0 );
 }
 
 void
@@ -650,12 +637,9 @@ UOdysseyPainterEditorVectorTrajectoryTool::DeleteRoute()
 
     mPickedRoute->GetInbetweenerTag()->RemoveRoute( mPickedRoute );
 
-    // Updating via the Shared env allow multiple cells to be updated which is paramount
-    // here because we may be on a cell different from the tag's starting cell
-    scene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 
-    // redraw
-    //scene->GetRoot()->GetCellEngine()->Invalidate( 0 );
+    scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    scene->GetLayer()->RequestRedraw( 0 );
 }
 
 void

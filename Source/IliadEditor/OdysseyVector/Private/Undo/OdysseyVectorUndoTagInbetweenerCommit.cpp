@@ -5,7 +5,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTag.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoTagInbetweenerCommit::~FOdysseyVectorUndoTagInbetweenerCommit()
 {
@@ -25,7 +25,7 @@ FOdysseyVectorUndoTagInbetweenerCommit::~FOdysseyVectorUndoTagInbetweenerCommit(
     }
 }
 
-FOdysseyVectorUndoTagInbetweenerCommit::FOdysseyVectorUndoTagInbetweenerCommit( FOdysseyVectorSharedEnv* iSharedEnv
+FOdysseyVectorUndoTagInbetweenerCommit::FOdysseyVectorUndoTagInbetweenerCommit( FOdysseyVectorLayer* iSharedEnv
                                                                               , const std::list<FOdysseyVectorTag*>& iRemovedTagList
                                                                               , const std::list<FOdysseyVectorObject*>& iAddedObjectList
                                                                               , const std::list<FOdysseyVectorGroupPaint*>& iCommittedSceneList

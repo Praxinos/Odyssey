@@ -11,14 +11,14 @@
 #include "Undo/OdysseyVectorUndo.h"
 
 class FOdysseyVectorGroupPaint;
-class FOdysseyVectorSharedEnv;
+class FOdysseyVectorLayer;
 class FOdysseyVectorTag;
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndoTagInbetweenerCommit : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoTagInbetweenerCommit();
-        FOdysseyVectorUndoTagInbetweenerCommit( FOdysseyVectorSharedEnv* iSharedEnv
+        FOdysseyVectorUndoTagInbetweenerCommit( FOdysseyVectorLayer* iSharedEnv
                                               , const std::list<FOdysseyVectorTag*>& iRemovedTagList
                                               , const std::list<FOdysseyVectorObject*>& iAddedObjectList
                                               , const std::list<FOdysseyVectorGroupPaint*>& iCommittedSceneList

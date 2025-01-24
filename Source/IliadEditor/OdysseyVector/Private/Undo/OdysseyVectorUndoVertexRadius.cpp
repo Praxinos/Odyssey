@@ -5,7 +5,7 @@
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoVertexRadius::~FOdysseyVectorUndoVertexRadius()
 {
@@ -22,7 +22,7 @@ FOdysseyVectorUndoVertexRadius::~FOdysseyVectorUndoVertexRadius()
 FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGroupPaint* iScene
                                                               , std::vector<FOdysseyVectorPath*>& iPathArray
                                                               , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
     mPathSnapshotArray.reserve( iPathArray.size() );
 
@@ -35,7 +35,7 @@ FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGr
 FOdysseyVectorUndoVertexRadius::FOdysseyVectorUndoVertexRadius( FOdysseyVectorGroupPaint* iScene
                                                               , std::vector<FOdysseyVectorVertex*>& iVertexArray
                                                               , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
     mVertexSnapshotArray.reserve( iVertexArray.size() );
 

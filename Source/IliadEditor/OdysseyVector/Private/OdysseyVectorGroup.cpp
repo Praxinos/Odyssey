@@ -26,15 +26,6 @@ FOdysseyVectorGroup::HasBaseClass( uint32 iBaseClassID )
     return FOdysseyVectorObject::HasBaseClass( iBaseClassID );
 }
 
-void
-FOdysseyVectorGroup::DrawShape( BLContext* iBLContext
-                              , const ::ULIS::FRectD& iInvalidationArea
-                              , double iCombinedOpacity
-                              , uint64 iFlags )
-{
-
-}
-
 bool
 FOdysseyVectorGroup::PickShape( const ::ULIS::FRectD &iRoi, uint32 iSelectionFlags )
 {

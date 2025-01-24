@@ -18,8 +18,8 @@
 #include "OdysseyVectorEllipse.h"
 #include "OdysseyVectorLine.h"
 #include "OdysseyVectorRectangle.h"
-#include "OdysseyVectorSharedEnv.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorLayer.h"
+#include "OdysseyVectorCell.h"
 #include "Undo/OdysseyVectorUndoObjectAdd.h"
 
 #ifndef M_PI
@@ -66,8 +66,10 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    // Calling Update via Root will request a redraw even if root is not invalidated
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -76,8 +78,9 @@ uint64
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    // Calling Update via Root will request a redraw even if root is not invalidated
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -114,9 +117,9 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::GetParentObject( FOdysseyVector
     FOdysseyVectorObject* parentObject = iScene;
 
     // Add the path to the current unique selected group
-    if( iScene->GetRoot()->GetSelectedObjectList().size() == 1 )
+    if( iScene->GetCell()->GetSelectedObjectList().size() == 1 )
     {
-        FOdysseyVectorObject* selectedObject = iScene->GetRoot()->GetLastSelectedObject();
+        FOdysseyVectorObject* selectedObject = iScene->GetCell()->GetLastSelectedObject();
 
         if(  selectedObject->HasBaseClass( FOdysseyVectorGroup::StaticClass() ) )
         {
@@ -184,12 +187,12 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
 
         //mSelectionChanged.Broadcast(iScene);
 
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
-                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated objects
+        iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                  | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated objects
     }
 
     // redraw
-    //iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
 
     oSignalFlags = notificationFlags;
 
@@ -293,12 +296,11 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDragVector( FOdysseyVect
             }
         }
 
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
-                                      | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated objects
+        iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE
+                                  | FOdysseyVectorObject::UPDATE_NOINBETWEENING ); // update invalidated objects
     }
 
-    // redraw
-    //iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
 
     oSignalFlags = notificationFlags;
 }
@@ -350,11 +352,10 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseUpVector( FOdysseyVector
             GEditor->EndTransaction();
         }
 
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidate objects
+        iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS ); // update invalidate objects
     }
 
-    // redraw
-    //iScene->GetEngine()->Invalidate( 0 );
+    iScene->GetLayer()->RequestRedraw( 0 );
 
     oSignalFlags = notificationFlags;
 

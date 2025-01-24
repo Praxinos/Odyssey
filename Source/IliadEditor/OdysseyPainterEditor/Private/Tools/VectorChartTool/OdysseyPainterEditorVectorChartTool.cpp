@@ -9,8 +9,8 @@
 #include "ISinglePropertyView.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorRoot.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorCell.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "SOdysseySinglePropertyView.h"
 
@@ -48,8 +48,10 @@ UOdysseyPainterEditorVectorChartTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorChartTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    // force redraw
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -57,10 +59,10 @@ UOdysseyPainterEditorVectorChartTool::UnloadVector( FOdysseyVectorGroupPaint* iS
 uint64
 UOdysseyPainterEditorVectorChartTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -105,8 +107,7 @@ UOdysseyPainterEditorVectorChartTool::OnKeyDownGlobalVector( FOdysseyVectorGroup
         }
 
         // Calling Update via Root will request a redraw even if root is not invalidated
-        iScene->GetRoot()->Invalidate( 0 );
-        iScene->GetSharedEnv()->Update( 0 );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
     }
 
     return false;
@@ -117,7 +118,6 @@ UOdysseyPainterEditorVectorChartTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPa
                                                          , const FKeyEvent& InKeyEvent
                                                          , uint64& oSignalFlags )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     FKey key = InKeyEvent.GetKey();
 
     // note, we cannot use FSlateApplication::Get().GetModifierKeys()
@@ -130,8 +130,8 @@ UOdysseyPainterEditorVectorChartTool::OnKeyUpGlobalVector( FOdysseyVectorGroupPa
       || ( key == EKeys::LeftAlt     ) || ( key == EKeys::RightAlt     ) )
     {
         // redraw
-        iScene->GetRoot()->Invalidate( 0 );
-        iScene->GetSharedEnv()->Update( 0 );
+        iScene->GetCell()->Invalidate( 0 );
+        iScene->GetLayer()->RequestRedraw( 0 );
     }
 
     // first reset display mode
@@ -150,7 +150,6 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     uint64 notificationFlags = 0;
 
     mPickedBreakdown = nullptr;
@@ -261,9 +260,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseHoverVector( FOdysseyVectorGroupPai
         mHoveredInbetween = mChartHUD->PickInbetween( iPointInTexture.x
                                                     , iPointInTexture.y );
 
-        // redraw
-        iScene->GetRoot()->Invalidate( 0 );
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorObject::UPDATE_INTERACTIVE );
     }
 }
 
@@ -272,7 +269,6 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                                                         , const FOdysseyPoint& iPointInTexture
                                                         , uint64& oSignalFlags )
 {
-    FOdysseyVectorEngine* engine = iScene->GetEngine();
     static FVector2D deltaPositionCumul = FVector2D( 0.0f, 0.0f );
     FOdysseyPoint pointInTexture = iPointInTexture;
     uint64 notificationFlags = 0;
@@ -283,7 +279,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
     // For some reason we receive quite a lot of mouse events between 2 screen refresh, I don't know why
     // The issue is absent with the Ink driver. It is present with the Wintab and Native drivers. The simpliest
     // solution I've found is to discard events until the screen has been refreshed.
-    if( engine->GetInvalidationFlags()  )
+    if( iScene->GetCell()->PendingRedraw()  )
         return;
 
     pointInTexture.deltaPosition = deltaPositionCumul;
@@ -397,8 +393,8 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
     }
 
     // update ALL impacted scenes.
-    // It will request a redraw as well
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 
     deltaPositionCumul = FVector2D( 0.0f, 0.0f );
 
@@ -414,7 +410,6 @@ UOdysseyPainterEditorVectorChartTool::OnMouseUpVector( FOdysseyVectorGroupPaint*
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
     uint64 retFlags = 0;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
@@ -425,10 +420,11 @@ UOdysseyPainterEditorVectorChartTool::OnMouseUpVector( FOdysseyVectorGroupPaint*
             FOdysseyVectorTagInbetweener* inbetweenerTag = mPickedInbetween->GetChart()->GetBreakdown()->GetInbetweenerTag();
 
             // we need to manually redraw because no object is modified
-            inbetweenerTag->RedrawCells();
+            //inbetweenerTag->RedrawCells();
 
              // update ALL impacted scenes
-            iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+            iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+            iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
         }
     }
 
@@ -441,10 +437,10 @@ uint64
 UOdysseyPainterEditorVectorChartTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                            , const FName& iPropertyName )
 {
-    iScene->GetRoot()->ResetHUD();
+    iScene->GetCell()->ResetHUD();
 
-    iScene->GetRoot()->Invalidate( 0 );
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->RequestRedraw( 0 );
 
     return 0;
 }

@@ -4,9 +4,9 @@
 #include "Undo/OdysseyVectorUndoTagInbetweenerReset.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyVectorTag.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoTagInbetweenerReset::~FOdysseyVectorUndoTagInbetweenerReset()
 {
@@ -25,7 +25,7 @@ FOdysseyVectorUndoTagInbetweenerReset::FOdysseyVectorUndoTagInbetweenerReset( FO
                                                                             , bool iResetGridGeometry
                                                                             , bool iResetTransformations
                                                                             , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
     mBreakdownSnapshotBuffer.reserve( iBreakdownList.size() );
 
@@ -42,7 +42,7 @@ FOdysseyVectorUndoTagInbetweenerReset::FOdysseyVectorUndoTagInbetweenerReset( FO
                                                                             , bool iResetGridGeometry
                                                                             , bool iResetTransformations
                                                                             , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
     uint32 breakdownCount = 0;
 

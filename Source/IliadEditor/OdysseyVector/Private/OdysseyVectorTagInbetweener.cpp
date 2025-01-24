@@ -2,14 +2,12 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #include "OdysseyVectorTagInbetweener.h"
-#include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorPath.h"
-#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorCell.h"
@@ -146,7 +144,6 @@ FOdysseyVectorTagInbetweener::Copy( FOdysseyVectorObject* iDestOwnerObject )
 void
 FOdysseyVectorTagInbetweener::Map()
 {
-    FOdysseyVectorEngine* vectorEngine = mOwner->GetEngine();
     FInbetweenerGrid* firstGrid = mBreakdownList.front()->GetGrid();
     uint32 paintgroupCount = 0;
     uint32 pathCount = 0;
@@ -719,7 +716,7 @@ FOdysseyVectorTagInbetweener::GetBreakdownByTargetIndex( uint32 iDrawingIndex )
 FInbetweenerBreakdown*
 FOdysseyVectorTagInbetweener::GetBreakdownByCellIndex( uint32 iCellIndex )
 {
-    uint32 tagCellIndex = mScene->GetRoot()->GetCell()->GetIndex();
+    uint32 tagCellIndex = mScene->GetCell()->GetIndex();
     int32 drawingIndex = ( mInterpolationDirection == eInbetweenerInterpolationDirection::Forward ) ? ( iCellIndex - tagCellIndex )
                                                                                                     : ( tagCellIndex - iCellIndex );
 
@@ -956,7 +953,7 @@ void
 FOdysseyVectorTagInbetweener::ObjectAdded()
 {
     mScene = mOwner->GetScene();
-    mSharedEnv = mOwner->GetSharedEnv();
+    mSharedEnv = mOwner->GetLayer();
 
     if( bShared == false )
     {
@@ -985,7 +982,7 @@ void
 FOdysseyVectorTagInbetweener::Added()
 {
     mScene = mOwner->GetScene();
-    mSharedEnv = mOwner->GetSharedEnv();
+    mSharedEnv = mOwner->GetLayer();
 
     if( mSharedEnv )
     {
@@ -1147,18 +1144,18 @@ FOdysseyVectorTagInbetweener::GetScene()
     return mScene;
 }
 
-IOdysseyVectorCell*
+FOdysseyVectorCell*
 FOdysseyVectorTagInbetweener::GetCell()
 {
-    return mOwner->GetRoot()->GetCell();
+    return mOwner->GetCell();
 }
 
-IOdysseyVectorCell*
+FOdysseyVectorCell*
 FOdysseyVectorTagInbetweener::GetSourceCell()
 {
     uint32 sourceCellIndex = GetSourceCellIndex();
 
-    return GetOwner()->GetRoot()->GetLayer()->GetCellByIndex( sourceCellIndex );
+    return GetOwner()->GetLayer()->GetCellByIndex( sourceCellIndex );
 }
 
 int32
@@ -1167,12 +1164,12 @@ FOdysseyVectorTagInbetweener::GetSourceCellIndex()
     return mBreakdownList.front()->GetSourceCellIndex();
 }
 
-IOdysseyVectorCell*
+FOdysseyVectorCell*
 FOdysseyVectorTagInbetweener::GetTargetCell()
 {
     uint32 targetCellIndex = GetTargetCellIndex();
 
-    return GetOwner()->GetRoot()->GetLayer()->GetCellByIndex( targetCellIndex );
+    return GetOwner()->GetLayer()->GetCellByIndex( targetCellIndex );
 }
 
 int32
@@ -1391,10 +1388,10 @@ FOdysseyVectorTagInbetweener::RedrawCells( uint32 iDrawingCount )
 {
     // scene could be non existent when the tag's owner is removed, as it would still trigger call to Update()
     // right after the removal of an object in the hierarchy.
-    if( mScene->GetSharedEnv() )
+    if( mScene->GetLayer() )
     {
-        IOdysseyVectorCell* cell = mScene->GetRoot()->GetCell();
-        IOdysseyVectorLayer* layer = mScene->GetRoot()->GetLayer();
+        FOdysseyVectorCell* cell = mScene->GetCell();
+        FOdysseyVectorLayer* layer = mScene->GetLayer();
 
         if( cell )
         {
@@ -1405,13 +1402,11 @@ FOdysseyVectorTagInbetweener::RedrawCells( uint32 iDrawingCount )
             {
                 FInbetweenerDrawing* drawing = GetDrawing( i );
                 int32 inbetweenCellIndex = drawing->GetCellIndex();
-                IOdysseyVectorCell* nextCell = layer->GetCellByIndex( inbetweenCellIndex );
+                FOdysseyVectorCell* nextCell = layer->GetCellByIndex( inbetweenCellIndex );
 
                 if( nextCell )
                 {
-                    //nextCell->GetEngine()->Invalidate();
-                    // request redraw
-                    nextCell->GetScene()->GetRoot()->RequestRedraw( 0 );
+                    layer->InvalidateCell( nextCell );
                 }
 
                 cell = nextCell;
@@ -1484,6 +1479,7 @@ FOdysseyVectorTagInbetweener::DrawMotionGrid( uint32 iDrawingIndex
 
 void
 FOdysseyVectorTagInbetweener::Draw( BLContext* iBLContext
+                                  , FOdysseyVectorEngine* iEngine
                                   , const ::ULIS::FRectD& iInvalidationArea
                                   , double iAncestorsOpacity
                                   , uint64 iDrawingFlags )
@@ -1495,11 +1491,12 @@ FOdysseyVectorTagInbetweener::Draw( BLContext* iBLContext
 void
 FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
                                   , BLContext* iBLContext
+                                  , FOdysseyVectorEngine* iEngine
                                   , const ::ULIS::FRectD& iInvalidationArea
                                   , double iAncestorsOpacity
                                   , uint64 iDrawingFlags )
 {
-    IOdysseyVectorCell* displayedCell = iDisplayedScene->GetRoot()->GetCell();
+    FOdysseyVectorCell* displayedCell = iDisplayedScene->GetCell();
 
     LockDrawing();
 
@@ -1507,7 +1504,7 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
     if( mOwner->GetScene() )
     {
 
-        IOdysseyVectorCell* tagCell = mOwner->GetScene()->GetRoot()->GetCell();
+        FOdysseyVectorCell* tagCell = mOwner->GetScene()->GetCell();
 
         iBLContext->save();
         iBLContext->resetMatrix();
@@ -1539,6 +1536,7 @@ FOdysseyVectorTagInbetweener::Draw( FOdysseyVectorGroupPaint* iDisplayedScene
                         DrawPathsInbetween( iDisplayedScene
                                           , inbetween
                                           , iBLContext
+                                          , iEngine
                                           , false );
                     }
                 }
@@ -1587,6 +1585,7 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                                         , FInbetweenerChart::Inbetween* iInbetween
                                         , FInterpolatedPath* iInterpolatedPath
                                         , BLContext* iBLContext
+                                        , FOdysseyVectorEngine* iEngine
                                         , bool iLock )
 {
     if( iLock )
@@ -1606,7 +1605,6 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
     FOdysseyVectorPath* originalPath = iInterpolatedPath->GetOriginalPath();
     FColor pathColor = originalPath->GetForegroundColor();
     BLMatrix2D worldMatrix = mOwner->GetWorldMatrix();
-    FOdysseyVectorEngine* displayedSceneEngine = iDisplayedScene->GetEngine();
 
     // passed to DrawPathAt()
     worldMatrix.transform( iInbetween->GetDrawing()->localMatrix );
@@ -1706,29 +1704,29 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
                         polygonDrawingFlags |= brush.BilinearFiltering ? FPolygonDrawingFlags::BILINEARFILTERING : 0;
 
                         // should be a static function
-                        displayedSceneEngine->FillQuad( iBLContext
-                                                      , quad0P
-                                                      , quad0U
-                                                      , quad0V
-                                                      , 1.0f /*iCombinedOpacity*/
-                                                      , pathColor
-                                                      , (int8*) brush.pixels // will be nullptr if no texture is loaded
-                                                      , brush.width
-                                                      , brush.height
-                                                      , brush.bitsPerPixel
-                                                      , polygonDrawingFlags );
+                        iEngine->FillQuad( iBLContext
+                                         , quad0P
+                                         , quad0U
+                                         , quad0V
+                                         , 1.0f /*iCombinedOpacity*/
+                                         , pathColor
+                                         , (int8*) brush.pixels // will be nullptr if no texture is loaded
+                                         , brush.width
+                                         , brush.height
+                                         , brush.bitsPerPixel
+                                         , polygonDrawingFlags );
 
-                        displayedSceneEngine->FillQuad( iBLContext
-                                                      , quad1P
-                                                      , quad1U
-                                                      , quad1V
-                                                      , 1.0f /*iCombinedOpacity*/
-                                                      , pathColor
-                                                      , (int8*) brush.pixels // will be nullptr if no texture is loaded
-                                                      , brush.width
-                                                      , brush.height
-                                                      , brush.bitsPerPixel
-                                                      , polygonDrawingFlags );
+                        iEngine->FillQuad( iBLContext
+                                         , quad1P
+                                         , quad1U
+                                         , quad1V
+                                         , 1.0f /*iCombinedOpacity*/
+                                         , pathColor
+                                         , (int8*) brush.pixels // will be nullptr if no texture is loaded
+                                         , brush.width
+                                         , brush.height
+                                         , brush.bitsPerPixel
+                                         , polygonDrawingFlags );
                     }
                     else
                     {
@@ -1790,7 +1788,7 @@ FOdysseyVectorTagInbetweener::DrawPathAt( FOdysseyVectorGroupPaint* iDisplayedSc
         for( FOdysseyVectorChain& chain : iInterpolatedPath->GetOriginalPath()->GetChainArray() )
         {
             iInterpolatedPath->GetOriginalPath()->DrawChain( iBLContext
-                                                           , iDisplayedScene->GetEngine()
+                                                           , iEngine
                                                            , 1.0f/*double iCombinedOpacity*/
                                                            , chain
                                                            , 0 );
@@ -1865,6 +1863,7 @@ void
 FOdysseyVectorTagInbetweener::DrawPathsInbetween( FOdysseyVectorGroupPaint* iDisplayedScene
                                                 , FInbetweenerChart::Inbetween* inbetween
                                                 , BLContext* iBLContext
+                                                , FOdysseyVectorEngine* iEngine
                                                 , bool iLock )
 {
     if( iLock )
@@ -1881,6 +1880,7 @@ FOdysseyVectorTagInbetweener::DrawPathsInbetween( FOdysseyVectorGroupPaint* iDis
                   //, pointPositionBuffer
                   //, worldMatrix
                   , iBLContext
+                  , iEngine
                   , false );
     }
 
@@ -1899,7 +1899,8 @@ FOdysseyVectorTagInbetweener::MoveInbetween( FInbetweenerChart::Inbetween* iInbe
 
     if( ( iNewSpacing > 0.0f ) && ( iNewSpacing < 1.0f ) )
     {
-        IOdysseyVectorCell* animationCell = mOwner->GetScene()->GetRoot()->GetCell();
+        FOdysseyVectorCell* animationCell = mOwner->GetCell();
+        FOdysseyVectorLayer* animationLayer = mOwner->GetLayer();
         int32  prevIndex  = iInbetween->GetIndex() - 1;
         uint32 nextIndex  = iInbetween->GetIndex() + 1;
         float prevSpacing = iInbetween->GetChart()->GetInbetweenBuffer()[prevIndex].GetSpacing();
@@ -1911,14 +1912,13 @@ FOdysseyVectorTagInbetweener::MoveInbetween( FInbetweenerChart::Inbetween* iInbe
              && ( iNewSpacing < nextSpacing ) )
             {
                 uint32 inbetweenCellIndex = iInbetween->GetCellIndex();
-                IOdysseyVectorCell* inbetweenCell = GetOwner()->GetRoot()->GetLayer()->GetCellByIndex( inbetweenCellIndex );
+                FOdysseyVectorCell* inbetweenCell = GetOwner()->GetLayer()->GetCellByIndex( inbetweenCellIndex );
 
                 iInbetween->SetSpacing( iNewSpacing );
 
                 if( inbetweenCell )
                 {
-                    // Request redraw
-                    inbetweenCell->GetScene()->GetRoot()->Invalidate( 0 );
+                   animationLayer->InvalidateCell( inbetweenCell );
                 }
 
                 // recompute single inbetweens
@@ -2129,8 +2129,8 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                                     , std::list<FOdysseyVectorObject*>& oAddedObjectList
                                     , std::list<FOdysseyVectorGroupPaint*>& oCommittedSceneList )
 {
-    IOdysseyVectorCell* cell = mOwner->GetRoot()->GetCell();
-    IOdysseyVectorLayer* layer = mOwner->GetRoot()->GetLayer();
+    FOdysseyVectorCell* cell = mOwner->GetCell();
+    FOdysseyVectorLayer* layer = mOwner->GetLayer();
     int32 animationCellIndex = cell->GetIndex();
 
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
@@ -2140,7 +2140,7 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
 
         for( uint32 drawingIndex = breakdownSourceDrawingIndex + 1; drawingIndex <= breakdownTargetDrawingIndex; drawingIndex++ )
         {
-            IOdysseyVectorCell* inbetweenCell = layer->GetCellByIndex( animationCellIndex + ( drawingIndex * (int)mInterpolationDirection ) );
+            FOdysseyVectorCell* inbetweenCell = layer->GetCellByIndex( animationCellIndex + ( drawingIndex * (int)mInterpolationDirection ) );
 
             if( ( drawingIndex != breakdownTargetDrawingIndex ) || breakdown->IsTargetVisible() )
             {

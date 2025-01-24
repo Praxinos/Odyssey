@@ -18,11 +18,10 @@
 // From module OdysseyStyle
 #include "OdysseyStyleSet.h"
 // From module OdysseyVector
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyVectorCell.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTag.h"
 #include "OdysseyVectorTagInbetweener.h"
@@ -113,7 +112,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Update()
 {
     mItemsSource.Reset();
 
-    for( FOdysseyVectorTag* tag : mAnimationLayerImageVector->GetSharedEnv()->GetSharedTagList() )
+    for( FOdysseyVectorTag* tag : mAnimationLayerImageVector->GetVectorLayer()->GetSharedTagList() )
     {
         if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
         {
@@ -136,7 +135,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_SelectRangeFromCu
         FOdysseyVectorObject* fromObject = RangeSelectionStart.Get()->GetInbetweenerTag()->GetOwner();
         FOdysseyVectorObject* toObject = iItem.Get()->GetInbetweenerTag()->GetOwner();
         FOdysseyVectorObject* vectorObject = mItemsSource[0].Get()->GetInbetweenerTag()->GetOwner();
-        FOdysseyVectorRoot* vectorRoot = fromObject->GetRoot();
+        FOdysseyVectorCell* vectorCell = fromObject->GetCell();
         bool doSelect = false;
 
         for( const TSharedPtr<FInbetweeningListViewItem>& rangeItem : GetItems() )
@@ -147,7 +146,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_SelectRangeFromCu
             {
                 if( rangeItemObject->IsSelected() == false )
                 {
-                    vectorRoot->SelectObject( rangeItemObject );
+                    vectorCell->SelectObject( rangeItemObject );
                     // Keep internal array consistent for use by other methods
                     SelectedItems.Add( rangeItem );
                 }
@@ -160,7 +159,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_SelectRangeFromCu
                 {
                     if( rangeItemObject->IsSelected() == false )
                     {
-                        vectorRoot->SelectObject( rangeItemObject );
+                        vectorCell->SelectObject( rangeItemObject );
                         // Keep internal array consistent for use by other methods
                         SelectedItems.Add( rangeItem );
                     }
@@ -176,7 +175,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_SetItemSelection 
                                                                                 , bool bWasUserDirected )
 {
     FOdysseyVectorObject* vectorObject = iItem.Get()->GetInbetweenerTag()->GetOwner();
-    FOdysseyVectorRoot* vectorRoot = vectorObject->GetRoot();
+    FOdysseyVectorCell* vectorRoot = vectorObject->GetCell();
 
     if( bShouldBeSelected )
     {
@@ -201,7 +200,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_ClearSelection()
     {
         // the scene
         FOdysseyVectorObject* vectorObject = mItemsSource[0].Get()->GetInbetweenerTag()->GetOwner();
-        FOdysseyVectorRoot* vectorRoot = vectorObject->GetRoot();
+        FOdysseyVectorCell* vectorRoot = vectorObject->GetCell();
 
         vectorRoot->ClearObjectSelection();
     }
@@ -269,12 +268,12 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnContextMenuOpening()
 void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetSelectedInbetweenerTags( std::list<FOdysseyVectorTagInbetweener*>& oSelectedInbetweenerTagList )
 {
-    FOdysseyVectorSharedEnv* sharedEnv = mAnimationLayerImageVector->GetSharedEnv();
+    FOdysseyVectorLayer* vectorLayer = mAnimationLayerImageVector->GetVectorLayer();
 
     oSelectedInbetweenerTagList.clear();
 
     // I could not make it work using SListView SelectedItems methods, for some reason. So I use the SharedEnv
-    for( FOdysseyVectorTag* tag : sharedEnv->GetSharedTagList() )
+    for( FOdysseyVectorTag* tag : vectorLayer->GetSharedTagList() )
     {
         if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
         {
@@ -282,8 +281,6 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::GetSelectedInbetweenerTag
 
             if( tag->GetOwner()->IsSelected() )
             {
-                FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
-
                 oSelectedInbetweenerTagList.push_back( inbetweenerTag );
             }
         }
@@ -311,7 +308,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
         GEditor->BeginTransaction(LOCTEXT("vector-timeline.transaction.add-breakdown", "Add Breakdown"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAdd( mAnimationLayerImageVector->GetSharedEnv()
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAdd( mAnimationLayerImageVector->GetVectorLayer()
                                                                                        , selectedInbetweenerTagList
                                                                                        , notificationFlags );
 
@@ -330,7 +327,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
 
         for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
         {
-            uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetRoot()->GetCell()->GetIndex();
+            uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetCell()->GetCell()->GetIndex();
             int32 drawingIndex = inbetweenerTag->GetDrawingIndexFromCellIndex( breakdownCellIndex );
             FInbetweenerBreakdown* curBreakdown = inbetweenerTag->GetBreakdown( drawingIndex, true );
 
@@ -345,7 +342,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::AddBreakdown()
         }
 
         // Updates and request redraw
-        mAnimationLayerImageVector->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( 0 );
     }
 
     FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
@@ -371,7 +369,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
         GEditor->BeginTransaction(LOCTEXT("vector-timeline.transaction.remove-breakdown", "Remove Breakdown"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownRemove( mAnimationLayerImageVector->GetSharedEnv()
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownRemove( mAnimationLayerImageVector->GetVectorLayer()
                                                                                           , selectedInbetweenerTagList
                                                                                           , notificationFlags );
 
@@ -390,8 +388,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
 
         for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
         {
-            uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetRoot()->GetCell()->GetIndex();
-            FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
+            uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetCell()->GetCell()->GetIndex();
             int32 drawingIndex = inbetweenerTag->GetDrawingIndexFromCellIndex( breakdownCellIndex );
             FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdown( drawingIndex, false );
 
@@ -404,7 +401,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveBreakdown()
             }
         }
         // Updates and request redraw
-        mAnimationLayerImageVector->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( 0 );
     }
 
     // static call
@@ -428,8 +426,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
 
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : selectedInbetweenerTagList )
     {
-        uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetRoot()->GetCell()->GetIndex();
-        FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
+        uint32 tagCellIndex = inbetweenerTag->GetOwner()->GetCell()->GetCell()->GetIndex();
         int32 drawingIndex = inbetweenerTag->GetDrawingIndexFromCellIndex( breakdownCellIndex );
         FInbetweenerBreakdown* breakdown = inbetweenerTag->GetBreakdown( drawingIndex, false );
 
@@ -445,7 +442,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
         GEditor->BeginTransaction(LOCTEXT("vector-timeline.transaction.remove-breakdown", "Remove Breakdown"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( mAnimationLayerImageVector->GetSharedEnv()
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility( mAnimationLayerImageVector->GetVectorLayer()
                                                                                                     , breakdownList
                                                                                                     , notificationFlags );
 
@@ -469,7 +466,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ShowHideTarget()
             //breakdown->GetTargetCell()->GetEngine()->Invalidate(0);
         }
         // Updates and request redraw
-        mAnimationLayerImageVector->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( 0 );
     }
 
     // static call
@@ -535,7 +533,8 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::ChangeDirection()
     }
 
     // Updates and request redraw
-    mAnimationLayerImageVector->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mAnimationLayerImageVector->GetVectorLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( 0 );
 
     // static call
     FOdysseyVectorEngine::Notify( nullptr, notificationFlags );
@@ -556,7 +555,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::RemoveInbetweenerTag()
     FOdysseyPainterEditor* editor = mEditor.Get();
 
     // note: editor is NULL in the Sequencer
-    FOdysseyPainterEditor::RemoveInbetweenerTag( editor, mAnimationLayerImageVector->GetSharedEnv() );
+    FOdysseyPainterEditor::RemoveInbetweenerTag( editor, mAnimationLayerImageVector->GetVectorLayer() );
 }
 
 float

@@ -2,7 +2,7 @@
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #include "OdysseyVectorTag.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorTag::~FOdysseyVectorTag()
 {
@@ -22,7 +22,7 @@ FOdysseyVectorTag::GetOwner()
 }
 
 void
-FOdysseyVectorTag::Share( FOdysseyVectorSharedEnv* iSharedEnv )
+FOdysseyVectorTag::Share( FOdysseyVectorLayer* iSharedEnv )
 {
     iSharedEnv->AddSharedTag( this );
 
@@ -30,7 +30,7 @@ FOdysseyVectorTag::Share( FOdysseyVectorSharedEnv* iSharedEnv )
 }
 
 void
-FOdysseyVectorTag::Unshare( FOdysseyVectorSharedEnv* iSharedEnv )
+FOdysseyVectorTag::Unshare( FOdysseyVectorLayer* iSharedEnv )
 {
     iSharedEnv->RemoveSharedTag( this );
 

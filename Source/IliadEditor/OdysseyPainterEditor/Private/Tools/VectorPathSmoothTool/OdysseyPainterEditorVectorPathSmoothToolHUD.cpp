@@ -5,7 +5,7 @@
 #include "OdysseyPainterEditor.h"
 // Vector engine
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyVectorGroupPaint.h"
 
 FOdysseyPainterEditorVectorPathSmoothToolHUD::~FOdysseyPainterEditorVectorPathSmoothToolHUD()
@@ -62,7 +62,7 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( BLContext* iBLContext
     FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
 
     // draw selection box only if we restrict erasure to the selection
-    if( mPathSmoothTool->RestrictToSelectedObjects  && iScene->GetRoot()->GetSelectedObjectList().size() )
+    if( mPathSmoothTool->RestrictToSelectedObjects  && iScene->GetCell()->GetSelectedObjectList().size() )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }

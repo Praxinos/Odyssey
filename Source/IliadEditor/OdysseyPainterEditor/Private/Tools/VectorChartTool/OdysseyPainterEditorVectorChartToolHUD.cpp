@@ -8,8 +8,7 @@
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCell.h"
-#include "OdysseyVectorRoot.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 #include "Interfaces/IPluginManager.h"
 
 #define INBETWEENER_INDICATOR_RADIUS 10.0f
@@ -90,11 +89,11 @@ FOdysseyPainterEditorVectorChartToolHUD::GetBreakdownList()
 void
 FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdown( FOdysseyVectorGroupPaint* iScene )
 {
-    uint32 cellIndex = iScene->GetRoot()->GetCell()->GetIndex();
+    uint32 cellIndex = iScene->GetCell()->GetIndex();
 
     mBreakdownList.clear();
 
-    for( FOdysseyVectorTag* tag : iScene->GetSharedEnv()->GetSharedTagList() )
+    for( FOdysseyVectorTag* tag : iScene->GetLayer()->GetSharedTagList() )
     {
         if( tag->GetOwner()->IsSelected() )
         {
@@ -325,7 +324,7 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
     BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint64 hudFlags = mChartTool->GetEditor()->GetVectorHUDFlags();
-    uint32 cellIndex = iScene->GetRoot()->GetCell()->GetIndex();
+    uint32 cellIndex = iScene->GetCell()->GetIndex();
 
     iBLContext->save();
     // do not add-up colors
@@ -363,7 +362,7 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
                                   , hcColor
                                   , breakdown
                                   , breakdown->GetChart()->GetHUDBezier()
-                                  , iScene->GetRoot()->GetCell()->GetIndex()
+                                  , iScene->GetCell()->GetIndex()
                                   , prevBreakdown ? false : true );
             }
 
@@ -375,7 +374,7 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
                                   , hcColor
                                   , breakdown
                                   , breakdown->GetChart()->GetHUDBezier()
-                                  , iScene->GetRoot()->GetCell()->GetIndex()
+                                  , iScene->GetCell()->GetIndex()
                                   , true );
             }
 

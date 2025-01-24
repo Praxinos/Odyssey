@@ -5,9 +5,8 @@
 #include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingTool.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorCell.h"
 #include "InbetweenerTag/InbetweenerPoint.h"
@@ -48,8 +47,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     static BLRgba32 greyColor = BLRgba32( 128, 128, 128, 128 );
     uint64 hudFlags = mMatchingTool->GetEditor()->GetVectorHUDFlags();
-    FOdysseyVectorEngine *engine = iScene->GetEngine();
-    FOdysseyVectorSharedEnv *sharedEnv = iScene->GetSharedEnv();
+    FOdysseyVectorLayer *sharedEnv = iScene->GetLayer();
     uint64 gridDotted = mMatchingTool->GridDisplayMode == eMatchingGridDisplayMode::AsPoints ?  HUD_BREAKDOWN_GRID_DOTTED : 0;
 
     iBLContext->save();
@@ -73,7 +71,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
             {
                 FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
                 FOdysseyVectorGroupPaint* inbetweenerTagScene = inbetweenerTag->GetOwner()->GetScene();
-                uint32 currentCellIndex = iScene->GetRoot()->GetCell()->GetIndex();
+                uint32 currentCellIndex = iScene->GetCell()->GetIndex();
 
                 inbetweenerTag->LockDrawing();
 

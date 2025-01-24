@@ -100,6 +100,7 @@ FOdysseyVectorRectangle::CopyShape( uint64 iCopyFlags )
 
 void
 FOdysseyVectorRectangle::DrawShape( BLContext* iBLContext
+                                  , FOdysseyVectorEngine* iEngine
                                   , const ::ULIS::FRectD& iInvalidationArea
                                   , double iCombinedOpacity
                                   , uint64 iFlags )
@@ -107,6 +108,7 @@ FOdysseyVectorRectangle::DrawShape( BLContext* iBLContext
     if ( mWidth && mHeight )
     {
         FOdysseyVectorPath::DrawShape ( iBLContext
+                                      , iEngine
                                       , iInvalidationArea
                                       , iCombinedOpacity
                                       , iFlags );

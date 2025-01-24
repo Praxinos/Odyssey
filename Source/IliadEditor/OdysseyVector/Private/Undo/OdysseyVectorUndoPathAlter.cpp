@@ -3,7 +3,7 @@
 
 #include "Undo/OdysseyVectorUndoPathAlter.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoPathAlter::~FOdysseyVectorUndoPathAlter()
 {
@@ -62,7 +62,7 @@ FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorGroupPai
                                                         , FOdysseyVectorVertex* iAddedVertex
                                                         , FOdysseyVectorSegment* iAddedSegment
                                                         , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
     if( iRemovedVertex )
         mRemovedVertexArray.push_back( iRemovedVertex );
@@ -97,7 +97,7 @@ FOdysseyVectorUndoPathAlter::FOdysseyVectorUndoPathAlter( FOdysseyVectorGroupPai
                                                         , std::vector<FOdysseyVectorVertex*>& iAddedVertexArray
                                                         , std::vector<FOdysseyVectorSegment*>& iAddedSegmentArray
                                                         , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
     mAddedPathArray = iAddedPathArray;
     mAddedVertexArray = iAddedVertexArray;

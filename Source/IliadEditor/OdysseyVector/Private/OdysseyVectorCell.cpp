@@ -1,25 +1,23 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorLayer.h"
-#include "OdysseyVectorCell.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 #include "HUD/OdysseyVectorHUD.h"
 
-FOdysseyVectorCell::FOdysseyVectorCell( IOdysseyVectorLayer* iLayer
-                                      , IOdysseyVectorCell* iCell
+FOdysseyVectorCell::FOdysseyVectorCell( IOdysseyVectorCell* iCellInterface
                                       , FOdysseyVectorGroupPaint* iScene )
     : FOdysseyVectorObject("ROOT")
-    , mLayer ( iLayer )
-    , mCell ( iCell )
+    , mCellInterface ( iCellInterface )
     , mScene ( nullptr )
     , mSelectionSpace( nullptr )
     //, mInvalidTileMap( 64, iCell->GetWidth(), iCell->GetHeight() )
-    , mInvalidatedRect( 0, 0, iLayer->GetWidth(), iLayer->GetHeight() )
+    , mInvalidatedRect( 0, 0, 0, 0 )
+    , bPendingRedraw ( false )
 {
     bIsSystem = true;
 
@@ -79,22 +77,42 @@ FOdysseyVectorCell::SelectObject( FOdysseyVectorObject* iVecObj )
     }
 }
 
+int32
+FOdysseyVectorCell::GetIndex()
+{
+    return mCellInterface->GetIndex();
+}
+
+uint32
+FOdysseyVectorCell::GetLength()
+{
+    return mCellInterface->GetLength();
+}
+
+uint32
+FOdysseyVectorCell::GetFrame()
+{
+    return mCellInterface->GetFrame();
+}
+
 FOdysseyVectorGroupPaint*
 FOdysseyVectorCell::GetScene()
 {
     return static_cast<FOdysseyVectorGroupPaint*>(mChildrenList.front());
 }
 
-IOdysseyVectorLayer*
+FOdysseyVectorLayer*
 FOdysseyVectorCell::GetLayer()
 {
-    return mLayer;
+    return ( ( mParent )
+          && ( mParent->GetClass() == FOdysseyVectorLayer::StaticClass() ) ) ? static_cast<FOdysseyVectorLayer*>(mParent)
+                                                                             : nullptr;
 }
 
 IOdysseyVectorCell*
-FOdysseyVectorCell::GetCell()
+FOdysseyVectorCell::GetCellInterface()
 {
-    return mCell;
+    return mCellInterface;
 }
 
 BLImage*
@@ -107,6 +125,34 @@ void
 FOdysseyVectorCell::SetBLMask( BLImage* iBLMask )
 {
     mBLMask = iBLMask;
+}
+
+bool
+FOdysseyVectorCell::PendingRedraw()
+{
+    return bPendingRedraw;
+}
+
+void
+FOdysseyVectorCell::SetPendingRedraw( bool iPendingRedraw )
+{
+    bPendingRedraw = iPendingRedraw;
+
+    if( bPendingRedraw == false )
+    {
+        mInvalidatedRect = ::ULIS::FRectD( 0.0f, 0.0f, 0.0f, 0.0f );
+    }
+}
+
+void
+FOdysseyVectorCell::Update( uint32 iUpdateFlags )
+{
+    FOdysseyVectorObject::Update( iUpdateFlags );
+
+    if( GetLayer() )
+    {
+        GetLayer()->InvalidateCell( this );
+    }
 }
 
 void
@@ -285,18 +331,6 @@ FOdysseyVectorCell::OnRequestRedrawDelegate()
 }
 
 void
-FOdysseyVectorCell::Update( uint32 iUpdateFlags )
-{
-    FOdysseyVectorObject::Update( iUpdateFlags );
-
-    if( ( iUpdateFlags & UPDATE_NOREDRAW ) == 0 )
-    {
-        mOnRequestRedrawDelegate.Broadcast( GetScene(), ( iUpdateFlags & FOdysseyVectorObject::UPDATE_INTERACTIVE ) ? FOdysseyVectorCell::REDRAW_INTERACTIVE
-                                                                                                                    : 0 );
-    }
-}
-
-void
 FOdysseyVectorCell::SetScene( FOdysseyVectorGroupPaint* iScene )
 {
     if( mScene )
@@ -310,7 +344,6 @@ FOdysseyVectorCell::SetScene( FOdysseyVectorGroupPaint* iScene )
 
     mScene = iScene;
     mScene->UpdateMatrix();
-    mScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
 }
 
 void

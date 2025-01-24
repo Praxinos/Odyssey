@@ -9,16 +9,16 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 #include "Misc/OdysseyUndoDelegates.h"
 
 FOdysseyVectorUndo::~FOdysseyVectorUndo()
 {
 }
 
-FOdysseyVectorUndo::FOdysseyVectorUndo( FOdysseyVectorSharedEnv* iSharedEnv, uint64 iReturnFlags )
+FOdysseyVectorUndo::FOdysseyVectorUndo( FOdysseyVectorLayer* iSharedEnv, uint64 iReturnFlags )
     : mApplied( true )
-    , mSharedEnv( iSharedEnv )
+    , mLayer( iSharedEnv )
     , mReturnFlags( iReturnFlags )
 {
 }
@@ -43,75 +43,12 @@ FOdysseyVectorUndo::Update()
         [this]( bool iIsRedo )
         {
             // update invalidated objects
-            mSharedEnv->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+            mLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+            mLayer->RequestRedraw( 0 );
 
             FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
         }
     );
-}
-
-//static
-void
-FOdysseyVectorUndo::GetRootListFromObjectList( const std::list<FOdysseyVectorObject*>& iObjectList
-                                             , std::list<FOdysseyVectorRoot*>& oRootList )
-{
-    for( FOdysseyVectorObject* vectorObject : iObjectList )
-    {
-        FOdysseyVectorRoot* root = vectorObject->GetRoot();
-
-        if( std::find( oRootList.begin(), oRootList.end(), root ) == oRootList.end() )
-        {
-            oRootList.push_back( root );
-        }
-    }
-}
-
-//static
-void
-FOdysseyVectorUndo::GetRootListFromInbetweenerTagList( const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
-                                                     , std::list<FOdysseyVectorRoot*>& oRootList )
-{
-    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
-    {
-        FOdysseyVectorRoot* root = inbetweenerTag->GetOwner()->GetRoot();
-
-        if( std::find( oRootList.begin(), oRootList.end(), root ) == oRootList.end() )
-        {
-            oRootList.push_back( root );
-        }
-    }
-}
-
-//static
-void
-FOdysseyVectorUndo::GetRootListFromTagList( const std::list<FOdysseyVectorTag*>& iTagList
-                                          , std::list<FOdysseyVectorRoot*>& oRootList )
-{
-    for( FOdysseyVectorTag* tag : iTagList )
-    {
-        FOdysseyVectorRoot* root = tag->GetOwner()->GetRoot();
-
-        if( std::find( oRootList.begin(), oRootList.end(), root ) == oRootList.end() )
-        {
-            oRootList.push_back( root );
-        }
-    }
-}
-
-//static
-void
-FOdysseyVectorUndo::GetRootListFromInbetweenerTagArray( const std::vector<FOdysseyVectorTagInbetweener*>& iInbetweenerTagArray
-                                                      , std::list<FOdysseyVectorRoot*>& oRootList )
-{
-    for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagArray )
-    {
-        FOdysseyVectorRoot* root = inbetweenerTag->GetOwner()->GetRoot();
-
-        if( std::find( oRootList.begin(), oRootList.end(), root ) == oRootList.end() )
-        {
-            oRootList.push_back( root );
-        }
-    }
 }
 
 FSnapshotTrajectory::~FSnapshotTrajectory()

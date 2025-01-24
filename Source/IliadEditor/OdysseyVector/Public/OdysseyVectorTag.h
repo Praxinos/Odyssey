@@ -12,7 +12,8 @@
 
 class FOdysseyVectorObject;
 class FOdysseyVectorGroupPaint;
-class FOdysseyVectorSharedEnv;
+class FOdysseyVectorLayer;
+class FOdysseyVectorEngine;
 
 class ODYSSEYVECTOR_API FOdysseyVectorTag
 {
@@ -26,20 +27,22 @@ class ODYSSEYVECTOR_API FOdysseyVectorTag
         virtual ~FOdysseyVectorTag();
         FOdysseyVectorTag( FOdysseyVectorObject* iOwnerObject );
         virtual void Draw( BLContext* iBLContext
+                         , FOdysseyVectorEngine* iEngine
                          , const ::ULIS::FRectD& iInvalidationArea
                          , double iAncestorsOpacity
                          , uint64 iDrawingFlags ) = 0;
         // when drawn as a shared tag
         virtual void Draw( FOdysseyVectorGroupPaint* iCurrentScene
                          , BLContext* iBLContext
+                         , FOdysseyVectorEngine* iEngine
                          , const ::ULIS::FRectD& iInvalidationArea
                          , double iAncestorsOpacity
                          , uint64 iDrawingFlags ) = 0;
         virtual void Update( uint32 iUpdateFlags
                            , uint64 iOwnerInvalidationFlags ) = 0;
         virtual void UpdateMatrix() = 0;
-        virtual void Share( FOdysseyVectorSharedEnv* iSharedEnv );
-        virtual void Unshare( FOdysseyVectorSharedEnv* iSharedEnv );
+        virtual void Share( FOdysseyVectorLayer* iSharedEnv );
+        virtual void Unshare( FOdysseyVectorLayer* iSharedEnv );
         virtual void ObjectAdded();
         virtual void ObjectRemoved();
         virtual void Added();

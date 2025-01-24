@@ -7,8 +7,8 @@
 // module OdysseyVector
 #include "HUD/OdysseyVectorHUD.h"
 #include "OdysseyVectorTagInbetweener.h"
-#include "OdysseyVectorSharedEnv.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorLayer.h"
+#include "OdysseyVectorCell.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -18,7 +18,6 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CreateWidget( SOdysseyPaint
 {
     TSharedPtr<FVectorSceneTreeViewItem> rootItem = iTreeView->GetRootItem();
     FOdysseyVectorGroupPaint* vectorScene = static_cast<FOdysseyVectorGroupPaint*>(rootItem.Get()->GetVectorObject());
-    FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
     FOdysseyPainterEditor* editor = iTreeView->GetEditor();
     uint64 hudFlags = editor->GetVectorHUDFlags();
     FMenuBuilder menu( true, nullptr );
@@ -104,7 +103,7 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CreateWidget( SOdysseyPaint
             LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.name", "Commit Inbetweener Tag")
           , LOCTEXT("vector-tool.inbetween-context-menu.commit-inbetweener-tag.tooltip", "Commit Inbetweener Tag")
           , FSlateIcon()
-          , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CommitSelectedInbetweenerTag, editor, vectorScene->GetSharedEnv() )));
+          , FUIAction(FExecuteAction::CreateStatic( &FOdysseyPainterEditor::CommitSelectedInbetweenerTag, editor, vectorScene->GetLayer() )));
     }
     menu.EndSection();
 
@@ -117,7 +116,7 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CanAddInbetweener( FOdyssey
 {
     bool ret = false;
 
-    for( FOdysseyVectorObject* selectedObject : iScene->GetRoot()->GetSelectedObjectList() )
+    for( FOdysseyVectorObject* selectedObject : iScene->GetCell()->GetSelectedObjectList() )
     {
         if( selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() ) )
         {
@@ -134,7 +133,7 @@ SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CanAddInbetweener( FOdyssey
 bool
 SOdysseyPainterEditorVectorSceneTreeViewContextMenu::CanAlterInbetweener( FOdysseyVectorGroupPaint* iScene )
 {
-    for( FOdysseyVectorObject* selectedObject : iScene->GetRoot()->GetSelectedObjectList() )
+    for( FOdysseyVectorObject* selectedObject : iScene->GetCell()->GetSelectedObjectList() )
     {
         if( selectedObject->GetTagByType( FOdysseyVectorTagInbetweener::StaticClass() ) )
         {

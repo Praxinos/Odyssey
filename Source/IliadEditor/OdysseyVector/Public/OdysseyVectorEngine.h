@@ -102,9 +102,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
          */
         static void Notify( FOdysseyVectorGroupPaint* iScene, uint64 iNotifyFlags );
 
-        void Invalidate( FOdysseyVectorGroupPaint* iScene, uint64 iInvalidationFlags );
-
         ::ULIS::FRectD Render( BLContext* iBLContext
+                             , const ::ULIS::FRectD& iRedrawRect
                              , FOdysseyVectorGroupPaint* iScene
                              , uint64 iDrawingFlags );
 
@@ -160,6 +159,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorEngine
                        , const FColor& iColor );
 
         uint64 GetInvalidationFlags();
+        ::ULIS::FRectD SanitizeRect( const ::ULIS::FRectD& iRenderRect
+                                   , double iScreenWidth
+                                   , double iScreenHeight );
 
     protected:
         void TracePolygon( const  ::ULIS::FVec2I* iPoint

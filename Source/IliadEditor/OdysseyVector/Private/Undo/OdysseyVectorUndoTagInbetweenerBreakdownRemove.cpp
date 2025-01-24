@@ -5,7 +5,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTag.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoTagInbetweenerBreakdownRemove::~FOdysseyVectorUndoTagInbetweenerBreakdownRemove()
 {
@@ -19,7 +19,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::~FOdysseyVectorUndoTagInbetween
     }
 }
 
-FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorSharedEnv* iSharedEnv
+FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorLayer* iSharedEnv
                                                                                                 , FOdysseyVectorTagInbetweener* iInbetweenerTag
                                                                                                 , uint64 iReturnFlags )
     : FOdysseyVectorUndoTagInbetweenerBreakdownRemove( iSharedEnv
@@ -29,7 +29,7 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweene
 
 }
 
-FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorSharedEnv* iSharedEnv
+FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweenerBreakdownRemove( FOdysseyVectorLayer* iSharedEnv
                                                                                                 , const std::list<FOdysseyVectorTagInbetweener*>& iInbetweenerTagList
                                                                                                 , uint64 iReturnFlags )
     : FOdysseyVectorUndo( iSharedEnv, iReturnFlags )
@@ -38,8 +38,6 @@ FOdysseyVectorUndoTagInbetweenerBreakdownRemove::FOdysseyVectorUndoTagInbetweene
 
     for( FOdysseyVectorTagInbetweener* inbetweenerTag : iInbetweenerTagList )
     {
-        FOdysseyVectorEngine* inbetweenerTagEngine = inbetweenerTag->GetOwner()->GetEngine();
-
         mInbetweenerTagSnapshotBuffer.emplace_back( inbetweenerTag
                                                   , FSnapshotFlags::Tag::Inbetweener::BREAKDOWNS
                                                   , ( FSnapshotFlags::Breakdown::TRANSFORMATIONS

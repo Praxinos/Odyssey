@@ -7,8 +7,8 @@
 #include "OdysseyPainterEditor.h"
 #include "ISinglePropertyView.h"
 #include "OdysseyVector.h"
-#include "OdysseyVectorRoot.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorCell.h"
+#include "OdysseyVectorLayer.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "Undo/OdysseyVectorUndoErase.h"
 #include "SOdysseySinglePropertyView.h"
@@ -47,8 +47,10 @@ UOdysseyPainterEditorVectorEraserTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorEraserTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    // Calling Update via Root will request a redraw even if root is not invalidated
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -56,9 +58,10 @@ UOdysseyPainterEditorVectorEraserTool::UnloadVector( FOdysseyVectorGroupPaint* i
 uint64
 UOdysseyPainterEditorVectorEraserTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    // redetect paintgroups cycles in case the path drawing tool is not set to do so.
-    // Calling Update via Root will request a redraw even if root is not invalidated
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -83,9 +86,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorGroupPai
         mEraserHUD->FillCircle( iPointInTexture.x, iPointInTexture.y );
     }
 
-    // Calling Update via Root will request a redraw even if root is not invalidated
-    iScene->GetRoot()->Invalidate( 0 );
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 
     return true;
 }
@@ -113,8 +114,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorGroupPa
 
     /*}*/
     // Calling Update via Root will request a redraw even if root is not invalidated
-    iScene->GetRoot()->Invalidate( 0 );
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 }
 
 void
@@ -136,9 +136,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorGroupPai
                                               , iPointInTexture.y ) );
     }
 
-    // Calling Update via Root will request a redraw even if root is not invalidated
-    iScene->GetRoot()->Invalidate( 0 );
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 }
 
 void
@@ -162,7 +160,7 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
       , &oPaintGroupArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
           // build the list of impacted paintgroups, no duplicates
-          if( iScene->GetRoot()->ObjectHasFocus( object, traversalFlags ) )
+          if( iScene->GetCell()->ObjectHasFocus( object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
               {
@@ -240,14 +238,15 @@ UOdysseyPainterEditorVectorEraserTool::EraseSections( FOdysseyVectorGroupPaint* 
 
             if( oRemovedObjectArray[i]->IsSelected() )
             {
-                iScene->GetRoot()->UnselectObject( oRemovedObjectArray[i] );
+                iScene->GetCell()->UnselectObject( oRemovedObjectArray[i] );
             }
         }
     }
 
     iScene->UpdateMatrix();
 
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->RequestRedraw( 0 );
 }
 
 void
@@ -273,7 +272,7 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
       , &oRemovedSegmentArray
       , &oRemovedObjectArray ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
-          if( iScene->GetRoot()->ObjectHasFocus( object, traversalFlags ) )
+          if( iScene->GetCell()->ObjectHasFocus( object, traversalFlags ) )
           {
               if( object->HasBaseClass( FOdysseyVectorPath::StaticClass() ) )
               {
@@ -324,14 +323,15 @@ UOdysseyPainterEditorVectorEraserTool::ErasePaths( FOdysseyVectorGroupPaint* iSc
 
             if( oRemovedObjectArray[i]->IsSelected() )
             {
-                iScene->GetRoot()->UnselectObject( oRemovedObjectArray[i] );
+                iScene->GetCell()->UnselectObject( oRemovedObjectArray[i] );
             }
         }
     }
 
     iScene->UpdateMatrix();
 
-    iScene->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->RequestRedraw( 0 );
 }
 
 bool
@@ -349,7 +349,8 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
                                                            , mMax.y + Radius );
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+                             | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                             | FOdysseyPainterEditor::UI_UPDATE_HUD;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -364,7 +365,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
 
         mEraserHUD->BlendMask( false );
         // TODO: pass the mask image as arg to Pick function
-        iScene->GetRoot()->SetBLMask( mEraserHUD->GetMask() );
+        iScene->GetCell()->SetBLMask( mEraserHUD->GetMask() );
 
         if ( FSlateApplication::Get().GetModifierKeys().IsShiftDown() )
         {
@@ -389,7 +390,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
                       , removedObjectArray );
         }
 
-        iScene->GetRoot()->SetBLMask( nullptr );
+        iScene->GetCell()->SetBLMask( nullptr );
 
         // needed for valid GUndo pointer
         GEditor->BeginTransaction(LOCTEXT("vector-eraser-tool.transaction.erase","Erase"));
@@ -412,9 +413,6 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseUpVector( FOdysseyVectorGroupPaint
         }
         GEditor->EndTransaction();
    }
-
-    // this will resize the selection box, knowing that some paths may have been removed after erasal.
-    iScene->GetRoot()->ResetHUD();
 
     oSignalFlags = notificationFlags;
 

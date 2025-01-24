@@ -7,7 +7,6 @@
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorObject.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCell.h"
@@ -597,27 +596,27 @@ FInbetweenerBreakdown::GetDrawingCount()
     return mTargetDrawingIndex - sourceDrawingIndex + 1;
 }
 
-IOdysseyVectorCell*
+FOdysseyVectorCell*
 FInbetweenerBreakdown::GetSourceCell()
 {
     uint32 sourceCellIndex = GetSourceCellIndex();
 
-    return mInbetweenerTag->GetOwner()->GetRoot()->GetLayer()->GetCellByIndex( sourceCellIndex );
+    return mInbetweenerTag->GetOwner()->GetLayer()->GetCellByIndex( sourceCellIndex );
 }
 
-IOdysseyVectorCell*
+FOdysseyVectorCell*
 FInbetweenerBreakdown::GetTargetCell()
 {
     uint32 targetCellIndex = GetTargetCellIndex();
 
-    return mInbetweenerTag->GetOwner()->GetRoot()->GetLayer()->GetCellByIndex( targetCellIndex );
+    return mInbetweenerTag->GetOwner()->GetLayer()->GetCellByIndex( targetCellIndex );
 }
 
 
 int32
 FInbetweenerBreakdown::GetTargetCellIndex()
 {
-    uint32 tagCellIndex = mInbetweenerTag->GetOwner()->GetRoot()->GetCell()->GetIndex();
+    uint32 tagCellIndex = mInbetweenerTag->GetOwner()->GetCell()->GetIndex();
 
     return (int32)tagCellIndex + (int32)( mTargetDrawingIndex * (int)mInbetweenerTag->GetInterpolationDirection());
 }
@@ -627,7 +626,7 @@ FInbetweenerBreakdown::GetSourceCellIndex()
 {
     // we use GetSecene because the Scene is stored as a member varriable in order to be able to
     // redraw when the owner object is removed (its scene would be null then)
-    uint32 tagCellIndex = mInbetweenerTag->GetScene()->GetRoot()->GetCell()->GetIndex();
+    uint32 tagCellIndex = mInbetweenerTag->GetScene()->GetCell()->GetIndex();
     uint32 sourceDrawingIndex = GetSourceDrawingIndex();
 
     return (int32)tagCellIndex + (int32)( sourceDrawingIndex * (int)mInbetweenerTag->GetInterpolationDirection());

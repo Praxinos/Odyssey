@@ -67,7 +67,6 @@ void
 FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
                                                 , FOdysseyVectorGroupPaint* iScene )
 {
-    FOdysseyVectorEngine* vectorEngine = iScene->GetEngine();
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();

@@ -7,8 +7,8 @@
 #include "OdysseyVectorGroup.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorSharedEnv.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorLayer.h"
+#include "OdysseyVectorCell.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 
 #ifndef M_PI
@@ -265,7 +265,6 @@ FOdysseyVectorObject::MakeInDepthBBox()
 void
 FOdysseyVectorObject::Update( uint32 iUpdateFlags )
 {
-    FOdysseyVectorEngine* engine = GetEngine();
     uint32 childUpdateFlags = iUpdateFlags;
 
     LockDrawing();
@@ -738,30 +737,33 @@ FOdysseyVectorObject::GetLastChild()
 
 void
 FOdysseyVectorObject::DrawChildren( BLContext* iBLContext
+                                  , FOdysseyVectorEngine* iEngine
                                   , const ::ULIS::FRectD& iInvalidationArea
                                   , double iCombinedOpacity
                                   , uint64 iFlags )
 {
     for( FOdysseyVectorObject *child : mChildrenList )
     {
-        child->Draw( iBLContext, iInvalidationArea, iCombinedOpacity, iFlags );
+        child->Draw( iBLContext, iEngine, iInvalidationArea, iCombinedOpacity, iFlags );
     }
 }
 
 void
 FOdysseyVectorObject::DrawTags( BLContext* iBLContext
+                              , FOdysseyVectorEngine* iEngine
                               , const ::ULIS::FRectD& iInvalidationArea
                               , double iCombinedOpacity
                               , uint64 iFlags )
 {
     for( FOdysseyVectorTag *tag : mTagList )
     {
-        tag->Draw( iBLContext, iInvalidationArea, iCombinedOpacity, iFlags );
+        tag->Draw( iBLContext, iEngine, iInvalidationArea, iCombinedOpacity, iFlags );
     }
 }
 
 void
 FOdysseyVectorObject::Draw( BLContext* iBLContext
+                          , FOdysseyVectorEngine* iEngine
                           , const ::ULIS::FRectD& iInvalidationArea
                           , double iAncestorsOpacity
                           , uint64 iFlags )
@@ -777,14 +779,14 @@ FOdysseyVectorObject::Draw( BLContext* iBLContext
     //Get sure everything is drawn before we draw in the BLend2D buffer.
     iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
 
-    DrawShape( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
+    DrawShape( iBLContext, iEngine, iInvalidationArea, combinedOpacity, iFlags );
 
     // get sure the parent has finished drawing before drawing its children
     iBLContext->flush( BL_CONTEXT_FLUSH_SYNC  );
 
-    DrawChildren( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
+    DrawChildren( iBLContext, iEngine, iInvalidationArea, combinedOpacity, iFlags );
 
-    DrawTags( iBLContext, iInvalidationArea, combinedOpacity, iFlags );
+    DrawTags( iBLContext, iEngine, iInvalidationArea, combinedOpacity, iFlags );
 
     iBLContext->restore();
 
@@ -866,24 +868,16 @@ FOdysseyVectorObject::Invalidate( uint64 iInvalidationFlags )
     mInvalidationFlags |= ( INVALIDATE_DEFAULT | iInvalidationFlags );
 }
 
-FOdysseyVectorEngine*
-FOdysseyVectorObject::GetEngine()
-{
-    FOdysseyVectorRoot* root = GetRoot();
-
-    return root ? root->GetEngine() : nullptr;
-}
-
-FOdysseyVectorRoot*
-FOdysseyVectorObject::GetRoot()
+FOdysseyVectorCell*
+FOdysseyVectorObject::GetCell()
 {
     FOdysseyVectorObject* candidate = this;
 
     while ( candidate )
     {
-        if( candidate->GetClass() == FOdysseyVectorRoot::StaticClass() )
+        if( candidate->GetClass() == FOdysseyVectorCell::StaticClass() )
         {
-            return static_cast<FOdysseyVectorRoot*>(candidate);
+            return static_cast<FOdysseyVectorCell*>(candidate);
         }
 
         candidate = candidate->GetParent();
@@ -892,16 +886,16 @@ FOdysseyVectorObject::GetRoot()
     return nullptr;
 }
 
-FOdysseyVectorSharedEnv*
-FOdysseyVectorObject::GetSharedEnv()
+FOdysseyVectorLayer*
+FOdysseyVectorObject::GetLayer()
 {
     FOdysseyVectorObject* candidate = this;
 
     while ( candidate )
     {
-        if( candidate->GetClass() == FOdysseyVectorSharedEnv::StaticClass() )
+        if( candidate->GetClass() == FOdysseyVectorLayer::StaticClass() )
         {
-            return static_cast<FOdysseyVectorSharedEnv*>(candidate);
+            return static_cast<FOdysseyVectorLayer*>(candidate);
         }
 
         candidate = candidate->GetParent();
@@ -913,9 +907,9 @@ FOdysseyVectorObject::GetSharedEnv()
 FOdysseyVectorGroupPaint*
 FOdysseyVectorObject::GetScene()
 {
-    FOdysseyVectorRoot* root = GetRoot();
+    FOdysseyVectorCell* cell = GetCell();
 
-    return root ? root->GetScene() : nullptr;
+    return cell ? cell->GetScene() : nullptr;
 }
 
 void
@@ -1055,7 +1049,7 @@ FOdysseyVectorObject::PrependChild( FOdysseyVectorObject* iChild )
 uint32
 FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObject* iInsertAfter )
 {
-    FOdysseyVectorRoot* root = GetRoot();
+    FOdysseyVectorCell* cell = GetCell();
     FOdysseyVectorObject* lastItem = GetLastChild();
     uint32 ret = HIERARCHY_CHANGE_ERROR;
 
@@ -1108,9 +1102,9 @@ FOdysseyVectorObject::AddChild( FOdysseyVectorObject* iChild, FOdysseyVectorObje
     UnlockDrawing();
 
     // auto invalidation of the whole region that needs to be redrawn
-    if( root )
+    if( cell )
     {
-        root->InvalidateRect();
+        cell->InvalidateRect();
     }
 
     return ret;
@@ -1125,7 +1119,7 @@ FOdysseyVectorObject::GetOldParent()
 uint32
 FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 {
-    FOdysseyVectorRoot* root = GetRoot();
+    FOdysseyVectorCell* cell = GetCell();
     uint32 ret = HIERARCHY_CHANGE_ERROR;
 
     LockDrawing();
@@ -1155,9 +1149,9 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
     UnlockDrawing();
 
     // auto invalidation of the whole region that needs to be redrawn
-    if( root )
+    if( cell )
     {
-        root->InvalidateRect();
+        cell->InvalidateRect();
     }
 
     return ret;
@@ -1166,7 +1160,7 @@ FOdysseyVectorObject::RemoveChild( FOdysseyVectorObject* iChild )
 uint32
 FOdysseyVectorObject::RemoveAllChildren()
 {
-    FOdysseyVectorRoot* root = GetRoot();
+    FOdysseyVectorCell* cell = GetCell();
     uint32 ret = HIERARCHY_CHANGE_ERROR;
 
     LockDrawing();
@@ -1192,9 +1186,9 @@ FOdysseyVectorObject::RemoveAllChildren()
     UnlockDrawing();
 
     // auto invalidation of the whole region that needs to be redrawn
-    if( root )
+    if( cell )
     {
-        root->InvalidateRect();
+        cell->InvalidateRect();
     }
 
     return HIERARCHY_CHANGE_SUCCESS;

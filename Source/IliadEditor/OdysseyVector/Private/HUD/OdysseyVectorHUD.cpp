@@ -8,11 +8,10 @@
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorPath.h"
 #include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorTagInbetweener.h"
 #include "OdysseyVectorLayer.h"
+#include "OdysseyVectorCell.h"
 
 FPointQuadTree::~FPointQuadTree()
 {
@@ -175,8 +174,8 @@ FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorGroupPaint *iScene
                                     , uint64 iHUDFlags )
 {
     std::vector<FPointQuadTreeEntry> pointQuadTreeEntryArray;
-    uint32 width = iScene->GetRoot()->GetLayer()->GetWidth();
-    uint32 height = iScene->GetRoot()->GetLayer()->GetHeight();
+    uint32 width = iScene->GetLayer()->GetWidth();
+    uint32 height = iScene->GetLayer()->GetHeight();
     ::ULIS::FRectD screenRect;
 
     screenRect = ::ULIS::FRectD::FromXYWH( 0, 0, width, height );
@@ -190,7 +189,7 @@ FOdysseyVectorHUD::MakePointQuadTree( FOdysseyVectorGroupPaint *iScene
                           ,   &screenRect
                           ,   &pointQuadTreeEntryArray ]( FOdysseyVectorObject* object, uint64 traverseFlags ) -> uint64
                             {
-                                if( ( iFocusedObjectsOnly == false ) || iScene->GetRoot()->ObjectHasFocus( object, traverseFlags ) )
+                                if( ( iFocusedObjectsOnly == false ) || iScene->GetCell()->ObjectHasFocus( object, traverseFlags ) )
                                 {
                                     MapPoints( object, screenRect, pointQuadTreeEntryArray );
 

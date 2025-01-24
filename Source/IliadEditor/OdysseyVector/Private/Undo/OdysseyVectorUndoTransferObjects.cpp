@@ -4,8 +4,8 @@
 #include "Undo/OdysseyVectorUndoTransferObjects.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorCell.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoTransferObjects::~FOdysseyVectorUndoTransferObjects()
 {
@@ -23,7 +23,7 @@ FOdysseyVectorUndoTransferObjects::~FOdysseyVectorUndoTransferObjects()
 FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVectorGroupPaint* iScene
                                                                     , FOdysseyVectorObject* iTransferredObject
                                                                     , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
     , mScene( iScene )
 {
     mTransferredObjectSnapshotArray.emplace_back( iTransferredObject, FSnapshotFlags::Object::HIERARCHY );
@@ -32,7 +32,7 @@ FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVe
 FOdysseyVectorUndoTransferObjects::FOdysseyVectorUndoTransferObjects( FOdysseyVectorGroupPaint* iScene
                                                                     , const std::list<FOdysseyVectorObject*>& iTransferredObjectList
                                                                     , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
     , mScene( iScene )
 {
     for( FOdysseyVectorObject* transferredObject : iTransferredObjectList )
@@ -49,7 +49,7 @@ FOdysseyVectorUndoTransferObjects::Apply( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Apply( iIgnored );
 
-    mScene->GetRoot()->ClearObjectSelection();
+    mScene->GetCell()->ClearObjectSelection();
 
     while( allRestored == false )
     {
@@ -77,7 +77,7 @@ FOdysseyVectorUndoTransferObjects::Revert( UObject* iIgnored )
     // call method from base class
     FOdysseyVectorUndo::Revert( iIgnored );
 
-    mScene->GetRoot()->ClearObjectSelection();
+    mScene->GetCell()->ClearObjectSelection();
 
     while( allRestored == false )
     {

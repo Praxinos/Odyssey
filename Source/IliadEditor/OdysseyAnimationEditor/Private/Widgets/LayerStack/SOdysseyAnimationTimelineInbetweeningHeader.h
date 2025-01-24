@@ -8,7 +8,7 @@
 //#include "LayerStack/LightTable/OdysseyAnimationLightTable.h"
 
 class FInbetweeningListViewItem;
-class FOdysseyVectorSharedEnv;
+class FOdysseyVectorLayer;
 class UOdysseyAnimationLayerImageVector;
 class FOdysseyPainterEditor;
 class FOdysseyVectorGroupPaint;

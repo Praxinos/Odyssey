@@ -9,9 +9,8 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTagInbetweener.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 #include "OdysseyVectorCell.h"
-#include "OdysseyVectorRoot.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerMatching.h"
 #include "SOdysseySinglePropertyView.h"
 #include <chrono>
@@ -52,8 +51,10 @@ UOdysseyPainterEditorVectorMatchingTool::IsActivable() const
 uint64
 UOdysseyPainterEditorVectorMatchingTool::UnloadVector( FOdysseyVectorGroupPaint* iScene )
 {
-    // force redraw
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // redetect paintgroups cycles in case the path drawing tool is not set to do so
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -62,7 +63,9 @@ uint64
 UOdysseyPainterEditorVectorMatchingTool::LoadVector( FOdysseyVectorGroupPaint* iScene )
 {
     // redetect paintgroups cycles in case the path drawing tool is not set to do so
-    iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    // force redrawing when we switch tool
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     return 0;
 }
@@ -76,7 +79,6 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    FOdysseyVectorEngine* engine = iScene->GetEngine();
     uint64 notificationFlags = 0;
 
     mPickedPointArray.clear();
@@ -132,16 +134,15 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDownVector( FOdysseyVectorGroupP
 
 void
 UOdysseyPainterEditorVectorMatchingTool::OnMouseHoverVector( FOdysseyVectorGroupPaint* iScene
-                                                               , const FOdysseyPoint& iPointInTexture
-                                                            , uint64& oSignalFlags )
+                                                           , const FOdysseyPoint& iPointInTexture
+                                                           , uint64& oSignalFlags )
 {
     // TODO: highlight grid handles ?
 
     mMatchingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
     // redraw
-    iScene->GetRoot()->Invalidate( 0 );
-    iScene->GetSharedEnv()->Update( 0 );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 }
 
 void
@@ -149,7 +150,6 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
                                                               , const FOdysseyPoint& iPointInTexture
                                                             , uint64& oSignalFlags )
 {
-    FOdysseyVectorEngine* engine = iScene->GetEngine();
     uint64 notificationFlags = 0;
 
 //UE_LOG(LogTemp, Warning, TEXT("UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector %d") );
@@ -157,7 +157,7 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
     // For some reason we receive quite a lot of mouse events between 2 screen refresh, I don't know why
     // The issue is absent with the Ink driver. It is present with the Wintab and Native drivers. The simpliest
     // solution I've found is to discard events until the screen has been refreshed.
-    if( engine->GetInvalidationFlags()  )
+    if( iScene->GetCell()->PendingRedraw() )
         return;
 
     mMatchingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
@@ -194,11 +194,10 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupP
         }
 
         // update
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+        iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
     }
 
-    // redraw
-    //iScene->GetEngine()->Invalidate( FOdysseyVectorEngine::INVALIDATE_INTERACTIVE );
 
     oSignalFlags = notificationFlags;
 }
@@ -212,17 +211,14 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseUpVector( FOdysseyVectorGroupPai
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
-    FOdysseyVectorEngine* engine = iScene->GetEngine();
     uint64 notificationFlags = 0;
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
     {
-        iScene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        iScene->GetLayer()->RequestRedraw( 0 );
     }
-
-    // redraw
-    //iScene->GetEngine()->Invalidate( 0 );
 
     oSignalFlags =notificationFlags;
     return true;
@@ -232,13 +228,11 @@ uint64
 UOdysseyPainterEditorVectorMatchingTool::PropertyChangedVector( FOdysseyVectorGroupPaint* iScene
                                                               , const FName& iPropertyName )
 {
-    FOdysseyVectorEngine* iEngine = iScene->GetEngine();
-
-    iScene->GetRoot()->ResetHUD();
+    iScene->GetCell()->ResetHUD();
 
     // redraw
-    iScene->GetRoot()->Invalidate( 0 );
-    iScene->GetSharedEnv()->Update( 0 );
+    iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetLayer()->RequestRedraw( 0 );
 
     return 0;
 }

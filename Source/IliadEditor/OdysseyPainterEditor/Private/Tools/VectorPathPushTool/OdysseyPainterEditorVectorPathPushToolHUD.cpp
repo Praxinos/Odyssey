@@ -4,7 +4,7 @@
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushToolHUD.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyVectorGroupPaint.h"
 
 FOdysseyPainterEditorVectorPathPushToolHUD::~FOdysseyPainterEditorVectorPathPushToolHUD()
@@ -56,7 +56,7 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext
     FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
 
     // draw selection box only if we restrict pushing to the selection
-    if( mPathPushTool->RestrictToSelectedObjects && iScene->GetRoot()->GetSelectedObjectList().size() && ( mPathPushTool->IsDragging() == false ) )
+    if( mPathPushTool->RestrictToSelectedObjects && iScene->GetCell()->GetSelectedObjectList().size() && ( mPathPushTool->IsDragging() == false ) )
     {
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }

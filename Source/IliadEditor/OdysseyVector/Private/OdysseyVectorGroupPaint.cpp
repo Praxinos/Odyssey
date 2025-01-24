@@ -4,7 +4,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorVertexIntersection.h"
@@ -360,9 +360,8 @@ FOdysseyVectorGroupPaint::MakeCanvasPath()
     // vectorScene can be null when the object is copied
     if( vectorScene )
     {
-        FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
-        uint32 width = vectorScene->GetRoot()->GetLayer()->GetWidth();
-        uint32 height = vectorScene->GetRoot()->GetLayer()->GetHeight();
+        uint32 width = vectorScene->GetLayer()->GetWidth();
+        uint32 height = vectorScene->GetLayer()->GetHeight();
         // Note: mCanvasPath has identity matrix
         BLPoint pt[4] = { BLPoint( 0    , 0      )
                         , BLPoint( width, 0      )
@@ -981,7 +980,6 @@ FOdysseyVectorGroupPaint::UpdateBBox()
 void
 FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
 {
-    FOdysseyVectorEngine* engine = GetEngine();
     BLMatrix2D identityMatrix = BLMatrix2D( BLMatrix2D::makeIdentity() );
 
     if( mInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY )
@@ -1137,11 +1135,11 @@ FOdysseyVectorGroupPaint::RemoveAllBuckets()
 
 void
 FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext
+                                   , FOdysseyVectorEngine* iEngine
                                    , const ::ULIS::FRectD& iInvalidationArea
                                    , double iCombinedOpacity
                                    , uint64 iFlags )
 {
-    FOdysseyVectorEngine* vectorEngine = GetEngine();
     ::ULIS::FRectD worldBBox = GetBBox( false, true );
     ::ULIS::FVec2D worldBBoxMin;
     ::ULIS::FVec2D worldBBoxMax;
@@ -2591,7 +2589,7 @@ FOdysseyVectorGroupPaint::GetBBoxFromSelectedVertices( ::ULIS::FRectD& oBBox, bo
 void
 FOdysseyVectorGroupPaint::PickBucket( std::vector<FOdysseyVectorBucket*>& oPickedBucketArray )
 {
-    BLImage* maskImage = GetRoot()->GetBLMask();
+    BLImage* maskImage = GetCell()->GetBLMask();
     BLImageData imageData;
 
     maskImage->getData( &imageData );
@@ -2706,7 +2704,7 @@ FOdysseyVectorGroupPaint::PickSection( FOdysseyVectorSection* iSection
 void
 FOdysseyVectorGroupPaint::PickErasedSections( std::vector<FOdysseyVectorSection*>& oErasedSectionArray )
 {
-    BLImage* maskImage = GetRoot()->GetBLMask();
+    BLImage* maskImage = GetCell()->GetBLMask();
     BLImageData maskData;
     ::ULIS::FRectD maskRect;
 
@@ -2736,7 +2734,7 @@ FOdysseyVectorGroupPaint::EraseSections( std::vector<FOdysseyVectorObject*>& oAd
 {
     std::vector<FOdysseyVectorSection*> erasedSectionArray;
     BLImageData imageData;
-    BLImage* blimg = GetRoot()->GetBLMask(); // the mask image must be selected by the vector engine at this point
+    BLImage* blimg = GetCell()->GetBLMask(); // the mask image must be selected by the vector engine at this point
 
     blimg->getData( &imageData );
 

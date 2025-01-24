@@ -213,8 +213,8 @@ public:
                                  , FOdysseyVectorGroupPaint* iScene
                                  , bool iResetPositionning
                                  , bool iCurrentBreakdownOnly );
-    static void ResetInbetweenerTagSpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorSharedEnv* iSharedEnv );
-    static void CommitSelectedInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorSharedEnv* iSharedEnv );
+    static void ResetInbetweenerTagSpacingChart( FOdysseyPainterEditor* iEditor, FOdysseyVectorLayer* iSharedEnv );
+    static void CommitSelectedInbetweenerTag( FOdysseyPainterEditor* iEditor, FOdysseyVectorLayer* iSharedEnv );
     static void CopySpacingChart( FOdysseyPainterEditor* iEditor
                                 , FOdysseyVectorGroupPaint* iScene
                                 , bool iCurrentBreakdownOnly );
@@ -226,7 +226,7 @@ public:
                                     , bool iResetTransformation
                                     , bool iResetDeformation );
     static void RemoveInbetweenerTag( FOdysseyPainterEditor* iEditor
-                                    , FOdysseyVectorSharedEnv* iSharedEnv );
+                                    , FOdysseyVectorLayer* iSharedEnv );
     static void Subdivide( FOdysseyPainterEditor* iEditor, FOdysseyVectorGroupPaint* iScene );
 
 public:

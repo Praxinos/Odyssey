@@ -3,7 +3,7 @@
 
 #include "Undo/OdysseyVectorUndoBucketParam.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorSharedEnv.h"
+#include "OdysseyVectorLayer.h"
 
 FOdysseyVectorUndoBucketParam::~FOdysseyVectorUndoBucketParam()
 {
@@ -24,7 +24,7 @@ FOdysseyVectorUndoBucketParam::~FOdysseyVectorUndoBucketParam()
 FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorGroupPaint* iScene
                                                             , FOdysseyVectorBucket* iBucket
                                                             , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
     mBucketSnapshotArray.push_back( FSnapshotBucket( iBucket, FSnapshotFlags::Point::Bucket::PARAM ));
 }
@@ -34,7 +34,7 @@ FOdysseyVectorUndoBucketParam::FOdysseyVectorUndoBucketParam( FOdysseyVectorGrou
                                                             , std::vector<FOdysseyVectorBucket*>& iAddedBucketArray
                                                             , std::vector<FOdysseyVectorBucket*>& iBucketArray
                                                             , uint64 iReturnFlags )
-    : FOdysseyVectorUndo( iScene->GetSharedEnv(), iReturnFlags )
+    : FOdysseyVectorUndo( iScene->GetLayer(), iReturnFlags )
 {
     mAddedBucketArray = iAddedBucketArray;
 

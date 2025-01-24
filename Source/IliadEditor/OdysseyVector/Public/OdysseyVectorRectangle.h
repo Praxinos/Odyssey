@@ -51,6 +51,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorRectangle : public FOdysseyVectorPrimitive
 
     private:
         virtual void DrawShape( BLContext* iBLContext
+                              , FOdysseyVectorEngine* iEngine
                               , const ::ULIS::FRectD& iInvalidationArea
                               , double iHierarchyOpacity
                               , uint64 iFlags ) override;
