@@ -32,6 +32,11 @@
 
 #define LOCTEXT_NAMESPACE "AnimationEditor"
 
+const uint32 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CellBox::TYPE_SOURCE;
+const uint32 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CellBox::TYPE_INBETWEEN;
+const uint32 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CellBox::TYPE_TARGET;
+const uint32 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::CellBox::TYPE_VISIBLE;
+
 SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow::~SOdysseyAnimationLayerImageVectorTimelineInbetweeningRow()
 {
 }
