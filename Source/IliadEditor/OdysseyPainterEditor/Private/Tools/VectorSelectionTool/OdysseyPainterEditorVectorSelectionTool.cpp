@@ -423,6 +423,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPa
 
     // force redraw
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    iScene->GetCell()->ResetHUD();
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     oSignalFlags = notificationFlags;

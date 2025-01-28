@@ -17,7 +17,7 @@
 
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
@@ -210,7 +210,7 @@ FOdysseyTextureEditorSource::Clear()
 
         for (TSharedPtr<FOdysseyMediaVector> mediaVector : mediasVector)
         {
-            FOdysseyVectorRoot* vectorRoot = mediaVector->GetScene()->GetRoot();
+            FOdysseyVectorCell* vectorCell = mediaVector->GetScene()->GetCell();
 
             // needed for undos
             if (GUndo)
@@ -220,7 +220,7 @@ FOdysseyTextureEditorSource::Clear()
                 RecordCurrentFrameUndo();
             }
 
-            vectorRoot->SetScene(new FOdysseyVectorGroupPaint("Scene") );
+            vectorCell->SetScene(new FOdysseyVectorGroupPaint("Scene") );
         }
 
         FOdysseyVectorEngine::Notify( nullptr, notificationFlags );

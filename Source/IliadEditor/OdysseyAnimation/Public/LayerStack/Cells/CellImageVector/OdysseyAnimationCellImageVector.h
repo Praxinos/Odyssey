@@ -14,7 +14,7 @@ class FOdysseyMediaVector;
 class FOdysseyVectorEngine;
 class FOdysseyVectorGroupPaint;
 class UOdysseyAnimationLayerImageVector;
-class FOdysseyVectorRoot;
+class FOdysseyVectorCell;
 
 UCLASS(BlueprintType)
 class ODYSSEYANIMATION_API UOdysseyAnimationCellImageVector
@@ -35,7 +35,7 @@ public:
     virtual void Serialize(FArchive& Ar) override;
     virtual void OldSerialize(FArchive& Ar) override; //DEPRECATED: Keep that for compatibility with early versions of Odyssey
 
-    FOdysseyVectorRoot* GetRoot() const;
+    FOdysseyVectorCell* GetVectorCell() const;
     FOdysseyVectorImportV2* GetImporterV2();
     TSharedPtr<FOdysseyVectorBlock> GetVectorBlock() const;
     FGuid GetVectorBlockId();
@@ -57,7 +57,6 @@ public:
 
 public:
     // Implements Interface IOdysseyVectorCell
-    virtual FOdysseyVectorGroupPaint* GetScene() override;
     virtual int32 GetIndex() override;
     virtual uint32 GetLength() override;
     virtual uint32 GetFrame() override;
@@ -71,7 +70,7 @@ private:
     friend class FOdysseyAnimationCellImageVectorImport;
 
 private:
-    TSharedPtr<FOdysseyVectorRoot> mRoot = nullptr;
+    TSharedPtr<FOdysseyVectorCell> mVectorCell = nullptr;
     FGuid mVectorBlockId;
     TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
     mutable FCriticalSection mImageRenderingMutex;

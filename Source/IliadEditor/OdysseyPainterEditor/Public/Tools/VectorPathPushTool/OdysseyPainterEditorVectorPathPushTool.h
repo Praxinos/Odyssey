@@ -15,6 +15,7 @@ typedef struct _FPushedPoint
      FOdysseyVectorPoint* point;
      double distance;
      FOdysseyVectorSegment* smoothingGuideSegment;
+     ::ULIS::FVec2D originalCoords;
 
      _FPushedPoint( FOdysseyVectorPoint* iPoint
                   , double iDistance
@@ -23,6 +24,7 @@ typedef struct _FPushedPoint
          point = iPoint;
          distance = iDistance;
          smoothingGuideSegment = iSmoothingGuideSegment;
+         originalCoords = iPoint->GetCoords();
      }
 } FPushedPoint;
 

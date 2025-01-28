@@ -9,7 +9,7 @@
 #include "OdysseyFile.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorLayer.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 
 void
 FOdysseyAnimationCellImageVectorExport::WriteResolution( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
@@ -61,15 +61,15 @@ FOdysseyAnimationCellImageVectorExport::Write( UOdysseyAnimationCellImageVector*
                             , Ar
                             , [iAnimationCellImageVector](FArchive &Ar) -> void
     {
-        FOdysseyVectorRoot* vectorRoot = iAnimationCellImageVector->GetRoot();
+        FOdysseyVectorCell* vectorCell = iAnimationCellImageVector->GetVectorCell();
 
         WriteResolution( iAnimationCellImageVector, Ar );
         WriteVectorBlock( iAnimationCellImageVector, Ar );
         // engine might be NULL because this function is sometimes called even before loading anything
         // so we have to check the validity of the pointer
-        if( vectorRoot )
+        if( vectorCell )
         {
-            FOdysseyVectorExportV2::Write( vectorRoot->GetScene(), Ar );
+            FOdysseyVectorExportV2::Write( vectorCell->GetScene(), Ar );
         }
     } );
 }

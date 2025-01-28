@@ -9,7 +9,6 @@
 #include <ULIS>
 
 #include "OdysseyVector.h"
-#include "OdysseyVectorSharedEnv.h"
 #include "OdysseyVectorLayer.h" // interface
 
 #include "OdysseyAnimationLayerImageVector.generated.h"
@@ -35,6 +34,9 @@ public:
     static FOnIsColoredChanged& OnIsColoredChanged();
     static FOnIsWireframeChanged& OnIsWireframeChanged();
 
+    ~UOdysseyAnimationLayerImageVector();
+    UOdysseyAnimationLayerImageVector();
+
 public:
     // UObject overrides
     virtual void PostInitProperties() override;
@@ -53,7 +55,7 @@ public:
     static uint32 GetInbetweeningRowHeight();
 
     // vector data shared between all cells
-    FOdysseyVectorSharedEnv* GetSharedEnv();
+    FOdysseyVectorLayer* GetVectorLayer();
     void UpdateSharedEnv();
 
 public:
@@ -63,10 +65,10 @@ public:
 
 public:
     // Implements Interface IOdysseyVectorLayer
-    virtual IOdysseyVectorCell* GetCellByIndex( uint32 iIndex ) override;
-    virtual IOdysseyVectorCell* GetFirstCell() override;
-    virtual IOdysseyVectorCell* GetLastCell() override;
-    virtual bool Contains( IOdysseyVectorCell* iCandidateCell )override;
+    virtual FOdysseyVectorCell* GetCellByIndex( uint32 iIndex ) override;
+    virtual FOdysseyVectorCell* GetFirstCell() override;
+    virtual FOdysseyVectorCell* GetLastCell() override;
+    virtual bool Contains( FOdysseyVectorCell* iCandidateCell )override;
     virtual uint32 GetWidth() override;
     virtual uint32 GetHeight() override;
 
@@ -110,6 +112,6 @@ public:
 
 private:
     // mSharedEnv MUST be before mCellsContainer because of the destruction order
-    FOdysseyVectorSharedEnv mSharedEnv;
-    TMap<FInbetweenerBreakdown*, IOdysseyVectorCell*> mBreakdownTargetMap;
+    FOdysseyVectorLayer mVectorLayer;
+    TMap<FInbetweenerBreakdown*, FOdysseyVectorCell*> mBreakdownTargetMap;
 };

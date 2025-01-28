@@ -141,10 +141,8 @@ SOdysseyPainterEditorVectorSceneTreeViewRow::OnMouseButtonUp( const FGeometry & 
                                 //| FOdysseyPainterEditor::UI_UPDATE_TIMELINE
                                 | FOdysseyPainterEditor::UI_UPDATE_HUD );
 
-    // force invalidation for redrawing
-    scene->GetCell()->Invalidate( 0 );
     // request redraw
-    scene->GetLayer()->RequestRedraw( 0 );
+    scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );
 
     return reply;
 }

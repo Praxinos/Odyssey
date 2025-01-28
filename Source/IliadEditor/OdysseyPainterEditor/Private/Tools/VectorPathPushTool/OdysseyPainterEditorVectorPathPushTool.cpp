@@ -257,30 +257,47 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDragVector( FOdysseyVectorGroupP
     {
         mPathPushHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 
+        // first step : move vertices
         for( int i = 0; i < mPushedPointArray.size(); i++ )
         {
             double ratio = 1.0f - ( mPushedPointArray[i].distance / mMaxDistance );
             FOdysseyVectorPoint* point = mPushedPointArray[i].point;
-            FOdysseyVectorPath* path;
+
+            if( point->GetClass() == FOdysseyVectorVertex::StaticClass() )
+            {
+                FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(point);
+                FOdysseyVectorPath* path = vertex->GetOwnerAsPath();
+                BLPoint delta = path->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
+                                                                       , iPointInTexture.deltaPosition.Y );
+
+                point->Set( mPushedPointArray[i].originalCoords.x + ( delta.x * ratio )
+                          , mPushedPointArray[i].originalCoords.y + ( delta.y * ratio ) );
+
+                mPushedPointArray[i].originalCoords.x = point->GetX();
+                mPushedPointArray[i].originalCoords.y = point->GetY();
+            }
+        }
+
+        // second step : move handles. We do it in to steps otherwise some shaking appears are handles
+        // when they are aligned are positionned depending on vertices.
+        for( int i = 0; i < mPushedPointArray.size(); i++ )
+        {
+            double ratio = 1.0f - ( mPushedPointArray[i].distance / mMaxDistance );
+            FOdysseyVectorPoint* point = mPushedPointArray[i].point;
 
             if( point->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
             {
                 FOdysseyVectorHandleSegment* handleSegment = static_cast<FOdysseyVectorHandleSegment*>(point);
+                FOdysseyVectorPath* path = handleSegment->GetOwner()->GetOwnerAsPath();
+                BLPoint delta = path->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
+                                                                       , iPointInTexture.deltaPosition.Y );
 
-                path = handleSegment->GetOwner()->GetOwnerAsPath();
+                point->Set( mPushedPointArray[i].originalCoords.x + ( delta.x * ratio )
+                          , mPushedPointArray[i].originalCoords.y + ( delta.y * ratio ) );
+
+                mPushedPointArray[i].originalCoords.x = point->GetX();
+                mPushedPointArray[i].originalCoords.y = point->GetY();
             }
-            else
-            {
-                FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(point);
-
-                path = vertex->GetOwnerAsPath();
-            }
-
-            BLPoint delta = path->GetInverseWorldMatrix().mapVector( iPointInTexture.deltaPosition.X
-                                                                   , iPointInTexture.deltaPosition.Y );
-
-            point->SetX( point->GetX() + ( delta.x * ratio ) );
-            point->SetY( point->GetY() + ( delta.y * ratio ) );
         }
 
         // update vector scene. It will request a redraw as well

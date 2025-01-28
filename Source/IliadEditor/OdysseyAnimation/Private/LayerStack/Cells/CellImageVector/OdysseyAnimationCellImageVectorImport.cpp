@@ -6,7 +6,7 @@
 #include "Import/v2/OdysseyVectorImport.h"
 #include "OdysseyFile.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 
 bool
 FOdysseyAnimationCellImageVectorImport::Read( UOdysseyAnimationCellImageVector* iAnimationCellImageVector
@@ -77,12 +77,12 @@ FOdysseyAnimationCellImageVectorImport::Read( UOdysseyAnimationCellImageVector* 
 
                 case FOdysseyFile::VectorV2::CHUNK_VECTOR_MAGIC_V2:
                 {
-                    FOdysseyVectorRoot* vectorRoot = iAnimationCellImageVector->GetRoot();
+                    FOdysseyVectorCell* vectorCell = iAnimationCellImageVector->GetVectorCell();
                     FOdysseyVectorImportV2* importerV2 = iAnimationCellImageVector->GetImporterV2();
 
                     //UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V2") );
 
-                    importerV2->Read( vectorRoot->GetScene(), Ar, Ar.Tell() + iChunkLen );
+                    importerV2->Read( vectorCell->GetScene(), Ar, Ar.Tell() + iChunkLen );
                 }
                 break;
 

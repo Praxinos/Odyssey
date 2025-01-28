@@ -15,7 +15,7 @@
 #include "Undo/OdysseyVectorUndoSceneClear.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorGroupPaint.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyAnimationCurrentFrameMutator.h"
 #include "OdysseyAnimationPlayer.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -286,13 +286,13 @@ FOdysseyAnimationEditorSource::Clear()
 
         for (TSharedPtr<FOdysseyMediaVector> mediaVector : mediasVector)
         {
-            FOdysseyVectorRoot* vectorRoot = mediaVector->GetScene()->GetRoot();
+            FOdysseyVectorCell* vectorCell = mediaVector->GetScene()->GetCell();
 
             // needed for undos
             GEditor->BeginTransaction(transactionName);
             if (GUndo)
             {
-                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSceneClear( vectorRoot->GetScene(), notificationFlags );
+                FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSceneClear( vectorCell->GetScene(), notificationFlags );
 
                 GUndo->StoreUndo(GEditor, TUniquePtr<FOdysseyVectorUndo>(undo));
 
@@ -302,7 +302,7 @@ FOdysseyAnimationEditorSource::Clear()
             }
             GEditor->EndTransaction();
 
-            vectorRoot->SetScene( new FOdysseyVectorGroupPaint("Scene") );
+            vectorCell->SetScene( new FOdysseyVectorGroupPaint("Scene") );
             //vectorRoot->Invalidate( 0 );
         }
 

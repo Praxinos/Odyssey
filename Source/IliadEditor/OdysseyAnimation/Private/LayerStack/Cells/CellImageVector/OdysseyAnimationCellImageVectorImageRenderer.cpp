@@ -76,7 +76,7 @@ FOdysseyAnimationCellImageVectorImageRenderer::Init()
     }
 
     {
-        vectorBlock->Render( mDrawingFlags, mRenderHUD );
+        vectorBlock->Render( mDrawingFlags );
     }
 }
 

@@ -44,9 +44,10 @@ FOdysseyVectorUndo::Update()
         {
             // update invalidated objects
             mLayer->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-            mLayer->RequestRedraw( 0 );
 
             FOdysseyVectorEngine::Notify( nullptr, mReturnFlags );
+
+            mLayer->RequestRedraw( 0 );
         }
     );
 }

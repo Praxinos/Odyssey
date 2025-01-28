@@ -6,7 +6,7 @@
 #include "Import/v2/OdysseyVectorImport.h"
 #include "OdysseyFile.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 
 bool
 FOdysseyTextureLayerImageVectorImport::Read( UOdysseyTextureLayerImageVector* iTextureLayerImageVector
@@ -53,12 +53,12 @@ FOdysseyTextureLayerImageVectorImport::Read( UOdysseyTextureLayerImageVector* iT
             {
                 case FOdysseyFile::VectorV2::CHUNK_VECTOR_MAGIC_V2:
                 {
-                    FOdysseyVectorRoot* vectorRoot = iTextureLayerImageVector->GetRoot();
+                    FOdysseyVectorCell* vectorCell = iTextureLayerImageVector->GetVectorCell();
                     FOdysseyVectorImportV2* importerV2 = iTextureLayerImageVector->GetImporterV2();
 
                     //UE_LOG(LogTemp, Warning, TEXT("CHUNK_VECTOR_MAGIC_V2") );
 
-                    importerV2->Read( vectorRoot->GetScene(), Ar, Ar.Tell() + iChunkLen );
+                    importerV2->Read( vectorCell->GetScene(), Ar, Ar.Tell() + iChunkLen );
                 }
                 break;
 

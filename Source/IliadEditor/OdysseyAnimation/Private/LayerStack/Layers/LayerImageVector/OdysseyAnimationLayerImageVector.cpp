@@ -26,7 +26,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorTagInbetweener.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorLayer.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAlter.h"
 #include "Editor.h"
 
@@ -44,6 +44,16 @@ UOdysseyAnimationLayerImageVector::OnIsWireframeChanged()
 {
     static FOnIsWireframeChanged onIsWireframeChanged;
     return onIsWireframeChanged;
+}
+
+UOdysseyAnimationLayerImageVector::~UOdysseyAnimationLayerImageVector()
+{
+    mVectorLayer.RemoveAllChildren();
+}
+
+UOdysseyAnimationLayerImageVector::UOdysseyAnimationLayerImageVector()
+    : mVectorLayer( this )
+{
 }
 
 void
@@ -76,7 +86,7 @@ UOdysseyAnimationLayerImageVector::PostDuplicate(EDuplicateMode::Type iDuplicate
 void
 UOdysseyAnimationLayerImageVector::UpdateSharedEnv()
 {
-    GetSharedEnv()->RemoveAllChildren();
+    mVectorLayer.RemoveAllChildren();
 
     for (UOdysseyAnimationCell* cell : Cells)
     {
@@ -87,9 +97,12 @@ UOdysseyAnimationLayerImageVector::UpdateSharedEnv()
 
         if( cellVector )
         {
-            GetSharedEnv()->AppendChild( cellVector->GetRoot() );
+            mVectorLayer.AppendChild( cellVector->GetVectorCell() );
         }
     }
+
+    mVectorLayer.Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mVectorLayer.RequestRedraw( 0 );
 }
 
 struct FOdysseyAnimationLayerImageVectorObjectVersion
@@ -403,7 +416,7 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
         FOdysseyObjectEditorUtils::SetPropertyValue(cell, GET_MEMBER_NAME_CHECKED(UOdysseyAnimationCell, Exposure), cellRange.GetUpperBoundValue() - cellRange.GetLowerBoundValue() + 1);
 
         int frame = cellRange.GetLowerBoundValue();
-        FOdysseyVectorGroupPaint* destinationScene = cell->GetRoot()->GetScene();
+        FOdysseyVectorGroupPaint* destinationScene = cell->GetVectorCell()->GetScene();
 
         for (int layerIndex = 0; layerIndex < iLayers.Num(); layerIndex++)
         {
@@ -432,7 +445,7 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
             if (!cellVector)
                 continue;
 
-            FOdysseyVectorGroupPaint* scene = cellVector->GetRoot()->GetScene();
+            FOdysseyVectorGroupPaint* scene = cellVector->GetVectorCell()->GetScene();
             for( FOdysseyVectorObject* child : scene->GetChildrenList() )
             {
                 FOdysseyVectorObject* copiedChild = child->Copy();
@@ -445,13 +458,15 @@ UOdysseyAnimationLayerImageVector::Merge(const TArray<UOdysseyLayer*>& iLayers)
 
     for ( UOdysseyAnimationCell* cell : Cells)
     {
-        UOdysseyAnimationCellImageVector* vectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
-        FOdysseyVectorGroupPaint* scene = vectorCell->GetScene();
+        UOdysseyAnimationCellImageVector* cellVector = Cast<UOdysseyAnimationCellImageVector>(cell);
+        FOdysseyVectorGroupPaint* scene = cellVector->GetVectorCell()->GetScene();
 
         scene->UpdateMatrix();
 
-        scene->GetSharedEnv()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+        scene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     }
+
+    mVectorLayer.RequestRedraw( 0 );
 
     FOdysseyVectorEngine::Notify( nullptr, FOdysseyVectorEngine::NOTIFY_ALL );
 }
@@ -463,10 +478,10 @@ UOdysseyAnimationLayerImageVector::GetInbetweeningRowHeight()
     return 20UL;
 }
 
-FOdysseyVectorSharedEnv*
-UOdysseyAnimationLayerImageVector::GetSharedEnv()
+FOdysseyVectorLayer*
+UOdysseyAnimationLayerImageVector::GetVectorLayer()
 {
-    return &mSharedEnv;
+    return &mVectorLayer;
 }
 
 // Implements Interface IOdysseyVectorLayer::GetWidth
@@ -484,7 +499,7 @@ UOdysseyAnimationLayerImageVector::GetHeight()
 }
 
 // Implements Interface IOdysseyVectorLayer::GetCellByIndex
-IOdysseyVectorCell*
+FOdysseyVectorCell*
 UOdysseyAnimationLayerImageVector::GetCellByIndex( uint32 iIndex )
 {
     uint32 cellCount = Cells.Num();
@@ -495,7 +510,7 @@ UOdysseyAnimationLayerImageVector::GetCellByIndex( uint32 iIndex )
         if (!cell->IsA<UOdysseyAnimationCellImageVector>())
             return nullptr;
 
-        return Cast<UOdysseyAnimationCellImageVector>(cell);
+        return Cast<UOdysseyAnimationCellImageVector>(cell)->GetVectorCell();
     }
 
     return nullptr;
@@ -503,18 +518,18 @@ UOdysseyAnimationLayerImageVector::GetCellByIndex( uint32 iIndex )
 
 // Implements Interface IOdysseyVectorLayer::Contains
 bool
-UOdysseyAnimationLayerImageVector::Contains( IOdysseyVectorCell* iCandidateCell )
+UOdysseyAnimationLayerImageVector::Contains( FOdysseyVectorCell* iCandidateCell )
 {
     return GetCells().ContainsByPredicate( [ iCandidateCell ] ( UOdysseyAnimationCell* cell )
                                            {
                                                UOdysseyAnimationCellImageVector* vectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
 
-                                               return ( vectorCell == iCandidateCell ) ? true : false;
+                                               return ( vectorCell->GetVectorCell() == iCandidateCell ) ? true : false;
                                            } );
 }
 
 // Implements Interface IOdysseyVectorLayer::GetLastCell
-IOdysseyVectorCell*
+FOdysseyVectorCell*
 UOdysseyAnimationLayerImageVector::GetLastCell()
 {
     if (Cells.IsEmpty())
@@ -524,11 +539,11 @@ UOdysseyAnimationLayerImageVector::GetLastCell()
     if (!lastCell->IsA<UOdysseyAnimationCellImageVector>())
         return nullptr;
 
-    return Cast<UOdysseyAnimationCellImageVector>(lastCell);
+    return Cast<UOdysseyAnimationCellImageVector>(lastCell)->GetVectorCell();
 }
 
 // Implements Interface IOdysseyVectorLayer::GetLastCell
-IOdysseyVectorCell*
+FOdysseyVectorCell*
 UOdysseyAnimationLayerImageVector::GetFirstCell()
 {
     if (Cells.IsEmpty())
@@ -538,7 +553,7 @@ UOdysseyAnimationLayerImageVector::GetFirstCell()
     if (!firstCell->IsA<UOdysseyAnimationCellImageVector>())
         return nullptr;
 
-    return Cast<UOdysseyAnimationCellImageVector>(firstCell);
+    return Cast<UOdysseyAnimationCellImageVector>(firstCell)->GetVectorCell();
 }
 
 void
@@ -569,7 +584,7 @@ UOdysseyAnimationLayerImageVector::GetRowHeight(FName iSubRowName) const
 {
     if (iSubRowName == "Inbetweening")
     {
-        const std::list<FOdysseyVectorTag*>& tagList = mSharedEnv.GetSharedTagList();
+        const std::list<FOdysseyVectorTag*>& tagList = mVectorLayer.GetSharedTagList();
         int numTags = 0;
         for (FOdysseyVectorTag* tag : tagList)
         {
@@ -600,7 +615,7 @@ UOdysseyAnimationLayerImageVector::MakeBreakdownTargetMap()
     uint64 notificationFlags = 0xFFFFFFFFFFFFFFFF;
 
     // Make breakdown lookup for adapting the length of the inbetweener tags
-    for( FOdysseyVectorTag* sharedTag : mSharedEnv.GetSharedTagList() )
+    for( FOdysseyVectorTag* sharedTag : mVectorLayer.GetSharedTagList() )
     {
         if( sharedTag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
         {
@@ -622,7 +637,7 @@ UOdysseyAnimationLayerImageVector::MakeBreakdownTargetMap()
         // needed for valid GUndo pointer
         if( GUndo )
         {
-            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( &mSharedEnv
+            FOdysseyVectorUndo *undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( &mVectorLayer
                                                                                          , inbetweenerTagList
                                                                                          , notificationFlags );
 
@@ -645,11 +660,11 @@ UOdysseyAnimationLayerImageVector::CheckBreakdownTargetMap()
     for ( const auto& pair : mBreakdownTargetMap )
     {
         FInbetweenerBreakdown* breakdown = pair.Key;
-        IOdysseyVectorCell* expectedTargetCell = pair.Value;
+        FOdysseyVectorCell* expectedTargetCell = pair.Value;
         FOdysseyVectorTagInbetweener* inbetweenerTag = breakdown->GetInbetweenerTag();
-        IOdysseyVectorCell* sourceCell = inbetweenerTag->GetSourceCell();
-        IOdysseyVectorCell* targetCell = breakdown->GetTargetCell();
-        IOdysseyVectorLayer* layer = inbetweenerTag->GetOwner()->GetRoot()->GetLayer();
+        FOdysseyVectorCell* sourceCell = inbetweenerTag->GetSourceCell();
+        FOdysseyVectorCell* targetCell = breakdown->GetTargetCell();
+        FOdysseyVectorLayer* layer = inbetweenerTag->GetOwner()->GetCell()->GetLayer();
 
         if( targetCell && sourceCell )
         {
@@ -682,7 +697,8 @@ UOdysseyAnimationLayerImageVector::CheckBreakdownTargetMap()
         }
     }
 
-    mSharedEnv.Update( 0 );
+    mVectorLayer.Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
+    mVectorLayer.RequestRedraw( 0 );
 
     FOdysseyVectorEngine::Notify( nullptr, 0xFFFFFFFFFFFFFFFF );
 

@@ -13,7 +13,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
+#include "OdysseyVectorCell.h"
 #include "OdysseyAnimation.h"
 #include "LayerStack/Layers/LayerImageVector/OdysseyAnimationLayerImageVector.h"
 #include "LayerStack/Cells/CellImageVector/OdysseyAnimationCellImageVector.h"
@@ -141,7 +141,7 @@ FOdysseyAnimationEditorGUI::OnMediaChanged()
     {
 
         // check the validity of inbetweener tags and prepare a list for processing
-        for( FOdysseyVectorTag* tag : currentVectorLayer->GetSharedEnv()->GetSharedTagList() )
+        for( FOdysseyVectorTag* tag : currentVectorLayer->GetLayer()->GetSharedTagList() )
         {
             if( tag->GetClass() == FOdysseyVectorTagInbetweener::StaticClass() )
             {
@@ -159,7 +159,7 @@ FOdysseyAnimationEditorGUI::OnMediaChanged()
         GEditor->BeginTransaction(LOCTEXT("vector-scene.transaction.reset-breakdown-layout","Reset Breakdown Layout"));
         if( GUndo )
         {
-            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( currentVectorLayer->GetSharedEnv()
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoTagInbetweenerBreakdownAlter( currentVectorLayer->GetLayer()
                                                                                          , inbetweenerTagList
                                                                                          , returnFlags );
 
@@ -210,7 +210,6 @@ FOdysseyAnimationEditorGUI::OnSourceChanged()
         if( mediaVectors.Num() > 0 )
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
             OnVectorSceneNotify( vectorScene, FOdysseyVectorEngine::NOTIFY_ALL );
         }
@@ -238,9 +237,7 @@ FOdysseyAnimationEditorGUI::OnCurrentFrameChanged( UOdysseyAnimation* iAnimation
 
             ParseVectorNotifications( vectorScene, notificationFlags );
 
-            // force redraw after snudging the timeline
-            vectorScene->GetRoot()->Invalidate( 0 );
-            vectorScene->GetSharedEnv()->Update( 0 );
+            vectorScene->GetLayer()->RequestRedraw( vectorScene->GetCell(), 0 );
         }
         else
         {
@@ -325,7 +322,7 @@ FOdysseyAnimationEditorGUI::ParseVectorNotifications( FOdysseyVectorGroupPaint* 
     {
         if( iScene )
         {
-            iScene->GetRoot()->ResetHUD();
+            iScene->GetCell()->ResetHUD();
         }
     }
 }
@@ -348,7 +345,7 @@ FOdysseyAnimationEditorGUI::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScen
             {
                 UOdysseyAnimationCellImageVector* cellVector = Cast<UOdysseyAnimationCellImageVector>(cell);
                 // Note: iScene is ignored. We update the widget according to the current scene if any.
-                FOdysseyVectorGroupPaint* vectorScene = cellVector->GetScene();
+                FOdysseyVectorGroupPaint* vectorScene = cellVector->GetVectorCell()->GetScene();
                 ParseVectorNotifications( vectorScene, iNotificationFlags );
                 return;
             }

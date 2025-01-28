@@ -39,10 +39,10 @@ SOdysseyPainterEditorVectorSceneTreeView::Construct( const FArguments& InArgs, F
         .OnGenerateRow( this, &SOdysseyPainterEditorVectorSceneTreeView::OnGenerateRow )
         .OnGetChildren( this, &SOdysseyPainterEditorVectorSceneTreeView::OnGetChildren )
         .OnExpansionChanged( this, &SOdysseyPainterEditorVectorSceneTreeView::OnExpansionChanged )
-        //.OnSelectionChanged( this, &SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged )
+        .OnSelectionChanged( this, &SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged )
         //.OnItemScrolledIntoView(this, &SOdysseyLayerStackTreeView::OnItemScrolledIntoView)
         .OnContextMenuOpening( this, &SOdysseyPainterEditorVectorSceneTreeView::OnContextMenuOpening )
-        .SelectionMode( ESelectionMode::Multi )
+        //.SelectionMode( ESelectionMode::Multi )
         //.HeaderRow(headerRow)
     );
 }
@@ -124,6 +124,7 @@ SOdysseyPainterEditorVectorSceneTreeView::ExpandTree( const TSharedPtr<FVectorSc
     }
 }
 
+/*
 void
 SOdysseyPainterEditorVectorSceneTreeView::Private_SelectRangeFromCurrentTo ( TSharedPtr<FVectorSceneTreeViewItem> iItem )
 {
@@ -181,6 +182,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Private_SetItemSelection ( TSharedPtr<
         SelectedItems.Add( iItem );
 
         RangeSelectionStart = iItem;
+        SelectorItem = iItem;
     }
     else
     {
@@ -205,6 +207,7 @@ SOdysseyPainterEditorVectorSceneTreeView::Private_ClearSelection()
     // Keep internal array consistent for use by other methods
     SelectedItems.Empty();
 }
+*/
 
 bool
 SOdysseyPainterEditorVectorSceneTreeView::Private_IsItemSelected( const TSharedPtr<FVectorSceneTreeViewItem>& iItem )  const
@@ -294,7 +297,8 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
                                                             , ESelectInfo::Type SelectInfo )
 {
     uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
-                    | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
+                    | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                    | FOdysseyPainterEditor::UI_UPDATE_HUD;
 
     if( mRootItem && ( SelectInfo != ESelectInfo::Type::Direct ) )
     {
@@ -313,26 +317,22 @@ SOdysseyPainterEditorVectorSceneTreeView::OnSelectionChanged( TSharedPtr<FVector
                 source->RecordCurrentFrameUndo();
         }
         GEditor->EndTransaction();
-/*
-        scene->GetEngine()->ClearObjectSelection();
+
+        scene->GetCell()->ClearObjectSelection();
 
         // iTtem is null when selection is empty
         if( iItem )
         {
             TArray<TSharedPtr<FVectorSceneTreeViewItem>> selectedItems = GetSelectedItems();
 
-            // no need to create an undo record or do anything if the selection is empty
-            if( selectedItems.Num() )
+            for( int i = 0; i < selectedItems.Num(); i++ )
             {
-                for( int i = 0; i < selectedItems.Num(); i++ )
-                {
-                    FOdysseyVectorObject* selectedObject = selectedItems[i].Get()->GetVectorObject();
+                FOdysseyVectorObject* selectedObject = selectedItems[i].Get()->GetVectorObject();
 
-                    scene->GetEngine()->SelectObject( selectedObject );
-                }
+                scene->GetCell()->SelectObject( selectedObject );
             }
         }
-*/
+
         scene->GetCell()->ResetHUD();
 
         scene->GetLayer()->RequestRedraw( scene->GetCell(), 0 );

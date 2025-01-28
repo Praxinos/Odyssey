@@ -38,6 +38,9 @@ FOdysseyVectorUndoSelectObject::Apply( UObject* iIgnored )
     // prepare former selection for Revert()
     mSelectedObjectList = selectedObjectList;
 
+    // force redraw
+    mScene->GetLayer()->InvalidateCell( mScene->GetCell() );
+
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
     Update();
 }
@@ -58,6 +61,9 @@ FOdysseyVectorUndoSelectObject::Revert( UObject* iIgnored )
 
     // prepare former selection for Apply()
     mSelectedObjectList = selectedObjectList;
+
+    // force redraw
+    mScene->GetLayer()->InvalidateCell( mScene->GetCell() );
 
     // Update vector scenes and call callbacks if any (for refreshing GUI e.g)
     Update();

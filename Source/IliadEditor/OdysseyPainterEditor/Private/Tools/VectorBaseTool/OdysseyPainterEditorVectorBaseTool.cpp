@@ -526,7 +526,11 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseHover( const FOdysseyPoint& iPointIn
     uint64 notificationFlags = 0;
 
     OnMouseHoverVector( vectorScene, iPointInTexture, notificationFlags );
-    FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
+
+    if( notificationFlags )
+    {
+        FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
+    }
 }
 
 // WorkAround for faulty stylus drivers
@@ -595,7 +599,11 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseDrag( const FOdysseyPoint& iPointInT
     uint64 notificationFlags = 0;
 
     OnMouseDragVector( vectorScene, iPointInTexture, notificationFlags );
-    FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
+
+    if( notificationFlags )
+    {
+        FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
+    }
 }
 
 bool

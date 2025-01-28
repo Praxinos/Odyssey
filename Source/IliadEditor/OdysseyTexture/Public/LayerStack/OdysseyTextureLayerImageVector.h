@@ -8,8 +8,6 @@
 #include <ULIS>
 
 #include "OdysseyVectorObject.h"
-#include "OdysseyVectorSharedEnv.h"
-#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorCell.h"
 #include "Import/v2/OdysseyVectorImport.h"
@@ -42,8 +40,8 @@ protected:
 
 private:
     // handle to a callback to refresh the layer when a property of an object's details view is changed
-    TSharedPtr<FOdysseyVectorRoot> mRoot;
-    FOdysseyVectorSharedEnv mSharedEnv;
+    TSharedPtr<FOdysseyVectorCell> mVectorCell;
+    FOdysseyVectorLayer mVectorLayer;
     TSharedPtr<FOdysseyVectorBlock> mVectorBlock; //A automatically cached block containing the render of mEngine
 
     UPROPERTY()
@@ -56,7 +54,7 @@ public:
     virtual void PostDuplicate(bool bDuplicateForPIE) override;
     virtual void Merge(const TArray<UOdysseyLayer*>& Layers) override;
 
-    FOdysseyVectorRoot* GetRoot();
+    FOdysseyVectorCell* GetVectorCell();
     FOdysseyVectorImportV2* GetImporterV2();
 
     void IsWireframeChanged();
@@ -77,15 +75,14 @@ private:
 
 public:
     // Implements Interface IOdysseyVectorLayer
-    virtual IOdysseyVectorCell* GetCellByIndex( uint32 iIndex ) override;
-    virtual IOdysseyVectorCell* GetFirstCell() override;
-    virtual IOdysseyVectorCell* GetLastCell() override;
-    virtual bool Contains( IOdysseyVectorCell* iCandidateCell )override;
+    virtual FOdysseyVectorCell* GetCellByIndex( uint32 iIndex ) override;
+    virtual FOdysseyVectorCell* GetFirstCell() override;
+    virtual FOdysseyVectorCell* GetLastCell() override;
+    virtual bool Contains( FOdysseyVectorCell* iCandidateCell )override;
     virtual uint32 GetWidth() override;
     virtual uint32 GetHeight() override;
 
     // Implements Interface IOdysseyVectorCell
-    virtual FOdysseyVectorGroupPaint* GetScene() override;
     virtual int32 GetIndex() override;
     virtual uint32 GetLength() override;
     virtual uint32 GetFrame() override;

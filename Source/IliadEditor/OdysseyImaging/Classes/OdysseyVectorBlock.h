@@ -10,7 +10,7 @@
 // From Module OdysseyVector
 #include "OdysseyVectorEngine.h"
 
-class FOdysseyVectorRoot;
+class FOdysseyVectorCell;
 class FOdysseyVectorEngine;
 class FOdysseyVectorGroupPaint;
 
@@ -36,7 +36,7 @@ public:
      * @param iHeight
      * @param iFormat
      */
-    void Init(const FGuid& iId, TSharedPtr<FOdysseyVectorRoot> iRoot, int iWidth, int iHeight, ::ULIS::eFormat iFormat);
+    void Init(const FGuid& iId, TSharedPtr<FOdysseyVectorCell> iRoot, int iWidth, int iHeight, ::ULIS::eFormat iFormat);
 
     /**
      * @brief Get the block Width
@@ -78,8 +78,7 @@ public:
      *
      * @return TSharedPtr<::ULIS::FBlock>
      */
-    TSharedPtr<::ULIS::FBlock> Render( uint64 iDrawingFlags
-                                     , bool iRenderHUD );
+    TSharedPtr<::ULIS::FBlock> Render( uint64 iDrawingFlags );
 
     /**
      * @brief Sets the render flags passed to the vector engine
@@ -105,7 +104,7 @@ private:
     static void CleanupHUDBlock(uint8* iData, void* iInfo);
     void Render(::ULIS::FBlock& ioBlock, uint64 iDrawingFlags);
     void RenderHUD(::ULIS::FBlock& ioBlock );
-    void OnVectorRootRequestRedraw( uint64 iSignalFlags );
+    void OnVectorRootRequestRedraw( FOdysseyVectorGroupPaint* iIgnored, uint64 iSignalFlags );
     void Invalidate( const ::ULIS::FRectD& iRect, bool iIsInteractive );
     void SetState(eBlockState iState);
 
@@ -115,10 +114,11 @@ private:
     TWeakPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mBlock; //Loaded on demand from cache, can be destroyed at any time if noone keeps a sharedptr on it
     TWeakPtr<::ULIS::FBlock, ESPMode::ThreadSafe> mHUDBlock; //Loaded on demand
     FOdysseyVectorEngine mEngine;
-    TSharedPtr<FOdysseyVectorRoot> mRoot;
+    TSharedPtr<FOdysseyVectorCell> mVectorCell;
     int mWidth;
     int mHeight;
     ::ULIS::eFormat mFormat;
+    ::ULIS::FRectI mSanitizedRect;
     //uint64 mRenderFlags; //See DRAWING_IGNORECOLOR for example
 
     //

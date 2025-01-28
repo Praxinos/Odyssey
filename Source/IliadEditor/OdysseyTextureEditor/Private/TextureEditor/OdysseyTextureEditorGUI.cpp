@@ -46,8 +46,7 @@ FOdysseyTextureEditorGUI::OnCurrentLayerChanged( UOdysseyLayerStack* iLayerStack
 
     if( currentVectorLayer )
     {
-        FOdysseyVectorRoot* vectorRoot = currentVectorLayer->GetRoot();
-        FOdysseyVectorGroupPaint* vectorScene = vectorRoot->GetScene();
+        FOdysseyVectorGroupPaint* vectorScene = currentVectorLayer->GetVectorCell()->GetScene();
 
         OnVectorSceneNotify( vectorScene, FOdysseyVectorEngine::NOTIFY_ALL );
     }
@@ -72,7 +71,6 @@ FOdysseyTextureEditorGUI::OnSourceChanged()
         if( mediaVectors.Num() > 0 )
         {
             FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-            FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
             OnVectorSceneNotify( vectorScene, FOdysseyVectorEngine::NOTIFY_ALL );
         }
@@ -195,7 +193,7 @@ FOdysseyTextureEditorGUI::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene,
 
         if( currentVectorLayer )
         {
-            FOdysseyVectorGroupPaint* currentScene = currentVectorLayer->GetRoot()->GetScene();
+            FOdysseyVectorGroupPaint* currentScene = currentVectorLayer->GetVectorCell()->GetScene();
 
             if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW )
             {
@@ -207,6 +205,14 @@ FOdysseyTextureEditorGUI::OnVectorSceneNotify( FOdysseyVectorGroupPaint* iScene,
             {
                 vectorSceneTreeViewTab.Get()->UpdateObjectPropertiesPanel( ( iScene == nullptr ) ? currentScene
                                                                                                  : iScene );
+            }
+
+            if( iSignalFlags & FOdysseyPainterEditor::UI_UPDATE_HUD )
+            {
+                if( currentScene )
+                {
+                    currentScene->GetCell()->ResetHUD();
+                }
             }
         }
     }

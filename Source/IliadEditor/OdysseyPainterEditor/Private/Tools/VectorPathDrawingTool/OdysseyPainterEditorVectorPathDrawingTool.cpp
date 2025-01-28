@@ -493,8 +493,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseUpVector( FOdysseyVectorGroup
         return false;
 
     ::ULIS::FVec2D vertexWorldCoords = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
-    uint32 imgW = iScene->GetCell()->GetLayer()->GetWidth();
-    uint32 imgH = iScene->GetCell()->GetLayer()->GetHeight();
     uint64 notificationFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_HUD; // re-creates the quadtree;

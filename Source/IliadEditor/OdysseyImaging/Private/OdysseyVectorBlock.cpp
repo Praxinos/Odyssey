@@ -3,7 +3,6 @@
 
 #include "OdysseyVectorBlock.h"
 #include "OdysseyVectorEngine.h"
-#include "OdysseyVectorRoot.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorCell.h"
 #include "ULISLoaderModule.h"
@@ -19,7 +18,7 @@ FOdysseyVectorBlock::OnInvalidated()
 
 FOdysseyVectorBlock::~FOdysseyVectorBlock()
 {
-    mRoot.Get()->OnRequestRedrawDelegate().RemoveAll( this );
+    mVectorCell.Get()->OnRequestRedrawDelegate().RemoveAll( this );
 }
 
 FOdysseyVectorBlock::FOdysseyVectorBlock()
@@ -29,16 +28,17 @@ FOdysseyVectorBlock::FOdysseyVectorBlock()
 }
 
 void
-FOdysseyVectorBlock::Init(const FGuid& iId, TSharedPtr<FOdysseyVectorRoot> iRoot, int iWidth, int iHeight, ::ULIS::eFormat iFormat)
+FOdysseyVectorBlock::Init(const FGuid& iId, TSharedPtr<FOdysseyVectorCell> iRoot, int iWidth, int iHeight, ::ULIS::eFormat iFormat)
 {
     mId = iId;
     mWidth = iWidth;
     mHeight = iHeight;
     mFormat = iFormat;
     mNeedsRender = false;
-    mRoot = iRoot;
+    mVectorCell = iRoot;
+    mSanitizedRect = ::ULIS::FRectI( 0, 0, mWidth, mHeight );
 
-    mRoot.Get()->OnRequestRedrawDelegate().AddRaw( this, &FOdysseyVectorBlock::OnVectorRootRequestRedraw );
+    mVectorCell.Get()->OnRequestRedrawDelegate().AddRaw( this, &FOdysseyVectorBlock::OnVectorRootRequestRedraw );
 }
 
 int
@@ -80,27 +80,29 @@ FOdysseyVectorBlock::Render( ::ULIS::FBlock& ioBlock, uint64 iDrawingFlags )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render);
 
-    //Render in a BLImage (also resets the internal invalidation rectangle)
-    ::ULIS::FRectD invalidatedRectD = mEngine.Render( mBlockData->mBLContext.Get(), mRoot->GetScene(), iDrawingFlags );
-    ::ULIS::FRectI invalidatedRectI = invalidatedRectD;
-
-    if( invalidatedRectD.Area() )
+    if( mVectorCell.IsValid() )
     {
+        //Render in a BLImage (also resets the internal invalidation rectangle)
+        mEngine.Render( mBlockData->mBLContext.Get(), mSanitizedRect, mVectorCell->GetScene(), iDrawingFlags );
+
+        if( mSanitizedRect.Area() )
         {
-            TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertBlock);
-            //Get a ULIS block pointing to the BLImage
-            BLImageData imgData;
-            mBlockData->mBLImage->getData(&imgData);
-            ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
+            {
+                TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertBlock);
+                //Get a ULIS block pointing to the BLImage
+                BLImageData imgData;
+                mBlockData->mBLImage->getData(&imgData);
+                ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
 
-            //Unpremultiply the render block
-            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
-            ctx.Unpremultiply(renderBlock, invalidatedRectI );
-            ctx.Finish();
+                //Unpremultiply the render block
+                ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
+                ctx.Unpremultiply(renderBlock, mSanitizedRect );
+                ctx.Finish();
 
-            //Convert the right ULIS block in the expected ULIS Format
-            ctx.ConvertFormat(renderBlock, ioBlock, invalidatedRectI, ::ULIS::FVec2I( invalidatedRectI.x, invalidatedRectI.y ) );
-            ctx.Finish();
+                //Convert the right ULIS block in the expected ULIS Format
+                ctx.ConvertFormat(renderBlock, ioBlock, mSanitizedRect, ::ULIS::FVec2I( mSanitizedRect.x, mSanitizedRect.y ) );
+                ctx.Finish();
+            }
         }
     }
 }
@@ -110,28 +112,31 @@ FOdysseyVectorBlock::RenderHUD( ::ULIS::FBlock& ioBlock )
 {
     TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::RenderHUD);
 
-    mEngine.RenderHUD( mHUDBlockData->mBLContext.Get(), mRoot->GetScene() );
-
+    if( mVectorCell.IsValid() )
     {
-        TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertHUDBlock);
-        //Get a ULIS block pointing to the BLImage
-        BLImageData imgData;
-        mHUDBlockData->mBLImage->getData(&imgData);
-        ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
+        mEngine.RenderHUD( mHUDBlockData->mBLContext.Get(), mVectorCell->GetScene() );
 
-        //Unpremultiply the render block
-        ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
-        ctx.Unpremultiply(renderBlock);
-        ctx.Finish();
+        {
+            TRACE_CPUPROFILER_EVENT_SCOPE(FOdysseyVectorBlock::Render::ConvertHUDBlock);
+            //Get a ULIS block pointing to the BLImage
+            BLImageData imgData;
+            mHUDBlockData->mBLImage->getData(&imgData);
+            ::ULIS::FBlock renderBlock((uint8*)imgData.pixelData, mWidth, mHeight, ULIS::Format_BGRA8);
 
-        //Convert the right ULIS block in the expected ULIS Format
-        ctx.ConvertFormat(renderBlock, ioBlock);
-        ctx.Finish();
+            //Unpremultiply the render block
+            ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(ULIS::Format_BGRA8);
+            ctx.Unpremultiply(renderBlock);
+            ctx.Finish();
+
+            //Convert the right ULIS block in the expected ULIS Format
+            ctx.ConvertFormat(renderBlock, ioBlock);
+            ctx.Finish();
+        }
     }
 }
 
 TSharedPtr<::ULIS::FBlock>
-FOdysseyVectorBlock::Render( uint64 iDrawingFlags, bool iRenderHUD )
+FOdysseyVectorBlock::Render( uint64 iDrawingFlags )
 {
     TSharedPtr<::ULIS::FBlock> block = GetBlock( iDrawingFlags );
 
@@ -145,12 +150,9 @@ FOdysseyVectorBlock::Render( uint64 iDrawingFlags, bool iRenderHUD )
     {
         Render(*block, iDrawingFlags );
 
-        if( iRenderHUD )
-        {
-            TSharedPtr<::ULIS::FBlock> hudBlock = mHUDBlock.Pin();
-            if ( hudBlock )
-                RenderHUD(*hudBlock );
-        }
+        TSharedPtr<::ULIS::FBlock> hudBlock = mHUDBlock.Pin();
+        if ( hudBlock )
+            RenderHUD(*hudBlock );
 
         mNeedsRender = false;
         mBlockData->mNeedsCache = true;
@@ -283,10 +285,10 @@ FOdysseyVectorBlock::GetBlock( uint64 iDrawingFlags)
 }
 
 void
-FOdysseyVectorBlock::OnVectorRootRequestRedraw( uint64 iSignalFlags )
+FOdysseyVectorBlock::OnVectorRootRequestRedraw( FOdysseyVectorGroupPaint* ignored, uint64 iSignalFlags )
 {
-    Invalidate( mRoot->GetInvalidatedRect()
-              , iSignalFlags & FOdysseyVectorRoot::REDRAW_INTERACTIVE );
+    Invalidate( mVectorCell->GetInvalidatedRect()
+              , iSignalFlags & FOdysseyVectorCell::REDRAW_INTERACTIVE );
 }
 
 /*
@@ -305,9 +307,7 @@ FOdysseyVectorBlock::SetState(eBlockState iState)
 void
 FOdysseyVectorBlock::Invalidate( const ::ULIS::FRectD& iRect, bool iIsInteractive)
 {
-//    ::ULIS::FRectI sanitizedRect = mEngine.GetInvalidatedRect( iRect, mWidth, mHeight );
-
-    ::ULIS::FRectI sanitizedRect = iRect;
+    mSanitizedRect = mEngine.SanitizeRect( iRect, mWidth, mHeight );
 
     if (!mNeedsRender)
     {
@@ -319,7 +319,7 @@ FOdysseyVectorBlock::Invalidate( const ::ULIS::FRectD& iRect, bool iIsInteractiv
 
     //mEngine->Invalidate( FOdysseyVectorEngine::INVALIDATE_DEFAULT );
     //SetState(kNeedsRender);
-    mOnInvalidated.Broadcast( { sanitizedRect }, iIsInteractive );
+    mOnInvalidated.Broadcast( { mSanitizedRect }, iIsInteractive );
 }
 
 FOdysseyVectorEngine&

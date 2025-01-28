@@ -1035,16 +1035,9 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
                     }
                 }
             }
-
-            // in inbetween mode, the scene we modifiy might not be the one we draw, so we force redrawing
-            // of the current scene
-            if( mEditor->GetVectorHUDFlags() & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
-            {
-                // Calling Update via Root will request a redraw even if root is not invalidated
-                iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
-            }
         }
 
+        //iScene->GetCell()->OnRequestRedrawDelegate().Broadcast( iScene, FOdysseyVectorCell::REDRAW_INTERACTIVE );
         iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
     }
 
