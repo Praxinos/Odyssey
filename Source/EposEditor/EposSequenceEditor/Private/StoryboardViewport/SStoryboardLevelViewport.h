@@ -13,6 +13,7 @@
 #include "Misc/FrameRate.h"
 #include "Framework/Application/IInputProcessor.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
+#include "Subsystems/PanelExtensionSubsystem.h"
 
 #include "StoryboardViewport/StoryboardVisibleArea.h"
 #include "StoryboardViewport/StoryboardViewportZoomController.h"
@@ -27,6 +28,7 @@ class FUICommandList;
 class ILevelEditor;
 class ISequencer;
 class SBox;
+class SFilmOverlay;
 class SFilmOverlayOptions;
 class SStoryboardPreviewViewport;
 class SStoryboardTransportRange;
@@ -143,6 +145,8 @@ public:
         SLATE_ARGUMENT(TSharedPtr<FAssetEditorViewportLayout>, ParentLayout)
         /** Ptr to this viewport's parent level editor */
         SLATE_ARGUMENT(TWeakPtr<ILevelEditor>, ParentLevelEditor)
+
+        SLATE_ARGUMENT( TWeakPtr<SStoryboardPreviewViewport>, PreviewViewport )
     SLATE_END_ARGS()
 
     /** Access this viewport's viewport client */
@@ -160,6 +164,15 @@ public:
     virtual FReply OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent) override;
     virtual bool SupportsKeyboardFocus() const override { return true; }
 
+    const TSharedPtr<SFilmOverlay>& GetOverlayWidget()
+    {
+        return OverlayWidget;
+    }
+
+    TSharedPtr<FUICommandList> GetCommandList()
+    {
+        return CommandList;
+    }
 private:
 
     /** Set up this viewport to operate on its sequencer */
@@ -248,12 +261,11 @@ public:
 
 private:
     void CreateCommandList();
-    void RegisterToolBarExtender();
-    void UnregisterToolBarExtender();
-    void ExtendToolBar(FToolBarBuilder& iBuilder);
+
     TSharedRef<SWidget> NoteSettingsGetMenuContent();
 
-private:
+public: // Needed by SStoryboardPreviewViewport
+//private:
     FText GetRotationLabel();
     FText GetRotationTooltip();
     TSharedRef<SWidget> CreateRotationWidget();
@@ -265,12 +277,6 @@ private:
 
     /** Widget where the scene viewport is drawn in */
     TSharedPtr<SStoryboardPreviewViewport> ViewportWidget;
-    /** Widget where the grid option are and which contains the widget where grid is drawn in */
-    TSharedPtr<SFilmOverlayOptions> FilmOverlayOptions;
-
-    /** Widget where the story board viewport settings lies */
-    TSharedPtr<SStoryboardViewportSettings> StoryboardViewportSettings;
-
 
     /** The sequencer we're currently editing */
     TWeakPtr<ISequencer> mCurrentSquencer;
@@ -310,6 +316,9 @@ private:
     /** The level editor viewport client for this viewport */
     TSharedPtr<FStoryboardLevelViewportClient> ViewportClient;
 
+    /** The overlay widget */
+    TSharedPtr<SFilmOverlay> OverlayWidget;
+
     TSharedPtr<SSplitter> mNoteSplitter;
 
     TWeakObjectPtr<ACineCameraActor>    mCameraToFocalLength;
@@ -345,8 +354,4 @@ private:
     TSharedPtr<SScrollBar> mVerticalScrollBar;
     TSharedPtr<SScrollBar> mHorizontalScrollBar;
     bool mNeedUpdateScrollbars = true;
-
-    TSharedPtr<SWidget> mViewportTransformBox;
-
-    TSharedPtr<FExtender> mToolBarExtender;
 };

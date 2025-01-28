@@ -106,6 +106,7 @@ public class EposSequenceEditor : ModuleRules
                 "PropertyEditor",
                 "SceneOutliner",
                 "ActorPickerMode",
+                "ToolMenus",
                 // [EDITOR] custom plugin dependencies
                 "EposTracksEditor",
                 "EposNamingConvention",
