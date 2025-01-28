@@ -1037,8 +1037,7 @@ UOdysseyPainterEditorVectorTransformTool::OnMouseDragVector( FOdysseyVectorGroup
             }
         }
 
-        //iScene->GetCell()->OnRequestRedrawDelegate().Broadcast( iScene, FOdysseyVectorCell::REDRAW_INTERACTIVE );
-        iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
     }
 
     deltaPositionCumul = FVector2D( 0.0f, 0.0f );
