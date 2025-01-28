@@ -66,7 +66,10 @@ public:
      * folders without relying on a single clipboard.
      */
     UFUNCTION(BlueprintCallable, Category = "Epos Sequence Editor")
-    void CopyFolders(const TArray<UMovieSceneFolder*>& Folders, FString& ExportedText);
+    void CopyFolders(const TArray<UMovieSceneFolder*>& Folders, FString& FoldersExportedText, FString& ObjectsExportedText, FString& TracksExportedText);
+
+    UE_DEPRECATED(5.5, "CopyFolders now gathers objects and tracks within the folders. Please use CopyFolders that outputs ObjectsExportedText and TracksExportedText")
+    void CopyFolders(const TArray<UMovieSceneFolder*>& Folders, FString& FoldersExportedText);
 
     /**
      * Paste folders
@@ -170,10 +173,3 @@ private:
     //...
 
 };
-
-#if UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_2
-#include "CoreMinimal.h"
-#include "ISequencer.h"
-#include "MovieSceneBindingProxy.h"
-#include "SequencerUtilities.h"
-#endif

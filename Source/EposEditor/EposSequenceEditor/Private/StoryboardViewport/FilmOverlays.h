@@ -29,23 +29,48 @@ public:
     /** Paint this widget */
     virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 
+    /** Assigns film overlays to this film overlay widget*/
+    void SetFilmOverlays( const TAttribute<TArray<IFilmOverlay*>>& InFilmOverlays )
+    {
+        FilmOverlays = InFilmOverlays;
+    }
+
+    /** Sets the current primary film overlay */
+    void SetPrimaryFilmOverlay( const FName InFilmOverlay )
+    {
+        PrimaryFilmOverlay = InFilmOverlay;
+    }
+
+    /** Get the current primary film overlay */
+    FName GetPrimaryFilmOverlay() const
+    {
+        return PrimaryFilmOverlay;
+    }
+
 private:
     /** Attribute used once per frame to retrieve the film overlays to paint */
     TAttribute<TArray<IFilmOverlay*>> FilmOverlays;
+
+    /** Currently selected primary film overlay */
+    FName PrimaryFilmOverlay;
 };
 
 /** A custom widget that comprises a combo box displaying all available overlay options */
 class SFilmOverlayOptions : public SCompoundWidget
 {
 public:
-    SLATE_BEGIN_ARGS(SFilmOverlayOptions){}
+    SLATE_BEGIN_ARGS(SFilmOverlayOptions)
+        : _IsComboButton( true )
+        {}
+        /** Set this to false in order to directly show the menu content, instead of showing a button to summon it */
+        SLATE_ATTRIBUTE( bool, IsComboButton )
     SLATE_END_ARGS()
 
     /** Construct this widget */
-    void Construct(const FArguments& InArgs);
+    void Construct(const FArguments& InArgs, TSharedPtr<SFilmOverlay> InFilmOverlay);
 
     /** Retrieve the actual overlay widget that this widget controls. Can be positioned in any other widget hierarchy. */
-    TSharedRef<SFilmOverlay> GetFilmOverlayWidget() const;
+    TSharedPtr<SFilmOverlay> GetFilmOverlayWidget() const;
 
     /** Bind commands for the overlays */
     void BindCommands( TSharedRef<FUICommandList> );
@@ -84,9 +109,6 @@ private:
 
 private:
 
-    /** The name of the current primary overlay */
-    FName CurrentPrimaryOverlay;
-
     /** Color tint to apply to primary overlays */
     FLinearColor PrimaryColorTint;
 
@@ -96,6 +118,6 @@ private:
     /** Toggleable overlays (any number can be active at a time) */
     TArray<TSharedPtr<IFilmOverlay>> ToggleableOverlays;
 
-    /** The overlay widget we control */
-    TSharedPtr<SFilmOverlay> OverlayWidget;
+    /** The overlay widget we control - externally owned */
+    TWeakPtr<SFilmOverlay> OverlayWidget;
 };

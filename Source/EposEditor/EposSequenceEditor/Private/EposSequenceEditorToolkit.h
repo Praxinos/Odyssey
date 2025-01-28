@@ -68,6 +68,7 @@ public:
     virtual FString GetReferencerName() const override;
 
     //~ FAssetEditorToolkit interface
+    virtual void SaveAsset_Execute() override;
     virtual void OnClose() override;
     virtual bool CanFindInContentBrowser() const override;
 

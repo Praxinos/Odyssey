@@ -35,7 +35,6 @@ FPreAnimatedCameraCutEditorState FPreAnimatedCameraCutEditorTraits::CachePreAnim
     FPreAnimatedCameraCutEditorState CachedValue;
     CachedValue.ViewportLocation = InKey->GetViewLocation();
     CachedValue.ViewportRotation = InKey->GetViewRotation();
-    CachedValue.ViewportFOV = InKey->ViewFOV;
     return CachedValue;
 }
 
@@ -49,7 +48,8 @@ void FPreAnimatedCameraCutEditorTraits::RestorePreAnimatedValue(
         return;
     }
 
-    // Check that our pointer is still valid by searching it in active viewports.
+    // Check that our pointer is still valid by searching it in active viewports,
+    // in case the user removed that viewport since we cached the pre-animated state.
     if (GEditor->GetLevelViewportClients().Find(InKey) == INDEX_NONE)
     {
         return;
@@ -78,7 +78,7 @@ void FPreAnimatedCameraCutEditorTraits::RestorePreAnimatedValue(
     {
         InKey->SetViewLocation(CachedValue.ViewportLocation);
         InKey->SetViewRotation(CachedValue.ViewportRotation);
-        InKey->ViewFOV = CachedValue.ViewportFOV;
+        InKey->ViewFOV = InKey->FOVAngle;
     }
 
     InKey->SetCinematicActorLock(nullptr);
@@ -315,7 +315,7 @@ void FCameraCutEditorHandler::SetCameraCutForViewport(
             FPreAnimatedCameraCutEditorState CachedValue = PreAnimatedStorage->GetCachedValue(StorageIndex);
             ViewLocation = CachedValue.ViewportLocation;
             ViewRotation = CachedValue.ViewportRotation;
-            ViewFOV = CachedValue.ViewportFOV;
+            ViewFOV = ViewportClient.FOVAngle;
         }
     }
 
@@ -445,7 +445,7 @@ void FCameraCutEditorHandler::ReleaseCameraCutForViewport(
         FPreAnimatedCameraCutEditorState CachedValue = PreAnimatedStorage->GetCachedValue(StorageIndex);
         ViewportClient.SetViewLocation(CachedValue.ViewportLocation);
         ViewportClient.SetViewRotation(CachedValue.ViewportRotation);
-        ViewportClient.ViewFOV = CachedValue.ViewportFOV;
+        ViewportClient.ViewFOV = ViewportClient.FOVAngle;
     }
 
     // Actually release control.

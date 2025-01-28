@@ -120,6 +120,7 @@ struct FBlendedCameraCut
     FFrameTime LocalContextTime;
     FFrameNumber LocalEaseOutStartTime;
     FFrameNumber LocalEndTime;
+    EPlayDirection LocalDirection = EPlayDirection::Forwards;
 
     FBlendedCameraCutEasingInfo EaseIn;
     FBlendedCameraCutEasingInfo EaseOut;
@@ -411,13 +412,15 @@ void UMovieSceneSingleCameraCutTrackInstance::OnAnimate()
         FTransform CutTransform = Section->InitialCameraCutTransform;
         const bool bHasCutTransform = Section->bHasInitialCameraCutTransform;
 
+        const bool bIsBackwards = Context.GetDirection() == EPlayDirection::Backwards;
+
         const int32 PreRollFrames = Section->GetPreRollFrames();
         bool bIsSectionPreRoll = false;
         if (PreRollFrames > 0 && Section->HasStartFrame())
         {
             const FFrameNumber SectionStartTime = Section->GetTrueRange().GetLowerBoundValue();
             const TRange<FFrameNumber> PreRollRange(SectionStartTime - PreRollFrames, SectionStartTime);
-            bIsSectionPreRoll = PreRollRange.Contains(Context.GetTime().FloorToFrame());
+            bIsSectionPreRoll = !bIsBackwards && PreRollRange.Contains(Context.GetTime().FloorToFrame());
         }
 
         if (Context.IsPreRoll() || bIsSectionPreRoll)
@@ -431,6 +434,7 @@ void UMovieSceneSingleCameraCutTrackInstance::OnAnimate()
             const FMovieSceneInverseSequenceTransform SequenceToRootTransform = Context.GetSequenceToRootSequenceTransform();
 
             FBlendedCameraCut Params(Input, CameraBindingID, SequenceInstance.GetSequenceID());
+            Params.LocalDirection = Context.GetDirection();
             Params.bCanBlend = false; // Track->bCanBlend; //????????????????????????????
 
             // Get start/current/end time.
@@ -468,6 +472,14 @@ void UMovieSceneSingleCameraCutTrackInstance::OnAnimate()
                     const float RootEaseOutTime = RootSequenceInstance.GetContext().GetFrameRate().AsSeconds( RootEnd.GetValue() - RootStart.GetValue() );
                     Params.EaseOut = FBlendedCameraCutEasingInfo( RootEaseOutTime, Section->Easing.EaseOut );
                 }
+            }
+
+            // If we are evaluating backwards, swap all our start/end times.
+            if( bIsBackwards )
+            {
+                Swap( Params.LocalStartTime, Params.LocalEndTime );
+                Swap( Params.EaseIn, Params.EaseOut );
+                Swap( Params.LocalEaseInEndTime, Params.LocalEaseOutStartTime );
             }
 
             // Remember locking option.
@@ -509,7 +521,11 @@ void UMovieSceneSingleCameraCutTrackInstance::OnAnimate()
         // We want to blend away from this priority cut only if we are currently in its blend-out. We'll
         // determine that thanks to the various times we saved on the info struct.
         const FBlendedCameraCut& PriorityCameraCut = CameraCutParams[0];
-        if (PriorityCameraCut.LocalContextTime < PriorityCameraCut.LocalEaseInEndTime)
+        const bool bIsBackwards = PriorityCameraCut.LocalDirection == EPlayDirection::Backwards;
+
+        if(
+            ( !bIsBackwards && PriorityCameraCut.LocalContextTime < PriorityCameraCut.LocalEaseInEndTime ) ||
+            ( bIsBackwards && PriorityCameraCut.LocalContextTime > PriorityCameraCut.LocalEaseInEndTime ) )
         {
             // Blending in from the other cut.
             const FBlendedCameraCut& PrevCameraCut = CameraCutParams[1];
@@ -519,7 +535,9 @@ void UMovieSceneSingleCameraCutTrackInstance::OnAnimate()
             FinalCameraCut.PreviousCameraBindingID = PrevCameraCut.CameraBindingID;
             FinalCameraCut.PreviousOperandSequenceID = PrevCameraCut.OperandSequenceID;
         }
-        else if (PriorityCameraCut.LocalContextTime > PriorityCameraCut.LocalEaseOutStartTime)
+        else if(
+            ( !bIsBackwards && PriorityCameraCut.LocalContextTime > PriorityCameraCut.LocalEaseOutStartTime ) ||
+            ( bIsBackwards && PriorityCameraCut.LocalContextTime < PriorityCameraCut.LocalEaseOutStartTime ) )
         {
             // Blending out to the other cut.
             const FBlendedCameraCut& PrevCameraCut = CameraCutParams[0];
@@ -559,7 +577,10 @@ void UMovieSceneSingleCameraCutTrackInstance::OnAnimate()
         FinalCameraCut = CameraCutParams[0];
 
         // It may be blending out back to gameplay however.
-        if (FinalCameraCut.LocalContextTime > FinalCameraCut.LocalEaseOutStartTime)
+        const bool bIsBackwards = FinalCameraCut.LocalDirection == EPlayDirection::Backwards;
+        if(
+            ( !bIsBackwards && FinalCameraCut.LocalContextTime > FinalCameraCut.LocalEaseOutStartTime ) ||
+            ( bIsBackwards && FinalCameraCut.LocalContextTime < FinalCameraCut.LocalEaseOutStartTime ) )
         {
             FinalCameraCut.PreviewBlendFactor = 1.0f - FinalCameraCut.PreviewBlendFactor;
             FinalCameraCut.EaseIn = FinalCameraCut.EaseOut;

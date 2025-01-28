@@ -12,6 +12,7 @@ class AActor;
 class FLevelEditorViewportClient;
 class UCameraComponent;
 struct FEditorViewportViewModifierParams;
+struct FPostProcessSettings;
 struct FMovieSceneCameraCutParams;
 
 namespace UE::MovieScene
@@ -37,7 +38,7 @@ namespace UE::EposMovieScene
         TSharedPtr<FPreAnimatedCameraCutEditorStorage> PreAnimatedStorage;
 
         /** Returns the target's location, rotation, and FOV */
-        void Get(FLevelEditorViewportClient* InClient, FVector& OutLocation, FRotator& OutRotation, float& OutFOV) const;
+        void Get(FLevelEditorViewportClient* InClient, FVector& OutLocation, FRotator& OutRotation, float& OutFOV, const FPostProcessSettings*& OutPP, float& OutPPWeight) const;
     };
 
     /**

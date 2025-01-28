@@ -8,6 +8,7 @@
 #include "DragAndDrop/ActorDragDropGraphEdOp.h"
 #include "DragAndDrop/AssetDragDropOp.h"
 #include "DragAndDrop/ClassDragDropOp.h"
+#include "EditorModeManager.h"
 #include "Engine/Selection.h"
 #include "Framework/Docking/TabManager.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
@@ -21,8 +22,11 @@
 #include "Modules/ModuleManager.h"
 #include "MovieSceneSequence.h"
 #include "ScopedTransaction.h"
+#include "SequencerCommands.h"
 #include "SequencerSettings.h"
+#include "SEditorViewport.h"
 #include "SLevelViewport.h"
+#include "ViewportToolbar/UnrealEdViewportToolbarContext.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Text/STextBlock.h"
@@ -39,6 +43,75 @@
 #include "Tools/EposSequenceTools.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceEditorToolkit"
+
+//---
+
+namespace UE::MovieScene::Private
+{
+
+const FName ViewportToolbarOwnerName = "LevelSequenceEditorViewportToolbar";
+
+FToolMenuEntry CreateToggleViewportSelectionEntry( TWeakPtr<ISequencer> InWeakSequencer )
+{
+    return FToolMenuEntry::InitDynamicEntry(
+        "DynamicToggleViewportSelection",
+        FNewToolMenuSectionDelegate::CreateLambda(
+            [InWeakSequencer]( FToolMenuSection& InDynamicSection )
+            {
+                // First attempt to use the non-context Sequencer.
+                TSharedPtr<ISequencer> Sequencer = InWeakSequencer.Pin();
+                if( !Sequencer )
+                {
+                    return;
+                }
+
+                if( !Sequencer->GetHostCapabilities().bSupportsViewportSelectability )
+                {
+                    return;
+                }
+
+                const TSharedPtr<FUICommandList> CommandList =
+                    Sequencer->GetCommandBindings( ESequencerCommandBindings::Sequencer );
+
+                FToolMenuEntry& Entry = InDynamicSection.AddMenuEntryWithCommandList(
+                    FSequencerCommands::Get().ToggleLimitViewportSelection, CommandList
+                );
+                Entry.InsertPosition.Position = EToolMenuInsertType::Last;
+
+                if( UUnrealEdViewportToolbarContext* ViewportToolbarContext =
+                    InDynamicSection.FindContext<UUnrealEdViewportToolbarContext>() )
+                {
+                    // Show the entry in the top-level toolbar if we're in Animation Mode (EditMode.ControlRig). Otherwise it will be in the Transform submenu.
+                    Entry.SetShowInToolbarTopLevel( TAttribute<bool>::CreateLambda(
+                        [WeakViewport = ViewportToolbarContext->Viewport]() -> bool
+                        {
+                            if( TSharedPtr<SEditorViewport> Viewport = WeakViewport.Pin() )
+                            {
+                                if( TSharedPtr<FEditorViewportClient> Client = Viewport->GetViewportClient() )
+                                {
+                                    if( FEditorModeTools* ModeTools = Client->GetModeTools() )
+                                    {
+                                        // Hard-code the mode name instead of using FControlRigEditMode::ModeName to avoid adding a dependency on ControlRigEditor.
+                                        const FName ControlRigModeName = "EditMode.ControlRig";
+
+                                        if( ModeTools->GetActiveMode( ControlRigModeName ) )
+                                        {
+                                            return true;
+                                        }
+                                    }
+                                }
+                            }
+
+                            return false;
+                        }
+                    ) );
+                }
+            }
+        )
+    );
+}
+
+}; // namespace UE::MovieScene::Private
 
 //---
 
@@ -190,6 +263,23 @@ void FEposSequenceEditorToolkit::Initialize( const EToolkitMode::Type iMode, con
 
     OnOpened().Broadcast( *this );
 
+    // Extend the Level Editor viewport toolbar.
+    {
+        FToolMenuOwnerScoped ScopeOwner( UE::MovieScene::Private::ViewportToolbarOwnerName );
+
+        const FName TransformMenu = "LevelEditor.ViewportToolbar.Transform";
+        UToolMenu* const Menu = UToolMenus::Get()->ExtendMenu( TransformMenu );
+
+        FToolMenuSection& SelectionSection = Menu->FindOrAddSection( "Selection" );
+
+        {
+            FToolMenuEntry Entry = UE::MovieScene::Private::CreateToggleViewportSelectionEntry( mSequencer.ToWeakPtr() );
+            Entry.InsertPosition.Position = EToolMenuInsertType::Last;
+
+            SelectionSection.AddEntry( Entry );
+        }
+    }
+
     //---
 
     ToolkitHelpers::SetStoryboardViewport();
@@ -256,8 +346,16 @@ FEposSequenceEditorToolkit::GetReferencerName() const //override
 
 //--- FAssetEditorToolkit interface
 
+void FEposSequenceEditorToolkit::SaveAsset_Execute()
+{
+    GetSequencer()->Save();
+}
+
 void FEposSequenceEditorToolkit::OnClose()
 {
+    // Remove the viewport toolbar extensions we added earlier.
+    UToolMenus::Get()->UnregisterOwnerByName( UE::MovieScene::Private::ViewportToolbarOwnerName );
+
     sgOpenToolkits.Remove( this );
 
     mOnClosedEvent.Broadcast();

@@ -97,7 +97,7 @@ struct FFilmOverlay_Grid : IFilmOverlay
         : NumDivsH(InNumDivsH)
         , NumDivsV(InNumDivsV)
     {
-        BrushName = *FString::Printf(TEXT("FilmOverlay.%dx%dGrid"), NumDivsH, NumDivsV);
+        BrushName = *FString::Printf(TEXT("FilmOverlay.Grid%dx%d"), NumDivsH, NumDivsV);
     }
 
     FText GetDisplayName() const
@@ -501,7 +501,7 @@ int32 SFilmOverlay::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeo
     return LayerId;
 }
 
-void SFilmOverlayOptions::Construct(const FArguments& InArgs)
+void SFilmOverlayOptions::Construct(const FArguments& InArgs, TSharedPtr<SFilmOverlay> InFilmOverlay)
 {
     PrimaryColorTint = FLinearColor(1.f, 1.f, 1.f, .5f);
 
@@ -532,29 +532,61 @@ void SFilmOverlayOptions::Construct(const FArguments& InArgs)
     ToggleableOverlays.Add(MakeShareable(new FFilmOverlay_LetterBox));
     UFilmOverlayToolkit2::RegisterToggleableFilmOverlay("LetterBox", ToggleableOverlays.Last());
 
-    OverlayWidget = SNew(SFilmOverlay)
-        .Visibility(EVisibility::HitTestInvisible)
-        .FilmOverlays(this, &SFilmOverlayOptions::GetActiveFilmOverlays);
+    // used to choose between creating the whole button + menu widget, or just the menu widget
+    // e.g. Old toolbar uses the combo button, while the new one does not
+    const bool bIsComboButton = InArgs._IsComboButton.Get();
+
+    TSharedPtr<SWidget> MainWidget;
+    if( bIsComboButton )
+    {
+        // Styling replicates the same from the other old toolbar menu buttons
+        MainWidget =
+            SNew( SComboButton )
+            .ButtonStyle( &FAppStyle::Get().GetWidgetStyle<FButtonStyle>( "EditorViewportToolBar.Button" ) )
+            .ForegroundColor( FSlateColor::UseStyle() )
+            .HasDownArrow( false )
+            .ContentPadding( FMargin( 0.0f, 0.0f ) )
+            .OnGetMenuContent( this, &SFilmOverlayOptions::GetMenuContent )
+            .ButtonContent()
+            [
+                SNew( SBox )
+                    .VAlign( VAlign_Center )
+                    .HAlign( HAlign_Center )
+                    .WidthOverride( 24 )
+                    .HeightOverride( 16 )
+                    .ToolTipText( LOCTEXT( "FilmOverlaysToolTip", "Displays a list of available film overlays to apply to this viewport." ) )
+                    [
+                        SNew( SImage )
+                            .Image( this, &SFilmOverlayOptions::GetCurrentThumbnail )
+                            .ColorAndOpacity( FSlateColor::UseForeground() )
+                    ]
+            ];
+    }
+    else
+    {
+        MainWidget = GetMenuContent();
+    }
+
+    OverlayWidget = InFilmOverlay;
+    if( TSharedPtr<SFilmOverlay> OverlayWidgetPinned = OverlayWidget.Pin() )
+    {
+        OverlayWidgetPinned->SetFilmOverlays( TAttribute<TArray<IFilmOverlay*>>::CreateSP( this, &SFilmOverlayOptions::GetActiveFilmOverlays ) );
+
+        // CurrentPrimaryOverlay (and therefore Thumbnail) resets for non button version of this widget every time we create it, so let's keep it up to date
+        if( !bIsComboButton )
+        {
+            FName WidgetPrimaryOverlay = OverlayWidgetPinned->GetPrimaryFilmOverlay();
+
+            if( !WidgetPrimaryOverlay.IsNone() )
+            {
+                SetPrimaryFilmOverlay( WidgetPrimaryOverlay );
+            }
+        }
+    }
 
     ChildSlot
     [
-        SNew(SComboButton)
-        .ButtonStyle(FAppStyle::Get(), "EditorViewportToolBar.Button")
-        .ForegroundColor(FSlateColor::UseStyle())
-        .OnGetMenuContent(this, &SFilmOverlayOptions::GetMenuContent)
-        .ToolTipText(LOCTEXT("FilmOverlaysToolTip", "Displays a list of available film overlays to apply to this viewport."))
-        .HasDownArrow(false)
-        .ButtonContent()
-        [
-            SNew(SBox)
-            .WidthOverride(24)
-            .HeightOverride(16)
-            [
-                SNew(SImage)
-                .Image(this, &SFilmOverlayOptions::GetCurrentThumbnail)
-                .ColorAndOpacity(FSlateColor::UseForeground())
-            ]
-        ]
+        MainWidget.ToSharedRef()
     ];
 }
 
@@ -758,7 +790,12 @@ TSharedRef<SWidget> SFilmOverlayOptions::ConstructToggleableOverlaysMenu()
 
 FReply SFilmOverlayOptions::SetPrimaryFilmOverlay(FName InName)
 {
-    CurrentPrimaryOverlay = InName;
+    if( TSharedPtr<SFilmOverlay> OverlayWidgetPinned = OverlayWidget.Pin() )
+    {
+        OverlayWidgetPinned->SetFilmOverlays( TAttribute<TArray<IFilmOverlay*>>::CreateSP( this, &SFilmOverlayOptions::GetActiveFilmOverlays ) );
+        OverlayWidgetPinned->SetPrimaryFilmOverlay( InName );
+    }
+
     IFilmOverlay* Overlay = GetPrimaryFilmOverlay();
     if (Overlay)
     {
@@ -778,9 +815,9 @@ FReply SFilmOverlayOptions::ToggleFilmOverlay( FName InName )
     return FReply::Unhandled();
 }
 
-TSharedRef<SFilmOverlay> SFilmOverlayOptions::GetFilmOverlayWidget() const
+TSharedPtr<SFilmOverlay> SFilmOverlayOptions::GetFilmOverlayWidget() const
 {
-    return OverlayWidget.ToSharedRef();
+    return OverlayWidget.Pin();
 }
 
 TArray<IFilmOverlay*> SFilmOverlayOptions::GetActiveFilmOverlays() const
@@ -811,19 +848,23 @@ TArray<IFilmOverlay*> SFilmOverlayOptions::GetActiveFilmOverlays() const
 
 const FSlateBrush* SFilmOverlayOptions::GetCurrentThumbnail() const
 {
-    if (!CurrentPrimaryOverlay.IsNone())
+    FName PrimaryOverlay = GetFilmOverlayWidget()->GetPrimaryFilmOverlay();
+    if (!PrimaryOverlay.IsNone())
     {
-        return UFilmOverlayToolkit2::GetPrimaryFilmOverlays()[CurrentPrimaryOverlay].Get()->GetThumbnail();
+        return UFilmOverlayToolkit2::GetPrimaryFilmOverlays()[PrimaryOverlay].Get()->GetThumbnail();
     }
-
     return FEposSequenceEditorStyle::Get().GetBrush("FilmOverlay.DefaultThumbnail");
 }
 
 IFilmOverlay* SFilmOverlayOptions::GetPrimaryFilmOverlay() const
 {
-    if (!CurrentPrimaryOverlay.IsNone())
+    if (TSharedPtr<SFilmOverlay> FilmOverlayWidget = GetFilmOverlayWidget())
     {
-        return UFilmOverlayToolkit2::GetPrimaryFilmOverlays()[CurrentPrimaryOverlay].Get();
+        FName CurrentPrimaryOverlay = FilmOverlayWidget->GetPrimaryFilmOverlay();
+        if (!CurrentPrimaryOverlay.IsNone())
+        {
+            return UFilmOverlayToolkit2::GetPrimaryFilmOverlays()[CurrentPrimaryOverlay].Get();
+        }
     }
     return nullptr;
 }

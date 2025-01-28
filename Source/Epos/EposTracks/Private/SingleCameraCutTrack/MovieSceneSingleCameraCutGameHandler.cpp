@@ -352,7 +352,9 @@ void FCameraCutGameHandler::SetCameraCut(
 
         // Convert known easing functions to their corresponding view target blend parameters.
         TTuple<EViewTargetBlendFunction, float> BlendFunctionAndExp = BuiltInEasingTypeToBlendFunction(CameraCutParams.BlendType.GetValue());
-        TransitionParams.BlendTime = CameraCutParams.BlendTime * PlayRateFactor;
+
+        // The playrate of sequences is defined as delta time * rate, so we need to match approach.
+        TransitionParams.BlendTime = CameraCutParams.BlendTime * (1 / FMath::Max(UE_SMALL_NUMBER, abs(PlayRateFactor)));
         TransitionParams.bLockOutgoing = CameraCutParams.bLockPreviousCamera;
         TransitionParams.BlendFunction = BlendFunctionAndExp.Get<0>();
         TransitionParams.BlendExp = BlendFunctionAndExp.Get<1>();

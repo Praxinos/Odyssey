@@ -665,7 +665,9 @@ void UEposSequenceEditorBlueprintLibrary::FocusParentSequence()
 
         if( Hierarchy.Num() > 1 )
         {
-            CurrentSequencer.Pin()->PopToSequenceInstance( Hierarchy[Hierarchy.Num() - 2] );
+            // Copy the sequence ID since PopToSequenceInstance takes it by reference
+            FMovieSceneSequenceID SequenceID = Hierarchy[Hierarchy.Num() - 2];
+            CurrentSequencer.Pin()->PopToSequenceInstance( SequenceID );
         }
     }
 }
@@ -997,6 +999,50 @@ void UEposSequenceEditorBlueprintLibrary::PlayTo( FMovieSceneSequencePlaybackPar
 
         CurrentSequencer.Pin()->PlayTo( PlaybackParams );
     }
+}
+
+FMovieSceneSequencePlaybackParams UEposSequenceEditorBlueprintLibrary::GetPlaybackStartPosition( EMovieSceneTimeUnit TimeUnit )
+{
+    FMovieSceneSequencePlaybackParams Params;
+
+    if( CurrentSequencer.IsValid() )
+    {
+        FFrameRate DisplayRate = CurrentSequencer.Pin()->GetFocusedDisplayRate();
+        FFrameRate TickResolution = CurrentSequencer.Pin()->GetFocusedTickResolution();
+
+        UMovieSceneSequence* Sequence = CurrentSequencer.Pin()->GetFocusedMovieSceneSequence();
+        TRange<FFrameNumber> PlaybackRange = Sequence->GetMovieScene()->GetPlaybackRange();
+        FQualifiedFrameTime StartPosition( UE::MovieScene::DiscreteInclusiveLower( PlaybackRange ), TickResolution );
+
+        Params.Frame = TimeUnit == EMovieSceneTimeUnit::DisplayRate ? ConvertFrameTime( StartPosition.Time, TickResolution, DisplayRate ) : StartPosition.Time;
+        Params.Timecode = StartPosition.ToTimecode();
+        Params.Time = StartPosition.AsSeconds();
+    }
+
+    return Params;
+}
+
+FMovieSceneSequencePlaybackParams UEposSequenceEditorBlueprintLibrary::GetPlaybackEndPosition( EMovieSceneTimeUnit TimeUnit )
+{
+    FMovieSceneSequencePlaybackParams Params;
+
+    if( CurrentSequencer.IsValid() )
+    {
+        FFrameRate DisplayRate = CurrentSequencer.Pin()->GetFocusedDisplayRate();
+        FFrameRate TickResolution = CurrentSequencer.Pin()->GetFocusedTickResolution();
+
+        UMovieSceneSequence* Sequence = CurrentSequencer.Pin()->GetFocusedMovieSceneSequence();
+        TRange<FFrameNumber> PlaybackRange = Sequence->GetMovieScene()->GetPlaybackRange();
+
+        FFrameTime OneFrame = FFrameRate::TransformTime( FFrameTime( 1 ), DisplayRate, TickResolution );
+        FQualifiedFrameTime EndPosition( UE::MovieScene::DiscreteExclusiveUpper( PlaybackRange ) - OneFrame, TickResolution );
+
+        Params.Frame = TimeUnit == EMovieSceneTimeUnit::DisplayRate ? ConvertFrameTime( EndPosition.Time, TickResolution, DisplayRate ) : EndPosition.Time;
+        Params.Timecode = EndPosition.ToTimecode();
+        Params.Time = EndPosition.AsSeconds();
+    }
+
+    return Params;
 }
 
 bool UEposSequenceEditorBlueprintLibrary::IsPlaying()

@@ -5,8 +5,8 @@
 
 #if WITH_EDITOR
 
+#include "Engine/PostProcessUtils.h"
 #include "Evaluation/CameraCutPlaybackCapability.h"
-#include "IMovieScenePlayer.h"
 #include "LevelEditorViewport.h"
 #include "MovieSceneCommonHelpers.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutEditorHandler.h"
@@ -16,13 +16,15 @@ namespace UE::EposMovieScene
 
 using namespace UE::MovieScene;
 
-void FCameraCutViewportPreviewerTarget::Get(FLevelEditorViewportClient* InClient, FVector& OutLocation, FRotator& OutRotation, float& OutFOV) const
+void FCameraCutViewportPreviewerTarget::Get(FLevelEditorViewportClient* InClient, FVector& OutLocation, FRotator& OutRotation, float& OutFOV, const FPostProcessSettings*& OutPP, float& OutPPWeight) const
 {
     if (CameraComponent)
     {
         OutLocation = CameraComponent->GetComponentLocation();
         OutRotation = CameraComponent->GetComponentRotation();
         OutFOV = CameraComponent->FieldOfView;
+        OutPP = &CameraComponent->PostProcessSettings;
+        OutPPWeight = CameraComponent->PostProcessBlendWeight;
         return;
     }
 
@@ -31,6 +33,8 @@ void FCameraCutViewportPreviewerTarget::Get(FLevelEditorViewportClient* InClient
         OutLocation = CameraActor->GetActorLocation();
         OutRotation = CameraActor->GetActorRotation();
         OutFOV = -1.f;
+        OutPP = nullptr;
+        OutPPWeight = 0.f;
         return;
     }
 
@@ -42,7 +46,9 @@ void FCameraCutViewportPreviewerTarget::Get(FLevelEditorViewportClient* InClient
             FPreAnimatedCameraCutEditorState CachedValue = PreAnimatedStorage->GetCachedValue(StorageIndex);
             OutLocation = CachedValue.ViewportLocation;
             OutRotation = CachedValue.ViewportRotation;
-            OutFOV = CachedValue.ViewportFOV;
+            OutFOV = InClient->FOVAngle;
+            OutPP = nullptr;
+            OutPPWeight = 0.f;
             return;
         }
     }
@@ -52,6 +58,8 @@ void FCameraCutViewportPreviewerTarget::Get(FLevelEditorViewportClient* InClient
     OutLocation = InClient->GetViewLocation();
     OutRotation = InClient->GetViewRotation();
     OutFOV = InClient->ViewFOV;
+    OutPP = nullptr;
+    OutPPWeight = 0.f;
 }
 
 FCameraCutViewportPreviewer::FCameraCutViewportPreviewer()
@@ -129,10 +137,12 @@ void FCameraCutViewportPreviewer::ModifyViewportClientView(FEditorViewportViewMo
     FVector FromViewLocation, ToViewLocation;
     FRotator FromViewRotation, ToViewRotation;
     float FromViewFOV, ToViewFOV;
+    const FPostProcessSettings* FromPP; const FPostProcessSettings* ToPP;
+    float FromPPWeight, ToPPWeight;
     FLevelEditorViewportClient* ViewportClient = static_cast<FLevelEditorViewportClient*>(Params.ViewportClient);
 
-    FromTarget.Get(ViewportClient, FromViewLocation, FromViewRotation, FromViewFOV);
-    ToTarget.Get(ViewportClient, ToViewLocation, ToViewRotation, ToViewFOV);
+    FromTarget.Get(ViewportClient, FromViewLocation, FromViewRotation, FromViewFOV, FromPP, FromPPWeight);
+    ToTarget.Get(ViewportClient, ToViewLocation, ToViewRotation, ToViewFOV, ToPP, ToPPWeight);
 
     const FVector BlendedLocation = FMath::Lerp(FromViewLocation, ToViewLocation, BlendFactor);
     const FRotator BlendedRotation = FMath::Lerp(FromViewRotation, ToViewRotation, BlendFactor);
@@ -141,6 +151,28 @@ void FCameraCutViewportPreviewer::ModifyViewportClientView(FEditorViewportViewMo
     Params.ViewInfo.Location = BlendedLocation;
     Params.ViewInfo.Rotation = BlendedRotation;
     Params.ViewInfo.FOV = BlendedFOV;
+
+    if (FromPP)
+    {
+        FPostProcessUtils::OverridePostProcessSettings(Params.ViewInfo.PostProcessSettings, *FromPP);
+    }
+    if (ToPP)
+    {
+        FPostProcessUtils::BlendPostProcessSettings(Params.ViewInfo.PostProcessSettings, *ToPP, BlendFactor);
+    }
+
+    if (FromPP && !ToPP)
+    {
+        Params.ViewInfo.PostProcessBlendWeight = (1.f - BlendFactor);
+    }
+    else if (!FromPP && ToPP)
+    {
+        Params.ViewInfo.PostProcessBlendWeight = BlendFactor;
+    }
+    else if (FromPP && ToPP)
+    {
+        Params.ViewInfo.PostProcessBlendWeight = 1.f;
+    }
 }
 
 void FCameraCutViewportPreviewer::OnLevelViewportClientListChanged()

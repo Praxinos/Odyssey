@@ -144,9 +144,26 @@ TSharedPtr<ISequencer> UEposSequenceEditorSubsystem::GetActiveSequencer()
 
 void UEposSequenceEditorSubsystem::CopyFolders(const TArray<UMovieSceneFolder*>& Folders, FString& ExportedText)
 {
-    FSequencerUtilities::CopyFolders(Folders, ExportedText);
+    FString DummyText;
+    CopyFolders( Folders, ExportedText, DummyText, DummyText );
+}
 
-    FPlatformApplicationMisc::ClipboardCopy(*ExportedText);
+void UEposSequenceEditorSubsystem::CopyFolders( const TArray<UMovieSceneFolder*>&Folders, FString & FoldersExportedText, FString & ObjectsExportedText, FString & TracksExportedText )
+{
+    TSharedPtr<ISequencer> Sequencer = GetActiveSequencer();
+    if( Sequencer == nullptr )
+    {
+        return;
+    }
+
+    FSequencerUtilities::CopyFolders( Sequencer.ToSharedRef(), Folders, FoldersExportedText, ObjectsExportedText, TracksExportedText );
+
+    FString ExportedText;
+    ExportedText += ObjectsExportedText;
+    ExportedText += TracksExportedText;
+    ExportedText += FoldersExportedText;
+
+    FPlatformApplicationMisc::ClipboardCopy( *ExportedText );
 }
 
 bool UEposSequenceEditorSubsystem::PasteFolders(const FString& InTextToImport, FMovieScenePasteFoldersParams PasteFoldersParams, TArray<UMovieSceneFolder*>& OutFolders)

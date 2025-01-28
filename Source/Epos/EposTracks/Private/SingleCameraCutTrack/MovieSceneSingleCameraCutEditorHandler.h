@@ -35,7 +35,6 @@ struct FPreAnimatedCameraCutEditorState
 {
     FVector ViewportLocation;
     FRotator ViewportRotation;
-    float ViewportFOV = 0.f;
 };
 
 /** Pre-animated traits for in-editor camera cuts */

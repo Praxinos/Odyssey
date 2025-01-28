@@ -507,6 +507,14 @@ public:
 
 public:
 
+    /** Return the playback start position */
+    UFUNCTION( BlueprintCallable, Category = "Level Sequence Editor", DisplayName = "Get Playback Start Time" )
+    static FMovieSceneSequencePlaybackParams GetPlaybackStartPosition( EMovieSceneTimeUnit TimeUnit = EMovieSceneTimeUnit::DisplayRate );
+
+    /** Return end of the playback range in the Sequencer UI, which accounts for the exclusive upper bound */
+    UFUNCTION( BlueprintCallable, Category = "Level Sequence Editor", DisplayName = "Get Playback End Time" )
+    static FMovieSceneSequencePlaybackParams GetPlaybackEndPosition( EMovieSceneTimeUnit TimeUnit = EMovieSceneTimeUnit::DisplayRate );
+
     /** Check whether the sequence is actively playing. */
     UFUNCTION(BlueprintPure, Category = "Epos Sequence Editor")
     static bool IsPlaying();
