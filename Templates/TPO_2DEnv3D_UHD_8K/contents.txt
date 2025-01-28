@@ -1,4 +1,0 @@
-../../../Templates/TPO_2DEnv3D_UHD_8K/manifest.json
-../../../Templates/TPO_2DEnv3D_UHD_8K/Config/config.ini
-../../../Templates/TPO_2DEnv3D_UHD_8K/Media/TPO_2DEnv3D_UHD_8K.png
-../../../Templates/TPO_2DEnv3D_UHD_8K/Media/TPO_2DEnv3D_UHD_8K_Preview.png

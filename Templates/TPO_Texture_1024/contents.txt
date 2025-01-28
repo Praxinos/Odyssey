@@ -1,4 +1,0 @@
-../../../Templates/TPO_Texture_1024/manifest.json
-../../../Templates/TPO_Texture_1024/Config/config.ini
-../../../Templates/TPO_Texture_1024/Media/TPO_Texture_1024.png
-../../../Templates/TPO_Texture_1024/Media/TPO_Texture_1024_Preview.png

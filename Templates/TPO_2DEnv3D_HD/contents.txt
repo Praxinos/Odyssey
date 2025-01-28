@@ -1,4 +1,0 @@
-../../../Templates/TPO_2DEnv3D_HD/manifest.json
-../../../Templates/TPO_2DEnv3D_HD/Config/config.ini
-../../../Templates/TPO_2DEnv3D_HD/Media/TPO_2DEnv3D_HD.png
-../../../Templates/TPO_2DEnv3D_HD/Media/TPO_2DEnv3D_HD_Preview.png

@@ -1,4 +1,0 @@
-../../../Templates/TPO_ModelingTools/manifest.json
-../../../Templates/TPO_ModelingTools/Config/config.ini
-../../../Templates/TPO_ModelingTools/Media/TPO_ModelingTools.png
-../../../Templates/TPO_ModelingTools/Media/TPO_ModelingTools_Preview.png
