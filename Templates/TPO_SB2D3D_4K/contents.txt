@@ -1,0 +1,4 @@
+../../../Templates/TPO_SB2D3D_4K/manifest.json
+../../../Templates/TPO_SB2D3D_4K/Config/config.ini
+../../../Templates/TPO_SB2D3D_4K/Media/TPO_SB2D3D_4K.png
+../../../Templates/TPO_SB2D3D_4K/Media/TPO_SB2D3D_4K_Preview.png
