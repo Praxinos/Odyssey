@@ -943,13 +943,13 @@ UOdysseyPainterEditorVectorBaseTool::SetVectorEditionFlags( uint64 iViewMode )
     if( mediaVectors.Num() )
     {
         FOdysseyVectorGroupPaint* vectorScene = mediaVectors[0]->GetScene();
-        FOdysseyVectorEngine* vectorEngine = vectorScene->GetEngine();
 
-        vectorEngine->ResetHUD();
-        vectorEngine->Invalidate( 0 );
         FOdysseyVectorEngine::Notify( vectorScene, FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
                                                  | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
-                                                 | FOdysseyPainterEditor::UI_UPDATE_TIMELINE );
+                                                 | FOdysseyPainterEditor::UI_UPDATE_TIMELINE
+                                                 | FOdysseyPainterEditor::UI_UPDATE_HUD );
+
+        vectorScene->GetLayer()->RequestRedraw( vectorScene->GetCell(), 0 );
     }
 }
 
