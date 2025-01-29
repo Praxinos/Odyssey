@@ -34,6 +34,8 @@ UOdysseyAnimationCellImageVector::~UOdysseyAnimationCellImageVector()
 void
 UOdysseyAnimationCellImageVector::PostInitProperties()
 {
+    UOdysseyAnimationLayerImageVector* layerImageVector = Cast<UOdysseyAnimationLayerImageVector>(GetLayer());
+
     Super::PostInitProperties();
 
     if (GetFlags() & RF_ClassDefaultObject)
@@ -53,6 +55,8 @@ UOdysseyAnimationCellImageVector::PostInitProperties()
 
     mVectorCell = MakeShared<FOdysseyVectorCell>( this
                                                 , new FOdysseyVectorGroupPaint( "Scene" ) );
+    // The reading process needs a valid sharedenv as the top object.
+    layerImageVector->GetVectorLayer()->AppendChild( mVectorCell.Get() );
 
     mVectorBlock->Init(mVectorBlockId, mVectorCell, animation->GetWidth(), animation->GetHeight(), animation->GetFormat());
 }

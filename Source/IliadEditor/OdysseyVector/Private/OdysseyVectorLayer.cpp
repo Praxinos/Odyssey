@@ -100,6 +100,17 @@ FOdysseyVectorLayer::RequestRedraw( uint64 iRedrawFlags )
     } );
 }
 
+uint32
+FOdysseyVectorLayer::RemoveChild( FOdysseyVectorObject* iChild )
+{
+    if( iChild->GetClass() == FOdysseyVectorCell::StaticClass() )
+    {
+        mInvalidatedCellList.remove ( static_cast<FOdysseyVectorCell*>( iChild ) );
+    }
+
+    return FOdysseyVectorObject::RemoveChild( iChild );
+}
+
 bool
 FOdysseyVectorLayer::HasBaseClass( uint32 iBaseClassID )
 {

@@ -122,6 +122,7 @@ FOdysseyVectorTagInbetweener::Copy( FOdysseyVectorObject* iDestOwnerObject )
 
     newTagDefaultBreakdown->SetTargetDrawingIndex( GetLength() - 1 );
 
+    // copy breakdowns
     for( FInbetweenerBreakdown* breakdown : mBreakdownList )
     {
         uint32 breakdownTargetDrawingIndex = breakdown->GetTargetDrawingIndex();
@@ -129,15 +130,64 @@ FOdysseyVectorTagInbetweener::Copy( FOdysseyVectorObject* iDestOwnerObject )
         if( ( breakdownTargetDrawingIndex > newTagDefaultBreakdown->GetSourceDrawingIndex() )
          && ( breakdownTargetDrawingIndex < newTagDefaultBreakdown->GetTargetDrawingIndex() ) )
         {
-            newTag->AddBreakdown( breakdown->GetTargetDrawingIndex(), false, false );
+            FInbetweenerBreakdown* newBreakdown = newTag->AddBreakdown( breakdown->GetTargetDrawingIndex(), false, false );
+            std::vector<::ULIS::FVec2D> targetPositionBuffer;
+            std::vector<float> spacingBuffer;
+
+            breakdown->GetGrid()->GetGeometry( targetPositionBuffer, eInbetweenerPointPositionType::TargetPosition );
+
+            newBreakdown->SetTargetTransform( breakdown->GetTargetTranslationX()
+                                           ,  breakdown->GetTargetTranslationY()
+                                           ,  breakdown->GetTargetRotation()
+                                           ,  breakdown->GetTargetScalingX()
+                                           ,  breakdown->GetTargetScalingY() );
+
+            newBreakdown->GetGrid()->Make( targetPositionBuffer, true );
+
+            // copy charts
+            breakdown->GetChart()->GetSpacing( spacingBuffer );
+
+            for( uint32 i = 0; i < spacingBuffer.size(); i++ )
+            {
+                FInbetweenerChart::Inbetween& inbetween = newBreakdown->GetChart()->GetInbetweenBuffer()[i];
+
+                inbetween.SetSpacing( spacingBuffer[i] );
+            }
         }
     }
-/*
+
+    // copy routes/trajectories
     for( FInbetweenerRoute* route : mRouteList )
     {
-        newTag->AddRoute( breakdown->GetTargetDrawingIndex(), false );
+        FInbetweenerRoute* newRoute = new FInbetweenerRoute( newTag
+                                                           , route->GetQuadIndex()
+                                                           , route->GetQuadU()
+                                                           , route->GetQuadV() );
+
+        newTag->AddRoute( newRoute );
+
+        for( uint32 i = 0; i < newRoute->GetTrajectoryBuffer().size(); i++ )
+        {
+            FInbetweenerTrajectory& srcTrajectory =    route->GetTrajectoryBuffer()[i];
+            FInbetweenerTrajectory& dstTrajectory = newRoute->GetTrajectoryBuffer()[i];
+
+            for( uint32 j = 0; j < dstTrajectory.GetWaypointBuffer().size(); j++ )
+            {
+                FInbetweenerWaypoint& srcWaypoint = srcTrajectory.GetWaypointBuffer()[j];
+                FInbetweenerWaypoint& dstWaypoint = dstTrajectory.GetWaypointBuffer()[j];
+
+                srcWaypoint.SetRatio( dstWaypoint.GetRatio() );
+            }
+
+            dstTrajectory.GetHandle(0)->Set( srcTrajectory.GetHandle(0)->GetDirection()
+                                           , srcTrajectory.GetHandle(0)->GetLengthRatio() );
+
+            dstTrajectory.GetHandle(1)->Set( srcTrajectory.GetHandle(1)->GetDirection()
+                                           , srcTrajectory.GetHandle(1)->GetLengthRatio() );
+        }
     }
-*/
+
+
     return newTag;
 }
 
