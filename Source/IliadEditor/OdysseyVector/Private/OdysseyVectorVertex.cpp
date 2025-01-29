@@ -862,9 +862,15 @@ FOdysseyVectorVertex::GetHandlePosition( ::ULIS::FVec2D iHandlePosition[2] )
     }
 }
 
-// TODO: rename as SetSegmentAligned
 void
 FOdysseyVectorVertex::SetHandleAligned( bool iHandleAligned )
+{
+    SetHandleAligned( iHandleAligned, true );
+}
+
+// TODO: rename as SetSegmentAligned
+void
+FOdysseyVectorVertex::SetHandleAligned( bool iHandleAligned, bool iAlignNow )
 {
     if( iHandleAligned == true )
     {
@@ -872,7 +878,7 @@ FOdysseyVectorVertex::SetHandleAligned( bool iHandleAligned )
 
         mFlags |= HANDLE_ALIGNED;
 
-        if( firstSegment )
+        if( iAlignNow && firstSegment )
         {
             FOdysseyVectorHandleSegment* handle = firstSegment->GetHandle( this );
 

@@ -344,6 +344,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorVertex : public FOdysseyVectorPoint
          * @param iHandleAligned
          */
         void SetHandleAligned( bool iHandleAligned );
+        void SetHandleAligned( bool iHandleAligned, bool iAlignNow );
 
         /**
          * @brief Set the vertex as VISITED. Internal use only for the GroupPaint class.

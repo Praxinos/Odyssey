@@ -1062,7 +1062,28 @@ FSnapshotPoint::Restore()
     {
         ::ULIS::FVec2D swapCoords = mPoint->GetCoords();
 
-        mPoint->Set( mCoords.x, mCoords.y );
+        if( mPoint->GetClass() == FOdysseyVectorHandleSegment::StaticClass() )
+        {
+            FOdysseyVectorHandleSegment* handle = static_cast<FOdysseyVectorHandleSegment*>( mPoint );
+            bool alignStatus = handle->GetAttachedVertex()->IsHandleAligned();
+
+            if( alignStatus )
+            {
+                handle->GetAttachedVertex()->SetHandleAligned( false );
+            }
+
+            mPoint->Set( mCoords.x, mCoords.y );
+
+            if( alignStatus )
+            {
+                // second parameter is false to prevent immediate alignment
+                handle->GetAttachedVertex()->SetHandleAligned( true, false );
+            }
+        }
+        else
+        {
+            mPoint->Set( mCoords.x, mCoords.y );
+        }
 
         mCoords = swapCoords;
     }
