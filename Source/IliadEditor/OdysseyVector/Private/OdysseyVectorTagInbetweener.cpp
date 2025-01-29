@@ -1046,9 +1046,11 @@ void FOdysseyVectorTagInbetweener::Update( uint32 iUpdateFlags
             || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_HIERARCHY      )
             || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_TOPOLOGY       )
             || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_SHAPE          )
+            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_COLOR          ) // for buckets
             || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TAG_LIST )
             || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_TOPOLOGY )
-            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    ) )
+            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_SHAPE    )
+            || ( iOwnerInvalidationFlags & FOdysseyVectorObject::INVALIDATE_CHILD_COLOR    ) ) // for buckets
         {
             // map object to the first grid
             Map();
@@ -1972,12 +1974,12 @@ FOdysseyVectorTagInbetweener::MoveInbetween( FInbetweenerChart::Inbetween* iInbe
 void
 FOdysseyVectorTagInbetweener::AllocBuffers()
 {
-    for( FInterpolatedPath& interpolatedPath : mInterpolatedPathBuffer )
+    for( FInterpolatedObject* interpolatedObject : mInterpolatedObjectArray )
     {
-        uint32 pointCount = interpolatedPath.GetInterpolatedPointBuffer().size();
+        uint32 pointCount = interpolatedObject->GetInterpolatedPointBuffer().size();
 
         // Note: the position at the first drawing will not be used
-        interpolatedPath.GetInterpolatedPointGeometryBuffer().resize( GetLength() * pointCount );
+        interpolatedObject->GetInterpolatedPointGeometryBuffer().resize( GetLength() * pointCount );
     }
 }
 
@@ -2173,13 +2175,37 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                             {
                                 copyFlags &= (~FOdysseyVectorObject::COPY_RETOPOLOGY);
                             }
-/*
+
                             for( FInterpolatedGroupPaint& interpolatedGroupPaint : inbetweenerTag->mInterpolatedGroupPaintBuffer )
                             {
+                                BLMatrix2D commitWorldMatrix = inbetweenerTag->GetOwner()->GetWorldMatrix();
                                 uint32 pointCount = interpolatedGroupPaint.GetInterpolatedPointBuffer().size();
                                 uint32 skippedOffset = ( drawing->GetIndex() * pointCount );
+                                FOdysseyVectorGroupPaint* paintgroup = interpolatedGroupPaint.GetOriginalGroupPaint();
+
+                                commitWorldMatrix.transform( drawing->localMatrix );
+                                commitWorldMatrix.transform( interpolatedGroupPaint.GetRelativeMatrix() );
+
+                                for( uint32 i = 0; i < interpolatedGroupPaint.GetInterpolatedPointBuffer().size(); i++ )
+                                {
+                                    FInterpolatedPoint* interpolatedPoint = &interpolatedGroupPaint.GetInterpolatedPointBuffer()[i];
+                                    FOdysseyVectorPoint* originalPoint = interpolatedPoint->GetOriginalPoint();
+                                    ::ULIS::FVec2D* commitPosition = &interpolatedGroupPaint.GetInterpolatedPointGeometryBuffer()[skippedOffset + i].position;
+                                    ::ULIS::FVec2D worldBucketPosition = FOdysseyVector::MapPoint( commitWorldMatrix, *commitPosition );
+                                    ::ULIS::FVec2D localBucketPosition = FOdysseyVector::MapPoint( paintgroup->GetInverseWorldMatrix(), worldBucketPosition );
+
+                                    if( originalPoint->GetClass() == FOdysseyVectorBucket::StaticClass() )
+                                    {
+                                        FOdysseyVectorBucket* originalBucket = static_cast<FOdysseyVectorBucket*>(originalPoint);
+                                        ::ULIS::FVec2D originalBucketPosition = originalBucket->GetCoords();
+
+                                        originalBucket->Set( localBucketPosition );
+
+                                        *commitPosition = originalBucketPosition;
+                                    }
+                                }
                             }
-*/
+
                             for( FInterpolatedPath& interpolatedPath : inbetweenerTag->mInterpolatedPathBuffer )
                             {
                                 BLMatrix2D pathWorldMatrix = inbetweenerTag->GetOwner()->GetWorldMatrix();
@@ -2256,6 +2282,30 @@ FOdysseyVectorTagInbetweener::Commit( std::list<FOdysseyVectorTag*>& oRemovedTag
                             FInbetweenerDrawing* drawing = inbetweenerTag->GetDrawing( drawingIndex );
 
                             //drawing->localMatrix.reset();
+
+
+                            // revert buckets coords after having copied the object.
+                            // Coords were saved in the point position buffer
+                            for( FInterpolatedGroupPaint& interpolatedGroupPaint : inbetweenerTag->mInterpolatedGroupPaintBuffer )
+                            {
+                                uint32 pointCount = interpolatedGroupPaint.GetInterpolatedPointBuffer().size();
+                                uint32 skippedOffset = ( drawing->GetIndex() * pointCount );
+                                FOdysseyVectorGroupPaint* paintgroup = interpolatedGroupPaint.GetOriginalGroupPaint();
+
+                                for( uint32 i = 0; i < interpolatedGroupPaint.GetInterpolatedPointBuffer().size(); i++ )
+                                {
+                                    FInterpolatedPoint* interpolatedPoint = &interpolatedGroupPaint.GetInterpolatedPointBuffer()[i];
+                                    FOdysseyVectorPoint* originalPoint = interpolatedPoint->GetOriginalPoint();
+                                    ::ULIS::FVec2D* commitPosition = &interpolatedGroupPaint.GetInterpolatedPointGeometryBuffer()[skippedOffset + i].position;
+
+                                    if( originalPoint->GetClass() == FOdysseyVectorBucket::StaticClass() )
+                                    {
+                                        FOdysseyVectorBucket* originalBucket = static_cast<FOdysseyVectorBucket*>(originalPoint);
+
+                                        originalBucket->Set( *commitPosition );
+                                    }
+                                }
+                            }
 
                             // revert vertices coords after having copied the object.
                             // Coords were saved in the point position buffer
