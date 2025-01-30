@@ -37,6 +37,7 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeader
         FOdysseyPainterEditor* GetEditor() const;
 
     protected:
+        void OnSelectionChanged( TSharedPtr<FInbetweeningListViewItem> iItem, ESelectInfo::Type SelectInfo );
         TSharedRef<ITableRow> OnGenerateRow( TSharedPtr<FInbetweeningListViewItem> iItem
                                            , const TSharedRef<STableViewBase>& iOwnerTable );
         TSharedPtr<SWidget> OnContextMenuOpening();
@@ -47,11 +48,13 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationTimelineInbetweeningHeader
         void MapActionsToCommandList();
 
     private :
+/*
         virtual void Private_SelectRangeFromCurrentTo ( TSharedPtr<FInbetweeningListViewItem> iItem ) override;
         virtual void Private_SetItemSelection ( TSharedPtr<FInbetweeningListViewItem> iItem
                                               , bool bShouldBeSelected
                                               , bool bWasUserDirected ) override;
         virtual void Private_ClearSelection() override;
+*/
         virtual bool Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const override;
 
     protected:

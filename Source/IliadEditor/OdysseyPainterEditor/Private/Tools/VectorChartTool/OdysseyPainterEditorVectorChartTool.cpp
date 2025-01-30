@@ -25,6 +25,7 @@ UOdysseyPainterEditorVectorChartTool::~UOdysseyPainterEditorVectorChartTool()
 UOdysseyPainterEditorVectorChartTool::UOdysseyPainterEditorVectorChartTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorChartToolHUD( this ), false )
     , PickingRadius( 10.0f )
+    , Factor( 1 )
     , EditionMode ( eChartEditionMode::OneByOne )
     , ChartType ( eChartType::Partial )
 {
@@ -155,7 +156,7 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDownVector( FOdysseyVectorGroupPain
     mPickedBreakdown = nullptr;
     mPickedInbetween = nullptr;
     mPickedBezierPoint = nullptr;
-    mEasing = 0.0f;
+    mStrength = 0.0f;
 
     mMouseAtDown.x = iPointInTexture.x;
     mMouseAtDown.y = iPointInTexture.y;
@@ -326,18 +327,18 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
                 {
                     if( pointInTexture.x < mMouseAtDown.x )
                     {
-                        breakdown->EaseIn( mEasing );
+                        breakdown->EaseIn( mStrength, Factor );
 
-                        mEasing = std::clamp( ( pointInTexture.deltaPosition.X < 0.0f ) ? mEasing + 0.2f
-                                                                                        : mEasing - 0.2f, 0.0f, 1.0f );
+                        mStrength = std::clamp( ( pointInTexture.deltaPosition.X < 0.0f ) ? mStrength + 0.2f
+                                                                                          : mStrength - 0.2f, 0.0f, 1.0f );
                     }
 
                     if( pointInTexture.x > mMouseAtDown.x )
                     {
-                        breakdown->EaseOut( mEasing );
+                        breakdown->EaseOut( mStrength, Factor );
 
-                        mEasing = std::clamp( ( pointInTexture.deltaPosition.X > 0.0f ) ? mEasing + 0.2f
-                                                                                        : mEasing - 0.2f, 0.0f, 1.0f );
+                        mStrength = std::clamp( ( pointInTexture.deltaPosition.X > 0.0f ) ? mStrength + 0.2f
+                                                                                          : mStrength - 0.2f, 0.0f, 1.0f );
                     }
                 }
             }
@@ -346,10 +347,10 @@ UOdysseyPainterEditorVectorChartTool::OnMouseDragVector( FOdysseyVectorGroupPain
             {
                 if( mPickedInbetween )
                 {
-                    mPickedInbetween->GetChart()->GetBreakdown()->EaseInAndOut( mEasing, mPickedInbetween );
+                    mPickedInbetween->GetChart()->GetBreakdown()->EaseInAndOut( mStrength, Factor, mPickedInbetween );
 
-                    mEasing = std::clamp( ( pointInTexture.deltaPosition.X > 0.0f ) ? mEasing + 0.2f
-                                                                                    : mEasing - 0.2f, -1.0f, 1.0f );
+                    mStrength = std::clamp( ( pointInTexture.deltaPosition.X > 0.0f ) ? mStrength + 0.2f
+                                                                                      : mStrength - 0.2f, -1.0f, 1.0f );
                 }
             }
 

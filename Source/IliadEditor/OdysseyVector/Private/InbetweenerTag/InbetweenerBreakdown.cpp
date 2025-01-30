@@ -240,10 +240,10 @@ FInbetweenerBreakdown::GetIndex()
 }
 
 static double
-GetEaseOutSpacing( double iT, double iFraction )
+GetEaseOutSpacing( double iStrength, double iT )
 {
-    double t = iT;
-    double u = 1.0f - iT;
+    double t = iStrength;
+    double u = 1.0f - iStrength;
 
 //UE_LOG(LogTemp, Warning, TEXT("%f %f"), t, u );
 
@@ -251,14 +251,14 @@ GetEaseOutSpacing( double iT, double iFraction )
     ::ULIS::FVec2D p2 = ::ULIS::FVec2D( 1.0f, 1.0f );
     ::ULIS::FVec2D p1 = ::ULIS::FVec2D( 0.0f + ( u * 0.5f ), 0.5f + ( t * 0.5f ) );
 
-    return ::ULIS::QuadraticBezierPointAtParameter( p0, p1, p2, iFraction ).y;
+    return ::ULIS::QuadraticBezierPointAtParameter( p0, p1, p2, iT ).y;
 }
 
 static double
-GetEaseInSpacing( double iT, double iFraction )
+GetEaseInSpacing( double iStrength, double iT )
 {
-    double t = iT;
-    double u = 1.0f - iT;
+    double t = iStrength;
+    double u = 1.0f - iStrength;
 
 //UE_LOG(LogTemp, Warning, TEXT("%f %f"), t, u );
 
@@ -266,11 +266,11 @@ GetEaseInSpacing( double iT, double iFraction )
     ::ULIS::FVec2D p2 = ::ULIS::FVec2D( 1.0f, 1.0f );
     ::ULIS::FVec2D p1 = ::ULIS::FVec2D( 0.5f + ( t * 0.5f ), 0.0f + ( u * 0.5f ) );
 
-    return ::ULIS::QuadraticBezierPointAtParameter( p0, p1, p2, iFraction ).y;
+    return ::ULIS::QuadraticBezierPointAtParameter( p0, p1, p2, iT ).y;
 }
 
 void
-FInbetweenerBreakdown::EaseOut( float iEasing, uint32 iFrom, uint32 iTo )
+FInbetweenerBreakdown::EaseOut( float iStrength, uint32 iFactor, uint32 iFrom, uint32 iTo )
 {
     uint32 divisionCount = iTo - iFrom + 1;
     float fromSpacing = mChart.GetInbetweenBuffer()[iFrom].GetSpacing();
@@ -278,8 +278,14 @@ FInbetweenerBreakdown::EaseOut( float iEasing, uint32 iFrom, uint32 iTo )
 
     for( uint32 i = iFrom + 1, j = 1; i < iTo; i++, j++ )
     {
-        double fraction = ( double ) j / ( divisionCount - 1 );
-        double spacing = GetEaseOutSpacing( iEasing, fraction );
+        double t = ( double ) j / ( divisionCount - 1 );
+        double spacing = t;
+
+        for( uint32 k = 0; k < iFactor; k++ )
+        {
+            spacing = GetEaseOutSpacing( iStrength, spacing );
+        }
+
 //UE_LOG(LogTemp, Warning, TEXT("Spacing:%f"), spacing );
         mChart.GetInbetweenBuffer()[i].SetSpacing( fromSpacing + ( spacing * ( toSpacing - fromSpacing ) ) );
     }
@@ -289,15 +295,16 @@ FInbetweenerBreakdown::EaseOut( float iEasing, uint32 iFrom, uint32 iTo )
 }
 
 void
-FInbetweenerBreakdown::EaseOut( float iEasing )
+FInbetweenerBreakdown::EaseOut( float iStrength, uint32 iFactor )
 {
-    EaseOut( fabs(iEasing)
+    EaseOut( fabs(iStrength)
+           , iFactor
            , mChart.GetInbetweenBuffer().front().GetIndex()
            , mChart.GetInbetweenBuffer().back().GetIndex() );
 }
 
 void
-FInbetweenerBreakdown::EaseIn( float iEasing, uint32 iFrom, uint32 iTo )
+FInbetweenerBreakdown::EaseIn( float iStrength, uint32 iFactor, uint32 iFrom, uint32 iTo )
 {
     uint32 divisionCount = iTo - iFrom + 1;
     float fromSpacing = mChart.GetInbetweenBuffer()[iFrom].GetSpacing();
@@ -305,8 +312,14 @@ FInbetweenerBreakdown::EaseIn( float iEasing, uint32 iFrom, uint32 iTo )
 
     for( uint32 i = iFrom + 1, j = 1; i < iTo; i++, j++ )
     {
-        double fraction = ( double ) j / ( divisionCount - 1 );
-        double spacing = GetEaseInSpacing( iEasing, fraction );
+        double t = ( double ) j / ( divisionCount - 1 );
+        double spacing = t;
+
+        for( uint32 k = 0; k < iFactor; k++ )
+        {
+            spacing = GetEaseInSpacing( iStrength, spacing );
+        }
+
 //UE_LOG(LogTemp, Warning, TEXT("Spacing:%f"), spacing );
         mChart.GetInbetweenBuffer()[i].SetSpacing ( fromSpacing + ( spacing * ( toSpacing - fromSpacing ) ) );
     }
@@ -316,25 +329,26 @@ FInbetweenerBreakdown::EaseIn( float iEasing, uint32 iFrom, uint32 iTo )
 }
 
 void
-FInbetweenerBreakdown::EaseIn( float iEasing )
+FInbetweenerBreakdown::EaseIn( float iStrength, uint32 iFactor )
 {
-    EaseIn( fabs(iEasing)
+    EaseIn( fabs(iStrength)
+           , iFactor
            , mChart.GetInbetweenBuffer().front().GetIndex()
            , mChart.GetInbetweenBuffer().back().GetIndex() );
 }
 
 void
-FInbetweenerBreakdown::EaseInAndOut( float iEasing, FInbetweenerChart::Inbetween* iInbetween )
+FInbetweenerBreakdown::EaseInAndOut( float iStrength, uint32 iFactor, FInbetweenerChart::Inbetween* iInbetween )
 {
-    if( iEasing > 0.0f )
+    if( iStrength > 0.0f )
     {
-        EaseIn ( fabs(iEasing), mChart.GetInbetweenBuffer().front().GetIndex(), iInbetween->GetIndex() );
-        EaseOut( fabs(iEasing), iInbetween->GetIndex(), mChart.GetInbetweenBuffer().back().GetIndex() );
+        EaseIn ( fabs(iStrength), iFactor, mChart.GetInbetweenBuffer().front().GetIndex(), iInbetween->GetIndex() );
+        EaseOut( fabs(iStrength), iFactor, iInbetween->GetIndex(), mChart.GetInbetweenBuffer().back().GetIndex() );
     }
     else
     {
-        EaseOut( fabs(iEasing), mChart.GetInbetweenBuffer().front().GetIndex(), iInbetween->GetIndex() );
-        EaseIn ( fabs(iEasing), iInbetween->GetIndex(), mChart.GetInbetweenBuffer().back().GetIndex() );
+        EaseOut( fabs(iStrength), iFactor, mChart.GetInbetweenBuffer().front().GetIndex(), iInbetween->GetIndex() );
+        EaseIn ( fabs(iStrength), iFactor, iInbetween->GetIndex(), mChart.GetInbetweenBuffer().back().GetIndex() );
     }
 }
 

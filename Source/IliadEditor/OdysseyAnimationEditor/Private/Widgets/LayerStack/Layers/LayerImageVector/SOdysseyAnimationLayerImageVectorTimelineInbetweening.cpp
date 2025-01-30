@@ -25,6 +25,7 @@
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTag.h"
 #include "OdysseyVectorTagInbetweener.h"
+#include "Undo/OdysseyVectorUndoSelectObject.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownAdd.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownRemove.h"
 #include "Undo/OdysseyVectorUndoTagInbetweenerBreakdownTargetVisibility.h"
@@ -66,7 +67,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Construct( const FArgumen
         .ListItemsSource(&mItemsSource)
         .OnGenerateRow( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnGenerateRow )
         //.OnGetChildren( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnGetChildren )
-        //.OnSelectionChanged( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged )
+        .OnSelectionChanged( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged )
         //.OnItemScrolledIntoView(this, &SOdysseyLayerStackTreeView::OnItemScrolledIntoView)
         .OnContextMenuOpening( this, &SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnContextMenuOpening )
         .SelectionMode( ESelectionMode::Multi )
@@ -127,6 +128,7 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Update()
     RequestListRefresh();
 }
 
+/*
 void
 SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_SelectRangeFromCurrentTo ( TSharedPtr<FInbetweeningListViewItem> iItem )
 {
@@ -207,6 +209,69 @@ SOdysseyAnimationLayerImageVectorTimelineInbetweening::Private_ClearSelection()
 
     // Keep internal array consistent for use by other methods
     SelectedItems.Empty();
+}
+*/
+
+void
+SOdysseyAnimationLayerImageVectorTimelineInbetweening::OnSelectionChanged( TSharedPtr<FInbetweeningListViewItem> iItem
+                                                                         , ESelectInfo::Type SelectInfo )
+{
+    std::list<FOdysseyVectorCell*> cellList;
+    uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                    | FOdysseyPainterEditor::UI_UPDATE_HUD;
+
+    if( SelectInfo != ESelectInfo::Type::Direct )
+    {
+        for( TSharedPtr<FInbetweeningListViewItem> item : mItemsSource )
+        {
+            FOdysseyVectorCell* cell = item->GetInbetweenerTag()->GetOwner()->GetCell();
+
+            if( std::find( cellList.begin(), cellList.end(), cell ) == cellList.end() )
+            {
+                cellList.push_back( cell );
+            }
+        }
+
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.selection-changed","Selection Changed"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( mAnimationLayerImageVector->GetVectorLayer()
+                                                                         , cellList
+                                                                         , retFlags );
+
+            GUndo->StoreUndo( mAnimationLayerImageVector, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+            //TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+            //if (source)
+                //source->RecordCurrentFrameUndo();
+        }
+        GEditor->EndTransaction();
+
+        for( FOdysseyVectorCell* cell : cellList )
+        {
+            cell->ClearObjectSelection();
+
+            // mark for redraw (to force-redraw the HUD)
+            mAnimationLayerImageVector->GetVectorLayer()->InvalidateCell( cell );
+        }
+
+        for( TSharedPtr<FInbetweeningListViewItem> item : mItemsSource )
+        {
+            TArray<TSharedPtr<FInbetweeningListViewItem>> selectedItems = GetSelectedItems();
+
+            for( int i = 0; i < selectedItems.Num(); i++ )
+            {
+                FOdysseyVectorObject* selectedObject = selectedItems[i].Get()->GetInbetweenerTag()->GetOwner();
+
+                selectedObject->GetCell()->SelectObject( selectedObject );
+            }
+        }
+
+        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( 0 );
+
+        FOdysseyVectorEngine::Notify( nullptr, retFlags );
+    }
 }
 
 bool

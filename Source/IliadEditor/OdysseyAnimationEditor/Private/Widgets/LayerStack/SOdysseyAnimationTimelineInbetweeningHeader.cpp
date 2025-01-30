@@ -25,6 +25,7 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorCell.h"
 #include "Undo/OdysseyVectorUndoTagRemove.h"
+#include "Undo/OdysseyVectorUndoSelectObject.h"
 
 #include "Framework/Commands/GenericCommands.h"
 
@@ -58,7 +59,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Construct( const FArguments& InArgs
         .ListItemsSource(&mItemsSource)
         .OnGenerateRow( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnGenerateRow )
         //.OnGetChildren( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnGetChildren )
-        //.OnSelectionChanged( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnSelectionChanged )
+        .OnSelectionChanged( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnSelectionChanged )
         //.OnItemScrolledIntoView(this, &SOdysseyLayerStackTreeView::OnItemScrolledIntoView)
         .OnContextMenuOpening( this, &SOdysseyAnimationTimelineInbetweeningHeader::OnContextMenuOpening )
         .SelectionMode( ESelectionMode::Multi )
@@ -114,6 +115,7 @@ SOdysseyAnimationTimelineInbetweeningHeader::Update()
     RequestListRefresh();
 }
 
+/*
 void
 SOdysseyAnimationTimelineInbetweeningHeader::Private_SelectRangeFromCurrentTo ( TSharedPtr<FInbetweeningListViewItem> iItem )
 {
@@ -196,11 +198,75 @@ SOdysseyAnimationTimelineInbetweeningHeader::Private_ClearSelection()
     // Keep internal array consistent for use by other methods
     SelectedItems.Empty();
 }
+*/
+
+void
+SOdysseyAnimationTimelineInbetweeningHeader::OnSelectionChanged( TSharedPtr<FInbetweeningListViewItem> iItem
+                                                               , ESelectInfo::Type SelectInfo )
+{
+    std::list<FOdysseyVectorCell*> cellList;
+    uint64 retFlags = FOdysseyPainterEditor::UI_UPDATE_OBJECTDETAILS
+                    | FOdysseyPainterEditor::UI_UPDATE_HUD;
+
+    if( SelectInfo != ESelectInfo::Type::Direct )
+    {
+        for( TSharedPtr<FInbetweeningListViewItem> item : mItemsSource )
+        {
+            FOdysseyVectorCell* cell = item->GetInbetweenerTag()->GetOwner()->GetCell();
+
+            if( std::find( cellList.begin(), cellList.end(), cell ) == cellList.end() )
+            {
+                cellList.push_back( cell );
+            }
+        }
+
+        // needed for valid GUndo pointer
+        GEditor->BeginTransaction(LOCTEXT("vector-scene-tree-view.transaction.selection-changed","Selection Changed"));
+        if( GUndo )
+        {
+            FOdysseyVectorUndo* undo = new FOdysseyVectorUndoSelectObject( mAnimationLayerImageVector->GetVectorLayer()
+                                                                         , cellList
+                                                                         , retFlags );
+
+            GUndo->StoreUndo( mAnimationLayerImageVector, TUniquePtr<FOdysseyVectorUndo>(undo) );
+
+            //TSharedPtr<FOdysseyPainterEditorSource> source = mEditor->GetSource();
+            //if (source)
+                //source->RecordCurrentFrameUndo();
+        }
+        GEditor->EndTransaction();
+
+        for( FOdysseyVectorCell* cell : cellList )
+        {
+            cell->ClearObjectSelection();
+
+            // mark for redraw (to force-redraw the HUD)
+            mAnimationLayerImageVector->GetVectorLayer()->InvalidateCell( cell );
+        }
+
+        for( TSharedPtr<FInbetweeningListViewItem> item : mItemsSource )
+        {
+            TArray<TSharedPtr<FInbetweeningListViewItem>> selectedItems = GetSelectedItems();
+
+            for( int i = 0; i < selectedItems.Num(); i++ )
+            {
+                FOdysseyVectorObject* selectedObject = selectedItems[i].Get()->GetInbetweenerTag()->GetOwner();
+
+                selectedObject->GetCell()->SelectObject( selectedObject );
+            }
+        }
+
+        mAnimationLayerImageVector->GetVectorLayer()->RequestRedraw( 0 );
+
+        FOdysseyVectorEngine::Notify( nullptr, retFlags );
+    }
+}
 
 bool
 SOdysseyAnimationTimelineInbetweeningHeader::Private_IsItemSelected( const TSharedPtr<FInbetweeningListViewItem>& iItem )  const
 {
     UOdysseyLayerStack* layerStack = mAnimationLayerImageVector->GetLayerStack();
+
     return iItem.Get()->GetInbetweenerTag()->GetOwner()->IsSelected() && ( layerStack->CurrentLayer == mAnimationLayerImageVector );
 }
 

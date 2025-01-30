@@ -88,7 +88,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
         FInbetweenerChart::Inbetween* mHoveredInbetween;
         FInbetweenerChart::HUDBezier::Point* mPickedBezierPoint;
         ::ULIS::FVec2D mMouseAtDown;
-        float mEasing;
+        float mStrength;
 
     public:
         UPROPERTY( EditAnywhere
@@ -97,6 +97,17 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorChartTool : public UOd
                           , ClampMin = "0"
                           , UIMin    = "0" ) )
         uint32 PickingRadius;
+
+        UPROPERTY( EditAnywhere
+                 , Category = ChartTool
+                 , meta = ( ToolTip  = "Factor"
+                          , ClampMin = "1"
+                          , UIMin    = "1"
+                          , ClampMax = "5"
+                          , UIMax    = "5"
+                          , EditCondition = "( EditionMode == eChartEditionMode::EaseInOrOut ) || ( EditionMode == eChartEditionMode::Magnet )"
+                          , EditConditionHides ) )
+        uint32 Factor;
 
         UPROPERTY( EditAnywhere
                  , Category = ChartTool

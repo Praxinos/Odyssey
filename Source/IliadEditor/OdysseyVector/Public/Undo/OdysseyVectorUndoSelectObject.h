@@ -10,13 +10,19 @@
 #include <Image/Block.h>
 #include "Undo/OdysseyVectorUndo.h"
 
+class FOdysseyVectorLayer;
+class FOdysseyVectorCell;
 class FOdysseyVectorGroupPaint;
 
 class ODYSSEYVECTOR_API FOdysseyVectorUndoSelectObject : public FOdysseyVectorUndo
 {
     public:
         ~FOdysseyVectorUndoSelectObject();
-        FOdysseyVectorUndoSelectObject( FOdysseyVectorGroupPaint* iScene
+        FOdysseyVectorUndoSelectObject( FOdysseyVectorLayer* iLayer
+                                      , FOdysseyVectorCell* iCell
+                                      , uint64 iReturnFlags );
+        FOdysseyVectorUndoSelectObject( FOdysseyVectorLayer* iLayer
+                                      , const std::list<FOdysseyVectorCell*>& iCellList
                                       , uint64 iReturnFlags );
 
         /** Called when redoing */
@@ -29,6 +35,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorUndoSelectObject : public FOdysseyVectorUn
         virtual FString ToString() const override;
 
     private:
+        void GetSelectedObjectList( std::list<FOdysseyVectorObject*>& oObjectList );
+
+    private:
         std::list<FOdysseyVectorObject*> mSelectedObjectList;
-       FOdysseyVectorGroupPaint* mScene;
+        std::list<FOdysseyVectorCell*> mCellList;
 };

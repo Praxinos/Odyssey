@@ -524,7 +524,7 @@ UOdysseyAnimationLayerImageVector::Contains( FOdysseyVectorCell* iCandidateCell 
                                            {
                                                UOdysseyAnimationCellImageVector* vectorCell = Cast<UOdysseyAnimationCellImageVector>(cell);
 
-                                               return ( vectorCell->GetVectorCell() == iCandidateCell ) ? true : false;
+                                               return ( vectorCell && ( vectorCell->GetVectorCell() == iCandidateCell ) ) ? true : false;
                                            } );
 }
 
