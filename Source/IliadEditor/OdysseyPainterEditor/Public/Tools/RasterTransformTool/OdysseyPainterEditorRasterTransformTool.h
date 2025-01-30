@@ -77,6 +77,9 @@ private:
     //Copy from GeomTools.cpp
     bool IsPolygonConvex(const TArray<FVector2D>& Points);
 
+    void UndoTransformTransaction();
+    void RedoTransformTransaction();
+
 private:
     void OnTopLeftHandleDragged();
     void OnTopRightHandleDragged();
@@ -113,4 +116,9 @@ private:
     TSharedPtr<::ULIS::FBlock> mSelectionBlock; // The base block we transform
     TSharedPtr<::ULIS::FBlock> mTransformedBlock; // The transformed block
     ::ULIS::FRectI mSelectionBoundingBox;
+
+    FInputChord mToolChord; //The current state of the keyboard keys that are pressed while using this tool
+
+    int mIndexTransaction; //Current index in the transactions array
+    TArray<TStaticArray<FVector2D, 5>> mTransformTransactions; //Undos/Redos for the current transform, contains 4 handles and 1 pivot for each transaction
 };
