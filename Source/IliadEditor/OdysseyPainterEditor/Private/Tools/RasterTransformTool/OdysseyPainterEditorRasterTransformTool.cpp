@@ -11,6 +11,7 @@
 #include "GeomTools.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
+#include "Editor/Transactor.h"
 #include "ULISEventBuilder.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
@@ -286,6 +287,8 @@ void UOdysseyPainterEditorRasterTransformTool::Tick(float iDeltaTime)
 
 void UOdysseyPainterEditorRasterTransformTool::Load()
 {
+    GEditor->Trans->SetUndoBarrier();
+
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->OnChanged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnRasterSelectionChanged);
     mHUD->AddElement(rasterSelection->GetHUD());
@@ -299,6 +302,8 @@ void UOdysseyPainterEditorRasterTransformTool::Load()
 
 void UOdysseyPainterEditorRasterTransformTool::Unload()
 {
+    GEditor->Trans->RemoveUndoBarrier();
+
     TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     rasterSelection->OnChanged().RemoveAll(this);
     mHUD->RemoveElement(rasterSelection->GetHUD());
