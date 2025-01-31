@@ -48,6 +48,26 @@ public:
 //---
 
 USTRUCT( BlueprintType )
+struct FOdysseyAnimationSettings
+{
+    GENERATED_BODY()
+
+    /** This will make the animation bigger than the original size viewed by the camera by adding a margin to the animation */
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Animation", meta=(UIMin = "0", ClampMin = "0", UIMax = "200", ClampMax = "200", Units=Percent))
+    float SafeMargin { 0.f };
+
+    /** This will rescale the original size of the animation
+      * The original size is the one viewed by the camera
+      * The scale is applied before safe margin
+      * The default value (which means no rescale) is (100%, 100%)
+      */
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Animation", meta=(AllowPreserveRatio, DisplayName="Relative Scaling (%)"))
+    FVector2D RelativeScaling { 100.f, 100.f };
+};
+
+//---
+
+USTRUCT( BlueprintType )
 struct FPlaneSettings
 {
     GENERATED_BODY()
@@ -129,6 +149,10 @@ public:
     /** Specifies Camera stuff. (UpdateValues() must be called after camera modifications) */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Settings, meta=(ShowOnlyInnerProperties))
     FCameraSettings CameraSettings;
+
+    /** Specifies Animation stuff. */
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Settings, meta=(ShowOnlyInnerProperties))
+    FOdysseyAnimationSettings AnimationSettings;
 
     /** Specifies Plane stuff. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category=Settings, meta=(ShowOnlyInnerProperties))

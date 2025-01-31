@@ -21,9 +21,12 @@
 
 #include "EposMovieSceneSequence.h"
 #include "NamingConvention.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationFactory.h"
 #include "PlaneActor.h"
 #include "StoryNote.h"
 #include "Tools/EposSequenceTools.h"
+#include "Widgets/SOdysseyAnimationConfigureWindow.h"
 
 #define LOCTEXT_NAMESPACE "ResourceAssetTools"
 
@@ -615,6 +618,42 @@ ProjectAssetTools::CloneTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSe
 }
 
 //---
+
+//static
+UOdysseyAnimation*
+ProjectAssetTools::CreateAnimation( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FOdysseyAnimationConfiguration& iAnimationConfiguration )
+{
+    UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence );
+    if( !epos_sequence )
+    {
+        checkf( false, TEXT( "iSequence is certainly a LevelSequence, manage it" ) );
+
+        return nullptr;
+    }
+
+    FString animation_path;
+    FString animation_name;
+    FString animation_pathname = NamingConvention::GenerateAnimationAssetPathName( iPlayer, *epos_sequence, iSequenceID, animation_path, animation_name );
+
+    //---
+
+    UOdysseyAnimationFactory* factory = NewObject<UOdysseyAnimationFactory>();
+    factory->SetConfiguration( iAnimationConfiguration );
+
+    FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
+    UObject* new_object = assetToolsModule.Get().CreateAsset( animation_name, animation_path, UOdysseyAnimation::StaticClass(), factory );
+
+    UOdysseyAnimation* new_animation = Cast<UOdysseyAnimation>( new_object );
+
+    //---
+
+    //new_animation->mWidth = iAnimationConfiguration.Width;
+    //new_animation->mHeight = iAnimationConfiguration.Height;
+    //new_animation->Format = iAnimationConfiguration.Format;
+    //new_animation->FramesPerSecond = iAnimationConfiguration.FramesPerSecond;
+
+    return new_animation;
+}
 
 //static
 UMaterialInstanceConstant*

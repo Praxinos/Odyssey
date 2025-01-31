@@ -16,8 +16,10 @@ class UMaterialInstance;
 class UMaterialInstanceConstant;
 class UMaterialInterface;
 class UMovieSceneSequence;
+class UOdysseyAnimation;
 class UStoryNote;
 class UTexture2D;
+struct FOdysseyAnimationConfiguration;
 
 /** The grid type which must correspond to the value inside the material instance */
 enum class EGridType
@@ -85,6 +87,8 @@ public:
 class EPOSTRACKSEDITOR_API ProjectAssetTools
 {
 public:
+    static UOdysseyAnimation* CreateAnimation( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FOdysseyAnimationConfiguration& iAnimationConfiguration );
+
     static UMaterialInstanceConstant* CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FIntPoint iTextureSize );
     static UMaterialInstanceConstant* CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UTexture2D* iTexture );
     static UMaterialInstanceConstant* CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UMaterialInstance* iMaterialTemplate );

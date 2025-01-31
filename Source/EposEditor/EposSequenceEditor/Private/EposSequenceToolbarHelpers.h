@@ -12,6 +12,7 @@ class EposSequenceToolbarHelpers
 {
 public:
     static void MakeTextureSettingsEntries( FMenuBuilder& iMenuBuilder );
+    static void MakeAnimationSettingsEntries( FMenuBuilder& iMenuBuilder );
     static void MakeCameraSettingsEntries( FMenuBuilder& iMenuBuilder );
 
     static void MakeSettingsEntries( FMenuBuilder& iMenuBuilder, ISequencer* iSequencer );

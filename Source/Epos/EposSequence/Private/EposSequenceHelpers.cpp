@@ -36,6 +36,7 @@
 #include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 #include "NoteTrack/MovieSceneNoteTrack.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
+#include "OdysseyAnimationActor.h"
 #include "PlaneActor.h"
 #include "Shot/ShotSequence.h"
 #include "SingleCameraCutTrack/MovieSceneSingleCameraCutSection.h"
@@ -173,6 +174,198 @@ ShotSequenceHelpers::GetCamera( IMovieScenePlayer& iPlayer, UMovieSceneSequence*
     }
 
     return nullptr;
+}
+
+//static
+int32
+ShotSequenceHelpers::GetAllAnimations( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetAnimation iAnimationSelection, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
+{
+    if( oAnimations )
+        oAnimations->Empty();
+    if( oAnimationBindings )
+        oAnimationBindings->Empty();
+
+    UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !movieScene )
+        return 0;
+
+    TArray<AOdysseyAnimationActor*> animations;
+    TArray<FGuid> animation_bindings;
+
+    TArray<AOdysseyAnimationActor*> animations_selected;
+    TArray<FGuid> animation_bindings_selected;
+
+    TArray<AOdysseyAnimationActor*> animations_not_selected;
+    TArray<FGuid> animation_bindings_not_selected;
+
+    for( int i = 0; i < movieScene->GetPossessableCount(); i++ )
+    {
+        FMovieScenePossessable possessable = movieScene->GetPossessable( i );
+
+        for( TWeakObjectPtr<> WeakObject : iPlayer.FindBoundObjects( possessable.GetGuid(), iSequenceID ) )
+        {
+            AOdysseyAnimationActor* animation = Cast<AOdysseyAnimationActor>( WeakObject.Get() );
+
+            if( !animation )
+                continue;
+
+            switch( iAnimationSelection )
+            {
+                case EGetAnimation::kAll:
+                    animations.Add( animation );
+                    animation_bindings.Add( possessable.GetGuid() );
+                    break;
+                case EGetAnimation::kSelectedOnly:
+                    if( animation->IsSelected() )
+                    {
+                        animations.Add( animation );
+                        animation_bindings.Add( possessable.GetGuid() );
+                    }
+                    break;
+                default:
+                case EGetAnimation::kSelectedOrAll:
+                    if( animation->IsSelected() )
+                    {
+                        animations_selected.Add( animation );
+                        animation_bindings_selected.Add( possessable.GetGuid() );
+                    }
+                    else
+                    {
+                        animations_not_selected.Add( animation );
+                        animation_bindings_not_selected.Add( possessable.GetGuid() );
+                    }
+                    break;
+            }
+        }
+    }
+
+    if( animations.Num() )
+    {
+        if( oAnimations )
+            oAnimations->Append( animations );
+        if( oAnimationBindings )
+            oAnimationBindings->Append( animation_bindings );
+
+        return animations.Num();
+    }
+    else if( animations_selected.Num() )
+    {
+        if( oAnimations )
+            oAnimations->Append( animations_selected );
+        if( oAnimationBindings )
+            oAnimationBindings->Append( animation_bindings_selected );
+
+        return animations_selected.Num();
+    }
+    else
+    {
+        if( oAnimations )
+            oAnimations->Append( animations_not_selected );
+        if( oAnimationBindings )
+            oAnimationBindings->Append( animation_bindings_not_selected );
+
+        return animations_not_selected.Num();
+    }
+}
+
+//static
+int32
+ShotSequenceHelpers::GetAttachedAnimations( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetAnimation iAnimationSelection, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings )
+{
+    if( oAnimations )
+        oAnimations->Empty();
+    if( oAnimationBindings )
+        oAnimationBindings->Empty();
+
+    UMovieScene* movieScene = iSequence ? iSequence->GetMovieScene() : nullptr;
+    if( !movieScene )
+        return 0;
+
+    TArray<AOdysseyAnimationActor*> animations;
+    TArray<FGuid> animation_bindings;
+
+    TArray<AOdysseyAnimationActor*> animations_selected;
+    TArray<FGuid> animation_bindings_selected;
+
+    TArray<AOdysseyAnimationActor*> animations_not_selected;
+    TArray<FGuid> animation_bindings_not_selected;
+
+    for( int i = 0; i < movieScene->GetPossessableCount(); i++ )
+    {
+        FMovieScenePossessable possessable = movieScene->GetPossessable( i );
+
+        for( TWeakObjectPtr<> WeakObject : iPlayer.FindBoundObjects( possessable.GetGuid(), iSequenceID ) )
+        {
+            AOdysseyAnimationActor* animation = Cast<AOdysseyAnimationActor>( WeakObject.Get() );
+
+            if( !animation )
+                continue;
+
+            USceneComponent* RootComp = animation->GetRootComponent();
+            if( !RootComp || !RootComp->GetAttachParent() )
+                continue;
+
+            AActor* ParentActor = RootComp->GetAttachParent()->GetOwner();
+            if( !ParentActor ) //TODO: confirm by comparing with the camera ? or is it enough as the animations are in the movie scene ?
+                continue;
+
+            switch( iAnimationSelection )
+            {
+                case EGetAnimation::kAll:
+                    animations.Add( animation );
+                    animation_bindings.Add( possessable.GetGuid() );
+                    break;
+                case EGetAnimation::kSelectedOnly:
+                    if( animation->IsSelected() )
+                    {
+                        animations.Add( animation );
+                        animation_bindings.Add( possessable.GetGuid() );
+                    }
+                    break;
+                default:
+                case EGetAnimation::kSelectedOrAll:
+                    if( animation->IsSelected() )
+                    {
+                        animations_selected.Add( animation );
+                        animation_bindings_selected.Add( possessable.GetGuid() );
+                    }
+                    else
+                    {
+                        animations_not_selected.Add( animation );
+                        animation_bindings_not_selected.Add( possessable.GetGuid() );
+                    }
+                    break;
+            }
+        }
+    }
+
+    if( animations.Num() )
+    {
+        if( oAnimations )
+            oAnimations->Append( animations );
+        if( oAnimationBindings )
+            oAnimationBindings->Append( animation_bindings );
+
+        return animations.Num();
+    }
+    else if( animations_selected.Num() )
+    {
+        if( oAnimations )
+            oAnimations->Append( animations_selected );
+        if( oAnimationBindings )
+            oAnimationBindings->Append( animation_bindings_selected );
+
+        return animations_selected.Num();
+    }
+    else
+    {
+        if( oAnimations )
+            oAnimations->Append( animations_not_selected );
+        if( oAnimationBindings )
+            oAnimationBindings->Append( animation_bindings_not_selected );
+
+        return animations_not_selected.Num();
+    }
 }
 
 //static

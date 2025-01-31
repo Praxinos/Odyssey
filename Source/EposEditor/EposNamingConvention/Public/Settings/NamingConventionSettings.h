@@ -33,6 +33,33 @@ public:
 
 //---
 
+enum class ENamingConventionAnimationPatternKeyword : uint32
+{
+    ENUM_UNIQUE_ID( AnimationIndex ),
+};
+
+EPOSNAMINGCONVENTION_API const FPatternKeywordList& GetNamingConventionAnimationPatternKeywordList();
+
+USTRUCT( BlueprintType )
+struct FNamingConventionAnimation
+{
+    GENERATED_BODY()
+
+public:
+    FNamingConventionAnimation();
+
+public:
+    /** The animation pattern. */
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Animation")
+    FString Pattern;
+
+    FPatternKeywordLists mPatternKeywordLists;
+
+    /** The animation number format. */
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="Animation", meta=(ShowOnlyInnerProperties))
+    FNamingConventionNumberFormat IndexFormat { 10, 10, 4 };
+};
+
 enum class ENamingConventionPlanePatternKeyword : uint32
 {
     ENUM_UNIQUE_ID( PlaneIndex ),
@@ -269,6 +296,10 @@ public:
     /** The naming convention for boards. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="ShotNamingConvention", meta=(ShowOnlyInnerProperties) )
     FNamingConventionShot ShotNaming;
+
+    /** The naming convention for animations. */
+    UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="AnimationNamingConvention", meta=(ShowOnlyInnerProperties) )
+    FNamingConventionAnimation AnimationNaming;
 
     /** The naming convention for planes. */
     UPROPERTY(config, EditAnywhere, BlueprintReadWrite, Category="PlaneNamingConvention", meta=(ShowOnlyInnerProperties) )

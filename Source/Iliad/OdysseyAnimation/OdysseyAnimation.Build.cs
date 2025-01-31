@@ -77,6 +77,7 @@ namespace UnrealBuildTool.Rules
                     "OdysseyRendering",
                     "OdysseyLayerStack",
                     "RHI",
+                    "CinematicCamera",
                     // ... add private dependencies that you statically link with here ...
                 }
                 );

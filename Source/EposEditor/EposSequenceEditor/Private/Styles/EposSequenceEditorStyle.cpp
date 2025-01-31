@@ -119,6 +119,9 @@ FEposSequenceEditorStyle::InitCommands()
     Set( "EposSequenceCommands.GotoNextCameraPosition", new IMAGE_BRUSH_SVG( "camera-next", Icon20x20 ) );
     Set( "EposSequenceCommands.GotoNextCameraPosition.Small", new IMAGE_BRUSH_SVG( "camera-next", Icon20x20 ) );
 
+    Set( "EposSequenceCommands.CreateAnimationAtCurrentTime", new IMAGE_BRUSH_SVG( "animation-create", Icon20x20 ) );
+    Set( "EposSequenceCommands.CreateAnimationAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "animation-create", Icon20x20 ) );
+
     Set( "EposSequenceCommands.CreatePlaneAtCurrentTime", new IMAGE_BRUSH_SVG( "plane-create", Icon20x20 ) );
     Set( "EposSequenceCommands.CreatePlaneAtCurrentTime.Small", new IMAGE_BRUSH_SVG( "plane-create", Icon20x20 ) );
     Set( "EposSequenceCommands.DetachPlaneAtCurrentTime", new IMAGE_BRUSH_SVG( "plane-detach", Icon20x20 ) );

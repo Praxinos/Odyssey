@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "OdysseyAnimationActor.generated.h"
 
+class ACineCameraActor;
 class UOdysseyAnimationComponent;
 
 /**
@@ -31,4 +32,29 @@ public:
     TObjectPtr<UOdysseyAnimationComponent> AnimationComponent;
 
     static FName AnimationComponentName;
+
+public:
+    virtual FVector ComputeAnimationScaleOfCameraView( const ACineCameraActor* iCamera, float iDistance ) const; // From FDrawFrustumSceneProxy::GetDynamicMeshElements()
+    virtual FVector ComputeAnimationScaleWithScaleAndMargin( const ACineCameraActor* iCamera, float iDistance ) const;
+
+    virtual FIntPoint ComputeTextureSize( const ACineCameraActor* iCamera, int32 iTextureHeight ) const;
+
+public:
+    /** Get the margin as percent (0.1 for 10%) */
+    virtual float GetSafeMargin() const;
+    /** Get the relative scaling as percent (1. for 100%) */
+    virtual FVector2D GetRelativeScaling() const;
+
+public:
+    /** This will make the animation bigger than the original size viewed by the camera by adding a margin to the animation */
+    UPROPERTY( EditAnywhere, Category = "Animation Actor", meta = ( UIMin = "0", ClampMin = "0", UIMax = "200", ClampMax = "200", Units = Percent ) )
+    float SafeMargin = 0.f;
+
+    /** This will rescale the original size of the animation
+      * The original size is the one viewed by the camera
+      * The scale is applied before safe margin
+      * The default value (which means no rescale) is (100%, 100%)
+      */
+    UPROPERTY( EditAnywhere, Category = "Animation Actor", meta = ( AllowPreserveRatio ) )
+    FVector2D RelativeScaling = { 100.f, 100.f };
 };

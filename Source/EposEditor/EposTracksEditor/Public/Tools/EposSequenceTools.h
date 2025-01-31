@@ -15,6 +15,7 @@
 
 class AActor;
 class ACineCameraActor;
+class AOdysseyAnimationActor;
 class APlaneActor;
 class UBoardSequence;
 class UMaterialInstanceConstant;
@@ -27,6 +28,7 @@ class UMovieSceneSection;
 class UMovieSceneSequence;
 class UMovieSceneSubSection;
 class UMovieSceneTrack;
+class UOdysseyAnimation;
 class UShotSequence;
 class UTexture2D;
 class IMovieScenePlayer;
@@ -47,6 +49,13 @@ struct FPlaneArgs
     FString mName;
     TOptional<float> mMargin;
     TWeakObjectPtr<UTexture2D> mTexture;
+};
+
+struct FAnimationArgs
+{
+    FString mName;
+    TOptional<float> mMargin;
+    TWeakObjectPtr<UOdysseyAnimation> mAnimation;
 };
 
 struct FDrawingArgs
@@ -389,6 +398,34 @@ public:
     */
     static bool HasNextCameraPosition( ISequencer* iSequencer, FFrameNumber iFrameNumber );
 
+// Inside EposSequenceTools_Animation
+public:
+    /**
+    *  Create a new animation (actor & track) in the board section
+    *
+    * @param ISequencer     iSequencer to add a new animation.
+    * @param FFrameNumber   iFrameNumber to get the board section.
+    */
+    static void CreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
+
+    /**
+    *  Create a new animation (actor & track) in the board section
+    *
+    * @param ISequencer             iSequencer to add a new animation.
+    * @param UMovieSceneSubSection  iSubSection to add a new animation.
+    * @param FFrameNumber           iFrameNumber to get the board section.
+    */
+    static void CreateAnimation( ISequencer* iSequencer, const UMovieSceneSubSection& iSubSection, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
+
+    /**
+    *  Can a animation be created in the board section ?
+    *
+    * @param ISequencer         iSequencer to get the camera.
+    * @param FFrameNumber       iFrameNumber to get the board section.
+    * @return bool
+    */
+    static bool CanCreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
 // Inside EposSequenceTools_Plane
 public:
     /**
@@ -682,6 +719,18 @@ enum class EScalePlane : uint8
     kFitToCamera        UMETA( DisplayName = "Scale 100% Camera" ),
 };
 
+UENUM( BlueprintType )
+enum class EScaleAnimation : uint8
+{
+    // The animation won't scale
+    kNo                 UMETA( DisplayName = "No Scale" ),
+    // The animation will scale relatively to its original size
+    // If the animation is already 100% camera FOV, it will act as the option "100% Camera"
+    kRelativeScale      UMETA( DisplayName = "Relative Scale" ),
+    // The animation will auto-scale to match the 100% camera FOV
+    kFitToCamera        UMETA( DisplayName = "Scale 100% Camera" ),
+};
+
 class EPOSTRACKSEDITOR_API ShotSequenceTools
 {
 private:
@@ -822,13 +871,23 @@ private:
 public:
     static bool SetCameraFocalLengthAndScalePlane( TArray<TWeakObjectPtr<APlaneActor>> ioPlanes, ACineCameraActor* ioCamera, float iNewFocalLength, EScalePlane iScaleType );
 
+// Inside EposSequenceTools_Animation
+public:
+    static void CreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs = FAnimationArgs() );
+
+    static bool CanCreateAnimation( ISequencer* iSequencer, FFrameNumber iFrameNumber );
+
+    static bool MoveAndScaleAnimation( AOdysseyAnimationActor* ioAnimation, const ACineCameraActor* iCamera, float iNewDistance, EScaleAnimation iScaleType );
+    static bool CanMoveAndScaleAnimation( const AOdysseyAnimationActor* iAnimation, const ACineCameraActor* iCamera );
+
+private:
+    static void CreateAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs );
+
+    static AOdysseyAnimationActor* SpawnAnimation( UWorld* iWorld, ACineCameraActor* iCamera, float iSafeMargin, FVector2D iRelativeScaling );
+    static AOdysseyAnimationActor* SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FGuid iCameraGuid, ACineCameraActor* iCamera, FFrameNumber iFrameNumber, const FAnimationArgs& iAnimationArgs, FGuid* oGuid );
+
 // Inside EposSequenceTools_Plane
 public:
-    /**
-    *  Add a Camera track
-    *
-    * @param ISequencer iSequencer to add a plane.
-    */
     static void CreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber, const FPlaneArgs& iPlaneArgs = FPlaneArgs() );
 
     static bool CanCreatePlane( ISequencer* iSequencer, FFrameNumber iFrameNumber );

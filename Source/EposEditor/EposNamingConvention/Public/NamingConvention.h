@@ -10,6 +10,7 @@
 #include "Settings/NamingConventionSettings.h"
 
 class ACineCameraActor;
+class AOdysseyAnimationActor;
 class APlaneActor;
 class IMovieScenePlayer;
 class UEposMovieSceneSequence;
@@ -23,9 +24,11 @@ class EPOSNAMINGCONVENTION_API NamingConvention
 public:
     static FString GenerateCameraActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPathName, FString& oName );
     static FString GeneratePlaneActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPathName, FString& oName );
+    static FString GenerateAnimationActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPathName, FString& oName );
 
     static FString GenerateCameraTrackName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, ACineCameraActor* iCamera );
     static FString GeneratePlaneTrackName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, APlaneActor* iPlane );
+    static FString GenerateAnimationTrackName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, AOdysseyAnimationActor* iAnimation );
 
 public:
     static FString GetMasterMaterialPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPath, FString& oName );
@@ -36,6 +39,7 @@ public:
 
     static FString GenerateMaterialAssetPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPath, FString& oName );
     static FString GenerateTextureAssetPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, UMaterialInterface* iMaterial, FString& oPath, FString& oName );
+    static FString GenerateAnimationAssetPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPath, FString& oName );
 
 public:
     static FString GenerateBoardAssetPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iParentSequence, FMovieSceneSequenceIDRef iParentSequenceID, FFrameNumber iFrameNumber, FString& oPath, FString& oName, FBoardNameElements& oElements );

@@ -29,6 +29,12 @@ UOdysseyAnimationFactory::UOdysseyAnimationFactory( const FObjectInitializer& iO
     SupportedClass = UOdysseyAnimation::StaticClass();
 }
 
+void UOdysseyAnimationFactory::SetConfiguration( const FOdysseyAnimationConfiguration& iConfiguration )
+{
+    mConfiguration = iConfiguration;
+    mConfigured = true;
+}
+
 bool UOdysseyAnimationFactory::ConfigureProperties()
 {
     //We go in here before creating the asset: Meaning we can have any modal window here.

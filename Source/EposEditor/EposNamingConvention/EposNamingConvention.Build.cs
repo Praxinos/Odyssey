@@ -55,6 +55,7 @@ public class EposNamingConvention : ModuleRules
                 "LevelSequence",
                 "MovieScene",
                 "DeveloperSettings",
+                "MediaAssets", //TODO: remove once OdysseyAnimation is runtime
                 // [RUNTIME] custom plugin dependencies
                 "EposActors",
                 "EposMovieScene",
@@ -70,6 +71,8 @@ public class EposNamingConvention : ModuleRules
                 "PropertyEditor",
                 "EditorStyle",
                 // [EDITOR] custom plugin dependencies
+                "OdysseyAnimation", //TODO: move it in the runtime part above when it will be a runtime module
+                "OdysseyImaging", //TODO: remove once OdysseyAnimation is runtime
             }
             );
 

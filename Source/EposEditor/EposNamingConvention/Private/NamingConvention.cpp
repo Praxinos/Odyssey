@@ -24,6 +24,9 @@
 #include "EposSequenceHelpers.h"
 #include "NoteTrack/MovieSceneNoteSection.h"
 #include "NoteTrack/MovieSceneNoteTrack.h"
+#include "OdysseyAnimation.h"
+#include "OdysseyAnimationActor.h"
+#include "OdysseyAnimationComponent.h"
 #include "PlaneActor.h"
 #include "Settings/NamingConventionSettings.h"
 #include "Shot/ShotSequence.h"
@@ -200,6 +203,76 @@ FindAllNotePaths( const IMovieScenePlayer& iPlayer )
     }
 
     return map_notepath_to_count;
+}
+
+static
+FRelevantPathMap
+FindAllAnimationPaths( const IMovieScenePlayer& iPlayer, FRelevantPathMap& oParentPaths )
+{
+    IMovieScenePlayer& player = *const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
+
+    TMap<FMovieSceneSequenceID, UMovieSceneSequence*> map_sequences;
+    map_sequences.Add( MovieSceneSequenceID::Root, player.GetEvaluationTemplate().GetSequence( MovieSceneSequenceID::Root ) );
+
+    const FMovieSceneSequenceHierarchy* hierarchy = player.GetSharedPlaybackState()->GetHierarchy();
+    if( hierarchy )
+    {
+        const TMap<FMovieSceneSequenceID, FMovieSceneSubSequenceData>& subsequences = hierarchy->AllSubSequenceData();
+        for( auto pair : subsequences )
+            map_sequences.Add( pair.Key, pair.Value.GetSequence() );
+    }
+
+    TMap<FMovieSceneSequenceID, UMovieSceneSequence*> map_epos_sequences;
+    for( auto pair : map_sequences )
+    {
+        if( pair.Value->IsA<UEposMovieSceneSequence>() )
+            map_epos_sequences.Add( pair );
+    }
+
+    //---
+
+    FRelevantPathMap map_path_to_count;
+    oParentPaths.Empty();
+
+    for( auto pair : map_epos_sequences )
+    {
+        UMovieSceneSequence* sequence = pair.Value;
+        FMovieSceneSequenceID sequence_id = pair.Key;
+
+        TArray<AOdysseyAnimationActor*> animation_actors;
+        ShotSequenceHelpers::GetAllAnimations( player, sequence, sequence_id, EGetAnimation::kAll, &animation_actors, nullptr );
+
+        for( auto animation_actor : animation_actors )
+        {
+            const UOdysseyAnimation* animation = animation_actor->AnimationComponent->GetAnimation();
+            if( !animation )
+                continue;
+
+            //-
+
+            FString animation_pathname = animation->GetPackage()->GetName();
+            FString animation_path = FPackageName::GetLongPackagePath( animation_pathname );
+
+            int32* count = map_path_to_count.Find( animation_path );
+            if( count )
+                *count = *count + 1;
+            else
+                map_path_to_count.Add( animation_path, 1 );
+        }
+    }
+
+    map_path_to_count.ValueSort( TGreater<int32>() );
+    oParentPaths.ValueSort( TGreater<int32>() );
+
+    return map_path_to_count;
+}
+
+static
+FRelevantPathMap
+FindAllAnimationPaths( const IMovieScenePlayer& iPlayer )
+{
+    FRelevantPathMap map_parent_animation_paths;
+    return FindAllAnimationPaths( iPlayer, map_parent_animation_paths );
 }
 
 static
@@ -609,6 +682,110 @@ NamingConvention::GeneratePlaneActorPathName( const IMovieScenePlayer& iPlayer, 
 
 //static
 FString
+NamingConvention::GenerateAnimationActorPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPath, FString& oName )
+{
+    IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllAnimations()/GetAllDrawings() will use it to find cache
+
+    const UEposMovieSceneSequence* epos_root_sequence = EposSequenceHelpers::GetRootEposSequence( *player, iSequenceID );
+    check( epos_root_sequence );
+
+    UEposMovieSceneSequence* current_sequence = const_cast<UEposMovieSceneSequence*>( &iSequence ); //PATCH: Because there is no 'const' parameter version of ShotSequenceHelpers::GetCamera()
+
+    //--- Find the camera actor
+
+    FString animation_path;
+    FString camera_name;
+
+    ACineCameraActor* camera = ShotSequenceHelpers::GetCamera( *player, current_sequence, iSequenceID );
+    if( camera )
+    {
+        animation_path = camera->GetFolderPath().ToString();
+        camera_name = camera->GetActorLabel();
+    }
+
+    if( animation_path.IsEmpty() )
+    {
+        FString camera_path;
+        GenerateCameraActorPathName( iPlayer, iSequence, iSequenceID, camera_path, camera_name );
+
+        animation_path = camera_path;
+    }
+
+    //--- Find all animation track names
+
+    const TArray<FMovieSceneBinding>& bindings = iSequence.GetMovieScene()->GetBindings();
+    TArray<FString> binding_names;
+    for( auto binding : bindings )
+        binding_names.AddUnique( iSequence.GetMovieScene()->GetObjectDisplayName( binding.GetObjectGuid() ).ToString() );
+        // Don't use binding.GetName() because (for example) it is not updated when the name is changed directly in the shot track label (instead of the board section view)
+        // binding.GetName() is still keeping the old "track" name
+
+    //--- Find all animation indexes inside their names (through a regex)
+
+    const UNamingConventionSettings* settings = GetDefault<UNamingConventionSettings>();
+    FNamingConventionAnimation animation_settings = settings->AnimationNaming;
+
+    //TOCHECK: if it's no possible to use "named group", maybe try to order the replacement of {...} so we maybe have the group index ?
+    const FString animation_pattern_regex = animation_settings.Pattern.Replace( *animation_settings.mPatternKeywordLists.GetKeyword( ENamingConventionAnimationPatternKeyword::AnimationIndex ).mKeywordWithBraces, TEXT( "([0-9]+)" ) );
+    const FString animation_pattern_display = animation_settings.Pattern.Replace( *animation_settings.mPatternKeywordLists.GetKeyword( ENamingConventionAnimationPatternKeyword::AnimationIndex ).mKeywordWithBraces, TEXT( "{animation_index_formated}" ) );
+    FRegexPattern animation_pattern( animation_pattern_regex );
+
+    // https://stackoverflow.com/questions/3075130/what-is-the-difference-between-and-regular-expressions
+    // https://www.regular-expressions.info/refadv.html
+    // https://www.regular-expressions.info/atomic.html
+
+    TArray<int32> list_of_animation_index;
+
+    for( auto binding_name : binding_names )
+    {
+        FRegexMatcher matcher( animation_pattern, binding_name );
+
+        if( matcher.FindNext() )
+        {
+            int32 full_begin = matcher.GetMatchBeginning();
+            int32 full_end = matcher.GetMatchEnding();
+            FTextRange full_range( full_begin, full_end );
+            FString full_string = binding_name.Mid( full_range.BeginIndex, full_range.Len() );
+
+            int32 index_begin = matcher.GetCaptureGroupBeginning( 1 );
+            int32 index_end = matcher.GetCaptureGroupEnding( 1 );
+            FTextRange index_range( index_begin, index_end );
+            FString index_string = binding_name.Mid( index_range.BeginIndex, index_range.Len() );
+
+            int32 index = FCString::Atoi( *index_string );
+
+            list_of_animation_index.Add( index );
+        }
+    }
+
+    list_of_animation_index.Sort( TGreater<int32>() );
+
+    //--- Try to find the new animation name depending of the max existing index
+
+    int32 max_animation_index = list_of_animation_index.Num() ? list_of_animation_index[0] : animation_settings.IndexFormat.StartNumber;
+
+    FStringFormatNamedArguments args;
+    args.Add( TEXT( "animation_index_formated" ), FString::Printf( TEXT( "%0*d" ), animation_settings.IndexFormat.NumDigits, max_animation_index ) );
+    FString animation_name = FString::Format( *animation_pattern_display, args );
+
+    while( binding_names.Contains( animation_name ) )
+    {
+        max_animation_index += animation_settings.IndexFormat.Increment;
+
+        args.FindChecked( TEXT( "animation_index_formated" ) ) = FString::Printf( TEXT( "%0*d" ), animation_settings.IndexFormat.NumDigits, max_animation_index );
+        animation_name = FString::Format( *animation_pattern_display, args );
+    }
+
+    //---
+
+    oPath = animation_path;
+    oName = animation_name;
+
+    return oPath / oName;
+}
+
+//static
+FString
 NamingConvention::GenerateCameraTrackName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, ACineCameraActor* iCamera )
 {
     // See comment in GeneratePlaneTrackName()
@@ -622,6 +799,15 @@ NamingConvention::GeneratePlaneTrackName( const IMovieScenePlayer& iPlayer, cons
     // For the moment, it's ok, but it will change, double-check (for example) the clone plane function...
     // Or maybe name this function GeneratePlaneTrackNameFROMACTOR() et add another one which will really compute a new track name from the existing ones ?
     return iPlane->GetActorLabel();
+}
+
+//static
+FString
+NamingConvention::GenerateAnimationTrackName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, AOdysseyAnimationActor* iAnimation )
+{
+    // For the moment, it's ok, but it will change, double-check (for example) the clone plane function...
+    // Or maybe name this function GenerateAnimationTrackNameFROMACTOR() et add another one which will really compute a new track name from the existing ones ?
+    return iAnimation->GetActorLabel();
 }
 
 //---
@@ -798,6 +984,61 @@ NamingConvention::GenerateTextureAssetPathName( const IMovieScenePlayer& iPlayer
     oPath = texture_path;
 
     return texture_path / texture_name;
+}
+
+//static
+FString
+NamingConvention::GenerateAnimationAssetPathName( const IMovieScenePlayer& iPlayer, const UEposMovieSceneSequence& iSequence, FMovieSceneSequenceIDRef iSequenceID, FString& oPath, FString& oName )
+{
+    IMovieScenePlayer* player = const_cast<IMovieScenePlayer*>( &iPlayer ); //PATCH: Because there is no 'const' version of GetEvaluationTemplate() and GetAllPlanes()/GetAllDrawings() will use it to find cache
+
+    const UEposMovieSceneSequence* epos_root_sequence = EposSequenceHelpers::GetRootEposSequence( *player, iSequenceID );
+
+    //---
+
+    FString animation_path;
+
+    // Try to find the better path from all existing animations
+    FRelevantPathMap map_animation_paths = FindAllAnimationPaths( iPlayer );
+    if( map_animation_paths.Num() )
+    {
+        TArray<FString> keys;
+        map_animation_paths.GetKeys( keys );
+
+        animation_path = keys[0];
+    }
+
+    if( animation_path.IsEmpty() )
+    {
+        // Try to find the better path from all existing subsequences
+        FRelevantPathMap map_sequence_paths = FindAllSequencePaths( iPlayer );
+        if( map_sequence_paths.Num() )
+        {
+            TArray<FString> keys;
+            map_sequence_paths.GetKeys( keys );
+
+            animation_path = keys[0];
+        }
+    }
+
+    if( animation_path.IsEmpty() )
+    {
+        // Default path of the new animation
+        FString root_path = GetRootPath( iPlayer, epos_root_sequence ); // ie. /Game/MyStoryboard2
+        animation_path = root_path;
+
+    }
+
+    //---
+
+    FString animation_name = TEXT( "A_" ) + FGuid::NewGuid().ToString();
+
+    //---
+
+    oName = animation_name;
+    oPath = animation_path;
+
+    return animation_path / animation_name;
 }
 
 //---

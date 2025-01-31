@@ -14,6 +14,7 @@
 #include "EposSequenceHelpers.generated.h"
 
 class ACineCameraActor;
+class AOdysseyAnimationActor;
 class APlaneActor;
 class UEposMovieSceneSequence;
 class UMaterialInstance;
@@ -111,6 +112,13 @@ enum class EGetPlane
     kSelectedOrAll,
 };
 
+enum class EGetAnimation
+{
+    kAll,
+    kSelectedOnly,
+    kSelectedOrAll,
+};
+
 struct EPOSSEQUENCE_API FDrawing
 {
     FMovieSceneObjectPathChannel*       mChannel { nullptr };
@@ -150,6 +158,9 @@ public:
       * @return TArray<FFrameNumber>    the camera transform key list
       */
     static TArray<FFrameNumber> GetCameraTransformTimes( UMovieSceneSequence* iSequence, TOptional<FFrameNumber>* oDefaultFrame = nullptr );
+
+    static int32                GetAllAnimations( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetAnimation iAnimationSelection, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings );
+    static int32                GetAttachedAnimations( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetAnimation iAnimationSelection, TArray<AOdysseyAnimationActor*>* oAnimations, TArray<FGuid>* oAnimationBindings );
 
     static int32                GetAllPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings );
     static int32                GetAttachedPlanes( IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, EGetPlane iPlaneSelection, TArray<APlaneActor*>* oPlanes, TArray<FGuid>* oPlaneBindings );

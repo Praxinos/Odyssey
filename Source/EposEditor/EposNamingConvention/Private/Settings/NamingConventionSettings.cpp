@@ -7,6 +7,31 @@
 
 //---
 
+static FPatternKeywordList sgAnimationPatternKeywordList;
+
+const FPatternKeywordList& GetNamingConventionAnimationPatternKeywordList()
+{
+    if( !sgAnimationPatternKeywordList.mKeywordList.Num() )
+    {
+        sgAnimationPatternKeywordList.AddKeyword( ENamingConventionAnimationPatternKeyword::AnimationIndex   , "animation-index" , LOCTEXT( "animation-pattern-keyword.animation-index", "an incremental index" ) );
+        //sgAnimationPatternKeywordList.AddKeyword( ENamingConventionAnimationPatternKeyword::CameraName   , "camera-name" , LOCTEXT( "animation-pattern-keyword.camera-name", "the name of the camera (won't update if camera name changes)" ) );
+        //sgAnimationPatternKeywordList.AddKeyword( ENamingConventionAnimationPatternKeyword::ShotName     , "shot-name"   , LOCTEXT( "animation-pattern-keyword.shot-name", "the name of the shot (won't update if shot name changes)" ) );
+    }
+
+    return sgAnimationPatternKeywordList;
+}
+
+FNamingConventionAnimation::FNamingConventionAnimation()
+{
+    mPatternKeywordLists.AddKeywordList( &GetNamingConventionAnimationPatternKeywordList() );
+
+    Pattern = FString::Printf( TEXT( "animation_%s" )
+                               , *mPatternKeywordLists.GetKeyword( ENamingConventionAnimationPatternKeyword::AnimationIndex ).mKeywordWithBraces
+    );
+}
+
+//---
+
 static FPatternKeywordList sgPlanePatternKeywordList;
 
 const FPatternKeywordList& GetNamingConventionPlanePatternKeywordList()

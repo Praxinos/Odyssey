@@ -27,6 +27,13 @@ EposSequenceToolbarHelpers::MakeTextureSettingsEntries( FMenuBuilder& iMenuBuild
 
 //static
 void
+EposSequenceToolbarHelpers::MakeAnimationSettingsEntries( FMenuBuilder& iMenuBuilder )
+{
+    EposTracksToolbarHelpers::MakeAnimationSettingsEntries( iMenuBuilder );
+}
+
+//static
+void
 EposSequenceToolbarHelpers::MakeCameraSettingsEntries( FMenuBuilder& iMenuBuilder )
 {
     EposTracksToolbarHelpers::MakeCameraSettingsEntries( iMenuBuilder );
