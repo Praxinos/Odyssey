@@ -12,7 +12,8 @@ FOdysseyVectorSegment::~FOdysseyVectorSegment()
 
 FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorObject* iOwner
                                             , FOdysseyVectorVertex* iVertex0
-                                            , FOdysseyVectorVertex* iVertex1 )
+                                            , FOdysseyVectorVertex* iVertex1
+                                            , bool iNeedsWidth )
     : FOdysseyVectorLink( iVertex0, iVertex1 )
     , mOwner( iOwner )
     , mIsInvalidated( false )
@@ -22,6 +23,7 @@ FOdysseyVectorSegment::FOdysseyVectorSegment( FOdysseyVectorObject* iOwner
     , mIntersectionSlotCount( 0 )
     , mTextureStartU ( 0.0f )
     , mTextureEndU ( 0.0f )
+    , mNeedsWidth ( iNeedsWidth )
 {
 }
 

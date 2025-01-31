@@ -78,7 +78,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
          */
         FOdysseyVectorSegment( FOdysseyVectorObject* iOwner
                              , FOdysseyVectorVertex* iVertex0
-                             , FOdysseyVectorVertex* iVertex1 );
+                             , FOdysseyVectorVertex* iVertex1
+                             , bool iNeedsWidth );
 
         virtual ~FOdysseyVectorSegment();
 
@@ -208,8 +209,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         //void SetPaintingReady( bool iIsPaintingReady );
         //bool IsPaintingReady();
 
-        virtual bool Pick( const ::ULIS::FRectD& iMaskRect, uint8* iPixelData ) = 0;
-        virtual bool Pick( double iX, double iY, double iRadius ) = 0;
+        virtual bool Pick( const ::ULIS::FRectD& iMaskRect, uint8* iPixelData ) { return false; };
+        virtual bool Pick( double iX, double iY, double iRadius ) { return false; };
         ::ULIS::FVec2D GetFractionCacheStartPointInParent();
         ::ULIS::FVec2D GetFractionCacheEndPointInParent();
         virtual double GetLength();
@@ -259,4 +260,5 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegment : public FOdysseyVectorLink
         uint32 mIntersectionSlotCount;
         double mTextureStartU;
         double mTextureEndU;
+        bool mNeedsWidth;
 };

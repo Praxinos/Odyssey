@@ -1,5 +1,5 @@
-// IDDN.FR.001.250001.005.S.P.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #include "Export/v2/OdysseyVectorExport.h"
 // from module OdysseyFile
@@ -21,6 +21,48 @@ FOdysseyVectorExportV2::WriteGroupPaintBuckets( FOdysseyVectorGroupPaint& iPaint
             }
         } );
     }
+}
+
+void
+FOdysseyVectorExportV2::WriteGroupPaintGapSegmentExtensionSimplified( FOdysseyVectorGroupPaint& iPaintGroup
+                                                                    , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_GROUPPAINT_GAP_SEGMENTEXTENSION_SIMPLIFIED
+                            , Ar
+                            , [&iPaintGroup](FArchive &Ar) -> void
+    {
+        uint32 simplified = static_cast<uint32>(iPaintGroup.IsSegmentExtensionSimplified());
+
+        Ar << simplified;
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteGroupPaintGapSegmentExtensionScheme( FOdysseyVectorGroupPaint& iPaintGroup
+                                                                , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_GROUPPAINT_GAP_SEGMENTEXTENSION_SCHEME
+                            , Ar
+                            , [&iPaintGroup](FArchive &Ar) -> void
+    {
+        uint32 extensionScheme = static_cast<uint32>(iPaintGroup.GetSegmentExtensionScheme());
+
+        Ar << extensionScheme;
+    } );
+}
+
+void
+FOdysseyVectorExportV2::WriteGroupPaintGapDetectionScheme( FOdysseyVectorGroupPaint& iPaintGroup
+                                                         , FArchive &Ar )
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_GROUPPAINT_GAP_DETECTIONSCHEME
+                            , Ar
+                            , [&iPaintGroup](FArchive &Ar) -> void
+    {
+        uint32 gapDetectionScheme = static_cast<uint32>(iPaintGroup.GetGapDetectionScheme());
+
+        Ar << gapDetectionScheme;
+    } );
 }
 
 void
@@ -150,6 +192,9 @@ FOdysseyVectorExportV2::WriteGroupPaintChunks( FOdysseyVectorGroupPaint& iPaintG
     WriteGroupPaintWireframeColor( iPaintGroup, Ar );
     WriteGroupPaintGap( iPaintGroup, Ar );
     WriteGroupPaintBuckets( iPaintGroup, Ar );
+    WriteGroupPaintGapDetectionScheme( iPaintGroup, Ar );
+    WriteGroupPaintGapSegmentExtensionScheme( iPaintGroup, Ar );
+    WriteGroupPaintGapSegmentExtensionSimplified( iPaintGroup, Ar );
 }
 
 // Write chunks with encapsulation within the GroupPaint chunk header

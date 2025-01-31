@@ -9,6 +9,18 @@ UOdysseyPainterEditorVectorGroupPaintView::~UOdysseyPainterEditorVectorGroupPain
 
 UOdysseyPainterEditorVectorGroupPaintView::UOdysseyPainterEditorVectorGroupPaintView()
     : UOdysseyPainterEditorVectorObjectView()
+    , Painted( true )
+    , Monochrome( false )
+    , MonochromeColor( 127, 127, 127, 255 )
+    , Realtime( false )
+    , GapTolerance( 12.0f )
+    //, Wireframe
+    , WireframeColor( 255, 255, 255, 255 )
+    , Multithreaded( true )
+    , IntersectsCanvas( false )
+    , GapDetectionScheme(  eGapDetectionScheme::SegmentExtension )
+    , SegmentExtensionScheme( eSegmentExtensionScheme::Single )
+    , SegmentExtensionSimplified ( true )
 {
 }
 
@@ -24,15 +36,18 @@ UOdysseyPainterEditorVectorGroupPaintView::ImportParam()
             FOdysseyVectorGroupPaint* selectedPaintGroup = static_cast<FOdysseyVectorGroupPaint*>(selectedObject);
 
             // Category "PaintGroup"
-            Painted           = selectedPaintGroup->IsPainted();
-            Monochrome        = selectedPaintGroup->IsMonochrome();
-            MonochromeColor   = selectedPaintGroup->GetMonochromeColor();
-            Realtime          = selectedPaintGroup->IsRealtime();
-            GapTolerance      = selectedPaintGroup->GetGapTolerance();
-            //Wireframe       = selectedPaintGroup->IsWireframe();
-            WireframeColor    = selectedPaintGroup->GetWireframeColor();
-            Multithreaded     = selectedPaintGroup->IsMultithreaded();
-            IntersectsCanvas = selectedPaintGroup->IntersectsCanvas();
+            Painted                    = selectedPaintGroup->IsPainted();
+            Monochrome                 = selectedPaintGroup->IsMonochrome();
+            MonochromeColor            = selectedPaintGroup->GetMonochromeColor();
+            Realtime                   = selectedPaintGroup->IsRealtime();
+            GapTolerance               = selectedPaintGroup->GetGapTolerance();
+            //Wireframe                = selectedPaintGroup->IsWireframe();
+            WireframeColor             = selectedPaintGroup->GetWireframeColor();
+            Multithreaded              = selectedPaintGroup->IsMultithreaded();
+            IntersectsCanvas           = selectedPaintGroup->IntersectsCanvas();
+            GapDetectionScheme         = selectedPaintGroup->GetGapDetectionScheme();
+            SegmentExtensionScheme     = selectedPaintGroup->GetSegmentExtensionScheme();
+            SegmentExtensionSimplified = selectedPaintGroup->IsSegmentExtensionSimplified();
 
             break; // only one for now
         }
@@ -84,6 +99,15 @@ UOdysseyPainterEditorVectorGroupPaintView::PropertyChanged( const FName& iProper
 
             if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, Multithreaded) )
                 selectedPaintGroup->SetMultithreaded( Multithreaded );
+
+            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, GapDetectionScheme) )
+                selectedPaintGroup->SetGapDetectionScheme( GapDetectionScheme );
+
+            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, SegmentExtensionScheme) )
+                selectedPaintGroup->SetSegmentExtensionScheme( SegmentExtensionScheme );
+
+            if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorGroupPaintView, SegmentExtensionSimplified) )
+                selectedPaintGroup->SetSegmentExtensionSimplified( SegmentExtensionSimplified );
         }
     }
 }

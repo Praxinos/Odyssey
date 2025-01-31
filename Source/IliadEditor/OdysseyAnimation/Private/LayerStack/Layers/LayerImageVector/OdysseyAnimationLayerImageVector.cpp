@@ -542,7 +542,7 @@ UOdysseyAnimationLayerImageVector::GetLastCell()
     return Cast<UOdysseyAnimationCellImageVector>(lastCell)->GetVectorCell();
 }
 
-// Implements Interface IOdysseyVectorLayer::GetLastCell
+// Implements Interface IOdysseyVectorLayer::GetFirstCell
 FOdysseyVectorCell*
 UOdysseyAnimationLayerImageVector::GetFirstCell()
 {

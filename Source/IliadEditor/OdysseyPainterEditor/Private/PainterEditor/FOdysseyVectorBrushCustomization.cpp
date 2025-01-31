@@ -92,6 +92,7 @@ FOdysseyVectorBrushCustomization::OnClicked( TSharedRef<IPropertyHandle> StructP
     Config.OnShouldFilterAsset = FOnShouldFilterAsset::CreateRaw( this, &FOdysseyVectorBrushCustomization::FilterAsset );
     Config.bAllowNullSelection = true;
     Config.bAllowDragging = false;
+    Config.bForceShowEngineContent = true;
 
     FSlateApplication::Get().AddModalWindow( SNew(SWindow)
                                               .Title( LOCTEXT( "vector-brush.brush-picker-window.title", "Pick Vector Brush" ) )

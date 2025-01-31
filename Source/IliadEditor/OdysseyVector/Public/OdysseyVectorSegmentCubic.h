@@ -58,7 +58,7 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
                                   , double iCtrlPoint1x
                                   , double iCtrlPoint1y
                                   , FOdysseyVectorVertex* iVertex1
-                                  , bool iNeedWidth );
+                                  , bool iNeedsWidth );
 
         void Smooth( double iLimitAngleInRadians );
 
@@ -277,7 +277,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorSegmentCubic : public FOdysseyVectorSegmen
     protected:
         FOdysseyVectorOffsetCurveCubic mOffsetCurve[2];
         ::ULIS::FVec2D mBezier[4];
-        bool mNeedWidth;
         FOdysseyVectorHandleSegment mCtrlPoint[2];
         BLPath mBLPath;
 };

@@ -8,6 +8,7 @@
 #include "OdysseyVectorSection.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorSegmentCubicGap.h"
+#include "OdysseyVectorSegmentExtended.h"
 #include "OdysseyVectorObject.h"
 
 FOdysseyVectorSection::~FOdysseyVectorSection()
@@ -85,12 +86,6 @@ FOdysseyVectorSection::GetOwner()
     return mOwner;
 }
 
-bool
-FOdysseyVectorSection::IsGap()
-{
-    return ( mFlags & GAP ) ? true: false;
-}
-
 void
 FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgroup
                            , FOdysseyVectorSegment* iSegment
@@ -117,7 +112,7 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
     // Get "sub-bezier" from t values. Will help us building the adjacent cycle and draw the section.
     // We indeed have to draw the section or else you can expect a small 1-pixel gap between cycles,
     // especially where strokes are transparent.
-    if( iSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+    if( iSegment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
     {
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegment);
         ::ULIS::FVec2D* segmentBezier = cubicSegment->GetBezier();
@@ -199,12 +194,36 @@ FOdysseyVectorSection::Init( FOdysseyVectorObject* iOwner // usually the paintgr
         FOdysseyVectorSegmentCubicGap* gapCubicSegment = static_cast<FOdysseyVectorSegmentCubicGap*>(iSegment);
         ::ULIS::FVec2D* segmentBezier = gapCubicSegment->GetBezier();
 
-        // Gap segments already are in parent coordinates. Just copy the whole thing
+        // Gap segments already are in paintgroup coordinates. Just copy the whole thing
         memcpy( mBezier, segmentBezier, sizeof( mBezier ) );
 
         mLength = ::ULIS::FVec2D( mBezier[0] - mBezier[3] ).Distance();
+    }
 
-        mFlags |= GAP;
+    if( iSegment->GetClass() == FOdysseyVectorSegmentExtended::StaticClass() )
+    {
+        FOdysseyVectorSegmentExtended* extendedSegment = static_cast<FOdysseyVectorSegmentExtended*>(iSegment);
+        ::ULIS::FVec2D vertex0WorldCoords = iVertex0->GetWorldCoords();
+        ::ULIS::FVec2D vertex1WorldCoords = iVertex1->GetWorldCoords();
+        BLPoint convertedPoint[2];
+
+        // convert to desired space (the paintgroup, normally)
+        convertedPoint[0] = ownerInverseWorldMatrix.mapPoint( vertex0WorldCoords.x, vertex0WorldCoords.y );
+        convertedPoint[1] = ownerInverseWorldMatrix.mapPoint( vertex1WorldCoords.x, vertex1WorldCoords.y );
+
+        mBezier[0].x = convertedPoint[0].x;
+        mBezier[0].y = convertedPoint[0].y;
+
+        mBezier[1].x = convertedPoint[0].x;
+        mBezier[1].y = convertedPoint[0].y;
+
+        mBezier[2].x = convertedPoint[1].x;
+        mBezier[2].y = convertedPoint[1].y;
+
+        mBezier[3].x = convertedPoint[1].x;
+        mBezier[3].y = convertedPoint[1].y;
+
+        mLength = ::ULIS::FVec2D( mBezier[0] - mBezier[3] ).Distance();
     }
 
     if( mLength > 0.0f )
@@ -346,6 +365,12 @@ FOdysseyVectorSection::GetVectorFromVertex( uint32 iVertexIndex
         {
              tangent = ( iVertexIndex == 0 ) ?  GetTangentAt( 0.0f, false )
                                              : -GetTangentAt( 1.0f, false );
+        }
+
+        if( mSegment->HasBaseClass( FOdysseyVectorSegmentExtended::StaticClass() ) )
+        {
+            tangent =  ( iVertexIndex == 0 ) ? mBezier[3] - mBezier[0]
+                                             : mBezier[0] - mBezier[3];
         }
     }
 

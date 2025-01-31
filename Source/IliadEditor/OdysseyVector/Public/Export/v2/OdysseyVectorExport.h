@@ -106,6 +106,9 @@ namespace FOdysseyVectorExportV2
     void WriteGroupPaintWireframe( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
     void WriteGroupPaintPainted( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
     void WriteGroupPaintIntersectsCanevas( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
+    void WriteGroupPaintGapDetectionScheme( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
+    void WriteGroupPaintGapSegmentExtensionScheme( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
+    void WriteGroupPaintGapSegmentExtensionSimplified( FOdysseyVectorGroupPaint& iPaintGroup, FArchive &Ar );
 
     void ODYSSEYVECTOR_API WriteTagInbetweener( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );
     void WriteTagInbetweenerColor( FOdysseyVectorTagInbetweener& iInbetweenerTag, FArchive &Ar );

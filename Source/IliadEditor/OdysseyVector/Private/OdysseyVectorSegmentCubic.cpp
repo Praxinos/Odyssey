@@ -35,8 +35,7 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorObject* iO
                                                       , double iCtrlPoint1y
                                                       , FOdysseyVectorVertex* iPoint1
                                                       , bool iNeedWidth )
-    : FOdysseyVectorSegment( iOwner, iPoint0, iPoint1 )
-    , mNeedWidth( iNeedWidth )
+    : FOdysseyVectorSegment( iOwner, iPoint0, iPoint1, iNeedWidth )
     , mCtrlPoint { FOdysseyVectorHandleSegment( this, iPoint0, 0.0f, 0.0f )
                  , FOdysseyVectorHandleSegment( this, iPoint1, 0.0f, 0.0f ) }
 {
@@ -47,8 +46,7 @@ FOdysseyVectorSegmentCubic::FOdysseyVectorSegmentCubic( FOdysseyVectorObject* iO
                                                       , FOdysseyVectorVertex* iPoint0
                                                       , FOdysseyVectorVertex* iPoint1
                                                       , bool iNeedWidth )
-    : FOdysseyVectorSegment( iOwner, iPoint0, iPoint1 )
-    , mNeedWidth( iNeedWidth )
+    : FOdysseyVectorSegment( iOwner, iPoint0, iPoint1, iNeedWidth )
     , mCtrlPoint { FOdysseyVectorHandleSegment( this, iPoint0, 0.0f, 0.0f )
                  , FOdysseyVectorHandleSegment( this, iPoint1, 0.0f, 0.0f ) }
 {
@@ -1275,7 +1273,7 @@ FOdysseyVectorSegmentCubic::Update( uint32 iUpdateFlags )
                                     , mBezier[2].y
                                     , mBezier[3].y );
 
-    if( mNeedWidth )
+    if( mNeedsWidth )
     {
         BuildVariable( iUpdateFlags & FOdysseyVectorObject::UPDATE_NEEDPOLYLINE ? 5 : MINRECURSE
                      , MAXRECURSE

@@ -1,95 +1,11 @@
-// IDDN.FR.001.250001.005.S.P.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #include "Import/v2/OdysseyVectorImport.h"
 // from module OdysseyFile
 #include "OdysseyFile.h"
 #include "OdysseyVectorBucket.h"
 #include "OdysseyVectorGroupPaint.h"
-
-void
-FOdysseyVectorImportV2::ReadBucketEntry( FOdysseyVectorBucket& iBucket, uint64 iChunkEnd, FArchive &Ar )
-{
-    FOdysseyFile::ReadChunks( iChunkEnd
-                            , Ar
-                            , [&iBucket](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void
-        {
-            switch( iChunkID )
-            {
-                case FOdysseyFile::VectorV2::CHUNK_BUCKET_PROPAGATED:
-                {
-                    uint32 propagated;
-
-                    Ar << propagated;
-
-                    iBucket.SetPropagated( propagated ? true : false );
-                }
-                break;
-
-                case FOdysseyFile::VectorV2::CHUNK_BUCKET_ROTATION:
-                {
-                    double rotation;
-
-                    Ar << rotation;
-
-                    iBucket.SetRotation( rotation );
-                }
-                break;
-
-                case FOdysseyFile::VectorV2::CHUNK_BUCKET_POSITION:
-                {
-                    double x;
-                    double y;
-
-                    Ar << x;
-                    Ar << y;
-
-                    iBucket.Set( x, y );
-                }
-                break;
-
-                case FOdysseyFile::VectorV2::CHUNK_BUCKET_SOLIDCOLOR:
-                {
-                    uint8 R, G, B, A;
-
-                    Ar << R;
-                    Ar << G;
-                    Ar << B;
-                    Ar << A;
-
-                    iBucket.SetColorMode( eBucketColorMode::SolidColor );
-                    iBucket.SetSolidColor( R, G, B, A );
-                }
-                break;
-
-                case FOdysseyFile::VectorV2::CHUNK_BUCKET_GRADIENT: // container
-                   iBucket.SetColorMode( eBucketColorMode::LinearGradient );
-                break;
-
-                case FOdysseyFile::VectorV2::CHUNK_BUCKET_GRADIENT_STOP:
-                {
-                    uint8 R,G,B,A;
-                    double stopAt;
-
-                    Ar << R;
-                    Ar << G;
-                    Ar << B;
-                    Ar << A;
-
-                    Ar << stopAt;
-
-                    if( stopAt == 0.0f ) iBucket.SetGradientColor0( R, G, B, A );
-                    if( stopAt == 1.0f ) iBucket.SetGradientColor1( R, G, B, A );
-                }
-                break;
-
-                default:
-                // Mandatory
-                    Ar.Seek( Ar.Tell() + iChunkLen );
-                break;
-            }
-        } );
-}
 
 void
 FOdysseyVectorImportV2::ParseGroupPaintChunks( FOdysseyVectorGroupPaint& iPaintGroup
@@ -181,6 +97,36 @@ FOdysseyVectorImportV2::ParseGroupPaintChunks( FOdysseyVectorGroupPaint& iPaintG
         }
         break;
 
+        case FOdysseyFile::VectorV2::CHUNK_GROUPPAINT_GAP_DETECTIONSCHEME:
+        {
+            uint32 gapDetectionScheme;
+
+            Ar << gapDetectionScheme;
+
+            iPaintGroup.SetGapDetectionScheme( static_cast<eGapDetectionScheme>(gapDetectionScheme) );
+        }
+        break;
+
+        case FOdysseyFile::VectorV2::CHUNK_GROUPPAINT_GAP_SEGMENTEXTENSION_SCHEME:
+        {
+            uint32 segmentExtensionScheme;
+
+            Ar << segmentExtensionScheme;
+
+            iPaintGroup.SetSegmentExtensionScheme( static_cast<eSegmentExtensionScheme>(segmentExtensionScheme) );
+        }
+        break;
+
+        case FOdysseyFile::VectorV2::CHUNK_GROUPPAINT_GAP_SEGMENTEXTENSION_SIMPLIFIED:
+        {
+            uint32 simplified;
+
+            Ar << simplified;
+
+            iPaintGroup.SetSegmentExtensionSimplified( simplified ? true : false );
+        }
+        break;
+
         case FOdysseyFile::VectorV2::CHUNK_BUCKET_ENTRY:
         {
             FOdysseyVectorBucket* bucket = new FOdysseyVectorBucket( &iPaintGroup, 0.0f, 0.0f, false );
@@ -200,6 +146,9 @@ FOdysseyVectorImportV2::ParseGroupPaintChunks( FOdysseyVectorGroupPaint& iPaintG
 void
 FOdysseyVectorImportV2::ReadGroupPaint( FOdysseyVectorGroupPaint& iPaintGroup, uint64 iChunkEnd, FArchive &Ar )
 {
+    // for legacy reason, we set some default values that are different than the object's default value at constructor call.
+   iPaintGroup.SetGapDetectionScheme( eGapDetectionScheme::ClosestNeighbour );
+
     FOdysseyFile::ReadChunks( iChunkEnd
                             , Ar
                             , [this,&iPaintGroup](uint32 iChunkID, uint64 iChunkLen, FArchive &Ar) -> void

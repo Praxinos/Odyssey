@@ -211,6 +211,9 @@ namespace FOdysseyFile
                         static const uint32 CHUNK_GROUPPAINT_WIREFRAMECOLOR = 0x0AB56FA6; //uint8(R)-uint8(G)-uint8(B)-uint8(A)
                         static const uint32 CHUNK_GROUPPAINT_GAP = 0x7602b7f4; // container
                             static const uint32 CHUNK_GROUPPAINT_GAP_TOLERANCE = 0x960a3861; // double(tolerance)
+                            static const uint32 CHUNK_GROUPPAINT_GAP_DETECTIONSCHEME = 0x6ca604eb; // uint32(scheme)
+                            static const uint32 CHUNK_GROUPPAINT_GAP_SEGMENTEXTENSION_SCHEME = 0xd5581625; // uint32(scheme)
+                            static const uint32 CHUNK_GROUPPAINT_GAP_SEGMENTEXTENSION_SIMPLIFIED = 0x6a7304f2; // uint32(scheme)
                         static const uint32 CHUNK_GROUPPAINT_BUCKETS = 0x5791cb88; // container
                             static const uint32 CHUNK_BUCKET_ENTRY = 0x94267aa5; // container
                                 static const uint32 CHUNK_BUCKET_SPREADING = 0x402c03f1;  // uint32(spreadingPolicy)

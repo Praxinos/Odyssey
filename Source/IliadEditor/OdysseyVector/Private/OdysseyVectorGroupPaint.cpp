@@ -1,5 +1,5 @@
-// IDDN.FR.001.250001.005.S.P.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVector.h"
@@ -286,7 +286,9 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
                                                   , &mCanvasVertex[3]
                                                   , &mCanvasVertex[0]
                                                   , true ) }
-
+    , mSegmentExtensionScheme( eSegmentExtensionScheme::Single )
+    , mGapDetectionScheme( eGapDetectionScheme::SegmentExtension )
+    , bSegmentExtensionSimplified ( false )
 {
     SetName( iName );
 
@@ -706,7 +708,9 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment0
 
 // this part is for detecting near-intersections. We only consider path tips (segmentCount = 1)
 ////////////////////////////// Gap detection /////////////////////////////////
-        if( ( mGapTolerance  ) && ( iSegment0 != iSegment1 ) )
+        if( ( mGapTolerance  )
+         && ( iSegment0 != iSegment1 )
+         && ( mGapDetectionScheme == eGapDetectionScheme::ClosestNeighbour ) )
         {
             if( segment1Vertex0SegmentCount == 1 )
             {
@@ -777,12 +781,15 @@ FOdysseyVectorGroupPaint::IntersectSegment( FOdysseyVectorSegment* iSegment0
 ///////////////////////////////////
     }
 
-    mMutex.lock();
-    IntersectVertex( segment0Vertex0, segment0Point0InParent, segment1Vertex0, segment1Point0InParent );
-    IntersectVertex( segment0Vertex0, segment0Point0InParent, segment1Vertex1, segment1Point1InParent );
-    IntersectVertex( segment0Vertex1, segment0Point1InParent, segment1Vertex0, segment1Point0InParent );
-    IntersectVertex( segment0Vertex1, segment0Point1InParent, segment1Vertex1, segment1Point1InParent );
-    mMutex.unlock();
+    if( mGapDetectionScheme == eGapDetectionScheme::ClosestNeighbour )
+    {
+        mMutex.lock();
+        IntersectVertex( segment0Vertex0, segment0Point0InParent, segment1Vertex0, segment1Point0InParent );
+        IntersectVertex( segment0Vertex0, segment0Point0InParent, segment1Vertex1, segment1Point1InParent );
+        IntersectVertex( segment0Vertex1, segment0Point1InParent, segment1Vertex0, segment1Point0InParent );
+        IntersectVertex( segment0Vertex1, segment0Point1InParent, segment1Vertex1, segment1Point1InParent );
+        mMutex.unlock();
+    }
 }
 
 void
@@ -1028,7 +1035,7 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
                     {
                         //if( segment->IsPaintingReady() == false )
                         {
-                            if( segment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+                            if( segment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
                             {
                                 FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(segment);
                                 std::vector<FOdysseyVectorFraction>& fractionCache = cubicSegment->GetFractionCache();
@@ -1093,6 +1100,7 @@ FOdysseyVectorGroupPaint::UpdateShape( uint32 iUpdateFlags )
     {
         Clear();
     }
+
 }
 
 void
@@ -1195,9 +1203,17 @@ FOdysseyVectorGroupPaint::DrawShape( BLContext* iBLContext
             iBLContext->setStrokeWidth( 1.0f );
             iBLContext->setStrokeStyle( BLRgba32( 0xFF, 0x00, 0x00, 0xFF ) );
 
-            for( int i = 0; i < mGapSegmentBuffer.size(); i++ )
+            if( mInvalidationFlags == 0 )
             {
-                mGapSegmentBuffer[i].DrawStructure( iBLContext, this, true );
+                for( int i = 0; i < mGapSegmentBuffer.size(); i++ )
+                {
+                    mGapSegmentBuffer[i].DrawStructure( iBLContext, this, true );
+                }
+
+                for( int i = 0; i < mExtendedSegmentBuffer.size(); i++ )
+                {
+                    mExtendedSegmentBuffer[i].DrawStructure( iBLContext, mExtendedSegmentBuffer[i].GetOwner(), true );
+                }
             }
 
     /* Works too
@@ -1259,11 +1275,19 @@ FOdysseyVectorGroupPaint::CreateVertexGapSegment( FOdysseyVectorVertex* iVertex 
         // or if the nearest vertex is an intersection vertex.
         ||    ( nearestVertex->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() ) )
         {
-            FOdysseyVectorSegmentCubicGap& newGapSegment = mGapSegmentBuffer.emplace_back( this, nearestVertex, iVertex );
+            FOdysseyVectorSegmentCubicGap& newGapSegment = mGapSegmentBuffer.emplace_back( this
+                                                                                         , nearestVertex
+                                                                                         , iVertex );
             //iGapSegmentBuffer[gapCount].Link(); // not necessary. saves us some cpu cycles
             newGapSegment.Update( 0 );
 
-            FOdysseyVectorSection& newGapSection = mGapSectionBuffer.emplace_back( this, &newGapSegment, nearestVertex, iVertex, 0.0f, 1.0f, mShortSectionArray );
+            FOdysseyVectorSection& newGapSection = mGapSectionBuffer.emplace_back( this
+                                                                                 , &newGapSegment
+                                                                                 , nearestVertex
+                                                                                 , iVertex
+                                                                                 , 0.0f
+                                                                                 , 1.0f
+                                                                                 , mShortSectionArray );
             //newGapSection.Link();
 
             // unlink now if gap section is colinear with vertex segment. It creates a mess in
@@ -1354,8 +1378,8 @@ FOdysseyVectorGroupPaint::IntersectSegmentWithList( FOdysseyVectorSegment* iSegm
          && ( segmentMinInParentWithTolerance.y < intersectSegmentMaxInParentWithTolerance.y )
          && ( segmentMaxInParentWithTolerance.y > intersectSegmentMinInParentWithTolerance.y ) )
         {
-            IntersectSegment( static_cast<FOdysseyVectorSegmentCubic*>(iSegment)
-                            , static_cast<FOdysseyVectorSegmentCubic*>(intersectSegment)
+            IntersectSegment( iSegment
+                            , intersectSegment
                             , intersectSegmentMinInParentWithTolerance
                             , intersectSegmentMaxInParentWithTolerance
                             , mXIntersectionRecordArray );
@@ -1383,6 +1407,38 @@ FOdysseyVectorGroupPaint::IntersectSegmentWithList( FOdysseyVectorSegment* iSegm
 */
 
     //return intersectionCount;
+}
+
+void
+FOdysseyVectorGroupPaint::IntersectSegmentWithBuffer( FOdysseyVectorSegment* iSegment
+                                                    , std::vector<FOdysseyVectorSegmentCubic>& iSegmenBuffer )
+{
+    ::ULIS::FRectD& segmentBBoxInParent = iSegment->GetBBoxInParent();
+    ::ULIS::FVec2D segmentMinInParentWithTolerance( segmentBBoxInParent.x - mGapTolerance
+                                                  , segmentBBoxInParent.y - mGapTolerance );
+    ::ULIS::FVec2D segmentMaxInParentWithTolerance( segmentBBoxInParent.x + segmentBBoxInParent.w + mGapTolerance
+                                                  , segmentBBoxInParent.y + segmentBBoxInParent.h + mGapTolerance );
+
+    for( FOdysseyVectorSegment& intersectSegment : iSegmenBuffer )
+    {
+        ::ULIS::FRectD& intersectSegmentBBoxInParent = intersectSegment.GetBBoxInParent();
+        ::ULIS::FVec2D intersectSegmentMinInParentWithTolerance( intersectSegmentBBoxInParent.x - mGapTolerance
+                                                               , intersectSegmentBBoxInParent.y - mGapTolerance );
+        ::ULIS::FVec2D intersectSegmentMaxInParentWithTolerance( intersectSegmentBBoxInParent.x + intersectSegmentBBoxInParent.w + mGapTolerance
+                                                               , intersectSegmentBBoxInParent.y + intersectSegmentBBoxInParent.h + mGapTolerance );
+
+        if( ( segmentMinInParentWithTolerance.x < intersectSegmentMaxInParentWithTolerance.x )
+         && ( segmentMaxInParentWithTolerance.x > intersectSegmentMinInParentWithTolerance.x )
+         && ( segmentMinInParentWithTolerance.y < intersectSegmentMaxInParentWithTolerance.y )
+         && ( segmentMaxInParentWithTolerance.y > intersectSegmentMinInParentWithTolerance.y ) )
+        {
+            IntersectSegment( static_cast<FOdysseyVectorSegmentCubic*>(iSegment)
+                            , static_cast<FOdysseyVectorSegmentCubic*>(&intersectSegment)
+                            , intersectSegmentMinInParentWithTolerance
+                            , intersectSegmentMaxInParentWithTolerance
+                            , mXIntersectionRecordArray );
+        }
+    }
 }
 
 static void
@@ -1522,7 +1578,8 @@ GetCycleNormalVector( std::vector<uint32>& iVertexIndexArray
         ::ULIS::FVec2D& viCoords = sectioni->GetVertexCoords( vertex     );
         ::ULIS::FVec2D& vnCoords = sectioni->GetVertexCoords( nextVertex );
 
-        if( segment->GetClass() == FOdysseyVectorSegmentCubicGap::StaticClass() )
+        if( ( segment->GetClass() == FOdysseyVectorSegmentCubicGap::StaticClass() )
+         || ( segment->GetClass() == FOdysseyVectorSegmentExtended::StaticClass() ) )
         {
             z += ( ( viCoords.x - vnCoords.x ) * ( viCoords.y + vnCoords.y ) );
         }
@@ -1594,9 +1651,9 @@ FOdysseyVectorGroupPaint::Explore( FExplorationPair* iExplorationPair )
 // static
 void
 FOdysseyVectorGroupPaint::SetSegmentBBox( FOdysseyVectorSegment* iSegment
-                                        , BLMatrix2D& iConversionMatrix )
+                                        , const BLMatrix2D& iConversionMatrix )
 {
-    if( iSegment->GetClass() == FOdysseyVectorSegmentCubic::StaticClass() )
+    if( iSegment->HasBaseClass( FOdysseyVectorSegmentCubic::StaticClass() ) )
     {
         FOdysseyVectorSegmentCubic* cubicSegment = static_cast<FOdysseyVectorSegmentCubic*>(iSegment);
         ::ULIS::FVec2D* bezier = cubicSegment->GetBezier();
@@ -1608,6 +1665,21 @@ FOdysseyVectorGroupPaint::SetSegmentBBox( FOdysseyVectorSegment* iSegment
              , ymin = ::ULIS::FMath::Min4( p[0].y, p[1].y, p[2].y, p[3].y )
              , xmax = ::ULIS::FMath::Max4( p[0].x, p[1].x, p[2].x, p[3].x )
              , ymax = ::ULIS::FMath::Max4( p[0].y, p[1].y, p[2].y, p[3].y );
+
+        iSegment->SetBBoxInParent( ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) );
+    }
+
+    if( iSegment->HasBaseClass( FOdysseyVectorSegmentExtended::StaticClass() ) )
+    {
+        FOdysseyVectorSegmentExtended* extendedSegment = static_cast<FOdysseyVectorSegmentExtended*>(iSegment);
+        ::ULIS::FVec2D& vertex0Coords = extendedSegment->GetVertex(0)->GetCoords();
+        ::ULIS::FVec2D& vertex1Coords = extendedSegment->GetVertex(1)->GetCoords();
+        BLPoint p[2] = { iConversionMatrix.mapPoint( vertex0Coords.x, vertex0Coords.y )
+                       , iConversionMatrix.mapPoint( vertex1Coords.x, vertex1Coords.y ) };
+        double xmin = ::ULIS::FMath::Min( p[0].x, p[1].x )
+             , ymin = ::ULIS::FMath::Min( p[0].y, p[1].y )
+             , xmax = ::ULIS::FMath::Max( p[0].x, p[1].x )
+             , ymax = ::ULIS::FMath::Max( p[0].y, p[1].y );
 
         iSegment->SetBBoxInParent( ::ULIS::FRectD::FromMinMax( xmin, ymin, xmax, ymax ) );
     }
@@ -1736,6 +1808,34 @@ FOdysseyVectorGroupPaint::CreateNearIntersection( FOdysseyVectorVertex *iVertex 
             }
         }
     }
+}
+
+eGapDetectionScheme
+FOdysseyVectorGroupPaint::GetGapDetectionScheme()
+{
+    return mGapDetectionScheme;
+}
+
+void
+FOdysseyVectorGroupPaint::SetGapDetectionScheme( eGapDetectionScheme iGapDetectionScheme )
+{
+    mGapDetectionScheme = iGapDetectionScheme;
+
+    Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
+}
+
+eSegmentExtensionScheme
+FOdysseyVectorGroupPaint::GetSegmentExtensionScheme()
+{
+    return mSegmentExtensionScheme;
+}
+
+void
+FOdysseyVectorGroupPaint::SetSegmentExtensionScheme( eSegmentExtensionScheme iSegmentExtensionScheme )
+{
+    mSegmentExtensionScheme = iSegmentExtensionScheme;
+
+    Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
 }
 
 double
@@ -1911,21 +2011,67 @@ FOdysseyVectorGroupPaint::UpdatePathList()
     }
 */
 }
-/*
-void
-FOdysseyVectorGroupPaint::AddChild( FOdysseyVectorObject* iChild
-                                  , FOdysseyVectorObject* iInsertAfter )
-{
-    FOdysseyVectorGroup::AddChild( iChild, iInsertAfter );
 
-    UpdatePathList();
-}
-
+//static
 void
-FOdysseyVectorGroupPaint::RemoveChild()
+FOdysseyVectorGroupPaint::MakeExtendedSegments( FOdysseyVectorVertex* iVertex
+                                              , eSegmentExtensionScheme iScheme
+                                              , const BLMatrix2D& iConversionMatrix
+                                              , std::vector<FOdysseyVectorVertex>& iExtendedVertexBuffer
+                                              , std::vector<FOdysseyVectorSegmentExtended>& iExtendedSegmentBuffer
+                                              , double iGapTolerance )
 {
+    ::ULIS::FVec2D tangent = - iVertex->GetFirstSegment()->GetVectorFromVertex( iVertex, true ) * iGapTolerance;
+    ::ULIS::FVec2D perp = ::ULIS::FVec2D( -tangent.y, tangent.x );
+    ::ULIS::FVec2D vector[3] = { {  tangent.x,  tangent.y }
+                               , { -tangent.y,  tangent.x }
+                               , {  tangent.y, -tangent.x } };
+    FOdysseyVectorObject* vertexOwner = iVertex->GetOwner();
+    ::ULIS::FVec2D& vertexCoords = iVertex->GetCoords();
+
+    for( uint32 i = 0; i < (uint32) iScheme; i++ )
+    {
+
+        FOdysseyVectorVertex& extendedVertex = iExtendedVertexBuffer.emplace_back( vertexCoords.x + vector[i].x
+                                                                                 , vertexCoords.y + vector[i].y
+                                                                                 , 0.0f );
+        extendedVertex.SetOwner( vertexOwner );
+
+        FOdysseyVectorSegmentExtended& extendedSegment = iExtendedSegmentBuffer.emplace_back( vertexOwner
+                                                                                            , iVertex
+                                                                                            , &extendedVertex
+                                                                                            , true );
+        std::vector<FOdysseyVectorFraction>& fractionCache = extendedSegment.GetFractionCache();
+        // convert polygon cache coordinates to paintgroup's coordinates
+        // for faster intersection test
+        for( int j = 0; j < fractionCache.size(); j++ )
+        {
+            FOdysseyVectorFraction* fraction = &fractionCache[j];
+            ::ULIS::FVec2D& p0Coords = fraction->point[0]->GetCoords();
+            ::ULIS::FVec2D& p1Coords = fraction->point[1]->GetCoords();
+
+            BLPoint lineVertex0 = iConversionMatrix.mapPoint( p0Coords.x, p0Coords.y );
+            fraction->pointCoordsInParent[0].x = lineVertex0.x;
+            fraction->pointCoordsInParent[0].y = lineVertex0.y;
+
+            BLPoint lineVertex1 = iConversionMatrix.mapPoint( p1Coords.x, p1Coords.y );
+            fraction->pointCoordsInParent[1].x = lineVertex1.x;
+            fraction->pointCoordsInParent[1].y = lineVertex1.y;
+
+            // this may be a bit too memory-consuming. Don't know. Keep it for now.
+            fraction->xMaxInParent = ::ULIS::FMath::Max( fraction->pointCoordsInParent[0].x, fraction->pointCoordsInParent[1].x );
+            fraction->yMaxInParent = ::ULIS::FMath::Max( fraction->pointCoordsInParent[0].y, fraction->pointCoordsInParent[1].y );
+            fraction->xMinInParent = ::ULIS::FMath::Min( fraction->pointCoordsInParent[0].x, fraction->pointCoordsInParent[1].x );
+            fraction->yMinInParent = ::ULIS::FMath::Min( fraction->pointCoordsInParent[0].y, fraction->pointCoordsInParent[1].y );
+        }
+
+        // take advantage of this loop to compute the box.
+        // Note: bbox could be computed from the above polygon processing thing
+        SetSegmentBBox( &extendedSegment, iConversionMatrix );
+
+        static_cast<FOdysseyVectorPath*>(vertexOwner)->AddSegment( &extendedSegment );
+    }
 }
-*/
 
 void
 FOdysseyVectorGroupPaint::BuildGraph()
@@ -1933,6 +2079,56 @@ FOdysseyVectorGroupPaint::BuildGraph()
     //std::list<FOdysseyVectorPath*> intersectedPathList = mPathList; // copy
     uint32 totalGapSegmentCount = 0;
     uint32 totalSectionCount = 0;
+    uint32 extendedVertexCount = 0;
+
+    mExtendedVertexBuffer.clear();
+    mExtendedSegmentBuffer.clear();
+
+    if( mGapTolerance )
+    {
+        if( mGapDetectionScheme == eGapDetectionScheme::SegmentExtension )
+        {
+            for( FOdysseyVectorPath *path : mPathList )
+            {
+                for( FOdysseyVectorChain& chain : path->GetChainArray() )
+                {
+                    for( FOdysseyVectorVertex* vertex : chain.GetVertexArray() )
+                    {
+                        if( vertex->GetSegmentCount() == 1 )
+                        {
+                            extendedVertexCount += (int) mSegmentExtensionScheme;
+                        }
+                    }
+                }
+            }
+
+            mExtendedVertexBuffer.reserve( extendedVertexCount );
+            mExtendedSegmentBuffer.reserve( extendedVertexCount );
+
+            // Generate extensions for gap detection
+            for( FOdysseyVectorPath *path : mPathList )
+            {
+                BLMatrix2D conversionMatrix;
+                FOdysseyVector::MatrixMultiply( mInverseWorldMatrix, path->GetWorldMatrix(), conversionMatrix );
+
+                for( FOdysseyVectorChain& chain : path->GetChainArray() )
+                {
+                    for( FOdysseyVectorVertex* vertex : chain.GetVertexArray() )
+                    {
+                        if( vertex->GetSegmentCount() == 1 )
+                        {
+                            MakeExtendedSegments( vertex
+                                                , mSegmentExtensionScheme
+                                                , conversionMatrix
+                                                , mExtendedVertexBuffer
+                                                , mExtendedSegmentBuffer
+                                                , mGapTolerance );
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     // act as boolean without the need to reinitialize its value
     ++mPaintingCode;
@@ -2151,6 +2347,11 @@ FOdysseyVectorGroupPaint::BuildGraph()
         }
     }
 
+    for( FOdysseyVectorSegmentExtended& extendedSegment : mExtendedSegmentBuffer )
+    {
+        extendedSegment.GetOwnerAsPath()->RemoveSegment( &extendedSegment );
+    }
+
     // Get rid of section of length 0
     for( FOdysseyVectorSection* shortSection : mShortSectionArray )
     {
@@ -2284,6 +2485,24 @@ FOdysseyVectorGroupPaint::SimplifyGraph()
 {
     bool keepSimplifying;
 
+    // unlink extended sections that have both vertices as intersection vertices
+
+    if( ( mGapDetectionScheme == eGapDetectionScheme::SegmentExtension )
+    &&  ( bSegmentExtensionSimplified ) )
+    {
+        for( FOdysseyVectorSection& section : mSectionBuffer )
+        {
+            if( section.GetSegment()->GetClass() == FOdysseyVectorSegmentExtended::StaticClass() )
+            {
+                if( ( section.GetVertex(0)->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() )
+                  &&( section.GetVertex(1)->GetClass() == FOdysseyVectorVertexIntersection::StaticClass() ) )
+                {
+                    section.Unlink( false );
+                }
+            }
+        }
+    }
+
     // unlink gap sections that intersect with other gap sections.
     for( FOdysseyVectorSection& section : mGapSectionBuffer )
     {
@@ -2338,6 +2557,20 @@ FOdysseyVectorGroupPaint::SimplifyGraph()
             }
         }
     } while ( keepSimplifying );
+}
+
+void
+FOdysseyVectorGroupPaint::SetSegmentExtensionSimplified( bool iSegmentExtensionSimplified )
+{
+    bSegmentExtensionSimplified = iSegmentExtensionSimplified;
+
+    Invalidate( FOdysseyVectorObject::INVALIDATE_SHAPE );
+}
+
+bool
+FOdysseyVectorGroupPaint::IsSegmentExtensionSimplified()
+{
+    return bSegmentExtensionSimplified;
 }
 
 void

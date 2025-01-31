@@ -1,5 +1,5 @@
-// IDDN.FR.001.250001.005.S.P.2019.000.00000
-// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2022
+// IDDN.FR.001.250001.006.S.P.2019.000.00000
+// ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
 #pragma once
 
@@ -16,6 +16,7 @@
 #include "OdysseyVectorSegment.h"
 #include "OdysseyVectorSegmentCubic.h"
 #include "OdysseyVectorSegmentCubicGap.h"
+#include "OdysseyVectorSegmentExtended.h"
 #include "OdysseyVectorPath.h"
 
 class FOdysseyVectorVertex;
@@ -24,6 +25,21 @@ class FOdysseyVectorSection;
 class FOdysseyVectorIntersection;
 class FOdysseyVectorBucket;
 class FOdysseyVectorCycle;
+
+UENUM(BlueprintType)
+enum class eGapDetectionScheme : uint8
+{
+    ClosestNeighbour = 0,
+    SegmentExtension = 1
+};
+
+UENUM(BlueprintType)
+enum class eSegmentExtensionScheme : uint8
+{
+    None   = 0 UMETA(Hidden),
+    Single = 1,
+    Triple = 3
+};
 
 // small temporary structure will allow us to alloc the intersection vertices in one go.
 // for X-Junction
@@ -216,6 +232,12 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                         , const uint8* iMaskPixelData );
         void PickErasedSections( std::vector<FOdysseyVectorSection*>& oErasedSectionArray );
         virtual void UpdateBBox() override;
+        eGapDetectionScheme GetGapDetectionScheme();
+        void SetGapDetectionScheme( eGapDetectionScheme iGapDetectionScheme );
+        eSegmentExtensionScheme GetSegmentExtensionScheme();
+        void SetSegmentExtensionScheme( eSegmentExtensionScheme iSegmentExtensionScheme );
+        void SetSegmentExtensionSimplified( bool iSegmentExtensionSimplified );
+        bool IsSegmentExtensionSimplified();
 
     protected:
         // static
@@ -230,7 +252,8 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
          */
         void IntersectSegmentWithList( FOdysseyVectorSegment* iSegment
                                      , const std::list<FOdysseyVectorSegment*>& iSegmenList );
-
+        void IntersectSegmentWithBuffer( FOdysseyVectorSegment* iSegment
+                                       , std::vector<FOdysseyVectorSegmentCubic>& iSegmenBuffer );
         /**
          * @brief Build the graph that allows to detect the cycles. It basically checks intersections
          */
@@ -293,8 +316,15 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
                                                     , FOdysseyVectorSegment* iOwnerSegment );
         bool PickSections( std::vector<FOdysseyVectorSection*>& oPickedSectionArray );
 
-        void SetSegmentBBox( FOdysseyVectorSegment* iSegment
-                           , BLMatrix2D& iConversionMatrix );
+        static void SetSegmentBBox( FOdysseyVectorSegment* iSegment
+                                  , const BLMatrix2D& iConversionMatrix );
+        static void MakeExtendedSegments( FOdysseyVectorVertex* iVertex
+                                        , eSegmentExtensionScheme iScheme
+                                        , const BLMatrix2D& iConversionMatrix
+                                        , std::vector<FOdysseyVectorVertex>& iExtendedVertexBuffer
+                                        , std::vector<FOdysseyVectorSegmentExtended>& iExtendedSegmentBuffer
+                                                      , double iGapTolerance );
+
         bool IntersectGapSection( FOdysseyVectorSection* iGapSection
                                 , FOdysseyVectorSegmentCubic* iSegment );
         void CreateNearIntersection( FOdysseyVectorVertex *iVertex );
@@ -325,6 +355,13 @@ class ODYSSEYVECTOR_API FOdysseyVectorGroupPaint : public FOdysseyVectorGroup
         std::vector<FOdysseyVectorSection> mSectionBuffer;
         std::vector<FOdysseyVectorSection> mGapSectionBuffer;
         std::vector<FOdysseyVectorSegmentCubicGap> mGapSegmentBuffer;
+
+        std::vector<FOdysseyVectorVertex> mExtendedVertexBuffer;
+        std::vector<FOdysseyVectorSegmentExtended> mExtendedSegmentBuffer;
+        eSegmentExtensionScheme mSegmentExtensionScheme;
+        bool bSegmentExtensionSimplified;
+        eGapDetectionScheme mGapDetectionScheme;
+
         uint32 mVertexID;
         bool bMultithreaded;
         bool bPainted;
