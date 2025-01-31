@@ -57,6 +57,9 @@ public:
     bool FlipHorizontal();
     bool FlipVertical();
 
+    void UndoTransformTransaction();
+    void RedoTransformTransaction();
+
 private:
     int GetRotationAngleFromLastReference(FVector2D iPointInTexture);
 
@@ -77,8 +80,7 @@ private:
     //Copy from GeomTools.cpp
     bool IsPolygonConvex(const TArray<FVector2D>& Points);
 
-    void UndoTransformTransaction();
-    void RedoTransformTransaction();
+    void RecordTransformTransaction();
 
 private:
     void OnTopLeftHandleDragged();

@@ -309,9 +309,12 @@ FOdysseyPainterEditor::ExtendToolbarToolParameters(FToolBarBuilder& iBuilder)
     undoButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::Button;
     undoButtonArgs.Action = FUIAction(
         FExecuteAction::CreateLambda(
-            []()
+            [this]()
             {
-                GEditor->UndoTransaction(true);
+                if( GetCurrentMainTool() && GetCurrentMainTool()->IsA( UOdysseyPainterEditorRasterTransformTool::StaticClass() ) )
+                    Cast<UOdysseyPainterEditorRasterTransformTool>( GetCurrentMainTool() )->UndoTransformTransaction();
+                else
+                    GEditor->UndoTransaction(true);
             }
         )
     );
@@ -324,9 +327,12 @@ FOdysseyPainterEditor::ExtendToolbarToolParameters(FToolBarBuilder& iBuilder)
     redoButtonArgs.UserInterfaceActionType = EUserInterfaceActionType::Button;
     redoButtonArgs.Action = FUIAction(
         FExecuteAction::CreateLambda(
-            []()
+            [this]()
             {
-                GEditor->RedoTransaction();
+                if (GetCurrentMainTool() && GetCurrentMainTool()->IsA(UOdysseyPainterEditorRasterTransformTool::StaticClass()))
+                    Cast<UOdysseyPainterEditorRasterTransformTool>(GetCurrentMainTool())->RedoTransformTransaction();
+                else
+                    GEditor->RedoTransaction();
             }
         )
     );

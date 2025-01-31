@@ -110,19 +110,7 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseDown(const FOdysseyPoint& 
     mMouseLastReferencePoint = FVector2D(point.x, point.y);
     if( mTransformCaptureMode != EOdysseyTransformCapture::NoCapture )
     {
-        TStaticArray<FVector2D, 5> transaction;
-        for (int i = 0; i < 5; i++)
-            transaction[i] = mHandles[i]->GetPosition();
-
-        if (mIndexTransaction >= mTransformTransactions.Num())
-            mTransformTransactions.Add(transaction);
-        else
-        {
-            mTransformTransactions[mIndexTransaction] = transaction;
-            mTransformTransactions.SetNum(mIndexTransaction + 1);
-        }
-
-        mIndexTransaction++;
+        RecordTransformTransaction();
 
         UpdateTransformBlock();
         return true;
@@ -213,18 +201,24 @@ bool UOdysseyPainterEditorRasterTransformTool::OnMouseUp(const FOdysseyPoint& iP
 bool UOdysseyPainterEditorRasterTransformTool::OnKeyDown(const FKey& iKey)
 {
     mToolChord = FInputChord( iKey,
-        mToolChord.Key == EKeys::LeftShift || mToolChord.Key == EKeys::RightShift || mToolChord.bShift == true,
-        mToolChord.Key == EKeys::LeftControl || mToolChord.Key == EKeys::RightControl || mToolChord.bCtrl == true,
-        mToolChord.Key == EKeys::LeftAlt || mToolChord.Key == EKeys::RightAlt || mToolChord.bAlt == true,
-        mToolChord.Key == EKeys::LeftCommand || mToolChord.Key == EKeys::RightCommand || mToolChord.bCmd == true);
+        iKey == EKeys::LeftShift || iKey == EKeys::RightShift || mToolChord.bShift == true,
+        iKey == EKeys::LeftControl || iKey == EKeys::RightControl || mToolChord.bCtrl == true,
+        iKey == EKeys::LeftAlt || iKey == EKeys::RightAlt || mToolChord.bAlt == true,
+        iKey == EKeys::LeftCommand || iKey == EKeys::RightCommand || mToolChord.bCmd == true);
 
     for (uint32 i = 0; i < static_cast<uint8>(EMultipleKeyBindingIndex::NumChords); ++i)
     {
         EMultipleKeyBindingIndex chordIndex = static_cast<EMultipleKeyBindingIndex>(i);
         const TSharedRef<const FInputChord> undoChord = FGenericCommands::Get().Undo->GetActiveChord(chordIndex);
+        const TSharedRef<const FInputChord> redoChord = FGenericCommands::Get().Redo->GetActiveChord(chordIndex);
         if( mToolChord == undoChord.Get() )
         {
             UndoTransformTransaction();
+            return true;
+        }
+        else if( mToolChord == redoChord.Get() )
+        {
+            RedoTransformTransaction();
             return true;
         }
     }
@@ -234,7 +228,7 @@ bool UOdysseyPainterEditorRasterTransformTool::OnKeyDown(const FKey& iKey)
         Uniform = !Uniform;
         return true;
     }
-    else if (iKey == EKeys::LeftControl || iKey == EKeys::RightControl)
+    else if (iKey == EKeys::LeftAlt || iKey == EKeys::RightAlt)
     {
         Perspective = !Perspective;
         return true;
@@ -253,13 +247,13 @@ bool UOdysseyPainterEditorRasterTransformTool::OnKeyUp(const FKey& iKey)
     }
     else if (iKey == EKeys::LeftControl || iKey == EKeys::RightControl)
     {
-        Perspective = !Perspective;
         mToolChord.bCtrl = false;
-        return true;
     }
     else if (iKey == EKeys::LeftAlt || iKey == EKeys::RightAlt)
     {
+        Perspective = !Perspective;
         mToolChord.bAlt = false;
+        return true;
     }
     else if (iKey == EKeys::LeftCommand || iKey == EKeys::RightCommand)
     {
@@ -379,6 +373,11 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformHUD()
     handleBottomRight->OnDragged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnBottomRightHandleDragged);
     handleBottomLeft->OnDragged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnBottomLeftHandleDragged);
     pivot->OnDragged().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::OnPivotHandleDragged);
+    handleTopLeft->OnDragBegin().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::RecordTransformTransaction);
+    handleTopRight->OnDragBegin().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::RecordTransformTransaction);
+    handleBottomRight->OnDragBegin().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::RecordTransformTransaction);
+    handleBottomLeft->OnDragBegin().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::RecordTransformTransaction);
+    pivot->OnDragBegin().AddUObject(this, &UOdysseyPainterEditorRasterTransformTool::RecordTransformTransaction);
 
     mTransformAreaHUD->AddElement(handleTopLeft);
     mTransformAreaHUD->AddElement(handleTopRight);
@@ -722,6 +721,8 @@ void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
         mRasterMutator.SetRasterBlock(nullptr);
     }
 
+    mIndexTransaction = 0;
+    mTransformTransactions.Empty();
     mSelectionBlock = nullptr;
     mTransformedBlock = nullptr;
     mLastReferenceRotation = 0;
@@ -781,10 +782,33 @@ bool UOdysseyPainterEditorRasterTransformTool::IsPolygonConvex(const TArray<FVec
     return true;
 }
 
+void UOdysseyPainterEditorRasterTransformTool::RecordTransformTransaction()
+{
+    TStaticArray<FVector2D, 5> transaction;
+    for (int i = 0; i < 5; i++)
+        transaction[i] = mHandles[i]->GetPosition();
+
+    if (mIndexTransaction >= mTransformTransactions.Num())
+        mTransformTransactions.Add(transaction);
+    else
+    {
+        mTransformTransactions[mIndexTransaction] = transaction;
+        mTransformTransactions.SetNum(mIndexTransaction + 1);
+    }
+
+    mIndexTransaction++;
+}
+
 void UOdysseyPainterEditorRasterTransformTool::UndoTransformTransaction()
 {
     if( mIndexTransaction <= 0 )
         return;
+
+    if( mIndexTransaction == mTransformTransactions.Num() )
+    {
+        RecordTransformTransaction();
+        mIndexTransaction--;
+    }
 
     mIndexTransaction--;
 
@@ -801,8 +825,10 @@ void UOdysseyPainterEditorRasterTransformTool::UndoTransformTransaction()
 
 void UOdysseyPainterEditorRasterTransformTool::RedoTransformTransaction()
 {
-    if (mIndexTransaction >= mTransformTransactions.Num() )
+    if (mIndexTransaction >= mTransformTransactions.Num() - 1 )
         return;
+
+    mIndexTransaction++;
 
     for (int i = 0; i < 4; i++)
     {
@@ -811,8 +837,6 @@ void UOdysseyPainterEditorRasterTransformTool::RedoTransformTransaction()
     }
 
     mHandles[4]->SetPosition(mTransformTransactions[mIndexTransaction][4]);
-
-    mIndexTransaction++;
 
     UpdateTransformBlock();
 }
@@ -827,6 +851,8 @@ bool UOdysseyPainterEditorRasterTransformTool::FlipHorizontal()
 {
     if( !mSelectionBlock )
         return false;
+
+    RecordTransformTransaction();
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext( mSelectionBlock->Format() );
 
@@ -880,6 +906,8 @@ bool UOdysseyPainterEditorRasterTransformTool::FlipVertical()
 {
     if (!mSelectionBlock)
         return false;
+
+    RecordTransformTransaction();
 
     ::ULIS::FContext& ctx = IULISLoaderModule::StaticFindOrAddContext(mSelectionBlock->Format());
 
