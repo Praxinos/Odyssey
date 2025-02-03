@@ -550,7 +550,6 @@ static inline void TraceHorizontalLine ( const FHorizontalLine *hline
     double dv  = hline->v1 - hline->v0, pv = ( dx ) ? ( dv / dx ) : 0.0f;
     double u = u0;
     double v = v0;
-    double opacityFactor = iOpacity / 255.0f;
     uint32 offset = ( hline->y * iImageWidth );
     int32 screenx = dx;
     unsigned char BR = iColor.R, BG = iColor.G, BB = iColor.B, BA = iColor.A;
@@ -623,14 +622,18 @@ static inline void TraceHorizontalLine ( const FHorizontalLine *hline
 
                     if( BA )
                     {
-                        double blending = (double) BA * opacityFactor;
-                        double invBlending = 1.0f - blending;
-                        uint32 maxAlpha = ( uint32) srcimg[aoffset][3] + ( BA * iOpacity );
+                        // https://en.wikipedia.org/wiki/Alpha_compositing
+                        // Premultiplied OVER operation
+                        double BAf = ( double ) BA * iOpacity / 255;
+                        uint8 B = ( BB * BAf ) + ( srcimg[aoffset][0] * ( 1.0f - BAf ) );
+                        uint8 G = ( BG * BAf ) + ( srcimg[aoffset][1] * ( 1.0f - BAf ) );
+                        uint8 R = ( BR * BAf ) + ( srcimg[aoffset][2] * ( 1.0f - BAf ) );
+                        uint8 A =   BA         + ( srcimg[aoffset][3] * ( 1.0f - BAf ) );
 
-                        srcimg[aoffset][0] = /*BB*/( invBlending * srcimg[aoffset][0] ) + ( BB * blending );
-                        srcimg[aoffset][1] = /*BG*/( invBlending * srcimg[aoffset][1] ) + ( BG * blending );
-                        srcimg[aoffset][2] = /*BR*/( invBlending * srcimg[aoffset][2] ) + ( BR * blending );
-                        srcimg[aoffset][3] = ( maxAlpha > 255 ) ? 255 : maxAlpha;
+                        srcimg[aoffset][0] = B;
+                        srcimg[aoffset][1] = G;
+                        srcimg[aoffset][2] = R;
+                        srcimg[aoffset][3] = A;
                     }
                 }
                 break;
