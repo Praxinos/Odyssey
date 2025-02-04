@@ -7,6 +7,8 @@
 
 #include "MovieSceneSequenceID.h"
 
+#include "OdysseyAnimation.h"
+
 class ACineCameraActor;
 class APlaneActor;
 class FString;
@@ -87,7 +89,7 @@ public:
 class EPOSTRACKSEDITOR_API ProjectAssetTools
 {
 public:
-    static UOdysseyAnimation* CreateAnimation( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FOdysseyAnimationConfiguration& iAnimationConfiguration );
+    static UOdysseyAnimation* CreateAnimation( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FIntPoint iSize, EOdysseyAnimationFormat iFormat, FFrameRate iFrameRate, TSubclassOf<class UOdysseyAnimationLayer> iDefaultLayerClass, TOptional<FLinearColor> iLayerBackgroundColor );
 
     static UMaterialInstanceConstant* CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FIntPoint iTextureSize );
     static UMaterialInstanceConstant* CreateMaterialAndTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, UTexture2D* iTexture );

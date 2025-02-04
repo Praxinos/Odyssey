@@ -33,7 +33,6 @@
 #include "Settings/EposTracksEditorSettings.h"
 #include "Tools/ResourceAssetTools.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
-#include "Widgets/SOdysseyAnimationConfigureWindow.h"
 
 #define LOCTEXT_NAMESPACE "EposSequenceTools_Animation"
 
@@ -127,8 +126,8 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
     GEditor->SelectNone( true, true );
 
     const UEposTracksEditorSettings* settings = GetDefault<UEposTracksEditorSettings>();
-    float margin = settings->AnimationSettings.SafeMargin;
-    FVector2D relative_scaling = settings->AnimationSettings.RelativeScaling;
+    float margin = settings->AnimationActorSettings.SafeMargin;
+    FVector2D relative_scaling = settings->AnimationActorSettings.RelativeScaling;
 
     if( iAnimationArgs.mMargin.IsSet() )
         margin = iAnimationArgs.mMargin.GetValue();
@@ -137,21 +136,16 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
 
     //---
 
-    FIntPoint texture_size = animation->ComputeTextureSize( iCamera, settings->TextureSettings.Height );
+    FIntPoint texture_size = animation->ComputeTextureSize( iCamera, settings->AnimationAssetSettings.Height );
 
     //UMaterialInstanceConstant* new_animation = iAnimationArgs.mAnimation.IsValid()
     //                                           ? ProjectAssetTools::CreateAnimation( iSequencer, iSequence, iSequenceID, iAnimationArgs.mAnimation.Get() )
     //                                           : ProjectAssetTools::CreateAnimation( iSequencer, iSequence, iSequenceID, texture_size );
-    FOdysseyAnimationConfiguration config;
-    //config.Name =
-    //config.Format =
-    //config.BackgroundColorFormat =
-    //config.FramesPerSecond =
-    //config.LayerType =
-    //config.Name =
-    config.Width = texture_size.X;
-    config.Height = texture_size.Y;
-    UOdysseyAnimation* new_animation = ProjectAssetTools::CreateAnimation( iSequencer, iSequence, iSequenceID, config );
+    TOptional<FLinearColor> background_layer_color;
+    if( settings->AnimationAssetSettings.AddLayerBackground )
+        background_layer_color = settings->AnimationAssetSettings.LayerBackgroundColor;
+
+    UOdysseyAnimation* new_animation = ProjectAssetTools::CreateAnimation( iSequencer, iSequence, iSequenceID, texture_size, settings->AnimationAssetSettings.Format, settings->AnimationAssetSettings.FrameRate, settings->AnimationAssetSettings.DefaultLayerClass, background_layer_color );
     if( !new_animation )
         return nullptr;
 

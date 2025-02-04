@@ -29,29 +29,43 @@ UOdysseyAnimationFactory::UOdysseyAnimationFactory( const FObjectInitializer& iO
     SupportedClass = UOdysseyAnimation::StaticClass();
 }
 
-void UOdysseyAnimationFactory::SetConfiguration( const FOdysseyAnimationConfiguration& iConfiguration )
-{
-    mConfiguration = iConfiguration;
-    mConfigured = true;
-}
-
 bool UOdysseyAnimationFactory::ConfigureProperties()
 {
     //We go in here before creating the asset: Meaning we can have any modal window here.
     //If return false, we don't create the object, if true, we create it
     TSharedPtr<SOdysseyAnimationConfigureWindow> configurationWindow = SNew( SOdysseyAnimationConfigureWindow );
     GEditor->EditorAddModalWindow( configurationWindow.ToSharedRef() );
-    mConfiguration = configurationWindow->GetConfiguration();
 
-    mConfigured = configurationWindow->GetWindowAnswer();
+    if( !configurationWindow->GetWindowAnswer() )
+        return false;
 
-    return configurationWindow->GetWindowAnswer();
+    //---
+
+    DefaultName = configurationWindow->GetConfiguration().Name.ToString();
+    Width = configurationWindow->GetConfiguration().Width;
+    Height = configurationWindow->GetConfiguration().Height;
+    Format = configurationWindow->GetConfiguration().Format;
+    FrameRate = FFrameRate( configurationWindow->GetConfiguration().FramesPerSecond, 1.f );
+    DefaultLayerClass = nullptr;
+    switch( configurationWindow->GetConfiguration().LayerType )
+    {
+        case EOdysseyAnimationDefaultLayerType::Raster: DefaultLayerClass = UOdysseyAnimationLayerImageRaster::StaticClass(); break;
+        case EOdysseyAnimationDefaultLayerType::Vector: DefaultLayerClass = UOdysseyAnimationLayerImageVector::StaticClass(); break;
+        default: checkNoEntry();
+    }
+    LayerBackgroundColor.Reset();
+    if( configurationWindow->GetConfiguration().BackgroundColor != EOdysseyAnimationBackgroundColor::Transparent )
+    {
+        LayerBackgroundColor = configurationWindow->GetConfiguration().GetBackgroundColor();
+    }
+
+    return true;
 }
 
 FString
 UOdysseyAnimationFactory::GetDefaultNewAssetName() const
 {
-    return !mConfiguration.Name.ToString().IsEmpty() ? mConfiguration.Name.ToString() : Super::GetDefaultNewAssetName();
+    return DefaultName.Len() ? DefaultName : Super::GetDefaultNewAssetName();
 }
 
 UObject*
@@ -61,40 +75,15 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
 
     UOdysseyAnimation* animation = NewObject<UOdysseyAnimation>( iParent, iName, iFlags | RF_Transactional );
 
-    //happens when ConfigureProperties is not called
-    //Example : In the CreateAnimationAsset blueprint node
-    if (!mConfigured)
-        return animation;
-
-    mConfigured = false;
-
-    animation->Init(mConfiguration.Width, mConfiguration.Height, mConfiguration.Format, mConfiguration.FramesPerSecond);
+    animation->Init( Width, Height, Format, FrameRate.AsDecimal() );
     UOdysseyLayerStack* layerStack = animation->GetLayerStack();
 
-    switch (mConfiguration.LayerType)
-    {
-        case EOdysseyAnimationDefaultLayerType::Raster:
-        {
-            UOdysseyAnimationLayerImageRaster* layer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass()));
-            layerStack->SetCurrentLayer(layer);
-            layer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass());
-        }
-        break;
-
-        case EOdysseyAnimationDefaultLayerType::Vector:
-        {
-            UOdysseyAnimationLayerImageVector* layer = Cast<UOdysseyAnimationLayerImageVector>(layerStack->AddLayer(UOdysseyAnimationLayerImageVector::StaticClass()));
-            layerStack->SetCurrentLayer(layer);
-            layer->AddCell(UOdysseyAnimationCellImageVector::StaticClass());
-        }
-        break;
-
-        default:
-            check(false); //should not be called
-    }
+    UOdysseyAnimationLayer* layer = Cast<UOdysseyAnimationLayer>( layerStack->AddLayer( *DefaultLayerClass ) );
+    layerStack->SetCurrentLayer( layer );
+    layer->AddCell( layer->GetDefaultCellClass() );
 
     //Background Layer
-    if (mConfiguration.BackgroundColor != EOdysseyAnimationBackgroundColor::Transparent)
+    if( LayerBackgroundColor.IsSet() )
     {
         UOdysseyAnimationLayerImageRaster* backgroundLayer = Cast<UOdysseyAnimationLayerImageRaster>(layerStack->AddLayer(UOdysseyAnimationLayerImageRaster::StaticClass(), nullptr, 1));
         backgroundLayer->SetPostBehaviour(EOdysseyLayerImagePostBehaviour::Hold);
@@ -103,7 +92,7 @@ UOdysseyAnimationFactory::FactoryCreateNew( UClass* iClass, UObject* iParent, FN
         UOdysseyAnimationCellImageRaster* backgroundCell = Cast<UOdysseyAnimationCellImageRaster>(backgroundLayer->AddCell(UOdysseyAnimationCellImageRaster::StaticClass()));
         TSharedPtr<FOdysseyRasterBlock> backgroundRasterBlock = backgroundCell->GetRasterBlock();
 
-        FLinearColor backgorundColor = mConfiguration.GetBackgroundColor();
+        FLinearColor backgorundColor = *LayerBackgroundColor;
 
         FOdysseyRasterBlockMutator rasterBlockMutator(backgroundRasterBlock);
         rasterBlockMutator.EditTilesFromRects(

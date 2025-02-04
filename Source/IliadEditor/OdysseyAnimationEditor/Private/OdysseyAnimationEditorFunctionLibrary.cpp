@@ -22,20 +22,21 @@ UOdysseyAnimationEditorFunctionLibrary::CreateAnimationAsset(FString AssetName, 
     if (FramesPerSecond < 0.f)
         return nullptr;
 
+    UOdysseyAnimationFactory* factory = NewObject<UOdysseyAnimationFactory>();
+    factory->Width = Width;
+    factory->Height = Height;
+    factory->Format = Format;
+    factory->FrameRate = FFrameRate( FramesPerSecond, 1.f );
+
     IAssetTools& assetTools = FAssetToolsModule::GetModule().Get();
     UOdysseyAnimation* animation = Cast<UOdysseyAnimation>(
         assetTools.CreateAsset(
             AssetName,
             PackagePath,
             UOdysseyAnimation::StaticClass(),
-            UOdysseyAnimationFactory::StaticClass()->GetDefaultObject<UFactory>()
+            factory
         )
     );
-
-    if (!animation)
-        return nullptr;
-
-    animation->Init(Width, Height, Format, FramesPerSecond);
 
     return animation;
 }

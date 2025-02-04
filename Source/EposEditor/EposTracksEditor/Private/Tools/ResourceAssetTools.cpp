@@ -621,7 +621,7 @@ ProjectAssetTools::CloneTexture( const IMovieScenePlayer& iPlayer, UMovieSceneSe
 
 //static
 UOdysseyAnimation*
-ProjectAssetTools::CreateAnimation( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, const FOdysseyAnimationConfiguration& iAnimationConfiguration )
+ProjectAssetTools::CreateAnimation( const IMovieScenePlayer& iPlayer, UMovieSceneSequence* iSequence, FMovieSceneSequenceIDRef iSequenceID, FIntPoint iSize, EOdysseyAnimationFormat iFormat, FFrameRate iFrameRate, TSubclassOf<class UOdysseyAnimationLayer> iDefaultLayerClass, TOptional<FLinearColor> iLayerBackgroundColor )
 {
     UEposMovieSceneSequence* epos_sequence = Cast<UEposMovieSceneSequence>( iSequence );
     if( !epos_sequence )
@@ -638,7 +638,12 @@ ProjectAssetTools::CreateAnimation( const IMovieScenePlayer& iPlayer, UMovieScen
     //---
 
     UOdysseyAnimationFactory* factory = NewObject<UOdysseyAnimationFactory>();
-    factory->SetConfiguration( iAnimationConfiguration );
+    factory->Width = iSize.X;
+    factory->Height = iSize.Y;
+    factory->Format = iFormat;
+    factory->FrameRate = iFrameRate;
+    factory->DefaultLayerClass = iDefaultLayerClass;
+    factory->LayerBackgroundColor = iLayerBackgroundColor;
 
     FAssetToolsModule& assetToolsModule = FModuleManager::GetModuleChecked<FAssetToolsModule>( "AssetTools" );
     UObject* new_object = assetToolsModule.Get().CreateAsset( animation_name, animation_path, UOdysseyAnimation::StaticClass(), factory );
@@ -647,10 +652,7 @@ ProjectAssetTools::CreateAnimation( const IMovieScenePlayer& iPlayer, UMovieScen
 
     //---
 
-    //new_animation->mWidth = iAnimationConfiguration.Width;
-    //new_animation->mHeight = iAnimationConfiguration.Height;
-    //new_animation->Format = iAnimationConfiguration.Format;
-    //new_animation->FramesPerSecond = iAnimationConfiguration.FramesPerSecond;
+    //new_animation-> = ...;
 
     return new_animation;
 }

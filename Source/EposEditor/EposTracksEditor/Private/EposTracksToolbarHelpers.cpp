@@ -80,42 +80,35 @@ EposTracksToolbarHelpers::MakeTextureSettingsEntries( FMenuBuilder& iMenuBuilder
 void
 EposTracksToolbarHelpers::MakeAnimationSettingsEntries( FMenuBuilder& iMenuBuilder )
 {
-    static FOdysseyAnimationConfiguration configuration; //PATCH: must be a USettings like in MakeTextureSettingsEntries() above, to be able to easily access to GetMutableDefault<>()
-
     iMenuBuilder.BeginSection( NAME_None, LOCTEXT( "animation-settings.section-title", "Default Animation Settings" ) );
     {
         FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>( "PropertyEditor" );
 
-        FStructureDetailsViewArgs structureDetailsViewArgs;
-        FDetailsViewArgs detailsViewArgs;
-        detailsViewArgs.bAllowSearch = false;
-        detailsViewArgs.bShowScrollBar = false;
-        detailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
-        detailsViewArgs.ColumnWidth = .5f;
-
-        TSharedRef<FStructOnScope> structOnScope = MakeShared<FStructOnScope>( FOdysseyAnimationConfiguration::StaticStruct(), reinterpret_cast<uint8*>( &configuration ) );
-        TSharedPtr<IStructureDetailsView> configurationDetailsView = PropertyModule.CreateStructureDetailView( detailsViewArgs, structureDetailsViewArgs, structOnScope );      //TODO: must remove the width parameter to auto compute it OR make a custom USettings ???
-
-        iMenuBuilder.AddWidget( configurationDetailsView->GetWidget().ToSharedRef(), FText(), true );
-
         // Create a detail view
-        //FDetailsViewArgs Args;
-        //Args.bAllowSearch = false;
-        //Args.NameAreaSettings = FDetailsViewArgs::HideNameArea;
-        //Args.ColumnWidth = .5f;
-        //TSharedRef<IDetailsView> DetailView = PropertyModule.CreateDetailView( Args );
+        FDetailsViewArgs Args;
+        Args.bAllowSearch = false;
+        Args.NameAreaSettings = FDetailsViewArgs::HideNameArea;
+        Args.ColumnWidth = .5f;
+        TSharedRef<IDetailsView> DetailView = PropertyModule.CreateDetailView( Args );
 
         // Filter properties to only get CameraSettings ones
-        //auto visible_property = []( const FPropertyAndParent& iPropertyChain )
-        //{
-        //    FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties.Last()->GetFName() : iPropertyChain.Property.GetFName();
-        //    return root_name == GET_MEMBER_NAME_CHECKED( FOdysseyAnimationConfiguration, TextureSettings );
-        //};
-        //DetailView->SetIsPropertyVisibleDelegate( FIsPropertyVisible::CreateLambda( visible_property ) );
+        auto visible_property = []( const FPropertyAndParent& iPropertyChain )
+        {
+            FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties[0]->GetFName() : iPropertyChain.Property.GetFName();
+            if( root_name == GET_MEMBER_NAME_CHECKED( UEposTracksEditorSettings, AnimationAssetSettings ) )
+            {
+                if( iPropertyChain.Property.GetFName() == GET_MEMBER_NAME_CHECKED( FOdysseyAnimationAssetSettings, Name )
+                    || iPropertyChain.Property.GetFName() == GET_MEMBER_NAME_CHECKED( FOdysseyAnimationAssetSettings, Width ) )
+                    return false;
+                return true;
+            }
+            return false;
+        };
+        DetailView->SetIsPropertyVisibleDelegate( FIsPropertyVisible::CreateLambda( visible_property ) );
         // Set the object to view
-        //DetailView->SetObject( GetMutableDefault<FOdysseyAnimationConfiguration>() );
+        DetailView->SetObject( GetMutableDefault<UEposTracksEditorSettings>() );
 
-        //iMenuBuilder.AddWidget( DetailView, FText(), true );
+        iMenuBuilder.AddWidget( DetailView, FText(), true );
     }
     iMenuBuilder.EndSection();
 }

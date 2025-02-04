@@ -5,27 +5,50 @@
 
 #include "CoreMinimal.h"
 #include "Factories/Factory.h"
-#include "Widgets/SOdysseyAnimationConfigureWindow.h"
+
+#include "OdysseyAnimation.h"
 
 #include "OdysseyAnimationFactory.generated.h"
 
-UCLASS()
+UCLASS(hidecategories=Object, MinimalAPI)
 class UOdysseyAnimationFactory
     : public UFactory
 {
     GENERATED_UCLASS_BODY()
 
 public:
-    void SetConfiguration( const FOdysseyAnimationConfiguration& iConfiguration );
+    /** The default name of the new animation asset. */
+    UPROPERTY()
+    FString DefaultName = TEXT( "Animation" );
 
-private:
+    /** The width of the new animation asset. */
+    UPROPERTY()
+    uint32 Width = 1920;
+
+    /** The height of the new animation asset. */
+    UPROPERTY()
+    uint32 Height = 1080;
+
+    /** The height of the new animation asset. */
+    UPROPERTY()
+    EOdysseyAnimationFormat Format = EOdysseyAnimationFormat::BGRA8;
+
+    /** The framerate of the new animation asset. */
+    UPROPERTY()
+    FFrameRate FrameRate = FFrameRate( 24.f, 1.f );
+
+    /** The default layer type to use with this animation */
+    UPROPERTY()
+    TSubclassOf<class UOdysseyAnimationLayer> DefaultLayerClass;
+
+    /** A background color of the new animation asset. */
+    UPROPERTY()
+    TOptional<FLinearColor> LayerBackgroundColor;
+
+protected:
     virtual UObject* FactoryCreateNew( UClass* iClass, UObject* iParent, FName iName, EObjectFlags iFlags, UObject* iContext, FFeedbackContext* iWarn ) override;
 
     virtual bool ConfigureProperties() override;
 
     virtual FString GetDefaultNewAssetName() const;
-
-private:
-    FOdysseyAnimationConfiguration mConfiguration;
-    bool mConfigured = false;
 };
