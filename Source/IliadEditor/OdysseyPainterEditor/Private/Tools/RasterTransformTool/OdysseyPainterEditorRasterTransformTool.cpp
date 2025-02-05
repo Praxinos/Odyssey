@@ -266,7 +266,7 @@ bool UOdysseyPainterEditorRasterTransformTool::OnKeyUp(const FKey& iKey)
     }
     else if( iKey == EKeys::Escape )
     {
-        ClearTransform();
+        ClearTransform(true);
         return true;
     }
 
@@ -560,7 +560,6 @@ void UOdysseyPainterEditorRasterTransformTool::UpdateTransformBlock()
 
     ::ULIS::FRectI boundingBox = GetTransformAreaBoundingRect();
 
-    TSharedPtr<FOdysseyPainterEditorRasterSelection> rasterSelection = GetEditor()->RasterSelection();
     if (mSelectionBlock)
     {
         mTransformedBlock = MakeShareable(new ::ULIS::FBlock(boundingBox.w, boundingBox.h, mSelectionBlock->Format()));
@@ -709,10 +708,10 @@ void UOdysseyPainterEditorRasterTransformTool::CommitTransform()
         if (!rasterSelection->IsEmpty())
             rasterSelection->OnChanged().Broadcast();
     }
-    ClearTransform();
+    ClearTransform(true);
 }
 
-void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
+void UOdysseyPainterEditorRasterTransformTool::ClearTransform( bool iInactivateTransformTool )
 {
     if (mRasterMutator.GetRasterBlock() != nullptr)
     {
@@ -732,7 +731,8 @@ void UOdysseyPainterEditorRasterTransformTool::ClearTransform()
     mTransformCaptureMode = EOdysseyTransformCapture::NoCapture;
     ResetRasterSelection();
 
-    mEditor->ActivateMainTool( mEditor->GetRasterDrawingTool() );
+    if( iInactivateTransformTool )
+        mEditor->ActivateMainTool( mEditor->GetRasterDrawingTool() );
 }
 
 void UOdysseyPainterEditorRasterTransformTool::ClearBlock(TSharedPtr<::ULIS::FBlock, ESPMode::ThreadSafe> iBlock)
