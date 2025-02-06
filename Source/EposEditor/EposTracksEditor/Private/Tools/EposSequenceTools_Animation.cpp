@@ -136,16 +136,16 @@ ShotSequenceTools::SpawnAndBindAnimation( ISequencer& iSequencer, UMovieSceneSeq
 
     //---
 
-    FIntPoint texture_size = animation->ComputeTextureSize( iCamera, settings->AnimationAssetSettings.Height );
+    FIntPoint texture_size = animation->ComputeTextureSize( iCamera, settings->AnimationSettings.Height );
 
     //UMaterialInstanceConstant* new_animation = iAnimationArgs.mAnimation.IsValid()
     //                                           ? ProjectAssetTools::CreateAnimation( iSequencer, iSequence, iSequenceID, iAnimationArgs.mAnimation.Get() )
     //                                           : ProjectAssetTools::CreateAnimation( iSequencer, iSequence, iSequenceID, texture_size );
     TOptional<FLinearColor> background_layer_color;
-    if( settings->AnimationAssetSettings.AddLayerBackground )
-        background_layer_color = settings->AnimationAssetSettings.LayerBackgroundColor;
+    if( settings->AnimationSettings.AddLayerBackground )
+        background_layer_color = settings->AnimationSettings.LayerBackgroundColor;
 
-    UOdysseyAnimation* new_animation = ProjectAssetTools::CreateAnimation( iSequencer, iSequence, iSequenceID, texture_size, settings->AnimationAssetSettings.Format, settings->AnimationAssetSettings.FrameRate, settings->AnimationAssetSettings.DefaultLayerClass, background_layer_color );
+    UOdysseyAnimation* new_animation = ProjectAssetTools::CreateAnimation( iSequencer, iSequence, iSequenceID, texture_size, settings->AnimationSettings.Format, settings->AnimationSettings.FrameRate, settings->AnimationSettings.DefaultLayerClass, background_layer_color );
     if( !new_animation )
         return nullptr;
 

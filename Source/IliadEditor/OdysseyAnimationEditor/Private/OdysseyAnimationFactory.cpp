@@ -41,22 +41,18 @@ bool UOdysseyAnimationFactory::ConfigureProperties()
 
     //---
 
-    DefaultName = configurationWindow->GetConfiguration().Name.ToString();
-    Width = configurationWindow->GetConfiguration().Width;
-    Height = configurationWindow->GetConfiguration().Height;
-    Format = configurationWindow->GetConfiguration().Format;
-    FrameRate = FFrameRate( configurationWindow->GetConfiguration().FramesPerSecond, 1.f );
-    DefaultLayerClass = nullptr;
-    switch( configurationWindow->GetConfiguration().LayerType )
-    {
-        case EOdysseyAnimationDefaultLayerType::Raster: DefaultLayerClass = UOdysseyAnimationLayerImageRaster::StaticClass(); break;
-        case EOdysseyAnimationDefaultLayerType::Vector: DefaultLayerClass = UOdysseyAnimationLayerImageVector::StaticClass(); break;
-        default: checkNoEntry();
-    }
+    FOdysseyAnimationConfiguration configuration = configurationWindow->GetConfiguration();
+
+    DefaultName = configuration.Name;
+    Width = configuration.Settings.Width;
+    Height = configuration.Settings.Height;
+    Format = configuration.Settings.Format;
+    FrameRate = configuration.Settings.FrameRate;
+    DefaultLayerClass = configuration.Settings.DefaultLayerClass;
     LayerBackgroundColor.Reset();
-    if( configurationWindow->GetConfiguration().BackgroundColor != EOdysseyAnimationBackgroundColor::Transparent )
+    if( configuration.Settings.AddLayerBackground )
     {
-        LayerBackgroundColor = configurationWindow->GetConfiguration().GetBackgroundColor();
+        LayerBackgroundColor = configuration.Settings.LayerBackgroundColor;
     }
 
     return true;

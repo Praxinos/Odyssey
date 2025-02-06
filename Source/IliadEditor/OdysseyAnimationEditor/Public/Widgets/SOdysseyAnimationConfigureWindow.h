@@ -5,58 +5,23 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/SWindow.h"
-#include <ULIS>
-#include "OdysseyAnimation.h" //For EOdysseyAnimationFormat
+#include "OdysseyAnimationSettings.h"
 
 #include "SOdysseyAnimationConfigureWindow.generated.h"
 
-class SEnumComboBox;
-
-UENUM()
-enum class EOdysseyAnimationBackgroundColor : uint8
-{
-    Transparent,
-    White,
-    Normal UMETA(DisplayName = "Purple (127, 127, 255)")
-};
-
-UENUM()
-enum class EOdysseyAnimationDefaultLayerType : uint8
-{
-    Raster,
-    Vector
-};
-
 USTRUCT()
-struct ODYSSEYANIMATIONEDITOR_API FOdysseyAnimationConfiguration
+struct FOdysseyAnimationConfiguration
 {
     GENERATED_BODY()
 
 public:
-    ::ULIS::eFormat ULISFormat() const;
-    FLinearColor GetBackgroundColor() const;
+    /** The default name of the asset. */
+    UPROPERTY( EditAnywhere, Category = "Animation Asset" )
+    FString Name = TEXT( "Animation" );
 
-public:
-    UPROPERTY(EditAnywhere, Category="OdysseyAnimationConfiguration")
-    FName                   Name = "Animation";
-
-    UPROPERTY(EditAnywhere, Category="OdysseyAnimationConfiguration", meta = (ClampMin = 1, ClampMax = 8192, UIMin = 1, UIMax = 8192))
-    uint32                  Width = 1920;
-
-    UPROPERTY(EditAnywhere, Category="OdysseyAnimationConfiguration", meta=(ClampMin=1, ClampMax=8192, UIMin=1, UIMax=8192) )
-    uint32                  Height = 1080;
-
-    UPROPERTY(EditAnywhere, Category="OdysseyAnimationConfiguration")
-    EOdysseyAnimationFormat   Format = EOdysseyAnimationFormat::BGRA8;
-
-    UPROPERTY(EditAnywhere, Category="OdysseyAnimationConfiguration", meta=(ClampMin=1, UIMin=1, LinearDeltaSensitivity=1) )
-    float                   FramesPerSecond = 24.f;
-
-    UPROPERTY(EditAnywhere, Category="OdysseyAnimationConfiguration")
-    EOdysseyAnimationBackgroundColor BackgroundColor = EOdysseyAnimationBackgroundColor::Transparent;
-
-    UPROPERTY(EditAnywhere, Category="OdysseyAnimationConfiguration")
-    EOdysseyAnimationDefaultLayerType LayerType = EOdysseyAnimationDefaultLayerType::Raster;
+    /** The other settings of the asset. */
+    UPROPERTY( EditAnywhere, Category = "Animation Asset", meta=(ShowOnlyInnerProperties) )
+    FOdysseyAnimationSettings Settings;
 };
 
 class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationConfigureWindow
@@ -64,14 +29,11 @@ class ODYSSEYANIMATIONEDITOR_API SOdysseyAnimationConfigureWindow
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyAnimationConfigureWindow)
-    {
-
-    }
+    {}
     SLATE_END_ARGS()
 
 public:
     void Construct(const FArguments& iArgs);
-    void Construct( const FArguments& iArgs, const FOdysseyAnimationConfiguration& iProperties);
 
     bool GetWindowAnswer();
 
@@ -88,5 +50,5 @@ private:
 private:
     FOdysseyAnimationConfiguration  mConfiguration;
     bool                            mWindowAnswer;
-    TSharedPtr< SEnumComboBox >     mFormatComboBox;
+    TSharedPtr<class SEnumComboBox> mFormatComboBox;
 };

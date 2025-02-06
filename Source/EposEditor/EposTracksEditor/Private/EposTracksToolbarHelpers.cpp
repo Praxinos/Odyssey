@@ -95,10 +95,10 @@ EposTracksToolbarHelpers::MakeAnimationSettingsEntries( FMenuBuilder& iMenuBuild
         auto visible_property = []( const FPropertyAndParent& iPropertyChain )
         {
             FName root_name = iPropertyChain.ParentProperties.Num() ? iPropertyChain.ParentProperties[0]->GetFName() : iPropertyChain.Property.GetFName();
-            if( root_name == GET_MEMBER_NAME_CHECKED( UEposTracksEditorSettings, AnimationAssetSettings ) )
+            if( root_name == GET_MEMBER_NAME_CHECKED( UEposTracksEditorSettings, AnimationSettings ) )
             {
-                if( iPropertyChain.Property.GetFName() == GET_MEMBER_NAME_CHECKED( FOdysseyAnimationAssetSettings, Name )
-                    || iPropertyChain.Property.GetFName() == GET_MEMBER_NAME_CHECKED( FOdysseyAnimationAssetSettings, Width ) )
+                // Don't display Width as it is auto-computed later
+                if( iPropertyChain.Property.GetFName() == GET_MEMBER_NAME_CHECKED( FOdysseyAnimationSettings, Width ) )
                     return false;
                 return true;
             }
