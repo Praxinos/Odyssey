@@ -303,7 +303,7 @@ FOdysseyAnimationEditorTimelineTab::ImportImageSequence()
         , LOCTEXT("animation.import-image-sequence.dialog.title", "Select Images to import").ToString()
         , FPaths::ProjectDir()
         , animation->GetName()
-        , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg")
+        , TEXT("PNG Image (.png)|*.png|BMP Image (.bmp)|*.bmp|TGA Image (.tga)|*.tga|JPG Image (.jpg)|*.jpg|Any (.*)|*.*")
         , EFileDialogFlags::Multiple
         , filenames
     );
