@@ -21,31 +21,31 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::FOdysseyPainterEditorVectorPathSmo
 }
 
 void
-FOdysseyPainterEditorVectorPathSmoothToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPathSmoothToolHUD::Reset()
 {
     uint64 hudFlags = mPathSmoothTool->GetEditor()->GetVectorHUDFlags();
 
     mPickedPointArray.clear();
     mPickedPointArray.reserve( 50 );
 
-    MakePointQuadTree( iScene, false, hudFlags );
+    MakePointQuadTree( false, hudFlags );
 
-    UpdateSelectionBox( iScene, false, hudFlags );
+    UpdateSelectionBox( false, hudFlags );
 }
 
 void
-FOdysseyPainterEditorVectorPathSmoothToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPathSmoothToolHUD::Load()
+{
+    FOdysseyPainterEditorVectorBaseToolHUD::Load();
+}
+
+void
+FOdysseyPainterEditorVectorPathSmoothToolHUD::Unload()
 {
 }
 
 void
-FOdysseyPainterEditorVectorPathSmoothToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
-{
-}
-
-void
-FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( BLContext* iBLContext
-                                                  , FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( BLContext* iBLContext )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -59,12 +59,12 @@ FOdysseyPainterEditorVectorPathSmoothToolHUD::Draw( BLContext* iBLContext
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.
     // -> inbetweens in inbetween mode.
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext );
 
     // draw selection box only if we restrict erasure to the selection
-    if( mPathSmoothTool->RestrictToSelectedObjects  && iScene->GetCell()->GetSelectedObjectList().size() )
+    if( mPathSmoothTool->RestrictToSelectedObjects  && mScene->GetCell()->GetSelectedObjectList().size() )
     {
-        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+ //3DHUD        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.

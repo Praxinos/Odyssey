@@ -23,25 +23,25 @@ FOdysseyPainterEditorVectorScenePanToolHUD::FOdysseyPainterEditorVectorScenePanT
 }
 
 void
-FOdysseyPainterEditorVectorScenePanToolHUD::Reset(FOdysseyVectorGroupPaint* iScene)
+FOdysseyPainterEditorVectorScenePanToolHUD::Reset()
 {
     // it's unused but we could use it at some point so, we init it anyways
-    UpdateSelectionBox( iScene, false, mScenePanTool->GetEditor()->GetVectorHUDFlags() );
+    UpdateSelectionBox( false, mScenePanTool->GetEditor()->GetVectorHUDFlags() );
 }
 
 void
-FOdysseyPainterEditorVectorScenePanToolHUD::Load(FOdysseyVectorGroupPaint* iScene)
+FOdysseyPainterEditorVectorScenePanToolHUD::Load()
 {
+    FOdysseyPainterEditorVectorBaseToolHUD::Load();
 }
 
 void
-FOdysseyPainterEditorVectorScenePanToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorScenePanToolHUD::Unload()
 {
 }
 
 void
 FOdysseyPainterEditorVectorScenePanToolHUD::DrawFrame( BLContext* iBLContext
-                                                     , FOdysseyVectorGroupPaint* iScene
                                                      , ::ULIS::FRectI& iFrame
                                                      , ::ULIS::FVec2I& iFrameLength )
 {
@@ -64,8 +64,7 @@ FOdysseyPainterEditorVectorScenePanToolHUD::DrawFrame( BLContext* iBLContext
 }
 
 void
-FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
-                                                , FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -92,7 +91,7 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.
     // -> inbetweens in inbetween mode.
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext );
 
     iBLContext->save();
     iBLContext->resetMatrix();
@@ -100,18 +99,18 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
     iBLContext->setCompOp( BL_COMP_OP_SRC_OVER );
     iBLContext->setStrokeWidth( 2.0f );
     iBLContext->setStrokeStyle( bgColor );
-    DrawFrame( iBLContext, iScene, frame, frameLength );
+    DrawFrame( iBLContext, frame, frameLength );
 
     iBLContext->setStrokeWidth( 1.0f );
     iBLContext->setStrokeStyle( fgColor );
-    DrawFrame( iBLContext, iScene, frame, frameLength );
+    DrawFrame( iBLContext, frame, frameLength );
 
     // Zoom Text
     snprintf( zoomText
             , 255
             , "Zoom[x:%.2f y:%.2f]"
-            , iScene->GetScalingX()
-            , iScene->GetScalingY() );
+            , mScene->GetScalingX()
+            , mScene->GetScalingY() );
 
     iBLContext->setFillStyle( fgColor );
     iBLContext->fillUtf8Text( BLPoint( frame.x + 10, frame.y + frame.h - 28 ), mFont, zoomText );
@@ -120,8 +119,8 @@ FOdysseyPainterEditorVectorScenePanToolHUD::Draw( BLContext* iBLContext
     snprintf( panText
             , 255
             , "Pan[x:%.2f y:%.2f]"
-            , iScene->GetTranslationX()
-            , iScene->GetTranslationY() );
+            , mScene->GetTranslationX()
+            , mScene->GetTranslationY() );
 
     iBLContext->setFillStyle( fgColor );
     iBLContext->fillUtf8Text( BLPoint( frame.x + 10, frame.y + frame.h - 10 ), mFont, panText );

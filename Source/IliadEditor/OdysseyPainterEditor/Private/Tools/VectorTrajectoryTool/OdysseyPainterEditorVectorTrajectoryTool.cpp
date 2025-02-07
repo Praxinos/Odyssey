@@ -37,7 +37,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::~UOdysseyPainterEditorVectorTrajector
 }
 
 UOdysseyPainterEditorVectorTrajectoryTool::UOdysseyPainterEditorVectorTrajectoryTool()
-    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorTrajectoryToolHUD( this ), false )
+    : UOdysseyPainterEditorVectorBaseTool(MakeShared<FOdysseyPainterEditorVectorTrajectoryToolHUD>( this ), false)
     , mHoveredQuad( nullptr )
     , PickingRadius( 10.0f )
     , ShowInbetweens( true )
@@ -46,7 +46,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::UOdysseyPainterEditorVectorTrajectory
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Trajectory64");
 
-    mTrajectoryHUD = static_cast<FOdysseyPainterEditorVectorTrajectoryToolHUD*>( mBaseHUD );
+    mTrajectoryHUD = static_cast<FOdysseyPainterEditorVectorTrajectoryToolHUD*>( mBaseHUD.Get() );
 }
 
 //--------------------------------------------------------------------------------------
@@ -188,8 +188,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::RightMouseButton )
     {
-        mPickedRoute = mTrajectoryHUD->PickRoute( iScene
-                                                , iPointInTexture.x
+        mPickedRoute = mTrajectoryHUD->PickRoute( iPointInTexture.x
                                                 , iPointInTexture.y
                                                 , PickingRadius );
     }
@@ -240,8 +239,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
 
         if( EditionMode == eTrajectoryEditionMode::Curve )
         {
-            mPickedHandle = mTrajectoryHUD->PickHandle( iScene
-                                                      , iPointInTexture.x
+            mPickedHandle = mTrajectoryHUD->PickHandle( iPointInTexture.x
                                                       , iPointInTexture.y
                                                       , PickingRadius );
 
@@ -266,8 +264,7 @@ UOdysseyPainterEditorVectorTrajectoryTool::OnMouseDownVector( FOdysseyVectorGrou
             else
             {
                 // pick a step (a trajectory's endpoint) to align or disalign handles
-                mPickedStep = mTrajectoryHUD->PickStep( iScene
-                                                      , iPointInTexture.x
+                mPickedStep = mTrajectoryHUD->PickStep( iPointInTexture.x
                                                       , iPointInTexture.y
                                                       , PickingRadius );
             }

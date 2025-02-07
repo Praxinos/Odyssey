@@ -23,13 +23,13 @@ UOdysseyPainterEditorVectorPathStitchTool::~UOdysseyPainterEditorVectorPathStitc
 }
 
 UOdysseyPainterEditorVectorPathStitchTool::UOdysseyPainterEditorVectorPathStitchTool()
-    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathStitchToolHUD( this ), false )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathStitchToolHUD>( this ), false )
     , PickingRadius(20.0f)
 //    , RestrictToSelection( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathStitch64");
 
-    mPathStitchHUD = static_cast<FOdysseyPainterEditorVectorPathStitchToolHUD*>( mBaseHUD );
+    mPathStitchHUD = static_cast<FOdysseyPainterEditorVectorPathStitchToolHUD*>( mBaseHUD.Get() );
 }
 
 //--------------------------------------------------------------------------------------
@@ -184,26 +184,7 @@ UOdysseyPainterEditorVectorPathStitchTool::OnMouseHoverVector( FOdysseyVectorGro
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , uint64& oSignalFlags )
 {
-    double diameter = PickingRadius * 2.0f;
-    ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)PickingRadius
-                          , (int)iPointInTexture.y - (int)PickingRadius
-                          , (int)diameter
-                          , (int)diameter };
-
     mPathStitchHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
-
-
-/*
-    if( rect.x < 0 ) rect.x = 0;
-    if( rect.y < 0 ) rect.y = 0;
-
-    rect = rect & layerStack->GetSurface()->Block()->Rect();
-
-    if( rect.Area() )
-    {*/
-    /*}*/
-
-    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 }
 
 void

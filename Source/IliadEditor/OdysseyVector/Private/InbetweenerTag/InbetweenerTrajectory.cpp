@@ -190,7 +190,17 @@ FInbetweenerTrajectory::GetCubicT( float iLinearT )
 }
 
 ::ULIS::FVec2D
-FInbetweenerTrajectory::GetPoint( float iLinearT )
+FInbetweenerTrajectory::GetPointFromCubicT( float iCubicT )
+{
+    return ::ULIS::CubicBezierPointAtParameter<::ULIS::FVec2D>( mCubicBezier[0]
+                                                              , mCubicBezier[1]
+                                                              , mCubicBezier[2]
+                                                              , mCubicBezier[3]
+                                                              , iCubicT );
+}
+
+::ULIS::FVec2D
+FInbetweenerTrajectory::GetPointFromLinearT( float iLinearT )
 {
     float cubicT = GetCubicT( iLinearT );
 
@@ -217,6 +227,12 @@ FInbetweenerBreakdown*
 FInbetweenerTrajectory::GetBreakdown()
 {
     return mBreakdown;
+}
+
+std::vector<FInbetweenerTrajectory::Fraction>&
+FInbetweenerTrajectory::GetFractionBuffer()
+{
+    return mFractionBuffer;
 }
 
 void

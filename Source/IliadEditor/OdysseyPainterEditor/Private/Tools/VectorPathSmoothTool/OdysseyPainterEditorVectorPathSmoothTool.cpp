@@ -23,7 +23,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::~UOdysseyPainterEditorVectorPathSmoot
 }
 
 UOdysseyPainterEditorVectorPathSmoothTool::UOdysseyPainterEditorVectorPathSmoothTool()
-    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathSmoothToolHUD( this ), false )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathSmoothToolHUD>( this ), false )
     , mUndoSegmentReshape( nullptr )
     , SmoothingMode( ePathSmoothingMode::Round )
     , PickingRadius( 20.0f )
@@ -32,7 +32,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::UOdysseyPainterEditorVectorPathSmooth
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathSmooth64");
 
-    mPathSmoothHUD = static_cast<FOdysseyPainterEditorVectorPathSmoothToolHUD*>( mBaseHUD );
+    mPathSmoothHUD = static_cast<FOdysseyPainterEditorVectorPathSmoothToolHUD*>( mBaseHUD.Get() );
 }
 
 bool
@@ -139,15 +139,8 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorGro
                                                              , const FOdysseyPoint& iPointInTexture
                                                              , uint64& oSignalFlags )
 {
-    double diameter = PickingRadius * 2.0f;
-    ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)PickingRadius
-                          , (int)iPointInTexture.y - (int)PickingRadius
-                          , (int)diameter
-                          , (int)diameter };
 
     mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
-
-    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 }
 
 void

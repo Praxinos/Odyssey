@@ -51,6 +51,18 @@ FOdysseyVectorCycle::FOdysseyVectorCycle( FOdysseyVectorObject* iOwner
     }
 }
 
+std::vector<FOdysseyVectorSection*>&
+FOdysseyVectorCycle::GetContourSectionArray()
+{
+    return mContourSectionArray;
+}
+
+std::vector<FOdysseyVectorSection*>&
+FOdysseyVectorCycle::GetInnerSectionArray()
+{
+    return mInnerSectionArray;
+}
+
 void
 FOdysseyVectorCycle::Merge( FOdysseyVectorCycle* iMergeCycle )
 {

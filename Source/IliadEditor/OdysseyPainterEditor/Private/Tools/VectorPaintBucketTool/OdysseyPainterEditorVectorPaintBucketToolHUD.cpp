@@ -20,21 +20,23 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::FOdysseyPainterEditorVectorPaintB
 }
 
 void
-FOdysseyPainterEditorVectorPaintBucketToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPaintBucketToolHUD::Reset()
 {
-    UpdateSelectionBox( iScene, false, mPaintBucketTool->GetEditor()->GetVectorHUDFlags() );
+    UpdateSelectionBox( false, mPaintBucketTool->GetEditor()->GetVectorHUDFlags() );
 
-    UpdateWorkingPaintgroupList( iScene );
+    UpdateWorkingPaintgroupList( );
 }
 
 void
-FOdysseyPainterEditorVectorPaintBucketToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPaintBucketToolHUD::Load()
 {
-    Reset( iScene );
+    Reset();
+
+    FOdysseyPainterEditorVectorBaseToolHUD::Load( );
 }
 
 void
-FOdysseyPainterEditorVectorPaintBucketToolHUD::Unload(FOdysseyVectorGroupPaint* iScene)
+FOdysseyPainterEditorVectorPaintBucketToolHUD::Unload()
 {
 }
 
@@ -45,17 +47,16 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::GetWorkingPaintgroupList()
 }
 
 void
-FOdysseyPainterEditorVectorPaintBucketToolHUD::UpdateWorkingPaintgroupList( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPaintBucketToolHUD::UpdateWorkingPaintgroupList()
 {
     mWorkingPaintgroupList.clear();
 
     FOdysseyVectorObject::Traverse
-    ( iScene
+    ( mScene
     , 0
-    , [ this
-      , iScene ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
+    , [ this ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
         {
-            if( iScene->GetCell()->ObjectHasFocus( object, traversalFlags ) )
+            if( mScene->GetCell()->ObjectHasFocus( object, traversalFlags ) )
             {
                 if( object->HasBaseClass( FOdysseyVectorGroupPaint::StaticClass() ) )
                 {
@@ -90,7 +91,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBuc
                                                              , double iWorldX
                                                              , double iWorldY )
 {
-    ::ULIS::FVec2D bucketWorldCoords = GetBucketPosition( iBucket, true );
+    ::ULIS::FVec2D bucketWorldCoords = FOdysseyVectorHUD::GetBucketPosition( iBucket, true );
     ::ULIS::FVec2D pickDif = ::ULIS::FVec2D( iWorldX - bucketWorldCoords.x
                                            , iWorldY - bucketWorldCoords.y );
 
@@ -98,7 +99,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBuc
     {
         if( iBucket->GetColorMode() == eBucketColorMode::LinearGradient )
         {
-            ::ULIS::FVec2D handleWorldCoords = bucketWorldCoords + ( GetBucketHandleVector( iBucket, true ) * HANDLE_DISTANCE );
+            ::ULIS::FVec2D handleWorldCoords = bucketWorldCoords + ( FOdysseyVectorHUD::GetBucketHandleVector( iBucket, true ) * FOdysseyVectorHUD::HANDLE_DISTANCE );
             ::ULIS::FVec2D handleDif = ::ULIS::FVec2D( iWorldX - handleWorldCoords.x
                                                      , iWorldY - handleWorldCoords.y );
 
@@ -110,10 +111,10 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBuc
 
         if( iBucket->GetColorMode() == eBucketColorMode::RadialGradient )
         {
-            ::ULIS::FVec2D radialHandleWorldCoords = GetBucketRadialHandlePosition( iBucket, true );
+            ::ULIS::FVec2D radialHandleWorldCoords = FOdysseyVectorHUD::GetBucketRadialHandlePosition( iBucket, true );
             ::ULIS::FVec2D radialHandleDif = ::ULIS::FVec2D( iWorldX - radialHandleWorldCoords.x
                                                            , iWorldY - radialHandleWorldCoords.y );
-            ::ULIS::FVec2D radialWorldCoords = GetBucketRadialPosition( iBucket, true );
+            ::ULIS::FVec2D radialWorldCoords = FOdysseyVectorHUD::GetBucketRadialPosition( iBucket, true );
             ::ULIS::FVec2D radialDif = ::ULIS::FVec2D( iWorldX - radialWorldCoords.x
                                                      , iWorldY - radialWorldCoords.y );
 
@@ -122,7 +123,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucketArea( FOdysseyVectorBuc
                 return PICK_RADIAL_HANDLE;
             }
 
-            if ( radialDif.Distance() < RADIAL_AREA_RADIUS )
+            if ( radialDif.Distance() < FOdysseyVectorHUD::RADIAL_AREA_RADIUS )
             {
                 return PICK_RADIAL_AREA;
             }
@@ -153,8 +154,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::SetCursorPosition( double iWorldX
 }
 
 void
-FOdysseyPainterEditorVectorPaintBucketToolHUD::PickCycles( FOdysseyVectorGroupPaint* iScene
-                                                         , double iWorldX
+FOdysseyPainterEditorVectorPaintBucketToolHUD::PickCycles( double iWorldX
                                                          , double iWorldY
                                                          , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray )
 {
@@ -172,8 +172,7 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickCycles( FOdysseyVectorGroupPa
 }
 
 FOdysseyVectorBucket*
-FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucket( FOdysseyVectorGroupPaint* iScene
-                                                         , double iWorldX
+FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucket( double iWorldX
                                                          , double iWorldY )
 {
     FOdysseyVectorBucket* pickedBucket = nullptr;
@@ -197,78 +196,67 @@ FOdysseyPainterEditorVectorPaintBucketToolHUD::PickBucket( FOdysseyVectorGroupPa
 }
 
 void
-FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext
-                                                   , FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPaintBucketToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
-    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
-    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
-    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    uint64 viewBucketHandleFlag = mPaintBucketTool->GetShowControls() ? HUD_GROUPPAINT_BUCKET_HANDLE : 0;
+    FLinearColor fgColor = FLinearColor( fg );
+    FLinearColor bgColor = FLinearColor( bg );
+    FLinearColor hcColor = FLinearColor( hc );
+    uint64 viewBucketHandleFlag = mPaintBucketTool->GetShowControls() ? FOdysseyVectorHUD::HUD_GROUPPAINT_BUCKET_HANDLE : 0;
     uint64 hudFlags = mPaintBucketTool->GetEditor()->GetVectorHUDFlags();
     std::vector<FOdysseyVectorCycle*> pickedCycleArray;
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
-        DrawObjects( iBLContext
-                   , iScene
-                   , fgColor
-                   , bgColor
-                   , hcColor
-                   , hudFlags
-                   | HUD_PATH_VERTEX
-                   | HUD_PATH_SEGMENT
-                   | HUD_GROUPPAINT_BUCKET
-                   | viewBucketHandleFlag );
+        DrawHierarchy( iParams
+                     , mScene
+                     , fgColor
+                     , bgColor
+                     , hcColor
+                     , hudFlags
+                     | FOdysseyVectorHUD::HUD_PATH_VERTEX
+                     | FOdysseyVectorHUD::HUD_PATH_SEGMENT
+                     | FOdysseyVectorHUD::HUD_GROUPPAINT_BUCKET
+                     | viewBucketHandleFlag );
     }
 
     // Draw object details only in vertex mode
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT )
     {
-        DrawObjects( iBLContext
-                   , iScene
-                   , fgColor
-                   , bgColor
-                   , hcColor
-                   , hudFlags
-                   | HUD_GROUPPAINT_BUCKET
-                   | viewBucketHandleFlag );
+        DrawHierarchy( iParams
+                     , mScene
+                     , fgColor
+                     , bgColor
+                     , hcColor
+                     , hudFlags
+                     | FOdysseyVectorHUD::HUD_GROUPPAINT_BUCKET
+                     | viewBucketHandleFlag );
     }
 
     // draw selection box only if we restrict erasure to the selection
-    if( iScene->GetCell()->GetSelectedObjectList().size() )
+    if( mScene->GetCell()->GetSelectedObjectList().size() )
     {
-        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+ //3DHUD        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }
-
-    iBLContext->save();
-    iBLContext->resetMatrix();
 
     if( mPaintBucketTool->GetShowControls() == false )
     {
-        PickCycles( iScene, mCursorAt.x, mCursorAt.y, pickedCycleArray );
+        PickCycles( mCursorAt.x, mCursorAt.y, pickedCycleArray );
 
         for( FOdysseyVectorCycle* cycle : pickedCycleArray)
         {
             FOdysseyVectorObject* owner = cycle->GetOwner();
             BLMatrix2D& worldMatrix = owner->GetWorldMatrix();
 
-            iBLContext->setMatrix( worldMatrix );
-
-            iBLContext->setCompOp( BL_COMP_OP_SRC_OVER );
-            iBLContext->setStrokeStyle( bgColor );
-            iBLContext->setStrokeWidth( 4.0f );
-
-            cycle->StrokePath( iBLContext, true );
-
-            iBLContext->setStrokeStyle( hcColor );
-            iBLContext->setStrokeWidth( 3.0f );
-
-            cycle->StrokePath( iBLContext, true );
+            DrawCycle( iParams, cycle, hcColor, bgColor, hudFlags );
         }
     }
+}
 
-    iBLContext->restore();
+void
+FOdysseyPainterEditorVectorPaintBucketToolHUD::Draw( BLContext* iBLContext )
+{
+
 }

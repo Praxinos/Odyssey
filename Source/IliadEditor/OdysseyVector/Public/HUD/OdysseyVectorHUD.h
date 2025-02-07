@@ -22,43 +22,13 @@ class FOdysseyVectorTagInbetweener;
 class FInbetweenerBreakdown;
 class FInterpolatedPath;
 
-typedef struct _FPointQuadTreeEntry
-{
-    FOdysseyVectorPoint* point;
-    ::ULIS::FVec2D worldCoords;
 
-    _FPointQuadTreeEntry( FOdysseyVectorPoint* iPoint, ::ULIS::FVec2D iWorldCoords )
-    {
-        point = iPoint;
-        worldCoords = iWorldCoords;
-    }
-} FPointQuadTreeEntry;
-
-class ODYSSEYVECTOR_API FPointQuadTree
+class ODYSSEYVECTOR_API IOdysseyVectorHUD
 {
     public:
-       ~FPointQuadTree();
-       FPointQuadTree( const ::ULIS::FRectD& iRect
-                     , uint32 iMaxPointsPerQuad
-                     , std::vector<FPointQuadTreeEntry>& iPointQuadTreeEntryArray
-                     , uint32 iDepth
-                     , uint32 iMaxDepth );
-
-        void Build( uint32 iMaxPointsPerQuad
-                     , std::vector<FPointQuadTreeEntry>& iParentPointQuadTreeEntryArray
-                     , uint32 iDepth
-                     , uint32 iMaxDepth );
-        void Draw( BLContext* iBLContext
-                 , FOdysseyVectorGroupPaint* iScene
-                 , uint64 iFlags );
-        void PickPoints( double iWorldX
-                       , double iWorldY
-                       , double iSelectionRadius
-                       , std::vector<FOdysseyVectorPoint*>& oPickedPointArray );
-    private:
-        std::vector<FPointQuadTreeEntry> mPointQuadTreeEntryArray;
-        FPointQuadTree* mChildren[4];
-        ::ULIS::FRectD mRect;
+        virtual void SetScene( FOdysseyVectorGroupPaint* iScene ) = 0;
+        virtual void Reset() = 0;
+        virtual void Draw( BLContext* iBLContext ) = 0;
 };
 
 class ODYSSEYVECTOR_API FOdysseyVectorHUD
@@ -69,13 +39,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
         static FColor& GetForegroundColor();
         static FColor& GetBackgroundColor();
         static FColor& GetHighlightColor();
-        static void DrawLine( BLContext* iBLContext
-                            , double iWorldx0
-                            , double iWorldY0
-                            , double iWorldx1
-                            , double iWorldY1
-                            , const BLRgba32& fgColor
-                            , const BLRgba32& bgColor );
 
         static void DrawCenteredSquare( BLContext* iBLContext
                                       , double iWorldx
@@ -84,105 +47,19 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                                       , const BLRgba32& fgColor
                                       , const BLRgba32& bgColor );
 
-        static void DrawCircle( BLContext* iBLContext
-                              , double iWorldx
-                              , double iWorldY
-                              , double iRadius
-                              , const BLRgba32& fgColor
-                              , const BLRgba32& bgColor );
-
-        static void DrawVertex( BLContext* iBLContext
-                              , FOdysseyVectorVertex* iVertex
-                              , const BLRgba32& fgColor
-                              , const BLRgba32& bgColor
-                              , const BLRgba32& hcColor
-                              , bool iWorld
-                              , uint64 iHUDFlags );
-
-        static void DrawCubicSegment( BLContext* iBLContext
-                                    , FOdysseyVectorSegmentCubic* iCubicSegment
-                                    , const BLRgba32& fgColor
-                                    , const BLRgba32& bgColor
-                                    , const BLRgba32& hcColor
-                                    , bool iWorld
-                                   , uint64 iHUDFlags );
-
-        static void DrawPath( BLContext* iBLContext
-                            , FOdysseyVectorPath* iPath
-                            , const BLRgba32& fgColor
-                            , const BLRgba32& bgColor
-                            , const BLRgba32& hcColor
-                            , bool iWorld
-                            , uint64 iHUDFlags );
-/*
-        static void DrawInbetweens( FOdysseyVectorGroupPaint* iDisplayedScene
-                                  , BLContext* iBLContext
-                                  , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                  , const BLRgba32& fgColor
-                                  , const BLRgba32& bgColor
-                                  , const BLRgba32& hcColo
-                                  , uint64 iHUDFlags  );
-*/
-        static void DrawInbetweenerInterpolatedPathAt( FOdysseyVectorGroupPaint* iDisplayedScene
-                                                     , BLContext* iBLContext
-                                                     , FOdysseyVectorTagInbetweener* iInbetweenerTag
-                                                     , FInterpolatedPath* iInterpolatedPath
-                                                     , FInbetweenerChart::Inbetween* iInbetween );
-
-        static void DrawBreakdown( FOdysseyVectorGroupPaint* iDisplayedScene
-                                 , BLContext* iBLContext
-                                 , FInbetweenerBreakdown* iBreakdown
-                                 , const BLRgba32& iSourceDrawingColor
-                                 , const BLRgba32& iTargetDrawingColor
-                                 , uint64 iHUDFlags );
-
-        static void DrawGrid( BLContext* iBLContext
-                            , FInbetweenerGrid* iGrid
-                            , eInbetweenerPointPositionType iPositionType
-                            , const FColor& iColor
-                            , uint64 iHUDFlags );
-
         static ::ULIS::FVec2D GetBucketPosition( FOdysseyVectorBucket* iBucket, bool iWorld );
         static ::ULIS::FVec2D GetBucketRadialHandlePosition( FOdysseyVectorBucket* iBucket, bool iWorld );
         static ::ULIS::FVec2D GetBucketRadialPosition( FOdysseyVectorBucket* iBucket, bool iWorld );
         static ::ULIS::FVec2D GetBucketHandleVector( FOdysseyVectorBucket* iBucket, bool iWorld );
 
-        static void DrawBucket( BLContext* iBLContext
-                              , FOdysseyVectorBucket* iBucket
-                              , const BLRgba32& fgColor
-                              , const BLRgba32& bgColor
-                              , const BLRgba32& hcColor
-                              , uint64 iHUDFlags );
-
-        static void DrawGroupPaint( BLContext* iBLContext
-                                  , FOdysseyVectorGroupPaint* iPaintGroup
-                                  , const BLRgba32& fgColor
-                                  , const BLRgba32& bgColor
-                                  , const BLRgba32& hcColor
-                                  , bool iWorld
-                                  , uint64 iHUDFlags );
-
-        virtual ~FOdysseyVectorHUD();
-        FOdysseyVectorHUD();
-
-        static constexpr  double VERTEXRADIUS_SMALL = 2.0f;
-        static constexpr  double HANDLERADIUS_SMALL = 1.5;
-
-        static constexpr  double VERTEXRADIUS = 3.0f;
-        static constexpr  double HANDLERADIUS = 2.5f;
+        static constexpr  double VERTEXRADIUS = 4.0f;
+        static constexpr  double HANDLERADIUS = 3.0f;
 
         // Bucket constants
         static constexpr  double HANDLE_RADIUS      = 3;
         static constexpr  double HANDLE_DISTANCE    = 40;
-        static constexpr  double PELLET_RADIUS      = 5;
+        static constexpr  double PELLET_RADIUS      = 8;
         static constexpr  double RADIAL_AREA_RADIUS = 40;
-
-        static const uint32 PICK_NONE          = 0;
-        static const uint32 PICK_HANDLE        = 1;
-        static const uint32 PICK_BUCKET        = 2;
-        static const uint32 PICK_RADIAL_HANDLE = 3;
-        static const uint32 PICK_RADIAL_AREA   = 4;
-        static const uint32 PICK_PROPAGATE     = 5;
 
         // HUD Drawing Flags
         static const uint64 HUD_MODE_OBJECT              = ( 1ULL <<  0 );
@@ -227,23 +104,6 @@ class ODYSSEYVECTOR_API FOdysseyVectorHUD
                                                          | HUD_BREAKDOWN_TARGET_GRID
                                                          | HUD_BREAKDOWN_INBETWEEN;
         static const uint64 HUD_SELECTIONBOX             = ( 1ULL << 24 );
-        static const uint64 HUD_SIZE_SMALL               = ( 1ULL << 25 );
         static const uint64 HUD_DRAW_ALL                 = ( 1ULL << 26 );
         //static const uint64 VIEW_ALL              = 0xFFFFFFFFFFFFFFFFULL;
-
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) = 0;
-        virtual void Reset( FOdysseyVectorGroupPaint* iScene ) = 0;
-
-
-        void PickPoints( double iWorldX
-                       , double iWorldY
-                       , double iSelectionRadius
-                       , std::vector<FOdysseyVectorPoint*>& oPickedPointArray );
-
-        void MakePointQuadTree( FOdysseyVectorGroupPaint *iScene
-                              , bool iFocusedObjectsOnly
-                              , uint64 iHUDFlags );
-
-    protected:
-        FPointQuadTree* mPointQuadTree;
 };

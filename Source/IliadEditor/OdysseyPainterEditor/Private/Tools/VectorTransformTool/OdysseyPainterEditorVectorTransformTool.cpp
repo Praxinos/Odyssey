@@ -34,7 +34,7 @@ UOdysseyPainterEditorVectorTransformTool::~UOdysseyPainterEditorVectorTransformT
 }
 
 UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTool()
-    : UOdysseyPainterEditorVectorSelectionTool( new FOdysseyPainterEditorVectorTransformToolHUD( this ) )
+    : UOdysseyPainterEditorVectorSelectionTool( MakeShared<FOdysseyPainterEditorVectorTransformToolHUD>( this ) )
     , mPickedPivot( nullptr )
     , mDragging( false )
     , PickingRadius(10.0f)
@@ -45,7 +45,7 @@ UOdysseyPainterEditorVectorTransformTool::UOdysseyPainterEditorVectorTransformTo
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Transform32");
 
-    mTransformHUD = static_cast<FOdysseyPainterEditorVectorTransformToolHUD*>( mBaseHUD );
+    mTransformHUD = static_cast<FOdysseyPainterEditorVectorTransformToolHUD*>( mBaseHUD.Get() );
 }
 
 //--------------------------------------------------------------------------------------

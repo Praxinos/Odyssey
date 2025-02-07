@@ -8,6 +8,7 @@
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseToolHUD.h"
 #include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
+#include "OdysseyHUDSystem.h"
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
@@ -15,13 +16,13 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : pub
         virtual ~FOdysseyPainterEditorVectorSelectionToolHUD();
         FOdysseyPainterEditorVectorSelectionToolHUD(  UOdysseyPainterEditorVectorSelectionTool* iSelectionTool );
 
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) override;
-        virtual void Load( FOdysseyVectorGroupPaint* iScene ) override;
-        virtual void Unload( FOdysseyVectorGroupPaint* iScene ) override;
-        virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
+        virtual void Draw( BLContext* iBLContext ) override;
+        virtual void Load() override;
+        virtual void Unload() override;
+        virtual void Reset( ) override;
         void ShowSelectionBox( bool iShowSelectionBox );
         void Init( uint32 iWidth, uint32 iHeight );
-        void GetSelectedVertices( FOdysseyVectorGroupPaint* iScene, std::vector<FOdysseyVectorPoint*>& oPointArray );
+        void GetSelectedVertices( std::vector<FOdysseyVectorPoint*>& oPointArray );
 
         void ClearMask();
         BLImage* GetMask();
@@ -47,16 +48,21 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorSelectionToolHUD : pub
          * @return the bounding box including the rectangle.
          */
         ::ULIS::FRectD GenerateRectangleMask( const ::ULIS::FRectD& iRect );
-
+        virtual void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams ) override;
 
     protected:
         void DrawPickingArea( BLContext* iBLContext
                             , BLRgba32 fgColor
                             , BLRgba32 bgColor
                             , BLRgba32 hcColor );
-        void DrawVertexSelection( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene, uint64 iFlags );
-        void DrawObjectSelection( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene, uint64 iFlags );
-        void DrawSelectionSpace( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene,uint64 iFlags);
+        void DrawPickingArea( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                            , const FLinearColor& fgColor
+                            , const FLinearColor& bgColor
+                            , const FLinearColor& hcColor );
+
+        void DrawVertexSelection( BLContext* iBLContext, uint64 iFlags );
+        void DrawObjectSelection( BLContext* iBLContext, uint64 iFlags );
+        void DrawSelectionSpace( BLContext* iBLContext, uint64 iFlags);
 
     protected:
         UOdysseyPainterEditorVectorSelectionTool* mSelectionTool;

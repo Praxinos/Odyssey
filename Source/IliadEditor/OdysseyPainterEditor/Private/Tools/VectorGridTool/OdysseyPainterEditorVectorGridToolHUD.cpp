@@ -211,15 +211,9 @@ FOdysseyPainterEditorVectorGridToolHUD::PickNodes( ::ULIS::FRectD& iWorldRect, b
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( BLContext* iBLContext
-                                                              , BLRgba32& iHighlightColor )
+FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                                                              , FLinearColor& iHighlightColor )
 {
-    iBLContext->save();
-    iBLContext->resetMatrix();
-
-    iBLContext->setStrokeStyle( iHighlightColor );
-    iBLContext->setStrokeWidth( 1.0f );
-
     if( mWorldSelDrag != mWorldSelStart )
     {
         if( mSelectionBox.rect.Area() )
@@ -228,78 +222,89 @@ FOdysseyPainterEditorVectorGridToolHUD::DrawSelectionRectangle( BLContext* iBLCo
             double ymin = ::ULIS::FMath::Min( mWorldSelDrag.y, mWorldSelStart.y );
             double xmax = ::ULIS::FMath::Max( mWorldSelDrag.x, mWorldSelStart.x );
             double ymax = ::ULIS::FMath::Max( mWorldSelDrag.y, mWorldSelStart.y );
+            FVector2D hudCoords[4] = { iParams.mTextureToHUD.Execute( FVector2D( xmin, ymin ) )
+                                     , iParams.mTextureToHUD.Execute( FVector2D( xmax, ymin ) )
+                                     , iParams.mTextureToHUD.Execute( FVector2D( xmax, ymax ) )
+                                     , iParams.mTextureToHUD.Execute( FVector2D( xmin, ymax ) ) };
 
-            iBLContext->strokeLine( xmin, ymin, xmax, ymin );
-            iBLContext->strokeLine( xmax, ymin, xmax, ymax );
-            iBLContext->strokeLine( xmax, ymax, xmin, ymax );
-            iBLContext->strokeLine( xmin, ymax, xmin, ymin );
+            for( uint32 i = 0; i < 4; i++ )
+            {
+                uint32 n = ( i + 1 ) % 4;
+
+                DrawPrimitiveLine( iParams
+                                 , hudCoords[i]
+                                 , hudCoords[n]
+                                 , iHighlightColor
+                                 , iHighlightColor
+                                 , 1.0f
+                                 , false );
+            }
         }
     }
-
-    iBLContext->restore();
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorGridToolHUD::Reset( )
 {
-    MakeGrid( iScene, mGridTool->GetEditor()->GetVectorHUDFlags() );
+    MakeGrid( mGridTool->GetEditor()->GetVectorHUDFlags() );
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext
-                                            , FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorGridToolHUD::Draw( BLContext* iBLContext )
 {
-    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
-    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
-    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
-    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
-    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
-    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+}
+
+void
+FOdysseyPainterEditorVectorGridToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
+{
+    FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
+    FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
+    FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
     uint64 hudFlags = mGridTool->GetEditor()->GetVectorHUDFlags();
 
     // Draw default
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.
     // -> inbetweens in inbetween mode.
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
-
-    iBLContext->save();
-    iBLContext->resetMatrix();
+    FOdysseyPainterEditorVectorBaseToolHUD::DrawHUD( iParams );
 
     if( mSelectionBox.rect.Area() )
     {
         BLMatrix2D worldMatrix = mSelectionBox.worldMatrix;
 
-        DrawSelectionRectangle( iBLContext, hcColor );
+        DrawSelectionRectangle( iParams, hcColor );
 
         for( int i = 0; i < mCellArray.size(); i++ )
         {
-            BLPoint pt[4] = { worldMatrix.mapPoint( mCellArray[i].mNode[0]->GetX(), mCellArray[i].mNode[0]->GetY() ),
-                              worldMatrix.mapPoint( mCellArray[i].mNode[1]->GetX(), mCellArray[i].mNode[1]->GetY() ),
-                              worldMatrix.mapPoint( mCellArray[i].mNode[2]->GetX(), mCellArray[i].mNode[2]->GetY() ),
-                              worldMatrix.mapPoint( mCellArray[i].mNode[3]->GetX(), mCellArray[i].mNode[3]->GetY() ) };
+            ::ULIS::FVec2D texCoords[4] = { FOdysseyVector::MapPoint( worldMatrix, mCellArray[i].mNode[0]->GetCoords() ),
+                                            FOdysseyVector::MapPoint( worldMatrix, mCellArray[i].mNode[1]->GetCoords() ),
+                                            FOdysseyVector::MapPoint( worldMatrix, mCellArray[i].mNode[2]->GetCoords() ),
+                                            FOdysseyVector::MapPoint( worldMatrix, mCellArray[i].mNode[3]->GetCoords() ) };
+            FVector2D hudCoords[4] = { iParams.mTextureToHUD.Execute( FVector2D( texCoords[0].x, texCoords[0].y ) )
+                                     , iParams.mTextureToHUD.Execute( FVector2D( texCoords[1].x, texCoords[1].y ) )
+                                     , iParams.mTextureToHUD.Execute( FVector2D( texCoords[2].x, texCoords[2].y ) )
+                                     , iParams.mTextureToHUD.Execute( FVector2D( texCoords[3].x, texCoords[3].y ) ) };
 
-            iBLContext->setStrokeWidth( 2.0f );
-            iBLContext->setStrokeStyle( bgColor );
-            iBLContext->strokePolygon( pt, 4 );
-            iBLContext->setStrokeStyle( fgColor );
-            iBLContext->setStrokeWidth( 1.0f );
-            iBLContext->strokePolygon( pt, 4 );
+            for( uint32 j = 0; j < 4; j ++ )
+            {
+                uint32 n = ( j + 1 ) % 4;
+
+                DrawPrimitiveLine( iParams, hudCoords[j], hudCoords[n], fgColor, bgColor, 1.0f, false );
+            }
         }
 
         for( int i = 0; i < mNodeArray.size(); i++ )
         {
-            BLPoint pt = worldMatrix.mapPoint( mNodeArray[i].GetX(), mNodeArray[i].GetY() );
+            ::ULIS::FVec2D texCoords = FOdysseyVector::MapPoint( worldMatrix, mNodeArray[i].GetCoords() );
+            FVector2D hudCoords = iParams.mTextureToHUD.Execute( FVector2D( texCoords.x, texCoords.y ) );
 
-            iBLContext->setFillStyle( mNodeArray[i].IsSelected() ? hcColor : fgColor );
-            iBLContext->fillCircle( pt.x, pt.y, FOdysseyPainterEditorVectorGridToolHUD::HANDLE_RADIUS );
-            iBLContext->setStrokeWidth( 1.0f );
-            iBLContext->setStrokeStyle( bgColor );
-            iBLContext->strokeCircle( pt.x, pt.y, FOdysseyPainterEditorVectorGridToolHUD::HANDLE_RADIUS );
+            DrawPrimitiveHandle( iParams
+                               , hudCoords
+                               , FOdysseyPainterEditorVectorGridToolHUD::HANDLE_RADIUS
+                               , mNodeArray[i].IsSelected() ? hcColor : fgColor
+                               , bgColor );
         }
     }
-
-    iBLContext->restore();
 }
 
 void
@@ -348,17 +353,16 @@ FOdysseyPainterEditorVectorGridToolHUD::MapPoint( FOdysseyVectorObject* iObject
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::Map( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorGridToolHUD::Map()
 {
     mPointCount = 0;
 
     FOdysseyVectorObject::Traverse
-    ( iScene
+    ( mScene
     , 0
-    , [ this
-      , iScene ]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
+    , [ this]( FOdysseyVectorObject* object, uint64 travesalFlags ) -> uint64
       {
-          if( iScene->GetCell()->ObjectHasFocus( object, travesalFlags ) )
+          if( mScene->GetCell()->ObjectHasFocus( object, travesalFlags ) )
           {
               BLMatrix2D& inverseSpaceMatrix = mSelectionBox.inverseWorldMatrix;
 
@@ -507,10 +511,10 @@ FOdysseyPainterEditorVectorGridToolHUD::MakeCells()
 }
 
 void
-FOdysseyPainterEditorVectorGridToolHUD::MakeGrid( FOdysseyVectorGroupPaint* iScene, uint64 iHUDFlags )
+FOdysseyPainterEditorVectorGridToolHUD::MakeGrid( uint64 iHUDFlags )
 {
     // Updates the selection box
-    UpdateSelectionBox( iScene, mGridTool->World, iHUDFlags );
+    UpdateSelectionBox( mGridTool->World, iHUDFlags );
 
     if( mSelectionBox.rect.Area() )
     {
@@ -523,6 +527,6 @@ FOdysseyPainterEditorVectorGridToolHUD::MakeGrid( FOdysseyVectorGroupPaint* iSce
         MakeNodes();
         MakeCells();
 
-        Map( iScene );
+        Map();
     }
 }

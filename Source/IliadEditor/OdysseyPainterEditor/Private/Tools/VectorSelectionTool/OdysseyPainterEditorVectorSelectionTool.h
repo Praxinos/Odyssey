@@ -38,7 +38,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorSelectionTool : public
         UOdysseyPainterEditorVectorSelectionTool();
 
         //Constructor
-        UOdysseyPainterEditorVectorSelectionTool( FOdysseyPainterEditorVectorBaseToolHUD* iHUD );
+        UOdysseyPainterEditorVectorSelectionTool( TSharedPtr<FOdysseyPainterEditorVectorBaseToolHUD> iHUD );
 
         virtual bool IsActivable() const override;
 

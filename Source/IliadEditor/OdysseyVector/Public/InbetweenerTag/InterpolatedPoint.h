@@ -9,7 +9,7 @@
 class FOdysseyVectorPoint;
 class FInbetweenerQuad;
 
-class FInterpolatedPoint
+class ODYSSEYVECTOR_API FInterpolatedPoint
 {
     public:
         virtual ~FInterpolatedPoint();

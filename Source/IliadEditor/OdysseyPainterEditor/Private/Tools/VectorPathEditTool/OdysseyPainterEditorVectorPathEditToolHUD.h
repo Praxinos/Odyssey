@@ -14,10 +14,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathEditToolHUD : publ
         virtual ~FOdysseyPainterEditorVectorPathEditToolHUD(  );
         FOdysseyPainterEditorVectorPathEditToolHUD( UOdysseyPainterEditorVectorPathEditTool* iPathEditTool );
 
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) override;
-        virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
-        virtual void Load( FOdysseyVectorGroupPaint* iScene ) override;
-        virtual void Unload( FOdysseyVectorGroupPaint* iScene ) override;
+        void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams );
+        virtual void Draw( BLContext* iBLContext ) override;
+        virtual void Reset() override;
+        virtual void Load() override;
+        virtual void Unload() override;
         void ClearMask();
         ::ULIS::FRectD GenerateMask( double iX
                                    , double iY
@@ -33,14 +34,18 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathEditToolHUD : publ
         ::ULIS::FVec2D& GetCutLineP1();
 
     private:
-        void DrawMinus( BLContext* iBLContext
-                      , const BLRgba32& iFgColor
-                      , const BLRgba32& iBgColor
-                      , const BLRgba32& iHcColor  );
-        void DrawPlus( BLContext* iBLContext
-                     , const BLRgba32& iFgColor
-                     , const BLRgba32& iBgColor
-                     , const BLRgba32& iHcColor  );
+
+        void DrawMinus( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                      , const FLinearColor& iFgColor
+                      , const FLinearColor& iBgColor
+                      , float iThickness
+                      , bool iContour );
+
+        void DrawPlus( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                     , const FLinearColor& iFgColor
+                     , const FLinearColor& iBgColor
+                     , float iThickness
+                     , bool iContour );
 
     private:
         double mX;

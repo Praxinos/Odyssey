@@ -32,7 +32,7 @@ UOdysseyPainterEditorVectorPathEditTool::~UOdysseyPainterEditorVectorPathEditToo
 }
 
 UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool()
-    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathEditToolHUD( this ), false )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathEditToolHUD>( this ), false )
     , mPickingFlags ( FOdysseyVectorPath::PICK_VERTEX )
     , mPickingMode  ( ePathPickingMode::Vertex )
     , PickingRadius(10.0f)
@@ -40,7 +40,7 @@ UOdysseyPainterEditorVectorPathEditTool::UOdysseyPainterEditorVectorPathEditTool
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathEdit64");
 
-    mPathEditHUD = static_cast<FOdysseyPainterEditorVectorPathEditToolHUD*>( mBaseHUD );
+    mPathEditHUD = static_cast<FOdysseyPainterEditorVectorPathEditToolHUD*>( mBaseHUD.Get() );
 }
 
 //--------------------------------------------------------------------------------------
@@ -739,30 +739,8 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseHoverVector( FOdysseyVectorGroup
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , uint64& oSignalFlags )
 {
-    std::vector<FOdysseyVectorPoint*>& hoveredPointArray = mPathEditHUD->GetHoveredPointArray();
-    uint64 notificationFlags = 0;
-
-    // we need the focus on the viewport for keyboard
-    //FSlateApplication::Get().SetKeyboardFocus( mViewportWidget.ToSharedRef() );
-
-/*
-    ::ULIS::FRectI formerRegion = ::ULIS::FRectI( iPointInTexture.x - iPointInTexture.deltaPosition.X - Radius
-                                                , iPointInTexture.y - iPointInTexture.deltaPosition.Y - Radius
-                                                , Radius * 2
-                                                , Radius * 2 );
-    ::ULIS::FRectI currentRegion = ::ULIS::FRectI( iPointInTexture.x - Radius
-                                                 , iPointInTexture.y - Radius
-                                                 , Radius * 2
-                                                 , Radius * 2 );
-    ::ULIS::FRectI finalRegion = currentRegion | formerRegion;
-*/
-
     // This populates mPathEditHUD::mHoveredPointArray
     mPathEditHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
-
-    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
-
-    oSignalFlags = notificationFlags;
 }
 
 void

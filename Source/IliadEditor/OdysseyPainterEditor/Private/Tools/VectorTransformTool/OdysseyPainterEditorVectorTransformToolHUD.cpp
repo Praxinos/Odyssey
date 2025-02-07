@@ -106,52 +106,39 @@ GetWorldScalers( FSelectionBox& iSelectionBox, FSelectionBoxScaler iScaler[4] )
 }
 
 void
-FOdysseyPainterEditorVectorTransformToolHUD::DrawScalers( BLContext* iBLContext
-                                                        , FOdysseyVectorGroupPaint* iScene
-                                                        , uint64 iFlags )
+FOdysseyPainterEditorVectorTransformToolHUD::DrawScalers( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
 {
-    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
-    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
-    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
-    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
-    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
-    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    FSelectionBoxScaler scaler[4];
+    FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
+    FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
+    FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
+    FSelectionBoxScaler texScaler[4];
 
-    GetWorldScalers( mSelectionBox, scaler);
+    GetWorldScalers( mSelectionBox, texScaler);
 
     for( int i = 0; i < 4; i++ )
     {
-        BLRgba32 scalerColor = ( mFlags & scaler[i].flag ) ? hcColor : fgColor;
+        FLinearColor scalerColor = ( mFlags & texScaler[i].flag ) ? hcColor : fgColor;
+        FVector2D hudCoords = iParams.mTextureToHUD.Execute( FVector2D( texScaler[i].position.x
+                                                                      , texScaler[i].position.y ) );
 
-        iBLContext->setFillStyle( scalerColor );
-        iBLContext->fillCircle( scaler[i].position.x, scaler[i].position.y, SCALER_RADIUS );
-
-        iBLContext->setStrokeWidth( 1.0f );
-        iBLContext->setStrokeStyle( bgColor );
-        iBLContext->strokeCircle( scaler[i].position.x, scaler[i].position.y, SCALER_RADIUS );
+        DrawPrimitiveHandle( iParams, hudCoords, SCALER_RADIUS, scalerColor, bgColor );
     }
 }
 
 void
-FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( BLContext* iBLContext
-                                                      , FOdysseyVectorGroupPaint* iScene
-                                                      , uint64 iFlags )
+FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
 {
-    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
-    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
-    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
-    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
-    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
-    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    BLRgba32 gizmoColor = ( mFlags & PICK_ZAXIS ) ? hcColor : fgColor;
-    BLRgba32 xAxisColor = ( mFlags & PICK_XAXIS ) ? hcColor : fgColor;
-    BLRgba32 yAxisColor = ( mFlags & PICK_YAXIS ) ? hcColor : fgColor;
-    ::ULIS::FVec2D worldGizmo;
+    FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
+    FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
+    FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
+    FLinearColor gizmoColor = ( mFlags & PICK_ZAXIS ) ? hcColor : fgColor;
+    FLinearColor xAxisColor = ( mFlags & PICK_XAXIS ) ? hcColor : fgColor;
+    FLinearColor yAxisColor = ( mFlags & PICK_YAXIS ) ? hcColor : fgColor;
     ::ULIS::FVec2D worldXAxisStart;
     ::ULIS::FVec2D worldYAxisStart;
     ::ULIS::FVec2D worldXAxisLength;
     ::ULIS::FVec2D worldYAxisLength;
+    ::ULIS::FVec2D worldGizmo;
 
     GetWorldGizmo( mSelectionBox
                  , mGizmo
@@ -161,6 +148,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( BLContext* iBLContext
                  , worldXAxisLength
                  , worldYAxisLength );
 
+/*
     // Central circle
 
     iBLContext->setFillStyle( gizmoColor );
@@ -193,6 +181,7 @@ FOdysseyPainterEditorVectorTransformToolHUD::DrawGizmo( BLContext* iBLContext
                           , worldYAxisStart.y
                           , worldYAxisStart.x + worldYAxisLength.x
                           , worldYAxisStart.y + worldYAxisLength.y );
+*/
 }
 
 uint32
@@ -342,16 +331,16 @@ FOdysseyPainterEditorVectorTransformToolHUD::CenterGizmo()
 }
 
 void
-FOdysseyPainterEditorVectorTransformToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorTransformToolHUD::Reset( )
 {
     uint64 hudFlags = mTransformTool->GetEditor()->GetVectorHUDFlags();
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
-        UpdateSelectionInbetweenMode( iScene );
+        UpdateSelectionInbetweenMode();
     }
 
-    UpdateSelectionBox( iScene, mTransformTool->World, mTransformTool->GetEditor()->GetVectorHUDFlags() );
+    UpdateSelectionBox( mTransformTool->World, mTransformTool->GetEditor()->GetVectorHUDFlags() );
 
     if( mCenterGizmo )
     {
@@ -360,33 +349,24 @@ FOdysseyPainterEditorVectorTransformToolHUD::Reset( FOdysseyVectorGroupPaint* iS
 }
 
 void
-FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
-                                                 , FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorTransformToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
 {
-    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
-    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
-    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
-    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
-    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
-    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    static BLRgba32 greyColor = BLRgba32( 128, 128, 128, 128 );
-    uint32 selectedObjectCount = iScene->GetCell()->GetSelectedObjectList().size();
+    FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
+    FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
+    FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
+    uint32 selectedObjectCount = mScene->GetCell()->GetSelectedObjectList().size();
     uint64 hudFlags = mTransformTool->GetEditor()->GetVectorHUDFlags();
-
-    iBLContext->save();
-    // do not add-up colors
-    iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
 
     // Draw default
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.
     // -> inbetweens in inbetween mode.
-    if( hudFlags & HUD_MODE_VERTEX )
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX )
     {
-        FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene);
+        FOdysseyPainterEditorVectorBaseToolHUD::DrawHUD( iParams );
     }
 
-    if( hudFlags & HUD_MODE_INBETWEEN )
+    if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
         for( FInbetweenerBreakdown* breakdown : mSelectedBreakdownList )
         {
@@ -398,24 +378,22 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
                 {
                     if( breakdown != otherBreakdown )
                     {
-                        DrawBreakdown( iScene
-                                     , iBLContext
+                        DrawBreakdown( iParams
                                      , otherBreakdown
-                                     , BLRgba32( 127, 127, 127, 255 )
-                                     , BLRgba32( 127, 127, 127, 255 )
-                                     , HUD_BREAKDOWN_SOURCE
-                                     | HUD_BREAKDOWN_INBETWEEN
-                                     | HUD_BREAKDOWN_TARGET );
+                                     , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                                     , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                                     , FOdysseyVectorHUD::HUD_BREAKDOWN_SOURCE
+                                     | FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN
+                                     | FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET );
                     }
                 }
 
-                DrawBreakdown( iScene
-                             , iBLContext
-                             , breakdown
-                             , BLRgba32( 127, 127, 127, 255 )
-                             , BLRgba32( 255, 127, 127, 255 )
-                             , HUD_BREAKDOWN_INBETWEEN
-                             | HUD_BREAKDOWN_TARGET );
+                DrawBreakdown( iParams
+                                 , breakdown
+                                 , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                                 , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
+                                 , FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN
+                                 | FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET );
             }
 
             if( mTransformTool->ShowInbetweens == eTransformShowInbetweens::Surrounding )
@@ -424,21 +402,19 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
 
                 if( nextBreakdown )
                 {
-                    DrawBreakdown( iScene
-                                 , iBLContext
+                    DrawBreakdown( iParams
                                  , nextBreakdown
-                                 , BLRgba32( 127, 127, 127, 255 )
-                                 , BLRgba32( 127, 127, 127, 255 )
-                                 , HUD_BREAKDOWN_INBETWEEN );
+                                 , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                                 , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                                 , FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN );
                 }
 
-                DrawBreakdown( iScene
-                             , iBLContext
+                DrawBreakdown( iParams
                              , breakdown
-                             , BLRgba32( 127, 127, 127, 255 )
-                             , BLRgba32( 255, 127, 127, 255 )
-                             , HUD_BREAKDOWN_INBETWEEN
-                             | HUD_BREAKDOWN_TARGET );
+                             , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                             , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
+                             , FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN
+                             | FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET );
 
             }
 
@@ -446,22 +422,23 @@ FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext
         }
     }
 
-    iBLContext->resetMatrix();
-
     if( mSelectionBox.rect.Area() )
     {
         BLMatrix2D worldMatrix = mSelectionBox.worldMatrix;
 
         if( mShowSelectionBox )
         {
-            DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+ //3DHUD            DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
 
             //DrawSelectionBox( iScene, iFlags ); // commented out: now called from super::draw()
-            DrawScalers( iBLContext, iScene, hudFlags );
+            DrawScalers( iParams );
         }
 
-        DrawGizmo( iBLContext, iScene, hudFlags );
+        DrawGizmo( iParams );
     }
+}
 
-    iBLContext->restore();
+void
+FOdysseyPainterEditorVectorTransformToolHUD::Draw( BLContext* iBLContext )
+{
 }

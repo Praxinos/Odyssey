@@ -119,9 +119,9 @@ FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext
     //mBLContext->setFillAlpha( 0.0f );
     iBLContext->clearAll();
 
-    for( FOdysseyVectorHUD *hud : scene->GetCell()->GetHUDList() )
+    for( IOdysseyVectorHUD *hud : scene->GetCell()->GetHUDList() )
     {
-        hud->Draw( iBLContext, scene );
+        hud->Draw( iBLContext );
     }
 
     iBLContext->restore();

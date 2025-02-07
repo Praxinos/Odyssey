@@ -26,10 +26,10 @@
 //----------------------------------------------------------- Construction / Destruction
 UOdysseyPainterEditorVectorBaseTool::~UOdysseyPainterEditorVectorBaseTool()
 {
-    if( mBaseHUD )
-    {
-        delete mBaseHUD;
-    }
+    //if( mBaseHUD )
+    //{
+    //    delete mBaseHUD;
+    //}
 }
 
 UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool()
@@ -39,7 +39,7 @@ UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool()
 
 }
 
-UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool( FOdysseyPainterEditorVectorBaseToolHUD* iBaseHUD, bool iAutoCreateMedia )
+UOdysseyPainterEditorVectorBaseTool::UOdysseyPainterEditorVectorBaseTool( TSharedPtr<FOdysseyPainterEditorVectorBaseToolHUD> iBaseHUD, bool iAutoCreateMedia)
     : mBaseHUD( iBaseHUD )
     , mHasContextMenu(true)
     , mAutoCreateMedia( iAutoCreateMedia )
@@ -256,9 +256,11 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
 
             if( mBaseHUD )
             {
-                mBaseHUD->Unload( vectorScene );
-
-                vectorScene->GetCell()->RemoveHUD( mBaseHUD );
+                mBaseHUD->Unload();
+                // 2D HUD
+                vectorScene->GetCell()->RemoveHUD( mBaseHUD.Get() );
+                // 3D HUD
+                mHUD->RemoveElement( mBaseHUD );
             }
         }
     }
@@ -290,9 +292,13 @@ UOdysseyPainterEditorVectorBaseTool::Load()
 
             if( mBaseHUD )
             {
-                mBaseHUD->Load( vectorScene );
+                mBaseHUD->SetScene( vectorScene );
+                mBaseHUD->Load();
+                // 2D HUD
+                vectorScene->GetCell()->AddHUD( mBaseHUD.Get() );
+                // 3D HUD
+                mHUD->AddElement( mBaseHUD );
 
-                vectorScene->GetCell()->AddHUD( mBaseHUD );
                 vectorScene->GetCell()->ResetHUD();
             }
 

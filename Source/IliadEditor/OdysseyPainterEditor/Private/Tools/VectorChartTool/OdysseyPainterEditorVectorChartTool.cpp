@@ -23,7 +23,7 @@ UOdysseyPainterEditorVectorChartTool::~UOdysseyPainterEditorVectorChartTool()
 }
 
 UOdysseyPainterEditorVectorChartTool::UOdysseyPainterEditorVectorChartTool()
-    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorChartToolHUD( this ), false )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorChartToolHUD>( this ), false )
     , PickingRadius( 10.0f )
     , Factor( 1 )
     , EditionMode ( eChartEditionMode::OneByOne )
@@ -31,7 +31,7 @@ UOdysseyPainterEditorVectorChartTool::UOdysseyPainterEditorVectorChartTool()
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Chart64");
 
-    mChartHUD = static_cast<FOdysseyPainterEditorVectorChartToolHUD*>( mBaseHUD );
+    mChartHUD = static_cast<FOdysseyPainterEditorVectorChartToolHUD*>( mBaseHUD.Get() );
 }
 
 //--------------------------------------------------------------------------------------
@@ -260,8 +260,6 @@ UOdysseyPainterEditorVectorChartTool::OnMouseHoverVector( FOdysseyVectorGroupPai
         // TODO: highlight grid handles ?
         mHoveredInbetween = mChartHUD->PickInbetween( iPointInTexture.x
                                                     , iPointInTexture.y );
-
-        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorObject::UPDATE_INTERACTIVE );
     }
 }
 

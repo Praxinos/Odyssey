@@ -30,6 +30,9 @@ class ODYSSEYVECTOR_API FOdysseyVectorCycle
         void ToBucketArray( std::vector<FOdysseyVectorCycle*>& iCyleArray
                           , std::vector<FOdysseyVectorBucket*>& oBucketArray );
 
+        std::vector<FOdysseyVectorSection*>& GetContourSectionArray();
+        std::vector<FOdysseyVectorSection*>& GetInnerSectionArray();
+
         /**
          * @brief destructor.
          */

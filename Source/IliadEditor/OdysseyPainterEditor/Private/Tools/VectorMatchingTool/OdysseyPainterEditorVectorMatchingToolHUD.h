@@ -23,8 +23,9 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorMatchingToolHUD : publ
         virtual ~FOdysseyPainterEditorVectorMatchingToolHUD();
         FOdysseyPainterEditorVectorMatchingToolHUD(  UOdysseyPainterEditorVectorMatchingTool* iGridTool );
 
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) override;
-        virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
+        virtual void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams ) override;
+        virtual void Draw( BLContext* iBLContext ) override;
+        virtual void Reset() override;
         void PickTargetPoints( FInbetweenerBreakdown* iBreakdown
                              , double iWorldX
                              , double iWorldY
@@ -41,7 +42,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorMatchingToolHUD : publ
                            , const BLRgba32& iFgColor
                            , const BLRgba32& iBgColor
                            , const BLRgba32& iHcColor );
-        void UpdateBreakdown( FOdysseyVectorGroupPaint* iScene );
+        void UpdateBreakdown();
 
     private:
         UOdysseyPainterEditorVectorMatchingTool* mMatchingTool;

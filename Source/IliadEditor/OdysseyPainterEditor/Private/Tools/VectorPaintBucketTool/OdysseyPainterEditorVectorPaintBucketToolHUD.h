@@ -16,23 +16,30 @@ class FOdysseyVectorGroupPaint;
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPaintBucketToolHUD : public FOdysseyPainterEditorVectorBaseToolHUD
 {
     public:
+        static const uint32 PICK_NONE          = 0;
+        static const uint32 PICK_HANDLE        = 1;
+        static const uint32 PICK_BUCKET        = 2;
+        static const uint32 PICK_RADIAL_HANDLE = 3;
+        static const uint32 PICK_RADIAL_AREA   = 4;
+        static const uint32 PICK_PROPAGATE     = 5;
+
         virtual ~FOdysseyPainterEditorVectorPaintBucketToolHUD();
         FOdysseyPainterEditorVectorPaintBucketToolHUD(  UOdysseyPainterEditorVectorPaintBucketTool* iVectorPaintBucketTool );
 
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) override;
-        virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
-        virtual void Load( FOdysseyVectorGroupPaint* iScene ) override;
-        virtual void Unload( FOdysseyVectorGroupPaint* iScene ) override;
-        void UpdateWorkingPaintgroupList( FOdysseyVectorGroupPaint* iScene );
+        virtual void Draw( BLContext* iBLContext ) override;
+        virtual void Reset() override;
+        virtual void Load() override;
+        virtual void Unload() override;
+        void UpdateWorkingPaintgroupList();
+
+        void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams );
 
         void SetCycle( FOdysseyVectorCycle* iCycle );
 
-        FOdysseyVectorBucket* PickBucket( FOdysseyVectorGroupPaint* iScene
-                                        , double iWorldX
+        FOdysseyVectorBucket* PickBucket( double iWorldX
                                         , double iWorldY );
 
-        void PickCycles( FOdysseyVectorGroupPaint* iScene
-                       , double iWorldX
+        void PickCycles( double iWorldX
                        , double iWorldY
                        , std::vector<FOdysseyVectorCycle*>& oPickedCycleArray );
 

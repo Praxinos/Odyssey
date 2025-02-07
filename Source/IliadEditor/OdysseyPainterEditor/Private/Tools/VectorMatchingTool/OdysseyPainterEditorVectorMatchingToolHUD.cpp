@@ -25,34 +25,27 @@ FOdysseyPainterEditorVectorMatchingToolHUD::FOdysseyPainterEditorVectorMatchingT
 }
 
 void
-FOdysseyPainterEditorVectorMatchingToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorMatchingToolHUD::Reset()
 {
     uint64 hudFlags = mMatchingTool->GetEditor()->GetVectorHUDFlags();
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
-        UpdateSelectionInbetweenMode( iScene );
+        UpdateSelectionInbetweenMode();
     }
 }
 
 void
-FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
-                                                , FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorMatchingToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
 {
-    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
-    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
-    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
-    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
-    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
-    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    static BLRgba32 greyColor = BLRgba32( 128, 128, 128, 128 );
+    FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
+    FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
+    FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
+    static FLinearColor greyColor = FLinearColor( 0.5f, 0.5f, 0.5f, 0.5f );
     uint64 hudFlags = mMatchingTool->GetEditor()->GetVectorHUDFlags();
-    FOdysseyVectorLayer *sharedEnv = iScene->GetLayer();
-    uint64 gridDotted = mMatchingTool->GridDisplayMode == eMatchingGridDisplayMode::AsPoints ?  HUD_BREAKDOWN_GRID_DOTTED : 0;
-
-    iBLContext->save();
-    // do not add-up colors
-    iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
+    FOdysseyVectorLayer *sharedEnv = mScene->GetLayer();
+    uint64 gridDotted = mMatchingTool->GridDisplayMode == eMatchingGridDisplayMode::AsPoints ?  FOdysseyVectorHUD::HUD_BREAKDOWN_GRID_DOTTED : 0;
+    FVector2D hudCursor = iParams.mTextureToHUD.Execute( FVector2D( mCursorPosition.x, mCursorPosition.y ) );
 
     // Draw default
     // -> nothing in object mode.
@@ -71,7 +64,7 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
             {
                 FOdysseyVectorTagInbetweener* inbetweenerTag = static_cast<FOdysseyVectorTagInbetweener*>(tag);
                 FOdysseyVectorGroupPaint* inbetweenerTagScene = inbetweenerTag->GetOwner()->GetScene();
-                uint32 currentCellIndex = iScene->GetCell()->GetIndex();
+                uint32 currentCellIndex = mScene->GetCell()->GetIndex();
 
                 inbetweenerTag->LockDrawing();
 
@@ -79,42 +72,33 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
                 {
                     if( breakdown->GetTargetCellIndex() == currentCellIndex )
                     {
-/*
-                        DrawBreakdown( iScene
-                                      , iBLContext
-                                      , breakdown
-                                      , BLRgba32( 127, 127, 127, 255 )
-                                      , BLRgba32( 255, 127, 127, 255 )
-                                      , HUD_BREAKDOWN_SOURCE );
-*/
                         if( mMatchingTool->ShowInbetweens )
                         {
                             FInbetweenerBreakdown* nextBreakdown = breakdown->GetNextBreakdown();
 
-                            DrawBreakdown( iScene
-                                          , iBLContext
-                                          , breakdown
-                                          , BLRgba32( 127, 127, 127, 255 )
-                                          , BLRgba32( 255, 127, 127, 255 )
-                                          , HUD_BREAKDOWN_INBETWEEN /*| HUD_INBETWEEN_FADEFROMTARGET*/ );
+                            DrawBreakdown( iParams
+                                         , breakdown
+                                         , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                                         , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
+                                         , FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN /*| HUD_INBETWEEN_FADEFROMTARGET*/ );
 
                             if( nextBreakdown )
                             {
-                                DrawBreakdown( iScene
-                                              , iBLContext
-                                              , nextBreakdown
-                                              , BLRgba32( 127, 127, 127, 255 )
-                                              , BLRgba32( 255, 127, 127, 255 )
-                                              , HUD_BREAKDOWN_INBETWEEN /*| HUD_INBETWEEN_FADEFROMSOURCE*/ );
+                                DrawBreakdown( iParams
+                                             , nextBreakdown
+                                             , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                                             , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
+                                             , FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN /*| HUD_INBETWEEN_FADEFROMSOURCE*/ );
                             }
                         }
 
-                        DrawBreakdown( iScene
-                                      , iBLContext
-                                      , breakdown
-                                      , BLRgba32( 127, 127, 127, 255 )
-                                      , BLRgba32( 255, 127, 127, 255 )
-                                      , HUD_BREAKDOWN_TARGET_GRID | gridDotted | HUD_BREAKDOWN_TARGET );
+                        DrawBreakdown( iParams
+                                     , breakdown
+                                     , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                                     , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
+                                     , FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET_GRID
+                                     | gridDotted
+                                     | FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET );
 
                         /*DrawTargetGrid ( iBLContext
                                        , breakdown
@@ -129,16 +113,12 @@ FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext
         }
     }
 
-    iBLContext->resetMatrix();
+    DrawPrimitiveCircle( iParams, hudCursor, mMatchingTool->PickingRadius, hcColor, hcColor, 1.0f, false );
+}
 
-    iBLContext->setStrokeStyle( hcColor );
-    iBLContext->setStrokeWidth( 1.0f );
-
-    iBLContext->strokeCircle( mCursorPosition.x
-                            , mCursorPosition.y
-                            , mMatchingTool->PickingRadius );
-
-    iBLContext->restore();
+void
+FOdysseyPainterEditorVectorMatchingToolHUD::Draw( BLContext* iBLContext )
+{
 }
 
 void

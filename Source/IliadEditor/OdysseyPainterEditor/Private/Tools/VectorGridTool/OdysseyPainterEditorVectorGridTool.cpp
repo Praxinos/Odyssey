@@ -30,7 +30,7 @@ UOdysseyPainterEditorVectorGridTool::~UOdysseyPainterEditorVectorGridTool()
 }
 
 UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
-    : UOdysseyPainterEditorVectorSelectionTool( new FOdysseyPainterEditorVectorGridToolHUD( this ) )
+    : UOdysseyPainterEditorVectorSelectionTool( MakeShared<FOdysseyPainterEditorVectorGridToolHUD>( this ) )
     , mMultipleSelectionMode( false )
     , DivisionsX( 4 )
     , DivisionsY( 4 )
@@ -39,7 +39,7 @@ UOdysseyPainterEditorVectorGridTool::UOdysseyPainterEditorVectorGridTool()
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Grid64");
 
-    mGridHUD = static_cast<FOdysseyPainterEditorVectorGridToolHUD*>( mBaseHUD );
+    mGridHUD = static_cast<FOdysseyPainterEditorVectorGridToolHUD*>( mBaseHUD.Get() );
 }
 
 //--------------------------------------------------------------------------------------

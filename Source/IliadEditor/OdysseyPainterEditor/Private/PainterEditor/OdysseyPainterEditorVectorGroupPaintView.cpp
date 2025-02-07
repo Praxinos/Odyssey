@@ -12,15 +12,14 @@ UOdysseyPainterEditorVectorGroupPaintView::UOdysseyPainterEditorVectorGroupPaint
     , Painted( true )
     , Monochrome( false )
     , MonochromeColor( 127, 127, 127, 255 )
-    , Realtime( false )
     , GapTolerance( 12.0f )
-    //, Wireframe
-    , WireframeColor( 255, 255, 255, 255 )
-    , Multithreaded( true )
-    , IntersectsCanvas( false )
     , GapDetectionScheme(  eGapDetectionScheme::SegmentExtension )
     , SegmentExtensionScheme( eSegmentExtensionScheme::Single )
     , SegmentExtensionSimplified ( true )
+    , IntersectsCanvas( false )
+    , WireframeColor( 255, 255, 255, 255 )
+    , Realtime( false )
+    , Multithreaded( true )
 {
 }
 

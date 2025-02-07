@@ -28,7 +28,8 @@ UOdysseyPainterEditorVectorPathDrawingTool::~UOdysseyPainterEditorVectorPathDraw
 }
 
 UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawingTool()
-    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathDrawingToolHUD( this ), true )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathDrawingToolHUD>( this ), true )
+    , ColorMode( eForegroundColorMode::SolidColor )
     , Opacity( 1.0f )
     , Brush( nullptr )
     , TracingType( eTracingType::Organic )
@@ -49,7 +50,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawi
 
     mPathTracer.SetTracingWidth( (double) TracingFidelity );
 
-    mPathDrawingHUD = static_cast<FOdysseyPainterEditorVectorPathDrawingToolHUD*>( mBaseHUD );
+    mPathDrawingHUD = static_cast<FOdysseyPainterEditorVectorPathDrawingToolHUD*>( mBaseHUD.Get() );
 }
 
 //--------------------------------------------------------------------------------------
@@ -369,28 +370,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseHoverVector( FOdysseyVectorGr
                                                               , const FOdysseyPoint& iPointInTexture
                                                               , uint64& oSignalFlags )
 {
-    uint32 width = iScene->GetCell()->GetLayer()->GetWidth();
-    uint32 height = iScene->GetCell()->GetLayer()->GetHeight();
-    ::ULIS::FRectI redrawRegion = { 0, 0, 0, 0 };
-    ::ULIS::FRectI imageRegion;
-    uint64 notificationFlags = 0;
-
-    imageRegion.x = 0;
-    imageRegion.y = 0;
-    imageRegion.w = width;
-    imageRegion.h = height;
-
-    if( mPathDrawingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y ) == true )
-    {
-        redrawRegion = imageRegion; // needs full redraw
-    }
-
-    if( Stitch )
-    {
-        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
-
-        oSignalFlags = notificationFlags;
-    }
+    mPathDrawingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
 }
 
 void

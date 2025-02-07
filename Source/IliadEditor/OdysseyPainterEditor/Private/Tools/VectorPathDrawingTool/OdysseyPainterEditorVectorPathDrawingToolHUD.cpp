@@ -21,23 +21,24 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::FOdysseyPainterEditorVectorPathDr
 }
 
 void
-FOdysseyPainterEditorVectorPathDrawingToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPathDrawingToolHUD::Reset()
 {
     uint64 hudFlags = mPathDrawingTool->GetEditor()->GetVectorHUDFlags();
 
-    MakePointQuadTree( iScene, false, hudFlags );
+    MakePointQuadTree( false, hudFlags );
 
     // Updates the selection box (it is not used in this tool but whatever)
-    UpdateSelectionBox( iScene, false, hudFlags );
+    UpdateSelectionBox( false, hudFlags );
 }
 
 void
-FOdysseyPainterEditorVectorPathDrawingToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPathDrawingToolHUD::Load()
 {
+    FOdysseyPainterEditorVectorBaseToolHUD::Load();
 }
 
 void
-FOdysseyPainterEditorVectorPathDrawingToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPathDrawingToolHUD::Unload()
 {
 }
 
@@ -101,8 +102,47 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::DrawEdge( BLContext* iBLContext
 }
 
 void
-FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
-                                                   , FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPathDrawingToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
+{
+    FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
+    FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
+    FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
+    // PathTracer data
+    FOdysseyVectorPathTracer& pathTracer = mPathDrawingTool->GetPathTracer();
+    FOdysseyVectorPath* path = pathTracer.GetPath();
+    uint64 hudFlags = mPathDrawingTool->GetEditor()->GetVectorHUDFlags();
+    FVector2D hudCursor = iParams.mTextureToHUD.Execute( FVector2D( mX, mY ) );
+
+    if( mPathDrawingTool->Stitch )
+    {
+        DrawPrimitiveCircle( iParams, hudCursor, mPathDrawingTool->StitchingRadius, hcColor, hcColor, 1.0f, false );
+
+        if( mStitchedPointArray.size() )
+        {
+            FOdysseyVectorPoint* point = mStitchedPointArray[0];
+
+            if( point->GetClass() == FOdysseyVectorVertex::StaticClass() )
+            {
+                FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(point);
+
+                if( vertex->GetSegmentCount() == 1 )
+                {
+                    FOdysseyVectorPath* stitchedPath = vertex->GetOwnerAsPath();
+
+                    DrawPath( iParams
+                            , stitchedPath
+                            , hcColor
+                            , bgColor
+                            , hcColor
+                            , FOdysseyVectorHUD::HUD_PATH_SEGMENT );
+                }
+            }
+        }
+    }
+}
+
+void
+FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -124,46 +164,12 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.
     // -> inbetweens in inbetween mode.
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext );
 
     //DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
 
     //mPointQuadTree->Draw( iBLContext, iScene, 0 );
 
-    if( mPathDrawingTool->Stitch )
-    {
-        // matrix might get altered for displaying the selection rectangle of a single object. Save it.
-        iBLContext->save();
-
-        iBLContext->setStrokeStyle( hcColor );
-        iBLContext->setStrokeWidth( 1.0f );
-        iBLContext->strokeCircle( mX, mY, mPathDrawingTool->StitchingRadius );
-
-        iBLContext->restore();
-
-        if( mStitchedPointArray.size() )
-        {
-            FOdysseyVectorPoint* point = mStitchedPointArray[0];
-
-            if( point->GetClass() == FOdysseyVectorVertex::StaticClass() )
-            {
-                FOdysseyVectorVertex* vertex = static_cast<FOdysseyVectorVertex*>(point);
-
-                if( vertex->GetSegmentCount() == 1 )
-                {
-                    FOdysseyVectorPath* stitchedPath = vertex->GetOwnerAsPath();
-
-                    DrawPath( iBLContext
-                            , stitchedPath
-                            , hcColor
-                            , bgColor
-                            , hcColor
-                            , true // World
-                            , HUD_PATH_SEGMENT );
-                }
-            }
-        }
-    }
 /*
     iBLContext->save();
     iBLContext->resetMatrix();

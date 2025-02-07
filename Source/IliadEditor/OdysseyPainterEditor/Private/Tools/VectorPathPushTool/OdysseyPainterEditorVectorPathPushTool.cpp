@@ -22,13 +22,13 @@ UOdysseyPainterEditorVectorPathPushTool::~UOdysseyPainterEditorVectorPathPushToo
 }
 
 UOdysseyPainterEditorVectorPathPushTool::UOdysseyPainterEditorVectorPathPushTool()
-    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathPushToolHUD( this ),false )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathPushToolHUD>( this ),false )
     , Radius( 20.0f )
     , RestrictToSelectedObjects( false )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PathPush64");
 
-    mPathPushHUD = static_cast<FOdysseyPainterEditorVectorPathPushToolHUD*>( mBaseHUD );
+    mPathPushHUD = static_cast<FOdysseyPainterEditorVectorPathPushToolHUD*>( mBaseHUD.Get() );
 }
 
 //--------------------------------------------------------------------------------------
@@ -230,19 +230,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseHoverVector( FOdysseyVectorGroup
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , uint64& oSignalFlags )
 {
-    double diameter = Radius * 2.0f;
-    ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)Radius
-                          , (int)iPointInTexture.y - (int)Radius
-                          , (int)diameter
-                          , (int)diameter };
-    uint64 notificationFlags = 0;
-
     mPathPushHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
-
-    // force redrawal
-    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorObject::UPDATE_INTERACTIVE );
-
-    oSignalFlags = notificationFlags;
 }
 
 void

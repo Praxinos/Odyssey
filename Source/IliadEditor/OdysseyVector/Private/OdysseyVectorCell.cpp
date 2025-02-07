@@ -188,20 +188,20 @@ FOdysseyVectorCell::InvalidateRect( const ::ULIS::FRectD& iRect )
     }
 }
 
-std::list<FOdysseyVectorHUD*>&
+std::list<IOdysseyVectorHUD*>&
 FOdysseyVectorCell::GetHUDList()
 {
     return mHUDList;
 }
 
 void
-FOdysseyVectorCell::AddHUD( FOdysseyVectorHUD* iHUDObject )
+FOdysseyVectorCell::AddHUD( IOdysseyVectorHUD* iHUDObject )
 {
     GetHUDList().push_back( iHUDObject );
 }
 
 void
-FOdysseyVectorCell::RemoveHUD( FOdysseyVectorHUD* iHUDObject )
+FOdysseyVectorCell::RemoveHUD( IOdysseyVectorHUD* iHUDObject )
 {
     GetHUDList().remove( iHUDObject );
 }
@@ -217,9 +217,10 @@ FOdysseyVectorCell::ResetHUD()
 {
     FOdysseyVectorGroupPaint* scene = GetScene();
 
-    for( FOdysseyVectorHUD *hud : GetHUDList() )
+    for( IOdysseyVectorHUD *hud : GetHUDList() )
     {
-        hud->Reset( scene );
+        hud->SetScene( scene );
+        hud->Reset();
     }
 }
 

@@ -15,7 +15,7 @@
 class FOdysseyVectorGroupPaint;
 class FOdysseyVectorTagInbetweener;
 
-class FInterpolatedGroupPaint : public FInterpolatedObject
+class ODYSSEYVECTOR_API FInterpolatedGroupPaint : public FInterpolatedObject
 {
     public:
         virtual ~FInterpolatedGroupPaint();

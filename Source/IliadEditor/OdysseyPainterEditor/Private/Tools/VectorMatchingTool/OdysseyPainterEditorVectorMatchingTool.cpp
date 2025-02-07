@@ -23,7 +23,7 @@ UOdysseyPainterEditorVectorMatchingTool::~UOdysseyPainterEditorVectorMatchingToo
 }
 
 UOdysseyPainterEditorVectorMatchingTool::UOdysseyPainterEditorVectorMatchingTool()
-    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorMatchingToolHUD( this ), false )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorMatchingToolHUD>( this ), false )
     , PickingRadius( 75 )
     , MatchingInfluence( eMatchingInfluence::Radial )
     , Rigidity( 5 )
@@ -33,7 +33,7 @@ UOdysseyPainterEditorVectorMatchingTool::UOdysseyPainterEditorVectorMatchingTool
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Matching64");
 
-    mMatchingHUD = static_cast<FOdysseyPainterEditorVectorMatchingToolHUD*>( mBaseHUD );
+    mMatchingHUD = static_cast<FOdysseyPainterEditorVectorMatchingToolHUD*>( mBaseHUD.Get() );
 }
 
 //--------------------------------------------------------------------------------------
@@ -137,18 +137,13 @@ UOdysseyPainterEditorVectorMatchingTool::OnMouseHoverVector( FOdysseyVectorGroup
                                                            , const FOdysseyPoint& iPointInTexture
                                                            , uint64& oSignalFlags )
 {
-    // TODO: highlight grid handles ?
-
     mMatchingHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
-
-    // redraw
-    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 }
 
 void
 UOdysseyPainterEditorVectorMatchingTool::OnMouseDragVector( FOdysseyVectorGroupPaint* iScene
-                                                              , const FOdysseyPoint& iPointInTexture
-                                                            , uint64& oSignalFlags )
+                                                          , const FOdysseyPoint& iPointInTexture
+                                                          , uint64& oSignalFlags )
 {
     uint64 notificationFlags = 0;
 

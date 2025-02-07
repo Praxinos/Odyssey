@@ -31,21 +31,21 @@ UOdysseyPainterEditorVectorSelectionTool::~UOdysseyPainterEditorVectorSelectionT
 }
 
 UOdysseyPainterEditorVectorSelectionTool::UOdysseyPainterEditorVectorSelectionTool()
-    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorSelectionToolHUD( this ), false )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorSelectionToolHUD>( this ), false )
     , SelectionShape( EOdysseyVectorSelectionShape::Freehand )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
 
-    mPickHUD = static_cast<FOdysseyPainterEditorVectorSelectionToolHUD*>( mBaseHUD );
+    mPickHUD = static_cast<FOdysseyPainterEditorVectorSelectionToolHUD*>( mBaseHUD.Get() );
 }
 
-UOdysseyPainterEditorVectorSelectionTool::UOdysseyPainterEditorVectorSelectionTool( FOdysseyPainterEditorVectorBaseToolHUD* iHUD )
+UOdysseyPainterEditorVectorSelectionTool::UOdysseyPainterEditorVectorSelectionTool( TSharedPtr<FOdysseyPainterEditorVectorBaseToolHUD> iHUD )
     : UOdysseyPainterEditorVectorBaseTool( iHUD, false )
     , SelectionShape( EOdysseyVectorSelectionShape::Freehand )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Lasso64");
 
-    mPickHUD = static_cast<FOdysseyPainterEditorVectorSelectionToolHUD*>( mBaseHUD );
+    mPickHUD = static_cast<FOdysseyPainterEditorVectorSelectionToolHUD*>( mBaseHUD.Get() );
 }
 
 //--------------------------------------------------------------------------------------
@@ -139,7 +139,7 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseDragVector( FOdysseyVectorGroup
     }
 
     // force redraw
-    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
+    //iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 }
 
 ::ULIS::FRectD
@@ -426,7 +426,8 @@ UOdysseyPainterEditorVectorSelectionTool::OnMouseUpVector( FOdysseyVectorGroupPa
     // force redraw
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
     iScene->GetCell()->ResetHUD();
-    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
+
+    //iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
 
     oSignalFlags = notificationFlags;
 

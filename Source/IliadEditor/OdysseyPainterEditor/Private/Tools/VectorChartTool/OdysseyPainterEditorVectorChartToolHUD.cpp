@@ -11,6 +11,9 @@
 #include "OdysseyVectorLayer.h"
 #include "Interfaces/IPluginManager.h"
 #include "OdysseyVector.h"
+// for 3D HUDs
+#include "CanvasTypes.h"
+#include "CanvasItem.h"
 
 #define INBETWEENER_INDICATOR_RADIUS 10.0f
 #define BREAKDOWN_INDICATOR_RADIUS   20.0f
@@ -26,58 +29,19 @@ FOdysseyPainterEditorVectorChartToolHUD::FOdysseyPainterEditorVectorChartToolHUD
     , mChartTool( iChartTool )
     , mChartRect( 200.0f, 40, 400.0f, 40 )
 {
-    BLFontFace face;
-   // TODO: do something depending on to the O.S
-    //FString fontPath = FPaths::ProjectDir() + FString("/Resources/Font/Jrhand.ttf");
-    //BLResult err = face.createFromFile("C:/Windows/Fonts/lucon.ttf"); // Lucida console
-    FString fontPath = IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources/OdysseyAssetResources/Font/LoveStruck.ttf" );
-    BLResult err = face.createFromFile( TCHAR_TO_ANSI( *fontPath ) ); // JR!Hand
+    //FString fontPath = IPluginManager::Get().FindPlugin( "Odyssey" )->GetBaseDir() / TEXT( "Resources/OdysseyAssetResources/Font/LoveStruck.ttf" );
 
-    mFont.createFromFace( face, FONT_SIZE );
-    // reserve enough bounding box for at least 20 numbers. That way we don't recompute them each time.
-    mGlyphBuffer.reserve( 20 );
-}
-
-const FOdysseyPainterEditorVectorChartToolHUD::FGlyph*
-FOdysseyPainterEditorVectorChartToolHUD::GetGlyph( uint32 iNum )
-{
-    FGlyph* glyph;
-
-    if( iNum >= mGlyphBuffer.size() )
-    {
-        mGlyphBuffer.resize( iNum + 1 );
-    }
-
-    glyph = &mGlyphBuffer[iNum];
-
-    if( ( glyph->bbox.w == 0 ) && ( glyph->bbox.h == 0 ) )
-    {
-        BLGlyphBuffer blGlyph;
-        BLTextMetrics blGlyphMetrics;
-
-        snprintf( glyph->str, 6, "%d", iNum );
-        blGlyph.setUtf8Text( mGlyphBuffer[iNum].str, strlen( glyph->str ) );
-        mFont.getTextMetrics( blGlyph, blGlyphMetrics );
-
-        glyph->bbox = ::ULIS::FRectI ( 0
-                                     , 0
-                                     , ( blGlyphMetrics.boundingBox.x1 - blGlyphMetrics.boundingBox.x0 ) + 1
-                                     , FONT_SIZE * 0.5f
-                                     // commented out. for some reason its value is 0 ??
-                                     /*, ( blGlyphMetrics.boundingBox.y1 - blGlyphMetrics.boundingBox.y0 ) + 1*/ );
-    }
-
-    return glyph;
+    mFontInfo = FSlateFontInfo( LoadObject<UFont>( nullptr, TEXT("/Odyssey/Fonts/LoveStruck_Font") ), 40 );
 }
 
 void
-FOdysseyPainterEditorVectorChartToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorChartToolHUD::Reset()
 {
     uint64 hudFlags = mChartTool->GetEditor()->GetVectorHUDFlags();
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN )
     {
-        UpdateBreakdown( iScene );
+        UpdateBreakdown();
     }
 }
 
@@ -88,13 +52,13 @@ FOdysseyPainterEditorVectorChartToolHUD::GetBreakdownList()
 }
 
 void
-FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdown( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdown()
 {
-    uint32 cellIndex = iScene->GetCell()->GetIndex();
+    uint32 cellIndex = mScene->GetCell()->GetIndex();
 
     mBreakdownList.clear();
 
-    for( FOdysseyVectorTag* tag : iScene->GetLayer()->GetSharedTagList() )
+    for( FOdysseyVectorTag* tag : mScene->GetLayer()->GetSharedTagList() )
     {
         if( tag->GetOwner()->IsSelected() )
         {
@@ -133,10 +97,10 @@ FOdysseyPainterEditorVectorChartToolHUD::UpdateBreakdown( FOdysseyVectorGroupPai
 }
 
 void
-FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( BLContext* iBLContext
-                                                           , BLRgba32& iFgColor
-                                                           , BLRgba32& iBgColor
-                                                           , BLRgba32& iHcColor
+FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                                                           , const FLinearColor& iFgColor
+                                                           , const FLinearColor& iBgColor
+                                                           , const FLinearColor& iHcColor
                                                            , FInbetweenerBreakdown* iBreakdown
                                                            , FInbetweenerChart::HUDBezier* iHUDBezier
                                                            , uint32 iRenderedCellIndex
@@ -148,135 +112,143 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( BLContext* iBLConte
     FInbetweenerChart* chart = iBreakdown->GetChart();
     double cursorRadius = mChartRect.h *.5f;
     float indicatorY = mChartRect.y + cursorRadius;
-    float fontSize = mFont.size();
-    BLRgba32 chartColor = BLRgba32( inbetweenerTag->GetChartColor().R
-                                  , inbetweenerTag->GetChartColor().G
-                                  , inbetweenerTag->GetChartColor().B
-                                  , inbetweenerTag->GetChartColor().A );
-    BLRgba32 inbetweenColor = BLRgba32( inbetweenerTag->GetInbetweenColor().R
-                                      , inbetweenerTag->GetInbetweenColor().G
-                                      , inbetweenerTag->GetInbetweenColor().B
-                                      , 255 );
-    BLRgba32 blackColor = BLRgba32(   0,   0,   0, 255 );
-    BLRgba32 greyColor  = BLRgba32( 127, 127, 127, 255 );
-    BLRgba32 whiteColor = BLRgba32( 255, 255, 255, 255 );
+    float fontSize = mFontInfo.Size;
+    FLinearColor chartColor = FLinearColor( inbetweenerTag->GetChartColor() );
+    FLinearColor inbetweenColor = FLinearColor( inbetweenerTag->GetInbetweenColor() );
+    FLinearColor blackColor = FLinearColor( 0.0f, 0.0f, 0.0f, 1.0f );
+    FLinearColor greyColor  = FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f );
+    FLinearColor whiteColor = FLinearColor( 1.0f, 1.0f, 1.0f, 1.0f );
     uint32 sourceDrawingIndex = iBreakdown->GetSourceDrawingIndex();
     uint32 targetDrawingIndex = iBreakdown->GetTargetDrawingIndex();
     FInbetweenerDrawing* sourceDrawing = inbetweenerTag->GetDrawing( sourceDrawingIndex );
     FInbetweenerDrawing* targetDrawing = inbetweenerTag->GetDrawing( targetDrawingIndex );
-    float displayRatio = ( float ) sqrt( ( iBLContext->targetWidth() * iBLContext->targetHeight() ) / DEFAULT_SURFACE );
+    ::ULIS::FVec2D texCoords[3] = { iHUDBezier->GetPoints()[0].GetPosition()
+                                  , iHUDBezier->GetPoints()[1].GetPosition()
+                                  , iHUDBezier->GetPoints()[2].GetPosition() };
+    FVector2D hudCoords[3] = { iParams.mTextureToHUD.Execute( FVector2D( texCoords[0].x, texCoords[0].y ) )
+                             , iParams.mTextureToHUD.Execute( FVector2D( texCoords[1].x, texCoords[1].y ) )
+                             , iParams.mTextureToHUD.Execute( FVector2D( texCoords[2].x, texCoords[2].y ) ) };
+    const UFont* font = Cast<UFont>(mFontInfo.FontObject);
 
-     // On my colleague's request, the width of the stroke varies relative to the size of the image
-    displayRatio = std::max( 1.0f, 1.0f + ( ( displayRatio - 1.0f ) * 0.25f ) );
-
-    iBLContext->save();
-    iBLContext->resetMatrix();
-
-    iBLContext->setCompOp( BL_COMP_OP_SRC_OVER  );
-
-    iBLContext->setStrokeStyle( chartColor );
-    iBLContext->setStrokeWidth( 2.0f * displayRatio );
+    // force inbetween opacity
+    inbetweenColor.A = 1.0f;
 
     // chart quadratic bezier line
     {
-        BLPath path;
-
-        path.moveTo( iHUDBezier->GetPoints()[0].GetPosition().x, iHUDBezier->GetPoints()[0].GetPosition().y );
-        path.quadTo( iHUDBezier->GetPoints()[1].GetPosition().x, iHUDBezier->GetPoints()[1].GetPosition().y
-                   , iHUDBezier->GetPoints()[2].GetPosition().x, iHUDBezier->GetPoints()[2].GetPosition().y );
-
-        iBLContext->strokePath( path );
+        DrawPrimitiveBezierQuadratic( iParams
+                                    , hudCoords[0]
+                                    , hudCoords[1]
+                                    , hudCoords[2]
+                                    , 24
+                                    , chartColor
+                                    , blackColor
+                                    , 2.0f
+                                    , false );
     }
-/*
-    iBLContext->strokeLine( mChartRect.x               , indicatorY
-                          , mChartRect.x + mChartRect.w, indicatorY );
-*/
+
     // vertical lines
     for( uint32 i = 0; i < iBreakdown->GetDrawingCount(); i++ )
     {
         FInbetweenerChart::Inbetween* inbetween = &iBreakdown->GetChart()->GetInbetweenBuffer()[i];
         float indicatorX = mChartRect.x + ( inbetween->GetSpacing() * mChartRect.w );
         double quadraticT = iHUDBezier->GetQuadraticT( inbetween->GetSpacing() );
-        ::ULIS::FVec2D indicatorPosition = ::ULIS::QuadraticBezierPointAtParameter( iHUDBezier->GetPoints()[0].GetPosition(),
-                                                                                    iHUDBezier->GetPoints()[1].GetPosition(),
-                                                                                    iHUDBezier->GetPoints()[2].GetPosition(),
-                                                                                    quadraticT );
-        ::ULIS::FVec2D indicatorTangent = ::ULIS::QuadraticBezierTangentAtParameter( iHUDBezier->GetPoints()[0].GetPosition(),
-                                                                                     iHUDBezier->GetPoints()[1].GetPosition(),
-                                                                                     iHUDBezier->GetPoints()[2].GetPosition(),
-                                                                                     quadraticT );
-        ::ULIS::FVec2D indicatorPerpendicular = ::ULIS::FVec2D( -indicatorTangent.y, indicatorTangent.x );
+        ::ULIS::FVec2D hudIndicatorPosition = ::ULIS::QuadraticBezierPointAtParameter( ::ULIS::FVec2D( hudCoords[0].X, hudCoords[0].Y ),
+                                                                                       ::ULIS::FVec2D( hudCoords[1].X, hudCoords[1].Y ),
+                                                                                       ::ULIS::FVec2D( hudCoords[2].X, hudCoords[2].Y ),
+                                                                                       quadraticT );
+        ::ULIS::FVec2D hudIndicatorTangent = ::ULIS::QuadraticBezierTangentAtParameter( ::ULIS::FVec2D( hudCoords[0].X, hudCoords[0].Y ),
+                                                                                        ::ULIS::FVec2D( hudCoords[1].X, hudCoords[1].Y ),
+                                                                                        ::ULIS::FVec2D( hudCoords[2].X, hudCoords[2].Y ),
+                                                                                        quadraticT );
+        ::ULIS::FVec2D hudIndicatorPerpendicular = ::ULIS::FVec2D( -hudIndicatorTangent.y, hudIndicatorTangent.x );
         bool hovered = ( inbetween == mChartTool->GetHoveredInbetween() );
         bool current = ( inbetween->GetCellIndex() == iRenderedCellIndex );
 
-        if( indicatorPerpendicular.DistanceSquared() )
+        if( hudIndicatorPerpendicular.DistanceSquared() )
         {
             float lengthFactor = ( ( inbetween->GetSpacing() == 0.0f ) || ( inbetween->GetSpacing() == 1.0f ) ) ? 1.0f : 0.6f;
-            ::ULIS::FVec2D normalizedPerpendicular = indicatorPerpendicular.Normalize() * lengthFactor;
+            ::ULIS::FVec2D normalizedPerpendicular = hudIndicatorPerpendicular.Normalize() * lengthFactor;
              // Note: "* 0.1f" helps positionning the circle surrounding the numbers a bit away from the indicator
-            ::ULIS::FVec2D frameInfoPosition = ::ULIS::FVec2D( indicatorPosition.x + ( normalizedPerpendicular.x * 1.1f * ( FONT_SIZE + ( BREAKDOWN_INDICATOR_RADIUS ) ) )
-                                                             , indicatorPosition.y + ( normalizedPerpendicular.y * 1.1f * ( FONT_SIZE + ( BREAKDOWN_INDICATOR_RADIUS ) ) ) );
-            // calculate inbetween number position
-            const FGlyph* glyph = GetGlyph( iBreakdown->GetSourceDrawingIndex() + i + 1 );
-            ::ULIS::FVec2D frameNumberPosition = ::ULIS::FVec2D( frameInfoPosition.x - ( glyph->bbox.w * 0.5f )
-                                                               , frameInfoPosition.y + ( glyph->bbox.h * 0.5f ) );
+            ::ULIS::FVec2D hudFrameInfoPosition = ::ULIS::FVec2D( hudIndicatorPosition.x + ( normalizedPerpendicular.x * 1.1f * ( FONT_SIZE + ( BREAKDOWN_INDICATOR_RADIUS ) ) )
+                                                                , hudIndicatorPosition.y + ( normalizedPerpendicular.y * 1.1f * ( FONT_SIZE + ( BREAKDOWN_INDICATOR_RADIUS ) ) ) );
+            FText glyphText = FText::AsNumber( iBreakdown->GetSourceDrawingIndex() + i + 1 );
+            ::ULIS::FVec2D hudFrameNumberPosition;
+            int32 glyphW, glyphH;
+
+            font->GetStringHeightAndWidth ( glyphText.ToString(), glyphH, glyphW );
+
+            hudFrameNumberPosition = ::ULIS::FVec2D( hudFrameInfoPosition.x - ( glyphW * 0.5f )
+                                                   , hudFrameInfoPosition.y + ( glyphH * 0.5f ) );
 
             if( ( ( inbetween->GetSpacing() == 0.0f ) && iDrawSourceIndicator ) || ( inbetween->GetSpacing() == 1.0f ) )
             {
-                iBLContext->setStrokeWidth( 2.0f * displayRatio );
-                iBLContext->setStrokeStyle( chartColor );
+                FCanvasTextItem textItem = FCanvasTextItem( FVector2D( hudFrameNumberPosition.x
+                                                                     , hudFrameNumberPosition.y )
+                                                          , glyphText
+                                                          , font
+                                                          , chartColor );
 
                 if( ( ( inbetween->GetSpacing() == 0.0f ) && prevBreakdown )
                  || ( ( inbetween->GetSpacing() == 1.0f ) && nextBreakdown ) )
                 {
-                    iBLContext->strokeLine( frameNumberPosition.x
-                                          , frameNumberPosition.y + glyph->bbox.h
-                                          , frameNumberPosition.x + glyph->bbox.w
-                                          , frameNumberPosition.y + glyph->bbox.h );
+                    FVector2D lineP0 = FVector2D ( hudFrameNumberPosition.x         , hudFrameNumberPosition.y + glyphH );
+                    FVector2D lineP1 = FVector2D ( hudFrameNumberPosition.x + glyphW, hudFrameNumberPosition.y + glyphH );
+
+                    // underline
+                    DrawPrimitiveLine( iParams, lineP0, lineP1, chartColor, chartColor, 2.0f, false );
                 }
                 else
                 {
-                    iBLContext->strokeCircle( frameInfoPosition.x, frameInfoPosition.y, fontSize );
+                    FVector2D circleCenter = FVector2D ( hudFrameInfoPosition.x, hudFrameInfoPosition.y );
+
+                    DrawPrimitiveCircle( iParams, circleCenter, fontSize, chartColor, chartColor, 2.0f, false );
                 }
 
                 // draw indicator
-                iBLContext->strokeLine( indicatorPosition.x + ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
-                                      , indicatorPosition.y + ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS )
-                                      , indicatorPosition.x - ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
-                                      , indicatorPosition.y - ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) );
+                DrawPrimitiveLine( iParams
+                                 , FVector2D( hudIndicatorPosition.x + ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
+                                            , hudIndicatorPosition.y + ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
+                                 , FVector2D( hudIndicatorPosition.x - ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
+                                            , hudIndicatorPosition.y - ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
+                                 , chartColor
+                                 , chartColor
+                                 , 2.0f
+                                 , false );
 
-                iBLContext->strokeUtf8Text( BLPoint( frameNumberPosition.x
-                                                   , frameNumberPosition.y ), mFont, glyph->str );
-
-                iBLContext->setFillStyle( chartColor );
-                iBLContext->fillUtf8Text( BLPoint( frameNumberPosition.x
-                                                 , frameNumberPosition.y ), mFont, glyph->str );
+                iParams.mCanvas->DrawItem( textItem );
             }
 
             if ( ( inbetween->GetSpacing() > 0.0f ) && ( inbetween->GetSpacing() < 1.0f ) )
             {
-                iBLContext->setStrokeWidth( hovered ? 3.0f * displayRatio: 2.0f * displayRatio );
-                iBLContext->setStrokeStyle( hovered ? iHcColor : inbetweenColor );
+                FCanvasTextItem textItem = FCanvasTextItem( FVector2D( hudFrameNumberPosition.x
+                                                                     , hudFrameNumberPosition.y )
+                                                          , glyphText
+                                                          , font
+                                                          , hovered ? iHcColor : inbetweenColor );
+
                 // draw indicator
-                iBLContext->strokeLine( indicatorPosition.x + ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
-                                      , indicatorPosition.y + ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS )
-                                      , indicatorPosition.x - ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
-                                      , indicatorPosition.y - ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) );
+                DrawPrimitiveLine( iParams
+                                 , FVector2D( hudIndicatorPosition.x + ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
+                                            , hudIndicatorPosition.y + ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
+                                 , FVector2D( hudIndicatorPosition.x - ( normalizedPerpendicular.x * BREAKDOWN_INDICATOR_RADIUS )
+                                            , hudIndicatorPosition.y - ( normalizedPerpendicular.y * BREAKDOWN_INDICATOR_RADIUS ) )
+                                 , hovered ? iHcColor : inbetweenColor
+                                 , chartColor
+                                 , hovered ? 3.0f: 2.0f
+                                 , false );
 
-                iBLContext->strokeUtf8Text( BLPoint( frameNumberPosition.x
-                                                   , frameNumberPosition.y ), mFont, glyph->str );
-
-                iBLContext->setFillStyle( hovered ? iHcColor : inbetweenColor );
-                iBLContext->fillUtf8Text( BLPoint( frameNumberPosition.x
-                                                 , frameNumberPosition.y ), mFont, glyph->str );
+                iParams.mCanvas->DrawItem( textItem );
             }
 
             if( current )
             {
-                iBLContext->setStrokeStyle( blackColor );
-                iBLContext->setStrokeWidth( 3.0f * displayRatio );
-                iBLContext->strokeUtf8Text( BLPoint( frameNumberPosition.x
-                                                   , frameNumberPosition.y ), mFont, glyph->str );
+                FCanvasTextItem textItem = FCanvasTextItem( FVector2D( hudFrameNumberPosition.x
+                                                                     , hudFrameNumberPosition.y )
+                                                          , glyphText
+                                                          , font
+                                                          , blackColor );
+
+                iParams.mCanvas->DrawItem( textItem );
             }
 
         }
@@ -284,52 +256,40 @@ FOdysseyPainterEditorVectorChartToolHUD::DrawBreakdownChart( BLContext* iBLConte
 
     if( mChartTool->EditionMode == eChartEditionMode::Reshape )
     {
-        DrawLine( iBLContext
-                , iHUDBezier->GetPoints()[0].GetPosition().x
-                , iHUDBezier->GetPoints()[0].GetPosition().y
-                , iHUDBezier->GetPoints()[1].GetPosition().x
-                , iHUDBezier->GetPoints()[1].GetPosition().y
-                , iFgColor
-                , iBgColor );
+        DrawPrimitiveLine( iParams
+                         , hudCoords[0]
+                         , hudCoords[1]
+                         , iFgColor
+                         , iBgColor
+                         , 2.0f
+                         , true );
 
-        DrawLine( iBLContext
-                , iHUDBezier->GetPoints()[1].GetPosition().x
-                , iHUDBezier->GetPoints()[1].GetPosition().y
-                , iHUDBezier->GetPoints()[2].GetPosition().x
-                , iHUDBezier->GetPoints()[2].GetPosition().y
-                , iFgColor
-                , iBgColor );
+        DrawPrimitiveLine( iParams
+                         , hudCoords[1]
+                         , hudCoords[2]
+                         , iFgColor
+                         , iBgColor
+                         , 2.0f
+                         , true );
 
         for( uint32 i = 0; i < 3; i++ )
         {
-            DrawCircle( iBLContext
-                      , iHUDBezier->GetPoints()[i].GetPosition().x
-                      , iHUDBezier->GetPoints()[i].GetPosition().y
-                      , 3.0f
-                      , iFgColor
-                      , iBgColor );
+            DrawPrimitiveHandle( iParams, hudCoords[i], 3.0f, iFgColor, iBgColor );
         }
     }
-
-    iBLContext->restore();
 }
 
 void
-FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
-                                             , FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorChartToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
-    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
-    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
-    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    FLinearColor fgColor = FLinearColor( fg );
+    FLinearColor bgColor = FLinearColor( bg );
+    FLinearColor hcColor = FLinearColor( hc );
     uint64 hudFlags = mChartTool->GetEditor()->GetVectorHUDFlags();
-    uint32 cellIndex = iScene->GetCell()->GetIndex();
-
-    iBLContext->save();
-    // do not add-up colors
-    iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
+    uint32 cellIndex = mScene->GetCell()->GetIndex();
 
     // Draw default
     // -> nothing in object mode.
@@ -345,45 +305,47 @@ FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext
 
             breakdown->GetInbetweenerTag()->LockDrawing();
 
-            DrawBreakdown( iScene
-                         , iBLContext
+            DrawBreakdown( iParams
                          , breakdown
-                         , BLRgba32( 127, 127, 127, 255 )
-                         , BLRgba32( 255, 127, 127, 255 )
-                         , HUD_BREAKDOWN_SOURCE
-                         | HUD_BREAKDOWN_INBETWEEN
+                         , FLinearColor( 0.5f, 0.5f, 0.5f, 1.0f )
+                         , FLinearColor( 1.0f, 0.5f, 0.5f, 1.0f )
+                         , FOdysseyVectorHUD::HUD_BREAKDOWN_SOURCE
+                         | FOdysseyVectorHUD::HUD_BREAKDOWN_INBETWEEN
                          //| HUD_INBETWEEN_FADEFROMTARGET
-                         | HUD_BREAKDOWN_TARGET );
+                         | FOdysseyVectorHUD::HUD_BREAKDOWN_TARGET );
 
             if( mChartTool->ChartType == eChartType::Full )
             {
-                DrawBreakdownChart( iBLContext
+                DrawBreakdownChart( iParams
                                   , fgColor
                                   , bgColor
                                   , hcColor
                                   , breakdown
                                   , breakdown->GetChart()->GetHUDBezier()
-                                  , iScene->GetCell()->GetIndex()
+                                  , mScene->GetCell()->GetIndex()
                                   , prevBreakdown ? false : true );
             }
 
             if( mChartTool->ChartType == eChartType::Partial )
             {
-                DrawBreakdownChart( iBLContext
+                DrawBreakdownChart( iParams
                                   , fgColor
                                   , bgColor
                                   , hcColor
                                   , breakdown
                                   , breakdown->GetChart()->GetHUDBezier()
-                                  , iScene->GetCell()->GetIndex()
+                                  , mScene->GetCell()->GetIndex()
                                   , true );
             }
 
            breakdown->GetInbetweenerTag()->UnlockDrawing();
         }
     }
+}
 
-    iBLContext->restore();
+void
+FOdysseyPainterEditorVectorChartToolHUD::Draw( BLContext* iBLContext )
+{
 }
 
 FInbetweenerChart::Inbetween*

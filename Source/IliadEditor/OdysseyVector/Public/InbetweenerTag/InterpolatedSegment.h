@@ -9,7 +9,7 @@
 class FOdysseyVectorSegment;
 class FInterpolatedPoint;
 
-class FInterpolatedSegment
+class ODYSSEYVECTOR_API FInterpolatedSegment
 {
     public:
         virtual ~FInterpolatedSegment();

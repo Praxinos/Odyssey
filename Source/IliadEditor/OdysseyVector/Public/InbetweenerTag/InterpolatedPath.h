@@ -16,7 +16,7 @@
 class FOdysseyVectorPath;
 class FOdysseyVectorTagInbetweener;
 
-class FInterpolatedPath : public FInterpolatedObject
+class ODYSSEYVECTOR_API FInterpolatedPath : public FInterpolatedObject
 {
     public:
         virtual ~FInterpolatedPath();

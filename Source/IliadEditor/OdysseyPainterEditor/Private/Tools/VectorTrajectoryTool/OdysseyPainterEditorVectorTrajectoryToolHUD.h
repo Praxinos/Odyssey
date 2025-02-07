@@ -23,8 +23,9 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
         virtual ~FOdysseyPainterEditorVectorTrajectoryToolHUD();
         FOdysseyPainterEditorVectorTrajectoryToolHUD(  UOdysseyPainterEditorVectorTrajectoryTool* iGridTool );
 
-        virtual void Draw( BLContext* iBLContext, FOdysseyVectorGroupPaint* iScene ) override;
-        virtual void Reset( FOdysseyVectorGroupPaint* iScene ) override;
+        void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams ) override;
+        virtual void Draw( BLContext* iBLContext ) override;
+        virtual void Reset() override;
         FInbetweenerInbetween* PickInbetween( FOdysseyVectorTagInbetweener* iInbetweenerTag
                                             , double iWorldX
                                             , double iWorldY
@@ -35,8 +36,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
                           , double iWorldY
                           , bool iRelative );
 
-        FInbetweenerRoute* PickRoute( FOdysseyVectorGroupPaint* iScene
-                                    , double iWorldX
+        FInbetweenerRoute* PickRoute( double iWorldX
                                     , double iWorldY
                                     , double iPickingRadius  );
 
@@ -45,13 +45,11 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
                                         , double iworldY
                                         , double iPickingRadius );
 
-        FInbetweenerHandleTrajectory* PickHandle( FOdysseyVectorGroupPaint* iScene
-                                                , double iWorldX
+        FInbetweenerHandleTrajectory* PickHandle( double iWorldX
                                                 , double iWorldY
                                                 , double iPickingRadius );
 
-        FInbetweenerStep* PickStep( FOdysseyVectorGroupPaint* iScene
-                                  , double iWorldX
+        FInbetweenerStep* PickStep( double iWorldX
                                   , double iWorldY
                                   , double iPickingRadius );
 
@@ -66,22 +64,18 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorTrajectoryToolHUD : pu
         static constexpr double WAYPOINTRADIUS = 3.5f;
 
     private:
-        void DrawTrajectory( BLContext* iBLContext
-                           , BLRgba32& iFgColor
-                           , BLRgba32& iBgColor
-                           , BLRgba32& iHcColor
+        void DrawTrajectory( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                           , const FLinearColor& iFgColor
+                           , const FLinearColor& iBgColor
+                           , const FLinearColor& iHcColor
                            , FOdysseyVectorTagInbetweener* iInbetweenerTag
                            , FInbetweenerTrajectory* iTrajectory );
-        void DrawQuad( BLContext* iBLContext
-                     , BLRgba32& iFgColor
-                     , BLRgba32& iBgColor
-                     , BLRgba32& iHcColor
-                     , FInbetweenerQuad* iQuad );
-        void DrawSourceGrid( BLContext* iBLContext
-                           , BLRgba32& iFgColor
-                           , BLRgba32& iBgColor
-                           , BLRgba32& iHcColor
-                           , FOdysseyVectorTagInbetweener* iInbetweenerTag );
+
+        void DrawQuad( const FOdysseyHUDSystem::FDrawHUDParams& iParams
+                           , const FLinearColor& iFgColor
+                           , const FLinearColor& iBgColor
+                           , const FLinearColor& iHcColor
+                           , FInbetweenerQuad* iQuad );
 
     private:
         UOdysseyPainterEditorVectorTrajectoryTool* mTrajectoryTool;

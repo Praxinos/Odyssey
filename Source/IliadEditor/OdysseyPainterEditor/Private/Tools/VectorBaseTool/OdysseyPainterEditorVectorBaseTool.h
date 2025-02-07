@@ -44,7 +44,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
 
         //Constructor
         UOdysseyPainterEditorVectorBaseTool();
-        UOdysseyPainterEditorVectorBaseTool( FOdysseyPainterEditorVectorBaseToolHUD* iBaseHUD
+        UOdysseyPainterEditorVectorBaseTool( TSharedPtr<FOdysseyPainterEditorVectorBaseToolHUD> iBaseHUD
                                            , bool iAutoCreateFrame );
 
         static bool DoubleClicked();
@@ -179,7 +179,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         // to force keyboard focus on mouse hover.
         // Prevents the user from having to click at least once in the viewport.
         TSharedPtr< SViewport > mViewportWidget;
-        FOdysseyPainterEditorVectorBaseToolHUD* mBaseHUD;
+        TSharedPtr<FOdysseyPainterEditorVectorBaseToolHUD> mBaseHUD;
         bool mHasContextMenu;
         bool mDragging;
         bool mAutoCreateMedia;

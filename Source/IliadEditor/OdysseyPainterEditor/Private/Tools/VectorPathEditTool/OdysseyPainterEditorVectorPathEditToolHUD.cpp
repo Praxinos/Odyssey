@@ -7,6 +7,9 @@
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorCell.h"
+// for 3D HUDs
+#include "CanvasTypes.h"
+#include "CanvasItem.h"
 
 FOdysseyPainterEditorVectorPathEditToolHUD::~FOdysseyPainterEditorVectorPathEditToolHUD()
 {
@@ -19,32 +22,34 @@ FOdysseyPainterEditorVectorPathEditToolHUD::FOdysseyPainterEditorVectorPathEditT
 }
 
 void
-FOdysseyPainterEditorVectorPathEditToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPathEditToolHUD::Reset()
 {
     uint64 hudFlags = mPathEditTool->GetEditor()->GetVectorHUDFlags();
 
     // reset cut line by setting both end points at the same location
     mCutLinePoint[0] = mCutLinePoint[1] = ::ULIS::FVec2D( 0.0f, 0.0f );
 
-    MakePointQuadTree( iScene, true, hudFlags );
+    MakePointQuadTree( true, hudFlags );
 
     // Updates the selection box
-    UpdateSelectionBox( iScene, false, hudFlags );
+    UpdateSelectionBox( false, hudFlags );
 }
 
 void
-FOdysseyPainterEditorVectorPathEditToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPathEditToolHUD::Load()
 {
-    uint32 width = iScene->GetLayer()->GetWidth();
-    uint32 height = iScene->GetLayer()->GetHeight();
+    uint32 width = mScene->GetLayer()->GetWidth();
+    uint32 height = mScene->GetLayer()->GetHeight();
 
     mBLSelectionMask.create( width, height, BL_FORMAT_A8 );
 
     mBLSelectionContext.begin( mBLSelectionMask );
+
+    FOdysseyPainterEditorVectorBaseToolHUD::Load();
 }
 
 void
-FOdysseyPainterEditorVectorPathEditToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPathEditToolHUD::Unload()
 {
     mBLSelectionContext.end();
 }
@@ -87,137 +92,83 @@ FOdysseyPainterEditorVectorPathEditToolHUD::GenerateMask( double iX
 }
 
 void
-FOdysseyPainterEditorVectorPathEditToolHUD::DrawMinus( BLContext* iBLContext
-                                                     , const BLRgba32& iFgColor
-                                                     , const BLRgba32& iBgColor
-                                                     , const BLRgba32& iHcColor  )
-{
-    BLRgba32 blackColor = BLRgba32( 0, 0, 0, 255 );
-
-    iBLContext->setStrokeStyle( blackColor );
-    iBLContext->setStrokeWidth( 2.0f );
-    // we are over a vertex, draw a minus sign
-    iBLContext->strokeLine( mX + mPathEditTool->PickingRadius
-                          , mY - mPathEditTool->PickingRadius
-                          , mX + mPathEditTool->PickingRadius + 8
-                          , mY - mPathEditTool->PickingRadius );
-
-    iBLContext->setStrokeStyle( iHcColor );
-    iBLContext->setStrokeWidth( 1.0f );
-    // we are over a vertex, draw a minus sign
-    iBLContext->strokeLine( mX + mPathEditTool->PickingRadius
-                          , mY - mPathEditTool->PickingRadius
-                          , mX + mPathEditTool->PickingRadius + 8
-                          , mY - mPathEditTool->PickingRadius );
-}
-
-void
-FOdysseyPainterEditorVectorPathEditToolHUD::DrawPlus( BLContext* iBLContext
-                                                    , const BLRgba32& iFgColor
-                                                    , const BLRgba32& iBgColor
-                                                    , const BLRgba32& iHcColor  )
-{
-    BLRgba32 blackColor = BLRgba32( 0, 0, 0, 255 );
-
-    iBLContext->setStrokeStyle( blackColor );
-    iBLContext->setStrokeWidth( 2.0f );
-    // we are over a vertex, draw a minus sign
-    iBLContext->strokeLine( mX + mPathEditTool->PickingRadius
-                          , mY - mPathEditTool->PickingRadius
-                          , mX + mPathEditTool->PickingRadius + 8
-                          , mY - mPathEditTool->PickingRadius );
-    iBLContext->strokeLine( mX + mPathEditTool->PickingRadius + 4
-                          , mY - mPathEditTool->PickingRadius - 4
-                          , mX + mPathEditTool->PickingRadius + 4
-                          , mY - mPathEditTool->PickingRadius + 4 );
-
-    iBLContext->setStrokeStyle( iHcColor );
-    iBLContext->setStrokeWidth( 1.0f );
-    // we are over a vertex, draw a minus sign
-    iBLContext->strokeLine( mX + mPathEditTool->PickingRadius
-                          , mY - mPathEditTool->PickingRadius
-                          , mX + mPathEditTool->PickingRadius + 8
-                          , mY - mPathEditTool->PickingRadius );
-    iBLContext->strokeLine( mX + mPathEditTool->PickingRadius + 4
-                          , mY - mPathEditTool->PickingRadius - 4
-                          , mX + mPathEditTool->PickingRadius + 4
-                          , mY - mPathEditTool->PickingRadius + 4 );
-}
-
-void
-FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext
-                                                , FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPathEditToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
     FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
-    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
-    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
-    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    FLinearColor fgColor = FLinearColor( fg );
+    FLinearColor bgColor = FLinearColor( bg );
+    FLinearColor hcColor = FLinearColor( hc );
     ePathPickingMode pickingMode = mPathEditTool->GetPickingMode();
-    uint64 vertexHandleFlag  = ( pickingMode == ePathPickingMode::VertexHandle  ) ? HUD_PATH_VERTEX_HANDLE  : 0;
-    uint64 segmentHandleFlag = ( pickingMode == ePathPickingMode::SegmentHandle ) ? HUD_PATH_SEGMENT_HANDLE
-                                                                                  | HUD_PATH_VERTEX_ALIGNMENT : 0;
+    uint64 vertexHandleFlag  = ( pickingMode == ePathPickingMode::VertexHandle  ) ? FOdysseyVectorHUD::HUD_PATH_VERTEX_HANDLE  : 0;
+    uint64 segmentHandleFlag = ( pickingMode == ePathPickingMode::SegmentHandle ) ? FOdysseyVectorHUD::HUD_PATH_SEGMENT_HANDLE
+                                                                                  | FOdysseyVectorHUD::HUD_PATH_VERTEX_ALIGNMENT : 0;
     uint64 hudFlags = mPathEditTool->GetEditor()->GetVectorHUDFlags();
+    FVector2D hudCursor = iParams.mTextureToHUD.Execute( FVector2D( mX, mY ) );
 
     // Draw default
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.
     // -> inbetweens in inbetween mode.
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
+    //FOdysseyPainterEditorVectorBaseToolHUD::DrawHUD( iParams );
 
     // draw object details in any mode (if statement is useles per-se but here for clarity)
-    if( ( hudFlags & HUD_MODE_OBJECT    )
-     || ( hudFlags & HUD_MODE_VERTEX    )
-     || ( hudFlags & HUD_MODE_INBETWEEN ) )
+    if( ( hudFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT    )
+     || ( hudFlags & FOdysseyVectorHUD::HUD_MODE_VERTEX    )
+     || ( hudFlags & FOdysseyVectorHUD::HUD_MODE_INBETWEEN ) )
     {
-        DrawObjects( iBLContext
-                   , iScene
-                   , fgColor
-                   , bgColor
-                   , hcColor
-                   , hudFlags
-                   | HUD_PATH_VERTEX
-                   | HUD_PATH_SEGMENT
-                   | vertexHandleFlag
-                   | segmentHandleFlag );
+        DrawHierarchy( iParams
+                     , mScene
+                     , fgColor
+                     , bgColor
+                     , hcColor
+                     , hudFlags
+                     | FOdysseyVectorHUD::HUD_PATH_VERTEX
+                     | FOdysseyVectorHUD::HUD_PATH_SEGMENT
+                     | vertexHandleFlag
+                     | segmentHandleFlag );
     }
 
-    // draw selection box only if we restrict erasure to the selection
-    if( iScene->GetCell()->GetSelectedObjectList().size() )
-//    {
-//        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
-//    }
-
-    iBLContext->save();
-    iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
-    iBLContext->setStrokeStyle( hcColor );
-    iBLContext->setStrokeWidth( 1.0f );
-    iBLContext->strokeCircle( mX, mY, mPathEditTool->PickingRadius );
+    // cursor
+    DrawPrimitiveCircle( iParams, hudCursor, mPathEditTool->PickingRadius, hcColor, hcColor, 1.0f, false );
 
     if( mPathEditTool->GetPickingMode() == ePathPickingMode::Alter )
     {
         if(  mHoveredPointArray.size() )
         {
-            // we are over a vertex, draw a minus sign
-            DrawMinus( iBLContext, fgColor, bgColor, hcColor );
+            FVector2D minusP0 = FVector2D( hudCursor.X + mPathEditTool->PickingRadius
+                                         , hudCursor.Y - mPathEditTool->PickingRadius );
+            FVector2D minusP1 = FVector2D( hudCursor.X + mPathEditTool->PickingRadius + 8
+                                         , hudCursor.Y - mPathEditTool->PickingRadius );
+
+            DrawPrimitiveLine( iParams, minusP0, minusP1, hcColor, hcColor, 1.0f, true );
         }
         else
         {
+            FVector2D lineP0 = iParams.mTextureToHUD.Execute( FVector2D( mCutLinePoint[0].x, mCutLinePoint[0].y ) );
+            FVector2D lineP1 = iParams.mTextureToHUD.Execute( FVector2D( mCutLinePoint[1].x, mCutLinePoint[1].y ) );
+
             // we are NOT over a vertex, draw a plus sign
-            DrawPlus( iBLContext, fgColor, bgColor, hcColor );
+            DrawPrimitivePlus( iParams
+                             , FVector2D( hudCursor.X + mPathEditTool->PickingRadius
+                                        , hudCursor.Y - mPathEditTool->PickingRadius )
+                             , 4
+                             , hcColor
+                             , bgColor
+                             , 1.0f
+                             , true );
 
             // cutting Line
-            iBLContext->setStrokeStyle( hcColor );
-            iBLContext->strokeLine( mCutLinePoint[0].x
-                                  , mCutLinePoint[0].y
-                                  , mCutLinePoint[1].x
-                                  , mCutLinePoint[1].y );
+            DrawPrimitiveLine( iParams, lineP0, lineP1, hcColor, hcColor, 1.0f, false );
         }
     }
+}
 
+void
+FOdysseyPainterEditorVectorPathEditToolHUD::Draw( BLContext* iBLContext )
+{
 
-    iBLContext->restore();
 }
 
 std::vector<FOdysseyVectorPoint*>&

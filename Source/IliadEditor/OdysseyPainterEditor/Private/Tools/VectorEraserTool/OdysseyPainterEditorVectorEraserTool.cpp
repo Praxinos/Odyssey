@@ -22,13 +22,13 @@ UOdysseyPainterEditorVectorEraserTool::~UOdysseyPainterEditorVectorEraserTool()
 }
 
 UOdysseyPainterEditorVectorEraserTool::UOdysseyPainterEditorVectorEraserTool()
-    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorEraserToolHUD( this ), false )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorEraserToolHUD>( this ), false )
     , SplitPath( true )
     , Radius( 20.0f )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser64");
 
-    mEraserHUD = static_cast<FOdysseyPainterEditorVectorEraserToolHUD*>( mBaseHUD );
+    mEraserHUD = static_cast<FOdysseyPainterEditorVectorEraserToolHUD*>( mBaseHUD.Get() );
 }
 
 //--------------------------------------------------------------------------------------
@@ -96,25 +96,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseHoverVector( FOdysseyVectorGroupPa
                                                          , const FOdysseyPoint& iPointInTexture
                                                          , uint64& oSignalFlags )
 {
-    double diameter = Radius * 2.0f;
-    ::ULIS::FRectI rect = { (int)iPointInTexture.x - (int)Radius
-                          , (int)iPointInTexture.y - (int)Radius
-                          , (int)diameter
-                          , (int)diameter };
-
     mEraserHUD->SetPosition( iPointInTexture.x, iPointInTexture.y );
-/*
-    if( rect.x < 0 ) rect.x = 0;
-    if( rect.y < 0 ) rect.y = 0;
-
-    rect = rect & layerStack->GetSurface()->Block()->Rect();
-
-    if( rect.Area() )
-    {*/
-
-    /*}*/
-    // Calling Update via Root will request a redraw even if root is not invalidated
-    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 }
 
 void

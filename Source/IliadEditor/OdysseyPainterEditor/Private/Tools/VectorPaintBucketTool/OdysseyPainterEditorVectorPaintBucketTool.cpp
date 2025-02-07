@@ -36,7 +36,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::~UOdysseyPainterEditorVectorPaintBuc
 }
 
 UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBucketTool()
-    : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPaintBucketToolHUD( this ), false )
+    : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPaintBucketToolHUD>( this ), false )
     , Propagate( true )
     , ColorMode ( EPaintBucketToolColorMode::Color )
     , Opacity( 1.0f )
@@ -48,7 +48,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBuck
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.PaintBucket64");
 
-    mBucketHUD = static_cast<FOdysseyPainterEditorVectorPaintBucketToolHUD*>( mBaseHUD );
+    mBucketHUD = static_cast<FOdysseyPainterEditorVectorPaintBucketToolHUD*>( mBaseHUD.Get() );
 }
 
 //--------------------------------------------------------------------------------------
@@ -149,7 +149,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDownVector( FOdysseyVectorGro
     uint64 retFlags = 0;
 
     // valid for boith right and left clicks
-    mPickedBucket = mBucketHUD->PickBucket( iScene, iPointInTexture.x, iPointInTexture.y );
+    mPickedBucket = mBucketHUD->PickBucket( iPointInTexture.x, iPointInTexture.y );
 
     // Left mouse button clicked (Note: do not use iPointInTexture.keysDown.Find() in Down & Up events)
     if( iKey == EKeys::LeftMouseButton )
@@ -253,8 +253,6 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseHoverVector( FOdysseyVectorGr
                                                               , uint64& oSignalFlags )
 {
     mBucketHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
-
-    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 }
 
 double
@@ -349,7 +347,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDragVector( FOdysseyVectorGro
     mOldPointInTexture = ::ULIS::FVec2D( iPointInTexture.x, iPointInTexture.y );
 
     iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_INTERACTIVE );
-    iScene->GetLayer()->RequestRedraw( FOdysseyVectorCell::REDRAW_INTERACTIVE );
+    iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
 }
 
 void
@@ -425,8 +423,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVectorCreateBucket( FOdysse
     std::vector<FOdysseyVectorCycle*> pickedCycleArray;
     uint64 notificationFlags = 0;
 
-    mBucketHUD->PickCycles( iScene
-                          , iPointInTexture.x
+    mBucketHUD->PickCycles( iPointInTexture.x
                           , iPointInTexture.y
                           , pickedCycleArray );
 
@@ -654,7 +651,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseUpVector( FOdysseyVectorGroup
         mPickedBucket = nullptr;
 
         iScene->GetLayer()->Update( FOdysseyVectorObject::UPDATE_PAINTGROUPS );
-        iScene->GetLayer()->RequestRedraw( 0 );
+        iScene->GetLayer()->RequestRedraw( iScene->GetCell(), 0 );
     }
 
     oSignalFlags = notificationFlags;

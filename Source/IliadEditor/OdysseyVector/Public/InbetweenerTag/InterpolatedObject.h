@@ -14,7 +14,7 @@
 class FOdysseyVectorObject;
 class FOdysseyVectorTagInbetweener;
 
-class FInterpolatedObject
+class ODYSSEYVECTOR_API FInterpolatedObject
 {
     public:
         struct PointGeometry

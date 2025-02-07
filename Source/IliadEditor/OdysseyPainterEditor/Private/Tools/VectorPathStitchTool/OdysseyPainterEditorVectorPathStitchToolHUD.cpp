@@ -4,6 +4,7 @@
 #include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchToolHUD.h"
 #include "OdysseyVectorEngine.h"
 #include "OdysseyVectorVertex.h"
+#include "OdysseyVectorGroupPaint.h"
 #include "OdysseyPainterEditor.h"
 
 FOdysseyPainterEditorVectorPathStitchToolHUD::~FOdysseyPainterEditorVectorPathStitchToolHUD()
@@ -17,7 +18,7 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::FOdysseyPainterEditorVectorPathSti
 }
 
 void
-FOdysseyPainterEditorVectorPathStitchToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPathStitchToolHUD::Reset()
 {
     uint64 hudFlags = mPathStitchTool->GetEditor()->GetVectorHUDFlags();
 
@@ -27,18 +28,19 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Reset( FOdysseyVectorGroupPaint* i
     mStitchableVertex[0] = nullptr;
     mStitchableVertex[1] = nullptr;
 
-    MakePointQuadTree( iScene, true, hudFlags );
+    MakePointQuadTree( true, hudFlags );
 
-    UpdateSelectionBox( iScene, false, hudFlags );
+    UpdateSelectionBox( false, hudFlags );
 }
 
 void
-FOdysseyPainterEditorVectorPathStitchToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPathStitchToolHUD::Load()
 {
+    FOdysseyPainterEditorVectorBaseToolHUD::Load();
 }
 
 void
-FOdysseyPainterEditorVectorPathStitchToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPathStitchToolHUD::Unload()
 {
 }
 
@@ -87,31 +89,32 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::SetPosition( double iWorldX, doubl
 }
 
 void
-FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext
-                                                  , FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPathStitchToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
 {
-    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
-    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
-    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
-    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
-    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
-    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
-    uint64 hudFlags = mPathStitchTool->GetEditor()->GetVectorHUDFlags();
+    FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
+    FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
+    FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
+    FLinearColor noColor = FLinearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+
+    uint64 hudFlags = mBaseTool->GetEditor()->GetVectorHUDFlags();
+    FVector2D hudCursor = iParams.mTextureToHUD.Execute( FVector2D( mX, mY ) );
 
     // Draw default
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.
     // -> inbetweens in inbetween mode.
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
+    FOdysseyPainterEditorVectorBaseToolHUD::DrawHUD( iParams );
 
     if( hudFlags & FOdysseyVectorHUD::HUD_MODE_OBJECT )
     {
-        DrawObjects( iBLContext
-                   , iScene
-                   , fgColor
-                   , bgColor
-                   , hcColor
-                   , hudFlags | HUD_PATH_VERTEX_VALENCE1 | HUD_PATH_SEGMENT );
+        DrawHierarchy( iParams
+                     , mScene
+                     , fgColor
+                     , bgColor
+                     , hcColor
+                     , hudFlags
+                     | FOdysseyVectorHUD::HUD_PATH_VERTEX_VALENCE1
+                     | FOdysseyVectorHUD::HUD_PATH_SEGMENT );
     }
 
     // draw selection box only if we restrict erasure to the selection
@@ -121,25 +124,23 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext
         DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }
 */
-    iBLContext->save();
-    iBLContext->resetMatrix();
-
-    iBLContext->setCompOp( BL_COMP_OP_SRC_COPY );
-
-    iBLContext->setStrokeStyle( hcColor );
-    iBLContext->setStrokeWidth( 1.0f );
-    iBLContext->strokeCircle( mX, mY, mPathStitchTool->PickingRadius );
+    // cursor
+    DrawPrimitiveCircle( iParams, hudCursor, mPathStitchTool->PickingRadius, hcColor, noColor, 1.0f, false );
 
     if( mStitchableVertex[0] && mStitchableVertex[1] )
     {
-        BLRgba32 orange = BLRgba32( 255, 127, 0, 255 );
+        FLinearColor orange = FLinearColor( 1.0f, 0.5f, 0.0f, 1.0f );
 
-        DrawPath( iBLContext, mStitchableVertex[0]->GetOwnerAsPath(), orange, bgColor, hcColor, true, HUD_PATH_SEGMENT );
-        DrawPath( iBLContext, mStitchableVertex[1]->GetOwnerAsPath(), orange, bgColor, hcColor, true, HUD_PATH_SEGMENT );
+        DrawPath( iParams, mStitchableVertex[0]->GetOwnerAsPath(), orange, bgColor, hcColor, FOdysseyVectorHUD::HUD_PATH_SEGMENT );
+        DrawPath( iParams, mStitchableVertex[1]->GetOwnerAsPath(), orange, bgColor, hcColor, FOdysseyVectorHUD::HUD_PATH_SEGMENT );
 
-        DrawVertex( iBLContext, mStitchableVertex[0], orange, bgColor, hcColor, true, 0 );
-        DrawVertex( iBLContext, mStitchableVertex[1], orange, bgColor, hcColor, true, 0 );
+        DrawVertex( iParams, mStitchableVertex[0], orange, bgColor, hcColor, 0 );
+        DrawVertex( iParams, mStitchableVertex[1], orange, bgColor, hcColor, 0 );
     }
 
-    iBLContext->restore();
+}
+
+void
+FOdysseyPainterEditorVectorPathStitchToolHUD::Draw( BLContext* iBLContext )
+{
 }

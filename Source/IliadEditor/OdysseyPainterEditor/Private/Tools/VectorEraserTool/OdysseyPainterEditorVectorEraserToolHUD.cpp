@@ -20,33 +20,34 @@ FOdysseyPainterEditorVectorEraserToolHUD::FOdysseyPainterEditorVectorEraserToolH
 }
 
 void
-FOdysseyPainterEditorVectorEraserToolHUD::Load( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorEraserToolHUD::Load()
 {
-    uint32 width = iScene->GetLayer()->GetWidth();
-    uint32 height = iScene->GetLayer()->GetHeight();
+    uint32 width = mScene->GetLayer()->GetWidth();
+    uint32 height = mScene->GetLayer()->GetHeight();
 
     mBLEraserMask.create( width, height, BL_FORMAT_A8 );
 
     mBLEraserContext.begin( mBLEraserMask );
+
+    FOdysseyPainterEditorVectorBaseToolHUD::Load();
 }
 
 void
-FOdysseyPainterEditorVectorEraserToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorEraserToolHUD::Unload( )
 {
     mBLEraserContext.end();
 }
 
 void
-FOdysseyPainterEditorVectorEraserToolHUD::Reset( FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorEraserToolHUD::Reset()
 {
     ClearMask();
 
-    UpdateSelectionBox( iScene, false, mEraserTool->GetEditor()->GetVectorHUDFlags() );
+    UpdateSelectionBox( false, mEraserTool->GetEditor()->GetVectorHUDFlags() );
 }
 
 void
-FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext
-                                              , FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -60,12 +61,12 @@ FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.
     // -> inbetweens in inbetween mode.
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext );
 
     // draw selection box only if we restrict erasure to the selection
-    if( iScene->GetCell()->GetSelectedObjectList().size() )
+    if( mScene->GetCell()->GetSelectedObjectList().size() )
     {
-        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+ //3DHUD       DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }
 
     // Prepare bliting the erasing mask

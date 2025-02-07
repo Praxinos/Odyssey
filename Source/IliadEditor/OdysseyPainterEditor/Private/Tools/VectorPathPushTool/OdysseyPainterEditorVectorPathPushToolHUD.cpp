@@ -21,25 +21,25 @@ FOdysseyPainterEditorVectorPathPushToolHUD::FOdysseyPainterEditorVectorPathPushT
 }
 
 void
-FOdysseyPainterEditorVectorPathPushToolHUD::Reset(FOdysseyVectorGroupPaint* iScene)
+FOdysseyPainterEditorVectorPathPushToolHUD::Reset()
 {
     // Updates the selection box
-    UpdateSelectionBox( iScene, false, mPathPushTool->GetEditor()->GetVectorHUDFlags() );
+    UpdateSelectionBox( false, mPathPushTool->GetEditor()->GetVectorHUDFlags() );
 }
 
 void
-FOdysseyPainterEditorVectorPathPushToolHUD::Load(FOdysseyVectorGroupPaint* iScene)
+FOdysseyPainterEditorVectorPathPushToolHUD::Load()
+{
+    FOdysseyPainterEditorVectorBaseToolHUD::Load();
+}
+
+void
+FOdysseyPainterEditorVectorPathPushToolHUD::Unload( )
 {
 }
 
 void
-FOdysseyPainterEditorVectorPathPushToolHUD::Unload( FOdysseyVectorGroupPaint* iScene )
-{
-}
-
-void
-FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext
-                                                , FOdysseyVectorGroupPaint* iScene )
+FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
     FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
@@ -53,12 +53,12 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.
     // -> inbetweens in inbetween mode.
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext, iScene );
+    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext );
 
     // draw selection box only if we restrict pushing to the selection
-    if( mPathPushTool->RestrictToSelectedObjects && iScene->GetCell()->GetSelectedObjectList().size() && ( mPathPushTool->IsDragging() == false ) )
+    if( mPathPushTool->RestrictToSelectedObjects && mScene->GetCell()->GetSelectedObjectList().size() && ( mPathPushTool->IsDragging() == false ) )
     {
-        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
+ //3DHUD        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
     }
 
     // matrix might get altered for displaying the selection rectangle of a single object. Save it.
