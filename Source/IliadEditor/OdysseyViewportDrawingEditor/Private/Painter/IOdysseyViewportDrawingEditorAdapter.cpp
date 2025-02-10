@@ -477,18 +477,19 @@ bool IOdysseyViewportDrawingEditorAdapter::InputKey(FEditorViewportClient* iView
     // - right click camera movement
     //and disallow (return true) left click camera movement
     bool isMouseEvent = iKey == EKeys::LeftMouseButton || iKey == EKeys::RightMouseButton;
-    if (!mIsMouseDown && isMouseEvent && (isOutsideTexture || iEvent == IE_Released))
+    if (isOutsideTexture && isMouseEvent)
     {
-        /* if (iEvent == EInputEvent::IE_DoubleClick)
-            return false;
-0
-        if (iKey == EKeys::RightMouseButton)
+        /*GEditor->GetActiveViewport()
+        GEngine->GameViewport->SetMouseCaptureMode(EMouseCaptureMode::NoCapture);
+        GEngine->GameViewport->SetMouseLockMode(EMouseLockMode::DoNotLock);*/
+
+        if (iKey == EKeys::LeftMouseButton && iEvent == EInputEvent::IE_DoubleClick ) //Selecting by double clicking on an actor/mesh
             return false;
 
-        if (iKey == EKeys::LeftMouseButton)
-            return false; */
+        if (iKey == EKeys::RightMouseButton ) //Moving camera
+            return false;
 
-        return false;
+        return true;
     }
 
     //Init our StrokeRay, having all the basic info to draw
