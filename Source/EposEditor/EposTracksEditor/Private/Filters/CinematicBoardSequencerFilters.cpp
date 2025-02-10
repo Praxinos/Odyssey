@@ -3,12 +3,9 @@
 
 #include "CinematicBoardSequencerFilters.h"
 
-#include "Filters/SequencerTrackFilterBase.h"
 #include "Framework/Commands/Commands.h"
 #include "Framework/Commands/UICommandInfo.h"
 #include "Styles/EposTracksEditorStyle.h"
-
-#include "CinematicBoardTrack/MovieSceneCinematicBoardTrack.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CinematicBoardSequencerFilters)
 
@@ -38,58 +35,59 @@ public:
 //////////////////////////////////////////////////////////////////////////
 //
 
-class FSequencerTrackFilter_CinematicBoard: public FSequencerTrackFilter_ClassType<UMovieSceneCinematicBoardTrack>
+//static
+FString
+FSequencerTrackFilter_CinematicBoard::StaticName()
 {
-public:
-    FSequencerTrackFilter_CinematicBoard( ISequencerTrackFilters& InFilterInterface, TSharedPtr<FFilterCategory> InCategory = nullptr )
-        : FSequencerTrackFilter_ClassType<UMovieSceneCinematicBoardTrack>( InFilterInterface, InCategory )
-    {
-        FSequencerTrackFilter_CinematicBoardFilterCommands::Register();
-    }
+    return TEXT( "CinematicBoard" );
+}
 
-    virtual ~FSequencerTrackFilter_CinematicBoard() override
-    {
-        FSequencerTrackFilter_CinematicBoardFilterCommands::Unregister();
-    }
+FSequencerTrackFilter_CinematicBoard::FSequencerTrackFilter_CinematicBoard( ISequencerTrackFilters& InFilterInterface, TSharedPtr<FFilterCategory> InCategory )
+    : FSequencerTrackFilter_ClassType<UMovieSceneCinematicBoardTrack>( InFilterInterface, InCategory )
+{
+    FSequencerTrackFilter_CinematicBoardFilterCommands::Register();
+}
 
-    //~ Begin IFilter
-    virtual FString GetName() const override
-    {
-        return TEXT( "CinematicBoard" );
-    }
-    //~ End IFilter
+FSequencerTrackFilter_CinematicBoard::~FSequencerTrackFilter_CinematicBoard()
+{
+    FSequencerTrackFilter_CinematicBoardFilterCommands::Unregister();
+}
 
-    //~ Begin FFilterBase
-    virtual FText GetDisplayName() const override
-    {
-        return LOCTEXT( "SequencerTrackFilter_CinematicBoard", "Board" );
-    }
-    virtual FSlateIcon GetIcon() const override
-    {
-        return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), TEXT( "Sequencer.Tracks.CinematicBoard" ) );
-        //return FSlateIcon( FAppStyle::GetAppStyleSetName(), TEXT( "Sequencer.Tracks.CinematicBoard" ) );
-    }
-    //~ End FFilterBase
+FString
+FSequencerTrackFilter_CinematicBoard::GetName() const //override
+{
+    return StaticName();
+}
 
-    //~ Begin FSequencerTrackFilter
+FText
+FSequencerTrackFilter_CinematicBoard::GetDisplayName() const //override
+{
+    return LOCTEXT( "SequencerTrackFilter_CinematicBoard", "Board" );
+}
+FSlateIcon
+FSequencerTrackFilter_CinematicBoard::GetIcon() const //override
+{
+    return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), TEXT( "Sequencer.Tracks.CinematicBoard" ) );
+    //return FSlateIcon( FAppStyle::GetAppStyleSetName(), TEXT( "Sequencer.Tracks.CinematicBoard" ) );
+}
 
-    virtual FText GetDefaultToolTipText() const override
-    {
-        return LOCTEXT( "SequencerTrackFilter_CinematicBoardToolTip", "Show only Board tracks" );
-    }
+FText
+FSequencerTrackFilter_CinematicBoard::GetDefaultToolTipText() const //override
+{
+    return LOCTEXT( "SequencerTrackFilter_CinematicBoardToolTip", "Show only Board tracks" );
+}
 
-    virtual TSharedPtr<FUICommandInfo> GetToggleCommand() const override
-    {
-        return FSequencerTrackFilter_CinematicBoardFilterCommands::Get().ToggleFilter_CinematicBoard;
-    }
+TSharedPtr<FUICommandInfo>
+FSequencerTrackFilter_CinematicBoard::GetToggleCommand() const //override
+{
+    return FSequencerTrackFilter_CinematicBoardFilterCommands::Get().ToggleFilter_CinematicBoard;
+}
 
-    virtual bool SupportsSequence( UMovieSceneSequence* const InSequence ) const override
-    {
-        return IsSequenceTrackSupported<UMovieSceneCinematicBoardTrack>( InSequence ); //TODO: maybe also check of sequence class itself ?
-    }
-
-    //~ End FSequencerTrackFilter
-};
+bool
+FSequencerTrackFilter_CinematicBoard::SupportsSequence( UMovieSceneSequence* const InSequence ) const //override
+{
+    return IsSequenceTrackSupported<UMovieSceneCinematicBoardTrack>( InSequence ); //TODO: maybe also check of sequence class itself ?
+}
 
 //////////////////////////////////////////////////////////////////////////
 //

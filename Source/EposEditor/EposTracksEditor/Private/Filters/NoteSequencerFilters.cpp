@@ -3,13 +3,11 @@
 
 #include "NoteSequencerFilters.h"
 
-#include "Filters/SequencerTrackFilterBase.h"
 #include "Framework/Commands/Commands.h"
 #include "Framework/Commands/UICommandInfo.h"
 #include "LevelSequence.h"
 
 #include "Board/BoardSequence.h"
-#include "NoteTrack/MovieSceneNoteTrack.h"
 #include "Styles/EposTracksEditorStyle.h"
 #include "Shot/ShotSequence.h"
 
@@ -41,58 +39,59 @@ public:
 //////////////////////////////////////////////////////////////////////////
 //
 
-class FSequencerTrackFilter_Note: public FSequencerTrackFilter_ClassType<UMovieSceneNoteTrack>
+//static
+FString
+FSequencerTrackFilter_Note::StaticName()
 {
-public:
-    FSequencerTrackFilter_Note( ISequencerTrackFilters& InFilterInterface, TSharedPtr<FFilterCategory> InCategory = nullptr )
-        : FSequencerTrackFilter_ClassType<UMovieSceneNoteTrack>( InFilterInterface, InCategory )
-    {
-        FSequencerTrackFilter_NoteFilterCommands::Register();
-    }
+    return TEXT( "Note" );
+}
 
-    virtual ~FSequencerTrackFilter_Note() override
-    {
-        FSequencerTrackFilter_NoteFilterCommands::Unregister();
-    }
+FSequencerTrackFilter_Note::FSequencerTrackFilter_Note( ISequencerTrackFilters& InFilterInterface, TSharedPtr<FFilterCategory> InCategory )
+    : FSequencerTrackFilter_ClassType<UMovieSceneNoteTrack>( InFilterInterface, InCategory )
+{
+    FSequencerTrackFilter_NoteFilterCommands::Register();
+}
 
-    //~ Begin IFilter
-    virtual FString GetName() const override
-    {
-        return TEXT( "Note" );
-    }
-    //~ End IFilter
+FSequencerTrackFilter_Note::~FSequencerTrackFilter_Note()
+{
+    FSequencerTrackFilter_NoteFilterCommands::Unregister();
+}
 
-    //~ Begin FFilterBase
-    virtual FText GetDisplayName() const override
-    {
-        return LOCTEXT( "SequencerTrackFilter_Note", "Note" );
-    }
-    virtual FSlateIcon GetIcon() const override
-    {
-        return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), TEXT( "Sequencer.Tracks.Note" ) );
-    }
-    //~ End FFilterBase
+FString
+FSequencerTrackFilter_Note::GetName() const //override
+{
+    return StaticName();
+}
 
-    //~ Begin FSequencerTrackFilter
+FText
+FSequencerTrackFilter_Note::GetDisplayName() const //override
+{
+    return LOCTEXT( "SequencerTrackFilter_Note", "Note" );
+}
+FSlateIcon
+FSequencerTrackFilter_Note::GetIcon() const //override
+{
+    return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), TEXT( "Sequencer.Tracks.Note" ) );
+}
 
-    virtual FText GetDefaultToolTipText() const override
-    {
-        return LOCTEXT( "SequencerTrackFilter_NoteToolTip", "Show only Note tracks" );
-    }
+FText
+FSequencerTrackFilter_Note::GetDefaultToolTipText() const //override
+{
+    return LOCTEXT( "SequencerTrackFilter_NoteToolTip", "Show only Note tracks" );
+}
 
-    virtual TSharedPtr<FUICommandInfo> GetToggleCommand() const override
-    {
-        return FSequencerTrackFilter_NoteFilterCommands::Get().ToggleFilter_Note;
-    }
+TSharedPtr<FUICommandInfo>
+FSequencerTrackFilter_Note::GetToggleCommand() const //override
+{
+    return FSequencerTrackFilter_NoteFilterCommands::Get().ToggleFilter_Note;
+}
 
-    virtual bool SupportsSequence( UMovieSceneSequence* const InSequence ) const override
-    {
-        return InSequence->IsA<UBoardSequence>() || InSequence->IsA<UShotSequence>() || InSequence->IsA<ULevelSequence>();
-        //return IsSequenceTrackSupported<UMovieSceneNoteTrack>( InSequence ); //TODO: maybe also check of sequence class itself ?
-    }
-
-    //~ End FSequencerTrackFilter
-};
+bool
+FSequencerTrackFilter_Note::SupportsSequence( UMovieSceneSequence* const InSequence ) const //override
+{
+    return InSequence->IsA<UBoardSequence>() || InSequence->IsA<UShotSequence>() || InSequence->IsA<ULevelSequence>();
+    //return IsSequenceTrackSupported<UMovieSceneNoteTrack>( InSequence ); //TODO: maybe also check of sequence class itself ?
+}
 
 //////////////////////////////////////////////////////////////////////////
 //

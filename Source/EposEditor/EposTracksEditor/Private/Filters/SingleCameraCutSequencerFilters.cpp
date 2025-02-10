@@ -3,14 +3,11 @@
 
 #include "SingleCameraCutSequencerFilters.h"
 
-#include "Filters/SequencerTrackFilterBase.h"
 #include "Framework/Commands/Commands.h"
 #include "Framework/Commands/UICommandInfo.h"
 
 #include "Shot/ShotSequence.h"
 #include "Styles/EposTracksEditorStyle.h"
-
-#include "SingleCameraCutTrack/MovieSceneSingleCameraCutTrack.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(SingleCameraCutSequencerFilters)
 
@@ -40,60 +37,61 @@ public:
 //////////////////////////////////////////////////////////////////////////
 //
 
-class FSequencerTrackFilter_SingleCameraCut: public FSequencerTrackFilter_ClassType<UMovieSceneSingleCameraCutTrack>
+//static
+FString
+FSequencerTrackFilter_SingleCameraCut::StaticName()
 {
-public:
-    FSequencerTrackFilter_SingleCameraCut( ISequencerTrackFilters& InFilterInterface, TSharedPtr<FFilterCategory> InCategory = nullptr )
-        : FSequencerTrackFilter_ClassType<UMovieSceneSingleCameraCutTrack>( InFilterInterface, InCategory )
-    {
-        FSequencerTrackFilter_SingleCameraCutFilterCommands::Register();
-    }
+    return TEXT( "SingleCameraCut" );
+}
 
-    virtual ~FSequencerTrackFilter_SingleCameraCut() override
-    {
-        FSequencerTrackFilter_SingleCameraCutFilterCommands::Unregister();
-    }
+FSequencerTrackFilter_SingleCameraCut::FSequencerTrackFilter_SingleCameraCut( ISequencerTrackFilters& InFilterInterface, TSharedPtr<FFilterCategory> InCategory )
+    : FSequencerTrackFilter_ClassType<UMovieSceneSingleCameraCutTrack>( InFilterInterface, InCategory )
+{
+    FSequencerTrackFilter_SingleCameraCutFilterCommands::Register();
+}
 
-    //~ Begin IFilter
-    virtual FString GetName() const override
-    {
-        return TEXT( "SingleCameraCut" );
-    }
-    //~ End IFilter
+FSequencerTrackFilter_SingleCameraCut::~FSequencerTrackFilter_SingleCameraCut()
+{
+    FSequencerTrackFilter_SingleCameraCutFilterCommands::Unregister();
+}
 
-    //~ Begin FFilterBase
-    virtual FText GetDisplayName() const override
-    {
-        return LOCTEXT( "SequencerTrackFilter_SingleCameraCut", "Single CameraCut" );
-    }
-    virtual FSlateIcon GetIcon() const override
-    {
-        return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), TEXT( "Sequencer.Tracks.SingleCameraCut" ) );
-    }
-    //~ End FFilterBase
+FString
+FSequencerTrackFilter_SingleCameraCut::GetName() const //override
+{
+    return StaticName();
+}
 
-    //~ Begin FSequencerTrackFilter
+FText
+FSequencerTrackFilter_SingleCameraCut::GetDisplayName() const //override
+{
+    return LOCTEXT( "SequencerTrackFilter_SingleCameraCut", "Single CameraCut" );
+}
+FSlateIcon
+FSequencerTrackFilter_SingleCameraCut::GetIcon() const //override
+{
+    return FSlateIcon( FEposTracksEditorStyle::Get().GetStyleSetName(), TEXT( "Sequencer.Tracks.SingleCameraCut" ) );
+}
 
-    virtual FText GetDefaultToolTipText() const override
-    {
-        return LOCTEXT( "SequencerTrackFilter_SingleCameraCutToolTip", "Show only Single CameraCut tracks" );
-    }
+FText
+FSequencerTrackFilter_SingleCameraCut::GetDefaultToolTipText() const //override
+{
+    return LOCTEXT( "SequencerTrackFilter_SingleCameraCutToolTip", "Show only Single CameraCut tracks" );
+}
 
-    virtual TSharedPtr<FUICommandInfo> GetToggleCommand() const override
-    {
-        return FSequencerTrackFilter_SingleCameraCutFilterCommands::Get().ToggleFilter_SingleCameraCut;
-    }
+TSharedPtr<FUICommandInfo>
+FSequencerTrackFilter_SingleCameraCut::GetToggleCommand() const //override
+{
+    return FSequencerTrackFilter_SingleCameraCutFilterCommands::Get().ToggleFilter_SingleCameraCut;
+}
 
-    virtual bool SupportsSequence( UMovieSceneSequence* const InSequence ) const override
-    {
-        // Here the class must be also checked
-        // because board sequence internally supports SingleCameraCut track (see UBoardSequence::IsTrackSupportedImpl())
-        // but it is not displayed in the Add menu
-        return InSequence->IsA<UShotSequence>() && IsSequenceTrackSupported<UMovieSceneSingleCameraCutTrack>( InSequence );
-    }
-
-    //~ End FSequencerTrackFilter
-};
+bool
+FSequencerTrackFilter_SingleCameraCut::SupportsSequence( UMovieSceneSequence* const InSequence ) const //override
+{
+    // Here the class must be also checked
+    // because board sequence internally supports SingleCameraCut track (see UBoardSequence::IsTrackSupportedImpl())
+    // but it is not displayed in the Add menu
+    return InSequence->IsA<UShotSequence>() && IsSequenceTrackSupported<UMovieSceneSingleCameraCutTrack>( InSequence );
+}
 
 //////////////////////////////////////////////////////////////////////////
 //

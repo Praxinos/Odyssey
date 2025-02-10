@@ -46,6 +46,7 @@ public:
 
 #if WITH_EDITOR
     virtual ETrackSupport IsTrackSupportedImpl( TSubclassOf<class UMovieSceneTrack> InTrackClass ) const override;
+    virtual bool IsFilterSupportedImpl( const FString& iFilterName ) const override;
     virtual FText GetDisplayName() const override;
 //
     virtual void GetAssetRegistryTagMetadata( TMap<FName, FAssetRegistryTagMetadata>& OutMetadata ) const override;
