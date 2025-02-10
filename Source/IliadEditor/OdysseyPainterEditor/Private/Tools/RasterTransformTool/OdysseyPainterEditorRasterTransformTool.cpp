@@ -12,6 +12,7 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
 #include "Editor/Transactor.h"
+#include "Framework/Commands/GenericCommands.h"
 #include "ULISEventBuilder.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
