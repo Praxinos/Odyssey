@@ -14,7 +14,7 @@ class SOdysseyPaletteTreeView;
 /**
  * Implements a layer row widget
  */
-class ODYSSEYPALETTE_API SOdysseyPaletteEntryRow
+class SOdysseyPaletteEntryRow
     : public SMultiColumnTableRow<UOdysseyPaletteEntry*>
 {
 public:

@@ -8,7 +8,7 @@
 #include "Toolkits/IToolkitHost.h"
 
 
-class ODYSSEYPALETTE_API FOdysseyPaletteAssetTypeActions
+class FOdysseyPaletteAssetTypeActions
     : public FAssetTypeActions_Base
 {
 public:

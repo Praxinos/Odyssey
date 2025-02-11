@@ -9,7 +9,7 @@
 /**
  * Implements a layer row widget
  */
-class ODYSSEYPALETTE_API SOdysseyPaletteColorRow
+class SOdysseyPaletteColorRow
     : public SOdysseyPaletteEntryRow
 {
     SLATE_BEGIN_ARGS(SOdysseyPaletteColorRow)

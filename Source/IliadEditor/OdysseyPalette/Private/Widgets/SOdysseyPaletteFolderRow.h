@@ -9,7 +9,7 @@
 /**
  * Implements an entry row widget
  */
-class ODYSSEYPALETTE_API SOdysseyPaletteFolderRow
+class SOdysseyPaletteFolderRow
     : public SOdysseyPaletteEntryRow
 {
 protected:
