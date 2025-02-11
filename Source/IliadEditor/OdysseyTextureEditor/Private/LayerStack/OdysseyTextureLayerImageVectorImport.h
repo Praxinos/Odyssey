@@ -16,7 +16,7 @@ public:
      * @param iTextureLayerImageVector
      * @param Ar
      */
-    static bool ODYSSEYTEXTURE_API Read( UOdysseyTextureLayerImageVector* iTextureLayerImageVector
+    static bool Read( UOdysseyTextureLayerImageVector* iTextureLayerImageVector
                                   , FArchive &Ar );
 
 private:

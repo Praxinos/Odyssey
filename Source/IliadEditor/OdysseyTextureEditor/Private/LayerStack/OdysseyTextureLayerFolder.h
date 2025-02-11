@@ -7,7 +7,7 @@
 #include "OdysseyTextureLayerFolder.generated.h"
 
 UCLASS(BlueprintType)
-class ODYSSEYTEXTURE_API UOdysseyTextureLayerFolder
+class UOdysseyTextureLayerFolder
     : public UOdysseyTextureLayer
 {
     GENERATED_BODY()

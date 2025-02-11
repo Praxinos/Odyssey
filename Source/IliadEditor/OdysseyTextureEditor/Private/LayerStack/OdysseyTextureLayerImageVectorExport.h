@@ -10,7 +10,7 @@ class UOdysseyTextureLayerImageVector;
 class FOdysseyTextureLayerImageVectorExport
 {
 public:
-    static void ODYSSEYTEXTURE_API Write( UOdysseyTextureLayerImageVector* iTextureLayerImageVector, FArchive &Ar );
+    static void Write( UOdysseyTextureLayerImageVector* iTextureLayerImageVector, FArchive &Ar );
 
 private:
     ////////////////////////////////////

@@ -15,7 +15,7 @@
 #include "OdysseyTextureLayerImageRaster.generated.h"
 
 UCLASS(BlueprintType)
-class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageRaster
+class UOdysseyTextureLayerImageRaster
     : public UOdysseyTextureLayer
 {
     GENERATED_BODY()

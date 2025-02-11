@@ -75,7 +75,6 @@ namespace UnrealBuildTool.Rules
                     "OdysseyEditor",
                     "OdysseyPainterEditor",
                     "OdysseyStyle",
-                    "OdysseyTexture",
                     "OdysseyTextureEditor",
                     "OdysseyWidgets",
                     "OdysseyHUDSystem",

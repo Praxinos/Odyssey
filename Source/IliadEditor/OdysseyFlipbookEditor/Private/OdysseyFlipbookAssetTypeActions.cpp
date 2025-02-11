@@ -9,7 +9,6 @@
 #include "OdysseyFlipbook.h"
 #include "OdysseyFlipbookEditorModule.h"
 #include "OdysseyFlipbookWrapper.h"
-#include "OdysseyTextureLayerStackUserData.h"
 #include "OdysseyPainterEditorSettings.h"
 
 #define LOCTEXT_NAMESPACE "FlipbookEditor"

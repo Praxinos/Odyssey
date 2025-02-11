@@ -28,6 +28,7 @@ namespace UnrealBuildTool.Rules
                     Path.Combine(ModuleDirectory, "Public"),
                     Path.Combine(ModuleDirectory, "Public", "Settings"),
                     Path.Combine(ModuleDirectory, "Public", "TextureEditor"),
+                    Path.Combine(ModuleDirectory, "Public", "LayerStack")
                 }
                 );
 
@@ -35,6 +36,7 @@ namespace UnrealBuildTool.Rules
                 new string[] {
                     Path.Combine(ModuleDirectory, "Private", "Settings"),
                     Path.Combine(ModuleDirectory, "Private", "TextureEditor"),
+                    Path.Combine(ModuleDirectory, "Private", "LayerStack")
                 }
                 );
 
@@ -63,6 +65,7 @@ namespace UnrealBuildTool.Rules
                     "OdysseyBrush",
                     "OdysseyCore",
                     "OdysseyPaintEngine",
+                    "OdysseyFile",
                     "OdysseyImaging",
                     "OdysseyMedia",
                     "OdysseyLayerStack",
@@ -70,12 +73,12 @@ namespace UnrealBuildTool.Rules
                     "OdysseyEditor",
                     "OdysseyPainterEditor",
                     "OdysseyStyle",
-                    "OdysseyTexture",
                     "OdysseyVector",
                     "OdysseyWidgets",
                     "Slate",
                     "SlateCore",
                     "UnrealEd",
+                    "zlib"
                 }
                 );
 

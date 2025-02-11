@@ -225,11 +225,6 @@
             "LoadingPhase": "Default"
         },
         {
-            "Name": "OdysseyTexture",
-            "Type": "Editor",
-            "LoadingPhase": "Default"
-        },
-        {
             "Name": "OdysseyTextureEditor",
             "Type": "Editor",
             "LoadingPhase": "Default"

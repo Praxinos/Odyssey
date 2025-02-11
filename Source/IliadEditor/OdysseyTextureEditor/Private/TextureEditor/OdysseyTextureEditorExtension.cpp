@@ -9,6 +9,7 @@
 #include "TextureEditor/OdysseyTextureEditorGUI.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyLayerStack.h"
+#include "OdysseyTextureLayerStack.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "TextureEditor/OdysseyTextureEditorSource.h"
 #include "HUD/OdysseyVectorHUD.h"

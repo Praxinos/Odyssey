@@ -25,7 +25,7 @@ enum class EOdysseyTextureLayerStackTextureUpdateMode
 };
 
 UCLASS(BlueprintType)
-class ODYSSEYTEXTURE_API UOdysseyTextureLayerStack
+class ODYSSEYTEXTUREEDITOR_API UOdysseyTextureLayerStack
     : public UOdysseyLayerStack
     , public FTickableGameObject
 {

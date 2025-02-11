@@ -17,6 +17,7 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyRasterBlock.h"
 #include "OdysseySurfaceTexture2DEditable.h"
+#include "OdysseyTextureLayerStack.h"
 #include "LayerStack/OdysseyTextureLayerImageRaster.h"
 #include "TextureEditor/OdysseyTextureEditorCommands.h"
 #include "TextureEditor/OdysseyTextureEditorSource.h"

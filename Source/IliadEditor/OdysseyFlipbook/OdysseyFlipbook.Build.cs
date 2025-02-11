@@ -56,7 +56,6 @@ namespace UnrealBuildTool.Rules
                     "OdysseyCore",
                     "OdysseyImaging",
                     "OdysseyLayerStack",
-                    "OdysseyTexture",
                     "Paper2D",
                     "Paper2DEditor",
                     "Slate",

@@ -19,7 +19,7 @@ class FOdysseyVectorGroupPaint;
 class FOdysseyVectorEngine;
 
 UCLASS(BlueprintType)
-class ODYSSEYTEXTURE_API UOdysseyTextureLayerImageVector
+class UOdysseyTextureLayerImageVector
     : public UOdysseyTextureLayer , public IOdysseyVectorLayer, public IOdysseyVectorCell
 {
     GENERATED_BODY()

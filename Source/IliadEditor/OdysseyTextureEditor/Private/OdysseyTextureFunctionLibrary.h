@@ -11,7 +11,7 @@ class UOdysseyLayerStack;
 class UTexture2D;
 
 UCLASS()
-class ODYSSEYTEXTURE_API UOdysseyTextureFunctionLibrary : public UBlueprintFunctionLibrary
+class UOdysseyTextureFunctionLibrary : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 

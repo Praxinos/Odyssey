@@ -12,7 +12,7 @@
 #include "OdysseyTextureLayer.generated.h"
 
 UCLASS(Abstract, HideDropdown, BlueprintType)
-class ODYSSEYTEXTURE_API UOdysseyTextureLayer
+class ODYSSEYTEXTUREEDITOR_API UOdysseyTextureLayer
     : public UOdysseyLayer
 {
     GENERATED_BODY()

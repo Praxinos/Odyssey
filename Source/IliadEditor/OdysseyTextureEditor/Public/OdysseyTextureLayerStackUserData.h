@@ -14,7 +14,7 @@
 #include "OdysseyTextureLayerStackUserData.generated.h"
 
 UCLASS(BlueprintType)
-class ODYSSEYTEXTURE_API UOdysseyTextureLayerStackUserData : public UAssetUserData
+class ODYSSEYTEXTUREEDITOR_API UOdysseyTextureLayerStackUserData : public UAssetUserData
 {
     GENERATED_BODY()
 
