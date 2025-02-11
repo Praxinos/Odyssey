@@ -16,6 +16,8 @@ class FOdysseyVectorGroupPaint;
 class FOdysseyVectorSegment;
 class FOdysseyVectorPath;
 class FOdysseyVectorHandleSegment;
+class FOdysseyVectorVertex;
+class FOdysseyVectorHandleSegment;
 
 enum class eMouseEventName : uint8
 {

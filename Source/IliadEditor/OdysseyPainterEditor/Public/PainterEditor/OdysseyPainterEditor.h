@@ -4,32 +4,11 @@
 #pragma once
 
 #include "OdysseyEditor.h"
-#include "OdysseyPainterEditorGUI.h"
 #include "OdysseyHUDSystem.h"
-#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
-#include "Tools/RasterEraserTool/OdysseyPainterEditorRasterEraserTool.h"
-#include "Tools/RasterSelectionTool/OdysseyPainterEditorRasterSelectionTool.h"
-#include "Tools/RasterTransformTool/OdysseyPainterEditorRasterTransformTool.h"
-#include "Tools/RasterPrimitiveDrawingTool/OdysseyPainterEditorRasterPrimitiveDrawingTool.h"
-#include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
-#include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
-#include "Tools/VectorPathDrawingTool/OdysseyPainterEditorVectorPathDrawingTool.h"
-#include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditTool.h"
-#include "Tools/VectorSelectionTool/OdysseyPainterEditorVectorSelectionTool.h"
-#include "Tools/VectorScenePanTool/OdysseyPainterEditorVectorScenePanTool.h"
-#include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserTool.h"
-#include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
-#include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothTool.h"
-#include "Tools/VectorPathStitchTool/OdysseyPainterEditorVectorPathStitchTool.h"
-#include "Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.h"
-#include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
-#include "Tools/VectorGridTool/OdysseyPainterEditorVectorGridTool.h"
-#include "Tools/VectorTransformTool/OdysseyPainterEditorVectorTransformTool.h"
-#include "Tools/VectorMatchingTool/OdysseyPainterEditorVectorMatchingTool.h"
-#include "Tools/VectorChartTool/OdysseyPainterEditorVectorChartTool.h"
-#include "Tools/VectorTrajectoryTool/OdysseyPainterEditorVectorTrajectoryTool.h"
 #include "OdysseyMediaProvider.h"
 #include "OdysseyVectorEngine.h"
+#include "Proxies/OdysseyBrushColor.h"
+#include "PainterEditor/OdysseyPainterEditorColorTypes.h"
 #include <ULIS>
 
 class IOdysseySurfaceEditable;
@@ -41,8 +20,34 @@ class UOdysseyLayerStack;
 class FOdysseyMeshSelector;
 class FOdysseyPainterEditorRasterSelection;
 class FOdysseyVectorGroupPaint;
+class FOdysseyVectorSegment;
+class FOdysseyVectorPath;
 class FOdysseyPainterEditorPaletteSet;
 class UOdysseyPaletteEntryColor;
+class FOdysseyPainterEditorGUI;
+
+class UOdysseyPainterEditorRasterDrawingTool;
+class UOdysseyPainterEditorRasterEraserTool;
+class UOdysseyPainterEditorRasterSelectionTool;
+class UOdysseyPainterEditorRasterTransformTool;
+class UOdysseyPainterEditorRasterPrimitiveDrawingTool;
+class UOdysseyPainterEditorRasterPaintBucketTool;
+class UOdysseyPainterEditorVectorPrimitiveDrawingTool;
+class UOdysseyPainterEditorVectorPathDrawingTool;
+class UOdysseyPainterEditorVectorPathEditTool;
+class UOdysseyPainterEditorVectorSelectionTool;
+class UOdysseyPainterEditorVectorScenePanTool;
+class UOdysseyPainterEditorVectorEraserTool;
+class UOdysseyPainterEditorVectorPathPushTool;
+class UOdysseyPainterEditorVectorPathSmoothTool;
+class UOdysseyPainterEditorVectorPathStitchTool;
+class UOdysseyPainterEditorVectorPaintBucketTool;
+class UOdysseyPainterEditorColorPickerTool;
+class UOdysseyPainterEditorVectorGridTool;
+class UOdysseyPainterEditorVectorTransformTool;
+class UOdysseyPainterEditorVectorMatchingTool;
+class UOdysseyPainterEditorVectorChartTool;
+class UOdysseyPainterEditorVectorTrajectoryTool;
 
 /**
  * Base class for a Painting Editor

@@ -13,6 +13,7 @@
 #include "OdysseyHUDElement.h"
 #include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
 #include "SOdysseySinglePropertyView.h"
+#include "ULISLoaderModule.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

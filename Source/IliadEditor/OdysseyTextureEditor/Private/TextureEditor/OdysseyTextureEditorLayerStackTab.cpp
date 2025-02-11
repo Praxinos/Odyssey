@@ -24,6 +24,8 @@
 #include "TextureEditor/OdysseyTextureEditorExtension.h"
 #include "OdysseyPainterEditor.h"
 #include "AssetToolsModule.h"
+#include "ULISLoaderModule.h"
+#include "OdysseyRasterBlockMutator.h"
 
 #define LOCTEXT_NAMESPACE "TextureEditor"
 

@@ -40,6 +40,7 @@
 #include "OdysseyKeyState.h"
 #include "OdysseyHUDElement.h"
 #include "MouseDeltaTracker.h"
+#include "Tools/OdysseyPainterEditorTool.h"
 
 #include <memory>
 #include <chrono>

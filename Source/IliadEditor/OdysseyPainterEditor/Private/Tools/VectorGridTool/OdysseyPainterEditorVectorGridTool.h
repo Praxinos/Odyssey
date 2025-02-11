@@ -10,6 +10,7 @@
 
 class FGridNode;
 class FOdysseyPainterEditorVectorGridToolHUD;
+class FOdysseyVectorPoint;
 
 UCLASS( HideCategories = (SelectionTool) )
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorGridTool : public UOdysseyPainterEditorVectorSelectionTool

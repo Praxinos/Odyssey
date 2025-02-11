@@ -12,6 +12,7 @@ class FOdysseyPainterEditorVectorTransformToolHUD;
 class FOdysseyVectorTagInbetweener;
 class FOdysseyVectorUndo;
 class FInbetweenerBreakdown;
+class FOdysseyVectorObject;
 
 UENUM()
 enum class eTransformShowInbetweens : uint8

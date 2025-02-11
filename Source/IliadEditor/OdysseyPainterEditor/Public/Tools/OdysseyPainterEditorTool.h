@@ -9,8 +9,6 @@
 #include "Input/OdysseyPoint.h"
 #include "OdysseyStyle.h"
 #include "OdysseyHUDSystem.h"
-#include "OdysseyPainterEditorToolContext.h"
-#include "OdysseyPainterEditorToolInputProcessor.h"
 #include "Widgets/SWidget.h"
 
 #include "PainterEditor/OdysseyPainterEditorColorTypes.h"
@@ -19,6 +17,7 @@
 
 class FOdysseyPainterEditor;
 class FOdysseyHUDElement;
+class FOdysseyPainterEditorToolInputProcessor;
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorTool : public UObject

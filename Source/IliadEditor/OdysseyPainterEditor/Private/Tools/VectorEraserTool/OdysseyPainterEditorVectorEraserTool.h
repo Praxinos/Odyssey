@@ -5,10 +5,14 @@
 
 #include "CoreMinimal.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
+#include <ULIS>
 
 #include "OdysseyPainterEditorVectorEraserTool.generated.h"
 
 class FOdysseyPainterEditorVectorEraserToolHUD;
+class FOdysseyVectorObject;
+class FOdysseyVectorSegment;
+class FOdysseyVectorVertex;
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorEraserTool : public UOdysseyPainterEditorVectorBaseTool

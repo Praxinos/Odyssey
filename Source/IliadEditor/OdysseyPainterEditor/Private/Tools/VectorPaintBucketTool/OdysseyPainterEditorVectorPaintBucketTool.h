@@ -12,6 +12,8 @@
 class FOdysseyPaintEngine;
 class FOdysseyPainterEditorVectorPaintBucketToolHUD;
 class FOdysseyPainterEditorVectorPaintBucketToolContextMenu;
+class FOdysseyVectorBucket;
+class FOdysseyPainterEditor;
 
 UENUM()
 enum class EPaintBucketToolColorMode : uint8

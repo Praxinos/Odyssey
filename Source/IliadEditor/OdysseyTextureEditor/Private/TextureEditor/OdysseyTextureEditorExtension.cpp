@@ -13,6 +13,7 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "TextureEditor/OdysseyTextureEditorSource.h"
 #include "HUD/OdysseyVectorHUD.h"
+#include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction

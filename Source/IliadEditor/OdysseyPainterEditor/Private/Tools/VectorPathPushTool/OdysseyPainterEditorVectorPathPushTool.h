@@ -4,7 +4,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OdysseyVectorPoint.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
+#include <ULIS>
 
 #include "OdysseyPainterEditorVectorPathPushTool.generated.h"
 

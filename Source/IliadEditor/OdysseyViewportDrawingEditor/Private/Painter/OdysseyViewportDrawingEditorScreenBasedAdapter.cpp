@@ -21,6 +21,7 @@
 #include "SEditorViewport.h"
 #include "Slate/SceneViewport.h"
 #include "OdysseySurfaceTexture2DEditable.h"
+#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 
 FOdysseyViewportDrawingEditorScreenBasedAdapter::~FOdysseyViewportDrawingEditorScreenBasedAdapter()
 {

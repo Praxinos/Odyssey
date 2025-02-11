@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Tools/VectorBaseTool/OdysseyPainterEditorVectorBaseTool.h"
+#include <ULIS>
 
 #include "OdysseyPainterEditorVectorSelectionTool.generated.h"
 
@@ -18,6 +19,9 @@ enum class EOdysseyVectorSelectionShape : uint8
 
 class FOdysseyPainterEditorVectorBaseToolHUD;
 class FOdysseyPainterEditorVectorSelectionToolHUD;
+class FOdysseyVectorEngine;
+class FOdysseyVectorGroupPaint;
+class FOdysseyVectorBucket;
 
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorSelectionTool : public UOdysseyPainterEditorVectorBaseTool

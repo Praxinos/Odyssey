@@ -21,6 +21,8 @@
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
 
+#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
+
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
 /////////////////////////////////////////////////////

@@ -12,6 +12,7 @@
 #include "OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "Toolkits/BaseToolkit.h"
+#include "Tools/ColorPickerTool/OdysseyPainterEditorColorPickerTool.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

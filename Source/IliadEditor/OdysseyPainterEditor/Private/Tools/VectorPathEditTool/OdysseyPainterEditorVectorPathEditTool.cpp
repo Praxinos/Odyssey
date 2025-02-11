@@ -6,6 +6,7 @@
 #include "OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
+#include "OdysseyVector.h"
 #include "OdysseyVectorLayer.h"
 #include "OdysseyVectorCell.h"
 #include "Undo/OdysseyVectorUndoSelectObject.h"

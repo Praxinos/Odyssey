@@ -12,6 +12,7 @@
 #include "SOdysseySinglePropertyView.h"
 
 // Vector engine
+#include "OdysseyVector.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorPrimitive.h"
 #include "OdysseyVectorEllipse.h"

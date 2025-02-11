@@ -10,6 +10,7 @@
 #include "ISinglePropertyView.h"
 #include "SOdysseySinglePropertyView.h"
 // Vector engine
+#include "OdysseyVector.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyVectorTag.h"
 #include "OdysseyVectorCell.h"

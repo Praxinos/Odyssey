@@ -8,12 +8,14 @@
 #include "OdysseyHUDPolygon.h"
 #include "OdysseyHUDHandle.h"
 #include "OdysseyBrushTransform.h"
+#include "OdysseyRasterBlock.h"
 #include "GeomTools.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "PainterEditor/OdysseyPainterEditorRasterSelection.h"
 #include "Editor/Transactor.h"
 #include "Framework/Commands/GenericCommands.h"
 #include "ULISEventBuilder.h"
+#include "Tools/RasterDrawingTool/OdysseyPainterEditorRasterDrawingTool.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

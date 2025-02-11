@@ -9,6 +9,7 @@
 #include "OdysseyPainterEditor.h"
 #include "OdysseyHUDSystem.h"
 #include "Misc/OdysseyUndoDelegates.h"
+#include "OdysseyPainterEditorToolInputProcessor.h"
 
 //--------------------------------------------------------------------------------------
 //----------------------------------------------------------- Construction / Destruction
