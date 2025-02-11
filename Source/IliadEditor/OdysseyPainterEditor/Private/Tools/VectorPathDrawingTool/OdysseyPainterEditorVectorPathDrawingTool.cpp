@@ -29,7 +29,6 @@ UOdysseyPainterEditorVectorPathDrawingTool::~UOdysseyPainterEditorVectorPathDraw
 
 UOdysseyPainterEditorVectorPathDrawingTool::UOdysseyPainterEditorVectorPathDrawingTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPathDrawingToolHUD( this ), true )
-    , ColorMode( eForegroundColorMode::SolidColor )
     , Opacity( 1.0f )
     , Brush( nullptr )
     , TracingType( eTracingType::Organic )
@@ -322,7 +321,7 @@ UOdysseyPainterEditorVectorPathDrawingTool::OnMouseDownVector( FOdysseyVectorGro
             parentObject->AppendChild( path );
             path->UpdateMatrix();
 
-            SetPathColor( path, ColorMode );
+            SetPathColor( path );
 
             path->SetOpacity( Opacity );
         }

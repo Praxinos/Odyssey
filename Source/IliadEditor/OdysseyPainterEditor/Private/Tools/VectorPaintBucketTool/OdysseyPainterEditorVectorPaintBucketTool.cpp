@@ -37,7 +37,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::~UOdysseyPainterEditorVectorPaintBuc
 UOdysseyPainterEditorVectorPaintBucketTool::UOdysseyPainterEditorVectorPaintBucketTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorPaintBucketToolHUD( this ), false )
     , Propagate( true )
-    , ColorMode ( eBucketColorMode::SolidColor )
+    , ColorMode ( EPaintBucketToolColorMode::Color )
     , Opacity( 1.0f )
     , Color1( 255, 255, 255, 255 )
     , Color2( 255, 255, 255, 255 )
@@ -354,31 +354,55 @@ UOdysseyPainterEditorVectorPaintBucketTool::OnMouseDragVector( FOdysseyVectorGro
 void
 UOdysseyPainterEditorVectorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket* iBucket )
 {
+    eBucketColorMode bucketColorMode;
     switch( ColorMode )
     {
-        case eBucketColorMode::LinearGradient:
-        case eBucketColorMode::RadialGradient:
+        case EPaintBucketToolColorMode::LinearGradient:
+        {
             iBucket->SetGradientColor0( Color1.R, Color1.G, Color1.B, Color1.A );
             iBucket->SetGradientColor1( Color2.R, Color2.G, Color2.B, Color2.A );
+            bucketColorMode = eBucketColorMode::LinearGradient;
+        }
+
         break;
 
-        case eBucketColorMode::SolidColor:
+        case EPaintBucketToolColorMode::RadialGradient:
         {
-            ::ULIS::FColor color = GetEditor()->PaintColor().GetValue();
-            ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
-            uint8 R = rgba8.R8();
-            uint8 G = rgba8.G8();
-            uint8 B = rgba8.B8();
-            uint8 A = Opacity * 255/*rgba8.A8()*/;
-
-            iBucket->SetSolidColor( R, G, B, A );
+            iBucket->SetGradientColor0( Color1.R, Color1.G, Color1.B, Color1.A );
+            iBucket->SetGradientColor1( Color2.R, Color2.G, Color2.B, Color2.A );
+            bucketColorMode = eBucketColorMode::RadialGradient;
         }
         break;
 
-        case eBucketColorMode::Palette:
+        case EPaintBucketToolColorMode::Color:
         {
-            iBucket->SetPaletteEntry( GetEditor()->GetCurrentPaletteColorEntry() );
-            iBucket->SetPaletteSet( GetEditor()->GetCurrentPaletteSet() );
+            switch( GetEditor()->GetColorType() )
+            {
+                case EOdysseyPainterEditorColorType::Raw:
+                {
+                    ::ULIS::FColor color = GetEditor()->PaintColor().GetValue();
+                    ::ULIS::FColor rgba8 = color.ToFormat( ::ULIS::eFormat::Format_RGBA8 );
+                    uint8 R = rgba8.R8();
+                    uint8 G = rgba8.G8();
+                    uint8 B = rgba8.B8();
+                    uint8 A = Opacity * 255/*rgba8.A8()*/;
+
+                    iBucket->SetSolidColor( R, G, B, A );
+                    bucketColorMode = eBucketColorMode::SolidColor;
+                }
+                break;
+
+                case EOdysseyPainterEditorColorType::Indexed:
+                {
+                    iBucket->SetPaletteEntry( GetEditor()->GetCurrentPaletteColorEntry() );
+                    iBucket->SetPaletteSet( GetEditor()->GetCurrentPaletteSet() );
+                    bucketColorMode = eBucketColorMode::Palette;
+                }
+                break;
+
+                default:
+                break;
+            }
         }
         break;
 
@@ -386,7 +410,7 @@ UOdysseyPainterEditorVectorPaintBucketTool::SetBucketColor( FOdysseyVectorBucket
         break;
     }
 
-    iBucket->SetColorMode( ColorMode );
+    iBucket->SetColorMode( bucketColorMode );
     iBucket->SetPropagated( Propagate );
 }
 

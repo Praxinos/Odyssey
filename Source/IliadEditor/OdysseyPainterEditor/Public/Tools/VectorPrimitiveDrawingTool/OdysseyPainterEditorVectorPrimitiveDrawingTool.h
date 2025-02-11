@@ -12,13 +12,6 @@ class FOdysseyVectorLine;
 class FOdysseyVectorPrimitive;
 
 UENUM()
-enum class ePrimitiveDrawingToolColorSource : uint8
-{
-    ColorWheel = uint8(eBucketColorMode::SolidColor),
-    Palette  = uint8(eBucketColorMode::Palette)
-};
-
-UENUM()
 enum class EOdysseyVectorPrimitiveType : uint8
 {
     Ellipse,
@@ -76,11 +69,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPrimitiveDrawingTool :
                  , Category=PrimitiveDrawingTool
                  , meta = ( ToolTip = "Primitive Type" ) )
         EOdysseyVectorPrimitiveType PrimitiveType;
-
-        UPROPERTY( EditAnywhere
-                 , Category=PrimitiveDrawingTool
-                 , meta = ( ToolTip = "Color Mode" ) )
-        eForegroundColorMode ColorMode;
 
         //UPROPERTY( EditAnywhere, Category=PrimitiveDrawingTool, meta = (ClampMin = "0.0",UIMin = "0.0", ClampMax = "1.0", UIMax = "1.0" ))
         double Opacity;

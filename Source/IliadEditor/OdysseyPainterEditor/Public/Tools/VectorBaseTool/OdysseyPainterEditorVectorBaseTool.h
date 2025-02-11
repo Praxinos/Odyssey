@@ -142,8 +142,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         // static
         void GetSegmentHandlesFromVertices( const std::vector<FOdysseyVectorVertex*>& iVertexArray
                                           , std::vector<FOdysseyVectorHandleSegment*>& oSegmentHandleArray );
-        void SetPathColor( FOdysseyVectorPath* iPath
-                         , eForegroundColorMode iColorSource );
+        void SetPathColor( FOdysseyVectorPath* iPath );
         void MakeTest( FOdysseyVectorGroupPaint* iScene );
 
         // for testing purpose
