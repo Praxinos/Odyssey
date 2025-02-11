@@ -39,36 +39,26 @@ FOdysseyPainterEditorVectorPathPushToolHUD::Unload( )
 }
 
 void
-FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext )
+FOdysseyPainterEditorVectorPathPushToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
 {
-    FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
-    FColor& bg = FOdysseyVectorHUD::GetBackgroundColor();
-    FColor& hc = FOdysseyVectorHUD::GetHighlightColor();
-    BLRgba32 fgColor = BLRgba32( fg.R, fg.G, fg.B, fg.A );
-    BLRgba32 bgColor = BLRgba32( bg.R, bg.G, bg.B, bg.A );
-    BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
+    FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
+    FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
+    FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
     uint64 hudFlags = mPathPushTool->GetEditor()->GetVectorHUDFlags();
+    FVector2D hudCursor = iParams.mTextureToHUD.Execute( FVector2D( mX, mY ) );
 
     // Draw default
     // -> nothing in object mode.
     // -> vertices and segments in vertex mode.
     // -> inbetweens in inbetween mode.
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext );
+    FOdysseyPainterEditorVectorBaseToolHUD::DrawHUD( iParams );
 
-    // draw selection box only if we restrict pushing to the selection
-    if( mPathPushTool->RestrictToSelectedObjects && mScene->GetCell()->GetSelectedObjectList().size() && ( mPathPushTool->IsDragging() == false ) )
-    {
- //3DHUD        DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
-    }
+    DrawPrimitiveCircle( iParams, hudCursor, mPathPushTool->Radius, hcColor, bgColor, 1.0f, false );
+}
 
-    // matrix might get altered for displaying the selection rectangle of a single object. Save it.
-    iBLContext->save();
-
-    iBLContext->setStrokeStyle( hcColor );
-    iBLContext->setStrokeWidth( 1.0f );
-    iBLContext->strokeCircle( mX, mY, mPathPushTool->Radius );
-
-    iBLContext->restore();
+void
+FOdysseyPainterEditorVectorPathPushToolHUD::Draw( BLContext* iBLContext )
+{
 }
 
 void

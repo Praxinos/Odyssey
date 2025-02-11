@@ -5,6 +5,7 @@
 #include "Tools/VectorEraserTool/OdysseyPainterEditorVectorEraserToolHUD.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorViewportTab.h"
 #include "ISinglePropertyView.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorCell.h"
@@ -25,6 +26,7 @@ UOdysseyPainterEditorVectorEraserTool::UOdysseyPainterEditorVectorEraserTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorEraserToolHUD>( this ), false )
     , SplitPath( true )
     , Radius( 20.0f )
+    , mZoomFactor( 1.0f )
 {
     Icon = *FOdysseyStyle::GetBrush( "PainterEditor.ToolsTab.Eraser64");
 
@@ -72,6 +74,10 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorGroupPai
                                                         , const FKey& iKey
                                                         , uint64& oSignalFlags )
 {
+    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+
+    mZoomFactor = viewportTab->GetViewport()->GetZoom();
+
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
@@ -83,7 +89,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDownVector( FOdysseyVectorGroupPai
     {
         mEraserHUD->BlendMask( true );
         mEraserHUD->ClearMask();
-        mEraserHUD->FillCircle( iPointInTexture.x, iPointInTexture.y );
+        mEraserHUD->FillCircle( iPointInTexture.x, iPointInTexture.y, mZoomFactor );
     }
 
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );
@@ -115,7 +121,7 @@ UOdysseyPainterEditorVectorEraserTool::OnMouseDragVector( FOdysseyVectorGroupPai
         mEraserHUD->StrokeLine( ::ULIS::FVec2D( iPointInTexture.x - iPointInTexture.deltaPosition.X
                                               , iPointInTexture.y - iPointInTexture.deltaPosition.Y )
                               , ::ULIS::FVec2D( iPointInTexture.x
-                                              , iPointInTexture.y ) );
+                                              , iPointInTexture.y ), mZoomFactor );
     }
 
     iScene->GetLayer()->RequestRedraw( iScene->GetCell(), FOdysseyVectorCell::REDRAW_INTERACTIVE );

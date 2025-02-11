@@ -11,6 +11,7 @@
 
 class FOdysseyPainterEditorVectorBaseToolHUD;
 class ISinglePropertyView;
+class SOdysseyViewport;
 class SViewport;
 
 class FOdysseyVectorGroupPaint;
@@ -77,6 +78,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual bool SupportsColorType(EOdysseyPainterEditorColorType iType) override;
 
         bool IsDragging();
+
+        TSharedPtr<SOdysseyViewport> GetViewport();
 
     protected:
         virtual uint64 LoadVector( FOdysseyVectorGroupPaint* iScene ){ return 0; };
@@ -174,11 +177,6 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         static const uint64 OBJECTMENU_HASSUBDIVIDE = ( 1ULL << 0 );
 
     protected:
-        // to store the top tab widget in order to create it only once. this will prevent sizing
-        // issues in the top bar.
-        // to force keyboard focus on mouse hover.
-        // Prevents the user from having to click at least once in the viewport.
-        TSharedPtr< SViewport > mViewportWidget;
         TSharedPtr<FOdysseyPainterEditorVectorBaseToolHUD> mBaseHUD;
         bool mHasContextMenu;
         bool mDragging;
@@ -189,6 +187,9 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         // they sometimes are both called and both trigger
         // FOdysseyPainterEditorViewportClient::InputKeyWithStrokePoint
         eMouseEventName mPreviousMouseEvent; // filter faulty stylus events
+        // we need the focus on the viewport for keyboard
+        // and some tools need to know the viewport size
+        TSharedPtr<SOdysseyViewport> mViewport;
 
     public:
         //UPROPERTY( EditAnywhere, Category=Behavior )

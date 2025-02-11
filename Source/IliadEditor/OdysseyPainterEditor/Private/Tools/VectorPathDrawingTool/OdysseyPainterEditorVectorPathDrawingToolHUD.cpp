@@ -113,6 +113,12 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::DrawHUD( const FOdysseyHUDSystem:
     uint64 hudFlags = mPathDrawingTool->GetEditor()->GetVectorHUDFlags();
     FVector2D hudCursor = iParams.mTextureToHUD.Execute( FVector2D( mX, mY ) );
 
+    // Draw default
+    // -> nothing in object mode.
+    // -> vertices and segments in vertex mode.
+    // -> inbetweens in inbetween mode.
+    FOdysseyPainterEditorVectorBaseToolHUD::DrawHUD( iParams );
+
     if( mPathDrawingTool->Stitch )
     {
         DrawPrimitiveCircle( iParams, hudCursor, mPathDrawingTool->StitchingRadius, hcColor, hcColor, 1.0f, false );
@@ -141,6 +147,7 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::DrawHUD( const FOdysseyHUDSystem:
     }
 }
 
+// part of this HUD is drawn onto the image
 void
 FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext )
 {
@@ -160,24 +167,6 @@ FOdysseyPainterEditorVectorPathDrawingToolHUD::Draw( BLContext* iBLContext )
     FTracerBezier& rawBezier = pathTracer.GetRawBezier();
     uint64 hudFlags = mPathDrawingTool->GetEditor()->GetVectorHUDFlags();
 
-    // Draw default
-    // -> nothing in object mode.
-    // -> vertices and segments in vertex mode.
-    // -> inbetweens in inbetween mode.
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext );
-
-    //DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
-
-    //mPointQuadTree->Draw( iBLContext, iScene, 0 );
-
-/*
-    iBLContext->save();
-    iBLContext->resetMatrix();
-
-    mCubicSegment.Draw( iBLContext );
-
-    iBLContext->restore();
-*/
     if( path )
     {
         FColor pathcolor = path->GetForegroundColor();

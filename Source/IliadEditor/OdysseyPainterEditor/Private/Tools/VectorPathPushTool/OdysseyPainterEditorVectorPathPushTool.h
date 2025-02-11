@@ -77,6 +77,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPathPushTool : public 
         //FOdysseyVectorHUDPicking mPickingHUD;
         FOdysseyPainterEditorVectorPathPushToolHUD *mPathPushHUD;
         double mMaxDistance;
+        double mZoomFactor;
 
     public:
         UPROPERTY( EditAnywhere

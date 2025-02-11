@@ -4,6 +4,7 @@
 #include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothTool.h"
 #include "Tools/VectorPathSmoothTool/OdysseyPainterEditorVectorPathSmoothToolHUD.h"
 #include "OdysseyPainterEditor.h"
+#include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
 #include "ISinglePropertyView.h"
@@ -25,6 +26,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::~UOdysseyPainterEditorVectorPathSmoot
 UOdysseyPainterEditorVectorPathSmoothTool::UOdysseyPainterEditorVectorPathSmoothTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathSmoothToolHUD>( this ), false )
     , mUndoSegmentReshape( nullptr )
+    , mZoomFactor( 1.0f )
     , SmoothingMode( ePathSmoothingMode::Round )
     , PickingRadius( 20.0f )
     , PreserveHandleLength( false )
@@ -103,6 +105,10 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDownVector( FOdysseyVectorGrou
                                                             , const FKey& iKey
                                                             , uint64& oSignalFlags )
 {
+    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+
+    mZoomFactor = viewportTab->GetViewport()->GetZoom();
+
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
@@ -140,7 +146,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseHoverVector( FOdysseyVectorGro
                                                              , uint64& oSignalFlags )
 {
 
-    mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
+    mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y, mZoomFactor );
 }
 
 void
@@ -153,7 +159,7 @@ UOdysseyPainterEditorVectorPathSmoothTool::OnMouseDragVector( FOdysseyVectorGrou
     {
         std::vector<FOdysseyVectorPoint*> pickedPointArray;
 
-        mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y );
+        mPathSmoothHUD->SetCursorPosition( iPointInTexture.x, iPointInTexture.y, mZoomFactor );
 
         pickedPointArray = mPathSmoothHUD->GetPickedPointArray();
 

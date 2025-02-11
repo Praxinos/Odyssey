@@ -16,12 +16,13 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorPathSmoothToolHUD : pu
         virtual ~FOdysseyPainterEditorVectorPathSmoothToolHUD();
         FOdysseyPainterEditorVectorPathSmoothToolHUD( UOdysseyPainterEditorVectorPathSmoothTool* iPathSmoothTool );
 
+        virtual void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams ) override;
         virtual void Draw( BLContext* iBLContext ) override;
         virtual void Reset() override;
         virtual void Load() override;
         virtual void Unload() override;
 
-        void SetCursorPosition( double iX, double iY );
+        void SetCursorPosition( double iX, double iY, double iZoomFactor );
         std::vector<FOdysseyVectorPoint*>& GetPickedPointArray();
 
     private:

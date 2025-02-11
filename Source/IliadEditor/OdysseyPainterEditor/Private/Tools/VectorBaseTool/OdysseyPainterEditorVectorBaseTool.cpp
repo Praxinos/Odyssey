@@ -269,12 +269,14 @@ UOdysseyPainterEditorVectorBaseTool::Unload()
 void
 UOdysseyPainterEditorVectorBaseTool::Load()
 {
-    UOdysseyPainterEditorTool::Load();
-    // we need the focus on the viewport for keyboard
     TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+
+    UOdysseyPainterEditorTool::Load();
     bool hasVector = GetEditor()->GetCurrentMediaProvider().HasMedia<FOdysseyMediaVector>();
 
-    mViewportWidget = viewportTab->GetViewport()->GetViewportWidget();
+    // we need the focus on the viewport for keyboard
+    // and some tools need to know the viewport size
+    mViewport = viewportTab->GetViewport();
 
     mPreviousMouseEvent = eMouseEventName::MouseHover;
 
@@ -528,6 +530,12 @@ UOdysseyPainterEditorVectorBaseTool::OnMouseHover( const FOdysseyPoint& iPointIn
     {
         FOdysseyVectorEngine::Notify( vectorScene, notificationFlags );
     }
+}
+
+TSharedPtr<SOdysseyViewport>
+UOdysseyPainterEditorVectorBaseTool::GetViewport()
+{
+    return mViewport;
 }
 
 // WorkAround for faulty stylus drivers

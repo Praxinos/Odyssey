@@ -72,12 +72,12 @@ FPointQuadTree::Build( uint32 iMaxPointsPerQuad
 
     if( ( mPointQuadTreeEntryArray.size() > iMaxPointsPerQuad ) && ( iDepth < iMaxDepth ) )
     {
-        uint32 minX =   mRect.x;
-        uint32 minY =   mRect.y;
-        uint32 maxX = ( mRect.x +   mRect.w );
-        uint32 maxY = ( mRect.y +   mRect.h );
-        uint32 avgX =   mRect.x + ( mRect.w * 0.5f );
-        uint32 avgY =   mRect.y + ( mRect.h * 0.5f );
+        double minX =   mRect.x;
+        double minY =   mRect.y;
+        double maxX = ( mRect.x +   mRect.w );
+        double maxY = ( mRect.y +   mRect.h );
+        double avgX =   mRect.x + ( mRect.w * 0.5f );
+        double avgY =   mRect.y + ( mRect.h * 0.5f );
 
         mChildren[0] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( minX, minY, avgX, avgY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray, iDepth + 1, iMaxDepth );
         mChildren[1] = new FPointQuadTree( ::ULIS::FRectD::FromMinMax( avgX, minY, maxX, avgY ), iMaxPointsPerQuad, mPointQuadTreeEntryArray, iDepth + 1, iMaxDepth );
@@ -162,9 +162,9 @@ FOdysseyPainterEditorVectorBaseToolHUD::MakePointQuadTree( bool iFocusedObjectsO
     std::vector<FPointQuadTreeEntry> pointQuadTreeEntryArray;
     uint32 width = mScene->GetLayer()->GetWidth();
     uint32 height = mScene->GetLayer()->GetHeight();
-    ::ULIS::FRectD screenRect;
+    ::ULIS::FRectD screenRect = mScene->GetBBox( true, true );
 
-    screenRect = ::ULIS::FRectD::FromXYWH( 0, 0, width, height );
+    //screenRect = ::ULIS::FRectD::FromXYWH( 0, 0, width, height );
 
     pointQuadTreeEntryArray.reserve( 200 );
 
@@ -901,7 +901,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveVertex( const FOdysseyHUDSy
                              , iFillColor
                              , mVertexTexture->GetResource()
                              , ESimpleElementBlendMode::SE_BLEND_Masked );
-
+/*
     iParams.mCanvas->DrawTile( iHUDCoords.X - iRadius
                              , iHUDCoords.Y - iRadius
                              , iRadius * 2.0f
@@ -913,6 +913,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveVertex( const FOdysseyHUDSy
                              , iContourColor
                              , mVertexContourTexture->GetResource()
                              , ESimpleElementBlendMode::SE_BLEND_Masked );
+*/
 
     // inner
 //    iBLContext->setFillStyle( fgColor );
@@ -1082,15 +1083,16 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveLine( const FOdysseyHUDSyst
                                                          , bool iOutline )
 {
     FBatchedElements* batchedElements = iParams.mCanvas->GetBatchedElements(FCanvas::ET_Line);
-    //FCanvasLineItem line = FCanvasLineItem( iHUDCoordsP0, iHUDCoordsP1 );
+    FCanvasLineItem line = FCanvasLineItem( iHUDCoordsP0, iHUDCoordsP1 );
 
-/*
     if( iOutline )
     {
+/*
         line.LineThickness = iThickness + 1.0f;
         line.SetColor( bgColor );
         iParams.mCanvas->DrawItem( line );
-
+*/
+/*
         batchedElements->AddTranslucentLine( FVector( iHUDCoordsP0, 0.f)
                                            , FVector( iHUDCoordsP1, 0.f)
                                            , bgColor
@@ -1098,14 +1100,15 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveLine( const FOdysseyHUDSyst
                                            , iThickness + 1.0f
                                            , 0.f
                                            , true );
+*/
 
     }
-*/
-/*
+
     line.LineThickness = iThickness;
     line.SetColor( fgColor );
     iParams.mCanvas->DrawItem( line );
-*/
+
+/*
     batchedElements->AddTranslucentLine( FVector( iHUDCoordsP0, 0.f)
                                        , FVector( iHUDCoordsP1, 0.f)
                                        , fgColor
@@ -1113,7 +1116,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawPrimitiveLine( const FOdysseyHUDSyst
                                        , iThickness
                                        , 0.f
                                        , true );
-
+*/
 }
 
 void
@@ -1209,7 +1212,7 @@ FOdysseyPainterEditorVectorBaseToolHUD::DrawCubicSegment( const FOdysseyHUDSyste
                                , hudHandle[i]
                                , vertex[i]->IsHandleAligned() ? greenColor : whiteColor
                                , blackColor
-                               , 2.0f
+                               , 1.0f
                                , true );
 
             // control handle

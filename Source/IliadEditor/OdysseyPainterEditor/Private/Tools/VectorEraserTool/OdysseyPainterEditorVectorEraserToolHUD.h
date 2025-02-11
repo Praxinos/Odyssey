@@ -14,6 +14,7 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorEraserToolHUD : public
         virtual ~FOdysseyPainterEditorVectorEraserToolHUD();
         FOdysseyPainterEditorVectorEraserToolHUD(  UOdysseyPainterEditorVectorEraserTool* iEraserTool );
 
+        void DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams );
         virtual void Draw( BLContext* iBLContext ) override;
         virtual void Reset() override;
         virtual void Load() override;
@@ -28,8 +29,8 @@ class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorVectorEraserToolHUD : public
          */
         void ClearMask();
 
-        void StrokeLine( const ::ULIS::FVec2D& iP0, const ::ULIS::FVec2D& iP1 );
-        void FillCircle( double iX, double iY );
+        void StrokeLine( const ::ULIS::FVec2D& iP0, const ::ULIS::FVec2D& iP1, double iRadius );
+        void FillCircle( double iX, double iY, double iRadius );
         BLImage* GetMask();
 
     protected:

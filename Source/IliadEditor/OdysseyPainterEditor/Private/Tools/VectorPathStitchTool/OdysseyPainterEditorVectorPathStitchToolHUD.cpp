@@ -6,6 +6,7 @@
 #include "OdysseyVectorVertex.h"
 #include "OdysseyVectorGroupPaint.h"
 #include "OdysseyPainterEditor.h"
+#include "SOdysseyViewport.h"
 
 FOdysseyPainterEditorVectorPathStitchToolHUD::~FOdysseyPainterEditorVectorPathStitchToolHUD()
 {
@@ -51,7 +52,8 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::GetStitchableVertices()
 }
 
 void
-FOdysseyPainterEditorVectorPathStitchToolHUD::SetPosition( double iWorldX, double iWorldY )
+FOdysseyPainterEditorVectorPathStitchToolHUD::SetPosition( double iWorldX
+                                                         , double iWorldY )
 {
     mX = iWorldX;
     mY = iWorldY;
@@ -60,7 +62,7 @@ FOdysseyPainterEditorVectorPathStitchToolHUD::SetPosition( double iWorldX, doubl
     mStitchableVertex[1] = nullptr;
     mPickedPointArray.clear();
 
-    PickPoints( iWorldX, iWorldY, mPathStitchTool->PickingRadius, mPickedPointArray );
+    PickPoints( iWorldX, iWorldY, mPathStitchTool->PickingRadius / mPathStitchTool->GetViewport()->GetZoom(), mPickedPointArray );
 
     for( int i = 0; i < mPickedPointArray.size(); i++ )
     {

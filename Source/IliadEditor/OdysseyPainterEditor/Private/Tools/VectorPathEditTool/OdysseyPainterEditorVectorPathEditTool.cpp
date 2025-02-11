@@ -5,6 +5,7 @@
 #include "Tools/VectorPathEditTool/OdysseyPainterEditorVectorPathEditToolHUD.h"
 #include "OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
+#include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyMediaVector.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorLayer.h"
@@ -502,6 +503,9 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
                              | FOdysseyPainterEditor::UI_UPDATE_SCENETREEVIEW
                              | FOdysseyPainterEditor::UI_UPDATE_TIMELINE;
 
+    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+    double zoomFactor = viewportTab->GetViewport()->GetZoom();
+
     mSelectedPathArray.clear();
     mPickedVertexArray.clear();
     mPickedVertexPositionArray.clear();
@@ -514,6 +518,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
     ( iScene
     , 0
     , [ this
+      , zoomFactor
       , iScene
       , &iPointInTexture ]( FOdysseyVectorObject* object, uint64 traversalFlags ) -> uint64
       {
@@ -525,7 +530,7 @@ UOdysseyPainterEditorVectorPathEditTool::OnMouseDownPickPoint( FOdysseyVectorGro
 
                   path->PickPoint( iPointInTexture.x
                                  , iPointInTexture.y
-                                 , PickingRadius
+                                 , PickingRadius / zoomFactor
                                  , mPickedVertexArray
                                  , mPickedHandleArray
                                  , mPickingFlags );

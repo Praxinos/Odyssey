@@ -4,6 +4,7 @@
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushTool.h"
 #include "Tools/VectorPathPushTool/OdysseyPainterEditorVectorPathPushToolHUD.h"
 #include "Undo/OdysseyVectorUndoSegmentReshape.h"
+#include "OdysseyPainterEditorViewportTab.h"
 #include "OdysseyPainterEditor.h"
 #include "OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
@@ -23,6 +24,7 @@ UOdysseyPainterEditorVectorPathPushTool::~UOdysseyPainterEditorVectorPathPushToo
 
 UOdysseyPainterEditorVectorPathPushTool::UOdysseyPainterEditorVectorPathPushTool()
     : UOdysseyPainterEditorVectorBaseTool( MakeShared<FOdysseyPainterEditorVectorPathPushToolHUD>( this ),false )
+    , mZoomFactor( 1.0f )
     , Radius( 20.0f )
     , RestrictToSelectedObjects( false )
 {
@@ -86,6 +88,10 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
                                                           , const FKey& iKey
                                                           , uint64& oSignalFlags )
 {
+    TSharedPtr<FOdysseyPainterEditorViewportTab> viewportTab = GetEditor()->FindTab<FOdysseyPainterEditorViewportTab>();
+
+    mZoomFactor = viewportTab->GetViewport()->GetZoom();
+
     if (iKey != EKeys::LeftMouseButton)
         return false;
 
@@ -121,7 +127,7 @@ UOdysseyPainterEditorVectorPathPushTool::OnMouseDownVector( FOdysseyVectorGroupP
 
                       path->PickSegments( iPointInTexture.x
                                         , iPointInTexture.y
-                                        , Radius
+                                        , Radius / mZoomFactor
                                         , mSegmentArray
                                         , &pickedSegmentDistanceArray );
                   }

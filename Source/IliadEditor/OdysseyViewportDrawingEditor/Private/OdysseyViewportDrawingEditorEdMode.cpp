@@ -89,6 +89,9 @@ FOdysseyViewportDrawingEditorEdMode::DrawHUD(FEditorViewportClient* ViewportClie
     TSharedPtr<SWidget> viewportWidget = ViewportClient->GetEditorViewportWidget();
     TSharedPtr<SWindow> window = FSlateApplication::Get().FindWidgetWindow(viewportWidget.ToSharedRef());
 
+    if( !window )
+        return;
+
     float scaleFactor = FSlateApplication::Get().GetApplicationScale() * window->GetNativeWindow()->GetDPIScaleFactor();
 
     FOdysseyHUD::FDrawHUDParams params;

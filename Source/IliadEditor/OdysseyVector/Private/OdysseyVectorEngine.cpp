@@ -98,6 +98,7 @@ void
 FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext
                                , FOdysseyVectorGroupPaint* iScene )
 {
+/*
     FOdysseyVectorGroupPaint* scene = iScene;
     BLImage* image = iBLContext->targetImage();
 
@@ -131,6 +132,7 @@ FOdysseyVectorEngine::RenderHUD( BLContext* iBLContext
     mRenderData.reset();
 
     mDrawingMutex.unlock();
+*/
 }
 
 
@@ -244,6 +246,12 @@ FOdysseyVectorEngine::Render( BLContext* iBLContext
             }
 
             scene->GetLayer()->GetSharedTagMutex().unlock();
+        }
+
+        // redraw HUDs that need to be fused with the render.
+        for( IOdysseyVectorHUD *hud : scene->GetCell()->GetHUDList() )
+        {
+            hud->Draw( iBLContext );
         }
 
         iBLContext->flush(BL_CONTEXT_FLUSH_SYNC);

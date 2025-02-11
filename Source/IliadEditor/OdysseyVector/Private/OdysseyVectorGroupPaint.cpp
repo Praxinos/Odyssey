@@ -286,7 +286,7 @@ FOdysseyVectorGroupPaint::FOdysseyVectorGroupPaint( const FString& iName )
                                                   , &mCanvasVertex[3]
                                                   , &mCanvasVertex[0]
                                                   , true ) }
-    , mSegmentExtensionScheme( eSegmentExtensionScheme::Single )
+    , mSegmentExtensionScheme(eSegmentExtensionScheme::Triple)
     , mGapDetectionScheme( eGapDetectionScheme::SegmentExtension )
     , bSegmentExtensionSimplified ( false )
 {

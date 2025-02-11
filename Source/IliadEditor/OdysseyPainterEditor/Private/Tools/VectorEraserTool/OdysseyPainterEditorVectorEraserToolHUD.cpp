@@ -47,6 +47,24 @@ FOdysseyPainterEditorVectorEraserToolHUD::Reset()
 }
 
 void
+FOdysseyPainterEditorVectorEraserToolHUD::DrawHUD( const FOdysseyHUDSystem::FDrawHUDParams& iParams )
+{
+    FLinearColor fgColor = FLinearColor( FOdysseyVectorHUD::GetForegroundColor() );
+    FLinearColor bgColor = FLinearColor( FOdysseyVectorHUD::GetBackgroundColor() );
+    FLinearColor hcColor = FLinearColor( FOdysseyVectorHUD::GetHighlightColor() );
+    uint64 hudFlags = mEraserTool->GetEditor()->GetVectorHUDFlags();
+    FVector2D hudCursor = iParams.mTextureToHUD.Execute( FVector2D( mX, mY ) );
+
+    // Draw default
+    // -> nothing in object mode.
+    // -> vertices and segments in vertex mode.
+    // -> inbetweens in inbetween mode.
+    FOdysseyPainterEditorVectorBaseToolHUD::DrawHUD( iParams );
+
+    DrawPrimitiveCircle( iParams, hudCursor, mEraserTool->Radius, hcColor, bgColor, 1.0f, false );
+}
+
+void
 FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext )
 {
     FColor& fg = FOdysseyVectorHUD::GetForegroundColor();
@@ -57,18 +75,6 @@ FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext )
     BLRgba32 hcColor = BLRgba32( hc.R, hc.G, hc.B, hc.A );
     uint64 hudFlags = mEraserTool->GetEditor()->GetVectorHUDFlags();
 
-    // Draw default
-    // -> nothing in object mode.
-    // -> vertices and segments in vertex mode.
-    // -> inbetweens in inbetween mode.
-    FOdysseyPainterEditorVectorBaseToolHUD::Draw( iBLContext );
-
-    // draw selection box only if we restrict erasure to the selection
-    if( mScene->GetCell()->GetSelectedObjectList().size() )
-    {
- //3DHUD       DrawSelectionBox( iBLContext, iScene, fgColor, bgColor, hcColor, hudFlags );
-    }
-
     // Prepare bliting the erasing mask
     mBLEraserContext.flush( BL_CONTEXT_FLUSH_SYNC );
 
@@ -76,30 +82,26 @@ FOdysseyPainterEditorVectorEraserToolHUD::Draw( BLContext* iBLContext )
     {
         iBLContext->blitImage( BLPoint( 0, 0 ), mBLEraserMask );
     }
-
-    iBLContext->save();
-
-    iBLContext->setStrokeStyle( BLRgba32( 0xFF0000FF ) );
-    iBLContext->setStrokeWidth( 1.0f );
-    iBLContext->strokeCircle( mX, mY, mEraserTool->Radius );
-
-    iBLContext->restore();
 }
 
 void
-FOdysseyPainterEditorVectorEraserToolHUD::FillCircle( double iX, double iY )
+FOdysseyPainterEditorVectorEraserToolHUD::FillCircle( double iX
+                                                    , double iY
+                                                    , double iZoomFactor )
 {
     mBLEraserContext.setFillAlpha( 1.0f );
-    mBLEraserContext.fillCircle( iX, iY, mEraserTool->Radius );
+    mBLEraserContext.fillCircle( iX, iY, mEraserTool->Radius / iZoomFactor );
 }
 
 void
-FOdysseyPainterEditorVectorEraserToolHUD::StrokeLine( const ::ULIS::FVec2D& iP0, const ::ULIS::FVec2D& iP1 )
+FOdysseyPainterEditorVectorEraserToolHUD::StrokeLine( const ::ULIS::FVec2D& iP0
+                                                    , const ::ULIS::FVec2D& iP1
+                                                    , double iZoomFactor )
 {
     mBLEraserContext.setFillAlpha( 1.0f );
     mBLEraserContext.setStrokeWidth( mEraserTool->Radius * 2 );
     mBLEraserContext.strokeLine( iP0.x, iP0.y, iP1.x, iP1.y );
-    mBLEraserContext.fillCircle( iP1.x, iP1.y, mEraserTool->Radius );
+    mBLEraserContext.fillCircle( iP1.x, iP1.y, mEraserTool->Radius / iZoomFactor );
 }
 
 void
