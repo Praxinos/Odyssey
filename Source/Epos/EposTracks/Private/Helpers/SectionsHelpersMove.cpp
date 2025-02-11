@@ -9,255 +9,183 @@
 
 //---
 
-TRange<FFrameNumber>
-FMoveFragment::GetEffectiveTrueRange() const
+FMoveResult::FMoveResult()
+    : mForward( false )
+    , mBackward( false )
+    , mReferenceFrame( 0 )
+    , mInitialGap( TRange<FFrameNumber>::Empty() )
+    , mInitialGapMiddle( 0 )
+    , mInitialGapSize( 0 )
+    , mSectionsBeforeGap()
+    , mSectionsAfterGap()
 {
-    if( mIsGap )
-        return mInitialGap;
-
-    return mSection->GetTrueRange();
-}
-
-bool operator< ( const FMoveFragment& iA, const FMoveFragment& iB )
-{
-    FFrameNumber frame_a = iA.mIsGap ? iA.mInitialGap.GetLowerBoundValue() : iA.mSection->GetTrueRange().GetLowerBoundValue();
-    FFrameNumber frame_b = iB.mIsGap ? iB.mInitialGap.GetLowerBoundValue() : iB.mSection->GetTrueRange().GetLowerBoundValue();
-
-    return frame_a < frame_b;
-}
-
-int32
-FMoveResults2::FindFragmentFromSection( const UMovieSceneSection* iSection ) const
-{
-    for( int i = 0; i < mFragments.Num(); i++ )
-    {
-        FMoveFragment fragment = mFragments[i];
-        if( fragment.mSection == iSection )
-            return i;
-    }
-
-    return INDEX_NONE;
-}
-
-static
-void
-SwitchFragment( FMoveFragment& ioFragment1, FMoveFragment& ioFragment2 )
-{
-    FMoveFragment& fragment_left = ioFragment1;
-    FMoveFragment& fragment_right = ioFragment2;
-    if( ioFragment1.GetEffectiveTrueRange().GetLowerBoundValue() > ioFragment2.GetEffectiveTrueRange().GetLowerBoundValue() )
-    {
-        fragment_left = ioFragment2;
-        fragment_right = ioFragment1;
-    }
-
-    if( fragment_left.mIsGap && fragment_right.mIsGap )
-    {
-        FFrameNumber fragment_left_size = fragment_left.mInitialGapSize;
-        FFrameNumber fragment_right_size = fragment_right.mInitialGapSize;
-
-        fragment_left.mInitialGap = UE::MovieScene::TranslateRange( fragment_left.mInitialGap, fragment_right_size );
-        fragment_left.mInitialGapMiddle += fragment_right_size;
-        fragment_right.mInitialGap = UE::MovieScene::TranslateRange( fragment_right.mInitialGap, -fragment_left_size );
-        fragment_right.mInitialGapMiddle -= fragment_left_size;
-    }
-    else if( !fragment_left.mIsGap && fragment_right.mIsGap )
-    {
-        FFrameNumber fragment_left_size = UE::MovieScene::DiscreteSize( fragment_left.mSection->GetTrueRange() );
-        FFrameNumber fragment_right_size = fragment_right.mInitialGapSize;
-
-        fragment_left.mSection->MoveSection( fragment_right_size );
-        fragment_right.mInitialGap = UE::MovieScene::TranslateRange( fragment_right.mInitialGap, -fragment_left_size );
-        fragment_right.mInitialGapMiddle -= fragment_left_size;
-    }
-    else if( fragment_left.mIsGap && !fragment_right.mIsGap )
-    {
-        FFrameNumber fragment_left_size = fragment_left.mInitialGapSize;
-        FFrameNumber fragment_right_size = UE::MovieScene::DiscreteSize( fragment_right.mSection->GetTrueRange() );
-
-        fragment_left.mInitialGap = UE::MovieScene::TranslateRange( fragment_left.mInitialGap, fragment_right_size );
-        fragment_left.mInitialGapMiddle += fragment_right_size;
-        fragment_right.mSection->MoveSection( -fragment_left_size );
-    }
-    else if( !fragment_left.mIsGap && !fragment_right.mIsGap )
-    {
-        FFrameNumber fragment_left_size = UE::MovieScene::DiscreteSize( fragment_left.mSection->GetTrueRange() );
-        FFrameNumber fragment_right_size = UE::MovieScene::DiscreteSize( fragment_right.mSection->GetTrueRange() );
-
-        fragment_left.mSection->MoveSection( fragment_right_size );
-        fragment_right.mSection->MoveSection( -fragment_left_size );
-    }
-}
-
-void
-FMoveResults2::SwitchFragments( int32 iFragmentIndex1, int32 iFragmentIndex2 )
-{
-    check( FMath::Abs( iFragmentIndex1 - iFragmentIndex2 ) == 1 );
-
-    SwitchFragment( mFragments[iFragmentIndex1], mFragments[iFragmentIndex2] );
-}
-
-void
-FMoveResults2::MoveForwardGap( int32 iGapIndex, const FMoveSection& iReferenceSection )
-{
-    check( mFragments.IsValidIndex( iGapIndex ) );
-    check( mFragments[iGapIndex].mIsGap );
-    check( mFragments[iGapIndex].mSection == iReferenceSection.mSection );
-
-    FMoveFragment& gap_fragment = mFragments[iGapIndex];
-
-    for( int i = iGapIndex + 1; i < mFragments.Num(); i++ )
-    {
-        FMoveFragment& next_fragment = mFragments[i];
-
-        FFrameNumber next_fragment_middle = next_fragment.GetEffectiveTrueRange().GetLowerBoundValue() + UE::MovieScene::DiscreteSize( next_fragment.GetEffectiveTrueRange() ) / 2;
-
-        if( next_fragment_middle >= iReferenceSection.mReferenceFrame )
-            //if( gap_fragment.mInitialGapMiddle >= iReferenceSection.mReferenceFrame )
-            break;
-
-        if( next_fragment.mIsGap )
-            break;
-
-        check( gap_fragment.GetEffectiveTrueRange().GetUpperBoundValue() == next_fragment.GetEffectiveTrueRange().GetLowerBoundValue() );
-
-        SwitchFragment( gap_fragment, next_fragment );
-    }
-
-    //Do it here ? or outside ? when to *physically* re-sort the array ?
-    mFragments.StableSort();
-}
-
-void
-FMoveResults2::MoveBackwardGap( int32 iGapIndex, const FMoveSection& iReferenceSection )
-{
-    check( mFragments.IsValidIndex( iGapIndex ) );
-    check( mFragments[iGapIndex].mIsGap );
-    check( mFragments[iGapIndex].mSection == iReferenceSection.mSection );
-
-    FMoveFragment& gap_fragment = mFragments[iGapIndex];
-
-    for( int i = iGapIndex - 1; i >= 0; i-- )
-    {
-        FMoveFragment& previous_fragment = mFragments[i];
-
-        FFrameNumber previous_fragment_middle = previous_fragment.GetEffectiveTrueRange().GetLowerBoundValue() + UE::MovieScene::DiscreteSize( previous_fragment.GetEffectiveTrueRange() ) / 2;
-
-        if( previous_fragment_middle < iReferenceSection.mReferenceFrame )
-            break;
-
-        if( previous_fragment.mIsGap )
-            break;
-
-        check( gap_fragment.GetEffectiveTrueRange().GetLowerBoundValue() == previous_fragment.GetEffectiveTrueRange().GetUpperBoundValue() );
-
-        SwitchFragment( previous_fragment, gap_fragment );
-    }
-
-    //Do it here ? or outside ? when to *physically* re-sort the array ?
-    mFragments.StableSort();
 }
 
 //---
 
 //static
-FMoveResults2
-SectionsHelpersMove::GetMoveInfo2( const TArray<UMovieSceneSection*>& iUnmovedSections, const TMap<UMovieSceneSection*, TRange<FFrameNumber>>& iPreviousMoves, const TMap<UMovieSceneSection*, TRange<FFrameNumber>>& iLastGapMoves, const TArray<UMovieSceneSection*>& iMovedSections )
+FMoveResult
+SectionsHelpersMove::GetMoveInfo( TArray< UMovieSceneSection* > iSections, TRange<FFrameNumber> iPreviousMove, TRange<FFrameNumber> iLastGapMove, const UMovieSceneSection* iSection )
 {
-    FMoveResults2 move_result;
+    FMoveResult move_result;
 
-    for( UMovieSceneSection* moved_section : iMovedSections )
-    {
-        TRange<FFrameNumber> previous_move = iPreviousMoves.FindChecked( moved_section );
-
-        if( moved_section->GetInclusiveStartFrame() > previous_move.GetLowerBoundValue() )
-            move_result.mForward = true;
-        else if( moved_section->GetInclusiveStartFrame() < previous_move.GetLowerBoundValue() )
-            move_result.mBackward = true;
-
-        FMoveSection moved_section_to_add;
-        moved_section_to_add.mSection = moved_section;
-        if( move_result.mForward )
-            moved_section_to_add.mReferenceFrame = moved_section->GetExclusiveEndFrame();
-        else
-            moved_section_to_add.mReferenceFrame = moved_section->GetInclusiveStartFrame();
-
-        move_result.mMovedSections.Add( moved_section_to_add );
-    }
-
-    //---
-
-    for( UMovieSceneSection* unmoved_section : iUnmovedSections )
-    {
-        FMoveFragment fragment;
-        fragment.mSection = unmoved_section;
-        fragment.mIsGap = false;
-
-        move_result.mFragments.Add( fragment );
-    }
-
-    for( TPair<UMovieSceneSection*, TRange<FFrameNumber>> pair : iLastGapMoves )
-    {
-        FMoveFragment fragment;
-        fragment.mSection = pair.Key;
-        fragment.mIsGap = true;
-
-        fragment.mInitialGap = pair.Value;
-        fragment.mInitialGapMiddle = ( fragment.mInitialGap.GetLowerBoundValue() + fragment.mInitialGap.GetUpperBoundValue() ) / 2;
-        fragment.mInitialGapSize = UE::MovieScene::DiscreteSize( fragment.mInitialGap );
-
-        check( fragment.mInitialGapSize == UE::MovieScene::DiscreteSize( fragment.mSection->GetTrueRange() ) );
-
-        move_result.mFragments.Add( fragment );
-    }
-
-    //---
-
-    FMoveResults2 move_result_ordered = move_result;
-
-    move_result_ordered.mMovedSections.StableSort();
-    move_result_ordered.mFragments.StableSort();
-
-    return move_result_ordered;
-}
-
-//static
-void
-SectionsHelpersMove::FixMoveSections2( TArray<UMovieSceneSection*>& ioSections, TMap<UMovieSceneSection*, TRange<FFrameNumber>>* ioLastGapMoves, const FMoveResults2& iMoveResults )
-{
-    FMoveResults2 move_results = iMoveResults;
-
-    if( move_results.mForward )
-    {
-        TArray<FMoveSection> moved_sections = move_results.mMovedSections;
-        Algo::Reverse( moved_sections );
-
-        for( FMoveSection current_moved_section : moved_sections )
-        {
-            int32 gap_index = move_results.FindFragmentFromSection( current_moved_section.mSection );
-
-            move_results.MoveForwardGap( gap_index, current_moved_section );
-
-            int32 new_gap_index = move_results.FindFragmentFromSection( current_moved_section.mSection );
-            check( move_results.mFragments[new_gap_index].mIsGap );
-
-            *ioLastGapMoves->Find( current_moved_section.mSection ) = move_results.mFragments[new_gap_index].GetEffectiveTrueRange();
-        }
-    }
+    if( iSection->GetInclusiveStartFrame() > iPreviousMove.GetLowerBoundValue() )
+        move_result.mForward = true;
+    else if( iSection->GetInclusiveStartFrame() < iPreviousMove.GetLowerBoundValue() )
+        move_result.mBackward = true;
     else
+        return move_result;
+
+    if( move_result.mForward )
+        move_result.mReferenceFrame = iSection->GetExclusiveEndFrame();
+    else
+        move_result.mReferenceFrame = iSection->GetInclusiveStartFrame();
+
+    //---
+
+    move_result.mInitialGap = iLastGapMove;
+    move_result.mInitialGapMiddle = ( move_result.mInitialGap.GetLowerBoundValue() + move_result.mInitialGap.GetUpperBoundValue() ) / 2;
+    move_result.mInitialGapSize = UE::MovieScene::DiscreteSize( move_result.mInitialGap );
+
+    //---
+
+    for( int i = 0; i < iSections.Num(); i++ )
     {
-        for( FMoveSection current_moved_section : move_results.mMovedSections )
-        {
-            int32 gap_index = move_results.FindFragmentFromSection( current_moved_section.mSection );
+        if( iSections[i] == iSection )
+            continue;
 
-            move_results.MoveBackwardGap( gap_index, current_moved_section );
+        UMovieSceneSection* section = iSections[i];
+        FFrameNumber section_middle = ( section->GetInclusiveStartFrame() + section->GetExclusiveEndFrame() ) / 2;
 
-            int32 new_gap_index = move_results.FindFragmentFromSection( current_moved_section.mSection );
-            check( move_results.mFragments[new_gap_index].mIsGap );
-
-            *ioLastGapMoves->Find( current_moved_section.mSection ) = move_results.mFragments[new_gap_index].GetEffectiveTrueRange();
-        }
+        if( section_middle < move_result.mInitialGapMiddle )
+            move_result.mSectionsBeforeGap.Add( section );
+        else
+            move_result.mSectionsAfterGap.Add( section );
     }
+
+
+    // So we can use for( auto section : mSectionsBeforeGap )
+    Algo::Reverse( move_result.mSectionsBeforeGap );
+
+    return move_result;
 }
 
-//---
+//static
+void
+SectionsHelpersMove::FixMoveSections( TArray< UMovieSceneSection* >& ioSections, TRange<FFrameNumber>* ioLastGapMove, UMovieSceneSection* iSection, FMoveResult iMoveResult )
+{
+    // If the reference frame is at the right of the gap,
+    // process only every sections 'AfterGap'
+    if( iMoveResult.mReferenceFrame > iMoveResult.mInitialGapMiddle )
+    {
+        // Find the section (if any) corresponding to the reference frame
+        UMovieSceneSection* section_containing_reference_frame = nullptr;
+        TArray<TRange<FFrameNumber>> ranges;
+        for( auto section : iMoveResult.mSectionsAfterGap )
+        {
+            if( section->IsTimeWithinSection( iMoveResult.mReferenceFrame ) )
+            {
+                section_containing_reference_frame = section;
+                ranges = section->GetTrueRange().Split( ( section->GetInclusiveStartFrame() + section->GetExclusiveEndFrame() ) / 2 );
+                break;
+            }
+        }
+
+        if( ranges.Num() && ranges[0].Contains( iMoveResult.mReferenceFrame ) )
+        {
+            // Move every 'after gap' sections before (and excluding) the referenced one
+            for( auto section_after_gap : iMoveResult.mSectionsAfterGap )
+            {
+                if( section_after_gap == section_containing_reference_frame )
+                    break;
+
+                FFrameNumber gap_shift = UE::MovieScene::DiscreteSize( section_after_gap->GetTrueRange() );
+                *ioLastGapMove = TRange<FFrameNumber>( ioLastGapMove->GetLowerBoundValue() + gap_shift, ioLastGapMove->GetUpperBoundValue() + gap_shift );
+
+                section_after_gap->MoveSection( -iMoveResult.mInitialGapSize );
+            }
+        }
+        else if( ranges.Num() >= 2 && ranges[1].Contains( iMoveResult.mReferenceFrame ) )
+        {
+            // Move every 'after gap' sections before (and including) the referenced one
+            for( auto section_after_gap : iMoveResult.mSectionsAfterGap )
+            {
+                FFrameNumber gap_shift = UE::MovieScene::DiscreteSize( section_after_gap->GetTrueRange() );
+                *ioLastGapMove = TRange<FFrameNumber>( ioLastGapMove->GetLowerBoundValue() + gap_shift, ioLastGapMove->GetUpperBoundValue() + gap_shift );
+
+                section_after_gap->MoveSection( -iMoveResult.mInitialGapSize );
+
+                if( section_after_gap == section_containing_reference_frame )
+                    break;
+            }
+        }
+    }
+    // If the reference frame is at the left of the gap,
+    // process only every sections 'BeforeGap'
+    else if( iMoveResult.mReferenceFrame < iMoveResult.mInitialGapMiddle )
+    {
+        // Find the section (if any) corresponding to the reference frame
+        UMovieSceneSection* section_containing_reference_frame = nullptr;
+        TArray<TRange<FFrameNumber>> ranges;
+        for( auto section : iMoveResult.mSectionsBeforeGap )
+        {
+            if( section->IsTimeWithinSection( iMoveResult.mReferenceFrame ) )
+            {
+                section_containing_reference_frame = section;
+                ranges = section->GetTrueRange().Split( ( section->GetInclusiveStartFrame() + section->GetExclusiveEndFrame() ) / 2 );
+                break;
+            }
+        }
+
+        if( ranges.Num() && ranges[0].Contains( iMoveResult.mReferenceFrame ) )
+        {
+            // Move every 'before gap' sections after (and including) the referenced one
+            for( auto section_before_gap : iMoveResult.mSectionsBeforeGap )
+            {
+                FFrameNumber gap_shift = UE::MovieScene::DiscreteSize( section_before_gap->GetTrueRange() );
+                *ioLastGapMove = TRange<FFrameNumber>( ioLastGapMove->GetLowerBoundValue() - gap_shift, ioLastGapMove->GetUpperBoundValue() - gap_shift );
+
+                section_before_gap->MoveSection( iMoveResult.mInitialGapSize );
+
+                if( section_before_gap == section_containing_reference_frame )
+                    break;
+            }
+        }
+        else if( ranges.Num() >= 2 && ranges[1].Contains( iMoveResult.mReferenceFrame ) )
+        {
+            // Move every 'before gap' sections after (and excluding) the referenced one
+            for( auto section_before_gap : iMoveResult.mSectionsBeforeGap )
+            {
+                if( section_before_gap == section_containing_reference_frame )
+                    break;
+
+                FFrameNumber gap_shift = UE::MovieScene::DiscreteSize( section_before_gap->GetTrueRange() );
+                *ioLastGapMove = TRange<FFrameNumber>( ioLastGapMove->GetLowerBoundValue() - gap_shift, ioLastGapMove->GetUpperBoundValue() - gap_shift );
+
+                section_before_gap->MoveSection( iMoveResult.mInitialGapSize );
+            }
+        }
+    }
+
+    MovieSceneHelpers::SortConsecutiveSections( ioSections );
+}
+
+//static
+TArray< UMovieSceneSection* >
+SectionsHelpersMove::GetOrderedSections( const TArray< UMovieSceneSection* > iSections )
+{
+    TArray< UMovieSceneSection* > ordered_sections = iSections;
+    MovieSceneHelpers::SortConsecutiveSections( ordered_sections );
+    return ordered_sections;
+}
+
+//static
+void
+SectionsHelpersMove::FixPostMoveSections( TArray< UMovieSceneSection* >& ioSections, TRange<FFrameNumber> iLastGapMove, UMovieSceneSection* iSection, FMoveResult iMoveResult )
+{
+    check( UE::MovieScene::DiscreteSize( iSection->GetTrueRange() ) == UE::MovieScene::DiscreteSize( iLastGapMove ) );
+
+    iSection->SetRange( iLastGapMove );
+
+    MovieSceneHelpers::SortConsecutiveSections( ioSections );
+}

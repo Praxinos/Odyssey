@@ -159,7 +159,7 @@ BoardSequenceTools::SwitchTake( ISequencer* iSequencer, UMovieSceneSubSection& i
         board_section->Resizing(); // So OnSectionMoved() will go inside IsResizing()
 
         UMovieSceneCinematicBoardTrack* track = board_section->GetTypedOuter<UMovieSceneCinematicBoardTrack>();
-        track->OnSectionMoved( { board_section }, EPropertyChangeType::ValueSet ); // This will call StopResizing()
+        track->OnSectionMoved( *board_section, EPropertyChangeType::ValueSet ); // This will call StopResizing()
     }
     else
     {

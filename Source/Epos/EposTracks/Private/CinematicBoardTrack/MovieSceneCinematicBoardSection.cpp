@@ -82,7 +82,7 @@ void UMovieSceneCinematicBoardSection::PostEditChangeProperty( FPropertyChangedE
 
         if( UMovieSceneCinematicBoardTrack* Track = GetTypedOuter<UMovieSceneCinematicBoardTrack>() )
         {
-            Track->OnSectionMoved( { this }, EPropertyChangeType::ValueSet );
+            Track->OnSectionMoved( *this, EPropertyChangeType::ValueSet );
         }
     }
 }
