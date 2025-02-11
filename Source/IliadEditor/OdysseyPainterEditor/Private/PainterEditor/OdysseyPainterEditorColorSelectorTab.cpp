@@ -41,9 +41,10 @@ FOdysseyPainterEditorColorSelectorTab::FOdysseyPainterEditorColorSelectorTab(FOd
 TSharedPtr<SWidget>
 FOdysseyPainterEditorColorSelectorTab::CreateWidget()
 {
-    return SNew(SVerticalBox)
-        +SVerticalBox::Slot()
-        .AutoHeight()
+    return
+        SNew(SScrollBox)
+        +SScrollBox::Slot()
+        .AutoSize()
         [
             SNew(SSegmentedControl<EOdysseyPainterEditorColorType>)
             .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetColorTypeVisibility)
@@ -62,8 +63,8 @@ FOdysseyPainterEditorColorSelectorTab::CreateWidget()
             .ToolTip(LOCTEXT("color-selector.color-type.indexed.tooltip", "Switch to Indexed colors"))
             .Icon(FOdysseyStyle::GetBrush( "PainterEditor.ColorSelector.ColorType.Indexed" ))
         ]
-        +SVerticalBox::Slot()
-        .AutoHeight()
+        +SScrollBox::Slot()
+        .AutoSize()
         [
             SNew(SVerticalBox)
             .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetRawColorWidgetsVisibility)
@@ -112,8 +113,8 @@ FOdysseyPainterEditorColorSelectorTab::CreateWidget()
             ]
         ]
 
-        +SVerticalBox::Slot()
-        .AutoHeight()
+        +SScrollBox::Slot()
+        .AutoSize()
         [
             SNew(SVerticalBox)
             .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetRawColorWidgetsVisibility)
@@ -155,8 +156,8 @@ FOdysseyPainterEditorColorSelectorTab::CreateWidget()
                 .OnColorChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnColorChanged)
             ]
         ]
-        +SVerticalBox::Slot()
-        .AutoHeight()
+        +SScrollBox::Slot()
+        .AutoSize()
         [
             SNew(SVerticalBox)
             .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetRawColorWidgetsVisibility)
@@ -199,7 +200,8 @@ FOdysseyPainterEditorColorSelectorTab::CreateWidget()
             ]
         ]
 
-        +SVerticalBox::Slot()
+        +SScrollBox::Slot()
+        .FillSize(1.0f)
         [
             SNew(SVerticalBox)
             +SVerticalBox::Slot()
@@ -233,15 +235,19 @@ FOdysseyPainterEditorColorSelectorTab::CreateWidget()
             ]
             +SVerticalBox::Slot()
             [
-                SNew(SOdysseyPainterEditorPaletteSetList)
-                .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetColorPaletteVisibility)
-                .PaletteSets(this, &FOdysseyPainterEditorColorSelectorTab::GetPaletteSets)
-                .CurrentColorEntry(this, &FOdysseyPainterEditorColorSelectorTab::GetCurrentPaletteColorEntry)
-                .CurrentSet(this, &FOdysseyPainterEditorColorSelectorTab::GetCurrentPaletteSet)
-                //.OnPaletteSetChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnPaletteSetChanged)
-                .OnAddPaletteSet(this, &FOdysseyPainterEditorColorSelectorTab::OnAddPaletteSet)
-                .OnRemovePaletteSet(this, &FOdysseyPainterEditorColorSelectorTab::OnRemovePaletteSet)
-                .OnCurrentColorEntryChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnPaletteCurrentColorEntryChanged)
+                SNew(SBox)
+                .MaxDesiredHeight(100.f)
+                [
+                    SNew(SOdysseyPainterEditorPaletteSetList)
+                    .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetColorPaletteVisibility)
+                    .PaletteSets(this, &FOdysseyPainterEditorColorSelectorTab::GetPaletteSets)
+                    .CurrentColorEntry(this, &FOdysseyPainterEditorColorSelectorTab::GetCurrentPaletteColorEntry)
+                    .CurrentSet(this, &FOdysseyPainterEditorColorSelectorTab::GetCurrentPaletteSet)
+                    //.OnPaletteSetChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnPaletteSetChanged)
+                    .OnAddPaletteSet(this, &FOdysseyPainterEditorColorSelectorTab::OnAddPaletteSet)
+                    .OnRemovePaletteSet(this, &FOdysseyPainterEditorColorSelectorTab::OnRemovePaletteSet)
+                    .OnCurrentColorEntryChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnPaletteCurrentColorEntryChanged)
+                ]
             ]
         ];
 }

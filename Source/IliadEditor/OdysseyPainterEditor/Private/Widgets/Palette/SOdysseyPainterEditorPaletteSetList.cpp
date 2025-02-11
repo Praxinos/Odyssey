@@ -91,7 +91,6 @@ void SOdysseyPainterEditorPaletteSetList::Construct(const FArguments& InArgs)
             .OnGetMenuContent(this, &SOdysseyPainterEditorPaletteSetList::OnGetAddPaletteMenuContent)
         ]
         + SVerticalBox::Slot()
-        .AutoHeight()
         [
             SAssignNew(mTreeView, STreeView<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>>)
             .OnIsSelectableOrNavigable(this, &SOdysseyPainterEditorPaletteSetList::OnIsSelectableOrNavigable)
