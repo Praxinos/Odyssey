@@ -4,7 +4,6 @@
 #include "Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketTool.h"
 #include "Tools/VectorPaintBucketTool/OdysseyPainterEditorVectorPaintBucketToolHUD.h"
 
-#include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
 #include "OdysseyMediaVector.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 #include "OdysseyPainterEditorViewportTab.h"

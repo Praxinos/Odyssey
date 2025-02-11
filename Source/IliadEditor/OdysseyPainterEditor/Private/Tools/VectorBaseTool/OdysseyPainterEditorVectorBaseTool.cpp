@@ -11,7 +11,6 @@
 #include "OdysseyPainterEditorViewportTab.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 #include "Palette/OdysseyPalette.h"
-#include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
 #include "ISinglePropertyView.h"
 #include "Toolkits/BaseToolkit.h"
 #include "OdysseyVectorEngine.h"
