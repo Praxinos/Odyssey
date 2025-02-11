@@ -597,6 +597,19 @@ FOdysseyPainterEditor::PaintColor() const
     return mPaintColor;
 }
 
+
+EOdysseyPainterEditorColorType
+FOdysseyPainterEditor::GetColorType() const
+{
+    return mColorType;
+}
+
+void
+FOdysseyPainterEditor::SetColorType(EOdysseyPainterEditorColorType iType)
+{
+    mColorType = iType;
+}
+
 UOdysseyPainterEditorTool*
 FOdysseyPainterEditor::GetCurrentMainTool() const
 {

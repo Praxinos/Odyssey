@@ -1,7 +1,7 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "Color/SOdysseyColorSliders.h"
+#include "Widgets/Color/SOdysseyColorSliders.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/SOverlay.h"
@@ -10,7 +10,7 @@
 #include "Widgets/Input/SCheckBox.h"
 #include "Brushes/SlateColorBrush.h"
 #include "Widgets/Views/SListView.h"
-#include "Color/SOdysseyColorSlider.h"
+#include "Widgets/Color/SOdysseyColorSlider.h"
 
 #define LOCTEXT_NAMESPACE "Widgets"
 
@@ -28,7 +28,7 @@ void
 SOdysseyColorSliders::Construct( const FArguments& InArgs )
 {
     mColor = InArgs._Color;
-    OnColorChangeCallback = InArgs._OnColorChange;
+    OnColorChanged = InArgs._OnColorChanged;
     ChildSlot
     [
         SNew( SVerticalBox )
@@ -92,7 +92,7 @@ SOdysseyColorSliders::GenerateMenu()
     sliders_options.Add( GenerateSliderOption<FOdysseyGroupChannelSlider_HSL>( "HSL", false ) );
     sliders_options.Add( GenerateSliderOption<FOdysseyGroupChannelSlider_CMYK>( "CMYK", false ) );
     //sliders_options.Add( GenerateSliderOption<FOdysseyGroupChannelSlider_YUV>( "YUV", false ) );
-    sliders_options.Add( GenerateSliderOption<FOdysseyGroupChannelSlider_Lab>( "LabD65", true ) );
+    sliders_options.Add( GenerateSliderOption<FOdysseyGroupChannelSlider_Lab>( "LabD65", false ) );
 
     combo_menu = SNew( SVerticalBox );
     for( int i = 0; i < sliders_options.Num(); ++i )

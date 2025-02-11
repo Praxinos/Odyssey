@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "Engine/StaticMesh.h"
 #include "Styling/SlateTypes.h"
-#include "Color/SOdysseyColorSlider.h"
 
 /**
  * The Model of the MeshSelector

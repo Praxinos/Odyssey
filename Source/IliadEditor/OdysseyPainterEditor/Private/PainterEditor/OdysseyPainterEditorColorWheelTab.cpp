@@ -3,7 +3,7 @@
 
 #include "OdysseyPainterEditorColorWheelTab.h"
 
-#include "Color/SOdysseyColorSelector.h"
+#include "Widgets/Color/SOdysseyAdvancedColorWheel.h"
 #include "OdysseyPainterEditor.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
 
@@ -44,7 +44,7 @@ FOdysseyPainterEditorColorWheelTab::CreateWidget()
         .DesiredWidth(   150 )
         .DesiredHeight(  150 )
         .Color_Raw(this, &FOdysseyPainterEditorColorWheelTab::Color)
-        .OnColorChange_Raw(this, &FOdysseyPainterEditorColorWheelTab::OnColorChange);
+        .OnColorChanged_Raw(this, &FOdysseyPainterEditorColorWheelTab::OnColorChanged);
 }
 
 //--------------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ FOdysseyPainterEditorColorWheelTab::Color() const
 //---------------------------------------------------------------------- Event Listeners
 
 void
-FOdysseyPainterEditorColorWheelTab::OnColorChange( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor )
+FOdysseyPainterEditorColorWheelTab::OnColorChanged( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor )
 {
     mEditor->PaintColor( iColor, iEventState == eOdysseyEventState::kSet );
 }

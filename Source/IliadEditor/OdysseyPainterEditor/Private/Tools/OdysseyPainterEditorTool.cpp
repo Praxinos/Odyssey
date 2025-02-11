@@ -24,6 +24,12 @@ UOdysseyPainterEditorTool::UOdysseyPainterEditorTool()
     mInputProcessor = MakeShared<FOdysseyPainterEditorToolInputProcessor>(this);
 }
 
+bool
+UOdysseyPainterEditorTool::SupportsColorType(EOdysseyPainterEditorColorType iType)
+{
+    return iType == EOdysseyPainterEditorColorType::Raw;
+}
+
 void
 UOdysseyPainterEditorTool::SetEditor(FOdysseyPainterEditor* iEditor)
 {

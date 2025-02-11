@@ -16,14 +16,13 @@
 #include "OdysseyEventState.h"
 #include <ULIS>
 
-//DECLARE_DELEGATE_OneParam( FOnColorChanged, const ::ULIS::FColor& );
-DECLARE_DELEGATE_TwoParams( FOnColorChange, eOdysseyEventState::Type, const ::ULIS::FColor& );
-
-
 /////////////////////////////////////////////////////
 // SOdysseyAdvancedColorWheel
-class ODYSSEYWIDGETS_API SOdysseyAdvancedColorWheel : public SOdysseyLeafWidget
+class SOdysseyAdvancedColorWheel : public SOdysseyLeafWidget
 {
+public:
+    DECLARE_DELEGATE_TwoParams( FOnColorChanged, eOdysseyEventState::Type, const ::ULIS::FColor& );
+
 private:
     typedef SOdysseyLeafWidget tSuperClass;
 
@@ -40,7 +39,7 @@ public:
         {}
         ODYSSEY_LEAF_WIDGET_CONSTRUCT_ATTRIBUTES
         SLATE_ATTRIBUTE( ::ULIS::FColor, Color )
-        SLATE_EVENT( FOnColorChange, OnColorChange )
+        SLATE_EVENT( FOnColorChanged, OnColorChanged )
     SLATE_END_ARGS()
 
 public:
@@ -148,7 +147,7 @@ private:
     mutable bool bMarkedAsInvalid;
     mutable ::ULIS::FColor mDisplayedColor;
 
-    FOnColorChange OnColorChangeCallback;
+    FOnColorChanged OnColorChanged;
     TAttribute<::ULIS::FColor> mColor;
 
 };

@@ -71,6 +71,8 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorBaseTool : public UOdy
         virtual EMouseCursor::Type GetMouseCursor() const override;
         virtual void ExtendToolbar( FToolBarBuilder& iBuilder ) override;
 
+        virtual bool SupportsColorType(EOdysseyPainterEditorColorType iType) override;
+
         bool IsDragging();
 
     protected:

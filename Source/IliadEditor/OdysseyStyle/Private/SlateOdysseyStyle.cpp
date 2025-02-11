@@ -476,6 +476,9 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.Matching16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/matching_tool", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.Matching64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/matching_tool", mIcon64x64 ) );
 
+    Set("PainterEditor.ColorSelector.ColorType.Raw", new IMAGE_BRUSH_SVG( "PainterEditor/ColorSelector/color_type_raw", mIcon16x16 ));
+    Set("PainterEditor.ColorSelector.ColorType.Indexed", new IMAGE_BRUSH_SVG( "PainterEditor/ColorSelector/color_type_indexed", mIcon16x16 ));
+
     //OdysseyPainterEditorTools
     Set( "OdysseyPainterEditorTools.Tile", mCoreTableRowStyle
 

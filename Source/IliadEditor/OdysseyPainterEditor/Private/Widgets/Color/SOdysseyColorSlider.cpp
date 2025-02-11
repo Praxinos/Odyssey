@@ -1,7 +1,7 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "Color/SOdysseyColorSlider.h"
+#include "Widgets/Color/SOdysseyColorSlider.h"
 #include "Rendering/DrawElements.h"
 #include <ULIS>
 #include "ULISLoaderModule.h"
@@ -135,7 +135,7 @@ IOdysseyChannelSlider::SetPosition( float iPos )
     cursor_t = iPos;
     FColor value = ::ULIS::Conv( GetColorForProportion( cursor_t ), mFormat );
     bMarkedAsInvalid = true;
-    //OnColorChangeCallback.ExecuteIfBound( cursor_t );
+    //OnColorChanged.ExecuteIfBound( cursor_t );
 } */
 
 
@@ -152,7 +152,7 @@ FReply
 IOdysseyChannelSlider::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
     cursor_t = GetProportionForMousePosition(MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ));
-    OnColorChangeCallback.ExecuteIfBound( eOdysseyEventState::kStart, GetColorForProportion(cursor_t) );
+    OnColorChanged.ExecuteIfBound( eOdysseyEventState::kStart, GetColorForProportion(cursor_t) );
     return FReply::Handled().CaptureMouse(SharedThis(this));
 }
 
@@ -164,7 +164,7 @@ IOdysseyChannelSlider::OnMouseButtonUp(const FGeometry& MyGeometry, const FPoint
         return FReply::Unhandled();
 
     cursor_t = GetProportionForMousePosition(MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ));
-    OnColorChangeCallback.ExecuteIfBound(eOdysseyEventState::kSet, GetColorForProportion(cursor_t) );
+    OnColorChanged.ExecuteIfBound(eOdysseyEventState::kSet, GetColorForProportion(cursor_t) );
     return FReply::Handled().ReleaseMouseCapture();
 }
 
@@ -180,7 +180,7 @@ IOdysseyChannelSlider::OnMouseMove(const FGeometry& MyGeometry, const FPointerEv
         return FReply::Handled();
 
     cursor_t = pos;
-    OnColorChangeCallback.ExecuteIfBound(eOdysseyEventState::kAdjust, GetColorForProportion(cursor_t) );
+    OnColorChanged.ExecuteIfBound(eOdysseyEventState::kAdjust, GetColorForProportion(cursor_t) );
 
     return FReply::Handled();
 }

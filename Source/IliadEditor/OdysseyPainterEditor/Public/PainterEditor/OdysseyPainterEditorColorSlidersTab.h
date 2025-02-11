@@ -31,7 +31,7 @@ protected:
 
 protected:
     // Event Listeners
-    virtual void OnColorChange( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor );
+    virtual void OnColorChanged( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor );
 
 private:
     FOdysseyPainterEditor* mEditor;

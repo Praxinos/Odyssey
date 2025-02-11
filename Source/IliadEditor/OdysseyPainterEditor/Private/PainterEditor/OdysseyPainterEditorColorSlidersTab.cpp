@@ -3,7 +3,7 @@
 
 #include "OdysseyPainterEditorColorSlidersTab.h"
 
-#include "Color/SOdysseyColorSliders.h"
+#include "Widgets/Color/SOdysseyColorSliders.h"
 #include "OdysseyPainterEditor.h"
 #include "ObjectEditorUtils.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
@@ -45,7 +45,7 @@ FOdysseyPainterEditorColorSlidersTab::CreateWidget()
 {
     return SNew( SOdysseyColorSliders )
         .Color_Raw(this, &FOdysseyPainterEditorColorSlidersTab::Color)
-        .OnColorChange_Raw(this, &FOdysseyPainterEditorColorSlidersTab::OnColorChange);
+        .OnColorChanged_Raw(this, &FOdysseyPainterEditorColorSlidersTab::OnColorChanged);
 }
 
 //--------------------------------------------------------------------------------------
@@ -61,7 +61,7 @@ FOdysseyPainterEditorColorSlidersTab::Color() const
 //---------------------------------------------------------------------- Event Listeners
 
 void
-FOdysseyPainterEditorColorSlidersTab::OnColorChange( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor )
+FOdysseyPainterEditorColorSlidersTab::OnColorChanged( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor )
 {
     mEditor->PaintColor( iColor, iEventState == eOdysseyEventState::kSet );
 }

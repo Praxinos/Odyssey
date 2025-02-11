@@ -3,9 +3,13 @@
 
 #include "OdysseyPainterEditorColorSelectorTab.h"
 
-#include "Color/SOdysseyColorSelector.h"
 #include "OdysseyPainterEditor.h"
 #include "UObject/OdysseyObjectEditorUtils.h"
+#include "Widgets/Input/SSegmentedControl.h"
+#include "Widgets/Color/SOdysseyAdvancedColorWheel.h"
+#include "Widgets/Color/SOdysseyColorSliders.h"
+#include "Widgets/Color/SOdysseyColorHexadecimal.h"
+#include "SOdysseyPalette.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -36,9 +40,208 @@ FOdysseyPainterEditorColorSelectorTab::FOdysseyPainterEditorColorSelectorTab(FOd
 TSharedPtr<SWidget>
 FOdysseyPainterEditorColorSelectorTab::CreateWidget()
 {
-    return SNew( SOdysseyColorSelector )
-        .Color_Raw(this, &FOdysseyPainterEditorColorSelectorTab::Color)
-        .OnColorChange_Raw(this, &FOdysseyPainterEditorColorSelectorTab::OnColorChange);
+    return SNew(SVerticalBox)
+        +SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(SSegmentedControl<EOdysseyPainterEditorColorType>)
+            .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetColorTypeVisibility)
+            .Value(this, &FOdysseyPainterEditorColorSelectorTab::GetColorType)
+            .OnValueChecked(this, &FOdysseyPainterEditorColorSelectorTab::OnColorTypeChanged)
+
+            //Selection Tool
+            + SSegmentedControl<EOdysseyPainterEditorColorType>::Slot(EOdysseyPainterEditorColorType::Raw)
+            .Text(LOCTEXT("color-selector.color-type.raw.name", "Raw"))
+            .ToolTip(LOCTEXT("color-selector.color-type.raw.tooltip", "Switch to Raw colors"))
+            .Icon(FOdysseyStyle::GetBrush( "PainterEditor.ColorSelector.ColorType.Raw" ))
+
+            //Move Tool
+            + SSegmentedControl<EOdysseyPainterEditorColorType>::Slot(EOdysseyPainterEditorColorType::Indexed)
+            .Text(LOCTEXT("color-selector.color-type.indexed.name", "Indexed"))
+            .ToolTip(LOCTEXT("color-selector.color-type.indexed.tooltip", "Switch to Indexed colors"))
+            .Icon(FOdysseyStyle::GetBrush( "PainterEditor.ColorSelector.ColorType.Indexed" ))
+        ]
+        +SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(SVerticalBox)
+            .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetRawColorWidgetsVisibility)
+            +SVerticalBox::Slot()
+            .AutoHeight()
+            [
+                SNew( SHorizontalBox )
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SAssignNew(mColorWheelExpanderArrow, SButton)
+                    .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+                    .VAlign(VAlign_Center)
+                    .HAlign(HAlign_Center)
+                    .ClickMethod( EButtonClickMethod::MouseDown )
+                    .OnClicked( this, &FOdysseyPainterEditorColorSelectorTab::OnColorWheelExpanderArrowClicked )
+                    .ContentPadding(0.f)
+                    .ForegroundColor( FSlateColor::UseForeground() )
+                    .IsFocusable( false )
+                    [
+                        SNew(SImage)
+                        .Image( this, &FOdysseyPainterEditorColorSelectorTab::GetColorWheelExpanderArrowImage )
+                        .ColorAndOpacity( FSlateColor::UseSubduedForeground() )
+                    ]
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SNew(STextBlock)
+                    .Text(LOCTEXT( "color-selector.color-wheel.name", "Color Wheel" ))
+                ]
+            ]
+            +SVerticalBox::Slot()
+            .AutoHeight()
+            [
+                SNew( SOdysseyAdvancedColorWheel )
+                .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetColorWheelVisibility)
+                .MinDesiredWidth(   150 )
+                .MinDesiredHeight(  150 )
+                .MaxDesiredWidth(   200 )
+                .MaxDesiredHeight(  200 )
+                .DesiredWidth(   175 )
+                .DesiredHeight(  175 )
+                .Color(this, &FOdysseyPainterEditorColorSelectorTab::GetRawColor)
+                .OnColorChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnColorChanged)
+            ]
+        ]
+
+        +SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(SVerticalBox)
+            .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetRawColorWidgetsVisibility)
+            +SVerticalBox::Slot()
+            .AutoHeight()
+            [
+                SNew( SHorizontalBox )
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SAssignNew(mColorSlidersExpanderArrow, SButton)
+                    .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+                    .VAlign(VAlign_Center)
+                    .HAlign(HAlign_Center)
+                    .ClickMethod( EButtonClickMethod::MouseDown )
+                    .OnClicked( this, &FOdysseyPainterEditorColorSelectorTab::OnColorSlidersExpanderArrowClicked )
+                    .ContentPadding(0.f)
+                    .ForegroundColor( FSlateColor::UseForeground() )
+                    .IsFocusable( false )
+                    [
+                        SNew(SImage)
+                        .Image( this, &FOdysseyPainterEditorColorSelectorTab::GetColorSlidersExpanderArrowImage )
+                        .ColorAndOpacity( FSlateColor::UseSubduedForeground() )
+                    ]
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SNew(STextBlock)
+                    .Text(LOCTEXT( "color-selector.color-sliders.name", "Color Sliders" ))
+                ]
+            ]
+            +SVerticalBox::Slot()
+            .AutoHeight()
+            [
+                SNew( SOdysseyColorSliders )
+                .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetColorSlidersVisibility)
+                .Color(this, &FOdysseyPainterEditorColorSelectorTab::GetRawColor)
+                .OnColorChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnColorChanged)
+            ]
+        ]
+        +SVerticalBox::Slot()
+        .AutoHeight()
+        [
+            SNew(SVerticalBox)
+            .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetRawColorWidgetsVisibility)
+            +SVerticalBox::Slot()
+            .AutoHeight()
+            [
+                SNew( SHorizontalBox )
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SAssignNew(mHexadecimalExpanderArrow, SButton)
+                    .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+                    .VAlign(VAlign_Center)
+                    .HAlign(HAlign_Center)
+                    .ClickMethod( EButtonClickMethod::MouseDown )
+                    .OnClicked( this, &FOdysseyPainterEditorColorSelectorTab::OnHexadecimalExpanderArrowClicked )
+                    .ContentPadding(0.f)
+                    .ForegroundColor( FSlateColor::UseForeground() )
+                    .IsFocusable( false )
+                    [
+                        SNew(SImage)
+                        .Image( this, &FOdysseyPainterEditorColorSelectorTab::GetHexadecimalExpanderArrowImage )
+                        .ColorAndOpacity( FSlateColor::UseSubduedForeground() )
+                    ]
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SNew(STextBlock)
+                    .Text(LOCTEXT( "color-selector.hexadecimal.name", "Hexadecimal" ))
+                ]
+            ]
+            +SVerticalBox::Slot()
+            .AutoHeight()
+            [
+                SNew(SOdysseyColorHexadecimal)
+                .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetColorHexadecimalVisibility)
+                .Color(this, &FOdysseyPainterEditorColorSelectorTab::GetRawColor)
+                .OnColorChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnColorChanged)
+            ]
+        ]
+
+        +SVerticalBox::Slot()
+        [
+            SNew(SVerticalBox)
+            +SVerticalBox::Slot()
+            .AutoHeight()
+            [
+                SNew( SHorizontalBox )
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SAssignNew(mColorPaletteExpanderArrow, SButton)
+                    .ButtonStyle( FCoreStyle::Get(), "NoBorder" )
+                    .VAlign(VAlign_Center)
+                    .HAlign(HAlign_Center)
+                    .ClickMethod( EButtonClickMethod::MouseDown )
+                    .OnClicked( this, &FOdysseyPainterEditorColorSelectorTab::OnColorPaletteExpanderArrowClicked )
+                    .ContentPadding(0.f)
+                    .ForegroundColor( FSlateColor::UseForeground() )
+                    .IsFocusable( false )
+                    [
+                        SNew(SImage)
+                        .Image( this, &FOdysseyPainterEditorColorSelectorTab::GetColorPaletteExpanderArrowImage )
+                        .ColorAndOpacity( FSlateColor::UseSubduedForeground() )
+                    ]
+                ]
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SNew(STextBlock)
+                    .Text(LOCTEXT( "color-selector.color-palette.name", "Color Palette" ))
+                ]
+            ]
+            +SVerticalBox::Slot()
+            [
+                SNew( SOdysseyPalette )
+                .Visibility(this, &FOdysseyPainterEditorColorSelectorTab::GetColorPaletteVisibility)
+                .Palette(this, &FOdysseyPainterEditorColorSelectorTab::GetPalette)
+                .CurrentColorEntry(this, &FOdysseyPainterEditorColorSelectorTab::GetPaletteCurrentColorEntry)
+                .CurrentSet(this, &FOdysseyPainterEditorColorSelectorTab::GetPaletteCurrentSet)
+                .OnPaletteChanged(this, &FOdysseyPainterEditorColorSelectorTab::OnPaletteChanged)
+                .OnCurrentColorEntrySelected(this, &FOdysseyPainterEditorColorSelectorTab::OnPaletteCurrentColorEntrySelected)
+                .OnCurrentSetSelected(this, &FOdysseyPainterEditorColorSelectorTab::OnPaletteCurrentSetSelected)
+            ]
+        ];
 }
 
 //--------------------------------------------------------------------------------------
@@ -51,18 +254,199 @@ FOdysseyPainterEditorColorSelectorTab::GetId() const
 }
 
 ::ULIS::FColor
-FOdysseyPainterEditorColorSelectorTab::Color() const
+FOdysseyPainterEditorColorSelectorTab::GetRawColor() const
 {
     return mEditor->PaintColor().GetValue();
+}
+
+const FSlateBrush*
+FOdysseyPainterEditorColorSelectorTab::GetExpanderArrowImage(TSharedPtr<SButton> iExpander, bool iIsExpanded) const
+{
+    FName resourceName;
+    if (iIsExpanded)
+    {
+        if ( iExpander->IsHovered() )
+        {
+            static FName expandedHoveredName = "TreeArrow_Expanded_Hovered";
+            resourceName = expandedHoveredName;
+        }
+        else
+        {
+            static FName expandedName = "TreeArrow_Expanded";
+            resourceName = expandedName;
+        }
+    }
+    else
+    {
+        if ( iExpander->IsHovered() )
+        {
+            static FName collapsedHoveredName = "TreeArrow_Collapsed_Hovered";
+            resourceName = collapsedHoveredName;
+        }
+        else
+        {
+            static FName collapsedName = "TreeArrow_Collapsed";
+            resourceName = collapsedName;
+        }
+    }
+
+    return FAppStyle::Get().GetBrush(resourceName);
+}
+
+const FSlateBrush*
+FOdysseyPainterEditorColorSelectorTab::GetColorWheelExpanderArrowImage() const
+{
+    return GetExpanderArrowImage(mColorWheelExpanderArrow, mIsColorWheelExpanded);
+}
+
+const FSlateBrush*
+FOdysseyPainterEditorColorSelectorTab::GetColorSlidersExpanderArrowImage() const
+{
+    return GetExpanderArrowImage(mColorSlidersExpanderArrow, mIsColorSlidersExpanded);
+}
+
+const FSlateBrush*
+FOdysseyPainterEditorColorSelectorTab::GetHexadecimalExpanderArrowImage() const
+{
+    return GetExpanderArrowImage(mHexadecimalExpanderArrow, mIsHexadecimalExpanded);
+}const FSlateBrush*
+FOdysseyPainterEditorColorSelectorTab::GetColorPaletteExpanderArrowImage() const
+{
+    return GetExpanderArrowImage(mColorPaletteExpanderArrow, mIsColorPaletteExpanded);
+}
+
+EOdysseyPainterEditorColorType
+FOdysseyPainterEditorColorSelectorTab::GetColorType() const
+{
+    return mEditor->GetColorType();
+}
+
+EVisibility
+FOdysseyPainterEditorColorSelectorTab::GetColorTypeVisibility() const
+{
+    UOdysseyPainterEditorTool* tool = mEditor->GetCurrentTool();
+    if (!tool)
+        return EVisibility::Collapsed; //Only Raw Colors are displayed by default
+
+    return tool->SupportsColorType(EOdysseyPainterEditorColorType::Indexed) ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+EVisibility
+FOdysseyPainterEditorColorSelectorTab::GetRawColorWidgetsVisibility() const
+{
+    UOdysseyPainterEditorTool* tool = mEditor->GetCurrentTool();
+    if (!tool)
+        return EVisibility::Visible; //Only Raw Colors are displayed by default
+
+    if (!tool->SupportsColorType(EOdysseyPainterEditorColorType::Indexed))
+        return EVisibility::Visible; //Only Raw Colors are displayed by default
+
+    return mEditor->GetColorType() == EOdysseyPainterEditorColorType::Raw ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+EVisibility
+FOdysseyPainterEditorColorSelectorTab::GetColorWheelVisibility() const
+{
+    return mIsColorWheelExpanded ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+EVisibility
+FOdysseyPainterEditorColorSelectorTab::GetColorSlidersVisibility() const
+{
+    return mIsColorSlidersExpanded ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+EVisibility
+FOdysseyPainterEditorColorSelectorTab::GetColorHexadecimalVisibility() const
+{
+    return mIsHexadecimalExpanded ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+EVisibility
+FOdysseyPainterEditorColorSelectorTab::GetColorPaletteVisibility() const
+{
+    return mIsColorPaletteExpanded ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+
+UOdysseyPalette*
+FOdysseyPainterEditorColorSelectorTab::GetPalette() const
+{
+    return mEditor->GetPalette();
+}
+
+UOdysseyPaletteEntryColor*
+FOdysseyPainterEditorColorSelectorTab::GetPaletteCurrentColorEntry() const
+{
+    return mEditor->GetPaletteCurrentColorEntry();
+}
+
+int
+FOdysseyPainterEditorColorSelectorTab::GetPaletteCurrentSet() const
+{
+    return mEditor->GetPaletteCurrentSet();
 }
 
 //--------------------------------------------------------------------------------------
 //---------------------------------------------------------------------- Event Listeners
 
 void
-FOdysseyPainterEditorColorSelectorTab::OnColorChange( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor )
+FOdysseyPainterEditorColorSelectorTab::OnColorChanged( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor )
 {
     mEditor->PaintColor( iColor, iEventState == eOdysseyEventState::kSet );
+}
+
+FReply
+FOdysseyPainterEditorColorSelectorTab::OnHexadecimalExpanderArrowClicked()
+{
+    mIsHexadecimalExpanded = !mIsHexadecimalExpanded;
+    return FReply::Handled();
+}
+
+FReply
+FOdysseyPainterEditorColorSelectorTab::OnColorSlidersExpanderArrowClicked()
+{
+    mIsColorSlidersExpanded = !mIsColorSlidersExpanded;
+    return FReply::Handled();
+}
+
+FReply
+FOdysseyPainterEditorColorSelectorTab::OnColorWheelExpanderArrowClicked()
+{
+    mIsColorWheelExpanded = !mIsColorWheelExpanded;
+    return FReply::Handled();
+}
+
+FReply
+FOdysseyPainterEditorColorSelectorTab::OnColorPaletteExpanderArrowClicked()
+{
+    mIsColorPaletteExpanded = !mIsColorPaletteExpanded;
+    return FReply::Handled();
+}
+
+void
+FOdysseyPainterEditorColorSelectorTab::OnColorTypeChanged(EOdysseyPainterEditorColorType iType, ECheckBoxState iState)
+{
+    if (iState == ECheckBoxState::Checked)
+        mEditor->SetColorType(iType);
+}
+
+void
+FOdysseyPainterEditorColorSelectorTab::OnPaletteChanged(UOdysseyPalette* iPalette) const
+{
+    return mEditor->SetPalette(iPalette);
+}
+
+void
+FOdysseyPainterEditorColorSelectorTab::OnPaletteCurrentColorEntrySelected(UOdysseyPaletteEntryColor* iEntry) const
+{
+    return mEditor->SetPaletteCurrentColorEntry(iEntry);
+}
+
+void
+FOdysseyPainterEditorColorSelectorTab::OnPaletteCurrentSetSelected(int iSet) const
+{
+    return mEditor->SetPaletteCurrentSet(iSet);
 }
 
 #undef LOCTEXT_NAMESPACE

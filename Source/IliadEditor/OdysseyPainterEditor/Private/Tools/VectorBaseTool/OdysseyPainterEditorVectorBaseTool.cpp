@@ -1035,6 +1035,12 @@ UOdysseyPainterEditorVectorBaseTool::ExtendToolbar( FToolBarBuilder& iBuilder )
     iBuilder.EndSection();
 }
 
+bool
+UOdysseyPainterEditorVectorBaseTool::SupportsColorType(EOdysseyPainterEditorColorType iType)
+{
+    return iType == EOdysseyPainterEditorColorType::Raw || iType == EOdysseyPainterEditorColorType::Indexed;
+}
+
 void
 UOdysseyPainterEditorVectorBaseTool::PopupContextMenu()
 {

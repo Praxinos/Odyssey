@@ -153,6 +153,7 @@ public:
 
     virtual FOdysseyHUDSystem*                               HUDSystem() const;
     virtual const FOdysseyBrushColor&                        PaintColor() const;
+    EOdysseyPainterEditorColorType                           GetColorType() const;
     virtual FOdysseyMediaProvider                            GetCurrentMediaProvider();
     virtual UOdysseyLayerStack*                              LayerStack() const;
     virtual TSharedPtr<FOdysseyPainterEditorRasterSelection> RasterSelection();
@@ -164,6 +165,8 @@ public:
     void SetPalette(UOdysseyPalette* iPalette);
     void SetPaletteCurrentColorEntry(UOdysseyPaletteEntryColor* iEntry);
     void SetPaletteCurrentSet(int iSet);
+
+    void SetColorType(EOdysseyPainterEditorColorType iType);
 
     TSharedPtr<FOdysseyMeshSelector>                        GetMeshSelector() const;
 
@@ -305,6 +308,7 @@ protected:
     TSharedPtr<FOdysseyPainterEditorRasterSelection> mRasterSelection;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
+    EOdysseyPainterEditorColorType  mColorType = EOdysseyPainterEditorColorType::Raw;
     FSimpleMulticastDelegate        mOnCurrentToolChanged;
     FSimpleMulticastDelegate        mOnCurrentMainToolChanged;
     FSimpleMulticastDelegate        mOnCurrentTemporaryToolChanged;
