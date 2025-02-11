@@ -104,9 +104,11 @@ UOdysseyPainterEditorVectorBaseTool::SetPathColor( FOdysseyVectorPath* iPath
         case eForegroundColorMode::Palette:
         {
             UOdysseyPaletteEntryColor* paletteEntry = GetEditor()->GetPaletteCurrentColorEntry();
+            int paletteSet = GetEditor()->GetPaletteCurrentSet();
             if( paletteEntry )
             {
                 iPath->GetForegroundBucket().SetPaletteEntry( paletteEntry );
+                iPath->GetForegroundBucket().SetPaletteSet( paletteSet );
             }
         }
         break;

@@ -19,9 +19,9 @@ class ODYSSEYPALETTE_API SOdysseyPaletteEntryRow
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyPaletteEntryRow)
-        : _Set(0)
+        : _IsReadOnly(true)
         {}
-        SLATE_ATTRIBUTE(int, Set)
+        SLATE_ARGUMENT(bool, IsReadOnly)
     SLATE_END_ARGS()
 
 public:
@@ -62,8 +62,8 @@ private:
     EItemDropZone ComputeItemDropZoneForLeaf(FVector2D iLocalPointerPos, FVector2D iLocalSize, bool iCanHaveChildren, bool iIsExpanded);
 
 protected:
-    TAttribute<int> mSet;
     TWeakPtr<class SOdysseyPaletteTreeView> mTreeView;
     TSharedPtr<SInlineEditableTextBlock> mNameWidget = nullptr;
     UOdysseyPaletteEntry* mEntry = nullptr;
+    bool mIsReadOnly;
 };

@@ -34,6 +34,20 @@ FOdysseyVectorExportV2::WriteBucketPaletteEntryMark2( FOdysseyVectorBucket& iBuc
     } );
 }
 
+
+void
+FOdysseyVectorExportV2::WriteBucketPaletteSet( FOdysseyVectorBucket& iBucket, FArchive& Ar)
+{
+    FOdysseyFile::WriteChunk( FOdysseyFile::VectorV2::CHUNK_BUCKET_PALETTESET
+                            , Ar
+                            , [&iBucket](FArchive &Ar) -> void
+    {
+        int set = iBucket.GetPaletteSet();
+
+        Ar << set;
+    } );
+}
+
 // unused. Kept as history
 void
 FOdysseyVectorExportV2::WriteBucketPaletteEntryMark1( FOdysseyVectorBucket& iBucket, FArchive& Ar)
@@ -201,6 +215,7 @@ FOdysseyVectorExportV2::WriteBucket( FOdysseyVectorBucket& iBucket, FArchive &Ar
         if( iBucket.GetColorMode() == eBucketColorMode::Palette )
         {
             WriteBucketPaletteEntryMark2( iBucket, Ar );
+            WriteBucketPaletteSet( iBucket, Ar );
         }
 
         WriteBucketGradient( iBucket, Ar );

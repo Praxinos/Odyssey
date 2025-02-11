@@ -16,10 +16,15 @@ UOdysseyPaletteEntryColor::UOdysseyPaletteEntryColor()
     EntryTypeName = LOCTEXT( "entry-color.type", "Color" );
     DefaultName = LOCTEXT("entry-color.default-name", "Color");
     Icon = *FOdysseyStyle::GetBrush("OdysseyPalette.EntryColor");
+}
 
+void
+UOdysseyPaletteEntryColor::PostInitProperties()
+{
+    Super::PostInitProperties();
     if( GetPalette() )
     {
-        for (int i = 0; i < GetPalette()->Sets.Num(); i++)
+        for (int i = 0; i < GetPalette()->GetSets().Num(); i++)
             AddSet();
     }
 }

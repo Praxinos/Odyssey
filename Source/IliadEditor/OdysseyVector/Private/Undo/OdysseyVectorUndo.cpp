@@ -1211,6 +1211,11 @@ FSnapshotBucket::FSnapshotBucket( FOdysseyVectorBucket* iBucket, uint64 iSnapsho
     {
         mPaletteEntry = iBucket->GetPaletteEntry();
     }
+
+    if( iSnapshotFlags & FSnapshotFlags::Point::Bucket::PALETTESET )
+    {
+        mPaletteSet = iBucket->GetPaletteSet();
+    }
 }
 
 FOdysseyVectorBucket*
@@ -1314,6 +1319,15 @@ FSnapshotBucket::Restore()
         bucket->SetPaletteEntry( mPaletteEntry );
         // swap
         mPaletteEntry = currentPaletteEntry;
+    }
+
+    if( mSnapshotFlags & FSnapshotFlags::Point::Bucket::PALETTESET )
+    {
+        int currentPaletteSet = bucket->GetPaletteSet();
+
+        bucket->SetPaletteSet( mPaletteSet );
+        // swap
+        mPaletteSet = currentPaletteSet;
     }
 }
 

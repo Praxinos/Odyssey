@@ -17,9 +17,11 @@ void SOdysseyPaletteColorRow::Construct(const FArguments& InArgs, const TSharedR
 {
     ensure(iColorEntry);
     mColorEntry = iColorEntry;
+    mSet = InArgs._Set;
 
     SOdysseyPaletteEntryRow::Construct(
-        InArgs,
+        SOdysseyPaletteEntryRow::FArguments()
+            .IsReadOnly(InArgs._IsReadOnly),
         iTreeView,
         iColorEntry
     );
@@ -48,6 +50,9 @@ SOdysseyPaletteColorRow::GenerateColorWidget()
 
 FReply SOdysseyPaletteColorRow::HandleEntryColorMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
+    if (mIsReadOnly)
+        return FReply::Unhandled();
+
     FColorPickerArgs PickerArgs;
     {
         PickerArgs.bUseAlpha = true;
@@ -73,6 +78,9 @@ FReply SOdysseyPaletteColorRow::HandleEntryColorMouseButtonDown(const FGeometry&
 
 void SOdysseyPaletteColorRow::OnSetColorFromColorPicker(FLinearColor iNewColor)
 {
+    if (mIsReadOnly)
+        return;
+
     mColorEntry->SetColor( iNewColor.ToFColorSRGB(), mSet.Get() );
 }
 

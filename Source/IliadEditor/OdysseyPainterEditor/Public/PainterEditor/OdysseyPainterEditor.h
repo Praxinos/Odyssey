@@ -339,7 +339,7 @@ protected:
 
     UOdysseyPalette* mPalette = nullptr;
     UOdysseyPaletteEntryColor* mPaletteCurrentColorEntry = nullptr;
-    int mPaletteCurrentSet = INDEX_NONE;
+    int mPaletteCurrentSet = 0;
 };
 
 template <class T>

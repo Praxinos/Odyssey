@@ -40,6 +40,7 @@ public:
 
 public:
     // UObject overrides
+    virtual void PostInitProperties() override;
     virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 

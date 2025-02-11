@@ -22,16 +22,15 @@ class ODYSSEYPALETTE_API SOdysseyPaletteTreeView
 
 public:
     DECLARE_DELEGATE_OneParam(FOnCurrentColorEntrySelected, UOdysseyPaletteEntryColor*)
-    DECLARE_DELEGATE_OneParam(FOnCurrentSetSelected, int)
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyPaletteTreeView)
+        : _IsReadOnly(true)
         {}
+        SLATE_ARGUMENT(bool, IsReadOnly)
         SLATE_ATTRIBUTE(UOdysseyPalette*, Palette)
         SLATE_ATTRIBUTE(UOdysseyPaletteEntryColor*, CurrentColorEntry)
-        SLATE_ATTRIBUTE(int, CurrentSet)
         SLATE_EVENT(FOnCurrentColorEntrySelected, OnCurrentColorEntrySelected)
-        SLATE_EVENT(FOnCurrentSetSelected, OnCurrentSetSelected)
     SLATE_END_ARGS()
 
 public:
@@ -44,7 +43,6 @@ public:
 public:
     TSharedPtr<FOdysseyPaletteDragDropOperation> CreateDragDropOperation() const;
     UOdysseyPaletteEntryColor* GetCurrentColorEntry() const;
-    TSharedPtr<int> GetCurrentSet() const;
     UOdysseyPalette* GetPalette() const;
 
 protected:
@@ -64,18 +62,12 @@ protected:
      */
     virtual void CreateContextMenu();
 
-    void OnSetSelected(FName iSet);
-
     /**
      * @brief Extends the context menu
      * Allows us to insert entries wherever we want in the context menu
      * CreateContextMenu() does not allow us to do that
      */
     virtual TArray<TSharedPtr<FExtender>> ExtendContextMenu();
-
-private:
-    TSharedRef<SWidget> CreateHeaderColumnHeaderContent();
-    TSharedRef<SWidget> CreateColorColumnHeaderContent();
 
 protected:
     //CommandList Actions
@@ -142,7 +134,6 @@ protected:
      * @param iPalette
      */
     void OnPaletteHierarchyChanged( UOdysseyPalette* iPalette);
-    void OnPaletteSetsChanged( UOdysseyPalette* iPalette);
 
     /**
      * @brief Called when entries have been removed from a folder entry
@@ -154,7 +145,6 @@ protected:
 
     TSharedRef<ITableRow> OnGenerateRow(UOdysseyPaletteEntry* iEntry, const TSharedRef<STableViewBase>& iOwnerTable);
     void OnSelectionChanged(UOdysseyPaletteEntry* iEntry, ESelectInfo::Type iSelectInfo);
-    void OnSetSelectionChanged(TSharedPtr<int> iSet, ESelectInfo::Type iSelectInfo);
 
 public:
     /**
@@ -164,11 +154,6 @@ public:
     void ResetDropZone();
 
     /**
-     * @brief Adds a new set to the palette represented by this view
-     */
-    FReply AddSetToPalette();
-
-    /**
      * @brief Saves palette
      */
     FReply SavePalette();
@@ -176,31 +161,23 @@ public:
 private:
     void OnPaletteChanged();
     void OnCurrentColorEntryChanged();
-    void OnCurrentSetChanged();
     void RefreshItemsSource();
-    void RefreshSetsSource();
 
     FReply AddColorEntry();
     FReply AddFolderEntry();
-    TSharedRef<SWidget> OnGenerateSetWidget(TSharedPtr<int> iSet);
 
 protected:
+    bool mIsReadOnly;
     TSlateAttribute<UOdysseyPalette*> mPaletteAttribute;
     UOdysseyPalette* mPalette;
     TSlateAttribute<UOdysseyPaletteEntryColor*> mCurrentColorEntryAttribute;
     UOdysseyPaletteEntryColor* mCurrentColorEntry;
-    TSlateAttribute<int> mCurrentSetAttribute;
-    int mCurrentSet;
     UOdysseyPaletteEntry* mSelectedEntry;
     FOnCurrentColorEntrySelected mOnCurrentColorEntrySelected;
-    FOnCurrentSetSelected mOnCurrentSetSelected;
     TSharedPtr<UE::Slate::Containers::TObservableArray<UOdysseyPaletteEntry*>> mItemsSource;
-    TSharedPtr<UE::Slate::Containers::TObservableArray<TSharedPtr<int>>> mSetsSource;
 
     TSharedRef<FUICommandList> mCommandList;
 
     bool mIsRenamePending = false;
     bool mDisplayDropZone = false;
-
-    TSharedPtr<SComboBox<TSharedPtr<int>>> mSetComboBox;
 };

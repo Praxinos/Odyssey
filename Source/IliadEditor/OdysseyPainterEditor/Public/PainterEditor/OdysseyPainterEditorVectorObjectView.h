@@ -21,19 +21,14 @@ struct FPaletteEntrySelection
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere
-        , Category=Appearance
-        , meta = (ToolTip = "Palette Used for Foreground Color"
-            , EditCondition = "(ForegroundColorMode == eForegroundColorMode::Palette)"
-            , EditConditionHides))
+    UPROPERTY(EditAnywhere, Category=Appearance)
     UOdysseyPalette* OdysseyPalette;
 
-    UPROPERTY(EditAnywhere
-        , Category=Appearance
-        , meta = (ToolTip = "Palette Entry Used for Foreground Color"
-            , EditCondition = "OdysseyPalette != nullptr"
-            , EditConditionHides))
+    UPROPERTY(EditAnywhere, Category=Appearance, meta = (EditCondition = "OdysseyPalette != nullptr", EditConditionHides))
     UOdysseyPaletteEntryColor* OdysseyPaletteEntryColor;
+
+    UPROPERTY(EditAnywhere, Category=Appearance, meta = (EditCondition = "OdysseyPalette != nullptr", EditConditionHides))
+    int OdysseyPaletteSet;
 };
 
 UCLASS()

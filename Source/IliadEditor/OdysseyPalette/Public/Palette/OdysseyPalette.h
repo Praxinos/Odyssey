@@ -27,6 +27,9 @@ public:
     /* Called when the sets changed at some point */
     DECLARE_MULTICAST_DELEGATE_OneParam(FOnSetsChanged, UOdysseyPalette*);
 
+    /* Called when the sets changed at some point */
+    DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentSetChanged, UOdysseyPalette*);
+
 public:
     //Delegates
     /**
@@ -37,7 +40,12 @@ public:
     /**
      * @brief Returns the SetsChanged delegate
      */
-    static FOnHierarchyChanged& OnSetsChanged();
+    static FOnSetsChanged& OnSetsChanged();
+
+    /**
+     * @brief Returns the SetsChanged delegate
+     */
+    static FOnCurrentSetChanged& OnCurrentSetChanged();
 
 
 public:
@@ -168,17 +176,18 @@ public:
     UFUNCTION(BlueprintCallable, Category="Palette")
     void MoveEntries(TArray<UOdysseyPaletteEntry*> iEntries, UOdysseyPaletteEntry* iParentEntry = nullptr, int iIndexInParent = 0);
 
+public:
+    //Sets
+    const TArray<FName>& GetSets() const;
     void DuplicateSet( int iSet );
-
-    void RemoveSet(int iIndex = -1);
+    void RemoveSet(int iIndex);
 
 public:
     //Called by layers when there Parent or Children changed
     virtual void HierarchyChanged();
 
+
 protected:
-    //Property changed methods
-    void SetsChanged();
     virtual void PropertyChanged(const FName& iPropertyName);
     virtual void PostPropertyChanged(const FName& iPropertyName);
 
@@ -214,10 +223,14 @@ protected:
 
     void GetEntriesUniqueParents(TArray<UOdysseyPaletteEntry*> iEntries, TArray<UOdysseyPaletteEntry*>& oParents);
 
+private:
+    UPROPERTY()
+    TArray<FName> Sets;
+
 public:
     UPROPERTY()
     TObjectPtr<UOdysseyPaletteEntry> PaletteRoot;
 
     UPROPERTY()
-    TArray<FName> Sets;
+    uint8 UsedSet_DEPRECATED;
 };

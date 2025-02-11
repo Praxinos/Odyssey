@@ -12,7 +12,6 @@
 #include "SOdysseyPaletteEntryRow.h"
 #include "SOdysseyPaletteFolderRow.h"
 #include "SOdysseyPaletteColorRow.h"
-#include "SOdysseyPaletteAddEntryButton.h"
 
 #include "ToolMenus.h"
 #include "Framework/Commands/GenericCommands.h"
@@ -44,20 +43,11 @@ SOdysseyPaletteTreeView::PrivateRegisterAttributes(FSlateAttributeInitializer& A
             static_cast<SOdysseyPaletteTreeView&>(Widget).OnCurrentColorEntryChanged();
         }
     ));
-
-    SLATE_ADD_MEMBER_ATTRIBUTE_DEFINITION(AttributeInitializer, mCurrentSetAttribute, EInvalidateWidgetReason::None)
-    .OnValueChanged(FSlateAttributeDescriptor::FAttributeValueChangedDelegate::CreateLambda(
-        [](SWidget& Widget)
-        {
-            static_cast<SOdysseyPaletteTreeView&>(Widget).OnCurrentSetChanged();
-        }
-    ));
 }
 
 SOdysseyPaletteTreeView::~SOdysseyPaletteTreeView()
 {
     UOdysseyPalette::OnHierarchyChanged().RemoveAll(this);
-    UOdysseyPalette::OnSetsChanged().RemoveAll(this);
 }
 
 SOdysseyPaletteTreeView::SOdysseyPaletteTreeView()
@@ -65,51 +55,37 @@ SOdysseyPaletteTreeView::SOdysseyPaletteTreeView()
     , mPalette(nullptr)
     , mCurrentColorEntryAttribute(*this, nullptr)
     , mCurrentColorEntry(nullptr)
-    , mCurrentSetAttribute(*this, 0)
-    , mCurrentSet(0)
     , mSelectedEntry(nullptr)
     , mCommandList(MakeShared<FUICommandList>())
 {
     MapActionsToCommandList();
     UOdysseyPalette::OnHierarchyChanged().AddRaw(this, &SOdysseyPaletteTreeView::OnPaletteHierarchyChanged);
-    UOdysseyPalette::OnSetsChanged().AddRaw(this, &SOdysseyPaletteTreeView::OnPaletteSetsChanged);
 }
 
 //CONSTRUCTION/DESTRUCTION-----------------------------------------------
 void SOdysseyPaletteTreeView::Construct(const FArguments& InArgs)
 {
+    mIsReadOnly = InArgs._IsReadOnly;
     mPaletteAttribute.Assign(*this, InArgs._Palette);
     mPalette = mPaletteAttribute.Get();
     mCurrentColorEntryAttribute.Assign(*this, InArgs._CurrentColorEntry);
     mCurrentColorEntry = mCurrentColorEntryAttribute.Get();
-    mCurrentSetAttribute.Assign(*this, InArgs._CurrentSet);
-    mCurrentSet = mCurrentSetAttribute.Get();
     mSelectedEntry = mCurrentColorEntry;
     mOnCurrentColorEntrySelected = InArgs._OnCurrentColorEntrySelected;
-    mOnCurrentSetSelected = InArgs._OnCurrentSetSelected;
 
     mItemsSource = MakeShared<UE::Slate::Containers::TObservableArray<UOdysseyPaletteEntry*>>();
-    mSetsSource = MakeShared<UE::Slate::Containers::TObservableArray<TSharedPtr<int>>>();
-
     RefreshItemsSource();
-    RefreshSetsSource();
 
     TSharedRef<SHeaderRow> headerRow = SNew(SHeaderRow)
         + SHeaderRow::Column("Header")
         .DefaultLabel(FText())
         .VAlignCell(VAlign_Top)
-        .FillWidth(0.3f)
-        [
-            CreateHeaderColumnHeaderContent()
-        ]
+        .FillWidth(0.5f)
 
         + SHeaderRow::Column("Color")
         .DefaultLabel(FText())
         .VAlignCell(VAlign_Top)
-        .FillWidth(0.6f)
-        [
-            CreateColorColumnHeaderContent()
-        ];
+        .FillWidth(0.5f);
 
     STreeView<UOdysseyPaletteEntry*>::Construct(
         STreeView<UOdysseyPaletteEntry*>::FArguments()
@@ -137,6 +113,9 @@ int32
 SOdysseyPaletteTreeView::OnPaint( const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 EntryId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled ) const
 {
     int32 entryId = STreeView<UOdysseyPaletteEntry*>::OnPaint( Args, AllottedGeometry, MyCullingRect, OutDrawElements, EntryId, InWidgetStyle, bParentEnabled );
+
+    if (mIsReadOnly)
+        return entryId;
 
     if (mDisplayDropZone)
     {
@@ -196,7 +175,7 @@ SOdysseyPaletteTreeView::OnPaint( const FPaintArgs& Args, const FGeometry& Allot
 FReply
 SOdysseyPaletteTreeView::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent& iKeyEvent )
 {
-    if (mCommandList->ProcessCommandBindings(iKeyEvent))
+    if (!mIsReadOnly && mCommandList->ProcessCommandBindings(iKeyEvent))
         return FReply::Handled();
 
     return STreeView<UOdysseyPaletteEntry*>::OnKeyDown(iGeometry, iKeyEvent);
@@ -205,6 +184,9 @@ SOdysseyPaletteTreeView::OnKeyDown( const FGeometry& iGeometry, const FKeyEvent&
 FReply
 SOdysseyPaletteTreeView::OnDragOver(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
 {
+    if (mIsReadOnly)
+        return FReply::Unhandled();
+
     if ( !mPalette )
         return FReply::Unhandled();
 
@@ -242,12 +224,18 @@ SOdysseyPaletteTreeView::OnDragOver(const FGeometry& MyGeometry, const FDragDrop
 void
 SOdysseyPaletteTreeView::OnDragLeave(const FDragDropEvent& DragDropEvent)
 {
+    if (mIsReadOnly)
+        return;
+
     mDisplayDropZone = false;
 }
 
 FReply
 SOdysseyPaletteTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent)
 {
+    if (mIsReadOnly)
+        return FReply::Unhandled();
+
     mDisplayDropZone = false;
 
     if ( !mPalette )
@@ -297,34 +285,10 @@ SOdysseyPaletteTreeView::OnDrop(const FGeometry& MyGeometry, const FDragDropEven
 void
 SOdysseyPaletteTreeView::ResetDropZone()
 {
+    if (mIsReadOnly)
+        return;
+
     mDisplayDropZone = false;
-}
-
-FReply SOdysseyPaletteTreeView::AddSetToPalette()
-{
-    mPalette->AddSet();
-    mOnCurrentSetSelected.ExecuteIfBound(mPalette->Sets.Num() - 1);
-    return FReply::Handled();
-}
-
-FReply SOdysseyPaletteTreeView::SavePalette()
-{
-    if (!mPalette)
-        return FReply::Unhandled();
-
-    UPackage* package = mPalette->GetOutermost();
-    mPalette->MarkPackageDirty();
-
-    FSavePackageArgs packageArgs;
-    packageArgs.SaveFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone | EObjectFlags::RF_HasExternalPackage;
-    FString packageFileName = FPackageName::LongPackageNameToFilename(package->GetName(), FPackageName::GetAssetPackageExtension());
-
-    bool isSaved = UPackage::SavePackage( package, nullptr, *packageFileName, packageArgs );
-
-    if( isSaved )
-        return FReply::Handled();
-    else
-        return FReply::Unhandled();
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -357,94 +321,14 @@ SOdysseyPaletteTreeView::OnPaletteHierarchyChanged(UOdysseyPalette* iPalette)
     RefreshItemsSource();
 }
 
-TSharedRef<SWidget> SOdysseyPaletteTreeView::CreateHeaderColumnHeaderContent()
-{
-    return SNew(SHorizontalBox)
-        + SHorizontalBox::Slot()
-        .AutoWidth()
-        [
-            SNew(SButton)
-            .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("Button.NoPadding"))
-            .OnClicked(this, &SOdysseyPaletteTreeView::AddColorEntry )
-            [
-                SNew(SImage)
-                .Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddColor"))
-            ]
-        ]
-        + SHorizontalBox::Slot()
-        .AutoWidth()
-        [
-            SNew(SButton)
-            .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("Button.NoPadding"))
-            .OnClicked(this, &SOdysseyPaletteTreeView::AddFolderEntry)
-            [
-                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddFolder"))
-            ]
-        ]
-}
-
-TSharedRef<SWidget> SOdysseyPaletteTreeView::CreateColorColumnHeaderContent()
-{
-    return SNew(SHorizontalBox)
-        + SHorizontalBox::Slot()
-        .HAlign(HAlign_Fill)
-        [
-            SAssignNew(mSetComboBox, SComboBox<TSharedPtr<int>>)
-            .InitiallySelectedItem(GetCurrentSet())
-            .OptionsSource(mSetsSource)
-            .OnSelectionChanged(this, &SOdysseyPaletteTreeView::OnSetSelectionChanged)
-            .OnGenerateWidget(this, &SOdysseyPaletteTreeView::OnGenerateSetWidget)
-            [
-                SNew(STextBlock)
-                .Text_Lambda(
-                    [this]()
-                    {
-                        if (!mPalette)
-                            return FText::GetEmpty();
-
-                        if (mCurrentSet < 0 || mCurrentSet >= mPalette->Sets.Num())
-                            return FText::GetEmpty();
-
-                        return FText::FromName(mPalette->Sets[mCurrentSet]);
-                    }
-                )
-            ]
-        ]
-        + SHorizontalBox::Slot()
-        .AutoWidth()
-        .HAlign(HAlign_Right)
-        .VAlign(VAlign_Top)
-        [
-            SNew(SButton)
-            .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("Button.NoPadding"))
-            .HAlign(HAlign_Center)
-            .VAlign(VAlign_Center)
-            .OnClicked(this, &SOdysseyPaletteTreeView::AddSetToPalette)
-            [
-                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.AddSet"))
-            ]
-        ]
-        + SHorizontalBox::Slot()
-        .AutoWidth()
-        .HAlign(HAlign_Right)
-        .VAlign(VAlign_Top)
-        [
-            SNew(SButton)
-            .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("Button.NoPadding"))
-            .HAlign(HAlign_Center)
-            .VAlign(VAlign_Center)
-            .OnClicked(this, &SOdysseyPaletteTreeView::SavePalette)
-            [
-                SNew(SImage).Image(FOdysseyStyle::GetBrush("OdysseyPalette.Save"))
-            ]
-        ];
-}
-
 // ContextMenu
 
 TSharedPtr<SWidget>
 SOdysseyPaletteTreeView::OnContextMenuOpening()
 {
+    if (mIsReadOnly)
+        return nullptr;
+
     //Create a new command, so that we can add context menu specific entries
     TSharedRef<FUICommandList> commandList = MakeShared<FUICommandList>();
     commandList->Append(mCommandList);
@@ -461,6 +345,9 @@ SOdysseyPaletteTreeView::OnContextMenuOpening()
 
 void SOdysseyPaletteTreeView::CreateContextMenu()
 {
+    if (mIsReadOnly)
+        return;
+
     UToolMenus* ToolMenus = UToolMenus::Get();
     if (!ensure(ToolMenus))
         return;
@@ -483,16 +370,6 @@ void SOdysseyPaletteTreeView::CreateContextMenu()
     }
 }
 
-void
-SOdysseyPaletteTreeView::OnSetSelected(FName iSet)
-{
-    int index = mPalette->Sets.Find(iSet);
-
-    if( index >= 0 )
-        mPalette->UsedSet = index;
-}
-
-
 TArray<TSharedPtr<FExtender>>
 SOdysseyPaletteTreeView::ExtendContextMenu()
 {
@@ -502,6 +379,9 @@ SOdysseyPaletteTreeView::ExtendContextMenu()
 void
 SOdysseyPaletteTreeView::MapActionsToCommandList()
 {
+    if (mIsReadOnly)
+        return;
+
     mCommandList->MapAction(
         FGenericCommands::Get().SelectAll,
         FExecuteAction::CreateRaw(this, &SOdysseyPaletteTreeView::SelectAllEntries)
@@ -529,6 +409,9 @@ SOdysseyPaletteTreeView::MapActionsToCommandList()
 void
 SOdysseyPaletteTreeView::SelectAllEntries()
 {
+    if (mIsReadOnly)
+        return;
+
     if ( !mPalette )
         return;
 
@@ -540,6 +423,9 @@ SOdysseyPaletteTreeView::SelectAllEntries()
 void
 SOdysseyPaletteTreeView::DeleteSelectedEntries()
 {
+    if (mIsReadOnly)
+        return;
+
     if ( !mPalette )
         return;
 
@@ -554,6 +440,9 @@ SOdysseyPaletteTreeView::DeleteSelectedEntries()
 bool
 SOdysseyPaletteTreeView::CanDeleteSelectedEntries()
 {
+    if (mIsReadOnly)
+        return false;
+
     if ( !mPalette )
         return false;
 
@@ -575,6 +464,9 @@ SOdysseyPaletteTreeView::CanDeleteSelectedEntries()
 void
 SOdysseyPaletteTreeView::DuplicateSelectedEntries()
 {
+    if (mIsReadOnly)
+        return;
+
     if ( !mPalette )
         return;
 
@@ -593,26 +485,32 @@ SOdysseyPaletteTreeView::DuplicateSelectedEntries()
 void
 SOdysseyPaletteTreeView::RenameCurrentEntry()
 {
+    if (mIsReadOnly)
+        return;
+
     if ( !mPalette )
         return;
 
-    if (!mPalette->CurrentEntry)
+    if (!mSelectedEntry)
         return;
 
     mIsRenamePending = true; //has to come before ScrollItemIntoView() in case the item is already into view, which will trigger OnItemScrolledIntoView() immediately
-    RequestScrollIntoView(mPalette->CurrentEntry.Get());
+    RequestScrollIntoView(mSelectedEntry);
 }
 
 void
 SOdysseyPaletteTreeView::OnItemScrolledIntoView(UOdysseyPaletteEntry* iEntry, const TSharedPtr<ITableRow>& iRow)
 {
+    if (mIsReadOnly)
+        return;
+
     if ( !mPalette )
         return;
 
     if (!iEntry || !iRow)
         return;
 
-    if (mIsRenamePending && iEntry == mPalette->CurrentEntry)
+    if (mIsRenamePending && iEntry == mSelectedEntry)
     {
         TSharedPtr<SOdysseyPaletteEntryRow> entryRow = StaticCastSharedPtr<SOdysseyPaletteEntryRow>(iRow);
         entryRow->Rename();
@@ -623,6 +521,9 @@ SOdysseyPaletteTreeView::OnItemScrolledIntoView(UOdysseyPaletteEntry* iEntry, co
 TSharedPtr<FOdysseyPaletteDragDropOperation>
 SOdysseyPaletteTreeView::CreateDragDropOperation() const
 {
+    if (mIsReadOnly)
+        return nullptr;
+
     if ( !mPalette )
         return nullptr;
 
@@ -637,10 +538,12 @@ TSharedRef<ITableRow>
 SOdysseyPaletteTreeView::OnGenerateRow(UOdysseyPaletteEntry* iEntry, const TSharedRef<STableViewBase>& iOwnerTable)
 {
     if (iEntry->IsA<UOdysseyPaletteEntryFolder>())
-        return SNew(SOdysseyPaletteFolderRow, SharedThis(this), Cast<UOdysseyPaletteEntryFolder>(iEntry));
+        return SNew(SOdysseyPaletteFolderRow, SharedThis(this), Cast<UOdysseyPaletteEntryFolder>(iEntry))
+            .IsReadOnly(mIsReadOnly);
 
     if (iEntry->IsA<UOdysseyPaletteEntryColor>())
-        return SNew(SOdysseyPaletteColorRow, SharedThis(this), Cast<UOdysseyPaletteEntryColor>(iEntry));
+        return SNew(SOdysseyPaletteColorRow, SharedThis(this), Cast<UOdysseyPaletteEntryColor>(iEntry))
+            .IsReadOnly(mIsReadOnly);
 
     return SNew(STableRow<UOdysseyPaletteEntry*>, iOwnerTable);
 }
@@ -662,45 +565,11 @@ SOdysseyPaletteTreeView::OnSelectionChanged(UOdysseyPaletteEntry* iEntry, ESelec
     mOnCurrentColorEntrySelected.ExecuteIfBound(Cast<UOdysseyPaletteEntryColor>(iEntry));
 }
 
-TSharedRef<SWidget>
-SOdysseyPaletteTreeView::OnGenerateSetWidget(TSharedPtr<int> iSet)
-{
-    return SNew(STextBlock)
-        .Text_Lambda(
-            [this, iSet]()
-            {
-                if (!mPalette)
-                    return FText::GetEmpty();
-
-                if (!iSet || *iSet < 0 || *iSet >= mPalette->Sets.Num())
-                    return FText::GetEmpty();
-
-                return FText::FromName(mPalette->Sets[*iSet]);
-            }
-        );
-}
-
-void
-SOdysseyPaletteTreeView::OnSetSelectionChanged(TSharedPtr<int> iSet, ESelectInfo::Type iSelectInfo)
-{
-    mOnCurrentSetSelected.ExecuteIfBound(iSet ? *iSet : INDEX_NONE);
-}
-
 void
 SOdysseyPaletteTreeView::OnPaletteChanged()
 {
     mPalette = mPaletteAttribute.Get();
     RefreshItemsSource();
-    RefreshSetsSource();
-}
-
-void
-SOdysseyPaletteTreeView::OnPaletteSetsChanged( UOdysseyPalette* iPalette)
-{
-    if (iPalette != mPalette)
-        return;
-
-    RefreshSetsSource();
 }
 
 void
@@ -723,13 +592,6 @@ SOdysseyPaletteTreeView::OnCurrentColorEntryChanged()
 }
 
 void
-SOdysseyPaletteTreeView::OnCurrentSetChanged()
-{
-    mCurrentSet = mCurrentSetAttribute.Get();
-    mSetComboBox->SetSelectedItem(GetCurrentSet());
-}
-
-void
 SOdysseyPaletteTreeView::RefreshItemsSource()
 {
     mItemsSource->Reset();
@@ -749,23 +611,6 @@ SOdysseyPaletteTreeView::RefreshItemsSource()
     mItemsSource->Append(colorAndFolderEntries);
 }
 
-void
-SOdysseyPaletteTreeView::RefreshSetsSource()
-{
-    mSetsSource->Reset();
-
-    if (!mPalette)
-        return;
-
-    TArray<TSharedPtr<int>> sets;
-    for ( int i = 0; i < mPalette->Sets.Num() ; i++ )
-    {
-        sets.Add(MakeShared<int>(i));
-    }
-
-    mSetsSource->Append(sets);
-}
-
 UOdysseyPalette*
 SOdysseyPaletteTreeView::GetPalette() const
 {
@@ -778,18 +623,12 @@ SOdysseyPaletteTreeView::GetCurrentColorEntry() const
     return mCurrentColorEntry;
 }
 
-TSharedPtr<int>
-SOdysseyPaletteTreeView::GetCurrentSet() const
-{
-    if (mCurrentSet < 0 || mCurrentSet >= mSetsSource->Num())
-        return nullptr;
-
-    return (*mSetsSource)[mCurrentSet];
-}
-
 FReply
 SOdysseyPaletteTreeView::AddColorEntry()
 {
+    if (mIsReadOnly)
+        return FReply::Unhandled();
+
     if (!mPalette)
         return FReply::Unhandled();
 
@@ -828,6 +667,9 @@ SOdysseyPaletteTreeView::AddColorEntry()
 FReply
 SOdysseyPaletteTreeView::AddFolderEntry()
 {
+    if (mIsReadOnly)
+        return FReply::Unhandled();
+
     if (!mPalette)
         return FReply::Unhandled();
 

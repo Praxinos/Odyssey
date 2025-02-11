@@ -69,11 +69,13 @@ UOdysseyPainterEditorVectorObjectView::ImportParam()
             ForegroundPaletteSelection.OdysseyPalette = focusedObject->GetForegroundBucket().GetPaletteEntry()->GetPalette();
             //Careful, we can't select anything else than a color FOR NOW, so the cast is correct, but later, when we'll have material, we should change this accordingly
             ForegroundPaletteSelection.OdysseyPaletteEntryColor = Cast<UOdysseyPaletteEntryColor>( focusedObject->GetForegroundBucket().GetPaletteEntry() );
+            ForegroundPaletteSelection.OdysseyPaletteSet = focusedObject->GetForegroundBucket().GetPaletteSet();
         }
         else
         {
             ForegroundPaletteSelection.OdysseyPalette = nullptr;
             ForegroundPaletteSelection.OdysseyPaletteEntryColor = nullptr;
+            ForegroundPaletteSelection.OdysseyPaletteSet = 0;
         }
 
         if (focusedObject->GetBackgroundBucket().GetPaletteEntry())
@@ -81,11 +83,13 @@ UOdysseyPainterEditorVectorObjectView::ImportParam()
             BackgroundPaletteSelection.OdysseyPalette = focusedObject->GetBackgroundBucket().GetPaletteEntry()->GetPalette();
             //Careful, we can't select anything else than a color FOR NOW, so the cast is correct, but later, when we'll have material, we should change this accordingly
             BackgroundPaletteSelection.OdysseyPaletteEntryColor = Cast<UOdysseyPaletteEntryColor>( focusedObject->GetBackgroundBucket().GetPaletteEntry() );
+            BackgroundPaletteSelection.OdysseyPaletteSet = focusedObject->GetBackgroundBucket().GetPaletteSet();
         }
         else
         {
             BackgroundPaletteSelection.OdysseyPalette = nullptr;
             BackgroundPaletteSelection.OdysseyPaletteEntryColor = nullptr;
+            BackgroundPaletteSelection.OdysseyPaletteSet = 0;
         }
 
 
@@ -156,10 +160,16 @@ UOdysseyPainterEditorVectorObjectView::PropertyChanged( const FName& iPropertyNa
             selectedObject->GetForegroundBucket().SetSolidColor( ForegroundColor );
 
         if ( (iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundPaletteSelection)) || (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, ForegroundPaletteSelection)) )
+        {
             selectedObject->GetForegroundBucket().SetPaletteEntry( ForegroundPaletteSelection.OdysseyPaletteEntryColor );
+            selectedObject->GetForegroundBucket().SetPaletteSet( ForegroundPaletteSelection.OdysseyPaletteSet );
+        }
 
         if ((iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundPaletteSelection)) || (iMemberPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundPaletteSelection)))
-            selectedObject->GetBackgroundBucket().SetPaletteEntry( BackgroundPaletteSelection.OdysseyPaletteEntryColor);
+        {
+            selectedObject->GetBackgroundBucket().SetPaletteEntry( BackgroundPaletteSelection.OdysseyPaletteEntryColor );
+            selectedObject->GetBackgroundBucket().SetPaletteSet( BackgroundPaletteSelection.OdysseyPaletteSet );
+        }
 
         if( iPropertyName == GET_MEMBER_NAME_CHECKED(UOdysseyPainterEditorVectorObjectView, BackgroundColorMode) )
             selectedObject->GetBackgroundBucket().SetColorMode( static_cast<eBucketColorMode>(BackgroundColorMode) );

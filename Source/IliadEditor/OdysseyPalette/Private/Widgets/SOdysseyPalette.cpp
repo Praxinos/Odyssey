@@ -6,8 +6,11 @@
 #include "OdysseyPalette.h"
 
 #include "SOdysseyPaletteTreeView.h"
+#include "Widgets/SOdysseyPaletteSetComboBox.h"
 
 #include "PropertyCustomizationHelpers.h"
+
+#define LOCTEXT_NAMESPACE "OdysseyPalette"
 
 SLATE_IMPLEMENT_WIDGET(SOdysseyPalette)
 void
@@ -67,13 +70,31 @@ void SOdysseyPalette::Construct(const FArguments& InArgs)
         ]
         + SScrollBox::Slot()
         [
+            SNew(SHorizontalBox)
+            .Visibility(this, &SOdysseyPalette::GetTreeViewVisibility)
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .Padding(FMargin(0, 0, 4, 0))
+            .VAlign(VAlign_Center)
+            [
+                SNew(STextBlock)
+                .Text(LOCTEXT("palette.set.name", "Set"))
+            ]
+            + SHorizontalBox::Slot()
+            [
+                SNew(SOdysseyPaletteSetComboBox)
+                .Palette(InArgs._Palette)
+                .CurrentSet(InArgs._CurrentSet)
+                .OnCurrentSetSelected(InArgs._OnCurrentSetSelected)
+            ]
+        ]
+        + SScrollBox::Slot()
+        [
             SNew(SOdysseyPaletteTreeView)
             .Visibility(this, &SOdysseyPalette::GetTreeViewVisibility)
             .Palette(InArgs._Palette)
             .CurrentColorEntry(InArgs._CurrentColorEntry)
-            .CurrentSet(InArgs._CurrentSet)
             .OnCurrentColorEntrySelected(InArgs._OnCurrentColorEntrySelected)
-            .OnCurrentSetSelected(InArgs._OnCurrentSetSelected)
         ]
     ];
 }
@@ -93,16 +114,14 @@ SOdysseyPalette::GetTreeViewVisibility() const
 void
 SOdysseyPalette::OnObjectChanged(const FAssetData& AssetData)
 {
-    if (!AssetData.IsValid())
+    UOdysseyPalette* palette = nullptr;
+    if (AssetData.IsValid())
     {
-
-        mPalette = nullptr;
-        return;
+        palette = CastChecked< UOdysseyPalette >(AssetData.GetAsset());
     }
 
-    mPalette = CastChecked< UOdysseyPalette >(AssetData.GetAsset());
+    mOnPaletteChanged.ExecuteIfBound(palette);
 }
-
 
 FString
 SOdysseyPalette::ObjectPath() const
@@ -118,3 +137,5 @@ SOdysseyPalette::OnPaletteChanged()
 {
     mPalette = mPaletteAttribute.Get();
 }
+
+#undef LOCTEXT_NAMESPACE

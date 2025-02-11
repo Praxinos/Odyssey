@@ -12,6 +12,9 @@
 #include "UObject/UObjectGlobals.h"
 #include "Editor/PropertyEditor/Public/IDetailChildrenBuilder.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
+#include "Widgets/SOdysseyPaletteTreeView.h"
+#include "Widgets/Colors/SColorBlock.h"
+#include "Widgets/SOdysseyPaletteSetComboBox.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
@@ -22,29 +25,48 @@ TSharedRef<IPropertyTypeCustomization> FOdysseyVectorObjectViewPaletteCustomizat
 
 void FOdysseyVectorObjectViewPaletteCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> StructPropertyHandle, class FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
-    TArray<void*> rawPalettePtr;
-    StructPropertyHandle->AccessRawData(rawPalettePtr);
-    UOdysseyPalette* palette = static_cast<FPaletteEntrySelection*>(rawPalettePtr[0])->OdysseyPalette;
+    uint32 NumChildren;
+    StructPropertyHandle->GetNumChildren(NumChildren);
+    mPaletteHandle = StructPropertyHandle->GetChildHandle( GET_MEMBER_NAME_CHECKED(FPaletteEntrySelection, OdysseyPalette) );
+    mPaletteEntryHandle = StructPropertyHandle->GetChildHandle( GET_MEMBER_NAME_CHECKED(FPaletteEntrySelection, OdysseyPaletteEntryColor) );
+    mPaletteSetHandle = StructPropertyHandle->GetChildHandle( GET_MEMBER_NAME_CHECKED(FPaletteEntrySelection, OdysseyPaletteSet) );
 
-    if (palette)
-    {
-        mPaletteEntries.Empty();
-        for (int i = 0; i < palette->GetEntries().Num(); i++)
-        {
-            if (palette->GetEntries()[i]->IsA(UOdysseyPaletteEntryColor::StaticClass()))
-                mPaletteEntries.Add(palette->GetEntries()[i]);
-        }
-    }
+    HeaderRow
+    .NameContent()
+    [
+        StructPropertyHandle->CreatePropertyNameWidget()
+    ]
+    .ValueContent()
+    [
+        MakeCurrentColorEntryWidget()
+    ];
 
-    HeaderRow.NameContent()
+    mPaletteEntryHandle->SetOnPropertyValueChanged(FSimpleDelegate::CreateRaw(this, &FOdysseyVectorObjectViewPaletteCustomization::OnChildPropertyValueChanged, StructPropertyHandle));
+    mPaletteSetHandle->SetOnPropertyValueChanged(FSimpleDelegate::CreateRaw(this, &FOdysseyVectorObjectViewPaletteCustomization::OnChildPropertyValueChanged, StructPropertyHandle));
+    mPaletteHandle->SetOnPropertyValueChanged(FSimpleDelegate::CreateRaw(this, &FOdysseyVectorObjectViewPaletteCustomization::OnChildPropertyValueChanged, StructPropertyHandle));
+}
+
+TSharedRef<SWidget>
+FOdysseyVectorObjectViewPaletteCustomization::MakeCurrentColorEntryWidget()
+{
+    return SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
+        .Padding(FMargin(0, 0, 4, 0))
+        .AutoWidth()
         [
-            StructPropertyHandle->CreatePropertyNameWidget()
+            SNew(SColorBlock )
+                .Color(this, &FOdysseyVectorObjectViewPaletteCustomization::GetCurrentEntryColorAsLinear)
         ]
-        .ValueContent()
-        .MinDesiredWidth(125.f)
-        .MaxDesiredWidth(600.f)
+        + SHorizontalBox::Slot()
         [
-            StructPropertyHandle->CreatePropertyValueWidget()
+            SNew(STextBlock)
+            .Text_Lambda(
+                [this]() -> FText
+                {
+                    UOdysseyPaletteEntryColor* entry = GetCurrentEntryColor();
+                    return entry ? entry->EntryName : LOCTEXT("vector-object-view-palette.selected-entry.none", "None");
+                }
+            )
         ];
 }
 
@@ -52,94 +74,130 @@ void FOdysseyVectorObjectViewPaletteCustomization::CustomizeChildren(TSharedRef<
 {
     uint32 NumChildren;
     StructPropertyHandle->GetNumChildren(NumChildren);
-    mPaletteHandle = StructPropertyHandle->GetChildHandle( 0 );
-    mPaletteEntryHandle = StructPropertyHandle->GetChildHandle( 1 );
+    mPaletteHandle = StructPropertyHandle->GetChildHandle( GET_MEMBER_NAME_CHECKED(FPaletteEntrySelection, OdysseyPalette) );
+    mPaletteSetHandle = StructPropertyHandle->GetChildHandle( GET_MEMBER_NAME_CHECKED(FPaletteEntrySelection, OdysseyPaletteSet) );
+    mPaletteEntryHandle = StructPropertyHandle->GetChildHandle( GET_MEMBER_NAME_CHECKED(FPaletteEntrySelection, OdysseyPaletteEntryColor) );
 
     StructBuilder.AddProperty(mPaletteHandle->AsShared())
-        .CustomWidget()
-        .NameContent()
-        [
-            mPaletteHandle->CreatePropertyNameWidget()
-        ]
-        .ValueContent()
-        .MaxDesiredWidth(500)
-        [
-            SNew(SObjectPropertyEntryBox)
-                .PropertyHandle(mPaletteHandle)
-                .AllowedClass(UOdysseyPalette::StaticClass())
-                .OnObjectChanged(this, &FOdysseyVectorObjectViewPaletteCustomization::OnPaletteChanged)
-        ];
+    .CustomWidget()
+    .NameContent()
+    [
+        mPaletteHandle->CreatePropertyNameWidget()
+    ]
+    .ValueContent()
+    [
+        SNew(SObjectPropertyEntryBox)
+            .PropertyHandle(mPaletteHandle)
+            .AllowedClass(UOdysseyPalette::StaticClass())
+            .OnObjectChanged(this, &FOdysseyVectorObjectViewPaletteCustomization::OnPaletteChanged)
+    ];
+
+    StructBuilder.AddProperty(mPaletteSetHandle->AsShared())
+    .CustomWidget()
+    .NameContent()
+    [
+        mPaletteSetHandle->CreatePropertyNameWidget()
+    ]
+    .ValueContent()
+    [
+        SNew(SOdysseyPaletteSetComboBox)
+        .Palette(this, &FOdysseyVectorObjectViewPaletteCustomization::GetPalette)
+        .CurrentSet(this, &FOdysseyVectorObjectViewPaletteCustomization::GetCurrentSet)
+        .OnCurrentSetSelected(this, &FOdysseyVectorObjectViewPaletteCustomization::OnPaletteCurrentSetSelected)
+    ];
 
     StructBuilder.AddProperty(mPaletteEntryHandle->AsShared())
-        .CustomWidget()
-        .NameContent()
+    .CustomWidget()
+    .NameContent()
+    [
+        mPaletteEntryHandle->CreatePropertyNameWidget()
+    ]
+    .ValueContent()
+    [
+        SNew(SComboButton)
+        .OnGetMenuContent(this, &FOdysseyVectorObjectViewPaletteCustomization::GetPaletteEntryMenuContent)
+        .ButtonContent()
         [
-            mPaletteEntryHandle->CreatePropertyNameWidget()
+            MakeCurrentColorEntryWidget()
         ]
-        .ValueContent()
-        .MaxDesiredWidth(500)
-        [
-            SAssignNew(mComboBoxWidget, SComboBox<UOdysseyPaletteEntry*>)
-                .OptionsSource(&mPaletteEntries)
-                .OnGenerateWidget_Lambda([](UOdysseyPaletteEntry* entry) -> TSharedRef<SWidget>
-                    {
-                        return SNew(STextBlock).Text(entry->EntryName);//entry ? entry->EntryName : TEXT("None"));
-                    })
-                .OnSelectionChanged(this, &FOdysseyVectorObjectViewPaletteCustomization::OnEntrySelected)
-                        .Content()
-                        [
-                            SNew(STextBlock)
-                                .Text_Lambda([this]() -> FText
-                                    {
-                                        UObject* objectEntry = nullptr;
-                                        mPaletteEntryHandle->GetValue(objectEntry);
-                                        UOdysseyPaletteEntry* entry = Cast<UOdysseyPaletteEntry>(objectEntry);
-                                        return entry ? entry->EntryName : LOCTEXT("None", "None");
-                                    })
-                        ]
-        ];
+    ];
 
     mPaletteEntryHandle->SetOnPropertyValueChanged(FSimpleDelegate::CreateRaw(this, &FOdysseyVectorObjectViewPaletteCustomization::OnChildPropertyValueChanged, StructPropertyHandle));
+    mPaletteSetHandle->SetOnPropertyValueChanged(FSimpleDelegate::CreateRaw(this, &FOdysseyVectorObjectViewPaletteCustomization::OnChildPropertyValueChanged, StructPropertyHandle));
     mPaletteHandle->SetOnPropertyValueChanged(FSimpleDelegate::CreateRaw(this, &FOdysseyVectorObjectViewPaletteCustomization::OnChildPropertyValueChanged, StructPropertyHandle));
-
 }
 
-void FOdysseyVectorObjectViewPaletteCustomization::OnEntrySelected(UOdysseyPaletteEntry* SelectedObject, ESelectInfo::Type SelectInfo)
+TSharedRef<SWidget>
+FOdysseyVectorObjectViewPaletteCustomization::GetPaletteEntryMenuContent()
 {
-    if (SelectedObject->IsValidLowLevel())
-    {
-        mPaletteEntryHandle->SetValue(SelectedObject);
+    return SNew(SBox)
+        .MinDesiredWidth(300)
+        .MaxDesiredHeight(300)
+        [
+            SNew(SOdysseyPaletteTreeView)
+            .Visibility(this, &FOdysseyVectorObjectViewPaletteCustomization::GetTreeViewVisibility)
+            .Palette(this, &FOdysseyVectorObjectViewPaletteCustomization::GetPalette)
+            .CurrentColorEntry(this, &FOdysseyVectorObjectViewPaletteCustomization::GetCurrentEntryColor)
+            .OnCurrentColorEntrySelected(this, &FOdysseyVectorObjectViewPaletteCustomization::OnPaletteCurrentColorEntrySelected)
+        ];
+}
 
-        mPaletteEntries.Empty();
-        for (int i = 0; i < SelectedObject->GetPalette()->GetEntries().Num(); i++)
-        {
-            if (SelectedObject->GetPalette()->GetEntries()[i]->IsA(UOdysseyPaletteEntryColor::StaticClass()))
-                mPaletteEntries.Add(SelectedObject->GetPalette()->GetEntries()[i]);
-        }
+EVisibility
+FOdysseyVectorObjectViewPaletteCustomization::GetTreeViewVisibility() const
+{
+    return GetPalette() ? EVisibility::Visible : EVisibility::Collapsed;
+}
 
-        mComboBoxWidget->RefreshOptions();
-    }
+UOdysseyPalette*
+FOdysseyVectorObjectViewPaletteCustomization::GetPalette() const
+{
+    UObject* palette;
+    mPaletteHandle->GetValue(palette);
+    return Cast<UOdysseyPalette>(palette);
+}
+
+int
+FOdysseyVectorObjectViewPaletteCustomization::GetCurrentSet() const
+{
+    int set;
+    mPaletteSetHandle->GetValue(set);
+    return set;
+}
+
+UOdysseyPaletteEntryColor*
+FOdysseyVectorObjectViewPaletteCustomization::GetCurrentEntryColor() const
+{
+    UObject* entry;
+    mPaletteEntryHandle->GetValue(entry);
+    return Cast<UOdysseyPaletteEntryColor>(entry);
+}
+
+FLinearColor
+FOdysseyVectorObjectViewPaletteCustomization::GetCurrentEntryColorAsLinear() const
+{
+    UOdysseyPaletteEntryColor* entry = GetCurrentEntryColor();
+    if (!entry)
+        return FLinearColor();
+    return FLinearColor( entry->GetColor(GetCurrentSet()) );
+}
+void
+FOdysseyVectorObjectViewPaletteCustomization::OnPaletteCurrentSetSelected(int iSet)
+{
+    mPaletteSetHandle->SetValue(iSet);
+}
+
+void
+FOdysseyVectorObjectViewPaletteCustomization::OnPaletteCurrentColorEntrySelected(UOdysseyPaletteEntryColor* iEntry)
+{
+    mPaletteEntryHandle->SetValue(iEntry);
 }
 
 void FOdysseyVectorObjectViewPaletteCustomization::OnPaletteChanged(const FAssetData& AssetData)
 {
     UOdysseyPalette* palette = Cast<UOdysseyPalette>(AssetData.GetAsset());
-    if ( palette )
-    {
-        mPaletteHandle->SetValue(palette);
-
-        mPaletteEntries.Empty();
-        for( int i = 0; i < palette->GetEntries().Num(); i++ )
-        {
-            if( palette->GetEntries()[i]->IsA(UOdysseyPaletteEntryColor::StaticClass()) )
-                mPaletteEntries.Add(palette->GetEntries()[i]);
-        }
-
-        mComboBoxWidget->RefreshOptions();
-
-        UOdysseyPaletteEntry* entry = nullptr;
-        mPaletteEntryHandle->SetValue(entry);
-    }
+    mPaletteHandle->SetValue(palette);
+    mPaletteEntryHandle->SetValue((UObject*)nullptr);
+    mPaletteSetHandle->SetValue(0);
 }
 
 void

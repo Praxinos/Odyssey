@@ -3,8 +3,11 @@
 
 #include "OdysseyPainterEditorColorPaletteTab.h"
 
+#include "OdysseyPalette.h"
 #include "SOdysseyPalette.h"
 #include "OdysseyPainterEditor.h"
+
+#include "UObject/OdysseyObjectEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 

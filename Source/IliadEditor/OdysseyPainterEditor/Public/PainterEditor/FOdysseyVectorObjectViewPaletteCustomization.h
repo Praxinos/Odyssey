@@ -9,6 +9,7 @@
 #include "Editor/PropertyEditor/Public/DetailCategoryBuilder.h"
 #include "Widgets/Input/SComboBox.h"
 
+class UOdysseyPaletteEntryColor;
 
 class FOdysseyVectorObjectViewPaletteCustomization : public IPropertyTypeCustomization
 {
@@ -32,12 +33,26 @@ private:
     void OnEntrySelected(UOdysseyPaletteEntry* SelectedEntry, ESelectInfo::Type SelectInfo);
     void OnPaletteChanged(const FAssetData& AssetData);
     void OnChildPropertyValueChanged(TSharedRef<IPropertyHandle> StructPropertyHandle);
+    TSharedRef<SWidget> GetPaletteEntryMenuContent();
+
+    UOdysseyPalette* GetPalette() const;
+    int GetCurrentSet() const;
+    UOdysseyPaletteEntryColor* GetCurrentEntryColor() const;
+    FLinearColor GetCurrentEntryColorAsLinear() const;
+
+    EVisibility GetTreeViewVisibility() const;
+
+    void OnPaletteCurrentSetSelected(int iSet);
+    void OnPaletteCurrentColorEntrySelected(UOdysseyPaletteEntryColor* iEntry);
+
+    TSharedRef<SWidget> MakeCurrentColorEntryWidget();
 
 private:
     TSharedPtr<IPropertyHandle> mPaletteEntryHandle;
+    TSharedPtr<IPropertyHandle> mPaletteSetHandle;
     TSharedPtr<IPropertyHandle> mPaletteHandle;
 
-    TArray< UOdysseyPaletteEntry* > mPaletteEntries;
+    //TArray< UOdysseyPaletteEntry* > mPaletteEntries;
 
-    TSharedPtr<SComboBox<UOdysseyPaletteEntry*>> mComboBoxWidget;
+    //TSharedPtr<SComboBox<UOdysseyPaletteEntry*>> mComboBoxWidget;
 };

@@ -39,6 +39,7 @@ FOdysseyVectorImportV1::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                                 {
                                     iBucket.SetColorMode( eBucketColorMode::Palette );
                                     iBucket.SetPaletteEntry(entries[j]);
+                                    iBucket.SetPaletteSet(palette->UsedSet_DEPRECATED);
                                     break;
                                 }
                             }

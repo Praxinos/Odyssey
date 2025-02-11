@@ -34,7 +34,6 @@ class ODYSSEYPALETTE_API UOdysseyPaletteEntry : public UObject
 {
     GENERATED_BODY()
 
-
     public:
     /**
      * @brief Delegate called when something changed the name on this entry

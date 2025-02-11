@@ -18,10 +18,11 @@ void SOdysseyPaletteEntryRow::Construct(const FArguments& InArgs, const TSharedR
     ensure(iEntry);
     mEntry = iEntry;
     mTreeView = iTreeView;
-    mSet = InArgs._Set;
+    mIsReadOnly = InArgs._IsReadOnly;
 
     SMultiColumnTableRow<UOdysseyPaletteEntry*>::FArguments args;
     args.Style(&FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows"))
+        .Padding(FMargin(0, 2, 0, 2))
         .OnCanAcceptDrop(this, &SOdysseyPaletteEntryRow::OnRowCanAcceptDrop)
         .OnAcceptDrop(this, &SOdysseyPaletteEntryRow::OnRowAcceptDrop)
         .OnDragDetected(this, &SOdysseyPaletteEntryRow::OnRowDragDetected);
@@ -102,51 +103,16 @@ SOdysseyPaletteEntryRow::GenerateHeaderWidget()
             )
             .OnTextCommitted(this, &SOdysseyPaletteEntryRow::OnEntryNameCommited)
             .IsSelected(this, &SOdysseyPaletteEntryRow::IsSelectedExclusively) //Allows edition to work
+            .IsReadOnly(mIsReadOnly)
         ];
-}
-
-/* TSharedRef<SWidget> SOdysseyPaletteEntryRow::GenerateExpandableHeaderWidget()
-{
-    return SNew(SHorizontalBox)
-        + SHorizontalBox::Slot()
-        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
-        .AutoWidth()
-        [
-            SNew(SOdysseyPaletteExpanderArrow, SharedThis(this))
-            .ArrowPadding(FMargin(0.f, 2.f, 0.f, 0.f))
-            .ExpanderImageOpened(&mEntry->IconExpanded)
-            .ExpanderImageClosed(&mEntry->Icon)
-            .IndentAmount(16.f)
-            .ShouldDrawWires(true)
-        ]
-        + SHorizontalBox::Slot()
-        .Padding(FMargin(0.f, 2.f, 0.f, 2.f))
-        [
-            SNew(SVerticalBox)
-            + SVerticalBox::Slot()
-            .Padding(FMargin(0.f, 0.f, 0.f, 2.f))
-            .AutoHeight()
-            [
-                GenerateHeaderWidget()
-            ]
-        ];
-} */
-
-FText
-SOdysseyPaletteEntryRow::GetEntryName() const
-{
-    return mEntry->EntryName;
-}
-
-FSlateFontInfo
-SOdysseyPaletteEntryRow::GetEntryNameFont() const
-{
-    return FAppStyle::Get().GetFontStyle("NormalFontBold");
 }
 
 void
 SOdysseyPaletteEntryRow::OnEntryNameCommited(const FText& iText, ETextCommit::Type iType)
 {
+    if (mIsReadOnly)
+        return;
+
     FScopedTransaction ScopedTransaction(LOCTEXT("entry-row.set-name", "Change Entry Name"));
     FOdysseyObjectEditorUtils::SetPropertyValue(mEntry, GET_MEMBER_NAME_CHECKED(UOdysseyPaletteEntry, EntryName), iText);
 }
@@ -154,6 +120,9 @@ SOdysseyPaletteEntryRow::OnEntryNameCommited(const FText& iText, ETextCommit::Ty
 void
 SOdysseyPaletteEntryRow::Rename()
 {
+    if (mIsReadOnly)
+        return;
+
     mNameWidget->EnterEditingMode();
 }
 
@@ -201,6 +170,9 @@ SOdysseyPaletteEntryRow::OnRowCanAcceptDrop(const FDragDropEvent& iEvent, EItemD
     StaticCastSharedPtr<SOdysseyPaletteTreeView>(OwnerTablePtr.Pin())->ResetDropZone();
 
     EItemDropZone emptyDropZone;
+    if (mIsReadOnly)
+        return emptyDropZone;
+
     if ( !mEntry )
         return emptyDropZone;
 
@@ -252,6 +224,8 @@ FReply
 SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iDropZone, UOdysseyPaletteEntry* iEntry)
 {
     StaticCastSharedPtr<SOdysseyPaletteTreeView>(OwnerTablePtr.Pin())->ResetDropZone();
+    if (mIsReadOnly)
+        return FReply::Unhandled();
 
     TOptional<EItemDropZone> dropZone = OnRowCanAcceptDrop(iEvent, iDropZone, iEntry);
     if (!dropZone.IsSet())
@@ -355,6 +329,9 @@ SOdysseyPaletteEntryRow::OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDrop
 FReply
 SOdysseyPaletteEntryRow::OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent)
 {
+    if (mIsReadOnly)
+        return FReply::Unhandled();
+
     TSharedPtr<SOdysseyPaletteTreeView> treeView = mTreeView.Pin();
     if (treeView.IsValid() && iEvent.IsMouseButtonDown( EKeys::LeftMouseButton ))
     {

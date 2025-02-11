@@ -532,12 +532,14 @@ void
 FOdysseyVectorObject::ExportParam( FOdysseyVectorObject* iDestinationObject, bool iInvalidate )
 {
     iDestinationObject->mForegroundBucket.SetPaletteEntry( mForegroundBucket.GetPaletteEntry() );
+    iDestinationObject->mForegroundBucket.SetPaletteSet( mForegroundBucket.GetPaletteSet() );
     iDestinationObject->mForegroundBucket.SetSolidColor( mForegroundBucket.GetSolidColor() );
     iDestinationObject->mForegroundBucket.SetColorMode( mForegroundBucket.GetColorMode() );
     iDestinationObject->mForegroundBucket.SetGradientColor0( mForegroundBucket.GetGradientColor0() );
     iDestinationObject->mForegroundBucket.SetGradientColor1( mForegroundBucket.GetGradientColor1() );
 
     iDestinationObject->mBackgroundBucket.SetPaletteEntry( mBackgroundBucket.GetPaletteEntry() );
+    iDestinationObject->mBackgroundBucket.SetPaletteSet( mBackgroundBucket.GetPaletteSet() );
     iDestinationObject->mBackgroundBucket.SetSolidColor( mBackgroundBucket.GetSolidColor() );
     iDestinationObject->mBackgroundBucket.SetColorMode( mBackgroundBucket.GetColorMode() );
     iDestinationObject->mBackgroundBucket.SetGradientColor0( mBackgroundBucket.GetGradientColor0() );

@@ -12,6 +12,12 @@
 class ODYSSEYPALETTE_API SOdysseyPaletteColorRow
     : public SOdysseyPaletteEntryRow
 {
+    SLATE_BEGIN_ARGS(SOdysseyPaletteColorRow)
+        {}
+        SLATE_ARGUMENT(bool, IsReadOnly)
+        SLATE_ATTRIBUTE(int, Set)
+    SLATE_END_ARGS()
+
 public:
     // Construction / Destruction
     void Construct(const FArguments& iArgs, const TSharedRef<SOdysseyPaletteTreeView>& iTreeView, class UOdysseyPaletteEntryColor* iColorEntry);
@@ -29,4 +35,5 @@ private:
 private:
     class UOdysseyPaletteEntryColor* mColorEntry;
     TSharedPtr<SWidget> mColorWidget;
+    TAttribute<int> mSet;
 };

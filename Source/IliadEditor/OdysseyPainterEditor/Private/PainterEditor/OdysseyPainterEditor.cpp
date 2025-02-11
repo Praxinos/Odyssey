@@ -842,6 +842,8 @@ void
 FOdysseyPainterEditor::PaintColor(const FOdysseyBrushColor& iColor, bool iIsCommit)
 {
     mPaintColor = iColor;
+    mPaletteCurrentColorEntry = nullptr;
+    mPaletteCurrentSet = 0;
 
     //PATCH: should be automatic in the new drawing Tool, fix it asap
     if (iIsCommit)
@@ -2961,7 +2963,7 @@ FOdysseyPainterEditor::GetPaletteCurrentSet() const
 void
 FOdysseyPainterEditor::SetPalette(UOdysseyPalette* iPalette)
 {
-    if (mPalette != iPalette)
+    if (mPalette == iPalette)
         return;
 
     mPalette = iPalette;
@@ -2975,16 +2977,18 @@ FOdysseyPainterEditor::SetPaletteCurrentColorEntry(UOdysseyPaletteEntryColor* iE
     if (!mPalette)
         return;
 
+    if(iEntry && mPaletteCurrentSet >= 0 && mPaletteCurrentSet < mPalette->GetSets().Num())
+    {
+        FColor color = iEntry->GetColor(mPaletteCurrentSet);
+        ::ULIS::FColor ulisColor = ::ULIS::FColor::FromRGBA8(color.R, color.G, color.B, color.A);
+
+        mPaintColor = ulisColor;
+
+        //PATCH: should be automatic in the new drawing Tool, fix it asap
+        FOdysseyObjectEditorUtils::SetPropertyValue(GetRasterDrawingTool()->GetBrushOptions(), GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Color), mPaintColor);
+    }
+
     mPaletteCurrentColorEntry = iEntry;
-    if(!mPaletteCurrentColorEntry)
-        return;
-
-    if (mPaletteCurrentSet < 0 || mPaletteCurrentSet >= mPalette->Sets.Num())
-        return;
-
-    FColor color = mPaletteCurrentColorEntry->GetColor(mPaletteCurrentSet);
-    ::ULIS::FColor ulisColor = ::ULIS::FColor::FromRGBA8(color.R, color.B, color.G, color.A);
-    PaintColor(ulisColor, true);
 }
 
 void
@@ -2993,17 +2997,18 @@ FOdysseyPainterEditor::SetPaletteCurrentSet(int iSet)
     if (!mPalette)
         return;
 
+    if(mPaletteCurrentColorEntry && iSet >= 0 && iSet < mPalette->GetSets().Num())
+    {
+        FColor color = mPaletteCurrentColorEntry->GetColor(iSet);
+        ::ULIS::FColor ulisColor = ::ULIS::FColor::FromRGBA8(color.R, color.G, color.B, color.A);
+
+        mPaintColor = ulisColor;
+
+        //PATCH: should be automatic in the new drawing Tool, fix it asap
+        FOdysseyObjectEditorUtils::SetPropertyValue(GetRasterDrawingTool()->GetBrushOptions(), GET_MEMBER_NAME_CHECKED(UOdysseyBrushOptions, Color), mPaintColor);
+    }
+
     mPaletteCurrentSet = iSet;
-
-    if(!mPaletteCurrentColorEntry)
-        return;
-
-    if (mPaletteCurrentSet < 0 || mPaletteCurrentSet >= mPalette->Sets.Num())
-        return;
-
-    FColor color = mPaletteCurrentColorEntry->GetColor(mPaletteCurrentSet);
-    ::ULIS::FColor ulisColor = ::ULIS::FColor::FromRGBA8(color.R, color.B, color.G, color.A);
-    PaintColor(ulisColor, true);
 }
 
 #undef LOCTEXT_NAMESPACE
