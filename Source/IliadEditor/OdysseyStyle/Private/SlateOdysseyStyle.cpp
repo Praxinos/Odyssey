@@ -205,6 +205,12 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("OdysseyPalette.AddSet", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddSet", mIcon24x24));
     Set("OdysseyPalette.AddPicker", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddPicker", mIcon24x24));
     Set("OdysseyPalette.Save", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteSave", mIcon24x24));
+    Set("OdysseyPalette.Row", mCoreTableRowStyle
+        .SetEvenRowBackgroundBrush(FSlateColorBrush(FStyleColors::Panel))
+        .SetEvenRowBackgroundHoveredBrush(FSlateColorBrush(FStyleColors::Hover))
+        .SetOddRowBackgroundBrush(FSlateColorBrush(FStyleColors::Panel))
+        .SetOddRowBackgroundHoveredBrush(FSlateColorBrush(FStyleColors::Hover))
+    );
 
 
     // OdysseyWidgets - AdvancedColorWheel

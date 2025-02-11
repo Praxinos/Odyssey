@@ -61,6 +61,7 @@ void SOdysseyPainterEditorPaletteSetList::Construct(const FArguments& InArgs)
 {
     mPaletteSets.Assign(*this, InArgs._PaletteSets);
     mCurrentColorEntry.Assign(*this, InArgs._CurrentColorEntry);
+    mCurrentSet = InArgs._CurrentSet;
     mOnAddPaletteSet = InArgs._OnAddPaletteSet;
     mOnRemovePaletteSet = InArgs._OnRemovePaletteSet;
     mOnCurrentColorEntryChanged = InArgs._OnCurrentColorEntryChanged;
@@ -68,6 +69,7 @@ void SOdysseyPainterEditorPaletteSetList::Construct(const FArguments& InArgs)
     mItemsSource = MakeShared<UE::Slate::Containers::TObservableArray<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>>>();
 
     TSharedRef<SHeaderRow> headerRow = SNew(SHeaderRow)
+        .Visibility(EVisibility::Collapsed)
         + SHeaderRow::Column("Header")
         .DefaultLabel(FText())
         .VAlignCell(VAlign_Top)
@@ -397,7 +399,7 @@ SOdysseyPainterEditorPaletteSetList::OnCurrentColorEntryChanged()
     for (TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem> item : *mItemsSource)
     {
         TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem> entryItem = FindEntryItem(entry, item->mChildren);
-        if (entryItem)
+        if (entryItem && mCurrentSet.Get() == entryItem->mPaletteSet->GetSet())
         {
             mTreeView->SetItemSelection({entryItem}, true);
             return;

@@ -3,23 +3,51 @@
 
 #include "Widgets/Palette/SOdysseyPainterEditorPaletteEntryRow.h"
 #include "Palette/OdysseyPaletteEntry.h"
-#include "OdysseyStyleSet.h"
 
 #define LOCTEXT_NAMESPACE "PainterEditor"
 
-//CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
+//CONSTRUCTION/DESTRUCTION----------------------------------------------- STableRow
 void SOdysseyPainterEditorPaletteEntryRow::Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& iTreeView)
 {
     mEntry = InArgs._Entry;
 
-    SMultiColumnTableRow<TSharedPtr<struct IOdysseyPainterEditorPaletteTreeViewItem>>::FArguments args;
-    // args.Style(&FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows"))
-    args.Padding(FMargin(0, 2, 0, 2));
+    STableRow<TSharedPtr<struct IOdysseyPainterEditorPaletteTreeViewItem>>::FArguments args;
+    args.Style(InArgs._Style);
 
-    SMultiColumnTableRow<TSharedPtr<struct IOdysseyPainterEditorPaletteTreeViewItem>>::Construct(
-        args,
+    TSharedRef<SSplitter> Splitter = SNew(SSplitter)
+        //.Style(FAppStyle::Get(), "DetailsView.Splitter")
+        .PhysicalSplitterHandleSize(1.0f)
+        .HitDetectionSplitterHandleSize(5.0f);
+        //.HighlightedHandleIndex(ColumnSizeData.GetHoveredSplitterIndex())
+        //.OnHandleHovered(ColumnSizeData.GetOnSplitterHandleHovered());
+
+    //header Column
+
+
+    TSharedPtr< SHeaderRow > headerRow = iTreeView->GetHeaderRow();
+    const TIndirectArray<SHeaderRow::FColumn>& columns = headerRow->GetColumns();
+    for (int i = 0; i < columns.Num(); i++)
+    {
+        const SHeaderRow::FColumn& column = columns[i];
+
+        Splitter->AddSlot()
+        .Value(this, &SOdysseyPainterEditorPaletteEntryRow::GetColumnWidth, i)
+        .OnSlotResized(this, &SOdysseyPainterEditorPaletteEntryRow::OnColumnResized, i)
+        [
+            GenerateWidgetForColumn(column.ColumnId)
+        ];
+    }
+
+    STableRow<TSharedPtr<struct IOdysseyPainterEditorPaletteTreeViewItem>>::Construct(
+        args
+        [
+            Splitter
+        ],
         iTreeView
     );
+
+    if (ExpanderArrowWidget)
+        ExpanderArrowWidget->SetVisibility(EVisibility::Collapsed);
 }
 
 //PRIVATE API-----------------------------------------------------------
@@ -32,7 +60,49 @@ SOdysseyPainterEditorPaletteEntryRow::GenerateWidgetForColumn( const FName& InCo
         return GenerateHeaderWidget();
     }
 
-    return SNullWidget::NullWidget;
+    return SNew(SBox);
+}
+
+float
+SOdysseyPainterEditorPaletteEntryRow::GetColumnWidth(int iColumnIndex) const
+{
+    TSharedPtr<ITypedTableView<TSharedPtr<IOdysseyPainterEditorPaletteTreeViewItem>>> table = OwnerTablePtr.Pin();
+    if (!table)
+        return 0.f;
+
+    TSharedPtr<SWidget> tableWidget = table->AsWidget();
+    if (!tableWidget)
+        return 0.f;
+
+    TSharedPtr<STableViewBase> tableViewBase = StaticCastSharedPtr<STableViewBase>(tableWidget);
+    if (!tableViewBase)
+        return 0.f;
+
+    TSharedPtr< SHeaderRow > headerRow = tableViewBase->GetHeaderRow();
+    const TIndirectArray<SHeaderRow::FColumn>& columns = headerRow->GetColumns();
+
+    return columns[iColumnIndex].GetWidth();
+}
+
+void
+SOdysseyPainterEditorPaletteEntryRow::OnColumnResized(float iSize, int iColumnIndex)
+{
+    TSharedPtr<ITypedTableView<TSharedPtr<IOdysseyPainterEditorPaletteTreeViewItem>>> table = OwnerTablePtr.Pin();
+    if (!table)
+        return;
+
+    TSharedPtr<SWidget> tableWidget = table->AsWidget();
+    if (!tableWidget)
+        return;
+
+    TSharedPtr<STableViewBase> tableViewBase = StaticCastSharedPtr<STableViewBase>(tableWidget);
+    if (!tableViewBase)
+        return;
+
+    TSharedPtr< SHeaderRow > headerRow = tableViewBase->GetHeaderRow();
+    const TIndirectArray<SHeaderRow::FColumn>& columns = headerRow->GetColumns();
+
+    headerRow->SetColumnWidth( columns[iColumnIndex].ColumnId, iSize );
 }
 
 const FSlateBrush*
@@ -50,33 +120,37 @@ SOdysseyPainterEditorPaletteEntryRow::GetIconColorAndOpacity() const
 TSharedRef<SWidget>
 SOdysseyPainterEditorPaletteEntryRow::GenerateHeaderWidget()
 {
-    return SNew(SHorizontalBox)
-        + SHorizontalBox::Slot()
-        .AutoWidth()
-        .HAlign(HAlign_Right)
-        .VAlign(VAlign_Fill)
+    return SNew(SBox)
+        .Padding(FMargin(0, 2, 0, 2))
         [
-            SNew(SExpanderArrow, SharedThis(this) )
-            .ShouldDrawWires(true)
-        ]
-        + SHorizontalBox::Slot()
-        .AutoWidth()
-        .VAlign(VAlign_Center)
-        [
-            SNew(SImage)
-            .Image(this, &SOdysseyPainterEditorPaletteEntryRow::GetIcon)
-            .ColorAndOpacity(this, &SOdysseyPainterEditorPaletteEntryRow::GetIconColorAndOpacity)
-        ]
-        + SHorizontalBox::Slot()
-        .VAlign(VAlign_Center)
-        [
-            SNew(STextBlock)
-            .Text_Lambda(
-                [this]()
-                {
-                    return mEntry.Get()->EntryName;
-                }
-            )
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .HAlign(HAlign_Right)
+            .VAlign(VAlign_Fill)
+            [
+                SNew(SExpanderArrow, SharedThis(this) )
+                .ShouldDrawWires(false)
+            ]
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            .VAlign(VAlign_Center)
+            [
+                SNew(SImage)
+                .Image(this, &SOdysseyPainterEditorPaletteEntryRow::GetIcon)
+                .ColorAndOpacity(this, &SOdysseyPainterEditorPaletteEntryRow::GetIconColorAndOpacity)
+            ]
+            + SHorizontalBox::Slot()
+            .VAlign(VAlign_Center)
+            [
+                SNew(STextBlock)
+                .Text_Lambda(
+                    [this]()
+                    {
+                        return mEntry.Get()->EntryName;
+                    }
+                )
+            ]
         ];
 }
 

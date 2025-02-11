@@ -18,38 +18,37 @@ void SOdysseyPainterEditorPaletteRow::Construct(const FArguments& InArgs, const 
     mOnDeleteButtonClicked = InArgs._OnDeleteButtonClicked;
 
     STableRow<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>>::FArguments args;
-    args.Style(&FOdysseyStyle::GetWidgetStyle<FTableRowStyle>("OdysseyLayerStack.AlternatedRows"))
-        .Padding(FMargin(0, 2, 0, 2))
-    [
-        SNew(SHorizontalBox)
-        + SHorizontalBox::Slot()
-        .VAlign(VAlign_Center)
+    args.Padding(FMargin(0, 2, 0, 2))
         [
-            SNew(STextBlock)
-            .Text(this, &SOdysseyPainterEditorPaletteRow::GetPaletteName)
-        ]
-        + SHorizontalBox::Slot()
-        .VAlign(VAlign_Center)
-        [
-            SNew(SOdysseyPaletteSetComboBox)
-            .Palette(mPalette)
-            .CurrentSet(mSet)
-            .OnCurrentSetSelected(mOnSetChanged)
-        ]
-        + SHorizontalBox::Slot()
-        .VAlign(VAlign_Center)
-        .AutoWidth()
-        [
-            SNew(SButton)
-            .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("Button.TransparentNoPadding"))
-            .OnClicked(mOnDeleteButtonClicked)
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            .VAlign(VAlign_Center)
             [
-                SNew( SImage )
-                .Image( FAppStyle::GetBrush("Icons.Delete") )
-                .ColorAndOpacity( FSlateColor::UseForeground() )
+                SNew(STextBlock)
+                .Text(this, &SOdysseyPainterEditorPaletteRow::GetPaletteName)
             ]
-        ]
-    ];
+            + SHorizontalBox::Slot()
+            .VAlign(VAlign_Center)
+            [
+                SNew(SOdysseyPaletteSetComboBox)
+                .Palette(mPalette)
+                .CurrentSet(mSet)
+                .OnCurrentSetSelected(mOnSetChanged)
+            ]
+            + SHorizontalBox::Slot()
+            .VAlign(VAlign_Center)
+            .AutoWidth()
+            [
+                SNew(SButton)
+                .ButtonStyle(&FOdysseyStyle::GetWidgetStyle<FButtonStyle>("Button.TransparentNoPadding"))
+                .OnClicked(mOnDeleteButtonClicked)
+                [
+                    SNew( SImage )
+                    .Image( FAppStyle::GetBrush("Icons.Delete") )
+                    .ColorAndOpacity( FSlateColor::UseForeground() )
+                ]
+            ]
+        ];
 
     STableRow<TSharedPtr<FOdysseyPainterEditorPaletteTreeViewItem>>::Construct(
         args,

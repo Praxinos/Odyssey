@@ -42,8 +42,12 @@ SOdysseyPainterEditorPaletteColorRow::GenerateWidgetForColumn( const FName& InCo
 TSharedRef<SWidget>
 SOdysseyPainterEditorPaletteColorRow::GenerateColorWidget()
 {
-    return SNew(SColorBlock )
-        .Color(this, &SOdysseyPainterEditorPaletteColorRow::GetEntryColorAsLinear);
+    return SNew(SBox)
+        .Padding(FMargin(10, 2, 0, 2))
+        [
+            SNew(SColorBlock )
+            .Color(this, &SOdysseyPainterEditorPaletteColorRow::GetEntryColorAsLinear)
+        ];
 }
 
 FLinearColor SOdysseyPainterEditorPaletteColorRow::GetEntryColorAsLinear() const

@@ -3033,7 +3033,8 @@ FOdysseyPainterEditor::SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iE
 {
     if (!iEntry)
     {
-        mCurrentPaletteEntryColor = iEntry;
+        mCurrentPaletteEntryColor = nullptr;
+        mCurrentPaletteSet = 0;
         return;
     }
 
