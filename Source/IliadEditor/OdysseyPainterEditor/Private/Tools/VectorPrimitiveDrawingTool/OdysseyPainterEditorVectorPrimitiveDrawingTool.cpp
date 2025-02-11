@@ -3,7 +3,6 @@
 
 #include "Tools/VectorPrimitiveDrawingTool/OdysseyPainterEditorVectorPrimitiveDrawingTool.h"
 #include "OdysseyPaletteEntryColor.h"
-#include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
 #include "PainterEditor/OdysseyPainterEditor.h"
 #include "PainterEditor/OdysseyPainterEditorSource.h"
 #include "OdysseyMediaVector.h"
@@ -37,7 +36,6 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::~UOdysseyPainterEditorVectorPri
 UOdysseyPainterEditorVectorPrimitiveDrawingTool::UOdysseyPainterEditorVectorPrimitiveDrawingTool()
     : UOdysseyPainterEditorVectorBaseTool( new FOdysseyPainterEditorVectorBaseToolHUD( this ), true )
     , PrimitiveType ( EOdysseyVectorPrimitiveType::Ellipse )
-    , ColorMode( eForegroundColorMode::SolidColor )
     , Opacity( 1.0f )
     , Brush( nullptr )
     , StrokeWidth( 4.0f )
@@ -175,7 +173,7 @@ UOdysseyPainterEditorVectorPrimitiveDrawingTool::OnMouseDownVector( FOdysseyVect
 
         parentObject->AppendChild( mPrimitive );
 
-        SetPathColor( mPrimitive, ColorMode );
+        SetPathColor( mPrimitive );
         mPrimitive->SetOpacity( Opacity );
         mPrimitive->SetBrush( Brush );
         //mPrimitive->SetForegroundColor( ueColor );

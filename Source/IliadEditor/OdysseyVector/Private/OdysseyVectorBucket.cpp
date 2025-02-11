@@ -4,6 +4,7 @@
 #include "OdysseyVectorBucket.h"
 #include "OdysseyVector.h"
 #include "OdysseyVectorObject.h"
+#include "Palette/OdysseyPalette.h"
 #include "Palette/OdysseyPaletteEntryColor.h"
 
 #ifndef M_PI
@@ -41,6 +42,7 @@ FOdysseyVectorBucket::FOdysseyVectorBucket( FOdysseyVectorObject* iOwner
     , mOwner ( iOwner )
     , bSelected( false )
     , mPaletteEntry( nullptr )
+    , mPaletteSet( 0 )
 {
     SetSolidColor( 160, 160, 160, 255 );
 
@@ -238,10 +240,14 @@ FOdysseyVectorBucket::GetColor()
     {
         case eBucketColorMode::Palette:
         if( mPaletteEntry && mPaletteEntry->IsValidLowLevel() )
-            return Cast< UOdysseyPaletteEntryColor >(mPaletteEntry)->GetUsedColor();
+        {
+            UOdysseyPalette* palette = mPaletteEntry->GetPalette();
+            return Cast< UOdysseyPaletteEntryColor >(mPaletteEntry)->GetColor(mPaletteSet);
+        }
         else
         {
             mPaletteEntry = nullptr;
+            mPaletteSet = 0;
             return mSolidColor;
         }
         case eBucketColorMode::SolidColor:
@@ -263,6 +269,7 @@ FOdysseyVectorBucket::Copy( FOdysseyVectorBucket* iDestinationBucket )
     iDestinationBucket->mCoords                      = mCoords;
 
     iDestinationBucket->mPaletteEntry    = mPaletteEntry;
+    iDestinationBucket->mPaletteSet      = mPaletteSet;
     iDestinationBucket->mColorMode       = mColorMode;
     iDestinationBucket->mSpreadingPolicy = mSpreadingPolicy;
     iDestinationBucket->mSolidColor      = mSolidColor;
@@ -293,4 +300,16 @@ UOdysseyPaletteEntry*
 FOdysseyVectorBucket::GetPaletteEntry()
 {
     return mPaletteEntry;
+}
+
+void
+FOdysseyVectorBucket::SetPaletteSet( int iPaletteSet )
+{
+    mPaletteSet = iPaletteSet;
+}
+
+int
+FOdysseyVectorBucket::GetPaletteSet()
+{
+    return mPaletteSet;
 }

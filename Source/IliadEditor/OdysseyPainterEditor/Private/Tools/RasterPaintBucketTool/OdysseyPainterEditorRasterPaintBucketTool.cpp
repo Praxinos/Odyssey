@@ -3,7 +3,6 @@
 
 #include "Tools/RasterPaintBucketTool/OdysseyPainterEditorRasterPaintBucketTool.h"
 
-#include "PainterEditor/OdysseyPainterEditorColorPaletteTab.h"
 #include "OdysseyRasterBlock.h"
 #include "OdysseyMediaRaster.h"
 #include "OdysseyPainterEditor.h"

@@ -7,9 +7,10 @@
 #include "OdysseyPaletteEntry.h"
 #include "Widgets/Views/STreeView.h"
 #include "DragDropOperations/OdysseyPaletteDragDropOperation.h"
-#include "SOdysseyPaletteSetView.h"
+#include "Widgets/Input/SComboBox.h"
 
 class UOdysseyPalette;
+class UOdysseyPaletteEntryColor;
 
 /**
  * Implements the Palette widget
@@ -17,22 +18,22 @@ class UOdysseyPalette;
 class ODYSSEYPALETTE_API SOdysseyPaletteTreeView
     : public STreeView<UOdysseyPaletteEntry*>
 {
+    SLATE_DECLARE_WIDGET(SOdysseyPaletteTreeView, STreeView<UOdysseyPaletteEntry*>)
+
+public:
+    DECLARE_DELEGATE_OneParam(FOnCurrentColorEntryChanged, UOdysseyPaletteEntryColor*)
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyPaletteTreeView)
-        : _HeaderFillWidth( 1.0f )
+        : _IsReadOnly(true)
+        , _Palette(nullptr)
+        , _Set(0)
         {}
-        SLATE_ARGUMENT( UOdysseyPalette*, Palette )
-        SLATE_ARGUMENT( TArray<SHeaderRow::FColumn::FArguments>, AdditionalColumns )
-        /** Set the HeaderColumn Size Mode to Fill. It's a fraction between 0 and 1 */
-        SLATE_ATTRIBUTE( float, HeaderFillWidth )
-        /** Set the HeaderColumn Size Mode to Fixed. */
-        SLATE_ARGUMENT( TOptional< float >, HeaderFixedWidth )
-        /** Set the HeaderColumn Size Mode to Manual. */
-        SLATE_ATTRIBUTE( float, HeaderManualWidth )
-        /** Set the HeaderColumn Size Mode to Fill Sized. */
-        SLATE_ARGUMENT(TOptional< float >, HeaderFillSized)
-        SLATE_EVENT( FOnGenerateRow, OnGenerateRow )
+        SLATE_ARGUMENT(bool, IsReadOnly)
+        SLATE_ATTRIBUTE(UOdysseyPalette*, Palette)
+        SLATE_ATTRIBUTE(int, Set)
+        SLATE_ATTRIBUTE(UOdysseyPaletteEntryColor*, CurrentColorEntry)
+        SLATE_EVENT(FOnCurrentColorEntryChanged, OnCurrentColorEntryChanged)
     SLATE_END_ARGS()
 
 public:
@@ -44,6 +45,8 @@ public:
 
 public:
     TSharedPtr<FOdysseyPaletteDragDropOperation> CreateDragDropOperation() const;
+    UOdysseyPaletteEntryColor* GetCurrentColorEntry() const;
+    UOdysseyPalette* GetPalette() const;
 
 protected:
     //SWidget overrides
@@ -55,10 +58,6 @@ protected:
     virtual FReply OnDrop(const FGeometry& MyGeometry, const FDragDropEvent& DragDropEvent) override;
 
 protected:
-    //STreeView overrides
-    virtual void Private_SignalSelectionChanged(ESelectInfo::Type SelectInfo) override;
-
-protected:
     //Context menu
     /**
      * @brief Creates and registers palette context menu
@@ -66,33 +65,12 @@ protected:
      */
     virtual void CreateContextMenu();
 
-    void OnSetSelected(FName iSet);
-
     /**
      * @brief Extends the context menu
      * Allows us to insert entries wherever we want in the context menu
      * CreateContextMenu() does not allow us to do that
      */
     virtual TArray<TSharedPtr<FExtender>> ExtendContextMenu();
-
-private:
-    /**
-     * @brief Set the palette selected entry from the treeview Selector Item
-     *
-     */
-    void SetCurrentEntryFromSelectorItem();
-
-    /**
-     * @brief Refreshes all rows expansion states from the state stored in the entry
-     *
-     */
-    void RefreshAllExpansionStates();
-
-    /**
-     * @brief Creation of the widget to add and delete sets of palette
-     *
-     */
-    TSharedRef<SWidget> CreateSetWidget();
 
 protected:
     //CommandList Actions
@@ -154,30 +132,6 @@ protected:
     void OnGetChildren(UOdysseyPaletteEntry* iParent, TArray<UOdysseyPaletteEntry*>& oChildren) const;
 
     /**
-     * @brief Called when the treeview changed one of its row expansion state
-     * Allows synchronization between treeview expansion state and entry expansion state
-     *
-     * @param iEntry
-     * @param iIsExpanded
-     */
-    void OnExpansionChanged(UOdysseyPaletteEntry* iEntry, bool iIsExpanded);
-
-    /**
-     * @brief Called when the entry changed the expansion state it stores
-     * Allows synchronization between treeview expansion state and entry expansion state
-     *
-     * @param iEntry
-     */
-    void OnEntryIsExpandedChanged(UOdysseyPaletteEntry* iEntry);
-
-    /**
-     * @brief Called when the current entry changed to another entry
-     *
-     * @param iPalette
-     */
-    void OnCurrentEntryChanged(UOdysseyPalette* iPalette);
-
-    /**
      * @brief Called when the palette hierarchy has changed
      *
      * @param iPalette
@@ -192,6 +146,9 @@ protected:
      */
     void OnItemScrolledIntoView(UOdysseyPaletteEntry* iEntry, const TSharedPtr<ITableRow>& iRow);
 
+    TSharedRef<ITableRow> OnGenerateRow(UOdysseyPaletteEntry* iEntry, const TSharedRef<STableViewBase>& iOwnerTable);
+    void OnSelectionChanged(UOdysseyPaletteEntry* iEntry, ESelectInfo::Type iSelectInfo);
+
 public:
     /**
      * @brief Hides the dropzone of the Palette
@@ -200,23 +157,31 @@ public:
     void ResetDropZone();
 
     /**
-     * @brief Adds a new set to the palette represented by this view
-     */
-    FReply AddSetToPalette();
-
-    /**
      * @brief Saves palette
      */
     FReply SavePalette();
 
+private:
+    void OnPaletteChanged();
+    void OnCurrentColorEntryChanged();
+    void RefreshItemsSource();
+
+    FReply AddColorEntry();
+    FReply AddFolderEntry();
+
 protected:
+    bool mIsReadOnly;
+    TSlateAttribute<UOdysseyPalette*> mPaletteAttribute;
     UOdysseyPalette* mPalette;
+    TSlateAttribute<UOdysseyPaletteEntryColor*> mCurrentColorEntryAttribute;
+    UOdysseyPaletteEntryColor* mCurrentColorEntry;
+    TAttribute<int> mSet;
+    UOdysseyPaletteEntry* mSelectedEntry;
+    FOnCurrentColorEntryChanged mOnCurrentColorEntryChanged;
+    TSharedPtr<UE::Slate::Containers::TObservableArray<UOdysseyPaletteEntry*>> mItemsSource;
 
     TSharedRef<FUICommandList> mCommandList;
 
-    bool mNeedsRefresh = false;
     bool mIsRenamePending = false;
     bool mDisplayDropZone = false;
-
-    TSharedPtr<SOdysseyPaletteSetView> mPaletteSetView;
 };

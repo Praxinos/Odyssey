@@ -7,10 +7,9 @@
 #include "Widgets/Views/STableRow.h"
 #include "Widgets/Text/SInlineEditableTextBlock.h"
 #include "OdysseyPaletteEntry.h"
-#include "Widgets/SOdysseyPaletteTreeView.h"
 
-class SOdysseyLayerStackTreeView;
 class UOdysseyPaletteEntry;
+class SOdysseyPaletteTreeView;
 
 /**
  * Implements a layer row widget
@@ -20,7 +19,9 @@ class ODYSSEYPALETTE_API SOdysseyPaletteEntryRow
 {
 public:
     SLATE_BEGIN_ARGS(SOdysseyPaletteEntryRow)
+        : _IsReadOnly(true)
         {}
+        SLATE_ARGUMENT(bool, IsReadOnly)
     SLATE_END_ARGS()
 
 public:
@@ -29,7 +30,7 @@ public:
 
 public:
     //Getters
-    UOdysseyPaletteEntry* GetPaletteEntry();
+    //UOdysseyPaletteEntry* GetPaletteEntry();
 
     //Commands
     void Rename();
@@ -37,15 +38,13 @@ public:
 protected:
     //SMultiColumnTableRow overrides
     virtual TSharedRef<SWidget> GenerateWidgetForColumn( const FName& InColumnName ) override;
-    virtual const FSlateBrush* GetBorder() const override;
+
+    virtual const FSlateBrush* GetIcon() const;
+    virtual FSlateColor GetIconColorAndOpacity() const;
+    //virtual const FSlateBrush* GetBorder() const override;
 
 protected:
     virtual TSharedRef<SWidget> GenerateHeaderWidget();
-    TSharedRef<SWidget> GenerateIsActivatedWidget();
-    TSharedRef<SWidget> GenerateExpandableHeaderWidget();
-
-    void OnIsActivatedCheckBoxStateChanged(ECheckBoxState iState);
-    ECheckBoxState GetIsActivatedCheckBoxState() const;
 
     void OnEntryNameCommited(const FText& iText, ETextCommit::Type iType);
 
@@ -56,13 +55,15 @@ protected:
 
     FReply OnRowAcceptDrop(const FDragDropEvent& iEvent, EItemDropZone iDropZone, UOdysseyPaletteEntry* iEntry);
 
-    FReply OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent, TWeakPtr<SOdysseyPaletteTreeView> iTreeView);
+    FReply OnRowDragDetected(const FGeometry& iGeometry, const FPointerEvent& iEvent);
 
 
 private:
     EItemDropZone ComputeItemDropZoneForLeaf(FVector2D iLocalPointerPos, FVector2D iLocalSize, bool iCanHaveChildren, bool iIsExpanded);
 
-private:
+protected:
+    TWeakPtr<class SOdysseyPaletteTreeView> mTreeView;
     TSharedPtr<SInlineEditableTextBlock> mNameWidget = nullptr;
     UOdysseyPaletteEntry* mEntry = nullptr;
+    bool mIsReadOnly;
 };

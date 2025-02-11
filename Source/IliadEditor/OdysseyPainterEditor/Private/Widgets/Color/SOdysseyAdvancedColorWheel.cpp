@@ -1,7 +1,7 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "Color/SOdysseyAdvancedColorWheel.h"
+#include "Widgets/Color/SOdysseyAdvancedColorWheel.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseySurfaceTexture2DEditable.h"
 #include <ULIS>
@@ -143,7 +143,7 @@ void SOdysseyAdvancedColorWheel::Construct(const FArguments& InArgs)
     CursorOverlay           = FOdysseyStyle::GetBrush("AdvancedColorWheel.CursorOverlay");
 
     mColor = InArgs._Color;
-    OnColorChangeCallback = InArgs._OnColorChange;
+    OnColorChanged = InArgs._OnColorChanged;
 
     triangle_buffer_size = FVector2D( 1, 1 );
     mEditMode = eEditMode::kNone;
@@ -472,7 +472,7 @@ SOdysseyAdvancedColorWheel::OnMouseButtonDown(const FGeometry& MyGeometry, const
 {
     mEditMode = eEditMode::kNone;
     StartProcessMouseAction( MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ) - clamp_shift );
-    OnColorChangeCallback.ExecuteIfBound( eOdysseyEventState::kStart, GetColorResult() );
+    OnColorChanged.ExecuteIfBound( eOdysseyEventState::kStart, GetColorResult() );
     return FReply::Handled().CaptureMouse(SharedThis(this));
 }
 
@@ -483,7 +483,7 @@ SOdysseyAdvancedColorWheel::OnMouseButtonUp(const FGeometry& MyGeometry, const F
     mEditMode = eEditMode::kNone;
     if( HasMouseCapture() )
     {
-        OnColorChangeCallback.ExecuteIfBound( eOdysseyEventState::kSet, GetColorResult() );
+        OnColorChanged.ExecuteIfBound( eOdysseyEventState::kSet, GetColorResult() );
         return FReply::Handled().ReleaseMouseCapture();
     }
 
@@ -498,7 +498,7 @@ SOdysseyAdvancedColorWheel::OnMouseMove(const FGeometry& MyGeometry, const FPoin
         return FReply::Unhandled();
 
     ProcessMouseAction( MyGeometry.AbsoluteToLocal( MouseEvent.GetScreenSpacePosition() ) - clamp_shift );
-    OnColorChangeCallback.ExecuteIfBound( eOdysseyEventState::kAdjust, GetColorResult() );
+    OnColorChanged.ExecuteIfBound( eOdysseyEventState::kAdjust, GetColorResult() );
 
     return FReply::Handled();
 }

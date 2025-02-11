@@ -30,8 +30,8 @@ public:
     static FOnEntryColorChanged& OnEntryColorChanged();
 
 public:
-    FColor& GetUsedColor();
-    void SetUsedColor( FColor iColor );
+    FColor& GetColor(int iSet);
+    void SetColor( FColor iColor, int iSet );
 
     virtual void AddSet() override;
     virtual void DuplicateSetAt( int iIndex = -1 ) override;
@@ -40,6 +40,7 @@ public:
 
 public:
     // UObject overrides
+    virtual void PostInitProperties() override;
     virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
     virtual void PostTransacted(const FTransactionObjectEvent& iTransactionEvent) override;
 

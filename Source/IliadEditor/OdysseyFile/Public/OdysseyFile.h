@@ -223,6 +223,7 @@ namespace FOdysseyFile
                                 static const uint32 CHUNK_BUCKET_COLORMODE = 0x9529f13e;  // uint32(colorMode)
                                 static const uint32 CHUNK_BUCKET_PALETTEENTRY_MK1 = 0xac23cabe; // FName to load PaletteEntry
                                 static const uint32 CHUNK_BUCKET_PALETTEENTRY_MK2 = 0x116eaba8; // FString to load PaletteEntry
+                                static const uint32 CHUNK_BUCKET_PALETTESET = 0x12a6b372; // int32(paletteSet)
                                 static const uint32 CHUNK_BUCKET_SOLIDCOLOR = 0xd951af3c; // uint8(R)-uint8(G)-uint8(B)-uint8(A)
                                 static const uint32 CHUNK_BUCKET_GRADIENT = 0x5d7bbd93; // container
                                     static const uint32 CHUNK_BUCKET_GRADIENT_STOP = 0xd0dfb9d3; // uint8(R)-uint8(G)-uint8(B)-uint8(A)-float(stop)

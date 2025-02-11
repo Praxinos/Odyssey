@@ -151,7 +151,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 {
 #if WITH_EDITOR
     // Generic Button styles
-    Set( "Button.NoPadding", FButtonStyle()
+    Set( "Button.NoPadding", FButtonStyle(FAppStyle::Get().GetWidgetStyle< FButtonStyle >( "Button" ))
         .SetNormalPadding( FMargin(0,0) )
         .SetPressedPadding( FMargin(0,0) )
     );
@@ -205,6 +205,12 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("OdysseyPalette.AddSet", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddSet", mIcon24x24));
     Set("OdysseyPalette.AddPicker", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteAddPicker", mIcon24x24));
     Set("OdysseyPalette.Save", new IMAGE_BRUSH_SVG("OdysseyPalette/OdysseyPaletteSave", mIcon24x24));
+    Set("OdysseyPalette.Row", FTableRowStyle(mCoreTableRowStyle)
+        .SetEvenRowBackgroundBrush(FSlateColorBrush(FStyleColors::Panel))
+        .SetEvenRowBackgroundHoveredBrush(FSlateColorBrush(FStyleColors::Hover))
+        .SetOddRowBackgroundBrush(FSlateColorBrush(FStyleColors::Panel))
+        .SetOddRowBackgroundHoveredBrush(FSlateColorBrush(FStyleColors::Hover))
+    );
 
 
     // OdysseyWidgets - AdvancedColorWheel
@@ -476,8 +482,11 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set( "PainterEditor.ToolsTab.Matching16", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/matching_tool", mIcon16x16 ) );
     Set( "PainterEditor.ToolsTab.Matching64", new IMAGE_BRUSH_SVG( "PainterEditor/ToolsTab/matching_tool", mIcon64x64 ) );
 
+    Set("PainterEditor.ColorSelector.ColorType.Raw", new IMAGE_BRUSH_SVG( "PainterEditor/ColorSelector/color_type_raw", mIcon16x16 ));
+    Set("PainterEditor.ColorSelector.ColorType.Indexed", new IMAGE_BRUSH_SVG( "PainterEditor/ColorSelector/color_type_indexed", mIcon16x16 ));
+
     //OdysseyPainterEditorTools
-    Set( "OdysseyPainterEditorTools.Tile", mCoreTableRowStyle
+    Set( "OdysseyPainterEditorTools.Tile", FTableRowStyle(mCoreTableRowStyle)
 
     );
 
@@ -560,7 +569,7 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
         FSlateColor selectedParentRow(FStyleColors::SelectParent.GetSpecifiedColor().CopyWithNewOpacity(0.3f));
         Set ("OdysseyLayerStack.CurrentLayerBackgroundBrush", new FSlateColorBrush(FStyleColors::Select));
         Set ("OdysseyLayerStack.CurrentLayerInactiveBackgroundBrush", new FSlateColorBrush(FStyleColors::SelectInactive));
-        Set( "OdysseyLayerStack.AlternatedRows", mCoreTableRowStyle
+        Set( "OdysseyLayerStack.AlternatedRows", FTableRowStyle(mCoreTableRowStyle)
                 .SetOddRowBackgroundBrush(FSlateColorBrush(FStyleColors::Header))
                 .SetSelectorFocusedBrush(FSlateNoResource())
                 .SetActiveBrush(FSlateColorBrush(selectedRow))
@@ -888,6 +897,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
 
     Set("ViewportDrawingEditor.MainTab.ModeTool.Selection", new IMAGE_BRUSH_SVG("OdysseyViewportDrawing/SelectionModeTool", mIcon16x16));
     Set("ViewportDrawingEditor.MainTab.ModeTool.Paint", new IMAGE_BRUSH_SVG("OdysseyViewportDrawing/PaintModeTool", mIcon16x16));
+
+    Set( "PaletteEditor.Tab.Colors", new IMAGE_BRUSH_SVG( "PaletteEditor/tab_colors", mIcon16x16 ) );
 
 #endif
 }

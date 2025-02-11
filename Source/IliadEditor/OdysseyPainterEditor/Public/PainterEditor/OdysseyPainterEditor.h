@@ -41,6 +41,8 @@ class UOdysseyLayerStack;
 class FOdysseyMeshSelector;
 class FOdysseyPainterEditorRasterSelection;
 class FOdysseyVectorGroupPaint;
+class FOdysseyPainterEditorPaletteSet;
+class UOdysseyPaletteEntryColor;
 
 /**
  * Base class for a Painting Editor
@@ -151,9 +153,22 @@ public:
 
     virtual FOdysseyHUDSystem*                               HUDSystem() const;
     virtual const FOdysseyBrushColor&                        PaintColor() const;
+    EOdysseyPainterEditorColorType                           GetColorType() const;
     virtual FOdysseyMediaProvider                            GetCurrentMediaProvider();
     virtual UOdysseyLayerStack*                              LayerStack() const;
     virtual TSharedPtr<FOdysseyPainterEditorRasterSelection> RasterSelection();
+
+    const TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>>& GetPaletteSets() const;
+    //const FOdysseyPainterEditorPaletteEntryColor& GetPaletteCurrentColorEntry() const;
+    UOdysseyPaletteEntryColor* GetCurrentPaletteColorEntry() const;
+    int GetCurrentPaletteSet() const;
+
+    void AddPaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet);
+    void RemovePaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet);
+
+    void SetCurrentPaletteColorEntry(UOdysseyPaletteEntryColor* iEntry, int iSet);
+
+    void SetColorType(EOdysseyPainterEditorColorType iType);
 
     TSharedPtr<FOdysseyMeshSelector>                        GetMeshSelector() const;
 
@@ -295,6 +310,7 @@ protected:
     TSharedPtr<FOdysseyPainterEditorRasterSelection> mRasterSelection;
     TArray<FOdysseyBrushContext*>   mBrushContexts;
     FOdysseyBrushColor              mPaintColor;
+    EOdysseyPainterEditorColorType  mColorType = EOdysseyPainterEditorColorType::Raw;
     FSimpleMulticastDelegate        mOnCurrentToolChanged;
     FSimpleMulticastDelegate        mOnCurrentMainToolChanged;
     FSimpleMulticastDelegate        mOnCurrentTemporaryToolChanged;
@@ -326,6 +342,10 @@ protected:
     TMap<UClass*, UOdysseyPainterEditorTool*> mCurrentMainToolPerLayerClass;
 
     FName mToolbarMenuName;
+
+    TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>> mPaletteSets;
+    UOdysseyPaletteEntryColor* mCurrentPaletteEntryColor = nullptr;
+    int mCurrentPaletteSet = 0;
 };
 
 template <class T>

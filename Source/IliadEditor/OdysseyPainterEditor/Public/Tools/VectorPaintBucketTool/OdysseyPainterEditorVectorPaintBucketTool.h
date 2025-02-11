@@ -13,6 +13,14 @@ class FOdysseyPaintEngine;
 class FOdysseyPainterEditorVectorPaintBucketToolHUD;
 class FOdysseyPainterEditorVectorPaintBucketToolContextMenu;
 
+UENUM()
+enum class EPaintBucketToolColorMode : uint8
+{
+    Color = 0,
+    LinearGradient = 1,
+    RadialGradient = 2,
+};
+
 UCLASS()
 class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : public UOdysseyPainterEditorVectorBaseTool
 {
@@ -92,7 +100,7 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
         UPROPERTY( EditAnywhere
                  , Category=PaintBucketTool
                  , meta = ( ToolTip  = "Color Mode" ) )
-        eBucketColorMode ColorMode;
+        EPaintBucketToolColorMode ColorMode;
 
         UPROPERTY( EditAnywhere
                  , Category=PaintBucketTool
@@ -106,14 +114,14 @@ class ODYSSEYPAINTEREDITOR_API UOdysseyPainterEditorVectorPaintBucketTool : publ
         UPROPERTY( EditAnywhere
                  , Category=PaintBucketTool
                  , meta = ( ToolTip = "Color1"
-                          , EditCondition = "(ColorMode == eBucketColorMode::LinearGradient) || (ColorMode == eBucketColorMode::RadialGradient)"
+                          , EditCondition = "(ColorMode == EPaintBucketToolColorMode::LinearGradient) || (ColorMode == EPaintBucketToolColorMode::RadialGradient)"
                           , EditConditionHides ) )
         FColor Color1;
 
         UPROPERTY( EditAnywhere
                  , Category=PaintBucketTool
                  , meta = ( ToolTip = "Color2"
-                          , EditCondition = "(ColorMode == eBucketColorMode::LinearGradient) || (ColorMode == eBucketColorMode::RadialGradient)"
+                          , EditCondition = "(ColorMode == EPaintBucketToolColorMode::LinearGradient) || (ColorMode == EPaintBucketToolColorMode::RadialGradient)"
                           , EditConditionHides ) )
         FColor Color2;
 

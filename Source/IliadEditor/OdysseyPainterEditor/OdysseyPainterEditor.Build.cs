@@ -61,7 +61,8 @@ public class OdysseyPainterEditor : ModuleRules
                 "OdysseyStyle",
                 "OdysseyStylusInput",
                 "OdysseyVector",
-                "OdysseyWidgets"
+                "OdysseyWidgets",
+                "ToolWidgets"
             }
         );
 

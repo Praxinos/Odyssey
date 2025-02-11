@@ -6,8 +6,11 @@
 #include <ULIS>
 #include "OdysseyEditorTab.h"
 #include "OdysseyEventState.h"
+#include "PainterEditor/OdysseyPainterEditorColorTypes.h"
+#include "PainterEditor/OdysseyPainterEditorPaletteSet.h"
 
 class FOdysseyPainterEditor;
+class UOdysseyPalette;
 
 class ODYSSEYPAINTEREDITOR_API FOdysseyPainterEditorColorSelectorTab :
     public FOdysseyEditorTab
@@ -27,12 +30,51 @@ protected:
 
 protected:
     // Widget Getters
-    virtual ::ULIS::FColor Color() const;
+    ::ULIS::FColor GetRawColor() const;
+
+    TArray<TSharedPtr<FOdysseyPainterEditorPaletteSet>> GetPaletteSets() const;
+    UOdysseyPaletteEntryColor* GetCurrentPaletteColorEntry() const;
+    int GetCurrentPaletteSet() const;
+
+    EOdysseyPainterEditorColorType GetColorType() const;
+    void OnColorTypeChanged(EOdysseyPainterEditorColorType iType, ECheckBoxState iState);
+
+    EVisibility GetColorTypeVisibility() const;
+    EVisibility GetRawColorWidgetsVisibility() const;
+    EVisibility GetColorWheelVisibility() const;
+    EVisibility GetColorSlidersVisibility() const;
+    EVisibility GetColorHexadecimalVisibility() const;
+    EVisibility GetColorPaletteVisibility() const;
+
+    const FSlateBrush* GetExpanderArrowImage(TSharedPtr<SButton> iExpander, bool iIsExpanded) const;
+    const FSlateBrush* GetColorWheelExpanderArrowImage() const;
+    const FSlateBrush* GetColorSlidersExpanderArrowImage() const;
+    const FSlateBrush* GetHexadecimalExpanderArrowImage() const;
+    const FSlateBrush* GetColorPaletteExpanderArrowImage() const;
 
 protected:
     // Event Listeners
-    virtual void OnColorChange( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor );
+    void OnColorChanged( eOdysseyEventState::Type iEventState, const ::ULIS::FColor& iColor );
+
+    //void OnPaletteSetChanged(int iIndex, FOdysseyPainterEditorPaletteSet iPaletteSet);
+    void OnAddPaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet);
+    void OnRemovePaletteSet(TSharedPtr<FOdysseyPainterEditorPaletteSet> iPaletteSet);
+    void OnPaletteCurrentColorEntryChanged(UOdysseyPaletteEntryColor* iEntry, int iSet);
+
+    FReply OnColorWheelExpanderArrowClicked();
+    FReply OnColorSlidersExpanderArrowClicked();
+    FReply OnHexadecimalExpanderArrowClicked();
+    FReply OnColorPaletteExpanderArrowClicked();
 
 private:
     FOdysseyPainterEditor* mEditor;
+
+    TSharedPtr<SButton> mColorWheelExpanderArrow;
+    TSharedPtr<SButton> mColorSlidersExpanderArrow;
+    TSharedPtr<SButton> mHexadecimalExpanderArrow;
+    TSharedPtr<SButton> mColorPaletteExpanderArrow;
+    bool mIsColorWheelExpanded = true;
+    bool mIsColorSlidersExpanded = false;
+    bool mIsHexadecimalExpanded = false;
+    bool mIsColorPaletteExpanded = true;
 };

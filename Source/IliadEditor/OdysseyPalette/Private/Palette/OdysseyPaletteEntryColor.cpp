@@ -1,7 +1,7 @@
 // IDDN.FR.001.250001.006.S.P.2019.000.00000
 // ILIAD is subject to copyright laws and is the legal and intellectual property of Praxinos,Inc - Year of publishing 2023
 
-#include "OdysseyPaletteEntryColor.h"
+#include "Palette/OdysseyPaletteEntryColor.h"
 #include "OdysseyStyleSet.h"
 #include "OdysseyPalette.h"
 #include "Misc/TransactionObjectEvent.h"
@@ -16,10 +16,15 @@ UOdysseyPaletteEntryColor::UOdysseyPaletteEntryColor()
     EntryTypeName = LOCTEXT( "entry-color.type", "Color" );
     DefaultName = LOCTEXT("entry-color.default-name", "Color");
     Icon = *FOdysseyStyle::GetBrush("OdysseyPalette.EntryColor");
+}
 
+void
+UOdysseyPaletteEntryColor::PostInitProperties()
+{
+    Super::PostInitProperties();
     if( GetPalette() )
     {
-        for (int i = 0; i < GetPalette()->Sets.Num(); i++)
+        for (int i = 0; i < GetPalette()->GetSets().Num(); i++)
             AddSet();
     }
 }
@@ -30,18 +35,18 @@ UOdysseyPaletteEntryColor::FOnEntryColorChanged& UOdysseyPaletteEntryColor::OnEn
     return onEntryColorChanged;
 }
 
-FColor& UOdysseyPaletteEntryColor::GetUsedColor()
+FColor& UOdysseyPaletteEntryColor::GetColor(int iSet)
 {
-    return EntryColors[ GetPalette()->UsedSet ];
+    return EntryColors[ iSet ];
 }
 
-void UOdysseyPaletteEntryColor::SetUsedColor(FColor iColor)
+void UOdysseyPaletteEntryColor::SetColor(FColor iColor, int iSet)
 {
     const FScopedTransaction transaction(NSLOCTEXT("Palette", "ChangeColorEntry_Transaction", "Change color entry"));
 
     FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "EntryColors");
 
-    EntryColors[GetPalette()->UsedSet] = iColor;
+    EntryColors[iSet] = iColor;
 
     FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "EntryColors", EPropertyChangeType::ValueSet);
 }

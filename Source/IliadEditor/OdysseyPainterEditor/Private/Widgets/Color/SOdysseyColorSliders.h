@@ -20,10 +20,7 @@
 
 #include "SOdysseyColorSlider.h"
 
-//class IOdysseyGroupChannelSlider;
-//DECLARE_DELEGATE_OneParam( FOnColorChanged, const ::ULIS::FColor& );
-
-class ODYSSEYWIDGETS_API SOdysseyColorSliders : public SCompoundWidget
+class SOdysseyColorSliders : public SCompoundWidget
 {
     typedef SCompoundWidget tSuperClass;
 
@@ -42,10 +39,13 @@ class ODYSSEYWIDGETS_API SOdysseyColorSliders : public SCompoundWidget
     typedef TSharedPtr< FSliderOption > FSliderOptionItem;
 
 public:
+    DECLARE_DELEGATE_TwoParams( FOnColorChanged, eOdysseyEventState::Type, const ::ULIS::FColor& );
+
+public:
     SLATE_BEGIN_ARGS( SOdysseyColorSliders )
         {}
     SLATE_ATTRIBUTE(::ULIS::FColor, Color)
-    SLATE_EVENT( FOnColorChange, OnColorChange )
+    SLATE_EVENT( FOnColorChanged, OnColorChanged )
     SLATE_END_ARGS()
 
 public:
@@ -73,7 +73,7 @@ private:
         sliderOption->widget = SNew(T/*FOdysseyGroupChannelSlider_RGB*/)
             .HeightOverride(20)
             .Color(mColor)
-            .OnColorChange(OnColorChangeCallback)
+            .OnColorChanged(OnColorChanged)
             .Visibility_Lambda([sliderOption]() { return sliderOption->enabled ? EVisibility::Visible : EVisibility::Collapsed; });
 
         return MakeShareable(sliderOption);
@@ -86,5 +86,5 @@ private:
     TSharedPtr< SComboButton > combo_button;
     TSharedPtr< SVerticalBox > combo_menu;
     TSharedPtr< SScrollBox > contents;
-    FOnColorChange OnColorChangeCallback;
+    FOnColorChanged OnColorChanged;
 };

@@ -20,15 +20,14 @@
 #include "OdysseyEventState.h"
 #include <ULIS>
 
-DECLARE_DELEGATE_TwoParams( FOnColorChange, eOdysseyEventState::Type, const ::ULIS::FColor& );
-/* DECLARE_DELEGATE_TwoParams( FOnChannelChanged, EOdysseyEventState, float ); */
-/* DECLARE_DELEGATE_TwoParams( FOnValueChanged, float ); */
-
 /////////////////////////////////////////////////////
 // IOdysseyChannelSlider
-class ODYSSEYWIDGETS_API IOdysseyChannelSlider : public SOdysseyLeafWidget
+class IOdysseyChannelSlider : public SOdysseyLeafWidget
 {
     typedef SOdysseyLeafWidget tSuperClass;
+
+public:
+    DECLARE_DELEGATE_TwoParams( FOnColorChanged, eOdysseyEventState::Type, const ::ULIS::FColor& );
 
 public:
     SLATE_BEGIN_ARGS( IOdysseyChannelSlider )
@@ -76,17 +75,15 @@ public:
 
 private:
     // Private IOdysseyChannelSlider API
-    // virtual void SetColor_Imp( const ::ULIS::FColor& iColor ) = 0
     float GetProportionForMousePosition( FVector2D iPos ) const;
     virtual void SetColorForProportion_Imp( ::ULIS::FColor& iColor, float t ) const = 0;
     virtual float GetProportionForColor_Imp( const ::ULIS::FColor& iColor ) const = 0;
-    //void  SetPosition( float iPos );
 
 protected:
     // Protected data members
     TAttribute< ::ULIS::FColor > mColor;
     ::ULIS::eFormat mFormat;
-    FOnColorChange OnColorChangeCallback;
+    FOnColorChanged OnColorChanged;
 
 private:
     // Private data members
@@ -113,7 +110,7 @@ public:                                                                         
         {}                                                                                          \
         ODYSSEY_LEAF_WIDGET_CONSTRUCT_ATTRIBUTES                                                    \
         SLATE_ATTRIBUTE( ::ULIS::FColor, Color )                                                \
-        SLATE_EVENT( FOnColorChange, OnColorChange )                                                \
+        SLATE_EVENT( FOnColorChanged, OnColorChanged )                                                \
     SLATE_END_ARGS()                                                                                \
                                                                                                     \
 public:                                                                                             \
@@ -121,7 +118,7 @@ public:                                                                         
     {                                                                                               \
         ODYSSEY_LEAF_WIDGET_FORWARD_CONSTRUCT_ARGS                                                  \
         mColor = InArgs._Color;                                                                     \
-        OnColorChangeCallback = InArgs._OnColorChange;                                              \
+        OnColorChanged = InArgs._OnColorChanged;                                              \
         Init();                                                                                     \
     }                                                                                               \
                                                                                                     \
@@ -158,7 +155,7 @@ public:                                                                         
 /////////////////////////////////////////////////////
 // RGB
 // R
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_R : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_R : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_R, ::ULIS::Format_RGBAF)
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetRedF, RedF)
@@ -166,7 +163,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_R : public IOdysseyChannelSlider
 };
 
 // G
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_G : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_G : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_G, ::ULIS::Format_RGBAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetGreenF, GreenF)
@@ -174,7 +171,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_G : public IOdysseyChannelSlider
 };
 
 // B
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_B : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_B : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_B, ::ULIS::Format_RGBAF)
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetBlueF, BlueF)
@@ -182,7 +179,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_B : public IOdysseyChannelSlider
 };
 
 // A
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_A : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_A : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_A, ::ULIS::Format_RGBAF)
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetAlphaF, AlphaF)
@@ -193,7 +190,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_A : public IOdysseyChannelSlider
 /////////////////////////////////////////////////////
 // HSV
 // H
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSV_H : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_HSV_H : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSV_H, ::ULIS::Format_HSVAF )
 
@@ -213,7 +210,7 @@ private:
 };
 
 // S
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSV_S : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_HSV_S : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSV_S, ::ULIS::Format_HSVAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetSaturationF, SaturationF)
@@ -221,7 +218,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSV_S : public IOdysseyChannelSli
 };
 
 // V
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSV_V : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_HSV_V : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSV_V, ::ULIS::Format_HSVAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetValueF, ValueF)
@@ -232,7 +229,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSV_V : public IOdysseyChannelSli
 /////////////////////////////////////////////////////
 // HSL
 // H
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSL_H : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_HSL_H : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSL_H, ::ULIS::Format_HSLAF )
 
@@ -252,7 +249,7 @@ private:
 };
 
 // S
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSL_S : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_HSL_S : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSL_S, ::ULIS::Format_HSLAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetSaturationF, SaturationF)
@@ -260,7 +257,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSL_S : public IOdysseyChannelSli
 };
 
 // L
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSL_L : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_HSL_L : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_HSL_L, ::ULIS::Format_HSLAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetLightnessF, LightnessF)
@@ -272,7 +269,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_HSL_L : public IOdysseyChannelSli
 /////////////////////////////////////////////////////
 // CMYK
 // C
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_C : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_C : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_C, ::ULIS::Format_CMYKAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetCyanF, CyanF)
@@ -280,7 +277,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_C : public IOdysseyChannelSlider
 };
 
 // M
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_M : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_M : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_M, ::ULIS::Format_CMYKAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetMagentaF, MagentaF)
@@ -288,7 +285,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_M : public IOdysseyChannelSlider
 };
 
 // Y
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Y : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_Y : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_Y, ::ULIS::Format_CMYKAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetYellowF, YellowF)
@@ -296,7 +293,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Y : public IOdysseyChannelSlider
 };
 
 // K
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_K : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_K : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_K, ::ULIS::Format_CMYKAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetKeyF, KeyF)
@@ -306,7 +303,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_K : public IOdysseyChannelSlider
 /////////////////////////////////////////////////////
 // YUV
 // Y
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_YUV_Y : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_YUV_Y : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_YUV_Y, ::ULIS::Format_YUVAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetLumaF, LumaF)
@@ -314,7 +311,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_YUV_Y : public IOdysseyChannelSli
 };
 
 // S
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_YUV_U : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_YUV_U : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_YUV_U, ::ULIS::Format_YUVAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetUF, UF)
@@ -322,7 +319,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_YUV_U : public IOdysseyChannelSli
 };
 
 // L
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_YUV_V : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_YUV_V : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_YUV_V, ::ULIS::Format_YUVAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetVF, VF)
@@ -332,7 +329,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_YUV_V : public IOdysseyChannelSli
 /////////////////////////////////////////////////////
 // Lab
 // L
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Lab_L : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_Lab_L : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_Lab_L, ::ULIS::Format_LabAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetLF, LF)
@@ -340,7 +337,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Lab_L : public IOdysseyChannelSli
 };
 
 // a
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Lab_a : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_Lab_a : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_Lab_a, ::ULIS::Format_LabAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetaF, aF)
@@ -348,7 +345,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Lab_a : public IOdysseyChannelSli
 };
 
 // b
-class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Lab_b : public IOdysseyChannelSlider
+class SOdysseyChannelSlider_Lab_b : public IOdysseyChannelSlider
 {
     ODYSSEY_CHANNEL_SLIDER( SOdysseyChannelSlider_Lab_b, ::ULIS::Format_LabAF )
     ODYSSEY_CHANNEL_SLIDER_SIMPLEIMP(SetbF, bF)
@@ -357,7 +354,7 @@ class ODYSSEYWIDGETS_API SOdysseyChannelSlider_Lab_b : public IOdysseyChannelSli
 
 /////////////////////////////////////////////////////
 // IOdysseyPrettyChannelSlider
-class ODYSSEYWIDGETS_API IOdysseyPrettyChannelSlider : public SCompoundWidget
+class IOdysseyPrettyChannelSlider : public SCompoundWidget
 {
     typedef SCompoundWidget tSuperClass;
     typedef IOdysseyPrettyChannelSlider tSelf;
@@ -383,18 +380,21 @@ public:
 /////////////////////////////////////////////////////
 // TOdysseyPrettyChannelSlider
 template< class T >
-class ODYSSEYWIDGETS_API TOdysseyPrettyChannelSlider : public IOdysseyPrettyChannelSlider
+class TOdysseyPrettyChannelSlider : public IOdysseyPrettyChannelSlider
 {
     typedef IOdysseyPrettyChannelSlider tSuperClass;
     typedef T TSliderType;
     typedef TOdysseyPrettyChannelSlider< TSliderType > tSelf;
 
 public:
+    DECLARE_DELEGATE_TwoParams( FOnColorChanged, eOdysseyEventState::Type, const ::ULIS::FColor& );
+
+public:
     SLATE_BEGIN_ARGS( TOdysseyPrettyChannelSlider )
         {}
     SLATE_ARGUMENT( int, HeightOverride )
     SLATE_ATTRIBUTE( ::ULIS::FColor, Color )
-    SLATE_EVENT( FOnColorChange, OnColorChange )
+    SLATE_EVENT( FOnColorChanged, OnColorChanged )
     SLATE_END_ARGS()
 
 private:
@@ -402,7 +402,7 @@ private:
     TAttribute<::ULIS::FColor> mColor;
     TSharedPtr< SSpinBox< int > > mSpinbox;
     TSharedPtr< TSliderType > mSlider;
-    FOnColorChange mOnColorChangeCallback;
+    FOnColorChanged mOnColorChanged;
     eOdysseyEventState::Type mEventState;
     // bool DisableCallbackPropagation;
     // bool DisableNextCallback;
@@ -423,7 +423,7 @@ public:
         UnitString.AppendChar( UnitChar );
 
         mColor = InArgs._Color;
-        mOnColorChangeCallback = InArgs._OnColorChange;
+        mOnColorChanged = InArgs._OnColorChanged;
         mEventState = eOdysseyEventState::kNone;
 
         ChildSlot
@@ -449,7 +449,7 @@ public:
                 SAssignNew( mSlider, TSliderType )
                 .DesiredHeight( HeightOverride )
                 .Color(mColor)
-                .OnColorChange( mOnColorChangeCallback )
+                .OnColorChanged( mOnColorChanged )
             ]
             +SHorizontalBox::Slot()
             .VAlign( VAlign_Center )
@@ -497,7 +497,7 @@ private:
 
         if (mEventState == iState && mEventState == eOdysseyEventState::kAdjust)
         {
-            mOnColorChangeCallback.ExecuteIfBound(eOdysseyEventState::kAdjust, iValue);
+            mOnColorChanged.ExecuteIfBound(eOdysseyEventState::kAdjust, iValue);
             return;
         }
 
@@ -509,14 +509,14 @@ private:
                 case eOdysseyEventState::kSet:
                 case eOdysseyEventState::kAbort:
                 {
-                    mOnColorChangeCallback.ExecuteIfBound( eOdysseyEventState::kStart, iValue );
+                    mOnColorChanged.ExecuteIfBound( eOdysseyEventState::kStart, iValue );
                     mEventState = eOdysseyEventState::kStart;
                 }
                 break;
 
                 case eOdysseyEventState::kStart:
                 {
-                    mOnColorChangeCallback.ExecuteIfBound( eOdysseyEventState::kAdjust, iValue );
+                    mOnColorChanged.ExecuteIfBound( eOdysseyEventState::kAdjust, iValue );
                     mEventState = eOdysseyEventState::kAdjust;
                 }
                 break;
@@ -525,12 +525,12 @@ private:
                 {
                     if (iState == eOdysseyEventState::kAbort)
                     {
-                        mOnColorChangeCallback.ExecuteIfBound( eOdysseyEventState::kAbort, iValue );
+                        mOnColorChanged.ExecuteIfBound( eOdysseyEventState::kAbort, iValue );
                         mEventState = eOdysseyEventState::kAbort;
                     }
                     else
                     {
-                        mOnColorChangeCallback.ExecuteIfBound( eOdysseyEventState::kSet, iValue );
+                        mOnColorChanged.ExecuteIfBound( eOdysseyEventState::kSet, iValue );
                         mEventState = eOdysseyEventState::kSet;
                     }
                 }
@@ -623,10 +623,13 @@ public:
 
 /////////////////////////////////////////////////////
 // IOdysseyGroupChannelSlider
-class ODYSSEYWIDGETS_API IOdysseyGroupChannelSlider : public SCompoundWidget
+class IOdysseyGroupChannelSlider : public SCompoundWidget
 {
     typedef SCompoundWidget tSuperClass;
     typedef IOdysseyGroupChannelSlider tSelf;
+
+public:
+    DECLARE_DELEGATE_TwoParams( FOnColorChanged, eOdysseyEventState::Type, const ::ULIS::FColor& );
 
 public:
     SLATE_BEGIN_ARGS( IOdysseyGroupChannelSlider )
@@ -637,7 +640,7 @@ protected:
     // Protected data members
     TAttribute<::ULIS::FColor> mColor;
     TArray< TSharedPtr< IOdysseyPrettyChannelSlider > > mSliders;
-    FOnColorChange mOnColorChangeCallback;
+    FOnColorChanged mOnColorChanged;
     int mHeightOverride;
     // ::ULIS::FColor mColor;
     // bool DisableCallbackPropagation;
@@ -669,35 +672,6 @@ public:
             vbox.ToSharedRef()
         ];
     }
-
-    /* void HandleValueChanged( float )
-    {
-        ComputeColorOnChanged();
-        for( int i = 0; i < mSliders.Num(); ++i )
-        {
-            sliders[i]->SetColor( mColor );
-        }
-        if( !DisableCallbackPropagation )
-            OnColorChangedCallback.ExecuteIfBound( mColor );
-    } */
-
-    /* void SetColor( const ::ULIS::FColor& iColor )
-    {
-        ComputeColorOnSet( iColor );
-        DisableCallbackPropagation = true;
-        for( int i = 0; i < mSliders.Num(); ++i )
-        {
-            sliders[i]->SetColor( iColor );
-        }
-        DisableCallbackPropagation = false;
-        ::ULIS::Conv( iColor, mColor );
-    } */
-
-    /* virtual void ComputeColorOnChanged() = 0;
-    virtual void ComputeColorOnSet( const ::ULIS::FColor& iColor ) {
-        ::ULIS::Conv( iColor, mColor );
-    } */
-
 };
 
 
@@ -713,14 +687,14 @@ public:                                                     \
         {}                                                  \
         ODYSSEY_LEAF_WIDGET_CONSTRUCT_ATTRIBUTES            \
         SLATE_ATTRIBUTE( ::ULIS::FColor, Color )        \
-        SLATE_EVENT( FOnColorChange, OnColorChange )        \
+        SLATE_EVENT( FOnColorChanged, OnColorChanged )        \
         SLATE_ARGUMENT( int, HeightOverride )               \
     SLATE_END_ARGS()                                        \
 public:                                                     \
     void Construct(const FArguments& InArgs)                \
     {                                                       \
         mColor = InArgs._Color;                             \
-        mOnColorChangeCallback = InArgs._OnColorChange;     \
+        mOnColorChanged = InArgs._OnColorChanged;     \
         mHeightOverride = InArgs._HeightOverride;           \
         BuildWidgets();                                     \
         BuildContents();                                    \
@@ -730,7 +704,7 @@ public:                                                     \
 
 /////////////////////////////////////////////////////
 // FOdysseyGroupChannelSlider_RGB
-class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_RGB : public IOdysseyGroupChannelSlider
+class FOdysseyGroupChannelSlider_RGB : public IOdysseyGroupChannelSlider
 {
     ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_RGB, ::ULIS::Format_RGB8 )
     void BuildWidgets()
@@ -738,22 +712,22 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_RGB : public IOdysseyGroupCh
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_R > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_G > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_B > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
     }
 };
 
 
 /////////////////////////////////////////////////////
 // FOdysseyGroupChannelSlider_RGBA
-class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_RGBA : public IOdysseyGroupChannelSlider
+class FOdysseyGroupChannelSlider_RGBA : public IOdysseyGroupChannelSlider
 {
     ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_RGBA, ::ULIS::Format_RGBA8 )
     void BuildWidgets()
@@ -761,26 +735,26 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_RGBA : public IOdysseyGroupC
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_R > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_G > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_B > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_A > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
     }
 };
 
 
 /////////////////////////////////////////////////////
 // FOdysseyGroupChannelSlider_HA (Hue, Alpha)
-class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HA : public IOdysseyGroupChannelSlider
+class FOdysseyGroupChannelSlider_HA : public IOdysseyGroupChannelSlider
 {
     ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_HA, ::ULIS::Format_HSVA8 )
     void BuildWidgets()
@@ -788,18 +762,18 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HA : public IOdysseyGroupCha
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_HSV_H > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_A > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
     }
 };
 
 
 /////////////////////////////////////////////////////
 // FOdysseyGroupChannelSlider_HSV
-class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HSV : public IOdysseyGroupChannelSlider
+class FOdysseyGroupChannelSlider_HSV : public IOdysseyGroupChannelSlider
 {
     ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_HSV, ::ULIS::Format_HSV8 )
     void BuildWidgets()
@@ -807,22 +781,22 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HSV : public IOdysseyGroupCh
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_HSV_H > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_HSV_S > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_HSV_V > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
     }
 };
 
 
 /////////////////////////////////////////////////////
 // FOdysseyGroupChannelSlider_HSL
-class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HSL : public IOdysseyGroupChannelSlider
+class FOdysseyGroupChannelSlider_HSL : public IOdysseyGroupChannelSlider
 {
     ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_HSL, ::ULIS::Format_HSL8 )
     void BuildWidgets()
@@ -830,15 +804,15 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HSL : public IOdysseyGroupCh
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_HSL_H > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_HSL_S > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_HSL_L > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
     }
 
 };
@@ -847,7 +821,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_HSL : public IOdysseyGroupCh
 
 /////////////////////////////////////////////////////
 // FOdysseyGroupChannelSlider_CMYK
-class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_CMYK : public IOdysseyGroupChannelSlider
+class FOdysseyGroupChannelSlider_CMYK : public IOdysseyGroupChannelSlider
 {
     ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_CMYK, ::ULIS::Format_CMYK8 )
     void BuildWidgets()
@@ -855,26 +829,26 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_CMYK : public IOdysseyGroupC
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_C > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_M > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_Y > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_K > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
     }
 };
 
 
 /////////////////////////////////////////////////////
 // FOdysseyGroupChannelSlider_YUV
-class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_YUV : public IOdysseyGroupChannelSlider
+class FOdysseyGroupChannelSlider_YUV : public IOdysseyGroupChannelSlider
 {
     ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_YUV, ::ULIS::Format_YUV8 )
     void BuildWidgets()
@@ -882,15 +856,15 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_YUV : public IOdysseyGroupCh
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_YUV_Y > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_YUV_U > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_YUV_V > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
     }
 
 };
@@ -898,7 +872,7 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_YUV : public IOdysseyGroupCh
 
 /////////////////////////////////////////////////////
 // FOdysseyGroupChannelSlider_Lab
-class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_Lab : public IOdysseyGroupChannelSlider
+class FOdysseyGroupChannelSlider_Lab : public IOdysseyGroupChannelSlider
 {
     ODYSSEY_GROUP_SLIDER( FOdysseyGroupChannelSlider_Lab, ::ULIS::Format_Lab8 )
     void BuildWidgets()
@@ -906,15 +880,15 @@ class ODYSSEYWIDGETS_API FOdysseyGroupChannelSlider_Lab : public IOdysseyGroupCh
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_Lab_L > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_Lab_a > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
         mSliders.Add( SNew( TOdysseyPrettyChannelSlider< SOdysseyChannelSlider_Lab_b > )
                 .Color(mColor)
                 .HeightOverride( mHeightOverride )
-                .OnColorChange( mOnColorChangeCallback ) );
+                .OnColorChanged( mOnColorChanged ) );
     }
 
 };

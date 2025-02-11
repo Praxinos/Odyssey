@@ -34,7 +34,6 @@ class ODYSSEYPALETTE_API UOdysseyPaletteEntry : public UObject
 {
     GENERATED_BODY()
 
-
     public:
     /**
      * @brief Delegate called when something changed the name on this entry
@@ -85,9 +84,6 @@ public:
 public:
     UFUNCTION(BlueprintPure, Category="Palette")
     UOdysseyPalette* GetPalette() const;
-
-    UFUNCTION(BlueprintPure, Category="Palette")
-    uint8 GetUsedSetInPalete() const;
 
     /**
      * @brief Returns the entries children recursively

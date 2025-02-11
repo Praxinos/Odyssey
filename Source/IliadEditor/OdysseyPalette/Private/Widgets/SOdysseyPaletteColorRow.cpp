@@ -8,52 +8,51 @@
 #include "UObject/OdysseyObjectEditorUtils.h"
 #include "OdysseyStyleSet.h"
 #include "SOdysseyPaletteEntryRow.h"
-#include "Widgets/SOdysseyPaletteTreeView.h"
 #include "Widgets/Colors/SColorPicker.h"
 #include "OdysseyPaletteEntryColor.h"
 #include "Widgets/Colors/SColorBlock.h"
 
 //CONSTRUCTION/DESTRUCTION----------------------------------------------- SMultiColumnTableRow
-void SOdysseyPaletteColorRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyPaletteTreeView>& iOwnerTableView, UOdysseyPaletteEntryColor* iColorEntry)
+void SOdysseyPaletteColorRow::Construct(const FArguments& InArgs, const TSharedRef<SOdysseyPaletteTreeView>& iTreeView, UOdysseyPaletteEntryColor* iColorEntry)
 {
     ensure(iColorEntry);
     mColorEntry = iColorEntry;
+    mSet = InArgs._Set;
 
     SOdysseyPaletteEntryRow::Construct(
-        SOdysseyPaletteEntryRow::FArguments(),
-        iOwnerTableView,
+        SOdysseyPaletteEntryRow::FArguments()
+            .IsReadOnly(InArgs._IsReadOnly),
+        iTreeView,
         iColorEntry
     );
-
-    SignalSelectionMode = ETableRowSignalSelectionMode::Instantaneous;
 }
 
 //PRIVATE API-----------------------------------------------------------
 
 TSharedRef<SWidget>
-SOdysseyPaletteColorRow::GenerateHeaderWidget()
+SOdysseyPaletteColorRow::GenerateWidgetForColumn( const FName& InColumnName )
 {
-    TSharedRef<SWidget> defaultWidget = SOdysseyPaletteEntryRow::GenerateHeaderWidget();
-    return SNew(SHorizontalBox)
-        +SHorizontalBox::Slot()
-        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
-        .VAlign(VAlign_Center)
-        [
-            SOdysseyPaletteEntryRow::GenerateHeaderWidget()
-        ]
-        + SHorizontalBox::Slot()
-        .Padding(FMargin(0.f, 0.f, 2.f, 0.f))
-        .VAlign(VAlign_Center)
-        [
-             SAssignNew(mColorWidget, SColorBlock )
-            .Color(this, &SOdysseyPaletteColorRow::GetEntryColorAsLinear)
-            .OnMouseButtonDown(this, &SOdysseyPaletteColorRow::HandleEntryColorMouseButtonDown)
-        ];
+    if (InColumnName == "Color")
+    {
+        return GenerateColorWidget();
+    }
 
+    return SOdysseyPaletteEntryRow::GenerateWidgetForColumn(InColumnName);
+}
+
+TSharedRef<SWidget>
+SOdysseyPaletteColorRow::GenerateColorWidget()
+{
+    return SAssignNew(mColorWidget, SColorBlock )
+        .Color(this, &SOdysseyPaletteColorRow::GetEntryColorAsLinear)
+        .OnMouseButtonDown(this, &SOdysseyPaletteColorRow::HandleEntryColorMouseButtonDown);
 }
 
 FReply SOdysseyPaletteColorRow::HandleEntryColorMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
+    if (mIsReadOnly)
+        return FReply::Unhandled();
+
     FColorPickerArgs PickerArgs;
     {
         PickerArgs.bUseAlpha = true;
@@ -62,7 +61,7 @@ FReply SOdysseyPaletteColorRow::HandleEntryColorMouseButtonDown(const FGeometry&
         PickerArgs.sRGBOverride = false;
         PickerArgs.OnColorCommitted = FOnLinearColorValueChanged::CreateSP(this, &SOdysseyPaletteColorRow::OnSetColorFromColorPicker);
         PickerArgs.bOnlyRefreshOnOk = true;
-        PickerArgs.InitialColor = mColorEntry->GetUsedColor();
+        PickerArgs.InitialColor = mColorEntry->GetColor(mSet.Get());
         PickerArgs.ParentWidget = mColorWidget;
         PickerArgs.OptionalOwningDetailsView = mColorWidget;
         FWidgetPath ParentWidgetPath;
@@ -79,10 +78,19 @@ FReply SOdysseyPaletteColorRow::HandleEntryColorMouseButtonDown(const FGeometry&
 
 void SOdysseyPaletteColorRow::OnSetColorFromColorPicker(FLinearColor iNewColor)
 {
-    mColorEntry->SetUsedColor( iNewColor.ToFColorSRGB() );
+    if (mIsReadOnly)
+        return;
+
+    mColorEntry->SetColor( iNewColor.ToFColorSRGB(), mSet.Get() );
 }
 
 FLinearColor SOdysseyPaletteColorRow::GetEntryColorAsLinear() const
 {
-    return FLinearColor( mColorEntry->GetUsedColor() );
+    return FLinearColor( mColorEntry->GetColor(mSet.Get()) );
+}
+
+const FSlateBrush*
+SOdysseyPaletteColorRow::GetIcon() const
+{
+    return FOdysseyStyle::Get().GetBrush("OdysseyPalette.EntryColor");
 }

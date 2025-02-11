@@ -13,6 +13,8 @@
 #include "OdysseyPainterEditorToolInputProcessor.h"
 #include "Widgets/SWidget.h"
 
+#include "PainterEditor/OdysseyPainterEditorColorTypes.h"
+
 #include "OdysseyPainterEditorTool.generated.h"
 
 class FOdysseyPainterEditor;
@@ -83,6 +85,8 @@ public:
     virtual TSharedPtr<FOdysseyHUDElement> GetHUD();
     virtual EMouseCursor::Type GetMouseCursor() const;
     virtual void DrawHUD(const FOdysseyHUDSystem::FDrawHUDParams& iParams);
+
+    virtual bool SupportsColorType(EOdysseyPainterEditorColorType iType);
 
 protected:
     virtual void PropertyChanged(const FName& iPropertyName);

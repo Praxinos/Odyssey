@@ -29,6 +29,16 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                 }
                 break;
 
+                case FOdysseyFile::VectorV2::CHUNK_BUCKET_PALETTESET:
+                {
+                    int paletteSet;
+
+                    Ar << paletteSet;
+
+                    iBucket.SetPaletteSet( paletteSet );
+                }
+                break;
+
                 case FOdysseyFile::VectorV2::CHUNK_BUCKET_PALETTEENTRY_MK2:
                 {
                     FString fullpath;
@@ -37,6 +47,7 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
 
                     FSoftObjectPath objectPath = FSoftObjectPath( fullpath );
                     UOdysseyPaletteEntry* paletteEntry = Cast<UOdysseyPaletteEntry>(objectPath.TryLoad());
+
                     iBucket.SetPaletteEntry( paletteEntry );
                 }
                 break;
@@ -62,6 +73,7 @@ FOdysseyVectorImportV2::ReadBucket( FOdysseyVectorBucket& iBucket, uint64 iChunk
                                 if (entries[j]->GetFName().IsEqual(nameEntry, ENameCase::CaseSensitive))
                                 {
                                     iBucket.SetPaletteEntry(entries[j]);
+                                    iBucket.SetPaletteSet(palette->UsedSet_DEPRECATED);
                                     break;
                                 }
                             }

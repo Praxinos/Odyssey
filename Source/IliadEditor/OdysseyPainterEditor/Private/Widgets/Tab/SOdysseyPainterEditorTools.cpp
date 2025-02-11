@@ -56,9 +56,9 @@ SOdysseyPainterEditorTools::Construct(const FArguments& InArgs)
         SNew(SHorizontalBox)
         + SHorizontalBox::Slot()
         [
-            SNew(SVerticalBox)
-            + SVerticalBox::Slot()
-            .AutoHeight()
+            SNew(SScrollBox)
+            + SScrollBox::Slot()
+            .AutoSize()
             [
                 SNew(SOdysseyPainterEditorRasterDrawingToolBrushSelector)
                 .Visibility_Lambda(
@@ -69,7 +69,8 @@ SOdysseyPainterEditorTools::Construct(const FArguments& InArgs)
                 )
                 .Tool(editor->GetRasterDrawingTool())
             ]
-            + SVerticalBox::Slot()
+            + SScrollBox::Slot()
+            .FillSize(1.0f)
             [
                 SNew(SOdysseyPainterEditorToolOptions)
                 .Tool_Raw(this, &SOdysseyPainterEditorTools::GetCurrentTool)
@@ -79,9 +80,14 @@ SOdysseyPainterEditorTools::Construct(const FArguments& InArgs)
         + SHorizontalBox::Slot()
         .AutoWidth()
         [
-            SNew( SOdysseyPainterEditorToolsTileView )
-            .Tools(tools)
-            .OnToolSelected(this, &SOdysseyPainterEditorTools::OnToolSelected)
+            SNew(SScrollBox)
+            + SScrollBox::Slot()
+            .AutoSize()
+            [
+                SNew( SOdysseyPainterEditorToolsTileView )
+                .Tools(tools)
+                .OnToolSelected(this, &SOdysseyPainterEditorTools::OnToolSelected)
+            ]
         ]
     ];
 }

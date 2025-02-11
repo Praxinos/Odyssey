@@ -3,9 +3,8 @@
 
 #include "OdysseyPaletteAssetTypeActions.h"
 
-#include "ContentBrowserModule.h"
-#include "IContentBrowserSingleton.h"
 #include "OdysseyPalette.h"
+#include "PaletteEditor/OdysseyPaletteEditorToolkit.h"
 
 #define LOCTEXT_NAMESPACE "Palette"
 
@@ -44,6 +43,25 @@ void
 FOdysseyPaletteAssetTypeActions::BuildBackendFilter( FARFilter & InFilter )
 {
     InFilter.ClassPaths.Add( UOdysseyPalette::StaticClass()->GetClassPathName() );
+}
+
+void
+FOdysseyPaletteAssetTypeActions::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor)
+{
+    UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+
+    for( auto object : InObjects )
+    {
+        if (!object || !object->IsA<UOdysseyPalette>())
+            continue;
+
+        if (AssetEditorSubsystem->FindEditorForAsset(object, true) != nullptr)
+            continue;
+
+        UOdysseyPalette* palette = Cast< UOdysseyPalette >( object );
+        TSharedPtr<FOdysseyPaletteEditorToolkit> toolkit = MakeShared<FOdysseyPaletteEditorToolkit>(palette);
+        toolkit->Open();
+    }
 }
 
 #undef LOCTEXT_NAMESPACE

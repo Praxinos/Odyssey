@@ -66,6 +66,7 @@ namespace FOdysseyVectorExportV2
     void WriteBucketPropagated( FOdysseyVectorBucket& iBucket, FArchive &Ar );
     void WriteBucketPaletteEntryMark1( FOdysseyVectorBucket& iBucket, FArchive& Ar);
     void WriteBucketPaletteEntryMark2( FOdysseyVectorBucket& iBucket, FArchive& Ar);
+    void WriteBucketPaletteSet( FOdysseyVectorBucket& iBucket, FArchive& Ar);
     void WriteBucketColorMode( FOdysseyVectorBucket& iBucket, FArchive &Ar );
     void WriteBucketGradientRadialOffset( FOdysseyVectorBucket& iBucket, FArchive &Ar );
     void WriteBucketGradientRadialRadius( FOdysseyVectorBucket& iBucket, FArchive &Ar );
