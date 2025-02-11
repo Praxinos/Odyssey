@@ -11,7 +11,7 @@
 
 UOdysseyPalette::UOdysseyPalette()
 {
-    Sets.Add("Set0");
+    Sets.Add("Default Set");
 }
 
 UOdysseyPalette::FOnHierarchyChanged& UOdysseyPalette::OnHierarchyChanged()
@@ -408,10 +408,19 @@ UOdysseyPalette::GetSets() const
     return Sets;
 }
 
-void UOdysseyPalette::DuplicateSet(int iSet)
+void
+UOdysseyPalette::RenameSet(int iSet, const FName& iName)
 {
-    const FScopedTransaction transaction(NSLOCTEXT("Palette", "DuplicateSet_Transaction", "Duplicate Set"));
+    if (iSet < 0 || iSet >= Sets.Num())
+        return;
 
+    FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "Sets");
+    Sets[iSet] = iName;
+    FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "Sets", EPropertyChangeType::ValueSet);
+}
+
+void UOdysseyPalette::DuplicateSet(int iSet, const FName& iName)
+{
     FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "Sets");
 
     TArray<UOdysseyPaletteEntry*> entries = GetEntries();
@@ -420,8 +429,7 @@ void UOdysseyPalette::DuplicateSet(int iSet)
         entries[i]->DuplicateSetAt(iSet);
     }
 
-    FString text = FString("Set") + FString::FromInt(Sets.Num());
-    Sets.Add(FName(text));
+    Sets.Add(iName);
 
     FOdysseyObjectEditorUtils::PostChangePropertyValue(this, "Sets", EPropertyChangeType::ArrayAdd);
 }
@@ -433,8 +441,6 @@ void UOdysseyPalette::RemoveSet(int iIndex /*= -1 */)
 
     if (iIndex >= Sets.Num())
         return;
-
-    const FScopedTransaction transaction(NSLOCTEXT("Palette", "RemoveSet_Transaction", "Remove Set"));
 
     FOdysseyObjectEditorUtils::PreChangePropertyValue(this, "Sets");
 

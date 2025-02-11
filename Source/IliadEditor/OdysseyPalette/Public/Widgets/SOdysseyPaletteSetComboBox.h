@@ -20,7 +20,9 @@ public:
 
 public:
     SLATE_BEGIN_ARGS(SOdysseyPaletteSetComboBox)
+        : _IsReadOnly(false)
         {}
+        SLATE_ARGUMENT(bool, IsReadOnly)
         SLATE_ATTRIBUTE(UOdysseyPalette*, Palette)
         SLATE_ATTRIBUTE(int, CurrentSet)
         SLATE_EVENT(FOnCurrentSetSelected, OnCurrentSetSelected)
@@ -35,6 +37,7 @@ public:
 
 public:
     UOdysseyPalette* GetPalette() const;
+    static void BuildMenu(FMenuBuilder& iMenuBuilder, UOdysseyPalette* iPalette, int iCurrentSet, bool iIsReadOnly, FOnCurrentSetSelected iOnCurrentSetSelected);
 
 private:
     void OnPaletteChanged();
@@ -49,4 +52,5 @@ protected:
     TSlateAttribute<int> mCurrentSetAttribute;
     int mCurrentSet;
     FOnCurrentSetSelected mOnCurrentSetSelected;
+    bool mIsReadOnly;
 };

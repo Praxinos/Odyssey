@@ -889,6 +889,8 @@ FOdysseyStyleDefault::SetupClassIconsAndThumbnails()
     Set("ViewportDrawingEditor.MainTab.ModeTool.Selection", new IMAGE_BRUSH_SVG("OdysseyViewportDrawing/SelectionModeTool", mIcon16x16));
     Set("ViewportDrawingEditor.MainTab.ModeTool.Paint", new IMAGE_BRUSH_SVG("OdysseyViewportDrawing/PaintModeTool", mIcon16x16));
 
+    Set( "PaletteEditor.Tab.Colors", new IMAGE_BRUSH_SVG( "PaletteEditor/tab_colors", mIcon16x16 ) );
+
 #endif
 }
 

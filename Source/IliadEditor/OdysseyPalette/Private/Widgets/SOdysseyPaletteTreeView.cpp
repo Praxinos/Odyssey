@@ -70,6 +70,7 @@ void SOdysseyPaletteTreeView::Construct(const FArguments& InArgs)
     mPalette = mPaletteAttribute.Get();
     mCurrentColorEntryAttribute.Assign(*this, InArgs._CurrentColorEntry);
     mCurrentColorEntry = mCurrentColorEntryAttribute.Get();
+    mSet = InArgs._Set;
     mSelectedEntry = mCurrentColorEntry;
     mOnCurrentColorEntrySelected = InArgs._OnCurrentColorEntrySelected;
 
@@ -543,6 +544,7 @@ SOdysseyPaletteTreeView::OnGenerateRow(UOdysseyPaletteEntry* iEntry, const TShar
 
     if (iEntry->IsA<UOdysseyPaletteEntryColor>())
         return SNew(SOdysseyPaletteColorRow, SharedThis(this), Cast<UOdysseyPaletteEntryColor>(iEntry))
+            .Set(mSet)
             .IsReadOnly(mIsReadOnly);
 
     return SNew(STableRow<UOdysseyPaletteEntry*>, iOwnerTable);

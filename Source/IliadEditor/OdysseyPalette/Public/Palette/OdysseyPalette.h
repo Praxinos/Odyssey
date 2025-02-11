@@ -179,7 +179,8 @@ public:
 public:
     //Sets
     const TArray<FName>& GetSets() const;
-    void DuplicateSet( int iSet );
+    void RenameSet(int iSet, const FName& iName);
+    void DuplicateSet( int iSet, const FName& iName );
     void RemoveSet(int iIndex);
 
 public:

@@ -79,7 +79,7 @@
 #include "PainterEditor/OdysseyPainterEditorToolMenuContext.h"
 #include "FileHelpers.h"
 
-#define LOCTEXT_NAMESPACE "PainonterEditor"
+#define LOCTEXT_NAMESPACE "PainterEditor"
 
 /////////////////////////////////////////////////////
 // FOdysseyPainterEditor
